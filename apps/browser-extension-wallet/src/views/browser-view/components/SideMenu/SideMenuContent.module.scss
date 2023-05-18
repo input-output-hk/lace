@@ -19,3 +19,13 @@
     font-size: var(--body, 16px) !important;
   }
 }
+
+.center {
+  padding: 0 !important;
+  justify-content: center !important;
+  overflow: hidden;
+}
+
+.center > span {
+  flex: none !important;
+}

@@ -1,0 +1,62 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+$navigation-col-width: 215px;
+$navigation-col-width-small: 64px;
+$grid-gap-large: 65px;
+
+.navigation {
+  position: sticky;
+  top: 0;
+  left: 0;
+  grid-area: nav;
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+  align-items: center;
+  justify-self: center;
+  padding: 0 28px;
+  background-color: var(--bg-color-body);
+
+  @media (min-width: 1024px) {
+    width: $navigation-col-width;
+  }
+}
+
+.navigationShadow {
+  z-index: 100;
+  box-shadow: var(--bg-color-body) 18px 0px 32px 12px;
+}
+
+.stickyMenuInner {
+  position: sticky;
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(6.5);
+  top: 0;
+}
+
+.logoContainer {
+  max-height: 88px;
+  padding-top: size_unit(3);
+  display: flex;
+  align-items: center;
+
+  .logo {
+    cursor: pointer;
+  }
+}
+
+.shortenedLogo {
+  height: 40px;
+  width: 40px;
+  cursor: pointer;
+}
+
+.networkPillContainer{
+  position: absolute;
+  left: 35px;
+}
+
+.smallMenuContainer:hover {
+  padding-left: 12px;
+}
