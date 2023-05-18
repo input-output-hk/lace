@@ -35,3 +35,29 @@
     transform: translate(0, -18%);
   }
 }
+
+.expandablePill {
+  width: 10px;
+  height: 10px;
+  border-radius: 100px;
+  padding: 0;
+  transition: all .25s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    margin-left: size_unit(1.5);
+    border-radius: size_unit(2);
+    padding: size_unit(1) size_unit(1.5);
+    width: auto;
+    height: auto;
+    transition: all .25s ease-in-out;
+  }
+}
+
+.expandablePill > div.offlinePillText, .expandablePill > span  {
+  display: none;
+}
+.expandablePill:hover > div.offlinePillText, .expandablePill:hover > span  {
+  display: flex;
+}
+
