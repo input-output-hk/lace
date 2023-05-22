@@ -1,5 +1,6 @@
 @import '../../../../../../../packages/common/src/ui/styles/theme.scss';
 @import '../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
 
 $col-width-small: 60px;
 $col-width-medium: 70px;
@@ -96,6 +97,9 @@ $main-gap: 49px;
   @media (max-width: $breakpoint-minimum) {
     overflow-x: scroll;
     justify-content: start;
+    margin-right: 0;
+    padding-right: size_unit(4);
+    @include scroll-bar-style;
   }
 
   @media (min-width: $breakpoint-xsmall) {

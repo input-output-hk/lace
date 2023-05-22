@@ -56,7 +56,6 @@ $aside-width-large: 420px;
 
 .stickyAsideInner {
   position: sticky;
-  z-index: 100;
   &.top {
     top: 0;
   }
