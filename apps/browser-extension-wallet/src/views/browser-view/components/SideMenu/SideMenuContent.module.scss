@@ -20,12 +20,9 @@
   }
 }
 
-.center {
-  padding: 0 !important;
-  justify-content: center !important;
-  overflow: hidden;
-}
-
-.center > span {
-  flex: none !important;
+.menuContainer {
+  padding-left: 12px;
+  @media (min-width: $breakpoint-xsmall) {
+    padding-left: 0;
+  }
 }

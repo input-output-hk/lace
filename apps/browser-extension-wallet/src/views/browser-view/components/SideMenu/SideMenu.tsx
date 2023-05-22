@@ -14,7 +14,7 @@ import { walletRoutePaths as routes } from '@routes/wallet-paths';
 
 const isPathAvailable = (path: string) => Object.values(routes).includes(path);
 
-export const SideMenu = ({ isFullWidthMenu = true }: { isFullWidthMenu?: boolean }): React.ReactElement => {
+export const SideMenu = (): React.ReactElement => {
   const {
     push,
     location: { pathname },
@@ -77,7 +77,6 @@ export const SideMenu = ({ isFullWidthMenu = true }: { isFullWidthMenu?: boolean
       onClick={handleRedirection}
       onMouseEnter={onMouseEnterItem}
       onMouseLeave={onMouseLeaveItem}
-      withLabel={isFullWidthMenu}
     />
   );
 };
