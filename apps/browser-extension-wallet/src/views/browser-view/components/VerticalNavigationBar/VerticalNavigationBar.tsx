@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import classnames from 'classnames';
+import React from 'react';
 import { useHistory } from 'react-router';
 import { walletRoutePaths } from '@routes';
 import { NetworkPill } from '../../../../components/NetworkPill';
@@ -23,7 +22,6 @@ const logoExtended: Record<string, string> = {
 export const VerticalNavigationBar = ({ theme }: VerticalNavigationBarProps): React.ReactElement => {
   const history = useHistory();
   const isSmallerVersion = useIsSmallerScreenWidthThan(BREAKPOINT_XSMALL);
-  const [isFullWidthMenu, setIsFullWidthMenu] = useState(false);
 
   const logo = isSmallerVersion ? (
     <LaceLogoMark className={styles.shortenedLogo} onClick={() => history.push(walletRoutePaths.assets)} />
@@ -38,7 +36,7 @@ export const VerticalNavigationBar = ({ theme }: VerticalNavigationBarProps): Re
   );
 
   return (
-    <nav id="nav" className={classnames(styles.navigation, { [styles.navigationShadow]: isFullWidthMenu })}>
+    <nav id="nav" className={styles.navigation}>
       <div className={styles.stickyMenuInner}>
         <div className={styles.logoContainer}>
           {logo}
@@ -50,17 +48,7 @@ export const VerticalNavigationBar = ({ theme }: VerticalNavigationBarProps): Re
             <NetworkPill />
           )}
         </div>
-        {isSmallerVersion ? (
-          <div
-            onMouseEnter={() => setIsFullWidthMenu(true)}
-            onMouseLeave={() => setIsFullWidthMenu(false)}
-            className={styles.smallMenuContainer}
-          >
-            <SideMenu isFullWidthMenu={isFullWidthMenu} />
-          </div>
-        ) : (
-          <SideMenu />
-        )}
+        <SideMenu />
       </div>
     </nav>
   );

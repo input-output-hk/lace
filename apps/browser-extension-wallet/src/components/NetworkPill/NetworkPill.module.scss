@@ -41,8 +41,15 @@
   height: 10px;
   border-radius: 100px;
   padding: 0;
-  transition: all .25s ease-in-out;
+  transition: all 0.25s ease-in-out;
+  z-index: 100;
   cursor: pointer;
+  pointer-events: auto;
+
+  .offlinePillText,
+  .networkPillText {
+    display: none;
+  }
 
   &:hover {
     margin-left: size_unit(1.5);
@@ -50,14 +57,11 @@
     padding: size_unit(1) size_unit(1.5);
     width: auto;
     height: auto;
-    transition: all .25s ease-in-out;
+    transition: all 0.25s ease-in-out;
+
+    .offlinePillText,
+    .networkPillText {
+      display: flex;
+    }
   }
 }
-
-.expandablePill > div.offlinePillText, .expandablePill > span  {
-  display: none;
-}
-.expandablePill:hover > div.offlinePillText, .expandablePill:hover > span  {
-  display: flex;
-}
-

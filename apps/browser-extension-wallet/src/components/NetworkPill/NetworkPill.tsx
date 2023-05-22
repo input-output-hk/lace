@@ -22,7 +22,7 @@ export const NetworkPill = ({ isExpandablePill }: NetworkPillProp): ReactElement
           className={classnames(styles.networkPill, { [styles.expandablePill]: isExpandablePill })}
           data-testid="network-pill"
         >
-          <span>{environmentName}</span>
+          <span className={classnames({ [styles.networkPillText]: isExpandablePill })}>{environmentName}</span>
         </div>
       );
     }
