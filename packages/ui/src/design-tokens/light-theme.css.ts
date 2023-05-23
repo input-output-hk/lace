@@ -96,6 +96,16 @@ const colors: Colors = {
   $sub_navigation_item_label_color_hover: lightColorScheme.$primary_black,
   $sub_navigation_item_label_color_pressed: lightColorScheme.$primary_black,
   $sub_navigation_item_label_color_focused: lightColorScheme.$primary_dark_grey,
+
+  $navigation_button_label_color: lightColorScheme.$primary_dark_grey,
+  $navigation_button_label_color_pressed: lightColorScheme.$primary_black,
+  $navigation_button_container_bgColor: lightColorScheme.$primary_light_grey,
+  $navigation_button_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $navigation_button_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $navigation_button_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
 };
 
 export const elevation: Elevation = {
