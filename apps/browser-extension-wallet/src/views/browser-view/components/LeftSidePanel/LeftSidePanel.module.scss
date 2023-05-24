@@ -3,14 +3,8 @@
 $navigation-col-width: 215px;
 
 @mixin concealable-menu-label($display) {
-  // without the global there is no way to target SideMenuLabel inside this module
-  // this is done in the scope of this file, so the entire navigation container handles the hover behaviour and hides and shows the side menu labels on hover
-  :global {
-    .ant-menu-title-content {
-      .concealable-menu-label {
-        display: $display !important;
-      }
-    }
+  .concealableMenuLabel {
+    display: $display !important;
   }
 }
 
@@ -43,11 +37,15 @@ $navigation-col-width: 215px;
   }
 }
 
+.navigationShadow {
+  box-shadow: var(--bg-color-body) 18px 0px 32px 12px;
+}
+
 .stickyMenuInner {
   position: sticky;
   display: flex;
   flex-direction: column;
-  gap: size_unit(6.5);
+  gap: 52px;
   top: 0;
 }
 

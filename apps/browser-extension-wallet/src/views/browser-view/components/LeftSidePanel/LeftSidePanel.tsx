@@ -1,14 +1,14 @@
 import React from 'react';
 import { useHistory } from 'react-router';
 import { walletRoutePaths } from '@routes';
-import { NetworkPill } from '../../../../components/NetworkPill';
 import { SideMenu } from '../SideMenu';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { BREAKPOINT_XSMALL } from '@src/styles/constants';
-import laceLogo from '../../../../assets/branding/lace-logo.svg';
-import laceLogoDarkMode from '../../../../assets/branding/lace-logo-dark-mode.svg';
-import LaceLogoMark from '../../../../assets/branding/lace-logo-mark.component.svg';
-import styles from './VerticalNavigationBar.module.scss';
+import { NetworkPill } from '@components/NetworkPill';
+import laceLogo from '@assets/branding/lace-logo.svg';
+import laceLogoDarkMode from '@assets/branding/lace-logo-dark-mode.svg';
+import LaceLogoMark from '@assets/branding/lace-logo-mark.component.svg';
+import styles from './LeftSidePanel.module.scss';
 
 export interface VerticalNavigationBarProps {
   theme: string;
@@ -19,19 +19,21 @@ const logoExtended: Record<string, string> = {
   light: laceLogo
 };
 
-export const VerticalNavigationBar = ({ theme }: VerticalNavigationBarProps): React.ReactElement => {
+export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.ReactElement => {
   const history = useHistory();
-  const isSmallerVersion = useIsSmallerScreenWidthThan(BREAKPOINT_XSMALL);
+  const isNarrowWindow = useIsSmallerScreenWidthThan(BREAKPOINT_XSMALL);
 
-  const logo = isSmallerVersion ? (
-    <LaceLogoMark className={styles.shortenedLogo} onClick={() => history.push(walletRoutePaths.assets)} />
+  const handleLogoRedirection = () => history.push(walletRoutePaths.assets);
+
+  const logo = isNarrowWindow ? (
+    <LaceLogoMark className={styles.shortenedLogo} onClick={handleLogoRedirection} />
   ) : (
     <img
       className={styles.logo}
       src={logoExtended[theme]}
       alt="LACE"
       data-testid="header-logo"
-      onClick={() => history.push(walletRoutePaths.assets)}
+      onClick={handleLogoRedirection}
     />
   );
 
@@ -40,15 +42,15 @@ export const VerticalNavigationBar = ({ theme }: VerticalNavigationBarProps): Re
       <div className={styles.stickyMenuInner}>
         <div className={styles.logoContainer}>
           {logo}
-          {isSmallerVersion ? (
+          {isNarrowWindow ? (
             <div className={styles.networkPillContainer}>
-              <NetworkPill isExpandablePill />
+              <NetworkPill isExpandable />
             </div>
           ) : (
             <NetworkPill />
           )}
         </div>
-        <SideMenu />
+        <SideMenu menuItemLabelClassName={styles.concealableMenuLabel} />
       </div>
     </nav>
   );
