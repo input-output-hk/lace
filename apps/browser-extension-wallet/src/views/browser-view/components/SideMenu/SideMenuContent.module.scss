@@ -1,5 +1,12 @@
 @import '../../../../../../../packages/common/src/ui/styles/theme.scss';
 
+.menuContainer {
+  padding-left: 12px;
+  @media (min-width: $breakpoint-xsmall) {
+    padding-left: 0;
+  }
+}
+
 :global {
   ul.ant-menu-inline {
     border: none !important;
@@ -17,12 +24,5 @@
 
   &.tokensLinkIcon {
     font-size: var(--body, 16px) !important;
-  }
-}
-
-.menuContainer {
-  padding-left: 12px;
-  @media (min-width: $breakpoint-xsmall) {
-    padding-left: 0;
   }
 }

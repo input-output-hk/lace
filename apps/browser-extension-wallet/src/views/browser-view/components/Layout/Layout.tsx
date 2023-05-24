@@ -10,7 +10,7 @@ import { BrowserViewSections, ChangeThemeData, Message, MessageTypes } from '@li
 import { useDrawer } from '../../stores';
 import { DrawerContent, DrawerUIContainer } from '../Drawer';
 import { useNetworkError } from '@hooks/useNetworkError';
-import { VerticalNavigationBar } from '../VerticalNavigationBar';
+import { LeftSidePanel } from '../LeftSidePanel';
 import styles from './Layout.module.scss';
 
 interface LayoutProps {
@@ -63,7 +63,7 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
       id="main"
       className={classnames(styles.layoutGridContainer, isFullWidth && styles.fullWidth, isFlexible && styles.flexible)}
     >
-      <VerticalNavigationBar theme={theme.name} />
+      <LeftSidePanel theme={theme.name} />
       {children}
       <DrawerUIContainer defaultContent={drawerUIDefaultContent} />
     </div>

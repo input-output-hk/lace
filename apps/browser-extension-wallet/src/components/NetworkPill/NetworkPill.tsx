@@ -7,10 +7,10 @@ import { Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 interface NetworkPillProp {
-  isExpandablePill?: boolean;
+  isExpandable?: boolean;
 }
 
-export const NetworkPill = ({ isExpandablePill }: NetworkPillProp): ReactElement => {
+export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => {
   const { environmentName } = useWalletStore();
   const { t } = useTranslation();
   const { isOnline, isBackendFailing } = useNetwork();
@@ -19,10 +19,10 @@ export const NetworkPill = ({ isExpandablePill }: NetworkPillProp): ReactElement
     if (isOnline && !isBackendFailing && environmentName !== 'Mainnet') {
       return (
         <div
-          className={classnames(styles.networkPill, { [styles.expandablePill]: isExpandablePill })}
+          className={classnames(styles.networkPill, { [styles.expandablePill]: isExpandable })}
           data-testid="network-pill"
         >
-          <span className={classnames({ [styles.networkPillText]: isExpandablePill })}>{environmentName}</span>
+          <span className={classnames({ [styles.networkPillText]: isExpandable })}>{environmentName}</span>
         </div>
       );
     }
@@ -30,7 +30,7 @@ export const NetworkPill = ({ isExpandablePill }: NetworkPillProp): ReactElement
       return (
         <Tooltip title={t('general.networks.error')} placement="rightBottom">
           <div
-            className={classnames(styles.offlinePill, { [styles.expandablePill]: isExpandablePill })}
+            className={classnames(styles.offlinePill, { [styles.expandablePill]: isExpandable })}
             data-testid="network-pill"
           >
             <div className={styles.offlinePillText}>
@@ -45,7 +45,7 @@ export const NetworkPill = ({ isExpandablePill }: NetworkPillProp): ReactElement
       return (
         <Tooltip title={t('general.networks.connectionUnavailable.error')} placement="rightBottom">
           <div
-            className={classnames(styles.offlinePill, { [styles.expandablePill]: isExpandablePill })}
+            className={classnames(styles.offlinePill, { [styles.expandablePill]: isExpandable })}
             data-testid="backend-pill"
           >
             <div className={styles.offlinePillText}>
@@ -57,5 +57,5 @@ export const NetworkPill = ({ isExpandablePill }: NetworkPillProp): ReactElement
       );
     }
     return <></>;
-  }, [isOnline, isBackendFailing, environmentName, t, isExpandablePill]);
+  }, [isOnline, isBackendFailing, environmentName, t, isExpandable]);
 };
