@@ -96,6 +96,9 @@ const colors: Colors = {
   $sub_navigation_item_label_color_hover: lightColorScheme.$primary_black,
   $sub_navigation_item_label_color_pressed: lightColorScheme.$primary_black,
   $sub_navigation_item_label_color_focused: lightColorScheme.$primary_dark_grey,
+
+  $scrollbar_thumb_container_bgColor: lightColorScheme.$primary_light_grey_plus,
+  $scrollbar_thumb_container_bgColor_hover: lightColorScheme.$primary_grey,
 };
 
 export const elevation: Elevation = {
