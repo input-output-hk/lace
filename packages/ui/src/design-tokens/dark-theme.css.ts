@@ -90,6 +90,9 @@ const colors: Colors = {
   $sub_navigation_item_label_color_hover: darkColorScheme.$primary_white,
   $sub_navigation_item_label_color_pressed: darkColorScheme.$primary_white,
   $sub_navigation_item_label_color_focused: darkColorScheme.$primary_grey,
+
+  $scrollbar_thumb_container_bgColor: darkColorScheme.$primary_mid_grey,
+  $scrollbar_thumb_container_bgColor_hover: darkColorScheme.$primary_grey,
 };
 
 const elevation: Elevation = {
