@@ -16,8 +16,9 @@ import {
   ObservableWallet,
   SingleAddressWalletDependencies,
   storage,
-  SetupWalletProps
-} from '@cardano-sdk/wallet';
+  SetupWalletProps,
+  restoreKeyAgent
+} from '../../../../../node_modules/@cardano-sdk/wallet/dist/cjs';
 import * as KeyManagement from '../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 import { WalletManagerActivateProps, WalletManagerUi } from '@cardano-sdk/web-extension';
 import { ChainName, WalletManagerProviderTypes } from '../types';
@@ -193,8 +194,7 @@ export const restoreWallet = async (
   createWallet: SetupWalletProps<ObservableWallet, KeyManagement.KeyAgent>['createWallet']
 ): Promise<{ keyAgent: KeyManagement.KeyAgent; wallet: ObservableWallet }> => {
   const { keyAgent, wallet } = await setupWallet({
-    createKeyAgent: async (dependencies) =>
-      await KeyManagement.restoreKeyAgent(keyAgentData, dependencies, getPassword),
+    createKeyAgent: async (dependencies) => await restoreKeyAgent(keyAgentData, dependencies, getPassword),
     createWallet,
     logger: console,
     bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
@@ -258,7 +258,7 @@ export const validateWalletPassword = async (
   password: string
 ): Promise<boolean> => {
   const getPassword = async () => Buffer.from(password);
-  const keyAgent = await KeyManagement.restoreKeyAgent(
+  const keyAgent = await restoreKeyAgent(
     keyAgentData,
     // Not needed for this
     {
@@ -285,7 +285,7 @@ export const validateWalletMnemonic = async (
   password: string
 ): Promise<boolean> => {
   const getPassword = async () => Buffer.from(password);
-  const originalKeyAgent = await KeyManagement.restoreKeyAgent(
+  const originalKeyAgent = await restoreKeyAgent(
     keyAgentData,
     // Not needed for this
     {
