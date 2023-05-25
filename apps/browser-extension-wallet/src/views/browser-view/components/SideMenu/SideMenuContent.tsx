@@ -15,7 +15,6 @@ export interface SideMenuContentProps {
   onClick: MenuProps['onClick'];
   onMouseEnter: (item: MenuItemList) => void;
   onMouseLeave: () => void;
-  menuItemLabelClassName?: string;
   // required for desktop-specific styling
   menuItemClassName?: string;
 }
@@ -39,8 +38,7 @@ export const SideMenuContent = ({
   onClick,
   onMouseEnter,
   onMouseLeave,
-  menuItemClassName,
-  menuItemLabelClassName
+  menuItemClassName
 }: SideMenuContentProps): React.ReactElement => {
   const { t } = useTranslate();
 
@@ -63,7 +61,7 @@ export const SideMenuContent = ({
           {React.createElement(getIcon(menuItem, activeItemId, hoveredItemId), {
             className: classnames(styles.icon, menuItem.iconClassName)
           })}
-          <SideMenuLabel className={menuItemLabelClassName}>{t(menuItem.label)}</SideMenuLabel>
+          <SideMenuLabel className={styles.concealableMenuLabel}>{t(menuItem.label)}</SideMenuLabel>
         </SideMenuItem>
       ))}
     </Menu>

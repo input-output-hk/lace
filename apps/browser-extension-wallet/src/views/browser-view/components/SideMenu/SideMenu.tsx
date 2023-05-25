@@ -12,13 +12,9 @@ import { sideMenuConfig } from './side-menu-config';
 import { SideMenuContent } from './SideMenuContent';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
 
-export interface SideMenuProps {
-  menuItemLabelClassName?: string;
-}
-
 const isPathAvailable = (path: string) => Object.values(routes).includes(path);
 
-export const SideMenu = ({ menuItemLabelClassName }: SideMenuProps): React.ReactElement => {
+export const SideMenu = (): React.ReactElement => {
   const {
     push,
     location: { pathname },
@@ -81,7 +77,6 @@ export const SideMenu = ({ menuItemLabelClassName }: SideMenuProps): React.React
       onClick={handleRedirection}
       onMouseEnter={onMouseEnterItem}
       onMouseLeave={onMouseLeaveItem}
-      menuItemLabelClassName={menuItemLabelClassName}
     />
   );
 };

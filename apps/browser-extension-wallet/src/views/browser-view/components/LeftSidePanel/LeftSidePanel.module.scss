@@ -2,12 +2,6 @@
 
 $navigation-col-width: 215px;
 
-@mixin concealable-menu-label($display) {
-  .concealableMenuLabel {
-    display: $display !important;
-  }
-}
-
 .navigation {
   position: sticky;
   top: 0;
@@ -20,17 +14,19 @@ $navigation-col-width: 215px;
   justify-self: center;
   padding: 0 24px;
   background-color: var(--bg-color-body);
-  z-index: 100;
-  @include concealable-menu-label(none);
+  pointer-events: none;
 
   &:hover {
     box-shadow: var(--bg-color-body) 18px 0px 32px 12px;
-    @include concealable-menu-label(block);
+    z-index: 100;
+    &.shadowNone {
+      box-shadow: none;
+    }
   }
 
   @media (min-width: $breakpoint-xsmall) {
+    pointer-events: auto;
     width: $navigation-col-width;
-    @include concealable-menu-label(block);
     &:hover {
       box-shadow: none;
     }
@@ -64,9 +60,5 @@ $navigation-col-width: 215px;
   height: 40px;
   width: 40px;
   cursor: pointer;
-}
-
-.networkPillContainer {
-  position: absolute;
-  left: 35px;
+  pointer-events: auto;
 }
