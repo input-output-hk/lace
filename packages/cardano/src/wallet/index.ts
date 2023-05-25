@@ -24,12 +24,8 @@ export { ProtocolParameters } from '../../../../node_modules/@cardano-sdk/core/d
 
 export {
   BalanceTracker as Balance,
-  InitializeTxProps,
-  InitializeTxPropsValidationResult,
-  RewardAccount,
   RewardsHistory,
   SingleAddressWallet,
-  StakeKeyStatus,
   storage,
   SingleAddressWalletProps,
   ObservableWallet,
@@ -38,6 +34,13 @@ export {
   Assets,
   TxInFlight
 } from '../../../../node_modules/@cardano-sdk/wallet/dist/cjs';
+
+export {
+  InitializeTxProps,
+  InitializeTxResult,
+  InitializeTxPropsValidationResult,
+  MinimumCoinQuantityPerOutput
+} from '@cardano-sdk/tx-construction';
 
 export * as KeyManagement from '../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 

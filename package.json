@@ -54,7 +54,8 @@
     "packages/staking/package.json": "sort-package-json"
   },
   "contributors": [
-    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)"
+    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)",
+    "Lucas Barros Araújo <lucas.araujo@iohk.io> (https://iohk.io)"
   ],
   "license": "Apache-2.0",
   "bugs": {
