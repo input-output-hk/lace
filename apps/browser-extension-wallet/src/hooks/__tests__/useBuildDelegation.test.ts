@@ -1,32 +1,45 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
-const mockInitializeTx = jest.fn();
-const mockBuildDelegation = jest.fn();
+/* eslint-disable no-magic-numbers */
+const mockSetIsBuildingTx = jest.fn();
+const mockSetStakingError = jest.fn();
+const mockSetDelegationTxBuilder = jest.fn();
+const mockSetDelegationTxFee = jest.fn();
+const mockInspect = jest.fn().mockResolvedValue({
+  body: {
+    fee: '0.17'
+  }
+});
+const mockBuild = jest.fn().mockReturnThis();
+const mockDelegate = jest.fn().mockReturnThis();
+const mockCreateTxBuilder = jest.fn().mockReturnValue({
+  delegate: mockDelegate,
+  build: mockBuild,
+  inspect: mockInspect
+});
 import { renderHook } from '@testing-library/react-hooks';
 import { useBuildDelegation } from '../useBuildDelegation';
 import { cardanoStakePoolMock } from '../../utils/mocks/test-helpers';
 
-jest.mock('@lace/cardano', () => {
-  const actual = jest.requireActual<any>('@lace/cardano');
-  return {
-    __esModule: true,
-    ...actual,
-    Wallet: {
-      ...actual.Wallet,
-      buildDelegation: mockBuildDelegation
-    }
-  };
-});
+jest.mock('../../features/stake-pool-details/store', () => ({
+  ...jest.requireActual<any>('../../features/stake-pool-details/store'),
+  useStakePoolDetails: () => ({
+    setIsBuildingTx: mockSetIsBuildingTx,
+    setStakingError: mockSetStakingError
+  })
+}));
 
 jest.mock('../../features/delegation/stores', () => ({
   ...jest.requireActual<any>('../../features/delegation/stores'),
   useDelegationStore: () => ({
-    selectedStakePool: cardanoStakePoolMock.pageResults[0]
+    selectedStakePool: cardanoStakePoolMock.pageResults[0],
+    setDelegationTxBuilder: mockSetDelegationTxBuilder,
+    setDelegationTxFee: mockSetDelegationTxFee
   })
 }));
 
 const inMemoryWallet = {
-  initializeTx: mockInitializeTx
+  createTxBuilder: mockCreateTxBuilder
 };
 
 jest.mock('../../stores', () => ({
@@ -36,25 +49,24 @@ jest.mock('../../stores', () => ({
   })
 }));
 
+// eslint-disable-next-line promise/avoid-new
+const flushPromises = () => new Promise(setImmediate);
+
 describe('Testing useBuildDelegation hook', () => {
-  process.env.AVAILABLE_CHAINS = process.env.AVAILABLE_CHAINS || 'Mainnet,Preprod,Preview';
-  process.env.DEFAULT_CHAIN = process.env.DEFAULT_CHAIN || 'Preprod';
-
-  test('should return build delegation transaction function', () => {
-    const { result } = renderHook(() => useBuildDelegation());
-    expect(result.current).toBeDefined();
-  });
-
   describe('Testing build delegation transaction function', () => {
-    test('should build delegation using buildDelegation util and return initialized tx', async () => {
-      const mockedTxConfig = 'txConfig';
-      mockBuildDelegation.mockImplementation(async () => await mockedTxConfig);
-      const { result } = renderHook(() => useBuildDelegation());
+    test('should build delegation using txBuilder', async () => {
+      renderHook(() => useBuildDelegation());
 
-      await result.current();
-
-      expect(mockBuildDelegation).toBeCalledWith(inMemoryWallet, cardanoStakePoolMock.pageResults[0].id);
-      expect(mockInitializeTx).toBeCalledWith(mockedTxConfig);
+      expect(mockSetIsBuildingTx).toBeCalled();
+      expect(mockCreateTxBuilder).toBeCalled();
+      expect(mockDelegate).toBeCalledWith(cardanoStakePoolMock.pageResults[0].id);
+      expect(mockBuild).toBeCalled();
+      expect(mockInspect).toBeCalled();
+      await flushPromises();
+      expect(mockSetIsBuildingTx).toBeCalledTimes(2);
+      expect(mockSetDelegationTxBuilder).toBeCalled();
+      expect(mockSetDelegationTxFee).toBeCalledWith('0.17');
+      expect(mockSetStakingError).toBeCalledWith();
     });
   });
 });

@@ -95,7 +95,7 @@ interface SendTransactionSummaryProps {
 export const SendTransactionSummary = withAddressBookContext(
   ({ isPopupView = false }: SendTransactionSummaryProps): React.ReactElement => {
     const { t } = useTranslation();
-    const { builtTxData } = useBuitTxState();
+    const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuitTxState();
     const [metadata] = useMetadata();
     const { inMemoryWallet } = useWalletStore();
     const { priceResult } = useFetchCoinPrice();
@@ -127,7 +127,7 @@ export const SendTransactionSummary = withAddressBookContext(
       [addressList]
     );
 
-    const rows = [...(builtTxData?.tx?.inputSelection?.outputs?.values() ?? [])].map((item) => ({
+    const rows = [...(outputs?.values() ?? [])].map((item) => ({
       list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
       recipientAddress: item.address.toString(),
       recipientName: addressToNameMap?.get(item.address.toString())
@@ -139,7 +139,7 @@ export const SendTransactionSummary = withAddressBookContext(
         <OutputSummaryList
           rows={rows as OutputSummaryProps[]}
           txFee={{
-            ...getFee(builtTxData?.tx?.body?.fee?.toString(), priceResult?.cardano?.price, cardanoCoin, fiatCurrency),
+            ...getFee(fee?.toString(), priceResult?.cardano?.price, cardanoCoin, fiatCurrency),
             tootipText: t('send.theAmountYoullBeChargedToProcessYourTransaction')
           }}
           metadata={metadata}
