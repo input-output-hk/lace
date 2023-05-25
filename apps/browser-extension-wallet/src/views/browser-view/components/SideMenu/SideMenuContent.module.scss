@@ -1,9 +1,23 @@
 @import '../../../../../../../packages/common/src/ui/styles/theme.scss';
 
+@mixin concealable-menu-label($display) {
+  .concealableMenuLabel {
+    display: $display !important;
+  }
+}
+
 .menuContainer {
+  pointer-events: auto;
   padding-left: 12px;
+  @include concealable-menu-label(none);
+
+  &:hover {
+    @include concealable-menu-label(block);
+  }
+
   @media (min-width: $breakpoint-xsmall) {
     padding-left: 0;
+    @include concealable-menu-label(block);
   }
 }
 

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import classnames from 'classnames';
 import { useHistory } from 'react-router';
 import { walletRoutePaths } from '@routes';
 import { SideMenu } from '../SideMenu';
@@ -22,11 +23,19 @@ const logoExtended: Record<string, string> = {
 export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.ReactElement => {
   const history = useHistory();
   const isNarrowWindow = useIsSmallerScreenWidthThan(BREAKPOINT_XSMALL);
+  const [shouldHaveShadowNone, setShouldHaveShadowNone] = useState(false);
 
   const handleLogoRedirection = () => history.push(walletRoutePaths.assets);
+  const handleLogoMouseEnter = () => setShouldHaveShadowNone(true);
+  const handleLogoMouseLeave = () => setShouldHaveShadowNone(false);
 
   const logo = isNarrowWindow ? (
-    <LaceLogoMark className={styles.shortenedLogo} onClick={handleLogoRedirection} />
+    <LaceLogoMark
+      onMouseOver={handleLogoMouseEnter}
+      onMouseLeave={handleLogoMouseLeave}
+      className={styles.shortenedLogo}
+      onClick={handleLogoRedirection}
+    />
   ) : (
     <img
       className={styles.logo}
@@ -38,20 +47,17 @@ export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.Reac
   );
 
   return (
-    <nav id="nav" className={styles.navigation}>
-      <div className={styles.stickyMenuInner}>
-        <div className={styles.logoContainer}>
-          {logo}
-          {isNarrowWindow ? (
-            <div className={styles.networkPillContainer}>
-              <NetworkPill isExpandable />
-            </div>
-          ) : (
-            <NetworkPill />
-          )}
+    <>
+      {isNarrowWindow && <NetworkPill isExpandable />}
+      <nav id="nav" className={classnames(styles.navigation, { [styles.shadowNone]: shouldHaveShadowNone })}>
+        <div className={styles.stickyMenuInner}>
+          <div className={styles.logoContainer}>
+            {logo}
+            {!isNarrowWindow && <NetworkPill />}
+          </div>
+          <SideMenu />
         </div>
-        <SideMenu menuItemLabelClassName={styles.concealableMenuLabel} />
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };

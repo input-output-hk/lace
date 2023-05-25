@@ -37,14 +37,16 @@
 }
 
 .expandablePill {
+  position: absolute;
+  left: 60px;
+  top: 40px;
   width: 10px;
   height: 10px;
   border-radius: 100px;
   padding: 0;
-  transition: all 0.25s ease-in-out;
-  z-index: 100;
+  z-index: 150;
   cursor: pointer;
-  pointer-events: auto;
+  transition: all 0.25s ease-in-out;
 
   .offlinePillText,
   .networkPillText {
@@ -52,6 +54,7 @@
   }
 
   &:hover {
+    top: 30px;
     margin-left: 12px;
     border-radius: size_unit(2);
     padding: 8px 12px;
