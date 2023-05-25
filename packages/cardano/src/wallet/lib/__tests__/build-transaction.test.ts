@@ -1,6 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import { Cardano } from '@cardano-sdk/core';
-import { InitializeTxProps, SingleAddressWallet } from '@cardano-sdk/wallet';
+import { SingleAddressWallet } from '@cardano-sdk/wallet';
+import { InitializeTxProps } from '@cardano-sdk/tx-construction';
 import * as mocks from '../../test/mocks';
 import { buildTransaction } from '../build-transaction';
 

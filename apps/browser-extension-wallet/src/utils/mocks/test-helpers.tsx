@@ -195,6 +195,7 @@ export const mockAssetMetadata: Wallet.Asset.AssetInfo = {
   ],
   name: Wallet.Cardano.AssetName('54534c41'),
   policyId: Wallet.Cardano.PolicyId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82'),
+  quantity: BigInt('1000'),
   supply: BigInt('1000')
 };
 
@@ -323,6 +324,7 @@ export const mockAsset: Wallet.Asset.AssetInfo = {
   fingerprint: Wallet.Cardano.AssetFingerprint('asset1cvmyrfrc7lpht2hcjwr9lulzyyjv27uxh3kcz0'),
   name: Wallet.Cardano.AssetName('54657374636f696e'),
   policyId: Wallet.Cardano.PolicyId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'),
+  quantity: BigInt('100042'),
   supply: BigInt('100042'),
   tokenMetadata: {
     assetId: Wallet.Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'),
@@ -347,6 +349,7 @@ export const mockNft: Wallet.Asset.AssetInfo = {
   fingerprint: Wallet.Cardano.AssetFingerprint('asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w'),
   name: Wallet.Cardano.AssetName('54534c41'),
   policyId: Wallet.Cardano.PolicyId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82'),
+  quantity: BigInt(1),
   supply: BigInt(1),
   tokenMetadata: {
     assetId: Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
