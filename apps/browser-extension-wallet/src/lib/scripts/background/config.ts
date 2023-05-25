@@ -1,9 +1,10 @@
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 import { Wallet } from '@lace/cardano';
-import { RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { getBaseUrlForChain } from '@src/utils/chain';
+import { BackgroundService } from '../types';
 
-export const backgroundServiceProperties = {
+export const backgroundServiceProperties: RemoteApiProperties<BackgroundService> = {
   requestMessage$: RemoteApiPropertyType.HotObservable,
   migrationState$: RemoteApiPropertyType.HotObservable,
   coinPrices: {

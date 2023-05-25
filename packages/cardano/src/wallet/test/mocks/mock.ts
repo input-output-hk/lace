@@ -1,6 +1,5 @@
 /* eslint-disable no-magic-numbers */
 // Used in storybook
-import { RewardAccount, StakeKeyStatus } from '@cardano-sdk/wallet';
 import { Cardano } from '@cardano-sdk/core';
 
 // eslint-disable-next-line no-console
@@ -47,9 +46,9 @@ export const stakePoolMock: Cardano.StakePool = {
   relays: undefined
 };
 
-export const rewardAcountMock: Partial<RewardAccount> = {
+export const rewardAcountMock: Partial<Cardano.RewardAccountInfo> = {
   address: Cardano.RewardAccount('stake_test1urm7tqwy3d5e3kxp424cvtcgr8zaprkszk38jntyzu5t4mqalgvfg'),
-  keyStatus: StakeKeyStatus.Registered,
+  keyStatus: Cardano.StakeKeyStatus.Registered,
 
   delegatee: {
     nextNextEpoch: stakePoolMock
