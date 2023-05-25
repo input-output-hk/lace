@@ -15,10 +15,10 @@ $navigation-col-width: 215px;
   padding: 0 24px;
   background-color: var(--bg-color-body);
   pointer-events: none;
+  z-index: 100;
 
   &:hover {
     box-shadow: var(--bg-color-body) 18px 0px 32px 12px;
-    z-index: 100;
     &.shadowNone {
       box-shadow: none;
     }
