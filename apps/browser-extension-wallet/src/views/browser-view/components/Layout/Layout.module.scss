@@ -94,10 +94,8 @@ $main-gap: 49px;
   }
 
   @media (max-width: $breakpoint-minimum) {
-    overflow-x: scroll;
     justify-content: start;
     margin-right: 0;
-    padding-right: size_unit(4);
     @include scroll-bar-style;
   }
 

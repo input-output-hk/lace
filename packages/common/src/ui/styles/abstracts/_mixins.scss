@@ -23,6 +23,7 @@
 @mixin scroll-bar-style(
   $width: $scroll-bar-default-width,
   $height: $scroll-bar-default-height,
+  $thumb-height: $scroll-bar-thumb-default-height,
   $track-radius: $track-default-radius,
   $thum-raidus: $thumb-default-radius,
   $track-color: var(--scroll-bar-track),
@@ -30,6 +31,7 @@
 ) {
   &::-webkit-scrollbar {
     width: $width;
+    height: $height;
     scrollbar-width: thin;
   }
 
@@ -41,7 +43,7 @@
   &::-webkit-scrollbar-thumb {
     background-color: $thum-color;
     border-radius: $thum-raidus;
-    height: $height;
+    height: $thumb-height;
   }
 }
 

@@ -8,9 +8,7 @@ $theme-light-grey: var(--data-light-grey, #f9f9f9);
 $theme-light-grey-border: #efefef;
 $theme-light-grey-border-opacity: #efefef8f;
 
-// TODO: Workaround to address overflow issues on staking layout, this is going to be address in https://input-output.atlassian.net/browse/LW-6560
-// once this issue is addressed, go back to 768px
-$breakpoint-minimum: 810px;
+$breakpoint-minimum: 768px;
 $breakpoint-xsmall: 1024px;
 $breakpoint-small: 1280px;
 $breakpoint-medium: 1440px;
