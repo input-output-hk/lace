@@ -5,7 +5,7 @@ $navigation-col-width: 215px;
 .navigation {
   position: sticky;
   top: 0;
-  left: 0;
+  left: 1px;
   grid-area: nav;
   display: flex;
   flex-direction: column;
