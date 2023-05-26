@@ -23,11 +23,11 @@ const logoExtended: Record<string, string> = {
 export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.ReactElement => {
   const history = useHistory();
   const isNarrowWindow = useIsSmallerScreenWidthThan(BREAKPOINT_XSMALL);
-  const [shouldHaveShadowNone, setShouldHaveShadowNone] = useState(false);
+  const [shouldLogoHaveNoShadow, setShouldLogoHaveNoShadow] = useState(false);
 
   const handleLogoRedirection = () => history.push(walletRoutePaths.assets);
-  const handleLogoMouseEnter = () => setShouldHaveShadowNone(true);
-  const handleLogoMouseLeave = () => setShouldHaveShadowNone(false);
+  const handleLogoMouseEnter = () => setShouldLogoHaveNoShadow(true);
+  const handleLogoMouseLeave = () => setShouldLogoHaveNoShadow(false);
 
   const logo = isNarrowWindow ? (
     <LaceLogoMark
@@ -49,7 +49,7 @@ export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.Reac
   return (
     <>
       {isNarrowWindow && <NetworkPill isExpandable />}
-      <nav id="nav" className={classnames(styles.navigation, { [styles.shadowNone]: shouldHaveShadowNone })}>
+      <nav id="nav" className={classnames(styles.navigation, { [styles.shadowNone]: shouldLogoHaveNoShadow })}>
         <div className={styles.stickyMenuInner}>
           <div className={styles.logoContainer}>
             {logo}
