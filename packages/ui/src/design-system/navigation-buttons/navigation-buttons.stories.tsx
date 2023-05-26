@@ -28,8 +28,7 @@ export default {
     ),
   ],
   argTypes: {
-    onClose: { action: true },
-    onBack: { action: true },
+    onClick: { action: true },
   },
 } as Meta;
 
@@ -114,14 +113,12 @@ Overview.parameters = {
 };
 
 interface Props {
-  onClose?: () => void;
-  onBack?: () => void;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 type Interactions = ComponentStory<ElementType<Props>>;
 
 export const Interactions: Interactions = ({
-  onClose,
-  onBack,
+  onClick,
 }: Readonly<Props>): JSX.Element => {
   return (
     <Grid columns="$1">
@@ -130,10 +127,10 @@ export const Interactions: Interactions = ({
           <Variants.Table headers={['Close', 'Back']}>
             <Variants.Row>
               <Variants.Cell>
-                <Close onClose={onClose} data-testid="close-button" />
+                <Close onClick={onClick} data-testid="close-button" />
               </Variants.Cell>
               <Variants.Cell>
-                <Back onGoBack={onBack} data-testid="back-button" />
+                <Back onClick={onClick} data-testid="back-button" />
               </Variants.Cell>
             </Variants.Row>
           </Variants.Table>
@@ -151,7 +148,7 @@ Interactions.play = async ({ canvasElement, args }): Promise<void> => {
   userEvent.click(await canvas.findByTestId('close-button'));
 
   await waitFor(() => {
-    expect(args.onClose).toHaveBeenCalled();
+    expect(args.onClick).toHaveBeenCalled();
   });
 
   await sleep();
@@ -159,6 +156,6 @@ Interactions.play = async ({ canvasElement, args }): Promise<void> => {
   userEvent.click(await canvas.findByTestId('back-button'));
 
   await waitFor(() => {
-    expect(args.onBack).toHaveBeenCalled();
+    expect(args.onClick).toHaveBeenCalled();
   });
 };

@@ -9,22 +9,13 @@ import type { OmitClassName } from '../../types';
 
 type Props = OmitClassName<HTMLButtonElement> & {
   disabled?: boolean;
-  onClose?: () => void;
+  // Needed for @storybook/addon-docs
+  onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
 };
 
-export const Close = ({
-  onClose,
-  onClick,
-  ...props
-}: Readonly<Props>): JSX.Element => {
+export const Close = ({ ...props }: Readonly<Props>): JSX.Element => {
   return (
-    <NavigationSkeletonButton
-      {...props}
-      onClick={(event): void => {
-        onClose?.();
-        onClick?.(event);
-      }}
-    >
+    <NavigationSkeletonButton {...props}>
       <CloseIcon className={cx.icon} />
     </NavigationSkeletonButton>
   );
