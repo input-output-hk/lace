@@ -7,3 +7,4 @@ export * as Text from './typography';
 export { AssetInput } from './asset-input';
 export { BundleInput } from './bundle-input';
 export * as SubNavigation from './sub-navigation';
+export * as ProfilePicture from './profile-picture';

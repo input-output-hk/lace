@@ -90,6 +90,14 @@ const colors: Colors = {
   $sub_navigation_item_label_color_hover: darkColorScheme.$primary_white,
   $sub_navigation_item_label_color_pressed: darkColorScheme.$primary_white,
   $sub_navigation_item_label_color_focused: darkColorScheme.$primary_grey,
+
+  $profile_picture_avatar_label_color: darkColorScheme.$primary_mid_black,
+  $profile_picture_initials_label_color: darkColorScheme.$secondary_lace_yellow,
+  $profile_picture_initials_container_bgColor:
+    darkColorScheme.$secondary_lace_yellow,
+
+  $profile_picture_image_container_borderColor: 'transparent',
+  $profile_picture_image_container_borderColor_selected: 'transparent',
 };
 
 const elevation: Elevation = {
