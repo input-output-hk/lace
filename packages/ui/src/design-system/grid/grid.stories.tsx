@@ -4,7 +4,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { Box } from '../box';
-import { Page, Section } from '../decorators';
+import { page, Section } from '../decorators';
 
 import { Cell } from './cell.component';
 import { Grid } from './grid.component';
@@ -18,13 +18,7 @@ export default {
   subcomponents: {
     Cell,
   },
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Layout grid" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Layout grid', subtitle })],
 } as Meta;
 
 const Col = (): JSX.Element => (
