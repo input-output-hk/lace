@@ -1,6 +1,6 @@
 import { createTheme } from '@vanilla-extract/css';
 
-import { laceGradient, lightColorScheme } from './colors.data';
+import { darkColorScheme, laceGradient, lightColorScheme } from './colors.data';
 import { opacities } from './opacities.data';
 import { radius } from './radius.data';
 import { spacing } from './spacing.data';
@@ -49,6 +49,11 @@ const colors: Colors = {
     lightColorScheme.$primary_light_grey,
   $buttons_secondary_container_outlineColor:
     lightColorScheme.$primary_accent_purple_0_3,
+
+  $card_elevated_backgroundColor: lightColorScheme.$primary_white,
+  $card_greyed_backgroundColor: lightColorScheme.$primary_light_grey,
+  $card_outlined_backgroundColor: lightColorScheme.$primary_white,
+  $card_outlined_borderColor: lightColorScheme.$primary_light_grey_plus,
 
   $control_buttons_filled_label_color: lightColorScheme.$primary_dark_grey,
   $control_buttons_filled_label_color_hover: lightColorScheme.$primary_black,
@@ -103,6 +108,7 @@ export const elevation: Elevation = {
   $dialog: '0px 0px 20px rgba(167, 143, 160, 0.15)',
   $primaryButton: '0px 4px 10px rgba(167, 143, 160, 0.2)',
   $assets: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 0px 10px rgba(0, 0, 0, 0.05)',
+  $card: '0px 0px 20px rgba(167, 143, 160, 0.15)',
 } as const;
 
 export const lightTheme = createTheme(vars, {
