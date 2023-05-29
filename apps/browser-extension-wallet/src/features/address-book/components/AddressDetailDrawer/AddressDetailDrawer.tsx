@@ -1,10 +1,11 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
 import React, { useEffect, useState } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { Button, toast, Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
-import { EditAddressForm, valuesPropType, ValidationOptionsProps, FormKeys } from '@lace/core';
+import { EditAddressForm as AddressForm, valuesPropType, ValidationOptionsProps, FormKeys } from '@lace/core';
 import { validateWalletName, validateWalletAddress } from '@src/utils/validators/address-book';
 import { AddressDetailsSteps, AddressDetailsConfig, AddressDetailsSectionConfig } from './types';
 import { DeleteAddressModal } from '../DeleteAddressModal';
@@ -48,6 +49,7 @@ export type AddressDetailDrawerProps = {
   onConfirmClick: (values: valuesPropType) => unknown;
   onDelete: (address: InitialValuesProps['id']) => unknown;
   visible: boolean;
+  useNewAddressForm?: boolean;
   popupView?: boolean;
 };
 
@@ -57,17 +59,24 @@ export const AddressDetailDrawer = ({
   onConfirmClick,
   visible,
   onDelete,
-  popupView
+  popupView,
+  useNewAddressForm
 }: AddressDetailDrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState<number | null>();
   const [stepsConfig, setStepsConfig] = useState<AddressDetailsSectionConfig>(
-    config[initialValues?.id ? AddressDetailsSteps.DETAIL : AddressDetailsSteps.FORM]
+    useNewAddressForm
+      ? config[AddressDetailsSteps.FORM]
+      : config[initialValues?.id ? AddressDetailsSteps.DETAIL : AddressDetailsSteps.FORM]
   );
   useEffect(() => {
-    setStepsConfig(config[initialValues?.id ? AddressDetailsSteps.DETAIL : AddressDetailsSteps.FORM]);
-  }, [initialValues?.id]);
-  const showArrowIcon = stepsConfig.currentSection === AddressDetailsSteps.FORM || popupView;
+    setStepsConfig(
+      useNewAddressForm
+        ? config[AddressDetailsSteps.FORM]
+        : config[initialValues?.id ? AddressDetailsSteps.DETAIL : AddressDetailsSteps.FORM]
+    );
+  }, [initialValues?.id, useNewAddressForm]);
+  const showArrowIcon = (stepsConfig.currentSection === AddressDetailsSteps.FORM && !useNewAddressForm) || popupView;
   const [formValues, setFormValues] = useState<valuesPropType>(initialValues || {});
   const analytics = useAnalyticsContext();
 
@@ -102,10 +111,10 @@ export const AddressDetailDrawer = ({
   const getFieldError = (key: FormKeys) => validations[key]?.(formValues[key]);
 
   const handleOnCancelClick = () => {
-    if (!popupView || initialValues?.id) {
-      setStepsConfig(config[AddressDetailsSteps.DETAIL]);
-    } else {
+    if ((popupView && initialValues?.id) || useNewAddressForm) {
       onCancelClick();
+    } else {
+      setStepsConfig(config[AddressDetailsSteps.DETAIL]);
     }
   };
 
@@ -117,6 +126,16 @@ export const AddressDetailDrawer = ({
     });
   };
 
+  const isNewAddressFormPopup = popupView && !initialValues?.id;
+  const newAddressFormTitle = useNewAddressForm
+    ? t('browserView.addressBook.form.addNewAddress')
+    : t('browserView.addressBook.addressForm.title.add');
+  const drawerHeaderTitle =
+    stepsConfig.currentSection === AddressDetailsSteps.DETAIL
+      ? t('browserView.addressBook.addressDetail.title')
+      : ((isNewAddressFormPopup || useNewAddressForm) && newAddressFormTitle) ||
+        t('browserView.addressBook.editAddress.title');
+
   return (
     <>
       <Drawer
@@ -125,12 +144,8 @@ export const AddressDetailDrawer = ({
         onClose={onClose}
         title={
           <DrawerHeader
-            title={
-              stepsConfig.currentSection === AddressDetailsSteps.DETAIL
-                ? t('browserView.addressBook.addressDetail.title')
-                : (popupView && !initialValues?.id && t('browserView.addressBook.addressForm.title.add')) ||
-                  t('browserView.addressBook.editAddress.title')
-            }
+            title={drawerHeaderTitle}
+            subtitle={useNewAddressForm && t('browserView.addressBook.form.addNewSubtitle')}
           />
         }
         navigation={
@@ -186,7 +201,7 @@ export const AddressDetailDrawer = ({
                 onConfirmClick={onConfirmClick}
                 getFieldError={getFieldError}
                 onClose={onClose}
-                isNewAddress={popupView && !initialValues?.id}
+                isNewAddress={isNewAddressFormPopup || useNewAddressForm}
                 currentName={initialValues?.name}
               />
             )}
@@ -197,7 +212,7 @@ export const AddressDetailDrawer = ({
       >
         {visible && (
           <>
-            {stepsConfig.currentSection === AddressDetailsSteps.DETAIL && (
+            {stepsConfig.currentSection === AddressDetailsSteps.DETAIL && initialValues && (
               <div className={styles.container} data-testid="address-form-details-container">
                 <div className={styles.body}>
                   <div
@@ -238,7 +253,7 @@ export const AddressDetailDrawer = ({
             )}
             {stepsConfig.currentSection === AddressDetailsSteps.FORM && (
               <div className={styles.container} data-testid="address-form-container">
-                <EditAddressForm
+                <AddressForm
                   {...{
                     initialValues,
                     setFormValues,

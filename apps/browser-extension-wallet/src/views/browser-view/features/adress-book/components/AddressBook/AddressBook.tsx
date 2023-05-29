@@ -2,17 +2,18 @@ import React, { useMemo, useState, useCallback } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { WalletAddressList, WalletAddressItemProps } from '@lace/core';
+import { Button } from '@lace/common';
 import { withAddressBookContext, useAddressBookContext } from '@src/features/address-book/context';
 import { AddressBookSchema } from '@src/lib/storage';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import { SectionLayout, EducationalList, Layout } from '@src/views/browser-view/components';
-import { AddressForm } from '../AddressForm';
 import { AddressDetailDrawer } from '@src/features/address-book/components/AddressDetailDrawer';
 import { AddressBookEmpty } from '../AddressBookEmpty';
 import styles from './AddressBook.module.scss';
 import DeleteIcon from '@assets/icons/delete-icon.component.svg';
 import AddIcon from '@assets/icons/add.component.svg';
 import EditIcon from '@assets/icons/edit.component.svg';
+import PlusIcon from '@assets/icons/plus.component.svg';
 import Book from '@assets/icons/book.svg';
 import { PageTitle } from '@components/Layout';
 import { LACE_APP_ID } from '@src/utils/constants';
@@ -29,6 +30,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
   const { extendLimit, saveRecord: saveAddress, updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
   const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
+  const [isNewAddressForm, setIsNewAddressForm] = useState(false);
   const analytics = useAnalyticsContext();
 
   const addressListTranslations = {
@@ -95,23 +97,30 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
         });
   };
 
+  const handleAddAddressClick = () => {
+    setIsNewAddressForm(true);
+    setIsFormVisible(true);
+  };
+
   if (!isNumber(addressCount)) return <span />;
 
   const sidePanel = (
-    <>
-      <AddressForm initialValues={addressToEdit} onConfirmClick={onAddressSave} />
-      <div className={styles.educationalList}>
-        <EducationalList items={educationalList} title={translate('browserView.sidePanel.aboutYourWallet')} />
-      </div>
-    </>
+    <EducationalList items={educationalList} title={translate('browserView.sidePanel.aboutYourWallet')} />
   );
 
   return (
     <Layout>
       <SectionLayout sidePanelContent={sidePanel}>
-        <PageTitle amount={addressCount} data-testid="address-book-page-title">
-          {translate('browserView.addressBook.title')}
-        </PageTitle>
+        <div className={styles.titleContainer}>
+          <PageTitle amount={addressCount} data-testid="address-book-page-title">
+            {translate('browserView.addressBook.title')}
+          </PageTitle>
+          <Button onClick={handleAddAddressClick} className={styles.addAddressBtn}>
+            <PlusIcon className={styles.btnIcon} />
+            {translate('browserView.addressBook.addressList.addItem.button')}
+          </Button>
+        </div>
+
         {addressCount ? (
           <>
             <div className={styles.listContainer}>
@@ -129,10 +138,11 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
           <AddressBookEmpty />
         )}
         <AddressDetailDrawer
-          initialValues={addressToEdit}
+          initialValues={!isNewAddressForm ? addressToEdit : undefined}
           onCancelClick={() => {
             setAddressToEdit({} as AddressBookSchema);
             setIsFormVisible(false);
+            setIsNewAddressForm(false);
           }}
           onConfirmClick={onAddressSave}
           onDelete={(id) =>
@@ -142,6 +152,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             })
           }
           visible={isFormVisible}
+          useNewAddressForm={isNewAddressForm}
         />
       </SectionLayout>
     </Layout>
