@@ -55,6 +55,13 @@ export const colors = {
   $sub_navigation_item_label_color_hover: '',
   $sub_navigation_item_label_color_pressed: '',
   $sub_navigation_item_label_color_focused: '',
+
+  $profile_picture_avatar_label_color: '',
+  $profile_picture_initials_label_color: '',
+  $profile_picture_initials_container_bgColor: '',
+
+  $profile_picture_image_container_borderColor: '',
+  $profile_picture_image_container_borderColor_selected: '',
 };
 
 export type Colors = typeof colors;
