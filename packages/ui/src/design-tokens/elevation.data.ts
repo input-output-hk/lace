@@ -3,6 +3,7 @@ export const elevation = {
   $dialog: '',
   $primaryButton: '',
   $assets: '',
+  $card: '',
 };
 
 export type Elevation = typeof elevation;
