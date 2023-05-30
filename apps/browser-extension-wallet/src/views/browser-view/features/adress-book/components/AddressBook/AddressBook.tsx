@@ -23,6 +23,9 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
+const ELLIPSIS_LEFT_SIDE_LENGTH = 34;
+const ELLIPSIS_RIGHT_SIDE_LENGTH = 34;
+
 export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { t: translate } = useTranslation();
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
@@ -69,7 +72,10 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
           });
           setAddressToEdit(address);
           setIsFormVisible(true);
-        }
+        },
+        shouldUseEllipsisBeferoAfter: true,
+        beforeEllipsis: ELLIPSIS_LEFT_SIDE_LENGTH,
+        afterEllipsis: ELLIPSIS_RIGHT_SIDE_LENGTH
       })) || [],
     [addressList, analytics, setAddressToEdit]
   );
