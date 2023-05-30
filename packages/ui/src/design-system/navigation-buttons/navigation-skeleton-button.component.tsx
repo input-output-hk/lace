@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import { Flex } from '../flex';
@@ -7,10 +7,10 @@ import * as cx from './navigation-skeleton-button.css';
 
 import type { OmitClassName } from '../../types';
 
-export type Props = OmitClassName<HTMLButtonElement> & {
-  disabled?: boolean;
-  children: ReactNode;
-};
+export type Props = OmitClassName<HTMLButtonElement> &
+  PropsWithChildren<{
+    disabled?: boolean;
+  }>;
 
 export const NavigationSkeletonButton = ({
   id,

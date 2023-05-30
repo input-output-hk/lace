@@ -5,18 +5,16 @@ import { ReactComponent as ArrowLeftIcon } from '../../assets/icons/arrow-left.c
 import * as cx from './back-button.css';
 import { NavigationSkeletonButton } from './navigation-skeleton-button.component';
 
-import type { OmitClassName } from '../../types';
+import type { Props as SkeletonButtonProps } from './navigation-skeleton-button.component';
 
-type Props = OmitClassName<HTMLButtonElement> & {
+type Props = Omit<SkeletonButtonProps, 'children'> & {
   disabled?: boolean;
   // Needed for @storybook/addon-docs
-  onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-export const Back = ({ ...props }: Readonly<Props>): JSX.Element => {
-  return (
-    <NavigationSkeletonButton {...props}>
-      <ArrowLeftIcon className={cx.icon} />
-    </NavigationSkeletonButton>
-  );
-};
+export const Back = ({ ...props }: Readonly<Props>): JSX.Element => (
+  <NavigationSkeletonButton {...props}>
+    <ArrowLeftIcon className={cx.icon} />
+  </NavigationSkeletonButton>
+);
