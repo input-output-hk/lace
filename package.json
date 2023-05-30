@@ -76,14 +76,6 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "13.0.4",
     "@rollup/plugin-typescript": "8.3.0",
-    "@storybook/addon-actions": "^6.5.9",
-    "@storybook/addon-essentials": "^6.5.9",
-    "@storybook/addon-interactions": "^6.5.12",
-    "@storybook/addon-links": "^6.5.9",
-    "@storybook/builder-webpack5": "6.5.9",
-    "@storybook/manager-webpack5": "6.5.9",
-    "@storybook/react": "^6.5.9",
-    "@storybook/testing-library": "^0.0.13",
     "@svgr/rollup": "^6.1.2",
     "@svgr/webpack": "^6.1.2",
     "@swc-node/register": "1.5.4",
@@ -184,6 +176,8 @@
     "wsrun": "^5.2.4"
   },
   "resolutions": {
+    "http-cache-semantics": "^4.1.1",
+    "minimatch": "^3.0.5",
     "minimist": "^1.2.6",
     "json-schema": "^0.4.0",
     "follow-redirects": "^1.14.8",
