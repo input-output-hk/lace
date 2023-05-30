@@ -5,18 +5,16 @@ import { ReactComponent as CloseIcon } from '../../assets/icons/close.component.
 import * as cx from './close-button.css';
 import { NavigationSkeletonButton } from './navigation-skeleton-button.component';
 
-import type { OmitClassName } from '../../types';
+import type { Props as SkeletonButtonProps } from './navigation-skeleton-button.component';
 
-type Props = OmitClassName<HTMLButtonElement> & {
+type Props = Omit<SkeletonButtonProps, 'children'> & {
   disabled?: boolean;
   // Needed for @storybook/addon-docs
   onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
 };
 
-export const Close = ({ ...props }: Readonly<Props>): JSX.Element => {
-  return (
-    <NavigationSkeletonButton {...props}>
-      <CloseIcon className={cx.icon} />
-    </NavigationSkeletonButton>
-  );
-};
+export const Close = ({ ...props }: Readonly<Props>): JSX.Element => (
+  <NavigationSkeletonButton {...props}>
+    <CloseIcon className={cx.icon} />
+  </NavigationSkeletonButton>
+);
