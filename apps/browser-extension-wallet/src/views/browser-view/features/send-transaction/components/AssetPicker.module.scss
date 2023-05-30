@@ -1,0 +1,8 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.selectorOverlay {
+  margin-top: size_unit(5.5);
+  @media (max-width: $breakpoint-popup) {
+    margin-top: initial;
+  }
+}

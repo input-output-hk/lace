@@ -1,0 +1,50 @@
+.square {
+  width: 20px;
+  height: 16px;
+  border: solid 2px var(--light-mode-black, #fff);
+  border-radius: 3px;
+  position: relative;
+}
+
+.switch {
+  height: 14px;
+  width: 16%;
+  border-left: solid 2px var(--light-mode-black, #fff);
+  border-radius: 3px;
+  background-color: var(--bg-color-body);
+  position: absolute;
+  top: -1px;
+  left: 80%;
+  transition: left 0.25s ease-in-out, width 0.25s ease-in-out;
+}
+
+.active {
+  left: 70%;
+}
+
+.roundBtn {
+  padding: 0 !important;
+  min-width: 50px !important;
+  border-radius: 100px !important;
+  background-color: var(--bg-color-body, #ffffff) !important;
+
+  &:hover {
+    background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+    .square {
+      .switch {
+        width: 42%;
+        left: 55%;
+        background-color: #00000033;
+        transition: left 0.25s ease-in-out, width 0.25s ease-in-out;
+      }
+
+      .switch.active {
+        left: 85%;
+        width: 4px;
+        transition: left 0.25s ease-in-out;
+        background-color: transparent;
+        border-left: solid 2px var(--dark-mode-bg-black, #00000033);
+      }
+    }
+  }
+}

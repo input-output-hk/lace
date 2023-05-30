@@ -1,0 +1,62 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: size_unit(5.5);
+  :global(.ant-btn-icon-only) {
+    width: size_unit(5);
+    height: size_unit(5);
+  }
+  @media (max-width: $breakpoint-popup) {
+    padding-bottom: 0;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  .title {
+    color: var(--text-color-primary);
+    @include text-subHeading-bold;
+  }
+}
+
+button.expand {
+  background: var(--color-white, #ffffff);
+  border: 1px solid var(--light-mode-light-grey-plus);
+  border-radius: 70px;
+  padding: size_unit(8);
+  display: flex;
+  width: 120px;
+  height: size_unit(4);
+  align-items: center;
+  gap: size_unit(1);
+  cursor: pointer;
+  color: var(--text-color-primary);
+  border: 1px solid var(--light-mode-light-grey-plus);
+  border-radius: 50px;
+  &:hover {
+    color: var(--text-color-black);
+    border: 1px solid var(--text-color-black);
+  }
+}
+
+.btn {
+  @include flex-center;
+  background-color: var(--light-mode-light-grey) !important;
+  border: none !important;
+  color: var(--text-color-secondary) !important;
+}
+
+.customSizeBtn {
+  min-height: size_unit(5) !important;
+  min-width: size_unit(15.75) !important;
+  width: size_unit(15.75) !important;
+  height: size_unit(5) !important;
+  padding: 0 !important;
+  border-radius: size_unit(1.5) !important;
+}

@@ -1,0 +1,124 @@
+@import '../../styles/theme.scss';
+@import '../../../../../common/src/ui/styles/abstracts/_typography.scss';
+.dappInfo {
+  margin: size_unit(1) 0px;
+}
+
+.details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: size_unit(4) 0 size_unit(2) 0px;
+  padding: size_unit(3) 0;
+  border-top: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+}
+
+.error {
+  margin: size_unit(2) 0px;
+}
+
+.header {
+  font-size: var(--bodyLarge);
+  letter-spacing: -0.015em;
+  margin-bottom: size_unit(1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .title {
+    font-weight: 600;
+    line-height: size_unit(3);
+    /* or 133% */
+    /* Secondary - Black */
+    color: var(--text-color-primary);
+  }
+  .type {
+    font-weight: 500;
+    line-height: size_unit(4);
+    /* or 178% */
+    text-align: right;
+    /* Primary - Purple */
+    color: var(--primary-default, #7f5af0);
+  }
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(2);
+}
+
+.detail {
+  display: flex;
+  justify-content: space-between;
+  > * {
+    display: flex;
+    flex: 0 1 50%;
+    min-width: 0;
+  }
+
+  .title {
+    font-weight: 500;
+    font-size: var(--body);
+    line-height: size_unit(3);
+    /* or 150% */
+    /* Secondary - Black */
+    color: var(--text-color-primary);
+  }
+  .value {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+
+    font-size: var(--bodySmall);
+    font-weight: 500;
+    line-height: size_unit(2);
+    /* Secondary - Black */
+    color: var(--text-color-primary);
+
+    .bold {
+      font-weight: 600;
+      line-height: size_unit(3);
+      font-size: var(--body);
+    }
+    .sub {
+      font-weight: 400;
+      font-size: var(--bodySmall);
+      line-height: size_unit(3);
+      /* or 171% */
+      letter-spacing: -0.015em;
+      /* Data - Dark Grey */
+      color: var(--text-color-primary);
+      text-align: right;
+    }
+
+    .rightAligned {
+      > div {
+        justify-content: flex-end;
+      }
+    }
+  }
+}
+.warningAlert {
+  flex-direction: row;
+  background: var(--lace-cream);
+  display: flex;
+  align-items: center;
+  border-radius: size_unit(2);
+  padding: size_unit(2) size_unit(3);
+  gap: size_unit(3);
+
+  svg {
+    height: size_unit(3);
+    width: size_unit(3);
+    color: var(--data-orange);
+  }
+
+  p {
+    @include text-body-semi-bold;
+    margin: 0;
+  }
+}
+:global(.__react_component_tooltip) {
+  @include tooltip-default;
+}

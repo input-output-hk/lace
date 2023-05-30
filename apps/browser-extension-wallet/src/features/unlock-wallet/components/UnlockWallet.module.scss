@@ -1,0 +1,47 @@
+@import '../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../packages/common/src/ui/styles/abstracts/_typography';
+
+.lockWalletContent {
+  padding: size_unit(3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - #{size_unit(3)});
+  gap: size_unit(4);
+
+  .title {
+    font-style: normal;
+    font-weight: bold;
+    color: var(--text-color-primary);
+    margin: 0;
+    font-weight: 700;
+    font-size: var(--subHeading);
+    line-height: size_unit(4);
+    text-align: center;
+    margin: size_unit(4) 0;
+  }
+  .image {
+    width: size_unit(11);
+    margin: 0 auto;
+  }
+  .patternTop {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  .patternBottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+  .content {
+    width: 100%;
+    text-align: center;
+  }
+  .blockButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

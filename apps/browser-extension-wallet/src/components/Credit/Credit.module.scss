@@ -1,0 +1,26 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.credits {
+  margin-bottom: size_unit(5);
+  border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  padding-top: size_unit(2);
+
+  @media (max-width: $breakpoint-popup) {
+    margin: 0 size_unit(3) size_unit(3);
+  }
+
+  div {
+    @include text-bodySmall-semi-bold;
+    color: var(--text-color-secondary);
+    display: flex;
+    gap: size_unit(0.5);
+    justify-content: flex-end;
+    margin-right: size_unit(0.5);
+  }
+
+  .link {
+    color: var(--text-color-blue, #3489f7);
+    cursor: pointer;
+  }
+}

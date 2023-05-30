@@ -1,0 +1,12 @@
+# Browser extension target
+browser:
+  - any: ['apps/browser-extension-wallet/**/*']
+# Staking & Multi-delegation
+staking:
+  - any: ['packages/staking/**/*']
+# E2E targets
+e2e:
+  - any: ['features/**/*', 'packages/e2e-tests/**/*']
+# Docs targets
+documentation:
+  - any: ['docs/**/*', '**/*.md']

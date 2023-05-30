@@ -1,0 +1,66 @@
+name: packages/staking
+
+# Triggering this workflow:
+# 1. Push to main branch
+# 2. Pushing to Pull Request with "staking" label
+# 3. Adding "staking" label to Pull Request
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_staking:
+    name: Build Staking Center
+    runs-on: ubuntu-22.04
+    container: mcr.microsoft.com/playwright:v1.32.2-jammy
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'staking')
+    steps:
+      - name: Setup Build Essential
+        run: apt-get update && apt-get install build-essential -y
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'yarn'
+      - name: Node modules cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            **/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --non-interactive
+      - name: Check for linter issues
+        run: yarn workspace @lace/staking lint
+      - name: Run tests
+        run: yarn workspace @lace/staking test:unit --coverage
+      - name: Upload test coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: staking-coverage
+          path: packages/staking/coverage
+      - name: Build Staking dist
+        run: yarn workspace @lace/staking build
+      - name: Build Ladle
+        run: yarn workspace @lace/staking story:build
+      - name: Upload Ladle artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: staking-ladle
+          path: packages/staking/build
+      - name: Run visual regression
+        continue-on-error: true
+        run: yarn workspace @lace/staking test:vr
+      - name: Upload visual regression
+        uses: actions/upload-artifact@v3
+        with:
+          name: staking-visual-regression
+          path: packages/staking/.lostpixel

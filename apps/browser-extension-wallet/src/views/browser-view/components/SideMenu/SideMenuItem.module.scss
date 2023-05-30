@@ -1,0 +1,28 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.menuItem {
+  display: flex;
+  padding-left: 0 !important;
+  height: size_unit(7) !important;
+  margin: 0 0 size_unit(2) 0 !important;
+
+  &:global(.ant-menu-item-selected) {
+    font-weight: $font-weight-bold !important;
+    background-color: transparent !important;
+    color: var(--primary-default, #7f5af0) !important;
+  }
+
+  &:global(.ant-menu-item:active) {
+    background: transparent;
+  }
+
+  &:global(.ant-menu-item::after) {
+    border: none !important;
+  }
+
+  span {
+    display: flex !important;
+    align-items: center;
+  }
+}

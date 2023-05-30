@@ -1,0 +1,33 @@
+@import '../../../../../styles/utils/functions.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: size_unit(2);
+  margin-top: -#{size_unit(1)};
+}
+
+.amount {
+  font-weight: 600;
+  font-size: var(--subHeading);
+  line-height: size_unit(5);
+  color: var(--light-mode-dark-grey);
+}
+
+.sectionTitle {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: size_unit(5.5);
+  .title {
+    margin-bottom: 0px !important;
+  }
+}
+
+.newFolderBtn {
+  margin-bottom: size_unit(6);
+  .newFolderIcon {
+    font-size: var(--bodyLarge);
+  }
+}

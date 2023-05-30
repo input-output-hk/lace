@@ -1,0 +1,12 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.BackButtonContainer {
+  position: absolute;
+  top: size_unit(3);
+  left: size_unit(3);
+  z-index: 9;
+}
+.icon {
+  margin-right: size_unit(1);
+  width: size_unit(2);
+}

@@ -1,0 +1,125 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+$sidebar-height: 120px;
+
+/* SIDER STYLES */
+
+:global {
+  ul.ant-menu-inline {
+    border: none !important;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background-color: transparent !important;
+  }
+}
+
+li.menuItem {
+  display: flex;
+  padding-left: 0 !important;
+  height: size_unit(7) !important;
+  margin: 0 0 size_unit(2) 0 !important;
+
+  &.dappItem {
+    width: 190px;
+    justify-content: space-between;
+  }
+
+  &:global(.ant-menu-item-selected) {
+    font-weight: $font-weight-bold !important;
+    background-color: transparent !important;
+    color: var(--primary-default, #7f5af0) !important;
+
+    .text {
+      font-weight: $font-weight-bold !important;
+      color: var(--text-color-primary, #3d3b39) !important;
+    }
+  }
+
+  &:global(.ant-menu-item-active) {
+    .text {
+      color: var(--text-color-primary, #3d3b39) !important;
+    }
+  }
+
+  &:global(.ant-menu-item:active) {
+    background: transparent;
+  }
+
+  &:global(.ant-menu-item::after) {
+    border: none !important;
+  }
+
+  .icon {
+    flex-shrink: 0;
+    color: var(--dark-mode-light-grey, var(--text-color-primary, #3d3b39));
+  }
+
+  .tokensLinkIcon {
+    font-size: var(--body, 16px) !important;
+  }
+
+  .nftsLinkIcon,
+  .txLinkIcon,
+  .stakingLinkIcon {
+    font-size: 18.5px !important;
+  }
+
+  .closeIcon {
+    font-size: size_unit(1.5);
+    color: var(--dark-mode-light-grey, #c0c0c0);
+  }
+
+  .text {
+    min-width: 100px;
+    margin-left: 1em;
+    margin-bottom: 0;
+    font-size: var(--body);
+    line-height: size_unit(3);
+    display: flex;
+    text-transform: capitalize;
+    font-weight: $font-weight-semi-bold;
+    align-items: center;
+    color: var(--dark-mode-light-grey, var(--text-color-primary, #3d3b39));
+  }
+
+  .dappContainer {
+    display: flex;
+  }
+
+  span {
+    display: flex !important;
+    align-items: center;
+  }
+}
+
+.dappsTitle {
+  font-size: size_unit(2);
+  margin-bottom: 0;
+  font-weight: $font-weight-bold;
+  color: var(--text-color-primary);
+}
+
+.dappIcon {
+  width: size_unit(3);
+  height: size_unit(3);
+}
+
+.dappLoaderIcon {
+  width: size_unit(2);
+  height: size_unit(2);
+  margin-left: 11px;
+  margin-top: 3px;
+}
+
+.withScroll {
+  overflow-y: scroll;
+  width: 200px;
+  height: calc(100vh - #{$sidebar-height});
+}
+
+.withScroll::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}

@@ -1,0 +1,139 @@
+name: E2E Tests Linux
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  push:
+    branches:
+      - 'release/**'
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Test scenario tags (will run all tests if empty)'
+        required: false
+      browser:
+        description: 'Browser to use'
+        required: true
+        default: 'chrome'
+        type: choice
+        options:
+          - chrome
+          - edge
+      network:
+        type: choice
+        description: network to use
+        options:
+          - preprod
+          - mainnet
+
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | tags: ${{ github.event.inputs.tags || 'empty' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
+
+env:
+  TAGS: ${{ github.event.inputs.tags || 'empty' }}
+  BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
+  NETWORK: ${{ github.event.inputs.network || 'preprod' }}
+  RUN: ${{ github.run_number }}
+  DISPLAY: ':99.0'
+
+jobs:
+  tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Decrypt test data
+        working-directory: ./packages/e2e-tests
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
+        with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+      - name: Start XVFB
+        run: |
+          Xvfb :99 &
+      - name: Start Chrome driver
+        working-directory: /usr/local/share/chrome_driver
+        run: |
+          if [ ${BROWSER} == "chrome" ]; then
+            ./chromedriver -port=4444 &
+          else
+            echo "Skipping start of ChromeDriver"
+          fi
+      - name: Start Edge driver
+        working-directory: /usr/local/share/edge_driver
+        run: |
+          if [ ${BROWSER} == "edge" ]; then
+            ./msedgedriver -port=4444 &
+          else
+            echo "Skipping start of EdgeDriver"
+          fi
+      - name: Execute E2E tests
+        id: e2e-tests
+        working-directory: ./packages/e2e-tests
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          ENV: ${{ env.NETWORK }}
+        run: |
+          if [ "$TAGS" == "empty" ]; then
+            TAGS_TO_RUN="";
+          else
+            TAGS_TO_RUN="--cucumberOpts.tagExpression=${TAGS}";
+          fi
+          ./node_modules/.bin/wdio run wdio.conf.${BROWSER}.ts $TAGS_TO_RUN
+      - name: Create allure properties
+        if: always()
+        working-directory: ./packages/e2e-tests/reports/allure/results
+        run: |
+          pendingCount=`grep -r "@Pending" ../../../src/features | wc -l | xargs`
+          pending=`grep -r -h "@Pending" ../../../src/features -A 2 | grep -v -- "^--$" | sed "s/@Pending//g" | awk '{$1=$1};1' | sed "/^@/s/ /./g;/^#/s/ /./g" | xargs | sed "s/@[^ ]*/\n&/g" | sed "s/ /./"`
+          echo "
+          env=${NETWORK}
+          browser=${BROWSER}
+          tags=${TAGS}
+          platform=Linux
+          Pending.Count=${pendingCount}
+          @Pending.Scenarios=
+          ${pending}
+          " > environment.properties
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v1.0.1
+        if: always()
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './packages/e2e-tests/reports/allure/results/*'
+          bucket: lightwallet
+          prefix: 'linux/${BROWSER}/${RUN}'
+          copyLatest: true
+          ignoreMissingResults: true
+      - name: Publish artifacts (logs, reports, screenshots)
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-artifacts
+          path: |
+            ./packages/e2e-tests/screenshots
+            ./packages/e2e-tests/logs
+            ./packages/e2e-tests/reports
+          retention-days: 10
+      - name: Add link to summary
+        if: always()
+        run: |
+          echo "TEST RESULTS:"
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2.2.0
+        if: always()
+        env:
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON_EMOJI: ':lace:'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
+          SLACK_TITLE: 'Test automation results :rocket:'
+          SLACK_USERNAME: lace-qa-bot
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

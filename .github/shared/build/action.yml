@@ -1,0 +1,29 @@
+name: Shared Build
+description: Shared build config for both Chromium and Safari workflows
+inputs:
+  LACE_EXTENSION_KEY:
+    description: 'Public extended manifest key'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'yarn'
+    - name: Node modules cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          node_modules
+          **/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+    - name: Install dependencies
+      shell: bash
+      run: yarn install --frozen-lockfile --non-interactive --logevel=error
+    - name: Build dist version
+      shell: bash
+      env:
+        LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
+      run: yarn browser build

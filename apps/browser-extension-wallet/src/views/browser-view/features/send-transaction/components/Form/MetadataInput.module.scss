@@ -1,0 +1,54 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.metadataInput {
+  margin-top: size_unit(2);
+  padding-bottom: size_unit(3);
+
+  :global(.ant-input-affix-wrapper) {
+    transition: none !important;
+  }
+
+  &.visibleCounter {
+    padding-bottom: size_unit(2.5);
+  }
+
+  input {
+    @include text-bodyLarge-medium;
+    color: var(--text-color-primary) !important;
+    ::placeholder {
+      color: var(--text-color-secondary) !important;
+    }
+  }
+
+  @media (max-width: 400px) {
+    margin-top: size_unit(1);
+    padding-bottom: size_unit(5);
+
+    &.visibleCounter {
+      padding-bottom: size_unit(4);
+    }
+  }
+
+  .suffixContent {
+    margin-right: -#{size_unit(2.25)};
+    &.focus {
+      margin-bottom: -#{size_unit(1.5)};
+    }
+  }
+}
+
+.characterCounter {
+  margin: size_unit(0.5) 0 0;
+  padding-left: size_unit(3);
+  @include text-form-label($weight: 500);
+  color: var(--text-color-secondary);
+
+  &.error {
+    color: var(--data-pink);
+  }
+}
+
+.iconSize {
+  font-size: size_unit(3) !important;
+}

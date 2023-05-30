@@ -1,0 +1,25 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2.28571 0C1.02335 0 0 1.02335 0 2.28571V4.57143C0 5.83379 1.02335 6.85714 2.28571 6.85714H4.57143C5.83379 6.85714 6.85714 5.83379 6.85714 4.57143V2.28571C6.85714 1.02335 5.83379 0 4.57143 0H2.28571Z" fill="url(#paint0_linear_1841_1916)"/>
+<path d="M2.28571 9.14286C1.02335 9.14286 0 10.1662 0 11.4286V13.7143C0 14.9767 1.02335 16 2.28571 16H4.57143C5.83379 16 6.85714 14.9767 6.85714 13.7143V11.4286C6.85714 10.1662 5.83379 9.14286 4.57143 9.14286H2.28571Z" fill="url(#paint1_linear_1841_1916)"/>
+<path d="M9.14286 2.28571C9.14286 1.02335 10.1662 0 11.4286 0H13.7143C14.9767 0 16 1.02335 16 2.28571V4.57143C16 5.83379 14.9767 6.85714 13.7143 6.85714H11.4286C10.1662 6.85714 9.14286 5.83379 9.14286 4.57143V2.28571Z" fill="url(#paint2_linear_1841_1916)"/>
+<path d="M9.14286 11.4286C9.14286 10.1662 10.1662 9.14286 11.4286 9.14286H13.7143C14.9767 9.14286 16 10.1662 16 11.4286V13.7143C16 14.9767 14.9767 16 13.7143 16H11.4286C10.1662 16 9.14286 14.9767 9.14286 13.7143V11.4286Z" fill="url(#paint3_linear_1841_1916)"/>
+<defs>
+<linearGradient id="paint0_linear_1841_1916" x1="-2.92766" y1="-2.92766" x2="20.5142" y2="-1.19868" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FF92E1"/>
+<stop offset="1" stop-color="#FDC300"/>
+</linearGradient>
+<linearGradient id="paint1_linear_1841_1916" x1="-2.92766" y1="-2.92766" x2="20.5142" y2="-1.19868" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FF92E1"/>
+<stop offset="1" stop-color="#FDC300"/>
+</linearGradient>
+<linearGradient id="paint2_linear_1841_1916" x1="-2.92766" y1="-2.92766" x2="20.5142" y2="-1.19868" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FF92E1"/>
+<stop offset="1" stop-color="#FDC300"/>
+</linearGradient>
+<linearGradient id="paint3_linear_1841_1916" x1="-2.92766" y1="-2.92766" x2="20.5142" y2="-1.19868" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FF92E1"/>
+<stop offset="1" stop-color="#FDC300"/>
+</linearGradient>
+</defs>
+</svg>
+

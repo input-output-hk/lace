@@ -1,0 +1,85 @@
+@import '../../../../../../styles/utils/functions.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.assetPickerHeader {
+  display: flex;
+  justify-content: space-between;
+}
+
+.title {
+  color: var(--text-color-primary);
+  @include text-subHeading-bold;
+}
+
+.titleAside {
+  margin-top: -#{size_unit(0.5)};
+  position: absolute;
+  right: size_unit(5);
+
+  @media (max-width: $breakpoint-popup) {
+    position: relative;
+    margin-top: 0;
+    right: 0;
+  }
+}
+
+.assetsSelectorWrapper {
+  @media (max-width: $breakpoint-popup) {
+    margin-top: size_unit(3);
+  }
+}
+
+.nftFolderDrawerTitle {
+  @include text-subHeading-bold;
+  color: var(--text-color-primary);
+  .nftFolderDrawerTitleSideText {
+    @include text-body-semi-bold;
+    color: var(--text-color-secondary);
+    margin-left: size_unit(1);
+  }
+}
+
+.nftFolderDrawerList {
+  margin: size_unit(5) -#{size_unit(1)} 0 -#{size_unit(1)};
+  @media (max-width: $breakpoint-popup) {
+    margin: 0;
+  }
+}
+
+.addFolderItem {
+  align-items: center;
+  background: var(--light-mode-light-grey, var(--dark-mode-mid-grey));
+  border-radius: 11px;
+  display: flex;
+  height: calc(100% + 2px);
+  justify-content: center;
+  width: 100%;
+  &:hover {
+    background: var(--light-mode-light-grey-plus-56, var(--dark-mode-dark-grey));
+  }
+}
+.addFolderIcon {
+  font-size: 40px;
+}
+
+.contextMenu {
+  @include text-body-medium;
+  background-color: var(--dark-mode-mid-grey, #ffffff) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--shadows-toast-tooltip) !important;
+  color: var(--dark-mode-light-grey, --light-mode-dark-grey) !important;
+  cursor: pointer;
+  max-width: 240px;
+  min-width: 240px;
+  padding: 6px !important;
+  width: 240px;
+}
+
+.contextMenuItem {
+  padding: size_unit(2);
+  border-radius: 11px;
+  &:hover {
+    background: var(--light-mode-light-grey, var(--dark-mode-grey));
+  }
+}

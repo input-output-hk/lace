@@ -1,0 +1,150 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
+
+$col-width-small: 60px;
+$col-width-medium: 70px;
+$col-width-large: 90px;
+
+$grid-gap-x-small: 24px;
+
+$grid-gap-small: 55px;
+$grid-gap-medium: 75px;
+$grid-gap-large: 65px;
+
+$gutter: 20px;
+
+$content-cols: 8;
+$aside-cols: 4;
+
+$content-cols-gutter: 7;
+$aside-cols-gutter: 3;
+
+$navigation-col-width: 215px;
+$main-gap: 49px;
+
+@function calc_content_width($width) {
+  $content-col-width: $width * $content-cols;
+  $content-gutter-width: $gutter * $content-cols-gutter;
+  @return $content-col-width + $content-gutter-width;
+}
+
+@function calc_aside_width($width, $gap) {
+  $aside-col-width: $width * $aside-cols;
+  $aside-gutter-width: $gutter * $aside-cols-gutter;
+  @return $aside-col-width + $aside-gutter-width + $gap;
+}
+
+@function calc_topbar_max_width($width, $gap) {
+  $content-width: calc_content_width($width);
+  $aside-width: calc_aside_width($width);
+  @return $content-width + $aside-width + $navigation-col-width + $gap + $main-gap;
+}
+
+@function calc_full_layout_content($width, $gap) {
+  $content-width: calc_content_width($width);
+  $aside-width: calc_aside_width($width, $gap);
+  @return $content-width + $aside-width;
+}
+
+@mixin content_grid($width, $gap) {
+  $content-width: calc_content_width($width);
+  $aside-width: calc_aside_width($width, $gap);
+  grid-template-columns: $navigation-col-width $content-width $aside-width;
+  height: 100%;
+}
+
+@mixin full_content_grid($width, $gap) {
+  $full-layout-content: calc_full_layout_content($width, $gap);
+  grid-template-columns: $navigation-col-width $full-layout-content;
+}
+
+.layoutGridContainer {
+  background-color: var(--bg-color-body, #ffffff);
+  display: grid;
+  grid-template-areas:
+    'nav side-panel'
+    'nav main';
+  justify-content: center;
+  margin: 0 size_unit(4) 0 size_unit(5);
+
+  &.flexible {
+    margin: 0;
+  }
+
+  &.fullWidth {
+    grid-template-areas: 'nav main';
+    @include full_content_grid($col-width-small, $grid-gap-x-small);
+
+    @media (min-width: $breakpoint-small) {
+      @include full_content_grid($col-width-small, $grid-gap-small);
+    }
+
+    @media (min-width: $breakpoint-medium) {
+      @include full_content_grid($col-width-medium, $grid-gap-medium);
+    }
+
+    @media (min-width: $breakpoint-large) {
+      @include full_content_grid($col-width-large, $grid-gap-large);
+    }
+  }
+
+  @include content_grid($col-width-small, $grid-gap-x-small);
+
+  $content-width: calc_content_width($col-width-small);
+  grid-template-columns: $navigation-col-width 1fr;
+  grid-template-rows: 68px 1fr;
+  height: 100%;
+
+  @media (max-width: $breakpoint-minimum) {
+    overflow-x: scroll;
+    justify-content: start;
+    margin: 0;
+    padding: 0 24px;
+  }
+
+  @media (min-width: $breakpoint-small) {
+    grid-template-areas: 'nav main side-panel';
+    grid-template-rows: repeat(3, 1fr);
+    @include content_grid($col-width-small, $grid-gap-small);
+  }
+
+  @media (min-width: $breakpoint-medium) {
+    @include content_grid($col-width-medium, $grid-gap-medium);
+  }
+
+  @media (min-width: $breakpoint-large) {
+    justify-content: center;
+    @include content_grid($col-width-large, $grid-gap-large);
+  }
+}
+
+.navigation {
+  position: sticky;
+  top: 0;
+  grid-area: nav;
+  display: flex;
+  flex-direction: column;
+  width: $navigation-col-width;
+  justify-self: center;
+  gap: size_unit(6.5);
+  padding-right: $grid-gap-large;
+}
+
+.stickyMenuInner {
+  position: sticky;
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(6.5);
+  top: 0;
+}
+
+.logoContainer {
+  max-height: 88px;
+  padding-top: size_unit(3);
+  display: flex;
+  align-items: center;
+
+  .logo {
+    cursor: pointer;
+  }
+}
