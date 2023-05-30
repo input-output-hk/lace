@@ -111,7 +111,7 @@ export const AddressDetailDrawer = ({
   const getFieldError = (key: FormKeys) => validations[key]?.(formValues[key]);
 
   const handleOnCancelClick = () => {
-    if ((popupView && initialValues?.id) || useNewAddressForm) {
+    if (useNewAddressForm) {
       onCancelClick();
     } else {
       setStepsConfig(config[AddressDetailsSteps.DETAIL]);
@@ -126,15 +126,13 @@ export const AddressDetailDrawer = ({
     });
   };
 
-  const isNewAddressFormPopup = popupView && !initialValues?.id;
-  const newAddressFormTitle = useNewAddressForm
-    ? t('browserView.addressBook.form.addNewAddress')
-    : t('browserView.addressBook.addressForm.title.add');
+  const newAddressFormTitle = popupView
+    ? t('browserView.addressBook.addressForm.title.add')
+    : t('browserView.addressBook.form.addNewAddress');
   const drawerHeaderTitle =
     stepsConfig.currentSection === AddressDetailsSteps.DETAIL
       ? t('browserView.addressBook.addressDetail.title')
-      : ((isNewAddressFormPopup || useNewAddressForm) && newAddressFormTitle) ||
-        t('browserView.addressBook.editAddress.title');
+      : (useNewAddressForm && newAddressFormTitle) || t('browserView.addressBook.editAddress.title');
 
   return (
     <>
@@ -201,7 +199,7 @@ export const AddressDetailDrawer = ({
                 onConfirmClick={onConfirmClick}
                 getFieldError={getFieldError}
                 onClose={onClose}
-                isNewAddress={isNewAddressFormPopup || useNewAddressForm}
+                isNewAddress={useNewAddressForm}
                 currentName={initialValues?.name}
               />
             )}

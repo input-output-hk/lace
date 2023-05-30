@@ -131,6 +131,7 @@ export const AddressBook = withAddressBookContext(() => {
           })
         }
         visible={isEditAddressVisible}
+        useNewAddressForm={!(addressToEdit as AddressBookSchema)?.id}
         popupView
       />
     </>
