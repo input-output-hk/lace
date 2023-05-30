@@ -30,7 +30,6 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
   const { extendLimit, saveRecord: saveAddress, updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
   const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
-  const [isNewAddressForm, setIsNewAddressForm] = useState(false);
   const analytics = useAnalyticsContext();
 
   const addressListTranslations = {
@@ -98,7 +97,6 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   };
 
   const handleAddAddressClick = () => {
-    setIsNewAddressForm(true);
     setIsFormVisible(true);
   };
 
@@ -138,11 +136,10 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
           <AddressBookEmpty />
         )}
         <AddressDetailDrawer
-          initialValues={!isNewAddressForm ? addressToEdit : undefined}
+          initialValues={addressToEdit}
           onCancelClick={() => {
             setAddressToEdit({} as AddressBookSchema);
             setIsFormVisible(false);
-            setIsNewAddressForm(false);
           }}
           onConfirmClick={onAddressSave}
           onDelete={(id) =>
@@ -152,7 +149,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             })
           }
           visible={isFormVisible}
-          useNewAddressForm={isNewAddressForm}
+          useNewAddressForm={!(addressToEdit as AddressBookSchema)?.id}
         />
       </SectionLayout>
     </Layout>
