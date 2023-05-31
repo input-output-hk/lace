@@ -3,9 +3,8 @@ import { isValidURL } from '../is-valid-url';
 
 describe('Testing isValidUrl function', () => {
   test('should return true if url is valid', async () => {
-    const result = isValidURL('https://www.lace.io/faq?question=example');
-
-    expect(result).toBe(true);
+    expect(isValidURL('https://www.lace.io/faq?question=example')).toBe(true);
+    expect(isValidURL('http://www.lace.io/faq?question=example')).toBe(true);
   });
 
   test('should return false if url is not valid', async () => {

@@ -10,7 +10,8 @@ const BILLION = 1_000_000_000;
 const TRILLION = 1_000_000_000_000;
 const QUADRILLION = 1_000_000_000_000_000;
 
-const MAX_FRACTION_DIGIT_RANGE = 20;
+// Number(value) vould limit to 15 chars anyway
+const MAX_FRACTION_DIGIT_RANGE = 15;
 
 type PlaceValue = 'unit' | 'ten' | 'hundred' | 'thousand' | 'million' | 'billion' | 'trillion' | 'quadrillion';
 
@@ -45,8 +46,8 @@ export const formatCurrencyValue = (value: number | string, maximumFractionDigit
 
 const truncateNumber = (num: number) => num.toString().match(/^-?\d+(?:\.\d{0,2})?/)[0];
 
-const shortenNumber = (str: string, length: number) =>
-  str?.length > length ? `${str.slice(0, Math.max(0, length))}` : str;
+export const shortenNumber = (str: string, length: number): string =>
+  str.length > length ? `${str.slice(0, Math.max(0, length))}` : str;
 
 export const getInlineCurrencyFormat = (value: string, maxDecimals = 0): string => {
   if (!value) return '0';
@@ -87,7 +88,7 @@ export const getChangedValue = ({
     return {
       currentDisplayValue: newDisplayValue,
       value: newDisplayValue.split(',').join(''),
-      currentCursorPosition: Math.max(currentCursorPosition - 1, 0)
+      currentCursorPosition: currentCursorPosition - 1
     };
   }
 
@@ -160,6 +161,7 @@ export const formatNumber = (number: string): { number: string; unit?: string } 
 
   const iterableKeys = unitsMap.keys();
   const { unit, value } = getNumberUnit(bigNumber, iterableKeys);
+
   const dividedBy = value.isZero() ? 1 : value;
   return { number: bigNumber.div(dividedBy).decimalPlaces(2).toString(), unit };
 };
@@ -171,10 +173,7 @@ export const formatLocaleNumber = (value: string, decimalPlaces: number = DEFAUL
     decimalSeparator: '.'
   });
 
-export const isNumeric = (str: string): boolean => {
-  if (typeof str !== 'string') return false;
-  return !Number.isNaN(str) && !Number.isNaN(Number.parseFloat(str));
-};
+export const isNumeric = (str: string): boolean => !Number.isNaN(str) && !Number.isNaN(Number.parseFloat(str));
 
 export const formatPercentages = (number: number | Cardano.Percent, decimalPlaces: number = DEFAULT_DECIMALS): string =>
   (Math.round(number.valueOf() * 100 * 100) / 100).toFixed(decimalPlaces);
