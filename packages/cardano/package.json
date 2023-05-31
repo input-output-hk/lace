@@ -1,0 +1,79 @@
+{
+  "name": "@lace/cardano",
+  "version": "0.1.0",
+  "description": "A Cardano blockchain package",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/index.esm.js",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "watch": "yarn build --watch",
+    "cleanup": "shx rm -rf dist node_modules coverage .rollup.cache src/dist",
+    "lint": "cd ../.. && yarn cardano:lint",
+    "prepack": "yarn build",
+    "prestart": "yarn build",
+    "start": "node dist/index.js",
+    "test": "NODE_ENV=test jest -c ./test/jest.config.js",
+    "test:coverage": "yarn test --coverage",
+    "prepare": "ts-patch install -s",
+    "tsc:declarationOnly": "tsc --project ./src/tsconfig.declarationOnly.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/input-output-hk/lace.git"
+  },
+  "author": "IOHK",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
+  },
+  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/cardano/README.md",
+  "dependencies": {
+    "@cardano-sdk/cardano-services-client": "~0.9.0",
+    "@cardano-sdk/core": "~0.11.0",
+    "@cardano-sdk/crypto": "~0.1.4",
+    "@cardano-sdk/key-management": "~0.5.1",
+    "@cardano-sdk/util": "~0.9.0",
+    "@cardano-sdk/wallet": "~0.11.0",
+    "@cardano-sdk/web-extension": "~0.9.0",
+    "@lace/common": "0.1.0",
+    "@stablelib/chacha20poly1305": "1.0.1",
+    "bignumber.js": "9.0.1",
+    "buffer": "6.0.3",
+    "classnames": "2.3.1",
+    "dayjs": "1.10.7",
+    "graphql": "^15.6.1",
+    "graphql-request": "3.5.0",
+    "lodash": "4.17.21",
+    "pbkdf2": "3.1.2",
+    "pify": "5.0.0",
+    "qr-code-styling": "^1.6.0-rc.1",
+    "randombytes": "2.1.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "rxjs": "7.4.0",
+    "webextension-polyfill": "0.8.0"
+  },
+  "devDependencies": {
+    "@cardano-sdk/util-dev": "~0.9.0",
+    "@emurgo/cardano-message-signing-browser": "1.0.1",
+    "@dcspark/cardano-multiplatform-lib-browser": "^3.1.1",
+    "rollup-plugin-polyfill-node": "^0.8.0",
+    "shx": "^0.3.2",
+    "typescript": "^4.3.5"
+  },
+  "directories": {
+    "lib": "src",
+    "test": "test"
+  },
+  "peerDependencies": {
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ]
+}

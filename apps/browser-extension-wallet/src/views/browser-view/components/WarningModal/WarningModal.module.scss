@@ -1,0 +1,55 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.modal {
+  @media (max-width: $breakpoint-popup) {
+    max-width: 100% !important;
+    padding: 0 size_unit(3) !important;
+  }
+
+  :global(.ant-modal-content) {
+    border-radius: size_unit(4) !important;
+    background: var(--color-white, var(--dark-mode-light-black));
+    box-shadow: var(--shadows-card-pop-up);
+  }
+  :global(.ant-modal-body) {
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
+    padding: size_unit(5) !important;
+  }
+  :global(.ant-modal-close-x) {
+    display: none;
+  }
+}
+
+.header {
+  @include text-subHeading-bold;
+  color: var(--text-color-primary);
+  text-align: center;
+}
+
+.content {
+  @include flex-center;
+  @include text-body-medium;
+  color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+  flex: 1;
+  margin-top: size_unit(3);
+  text-align: center;
+
+  @media (max-width: $breakpoint-popup) {
+    color: var(--text-color-secondary);
+    font-weight: 500;
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: size_unit(2);
+  margin-top: size_unit(4);
+
+  @media (max-width: $breakpoint-popup) {
+    flex-direction: column-reverse;
+  }
+}

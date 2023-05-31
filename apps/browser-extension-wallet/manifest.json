@@ -1,0 +1,41 @@
+{
+  "name": "Lace",
+  "description": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
+  "version": "1.1.0",
+  "manifest_version": 3,
+  "key": "$LACE_EXTENSION_KEY",
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "background": {
+    "service_worker": "./js/background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": ["webRequest", "storage", "tabs", "unlimitedStorage"],
+  "host_permissions": ["<all_urls>"],
+  "content_security_policy": {
+    "extension_pages": "default-src 'self' $LOCALHOST_DEFAULT_SRC; frame-src https://connect.trezor.io/; script-src 'self' 'wasm-unsafe-eval' $LOCALHOST_SCRIPT_SRC; font-src 'self' https://use.typekit.net; object-src 'self'; connect-src $CARDANO_SERVICES_URLS https://api.coingecko.com https://analyticsv2.muesliswap.com $LOCALHOST_CONNECT_SRC https://matomo.cw.iog.io/ https://use.typekit.net; style-src * 'unsafe-inline'; img-src * data:;"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "file://*/*"],
+      "js": ["./js/content.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["*://connect.trezor.io/*/popup.html"],
+      "js": ["js/trezor-content-script.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["/js/inject.js"],
+      "matches": ["http://*/*", "https://*/*", "<all_urls>"]
+    }
+  ]
+}

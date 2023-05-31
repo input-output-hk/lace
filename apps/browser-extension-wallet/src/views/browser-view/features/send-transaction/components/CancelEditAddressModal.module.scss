@@ -1,0 +1,46 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.modal {
+  :global(.ant-modal-content) {
+    border-radius: 12px !important;
+    background: var(--color-white, var(--dark-mode-light-black));
+    box-shadow: 0px 0px size_unit(5) rgba(0, 0, 0, 0.05), 0px 0px 20px rgba(0, 0, 0, 0.05) !important;
+  }
+  :global(.ant-modal-body) {
+    display: flex;
+    flex-direction: column;
+    padding: size_unit(4) !important;
+  }
+}
+
+.header {
+  @include text-subHeading-bold;
+  color: var(--text-color-primary);
+  padding-bottom: size_unit(3);
+  text-align: center;
+}
+
+.content {
+  @include text-body-semi-bold;
+  align-items: center;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--text-color-secondary);
+  padding-bottom: size_unit(4);
+  text-align: center;
+
+  & > div {
+    display: flex;
+    flex-direction: column;
+    width: 170px;
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: size_unit(2);
+}

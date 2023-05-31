@@ -1,0 +1,7 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.connectLedgerText {
+  margin-top: size_unit(6);
+  margin-bottom: size_unit(2);
+  color: var(--text-color-secondary) !important;
+}

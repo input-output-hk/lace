@@ -1,0 +1,24 @@
+@import '../../../../../packages/common/src/ui/styles/abstracts/typography.scss';
+
+.container {
+  color: var(--text-color-primary, #ffffff);
+  background-color: var(--color-white, var(--dark-mode-bg-black, #ffffff));
+  background: linear-gradient(
+        var(--color-white, var(--dark-mode-bg-black, #ffffff)),
+        var(--color-white, var(--dark-mode-bg-black, #ffffff))
+      )
+      padding-box,
+    var(--lace-gradient) border-box;
+  border: 1.5px solid transparent;
+  border-radius: 100%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  p {
+    @include text-body-bold;
+    margin: 0;
+  }
+}

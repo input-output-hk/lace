@@ -1,0 +1,48 @@
+@import '../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../styles/index';
+
+.modal {
+  :global(.ant-modal-content) {
+    background: var(--color-white, var(--dark-mode-light-black));
+    box-shadow: var(--shadows-card-pop-up) !important;
+    border-radius: size_unit(4) !important;
+  }
+  :global(.ant-modal-body) {
+    display: flex;
+    flex-direction: column;
+    padding: size_unit(5) !important;
+  }
+}
+
+.header {
+  @include text-subHeading-bold;
+  color: var(--text-color-primary);
+  padding-bottom: size_unit(3);
+  text-align: center;
+}
+
+.content {
+  @include text-body-semi-bold;
+  color: var(--text-color-secondary);
+  padding-bottom: size_unit(4);
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  gap: size_unit(2);
+  justify-content: space-between;
+  .btn {
+    flex: 1;
+  }
+}
+
+.isSmall {
+  .footer {
+    flex-direction: column-reverse;
+    .btn {
+      min-height: size_unit(6) !important;
+      width: 100%;
+    }
+  }
+}

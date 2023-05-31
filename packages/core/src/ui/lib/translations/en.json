@@ -1,0 +1,85 @@
+{
+  "package.core": {
+    "assetActivityItem": {
+      "entry": {
+        "asset": "asset",
+        "token": "token",
+        "tokens": "tokens",
+        "staking": "Staking",
+        "name": {
+          "delegation": "Delegation",
+          "delegationDeregistration": "De-Registration",
+          "delegationRegistration": "Registration",
+          "rewards": "Rewards",
+          "incoming": "Received",
+          "outgoing": "Sent",
+          "sending": "Sending",
+          "self": "Self Transaction"
+        }
+      }
+    },
+    "assetActivityList": {
+      "viewAll": "View All",
+      "title": "Activity"
+    },
+    "assetInput": {
+      "maxButton": "MAX"
+    },
+    "assetTable": {
+      "columns": {
+        "token": "Token",
+        "price": "Price / 24hr %",
+        "balance": "Balance"
+      }
+    },
+    "walletSetupStep": {
+      "next": "Next",
+      "back": "Back",
+      "skip": "Skip",
+      "legalAndAnalytics": "Legal & analytics",
+      "walletSetup": "Wallet setup",
+      "recoveryPhrase": "Recovery phrase",
+      "connectWallet": "Connect wallet",
+      "nameWallet": "Name wallet",
+      "allDone": "All done"
+    },
+    "assetSelectorOverlay": {
+      "youDonthaveAnyTokens": "You don't have any tokens.",
+      "justAddSomeDigitalAssetsToGetStarted": "Just add some digital assets to get started.",
+      "noNFTs": "You don't have any NFTs to send.",
+      "addFundsToStartYourWeb3Journey": "Add funds to start your Web3 journey.",
+      "usedAllAssets": "All gone! You've already selected everything",
+      "noMatchingResult": "No results matching your search"
+    },
+    "transactionDetailBrowser": {
+      "address": "Address",
+      "sent": "Sent",
+      "sending": "Sending",
+      "header": "Summary of your activity",
+      "transactionHash": "Transaction Hash",
+      "status": "Status",
+      "timestamp": "Timestamp",
+      "inputs": "Inputs",
+      "outputs": "Outputs",
+      "transactionFee": "Transaction fee",
+      "deposit": "Deposit",
+      "metadata": "Metadata",
+      "transactionFeeInfo": "The amount you have been charged to process your transaction",
+      "received": "Received",
+      "delegation": "Delegation",
+      "poolName": "Pool name",
+      "poolTicker": "Pool ticker",
+      "poolId": "Pool ID",
+      "rewards": "Rewards",
+      "rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
+      "copiedToClipboard": "Copied to clipboard"
+    },
+    "authorizeDapp": {
+      "title": "Allow this site to",
+      "seeNetwork": "See which network the wallet is connected to",
+      "seeWalletUtxo": "See your wallet UTXOs",
+      "seeWalletBalance": "See your wallet balance",
+      "seeWalletAddresses": "See your wallet different addresses, including reward accounts"
+    }
+  }
+}

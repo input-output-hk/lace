@@ -1,0 +1,22 @@
+@import '../../../../../../styles/utils/functions.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.inputContainer {
+  align-self: center;
+  padding-top: 197px;
+  width: 360px;
+
+  @media (max-width: $breakpoint-popup) {
+    margin: 0 size_unit(3);
+    padding-top: size_unit(10);
+    width: 100%;
+  }
+}
+
+.formError {
+  @include text-bodyXS-medium;
+  color: var(--text-color-red);
+  margin-left: size_unit(3);
+  margin-top: size_unit(0.5);
+}

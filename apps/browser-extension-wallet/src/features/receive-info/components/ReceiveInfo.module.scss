@@ -1,0 +1,17 @@
+@import '../../../styles/index';
+@import '../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.container {
+  position: relative;
+  padding: size_unit(5) 0 0;
+}
+
+.title {
+  color: var(--text-color-primary);
+  @include text-heading;
+}
+
+.subtitle {
+  color: var(--text-color-secondary);
+  @include text-bodyLarge-medium;
+}

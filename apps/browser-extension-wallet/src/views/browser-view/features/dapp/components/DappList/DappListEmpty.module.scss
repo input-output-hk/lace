@@ -1,0 +1,25 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: size_unit(24);
+  @media (max-width: $breakpoint-popup) {
+    margin-top: size_unit(11);
+  }
+}
+
+.text {
+  color: var(--text-color-secondary);
+  font-size: var(--bodyLarge);
+  letter-spacing: 0.02em;
+  line-height: size_unit(3);
+  margin-top: size_unit(2);
+  text-align: center;
+  @media (max-width: $breakpoint-popup) {
+    font-size: var(--body);
+    margin-top: size_unit(1);
+  }
+}

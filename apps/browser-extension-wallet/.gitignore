@@ -1,0 +1,9 @@
+.cache/
+coverage/
+*.log
+dist
+node_modules
+
+# Do not ignore the following
+!src/typings/*
+!test/types/*

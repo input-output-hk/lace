@@ -1,0 +1,87 @@
+@NFTs-Extended @Testnet
+Feature: LW-423: NFTs - Extended view
+
+  Background:
+    Given Wallet is synced
+
+  @LW-2495 @Mainnet
+  Scenario: Extended-view - NFTs title and counter
+    Given I am on NFTs extended page
+    When I see NFTs counter with total number of NFTs displayed
+    Then NFTs counter matches the number of wallet NFTs
+
+  @LW-2497 @Mainnet
+  Scenario: Extended-view - Owning NFTs
+    Given I am on NFTs extended page
+    Then A gallery view showing my NFTs is displayed
+
+  @LW-2498 @Mainnet
+  Scenario: Extended-view - Information displayed
+    Given I am on NFTs extended page
+    Then each NFT has name and image displayed
+
+  @LW-2499 @Mainnet
+  Scenario: Extended-view - Send button click
+    And I am on NFTs extended page
+    And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
+    When I click "core.nftDetail.sendNFT" button in drawer
+    Then the 'Send' screen is displayed in extended mode
+    And the NFT is pre-loaded as token to be sent with name: "Ibilecoin"
+
+  @LW-2500 @Mainnet
+  Scenario: Extended-view - Send NFT - Password screen
+    Given I am on NFTs extended page
+    When I'm sending an NFT with name: "Ibilecoin"
+    Then The password screen is displayed:
+      | Title: "Enter wallet" |
+      | Input: Password       |
+      | Button: "Confirm"     |
+      | Button: "Cancel"      |
+
+  @LW-2501 @Mainnet
+  Scenario: Extended-view  - Send NFT - User enters invalid password
+    Given I am on NFTs extended page
+    And I'm sending an NFT with name: "Ibilecoin"
+    When I fill incorrect password and confirm
+    Then I see "browserView.transaction.send.error.invalidPassword" password error
+
+  @LW-2504 @Mainnet
+  Scenario: Extended-view - "More on NFTs" widget
+    Given I am on NFTs extended page
+    Then I see "More on NFTs" widget with all relevant items
+
+  @LW-2505 @Mainnet
+  Scenario Outline: Extended-view - "About your wallet" widget item click - <subtitle>
+    Given I am on NFTs extended page
+    When I click on a widget item with subtitle: "<subtitle>"
+    Then I see a "<type>" article with title "<subtitle>"
+    Examples:
+      | type     | subtitle                        |
+      | Glossary | What are collections?           |
+      | FAQ      | How to buy an NFT?              |
+      | Video    | Enter the NFT gallery with Lace |
+
+  @LW-4375
+  Scenario: Extended-view - NFT without image displayed fallback picture
+    Given I am on NFTs extended page
+    Then Verify that "NFT LackImage" contains fallback image
+
+  @LW-4375 @Mainnet
+  Scenario: Extended-view - NFT with image does not display fallback picture
+    Given I am on NFTs extended page
+    Then Verify that "Bison Coin" doesn't contain fallback image
+
+  @LW-4746 @Mainnet
+  Scenario: Extended-view - NFTs details - Enter and Escape buttons support
+    Given I am on NFTs extended page
+    And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
+    And I see "core.nftDetail.sendNFT" button
+    When I press keyboard Escape button
+    Then I do not see "core.nftDetail.sendNFT" button
+    And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
+    When I press keyboard Enter button
+    Then send drawer is displayed with all its components in extended mode
+    And I see "browserView.transaction.send.footer.review" button
+    And I enter a valid "shelley" address in the bundle 1 recipient's address
+    When I press keyboard Escape button
+    Then a popup asking if you're sure you'd like to close it is displayed

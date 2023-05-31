@@ -1,0 +1,64 @@
+@import '../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(4);
+}
+
+.content {
+  flex-direction: column;
+  padding-bottom:size_unit(3.5);
+}
+
+.header {
+  align-items: baseline;
+  color: var(--text-color-primary);
+  display: flex;
+  font-size: var(--heading);
+  font-weight: 700;
+  line-height: size_unit(4);
+  margin-bottom: 0;
+  padding: 0 size_unit(3) size_unit(4) size_unit(3);
+  .subItem {
+    color: var(--text-color-secondary);
+    font-size: var(--bodyLarge);
+    font-weight: 600;
+    line-height: size_unit(3);
+    margin-bottom: -#{size_unit(1)};
+    margin-left: size_unit(1);
+  }
+}
+
+.title {
+  display: flex;
+  flex-direction: row;
+  @include text-subHeading-bold;
+  color: var(--text-color-primary);
+  gap: size_unit(1);
+  align-items: baseline;
+  margin-bottom: size_unit(2);
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.sideText {
+  @include text-bodyLarge-semi-bold;
+  color: var(--text-color-secondary) !important;
+  line-height: 32px;
+}
+
+.subHeader {
+  color: var(--text-color-primary);
+  font-size: var(--subHeading);
+  font-weight: 700;
+  line-height: size_unit(4);
+  margin-bottom: size_unit(2);
+}
+
+.sectionTilte {
+  padding-left: size_unit(3);
+}

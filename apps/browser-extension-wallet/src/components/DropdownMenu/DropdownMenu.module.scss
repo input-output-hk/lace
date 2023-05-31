@@ -1,0 +1,47 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.avatarBtn {
+  min-height: size_unit(6) !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border-radius: 100px !important;
+  border-width: 2px !important;
+  background-color: var(--bg-color-body, #ffffff) !important;
+
+  &.open {
+    background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+    &:hover {
+      background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+    }
+  }
+
+  @media (max-width: $breakpoint-popup) {
+    min-height: size_unit(4.5) !important;
+    min-width: 0 !important;
+  }
+}
+
+.content {
+  align-items: center;
+  display: flex;
+  margin: 0 6px;
+  &.isPopup {
+    margin: 0 3px;
+
+    .chevron {
+      font-size: 9px;
+      margin-left: 6px;
+      margin-right: 6px;
+    }
+  }
+}
+
+.chevron {
+  color: var(--dark-mode-light-grey, var(--light-mode-dark-grey, #878e9e)) !important;
+  font-size: 11px;
+  margin-left: 10px;
+  margin-right: 7px;
+  &.open {
+    transform: rotateX(180deg);
+  }
+}

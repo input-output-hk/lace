@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - 'release/**'
+
+jobs:
+  buildAndTest:
+    name: Build & Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Decrypt test data
+        working-directory: ./packages/e2e-tests
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+      - name: Audit packages
+        run: ./.github/scripts/audit.sh
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
+        with:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
+      - name: Check for linter issues
+        run: yarn lint
+      - name: Run unit tests
+        env:
+          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
+          DEFAULT_CHAIN: 'Preprod'
+        run: yarn test --maxWorkers=2
+      - name: Upload build
+        uses: actions/upload-artifact@v3
+        with:
+          name: lace
+          path: apps/browser-extension-wallet/dist

@@ -1,0 +1,21 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+:global {
+  ul.ant-menu-inline {
+    border: none !important;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background-color: transparent !important;
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--dark-mode-light-grey, var(--text-color-primary, #3d3b39));
+  font-size: 18.5px !important;
+
+  &.tokensLinkIcon {
+    font-size: var(--body, 16px) !important;
+  }
+}

@@ -1,0 +1,7 @@
+@import '../../../../../styles/utils/functions.scss';
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(2);
+}
