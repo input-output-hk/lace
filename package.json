@@ -2,6 +2,7 @@
   "name": "lace",
   "description": "A TypeScript monorepo containing modules for light wallet solutions",
   "version": "1.1.0",
+  "private": true,
   "workspaces": [
     "packages/common",
     "packages/cardano",
