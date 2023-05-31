@@ -9,8 +9,8 @@
   },
   "license": "Apache-2.0",
   "contributors": [
-    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)",
-    "Przemysław Włodek <przemyslaw.wlodek@iohk.io> (https://iohk.io)"
+    "Przemysław Włodek <przemyslaw.wlodek@iohk.io> (https://iohk.io)",
+    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)"
   ],
   "workspaces": [
     "packages/common",
@@ -60,7 +60,7 @@
       "prettier --write",
       "markdownlint --fix"
     ],
-    "packages/staking/package.json": "sort-package-json"
+    "package.json": "sort-package-json"
   },
   "resolutions": {
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.f9c48c0.0",
