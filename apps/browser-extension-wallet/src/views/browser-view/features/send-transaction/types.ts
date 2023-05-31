@@ -54,6 +54,7 @@ export interface AssetInfo {
 
 export type OutputRow = {
   address: string;
+  handle?: string;
   assets: Array<AssetInfo>;
 };
 
