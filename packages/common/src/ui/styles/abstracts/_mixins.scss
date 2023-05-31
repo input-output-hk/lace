@@ -45,6 +45,9 @@
     border-radius: $thum-raidus;
     height: $thumb-height;
   }
+  &::-webkit-scrollbar-corner {
+    background: $track-color;
+  }
 }
 
 // Loader icon spin animation
