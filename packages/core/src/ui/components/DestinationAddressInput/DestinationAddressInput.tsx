@@ -65,7 +65,7 @@ export const DestinationAddressInput = ({
     let handleIcon;
     if (handle === 'valid') {
       handleIcon = <CheckCircleOutlined className={styles.valid} />;
-    } else if (handleIcon === 'invalid') {
+    } else if (handle === 'invalid') {
       handleIcon = <CloseCircleOutlined className={styles.invalid} />;
     }
     return (

@@ -75,7 +75,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const handleInputChange = (value?: string) => {
     setAddressInputValue(value);
     setAddressValue(row, value);
-    setHandleVerificationState(undefined);
   };
 
   const debouncedValidateHandle = debounce(async () => {
@@ -95,15 +94,24 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   }, 1000);
 
   useEffect(() => {
+    if (!address) {
+      return;
+    }
+
     if (validateHandle(address)) {
       setHandleVerificationState(HandleVerificationState.VERIFYING);
       debouncedValidateHandle();
     }
 
+    if (handle) {
+      setHandleVerificationState(HandleVerificationState.VALID);
+    }
+
+    // eslint-disable-next-line consistent-return
     return () => {
       debouncedValidateHandle && debouncedValidateHandle.cancel();
     };
-  }, [address, setHandleVerificationState]);
+  }, [address, handle, setHandleVerificationState]);
 
   useEffect(() => {
     getAddressBookByNameOrAddress({ value: address || '' });
@@ -122,7 +130,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           network: currentNetwork
         })
     };
-  }, [address, currentNetwork, handleVerificationState]);
+  }, [address, currentNetwork]);
 
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 
@@ -133,7 +141,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     } else {
       setAddressInputValue(handle || address);
     }
-  }, [handle, address, getExistingAddress]);
+  }, [address, getExistingAddress]);
 
   const addressList = useMemo(
     () =>
