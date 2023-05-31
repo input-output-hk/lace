@@ -1,0 +1,58 @@
+@import '../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../styles/index';
+
+.listContainer {
+  height: 86%;
+  margin-top: 20px;
+  margin-left: -#{size_unit(1)};
+  margin-right: -#{size_unit(1)};
+
+  @media (max-width: $breakpoint-popup) {
+    margin-top: size_unit(2);
+  }
+}
+
+.emptyScreen {
+  height: 100%;
+  margin-top: size_unit(10);
+}
+
+.addressList {
+  :global {
+    .ant-list-items {
+      list-style: none;
+      margin: 0px;
+      padding: 0px;
+
+      p {
+        margin: 0;
+        text-align: right;
+      }
+    }
+  }
+}
+
+.title {
+  color: var(--text-color-primary);
+  margin: 0 size_unit(3) size_unit(3);
+  .subTitle {
+    color: var(--text-color-secondary);
+    font-size: var(--bodyLarge);
+    font-weight: $font-weight-bold;
+    line-height: size_unit(5);
+    margin-left: size_unit(1);
+  }
+  h1 {
+    @include text-heading;
+    color: var(--text-color-primary);
+    align-items: baseline;
+    display: flex;
+    margin: 0;
+  }
+}
+
+.btnContainer {
+  button {
+    font-weight: $font-weight-bold !important;
+  }
+}

@@ -1,0 +1,160 @@
+@import '../../../../packages/common/src/ui/styles/abstracts/mixins';
+@import './themes/dark';
+@import './themes/light';
+
+@media (max-width: $breakpoint-popup) {
+  #lace-popup-body {
+    max-width: $breakpoint-popup;
+    min-width: $breakpoint-popup;
+    min-height: 600px;
+    max-height: 600px;
+  }
+}
+
+// TODO: confirm if we need to animate the transition between modes
+// $color-related-props: background-color, background, border, border-bottom-color, border-color, border-left-color,
+//   border-right-color, border-top-color, box-shadow, color, column-rule, column-rule-color, filter, opacity,
+//   outline-color, outline, text-decoration, text-decoration-color, text-shadow;
+
+// @function getList($list, $suffix) {
+//   $result: '';
+
+//   @each $prop in $list {
+//     $result: $result + $prop + ' ' + $suffix + ', ';
+//   }
+
+//   @return unquote(str-slice($result, 0, -3));
+// }
+
+// * {
+//   $duration: 0.3s;
+//   $timing: ease;
+
+//   transition: getList($list: $color-related-props, $suffix: $duration + ' ' + $timing);
+// }
+
+*::selection {
+  background-color: rgba(127, 90, 240, 0.3);
+  color: var(--text-color-primary);
+}
+
+:global(#lace-app) {
+  height: 100%;
+  overflow: auto;
+  @include scroll-bar-style;
+}
+
+:root {
+  // fonts
+  @include font-size-variables;
+
+  // Set of border radius;
+  --border-sm: 8px;
+  --boder-md: 12px;
+  --border-lg: 16px;
+}
+
+// defined on ./themes folder
+@include dark-theme;
+@include light-theme;
+
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+.mb-1 {
+  margin-bottom: size_unit(1) !important;
+}
+.mb-2 {
+  margin-bottom: size_unit(2) !important;
+}
+.mb-3 {
+  margin-bottom: size_unit(3) !important;
+}
+.mt-1 {
+  margin-top: size_unit(1) !important;
+}
+.mt-3 {
+  margin-top: size_unit(3) !important;
+}
+.mt-4 {
+  margin-top: size_unit(4) !important;
+}
+.mt-5 {
+  margin-top: size_unit(5) !important;
+}
+
+.font-body-large {
+  font-size: var(--bodyLarge) !important;
+}
+
+.font-weight-600 {
+  font-weight: 600 !important;
+}
+
+.line-height-4 {
+  line-height: size_unit(4) !important;
+}
+
+.line-height-3 {
+  line-height: size_unit(3) !important;
+}
+
+.ws-preline {
+  white-space: pre-line;
+}
+
+body {
+  font-family: 'proxima-nova', sans-serif !important;
+}
+
+#lace-popup {
+  height: 100% !important;
+  width: $breakpoint-popup;
+  font-family: 'proxima-nova', sans-serif !important;
+}
+
+:global(.ant-radio:hover .ant-radio-inner) {
+  border-color: var(--light-mode-dark-grey, var(--dark-mode-light-grey)) !important;
+  background: var(--color-white, var(--dark-mode-grey));
+}
+:global(.ant-tooltip) {
+  color: var(--light-mode-dark-grey, var(--dark-mode-light-grey)) !important;
+  font-weight: 400 !important;
+  font-size: var(--bodySmall) !important;
+}
+:global(.ant-tooltip-inner) {
+  background-color: var(--dark-mode-mid-grey, #ffffff) !important;
+  box-shadow: var(--shadows-toast-tooltip) !important;
+  border-radius: 11px !important;
+  color: var(--dark-mode-light-grey, --light-mode-dark-grey) !important;
+  padding: size_unit(1) size_unit(2) !important;
+}
+:global(.ant-tooltip-arrow-content) {
+  background-color: var(--dark-mode-mid-grey, #ffffff) !important;
+}
+
+:global(.ant-modal-mask) {
+  background: var(--light-mode-black, var(--dark-mode-bg-black)) !important;
+  opacity: 0.9;
+}
+
+:global(.ant-drawer.ant-drawer-open .ant-drawer-mask) {
+  animation: none;
+}
+
+:global(.ant-drawer) {
+  transition: none;
+}
+
+:global {
+  .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: var(--primary-default) !important;
+    border-color: var(--primary-default) !important;
+  }
+}
+
+body {
+  background-color: var(--bg-color-body, #ffffff) !important;
+  color: var(--text-color-primary, #3d3b39);
+  min-width: $breakpoint-popup !important;
+}

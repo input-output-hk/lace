@@ -1,0 +1,14 @@
+@import '../../../../styles/utils/functions.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: size_unit(2) 0;
+}
+
+button.showUsedAddresses {
+  font-weight: 600 !important;
+}

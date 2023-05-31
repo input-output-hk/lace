@@ -1,0 +1,31 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  margin-top: size_unit(14);
+  @media (max-width: $breakpoint-popup) {
+    margin-top: size_unit(9);
+  }
+}
+.title {
+  @include text-bodyLarge-semi-bold;
+  color: var(--text-color-primary);
+  margin: size_unit(2) 0;
+  text-align: center;
+
+  @media (max-width: $breakpoint-popup) {
+    margin: size_unit(1) 0;
+  }
+}
+.subtitle {
+  font-size: var(--bodySmall);
+  line-height: size_unit(3);
+  text-align: center;
+  color: var(--text-color-secondary);
+  width: 327px;
+}

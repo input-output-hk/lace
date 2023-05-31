@@ -1,0 +1,52 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.collateralDrawer {
+  @media (max-width: $breakpoint-popup) {
+    overflow-y: hidden !important;
+  }
+}
+
+.confirmBtn {
+  letter-spacing: 0.02em;
+  width: 100%;
+}
+
+.collateralContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-bottom: size_unit(3);
+
+  @media (max-width: $breakpoint-popup) {
+    padding-bottom: 0;
+  }
+}
+
+.contentContainer {
+  flex: 1;
+}
+
+.notEnoughContainer {
+  margin-top: size_unit(2);
+  @include flex-center;
+  flex-direction: column;
+  height: 80%;
+}
+
+.sadFace {
+  width: size_unit(10.5);
+  height: size_unit(10.5);
+}
+
+.sadFaceText {
+  @include text-bodyLarge-semi-bold;
+  width: 250px;
+  color: var(--text-color-secondary) !important;
+  text-align: center;
+  margin-top: size_unit(1);
+
+  @media (max-width: $breakpoint-popup) {
+    font-size: var(--body) !important;
+  }
+}

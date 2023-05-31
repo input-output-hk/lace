@@ -1,0 +1,10 @@
+.ContainerTooltip {
+  display: flex;
+  align-items: center;
+}
+.tooltipContent {
+  max-width: 200px;
+  overflow-wrap: break-word;
+  z-index: 15;
+  font-size: var(--bodyXS);
+}

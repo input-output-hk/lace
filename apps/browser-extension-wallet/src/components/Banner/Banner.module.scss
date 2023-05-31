@@ -1,0 +1,51 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.bannerContainer {
+  width: 100%;
+  background-color: var(--dark-mode-dark-grey-plus, var(--color-magnolia, #fcf5e3));
+  border-radius: 16px;
+  padding: size_unit(2) 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: size_unit(1);
+
+  .iconContainer {
+    align-self: center;
+    margin-right: 27px;
+    @media (max-width: $breakpoint-popup) {
+      margin-top: -#{size_unit(3)};
+    }
+    &.withDescription {
+      margin-top: size_unit(1);
+    }
+  }
+
+  .descriptionContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    span.message {
+      color: var(--text-color-primary);
+      font-size: var(--body);
+      font-weight: 600;
+      line-height: size_unit(3);
+      text-align: left;
+      white-space: pre-line;
+    }
+
+    span.description {
+      color: var(--text-color-primary);
+      font-size: var(--body);
+      font-weight: 400;
+      line-height: size_unit(3);
+      letter-spacing: -0.015em;
+      text-align: left;
+
+      @media (max-width: $breakpoint-popup) {
+        font-size: var(--bodySmall);
+      }
+    }
+  }
+}

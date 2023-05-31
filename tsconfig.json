@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "module": "es2020",
+    "target": "es2016",
+    "jsx": "react",
+    "allowJs": false,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
+  }
+}

@@ -1,0 +1,50 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.button {
+  background-color: var(--bg-color-body);
+  border-radius: size_unit(10);
+  border: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333));
+  cursor: pointer;
+  gap: 0px;
+  text-decoration: none;
+  height: size_unit(4.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+  width: auto;
+  max-width: size_unit(4.5);
+  transition: all 0.5s ease, background-color 0s, border 0s;
+
+  &:hover {
+    max-width: 300px;
+    gap: size_unit(1);
+    padding: 0 size_unit(2);
+
+    background: var(--light-mode-light-grey, var(--dark-mode-light-black, #282828));
+
+    .text {
+      max-width: 100%;
+    }
+  }
+
+  &:active,
+  &:focus {
+    background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333));
+  }
+}
+
+.text {
+  color: var(--text-color-secondary);
+  white-space: nowrap;
+  max-width: 0%;
+  overflow: hidden;
+  transition: all 0.5s;
+}
+
+.icon {
+  font-size: size_unit(2.5);
+  color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #a9a9a9));
+}

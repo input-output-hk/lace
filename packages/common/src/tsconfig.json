@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist/",
+    "rootDir": "./",
+    "baseUrl": "../src",
+    "paths": {
+      "@src/*": ["*"],
+      "@ui/*": ["ui/*"]
+    },
+    "declarationDir": "./",
+    "declaration": true,
+    "plugins": [
+      { "transform": "typescript-transform-paths" },
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+    ]
+  },
+  "exclude": ["dist"]
+}

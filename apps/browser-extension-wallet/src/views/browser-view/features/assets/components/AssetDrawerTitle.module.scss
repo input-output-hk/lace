@@ -1,0 +1,49 @@
+@import '../../../../../styles/utils/functions.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography.scss';
+
+.assetDetailsHeader {
+  display: flex;
+  align-items: center;
+  gap: size_unit(2);
+  margin-bottom: size_unit(3);
+
+  .assetName {
+    display: flex;
+    align-items: baseline;
+    gap: size_unit(1);
+    @media (max-width: $breakpoint-popup) {
+      gap: 0;
+      flex-direction: column;
+    }
+  }
+  h1 {
+    @include text-heading;
+    margin: 0;
+    color: var(--text-color-primary);
+
+    @media (max-width: $breakpoint-popup) {
+      font-size: var(--subHeading);
+      line-height: size_unit(4);
+    }
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-color-secondary);
+    font-size: var(--bodyLarge);
+    font-weight: 700;
+    line-height: size_unit(4);
+    letter-spacing: -0.015em;
+
+    @media (max-width: $breakpoint-popup) {
+      font-size: var(--body);
+      line-height: size_unit(3);
+    }
+  }
+
+  img {
+    align-self: center;
+    width: size_unit(6);
+  }
+}

@@ -1,0 +1,19 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.listContainer {
+  @include light-grey-border;
+  border: 2px solid var(--dark-mode-mid-black, var(--light-mode-light-grey-plus));
+  background: var(--bg-color-container);
+  display: flex;
+  flex-direction: column;
+  padding: size_unit(3) size_unit(1.5) + $scroll-offset size_unit(5);
+  border-radius: size_unit(2);
+
+  .title {
+    @include text-subHeading-bold;
+    color: $theme-text-color-black;
+    padding: 0 size_unit(2);
+    margin: 0 0 size_unit(2);
+  }
+}

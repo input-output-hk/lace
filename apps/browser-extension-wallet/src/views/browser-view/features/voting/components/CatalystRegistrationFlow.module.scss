@@ -1,0 +1,29 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.catalystRegistration {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(4);
+  height: 100%;
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cancelModalContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    font-size: var(--bodySmall);
+    font-weight: 400;
+    line-height: size_unit(2);
+    letter-spacing: 0.02em;
+    text-align: center;
+    color: var(--text-color-black);
+  }
+}

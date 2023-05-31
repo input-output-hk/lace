@@ -1,0 +1,43 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.rowHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: size_unit(1);
+
+  .rowHeaderTitle {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: size_unit(1);
+
+    .title {
+      @include text-subHeading-bold;
+      color: var(--text-color-primary);
+      text-align: left;
+      margin: 0;
+    }
+  }
+
+  .actionsContainer {
+    display: flex;
+    align-items: center;
+    gap: size_unit(2);
+
+    .icon {
+      color: var(--text-color-primary);
+      font-size: var(--bodyLarge);
+    }
+
+    .removeBtn {
+      width: size_unit(5);
+      height: size_unit(5);
+      border-radius: size_unit(1.5);
+      path {
+        fill: var(--text-color-primary);
+      }
+    }
+  }
+}

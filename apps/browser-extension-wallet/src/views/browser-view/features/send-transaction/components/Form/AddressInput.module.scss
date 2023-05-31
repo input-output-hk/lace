@@ -1,0 +1,41 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+:global(.ant-select-item-option-selected:not(.ant-select-item-option-disabled)) {
+  background-color: var(--color-white, var(--dark-mode-grey, #ffffff)) !important;
+  color: var(--light-mode-dark-grey, #fff) !important;
+}
+
+.container {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+}
+
+.errorParagraph {
+  color: var(--data-pink) !important;
+  bottom: -#{size_unit(2)};
+  font-size: var(--bodySmall);
+  font-weight: 500;
+  line-height: size_unit(2);
+  margin-left: size_unit(3);
+  position: absolute;
+  text-align: left;
+}
+
+.input {
+  width: 100%;
+  font-size: 18px;
+
+  &::placeholder {
+    font-size: $font-size-bodyLarge !important;
+  }
+}
+
+.banner {
+  margin-bottom: size_unit(1);
+  margin-top: size_unit(2) !important;
+  &.popupView {
+    margin-bottom: 0;
+  }
+}

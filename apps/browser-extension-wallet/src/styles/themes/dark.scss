@@ -1,0 +1,87 @@
+@import '../../../../../packages/common/src/ui/styles/themes/dark';
+
+@mixin dark-theme {
+  /*
+  in case the theme provider is not being used, this media query allows us to use the theme set on the user system
+  */
+  @media (prefers-color-scheme: dark) and (data-theme: dark) {
+    :root {
+      @include theme-custom-properties($dark-theme);
+    }
+  }
+
+  html[data-theme='dark'] {
+    @include theme-custom-properties($dark-theme);
+  }
+}
+
+/*
+====== DARK PALLET ======
+
+====== BACKGROUNDS ======
+
+--bg-color-body => #1e1e1e 
+--bg-color-container => #252525 
+
+====== PRIMARY COLOUR ======
+
+--primary-default => #7f5af0 
+--primary-hover => #7452db
+--primary-active => #702bed 
+--primary-accent => rgba(127, 90, 240, 0.302) 
+--primary-gradient => linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%) 
+
+====== SECONDARY COLOURS ======
+
+--secondary-gradient => linear-gradient(128.79deg, #f4b4d0 0%, #f5c25d 100%)
+
+====== SECONDARY COLOURS ======
+
+--text-color-primary => #ffffff 
+--text-color-secondary => #a9a9a9 
+--text-color-white => #ffffff 
+--text-color-black => #212121 
+--text-color-green => #2cb67d 
+--text-color-red => #ff5470 
+--text-color-blue => #3489f7 
+--text-color-grey => #6b7280 
+
+====== SHADOWS ====== 
+
+--shadow-primary-button-hover => 0px 4px 10px rgba(#a78fa0, 0.2) rgba(#4b00b5, 0.3) 
+--shadow-inset-white => 2px 1000px 1px var(--color-white) inset 
+--shadow-inset-lgray => 2px 1000px 1px var(--light-mode-light-grey) inset 
+
+====== SCROLL BAR ======
+
+--scroll-bar-track => #282828 
+--scroll-bar-thum => #333333 
+
+====== SHARED COLOURS THIS ARE THE SAME FOR LIGHT AND DARK MODE ======
+
+This follows naming from figma
+
+--lace-gradient => linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%) 
+--lace-pink => #ff92de 
+--lace-yellow => #fdc300 
+
+--data-pink => #ff5470 
+--data-pink-10 => rgba(255, 84, 112, 0.1) 
+--data-orange => #ff8e3c 
+--data-green => #2cb67d 
+--data-blue => #3489f7 
+
+====== PROPERTIES ONLY AVAILABLE ON DARK MODE ======
+
+This follows naming from figma
+
+--dark-mode-black => #000000 
+--dark-mode-bg-black => #1e1e1e 
+--dark-mode-mid-black => #252525 
+--dark-mode-light-black => #282828 
+--dark-mode-dark-grey-plus => #2e2e2e 
+--dark-mode-dark-grey => #2f2f2f 
+--dark-mode-mid-grey => #333333 
+--dark-mode-grey => #383838 
+--dark-mode-light-grey => #a9a9a9 
+*/

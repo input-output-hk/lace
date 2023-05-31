@@ -1,0 +1,39 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.status {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: size_unit(1);
+  padding: size_unit(1) size_unit(1.5);
+  height: size_unit(4);
+  border: 1.5px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef));
+  border-radius: size_unit(2);
+
+  .statusDescription {
+    @include text-form-label($weight: 500);
+    letter-spacing: -0.015em;
+    text-align: left;
+    margin: 0;
+    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #a9a9a9));
+  }
+
+  .statusCircle {
+    width: size_unit(1);
+    height: size_unit(1);
+    border-radius: 100px;
+    background-color: var(--light-mode-dark-grey, #878e9e);
+
+    &.synced {
+      background-color: var(--data-green, #2cb67d);
+    }
+    &.notSynced {
+      background-color: var(--color-pink, #ff5470);
+    }
+
+    &.syncing {
+      background-color: var(--color-yellow, #fdc300);
+    }
+  }
+}

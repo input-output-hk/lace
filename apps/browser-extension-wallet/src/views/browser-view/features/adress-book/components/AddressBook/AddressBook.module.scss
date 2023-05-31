@@ -1,0 +1,12 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-left: -#{size_unit(2)};
+}
+
+.educationalList {
+  margin-top: size_unit(4);
+}

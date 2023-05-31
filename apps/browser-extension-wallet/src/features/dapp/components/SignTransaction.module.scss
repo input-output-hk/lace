@@ -1,0 +1,36 @@
+@import '../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../src/styles/rules/flex.scss';
+
+.passwordContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.message {
+  font-weight: 600;
+  font-size: var(--bodyLarge);
+  line-height: size_unit(3);
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--text-color-black);
+}
+
+.actions {
+  background-color: var(--bg-color-body);
+  @extend %flex-column;
+  justify-content: center;
+  gap: size_unit(1);
+  padding: size_unit(2) size_unit(3) size_unit(2) size_unit(3);
+  border-top: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  margin: 0 size_unit(-3) size_unit(-2) size_unit(-3);
+  position: sticky;
+  bottom: 0;
+  .actionBtn {
+    width: 100%;
+  }
+}

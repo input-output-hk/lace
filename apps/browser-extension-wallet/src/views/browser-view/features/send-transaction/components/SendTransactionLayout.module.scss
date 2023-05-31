@@ -1,0 +1,28 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.sendContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.drawer {
+  :global {
+    .ant-drawer-body {
+      overflow: hidden;
+    }
+    .ant-drawer-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+      min-height: 0;
+    }
+  }
+}
+
+.walletInfoContainer {
+  background: var(--color-white, #ffffff);
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.05), 0px 0px 10px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+}
