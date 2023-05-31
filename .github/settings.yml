@@ -1,3 +1,5 @@
+# These settings are synced to GitHub by https://probot.github.io/apps/settings/
+
 repository:
   allow_merge_commit: true
   allow_rebase_merge: false
@@ -9,5 +11,98 @@ repository:
   has_projects: false
   has_wiki: false
   name: lace
-  private: true
-  topics: lace
+  description: The Lace Wallet.
+  homepage: https://lace.io
+  private: true # on open source -> false
+  topics: lace, cardano, wallet, crypto
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
+
+# Labels: define labels for Issues and Pull Requests
+labels:
+  - name: browser
+    description: Changes to the browser application.
+
+  - name: staking
+    description: Changes to the staking package.
+
+  - name: e2e
+    description: Changes to the e2e testing instrumentation.
+
+  - name: documentation
+    description: Documentation related issues or pull requests.
+
+
+# See https://docs.github.com/en/rest/reference/teams#add-or-update-team-repository-permissions for available options
+teams:
+    # The permission to grant the team. Can be one of:
+    # * `pull` - can pull, but not push to or administer this repository.
+    # * `push` - can pull and push, but not administer this repository.
+    # * `admin` - can pull, push and administer this repository.
+    # * `maintain` - Recommended for project managers who need to manage the repository without access to sensitive or destructive actions.
+    # * `triage` - Recommended for contributors who need to proactively manage issues and pull requests without write access.
+  - name: lace
+    permission: push # on open source -> triage
+  - name: lace-admins
+    permission: admin
+  - name: lace-tech-leads
+    permission: admin
+
+
+branches:
+  - name: main
+    # https://docs.github.com/en/rest/reference/repos#update-branch-protection
+    # Branch Protection settings. Set to null to disable
+    protection:
+      # Required. Require at least one approving review on a pull request, before merging. Set to null to disable.
+      required_pull_request_reviews:
+        # The number of approvals required. (1-6)
+        required_approving_review_count: 1
+        # Dismiss approved reviews automatically when a new commit is pushed.
+        dismiss_stale_reviews: true
+        # Whether the most recent push must be approved by someone other than the person who pushed it.
+        require_last_push_approval: true
+        # Blocks merge until code owners have reviewed.
+        require_code_owner_reviews: true
+        # Allow specific users, teams, or apps to bypass pull request requirements.
+        bypass_pull_request_allowances:
+          apps: []
+          users: []
+          teams: []
+        # Specify which users and teams can dismiss pull request reviews. Pass an empty dismissal_restrictions object to disable. User and team dismissal_restrictions are only available for organization-owned repositories. Omit this parameter for personal repositories.
+        dismissal_restrictions:
+          apps: []
+          users: []
+          teams: []
+      # Required. Require status checks to pass before merging. Set to null to disable
+      required_status_checks:
+        # Required. Require branches to be up to date before merging.
+        strict: true
+        # Required. The list of status checks to require in order to merge into this branch
+        checks:
+          - context: Build & Test
+          - context: block-fixup
+          - context: Build Staking Center
+      # Required. Enforce all configured restrictions for administrators. Set to true to enforce required status checks for repository administrators. Set to null to disable.
+      enforce_admins: true
+      # Prevent merge commits from being pushed to matching branches
+      required_linear_history: false
+      # Permits force pushes to the protected branch by anyone with write access to the repository.
+      allow_force_pushes: false
+      # Allows deletion of the protected branch by anyone with write access to the repository.
+      allow_deletions: false
+      # If set to true, the restrictions branch protection settings which limits who can push will also block pushes which create new branches, unless the push is initiated by a user, team, or app which has the ability to push.
+      block_creations: true
+      # Requires all conversations on code to be resolved before a pull request can be merged into a branch that matches this rule.
+      required_conversation_resolution: false
+      # Whether to set the branch as read-only.
+      lock_branch: false
+      # Whether users can pull changes from upstream when the branch is locked.
+      allow_fork_syncing: false
+      # Whether commits must be signed on this branch.
+      required_signatures: true
+      # Required. Restrict who can push to this branch. Team and user restrictions are only available for organization-owned repositories. Set to null to disable.
+      restrictions:
+        apps: []
+        users: []
+        teams: []
