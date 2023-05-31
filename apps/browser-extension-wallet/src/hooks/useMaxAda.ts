@@ -26,7 +26,7 @@ export const useMaxAda = (): BigInt => {
           address: walletInfo.address,
           value: {
             coins: BigInt(0),
-            assets: balance?.assets || new Map()
+            assets: balance.assets || new Map()
           }
         }
       ]);

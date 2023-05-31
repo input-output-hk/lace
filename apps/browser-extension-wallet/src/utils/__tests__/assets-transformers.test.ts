@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 /* eslint-disable max-statements */
 /* eslint-disable no-magic-numbers */
@@ -47,6 +48,7 @@ describe('Testing assets transformers', () => {
     test('should return proper amount in fiat', () => {
       expect(assetsTransformers.parseFiat(0.567_89)).toEqual('0.6');
       expect(assetsTransformers.parseFiat(5.567_89)).toEqual('5.568');
+      expect(assetsTransformers.parseFiat(0)).toEqual('0');
     });
   });
 
@@ -93,19 +95,25 @@ describe('Testing assets transformers', () => {
       ticker: cardanoCoin.symbol,
       variation: '+1.00'
     };
+    const walletBalanceTransformerResult = {
+      coinBalance: 'coinBalance',
+      fiatBalance: 'fiatBalance'
+    };
+    let walletBalanceTransformerSpy: jest.SpyInstance;
+    let formatNumberSpy: jest.SpyInstance;
     beforeEach(() => {
-      jest.resetAllMocks();
+      walletBalanceTransformerSpy = jest
+        .spyOn(transformers, 'walletBalanceTransformer')
+        .mockReturnValue({ ...walletBalanceTransformerResult, fiatBalance: '-' });
+      formatNumberSpy = jest.spyOn(formatNumber, 'formatLocaleNumber');
+      formatNumberSpy.mockReturnValue('balance');
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
     });
     test('should return proper variation', () => {
-      const walletBalanceTransformerResult = {
-        coinBalance: 'coinBalance',
-        fiatBalance: 'fiatBalance'
-      };
-
-      const walletBalanceTransformerSpy = jest.spyOn(transformers, 'walletBalanceTransformer');
-      walletBalanceTransformerSpy.mockReturnValue({ ...walletBalanceTransformerResult, fiatBalance: '-' });
-
-      const formatNumberSpy = jest.spyOn(formatNumber, 'formatLocaleNumber');
+      formatNumberSpy.mockReset();
       formatNumberSpy.mockReturnValueOnce('formattedPrice');
       formatNumberSpy.mockReturnValue('balance');
 
@@ -123,46 +131,74 @@ describe('Testing assets transformers', () => {
       expect(walletBalanceTransformerSpy).toBeCalledWith(params.total.coins.toString(), params.fiatPrice?.price);
       expect(variationParserrSpy).toBeCalledWith(params.fiatPrice?.priceVariationPercentage24h);
 
-      // should return proper price if fiatPrice?.price is not a number
+      walletBalanceTransformerSpy.mockRestore();
+      formatNumberSpy.mockRestore();
+      variationParserrSpy.mockRestore();
+    });
+
+    test('should return proper price if fiatPrice?.price is not a number', () => {
       expect(
         assetsTransformers.cardanoTransformer({ ...params, fiatPrice: { ...params.fiatPrice, price: undefined } }).price
       ).toEqual('-');
 
-      // should return proper variation if fiatPrice?.priceVariationPercentage24h is not there
+      walletBalanceTransformerSpy.mockRestore();
+    });
+
+    test('should return proper price if fiatPrice is missing', () => {
+      expect(assetsTransformers.cardanoTransformer({ ...params, fiatPrice: undefined }).price).toEqual('-');
+    });
+
+    test('should return proper variation if fiatPrice?.priceVariationPercentage24h is not there', () => {
       expect(
         assetsTransformers.cardanoTransformer({
           ...params,
           fiatPrice: { ...params.fiatPrice, priceVariationPercentage24h: undefined }
         }).variation
       ).toEqual('-');
+    });
 
-      // should return proper fiatBalance if balance.fiatBalance returned from walletBalanceTransformer is numeric
+    test('should return proper fiatBalance if balance.fiatBalance returned from walletBalanceTransformer is numeric', () => {
+      const variationParserrSpy = jest.spyOn(assetsTransformers, 'variationParser');
+      variationParserrSpy.mockReturnValue('variationParserResult');
+
       const isNumericSpy = jest.spyOn(formatNumber, 'isNumeric');
       isNumericSpy.mockReturnValueOnce(true);
       walletBalanceTransformerSpy.mockReturnValue(walletBalanceTransformerResult);
+
       expect(assetsTransformers.cardanoTransformer(params).fiatBalance).toEqual(`balance ${params.fiatCode}`);
       expect(isNumericSpy).toBeCalledWith(walletBalanceTransformerResult.fiatBalance);
       expect(formatNumberSpy).toBeCalledWith(walletBalanceTransformerResult.fiatBalance);
 
-      // should return proper fiatBalance if balance.fiatBalance returned from walletBalanceTransformer is not numeric
-      isNumericSpy.mockReturnValueOnce(false);
+      formatNumberSpy.mockRestore();
+      walletBalanceTransformerSpy.mockRestore();
+      isNumericSpy.mockRestore();
+    });
+
+    test('should return proper fiatBalance if balance.fiatBalance returned from walletBalanceTransformer is not numeric', () => {
+      const variationParserrSpy = jest.spyOn(assetsTransformers, 'variationParser');
+      variationParserrSpy.mockReturnValue('variationParserResult');
+
+      walletBalanceTransformerSpy.mockReset();
+      walletBalanceTransformerSpy.mockReturnValue(walletBalanceTransformerResult);
+      const isNumericSpy = jest.spyOn(formatNumber, 'isNumeric');
+      isNumericSpy.mockReturnValue(false);
+
       expect(assetsTransformers.cardanoTransformer(params).fiatBalance).toEqual(`? ${params.fiatCode}`);
       expect(isNumericSpy).toBeCalledWith(walletBalanceTransformerResult.fiatBalance);
 
-      // should return balancesPlaceholder as balance and fiatBalance if areBalancesVisible is false
+      isNumericSpy.mockRestore();
+    });
+
+    test('should return balancesPlaceholder as balance and fiatBalance if areBalancesVisible is false', () => {
       const balancesPlaceholder = 'balancesPlaceholder';
       const { balance, fiatBalance } = assetsTransformers.cardanoTransformer({
         ...params,
         areBalancesVisible: false,
         balancesPlaceholder
       });
+
       expect(balance).toEqual(balancesPlaceholder);
       expect(fiatBalance).toEqual(balancesPlaceholder);
-
-      walletBalanceTransformerSpy.mockRestore();
-      formatNumberSpy.mockRestore();
-      variationParserrSpy.mockRestore();
-      isNumericSpy.mockRestore();
     });
   });
 
@@ -225,7 +261,7 @@ describe('Testing assets transformers', () => {
       addEllipsisSpy.mockReturnValue('addEllipsis');
 
       const getAssetImageUrlSpy = jest.spyOn(getAssetImage, 'getAssetImageUrl');
-      getAssetImageUrlSpy.mockImplementation((str) => str);
+      getAssetImageUrlSpy.mockImplementation((str: string) => str);
 
       const parseFiatSpy = jest.spyOn(assetsTransformers, 'parseFiat');
       parseFiatSpy.mockReturnValueOnce('parseFiat');
@@ -243,6 +279,7 @@ describe('Testing assets transformers', () => {
       const fiat = 11;
       const priceInAda = 22;
       const fiatBalance = new BigNumber(mockedTokenBalance).multipliedBy(fiat * priceInAda).toNumber();
+
       expect(
         assetsTransformers.assetTransformer({
           ...params,
@@ -273,15 +310,26 @@ describe('Testing assets transformers', () => {
       expect(compactNumberSpy).toBeCalledWith(mockedTokenBalance, tokenMetadata.decimals);
       expect(parseFiatSpy).toBeCalledWith(fiatBalance);
 
-      // to see proper name in case it's missing on the tokenMetadata or nftMetadata level
+      addEllipsisSpy.mockRestore();
+      compactNumberSpy.mockRestore();
+      variationParserSpy.mockRestore();
+      getAssetImageUrlSpy.mockRestore();
+      parseFiatSpy.mockRestore();
+    });
+
+    test("to see proper name in case it's missing on the tokenMetadata or nftMetadata level", () => {
       expect(
         assetsTransformers.assetTransformer({
           ...params,
           token: { ...token, tokenMetadata: {}, nftMetadata: {} } as Wallet.Asset.AssetInfo
         }).name
       ).toEqual('-');
+    });
 
-      // to see proper name, icon, decimals taken from tokenMetadata level
+    test('to see proper name, icon, decimals taken from tokenMetadata level', () => {
+      const getAssetImageUrlSpy = jest.spyOn(getAssetImage, 'getAssetImageUrl');
+      getAssetImageUrlSpy.mockImplementation((str: string) => str);
+      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumber');
       compactNumberSpy.mockReturnValue('tokenMetadatacCompactNumberBalance');
       const tokenMetadataName = 'tokenMetadataName';
       const tokenMetadataIcon = 'tokenMetadataIcon';
@@ -298,12 +346,20 @@ describe('Testing assets transformers', () => {
           nftMetadata: {}
         } as Wallet.Asset.AssetInfo
       });
+
       expect(tokenMetadataResults.name).toEqual(tokenMetadataName);
       expect(tokenMetadataResults.logo).toEqual(tokenMetadataIcon);
       expect(tokenMetadataResults.balance).toEqual('tokenMetadatacCompactNumberBalance');
       expect(compactNumberSpy.mock.calls[0][1]).toEqual(tokenMetadaDecimals);
 
-      // to see proper name, icon, decimals taken from nftMetadata level
+      getAssetImageUrlSpy.mockRestore();
+      compactNumberSpy.mockRestore();
+    });
+
+    test('to see proper name, icon, decimals taken from nftMetadata level', () => {
+      const getAssetImageUrlSpy = jest.spyOn(getAssetImage, 'getAssetImageUrl');
+      getAssetImageUrlSpy.mockImplementation((str: string) => str);
+      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumber');
       compactNumberSpy.mockReturnValue('nftMetadatacCompactNumberBalance');
       const nftMetadataName = 'nftMetadataName';
       const nftMetadataIcon = 'nftMetadataIcon';
@@ -317,36 +373,55 @@ describe('Testing assets transformers', () => {
           } as unknown as Wallet.Asset.AssetInfo['nftMetadata']
         } as Wallet.Asset.AssetInfo
       });
+
       expect(nftMetadataResults.name).toEqual(nftMetadataName);
       expect(nftMetadataResults.logo).toEqual(nftMetadataIcon);
       expect(nftMetadataResults.balance).toEqual('nftMetadatacCompactNumberBalance');
 
-      // to see proper fiatBalance in case pricesInfo.priceInAda is missing
+      compactNumberSpy.mockRestore();
+      getAssetImageUrlSpy.mockRestore();
+    });
+
+    test('to see proper fiatBalance in case pricesInfo.priceInAda is missing', () => {
       const noPriceInAdaResults = assetsTransformers.assetTransformer({
         ...params,
         pricesInfo: { ...pricesInfo, priceInAda: undefined }
       });
+
       expect(noPriceInAdaResults.price).toEqual('-');
       expect(noPriceInAdaResults.fiatBalance).toEqual('-');
       expect(noPriceInAdaResults.sortBy.fiatBalance).toEqual(undefined);
+    });
 
-      // to see proper fiatBalance in case fiat is missing
+    test('to see proper fiatBalance in case pricesInfo is missing', () => {
+      const noPriceInfoResults = assetsTransformers.assetTransformer({ ...params, pricesInfo: undefined });
+
+      expect(noPriceInfoResults.price).toEqual('-');
+      expect(noPriceInfoResults.fiatBalance).toEqual('-');
+      expect(noPriceInfoResults.sortBy.fiatBalance).toEqual(undefined);
+    });
+
+    test('to see proper fiatBalance in case fiat is missing', () => {
       const noFiatResults = assetsTransformers.assetTransformer({ ...params, fiat: undefined });
+
       expect(noFiatResults.price).toEqual('-');
       expect(noFiatResults.fiatBalance).toEqual('-');
       expect(noFiatResults.sortBy.fiatBalance).toEqual(undefined);
+    });
 
-      // to see proper variations in case pricesInfo.priceVariationPercentage24h is missing
+    test('to see proper variations in case pricesInfo.priceVariationPercentage24h is missing', () => {
       expect(
         assetsTransformers.assetTransformer({
           ...params,
           pricesInfo: { ...pricesInfo, priceVariationPercentage24h: undefined }
         }).variation
       ).toEqual('-');
+    });
 
-      // to see proper icon in case icon is missing from assetMetadata
+    test('to see proper icon in case icon is missing from assetMetadata', () => {
       const getRandomIconSpy = jest.spyOn(getRandomIcon, 'getRandomIcon');
       getRandomIconSpy.mockReturnValue('getRandomIcon');
+
       expect(
         assetsTransformers.assetTransformer({
           ...params,
@@ -359,22 +434,52 @@ describe('Testing assets transformers', () => {
       ).toEqual('getRandomIcon');
       expect(getRandomIconSpy).toBeCalledWith({ id: key.toString(), size: 30 });
 
-      // to see proper balance and fiatbalance in case areBalancesVisible is set to false
+      getRandomIconSpy.mockRestore();
+    });
+
+    test('to see proper balance and fiatbalance in case areBalancesVisible is set to false', () => {
       const balancesPlaceholder = 'balancesPlaceholder';
       const areBalancesVisibleResults = assetsTransformers.assetTransformer({
         ...params,
         areBalancesVisible: false,
         balancesPlaceholder
       });
+
       expect(areBalancesVisibleResults.balance).toEqual(balancesPlaceholder);
       expect(areBalancesVisibleResults.fiatBalance).toEqual(balancesPlaceholder);
+    });
 
-      addEllipsisSpy.mockRestore();
-      getAssetImageUrlSpy.mockRestore();
-      parseFiatSpy.mockRestore();
-      variationParserSpy.mockRestore();
-      compactNumberSpy.mockRestore();
-      getRandomIconSpy.mockRestore();
+    test('should default to 1 as bigintBalance value in case total is missing', () => {
+      mockCalculateAssetBalance.mockReset();
+      assetsTransformers.assetTransformer({ ...params, total: undefined });
+
+      expect(mockCalculateAssetBalance).toBeCalledWith(BigInt(1), params.token);
+      expect(mockCalculateAssetBalance).toBeCalledTimes(1);
+    });
+
+    test('should default to 1 as bigintBalance value in case total.assets is missing', () => {
+      mockCalculateAssetBalance.mockReset();
+      assetsTransformers.assetTransformer({ ...params, total: { assets: undefined } as Wallet.Cardano.Value });
+
+      expect(mockCalculateAssetBalance).toBeCalledWith(BigInt(1), params.token);
+      expect(mockCalculateAssetBalance).toBeCalledTimes(1);
+    });
+
+    test('should default to 1 as bigintBalance value in case assets balance is missing in total.assets', () => {
+      mockCalculateAssetBalance.mockReset();
+      assetsTransformers.assetTransformer({ ...params, total: { assets: new Map() } as Wallet.Cardano.Value });
+
+      expect(mockCalculateAssetBalance).toBeCalledWith(BigInt(1), params.token);
+      expect(mockCalculateAssetBalance).toBeCalledTimes(1);
+    });
+
+    test('to see proper metadataName in sortBy object', () => {
+      expect(
+        assetsTransformers.assetTransformer({
+          ...params,
+          token: { ...token, tokenMetadata: undefined } as Wallet.Asset.AssetInfo
+        }).sortBy.metadataName
+      ).toEqual(undefined);
     });
   });
 });

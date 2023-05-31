@@ -19,6 +19,7 @@
     "build": "rollup -c rollup.config.js",
     "cleanup": "shx rm -rf node_modules",
     "watch": "yarn build --watch",
+    "test:coverage": "yarn test --coverage",
     "test": "echo \"Error: no test specified\"",
     "storybook": "export NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
     "build-storybook": "export NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
