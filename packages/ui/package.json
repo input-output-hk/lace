@@ -2,31 +2,31 @@
   "name": "@lace/ui",
   "version": "1.0.0",
   "description": "Lace UI Toolkit",
+  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/ui/README.md",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/input-output-hk/lace.git"
   },
-  "author": "IOHK",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/input-output-hk/lace/issues"
-  },
-  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/ui/README.md",
+  "author": "IOHK",
   "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
   "module": "dist/index.esm.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.js",
-    "cleanup": "shx rm -rf node_modules",
-    "watch": "yarn build --watch",
-    "test": "echo \"Error: no test specified\"",
-    "storybook": "export NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
     "build-storybook": "export NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "cleanup": "shx rm -rf node_modules",
     "format": "yarn prettier --write '**/*.tsx'",
+    "lint": "eslint .",
+    "storybook": "export NODE_OPTIONS=--openssl-legacy-provider; start-storybook -p 6006",
+    "test": "echo \"Error: no test specified\"",
     "test-storybook": "test-storybook",
-    "test-storybook:ci": "export NODE_OPTIONS=--openssl-legacy-provider; export STORYBOOK_TEST=1; concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"yarn build-storybook && http-server storybook-static --port 6006\" \"wait-on http://127.0.0.1:6006/ && yarn test-storybook\""
+    "test-storybook:ci": "export NODE_OPTIONS=--openssl-legacy-provider; export STORYBOOK_TEST=1; concurrently -k -s first -n \"SB,TEST\" -c \"magenta,blue\" \"yarn build-storybook && http-server storybook-static --port 6006\" \"wait-on http://127.0.0.1:6006/ && yarn test-storybook\"",
+    "typecheck": "tsc --noEmit",
+    "watch": "yarn build --watch"
   },
   "dependencies": {
     "@radix-ui/react-tabs": "^1.0.3",

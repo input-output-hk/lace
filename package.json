@@ -1,8 +1,17 @@
 {
   "name": "lace",
-  "description": "A TypeScript monorepo containing modules for light wallet solutions",
   "version": "1.1.0",
   "private": true,
+  "description": "A TypeScript monorepo containing modules for light wallet solutions",
+  "homepage": "https://github.com/input-output-hk/lace#README.md",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
+  },
+  "license": "Apache-2.0",
+  "contributors": [
+    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)",
+    "Przemysław Włodek <przemyslaw.wlodek@iohk.io> (https://iohk.io)"
+  ],
   "workspaces": [
     "packages/common",
     "packages/cardano",
@@ -13,29 +22,29 @@
     "packages/ui"
   ],
   "scripts": {
+    "base-command-for-build-scripts": "wsrun --prefix -tram ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
     "browser": "APP_NAME=browser-extension-wallet yarn $1",
     "build": "yarn base-command-for-build-scripts -c build",
     "build-deps": "EXCLUDE_APP=true yarn build",
-    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)' -c watch",
-    "watch-deps": "EXCLUDE_APP=true yarn watch",
-    "base-command-for-build-scripts": "wsrun --prefix -tram ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
+    "cardano:lint": "yarn eslint-cmd \"packages/cardano/**/*.{js,ts,tsx}\"",
+    "chromatic": "ENV=development yarn build-storybook; chromatic --exit-zero-on-changes --project-token=e28776c940b9 -d storybook-static/",
     "cleanup": "yarn workspaces run cleanup && shx rm -rf node_modules storybook-static && rm -rf .cache/eslintcache",
+    "common:lint": "yarn eslint-cmd \"packages/common/**/*.{js,ts,tsx}\"",
+    "core:lint": "yarn eslint-cmd \"packages/core/**/*.{js,ts,tsx}\"",
+    "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore",
+    "extension:lint": "yarn eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
     "lint": "yarn workspaces run lint && yarn markdown:lint",
+    "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
+    "markdown:lint:fix": "yarn markdown:lint --fix",
     "prepare": "husky install & ts-patch install -s",
-    "test": "yarn workspaces run test",
-    "test:coverage": "yarn workspaces run test:coverage",
-    "version": "standard-version",
     "storybook": "ENV=development start-storybook -p 6006",
     "prestorybook:build": "yarn build",
     "storybook:build": "ENV=development build-storybook --log-level error",
-    "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore",
-    "extension:lint": "yarn eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
-    "core:lint": "yarn eslint-cmd \"packages/core/**/*.{js,ts,tsx}\"",
-    "cardano:lint": "yarn eslint-cmd \"packages/cardano/**/*.{js,ts,tsx}\"",
-    "common:lint": "yarn eslint-cmd \"packages/common/**/*.{js,ts,tsx}\"",
-    "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
-    "markdown:lint:fix": "yarn markdown:lint --fix",
-    "chromatic": "ENV=development yarn build-storybook; chromatic --exit-zero-on-changes --project-token=e28776c940b9 -d storybook-static/"
+    "test": "yarn workspaces run test",
+    "test:coverage": "yarn workspaces run test:coverage",
+    "version": "standard-version",
+    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)' -c watch",
+    "watch-deps": "EXCLUDE_APP=true yarn watch"
   },
   "lint-staged": {
     "*(apps/**/*.{js,ts,tsx}|packages/!(ui)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
@@ -53,15 +62,35 @@
     ],
     "packages/staking/package.json": "sort-package-json"
   },
-  "contributors": [
-    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)",
-    "Przemysław Włodek <przemyslaw.wlodek@iohk.io> (https://iohk.io)"
-  ],
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/input-output-hk/lace/issues"
+  "resolutions": {
+    "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.f9c48c0.0",
+    "ansi-regex": "^5.0.1",
+    "async": "^3.2.2",
+    "cross-fetch": "^3.1.5",
+    "follow-redirects": "^1.14.8",
+    "glob-parent": "^5.1.2",
+    "got": "^11.8.5",
+    "http-cache-semantics": "^4.1.1",
+    "json-schema": "^0.4.0",
+    "minimist": "^1.2.6",
+    "moment": "^2.29.4",
+    "nan": "^2.17.0",
+    "nanoid": "^3.1.31",
+    "node-fetch": "^2.6.7",
+    "nth-check": "^2.0.1",
+    "parse-link-header": "^2.0.0",
+    "raw-loader/loader-utils": "^2.0.4",
+    "shelljs": "^0.8.5",
+    "ssh2": "^1.4.0",
+    "tar": "^6.1.9",
+    "terser": "^5.14.2",
+    "trim": "^0.0.3",
+    "trim-newlines": "^3.0.1",
+    "trim-off-newlines": "^1.0.3"
   },
-  "homepage": "https://github.com/input-output-hk/lace#README.md",
+  "dependencies": {
+    "normalize.css": "^8.0.1"
+  },
   "devDependencies": {
     "@atixlabs/eslint-config": "^1.2.3",
     "@babel/core": "7.15.0",
@@ -175,34 +204,5 @@
     "webpack-merge": "5.8.0",
     "webpack-subresource-integrity": "^5.1.0",
     "wsrun": "^5.2.4"
-  },
-  "resolutions": {
-    "http-cache-semantics": "^4.1.1",
-    "minimist": "^1.2.6",
-    "json-schema": "^0.4.0",
-    "follow-redirects": "^1.14.8",
-    "ansi-regex": "^5.0.1",
-    "node-fetch": "^2.6.7",
-    "tar": "^6.1.9",
-    "moment": "^2.29.4",
-    "nth-check": "^2.0.1",
-    "glob-parent": "^5.1.2",
-    "async": "^3.2.2",
-    "shelljs": "^0.8.5",
-    "parse-link-header": "^2.0.0",
-    "ssh2": "^1.4.0",
-    "terser": "^5.14.2",
-    "trim": "^0.0.3",
-    "trim-newlines": "^3.0.1",
-    "trim-off-newlines": "^1.0.3",
-    "cross-fetch": "^3.1.5",
-    "got": "^11.8.5",
-    "nan": "^2.17.0",
-    "nanoid": "^3.1.31",
-    "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.f9c48c0.0",
-    "raw-loader/loader-utils": "^2.0.4"
-  },
-  "dependencies": {
-    "normalize.css": "^8.0.1"
   }
 }
