@@ -1,0 +1,6 @@
+.eslintrc.js
+*.d.ts
+*jest.config.js
+dist/*
+**/*.js
+apps/desktop/wdio-logs/*

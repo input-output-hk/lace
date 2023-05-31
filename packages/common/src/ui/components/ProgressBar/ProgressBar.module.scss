@@ -1,0 +1,11 @@
+.progressBarContainer {
+  background: var(--light-mode-light-grey);
+  height: 3px;
+  width: 100%;
+
+  .progressBar {
+    background: var(--primary-gradient);
+    height: 100%;
+    width: 0;
+  }
+}

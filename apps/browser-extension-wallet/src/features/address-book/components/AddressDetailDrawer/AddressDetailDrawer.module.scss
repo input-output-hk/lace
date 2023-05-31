@@ -1,0 +1,77 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../styles/index';
+
+.container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+  margin-top: size_unit(3);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+
+  .name {
+    color: var(--text-color-primary);
+    @include text-bodyLarge-bold;
+  }
+
+  .extended {
+    text-align: center;
+  }
+
+  .addressWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: size_unit(3);
+    margin-top: size_unit(1);
+    .address {
+      @include text-body-semi-bold;
+      max-width: 360px;
+      color: var(--text-color-secondary);
+      word-break: break-all;
+      flex: 1;
+      margin-top: size_unit(2);
+    }
+    .extended {
+      text-align: center;
+    }
+  }
+}
+
+.popupView {
+  .addressWrapper {
+    flex-direction: column;
+  }
+  .footer {
+    gap: size_unit(1);
+  }
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(2);
+
+  button {
+    font-weight: $font-weight-bold !important;
+  }
+}
+
+.copyAddressButton {
+  width: 100%;
+  font-weight: $font-weight-bold !important;
+}
+
+.copyIcon {
+  margin-right: size_unit(1);
+}
+
+.deleteButton {
+  color: var(--text-color-red) !important;
+}

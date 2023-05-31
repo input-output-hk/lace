@@ -1,0 +1,27 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../styles/rules/modal.scss';
+
+.continueInBrowser {
+  @extend %modal-globals;
+}
+
+.title {
+  text-align: center !important;
+  color: var(--text-color-primary) !important;
+}
+
+.description {
+  margin-top: size_unit(2) !important;
+  text-align: center;
+  color: var(--text-color-secondary) !important;
+  font-size: size_unit(2) !important;
+  font-weight: 500 !important;
+}
+
+.buttons {
+  display: flex;
+  gap: size_unit(2);
+  margin-top: size_unit(3) !important;
+  flex-direction: column;
+  width: size_unit(27);
+}

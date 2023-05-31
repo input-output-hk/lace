@@ -1,0 +1,102 @@
+@import '../../../../../packages/common/src/ui/styles/themes/light';
+
+@mixin light-theme {
+  /*
+  in case the theme provider is not being used, this media query allows us to use the theme set on the user system
+  */
+  @media (prefers-color-scheme: light) and (data-theme: light) {
+    :root {
+      @include theme-custom-properties($light-theme);
+    }
+  }
+
+  html[data-theme='light'] {
+    @include theme-custom-properties($light-theme);
+  }
+}
+
+// TODO: how can we improve documentation for custom properties? https://input-output.atlassian.net/browse/LW-5294
+
+/*
+====== LIGHT PALLET ======
+
+====== BACKGROUNDS ======
+
+--bg-color-body => #ffffff 
+--bg-color-container => #ffffff 
+
+====== PRIMARY COLOUR ======
+
+--primary-default => #7f5af0 
+--primary-hover => #7452db
+--primary-active => #7452db 
+--primary-accent => rgba(127, 90, 240, 0.3) 
+--primary-gradient => linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%) 
+
+====== SECONDARY COLOURS ======
+
+--secondary-gradient => linear-gradient(128.79deg, #f4b4d0 0%, #f5c25d 100%) 
+
+====== COLOURS ======
+
+ defined only in light mode
+--color-white => #fff 
+
+====== TEXT ======
+
+--text-color-primary => #3d3b39 
+--text-color-secondary => #878e9e 
+--text-color-white => #ffffff 
+--text-color-black => #212121 
+--text-color-green => #2cb67d 
+--text-color-red => #ff5470 
+--text-color-blue => #3489f7 
+--text-color-grey =>  #6b7280 
+
+====== SHADOWS ======
+
+--shadow-primary-button-hover => 0px 4px 10px rgba(#a78fa0, 0.2) rgba(#4b00b5, 0.3) 
+--shadow-inset-white => 2px 1000px 1px var(--color-white) inset 
+--shadow-inset-lgray => 2px 1000px 1px var(--light-mode-light-grey) inset 
+--shadow-setup-box => 0px 0px 20px rgba(167, 143, 160, 0.15)
+
+// we should start moving from properties above to properties below
+
+--shadows-toast-tooltip => 0px 0px 16px rgba(167, 143, 160, 0.2) 
+--shadows-card-pop-up => 0px 0px 20px rgba(167, 143, 160, 0.15) 
+--shadows-lighter-assets => 0px 0px 5px rgba(0, 0, 0, 0.05) 0px 0px 10px rgba(0, 0, 0, 0.05) 
+--shadows-hover-btn => 0px 4px 10px rgba(167, 143, 160, 0.2) 
+
+====== SCROLL BAR ======
+
+--scroll-bar-track => #fff 
+--scroll-bar-thum => #efefef 
+
+====== SHARED COLOURS THIS ARE THE SAME FOR LIGHT AND DARK MODE ======
+
+This follows naming from figma
+
+--lace-gradient => linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%) 
+--lace-pink => #ff92de 
+--lace-yellow => #fdc300 
+
+--data-pink => #ff5470 
+--data-pink-10 => rgba(255, 84, 112, 0.1) 
+--data-orange => #ff8e3c 
+--data-green => #2cb67d 
+--data-blue => #3489f7 
+
+====== PROPERTIES ONLY AVAILABLE ON LIGHT MODE ======
+
+This follows naming from figma
+
+--light-mode-black => #3d3b39 
+--light-mode-cream => #fcf5e3 
+--light-mode-dark-grey-plus => #7e8593 
+--light-mode-dark-grey => #878e9e 
+--light-mode-mid-grey => #c0c0c0 
+--light-mode-light-grey-plus => #efefef 
+--light-mode-light-grey-plus-56 => rgba(239, 239, 239, 0.56) 
+--light-mode-light-grey => #f9f9f9 
+--light-mode-light-grey-56 => rgba(249, 249, 249, 0.56) 
+*/

@@ -1,0 +1,13 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-top: size_unit(3);
+}
+.emptyContainer {
+  height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

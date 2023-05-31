@@ -1,0 +1,50 @@
+@import '../../styles/theme.scss';
+
+.inlineInfoList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(3);
+
+  * {
+    margin: 0;
+  }
+
+  .inlineInfo {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: size_unit(3);
+
+    * {
+      margin: 0;
+    }
+
+    .name {
+      max-width: 50%;
+      font-weight: 500;
+      font-size: var(--body, 16px);
+      line-height: size_unit(3);
+      color: var(--text-color-primary, #3d3b39);
+    }
+
+    .value {
+      max-width: 50%;
+      font-weight: 400;
+      font-size: var(--bodySmall, 14px);
+      line-height: size_unit(3);
+      color: var(--light-mode-dark-grey, var(--dark-mode-light-grey)) !important;
+      word-break: break-word;
+      text-align: end;
+
+      @media (max-width: $breakpoint-popup) {
+        line-height: 17px;
+      }
+    }
+
+    @media (max-width: $breakpoint-popup) {
+      gap: size_unit(4);
+    }
+  }
+}

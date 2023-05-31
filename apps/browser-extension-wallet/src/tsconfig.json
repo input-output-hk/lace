@@ -1,0 +1,31 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../dist/",
+    "rootDir": "./",
+    "baseUrl": "../src",
+    "resolveJsonModule": true,
+    "noEmitOnError": false,
+    "paths": {
+      "@assets/*": ["assets/*"],
+      "@components/*": ["components/*"],
+      "@hooks": ["hooks"],
+      "@hooks/*": ["hooks/*"],
+      "@lib/*": ["lib/*"],
+      "@providers": ["providers"],
+      "@providers/*": ["providers/*"],
+      "@routes": ["routes"],
+      "@routes/*": ["routes/*"],
+      "@src/*": ["*"],
+      "@stores": ["stores"],
+      "@stores/*": ["stores/*"],
+      "@styles/*": ["styles/*"],
+      "@types": ["types"],
+      "@types/*": ["types/*"],
+      "@utils/*": ["utils/*"],
+      "@views/browser/*": ["views/browser-view/*"]
+    }
+  },
+  "references": [{ "path": "../../../packages/core/src" }, { "path": "../../../packages/cardano/src" }],
+  "include": ["**/*", "../test/types/*.d.ts"]
+}

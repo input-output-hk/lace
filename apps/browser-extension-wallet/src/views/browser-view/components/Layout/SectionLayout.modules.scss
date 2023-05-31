@@ -1,0 +1,98 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/variables.scss';
+
+$grid-gap-x-small: 24px;
+$grid-gap-small: 55px;
+$grid-gap-medium: 75px;
+$grid-gap-large: 65px;
+
+$aside-width-small: 300px;
+$aside-width-medium: 340px;
+$aside-width-large: 420px;
+
+@function calc-left-box-gap($size) {
+  @return $size * 0.06; // assuming percentage base on medium screen width with 20px of gap https://www.figma.com/file/qGPfPiE6J7Oa7R1I1me6Vi/Lace-UI-toolkit?node-id=6%3A13
+  // this need to be confirmed
+}
+
+.content {
+  margin-top: 48px;
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  @media (min-width: $breakpoint-small) {
+    margin-top: 120px;
+  }
+}
+
+.sidePanelContainer {
+  position: relative;
+  grid-area: side-panel;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-left: $grid-gap-x-small;
+  height: 68px;
+
+  &.stickyAside.bottom {
+    justify-content: flex-end;
+  }
+
+  @media (min-width: $breakpoint-small) {
+    padding-left: $grid-gap-small;
+    height: auto;
+  }
+
+  @media (min-width: $breakpoint-medium) {
+    padding-left: $grid-gap-medium;
+  }
+
+  @media (min-width: $breakpoint-large) {
+    padding-left: $grid-gap-large;
+  }
+}
+
+.stickyAsideInner {
+  position: sticky;
+  z-index: 100;
+  &.top {
+    top: 0;
+  }
+  &.bottom {
+    bottom: 0;
+  }
+}
+
+.navigationBox {
+  display: flex;
+  align-items: center;
+  width: $aside-width-large;
+  padding-top: 20px;
+  gap: 16px;
+
+  @media (min-width: $breakpoint-small) {
+    width: $aside-width-small;
+    padding-bottom: 52px;
+  }
+
+  @media (min-width: $breakpoint-medium) {
+    width: $aside-width-medium;
+  }
+
+  @media (min-width: $breakpoint-large) {
+    width: $aside-width-large;
+  }
+}
+
+.topBarAlignment {
+  display: flex;
+  width: 100%;
+  justify-content: end;
+}
+
+.navigationBoxOverlay {
+  box-shadow: var(--navigation-shadow-color) -5px -10px 40px 20px;
+  background: var(--navigation-bg);
+}

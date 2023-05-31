@@ -1,0 +1,44 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.pinExtension {
+  display: flex;
+  align-items: center;
+  gap: size_unit(2);
+  width: 300px;
+  padding: size_unit(2);
+  background: var(--color-white, var(--dark-mode-dark-grey-plus));
+  box-shadow: var(--shadows-lighter-assets);
+  border-radius: 11px;
+
+  * {
+    margin: 0;
+  }
+
+  .logo {
+    font-size: var(--pageHeading);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+
+    h5 {
+      @include text-bodySmall-bold;
+      color: var(--text-color-primary);
+    }
+
+    p {
+      @include text-bodySmall-semi-bold;
+      color: var(--text-color-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      svg {
+        font-size: var(--body);
+        transform: rotate(90deg);
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+@import '../../styles/theme.scss';
+.nftImage {
+  border-radius: inherit;
+  height: calc(100% + 2px);
+  left: -1px;
+  object-fit: cover;
+  position: absolute;
+  top: -1px;
+  width: calc(100% + 2px);
+
+  &.detailView {
+    @media (max-width: $breakpoint-popup) {
+      border-radius: 16px;
+      height: 310px;
+      object-fit: cover;
+      width: 310px;
+      position: relative;
+    }
+  }
+}
+
+.spinnerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  height: calc(100% + 2px);
+  width: calc(100% + 2px);
+}

@@ -1,0 +1,1231 @@
+{
+  "package.core": {
+    "assetActivityList.viewAll": "View All",
+    "assetSelectorOverlay": {
+      "youDonthaveAnyTokens": "You don't have any tokens.",
+      "justAddSomeDigitalAssetsToGetStarted": "Just add some digital assets to get started.",
+      "noNFTs": "You don't have any NFTs to send.",
+      "addFundsToStartYourWeb3Journey.": "Add funds to start your Web3 journey.",
+      "usedAllAssets": "All gone! You've already selected everything",
+      "noMatchingResult": "No results matching your search"
+    },
+    "assetActivityItem": {
+      "entry": {
+        "asset": "asset",
+        "token": "token",
+        "tokens": "tokens",
+        "staking": "Staking",
+        "name": {
+          "delegation": "Delegation",
+          "delegationDeregistration": "De-Registration",
+          "delegationRegistration": "Registration",
+          "rewards": "Rewards",
+          "incoming": "Received",
+          "outgoing": "Sent",
+          "sending": "Sending",
+          "self": "Self Transaction"
+        }
+      }
+    },
+    "transactionDetailBrowser": {
+      "address": "Address",
+      "sent": "Sent",
+      "sending": "Sending",
+      "header": "Summary of your activity",
+      "transactionHash": "Transaction Hash",
+      "status": "Status",
+      "timestamp": "Timestamp",
+      "inputs": "Inputs",
+      "outputs": "Outputs",
+      "transactionFee": "Transaction fee",
+      "deposit": "Deposit",
+      "metadata": "Metadata",
+      "transactionFeeInfo": "The amount you have been charged to process your transaction",
+      "received": "Received",
+      "delegation": "Delegation",
+      "poolName": "Pool name",
+      "poolTicker": "Pool ticker",
+      "poolId": "Pool ID",
+      "rewards": "Rewards",
+      "rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
+      "summary": "Summary",
+      "from": "From",
+      "to": "To",
+      "multipleAddresses": "Multiple addresses"
+    }
+  },
+  "tab.main.title": "Tab extension",
+  "general": {
+    "buttons.back": "Back",
+    "button.cancel": "Cancel",
+    "button.confirm": "Confirm",
+    "button.agree": "Agree",
+    "button.home": "Home",
+    "button.close": "Close",
+    "button.send": "Send",
+    "button.copy": "Copy",
+    "button.copied": "Copied",
+    "button.continue": "Continue",
+    "button.reload": "Reload",
+    "button.authorize": "Authorize",
+    "clipboard.copiedToClipboard": "Copied to clipboard",
+    "adaFollowingNumericValue": "ADA",
+    "errors": {
+      "networkError": "Network Error",
+      "uhoh": "Uh Oh!",
+      "tryAgain": "Try again",
+      "invalidPassword": "Invalid password",
+      "invalidMnemonic": "Invalid mnemonic",
+      "somethingWentWrong": "Something went wrong, please try again",
+      "insufficientBalance": "Insufficient balance",
+      "utxoNotFragmentedEnough": "UTxO Not Fragmented Enough",
+      "utxoFullyDepleted": "UTxO Fully Depleted",
+      "maximumInputCountExceeded": "Maximum Input Count Exceeded",
+      "bundleAmountIsEmpty": "Amount value missing",
+      "incorrectAddress": "Incorrect address",
+      "wrongNetworkAddress": "This address belongs to a different network",
+      "wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead."
+    },
+    "warnings": {
+      "youHaveToStartAgain": "You'll have to start again",
+      "areYouSureYouWantToExit": "Are you sure you want to exit?",
+      "thisWillNotBeSaved": "This will not be saved",
+      "cannotFetchPrice": "Unable to fetch fiat values. Everything's fine – just come back later.",
+      "priceDataExpired": "Price data expired - We are unable to fetch the most recent pricing information.\nDetails of the last ADA value recorded: {{ date }}",
+      "walletIsOffline": "Wallet is offline - Seems like your internet connection is not working. No worries, you can still navigate the wallet based on the latest connection you had."
+    },
+    "lock.helpAndSupport": "Help and support",
+    "lock.yourWalletIsLocked": "Your wallet is locked.",
+    "lock.toUnlockOpenPopUp": "To unlock, open the extension",
+    "networks": {
+      "mainnet": "Mainnet",
+      "preprod": "Preprod",
+      "preview": "Preview",
+      "legacyTestnet": "Legacy Testnet",
+      "custom": "Custom",
+      "offline": "Offline",
+      "error": "Your internet connection is not working. You can still navigate the wallet based on the latest connection you had.",
+      "connectionUnavailable": {
+        "title": "Poor connection",
+        "error": "You're online, but there's an issue on our end. We're working on it. And don't worry, your funds are safe."
+      }
+    },
+    "credit": {
+      "poweredBy": "Powered by",
+      "coinGecko": "CoinGecko"
+    },
+    "loading": "Loading..."
+  },
+  "multipleSelection.cancel": "Cancel",
+  "multipleSelection.selectMultiple": "Select multiple",
+  "multipleSelection.addToTransaction": "Add to transaction",
+  "multipleSelection.deselect": "Deselect",
+  "multipleSelection.reachedTheTxLimit": "You've reached the transaction size limit",
+  "multipleSelection.noOtherTokensCanBeAdded": "No other tokens can be added to this transaction.",
+  "multipleSelection.gotIt": "Got it",
+  "multipleSelection.clear": "Clear",
+  "walletOverview": {
+    "title": "Assets",
+    "balance.receiveBtn": "Receive",
+    "balance.sendBtn": "Send",
+    "toolbar.wallet": "Wallet",
+    "toolbar.activity": "Activity",
+    "cryptoAssets.coins": "Coins",
+    "cryptoAssets.nfts": "NFTs"
+  },
+  "transactions": {
+    "detail.title": "Activity detail",
+    "detail.blockInfo": "Block information"
+  },
+  "announcement.title.badge": "New",
+  "announcement.title.text": "release notes",
+  "announcement.cta": "Got it",
+  "walletSetup": {
+    "backModal": {
+      "youllHaveToStartAgain": "You'll have to start again",
+      "youWillBeShowANewRecoveryPhraseThePreviousOneWillBeDeleted": "You will be shown a new recovery phrase, the previous one will be deleted",
+      "iUnderstandGoBack": "Cancel",
+      "ohOkLetsContinue": "Got it"
+    },
+    "recoveryPhrase": {
+      "currentSet": "Set {{set}} - words {{start}} to {{end}}",
+      "enterYourSecretRecoveryPhrase": "Enter your secret recovery phrase",
+      "confirm": "confirm",
+      "iHaveWrittenDownAll24Word": "I have written down all 24 words",
+      "howOftenWouldYouLikeToVerifyYourPassphrase": "How often would you like to verify your passphrase?",
+      "verificationFrequencyDecription": "Keep your wallet secure by verifying your passphrase periodically"
+    },
+    "walletName": {
+      "pleaseNameYourWallet": "Please name your wallet",
+      "walletNameDescription": "Lorem ipsum dolor sit amet"
+    },
+    "setupOptions": {
+      "createNewWallet": "Create new wallet",
+      "createDescription": "Start with a fresh wallet",
+      "restoreWallet": "Restore wallet",
+      "restoreDescription": "By typing your secret phrase",
+      "getStarted": "Get started"
+    },
+    "password": {
+      "createYourWalletPassword": "Create your wallet password",
+      "capitalLetter": "1 capital letter",
+      "lowecasseLetter": "1 lowercase letter",
+      "number": "1 number",
+      "characterMin": "8 characters min",
+      "looksLikeThePasswordsYouHaveEnteredAreNotMatching": "Looks Like The Passwords You Have Entered Are Not Matching"
+    },
+    "layout": {
+      "btns": {
+        "next": "Next",
+        "back": "Back"
+      }
+    },
+    "restore": {
+      "recoveryPassphrasesFromOtherWalletsWillNotWork": "Recovery passphrases from other wallets will not work!"
+    }
+  },
+  "walletActivity": {
+    "sectionTitle": "Activity"
+  },
+  "send": {
+    "balanceAmount": "Balance: {{ amount }}",
+    "sectionTitle.sendFund": "Send funds",
+    "sectionTitle.confirmTransaction": "Confirm transaction",
+    "sectionTitle.TransactionSummary": "Transaction summary",
+    "form.cancel": "Cancel",
+    "form.next": "Next",
+    "form.addrTitle": "To",
+    "confirmation.enterYourSpendingPassword": "Enter your spending password",
+    "summary.youSign": "You sign:",
+    "addressBook.title": "Address book",
+    "networkFee": "Network fee",
+    "cancelModal.woopsWrongButton": "Woops wrong button",
+    "cancelModal.iUnderstandGoBack": "I understand, go back",
+    "cancelModal.title": "Back home?",
+    "cancelModal.description": "By pressing the 'Cancel' button you will be redirected to the home page",
+    "addressBook.nameLabel": "Wallet name",
+    "sendMultipleOutputsAtTheSameTime": "Send multiple outputs at the same time and add metadata. This means you can send multiple assets to different addresses in one transaction",
+    "theAmountYoullBeChargedToProcessYourTransaction": "The amount you'll be charged to process your transaction",
+    "connectYourLedger": "Connect your Ledger device directly to your computer. Unlock the device and open the Cardano app. Then click confirm.",
+    "toSendAnNFTOrNativeToken": "To send an NFT or a native token, a small amount of ADA has to be sent with it to facilitate the operation"
+  },
+  "staking": {
+    "sectionTitle": "Staking",
+    "notEnoughFunds.title": "Not enough funds",
+    "notEnoughFunds.text": "You need at least 10 ADA to start staking",
+    "notStaking.title": "Find a pool to delegate",
+    "notStaking.text": "Enter a stake pool name or ID in the search bar. Delegate your funds to a pool by clicking on the Delegate button",
+    "confirmation.title": "Confirmation",
+    "details.confirmation.button.confirm": "Next",
+    "authorization.title": "Authorization",
+    "authorization.delegateBtnLabel": "Delegate",
+    "stakePools.sectionTitle": "Stake pools",
+    "expandView.title": "There is more!",
+    "expandView.description": "Get more information on the network and the pool in the browser experience",
+    "expandView.button": "Expand view",
+    "confirmation.stakingDeposit": "Staking deposit",
+    "confirmation.transactionFee": "Transaction fee",
+    "confirmation.theAmountYoullBeChargedForRegisteringYourStakeKey": "The amount you'll be charged for registering your stake key."
+  },
+  "poolDetails": {
+    "sectionTitle": "Pool detail",
+    "delegate": "Delegate to this pool"
+  },
+  "addressBook": {
+    "sectionTitle": "Address book",
+    "empty.sendSecurelyBySavingYourFavouriteAddresses": "Send securely by saving your favourite addresses",
+    "empty.addNewAddress": "Add address",
+    "errors": {
+      "nameTooLong": "Name too long ({{ maxLength }} characters max.)",
+      "givenAddressAlreadyExist": "Given address already exists",
+      "givenNameAlreadyExist": "Given name already exist"
+    },
+    "addressDetail.btn.copy": "Copy",
+    "editModal": {
+      "title": "Save Address"
+    },
+    "deleteModal.title": "Delete this address?",
+    "deleteModal.description": "Are you sure? There is no way to undo this action",
+    "deleteModal.buttons.cancel": "No"
+  },
+  "unlock": {
+    "sectionTitle": "Welcome back!",
+    "button": "Unlock",
+    "input.placeholder": "Password",
+    "forgotPassword": "Forgot password?"
+  },
+  "forgotPassword": {
+    "title": "Forgot password?",
+    "description": "By confirming this action we will unpair your wallet and request to input your mnemonic passphrase.",
+    "confirm": "Proceed",
+    "cancel": "Cancel"
+  },
+  "settings": {
+    "title": "Settings",
+    "passphraseVerificationSection.title": "Passphrase verification",
+    "security.title": "Security",
+    "support.title": "Support",
+    "legals.title": "Legals",
+    "security.passphraseVerificationIntervals": "Passphrase verification intervals",
+    "legals.termsAndConditions": "Terms and conditions",
+    "legals.privacyPolicy": "Privacy policy",
+    "legals.cookiePolicy": "Cookie policy",
+    "legals.termsOfService": "Terms of service",
+    "support.faqs": "FAQ's",
+    "support.feesExplained": "Fees explained",
+    "copyAddress": "Copy address"
+  },
+  "dapp": {
+    "nowallet.btn": "Create or restore a wallet",
+    "connect.header": "Authorize DApp",
+    "connect.btn.accept": "Authorize",
+    "connect.btn.cancel": "Cancel",
+    "connect.btn.justOnce": "Once",
+    "connect.btn.confirm": "Confirm",
+    "connect.modal.allowAlways": "Always",
+    "connect.modal.allowOnce": "Only once",
+    "connect.modal.header": "DApp connection",
+    "connect.modal.description": "You agree to whitelist this DApp to access your wallet.",
+    "confirm.header": "Confirm transaction",
+    "confirm.details.header": "Transaction",
+    "confirm.details.amount": "Amount",
+    "confirm.details.recepient": "Recipient",
+    "confirm.header.confirmData": "Confirm Data",
+    "confirm.header.signData": "Sign Data",
+    "confirm.btn.cancel": "Cancel",
+    "confirm.btn.confirm": "Confirm",
+    "confirm.details.fee": "Fee",
+    "sign.header": "Sign transaction",
+    "sign.success.header": "Done!",
+    "sign.success.title": "You can safely close this panel",
+    "sign.success.description": "The transaction is pending, the detail will soon appear in your activity",
+    "sign.failure.title": "Oops something went wrong!",
+    "sign.failure.description": "The transaction has not been proceed. Please try again",
+    "sign.data.success.description": "Data signed",
+    "sign.data.failure.description": "Signing failed. Please try again",
+    "list.title": "Authorized DApps",
+    "list.subTitle": "This is the list of the dApps you have authorized to interact with your wallet. You can remove them at anytime.",
+    "list.subTitleEmpty": "This is where you'll find any DApps you authorize to interact with your wallet.",
+    "list.removedSuccess": "DApp disconnected",
+    "list.removedFailure": "DApp disconnection unsuccessful",
+    "list.empty.text": "You don't have any authorized DApps",
+    "delete.title": "Hold up!",
+    "delete.description": "Are you sure you want to disconnect this DApp? You'll have to authorize it again.",
+    "delete.cancel": "Back",
+    "delete.confirm": "Disconnect DApp",
+    "noWallet.heading": "You don't have a wallet right now",
+    "noWallet.description": "You'll need to create or restore a wallet to connect to a dApp or make a transaction.",
+    "educationBanner.title": "DApp Guide",
+    "betaModal": {
+      "header": "DApp connector is now in Beta",
+      "content.1": "This feature is now available in Lace but we're still ironing out the kinks, so you may have issues connecting to a DApp or signing transactions.",
+      "content.2": "Please bear with us while we work on improving your experience.",
+      "btn.close": "Got it",
+      "btn.learnMore": "Learn more"
+    },
+    "transactions.confirm.title": "Confirm transaction"
+  },
+  "qrInfo": {
+    "receive": "Receive",
+    "title": "Your wallet address",
+    "scanQRCodeToConnectWallet": "Scan QR code or copy address",
+    "walletAddress": "Wallet address",
+    "publicKey": "Show public key"
+  },
+  "expandPopup": "Expand",
+  "browserView": {
+    "welcome": "Welcome!",
+    "addFundsToStartYourCryptoJourney": "Add funds to start your crypto journey",
+    "sidePanel.aboutYourWallet": "About your wallet",
+    "sidePanel.learnAbout": "Learn about",
+    "sidePanel.aboutStaking": "About staking",
+    "assets.add": "Add",
+    "assets.title": "Tokens",
+    "assets.token": "Token",
+    "assets.send": "Send",
+    "assets.welcome": "Welcome!",
+    "assets.addFundsToStartYourCryptoJourney": "Add funds to start your crypto journey",
+    "assets.startYourWeb3Journey": "Start your Web3 journey. Just add some digital assets to get started.",
+    "assets.totalWalletBalance": "Total wallet balance",
+    "assets.portfolioBalanceToolTip": "Approximate value of all tokens with available fiat pair",
+    "assetDetails.title": "Token detail",
+    "assetDetails.price": "Price",
+    "assetDetails.assetPrice": "Token price",
+    "assetDetails.assetBalance": "Token balance",
+    "assetDetails.recentTransactions": "Recent transactions",
+    "assetDetails.seeAllYourTransactions": "See all your transactions",
+    "assetDetails.viewAll": "View all",
+    "sideMenu.links.tokens": "Tokens",
+    "sideMenu.links.nfts": "NFTs",
+    "sideMenu.links.activity": "Activity",
+    "sideMenu.links.staking": "Staking",
+    "sideMenu.links.dappStore": "Dapp Store",
+    "sideMenu.links.voting": "Voting",
+    "sideMenu.links.addressBook": "Address Book",
+    "sideMenu.dapps.header": "Open Dapps",
+    "sideMenu.mode.light": "Light mode",
+    "sideMenu.mode.dark": "Dark mode",
+    "topNavigationBar.links.settings": "Settings",
+    "topNavigationBar.links.network": "Network",
+    "topNavigationBar.links.lockWallet": "Lock wallet",
+    "topNavigationBar.walletStatus.walletSynced": "Wallet synced",
+    "topNavigationBar.walletStatus.notSyncedToTheBlockchain": "Not synced to the blockchain",
+    "topNavigationBar.walletStatus.walletSyncing": "Wallet syncing",
+    "walletSetup.support": "Help & Support",
+    "walletSetup.mnemonicResetModal.header": "Are you sure you want to start again?",
+    "walletSetup.mnemonicResetModal.content": "In order to keep you safe, we'll show you a new set of 24 words.",
+    "walletSetup.mnemonicResetModal.cancel": "Cancel",
+    "walletSetup.mnemonicResetModal.confirm": "OK",
+    "walletSetup.confirmRestoreModal.header": "Restoring a multi-address wallet?",
+    "walletSetup.confirmRestoreModal.notVisible": "If you're restoring a wallet created in another application, you may find some of your assets are not visible. Don't worry. Create a new wallet and send your assets to your new Lace wallet address and everything should be visible again.",
+    "walletSetup.confirmRestoreModal.confirm": "OK",
+    "walletSetup.confirmExperimentalHwDapp.header": "Limited support for Dapp connection",
+    "walletSetup.confirmExperimentalHwDapp.content": "This current version does not support signing transactions through the Dapp connection feature with hardware wallets. Please stay tuned for upcoming releases and new features through @lace on Twitter.",
+    "walletSetup.confirmExperimentalHwDapp.confirm": "OK",
+    "crypto": {
+      "emptyDashboard.welcome": "Welcome",
+      "emptyDashboard.addSomeFundsYoStartYourJourney": "Add some funds to start your journey",
+      "emptyDashboard.useThisAddressOrScanTheQRCodeToTransferFunds": "Use this address or scan the QR code to transfer funds",
+      "emptyDashboard.copyAddress": "Copy address",
+      "dashboard": {
+        "emptyRewards": "Stake your funds to receive ADA rewards",
+        "adaBalance": "ADA Balance",
+        "rewards": "Rewards",
+        "topAssetsTitle": "Top assets",
+        "lastTxsTitle": "Last transactions",
+        "staking": "Staking",
+        "faqBanner": {
+          "title": "Have a question?",
+          "subtitle": "Check out the FAQ"
+        },
+        "glossaryBanner": {
+          "title": "What's that word?",
+          "subtitle": "Have a look at the Glossary"
+        }
+      },
+      "nft": {
+        "send": "Send NFT"
+      }
+    },
+    "addressBook.title": "Address book",
+    "addressBook.addressList.addItem.title": "Your saved addresses",
+    "addressBook.addressList.addItem.button": "+ Add new address",
+    "addressBook.emptyState.title": "You don't have any saved addresses",
+    "addressBook.emptyState.message": "Save your favorites to your address book for easy access right here",
+    "addressBook.emptyState.button": "Add address",
+    "addressBook.addressDetail.btn.copy": "Copy",
+    "addressBook.addressDetail.title": "Address detail",
+    "addressBook.editAddress.title": "Edit address",
+    "addressBook.addressDetail.btn.edit": "Edit",
+    "addressBook.addressDetail.btn.delete": "Delete",
+    "addressBook.addressForm.title.edit": "Edit address",
+    "addressBook.addressForm.title.add": "Add address",
+    "addressBook.addressForm.saveAddress": "Save address",
+    "addressBook.deleteModal.title": "Hold up!",
+    "addressBook.deleteModal.description": "Are you sure you want to delete this? You can't undo this action.",
+    "addressBook.deleteModal.description1": "Are you sure you want to delete this?",
+    "addressBook.deleteModal.description2": "You can't undo this action.",
+    "addressBook.deleteModal.buttons.cancel": "Cancel",
+    "addressBook.deleteModal.buttons.confirm": "Delete address",
+    "addressBook.toast.addAddress": "Address added",
+    "addressBook.toast.editAddress": "Edited successfully",
+    "addressBook.toast.deleteAddress": "Address removed",
+    "addressBook.form.nameMissing": "Name field is required",
+    "addressBook.form.nameHasWhiteSpace": "Name has unnecessary white space",
+    "addressBook.form.nameIsTooLong": "Max {{maxLength}} Characters",
+    "addressBook.form.addressMissing": "Address field is required",
+    "addressBook.form.addressHasWhiteSpace": "Address has unnecessary white space",
+    "addressBook.form.incorrectCardanoAddress": "Incorrect Cardano address",
+    "voting.pageTitle": "Voting",
+    "voting.catalystRegistrationFlow.title": "Wallet registration",
+    "voting.educationalList.title": "About governance",
+    "voting.fundWalletBanner.title": "Add funds to vote",
+    "voting.fundWalletBanner.subtitle": "Add funds to start your crypto journey",
+    "voting.votingPhase": "Voting phase",
+    "voting.alert.insufficientBalance.message": "Not enough ADA to vote, add funds before the Snapshot",
+    "voting.alert.insufficientBalanceDuringSnapshot.message": "You did not have enough funds in your wallet during the snapshot, make sure to have 500ADA to participate",
+    "voting.alert.insufficientBalance.action": "Add funds",
+    "voting.alert.registrationEnded.message": "Registration phase ended. You can still register, however you will have to wait until the next Fund to participate",
+    "voting.alert.registrationEnded.action": "Register",
+    "voting.phase": "Phase",
+    "voting.registration": "Registration",
+    "voting.snapshot": "Snapshot",
+    "voting.voting": "Voting",
+    "voting.registerYourWallet": "You must register your wallet to vote in Funds. You only have to register once.",
+    "voting.register": "Register",
+    "voting.registered": "Registered",
+    "voting.snapshotExplanation": "A snapshot is taken to see which wallets are eligible to vote, <b>you need at least {{amount}}ADA to participate</b>",
+    "voting.voteForChallenges": "Browse through the different proposals and challenges in the Catalyst app and vote for them",
+    "voting.votePrompt": "Go vote!",
+    "voting.voting.canNotParticipate": "Can't participate",
+    "sendReceive": {
+      "sendAndReceiveAssetsAtTheSpeedOfLightPart1": "Send and receive assets",
+      "sendAndReceiveAssetsAtTheSpeedOfLightPart2": "at the speed of light",
+      "send": "Send",
+      "receive": "Receive"
+    },
+    "staking": {
+      "title": "Staking",
+      "stakingInfo.title": "You are currently staking with:",
+      "stakingInfo.tooltip.title": "USD Value",
+      "stakingInfo.totalRewards.title": "Total rewards",
+      "stakingInfo.totalStaked.title": "Total staked",
+      "stakingInfo.stats.ros": "ROS",
+      "stakingInfo.stats.Fee": "Fee",
+      "stakingInfo.stats.Margin": "Margin",
+      "stakingInfo.lastReward.title": "Last reward",
+      "stakingInfo.StakeFundsBanner.title": "Start staking",
+      "stakingInfo.StakeFundsBanner.description": "Stake your funds on a pool to start receiving rewards.",
+      "stakingInfo.StakeFundsBanner.balanceTitle": "Available balance",
+      "fundWalletBanner": {
+        "subtitle": "Add funds to start staking",
+        "prompt": "Copy this address or scan the QR code to transfer funds"
+      },
+      "faqBanner": {
+        "title": "Dig deeper",
+        "subtitle": "What is staking?"
+      },
+      "glossaryBanner": {
+        "title": "What's that word?",
+        "subtitle": "Have a look at the Glossary"
+      },
+      "stakePoolsTable.title": "Stake pools",
+      "stakePoolsTable.searchPlacehholder": "Search by type, token name or ID",
+      "stakePoolsTable.emptyMessage": "No results matching your search",
+      "details": {
+        "title": "Stake pool detail",
+        "titleSecond": "Manage delegation",
+        "unstakingIsNotYetAvailableFollowTheseStepsIfYouWishToChangeStakePool": "Unstaking is not yet available. Follow these steps if you wish to change stake pool",
+        "clickOnAPoolFromTheListInTheMainPage": "Click on a pool from the list in the main page",
+        "clickOnTheStakeToThisPoolButtonInTheDetailPage": "Click on the “Stake to this pool” button in the detail page",
+        "followTheIstructionsInTheStakingFlow": "Follow the instructions in the staking flow",
+        "stakeButtonText": "Stake on this pool",
+        "statistics.title": "Statistics",
+        "information.title": "Information",
+        "social.title": "Social links",
+        "poolIds.title": "Pool IDs",
+        "owners.title": "Owners",
+        "confirmation.title": "Staking confirmation",
+        "confirmation.subTitle": "Confirm the stake pool",
+        "confirmation.cardanoName": "Cardano",
+        "confirmation.totalCost.title": "Transaction cost",
+        "confirmation.button.confirm": "Next",
+        "confirmation.button.signing": "Signing in progress",
+        "confirmation.button.confirmWithDevice": "Confirm with {{hardwareWallet}}",
+        "confirmation.button.continueInAdvancedView": "Continue in Advanced View",
+        "sign.title": "Staking confirmation",
+        "sign.subTitle": "Please sign the transaction with your password.",
+        "success.title": "Hurray! You've staked your funds",
+        "success.subTitle": "You'll start receiving your staking rewards after two epochs.",
+        "switchedPools.title": "Hurray! You've switched pools",
+        "switchedPools.subTitle": "You'll start receiving your staking rewards from the new pool after two epochs. Until then you'll continue receiving rewards from the previous one.",
+        "success.text": "You can safely close this panel",
+        "success.description": "The transaction is pending, 'Your stake' panel will soon appear on your dashboard",
+        "fail.title": "Oops! Something went wrong...",
+        "fail.subTitle": "The transaction was not successful. Please try again.",
+        "fail.text": "Something went wrong",
+        "fail.description": "The transaction was not successful. Please try again.",
+        "fail.btn.close": "Close",
+        "fail.btn.retry": "Retry",
+        "fail.btn.back": "Back",
+        "switchingPoolsModal.title": "Switching pool?",
+        "switchingPoolsModal.description": "That's totally fine! Just please note that you'll continue receiving rewards from your former pool for two epochs. After that, you'll start receiving rewards from your new pool.",
+        "switchingPoolsModal.buttons.cancel": "Cancel",
+        "switchingPoolsModal.buttons.confirm": "Fine by me",
+        "poolOversaturatedModal.title": "Switch things up",
+        "poolOversaturatedModal.description": "The stake pool you are staking on is too saturated. Please stake your funds on another pool to avoid missing out on rewards.",
+        "poolOversaturatedModal.buttons.confirm": "Got it",
+        "poolRetiredModal.title": "Time for a change",
+        "poolRetiredModal.description": "The stake pool you are staking on is now retired. Please stake your funds on another pool to avoid missing out on rewards.",
+        "poolRetiredModal.buttons.confirm": "Got it",
+        "exitStakingModal.title": "You'll have to start again",
+        "exitStakingModal.description": "Are you sure you want to exit? This will not be saved.",
+        "exitStakingModal.buttons.cancel": "Cancel",
+        "exitStakingModal.buttons.confirm": "Exit",
+        "noFundsModal.title": "You don't have enough funds to stake...",
+        "noFundsModal.description": "You need a minimum of 2 ada and fees to be able to stake",
+        "noFundsModal.buttons.cancel": "Close",
+        "noFundsModal.buttons.confirm": "Add funds",
+        "errors.utxoFullyDepleted": "UTxO has been fully depleted",
+        "errors.utxoBalanceInsufficient": "Balance Insufficient"
+      }
+    },
+    "onboarding": {
+      "commonError": {
+        "title": "Oops! Something went wrong",
+        "description": "Please check your hardware device.",
+        "ok": "OK"
+      },
+      "notDetectedError": {
+        "title": "Failed to detect device",
+        "description": "Please make sure your device is unlocked and the Cardano app is open.",
+        "agree": "Agree"
+      },
+      "startOver": {
+        "title": "Are you sure you want to start again?",
+        "description": "Connection to this device will be cancelled and you will need to re-connect.",
+        "cancel": "Cancel",
+        "gotIt": "Ok"
+      },
+      "sendTransitionAcknowledgment": {
+        "title": "Heads up",
+        "description": "Hardware wallet transactions will need to be confirmed in advanced view.",
+        "iUnderstand": "I understand",
+        "dontShowAgain": "Don't show again"
+      },
+      "stakingTransitionAcknowledgment": {
+        "title": "Heads up",
+        "description": "Staking to a pool will need to be confirmed in advanced view.",
+        "iUnderstand": "I understand"
+      },
+      "hardwareWalletSendTransition": {
+        "title": "This transaction will now open in advanced view",
+        "description": "Ledger transactions require confirmation in advanced view.",
+        "ok": "Ok",
+        "cancel": "Cancel"
+      },
+      "hardwareWalletStakingTransition": {
+        "title": "This will now open in advanced view",
+        "description": "Staking confirmation require confirmation in advanced view",
+        "ok": "Ok",
+        "cancel": "Cancel"
+      }
+    },
+    "activity": {
+      "title": "Activity",
+      "learnAbout": {
+        "title": "Learn about",
+        "whatAreActivityDetails": "What are activity details?",
+        "whatIsAnUnconfirmedTransaction": "What is an unconfirmed transaction?",
+        "doesLaceHaveFees": "Does Lace have fees?",
+        "transactionBundles": "Transaction bundles"
+      },
+      "entry": {
+        "asset": "asset",
+        "token": "token",
+        "tokens": "tokens",
+        "staking": "Staking",
+        "name": {
+          "delegation": "Delegation",
+          "delegationDeregistration": "De-Registration",
+          "delegationRegistration": "Registration",
+          "withdrawal": "Withdrawal",
+          "incoming": "Received",
+          "outgoing": "Sent",
+          "sending": "Sending",
+          "self": "Self Transaction"
+        }
+      },
+      "fundWalletBanner.title": "Add funds to start your Web3 journey",
+      "fundWalletBanner.subtitle": "Use this address or scan the QR code to transfer funds"
+    },
+    "transaction": {
+      "send.title": "Send",
+      "send.advancedTransaction": "Advanced transaction",
+      "send.metadata.addANote": "Add a note (max 160 char.)",
+      "send.metadata.note": "Note",
+      "send.metadata.count": "{{count}} characters",
+      "send.drawer.advanced": "Advanced",
+      "send.drawer.addBundle": "Add bundle",
+      "send.advancedFlowText": "Click 'Add bundle' to send assets to another recipient in this transaction.",
+      "send.drawer.newTransaction": "Send",
+      "send.drawer.transactionSummary": "Transaction summary",
+      "send.drawer.breakdownOfYourTransactionCost": "Breakdown of your transaction cost.",
+      "send.drawer.signTransaction": "Sign transaction",
+      "send.drawer.allDone": "All done!",
+      "send.drawer.transactionError": "Transaction error",
+      "send.drawer.addressList": "Select address",
+      "send.drawer.addressBookEmpty": "You don't have saved addresses yet",
+      "send.drawer.addressForm": "Add address",
+      "send.drawer.addressBook": "Address book",
+      "send.drawer.cancelEditAddressModal.title": "Oh?!",
+      "send.drawer.cancelEditAddressModal.description1": "Are you sure you want to exit?",
+      "send.drawer.cancelEditAddressModal.description2": "The address will not be saved",
+      "send.drawer.cancelEditAddressModal.cancel": "Back",
+      "send.drawer.cancelEditAddressModal.confirm": "I know",
+      "send.group.label1": "simple",
+      "send.group.label2": "advanced",
+      "send.totalFee": "Total fee",
+      "send.footer.cancel": "Cancel",
+      "send.footer.close": "Close",
+      "send.footer.confirm": "Confirm",
+      "send.footer.review": "Review transaction",
+      "send.footer.viewTransaction": "View transaction",
+      "send.footer.view": "View",
+      "send.footer.fail": "Back",
+      "send.footer.save": "Save",
+      "send.footer.signing": "Signing in progress",
+      "send.footer.confirmWithDevice": "Confirm with {{hardwareWallet}}",
+      "send.footer.continueInAdvancedView": "Continue in Advanced View",
+      "send.simple.to": "To",
+      "send.simple.enterYourSpendingPassword": "Enter your spending password",
+      "send.error.insufficientBalance": "Insufficient balance",
+      "send.error.invalidAddress": "invalid address",
+      "send.error.invalidPassword": "Wrong password",
+      "send.password.placeholder": "Password",
+      "success.youCanSafelyCloseThisPanel": "All done!",
+      "success.thisMayTakeAFewMinutes": "The transaction will complete and show in your activity soon.",
+      "success.localNodeBanner": {
+        "headline": "Enable local node",
+        "infoText": "Get faster transaction speeds and security by enabling the local node for this wallet.",
+        "buttonText": "Learn more"
+      },
+      "fail.oopsSomethingWentWrong": "Oops! Something went wrong",
+      "fail.problemSubmittingYourTransaction": "There was a problem submitting your transaction.",
+      "fail.clickBackAndTryAgain": "Click \"Back\" and try again.",
+      "success.thisMayTakeAFewMinutesToProcessYouCanViewTheStatusByClickingViewTransaction": "This may take a few minutes to process. You can view the status by clicking view transaction.",
+      "fail.theTransactionHasNotBeenProceedPleasetryagain": "There was a problem submitting your transaction. Click 'Back to transaction summary' and try again",
+      "send.advanced.output": "Add bundle",
+      "send.advanced.asset": "Add token or NFT ",
+      "send.advanced.bundleTitle": "Bundle {{ index }}",
+      "send.transactionFee": "Transaction fee",
+      "send.transactionCosts": "Transaction costs",
+      "send.adaAllocation": "Ada allocation",
+      "send.confirmationTitle": "Transaction confirmation",
+      "send.signTransactionWithPassword": "Please sign the transaction with your password.",
+      "send.enterWalletPasswordToConfirmTransaction": "Enter your wallet password to confirm transaction"
+    },
+    "settings": {
+      "heading": "Settings",
+      "wallet": {
+        "title": "Wallet",
+        "about": {
+          "title": "About",
+          "description": "Get information on the Lace app",
+          "content": {
+            "title": "About {{name}}",
+            "network": "Network",
+            "currentVersion": "Current version",
+            "commit": "Commit"
+          }
+        },
+        "general": {
+          "title": "Your keys",
+          "description": "View and copy your public and staking keys",
+          "removeWallet": "Remove wallet",
+          "removeWalletDescription": "Removing it does not affect the wallet balance, and it can be restored at any time.",
+          "removeAction": "Remove wallet",
+          "showPubKey": "Show public key",
+          "exportPubKey": "Export public key",
+          "showPubKeyDescription": "This lets you import your wallet to other browsers and devices, or to restore it at a later date",
+          "exportPubKeyDescription": "This enable you to easily import your wallet in other browser/devices or to restore it at a later point",
+          "showPubKeyAction": "Show public key",
+          "exportPubKeyAction": "Export public key",
+          "removeWalletAlert": {
+            "title": "Hold up!",
+            "content": "Are you sure you want to remove your wallet? You'll have to restore it with your secret passphrase to access it again.",
+            "cancel": "Back",
+            "confirm": "Remove wallet"
+          }
+        },
+        "collateral": {
+          "title": "Collateral",
+          "description": "Add and remove collateral in order to interact with smart contracts on Cardano",
+          "amountDescription": "Add collateral in order to interact with smart contracts on Cardano. The recommended collateral amount is 5 ₳.",
+          "amountSeparated": "The amount is separated from your account balance, you can choose to return it to your balance at any time.",
+          "reclaimDescription": "Your collateral amount is 5 ₳.",
+          "reclaimBanner": "When removing the collateral amount, it is returned to the account balance, but disables interactions with smart contracts.",
+          "close": "Close",
+          "confirm": "Confirm",
+          "reclaimCollateral": "Reclaim collateral",
+          "continueInAdvancedView": "Continue in Advanced View",
+          "confirmWithLedger": "Confirm transaction with Ledger",
+          "notEnoughAda": "You don't have enough ADA to proceed with the transaction.",
+          "active": "Active",
+          "inactive": "Inactive"
+        },
+        "network": {
+          "title": "Network",
+          "description": "Switch from mainnet to testnet",
+          "drawerDescription": "Select the network you would like your wallet to operate on.",
+          "networkSwitched": "Switched network"
+        },
+        "authorizedDApps.title": "Authorized DApps",
+        "authorizedDApps.description": "See and manage authorized DApps"
+      },
+      "preferences": {
+        "title": "Preferences",
+        "currency": {
+          "title": "Currency",
+          "description": "Select your preferred local currency",
+          "toast": "Currency updated",
+          "list": {
+            "ADA": "Cardano",
+            "USD": "US Dollar",
+            "AUD": "Australian Dollar",
+            "BRL": "Real",
+            "CAD": "Canadian Dollar",
+            "EUR": "Euro",
+            "INR": "Indian Rupee",
+            "JPY": "Yen",
+            "KRW": "Won",
+            "CHF": "Swiss Franc",
+            "GBP": "Pound Sterling",
+            "VND": "Dong"
+          }
+        },
+        "theme": {
+          "title": "Theme",
+          "description": "Choose between light or dark for your workstation's theme"
+        }
+      },
+      "help": {
+        "title": "Support",
+        "faqs": {
+          "title": "FAQs",
+          "description": "Get the answers to our most frequently asked questions",
+          "drawer.title": "FAQs",
+          "drawer.description": "Here you can find information about your wallet and blockchain related questions"
+        },
+        "support": {
+          "title": "Support",
+          "help": "Help",
+          "description": "If you're stuck and you can't find the answer to your question in our FAQs, create a ZenDesk ticket and we'll try to solve your issue as fast as we can.",
+          "iogZenDesk": "IOG ZenDesk",
+          "createASupportTicket": "Create a support ticket"
+        }
+      },
+      "security": {
+        "title": "Security",
+        "2fa": "2-Factor authentication",
+        "passphrasePeriodicVerification.title": "Passphrase verification",
+        "passphrasePeriodicVerification.description": "How often we ask you to verify your passphrase",
+        "showPassphrase.title": "Show recovery phrase",
+        "showPassphrase.description": "View the recovery phrase associated with your wallet",
+        "analytics.title": "Analytics",
+        "analytics.description": "We'll collect anonymous analytics info from your browser extension to help us improve the quality and performance of Lace",
+        "periodicVerification": {
+          "title": "Periodic Verification",
+          "description": "How often we ask you to verify your passphrase",
+          "success": "Edited successfully!"
+        },
+        "showPassphraseDrawer": {
+          "title": "Show 24-word recovery phrase",
+          "description": "This is the recovery phrase associated with your wallet. Use it to recover or import your wallet.",
+          "warning": "This is sensitive information, make sure nobody is looking at your screen.",
+          "hidePassphrase": "Hide passphrase",
+          "showPassphrase": "Show passphrase"
+        }
+      },
+      "legal": {
+        "title": "Legal",
+        "tnc": {
+          "title": "Terms and conditions",
+          "description": "Read our terms of use"
+        },
+        "privacyPolicy": {
+          "title": "Privacy policy",
+          "description": "Read our privacy policy"
+        },
+        "cookiePolicy": {
+          "title": "Cookie policy",
+          "description": "Read our cookie policy"
+        },
+        "downloadNow": "Download Now"
+      }
+    },
+    "fundWalletBanner": {
+      "walletAddress": "Your wallet address",
+      "prompt": "Use this address or scan the QR code to transfer funds",
+      "copyAddress": "Copy address"
+    },
+    "nfts": {
+      "fundWalletBanner": {
+        "title": "You don't have any NFTs yet",
+        "subtitle": "Use this address or scan the QR code to transfer your NFTs",
+        "prompt": "Use this address or scan the QR code to transfer your NFTs"
+      },
+      "pageTitle": "NFTs",
+      "createFolder": "Create folder",
+      "renameYourFolder": "Rename your folder",
+      "educationalList": {
+        "title": "More on NFTs"
+      },
+      "folderDrawer": {
+        "header": "Create NFT folder",
+        "existingFolderHeader": "NFT folder",
+        "nameForm": {
+          "title": "Name your folder",
+          "inputPlaceholder": "Folder name",
+          "inputError": "Max. {{length}} characters",
+          "givenNameAlreadyExist": "Given name already exist"
+        },
+        "assetPicker": {
+          "title": "Select NFTs"
+        },
+        "cta": {
+          "create": "Next",
+          "update": "Add selected NFTs"
+        },
+        "toast": {
+          "create": "Folder created successfully",
+          "update": "NFTs added to folder",
+          "delete": "NFT removed"
+        },
+        "contextMenu": {
+          "remove": "Remove from folder"
+        }
+      },
+      "contextMenu": {
+        "rename": "Rename",
+        "delete": "Delete"
+      },
+      "renameFolderSuccess": "Folder renamed successfully",
+      "deleteFolderSuccess": "Folder deleted successfully",
+      "exitModal": {
+        "header": "You'll have to start again",
+        "description": "Are you sure you want to exit? This will not be saved",
+        "confirm": "Agree",
+        "cancel": "Cancel"
+      },
+      "deleteFolderModal": {
+        "header": "Hold up!",
+        "description1": "Are you sure you want to delete this?\nYou can't undo this action.",
+        "description2": "Don’t worry, you won’t loose your NFTs. They will be restored in your main gallery.",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      }
+    },
+    "pinExtension.title": "Pin the wallet extension",
+    "pinExtension.prompt": "Click <icon/> and then pin"
+  },
+  "educationalBanners": {
+    "title": {
+      "glossary": "Glossary",
+      "faq": "FAQ",
+      "video": "Video",
+      "learn": "Learn",
+      "more": "More",
+      "videoBlog": "Video / Blog"
+    },
+    "subtitle": {
+      "whatIsADigitalAsset": "What is a digital asset?",
+      "whatIsLaceAddressBook": "What is the Lace address book?",
+      "whatIsSavedAddress": "What is a saved address?",
+      "howToSendReceiveFunds": "How do I send and receive funds?",
+      "connectingDApps": "Connecting to DApps with Lace",
+      "secureSelfCustody": "Secure self-custody with Lace",
+      "collections": "What are collections?",
+      "enterNFTGallery": "Enter the NFT gallery with Lace",
+      "buyAnNft": "How to buy an NFT?",
+      "stakingAndDelegation": "What are staking & delegation?",
+      "choosingAStakePool": "Which stake pool should I choose?",
+      "activeStake": "What is an active stake?",
+      "stakingMadeEasy": "Staking made easy with Lace"
+    }
+  },
+  "migrations": {
+    "inProgress": {
+      "applying": "Applying update...",
+      "browser": {
+        "title": "Update in progress",
+        "description.1": "Lace has just been updated to the latest version, but in order for the update to be fully applied, we need to make some changes",
+        "description.2": "Please open the extension to continue."
+      }
+    },
+    "failed": {
+      "title": "Sorry!",
+      "subtitle": "Data migration failed!",
+      "errorDescription": "We tried to automatically update your wallet to lace's latest version but something went wrong.",
+      "actionDescription": "You will need to restore your wallet again with your recovery passphrase",
+      "btn.confirm": "Got it"
+    }
+  },
+  "cardano": {
+    "general": {
+      "confirmButton": "Confirm",
+      "cancelButton": "Cancel",
+      "nextButton": "Next"
+    },
+    "networkInfo": {
+      "title": "Network Info",
+      "currentEpoch": "Current epoch",
+      "epochEnd": "Epoch end",
+      "totalPools": "Total pools",
+      "percentageStaked": "% Staked",
+      "averageRos": "Average ROS",
+      "averageMargin": "Average margin"
+    },
+    "stakePoolMetricsBrowser": {
+      "activeStake": "Active stake",
+      "saturation": "Saturation",
+      "delegators": "Delegators",
+      "ros": "ROS"
+    },
+    "stakePoolSearch": {
+      "gettingSaturated": "This pool starts to be saturated",
+      "saturated": "This pool is saturated",
+      "overSaturated": "This pool is over-saturated",
+      "staking": "You are staking on this pool",
+      "searchPlaceholder": "Search by ID or name"
+    },
+    "stakePoolStatusLogo": {
+      "retiring": "This pool is retiring. Re-delegate to an other pool to avoid losing rewards",
+      "retired": "This pool is retired. Re-delegate to an other pool to receive rewards",
+      "delegating": "You are delegating to this pool",
+      "saturated": "This pool is too saturated. Stake on another pool to avoid losing rewards"
+    },
+    "stakePoolTableBrowser": {
+      "tableHeader.poolName": "Pool name",
+      "tableHeader.ros": "ROS",
+      "tableHeader.cost": "Cost",
+      "tableHeader.saturation": "Saturation"
+    },
+    "stakingConfirmationInfo": {
+      "delegateTo": "Delegate to",
+      "poolId": "Pool ID",
+      "deposit": "Deposit",
+      "transactionFee": "Transaction fee"
+    },
+    "catalystConfirmationStep": {
+      "confirmHeader": "Confirm the registration transaction",
+      "confirmBody": "Please sign the voting registration transaction. This will link your wallet balance as proof of voting power. Funds will not leave your wallet, but requires a transaction fee, displayed at the bottom of the screen.",
+      "register": "Register to vote in",
+      "totalFee": "Total fee"
+    },
+    "catalystPinStep": {
+      "confirmPin": "Confirm your PIN code",
+      "setPin": "Set a PIN code. You'll need it everytime you want to access the Catalyst app and to vote",
+      "resetPin": "Reset PIN?",
+      "pinNotMatching": "PIN is not matching"
+    },
+    "catalystRegistrationStep": {
+      "registerNow": "In the Catalyst App, click on the 'Register now' button"
+    },
+    "catalystScanStep": {
+      "header": "Use the Catalyst Voting App to scan the QR code",
+      "body1": "The following QR code is the generated certificate required by the Catalyst App to be able to participate in the voting process of Cardano.",
+      "body2": "We strongly suggest to take a screenshot of the QR code as a backup. You won't be able to access it after clicking on 'Done'.",
+      "downloadButton": "Download QR code",
+      "doneButton": "Done"
+    },
+    "currentCatalystFund": {
+      "endOfRegistration": "until end of registration"
+    },
+    "votingParticipation": {
+      "walletStatus": "Wallet status"
+    },
+    "waitForNextFundCard": {
+      "phase0": "Phase 0",
+      "title": "Waiting for next Fund",
+      "message": "While waiting for the next fund you can register your wallet if it is not already done",
+      "register": "Register",
+      "registered": "Registered"
+    }
+  },
+  "core": {
+    "general": {
+      "saveButton": "Save",
+      "cancelButton": "Cancel"
+    },
+    "addressForm": {
+      "addAddress": "Add address",
+      "name": "Name",
+      "address": "Address",
+      "addNew": "Add new address",
+      "addNewSubtitle": "Save your favorite addresses to find them easily."
+    },
+    "dapp": {
+      "beta": "DApp connector Beta"
+    },
+    "authorizeDapp": {
+      "warning": "Only connect to trusted DApps"
+    },
+    "dappTransaction": {
+      "transaction": "Transaction",
+      "amount": "Amount",
+      "fee": "Fee",
+      "recipient": "Recipient",
+      "insufficientFunds": "You do not have enough funds to complete the transaction",
+      "signedSuccessfully": "The transaction was signed successfully.",
+      "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet."
+    },
+    "destinationAddressInput": {
+      "recipientAddress": "Recipient's address"
+    },
+    "editAddressForm": {
+      "walletName": "Wallet name",
+      "address": "Address",
+      "submissionError": "Address could not be submitted",
+      "doneButton": "Done"
+    },
+    "infoWallet": {
+      "copy": "Copy",
+      "addressCopied": "Address copied"
+    },
+    "nftDetail": {
+      "title": "NFT detail",
+      "tokenInformation": "Token Information",
+      "attributes": "Attributes",
+      "sendNFT": "Send NFT"
+    },
+    "outputSummaryList": {
+      "recipientAddress": "Recipient address",
+      "sending": "Sending",
+      "txFee": "Transaction fee",
+      "metaData": "Metadata",
+      "deposit": "Deposit",
+      "output": "Bundle"
+    },
+    "sendReceive": {
+      "send": "Send",
+      "receive": "Receive"
+    },
+    "coinInputSelection": {
+      "assetSelection": "Select tokens or NFTs",
+      "tokens": "Tokens",
+      "nfts": "NFTs"
+    },
+    "walletAddressList": {
+      "name": "Name",
+      "address": "Address"
+    },
+    "walletBasicInfo": {
+      "balance": "Balance"
+    },
+    "walletSetupLegalStep": {
+      "title": "Lace Terms of Use",
+      "toolTipText": "Please read and accept the terms"
+    },
+    "walletSetupAnalyticsStep": {
+      "title": "Give us a hand to improve your experience",
+      "description": "By sharing analytics data from your browser, you can help us improve the quality and performance of Lace. For more information on our privacy practices, please see our",
+      "back": "Back",
+      "agree": "Agree",
+      "optionsTitle": "Lace will:",
+      "optionsFooter1": "For more information on our privacy practices, please see our",
+      "privacyPolicy": "Privacy Policy.",
+      "allowOptout": "Only collect pseudonymous analytics info",
+      "collectPrivateKeys": "Not access your private keys",
+      "collectIp": "Not record your IP address",
+      "personalData": "Not sell your personal data"
+    },
+    "walletSetupConnectHardwareWalletStep": {
+      "title": "Connect Hardware Wallet",
+      "subTitle": "Choose the brand of your hardware wallet.",
+      "supportedDevicesFull": "Lace is supporting Ledger Nano X, Nano S, Nano S Plus and Trezor Model T",
+      "supportedDevices": "Lace is supporting Ledger Nano X, Nano S and Nano S Plus",
+      "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue."
+    },
+    "walletSetupCreateStep": {
+      "title": "Creating your wallet",
+      "description": "Your Lace wallet will be all set up in a few seconds."
+    },
+    "walletSetupRestoreStep": {
+      "title": "Restoring your wallet"
+    },
+    "walletSetupFinalStep": {
+      "title": "Hurray! All done :)",
+      "description": "It's time to start your Web3 journey. Plus you can follow us to stay up to date on all our latest news and content.",
+      "close": "Go to my wallet",
+      "followTwitter": "Follow us on Twitter",
+      "followYoutube": "Follow us on Youtube",
+      "followDiscord": "Join us on Discord"
+    },
+    "walletSetupMnemonicStep": {
+      "writePassphrase": "Write down your secret passphrase",
+      "enterPassphrase": "Enter your secret passphrase",
+      "body": "Now let's check you've got the correct secret passphrase. Enter each word of your passphrase in the right order to verify it.",
+      "passphraseInfo1": "Make sure you create an offline backup of your secret passphrase.",
+      "passphraseInfo2": "Do not store your backup digitally.",
+      "passphraseInfo3": "Find out more.",
+      "passphraseError": "Make sure the words of your recovery phrase are in the right order and spelled correctly."
+    },
+    "walletSetupMnemonicIntroStep": {
+      "title": "Keeping your wallet secure",
+      "description": "Your 24-word secret passphrase is like a master key to your Lace wallet. We'll show it to you over the next 3 screens. Keep it safe – if you lose your password, it's the only way to access your wallet and funds. Read more about it",
+      "link": "here."
+    },
+    "walletSetupMnemonicVerificationStep": {
+      "enterPassphrase": "Enter your secret passphrase"
+    },
+    "walletSetupOptionsStep": {
+      "title": "Hello Web3",
+      "subTitle": "Choose an option to get started",
+      "newWallet": {
+        "title": "New wallet",
+        "description": "Create a new\nLace wallet",
+        "button": "Create"
+      },
+      "hardwareWallet": {
+        "title": "Hardware wallet",
+        "description": "Connect your hardware wallet to Lace",
+        "button": "Connect"
+      },
+      "restoreWallet": {
+        "title": "Restore wallet",
+        "description": "Enter your passphrase to recover your wallet",
+        "button": "Restore"
+      }
+    },
+    "walletSetupRegisterStep": {
+      "title": "Let's set up your new wallet",
+      "titlePassword": "Set up your password",
+      "description": "Choose a name to help you identify your wallet. It will only be visible to you.",
+      "passwordDescription": "You'll use this to log into your wallet and make transactions.",
+      "walletName": "Wallet name",
+      "nameMaxLength": "Max. 20 characters",
+      "capitalLetterRequired": "1 capital letter required",
+      "lowercaseLetterRequired": "1 lowercase letter required",
+      "numberRequired": "1 number required",
+      "charactersRequired": "8 characters is min",
+      "nameRequired": "Wallet name is required",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "noMatchPassword": "Oops! The passwords don't match.",
+      "validationMessage": "8+ characters with at least 1 uppercase letter, 1 lowercase letter, 1 number"
+    },
+    "walletSetupSelectAccountsStep": {
+      "selectAccount": "Select Account",
+      "exportKeys": "Next",
+      "chooseAccountToExport": "Choose which account you would like to export.",
+      "useHWToConfirm": "Use your {{wallet}} device to confirm exporting keys",
+      "account": "Account"
+    },
+    "walletSetupWalletNameStep": {
+      "maxCharacters": "Max. 20 characters",
+      "walletName": "Wallet name",
+      "nameYourWallet": "Name your wallet",
+      "create": "Create",
+      "chooseName": "Choose a name to easily identify your wallet."
+    },
+    "walletSetupWalletModeStep": {
+      "title": "Choose your wallet mode",
+      "modes": "Wallet modes",
+      "instructions": "You are able to have multiple wallets, each with a different mode selected.",
+      "lightWalletOption": "Light wallet mode",
+      "fullNodeOption": "Full node mode",
+      "lightWalletDescription": "Light wallet connected to a synced server",
+      "fullNodeWalletDescription": "Trustless wallet running on a full node"
+    },
+    "walletSetupRecoveryPhraseLengthStep": {
+      "title": "Recovery phrase length",
+      "description": "Choose your recovery phrase length of either 12, 15 or 24 words to restore your wallet.",
+      "wordPassphrase": "word passphrase"
+    },
+    "password": {
+      "feedback.1": "Weak password. Add some numbers and characters to make it stronger.",
+      "feedback.2": "Getting there! Add some symbols and numbers to make it stronger.",
+      "feedback.3": "No need for symbols, digits, or uppercase letters.",
+      "feedback.4": "Use a longer keyboard pattern with more turns.",
+      "feedback.5": "Avoid repeated words and characters.",
+      "feedback.6": "Avoid sequences.",
+      "feedback.7": "Avoid recent years.",
+      "feedback.8": "Avoid years that are associated with you.",
+      "feedback.9": "Avoid dates and years that are associated with you.",
+      "feedback.10": "Capitalization doesn't help very much.",
+      "feedback.11": "All-uppercase is almost as easy to guess as all-lowercase.",
+      "feedback.12": "Reversed words aren't much harder to guess.",
+      "feedback.13": "Predictable substitutions like '@' instead of 'a' don't help very much.",
+      "feedback.14": "Well done! That's one strong password.",
+      "feedback.15": "Hurray! Your password is super strong."
+    },
+    "receive": {
+      "usedAddresses.title": "Used Addresses ({{count}})",
+      "usedAddresses.subtitle": "New addresses are automatically generated after a transaction.",
+      "usedAddresses.copy": "Copy Address",
+      "usedAddresses.addressCopied": "Address copied",
+      "showUsedAddresses": "Show used addresses"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@src/*": ["../src/*"]
+    },
+    "baseUrl": ".",
+    "rootDir": ".."
+  },
+  "include": ["../src/*", "../src/ui/typings"]
+}

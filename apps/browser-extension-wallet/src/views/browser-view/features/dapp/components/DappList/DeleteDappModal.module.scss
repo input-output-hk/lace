@@ -1,0 +1,52 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.modal {
+  :global(.ant-modal-content) {
+    background: var(--color-white, var(--dark-mode-light-black));
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.05), 0px 0px 40px rgba(0, 0, 0, 0.05);
+    border-radius: size_unit(4);
+  }
+  :global(.ant-modal-body) {
+    display: flex;
+    flex-direction: column;
+    padding: size_unit(5) !important;
+  }
+}
+
+.header {
+  color: var(--text-color-primary);
+  font-size: var(--subHeading);
+  font-weight: bold;
+  line-height: size_unit(4);
+  text-align: center;
+}
+
+.content {
+  align-items: center;
+  color: var(--text-color-secondary);
+  display: flex;
+  flex: 1;
+  font-size: var(--body);
+  font-weight: normal;
+  justify-content: center;
+  line-height: size_unit(3);
+  text-align: center;
+  padding: 0 size_unit(2);
+  margin-top: size_unit(3);
+  margin-bottom: size_unit(4);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(2);
+  justify-content: space-between;
+  .btn,
+  .btnCancel {
+    width: 100%;
+    @media (max-width: $breakpoint-popup) {
+      width: 192px;
+      margin: 0 auto;
+    }
+  }
+}

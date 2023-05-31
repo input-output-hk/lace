@@ -1,0 +1,112 @@
+@import '../../../../../common/src/ui/styles/abstracts/typography';
+
+.transactionInOut {
+  .txInOutContent {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .expanderHeader {
+    display: flex;
+    font-size: var(--bodyLarge);
+    font-weight: 700;
+    justify-content: space-between;
+    line-height: 32px;
+    padding: size_unit(3) 0px;
+
+    color: var(--text-color-primary);
+
+    .label {
+      @include text-bodyLarge-bold;
+    }
+
+    button.arrowBtn[data-color='secondary'] {
+      border-radius: size_unit(1) !important;
+      min-width: size_unit(4) !important;
+      min-height: size_unit(4) !important;
+      max-width: size_unit(4) !important;
+      max-height: size_unit(4) !important;
+      width: size_unit(4) !important;
+      height: size_unit(4) !important;
+
+      .bracket {
+        color: var(--text-color-primary);
+      }
+    }
+  }
+
+  .addressContainer {
+    display: flex;
+    flex-direction: column;
+    gap: size_unit(3);
+    border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+    padding: size_unit(5) 0;
+
+    @media (max-width: $breakpoint-popup) {
+      padding-bottom: size_unit(4);
+    }
+
+    .row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+
+      .label {
+        display: flex;
+        flex: 0 0 50%;
+        align-self: baseline;
+        color: var(--text-color-primary, #fff);
+        @include text-body-semi-bold;
+      }
+
+      .address {
+        @include text-address;
+        font-weight: 500;
+        text-align: right;
+      }
+      .addressDetail {
+        font-size: var(--bodySmall, 14px) !important;
+      }
+
+      .content {
+        display: flex;
+        flex-direction: column;
+        align-items: end;
+        gap: size_unit(2);
+
+        color: var(--text-color-primary, #ffffff);
+        @include text-body-medium;
+
+        text-align: right;
+        word-break: break-all;
+
+        .amount {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          align-items: flex-end;
+
+          .asset {
+            color: var(--text-color-primary, #ffffff);
+          }
+
+          .fiat {
+            color: var(--text-color-secondary, #878e9e);
+          }
+        }
+      }
+    }
+
+    &:first-of-type {
+      padding-top: 0px;
+    }
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+  }
+}
+
+.separatorLine {
+  border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+}

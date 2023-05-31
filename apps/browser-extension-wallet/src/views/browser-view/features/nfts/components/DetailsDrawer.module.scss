@@ -1,0 +1,11 @@
+@import '../../../../../styles/utils/functions.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.sendButton {
+  width: 100%;
+  font-weight: 600 !important;
+}
+
+.wrapper {
+  padding-top: size_unit(5);
+}

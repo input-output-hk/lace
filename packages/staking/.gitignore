@@ -1,0 +1,8 @@
+logs
+dist
+build
+.lostpixel/current
+.lostpixel/difference
+
+# Do not ignore the following
+!*.d.ts

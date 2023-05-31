@@ -1,0 +1,189 @@
+import { DataTable, Given, Then, When } from '@cucumber/cucumber';
+import transactionsPageAssert, { ExpectedTransactionRowAssetDetails } from '../assert/transactionsPageAssert';
+import transactionDetailsAssert from '../assert/transactionDetailsAssert';
+import mainMenuPageObject from '../pageobject/mainMenuPageObject';
+import transactionsPageObject from '../pageobject/transactionsPageObject';
+import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
+import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
+import testContext from '../utils/testContext';
+import { TransactionDetailsPage } from '../elements/transactionDetails';
+import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
+
+Given(/^I am on the Transactions section - Extended view$/, async () => {
+  await mainMenuPageObject.navigateToSection('Transactions', 'extended');
+  await transactionsPageAssert.assertTxsLoaded();
+});
+
+Given(/^I am on the Transactions section - popup view$/, async () => {
+  await mainMenuPageObject.navigateToSection('Transactions', 'popup');
+  await transactionsPageAssert.assertTxsLoaded();
+});
+
+Then(/^Transactions section is displayed$/, async () => {
+  await transactionsPageAssert.assertTxsLoaded();
+  await transactionsPageAssert.assertSeeTitleWithCounter();
+});
+
+Then(/^a transactions counter that sums up to the total number of all transactions is displayed$/, async () => {
+  await transactionsPageAssert.assertTxsLoaded();
+  await transactionsPageAssert.assertCounterNumberMatchesWalletTransactions();
+});
+
+Then(/^all transactions are grouped by date$/, async () => {
+  await transactionsPageAssert.assertTxsLoaded();
+  await transactionsPageAssert.assertSeeDateGroups();
+  await transactionsPageAssert.assertDateFormat();
+});
+
+Then(/^all transactions have icon, type of transaction, amount of tokens, value, and value in FIAT$/, async () => {
+  await transactionsPageAssert.assertTxsLoaded();
+  await transactionsPageAssert.assertSeeTableItems();
+});
+
+Then(/^I can see transaction ([^"]*) with type "([^"]*)"$/, async (index: number, type: string) => {
+  await transactionsPageAssert.assertTableItemDetails(index, type);
+});
+
+When(/^click on a transaction$/, async () => {
+  //  DO NOTHING - COVERED IN NEXT STEP TO CHECK ALL TRANSACTIONS
+});
+
+When(/^I click on a transaction: (\d)$/, async (rowNumber: number) => {
+  await transactionsPageObject.clickTransaction(rowNumber);
+});
+
+When(/^I click on a transaction hash and save hash information$/, async () => {
+  const transactionsDetails = new TransactionDetailsPage();
+  await testContext.save('txHashValue', await transactionsDetails.transactionDetailsHash.getText());
+  await transactionsDetails.transactionDetailsHash.click();
+});
+
+When(/^I click on a transaction hash$/, async () => {
+  const transactionsDetails = new TransactionDetailsPage();
+  await transactionsDetails.transactionDetailsHash.click();
+});
+
+Then(/^I see cexplorer url with correct transaction hash$/, async () => {
+  const txHashValue = String(await testContext.load('txHashValue'));
+  await transactionsPageAssert.assertSeeCexplorerUrl(txHashValue);
+});
+
+When(
+  /^I click and open recent transactions details until find transaction with correct (hash|poolID)$/,
+  async (valueForCheck: string) => {
+    const transactionsDetails = new TransactionDetailsPage();
+    await transactionsPageAssert.waitRowsToLoad();
+    for (let i = 1; i <= 10; i++) {
+      let actualValue;
+      let expectedValue;
+      await transactionsPageObject.clickTransaction(i);
+      await transactionsDetails.transactionDetailsSkeleton.waitForDisplayed({ timeout: 30_000, reverse: true });
+      if (valueForCheck === 'hash') {
+        actualValue = await transactionsDetails.transactionDetailsHash.getText();
+        expectedValue = String(testContext.load('txHashValue'));
+      } else {
+        actualValue = await transactionsDetails.transactionDetailsStakePoolId.getText();
+        expectedValue = String(testContext.load('poolID'));
+      }
+      if (actualValue !== expectedValue) {
+        await simpleTxSideDrawerPageObject.clickCloseDrawerButton();
+      } else {
+        break;
+      }
+    }
+  }
+);
+
+When(/^I wait for the transaction history to be loaded and all transactions to be confirmed/, async () => {
+  await transactionsPageAssert.waitRowsToLoad();
+});
+
+Then(
+  /^a side drawer is displayed showing the following information in (extended|popup) mode$/,
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  async (mode: 'extended' | 'popup', _item: DataTable) => {
+    await transactionDetailsAssert.assertSeeTransactionDetailsUnfolded(mode);
+  }
+);
+
+When(/^I click on a transaction and click on both dropdowns$/, async () => {
+  //  DO NOTHING - COVERED IN NEXT STEP TO CHECK ALL TRANSACTIONS
+});
+
+Then(
+  /^all inputs and outputs of the transactions are displayed in (extended|popup) mode$/,
+  async (mode: 'extended' | 'popup') => {
+    await transactionDetailsAssert.assertSeeTransactionDetailsInputAndOutputs(mode);
+  }
+);
+
+Then(/^all the transactions have a value other than zero$/, async () => {
+  await transactionsPageAssert.assertTxValueNotZero();
+});
+
+Then(/none of the input and output values is zero in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await transactionDetailsAssert.assertTxDetailValuesNotZero(mode);
+});
+
+Then(
+  /the amounts sent or received are displayed below the Tx hash in (extended|popup) mode$/,
+  async (mode: 'extended' | 'popup') => {
+    await transactionDetailsAssert.assertSeeTransactionDetailsSummary(mode);
+  }
+);
+
+Then(/the Sender or Receiver is displayed$/, async () => {
+  // DO NOTHING, COVERED IN PREVIOUS STEP
+});
+
+Then(
+  /the amounts summary shows as many rows as assets sent or received minus 1 -ADA- in (extended|popup) mode$/,
+  async (mode: 'extended' | 'popup') => {
+    await transactionDetailsAssert.assertSeeTransactionDetailsSummaryAmounts(mode);
+  }
+);
+
+When(/^I scroll to the row: (\d*)$/, async (index: number) => {
+  await transactionsPageObject.scrollToTheRow(index);
+});
+
+When(/^I scroll to the last row$/, async () => {
+  await transactionsPageObject.scrollToTheLastRow();
+});
+
+Then(/^a skeleton (is|is not) displayed at the bottom of the page/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await transactionsPageAssert.assertSeeSkeleton(shouldBeDisplayed === 'is');
+});
+
+When(/^I save number of visible rows$/, async () => {
+  await transactionsPageObject.saveNumberOfVisibleRows();
+});
+
+Then(/^more transactions are loaded$/, async () => {
+  await transactionsPageAssert.assertSeeMoreTransactions();
+});
+
+Then(
+  /^the (Received|Sent) transaction is displayed with value: "([^"]*)" and tokens count (\d)$/,
+  async (transactionType: 'Received' | 'Sent', tokenValue: string, tokenCount: number) => {
+    await browser.pause(3000);
+    const expectedTransactionRowAssetDetailsSent: ExpectedTransactionRowAssetDetails = {
+      type: transactionType,
+      tokensAmount: `${tokenValue}`,
+      tokensCount: Number(tokenCount)
+    };
+    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(1, expectedTransactionRowAssetDetailsSent);
+  }
+);
+
+When(/^I add all available token types to bundle (\d+)$/, async (bundleIndex: number) => {
+  await NewTransactionExtendedPageObject.addAllAvailableTokenTypes(bundleIndex);
+});
+
+When(/^I add all available NFT types to bundle (\d+)$/, async (bundleIndex: number) => {
+  await NewTransactionExtendedPageObject.addAllAvailableNftTypes(bundleIndex);
+});
+
+Then(/^the 'Add asset' is (enabled|disabled) for bundle (\d)$/, async (state: string, bundleIndex: number) => {
+  await transactionBundleAssert.assertAddAssetButtonIsEnabled(bundleIndex, state === 'enabled');
+});

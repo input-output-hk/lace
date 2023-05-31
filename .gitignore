@@ -1,0 +1,20 @@
+.idea
+.env
+.history
+.lh
+*.crx
+*.d.ts
+!declaration.d.ts
+*dist/
+*demo/
+*node_modules/
+*yarn-error.log
+storybook-static
+build-storybook.log
+.DS_Store
+coverage
+.rollup.cache
+.tool-versions
+
+# PRJ Spec
+/.cache
