@@ -149,8 +149,9 @@ describe('MigrationContainer', () => {
 
         await waitFor(() => expect(queryByTestId('mock-child')).not.toBeInTheDocument());
         await waitFor(() => {
-          const failed = queryByTestId('failed-migration');
+          const failed = queryByTestId('reset-data-error');
           expect(failed).toBeInTheDocument();
+          expect(failed).toHaveTextContent('Data migration failed!');
         });
         expect(mockMigrations.applyMigrations).not.toHaveBeenCalled();
       });
@@ -160,27 +161,17 @@ describe('MigrationContainer', () => {
       beforeEach(async () => {
         await storage.local.set({ MIGRATION_STATE: { state: 'not-applied', from: '1.0.0', to: '2.0.0' } });
       });
-      test('in popup mode, renders MainLoader screen with applying update message and applies migrations', async () => {
+      test('renders MainLoader screen with loading message and tries to apply migrations', async () => {
         const { queryByTestId } = render(<MigrationContainerTest />);
 
         await waitFor(() => expect(queryByTestId('mock-child')).not.toBeInTheDocument());
         await waitFor(() => {
           const mainLoader = queryByTestId('main-loader');
           expect(mainLoader).toBeInTheDocument();
-          expect(mainLoader).toHaveTextContent('Applying update...');
+          expect(mainLoader).toHaveTextContent('Loading...');
         });
         await waitFor(() => expect(mockMigrations.migrationsRequirePassword).toHaveBeenCalled());
         await waitFor(() => expect(mockMigrations.applyMigrations).toHaveBeenCalled());
-      });
-      test('in browser mode, renders migration in progress screen and does not apply migrations', async () => {
-        const { queryByTestId } = render(<MigrationContainerTest appMode={APP_MODE_BROWSER} />);
-
-        await waitFor(() => expect(queryByTestId('mock-child')).not.toBeInTheDocument());
-        await waitFor(() => {
-          const inProgress = queryByTestId('migration-in-progress');
-          expect(inProgress).toBeInTheDocument();
-        });
-        await waitFor(() => expect(mockMigrations.applyMigrations).not.toHaveBeenCalled());
       });
     });
   });

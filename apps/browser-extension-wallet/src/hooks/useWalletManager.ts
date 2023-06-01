@@ -126,8 +126,6 @@ export const useWalletManager = (): UseWalletManager => {
    * Deletes wallet info in storage, which should be stored encrypted with the wallet password as lock
    */
   const lockWallet = useCallback(async (): Promise<void> => {
-    // TODO: if !walletLock then browser storage is corrupted and won't be able to unlock later.
-    // what should we do in this case? should we display an error screen to the user with a CTA to delete all data?
     if (!walletLock) return;
     // Deletes key agent data from storage and clears states
     await backgroundService.clearBackgroundStorage(['keyAgentsByChain']);
@@ -142,8 +140,6 @@ export const useWalletManager = (): UseWalletManager => {
    */
   const unlockWallet = useCallback(
     async (password: string): Promise<Wallet.KeyAgentsByChain | void> => {
-      // TODO: if !walletLock then browser storage is corrupted and won't be able to unlock later.
-      // what should we do in this case? should we display an error screen to the user with a CTA to delete all data?
       if (!walletLock) return;
       const walletDecrypted = await Wallet.KeyManagement.emip3decrypt(walletLock, Buffer.from(password));
 
