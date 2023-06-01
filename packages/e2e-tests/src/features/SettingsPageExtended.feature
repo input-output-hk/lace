@@ -202,7 +202,7 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Settings - Privacy policy copy
     When I open settings from header menu
     When I click on "Privacy policy" setting
-    Then the Privacy policy copy is displayed
+    Then the Privacy policy copy is displayed in extended mode
 
   @LW-5830 @Mainnet @Testnet
   Scenario: Extended View - Settings - Cookie policy copy
