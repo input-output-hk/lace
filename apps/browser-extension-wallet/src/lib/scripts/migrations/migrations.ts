@@ -1,8 +1,16 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import { runtime, storage } from 'webextension-polyfill';
+import findLast from 'lodash/findLast';
 import pRetry from 'p-retry';
 import { MigrationState } from '../types';
-import { compareVersions, isVersionNewerThan, isVersionOlderThanOrEqual } from './util';
+import {
+  compareVersions,
+  isVersionEqual,
+  isVersionNewerThan,
+  isVersionNewerThanOrEqual,
+  isVersionOlderThan,
+  isVersionOlderThanOrEqual
+} from './util';
 import * as versions from './versions';
 
 const MIGRATIONS_RETRIES = 4; // 5 attempts = first attempt + 4 retries
@@ -39,11 +47,39 @@ export type Migration = {
   requiresPassword?: () => boolean | Promise<boolean>;
   shouldSkip?: () => boolean | Promise<boolean>;
   upgrade: (password?: string) => MigrationPersistance | Promise<MigrationPersistance>;
-  // TODO: allow downgrades and make it mandatory [LW-5595]
-  downgrade?: (password?: string) => MigrationPersistance | Promise<MigrationPersistance>;
+  downgrade: ((password?: string) => MigrationPersistance | Promise<MigrationPersistance>) | null;
 };
 
 const migrations: Migration[] = [versions.v0_6_0, versions.v_1_0_0];
+
+/**
+ * Find migrations between versions to migrate and make sure they are in the correct order
+ */
+export const getMigrationsBetween = (
+  fromVersion: string,
+  toVersion: string,
+  migrationsArray: Migration[] = migrations
+): Migration[] => {
+  if (isVersionEqual(toVersion, fromVersion)) return [];
+
+  const sortedMigrationsAsc = [...migrationsArray].sort((a, b) => compareVersions(a.version, b.version));
+
+  const isUpgrade = isVersionNewerThan(toVersion, fromVersion);
+  if (!isUpgrade) {
+    // Finds previous version with a migration
+    // For example, if downgrading from 2.0.0 to 1.5.0, but we have migrations = [1.0.0, 2.0.0], it should run the 1.0.0 one
+    toVersion = findLast(sortedMigrationsAsc, (mig) => isVersionOlderThanOrEqual(mig.version, toVersion))?.version;
+  }
+
+  // Find migrations between versions
+  const foundMigrationsAsc = sortedMigrationsAsc.filter((migration) =>
+    isUpgrade
+      ? isVersionNewerThan(migration.version, fromVersion) && isVersionOlderThanOrEqual(migration.version, toVersion)
+      : isVersionOlderThan(migration.version, fromVersion) && isVersionNewerThanOrEqual(migration.version, toVersion)
+  );
+
+  return isUpgrade ? foundMigrationsAsc : foundMigrationsAsc.reverse();
+};
 
 /**
  * Applies all migrations in order between the two version provided
@@ -59,24 +95,23 @@ export const applyMigrations = async (
       MIGRATION_STATE: { ...migrationState, state: 'migrating' } as MigrationState
     });
 
-    // TODO: allow downgrades too [LW-5595]
-    // Find migrations between versions to migrate and make sure they are in the correct order
-    const upgradeMigrationsToApply = migrationsArray
-      .filter(
-        (migration) =>
-          isVersionNewerThan(migration.version, migrationState.from) &&
-          isVersionOlderThanOrEqual(migration.version, migrationState.to)
-      )
-      .sort((a, b) => compareVersions(a.version, b.version));
+    const migrationsToApply = getMigrationsBetween(migrationState.from, migrationState.to, migrationsArray);
+    const isUpgrade = isVersionNewerThan(migrationState.to, migrationState.from);
 
-    // Apply all upgrades in order
-    for (const migration of upgradeMigrationsToApply) {
+    // Apply all migrations in order
+    for (const migration of migrationsToApply) {
       await pRetry(
         async (attemptNumber) => {
           console.log(`Applying migration for version ${migration.version} (attempt: ${attemptNumber})`);
-          const shouldSkip = await migration.shouldSkip?.();
-          if (shouldSkip) return;
-          const { prepare, assert, persist, rollback } = await migration.upgrade(password);
+          const shouldSkip = (await migration.shouldSkip?.()) || (!isUpgrade && migration.downgrade === null);
+          if (shouldSkip) {
+            console.log(`Skipping migration for version ${migration.version}`);
+            return;
+          }
+
+          const { prepare, assert, persist, rollback } = await (isUpgrade
+            ? migration.upgrade(password)
+            : migration.downgrade(password));
           try {
             await prepare();
             await assert();
@@ -97,7 +132,7 @@ export const applyMigrations = async (
           retries: MIGRATIONS_RETRIES,
           onFailedAttempt: (error) =>
             console.log(
-              `Migration attempt ${error.attemptNumber} for ${migration.version} upgrade failed. There are ${error.retriesLeft} retries left.`
+              `Migration attempt ${error.attemptNumber} for ${migration.version} failed. There are ${error.retriesLeft} retries left.`
             )
         }
       );
@@ -122,14 +157,10 @@ export const migrationsRequirePassword = async (
   migrationsArray = migrations
 ): Promise<boolean> => {
   if (migrationState.state !== 'not-applied' && migrationState.state !== 'migrating') return false;
-  const upgradeMigrationsToApply = migrationsArray.filter(
-    (migration) =>
-      isVersionNewerThan(migration.version, migrationState.from) &&
-      isVersionOlderThanOrEqual(migration.version, migrationState.to)
-  );
 
+  const migrationsToApply = getMigrationsBetween(migrationState.from, migrationState.to, migrationsArray);
   // Runs all `requiresPassword` functions for all migrations and check if some returns true
-  return (await Promise.all(upgradeMigrationsToApply.map(async (mig) => mig.requiresPassword?.()))).includes(true);
+  return (await Promise.all(migrationsToApply.map(async (mig) => mig.requiresPassword?.()))).includes(true);
 };
 
 /**
@@ -138,19 +169,12 @@ export const migrationsRequirePassword = async (
 export const checkMigrations = async (previousVersion: string, migrationsArray = migrations): Promise<void> => {
   const currentVersion = runtime.getManifest().version;
 
-  // Return if a downgrade is occurring
-  if (isVersionOlderThanOrEqual(currentVersion, previousVersion)) {
-    // TODO: allow migrations if downgrading versions too [LW-5595]
+  if (isVersionEqual(currentVersion, previousVersion)) {
     await storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
     return;
   }
-  // Find migrations between versions
-  const migrationsToApply = migrationsArray.filter(
-    (migration) =>
-      isVersionNewerThan(migration.version, previousVersion) &&
-      isVersionOlderThanOrEqual(migration.version, currentVersion)
-  );
 
+  const migrationsToApply = getMigrationsBetween(previousVersion, currentVersion, migrationsArray);
   // If so, then set storage with version migration data
   migrationsToApply.length > 0
     ? await storage.local.set({

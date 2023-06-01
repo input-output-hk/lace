@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable camelcase */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import isEqual from 'lodash/isEqual';
@@ -7,10 +8,6 @@ import { Migration } from '../migrations';
 import { getItemFromLocalStorage, removeItemFromLocalStorage, setItemInLocalStorage } from '../util';
 
 const MIGRATION_VERSION = '1.0.0';
-const throwInvalidDataError = (reason?: string) => {
-  throw new InvalidMigrationData(MIGRATION_VERSION, reason);
-};
-
 export const v_1_0_0: Migration = {
   version: MIGRATION_VERSION,
   // No password required for this migration
@@ -55,6 +52,11 @@ export const v_1_0_0: Migration = {
         }
       },
       assert: () => {
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const throwInvalidDataError = (reason?: string) => {
+          throw new InvalidMigrationData(MIGRATION_VERSION, 'upgrade', reason);
+        };
+
         const tmpAppSettings = getItemFromLocalStorage<any>('appSettings_tmp');
         const tmpKeyAgentData = getItemFromLocalStorage<any>('keyAgentData_tmp');
 
@@ -88,5 +90,6 @@ export const v_1_0_0: Migration = {
         removeItemFromLocalStorage('keyAgentData_tmp');
       }
     };
-  }
+  },
+  downgrade: null
 };
