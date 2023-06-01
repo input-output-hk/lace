@@ -4,3 +4,5 @@ export type OmitClassName<T extends HTMLElement = HTMLDivElement> = Omit<
   HTMLAttributes<T>,
   'className'
 >;
+
+export type ColorValueHex = `#${string}`;

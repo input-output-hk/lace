@@ -11,7 +11,7 @@ import { subtitleBox } from './page.css';
 
 type Props = PropsWithChildren<{
   title: string;
-  subtitle: string;
+  subtitle?: string;
 }>;
 
 export const Page = ({
@@ -25,11 +25,13 @@ export const Page = ({
         <Grid columns="$1" rows="$fitContent">
           <Cell>
             <Text.Display>{title}</Text.Display>
-            <Box pt="$32">
-              <div className={subtitleBox}>
-                <Text.Body.Large>{subtitle}</Text.Body.Large>
-              </div>
-            </Box>
+            {Boolean(subtitle) && (
+              <Box pt="$32">
+                <div className={subtitleBox}>
+                  <Text.Body.Large>{subtitle}</Text.Body.Large>
+                </div>
+              </Box>
+            )}
 
             <Divider mt="$96" mb="$64" />
           </Cell>
