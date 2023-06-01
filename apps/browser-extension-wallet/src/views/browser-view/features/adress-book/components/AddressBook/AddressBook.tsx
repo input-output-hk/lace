@@ -23,6 +23,7 @@ import {
   AnalyticsEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
+import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
 
 export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { t: translate } = useTranslation();
@@ -106,6 +107,10 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
     <EducationalList items={educationalList} title={translate('browserView.sidePanel.aboutYourWallet')} />
   );
 
+  const AddressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
+    ? AddressDetailsSteps.DETAILS
+    : AddressDetailsSteps.CREATE;
+
   return (
     <Layout>
       <SectionLayout sidePanelContent={sidePanel}>
@@ -149,7 +154,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             })
           }
           visible={isFormVisible}
-          useNewAddressForm={!(addressToEdit as AddressBookSchema)?.id}
+          initialStep={AddressDrawerInitialStep}
         />
       </SectionLayout>
     </Layout>

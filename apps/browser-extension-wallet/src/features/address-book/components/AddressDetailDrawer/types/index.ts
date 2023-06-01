@@ -1,6 +1,7 @@
 export enum AddressDetailsSteps {
-  DETAIL = 'detail',
-  FORM = 'form'
+  DETAILS,
+  CREATE,
+  EDIT
 }
 
 export interface AddressDetailsSectionConfig {
