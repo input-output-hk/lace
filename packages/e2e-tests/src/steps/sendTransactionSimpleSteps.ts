@@ -24,7 +24,7 @@ import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import { getTestWallet } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedTransactionDetails } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import nftsPageObject from '../pageobject/nftsPageObject';
 import transactionsPageObject from '../pageobject/transactionsPageObject';
@@ -368,10 +368,29 @@ When(/^I save fee value$/, async () => {
 Then(
   /^The Tx details are displayed as "([^"]*)" for ADA with value: ([^"]*) and wallet: "([^"]*)" address$/,
   async (type: string, adaValue: string, walletName: string) => {
-    const expectedTransactionDetails = {
+    const expectedTransactionDetails: ExpectedTransactionDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
-      hash: String(testContext.load('txHashValue')),
+      hash: testContext.load('txHashValue'),
       transactionData: [{ ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: getTestWallet(walletName).address }],
+      status: 'Success'
+    };
+    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+  }
+);
+
+Then(
+  /^The Tx details are displayed as "([^"]*)" for ADA with value: "([^"]*)" and LaceCoin2 with value: "([^"]*)" and wallet: "([^"]*)" address$/,
+  async (type: string, adaValue: string, laceCoin2Value: string, walletName: string) => {
+    const expectedTransactionDetails: ExpectedTransactionDetails = {
+      transactionDescription: `${await t(type)}\n(2)`,
+      hash: testContext.load('txHashValue'),
+      transactionData: [
+        {
+          ada: `${adaValue} ${Asset.CARDANO.ticker}`,
+          address: getTestWallet(walletName).address,
+          assets: [`${laceCoin2Value} LaceCoin2`]
+        }
+      ],
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);

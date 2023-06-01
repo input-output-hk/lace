@@ -36,4 +36,4 @@ Feature: DAppConnector - Common
     And I switch to window with Lace
     And I close all remaining tabs except current one
     And I open test DApp
-    Then I don't see DApp authorization window
+    Then I don't see DApp window
