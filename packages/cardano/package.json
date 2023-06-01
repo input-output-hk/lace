@@ -31,7 +31,7 @@
   "dependencies": {
     "@cardano-sdk/cardano-services-client": "~0.9.1",
     "@cardano-sdk/core": "~0.12.0",
-    "@cardano-sdk/crypto": "~0.1.4",
+    "@cardano-sdk/crypto": "~0.1.5",
     "@cardano-sdk/hardware-ledger": "~0.2.0",
     "@cardano-sdk/key-management": "~0.6.0",
     "@cardano-sdk/util": "~0.10.0",

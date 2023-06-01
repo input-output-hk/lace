@@ -31,8 +31,8 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@cardano-sdk/core": "~0.12.0",
-    "@cardano-sdk/dapp-connector": "~0.9.0",
-    "@cardano-sdk/input-selection": "~0.9.1",
+    "@cardano-sdk/dapp-connector": "~0.9.1",
+    "@cardano-sdk/input-selection": "~0.9.2",
     "@cardano-sdk/util": "~0.10.0",
     "@cardano-sdk/tx-construction": "~0.5.0",
     "@cardano-sdk/wallet": "~0.12.0",

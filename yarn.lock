@@ -3826,7 +3826,7 @@
     ts-custom-error "^3.2.0"
     ts-log "^2.2.4"
 
-"@cardano-sdk/crypto@~0.1.4", "@cardano-sdk/crypto@~0.1.5":
+"@cardano-sdk/crypto@~0.1.5":
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@cardano-sdk/crypto/-/crypto-0.1.5.tgz#0416f2ff818101a0a021d4442dff4eb70ae6a00b"
   integrity sha512-qgnx6pfKDZ+PMx3xCa8fS2iRZsjTmFRhUzJyz7EWz2Apd1+nFd83VqUhA3RfiIgoo6qrMXgZDN0dHHTDsDaF3g==
