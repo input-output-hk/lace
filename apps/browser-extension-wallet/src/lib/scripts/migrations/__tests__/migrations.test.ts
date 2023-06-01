@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable camelcase */
 /* eslint-disable no-magic-numbers */
 /* eslint-disable sonarjs/no-duplicate-string */
@@ -5,7 +6,13 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import { MigrationState } from '@lib/scripts/types';
 import { Manifest, runtime, storage } from 'webextension-polyfill';
-import { applyMigrations, checkMigrations, Migration, migrationsRequirePassword } from '../migrations';
+import {
+  applyMigrations,
+  checkMigrations,
+  Migration,
+  migrationsRequirePassword,
+  getMigrationsBetween
+} from '../migrations';
 
 const windowReload = jest.fn();
 const mockPersistanceFunctions = (implementations?: {
@@ -66,6 +73,79 @@ describe('migrations', () => {
     await storage.local.clear();
   });
 
+  describe('getMigrationsBetween', () => {
+    const testMigrationsBetween = [
+      { version: '1.0.0' },
+      { version: '2.0.0' },
+      { version: '3.0.0' },
+      { version: '3.1.0' },
+      { version: '3.1.5' }
+    ] as Migration[];
+    it('returns an empty array if the "from" and "to" versions are the same', () => {
+      expect(getMigrationsBetween('1.0.0', '1.0.0', testMigrationsBetween)).toEqual([]);
+    });
+
+    describe('upgrading between "from" and "to" versions', () => {
+      it('returns an empty array when there are no migrations to apply', () => {
+        expect(getMigrationsBetween('3.1.5', '4.0.0', testMigrationsBetween)).toEqual([]);
+      });
+
+      it(
+        'returns all migrations in ascending order including the migration for the "to" version if exists ' +
+          'and excluding the migration for the "from" version',
+        () => {
+          expect(getMigrationsBetween('1.0.0', '3.1.5', testMigrationsBetween)).toEqual([
+            { version: '2.0.0' },
+            { version: '3.0.0' },
+            { version: '3.1.0' },
+            { version: '3.1.5' }
+          ]);
+        }
+      );
+
+      it(
+        'returns all migrations in ascending order excluding the migration for the "from" version ' +
+          'and also excluding the migration for the "to" version if it does not exist',
+        () => {
+          expect(getMigrationsBetween('1.0.0', '3.1.2', testMigrationsBetween)).toEqual([
+            { version: '2.0.0' },
+            { version: '3.0.0' },
+            { version: '3.1.0' }
+          ]);
+        }
+      );
+    });
+
+    describe('downgrading between "from" and "to" versions', () => {
+      it('returns an empty array when there are no migrations to apply', () => {
+        expect(getMigrationsBetween('1.0.0', '0.5.0', testMigrationsBetween)).toEqual([]);
+      });
+
+      it(
+        'returns all migrations in descending order including the migration for the "to" version if it exists, ' +
+          'and excluding the migration for the "from" version',
+        () => {
+          expect(getMigrationsBetween('3.1.1', '2.0.0', testMigrationsBetween)).toEqual([
+            { version: '3.1.0' },
+            { version: '3.0.0' },
+            { version: '2.0.0' }
+          ]);
+        }
+      );
+
+      it(
+        'returns all migrations in descending order excluding the migration for the "from" version and ' +
+          'the migration for the "to" version when it does not exist, but including the migration for the previous version',
+        () => {
+          expect(getMigrationsBetween('3.1.1', '2.5.0', testMigrationsBetween)).toEqual([
+            { version: '3.1.0' },
+            { version: '3.0.0' },
+            { version: '2.0.0' }
+          ]);
+        }
+      );
+    });
+  });
   describe('applyMigrations', () => {
     describe('do not apply', () => {
       test.each([
@@ -90,53 +170,98 @@ describe('migrations', () => {
     });
 
     describe('apply', () => {
-      test('all available upgrades when migrating from an older version to a newer one', async () => {
-        await applyMigrations({ state: 'not-applied', from: '1.0.0', to: '3.1.0' }, 'password', mockMigrations);
-        const shouldApply = mockMigrations.filter((migration) =>
-          ['2.0.0', '3.0.0', '3.1.0'].includes(migration.version)
-        );
-        const shouldNotApply = mockMigrations.filter(
-          (migration) => !['2.0.0', '3.0.0', '3.1.0'].includes(migration.version)
-        );
-        shouldApply.forEach((migration) => {
-          const { assert, persist, prepare, rollback } = getMigrationMocks(migration.version).upgradeReturn;
-          expect(migration.upgrade).toHaveBeenCalledWith('password');
-          expect(prepare).toHaveBeenCalledTimes(1);
-          expect(assert).toHaveBeenCalledTimes(1);
-          expect(assert.mock.invocationCallOrder[0]).toBeGreaterThan(prepare.mock.invocationCallOrder[0]);
-          expect(persist).toHaveBeenCalledTimes(1);
-          expect(persist.mock.invocationCallOrder[0]).toBeGreaterThan(assert.mock.invocationCallOrder[0]);
-          expect(rollback).not.toHaveBeenCalled();
-          expect(migration.downgrade).not.toHaveBeenCalled();
+      describe('all available upgrades', () => {
+        test('when migrating from an older version to a newer one', async () => {
+          await applyMigrations({ state: 'not-applied', from: '1.0.0', to: '3.1.0' }, 'password', mockMigrations);
+          const shouldApply = mockMigrations.filter((migration) =>
+            ['2.0.0', '3.0.0', '3.1.0'].includes(migration.version)
+          );
+          const shouldNotApply = mockMigrations.filter(
+            (migration) => !['2.0.0', '3.0.0', '3.1.0'].includes(migration.version)
+          );
+          shouldApply.forEach((migration) => {
+            const { assert, persist, prepare, rollback } = getMigrationMocks(migration.version).upgradeReturn;
+            expect(migration.upgrade).toHaveBeenCalledWith('password');
+            expect(prepare).toHaveBeenCalledTimes(1);
+            expect(assert).toHaveBeenCalledTimes(1);
+            expect(assert.mock.invocationCallOrder[0]).toBeGreaterThan(prepare.mock.invocationCallOrder[0]);
+            expect(persist).toHaveBeenCalledTimes(1);
+            expect(persist.mock.invocationCallOrder[0]).toBeGreaterThan(assert.mock.invocationCallOrder[0]);
+            expect(rollback).not.toHaveBeenCalled();
+            expect(migration.downgrade).not.toHaveBeenCalled();
+          });
+          shouldNotApply.forEach((migration) => {
+            expect(migration.upgrade).not.toHaveBeenCalled();
+            expect(migration.downgrade).not.toHaveBeenCalled();
+          });
         });
-        shouldNotApply.forEach((migration) => {
-          expect(migration.upgrade).not.toHaveBeenCalled();
-          expect(migration.downgrade).not.toHaveBeenCalled();
+        test('in ascending order according to version number', async () => {
+          const unsortedMigrations = [
+            { version: '2.0.0', upgrade: jest.fn(() => mockPersistanceFunctions()), downgrade: jest.fn() },
+            { version: '3.0.0', upgrade: jest.fn(() => mockPersistanceFunctions()), downgrade: jest.fn() },
+            { version: '1.0.0', upgrade: jest.fn(() => mockPersistanceFunctions()), downgrade: jest.fn() }
+          ];
+          await applyMigrations({ state: 'not-applied', from: '0.0.9', to: '3.0.0' }, undefined, unsortedMigrations);
+
+          expect(unsortedMigrations[2].upgrade).toHaveBeenCalled();
+          expect(unsortedMigrations[0].upgrade).toHaveBeenCalled();
+          expect(unsortedMigrations[0].upgrade.mock.invocationCallOrder[0]).toBeGreaterThan(
+            unsortedMigrations[2].upgrade.mock.invocationCallOrder[0]
+          );
+          expect(unsortedMigrations[1].upgrade).toHaveBeenCalled();
+          expect(unsortedMigrations[1].upgrade.mock.invocationCallOrder[0]).toBeGreaterThan(
+            unsortedMigrations[0].upgrade.mock.invocationCallOrder[0]
+          );
         });
       });
-      test('all available upgrades in ascending order according to version number', async () => {
-        const unsortedMigrations = [
-          { version: '2.0.0', upgrade: jest.fn(() => mockPersistanceFunctions()) },
-          { version: '3.0.0', upgrade: jest.fn(() => mockPersistanceFunctions()) },
-          { version: '1.0.0', upgrade: jest.fn(() => mockPersistanceFunctions()) }
-        ];
-        await applyMigrations({ state: 'not-applied', from: '0.0.9', to: '3.0.0' }, undefined, unsortedMigrations);
-        expect(unsortedMigrations[2].upgrade).toHaveBeenCalled();
-        expect(unsortedMigrations[0].upgrade).toHaveBeenCalled();
-        expect(unsortedMigrations[0].upgrade.mock.invocationCallOrder[0]).toBeGreaterThan(
-          unsortedMigrations[2].upgrade.mock.invocationCallOrder[0]
-        );
-        expect(unsortedMigrations[1].upgrade).toHaveBeenCalled();
-        expect(unsortedMigrations[1].upgrade.mock.invocationCallOrder[0]).toBeGreaterThan(
-          unsortedMigrations[0].upgrade.mock.invocationCallOrder[0]
-        );
+      describe('all available downgrades', () => {
+        test('when migrating from an newer version to an older one', async () => {
+          await applyMigrations({ state: 'not-applied', from: '3.1.5', to: '2.0.0' }, 'password', mockMigrations);
+          const shouldApply = mockMigrations.filter((migration) =>
+            ['2.0.0', '3.0.0', '3.1.0'].includes(migration.version)
+          );
+          const shouldNotApply = mockMigrations.filter(
+            (migration) => !['2.0.0', '3.0.0', '3.1.0'].includes(migration.version)
+          );
+          shouldApply.forEach((migration) => {
+            const { assert, persist, prepare, rollback } = getMigrationMocks(migration.version).downgradeReturn;
+            expect(migration.downgrade).toHaveBeenCalledWith('password');
+            expect(prepare).toHaveBeenCalledTimes(1);
+            expect(assert).toHaveBeenCalledTimes(1);
+            expect(assert.mock.invocationCallOrder[0]).toBeGreaterThan(prepare.mock.invocationCallOrder[0]);
+            expect(persist).toHaveBeenCalledTimes(1);
+            expect(persist.mock.invocationCallOrder[0]).toBeGreaterThan(assert.mock.invocationCallOrder[0]);
+            expect(rollback).not.toHaveBeenCalled();
+            expect(migration.upgrade).not.toHaveBeenCalled();
+          });
+          shouldNotApply.forEach((migration) => {
+            expect(migration.upgrade).not.toHaveBeenCalled();
+            expect(migration.downgrade).not.toHaveBeenCalled();
+          });
+        });
+        test('in descending order according to version number', async () => {
+          const unsortedMigrations = [
+            { version: '1.0.0', upgrade: jest.fn(), downgrade: jest.fn(() => mockPersistanceFunctions()) },
+            { version: '3.0.0', upgrade: jest.fn(), downgrade: jest.fn(() => mockPersistanceFunctions()) },
+            { version: '2.0.0', upgrade: jest.fn(), downgrade: jest.fn(() => mockPersistanceFunctions()) }
+          ];
+          await applyMigrations({ state: 'not-applied', from: '3.1.0', to: '1.0.0' }, undefined, unsortedMigrations);
+
+          expect(unsortedMigrations[1].downgrade).toHaveBeenCalled();
+          expect(unsortedMigrations[2].downgrade).toHaveBeenCalled();
+          expect(unsortedMigrations[2].downgrade.mock.invocationCallOrder[0]).toBeGreaterThan(
+            unsortedMigrations[1].downgrade.mock.invocationCallOrder[0]
+          );
+          expect(unsortedMigrations[0].downgrade).toHaveBeenCalled();
+          expect(unsortedMigrations[0].downgrade.mock.invocationCallOrder[0]).toBeGreaterThan(
+            unsortedMigrations[1].downgrade.mock.invocationCallOrder[0]
+          );
+        });
       });
-      test.todo('implement downgrades and test');
 
       test('and skip migrations that should be skipped', async () => {
         const withSkipMigrations = [...mockMigrations];
         withSkipMigrations[2].shouldSkip = jest.fn().mockResolvedValue(true);
-        console.log(withSkipMigrations[2]);
         await applyMigrations({ state: 'not-applied', from: '0.5.0', to: '3.1.5' }, undefined, withSkipMigrations);
         const shouldApply = mockMigrations.filter((_, index) => index !== 2);
         const shouldSkip = mockMigrations.filter((_, index) => index === 2);
@@ -161,7 +286,8 @@ describe('migrations', () => {
           };
           const failingMigration: Migration = {
             version: '10.0.0',
-            upgrade: () => mockUpgrade
+            upgrade: () => mockUpgrade,
+            downgrade: jest.fn()
           };
 
           await applyMigrations({ state: 'not-applied', from: '9.9.9', to: '10.0.0' }, undefined, [failingMigration]);
@@ -183,7 +309,8 @@ describe('migrations', () => {
           };
           const failingMigration: Migration = {
             version: '10.0.0',
-            upgrade: () => mockUpgrade
+            upgrade: () => mockUpgrade,
+            downgrade: jest.fn()
           };
 
           await applyMigrations({ state: 'not-applied', from: '9.9.9', to: '10.0.0' }, undefined, [failingMigration]);
@@ -205,7 +332,8 @@ describe('migrations', () => {
           };
           const failingMigration: Migration = {
             version: '10.0.0',
-            upgrade: () => mockUpgrade
+            upgrade: () => mockUpgrade,
+            downgrade: jest.fn()
           };
 
           await applyMigrations({ state: 'not-applied', from: '9.9.9', to: '10.0.0' }, undefined, [failingMigration]);
@@ -224,7 +352,8 @@ describe('migrations', () => {
           };
           const failingMigration: Migration = {
             version: '10.0.0',
-            upgrade: () => mockUpgrade
+            upgrade: () => mockUpgrade,
+            downgrade: jest.fn()
           };
 
           await expect(
@@ -289,7 +418,8 @@ describe('migrations', () => {
             };
             const failingMigration: Migration = {
               version: '2.0.0',
-              upgrade: () => mockUpgrade
+              upgrade: () => mockUpgrade,
+              downgrade: jest.fn()
             };
 
             await applyMigrations(initialState, undefined, [failingMigration]);
@@ -305,11 +435,13 @@ describe('migrations', () => {
     const noPasswordMigration: Migration = {
       version: '4.0.0',
       upgrade: jest.fn(),
+      downgrade: jest.fn(),
       requiresPassword: jest.fn(() => false)
     };
     const withPasswordMigration: Migration = {
       version: '5.0.0',
       upgrade: jest.fn(),
+      downgrade: jest.fn(),
       requiresPassword: jest.fn(() => true)
     };
     describe('is false', () => {
@@ -366,9 +498,8 @@ describe('migrations', () => {
       delete runtime.getManifest;
     });
     describe('set migration state to "up-to-date"', () => {
-      // TODO: change when downgrades implemented [LW-5595]
-      test('when is a downgrade', async () => {
-        await checkMigrations('4.0.0', mockMigrations);
+      test('when previous and current versions are the same', async () => {
+        await checkMigrations('3.0.0', mockMigrations);
         expect(storage.local.set).toHaveBeenCalledWith({ MIGRATION_STATE: { state: 'up-to-date' } });
       });
 
@@ -376,14 +507,25 @@ describe('migrations', () => {
         await checkMigrations('2.9.9', mockMigrations);
         expect(storage.local.set).toHaveBeenCalledWith({ MIGRATION_STATE: { state: 'up-to-date' } });
       });
+
+      test('when no downgrades found between previous and current versions', async () => {
+        await checkMigrations('3.0.5', mockMigrations);
+        expect(storage.local.set).toHaveBeenCalledWith({ MIGRATION_STATE: { state: 'up-to-date' } });
+      });
     });
 
     describe('set migration state to "not-applied"', () => {
-      // TODO: add downgrade case when implemented [LW-5595]
       test('when at least one upgrade was found between previous and current versions', async () => {
         await checkMigrations('1.0.0', mockMigrations);
         expect(storage.local.set).toHaveBeenCalledWith({
           MIGRATION_STATE: { state: 'not-applied', from: '1.0.0', to: '3.0.0' }
+        });
+      });
+
+      test('when at least one downgrade was found between previous and current versions', async () => {
+        await checkMigrations('3.1.5', mockMigrations);
+        expect(storage.local.set).toHaveBeenCalledWith({
+          MIGRATION_STATE: { state: 'not-applied', from: '3.1.5', to: '3.0.0' }
         });
       });
     });
