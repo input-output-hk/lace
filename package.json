@@ -51,7 +51,7 @@
       "prettier --write",
       "markdownlint --fix"
     ],
-    "packages/staking/package.json": "sort-package-json"
+    "packages/{staking,ui}/package.json": "sort-package-json"
   },
   "contributors": [
     "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)"

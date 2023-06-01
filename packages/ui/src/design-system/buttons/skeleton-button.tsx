@@ -39,7 +39,9 @@ export const SkeletonButton = ({
     >
       <Flex alignItems="center" justifyContent="center">
         {icon !== undefined && <Flex pr="$8">{icon}</Flex>}
-        <Text.Button className={className.label}>{label}</Text.Button>
+        <Text.Button className={className.label}>
+          {label}
+        </Text.Button>
       </Flex>
     </button>
   );

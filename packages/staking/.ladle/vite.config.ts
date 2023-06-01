@@ -1,8 +1,10 @@
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import checker from 'vite-plugin-checker';
 import eslint from 'vite-plugin-eslint';
 
 export const ladleViteConfig = {
   plugins: [
+    vanillaExtractPlugin(),
     checker({
       overlay: {
         position: 'br',
@@ -11,7 +13,10 @@ export const ladleViteConfig = {
         root: '../',
       },
     }),
-    eslint(),
+    eslint({
+      include: './**/*',
+      overrideConfigFile: '.eslintrc.cjs',
+    }),
   ],
 };
 
