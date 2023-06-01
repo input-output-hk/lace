@@ -19,6 +19,7 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
+import { AddressDetailsSteps } from './AddressDetailDrawer/types';
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
@@ -75,6 +76,10 @@ export const AddressBook = withAddressBookContext(() => {
     extendLimit();
   }, [extendLimit]);
 
+  const AddressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
+    ? AddressDetailsSteps.DETAILS
+    : AddressDetailsSteps.CREATE;
+
   return (
     <>
       <ContentLayout
@@ -118,6 +123,7 @@ export const AddressBook = withAddressBookContext(() => {
         )}
       </ContentLayout>
       <AddressDetailDrawer
+        initialStep={AddressDrawerInitialStep}
         initialValues={addressToEdit}
         onCancelClick={() => {
           setAddressToEdit({} as AddressBookSchema);
@@ -131,7 +137,6 @@ export const AddressBook = withAddressBookContext(() => {
           })
         }
         visible={isEditAddressVisible}
-        useNewAddressForm={!(addressToEdit as AddressBookSchema)?.id}
         popupView
       />
     </>

@@ -43,7 +43,7 @@ const handleAddressBtn = () => {
   const addressSaveBtn: HTMLButtonElement = document.querySelector('[data-testid="address-form-button-save"]');
   const addressDeleteBtn: HTMLButtonElement = document.querySelector('[data-testid="delete-address-modal-confirm"]');
 
-  if (addressDeleteBtn && !addressDeleteBtn.hasAttribute('disabled')) {
+  if (addressDeleteBtn.offsetHeight && !addressDeleteBtn.hasAttribute('disabled')) {
     addressDeleteBtn.click();
   } else if (addressSaveBtn && !addressSaveBtn.hasAttribute('disabled')) {
     addressSaveBtn.click();
