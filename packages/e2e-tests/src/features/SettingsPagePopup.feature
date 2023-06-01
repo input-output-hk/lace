@@ -237,13 +237,13 @@ Feature: General Settings - Popup View
   Scenario: Popup View - Settings - Visibility of Help drawer
     When I open settings from header menu
     When I click on "Help" setting
-    Then I see help details open in a drawer
+    Then I see help details drawer in popup mode
 
   @LW-2791 @Mainnet @Testnet
   Scenario: Popup View - Settings - Help Create a ticket
     When I open settings from header menu
     When I click on "Help" setting
-    And I click "browserView.settings.help.support.createASupportTicket" button in drawer
+    And I click "Create a support ticket" button on Help drawer
     Then New tab with url containing "iohk.zendesk.com/hc/en-us/requests/new" is opened
 
   @LW-3630 @Mainnet @Testnet

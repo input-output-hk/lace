@@ -22,6 +22,7 @@ import Modal from '../elements/modal';
 import WalletAddressPage from '../elements/walletAddressPage';
 import { browser } from '@wdio/globals';
 import CollateralSettingsDrawer from '../elements/settings/extendedView/collateralSettingsDrawer';
+import HelpSettingsDrawer from '../elements/settings/extendedView/helpSettingsDrawer';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
@@ -142,10 +143,13 @@ Then(/^the Cookie policy drawer is displayed in (extended|popup) mode$/, async (
   await CookiePolicyDrawerAssert.assertSeeCookiePolicyContent();
 });
 
-Then(/I see help details open in a drawer/, async () => {
-  await drawerCommonExtendedAssert.assertSeeDrawerWithTitle(await t('browserView.settings.help.support.help'), false);
-  await drawerHelpSettingsAssert.assertSeeHelpModal();
-  await drawerHelpSettingsAssert.assertSeeCreateNewTicketKeyButton();
+Then(/^I see help details drawer in (extended|popup) mode/, async (mode: 'extended' | 'popup') => {
+  await drawerHelpSettingsAssert.assertSeeHelpDrawer(mode);
+});
+
+When(/^I click "Create a support ticket" button on Help drawer$/, async () => {
+  await HelpSettingsDrawer.createASupportTicketButton.waitForClickable();
+  await HelpSettingsDrawer.createASupportTicketButton.click();
 });
 
 Then(/I see analytics option with proper description and toggle/, async () => {
