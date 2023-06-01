@@ -12,11 +12,19 @@ export const DappTransactionSuccess = (): React.ReactElement => {
     <div data-testid="dapp-sign-tx-success" className={styles.noWalletContainer}>
       <div className={styles.noWalletContent}>
         <Image data-testid="dapp-sign-tx-success-image" preview={false} width={112} src={Success} />
-        <div className={styles.heading}>{t('browserView.transaction.success.youCanSafelyCloseThisPanel')}</div>
-        <div className={styles.description}>{t('core.dappTransaction.signedSuccessfully')}</div>
+        <div data-testid="dapp-sign-tx-success-heading" className={styles.heading}>
+          {t('browserView.transaction.success.youCanSafelyCloseThisPanel')}
+        </div>
+        <div data-testid="dapp-sign-tx-success-description" className={styles.description}>
+          {t('core.dappTransaction.signedSuccessfully')}
+        </div>
       </div>
       <div className={styles.footer}>
-        <Button data-test-id="window-close-btn" className={styles.footerBtn} onClick={() => window.close()}>
+        <Button
+          data-testid="dapp-sign-tx-success-close-button"
+          className={styles.footerBtn}
+          onClick={() => window.close()}
+        >
           {t('general.button.close')}
         </Button>
       </div>
