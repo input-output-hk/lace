@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+/* eslint-disable sonarjs/cognitive-complexity */
 import { ChainablePromiseElement } from 'webdriverio';
 import { Logger } from '../support/logger';
 import allure from '@wdio/allure-reporter';
@@ -103,16 +104,23 @@ export class NetworkManager {
           if (request.response.status >= 400) {
             const requestId = request.requestId;
             let requestPayload = '';
+            let body = '';
             const approximateTimestamp = new Date().toString();
+            // Fails If request does not contain Post data
             try {
               requestPayload = JSON.stringify(await client.send('Network.getRequestPostData', { requestId }));
             } catch (error) {
               Logger.warn(`${error}`);
             }
-            const responseBody = await client.send('Network.getResponseBody', { requestId });
-            const body = responseBody.base64Encoded
-              ? Buffer.from(responseBody.body, 'base64').toString('ascii')
-              : responseBody.body;
+            // Fails If request does not contain Response body
+            try {
+              const responseBody = await client.send('Network.getResponseBody', { requestId });
+              body = responseBody.base64Encoded
+                ? Buffer.from(responseBody.body, 'base64').toString('ascii')
+                : responseBody.body;
+            } catch (error) {
+              Logger.warn(`${error}`);
+            }
             const combinedFailedRequestInfo = `URL:\n${request.response.url}\n\nRESPONSE CODE:\n${request.response.status}\n\nAPPROXIMATE TIME:\n${approximateTimestamp}\n\nRESPONSE BODY:\n${body}\n\nREQUEST PAYLOAD:\n${requestPayload}`;
             allure.addAttachment('Failed request', combinedFailedRequestInfo, 'text/plain');
             console.log('Failed request');
