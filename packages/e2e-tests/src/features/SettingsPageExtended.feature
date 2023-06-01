@@ -369,13 +369,13 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Remove wallet - Enter and Escape buttons support
     When I open settings from header menu
     And I click on Remove wallet button
-    Then An "browserView.settings.wallet.general.removeWalletAlert.title" text is displayed
+    Then "Remove wallet" modal is displayed
     When I press keyboard Enter button
-    Then No "browserView.settings.wallet.general.removeWalletAlert.title" text is displayed
+    Then "Remove wallet" modal is not displayed
     And I click on Remove wallet button
-    And An "browserView.settings.wallet.general.removeWalletAlert.title" text is displayed
+    Then "Remove wallet" modal is displayed
     When I press keyboard Escape button
-    Then No "browserView.settings.wallet.general.removeWalletAlert.title" text is displayed
+    Then "Remove wallet" modal is not displayed
 
   @LW-5821 @Mainnet @Testnet
   Scenario: Remove and Onboard new wallet - address has been changed defect - LW-5087
