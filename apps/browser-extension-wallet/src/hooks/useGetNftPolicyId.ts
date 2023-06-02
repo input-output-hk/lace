@@ -15,5 +15,5 @@ export const useFindNftByPolicyId = (policyId: Wallet.Cardano.PolicyId) => {
   return useMemo(() => {
     const { nftList } = getTokenList({ assetsInfo, balance: assetsBalance?.assets, environmentName, fiatCurrency });
     return nftList.find((nft) => assetsInfo.get(nft.assetId).policyId === policyId);
-  }, [assetsInfo, assetsBalance?.assets, fiatCurrency, environmentName]);
+  }, [assetsInfo, assetsBalance?.assets, fiatCurrency, environmentName, policyId]);
 };
