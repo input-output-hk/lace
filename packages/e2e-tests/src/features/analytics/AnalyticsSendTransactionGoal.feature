@@ -4,7 +4,7 @@ Feature: Analytics
   Background:
     Given Wallet is synced
 
-  @wip
+  @LW-6824
   Scenario: Extended View - Send transaction goal event analytics
     And I set up request interception for 5 matomo analytics request(s)
     And I click "Send" button on page header
