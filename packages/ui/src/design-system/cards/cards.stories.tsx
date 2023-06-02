@@ -8,7 +8,7 @@ import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 import * as Typography from '../typography';
 
-import { Variant } from './types';
+import { Scheme } from './types';
 
 import * as Card from '.';
 
@@ -31,15 +31,15 @@ export const Overview = (): JSX.Element => {
   const variantsData = [
     {
       Component: Card.Elevated,
-      variant: Variant.Elevated,
+      variant: Scheme.Elevated,
     },
     {
       Component: Card.Greyed,
-      variant: Variant.Greyed,
+      variant: Scheme.Greyed,
     },
     {
       Component: Card.Outlined,
-      variant: Variant.Outlined,
+      variant: Scheme.Outlined,
     },
   ];
 
