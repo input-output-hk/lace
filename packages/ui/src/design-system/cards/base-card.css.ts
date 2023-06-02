@@ -1,23 +1,27 @@
 import { recipe } from '@vanilla-extract/recipes';
 
-import { sx, vars } from '../../design-tokens';
+import { vars } from '../../design-tokens';
 
-import { Variant } from './types';
+import { Scheme } from './types';
 
 export const card = recipe({
-  base: sx({
-    borderRadius: '$medium',
-  }),
+  base: {
+    borderRadius: vars.radius.$medium,
+    borderStyle: 'solid',
+    borderWidth: vars.spacing.$2,
+  },
   variants: {
-    variant: {
-      [Variant.Elevated]: {
+    scheme: {
+      [Scheme.Elevated]: {
+        borderColor: vars.colors.$card_elevated_backgroundColor,
         backgroundColor: vars.colors.$card_elevated_backgroundColor,
         boxShadow: vars.elevation.$card,
       },
-      [Variant.Greyed]: {
+      [Scheme.Greyed]: {
+        borderColor: vars.colors.$card_greyed_backgroundColor,
         backgroundColor: vars.colors.$card_greyed_backgroundColor,
       },
-      [Variant.Outlined]: {
+      [Scheme.Outlined]: {
         backgroundColor: vars.colors.$card_outlined_backgroundColor,
         borderColor: vars.colors.$card_outlined_borderColor,
         borderStyle: 'solid',

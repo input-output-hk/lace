@@ -5,23 +5,23 @@ import cs from 'classnames';
 
 import * as cx from './base-card.css';
 
-import type { Variant } from './types';
+import type { Scheme } from './types';
 
 export type CardProps = PropsWithChildren<
   HTMLAttributes<HTMLDivElement> & {
-    variant: `${Variant}`;
+    scheme: `${Scheme}`;
   }
 >;
 
 export const BaseCard = ({
   children,
   className,
-  variant,
+  scheme,
   ...restProps
 }: Readonly<CardProps>): JSX.Element => (
   <div
     {...restProps}
-    className={cs(className, cx.card({ variant: variant as Variant }))}
+    className={cs(className, cx.card({ scheme: scheme as Scheme }))}
   >
     {children}
   </div>
