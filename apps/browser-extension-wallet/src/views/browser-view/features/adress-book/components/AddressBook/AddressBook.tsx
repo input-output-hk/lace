@@ -30,7 +30,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
   const { extendLimit, saveRecord: saveAddress, updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
-  const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const analytics = useAnalyticsContext();
 
   const addressListTranslations = {
@@ -70,7 +70,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_BROWSER
           });
           setAddressToEdit(address);
-          setIsFormVisible(true);
+          setIsDrawerOpen(true);
         }
       })) || [],
     [addressList, analytics, setAddressToEdit]
@@ -98,7 +98,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   };
 
   const handleAddAddressClick = () => {
-    setIsFormVisible(true);
+    setIsDrawerOpen(true);
   };
 
   if (!isNumber(addressCount)) return <span />;
@@ -107,7 +107,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
     <EducationalList items={educationalList} title={translate('browserView.sidePanel.aboutYourWallet')} />
   );
 
-  const AddressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
+  const addressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
     ? AddressDetailsSteps.DETAILS
     : AddressDetailsSteps.CREATE;
 
@@ -144,7 +144,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
           initialValues={addressToEdit}
           onCancelClick={() => {
             setAddressToEdit({} as AddressBookSchema);
-            setIsFormVisible(false);
+            setIsDrawerOpen(false);
           }}
           onConfirmClick={onAddressSave}
           onDelete={(id) =>
@@ -153,8 +153,8 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
               icon: DeleteIcon
             })
           }
-          visible={isFormVisible}
-          initialStep={AddressDrawerInitialStep}
+          visible={isDrawerOpen}
+          initialStep={addressDrawerInitialStep}
         />
       </SectionLayout>
     </Layout>

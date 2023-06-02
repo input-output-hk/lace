@@ -76,7 +76,7 @@ export const AddressBook = withAddressBookContext(() => {
     extendLimit();
   }, [extendLimit]);
 
-  const AddressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
+  const addressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
     ? AddressDetailsSteps.DETAILS
     : AddressDetailsSteps.CREATE;
 
@@ -123,7 +123,7 @@ export const AddressBook = withAddressBookContext(() => {
         )}
       </ContentLayout>
       <AddressDetailDrawer
-        initialStep={AddressDrawerInitialStep}
+        initialStep={addressDrawerInitialStep}
         initialValues={addressToEdit}
         onCancelClick={() => {
           setAddressToEdit({} as AddressBookSchema);
