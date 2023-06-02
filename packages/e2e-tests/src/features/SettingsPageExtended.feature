@@ -214,13 +214,13 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Settings - Visibility of Help drawer
     When I open settings from header menu
     When I click on "Help" setting
-    Then I see help details open in a drawer
+    Then I see help details drawer in extended mode
 
   @LW-2789 @Mainnet @Testnet
   Scenario: Extended View - Settings - Help Create a ticket
     When I open settings from header menu
     When I click on "Help" setting
-    And I click "browserView.settings.help.support.createASupportTicket" button in drawer
+    And I click "Create a support ticket" button on Help drawer
     Then New tab with url containing "iohk.zendesk.com/hc/en-us/requests/new" is opened
 
   @LW-3629 @Mainnet @Testnet
