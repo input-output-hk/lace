@@ -10,7 +10,7 @@ import publicKeyDrawerAssert from '../assert/settings/publicKeyDrawerAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import drawerNetworkSettingsAssert from '../assert/settings/drawerNetworkSettingsAssert';
 import drawerTermsAndConditionsSettingsAssert from '../assert/settings/drawerTermsAndConditionsSettingsAssert';
-import drawerPrivacyPolicySettingsAssert from '../assert/settings/drawerPrivacyPolicySettingsAssert';
+import PrivacyPolicyDrawerAssert from '../assert/settings/PrivacyPolicyDrawerAssert';
 import drawerHelpSettingsAssert from '../assert/settings/drawerHelpSettingsAssert';
 import { t } from '../utils/translationService';
 import passphraseDrawerAssert from '../assert/settings/passphraseDrawerAssert';
@@ -129,8 +129,15 @@ Then(/the Terms and Conditions copy is displayed/, async () => {
   await drawerTermsAndConditionsSettingsAssert.assertTermsAndConditionsContent();
 });
 
-Then(/the Privacy policy copy is displayed/, async () => {
-  await drawerPrivacyPolicySettingsAssert.assertPrivacyPolicyContent();
+Then(/the Privacy policy copy is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  if (mode === 'extended') {
+    await PrivacyPolicyDrawerAssert.assertSeeDrawerNavigationTitle();
+    await PrivacyPolicyDrawerAssert.assertSeeDrawerCloseButton();
+  } else {
+    await PrivacyPolicyDrawerAssert.assertSeeDrawerBackButton();
+  }
+  await PrivacyPolicyDrawerAssert.assertSeePrivacyPolicyTitle();
+  await PrivacyPolicyDrawerAssert.assertSeePrivacyPolicyContent();
 });
 
 Then(/^the Cookie policy drawer is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {

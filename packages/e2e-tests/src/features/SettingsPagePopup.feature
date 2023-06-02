@@ -225,7 +225,7 @@ Feature: General Settings - Popup View
   Scenario: Popup View - Settings - Privacy policy copy
     When I open settings from header menu
     When I click on "Privacy policy" setting
-    Then the Privacy policy copy is displayed
+    Then the Privacy policy copy is displayed in popup mode
 
   @LW-5831 @Mainnet @Testnet
   Scenario: Popup View - Settings - Cookie policy copy
@@ -266,7 +266,7 @@ Feature: General Settings - Popup View
     And "Password" field is displayed
     And "Show passphrase" button is displayed
 
-  @LW-3874 @Mainnet @Testnet @test
+  @LW-3874 @Mainnet @Testnet
   Scenario: Popup view - Settings - When user enter wrong password on the "Show 24-word passphrase" drawer then error state "Wrong password" is displayed and the "Show passphrase" button is disabled
     When I open settings from header menu
     And I click on "Show recovery phrase" setting
@@ -276,7 +276,7 @@ Feature: General Settings - Popup View
     Then I see "browserView.transaction.send.error.invalidPassword" password error
     And "Show passphrase" button is disabled on "Show 24-word recovery phrase" drawer
 
-  @LW-3878 @LW-3890 @Mainnet @Testnet @test
+  @LW-3878 @LW-3890 @Mainnet @Testnet
   Scenario: Popup view - Settings - When user clicks on "Hide passphrase"/"Show passphrase" button on the "Show 24-word passphrase" side drawer all mnemonics are blurred/visible
     When I open settings from header menu
     And I click on "Show recovery phrase" setting
@@ -291,7 +291,7 @@ Feature: General Settings - Popup View
     Then all mnemonics are not blurred
     And all mnemonics from "TestAutomationWallet" wallet are listed
 
-  @LW-3920 @Mainnet @Testnet @test
+  @LW-3920 @Mainnet @Testnet
   Scenario: Popup view - Settings - "Show passphrase" button enabled after user fills correct password on the "Show 24-word passphrase" side drawer
     When I open settings from header menu
     And I click on "Show recovery phrase" setting
