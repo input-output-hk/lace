@@ -177,8 +177,8 @@ Then(/^"Password" field is displayed$/, async () => {
   await passphraseDrawerAssert.assertSeePasswordInputContainer();
 });
 
-Then(/^"Show passphrase" button is displayed$/, async () => {
-  await passphraseDrawerAssert.assertSeeShowPassphraseButton();
+Then(/^"Show passphrase" button (is|is not) displayed$/, async (isDisplayed: 'is' | 'is not') => {
+  await passphraseDrawerAssert.assertSeeShowPassphraseButton(isDisplayed === 'is');
 });
 
 Then(/^"Hide passphrase" button is displayed$/, async () => {
@@ -191,6 +191,15 @@ When(
     buttonType === 'Show passphrase'
       ? await PassphraseDrawer.showPassphraseButton.click()
       : await PassphraseDrawer.hidePassphraseButton.click();
+  }
+);
+
+Then(
+  /^"(Show passphrase|Hide passphrase)" button is (enabled|disabled) on "Show 24-word recovery phrase" drawer$/,
+  async (button: 'Show passphrase' | 'Hide passphrase', state: 'enabled' | 'disabled') => {
+    await (button === 'Show passphrase'
+      ? passphraseDrawerAssert.assertShowPassphraseButtonEnabled(state === 'enabled')
+      : passphraseDrawerAssert.assertHidePassphraseButtonEnabled(state === 'enabled'));
   }
 );
 
