@@ -147,6 +147,10 @@ Then(/^I see help details drawer in (extended|popup) mode/, async (mode: 'extend
   await drawerHelpSettingsAssert.assertSeeHelpDrawer(mode);
 });
 
+Then(/^"Create a support ticket" button (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await drawerHelpSettingsAssert.assertSeeCreateASupportTicketButton(shouldBeDisplayed === 'is');
+});
+
 When(/^I click "Create a support ticket" button on Help drawer$/, async () => {
   await HelpSettingsDrawer.createASupportTicketButton.waitForClickable();
   await HelpSettingsDrawer.createASupportTicketButton.click();

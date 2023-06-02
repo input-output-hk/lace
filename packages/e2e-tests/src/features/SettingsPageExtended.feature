@@ -361,9 +361,9 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Help setting - Escape button support
     When I open settings from header menu
     When I click on "Help" setting
-    Then I see "browserView.settings.help.support.createASupportTicket" button
+    Then "Create a support ticket" button is displayed
     When I press keyboard Escape button
-    Then I do not see "browserView.settings.help.support.createASupportTicket" button
+    Then "Create a support ticket" button is not displayed
 
   @LW-4876 @Mainnet @Testnet
   Scenario: Extended View - Remove wallet - Enter and Escape buttons support
