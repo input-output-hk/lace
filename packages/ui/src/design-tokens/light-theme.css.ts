@@ -1,6 +1,6 @@
 import { createTheme } from '@vanilla-extract/css';
 
-import { laceGradient, lightColorScheme} from './colors.data';
+import { laceGradient, lightColorScheme } from './colors.data';
 import { opacities } from './opacities.data';
 import { radius } from './radius.data';
 import { spacing } from './spacing.data';
