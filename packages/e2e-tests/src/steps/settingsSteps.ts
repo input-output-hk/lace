@@ -23,6 +23,7 @@ import WalletAddressPage from '../elements/walletAddressPage';
 import { browser } from '@wdio/globals';
 import CollateralSettingsDrawer from '../elements/settings/extendedView/collateralSettingsDrawer';
 import HelpSettingsDrawer from '../elements/settings/extendedView/helpSettingsDrawer';
+import ModalAssert from '../assert/modalAssert';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
@@ -227,6 +228,11 @@ Then(/^all elements of (Inactive|Active) collateral drawer are displayed$/, asyn
 Then(/^Collateral drawer with not enough ADA error is displayed$/, async () => {
   await collateralDrawerAssert.assertSeeCollateralNotEnoughAdaDrawer();
 });
+
+Then(/^"Remove wallet" modal (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await ModalAssert.assertSeeRemoveWalletModal(shouldBeDisplayed === 'is');
+});
+
 When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (button: 'Back' | 'Remove wallet') => {
   await browser.pause(500);
   switch (button) {
