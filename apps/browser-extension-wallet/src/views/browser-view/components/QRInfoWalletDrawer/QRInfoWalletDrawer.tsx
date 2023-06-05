@@ -8,10 +8,7 @@ import { useDrawer } from '../../stores';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { useKeyboardShortcut } from '@hooks';
 import { useFindNftByPolicyId } from '@hooks/useGetNftPolicyId';
-import { Wallet } from '@lace/cardano';
-
-const isAdaHandleEnabled = process.env.USE_ADA_HANDLE;
-const ADA_HANDLE_POLICY_ID = Wallet.Cardano.PolicyId('f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a');
+import { ADA_HANDLE_POLICY_ID, isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
