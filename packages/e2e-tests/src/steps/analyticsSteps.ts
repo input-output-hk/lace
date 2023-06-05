@@ -3,9 +3,9 @@ import { URLSearchParams } from 'url';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
 
-export const getRequestInLatestOrderParams = async (requestIndexInLatestOrder: number): Promise<URLSearchParams> => {
+export const getLatestIncomingRequests = async (index: number): Promise<URLSearchParams> => {
   const requests = await browser.getRequests({ includePending: true, orderBy: 'START' });
-  const decodedLatestRequestUrl = decodeURIComponent(requests[requests.length - 1 - requestIndexInLatestOrder].url);
+  const decodedLatestRequestUrl = decodeURIComponent(requests[requests.length - 1 - index].url);
   return new URLSearchParams(decodedLatestRequestUrl.split('?')[1]);
 };
 
@@ -20,8 +20,7 @@ When(/^I set up request interception for (\d) matomo analytics request\(s\)$/, a
 When(/^I validate latest analytics request\(s\) information:$/, async (eventInfo: DataTable) => {
   await browser.pause(1000);
   for (let i = 0; i < eventInfo.rows().length; i++) {
-    const requestIndexInLatestOrder = eventInfo.rows().length - 1 - i;
-    const actualEventInfo = await getRequestInLatestOrderParams(requestIndexInLatestOrder);
+    const actualEventInfo = await getLatestIncomingRequests(eventInfo.rows().length - 1 - i);
     const [expectedEventCategory, expectedEventAction, expectedEventName] = eventInfo.rows()[i];
     expect(actualEventInfo.get('e_c')).to.equal(expectedEventCategory);
     expect(actualEventInfo.get('e_a')).to.equal(expectedEventAction);
