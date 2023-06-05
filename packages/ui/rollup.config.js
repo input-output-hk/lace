@@ -13,6 +13,7 @@ export default () => ({
     typescript({
       tsconfig: 'tsconfig.json',
       composite: false,
+      exclude: ['**/*.stories.tsx'],
     }),
     peerDepsExternal(),
     commonjs(),
