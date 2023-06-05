@@ -1,5 +1,10 @@
 import { WalletLocked } from '@src/types';
-import { saveValueInLocalStorage, deleteFromLocalStorage } from '@src/utils/local-storage';
+import {
+  saveValueInLocalStorage,
+  deleteFromLocalStorage,
+  getValueFromLocalStorage,
+  bufferReviver
+} from '@src/utils/local-storage';
 import { LockSlice, SliceCreator, WalletInfoSlice, ZustandHandlers } from '../types';
 
 const isWalletLocked = ({ get }: ZustandHandlers<LockSlice & WalletInfoSlice>): boolean =>
@@ -21,12 +26,12 @@ const resetWalletLock = (_: WalletLocked, { set }: ZustandHandlers<LockSlice>): 
   set({ walletLock: undefined });
 };
 
-export const lockSlice: SliceCreator<LockSlice & WalletInfoSlice, LockSlice, WalletLocked, LockSlice> = (
-  { get, set },
-  walletLock
-) => ({
-  isWalletLocked: () => isWalletLocked({ get }),
-  walletLock,
-  setWalletLock: (lock: WalletLocked) => setWalletLock(lock, { set }),
-  resetWalletLock: () => resetWalletLock(undefined, { set })
-});
+export const lockSlice: SliceCreator<LockSlice & WalletInfoSlice, LockSlice, void, LockSlice> = ({ get, set }) => {
+  const walletLock = getValueFromLocalStorage('lock', undefined, bufferReviver);
+  return {
+    isWalletLocked: () => isWalletLocked({ get }),
+    walletLock,
+    setWalletLock: (lock: WalletLocked) => setWalletLock(lock, { set }),
+    resetWalletLock: () => resetWalletLock(undefined, { set })
+  };
+};
