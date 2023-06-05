@@ -37,7 +37,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     <div className={styles.infoContainer}>
       <InfoWallet
         getQRCodeOptions={() => getQRCodeOptions(theme)}
-        walletInfo={{ name: isAdaHandleEnabled === 'true' && handle?.name || name, qrData: address.toString() }}
+        walletInfo={{ name: (isAdaHandleEnabled === 'true' && handle?.name) || name, qrData: address.toString() }}
         translations={infoWalletTranslations}
       />
     </div>
