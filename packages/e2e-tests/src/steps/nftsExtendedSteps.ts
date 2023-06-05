@@ -1,10 +1,11 @@
-import { Given, Then, When } from '@cucumber/cucumber';
+/* eslint-disable no-magic-numbers */
+/* eslint-disable new-cap */
+import { Given, Then } from '@cucumber/cucumber';
 import nftsPageObject from '../pageobject/nftsPageObject';
 import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
 import nftAssert from '../assert/nftAssert';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import webTester from '../actor/webTester';
-import { NftDetails } from '../elements/NFTs/nftDetails';
 
 Then(
   /^NFT with name: "([^"]*)" (is displayed|is not displayed) in coin selector$/,
@@ -28,14 +29,6 @@ Given(
     await nftAssert.assertSeeNftDetails();
   }
 );
-
-When(/^I click "Send NFT" button on NFT details drawer$/, async () => {
-  await new NftDetails().sendNFTButton.click();
-});
-
-Then(/^"Send NFT" button (is|is not) displayed on NFT details drawer$/, async (shouldBeDisplayed: 'is' | 'is not') => {
-  await nftAssert.assertSeeSendNFTButton(shouldBeDisplayed === 'is');
-});
 
 Given(/^I'm sending an NFT with name: "([^"]*)"$/, async (nftName: string) => {
   await nftsPageObject.progressWithSendUntilPasswordPage(nftName);

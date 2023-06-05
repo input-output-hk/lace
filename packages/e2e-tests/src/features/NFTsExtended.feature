@@ -24,7 +24,7 @@ Feature: LW-423: NFTs - Extended view
   Scenario: Extended-view - Send button click
     And I am on NFTs extended page
     And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
-    When I click "Send NFT" button on NFT details drawer
+    When I click "core.nftDetail.sendNFT" button in drawer
     Then the 'Send' screen is displayed in extended mode
     And the NFT is pre-loaded as token to be sent with name: "Ibilecoin"
 
@@ -75,13 +75,13 @@ Feature: LW-423: NFTs - Extended view
   Scenario: Extended-view - NFTs details - Enter and Escape buttons support
     Given I am on NFTs extended page
     And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
-    And "Send NFT" button is displayed on NFT details drawer
+    And I see "core.nftDetail.sendNFT" button
     When I press keyboard Escape button
-    Then "Send NFT" button is not displayed on NFT details drawer
+    Then I do not see "core.nftDetail.sendNFT" button
     And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
     When I press keyboard Enter button
     Then send drawer is displayed with all its components in extended mode
-    And "Review transaction" button is displayed on "Send" page
+    And I see "browserView.transaction.send.footer.review" button
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     When I press keyboard Escape button
     Then a popup asking if you're sure you'd like to close it is displayed

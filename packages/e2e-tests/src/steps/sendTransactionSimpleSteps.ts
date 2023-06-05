@@ -501,10 +501,6 @@ Then(/^"Review transaction" button is (enabled|disabled) on "Send" page$/, async
   await drawerSendExtendedAssert.assertReviewTransactionButtonIsEnabled(state === 'enabled');
 });
 
-Then(/^"Review transaction" button (is|is not) displayed on "Send" page$/, async (state: 'is' | 'is not') => {
-  await drawerSendExtendedAssert.assertReviewTransactionButtonIsDisplayed(state === 'is');
-});
-
 Then(/^"Insufficient balance" error (is|is not) displayed on "Send" page$/, async (state: 'is' | 'is not') => {
   await drawerSendExtendedAssert.assertSeeAnyInsufficientBalanceError(state === 'is');
 });

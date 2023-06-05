@@ -294,15 +294,6 @@ class DrawerSendExtendedAssert {
   async assertReviewTransactionButtonIsEnabled(shouldBeEnabled: boolean) {
     await new TransactionNewPage().reviewTransactionButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }
-
-  async assertReviewTransactionButtonIsDisplayed(shouldBeDisplayed: boolean) {
-    await new TransactionNewPage().reviewTransactionButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
-    if (shouldBeDisplayed) {
-      await expect(await new TransactionNewPage().reviewTransactionButton.getText()).to.equal(
-        await t('browserView.transaction.send.footer.review')
-      );
-    }
-  }
 }
 
 export default new DrawerSendExtendedAssert();
