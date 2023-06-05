@@ -1,28 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { KoraLabsHandleProvider } from '@src/features/ada-handle/provider';
 import { useWalletStore } from '@src/stores';
-import { HandleProvider } from '@src/features/ada-handle/types';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useHandleResolver = () => {
-  const [handleResolver, setHandleResolver] = useState<HandleProvider>();
   const {
     blockchainProvider,
     currentChain: { networkMagic }
   } = useWalletStore();
 
-  useEffect(() => {
-    const getHandleResolver = () => {
-      const serverUrl = HANDLE_SERVER_URLS[networkMagic as keyof typeof HANDLE_SERVER_URLS];
-      const handleProvider = new KoraLabsHandleProvider({
-        serverUrl,
-        networkInfoProvider: blockchainProvider.networkInfoProvider
-      });
-      setHandleResolver(handleProvider);
-    };
-
-    getHandleResolver();
+  return useMemo(() => {
+    const serverUrl = HANDLE_SERVER_URLS[networkMagic as keyof typeof HANDLE_SERVER_URLS];
+    return new KoraLabsHandleProvider({
+      serverUrl,
+      networkInfoProvider: blockchainProvider.networkInfoProvider
+    });
   }, [blockchainProvider, networkMagic]);
-
-  return handleResolver;
 };

@@ -77,41 +77,49 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     setAddressValue(row, value);
   };
 
-  const debouncedValidateHandle = debounce(async () => {
-    try {
-      const resolvedHandles = await handleResolver.resolveHandles({ handles: [address.slice(1)] });
+  const resolveHandle = useMemo(
+    () =>
+      debounce(async () => {
+        if (handle) {
+          setHandleVerificationState(HandleVerificationState.VALID);
+          return;
+        }
 
-      if (resolvedHandles.length === 0) {
-        setHandleVerificationState(HandleVerificationState.INVALID);
-      } else {
-        setAddressValue(row, resolvedHandles[0].resolvedAddresses.cardano.toString(), address);
-        setHandleVerificationState(HandleVerificationState.VALID);
-      }
-    } catch (error) {
-      console.error('Error occurred during handle verification:', error);
-      setHandleVerificationState(HandleVerificationState.INVALID);
-    }
-  }, 1000);
+        try {
+          const handleString = addressInputValue.toString();
+          const resolvedHandles = await handleResolver.resolveHandles({ handles: [handleString.slice(1)] });
+
+          if (resolvedHandles.length === 0) {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          } else {
+            setAddressValue(row, resolvedHandles[0].resolvedAddresses.cardano.toString(), handleString);
+            setHandleVerificationState(HandleVerificationState.VALID);
+          }
+        } catch (error) {
+          console.error('Error occurred during handle verification:', error);
+          setHandleVerificationState(HandleVerificationState.INVALID);
+        }
+      }, 1000),
+    [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
+  );
 
   useEffect(() => {
     if (!address) {
       return;
     }
 
-    if (validateHandle(address)) {
+    if (validateHandle(addressInputValue.toString())) {
       setHandleVerificationState(HandleVerificationState.VERIFYING);
-      debouncedValidateHandle();
-    }
-
-    if (handle) {
-      setHandleVerificationState(HandleVerificationState.VALID);
+      resolveHandle();
+    } else {
+      setHandleVerificationState(undefined);
     }
 
     // eslint-disable-next-line consistent-return
     return () => {
-      debouncedValidateHandle && debouncedValidateHandle.cancel();
+      resolveHandle && resolveHandle.cancel();
     };
-  }, [address, handle, setHandleVerificationState]);
+  }, [address, addressInputValue, setHandleVerificationState, resolveHandle]);
 
   useEffect(() => {
     getAddressBookByNameOrAddress({ value: address || '' });
@@ -141,7 +149,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     } else {
       setAddressInputValue(handle || address);
     }
-  }, [address, getExistingAddress]);
+  }, [address, handle, getExistingAddress]);
 
   const addressList = useMemo(
     () =>
