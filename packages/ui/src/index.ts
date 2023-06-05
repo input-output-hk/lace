@@ -1,2 +1,2 @@
 export * from './design-system';
-export { ThemeColorScheme, ThemeProvider } from './design-tokens';
+export * from './design-tokens';
