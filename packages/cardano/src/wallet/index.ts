@@ -25,9 +25,9 @@ export { ProtocolParameters } from '../../../../node_modules/@cardano-sdk/core/d
 export {
   BalanceTracker as Balance,
   RewardsHistory,
-  SingleAddressWallet,
+  PersonalWallet,
   storage,
-  SingleAddressWalletProps,
+  PersonalWalletProps,
   ObservableWallet,
   PollingConfig,
   createWalletUtil,

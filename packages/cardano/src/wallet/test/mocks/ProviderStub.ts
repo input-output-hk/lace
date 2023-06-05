@@ -209,6 +209,7 @@ export const mockWalletProvider = (): NetworkInfoProvider &
     }),
   stakePoolStats: async () => ({
     qty: {
+      activating: 0,
       active: 1000,
       retired: 500,
       retiring: 5

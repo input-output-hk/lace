@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable sonarjs/no-duplicate-string */
-/* eslint-disable max-len, @typescript-eslint/no-explicit-any, no-magic-numbers */
+/* eslint-disable max-len, @typescript-eslint/no-explicit-any, no-magic-numbers, new-cap */
 import React, { FunctionComponent } from 'react';
 import { Wallet } from '@lace/cardano';
 import { SendStoreProvider } from '../../features/send/stores';
@@ -12,6 +12,7 @@ import { fakeApiRequest } from './fake-api-request';
 // eslint-disable-next-line import/no-unresolved
 import { Observable, of } from 'rxjs';
 import { PriceResult } from '@hooks';
+import { Percent } from '@cardano-sdk/util';
 
 export const mockWalletInfoTestnet: WalletInfo = {
   name: 'testnet wallet',
@@ -113,7 +114,7 @@ export const getSendStoreContext =
   ({ children }: { children?: React.ReactNode }) =>
     <SendStoreProvider>{children}</SendStoreProvider>;
 
-export const mockSingleAddressWallet = {
+export const mockPersonalWallet = {
   addresses$: createSignal<any>()[0],
   assets$: createSignal<any>()[0],
   balance: {
@@ -221,6 +222,7 @@ export const mockAssetInfo: IAssetInfo[] = [
 
 export const cardanoStakePoolStats: Wallet.StakePoolStats = {
   qty: {
+    activating: 0,
     active: 1,
     retired: 0,
     retiring: 0
@@ -253,10 +255,10 @@ export const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
         blocksCreated: 20,
         delegators: 20,
         livePledge: BigInt('2000000000'),
-        saturation: Wallet.Cardano.Percent(0.0512),
+        saturation: Percent(0.0512),
         stake: undefined,
         size: undefined,
-        apy: Wallet.Cardano.Percent(0.013)
+        apy: Percent(0.013)
       },
       owners: [
         Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
@@ -265,8 +267,6 @@ export const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
       pledge: BigInt('2000000000'),
       rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
       status: Wallet.Cardano.StakePoolStatus.Active,
-      transactions: undefined,
-      epochRewards: [],
       vrf: undefined,
       relays: undefined
     }
