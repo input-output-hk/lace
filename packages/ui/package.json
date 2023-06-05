@@ -73,6 +73,7 @@
     "http-server": "^14.1.1",
     "jest-image-snapshot": "^6.1.0",
     "prettier": "^2.4.1",
+    "rollup-plugin-copy": "^3.4.0",
     "storybook-addon-pseudo-states": "^1.15.2",
     "url-loader": "^4.1.1",
     "wait-on": "^7.0.1",
