@@ -177,7 +177,6 @@
   },
   "resolutions": {
     "http-cache-semantics": "^4.1.1",
-    "minimatch": "^3.0.5",
     "minimist": "^1.2.6",
     "json-schema": "^0.4.0",
     "follow-redirects": "^1.14.8",
