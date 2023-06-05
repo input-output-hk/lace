@@ -77,7 +77,7 @@ export const DelegationContainer = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
 
   const delegationDetails = useDelegationDetails();
-  const isStakeRegistered = rewardAccounts && rewardAccounts[0].keyStatus === Wallet.StakeKeyStatus.Registered;
+  const isStakeRegistered = rewardAccounts && rewardAccounts[0].keyStatus === Wallet.Cardano.StakeKeyStatus.Registered;
   const coinBalance = balance?.total?.coinBalance && Number(balance?.total?.coinBalance);
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
   const isDelegating = !!(rewardAccounts && delegationDetails);

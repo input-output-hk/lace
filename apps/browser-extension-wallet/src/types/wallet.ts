@@ -5,7 +5,7 @@ export type Tokens = Wallet.Cardano.TokenMap;
 export type TokensDetails = Wallet.Asset.AssetInfo;
 export type Balance = Wallet.Balance;
 export type CoinOverview = Omit<CoinItemProps, 'handleClick'>;
-export type RewardAccount = Wallet.RewardAccount;
+export type RewardAccount = Wallet.Cardano.RewardAccount;
 export type Transaction = Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
 export type CoinId = {
   id: string;
