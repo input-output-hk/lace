@@ -101,19 +101,10 @@ export class NetworkManager {
         await client.send(this.NETWORK_ENABLE);
         client.on('Network.responseReceived', async (request) => {
           if (request.response.status >= 400) {
-            const requestId = request.requestId;
-            let requestPayload = '';
+            const requestPayload = await this.getRequestPostData(client, request.requestId);
+            const responseBody = await this.getResponseBody(client, request.requestId);
             const approximateTimestamp = new Date().toString();
-            try {
-              requestPayload = JSON.stringify(await client.send('Network.getRequestPostData', { requestId }));
-            } catch (error) {
-              Logger.warn(`${error}`);
-            }
-            const responseBody = await client.send('Network.getResponseBody', { requestId });
-            const body = responseBody.base64Encoded
-              ? Buffer.from(responseBody.body, 'base64').toString('ascii')
-              : responseBody.body;
-            const combinedFailedRequestInfo = `URL:\n${request.response.url}\n\nRESPONSE CODE:\n${request.response.status}\n\nAPPROXIMATE TIME:\n${approximateTimestamp}\n\nRESPONSE BODY:\n${body}\n\nREQUEST PAYLOAD:\n${requestPayload}`;
+            const combinedFailedRequestInfo = `URL:\n${request.response.url}\n\nRESPONSE CODE:\n${request.response.status}\n\nAPPROXIMATE TIME:\n${approximateTimestamp}\n\nRESPONSE BODY:\n${responseBody}\n\nREQUEST PAYLOAD:\n${requestPayload}`;
             allure.addAttachment('Failed request', combinedFailedRequestInfo, 'text/plain');
             console.log('Failed request');
             console.log(combinedFailedRequestInfo);
@@ -128,6 +119,29 @@ export class NetworkManager {
       if (session.connection()) await session.detach();
     });
     NetworkManager.cdpSessions = [];
+  };
+
+  private getRequestPostData = async (client: any, requestId: any): Promise<string> => {
+    let postData = '';
+    try {
+      postData = JSON.stringify(await client.send('Network.getRequestPostData', { requestId }));
+    } catch (error) {
+      Logger.warn(`${error}`);
+    }
+    return postData;
+  };
+
+  private getResponseBody = async (client: any, requestId: any): Promise<string> => {
+    let responseBody = '';
+    try {
+      const getResponseBody = await client.send('Network.getResponseBody', { requestId });
+      responseBody = getResponseBody.base64Encoded
+        ? Buffer.from(getResponseBody.body, 'base64').toString('ascii')
+        : getResponseBody.body;
+    } catch (error) {
+      Logger.warn(`${error}`);
+    }
+    return responseBody;
   };
 }
 
