@@ -6,8 +6,7 @@ import { ReactComponent as InfoIcon } from '../../assets/icons/info.component.sv
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { Page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
-import { Grid } from '../grid';
-import { Cell } from '../grid/cell.component';
+import { Grid, Cell } from '../grid';
 
 import { ToggleSwitch } from './toggle-switch.component';
 
@@ -30,10 +29,11 @@ const ToggleSwitchPreview = (): JSX.Element => (
     <Variants.Row>
       <Variants.Cell>
         <ToggleSwitch
-          label="Label"
+          label="Label 1"
           id="rest"
           defaultChecked
           icon={<InfoIcon />}
+          required
         />
       </Variants.Cell>
       <Variants.Cell>
