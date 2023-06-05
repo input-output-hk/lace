@@ -14,7 +14,7 @@ import {
 import {
   setupWallet,
   ObservableWallet,
-  SingleAddressWalletDependencies,
+  PersonalWalletDependencies,
   storage,
   SetupWalletProps,
   restoreKeyAgent
@@ -50,10 +50,10 @@ export interface WalletProvidersDependencies {
   chainHistoryProvider: ChainHistoryProvider;
 }
 
-export interface CreateSingleAddressWallet {
+export interface CreatePersonalWallet {
   providers: WalletProvidersDependencies;
   name: string;
-  logger: SingleAddressWalletDependencies['logger'];
+  logger: PersonalWalletDependencies['logger'];
   stores: storage.WalletStores;
   keyAgent: KeyManagement.AsyncKeyAgent;
 }

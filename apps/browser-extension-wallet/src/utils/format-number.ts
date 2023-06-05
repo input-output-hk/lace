@@ -1,5 +1,5 @@
-/* eslint-disable no-magic-numbers */
-import { Cardano } from '@cardano-sdk/core';
+/* eslint-disable no-magic-numbers, new-cap */
+import { Percent } from '@cardano-sdk/util';
 import BigNumber from 'bignumber.js';
 import { unitsMap } from './constants';
 import { getNumberUnit } from './get-number-unit';
@@ -176,7 +176,7 @@ export const isNumeric = (str: string): boolean => {
   return !Number.isNaN(str) && !Number.isNaN(Number.parseFloat(str));
 };
 
-export const formatPercentages = (number: number | Cardano.Percent, decimalPlaces: number = DEFAULT_DECIMALS): string =>
+export const formatPercentages = (number: number | Percent, decimalPlaces: number = DEFAULT_DECIMALS): string =>
   (Math.round(number.valueOf() * 100 * 100) / 100).toFixed(decimalPlaces);
 
 export const compactNumber = (value: number | string, decimal?: number): string => {
