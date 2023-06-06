@@ -76,27 +76,27 @@ func main() {
 
 	ogmiosStatus := make(chan string, 1)
 	cardanoNodeStatus := make(chan string, 1)
-	cardanoServicesStatus := make(chan string, 1)
+	providerServerStatus := make(chan string, 1)
 	networkSwitch := make(chan string)
 
 	ogmiosStatus <- "off"
 	cardanoNodeStatus <- "off"
-	cardanoServicesStatus <- "off"
+	providerServerStatus <- "off"
 
 	go manageChildren(libexecDir, resourcesDir, workDir,
 		networkSwitch,
 		cardanoNodeStatus,
 		ogmiosStatus,
-		cardanoServicesStatus,
+		providerServerStatus,
 	)
 
-	systray.Run(onReady(ogmiosStatus, cardanoNodeStatus, cardanoServicesStatus, networkSwitch), onExit)
+	systray.Run(onReady(ogmiosStatus, cardanoNodeStatus, providerServerStatus, networkSwitch), onExit)
 }
 
 func onReady(
 	ogmiosStatus <-chan string,
 	cardanoNodeStatus <-chan string,
-	cardanoServicesStatus <-chan string,
+	providerServerStatus <-chan string,
 	networkSwitch chan<- string,
 ) func() { return func() {
 	systray.SetTitle("lace-local-backend")
@@ -136,14 +136,14 @@ func onReady(
 	mNetworks[networks[0]].ClickedCh <- struct{}{}
 
 	// XXX: additional spaces are there so that the width of the menu doesn’t change:
-	systray.AddMenuItemCheckbox("Run Full (cardano-db-sync)                 ", "", false)
+	systray.AddMenuItemCheckbox("Run Full Backend (projector)               ", "", false)
 
 	systray.AddSeparator()
 
 	statuses := map[string](<-chan string){
 		"cardano-node": cardanoNodeStatus,
 		"Ogmios": ogmiosStatus,
-		"cardano-services": cardanoServicesStatus,
+		"provider-server": providerServerStatus,
 	}
 	for component, statusCh := range statuses {
 		menuItem := systray.AddMenuItem("", "")
@@ -185,7 +185,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 	networkSwitch <-chan string,
 	cardanoNodeStatus chan<- string,
 	ogmiosStatus chan<- string,
-	cardanoServicesStatus chan<- string,
+	providerServerStatus chan<- string,
 ) {
 	sep := string(filepath.Separator)
 
@@ -320,15 +320,15 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 		// -------------------------- cardano-js-sdk -------------------------- //
 
-		cardanoServicesPort := 3000
+		providerServerPort := 3000
 
 		tokenMetadataServerUrl := "https://tokens.cardano.org"
 		if network != "mainnet" {
 			tokenMetadataServerUrl = "https://metadata.cardano-testnet.iohkdev.io/"
 		}
 
-		cancelCardanoServices, cardanoServicesExited := addChild(
-			"cardano-services",
+		cancelProviderServer, providerServerExited := addChild(
+			"provider-server",
 			libexecDir + sep + "node" + exeSuffix,
 			[]string{
 				cardanoServicesDir + sep + "dist" + sep + "cjs" + sep + "cli.js",
@@ -337,38 +337,38 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				"NETWORK=" + network,
 				"TOKEN_METADATA_SERVER_URL=" + tokenMetadataServerUrl,
 				"CARDANO_NODE_CONFIG_PATH=" + cardanoNodeConfigDir + sep + "config.json",
-				"API_URL=http://0.0.0.0:" + fmt.Sprintf("%d", cardanoServicesPort),
+				"API_URL=http://0.0.0.0:" + fmt.Sprintf("%d", providerServerPort),
 				"ENABLE_METRICS=true",
 				"LOGGER_MIN_SEVERITY=info",
 				"SERVICE_NAMES=tx-submit",
 				"USE_QUEUE=false",
 				"USE_BLOCKFROST=false",
 				"OGMIOS_URL=ws://127.0.0.1:" + fmt.Sprintf("%d", ogmiosPort),
-			}, cardanoServicesStatus)
-		defer cancelCardanoServices()
+			}, providerServerStatus)
+		defer cancelProviderServer()
 
-		cardanoServicesHealthErr := make(chan error, 1)
+		providerServerHealthErr := make(chan error, 1)
 		go func() {
 			// It usually takes <1s
-			cardanoServicesHealthErr <- waitForHttp200(fmt.Sprintf("http://127.0.0.1:%d/health", cardanoServicesPort), 10 * time.Second)
+			providerServerHealthErr <- waitForHttp200(fmt.Sprintf("http://127.0.0.1:%d/health", providerServerPort), 10 * time.Second)
 		}()
 		select {
-		case err := <-cardanoServicesHealthErr:
+		case err := <-providerServerHealthErr:
 			if (err != nil) {
 				panic(err)
 			}
-		case <-cardanoServicesExited:
-			panic("cardano-services exited prematurely")
+		case <-providerServerExited:
+			panic("provider-server exited prematurely")
 		}
 
-		cardanoServicesStatus <- "listening"
+		providerServerStatus <- "listening"
 
 		// -------------------------- wait for disaster (or network switch) -------------------------- //
 
 		select {
 		case <-cardanoNodeExited:
 		case <-ogmiosExited:
-		case <-cardanoServicesExited:
+		case <-providerServerExited:
 		case newNetwork := <-networkSwitch:
 			if newNetwork != network {
 				omitSleep = true
