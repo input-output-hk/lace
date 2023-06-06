@@ -36,7 +36,7 @@ const chromeConfig: WebdriverIO.Config = {
       }
     }
   ],
-  services: ['devtools']
+  services: ['devtools', 'intercept']
 };
 
 if (!process.env.CI) {
@@ -48,7 +48,8 @@ if (!process.env.CI) {
         args: { drivers }
       }
     ],
-    'devtools'
+    'devtools',
+    'intercept'
   ];
 }
 
