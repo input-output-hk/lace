@@ -55,6 +55,9 @@ export const colors = {
   $sub_navigation_item_label_color_hover: '',
   $sub_navigation_item_label_color_pressed: '',
   $sub_navigation_item_label_color_focused: '',
+
+  $scrollbar_thumb_container_bgColor: '',
+  $scrollbar_thumb_container_bgColor_hover: '',
 };
 
 export type Colors = typeof colors;
