@@ -112,19 +112,23 @@ func onReady(
 
 	networks := []string{"mainnet", "preprod", "preview"}
 	mNetworks := make(map[string](*systray.MenuItem))
+	currentNetwork := ""
 	for _, network := range networks {
 		mNetworks[network] = mChooseNetwork.AddSubMenuItemCheckbox(network, "", false)
 	}
 	for _, network := range networks {
 		go func(network string) {
 			for range mNetworks[network].ClickedCh {
-				fmt.Println("Switching network to: " + network + "…")
 				mChooseNetwork.SetTitle("Network: " + network)
 				for _, networkBis := range networks {
 					mNetworks[networkBis].Uncheck()
 				}
 				mNetworks[network].Check()
-				networkSwitch <- network
+				if network != currentNetwork {
+					currentNetwork = network
+					fmt.Println("Switching network to: " + network + "…")
+					networkSwitch <- network
+				}
 			}
 		}(network)
 	}
@@ -153,12 +157,20 @@ func onReady(
 
 	systray.AddSeparator()
 
+	systray.AddMenuItem("Copy Backend URL", "")
 	systray.AddMenuItem("Current Log", "")
 	systray.AddMenuItem("Logs Directory", "")
 
 	systray.AddSeparator()
 
-	mQuit := systray.AddMenuItem("Quit", "Quit the application")
+	mForceRestart := systray.AddMenuItem("Force Restart", "")
+	go func() {
+		for range mForceRestart.ClickedCh {
+			networkSwitch <- currentNetwork
+		}
+	}()
+
+	mQuit := systray.AddMenuItem("Quit", "")
 	go func() {
 		<-mQuit.ClickedCh
 		systray.Quit()
@@ -185,25 +197,27 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 	network := <-networkSwitch
 
 	firstIteration := true
+	omitSleep := false
 
 	// XXX: we nest a function here, so that we can defer cleanups, and return early on errors etc.
 	for { func() {
-		fmt.Printf("info: starting session for network %s\n", network)
-
 		var wgChildren sync.WaitGroup
 
-		defer func() {
+		defer func(networkMemo string) {
 			if r := recover(); r != nil {
 				fmt.Fprintln(os.Stderr, "panic:", r)
 			}
 			wgChildren.Wait()
-			fmt.Printf("info: session ended for network %s\n", network)
-		}()
+			fmt.Printf("info: session ended for network %s\n", networkMemo)
+		}("" + network)
 
-		if !firstIteration {
+		if !firstIteration && !omitSleep {
 			time.Sleep(5 * time.Second)
 		}
 		firstIteration = false
+		omitSleep = false
+
+		fmt.Printf("info: starting session for network %s\n", network)
 
 		addChild := func(
 			logPrefix string, exePath string, argv []string, extraEnv []string,
@@ -355,6 +369,11 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 		case <-cardanoNodeExited:
 		case <-ogmiosExited:
 		case <-cardanoServicesExited:
+		case newNetwork := <-networkSwitch:
+			if newNetwork != network {
+				omitSleep = true
+				network = newNetwork
+			}
 		}
 	}()}
 
