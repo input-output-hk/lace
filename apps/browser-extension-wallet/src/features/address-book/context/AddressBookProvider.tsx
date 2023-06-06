@@ -13,15 +13,16 @@ interface AddressBookProviderProps {
 
 export type AddressRecordParams = Pick<AddressBookSchema, 'address' | 'name'>;
 
+export const cardanoNetworkMap = {
+  Mainnet: Wallet.Cardano.NetworkMagics.Mainnet,
+  Preprod: Wallet.Cardano.NetworkMagics.Preprod,
+  Preview: Wallet.Cardano.NetworkMagics.Preview,
+  LegacyTestnet: Wallet.Cardano.NetworkMagics.Testnet
+};
+
 export const AddressBookProvider = ({ children, initialState }: AddressBookProviderProps): React.ReactElement => {
   const { environmentName } = useWalletStore();
-  const queries = useMemo(
-    () =>
-      addressBookQueries(
-        environmentName === 'Mainnet' ? Wallet.Cardano.NetworkId.Mainnet : Wallet.Cardano.NetworkId.Testnet
-      ),
-    [environmentName]
-  );
+  const queries = useMemo(() => addressBookQueries(cardanoNetworkMap[environmentName]), [environmentName]);
 
   return (
     <AddressBookContext.Provider

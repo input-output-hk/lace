@@ -84,6 +84,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
       action: AnalyticsEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_BROWSER
     });
+
     return 'id' in addressToEdit
       ? updateAddress(addressToEdit.id, address, {
           text: translate('browserView.addressBook.toast.editAddress'),
