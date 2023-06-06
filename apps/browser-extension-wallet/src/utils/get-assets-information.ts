@@ -19,7 +19,7 @@ export const getAssetsInformation = async (
         if (!asset) return await assetProvider.getAsset({ assetId, extraData });
       } catch (error) {
         // If an error occurs fetching from the provider then just skip this asset
-        console.log('Error fetching asset info', { assetId, error });
+        console.log('Error fetching asset info', { assetId, error: error.message });
       }
       return asset;
     })

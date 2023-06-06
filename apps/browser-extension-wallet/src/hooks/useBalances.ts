@@ -24,11 +24,11 @@ export const useBalances = (fiatPrice?: number): BalancesReturnedFields => {
       total && available
         ? {
             total: walletBalanceTransformer(
-              BigInt((total?.coins || BigInt(0)) + (availableRewards || BigInt(0))).toString(),
+              BigInt((total.coins || BigInt(0)) + (availableRewards || BigInt(0))).toString(),
               fiatPrice
             ),
             available: walletBalanceTransformer(
-              BigInt((available?.coins || BigInt(0)) + (availableRewards || BigInt(0))).toString(),
+              BigInt((available.coins || BigInt(0)) + (availableRewards || BigInt(0))).toString(),
               fiatPrice
             )
           }
