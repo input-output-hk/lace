@@ -490,7 +490,7 @@
         "subtitle": "Have a look at the Glossary"
       },
       "stakePoolsTable.title": "Stake pools",
-      "stakePoolsTable.searchPlacehholder": "Search by type, token name or ID",
+      "stakePoolsTable.searchPlaceholder": "Search by type, token name or ID",
       "stakePoolsTable.emptyMessage": "No results matching your search",
       "details": {
         "title": "Stake pool detail",
