@@ -105,4 +105,4 @@ branches:
       restrictions:
         apps: []
         users: []
-        teams: ['lace-tech-leads']
+        teams: ['lace-tech-leads', 'lace']
