@@ -1,4 +1,4 @@
-import { InitializeTxPropsValidationResult } from '@cardano-sdk/wallet';
+import { InitializeTxPropsValidationResult } from '@cardano-sdk/tx-construction';
 import BigNumber from 'bignumber.js';
 
 export interface TxMinimumCoinQuantity {
