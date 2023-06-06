@@ -27,6 +27,7 @@ export const mockedAssets: Asset.AssetInfo[] = [
     },
     name: Cardano.AssetName('6e7574636f696e'),
     policyId: Cardano.PolicyId('b0d07d45fe9514f80213f4020e5a61241458be626841cde717cb38a7'),
+    quantity: BigInt('12000'),
     supply: BigInt('12000')
   }
 ];

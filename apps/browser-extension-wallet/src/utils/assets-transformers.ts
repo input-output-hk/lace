@@ -28,7 +28,7 @@ export const cardanoTransformer = (params: {
   balancesPlaceholder?: string;
 }): IAssetDetails => {
   const { fiatPrice, total, cardanoCoin, fiatCode, areBalancesVisible = true, balancesPlaceholder = '' } = params;
-  const balance = walletBalanceTransformer(total?.coins.toString(), fiatPrice?.price);
+  const balance = walletBalanceTransformer(total.coins.toString(), fiatPrice?.price);
   const fiatBalance =
     balance.fiatBalance === '-'
       ? balance.fiatBalance
@@ -41,8 +41,8 @@ export const cardanoTransformer = (params: {
     logo: CardanoLogo,
     name: cardanoCoin.name,
     ticker: cardanoCoin.symbol,
-    price: isNumber(fiatPrice?.price) ? formatLocaleNumber(fiatPrice?.price.toString(), 3) : '-',
-    variation: fiatPrice?.priceVariationPercentage24h ? variationParser(fiatPrice?.priceVariationPercentage24h) : '-',
+    price: isNumber(fiatPrice?.price) ? formatLocaleNumber(fiatPrice.price.toString(), 3) : '-',
+    variation: fiatPrice?.priceVariationPercentage24h ? variationParser(fiatPrice.priceVariationPercentage24h) : '-',
     balance: areBalancesVisible ? formatLocaleNumber(balance.coinBalance) : balancesPlaceholder,
     fiatBalance: areBalancesVisible ? `${fiatBalance} ${fiatCode}` : balancesPlaceholder
   };
@@ -94,11 +94,11 @@ export const assetTransformer = (params: {
       ? new BigNumber(tokenBalance).multipliedBy(fiatPrice)
       : undefined;
   const variation = pricesInfo?.priceVariationPercentage24h
-    ? variationParser(pricesInfo?.priceVariationPercentage24h)
+    ? variationParser(pricesInfo.priceVariationPercentage24h)
     : '-';
   const price = fiatPrice !== undefined ? parseFiat(fiatPrice) : '-';
   const formattedFiatBalance =
-    fiatBalance !== undefined ? `${parseFiat(fiatBalance.toNumber())} ${fiatCurrency?.code}` : '-';
+    fiatBalance !== undefined ? `${parseFiat(fiatBalance.toNumber())} ${fiatCurrency.code}` : '-';
 
   return {
     id: key.toString(),
