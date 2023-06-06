@@ -41,3 +41,19 @@ const displayReleaseAnnouncements = async ({ reason }: Runtime.OnInstalledDetail
 if (!runtime.onInstalled.hasListener(displayReleaseAnnouncements))
   runtime.onInstalled.addListener(displayReleaseAnnouncements);
 if (!runtime.onInstalled.hasListener(checkMigrationsOnUpdate)) runtime.onInstalled.addListener(checkMigrationsOnUpdate);
+
+const updateToVersionCallback = (details: Runtime.OnUpdateAvailableDetailsType) => {
+  console.log(`updating to version ${details.version}`);
+  if (runtime.onUpdateAvailable.hasListener(updateToVersionCallback)) {
+    runtime.onUpdateAvailable.removeListener(updateToVersionCallback);
+  }
+  runtime.reload();
+};
+
+if (!runtime.onUpdateAvailable.hasListener(updateToVersionCallback))
+  // fires when the new .crx file has been downloaded and the new version is ready to be installed
+  runtime.onUpdateAvailable.addListener(updateToVersionCallback);
+
+// extensions will not auto-update while a background page is in use (which effectively means waiting until a browser restart
+// forces the browser to check if your add-on has an update, rather than relying on the existing, automated check for updates
+runtime.requestUpdateCheck();

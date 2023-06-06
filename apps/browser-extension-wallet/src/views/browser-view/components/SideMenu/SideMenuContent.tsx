@@ -39,7 +39,7 @@ export const SideMenuContent = ({
   onMouseEnter,
   onMouseLeave,
   menuItemClassName
-}: SideMenuContentProps) => {
+}: SideMenuContentProps): React.ReactElement => {
   const { t } = useTranslate();
 
   return (

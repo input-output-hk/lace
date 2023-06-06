@@ -124,10 +124,13 @@ describe('Testing address book validator', () => {
       expect(addressBook.isValidAddress('asd')).toEqual(false);
     });
     test('should return false in case it throws', () => {
+      const logSpy = jest.spyOn(console, 'log');
+
       mockIsAddress.mockImplementation(() => {
         throw new Error('error');
       });
       expect(addressBook.isValidAddress('asd')).toEqual(false);
+      expect(logSpy).toHaveBeenCalledWith('error');
     });
     test('should return true in case the address is valid', () => {
       mockIsAddress.mockReturnValue(true);

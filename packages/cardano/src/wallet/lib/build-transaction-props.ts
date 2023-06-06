@@ -1,5 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
-import { Assets, InitializeTxProps } from '@cardano-sdk/wallet';
+import { Assets } from '@cardano-sdk/wallet';
+import { InitializeTxProps } from '@cardano-sdk/tx-construction';
 import isEmpty from 'lodash/isEmpty';
 import { assetBalanceToBigInt } from '../util/asset-balance';
 import { getAuxiliaryData } from './get-auxiliary-data';

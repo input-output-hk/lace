@@ -47,12 +47,12 @@ export interface buildMockProvidersResponse {
 
 export const buildMockProviders = async (
   config?: ProvidersConfig,
-  mockSingleAddressWallet?: Wallet.ObservableWallet,
+  mockPersonalWallet?: Wallet.ObservableWallet,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   storeCustomSlice?: (set: SetState<any>, get: GetState<any>) => Partial<WalletStore>
 ): Promise<buildMockProvidersResponse> => {
   const blockchainProviders: IBlockchainProvider = mockBlockchainProviders(config?.blockchainProviders);
-  const mockStore: WalletStore = await walletStoreMock(config?.walletStore, mockSingleAddressWallet);
+  const mockStore: WalletStore = await walletStoreMock(config?.walletStore, mockPersonalWallet);
   const mockAppSettings: AppSettings = {
     mnemonicVerificationFrequency: '',
     lastMnemonicVerification: dayjs().valueOf().toString(),

@@ -1,7 +1,7 @@
 import { QRCode } from '@lace/common';
 import { ThemeInstance } from '@providers/ThemeProvider';
 
-const qrCodeSize = 164;
+export const qrCodeSize = 164;
 export const getQRCodeOptions = (
   theme: ThemeInstance,
   size?: number
