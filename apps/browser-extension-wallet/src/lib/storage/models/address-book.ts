@@ -9,7 +9,7 @@ export interface AddressBookSchema {
   id: number;
   name: string;
   address: string;
-  network: Wallet.Cardano.NetworkId;
+  network: Wallet.Cardano.NetworkMagics;
 }
 
 export const addressBookSchema: VersionedSchema = {
@@ -21,7 +21,7 @@ export const addressBookSchema: VersionedSchema = {
 };
 
 export const addressBookQueries = (
-  currentChain: Wallet.Cardano.NetworkId
+  currentChain: Wallet.Cardano.NetworkMagics
 ): DbQueries<AddressBookSchema, AddressRecordParams> => ({
   listQuery: (collection) =>
     collection.filter(({ network }) => network === currentChain).sortBy('name', sortTabletByName),
