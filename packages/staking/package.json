@@ -50,8 +50,8 @@
     "watch": "tsup --watch"
   },
   "devDependencies": {
-    "@ladle/react": "^2.12.3",
     "@lace/ui": "^0.1.0",
+    "@ladle/react": "^2.12.3",
     "@tsconfig/create-react-app": "^1.0.3",
     "@vanilla-extract/vite-plugin": "^3.8.2",
     "@vitest/coverage-c8": "^0.31.0",
