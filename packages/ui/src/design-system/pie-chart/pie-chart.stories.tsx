@@ -47,26 +47,13 @@ export const Overview = (): JSX.Element => (
           <Variants.Cell>
             <PieChart
               colors={PIE_CHART_DEFAULT_COLOR_SET}
-              data={[
-                {
-                  name: 'Pool 1',
-                  value: 50,
-                },
-                {
-                  name: 'Pool 2',
-                  value: 50,
-                },
-              ]}
+              data={mockDataSet(2)}
             />
           </Variants.Cell>
           <Variants.Cell>
             <PieChart
               colors={PIE_CHART_DEFAULT_COLOR_SET}
-              data={[
-                { name: 'Pool 1', value: 33.33 },
-                { name: 'Pool 2', value: 33.33 },
-                { name: 'Pool 3', value: 33.33 },
-              ]}
+              data={mockDataSet(3)}
             />
           </Variants.Cell>
           <Variants.Cell>
@@ -182,34 +169,19 @@ export const Overview = (): JSX.Element => (
         <Cell colStart="$1" colEnd="$4">
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
-            data={[
-              {
-                name: 'Pool 1',
-                value: 100,
-              },
-            ]}
+            data={mockDataSet(1)}
           />
         </Cell>
         <Cell colStart="$4" colEnd="$6">
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
-            data={[
-              {
-                name: 'Pool 1',
-                value: 100,
-              },
-            ]}
+            data={mockDataSet(1)}
           />
         </Cell>
         <Cell>
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
-            data={[
-              {
-                name: 'Pool 1',
-                value: 100,
-              },
-            ]}
+            data={mockDataSet(1)}
           />
         </Cell>
       </Grid>
