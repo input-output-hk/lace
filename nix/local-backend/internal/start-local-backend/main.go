@@ -58,7 +58,7 @@ func main() {
 	default:
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
-	fmt.Println("workDir = " + workDir)
+	fmt.Println("info: workDir is " + workDir)
 	os.MkdirAll(workDir, 0755)
 
 	lockFile := workDir + sep + "instance.lock"
@@ -70,9 +70,9 @@ func main() {
 	}
 
 	logFile := workDir + sep + "logs" + sep + time.Now().UTC().Format("2006-01-02--15-04-05Z") + ".log"
-	fmt.Printf("Logging to file: %s\n", logFile)
+	fmt.Printf("info: logging to file: %s\n", logFile)
 	os.MkdirAll(filepath.Dir(logFile), 0755)
-	duplicateOutputToFile(logFile)
+	closeOutputs := duplicateOutputToFile(logFile)
 
 	ogmiosStatus := make(chan string, 1)
 	cardanoNodeStatus := make(chan string, 1)
@@ -83,21 +83,32 @@ func main() {
 	cardanoNodeStatus <- "off"
 	providerServerStatus <- "off"
 
-	go manageChildren(libexecDir, resourcesDir, workDir,
+	initiateShutdownCh := make(chan struct{})
+
+	go systray.Run(setupTrayUI(
+		ogmiosStatus, cardanoNodeStatus, providerServerStatus, networkSwitch, initiateShutdownCh,
+	), func(){})
+
+	manageChildren(libexecDir, resourcesDir, workDir,
 		networkSwitch,
+		initiateShutdownCh,
 		cardanoNodeStatus,
 		ogmiosStatus,
 		providerServerStatus,
 	)
 
-	systray.Run(onReady(ogmiosStatus, cardanoNodeStatus, providerServerStatus, networkSwitch), onExit)
+	systray.Quit()
+
+	fmt.Println("info: all good, exiting")
+	closeOutputs()
 }
 
-func onReady(
+func setupTrayUI(
 	ogmiosStatus <-chan string,
 	cardanoNodeStatus <-chan string,
 	providerServerStatus <-chan string,
 	networkSwitch chan<- string,
+	initiateShutdownCh chan<- struct{},
 ) func() { return func() {
 	systray.SetTitle("lace-local-backend")
 	// systray.SetTooltip("")
@@ -126,7 +137,7 @@ func onReady(
 				mNetworks[network].Check()
 				if network != currentNetwork {
 					currentNetwork = network
-					fmt.Println("Switching network to: " + network + "…")
+					fmt.Println("info: switching network to: " + network + "...")
 					networkSwitch <- network
 				}
 			}
@@ -173,16 +184,14 @@ func onReady(
 	mQuit := systray.AddMenuItem("Quit", "")
 	go func() {
 		<-mQuit.ClickedCh
-		systray.Quit()
-		fmt.Println("Quitting…")
+		mQuit.Disable()
+		initiateShutdownCh <- struct{}{}
 	}()
 }}
 
-func onExit() {
-}
-
 func manageChildren(libexecDir string, resourcesDir string, workDir string,
 	networkSwitch <-chan string,
+	initiateShutdownCh <-chan struct{},
 	cardanoNodeStatus chan<- string,
 	ogmiosStatus chan<- string,
 	providerServerStatus chan<- string,
@@ -198,9 +207,10 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 	firstIteration := true
 	omitSleep := false
+	keepGoing := true
 
 	// XXX: we nest a function here, so that we can defer cleanups, and return early on errors etc.
-	for { func() {
+	for keepGoing { func() {
 		var wgChildren sync.WaitGroup
 
 		defer func(networkMemo string) {
@@ -273,8 +283,8 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 		socketListenErr := make(chan error, 1)
 		go func() {
-			// It usually takes ~9 seconds, let’s wait 5× that
-			socketListenErr <- waitForUnixSocket(cardanoNodeSocket, 45 * time.Second)
+			// FIXME: a smarter health check needed
+			socketListenErr <- waitForUnixSocket(cardanoNodeSocket, 120 * time.Second)
 		}()
 		select {
 		case err := <-socketListenErr:
@@ -374,13 +384,14 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				omitSleep = true
 				network = newNetwork
 			}
+		case <-initiateShutdownCh:
+			fmt.Println("info: initiating a clean shutdown...")
+			keepGoing = false
 		}
 	}()}
-
-	os.Exit(0)
 }
 
-func duplicateOutputToFile(logFile string) {
+func duplicateOutputToFile(logFile string) func() {
 	originalStdout := os.Stdout
 	originalStderr := os.Stderr
 
@@ -410,33 +421,52 @@ func duplicateOutputToFile(logFile string) {
 		return time.Now().UTC().Format("2006-01-02 15:04:05.000Z")
 	}
 
+	var wgScanners sync.WaitGroup
+	wgScanners.Add(2)
+
+	lines := make(chan string)
+
+	go func() {
+		scanner := bufio.NewScanner(newStdoutR)
+		for scanner.Scan() {
+			line := logTime() + " " + scanner.Text()
+			lines <- line
+			originalStdout.WriteString(line + newLine)
+		}
+		wgScanners.Done()
+	}()
+
+	go func() {
+		scanner := bufio.NewScanner(newStderrR)
+		for scanner.Scan() {
+			now := logTime()
+			line := scanner.Text()
+			lines <- now + " [stderr] " + line
+			originalStderr.WriteString(now + " " + line + newLine)
+		}
+		wgScanners.Done()
+	}()
+
+	writerDone := make(chan struct{})
+
 	go func() {
 		defer fp.Close()
-		lines := make(chan string)
-
-		go func() {
-			scanner := bufio.NewScanner(newStdoutR)
-			for scanner.Scan() {
-				line := logTime() + " " + scanner.Text()
-				lines <- line
-				originalStdout.WriteString(line + newLine)
-			}
-		}()
-
-		go func() {
-			scanner := bufio.NewScanner(newStderrR)
-			for scanner.Scan() {
-				now := logTime()
-				line := scanner.Text()
-				lines <- now + " [stderr] " + line
-				originalStderr.WriteString(now + " " + line + newLine)
-			}
-		}()
-
 		for line := range lines {
 			fp.WriteString(stripansi.Strip(line) + newLine)
 		}
+		writerDone <- struct{}{}
 	}()
+
+	// Wait, making sure that everything is indeed written before exiting:
+	closeOutputs := func(){
+		newStdoutW.Close()
+		newStderrW.Close()
+		wgScanners.Wait()
+		close(lines)
+		<-writerDone
+	}
+
+	return closeOutputs
 }
 
 func childProcess(
