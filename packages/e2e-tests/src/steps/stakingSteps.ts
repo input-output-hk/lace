@@ -15,9 +15,9 @@ import StakingPageObject from '../pageobject/stakingPageObject';
 import StakingPage from '../elements/staking/stakingPage';
 import StakePoolDetails from '../elements/staking/stakePoolDetails';
 import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDrawer';
-import Modal from '../elements/modal';
 import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
+import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 
 Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
   await stakingPageAssert.assertSeeTitleWithCounter();
@@ -254,12 +254,12 @@ When(/^I click "Next" button on staking confirmation drawer$/, async () => {
 When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async (button: 'Cancel' | 'Fine by me') => {
   switch (button) {
     case 'Cancel':
-      await Modal.cancelButton.waitForClickable();
-      await Modal.cancelButton.click();
+      await SwitchingStakePoolModal.cancelButton.waitForClickable();
+      await SwitchingStakePoolModal.cancelButton.click();
       break;
     case 'Fine by me':
-      await Modal.confirmButton.waitForClickable();
-      await Modal.confirmButton.click();
+      await SwitchingStakePoolModal.fineByMeButton.waitForClickable();
+      await SwitchingStakePoolModal.fineByMeButton.click();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
