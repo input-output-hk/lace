@@ -22,6 +22,11 @@ export const colors = {
   $buttons_secondary_container_bgColor_disabled: '',
   $buttons_secondary_container_outlineColor: '',
 
+  $card_elevated_backgroundColor: '',
+  $card_greyed_backgroundColor: '',
+  $card_outlined_backgroundColor: '',
+  $card_outlined_borderColor: '',
+
   $control_buttons_filled_label_color: '',
   $control_buttons_filled_label_color_hover: '',
   $control_buttons_filled_container_bgColor: '',
@@ -59,15 +64,19 @@ export const colors = {
   $profile_picture_avatar_label_color: '',
   $profile_picture_initials_label_color: '',
   $profile_picture_initials_container_bgColor: '',
-
   $profile_picture_image_container_borderColor: '',
   $profile_picture_image_container_borderColor_selected: '',
+
+  $scrollbar_thumb_container_bgColor: '',
+  $scrollbar_thumb_container_bgColor_hover: '',
 };
 
 export type Colors = typeof colors;
 
 export const laceGradient =
   'linear-gradient(94.22deg, #FF92E1 -18.3%, #FDC300 118.89%)';
+
+export const colorTransparent = 'rgba(0, 0, 0, 0)';
 
 export const lightColorScheme = {
   $primary_accent_purple: '#7F5AF0',
@@ -100,7 +109,7 @@ export const darkColorScheme = {
   $primary_grey: '#383838',
   $primary_mid_grey: '#333333',
   $primary_dark_grey: '#2F2F2F',
-  $primary_dark_grey_plus: 'rgba(46, 46, 46, 1)',
+  $primary_dark_grey_plus: '#2E2E2E',
   $primary_light_black: '#282828',
   $primary_mid_black: '#252525',
   $primary_bg_black: '#1E1E1E',

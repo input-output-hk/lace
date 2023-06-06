@@ -3,7 +3,6 @@ import createContext from 'zustand/context';
 import { UseStore } from 'zustand';
 import { WalletStore } from './types';
 import { createWalletStore } from './createWalletStore';
-import { bufferReviver, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { useAppSettingsContext } from '@providers';
 import { config } from '@src/config';
 import { AppMode } from '@src/utils/constants';
@@ -35,9 +34,7 @@ export const StoreProvider = ({
   sliceProvider = createWalletStore
 }: StoreProviderProps): React.ReactElement => {
   const [{ chainName = CHAIN }] = useAppSettingsContext();
-  const walletLock = getValueFromLocalStorage('lock', undefined, bufferReviver);
-
-  const createStore = () => store ?? sliceProvider(walletLock, chainName, appMode);
+  const createStore = () => store ?? sliceProvider(chainName, appMode);
 
   return <Provider createStore={createStore}>{children}</Provider>;
 };

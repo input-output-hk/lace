@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { Meta } from '@storybook/react';
 
-import { Page, Section, Variants } from '../decorators';
+import { page, Section, Variants } from '../decorators';
 import { Grid, Cell } from '../grid';
 
 import { Address } from './address.component';
@@ -33,13 +33,7 @@ export default {
     PageHeading,
     SubHeading,
   },
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Typography" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Typography', subtitle })],
 } as Meta;
 
 type FontWeights = keyof Theme['fontWeights'];

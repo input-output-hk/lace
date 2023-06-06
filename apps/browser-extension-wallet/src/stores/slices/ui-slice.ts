@@ -1,9 +1,12 @@
 import { Wallet } from '@lace/cardano';
 import isNil from 'lodash/isNil';
-import { NetworkConnectionStates, WalletUIProps } from '@src/types';
+import { ILocalStorage, NetworkConnectionStates, WalletUIProps } from '@src/types';
 import { AppMode, cardanoCoin, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 import { GetState, SetState } from 'zustand';
 import { SliceCreator, UISlice } from '../types';
+import { getValueFromLocalStorage, onStorageChangeEvent, saveValueInLocalStorage } from '@src/utils/local-storage';
+
+const HIDE_BALANCE_FEATURE_ENABLED = process.env.USE_HIDE_MY_BALANCE === 'true';
 
 const setWalletUI = (
   {
@@ -30,22 +33,39 @@ const setWalletUI = (
   });
 };
 
-const getWalletUI = ({ currentNetwork, appMode }: { currentNetwork: Wallet.Cardano.NetworkId; appMode: AppMode }) => ({
-  appMode,
-  cardanoCoin: {
-    ...cardanoCoin,
-    symbol: CARDANO_COIN_SYMBOL[currentNetwork]
-  },
-  networkConnection: NetworkConnectionStates.CONNNECTED,
-  areBalancesVisible: true,
-  hiddenBalancesPlaceholder: '*',
-  canManageBalancesVisibility: process.env.USE_HIDE_MY_BALANCE === 'true'
-});
+const getWalletUI = ({ currentNetwork, appMode }: { currentNetwork: Wallet.Cardano.NetworkId; appMode: AppMode }) => {
+  const shouldHideBalance = HIDE_BALANCE_FEATURE_ENABLED
+    ? getValueFromLocalStorage<ILocalStorage, 'hideBalance'>('hideBalance')
+    : false;
 
-export const uiSlice: SliceCreator<UISlice, UISlice, WalletUIProps> = ({ get, set }, { currentChain, appMode }) => ({
-  walletUI: getWalletUI({ currentNetwork: currentChain.networkId, appMode }),
-  setCardanoCoin: (chain: Wallet.Cardano.ChainId) => setWalletUI({ network: chain.networkId }, { get, set }),
-  setNetworkConnection: (networkConnection: NetworkConnectionStates) =>
-    setWalletUI({ networkConnection }, { get, set }),
-  setBalancesVisibility: (areBalancesVisible: boolean) => setWalletUI({ areBalancesVisible }, { get, set })
-});
+  return {
+    appMode,
+    cardanoCoin: {
+      ...cardanoCoin,
+      symbol: CARDANO_COIN_SYMBOL[currentNetwork]
+    },
+    networkConnection: NetworkConnectionStates.CONNNECTED,
+    areBalancesVisible: !shouldHideBalance,
+    hiddenBalancesPlaceholder: '*',
+    canManageBalancesVisibility: HIDE_BALANCE_FEATURE_ENABLED
+  };
+};
+
+export const uiSlice: SliceCreator<UISlice, UISlice, WalletUIProps> = ({ get, set }, { currentChain, appMode }) => {
+  onStorageChangeEvent(['hideBalance'], (ev: StorageEvent) => {
+    const hideBalance = JSON.parse(ev.newValue);
+    setWalletUI({ areBalancesVisible: !hideBalance }, { get, set });
+  });
+
+  return {
+    walletUI: getWalletUI({ currentNetwork: currentChain.networkId, appMode }),
+    setCardanoCoin: (chain: Wallet.Cardano.ChainId) => setWalletUI({ network: chain.networkId }, { get, set }),
+    setNetworkConnection: (networkConnection: NetworkConnectionStates) =>
+      setWalletUI({ networkConnection }, { get, set }),
+    setBalancesVisibility: (areBalancesVisible: boolean) => {
+      if (!HIDE_BALANCE_FEATURE_ENABLED) return;
+      saveValueInLocalStorage({ key: 'hideBalance', value: !areBalancesVisible });
+      setWalletUI({ areBalancesVisible }, { get, set });
+    }
+  };
+};
