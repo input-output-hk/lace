@@ -74,6 +74,8 @@ in rec {
     cp ${start-local-backend}/bin/* $out/bin/
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/
+    ln -s ${cardano-js-sdk.nodejs}/bin/node $out/libexec
+
     mkdir -p $out/share/lace-local-backend/cardano-node-config
     ln -s ${cardano-js-sdk}/libexec/source $out/share/lace-local-backend/cardano-js-sdk
   '';

@@ -76,26 +76,27 @@ func main() {
 
 	ogmiosStatus := make(chan string, 1)
 	cardanoNodeStatus := make(chan string, 1)
-	cardanoJsSdkStatus := make(chan string, 1)
+	cardanoServicesStatus := make(chan string, 1)
 	networkSwitch := make(chan string)
 
 	ogmiosStatus <- "off"
 	cardanoNodeStatus <- "off"
-	cardanoJsSdkStatus <- "off"
+	cardanoServicesStatus <- "off"
 
 	go manageChildren(libexecDir, resourcesDir, workDir,
 		networkSwitch,
 		cardanoNodeStatus,
 		ogmiosStatus,
+		cardanoServicesStatus,
 	)
 
-	systray.Run(onReady(ogmiosStatus, cardanoNodeStatus, cardanoJsSdkStatus, networkSwitch), onExit)
+	systray.Run(onReady(ogmiosStatus, cardanoNodeStatus, cardanoServicesStatus, networkSwitch), onExit)
 }
 
 func onReady(
 	ogmiosStatus <-chan string,
 	cardanoNodeStatus <-chan string,
-	cardanoJsSdkStatus <-chan string,
+	cardanoServicesStatus <-chan string,
 	networkSwitch chan<- string,
 ) func() { return func() {
 	systray.SetTitle("lace-local-backend")
@@ -138,7 +139,7 @@ func onReady(
 	statuses := map[string](<-chan string){
 		"cardano-node": cardanoNodeStatus,
 		"Ogmios": ogmiosStatus,
-		"cardano-js-sdk": cardanoJsSdkStatus,
+		"cardano-services": cardanoServicesStatus,
 	}
 	for component, statusCh := range statuses {
 		menuItem := systray.AddMenuItem("", "")
@@ -172,6 +173,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 	networkSwitch <-chan string,
 	cardanoNodeStatus chan<- string,
 	ogmiosStatus chan<- string,
+	cardanoServicesStatus chan<- string,
 ) {
 	sep := string(filepath.Separator)
 
@@ -198,37 +200,51 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 			fmt.Printf("info: session ended for network %s\n", network)
 		}()
 
-		processOutput := func(
-			prefix string, lines <-chan string,
-			markExit chan<- struct{}, didExit *bool, statusCh chan<- string,
-		) {
-			for line := range lines {
-				fmt.Printf("[%s] %s\n", prefix, line)
-			}
-			*didExit = true
-			statusCh <- "off"
-			wgChildren.Done()
-			markExit <- struct{}{}
-		}
-
 		if !firstIteration {
 			time.Sleep(5 * time.Second)
 		}
 		firstIteration = false
 
+		addChild := func(
+			logPrefix string, exePath string, argv []string, extraEnv []string,
+			statusCh chan<- string,
+		) (func(), <-chan struct{}) {
+			wgChildren.Add(1)
+			statusCh <- "starting…"
+			outputLines := make(chan string)
+			terminateCh := make(chan struct{}, 1)
+			childDidExit := false
+			go childProcess(exePath, argv, extraEnv, outputLines, terminateCh)
+			cancelChild := func() {
+				if !childDidExit {
+					statusCh <- "terminating…"
+					terminateCh <- struct{}{}
+				}
+			}
+			markExitCh := make(chan struct{}, 1)
+			go func() {
+				for line := range outputLines {
+					fmt.Printf("[%s] %s\n", logPrefix, line)
+				}
+				childDidExit = true
+				statusCh <- "off"
+				wgChildren.Done()
+				markExitCh <- struct{}{}
+			}()
+			return cancelChild, markExitCh
+		}
+
 		// -------------------------- cardano-node -------------------------- //
 
-		cardanoNodeConfigDir := (resourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
-			sep + "cardano-services" + sep + "config" + sep + "network" +
+		cardanoServicesDir := (resourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
+			sep + "cardano-services")
+
+		cardanoNodeConfigDir := (cardanoServicesDir + sep + "config" + sep + "network" +
 			sep + network + sep + "cardano-node")
 		cardanoNodeSocket := workDir + sep + network + sep + "cardano-node.socket"
-		cardanoNodeStatus <- "starting…"
-		cardanoNodeOut := make(chan string)
-		cardanoNodeExited := make(chan struct{})
-		cardanoNodeDidExit := false
-		terminateCardanoNode := make(chan struct{}, 1)
-		wgChildren.Add(1)
-		go childProcess(
+
+		cancelCardanoNode, cardanoNodeExited := addChild(
+			"cardano-node",
 			libexecDir + sep + "cardano-node" + exeSuffix,
 			[]string{
 				"run",
@@ -238,14 +254,8 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				"--host-addr", "0.0.0.0",
 				"--config", cardanoNodeConfigDir + sep + "config.json",
 				"--socket-path", cardanoNodeSocket,
-			}, cardanoNodeOut, terminateCardanoNode)
-		defer func() {
-			if !cardanoNodeDidExit {
-				cardanoNodeStatus <- "terminating…"
-				terminateCardanoNode <- struct{}{}
-			}
-		}()
-		go processOutput("cardano-node", cardanoNodeOut, cardanoNodeExited, &cardanoNodeDidExit, cardanoNodeStatus)
+			}, []string{}, cardanoNodeStatus)
+		defer cancelCardanoNode()
 
 		socketListenErr := make(chan error, 1)
 		go func() {
@@ -265,29 +275,18 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 		// -------------------------- Ogmios -------------------------- //
 
-		ogmiosStatus <- "starting…"
 		ogmiosPort := getFreeTCPPort()
-		ogmiosOut := make(chan string)
-		ogmiosExited := make(chan struct{})
-		ogmiosDidExit := false
-		terminateOgmios := make(chan struct{}, 1)
-		wgChildren.Add(1)
-		go childProcess(
+
+		cancelOgmios, ogmiosExited := addChild(
+			"ogmios",
 			libexecDir + sep + "ogmios" + exeSuffix,
 			[]string{
-
 				"--host", "127.0.0.1",
 				"--port", fmt.Sprintf("%d", ogmiosPort),
 				"--node-config", cardanoNodeConfigDir + sep + "config.json",
 				"--node-socket", cardanoNodeSocket,
-			}, ogmiosOut, terminateOgmios)
-		defer func() {
-			if (!ogmiosDidExit) {
-				ogmiosStatus <- "terminating…"
-				terminateOgmios <- struct{}{}
-			}
-		}()
-		go processOutput("ogmios", ogmiosOut, ogmiosExited, &ogmiosDidExit, ogmiosStatus)
+			}, []string{}, ogmiosStatus)
+		defer cancelOgmios()
 
 		ogmiosHealthErr := make(chan error, 1)
 		go func() {
@@ -305,17 +304,59 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 		ogmiosStatus <- "listening"
 
+		// -------------------------- cardano-js-sdk -------------------------- //
+
+		cardanoServicesPort := 3000
+
+		tokenMetadataServerUrl := "https://tokens.cardano.org"
+		if network != "mainnet" {
+			tokenMetadataServerUrl = "https://metadata.cardano-testnet.iohkdev.io/"
+		}
+
+		cancelCardanoServices, cardanoServicesExited := addChild(
+			"cardano-services",
+			libexecDir + sep + "node" + exeSuffix,
+			[]string{
+				cardanoServicesDir + sep + "dist" + sep + "cjs" + sep + "cli.js",
+				"start-provider-server",
+			}, []string{
+				"NETWORK=" + network,
+				"TOKEN_METADATA_SERVER_URL=" + tokenMetadataServerUrl,
+				"CARDANO_NODE_CONFIG_PATH=" + cardanoNodeConfigDir + sep + "config.json",
+				"API_URL=http://0.0.0.0:" + fmt.Sprintf("%d", cardanoServicesPort),
+				"ENABLE_METRICS=true",
+				"LOGGER_MIN_SEVERITY=info",
+				"SERVICE_NAMES=tx-submit",
+				"USE_QUEUE=false",
+				"USE_BLOCKFROST=false",
+				"OGMIOS_URL=ws://127.0.0.1:" + fmt.Sprintf("%d", ogmiosPort),
+			}, cardanoServicesStatus)
+		defer cancelCardanoServices()
+
+		cardanoServicesHealthErr := make(chan error, 1)
+		go func() {
+			// It usually takes <1s
+			cardanoServicesHealthErr <- waitForHttp200(fmt.Sprintf("http://127.0.0.1:%d/health", cardanoServicesPort), 10 * time.Second)
+		}()
+		select {
+		case err := <-cardanoServicesHealthErr:
+			if (err != nil) {
+				panic(err)
+			}
+		case <-cardanoServicesExited:
+			panic("cardano-services exited prematurely")
+		}
+
+		cardanoServicesStatus <- "listening"
+
 		// -------------------------- wait for disaster (or network switch) -------------------------- //
 
 		select {
 		case <-cardanoNodeExited:
 		case <-ogmiosExited:
+		case <-cardanoServicesExited:
 		}
 	}()}
-
-
-	// TODO: continue here
-
 
 	os.Exit(0)
 }
@@ -379,13 +420,20 @@ func duplicateOutputToFile(logFile string) {
 	}()
 }
 
-func childProcess(path string, argv []string, outputLines chan<- string, terminate <-chan struct{}) {
+func childProcess(
+	path string, argv []string, extraEnv []string,
+	outputLines chan<- string, terminate <-chan struct{},
+) {
 	defer close(outputLines)
 
 	var wgOuts sync.WaitGroup
 	wgOuts.Add(2)
 
 	cmd := exec.Command(path, argv...)
+
+	if len(extraEnv) > 0 {
+		cmd.Env = append(os.Environ(), extraEnv...)
+	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
