@@ -23,6 +23,9 @@ const mockDataSet = (amount: number): { name: string; value: number }[] =>
 const meta: Meta<typeof PieChart> = {
   title: 'PieChart',
   decorators: [page({ title: 'PieChart' })],
+  parameters: {
+    chromatic: { pauseAnimationAtEnd: true },
+  },
 };
 
 export default meta;
