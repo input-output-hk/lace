@@ -229,7 +229,7 @@ export const StakePoolSearch = ({
       </Select>
       {isSearching && (
         <span className={styles.loaderContainer}>
-          <Icon className={styles.loader} component={Loader} />
+          <Icon className={styles.loader} component={Loader} data-testid="search-results-loader" />
         </span>
       )}
       {showRemove && (
