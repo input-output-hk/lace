@@ -9,7 +9,7 @@ import * as Text from '../typography';
 
 import { subtitleBox } from './page.css';
 
-export type Props = PropsWithChildren<{
+export type PageProps = PropsWithChildren<{
   title: string;
   subtitle?: string;
 }>;
@@ -18,7 +18,7 @@ export const Page = ({
   children,
   title,
   subtitle,
-}: Readonly<Props>): JSX.Element => {
+}: Readonly<PageProps>): JSX.Element => {
   return (
     <ThemeProvider colorScheme={ThemeColorScheme.Light}>
       <div style={{ height: '100%', width: '100%' }}>

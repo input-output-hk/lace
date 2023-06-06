@@ -3,7 +3,7 @@ import React from 'react';
 
 import type { Meta } from '@storybook/react';
 
-import { Page, Section, Variants } from '../decorators';
+import { page, Section, Variants } from '../decorators';
 import { Cell, Grid } from '../grid';
 
 import {
@@ -22,13 +22,7 @@ const mockDataSet = (amount: number): { name: string; value: number }[] =>
 
 const meta: Meta<typeof PieChart> = {
   title: 'PieChart',
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Pie Chart">
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'PieChart' })],
 };
 
 export default meta;
