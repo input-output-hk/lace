@@ -1,6 +1,11 @@
 import { createTheme } from '@vanilla-extract/css';
 
-import { darkColorScheme, laceGradient, lightColorScheme } from './colors.data';
+import {
+  colorTransparent,
+  darkColorScheme,
+  laceGradient,
+  lightColorScheme,
+} from './colors.data';
 import { opacities } from './opacities.data';
 import { radius } from './radius.data';
 import { spacing } from './spacing.data';
@@ -17,7 +22,7 @@ import type { Elevation } from './elevation.data';
 
 const colors: Colors = {
   $lace_gradient: laceGradient,
-  $transparent: 'rgba(0,0,0,0)',
+  $transparent: colorTransparent,
 
   $buttons_primary_label_color: darkColorScheme.$primary_white,
   $buttons_primary_container_bgColor: darkColorScheme.$primary_mid_black,
@@ -45,6 +50,11 @@ const colors: Colors = {
   $buttons_secondary_container_bgColor_disabled: darkColorScheme.$primary_grey,
   $buttons_secondary_container_outlineColor:
     darkColorScheme.$primary_accent_purple_0_3,
+
+  $card_elevated_backgroundColor: darkColorScheme.$primary_mid_black,
+  $card_greyed_backgroundColor: darkColorScheme.$primary_dark_grey_plus,
+  $card_outlined_backgroundColor: darkColorScheme.$primary_mid_black,
+  $card_outlined_borderColor: colorTransparent,
 
   $control_buttons_filled_label_color: darkColorScheme.$primary_light_grey,
   $control_buttons_filled_label_color_hover: darkColorScheme.$primary_white,
@@ -100,6 +110,7 @@ const elevation: Elevation = {
   $dialog: '0px 0px 20px rgba(167, 143, 160, 0.15)',
   $primaryButton: 'none',
   $assets: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 0px 10px rgba(0, 0, 0, 0.05)',
+  $card: 'none',
 };
 
 export const darkTheme = createTheme(vars, {

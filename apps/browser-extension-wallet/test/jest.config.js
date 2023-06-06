@@ -70,7 +70,7 @@ module.exports = {
     '!src/utils/get-polling-config.ts',
     '!src/utils/test-helpers.tsx',
     '!src/utils/test-utils.ts',
-    '!src/utils/fake-api-request.ts',
+    '!src/utils/fake-api-request.ts'
   ],
   setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock'],
   globals: {
