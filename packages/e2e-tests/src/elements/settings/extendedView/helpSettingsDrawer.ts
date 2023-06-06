@@ -1,25 +1,21 @@
-import { DrawerCommonExtended } from '../../drawerCommonExtended';
-import { WebElement, WebElementFactory as Factory } from '../../webElement';
+import CommonDrawerElements from '../../CommonDrawerElements';
 
-export class HelpSettingsDrawer extends WebElement {
-  baseDrawer: DrawerCommonExtended;
-  private HELP_CREATE_NEW_TICKET_BUTTON = '//button[@data-testid="create-new-ticket-button"]';
-  private HELP_DESCRIPTION = '//*[@data-testid="help-description"]';
-  private HELP_ZENDESK_TITLE = '//*[@data-testid="help-zen-title"]';
-  constructor() {
-    super();
-    this.baseDrawer = new DrawerCommonExtended();
+class HelpSettingsDrawer extends CommonDrawerElements {
+  private HELP_CREATE_A_SUPPORT_TICKET_BUTTON = '[data-testid="create-new-ticket-button"]';
+  private HELP_DESCRIPTION = '[data-testid="help-description"]';
+  private HELP_ZENDESK_TITLE = '[data-testid="help-zen-title"]';
+
+  get createASupportTicketButton() {
+    return $(this.HELP_CREATE_A_SUPPORT_TICKET_BUTTON);
   }
-  createNewTicketButton(): WebElement {
-    return Factory.fromSelector(
-      `${this.baseDrawer.container().toJSLocator()}${this.HELP_CREATE_NEW_TICKET_BUTTON}`,
-      'xpath'
-    );
+
+  get helpDescriptionContent() {
+    return $(this.HELP_DESCRIPTION);
   }
-  helpDescriptionContent(): WebElement {
-    return Factory.fromSelector(`${this.baseDrawer.container().toJSLocator()}${this.HELP_DESCRIPTION}`, 'xpath');
-  }
-  helpZendeskTitle(): WebElement {
-    return Factory.fromSelector(`${this.baseDrawer.container().toJSLocator()}${this.HELP_ZENDESK_TITLE}`, 'xpath');
+
+  get helpZendeskTitle() {
+    return $(this.HELP_ZENDESK_TITLE);
   }
 }
+
+export default new HelpSettingsDrawer();

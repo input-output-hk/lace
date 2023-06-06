@@ -15,7 +15,7 @@ import { Subject, of, BehaviorSubject } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
-import { Cardano, Asset } from '@cardano-sdk/core';
+import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
 import {
   setBackgroundStorage,
@@ -99,7 +99,7 @@ const fetchTokenPrices = () => {
         if (!assetName) continue;
         const policyId = Cardano.PolicyId(policy);
         // get the asset id to use as key for tokenPrices Map
-        const assetId = Asset.util.assetIdFromPolicyAndName(policyId, assetName);
+        const assetId = Cardano.AssetId.fromParts(policyId, assetName);
         // it is possible for the price to come as NA so we need check this
         const price = priceInfo.last_price === 'NA' ? 0 : (priceInfo.last_price as number);
 

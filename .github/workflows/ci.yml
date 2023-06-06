@@ -28,11 +28,11 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
       - name: Check for linter issues
         run: yarn lint
-      - name: Run unit tests
+      - name: Run unit tests, generate test coverage report
         env:
           AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
           DEFAULT_CHAIN: 'Preprod'
-        run: yarn test --maxWorkers=2
+        run: yarn test:coverage --maxWorkers=2
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:

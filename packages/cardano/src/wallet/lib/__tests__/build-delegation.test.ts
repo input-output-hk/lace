@@ -1,5 +1,5 @@
 import { Cardano } from '@cardano-sdk/core';
-import { ObservableWallet, StakeKeyStatus } from '@cardano-sdk/wallet';
+import { ObservableWallet } from '@cardano-sdk/wallet';
 import { rewardAcountMock } from '@src/wallet/test/mocks/mock';
 import { mockObservableWallet } from '@src/wallet/test/mocks';
 import { firstValueFrom, of } from 'rxjs';
@@ -24,7 +24,7 @@ describe('Testing buildDelegation', () => {
     const wallet = {
       ...mockObservableWallet,
       delegation: {
-        rewardAccounts$: of([{ ...rewardAcountMock, keyStatus: StakeKeyStatus.Unregistered }])
+        rewardAccounts$: of([{ ...rewardAcountMock, keyStatus: Cardano.StakeKeyStatus.Unregistered }])
       }
     } as unknown as ObservableWallet;
     const { certificates } = await buildDelegation(wallet, poolId);
@@ -39,7 +39,7 @@ describe('Testing buildDelegation', () => {
       delegation: { rewardAccounts$: of([rewardAcountMock]) }
     } as unknown as ObservableWallet;
     const walletRewardAccount = (await firstValueFrom(wallet.delegation.rewardAccounts$))[0];
-    walletRewardAccount.keyStatus = StakeKeyStatus.Registered;
+    walletRewardAccount.keyStatus = Cardano.StakeKeyStatus.Registered;
     const { certificates } = await buildDelegation(wallet, poolId);
 
     expect(certificates).toContainEqual(delegationCertificate);

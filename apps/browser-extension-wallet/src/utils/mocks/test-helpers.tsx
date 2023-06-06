@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable sonarjs/no-duplicate-string */
-/* eslint-disable max-len, @typescript-eslint/no-explicit-any, no-magic-numbers */
+/* eslint-disable max-len, @typescript-eslint/no-explicit-any, no-magic-numbers, new-cap */
 import React, { FunctionComponent } from 'react';
 import { Wallet } from '@lace/cardano';
 import { SendStoreProvider } from '../../features/send/stores';
@@ -12,6 +12,7 @@ import { fakeApiRequest } from './fake-api-request';
 // eslint-disable-next-line import/no-unresolved
 import { Observable, of } from 'rxjs';
 import { PriceResult } from '@hooks';
+import { Percent } from '@cardano-sdk/util';
 
 export const mockWalletInfoTestnet: WalletInfo = {
   name: 'testnet wallet',
@@ -113,7 +114,7 @@ export const getSendStoreContext =
   ({ children }: { children?: React.ReactNode }) =>
     <SendStoreProvider>{children}</SendStoreProvider>;
 
-export const mockSingleAddressWallet = {
+export const mockPersonalWallet = {
   addresses$: createSignal<any>()[0],
   assets$: createSignal<any>()[0],
   balance: {
@@ -195,6 +196,7 @@ export const mockAssetMetadata: Wallet.Asset.AssetInfo = {
   ],
   name: Wallet.Cardano.AssetName('54534c41'),
   policyId: Wallet.Cardano.PolicyId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82'),
+  quantity: BigInt('1000'),
   supply: BigInt('1000')
 };
 
@@ -220,6 +222,7 @@ export const mockAssetInfo: IAssetInfo[] = [
 
 export const cardanoStakePoolStats: Wallet.StakePoolStats = {
   qty: {
+    activating: 0,
     active: 1,
     retired: 0,
     retiring: 0
@@ -252,10 +255,10 @@ export const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
         blocksCreated: 20,
         delegators: 20,
         livePledge: BigInt('2000000000'),
-        saturation: Wallet.Cardano.Percent(0.0512),
+        saturation: Percent(0.0512),
         stake: undefined,
         size: undefined,
-        apy: Wallet.Cardano.Percent(0.013)
+        apy: Percent(0.013)
       },
       owners: [
         Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
@@ -264,8 +267,6 @@ export const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
       pledge: BigInt('2000000000'),
       rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
       status: Wallet.Cardano.StakePoolStatus.Active,
-      transactions: undefined,
-      epochRewards: [],
       vrf: undefined,
       relays: undefined
     }
@@ -323,6 +324,7 @@ export const mockAsset: Wallet.Asset.AssetInfo = {
   fingerprint: Wallet.Cardano.AssetFingerprint('asset1cvmyrfrc7lpht2hcjwr9lulzyyjv27uxh3kcz0'),
   name: Wallet.Cardano.AssetName('54657374636f696e'),
   policyId: Wallet.Cardano.PolicyId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'),
+  quantity: BigInt('100042'),
   supply: BigInt('100042'),
   tokenMetadata: {
     assetId: Wallet.Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'),
@@ -347,6 +349,7 @@ export const mockNft: Wallet.Asset.AssetInfo = {
   fingerprint: Wallet.Cardano.AssetFingerprint('asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w'),
   name: Wallet.Cardano.AssetName('54534c41'),
   policyId: Wallet.Cardano.PolicyId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82'),
+  quantity: BigInt(1),
   supply: BigInt(1),
   tokenMetadata: {
     assetId: Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),

@@ -8,7 +8,7 @@ type CardanoServiceUrls = {
   Preview: string;
 };
 
-type Config = {
+export type Config = {
   TOAST_DURATION: number;
   CHAIN: Wallet.ChainName;
   MNEMONIC_LENGTH: number;
