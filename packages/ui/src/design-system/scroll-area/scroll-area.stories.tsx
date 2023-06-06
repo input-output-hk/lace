@@ -4,26 +4,20 @@ import type { Meta } from '@storybook/react';
 
 import { ThemeColorScheme, ThemeProvider, sx } from '../../design-tokens';
 import { Box } from '../box';
-import { Page, Variants, Section } from '../decorators';
+import { page, Variants, Section } from '../decorators';
 import { Grid } from '../grid';
 import { Cell } from '../grid/cell.component';
 import * as Text from '../typography';
 
 import { ScrollArea } from './scroll-area.component';
 
-const subtitle = `Scroll bars enable content to extend beyond the bounds of the viewport (visible area). Users reach this content by manipulating the scroll viewer surface through touch, mousewheel, keyboard, or a gamepad, or by using the mouse or pen cursor to interact with the scroll viewer's scrollbar. 
+const subtitle = `Scroll bars enable content to extend beyond the bounds of the viewport (visible area). Users reach this content by manipulating the scroll viewer surface through touch, mousewheel, keyboard, or a gamepad, or by using the mouse or pen cursor to interact with the scroll viewer's scrollbar.
 Minimum height: 40px.`;
 
 export default {
   title: 'Basic Input/Scroll Area',
   component: ScrollArea,
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Scroll bar" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Scroll bar', subtitle })],
 } as Meta;
 
 const Demo = (): JSX.Element => {
