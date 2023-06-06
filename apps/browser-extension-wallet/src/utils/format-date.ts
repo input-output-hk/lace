@@ -3,8 +3,8 @@ import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 
-const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
-const DEFAULT_TIME_FORTMAT = 'HH:mm:ss';
+export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
+export const DEFAULT_TIME_FORTMAT = 'HH:mm:ss';
 
 export const formatDate = (date: Date | string | number, format?: string): string =>
   dayjs(date)

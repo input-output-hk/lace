@@ -1,15 +1,14 @@
-/* eslint-disable no-magic-numbers */
-/* eslint-disable sonarjs/no-duplicate-string */
+/* eslint-disable no-magic-numbers, sonarjs/no-duplicate-string, new-cap  */
 import { createStubStakePoolProvider } from '@cardano-sdk/util-dev';
 import { Cardano, StakePoolProvider, StakePoolStats } from '@cardano-sdk/core';
 import { StakePoolSearchResults } from '@src/wallet/types';
+import { Percent } from '@cardano-sdk/util';
 
-type Details = 'metrics' | 'relays' | 'owners' | 'margin' | 'cost' | 'transactions' | 'vrf' | 'rewardAccount';
+type Details = 'metrics' | 'relays' | 'owners' | 'margin' | 'cost' | 'vrf' | 'rewardAccount';
 type PoolDetails = Pick<Cardano.StakePool, Details>;
 
 export const pools: Partial<Cardano.StakePool>[] = [
   {
-    epochRewards: [],
     id: Cardano.PoolId('pool126zlx7728y7xs08s8epg9qp393kyafy9rzr89g4qkvv4cv93zem'),
     hexId: Cardano.PoolIdHex('b76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab'),
     pledge: BigInt('3000000000'),
@@ -19,7 +18,7 @@ export const pools: Partial<Cardano.StakePool>[] = [
       blocksCreated: 3.1,
       delegators: 11,
       livePledge: BigInt('2000000000'),
-      saturation: Cardano.Percent(0.211),
+      saturation: Percent(0.211),
       size: undefined,
       stake: undefined
     },
@@ -45,7 +44,6 @@ export const pools: Partial<Cardano.StakePool>[] = [
     hexId: Cardano.PoolIdHex('c76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab'),
     pledge: BigInt('5000000000'),
     cost: BigInt('89000000'),
-    epochRewards: [],
     margin: {
       numerator: 2.21,
       denominator: 50
@@ -55,7 +53,7 @@ export const pools: Partial<Cardano.StakePool>[] = [
       blocksCreated: 3.273,
       delegators: 28,
       livePledge: BigInt('2000000000'),
-      saturation: Cardano.Percent(0.7014),
+      saturation: Percent(0.7014),
       size: undefined,
       stake: {
         live: BigInt('201000000'),
@@ -76,7 +74,6 @@ export const pools: Partial<Cardano.StakePool>[] = [
     }
   },
   {
-    epochRewards: [],
     id: Cardano.PoolId('pool1tmn4jxlnp64y7hwwwz62vahtqt2maqqj6xy0qnlrhmlmq3u8q0e'),
     hexId: Cardano.PoolIdHex('d76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab'),
     pledge: BigInt('1000000000'),
@@ -90,7 +87,7 @@ export const pools: Partial<Cardano.StakePool>[] = [
       blocksCreated: 3.333,
       delegators: 8,
       livePledge: BigInt('2000000000'),
-      saturation: Cardano.Percent(0.991),
+      saturation: Percent(0.991),
       size: undefined,
       stake: {
         live: BigInt('77000000'),
@@ -99,7 +96,6 @@ export const pools: Partial<Cardano.StakePool>[] = [
     }
   },
   {
-    epochRewards: [],
     id: Cardano.PoolId('pool1jcwn98a6rqr7a7yakanm5sz6asx9gfjsr343mus0tsye23wmg70'),
     hexId: Cardano.PoolIdHex('e76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab'),
     pledge: BigInt('7000000000'),
@@ -113,7 +109,7 @@ export const pools: Partial<Cardano.StakePool>[] = [
       blocksCreated: 2.355,
       delegators: 16,
       livePledge: BigInt('2000000000'),
-      saturation: Cardano.Percent(1.196),
+      saturation: Percent(1.196),
       size: undefined,
       stake: {
         live: BigInt('34000000'),
@@ -134,7 +130,6 @@ export const pools: Partial<Cardano.StakePool>[] = [
     }
   },
   {
-    epochRewards: [],
     id: Cardano.PoolId('pool1euf2nh92ehqfw7rpd4s9qgq34z8dg4pvfqhjmhggmzk95gcd402'),
     hexId: Cardano.PoolIdHex('cf12a9dcaacdc09778616d60502011a88ed4542c482f2ddd08d8ac5a'),
     pledge: BigInt('500000000'),
@@ -144,7 +139,7 @@ export const pools: Partial<Cardano.StakePool>[] = [
       blocksCreated: 1.802,
       delegators: 2,
       livePledge: BigInt('2000000000'),
-      saturation: Cardano.Percent(1.001),
+      saturation: Percent(1.001),
       size: undefined,
       stake: {
         live: BigInt('53000000'),
@@ -163,7 +158,6 @@ export const pools: Partial<Cardano.StakePool>[] = [
     }
   },
   {
-    epochRewards: [],
     id: Cardano.PoolId('pool1fghrkl620rl3g54ezv56weeuwlyce2tdannm2hphs62syf3vyyh'),
     hexId: Cardano.PoolIdHex('4a2e3b7f4a78ff1452b91329a7673c77c98ca96dece7b55c37869502'),
     pledge: BigInt('1500000000'),
@@ -173,7 +167,7 @@ export const pools: Partial<Cardano.StakePool>[] = [
       blocksCreated: 3.016,
       delegators: 22,
       livePledge: BigInt('2000000000'),
-      saturation: Cardano.Percent(0.8077),
+      saturation: Percent(0.8077),
       size: undefined,
       stake: {
         live: BigInt('53000000'),
@@ -203,7 +197,7 @@ const detailsForAll: PoolDetails = {
     blocksCreated: 4.02,
     delegators: 13,
     livePledge: BigInt('2000000000'),
-    saturation: Cardano.Percent(0.021),
+    saturation: Percent(0.021),
     size: undefined,
     stake: {
       live: BigInt('34000000'),
@@ -212,7 +206,6 @@ const detailsForAll: PoolDetails = {
   },
   relays: undefined,
   rewardAccount: Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
-  transactions: undefined,
   vrf: undefined
 };
 
@@ -231,6 +224,7 @@ export const mockedStakePoolSearchResults: Promise<StakePoolSearchResults> = Pro
 
 export const mockedStakePoolStats: Promise<StakePoolStats> = Promise.resolve({
   qty: {
+    activating: 0,
     active: mockedStakePools.filter((pool) => pool.status === Cardano.StakePoolStatus.Active).length,
     retired: mockedStakePools.filter((pool) => pool.status === Cardano.StakePoolStatus.Retired).length,
     retiring: mockedStakePools.filter((pool) => pool.status === Cardano.StakePoolStatus.Retiring).length

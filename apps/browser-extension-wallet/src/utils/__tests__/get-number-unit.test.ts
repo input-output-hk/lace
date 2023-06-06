@@ -12,6 +12,13 @@ describe('Testing getNumberUnit component', () => {
     expect(JSON.stringify(result)).toBe(JSON.stringify({ unit: '', value: new BigNumber(0) }));
   });
 
+  test('should handle last iteration', async () => {
+    const keys = new Map().keys();
+    const result = getNumberUnit(new BigNumber('100'), keys);
+
+    expect(JSON.stringify(result)).toBe(JSON.stringify({ unit: 'B', value: unitsMap.get('B').gt }));
+  });
+
   test('should return K when is greater-equal 1000 less 1000000', async () => {
     const keys = unitsMap.keys();
     const result = getNumberUnit(new BigNumber('10000'), keys);

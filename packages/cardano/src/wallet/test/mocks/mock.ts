@@ -1,10 +1,10 @@
-/* eslint-disable no-magic-numbers */
+/* eslint-disable no-magic-numbers, new-cap */
 // Used in storybook
-import { RewardAccount, StakeKeyStatus } from '@cardano-sdk/wallet';
 import { Cardano } from '@cardano-sdk/core';
+import { Percent } from '@cardano-sdk/util';
 
 // eslint-disable-next-line no-console
-export const createSingleAddressWallet = (): void => console.log('createSigleAddressWallet mock');
+export const createPersonalWallet = (): void => console.log('createSigleAddressWallet mock');
 
 export const stakePoolMock: Cardano.StakePool = {
   cost: BigInt('6040000'),
@@ -30,7 +30,7 @@ export const stakePoolMock: Cardano.StakePool = {
     blocksCreated: 20,
     delegators: 20,
     livePledge: BigInt('2000000000'),
-    saturation: Cardano.Percent(0.5),
+    saturation: Percent(0.5),
     stake: undefined,
     size: undefined
   },
@@ -39,17 +39,15 @@ export const stakePoolMock: Cardano.StakePool = {
     Cardano.RewardAccount('stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx')
   ],
   pledge: BigInt('2000000000'),
-  epochRewards: [],
   rewardAccount: Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
   status: Cardano.StakePoolStatus.Active,
-  transactions: undefined,
   vrf: undefined,
   relays: undefined
 };
 
-export const rewardAcountMock: Partial<RewardAccount> = {
+export const rewardAcountMock: Partial<Cardano.RewardAccountInfo> = {
   address: Cardano.RewardAccount('stake_test1urm7tqwy3d5e3kxp424cvtcgr8zaprkszk38jntyzu5t4mqalgvfg'),
-  keyStatus: StakeKeyStatus.Registered,
+  keyStatus: Cardano.StakeKeyStatus.Registered,
 
   delegatee: {
     nextNextEpoch: stakePoolMock
