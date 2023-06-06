@@ -6,6 +6,7 @@ import { getTokenList } from '@src/utils/get-token-list';
 import { useMemo } from 'react';
 import { Wallet } from '@lace/cardano';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useFindNftByPolicyId = (policyId: Wallet.Cardano.PolicyId) => {
   const { inMemoryWallet, environmentName } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
