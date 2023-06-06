@@ -23,4 +23,5 @@ export const spacing = {
   $584: '584px',
   $fill: '100%',
   $auto: 'auto',
+  $dialog: '664px',
 } as const;

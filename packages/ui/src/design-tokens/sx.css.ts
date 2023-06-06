@@ -19,7 +19,7 @@ const responsiveProperties = defineProperties({
     'xLargeScreen',
   ],
   properties: {
-    display: ['none', 'flex', 'block', 'inline', 'inline-block'],
+    display: ['none', 'flex', 'block', 'inline', 'inline-block', 'grid'],
     flexDirection: ['row', 'column'],
     justifyContent: [
       'stretch',
@@ -114,6 +114,12 @@ const opacityProperties = defineProperties({
   },
 });
 
+const zIndexProperties = defineProperties({
+  properties: {
+    zIndex: vars.zIndex,
+  },
+});
+
 export const sx = createSprinkles(
   responsiveProperties,
   typographyProperties,
@@ -121,6 +127,7 @@ export const sx = createSprinkles(
   radiusProperties,
   elevationProperties,
   opacityProperties,
+  zIndexProperties,
 );
 
 export type Sx = Parameters<typeof sx>[0];

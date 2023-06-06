@@ -138,6 +138,12 @@ const colors: Colors = {
     darkColorScheme.$primary_light_grey,
   $toggle_switch_container_outline: lightColorScheme.$primary_accent_purple_0_3,
   $toggle_switch_thumb_bgColor: lightColorScheme.$primary_grey,
+
+  $side_drawer_container_bgColor: lightColorScheme.$primary_white,
+  $side_drawer_separator_bgColor: lightColorScheme.$primary_light_grey_plus,
+  $side_drawer_head_title_color: lightColorScheme.$primary_black,
+  $side_drawer_content_title_color: lightColorScheme.$primary_black,
+  $side_drawer_content_description_color: lightColorScheme.$primary_dark_grey,
 };
 
 export const elevation: Elevation = {
@@ -158,4 +164,5 @@ export const lightTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
+  zIndex,
 });
