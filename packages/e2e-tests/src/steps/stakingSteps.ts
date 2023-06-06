@@ -12,7 +12,12 @@ import StakingExitModalAssert from '../assert/stakingExitModalAssert';
 import extensionUtils from '../utils/utils';
 import stakingConfirmationScreenAssert from '../assert/stakingConfirmationScreenAssert';
 import StakingPageObject from '../pageobject/stakingPageObject';
-import { browser } from '@wdio/globals';
+import StakingPage from '../elements/staking/stakingPage';
+import StakePoolDetails from '../elements/staking/stakePoolDetails';
+import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDrawer';
+import Modal from '../elements/modal';
+import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
+import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
 Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
   await stakingPageAssert.assertSeeTitleWithCounter();
@@ -144,13 +149,12 @@ Then(/^I input "([^"]*)" to the search bar$/, async (term: string) => {
   await (term === 'OtherStakePool' || term === 'OtherNoMetadataStakePool'
     ? StakingPageObject.fillSearch(testContext.load(term))
     : StakingPageObject.fillSearch(term));
-  await browser.pause(2000); // wait some time to get results
+  await StakingPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
 
 Then(
   /^there are (.*) results and "([^"]*)" and "([^"]*)" are populated if applicable$/,
   async (results: number, resultTitle: string, resultSubTitle: string) => {
-    await browser.pause(3000); // wait some time to get results
     await stakingPageAssert.assertCheckResults(resultTitle, resultSubTitle, results);
   }
 );
@@ -207,7 +211,7 @@ When(/^I reveal all stake pools$/, async () => {
   await stakingExtendedPageObject.revealAllStakePools();
 });
 
-When(/^I save stakepool info$/, async () => {
+When(/^I save stake pool info$/, async () => {
   await stakingExtendedPageObject.saveStakePoolInfo();
 });
 
@@ -236,3 +240,48 @@ Then(
 When(/^I wait for single search result$/, async () => {
   await stakingPageAssert.assertSeeSingleSearchResult();
 });
+
+When(/^I click "Stake on this pool" button on stake pool details drawer$/, async () => {
+  await StakePoolDetails.stakeButton.waitForClickable();
+  await StakePoolDetails.stakeButton.click();
+});
+
+When(/^I click "Next" button on staking confirmation drawer$/, async () => {
+  await StakingConfirmationDrawer.nextButton.waitForClickable();
+  await StakingConfirmationDrawer.nextButton.click();
+});
+
+When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async (button: 'Cancel' | 'Fine by me') => {
+  switch (button) {
+    case 'Cancel':
+      await Modal.cancelButton.waitForClickable();
+      await Modal.cancelButton.click();
+      break;
+    case 'Fine by me':
+      await Modal.confirmButton.waitForClickable();
+      await Modal.confirmButton.click();
+      break;
+    default:
+      throw new Error(`Unsupported button name: ${button}`);
+  }
+});
+
+Then(
+  /^I enter (correct|incorrect|newly created) wallet password and confirm staking$/,
+  async (type: 'correct' | 'incorrect' | 'newly created') => {
+    let password;
+    switch (type) {
+      case 'newly created':
+        password = (testContext.load('newCreatedWallet') as WalletConfig).password;
+        break;
+      case 'incorrect':
+        password = 'somePassword';
+        break;
+      case 'correct':
+      default:
+        password = getTestWallet(TestWalletName.TestAutomationWallet).password;
+    }
+    await SimpleTxSideDrawerPageObject.fillPassword(password);
+    await stakingExtendedPageObject.confirmStaking();
+  }
+);

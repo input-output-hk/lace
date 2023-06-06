@@ -7,17 +7,16 @@ Feature: Staking Page - Popup View
   @LW-2487
   Scenario: Popup View - Staking page is present with title and counter
     When I navigate to Staking popup page
-    Then I see Staking title displayed
+    Then I see Staking title and counter with total number of pools displayed
 
   @LW-2488
   Scenario: Popup View - Staking search control is displayed with appropriate content
     When I navigate to Staking popup page
-    Then I see stake pool search control with appropriate content
+    Then I see the stake pool search control with appropriate content in popup mode
 
   @LW-2722
   Scenario: Popup View - Selecting stake pool from list opens drawer with appropriate details
     When I navigate to Staking popup page
-    And I see stake pool search control with appropriate content
-    And I input "Capital" to search bar
-    And I click stake pool with the name "ADA Capital"
+    And I input "Capital" to the search bar
+    And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
