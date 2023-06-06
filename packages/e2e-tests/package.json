@@ -35,6 +35,7 @@
     "@wdio/spec-reporter": "8.8.6",
     "@wdio/types": "8.8.6",
     "@wdio/devtools-service": "8.8.6",
+    "wdio-intercept-service": "4.4.0",
     "allure-commandline": "^2.21.0",
     "clipboardy": "2.3.0",
     "eslint": "8.38.0",
