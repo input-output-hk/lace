@@ -21,11 +21,9 @@ import {
   setBackgroundStorage,
   clearBackgroundStorage,
   getBackgroundStorage,
-  convertToAssetName,
   getADAPriceFromBackgroundStorage
 } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
-import { tokenInLovelacePrices } from '@utils/token-prices-lovelace-list';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -40,6 +38,15 @@ const coinPrices: CoinPrices = {
     status: 'idle'
   })
 };
+interface TokenAPIResponse {
+  price: {
+    price: number;
+    quoteDecimalPlaces: number;
+    baseDecimalPlaces: number;
+    quoteAddress: { policyId: string; name: string };
+    priceChange: { '24h': string; '7d': string };
+  };
+}
 
 const migrationState$ = new BehaviorSubject<MigrationState | undefined>(undefined);
 let walletPassword: Uint8Array;
@@ -81,38 +88,33 @@ const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type
 
 const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION } = config();
 const fetchTokenPrices = () => {
-  fetch('https://analyticsv2.muesliswap.com/ticker')
+  // `base-policy-id=&base-tokenname=` for ADA as base token
+  fetch('https://api.muesliswap.com/list?base-policy-id=&base-tokenname=')
     .then(async (response) => {
-      const prices: Record<string, { ['last_price']: string | number; ['price_change']?: number }> =
-        await response.json();
+      const tokens: TokenAPIResponse[] = await response.json();
       const tokenPrices: TokenPrices = new Map();
-
-      for (const [key, priceInfo] of Object.entries(prices)) {
-        // the key is a concatenation of policy id + . + decoded asset name + _ADA, so we need to split it to get policy id and asset name
-        const [policy, assetNameAsHex] = key.split('.');
-        // get decoded asset name + _ADA in index 1 and split it to get asset name
-        const strAssetName = assetNameAsHex.split('_')[0];
-        // if for some reason we couldn't get any of this field jump to the next token
-        if (!policy || !strAssetName) continue;
-        // to be able to convert this to a type asset name first we need to convert it to hexadecimal
-        const assetName = convertToAssetName(strAssetName);
-        if (!assetName) continue;
-        const policyId = Cardano.PolicyId(policy);
-        // get the asset id to use as key for tokenPrices Map
-        const assetId = Cardano.AssetId.fromParts(policyId, assetName);
-        // it is possible for the price to come as NA so we need check this
-        const price = priceInfo.last_price === 'NA' ? 0 : (priceInfo.last_price as number);
-
-        // eslint-disable-next-line no-magic-numbers
-        const priceInAda = tokenInLovelacePrices[assetId] ? price / 1_000_000 : price; // check if the price is in lovelace
-
-        tokenPrices.set(assetId, {
-          id: key,
-          priceInAda,
-          priceVariationPercentage24h: priceInfo.price_change
-        });
+      for (const token of tokens) {
+        try {
+          const assetId = Cardano.AssetId.fromParts(
+            Cardano.PolicyId(token.price.quoteAddress.policyId),
+            Cardano.AssetName(token.price.quoteAddress.name)
+          );
+          // Base token is ADA, quote token is the one we are fetching the price
+          // According to muesliswap API, ADA decimal places (baseDecimalPlaces) is 6
+          // The token price returned by this endpoint is not based on ADA, even when ADA is specified as the base
+          // If the token and ADA decimal places differ, we need to do the following to calculate the price in ADA properly:
+          //   priceInAda = token price / (10 ^ (ADA decimal places - token decimal places))
+          const priceInAda =
+            // eslint-disable-next-line no-magic-numbers
+            token.price.price / Math.pow(10, token.price.baseDecimalPlaces - token.price.quoteDecimalPlaces);
+          tokenPrices.set(assetId, {
+            priceInAda,
+            priceVariationPercentage24h: Number(token.price.priceChange['24h'])
+          });
+        } catch {
+          // If a token couldn't be parsed then skip it
+        }
       }
-
       coinPrices.tokenPrices$.next({ tokens: tokenPrices, status: 'fetched' });
     })
     .catch((error) => {
@@ -165,10 +167,6 @@ const fetchAdaPrice = () => {
 
 fetchAdaPrice();
 setInterval(fetchAdaPrice, ADA_PRICE_CHECK_INTERVAL);
-
-/* TODO: before enable token price fetching, we need this ticket https://input-output.atlassian.net/browse/ADP-2821 to be resolved
-  once we have this resolved, we can enable token price fetching by adding USE_TOKEN_PRINCING=true to the environment variables
-*/
 if (process.env.USE_TOKEN_PRICING === 'true') {
   fetchTokenPrices();
   setInterval(fetchTokenPrices, ADA_PRICE_CHECK_INTERVAL);

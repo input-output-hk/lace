@@ -4,7 +4,7 @@ import type { Meta } from '@storybook/react';
 
 import { ReactComponent as QuestionMark } from '../../assets/icons/question-mark.component.svg';
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
-import { Page, Variants, Section } from '../decorators';
+import { Variants, Section, page } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
@@ -17,13 +17,7 @@ const subtitle = `A button gives the user a way to trigger an immediate action. 
 export default {
   title: 'Buttons/Main',
   component: Primary,
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Main Button" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Main Button', subtitle })],
 } as Meta;
 
 const Buttons = (): JSX.Element => (
