@@ -51,6 +51,35 @@ in rec {
 
   # ----------------------------------------------------------------------------- #
 
+  start-local-backend = pkgs.buildGoModule rec {
+    name = "start-local-backend";
+    src = ./start-local-backend;
+    #vendorHash = "sha256-LXS4koQixEwslu1Oj4IzeQNAwXl7RwZGnmOAZdCHFkk=";
+    vendorHash = "sha256-JgR87Q/jZ6N6OyKI3KPEmRx3PTd1RGtGEvmvemD81CI=";
+    nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
+    buildInputs = with pkgs; [ libayatana-appindicator-gtk3 gtk3 ];
+    overrideModAttrs = oldAttrs: {
+      buildInputs = (oldAttrs.buildInputs or []) ++ buildInputs;
+    };
+    preBuild = ''
+      convert -background none -size 44x44 cardano.svg cardano.png
+      go-bindata -pkg main -o assets.go cardano.png
+    '';
+  };
+
+  lace-local-backend = pkgs.runCommand "lace-local-backend" {
+    meta.mainProgram = start-local-backend.name;
+  } ''
+    mkdir -p $out/bin $out/libexec $out/share/lace-local-backend
+    cp ${start-local-backend}/bin/* $out/bin/
+    ln -s ${cardano-node}/bin/* $out/libexec/
+    ln -s ${ogmios}/bin/* $out/libexec/
+    mkdir -p $out/share/lace-local-backend/cardano-node-config
+    ln -s ${cardano-js-sdk}/libexec/source $out/share/lace-local-backend/cardano-js-sdk
+  '';
+
+  # ----------------------------------------------------------------------------- #
+
   debug-servers = pkgs.writeShellScriptBin "debug-servers" ''
     set -euo pipefail
 
