@@ -30,12 +30,13 @@ class PassphraseDrawerAssert {
     await PassphraseDrawer.passwordInputContainer.waitForDisplayed();
   }
 
-  async assertSeeShowPassphraseButton() {
-    const showPassphraseButton = await PassphraseDrawer.showPassphraseButton;
-    await showPassphraseButton.waitForDisplayed();
-    expect(await showPassphraseButton.getText()).to.equal(
-      await t('browserView.settings.security.showPassphraseDrawer.showPassphrase')
-    );
+  async assertSeeShowPassphraseButton(shouldBeDisplayed: boolean) {
+    await PassphraseDrawer.showPassphraseButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      expect(await PassphraseDrawer.showPassphraseButton.getText()).to.equal(
+        await t('browserView.settings.security.showPassphraseDrawer.showPassphrase')
+      );
+    }
   }
 
   async assertSeeHidePassphraseButton() {
@@ -44,6 +45,14 @@ class PassphraseDrawerAssert {
     expect(await hidePassphraseButton.getText()).to.equal(
       await t('browserView.settings.security.showPassphraseDrawer.hidePassphrase')
     );
+  }
+
+  async assertShowPassphraseButtonEnabled(shouldBeEnabled: boolean) {
+    await PassphraseDrawer.showPassphraseButton.waitForEnabled({ reverse: !shouldBeEnabled });
+  }
+
+  async assertHidePassphraseButtonEnabled(shouldBeEnabled: boolean) {
+    await PassphraseDrawer.hidePassphraseButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }
 
   async assertAllMnemonicsAreListed(expectedMnemonics: string[]) {

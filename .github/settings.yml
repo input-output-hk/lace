@@ -59,9 +59,9 @@ branches:
         # The number of approvals required. (1-6)
         required_approving_review_count: 1
         # Dismiss approved reviews automatically when a new commit is pushed.
-        dismiss_stale_reviews: true
+        dismiss_stale_reviews: false
         # Whether the most recent push must be approved by someone other than the person who pushed it.
-        require_last_push_approval: true
+        require_last_push_approval: false
         # Blocks merge until code owners have reviewed.
         require_code_owner_reviews: true
         # Allow specific users, teams, or apps to bypass pull request requirements.
@@ -105,4 +105,4 @@ branches:
       restrictions:
         apps: []
         users: []
-        teams: []
+        teams: ['lace-tech-leads']
