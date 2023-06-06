@@ -47,7 +47,7 @@ export const onStorageChangeEvent = (
 ): void => {
   // eslint-disable-next-line consistent-return, complexity
   window.addEventListener('storage', (ev) => {
-    let extraCondition = true;
+    let extraCondition;
 
     switch (eventType) {
       case 'create':
@@ -62,6 +62,7 @@ export const onStorageChangeEvent = (
       case 'any':
       default:
         true;
+        extraCondition = true;
     }
 
     if (keys.includes(ev.key as keyof ILocalStorage) && extraCondition) {

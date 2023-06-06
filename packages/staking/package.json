@@ -43,6 +43,7 @@
     "stylelint:fix": "yarn stylelint:check --fix",
     "test": "echo 'Staking package runs tests in its own CI'",
     "test:all": "yarn test:unit --coverage && yarn test:vr",
+    "test:coverage": "yarn test --coverage",
     "test:unit": "vitest run",
     "test:vr": "concurrently --kill-others --success first --names LADLE,VR \"yarn story:preview\" \"wait-on http://127.0.0.1:8080 && yarn lost-pixel\"",
     "test:vr:update": "lost-pixel update",

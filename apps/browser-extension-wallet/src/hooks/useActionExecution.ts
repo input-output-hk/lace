@@ -4,7 +4,7 @@ import ErrorIcon from '../assets/icons/address-error-icon.component.svg';
 
 const TOAST_DEFAULT_DURATION = 3;
 
-interface ActionExecutionArgs {
+export interface ActionExecutionArgs {
   successMessage?: string;
   toastDuration?: number;
   shouldDisplayToastOnSuccess?: boolean;
