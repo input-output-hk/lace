@@ -50,7 +50,9 @@
   },
   "devDependencies": {
     "@ladle/react": "^2.12.3",
+    "@lace/ui": "^0.1.0",
     "@tsconfig/create-react-app": "^1.0.3",
+    "@vanilla-extract/vite-plugin": "^3.8.2",
     "@vitest/coverage-c8": "^0.31.0",
     "concurrently": "^8.0.1",
     "esbuild-scss-modules-plugin": "^1.1.1",
@@ -64,6 +66,7 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
+    "@lace/ui": "^0.1.0",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   }

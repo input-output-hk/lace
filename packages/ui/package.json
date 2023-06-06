@@ -1,6 +1,6 @@
 {
   "name": "@lace/ui",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Lace UI Toolkit",
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
     "@rollup/plugin-commonjs": "20.0.0",
     "@rollup/plugin-image": "2.1.1",
     "@rollup/plugin-node-resolve": "13.0.4",
-    "@rollup/plugin-typescript": "8.3.0",
+    "@rollup/plugin-typescript": "^11.1.1",
     "@storybook/addon-actions": "^6.5.16",
     "@storybook/addon-essentials": "^6.5.16",
     "@storybook/addon-interactions": "^6.5.16",
