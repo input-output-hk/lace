@@ -42,7 +42,7 @@ export const deleteFromLocalStorage = (key: keyof ILocalStorage): void => window
 
 export const onStorageChangeEvent = (
   keys: (keyof ILocalStorage)[],
-  callback: StorageEventPresetAction | (() => unknown),
+  callback: StorageEventPresetAction | ((ev?: StorageEvent) => unknown),
   eventType: StorageEventType = 'any'
 ): void => {
   // eslint-disable-next-line consistent-return, complexity
@@ -69,7 +69,7 @@ export const onStorageChangeEvent = (
       if (typeof callback === 'string' && (callback as StorageEventPresetAction) === 'reload')
         return window.location.reload();
 
-      if (typeof callback === 'function') return callback();
+      if (typeof callback === 'function') return callback(ev);
     }
   });
 };
