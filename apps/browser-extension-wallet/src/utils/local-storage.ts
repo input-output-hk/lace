@@ -42,12 +42,12 @@ export const deleteFromLocalStorage = (key: keyof ILocalStorage): void => window
 
 export const onStorageChangeEvent = (
   keys: (keyof ILocalStorage)[],
-  callback: StorageEventPresetAction | (() => unknown),
+  callback: StorageEventPresetAction | ((ev?: StorageEvent) => unknown),
   eventType: StorageEventType = 'any'
 ): void => {
   // eslint-disable-next-line consistent-return, complexity
   window.addEventListener('storage', (ev) => {
-    let extraCondition = true;
+    let extraCondition;
 
     switch (eventType) {
       case 'create':
@@ -62,13 +62,14 @@ export const onStorageChangeEvent = (
       case 'any':
       default:
         true;
+        extraCondition = true;
     }
 
     if (keys.includes(ev.key as keyof ILocalStorage) && extraCondition) {
       if (typeof callback === 'string' && (callback as StorageEventPresetAction) === 'reload')
         return window.location.reload();
 
-      if (typeof callback === 'function') return callback();
+      if (typeof callback === 'function') return callback(ev);
     }
   });
 };

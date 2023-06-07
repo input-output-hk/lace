@@ -9,7 +9,7 @@ import * as Text from '../typography';
 
 import { subtitleBox } from './page.css';
 
-type Props = PropsWithChildren<{
+export type Props = PropsWithChildren<{
   title: string;
   subtitle: string;
 }>;

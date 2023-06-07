@@ -1,10 +1,5 @@
-import {
-  createWalletUtil,
-  InitializeTxProps,
-  InitializeTxResult,
-  MinimumCoinQuantityPerOutput,
-  ObservableWallet
-} from '@cardano-sdk/wallet';
+import { createWalletUtil, ObservableWallet } from '@cardano-sdk/wallet';
+import { InitializeTxProps, InitializeTxResult, MinimumCoinQuantityPerOutput } from '@cardano-sdk/tx-construction';
 
 export interface InitializedCardanoTransaction {
   transaction: InitializeTxResult;
