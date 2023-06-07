@@ -4,7 +4,7 @@ import type { Meta } from '@storybook/react';
 
 import { ReactComponent as InfoIcon } from '../../assets/icons/info.component.svg';
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
-import { Page, Variants, Section } from '../decorators';
+import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
@@ -15,13 +15,7 @@ const subtitle = `The toggle switch represents a physical switch that allows use
 export default {
   title: 'Basic Input/Toggle switch',
   component: ToggleSwitch,
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Toggle switch" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Toggle switch', subtitle })],
 } as Meta;
 
 const ToggleSwitchPreview = (): JSX.Element => (
