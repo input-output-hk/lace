@@ -5,7 +5,7 @@
 assert inputs.nixpkgs.system == "x86_64-linux"; let
   pkgs = inputs.nixpkgs;
 in rec {
-  package = throw "unimplemented";
+  package = local-backend;
 
   installer = throw "unimplemented";
 
@@ -51,10 +51,9 @@ in rec {
 
   # ----------------------------------------------------------------------------- #
 
-  start-local-backend = pkgs.buildGoModule rec {
-    name = "start-local-backend";
-    src = ./start-local-backend;
-    #vendorHash = "sha256-LXS4koQixEwslu1Oj4IzeQNAwXl7RwZGnmOAZdCHFkk=";
+  local-backend-exe = pkgs.buildGoModule rec {
+    name = "local-backend";
+    src = ./local-backend;
     vendorHash = "sha256-JgR87Q/jZ6N6OyKI3KPEmRx3PTd1RGtGEvmvemD81CI=";
     nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
     buildInputs = with pkgs; [ libayatana-appindicator-gtk3 gtk3 ];
@@ -67,11 +66,11 @@ in rec {
     '';
   };
 
-  lace-local-backend = pkgs.runCommand "lace-local-backend" {
-    meta.mainProgram = start-local-backend.name;
+  local-backend = pkgs.runCommand "local-backend" {
+    meta.mainProgram = local-backend-exe.name;
   } ''
     mkdir -p $out/bin $out/libexec $out/share/lace-local-backend
-    cp ${start-local-backend}/bin/* $out/bin/
+    cp ${local-backend-exe}/bin/* $out/bin/
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/
     ln -s ${cardano-js-sdk.nodejs}/bin/node $out/libexec

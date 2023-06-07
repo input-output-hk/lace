@@ -1,4 +1,4 @@
-module lace.io/start-local-backend
+module lace.io/local-backend
 
 go 1.20
 

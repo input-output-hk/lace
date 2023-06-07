@@ -19,7 +19,7 @@ in
         }
         cd "$PROJECT_DIR"
 
-        cd nix/local-backend/internal/start-local-backend
+        cd nix/local-backend/internal/local-backend
       '';
     };
   } else {}
