@@ -32,7 +32,6 @@ export interface WalletSetupProps {
 export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetupProps): React.ReactElement => {
   const history = useHistory();
   const { path } = useRouteMatch();
-  const [isConfirmRestoreOpen, setIsConfirmRestoreOpen] = useState(false);
   const [isDappConnectorWarningOpen, setIsDappConnectorWarningOpen] = useState(false);
   const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>('isForgotPasswordFlow');
   const { t: translate, Trans } = useTranslate();
@@ -95,7 +94,6 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
 
   const cancelWalletFlow = () => history.push(walletRoutePaths.setup.home);
 
-  const handleRestoreWallet = () => setIsConfirmRestoreOpen(true);
   const handleStartHardwareOnboarding = () => setIsDappConnectorWarningOpen(true);
 
   const sendAnalytics = (category: SetupAnalyticsCategories, eventName: string, value = 1) =>
@@ -105,6 +103,11 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
       name: eventName,
       value
     });
+
+  const handleRestoreWallet = () => {
+    sendAnalytics(AnalyticsEventCategories.WALLET_RESTORE, Events.RESTORE_WALLET_START);
+    history.push(walletRoutePaths.setup.restore);
+  };
 
   return (
     <Portal>
@@ -119,24 +122,6 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
               onHardwareWalletRequest={handleStartHardwareOnboarding}
               onRestoreWalletRequest={handleRestoreWallet}
               translations={walletSetupOptionsStepTranslations}
-            />
-            <WarningModal
-              header={translate('browserView.walletSetup.confirmRestoreModal.header')}
-              content={
-                <div className={styles.confirmResetContent}>
-                  <p>
-                    <Trans i18nKey="browserView.walletSetup.confirmRestoreModal.notVisible" />
-                  </p>
-                </div>
-              }
-              visible={isConfirmRestoreOpen}
-              confirmLabel={translate('browserView.walletSetup.confirmRestoreModal.confirm')}
-              onCancel={() => setIsConfirmRestoreOpen(false)}
-              onConfirm={() => {
-                setIsConfirmRestoreOpen(false);
-                sendAnalytics(AnalyticsEventCategories.WALLET_RESTORE, Events.RESTORE_WALLET_START);
-                history.push(walletRoutePaths.setup.restore);
-              }}
             />
             <WarningModal
               header={translate('browserView.walletSetup.confirmExperimentalHwDapp.header')}
