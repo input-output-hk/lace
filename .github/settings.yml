@@ -83,6 +83,7 @@ branches:
           - context: Build & Test
           - context: block-fixup
           - context: Build Staking Center
+          - context: chromatic-deployment
       # Required. Enforce all configured restrictions for administrators. Set to true to enforce required status checks for repository administrators. Set to null to disable.
       enforce_admins: true
       # Prevent merge commits from being pushed to matching branches

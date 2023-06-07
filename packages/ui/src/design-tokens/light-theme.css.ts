@@ -1,6 +1,6 @@
 import { createTheme } from '@vanilla-extract/css';
 
-import { laceGradient, lightColorScheme } from './colors.data';
+import { darkColorScheme, laceGradient, lightColorScheme } from './colors.data';
 import { opacities } from './opacities.data';
 import { radius } from './radius.data';
 import { spacing } from './spacing.data';
@@ -112,8 +112,26 @@ const colors: Colors = {
   $navigation_button_container_outlineColor:
     lightColorScheme.$primary_accent_purple_0_3,
 
+  $profile_picture_avatar_label_color: lightColorScheme.$primary_white,
+  $profile_picture_initials_label_color:
+    lightColorScheme.$secondary_lace_yellow,
+  $profile_picture_initials_container_bgColor:
+    lightColorScheme.$secondary_lace_yellow,
+  $profile_picture_image_container_borderColor:
+    lightColorScheme.$primary_light_grey,
+  $profile_picture_image_container_borderColor_selected:
+    lightColorScheme.$secondary_lace_yellow,
+
   $scrollbar_thumb_container_bgColor: lightColorScheme.$primary_light_grey_plus,
   $scrollbar_thumb_container_bgColor_hover: lightColorScheme.$primary_grey,
+
+  $toggle_switch_label_color: lightColorScheme.$primary_dark_grey,
+  $toggle_switch_container_bgColor_on: laceGradient,
+  $toggle_switch_container_bgColor_off: lightColorScheme.$primary_grey,
+  $toggle_switch_container_bgColor_disabled:
+    darkColorScheme.$primary_light_grey,
+  $toggle_switch_container_outline: lightColorScheme.$primary_accent_purple_0_3,
+  $toggle_switch_thumb_bgColor: lightColorScheme.$primary_grey,
 };
 
 export const elevation: Elevation = {

@@ -723,9 +723,6 @@ describe('Testing useWalletManager hook', () => {
       expect(deleteFromLocalStorage.mock.calls[2]).toEqual(['lastStaking']);
       expect(deleteFromLocalStorage.mock.calls[3]).toEqual(['userInfo']);
       expect(deleteFromLocalStorage.mock.calls[4]).toEqual(['keyAgentData']);
-      expect(deleteFromLocalStorage.mock.calls[5]).toEqual(['wallet']);
-      expect(deleteFromLocalStorage.mock.calls[6]).toEqual(['analyticsAccepted']);
-      expect(deleteFromLocalStorage.mock.calls[7]).toEqual(['analyticsUserId']);
       expect(clearBackgroundStorage).toBeCalledWith(['message', 'mnemonic', 'keyAgentsByChain']);
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();

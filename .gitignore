@@ -15,6 +15,7 @@ build-storybook.log
 coverage
 .rollup.cache
 .tool-versions
+.vscode
 
 # PRJ Spec
 /.cache

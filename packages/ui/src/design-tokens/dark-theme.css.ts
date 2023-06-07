@@ -111,8 +111,23 @@ const colors: Colors = {
   $navigation_button_label_color: darkColorScheme.$primary_light_grey,
   $navigation_button_label_color_pressed: darkColorScheme.$primary_white,
 
+  $profile_picture_avatar_label_color: darkColorScheme.$primary_mid_black,
+  $profile_picture_initials_label_color: darkColorScheme.$secondary_lace_yellow,
+  $profile_picture_initials_container_bgColor:
+    darkColorScheme.$secondary_lace_yellow,
+  $profile_picture_image_container_borderColor: 'transparent',
+  $profile_picture_image_container_borderColor_selected: 'transparent',
+
   $scrollbar_thumb_container_bgColor: darkColorScheme.$primary_mid_grey,
   $scrollbar_thumb_container_bgColor_hover: darkColorScheme.$primary_grey,
+
+  $toggle_switch_label_color: darkColorScheme.$primary_light_grey,
+  $toggle_switch_container_bgColor_on: darkColorScheme.$primary_mid_grey,
+  $toggle_switch_container_bgColor_off: darkColorScheme.$primary_accent_purple,
+  $toggle_switch_container_bgColor_disabled:
+    darkColorScheme.$primary_light_grey,
+  $toggle_switch_container_outline: lightColorScheme.$primary_accent_purple_0_3,
+  $toggle_switch_thumb_bgColor: darkColorScheme.$primary_white,
 };
 
 const elevation: Elevation = {
