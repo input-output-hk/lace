@@ -1,1 +1,1 @@
-export { ToggleSwitch as Filled } from './toggle-switch.component';
+export { ToggleSwitch } from './toggle-switch.component';
