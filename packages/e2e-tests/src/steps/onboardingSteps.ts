@@ -98,7 +98,7 @@ When(/^I click "Go to my wallet" button on "All done" page$/, async () => {
 });
 
 When(
-  /^I click "(Cancel|OK)" button on "(Limited support for DApp|Restoring a multi-address wallet\?|Are you sure you want to start again\?)" modal$/,
+  /^I click "(Cancel|OK)" button on "(Limited support for DApp|Are you sure you want to start again\?)" modal$/,
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   async (button: 'Cancel' | 'OK', _modalType: string) => {
     switch (button) {
@@ -113,12 +113,6 @@ When(
     }
   }
 );
-
-Given(/^I click "Restore" button and confirm$/, async () => {
-  await OnboardingMainPage.restoreWalletButton.click();
-  await Modal.confirmButton.waitForClickable();
-  await Modal.confirmButton.click();
-});
 
 When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
   await OnboardingPageObject.fillWalletNameInput(walletName === 'empty' ? '' : walletName);
