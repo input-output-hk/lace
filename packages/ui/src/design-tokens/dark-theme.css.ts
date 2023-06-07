@@ -101,6 +101,16 @@ const colors: Colors = {
   $sub_navigation_item_label_color_pressed: darkColorScheme.$primary_white,
   $sub_navigation_item_label_color_focused: darkColorScheme.$primary_grey,
 
+  $navigation_button_container_bgColor: darkColorScheme.$primary_grey,
+  $navigation_button_container_bgColor_hover:
+    darkColorScheme.$primary_dark_grey,
+  $navigation_button_container_bgColor_pressed:
+    darkColorScheme.$primary_mid_grey,
+  $navigation_button_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $navigation_button_label_color: darkColorScheme.$primary_light_grey,
+  $navigation_button_label_color_pressed: darkColorScheme.$primary_white,
+
   $profile_picture_avatar_label_color: darkColorScheme.$primary_mid_black,
   $profile_picture_initials_label_color: darkColorScheme.$secondary_lace_yellow,
   $profile_picture_initials_container_bgColor:
@@ -110,6 +120,14 @@ const colors: Colors = {
 
   $scrollbar_thumb_container_bgColor: darkColorScheme.$primary_mid_grey,
   $scrollbar_thumb_container_bgColor_hover: darkColorScheme.$primary_grey,
+
+  $toggle_switch_label_color: darkColorScheme.$primary_light_grey,
+  $toggle_switch_container_bgColor_on: darkColorScheme.$primary_mid_grey,
+  $toggle_switch_container_bgColor_off: darkColorScheme.$primary_accent_purple,
+  $toggle_switch_container_bgColor_disabled:
+    darkColorScheme.$primary_light_grey,
+  $toggle_switch_container_outline: lightColorScheme.$primary_accent_purple_0_3,
+  $toggle_switch_thumb_bgColor: darkColorScheme.$primary_white,
 };
 
 const elevation: Elevation = {
