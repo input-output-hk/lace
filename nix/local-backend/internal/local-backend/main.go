@@ -18,6 +18,7 @@ import (
 	"github.com/getlantern/systray"
 	"github.com/allan-simon/go-singleinstance"
 	"github.com/acarl005/stripansi"
+	"github.com/atotto/clipboard"
 )
 
 func main() {
@@ -105,9 +106,11 @@ func main() {
 		}
 	}()
 
+	providerServerPort := 3000
+
 	go systray.Run(setupTrayUI(
 		ogmiosStatus, cardanoNodeStatus, providerServerStatus, networkSwitch, initiateShutdownCh,
-		logFile,
+		logFile, &providerServerPort,
 	), func(){})
 
 	manageChildren(libexecDir, resourcesDir, workDir,
@@ -116,6 +119,7 @@ func main() {
 		cardanoNodeStatus,
 		ogmiosStatus,
 		providerServerStatus,
+		&providerServerPort,
 	)
 
 	systray.Quit()
@@ -131,6 +135,7 @@ func setupTrayUI(
 	networkSwitch chan<- string,
 	initiateShutdownCh chan<- struct{},
 	logFile string,
+	providerServerPort *int,
 ) func() { return func() {
 	systray.SetTitle("lace-local-backend")
 	// systray.SetTooltip("")
@@ -189,7 +194,16 @@ func setupTrayUI(
 
 	systray.AddSeparator()
 
-	systray.AddMenuItem("Copy Backend URL", "")
+	mCopyUrl := systray.AddMenuItem("Copy Backend URL", "")
+	go func() {
+		for range mCopyUrl.ClickedCh {
+			url := fmt.Sprintf("http://127.0.0.1:%d", *providerServerPort)
+			err := clipboard.WriteAll(url)
+			if err != nil {
+				fmt.Printf("error: failed to copy '%s' to clipboard: %s\n", url, err)
+			}
+		}
+	}()
 
 	mCurrentLog := systray.AddMenuItem("Current Log", "")
 	go func() {
@@ -229,6 +243,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 	cardanoNodeStatus chan<- string,
 	ogmiosStatus chan<- string,
 	providerServerStatus chan<- string,
+	providerServerPort *int,
 ) {
 	sep := string(filepath.Separator)
 
@@ -364,8 +379,6 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 		// -------------------------- cardano-js-sdk -------------------------- //
 
-		providerServerPort := 3000
-
 		tokenMetadataServerUrl := "https://tokens.cardano.org"
 		if network != "mainnet" {
 			tokenMetadataServerUrl = "https://metadata.cardano-testnet.iohkdev.io/"
@@ -381,7 +394,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				"NETWORK=" + network,
 				"TOKEN_METADATA_SERVER_URL=" + tokenMetadataServerUrl,
 				"CARDANO_NODE_CONFIG_PATH=" + cardanoNodeConfigDir + sep + "config.json",
-				"API_URL=http://0.0.0.0:" + fmt.Sprintf("%d", providerServerPort),
+				"API_URL=http://0.0.0.0:" + fmt.Sprintf("%d", *providerServerPort),
 				"ENABLE_METRICS=true",
 				"LOGGER_MIN_SEVERITY=info",
 				"SERVICE_NAMES=tx-submit",
@@ -394,7 +407,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 		providerServerHealthErr := make(chan error, 1)
 		go func() {
 			// It usually takes <1s
-			providerServerHealthErr <- waitForHttp200(fmt.Sprintf("http://127.0.0.1:%d/health", providerServerPort), 10 * time.Second)
+			providerServerHealthErr <- waitForHttp200(fmt.Sprintf("http://127.0.0.1:%d/health", *providerServerPort), 10 * time.Second)
 		}()
 		select {
 		case err := <-providerServerHealthErr:

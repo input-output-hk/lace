@@ -54,7 +54,7 @@ in rec {
   local-backend-exe = pkgs.buildGoModule rec {
     name = "local-backend";
     src = ./local-backend;
-    vendorHash = "sha256-JgR87Q/jZ6N6OyKI3KPEmRx3PTd1RGtGEvmvemD81CI=";
+    vendorHash = "sha256-Aek1n2h4YCvwnGwlFSoGMvk3LNby/UPSl3er5hhbqSs=";
     nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
     buildInputs = with pkgs; [ libayatana-appindicator-gtk3 gtk3 ];
     overrideModAttrs = oldAttrs: {
