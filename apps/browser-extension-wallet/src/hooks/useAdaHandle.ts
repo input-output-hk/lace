@@ -3,8 +3,7 @@ import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { KoraLabsHandleProvider } from '@src/features/ada-handle/provider';
 import { useWalletStore } from '@src/stores';
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const useHandleResolver = () => {
+export const useHandleResolver = (): KoraLabsHandleProvider => {
   const {
     blockchainProvider,
     currentChain: { networkMagic }

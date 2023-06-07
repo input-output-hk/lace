@@ -45,7 +45,7 @@ export const validateAddressBookName = (value: string, translateFn: TFunction): 
       }
     : { valid: true };
 
-export const validateHandle = (value: string) =>
+export const validateHandle = (value: string): boolean =>
   value && value.charAt(0) === ADA_HANDLE_PREFIX && value.length > ADA_HANDLE_THRESHOLD;
 
 export const validateMainnetAddress = (address: string): boolean =>
