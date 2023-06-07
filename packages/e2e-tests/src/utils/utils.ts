@@ -4,16 +4,7 @@ import { Logger } from '../support/logger';
 
 class ExtensionUtils {
   async getBrowser(): Promise<string> {
-    if (this.isElectron()) {
-      // unfortunately Electron identifies itself as Chrome, but it does not expose
-      // Extension APIs such as chrome.storage.local
-      return 'electron';
-    }
     return (browser.capabilities as Capabilities.Capabilities).browserName;
-  }
-
-  isElectron() {
-    return process.env.DESKTOP_E2E_TEST_MODE_ENABLED === 'true';
   }
 
   async getUserAgent(): Promise<string> {

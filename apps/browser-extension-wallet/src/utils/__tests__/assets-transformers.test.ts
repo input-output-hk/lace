@@ -14,7 +14,7 @@ import { TokenPrice } from '@lib/scripts/types';
 import BigNumber from 'bignumber.js';
 
 jest.mock('@lace/cardano', () => {
-  const actual = jest.requireActual<any>('@lace/cardano');
+  const actual = jest.requireActual<typeof import('@lace/cardano')>('@lace/cardano');
   return {
     __esModule: true,
     ...actual,

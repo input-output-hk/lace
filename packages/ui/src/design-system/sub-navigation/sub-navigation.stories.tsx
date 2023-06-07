@@ -7,7 +7,7 @@ import { within, userEvent, waitFor } from '@storybook/testing-library';
 
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
-import { Page, Section, Variants } from '../decorators';
+import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid } from '../grid';
@@ -21,13 +21,7 @@ const subtitle = `Subnavigations provide ergonomic movement between destinations
 export default {
   title: 'Navigation & toolbars',
   component: SubNavigation,
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Subnavigation" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Subnavigation', subtitle })],
   argTypes: {
     onValueChange: { action: true },
   },
