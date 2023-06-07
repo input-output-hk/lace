@@ -4,7 +4,7 @@ import type { Meta } from '@storybook/react';
 
 import cardanoImage from '../../assets/images/cardano-blue-bg.png';
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
-import { Page, Variants, Section } from '../decorators';
+import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
@@ -22,13 +22,7 @@ export default {
     Image,
     Initials,
   },
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Profile picture" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Profile picture', subtitle })],
 } as Meta;
 
 const Images = (): JSX.Element => (
