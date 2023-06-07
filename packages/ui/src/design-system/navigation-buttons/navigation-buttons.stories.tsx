@@ -7,7 +7,7 @@ import { userEvent, waitFor, within } from '@storybook/testing-library';
 
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
-import { Page, Variants, Section } from '../decorators';
+import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
@@ -20,13 +20,7 @@ export default {
   title: 'Buttons/Navigation Buttons',
   component: Close,
   subcomponents: { Back },
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Navigation button" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Navigation button', subtitle })],
   argTypes: {
     onClick: { action: true },
   },
