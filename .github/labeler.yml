@@ -4,6 +4,9 @@ browser:
 # Staking & Multi-delegation
 staking:
   - any: ['packages/staking/**/*']
+# UI Toolkit
+ui-toolkit:
+  - any: ['packages/ui/**/*']
 # E2E targets
 e2e:
   - any: ['features/**/*', 'packages/e2e-tests/**/*']
