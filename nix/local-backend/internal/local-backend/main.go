@@ -61,6 +61,7 @@ func main() {
 	}
 	fmt.Println("info: workDir is " + workDir)
 	os.MkdirAll(workDir, 0755)
+	os.Chdir(workDir)
 
 	lockFile := workDir + sep + "instance.lock"
 	_, err = singleinstance.CreateLockFile(lockFile)
@@ -106,6 +107,7 @@ func main() {
 
 	go systray.Run(setupTrayUI(
 		ogmiosStatus, cardanoNodeStatus, providerServerStatus, networkSwitch, initiateShutdownCh,
+		logFile,
 	), func(){})
 
 	manageChildren(libexecDir, resourcesDir, workDir,
@@ -128,6 +130,7 @@ func setupTrayUI(
 	providerServerStatus <-chan string,
 	networkSwitch chan<- string,
 	initiateShutdownCh chan<- struct{},
+	logFile string,
 ) func() { return func() {
 	systray.SetTitle("lace-local-backend")
 	// systray.SetTooltip("")
@@ -187,8 +190,20 @@ func setupTrayUI(
 	systray.AddSeparator()
 
 	systray.AddMenuItem("Copy Backend URL", "")
-	systray.AddMenuItem("Current Log", "")
-	systray.AddMenuItem("Logs Directory", "")
+
+	mCurrentLog := systray.AddMenuItem("Current Log", "")
+	go func() {
+		for range mCurrentLog.ClickedCh {
+			openWithDefaultApp(logFile)
+		}
+	}()
+
+	mLogsDirectory := systray.AddMenuItem("Logs Directory", "")
+	go func() {
+		for range mLogsDirectory.ClickedCh {
+			openWithDefaultApp(filepath.Dir(logFile))
+		}
+	}()
 
 	systray.AddSeparator()
 
@@ -615,4 +630,19 @@ func waitForHttp200(url string, timeout time.Duration) error {
 		}
 		time.Sleep(1 * time.Second)
 	}
+}
+
+func openWithDefaultApp(target string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "linux":
+		cmd = exec.Command("xdg-open", target)
+	case "darwin":
+		cmd = exec.Command("open", target)
+	case "windows":
+		cmd = exec.Command("cmd", "/c", "start", target)
+	default:
+		panic("cannot happen, unknown OS: " + runtime.GOOS)
+	}
+	return cmd.Run()
 }
