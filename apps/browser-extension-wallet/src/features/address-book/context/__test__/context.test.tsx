@@ -17,12 +17,12 @@ jest.mock('../AddressBookProvider', () => ({
 }));
 
 const makeDbContextWrapper =
-  (dbIntance: WalletDatabase): FunctionComponent =>
+  (dbInstance: WalletDatabase): FunctionComponent =>
   ({ children }: { children?: React.ReactNode }) =>
     (
       <AppSettingsProvider>
         <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' } as any))}>
-          <DatabaseProvider dbCustomInstance={dbIntance}>
+          <DatabaseProvider dbCustomInstance={dbInstance}>
             <AddressBookProvider>{children}</AddressBookProvider>
           </DatabaseProvider>
         </StoreProvider>
@@ -35,7 +35,7 @@ describe('testing useAddressBookState', () => {
     id: i + 1,
     address: `addr_test${i + 1}`,
     name: `atest wallet ${i + 1}`,
-    network: 0
+    network: 1
   }));
 
   beforeEach(async () => {
@@ -54,6 +54,8 @@ describe('testing useAddressBookState', () => {
     expect(result.current.utils.extendLimit).toBeDefined();
 
     await waitForNextUpdate();
+
+    console.log({ result: result.current.list });
 
     expect(result.current.list.length).toBe(10);
     expect(result.current.count).toBe(15);
@@ -78,7 +80,7 @@ describe('testing useAddressBookState', () => {
       address: 'addr_test16',
       id: 16,
       name: 'test wallet 16',
-      network: 0
+      network: 1
     });
     expect(result.current.list.length).toBe(16);
     expect(result.current.count).toBe(16);
@@ -99,7 +101,7 @@ describe('testing useAddressBookState', () => {
       id: result.current.list[0].id,
       name: 'newName',
       address: 'newAddress',
-      network: 0
+      network: 1
     };
 
     result.current.utils.updateRecord(idToUpdate, addressData as AddressBookSchema);

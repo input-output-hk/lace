@@ -4,19 +4,18 @@
 import React, { FunctionComponent } from 'react';
 import { useGetFilteredAddressBook } from '../useGetFilteredAddressBook';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { DatabaseProvider } from '../../../../providers/DatabaseProvider';
-import { WalletDatabase, AddressBookSchema, addressBookSchema } from '../../../../lib/storage';
+import { WalletDatabase, AddressBookSchema, addressBookSchema } from '@lib/storage';
 import { StoreProvider } from '@src/stores';
 import create from 'zustand';
-import { AppSettingsProvider } from '@providers';
+import { AppSettingsProvider, DatabaseProvider } from '@providers';
 
 const makeDbContextWrapper =
-  (dbIntance: WalletDatabase): FunctionComponent =>
+  (dbInstance: WalletDatabase): FunctionComponent =>
   ({ children }: { children?: React.ReactNode }) =>
     (
       <AppSettingsProvider>
         <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' } as any))}>
-          <DatabaseProvider dbCustomInstance={dbIntance}>{children}</DatabaseProvider>
+          <DatabaseProvider dbCustomInstance={dbInstance}>{children}</DatabaseProvider>
         </StoreProvider>
       </AppSettingsProvider>
     );
@@ -27,19 +26,19 @@ describe('Testing useGetFilteredAddressBook hook', () => {
       id: 1,
       address: 'addr_test1',
       name: 'test wallet',
-      network: 0
+      network: 1
     },
     {
       id: 2,
       address: 'addr_test2',
       name: 'Other wallet',
-      network: 0
+      network: 1
     },
     {
       id: 3,
       address: 'addr_test3',
       name: 'Other wallet 2',
-      network: 0
+      network: 1
     }
   ];
 
