@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 import { useObservable } from './useObservable';
@@ -8,5 +7,5 @@ export const useGetHandles = () => {
   const { inMemoryWallet } = useWalletStore();
   const handles = useObservable(inMemoryWallet.handles$);
 
-  return useMemo(() => isAdaHandleEnabled === 'true' && handles, [handles]);
+  return isAdaHandleEnabled === 'true' ? handles : undefined;
 };
