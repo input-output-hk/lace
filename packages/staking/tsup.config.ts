@@ -1,4 +1,6 @@
+import { ScssModulesPlugin } from 'esbuild-scss-modules-plugin';
 import { defineConfig } from 'tsup';
+import { peerDependencies } from './package.json';
 
 const tsupConfig = defineConfig([
   {
@@ -6,6 +8,9 @@ const tsupConfig = defineConfig([
     clean: true,
     dts: true,
     entry: ['./src/index.ts'],
+    // eslint-disable-next-line new-cap
+    esbuildPlugins: [ScssModulesPlugin() as never],
+    external: Object.keys(peerDependencies),
     format: ['esm', 'cjs'],
     name: 'lace/staking',
     outDir: './dist',

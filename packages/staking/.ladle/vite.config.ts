@@ -11,10 +11,12 @@ export const ladleViteConfig = {
       },
       typescript: {
         root: '../',
+        tsconfigPath: './tsconfig.json',
       },
     }),
     eslint({
       include: './**/*',
+      exclude: './**/*.scss',
       overrideConfigFile: '.eslintrc.cjs',
     }),
   ],
