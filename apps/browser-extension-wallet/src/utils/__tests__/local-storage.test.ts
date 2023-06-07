@@ -50,7 +50,7 @@ describe('Testing local storage functions', () => {
   });
   test('getValueFromLocalStorage', async () => {
     const key = 'key';
-    const defaultValue = 'value';
+    const defaultValue = true;
     const reviver = jest.fn();
 
     const jsonParseSpy = jest.spyOn(JSON, 'parse');
@@ -72,19 +72,18 @@ describe('Testing local storage functions', () => {
 
   test('saveValueInLocalStorage', async () => {
     const key = 'key';
-    const value = 'value';
+    const value = true;
     const replacer = jest.fn();
     const eventName = 'eventName';
 
-    const valueToStore = 'valueToStore';
+    const valueToStore = 'true';
     const jsonStringifySpy = jest.spyOn(JSON, 'stringify');
     jsonStringifySpy.mockReturnValueOnce(valueToStore);
 
     const dispatchEvent = jest.spyOn(window, 'dispatchEvent');
 
-    const item = 'value';
     saveValueInLocalStorage({ key: key as keyof ILocalStorage, value, replacer, eventName });
-    expect(jsonStringifySpy).toBeCalledWith(item, replacer);
+    expect(jsonStringifySpy).toBeCalledWith(value, replacer);
     expect(setItem).toBeCalledWith(key, valueToStore);
     expect(dispatchEvent).toBeCalledWith(new CustomEvent(eventName, { detail: { key, value } }));
 

@@ -21,7 +21,8 @@ class TestDAppPage {
   private SEND_TOKEN_VALUE_INPUT = '[data-testid="send-token-value-input"]';
   private SEND_TOKEN_POLICY_ID = '[data-testid="send-token-asset-policy-id"]';
   private SEND_TOKEN_ASSET_NAME = '[data-testid="send-token-asset-name-hex"]';
-  private RUN_BUTTON = '[data-testid="run-button"]';
+  private SEND_ADA_RUN_BUTTON = '[data-testid="send-ada-run-button"]';
+  private SEND_TOKEN_RUN_BUTTON = '[data-testid="send-token-run-button"]';
 
   get walletItem(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.WALLET_ITEM);
@@ -103,8 +104,12 @@ class TestDAppPage {
     return $(this.SEND_TOKEN_ASSET_NAME);
   }
 
-  get runButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.RUN_BUTTON);
+  get sendAdaRunButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SEND_ADA_RUN_BUTTON);
+  }
+
+  get sendTokenRunButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SEND_TOKEN_RUN_BUTTON);
   }
 }
 

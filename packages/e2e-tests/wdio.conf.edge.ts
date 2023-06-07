@@ -33,7 +33,8 @@ const edgeConfig: WebdriverIO.Config = {
         ignoreDefaultArgs: true
       }
     }
-  ]
+  ],
+  services: ['devtools', 'intercept']
 };
 
 if (!process.env.CI) {
@@ -44,7 +45,9 @@ if (!process.env.CI) {
         installArgs: { drivers },
         args: { drivers }
       }
-    ]
+    ],
+    'devtools',
+    'intercept'
   ];
 }
 

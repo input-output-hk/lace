@@ -2,39 +2,49 @@
   "name": "@lace/browser-extension-wallet",
   "version": "1.1.0",
   "description": "A fully capable wallet packaged as browser extensions for Chrome, Firefox, and Edge",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "scripts": {
-    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.prod.js --progress & webpack --config webpack.app.prod.js --progress",
-    "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress & webpack --config webpack.app.dev.js --progress",
-    "watch": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress --watch & webpack --config webpack.app.dev.js --progress --watch",
-    "cleanup": "shx rm -rf dist node_modules",
-    "lint": "cd ../.. && yarn extension:lint",
-    "prepack": "yarn build",
-    "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress --watch & webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
-    "test:e2e": "shx echo \"No e2e tests on this app yet!\"",
-    "test": "jest --config test/jest.config.js",
-    "test:coverage": "yarn test --coverage",
-    "prettier": "prettier --write .",
-    "prepare": "ts-patch install -s"
+  "homepage": "https://github.com/input-output-hk/lace/blob/master/apps/browser-extension-wallet/README.md",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/input-output-hk/lace.git"
   },
-  "author": "IOHK",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/input-output-hk/lace/issues"
+  "author": "IOHK",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "directories": {
+    "lib": "src",
+    "test": "test"
   },
-  "homepage": "https://github.com/input-output-hk/lace/blob/master/apps/browser-extension-wallet/README.md",
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.prod.js --progress & webpack --config webpack.app.prod.js --progress",
+    "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress & webpack --config webpack.app.dev.js --progress",
+    "cleanup": "shx rm -rf dist node_modules",
+    "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress --watch & webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
+    "lint": "cd ../.. && yarn extension:lint",
+    "prepack": "yarn build",
+    "prepare": "ts-patch install -s",
+    "prettier": "prettier --write .",
+    "test": "jest --config test/jest.config.js",
+    "test:coverage": "yarn test --coverage",
+    "test:e2e": "shx echo \"No e2e tests on this app yet!\"",
+    "watch": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress --watch & webpack --config webpack.app.dev.js --progress --watch"
+  },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@cardano-sdk/core": "~0.13.0",
     "@cardano-sdk/dapp-connector": "~0.9.4",
     "@cardano-sdk/input-selection": "~0.9.5",
-    "@cardano-sdk/util": "~0.11.0",
     "@cardano-sdk/tx-construction": "~0.5.3",
+    "@cardano-sdk/util": "~0.11.0",
     "@cardano-sdk/wallet": "~0.14.0",
     "@cardano-sdk/web-extension": "~0.12.0",
     "@emurgo/cip14-js": "~3.0.1",
@@ -94,15 +104,5 @@
     "jest-webextension-mock": "^3.7.19",
     "tsconfig-paths-webpack-plugin": "3.5.2",
     "webassembly-loader-sw": "^1.1.0"
-  },
-  "directories": {
-    "lib": "src",
-    "test": "test"
-  },
-  "files": [
-    "dist",
-    "LICENSE",
-    "NOTICE",
-    "README.md"
-  ]
+  }
 }

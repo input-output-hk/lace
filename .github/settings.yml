@@ -3,7 +3,7 @@
 repository:
   allow_merge_commit: true
   allow_rebase_merge: false
-  allow_squash_merge: false
+  allow_squash_merge: true
   default_branch: main
   delete_branch_on_merge: true
   has_downloads: false
@@ -77,12 +77,13 @@ branches:
       # Required. Require status checks to pass before merging. Set to null to disable
       required_status_checks:
         # Required. Require branches to be up to date before merging.
-        strict: true
+        strict: false
         # Required. The list of status checks to require in order to merge into this branch
         checks:
           - context: Build & Test
           - context: block-fixup
           - context: Build Staking Center
+          - context: chromatic-deployment
       # Required. Enforce all configured restrictions for administrators. Set to true to enforce required status checks for repository administrators. Set to null to disable.
       enforce_admins: true
       # Prevent merge commits from being pushed to matching branches
@@ -105,4 +106,4 @@ branches:
       restrictions:
         apps: []
         users: []
-        teams: ['lace-tech-leads']
+        teams: ['lace-tech-leads', 'lace']

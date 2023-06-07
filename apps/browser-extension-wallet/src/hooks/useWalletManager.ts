@@ -299,7 +299,6 @@ export const useWalletManager = (): UseWalletManager => {
       if (!isForgotPasswordFlow) {
         deleteFromLocalStorage('wallet');
         deleteFromLocalStorage('analyticsAccepted');
-        deleteFromLocalStorage('analyticsUserId');
         clearAddressBook();
         clearNftsFolders();
       }
