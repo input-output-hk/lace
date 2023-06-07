@@ -177,19 +177,23 @@ func setupTrayUI(
 
 	systray.AddSeparator()
 
-	statuses := map[string](<-chan string){
-		"cardano-node": cardanoNodeStatus,
-		"Ogmios": ogmiosStatus,
-		"provider-server": providerServerStatus,
+	// XXX: this weird type because we want order, and there are no tuples:
+	statuses := []map[string](<-chan string) {
+		{ "cardano-node":    cardanoNodeStatus },
+		{ "Ogmios":          ogmiosStatus },
+		{ "provider-server": providerServerStatus },
 	}
-	for component, statusCh := range statuses {
-		menuItem := systray.AddMenuItem("", "")
-		menuItem.Disable()
-		go func(component string, statusCh <-chan string, menuItem *systray.MenuItem) {
-			for newStatus := range statusCh {
-				menuItem.SetTitle(component + " · " + newStatus)
-			}
-		}(component, statusCh, menuItem)
+
+	for _, statusItem := range statuses {
+		for component, statusCh := range statusItem {
+			menuItem := systray.AddMenuItem("", "")
+			menuItem.Disable()
+			go func(component string, statusCh <-chan string, menuItem *systray.MenuItem) {
+				for newStatus := range statusCh {
+					menuItem.SetTitle(component + " · " + newStatus)
+				}
+			}(component, statusCh, menuItem)
+		}
 	}
 
 	systray.AddSeparator()
