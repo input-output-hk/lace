@@ -111,14 +111,9 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const isHwSummary = useMemo(() => isSummaryStep && !isInMemory, [isSummaryStep, isInMemory]);
 
   const signAndSubmitTransaction = useCallback(async () => {
-    const signedTx = await inMemoryWallet.finalizeTx({
-      tx: builtTxData.tx,
-      ...(builtTxData?.auxiliaryData && {
-        auxiliaryData: builtTxData.auxiliaryData
-      })
-    });
-    await inMemoryWallet.submitTx(signedTx);
-  }, [inMemoryWallet, builtTxData?.tx, builtTxData?.auxiliaryData]);
+    const { tx } = await builtTxData.txBuilder.build().sign();
+    await inMemoryWallet.submitTx(tx);
+  }, [builtTxData, inMemoryWallet]);
 
   const handleVerifyPass = useCallback(async () => {
     if (isSubmitingTx) return;
@@ -196,8 +191,8 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   ]);
 
   const confirmDisable = useMemo(
-    () => !builtTxData.tx || hasInvalidOutputs || metadata?.length > METADATA_MAX_LENGTH,
-    [builtTxData.tx, hasInvalidOutputs, metadata]
+    () => !builtTxData.txBuilder || hasInvalidOutputs || metadata?.length > METADATA_MAX_LENGTH,
+    [builtTxData.txBuilder, hasInvalidOutputs, metadata]
   );
   const isSubmitDisabled = useMemo(
     () =>

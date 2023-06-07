@@ -1,11 +1,14 @@
+import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
-import { CardanoStakePool, CardanoTxBuild } from '../../../types';
+import { CardanoStakePool } from '../../../types';
 
 export interface DelegationStore {
   selectedStakePool?: CardanoStakePool & { logo?: string };
-  delegationBuiltTx?: CardanoTxBuild;
+  delegationTxBuilder?: TxBuilder;
+  delegationTxFee?: string;
   setSelectedStakePool: (pool: CardanoStakePool & { logo?: string }) => void;
-  setDelegationBuiltTx: (tx?: CardanoTxBuild) => void;
+  setDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
+  setDelegationTxFee: (fee?: string) => void;
 }
 
 export interface StakePool {
