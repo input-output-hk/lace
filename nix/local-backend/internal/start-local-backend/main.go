@@ -165,8 +165,7 @@ func setupTrayUI(
 
 	mNetworks[networks[0]].ClickedCh <- struct{}{}
 
-	// XXX: additional spaces are there so that the width of the menu doesn’t change:
-	systray.AddMenuItemCheckbox("Run Full Backend (projector)               ", "", false)
+	//systray.AddMenuItemCheckbox("Run Full Backend (projector)", "", false)
 
 	systray.AddSeparator()
 
@@ -200,7 +199,8 @@ func setupTrayUI(
 		}
 	}()
 
-	mQuit := systray.AddMenuItem("Quit", "")
+	// XXX: additional spaces are there so that the width of the menu doesn’t change with updates:
+	mQuit := systray.AddMenuItem("Quit                                       ", "")
 	go func() {
 		<-mQuit.ClickedCh
 		mQuit.Disable()
