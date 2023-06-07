@@ -63,46 +63,50 @@ const formatPieColor = (color: PieChartColor): string =>
 export const PieChart = <T extends object | { name: string; value: number }>({
   animate = true,
   colors,
-  data,
+  data: inputData,
   direction = 'clockwise',
   nameKey = 'name',
   tooltip,
   valueKey = 'value',
-}: PieChartProps<T>): JSX.Element => (
-  <ResponsiveContainer aspect={1}>
-    <RechartsPieChart>
-      <defs>
-        <linearGradient id={PieChartGradientColor.LaceLinearGradient}>
-          <stop offset="-18%" stopColor="#FDC300" />
-          <stop offset="120%" stopColor="#FF92E1" />
-        </linearGradient>
-      </defs>
-      {tooltip && <Tooltip content={tooltip} />}
-      <Pie
-        data={data.slice(0, colors.length)}
-        dataKey={valueKey}
-        nameKey={nameKey}
-        innerRadius="90%"
-        isAnimationActive={animate}
-        outerRadius="100%"
-        cornerRadius="50%"
-        paddingAngle={data.length > 1 ? 4 : 0}
-        stroke="none"
-        startAngle={90}
-        endAngle={direction === 'clockwise' ? -270 : 450}
-      >
-        {data.length === 1 && (
-          <Cell fill={formatPieColor(colors[0])} {...data[0].overrides} />
-        )}
-        {data.length > 1 &&
-          data.map((_, index) => (
-            <Cell
-              key={index}
-              fill={formatPieColor(colors[index])}
-              {...(data[index].overrides ?? {})}
-            />
-          ))}
-      </Pie>
-    </RechartsPieChart>
-  </ResponsiveContainer>
-);
+}: PieChartProps<T>): JSX.Element => {
+  const data = inputData.slice(0, colors.length);
+
+  return (
+    <ResponsiveContainer aspect={1}>
+      <RechartsPieChart>
+        <defs>
+          <linearGradient id={PieChartGradientColor.LaceLinearGradient}>
+            <stop offset="-18%" stopColor="#FDC300" />
+            <stop offset="120%" stopColor="#FF92E1" />
+          </linearGradient>
+        </defs>
+        {tooltip && <Tooltip content={tooltip} />}
+        <Pie
+          data={data.slice(0, colors.length)}
+          dataKey={valueKey}
+          nameKey={nameKey}
+          innerRadius="90%"
+          isAnimationActive={animate}
+          outerRadius="100%"
+          cornerRadius="50%"
+          paddingAngle={data.length > 1 ? 4 : 0}
+          stroke="none"
+          startAngle={90}
+          endAngle={direction === 'clockwise' ? -270 : 450}
+        >
+          {data.length === 1 && (
+            <Cell fill={formatPieColor(colors[0])} {...data[0].overrides} />
+          )}
+          {data.length > 1 &&
+            data.map((_, index) => (
+              <Cell
+                key={index}
+                fill={formatPieColor(colors[index])}
+                {...(data[index].overrides ?? {})}
+              />
+            ))}
+        </Pie>
+      </RechartsPieChart>
+    </ResponsiveContainer>
+  );
+};
