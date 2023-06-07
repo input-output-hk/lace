@@ -12,7 +12,7 @@ export const isValidAddress = (address: string): boolean => {
   try {
     isValid = Wallet.Cardano.isAddress(address);
   } catch (error) {
-    console.log(error?.message);
+    console.log(error.message);
     isValid = false;
   }
   return isValid;

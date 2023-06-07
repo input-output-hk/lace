@@ -3,8 +3,8 @@ import { expect } from 'chai';
 import { t } from '../utils/translationService';
 
 class ModalAssert {
-  async assertSeeContainer() {
-    await Modal.container.waitForDisplayed();
+  async assertSeeModalContainer(shouldSee: boolean) {
+    await Modal.container.waitForDisplayed({ reverse: !shouldSee });
   }
 
   async assertSeeTitle(expectedTitle: string) {
@@ -28,7 +28,7 @@ class ModalAssert {
   }
 
   async assertSeeModal(title: string, description: string, cancelButtonLabel: string, confirmButtonLabel: string) {
-    await this.assertSeeContainer();
+    await this.assertSeeModalContainer(true);
     await this.assertSeeTitle(title);
     await this.assertSeeDescription(description);
     await this.assertSeeCancelButton(cancelButtonLabel);
@@ -42,6 +42,18 @@ class ModalAssert {
     const confirmButtonLabel = await t('browserView.walletSetup.confirmRestoreModal.confirm');
 
     await this.assertSeeModal(title, description, cancelButtonLabel, confirmButtonLabel);
+  }
+
+  async assertSeeRemoveWalletModal(shouldBeDisplayed: boolean) {
+    if (shouldBeDisplayed) {
+      const title = await t('browserView.settings.wallet.general.removeWalletAlert.title');
+      const description = await t('browserView.settings.wallet.general.removeWalletAlert.content');
+      const cancelButtonLabel = await t('browserView.settings.wallet.general.removeWalletAlert.cancel');
+      const confirmButtonLabel = await t('browserView.settings.wallet.general.removeAction');
+      await this.assertSeeModal(title, description, cancelButtonLabel, confirmButtonLabel);
+    } else {
+      await this.assertSeeModalContainer(false);
+    }
   }
 }
 

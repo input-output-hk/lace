@@ -3,7 +3,6 @@ module.exports = {
     node: true,
   },
   extends: ['prettier'],
-  ignorePatterns: ['node_modules/**/*'],
   overrides: [
     {
       files: ['src/**/*.d.ts', 'tsup.config.ts', 'vitest.config.ts', '.ladle/*.*'],

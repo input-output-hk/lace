@@ -59,7 +59,7 @@ export const Staking = (): React.ReactElement => {
   }, [fetchNetworkInfo, blockchainProvider]);
 
   const coinBalance = balance?.total?.coinBalance && Number(balance?.total?.coinBalance);
-  const isStakeRegistered = rewardAccounts && rewardAccounts[0].keyStatus === Wallet.StakeKeyStatus.Registered;
+  const isStakeRegistered = rewardAccounts && rewardAccounts[0].keyStatus === Wallet.Cardano.StakeKeyStatus.Registered;
   const isDelegating = rewardAccounts && delegationDetails;
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
   const canDelegate = !isDelegating && isNumber(coinBalance) && !hasNoFunds;

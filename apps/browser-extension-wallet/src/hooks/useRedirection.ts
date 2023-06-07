@@ -1,4 +1,4 @@
-import { useHistory, generatePath } from 'react-router';
+import { useHistory, generatePath } from 'react-router-dom';
 import { useCallback } from 'react';
 
 type GenericParams = Record<string, string>;
@@ -18,10 +18,10 @@ export const useRedirection = <R extends RouteConfig<GenericParams, GenericParam
   const handleRedirection: RedirectionHandler<R> = useCallback(
     (config = {}) => {
       let url = path;
-      if (config?.params) {
+      if (config.params) {
         url = generatePath(url, config.params);
       }
-      if (config?.search) {
+      if (config.search) {
         const searchParams = new URLSearchParams(config.search);
         url = `${url}?${searchParams.toString()}`;
       }

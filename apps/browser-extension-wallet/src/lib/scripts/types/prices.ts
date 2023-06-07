@@ -3,7 +3,6 @@ import { BehaviorSubject } from 'rxjs';
 import { currencyCode } from '@providers/currency/constants';
 
 export interface TokenPrice {
-  id: string;
   priceInAda: number;
   priceVariationPercentage24h: number;
 }

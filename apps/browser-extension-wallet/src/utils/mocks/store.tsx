@@ -23,10 +23,10 @@ interface StoreProviderProps {
  */
 export const walletStoreMock = async (
   customStore?: Partial<WalletStore>,
-  mockSingleAddressWallet?: Wallet.ObservableWallet
+  mockPersonalWallet?: Wallet.ObservableWallet
 ): Promise<WalletStore> => {
-  // TODO: update and use `mockSingleAddressWallet` in test-helpers instead? [LW-5454]
-  const wallet = mockSingleAddressWallet ?? (await Wallet.mockUtils.mockWallet()).wallet;
+  // TODO: update and use `mockPersonalWallet` in test-helpers instead? [LW-5454]
+  const wallet = mockPersonalWallet ?? (await Wallet.mockUtils.mockWallet()).wallet;
 
   // TODO: If possible use real methods/states and mock only needed ones, like inMemoryWallet [LW-5454]
   return {

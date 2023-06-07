@@ -1,5 +1,5 @@
 import { Origin } from '@cardano-sdk/dapp-connector';
-import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { consumeRemoteApi, exposeApi, RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { AuthorizedDappService, AuthorizedDappStorage } from '@src/types/dappConnector';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { Subject, of } from 'rxjs';
@@ -30,7 +30,7 @@ const authorizedDappsApi: AuthorizedDappService = {
   }
 };
 
-export const dappServiceProperties = {
+export const dappServiceProperties: RemoteApiProperties<AuthorizedDappService> = {
   authorizedDappsList: RemoteApiPropertyType.HotObservable,
   removeAuthorizedDapp: RemoteApiPropertyType.MethodReturningPromise
 };

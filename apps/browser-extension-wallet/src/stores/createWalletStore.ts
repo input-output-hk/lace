@@ -1,7 +1,6 @@
 import create, { UseStore } from 'zustand';
 import { Wallet } from '@lace/cardano';
 import { WalletStore } from './types';
-import { WalletLocked } from '../types';
 import {
   BlockchainProviderFactory,
   walletActivitiesSlice,
@@ -20,7 +19,6 @@ import { config } from '@src/config';
 const { CHAIN } = config();
 
 export const createWalletStore = (
-  walletLock: WalletLocked,
   currentChainName: Wallet.ChainName,
   appMode: AppMode,
   blockchainProviderFactory?: BlockchainProviderFactory
@@ -35,7 +33,7 @@ export const createWalletStore = (
     ...walletActivitiesSlice({ set, get }),
     ...networkSlice({ set, get }),
     ...stakePoolSearchSlice({ set, get }),
-    ...lockSlice({ set, get }, walletLock),
+    ...lockSlice({ set, get }),
     ...transactionDetailSlice({ set, get }),
     ...assetDetailsSlice({ set, get })
   }));

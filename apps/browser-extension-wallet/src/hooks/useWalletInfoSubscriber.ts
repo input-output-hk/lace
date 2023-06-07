@@ -6,12 +6,16 @@ export const useWalletInfoSubscriber = (): void => {
   const { inMemoryWallet, setWalletInfo } = useWalletStore();
 
   useEffect(() => {
-    inMemoryWallet?.addresses$.subscribe(([addresses]) => {
+    const subscription = inMemoryWallet?.addresses$.subscribe(([addresses]) => {
       setWalletInfo({
         name: getWalletFromStorage()?.name ?? 'Lace',
         address: addresses.address,
         rewardAccount: addresses.rewardAccount
       });
     });
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
   }, [inMemoryWallet?.addresses$, setWalletInfo]);
 };
