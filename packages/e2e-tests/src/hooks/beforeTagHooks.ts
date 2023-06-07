@@ -56,7 +56,7 @@ Before(
 );
 
 Before(
-  { tags: '@SendSimpleTransaction-Extended-E2E' },
+  { tags: '@SendSimpleTransaction-Extended-E2E or @SendTransactionDapp-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSendSimpleTransactionE2E)
 );
 
