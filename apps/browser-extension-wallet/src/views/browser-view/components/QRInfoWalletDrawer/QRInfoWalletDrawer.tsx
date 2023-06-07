@@ -7,8 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useDrawer } from '../../stores';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { useKeyboardShortcut } from '@hooks';
-import { useFindNftByPolicyId } from '@hooks/useGetNftPolicyId';
-import { ADA_HANDLE_POLICY_ID, isAdaHandleEnabled } from '@src/features/ada-handle/config';
+import { useGetHandles } from '@hooks/useGetHandles';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
@@ -21,7 +20,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const { theme } = useTheme();
   const { name, address } = useWalletInformation();
   const [, closeDrawer] = useDrawer();
-  const handle = useFindNftByPolicyId(ADA_HANDLE_POLICY_ID);
+  const handles = useGetHandles();
 
   const infoWalletTranslations = {
     copy: t('core.infoWallet.copy'),
@@ -34,7 +33,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     <div className={styles.infoContainer}>
       <InfoWallet
         getQRCodeOptions={() => getQRCodeOptions(theme)}
-        walletInfo={{ name: (isAdaHandleEnabled === 'true' && handle?.name) || name, qrData: address.toString() }}
+        walletInfo={{ name: (handles?.length && handles[0]?.nftMetadata.name) || name, qrData: address.toString() }}
         translations={infoWalletTranslations}
       />
     </div>
