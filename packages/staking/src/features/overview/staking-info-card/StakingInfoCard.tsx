@@ -30,8 +30,8 @@ const formatNumericValue = (val: number | string, suffix: number | string): Reac
 
 export type StakingInfoCardProps = {
   className?: string;
-  coinBalance: number;
-  coinBalanceFiat?: number;
+  coinBalance: string;
+  coinBalanceFiat?: string;
   fee: string | number;
   id: string;
   logo?: string;
