@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"os/signal"
 	"syscall"
 	"sync"
 	"net"
@@ -83,7 +84,25 @@ func main() {
 	cardanoNodeStatus <- "off"
 	providerServerStatus <- "off"
 
-	initiateShutdownCh := make(chan struct{})
+	initiateShutdownCh := make(chan struct{}, 1)
+
+	// XXX: os.Interrupt is the regular SIGINT on Unix, but also something rare on Windows
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+
+	go func(){
+		alreadySignaled := false
+		for sig := range sigCh {
+			if !alreadySignaled {
+				alreadySignaled = true
+				fmt.Fprintf(os.Stderr, "warn: got signal (%s), will shutdown...\n", sig)
+				initiateShutdownCh <- struct{}{}
+			} else {
+				fmt.Fprintf(os.Stderr,
+					"warn: got another signal (%s), but already in shutdown\n", sig)
+			}
+		}
+	}()
 
 	go systray.Run(setupTrayUI(
 		ogmiosStatus, cardanoNodeStatus, providerServerStatus, networkSwitch, initiateShutdownCh,
