@@ -2,6 +2,7 @@
 import React from 'react';
 
 import type { Meta } from '@storybook/react';
+import isChromatic from 'chromatic/isChromatic';
 
 import { page, Section, Variants } from '../decorators';
 import { Cell, Grid } from '../grid';
@@ -39,18 +40,21 @@ export const Overview = (): JSX.Element => (
             <PieChart
               colors={PIE_CHART_DEFAULT_COLOR_SET}
               data={mockDataSet(1)}
+              animate={false}
             />
           </Variants.Cell>
           <Variants.Cell>
             <PieChart
               colors={PIE_CHART_DEFAULT_COLOR_SET}
               data={mockDataSet(2)}
+              animate={false}
             />
           </Variants.Cell>
           <Variants.Cell>
             <PieChart
               colors={PIE_CHART_DEFAULT_COLOR_SET}
               data={mockDataSet(3)}
+              animate={false}
             />
           </Variants.Cell>
           <Variants.Cell>
@@ -62,6 +66,7 @@ export const Overview = (): JSX.Element => (
                 { name: 'Pool 3', value: 15 },
                 { name: 'Pool 4', value: 15 },
               ]}
+              animate={false}
             />
           </Variants.Cell>
           <Variants.Cell>
@@ -74,6 +79,7 @@ export const Overview = (): JSX.Element => (
                 { name: 'Pool 4', value: 10 },
                 { name: 'Pool 5', value: 10 },
               ]}
+              animate={false}
             />
           </Variants.Cell>
         </Variants.Row>
@@ -92,6 +98,7 @@ export const Overview = (): JSX.Element => (
               { name: 'Pool 5', value: 10 },
               { name: 'Pool 6', value: 10 },
             ]}
+            animate={false}
           />
         </Variants.Cell>
         <Variants.Cell>
@@ -106,6 +113,7 @@ export const Overview = (): JSX.Element => (
               { name: 'Pool 6', value: 10 },
               { name: 'Pool 7', value: 10 },
             ]}
+            animate={false}
           />
         </Variants.Cell>
         <Variants.Cell>
@@ -121,6 +129,7 @@ export const Overview = (): JSX.Element => (
               { name: 'Pool 7', value: 10 },
               { name: 'Pool 8', value: 10 },
             ]}
+            animate={false}
           />
         </Variants.Cell>
         <Variants.Cell>
@@ -137,12 +146,14 @@ export const Overview = (): JSX.Element => (
               { name: 'Pool 8', value: 10 },
               { name: 'Pool 9', value: 10 },
             ]}
+            animate={false}
           />
         </Variants.Cell>
         <Variants.Cell>
           <PieChart
             colors={PIE_CHART_DEFAULT_COLOR_SET}
             data={mockDataSet(10)}
+            animate={false}
           />
         </Variants.Cell>
       </Variants.Row>
@@ -156,6 +167,7 @@ export const Overview = (): JSX.Element => (
             <PieChart
               colors={[PieChartGradientColor.LaceLinearGradient]}
               data={mockDataSet(1)}
+              animate={false}
             />
           </Variants.Cell>
         </Variants.Row>
@@ -167,18 +179,21 @@ export const Overview = (): JSX.Element => (
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
+            animate={false}
           />
         </Cell>
         <Cell colStart="$4" colEnd="$6">
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
+            animate={false}
           />
         </Cell>
         <Cell>
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
+            animate={false}
           />
         </Cell>
       </Grid>
@@ -198,7 +213,7 @@ export const Configurable = ({
 }: Readonly<ConfigurableStoryProps>): JSX.Element => (
   <Grid columns="$5">
     <Cell>
-      <PieChart colors={colors} data={data} {...props} />
+      <PieChart animate={false} colors={colors} data={data} {...props} />
     </Cell>
   </Grid>
 );

@@ -20,6 +20,7 @@ type PieChartDataProps = Partial<{
 }>;
 type PieChartColor = ColorValueHex | PieChartGradientColor;
 interface PieChartBaseProps<T extends object> {
+  animate?: boolean;
   colors: PieChartColor[];
   data: (PieChartDataProps & T)[];
   direction?: 'clockwise' | 'counterclockwise';
@@ -50,6 +51,7 @@ const formatPieColor = (color: PieChartColor): string =>
  * **Important**: The length of `colors` array needs to be greater than or equal to the length of `data` array.
  * The `data` items that do not have corresponding `color` definition will not be rendered.
  *
+ * @param animate enables animation
  * @param colors set of colors that will be used to render the pies in defined order
  * @param data dataset used to render the pies
  * @param data[].overrides Recharts Cell props
@@ -59,6 +61,7 @@ const formatPieColor = (color: PieChartColor): string =>
  * @param valueKey object key of a `data` item that will be used as value (displayed in the tooltip)
  */
 export const PieChart = <T extends object | { name: string; value: number }>({
+  animate = true,
   colors,
   data,
   direction = 'clockwise',
@@ -77,9 +80,10 @@ export const PieChart = <T extends object | { name: string; value: number }>({
       {tooltip && <Tooltip content={tooltip} />}
       <Pie
         data={data.slice(0, colors.length)}
-        nameKey={nameKey}
         dataKey={valueKey}
+        nameKey={nameKey}
         innerRadius="90%"
+        isAnimationActive={animate}
         outerRadius="100%"
         cornerRadius="50%"
         paddingAngle={data.length > 1 ? 4 : 0}
