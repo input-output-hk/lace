@@ -8,12 +8,10 @@
       "@wdio/cucumber-framework",
       "expect-webdriverio",
       "chai",
-      "@wdio/devtools-service"
+      "@wdio/devtools-service",
+      "wdio-intercept-service"
     ],
-    "lib": [
-      "es2015",
-      "dom"
-    ],
+    "lib": ["es2015", "dom"],
     "resolveJsonModule": true,
     "esModuleInterop": true
   }

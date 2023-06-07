@@ -166,15 +166,3 @@ export const getLastActiveTab: () => Promise<Tabs.Tab> = async () =>
   await (
     await tabs.query({ currentWindow: true, active: true })
   )[0];
-
-export const convertToAssetName = (str: string): Wallet.Cardano.AssetName => {
-  try {
-    const hexAssetName = Buffer.from(str).toString('hex');
-    return Wallet.Cardano.AssetName(hexAssetName);
-  } catch (error) {
-    // the api has inconsistent data, not all assets name comes decoded
-    console.log(`unable to parse asset name: ${error.message}`);
-  }
-
-  return '' as unknown as Wallet.Cardano.AssetName;
-};

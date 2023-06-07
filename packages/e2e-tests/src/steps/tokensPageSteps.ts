@@ -143,10 +143,32 @@ Then(
 
 Then(
   // eslint-disable-next-line max-len
-  /^the sent amount of: ([^"]*) with fee: ([^"]*) for token "([^"]*)" is subtracted from the total balance in (extended|popup) mode$/,
-  async (subtractedAmount: string, fee: string, tokenName: string, mode: 'extended' | 'popup') => {
-    if (fee === 'saved') fee = await testContext.load('feeValue');
-    await tokensPageAssert.assertSeeValueSubtracted(tokenName, subtractedAmount, fee, mode);
+  /^the sent amount of: "([^"]*)" with "(saved|DApp transaction)" fee for token "([^"]*)" is subtracted from the total balance in (extended|popup) mode$/,
+  async (
+    subtractedAmount: string,
+    feeType: 'saved' | 'DApp transaction',
+    tokenName: string,
+    mode: 'extended' | 'popup'
+  ) => {
+    let fee: string;
+    switch (feeType) {
+      case 'saved':
+        fee = await testContext.load('feeValue');
+        break;
+      case 'DApp transaction':
+        fee = await testContext.load('feeValueDAppTx');
+        break;
+      default:
+        break;
+    }
+    await tokensPageAssert.assertSeeValueSubtractedAda(tokenName, subtractedAmount, fee, mode);
+  }
+);
+
+Then(
+  /^the sent amount of: "([^"]*)" for token "([^"]*)" is subtracted from the total balance in (extended|popup) mode$/,
+  async (subtractedAmount: string, tokenName: string, mode: 'extended' | 'popup') => {
+    await tokensPageAssert.assertSeeValueSubtractedAsset(tokenName, subtractedAmount, mode);
   }
 );
 
