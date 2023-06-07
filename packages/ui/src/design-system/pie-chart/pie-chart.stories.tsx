@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types, functional/immutable-data */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/naming-convention, functional/immutable-data */
 import React from 'react';
 
 import type { Meta } from '@storybook/react';
@@ -15,6 +15,8 @@ import { PieChart } from './pie-chart.component';
 
 import type { PieChartProps } from './pie-chart.component';
 
+const notInChromatic = !isChromatic();
+
 const mockDataSet = (amount: number): { name: string; value: number }[] =>
   Array.from({ length: amount }).map((_, index) => ({
     name: `Pool ${index + 1}`,
@@ -24,9 +26,6 @@ const mockDataSet = (amount: number): { name: string; value: number }[] =>
 const meta: Meta<typeof PieChart> = {
   title: 'PieChart',
   decorators: [page({ title: 'PieChart' })],
-  parameters: {
-    chromatic: { pauseAnimationAtEnd: true },
-  },
 };
 
 export default meta;
@@ -36,75 +35,54 @@ export const Overview = (): JSX.Element => (
     <Section title="Default color set">
       <Variants.Table headers={['One', 'Two', 'Three', 'Four', 'Five']}>
         <Variants.Row>
-          <Variants.Cell>
-            <PieChart
-              colors={PIE_CHART_DEFAULT_COLOR_SET}
-              data={mockDataSet(1)}
-              animate={false}
-            />
-          </Variants.Cell>
-          <Variants.Cell>
-            <PieChart
-              colors={PIE_CHART_DEFAULT_COLOR_SET}
-              data={mockDataSet(2)}
-              animate={false}
-            />
-          </Variants.Cell>
-          <Variants.Cell>
-            <PieChart
-              colors={PIE_CHART_DEFAULT_COLOR_SET}
-              data={mockDataSet(3)}
-              animate={false}
-            />
-          </Variants.Cell>
-          <Variants.Cell>
-            <PieChart
-              colors={PIE_CHART_DEFAULT_COLOR_SET}
-              data={[
+          {[
+            { data: mockDataSet(1) },
+            { data: mockDataSet(2) },
+            { data: mockDataSet(3) },
+            {
+              data: [
                 { name: 'Pool 1', value: 35 },
                 { name: 'Pool 2', value: 35 },
                 { name: 'Pool 3', value: 15 },
                 { name: 'Pool 4', value: 15 },
-              ]}
-              animate={false}
-            />
-          </Variants.Cell>
-          <Variants.Cell>
-            <PieChart
-              colors={PIE_CHART_DEFAULT_COLOR_SET}
-              data={[
+              ],
+            },
+            {
+              data: [
                 { name: 'Pool 1', value: 35 },
                 { name: 'Pool 2', value: 35 },
                 { name: 'Pool 3', value: 10 },
                 { name: 'Pool 4', value: 10 },
                 { name: 'Pool 5', value: 10 },
-              ]}
-              animate={false}
-            />
-          </Variants.Cell>
+              ],
+            },
+          ].map((pieChartProps, index) => (
+            <Variants.Cell key={index}>
+              <PieChart
+                animate={notInChromatic}
+                colors={PIE_CHART_DEFAULT_COLOR_SET}
+                {...pieChartProps}
+              />
+            </Variants.Cell>
+          ))}
         </Variants.Row>
       </Variants.Table>
     </Section>
     <Variants.Table headers={['Six', 'Seven', 'Eight', 'Nine', 'Ten']}>
       <Variants.Row>
-        <Variants.Cell>
-          <PieChart
-            colors={PIE_CHART_DEFAULT_COLOR_SET}
-            data={[
+        {[
+          {
+            data: [
               { name: 'Pool 1', value: 30 },
               { name: 'Pool 2', value: 30 },
               { name: 'Pool 3', value: 10 },
               { name: 'Pool 4', value: 10 },
               { name: 'Pool 5', value: 10 },
               { name: 'Pool 6', value: 10 },
-            ]}
-            animate={false}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <PieChart
-            colors={PIE_CHART_DEFAULT_COLOR_SET}
-            data={[
+            ],
+          },
+          {
+            data: [
               { name: 'Pool 1', value: 25 },
               { name: 'Pool 2', value: 25 },
               { name: 'Pool 3', value: 10 },
@@ -112,14 +90,10 @@ export const Overview = (): JSX.Element => (
               { name: 'Pool 5', value: 10 },
               { name: 'Pool 6', value: 10 },
               { name: 'Pool 7', value: 10 },
-            ]}
-            animate={false}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <PieChart
-            colors={PIE_CHART_DEFAULT_COLOR_SET}
-            data={[
+            ],
+          },
+          {
+            data: [
               { name: 'Pool 1', value: 20 },
               { name: 'Pool 2', value: 20 },
               { name: 'Pool 3', value: 10 },
@@ -128,14 +102,10 @@ export const Overview = (): JSX.Element => (
               { name: 'Pool 6', value: 10 },
               { name: 'Pool 7', value: 10 },
               { name: 'Pool 8', value: 10 },
-            ]}
-            animate={false}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <PieChart
-            colors={PIE_CHART_DEFAULT_COLOR_SET}
-            data={[
+            ],
+          },
+          {
+            data: [
               { name: 'Pool 1', value: 15 },
               { name: 'Pool 2', value: 15 },
               { name: 'Pool 3', value: 10 },
@@ -145,17 +115,18 @@ export const Overview = (): JSX.Element => (
               { name: 'Pool 7', value: 10 },
               { name: 'Pool 8', value: 10 },
               { name: 'Pool 9', value: 10 },
-            ]}
-            animate={false}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <PieChart
-            colors={PIE_CHART_DEFAULT_COLOR_SET}
-            data={mockDataSet(10)}
-            animate={false}
-          />
-        </Variants.Cell>
+            ],
+          },
+          { data: mockDataSet(10) },
+        ].map((pieChartProps, index) => (
+          <Variants.Cell key={index}>
+            <PieChart
+              animate={notInChromatic}
+              colors={PIE_CHART_DEFAULT_COLOR_SET}
+              {...pieChartProps}
+            />
+          </Variants.Cell>
+        ))}
       </Variants.Row>
     </Variants.Table>
     <Section title="Custom colors">
@@ -167,7 +138,7 @@ export const Overview = (): JSX.Element => (
             <PieChart
               colors={[PieChartGradientColor.LaceLinearGradient]}
               data={mockDataSet(1)}
-              animate={false}
+              animate={notInChromatic}
             />
           </Variants.Cell>
         </Variants.Row>
@@ -179,21 +150,21 @@ export const Overview = (): JSX.Element => (
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
-            animate={false}
+            animate={notInChromatic}
           />
         </Cell>
         <Cell colStart="$4" colEnd="$6">
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
-            animate={false}
+            animate={notInChromatic}
           />
         </Cell>
         <Cell>
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
-            animate={false}
+            animate={notInChromatic}
           />
         </Cell>
       </Grid>
@@ -213,7 +184,12 @@ export const Configurable = ({
 }: Readonly<ConfigurableStoryProps>): JSX.Element => (
   <Grid columns="$5">
     <Cell>
-      <PieChart animate={false} colors={colors} data={data} {...props} />
+      <PieChart
+        animate={notInChromatic}
+        colors={colors}
+        data={data}
+        {...props}
+      />
     </Cell>
   </Grid>
 );
