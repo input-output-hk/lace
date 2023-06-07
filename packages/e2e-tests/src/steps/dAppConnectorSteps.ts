@@ -58,6 +58,10 @@ Then(/^I see DApp connection modal$/, async () => {
   await DAppConnectorAssert.assertSeeDAppConnectionModal();
 });
 
+Then(/^I see DApp removal confirmation modal$/, async () => {
+  await DAppConnectorAssert.assertSeeDAppRemovalConfirmationModal();
+});
+
 Then(/^I click "(Authorize|Cancel)" button in DApp authorization window$/, async (button: 'Authorize' | 'Cancel') => {
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow(button);
 });
@@ -65,6 +69,13 @@ Then(/^I click "(Authorize|Cancel)" button in DApp authorization window$/, async
 Then(/^I click "(Always|Only once)" button in DApp authorization modal$/, async (button: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(button);
 });
+
+Then(
+  /^I click "(Back|Disconnect DApp)" button in DApp removal confirmation modal$/,
+  async (button: 'Back' | 'Disconnect DApp') => {
+    await DAppConnectorPageObject.clickButtonInDAppRemovalConfirmationModal(button);
+  }
+);
 
 Then(/^I see Lace wallet info in DApp when not connected$/, async () => {
   await DAppConnectorAssert.assertWalletFoundButNotConnectedInTestDApp();
@@ -94,6 +105,10 @@ When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async
 
 Then(/^I de-authorize all DApps in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await DAppConnectorPageObject.deauthorizeAllDApps(mode);
+});
+
+Then(/^I de-authorize test DApp in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await DAppConnectorPageObject.deauthorizeDApp(DAppConnectorPageObject.TEST_DAPP_NAME, mode);
 });
 
 Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runButton: 'Send ADA' | 'Send Token') => {
