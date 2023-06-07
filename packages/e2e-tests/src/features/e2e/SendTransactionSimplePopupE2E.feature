@@ -23,7 +23,7 @@ Feature: Send Simple Transactions - Popup view - E2E
       | Button: "Close"                              |
     When I close the drawer by clicking close button
     And I navigate to Tokens popup page
-    Then the sent amount of: 1.123 with fee: saved for token "Cardano" is subtracted from the total balance in popup mode
+    Then the sent amount of: "1.123" with "saved" fee for token "Cardano" is subtracted from the total balance in popup mode
     When I navigate to Transactions popup page
     Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash

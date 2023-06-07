@@ -68,7 +68,7 @@ export const SignTransaction = (): React.ReactElement => {
     <Layout title={undefined}>
       <div className={styles.passwordContainer}>
         <Spin spinning={isLoading}>
-          <h5 className={styles.message}>
+          <h5 className={styles.message} data-testid="sign-transaction-description">
             {t('browserView.transaction.send.enterWalletPasswordToConfirmTransaction')}
           </h5>
           <Password
@@ -81,10 +81,20 @@ export const SignTransaction = (): React.ReactElement => {
         </Spin>
       </div>
       <div className={styles.actions}>
-        <Button onClick={onConfirm} disabled={confirmIsDisabled} className={styles.actionBtn}>
+        <Button
+          onClick={onConfirm}
+          disabled={confirmIsDisabled}
+          className={styles.actionBtn}
+          data-testid="sign-transaction-confirm"
+        >
           {t('dapp.confirm.btn.confirm')}
         </Button>
-        <Button onClick={setPreviousView} color="secondary" className={styles.actionBtn}>
+        <Button
+          onClick={setPreviousView}
+          color="secondary"
+          className={styles.actionBtn}
+          data-testid="sign-transaction-cancel"
+        >
           {t('dapp.confirm.btn.cancel')}
         </Button>
       </div>
