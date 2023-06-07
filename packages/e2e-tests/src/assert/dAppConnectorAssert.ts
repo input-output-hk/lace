@@ -10,6 +10,7 @@ import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
 import DAppTransactionAllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
 import { Logger } from '../support/logger';
 import testContext from '../utils/testContext';
+import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -91,6 +92,21 @@ class DAppConnectorAssert {
 
     await AuthorizeDAppModal.onceButton.waitForDisplayed();
     await expect(await AuthorizeDAppModal.onceButton.getText()).to.equal(await t('dapp.connect.modal.allowOnce'));
+  }
+
+  async assertSeeDAppRemovalConfirmationModal() {
+    await RemoveDAppModal.container.waitForDisplayed();
+    await RemoveDAppModal.title.waitForDisplayed();
+    await expect(await RemoveDAppModal.title.getText()).to.equal(await t('dapp.delete.title'));
+
+    await RemoveDAppModal.description.waitForDisplayed();
+    await expect(await RemoveDAppModal.description.getText()).to.equal(await t('dapp.delete.description'));
+
+    await RemoveDAppModal.confirmButton.waitForDisplayed();
+    await expect(await RemoveDAppModal.confirmButton.getText()).to.equal(await t('dapp.delete.confirm'));
+
+    await RemoveDAppModal.cancelButton.waitForDisplayed();
+    await expect(await RemoveDAppModal.cancelButton.getText()).to.equal(await t('dapp.delete.cancel'));
   }
 
   async assertWalletFoundButNotConnectedInTestDApp() {

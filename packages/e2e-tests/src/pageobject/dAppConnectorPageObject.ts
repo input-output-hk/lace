@@ -46,6 +46,11 @@ class DAppConnectorPageObject {
     button === 'Always' ? await AuthorizeDappModal.alwaysButton.click() : await AuthorizeDappModal.onceButton.click();
   }
 
+  async clickButtonInDAppRemovalConfirmationModal(button: 'Back' | 'Disconnect DApp') {
+    await RemoveDAppModal.cancelButton.waitForDisplayed();
+    button === 'Back' ? await RemoveDAppModal.cancelButton.click() : await RemoveDAppModal.confirmButton.click();
+  }
+
   async deauthorizeAllDApps(mode: 'extended' | 'popup') {
     mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
     await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
@@ -57,6 +62,19 @@ class DAppConnectorPageObject {
       await RemoveDAppModal.confirmButton.click();
 
       await ToastMessage.container.waitForDisplayed();
+    }
+  }
+
+  async deauthorizeDApp(expectedDappName: string, mode: 'extended' | 'popup') {
+    mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
+    await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
+    await AuthorizedDappsPage.drawerHeaderTitle.waitForDisplayed();
+
+    for (const dAppName of await AuthorizedDappsPage.dAppNames) {
+      if ((await dAppName.getText()) === expectedDappName) {
+        await AuthorizedDappsPage.dAppRemoveButtons[dAppName.index].waitForClickable();
+        await AuthorizedDappsPage.dAppRemoveButtons[dAppName.index].click();
+      }
     }
   }
 
