@@ -4,7 +4,7 @@ import type { Meta } from '@storybook/react';
 
 import { ReactComponent as PlusCircle } from '../../assets/icons/plus-circle.component.svg';
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
-import { Page, Variants, Section } from '../decorators';
+import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid } from '../grid';
 import { Cell } from '../grid/cell.component';
@@ -16,13 +16,7 @@ const subtitle = ``;
 export default {
   title: 'Buttons/Control Buttons',
   component: Filled,
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Control Buttons" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Control Buttons', subtitle })],
 } as Meta;
 
 const Buttons = (): JSX.Element => (

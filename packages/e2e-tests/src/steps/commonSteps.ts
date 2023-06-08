@@ -22,7 +22,6 @@ import topNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
 import { closeAllTabsExceptActiveOne, switchToLastWindow, switchToWindowWithLace } from '../utils/window';
-import extensionUtils from '../utils/utils';
 import { Given } from '@wdio/cucumber-framework';
 import tokensPageObject from '../pageobject/tokensPageObject';
 import menuMainAssert from '../assert/menuMainAssert';
@@ -107,10 +106,6 @@ Then(/^I click "([^"]*)" link$/, async (linkText: string) => {
 });
 
 Then(/New tab with url containing "([^"]*)" is opened/, async (urlPart: string) => {
-  if (extensionUtils.isElectron()) {
-    throw new Error('Feature not available in Electron');
-  }
-
   await commonAssert.assertSeeTabWithUrl(urlPart);
 });
 

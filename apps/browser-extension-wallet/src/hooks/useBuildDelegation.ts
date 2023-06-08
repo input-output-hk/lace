@@ -1,15 +1,46 @@
+import { useEffect } from 'react';
+import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
+import { StakingError } from '@src/views/browser-view/features/staking/types';
 import { useWalletStore } from '../stores';
-import { useCallback } from 'react';
-import { CardanoTxBuild } from '../types';
 import { useDelegationStore } from '../features/delegation/stores';
-import { Wallet } from '@lace/cardano';
+import { InputSelectionFailure } from '@cardano-sdk/input-selection';
 
-export const useBuildDelegation = (): (() => Promise<CardanoTxBuild>) => {
+const ERROR_MESSAGES: { [key: string]: StakingError } = {
+  [InputSelectionFailure.UtxoFullyDepleted]: StakingError.UTXO_FULLY_DEPLETED,
+  [InputSelectionFailure.UtxoBalanceInsufficient]: StakingError.UTXO_BALANCE_INSUFFICIENT
+};
+
+export const useBuildDelegation = (): void => {
   const { inMemoryWallet } = useWalletStore();
-  const { selectedStakePool } = useDelegationStore();
+  const { selectedStakePool, setDelegationTxBuilder, setDelegationTxFee } = useDelegationStore();
+  const { setIsBuildingTx, setStakingError } = useStakePoolDetails();
 
-  return useCallback(async () => {
-    const txConfig = await Wallet.buildDelegation(inMemoryWallet, selectedStakePool.id);
-    return inMemoryWallet.initializeTx(txConfig);
-  }, [inMemoryWallet, selectedStakePool.id]);
+  useEffect(() => {
+    const buildDelegation = async () => {
+      try {
+        setIsBuildingTx(true);
+        const txBuilder = inMemoryWallet.createTxBuilder();
+        const tx = await txBuilder.delegate(selectedStakePool.id).build().inspect();
+        setDelegationTxBuilder(txBuilder);
+        setDelegationTxFee(tx.body.fee.toString());
+        setStakingError();
+      } catch (error) {
+        // TODO: check for error instance after LW-6749
+        if (typeof error === 'object' && Object.values(InputSelectionFailure).includes(error.failure)) {
+          setStakingError(ERROR_MESSAGES[error?.failure]);
+        }
+      } finally {
+        setIsBuildingTx(false);
+      }
+    };
+
+    buildDelegation();
+  }, [
+    inMemoryWallet,
+    selectedStakePool.id,
+    setDelegationTxBuilder,
+    setDelegationTxFee,
+    setIsBuildingTx,
+    setStakingError
+  ]);
 };

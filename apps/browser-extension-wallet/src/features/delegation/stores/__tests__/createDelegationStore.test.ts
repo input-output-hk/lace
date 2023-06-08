@@ -1,18 +1,15 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '../createDelegationStore';
-import {
-  cardanoStakePoolMock,
-  TransactionBuildMock,
-  cardanoStakePoolSelectedDetails
-} from '../../../../utils/mocks/test-helpers';
+import { cardanoStakePoolMock, cardanoStakePoolSelectedDetails } from '../../../../utils/mocks/test-helpers';
 import { DelegationStore } from '../../types';
+import { TxBuilder } from '@cardano-sdk/tx-construction';
 
 describe('Testing useDelegationStore hook', () => {
   test('should return delegation store', () => {
     const { result } = renderHook(() => useDelegationStore());
-    expect(result.current.setDelegationBuiltTx).toBeDefined();
+    expect(result.current.setDelegationTxBuilder).toBeDefined();
     expect(result.current.setSelectedStakePool).toBeDefined();
-    expect(result.current.delegationBuiltTx).not.toBeDefined();
+    expect(result.current.delegationTxBuilder).not.toBeDefined();
     expect(result.current.selectedStakePool).not.toBeDefined();
   });
 
@@ -27,15 +24,16 @@ describe('Testing useDelegationStore hook', () => {
     expect(result.current.selectedStakePool).toEqual(cardanoStakePoolMock.pageResults[0]);
   });
 
-  test('should return update state of delegationBuiltTx', () => {
+  test('should return update state of delegationTxBuilder', () => {
+    const txBuilderMock = {} as TxBuilder;
     const { result, waitForValueToChange } = renderHook(() => useDelegationStore());
-    expect(result.current.setDelegationBuiltTx).toBeDefined();
+    expect(result.current.setDelegationTxBuilder).toBeDefined();
 
     act(() => {
-      result.current.setDelegationBuiltTx(TransactionBuildMock);
+      result.current.setDelegationTxBuilder(txBuilderMock);
     });
-    waitForValueToChange(() => result.current.delegationBuiltTx);
-    expect(result.current.delegationBuiltTx).toEqual(TransactionBuildMock);
+    waitForValueToChange(() => result.current.delegationTxBuilder);
+    expect(result.current.delegationTxBuilder).toEqual(txBuilderMock);
   });
 
   test('should return proper data form stakePoolDetailsSelector', () => {

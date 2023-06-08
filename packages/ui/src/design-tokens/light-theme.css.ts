@@ -1,6 +1,6 @@
 import { createTheme } from '@vanilla-extract/css';
 
-import { laceGradient, lightColorScheme } from './colors.data';
+import { darkColorScheme, laceGradient, lightColorScheme } from './colors.data';
 import { opacities } from './opacities.data';
 import { radius } from './radius.data';
 import { spacing } from './spacing.data';
@@ -50,6 +50,11 @@ const colors: Colors = {
   $buttons_secondary_container_outlineColor:
     lightColorScheme.$primary_accent_purple_0_3,
 
+  $card_elevated_backgroundColor: lightColorScheme.$primary_white,
+  $card_greyed_backgroundColor: lightColorScheme.$primary_light_grey,
+  $card_outlined_backgroundColor: lightColorScheme.$primary_white,
+  $card_outlined_borderColor: lightColorScheme.$primary_light_grey_plus,
+
   $control_buttons_filled_label_color: lightColorScheme.$primary_dark_grey,
   $control_buttons_filled_label_color_hover: lightColorScheme.$primary_black,
   $control_buttons_filled_container_bgColor: lightColorScheme.$primary_white,
@@ -96,6 +101,37 @@ const colors: Colors = {
   $sub_navigation_item_label_color_hover: lightColorScheme.$primary_black,
   $sub_navigation_item_label_color_pressed: lightColorScheme.$primary_black,
   $sub_navigation_item_label_color_focused: lightColorScheme.$primary_dark_grey,
+
+  $navigation_button_label_color: lightColorScheme.$primary_dark_grey,
+  $navigation_button_label_color_pressed: lightColorScheme.$primary_black,
+  $navigation_button_container_bgColor: lightColorScheme.$primary_light_grey,
+  $navigation_button_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $navigation_button_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $navigation_button_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+
+  $profile_picture_avatar_label_color: lightColorScheme.$primary_white,
+  $profile_picture_initials_label_color:
+    lightColorScheme.$secondary_lace_yellow,
+  $profile_picture_initials_container_bgColor:
+    lightColorScheme.$secondary_lace_yellow,
+  $profile_picture_image_container_borderColor:
+    lightColorScheme.$primary_light_grey,
+  $profile_picture_image_container_borderColor_selected:
+    lightColorScheme.$secondary_lace_yellow,
+
+  $scrollbar_thumb_container_bgColor: lightColorScheme.$primary_light_grey_plus,
+  $scrollbar_thumb_container_bgColor_hover: lightColorScheme.$primary_grey,
+
+  $toggle_switch_label_color: lightColorScheme.$primary_dark_grey,
+  $toggle_switch_container_bgColor_on: laceGradient,
+  $toggle_switch_container_bgColor_off: lightColorScheme.$primary_grey,
+  $toggle_switch_container_bgColor_disabled:
+    darkColorScheme.$primary_light_grey,
+  $toggle_switch_container_outline: lightColorScheme.$primary_accent_purple_0_3,
+  $toggle_switch_thumb_bgColor: lightColorScheme.$primary_grey,
 };
 
 export const elevation: Elevation = {
@@ -103,6 +139,7 @@ export const elevation: Elevation = {
   $dialog: '0px 0px 20px rgba(167, 143, 160, 0.15)',
   $primaryButton: '0px 4px 10px rgba(167, 143, 160, 0.2)',
   $assets: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 0px 10px rgba(0, 0, 0, 0.05)',
+  $card: '0px 0px 20px rgba(167, 143, 160, 0.15)',
 } as const;
 
 export const lightTheme = createTheme(vars, {
