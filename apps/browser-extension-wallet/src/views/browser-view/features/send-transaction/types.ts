@@ -1,6 +1,7 @@
 import { CardanoTxOut, TxMinimumCoinQuantity } from '../../../../types';
 import { Wallet } from '@lace/cardano';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
+import { Handle } from '@cardano-sdk/core';
 
 export enum Sections {
   FORM = 'form',
@@ -31,7 +32,7 @@ export interface BuiltTxData {
   txBuilder?: TxBuilder;
   uiTx?: {
     hash: Wallet.Cardano.TransactionId;
-    outputs: Set<Wallet.Cardano.TxOut>;
+    outputs: Set<Wallet.Cardano.TxOut & { handle?: Handle }>;
     fee: Wallet.Cardano.Lovelace;
   };
   error?: string;

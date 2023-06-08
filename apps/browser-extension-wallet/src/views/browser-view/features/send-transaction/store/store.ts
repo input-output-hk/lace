@@ -419,7 +419,7 @@ export const useTransactionProps = (): {
 export const useOutputInitialState = (): Store['setInitialOutputState'] =>
   useStore((state) => state.setInitialOutputState);
 
-export const useBuitTxState = (): Pick<Store, 'setBuiltTxData' | 'builtTxData'> =>
+export const useBuiltTxState = (): Pick<Store, 'setBuiltTxData' | 'builtTxData'> =>
   useStore(({ setBuiltTxData, builtTxData }) => ({ setBuiltTxData, builtTxData }));
 
 export const useCurrentRow = (): [Store['currentRow'], Store['setCurrentRow']] =>
