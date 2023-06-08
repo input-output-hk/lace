@@ -55,8 +55,6 @@ describe('testing useAddressBookState', () => {
 
     await waitForNextUpdate();
 
-    console.log({ result: result.current.list });
-
     expect(result.current.list.length).toBe(10);
     expect(result.current.count).toBe(15);
   });
