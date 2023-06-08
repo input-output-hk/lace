@@ -350,7 +350,7 @@ export const WalletSetupWizard = ({
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
-        passphraseInfoLink={`${process.env.FAQ_URL}?question=what-is-my-private-key-what-is-my-secret-passphrase`}
+        passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
       />
     );
   };
