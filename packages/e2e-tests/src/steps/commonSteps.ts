@@ -28,6 +28,7 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
+import menuMainExtended from '../elements/menuMainExtended';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -195,3 +196,22 @@ Then(/^I close all remaining tabs except current one$/, async () => {
 Then(/^I switch to window with Lace$/, async () => {
   await switchToWindowWithLace();
 });
+
+When(/^I resize the window to a width of: ([^"]*) and a height of: ([^"]*)$/, async (width: number, height: number) => {
+  await browser.setWindowSize(Number(width), Number(height));
+});
+
+Then(/^I (see|do not see) expanded icon$/, async (shouldSee: 'see' | 'do not see') => {
+  await topNavigationAssert.assertSeeExpandedIcon(shouldSee === 'see');
+});
+
+When(/^I hover on the menu$/, async () => {
+  await menuMainExtended.hoverOverMenu();
+});
+
+Then(
+  /^I see (expanded|collapsed) menu for ([^"]*) resolution$/,
+  async (menuFormat: 'collapsed' | 'expanded', width: number) => {
+    await menuMainAssert.assertMenuFormat(menuFormat, width);
+  }
+);
