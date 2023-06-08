@@ -20,6 +20,7 @@ import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvider';
 import { APP_MODE_POPUP } from './utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
+import { DataCheckContainer } from '@components/DataCheckContainer';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -34,7 +35,9 @@ const App = (): React.ReactElement => (
                     <ThemeProvider>
                       <ExternalLinkOpenerProvider>
                         <MigrationContainer appMode={APP_MODE_POPUP}>
-                          <PopupView />
+                          <DataCheckContainer appMode={APP_MODE_POPUP}>
+                            <PopupView />
+                          </DataCheckContainer>
                         </MigrationContainer>
                       </ExternalLinkOpenerProvider>
                     </ThemeProvider>

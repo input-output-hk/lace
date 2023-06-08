@@ -20,6 +20,7 @@ import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvider';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
+import { DataCheckContainer } from '@components/DataCheckContainer';
 import '../../lib/scripts/keep-alive-ui';
 
 const App = (): React.ReactElement => (
@@ -35,7 +36,9 @@ const App = (): React.ReactElement => (
                     <ThemeProvider>
                       <ExternalLinkOpenerProvider>
                         <MigrationContainer appMode={APP_MODE_BROWSER}>
-                          <BrowserViewRoutes />
+                          <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                            <BrowserViewRoutes />
+                          </DataCheckContainer>
                         </MigrationContainer>
                       </ExternalLinkOpenerProvider>
                     </ThemeProvider>
