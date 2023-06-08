@@ -41,13 +41,13 @@ export const saveValueInLocalStorage = <T = ILocalStorage, K extends keyof T = k
 export const deleteFromLocalStorage = (key: keyof ILocalStorage): void => window.localStorage.removeItem(key);
 
 export const onStorageChangeEvent = (
-  keys: (keyof ILocalStorage)[],
+  keys: (keyof ILocalStorage)[] | 'all',
   callback: StorageEventPresetAction | ((ev?: StorageEvent) => unknown),
   eventType: StorageEventType = 'any'
-): void => {
-  // eslint-disable-next-line consistent-return, complexity
-  window.addEventListener('storage', (ev) => {
-    let extraCondition;
+): (() => void) => {
+  // eslint-disable-next-line complexity, consistent-return
+  const listener = (ev: StorageEvent) => {
+    let extraCondition = true;
 
     switch (eventType) {
       case 'create':
@@ -61,17 +61,20 @@ export const onStorageChangeEvent = (
         break;
       case 'any':
       default:
-        true;
         extraCondition = true;
     }
 
-    if (keys.includes(ev.key as keyof ILocalStorage) && extraCondition) {
-      if (typeof callback === 'string' && (callback as StorageEventPresetAction) === 'reload')
+    const shouldRun = typeof keys === 'string' ? keys === 'all' : keys.includes(ev.key as keyof ILocalStorage);
+    if (shouldRun && extraCondition) {
+      if (typeof callback === 'string' && (callback as StorageEventPresetAction) === 'reload') {
         return window.location.reload();
-
+      }
       if (typeof callback === 'function') return callback(ev);
     }
-  });
+  };
+  window.addEventListener('storage', listener);
+
+  return () => window.removeEventListener('storage', listener);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types

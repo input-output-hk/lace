@@ -931,6 +931,12 @@
       "btn.confirm": "Got it"
     }
   },
+  "corruptedData": {
+    "title": "Data Corrupted",
+    "errorDescription": "Looks like some of your data is missing or invalid. Don't worry your funds are safe.",
+    "actionDescription": "You will need to restore your wallet again with your recovery phrase.",
+    "btn.confirm": "Restore your wallet"
+  },
   "cardano": {
     "general": {
       "confirmButton": "Confirm",
