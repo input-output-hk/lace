@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import cn from 'classnames';
 import styles from './NftsLayout.module.scss';
 import { useWalletStore } from '@stores';
 import { useTranslation } from 'react-i18next';
@@ -188,6 +189,8 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     setSelectedFolderId(undefined);
   }, []);
 
+  const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0 && process.env.USE_NFT_FOLDERS === 'true';
+
   return (
     <>
       <Layout>
@@ -197,18 +200,18 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
           }
         >
           <Skeleton loading={isLoadingFirstTime}>
-            <div className={styles.sectionTitle}>
+            <div className={cn(styles.sectionTitle, { [styles.titleWithCreateNFTFolder]: showCreateFolder })}>
               <SectionTitle
                 classname={styles.title}
                 title={t('browserView.nfts.pageTitle')}
                 sideText={`(${nfts.length})`}
               />
-              {nfts.length > 0 && nftsNotInFolders.length > 0 && process.env.USE_NFT_FOLDERS === 'true' && (
+              {showCreateFolder && (
                 <Button
                   className={styles.newFolderBtn}
                   color="gradient"
                   onClick={() => setIsCreateFolderDrawerOpen(true)}
-                  data-testid="unlock-button"
+                  data-testid="create-folder-button"
                 >
                   <FolderIcon className={styles.newFolderIcon} />
                   {t('browserView.nfts.createFolder')}
