@@ -12,12 +12,12 @@ import { AppSettingsProvider } from '@providers';
 import { Cardano } from '@cardano-sdk/core';
 
 const makeDbContextWrapper =
-  (dbIntance: WalletDatabase): FunctionComponent =>
+  (dbInstance: WalletDatabase): FunctionComponent =>
   ({ children }: { children?: React.ReactNode }) =>
     (
       <AppSettingsProvider>
         <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' } as any))}>
-          <DatabaseProvider dbCustomInstance={dbIntance}>{children}</DatabaseProvider>
+          <DatabaseProvider dbCustomInstance={dbInstance}>{children}</DatabaseProvider>
         </StoreProvider>
       </AppSettingsProvider>
     );

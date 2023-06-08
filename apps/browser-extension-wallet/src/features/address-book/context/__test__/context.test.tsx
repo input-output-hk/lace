@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-magic-numbers */
 import React, { FunctionComponent } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { cleanup, renderHook } from '@testing-library/react-hooks';
 import { useAddressBookContext } from '../context';
 import { AddressBookProvider } from '../AddressBookProvider';
 import { WalletDatabase, AddressBookSchema, addressBookSchema, useDbStateValue } from '@src/lib/storage';
@@ -38,7 +38,7 @@ describe('testing useAddressBookState', () => {
     id: i + 1,
     address: `addr_test${i + 1}`,
     name: `atest wallet ${i + 1}`,
-    network: Cardano.NetworkMagics.Preprod
+    network: 1
   }));
 
   beforeEach(async () => {
@@ -46,7 +46,10 @@ describe('testing useAddressBookState', () => {
     db.getConnection(addressBookSchema).bulkAdd(mockAddressList);
   });
 
-  afterEach(() => db.delete());
+  afterEach(async () => {
+    await db.delete();
+    cleanup();
+  });
 
   test('should return state and utils', async () => {
     const { result, waitForNextUpdate } = renderHook(() => useAddressBookContext(), {
@@ -92,31 +95,28 @@ describe('testing useAddressBookState', () => {
   });
 
   test('should update address', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useAddressBookContext() as useDbStateValue<AddressBookSchema>,
-      {
-        wrapper: makeDbContextWrapper(db)
-      }
-    );
+    const hook = renderHook(() => useAddressBookContext() as useDbStateValue<AddressBookSchema>, {
+      wrapper: makeDbContextWrapper(db)
+    });
 
-    await waitForNextUpdate();
+    await hook.waitForNextUpdate();
 
-    const idToUpdate = result.current.list[0].id;
+    const idToUpdate = hook.result.current.list[0].id;
     const addressData = {
-      id: result.current.list[0].id,
+      id: hook.result.current.list[0].id,
       name: 'newName',
       address: 'newAddress',
-      network: Cardano.NetworkMagics.Preprod
+      network: 1
     };
 
     await act(async () => {
-      await result.current.utils.updateRecord(idToUpdate, addressData as AddressBookSchema);
+      await hook.result.current.utils.updateRecord(idToUpdate, addressData as AddressBookSchema);
     });
 
     await waitFor(() => {
-      expect(result.current.list).toContainEqual({ ...addressData, id: idToUpdate });
-      expect(result.current.list.length).toBe(10);
-      expect(result.current.count).toBe(15);
+      expect(hook.result.current.list).toContainEqual({ ...addressData, id: idToUpdate });
+      expect(hook.result.current.list.length).toBe(10);
+      expect(hook.result.current.count).toBe(15);
     });
   });
 
@@ -144,5 +144,81 @@ describe('testing useAddressBookState', () => {
       expect(result.current.list.length).toBe(14);
       expect(result.current.count).toBe(14);
     });
+  });
+});
+
+describe('testing the order', () => {
+  const addresses = {
+    // Alphanumeric that starts with lowercase
+    addr1: { name: 'abc123', address: 'addr_test11', network: 1, id: 1 },
+    addr2: { name: 'def456', address: 'addr_test12', network: 1, id: 2 },
+    addr3: { name: 'def123', address: 'addr_test13', network: 1, id: 3 },
+    // Lowercase
+    addr4: { name: 'ghiklm', address: 'addr_test21', network: 1, id: 4 },
+    addr5: { name: 'ghiklmn', address: 'addr_test22', network: 1, id: 5 },
+    addr6: { name: 'ghiklmopq', address: 'addr_test23', network: 1, id: 6 },
+    // Alphanumeric that starts with uppercase
+    addr7: { name: 'RST123', address: 'addr_test31', network: 1, id: 7 },
+    addr8: { name: 'RSTUV123', address: 'addr_test32', network: 1, id: 8 },
+    addr9: { name: 'R1STUV123', address: 'addr_test33', network: 1, id: 9 },
+    // Uppercase
+    addr10: { name: 'GHIKLM', address: 'addr_test41', network: 1, id: 10 },
+    addr11: { name: 'GHIKLMN', address: 'addr_test42', network: 1, id: 11 },
+    addr12: { name: 'GHIKLMOPQ', address: 'addr_test43', network: 1, id: 12 },
+    // Alphanumeric that starts with a number
+    addr13: { name: '123abc', address: 'addr_test51', network: 1, id: 13 },
+    addr14: { name: '123bcd', address: 'addr_test52', network: 1, id: 14 },
+    addr15: { name: '2a34abc', address: 'addr_test53', network: 1, id: 15 },
+    // Number
+    addr16: { name: '123456', address: 'addr_test61', network: 1, id: 16 },
+    addr17: { name: '12345', address: 'addr_test62', network: 1, id: 17 },
+    addr18: { name: '2346', address: 'addr_test63', network: 1, id: 18 }
+  };
+
+  let db1: WalletDatabase;
+  beforeEach(async () => {
+    db1 = new WalletDatabase();
+    db1.getConnection(addressBookSchema).bulkAdd(Object.values(addresses));
+  });
+
+  afterEach(async () => {
+    await db1.delete();
+    cleanup();
+  });
+  test('should sort items correctly Number -> Alphanumeric that starts with a number -> Uppercase -> Alphanumeric that starts with uppercase -> Lowercase -> Alphanumeric that starts with lowercase', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useAddressBookContext(), {
+      wrapper: makeDbContextWrapper(db1)
+    });
+
+    await waitForNextUpdate();
+    act(() => {
+      result.current.utils.extendLimit();
+    });
+    await waitForNextUpdate();
+
+    // Number
+    expect(result.current.list[0]).toEqual(addresses.addr17);
+    expect(result.current.list[1]).toEqual(addresses.addr16);
+    expect(result.current.list[2]).toEqual(addresses.addr18);
+    // Alphanumeric that starts with a number
+    expect(result.current.list[3]).toEqual(addresses.addr13);
+    expect(result.current.list[4]).toEqual(addresses.addr14);
+    expect(result.current.list[5]).toEqual(addresses.addr15);
+    // Uppercase
+    expect(result.current.list[6]).toEqual(addresses.addr10);
+    expect(result.current.list[7]).toEqual(addresses.addr11);
+    expect(result.current.list[8]).toEqual(addresses.addr12);
+    // Alphanumeric that starts with uppercase
+    expect(result.current.list[9]).toEqual(addresses.addr9);
+    expect(result.current.list[10]).toEqual(addresses.addr7);
+    expect(result.current.list[11]).toEqual(addresses.addr8);
+    // Lowercase
+    expect(result.current.list[12]).toEqual(addresses.addr4);
+    expect(result.current.list[13]).toEqual(addresses.addr5);
+    expect(result.current.list[14]).toEqual(addresses.addr6);
+    // Alphanumeric that starts with lowercase
+    expect(result.current.list[15]).toEqual(addresses.addr1);
+    expect(result.current.list[16]).toEqual(addresses.addr3);
+    expect(result.current.list[17]).toEqual(addresses.addr2);
   });
 });

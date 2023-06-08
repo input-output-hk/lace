@@ -19,12 +19,12 @@ jest.mock('../NftsFoldersProvider', () => ({
 }));
 
 const makeDbContextWrapper =
-  (dbIntance: WalletDatabase): FunctionComponent =>
+  (dbInstance: WalletDatabase): FunctionComponent =>
   ({ children }: { children?: React.ReactNode }) =>
     (
       <AppSettingsProvider>
         <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' } as any))}>
-          <DatabaseProvider dbCustomInstance={dbIntance}>
+          <DatabaseProvider dbCustomInstance={dbInstance}>
             <NftsFoldersProvider>{children}</NftsFoldersProvider>
           </DatabaseProvider>
         </StoreProvider>
