@@ -12,6 +12,12 @@ const ReleaseNote_1_2_0 = (): React.ReactElement => (
       <li>Improved DApp connector</li>
       <li>Added performance improvements for token information requests</li>
     </ul>
+    <p>
+      Check out the details in the{' '}
+      <a href="https://www.lace.io/blog/join-us-on-a-tour-of-lace-1-2" target="_blank">
+        blog
+      </a>
+    </p>
   </>
 );
 
