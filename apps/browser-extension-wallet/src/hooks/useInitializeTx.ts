@@ -60,33 +60,42 @@ export const useInitializeTx = (
       cardanoCoin
     });
     if (hasInvalidOutputs || reachedMaxAmountList.length > 0) {
-      setBuiltTxData({ tx: undefined, totalMinimumCoins: undefined, error: undefined, reachedMaxAmountList });
+      setBuiltTxData({
+        uiTx: undefined,
+        txBuilder: undefined,
+        totalMinimumCoins: undefined,
+        error: undefined,
+        reachedMaxAmountList
+      });
     } else {
       try {
         const partialTxProps = buildTransactionProps({ metadata, outputsMap: outputs, assetsInfo });
         const util = Wallet.createWalletUtil(inMemoryWallet);
         const minimumCoinQuantities = await util.validateOutputs(partialTxProps.outputs);
         const totalMinimumCoins = getTotalMinimumCoins(minimumCoinQuantities);
-
         const outputsWithMissingCoins = setMissingCoins(minimumCoinQuantities, partialTxProps.outputs);
+        const txBuilder = inMemoryWallet.createTxBuilder();
 
-        const finalTxProps = partialTxProps?.auxiliaryData
-          ? { ...outputsWithMissingCoins, auxiliaryData: partialTxProps.auxiliaryData }
-          : outputsWithMissingCoins;
-
-        const tx = await inMemoryWallet.initializeTx(finalTxProps);
+        outputsWithMissingCoins.outputs.forEach((output) => txBuilder.addOutput(output));
+        txBuilder.metadata(partialTxProps?.auxiliaryData?.blob || new Map());
+        const tx = await txBuilder.build().inspect();
 
         setBuiltTxData({
-          tx,
+          uiTx: {
+            fee: tx.inputSelection.fee,
+            hash: tx.hash,
+            outputs: tx.inputSelection.outputs
+          },
+          txBuilder,
           totalMinimumCoins,
-          auxiliaryData: partialTxProps?.auxiliaryData,
           error: undefined,
           reachedMaxAmountList: []
         });
       } catch (error) {
         console.error('error initializing transaction:', { error });
         setBuiltTxData({
-          tx: undefined,
+          uiTx: undefined,
+          txBuilder: undefined,
           error: error.message,
           reachedMaxAmountList: []
         });

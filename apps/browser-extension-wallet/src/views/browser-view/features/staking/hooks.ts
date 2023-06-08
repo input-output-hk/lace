@@ -4,11 +4,11 @@ import { useWalletStore } from '@stores';
 
 export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Promise<void> } => {
   const { inMemoryWallet } = useWalletStore();
-  const { delegationBuiltTx } = useDelegationStore();
+  const { delegationTxBuilder } = useDelegationStore();
   const signAndSubmitTransaction = useCallback(async () => {
-    const signedTx = await inMemoryWallet.finalizeTx({ tx: delegationBuiltTx });
-    await inMemoryWallet.submitTx(signedTx);
-  }, [inMemoryWallet, delegationBuiltTx]);
+    const signedTx = await delegationTxBuilder.build().sign();
+    await inMemoryWallet.submitTx(signedTx.tx);
+  }, [delegationTxBuilder, inMemoryWallet]);
 
   return { signAndSubmitTransaction };
 };
