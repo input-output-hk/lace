@@ -48,7 +48,8 @@ export const DelegationContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     getKeyAgentType,
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    blockchainProvider
   } = useWalletStore();
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
   const [searchValue, setSearchValue] = useState<string | undefined>();
@@ -102,7 +103,7 @@ export const DelegationContainer = (): React.ReactElement => {
     if (isHardwareWalletPopupTransition) return;
     if (searchValue?.length !== 0 && searchValue?.length < MIN_CHARS_TO_SEARCH) return;
     fetchStakePools({ searchString: searchValue || '', limit: MAX_ITEMS_TO_SHOW });
-  }, [searchValue, fetchStakePools, isInMemory]);
+  }, [searchValue, fetchStakePools, isInMemory, blockchainProvider]);
 
   const openDelagationConfirmation = useCallback(() => {
     setSection();

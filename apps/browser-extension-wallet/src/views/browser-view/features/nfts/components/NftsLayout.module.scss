@@ -22,11 +22,13 @@
   margin-bottom: size_unit(5.5);
   .title {
     margin-bottom: 0px !important;
+    &.titleWithCreateNFTFolder {
+      margin-bottom: size_unit(6);
+    }
   }
 }
 
 .newFolderBtn {
-  margin-bottom: size_unit(6);
   .newFolderIcon {
     font-size: var(--bodyLarge);
   }

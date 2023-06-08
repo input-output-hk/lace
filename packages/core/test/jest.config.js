@@ -11,7 +11,8 @@ module.exports = {
   rootDir,
   moduleNameMapper: {
     '.*\\.(scss|sass|css|less)$': '<rootDir>/test/__mocks__/styleMock.js',
-    '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)$': '<rootDir>/test/__mocks__/fileMock.js',
+    '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|ttf|woff|woff2)$': '<rootDir>/test/__mocks__/fileMock.js',
+    '\\.svg': '<rootDir>/test/__mocks__/svgMock.js',
     ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/src' })
   },
   preset: 'ts-jest',
