@@ -149,6 +149,8 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const rewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
 
+  const balanceWithAvailableRewards = useMemo(() => BigInt(total?.coins || 0) + BigInt(rewards || 0), [rewards, total]);
+
   const openSend = () => {
     analytics.sendEvent({
       category: AnalyticsEventCategories.SEND_TRANSACTION,
@@ -252,22 +254,28 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     ]
   );
 
-  const getTransfromedCardano = useCallback(
-    (withVisibleBalances) => {
-      const totalIncRewards = BigInt(total?.coins || 0) + BigInt(rewards || 0);
-      return cardanoTransformer({
+  const getTransformedCardano = useCallback(
+    (withVisibleBalances) =>
+      cardanoTransformer({
         total: {
           ...total,
-          coins: totalIncRewards
+          coins: balanceWithAvailableRewards
         },
         fiatPrice: priceResult?.cardano,
         cardanoCoin,
         fiatCode: fiatCurrency?.code,
         areBalancesVisible: withVisibleBalances || areBalancesVisible,
         balancesPlaceholder
-      });
-    },
-    [areBalancesVisible, balancesPlaceholder, cardanoCoin, fiatCurrency?.code, priceResult?.cardano, rewards, total]
+      }),
+    [
+      areBalancesVisible,
+      balancesPlaceholder,
+      cardanoCoin,
+      fiatCurrency?.code,
+      priceResult?.cardano,
+      total,
+      balanceWithAvailableRewards
+    ]
   );
 
   // TODO: move this to store once https://input-output.atlassian.net/browse/LW-1494 is done
@@ -284,7 +292,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     }
     tokens.sort(sortAssets);
 
-    const cardano = total?.coins ? [getTransfromedCardano(false)] : [];
+    const cardano = balanceWithAvailableRewards > BigInt(0) ? [getTransformedCardano(false)] : [];
 
     setList([...cardano, ...tokens]);
   }, [
@@ -297,11 +305,11 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     priceResult?.tokens,
     fiatCurrency,
     hasTokens,
-    fiatCurrency,
     areBalancesVisible,
     balancesPlaceholder,
     getTransformedAsset,
-    getTransfromedCardano
+    getTransformedCardano,
+    balanceWithAvailableRewards
   ]);
 
   const onScroll = () => setListItemsAmount((prevState) => prevState + chunkSize);
@@ -313,7 +321,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         ? AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_POPUP
         : AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_BROWSER
     });
-    const selectedAsset = id === cardanoCoin.id ? getTransfromedCardano(true) : getTransformedAsset(id, true);
+    const selectedAsset = id === cardanoCoin.id ? getTransformedCardano(true) : getTransformedAsset(id, true);
     setAssetDetails(selectedAsset);
     setAssetID(id);
   };
@@ -411,7 +419,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         />
       )}
       <Skeleton loading={!list}>
-        {total?.coins ? (
+        {balanceWithAvailableRewards > BigInt(0) ? (
           <AssetTable
             rows={filteredList}
             onRowClick={onRowClick}
