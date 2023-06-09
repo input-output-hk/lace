@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/naming-convention, functional/immutable-data */
+/* eslint-disable @typescript-eslint/naming-convention, functional/immutable-data */
 import React from 'react';
 
 import type { Meta } from '@storybook/react';
