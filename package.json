@@ -25,7 +25,7 @@
   "scripts": {
     "base-command-for-build-scripts": "wsrun --prefix -tram ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
     "browser": "APP_NAME=browser-extension-wallet npm run build $1",
-    "build": "npm run build --workspaces",
+    "build": "npm run build",
     "build-deps": "npm run build --workspace=packages/",
     "cardano:lint": "npm run eslint-cmd \"packages/cardano/**/*.{js,ts,tsx}\"",
     "chromatic": "ENV=development yarn build-storybook; chromatic --exit-zero-on-changes --project-token=e28776c940b9 -d storybook-static/",
