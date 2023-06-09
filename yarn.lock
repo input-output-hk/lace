@@ -10568,7 +10568,14 @@
     media-query-parser "^2.0.2"
     outdent "^0.8.0"
 
-"@vanilla-extract/integration@^6.0.0", "@vanilla-extract/integration@^6.0.2":
+"@vanilla-extract/esbuild-plugin@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@vanilla-extract/esbuild-plugin/-/esbuild-plugin-2.2.2.tgz#74f97a419a9b0290f76e97ce2a3ddb09537c5273"
+  integrity sha512-P2tlhBpAnoA4fx0xaYm8mcKBzorcyLC0O/c7ZpJL3aIKh6kdxdjDhOoWEXC2NuGJepEFsv0dXGJ99l424NvTKA==
+  dependencies:
+    "@vanilla-extract/integration" "^6.2.0"
+
+"@vanilla-extract/integration@^6.0.0", "@vanilla-extract/integration@^6.0.2", "@vanilla-extract/integration@^6.2.0":
   version "6.2.1"
   resolved "https://registry.npmjs.org/@vanilla-extract/integration/-/integration-6.2.1.tgz#e87849ed3d8e9ddd2703b8b8597fdbff08cf62ad"
   integrity sha512-+xYJz07G7TFAMZGrOqArOsURG+xcYvqctujEkANjw2McCBvGEK505RxQqOuNiA9Mi9hgGdNp2JedSa94f3eoLg==
