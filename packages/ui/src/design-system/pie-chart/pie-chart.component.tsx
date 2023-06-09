@@ -82,7 +82,7 @@ export const PieChart = <T extends object | { name: string; value: number }>({
         </defs>
         {tooltip && <Tooltip content={tooltip} />}
         <Pie
-          data={data.slice(0, colors.length)}
+          data={data}
           dataKey={valueKey}
           nameKey={nameKey}
           innerRadius="90%"
