@@ -241,7 +241,7 @@ func setupTrayUI(
 	}()
 
 	// XXX: additional spaces are there so that the width of the menu doesn’t change with updates:
-	mQuit := systray.AddMenuItem("Quit                                       ", "")
+	mQuit := systray.AddMenuItem("Quit                                                                    ", "")
 	go func() {
 		<-mQuit.ClickedCh
 		mQuit.Disable()
@@ -291,16 +291,6 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 	// XXX: we nest a function here, so that we can defer cleanups, and return early on errors etc.
 	for keepGoing { func() {
-		var wgChildren sync.WaitGroup
-
-		defer func(networkMemo string) {
-			if r := recover(); r != nil {
-				fmt.Fprintf(os.Stderr, "%s[%d]: panic: %s\n", OurLogPrefix, os.Getpid(), r)
-			}
-			wgChildren.Wait()
-			fmt.Printf("%s[%d]: session ended for network %s\n", OurLogPrefix, os.Getpid(), networkMemo)
-		}("" + network)
-
 		if !firstIteration && !omitSleep {
 			time.Sleep(5 * time.Second)
 		}
@@ -448,6 +438,21 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 			}(),
 		}
 
+		var wgChildren sync.WaitGroup
+
+		defer func(networkMemo string) {
+			if r := recover(); r != nil {
+				fmt.Fprintf(os.Stderr, "%s[%d]: panic: %s\n", OurLogPrefix, os.Getpid(), r)
+			}
+			wgChildren.Wait()
+			for _, child := range childrenDefs {
+				// Reset all statuses to "off" (not all children might’ve been started
+				// and they’re "waiting" now)
+				child.StatusCh <- "off"
+			}
+			fmt.Printf("%s[%d]: session ended for network %s\n", OurLogPrefix, os.Getpid(), networkMemo)
+		}("" + network)
+
 		anyChildExitedCh := make(chan struct{}, len(childrenDefs))
 
 		for childIdx, childUnsafe := range childrenDefs {
@@ -538,11 +543,6 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				keepGoing = false
 				return
 			}
-		}
-
-		// reset all statuses to "off" (not all children might’ve been started and they’re "waiting" now)
-		for _, child := range childrenDefs {
-			child.StatusCh <- "off"
 		}
 	}()}
 }
