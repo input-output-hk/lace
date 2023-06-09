@@ -61,6 +61,13 @@ export const colors = {
   $sub_navigation_item_label_color_pressed: '',
   $sub_navigation_item_label_color_focused: '',
 
+  $navigation_button_container_bgColor: '',
+  $navigation_button_container_bgColor_hover: '',
+  $navigation_button_container_bgColor_pressed: '',
+  $navigation_button_container_outlineColor: '',
+  $navigation_button_label_color: '',
+  $navigation_button_label_color_pressed: '',
+
   $profile_picture_avatar_label_color: '',
   $profile_picture_initials_label_color: '',
   $profile_picture_initials_container_bgColor: '',
@@ -69,6 +76,13 @@ export const colors = {
 
   $scrollbar_thumb_container_bgColor: '',
   $scrollbar_thumb_container_bgColor_hover: '',
+
+  $toggle_switch_label_color: '',
+  $toggle_switch_container_bgColor_on: '',
+  $toggle_switch_container_bgColor_off: '',
+  $toggle_switch_container_bgColor_disabled: '',
+  $toggle_switch_container_outline: '',
+  $toggle_switch_thumb_bgColor: '',
 };
 
 export type Colors = typeof colors;
@@ -104,7 +118,7 @@ export const darkColorScheme = {
   $primary_accent_purple: '#7F5AF0',
   $primary_hover_purple: 'rgba(116, 82, 219, 1)',
   $primary_accent_purple_0_3: 'rgba(127, 90, 240, 0.3)',
-  $primary_light_grey: 'rgba(169, 169, 169, 1)',
+  $primary_light_grey: '#a9a9a9',
   $primary_white: '#FFFFFF',
   $primary_grey: '#383838',
   $primary_mid_grey: '#333333',
