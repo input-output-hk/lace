@@ -22,6 +22,10 @@ import (
 	"github.com/atotto/clipboard"
 )
 
+const (
+	OurLogPrefix = "local-backend"
+)
+
 func main() {
 	executablePath, err := os.Executable()
 	if err != nil {
@@ -61,7 +65,7 @@ func main() {
 	default:
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
-	fmt.Println("info: workDir is " + workDir)
+	fmt.Printf("%s[%d]: workDir is %s\n", OurLogPrefix, os.Getpid(), workDir)
 	os.MkdirAll(workDir, 0755)
 	os.Chdir(workDir)
 
@@ -74,7 +78,7 @@ func main() {
 	}
 
 	logFile := workDir + sep + "logs" + sep + time.Now().UTC().Format("2006-01-02--15-04-05Z") + ".log"
-	fmt.Printf("info: logging to file: %s\n", logFile)
+	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
 	os.MkdirAll(filepath.Dir(logFile), 0755)
 	closeOutputs := duplicateOutputToFile(logFile)
 
@@ -98,11 +102,12 @@ func main() {
 		for sig := range sigCh {
 			if !alreadySignaled {
 				alreadySignaled = true
-				fmt.Fprintf(os.Stderr, "warn: got signal (%s), will shutdown...\n", sig)
+				fmt.Fprintf(os.Stderr, "%s[%d]: got signal (%s), will shutdown...\n",
+					OurLogPrefix, os.Getpid(), sig)
 				initiateShutdownCh <- struct{}{}
 			} else {
-				fmt.Fprintf(os.Stderr,
-					"warn: got another signal (%s), but already in shutdown\n", sig)
+				fmt.Fprintf(os.Stderr, "%s[%d]: got another signal (%s), but already in shutdown\n",
+					OurLogPrefix, os.Getpid(), sig)
 			}
 		}
 	}()
@@ -125,7 +130,7 @@ func main() {
 
 	systray.Quit()
 
-	fmt.Println("info: all good, exiting")
+	fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 	closeOutputs()
 }
 
@@ -165,7 +170,8 @@ func setupTrayUI(
 				mNetworks[network].Check()
 				if network != currentNetwork {
 					currentNetwork = network
-					fmt.Println("info: switching network to: " + network + "...")
+					fmt.Printf("%s[%d]: switching network to: %s...\n",
+						OurLogPrefix, os.Getpid(), network)
 					networkSwitch <- network
 				}
 			}
@@ -205,19 +211,20 @@ func setupTrayUI(
 			url := fmt.Sprintf("http://127.0.0.1:%d", *providerServerPort)
 			err := clipboard.WriteAll(url)
 			if err != nil {
-				fmt.Printf("error: failed to copy '%s' to clipboard: %s\n", url, err)
+				fmt.Printf("%s[%d]: error: failed to copy '%s' to clipboard: %s\n",
+					OurLogPrefix, os.Getpid(), url, err)
 			}
 		}
 	}()
 
-	mCurrentLog := systray.AddMenuItem("Current Log", "")
+	mCurrentLog := systray.AddMenuItem("Open Current Log", "")
 	go func() {
 		for range mCurrentLog.ClickedCh {
 			openWithDefaultApp(logFile)
 		}
 	}()
 
-	mLogsDirectory := systray.AddMenuItem("Logs Directory", "")
+	mLogsDirectory := systray.AddMenuItem("Open Logs Directory", "")
 	go func() {
 		for range mLogsDirectory.ClickedCh {
 			openWithDefaultApp(filepath.Dir(logFile))
@@ -288,10 +295,10 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 		defer func(networkMemo string) {
 			if r := recover(); r != nil {
-				fmt.Fprintln(os.Stderr, "panic:", r)
+				fmt.Fprintf(os.Stderr, "%s[%d]: panic: %s\n", OurLogPrefix, os.Getpid(), r)
 			}
 			wgChildren.Wait()
-			fmt.Printf("info: session ended for network %s\n", networkMemo)
+			fmt.Printf("%s[%d]: session ended for network %s\n", OurLogPrefix, os.Getpid(), networkMemo)
 		}("" + network)
 
 		if !firstIteration && !omitSleep {
@@ -300,7 +307,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 		firstIteration = false
 		omitSleep = false
 
-		fmt.Printf("info: starting session for network %s\n", network)
+		fmt.Printf("%s[%d]: starting session for network %s\n", OurLogPrefix, os.Getpid(), network)
 
 		cardanoServicesDir := (resourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
 			sep + "cardano-services")
@@ -425,7 +432,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 							1 * time.Second)
 						nextProbeIn := 1 * time.Second
 						if (err == nil) {
-							ogmiosStatus <- "listening"
+							providerServerStatus <- "listening"
 							nextProbeIn = 60 * time.Second
 						}
 						return HealthStatus {
@@ -446,8 +453,9 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 		for childIdx, childUnsafe := range childrenDefs {
 			child := childUnsafe // or else all interations will get the same ref (last child)
 			wgChildren.Add(1)
+			fmt.Printf("%s[%d]: starting %s...\n", OurLogPrefix, os.Getpid(), child.LogPrefix)
 			for _, dependant := range childrenDefs[(childIdx+1):] {
-				dependant.StatusCh <- fmt.Sprintf("waiting for ‘%s’…", child.PrettyName)
+				dependant.StatusCh <- fmt.Sprintf("waiting for %s", child.PrettyName)
 			}
 			child.StatusCh <- "starting…"
 			outputLines := make(chan string)
@@ -468,10 +476,12 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 			// monitor output:
 			go func() {
 				for line := range outputLines {
-					fmt.Printf("[%s] %s\n", child.LogPrefix, line)
+					fmt.Printf("%s[%d]: %s\n", child.LogPrefix, childPid, line)
 					child.LogMonitor(line)
 				}
 				childDidExit = true
+				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
+					child.LogPrefix, childPid)
 				child.StatusCh <- "off"
 				wgChildren.Done()
 				anyChildExitedCh <- struct{}{}
@@ -488,14 +498,15 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				for {
 					next := child.HealthProbe(prev)
 					if next.DoRestart {
-						fmt.Printf("[%s] HealthProbe requested restart\n", child.LogPrefix)
+						fmt.Printf("%s[%d]: HealthProbe of %s[%d] requested restart\n",
+							OurLogPrefix, os.Getpid(), child.LogPrefix, childPid)
 						terminateCh <- struct{}{}
 						return
 					}
 					next.Initialized = prev.Initialized || next.Initialized // remember true
 					if !prev.Initialized && next.Initialized {
-						fmt.Printf("[%s] HealthProbe reported as initialized\n",
-							child.LogPrefix)
+						fmt.Printf("%s[%d]: HealthProbe reported %s[%d] as initialized\n",
+							OurLogPrefix, os.Getpid(), child.LogPrefix, childPid)
 						initializedCh <- struct{}{} // continue launching the next process
 					}
 					time.Sleep(next.NextProbeIn)
@@ -509,10 +520,13 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				return // if any exited, fail the whole session, and restart
 			case <-initializedCh:
 				if childIdx + 1 == len(childrenDefs) {
+					fmt.Printf("%s[%d]: initialized all children\n", OurLogPrefix, os.Getpid())
 					// if it was the last child, continue waiting:
 					goto OneFinalWait
 				}
 				// else: continue starting the next child
+				fmt.Printf("%s[%d]: will continue launching the next child...\n",
+					OurLogPrefix, os.Getpid())
 			case newNetwork := <-networkSwitch:
 				if newNetwork != network {
 					omitSleep = true
@@ -520,7 +534,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				}
 				return
 			case <-initiateShutdownCh:
-				fmt.Println("info: initiating a clean shutdown...")
+				fmt.Printf("%s[%d]: initiating a graceful shutdown...\n", OurLogPrefix, os.Getpid())
 				keepGoing = false
 				return
 			}
@@ -688,7 +702,6 @@ func childProcess(
 		<-waitDone
 	case <-waitDone:
 	}
-	outputLines <- "info: process ended"
 }
 
 func getFreeTCPPort() int {
