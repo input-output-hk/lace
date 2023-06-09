@@ -41,6 +41,14 @@ export const AssetInputRow = ({
     [coin?.id, maxDecimals, onBlur, value]
   );
 
+  const onFocus = useCallback(
+    (props) => {
+      setIsFocused(true);
+      row?.onFocus(props);
+    },
+    [row]
+  );
+
   useOnClickOutside(
     containerRef,
     () => {
@@ -57,7 +65,13 @@ export const AssetInputRow = ({
   return (
     <>
       <div id={`input-${idx}`} className={styles.assetRow} ref={containerRef} onClick={onClick}>
-        <AssetInput {...row} focused={isFocused} setFocus={(focusState) => setIsFocused(focusState)} onBlur={onBlur} />
+        <AssetInput
+          {...row}
+          focused={isFocused}
+          setFocus={(focusState) => setIsFocused(focusState)}
+          onBlur={onBlur}
+          onFocus={onFocus}
+        />
         {rowsLength > 1 && (
           <div
             onClick={onDelete}

@@ -49,7 +49,7 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
 export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }): React.ReactElement => {
   const { t } = useTranslation();
   const { setIsDrawerVisible, resetStates } = useStakePoolDetails();
-  const { setDelegationBuiltTx } = useDelegationStore();
+  const { setDelegationTxBuilder } = useDelegationStore();
   const analytics = useAnalyticsContext();
   const { getKeyAgentType } = useWalletStore();
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
@@ -62,7 +62,7 @@ export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }):
         ? AnalyticsEventNames.Staking.STAKING_SUCCESS_POPUP
         : AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER
     });
-    setDelegationBuiltTx();
+    setDelegationTxBuilder();
     setIsDrawerVisible(false);
     resetStates();
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).

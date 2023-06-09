@@ -41,6 +41,7 @@ Feature: DAppConnector - Extended view
     Then I see test DApp on the Authorized DApps list
     When I open test DApp
     Then I don't see DApp window
+    And I de-authorize all DApps in extended mode
 
   @LW-6880 @Testnet @Mainnet
   Scenario: Extended view - Remove authorized DApp, DApp requires authorization

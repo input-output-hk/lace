@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { storage, Storage } from 'webextension-polyfill';
+import isNil from 'lodash/isNil';
 import { applyMigrations, migrationsRequirePassword } from '@lib/scripts/migrations';
 import { MigrationState } from '@lib/scripts/types';
 import { UnlockWallet } from '@src/features/unlock-wallet';
@@ -81,9 +82,15 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
       .catch((error) => console.log('Error fetching initial migration state:', error));
 
     // Observe changes to MIGRATION_STATE in storage
-    const observeMigrationState = (changes: Record<string, Storage.StorageChange>) => {
+    const observeMigrationState = async (changes: Record<string, Storage.StorageChange>) => {
       if (changes.MIGRATION_STATE && changes.MIGRATION_STATE.newValue !== changes.MIGRATION_STATE.oldValue) {
         setIsLoadingFirstTime(false);
+        if (isNil(changes.MIGRATION_STATE.newValue)) {
+          // Don't allow changing to undefined
+          await storage.local.set({ MIGRATION_STATE: changes.MIGRATION_STATE.oldValue as MigrationState });
+          setMigrationState(changes.MIGRATION_STATE.oldValue);
+          return;
+        }
         setMigrationState(changes.MIGRATION_STATE.newValue as MigrationState);
       }
     };
@@ -136,6 +143,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
         onUnlock={onUnlock}
         passwordInput={{ value: password, handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
         unlockButtonDisabled={password === ''}
+        // TODO: show forgot password here too. Use same logic as in ResetDataError on click
         showForgotPassword={false}
       />
     ) : (
@@ -144,7 +152,11 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
   }
 
   if (renderState.isMigrating) {
-    return migrationState?.state !== 'not-loaded' ? <MigrationInProgress appMode={appMode} /> : <MainLoader />;
+    return migrationState && migrationState.state === 'migrating' ? (
+      <MigrationInProgress appMode={appMode} />
+    ) : (
+      <MainLoader />
+    );
   }
 
   return <>{children}</>;

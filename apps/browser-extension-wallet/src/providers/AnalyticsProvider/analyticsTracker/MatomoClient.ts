@@ -4,7 +4,6 @@ import randomBytes from 'randombytes';
 import { Wallet } from '@lace/cardano';
 import { AnalyticsConsentStatus, AnalyticsClient, Metadata, sendEventProps } from './types';
 import { ANALYTICS_API_ENDPOINT, NETWORK_TO_ANALYTICS_SITE_ID_MAP } from './config';
-import { getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
 
 /**
  * Matomo API reference:
@@ -24,14 +23,8 @@ export class MatomoClient implements AnalyticsClient {
 
   // according to the docs _id must be a 16 characters hexadecimal string and address is bech32 format
   getUserId(): string {
-    let userId = getValueFromLocalStorage('analyticsUserId');
-
-    if (!userId) {
-      // eslint-disable-next-line no-magic-numbers
-      userId = randomBytes(8).toString('hex');
-      saveValueInLocalStorage({ key: 'analyticsUserId', value: userId });
-    }
-    return userId;
+    // eslint-disable-next-line no-magic-numbers
+    return randomBytes(8).toString('hex');
   }
 
   getMetadata(): Metadata {

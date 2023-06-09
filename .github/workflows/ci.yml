@@ -38,3 +38,15 @@ jobs:
         with:
           name: lace
           path: apps/browser-extension-wallet/dist
+      - name: Rebuild a version of Lace with feature flags enabled
+        shell: bash
+        env:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
+        run: |
+          eval "set -x ; $(cat apps/browser-extension-wallet/.env.* | grep ^USE_ | sed -r 's/false/true/' | sort --unique | sed -r 's/^/export /' | tr '\n' ';') set +x"
+          yarn browser build
+      - name: Upload build
+        uses: actions/upload-artifact@v3
+        with:
+          name: lace--all-feature-flags
+          path: apps/browser-extension-wallet/dist

@@ -33,10 +33,10 @@ export const mockKeyAgentDataTestnet: Wallet.KeyManagement.SerializableKeyAgentD
 };
 
 export const mockKeyAgentsByChain: Wallet.KeyAgentsByChain = {
-  Preprod: { keyAgentData: mockKeyAgentDataTestnet },
   LegacyTestnet: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.LegacyTestnet } },
-  Preview: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preview } },
-  Mainnet: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Mainnet } }
+  Mainnet: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Mainnet } },
+  Preprod: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preprod } },
+  Preview: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preview } }
 };
 
 export const mockInMemoryWallet = {

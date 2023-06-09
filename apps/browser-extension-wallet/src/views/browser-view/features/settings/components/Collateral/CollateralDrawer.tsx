@@ -32,7 +32,7 @@ export const CollateralDrawer = ({
   const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
   const [currentStep, setCurrentStep] = useState<CollateralStep>('send');
   const isWalletSyncingForTheFirstTime = useSyncingTheFirstTime();
-  const { tx, initializeCollateralTx, submitCollateralTx, isInitializing, isSubmitting, hasEnoughAda } =
+  const { txFee, initializeCollateralTx, submitCollateralTx, isInitializing, isSubmitting, hasEnoughAda } =
     useCollateral();
   const { fiatCurrency } = useCurrencyStore();
 
@@ -59,7 +59,7 @@ export const CollateralDrawer = ({
     }
     return (
       <CollateralStepSend
-        tx={tx}
+        txFee={txFee}
         hasEnoughAda={hasEnoughAda}
         popupView={popupView}
         password={password}
