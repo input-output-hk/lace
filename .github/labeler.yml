@@ -13,3 +13,6 @@ e2e:
 # Docs targets
 documentation:
   - any: ['docs/**/*', '**/*.md']
+# CI targets
+ci:
+  - any: ['.github/**/*']
