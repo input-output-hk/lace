@@ -203,7 +203,7 @@
     "webpack-cli": "4.7.2",
     "webpack-dev-server": "^4.9.3",
     "webpack-merge": "5.8.0",
-    "webpack-subresource-integrity": "^5.1.0",
-    "wsrun": "^5.2.4"
-  }
+    "webpack-subresource-integrity": "^5.1.0"
+  },
+  "packageManager": "yarn@3.6.0"
 }
