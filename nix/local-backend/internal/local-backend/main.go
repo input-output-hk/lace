@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+	"strings"
 	"github.com/sqweek/dialog"
 	"github.com/getlantern/systray"
 	"github.com/allan-simon/go-singleinstance"
@@ -250,6 +251,7 @@ type ManagedChild struct {
 	StatusCh    chan<- string
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
 	LogMonitor  func(string)
+	DropTimeFmt string // timestamp format to drop from child's output (only when it's equal to Now)
 }
 
 type HealthStatus struct {
@@ -347,6 +349,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					LogMonitor: func(line string) {},
+					DropTimeFmt: "[2006-01-02 15:04:05.00 UTC] ",
 				}
 			}(),
 			func() ManagedChild {
@@ -382,6 +385,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					LogMonitor: func(line string) {},
+					DropTimeFmt: "",
 				}
 			}(),
 			func() ManagedChild {
@@ -432,6 +436,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					LogMonitor: func(line string) {},
+					DropTimeFmt: "",
 				}
 			}(),
 		}
@@ -448,7 +453,10 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 			outputLines := make(chan string)
 			terminateCh := make(chan struct{}, 1)
 			childDidExit := false
-			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(), outputLines, terminateCh)
+			childPid := 0
+			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(),
+				child.DropTimeFmt,
+				outputLines, terminateCh, &childPid)
 			defer func() {
 				if !childDidExit {
 					child.StatusCh <- "terminating…"
@@ -605,7 +613,8 @@ func duplicateOutputToFile(logFile string) func() {
 
 func childProcess(
 	path string, argv []string, extraEnv []string,
-	outputLines chan<- string, terminate <-chan struct{},
+	deleteTimeFormat string,
+	outputLines chan<- string, terminate <-chan struct{}, pid *int,
 ) {
 	defer close(outputLines)
 
@@ -626,7 +635,11 @@ func childProcess(
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			outputLines <- "[stderr] " + scanner.Text()
+			line := scanner.Text()
+			if (deleteTimeFormat != "") {
+				line = strings.ReplaceAll(line, time.Now().UTC().Format(deleteTimeFormat), "")
+			}
+			outputLines <- "[stderr] " + line
 		}
 		wgOuts.Done()
 	}()
@@ -639,7 +652,11 @@ func childProcess(
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			outputLines <- scanner.Text()
+			line := scanner.Text()
+			if (deleteTimeFormat != "") {
+				line = strings.ReplaceAll(line, time.Now().UTC().Format(deleteTimeFormat), "")
+			}
+			outputLines <- line
 		}
 		wgOuts.Done()
 	}()
@@ -649,6 +666,9 @@ func childProcess(
 		return
 	}
 
+	if (pid != nil) {
+		*pid = cmd.Process.Pid
+	}
 	waitDone := make(chan struct{})
 
 	go func() {
