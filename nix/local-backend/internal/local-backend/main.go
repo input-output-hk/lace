@@ -70,12 +70,13 @@ func main() {
 	os.Chdir(workDir)
 
 	lockFile := workDir + sep + "instance.lock"
-	_, err = singleinstance.CreateLockFile(lockFile)
+	lockFileFile, err := singleinstance.CreateLockFile(lockFile)
 	if err != nil {
 		dialog.Message("Another instance of ‘%s’ is already running.",
 			filepath.Base(executablePath)).Title("Already running!").Error()
 		os.Exit(1)
 	}
+	defer lockFileFile.Close() // or else, it will be GC’d (and unlocked!)
 
 	logFile := workDir + sep + "logs" + sep + time.Now().UTC().Format("2006-01-02--15-04-05Z") + ".log"
 	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
