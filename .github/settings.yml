@@ -26,6 +26,9 @@ labels:
   - name: staking
     description: Changes to the staking package.
 
+  - name: ui-toolkit
+    description: Changes to the ui package.
+
   - name: e2e
     description: Changes to the e2e testing instrumentation.
 
