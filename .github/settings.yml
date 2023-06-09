@@ -19,6 +19,7 @@ repository:
   enable_vulnerability_alerts: true
 
 # Labels: define labels for Issues and Pull Requests
+# IMPORTANT: Please remember to add new labels to the `labeler.yml`
 labels:
   - name: browser
     description: Changes to the browser application.

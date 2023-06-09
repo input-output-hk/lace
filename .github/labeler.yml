@@ -1,3 +1,5 @@
+# IMPORTANT: Please remember to add new labels to the `settings.yml`
+
 # Browser extension
 browser:
   - any: ['apps/browser-extension-wallet/**/*']
