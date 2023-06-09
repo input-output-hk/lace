@@ -3,14 +3,11 @@ import StakePoolDetails from '../elements/staking/stakePoolDetails';
 import { expect } from 'chai';
 import { t } from '../utils/translationService';
 import { TestnetPatterns } from '../support/patterns';
-import webTester from '../actor/webTester';
-import { Button } from '../elements/button';
 
 class StakePoolDetailsAssert {
   async assertSeeStakePoolDetailsPage(expectedStakedPool: StakePool, staked: boolean, noMetaDataPool = false) {
-    await browser.pause(1000); // to populate fields with data
-
     await StakePoolDetails.poolLogo.waitForDisplayed();
+    await StakePoolDetails.poolName.waitForDisplayed();
     await expect(await StakePoolDetails.poolName.getText()).to.equal(expectedStakedPool.name);
 
     if (noMetaDataPool) {
@@ -60,7 +57,10 @@ class StakePoolDetailsAssert {
         await t('browserView.staking.details.unstakingIsNotYetAvailableFollowTheseStepsIfYouWishToChangeStakePool')
       );
     } else {
-      await webTester.seeWebElement(new Button(await t('browserView.staking.details.stakeButtonText')));
+      await StakePoolDetails.stakeButton.waitForDisplayed();
+      await expect(await StakePoolDetails.stakeButton.getText()).to.equal(
+        await t('browserView.staking.details.stakeButtonText')
+      );
     }
 
     await expect(await StakePoolDetails.informationTitle.getText()).to.equal(
