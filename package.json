@@ -24,25 +24,25 @@
   ],
   "scripts": {
     "base-command-for-build-scripts": "wsrun --prefix -tram ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
-    "browser": "APP_NAME=browser-extension-wallet yarn $1",
-    "build": "yarn base-command-for-build-scripts -c build",
-    "build-deps": "EXCLUDE_APP=true yarn build",
-    "cardano:lint": "yarn eslint-cmd \"packages/cardano/**/*.{js,ts,tsx}\"",
+    "browser": "APP_NAME=browser-extension-wallet npm run build $1",
+    "build": "npm run build --workspaces",
+    "build-deps": "npm run build --workspace=packages/",
+    "cardano:lint": "npm run eslint-cmd \"packages/cardano/**/*.{js,ts,tsx}\"",
     "chromatic": "ENV=development yarn build-storybook; chromatic --exit-zero-on-changes --project-token=e28776c940b9 -d storybook-static/",
-    "cleanup": "yarn workspaces run cleanup && shx rm -rf node_modules storybook-static && rm -rf .cache/eslintcache",
-    "common:lint": "yarn eslint-cmd \"packages/common/**/*.{js,ts,tsx}\"",
-    "core:lint": "yarn eslint-cmd \"packages/core/**/*.{js,ts,tsx}\"",
+    "cleanup": "npm run cleanup --workspaces && shx rm -rf node_modules storybook-static && rm -rf .cache/eslintcache",
+    "common:lint": "npm run eslint-cmd \"packages/common/**/*.{js,ts,tsx}\"",
+    "core:lint": "npm run eslint-cmd \"packages/core/**/*.{js,ts,tsx}\"",
     "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore",
-    "extension:lint": "yarn eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
-    "lint": "yarn workspaces run lint && yarn markdown:lint",
+    "extension:lint": "npm run eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
+    "lint": "npm run lint --workspaces --if-present && npm run markdown:lint",
     "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
-    "markdown:lint:fix": "yarn markdown:lint --fix",
+    "markdown:lint:fix": "npm run markdown:lint --fix",
     "prepare": "husky install & ts-patch install -s",
     "storybook": "ENV=development start-storybook -p 6006",
-    "prestorybook:build": "yarn build",
+    "prestorybook:build": "npm run build",
     "storybook:build": "ENV=development build-storybook --log-level error",
-    "test": "yarn workspaces run test",
-    "test:coverage": "yarn workspaces run test:coverage",
+    "test": "npm run test --workspaces",
+    "test:coverage": "npm run test:coverage --workspaces",
     "version": "standard-version",
     "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)' -c watch",
     "watch-deps": "EXCLUDE_APP=true yarn watch"
@@ -53,8 +53,8 @@
       "prettier --write"
     ],
     "*(packages/ui/**/*.{js,ts,tsx})": [
-      "yarn workspace @lace/ui lint --fix",
-      "yarn workspace @lace/ui format"
+      "npm run lint --workspace=@lace/ui --fix",
+      "npm run format --workspace=@lace/ui"
     ],
     "*.json": "prettier --write",
     "{packages/!(ui),apps}/**/*.md": [
@@ -203,7 +203,6 @@
     "webpack-cli": "4.7.2",
     "webpack-dev-server": "^4.9.3",
     "webpack-merge": "5.8.0",
-    "webpack-subresource-integrity": "^5.1.0",
-    "wsrun": "^5.2.4"
+    "webpack-subresource-integrity": "^5.1.0"
   }
 }
