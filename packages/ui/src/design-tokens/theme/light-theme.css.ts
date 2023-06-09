@@ -1,21 +1,23 @@
 import { createTheme } from '@vanilla-extract/css';
 
-import { laceGradient, lightColorScheme } from './colors.data';
-import { opacities } from './opacities.data';
-import { radius } from './radius.data';
-import { spacing } from './spacing.data';
-import { vars } from './theme.css';
+import { laceGradient, lightColorScheme } from '../colors.data';
+import { opacities } from '../opacities.data';
+import { radius } from '../radius.data';
+import { spacing } from '../spacing.data';
 import {
   fontWeights,
   fontSizes,
   lineHeights,
   fontFamily,
-} from './typography.data';
+} from '../typography.data';
 
-import type { Colors } from './colors.data';
-import type { Elevation } from './elevation.data';
+import { vars } from './theme-contract.css';
+
+import type { Colors } from '../colors.data';
+import type { Elevation } from '../elevation.data';
 
 const colors: Colors = {
+  $lace_typography_main_color: lightColorScheme.$primary_black,
   $lace_gradient: laceGradient,
   $transparent: 'rgba(0,0,0,0)',
 

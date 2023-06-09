@@ -1,0 +1,41 @@
+import type { PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
+
+import cs from 'classnames';
+
+import { ThemeColorScheme, ThemeContext } from './context';
+import { darkTheme } from './dark-theme.css';
+import { lightTheme } from './light-theme.css';
+import { vars } from './theme-contract.css';
+import * as cx from './theme-provider.css';
+
+import type { ThemeContextValue } from './context';
+
+type ThemeProviderProps = PropsWithChildren<{
+  colorScheme: ThemeColorScheme;
+}>;
+
+export const ThemeProvider = ({
+  children,
+  colorScheme,
+}: Readonly<ThemeProviderProps>): React.ReactElement => {
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      colorScheme,
+      vars,
+    }),
+    [colorScheme],
+  );
+  return (
+    <ThemeContext.Provider value={value}>
+      <div
+        className={cs(cx.root, {
+          [darkTheme]: colorScheme === ThemeColorScheme.Dark,
+          [lightTheme]: colorScheme === ThemeColorScheme.Light,
+        })}
+      >
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
+};
