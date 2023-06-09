@@ -241,6 +241,24 @@ func setupTrayUI(
 	}()
 }}
 
+type ManagedChild struct {
+	LogPrefix   string
+	PrettyName  string // used in auto-generated messages to StatusCh
+	ExePath     string
+	MkArgv      func() []string // XXX: it’s a func to run `getFreeTCPPort()` at the very last moment
+	MkExtraEnv  func() []string
+	StatusCh    chan<- string
+	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
+	LogMonitor  func(string)
+}
+
+type HealthStatus struct {
+	Initialized bool          // whether to continue with launching other dependant processes
+	DoRestart bool               // restart everything (even before it's considered initialized)
+	NextProbeIn time.Duration // when to schedule the next HealthProbe
+	LastErr error
+}
+
 func manageChildren(libexecDir string, resourcesDir string, workDir string,
 	networkSwitch <-chan string,
 	initiateShutdownCh <-chan struct{},
@@ -282,162 +300,227 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 		fmt.Printf("info: starting session for network %s\n", network)
 
-		addChild := func(
-			logPrefix string, exePath string, argv []string, extraEnv []string,
-			statusCh chan<- string,
-		) (func(), <-chan struct{}) {
-			wgChildren.Add(1)
-			statusCh <- "starting…"
-			outputLines := make(chan string)
-			terminateCh := make(chan struct{}, 1)
-			childDidExit := false
-			go childProcess(exePath, argv, extraEnv, outputLines, terminateCh)
-			cancelChild := func() {
-				if !childDidExit {
-					statusCh <- "terminating…"
-					terminateCh <- struct{}{}
-				}
-			}
-			markExitCh := make(chan struct{}, 1)
-			go func() {
-				for line := range outputLines {
-					fmt.Printf("[%s] %s\n", logPrefix, line)
-				}
-				childDidExit = true
-				statusCh <- "off"
-				wgChildren.Done()
-				markExitCh <- struct{}{}
-			}()
-			return cancelChild, markExitCh
-		}
-
-		// -------------------------- cardano-node -------------------------- //
-
 		cardanoServicesDir := (resourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
 			sep + "cardano-services")
-
 		cardanoNodeConfigDir := (cardanoServicesDir + sep + "config" + sep + "network" +
 			sep + network + sep + "cardano-node")
 		cardanoNodeSocket := workDir + sep + network + sep + "cardano-node.socket"
 
-		cancelCardanoNode, cardanoNodeExited := addChild(
-			"cardano-node",
-			libexecDir + sep + "cardano-node" + exeSuffix,
-			[]string{
-				"run",
-				"--topology", cardanoNodeConfigDir + sep + "topology.json",
-				"--database-path", workDir + sep + network + sep + "chain",
-				"--port", fmt.Sprintf("%d", getFreeTCPPort()),
-				"--host-addr", "0.0.0.0",
-				"--config", cardanoNodeConfigDir + sep + "config.json",
-				"--socket-path", cardanoNodeSocket,
-			}, []string{}, cardanoNodeStatus)
-		defer cancelCardanoNode()
-
-		socketListenErr := make(chan error, 1)
-		go func() {
-			// FIXME: a smarter health check needed
-			socketListenErr <- waitForUnixSocket(cardanoNodeSocket, 120 * time.Second)
-		}()
-		select {
-		case err := <-socketListenErr:
-			if (err != nil) {
-				panic(err)
-			}
-		case <-cardanoNodeExited:
-			panic("cardano-node exited prematurely")
-		}
-
-		cardanoNodeStatus <- "socket listening"
-
-		// -------------------------- Ogmios -------------------------- //
-
-		ogmiosPort := getFreeTCPPort()
-
-		cancelOgmios, ogmiosExited := addChild(
-			"ogmios",
-			libexecDir + sep + "ogmios" + exeSuffix,
-			[]string{
-				"--host", "127.0.0.1",
-				"--port", fmt.Sprintf("%d", ogmiosPort),
-				"--node-config", cardanoNodeConfigDir + sep + "config.json",
-				"--node-socket", cardanoNodeSocket,
-			}, []string{}, ogmiosStatus)
-		defer cancelOgmios()
-
-		ogmiosHealthErr := make(chan error, 1)
-		go func() {
-			// It usually takes <1s
-			ogmiosHealthErr <- waitForHttp200(fmt.Sprintf("http://127.0.0.1:%d/health", ogmiosPort), 10 * time.Second)
-		}()
-		select {
-		case err := <-ogmiosHealthErr:
-			if (err != nil) {
-				panic(err)
-			}
-		case <-ogmiosExited:
-			panic("ogmios exited prematurely")
-		}
-
-		ogmiosStatus <- "listening"
-
-		// -------------------------- cardano-js-sdk -------------------------- //
+		var ogmiosPort int
 
 		tokenMetadataServerUrl := "https://tokens.cardano.org"
 		if network != "mainnet" {
 			tokenMetadataServerUrl = "https://metadata.cardano-testnet.iohkdev.io/"
 		}
 
-		cancelProviderServer, providerServerExited := addChild(
-			"provider-server",
-			libexecDir + sep + "node" + exeSuffix,
-			[]string{
-				cardanoServicesDir + sep + "dist" + sep + "cjs" + sep + "cli.js",
-				"start-provider-server",
-			}, []string{
-				"NETWORK=" + network,
-				"TOKEN_METADATA_SERVER_URL=" + tokenMetadataServerUrl,
-				"CARDANO_NODE_CONFIG_PATH=" + cardanoNodeConfigDir + sep + "config.json",
-				"API_URL=http://0.0.0.0:" + fmt.Sprintf("%d", *providerServerPort),
-				"ENABLE_METRICS=true",
-				"LOGGER_MIN_SEVERITY=info",
-				"SERVICE_NAMES=tx-submit",
-				"USE_QUEUE=false",
-				"USE_BLOCKFROST=false",
-				"OGMIOS_URL=ws://127.0.0.1:" + fmt.Sprintf("%d", ogmiosPort),
-			}, providerServerStatus)
-		defer cancelProviderServer()
-
-		providerServerHealthErr := make(chan error, 1)
-		go func() {
-			// It usually takes <1s
-			providerServerHealthErr <- waitForHttp200(fmt.Sprintf("http://127.0.0.1:%d/health", *providerServerPort), 10 * time.Second)
-		}()
-		select {
-		case err := <-providerServerHealthErr:
-			if (err != nil) {
-				panic(err)
-			}
-		case <-providerServerExited:
-			panic("provider-server exited prematurely")
+		childrenDefs := []ManagedChild{
+			func() ManagedChild {
+				return ManagedChild{
+					LogPrefix: "cardano-node",
+					PrettyName: "cardano-node",
+					ExePath: libexecDir + sep + "cardano-node" + exeSuffix,
+					MkArgv: func() []string {
+						return []string {
+							"run",
+							"--topology", cardanoNodeConfigDir + sep + "topology.json",
+							"--database-path", workDir + sep + network + sep + "chain",
+							"--port", fmt.Sprintf("%d", getFreeTCPPort()),
+							"--host-addr", "0.0.0.0",
+							"--config", cardanoNodeConfigDir + sep + "config.json",
+							"--socket-path", cardanoNodeSocket,
+						}
+					},
+					MkExtraEnv: func() []string { return []string{} },
+					StatusCh: cardanoNodeStatus,
+					HealthProbe: func(prev HealthStatus) HealthStatus {
+						err := probeUnixSocket(cardanoNodeSocket, 1 * time.Second)
+						nextProbeIn := 1 * time.Second
+						if (err == nil) {
+							cardanoNodeStatus <- "socket listening"
+							nextProbeIn = 60 * time.Second
+						}
+						return HealthStatus {
+							Initialized: err == nil,
+							DoRestart: false,
+							NextProbeIn: nextProbeIn,
+							LastErr: err,
+						}
+					},
+					LogMonitor: func(line string) {},
+				}
+			}(),
+			func() ManagedChild {
+				return ManagedChild{
+					LogPrefix: "ogmios",
+					PrettyName: "Ogmios",
+					ExePath: libexecDir + sep + "ogmios" + exeSuffix,
+					MkArgv: func() []string {
+						ogmiosPort = getFreeTCPPort()
+						return []string{
+							"--host", "127.0.0.1",
+							"--port", fmt.Sprintf("%d", ogmiosPort),
+							"--node-config", cardanoNodeConfigDir + sep + "config.json",
+							"--node-socket", cardanoNodeSocket,
+						}
+					},
+					MkExtraEnv: func() []string { return []string{} },
+					StatusCh: ogmiosStatus,
+					HealthProbe: func(prev HealthStatus) HealthStatus {
+						err := probeHttp200(
+							fmt.Sprintf("http://127.0.0.1:%d/health", ogmiosPort),
+							1 * time.Second)
+						nextProbeIn := 1 * time.Second
+						if (err == nil) {
+							ogmiosStatus <- "listening"
+							nextProbeIn = 60 * time.Second
+						}
+						return HealthStatus {
+							Initialized: err == nil,
+							DoRestart: false,
+							NextProbeIn: nextProbeIn,
+							LastErr: err,
+						}
+					},
+					LogMonitor: func(line string) {},
+				}
+			}(),
+			func() ManagedChild {
+				return ManagedChild{
+					LogPrefix: "provider-server",
+					PrettyName: "provider-server",
+					ExePath: libexecDir + sep + "node" + exeSuffix,
+					MkArgv: func() []string {
+						return []string{
+							cardanoServicesDir + sep + "dist" + sep + "cjs" +
+								sep + "cli.js",
+							"start-provider-server",
+						}
+					},
+					MkExtraEnv: func() []string {
+						return []string{
+							"NETWORK=" + network,
+							"TOKEN_METADATA_SERVER_URL=" + tokenMetadataServerUrl,
+							"CARDANO_NODE_CONFIG_PATH=" + cardanoNodeConfigDir +
+								sep + "config.json",
+							"API_URL=http://0.0.0.0:" +
+								fmt.Sprintf("%d", *providerServerPort),
+							"ENABLE_METRICS=true",
+							"LOGGER_MIN_SEVERITY=info",
+							"SERVICE_NAMES=tx-submit",
+							"USE_QUEUE=false",
+							"USE_BLOCKFROST=false",
+							"OGMIOS_URL=ws://127.0.0.1:" +
+								fmt.Sprintf("%d", ogmiosPort),
+						}
+					},
+					StatusCh: providerServerStatus,
+					HealthProbe: func(prev HealthStatus) HealthStatus {
+						err := probeHttp200(
+							fmt.Sprintf("http://127.0.0.1:%d/health",
+								*providerServerPort),
+							1 * time.Second)
+						nextProbeIn := 1 * time.Second
+						if (err == nil) {
+							ogmiosStatus <- "listening"
+							nextProbeIn = 60 * time.Second
+						}
+						return HealthStatus {
+							Initialized: err == nil,
+							DoRestart: false,
+							NextProbeIn: nextProbeIn,
+							LastErr: err,
+						}
+					},
+					LogMonitor: func(line string) {},
+				}
+			}(),
 		}
 
-		providerServerStatus <- "listening"
+		anyChildExitedCh := make(chan struct{}, len(childrenDefs))
 
-		// -------------------------- wait for disaster (or network switch) -------------------------- //
-
-		select {
-		case <-cardanoNodeExited:
-		case <-ogmiosExited:
-		case <-providerServerExited:
-		case newNetwork := <-networkSwitch:
-			if newNetwork != network {
-				omitSleep = true
-				network = newNetwork
+		for childIdx, childUnsafe := range childrenDefs {
+			child := childUnsafe // or else all interations will get the same ref (last child)
+			wgChildren.Add(1)
+			for _, dependant := range childrenDefs[(childIdx+1):] {
+				dependant.StatusCh <- fmt.Sprintf("waiting for ‘%s’…", child.PrettyName)
 			}
-		case <-initiateShutdownCh:
-			fmt.Println("info: initiating a clean shutdown...")
-			keepGoing = false
+			child.StatusCh <- "starting…"
+			outputLines := make(chan string)
+			terminateCh := make(chan struct{}, 1)
+			childDidExit := false
+			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(), outputLines, terminateCh)
+			defer func() {
+				if !childDidExit {
+					child.StatusCh <- "terminating…"
+					terminateCh <- struct{}{}
+				}
+			}()
+			initializedCh := make(chan struct{}, 1)
+
+			// monitor output:
+			go func() {
+				for line := range outputLines {
+					fmt.Printf("[%s] %s\n", child.LogPrefix, line)
+					child.LogMonitor(line)
+				}
+				childDidExit = true
+				child.StatusCh <- "off"
+				wgChildren.Done()
+				anyChildExitedCh <- struct{}{}
+			}()
+
+			// monitor health:
+			go func() {
+				prev := HealthStatus {
+					Initialized: false,
+					DoRestart: false,
+					NextProbeIn: 1 * time.Second,
+					LastErr: nil,
+				}
+				for {
+					next := child.HealthProbe(prev)
+					if next.DoRestart {
+						fmt.Printf("[%s] HealthProbe requested restart\n", child.LogPrefix)
+						terminateCh <- struct{}{}
+						return
+					}
+					next.Initialized = prev.Initialized || next.Initialized // remember true
+					if !prev.Initialized && next.Initialized {
+						fmt.Printf("[%s] HealthProbe reported as initialized\n",
+							child.LogPrefix)
+						initializedCh <- struct{}{} // continue launching the next process
+					}
+					time.Sleep(next.NextProbeIn)
+					prev = next
+				}
+			}()
+
+		OneFinalWait:
+			select {
+			case <-anyChildExitedCh:
+				return // if any exited, fail the whole session, and restart
+			case <-initializedCh:
+				if childIdx + 1 == len(childrenDefs) {
+					// if it was the last child, continue waiting:
+					goto OneFinalWait
+				}
+				// else: continue starting the next child
+			case newNetwork := <-networkSwitch:
+				if newNetwork != network {
+					omitSleep = true
+					network = newNetwork
+				}
+				return
+			case <-initiateShutdownCh:
+				fmt.Println("info: initiating a clean shutdown...")
+				keepGoing = false
+				return
+			}
+		}
+
+		// reset all statuses to "off" (not all children might’ve been started and they’re "waiting" now)
+		for _, child := range childrenDefs {
+			child.StatusCh <- "off"
 		}
 	}()}
 }
@@ -600,53 +683,28 @@ func getFreeTCPPort() int {
 	return address.Port
 }
 
-func waitForUnixSocket(path string, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-	for {
-		// XXX: for Windows named pipes this would be:
-		// net.DialTimeout("pipe", `\\.\pipe\mypipe`, timeout)
-		conn, err := net.DialTimeout("unix", path, 1 * time.Second)
-		if err == nil {
-			defer conn.Close()
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return fmt.Errorf("timeout waiting for socket: %s: %s", path, err)
-		}
-		time.Sleep(1 * time.Second)
+func probeUnixSocket(path string, timeout time.Duration) error {
+	// XXX: for Windows named pipes this would be:
+	// net.DialTimeout("pipe", `\\.\pipe\mypipe`, timeout)
+	conn, err := net.DialTimeout("unix", path, timeout)
+	if err == nil {
+		defer conn.Close()
 	}
+	return err
 }
 
-func waitForFile(path string, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-	for {
-		_, err := os.Stat(path)
-		if err == nil {
+func probeHttp200(url string, timeout time.Duration) error {
+	httpClient := http.Client{Timeout: timeout}
+	resp, err := httpClient.Get(url)
+	if err == nil {
+		defer resp.Body.Close()
+		if resp.StatusCode == http.StatusOK {
 			return nil
+		} else {
+			return fmt.Errorf("got a non-200 response: %s for %s", resp.StatusCode, url)
 		}
-		if time.Now().After(deadline) {
-			return fmt.Errorf("timeout waiting for file: %s", path)
-		}
-		time.Sleep(1 * time.Second)
 	}
-}
-
-func waitForHttp200(url string, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-	httpClient := http.Client{Timeout: 1 * time.Second}
-	for {
-		resp, err := httpClient.Get(url)
-		if err == nil {
-			defer resp.Body.Close()
-			if resp.StatusCode == http.StatusOK {
-				return nil
-			}
-		}
-		if time.Now().After(deadline) {
-			return fmt.Errorf("timeout waiting for endpoint: %s: (err = %s, response = %s)", err, resp)
-		}
-		time.Sleep(1 * time.Second)
-	}
+	return err
 }
 
 func openWithDefaultApp(target string) error {
