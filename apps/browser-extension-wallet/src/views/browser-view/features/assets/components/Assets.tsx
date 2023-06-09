@@ -199,7 +199,17 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   /**
    * Means it has more than 1 asset (ADA) in portfolio for Assets list.
    */
-  const hasTokens = useMemo(() => !isNil(total?.assets) && total?.assets?.size > 0, [total?.assets]);
+  const hasTokens = useMemo(() => {
+    if (isNil(total?.assets) || total?.assets?.size === 0) return false;
+    // Look for at least one asset that is not an NFT
+    for (const [assetId] of total.assets) {
+      const assetInfo = assetsInfo?.get(assetId);
+      // If no assetInfo, assume it's not an NFT until the info is loaded
+      if (!assetInfo || !isNFT(assetInfo)) return true;
+    }
+    // Return false if all assets are NFTs as we are not displaying them in this component
+    return false;
+  }, [assetsInfo, total?.assets]);
   /**
    * Assets are loading if only ADA was populated in the list and there are more assets to load and append to the UI.
    */
