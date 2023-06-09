@@ -22,21 +22,27 @@ repository:
 labels:
   - name: browser
     description: Changes to the browser application.
+    color: '#FF6B35'
 
   - name: staking
     description: Changes to the staking package.
+    color: '#685369'
 
   - name: ui-toolkit
     description: Changes to the ui package.
+    color: '#FFBF00'
 
   - name: e2e
     description: Changes to the e2e testing instrumentation.
+    color: '#0B4F6C'
 
   - name: documentation
     description: Documentation related issues or pull requests.
+    color: '#81D2C7'
 
   - name: ci
     description: CI related issues or pull requests.
+    color: '#474747'
 
 # See https://docs.github.com/en/rest/reference/teams#add-or-update-team-repository-permissions for available options
 teams:
