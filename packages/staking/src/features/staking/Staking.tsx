@@ -2,6 +2,7 @@ import { Box, Text, ThemeColorScheme, ThemeProvider } from '@lace/ui';
 import { BrowsePools } from '../browse-pools';
 import { Overview } from '../overview';
 import { Navigation, Page } from './Navigation';
+import './reset.css';
 
 type StakingProps = {
   theme: 'light' | 'dark';
