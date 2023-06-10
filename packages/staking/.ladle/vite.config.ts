@@ -10,7 +10,7 @@ export const ladleViteConfig = {
         position: 'br',
       },
       typescript: {
-        root: '../',
+        root: './',
         tsconfigPath: './tsconfig.json',
       },
     }),
