@@ -102,6 +102,7 @@ func main() {
 		currentUser.Username, hostInfo.Hostname)
 	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
 	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), workDir)
+	fmt.Printf("%s[%d]: timezone: %s\n", OurLogPrefix, os.Getpid(), time.Now().Format("UTC-07:00 (MST)"))
 	fmt.Printf("%s[%d]: HostID: %s\n", OurLogPrefix, os.Getpid(), hostInfo.HostID)
 	fmt.Printf("%s[%d]: OS: (%s-%s) %s %s %s (family: %s)\n", OurLogPrefix, os.Getpid(),
 		runtime.GOOS, runtime.GOARCH, hostInfo.OS, hostInfo.Platform, hostInfo.PlatformVersion,
@@ -273,7 +274,7 @@ func setupTrayUI(
 	}()
 
 	// XXX: additional spaces are there so that the width of the menu doesn’t change with updates:
-	mQuit := systray.AddMenuItem("Quit                                                                    ", "")
+	mQuit := systray.AddMenuItem("Quit                                                               ", "")
 	go func() {
 		<-mQuit.ClickedCh
 		mQuit.Disable()
@@ -607,6 +608,15 @@ func duplicateOutputToFile(logFile string) func() {
 		newLine = "\r\n"
 	}
 
+	fp, err := os.Create(logFile)
+	if err != nil {
+	    panic(err)
+	}
+
+	introLine := "-- Log begins at " + time.Now().UTC().Format("Mon 2006-01-02 15:04:05") + " UTC. --"
+	fmt.Println(introLine)
+	fp.WriteString(introLine + newLine)
+
 	newStdoutR, newStdoutW, err := os.Pipe()
 	if err != nil {
 	    panic(err)
@@ -619,13 +629,8 @@ func duplicateOutputToFile(logFile string) func() {
 	}
 	os.Stderr = newStderrW
 
-	fp, err := os.Create(logFile)
-	if err != nil {
-	    panic(err)
-	}
-
 	logTime := func() string {
-		return time.Now().UTC().Format("2006-01-02 15:04:05.000Z")
+		return time.Now().UTC().Format("Jan 2 15:04:05.000Z")
 	}
 
 	var wgScanners sync.WaitGroup
