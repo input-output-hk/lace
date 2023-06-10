@@ -15,6 +15,10 @@ import (
 	"runtime"
 	"time"
 	"strings"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/load"
 	"github.com/sqweek/dialog"
 	"github.com/getlantern/systray"
 	"github.com/allan-simon/go-singleinstance"
@@ -42,6 +46,16 @@ func main() {
 		panic(err)
 	}
 
+	hostInfo, err := host.Info()
+	if err != nil {
+		panic(err)
+	}
+
+	cpuInfo, err := cpu.Info()
+	if err != nil {
+		panic(err)
+	}
+
 	sep := string(filepath.Separator)
 
 	binDir := filepath.Dir(executablePath)
@@ -65,7 +79,7 @@ func main() {
 	default:
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
-	fmt.Printf("%s[%d]: workDir is %s\n", OurLogPrefix, os.Getpid(), workDir)
+	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), workDir)
 	os.MkdirAll(workDir, 0755)
 	os.Chdir(workDir)
 
@@ -82,6 +96,25 @@ func main() {
 	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
 	os.MkdirAll(filepath.Dir(logFile), 0755)
 	closeOutputs := duplicateOutputToFile(logFile)
+	defer closeOutputs()
+
+	fmt.Printf("%s[%d]: running as %s@%s\n", OurLogPrefix, os.Getpid(),
+		currentUser.Username, hostInfo.Hostname)
+	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
+	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), workDir)
+	fmt.Printf("%s[%d]: HostID: %s\n", OurLogPrefix, os.Getpid(), hostInfo.HostID)
+	fmt.Printf("%s[%d]: OS: (%s-%s) %s %s %s (family: %s)\n", OurLogPrefix, os.Getpid(),
+		runtime.GOOS, runtime.GOARCH, hostInfo.OS, hostInfo.Platform, hostInfo.PlatformVersion,
+		hostInfo.PlatformFamily)
+	fmt.Printf("%s[%d]: CPU: %dx %s\n", OurLogPrefix, os.Getpid(), len(cpuInfo), cpuInfo[0].ModelName)
+
+	logSystemHealth()
+	go func() {
+		for {
+			time.Sleep(60 * time.Second)
+			logSystemHealth()
+		}
+	}()
 
 	ogmiosStatus := make(chan string, 1)
 	cardanoNodeStatus := make(chan string, 1)
@@ -119,6 +152,7 @@ func main() {
 		ogmiosStatus, cardanoNodeStatus, providerServerStatus, networkSwitch, initiateShutdownCh,
 		logFile, &providerServerPort,
 	), func(){})
+	defer systray.Quit()
 
 	manageChildren(libexecDir, resourcesDir, workDir,
 		networkSwitch,
@@ -129,10 +163,7 @@ func main() {
 		&providerServerPort,
 	)
 
-	systray.Quit()
-
 	fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
-	closeOutputs()
 }
 
 func setupTrayUI(
@@ -171,7 +202,7 @@ func setupTrayUI(
 				mNetworks[network].Check()
 				if network != currentNetwork {
 					currentNetwork = network
-					fmt.Printf("%s[%d]: switching network to: %s...\n",
+					fmt.Printf("%s[%d]: switching network to: %s\n",
 						OurLogPrefix, os.Getpid(), network)
 					networkSwitch <- network
 				}
@@ -650,11 +681,7 @@ func childProcess(
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			line := scanner.Text()
-			if (deleteTimeFormat != "") {
-				line = strings.ReplaceAll(line, time.Now().UTC().Format(deleteTimeFormat), "")
-			}
-			outputLines <- "[stderr] " + line
+			outputLines <- "[stderr] " + deleteExtraTime(scanner.Text())
 		}
 		wgOuts.Done()
 	}()
@@ -667,11 +694,7 @@ func childProcess(
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			line := scanner.Text()
-			if (deleteTimeFormat != "") {
-				line = strings.ReplaceAll(line, time.Now().UTC().Format(deleteTimeFormat), "")
-			}
-			outputLines <- line
+			outputLines <- deleteExtraTime(scanner.Text())
 		}
 		wgOuts.Done()
 	}()
@@ -754,4 +777,25 @@ func openWithDefaultApp(target string) error {
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
 	return cmd.Run()
+}
+
+func logSystemHealth() {
+	ourPrefix := fmt.Sprintf("%s[%d]", OurLogPrefix, os.Getpid())
+
+	memInfo, err := mem.VirtualMemory()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s: RAM err: %s\n", ourPrefix, err)
+	}
+
+	fmt.Printf("%s: memory: %.2fGi total, %.2fGi free\n", ourPrefix,
+		float64(memInfo.Total) / (1024.0 * 1024.0 * 1024.0),
+		float64(memInfo.Free) / (1024.0 * 1024.0 * 1024.0))
+
+	avgStat, err := load.Avg()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s: load err: %s\n", ourPrefix, err)
+	}
+
+	fmt.Printf("%s: load average: %.2f, %.2f, %.2f\n", ourPrefix,
+		avgStat.Load1, avgStat.Load5, avgStat.Load15)
 }
