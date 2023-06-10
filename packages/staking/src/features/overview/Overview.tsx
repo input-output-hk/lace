@@ -1,6 +1,7 @@
 import { Box, Button, Flex, Text } from '@lace/ui';
 import { StakingInfoCard } from './staking-info-card';
 
+// TODO: consume real data once SDK side is ready
 const data = {
   staked: [
     {
