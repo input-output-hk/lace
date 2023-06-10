@@ -24,6 +24,7 @@ class StakePoolDetails {
   private POOL_ID = '//div[@data-testid="stake-pool-details-pool-id"]';
   private OWNERS_TITLE = '//div[@data-testid="stake-pool-details-owners-title"]';
   private OWNER = '//div[@data-testid="stake-pool-details-owner"]';
+  private STAKE_BUTTON = '[data-testid="stake-pool-details-stake-btn"]';
 
   get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER);
@@ -111,6 +112,10 @@ class StakePoolDetails {
 
   get owners(): Promise<WebdriverIO.ElementArray> {
     return $$(this.OWNER);
+  }
+
+  get stakeButton() {
+    return $(this.STAKE_BUTTON);
   }
 }
 

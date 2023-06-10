@@ -13,6 +13,7 @@ export interface UnlockWalletContainerProps {
   validateMnemonic?: boolean;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContainerProps): React.ReactElement => {
   const { unlockWallet, lockWallet, deleteWallet } = useWalletManager();
   const { environmentName, setKeyAgentData } = useWalletStore();
@@ -27,7 +28,8 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const loadWallet = useCallback(async () => {
     if (unlocked) {
       const keyAgentData = unlocked[environmentName]?.keyAgentData;
-      saveValueInLocalStorage({ key: 'keyAgentData', value: keyAgentData });
+      // eslint-disable-next-line unicorn/no-null
+      saveValueInLocalStorage({ key: 'keyAgentData', value: keyAgentData ?? null });
       await backgroundService.setBackgroundStorage({ keyAgentsByChain: unlocked });
       setKeyAgentData(keyAgentData);
     }
@@ -59,7 +61,6 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
     try {
       const decrypted = await unlockWallet(password);
       setIsValidPassword(true);
-      // TODO: check comment in `useWalletManager` > `unlockWallet` [LW-5449]
       if (decrypted) setUnlocked(decrypted);
     } catch {
       setIsValidPassword(false);

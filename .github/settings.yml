@@ -19,35 +19,46 @@ repository:
   enable_vulnerability_alerts: true
 
 # Labels: define labels for Issues and Pull Requests
+# IMPORTANT: Please remember to add new labels to the `labeler.yml`
 labels:
   - name: browser
     description: Changes to the browser application.
+    color: '#FF6B35'
 
   - name: staking
     description: Changes to the staking package.
+    color: '#685369'
+
+  - name: ui-toolkit
+    description: Changes to the ui package.
+    color: '#FFBF00'
 
   - name: e2e
     description: Changes to the e2e testing instrumentation.
+    color: '#0B4F6C'
 
   - name: documentation
     description: Documentation related issues or pull requests.
+    color: '#81D2C7'
 
+  - name: ci
+    description: CI related issues or pull requests.
+    color: '#474747'
 
 # See https://docs.github.com/en/rest/reference/teams#add-or-update-team-repository-permissions for available options
 teams:
-    # The permission to grant the team. Can be one of:
-    # * `pull` - can pull, but not push to or administer this repository.
-    # * `push` - can pull and push, but not administer this repository.
-    # * `admin` - can pull, push and administer this repository.
-    # * `maintain` - Recommended for project managers who need to manage the repository without access to sensitive or destructive actions.
-    # * `triage` - Recommended for contributors who need to proactively manage issues and pull requests without write access.
+  # The permission to grant the team. Can be one of:
+  # * `pull` - can pull, but not push to or administer this repository.
+  # * `push` - can pull and push, but not administer this repository.
+  # * `admin` - can pull, push and administer this repository.
+  # * `maintain` - Recommended for project managers who need to manage the repository without access to sensitive or destructive actions.
+  # * `triage` - Recommended for contributors who need to proactively manage issues and pull requests without write access.
   - name: lace
     permission: push # on open source -> triage
   - name: lace-admins
     permission: admin
   - name: lace-tech-leads
     permission: admin
-
 
 branches:
   - name: main

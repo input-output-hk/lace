@@ -17,12 +17,12 @@ Feature: Staking Page - Extended Browser View
   @LW-2486 @Testnet @Mainnet
   Scenario: Extended View - Staking search control is displayed with appropriate content
     When I navigate to Staking extended page
-    Then I see the stake pool search control with appropriate content
+    Then I see the stake pool search control with appropriate content in extended mode
 
   @LW-2662 @Testnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
-    And I see the stake pool search control with appropriate content
+    And I see the stake pool search control with appropriate content in extended mode
     And I input "<stake_pool_search_term>" to the search bar
     Then there are <number_of_results> results and "<stake_pool_title>" and "<stake_pool_subtitle>" are populated if applicable
     Examples:
@@ -39,7 +39,7 @@ Feature: Staking Page - Extended Browser View
   @LW-2662 @Mainnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
-    And I see the stake pool search control with appropriate content
+    And I see the stake pool search control with appropriate content in extended mode
     And I input "<stake_pool_search_term>" to the search bar
     Then there are <number_of_results> results and "<stake_pool_title>" and "<stake_pool_subtitle>" are populated if applicable
     Examples:
@@ -56,7 +56,7 @@ Feature: Staking Page - Extended Browser View
   @LW-2663 @Testnet @Mainnet
   Scenario: Extended View - Selecting stake pool from list opens drawer with appropriate details
     When I navigate to Staking extended page
-    And I see the stake pool search control with appropriate content
+    And I see the stake pool search control with appropriate content in extended mode
     And I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
@@ -139,7 +139,7 @@ Feature: Staking Page - Extended Browser View
     Given I am on Staking extended page
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
-    And I click "browserView.staking.details.stakeButtonText" button
+    And I click "Stake on this pool" button on stake pool details drawer
     And <step>
     Then Staking exit modal is displayed
     Examples:
@@ -152,8 +152,8 @@ Feature: Staking Page - Extended Browser View
     Given I am on Staking extended page
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
-    And I click "browserView.staking.details.stakeButtonText" button
-    And I click "browserView.staking.details.confirmation.button.confirm" button
+    And I click "Stake on this pool" button on stake pool details drawer
+    And I click "Next" button on staking confirmation drawer
     Then Staking password screen is displayed
     When I close the drawer by clicking close button
     Then Staking exit modal is displayed
