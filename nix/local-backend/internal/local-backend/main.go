@@ -290,7 +290,7 @@ type ManagedChild struct {
 	StatusCh    chan<- string
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
 	LogMonitor  func(string)
-	DropTimeFmt string // timestamp format to drop from child's output (only when it's equal to Now)
+	LogModifier func(string) string // e.g. to drop redundant timestamps
 }
 
 type HealthStatus struct {
@@ -346,6 +346,20 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 
 		childrenDefs := []ManagedChild{
 			func() ManagedChild {
+				hostname, _ := os.Hostname()
+				droppedHostname := fmt.Sprintf("[%s:cardano.node.", hostname)
+				removeTimestamp := func(line string, when time.Time) string {
+					needle := when.Format("[2006-01-02 15:04:05.")
+					index := strings.Index(line, needle)
+					if index != -1 {
+						end := index + len(needle) + 8
+						if end > len(line) {
+							end = len(line)
+						}
+						return line[:index] + line[end:]
+					}
+					return line
+				}
 				return ManagedChild{
 					LogPrefix: "cardano-node",
 					PrettyName: "cardano-node",
@@ -378,7 +392,13 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					LogMonitor: func(line string) {},
-					DropTimeFmt: "[2006-01-02 15:04:05.00 UTC] ",
+					LogModifier: func(line string) string {
+						now := time.Now().UTC()
+						line = removeTimestamp(line, now)
+						line = removeTimestamp(line, now.Add(-1 * time.Second))
+						line = strings.ReplaceAll(line, droppedHostname, "[")
+						return line
+					},
 				}
 			}(),
 			func() ManagedChild {
@@ -414,7 +434,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					LogMonitor: func(line string) {},
-					DropTimeFmt: "",
+					LogModifier: func(line string) string { return line },
 				}
 			}(),
 			func() ManagedChild {
@@ -465,7 +485,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					LogMonitor: func(line string) {},
-					DropTimeFmt: "",
+					LogModifier: func(line string) string { return line },
 				}
 			}(),
 		}
@@ -500,8 +520,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 			childDidExit := false
 			childPid := 0
 			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(),
-				child.DropTimeFmt,
-				outputLines, terminateCh, &childPid)
+				child.LogModifier, outputLines, terminateCh, &childPid)
 			defer func() {
 				if !childDidExit {
 					child.StatusCh <- "terminating…"
@@ -535,14 +554,14 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				for {
 					next := child.HealthProbe(prev)
 					if next.DoRestart {
-						fmt.Printf("%s[%d]: HealthProbe of %s[%d] requested restart\n",
+						fmt.Printf("%s[%d]: health probe of %s[%d] requested restart\n",
 							OurLogPrefix, os.Getpid(), child.LogPrefix, childPid)
 						terminateCh <- struct{}{}
 						return
 					}
 					next.Initialized = prev.Initialized || next.Initialized // remember true
 					if !prev.Initialized && next.Initialized {
-						fmt.Printf("%s[%d]: HealthProbe reported %s[%d] as initialized\n",
+						fmt.Printf("%s[%d]: health probe reported %s[%d] as initialized\n",
 							OurLogPrefix, os.Getpid(), child.LogPrefix, childPid)
 						initializedCh <- struct{}{} // continue launching the next process
 					}
@@ -562,7 +581,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 					goto OneFinalWait
 				}
 				// else: continue starting the next child
-				fmt.Printf("%s[%d]: will continue launching the next child...\n",
+				fmt.Printf("%s[%d]: will continue launching the next child\n",
 					OurLogPrefix, os.Getpid())
 			case newNetwork := <-networkSwitch:
 				if newNetwork != network {
@@ -659,7 +678,7 @@ func duplicateOutputToFile(logFile string) func() {
 
 func childProcess(
 	path string, argv []string, extraEnv []string,
-	deleteTimeFormat string,
+	logModifier func(string) string, // e.g. to drop redundant timestamps
 	outputLines chan<- string, terminate <-chan struct{}, pid *int,
 ) {
 	defer close(outputLines)
@@ -681,7 +700,7 @@ func childProcess(
 	go func() {
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			outputLines <- "[stderr] " + deleteExtraTime(scanner.Text())
+			outputLines <- "[stderr] " + logModifier(scanner.Text())
 		}
 		wgOuts.Done()
 	}()
@@ -694,7 +713,7 @@ func childProcess(
 	go func() {
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			outputLines <- deleteExtraTime(scanner.Text())
+			outputLines <- logModifier(scanner.Text())
 		}
 		wgOuts.Done()
 	}()
