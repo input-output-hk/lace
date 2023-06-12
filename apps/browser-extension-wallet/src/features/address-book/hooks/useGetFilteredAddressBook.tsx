@@ -18,9 +18,12 @@ interface FilteredAddressList {
   walletAddress: string;
 }
 
-const getAddressBookByNameOrAddressTransformer = ({ address, name, id }: AddressBookSchema): FilteredAddressList => ({
-  walletAddress: address,
-  walletName: name,
+const getAddressBookByNameOrAddressTransformer = (
+  { address, name, id }: AddressBookSchema,
+  networkName: string
+): FilteredAddressList => ({
+  walletAddress: address.replace(networkName.toUpperCase(), ''),
+  walletName: name.replace(networkName.toUpperCase(), ''),
   id
 });
 
@@ -55,14 +58,16 @@ export const useGetFilteredAddressBook = (): {
           const result = await dbRef.current
             .getConnection<AddressBookSchema>(addressBookSchema)
             .where('name')
-            .startsWithIgnoreCase(value)
+            .startsWithIgnoreCase(`${environmentName}${value}`)
             .or('address')
-            .equalsIgnoreCase(value)
+            .equalsIgnoreCase(`${environmentName}${value}`)
             .filter((item) => item.network === network)
             .limit(limit)
             .toArray();
 
-          const addressList = result.map((element) => getAddressBookByNameOrAddressTransformer(element));
+          const addressList = result.map((element) =>
+            getAddressBookByNameOrAddressTransformer(element, environmentName)
+          );
           setFilteredAddresses(addressList);
         });
       }

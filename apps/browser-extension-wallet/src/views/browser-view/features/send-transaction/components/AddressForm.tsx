@@ -10,6 +10,8 @@ import { CancelEditAddressModal } from './CancelEditAddressModal';
 import AddIcon from '../../../../../assets/icons/add.component.svg';
 import EditIcon from '../../../../../assets/icons/edit.component.svg';
 import EditAddressFormFooter from '@src/features/address-book/components/AddressDetailDrawer/EditAddressFormFooter';
+import { addNetworkToAddressBook } from '@views/browser/features/adress-book';
+import { EnvironmentTypes, useWalletStore } from '@stores';
 
 const validations: ValidationOptionsProps<FormKeys> = {
   name: validateWalletName,
@@ -24,6 +26,7 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
   const { t } = useTranslation();
   const [isConfirmCancelVisible, setIsConfirmCancelVisible] = useState<boolean>(false);
   const { setPrevSection } = useSections();
+  const { environmentName } = useWalletStore();
 
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
   const { utils } = useAddressBookContext();
@@ -39,11 +42,15 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
 
   const onAddressSave = (address: AddressBookSchema): Promise<string> =>
     'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, address, {
-          text: t('browserView.addressBook.toast.editAddress'),
-          icon: EditIcon
-        })
-      : saveAddress(address, {
+      ? updateAddress(
+          addressToEdit.id,
+          addNetworkToAddressBook(address, environmentName.toUpperCase() as Uppercase<EnvironmentTypes>),
+          {
+            text: t('browserView.addressBook.toast.editAddress'),
+            icon: EditIcon
+          }
+        )
+      : saveAddress(addNetworkToAddressBook(address, environmentName.toUpperCase() as Uppercase<EnvironmentTypes>), {
           text: t('browserView.addressBook.toast.addAddress'),
           icon: AddIcon
         });

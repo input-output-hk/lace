@@ -32,7 +32,7 @@ export type DbQueries<TSchema, TRecord> = {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useDbState = <T, TRecord>(
-  intialState: Array<T>,
+  initialState: Array<T>,
   schema: VersionedSchema,
   queries?: DbQueries<T, TRecord>
 ) => {
@@ -49,8 +49,9 @@ export const useDbState = <T, TRecord>(
       return queries && queries?.listQuery ? queries.listQuery(limitQuery) : limitQuery.toArray();
     },
     [limit, queries],
-    intialState
+    initialState
   );
+
   const count = useLiveQuery(
     () =>
       queries && queries?.countQuery

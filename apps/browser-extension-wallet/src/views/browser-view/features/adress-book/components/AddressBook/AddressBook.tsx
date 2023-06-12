@@ -2,7 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { WalletAddressList, WalletAddressItemProps } from '@lace/core';
-import { withAddressBookContext, useAddressBookContext } from '@src/features/address-book/context';
+import { withAddressBookContext, useAddressBookContext, AddressRecordParams } from '@src/features/address-book/context';
 import { AddressBookSchema } from '@src/lib/storage';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import { SectionLayout, EducationalList, Layout } from '@src/views/browser-view/components';
@@ -22,6 +22,16 @@ import {
   AnalyticsEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
+import { EnvironmentTypes, useWalletStore } from '@stores';
+
+// This adds current network to address book to create a uniqueness with address book content across networks
+export const addNetworkToAddressBook = (
+  address: AddressBookSchema,
+  network: Uppercase<EnvironmentTypes>
+): AddressRecordParams => ({
+  name: `${network}${address.name}`,
+  address: `${network}${address.address}`
+});
 
 export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { t: translate } = useTranslation();
@@ -30,6 +40,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { extendLimit, saveRecord: saveAddress, updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
   const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
   const analytics = useAnalyticsContext();
+  const { environmentName } = useWalletStore();
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
@@ -86,11 +97,15 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
     });
 
     return 'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, address, {
-          text: translate('browserView.addressBook.toast.editAddress'),
-          icon: EditIcon
-        })
-      : saveAddress(address, {
+      ? updateAddress(
+          addressToEdit.id,
+          addNetworkToAddressBook(address, environmentName.toUpperCase() as Uppercase<EnvironmentTypes>),
+          {
+            text: translate('browserView.addressBook.toast.editAddress'),
+            icon: EditIcon
+          }
+        )
+      : saveAddress(addNetworkToAddressBook(address, environmentName.toUpperCase() as Uppercase<EnvironmentTypes>), {
           text: translate('browserView.addressBook.toast.addAddress'),
           icon: AddIcon
         });
