@@ -11,11 +11,19 @@
 
   &.visibleCounter {
     padding-bottom: size_unit(2.5);
+
+    :global(.ant-input-suffix) {
+      position: absolute;
+      right: size_unit(0.5);
+      top: size_unit(0.5);
+      width: size_unit(6.5);
+    }
   }
 
   input {
     @include text-bodyLarge-medium;
     color: var(--text-color-primary) !important;
+    transition: none;
     ::placeholder {
       color: var(--text-color-secondary) !important;
     }
