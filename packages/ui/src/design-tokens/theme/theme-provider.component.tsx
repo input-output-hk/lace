@@ -3,13 +3,13 @@ import React, { useMemo } from 'react';
 
 import cs from 'classnames';
 
-import { ThemeColorScheme, ThemeContext } from './context';
 import { darkTheme } from './dark-theme.css';
 import { lightTheme } from './light-theme.css';
 import { vars } from './theme-contract.css';
 import * as cx from './theme-provider.css';
+import { ThemeColorScheme, ThemeContext } from './theme.context';
 
-import type { ThemeContextValue } from './context';
+import type { ThemeContextValue } from './theme.context';
 
 type ThemeProviderProps = PropsWithChildren<{
   colorScheme: ThemeColorScheme;
