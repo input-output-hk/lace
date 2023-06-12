@@ -15,6 +15,11 @@
       "require": "./dist/index.cjs",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./index.css": {
+      "require": "./dist/index.css",
+      "import": "./dist/index.css",
+      "default": "./dist/index.css"
     }
   },
   "main": "./dist/index.cjs",
