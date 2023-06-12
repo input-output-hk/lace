@@ -1039,7 +1039,9 @@
       "beta": "DApp connector Beta"
     },
     "authorizeDapp": {
-      "warning": "Only connect to trusted DApps"
+      "warning": "Only connect to trusted DApps",
+      "nonssl": "This site is unsecured",
+      "nonsslTooltip": "This site does not follow common web standards"
     },
     "dappTransaction": {
       "transaction": "Transaction",
