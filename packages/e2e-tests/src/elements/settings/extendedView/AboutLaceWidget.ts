@@ -1,6 +1,7 @@
 import { SocialComponentElement, SocialComponentEnum } from './SocialComponentElement';
 
 class AboutLaceWidget {
+  private readonly CONTAINER = '[data-testid="about-container"]';
   private readonly TITLE = '[data-testid="settings-about-title"]';
   private readonly NETWORK_LABEL = '[data-testid="about-network-label"]';
   private readonly NETWORK_VALUE = '[data-testid="about-network-value"]';
@@ -8,6 +9,10 @@ class AboutLaceWidget {
   private readonly VERSION_VALUE = '[data-testid="about-version-value"]';
   private readonly COMMIT_LABEL = '[data-testid="about-commit-label"]';
   private readonly COMMIT_VALUE = '[data-testid="about-commit-value"]';
+
+  get container() {
+    return $(this.CONTAINER);
+  }
 
   get title() {
     return $(this.TITLE);

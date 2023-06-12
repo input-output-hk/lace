@@ -44,3 +44,13 @@ Then(/^I see Transactions "Learn about" widget with all relevant items$/, async 
 Then(/^I see "About staking" widget with all relevant items$/, async () => {
   await educationalListAssert.assertSeeStakingWidget();
 });
+
+Then(
+  /^I (see|do not see) the right side panel for (Tokens|NFTs|Transactions|Staking|Settings|Address Book) section$/,
+  async (
+    shouldSee: 'see' | 'do not see',
+    section: 'Tokens' | 'NFTs' | 'Transactions' | 'Staking' | 'Settings' | 'Address Book'
+  ) => {
+    await educationalListAssert.assertSeeRightSidePanel(shouldSee === 'see', section);
+  }
+);

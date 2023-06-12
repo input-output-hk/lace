@@ -190,3 +190,11 @@ Then(/^I close all remaining tabs except current one$/, async () => {
 Then(/^I switch to window with Lace$/, async () => {
   await switchToWindowWithLace();
 });
+
+Then(/^I (see|do not see) a horizontal scroll$/, async (shouldSee: 'see' | 'do not see') => {
+  await commonAssert.assertSeeHorizontalScroll(shouldSee === 'see');
+});
+
+When(/^I resize the window to a width of: ([^"]*) and a height of: ([^"]*)$/, async (width: number, height: number) => {
+  await browser.setWindowSize(Number(width), Number(height));
+});
