@@ -117,16 +117,37 @@ func main() {
 		}
 	}()
 
-	ogmiosStatus := make(chan string, 1)
-	cardanoNodeStatus := make(chan string, 1)
-	providerServerStatus := make(chan string, 1)
-	networkSwitch := make(chan string)
+	commUI, commManager := func() (CommChannels_UI, CommChannels_Manager) {
+		ogmiosStatus := make(chan string, 1)
+		ogmiosStatus <- "off"
+		cardanoNodeStatus := make(chan string, 1)
+		cardanoNodeStatus <- "off"
+		providerServerStatus := make(chan string, 1)
+		providerServerStatus <- "off"
+		setBackendUrl := make(chan string)
+		setOgmiosDashboard := make(chan string)
 
-	ogmiosStatus <- "off"
-	cardanoNodeStatus <- "off"
-	providerServerStatus <- "off"
+		networkSwitch := make(chan string)
+		initiateShutdownCh := make(chan struct{}, 1)
 
-	initiateShutdownCh := make(chan struct{}, 1)
+		return CommChannels_UI {
+			OgmiosStatus: ogmiosStatus,
+			CardanoNodeStatus: cardanoNodeStatus,
+			ProviderServerStatus: providerServerStatus,
+			SetBackendUrl: setBackendUrl,
+			SetOgmiosDashboard: setOgmiosDashboard,
+			NetworkSwitch: networkSwitch,
+			InitiateShutdownCh: initiateShutdownCh,
+		}, CommChannels_Manager {
+			OgmiosStatus: ogmiosStatus,
+			CardanoNodeStatus: cardanoNodeStatus,
+			ProviderServerStatus: providerServerStatus,
+			SetBackendUrl: setBackendUrl,
+			SetOgmiosDashboard: setOgmiosDashboard,
+			NetworkSwitch: networkSwitch,
+			InitiateShutdownCh: initiateShutdownCh,
+		}
+	}()
 
 	// XXX: os.Interrupt is the regular SIGINT on Unix, but also something rare on Windows
 	sigCh := make(chan os.Signal, 1)
@@ -139,7 +160,7 @@ func main() {
 				alreadySignaled = true
 				fmt.Fprintf(os.Stderr, "%s[%d]: got signal (%s), will shutdown...\n",
 					OurLogPrefix, os.Getpid(), sig)
-				initiateShutdownCh <- struct{}{}
+				commUI.InitiateShutdownCh <- struct{}{}
 			} else {
 				fmt.Fprintf(os.Stderr, "%s[%d]: got another signal (%s), but already in shutdown\n",
 					OurLogPrefix, os.Getpid(), sig)
@@ -147,34 +168,39 @@ func main() {
 		}
 	}()
 
-	providerServerPort := 3000
-
-	go systray.Run(setupTrayUI(
-		ogmiosStatus, cardanoNodeStatus, providerServerStatus, networkSwitch, initiateShutdownCh,
-		logFile, &providerServerPort,
-	), func(){})
+	go systray.Run(setupTrayUI(commUI, logFile), func(){})
 	defer systray.Quit()
 
-	manageChildren(libexecDir, resourcesDir, workDir,
-		networkSwitch,
-		initiateShutdownCh,
-		cardanoNodeStatus,
-		ogmiosStatus,
-		providerServerStatus,
-		&providerServerPort,
-	)
+	manageChildren(commManager, libexecDir, resourcesDir, workDir)
 
 	fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 }
 
+type CommChannels_UI struct {
+	OgmiosStatus         <-chan string
+	CardanoNodeStatus    <-chan string
+	ProviderServerStatus <-chan string
+	SetBackendUrl        <-chan string
+	SetOgmiosDashboard   <-chan string
+
+	NetworkSwitch        chan<- string
+	InitiateShutdownCh   chan<- struct{}
+}
+
+type CommChannels_Manager struct {
+	OgmiosStatus         chan<- string
+	CardanoNodeStatus    chan<- string
+	ProviderServerStatus chan<- string
+	SetBackendUrl        chan<- string
+	SetOgmiosDashboard   chan<- string
+
+	NetworkSwitch        <-chan string
+	InitiateShutdownCh   <-chan struct{}
+}
+
 func setupTrayUI(
-	ogmiosStatus <-chan string,
-	cardanoNodeStatus <-chan string,
-	providerServerStatus <-chan string,
-	networkSwitch chan<- string,
-	initiateShutdownCh chan<- struct{},
+	comm CommChannels_UI,
 	logFile string,
-	providerServerPort *int,
 ) func() { return func() {
 	systray.SetTitle("lace-local-backend")
 	// systray.SetTooltip("")
@@ -205,7 +231,7 @@ func setupTrayUI(
 					currentNetwork = network
 					fmt.Printf("%s[%d]: switching network to: %s\n",
 						OurLogPrefix, os.Getpid(), network)
-					networkSwitch <- network
+					comm.NetworkSwitch <- network
 				}
 			}
 		}(network)
@@ -215,13 +241,33 @@ func setupTrayUI(
 
 	//systray.AddMenuItemCheckbox("Run Full Backend (projector)", "", false)
 
+	mCopyUrl := systray.AddMenuItem("Copy Backend URL", "")
+	go func() {
+		url := ""
+		mCopyUrl.Disable()
+		for { select {
+		case <-mCopyUrl.ClickedCh:
+			err := clipboard.WriteAll(url)
+			if err != nil {
+				fmt.Printf("%s[%d]: error: failed to copy '%s' to clipboard: %s\n",
+					OurLogPrefix, os.Getpid(), url, err)
+			}
+		case url = <-comm.SetBackendUrl:
+			if url == "" {
+				mCopyUrl.Disable()
+			} else {
+				mCopyUrl.Enable()
+			}
+		}}
+	}()
+
 	systray.AddSeparator()
 
 	// XXX: this weird type because we want order, and there are no tuples:
 	statuses := []map[string](<-chan string) {
-		{ "cardano-node":    cardanoNodeStatus },
-		{ "Ogmios":          ogmiosStatus },
-		{ "provider-server": providerServerStatus },
+		{ "cardano-node":    comm.CardanoNodeStatus },
+		{ "Ogmios":          comm.OgmiosStatus },
+		{ "provider-server": comm.ProviderServerStatus },
 	}
 
 	for _, statusItem := range statuses {
@@ -238,18 +284,6 @@ func setupTrayUI(
 
 	systray.AddSeparator()
 
-	mCopyUrl := systray.AddMenuItem("Copy Backend URL", "")
-	go func() {
-		for range mCopyUrl.ClickedCh {
-			url := fmt.Sprintf("http://127.0.0.1:%d", *providerServerPort)
-			err := clipboard.WriteAll(url)
-			if err != nil {
-				fmt.Printf("%s[%d]: error: failed to copy '%s' to clipboard: %s\n",
-					OurLogPrefix, os.Getpid(), url, err)
-			}
-		}
-	}()
-
 	mCurrentLog := systray.AddMenuItem("Open Current Log", "")
 	go func() {
 		for range mCurrentLog.ClickedCh {
@@ -257,11 +291,27 @@ func setupTrayUI(
 		}
 	}()
 
-	mLogsDirectory := systray.AddMenuItem("Open Logs Directory", "")
+	mLogsDirectory := systray.AddMenuItem("Logs Directory", "")
 	go func() {
 		for range mLogsDirectory.ClickedCh {
 			openWithDefaultApp(filepath.Dir(logFile))
 		}
+	}()
+
+	mOgmiosDashboard := systray.AddMenuItem("Ogmios Dashboard", "")
+	go func() {
+		url := ""
+		mOgmiosDashboard.Disable()
+		for { select {
+		case <-mOgmiosDashboard.ClickedCh:
+			openWithDefaultApp(url)
+		case url = <-comm.SetOgmiosDashboard:
+			if url == "" {
+				mOgmiosDashboard.Disable()
+			} else {
+				mOgmiosDashboard.Enable()
+			}
+		}}
 	}()
 
 	systray.AddSeparator()
@@ -269,7 +319,7 @@ func setupTrayUI(
 	mForceRestart := systray.AddMenuItem("Force Restart", "")
 	go func() {
 		for range mForceRestart.ClickedCh {
-			networkSwitch <- currentNetwork
+			comm.NetworkSwitch <- currentNetwork
 		}
 	}()
 
@@ -278,7 +328,7 @@ func setupTrayUI(
 	go func() {
 		<-mQuit.ClickedCh
 		mQuit.Disable()
-		initiateShutdownCh <- struct{}{}
+		comm.InitiateShutdownCh <- struct{}{}
 	}()
 }}
 
@@ -292,6 +342,7 @@ type ManagedChild struct {
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
 	LogMonitor  func(string)
 	LogModifier func(string) string // e.g. to drop redundant timestamps
+	AfterExit   func()
 }
 
 type HealthStatus struct {
@@ -301,13 +352,8 @@ type HealthStatus struct {
 	LastErr error
 }
 
-func manageChildren(libexecDir string, resourcesDir string, workDir string,
-	networkSwitch <-chan string,
-	initiateShutdownCh <-chan struct{},
-	cardanoNodeStatus chan<- string,
-	ogmiosStatus chan<- string,
-	providerServerStatus chan<- string,
-	providerServerPort *int,
+func manageChildren(comm CommChannels_Manager,
+	libexecDir string, resourcesDir string, workDir string,
 ) {
 	sep := string(filepath.Separator)
 
@@ -316,7 +362,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 		exeSuffix = ".exe"
 	}
 
-	network := <-networkSwitch
+	network := <-comm.NetworkSwitch
 
 	firstIteration := true
 	omitSleep := false
@@ -339,6 +385,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 		cardanoNodeSocket := workDir + sep + network + sep + "cardano-node.socket"
 
 		var ogmiosPort int
+		var providerServerPort int
 
 		tokenMetadataServerUrl := "https://tokens.cardano.org"
 		if network != "mainnet" {
@@ -377,12 +424,12 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					MkExtraEnv: func() []string { return []string{} },
-					StatusCh: cardanoNodeStatus,
+					StatusCh: comm.CardanoNodeStatus,
 					HealthProbe: func(prev HealthStatus) HealthStatus {
 						err := probeUnixSocket(cardanoNodeSocket, 1 * time.Second)
 						nextProbeIn := 1 * time.Second
 						if (err == nil) {
-							cardanoNodeStatus <- "socket listening"
+							comm.CardanoNodeStatus <- "socket listening"
 							nextProbeIn = 60 * time.Second
 						}
 						return HealthStatus {
@@ -400,6 +447,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						line = strings.ReplaceAll(line, droppedHostname, "[")
 						return line
 					},
+					AfterExit: func() {},
 				}
 			}(),
 			func() ManagedChild {
@@ -417,14 +465,14 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					MkExtraEnv: func() []string { return []string{} },
-					StatusCh: ogmiosStatus,
+					StatusCh: comm.OgmiosStatus,
 					HealthProbe: func(prev HealthStatus) HealthStatus {
-						err := probeHttp200(
-							fmt.Sprintf("http://127.0.0.1:%d/health", ogmiosPort),
-							1 * time.Second)
+						ogmiosUrl := fmt.Sprintf("http://127.0.0.1:%d", ogmiosPort)
+						err := probeHttp200(ogmiosUrl + "/health", 1 * time.Second)
 						nextProbeIn := 1 * time.Second
 						if (err == nil) {
-							ogmiosStatus <- "listening"
+							comm.OgmiosStatus <- "listening"
+							comm.SetOgmiosDashboard <- ogmiosUrl
 							nextProbeIn = 60 * time.Second
 						}
 						return HealthStatus {
@@ -436,6 +484,9 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 					},
 					LogMonitor: func(line string) {},
 					LogModifier: func(line string) string { return line },
+					AfterExit: func() {
+						comm.SetOgmiosDashboard <- ""
+					},
 				}
 			}(),
 			func() ManagedChild {
@@ -451,13 +502,14 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 						}
 					},
 					MkExtraEnv: func() []string {
+						providerServerPort = getFreeTCPPort()
 						return []string{
 							"NETWORK=" + network,
 							"TOKEN_METADATA_SERVER_URL=" + tokenMetadataServerUrl,
 							"CARDANO_NODE_CONFIG_PATH=" + cardanoNodeConfigDir +
 								sep + "config.json",
 							"API_URL=http://0.0.0.0:" +
-								fmt.Sprintf("%d", *providerServerPort),
+								fmt.Sprintf("%d", providerServerPort),
 							"ENABLE_METRICS=true",
 							"LOGGER_MIN_SEVERITY=info",
 							"SERVICE_NAMES=tx-submit",
@@ -467,15 +519,15 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 								fmt.Sprintf("%d", ogmiosPort),
 						}
 					},
-					StatusCh: providerServerStatus,
+					StatusCh: comm.ProviderServerStatus,
 					HealthProbe: func(prev HealthStatus) HealthStatus {
-						err := probeHttp200(
-							fmt.Sprintf("http://127.0.0.1:%d/health",
-								*providerServerPort),
-							1 * time.Second)
+						backendUrl := fmt.Sprintf("http://127.0.0.1:%d",
+							providerServerPort)
+						err := probeHttp200(backendUrl + "/health", 1 * time.Second)
 						nextProbeIn := 1 * time.Second
 						if (err == nil) {
-							providerServerStatus <- "listening"
+							comm.ProviderServerStatus <- "listening"
+							comm.SetBackendUrl <- backendUrl
 							nextProbeIn = 60 * time.Second
 						}
 						return HealthStatus {
@@ -487,6 +539,9 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 					},
 					LogMonitor: func(line string) {},
 					LogModifier: func(line string) string { return line },
+					AfterExit: func() {
+						comm.SetBackendUrl <- ""
+					},
 				}
 			}(),
 		}
@@ -539,6 +594,7 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				childDidExit = true
 				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
 					child.LogPrefix, childPid)
+				child.AfterExit()
 				child.StatusCh <- "off"
 				wgChildren.Done()
 				anyChildExitedCh <- struct{}{}
@@ -584,13 +640,13 @@ func manageChildren(libexecDir string, resourcesDir string, workDir string,
 				// else: continue starting the next child
 				fmt.Printf("%s[%d]: will continue launching the next child\n",
 					OurLogPrefix, os.Getpid())
-			case newNetwork := <-networkSwitch:
+			case newNetwork := <-comm.NetworkSwitch:
 				if newNetwork != network {
 					omitSleep = true
 					network = newNetwork
 				}
 				return
-			case <-initiateShutdownCh:
+			case <-comm.InitiateShutdownCh:
 				fmt.Printf("%s[%d]: initiating a graceful shutdown...\n", OurLogPrefix, os.Getpid())
 				keepGoing = false
 				return
