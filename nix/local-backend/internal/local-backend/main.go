@@ -126,6 +126,7 @@ func main() {
 		providerServerStatus <- "off"
 		setBackendUrl := make(chan string)
 		setOgmiosDashboard := make(chan string)
+		blockRestartUI := make(chan bool)
 
 		networkSwitch := make(chan string)
 		initiateShutdownCh := make(chan struct{}, 1)
@@ -136,6 +137,7 @@ func main() {
 			ProviderServerStatus: providerServerStatus,
 			SetBackendUrl: setBackendUrl,
 			SetOgmiosDashboard: setOgmiosDashboard,
+			BlockRestartUI: blockRestartUI,
 			NetworkSwitch: networkSwitch,
 			InitiateShutdownCh: initiateShutdownCh,
 		}, CommChannels_Manager {
@@ -144,6 +146,7 @@ func main() {
 			ProviderServerStatus: providerServerStatus,
 			SetBackendUrl: setBackendUrl,
 			SetOgmiosDashboard: setOgmiosDashboard,
+			BlockRestartUI: blockRestartUI,
 			NetworkSwitch: networkSwitch,
 			InitiateShutdownCh: initiateShutdownCh,
 		}
@@ -182,6 +185,7 @@ type CommChannels_UI struct {
 	ProviderServerStatus <-chan string
 	SetBackendUrl        <-chan string
 	SetOgmiosDashboard   <-chan string
+	BlockRestartUI       <-chan bool
 
 	NetworkSwitch        chan<- string
 	InitiateShutdownCh   chan<- struct{}
@@ -193,6 +197,7 @@ type CommChannels_Manager struct {
 	ProviderServerStatus chan<- string
 	SetBackendUrl        chan<- string
 	SetOgmiosDashboard   chan<- string
+	BlockRestartUI       chan<- bool
 
 	NetworkSwitch        <-chan string
 	InitiateShutdownCh   <-chan struct{}
@@ -330,6 +335,24 @@ func setupTrayUI(
 		mQuit.Disable()
 		comm.InitiateShutdownCh <- struct{}{}
 	}()
+
+	go func() {
+		for doBlock := range comm.BlockRestartUI {
+			if doBlock {
+				for _, mNetwork := range mNetworks {
+					mNetwork.Disable()
+				}
+				mForceRestart.Disable()
+				mQuit.Disable()
+			} else {
+				for _, mNetwork := range mNetworks {
+					mNetwork.Enable()
+				}
+				mForceRestart.Enable()
+				mQuit.Enable()
+			}
+		}
+	}()
 }}
 
 type ManagedChild struct {
@@ -375,6 +398,7 @@ func manageChildren(comm CommChannels_Manager,
 		}
 		firstIteration = false
 		omitSleep = false
+		comm.BlockRestartUI <- false
 
 		fmt.Printf("%s[%d]: starting session for network %s\n", OurLogPrefix, os.Getpid(), network)
 
@@ -552,6 +576,7 @@ func manageChildren(comm CommChannels_Manager,
 			if r := recover(); r != nil {
 				fmt.Fprintf(os.Stderr, "%s[%d]: panic: %s\n", OurLogPrefix, os.Getpid(), r)
 			}
+			comm.BlockRestartUI <- true
 			wgChildren.Wait()
 			for _, child := range childrenDefs {
 				// Reset all statuses to "off" (not all children might’ve been started
