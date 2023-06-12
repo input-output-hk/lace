@@ -62,6 +62,15 @@ class MenuMainPopupPageAssert {
     const actualAddress = await FundWalletBanner.getWalletAddress();
     await expect(actualAddress).to.not.equal(expectedAddress);
   }
+
+  async assertMenuFormat(menuFormat: string, width: number) {
+    const menuWidth = await MenuMainExtended.container.getSize('width');
+    if (width > 1024) {
+      await expect(menuWidth).to.equal(198);
+    } else {
+      await (menuFormat === 'collapsed' ? expect(menuWidth).to.equal(47) : expect(menuWidth).to.equal(163));
+    }
+  }
 }
 
 export default new MenuMainPopupPageAssert();
