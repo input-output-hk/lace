@@ -1,4 +1,5 @@
 import { Wallet } from '@lace/cardano';
+import chunk from 'lodash/chunk';
 
 export type TokenInfo = Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>;
 interface AssetExtraData {
@@ -7,22 +8,35 @@ interface AssetExtraData {
   history?: boolean;
 }
 
+const FETCH_ASSET_LIMIT = 100;
+
 export const getAssetsInformation = async (
   ids: Wallet.Cardano.AssetId[],
   assetsInfo: Wallet.Assets,
   { assetProvider, extraData }: { assetProvider: Wallet.AssetProvider; extraData?: AssetExtraData }
 ): Promise<TokenInfo> => {
-  const assets = await Promise.all(
-    ids.map(async (assetId) => {
-      const asset = assetsInfo.get(assetId);
+  const assetsInformation: Wallet.Asset.AssetInfo[] = [];
+  const fetchedAssets: Wallet.Asset.AssetInfo[] = [];
+  const assetsNotFound: Wallet.Cardano.AssetId[] = [];
+
+  for (const assetId of ids) {
+    const assetInfo = assetsInfo.get(assetId);
+    assetInfo ? assetsInformation.push(assetInfo) : assetsNotFound.push(assetId);
+  }
+
+  if (assetsNotFound.length > 0) {
+    const assetChunks = chunk(assetsNotFound, FETCH_ASSET_LIMIT);
+
+    for (const assetChunk of assetChunks) {
       try {
-        if (!asset) return await assetProvider.getAsset({ assetId, extraData });
+        const fetched = await assetProvider.getAssets({ assetIds: assetChunk, extraData });
+        fetchedAssets.push(...fetched);
       } catch (error) {
-        // If an error occurs fetching from the provider then just skip this asset
-        console.log('Error fetching asset info', { assetId, error: error.message });
+        // If an error occurs fetching from the provider then just skip this chunk
+        console.log('Error fetching assets info', { error: error.message });
       }
-      return asset;
-    })
-  );
-  return new Map(assets.filter((asset) => !!asset).map((asset) => [asset.assetId, asset]));
+    }
+    assetsInformation.push(...fetchedAssets);
+  }
+  return new Map(assetsInformation.filter((asset) => !!asset).map((asset) => [asset.assetId, asset]));
 };
