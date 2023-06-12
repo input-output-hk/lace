@@ -49,7 +49,9 @@
   },
   "dependencies": {
     "@lace/common": "^0.1.0",
-    "jdenticon": "^3.2.0"
+    "i18next": "^22.5.1",
+    "jdenticon": "^3.2.0",
+    "react-i18next": "^12.3.1"
   },
   "devDependencies": {
     "@lace/ui": "^0.1.0",
