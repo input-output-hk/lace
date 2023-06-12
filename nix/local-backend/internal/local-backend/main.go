@@ -15,6 +15,8 @@ import (
 	"runtime"
 	"time"
 	"strings"
+	"strconv"
+	"regexp"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/host"
@@ -416,6 +418,9 @@ func manageChildren(comm CommChannels_Manager,
 			tokenMetadataServerUrl = "https://metadata.cardano-testnet.iohkdev.io/"
 		}
 
+		// XXX: we take that from Ogmios, we should probably calculate ourselves
+		syncProgress := -1.0
+
 		childrenDefs := []ManagedChild{
 			func() ManagedChild {
 				hostname, _ := os.Hostname()
@@ -432,6 +437,9 @@ func manageChildren(comm CommChannels_Manager,
 					}
 					return line
 				}
+				reReplayingLedger := regexp.MustCompile(`^.*ChainDB:Info.*Replayed block: slot \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
+				rePushingLedger := regexp.MustCompile(`^.*ChainDB:Info.*Pushing ledger state for block [0-9a-f]+ at slot \d+. Progress: (\d*\.\d+%)$`)
+				reSyncing := regexp.MustCompile(`^.*ChainDB:Notice.*Chain extended, new tip: [0-9a-f]+ at slot (\d+)$`)
 				return ManagedChild{
 					LogPrefix: "cardano-node",
 					PrettyName: "cardano-node",
@@ -453,7 +461,6 @@ func manageChildren(comm CommChannels_Manager,
 						err := probeUnixSocket(cardanoNodeSocket, 1 * time.Second)
 						nextProbeIn := 1 * time.Second
 						if (err == nil) {
-							comm.CardanoNodeStatus <- "socket listening"
 							nextProbeIn = 60 * time.Second
 						}
 						return HealthStatus {
@@ -463,7 +470,23 @@ func manageChildren(comm CommChannels_Manager,
 							LastErr: err,
 						}
 					},
-					LogMonitor: func(line string) {},
+					LogMonitor: func(line string) {
+						if strings.Index(line, "Started opening Ledger DB") != -1 {
+							comm.CardanoNodeStatus <- "opening ledger DB…"
+						} else if ms :=reReplayingLedger.FindStringSubmatch(line);len(ms)>0 {
+							comm.CardanoNodeStatus <- "replaying ledger · " + ms[1]
+						} else if strings.Index(line, "Opened lgr db") != -1 {
+							comm.CardanoNodeStatus <- "replaying ledger · 100.00%"
+						} else if ms := rePushingLedger.FindStringSubmatch(line); len(ms)>0 {
+							comm.CardanoNodeStatus <- "pushing ledger · " + ms[1]
+						} else if ms := reSyncing.FindStringSubmatch(line); len(ms) > 0 {
+							sp := ms[1] // fallback
+							if (syncProgress >= 0) {
+								sp = fmt.Sprintf("%.2f%%", syncProgress * 100.0)
+							}
+							comm.CardanoNodeStatus <- "syncing · " + sp
+						}
+					},
 					LogModifier: func(line string) string {
 						now := time.Now().UTC()
 						line = removeTimestamp(line, now)
@@ -475,6 +498,7 @@ func manageChildren(comm CommChannels_Manager,
 				}
 			}(),
 			func() ManagedChild {
+				reSyncProgress := regexp.MustCompile(`"networkSynchronization"\s*:\s*(\d*\.\d+)`)
 				return ManagedChild{
 					LogPrefix: "ogmios",
 					PrettyName: "Ogmios",
@@ -506,7 +530,14 @@ func manageChildren(comm CommChannels_Manager,
 							LastErr: err,
 						}
 					},
-					LogMonitor: func(line string) {},
+					LogMonitor: func(line string) {
+						if ms := reSyncProgress.FindStringSubmatch(line); len(ms) > 0 {
+							num, err := strconv.ParseFloat(ms[1], 64)
+							if err == nil {
+								syncProgress = num
+							}
+						}
+					},
 					LogModifier: func(line string) string { return line },
 					AfterExit: func() {
 						comm.SetOgmiosDashboard <- ""
