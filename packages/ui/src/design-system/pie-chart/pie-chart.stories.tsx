@@ -1,21 +1,21 @@
-/* eslint-disable @typescript-eslint/naming-convention, functional/immutable-data */
 import React from 'react';
 
 import type { Meta } from '@storybook/react';
 import isChromatic from 'chromatic/isChromatic';
 
+import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { page, Section, Variants } from '../decorators';
 import { Cell, Grid } from '../grid';
 
+import { PieChart } from './pie-chart.component';
 import {
   PIE_CHART_DEFAULT_COLOR_SET,
   PieChartGradientColor,
-} from './constants';
-import { PieChart } from './pie-chart.component';
+} from './pie-chart.data';
 
 import type { PieChartProps } from './pie-chart.component';
 
-const notInChromatic = !isChromatic();
+const isNotInChromatic = !isChromatic();
 
 const mockDataSet = (amount: number): { name: string; value: number }[] =>
   Array.from({ length: amount }).map((_, index) => ({
@@ -24,8 +24,21 @@ const mockDataSet = (amount: number): { name: string; value: number }[] =>
   }));
 
 const meta: Meta<typeof PieChart> = {
-  title: 'PieChart',
+  title: 'Elements/PieChart',
+  component: PieChart,
   decorators: [page({ title: 'PieChart' })],
+  argTypes: {
+    nameKey: {
+      table: {
+        disable: true,
+      },
+    },
+    valueKey: {
+      table: {
+        disable: true,
+      },
+    },
+  },
 };
 
 export default meta;
@@ -58,11 +71,7 @@ export const Overview = (): JSX.Element => (
             },
           ].map((pieChartProps, index) => (
             <Variants.Cell key={index}>
-              <PieChart
-                animate={notInChromatic}
-                colors={PIE_CHART_DEFAULT_COLOR_SET}
-                {...pieChartProps}
-              />
+              <PieChart animate={isNotInChromatic} {...pieChartProps} />
             </Variants.Cell>
           ))}
         </Variants.Row>
@@ -120,11 +129,7 @@ export const Overview = (): JSX.Element => (
           { data: mockDataSet(10) },
         ].map((pieChartProps, index) => (
           <Variants.Cell key={index}>
-            <PieChart
-              animate={notInChromatic}
-              colors={PIE_CHART_DEFAULT_COLOR_SET}
-              {...pieChartProps}
-            />
+            <PieChart animate={isNotInChromatic} {...pieChartProps} />
           </Variants.Cell>
         ))}
       </Variants.Row>
@@ -138,11 +143,50 @@ export const Overview = (): JSX.Element => (
             <PieChart
               colors={[PieChartGradientColor.LaceLinearGradient]}
               data={mockDataSet(1)}
-              animate={notInChromatic}
+              animate={isNotInChromatic}
             />
           </Variants.Cell>
         </Variants.Row>
       </Variants.Table>
+    </Section>
+    <Section title="Dark theme">
+      <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <Variants.Table
+          headers={[
+            'All colors',
+            PieChartGradientColor.LaceLinearGradient,
+            '',
+            '',
+            '',
+          ]}
+        >
+          <Variants.Row>
+            <Variants.Cell>
+              <PieChart
+                animate={isNotInChromatic}
+                data={[
+                  { name: 'Pool 1', value: 15 },
+                  { name: 'Pool 2', value: 15 },
+                  { name: 'Pool 3', value: 10 },
+                  { name: 'Pool 4', value: 10 },
+                  { name: 'Pool 5', value: 10 },
+                  { name: 'Pool 6', value: 10 },
+                  { name: 'Pool 7', value: 10 },
+                  { name: 'Pool 8', value: 10 },
+                  { name: 'Pool 9', value: 10 },
+                ]}
+              />
+            </Variants.Cell>
+            <Variants.Cell>
+              <PieChart
+                colors={[PieChartGradientColor.LaceLinearGradient]}
+                data={mockDataSet(1)}
+                animate={isNotInChromatic}
+              />
+            </Variants.Cell>
+          </Variants.Row>
+        </Variants.Table>
+      </ThemeProvider>
     </Section>
     <Section title="Responsive">
       <Grid columns="$8" rows="$none">
@@ -150,21 +194,21 @@ export const Overview = (): JSX.Element => (
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
-            animate={notInChromatic}
+            animate={isNotInChromatic}
           />
         </Cell>
         <Cell colStart="$4" colEnd="$6">
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
-            animate={notInChromatic}
+            animate={isNotInChromatic}
           />
         </Cell>
         <Cell>
           <PieChart
             colors={[PieChartGradientColor.LaceLinearGradient]}
             data={mockDataSet(1)}
-            animate={notInChromatic}
+            animate={isNotInChromatic}
           />
         </Cell>
       </Grid>
@@ -177,7 +221,7 @@ type ConfigurableStoryProps = Pick<
   'colors' | 'data' | 'direction' | 'tooltip'
 >;
 
-export const Configurable = ({
+export const Controls = ({
   colors,
   data,
   ...props
@@ -185,7 +229,7 @@ export const Configurable = ({
   <Grid columns="$5">
     <Cell>
       <PieChart
-        animate={notInChromatic}
+        animate={isNotInChromatic}
         colors={colors}
         data={data}
         {...props}
@@ -194,7 +238,7 @@ export const Configurable = ({
   </Grid>
 );
 
-Configurable.argTypes = {
+Controls.argTypes = {
   colors: {
     defaultValue: 0,
     control: {

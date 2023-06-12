@@ -1,4 +1,4 @@
-/* eslint-disable functional/prefer-immutable-types, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable functional/prefer-immutable-types */
 import React from 'react';
 
 import {
@@ -9,7 +9,10 @@ import {
   Tooltip,
 } from 'recharts';
 
-import { PieChartGradientColor } from './constants';
+import {
+  PIE_CHART_DEFAULT_COLOR_SET,
+  PieChartGradientColor,
+} from './pie-chart.data';
 
 import type { ColorValueHex } from '../../types';
 import type { CellProps, TooltipProps } from 'recharts';
@@ -18,10 +21,11 @@ import type { PickByValue } from 'utility-types';
 type PieChartDataProps = Partial<{
   overrides: CellProps;
 }>;
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type PieChartColor = ColorValueHex | PieChartGradientColor;
 interface PieChartBaseProps<T extends object> {
   animate?: boolean;
-  colors: PieChartColor[];
+  colors?: PieChartColor[];
   data: (PieChartDataProps & T)[];
   direction?: 'clockwise' | 'counterclockwise';
   tooltip?: TooltipProps<number, string>['content'];
@@ -43,8 +47,10 @@ export type PieChartProps<T extends object | { name: string; value: number }> =
     : PieChartCustomKeyProps<T>;
 
 const formatPieColor = (color: PieChartColor): string =>
-  PieChartGradientColor[color as PieChartGradientColor]
-    ? `url(#${color})`
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  Boolean(PieChartGradientColor[color as PieChartGradientColor])
+    ? // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `url(#${color})`
     : color;
 
 /**
@@ -62,7 +68,7 @@ const formatPieColor = (color: PieChartColor): string =>
  */
 export const PieChart = <T extends object | { name: string; value: number }>({
   animate = true,
-  colors,
+  colors = PIE_CHART_DEFAULT_COLOR_SET,
   data: inputData,
   direction = 'clockwise',
   nameKey = 'name',
@@ -70,6 +76,12 @@ export const PieChart = <T extends object | { name: string; value: number }>({
   valueKey = 'value',
 }: PieChartProps<T>): JSX.Element => {
   const data = inputData.slice(0, colors.length);
+
+  if (data.length < inputData.length) {
+    console.error(
+      'UI-Toolkit::PieChart `colors` array length is lower than the `data` array length. The `data` items without corresponding `colors` are not rendered.',
+    );
+  }
 
   return (
     <ResponsiveContainer aspect={1}>
