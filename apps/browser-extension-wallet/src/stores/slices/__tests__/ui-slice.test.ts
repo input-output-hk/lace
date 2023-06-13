@@ -7,33 +7,72 @@ import '@testing-library/jest-dom';
 import { uiSlice } from '../ui-slice';
 import create from 'zustand';
 import { APP_MODE_POPUP, cardanoCoin, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
+import { NetworkConnectionStates, WalletUIProps } from '@src/types';
 
 describe('Testing ui slice', () => {
-  test('should create store hook with ui slice', () => {
-    const props = { currentChain: Wallet.Cardano.ChainIds.Preprod, appMode: APP_MODE_POPUP };
-    const useLockHook = create<UISlice>((set, get) => uiSlice({ set, get }, props));
-    const { result } = renderHook(() => useLockHook());
+  let localStorageSetSpy: jest.SpyInstance;
+  const props: WalletUIProps = {
+    currentChain: Wallet.Cardano.ChainIds.Preprod,
+    appMode: APP_MODE_POPUP
+  };
+
+  beforeAll(() => {
+    localStorageSetSpy = jest.spyOn(Storage.prototype, 'setItem');
+  });
+
+  beforeEach(async () => {
+    localStorage.clear();
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('should create store hook with ui slice default values', () => {
+    const useUiStoreHook = create<UISlice>((set, get) => uiSlice({ set, get }, props));
+    const { result } = renderHook(() => useUiStoreHook());
 
     expect(result.current.walletUI.cardanoCoin).toEqual({
       ...cardanoCoin,
       symbol: CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Testnet]
     });
     expect(result.current.walletUI.appMode).toEqual(APP_MODE_POPUP);
+    expect(result.current.walletUI.areBalancesVisible).toEqual(true);
+    expect(result.current.walletUI.canManageBalancesVisibility).toEqual(true);
+    expect(result.current.walletUI.hiddenBalancesPlaceholder).toEqual('*');
+    expect(result.current.walletUI.networkConnection).toEqual(NetworkConnectionStates.CONNNECTED);
     expect(typeof result.current.setCardanoCoin).toEqual('function');
+    expect(typeof result.current.setBalancesVisibility).toEqual('function');
+    expect(typeof result.current.setNetworkConnection).toEqual('function');
   });
 
-  test('should set wallet locked info', async () => {
-    const props = { currentChain: Wallet.Cardano.ChainIds.Preprod, appMode: APP_MODE_POPUP };
-    const useLockHook = create<UISlice>((set, get) => uiSlice({ set, get }, props));
-    const { result, waitForNextUpdate } = renderHook(() => useLockHook());
+  describe('Cardano coin', () => {
+    test('should set cardano coin symbol depending on network', async () => {
+      const useUiStoreHook = create<UISlice>((set, get) => uiSlice({ set, get }, props));
+      const { result, waitForNextUpdate } = renderHook(() => useUiStoreHook());
 
-    await act(async () => {
-      result.current.setCardanoCoin(Wallet.Cardano.ChainIds.Mainnet);
-      await waitForNextUpdate();
-      expect(result.current.walletUI.cardanoCoin).toEqual({
-        ...cardanoCoin,
-        symbol: CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet]
+      await act(async () => {
+        result.current.setCardanoCoin(Wallet.Cardano.ChainIds.Mainnet);
+        await waitForNextUpdate();
+        expect(result.current.walletUI.cardanoCoin).toEqual({
+          ...cardanoCoin,
+          symbol: CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet]
+        });
       });
+    });
+  });
+
+  describe('Balance visibility', () => {
+    test('should change balance visibility state and update storage', async () => {
+      const useUiStoreHook = create<UISlice>((set, get) => uiSlice({ set, get }, props));
+      const { result } = renderHook(() => useUiStoreHook());
+      expect(result.current.walletUI.areBalancesVisible).toEqual(true);
+      act(() => {
+        result.current.setBalancesVisibility(false);
+      });
+      expect(result.current.walletUI.areBalancesVisible).toEqual(false);
+      expect(localStorageSetSpy).toHaveBeenCalledWith('hideBalance', 'true');
     });
   });
 });

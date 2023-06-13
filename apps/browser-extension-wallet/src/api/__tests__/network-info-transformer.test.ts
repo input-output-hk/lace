@@ -25,6 +25,7 @@ const stake = {
 
 const stakePoolStats = {
   qty: {
+    activating: 0,
     active: 1,
     retired: 0,
     retiring: 0

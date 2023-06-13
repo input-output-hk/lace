@@ -6,13 +6,16 @@ import { ChainName, DeviceConnection, CreateHardwareWalletArgs, HardwareWallets 
 import { activateWallet, CardanoWalletByChain, KeyAgentsByChain } from './cardano-wallet';
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import * as Crypto from '@cardano-sdk/crypto';
+import * as HardwareLedger from '../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
+
+const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
 const createEnumObject = <T extends string>(o: Array<T>) => o;
-export const AVAILABLE_WALLETS = createEnumObject<HardwareWallets>([
-  KeyManagement.KeyAgentType.Ledger,
-  KeyManagement.KeyAgentType.Trezor
-]);
-
+export const AVAILABLE_WALLETS = createEnumObject<HardwareWallets>(
+  isTrezorHWSupported()
+    ? [KeyManagement.KeyAgentType.Ledger, KeyManagement.KeyAgentType.Trezor]
+    : [KeyManagement.KeyAgentType.Ledger]
+);
 const DEFAULT_COMMUNICATION_TYPE = KeyManagement.CommunicationType.Web;
 
 // https://github.com/trezor/connect/blob/develop/docs/index.md#trezor-connect-manifest
@@ -28,18 +31,20 @@ const TREZOR_CONFIG: KeyManagement.TrezorConfig = {
 
 const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> = {
   [KeyManagement.KeyAgentType.Ledger]: async () =>
-    await KeyManagement.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
-  [KeyManagement.KeyAgentType.Trezor]: async () => {
-    const isTrezorInitialized = await KeyManagement.TrezorKeyAgent.initializeTrezorTransport({
-      manifest,
-      communicationType: DEFAULT_COMMUNICATION_TYPE
-    });
+    await HardwareLedger.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
+  ...(AVAILABLE_WALLETS.includes(KeyManagement.KeyAgentType.Trezor) && {
+    [KeyManagement.KeyAgentType.Trezor]: async () => {
+      const isTrezorInitialized = await KeyManagement.TrezorKeyAgent.initializeTrezorTransport({
+        manifest,
+        communicationType: DEFAULT_COMMUNICATION_TYPE
+      });
 
-    // initializeTrezorTransport would still succeed even when device is not connected
-    await KeyManagement.TrezorKeyAgent.checkDeviceConnection();
+      // initializeTrezorTransport would still succeed even when device is not connected
+      await KeyManagement.TrezorKeyAgent.checkDeviceConnection();
 
-    return isTrezorInitialized;
-  }
+      return isTrezorInitialized;
+    }
+  })
 };
 
 export const connectDevice = async (model: HardwareWallets): Promise<DeviceConnection> => await connectDevices[model]();
@@ -51,29 +56,29 @@ const createWithLedgerDeviceConnection = async (
     communicationType,
     extendedAccountPublicKey
   }: Omit<
-    Parameters<typeof KeyManagement.LedgerKeyAgent['createWithDevice']>[0] & {
+    Parameters<typeof HardwareLedger.LedgerKeyAgent['createWithDevice']>[0] & {
       extendedAccountPublicKey?: Crypto.Bip32PublicKeyHex;
     },
     'deviceConnection'
   >,
   deviceConnection: DeviceConnection,
-  dependencies: Parameters<typeof KeyManagement.LedgerKeyAgent['createWithDevice']>[1]
+  dependencies: Parameters<typeof HardwareLedger.LedgerKeyAgent['createWithDevice']>[1]
 ) => {
   // Throws an authentication error if called after the first key agent creation
   const publicKey =
     extendedAccountPublicKey ??
-    (await KeyManagement.LedgerKeyAgent.getXpub({
+    (await HardwareLedger.LedgerKeyAgent.getXpub({
       accountIndex,
       communicationType,
-      deviceConnection: deviceConnection as KeyManagement.LedgerKeyAgent['deviceConnection']
+      deviceConnection: deviceConnection as HardwareLedger.LedgerKeyAgent['deviceConnection']
     }));
 
-  return new KeyManagement.LedgerKeyAgent(
+  return new HardwareLedger.LedgerKeyAgent(
     {
       accountIndex,
       chainId,
       communicationType,
-      deviceConnection: deviceConnection as KeyManagement.LedgerKeyAgent['deviceConnection'],
+      deviceConnection: deviceConnection as HardwareLedger.LedgerKeyAgent['deviceConnection'],
       extendedAccountPublicKey: publicKey,
       knownAddresses: []
     },
@@ -129,11 +134,11 @@ export const createHardwareWalletsByChain = async (
   const { keyAgent: activeKeyAgent, wallet } = await setupWallet({
     createKeyAgent: async (dependencies) => {
       if (connectedDevice === KeyManagement.KeyAgentType.Ledger) {
-        return await KeyManagement.LedgerKeyAgent.createWithDevice(
+        return await HardwareLedger.LedgerKeyAgent.createWithDevice(
           {
             communicationType: DEFAULT_COMMUNICATION_TYPE,
             accountIndex,
-            deviceConnection: deviceConnection as KeyManagement.LedgerKeyAgent['deviceConnection'],
+            deviceConnection: deviceConnection as HardwareLedger.LedgerKeyAgent['deviceConnection'],
             chainId: activeChainId
           },
           dependencies

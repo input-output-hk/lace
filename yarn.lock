@@ -3798,27 +3798,27 @@
   resolved "https://registry.yarnpkg.com/@cardano-ogmios/schema/-/schema-5.6.0.tgz#7ab280953ad677ba93a03492613a41ba3e72e854"
   integrity sha512-JTlh/gOS5iM4b7CKc3dFRs2UC6fY+PeLiOv6fKxFSOSRMZ59sLgv+oGqjnzyVeZFUt6o683C9zFmBzh60l8KnA==
 
-"@cardano-sdk/cardano-services-client@~0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/cardano-services-client/-/cardano-services-client-0.9.0.tgz#b03c20555d71fde727a3eb8f7e2042cc2709a3eb"
-  integrity sha512-WYJ7UD+1KwfHhwTH73PV47m3utXtzHQjJrX0HtZOCSLS69ZoJJXMIdzjfGhURk26J0j5Ld4BceSKBPlq1s3a2Q==
+"@cardano-sdk/cardano-services-client@~0.9.4":
+  version "0.9.4"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/cardano-services-client/-/cardano-services-client-0.9.4.tgz#77b41720ca3b03f4eece684733c751e2d20b7c19"
+  integrity sha512-hE0LYphBTYIxkDNh5ZZINX+CIdv1GyeHmX1BCx3Ldmahkl5SEMykZ586ZOdWYtISAVioZMyf5bLomK7sDidlCg==
   dependencies:
-    "@cardano-sdk/core" "^0.11.0"
-    "@cardano-sdk/util" "^0.9.0"
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/util" "~0.11.0"
     axios "^0.27.2"
     class-validator "^0.14.0"
     json-bigint "~1.0.0"
     ts-log "^2.2.4"
 
-"@cardano-sdk/core@^0.11.0", "@cardano-sdk/core@~0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/core/-/core-0.11.0.tgz#21569b4b087348053548509466568a1efb58bea1"
-  integrity sha512-XwSY/PyJMSU4nkVqWkU9jphJvrYHBEjdTOa0VRo6ep4hybeR1kwNQFjLNceI9Gwb/V03t62lO4U4eXU22m74zA==
+"@cardano-sdk/core@~0.13.0":
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/core/-/core-0.13.0.tgz#737630f97a3663c16bf69c2ec93c92bb78ab30e3"
+  integrity sha512-0n4JOWpil9RLFFTLU0xhc5mpjlNY9jTnLTam3GVMxHYLR3VEAnd5qSnVnA+Ri6iwzyapfOz3Y9l5oNwYdwhd6A==
   dependencies:
     "@cardano-ogmios/client" "5.6.0"
     "@cardano-ogmios/schema" "5.6.0"
-    "@cardano-sdk/crypto" "^0.1.4"
-    "@cardano-sdk/util" "^0.9.0"
+    "@cardano-sdk/crypto" "~0.1.6"
+    "@cardano-sdk/util" "~0.11.0"
     "@dcspark/cardano-multiplatform-lib-nodejs" "^3.1.1"
     "@foxglove/crc" "^0.0.3"
     "@scure/base" "^1.1.1"
@@ -3826,12 +3826,12 @@
     ts-custom-error "^3.2.0"
     ts-log "^2.2.4"
 
-"@cardano-sdk/crypto@^0.1.4", "@cardano-sdk/crypto@~0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/crypto/-/crypto-0.1.4.tgz#74049e3a9e0cd0e43cd0199d1a87b5969d581e04"
-  integrity sha512-AS3BfFjXw9X2KSvhqwaJM8iTc5WQJjApn+wWYdkd1g2UdWpHxJsZljYhan8LJpHqceQEtNV0+f6XitIbyYF0pA==
+"@cardano-sdk/crypto@~0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/crypto/-/crypto-0.1.6.tgz#210ae97e36c6a7a21133c82fefb6ea1450cbacf9"
+  integrity sha512-k6J45lIjUOrRi5+p+0319BhVxMISILO71Hlh29hj/OnUDuJDEGH0RFHWtblYR6JeXvakZQ7sU3TWBSkzcsU4IA==
   dependencies:
-    "@cardano-sdk/util" "^0.9.0"
+    "@cardano-sdk/util" "~0.11.0"
     blake2b "^2.1.4"
     bn.js "^5.2.1"
     i "^0.3.7"
@@ -3842,41 +3842,55 @@
     ts-custom-error "^3.2.0"
     ts-log "^2.2.4"
 
-"@cardano-sdk/dapp-connector@^0.9.0", "@cardano-sdk/dapp-connector@~0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/dapp-connector/-/dapp-connector-0.9.0.tgz#ca72b24e985958ffb63bdb5d32019d995af871f6"
-  integrity sha512-e/rGJtjzH9+d6z8zC6L0ILx8jE0wlKFylFqAJp6enzhgLXkXj77yIA2O+kaQDTZ65QJ7QY0jLYzlcAdjrCQddw==
+"@cardano-sdk/dapp-connector@~0.9.4":
+  version "0.9.4"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/dapp-connector/-/dapp-connector-0.9.4.tgz#c706cfad0c7e6d82da7dcf5056f9bf88ce737b9f"
+  integrity sha512-ybzcZyCjrHXPuLv1gpt0fuO6BYuAFz2NRS62jbyE7FdgzvB1+MXj79gsDWpCvnPrXiCguIugzcAmnEhLY9yiOg==
   dependencies:
-    "@cardano-sdk/core" "^0.11.0"
-    "@cardano-sdk/util" "^0.9.0"
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/util" "~0.11.0"
     ts-custom-error "^3.2.0"
     ts-log "^2.2.4"
     webextension-polyfill "^0.8.0"
 
-"@cardano-sdk/input-selection@^0.9.1", "@cardano-sdk/input-selection@~0.9.1":
-  version "0.9.1"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/input-selection/-/input-selection-0.9.1.tgz#9350cb8ced96c3203d0e76fc1618fc9aeca2a094"
-  integrity sha512-tXnHD+5LYF4LcSX1hn+njx5gzgmNZFAeQX92PtUKE4/ehabUj3RS84WPivfRfV9OzkCKw9PcFXa2ExmE4ihAow==
-  dependencies:
-    "@cardano-sdk/core" "^0.11.0"
-    "@cardano-sdk/util" "^0.9.0"
-    lodash "^4.17.21"
-    ts-custom-error "^3.2.0"
-
-"@cardano-sdk/key-management@^0.5.1", "@cardano-sdk/key-management@~0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/key-management/-/key-management-0.5.1.tgz#54da3e6fc998f90e04b4fdb03a82afda0fc36819"
-  integrity sha512-ndasQTJXrURxMLCrVwmykkZuBD1cmLVmAbtDlMRvPXVOfrHyIM2oFlDKQT4so5Z6akON/uLspQpehgUFqskQQQ==
+"@cardano-sdk/hardware-ledger@~0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/hardware-ledger/-/hardware-ledger-0.2.3.tgz#ad81874055c909262e017b29479bd09380941ca0"
+  integrity sha512-TjpUTVhSDeGJTU1aThW+Gyw9fBUrw3eLSm88xkDnb/rVuByCdyKfKV3MFbpimDTLDipOObPXEdCQ3GlbZHFfrA==
   dependencies:
     "@cardano-foundation/ledgerjs-hw-app-cardano" "^6.0.0"
-    "@cardano-sdk/core" "^0.11.0"
-    "@cardano-sdk/crypto" "^0.1.4"
-    "@cardano-sdk/dapp-connector" "^0.9.0"
-    "@cardano-sdk/util" "^0.9.0"
-    "@emurgo/cardano-message-signing-nodejs" "^1.0.1"
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/crypto" "~0.1.6"
+    "@cardano-sdk/key-management" "~0.7.2"
+    "@cardano-sdk/tx-construction" "~0.5.3"
+    "@cardano-sdk/util" "~0.11.0"
     "@ledgerhq/hw-transport" "^6.28.1"
     "@ledgerhq/hw-transport-node-hid-noevents" "^6.27.12"
     "@ledgerhq/hw-transport-webhid" "^6.27.12"
+    ts-custom-error "^3.2.0"
+    ts-log "^2.2.4"
+
+"@cardano-sdk/input-selection@~0.9.5":
+  version "0.9.5"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/input-selection/-/input-selection-0.9.5.tgz#ffe9fe3d4e8e7f44e4fe791930745e71f3a7171d"
+  integrity sha512-3SDmmTv6Ea5GXuGXr635rLF1YmSjHoKppbH8c/ltd1urbIkJ3/xY9oc9F301UDJ03yl4C79bTjsg3dn+VMOGQA==
+  dependencies:
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/util" "~0.11.0"
+    lodash "^4.17.21"
+    ts-custom-error "^3.2.0"
+
+"@cardano-sdk/key-management@~0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/key-management/-/key-management-0.7.2.tgz#f5f1a7bcb74584d843c42a6d89c2a47a32089618"
+  integrity sha512-9V8zXjrjWeBNa2KEbktMyiJyV7jhDzPnEHQ3yWnVGvlUrtal4Gq2RO+1HidMVPBHwRsjrcQ9k/4TOS9lK2XoVg==
+  dependencies:
+    "@cardano-foundation/ledgerjs-hw-app-cardano" "^6.0.0"
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/crypto" "~0.1.6"
+    "@cardano-sdk/dapp-connector" "~0.9.4"
+    "@cardano-sdk/util" "~0.11.0"
+    "@emurgo/cardano-message-signing-nodejs" "^1.0.1"
     bip39 "^3.0.4"
     chacha "^2.1.0"
     get-random-values "^2.0.0"
@@ -3887,26 +3901,30 @@
     ts-custom-error "^3.2.0"
     ts-log "^2.2.4"
 
-"@cardano-sdk/tx-construction@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/tx-construction/-/tx-construction-0.4.0.tgz#f290b9a0b7dbcc0635433b0a4486a0c4d1b90706"
-  integrity sha512-F4RegjQRgTmCvdGHUqZsaH89Qnkdko6p+XVE06FLhlYop4vWgP6i4h4ChgB0KheAVkx1kSHbIozeg4AtoZUarw==
+"@cardano-sdk/tx-construction@~0.5.3":
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/tx-construction/-/tx-construction-0.5.3.tgz#72139e8509c54633557f366e49c2789dd2a536b7"
+  integrity sha512-DWOVegQopLsS7yFcQ51MvcBtU7uHQVTsjla9lUJPsiSwHfxHnkaOlFGLdOmYmwcYKMxKgqKnx8bt/y4SnqFbJA==
   dependencies:
-    "@cardano-sdk/core" "^0.11.0"
-    "@cardano-sdk/input-selection" "^0.9.1"
-    "@cardano-sdk/util" "^0.9.0"
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/crypto" "~0.1.6"
+    "@cardano-sdk/input-selection" "~0.9.5"
+    "@cardano-sdk/key-management" "~0.7.2"
+    "@cardano-sdk/util" "~0.11.0"
+    "@cardano-sdk/wallet" "~0.14.0"
     lodash "^4.17.21"
     npm "^9.3.0"
+    rxjs "^7.4.0"
     ts-custom-error "^3.2.0"
     ts-log "^2.2.4"
 
-"@cardano-sdk/util-dev@~0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/util-dev/-/util-dev-0.9.0.tgz#c0519bad125cf10d2509628155c819b4c7003e01"
-  integrity sha512-EsPh5u7pyaHrrKsg6RTxmgCRhLFnpm6UR1VxO9C8FVAe09kE5UtFLtQmJaqSJ3UVSdiHnDLfoqBI1N8a2tHvEg==
+"@cardano-sdk/util-dev@~0.12.0":
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/util-dev/-/util-dev-0.12.0.tgz#f604d31fe06537f129fff158324965be478bb054"
+  integrity sha512-D5SifVBL0RENH2JSt+uo4KYUVpPMYVrp2U2Nu3ZUGn6RBW4giYMN1sbdgJm7bYOhbAlzWC+GJPvazO819KtFMA==
   dependencies:
-    "@cardano-sdk/core" "^0.11.0"
-    "@cardano-sdk/util" "^0.9.0"
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/util" "~0.11.0"
     "@types/dockerode" "^3.3.8"
     delay "^5.0.0"
     dockerode "^3.3.1"
@@ -3918,19 +3936,19 @@
     rxjs "^7.4.0"
     ts-log "^2.2.4"
 
-"@cardano-sdk/util-rxjs@^0.4.7":
-  version "0.4.7"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/util-rxjs/-/util-rxjs-0.4.7.tgz#16ef607707c07eef7acc63ac0d5f6b5add024620"
-  integrity sha512-SP1/NR175Jv+zfRhfPfF21/mwkFhqf7RyJjAu71snpE87VGuU9UudDcHaiIlub9Z4hQd1cC5RfJOKbi3+WQs+A==
+"@cardano-sdk/util-rxjs@~0.4.11":
+  version "0.4.11"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/util-rxjs/-/util-rxjs-0.4.11.tgz#bdd5ce0039fa2c540e639d28a62f64621cc170a5"
+  integrity sha512-hk35ZAFAM4PDGn1u3qLAS/12S9HRkaf0GPExUfymv6Agmd0EAaNZCkivaCo1PtN79nH0XGUfSJG5Ev8EqAoktA==
   dependencies:
-    "@cardano-sdk/util" "^0.9.0"
+    "@cardano-sdk/util" "~0.11.0"
     backoff-rxjs "^7.0.0"
     rxjs "^7.4.0"
 
-"@cardano-sdk/util@^0.9.0", "@cardano-sdk/util@~0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/util/-/util-0.9.0.tgz#c5bfd5c90039f7e00895fe4ba1b91c4260322a40"
-  integrity sha512-YbThN1fB0wUXqgLxoAjVX581NPHDw8cB/j4MR1b3C2pZ54bLkh6kI3LYwowUhqAww+JCa14xIacuXqYVbU4uyg==
+"@cardano-sdk/util@~0.11.0":
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/util/-/util-0.11.0.tgz#0d65a3c84b1d8bef794132505706b5a9bd7d3a83"
+  integrity sha512-V9k4wPr4+VupXRHpxjN/QehsrL/JsEjvvRLuuxZvV34U/kK6Gu+w0/ntqN4FaDDadOPZ2A5ZHiMtVGjQFXIu0A==
   dependencies:
     bech32 "^2.0.0"
     lodash "^4.17.21"
@@ -3939,19 +3957,20 @@
     ts-log "^2.2.4"
     type-fest "^2.19.0"
 
-"@cardano-sdk/wallet@^0.11.0", "@cardano-sdk/wallet@~0.11.0":
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/wallet/-/wallet-0.11.0.tgz#2892125c742e5096d67de1bc47b58b18cf3076ab"
-  integrity sha512-Hhp9Yn7YSwZ7TYBdCQpjlzOnIed/zz2QTVnlka8WTIfMPvW3Sef+lhkYW+2zb1le3rWDPTgXPYMNOJh4yV439w==
+"@cardano-sdk/wallet@~0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/wallet/-/wallet-0.14.0.tgz#4a772d25b97b0eb9fc88cfe1957efcc39726cc07"
+  integrity sha512-xGav/BQBsS+5fuS30dQPEF7VITf4id80aIEn6JzpttXVtzqAicfTorLxvXgxf1m0A6XVuTpIt+XzuB4Py+BuCQ==
   dependencies:
-    "@cardano-sdk/core" "^0.11.0"
-    "@cardano-sdk/crypto" "^0.1.4"
-    "@cardano-sdk/dapp-connector" "^0.9.0"
-    "@cardano-sdk/input-selection" "^0.9.1"
-    "@cardano-sdk/key-management" "^0.5.1"
-    "@cardano-sdk/tx-construction" "^0.4.0"
-    "@cardano-sdk/util" "^0.9.0"
-    "@cardano-sdk/util-rxjs" "^0.4.7"
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/crypto" "~0.1.6"
+    "@cardano-sdk/dapp-connector" "~0.9.4"
+    "@cardano-sdk/hardware-ledger" "~0.2.3"
+    "@cardano-sdk/input-selection" "~0.9.5"
+    "@cardano-sdk/key-management" "~0.7.2"
+    "@cardano-sdk/tx-construction" "~0.5.3"
+    "@cardano-sdk/util" "~0.11.0"
+    "@cardano-sdk/util-rxjs" "~0.4.11"
     backoff-rxjs "^7.0.0"
     delay "^5.0.0"
     emittery "^0.10.0"
@@ -3961,18 +3980,20 @@
     ts-custom-error "^3.2.0"
     ts-log "^2.2.3"
 
-"@cardano-sdk/web-extension@~0.9.0":
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/web-extension/-/web-extension-0.9.0.tgz#be4e240bc62745380ea07dd9c2ec96d8e49c578d"
-  integrity sha512-y+kFNe0q/Zp9QVC/MeJU0Tokd7EVX91zGi/sAJ4nRO6ZDtYYYfp75Jok57Skr85eF4h3HpivoclX7mV1mBWkRw==
+"@cardano-sdk/web-extension@~0.12.0":
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/web-extension/-/web-extension-0.12.0.tgz#7b14f3029f317f5a15b0fa2594d9c8817c682dc5"
+  integrity sha512-0xYqnYqVW+OenyyTPx49eamDMyY5uZv3cjN2vJAz0OulzUam425JYZly3DWDae0bFHyjyMcGCxt3JC+df8pFPg==
   dependencies:
-    "@cardano-sdk/core" "^0.11.0"
-    "@cardano-sdk/crypto" "^0.1.4"
-    "@cardano-sdk/dapp-connector" "^0.9.0"
-    "@cardano-sdk/key-management" "^0.5.1"
-    "@cardano-sdk/util" "^0.9.0"
-    "@cardano-sdk/util-rxjs" "^0.4.7"
-    "@cardano-sdk/wallet" "^0.11.0"
+    "@cardano-sdk/core" "~0.13.0"
+    "@cardano-sdk/crypto" "~0.1.6"
+    "@cardano-sdk/dapp-connector" "~0.9.4"
+    "@cardano-sdk/key-management" "~0.7.2"
+    "@cardano-sdk/tx-construction" "~0.5.3"
+    "@cardano-sdk/util" "~0.11.0"
+    "@cardano-sdk/util-rxjs" "~0.4.11"
+    "@cardano-sdk/wallet" "~0.14.0"
+    backoff-rxjs "^7.0.0"
     lodash "^4.17.21"
     rxjs "^7.4.0"
     ts-custom-error "^3.2.0"
@@ -6173,12 +6194,44 @@
     unbzip2-stream "1.4.3"
     yargs "17.7.1"
 
+"@radix-ui/number@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/@radix-ui/number/-/number-0.1.0.tgz#73ad13d5cc5f75fa5e147d72e5d5d5e50d688256"
+  integrity sha512-rpf6QiOWLHAkM4FEMYu9i+5Jr8cKT893+R4mPpcdsy4LD7omr9JfdOqj/h/xPA5+EcVrpMMlU6rrRYpUB5UI8g==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
+"@radix-ui/primitive@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/@radix-ui/primitive/-/primitive-0.1.0.tgz#6206b97d379994f0d1929809db035733b337e543"
+  integrity sha512-tqxZKybwN5Fa3VzZry4G6mXAAb9aAqKmPtnVbZpL0vsBwvOHTBwsjHVPXylocYLwEtBY9SCe665bYnNB515uoA==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
 "@radix-ui/primitive@1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@radix-ui/primitive/-/primitive-1.0.0.tgz#e1d8ef30b10ea10e69c76e896f608d9276352253"
   integrity sha512-3e7rn8FDMin4CgeL7Z/49smCA3rFYY3Ha2rUQ7HRWFadS5iCRw08ZgVT1LaNTCNqgvrUiyczLflrVrF0SRQtNA==
   dependencies:
     "@babel/runtime" "^7.13.10"
+
+"@radix-ui/primitive@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@radix-ui/primitive/-/primitive-1.0.1.tgz#e46f9958b35d10e9f6dc71c497305c22e3e55dbd"
+  integrity sha512-yQ8oGX2GVsEYMWGxcovu1uGWPCxV5BFfeeYxqPmuAzUyLT9qmaMXSAhXpb0WrspIeqYzdJpkh2vHModJPgRIaw==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
+"@radix-ui/react-avatar@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@radix-ui/react-avatar/-/react-avatar-1.0.2.tgz#c72209882e191db00ac0bfa16a9d9c025f0958f0"
+  integrity sha512-XRL8z2l9V7hRLCPjHWg/34RBPZUGpmOjmsRSNvIh2DI28GyIWDChbcsDUVc63MzOItk6Q83Ob2KK8k2FUlXlGA==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-context" "1.0.0"
+    "@radix-ui/react-primitive" "1.0.2"
+    "@radix-ui/react-use-callback-ref" "1.0.0"
+    "@radix-ui/react-use-layout-effect" "1.0.0"
 
 "@radix-ui/react-collection@1.0.2":
   version "1.0.2"
@@ -6191,6 +6244,13 @@
     "@radix-ui/react-primitive" "1.0.2"
     "@radix-ui/react-slot" "1.0.1"
 
+"@radix-ui/react-compose-refs@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/@radix-ui/react-compose-refs/-/react-compose-refs-0.1.0.tgz#cff6e780a0f73778b976acff2c2a5b6551caab95"
+  integrity sha512-eyclbh+b77k+69Dk72q3694OHrn9B3QsoIRx7ywX341U9RK1ThgQjMFZoPtmZNQTksXHLNEiefR8hGVeFyInGg==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
 "@radix-ui/react-compose-refs@1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@radix-ui/react-compose-refs/-/react-compose-refs-1.0.0.tgz#37595b1f16ec7f228d698590e78eeed18ff218ae"
@@ -6198,10 +6258,31 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
 
+"@radix-ui/react-compose-refs@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-compose-refs/-/react-compose-refs-1.0.1.tgz#7ed868b66946aa6030e580b1ffca386dd4d21989"
+  integrity sha512-fDSBgd44FKHa1FRMU59qBMPFcl2PZE+2nmqunj+BWFyYYjnhIDWL2ItDs3rrbJDQOtzt5nIebLCQc4QRfz6LJw==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
+"@radix-ui/react-context@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-context/-/react-context-0.1.1.tgz#06996829ea124d9a1bc1dbe3e51f33588fab0875"
+  integrity sha512-PkyVX1JsLBioeu0jB9WvRpDBBLtLZohVDT3BB5CTSJqActma8S8030P57mWZb4baZifMvN7KKWPAA40UmWKkQg==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
 "@radix-ui/react-context@1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@radix-ui/react-context/-/react-context-1.0.0.tgz#f38e30c5859a9fb5e9aa9a9da452ee3ed9e0aee0"
   integrity sha512-1pVM9RfOQ+n/N5PJK33kRSKsr1glNxomxONs5c49MliinBY6Yw2Q995qfBUUo0/Mbg05B/sGA0gkgPI7kmSHBg==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
+"@radix-ui/react-context@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-context/-/react-context-1.0.1.tgz#fe46e67c96b240de59187dcb7a1a50ce3e2ec00c"
+  integrity sha512-ebbrdFoYTcuZ0v4wG5tedGnp9tzcV8awzsxYph7gXUyvnNLuTIcCk1q17JEbnVhXAKG9oX3KtchwiMIAYp9NLg==
   dependencies:
     "@babel/runtime" "^7.13.10"
 
@@ -6220,6 +6301,15 @@
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-use-layout-effect" "1.0.0"
 
+"@radix-ui/react-presence@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.npmjs.org/@radix-ui/react-presence/-/react-presence-0.1.2.tgz#9f11cce3df73cf65bc348e8b76d891f0d54c1fe3"
+  integrity sha512-3BRlFZraooIUfRlyN+b/Xs5hq1lanOOo/+3h6Pwu2GMFjkGKKa4Rd51fcqGqnVlbr3jYg+WLuGyAV4KlgqwrQw==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-compose-refs" "0.1.0"
+    "@radix-ui/react-use-layout-effect" "0.1.0"
+
 "@radix-ui/react-presence@1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@radix-ui/react-presence/-/react-presence-1.0.0.tgz#814fe46df11f9a468808a6010e3f3ca7e0b2e84a"
@@ -6229,6 +6319,14 @@
     "@radix-ui/react-compose-refs" "1.0.0"
     "@radix-ui/react-use-layout-effect" "1.0.0"
 
+"@radix-ui/react-primitive@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@radix-ui/react-primitive/-/react-primitive-0.1.4.tgz#6c233cf08b0cb87fecd107e9efecb3f21861edc1"
+  integrity sha512-6gSl2IidySupIMJFjYnDIkIWRyQdbu/AHK7rbICPani+LW4b0XdxBXc46og/iZvuwW8pjCS8I2SadIerv84xYA==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-slot" "0.1.2"
+
 "@radix-ui/react-primitive@1.0.2":
   version "1.0.2"
   resolved "https://registry.npmjs.org/@radix-ui/react-primitive/-/react-primitive-1.0.2.tgz#54e22f49ca59ba88d8143090276d50b93f8a7053"
@@ -6236,6 +6334,14 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-slot" "1.0.1"
+
+"@radix-ui/react-primitive@1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/@radix-ui/react-primitive/-/react-primitive-1.0.3.tgz#d49ea0f3f0b2fe3ab1cb5667eb03e8b843b914d0"
+  integrity sha512-yi58uVyoAcK/Nq1inRY56ZSjKypBNKTa/1mcL8qdl6oJeEaDbOldlzrGn7P6Q3Id5d+SYNGc5AJgc4vGhjs5+g==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-slot" "1.0.2"
 
 "@radix-ui/react-roving-focus@1.0.3":
   version "1.0.3"
@@ -6253,6 +6359,30 @@
     "@radix-ui/react-use-callback-ref" "1.0.0"
     "@radix-ui/react-use-controllable-state" "1.0.0"
 
+"@radix-ui/react-scroll-area@^0.1.3":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@radix-ui/react-scroll-area/-/react-scroll-area-0.1.4.tgz#be1d32c113ee9f64e3d2e7ee3983d98f00b42038"
+  integrity sha512-QHxRsjy+hsHwQYJ9cCNgSJ5+6ioZu1KhwD1UOXoHNciuFGMX08v+uJPKXIz+ySv03Rx6cOz6f/Fk5aPHRMFi/A==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/number" "0.1.0"
+    "@radix-ui/primitive" "0.1.0"
+    "@radix-ui/react-compose-refs" "0.1.0"
+    "@radix-ui/react-context" "0.1.1"
+    "@radix-ui/react-presence" "0.1.2"
+    "@radix-ui/react-primitive" "0.1.4"
+    "@radix-ui/react-use-callback-ref" "0.1.0"
+    "@radix-ui/react-use-direction" "0.1.0"
+    "@radix-ui/react-use-layout-effect" "0.1.0"
+
+"@radix-ui/react-slot@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.npmjs.org/@radix-ui/react-slot/-/react-slot-0.1.2.tgz#e6f7ad9caa8ce81cc8d532c854c56f9b8b6307c8"
+  integrity sha512-ADkqfL+agEzEguU3yS26jfB50hRrwf7U4VTwAOZEmi/g+ITcBWe12yM46ueS/UCIMI9Py+gFUaAdxgxafFvY2Q==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-compose-refs" "0.1.0"
+
 "@radix-ui/react-slot@1.0.1":
   version "1.0.1"
   resolved "https://registry.npmjs.org/@radix-ui/react-slot/-/react-slot-1.0.1.tgz#e7868c669c974d649070e9ecbec0b367ee0b4d81"
@@ -6260,6 +6390,28 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-compose-refs" "1.0.0"
+
+"@radix-ui/react-slot@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/@radix-ui/react-slot/-/react-slot-1.0.2.tgz#a9ff4423eade67f501ffb32ec22064bc9d3099ab"
+  integrity sha512-YeTpuq4deV+6DusvVUW4ivBgnkHwECUu0BiN43L5UCDFgdhsRUWAghhTF5MbvNTPzmiFOx90asDSUjWuCNapwg==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-compose-refs" "1.0.1"
+
+"@radix-ui/react-switch@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmjs.org/@radix-ui/react-switch/-/react-switch-1.0.3.tgz#6119f16656a9eafb4424c600fdb36efa5ec5837e"
+  integrity sha512-mxm87F88HyHztsI7N+ZUmEoARGkC22YVW5CaC+Byc+HRpuvCrOBPTAnXgf+tZ/7i0Sg/eOePGdMhUKhPaQEqow==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/primitive" "1.0.1"
+    "@radix-ui/react-compose-refs" "1.0.1"
+    "@radix-ui/react-context" "1.0.1"
+    "@radix-ui/react-primitive" "1.0.3"
+    "@radix-ui/react-use-controllable-state" "1.0.1"
+    "@radix-ui/react-use-previous" "1.0.1"
+    "@radix-ui/react-use-size" "1.0.1"
 
 "@radix-ui/react-tabs@^1.0.3":
   version "1.0.3"
@@ -6276,10 +6428,24 @@
     "@radix-ui/react-roving-focus" "1.0.3"
     "@radix-ui/react-use-controllable-state" "1.0.0"
 
+"@radix-ui/react-use-callback-ref@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/@radix-ui/react-use-callback-ref/-/react-use-callback-ref-0.1.0.tgz#934b6e123330f5b3a6b116460e6662cbc663493f"
+  integrity sha512-Va041McOFFl+aV+sejvl0BS2aeHx86ND9X/rVFmEFQKTXCp6xgUK0NGUAGcgBlIjnJSbMYPGEk1xKSSlVcN2Aw==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
 "@radix-ui/react-use-callback-ref@1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@radix-ui/react-use-callback-ref/-/react-use-callback-ref-1.0.0.tgz#9e7b8b6b4946fe3cbe8f748c82a2cce54e7b6a90"
   integrity sha512-GZtyzoHz95Rhs6S63D2t/eqvdFCm7I+yHMLVQheKM7nBD8mbZIt+ct1jz4536MDnaOGKIxynJ8eHTkVGVVkoTg==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
+"@radix-ui/react-use-callback-ref@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-use-callback-ref/-/react-use-callback-ref-1.0.1.tgz#f4bb1f27f2023c984e6534317ebc411fc181107a"
+  integrity sha512-D94LjX4Sp0xJFVaoQOd3OO9k7tpBYNOXdVhkltUbGv2Qb9OXdrg/CpsjlZv7ia14Sylv398LswWBVVu5nqKzAQ==
   dependencies:
     "@babel/runtime" "^7.13.10"
 
@@ -6291,12 +6457,56 @@
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-use-callback-ref" "1.0.0"
 
+"@radix-ui/react-use-controllable-state@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-use-controllable-state/-/react-use-controllable-state-1.0.1.tgz#ecd2ced34e6330caf89a82854aa2f77e07440286"
+  integrity sha512-Svl5GY5FQeN758fWKrjM6Qb7asvXeiZltlT4U2gVfl8Gx5UAv2sMR0LWo8yhsIZh2oQ0eFdZ59aoOOMV7b47VA==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-use-callback-ref" "1.0.1"
+
+"@radix-ui/react-use-direction@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/@radix-ui/react-use-direction/-/react-use-direction-0.1.0.tgz#97ac1d52e497c974389e7988f809238ed72e7df7"
+  integrity sha512-NajpY/An9TCPSfOVkgWIdXJV+VuWl67PxB6kOKYmtNAFHvObzIoh8o0n9sAuwSAyFCZVq211FEf9gvVDRhOyiA==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
+"@radix-ui/react-use-layout-effect@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.npmjs.org/@radix-ui/react-use-layout-effect/-/react-use-layout-effect-0.1.0.tgz#ebf71bd6d2825de8f1fbb984abf2293823f0f223"
+  integrity sha512-+wdeS51Y+E1q1Wmd+1xSSbesZkpVj4jsg0BojCbopWvgq5iBvixw5vgemscdh58ep98BwUbsFYnrywFhV9yrVg==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
 "@radix-ui/react-use-layout-effect@1.0.0":
   version "1.0.0"
   resolved "https://registry.npmjs.org/@radix-ui/react-use-layout-effect/-/react-use-layout-effect-1.0.0.tgz#2fc19e97223a81de64cd3ba1dc42ceffd82374dc"
   integrity sha512-6Tpkq+R6LOlmQb1R5NNETLG0B4YP0wc+klfXafpUCj6JGyaUc8il7/kUZ7m59rGbXGczE9Bs+iz2qloqsZBduQ==
   dependencies:
     "@babel/runtime" "^7.13.10"
+
+"@radix-ui/react-use-layout-effect@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-use-layout-effect/-/react-use-layout-effect-1.0.1.tgz#be8c7bc809b0c8934acf6657b577daf948a75399"
+  integrity sha512-v/5RegiJWYdoCvMnITBkNNx6bCj20fiaJnWtRkU18yITptraXjffz5Qbn05uOiQnOvi+dbkznkoaMltz1GnszQ==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
+"@radix-ui/react-use-previous@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-use-previous/-/react-use-previous-1.0.1.tgz#b595c087b07317a4f143696c6a01de43b0d0ec66"
+  integrity sha512-cV5La9DPwiQ7S0gf/0qiD6YgNqM5Fk97Kdrlc5yBcrF3jyEZQwm7vYFqMo4IfeHgJXsRaMvLABFtd0OVEmZhDw==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+
+"@radix-ui/react-use-size@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@radix-ui/react-use-size/-/react-use-size-1.0.1.tgz#1c5f5fea940a7d7ade77694bb98116fb49f870b2"
+  integrity sha512-ibay+VqrgcaI6veAojjofPATwledXiSmX+C0KrBk/xgpX9rBzPV3OsfwlhQdUOFbh+LKQorLYT+xTXW9V8yd0g==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@radix-ui/react-use-layout-effect" "1.0.1"
 
 "@reach/router@^1.3.4":
   version "1.3.4"
@@ -6377,6 +6587,14 @@
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     resolve "^1.17.0"
+
+"@rollup/plugin-typescript@^11.1.1":
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-typescript/-/plugin-typescript-11.1.1.tgz#258663a7aa6b51390dd39ae6e5502f2c4b2807cb"
+  integrity sha512-Ioir+x5Bejv72Lx2Zbz3/qGg7tvGbxQZALCLoJaGrkNXak/19+vKgKYJYM3i/fJxvsb23I9FuFQ8CUBEfsmBRg==
+  dependencies:
+    "@rollup/pluginutils" "^5.0.1"
+    resolve "^1.22.1"
 
 "@rollup/pluginutils@^3.1.0":
   version "3.1.0"
@@ -10432,7 +10650,7 @@
     media-query-parser "^2.0.2"
     outdent "^0.8.0"
 
-"@vanilla-extract/integration@^6.0.0":
+"@vanilla-extract/integration@^6.0.0", "@vanilla-extract/integration@^6.0.2":
   version "6.2.1"
   resolved "https://registry.npmjs.org/@vanilla-extract/integration/-/integration-6.2.1.tgz#e87849ed3d8e9ddd2703b8b8597fdbff08cf62ad"
   integrity sha512-+xYJz07G7TFAMZGrOqArOsURG+xcYvqctujEkANjw2McCBvGEK505RxQqOuNiA9Mi9hgGdNp2JedSa94f3eoLg==
@@ -10472,6 +10690,16 @@
   version "1.5.1"
   resolved "https://registry.npmjs.org/@vanilla-extract/sprinkles/-/sprinkles-1.5.1.tgz#3e226e99c597af8bfeafc8f76a7a720b210a29cf"
   integrity sha512-xPYpeEZEC1mhiPqWCBPGdIHkpFaaQIbaAfG9W2JyIW0byqTP7CoaxdYNMPjhZuoV5lkTI14SJg8Bt+fZqmV5yQ==
+
+"@vanilla-extract/vite-plugin@^3.8.2":
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/@vanilla-extract/vite-plugin/-/vite-plugin-3.8.2.tgz#ab70e48309e3d9de1d89a417060470bbd742eb83"
+  integrity sha512-i0vpuBUoh10Obl0hJr0dWQa6M3Udu/irm4tnsg1lUze8DXTbv3ctHmVu/wrRZHKw1EzzW/v+nLoJJRvisApspQ==
+  dependencies:
+    "@vanilla-extract/integration" "^6.0.2"
+    outdent "^0.8.0"
+    postcss "^8.3.6"
+    postcss-load-config "^3.1.0"
 
 "@vanilla-extract/webpack-plugin@^2.2.0":
   version "2.2.0"
@@ -26266,7 +26494,7 @@ postcss-load-config@^3.0.0:
     lilconfig "^2.0.3"
     yaml "^1.10.2"
 
-postcss-load-config@^3.0.1:
+postcss-load-config@^3.0.1, postcss-load-config@^3.1.0:
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/postcss-load-config/-/postcss-load-config-3.1.4.tgz#1ab2571faf84bb078877e1d07905eabe9ebda855"
   integrity sha512-6DiM4E7v4coTE4uzA8U//WhtPwyhiim3eyjEMFCnUpzbrkK9wJHgKDT2mR+HbtSrd/NubVaYTOpSpjUl8NQeRg==
@@ -26623,21 +26851,21 @@ postcss@^8.3.5:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
+postcss@^8.3.6, postcss@^8.4.23:
+  version "8.4.23"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.23.tgz#df0aee9ac7c5e53e1075c24a3613496f9e6552ab"
+  integrity sha512-bQ3qMcpF6A/YjR55xtoTr0jGOlnPOKAIMdOWiv0EIT6HVPEaJiJB4NLljSbiHoC2RX7DN5Uvjtpbg1NPdwv1oA==
+  dependencies:
+    nanoid "^3.3.6"
+    picocolors "^1.0.0"
+    source-map-js "^1.0.2"
+
 postcss@^8.4.21:
   version "8.4.21"
   resolved "https://registry.npmjs.org/postcss/-/postcss-8.4.21.tgz#c639b719a57efc3187b13a1d765675485f4134f4"
   integrity sha512-tP7u/Sn/dVxK2NnruI4H9BG+x+Wxz6oeZ1cJ8P6G/PZY0IKk4k/63TDsQf2kQq3+qoJeLm2kIBUNlZe3zgb4Zg==
   dependencies:
     nanoid "^3.3.4"
-    picocolors "^1.0.0"
-    source-map-js "^1.0.2"
-
-postcss@^8.4.23:
-  version "8.4.23"
-  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.23.tgz#df0aee9ac7c5e53e1075c24a3613496f9e6552ab"
-  integrity sha512-bQ3qMcpF6A/YjR55xtoTr0jGOlnPOKAIMdOWiv0EIT6HVPEaJiJB4NLljSbiHoC2RX7DN5Uvjtpbg1NPdwv1oA==
-  dependencies:
-    nanoid "^3.3.6"
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
@@ -32777,6 +33005,11 @@ wcwidth@^1.0.0, wcwidth@^1.0.1:
   integrity sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==
   dependencies:
     defaults "^1.0.3"
+
+wdio-intercept-service@4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/wdio-intercept-service/-/wdio-intercept-service-4.4.0.tgz#8f20d8c75c91aef2a0c27b30a6c51e5d3a389db2"
+  integrity sha512-9ao5WVTWmr/NEOTwqHNvYPso7Ygzx+PvITaZvYvC5RPXlGv1LPdDdP+WCGzwDlvqdOaty7Nko5BfJDyuBscH7A==
 
 web-namespaces@^1.0.0:
   version "1.1.4"

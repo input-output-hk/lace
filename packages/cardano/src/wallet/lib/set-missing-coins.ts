@@ -1,5 +1,5 @@
 import { Cardano } from '@cardano-sdk/core';
-import { InitializeTxPropsValidationResult, InitializeTxProps } from '@cardano-sdk/wallet';
+import { InitializeTxPropsValidationResult, InitializeTxProps } from '@cardano-sdk/tx-construction';
 import BigNumber from 'bignumber.js';
 
 export const setMissingCoins = (

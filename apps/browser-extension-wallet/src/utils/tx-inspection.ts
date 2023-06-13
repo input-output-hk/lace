@@ -64,11 +64,11 @@ export const inspectTxType = ({
 
   const withRewardsWithdrawal =
     inspectionProperties.totalWithdrawals > BigInt(0) &&
-    hasWalletStakeAddress(tx?.body?.withdrawals, walletAddresses.rewardAccount);
+    hasWalletStakeAddress(tx.body.withdrawals, walletAddresses.rewardAccount);
 
   if (inspectionProperties.sent.inputs.length > 0) {
     switch (true) {
-      case !!inspectionProperties.delegation?.[0]?.poolId:
+      case !!inspectionProperties.delegation[0]?.poolId:
         return 'delegation';
       case inspectionProperties.stakeKeyRegistration.length > 0:
         return 'delegationRegistration';

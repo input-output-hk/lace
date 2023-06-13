@@ -44,7 +44,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setIsDrawerVisible, resetStates, setSection } = useStakePoolDetails();
-  const { setDelegationBuiltTx } = useDelegationStore();
+  const { setDelegationTxBuilder } = useDelegationStore();
   const { password, removePassword } = usePassword();
   const { executeWithPassword } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -57,7 +57,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
         ? AnalyticsEventNames.Staking.STAKING_FAIL_POPUP
         : AnalyticsEventNames.Staking.STAKING_FAIL_BROWSER
     });
-    setDelegationBuiltTx();
+    setDelegationTxBuilder();
     setIsDrawerVisible(false);
     resetStates();
   };

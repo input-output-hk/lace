@@ -25,7 +25,7 @@ There are few root dev commands available:
 - `watch` - build and watch
 - `watch-deps` - build and watch only dependencies of a given app
 
-You can use them while working either with the `browser` or `desktop` app the following way:
+You can use them while working with the `browser` app the following way:
 
 ```console
 yarn [app] [command]
@@ -36,16 +36,16 @@ the appropriate env variable used by all involved build processes.
 
 **Examples:**
 
-- `yarn desktop watch` runs the `watch` command for all dependent workspaces of the [desktop] app and for the [desktop]
+- `yarn browser watch` runs the `watch` command for all dependent workspaces of the [browser] app and for the [browser]
   app itself.
 - `yarn browser build-deps` builds all dependent workspaces of the [browser-extension-wallet] app except the app itself.
 - `yarn browser [any command supported by yarn]` command you provide will run in the [browser-extension-wallet]
   context. For example:
-  - `yarn desktop workspace @light-wallet/core build` runs the `build` command **only for the @light-wallet/[core]
+  - `yarn browser workspace @lace/core build` runs the `build` command **only for the @lace/[core]
     package**, but in
-    the context of the `desktop`\*. Notice the `workspace @light-wallet/core build` is a yarn' syntax
+    the context of the `browser`\*. Notice the `workspace @lace/core build` is a yarn syntax
 
-\* the `@light-wallet/core` package will be built specifically for the `desktop` app
+\* the `@lace/core` package will be built specifically for the `browser` app
 
 [browser-extension-wallet]: ./apps/browser-extension-wallet
 [common]: ./packages/common

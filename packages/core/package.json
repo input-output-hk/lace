@@ -2,31 +2,41 @@
   "name": "@lace/core",
   "version": "0.1.0",
   "description": "Core application elements",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "module": "dist/index.esm.js",
-  "scripts": {
-    "build": "rollup -c rollup.config.js",
-    "watch": "yarn build --watch",
-    "cleanup": "shx rm -rf dist node_modules coverage .rollup.cache src/dist",
-    "lint": "cd ../.. && yarn core:lint",
-    "prepack": "yarn build",
-    "prestart": "yarn build",
-    "start": "node dist/index.js",
-    "test": "NODE_ENV=test jest -c ./test/jest.config.js",
-    "test:coverage": "yarn test --coverage",
-    "prepare": "ts-patch install -s"
+  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/core/README.md",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/input-output-hk/lace.git"
   },
-  "author": "IOHK",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/input-output-hk/lace/issues"
+  "author": "IOHK",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "typings": "dist/index.d.ts",
+  "directories": {
+    "lib": "src",
+    "test": "test"
   },
-  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/core/README.md",
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "cleanup": "shx rm -rf dist node_modules coverage .rollup.cache src/dist",
+    "lint": "cd ../.. && yarn core:lint",
+    "prepack": "yarn build",
+    "prepare": "ts-patch install -s",
+    "prestart": "yarn build",
+    "start": "node dist/index.js",
+    "test": "NODE_ENV=test jest -c ./test/jest.config.js",
+    "test:coverage": "yarn test --coverage",
+    "watch": "yarn build --watch"
+  },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@lace/common": "0.1.0",
@@ -47,18 +57,8 @@
     "shx": "^0.3.2",
     "typescript": "^4.3.5"
   },
-  "directories": {
-    "lib": "src",
-    "test": "test"
-  },
   "peerDependencies": {
     "react": "17.0.2",
     "react-dom": "17.0.2"
-  },
-  "files": [
-    "dist",
-    "LICENSE",
-    "NOTICE",
-    "README.md"
-  ]
+  }
 }

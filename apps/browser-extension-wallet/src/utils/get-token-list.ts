@@ -72,9 +72,9 @@ export const getTokenList = (params: GetTokenListParams): { tokenList: NonNFTAss
     } else {
       const tokenPriceInAda = prices?.tokens?.get(assetId)?.priceInAda;
       const fiat =
-        info?.tokenMetadata !== undefined && tokenPriceInAda && prices?.cardano?.price
-          ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices?.cardano?.price)))} ${
-              fiatCurrency?.code
+        info?.tokenMetadata !== undefined && tokenPriceInAda && prices?.cardano.price
+          ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices.cardano.price)))} ${
+              fiatCurrency.code
             }`
           : '-';
       const assetMetadata = { ...info?.tokenMetadata, ...info?.nftMetadata };
@@ -83,7 +83,7 @@ export const getTokenList = (params: GetTokenListParams): { tokenList: NonNFTAss
         amount,
         fiat,
         // eslint-disable-next-line no-magic-numbers
-        name: assetMetadata?.name || addEllipsis(info?.fingerprint.toString() || '-', 10, 4),
+        name: assetMetadata.name || addEllipsis(info?.fingerprint.toString() || '-', 10, 4),
         description: assetMetadata?.ticker || '-',
         logo: assetMetadata?.icon
           ? getAssetImageUrl(assetMetadata.icon)

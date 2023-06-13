@@ -2,8 +2,21 @@ import webTester from '../actor/webTester';
 import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
 import StakePoolDetails from '../elements/staking/stakePoolDetails';
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
+import { browser } from '@wdio/globals';
+import StakingPage from '../elements/staking/stakingPage';
 
-export default new (class StakingPageObject {
+class StakingPageObject {
+  async clickStakePoolWithName(poolName: string) {
+    await StakingPage.stakingPoolWithName(poolName).click();
+  }
+
+  async fillSearch(term: string) {
+    await StakingPage.stakingPageSearchInput.waitForEnabled();
+    await StakingPage.stakingPageSearchInput.scrollIntoView();
+    await StakingPage.stakingPageSearchInput.setValue(term);
+    await browser.pause(500);
+  }
+
   async clickPoolNameInStakingInfoComponent() {
     await webTester.clickElement(new StakingInfoComponent().poolName());
   }
@@ -20,10 +33,6 @@ export default new (class StakingPageObject {
     await webTester.hoverOnWebElement(new StakingInfoComponent().statsTotalRewards().value());
   }
 
-  async getPoolName() {
-    return await webTester.getTextValueFromElement(new StakingInfoComponent().poolName());
-  }
-
   async getPoolIdFromStakePoolDetails(mode: 'extended' | 'popup') {
     await this.clickPoolNameInStakingInfoComponent();
     await StakePoolDetails.poolId.waitForDisplayed();
@@ -33,4 +42,6 @@ export default new (class StakingPageObject {
       : simpleTxSideDrawerPageObject.clickCloseDrawerButton());
     return poolId;
   }
-})();
+}
+
+export default new StakingPageObject();

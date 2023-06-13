@@ -6,7 +6,7 @@ import { within, userEvent } from '@storybook/testing-library';
 
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
-import { Page, Section, Variants } from '../decorators';
+import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Grid } from '../grid';
 import { Cell } from '../grid/cell.component';
@@ -21,13 +21,7 @@ const subtitle = ``;
 export default {
   title: 'Input fields/Asset Input',
   component: AssetInput,
-  decorators: [
-    (Story): JSX.Element => (
-      <Page title="Asset Input" subtitle={subtitle}>
-        <Story />
-      </Page>
-    ),
-  ],
+  decorators: [page({ title: 'Asset Input', subtitle })],
 } as Meta;
 
 const asset: Asset = {

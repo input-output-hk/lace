@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { SettingsCard, SettingsLink, PassphraseSettingsDrawer, ShowPassphraseDrawer } from './';
 import { Switch } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,7 @@ import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
 import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks';
-import { useAppSettingsContext } from '@providers';
+import { useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { AnalyticsConsentStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ANALYTICS_ACCEPTANCE_LS_KEY } from '@providers/AnalyticsProvider/analyticsTracker/config';
@@ -26,6 +26,7 @@ export const SettingsSecurity = ({
 }: SettingsSecurityProps): React.ReactElement | null => {
   const [isPassphraseSettingsDrawerOpen, setIsPassphraseSettingsDrawerOpen] = useState(false);
   const [isShowPassphraseDrawerOpen, setIsShowPassphraseDrawerOpen] = useState(false);
+  const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
   const { t } = useTranslation();
   const { walletLock } = useWalletStore();
   const [settings] = useAppSettingsContext();
@@ -35,12 +36,30 @@ export const SettingsSecurity = ({
     ANALYTICS_ACCEPTANCE_LS_KEY,
     AnalyticsConsentStatus.REJECTED
   );
+  const backgroundService = useBackgroundServiceAPIContext();
 
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
 
   const handleAnalyticsChoise = (isAccepted: boolean) => {
     setIsTrackingEnabled(isAccepted ? AnalyticsConsentStatus.ACCEPTED : AnalyticsConsentStatus.REJECTED);
   };
+
+  const isMnemonicAvailable = useCallback(async () => {
+    if (!walletLock) {
+      setHideShowPassphraseSetting(true);
+      return;
+    }
+    const backgroundStorage = await backgroundService.getBackgroundStorage();
+    if (!backgroundStorage?.mnemonic) {
+      setHideShowPassphraseSetting(true);
+      return;
+    }
+    setHideShowPassphraseSetting(false);
+  }, [backgroundService, walletLock]);
+
+  useEffect(() => {
+    isMnemonicAvailable();
+  }, [isMnemonicAvailable]);
 
   return (
     <>
@@ -60,7 +79,7 @@ export const SettingsSecurity = ({
         <Title level={5} className={styles.heading5} data-testid="security-settings-heading">
           {t('browserView.settings.security.title')}
         </Title>
-        {walletLock && (
+        {!hideShowPassphraseSetting && (
           <>
             <SettingsLink
               onClick={() => setIsShowPassphraseDrawerOpen(true)}
