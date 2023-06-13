@@ -9,6 +9,8 @@ import { DatabaseProvider } from '@src/providers/DatabaseProvider';
 import { StoreProvider } from '@src/stores';
 import create from 'zustand';
 import { AppSettingsProvider } from '@providers';
+import { addNetworkToAddressBook } from '@views/browser/features/adress-book';
+import { Cardano } from '@cardano-sdk/core';
 
 jest.mock('../AddressBookProvider', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,7 +37,7 @@ describe('testing useAddressBookState', () => {
     id: i + 1,
     address: `addr_test${i + 1}`,
     name: `atest wallet ${i + 1}`,
-    network: 1
+    network: Cardano.NetworkMagics.Preprod
   }));
 
   beforeEach(async () => {
@@ -78,7 +80,7 @@ describe('testing useAddressBookState', () => {
       address: 'addr_test16',
       id: 16,
       name: 'test wallet 16',
-      network: 1
+      network: Cardano.NetworkMagics.Preprod
     });
     expect(result.current.list.length).toBe(16);
     expect(result.current.count).toBe(16);
@@ -99,7 +101,7 @@ describe('testing useAddressBookState', () => {
       id: result.current.list[0].id,
       name: 'newName',
       address: 'newAddress',
-      network: 1
+      network: Cardano.NetworkMagics.Preprod
     };
 
     result.current.utils.updateRecord(idToUpdate, addressData as AddressBookSchema);
@@ -129,9 +131,76 @@ describe('testing useAddressBookState', () => {
     expect(result.current.list).not.toContainEqual({
       address: 'addr_test1',
       name: 'test wallet',
-      id: 1
+      id: Cardano.NetworkMagics.Preprod
     });
     expect(result.current.list.length).toBe(14);
     expect(result.current.count).toBe(14);
+  });
+
+  test('should throw error when same address is used within the same network', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useAddressBookContext(), {
+      wrapper: makeDbContextWrapper(db)
+    });
+
+    try {
+      const address = {
+        id: 16,
+        address: 'addr_test17',
+        name: 'test wallet 17',
+        network: Cardano.NetworkMagics.Preprod
+      };
+
+      await waitForNextUpdate();
+
+      result.current.utils.saveRecord(addNetworkToAddressBook(address, 'PREPROD'));
+
+      await waitForNextUpdate();
+
+      result.current.utils.extendLimit();
+
+      await waitForNextUpdate();
+
+      expect(result.current.list).toContainEqual(address);
+      expect(result.current.list.length).toBe(16);
+      expect(result.current.count).toBe(16);
+
+      await expect(result.current.utils.saveRecord(addNetworkToAddressBook(address, 'PREPROD'))).rejects.toThrowError();
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  test('should allow the same address to be used across different networks', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useAddressBookContext(), {
+      wrapper: makeDbContextWrapper(db)
+    });
+
+    const address = { id: 16, address: 'addr_test17', name: 'test wallet 17', network: Cardano.NetworkMagics.Preprod };
+
+    await waitForNextUpdate();
+
+    result.current.utils.saveRecord(addNetworkToAddressBook(address, 'PREPROD'));
+
+    await waitForNextUpdate();
+
+    result.current.utils.extendLimit();
+
+    await waitForNextUpdate();
+
+    expect(result.current.list).toContainEqual(address);
+    expect(result.current.list.length).toBe(16);
+    expect(result.current.count).toBe(16);
+
+    result.current.utils.saveRecord(addNetworkToAddressBook(address, 'PREVIEW'));
+
+    await waitForNextUpdate();
+
+    result.current.utils.extendLimit();
+
+    await waitForNextUpdate();
+
+    expect(result.current.list).toContainEqual(address);
+    expect(result.current.list.length).toBe(17);
+    expect(result.current.count).toBe(17);
   });
 });

@@ -8,6 +8,7 @@ import { WalletDatabase, AddressBookSchema, addressBookSchema } from '@lib/stora
 import { StoreProvider } from '@src/stores';
 import create from 'zustand';
 import { AppSettingsProvider, DatabaseProvider } from '@providers';
+import { Cardano } from '@cardano-sdk/core';
 
 const makeDbContextWrapper =
   (dbInstance: WalletDatabase): FunctionComponent =>
@@ -26,19 +27,19 @@ describe('Testing useGetFilteredAddressBook hook', () => {
       id: 1,
       address: 'PREPRODaddr_test1',
       name: 'PREPRODtest wallet',
-      network: 1
+      network: Cardano.NetworkMagics.Preprod
     },
     {
       id: 2,
       address: 'PREPRODaddr_test2',
       name: 'PREPRODOther wallet',
-      network: 1
+      network: Cardano.NetworkMagics.Preprod
     },
     {
       id: 3,
       address: 'PREPRODaddr_test3',
       name: 'PREPRODOther wallet 2',
-      network: 1
+      network: Cardano.NetworkMagics.Preprod
     }
   ];
 
