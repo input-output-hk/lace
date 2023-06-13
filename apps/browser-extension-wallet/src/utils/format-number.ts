@@ -51,7 +51,8 @@ export const shortenNumber = (str: string, length: number): string =>
 
 export const getInlineCurrencyFormat = (value: string, maxDecimals = 0): string => {
   if (!value) return '0';
-  const parsedStringValue = value.replaceAll(/[^\d.]/g, '');
+  // eslint-disable-next-line unicorn/prefer-string-replace-all
+  const parsedStringValue = value.replace(/[^\d.]/g, '');
 
   if (!parsedStringValue.includes('.')) {
     return BigInt(parsedStringValue).toLocaleString('fullwide', { useGrouping: true });

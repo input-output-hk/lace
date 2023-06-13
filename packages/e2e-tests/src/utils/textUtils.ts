@@ -1,2 +1,3 @@
 export const removeWhitespacesFromText = async (text: string): Promise<string> =>
-  text.replaceAll(/[\s/]+/g, ' ').trim();
+  // eslint-disable-next-line unicorn/prefer-string-replace-all
+  text.replace(/[\s/]+/g, ' ').trim();

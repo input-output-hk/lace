@@ -15,7 +15,8 @@ class StakingExtendedPageObject {
     const stakePoolListItem = new StakePoolListItem();
     await webTester.waitUntilSeeElement(stakePoolListItem.container(), 6000);
 
-    const expectedTotalRows = Number((await StakingPage.counter.getText()).replaceAll(/\D/g, ''));
+    // eslint-disable-next-line unicorn/prefer-string-replace-all
+    const expectedTotalRows = Number((await StakingPage.counter.getText()).replace(/\D/g, ''));
     let displayedRows = (await stakePoolListItem.getRows()).length;
 
     while (displayedRows < expectedTotalRows) {

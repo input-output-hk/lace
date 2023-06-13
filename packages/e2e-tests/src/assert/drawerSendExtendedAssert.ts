@@ -176,7 +176,8 @@ class DrawerSendExtendedAssert {
     const popupTitleText = (await transactionCancelPopup.getCancelTxPopupTitle()) as string;
     await expect(popupTitleText).to.equal(await t('general.warnings.youHaveToStartAgain'));
     let popupContentText = (await transactionCancelPopup.getCancelTxPopupText()) as string;
-    popupContentText = popupContentText.replaceAll(new RegExp(/(\r\n|\n|\r)/gm), ' ');
+    // eslint-disable-next-line unicorn/prefer-string-replace-all
+    popupContentText = popupContentText.replace(new RegExp(/(\r\n|\n|\r)/gm), ' ');
     const expectedTextLine1 = (await t('general.warnings.areYouSureYouWantToExit')) as string;
     const expectedTextLine2 = (await t('general.warnings.thisWillNotBeSaved')) as string;
     const expectedText = `${expectedTextLine1} ${expectedTextLine2}`;

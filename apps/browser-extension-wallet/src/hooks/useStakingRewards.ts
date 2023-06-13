@@ -28,7 +28,8 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
                   ? // eslint-disable-next-line unicorn/no-null
                     BigNumber.sum.apply(null, confirmedRewardHistory.map(({ rewards }) => rewards.toString()) ?? [])
                   : 0,
-              lastReward: confirmedRewardHistory.at(-1)?.rewards || 0
+              // eslint-disable-next-line unicorn/prefer-at
+              lastReward: confirmedRewardHistory[confirmedRewardHistory.length - 1]?.rewards || 0
             };
           })
         ),

@@ -117,14 +117,15 @@ export class TokensPage extends WebElement {
 
   async getTokenTableItemValueByIndex(index: number, mode: 'extended' | 'popup'): Promise<number> {
     const tokenValue = (await webTester.getTextValueFromElement(this.tokensTableItemValue(index, mode))) as string;
-    return Number.parseFloat(tokenValue.replaceAll(',', ''));
+    // eslint-disable-next-line unicorn/prefer-string-replace-all
+    return Number.parseFloat(tokenValue.replace(',', ''));
   }
 
   async getTokenTableItemValueByName(tokenName: string, mode: 'extended' | 'popup'): Promise<number> {
     const tokenValue = (await webTester.getTextValueFromElement(
       this.tokensTableItemValue(await this.getTokenRowIndex(tokenName), mode)
     )) as string;
-    return Number.parseFloat(tokenValue.replaceAll(',', ''));
+    return Number.parseFloat(tokenValue.replace(',', ''));
   }
 
   async getTokenTableItemValueFiatByIndex(index: number, mode: 'extended' | 'popup'): Promise<string | number> {
