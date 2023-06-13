@@ -149,6 +149,8 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const rewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
 
+  const balanceWithAvailableRewards = useMemo(() => BigInt(total?.coins || 0) + BigInt(rewards || 0), [rewards, total]);
+
   const openSend = () => {
     analytics.sendEvent({
       category: AnalyticsEventCategories.SEND_TRANSACTION,
@@ -199,7 +201,17 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   /**
    * Means it has more than 1 asset (ADA) in portfolio for Assets list.
    */
-  const hasTokens = useMemo(() => !isNil(total?.assets) && total?.assets?.size > 0, [total?.assets]);
+  const hasTokens = useMemo(() => {
+    if (isNil(total?.assets) || total?.assets?.size === 0) return false;
+    // Look for at least one asset that is not an NFT
+    for (const [assetId] of total.assets) {
+      const assetInfo = assetsInfo?.get(assetId);
+      // If no assetInfo, assume it's not an NFT until the info is loaded
+      if (!assetInfo || !isNFT(assetInfo)) return true;
+    }
+    // Return false if all assets are NFTs as we are not displaying them in this component
+    return false;
+  }, [assetsInfo, total?.assets]);
   /**
    * Assets are loading if only ADA was populated in the list and there are more assets to load and append to the UI.
    */
@@ -252,22 +264,28 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     ]
   );
 
-  const getTransfromedCardano = useCallback(
-    (withVisibleBalances) => {
-      const totalIncRewards = BigInt(total?.coins || 0) + BigInt(rewards || 0);
-      return cardanoTransformer({
+  const getTransformedCardano = useCallback(
+    (withVisibleBalances) =>
+      cardanoTransformer({
         total: {
           ...total,
-          coins: totalIncRewards
+          coins: balanceWithAvailableRewards
         },
         fiatPrice: priceResult?.cardano,
         cardanoCoin,
         fiatCode: fiatCurrency?.code,
         areBalancesVisible: withVisibleBalances || areBalancesVisible,
         balancesPlaceholder
-      });
-    },
-    [areBalancesVisible, balancesPlaceholder, cardanoCoin, fiatCurrency?.code, priceResult?.cardano, rewards, total]
+      }),
+    [
+      areBalancesVisible,
+      balancesPlaceholder,
+      cardanoCoin,
+      fiatCurrency?.code,
+      priceResult?.cardano,
+      total,
+      balanceWithAvailableRewards
+    ]
   );
 
   // TODO: move this to store once https://input-output.atlassian.net/browse/LW-1494 is done
@@ -284,7 +302,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     }
     tokens.sort(sortAssets);
 
-    const cardano = total?.coins ? [getTransfromedCardano(false)] : [];
+    const cardano = balanceWithAvailableRewards > BigInt(0) ? [getTransformedCardano(false)] : [];
 
     setList([...cardano, ...tokens]);
   }, [
@@ -297,11 +315,11 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     priceResult?.tokens,
     fiatCurrency,
     hasTokens,
-    fiatCurrency,
     areBalancesVisible,
     balancesPlaceholder,
     getTransformedAsset,
-    getTransfromedCardano
+    getTransformedCardano,
+    balanceWithAvailableRewards
   ]);
 
   const onScroll = () => setListItemsAmount((prevState) => prevState + chunkSize);
@@ -313,7 +331,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         ? AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_POPUP
         : AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_BROWSER
     });
-    const selectedAsset = id === cardanoCoin.id ? getTransfromedCardano(true) : getTransformedAsset(id, true);
+    const selectedAsset = id === cardanoCoin.id ? getTransformedCardano(true) : getTransformedAsset(id, true);
     setAssetDetails(selectedAsset);
     setAssetID(id);
   };
@@ -411,7 +429,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         />
       )}
       <Skeleton loading={!list}>
-        {total?.coins ? (
+        {balanceWithAvailableRewards > BigInt(0) ? (
           <AssetTable
             rows={filteredList}
             onRowClick={onRowClick}

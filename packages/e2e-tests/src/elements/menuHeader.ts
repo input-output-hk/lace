@@ -23,6 +23,7 @@ export class MenuHeader {
   private MENU_THEME_SWITCHER = '.ant-dropdown-menu [data-testid="header-menu-theme-switcher"] button';
   private MENU_NETWORK_LABEL = '[data-testid="header-menu-network-choice-label"]';
   private MENU_NETWORK_VALUE = '[data-testid="header-menu-network-choice-value"]';
+  private RIGHT_SIDE_PANEL_BUTTON = '//button[@data-testid="side-panel-handler"]';
   private readonly RECEIVE_BUTTON = 'aside [data-testid="receive-button"]';
   private readonly SEND_BUTTON = 'aside [data-testid="send-button"]';
 
@@ -116,6 +117,10 @@ export class MenuHeader {
 
   get chevronUp(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CHEVRON_UP);
+  }
+
+  get rightSidePanelButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.RIGHT_SIDE_PANEL_BUTTON);
   }
 
   async clickOnExpandButton(): Promise<void> {

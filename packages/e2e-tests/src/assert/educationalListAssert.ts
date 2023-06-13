@@ -6,6 +6,7 @@ import LearnVideoPage from '../elements/LearnVideoPage';
 import FaqPage from '../elements/faqPage';
 import GlossaryPage from '../elements/glossaryPage';
 import { browser } from '@wdio/globals';
+import AboutLaceWidget from '../elements/settings/extendedView/AboutLaceWidget';
 
 class EducationalListAssert {
   glossaryTranslationPath = 'educationalBanners.title.glossary';
@@ -117,6 +118,12 @@ class EducationalListAssert {
     expect(currentUrl).to.contain(expectedPath);
     const video = await LearnVideoPage.getVideoByTitle(videoArticle.title);
     await video.waitForDisplayed();
+  }
+
+  async assertSeeRightSidePanel(shouldBeVisible: boolean, section: string) {
+    await (section === 'Settings'
+      ? AboutLaceWidget.container.waitForDisplayed({ reverse: !shouldBeVisible })
+      : EducationalList.container.waitForDisplayed({ reverse: !shouldBeVisible }));
   }
 }
 
