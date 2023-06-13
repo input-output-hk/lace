@@ -50,6 +50,7 @@ export const useGetFilteredAddressBook = (): {
   const getAddressBookByNameOrAddress = useCallback(
     async ({ value, limit = DEFAULT_QUERY_LIMIT }: GetAddressByNameOrAddressArgs) => {
       const network = cardanoNetworkMap[environmentName];
+      const queryValue = `${environmentName}${value}`;
 
       if (value.length <= 0) {
         setFilteredAddresses([]);
@@ -58,9 +59,9 @@ export const useGetFilteredAddressBook = (): {
           const result = await dbRef.current
             .getConnection<AddressBookSchema>(addressBookSchema)
             .where('name')
-            .startsWithIgnoreCase(`${environmentName}${value}`)
+            .startsWithIgnoreCase(queryValue)
             .or('address')
-            .equalsIgnoreCase(`${environmentName}${value}`)
+            .equalsIgnoreCase(queryValue)
             .filter((item) => item.network === network)
             .limit(limit)
             .toArray();

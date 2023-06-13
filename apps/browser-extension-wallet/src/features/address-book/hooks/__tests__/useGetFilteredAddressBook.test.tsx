@@ -24,20 +24,20 @@ describe('Testing useGetFilteredAddressBook hook', () => {
   const mockAddress: AddressBookSchema[] = [
     {
       id: 1,
-      address: 'addr_test1',
-      name: 'test wallet',
+      address: 'PREPRODaddr_test1',
+      name: 'PREPRODtest wallet',
       network: 1
     },
     {
       id: 2,
-      address: 'addr_test2',
-      name: 'Other wallet',
+      address: 'PREPRODaddr_test2',
+      name: 'PREPRODOther wallet',
       network: 1
     },
     {
       id: 3,
-      address: 'addr_test3',
-      name: 'Other wallet 2',
+      address: 'PREPRODaddr_test3',
+      name: 'PREPRODOther wallet 2',
       network: 1
     }
   ];
