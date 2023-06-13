@@ -88,3 +88,7 @@ Feature: LW: Tokens tab - extended view
   Scenario: CoinGecko credits - redirection
     When I click on "CoinGecko" link
     Then "www.coingecko.com" page is displayed in new tab
+
+  @LW-6877 @Testnet @Mainnet
+  Scenario: Extended View - Hide my balance - positive balance - closed eye icon displayed by default
+    Then Closed eye icon is displayed on Tokens page

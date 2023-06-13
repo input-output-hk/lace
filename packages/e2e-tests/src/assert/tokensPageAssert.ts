@@ -206,6 +206,14 @@ class TokensPageAssert {
     await tokensPage.closedEyeIcon.waitForDisplayed({ reverse: true });
     await tokensPage.openedEyeIcon.waitForDisplayed({ reverse: true });
   }
+
+  async assertSeeClosedEyeIcon() {
+    await new TokensPage().closedEyeIcon.waitForDisplayed();
+  }
+
+  async assertSeeOpenedEyeIcon() {
+    await new TokensPage().openedEyeIcon.waitForDisplayed();
+  }
 }
 
 export default new TokensPageAssert();

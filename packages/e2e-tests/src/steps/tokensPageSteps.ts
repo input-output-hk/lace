@@ -204,3 +204,9 @@ When(/^I click "(Receive|Send)" button on Tokens page in popup mode$/, async (bu
 Then(/^Eye icon is not displayed on Tokens page$/, async () => {
   await tokensPageAssert.assertDoNotSeeEyeIcon();
 });
+
+Then(/^(Closed|Opened) eye icon is displayed on Tokens page$/, async (iconType: 'Closed' | 'Opened') => {
+  iconType === 'Closed'
+    ? await tokensPageAssert.assertSeeClosedEyeIcon()
+    : await tokensPageAssert.assertSeeOpenedEyeIcon();
+});
