@@ -3,8 +3,7 @@ import React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import classNames from 'classnames';
 
-import { Box } from '../box';
-
+import { ContentCard } from './side-drawer-content-card.component';
 import * as cx from './side-drawer-content.css';
 
 type Props = Omit<Dialog.DialogContentProps, 'className'> & { zIndex?: number };
@@ -16,9 +15,9 @@ export const Content = ({
 }: Readonly<Props>): JSX.Element => (
   <Dialog.Content
     {...props}
-    className={classNames(cx.container, cx.storybook)}
+    className={classNames(cx.container)}
     style={{ zIndex }}
   >
-    <Box className={cx.content}>{children}</Box>
+    <ContentCard>{children}</ContentCard>
   </Dialog.Content>
 );

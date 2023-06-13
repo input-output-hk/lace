@@ -21,6 +21,7 @@ import * as Typography from '../typography';
 
 import { Close } from './side-drawer-close.component';
 import { Body } from './side-drawer-content-body.component';
+import { ContentCard } from './side-drawer-content-card.component';
 import { Footer } from './side-drawer-content-footer.component';
 import { Header } from './side-drawer-content-header.component';
 import { Headline } from './side-drawer-content-headline.component';
@@ -70,13 +71,13 @@ const DefaultScreen = ({
 const Layout = ({
   children,
 }: Readonly<{ children: ReactNode }>): JSX.Element => (
-  <div style={{ height: '852px' }}>{children}</div>
+  <div style={{ height: '852px', width: '664px' }}>{children}</div>
 );
 
 const Default = ({ onBackClick, onCloseClick }: Props): JSX.Element => (
   <Layout>
     <Root defaultOpen open>
-      <Content>
+      <ContentCard>
         <Header
           text="Label"
           onBackClick={onBackClick}
@@ -92,7 +93,7 @@ const Default = ({ onBackClick, onCloseClick }: Props): JSX.Element => (
           <Buttons.CallToAction label="Label" />
           <Buttons.Secondary label="Label" />
         </Footer>
-      </Content>
+      </ContentCard>
     </Root>
   </Layout>
 );
@@ -100,10 +101,10 @@ const Default = ({ onBackClick, onCloseClick }: Props): JSX.Element => (
 const Plain = ({ onCloseClick }: Props): JSX.Element => (
   <Layout>
     <Root defaultOpen open>
-      <Content>
+      <ContentCard>
         <Header text="Label" onCloseClick={onCloseClick} />
         <Body>{''}</Body>
-      </Content>
+      </ContentCard>
     </Root>
   </Layout>
 );
@@ -114,7 +115,7 @@ const TitlteAndTopNavigation = ({
 }: Props): JSX.Element => (
   <Layout>
     <Root defaultOpen open>
-      <Content>
+      <ContentCard>
         <Header
           text="Label"
           onBackClick={onBackClick}
@@ -125,7 +126,7 @@ const TitlteAndTopNavigation = ({
             <Headline title="Section title" />
           </Body>
         </div>
-      </Content>
+      </ContentCard>
     </Root>
   </Layout>
 );
@@ -144,7 +145,7 @@ const CTAButtonAndSelection = ({
 }: Props): JSX.Element => (
   <Layout>
     <Root defaultOpen open>
-      <Content>
+      <ContentCard>
         <Header
           text="Label"
           onBackClick={onBackClick}
@@ -197,7 +198,7 @@ const CTAButtonAndSelection = ({
           <Buttons.CallToAction label="Label" />
           <Buttons.Secondary label="Label" />
         </Footer>
-      </Content>
+      </ContentCard>
     </Root>
   </Layout>
 );
@@ -208,7 +209,7 @@ const TwoCTAButtonAndToggleSwitch = ({
 }: Props): JSX.Element => (
   <Layout>
     <Root defaultOpen open>
-      <Content>
+      <ContentCard>
         <Header
           text="Label"
           onBackClick={onBackClick}
@@ -238,7 +239,7 @@ const TwoCTAButtonAndToggleSwitch = ({
           <Buttons.CallToAction label="Label" />
           <Buttons.Secondary label="Label" />
         </Footer>
-      </Content>
+      </ContentCard>
     </Root>
   </Layout>
 );
