@@ -105,10 +105,23 @@ in rec {
       ) + ''
         mkdir -p $out/bin $out/share
         mv $out/libexec/lace-blockchain-services $out/bin/
-        cp -r --dereference ${unbundled}/share/. $out/share/ || true  # XXX: unsafe! ignore broken node_module links
+        cp -r --dereference ${unbundled}/share/. $out/share/ || true  # FIXME: unsafe! broken node_modules symlinks
+        cp $(find ${desktopItem} -type f -name '*.desktop') $out/share/template.desktop
+        ${pkgs.imagemagick}/bin/convert -background none -size 1024x1024 \
+          ${./lace-blockchain-services}/cardano.svg $out/share/icon_large.png
       '';
     });
   in bundled;
+
+  desktopItem = pkgs.makeDesktopItem {
+    name = "lace-blockchain-services";
+    exec = "INSERT_PATH_HERE";
+    desktopName = "Lace Blockchain Services";
+    genericName = "Cardano Crypto-Currency Backend";
+    comment = "Run the backend for the Lace wallet locally";
+    categories = [ "Network" ];
+    icon = "INSERT_ICON_PATH_HERE";
+  };
 
   # XXX: Be *super careful* changing this!!! You WILL DELETE user data if you make a mistake. Ping @michalrus
   selfExtractingArchive = let
@@ -133,6 +146,12 @@ in rec {
       fi
       echo "Unpacking..."
       tail -c+$((skip_bytes+1)) "$0" | $progress_cmd | tar -C "$target" -xJ
+      echo "Setting up a .desktop entry..."
+      mkdir -p "$HOME"/.local/share/applications
+      cat "$target"/share/template.desktop \
+        | sed -r "s+INSERT_PATH_HERE+$(echo "$target"/bin/*)+g" \
+        | sed -r "s+INSERT_ICON_PATH_HERE+$(echo "$target"/share/icon_large.png)+g" \
+        >"$HOME"/.local/share/applications/lace-blockchain-services.desktop
       echo "Installed successfully!"
       echo "Now, run:" "$target"/bin/*
       exit 0
