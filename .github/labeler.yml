@@ -1,12 +1,20 @@
-# Browser extension target
+# IMPORTANT: Please remember to add new labels to the `settings.yml`
+
+# Browser extension
 browser:
   - any: ['apps/browser-extension-wallet/**/*']
-# Staking & Multi-delegation
+# Staking
 staking:
   - any: ['packages/staking/**/*']
-# E2E targets
+# UI Toolkit
+ui-toolkit:
+  - any: ['packages/ui/**/*']
+# E2E
 e2e:
   - any: ['features/**/*', 'packages/e2e-tests/**/*']
-# Docs targets
+# Docs
 documentation:
   - any: ['docs/**/*', '**/*.md']
+# CI
+ci:
+  - any: ['.github/**/*']

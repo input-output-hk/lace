@@ -145,7 +145,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
                 className={styles.newFolderBtn}
                 color="gradient"
                 onClick={() => setIsCreateFolderDrawerOpen(true)}
-                data-testid="unlock-button"
+                data-testid="create-folder-button"
               >
                 <FolderIcon className={styles.newFolderIcon} />
               </Button>

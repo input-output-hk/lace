@@ -1,0 +1,12 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.resetDataErrorContainer {
+  @include flex-center;
+  height: 100%;
+  flex-direction: column;
+  gap: size_unit(2);
+}
+
+.resetDataErrorButton {
+  margin-top: 20px;
+}

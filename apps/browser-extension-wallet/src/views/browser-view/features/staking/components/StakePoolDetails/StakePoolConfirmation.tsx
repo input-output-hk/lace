@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-nested-ternary */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import { Skeleton } from 'antd';
@@ -48,16 +48,17 @@ interface OpenTabStakingProps {
 
 export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { setIsBuildingTx, setStakingError, stakingError } = useStakePoolDetails();
+  const { stakingError } = useStakePoolDetails();
   const {
     inMemoryWallet,
     walletUI: { cardanoCoin }
   } = useWalletStore();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
+  const { delegationTxFee } = useDelegationStore();
 
-  const buildDelegationTx = useBuildDelegation();
-  const { setDelegationBuiltTx, delegationBuiltTx } = useDelegationStore();
+  useBuildDelegation();
+
   const {
     logo: poolLogo,
     id: poolId,
@@ -70,40 +71,14 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const deposit =
-    rewardAccounts && rewardAccounts[0]?.keyStatus !== Wallet.StakeKeyStatus.Registered
+    rewardAccounts && rewardAccounts[0]?.keyStatus !== Wallet.Cardano.StakeKeyStatus.Registered
       ? protocolParameters?.stakeKeyDeposit
       : undefined;
-  const fee = delegationBuiltTx ? delegationBuiltTx?.body?.fee : 0;
-
-  const buildTransaction = useCallback(async () => {
-    try {
-      setIsBuildingTx(true);
-      const builtTx = await buildDelegationTx();
-      setDelegationBuiltTx(builtTx);
-      // eslint-disable-next-line unicorn/no-useless-undefined
-      setStakingError(undefined);
-    } catch (error) {
-      console.error(error);
-      if (error?.failure === 'UTxO Fully Depleted') {
-        setStakingError(StakingError.UTXO_FULLY_DEPLETED);
-      } else if (error?.failure === 'UTxO Balance Insufficient') {
-        setStakingError(StakingError.UTXO_BALANCE_INSUFFICIENT);
-      }
-    } finally {
-      setIsBuildingTx(false);
-    }
-  }, [buildDelegationTx, setDelegationBuiltTx, setIsBuildingTx, setStakingError]);
 
   const ErrorMessages = {
     [StakingError.UTXO_FULLY_DEPLETED]: t('browserView.staking.details.errors.utxoFullyDepleted'),
     [StakingError.UTXO_BALANCE_INSUFFICIENT]: t('browserView.staking.details.errors.utxoBalanceInsufficient')
   };
-
-  useEffect(() => {
-    if (!delegationBuiltTx) {
-      buildTransaction();
-    }
-  }, [delegationBuiltTx, buildTransaction]);
 
   const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
     <div>
@@ -203,9 +178,9 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
               })}
               <div>
                 {renderAmountInfo(
-                  `${Wallet.util.lovelacesToAdaString(fee.toString())} ${cardanoCoin.symbol}`,
+                  `${Wallet.util.lovelacesToAdaString(delegationTxFee)} ${cardanoCoin.symbol}`,
                   `${Wallet.util.convertAdaToFiat({
-                    ada: Wallet.util.lovelacesToAdaString(fee.toString()),
+                    ada: Wallet.util.lovelacesToAdaString(delegationTxFee),
                     fiat: priceResult?.cardano?.price || 0
                   })} ${fiatCurrency?.symbol}`
                 )}

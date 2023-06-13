@@ -225,7 +225,7 @@ Feature: General Settings - Popup View
   Scenario: Popup View - Settings - Privacy policy copy
     When I open settings from header menu
     When I click on "Privacy policy" setting
-    Then the Privacy policy copy is displayed
+    Then the Privacy policy copy is displayed in popup mode
 
   @LW-5831 @Mainnet @Testnet
   Scenario: Popup View - Settings - Cookie policy copy
@@ -237,13 +237,13 @@ Feature: General Settings - Popup View
   Scenario: Popup View - Settings - Visibility of Help drawer
     When I open settings from header menu
     When I click on "Help" setting
-    Then I see help details open in a drawer
+    Then I see help details drawer in popup mode
 
   @LW-2791 @Mainnet @Testnet
   Scenario: Popup View - Settings - Help Create a ticket
     When I open settings from header menu
     When I click on "Help" setting
-    And I click "browserView.settings.help.support.createASupportTicket" button in drawer
+    And I click "Create a support ticket" button on Help drawer
     Then New tab with url containing "iohk.zendesk.com/hc/en-us/requests/new" is opened
 
   @LW-3630 @Mainnet @Testnet
@@ -274,7 +274,7 @@ Feature: General Settings - Popup View
     When I fill incorrect password
     And I click on "Show passphrase" button
     Then I see "browserView.transaction.send.error.invalidPassword" password error
-    And "browserView.settings.security.showPassphraseDrawer.showPassphrase" button is disabled
+    And "Show passphrase" button is disabled on "Show 24-word recovery phrase" drawer
 
   @LW-3878 @LW-3890 @Mainnet @Testnet
   Scenario: Popup view - Settings - When user clicks on "Hide passphrase"/"Show passphrase" button on the "Show 24-word passphrase" side drawer all mnemonics are blurred/visible
@@ -282,7 +282,7 @@ Feature: General Settings - Popup View
     And I click on "Show recovery phrase" setting
     Then Side drawer "Show 24-word passphrase" is displayed
     When I fill correct password
-    Then "browserView.settings.security.showPassphraseDrawer.showPassphrase" button is enabled
+    Then "Show passphrase" button is enabled on "Show 24-word recovery phrase" drawer
     When I click on "Show passphrase" button
     Then all mnemonics from "TestAutomationWallet" wallet are listed
     When I click on "Hide passphrase" button
@@ -297,11 +297,11 @@ Feature: General Settings - Popup View
     And I click on "Show recovery phrase" setting
     Then Side drawer "Show 24-word passphrase" is displayed
     When I fill correct password
-    Then "browserView.settings.security.showPassphraseDrawer.showPassphrase" button is enabled
+    Then "Show passphrase" button is enabled on "Show 24-word recovery phrase" drawer
     When I click on "Show passphrase" button
     Then all mnemonics from "TestAutomationWallet" wallet are listed
     And "Hide passphrase" button is displayed
-    And "browserView.settings.security.showPassphraseDrawer.hidePassphrase" button is enabled
+    And "Hide passphrase" button is enabled on "Show 24-word recovery phrase" drawer
 
   @LW-4050 @Mainnet @Testnet
   Scenario: Popup view - Settings - User has to enter password again after leaving "Show 24-word passphrase" side drawer

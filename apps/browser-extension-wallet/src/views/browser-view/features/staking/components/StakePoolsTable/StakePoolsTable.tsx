@@ -135,7 +135,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
         <Search
           className={styles.search}
           withSearchIcon
-          inputPlaceholder={t('browserView.staking.stakePoolsTable.searchPlacehholder')}
+          inputPlaceholder={t('browserView.staking.stakePoolsTable.searchPlaceholder')}
           onChange={onSearch}
           data-testid="search-input"
           loading={fetchingPools}

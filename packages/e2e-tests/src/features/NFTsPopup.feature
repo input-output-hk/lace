@@ -28,7 +28,7 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
   Scenario: Popup-view - Send button click
     And I am on NFTs popup page
     And I am on a NFT details on the popup view for NFT with name: "Ibilecoin"
-    When I click "core.nftDetail.sendNFT" button
+    When I click "Send NFT" button on NFT details drawer
     Then the 'Send' screen is displayed in popup mode
     And the NFT is pre-loaded as token to be sent with name: "Ibilecoin"
 

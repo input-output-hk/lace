@@ -1,17 +1,8 @@
-/* eslint-disable no-magic-numbers */
-import { Cardano } from '@cardano-sdk/core';
+/* eslint-disable no-magic-numbers, new-cap */
+import { Percent } from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
 
-type Details =
-  | 'metrics'
-  | 'relays'
-  | 'owners'
-  | 'margin'
-  | 'cost'
-  | 'transactions'
-  | 'vrf'
-  | 'rewardAccount'
-  | 'epochRewards';
+type Details = 'metrics' | 'relays' | 'owners' | 'margin' | 'cost' | 'vrf' | 'rewardAccount';
 type PoolDetails = Pick<Wallet.Cardano.StakePool, Details>;
 
 const pools: Omit<Wallet.Cardano.StakePool, Details>[] = [
@@ -133,15 +124,13 @@ const getDetailsForAll = (): PoolDetails => ({
     blocksCreated: 20,
     delegators: 20,
     livePledge: BigInt('2000000000'),
-    saturation: Cardano.Percent(0.95),
+    saturation: Percent(0.95),
     size: undefined,
     stake: undefined
   },
   relays: undefined,
   rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
-  transactions: undefined,
-  vrf: undefined,
-  epochRewards: []
+  vrf: undefined
 });
 
 export const mockedStakePools: Wallet.Cardano.StakePool[] = pools.map((pool) => ({

@@ -14,7 +14,7 @@ export const CollapsiblePanelContainer = ({
 }: CollapsiblePanelContainerProps): React.ReactElement => (
   <div className={styles.overlay} onClick={onOverlayClick}>
     <div className={styles.stickyTopNavigation}>{topNavigation}</div>
-    <div className={styles.container} onClick={(e) => e.stopPropagation()}>
+    <div data-testid="right-side-panel" className={styles.container} onClick={(e) => e.stopPropagation()}>
       {children}
     </div>
   </div>

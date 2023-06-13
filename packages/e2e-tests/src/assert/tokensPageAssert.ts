@@ -142,7 +142,12 @@ class TokensPageAssert {
     }
   }
 
-  async assertSeeValueSubtracted(tokenName: string, subtractedAmount: string, fee: string, mode: 'extended' | 'popup') {
+  async assertSeeValueSubtractedAda(
+    tokenName: string,
+    subtractedAmount: string,
+    fee: string,
+    mode: 'extended' | 'popup'
+  ) {
     const tokensPage = new TokensPage();
     const expectedValue =
       Number.parseFloat(await testContext.load(`${Asset.getByName(tokenName).ticker}tokenBalance`)) -
@@ -155,6 +160,23 @@ class TokensPageAssert {
         (await tokensPage.getTokenTableItemValueByName(tokenName, mode)) === expectedValueRounded + 0.01 ||
         (await tokensPage.getTokenTableItemValueByName(tokenName, mode)) === expectedValueRounded - 0.01 ||
         (await tokensPage.getTokenTableItemValueByName(tokenName, mode)) === expectedValueRounded,
+      {
+        timeout: 30_000,
+        interval: 3000,
+        timeoutMsg: `failed while waiting for ${tokenName} value update`
+      }
+    );
+  }
+
+  async assertSeeValueSubtractedAsset(tokenName: string, subtractedAmount: string, mode: 'extended' | 'popup') {
+    const tokensPage = new TokensPage();
+    const expectedValue =
+      Number.parseFloat(await testContext.load(`${Asset.getByName(tokenName).ticker}tokenBalance`)) -
+      Number.parseFloat(subtractedAmount);
+    const expectedValueRounded = Number.parseFloat(expectedValue.toFixed(2));
+    Logger.log(`waiting for token: ${tokenName} with value: ${expectedValueRounded}`);
+    await browser.waitUntil(
+      async () => (await tokensPage.getTokenTableItemValueByName(tokenName, mode)) === expectedValueRounded,
       {
         timeout: 30_000,
         interval: 3000,

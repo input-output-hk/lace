@@ -6,7 +6,7 @@ DECRYPTED_FILE="$FILE_LOCATION/walletConfiguration.ts"
 
 if [ -z "${WALLET_1_PASSWORD}" ]; then
   echo "WALLET_1_PASSWORD environment variable is not set, aborting"
-  exit
+  exit 1
 fi
 
 # Decrypt the file

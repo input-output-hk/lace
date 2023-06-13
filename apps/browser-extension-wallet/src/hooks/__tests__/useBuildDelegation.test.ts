@@ -1,31 +1,72 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable import/imports-first */
+/* eslint-disable no-magic-numbers */
+const mockSetIsBuildingTx = jest.fn();
+const mockSetStakingError = jest.fn();
+const mockSetDelegationTxBuilder = jest.fn();
+const mockSetDelegationTxFee = jest.fn();
+const mockInspect = jest.fn().mockResolvedValue({
+  body: {
+    fee: '0.17'
+  }
+});
+const mockBuild = jest.fn().mockReturnThis();
+const mockDelegate = jest.fn().mockReturnThis();
+const mockCreateTxBuilder = jest.fn().mockReturnValue({
+  delegate: mockDelegate,
+  build: mockBuild,
+  inspect: mockInspect
+});
 import { renderHook } from '@testing-library/react-hooks';
 import { useBuildDelegation } from '../useBuildDelegation';
 import { cardanoStakePoolMock } from '../../utils/mocks/test-helpers';
 
+jest.mock('../../features/stake-pool-details/store', () => ({
+  ...jest.requireActual<any>('../../features/stake-pool-details/store'),
+  useStakePoolDetails: () => ({
+    setIsBuildingTx: mockSetIsBuildingTx,
+    setStakingError: mockSetStakingError
+  })
+}));
+
 jest.mock('../../features/delegation/stores', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...jest.requireActual<any>('../../features/delegation/stores'),
   useDelegationStore: () => ({
-    selectedStakePool: cardanoStakePoolMock
+    selectedStakePool: cardanoStakePoolMock.pageResults[0],
+    setDelegationTxBuilder: mockSetDelegationTxBuilder,
+    setDelegationTxFee: mockSetDelegationTxFee
   })
 }));
+
+const inMemoryWallet = {
+  createTxBuilder: mockCreateTxBuilder
+};
 
 jest.mock('../../stores', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...jest.requireActual<any>('../../stores'),
   useWalletStore: () => ({
-    inMemoryWallet: {
-      initializeTx: jest.fn()
-    }
+    inMemoryWallet
   })
 }));
 
-describe('Testing useBuildDelegation hook', () => {
-  process.env.AVAILABLE_CHAINS = process.env.AVAILABLE_CHAINS || 'Mainnet,Preprod,Preview';
-  process.env.DEFAULT_CHAIN = process.env.DEFAULT_CHAIN || 'Preprod';
+// eslint-disable-next-line promise/avoid-new
+const flushPromises = () => new Promise(setImmediate);
 
-  test('should return build delegation transaction function', () => {
-    const { result } = renderHook(() => useBuildDelegation());
-    expect(result.current).toBeDefined();
+describe('Testing useBuildDelegation hook', () => {
+  describe('Testing build delegation transaction function', () => {
+    test('should build delegation using txBuilder', async () => {
+      renderHook(() => useBuildDelegation());
+
+      expect(mockSetIsBuildingTx).toBeCalled();
+      expect(mockCreateTxBuilder).toBeCalled();
+      expect(mockDelegate).toBeCalledWith(cardanoStakePoolMock.pageResults[0].id);
+      expect(mockBuild).toBeCalled();
+      expect(mockInspect).toBeCalled();
+      await flushPromises();
+      expect(mockSetIsBuildingTx).toBeCalledTimes(2);
+      expect(mockSetDelegationTxBuilder).toBeCalled();
+      expect(mockSetDelegationTxFee).toBeCalledWith('0.17');
+      expect(mockSetStakingError).toBeCalledWith();
+    });
   });
 });
