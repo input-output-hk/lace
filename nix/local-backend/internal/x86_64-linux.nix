@@ -74,10 +74,39 @@ in rec {
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/
     ln -s ${cardano-js-sdk.nodejs}/bin/node $out/libexec
+    ln -s ${pkgs.xclip}/bin/xclip $out/libexec
 
-    mkdir -p $out/share/lace-local-backend/cardano-node-config
+    mkdir -p $out/share/lace-local-backend
     ln -s ${cardano-js-sdk}/libexec/source $out/share/lace-local-backend/cardano-js-sdk
   '';
+
+  nix-bundle-exe = pkgs.fetchFromGitHub {
+    owner = "3noch";
+    repo = "nix-bundle-exe";
+    rev = "3522ae68aa4188f4366ed96b41a5881d6a88af97"; # 2023-05-01T13:59:27Z
+    hash = "sha256-K9PT8LVvTLOm3gX9ZFxag0X85DFgB2vvJB+S12disWw=";
+  };
+
+  local-backend-bundle = let
+    unbundled = local-backend;
+    bundled = (import nix-bundle-exe {
+      inherit pkgs;
+      bin_dir = "libexec";
+      exe_dir = "lib";
+      lib_dir = "lib";
+    } unbundled).overrideAttrs (drv: {
+      buildCommand = (
+        builtins.replaceStrings
+          ["'${unbundled}/bin'"]
+          ["'${unbundled}/bin' '${unbundled}/libexec' -follow"]
+          drv.buildCommand
+      ) + ''
+        mkdir -p $out/bin $out/share
+        mv $out/libexec/local-backend $out/bin/
+        cp -r --dereference ${unbundled}/share/. $out/share/ || true  # XXX: unsafe! ignore broken node_module links
+      '';
+    });
+  in bundled;
 
   # ----------------------------------------------------------------------------- #
 

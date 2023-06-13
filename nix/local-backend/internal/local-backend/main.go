@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/user"
 	"os/signal"
 	"syscall"
 	"sync"
@@ -17,6 +16,9 @@ import (
 	"strings"
 	"strconv"
 	"regexp"
+
+	"lace.io/local-backend/ourpaths" // has to be imported before clipboard.init()
+
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/host"
@@ -33,21 +35,6 @@ const (
 )
 
 func main() {
-	executablePath, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-
-	executablePath, err = filepath.EvalSymlinks(executablePath)
-	if err != nil {
-		panic(err)
-	}
-
-	currentUser, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-
 	hostInfo, err := host.Info()
 	if err != nil {
 		panic(err)
@@ -60,50 +47,29 @@ func main() {
 
 	sep := string(filepath.Separator)
 
-	binDir := filepath.Dir(executablePath)
+	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), ourpaths.WorkDir)
+	os.MkdirAll(ourpaths.WorkDir, 0755)
+	os.Chdir(ourpaths.WorkDir)
 
-	var workDir string
-	var libexecDir string
-	var resourcesDir string
-	switch runtime.GOOS {
-	case "darwin":
-		workDir = currentUser.HomeDir + "/Library/Application Support/lace-local-backend"
-		libexecDir = binDir
-		resourcesDir = filepath.Clean(binDir + "/../Resources")
-	case "linux":
-		workDir = currentUser.HomeDir + "/.local/share/lace-local-backend"
-		libexecDir = filepath.Clean(binDir + "/../libexec")
-		resourcesDir = filepath.Clean(binDir + "/../share/lace-local-backend")
-	case "windows":
-		workDir = os.Getenv("AppData") + "\\lace-local-backend"
-		libexecDir = filepath.Clean(binDir + "\\libexec")
-		resourcesDir = binDir
-	default:
-		panic("cannot happen, unknown OS: " + runtime.GOOS)
-	}
-	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), workDir)
-	os.MkdirAll(workDir, 0755)
-	os.Chdir(workDir)
-
-	lockFile := workDir + sep + "instance.lock"
+	lockFile := ourpaths.WorkDir + sep + "instance.lock"
 	lockFileFile, err := singleinstance.CreateLockFile(lockFile)
 	if err != nil {
 		dialog.Message("Another instance of ‘%s’ is already running.",
-			filepath.Base(executablePath)).Title("Already running!").Error()
+			OurLogPrefix).Title("Already running!").Error()
 		os.Exit(1)
 	}
 	defer lockFileFile.Close() // or else, it will be GC’d (and unlocked!)
 
-	logFile := workDir + sep + "logs" + sep + time.Now().UTC().Format("2006-01-02--15-04-05Z") + ".log"
+	logFile := ourpaths.WorkDir + sep + "logs" + sep + time.Now().UTC().Format("2006-01-02--15-04-05Z") + ".log"
 	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
 	os.MkdirAll(filepath.Dir(logFile), 0755)
 	closeOutputs := duplicateOutputToFile(logFile)
 	defer closeOutputs()
 
 	fmt.Printf("%s[%d]: running as %s@%s\n", OurLogPrefix, os.Getpid(),
-		currentUser.Username, hostInfo.Hostname)
+		ourpaths.Username, hostInfo.Hostname)
 	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
-	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), workDir)
+	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), ourpaths.WorkDir)
 	fmt.Printf("%s[%d]: timezone: %s\n", OurLogPrefix, os.Getpid(), time.Now().Format("UTC-07:00 (MST)"))
 	fmt.Printf("%s[%d]: HostID: %s\n", OurLogPrefix, os.Getpid(), hostInfo.HostID)
 	fmt.Printf("%s[%d]: OS: (%s-%s) %s %s %s (family: %s)\n", OurLogPrefix, os.Getpid(),
@@ -176,7 +142,7 @@ func main() {
 	go systray.Run(setupTrayUI(commUI, logFile), func(){})
 	defer systray.Quit()
 
-	manageChildren(commManager, libexecDir, resourcesDir, workDir)
+	manageChildren(commManager)
 
 	fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 }
@@ -209,9 +175,6 @@ func setupTrayUI(
 	comm CommChannels_UI,
 	logFile string,
 ) func() { return func() {
-	systray.SetTitle("lace-local-backend")
-	// systray.SetTooltip("")
-
 	iconData, err := Asset("cardano.png")
 	if err != nil {
 	    panic(err)
@@ -377,9 +340,7 @@ type HealthStatus struct {
 	LastErr error
 }
 
-func manageChildren(comm CommChannels_Manager,
-	libexecDir string, resourcesDir string, workDir string,
-) {
+func manageChildren(comm CommChannels_Manager) {
 	sep := string(filepath.Separator)
 
 	exeSuffix := ""
@@ -404,11 +365,11 @@ func manageChildren(comm CommChannels_Manager,
 
 		fmt.Printf("%s[%d]: starting session for network %s\n", OurLogPrefix, os.Getpid(), network)
 
-		cardanoServicesDir := (resourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
+		cardanoServicesDir := (ourpaths.ResourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
 			sep + "cardano-services")
 		cardanoNodeConfigDir := (cardanoServicesDir + sep + "config" + sep + "network" +
 			sep + network + sep + "cardano-node")
-		cardanoNodeSocket := workDir + sep + network + sep + "cardano-node.socket"
+		cardanoNodeSocket := ourpaths.WorkDir + sep + network + sep + "cardano-node.socket"
 
 		var ogmiosPort int
 		var providerServerPort int
@@ -443,12 +404,13 @@ func manageChildren(comm CommChannels_Manager,
 				return ManagedChild{
 					LogPrefix: "cardano-node",
 					PrettyName: "cardano-node",
-					ExePath: libexecDir + sep + "cardano-node" + exeSuffix,
+					ExePath: ourpaths.LibexecDir + sep + "cardano-node" + exeSuffix,
 					MkArgv: func() []string {
 						return []string {
 							"run",
 							"--topology", cardanoNodeConfigDir + sep + "topology.json",
-							"--database-path", workDir + sep + network + sep + "chain",
+							"--database-path", ourpaths.WorkDir + sep + network + sep +
+								"chain",
 							"--port", fmt.Sprintf("%d", getFreeTCPPort()),
 							"--host-addr", "0.0.0.0",
 							"--config", cardanoNodeConfigDir + sep + "config.json",
@@ -502,7 +464,7 @@ func manageChildren(comm CommChannels_Manager,
 				return ManagedChild{
 					LogPrefix: "ogmios",
 					PrettyName: "Ogmios",
-					ExePath: libexecDir + sep + "ogmios" + exeSuffix,
+					ExePath: ourpaths.LibexecDir + sep + "ogmios" + exeSuffix,
 					MkArgv: func() []string {
 						ogmiosPort = getFreeTCPPort()
 						return []string{
@@ -548,7 +510,7 @@ func manageChildren(comm CommChannels_Manager,
 				return ManagedChild{
 					LogPrefix: "provider-server",
 					PrettyName: "provider-server",
-					ExePath: libexecDir + sep + "node" + exeSuffix,
+					ExePath: ourpaths.LibexecDir + sep + "node" + exeSuffix,
 					MkArgv: func() []string {
 						return []string{
 							cardanoServicesDir + sep + "dist" + sep + "cjs" +
