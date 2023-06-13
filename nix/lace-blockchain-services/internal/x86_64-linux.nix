@@ -7,7 +7,7 @@ assert inputs.nixpkgs.system == "x86_64-linux"; let
 in rec {
   package = lace-blockchain-services;
 
-  installer = throw "unimplemented";
+  installer = selfExtractingArchive;
 
   flake-compat = import inputs.cardano-node.inputs.flake-compat;
 
@@ -87,6 +87,7 @@ in rec {
     hash = "sha256-K9PT8LVvTLOm3gX9ZFxag0X85DFgB2vvJB+S12disWw=";
   };
 
+  # XXX: this has no dependency on /nix/store on the target machine
   lace-blockchain-services-bundle = let
     unbundled = lace-blockchain-services;
     bundled = (import nix-bundle-exe {
@@ -95,6 +96,7 @@ in rec {
       exe_dir = "lib";
       lib_dir = "lib";
     } unbundled).overrideAttrs (drv: {
+      meta.mainProgram = lace-blockchain-services-exe.name;
       buildCommand = (
         builtins.replaceStrings
           ["'${unbundled}/bin'"]
@@ -107,6 +109,50 @@ in rec {
       '';
     });
   in bundled;
+
+  # XXX: Be *super careful* changing this!!! You WILL DELETE user data if you make a mistake. Ping @michalrus
+  selfExtractingArchive = let
+    scriptTemplate = ''
+      #!/bin/sh
+      set -eu
+      # XXX: no -o pipefail in dash (on debians)
+      skip_bytes=$(( 1010101010 - 1000000000 ))
+      target="$HOME"/.local/opt/lace-blockchain-services
+      if [ -e "$target" ] ; then
+        echo "Found previous version of lace-blockchain-services, removing it..."
+        chmod -R +w "$target"
+        rm -rf "$target"
+      fi
+      mkdir -p "$target"
+      progress_cmd=cat
+      if type pv >/dev/null ; then
+        total_size=$(stat -c "%s" "$0")
+        progress_cmd="pv -s "$((total_size - skip_bytes))
+      else
+        echo "Note: you don't have \`pv' installed, so we can't show progress"
+      fi
+      echo "Unpacking..."
+      tail -c+$((skip_bytes+1)) "$0" | $progress_cmd | tar -C "$target" -xJ
+      echo "Installed successfully!"
+      echo "Now, run:" "$target"/bin/*
+      exit 0
+    '';
+    script = __replaceStrings ["1010101010"] [(toString (1000000000 + __stringLength scriptTemplate))] scriptTemplate;
+    revShort =
+      if inputs.self ? shortRev
+      then builtins.substring 0 9 inputs.self.rev
+      else "dirty";
+  in pkgs.runCommand "lace-blockchain-services-installer" {
+    inherit script;
+    passAsFile = [ "script" ];
+  } ''
+    mkdir -p $out
+    target=$out/lace-blockchain-services-${revShort}-x86_64-linux.bin
+    cat $scriptPath >$target
+    echo 'Compressing...'
+    tar -cJ -C ${lace-blockchain-services-bundle} . >>$target
+    chmod +x $target
+  '';
 
   # ----------------------------------------------------------------------------- #
 
