@@ -19,7 +19,7 @@ in
         }
         cd "$PROJECT_DIR"
 
-        cd nix/local-backend/internal/local-backend
+        cd nix/lace-blockchain-services/internal/lace-blockchain-services
       '';
     };
   } else {}

@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"regexp"
 
-	"lace.io/local-backend/ourpaths" // has to be imported before clipboard.init()
+	"lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
 
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	OurLogPrefix = "local-backend"
+	OurLogPrefix = "lace-blockchain-services"
 )
 
 func main() {

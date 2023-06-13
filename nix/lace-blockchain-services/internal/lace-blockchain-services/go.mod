@@ -1,4 +1,4 @@
-module lace.io/local-backend
+module lace.io/lace-blockchain-services
 
 go 1.20
 

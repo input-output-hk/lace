@@ -36,15 +36,15 @@ func init() {
 
 	switch runtime.GOOS {
 	case "darwin":
-		WorkDir = currentUser.HomeDir + "/Library/Application Support/lace-local-backend"
+		WorkDir = currentUser.HomeDir + "/Library/Application Support/lace-blockchain-services"
 		LibexecDir = binDir
 		ResourcesDir = filepath.Clean(binDir + "/../Resources")
 	case "linux":
-		WorkDir = currentUser.HomeDir + "/.local/share/lace-local-backend"
+		WorkDir = currentUser.HomeDir + "/.local/share/lace-blockchain-services"
 		LibexecDir = filepath.Clean(binDir + "/../libexec")
-		ResourcesDir = filepath.Clean(binDir + "/../share/lace-local-backend")
+		ResourcesDir = filepath.Clean(binDir + "/../share")
 	case "windows":
-		WorkDir = os.Getenv("AppData") + "\\lace-local-backend"
+		WorkDir = os.Getenv("AppData") + "\\lace-blockchain-services"
 		LibexecDir = filepath.Clean(binDir + "\\libexec")
 		ResourcesDir = binDir
 	default:

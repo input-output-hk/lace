@@ -5,7 +5,7 @@
 assert inputs.nixpkgs.system == "x86_64-linux"; let
   pkgs = inputs.nixpkgs;
 in rec {
-  package = local-backend;
+  package = lace-blockchain-services;
 
   installer = throw "unimplemented";
 
@@ -51,9 +51,9 @@ in rec {
 
   # ----------------------------------------------------------------------------- #
 
-  local-backend-exe = pkgs.buildGoModule rec {
-    name = "local-backend";
-    src = ./local-backend;
+  lace-blockchain-services-exe = pkgs.buildGoModule rec {
+    name = "lace-blockchain-services";
+    src = ./lace-blockchain-services;
     vendorHash = "sha256-1iyb+4faqZAo6IZf7PYx3Dg+H2IULzhBW80c5loXBPw=";
     nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
     buildInputs = with pkgs; [ libayatana-appindicator-gtk3 gtk3 ];
@@ -66,18 +66,18 @@ in rec {
     '';
   };
 
-  local-backend = pkgs.runCommand "local-backend" {
-    meta.mainProgram = local-backend-exe.name;
+  lace-blockchain-services = pkgs.runCommand "lace-blockchain-services" {
+    meta.mainProgram = lace-blockchain-services-exe.name;
   } ''
-    mkdir -p $out/bin $out/libexec $out/share/lace-local-backend
-    cp ${local-backend-exe}/bin/* $out/bin/
+    mkdir -p $out/bin $out/libexec $out/share/lace-blockchain-services
+    cp ${lace-blockchain-services-exe}/bin/* $out/bin/
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/
     ln -s ${cardano-js-sdk.nodejs}/bin/node $out/libexec
     ln -s ${pkgs.xclip}/bin/xclip $out/libexec
 
-    mkdir -p $out/share/lace-local-backend
-    ln -s ${cardano-js-sdk}/libexec/source $out/share/lace-local-backend/cardano-js-sdk
+    mkdir -p $out/share
+    ln -s ${cardano-js-sdk}/libexec/source $out/share/cardano-js-sdk
   '';
 
   nix-bundle-exe = pkgs.fetchFromGitHub {
@@ -87,8 +87,8 @@ in rec {
     hash = "sha256-K9PT8LVvTLOm3gX9ZFxag0X85DFgB2vvJB+S12disWw=";
   };
 
-  local-backend-bundle = let
-    unbundled = local-backend;
+  lace-blockchain-services-bundle = let
+    unbundled = lace-blockchain-services;
     bundled = (import nix-bundle-exe {
       inherit pkgs;
       bin_dir = "libexec";
@@ -102,7 +102,7 @@ in rec {
           drv.buildCommand
       ) + ''
         mkdir -p $out/bin $out/share
-        mv $out/libexec/local-backend $out/bin/
+        mv $out/libexec/lace-blockchain-services $out/bin/
         cp -r --dereference ${unbundled}/share/. $out/share/ || true  # XXX: unsafe! ignore broken node_module links
       '';
     });
@@ -146,7 +146,7 @@ in rec {
 
     export OGMIOS_URL="ws://127.0.0.1:$ogmios_port"
 
-    lace_local_backend_workdir="$HOME/.local/share/lace-local-backend/$NETWORK"
+    lace_local_backend_workdir="$HOME/.local/share/lace-blockchain-services/$NETWORK"
     mkdir -p "$lace_local_backend_workdir"
 
     cardano_node_socket="$lace_local_backend_workdir"/cardano-node.socket
