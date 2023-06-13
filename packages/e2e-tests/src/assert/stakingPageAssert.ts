@@ -1,4 +1,4 @@
-import { StakingPage } from '../elements/staking/stakingPage';
+import StakingPage from '../elements/staking/stakingPage';
 import { NetworkComponent } from '../elements/staking/networkComponent';
 import { TestnetPatterns } from '../support/patterns';
 import webTester from '../actor/webTester';
@@ -13,18 +13,18 @@ import { expect } from 'chai';
 import { StakePool } from '../data/expectedStakePoolsData';
 import StakingPasswordDrawer from '../elements/staking/StakingPasswordDrawer';
 import StakingErrorDrawer from '../elements/staking/StakingErrorDrawer';
+import { browser } from '@wdio/globals';
 
 class StakingPageAssert {
   assertSeeTitleWithCounter = async () => {
-    const stakingPage = new StakingPage();
-    await stakingPage.title.waitForDisplayed();
-    await stakingPage.counter.waitForDisplayed();
-    await expect(await stakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
-    await expect(await stakingPage.counter.getText()).to.match(TestnetPatterns.COUNTER_REGEX);
+    await StakingPage.title.waitForDisplayed();
+    await StakingPage.counter.waitForDisplayed();
+    await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
+    await expect(await StakingPage.counter.getText()).to.match(TestnetPatterns.COUNTER_REGEX);
   };
 
   assertSeeTitle = async () => {
-    await expect(await new StakingPage().title.getText()).to.equal(await t('staking.sectionTitle'));
+    await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
   };
 
   assertNetworkContainerExistsWithContent = async () => {
@@ -47,10 +47,16 @@ class StakingPageAssert {
     // await webTester.waitUntilSeeElement(networkComponent.marginDetail());
   };
 
-  assertSeeSearchComponent = async () => {
-    const stakingPage = new StakingPage();
-    await webTester.waitUntilSeeElement(stakingPage.stakingPageSearchIcon());
-    await webTester.waitUntilSeeElement(stakingPage.stakingPageSearchInput());
+  assertSeeSearchComponent = async (mode: 'extended' | 'popup') => {
+    await StakingPage.stakingPageSearchIcon.waitForDisplayed();
+    await StakingPage.stakingPageSearchInput.waitForDisplayed();
+    await (mode === 'extended'
+      ? expect(await StakingPage.stakingPageSearchInput.getAttribute('placeholder')).to.equal(
+          await t('browserView.staking.stakePoolsTable.searchPlaceholder')
+        )
+      : expect(await StakingPage.searchInputPlaceholderInPopup.getText()).to.equal(
+          await t('cardano.stakePoolSearch.searchPlaceholder')
+        ));
   };
 
   assertSeePopupSearch = async () => {
@@ -179,7 +185,11 @@ class StakingPageAssert {
     const resultsNum = Number(results);
     if (resultsNum === 0) {
       await expect(rowsNumber).to.equal(resultsNum);
-      await webTester.waitUntilSeeElementContainingText(await t('browserView.staking.stakePoolsTable.emptyMessage'));
+      await StakingPage.emptySearchResultsImage.waitForDisplayed();
+      await StakingPage.emptySearchResultsMessage.waitForDisplayed();
+      await expect(await StakingPage.emptySearchResultsMessage.getText()).to.equal(
+        await t('browserView.staking.stakePoolsTable.emptyMessage')
+      );
     } else {
       await webTester.seeWebElement(stakePoolListItem.logoWithIndex(1));
       await expect(await stakePoolListItem.getNameWithIndex(1)).to.equal(title);
@@ -196,7 +206,7 @@ class StakingPageAssert {
   };
 
   assertSeeSingleSearchResult = async () => {
-    await browser.waitUntil(async () => (await new StakingPage().counter.getText()) === '(1)', {
+    await browser.waitUntil(async () => (await StakingPage.counter.getText()) === '(1)', {
       timeout: 20_000,
       timeoutMsg: 'failed while waiting for single search result'
     });

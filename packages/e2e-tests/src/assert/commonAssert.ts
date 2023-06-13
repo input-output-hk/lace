@@ -51,6 +51,14 @@ class CommonAssert {
     expect(currentTabsCount).to.equal(previousTabsCount + 1);
     expect(await browser.getUrl()).to.contain(path);
   }
+
+  assertSeeHorizontalScroll = async (shouldBeVisible: boolean) => {
+    const scrollBarWidth = 15;
+    const pageWidth = await browser.execute(() => document.querySelector('#main').scrollWidth);
+    const viewportWidth = (await browser.execute(() => window.innerWidth)) - scrollBarWidth;
+    const hasHorizontalScroll = pageWidth >= viewportWidth;
+    await expect(hasHorizontalScroll).to.equal(shouldBeVisible);
+  };
 }
 
 export default new CommonAssert();
