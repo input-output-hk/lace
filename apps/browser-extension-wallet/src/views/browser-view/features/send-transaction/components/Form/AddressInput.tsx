@@ -66,6 +66,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
 
+  const isAddressInputValueHandle = validateHandle(addressInputValue.toString());
+
   const clearInput = useCallback(() => {
     setAddressInputValue('');
     setAddressValue(row, '');
@@ -75,6 +77,10 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const handleInputChange = (value?: string) => {
     setAddressInputValue(value);
     setAddressValue(row, value);
+
+    if (value.length === 0) {
+      setHandleVerificationState(undefined);
+    }
   };
 
   const resolveHandle = useMemo(
@@ -108,7 +114,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
       return;
     }
 
-    if (validateHandle(addressInputValue.toString())) {
+    if (isAddressInputValueHandle) {
       setHandleVerificationState(HandleVerificationState.VERIFYING);
       resolveHandle();
     } else {
@@ -202,12 +208,12 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         translations={destinationAddressInputTranslations}
         data-testid="address-input"
       />
-      {!isAddressInputValueValid && address && (
+      {!isAddressInputValueValid && !isAddressInputValueHandle && address && (
         <Text className={styles.errorParagraph} data-testid="address-input-error">
           {t('general.errors.incorrectAddress')}
         </Text>
       )}
-      {address && handleVerificationState === HandleVerificationState.INVALID && (
+      {isAddressInputValueHandle && handleVerificationState === HandleVerificationState.INVALID && (
         <Text className={styles.errorParagraph} data-testid="handle-input-error">
           {t('general.errors.incorrectHandle')}
         </Text>
