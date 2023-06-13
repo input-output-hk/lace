@@ -14,11 +14,11 @@
 :global(.ant-table-cell) {
   @media (max-width: $breakpoint-popup) {
     &:first-child {
-      padding: 16px 0 16px 16px;
+      padding: 15px 0 14px 16px;
     }
 
     &:last-child {
-      padding: 16px 16px 16px 0;
+      padding: 15px 16px 14px 0;
     }
   }
 }
@@ -94,6 +94,7 @@ p.neutral {
 
       @media (max-width: $breakpoint-popup) {
         font-size: var(--bodySmall, 14px);
+        margin-top: -1px;
       }
     }
   }
@@ -118,4 +119,8 @@ p.neutral {
       background-color: var(--light-mode-light-grey) !important;
     }
   }
+}
+
+.scrollContainer {
+  margin-right: -11px !important;
 }
