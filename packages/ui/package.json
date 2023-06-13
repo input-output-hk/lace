@@ -22,7 +22,7 @@
     "eslint:check": "eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' .",
     "eslint:fix": "yarn eslint:check --fix",
     "format": "yarn prettier --write '**/*.{js,ts,jsx,tsx,html,json,md}'",
-    "lint:all": "yarn eslint:check && yarn prettier:check",
+    "lint": "yarn eslint:check && yarn prettier:check",
     "lint:fix": "yarn eslint:fix && yarn prettier:fix",
     "prettier:check": "yarn prettier --check '**/*.{js,ts,jsx,tsx,html,json,md}'",
     "prettier:fix": "yarn prettier --write --loglevel warn '**/*.{js,ts,jsx,tsx,html,json,md}'",
