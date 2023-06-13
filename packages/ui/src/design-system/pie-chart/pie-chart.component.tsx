@@ -92,7 +92,7 @@ export const PieChart = <T extends object | { name: string; value: number }>({
             <stop offset="120%" stopColor="#FF92E1" />
           </linearGradient>
         </defs>
-        {tooltip && <Tooltip content={tooltip} />}
+        {Boolean(tooltip) && <Tooltip content={tooltip} />}
         <Pie
           data={data}
           dataKey={valueKey}
