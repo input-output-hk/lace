@@ -17,6 +17,8 @@ export class TokensPage extends WebElement {
   private COINGECKO_LINK = '[data-testid="coingecko-link"]';
   private RECEIVE_BUTTON_POPUP_MODE = 'main [data-testid="receive-button"]';
   private SEND_BUTTON_POPUP_MODE = 'main [data-testid="send-button"]';
+  private CLOSED_EYE_ICON = '[data-testid="closed-eye-icon"]';
+  private OPENED_EYE_ICON = '[data-testid="opened-eye-icon"]';
 
   constructor() {
     super();
@@ -93,6 +95,14 @@ export class TokensPage extends WebElement {
 
   get coinGeckoLink(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COINGECKO_LINK);
+  }
+
+  get closedEyeIcon(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLOSED_EYE_ICON);
+  }
+
+  get openedEyeIcon(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.OPENED_EYE_ICON);
   }
 
   async getTotalBalanceValue(): Promise<string | number> {

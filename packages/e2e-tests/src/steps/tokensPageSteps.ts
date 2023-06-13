@@ -200,3 +200,7 @@ When(/^I click "(Receive|Send)" button on Tokens page in popup mode$/, async (bu
       throw new Error(`Unsupported button name: ${button}`);
   }
 });
+
+Then(/^Eye icon is not displayed on Tokens page$/, async () => {
+  await tokensPageAssert.assertDoNotSeeEyeIcon();
+});

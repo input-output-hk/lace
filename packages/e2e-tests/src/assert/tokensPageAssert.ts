@@ -200,6 +200,12 @@ class TokensPageAssert {
     const currentUrl = await browser.getUrl();
     expect(currentUrl).to.contain(COINGECKO_URL);
   }
+
+  async assertDoNotSeeEyeIcon() {
+    const tokensPage = new TokensPage();
+    await tokensPage.closedEyeIcon.waitForDisplayed({ reverse: true });
+    await tokensPage.openedEyeIcon.waitForDisplayed({ reverse: true });
+  }
 }
 
 export default new TokensPageAssert();
