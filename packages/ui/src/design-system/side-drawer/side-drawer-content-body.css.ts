@@ -2,10 +2,11 @@ import { sx, style } from '../../design-tokens';
 
 export const container = style([
   sx({
-    px: '$40',
-    height: '$fill',
+    pl: '$40',
+    pr: '$16',
   }),
   {
     gridArea: 'body',
+    overflow: 'auto',
   },
 ]);

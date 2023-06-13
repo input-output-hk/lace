@@ -130,6 +130,14 @@ const TitlteAndTopNavigation = ({
   </Layout>
 );
 
+const ForceScrollbar = (): JSX.Element => (
+  <>
+    {Array.from({ length: 8 }).map((_, index) => (
+      <Box my="$112" h="$112" key={`scroll:${index}`} />
+    ))}
+  </>
+);
+
 const CTAButtonAndSelection = ({
   onBackClick,
   onCloseClick,
@@ -183,6 +191,7 @@ const CTAButtonAndSelection = ({
               </Flex>
             </Cell>
           </Grid>
+          <ForceScrollbar />
         </Body>
         <Footer>
           <Buttons.CallToAction label="Label" />
@@ -223,6 +232,7 @@ const TwoCTAButtonAndToggleSwitch = ({
               </Flex>
             </Cell>
           </Grid>
+          <ForceScrollbar />
         </Body>
         <Footer>
           <Buttons.CallToAction label="Label" />

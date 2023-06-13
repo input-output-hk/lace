@@ -12,6 +12,10 @@ interface Props {
 
 export const Body = ({ children }: Readonly<Props>): JSX.Element => (
   <Box className={cx.container}>
-    <ScrollArea>{children}</ScrollArea>
+    <ScrollArea>
+      <Box pr="$24" mr="$2" pb="$32">
+        {children}
+      </Box>
+    </ScrollArea>
   </Box>
 );
