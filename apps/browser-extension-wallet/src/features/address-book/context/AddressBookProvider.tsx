@@ -20,13 +20,15 @@ export const cardanoNetworkMap = {
   LegacyTestnet: Wallet.Cardano.NetworkMagics.Testnet
 };
 
-const removeNetworkFromAddressBook = (addressBook: AddressBookSchema[], networkName: string) =>
-  addressBook?.map(({ name, address, id, network }) => ({
+const removeNetworkFromAddressBook = (addressBook: AddressBookSchema[]) => {
+  const networks = /preprod|preview|mainnet/gi;
+  return addressBook?.map(({ name, address, id, network }) => ({
     id,
     network,
-    name: name.replace(networkName.toUpperCase(), ''),
-    address: address.replace(networkName.toUpperCase(), '')
+    name: name.replace(networks, ''),
+    address: address.replace(networks, '')
   }));
+};
 
 export const AddressBookProvider = ({ children, initialState }: AddressBookProviderProps): React.ReactElement => {
   const { environmentName } = useWalletStore();
@@ -34,9 +36,7 @@ export const AddressBookProvider = ({ children, initialState }: AddressBookProvi
   const dbState = useDbState<AddressBookSchema, AddressRecordParams>(initialState, addressBookSchema, queries);
 
   return (
-    <AddressBookContext.Provider
-      value={{ ...dbState, list: removeNetworkFromAddressBook(dbState.list, environmentName) }}
-    >
+    <AddressBookContext.Provider value={{ ...dbState, list: removeNetworkFromAddressBook(dbState.list) }}>
       {children}
     </AddressBookContext.Provider>
   );
