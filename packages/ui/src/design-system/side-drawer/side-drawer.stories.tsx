@@ -4,6 +4,7 @@ import React from 'react';
 import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { within, userEvent, waitFor } from '@storybook/testing-library';
+import MediaQuery from 'react-responsive';
 
 import cardanoImage from '../../assets/images/cardano-blue-bg.png';
 import { ThemeColorScheme, ThemeProvider, sx } from '../../design-tokens';
@@ -53,6 +54,18 @@ interface Props {
   onBackClick?: () => void;
   onCloseClick: () => void;
 }
+
+const ChromaticScreen = ({
+  children,
+}: Readonly<{ children: ReactNode }>): JSX.Element => (
+  <MediaQuery maxWidth={1440}>{children}</MediaQuery>
+);
+
+const DefaultScreen = ({
+  children,
+}: Readonly<{ children: ReactNode }>): JSX.Element => (
+  <MediaQuery minWidth={1440}>{children}</MediaQuery>
+);
 
 const Layout = ({
   children,
@@ -252,40 +265,94 @@ export const Overview = ({ onBackClick, onCloseClick }: Props): JSX.Element => (
         <Divider my="$64" />
 
         <Section title="Variants">
-          <Variants.Table headers={['Plain', 'Title and top navigation']}>
-            <Variants.Row>
-              <Variants.Cell>
-                <Plain onCloseClick={onCloseClick} />
-              </Variants.Cell>
-              <Variants.Cell>
-                <TitlteAndTopNavigation
-                  onCloseClick={onCloseClick}
-                  onBackClick={onBackClick}
-                />
-              </Variants.Cell>
-            </Variants.Row>
-          </Variants.Table>
-          <Variants.Table
-            headers={[
-              '1 bottom CTA, Selection',
-              '2 bottom CTAs, Toggle switch',
-            ]}
-          >
-            <Variants.Row>
-              <Variants.Cell>
-                <CTAButtonAndSelection
-                  onCloseClick={onCloseClick}
-                  onBackClick={onBackClick}
-                />
-              </Variants.Cell>
-              <Variants.Cell>
-                <TwoCTAButtonAndToggleSwitch
-                  onCloseClick={onCloseClick}
-                  onBackClick={onBackClick}
-                />
-              </Variants.Cell>
-            </Variants.Row>
-          </Variants.Table>
+          <DefaultScreen>
+            <Variants.Table headers={['Plain', 'Title and top navigation']}>
+              <Variants.Row>
+                <Variants.Cell>
+                  <Plain onCloseClick={onCloseClick} />
+                </Variants.Cell>
+                <Variants.Cell>
+                  <TitlteAndTopNavigation
+                    onCloseClick={onCloseClick}
+                    onBackClick={onBackClick}
+                  />
+                </Variants.Cell>
+              </Variants.Row>
+            </Variants.Table>
+            <Variants.Table headers={['Plain', 'Title and top navigation']}>
+              <Variants.Row>
+                <Variants.Cell>
+                  <Plain onCloseClick={onCloseClick} />
+                </Variants.Cell>
+                <Variants.Cell>
+                  <TitlteAndTopNavigation
+                    onCloseClick={onCloseClick}
+                    onBackClick={onBackClick}
+                  />
+                </Variants.Cell>
+              </Variants.Row>
+            </Variants.Table>
+            <Variants.Table
+              headers={[
+                '1 bottom CTA, Selection',
+                '2 bottom CTAs, Toggle switch',
+              ]}
+            >
+              <Variants.Row>
+                <Variants.Cell>
+                  <CTAButtonAndSelection
+                    onCloseClick={onCloseClick}
+                    onBackClick={onBackClick}
+                  />
+                </Variants.Cell>
+                <Variants.Cell>
+                  <TwoCTAButtonAndToggleSwitch
+                    onCloseClick={onCloseClick}
+                    onBackClick={onBackClick}
+                  />
+                </Variants.Cell>
+              </Variants.Row>
+            </Variants.Table>
+          </DefaultScreen>
+          <ChromaticScreen>
+            <Variants.Table headers={['Plain']}>
+              <Variants.Row>
+                <Variants.Cell>
+                  <Plain onCloseClick={onCloseClick} />
+                </Variants.Cell>
+              </Variants.Row>
+            </Variants.Table>
+            <Variants.Table headers={['Title and top navigation']}>
+              <Variants.Row>
+                <Variants.Cell>
+                  <TitlteAndTopNavigation
+                    onCloseClick={onCloseClick}
+                    onBackClick={onBackClick}
+                  />
+                </Variants.Cell>
+              </Variants.Row>
+            </Variants.Table>
+            <Variants.Table headers={['1 bottom CTA, Selection']}>
+              <Variants.Row>
+                <Variants.Cell>
+                  <CTAButtonAndSelection
+                    onCloseClick={onCloseClick}
+                    onBackClick={onBackClick}
+                  />
+                </Variants.Cell>
+              </Variants.Row>
+            </Variants.Table>
+            <Variants.Table headers={['2 bottom CTAs, Toggle switch']}>
+              <Variants.Row>
+                <Variants.Cell>
+                  <TwoCTAButtonAndToggleSwitch
+                    onCloseClick={onCloseClick}
+                    onBackClick={onBackClick}
+                  />
+                </Variants.Cell>
+              </Variants.Row>
+            </Variants.Table>
+          </ChromaticScreen>
         </Section>
 
         <Divider my="$64" />
