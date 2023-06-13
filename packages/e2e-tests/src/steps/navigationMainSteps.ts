@@ -20,20 +20,25 @@ Then(
     const actions = actionName.split(',');
     let elementToClick: ChainablePromiseElement<WebdriverIO.Element>;
     switch (element) {
-      case 'Tokens':
+      case 'Tokens': {
         elementToClick = mode === 'extended' ? MenuMainExtended.tokensButton : MenuMainPopup.tokensButton;
         break;
-      case 'NFTs':
+      }
+      case 'NFTs': {
         elementToClick = mode === 'extended' ? MenuMainExtended.nftsButton : MenuMainPopup.nftsButton;
         break;
-      case 'Transactions':
+      }
+      case 'Transactions': {
         elementToClick = mode === 'extended' ? MenuMainExtended.transactionsButton : MenuMainPopup.transactionsButton;
         break;
-      case 'Staking':
+      }
+      case 'Staking': {
         elementToClick = mode === 'extended' ? MenuMainExtended.stakingButton : MenuMainPopup.stakingButton;
         break;
-      default:
+      }
+      default: {
         throw new Error(`Element ${element} not found`);
+      }
     }
 
     await networkAssert.assertRequestWithParametersIsPresent(

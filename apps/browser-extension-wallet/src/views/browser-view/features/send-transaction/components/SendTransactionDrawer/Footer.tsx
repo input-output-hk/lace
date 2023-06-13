@@ -89,20 +89,25 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
 
   const sendAnalytics = useCallback(() => {
     switch (currentSection.currentSection) {
-      case Sections.FORM:
+      case Sections.FORM: {
         sendEvent(isPopupView ? Events.REVIEW_TX_DETAILS_POPUP : Events.REVIEW_TX_DETAILS_BROWSER);
         break;
-      case Sections.SUMMARY:
+      }
+      case Sections.SUMMARY: {
         sendEvent(isPopupView ? Events.CONFIRM_TX_DETAILS_POPUP : Events.CONFIRM_TX_DETAILS_BROWSER);
         break;
-      case Sections.CONFIRMATION:
+      }
+      case Sections.CONFIRMATION: {
         sendEvent(isPopupView ? Events.INPUT_TX_PASSWORD_POPUP : Events.INPUT_TX_PASSWORD_BROWSER);
         break;
-      case Sections.SUCCESS_TX:
+      }
+      case Sections.SUCCESS_TX: {
         sendEvent(isPopupView ? Events.SUCCESS_VIEW_TX_POPUP : Events.SUCCESS_VIEW_TX_BROWSER);
         break;
-      case Sections.FAIL_TX:
+      }
+      case Sections.FAIL_TX: {
         sendEvent(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
+      }
     }
   }, [currentSection.currentSection, isPopupView, sendEvent]);
 
@@ -160,20 +165,25 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
     }
 
     switch (true) {
-      case isSummaryStep && !isInMemory:
+      case isSummaryStep && !isInMemory: {
         if (isPopupView) {
           return openContinueDialog();
         }
         return handleVerifyPass();
-      case isConfirmPass:
+      }
+      case isConfirmPass: {
         return executeWithPassword(password, handleVerifyPass);
-      case txHasSucceeded:
+      }
+      case txHasSucceeded: {
         return onCloseSubmitedTransaction();
-      case txHasFailed:
+      }
+      case txHasFailed: {
         setSubmitingTxState({ isPasswordValid: true });
         return setSection(sectionsConfig.form);
-      default:
+      }
+      default: {
         return setSection();
+      }
     }
   }, [
     currentSection.currentSection,

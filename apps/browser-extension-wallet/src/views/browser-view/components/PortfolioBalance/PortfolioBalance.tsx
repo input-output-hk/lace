@@ -163,7 +163,7 @@ export const PortfolioBalance = ({
           })}
           {variationPercentage !== undefined &&
             renderVariation(
-              !Number.isNaN(Number(variationPercentage)) ? Number(variationPercentage) : variationPercentage,
+              Number.isNaN(Number(variationPercentage)) ? variationPercentage : Number(variationPercentage),
               size,
               popupView
             )}

@@ -85,7 +85,7 @@ export const WalletSetupMnemonicVerificationStep = ({
   }, [isBackToMnemonic, setIsBackToMnemonic]);
 
   const isNextEnabled = useMemo(
-    () => currentStepWords.every((word) => word) && (mnemonicStep !== mnemonicSteps - 1 || isSubmitEnabled),
+    () => currentStepWords.every(Boolean) && (mnemonicStep !== mnemonicSteps - 1 || isSubmitEnabled),
     [mnemonicStep, currentStepWords, mnemonicSteps, isSubmitEnabled]
   );
 

@@ -59,9 +59,7 @@ export const WalletAddressList = ({
           scrollableTarget={scrollableTargetId}
           style={{ overflow: 'hidden' }}
         >
-          {!isNumber(total) ? (
-            <Skeleton className={cn(styles.skeleton, { [styles.popupView]: popupView })} active avatar />
-          ) : (
+          {isNumber(total) ? (
             <List
               className={className}
               data-testid="address-list"
@@ -75,6 +73,8 @@ export const WalletAddressList = ({
               )}
               {...props}
             />
+          ) : (
+            <Skeleton className={cn(styles.skeleton, { [styles.popupView]: popupView })} active avatar />
           )}
         </InfiniteScroll>
       )}

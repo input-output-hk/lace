@@ -29,6 +29,7 @@ export const useActionExecution = (
         duration: params?.toastDuration || TOAST_DEFAULT_DURATION,
         icon: ErrorIcon
       });
+      // eslint-disable-next-line unicorn/no-useless-promise-resolve-reject
       return Promise.reject(errorMessage);
     }
   };

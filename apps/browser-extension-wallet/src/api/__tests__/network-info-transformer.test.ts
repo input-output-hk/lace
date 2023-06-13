@@ -15,11 +15,13 @@ const currentEpoch = {
   }
 };
 const lovelaceSupply = {
+  // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
   circulating: BigInt(42_064_399_450_423_723),
   total: BigInt(40_267_211_394_073_980)
 };
 const stake = {
   active: BigInt(1_060_378_314_781_343),
+  // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
   live: BigInt(15_001_884_895_856_815)
 };
 

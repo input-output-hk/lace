@@ -112,12 +112,14 @@ class TransactionsDetailsAssert {
         await transactionsDetails.transactionDetailsStakePoolId.waitForDisplayed();
       }
       switch (mode) {
-        case 'extended':
+        case 'extended': {
           await webTester.clickElement(sideDrawer.closeButton());
           break;
-        case 'popup':
+        }
+        case 'popup': {
           await webTester.clickElement(sideDrawer.backButton());
           break;
+        }
       }
     }
   }
@@ -144,18 +146,21 @@ class TransactionsDetailsAssert {
       await webTester.seeWebElement(transactionsDetails.transactionDetailsOutputFiatAmount());
       // await webTester.seeWebElement(transactionsDetails.transactionDetailsOutputTokens());
       switch (mode) {
-        case 'extended':
+        case 'extended': {
           await webTester.scrollIntoView(sideDrawer.closeButton());
           await webTester.clickElement(sideDrawer.closeButton());
           break;
-        case 'popup':
+        }
+        case 'popup': {
           await webTester.scrollIntoView(sideDrawer.backButton());
           await webTester.clickElement(sideDrawer.backButton());
           break;
+        }
       }
     }
   }
 
+  // eslint-disable-next-line max-statements
   async assertTxDetailValuesNotZero(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const transactionsPage = new TransactionsPage();
@@ -194,12 +199,14 @@ class TransactionsDetailsAssert {
       await expect(txDetailsFeeADAValue).to.be.greaterThan(0);
       await expect(txDetailsFeeFiatValue).to.be.greaterThan(0);
       switch (mode) {
-        case 'extended':
+        case 'extended': {
           await webTester.clickElement(sideDrawer.closeButton());
           break;
-        case 'popup':
+        }
+        case 'popup': {
           await webTester.clickElement(sideDrawer.backButton());
           break;
+        }
       }
     }
   }
@@ -220,12 +227,14 @@ class TransactionsDetailsAssert {
         await webTester.seeWebElement(transactionsDetails.transactionDetailsToAddress());
       }
       switch (mode) {
-        case 'extended':
+        case 'extended': {
           await webTester.clickElement(sideDrawer.closeButton());
           break;
-        case 'popup':
+        }
+        case 'popup': {
           await webTester.clickElement(sideDrawer.backButton());
           break;
+        }
       }
     }
   }
@@ -252,12 +261,14 @@ class TransactionsDetailsAssert {
           await expect(tokensAmountSummary).to.equal(Number(tokensDescriptionAmount));
         }
         switch (mode) {
-          case 'extended':
+          case 'extended': {
             await webTester.clickElement(sideDrawer.closeButton());
             break;
-          case 'popup':
+          }
+          case 'popup': {
             await webTester.clickElement(sideDrawer.backButton());
             break;
+          }
         }
       }
     }

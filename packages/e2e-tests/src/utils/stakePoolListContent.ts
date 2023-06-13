@@ -51,8 +51,8 @@ export const sortNameColumn = (columnContent: string[], order: string): string[]
   const itemsWithName = columnContent.filter((item) => item !== '-');
 
   const sortedItems = [...itemsWithName].sort((a, b) => {
-    const nameA = a.replace(emojiRegex, '').replace(' ', '').trim();
-    const nameB = b.replace(emojiRegex, '').replace(' ', '').trim();
+    const nameA = a.replaceAll(emojiRegex, '').replace(' ', '').trim();
+    const nameB = b.replaceAll(emojiRegex, '').replace(' ', '').trim();
     return nameA.localeCompare(nameB);
   });
   if (order === 'descending') {

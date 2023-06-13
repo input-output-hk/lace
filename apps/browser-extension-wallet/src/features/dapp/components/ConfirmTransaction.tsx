@@ -95,7 +95,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       {
         api$: of({
           async allowSignTx(): Promise<boolean> {
-            return Promise.resolve(false);
+            return false;
           }
         }),
         baseChannel: DAPP_CHANNELS.userPrompt,
@@ -113,7 +113,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         {
           api$: of({
             async allowSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
+              return true;
             }
           }),
           baseChannel: DAPP_CHANNELS.userPrompt,

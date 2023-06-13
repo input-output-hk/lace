@@ -67,7 +67,7 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
   } = useDelegationStore(stakePoolDetailsSelector) || {};
   const { fiatCurrency } = useCurrencyStore();
 
-  const stakePoolName = useMemo(() => (poolName ? poolName : popupView ? '-' : poolName), [poolName, popupView]);
+  const stakePoolName = useMemo(() => poolName || (popupView ? '-' : poolName), [poolName, popupView]);
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const deposit =
@@ -143,7 +143,7 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
                   </>
                 }
               />
-              <div className={styles.itemData}>{!popupView ? stakePoolAddress : <></>}</div>
+              <div className={styles.itemData}>{popupView ? <></> : stakePoolAddress}</div>
             </div>
           </div>
 

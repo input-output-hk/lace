@@ -129,6 +129,7 @@ export const migrationsRequirePassword = async (
   );
 
   // Runs all `requiresPassword` functions for all migrations and check if some returns true
+  // eslint-disable-next-line unicorn/no-await-expression-member
   return (await Promise.all(upgradeMigrationsToApply.map(async (mig) => mig.requiresPassword?.()))).includes(true);
 };
 

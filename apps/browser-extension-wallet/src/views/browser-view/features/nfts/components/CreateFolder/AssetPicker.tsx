@@ -50,7 +50,7 @@ export const AssetPicker = ({
   };
 
   const removeTokenFromList = (id: string) => {
-    const nfts = [...selectedNFTs.filter((_id) => _id !== id)];
+    const nfts = selectedNFTs.filter((_id) => _id !== id);
     setSelectedNfts(nfts);
     setSelectedTokenIds(nfts);
   };

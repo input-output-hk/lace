@@ -23,16 +23,21 @@ interface TxTypeProps {
 
 export const getTxDirection = ({ type }: TxTypeProps): TxDirection => {
   switch (type) {
-    case 'incoming':
+    case 'incoming': {
       return TxDirections.Incoming;
-    case 'rewards':
+    }
+    case 'rewards': {
       return TxDirections.Outgoing;
-    case 'outgoing':
+    }
+    case 'outgoing': {
       return TxDirections.Outgoing;
-    case 'self-rewards':
+    }
+    case 'self-rewards': {
       return TxDirections.Self;
-    case 'self':
+    }
+    case 'self': {
       return TxDirections.Self;
+    }
   }
 };
 
@@ -68,20 +73,27 @@ export const inspectTxType = ({
 
   if (inspectionProperties.sent.inputs.length > 0) {
     switch (true) {
-      case !!inspectionProperties.delegation[0]?.poolId:
+      case !!inspectionProperties.delegation[0]?.poolId: {
         return 'delegation';
-      case inspectionProperties.stakeKeyRegistration.length > 0:
+      }
+      case inspectionProperties.stakeKeyRegistration.length > 0: {
         return 'delegationRegistration';
-      case inspectionProperties.stakeKeyDeregistration.length > 0:
+      }
+      case inspectionProperties.stakeKeyDeregistration.length > 0: {
         return 'delegationDeregistration';
-      case withRewardsWithdrawal && inspectionProperties.selfTransaction:
+      }
+      case withRewardsWithdrawal && inspectionProperties.selfTransaction: {
         return 'self-rewards';
-      case withRewardsWithdrawal:
+      }
+      case withRewardsWithdrawal: {
         return 'rewards';
-      case inspectionProperties.selfTransaction:
+      }
+      case inspectionProperties.selfTransaction: {
         return 'self';
-      default:
+      }
+      default: {
         return 'outgoing';
+      }
     }
   }
 

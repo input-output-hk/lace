@@ -285,14 +285,14 @@ const getWalletActivitiesObservable = async ({
           assets: activity.assets.map((asset: ActivityAssetProp) => {
             const assetId = Wallet.Cardano.AssetId(asset.id);
             const token = assetsInfo.get(assetId);
-            const assetData = !token
-              ? undefined
-              : assetTransformer({
+            const assetData = token
+              ? assetTransformer({
                   token,
                   key: assetId,
                   total: { coins: BigInt(0), assets: new Map([[assetId, BigInt(asset.val)]]) },
                   fiatCurrency
-                });
+                })
+              : undefined;
             return {
               id: asset.id,
               val: Wallet.util.calculateAssetBalance(asset.val, token),
@@ -306,6 +306,7 @@ const getWalletActivitiesObservable = async ({
 
       set({
         walletActivities,
+        // eslint-disable-next-line unicorn/no-await-expression-member
         activitiesCount: (await allActivities).reduce(
           (accumulator, currentList) => accumulator + currentList.items.length,
           0

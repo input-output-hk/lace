@@ -11,10 +11,10 @@ class CoinConfigureAssert {
     const balance = ((await new CoinConfigure().getBalanceValue()) as string).replace('Balance: ', '').replace(',', '');
     await expect(Number(balance)).to.be.greaterThan(0);
     const balanceFiat = await new CoinConfigure().getFiatBalanceValue();
-    if (balanceFiat !== '-') {
-      await expect(Number(balanceFiat)).to.be.greaterThan(0);
-    } else {
+    if (balanceFiat === '-') {
       Logger.log('Fiat balance = "-", skipping validation');
+    } else {
+      await expect(Number(balanceFiat)).to.be.greaterThan(0);
     }
   }
 

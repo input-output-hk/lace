@@ -37,17 +37,21 @@ class OnboardingCommonAssert {
   async assertLegalContentIsDisplayed(linkName: string): Promise<void> {
     let expectedUrl;
     switch (linkName) {
-      case 'Cookie policy':
+      case 'Cookie policy': {
         expectedUrl = 'https://www.lace.io/lace-cookie-policy.pdf';
         break;
-      case 'Privacy policy':
+      }
+      case 'Privacy policy': {
         expectedUrl = 'https://www.lace.io/iog-privacy-policy.pdf';
         break;
-      case 'Terms of service':
+      }
+      case 'Terms of service': {
         expectedUrl = 'https://www.lace.io/lace-terms-of-use.pdf';
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported legal link - ${linkName}`);
+      }
     }
     const currentUrl = await browser.getUrl();
     expect(currentUrl).to.contain(expectedUrl);

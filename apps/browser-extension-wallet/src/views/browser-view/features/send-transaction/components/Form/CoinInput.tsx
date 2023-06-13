@@ -122,7 +122,7 @@ export const CoinInput = ({
   const changeCoinValue = (params: Parameters<AssetInputProps['onChange']>[0]) => {
     const { prevValue = '', element, value: currentValue, maxDecimals } = params;
 
-    const elementValue = !currentValue ? '' : element?.value;
+    const elementValue = currentValue ? element?.value : '';
 
     const { currentDisplayValue, value, currentCursorPosition } = getChangedValue({
       displayValue: getInlineCurrencyFormat(prevValue, maxDecimals),

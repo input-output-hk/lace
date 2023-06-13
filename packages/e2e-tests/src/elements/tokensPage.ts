@@ -117,14 +117,14 @@ export class TokensPage extends WebElement {
 
   async getTokenTableItemValueByIndex(index: number, mode: 'extended' | 'popup'): Promise<number> {
     const tokenValue = (await webTester.getTextValueFromElement(this.tokensTableItemValue(index, mode))) as string;
-    return Number.parseFloat(tokenValue.replace(/,/g, ''));
+    return Number.parseFloat(tokenValue.replaceAll(',', ''));
   }
 
   async getTokenTableItemValueByName(tokenName: string, mode: 'extended' | 'popup'): Promise<number> {
     const tokenValue = (await webTester.getTextValueFromElement(
       this.tokensTableItemValue(await this.getTokenRowIndex(tokenName), mode)
     )) as string;
-    return Number.parseFloat(tokenValue.replace(/,/g, ''));
+    return Number.parseFloat(tokenValue.replaceAll(',', ''));
   }
 
   async getTokenTableItemValueFiatByIndex(index: number, mode: 'extended' | 'popup'): Promise<string | number> {

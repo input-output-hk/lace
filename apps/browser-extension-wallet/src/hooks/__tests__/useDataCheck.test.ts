@@ -25,17 +25,17 @@ const setStorageHelper = async ({
   withAppSettings?: boolean;
   withKeyAgentsByChain?: boolean;
 }) => {
-  if (withLock) saveValueInLocalStorage({ key: 'lock', value: !isHardwareWallet ? Buffer.from('test') : null });
+  if (withLock) saveValueInLocalStorage({ key: 'lock', value: isHardwareWallet ? null : Buffer.from('test') });
   if (withKeyAgentData) {
     saveValueInLocalStorage({
       key: 'keyAgentData',
-      value: !isHardwareWallet
-        ? mockKeyAgentDataTestnet
-        : {
+      value: isHardwareWallet
+        ? {
             ...mockKeyAgentDataTestnet,
             __typename: Wallet.KeyManagement.KeyAgentType.Ledger,
             communicationType: Wallet.KeyManagement.CommunicationType.Web
           }
+        : mockKeyAgentDataTestnet
     });
   }
   if (withWalletStorage) saveValueInLocalStorage({ key: 'wallet', value: { name: 'test wallet' } });

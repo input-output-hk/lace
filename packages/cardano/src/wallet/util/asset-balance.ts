@@ -10,7 +10,7 @@ const getPlaceholderDecimal = (value: string) => {
   if (!Number(value)) return 0;
 
   const decimals = value?.split('.')[1]?.length;
-  return decimals ? decimals : 0;
+  return decimals || 0;
 };
 
 export const calculateAssetBalance = (balance: bigint | string, assetInfo: Asset.AssetInfo): string => {
@@ -22,7 +22,7 @@ export const calculateAssetBalance = (balance: bigint | string, assetInfo: Asset
 
 export const assetBalanceToBigInt = (balanceWithDecimals: string, assetInfo: Asset.AssetInfo): bigint => {
   const tokenMetadataDecimals = assetInfo?.tokenMetadata?.decimals;
-  const decimals = tokenMetadataDecimals ? tokenMetadataDecimals : getPlaceholderDecimal(balanceWithDecimals);
+  const decimals = tokenMetadataDecimals || getPlaceholderDecimal(balanceWithDecimals);
 
   if (!decimals) return BigInt(balanceWithDecimals);
 

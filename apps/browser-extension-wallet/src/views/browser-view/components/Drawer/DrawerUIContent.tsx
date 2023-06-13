@@ -25,14 +25,18 @@ export interface DrawerConfig {
 
 const renderDrawerContent = (content?: DrawerContent) => {
   switch (content) {
-    case DrawerContent.SEND_TRANSACTION:
+    case DrawerContent.SEND_TRANSACTION: {
       return <SendTransaction />;
-    case DrawerContent.RECEIVE_TRANSACTION:
+    }
+    case DrawerContent.RECEIVE_TRANSACTION: {
       return <QRInfoWalletDrawer />;
-    case DrawerContent.SHOW_USED_ADDRESSES:
+    }
+    case DrawerContent.SHOW_USED_ADDRESSES: {
       return <WalletUsedAddressesDrawer />;
-    default:
+    }
+    default: {
       return <Skeleton />;
+    }
   }
 };
 

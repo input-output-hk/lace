@@ -243,14 +243,17 @@ Then(/^"Remove wallet" modal (is|is not) displayed$/, async (shouldBeDisplayed: 
 When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (button: 'Back' | 'Remove wallet') => {
   await browser.pause(500);
   switch (button) {
-    case 'Back':
+    case 'Back': {
       await Modal.cancelButton.click();
       break;
-    case 'Remove wallet':
+    }
+    case 'Remove wallet': {
       await Modal.confirmButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });
 

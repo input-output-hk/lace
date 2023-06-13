@@ -45,7 +45,7 @@ class TokensPageAssert {
       await t('browserView.assets.totalWalletBalance')
     );
     await expect(await tokensPage.getTotalBalanceCurrency()).to.equal('USD');
-    const actualTotalBalance = Number(((await tokensPage.getTotalBalanceValue()) as string).replace(/,/g, ''));
+    const actualTotalBalance = Number(((await tokensPage.getTotalBalanceValue()) as string).replaceAll(',', ''));
     await expect(actualTotalBalance).to.be.greaterThan(0);
   };
 

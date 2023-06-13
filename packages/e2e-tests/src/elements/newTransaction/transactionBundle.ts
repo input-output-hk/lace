@@ -13,7 +13,7 @@ export class TransactionBundle extends WebElement {
 
   constructor(index?: number) {
     super();
-    this.CONTAINER = typeof index === 'undefined' ? this.CONTAINER : `(${this.CONTAINER})[${index}]`;
+    this.CONTAINER = index === undefined ? this.CONTAINER : `(${this.CONTAINER})[${index}]`;
   }
 
   container(): WebElement {

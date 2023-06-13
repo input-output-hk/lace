@@ -38,17 +38,19 @@ export const SendWarningModal = ({ isPopupView }: SendWarningModalProps): React.
       category: AnalyticsEventCategories.SEND_TRANSACTION
     };
     switch (section.currentSection) {
-      case Sections.SUMMARY:
+      case Sections.SUMMARY: {
         analytics.sendEvent({
           ...props,
           name: isPopupView ? Events.CANCEL_TX_DETAILS_POPUP : Events.CANCEL_TX_DETAILS_BROWSER
         });
         break;
-      case Sections.CONFIRMATION:
+      }
+      case Sections.CONFIRMATION: {
         analytics.sendEvent({
           ...props,
           name: isPopupView ? Events.CANCEL_TX_PASSWORD_POPUP : Events.CANCEL_TX_PASSWORD_BROWSER
         });
+      }
     }
   }, [section.currentSection, analytics, isPopupView]);
 

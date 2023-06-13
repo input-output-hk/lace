@@ -62,15 +62,15 @@ export const config = (): Config => {
     CHAIN: chosenChain,
     AVAILABLE_CHAINS: process.env.AVAILABLE_CHAINS.split(',') as Wallet.ChainName[],
     MNEMONIC_LENGTH: 24,
-    WALLET_SYNC_TIMEOUT: !Number.isNaN(Number(process.env.WALLET_SYNC_TIMEOUT_IN_SEC))
-      ? Number(process.env.WALLET_SYNC_TIMEOUT_IN_SEC) * 1000
-      : 60 * 1000,
-    WALLET_INTERVAL: !Number.isNaN(Number(process.env.WALLET_INTERVAL_IN_SEC))
-      ? Number(process.env.WALLET_INTERVAL_IN_SEC) * 1000
-      : 30 * 1000,
-    ADA_PRICE_CHECK_INTERVAL: !Number.isNaN(Number(process.env.ADA_PRICE_POLLING_IN_SEC))
-      ? Number(process.env.ADA_PRICE_POLLING_IN_SEC) * 1000
-      : 30 * 1000,
+    WALLET_SYNC_TIMEOUT: Number.isNaN(Number(process.env.WALLET_SYNC_TIMEOUT_IN_SEC))
+      ? 60 * 1000
+      : Number(process.env.WALLET_SYNC_TIMEOUT_IN_SEC) * 1000,
+    WALLET_INTERVAL: Number.isNaN(Number(process.env.WALLET_INTERVAL_IN_SEC))
+      ? 30 * 1000
+      : Number(process.env.WALLET_INTERVAL_IN_SEC) * 1000,
+    ADA_PRICE_CHECK_INTERVAL: Number.isNaN(Number(process.env.ADA_PRICE_POLLING_IN_SEC))
+      ? 30 * 1000
+      : Number(process.env.ADA_PRICE_POLLING_IN_SEC) * 1000,
     CARDANO_SERVICES_URLS: {
       Mainnet: process.env.CARDANO_SERVICES_URL_MAINNET,
       Preprod: process.env.CARDANO_SERVICES_URL_PREPROD,
@@ -82,8 +82,8 @@ export const config = (): Config => {
       Preprod: `${process.env.CEXPLORER_URL_PREPROD}/tx`,
       Preview: `${process.env.CEXPLORER_URL_PREVIEW}/tx`
     },
-    SAVED_PRICE_DURATION: !Number.isNaN(Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES))
-      ? Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)
-      : 720
+    SAVED_PRICE_DURATION: Number.isNaN(Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES))
+      ? 720
+      : Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)
   };
 };

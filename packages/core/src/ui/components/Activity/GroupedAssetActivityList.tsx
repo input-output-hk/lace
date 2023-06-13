@@ -55,9 +55,7 @@ export const GroupedAssetActivityList = ({
       {...infitineScrollProps}
       className={cn(styles.infitineScroll, { [styles.isDrawerView]: isDrawerView })}
     >
-      {!isNumber(lists.length) ? (
-        <Skeleton active avatar />
-      ) : (
+      {isNumber(lists.length) ? (
         <List
           className={cn(styles.activityContainer, { [styles.isDrawerView]: isDrawerView })}
           data-testid="grouped-asset-activity-list"
@@ -81,6 +79,8 @@ export const GroupedAssetActivityList = ({
             </List.Item>
           )}
         />
+      ) : (
+        <Skeleton active avatar />
       )}
     </InfiniteScroll>
   );

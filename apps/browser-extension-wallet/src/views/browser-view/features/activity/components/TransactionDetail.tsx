@@ -46,7 +46,7 @@ export const getTransactionData = ({
   // For incomming type of tx the sender addresses will be all addresses available in transactionInfo?.tx.addrInputs list (except the current one)
   if (isIncomingTransaction) {
     const outputData = addrOutputs.filter((input) => input.addr === walletAddress);
-    const addrs = uniq(flatMap(addrInputs, (input) => (input.addr !== walletAddress ? [input.addr] : []))) as string[];
+    const addrs = uniq(flatMap(addrInputs, (input) => (input.addr === walletAddress ? [] : [input.addr]))) as string[];
 
     return outputData.map((output) => ({
       ...output,

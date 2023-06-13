@@ -48,18 +48,21 @@ class OnboardingPageObject {
     mnemonicWords.push(...(await OnboardingMnemonicPage.getMnemonicWordTexts()));
 
     switch (Number(expectedWordsPage)) {
-      case 16:
+      case 16: {
         await OnboardingMnemonicPage.nextButton.click();
         mnemonicWords.push(...(await OnboardingMnemonicPage.getMnemonicWordTexts()));
         break;
-      case 24:
+      }
+      case 24: {
         await OnboardingMnemonicPage.nextButton.click();
         mnemonicWords.push(...(await OnboardingMnemonicPage.getMnemonicWordTexts()));
         await OnboardingMnemonicPage.nextButton.click();
         mnemonicWords.push(...(await OnboardingMnemonicPage.getMnemonicWordTexts()));
         break;
-      default:
+      }
+      default: {
         break;
+      }
     }
     Logger.log(`returning mnemonic: ${mnemonicWords.join(' ')}`);
     return mnemonicWords;
@@ -70,18 +73,21 @@ class OnboardingPageObject {
     await OnboardingMnemonicPage.nextButton.click();
 
     switch (Number(expectedWordsPage)) {
-      case 16:
+      case 16: {
         await this.fillMnemonicFields(mnemonicWords, 0);
         await OnboardingMnemonicPage.nextButton.click();
         break;
-      case 24:
+      }
+      case 24: {
         await this.fillMnemonicFields(mnemonicWords, 0);
         await OnboardingMnemonicPage.nextButton.click();
         await this.fillMnemonicFields(mnemonicWords, 8);
         await OnboardingMnemonicPage.nextButton.click();
         break;
-      default:
+      }
+      default: {
         break;
+      }
     }
     return mnemonicWords;
   }
@@ -92,10 +98,7 @@ class OnboardingPageObject {
   }
 
   async openMnemonicVerificationLastPage(mnemonicWords?: string[], length?: '12' | '15' | '24') {
-    if (!mnemonicWords) {
-      mnemonicWords = await this.openMnemonicVerificationPage(24);
-      await this.fillMnemonicFields(mnemonicWords, 16);
-    } else {
+    if (mnemonicWords) {
       await this.fillMnemonicFields(mnemonicWords, 0);
       await OnboardingMnemonicPage.nextButton.click();
       await this.fillMnemonicFields(mnemonicWords, 8);
@@ -103,6 +106,9 @@ class OnboardingPageObject {
         await OnboardingMnemonicPage.nextButton.click();
         await this.fillMnemonicFields(mnemonicWords, 16);
       }
+    } else {
+      mnemonicWords = await this.openMnemonicVerificationPage(24);
+      await this.fillMnemonicFields(mnemonicWords, 16);
     }
   }
 
@@ -179,30 +185,37 @@ class OnboardingPageObject {
 
   async clickOnLegalLink(link: string) {
     switch (link) {
-      case 'Cookie policy':
+      case 'Cookie policy': {
         await OnboardingMainPage.cookiePolicyLink.click();
         break;
-      case 'Privacy policy':
+      }
+      case 'Privacy policy': {
         await OnboardingMainPage.privacyPolicyLink.click();
         break;
-      case 'Terms of service':
+      }
+      case 'Terms of service': {
         await OnboardingMainPage.termsOfServiceLink.click();
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported legal link - ${link}`);
+      }
     }
   }
 
   async selectRecoveryPassphraseLength(length: '12' | '15' | '24') {
     switch (length) {
-      case '12':
+      case '12': {
         await RecoveryPhraseLengthPage.radioButton12wordsButton.click();
         break;
-      case '15':
+      }
+      case '15': {
         await RecoveryPhraseLengthPage.radioButton15wordsButton.click();
         break;
-      case '24':
+      }
+      case '24': {
         await RecoveryPhraseLengthPage.radioButton24wordsButton.click();
+      }
     }
   }
 }

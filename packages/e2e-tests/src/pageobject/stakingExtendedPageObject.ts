@@ -15,7 +15,7 @@ class StakingExtendedPageObject {
     const stakePoolListItem = new StakePoolListItem();
     await webTester.waitUntilSeeElement(stakePoolListItem.container(), 6000);
 
-    const expectedTotalRows = Number((await StakingPage.counter.getText()).replace(/\D/g, ''));
+    const expectedTotalRows = Number((await StakingPage.counter.getText()).replaceAll(/\D/g, ''));
     let displayedRows = (await stakePoolListItem.getRows()).length;
 
     while (displayedRows < expectedTotalRows) {
@@ -30,18 +30,22 @@ class StakingExtendedPageObject {
     for (let i = 1; i <= rowsNumber; i++) {
       const listItem = new StakePoolListItem(i);
       switch (columnName) {
-        case 'name':
+        case 'name': {
           columnContent.push((await listItem.getName()) as string);
           break;
-        case 'ros':
+        }
+        case 'ros': {
           columnContent.push((await listItem.getRos()) as string);
           break;
-        case 'cost':
+        }
+        case 'cost': {
           columnContent.push((await listItem.getCost()) as string);
           break;
-        case 'saturation':
+        }
+        case 'saturation': {
           columnContent.push((await listItem.getSaturation()) as string);
           break;
+        }
       }
     }
 

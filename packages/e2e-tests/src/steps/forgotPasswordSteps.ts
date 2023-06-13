@@ -52,20 +52,23 @@ Then(/^I switch to tab with restore wallet process$/, async () => {
 
 Then(/^I am on (.*) page of restoration flow$/, async (expectedPage: string) => {
   switch (expectedPage) {
-    case 'password':
+    case 'password': {
       // nothing to do as user lands on Password Page by default
       break;
-    case 'mnemonic verification 8/24':
+    }
+    case 'mnemonic verification 8/24': {
       await OnboardingPageObject.fillPasswordPage(validPassword, validPassword);
       await WalletPasswordPage.nextButton.click();
       break;
-    case 'mnemonic verification 16/24':
+    }
+    case 'mnemonic verification 16/24': {
       await OnboardingPageObject.fillPasswordPage(validPassword, validPassword);
       await WalletPasswordPage.nextButton.click();
       await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 0);
       await OnboardingMnemonicPage.nextButton.click();
       break;
-    case 'mnemonic verification 24/24':
+    }
+    case 'mnemonic verification 24/24': {
       await OnboardingPageObject.fillPasswordPage(validPassword, validPassword);
       await WalletPasswordPage.nextButton.click();
       await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 0);
@@ -73,8 +76,10 @@ Then(/^I am on (.*) page of restoration flow$/, async (expectedPage: string) => 
       await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 8);
       await OnboardingMnemonicPage.nextButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unknown page: ${expectedPage}`);
+    }
   }
 });
 

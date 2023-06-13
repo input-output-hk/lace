@@ -25,9 +25,9 @@ export class NetworkManager {
           if (params.request.url.includes(partialUrl)) {
             Logger.log(`Request match: ${partialUrl} => ${params.request.url}`);
             Logger.log(`expected params: ${expectedQueryParams}`);
-            initialCondition = !expectedQueryParams
-              ? true
-              : expectedQueryParams.every((param: string) => params.request.url.includes(param));
+            initialCondition = expectedQueryParams
+              ? expectedQueryParams.every((param: string) => params.request.url.includes(param))
+              : true;
           }
         });
       });

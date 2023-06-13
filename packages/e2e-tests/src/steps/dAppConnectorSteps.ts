@@ -115,28 +115,34 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
   await DAppConnectorPageObject.switchToTestDAppWindow();
   await browser.pause(1000);
   switch (runButton) {
-    case 'Send ADA':
+    case 'Send ADA': {
       await TestDAppPage.sendAdaRunButton.click();
       break;
-    case 'Send Token':
+    }
+    case 'Send Token': {
       await TestDAppPage.sendTokenRunButton.click();
       break;
-    default:
+    }
+    default: {
       break;
+    }
   }
 });
 
 Then(/^I click "(Send ADA|Send Token)" button in test DApp$/, async (buttonId: 'Send ADA' | 'Send Token') => {
   await DAppConnectorPageObject.switchToTestDAppWindow();
   switch (buttonId) {
-    case 'Send ADA':
+    case 'Send ADA': {
       await TestDAppPage.sendAdaOption.click();
       break;
-    case 'Send Token':
+    }
+    case 'Send Token': {
       await TestDAppPage.sendTokenOption.click();
       break;
-    default:
+    }
+    default: {
       break;
+    }
   }
 });
 

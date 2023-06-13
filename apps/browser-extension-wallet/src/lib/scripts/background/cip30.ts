@@ -33,7 +33,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = async (
       // Remove this method once it is dropped from the SDK in future build
       // Also transactions can be submitted by the dApps externally
       // once they've got the witnesss keys if they construct their own transactions
-      return Promise.resolve(true);
+      return true;
     }
     case walletCip30.Cip30ConfirmationCallbackType.SignTx: {
       try {
@@ -63,8 +63,10 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = async (
         return false;
       }
     }
-    default:
-      return Promise.reject();
+    default: {
+      // eslint-disable-next-line no-throw-literal
+      throw undefined;
+    }
   }
 };
 

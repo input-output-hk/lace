@@ -41,7 +41,6 @@
     "@wdio/types": "8.8.6",
     "allure-commandline": "^2.21.0",
     "clipboardy": "2.3.0",
-    "eslint": "8.38.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-wdio": "8.0.14",

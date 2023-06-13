@@ -77,10 +77,10 @@ export const AddressDetailDrawer = ({
   };
 
   const onClose = () => {
-    if (!popupView) {
-      setStepsConfig(config[AddressDetailsSteps.DETAIL]);
+    if (popupView) {
       onCancelClick();
     } else {
+      setStepsConfig(config[AddressDetailsSteps.DETAIL]);
       onCancelClick();
     }
   };
@@ -136,7 +136,7 @@ export const AddressDetailDrawer = ({
         navigation={
           <DrawerNavigation
             title={t('browserView.addressBook.title')}
-            onCloseIconClick={!popupView ? onClose : undefined}
+            onCloseIconClick={popupView ? undefined : onClose}
             onArrowIconClick={showArrowIcon ? onArrowIconClick : undefined}
           />
         }

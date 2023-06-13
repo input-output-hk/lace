@@ -41,7 +41,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     >
       {loading && <div className={styles.dimm} />}
       <span className={cn(styles.content, { [styles.loadingContent]: loading })}>
-        {icon ? icon : children}
+        {icon || children}
         {loading && (
           <span className={styles.loaderContainer}>
             <Icon className={styles.loader} component={Loader} />

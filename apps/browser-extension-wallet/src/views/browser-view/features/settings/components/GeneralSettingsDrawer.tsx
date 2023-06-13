@@ -52,7 +52,7 @@ export const GeneralSettingsDrawer = ({
         navigation={
           <DrawerNavigation
             title={t('browserView.settings.heading')}
-            onCloseIconClick={!popupView ? handleClose : undefined}
+            onCloseIconClick={popupView ? undefined : handleClose}
             onArrowIconClick={popupView || isPublicKeyQRVisible ? handleGoBackDrawer : undefined}
           />
         }

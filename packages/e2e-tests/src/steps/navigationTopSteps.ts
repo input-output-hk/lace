@@ -116,16 +116,19 @@ When(/^I close header menu$/, async () => {
 
 When(/^I click "(Receive|Send)" button on page header$/, async (button: 'Receive' | 'Send') => {
   switch (button) {
-    case 'Receive':
+    case 'Receive': {
       await MenuHeader.receiveButton.waitForDisplayed();
       await MenuHeader.receiveButton.click();
       break;
-    case 'Send':
+    }
+    case 'Send': {
       await MenuHeader.sendButton.waitForDisplayed();
       await MenuHeader.sendButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });
 

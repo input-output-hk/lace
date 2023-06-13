@@ -25,9 +25,7 @@ export const ConnectedDappList = ({
 }: connectedDappListProps): React.ReactElement => (
   <div className={styles.wrapper}>
     <div data-testid={CONTAINER_TESTID} id="infiniteScrollContainer" className={styles.infiniteScrollContainer}>
-      {!isNumber(total) ? (
-        <Skeleton active avatar />
-      ) : (
+      {isNumber(total) ? (
         <List
           className={className}
           data-testid={LIST_TESTID}
@@ -41,6 +39,8 @@ export const ConnectedDappList = ({
           )}
           {...props}
         />
+      ) : (
+        <Skeleton active avatar />
       )}
     </div>
   </div>

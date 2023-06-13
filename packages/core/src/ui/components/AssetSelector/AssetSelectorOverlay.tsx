@@ -63,11 +63,13 @@ const getTokensContent = (
     );
 
   switch (true) {
-    case (!params.tokens || params.tokens?.length === 0) && !params.hasUsedAllTokens:
+    case (!params.tokens || params.tokens?.length === 0) && !params.hasUsedAllTokens: {
       return <ListEmptyState message={t('package.core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
-    case params.hasUsedAllTokens:
+    }
+    case params.hasUsedAllTokens: {
       return <ListEmptyState message={t('package.core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
-    default:
+    }
+    default: {
       return params.tokens.map(({ id, ...item }, idx) => (
         <TokenItem
           selected={params.selectedTokenList?.includes(id)}
@@ -76,6 +78,7 @@ const getTokensContent = (
           onClick={params.selectedTokenList?.includes(id) ? () => removeTokenFromList(id) : () => handleTokenClick(id)}
         />
       ));
+    }
   }
 };
 
@@ -111,12 +114,15 @@ const getNftsContent = (
   }));
 
   switch (true) {
-    case (!nftList || nftList.length === 0) && !params.hasUsedAllNFTs:
+    case (!nftList || nftList.length === 0) && !params.hasUsedAllNFTs: {
       return <ListEmptyState message={t('package.core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
-    case params.hasUsedAllNFTs:
+    }
+    case params.hasUsedAllNFTs: {
       return <ListEmptyState message={t('package.core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
-    default:
+    }
+    default: {
       return <NftList {...params.nftListConfig} items={nftList} />;
+    }
   }
 };
 

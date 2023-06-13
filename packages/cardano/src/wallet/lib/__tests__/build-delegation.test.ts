@@ -38,7 +38,7 @@ describe('Testing buildDelegation', () => {
       ...mockObservableWallet,
       delegation: { rewardAccounts$: of([rewardAcountMock]) }
     } as unknown as ObservableWallet;
-    const walletRewardAccount = (await firstValueFrom(wallet.delegation.rewardAccounts$))[0];
+    const [walletRewardAccount] = await firstValueFrom(wallet.delegation.rewardAccounts$);
     walletRewardAccount.keyStatus = Cardano.StakeKeyStatus.Registered;
     const { certificates } = await buildDelegation(wallet, poolId);
 

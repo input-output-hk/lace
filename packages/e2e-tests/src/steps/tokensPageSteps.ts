@@ -92,22 +92,26 @@ Then(
     };
 
     switch (network) {
-      case 'Mainnet':
+      case 'Mainnet': {
         await tokensPageAssert.assertSeeToken(true, hoskyToken, mode);
         await tokensPageAssert.assertSeeToken(true, sundae, mode);
         await tokensPageAssert.assertSeeToken(false, tHosky, mode);
         await tokensPageAssert.assertSeeToken(false, happyCoin, mode);
         break;
-      case 'Preprod':
+      }
+      case 'Preprod': {
         await tokensPageAssert.assertSeeToken(true, tHosky, mode);
         await tokensPageAssert.assertSeeToken(false, happyCoin, mode);
         break;
-      case 'Preview':
+      }
+      case 'Preview': {
         await tokensPageAssert.assertSeeToken(true, happyCoin, mode);
         await tokensPageAssert.assertSeeToken(false, tHosky, mode);
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unrecognised network type: ${network}`);
+      }
     }
   }
 );
@@ -152,14 +156,17 @@ Then(
   ) => {
     let fee: string;
     switch (feeType) {
-      case 'saved':
+      case 'saved': {
         fee = await testContext.load('feeValue');
         break;
-      case 'DApp transaction':
+      }
+      case 'DApp transaction': {
         fee = await testContext.load('feeValueDAppTx');
         break;
-      default:
+      }
+      default: {
         break;
+      }
     }
     await tokensPageAssert.assertSeeValueSubtractedAda(tokenName, subtractedAmount, fee, mode);
   }
@@ -188,15 +195,18 @@ Then(/^"www.coingecko.com" page is displayed in new tab$/, async () => {
 When(/^I click "(Receive|Send)" button on Tokens page in popup mode$/, async (button: 'Receive' | 'Send') => {
   const tokensPage = new TokensPage();
   switch (button) {
-    case 'Receive':
+    case 'Receive': {
       await tokensPage.receiveButtonPopupMode.waitForDisplayed();
       await tokensPage.receiveButtonPopupMode.click();
       break;
-    case 'Send':
+    }
+    case 'Send': {
       await tokensPage.sendButtonPopupMode.waitForDisplayed();
       await tokensPage.sendButtonPopupMode.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });

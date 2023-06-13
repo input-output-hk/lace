@@ -1,3 +1,5 @@
+/* eslint-disable unicorn/prefer-code-point */
+
 const ALPHABET_RANGE_START = 96;
 const ALPHABET_RANGE_END = 122;
 const CIPHER_SHIFT = ALPHABET_RANGE_END - ALPHABET_RANGE_START;

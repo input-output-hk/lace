@@ -20,16 +20,21 @@ export const NetworkChoice = (): React.ReactElement => {
   const getNetworkName = useCallback(
     (chainName: Wallet.ChainName) => {
       switch (chainName) {
-        case 'Mainnet':
+        case 'Mainnet': {
           return t('general.networks.mainnet');
-        case 'Preprod':
+        }
+        case 'Preprod': {
           return t('general.networks.preprod');
-        case 'Preview':
+        }
+        case 'Preview': {
           return t('general.networks.preview');
-        case 'LegacyTestnet':
+        }
+        case 'LegacyTestnet': {
           return t('general.networks.legacyTestnet');
-        default:
+        }
+        default: {
           return '';
+        }
       }
     },
     [t]

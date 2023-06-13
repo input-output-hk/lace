@@ -38,7 +38,7 @@ class DrawerSendExtendedAssert {
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.footer.review'));
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.footer.cancel'));
     switch (mode) {
-      case 'extended':
+      case 'extended': {
         await transactionNewPage.addBundleButton.waitForDisplayed();
         await webTester.seeWebElement(transactionNewPage.bundleDescription());
         await expect(await transactionNewPage.getBundleDescription()).to.equal(
@@ -46,10 +46,12 @@ class DrawerSendExtendedAssert {
         );
         await webTester.seeWebElement(new DrawerCommonExtended().closeButton());
         break;
-      case 'popup':
+      }
+      case 'popup': {
         await webTester.seeWebElement(new DrawerCommonExtended().backButton());
         await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.drawer.addBundle'));
         break;
+      }
     }
   };
 
@@ -174,7 +176,7 @@ class DrawerSendExtendedAssert {
     const popupTitleText = (await transactionCancelPopup.getCancelTxPopupTitle()) as string;
     await expect(popupTitleText).to.equal(await t('general.warnings.youHaveToStartAgain'));
     let popupContentText = (await transactionCancelPopup.getCancelTxPopupText()) as string;
-    popupContentText = popupContentText.replace(new RegExp(/(\r\n|\n|\r)/gm), ' ');
+    popupContentText = popupContentText.replaceAll(new RegExp(/(\r\n|\n|\r)/gm), ' ');
     const expectedTextLine1 = (await t('general.warnings.areYouSureYouWantToExit')) as string;
     const expectedTextLine2 = (await t('general.warnings.thisWillNotBeSaved')) as string;
     const expectedText = `${expectedTextLine1} ${expectedTextLine2}`;

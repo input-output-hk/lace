@@ -41,7 +41,7 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
   const restOfNftsContent = (
     <Tooltip
       className={styles.restOfNftsNumber}
-      visible={!shouldShowCompactNumber ? false : undefined}
+      visible={shouldShowCompactNumber ? undefined : false}
       placement="top"
       title={`+${restOfNfts}`}
     >
@@ -72,6 +72,7 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
         <div className={styles.folderWrapper}>
           {nfts.slice(0, numberOfNftsToShow).map(({ image }, index) =>
             index === numberOfNftsToShow - 1 && nfts.length > numberOfNftsToShow ? (
+              // eslint-disable-next-line react/jsx-key
               <div className={styles.restOfNfts}>{restOfNftsContent}</div>
             ) : (
               <div data-testid="nft-item-img-container" key={image} className={styles.imageWrapper}>

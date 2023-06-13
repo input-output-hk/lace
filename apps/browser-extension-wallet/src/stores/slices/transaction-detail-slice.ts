@@ -90,9 +90,9 @@ const getTransactionDetail =
     const blocks = txBlock ? blockTransformer(txBlock) : undefined;
 
     // Metadata
-    const txMetadata = !isEmpty(tx.auxiliaryData?.blob)
-      ? transactionMetadataTransformer(tx.auxiliaryData.blob)
-      : undefined;
+    const txMetadata = isEmpty(tx.auxiliaryData?.blob)
+      ? undefined
+      : transactionMetadataTransformer(tx.auxiliaryData.blob);
 
     // Transaction Costs
     const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
@@ -134,15 +134,15 @@ const getTransactionDetail =
       };
       const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
 
-      if (!pools?.[0]) {
-        console.error(`Stake pool ${delegationInfo.poolId} was not found for delegation tx`);
-      } else {
+      if (pools?.[0]) {
         transaction = {
           ...transaction,
           poolName: pools?.[0].metadata?.name ?? '-',
           poolTicker: pools?.[0].metadata?.ticker ?? '-',
           poolId: pools?.[0].id.toString()
         };
+      } else {
+        console.error(`Stake pool ${delegationInfo.poolId} was not found for delegation tx`);
       }
     }
 

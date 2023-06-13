@@ -150,9 +150,9 @@ const stateHandlers = (get: GetState<Store>, set: SetState<Store>) => {
     if (!output) return;
 
     const list = output.assets ?? [];
-    const updatedList = !assetIds.prev
-      ? [...list, { id: assetIds.next }]
-      : list.map((item) => (item.id === assetIds.prev ? { id: assetIds.next } : item));
+    const updatedList = assetIds.prev
+      ? list.map((item) => (item.id === assetIds.prev ? { id: assetIds.next } : item))
+      : [...list, { id: assetIds.next }];
     const updatedOutput = { ...output, assets: updatedList };
     const updatedOutputs = { ...outputs, [id]: updatedOutput };
     set({ uiOutputs: updatedOutputs, currentCoinToChange: assetIds.next });
@@ -331,7 +331,7 @@ export const useCoinStateSelector = (
   useStore(
     useCallback(
       ({ uiOutputs, setCoinValue, setCoinValues, setPickedCoin, removeCoinFromOutputs }) => ({
-        uiOutputs: !uiOutputs[row] ? [initialAssetInfoState] : uiOutputs[row].assets,
+        uiOutputs: uiOutputs[row] ? uiOutputs[row].assets : [initialAssetInfoState],
         setCoinValue,
         setCoinValues,
         setPickedCoin,
@@ -345,7 +345,7 @@ export const useAddressState = (row: string): { address: string } & Pick<Store, 
   useStore(
     useCallback(
       ({ uiOutputs, setAddressValue }) => ({
-        address: !uiOutputs[row] ? '' : uiOutputs[row].address,
+        address: uiOutputs[row] ? uiOutputs[row].address : '',
         setAddressValue
       }),
       [row]

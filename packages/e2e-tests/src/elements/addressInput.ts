@@ -9,8 +9,7 @@ export class AddressInput extends WebElement {
 
   constructor(index?: number) {
     super();
-    this.CONTAINER =
-      typeof index === 'undefined' || index.toString() === '' ? this.CONTAINER : `(${this.CONTAINER})[${index}]`;
+    this.CONTAINER = index === undefined || index.toString() === '' ? this.CONTAINER : `(${this.CONTAINER})[${index}]`;
   }
 
   container(): WebElement {

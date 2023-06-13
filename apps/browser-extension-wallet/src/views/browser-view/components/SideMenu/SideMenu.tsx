@@ -44,20 +44,24 @@ export const SideMenu = (): React.ReactElement => {
 
   const handleRedirection: MenuProps['onClick'] = (field) => {
     switch (field.key) {
-      case routes.assets:
+      case routes.assets: {
         sendAnalytics(AnalyticsEventCategories.VIEW_TOKENS, AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_BROWSER);
         break;
-      case routes.staking:
+      }
+      case routes.staking: {
         sendAnalytics(AnalyticsEventCategories.STAKING, AnalyticsEventNames.Staking.VIEW_STAKING_BROWSER);
         break;
-      case routes.activity:
+      }
+      case routes.activity: {
         sendAnalytics(
           AnalyticsEventCategories.VIEW_TRANSACTIONS,
           AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_BROWSER
         );
         break;
-      case routes.nfts:
+      }
+      case routes.nfts: {
         sendAnalytics(AnalyticsEventCategories.VIEW_NFT, AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_BROWSER);
+      }
     }
     push(field.key);
   };

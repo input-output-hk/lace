@@ -98,6 +98,7 @@ const isTokenBundleSizeExceedingLimit = async (
   // how much tokens should we use to validate this, the entire amount for each selected asset or just 1?
   const { coins, assets } = await firstValueFrom(inMemoryWallet.balance.utxo.available$);
   // we need a valid address for the outputs
+  // eslint-disable-next-line unicorn/no-await-expression-member
   const address = (await firstValueFrom(inMemoryWallet.addresses$))[0].address;
 
   let tokensMap: Array<[Wallet.Cardano.AssetId, bigint]> = [];

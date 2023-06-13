@@ -97,26 +97,33 @@ const handleEnterKeyPress = (event: KeyboardEvent) => {
   const hash = window.location.hash;
   if (event.code === 'Enter') {
     switch (true) {
-      case new RegExp('send').test(hash):
+      case new RegExp('send').test(hash): {
         handleSendBtn();
         break;
-      case new RegExp('nft').test(hash):
+      }
+      case new RegExp('nft').test(hash): {
         handleClick(buttonIds.nftDetailsBtnId);
         break;
-      case new RegExp(walletRoutePaths.assets).test(hash):
+      }
+      case new RegExp(walletRoutePaths.assets).test(hash): {
         handleAssetBtn();
         break;
-      case new RegExp(walletRoutePaths.earn).test(hash) || new RegExp(walletRoutePaths.staking).test(hash):
+      }
+      case new RegExp(walletRoutePaths.earn).test(hash) || new RegExp(walletRoutePaths.staking).test(hash): {
         handleStakingBtn();
         break;
-      case new RegExp(walletRoutePaths.addressBook).test(hash):
+      }
+      case new RegExp(walletRoutePaths.addressBook).test(hash): {
         handleAddressBtn();
         break;
-      case new RegExp(walletRoutePaths.settings).test(hash):
+      }
+      case new RegExp(walletRoutePaths.settings).test(hash): {
         handleSetting();
         break;
-      default:
+      }
+      default: {
         break;
+      }
     }
   }
 };

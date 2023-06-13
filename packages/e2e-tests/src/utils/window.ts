@@ -2,7 +2,7 @@ import { browser } from '@wdio/globals';
 
 export const switchToLastWindow = async (): Promise<void> => {
   const windowHandles = await browser.getWindowHandles();
-  await browser.switchToWindow(windowHandles[windowHandles.length - 1]);
+  await browser.switchToWindow(windowHandles.at(-1));
 };
 
 export const getNumberOfOpenedTabs = async (): Promise<number> => (await browser.getWindowHandles()).length;
@@ -19,7 +19,7 @@ const closeAllTabsExceptExpectedOne = async (handleForTabToBeLeft: string): Prom
 };
 
 export const closeAllTabsExceptOriginalOne = async (): Promise<void> => {
-  const originalTab = (await browser.getWindowHandles())[0];
+  const [originalTab] = await browser.getWindowHandles();
   await closeAllTabsExceptExpectedOne(originalTab);
 };
 

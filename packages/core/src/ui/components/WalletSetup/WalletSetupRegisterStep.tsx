@@ -14,7 +14,7 @@ const nameShouldHaveRightLengthRegex = /^.{1,20}$/;
 type validationErrorKeys = 'nameMaxLength';
 
 const validateNameLength = (name: string): validationErrorKeys | '' =>
-  !nameShouldHaveRightLengthRegex.test(name) ? 'nameMaxLength' : '';
+  nameShouldHaveRightLengthRegex.test(name) ? '' : 'nameMaxLength';
 
 const WALLET_NAME_INPUT_MAX_LENGTH = 30;
 

@@ -9,10 +9,10 @@ export class AnalyticsTracker {
   constructor(protected chain: Wallet.Cardano.ChainId, enabled: boolean, analyticsAccepted?: AnalyticsConsentStatus) {
     this.analyticsClient = NoopAnalyticsClient;
 
-    if (!enabled) {
-      this.disableTracking();
-    } else {
+    if (enabled) {
       this.analyticsClient = new MatomoClient(this.chain, analyticsAccepted);
+    } else {
+      this.disableTracking();
     }
   }
 

@@ -4,9 +4,10 @@ import { Logger } from '../support/logger';
 const verifyBrowserStorageSupport: any = async () => {
   const currentBrowser = await extensionUtils.getBrowser();
   if (currentBrowser.includes('chrome') || currentBrowser.includes('msedge')) {
-    return Promise.resolve();
+    return;
   }
-  return Promise.reject('Unsupported browser');
+  // eslint-disable-next-line no-throw-literal
+  throw 'Unsupported browser';
 };
 
 export const getBackgroundStorage: any = async () => {

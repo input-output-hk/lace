@@ -18,7 +18,7 @@ export class CoinConfigure extends WebElement {
   constructor(bundleIndex?: number, assetName?: string) {
     super();
     this.CONTAINER =
-      typeof assetName === 'undefined'
+      assetName === undefined
         ? this.CONTAINER
         : `(${this.CONTAINER_BUNDLE})[${bundleIndex}]//div[contains(@data-testid-title,"${assetName}")]`;
   }

@@ -191,7 +191,7 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
 
   return (
     <DrawerNavigation
-      title={!isPopupView ? <div>{t('core.sendReceive.send')}</div> : undefined}
+      title={isPopupView ? undefined : <div>{t('core.sendReceive.send')}</div>}
       onArrowIconClick={shouldRenderArrow ? onArrowIconClick : undefined}
       rightActions={
         shouldDisplayAdvancedBtn ? (

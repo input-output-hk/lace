@@ -54,32 +54,40 @@ let walletPassword: Uint8Array;
 const handleOpenBrowser = async (data: OpenBrowserData) => {
   let path = '';
   switch (data.section) {
-    case BrowserViewSections.SEND_ADVANCED:
+    case BrowserViewSections.SEND_ADVANCED: {
       path = '';
       await setBackgroundStorage({ message: { type: MessageTypes.OPEN_BROWSER_VIEW, data } });
       break;
-    case BrowserViewSections.STAKING:
+    }
+    case BrowserViewSections.STAKING: {
       path = walletRoutePaths.staking;
       break;
-    case BrowserViewSections.NFTS:
+    }
+    case BrowserViewSections.NFTS: {
       path = walletRoutePaths.nfts;
       break;
-    case BrowserViewSections.TRANSACTION:
+    }
+    case BrowserViewSections.TRANSACTION: {
       path = walletRoutePaths.activity;
       break;
-    case BrowserViewSections.ADDRESS_BOOK:
+    }
+    case BrowserViewSections.ADDRESS_BOOK: {
       path = walletRoutePaths.addressBook;
       break;
-    case BrowserViewSections.SETTINGS:
+    }
+    case BrowserViewSections.SETTINGS: {
       path = walletRoutePaths.settings;
       break;
-    case BrowserViewSections.COLLATERAL_SETTINGS:
+    }
+    case BrowserViewSections.COLLATERAL_SETTINGS: {
       path = walletRoutePaths.settings;
       await setBackgroundStorage({ message: { type: MessageTypes.OPEN_COLLATERAL_SETTINGS, data } });
       break;
-    case BrowserViewSections.FORGOT_PASSWORD:
+    }
+    case BrowserViewSections.FORGOT_PASSWORD: {
       path = walletRoutePaths.setup.restore;
       break;
+    }
   }
   await tabs.create({ url: `app.html#${path}` }).catch((error) => console.log(error));
 };
