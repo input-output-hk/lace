@@ -28,13 +28,25 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
       - name: Check for linter issues
         run: yarn lint
-      - name: Run unit tests
+      - name: Run unit tests, generate test coverage report
         env:
           AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
           DEFAULT_CHAIN: 'Preprod'
-        run: yarn test --maxWorkers=2
+        run: yarn test:coverage --maxWorkers=2
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:
           name: lace
+          path: apps/browser-extension-wallet/dist
+      - name: Rebuild a version of Lace with feature flags enabled
+        shell: bash
+        env:
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
+        run: |
+          eval "set -x ; $(cat apps/browser-extension-wallet/.env.* | grep ^USE_ | sed -r 's/false/true/' | sort --unique | sed -r 's/^/export /' | tr '\n' ';') set +x"
+          yarn browser build
+      - name: Upload build
+        uses: actions/upload-artifact@v3
+        with:
+          name: lace--all-feature-flags
           path: apps/browser-extension-wallet/dist

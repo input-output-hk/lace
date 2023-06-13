@@ -53,6 +53,10 @@ class MenuHeaderPageObject {
       await MenuHeader.menuThemeSwitcher.click();
     }
   }
+
+  async clickRightSidePanelButton() {
+    await MenuHeader.rightSidePanelButton.click();
+  }
 }
 
 export default new MenuHeaderPageObject();

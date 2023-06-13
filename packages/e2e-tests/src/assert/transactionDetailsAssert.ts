@@ -5,7 +5,7 @@ import webTester from '../actor/webTester';
 import { expect } from 'chai';
 import testContext from '../utils/testContext';
 
-type ExpectedTransactionDetails = {
+export type ExpectedTransactionDetails = {
   transactionDescription: string;
   hash?: string;
   transactionData?: transactionData[];
@@ -40,7 +40,7 @@ class TransactionsDetailsAssert {
     );
     if (expectedTransactionDetails.hash) {
       await expect(await transactionsDetails.transactionDetailsHash.getText()).to.equal(
-        expectedTransactionDetails.hash
+        String(expectedTransactionDetails.hash)
       );
     }
     await expect(

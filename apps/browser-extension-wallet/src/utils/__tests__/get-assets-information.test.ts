@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 import '@testing-library/jest-dom';
 import { Wallet } from '@lace/cardano';
 import { getAssetsInformation, TokenInfo } from '../get-assets-information';
 import { mockAssetMetadata } from '../mocks/test-helpers';
+import { AssetProvider } from '@cardano-sdk/core';
 
 describe('Testing getAssetsInformation function', () => {
   const assetsIdList: Wallet.Cardano.AssetId[] = [
@@ -37,5 +39,25 @@ describe('Testing getAssetsInformation function', () => {
     expect(assets.size).toEqual(1);
     expect(assets.get(assetsIdList[1])).toEqual(Wallet.mockUtils.mockedAssets[0]);
     expect(assetProvider.getAsset).toHaveBeenCalled();
+  });
+
+  test('should skip an asset in case provider throws', async () => {
+    const consoleSpy = jest.spyOn(console, 'log');
+    const error = 'error';
+    const assetProvider = {
+      getAsset: async () => {
+        throw new Error(error);
+      }
+    } as unknown as AssetProvider;
+    const assets = await getAssetsInformation([assetsIdList[1]], assetsInfo, {
+      assetProvider,
+      extraData: {
+        nftMetadata: true,
+        tokenMetadata: true
+      }
+    });
+
+    expect(assets.size).toEqual(0);
+    expect(consoleSpy).toHaveBeenCalledWith('Error fetching asset info', { assetId: assetsIdList[1], error });
   });
 });

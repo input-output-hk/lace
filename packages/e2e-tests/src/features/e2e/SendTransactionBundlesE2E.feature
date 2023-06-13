@@ -32,7 +32,7 @@ Feature: Send Transaction bundles - E2E
       | Subtitle: "The transaction will complete..." |
     When I close the drawer by clicking close button
     And I navigate to Tokens extended page
-    Then the sent amount of: 4.50 with fee: saved for token "Cardano" is subtracted from the total balance in extended mode
+    Then the sent amount of: "4.50" with "saved" fee for token "Cardano" is subtracted from the total balance in extended mode
     When I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "4.50 tADA, 0.2333 LaceCoin3, 3 LaceCoin , +1" and tokens count 4
     And I click and open recent transactions details until find transaction with correct hash

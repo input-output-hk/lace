@@ -490,7 +490,7 @@
         "subtitle": "Have a look at the Glossary"
       },
       "stakePoolsTable.title": "Stake pools",
-      "stakePoolsTable.searchPlacehholder": "Search by type, token name or ID",
+      "stakePoolsTable.searchPlaceholder": "Search by type, token name or ID",
       "stakePoolsTable.emptyMessage": "No results matching your search",
       "details": {
         "title": "Stake pool detail",
@@ -930,6 +930,12 @@
       "actionDescription": "You will need to restore your wallet again with your recovery passphrase",
       "btn.confirm": "Got it"
     }
+  },
+  "corruptedData": {
+    "title": "Data Corrupted",
+    "errorDescription": "Looks like some of your data is missing or invalid. Don't worry your funds are safe.",
+    "actionDescription": "You will need to restore your wallet again with your recovery phrase.",
+    "btn.confirm": "Restore your wallet"
   },
   "cardano": {
     "general": {

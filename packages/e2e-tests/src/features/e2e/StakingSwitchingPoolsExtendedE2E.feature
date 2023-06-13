@@ -9,16 +9,16 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Given I save token: "Cardano" balance in extended mode
     When I navigate to Staking extended page
     Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
-    When I input "OtherStakePool" to search bar
+    When I input "OtherStakePool" to the search bar
     And I wait for single search result
-    And I click stake pool with the name "OtherStakePool"
+    And I click stake pool with name "OtherStakePool"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    And I save stakepool info
-    When I click "browserView.staking.details.stakeButtonText" button
-    And I click "browserView.staking.details.switchingPoolsModal.buttons.confirm" button
+    And I save stake pool info
+    When I click "Stake on this pool" button on stake pool details drawer
+    And I click "Fine by me" button on "Switching pool?" modal
     Then I see drawer with stakepool: "OtherStakePool" confirmation screen in extended mode
-    And I click "browserView.staking.details.confirmation.button.confirm" button
-    And I fill correct password and confirm
+    And I click "Next" button on staking confirmation drawer
+    And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed
     When I click "browserView.staking.details.fail.btn.close" button
     Then Staking exit modal is not displayed
@@ -33,15 +33,15 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
   Scenario: Extended View - Staking - Switching to a pool with no metadata
     When I navigate to Staking extended page
     Then I see currently staking stake pool in extended mode and choose new pool as "OtherNoMetadataStakePool"
-    When I input "OtherNoMetadataStakePool" to search bar
+    When I input "OtherNoMetadataStakePool" to the search bar
     And I wait for single search result
-    And I click stake pool with the name "-"
+    And I click stake pool with name "-"
     Then I see drawer with stake pool details without metadata and a button available for staking
-    And I save stakepool info
-    When I click "browserView.staking.details.stakeButtonText" button
-    And I click "browserView.staking.details.switchingPoolsModal.buttons.confirm" button
-    And I click "browserView.staking.details.confirmation.button.confirm" button
-    And I fill correct password and confirm
+    And I save stake pool info
+    When I click "Stake on this pool" button on stake pool details drawer
+    And I click "Fine by me" button on "Switching pool?" modal
+    And I click "Next" button on staking confirmation drawer
+    And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed
     When I click "browserView.staking.details.fail.btn.close" button
     And I wait until current stake pool switch to "-"
@@ -56,14 +56,14 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Given I enable network interception to fail request: "*/tx-submit/submit" with error 400
     When I navigate to Staking extended page
     Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
-    When I input "OtherStakePool" to search bar
+    When I input "OtherStakePool" to the search bar
     And I wait for single search result
-    And I click stake pool with the name "OtherStakePool"
-    And I click "browserView.staking.details.stakeButtonText" button
-    And I click "browserView.staking.details.switchingPoolsModal.buttons.confirm" button
-    And I click "browserView.staking.details.confirmation.button.confirm" button
+    And I click stake pool with name "OtherStakePool"
+    And I click "Stake on this pool" button on stake pool details drawer
+    And I click "Fine by me" button on "Switching pool?" modal
+    And I click "Next" button on staking confirmation drawer
     And Staking password screen is displayed
-    When I fill correct password and confirm
+    When I enter correct wallet password and confirm staking
     Then the staking error screen is displayed
     When I close the drawer by clicking close button
     Then Staking exit modal is displayed

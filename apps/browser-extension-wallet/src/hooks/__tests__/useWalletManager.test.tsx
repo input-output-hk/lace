@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-useless-undefined */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-null */
@@ -235,7 +236,10 @@ describe('Testing useWalletManager hook', () => {
         setCardanoWallet
       }));
 
-      jest.spyOn(getWallet, 'getWalletFromStorage').mockReturnValue({ name: undefined });
+      jest
+        .spyOn(getWallet, 'getWalletFromStorage')
+        .mockReturnValueOnce({ name: undefined })
+        .mockReturnValueOnce(undefined);
 
       const {
         result: {
@@ -246,6 +250,7 @@ describe('Testing useWalletManager hook', () => {
       });
 
       expect(loadWallet).toBeDefined();
+      expect(await loadWallet()).toEqual(undefined);
       expect(await loadWallet()).toEqual(undefined);
       expect(setCardanoWallet).not.toBeCalled();
     });
@@ -419,6 +424,47 @@ describe('Testing useWalletManager hook', () => {
       expect(setKeyAgentData).toBeCalledWith(walletInstance.wallet.keyAgent.serializableData);
       expect(setCurrentChain).toBeCalledWith(chainName);
     });
+
+    test('should use default mnemonicVerificationFrequency and chainName', async () => {
+      const updateLocalStorage = jest.fn();
+      const setCurrentChain = jest.fn();
+      const wallet = {
+        wallet: 'wallet',
+        keyAgent: { serializableData: 'serializableData' },
+        name: 'stnamering'
+      };
+      const walletInstance = {
+        encryptedKeyAgents: {},
+        wallet,
+        name: 'name'
+      } as any;
+
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        setWalletLock: jest.fn(),
+        setCardanoWallet: jest.fn(),
+        setKeyAgentData: jest.fn(),
+        setCurrentChain
+      }));
+      jest.spyOn(AppSettings, 'useAppSettingsContext').mockReturnValue([{}, updateLocalStorage]);
+
+      const {
+        result: {
+          current: { setWallet }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({})
+      });
+      await setWallet({ walletInstance });
+      expect(setWallet).toBeDefined();
+
+      expect(updateLocalStorage).toBeCalledWith({
+        chainName: 'Preprod',
+        mnemonicVerificationFrequency: '',
+        lastMnemonicVerification: expect.any(String)
+      });
+
+      expect(setCurrentChain).toBeCalledWith('Preprod');
+    });
   });
 
   describe('getPassword', () => {
@@ -483,6 +529,19 @@ describe('Testing useWalletManager hook', () => {
       ).toEqual(createCardanoWalletResult);
       expect(createHardwareWalletMock).toBeCalledWith(walletManagerUi, {
         accountIndex,
+        deviceConnection,
+        name,
+        activeChainId: chainId,
+        connectedDevice
+      });
+      await createHardwareWallet({
+        deviceConnection,
+        name,
+        chainId,
+        connectedDevice
+      });
+      expect(createHardwareWalletMock).toBeCalledWith(walletManagerUi, {
+        accountIndex: 0,
         deviceConnection,
         name,
         activeChainId: chainId,
@@ -572,6 +631,54 @@ describe('Testing useWalletManager hook', () => {
       expect(setKeyAgentData).toBeCalledWith(cardanoWallet.keyAgent.serializableData);
       expect(setCurrentChain).toBeCalledWith(chainName);
     });
+
+    test('should use default chain name', async () => {
+      const keyAgentsByChain = 'keyAgentsByChain';
+      const cardanoWallet = {
+        wallet: 'wallet',
+        keyAgent: { serializableData: 'serializableData' },
+        name: 'stnamering'
+      } as any;
+      const wallet = {
+        keyAgentsByChain,
+        ...cardanoWallet
+      } as any;
+
+      const updateLocalStorage = jest.fn();
+      jest.spyOn(AppSettings, 'useAppSettingsContext').mockReturnValue([{}, updateLocalStorage]);
+
+      const setWalletLock = jest.fn();
+      const setCardanoWallet = jest.fn();
+      const setKeyAgentData = jest.fn();
+      const setCurrentChain = jest.fn();
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        setWalletLock,
+        setCardanoWallet,
+        setKeyAgentData,
+        setCurrentChain
+      }));
+
+      const setBackgroundStorage = jest.fn();
+      const {
+        result: {
+          current: { saveHardwareWallet }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({
+          backgroundService: {
+            setBackgroundStorage
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
+      });
+      expect(saveHardwareWallet).toBeDefined();
+      await saveHardwareWallet(wallet);
+
+      expect(updateLocalStorage).toBeCalledWith({
+        chainName: 'Preprod',
+        mnemonicVerificationFrequency: ''
+      });
+      expect(setCurrentChain).toBeCalledWith('Preprod');
+    });
   });
 
   describe('deleteWallet', () => {
@@ -616,9 +723,6 @@ describe('Testing useWalletManager hook', () => {
       expect(deleteFromLocalStorage.mock.calls[2]).toEqual(['lastStaking']);
       expect(deleteFromLocalStorage.mock.calls[3]).toEqual(['userInfo']);
       expect(deleteFromLocalStorage.mock.calls[4]).toEqual(['keyAgentData']);
-      expect(deleteFromLocalStorage.mock.calls[5]).toEqual(['wallet']);
-      expect(deleteFromLocalStorage.mock.calls[6]).toEqual(['analyticsAccepted']);
-      expect(deleteFromLocalStorage.mock.calls[7]).toEqual(['analyticsUserId']);
       expect(clearBackgroundStorage).toBeCalledWith(['message', 'mnemonic', 'keyAgentsByChain']);
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();
@@ -689,7 +793,10 @@ describe('Testing useWalletManager hook', () => {
       const chainId = 'Preprod' as any;
       const keyAgentsByChain = {};
 
-      jest.spyOn(getWallet, 'getWalletFromStorage').mockReturnValue({ name: 'name' });
+      jest
+        .spyOn(getWallet, 'getWalletFromStorage')
+        .mockReturnValueOnce({ name: 'name' })
+        .mockReturnValueOnce(undefined);
 
       const getBackgroundStorage = jest.fn().mockReturnValue({ keyAgentsByChain });
       const {

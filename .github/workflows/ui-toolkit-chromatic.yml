@@ -56,6 +56,7 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_LACE_UI_TOOLKIT_TOKEN }}
           workingDir: ./packages/ui
           buildScriptName: build-storybook
+          onlyChanged: true
 
       - name: 🌍 Publish to Chromatic and auto accept changes
         if: github.ref == 'refs/heads/main'
@@ -64,3 +65,4 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_LACE_UI_TOOLKIT_TOKEN }}
           autoAcceptChanges: true
           workingDir: ./packages/ui
+          onlyChanged: true
