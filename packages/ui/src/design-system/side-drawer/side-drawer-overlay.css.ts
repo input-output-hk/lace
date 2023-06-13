@@ -13,7 +13,6 @@ export const container = style([
   sx({
     py: '$24',
     px: '$40',
-    zIndex: '$overlay',
   }),
   {
     backgroundColor: 'rgba(0, 0, 0, 0.45)',

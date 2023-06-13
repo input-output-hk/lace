@@ -411,11 +411,8 @@ export const Interactions: Interactions = ({
       <Cell>
         <Section title="Play">
           <Root>
-            <Trigger>
-              <Buttons.Primary label="Open side drawer" />
-            </Trigger>
-            <Overlay />
-            <Content data-testid="side-drawer-content">
+            <Overlay zIndex={100} />
+            <Content data-testid="side-drawer-content" zIndex={101}>
               <Header
                 text="Label"
                 onBackClick={onBackClick}
@@ -434,6 +431,9 @@ export const Interactions: Interactions = ({
                 </Close>
               </Footer>
             </Content>
+            <Trigger>
+              <Buttons.Primary label="Open side drawer" />
+            </Trigger>
           </Root>
         </Section>
       </Cell>

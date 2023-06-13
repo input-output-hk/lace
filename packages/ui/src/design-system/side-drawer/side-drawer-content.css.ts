@@ -22,7 +22,6 @@ export const container = style([
   sx({
     width: '$dialog',
     height: '$auto',
-    zIndex: '$dialog',
     top: '$24',
     bottom: '$24',
     right: '$24',

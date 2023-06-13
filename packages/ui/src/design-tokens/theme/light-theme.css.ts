@@ -164,5 +164,4 @@ export const lightTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
-  zIndex,
 });

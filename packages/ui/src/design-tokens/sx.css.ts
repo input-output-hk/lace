@@ -114,12 +114,6 @@ const opacityProperties = defineProperties({
   },
 });
 
-const zIndexProperties = defineProperties({
-  properties: {
-    zIndex: vars.zIndex,
-  },
-});
-
 export const sx = createSprinkles(
   responsiveProperties,
   typographyProperties,
@@ -127,7 +121,6 @@ export const sx = createSprinkles(
   radiusProperties,
   elevationProperties,
   opacityProperties,
-  zIndexProperties,
 );
 
 export type Sx = Parameters<typeof sx>[0];
