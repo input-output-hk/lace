@@ -17,7 +17,7 @@ Feature: LW: Tokens tab - extended view
   Scenario: Receive & Send buttons in header
     Then I see Receive & Send buttons in header
 
-  @LW-2334 @Testnet @test
+  @LW-2334 @Testnet
   Scenario: Tokens list
     Then I see Cardano & LaceCoin tokens on the list with all the details in extended mode
 
