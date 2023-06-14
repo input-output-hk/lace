@@ -60,7 +60,7 @@ export const DappConfirmData = (): React.ReactElement => {
       {
         api$: of({
           async allowSignData(): Promise<boolean> {
-            return Promise.resolve(false);
+            return false;
           }
         }),
         baseChannel: DAPP_CHANNELS.userPrompt,
@@ -107,7 +107,7 @@ export const DappConfirmData = (): React.ReactElement => {
         {
           api$: of({
             async allowSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
+              return true;
             }
           }),
           baseChannel: DAPP_CHANNELS.userPrompt,

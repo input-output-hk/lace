@@ -5,8 +5,8 @@ import { combineLatest, map } from 'rxjs';
 import { useObservable } from './useObservable';
 
 interface UseStakingRewardsReturns {
-  totalRewards: BigInt | number;
-  lastReward: BigInt | number;
+  totalRewards: bigint | number;
+  lastReward: bigint | number;
 }
 
 const LAST_STABLE_EPOCH = 2;
@@ -28,6 +28,7 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
                   ? // eslint-disable-next-line unicorn/no-null
                     BigNumber.sum.apply(null, confirmedRewardHistory.map(({ rewards }) => rewards.toString()) ?? [])
                   : 0,
+              // eslint-disable-next-line unicorn/prefer-at
               lastReward: confirmedRewardHistory[confirmedRewardHistory.length - 1]?.rewards || 0
             };
           })

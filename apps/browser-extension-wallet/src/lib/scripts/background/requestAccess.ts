@@ -16,7 +16,7 @@ export const requestAccess: RequestAccess = async (origin: Origin) => {
   const dappUrl = `#/dapp/connect?url=${url}&name=${name}&logo=${logo}`;
   await ensureUiIsOpenAndLoaded(dappUrl);
   const isAllowed = await userPromptService.allowOrigin(origin);
-  if (isAllowed === 'deny') return Promise.resolve(false);
+  if (isAllowed === 'deny') return false;
   if (isAllowed === 'allow') {
     const { authorizedDapps }: AuthorizedDappStorage = await webStorage.local.get(AUTHORIZED_DAPPS_KEY);
     if (authorizedDapps) {
@@ -34,7 +34,7 @@ export const requestAccess: RequestAccess = async (origin: Origin) => {
       }
     });
   }
-  return Promise.resolve(true);
+  return true;
 };
 
 export const requestAccessDebounced = pDebounce(requestAccess, DEBOUNCE_THROTTLE);

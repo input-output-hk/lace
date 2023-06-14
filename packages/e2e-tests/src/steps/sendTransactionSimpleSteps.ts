@@ -59,36 +59,46 @@ When(
   async (address: string, inputIndex: number) => {
     let addr;
     switch (address) {
-      case 'shelley':
+      case 'shelley': {
         addr = shelley.getAddress();
         break;
-      case 'byron':
+      }
+      case 'byron': {
         addr = byron.getAddress();
         break;
-      case 'icarus':
+      }
+      case 'icarus': {
         addr = icarus.getAddress();
         break;
-      case 'mainnetShelley':
+      }
+      case 'mainnetShelley': {
         addr = shelley.getMainnetAddress();
         break;
-      case 'testnetShelley':
+      }
+      case 'testnetShelley': {
         addr = shelley.getTestnetAddress();
         break;
-      case 'mainnetByron':
+      }
+      case 'mainnetByron': {
         addr = byron.getMainnetAddress();
         break;
-      case 'testnetByron':
+      }
+      case 'testnetByron': {
         addr = byron.getTestnetAddress();
         break;
-      case 'mainnetIcarus':
+      }
+      case 'mainnetIcarus': {
         addr = icarus.getMainnetAddress();
         break;
-      case 'testnetIcarus':
+      }
+      case 'testnetIcarus': {
         addr = icarus.getTestnetAddress();
         break;
-      default:
+      }
+      default: {
         addr = address;
         break;
+      }
     }
     await transactionExtendedPageObject.fillAddress(addr, inputIndex);
   }
@@ -208,21 +218,24 @@ When(
     await browser.pause(1000);
     for (const entry of options.hashes()) {
       switch (entry.type) {
-        case 'ADA':
+        case 'ADA': {
           break;
-        case 'NFT':
+        }
+        case 'NFT': {
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
           await transactionExtendedPageObject.clickCoinSelectorButton('NFTs');
           await nftsPageObject.clickNftItem(entry.assetName);
           break;
-        case 'Token':
+        }
+        case 'Token': {
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
           await transactionExtendedPageObject.clickCoinConfigureTokenSearchResult(entry.assetName);
           break;
+        }
       }
       await transactionExtendedPageObject.fillTokenValue(
         Number.parseFloat(entry.amount),
-        entry.ticker ? entry.ticker : entry.assetName,
+        entry.ticker || entry.assetName,
         bundleIndex
       );
     }
@@ -247,18 +260,22 @@ When(/^I hover over the ticker for "([^"]*)" asset in bundle (\d)$/, async (asse
 Then(/^Address field has filled "([^"]*)" address$/, async (address: string) => {
   let addr;
   switch (address) {
-    case 'shelley':
+    case 'shelley': {
       addr = shelley.getAddress();
       break;
-    case 'byron':
+    }
+    case 'byron': {
       addr = byron.getAddress();
       break;
-    case 'icarus':
+    }
+    case 'icarus': {
       addr = icarus.getAddress();
       break;
-    default:
+    }
+    default: {
       addr = address;
       break;
+    }
   }
   await addressAddNewExtendedAssert.assertSeeAddressInAddressInput(true, addr);
 });
@@ -422,16 +439,19 @@ Then(/a popup asking if you're sure you'd like to close it is displayed$/, async
 
 Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, async (button: 'Agree' | 'Cancel') => {
   switch (button) {
-    case 'Agree':
+    case 'Agree': {
       await Modal.confirmButton.waitForClickable();
       await Modal.confirmButton.click();
       break;
-    case 'Cancel':
+    }
+    case 'Cancel': {
       await Modal.cancelButton.waitForClickable();
       await Modal.cancelButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });
 
@@ -533,18 +553,22 @@ When(
   async (button: 'Review transaction' | 'Cancel' | 'Add bundle') => {
     const newTransactionPage = new TransactionNewPage();
     switch (button) {
-      case 'Review transaction':
+      case 'Review transaction': {
         await newTransactionPage.reviewTransactionButton.waitForEnabled({ timeout: 15_000 });
         await newTransactionPage.reviewTransactionButton.click();
         break;
-      case 'Cancel':
+      }
+      case 'Cancel': {
         await newTransactionPage.cancelTransactionButton.click();
         break;
-      case 'Add bundle':
+      }
+      case 'Add bundle': {
         await newTransactionPage.addBundleButton.click();
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported button name: ${button}`);
+      }
     }
   }
 );
@@ -557,14 +581,17 @@ When(/^I click "Confirm" button on "Transaction summary" page$/, async () => {
 
 When(/^I click "(Done|Cancel)" button on "Add address" drawer$/, async (button: 'Done' | 'Cancel') => {
   switch (button) {
-    case 'Cancel':
+    case 'Cancel': {
       await AddAddressDrawer.cancelButton.click();
       break;
-    case 'Done':
+    }
+    case 'Done': {
       await AddAddressDrawer.saveAddressButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });
 
@@ -579,20 +606,25 @@ Then(
     state: 'is' | 'is not'
   ) => {
     switch (text) {
-      case "All gone! You've already selected everything":
+      case "All gone! You've already selected everything": {
         await TransactionAssetSelectionAssert.assertSeeAllAssetsUsedMessage(state === 'is');
         break;
-      case 'No results matching your search':
+      }
+      case 'No results matching your search': {
         await TransactionAssetSelectionAssert.assertSeeNoMatchingResultsMessage(state === 'is');
         break;
-      case "You don't have any tokens":
+      }
+      case "You don't have any tokens": {
         await TransactionAssetSelectionAssert.assertSeeNoAssetsAvailableMessage('tokens', state === 'is');
         break;
-      case "You don't have any NFTs to send":
+      }
+      case "You don't have any NFTs to send": {
         await TransactionAssetSelectionAssert.assertSeeNoAssetsAvailableMessage('nfts', state === 'is');
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported message: ${text}`);
+      }
     }
   }
 );

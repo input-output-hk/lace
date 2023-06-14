@@ -123,7 +123,7 @@ export const ShowPassphraseDrawer = ({
       navigation={
         <DrawerNavigation
           title={t('browserView.settings.heading')}
-          onCloseIconClick={!popupView ? handleOnClose : undefined}
+          onCloseIconClick={popupView ? undefined : handleOnClose}
           onArrowIconClick={popupView ? handleOnClose : undefined}
         />
       }

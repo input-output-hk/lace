@@ -165,4 +165,4 @@ export const getWalletName = (): string => {
 export const getLastActiveTab: () => Promise<Tabs.Tab> = async () =>
   await (
     await tabs.query({ currentWindow: true, active: true })
-  )[0];
+  )[0]; // eslint-disable-line unicorn/no-await-expression-member

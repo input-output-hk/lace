@@ -36,6 +36,7 @@ export interface FetchResponse<T> {
   result: FetchState<T>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
 export const useFetchApi = <TResponse extends unknown>(args: FetchApiArgs): FetchResponse<TResponse> => {
   const { axiosInstance: axios, params, url } = args;
 
@@ -47,14 +48,18 @@ export const useFetchApi = <TResponse extends unknown>(args: FetchApiArgs): Fetc
 
   const [result, dispatch] = useReducer((state: FetchState<TResponse>, action: FetchAction<TResponse>) => {
     switch (action.type) {
-      case ActionType.FETCHING:
+      case ActionType.FETCHING: {
         return { ...initialState, status: FetchStatus.FETCHING } as FetchState<TResponse>;
-      case ActionType.FETCHED:
+      }
+      case ActionType.FETCHED: {
         return { ...initialState, status: FetchStatus.FETCHED, data: action.payload } as FetchState<TResponse>;
-      case ActionType.FETCH_ERROR:
+      }
+      case ActionType.FETCH_ERROR: {
         return { ...initialState, status: FetchStatus.ERROR, error: action.payload } as FetchState<TResponse>;
-      default:
+      }
+      default: {
         return state;
+      }
     }
   }, initialState);
 

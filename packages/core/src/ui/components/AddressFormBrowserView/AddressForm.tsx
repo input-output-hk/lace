@@ -25,7 +25,7 @@ export type AddressFormPropsBrowserView = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getValidator = (validate: (val: string) => string) => (_rule: any, value: string) => {
   const res = validate(value);
-  return !res ? Promise.resolve() : Promise.reject(res);
+  return res ? Promise.reject(res) : Promise.resolve();
 };
 
 export const AddressFormBrowserView = ({

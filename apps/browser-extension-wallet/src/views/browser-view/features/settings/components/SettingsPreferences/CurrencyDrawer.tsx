@@ -46,14 +46,14 @@ export const CurrencyDrawer = ({ visible, onClose, popupView = false }: Currency
       title={
         <DrawerHeader
           title={t('browserView.settings.preferences.currency.title')}
-          subtitle={!popupView ? t('browserView.settings.preferences.currency.description') : undefined}
+          subtitle={popupView ? undefined : t('browserView.settings.preferences.currency.description')}
           popupView={popupView}
         />
       }
       navigation={
         <DrawerNavigation
           title={t('browserView.settings.heading')}
-          onCloseIconClick={!popupView ? onClose : undefined}
+          onCloseIconClick={popupView ? undefined : onClose}
           onArrowIconClick={popupView ? onClose : undefined}
         />
       }

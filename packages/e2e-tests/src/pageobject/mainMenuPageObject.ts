@@ -16,24 +16,30 @@ class MainMenuPageObject {
 
   async navigateToSection(targetPage: string, mode: 'extended' | 'popup') {
     switch (targetPage) {
-      case 'Tokens':
+      case 'Tokens': {
         await this.tokens(mode);
         break;
-      case 'NFTs':
+      }
+      case 'NFTs': {
         await this.nfts(mode);
         break;
-      case 'Transactions':
+      }
+      case 'Transactions': {
         await this.transactions(mode);
         break;
-      case 'Staking':
+      }
+      case 'Staking': {
         await this.staking(mode);
         break;
-      case 'Address Book':
+      }
+      case 'Address Book': {
         await menuHeaderPageObject.openAddressBook();
         break;
-      case 'Settings':
+      }
+      case 'Settings': {
         await menuHeaderPageObject.openSettings();
         break;
+      }
     }
   }
 }

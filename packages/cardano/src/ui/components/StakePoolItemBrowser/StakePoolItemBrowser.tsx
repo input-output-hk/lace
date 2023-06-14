@@ -66,13 +66,13 @@ export const StakePoolItemBrowser = ({
       </div>
       <div>
         <p data-testid="stake-pool-list-saturation">
-          {!isNil(saturation) ? (
+          {isNil(saturation) ? (
+            '-'
+          ) : (
             <>
               <span className={cn(styles.dot, styles[getSaturationLevel(Number.parseFloat(saturation.toString()))])} />
               {saturation}%
             </>
-          ) : (
-            '-'
           )}
         </p>
       </div>

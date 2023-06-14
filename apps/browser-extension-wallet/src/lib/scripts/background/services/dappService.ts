@@ -67,6 +67,7 @@ try {
     .then((dapps) => {
       authorizedDappsList.next(dapps);
     })
+    // eslint-disable-next-line unicorn/prefer-top-level-await
     .catch((error) => {
       throw new Error(error);
     });

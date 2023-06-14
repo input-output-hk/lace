@@ -300,14 +300,17 @@ export const WalletSetupWizard = ({
           onStepNext={(step: number) => {
             /* eslint-disable no-magic-numbers */
             switch (step) {
-              case 0:
+              case 0: {
                 sendAnalytics(Events.MNEMONICS_INPUT_0_NEXT);
                 break;
-              case 1:
+              }
+              case 1: {
                 sendAnalytics(Events.MNEMONICS_INPUT_1_NEXT);
                 break;
-              case 2:
+              }
+              case 2: {
                 sendAnalytics(Events.MNEMONICS_INPUT_2_NEXT);
+              }
             }
             /* eslint-enable no-magic-numbers */
           }}
@@ -331,20 +334,23 @@ export const WalletSetupWizard = ({
         onStepNext={(stage: MnemonicStage, step: number) => {
           /* eslint-disable no-magic-numbers */
           switch (step) {
-            case 0:
+            case 0: {
               stage === 'input'
                 ? sendAnalytics(Events.MNEMONICS_INPUT_0_NEXT)
                 : sendAnalytics(Events.MNEMONICS_WRITEDOWN_0_NEXT);
               break;
-            case 1:
+            }
+            case 1: {
               stage === 'input'
                 ? sendAnalytics(Events.MNEMONICS_INPUT_1_NEXT)
                 : sendAnalytics(Events.MNEMONICS_WRITEDOWN_1_NEXT);
               break;
-            case 2:
+            }
+            case 2: {
               stage === 'input'
                 ? sendAnalytics(Events.MNEMONICS_INPUT_2_NEXT)
                 : sendAnalytics(Events.MNEMONICS_WRITEDOWN_2_NEXT);
+            }
           }
           /* eslint-enable no-magic-numbers */
         }}
@@ -404,7 +410,7 @@ export const WalletSetupWizard = ({
       )}
       {currentStep === WalletSetupSteps.Password && (
         <WalletSetupPasswordStep
-          onBack={setupType !== 'forgot_password' ? moveBack : undefined}
+          onBack={setupType === 'forgot_password' ? undefined : moveBack}
           onNext={(result) => {
             sendAnalytics(Events.WALLET_PASSWORD_NEXT);
             setPassword(result.password);

@@ -58,14 +58,18 @@ const initialState = { status: IMAGE_FETCH_STATUS.LOADING };
 
 const fetchImageReducer = (state: ImageResponse, action: FetchAction): ImageResponse => {
   switch (action.type) {
-    case IMAGE_FETCH_ACTION_TYPES.FETCHING:
+    case IMAGE_FETCH_ACTION_TYPES.FETCHING: {
       return { ...initialState, status: IMAGE_FETCH_STATUS.LOADING };
-    case IMAGE_FETCH_ACTION_TYPES.FETCHED:
+    }
+    case IMAGE_FETCH_ACTION_TYPES.FETCHED: {
       return { ...initialState, status: IMAGE_FETCH_STATUS.LOADED, src: action.payload };
-    case IMAGE_FETCH_ACTION_TYPES.FETCH_ERROR:
+    }
+    case IMAGE_FETCH_ACTION_TYPES.FETCH_ERROR: {
       return { ...initialState, status: IMAGE_FETCH_STATUS.ERROR };
-    default:
+    }
+    default: {
       return state;
+    }
   }
 };
 

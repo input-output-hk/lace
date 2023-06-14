@@ -47,6 +47,7 @@ export default new (class WebTester {
     try {
       await this.clearInputText(selector);
       await value
+        // eslint-disable-next-line unicorn/prefer-spread
         .split('')
         // eslint-disable-next-line unicorn/no-array-reduce
         .reduce(async (prev: Promise<string>, current: string) => {
@@ -173,7 +174,7 @@ export default new (class WebTester {
     await sel.waitForDisplayed();
     return await sel
       .getText()
-      .then((t) => Promise.resolve(t))
+      .then((t) => t)
       .catch(() => {
         throw new Error(`error while getting text from element : ${selector}`);
       });

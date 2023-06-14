@@ -38,15 +38,18 @@ class SettingsExtendedPageObject {
 
   clickOnNetworkRadioButton = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
     switch (network) {
-      case 'Mainnet':
+      case 'Mainnet': {
         await NetworkSettingsDrawer.mainnetRadioButton.click();
         break;
-      case 'Preprod':
+      }
+      case 'Preprod': {
         await NetworkSettingsDrawer.preprodRadioButton.click();
         break;
-      case 'Preview':
+      }
+      case 'Preview': {
         await NetworkSettingsDrawer.previewRadioButton.click();
         break;
+      }
     }
   };
 
@@ -59,42 +62,54 @@ class SettingsExtendedPageObject {
   clickSettingsItem = async (elementName: string): Promise<void> => {
     await browser.pause(500);
     switch (elementName) {
-      case 'About':
+      case 'About': {
         await this.clickOnAbout();
         break;
-      case 'Your keys':
+      }
+      case 'Your keys': {
         await this.clickOnYourKeys();
         break;
-      case 'Network':
+      }
+      case 'Network': {
         await this.clickOnNetwork();
         break;
-      case 'Authorized DApps':
+      }
+      case 'Authorized DApps': {
         await this.clickOnAuthorizedDApps();
         break;
-      case 'Show recovery phrase':
+      }
+      case 'Show recovery phrase': {
         await this.clickOnShowPassphrase();
         break;
-      case 'Passphrase verification':
+      }
+      case 'Passphrase verification': {
         await this.clickOnPassphraseVerification();
         break;
-      case 'FAQs':
+      }
+      case 'FAQs': {
         await this.clickOnFaqs();
         break;
-      case 'Help':
+      }
+      case 'Help': {
         await this.clickOnHelp();
         break;
-      case 'Terms and conditions':
+      }
+      case 'Terms and conditions': {
         await this.clickOnTermsAndConditions();
         break;
-      case 'Privacy policy':
+      }
+      case 'Privacy policy': {
         await this.clickOnPrivacyPolicy();
         break;
-      case 'Collateral':
+      }
+      case 'Collateral': {
         await this.clickOnCollateral();
         break;
-      case 'Cookie policy':
+      }
+      case 'Cookie policy': {
         await this.clickOnCookiePolicy();
         break;
+      }
     }
   };
 

@@ -249,11 +249,11 @@ export const NFTFolderDrawer = withNftsFoldersContext(
           navigation={
             <DrawerNavigation
               title={
-                !isPopupView ? (
+                isPopupView ? undefined : (
                   <div>{t(`browserView.nfts.folderDrawer.${selectedFolder ? 'existingFolderHeader' : 'header'}`)}</div>
-                ) : undefined
+                )
               }
-              onCloseIconClick={!isPopupView ? onCloseDrawer : undefined}
+              onCloseIconClick={isPopupView ? undefined : onCloseDrawer}
               onArrowIconClick={isPopupView || currentSection === Sections.ASSET_PICKER ? onGoBack : undefined}
               rightActions={isPopupView && currentSection === Sections.ASSET_PICKER ? selectTokenButton : undefined}
             />

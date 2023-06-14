@@ -83,15 +83,20 @@ const offsetMargin = 10;
 const TransactionStatusIcon = ({ status, type }: TransactionStatusIconProps) => {
   const iconStyle = { fontSize: txIconSize() };
   switch (status) {
-    case TransactionStatus.SUCCESS:
+    case TransactionStatus.SUCCESS: {
       return <TransactionTypeIcon type={type} />;
-    case TransactionStatus.SPENDABLE:
+    }
+    case TransactionStatus.SPENDABLE: {
       return <TransactionTypeIcon type="rewards" />;
-    case TransactionStatus.PENDING:
+    }
+    case TransactionStatus.PENDING: {
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
+    }
+    // eslint-disable-next-line unicorn/no-useless-switch-case
     case TransactionStatus.ERROR:
-    default:
+    default: {
       return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
+    }
   }
 };
 

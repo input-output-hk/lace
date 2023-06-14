@@ -88,7 +88,7 @@ const getNextBundleCoinId = (
   info: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>,
   cardanoCoin: CoinId
 ) => {
-  const adaAmountInLovelace = usedCoins[cardanoCoin.id] ? usedCoins[cardanoCoin.id] : '0';
+  const adaAmountInLovelace = usedCoins[cardanoCoin.id] || '0';
   const balanceInAda = Wallet.util.lovelacesToAdaString(balance);
   if (new BigNumber(adaAmountInLovelace).lt(balanceInAda)) return cardanoCoin.id;
   const filterdAssets = [];

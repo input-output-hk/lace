@@ -7,20 +7,24 @@ Then(
   /^I see empty state banner for (Tokens|NFTs|Transactions|Staking) page in (extended|popup) mode$/,
   async (targetPage: string, mode: 'extended' | 'popup') => {
     switch (targetPage) {
-      case 'Tokens':
+      case 'Tokens': {
         await emptyStateAssert.assertSeeEmptyStateTokens();
         break;
-      case 'NFTs':
+      }
+      case 'NFTs': {
         await emptyStateAssert.assertSeeEmptyStateNFTs(mode);
         break;
-      case 'Transactions':
+      }
+      case 'Transactions': {
         mode === 'extended'
           ? await emptyStateAssert.assertSeeEmptyStateTransactions()
           : await emptyStateAssert.assertSeeEmptyStateTransactionsPopup();
         break;
-      case 'Staking':
+      }
+      case 'Staking': {
         await emptyStateAssert.assertSeeEmptyStateStaking();
         break;
+      }
     }
   }
 );

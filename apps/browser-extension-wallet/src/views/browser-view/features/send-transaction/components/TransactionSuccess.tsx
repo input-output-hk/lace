@@ -1,3 +1,1 @@
-import { TransactionSuccessView } from './TransactionSuccessView';
-
-export const TransactionSuccess = TransactionSuccessView;
+export { TransactionSuccessView as TransactionSuccess } from './TransactionSuccessView';

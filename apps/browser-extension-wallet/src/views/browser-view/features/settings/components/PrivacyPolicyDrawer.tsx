@@ -30,7 +30,7 @@ export const PrivacyPolicyDrawer = ({
       navigation={
         <DrawerNavigation
           title={t('browserView.settings.heading')}
-          onCloseIconClick={!popupView ? onClose : undefined}
+          onCloseIconClick={popupView ? undefined : onClose}
           onArrowIconClick={popupView ? onClose : undefined}
         />
       }

@@ -10,14 +10,14 @@ export const useDelegationDetails = (): Wallet.Cardano.StakePool => {
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
 
   return useMemo(() => {
-    const rewardAccount = !isEmpty(rewardAccounts) ? rewardAccounts[0] : undefined;
+    const rewardAccount = isEmpty(rewardAccounts) ? undefined : rewardAccounts[0];
 
-    return !rewardAccounts
-      ? undefined
-      : rewardAccount?.delegatee?.nextNextEpoch ||
+    return rewardAccounts
+      ? rewardAccount?.delegatee?.nextNextEpoch ||
           rewardAccount?.delegatee?.nextEpoch ||
           rewardAccount?.delegatee?.currentEpoch ||
           // eslint-disable-next-line unicorn/no-null
-          null;
+          null
+      : undefined;
   }, [rewardAccounts]);
 };

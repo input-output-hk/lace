@@ -61,20 +61,24 @@ export const MainFooter = (): React.ReactElement => {
 
   const handleNavigation = (path: string) => {
     switch (path) {
-      case walletRoutePaths.assets:
+      case walletRoutePaths.assets: {
         sendAnalytics(AnalyticsEventCategories.VIEW_TOKENS, AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_POPUP);
         break;
-      case walletRoutePaths.earn:
+      }
+      case walletRoutePaths.earn: {
         sendAnalytics(AnalyticsEventCategories.STAKING, AnalyticsEventNames.Staking.VIEW_STAKING_POPUP);
         break;
-      case walletRoutePaths.activity:
+      }
+      case walletRoutePaths.activity: {
         sendAnalytics(
           AnalyticsEventCategories.VIEW_TRANSACTIONS,
           AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_POPUP
         );
         break;
-      case walletRoutePaths.nfts:
+      }
+      case walletRoutePaths.nfts: {
         sendAnalytics(AnalyticsEventCategories.VIEW_NFT, AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_POPUP);
+      }
     }
     history.push(path);
   };

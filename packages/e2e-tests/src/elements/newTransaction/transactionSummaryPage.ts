@@ -28,11 +28,11 @@ export class TransactionSummaryPage extends WebElement {
 
   setAssetRow(index?: number): any {
     this.ASSET_INFO_CONTAINER =
-      typeof index === 'undefined' ? this.ASSET_INFO_CONTAINER : `${this.ASSET_INFO_CONTAINER}[${index}]`;
+      index === undefined ? this.ASSET_INFO_CONTAINER : `${this.ASSET_INFO_CONTAINER}[${index}]`;
   }
 
   setBundleRow(index?: number): any {
-    this.BUNDLE_ROW = typeof index === 'undefined' ? this.BUNDLE_ROW : `${this.BUNDLE_ROW}[${index}]`;
+    this.BUNDLE_ROW = index === undefined ? this.BUNDLE_ROW : `${this.BUNDLE_ROW}[${index}]`;
   }
 
   mainTitle(): WebElement {

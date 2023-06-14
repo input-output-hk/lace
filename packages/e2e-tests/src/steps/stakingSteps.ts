@@ -99,15 +99,18 @@ When(
   /^I hover over (last reward|total staked|total rewards) in currently staking component$/,
   async (elementToHover: string) => {
     switch (elementToHover) {
-      case 'last reward':
+      case 'last reward': {
         await StakingPageObject.hoverLastRewardInStakingInfoComponent();
         break;
-      case 'total staked':
+      }
+      case 'total staked': {
         await StakingPageObject.hoverTotalStakedInStakingInfoComponent();
         break;
-      case 'total rewards':
+      }
+      case 'total rewards': {
         await StakingPageObject.hoverTotalRewardsInStakingInfoComponent();
         break;
+      }
     }
   }
 );
@@ -253,16 +256,19 @@ When(/^I click "Next" button on staking confirmation drawer$/, async () => {
 
 When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async (button: 'Cancel' | 'Fine by me') => {
   switch (button) {
-    case 'Cancel':
+    case 'Cancel': {
       await SwitchingStakePoolModal.cancelButton.waitForClickable();
       await SwitchingStakePoolModal.cancelButton.click();
       break;
-    case 'Fine by me':
+    }
+    case 'Fine by me': {
       await SwitchingStakePoolModal.fineByMeButton.waitForClickable();
       await SwitchingStakePoolModal.fineByMeButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });
 
@@ -271,15 +277,19 @@ Then(
   async (type: 'correct' | 'incorrect' | 'newly created') => {
     let password;
     switch (type) {
-      case 'newly created':
+      case 'newly created': {
         password = (testContext.load('newCreatedWallet') as WalletConfig).password;
         break;
-      case 'incorrect':
+      }
+      case 'incorrect': {
         password = 'somePassword';
         break;
+      }
+      // eslint-disable-next-line unicorn/no-useless-switch-case
       case 'correct':
-      default:
+      default: {
         password = getTestWallet(TestWalletName.TestAutomationWallet).password;
+      }
     }
     await SimpleTxSideDrawerPageObject.fillPassword(password);
     await stakingExtendedPageObject.confirmStaking();

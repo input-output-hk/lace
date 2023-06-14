@@ -11,9 +11,9 @@ const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) 
     // Initialize migration state with not-loaded
     await initMigrationState();
     // Set migration state to up-to-date on install or check migrations on update
-    !details.previousVersion
-      ? await storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState })
-      : await checkMigrations(details.previousVersion);
+    details.previousVersion
+      ? await checkMigrations(details.previousVersion)
+      : await storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
   }
 };
 

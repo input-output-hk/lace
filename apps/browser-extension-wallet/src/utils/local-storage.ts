@@ -50,18 +50,23 @@ export const onStorageChangeEvent = (
     let extraCondition = true;
 
     switch (eventType) {
-      case 'create':
+      case 'create': {
         extraCondition = isNil(ev.oldValue) && !isNil(ev.newValue);
         break;
-      case 'delete':
+      }
+      case 'delete': {
         extraCondition = !isNil(ev.oldValue) && isNil(ev.newValue);
         break;
-      case 'change':
+      }
+      case 'change': {
         extraCondition = !isNil(ev.oldValue) && !isNil(ev.newValue);
         break;
+      }
+      // eslint-disable-next-line unicorn/no-useless-switch-case
       case 'any':
-      default:
+      default: {
         extraCondition = true;
+      }
     }
 
     const shouldRun = typeof keys === 'string' ? keys === 'all' : keys.includes(ev.key as keyof ILocalStorage);

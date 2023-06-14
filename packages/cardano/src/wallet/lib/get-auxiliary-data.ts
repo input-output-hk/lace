@@ -37,7 +37,7 @@ export const getChunks = (input: string, chunkByteSize: number): string[] => {
     const isEndOfArray = char === input.length - 1;
 
     const currentSize = size + getSizeInBytes(input[char]);
-    const nextCharSize = !isEndOfArray ? currentSize + getSizeInBytes(input[char + 1]) : chunkByteSize + 1;
+    const nextCharSize = isEndOfArray ? chunkByteSize + 1 : currentSize + getSizeInBytes(input[char + 1]);
 
     const shouldSliceString = currentSize === chunkByteSize || nextCharSize > chunkByteSize || isEndOfArray;
 

@@ -85,10 +85,10 @@ When(
         actualValue = await transactionsDetails.transactionDetailsStakePoolId.getText();
         expectedValue = String(testContext.load('poolID'));
       }
-      if (actualValue !== expectedValue) {
-        await simpleTxSideDrawerPageObject.clickCloseDrawerButton();
-      } else {
+      if (actualValue === expectedValue) {
         break;
+      } else {
+        await simpleTxSideDrawerPageObject.clickCloseDrawerButton();
       }
     }
   }

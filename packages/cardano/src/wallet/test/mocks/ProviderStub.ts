@@ -202,11 +202,10 @@ export const mockWalletProvider = (): NetworkInfoProvider &
   transactionsByAddresses: queryTransactions(),
   transactionsByHashes: queryTransactions(),
   rewardsHistory: jest.fn().mockResolvedValue(rewardsHistory),
-  queryStakePools: async () =>
-    Promise.resolve({
-      pageResults: pools as Cardano.StakePool[],
-      totalResultCount: 5
-    }),
+  queryStakePools: async () => ({
+    pageResults: pools as Cardano.StakePool[],
+    totalResultCount: 5
+  }),
   stakePoolStats: async () => ({
     qty: {
       activating: 0,

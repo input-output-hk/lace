@@ -52,7 +52,7 @@ export const getReachedMaxAmountList = ({
 }: {
   assets: Wallet.Assets;
   tokensUsed: SpentBalances;
-  spendableCoin: BigInt;
+  spendableCoin: bigint;
   balance: Wallet.Cardano.Value;
   exceed?: boolean;
   cardanoCoin: CoinId;

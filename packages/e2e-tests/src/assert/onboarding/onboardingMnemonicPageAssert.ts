@@ -87,19 +87,22 @@ class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
     // Check for LW-5757
     await this.assertSeeMnemonicInputWithDisabledAutocomplete();
     switch (expectedFooterSecondNumber) {
-      case 12:
+      case 12: {
         Number(expectedFooterFirstNumber) === 8
           ? await this.assertSeeMnemonicInputs(8)
           : await this.assertSeeMnemonicInputs(4);
         break;
-      case 15:
+      }
+      case 15: {
         Number(expectedFooterFirstNumber) === 8
           ? await this.assertSeeMnemonicInputs(8)
           : await this.assertSeeMnemonicInputs(7);
         break;
-      case 24:
+      }
+      case 24: {
         await this.assertSeeMnemonicInputs(8);
         break;
+      }
     }
 
     await this.assertSeeBackButton();

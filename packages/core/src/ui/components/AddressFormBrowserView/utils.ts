@@ -4,5 +4,5 @@ export const getValidator =
   (validate: (val: string) => string) =>
   (_rule: any, value: string): Promise<void> => {
     const res = validate(value);
-    return !res ? Promise.resolve() : Promise.reject(res);
+    return res ? Promise.reject(res) : Promise.resolve();
   };

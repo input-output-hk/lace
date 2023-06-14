@@ -22,11 +22,11 @@ export const availableCoinsTransformer = (
   const assetList = [...tokens.entries()].map(([assetId, balance]) => ({
     id: assetId.toString(),
     balance: balance.toString(),
-    symbol: !isEmpty(tokensInfo)
-      ? tokensInfo.get(assetId)?.tokenMetadata?.ticker ??
+    symbol: isEmpty(tokensInfo)
+      ? addEllipsis(assetId.toString(), 8, 6)
+      : tokensInfo.get(assetId)?.tokenMetadata?.ticker ??
         tokensInfo.get(assetId)?.tokenMetadata?.name ??
         addEllipsis(tokensInfo.get(assetId)?.fingerprint.toString() ?? assetId.toString(), 8, 6)
-      : addEllipsis(assetId.toString(), 8, 6)
   }));
 
   return [adaCoin, ...assetList];

@@ -48,7 +48,7 @@ export const DappList = withDappContext(
         navigation={
           <DrawerNavigation
             title={t('browserView.settings.heading')}
-            onCloseIconClick={!popupView ? onCancelClick : undefined}
+            onCloseIconClick={popupView ? undefined : onCancelClick}
             onArrowIconClick={popupView ? onCancelClick : undefined}
           />
         }

@@ -38,15 +38,18 @@ Then(/^"Unlock" button is (enabled|disabled) on unlock screen$/, async (state: '
 
 When(/^I click "(Unlock|Help and support)" button on unlock screen$/, async (button: 'Unlock' | 'Help and support') => {
   switch (button) {
-    case 'Unlock':
+    case 'Unlock': {
       await WalletUnlockPage.unlockButton.waitForClickable();
       await WalletUnlockPage.unlockButton.click();
       break;
-    case 'Help and support':
+    }
+    case 'Help and support': {
       await WalletUnlockPage.helpAndSupportButton.waitForClickable();
       await WalletUnlockPage.helpAndSupportButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });

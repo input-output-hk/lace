@@ -53,7 +53,7 @@ const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: bo
 
   const walletSteps = isHardwareWallet ? hardwareWalletSteps : inMemoryWalletSteps;
 
-  if (typeof currentStep !== 'undefined') {
+  if (currentStep !== undefined) {
     const currentStepIndex = walletSteps.findIndex((step) => step.key === currentStep);
     return walletSteps.map((step, index) => ({ ...step, active: index <= currentStepIndex }));
   }

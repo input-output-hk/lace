@@ -96,9 +96,9 @@ export const assetTransformer = (params: {
   const variation = pricesInfo?.priceVariationPercentage24h
     ? variationParser(pricesInfo.priceVariationPercentage24h)
     : '-';
-  const price = fiatPrice !== undefined ? parseFiat(fiatPrice) : '-';
+  const price = fiatPrice === undefined ? '-' : parseFiat(fiatPrice);
   const formattedFiatBalance =
-    fiatBalance !== undefined ? `${parseFiat(fiatBalance.toNumber())} ${fiatCurrency.code}` : '-';
+    fiatBalance === undefined ? '-' : `${parseFiat(fiatBalance.toNumber())} ${fiatCurrency.code}`;
 
   return {
     id: key.toString(),

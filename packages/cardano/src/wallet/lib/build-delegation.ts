@@ -28,7 +28,7 @@ const buildDelegationCertificates = (
 };
 
 export const buildDelegation = async (wallet: ObservableWallet, poolId: Cardano.PoolId): Promise<InitializeTxProps> => {
-  const walletRewardAccount = (await firstValueFrom(wallet.delegation.rewardAccounts$))[0];
+  const [walletRewardAccount] = await firstValueFrom(wallet.delegation.rewardAccounts$);
   // TODO: check if already delegating to same stake pool? [LW-5458]
   const certificates = buildDelegationCertificates(walletRewardAccount, poolId);
   return { certificates };

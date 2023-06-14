@@ -48,17 +48,21 @@ When(
   /^I click "(Create|Connect|Restore)" button on wallet setup page$/,
   async (button: 'Create' | 'Connect' | 'Restore') => {
     switch (button) {
-      case 'Create':
+      case 'Create': {
         await OnboardingMainPage.createWalletButton.click();
         break;
-      case 'Connect':
+      }
+      case 'Connect': {
         await OnboardingMainPage.hardwareWalletButton.click();
         break;
-      case 'Restore':
+      }
+      case 'Restore': {
         await OnboardingMainPage.restoreWalletButton.click();
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported button name: ${button}`);
+      }
     }
   }
 );
@@ -66,30 +70,37 @@ When(
 When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back' | 'Next') => {
   const commonOnboardingElements = new CommonOnboardingElements();
   switch (button) {
-    case 'Back':
+    case 'Back': {
       await commonOnboardingElements.backButton.click();
       break;
-    case 'Next':
+    }
+    case 'Next': {
       await commonOnboardingElements.nextButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });
 
 When(/^I click "(Back|Skip|Agree)" button on Analytics page$/, async (button: 'Back' | 'Skip' | 'Agree') => {
   switch (button) {
-    case 'Back':
+    case 'Back': {
       await OnboardingAnalyticsPage.backButton.click();
       break;
-    case 'Skip':
+    }
+    case 'Skip': {
       await OnboardingAnalyticsPage.skipButton.click();
       break;
-    case 'Agree':
+    }
+    case 'Agree': {
       await OnboardingAnalyticsPage.nextButton.click();
       break;
-    default:
+    }
+    default: {
       throw new Error(`Unsupported button name: ${button}`);
+    }
   }
 });
 
@@ -103,14 +114,17 @@ When(
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   async (button: 'Cancel' | 'OK', _modalType: string) => {
     switch (button) {
-      case 'Cancel':
+      case 'Cancel': {
         await Modal.cancelButton.click();
         break;
-      case 'OK':
+      }
+      case 'OK': {
         await Modal.confirmButton.click();
         break;
-      default:
+      }
+      default: {
         throw new Error(`Unsupported button name: ${button}`);
+      }
     }
   }
 );
@@ -309,12 +323,14 @@ Given(
     await OnboardingWalletPasswordPage.nextButton.click();
     await OnboardingMnemonicInfoPage.nextButton.click();
     switch (onboardingType) {
-      case 'Create':
+      case 'Create': {
         await OnboardingPageObject.openMnemonicVerificationLastPage();
         break;
-      case 'Restore':
+      }
+      case 'Restore': {
         await OnboardingPageObject.openMnemonicVerificationLastPage(mnemonicWords);
         break;
+      }
     }
     await OnboardingMnemonicPage.nextButton.click();
     await OnboardingAllDonePageAssert.assertSeeAllDonePage();
@@ -337,14 +353,17 @@ Given(
   async (length: '12' | '15' | '24') => {
     const invalidMnemonic = [...invalidMnemonicWords];
     switch (length) {
-      case '12':
+      case '12': {
         invalidMnemonic.splice(12);
         break;
-      case '15':
+      }
+      case '15': {
         invalidMnemonic.splice(15);
         break;
-      case '24':
+      }
+      case '24': {
         break;
+      }
     }
     await OnboardingPageObject.openMnemonicVerificationLastPage(invalidMnemonic, length);
   }
@@ -354,38 +373,45 @@ Given(
   /^I fill passphrase fields using 24 words mnemonic on (8\/24|16\/24|24\/24) page$/,
   async (pageNumber: string) => {
     switch (pageNumber) {
-      case '8/24':
+      case '8/24': {
         await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 0);
         break;
-      case '16/24':
+      }
+      case '16/24': {
         await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 8);
         break;
-      case '24/24':
+      }
+      case '24/24': {
         await OnboardingPageObject.fillMnemonicFields(mnemonicWords, 16);
         break;
+      }
     }
   }
 );
 
 Given(/^I fill passphrase fields using 12 words mnemonic on (8\/12|12\/12) page$/, async (pageNumber: string) => {
   switch (pageNumber) {
-    case '8/12':
+    case '8/12': {
       await OnboardingPageObject.fillMnemonicFields(twelveMnemonicWords, 0);
       break;
-    case '12/12':
+    }
+    case '12/12': {
       await OnboardingPageObject.fillMnemonicFields(twelveMnemonicWords, 8);
       break;
+    }
   }
 });
 
 Given(/^I fill passphrase fields using 15 words mnemonic on (8\/15|15\/15) page$/, async (pageNumber: string) => {
   switch (pageNumber) {
-    case '8/15':
+    case '8/15': {
       await OnboardingPageObject.fillMnemonicFields(fifteenMnemonicWords, 0);
       break;
-    case '15/15':
+    }
+    case '15/15': {
       await OnboardingPageObject.fillMnemonicFields(fifteenMnemonicWords, 8);
       break;
+    }
   }
 });
 

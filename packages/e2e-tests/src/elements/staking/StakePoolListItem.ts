@@ -13,8 +13,7 @@ export class StakePoolListItem extends WebElement {
 
   constructor(index?: number) {
     super();
-    this.TABLE_ROW =
-      typeof index === 'undefined' || index.toString() === '' ? this.TABLE_ROW : `(${this.TABLE_ROW})[${index}]`;
+    this.TABLE_ROW = index === undefined || index.toString() === '' ? this.TABLE_ROW : `(${this.TABLE_ROW})[${index}]`;
   }
 
   container(): WebElement {

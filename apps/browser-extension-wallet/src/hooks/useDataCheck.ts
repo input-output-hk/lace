@@ -23,16 +23,21 @@ export type UseDataCheck = [DataCheckState, () => Promise<void>];
 
 const dataCheckReducer = (state: DataCheckState, action: DataCheckAction): DataCheckState => {
   switch (action.type) {
-    case 'not-checked':
+    case 'not-checked': {
       return { checkState: 'not-checked' };
-    case 'checking':
+    }
+    case 'checking': {
       return { checkState: 'checking' };
-    case 'valid':
+    }
+    case 'valid': {
       return { checkState: 'checked', result: { valid: true } };
-    case 'error':
+    }
+    case 'error': {
       return { checkState: 'checked', result: { valid: false, error: action.error } };
-    default:
+    }
+    default: {
       return state;
+    }
   }
 };
 
