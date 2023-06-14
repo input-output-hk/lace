@@ -29,7 +29,7 @@ export const migrateAddressBookSchema = (transaction: Transaction): PromiseExten
   transaction
     .table('addressBook')
     .toCollection()
-    .modify((addressBook: AddressBookSchema) => {
+    .modify((addressBook: Omit<AddressBookSchema, 'network'> & { network: Wallet.Cardano.NetworkId }) => {
       addressBook.network = startWithRegExp(addressBook.address).test('addr_test1')
         ? Wallet.Cardano.NetworkId.Testnet
         : Wallet.Cardano.NetworkId.Mainnet;

@@ -5,6 +5,8 @@ import { AddressBookContext } from './context';
 import { addressBookQueries, AddressBookSchema, addressBookSchema, useDbState } from '@src/lib/storage';
 import { useWalletStore } from '@src/stores';
 import { Wallet } from '@lace/cardano';
+import { toast } from '@lace/common';
+import { checkAddressForDuplicate } from '@utils/validators';
 
 interface AddressBookProviderProps {
   children: React.ReactNode;
@@ -13,20 +15,33 @@ interface AddressBookProviderProps {
 
 export type AddressRecordParams = Pick<AddressBookSchema, 'address' | 'name'>;
 
+export const cardanoNetworkMap = {
+  Mainnet: Wallet.Cardano.NetworkMagics.Mainnet,
+  Preprod: Wallet.Cardano.NetworkMagics.Preprod,
+  Preview: Wallet.Cardano.NetworkMagics.Preview,
+  LegacyTestnet: Wallet.Cardano.NetworkMagics.Testnet
+};
+
 export const AddressBookProvider = ({ children, initialState }: AddressBookProviderProps): React.ReactElement => {
   const { environmentName } = useWalletStore();
-  const queries = useMemo(
-    () =>
-      addressBookQueries(
-        environmentName === 'Mainnet' ? Wallet.Cardano.NetworkId.Mainnet : Wallet.Cardano.NetworkId.Testnet
-      ),
-    [environmentName]
+  const queries = useMemo(() => addressBookQueries(cardanoNetworkMap[environmentName]), [environmentName]);
+  const { list, count, utils } = useDbState<AddressBookSchema, AddressRecordParams>(
+    initialState,
+    addressBookSchema,
+    queries
   );
 
+  const handleSaveAddress = async (record: AddressRecordParams) => {
+    const [hasError, toastParams] = checkAddressForDuplicate(list, record);
+    if (hasError) {
+      toast.notify(toastParams);
+      throw new Error(toastParams.text);
+    }
+    return utils.saveRecord(record);
+  };
+
   return (
-    <AddressBookContext.Provider
-      value={useDbState<AddressBookSchema, AddressRecordParams>(initialState, addressBookSchema, queries)}
-    >
+    <AddressBookContext.Provider value={{ list, count, utils: { ...utils, saveRecord: handleSaveAddress } }}>
       {children}
     </AddressBookContext.Provider>
   );

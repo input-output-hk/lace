@@ -6,8 +6,8 @@ const isAddressError = /address/i;
 const isNameError = /name/i;
 const constraintError = 'ConstraintError';
 
-const addressErrorMessage = 'addressBook.errors.givenAddressAlreadyExist';
-const nameErrorMessage = 'addressBook.errors.givenNameAlreadyExist';
+export const addressErrorMessage = 'addressBook.errors.givenAddressAlreadyExist';
+export const nameErrorMessage = 'addressBook.errors.givenNameAlreadyExist';
 
 export const getErrorMessage = (error: Error): string => {
   const updateOrSaveError = error.name === constraintError || error instanceof Dexie.ModifyError;
