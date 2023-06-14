@@ -56,14 +56,21 @@ const colors: Colors = {
   $card_outlined_backgroundColor: darkColorScheme.$primary_mid_black,
   $card_outlined_borderColor: colorTransparent,
 
-  $control_buttons_filled_label_color: darkColorScheme.$primary_light_grey,
-  $control_buttons_filled_label_color_hover: darkColorScheme.$primary_white,
-  $control_buttons_filled_container_bgColor: darkColorScheme.$primary_grey,
-  $control_buttons_filled_container_bgColor_hover:
-    darkColorScheme.$primary_mid_grey,
-  $control_buttons_filled_container_bgColor_pressed:
+  $control_buttons_label_color: darkColorScheme.$primary_light_grey,
+  $control_buttons_label_color_danger: darkColorScheme.$primary_white,
+  $control_buttons_label_color_hover: darkColorScheme.$primary_white,
+  $control_buttons_container_bgColor: darkColorScheme.$primary_grey,
+  $control_buttons_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $control_buttons_container_bgColor_pressed:
     darkColorScheme.$primary_dark_grey,
-  $control_buttons_filled_container_outlineColor:
+  $control_buttons_container_bgColor_danger:
+    darkColorScheme.$secondary_data_pink,
+  $control_buttons_container_bgColor_danger_hover:
+    darkColorScheme.$secondary_hover_data_pink,
+  $control_buttons_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $control_buttons_borderColor: darkColorScheme.$primary_dark_grey_plus,
+  $control_buttons_borderColor_danger:
     darkColorScheme.$primary_accent_purple_0_3,
 
   $variants_table_bgColor: '#1E1E1E',

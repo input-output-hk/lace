@@ -6,10 +6,11 @@ import { ReactComponent as PlusCircle } from '../../assets/icons/plus-circle.com
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
-import { Grid } from '../grid';
-import { Cell } from '../grid/cell.component';
+import { Grid, Cell } from '../grid';
 
+import { Danger } from './danger-button.component';
 import { Filled } from './filled-button.component';
+import { Outlined } from './outlined-button.component';
 
 const subtitle = ``;
 
@@ -21,13 +22,6 @@ export default {
 
 const Buttons = (): JSX.Element => (
   <>
-    <Variants.Row>
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-    </Variants.Row>
     <Variants.Row>
       <Variants.Cell>
         <Filled label="Label" icon={<PlusCircle />} />
@@ -46,25 +40,38 @@ const Buttons = (): JSX.Element => (
       </Variants.Cell>
     </Variants.Row>
     <Variants.Row>
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
+      <Variants.Cell>
+        <Outlined label="Label" icon={<PlusCircle />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Outlined label="Label" id="hover" icon={<PlusCircle />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Outlined label="Label" id="pressed" icon={<PlusCircle />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Outlined label="Label" disabled icon={<PlusCircle />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Outlined label="Label" id="focused" icon={<PlusCircle />} />
+      </Variants.Cell>
     </Variants.Row>
     <Variants.Row>
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-    </Variants.Row>
-    <Variants.Row>
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
-      <Variants.Cell />
+      <Variants.Cell>
+        <Danger label="Label" icon={<PlusCircle />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Danger label="Label" id="hover" icon={<PlusCircle />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Danger label="Label" id="pressed" icon={<PlusCircle />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Danger label="Label" disabled icon={<PlusCircle />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Danger label="Label" id="focused" icon={<PlusCircle />} />
+      </Variants.Cell>
     </Variants.Row>
   </>
 );
@@ -83,13 +90,21 @@ export const Overview = (): JSX.Element => (
           ]}
         >
           <Variants.Row>
-            <Variants.Cell />
             <Variants.Cell>
               <Filled label="Label" icon={<PlusCircle />} />
             </Variants.Cell>
-            <Variants.Cell />
-            <Variants.Cell />
-            <Variants.Cell />
+            <Variants.Cell>
+              <Filled label="Label" icon={<PlusCircle />} />
+            </Variants.Cell>
+            <Variants.Cell>
+              <Filled icon={<PlusCircle />} />
+            </Variants.Cell>
+            <Variants.Cell>
+              <Filled label="Label" />
+            </Variants.Cell>
+            <Variants.Cell>
+              <Filled label="Label" />
+            </Variants.Cell>
           </Variants.Row>
         </Variants.Table>
         <Divider my="$64" />

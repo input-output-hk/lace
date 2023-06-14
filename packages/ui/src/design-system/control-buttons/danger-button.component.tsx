@@ -12,18 +12,18 @@ import type { ButtonProps } from '../buttons';
 
 type Props = Omit<ButtonProps, 'className'> & { icon: ReactNode };
 
-export const Filled = (props: Readonly<Props>): JSX.Element => {
+export const Danger = (props: Readonly<Props>): JSX.Element => {
   return (
     <SkeletonButton
       {...props}
       className={{
         container: cs(
           cx.container({
-            colorScheme: Scheme.Filled,
-            borderScheme: Scheme.Filled,
+            colorScheme: Scheme.Danger,
+            borderScheme: Scheme.Danger,
           }),
         ),
-        label: cx.label({ colorScheme: Scheme.Filled }),
+        label: cx.label({ colorScheme: Scheme.Danger }),
       }}
     />
   );
