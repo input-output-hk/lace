@@ -13,6 +13,7 @@ export const Stats = ({
   popupView?: boolean;
   dataTestid: string;
 }): React.ReactElement => (
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   <div data-testid={`${dataTestid}-container`} className={cn(styles.stat, { [styles.popupView!]: popupView })}>
     <div data-testid="stats-title" className={styles.title}>
       {text}

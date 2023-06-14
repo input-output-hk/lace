@@ -71,6 +71,7 @@ export const StakingInfoCard = ({
   const { t } = useTranslation();
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     <div className={cn(styles.panel, { className, [styles.popupView!]: popupView })}>
       <div className={styles.row}>
         <div className={styles.col}>
