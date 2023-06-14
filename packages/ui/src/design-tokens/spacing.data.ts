@@ -20,6 +20,7 @@ export const spacing = {
   $112: '112px',
   $116: '116px',
   $120: '120px',
+  $342: '342px',
   $584: '584px',
   $fill: '100%',
   $auto: 'auto',
