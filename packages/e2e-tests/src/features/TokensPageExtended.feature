@@ -17,7 +17,7 @@ Feature: LW: Tokens tab - extended view
   Scenario: Receive & Send buttons in header
     Then I see Receive & Send buttons in header
 
-  @LW-2334 @Testnet
+  @LW-2334 @Testnet @test
   Scenario: Tokens list
     Then I see Cardano & LaceCoin tokens on the list with all the details in extended mode
 
@@ -91,4 +91,15 @@ Feature: LW: Tokens tab - extended view
 
   @LW-6877 @Testnet @Mainnet
   Scenario: Extended View - Hide my balance - positive balance - closed eye icon displayed by default
-    Then Closed eye icon is displayed on Tokens page
+    Then closed eye icon is displayed on Tokens page
+
+  @LW-6883 @Testnet @Mainnet
+  Scenario: Extended View - Hide my balance - positive balance - hide/reveal balance
+    When I click closed eye icon on Tokens page
+    Then opened eye icon is displayed on Tokens page
+    And total wallet balance is masked with asterisks
+    And balance and FIAT balance for each token are masked with asterisks
+    When I click opened eye icon on Tokens page
+    Then closed eye icon is displayed on Tokens page
+    And I see total wallet balance in USD
+    And balance and FIAT balance for each token are visible

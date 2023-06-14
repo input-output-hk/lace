@@ -1,28 +1,23 @@
 /* eslint-disable no-undef */
-import webTester, { LocatorStrategy } from '../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from './webElement';
 import SectionTitle from './sectionTitle';
 import { ChainablePromiseElement } from 'webdriverio';
 
-export class TokensPage extends WebElement {
-  private CONTAINER = '//section[@id="content"]';
-  private BALANCE_LABEL = '//label[@data-testid="portfolio-balance-label"]';
-  private BALANCE_VALUE = '//h1[@data-testid="portfolio-balance-value"]';
-  private BALANCE_CURRENCY = '//h4[@data-testid="portfolio-balance-currency"]';
+class TokensPage {
+  private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
+  private BALANCE_VALUE = '[data-testid="portfolio-balance-value"]';
+  private BALANCE_CURRENCY = '[data-testid="portfolio-balance-currency"]';
   private TOKENS_TABLE_ROW = '//tr[@data-testid="infinite-scrollable-table-row"]';
-  private TOKENS_TABLE_ITEM_AVATAR = '//img[@data-testid="asset-table-cell-logo"]';
-  private TOKENS_TABLE_ITEM_TITLE = '//p[@data-testid="asset-table-cell-title"]';
-  private TOKENS_TABLE_ITEM_SUBTITLE = '//p[@data-testid="asset-table-cell-subtitle"]';
+  private TOKEN_AVATAR = '[data-testid="asset-table-cell-logo"]';
+  private TOKEN_NAME = '[data-testid="token-table-cell-name"]';
+  private TOKEN_TICKER = '[data-testid="token-table-cell-ticker"]';
+  private TOKEN_BALANCE = '[data-testid="token-table-cell-balance"]';
+  private TOKEN_FIAT_BALANCE = '[data-testid="token-table-cell-fiat-balance"]';
   private COINGECKO_CREDITS = '[data-testid="coingecko-credits"]';
   private COINGECKO_LINK = '[data-testid="coingecko-link"]';
   private RECEIVE_BUTTON_POPUP_MODE = 'main [data-testid="receive-button"]';
   private SEND_BUTTON_POPUP_MODE = 'main [data-testid="send-button"]';
   private CLOSED_EYE_ICON = '[data-testid="closed-eye-icon"]';
   private OPENED_EYE_ICON = '[data-testid="opened-eye-icon"]';
-
-  constructor() {
-    super();
-  }
 
   get sendButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEND_BUTTON_POPUP_MODE);
@@ -44,44 +39,32 @@ export class TokensPage extends WebElement {
     return $(this.BALANCE_LABEL);
   }
 
-  totalBalanceValue(): WebElement {
-    return Factory.fromSelector(`${this.BALANCE_VALUE}`, 'xpath');
+  get totalBalanceValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.BALANCE_VALUE);
   }
 
-  totalBalanceCurrency(): WebElement {
-    return Factory.fromSelector(`${this.BALANCE_CURRENCY}`, 'xpath');
+  get totalBalanceCurrency(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.BALANCE_CURRENCY);
   }
 
-  tokensTableTitle(title: string): WebElement {
-    return Factory.fromSelector(`//th[text() = '${title}']`, 'xpath');
+  tokensAvatar(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_AVATAR);
   }
 
-  tokensTableItemAvatar(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKENS_TABLE_ITEM_AVATAR})[${index}]`, 'xpath');
+  tokenName(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_NAME);
   }
 
-  tokensTableItemTitle(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKENS_TABLE_ROW}[${index}]${this.TOKENS_TABLE_ITEM_TITLE})[1]`, 'xpath');
+  tokenTicker(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_TICKER);
   }
 
-  tokensTableItemSubTitle(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKENS_TABLE_ROW}[${index}]${this.TOKENS_TABLE_ITEM_SUBTITLE})[1]`, 'xpath');
+  tokenBalance(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_BALANCE);
   }
 
-  tokensTableItemValue(index: number, mode: 'extended' | 'popup'): WebElement {
-    const tableCellIndex = mode === 'extended' ? 3 : 2;
-    return Factory.fromSelector(
-      `(${this.TOKENS_TABLE_ROW}[${index}]${this.TOKENS_TABLE_ITEM_TITLE})[${tableCellIndex}]`,
-      'xpath'
-    );
-  }
-
-  tokensTableItemValueFiat(index: number, mode: 'extended' | 'popup'): WebElement {
-    const tableCellIndex = mode === 'extended' ? 3 : 2;
-    return Factory.fromSelector(
-      `(${this.TOKENS_TABLE_ROW}[${index}]${this.TOKENS_TABLE_ITEM_SUBTITLE})[${tableCellIndex}]`,
-      'xpath'
-    );
+  tokenFiatBalance(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_FIAT_BALANCE);
   }
 
   tokensTableItemWithName(tokenName: string): ChainablePromiseElement<WebdriverIO.Element> {
@@ -105,47 +88,25 @@ export class TokensPage extends WebElement {
     return $(this.OPENED_EYE_ICON);
   }
 
-  async getTotalBalanceValue(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.totalBalanceValue());
-  }
-
-  async getTotalBalanceCurrency(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.totalBalanceCurrency());
-  }
-
   async getRows(): Promise<WebdriverIO.ElementArray> {
-    return $$(`${this.TOKENS_TABLE_ROW}`);
+    return $$(this.TOKENS_TABLE_ROW);
   }
 
-  async getTokensTableItemTitle(index: number): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokensTableItemTitle(index));
-  }
-
-  async getTokensTableItemSubTitle(index: number): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokensTableItemSubTitle(index));
-  }
-
-  async getTokenTableItemValueByIndex(index: number, mode: 'extended' | 'popup'): Promise<number> {
-    const tokenValue = (await webTester.getTextValueFromElement(this.tokensTableItemValue(index, mode))) as string;
+  async getTokenBalanceAsFloatByIndex(index: number): Promise<number> {
+    const tokenValue = await this.tokenBalance(index).getText();
     return Number.parseFloat(tokenValue.replace(/,/g, ''));
   }
 
-  async getTokenTableItemValueByName(tokenName: string, mode: 'extended' | 'popup'): Promise<number> {
-    const tokenValue = (await webTester.getTextValueFromElement(
-      this.tokensTableItemValue(await this.getTokenRowIndex(tokenName), mode)
-    )) as string;
-    return Number.parseFloat(tokenValue.replace(/,/g, ''));
-  }
-
-  async getTokenTableItemValueFiatByIndex(index: number, mode: 'extended' | 'popup'): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokensTableItemValueFiat(index, mode));
+  async getTokenBalanceAsFloatByName(tokenName: string): Promise<number> {
+    const tokenIndex = await this.getTokenRowIndex(tokenName);
+    return await this.getTokenBalanceAsFloatByIndex(tokenIndex);
   }
 
   async getTokenNames(): Promise<string[]> {
     const rowsNumber = await this.getRows();
     const names = [];
-    for (let i = 1; i <= rowsNumber.length; i++) {
-      names.push(String(await this.getTokensTableItemTitle(i)));
+    for (let i = 0; i < rowsNumber.length; i++) {
+      names.push(await this.tokenName(i).getText());
     }
     return names;
   }
@@ -153,22 +114,20 @@ export class TokensPage extends WebElement {
   async getTokenTickers(): Promise<string[]> {
     const rowsNumber = await this.getRows();
     const tickers = [];
-    for (let i = 1; i <= rowsNumber.length; i++) {
-      tickers.push(String(await this.getTokensTableItemSubTitle(i)));
+    for (let i = 0; i < rowsNumber.length; i++) {
+      tickers.push(await this.tokenTicker(i).getText());
     }
     return tickers;
   }
 
   async getTokenRowIndex(tokenName: string): Promise<number> {
     const tokens = await this.getTokenNames();
-    return tokens.indexOf(tokenName) + 1;
+    return tokens.indexOf(tokenName);
   }
 
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
-
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
+  async getTokensCounterAsNumber(): Promise<number> {
+    return SectionTitle.getCounterAsNumber();
   }
 }
+
+export default new TokensPage();
