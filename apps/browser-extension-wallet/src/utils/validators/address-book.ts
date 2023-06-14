@@ -73,7 +73,7 @@ export const isValidAddressPerNetwork = ({
   network: Wallet.Cardano.NetworkId;
 }): boolean => !address || validateAddrPerNetwork[network](address);
 
-export const checkAddressForDuplicate = (
+export const checkForDuplicateAddress = (
   list: AddressBookSchema[],
   record: AddressRecordParams
 ): [boolean, ToastProps | undefined] => {

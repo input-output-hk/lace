@@ -6,7 +6,7 @@ import { addressBookQueries, AddressBookSchema, addressBookSchema, useDbState } 
 import { useWalletStore } from '@src/stores';
 import { Wallet } from '@lace/cardano';
 import { toast } from '@lace/common';
-import { checkAddressForDuplicate } from '@utils/validators';
+import { checkForDuplicateAddress } from '@utils/validators';
 
 interface AddressBookProviderProps {
   children: React.ReactNode;
@@ -32,7 +32,7 @@ export const AddressBookProvider = ({ children, initialState }: AddressBookProvi
   );
 
   const handleSaveAddress = async (record: AddressRecordParams) => {
-    const [hasError, toastParams] = checkAddressForDuplicate(list, record);
+    const [hasError, toastParams] = checkForDuplicateAddress(list, record);
     if (hasError) {
       toast.notify(toastParams);
       throw new Error(toastParams.text);

@@ -1,3 +1,5 @@
+import { AddressBookSchema } from '@lib/storage';
+
 const mockIsAddress = jest.fn();
 /* eslint-disable import/imports-first */
 /* eslint-disable sonarjs/no-duplicate-string */
@@ -6,6 +8,7 @@ import { Wallet } from '@lace/cardano';
 import { ValidationResult } from '../../../types';
 import * as addressBook from '../address-book';
 import i18n from 'i18next';
+import { Cardano } from '@cardano-sdk/core';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
@@ -197,6 +200,31 @@ describe('Testing address book validator', () => {
       expect(addressBook.validateTestnetAddress('addr1')).toEqual(false);
       expect(addressBook.validateTestnetAddress('Ae2')).toEqual(false);
       expect(addressBook.validateTestnetAddress('DdzFF')).toEqual(false);
+    });
+  });
+
+  describe('checkAddressForDuplicate', () => {
+    const mockAddressList: AddressBookSchema[] = Array.from({ length: 4 }, (_v, i) => ({
+      id: i + 1,
+      address: `addr_test${i + 1}`,
+      name: `test wallet ${i + 1}`,
+      network: Cardano.NetworkMagics.Preprod
+    }));
+
+    test('has an already existing name', () => {
+      expect(
+        addressBook.checkForDuplicateAddress(mockAddressList, { name: 'test wallet 1', address: 'addr_test14' })[0]
+      ).toBe(true);
+    });
+    test('has an already existing address', () => {
+      expect(
+        addressBook.checkForDuplicateAddress(mockAddressList, { name: 'test wallet 15', address: 'addr_test2' })[0]
+      ).toBe(true);
+    });
+    test('has a unique name and address', () => {
+      expect(
+        addressBook.checkForDuplicateAddress(mockAddressList, { name: 'test wallet 15', address: 'addr_test15' })[0]
+      ).toBe(false);
     });
   });
 });
