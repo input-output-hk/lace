@@ -27,6 +27,7 @@ export const StakePoolInfo = ({
     <div
       data-testid="staking-pool-info"
       onClick={onClick}
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       className={cn(styles.stakePool, { [styles.popupView!]: popupView })}
     >
       <img className={styles.logo} src={logo} alt="pool-logo" data-testid="stake-pool-logo" />

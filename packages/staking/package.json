@@ -53,10 +53,10 @@
     "watch": "tsup --watch"
   },
   "dependencies": {
-    "@lace/common": "^0.1.0",
     "jdenticon": "^3.2.0"
   },
   "devDependencies": {
+    "@lace/common": "^0.1.0",
     "@lace/ui": "^0.1.0",
     "@ladle/react": "^2.12.3",
     "@tsconfig/create-react-app": "^1.0.3",
@@ -80,6 +80,7 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
+    "@lace/common": "^0.1.0",
     "@lace/ui": "^0.1.0",
     "antd": "^4.17.3",
     "bignumber.js": "^9.0.1",
