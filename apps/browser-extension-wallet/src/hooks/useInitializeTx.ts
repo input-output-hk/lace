@@ -62,7 +62,7 @@ export const useInitializeTx = (
     if (hasInvalidOutputs || reachedMaxAmountList.length > 0) {
       setBuiltTxData({
         uiTx: undefined,
-        txBuilder: undefined,
+        tx: undefined,
         totalMinimumCoins: undefined,
         error: undefined,
         reachedMaxAmountList
@@ -78,15 +78,15 @@ export const useInitializeTx = (
 
         outputsWithMissingCoins.outputs.forEach((output) => txBuilder.addOutput(output));
         txBuilder.metadata(partialTxProps?.auxiliaryData?.blob || new Map());
-        const tx = await txBuilder.build().inspect();
-
+        const tx = txBuilder.build();
+        const inspection = await tx.inspect();
         setBuiltTxData({
           uiTx: {
-            fee: tx.inputSelection.fee,
-            hash: tx.hash,
-            outputs: tx.inputSelection.outputs
+            fee: inspection.inputSelection.fee,
+            hash: inspection.hash,
+            outputs: inspection.inputSelection.outputs
           },
-          txBuilder,
+          tx,
           totalMinimumCoins,
           error: undefined,
           reachedMaxAmountList: []
@@ -95,7 +95,7 @@ export const useInitializeTx = (
         console.error('error initializing transaction:', { error });
         setBuiltTxData({
           uiTx: undefined,
-          txBuilder: undefined,
+          tx: undefined,
           error: error.message,
           reachedMaxAmountList: []
         });

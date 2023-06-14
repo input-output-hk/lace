@@ -8,6 +8,10 @@ class MenuMainExtended {
   private TRANSACTIONS_BUTTON = '//li[@data-testid="item-transactions"]';
   private STAKING_BUTTON = '//li[@data-testid="item-staking"]';
 
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}`);
+  }
+
   get tokensButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER}${this.TOKENS_BUTTON}`);
   }
@@ -26,6 +30,10 @@ class MenuMainExtended {
 
   getIcon(menuItem: ChainablePromiseElement<WebdriverIO.Element>): ChainablePromiseElement<WebdriverIO.Element> {
     return menuItem.$('//*[name()="svg"]');
+  }
+
+  async hoverOverMenu(): Promise<void> {
+    await this.container.moveTo();
   }
 }
 
