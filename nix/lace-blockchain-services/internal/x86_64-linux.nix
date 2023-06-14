@@ -171,6 +171,10 @@ in rec {
     echo 'Compressing...'
     tar -cJ -C ${lace-blockchain-services-bundle} . >>$target
     chmod +x $target
+
+    # Make it downloadable from Hydra:
+    mkdir -p $out/nix-support
+    echo "file binary-dist \"$(echo $out/*.bin)\"" >$out/nix-support/hydra-build-products
   '';
 
   # ----------------------------------------------------------------------------- #
