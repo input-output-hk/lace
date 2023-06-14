@@ -6,19 +6,20 @@ import cs from 'classnames';
 import { SkeletonButton } from '../buttons';
 
 import * as cx from './control-button.css';
+import { Scheme } from './types';
 
 import type { ButtonProps } from '../buttons';
 
-type Props = Omit<ButtonProps, 'className'> & {
+type Props = Omit<ButtonProps, 'className' | 'label'> & {
   icon?: ReactNode;
 };
 
-export const Outlined = (props: Readonly<Props>): JSX.Element => {
+export const Icon = (props: Readonly<Props>): JSX.Element => {
   return (
     <SkeletonButton
       {...props}
       className={{
-        container: cs(cx.container()),
+        container: cs(cx.container({ paddingScheme: Scheme.Icon })),
         label: cx.label(),
       }}
     />

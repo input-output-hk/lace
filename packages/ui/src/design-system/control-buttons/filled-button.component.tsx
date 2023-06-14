@@ -10,7 +10,7 @@ import { Scheme } from './types';
 
 import type { ButtonProps } from '../buttons';
 
-type Props = Omit<ButtonProps, 'className'> & { icon: ReactNode };
+type Props = Omit<ButtonProps, 'className'> & { icon?: ReactNode };
 
 export const Filled = (props: Readonly<Props>): JSX.Element => {
   return (

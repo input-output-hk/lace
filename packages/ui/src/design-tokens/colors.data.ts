@@ -32,6 +32,7 @@ export const colors = {
   $control_buttons_label_color_hover: '',
   $control_buttons_container_bgColor: '',
   $control_buttons_container_bgColor_hover: '',
+  $control_buttons_container_bgColor_filled_hover: '',
   $control_buttons_container_bgColor_pressed: '',
   $control_buttons_container_bgColor_danger: '',
   $control_buttons_container_bgColor_danger_hover: '',
