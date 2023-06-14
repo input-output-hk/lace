@@ -12,7 +12,7 @@ import { ThemeColorScheme, ThemeContext } from './theme.context';
 import type { ThemeContextValue } from './theme.context';
 
 type ThemeProviderProps = PropsWithChildren<{
-  className: 'string';
+  className?: 'string';
   colorScheme: ThemeColorScheme;
 }>;
 
