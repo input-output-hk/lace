@@ -4,8 +4,7 @@ export type ConstructTranslationKeyUnion<T extends RecursiveStructure, K extends
   ? T[K] extends ''
     ? K
     : T[K] extends RecursiveStructure
-    ? // @ts-expect-error TS complains in the version we use but besides that it works as intended
-      `${K}.${ConstructTranslationKeyUnion<T[K]>}`
+    ? `${K}.${ConstructTranslationKeyUnion<T[K]>}`
     : never
   : never;
 
