@@ -9,6 +9,8 @@ import {
   Tooltip,
 } from 'recharts';
 
+import { createLogger } from '../../logger';
+
 import {
   PIE_CHART_DEFAULT_COLOR_SET,
   PieChartGradientColor,
@@ -46,6 +48,8 @@ export type PieChartProps<T extends object | { name: string; value: number }> =
     ? PieChartDefaultKeyProps<T>
     : PieChartCustomKeyProps<T>;
 
+const logger = createLogger('PieChart');
+
 const formatPieColor = (color: PieChartColor): string =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   Boolean(PieChartGradientColor[color as PieChartGradientColor])
@@ -78,9 +82,16 @@ export const PieChart = <T extends object | { name: string; value: number }>({
   const data = inputData.slice(0, colors.length);
 
   if (data.length < inputData.length) {
-    console.error(
-      'UI-Toolkit::PieChart `colors` array length is lower than the `data` array length. The `data` items without corresponding `colors` are not rendered.',
-    );
+    logger.error({
+      message: [
+        '`colors` array length is lower than the `data` array length.',
+        'The `data` items without corresponding `colors` are not rendered.',
+      ],
+      data: {
+        colors,
+        dataCount: inputData.length,
+      },
+    });
   }
 
   return (
