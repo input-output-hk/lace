@@ -12,11 +12,13 @@ import { ThemeColorScheme, ThemeContext } from './theme.context';
 import type { ThemeContextValue } from './theme.context';
 
 type ThemeProviderProps = PropsWithChildren<{
+  className: 'string';
   colorScheme: ThemeColorScheme;
 }>;
 
 export const ThemeProvider = ({
   children,
+  className,
   colorScheme,
 }: Readonly<ThemeProviderProps>): React.ReactElement => {
   const value = useMemo<ThemeContextValue>(
@@ -29,7 +31,7 @@ export const ThemeProvider = ({
   return (
     <ThemeContext.Provider value={value}>
       <div
-        className={cs(cx.root, {
+        className={cs(cx.root, className, {
           [darkTheme]: colorScheme === ThemeColorScheme.Dark,
           [lightTheme]: colorScheme === ThemeColorScheme.Light,
         })}
