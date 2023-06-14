@@ -34,8 +34,7 @@ const stepsConfiguration: AddressDetailsConfig = {
   },
   [AddressDetailsSteps.CREATE]: {
     currentSection: AddressDetailsSteps.CREATE,
-    headerTitle: 'browserView.addressBook.form.addNewAddress',
-    headerSubtitle: 'browserView.addressBook.form.addNewSubtitle'
+    headerTitle: 'browserView.addressBook.form.addNewAddress'
   }
 };
 
@@ -128,7 +127,6 @@ export const AddressDetailDrawer = ({
     currentStepConfig.currentSection === AddressDetailsSteps.EDIT ||
     currentStepConfig.currentSection === AddressDetailsSteps.CREATE;
   const headerTitle = currentStepConfig?.headerTitle && t(currentStepConfig.headerTitle);
-  const headerSubtitle = currentStepConfig?.headerSubtitle && t(currentStepConfig.headerSubtitle);
 
   return (
     <>
@@ -136,7 +134,7 @@ export const AddressDetailDrawer = ({
         keyboard={false}
         className={cn(styles.drawer, { [styles.popupView]: popupView })}
         onClose={onCancelClick}
-        title={<DrawerHeader title={headerTitle} subtitle={headerSubtitle} />}
+        title={<DrawerHeader title={headerTitle} />}
         navigation={
           <DrawerNavigation
             title={t('browserView.addressBook.title')}
