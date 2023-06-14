@@ -1,9 +1,9 @@
-{
-  inputs,
-  cell,
-}:
-assert inputs.nixpkgs.system == "x86_64-linux"; let
-  pkgs = inputs.nixpkgs;
+{ inputs, targetSystem }:
+
+assert targetSystem == "x86_64-linux";
+
+let
+  pkgs = inputs.nixpkgs.legacyPackages.${targetSystem};
 in rec {
   package = lace-blockchain-services;
 
@@ -45,7 +45,7 @@ in rec {
     nixpkgsArgs = { inherit (pkgs) system; };
   })).platform.amd64;
 
-  cardano-js-sdk = inputs.cardanojs-live-mainnet.packages.${pkgs.system}.default;
+  cardano-js-sdk = inputs.cardano-js-sdk.packages.${pkgs.system}.default;
 
   cardano-node = inputs.cardano-node.packages.${pkgs.system}.cardano-node;
 

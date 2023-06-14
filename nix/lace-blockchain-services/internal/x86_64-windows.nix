@@ -1,13 +1,10 @@
-{
-  inputs,
-  cell,
-}:
-assert inputs.nixpkgs.system == "x86_64-linux"; # cross-building for Windows on Linux
+{ inputs, targetSystem }:
 
-  let
-    pkgs = inputs.nixpkgs;
-  in {
-    package = throw "unimplemented";
+assert targetSystem == "x86_64-windows";
 
-    installer = throw "unimplemented";
-  }
+let
+  pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux; # cross-building for Windows on Linux
+in rec {
+  package = pkgs.runCommand "unimplemented" {} "echo unimplemented && exit 1";
+  installer = package;
+}
