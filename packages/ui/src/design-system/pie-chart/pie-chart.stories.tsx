@@ -150,16 +150,17 @@ export const Overview = (): JSX.Element => (
       </Variants.Table>
     </Section>
     <Section title="Dark theme">
+      <Variants.Table
+        headers={[
+          'All colors',
+          PieChartGradientColor.LaceLinearGradient,
+          '',
+          '',
+          '',
+        ]}
+      />
       <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
-        <Variants.Table
-          headers={[
-            'All colors',
-            PieChartGradientColor.LaceLinearGradient,
-            '',
-            '',
-            '',
-          ]}
-        >
+        <Variants.Table headers={['', '', '', '', '']}>
           <Variants.Row>
             <Variants.Cell>
               <PieChart
