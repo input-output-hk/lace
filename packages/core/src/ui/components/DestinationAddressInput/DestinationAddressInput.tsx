@@ -72,7 +72,7 @@ export const DestinationAddressInput = ({
       <>
         {handleIcon}
         <Button
-          disabled={!valid && !empty}
+          disabled={(!valid && !empty) || (handle && handle !== 'valid')}
           data-testid="address-book-btn"
           onClick={valid || empty ? onClick : undefined}
           className={styles.addressBookBtn}
