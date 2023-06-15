@@ -14,7 +14,9 @@ var (
 	ResourcesDir string
 )
 
-// XXX: the only reason we do this, is that we have to hook setting PATH before clipboard.init() runs
+// XXX: we do this because:
+//   • we have to hook setting PATH before "github.com/atotto/clipboard".init() – otherwise xclip is not found,
+//   • and also set XKB_CONFIG_EXTRA_PATH before "github.com/sqweek/dialog".init() – otherwise gtk3 segfaults
 func init() {
 	executablePath, err := os.Executable()
 	if err != nil {
@@ -55,5 +57,13 @@ func init() {
 	err = os.Setenv("PATH", LibexecDir + string(filepath.ListSeparator) + os.Getenv("PATH"))
 	if err != nil {
 		panic(err)
+	}
+
+	// Prevent a gtk3 segfault:
+	if runtime.GOOS == "linux" {
+		err = os.Setenv("XKB_CONFIG_EXTRA_PATH", ResourcesDir + "/xkb")
+		if err != nil {
+			panic(err)
+		}
 	}
 }

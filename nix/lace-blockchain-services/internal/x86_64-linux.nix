@@ -56,7 +56,14 @@ in rec {
     src = ./lace-blockchain-services;
     vendorHash = "sha256-1iyb+4faqZAo6IZf7PYx3Dg+H2IULzhBW80c5loXBPw=";
     nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
-    buildInputs = with pkgs; [ libayatana-appindicator-gtk3 gtk3 ];
+    buildInputs = with pkgs; [
+      (libayatana-appindicator-gtk3.override {
+        gtk3 = gtk3-x11;
+        libayatana-indicator = libayatana-indicator.override { gtk3 = gtk3-x11; };
+        libdbusmenu-gtk3 = libdbusmenu-gtk3.override { gtk3 = gtk3-x11; };
+      })
+      gtk3-x11
+    ];
     overrideModAttrs = oldAttrs: {
       buildInputs = (oldAttrs.buildInputs or []) ++ buildInputs;
     };
@@ -78,6 +85,7 @@ in rec {
 
     mkdir -p $out/share
     ln -s ${cardano-js-sdk}/libexec/source $out/share/cardano-js-sdk
+    ln -s ${pkgs.xkeyboard_config}/share/X11/xkb $out/share/xkb
   '';
 
   nix-bundle-exe = pkgs.fetchFromGitHub {
@@ -168,7 +176,7 @@ in rec {
     mkdir -p $out
     target=$out/lace-blockchain-services-${revShort}-x86_64-linux.bin
     cat $scriptPath >$target
-    echo 'Compressing...'
+    echo 'Compressing (xz)...'
     tar -cJ -C ${lace-blockchain-services-bundle} . >>$target
     chmod +x $target
 
