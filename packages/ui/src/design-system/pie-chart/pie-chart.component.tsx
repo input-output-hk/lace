@@ -23,7 +23,6 @@ import type { PickByValue } from 'utility-types';
 type PieChartDataProps = Partial<{
   overrides: CellProps;
 }>;
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type PieChartColor = ColorValueHex | PieChartGradientColor;
 interface PieChartBaseProps<T extends object> {
   animate?: boolean;
@@ -51,10 +50,8 @@ export type PieChartProps<T extends object | { name: string; value: number }> =
 const logger = createLogger('PieChart');
 
 const formatPieColor = (color: PieChartColor): string =>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   Boolean(PieChartGradientColor[color as PieChartGradientColor])
-    ? // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `url(#${color})`
+    ? `url(#${color})`
     : color;
 
 /**
