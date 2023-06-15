@@ -346,6 +346,7 @@ export const useWalletManager = (): UseWalletManager => {
       setCurrentChain(chainName);
       setCardanoCoin(chainId);
       setKeyAgentData(newKeyAgent);
+      deleteFromLocalStorage('handle');
     },
     [
       backgroundService,
