@@ -5,11 +5,11 @@ assert targetSystem == "x86_64-linux";
 let
   pkgs = inputs.nixpkgs.legacyPackages.${targetSystem};
 in rec {
+  common = import ./common.nix { inherit inputs targetSystem; };
+
   package = lace-blockchain-services;
 
   installer = selfExtractingArchive;
-
-  flake-compat = import inputs.cardano-node.inputs.flake-compat;
 
   # XXX: whenever updating Ogmios, make sure to update `ogmiosInputs` below (based on `${ogmiosSrc}/default.nix`):
   ogmiosSrc = pkgs.fetchFromGitHub {
@@ -21,7 +21,7 @@ in rec {
 
   ogmiosInputs = {
     haskellNix = let
-      self = flake-compat {
+      self = common.flake-compat {
         src = pkgs.fetchzip {
           url = "https://github.com/input-output-hk/haskell.nix/archive/0.0.117.tar.gz";
           hash = "sha256-oSlxyFCsmG/z1Vks8RT94ZagrzTPT/WMwT7OOiEsyzI=";
@@ -86,6 +86,7 @@ in rec {
     mkdir -p $out/share
     ln -s ${cardano-js-sdk}/libexec/source $out/share/cardano-js-sdk
     ln -s ${pkgs.xkeyboard_config}/share/X11/xkb $out/share/xkb
+    ln -s ${common.networkConfigs} $out/share/cardano-node-config
   '';
 
   nix-bundle-exe = pkgs.fetchFromGitHub {

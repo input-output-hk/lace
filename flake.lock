@@ -181,6 +181,23 @@
         "type": "github"
       }
     },
+    "cardano-world": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1669292447,
+        "narHash": "sha256-jExpemhCh8eBuqwrKywYBfgCKRCpcO2JQwm9YRhKQgU=",
+        "owner": "input-output-hk",
+        "repo": "cardano-world",
+        "rev": "666ed9a3041768d785bd52487a0ed85b4538c69e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "input-output-hk",
+        "repo": "cardano-world",
+        "rev": "666ed9a3041768d785bd52487a0ed85b4538c69e",
+        "type": "github"
+      }
+    },
     "customConfig": {
       "locked": {
         "lastModified": 1630400035,
@@ -656,6 +673,7 @@
       "inputs": {
         "cardano-js-sdk": "cardano-js-sdk",
         "cardano-node": "cardano-node",
+        "cardano-world": "cardano-world",
         "nixpkgs": "nixpkgs_4"
       }
     },

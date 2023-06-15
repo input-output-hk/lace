@@ -10,9 +10,11 @@ import (
 	"net"
 	"net/http"
 	"bufio"
+	"io/ioutil"
 	"path/filepath"
 	"runtime"
 	"time"
+	"sort"
 	"strings"
 	"strconv"
 	"regexp"
@@ -85,6 +87,9 @@ func main() {
 		}
 	}()
 
+	networks := readDirAsStrings(ourpaths.NetworkConfigDir)
+	sort.Strings(networks)
+
 	commUI, commManager := func() (CommChannels_UI, CommChannels_Manager) {
 		ogmiosStatus := make(chan string, 1)
 		ogmiosStatus <- "off"
@@ -139,7 +144,7 @@ func main() {
 		}
 	}()
 
-	go systray.Run(setupTrayUI(commUI, logFile), func(){})
+	go systray.Run(setupTrayUI(commUI, logFile, networks), func(){})
 	defer systray.Quit()
 
 	manageChildren(commManager)
@@ -174,6 +179,7 @@ type CommChannels_Manager struct {
 func setupTrayUI(
 	comm CommChannels_UI,
 	logFile string,
+	networks []string,
 ) func() { return func() {
 	iconData, err := Asset("cardano.png")
 	if err != nil {
@@ -183,7 +189,6 @@ func setupTrayUI(
 
 	mChooseNetwork := systray.AddMenuItem("Network", "")
 
-	networks := []string{"mainnet", "preprod", "preview"}
 	mNetworks := make(map[string](*systray.MenuItem))
 	currentNetwork := ""
 	for _, network := range networks {
@@ -335,7 +340,7 @@ type ManagedChild struct {
 
 type HealthStatus struct {
 	Initialized bool          // whether to continue with launching other dependant processes
-	DoRestart bool               // restart everything (even before it's considered initialized)
+	DoRestart bool            // restart everything (even before it's considered initialized)
 	NextProbeIn time.Duration // when to schedule the next HealthProbe
 	LastErr error
 }
@@ -367,8 +372,7 @@ func manageChildren(comm CommChannels_Manager) {
 
 		cardanoServicesDir := (ourpaths.ResourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
 			sep + "cardano-services")
-		cardanoNodeConfigDir := (cardanoServicesDir + sep + "config" + sep + "network" +
-			sep + network + sep + "cardano-node")
+		cardanoNodeConfigDir := ourpaths.NetworkConfigDir + sep + network
 		cardanoNodeSocket := ourpaths.WorkDir + sep + network + sep + "cardano-node.socket"
 
 		var ogmiosPort int
@@ -900,4 +904,20 @@ func logSystemHealth() {
 
 	fmt.Printf("%s: load average: %.2f, %.2f, %.2f\n", ourPrefix,
 		avgStat.Load1, avgStat.Load5, avgStat.Load15)
+}
+
+func readDirAsStrings(dirPath string) []string {
+	files, err := ioutil.ReadDir(ourpaths.NetworkConfigDir)
+	if err != nil {
+		panic(err)
+	}
+	rv := []string{}
+	for _, file := range files {
+		name := file.Name()
+		if name == "." || name == ".." {
+			continue
+		}
+		rv = append(rv, name)
+	}
+	return rv
 }

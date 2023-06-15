@@ -12,6 +12,8 @@
       };
     };
     cardano-js-sdk.url = "github:input-output-hk/cardano-js-sdk/693689d3f457799c674bed51878a7078b7ddbd0e";
+    cardano-world.url = "github:input-output-hk/cardano-world/666ed9a3041768d785bd52487a0ed85b4538c69e";
+    cardano-world.flake = false; # otherwise, +19k `divnix/std` dependencies in flake.lock
   };
 
   outputs = inputs: let

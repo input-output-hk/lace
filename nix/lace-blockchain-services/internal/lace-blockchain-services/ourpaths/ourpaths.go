@@ -12,6 +12,7 @@ var (
 	WorkDir string
 	LibexecDir string
 	ResourcesDir string
+	NetworkConfigDir string
 )
 
 // XXX: we do this because:
@@ -52,6 +53,8 @@ func init() {
 	default:
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
+
+	NetworkConfigDir = ResourcesDir + string(filepath.Separator) + "cardano-node-config"
 
 	// Prepend our libexec to PATH – e.g. for xclip on Linux, which is not installed on all distributions
 	err = os.Setenv("PATH", LibexecDir + string(filepath.ListSeparator) + os.Getenv("PATH"))
