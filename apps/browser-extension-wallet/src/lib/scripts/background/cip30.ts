@@ -11,19 +11,20 @@ import { DAPP_CHANNELS } from '../../../utils/constants';
 import { DappDataService } from '../types';
 import { BehaviorSubject, of } from 'rxjs';
 
-const dappSignTxData$ = new BehaviorSubject<Wallet.Cardano.Tx>(undefined);
+const dappSignTxData$ = new BehaviorSubject<{ dappInfo: Wallet.DappInfo; tx: Wallet.Cardano.Tx }>(undefined);
 const dappSignData$ = new BehaviorSubject<{
-  addr: Wallet.Cardano.PaymentAddress;
-  payload: Wallet.HexBlob;
+  dappInfo: Wallet.DappInfo;
+  sign: { addr: Wallet.Cardano.PaymentAddress; payload: Wallet.HexBlob };
 }>(undefined);
 
-const getDappInfoFromLastActiveTab: () => Promise<Wallet.DappInfo> = async () =>
-  await getLastActiveTab().then((t) => ({
-    logo: t.favIconUrl || getRandomIcon({ id: origin, size: 40 }),
-    name: t.title || t.url.split('//')[1],
-    url: t.url.replace(/\/$/, '')
-  }));
-
+const getDappInfoFromLastActiveTab: () => Promise<Wallet.DappInfo> = async () => {
+  const lastActiveTab = await getLastActiveTab();
+  return {
+    logo: lastActiveTab.favIconUrl || getRandomIcon({ id: origin, size: 40 }),
+    name: lastActiveTab.title || lastActiveTab.url.split('//')[1].trim(),
+    url: lastActiveTab.url.replace(/\/$/, '')
+  };
+};
 export const confirmationCallback: walletCip30.CallbackConfirmation = async (
   args: walletCip30.SignDataCallbackParams | walletCip30.SignTxCallbackParams | walletCip30.SubmitTxCallbackParams
 ): Promise<boolean> => {
@@ -38,7 +39,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = async (
     case walletCip30.Cip30ConfirmationCallbackType.SignTx: {
       try {
         const { logo, name, url } = await getDappInfoFromLastActiveTab();
-        dappSignTxData$.next(args.data);
+        dappSignTxData$.next({ dappInfo: { logo, name, url }, tx: args.data });
         await ensureUiIsOpenAndLoaded(`#/dapp/sign-tx?url=${url}&name=${name}&logo=${logo}`);
 
         return userPromptService.allowSignTx();
@@ -52,7 +53,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = async (
     case walletCip30.Cip30ConfirmationCallbackType.SignData: {
       try {
         const { logo, name, url } = await getDappInfoFromLastActiveTab();
-        dappSignData$.next(args.data);
+        dappSignData$.next({ dappInfo: { logo, name, url }, sign: args.data });
         await ensureUiIsOpenAndLoaded(`#/dapp/sign-data?url=${url}&name=${name}&logo=${logo}`);
 
         return userPromptService.allowSignData();

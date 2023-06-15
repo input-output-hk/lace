@@ -38,8 +38,7 @@ const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const ConfirmTransaction = withAddressBookContext((): React.ReactElement => {
   const {
-    utils: { setNextView },
-    dappInfo
+    utils: { setNextView }
   } = useViewsFlowContext();
   const { t } = useTranslation();
   const {
@@ -63,6 +62,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     [keyAgentType]
   );
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
+  const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
   const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
     const assetIds: Wallet.Cardano.AssetId[] = [];
@@ -129,8 +129,9 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   useEffect(() => {
     dappDataApi
       .getSignTxData()
-      .then(async (txData) => {
-        setTx(txData);
+      .then(({ dappInfo: backgroundDappInfo, tx: backgroundTx }) => {
+        setDappInfo(backgroundDappInfo);
+        setTx(backgroundTx);
       })
       .catch((error) => setErrorMessage(error));
   }, []);

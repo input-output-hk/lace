@@ -13,7 +13,9 @@ const DEBOUNCE_THROTTLE = 500;
 export const requestAccess: RequestAccess = async (origin: Origin) => {
   const launchingTab = await getLastActiveTab();
   const { logo, name, url } = await getDappInfo(origin);
-  const dappUrl = `#/dapp/connect?url=${url}&name=${name}&logo=${logo}`;
+  const encodedName = encodeURIComponent(name);
+  const encodedLogo = encodeURIComponent(logo);
+  const dappUrl = `#/dapp/connect?url=${url}&name=${encodedName}&logo=${encodedLogo}`;
   await ensureUiIsOpenAndLoaded(dappUrl);
   const isAllowed = await userPromptService.allowOrigin(origin);
   if (isAllowed === 'deny') return Promise.resolve(false);

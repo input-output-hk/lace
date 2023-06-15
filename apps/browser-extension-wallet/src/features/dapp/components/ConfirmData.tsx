@@ -37,14 +37,14 @@ const hasJsonStructure = (str: string): boolean => {
 
 export const DappConfirmData = (): React.ReactElement => {
   const {
-    utils: { setNextView },
-    dappInfo
+    utils: { setNextView }
   } = useViewsFlowContext();
   const { getKeyAgentType } = useWalletStore();
   const { t } = useTranslation();
   const [redirectToSignFailure] = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const [redirectToSignSuccess] = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
+  const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const isUsingHardwareWallet = useMemo(
     () => getKeyAgentType() !== Wallet.KeyManagement.KeyAgentType.InMemory,
     [getKeyAgentType]
@@ -84,15 +84,16 @@ export const DappConfirmData = (): React.ReactElement => {
 
     dappDataApi
       .getSignDataData()
-      .then((txData) => {
-        const dataFromHex = fromHex(txData.payload);
-        const txDataAddress = txData.addr.toString();
+      .then(({ sign: backgroundData, dappInfo: backgroundDappInfo }) => {
+        const dataFromHex = fromHex(backgroundData.payload);
+        const txDataAddress = backgroundData.addr.toString();
         const jsonStructureOrHexString = {
           address: txDataAddress,
           dataToSign: hasJsonStructure(dataFromHex)
             ? JSON.stringify(JSON.parse(dataFromHex), undefined, INDENT_SPACING)
             : dataFromHex
         };
+        setDappInfo(backgroundDappInfo);
         setFormattedData(jsonStructureOrHexString);
       })
       .catch((error) => {
