@@ -385,7 +385,11 @@ func manageChildren(comm CommChannels_Manager) {
 		childrenDefs := []ManagedChild{
 			func() ManagedChild {
 				hostname, _ := os.Hostname()
-				droppedHostname := fmt.Sprintf("[%s:cardano.node.", hostname)
+				trimmedHostname := hostname
+				if (len(trimmedHostname) > 8) {
+					trimmedHostname = trimmedHostname[:8]
+				}
+				droppedHostname := fmt.Sprintf("[%s:cardano.node.", trimmedHostname)
 				removeTimestamp := func(line string, when time.Time) string {
 					needle := when.Format("[2006-01-02 15:04:05.")
 					index := strings.Index(line, needle)
