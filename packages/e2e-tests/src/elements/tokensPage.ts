@@ -93,8 +93,8 @@ class TokensPage {
   }
 
   async getTokenBalanceAsFloatByIndex(index: number): Promise<number> {
-    const tokenValue = await this.tokenBalance(index).getText();
-    return Number.parseFloat(tokenValue.replace(/,/g, ''));
+    const tokenBalance = await this.tokenBalance(index).getText();
+    return Number.parseFloat(tokenBalance.replace(/,/g, ''));
   }
 
   async getTokenBalanceAsFloatByName(tokenName: string): Promise<number> {

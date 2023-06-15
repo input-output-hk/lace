@@ -85,8 +85,8 @@ class TokensPageAssert {
     const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(0);
     await expect(tokenBalance).to.be.greaterThan(0);
 
-    const tokenValueFiat = (await TokensPage.tokenFiatBalance(0).getText()).replace(',', '');
-    const tokenValueFiatFloat = Number.parseFloat(tokenValueFiat.split(' ')[0]);
+    const tokenFiatBalance = (await TokensPage.tokenFiatBalance(0).getText()).replace(',', '');
+    const tokenValueFiatFloat = Number.parseFloat(tokenFiatBalance.split(' ')[0]);
     await expect(tokenValueFiatFloat).to.be.greaterThan(0);
   };
 
@@ -100,11 +100,11 @@ class TokensPageAssert {
       // TODO: verify price cells in extended mode
     }
 
-    const tokenValue = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
-    await expect(tokenValue).to.be.greaterThan(0);
+    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
+    await expect(tokenBalance).to.be.greaterThan(0);
 
-    const tokensFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
-    await expect(tokensFiatBalance).to.equal('-');
+    const tokenFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
+    await expect(tokenFiatBalance).to.equal('-');
   };
 
   assertSeeHoskyItem = async (mode: 'extended' | 'popup') => {
@@ -115,8 +115,8 @@ class TokensPageAssert {
     if (mode === 'extended') {
       // TODO: verify price cells in extended mode
     }
-    const tokenValue = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
-    await expect(tokenValue).to.be.greaterThan(0);
+    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
+    await expect(tokenBalance).to.be.greaterThan(0);
 
     const tokenFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
     await expect(tokenFiatBalance).to.equal('-');
@@ -128,8 +128,8 @@ class TokensPageAssert {
       await expect(await TokensPage.getTokenNames()).to.contain(tokenDetails.name);
       await expect(await TokensPage.getTokenTickers()).to.contain(tokenDetails.ticker);
       const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenDetails.name);
-      const tokenValue = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
-      await expect(tokenValue).to.equal(tokenDetails.value);
+      const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
+      await expect(tokenBalance).to.equal(tokenDetails.value);
       if (mode === 'extended') {
         // TODO: verify price cells in extended mode
       }
