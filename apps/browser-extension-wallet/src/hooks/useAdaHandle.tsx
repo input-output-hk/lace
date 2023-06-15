@@ -1,5 +1,5 @@
 /* eslint-disable consistent-return */
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { getTokenList, NFT } from '@utils/get-token-list';
 import { useCurrencyStore } from '@providers';
 import { useObservable } from '@hooks/useObservable';
@@ -7,7 +7,7 @@ import { DEFAULT_WALLET_BALANCE } from '@utils/constants';
 import { useWalletStore } from '@stores';
 import { Cardano } from '@cardano-sdk/core';
 import { ADA_HANDLE_POLICY_ID } from '@src/features/ada-handle/config';
-import { getValueFromLocalStorage, saveValueInLocalStorage } from '@utils/local-storage';
+import { deleteFromLocalStorage, getValueFromLocalStorage, saveValueInLocalStorage } from '@utils/local-storage';
 
 const getAdaHandle = (nfts: NFT[]): NFT => {
   if (nfts.length === 0) return;
@@ -26,12 +26,24 @@ export const useAdaHandle = (): NFT => {
   const assetsBalance = useObservable(inMemoryWallet.balance.utxo.total$, DEFAULT_WALLET_BALANCE.utxo.total$);
   const storedHandle = getValueFromLocalStorage('handle');
 
-  return (
-    useMemo(() => {
+  const [handle, setHandle] = useState<NFT | undefined>();
+
+  useEffect(() => {
+    const fetchData = async () => {
       const { nftList } = getTokenList({ assetsInfo, balance: assetsBalance?.assets, environmentName, fiatCurrency });
-      const handle = getAdaHandle(nftList);
-      handle && saveValueInLocalStorage({ key: 'handle', value: handle });
-      return handle;
-    }, [assetsBalance?.assets, assetsInfo, environmentName, fiatCurrency]) || storedHandle
-  );
+      const resolvedHandle = await getAdaHandle(nftList);
+      resolvedHandle && saveValueInLocalStorage({ key: 'handle', value: resolvedHandle });
+      setHandle(resolvedHandle);
+    };
+
+    fetchData();
+  }, [assetsBalance?.assets, assetsInfo, environmentName, fiatCurrency]);
+
+  useEffect(() => {
+    if (handle === undefined) {
+      deleteFromLocalStorage('handle');
+    }
+  }, [handle]);
+
+  return handle || storedHandle;
 };
