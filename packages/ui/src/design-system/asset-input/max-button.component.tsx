@@ -8,7 +8,7 @@ import * as cx from './max-button.css';
 
 import type { OmitClassName } from '../../types';
 
-export type Props = OmitClassName<HTMLButtonElement> & {
+export type Props = OmitClassName<'button'> & {
   label?: string;
 };
 
