@@ -182,7 +182,7 @@ Feature: General Settings - Extended Browser View
     Then I see information about empty address book
 
   @LW-5471 @Testnet
-  Scenario: Extended View - Settings - Addresses are not shared when switching Test Preprod to Test Preview
+  Scenario: Extended View - Settings - Addresses entered in Preprod context are not available when switching to Preview
     Given I have 3 addresses in my address book in extended mode
     And I see address count: 3
     When I switch network to: "Preview" in extended mode

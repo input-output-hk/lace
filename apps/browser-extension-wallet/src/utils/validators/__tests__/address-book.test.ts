@@ -203,7 +203,7 @@ describe('Testing address book validator', () => {
     });
   });
 
-  describe('checkAddressForDuplicate', () => {
+  describe('hasAddressBookItem', () => {
     const mockAddressList: AddressBookSchema[] = Array.from({ length: 4 }, (_v, i) => ({
       id: i + 1,
       address: `addr_test${i + 1}`,
@@ -211,19 +211,19 @@ describe('Testing address book validator', () => {
       network: Cardano.NetworkMagics.Preprod
     }));
 
-    test('has an already existing name', () => {
+    test('has item with the same name', () => {
       expect(
-        addressBook.checkForDuplicateAddress(mockAddressList, { name: 'test wallet 1', address: 'addr_test14' })[0]
+        addressBook.hasAddressBookItem(mockAddressList, { name: 'test wallet 1', address: 'addr_test14' })[0]
       ).toBe(true);
     });
-    test('has an already existing address', () => {
+    test('has item with the same address', () => {
       expect(
-        addressBook.checkForDuplicateAddress(mockAddressList, { name: 'test wallet 15', address: 'addr_test2' })[0]
+        addressBook.hasAddressBookItem(mockAddressList, { name: 'test wallet 15', address: 'addr_test2' })[0]
       ).toBe(true);
     });
-    test('has a unique name and address', () => {
+    test('does not have an item with the same name and address', () => {
       expect(
-        addressBook.checkForDuplicateAddress(mockAddressList, { name: 'test wallet 15', address: 'addr_test15' })[0]
+        addressBook.hasAddressBookItem(mockAddressList, { name: 'test wallet 15', address: 'addr_test15' })[0]
       ).toBe(false);
     });
   });
