@@ -54,7 +54,7 @@ func main() {
 	lockFile := ourpaths.WorkDir + sep + "instance.lock"
 	lockFileFile, err := singleinstance.CreateLockFile(lockFile)
 	if err != nil {
-		dialog.Message("Another instance of ‘%s’ is already running.",
+		dialog.Message("Another instance of ‘%s’ is already running.\n\nCheck in the system tray area.",
 			OurLogPrefix).Title("Already running!").Error()
 		os.Exit(1)
 	}
