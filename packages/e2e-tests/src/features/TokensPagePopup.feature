@@ -61,3 +61,30 @@ Feature: LW: Tokens tab - popup view
   Scenario: CoinGecko credits - redirection
     When I click on "CoinGecko" link
     Then "www.coingecko.com" page is displayed in new tab
+
+  @LW-6684 @Mainnet
+  Scenario: Price fetch expired error is displayed
+    Given ADA FIAT price has been fetched
+    And I enable network interception to fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*"
+    Then fiat prices expired fetch error info is displayed
+    And I disable network interception
+    Then ADA FIAT price has been fetched
+
+  @LW-6682 @Mainnet
+  Scenario: Fiat price unable to fetch error is displayed on failed request
+    Given ADA FIAT price has been fetched
+    And I enable network interception to fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*"
+    And I delete fiat price from local storage
+    Then fiat prices unable to fetch error info is displayed
+    And I disable network interception
+    Then ADA FIAT price has been fetched
+
+  @LW-6683 @Mainnet @Pending
+  #bug LW-6798
+  Scenario: Fiat price unable to fetch error is displayed on error request
+    Given ADA FIAT price has been fetched
+    And I enable network interception to finish and fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*" with error 500
+    And I delete fiat price from local storage
+    Then fiat prices expired fetch error info is displayed
+    And I disable network interception
+    Then ADA FIAT price has been fetched

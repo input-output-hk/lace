@@ -17,6 +17,7 @@ export class TokensPage extends WebElement {
   private COINGECKO_LINK = '[data-testid="coingecko-link"]';
   private RECEIVE_BUTTON_POPUP_MODE = 'main [data-testid="receive-button"]';
   private SEND_BUTTON_POPUP_MODE = 'main [data-testid="send-button"]';
+  private PRICE_FETCH_ERROR_DESCRIPTION = '[data-testid="banner-description"]';
 
   constructor() {
     super();
@@ -82,6 +83,14 @@ export class TokensPage extends WebElement {
     );
   }
 
+  tokensTableItemValuePriceAda(index: number): WebElement {
+    return Factory.fromSelector(`(${this.TOKENS_TABLE_ROW}[${index}]${this.TOKENS_TABLE_ITEM_TITLE})[2]`, 'xpath');
+  }
+
+  tokensTableItemValuePriceChange(index: number): WebElement {
+    return Factory.fromSelector(`(${this.TOKENS_TABLE_ROW}[${index}]${this.TOKENS_TABLE_ITEM_SUBTITLE})[2]`, 'xpath');
+  }
+
   tokensTableItemWithName(tokenName: string): ChainablePromiseElement<WebdriverIO.Element> {
     const selector = `${this.TOKENS_TABLE_ROW}[descendant::*[text()='${tokenName}']]`;
     return $(selector);
@@ -131,6 +140,14 @@ export class TokensPage extends WebElement {
     return await webTester.getTextValueFromElement(this.tokensTableItemValueFiat(index, mode));
   }
 
+  async getTokenTableItemValuePriceAdaByIndex(index: number): Promise<string | number> {
+    return await webTester.getTextValueFromElement(this.tokensTableItemValuePriceAda(index));
+  }
+
+  async getTokenTableItemValuePriceChangeByIndex(index: number): Promise<string | number> {
+    return await webTester.getTextValueFromElement(this.tokensTableItemValuePriceChange(index));
+  }
+
   async getTokenNames(): Promise<string[]> {
     const rowsNumber = await this.getRows();
     const names = [];
@@ -152,6 +169,10 @@ export class TokensPage extends WebElement {
   async getTokenRowIndex(tokenName: string): Promise<number> {
     const tokens = await this.getTokenNames();
     return tokens.indexOf(tokenName) + 1;
+  }
+
+  get getPriceFetchErrorDescription(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PRICE_FETCH_ERROR_DESCRIPTION);
   }
 
   toJSLocator(): string {

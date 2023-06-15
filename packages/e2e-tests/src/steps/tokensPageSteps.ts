@@ -36,8 +36,8 @@ Then(
   /^I see Cardano & LaceCoin tokens on the list with all the details in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
     await tokensPageAssert.assertSeeTableItems(mode);
-    await tokensPageAssert.assertSeeCardanoItem(mode);
-    await tokensPageAssert.assertSeeLaceCoinItem(mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.CARDANO, mode);
+    await tokensPageAssert.assertSeeNotNativeToken(Asset.LACE_COIN, mode);
   }
 );
 
@@ -45,8 +45,8 @@ Then(
   /^I see Cardano & Hosky tokens on the list with all the details in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
     await tokensPageAssert.assertSeeTableItems(mode);
-    await tokensPageAssert.assertSeeCardanoItem(mode);
-    await tokensPageAssert.assertSeeHoskyItem(mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.CARDANO, mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.HOSKY_TOKEN, mode);
   }
 );
 
@@ -199,4 +199,16 @@ When(/^I click "(Receive|Send)" button on Tokens page in popup mode$/, async (bu
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+Then(/^fiat prices expired fetch error info is displayed$/, async () => {
+  await tokensPageAssert.seePriceFetchExpiredErrorMessage();
+});
+
+Then(/^fiat prices unable to fetch error info is displayed$/, async () => {
+  await tokensPageAssert.seePriceFetchFailedErrorMessage();
+});
+
+Then(/^fiat prices expired fetch error info is displayed in token details modal$/, async () => {
+  await tokensPageAssert.seePriceFetchExpiredErrorMessageInTokenDetailsScreen();
 });

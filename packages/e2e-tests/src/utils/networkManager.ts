@@ -61,7 +61,7 @@ export class NetworkManager {
     await browser.pause(2000);
   };
 
-  failResponse = async (urlPattern: string, responseCode: number): Promise<any> => {
+  finishWithFailResponse = async (urlPattern: string, responseCode: number): Promise<any> => {
     await browser.call(async () => {
       const puppeteer = await browser.getPuppeteer();
       const targets = puppeteer
@@ -81,6 +81,31 @@ export class NetworkManager {
             requestId,
             responseCode: Number(responseCode),
             body: Buffer.from('{"__type": "Error"}').toString('base64')
+          });
+        });
+      });
+    });
+  };
+
+  failRequest = async (urlPattern: string): Promise<any> => {
+    await browser.call(async () => {
+      const puppeteer = await browser.getPuppeteer();
+      const targets = puppeteer
+        .targets()
+        .filter(
+          (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
+        );
+      targets.map(async (target) => {
+        const client = await target.createCDPSession();
+        NetworkManager.cdpSessions.push(client);
+        await client.send('Fetch.enable', {
+          patterns: [{ urlPattern }]
+        });
+        client.on('Fetch.requestPaused', async ({ requestId, request }) => {
+          Logger.log(`found request: ${request.url}, failing request`);
+          await client.send('Fetch.failRequest', {
+            requestId,
+            errorReason: 'Failed'
           });
         });
       });
@@ -119,6 +144,11 @@ export class NetworkManager {
       if (session.connection()) await session.detach();
     });
     NetworkManager.cdpSessions = [];
+  };
+
+  waitForPricesToBeFetched = async (): Promise<void> => {
+    const ADA_PRICE_CHECK_INTERVAL = 65_000;
+    await browser.pause(ADA_PRICE_CHECK_INTERVAL);
   };
 
   private getRequestPostData = async (client: any, requestId: any): Promise<string> => {

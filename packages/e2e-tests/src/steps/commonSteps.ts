@@ -16,7 +16,11 @@ import networkManager from '../utils/networkManager';
 import { DrawerCommonExtended } from '../elements/drawerCommonExtended';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
-import { cleanBrowserStorage } from '../utils/browserStorage';
+import {
+  cleanBrowserStorage,
+  confirmFiatPricesAreInLocalStorage,
+  deleteFiatPriceFromBrowserStorage
+} from '../utils/browserStorage';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
@@ -27,6 +31,7 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
+import { browser } from '@wdio/globals';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -122,11 +127,19 @@ When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' 
 });
 
 When(
-  /^I enable network interception to fail request: "([^"]*)" with error (\d*)$/,
+  /^I enable network interception to finish and fail request: "([^"]*)" with error (\d*)$/,
   async (urlPattern: string, errorCode: number) => {
-    await networkManager.failResponse(urlPattern, errorCode);
+    await networkManager.finishWithFailResponse(urlPattern, errorCode);
   }
 );
+
+When(/^I enable network interception to fail request: "([^"]*)"$/, async (urlPattern: string) => {
+  await networkManager.failRequest(urlPattern);
+});
+
+Then(/^I disable network interception$/, async () => {
+  await networkManager.closeOpenedCdpSessions();
+});
 
 When(/^I click outside the drawer$/, async () => {
   await $(new DrawerCommonExtended().areaOutsideDrawer().toJSLocator()).click();
@@ -189,6 +202,14 @@ Then(/^I close all remaining tabs except current one$/, async () => {
 
 Then(/^I switch to window with Lace$/, async () => {
   await switchToWindowWithLace();
+});
+
+Given(/^I delete fiat price from local storage$/, async () => {
+  await deleteFiatPriceFromBrowserStorage();
+});
+
+Given(/^ADA FIAT price has been fetched$/, async () => {
+  await confirmFiatPricesAreInLocalStorage();
 });
 
 Then(/^I (see|do not see) a horizontal scroll$/, async (shouldSee: 'see' | 'do not see') => {

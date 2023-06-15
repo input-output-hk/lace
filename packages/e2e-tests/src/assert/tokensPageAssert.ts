@@ -8,6 +8,7 @@ import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
+import Banner from '../elements/banner';
 
 type ExpectedTokenDetails = {
   name: string;
@@ -127,6 +128,55 @@ class TokensPageAssert {
     await expect(tokenValueFiat).to.equal('-');
   };
 
+  assertSeeNativeToken = async (tokenName: Asset, mode: 'extended' | 'popup') => {
+    await this.assertSeeTokenItemBasicData(tokenName, mode);
+    await this.assertSeeNativeTokenData(tokenName, mode);
+  };
+
+  assertSeeNotNativeToken = async (tokenName: Asset, mode: 'extended' | 'popup') => {
+    await this.assertSeeTokenItemBasicData(tokenName, mode);
+    await this.assertSeeNotNativeTokenData(tokenName, mode);
+  };
+
+  assertSeeTokenItemBasicData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
+    const tokensPage = new TokensPage();
+    await expect(await tokensPage.getTokenNames()).to.contain(tokenName.name);
+    await expect(await tokensPage.getTokenTickers()).to.contain(tokenName.ticker);
+    const tokensTableIndex = await tokensPage.getTokenRowIndex(tokenName.name);
+    const tokenValue = await tokensPage.getTokenTableItemValueByIndex(tokensTableIndex, mode);
+    await expect(tokenValue).to.be.greaterThan(0);
+  };
+
+  assertSeeNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
+    const tokensPage = new TokensPage();
+    const tokensTableIndex = await tokensPage.getTokenRowIndex(tokenName.name);
+    const tokenValueFiat = (await tokensPage.getTokenTableItemValueFiatByIndex(tokensTableIndex, mode)) as string;
+    await expect(tokenValueFiat).to.match(new RegExp('^([\\d+,.])+\\.\\d{2}\\s\\D{2,3}$'));
+    if (mode === 'extended') {
+      const tokenValuePriceAda = (await tokensPage.getTokenTableItemValuePriceAdaByIndex(tokensTableIndex)) as string;
+      await expect(tokenValuePriceAda).to.match(new RegExp('^\\d+\\.\\d+$'));
+      const tokenValuePriceChange = (await tokensPage.getTokenTableItemValuePriceChangeByIndex(
+        tokensTableIndex
+      )) as string;
+      await expect(tokenValuePriceChange).to.match(new RegExp('^([-+])\\d+\\.\\d{2}$'));
+    }
+  };
+
+  assertSeeNotNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
+    const tokensPage = new TokensPage();
+    const tokensTableIndex = await tokensPage.getTokenRowIndex(tokenName.name);
+    const tokenValueFiat = (await tokensPage.getTokenTableItemValueFiatByIndex(tokensTableIndex, mode)) as string;
+    await expect(tokenValueFiat).to.equal('-');
+    if (mode === 'extended') {
+      const tokenValuePriceAda = (await tokensPage.getTokenTableItemValuePriceAdaByIndex(tokensTableIndex)) as string;
+      await expect(tokenValuePriceAda).to.equal('-');
+      const tokenValuePriceChange = (await tokensPage.getTokenTableItemValuePriceChangeByIndex(
+        tokensTableIndex
+      )) as string;
+      await expect(tokenValuePriceChange).to.equal('-');
+    }
+  };
+
   async assertSeeToken(shouldSee: boolean, tokenDetails: ExpectedTokenDetails, mode: 'extended' | 'popup') {
     const tokensPage = new TokensPage();
     if (shouldSee) {
@@ -199,6 +249,27 @@ class TokensPageAssert {
     const COINGECKO_URL = 'https://www.coingecko.com';
     const currentUrl = await browser.getUrl();
     expect(currentUrl).to.contain(COINGECKO_URL);
+  }
+
+  async seePriceFetchExpiredErrorMessage() {
+    const tokensPage = new TokensPage();
+    await tokensPage.getPriceFetchErrorDescription.waitForDisplayed({ timeout: 210_000 });
+    const expiredErrorMessageToMatch = (await t('general.warnings.priceDataExpired')).split(':')[0];
+    await expect(await tokensPage.getPriceFetchErrorDescription.getText()).to.include(expiredErrorMessageToMatch);
+  }
+
+  async seePriceFetchFailedErrorMessage() {
+    const tokensPage = new TokensPage();
+    const ADA_PRICE_CHECK_INTERVAL = 65_000;
+    await tokensPage.getPriceFetchErrorDescription.waitForDisplayed({ timeout: ADA_PRICE_CHECK_INTERVAL });
+    await expect(await tokensPage.getPriceFetchErrorDescription.getText()).to.equal(
+      await t('general.warnings.cannotFetchPrice')
+    );
+  }
+
+  async seePriceFetchExpiredErrorMessageInTokenDetailsScreen() {
+    const expiredErrorMessageToMatch = (await t('general.warnings.priceDataExpired')).split('.')[0];
+    await expect(await Banner.getContainerText()).to.include(expiredErrorMessageToMatch);
   }
 }
 
