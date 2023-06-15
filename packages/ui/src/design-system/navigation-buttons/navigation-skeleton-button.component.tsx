@@ -7,7 +7,7 @@ import * as cx from './navigation-skeleton-button.css';
 
 import type { OmitClassName } from '../../types';
 
-export type Props = OmitClassName<HTMLButtonElement> &
+export type Props = OmitClassName<'button'> &
   PropsWithChildren<{
     disabled?: boolean;
   }>;
