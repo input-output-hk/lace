@@ -29,6 +29,7 @@ export const colors = {
 
   $control_buttons_label_color: '',
   $control_buttons_label_color_danger: '',
+  $control_buttons_label_color_danger_pressed: '',
   $control_buttons_label_color_hover: '',
   $control_buttons_container_bgColor: '',
   $control_buttons_container_bgColor_hover: '',
@@ -110,6 +111,7 @@ export const lightColorScheme = {
   $primary_light_grey: '#F9F9F9',
   $primary_light_grey_0_56: 'rgba(249, 249, 249, 0.56)',
   $primary_white: '#FFFFFF',
+  $primary_white_0_8: 'rgba(255, 255, 255, 0.8)',
   $secondary_lace_pink: '#FF92DE',
   $secondary_data_pink: '#FF5470',
   $secondary_hover_data_pink: '#E84D66',
@@ -126,6 +128,7 @@ export const darkColorScheme = {
   $primary_accent_purple_0_3: 'rgba(127, 90, 240, 0.3)',
   $primary_light_grey: '#a9a9a9',
   $primary_white: '#FFFFFF',
+  $primary_white_0_8: 'rgba(255, 255, 255, 0.8)',
   $primary_grey: '#383838',
   $primary_mid_grey: '#333333',
   $primary_dark_grey: '#2F2F2F',

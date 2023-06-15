@@ -49,9 +49,15 @@ export const container = recipe({
       },
       [Scheme.Danger]: {
         background: vars.colors.$control_buttons_container_bgColor_danger,
-        ':hover': {
-          background:
-            vars.colors.$control_buttons_container_bgColor_danger_hover,
+        selectors: {
+          '&:hover': {
+            background:
+              vars.colors.$control_buttons_container_bgColor_danger_hover,
+          },
+          '&:active': {
+            background:
+              vars.colors.$control_buttons_container_bgColor_danger_hover,
+          },
         },
       },
     },
@@ -113,6 +119,11 @@ export const label = recipe({
       },
       [Scheme.Danger]: {
         color: vars.colors.$control_buttons_label_color_danger,
+        selectors: {
+          '&:active': {
+            color: vars.colors.$control_buttons_label_color_danger_pressed,
+          },
+        },
       },
     },
   },

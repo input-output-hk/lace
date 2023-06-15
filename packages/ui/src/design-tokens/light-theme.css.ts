@@ -58,6 +58,8 @@ const colors: Colors = {
   $control_buttons_label_color: lightColorScheme.$primary_dark_grey,
   $control_buttons_label_color_hover: lightColorScheme.$primary_black,
   $control_buttons_label_color_danger: lightColorScheme.$primary_white,
+  $control_buttons_label_color_danger_pressed:
+    lightColorScheme.$primary_white_0_8,
   $control_buttons_container_bgColor: lightColorScheme.$primary_white,
   $control_buttons_container_bgColor_hover:
     lightColorScheme.$primary_light_grey,
