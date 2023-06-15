@@ -62,7 +62,7 @@ Feature: LW: Tokens tab - popup view
     When I click on "CoinGecko" link
     Then "www.coingecko.com" page is displayed in new tab
 
-  @LW-6684 @Mainnet
+  @LW-6684 @Testnet @Mainnet
   Scenario: Price fetch expired error is displayed
     Given ADA FIAT price has been fetched
     And I enable network interception to fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*"
@@ -70,7 +70,7 @@ Feature: LW: Tokens tab - popup view
     And I disable network interception
     Then ADA FIAT price has been fetched
 
-  @LW-6682 @Mainnet
+  @LW-6682 @Testnet @Mainnet
   Scenario: Fiat price unable to fetch error is displayed on failed request
     Given ADA FIAT price has been fetched
     And I enable network interception to fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*"
@@ -79,7 +79,7 @@ Feature: LW: Tokens tab - popup view
     And I disable network interception
     Then ADA FIAT price has been fetched
 
-  @LW-6683 @Mainnet @Pending
+  @LW-6683 @Testnet @Mainnet @Pending
   #bug LW-6798
   Scenario: Fiat price unable to fetch error is displayed on error request
     Given ADA FIAT price has been fetched
