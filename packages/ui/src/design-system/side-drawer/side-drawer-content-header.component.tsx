@@ -12,7 +12,7 @@ import { Separator } from './side-drawer-separator.component';
 interface Props {
   text: string;
   onBackClick?: () => void;
-  onCloseClick?: () => void;
+  onCloseClick: () => void;
 }
 
 export const Header = ({
