@@ -1,8 +1,8 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import classnames from 'classnames';
-import { InfiniteScrollableTable } from '@lace/common';
+import { InfiniteScrollableTable, useHasScrollBar } from '@lace/common';
 import { ColumnsType } from 'antd/lib/table';
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './AssetTable.module.scss';
 import { useTranslate } from '@src/ui/hooks/useTranslate';
 
@@ -107,14 +107,19 @@ export const AssetTable = ({
       key: 'price'
     });
 
+  const [hasScrollBar, setHasScrollBar] = useState<boolean>(false);
+  useHasScrollBar({ current: document.querySelector(`#${scrollableTargetId}`) }, (withScroll) =>
+    setHasScrollBar(withScroll && popupView)
+  );
+
   return (
     <InfiniteScrollableTable
       data-testid="asset-table"
       columns={columns}
-      className={popupView && styles.negativeMarginTable}
       dataSource={renderRows(rows, popupView)}
       onRow={onRowClick ? handleRowClick : undefined}
-      infitineScrollProps={{
+      infiniteScrollContainerClass={hasScrollBar && styles.scrollContainer}
+      infiniteScrollProps={{
         dataLength: rows?.length || 0,
         next: onLoad,
         hasMore: rows?.length < (totalItems || 0),
