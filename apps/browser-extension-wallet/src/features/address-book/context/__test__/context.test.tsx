@@ -9,6 +9,7 @@ import { DatabaseProvider } from '@src/providers/DatabaseProvider';
 import { StoreProvider } from '@src/stores';
 import create from 'zustand';
 import { AppSettingsProvider } from '@providers';
+import { Cardano } from '@cardano-sdk/core';
 
 jest.mock('../AddressBookProvider', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,12 +18,12 @@ jest.mock('../AddressBookProvider', () => ({
 }));
 
 const makeDbContextWrapper =
-  (dbIntance: WalletDatabase): FunctionComponent =>
+  (dbInstance: WalletDatabase): FunctionComponent =>
   ({ children }: { children?: React.ReactNode }) =>
     (
       <AppSettingsProvider>
         <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' } as any))}>
-          <DatabaseProvider dbCustomInstance={dbIntance}>
+          <DatabaseProvider dbCustomInstance={dbInstance}>
             <AddressBookProvider>{children}</AddressBookProvider>
           </DatabaseProvider>
         </StoreProvider>
@@ -35,7 +36,7 @@ describe('testing useAddressBookState', () => {
     id: i + 1,
     address: `addr_test${i + 1}`,
     name: `atest wallet ${i + 1}`,
-    network: 0
+    network: Cardano.NetworkMagics.Preprod
   }));
 
   beforeEach(async () => {
@@ -78,7 +79,7 @@ describe('testing useAddressBookState', () => {
       address: 'addr_test16',
       id: 16,
       name: 'test wallet 16',
-      network: 0
+      network: Cardano.NetworkMagics.Preprod
     });
     expect(result.current.list.length).toBe(16);
     expect(result.current.count).toBe(16);
@@ -99,7 +100,7 @@ describe('testing useAddressBookState', () => {
       id: result.current.list[0].id,
       name: 'newName',
       address: 'newAddress',
-      network: 0
+      network: Cardano.NetworkMagics.Preprod
     };
 
     result.current.utils.updateRecord(idToUpdate, addressData as AddressBookSchema);
