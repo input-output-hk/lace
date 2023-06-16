@@ -5,6 +5,7 @@ export const radius = {
   $small: '12px',
   $medium: '16px',
   $large: '24px',
+  $extraLarge: '32px',
   $full: '100px',
   $circle: '100%',
 } as const;
