@@ -67,9 +67,7 @@ export class NetworkManager {
       const puppeteer = await browser.getPuppeteer();
       const targets = puppeteer
         .targets()
-        .filter(
-          (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
-        );
+        .filter((target) => ['page', 'service_worker', 'other'].includes(target.type()));
       targets.map(async (target) => {
         const client = await target.createCDPSession();
         NetworkManager.cdpSessions.push(client);
@@ -93,9 +91,7 @@ export class NetworkManager {
       const puppeteer = await browser.getPuppeteer();
       const targets = puppeteer
         .targets()
-        .filter(
-          (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
-        );
+        .filter((target) => ['page', 'service_worker', 'other'].includes(target.type()));
       targets.map(async (target) => {
         const client = await target.createCDPSession();
         NetworkManager.cdpSessions.push(client);

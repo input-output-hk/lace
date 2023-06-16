@@ -150,14 +150,14 @@ class TokensPageAssert {
   assertSeeNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
     const tokenValueFiat = await TokensPage.tokenFiatBalance(tokensTableIndex);
-    await expect(tokenValueFiat).to.match(new RegExp('^([\\d+,.])+\\.\\d{2}\\s\\D{2,3}$'));
+    await expect(tokenValueFiat).to.match(TestnetPatterns.TOKEN_VALUE_FIAT_REGEX);
     if (mode === 'extended') {
       const tokenValuePriceAda = (await TokensPage.getTokenTableItemValuePriceAdaByIndex(tokensTableIndex)) as string;
-      await expect(tokenValuePriceAda).to.match(new RegExp('^\\d+\\.\\d+$'));
+      await expect(tokenValuePriceAda).to.match(TestnetPatterns.TOKEN_VALUE_ADA_REGEX);
       const tokenValuePriceChange = (await TokensPage.getTokenTableItemValuePriceChangeByIndex(
         tokensTableIndex
       )) as string;
-      await expect(tokenValuePriceChange).to.match(new RegExp('^([-+])\\d+\\.\\d{2}$'));
+      await expect(tokenValuePriceChange).to.match(TestnetPatterns.TOKEN_PRICE_CHANGE);
     }
   };
 
@@ -281,7 +281,7 @@ class TokensPageAssert {
   }
 
   async seePriceFetchExpiredErrorMessage() {
-    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({ timeout: 210_000 });
+    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({ timeout: ADA_PRICE_CHECK_INTERVAL * 3 });
     const expiredErrorMessageToMatch = (await t('general.warnings.priceDataExpired')).split(':')[0];
     await expect(await TokensPage.getPriceFetchErrorDescription.getText()).to.include(expiredErrorMessageToMatch);
   }
