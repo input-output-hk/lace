@@ -12,43 +12,9 @@ in rec {
 
   installer = selfExtractingArchive;
 
-  # XXX: whenever updating Ogmios, make sure to update `ogmiosInputs` below (based on `${ogmiosSrc}/default.nix`):
-  ogmiosSrc = pkgs.fetchFromGitHub {
-    owner = "CardanoSolutions";
-    repo = "ogmios";
-    rev = "v5.6.0";
-    hash = "sha256-nCNz/aDDKPVhphM7RnlD81aZC2x7cEzlD+aD4qMA2Sc=";
-  };
-
-  ogmiosInputs = {
-    haskellNix = let
-      self = common.flake-compat {
-        src = pkgs.fetchzip {
-          url = "https://github.com/input-output-hk/haskell.nix/archive/0.0.117.tar.gz";
-          hash = "sha256-oSlxyFCsmG/z1Vks8RT94ZagrzTPT/WMwT7OOiEsyzI=";
-        };
-      };
-    in self.defaultNix // (self.defaultNix.internal.compat { inherit (pkgs) system; });
-
-    iohkNix = import (pkgs.fetchzip {
-      url = "https://github.com/input-output-hk/iohk-nix/archive/edb2d2df2ebe42bbdf03a0711115cf6213c9d366.tar.gz";
-      hash = "sha256-wveDdPsgB/3nAGAdFaxrcgLEpdi0aJ5kEVNtI+YqVfo=";
-    }) {};
-
-    cardanoPkgs = pkgs.fetchzip {
-      url = "https://github.com/input-output-hk/cardano-haskell-packages/archive/316e0a626fed1a928e659c7fc2577c7773770f7f.tar.gz";
-      hash = "sha256-RCd29xb0ZDZj5u9v9+dykv6nWs6pcEBsAyChm9Ut3To=";
-    };
-  };
-
-  ogmios = (import ogmiosSrc (ogmiosInputs // {
-    inherit (pkgs) system;
-    nixpkgsArgs = { inherit (pkgs) system; };
-  })).platform.amd64;
+  inherit (common) ogmios cardano-node;
 
   cardano-js-sdk = inputs.cardano-js-sdk.packages.${pkgs.system}.default;
-
-  cardano-node = inputs.cardano-node.packages.${pkgs.system}.cardano-node;
 
   # ----------------------------------------------------------------------------- #
 
@@ -90,17 +56,10 @@ in rec {
     ln -s ${common.networkConfigs} $out/share/cardano-node-config
   '';
 
-  nix-bundle-exe = pkgs.fetchFromGitHub {
-    owner = "3noch";
-    repo = "nix-bundle-exe";
-    rev = "3522ae68aa4188f4366ed96b41a5881d6a88af97"; # 2023-05-01T13:59:27Z
-    hash = "sha256-K9PT8LVvTLOm3gX9ZFxag0X85DFgB2vvJB+S12disWw=";
-  };
-
   # XXX: this has no dependency on /nix/store on the target machine
   lace-blockchain-services-bundle = let
     unbundled = lace-blockchain-services;
-    bundled = (import nix-bundle-exe {
+    bundled = (import inputs.nix-bundle-exe {
       inherit pkgs;
       bin_dir = "libexec";
       exe_dir = "lib";
