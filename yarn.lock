@@ -10718,7 +10718,31 @@
     media-query-parser "^2.0.2"
     outdent "^0.8.0"
 
-"@vanilla-extract/integration@^6.0.0", "@vanilla-extract/integration@^6.0.2":
+"@vanilla-extract/css@^1.11.1":
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/@vanilla-extract/css/-/css-1.11.1.tgz#0669e0b237d50561d669d8be6246dd601552be1a"
+  integrity sha512-iLalh4K4sXgkfzsiFUsiek4IY1/N4jtJKdr1ubpyszPE7W7G2v+DAl8KcmKkRA6vS7k5mFNW34e4fNki6T2cbQ==
+  dependencies:
+    "@emotion/hash" "^0.9.0"
+    "@vanilla-extract/private" "^1.0.3"
+    ahocorasick "1.0.2"
+    chalk "^4.1.1"
+    css-what "^6.1.0"
+    cssesc "^3.0.0"
+    csstype "^3.0.7"
+    deep-object-diff "^1.1.9"
+    deepmerge "^4.2.2"
+    media-query-parser "^2.0.2"
+    outdent "^0.8.0"
+
+"@vanilla-extract/esbuild-plugin@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@vanilla-extract/esbuild-plugin/-/esbuild-plugin-2.2.2.tgz#74f97a419a9b0290f76e97ce2a3ddb09537c5273"
+  integrity sha512-P2tlhBpAnoA4fx0xaYm8mcKBzorcyLC0O/c7ZpJL3aIKh6kdxdjDhOoWEXC2NuGJepEFsv0dXGJ99l424NvTKA==
+  dependencies:
+    "@vanilla-extract/integration" "^6.2.0"
+
+"@vanilla-extract/integration@^6.0.0", "@vanilla-extract/integration@^6.0.2", "@vanilla-extract/integration@^6.2.0":
   version "6.2.1"
   resolved "https://registry.npmjs.org/@vanilla-extract/integration/-/integration-6.2.1.tgz#e87849ed3d8e9ddd2703b8b8597fdbff08cf62ad"
   integrity sha512-+xYJz07G7TFAMZGrOqArOsURG+xcYvqctujEkANjw2McCBvGEK505RxQqOuNiA9Mi9hgGdNp2JedSa94f3eoLg==
@@ -12886,6 +12910,11 @@ bignumber.js@9.0.1, bignumber.js@^9.0.0:
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.0.1.tgz#8d7ba124c882bfd8e43260c67475518d0689e4e5"
   integrity sha512-IdZR9mh6ahOBv/hYGiXyVuyCetmGJhtYkqLBpTStdhEGjegpPlUawydyaF3pbIOFynJTpllEs+NP+CS9jKFLjA==
+
+bignumber.js@^9.0.1:
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/bignumber.js/-/bignumber.js-9.1.1.tgz#c4df7dc496bd849d4c9464344c1aa74228b4dac6"
+  integrity sha512-pHm4LsMJ6lzgNGVfZHjMoO8sdoRhOzOH4MLmY65Jg70bpxCKu5iOHNJyfF6OyvYw7t8Fpf35RuzUyqnQsj8Vig==
 
 bignumber.js@^9.0.2, bignumber.js@^9.1.0:
   version "9.1.0"
@@ -15359,6 +15388,11 @@ css-what@^5.0.1:
   version "5.1.0"
   resolved "https://registry.npmjs.org/css-what/-/css-what-5.1.0.tgz#3f7b707aadf633baf62c2ceb8579b545bb40f7fe"
   integrity sha512-arSMRWIIFY0hV8pIxZMEfmMI47Wj3R/aWpZDDxWYCPEiOMv6tfOrnpDtgxBYPEQD4V0Y/958+1TdC3iWTFcUPw==
+
+css-what@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/css-what/-/css-what-6.1.0.tgz#fb5effcf76f1ddea2c81bdfaa4de44e79bac70f4"
+  integrity sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==
 
 css.escape@^1.5.1:
   version "1.5.1"
@@ -21341,6 +21375,13 @@ jdenticon@3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/jdenticon/-/jdenticon-3.1.0.tgz#37ea02a527a038a82fd61ea8fc30332c0e15c4da"
   integrity sha512-shf4UwvviUnGKMQWa2AttLgmP7tOPrXQ56aJv2ARdY6hs1RyIdxe7QlQQg4lriGwCxe4nv1nmqOZZdJQxOU/IA==
+  dependencies:
+    canvas-renderer "~2.2.0"
+
+jdenticon@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/jdenticon/-/jdenticon-3.2.0.tgz#b5b9ef413cb66f70c600d6e69a764c977f248a46"
+  integrity sha512-z6Iq3fTODUMSOiR2nNYrqigS6Y0GvdXfyQWrUby7htDHvX7GNEwaWR4hcaL+FmhEgBe08Xkup/BKxXQhDJByPA==
   dependencies:
     canvas-renderer "~2.2.0"
 
