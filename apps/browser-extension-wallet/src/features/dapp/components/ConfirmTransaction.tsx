@@ -80,14 +80,16 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const assetIds = useMemo(() => tx?.body?.outputs && getTransactionAssetsId(tx.body.outputs), [tx?.body?.outputs]);
 
   useEffect(() => {
-    const fetchAssetsInfo = async () => {
-      const result = await getAssetsInformation(assetIds, assets, {
+    if (assetIds?.length > 0) {
+      getAssetsInformation(assetIds, assets, {
         assetProvider,
         extraData: { nftMetadata: true, tokenMetadata: true }
-      });
-      setAssetsInfo(result);
-    };
-    fetchAssetsInfo();
+      })
+        .then((result) => setAssetsInfo(result))
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }, [assetIds, assetProvider, assets]);
 
   const cancelTransaction = useCallback(() => {
