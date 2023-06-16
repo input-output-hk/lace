@@ -35,6 +35,8 @@ import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import webTester from '../actor/webTester';
+import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
+import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic;
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic;
@@ -67,14 +69,20 @@ When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back'
   const commonOnboardingElements = new CommonOnboardingElements();
   switch (button) {
     case 'Back':
+      await commonOnboardingElements.nextButton.waitForClickable();
       await commonOnboardingElements.backButton.click();
       break;
     case 'Next':
+      await commonOnboardingElements.nextButton.waitForClickable();
       await commonOnboardingElements.nextButton.click();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+When(/^I select ([^"]*) account on Select Account page$/, async (accountNumber: number) => {
+  await SelectAccountPage.accountRadioButtons[accountNumber - 1].click();
 });
 
 When(/^I click "(Back|Skip|Agree)" button on Analytics page$/, async (button: 'Back' | 'Skip' | 'Agree') => {
@@ -198,6 +206,10 @@ Then(/^"Mnemonic verification" page is displayed with words (8|15) of 15$/, asyn
 
 Then(/^"Connect Hardware Wallet" page is displayed$/, async () => {
   await OnboardingConnectHWPageAssert.assertSeeConnectHardwareWalletPage();
+});
+
+Then(/^I click trezor wallet icon$/, async () => {
+  await OnboardingConnectHardwareWalletPage.trezorButton.click();
 });
 
 Then(/^"All done" page is displayed$/, async () => {

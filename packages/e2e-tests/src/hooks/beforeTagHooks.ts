@@ -20,7 +20,9 @@ const popupViewWalletInitialization = async (walletName = TestWalletName.TestAut
 };
 
 Before(
-  { tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet' },
+  {
+    tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding'
+  },
   async () => await extendedView.visit()
 );
 

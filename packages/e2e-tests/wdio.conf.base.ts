@@ -5,7 +5,7 @@ import extensionUtils from './src/utils/utils';
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
-  specs: ['./src/features/**/*.feature'],
+  specs: [['./src/features/**/*.feature']],
   automationProtocol: 'webdriver',
   exclude: [],
   maxInstances: 1,
@@ -53,7 +53,7 @@ export const config: WebdriverIO.Config = {
     tagExpression: extensionUtils.isMainnet() ? '@Mainnet and not @Pending' : '@Testnet and not @Pending',
     tagsInTitle: true,
     timeout: 200_000,
-    retry: 1
+    retry: 0
   } as WebdriverIO.CucumberOpts,
   async beforeSession() {
     await dns.setDefaultResultOrder('ipv4first');
