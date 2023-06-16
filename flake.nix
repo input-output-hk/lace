@@ -3,7 +3,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     cardano-node = {
-      url = "github:input-output-hk/cardano-node/ebc7be471b30e5931b35f9bbc236d21c375b91bb";
+      url = "github:input-output-hk/cardano-node/1.35.4";
       inputs = {
         cardano-node-workbench.follows = "";
         node-measured.follows = "";

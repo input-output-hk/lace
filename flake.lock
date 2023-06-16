@@ -160,8 +160,8 @@
       },
       "original": {
         "owner": "input-output-hk",
+        "ref": "1.35.4",
         "repo": "cardano-node",
-        "rev": "ebc7be471b30e5931b35f9bbc236d21c375b91bb",
         "type": "github"
       }
     },
