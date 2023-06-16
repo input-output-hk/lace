@@ -39,7 +39,8 @@ export {
   InitializeTxProps,
   InitializeTxResult,
   InitializeTxPropsValidationResult,
-  MinimumCoinQuantityPerOutput
+  MinimumCoinQuantityPerOutput,
+  UnsignedTx
 } from '@cardano-sdk/tx-construction';
 
 export * as KeyManagement from '../../../../node_modules/@cardano-sdk/key-management/dist/cjs';

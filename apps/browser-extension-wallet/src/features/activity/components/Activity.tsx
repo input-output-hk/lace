@@ -93,7 +93,7 @@ export const Activity = (): React.ReactElement => {
         {hasActivities ? (
           <GroupedAssetActivityList
             lists={walletActivities}
-            infitineScrollProps={{ scrollableTarget: 'contentLayout' }}
+            infiniteScrollProps={{ scrollableTarget: 'contentLayout' }}
           />
         ) : (
           <div className={styles.emptyState}>

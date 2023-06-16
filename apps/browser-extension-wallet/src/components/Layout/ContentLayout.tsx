@@ -42,7 +42,7 @@ export const ContentLayout = ({
   const isMvpStyledRoute = mvpStyledRoutes.has(location?.pathname);
 
   const scrollabelContainer = useRef();
-  const [hasScollBar, setHasScrollBar] = useState<boolean>(false);
+  const [hasScrollBar, setHasScrollBar] = useState<boolean>(false);
   useHasScrollBar(scrollabelContainer, setHasScrollBar);
 
   const content = (
@@ -65,7 +65,7 @@ export const ContentLayout = ({
         </div>
       ) : (
         <main
-          className={cn(styles.MainContainer, { [mainClassName]: mainClassName, [styles.hasScollBar]: hasScollBar })}
+          className={cn(styles.MainContainer, { [mainClassName]: mainClassName, [styles.hasScrollBar]: hasScrollBar })}
         >
           {children}
           {hasCredit && <Credit handleOnClick={() => openExternalLink(COINGECKO_URL)} />}
@@ -75,7 +75,7 @@ export const ContentLayout = ({
   );
 
   return (
-    <div className={cn(styles.wrapper, { [styles.hasScollBar]: hasScollBar })}>
+    <div className={cn(styles.wrapper, { [styles.hasScrollBar]: hasScrollBar })}>
       <div
         ref={scrollabelContainer}
         id={id}

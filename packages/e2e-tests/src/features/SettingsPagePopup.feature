@@ -170,6 +170,7 @@ Feature: General Settings - Popup View
     Given I am on Tokens popup page
     And I see "Preprod" specific tokens in popup mode
     When I switch network to: "Preview" in popup mode
+    Then Wallet is synced
     When I navigate to Tokens popup page
     Then I see "Preview" specific tokens in popup mode
     When I navigate to NFTs popup page
@@ -180,6 +181,7 @@ Feature: General Settings - Popup View
     Given I am on Tokens popup page
     And I see "Mainnet" specific tokens in popup mode
     When I switch network to: "Preview" in popup mode
+    Then Wallet is synced
     When I navigate to Tokens popup page
     Then I see "Preview" specific tokens in popup mode
     When I navigate to NFTs popup page
