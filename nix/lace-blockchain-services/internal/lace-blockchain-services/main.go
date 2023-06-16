@@ -18,6 +18,7 @@ import (
 	"strings"
 	"strconv"
 	"regexp"
+	"encoding/json"
 
 	"lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
 
@@ -152,6 +153,10 @@ func main() {
 	fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 }
 
+type AppConfig struct {
+	LastNetwork string `json:"lastNetwork"`
+}
+
 type CommChannels_UI struct {
 	OgmiosStatus         <-chan string
 	CardanoNodeStatus    <-chan string
@@ -189,6 +194,8 @@ func setupTrayUI(
 
 	mChooseNetwork := systray.AddMenuItem("Network", "")
 
+	appConfig := loadAppConfig()
+
 	mNetworks := make(map[string](*systray.MenuItem))
 	currentNetwork := ""
 	for _, network := range networks {
@@ -206,13 +213,20 @@ func setupTrayUI(
 					currentNetwork = network
 					fmt.Printf("%s[%d]: switching network to: %s\n",
 						OurLogPrefix, os.Getpid(), network)
+					appConfig.LastNetwork = network
+					saveAppConfig(appConfig)
 					comm.NetworkSwitch <- network
 				}
 			}
 		}(network)
 	}
 
-	mNetworks[networks[0]].ClickedCh <- struct{}{}
+	if _, cfgNetExists := mNetworks[appConfig.LastNetwork]; !cfgNetExists {
+		appConfig.LastNetwork = networks[0]
+		saveAppConfig(appConfig)
+	}
+
+	mNetworks[appConfig.LastNetwork].ClickedCh <- struct{}{}
 
 	//systray.AddMenuItemCheckbox("Run Full Backend (projector)", "", false)
 
@@ -920,4 +934,49 @@ func readDirAsStrings(dirPath string) []string {
 		rv = append(rv, name)
 	}
 	return rv
+}
+
+func loadAppConfig() AppConfig {
+	configFile := ourpaths.WorkDir + string(filepath.Separator) + "app-config.json"
+
+	defaults := AppConfig {
+		LastNetwork: "mainnet",
+	}
+
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		return defaults
+	}
+
+	data, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s[%d]: cannot read the config file: %s: %s\n",
+			OurLogPrefix, os.Getpid(), configFile, err)
+		return defaults
+	}
+
+	err = json.Unmarshal(data, &defaults)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s[%d]: cannot unmarshal the config file: %s: %s\n",
+			OurLogPrefix, os.Getpid(), configFile, err)
+		return defaults
+	}
+
+	return defaults
+}
+
+func saveAppConfig(config AppConfig) {
+	configFile := ourpaths.WorkDir + string(filepath.Separator) + "app-config.json"
+
+	data, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s[%d]: cannot marshal the config file: %s: %s\n",
+			OurLogPrefix, os.Getpid(), configFile, err)
+		return
+	}
+
+	err = ioutil.WriteFile(configFile, data, 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s[%d]: cannot save the config file: %s: %s\n",
+			OurLogPrefix, os.Getpid(), configFile, err)
+	}
 }
