@@ -41,9 +41,10 @@ jobs:
       - name: Check for linter issues
         run: yarn workspace @lace/staking lint
       - name: Build dependencies of Staking Center
-        run: yarn workspace @lace/ui build
-      - name: Run tests
-        run: yarn workspace @lace/staking test:unit --coverage
+        run: yarn wsrun --prefix -tram -p @lace/staking -x @lace/staking -c build
+# TODO: Re-enable once tests config is fixed https://input-output.atlassian.net/browse/LW-6942
+#      - name: Run tests
+#        run: yarn workspace @lace/staking test:unit --coverage
       - name: Upload test coverage artifacts
         uses: actions/upload-artifact@v3
         with:

@@ -128,3 +128,11 @@ When(/^I click "(Receive|Send)" button on page header$/, async (button: 'Receive
       throw new Error(`Unsupported button name: ${button}`);
   }
 });
+
+Then(/^I (see|do not see) an icon to open the right side panel$/, async (shouldSee: 'see' | 'do not see') => {
+  await topNavigationAssert.assertSeeRightSidePanelButton(shouldSee === 'see');
+});
+
+When(/^I click on right side panel icon$/, async () => {
+  await menuHeaderPageObject.clickRightSidePanelButton();
+});

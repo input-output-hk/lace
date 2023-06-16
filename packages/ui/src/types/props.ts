@@ -1,6 +1,6 @@
-import type { HTMLAttributes } from 'react';
+import type { ComponentPropsWithoutRef, ElementType } from 'react';
 
-export type OmitClassName<T extends HTMLElement = HTMLDivElement> = Omit<
-  HTMLAttributes<T>,
+export type OmitClassName<T extends ElementType> = Omit<
+  ComponentPropsWithoutRef<T>,
   'className'
 >;

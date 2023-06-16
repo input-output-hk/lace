@@ -8,12 +8,14 @@ import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import * as Crypto from '@cardano-sdk/crypto';
 import * as HardwareLedger from '../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 
-const createEnumObject = <T extends string>(o: Array<T>) => o;
-export const AVAILABLE_WALLETS = createEnumObject<HardwareWallets>([
-  KeyManagement.KeyAgentType.Ledger,
-  KeyManagement.KeyAgentType.Trezor
-]);
+const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
+const createEnumObject = <T extends string>(o: Array<T>) => o;
+export const AVAILABLE_WALLETS = createEnumObject<HardwareWallets>(
+  isTrezorHWSupported()
+    ? [KeyManagement.KeyAgentType.Ledger, KeyManagement.KeyAgentType.Trezor]
+    : [KeyManagement.KeyAgentType.Ledger]
+);
 const DEFAULT_COMMUNICATION_TYPE = KeyManagement.CommunicationType.Web;
 
 // https://github.com/trezor/connect/blob/develop/docs/index.md#trezor-connect-manifest
@@ -30,17 +32,19 @@ const TREZOR_CONFIG: KeyManagement.TrezorConfig = {
 const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> = {
   [KeyManagement.KeyAgentType.Ledger]: async () =>
     await HardwareLedger.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
-  [KeyManagement.KeyAgentType.Trezor]: async () => {
-    const isTrezorInitialized = await KeyManagement.TrezorKeyAgent.initializeTrezorTransport({
-      manifest,
-      communicationType: DEFAULT_COMMUNICATION_TYPE
-    });
+  ...(AVAILABLE_WALLETS.includes(KeyManagement.KeyAgentType.Trezor) && {
+    [KeyManagement.KeyAgentType.Trezor]: async () => {
+      const isTrezorInitialized = await KeyManagement.TrezorKeyAgent.initializeTrezorTransport({
+        manifest,
+        communicationType: DEFAULT_COMMUNICATION_TYPE
+      });
 
-    // initializeTrezorTransport would still succeed even when device is not connected
-    await KeyManagement.TrezorKeyAgent.checkDeviceConnection();
+      // initializeTrezorTransport would still succeed even when device is not connected
+      await KeyManagement.TrezorKeyAgent.checkDeviceConnection();
 
-    return isTrezorInitialized;
-  }
+      return isTrezorInitialized;
+    }
+  })
 };
 
 export const connectDevice = async (model: HardwareWallets): Promise<DeviceConnection> => await connectDevices[model]();

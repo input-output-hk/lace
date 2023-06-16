@@ -77,8 +77,8 @@
     border-radius: 0 16px 16px 0;
   }
 }
-.infinitScrollContainer {
+.infiniteScrollContainer {
   background: var(--bg-color-body, #ffffff);
-  margin-left: -#{size_unit(1)};
-  margin-right: -#{size_unit(1)};
+  margin-left: -#{size_unit(2)};
+  margin-right: -#{size_unit(2)};
 }

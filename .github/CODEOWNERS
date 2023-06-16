@@ -1,6 +1,6 @@
 # Root Level
 *                       @input-output-hk/lace-tech-leads
-
+yarn.lock               @input-output-hk/lace-core
 # Packages Teams
 /packages/ui/           @input-output-hk/lace-ui
 /packages/staking/      @input-output-hk/lace-staking

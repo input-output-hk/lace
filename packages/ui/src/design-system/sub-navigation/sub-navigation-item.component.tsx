@@ -10,7 +10,7 @@ import * as cx from './sub-navigation-item.css';
 
 import type { OmitClassName } from '../../types';
 
-type Props = OmitClassName<HTMLSpanElement> & {
+type Props = OmitClassName<'span'> & {
   name: string;
   value: string;
   disabled?: boolean;

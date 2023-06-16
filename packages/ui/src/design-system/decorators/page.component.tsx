@@ -9,27 +9,29 @@ import * as Text from '../typography';
 
 import { subtitleBox } from './page.css';
 
-export type Props = PropsWithChildren<{
+export type PageProps = PropsWithChildren<{
   title: string;
-  subtitle: string;
+  subtitle?: string;
 }>;
 
 export const Page = ({
   children,
   title,
   subtitle,
-}: Readonly<Props>): JSX.Element => {
+}: Readonly<PageProps>): JSX.Element => {
   return (
     <ThemeProvider colorScheme={ThemeColorScheme.Light}>
       <div style={{ height: '100%', width: '100%' }}>
         <Grid columns="$1" rows="$fitContent">
           <Cell>
             <Text.Display>{title}</Text.Display>
-            <Box pt="$32">
-              <div className={subtitleBox}>
-                <Text.Body.Large>{subtitle}</Text.Body.Large>
-              </div>
-            </Box>
+            {Boolean(subtitle) && (
+              <Box pt="$32">
+                <div className={subtitleBox}>
+                  <Text.Body.Large>{subtitle}</Text.Body.Large>
+                </div>
+              </Box>
+            )}
 
             <Divider mt="$96" mb="$64" />
           </Cell>
