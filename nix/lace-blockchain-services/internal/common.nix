@@ -8,6 +8,8 @@ in rec {
 
   flake-compat = import inputs.cardano-node.inputs.flake-compat;
 
+  prettyName = "Lace Blockchain Services";
+
   cardanoWorldFlake = (flake-compat { src = inputs.cardano-world; }).defaultNix;
 
   networkConfigs = let

@@ -4,6 +4,7 @@ assert targetSystem == "x86_64-linux";
 
 let
   pkgs = inputs.nixpkgs.legacyPackages.${targetSystem};
+  inherit (pkgs) lib;
 in rec {
   common = import ./common.nix { inherit inputs targetSystem; };
 
@@ -115,7 +116,7 @@ in rec {
         mkdir -p $out/bin $out/share
         mv $out/libexec/lace-blockchain-services $out/bin/
         cp -r --dereference ${unbundled}/share/. $out/share/ || true  # FIXME: unsafe! broken node_modules symlinks
-        cp $(find ${desktopItem} -type f -name '*.desktop') $out/share/template.desktop
+        cp $(find ${desktopItem} -type f -name '*.desktop') $out/share/lace-blockchain-services.desktop
         ${pkgs.imagemagick}/bin/convert -background none -size 1024x1024 \
           ${./lace-blockchain-services}/cardano.svg $out/share/icon_large.png
       '';
@@ -125,7 +126,7 @@ in rec {
   desktopItem = pkgs.makeDesktopItem {
     name = "lace-blockchain-services";
     exec = "INSERT_PATH_HERE";
-    desktopName = "Lace Blockchain Services";
+    desktopName = common.prettyName;
     genericName = "Cardano Crypto-Currency Backend";
     comment = "Run the backend for the Lace wallet locally";
     categories = [ "Network" ];
@@ -157,12 +158,16 @@ in rec {
       tail -c+$((skip_bytes+1)) "$0" | $progress_cmd | tar -C "$target" -xJ
       echo "Setting up a .desktop entry..."
       mkdir -p "$HOME"/.local/share/applications
-      cat "$target"/share/template.desktop \
-        | sed -r "s+INSERT_PATH_HERE+$(echo "$target"/bin/*)+g" \
-        | sed -r "s+INSERT_ICON_PATH_HERE+$(echo "$target"/share/icon_large.png)+g" \
-        >"$HOME"/.local/share/applications/lace-blockchain-services.desktop
+      chmod +w "$target"/share "$target"/share/*.desktop
+      sed -r "s+INSERT_PATH_HERE+$(echo "$target"/bin/*)+g" -i "$target"/share/*.desktop
+      sed -r "s+INSERT_ICON_PATH_HERE+$(echo "$target"/share/icon_large.png)+g" -i "$target"/share/*.desktop
+      chmod -w "$target"/share "$target"/share/*.desktop
+      ln -sf "$target"/share/*.desktop "$HOME"/.local/share/applications/lace-blockchain-services.desktop
       echo "Installed successfully!"
-      echo "Now, run:" "$target"/bin/*
+      echo
+      echo "Now, either:"
+      echo "  1. In a terminal, run $(echo "$target"/bin/* | sed -r "s+^$HOME+~+")"
+      echo "  2. Or select Start -> "${lib.escapeShellArg common.prettyName}"."
       exit 0
     '';
     script = __replaceStrings ["1010101010"] [(toString (1000000000 + __stringLength scriptTemplate))] scriptTemplate;
