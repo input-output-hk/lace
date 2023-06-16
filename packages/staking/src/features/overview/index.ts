@@ -1,1 +1,1 @@
-export { OverviewNavigation } from './OverviewNavigation';
+export { Overview } from './Overview';
