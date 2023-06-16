@@ -16,11 +16,7 @@ import networkManager from '../utils/networkManager';
 import { DrawerCommonExtended } from '../elements/drawerCommonExtended';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
-import {
-  cleanBrowserStorage,
-  confirmFiatPricesAreInLocalStorage,
-  deleteFiatPriceFromBrowserStorage
-} from '../utils/browserStorage';
+import { cleanBrowserStorage, deleteFiatPriceFromBrowserStorage } from '../utils/browserStorage';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
@@ -32,6 +28,7 @@ import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import { browser } from '@wdio/globals';
+import tokensPageAssert from '../assert/tokensPageAssert';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -209,7 +206,7 @@ Given(/^I delete fiat price from local storage$/, async () => {
 });
 
 Given(/^ADA FIAT price has been fetched$/, async () => {
-  await confirmFiatPricesAreInLocalStorage();
+  await tokensPageAssert.confirmFiatPricesAreInLocalStorage();
 });
 
 Then(/^I (see|do not see) a horizontal scroll$/, async (shouldSee: 'see' | 'do not see') => {

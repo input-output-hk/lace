@@ -9,7 +9,7 @@ import { Asset } from '../data/Asset';
 import settingsPageExtendedAssert from '../assert/settings/settingsPageExtendedAssert';
 import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
-import { TokensPage } from '../elements/tokensPage';
+import TokensPage from '../elements/tokensPage';
 import walletAddressPage from '../elements/walletAddressPage';
 
 When(/^I see Tokens counter with total number of tokens displayed$/, async () => {
@@ -134,22 +134,14 @@ Then(
   }
 );
 
-Then(
-  /^I save token: "([^"]*)" balance in (extended|popup) mode$/,
-  async (tokenName: string, mode: 'extended' | 'popup') => {
-    await tokensPageObject.saveTokenBalance(tokenName, mode);
-  }
-);
+Then(/^I save token: "([^"]*)" balance$/, async (tokenName: string) => {
+  await tokensPageObject.saveTokenBalance(tokenName);
+});
 
 Then(
   // eslint-disable-next-line max-len
-  /^the sent amount of: "([^"]*)" with "(saved|DApp transaction)" fee for token "([^"]*)" is subtracted from the total balance in (extended|popup) mode$/,
-  async (
-    subtractedAmount: string,
-    feeType: 'saved' | 'DApp transaction',
-    tokenName: string,
-    mode: 'extended' | 'popup'
-  ) => {
+  /^the sent amount of: "([^"]*)" with "(saved|DApp transaction)" fee for token "([^"]*)" is subtracted from the total balance$/,
+  async (subtractedAmount: string, feeType: 'saved' | 'DApp transaction', tokenName: string) => {
     let fee: string;
     switch (feeType) {
       case 'saved':
@@ -161,14 +153,14 @@ Then(
       default:
         break;
     }
-    await tokensPageAssert.assertSeeValueSubtractedAda(tokenName, subtractedAmount, fee, mode);
+    await tokensPageAssert.assertSeeValueSubtractedAda(tokenName, subtractedAmount, fee);
   }
 );
 
 Then(
-  /^the sent amount of: "([^"]*)" for token "([^"]*)" is subtracted from the total balance in (extended|popup) mode$/,
-  async (subtractedAmount: string, tokenName: string, mode: 'extended' | 'popup') => {
-    await tokensPageAssert.assertSeeValueSubtractedAsset(tokenName, subtractedAmount, mode);
+  /^the sent amount of: "([^"]*)" for token "([^"]*)" is subtracted from the total balance$/,
+  async (subtractedAmount: string, tokenName: string) => {
+    await tokensPageAssert.assertSeeValueSubtractedAsset(tokenName, subtractedAmount);
   }
 );
 
@@ -186,20 +178,45 @@ Then(/^"www.coingecko.com" page is displayed in new tab$/, async () => {
 });
 
 When(/^I click "(Receive|Send)" button on Tokens page in popup mode$/, async (button: 'Receive' | 'Send') => {
-  const tokensPage = new TokensPage();
   switch (button) {
     case 'Receive':
-      await tokensPage.receiveButtonPopupMode.waitForDisplayed();
-      await tokensPage.receiveButtonPopupMode.click();
+      await TokensPage.receiveButtonPopupMode.waitForDisplayed();
+      await TokensPage.receiveButtonPopupMode.click();
       break;
     case 'Send':
-      await tokensPage.sendButtonPopupMode.waitForDisplayed();
-      await tokensPage.sendButtonPopupMode.click();
+      await TokensPage.sendButtonPopupMode.waitForDisplayed();
+      await TokensPage.sendButtonPopupMode.click();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
 });
+
+Then(/^Eye icon is not displayed on Tokens page$/, async () => {
+  await tokensPageAssert.assertDoNotSeeEyeIcon();
+});
+
+Then(/^(closed|opened) eye icon is displayed on Tokens page$/, async (iconType: 'closed' | 'opened') => {
+  iconType === 'closed'
+    ? await tokensPageAssert.assertSeeClosedEyeIcon()
+    : await tokensPageAssert.assertSeeOpenedEyeIcon();
+});
+
+When(/^I click (closed|opened) eye icon on Tokens page$/, async (iconType: 'closed' | 'opened') => {
+  iconType === 'closed' ? await TokensPage.closedEyeIcon.click() : await TokensPage.openedEyeIcon.click();
+});
+
+Then(/^total wallet balance is masked with asterisks$/, async () => {
+  await tokensPageAssert.assertTotalWalletBalanceIsMasked();
+});
+
+Then(
+  /^balance and FIAT balance for each token are (masked with asterisks|visible)$/,
+  async (shouldBeMasked: 'masked with asterisks' | 'visible') => {
+    await tokensPageAssert.assertAllTokensBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
+    await tokensPageAssert.assertAllTokensFiatBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
+  }
+);
 
 Then(/^fiat prices expired fetch error info is displayed$/, async () => {
   await tokensPageAssert.seePriceFetchExpiredErrorMessage();

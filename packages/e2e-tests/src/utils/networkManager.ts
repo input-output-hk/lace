@@ -3,7 +3,7 @@ import { ChainablePromiseElement } from 'webdriverio';
 import { Logger } from '../support/logger';
 import allure from '@wdio/allure-reporter';
 import { CDPSession } from 'puppeteer-core/lib/esm/puppeteer/common/Connection';
-import tokensPageAssert from '../assert/tokensPageAssert';
+import { browser } from '@wdio/globals';
 
 export class NetworkManager {
   private readonly NETWORK_ENABLE = 'Network.enable';
@@ -145,11 +145,6 @@ export class NetworkManager {
       if (session.connection()) await session.detach();
     });
     NetworkManager.cdpSessions = [];
-  };
-
-  waitForPricesToBeFetched = async (): Promise<void> => {
-    const ADA_PRICE_CHECK_INTERVAL = 65_000;
-    await tokensPageAssert.assertSeeCurrencyLabelWithTimeout(ADA_PRICE_CHECK_INTERVAL);
   };
 
   private getRequestPostData = async (client: any, requestId: any): Promise<string> => {

@@ -1,7 +1,6 @@
 import extensionUtils from './utils';
 import { Logger } from '../support/logger';
-import networkManager from './networkManager';
-import { expect } from 'chai';
+import { browser } from '@wdio/globals';
 
 const verifyBrowserStorageSupport: any = async () => {
   const currentBrowser = await extensionUtils.getBrowser();
@@ -84,11 +83,4 @@ export const deleteFiatPriceFromBrowserStorage = async (): Promise<void> => {
   } catch (error) {
     throw new Error(`Setting browser storage failed: ${error}`);
   }
-};
-
-export const confirmFiatPricesAreInLocalStorage = async (): Promise<void> => {
-  let fiatPrices = await getBackgroundStorageItem('fiatPrices');
-  if (!fiatPrices) await networkManager.waitForPricesToBeFetched();
-  fiatPrices = await getBackgroundStorageItem('fiatPrices');
-  expect(fiatPrices, 'ADA Fiat price is not in local storage').is.not.undefined;
 };
