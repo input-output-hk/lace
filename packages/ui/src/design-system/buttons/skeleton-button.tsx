@@ -10,7 +10,7 @@ import * as Text from '../typography';
 import type { Sx } from '../../design-tokens';
 import type { OmitClassName } from '../../types';
 
-export type ButtonProps = OmitClassName<HTMLButtonElement> & {
+export type ButtonProps = OmitClassName<'button'> & {
   disabled?: boolean;
   className: {
     container: string;

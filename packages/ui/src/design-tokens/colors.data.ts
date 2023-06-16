@@ -1,4 +1,5 @@
 export const colors = {
+  $lace_typography_main_color: '',
   $lace_gradient: '',
 
   $buttons_primary_label_color: '',

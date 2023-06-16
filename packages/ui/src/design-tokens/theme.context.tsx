@@ -1,8 +1,8 @@
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 
-import { darkTheme } from './dark-theme.css';
-import { lightTheme } from './light-theme.css';
+import { darkTheme } from './theme/dark-theme.css';
+import { lightTheme } from './theme/light-theme.css';
 
 export enum ThemeColorScheme {
   Dark = 'dark',

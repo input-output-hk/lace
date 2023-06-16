@@ -39,7 +39,8 @@
     "@vanilla-extract/recipes": "^0.3.0",
     "@vanilla-extract/sprinkles": "^1.5.1",
     "classnames": "^2.3.2",
-    "polished": "^4.2.2"
+    "polished": "^4.2.2",
+    "recharts": "^2.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",
@@ -81,6 +82,7 @@
     "rollup-plugin-copy": "^3.4.0",
     "storybook-addon-pseudo-states": "^1.15.2",
     "url-loader": "^4.1.1",
+    "utility-types": "^3.10.0",
     "wait-on": "^7.0.1",
     "webpack": "^5.76.1",
     "webpack-dev-server": "^4.11.1"

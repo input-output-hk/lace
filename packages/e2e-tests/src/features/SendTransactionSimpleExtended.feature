@@ -511,9 +511,9 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
   @LW-1604 @Pending @Testnet
   #bug LW-5065
   Scenario: "Insufficient funds" error for extended view & advanced tx type for multiple assets
-    And I save token: "Cardano" balance in extended mode
-    And I save token: "LaceCoin" balance in extended mode
-    And I save token: "LaceCoin2" balance in extended mode
+    And I save token: "Cardano" balance
+    And I save token: "LaceCoin" balance
+    And I save token: "LaceCoin2" balance
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 110% of total "tADA" asset in bundle 1
