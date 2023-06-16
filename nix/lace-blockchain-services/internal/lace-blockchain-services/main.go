@@ -127,7 +127,7 @@ func main() {
 
 	// XXX: os.Interrupt is the regular SIGINT on Unix, but also something rare on Windows
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
 
 	go func(){
 		alreadySignaled := false
