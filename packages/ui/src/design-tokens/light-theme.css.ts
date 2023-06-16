@@ -1,4 +1,5 @@
 import { createTheme } from '@vanilla-extract/css';
+import { rgba } from 'polished';
 
 import { darkColorScheme, laceGradient, lightColorScheme } from './colors.data';
 import { opacities } from './opacities.data';
@@ -55,18 +56,25 @@ const colors: Colors = {
   $card_outlined_backgroundColor: lightColorScheme.$primary_white,
   $card_outlined_borderColor: lightColorScheme.$primary_light_grey_plus,
 
-  $control_buttons_label_color: lightColorScheme.$primary_dark_grey,
+  $control_buttons_label_color: lightColorScheme.$primary_black,
   $control_buttons_label_color_hover: lightColorScheme.$primary_black,
+  $control_buttons_label_color_filled: lightColorScheme.$primary_dark_grey,
+  $control_buttons_label_color_filled_hover: lightColorScheme.$primary_black,
   $control_buttons_label_color_danger: lightColorScheme.$primary_white,
-  $control_buttons_label_color_danger_pressed:
-    lightColorScheme.$primary_white_0_8,
+  $control_buttons_label_color_danger_pressed: rgba(
+    lightColorScheme.$primary_white,
+    0.8,
+  ),
   $control_buttons_container_bgColor: lightColorScheme.$primary_white,
   $control_buttons_container_bgColor_hover:
     lightColorScheme.$primary_light_grey,
+  $control_buttons_container_bgColor_filled: lightColorScheme.$primary_white,
   $control_buttons_container_bgColor_filled_hover:
     lightColorScheme.$primary_white,
-  $control_buttons_container_bgColor_pressed:
-    lightColorScheme.$primary_light_grey_plus,
+  $control_buttons_container_bgColor_pressed: rgba(
+    lightColorScheme.$primary_light_grey,
+    0.56,
+  ),
   $control_buttons_container_bgColor_danger:
     lightColorScheme.$secondary_data_pink,
   $control_buttons_container_bgColor_danger_hover:

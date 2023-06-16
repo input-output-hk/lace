@@ -3,7 +3,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { ReactComponent as PlusCircle } from '../../assets/icons/plus-circle.component.svg';
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { sx, ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
@@ -16,6 +16,9 @@ import { Small } from './small-button.component';
 
 const subtitle = ``;
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const SampleIcon = () => <PlusCircle className={sx({ fontSize: '$18' })} />;
+
 export default {
   title: 'Buttons/Control Buttons',
   component: Filled,
@@ -26,53 +29,53 @@ const Buttons = (): JSX.Element => (
   <>
     <Variants.Row>
       <Variants.Cell>
-        <Outlined label="Label" icon={<PlusCircle />} />
+        <Outlined label="Label" icon={<SampleIcon />} />
       </Variants.Cell>
       <Variants.Cell>
-        <Outlined label="Label" id="hover" icon={<PlusCircle />} />
+        <Outlined label="Label" id="hover" icon={<SampleIcon />} />
       </Variants.Cell>
       <Variants.Cell>
-        <Outlined label="Label" id="pressed" icon={<PlusCircle />} />
+        <Outlined label="Label" id="pressed" icon={<SampleIcon />} />
       </Variants.Cell>
       <Variants.Cell>
-        <Outlined label="Label" disabled icon={<PlusCircle />} />
+        <Outlined label="Label" disabled icon={<SampleIcon />} />
       </Variants.Cell>
       <Variants.Cell>
-        <Outlined label="Label" id="focused" icon={<PlusCircle />} />
-      </Variants.Cell>
-    </Variants.Row>
-    <Variants.Row>
-      <Variants.Cell>
-        <Filled label="Label" icon={<PlusCircle />} />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Filled label="Label" id="hover" icon={<PlusCircle />} />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Filled label="Label" id="pressed" icon={<PlusCircle />} />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Filled label="Label" disabled icon={<PlusCircle />} />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Filled label="Label" id="focused" icon={<PlusCircle />} />
+        <Outlined label="Label" id="focused" icon={<SampleIcon />} />
       </Variants.Cell>
     </Variants.Row>
     <Variants.Row>
       <Variants.Cell>
-        <Icon icon={<PlusCircle />} />
+        <Filled label="Label" icon={<SampleIcon />} />
       </Variants.Cell>
       <Variants.Cell>
-        <Icon id="hover" icon={<PlusCircle />} />
+        <Filled label="Label" id="hover" icon={<SampleIcon />} />
       </Variants.Cell>
       <Variants.Cell>
-        <Icon id="pressed" icon={<PlusCircle />} />
+        <Filled label="Label" id="pressed" icon={<SampleIcon />} />
       </Variants.Cell>
       <Variants.Cell>
-        <Icon disabled icon={<PlusCircle />} />
+        <Filled label="Label" disabled icon={<SampleIcon />} />
       </Variants.Cell>
       <Variants.Cell>
-        <Icon id="focused" icon={<PlusCircle />} />
+        <Filled label="Label" id="focused" icon={<SampleIcon />} />
+      </Variants.Cell>
+    </Variants.Row>
+    <Variants.Row>
+      <Variants.Cell>
+        <Icon icon={<SampleIcon />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Icon id="hover" icon={<SampleIcon />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Icon id="pressed" icon={<SampleIcon />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Icon disabled icon={<SampleIcon />} />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Icon id="focused" icon={<SampleIcon />} />
       </Variants.Cell>
     </Variants.Row>
     <Variants.Row>
@@ -127,13 +130,13 @@ export const Overview = (): JSX.Element => (
         >
           <Variants.Row>
             <Variants.Cell>
-              <Outlined label="Label" icon={<PlusCircle />} />
+              <Outlined label="Label" icon={<SampleIcon />} />
             </Variants.Cell>
             <Variants.Cell>
-              <Filled label="Label" icon={<PlusCircle />} />
+              <Filled label="Label" icon={<SampleIcon />} />
             </Variants.Cell>
             <Variants.Cell>
-              <Icon icon={<PlusCircle />} />
+              <Icon icon={<SampleIcon />} />
             </Variants.Cell>
             <Variants.Cell>
               <Small label="Label" />

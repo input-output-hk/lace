@@ -1,4 +1,5 @@
 import { createTheme } from '@vanilla-extract/css';
+import { rgba } from 'polished';
 
 import {
   colorTransparent,
@@ -56,17 +57,22 @@ const colors: Colors = {
   $card_outlined_backgroundColor: darkColorScheme.$primary_mid_black,
   $card_outlined_borderColor: colorTransparent,
 
-  $control_buttons_label_color: darkColorScheme.$primary_light_grey,
-  $control_buttons_label_color_danger: darkColorScheme.$primary_white,
+  $control_buttons_label_color: darkColorScheme.$primary_white,
   $control_buttons_label_color_hover: darkColorScheme.$primary_light_grey,
-  $control_buttons_label_color_danger_pressed:
-    darkColorScheme.$primary_white_0_8,
-  $control_buttons_container_bgColor_filled_hover:
+  $control_buttons_label_color_filled: darkColorScheme.$primary_light_grey,
+  $control_buttons_label_color_filled_hover: darkColorScheme.$primary_white,
+  $control_buttons_label_color_danger: darkColorScheme.$primary_white,
+  $control_buttons_label_color_danger_pressed: rgba(
     darkColorScheme.$primary_white,
-  $control_buttons_container_bgColor: darkColorScheme.$primary_grey,
+    0.8,
+  ),
+  $control_buttons_container_bgColor_filled: darkColorScheme.$primary_grey,
+  $control_buttons_container_bgColor_filled_hover:
+    darkColorScheme.$primary_mid_grey,
+  $control_buttons_container_bgColor: darkColorScheme.$primary_bg_black,
   $control_buttons_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
   $control_buttons_container_bgColor_pressed:
-    darkColorScheme.$primary_dark_grey_plus,
+    darkColorScheme.$primary_dark_grey,
   $control_buttons_container_bgColor_danger:
     darkColorScheme.$secondary_data_pink,
   $control_buttons_container_bgColor_danger_hover:

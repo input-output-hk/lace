@@ -1,4 +1,5 @@
 import { recipe } from '@vanilla-extract/recipes';
+import { rgba } from 'polished';
 
 import { style, vars, createVar, globalStyle } from '../../design-tokens';
 
@@ -45,7 +46,17 @@ export const container = recipe({
         },
       },
       [Scheme.Filled]: {
-        background: vars.colors.$control_buttons_container_bgColor,
+        background: vars.colors.$control_buttons_container_bgColor_filled,
+        selectors: {
+          '&:hover': {
+            background:
+              vars.colors.$control_buttons_container_bgColor_filled_hover,
+          },
+          '&:active': {
+            background:
+              vars.colors.$control_buttons_container_bgColor_filled_hover,
+          },
+        },
       },
       [Scheme.Danger]: {
         background: vars.colors.$control_buttons_container_bgColor_danger,
@@ -110,10 +121,10 @@ export const label = recipe({
         color: vars.colors.$control_buttons_label_color,
       },
       [Scheme.Filled]: {
-        color: vars.colors.$control_buttons_label_color,
+        color: vars.colors.$control_buttons_label_color_filled,
         selectors: {
           '&:hover': {
-            color: vars.colors.$control_buttons_label_color_hover,
+            color: vars.colors.$control_buttons_label_color_filled_hover,
           },
         },
       },
