@@ -6,7 +6,7 @@ Feature: Send Simple Transactions - Extended view - E2E
 
   @LW-2375
   Scenario: Extended-view - Send ADA (single asset) E2E
-    And I save token: "Cardano" balance in extended mode
+    And I save token: "Cardano" balance
     And I click "Send" button on page header
     And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
       | type | assetName | ticker | amount |
@@ -23,7 +23,7 @@ Feature: Send Simple Transactions - Extended view - E2E
       | Button: "Close"                              |
     When I close the drawer by clicking close button
     And I navigate to Tokens extended page
-    Then the sent amount of: "1.123" with "saved" fee for token "Cardano" is subtracted from the total balance in extended mode
+    Then the sent amount of: "1.123" with "saved" fee for token "Cardano" is subtracted from the total balance
     When I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
