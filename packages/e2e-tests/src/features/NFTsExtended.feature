@@ -38,7 +38,7 @@ Feature: LW-423: NFTs - Extended view
       | Button: "Confirm"     |
       | Button: "Cancel"      |
 
-  @LW-2501 @Mainnet @test
+  @LW-2501 @Mainnet
   Scenario: Extended-view  - Send NFT - User enters invalid password
     Given I am on NFTs extended page
     And I'm sending an NFT with name: "Ibilecoin"
