@@ -134,7 +134,7 @@ export const ActivityLayout = (): ReactElement => {
           {walletActivities?.length > 0 ? (
             <GroupedAssetActivityList
               lists={walletActivities}
-              infitineScrollProps={{ scrollableTarget: LACE_APP_ID }}
+              infiniteScrollProps={{ scrollableTarget: LACE_APP_ID }}
             />
           ) : (
             <FundWalletBanner

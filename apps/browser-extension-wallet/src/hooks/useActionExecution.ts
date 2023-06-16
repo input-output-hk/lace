@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { toast, ToastProps } from '@lace/common';
 import ErrorIcon from '../assets/icons/address-error-icon.component.svg';
 
-const TOAST_DEFAULT_DURATION = 3;
+export const TOAST_DEFAULT_DURATION = 3;
 
 export interface ActionExecutionArgs {
   successMessage?: string;

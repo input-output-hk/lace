@@ -141,7 +141,11 @@ export const PortfolioBalance = ({
           )}
           {canManageBalancesVisibility && (
             <span className={styles.iconWrapper} onClick={handleOnClick}>
-              {areBalancesVisible ? <EyeIconInvisible className={styles.icon} /> : <EyeIcon className={styles.icon} />}
+              {areBalancesVisible ? (
+                <EyeIconInvisible className={styles.icon} data-testid="closed-eye-icon" />
+              ) : (
+                <EyeIcon className={styles.icon} data-testid="opened-eye-icon" />
+              )}
             </span>
           )}
         </label>
