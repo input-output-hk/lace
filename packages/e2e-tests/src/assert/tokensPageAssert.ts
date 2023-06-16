@@ -144,12 +144,13 @@ class TokensPageAssert {
     await expect(await TokensPage.getTokenNames()).to.contain(tokenName.name);
     await expect(await TokensPage.getTokenTickers()).to.contain(tokenName.ticker);
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
-    await expect(await TokensPage.tokenBalance(tokensTableIndex)).to.be.greaterThan(0);
+    const tokenBalanceValue = Number(await TokensPage.tokenBalance(tokensTableIndex).getText());
+    await expect(tokenBalanceValue).to.be.greaterThan(0);
   };
 
   assertSeeNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
-    const tokenValueFiat = await TokensPage.tokenFiatBalance(tokensTableIndex);
+    const tokenValueFiat = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
     await expect(tokenValueFiat).to.match(TestnetPatterns.TOKEN_VALUE_FIAT_REGEX);
     if (mode === 'extended') {
       const tokenValuePriceAda = (await TokensPage.getTokenTableItemValuePriceAdaByIndex(tokensTableIndex)) as string;
@@ -163,7 +164,7 @@ class TokensPageAssert {
 
   assertSeeNotNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
-    const tokenValueFiat = await TokensPage.tokenFiatBalance(tokensTableIndex);
+    const tokenValueFiat = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
     await expect(tokenValueFiat).to.equal('-');
     if (mode === 'extended') {
       const tokenValuePriceAda = await TokensPage.getTokenTableItemValuePriceAdaByIndex(tokensTableIndex);
@@ -294,7 +295,7 @@ class TokensPageAssert {
   }
 
   waitForPricesToBeFetched = async (): Promise<void> => {
-    await this.assertSeeCurrencyLabelWithTimeout(ADA_PRICE_CHECK_INTERVAL);
+    await browser.pause(ADA_PRICE_CHECK_INTERVAL);
   };
 
   async seePriceFetchExpiredErrorMessageInTokenDetailsScreen() {
@@ -303,8 +304,11 @@ class TokensPageAssert {
   }
 
   async confirmFiatPricesAreInLocalStorage() {
-    await this.waitForPricesToBeFetched();
-    const fiatPrices = await getBackgroundStorageItem('fiatPrices');
+    let fiatPrices = await getBackgroundStorageItem('fiatPrices');
+    if (!fiatPrices) {
+      await this.waitForPricesToBeFetched();
+      fiatPrices = await getBackgroundStorageItem('fiatPrices');
+    }
     expect(fiatPrices, 'ADA Fiat price is not in local storage').is.not.undefined;
   }
 }

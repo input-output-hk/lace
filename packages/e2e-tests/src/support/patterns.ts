@@ -14,7 +14,7 @@ const COUNTER_REGEX = /\(\d+\)/;
 const PERCENT_DOUBLE_REGEX = /(\d*\.)?\d+\s?%|-%/;
 const STAKE_POOL_LIST_COST_REGEX = /(\d*\.)?\d+\s?%(\s\+\s\d*ADA)?/;
 const TIMESTAMP_REGEX = /\d{2}:\d{2}:\d{2} (AM|PM)/;
-const TOKEN_VALUE_FIAT_REGEX = /^([\d+,.])+\.\d{2}\s\D{2,3}$/;
+const TOKEN_VALUE_FIAT_REGEX = /^([\d+,.])+\.\d+\s\D{2,3}$/;
 const TOKEN_VALUE_ADA_REGEX = /^\d+\.\d+$/;
 const TOKEN_PRICE_CHANGE = /^([+-])\d+\.\d{2}$/;
 
