@@ -1,9 +1,9 @@
 import type { ElementType, ReactNode } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
-import { within, userEvent, waitFor } from '@storybook/testing-library';
+import { within, userEvent, waitFor, screen } from '@storybook/testing-library';
 import MediaQuery from 'react-responsive';
 
 import cardanoImage from '../../assets/images/cardano-blue-bg.png';
@@ -11,7 +11,7 @@ import { ThemeColorScheme, ThemeProvider, sx } from '../../design-tokens';
 import { sleep } from '../../test';
 import { Box } from '../box';
 import * as Buttons from '../buttons';
-import { page, Section, Variants } from '../decorators';
+import { page, Section, Variants, usePortalContainer } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
@@ -407,13 +407,19 @@ export const Interactions: Interactions = ({
   onCloseClick,
   onBackClick,
 }: Props): JSX.Element => {
+  const container = usePortalContainer();
+  console.log({ container });
+
   return (
     <Grid columns="$1">
       <Cell>
         <Section title="Play">
           <Root>
-            <Overlay zIndex={100} />
-            <Content data-testid="side-drawer-content" zIndex={101}>
+            <Content
+              data-testid="side-drawer-content"
+              zIndex={100}
+              container={container}
+            >
               <Header
                 text="Label"
                 onBackClick={onBackClick}
@@ -445,7 +451,7 @@ export const Interactions: Interactions = ({
 Interactions.play = async ({ canvasElement }): Promise<void> => {
   const canvas = within(canvasElement);
 
-  expect(canvas.queryByTestId(`side-drawer-content`)).not.toBeInTheDocument();
+  expect(screen.queryByTestId(`side-drawer-content`)).not.toBeInTheDocument();
 
   await sleep();
 
@@ -453,15 +459,15 @@ Interactions.play = async ({ canvasElement }): Promise<void> => {
 
   await sleep();
 
-  expect(canvas.getByTestId(`side-drawer-content`)).toBeInTheDocument();
+  expect(screen.getByTestId(`side-drawer-content`)).toBeInTheDocument();
 
   await sleep();
 
-  userEvent.click(canvas.getByText('Close'));
+  userEvent.click(screen.getByText('Close'));
 
   await sleep();
 
   await waitFor(() => {
-    expect(canvas.queryByTestId(`side-drawer-content`)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(`side-drawer-content`)).not.toBeInTheDocument();
   });
 };
