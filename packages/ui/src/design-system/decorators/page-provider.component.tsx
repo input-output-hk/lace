@@ -10,7 +10,7 @@ interface Props {
 export const PageProvider = ({
   children,
 }: Readonly<Props>): React.ReactElement => {
-  const [state, setState] = useState<Element>();
+  const [state, setState] = useState<HTMLElement>();
 
   return (
     <PageContext.Provider

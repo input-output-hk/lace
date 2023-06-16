@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'react';
 
 interface PageContextValue {
-  portalContainer?: Element;
-  setPortalContainer: (container: Readonly<Element>) => void;
+  portalContainer?: HTMLElement;
+  setPortalContainer: (container: Readonly<HTMLElement>) => void;
 }
 
 export const PageContext = createContext<PageContextValue>({

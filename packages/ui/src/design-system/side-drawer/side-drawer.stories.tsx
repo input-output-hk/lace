@@ -1,5 +1,5 @@
 import type { ElementType, ReactNode } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
@@ -26,7 +26,6 @@ import { Footer } from './side-drawer-content-footer.component';
 import { Header } from './side-drawer-content-header.component';
 import { Headline } from './side-drawer-content-headline.component';
 import { Content } from './side-drawer-content.component';
-import { Overlay } from './side-drawer-overlay.component';
 import { Root } from './side-drawer-root.component';
 import { Trigger } from './side-drawer-trigger.component';
 
@@ -408,7 +407,6 @@ export const Interactions: Interactions = ({
   onBackClick,
 }: Props): JSX.Element => {
   const container = usePortalContainer();
-  console.log({ container });
 
   return (
     <Grid columns="$1">

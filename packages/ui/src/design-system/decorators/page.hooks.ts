@@ -1,4 +1,4 @@
 import { usePageContext } from './page.context';
 
-export const usePortalContainer = (): Element | undefined =>
+export const usePortalContainer = (): HTMLElement | undefined =>
   usePageContext().portalContainer;
