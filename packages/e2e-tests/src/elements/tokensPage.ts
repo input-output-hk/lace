@@ -51,6 +51,10 @@ export class TokensPage extends WebElement {
     return Factory.fromSelector(`${this.BALANCE_CURRENCY}`, 'xpath');
   }
 
+  get totalBalanceCurrencyElement(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.BALANCE_CURRENCY);
+  }
+
   tokensTableTitle(title: string): WebElement {
     return Factory.fromSelector(`//th[text() = '${title}']`, 'xpath');
   }

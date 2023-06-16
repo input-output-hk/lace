@@ -50,6 +50,11 @@ class TokensPageAssert {
     await expect(actualTotalBalance).to.be.greaterThan(0);
   };
 
+  assertSeeCurrencyLabelWithTimeout = async (maxWaitTime: number) => {
+    const tokensPage = new TokensPage();
+    await tokensPage.totalBalanceCurrencyElement.waitForDisplayed({ timeout: maxWaitTime });
+  };
+
   assertSeeReceiveAndSendButtonsInHeader = async (shouldSee: boolean) => {
     await MenuHeader.sendButton.waitForDisplayed({ reverse: !shouldSee });
     await MenuHeader.receiveButton.waitForDisplayed({ reverse: !shouldSee });

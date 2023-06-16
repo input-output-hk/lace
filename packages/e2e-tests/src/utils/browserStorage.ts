@@ -87,7 +87,8 @@ export const deleteFiatPriceFromBrowserStorage = async (): Promise<void> => {
 };
 
 export const confirmFiatPricesAreInLocalStorage = async (): Promise<void> => {
-  const fiatPrices = await getBackgroundStorageItem('fiatPrices');
+  let fiatPrices = await getBackgroundStorageItem('fiatPrices');
   if (!fiatPrices) await networkManager.waitForPricesToBeFetched();
+  fiatPrices = await getBackgroundStorageItem('fiatPrices');
   expect(fiatPrices, 'ADA Fiat price is not in local storage').is.not.undefined;
 };
