@@ -29,9 +29,9 @@ export const useAdaHandle = (): NFT => {
   const [handle, setHandle] = useState<NFT | undefined>();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = () => {
       const { nftList } = getTokenList({ assetsInfo, balance: assetsBalance?.assets, environmentName, fiatCurrency });
-      const resolvedHandle = await getAdaHandle(nftList);
+      const resolvedHandle = getAdaHandle(nftList);
       resolvedHandle && saveValueInLocalStorage({ key: 'handle', value: resolvedHandle });
       setHandle(resolvedHandle);
     };
