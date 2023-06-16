@@ -1,6 +1,7 @@
 import { createTheme } from '@vanilla-extract/css';
 import { rgba } from 'polished';
 
+import { borders } from './borders.data';
 import {
   colorTransparent,
   darkColorScheme,
@@ -156,6 +157,7 @@ const elevation: Elevation = {
 };
 
 export const darkTheme = createTheme(vars, {
+  borders,
   spacing,
   fontWeights,
   fontSizes,

@@ -18,9 +18,7 @@ const ThemeContext = createContext<ThemeProvider>({
 });
 
 export const useTheme = (): ThemeProvider => {
-  const context = useContext(ThemeContext);
-  //   if (context === null) throw new Error('ThemeContext not defined');
-  return context;
+  return useContext(ThemeContext);
 };
 
 type Props = PropsWithChildren<{

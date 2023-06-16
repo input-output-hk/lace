@@ -15,7 +15,7 @@ export const container = recipe({
     justifyContent: 'center',
     alignItems: 'center',
     appearance: 'none',
-    border: '2px solid',
+    border: vars.borders.$button_default,
     borderRadius: vars.radius.$medium,
     outline: 'none',
     vars: {

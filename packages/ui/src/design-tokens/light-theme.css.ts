@@ -1,6 +1,7 @@
 import { createTheme } from '@vanilla-extract/css';
 import { rgba } from 'polished';
 
+import { borders } from './borders.data';
 import { darkColorScheme, laceGradient, lightColorScheme } from './colors.data';
 import { opacities } from './opacities.data';
 import { radius } from './radius.data';
@@ -163,6 +164,7 @@ export const elevation: Elevation = {
 } as const;
 
 export const lightTheme = createTheme(vars, {
+  borders,
   spacing,
   fontWeights,
   fontSizes,
