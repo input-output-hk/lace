@@ -184,7 +184,7 @@ Then(/^I press keyboard (Enter|Escape) button$/, async (key: 'Enter' | 'Escape')
 });
 
 Then(/^I switch to last window$/, async () => {
-  await browser.pause(1000);
+  await browser.pause(2000);
   await switchToLastWindow();
 });
 
