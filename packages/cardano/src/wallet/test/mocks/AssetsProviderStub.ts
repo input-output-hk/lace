@@ -41,7 +41,7 @@ export const assetsProviderStub = (assets: Asset.AssetInfo[] = mockedAssets): As
   getAssets: jest.fn().mockImplementation(
     ({ assetIds }) =>
       // eslint-disable-next-line promise/avoid-new
-      new Promise((resolve) => resolve(assets.find((asset) => assetIds.includes(asset.assetId)) || assets[0]))
+      new Promise((resolve) => resolve(assets.filter((asset) => assetIds.includes(asset.assetId)) || assets[0]))
   ),
   healthCheck: jest.fn().mockResolvedValue({ ok: true })
 });

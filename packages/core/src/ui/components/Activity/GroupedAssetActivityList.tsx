@@ -11,7 +11,7 @@ const { Text } = Typography;
 
 export interface GroupedAssetActivityListProps {
   lists: AssetActivityListProps[];
-  infitineScrollProps?: Partial<InfiniteScrollProps>;
+  infiniteScrollProps?: Partial<InfiniteScrollProps>;
   withTitle?: {
     title: string;
     onClick?: () => void;
@@ -22,7 +22,7 @@ export interface GroupedAssetActivityListProps {
 
 export const GroupedAssetActivityList = ({
   lists,
-  infitineScrollProps,
+  infiniteScrollProps,
   withTitle,
   isDrawerView
 }: GroupedAssetActivityListProps): React.ReactElement => {
@@ -52,7 +52,7 @@ export const GroupedAssetActivityList = ({
           <Skeleton active avatar />
         </div>
       }
-      {...infitineScrollProps}
+      {...infiniteScrollProps}
       className={cn(styles.infitineScroll, { [styles.isDrawerView]: isDrawerView })}
     >
       {!isNumber(lists.length) ? (
