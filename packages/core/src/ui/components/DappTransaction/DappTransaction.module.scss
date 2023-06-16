@@ -64,6 +64,7 @@
     /* or 150% */
     /* Secondary - Black */
     color: var(--text-color-primary);
+    text-align: right;
   }
   .value {
     display: flex;
@@ -81,20 +82,15 @@
       line-height: size_unit(3);
       font-size: var(--body);
     }
-    .sub {
-      font-weight: 400;
-      font-size: var(--bodySmall);
-      line-height: size_unit(3);
-      /* or 171% */
-      letter-spacing: -0.015em;
-      /* Data - Dark Grey */
-      color: var(--text-color-primary);
-      text-align: right;
-    }
 
     .rightAligned {
+      text-align: right;
       > div {
         justify-content: flex-end;
+      }
+      div,
+      p {
+        text-align: right;
       }
     }
   }
@@ -121,4 +117,15 @@
 }
 :global(.__react_component_tooltip) {
   @include tooltip-default;
+}
+
+.sub {
+  font-weight: 400;
+  font-size: var(--bodySmall);
+  line-height: size_unit(3);
+  /* or 171% */
+  letter-spacing: -0.015em;
+  /* Data - Dark Grey */
+  color: var(--text-color-primary);
+  text-align: right;
 }
