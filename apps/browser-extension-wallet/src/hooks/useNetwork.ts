@@ -14,7 +14,7 @@ export const useNetwork = (): NetworkStatus => {
   const [isBackendFailing, setIsbackendFailing] = useState(false);
 
   useEffect(() => {
-    const sub = backendFailures$.subscribe((numFailures) => {
+    const sub = backendFailures$?.subscribe((numFailures) => {
       if (numFailures > MAX_BACKEND_FAILURES) {
         setIsbackendFailing(true);
       } else {

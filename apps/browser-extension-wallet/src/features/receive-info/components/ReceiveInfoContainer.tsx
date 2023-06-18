@@ -6,7 +6,7 @@ import { ReceiveInfo } from './ReceiveInfo';
 import { useGetHandles } from '@hooks/useGetHandles';
 
 export const ReceiveInfoContainer = (): React.ReactElement => {
-  const [redirectToOverview] = useRedirection(walletRoutePaths.assets);
+  const redirectToOverview = useRedirection(walletRoutePaths.assets);
   const { walletInfo } = useWalletStore();
   const handles = useGetHandles();
 

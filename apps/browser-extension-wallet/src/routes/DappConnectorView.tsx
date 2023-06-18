@@ -42,8 +42,8 @@ export const DappConnectorView = (): React.ReactElement => {
   const [hasNoAvailableWallet, setHasNoAvailableWallet] = useState(false);
   const { loadWallet } = useWalletManager();
   const [isLoadingWallet, setIsLoadingWallet] = useState(false);
-  const [redirectToSignSuccess] = useRedirection(dAppRoutePaths.dappTxSignSuccess);
-  const [redirectToSignFailure] = useRedirection(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
 
   useWalletInfoSubscriber();
 

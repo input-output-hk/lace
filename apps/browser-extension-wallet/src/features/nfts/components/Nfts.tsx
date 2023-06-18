@@ -29,7 +29,7 @@ import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 
 export const Nfts = withNftsFoldersContext((): React.ReactElement => {
-  const [redirectToNftDetail] = useRedirection<{ params: { id: string } }>(walletRoutePaths.nftDetail);
+  const redirectToNftDetail = useRedirection<{ params: { id: string } }>(walletRoutePaths.nftDetail);
   const [isCreateFolderDrawerOpen, setIsCreateFolderDrawerOpen] = useState(false);
   const { environmentName } = useWalletStore();
 

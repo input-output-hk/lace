@@ -55,8 +55,8 @@ export const useHandleClose = (): {
   const { hasOutput } = useTransactionProps();
   const [, setIsDrawerVisible] = useDrawer();
   const { currentSection: section } = useSections();
-  const [reditectToTransactions] = useRedirection(walletRoutePaths.activity);
-  const [reditectToOverview] = useRedirection(walletRoutePaths.assets);
+  const reditectToTransactions = useRedirection(walletRoutePaths.activity);
+  const reditectToOverview = useRedirection(walletRoutePaths.assets);
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const resetStates = useCallback(() => {

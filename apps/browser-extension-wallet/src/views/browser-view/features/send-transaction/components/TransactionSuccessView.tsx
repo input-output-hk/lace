@@ -10,7 +10,7 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
   const { builtTxData: { uiTx: { hash } = {} } = {} } = useBuiltTxState();
   return (
     <>
-      <div className={styles.successTxContainer} data-testind="transaction-success-container">
+      <div className={styles.successTxContainer} data-testid="transaction-success-container">
         <ResultMessage
           title={<div>{t('browserView.transaction.success.youCanSafelyCloseThisPanel')}</div>}
           description={<div>{t('browserView.transaction.success.thisMayTakeAFewMinutes')}</div>}
