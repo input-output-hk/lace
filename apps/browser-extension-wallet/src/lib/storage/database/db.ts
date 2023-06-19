@@ -4,10 +4,6 @@ import { addressBookSchema, dappSchema, nftFoldersSchema } from '../models';
 import { buildStoreVersion, migrateAddressBookSchema } from './build';
 import { DATABASE_NAME } from './config';
 
-export interface SchemaDefinition {
-  table: string;
-  indexedFields: string[];
-}
 export type VersionedSchema = {
   table: string;
   indexedFields: Record<number, string[]>;

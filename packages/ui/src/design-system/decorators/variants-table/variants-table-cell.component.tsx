@@ -7,7 +7,7 @@ import * as cx from './variants-table-cell.css';
 
 import type { OmitClassName } from '../../../types';
 
-type Props = OmitClassName &
+type CellProps = OmitClassName<'td'> &
   PropsWithChildren<{
     align?: 'center' | 'left' | 'right';
   }>;
@@ -16,7 +16,7 @@ export const Cell = ({
   children,
   align = 'center',
   ...props
-}: Readonly<Props>): JSX.Element => {
+}: Readonly<CellProps>): JSX.Element => {
   const justifyContent = (): 'center' | 'flex-end' | 'flex-start' => {
     switch (align) {
       case 'center': {

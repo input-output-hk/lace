@@ -6,7 +6,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
 
   @LW-2650 @LW-4406 @LW-4557
   Scenario: Extended View - Staking - Switching pool E2E
-    Given I save token: "Cardano" balance in extended mode
+    Given I save token: "Cardano" balance
     When I navigate to Staking extended page
     Then I see currently staking stake pool in extended mode and choose new pool as "OtherStakePool"
     When I input "OtherStakePool" to the search bar
