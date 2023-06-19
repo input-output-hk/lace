@@ -273,7 +273,8 @@
     "legals.termsOfService": "Terms of service",
     "support.faqs": "FAQ's",
     "support.feesExplained": "Fees explained",
-    "copyAddress": "Copy address"
+    "copyAddress": "Copy address",
+    "copyHandle": "Copy handle"
   },
   "dapp": {
     "nowallet.btn": "Create or restore a wallet",

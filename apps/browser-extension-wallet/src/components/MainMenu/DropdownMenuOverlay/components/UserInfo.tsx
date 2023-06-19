@@ -40,7 +40,9 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
           <AntdTooltip
             overlayInnerStyle={overlayInnerStyle}
             placement="top"
-            title={<span className={styles.tooltip}>{t('settings.copyAddress')}</span>}
+            title={
+              <span className={styles.tooltip}>{handle ? t('settings.copyHandle') : t('settings.copyAddress')}</span>
+            }
           >
             <div
               className={styles.userInfo}
