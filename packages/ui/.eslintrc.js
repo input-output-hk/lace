@@ -130,7 +130,12 @@ module.exports = {
     'functional/immutable-data': [
       'error',
       {
-        ignoreAccessorPattern: ['draft.*', '**.parameters', '**.play'],
+        ignoreAccessorPattern: [
+          'draft.*',
+          '**.parameters',
+          '**.play',
+          '**.args',
+        ],
       },
     ],
     'functional/functional-parameters': 'off',

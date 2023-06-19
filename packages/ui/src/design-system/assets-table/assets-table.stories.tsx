@@ -1,6 +1,7 @@
+import type { ElementType } from 'react';
 import React from 'react';
 
-import type { Meta } from '@storybook/react';
+import type { ComponentStory, Meta } from '@storybook/react';
 
 import cardanoImage from '../../assets/images/cardano-blue-bg.png';
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
@@ -26,6 +27,12 @@ export default {
     MarketPrice,
   },
   decorators: [page({ title: 'Assets table', subtitle })],
+  argTypes: {
+    priceTrend: {
+      options: ['up', 'down'],
+      control: { type: 'select' },
+    },
+  },
 } as Meta;
 
 const PopUpView = ({
@@ -143,4 +150,58 @@ Overview.parameters = {
     hover: '#hover',
     focus: '#focused',
   },
+};
+
+interface ControlsProps {
+  tokenName: string;
+  tokenSubtitle: string;
+  tokenPrice: string;
+  priceChange: string;
+  priceTrend: 'down' | 'up';
+  tokenAmount: string;
+  fiatPrice: string;
+}
+
+type Controls = ComponentStory<ElementType<ControlsProps>>;
+
+export const Controls: Controls = ({
+  fiatPrice,
+  tokenAmount,
+  tokenName,
+  tokenPrice,
+  priceChange,
+  priceTrend,
+  tokenSubtitle,
+}: Readonly<ControlsProps>): JSX.Element => (
+  <Grid columns="$1">
+    <Cell>
+      <Section title="Copy for use">
+        <Flex alignItems="center" flexDirection="column">
+          <AssetsTable>
+            <TokenProfile
+              imageSrc={cardanoImage}
+              name={tokenName}
+              description={tokenSubtitle}
+            />
+            <MarketPrice
+              tokenPrice={tokenPrice}
+              priceChange={priceChange}
+              priceTrend={priceTrend}
+            />
+            <TokenAmount amount={tokenAmount} fiatPrice={fiatPrice} />
+          </AssetsTable>
+        </Flex>
+      </Section>
+    </Cell>
+  </Grid>
+);
+
+Controls.args = {
+  tokenAmount: '23,584.48',
+  fiatPrice: '24,568.54 USD',
+  tokenName: 'Token name',
+  tokenPrice: '1.092',
+  priceChange: '+3.21',
+  priceTrend: 'up',
+  tokenSubtitle: 'Subtitle',
 };
