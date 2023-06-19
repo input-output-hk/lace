@@ -21,7 +21,7 @@ const initialState = {
   isRestaking: false,
   ids: [defaultOutputKey],
   uiOutputs: {
-    [defaultOutputKey]: { address: '', assets: [{ id: cardanoCoin.id }] }
+    [defaultOutputKey]: { address: '', handle: '', assets: [{ id: cardanoCoin.id }] }
   },
   builtTxData: {
     totalMinimumCoins: { coinMissing: '0', minimumCoin: '0' }
@@ -59,7 +59,7 @@ export interface Store {
   removeCoinFromOutputs: (id: string, asset: { id: string }) => void;
   setAssetRowToOutput: (id: string, availableCoins: IAssetInfo[]) => void;
   // ====== output address handlers ======
-  setAddressValue: (id: string, address: string) => void;
+  setAddressValue: (id: string, address: string, handle?: string) => void;
   // ====== address book picker ======
   currentRow?: string | undefined;
   currentCoinToChange?: string | undefined;
@@ -171,11 +171,11 @@ const stateHandlers = (get: GetState<Store>, set: SetState<Store>) => {
     set({ uiOutputs: updatedOutputs });
   };
 
-  const setAddressValue = (id: string, address: string) => {
+  const setAddressValue = (id: string, address: string, handle?: string) => {
     const rows = get().uiOutputs;
     const row = rows[id];
     if (!row) return;
-    const updatedRow = { ...row, address };
+    const updatedRow = { ...row, address, handle };
     const outputs = { ...rows, [id]: updatedRow };
 
     set({ uiOutputs: outputs });
@@ -341,11 +341,12 @@ export const useCoinStateSelector = (
     )
   );
 
-export const useAddressState = (row: string): { address: string } & Pick<Store, 'setAddressValue'> =>
+export const useAddressState = (row: string): { address: string; handle?: string } & Pick<Store, 'setAddressValue'> =>
   useStore(
     useCallback(
       ({ uiOutputs, setAddressValue }) => ({
         address: !uiOutputs[row] ? '' : uiOutputs[row].address,
+        handle: !uiOutputs[row] ? '' : uiOutputs[row].handle,
         setAddressValue
       }),
       [row]
@@ -364,7 +365,6 @@ export const useTransactionProps = (): {
   const { outputs } = useStore(({ uiOutputs }) => ({
     outputs: uiOutputs
   }));
-
   const hasInvalidOutputs = useMemo(
     () =>
       Object.values(outputs).some(
@@ -384,13 +384,15 @@ export const useTransactionProps = (): {
       Object.entries(outputs).map(([key, info]) => {
         const value = getOutputValues(info.assets, coin);
         let address: Wallet.Cardano.PaymentAddress | undefined;
-
+        let handle: string;
         try {
           address = info.address ? Wallet.Cardano.PaymentAddress(info.address) : undefined;
+          handle = info.handle;
         } catch {
           address = undefined;
+          handle = undefined;
         }
-        return [key, { address, value }] as const;
+        return [key, { address, handle, value }] as const;
       }),
     [coin, outputs]
   );
@@ -417,7 +419,7 @@ export const useTransactionProps = (): {
 export const useOutputInitialState = (): Store['setInitialOutputState'] =>
   useStore((state) => state.setInitialOutputState);
 
-export const useBuitTxState = (): Pick<Store, 'setBuiltTxData' | 'builtTxData'> =>
+export const useBuiltTxState = (): Pick<Store, 'setBuiltTxData' | 'builtTxData'> =>
   useStore(({ setBuiltTxData, builtTxData }) => ({ setBuiltTxData, builtTxData }));
 
 export const useCurrentRow = (): [Store['currentRow'], Store['setCurrentRow']] =>

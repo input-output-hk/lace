@@ -1,4 +1,5 @@
 import { Box, Button, Flex, Text } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 import { StakingInfoCard } from './staking-info-card';
 
 // TODO: consume real data once SDK side is ready
@@ -33,20 +34,24 @@ const data = {
   ],
 };
 
-export const Overview = () => (
-  <>
-    <Flex justifyContent={'space-between'} mb={'$16'}>
-      <Text.SubHeading>Your pools</Text.SubHeading>
-      <Button.Primary label={'Manage'} />
-    </Flex>
-    {data.staked.map((item) => (
-      <Box key={item.id} mb={'$24'}>
-        <StakingInfoCard
-          {...item}
-          cardanoCoinSymbol={'tADA'}
-          onStakePoolSelect={() => console.log('onStakePoolSelect')}
-        />
-      </Box>
-    ))}
-  </>
-);
+export const Overview = () => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Flex justifyContent={'space-between'} mb={'$16'}>
+        <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
+        <Button.Primary label={t('overview.yourPoolsSection.manageButtonLabel')} />
+      </Flex>
+      {data.staked.map((item) => (
+        <Box key={item.id} mb={'$24'}>
+          <StakingInfoCard
+            {...item}
+            cardanoCoinSymbol={'tADA'}
+            onStakePoolSelect={() => console.log('onStakePoolSelect')}
+          />
+        </Box>
+      ))}
+    </>
+  );
+};

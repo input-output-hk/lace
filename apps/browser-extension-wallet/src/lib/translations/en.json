@@ -83,6 +83,7 @@
       "maximumInputCountExceeded": "Maximum Input Count Exceeded",
       "bundleAmountIsEmpty": "Amount value missing",
       "incorrectAddress": "Incorrect address",
+      "incorrectHandle": "Handle not found",
       "wrongNetworkAddress": "This address belongs to a different network",
       "wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead."
     },
@@ -1049,7 +1050,7 @@
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet."
     },
     "destinationAddressInput": {
-      "recipientAddress": "Recipient's address"
+      "recipientAddress": "Recipient's address or handle"
     },
     "editAddressForm": {
       "walletName": "Wallet name",

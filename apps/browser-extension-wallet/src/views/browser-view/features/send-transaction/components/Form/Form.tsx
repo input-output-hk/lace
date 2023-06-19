@@ -10,7 +10,7 @@ import { CoinInput } from './CoinInput';
 import { FormRowHeader } from './FormRowHeader';
 import {
   useOutputs,
-  useBuitTxState,
+  useBuiltTxState,
   useSections,
   useCurrentRow,
   useSpentBalances,
@@ -129,7 +129,7 @@ export const Form = ({
     currentChain
   } = useWalletStore();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
-  const { builtTxData: { error, totalMinimumCoins, uiTx } = {} } = useBuitTxState();
+  const { builtTxData: { error, totalMinimumCoins, uiTx } = {} } = useBuiltTxState();
   const { setSection } = useSections();
   const [row, setCurrentRow] = useCurrentRow();
   const [isBundle, setIsBundle] = useState(false);
