@@ -9,8 +9,11 @@ const tsupConfig = defineConfig([
     clean: true,
     dts: true,
     entry: ['./src/index.ts'],
-    // eslint-disable-next-line new-cap
-    esbuildPlugins: [ScssModulesPlugin() as never, vanillaExtractPlugin()],
+    esbuildPlugins: [
+      // eslint-disable-next-line new-cap
+      ScssModulesPlugin() as never,
+      vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
+    ],
     external: Object.keys(peerDependencies),
     format: ['esm', 'cjs'],
     name: 'lace/staking',
