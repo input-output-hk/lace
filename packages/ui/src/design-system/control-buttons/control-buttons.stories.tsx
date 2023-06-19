@@ -16,8 +16,9 @@ import { Small } from './small-button.component';
 
 const subtitle = ``;
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const SampleIcon = () => <PlusCircle className={sx({ fontSize: '$18' })} />;
+const SampleIcon = (): JSX.Element => (
+  <PlusCircle className={sx({ fontSize: '$18' })} />
+);
 
 export default {
   title: 'Buttons/Control Buttons',

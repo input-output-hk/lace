@@ -40,6 +40,9 @@ export const grid = recipe({
       $none: {
         gridTemplateColumns: 'none',
       },
+      $fitContent: {
+        gridTemplateColumns: 'auto minmax(0, 1fr)',
+      },
     },
     rows: {
       $1: {

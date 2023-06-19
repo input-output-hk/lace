@@ -1,13 +1,10 @@
 import { recipe } from '@vanilla-extract/recipes';
-import { rgba } from 'polished';
 
-import { style, vars, createVar, globalStyle } from '../../design-tokens';
+import { style, vars, globalStyle } from '../../design-tokens';
 
-import { Scheme } from './types';
+import { Scheme } from './control-button.data';
 
 export const button = style({});
-
-export const borderGap = createVar();
 
 export const container = recipe({
   base: {
@@ -19,14 +16,14 @@ export const container = recipe({
     borderRadius: vars.radius.$medium,
     outline: 'none',
     vars: {
-      [borderGap]: vars.spacing.$2,
+      borderGap: vars.spacing.$2,
     },
     ':disabled': {
       opacity: vars.opacities.$0_24,
     },
     selectors: {
       '&:focus:not(:active)': {
-        outlineColor: `${vars.colors.$control_buttons_container_outlineColor}`,
+        outlineColor: vars.colors.$control_buttons_container_outlineColor,
         outlineWidth: vars.spacing.$4,
         outlineStyle: 'solid',
       },

@@ -1,24 +1,19 @@
-import type { ReactNode } from 'react';
 import React from 'react';
 
-import cs from 'classnames';
+import cn from 'classnames';
 
 import { SkeletonButton } from '../buttons';
 
 import * as cx from './control-button.css';
 
-import type { ButtonProps } from '../buttons';
+import type { ControlButtonProps } from './control-button.data';
 
-type Props = Omit<ButtonProps, 'className'> & {
-  icon?: ReactNode;
-};
-
-export const Outlined = (props: Readonly<Props>): JSX.Element => {
+export const Outlined = (props: Readonly<ControlButtonProps>): JSX.Element => {
   return (
     <SkeletonButton
       {...props}
       className={{
-        container: cs(cx.container()),
+        container: cn(cx.container()),
         label: cx.label(),
       }}
     />
