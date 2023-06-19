@@ -206,7 +206,7 @@ Given(/^I delete fiat price from local storage$/, async () => {
 });
 
 Given(/^ADA FIAT price has been fetched$/, async () => {
-  await tokensPageAssert.confirmFiatPricesAreInLocalStorage();
+  await tokensPageAssert.assertFiatPricesAreInLocalStorage();
 });
 
 Then(/^I (see|do not see) a horizontal scroll$/, async (shouldSee: 'see' | 'do not see') => {

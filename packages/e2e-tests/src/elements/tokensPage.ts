@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
 import SectionTitle from './sectionTitle';
 import { ChainablePromiseElement } from 'webdriverio';
+import { browser } from '@wdio/globals';
+import TokensPageAssert from '../assert/tokensPageAssert';
 
 class TokensPage {
   private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
@@ -70,11 +72,11 @@ class TokensPage {
     return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_FIAT_BALANCE);
   }
 
-  tokensTableItemValuePriceAda(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+  tokenPriceAda(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_PRICE);
   }
 
-  tokensTableItemValuePriceChange(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+  tokenPriceChange(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_VARIATION);
   }
 
@@ -113,12 +115,16 @@ class TokensPage {
     return await this.getTokenBalanceAsFloatByIndex(tokenIndex);
   }
 
-  async getTokenTableItemValuePriceAdaByIndex(index: number): Promise<string | number> {
-    return await this.tokensTableItemValuePriceAda(index).getText();
+  async getTokenPriceAdaByIndex(index: number): Promise<string | number> {
+    return await this.tokenPriceAda(index).getText();
   }
 
-  async getTokenTableItemValuePriceChangeByIndex(index: number): Promise<string | number> {
-    return await this.tokensTableItemValuePriceChange(index).getText();
+  async getTokenFiatBalanceByIndex(index: number): Promise<string | number> {
+    return await this.tokenFiatBalance(index).getText();
+  }
+
+  async getTokenPriceChangeByIndex(index: number): Promise<string | number> {
+    return await this.tokenPriceChange(index).getText();
   }
 
   async getTokenNames(): Promise<string[]> {
@@ -150,6 +156,10 @@ class TokensPage {
 
   async getTokensCounterAsNumber(): Promise<number> {
     return SectionTitle.getCounterAsNumber();
+  }
+
+  async waitForPricesToBeFetched() {
+    await browser.pause(TokensPageAssert.ADA_PRICE_CHECK_INTERVAL);
   }
 }
 

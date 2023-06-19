@@ -16,9 +16,9 @@ type ExpectedTokenDetails = {
   value: number;
 };
 
-const ADA_PRICE_CHECK_INTERVAL = 65_000;
-
 class TokensPageAssert {
+  ADA_PRICE_CHECK_INTERVAL = 65_000;
+
   assertSeeTitle = async () => {
     await TokensPage.title.waitForDisplayed({ timeout: 10_000 });
   };
@@ -48,10 +48,6 @@ class TokensPageAssert {
     await expect(actualTotalBalance).to.be.greaterThan(0);
   };
 
-  assertSeeCurrencyLabelWithTimeout = async (maxWaitTime: number) => {
-    await TokensPage.totalBalanceCurrency.waitForDisplayed({ timeout: maxWaitTime });
-  };
-
   assertSeeReceiveAndSendButtonsInHeader = async (shouldSee: boolean) => {
     await MenuHeader.sendButton.waitForDisplayed({ reverse: !shouldSee });
     await MenuHeader.receiveButton.waitForDisplayed({ reverse: !shouldSee });
@@ -75,59 +71,12 @@ class TokensPageAssert {
       await TokensPage.tokenName(i).waitForDisplayed();
       await TokensPage.tokenTicker(i).waitForDisplayed();
       if (mode === 'extended') {
-        // TODO: verify price cells in extended mode
+        await TokensPage.tokenPriceAda(i).waitForDisplayed();
+        await TokensPage.tokenPriceChange(i).waitForDisplayed();
       }
       await TokensPage.tokenBalance(i).waitForDisplayed();
       await TokensPage.tokenFiatBalance(i).waitForDisplayed();
     }
-  };
-
-  assertSeeCardanoItem = async (mode: 'extended' | 'popup') => {
-    await expect(await TokensPage.tokenName(0).getText()).to.equal(Asset.CARDANO.name);
-    await expect(await TokensPage.tokenTicker(0).getText()).to.equal(Asset.CARDANO.ticker);
-
-    if (mode === 'extended') {
-      // TODO: verify price cells in extended mode
-    }
-
-    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(0);
-    await expect(tokenBalance).to.be.greaterThan(0);
-
-    const tokenFiatBalance = (await TokensPage.tokenFiatBalance(0).getText()).replace(',', '');
-    const tokenValueFiatFloat = Number.parseFloat(tokenFiatBalance.split(' ')[0]);
-    await expect(tokenValueFiatFloat).to.be.greaterThan(0);
-  };
-
-  assertSeeLaceCoinItem = async (mode: 'extended' | 'popup') => {
-    await expect(await TokensPage.getTokenNames()).to.contain(Asset.LACE_COIN.name);
-    await expect(await TokensPage.getTokenTickers()).to.contain(Asset.LACE_COIN.ticker);
-
-    const tokensTableIndex = await TokensPage.getTokenRowIndex(Asset.LACE_COIN.name);
-
-    if (mode === 'extended') {
-      // TODO: verify price cells in extended mode
-    }
-
-    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
-    await expect(tokenBalance).to.be.greaterThan(0);
-
-    const tokenFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
-    await expect(tokenFiatBalance).to.equal('-');
-  };
-
-  assertSeeHoskyItem = async (mode: 'extended' | 'popup') => {
-    await expect(await TokensPage.getTokenNames()).to.contain(Asset.HOSKY_TOKEN.name);
-    await expect(await TokensPage.getTokenTickers()).to.contain(Asset.HOSKY_TOKEN.ticker);
-
-    const tokensTableIndex = await TokensPage.getTokenRowIndex(Asset.HOSKY_TOKEN.name);
-    if (mode === 'extended') {
-      // TODO: verify price cells in extended mode
-    }
-    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
-    await expect(tokenBalance).to.be.greaterThan(0);
-
-    const tokenFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
-    await expect(tokenFiatBalance).to.equal('-');
   };
 
   assertSeeNativeToken = async (tokenName: Asset, mode: 'extended' | 'popup') => {
@@ -144,32 +93,30 @@ class TokensPageAssert {
     await expect(await TokensPage.getTokenNames()).to.contain(tokenName.name);
     await expect(await TokensPage.getTokenTickers()).to.contain(tokenName.ticker);
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
-    const tokenBalanceValue = Number(await TokensPage.tokenBalance(tokensTableIndex).getText());
+    const tokenBalanceValue = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
     await expect(tokenBalanceValue).to.be.greaterThan(0);
   };
 
   assertSeeNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
-    const tokenValueFiat = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
+    const tokenValueFiat = (await TokensPage.getTokenFiatBalanceByIndex(tokensTableIndex)) as string;
     await expect(tokenValueFiat).to.match(TestnetPatterns.TOKEN_VALUE_FIAT_REGEX);
     if (mode === 'extended') {
-      const tokenValuePriceAda = (await TokensPage.getTokenTableItemValuePriceAdaByIndex(tokensTableIndex)) as string;
+      const tokenValuePriceAda = (await TokensPage.getTokenPriceAdaByIndex(tokensTableIndex)) as string;
       await expect(tokenValuePriceAda).to.match(TestnetPatterns.TOKEN_VALUE_ADA_REGEX);
-      const tokenValuePriceChange = (await TokensPage.getTokenTableItemValuePriceChangeByIndex(
-        tokensTableIndex
-      )) as string;
+      const tokenValuePriceChange = (await TokensPage.getTokenPriceChangeByIndex(tokensTableIndex)) as string;
       await expect(tokenValuePriceChange).to.match(TestnetPatterns.TOKEN_PRICE_CHANGE);
     }
   };
 
   assertSeeNotNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
-    const tokenValueFiat = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
+    const tokenValueFiat = await TokensPage.getTokenFiatBalanceByIndex(tokensTableIndex);
     await expect(tokenValueFiat).to.equal('-');
     if (mode === 'extended') {
-      const tokenValuePriceAda = await TokensPage.getTokenTableItemValuePriceAdaByIndex(tokensTableIndex);
+      const tokenValuePriceAda = await TokensPage.getTokenPriceAdaByIndex(tokensTableIndex);
       await expect(tokenValuePriceAda).to.equal('-');
-      const tokenValuePriceChange = await TokensPage.getTokenTableItemValuePriceChangeByIndex(tokensTableIndex);
+      const tokenValuePriceChange = await TokensPage.getTokenPriceChangeByIndex(tokensTableIndex);
       await expect(tokenValuePriceChange).to.equal('-');
     }
   };
@@ -183,7 +130,8 @@ class TokensPageAssert {
       const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
       await expect(tokenBalance).to.equal(tokenDetails.value);
       if (mode === 'extended') {
-        // TODO: verify price cells in extended mode
+        await TokensPage.tokenPriceAda(tokensTableIndex).waitForDisplayed();
+        await TokensPage.tokenPriceChange(tokensTableIndex).waitForDisplayed();
       }
     } else {
       await expect(await TokensPage.getTokenNames()).to.not.contain(tokenDetails.name);
@@ -282,31 +230,27 @@ class TokensPageAssert {
   }
 
   async seePriceFetchExpiredErrorMessage() {
-    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({ timeout: ADA_PRICE_CHECK_INTERVAL * 3 });
+    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({ timeout: this.ADA_PRICE_CHECK_INTERVAL * 3 });
     const expiredErrorMessageToMatch = (await t('general.warnings.priceDataExpired')).split(':')[0];
     await expect(await TokensPage.getPriceFetchErrorDescription.getText()).to.include(expiredErrorMessageToMatch);
   }
 
   async seePriceFetchFailedErrorMessage() {
-    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({ timeout: ADA_PRICE_CHECK_INTERVAL });
+    await TokensPage.getPriceFetchErrorDescription.waitForDisplayed({ timeout: this.ADA_PRICE_CHECK_INTERVAL });
     await expect(await TokensPage.getPriceFetchErrorDescription.getText()).to.equal(
       await t('general.warnings.cannotFetchPrice')
     );
   }
-
-  waitForPricesToBeFetched = async (): Promise<void> => {
-    await browser.pause(ADA_PRICE_CHECK_INTERVAL);
-  };
 
   async seePriceFetchExpiredErrorMessageInTokenDetailsScreen() {
     const expiredErrorMessageToMatch = (await t('general.warnings.priceDataExpired')).split('.')[0];
     await expect(await Banner.getContainerText()).to.include(expiredErrorMessageToMatch);
   }
 
-  async confirmFiatPricesAreInLocalStorage() {
+  async assertFiatPricesAreInLocalStorage() {
     let fiatPrices = await getBackgroundStorageItem('fiatPrices');
     if (!fiatPrices) {
-      await this.waitForPricesToBeFetched();
+      await TokensPage.waitForPricesToBeFetched();
       fiatPrices = await getBackgroundStorageItem('fiatPrices');
     }
     expect(fiatPrices, 'ADA Fiat price is not in local storage').is.not.undefined;
