@@ -97,6 +97,12 @@ export const colors = {
   $toggle_switch_container_outline: '',
   $toggle_switch_thumb_bgColor: '',
 
+  $assets_table_container_bgColor_hover: '',
+  $assets_table_label_primary_color: '',
+  $assets_table_label_secondary_color: '',
+  $assets_table_market_price_trend_up_label_color: '',
+  $assets_table_market_price_trend_down_label_color: '',
+
   $side_drawer_container_bgColor: '',
   $side_drawer_separator_bgColor: '',
   $side_drawer_head_title_color: '',

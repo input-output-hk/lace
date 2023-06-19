@@ -57,3 +57,4 @@ Feature: DAppConnector - Extended view
     Then I see "Authorized DApps" section empty state in extended mode
     When I open test DApp
     Then I see DApp authorization window
+    And I see Lace wallet info in DApp when not connected

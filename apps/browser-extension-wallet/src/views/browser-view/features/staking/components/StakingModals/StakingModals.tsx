@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDrawer } from '@views/browser/stores';
@@ -11,6 +12,7 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
+import { DrawerHeader, DrawerNavigation } from '@lace/common';
 
 type StakingModalsProps = {
   popupView?: boolean;
@@ -98,7 +100,7 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
         actions={[
           {
             body: t('browserView.staking.details.noFundsModal.buttons.cancel'),
-            dataTestId: 'no-funds-modal-confirm',
+            dataTestId: 'no-funds-modal-cancel',
             onClick: () => setNoFundsVisible(false),
             color: 'secondary'
           },
@@ -107,7 +109,15 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
             dataTestId: 'no-funds-modal-confirm',
             onClick: () => {
               setNoFundsVisible(false);
-              setDrawerConfig({ content: DrawerContent.RECEIVE_TRANSACTION });
+              setDrawerConfig({
+                content: DrawerContent.RECEIVE_TRANSACTION,
+                renderHeader: () => (
+                  <DrawerNavigation title={t('qrInfo.receive')} onCloseIconClick={() => setDrawerConfig()} />
+                ),
+                renderTitle: () => (
+                  <DrawerHeader title={t('qrInfo.title')} subtitle={t('qrInfo.scanQRCodeToConnectWallet')} />
+                )
+              });
               setIsDrawerVisible(false);
             }
           }

@@ -21,7 +21,15 @@ export default ({
     }),
     typescript(tsPluginOptions),
     peerDepsExternal(),
-    postcss(),
+    postcss({
+      // postcss plugin includes always path to the es version of the style-inject
+      // no matter what build type it is. It makes cjs build requiring esm version
+      // https://github.com/egoist/rollup-plugin-postcss/issues/381
+      // https://github.com/egoist/rollup-plugin-postcss/issues/367
+      inject: cssVariableName => `
+import styleInject from 'style-inject';
+styleInject(${cssVariableName});`
+    }),
     commonjs(),
     nodePolyfills(),
     image(),
