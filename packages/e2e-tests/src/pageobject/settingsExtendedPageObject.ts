@@ -4,6 +4,7 @@ import NetworkSettingsDrawer from '../elements/settings/extendedView/networkSett
 import menuHeaderPageObject from './menuHeaderPageObject';
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import localStorageManager from '../utils/localStorageManager';
+import Modal from '../elements/modal';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -109,6 +110,12 @@ class SettingsExtendedPageObject {
     await (mode === 'extended'
       ? simpleTxSideDrawerPageObject.clickCloseDrawerButton()
       : simpleTxSideDrawerPageObject.clickBackDrawerButton());
+  };
+
+  removeWallet = async () => {
+    await menuHeaderPageObject.openSettings();
+    await this.clickOnRemoveWallet();
+    await Modal.confirmButton.click();
   };
 }
 

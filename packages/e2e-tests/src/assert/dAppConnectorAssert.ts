@@ -11,6 +11,7 @@ import DAppTransactionAllDonePage from '../elements/dappConnector/dAppTransactio
 import { Logger } from '../support/logger';
 import testContext from '../utils/testContext';
 import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
+import NoWalletModal from '../elements/dappConnector/noWalletModal';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -92,6 +93,21 @@ class DAppConnectorAssert {
 
     await AuthorizeDAppModal.onceButton.waitForDisplayed();
     await expect(await AuthorizeDAppModal.onceButton.getText()).to.equal(await t('dapp.connect.modal.allowOnce'));
+  }
+
+  async assertSeeNoWalletModal() {
+    await this.assertSeeHeader();
+    await NoWalletModal.container.waitForDisplayed();
+    await NoWalletModal.image.waitForDisplayed();
+
+    await NoWalletModal.title.waitForDisplayed();
+    await expect(await NoWalletModal.title.getText()).to.equal(await t('dapp.noWallet.heading'));
+
+    await NoWalletModal.description.waitForDisplayed();
+    await expect(await NoWalletModal.description.getText()).to.equal(await t('dapp.noWallet.description'));
+
+    await NoWalletModal.createRestoreButton.waitForDisplayed();
+    await expect(await NoWalletModal.createRestoreButton.getText()).to.equal(await t('dapp.nowallet.btn'));
   }
 
   async assertSeeDAppRemovalConfirmationModal() {
