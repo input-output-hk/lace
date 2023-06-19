@@ -1,18 +1,27 @@
 /* eslint-disable no-magic-numbers */
+/* eslint-disable unicorn/no-useless-undefined */
 import { Typography } from 'antd';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import cn from 'classnames';
-import { DestinationAddressInput, DestinationAddressInputProps, getInputLabel } from '@lace/core';
+import { DestinationAddressInput, getInputLabel } from '@lace/core';
 import { useAddressState, useCurrentRow, useSections } from '../../store';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
 import { useAddressBookStore } from '@src/features/address-book/store';
-import { validateWalletName, validateWalletAddress, isValidAddressPerNetwork } from '@src/utils/validators';
+import {
+  validateWalletName,
+  validateWalletAddress,
+  isValidAddressPerNetwork,
+  validateHandle
+} from '@src/utils/validators';
 import { Sections } from '../..';
 import { sectionsConfig } from '../../constants';
 import styles from './AddressInput.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { Banner } from '@components/Banner';
+import { useHandleResolver } from '@hooks/useAdaHandle';
+import debounce from 'lodash/debounce';
+import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
 const TEMP_ADDRESS = 'tempAddress';
 
@@ -30,17 +39,24 @@ const isWalletNameValid = (name: string) => !validateWalletName(name);
 const isWalletAddressValid = (address: string) => !validateWalletAddress(address);
 const getTempAddress = () => localStorage.getItem(TEMP_ADDRESS);
 
+enum HandleVerificationState {
+  VALID = 'valid',
+  INVALID = 'invalid',
+  VERIFYING = 'verifying'
+}
+
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
+  const handleResolver = useHandleResolver();
   const [addressInputValue, setAddressInputValue] = useState<inputValue>('');
   const MAX_ADDRESSES = isPopupView ? 3 : 5;
 
   const { setSection } = useSections();
-  const { address, setAddressValue } = useAddressState(row);
-
+  const { address, handle, setAddressValue } = useAddressState(row);
   const { filteredAddresses, getAddressBookByNameOrAddress } = useGetFilteredAddressBook();
   const { setAddressToEdit } = useAddressBookStore();
   const [, setRowId] = useCurrentRow();
+  const [handleVerificationState, setHandleVerificationState] = useState<HandleVerificationState | undefined>();
 
   const getExistingAddress = useCallback(
     (addr: string) => filteredAddresses?.find(({ walletAddress }) => walletAddress === addr),
@@ -51,15 +67,66 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
 
+  const isAddressInputValueHandle = isAdaHandleEnabled === 'true' && validateHandle(addressInputValue.toString());
+
   const clearInput = useCallback(() => {
     setAddressInputValue('');
     setAddressValue(row, '');
-  }, [setAddressInputValue, setAddressValue, row]);
+    setHandleVerificationState(undefined);
+  }, [setAddressInputValue, setAddressValue, setHandleVerificationState, row]);
 
-  const handleInputChange: DestinationAddressInputProps['onChange'] = (value?: string) => {
+  const handleInputChange = (value?: string) => {
     setAddressInputValue(value);
     setAddressValue(row, value);
+
+    if (value.length === 0) {
+      setHandleVerificationState(undefined);
+    }
   };
+
+  const resolveHandle = useMemo(
+    () =>
+      debounce(async () => {
+        if (handle) {
+          setHandleVerificationState(HandleVerificationState.VALID);
+          return;
+        }
+
+        try {
+          const handleString = addressInputValue.toString();
+          const resolvedHandles = await handleResolver.resolveHandles({ handles: [handleString.slice(1)] });
+
+          if (resolvedHandles.length === 0) {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          } else {
+            setAddressValue(row, resolvedHandles[0].resolvedAddresses.cardano.toString(), handleString);
+            setHandleVerificationState(HandleVerificationState.VALID);
+          }
+        } catch (error) {
+          console.error('Error occurred during handle verification:', error);
+          setHandleVerificationState(HandleVerificationState.INVALID);
+        }
+      }, 1000),
+    [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
+  );
+
+  useEffect(() => {
+    if (!address) {
+      return;
+    }
+
+    if (isAddressInputValueHandle) {
+      setHandleVerificationState(HandleVerificationState.VERIFYING);
+      resolveHandle();
+    } else {
+      setHandleVerificationState(undefined);
+    }
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      resolveHandle && resolveHandle.cancel();
+    };
+  }, [address, addressInputValue, setHandleVerificationState, resolveHandle]);
 
   useEffect(() => {
     getAddressBookByNameOrAddress({ value: address || '' });
@@ -87,9 +154,9 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     if (existingAddress) {
       setAddressInputValue({ name: existingAddress.walletName, address: existingAddress.walletAddress });
     } else {
-      setAddressInputValue(address);
+      setAddressInputValue(handle || address);
     }
-  }, [address, getExistingAddress]);
+  }, [address, handle, getExistingAddress]);
 
   const addressList = useMemo(
     () =>
@@ -130,6 +197,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         onClick={onClick}
         value={addressInputValue}
         options={addressList}
+        handle={handleVerificationState}
         onChange={handleInputChange}
         empty={!address}
         valid={isAddressInputValueValid}
@@ -141,9 +209,14 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         translations={destinationAddressInputTranslations}
         data-testid="address-input"
       />
-      {!isAddressInputValueValid && address && (
+      {!isAddressInputValueValid && !isAddressInputValueHandle && address && (
         <Text className={styles.errorParagraph} data-testid="address-input-error">
           {t('general.errors.incorrectAddress')}
+        </Text>
+      )}
+      {isAddressInputValueHandle && handleVerificationState === HandleVerificationState.INVALID && (
+        <Text className={styles.errorParagraph} data-testid="handle-input-error">
+          {t('general.errors.incorrectHandle')}
         </Text>
       )}
       {address && !validationObject.isValidAddressPerNetwork && (
