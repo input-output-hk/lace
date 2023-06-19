@@ -82,7 +82,7 @@ export const Connect = (): React.ReactElement => {
           className={styles.footerBtn}
           data-testid="connect-cancel-button"
           color="secondary"
-          onClick={closeWindow}
+          onClick={() => authorize('deny', url)}
         >
           {t('dapp.connect.btn.cancel')}
         </Button>
