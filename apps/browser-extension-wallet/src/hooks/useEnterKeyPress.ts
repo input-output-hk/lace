@@ -44,7 +44,7 @@ const handleAddressBtn = () => {
   const addressEditBtn: HTMLButtonElement = document.querySelector('[data-testid="address-form-details-btn-edit"]');
   const addressSaveBtn: HTMLButtonElement = document.querySelector('[data-testid="address-form-button-save"]');
   const addressDeleteBtn: HTMLButtonElement = document.querySelector('[data-testid="delete-address-modal-confirm"]');
-  const isAddressDeleteButtonVisible = addressDeleteBtn.offsetHeight;
+  const isAddressDeleteButtonVisible = addressDeleteBtn?.offsetHeight;
 
   if (isAddressDeleteButtonVisible && isElementEnabled(addressDeleteBtn)) {
     addressDeleteBtn.click();
