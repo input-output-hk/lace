@@ -6,7 +6,7 @@ import { useObservable } from '@hooks/useObservable';
 import { DEFAULT_WALLET_BALANCE } from '@utils/constants';
 import { useWalletStore } from '@stores';
 import { Cardano } from '@cardano-sdk/core';
-import { ADA_HANDLE_POLICY_ID } from '@src/features/ada-handle/config';
+import { ADA_HANDLE_POLICY_ID, isAdaHandleEnabled } from '@src/features/ada-handle/config';
 import { deleteFromLocalStorage, getValueFromLocalStorage, saveValueInLocalStorage } from '@utils/local-storage';
 
 const getAdaHandle = (nfts: NFT[]): NFT => {
@@ -19,7 +19,7 @@ const getAdaHandle = (nfts: NFT[]): NFT => {
   return handle;
 };
 
-export const useAdaHandle = (): NFT => {
+export const useAdaHandle = (): NFT | undefined => {
   const { inMemoryWallet, environmentName } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
@@ -45,5 +45,5 @@ export const useAdaHandle = (): NFT => {
     }
   }, [handle]);
 
-  return handle || storedHandle;
+  return isAdaHandleEnabled ? handle || storedHandle : undefined;
 };
