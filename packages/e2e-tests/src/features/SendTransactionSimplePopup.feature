@@ -252,7 +252,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I’ve entered accepted values for all fields of simple Tx
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I enter correct password and confirm the transaction
+    And I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
   @LW-2410 @Testnet @Mainnet
