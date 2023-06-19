@@ -4,7 +4,7 @@ import * as cx from './assets-table.css';
 
 import type { OmitClassName } from '../../types';
 
-type Props = OmitClassName & {
+type Props = OmitClassName<'div'> & {
   children: React.ReactNode;
 };
 

@@ -41,7 +41,7 @@ jobs:
       - name: Check for linter issues
         run: yarn workspace @lace/staking lint
       - name: Build dependencies of Staking Center
-        run: yarn workspace @lace/ui build
+        run: yarn wsrun --prefix -tram -p @lace/staking -x @lace/staking -c build
       - name: Run tests
         run: yarn workspace @lace/staking test:unit --coverage
       - name: Upload test coverage artifacts

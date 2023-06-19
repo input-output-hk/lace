@@ -9,7 +9,7 @@ import styles from './Footer.module.scss';
 import { Sections } from '../../types';
 import {
   useSections,
-  useBuitTxState,
+  useBuiltTxState,
   useSubmitingState,
   useTransactionProps,
   usePassword,
@@ -63,7 +63,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const triggerSubmit = () => confirmRef.current?.click();
   const { t } = useTranslation();
   const { hasInvalidOutputs, outputMap } = useTransactionProps();
-  const { builtTxData } = useBuitTxState();
+  const { builtTxData } = useBuiltTxState();
   const { setSection, currentSection } = useSections();
   const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
   const { inMemoryWallet, getKeyAgentType } = useWalletStore();
@@ -111,7 +111,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const isHwSummary = useMemo(() => isSummaryStep && !isInMemory, [isSummaryStep, isInMemory]);
 
   const signAndSubmitTransaction = useCallback(async () => {
-    const { tx } = await builtTxData.txBuilder.build().sign();
+    const { tx } = await builtTxData.tx.sign();
     await inMemoryWallet.submitTx(tx);
   }, [builtTxData, inMemoryWallet]);
 
@@ -191,8 +191,8 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   ]);
 
   const confirmDisable = useMemo(
-    () => !builtTxData.txBuilder || hasInvalidOutputs || metadata?.length > METADATA_MAX_LENGTH,
-    [builtTxData.txBuilder, hasInvalidOutputs, metadata]
+    () => !builtTxData.tx || hasInvalidOutputs || metadata?.length > METADATA_MAX_LENGTH,
+    [builtTxData.tx, hasInvalidOutputs, metadata]
   );
   const isSubmitDisabled = useMemo(
     () =>

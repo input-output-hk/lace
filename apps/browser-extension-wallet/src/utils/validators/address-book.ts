@@ -1,8 +1,16 @@
 import i18n, { TFunction } from 'i18next';
 import { Wallet } from '@lace/cardano';
 import { ValidationResult } from '@types';
+import { AddressBookSchema } from '@lib/storage';
+import { AddressRecordParams } from '@src/features/address-book/context';
+import { ToastProps } from '@lace/common';
+import { addressErrorMessage, nameErrorMessage } from '@lib/storage/helpers';
+import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
+import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
+const ADA_HANDLE_PREFIX = '$';
+const ADA_HANDLE_THRESHOLD = 2;
 
 // prettier-ignore
 const hasWhiteSpace = (s: string) => s.trim() !== s;
@@ -43,6 +51,9 @@ export const validateAddressBookName = (value: string, translateFn: TFunction): 
       }
     : { valid: true };
 
+export const validateHandle = (value: string): boolean =>
+  value && value.charAt(0) === ADA_HANDLE_PREFIX && value.length > ADA_HANDLE_THRESHOLD;
+
 export const validateMainnetAddress = (address: string): boolean =>
   // is Shelley era mainnet address
   address.startsWith('addr1') ||
@@ -66,3 +77,29 @@ export const isValidAddressPerNetwork = ({
   address: string;
   network: Wallet.Cardano.NetworkId;
 }): boolean => !address || validateAddrPerNetwork[network](address);
+
+export const hasAddressBookItem = (
+  list: AddressBookSchema[],
+  record: AddressRecordParams
+): [boolean, ToastProps | undefined] => {
+  const toastParams = { duration: TOAST_DEFAULT_DURATION, icon: ErrorIcon };
+  if (list.some((item) => item.name === record.name))
+    return [
+      true,
+      {
+        text: i18n.t(nameErrorMessage),
+        ...toastParams
+      }
+    ];
+
+  if (list.some((item) => item.address === record.address))
+    return [
+      true,
+      {
+        text: i18n.t(addressErrorMessage),
+        ...toastParams
+      }
+    ];
+
+  return [false, undefined];
+};

@@ -1,3 +1,5 @@
+const path = require('node:path');
+
 module.exports = {
   $schema: 'https://json.schemastore.org/eslintrc.json',
   root: true,
@@ -16,6 +18,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: ['./tsconfig.eslint.json'],
+    tsconfigRootDir: path.resolve(__dirname),
   },
   plugins: [
     'eslint-plugin-import',
@@ -134,6 +137,7 @@ module.exports = {
           'draft.*',
           '**.parameters',
           '**.play',
+          '**.argTypes',
           '**.args',
         ],
       },

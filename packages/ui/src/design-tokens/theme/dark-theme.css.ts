@@ -5,22 +5,24 @@ import {
   darkColorScheme,
   laceGradient,
   lightColorScheme,
-} from './colors.data';
-import { opacities } from './opacities.data';
-import { radius } from './radius.data';
-import { spacing } from './spacing.data';
-import { vars } from './theme.css';
+} from '../colors.data';
+import { opacities } from '../opacities.data';
+import { radius } from '../radius.data';
+import { spacing } from '../spacing.data';
 import {
   fontWeights,
   fontSizes,
   lineHeights,
   fontFamily,
-} from './typography.data';
+} from '../typography.data';
 
-import type { Colors } from './colors.data';
-import type { Elevation } from './elevation.data';
+import { vars } from './theme-contract.css';
+
+import type { Colors } from '../colors.data';
+import type { Elevation } from '../elevation.data';
 
 const colors: Colors = {
+  $lace_typography_main_color: darkColorScheme.$primary_white,
   $lace_gradient: laceGradient,
   $transparent: colorTransparent,
 
@@ -136,11 +138,17 @@ const colors: Colors = {
     lightColorScheme.$secondary_data_green,
   $assets_table_market_price_trend_down_label_color:
     lightColorScheme.$secondary_data_pink,
+
+  $side_drawer_container_bgColor: darkColorScheme.$primary_light_black,
+  $side_drawer_separator_bgColor: darkColorScheme.$primary_mid_grey,
+  $side_drawer_head_title_color: darkColorScheme.$primary_white,
+  $side_drawer_content_title_color: darkColorScheme.$primary_white,
+  $side_drawer_content_description_color: darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {
   $tooltip: '0px 0px 16px rgba(167, 143, 160, 0.2)',
-  $dialog: '0px 0px 20px rgba(167, 143, 160, 0.15)',
+  $dialog: 'none',
   $primaryButton: 'none',
   $assets: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 0px 10px rgba(0, 0, 0, 0.05)',
   $card: 'none',

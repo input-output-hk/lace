@@ -1,4 +1,5 @@
 export const colors = {
+  $lace_typography_main_color: '',
   $lace_gradient: '',
 
   $buttons_primary_label_color: '',
@@ -89,6 +90,12 @@ export const colors = {
   $assets_table_label_secondary_color: '',
   $assets_table_market_price_trend_up_label_color: '',
   $assets_table_market_price_trend_down_label_color: '',
+
+  $side_drawer_container_bgColor: '',
+  $side_drawer_separator_bgColor: '',
+  $side_drawer_head_title_color: '',
+  $side_drawer_content_title_color: '',
+  $side_drawer_content_description_color: '',
 };
 
 export type Colors = typeof colors;
