@@ -164,7 +164,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
   @LW-3560 @Pending
   # bug: LW-4698
   Scenario: Extended View - Validation of insufficient balance error
-    When I save token: "Cardano" balance in extended mode
+    When I save token: "Cardano" balance
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 1
@@ -180,7 +180,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
   @LW-4686 @Pending
   # FIXME: LW-6715
   Scenario: Extended View - Validation of insufficient balance error when assets value is equal to 0
-    When I save token: "Cardano" balance in extended mode
+    When I save token: "Cardano" balance
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 101% of total "tADA" asset in bundle 1
@@ -267,8 +267,8 @@ Feature: Send - Extended Browser View (Advanced Tx)
   @LW-1605 @LW-1606 @Pending
   #bug LW-5065
   Scenario: "Insufficient funds" error for extended view & advanced tx type - summing values for multiple assets
-    And I save token: "Cardano" balance in extended mode
-    And I save token: "LaceCoin" balance in extended mode
+    And I save token: "Cardano" balance
+    And I save token: "LaceCoin" balance
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 1
