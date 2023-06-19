@@ -205,7 +205,7 @@ Given(/^I delete fiat price from local storage$/, async () => {
   await deleteFiatPriceFromBrowserStorage();
 });
 
-Given(/^ADA FIAT price has been fetched$/, async () => {
+Given(/^ADA fiat price has been fetched$/, async () => {
   await tokensPageAssert.assertFiatPricesAreInLocalStorage();
 });
 

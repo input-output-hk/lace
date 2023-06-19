@@ -115,7 +115,7 @@ class TokensPage {
     return await this.getTokenBalanceAsFloatByIndex(tokenIndex);
   }
 
-  async getTokenPriceAdaByIndex(index: number): Promise<string | number> {
+  async getTokenPriceAdaByIndex(index: number): Promise<string> {
     return await this.tokenPriceAda(index).getText();
   }
 

@@ -218,11 +218,11 @@ Then(
   }
 );
 
-Then(/^fiat prices expired fetch error info is displayed$/, async () => {
+Then(/^fiat prices expired fetch error is displayed$/, async () => {
   await tokensPageAssert.seePriceFetchExpiredErrorMessage();
 });
 
-Then(/^fiat prices unable to fetch error info is displayed$/, async () => {
+Then(/^fiat prices unable to fetch error is displayed$/, async () => {
   await tokensPageAssert.seePriceFetchFailedErrorMessage();
 });
 
