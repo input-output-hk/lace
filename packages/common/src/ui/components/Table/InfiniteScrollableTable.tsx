@@ -1,30 +1,42 @@
 /* eslint-disable react/no-multi-comp */
 import { Table, Skeleton, SkeletonProps } from 'antd';
+import cn from 'classnames';
 import InfiniteScroll, { Props as InfiniteScrollProps } from 'react-infinite-scroll-component';
 import React from 'react';
 import styles from './InfiniteScrollableTable.module.scss';
 
 export type InfiniteScrollableTableProps = Omit<React.ComponentProps<typeof Table>, 'children'> & {
-  infitineScrollProps: Omit<InfiniteScrollProps, 'children' | 'loader'>;
+  infiniteScrollProps: Omit<InfiniteScrollProps, 'children' | 'loader'>;
+  infiniteScrollContainerClass?: string;
   loaderConfig?: SkeletonProps;
 };
 
 const TableBodyWrapper = ({
   children,
   loaderConfig,
+  infiniteScrollContainerClass,
   ...props
-}: Omit<InfiniteScrollProps, 'loader'> & { loaderConfig?: SkeletonProps }) => (
-  <InfiniteScroll className={styles.infinitScrollContainer} {...props} loader={<Skeleton {...loaderConfig} />}>
+}: Omit<InfiniteScrollProps, 'loader'> & { loaderConfig?: SkeletonProps; infiniteScrollContainerClass?: string }) => (
+  <InfiniteScroll
+    className={cn(styles.infiniteScrollContainer, { [infiniteScrollContainerClass]: infiniteScrollContainerClass })}
+    {...props}
+    loader={<Skeleton {...loaderConfig} />}
+  >
     {children}
   </InfiniteScroll>
 );
 
 export const InfiniteScrollableTable = ({
-  infitineScrollProps,
+  infiniteScrollProps,
+  infiniteScrollContainerClass,
   loaderConfig,
   ...props
 }: InfiniteScrollableTableProps): React.ReactElement => (
-  <TableBodyWrapper {...infitineScrollProps} loaderConfig={loaderConfig}>
+  <TableBodyWrapper
+    {...infiniteScrollProps}
+    loaderConfig={loaderConfig}
+    infiniteScrollContainerClass={infiniteScrollContainerClass}
+  >
     <div data-testid="infinite-scrollable-table" className={styles.tableContainer}>
       <Table
         {...props}

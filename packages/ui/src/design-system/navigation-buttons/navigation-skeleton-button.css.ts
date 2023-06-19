@@ -33,7 +33,7 @@ export const container = style([
         background: vars.colors.$navigation_button_container_bgColor_pressed,
         color: vars.colors.$buttons_secondary_label_color_pressed,
       },
-      '&:focus:not(:active)': {
+      '&:focus-visible:not(:active)': {
         outlineColor: `${vars.colors.$navigation_button_container_outlineColor}`,
         outlineWidth: vars.spacing.$4,
         outlineStyle: 'solid',

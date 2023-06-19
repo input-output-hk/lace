@@ -11,22 +11,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Build dist version of Lace
+        uses: ./.github/shared/build
         with:
-          node-version-file: '.nvmrc'
-          cache: 'yarn'
-      - name: Node modules cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --non-interactive --loglevel=error
-      - name: Build
-        run: yarn browser build
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:

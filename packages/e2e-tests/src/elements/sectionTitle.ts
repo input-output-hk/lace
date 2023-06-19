@@ -9,6 +9,10 @@ class SectionTitle {
   get sectionCounter() {
     return $(this.SECTION_COUNTER);
   }
+
+  async getCounterAsNumber(): Promise<number> {
+    return Number((await this.sectionCounter.getText()).slice(1, -1));
+  }
 }
 
 export default new SectionTitle();

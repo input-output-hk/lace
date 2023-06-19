@@ -7,6 +7,7 @@ export const spacing = {
   $10: '10px',
   $12: '12px',
   $16: '16px',
+  $18: '18px',
   $20: '20px',
   $24: '24px',
   $32: '32px',
@@ -23,4 +24,5 @@ export const spacing = {
   $584: '584px',
   $fill: '100%',
   $auto: 'auto',
+  $dialog: '664px',
 } as const;
