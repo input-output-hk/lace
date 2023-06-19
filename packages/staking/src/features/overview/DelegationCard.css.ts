@@ -22,5 +22,6 @@ export const infoLabel = style({
 });
 
 export const infoValue = style({
+  color: theme.colors.$delegationCardInfoValueColor,
   textAlign: 'right',
 });
