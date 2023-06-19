@@ -1,4 +1,5 @@
 export const colors = {
+  $lace_typography_main_color: '',
   $lace_gradient: '',
 
   $buttons_primary_label_color: '',
@@ -83,6 +84,12 @@ export const colors = {
   $toggle_switch_container_bgColor_disabled: '',
   $toggle_switch_container_outline: '',
   $toggle_switch_thumb_bgColor: '',
+
+  $side_drawer_container_bgColor: '',
+  $side_drawer_separator_bgColor: '',
+  $side_drawer_head_title_color: '',
+  $side_drawer_content_title_color: '',
+  $side_drawer_content_description_color: '',
 };
 
 export type Colors = typeof colors;
