@@ -6,7 +6,7 @@ Feature: Staking Page - Switching pools - Popup View - E2E
 
   @LW-2660 @LW-4407
   Scenario: Popup View - Staking - Switching pool E2E
-    Given I save token: "Cardano" balance in popup mode
+    Given I save token: "Cardano" balance
     And I navigate to Staking popup page
     Then I see currently staking stake pool in popup mode and choose new pool as "OtherStakePool"
     When I input "OtherStakePool" to the search bar

@@ -207,12 +207,12 @@ Feature: General Settings - Popup View
     Then I see information about empty address book
 
   @LW-5472 @Testnet
-  Scenario: Popup View - Settings - Addresses are shared and saved when switching Test Preprod to Test Preview
+  Scenario: Popup View - Settings - Addresses entered in Preprod context are not available when switching to Preview
     Given I have 3 addresses in my address book in popup mode
     And I see address count: 3
     When I switch network to: "Preview" in popup mode
     And  I open address book in popup mode
-    And I see address count: 3
+    And I see address count: 0
     When I switch network to: "Preprod" in popup mode
     And  I open address book in popup mode
     Then I see address count: 3

@@ -19,7 +19,7 @@ const responsiveProperties = defineProperties({
     'xLargeScreen',
   ],
   properties: {
-    display: ['none', 'flex', 'block', 'inline', 'inline-block'],
+    display: ['none', 'flex', 'block', 'inline', 'inline-block', 'grid'],
     flexDirection: ['row', 'column'],
     justifyContent: [
       'stretch',

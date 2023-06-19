@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { Box } from '../box';
@@ -7,6 +7,7 @@ import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 import * as Text from '../typography';
 
+import { usePageContext } from './page.context';
 import { subtitleBox } from './page.css';
 
 export type PageProps = PropsWithChildren<{
@@ -19,6 +20,15 @@ export const Page = ({
   title,
   subtitle,
 }: Readonly<PageProps>): JSX.Element => {
+  const container = useRef<HTMLDivElement>(null);
+  const { setPortalContainer } = usePageContext();
+
+  useEffect(() => {
+    if (container.current) {
+      setPortalContainer(container.current);
+    }
+  }, [container.current]);
+
   return (
     <ThemeProvider colorScheme={ThemeColorScheme.Light}>
       <div style={{ height: '100%', width: '100%' }}>
@@ -38,6 +48,7 @@ export const Page = ({
           {children}
         </Grid>
       </div>
+      <div id="portal-container" ref={container} />
     </ThemeProvider>
   );
 };
