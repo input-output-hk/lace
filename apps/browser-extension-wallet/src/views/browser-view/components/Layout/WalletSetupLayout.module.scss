@@ -3,7 +3,6 @@
 
 $header-height: size_unit(11);
 $padding: 70px;
-
 $container-width: 840px;
 
 .walletSetupLayout {
@@ -11,8 +10,8 @@ $container-width: 840px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0 90px 0 40px;
-  min-width: 970px;
+  padding: 0 70px;
+  min-width: 980px;
 
   .container {
     display: flex;
