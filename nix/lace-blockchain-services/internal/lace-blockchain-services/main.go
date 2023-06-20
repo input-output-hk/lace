@@ -162,10 +162,10 @@ func main() {
 		manageChildren(commManager)
 	}()
 
-	systray.Run(setupTrayUI(commUI, logFile, networks), func(){})
-
-	wgManager.Wait()
-	fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
+	systray.Run(setupTrayUI(commUI, logFile, networks), func(){
+		wgManager.Wait()
+		fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
+	})
 }
 
 type AppConfig struct {
