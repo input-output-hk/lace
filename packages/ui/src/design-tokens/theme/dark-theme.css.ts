@@ -1,4 +1,4 @@
-import { createTheme } from '@vanilla-extract/css';
+import { createGlobalTheme, createTheme } from '@vanilla-extract/css';
 
 import {
   colorTransparent,
@@ -154,7 +154,7 @@ const elevation: Elevation = {
   $card: 'none',
 };
 
-export const darkTheme = createTheme(vars, {
+export const theme = {
   spacing,
   fontWeights,
   fontSizes,
@@ -164,4 +164,6 @@ export const darkTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
-});
+};
+
+createGlobalTheme('[data-theme="dark"]:root', vars, theme);
