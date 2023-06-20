@@ -23,7 +23,7 @@ export const Filled = (
           }),
         ),
         label: cx.label({ colorScheme: Scheme.Filled }),
-        icon: cx.label({ colorScheme: Scheme.Filled }),
+        icon: cx.icon({ colorScheme: Scheme.Filled }),
       }}
     />
   );

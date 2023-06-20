@@ -139,3 +139,37 @@ export const label = recipe({
     colorScheme: Scheme.Outlined,
   },
 });
+
+export const icon = recipe({
+  base: {
+    fontSize: '$18',
+    maxWidth: '$24',
+    maxHeight: '$24',
+  },
+  variants: {
+    colorScheme: {
+      [Scheme.Outlined]: {
+        color: vars.colors.$control_buttons_label_color,
+      },
+      [Scheme.Filled]: {
+        color: vars.colors.$control_buttons_label_color_filled,
+        selectors: {
+          '&:hover': {
+            color: vars.colors.$control_buttons_label_color_filled_hover,
+          },
+        },
+      },
+      [Scheme.Danger]: {
+        color: vars.colors.$control_buttons_label_color_danger,
+        selectors: {
+          '&:active': {
+            color: vars.colors.$control_buttons_label_color_danger_pressed,
+          },
+        },
+      },
+    },
+  },
+  defaultVariants: {
+    colorScheme: Scheme.Outlined,
+  },
+});
