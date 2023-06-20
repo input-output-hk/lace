@@ -80,7 +80,7 @@ in rec {
         <key>CFBundleDevelopmentRegion</key>
         <string>en</string>
         <key>CFBundleExecutable</key>
-        <string>${common.prettyName}</string>
+        <string>lace-blockchain-services</string>
         <key>CFBundleIdentifier</key>
         <string>io.lace.lace-blockchain-services</string>
         <key>CFBundleName</key>
@@ -91,6 +91,8 @@ in rec {
         <string>1.0</string>
         <key>CFBundleShortVersionString</key>
         <string>1.0.0</string>
+        <key>CFBundleIconFile</key>
+        <string>iconset</string>
         <key>LSMinimumSystemVersion</key>
         <string>10.14</string>
         <key>NSHighResolutionCapable</key>
@@ -102,20 +104,33 @@ in rec {
     </plist>
   '';
 
-  lace-blockchain-services = let
-    inherit (common) prettyName;
-  in pkgs.runCommand "lace-blockchain-services" {
+  icons = let
+    sizes = [16 18 19 22 24 32 40 48 64 128 256 512 1024];
+    d2s = d: "${toString d}x${toString d}";
+    source = ./macos-app-icon.svg;
+  in pkgs.runCommand "darwin-icons" {
+    buildInputs = with pkgs; [ imagemagick ];
+  } ''
+    mkdir -p $out/iconset.iconset
+    ${lib.concatMapStringsSep "\n" (dim: ''
+      convert -background none -size ${d2s dim}       ${source} $out/iconset.iconset/icon_${d2s dim}.png
+      convert -background none -size ${d2s (dim * 2)} ${source} $out/iconset.iconset/icon_${d2s dim}@2x.png
+    '') sizes}
+    /usr/bin/iconutil --convert icns --output $out/iconset.icns $out/iconset.iconset
+  '';
+
+  lace-blockchain-services = pkgs.runCommand "lace-blockchain-services" {
     meta.mainProgram = lace-blockchain-services-exe.name;
   } ''
-    app=$out/Applications/${lib.escapeShellArg prettyName}.app/Contents
+    app=$out/Applications/${lib.escapeShellArg common.prettyName}.app/Contents
     mkdir -p "$app"/MacOS
     mkdir -p "$app"/Resources
 
     cp ${infoPlist} "$app"/Info.plist
 
-    cp ${lace-blockchain-services-exe}/bin/* "$app"/MacOS/${lib.escapeShellArg prettyName}
+    cp ${lace-blockchain-services-exe}/bin/* "$app"/MacOS/
     mkdir -p $out/bin/
-    ln -s "$app"/MacOS/${lib.escapeShellArg prettyName} $out/bin/${lace-blockchain-services-exe.name}
+    ln -s "$app"/MacOS/lace-blockchain-services $out/bin/
 
     ln -s ${cardano-node}/bin/* "$app"/MacOS/
     ln -s ${ogmios}/bin/* "$app"/MacOS/
@@ -123,6 +138,8 @@ in rec {
 
     ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
     ln -s ${common.networkConfigs} "$app"/Resources/cardano-node-config
+
+    ln -s ${icons}/iconset.icns "$app"/Resources/iconset.icns
   '';
 
 }
