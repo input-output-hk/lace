@@ -21,7 +21,13 @@ $aside-width-large: 420px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding-left: size_unit(1);
+  padding-left: size_unit(2);
+
+  @media (max-width: $breakpoint-minimum) {
+    min-width: 567px;
+    padding-right: 24px;
+  }
+
   @media (min-width: $breakpoint-small) {
     margin-top: 120px;
   }
@@ -38,6 +44,10 @@ $aside-width-large: 420px;
 
   &.stickyAside.bottom {
     justify-content: flex-end;
+  }
+
+  @media (max-width: $breakpoint-minimum) {
+    padding-right: 24px;
   }
 
   @media (min-width: $breakpoint-small) {
