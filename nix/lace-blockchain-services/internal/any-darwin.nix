@@ -7,8 +7,8 @@ let
   inherit (pkgs) lib;
 in rec {
   common = import ./common.nix { inherit inputs targetSystem; };
-  package = pkgs.runCommand "unimplemented" {} "echo unimplemented && exit 1";
-  installer = package;
+  package = lace-blockchain-services;
+  installer = pkgs.runCommand "unimplemented" {} "echo unimplemented && exit 1";
   inherit (common) cardano-node ogmios;
 
   cardano-js-sdk = let
