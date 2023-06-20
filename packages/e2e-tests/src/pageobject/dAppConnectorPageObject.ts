@@ -10,6 +10,7 @@ import ToastMessage from '../elements/toastMessage';
 import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 import testContext from '../utils/testContext';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
+import NoWalletModal from '../elements/dappConnector/noWalletModal';
 
 class DAppConnectorPageObject {
   TEST_DAPP_URL = this.getTestDAppUrl();
@@ -25,8 +26,8 @@ class DAppConnectorPageObject {
     await browser.newWindow(this.TEST_DAPP_URL);
   }
 
-  async waitAndSwitchToDAppConnectorWindow() {
-    await waitUntilExpectedNumberOfHandles(3);
+  async waitAndSwitchToDAppConnectorWindow(expectedNumberOfHandles: number) {
+    await waitUntilExpectedNumberOfHandles(expectedNumberOfHandles);
     await browser.switchWindow(this.DAPP_CONNECTOR_WINDOW_HANDLE);
   }
 
@@ -49,6 +50,11 @@ class DAppConnectorPageObject {
   async clickButtonInDAppRemovalConfirmationModal(button: 'Back' | 'Disconnect DApp') {
     await RemoveDAppModal.cancelButton.waitForDisplayed();
     button === 'Back' ? await RemoveDAppModal.cancelButton.click() : await RemoveDAppModal.confirmButton.click();
+  }
+
+  async clickCreateRestoreButtonInDAppNoWalletModal() {
+    await NoWalletModal.createRestoreButton.waitForDisplayed();
+    await NoWalletModal.createRestoreButton.click();
   }
 
   async deauthorizeAllDApps(mode: 'extended' | 'popup') {

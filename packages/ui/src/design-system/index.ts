@@ -12,4 +12,5 @@ export * as NavigationButton from './navigation-buttons';
 export * as ProfilePicture from './profile-picture';
 export { ScrollArea } from './scroll-area';
 export { ToggleSwitch } from './toggle-switch';
+export * as AssetsTable from './assets-table';
 export * as SideDrawer from './side-drawer';

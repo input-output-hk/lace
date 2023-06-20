@@ -1,30 +1,49 @@
-import { useMemo } from 'react';
-import { useWalletStore } from '@src/stores';
-import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
-import { Wallet } from '@lace/cardano';
+/* eslint-disable consistent-return */
+import { useEffect, useState } from 'react';
+import { getTokenList, NFT } from '@utils/get-token-list';
+import { useCurrencyStore } from '@providers';
+import { useObservable } from '@hooks/useObservable';
+import { DEFAULT_WALLET_BALANCE } from '@utils/constants';
+import { useWalletStore } from '@stores';
 import { Cardano } from '@cardano-sdk/core';
+import { ADA_HANDLE_POLICY_ID, isAdaHandleEnabled } from '@src/features/ada-handle/config';
+import { deleteFromLocalStorage, getValueFromLocalStorage, saveValueInLocalStorage } from '@utils/local-storage';
 
-export const HANDLE_SERVER_URLS: Record<Exclude<Cardano.NetworkMagics, Cardano.NetworkMagics.Testnet>, string> = {
-  [Cardano.NetworkMagics.Mainnet]: 'https://api.handle.me',
-  [Cardano.NetworkMagics.Preprod]: 'https://preprod.api.handle.me',
-  [Cardano.NetworkMagics.Preview]: 'https://preview.api.handle.me'
+const getAdaHandle = (nfts: NFT[]): NFT => {
+  if (nfts.length === 0) return;
+  const adaHandles = nfts.filter((nft) => Cardano.AssetId.getPolicyId(nft.assetId) === ADA_HANDLE_POLICY_ID);
+  if (adaHandles.length === 0) return;
+  if (adaHandles.length === 1) return adaHandles[0];
+
+  const [handle] = adaHandles.sort((a, b) => a.name.length - b.name.length);
+  return handle;
 };
 
-// TODO: use export after receive flow is merged
-const ADA_HANDLE_POLICY_ID = Wallet.Cardano.PolicyId('f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a');
+export const useAdaHandle = (): NFT | undefined => {
+  const { inMemoryWallet, environmentName } = useWalletStore();
+  const { fiatCurrency } = useCurrencyStore();
+  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const assetsBalance = useObservable(inMemoryWallet.balance.utxo.total$, DEFAULT_WALLET_BALANCE.utxo.total$);
+  const storedHandle = getValueFromLocalStorage('handle');
 
-export const useHandleResolver = (): KoraLabsHandleProvider => {
-  const {
-    blockchainProvider,
-    currentChain: { networkMagic }
-  } = useWalletStore();
+  const [handle, setHandle] = useState<NFT | undefined>();
 
-  return useMemo(() => {
-    const serverUrl = HANDLE_SERVER_URLS[networkMagic as keyof typeof HANDLE_SERVER_URLS];
-    return new KoraLabsHandleProvider({
-      serverUrl,
-      networkInfoProvider: blockchainProvider.networkInfoProvider,
-      policyId: ADA_HANDLE_POLICY_ID
-    });
-  }, [blockchainProvider, networkMagic]);
+  useEffect(() => {
+    const fetchData = () => {
+      const { nftList } = getTokenList({ assetsInfo, balance: assetsBalance?.assets, environmentName, fiatCurrency });
+      const resolvedHandle = getAdaHandle(nftList);
+      resolvedHandle && saveValueInLocalStorage({ key: 'handle', value: resolvedHandle });
+      setHandle(resolvedHandle);
+    };
+
+    fetchData();
+  }, [assetsBalance?.assets, assetsInfo, environmentName, fiatCurrency]);
+
+  useEffect(() => {
+    if (handle === undefined) {
+      deleteFromLocalStorage('handle');
+    }
+  }, [handle]);
+
+  return isAdaHandleEnabled ? handle || storedHandle : undefined;
 };
