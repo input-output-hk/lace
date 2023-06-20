@@ -7,6 +7,16 @@
   margin-left: -#{size_unit(2)};
 }
 
-.educationalList {
-  margin-top: size_unit(4);
+.titleContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  .addAddressBtn {
+    max-height: 48px !important;
+  }
+}
+
+.btnIcon {
+  font-size: 20px;
 }

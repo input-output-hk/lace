@@ -149,6 +149,14 @@ const colors: Colors = {
   $toggle_switch_container_outline: lightColorScheme.$primary_accent_purple_0_3,
   $toggle_switch_thumb_bgColor: darkColorScheme.$primary_white,
 
+  $assets_table_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $assets_table_label_primary_color: darkColorScheme.$primary_white,
+  $assets_table_label_secondary_color: darkColorScheme.$primary_light_grey,
+  $assets_table_market_price_trend_up_label_color:
+    lightColorScheme.$secondary_data_green,
+  $assets_table_market_price_trend_down_label_color:
+    lightColorScheme.$secondary_data_pink,
+
   $side_drawer_container_bgColor: darkColorScheme.$primary_light_black,
   $side_drawer_separator_bgColor: darkColorScheme.$primary_mid_grey,
   $side_drawer_head_title_color: darkColorScheme.$primary_white,
