@@ -6,7 +6,7 @@ import { Wallet } from '@lace/cardano';
 import { PriceResult, useFetchCoinPrice, useObservable } from '@hooks';
 import { walletBalanceTransformer } from '../../../../../api/transformers';
 import { OutputSummaryList, SentAssetsList, Costs, OutputSummaryProps } from '@lace/core';
-import { useBuitTxState, useMetadata } from '../store';
+import { useBuiltTxState, useMetadata } from '../store';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import styles from './SendTransactionSummary.module.scss';
@@ -95,7 +95,7 @@ interface SendTransactionSummaryProps {
 export const SendTransactionSummary = withAddressBookContext(
   ({ isPopupView = false }: SendTransactionSummaryProps): React.ReactElement => {
     const { t } = useTranslation();
-    const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuitTxState();
+    const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuiltTxState();
     const [metadata] = useMetadata();
     const { inMemoryWallet } = useWalletStore();
     const { priceResult } = useFetchCoinPrice();
@@ -130,7 +130,7 @@ export const SendTransactionSummary = withAddressBookContext(
     const rows = [...(outputs?.values() ?? [])].map((item) => ({
       list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
       recipientAddress: item.address.toString(),
-      recipientName: addressToNameMap?.get(item.address.toString())
+      recipientName: addressToNameMap?.get(item.address.toString()) || item.handle
     }));
 
     // Where do we get the deposit field? LW-1363
