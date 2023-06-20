@@ -10,7 +10,10 @@ export enum Scheme {
   Small = 'Small',
 }
 
-export type ControlButtonProps = Omit<ButtonProps, 'className' | 'label'> & {
+export type ControlButtonProps = Omit<ButtonProps, 'className'> & {
   icon?: ReactNode;
+};
+
+export type ControlButtonWithLabelProps = ControlButtonProps & {
   label?: string;
 };

@@ -7,9 +7,11 @@ import { SkeletonButton } from '../buttons';
 import * as cx from './control-button.css';
 import { Scheme } from './control-button.data';
 
-import type { ControlButtonProps } from './control-button.data';
+import type { ControlButtonWithLabelProps } from './control-button.data';
 
-export const Filled = (props: Readonly<ControlButtonProps>): JSX.Element => {
+export const Filled = (
+  props: Readonly<ControlButtonWithLabelProps>,
+): JSX.Element => {
   return (
     <SkeletonButton
       {...props}

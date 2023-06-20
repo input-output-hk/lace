@@ -1,5 +1,3 @@
-import { rgba } from 'polished';
-
 export const colors = {
   $lace_typography_main_color: '',
   $lace_gradient: '',
