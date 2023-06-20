@@ -17,7 +17,11 @@ import { Small } from './small-button.component';
 const subtitle = ``;
 
 const SampleIcon = (): JSX.Element => (
-  <PlusCircle className={sx({ fontSize: '$18' })} />
+  <PlusCircle
+    className={sx({
+      fontSize: '$18',
+    })}
+  />
 );
 
 export default {
@@ -143,7 +147,7 @@ export const Overview = (): JSX.Element => (
               <Small label="Label" />
             </Variants.Cell>
             <Variants.Cell>
-              <Filled label="Label" />
+              <Danger label="Label" />
             </Variants.Cell>
           </Variants.Row>
         </Variants.Table>

@@ -18,6 +18,7 @@ export const Small = (
       className={{
         container: cn(cx.container({ paddingScheme: Scheme.Small })),
         label: cx.label(),
+        icon: cx.label(),
       }}
     />
   );

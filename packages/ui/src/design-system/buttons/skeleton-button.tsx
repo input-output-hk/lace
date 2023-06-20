@@ -15,6 +15,7 @@ export type ButtonProps = OmitClassName<'button'> & {
   className: {
     container: string;
     label: string;
+    icon?: string;
   };
   label?: string;
   icon?: ReactNode;
@@ -39,7 +40,12 @@ export const SkeletonButton = ({
     >
       <Flex alignItems="center" justifyContent="center">
         {icon !== undefined && (
-          <Flex pr={label === undefined ? '$0' : '$8'}>{icon}</Flex>
+          <Flex
+            pr={label === undefined ? '$0' : '$8'}
+            className={className.icon}
+          >
+            {icon}
+          </Flex>
         )}
         {label !== undefined && (
           <Text.Button className={className.label}>{label}</Text.Button>

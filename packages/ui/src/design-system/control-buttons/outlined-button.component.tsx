@@ -17,6 +17,7 @@ export const Outlined = (
       className={{
         container: cn(cx.container()),
         label: cx.label(),
+        icon: cx.label(),
       }}
     />
   );

@@ -23,6 +23,7 @@ export const Danger = (
           }),
         ),
         label: cx.label({ colorScheme: Scheme.Danger }),
+        icon: cx.label({ colorScheme: Scheme.Danger }),
       }}
     />
   );

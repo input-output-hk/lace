@@ -16,6 +16,7 @@ export const Icon = (props: Readonly<ControlButtonProps>): JSX.Element => {
       className={{
         container: cn(cx.container({ paddingScheme: Scheme.Icon })),
         label: cx.label(),
+        icon: cx.label(),
       }}
     />
   );
