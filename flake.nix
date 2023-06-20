@@ -48,6 +48,12 @@
         # x86_64-darwin  = inputs.self.packages.x86_64-darwin.lace-blockchain-services-installer;
         # aarch64-darwin  = inputs.self.packages.aarch64-darwin.lace-blockchain-services-installer;
       };
+
+      required = inputs.nixpkgs.legacyPackages.x86_64-linux.releaseTools.aggregate {
+        name = "github-required";
+        meta.description = "All jobs required to pass CI";
+        constituents = __attrValues inputs.self.hydraJobs.lace-blockchain-services-installer;
+      };
     };
   };
 
