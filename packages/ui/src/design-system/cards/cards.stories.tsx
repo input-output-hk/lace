@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { Meta } from '@storybook/react';
 
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Section, Variants } from '../decorators';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
@@ -72,9 +72,9 @@ export const Overview = (): JSX.Element => {
         <Section title="Main components">
           <>
             {renderTable(true)}
-            <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+            <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
               <div style={{ color: 'white' }}>{renderTable()}</div>
-            </ThemeProvider>
+            </LocalThemeProvider>
           </>
         </Section>
       </Cell>
