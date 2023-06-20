@@ -21,10 +21,11 @@ Feature: Address book - extended view
   @LW-4464 @Smoke
   Scenario Outline: Extended-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in extended mode
+    And I click "Add address" button
     And I see Add new address form
-    And "browserView.addressBook.emptyState.button" button is disabled
+    And "browserView.addressBook.addressForm.saveAddress" button is disabled
     When I fill "<wallet_name>" and "<address>" address details outside drawer
-    And I click "browserView.addressBook.emptyState.button" button
+    And I click "browserView.addressBook.addressForm.saveAddress" button
     Then I see a toast with message: "browserView.addressBook.toast.addAddress"
     And I see address with name "<wallet_name>" and address "<address>" on the list
     Examples:
@@ -39,10 +40,11 @@ Feature: Address book - extended view
   @LW-4465
   Scenario Outline: Extended-view - Address Book - Add new address and display error message - Name: <name_error> - Address: <address_error>
     Given I don't have any addresses added to my address book in extended mode
+    And I click "Add address" button
     And I see Add new address form
     When I fill "<wallet_name>" and "<address>" address details outside drawer
     Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
-    And "core.addressForm.addAddress" button is disabled
+    And "browserView.addressBook.addressForm.saveAddress" button is disabled
     Examples:
       | wallet_name               | address                                                                  | name_error                       | address_error                       |
       | too_long_name_123456789   | addr_invalid                                                             | Max 20 Characters                | Incorrect Cardano address           |
@@ -54,11 +56,12 @@ Feature: Address book - extended view
   @LW-4554
   Scenario Outline: Extended-view - Address Book - Add empty name/address and display error message - Name: <name_error> - Address: <address_error>
     Given I don't have any addresses added to my address book in extended mode
+    And I click "Add address" button
     And I see Add new address form
     When I fill "<wallet_name>" and "<address>" address details outside drawer
     When I fill "<wallet_name2>" and "<address2>" address details outside drawer
     Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
-    And "core.addressForm.addAddress" button is disabled
+    And "browserView.addressBook.addressForm.saveAddress" button is disabled
     Examples:
       | wallet_name | wallet_name2 | address                                                               | address2                                                              | name_error             | address_error             |
       | name_ok     | empty        | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf | Name field is required | empty                     |
@@ -86,8 +89,9 @@ Feature: Address book - extended view
   @LW-4468
   Scenario Outline: Extended-view - Address Book - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in extended mode
+    And I click "Add address" button
     When I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" outside drawer
-    And I click "core.addressForm.addAddress" button
+    And I click "browserView.addressBook.addressForm.saveAddress" button
     Then I see a toast with message: "<toast_message>"
     Examples:
       | wallet_name | wallet_address | toast_message                               |
@@ -218,6 +222,7 @@ Feature: Address book - extended view
   @LW-4779
   Scenario: Extended-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in extended mode
+    And I click "Add address" button
     And I see Add new address form
     When I fill "name_ok" name for address details outside drawer
     And I fill "empty" address field in address book outside drawer
@@ -227,6 +232,7 @@ Feature: Address book - extended view
   @LW-4780
   Scenario: Extended-view - Address Book - Display error message when adding valid address and clicking outside with empty name field
     Given I don't have any addresses added to my address book in extended mode
+    And I click "Add address" button
     And I see Add new address form
     When I fill "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address field in address book outside drawer
     When I fill "empty" name for address details outside drawer
@@ -236,6 +242,7 @@ Feature: Address book - extended view
   @LW-4781
   Scenario: Extended-view - Address Book - No error is displayed when leaving both fields empty
     Given I don't have any addresses added to my address book in extended mode
+    And I click "Add address" button
     And I see Add new address form
     When I fill "name_ok" and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address details outside drawer
     And I remove Name field content in address book outside drawer

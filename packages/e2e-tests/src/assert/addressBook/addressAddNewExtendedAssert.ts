@@ -13,10 +13,9 @@ class AddressAddNewExtendedAssert {
   };
 
   async assertSeeAddNewAddressForm() {
-    await webTester.waitUntilSeeElementContainingText(await t('core.addressForm.addNew'));
-    await webTester.waitUntilSeeElementContainingText(await t('core.addressForm.addNewSubtitle'));
+    await webTester.waitUntilSeeElementContainingText(await t('browserView.addressBook.form.addNewAddress'));
     await this.assertSeeAddressFormInputs();
-    await webTester.seeWebElement(new Button(await t('browserView.addressBook.emptyState.button')));
+    await webTester.seeWebElement(new Button(await t('browserView.addressBook.addressForm.saveAddress')));
   }
 
   async assertSeeAddNewAddressFormInSendFlow() {
