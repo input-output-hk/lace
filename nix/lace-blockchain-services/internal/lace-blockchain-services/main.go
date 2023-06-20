@@ -43,9 +43,17 @@ func main() {
 		panic(err)
 	}
 
+	// FIXME: https://github.com/shirou/gopsutil/issues/1000
+	numCPUs := -1
+	cpuModel := "unknown-cpu"
 	cpuInfo, err := cpu.Info()
 	if err != nil {
-		panic(err)
+		if !(runtime.GOOS == "darwin" && runtime.GOARCH == "arm64") {
+			panic(err)
+		}
+	} else {
+		cpuModel = cpuInfo[0].ModelName
+		numCPUs = len(cpuInfo)
 	}
 
 	sep := string(filepath.Separator)
@@ -78,7 +86,7 @@ func main() {
 	fmt.Printf("%s[%d]: OS: (%s-%s) %s %s %s (family: %s)\n", OurLogPrefix, os.Getpid(),
 		runtime.GOOS, runtime.GOARCH, hostInfo.OS, hostInfo.Platform, hostInfo.PlatformVersion,
 		hostInfo.PlatformFamily)
-	fmt.Printf("%s[%d]: CPU: %dx %s\n", OurLogPrefix, os.Getpid(), len(cpuInfo), cpuInfo[0].ModelName)
+	fmt.Printf("%s[%d]: CPU: %dx %s\n", OurLogPrefix, os.Getpid(), numCPUs, cpuModel)
 
 	logSystemHealth()
 	go func() {
@@ -145,11 +153,18 @@ func main() {
 		}
 	}()
 
-	go systray.Run(setupTrayUI(commUI, logFile, networks), func(){})
-	defer systray.Quit()
+	// Both macOS and Windows require that UI happens on the main thread:
+	var wgManager sync.WaitGroup
+	wgManager.Add(1)
+	go func() {
+		defer systray.Quit()
+		defer wgManager.Done()
+		manageChildren(commManager)
+	}()
 
-	manageChildren(commManager)
+	systray.Run(setupTrayUI(commUI, logFile, networks), func(){})
 
+	wgManager.Wait()
 	fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 }
 

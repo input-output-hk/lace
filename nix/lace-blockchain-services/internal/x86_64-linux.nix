@@ -16,8 +16,6 @@ in rec {
 
   cardano-js-sdk = inputs.cardano-js-sdk.packages.${pkgs.system}.default;
 
-  # ----------------------------------------------------------------------------- #
-
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
     src = ./lace-blockchain-services;
