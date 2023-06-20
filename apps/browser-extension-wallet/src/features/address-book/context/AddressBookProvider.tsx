@@ -22,6 +22,14 @@ export const cardanoNetworkMap = {
   LegacyTestnet: Wallet.Cardano.NetworkMagics.Testnet
 };
 
+const handleRecordValidation = (list: AddressBookSchema[], record: AddressRecordParams) => {
+  const [hasError, toastParams] = hasAddressBookItem(list, record);
+  if (hasError) {
+    toast.notify(toastParams);
+    throw new Error(toastParams.text);
+  }
+};
+
 export const AddressBookProvider = ({ children, initialState }: AddressBookProviderProps): React.ReactElement => {
   const { environmentName } = useWalletStore();
   const queries = useMemo(() => addressBookQueries(cardanoNetworkMap[environmentName]), [environmentName]);
@@ -32,16 +40,20 @@ export const AddressBookProvider = ({ children, initialState }: AddressBookProvi
   );
 
   const handleSaveAddress = async (record: AddressRecordParams, params: ToastProps) => {
-    const [hasError, toastParams] = hasAddressBookItem(list, record);
-    if (hasError) {
-      toast.notify(toastParams);
-      throw new Error(toastParams.text);
-    }
+    handleRecordValidation(list, record);
     return utils.saveRecord(record, params);
   };
 
+  const handleUpdateAddress = async (id: number, record: AddressBookSchema, params: ToastProps) => {
+    const currentList = list.filter((data) => data.id !== id);
+    handleRecordValidation(currentList, record);
+    return utils.updateRecord(id, record, params);
+  };
+
   return (
-    <AddressBookContext.Provider value={{ list, count, utils: { ...utils, saveRecord: handleSaveAddress } }}>
+    <AddressBookContext.Provider
+      value={{ list, count, utils: { ...utils, saveRecord: handleSaveAddress, updateRecord: handleUpdateAddress } }}
+    >
       {children}
     </AddressBookContext.Provider>
   );
