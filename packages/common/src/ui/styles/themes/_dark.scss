@@ -55,7 +55,9 @@ $dark-theme: (
   ),
   'scroll-bar': (
     'track': transparent,
-    'thum': #333333
+    'thum': #333333,
+    'track-root': rgba(169, 169, 169, 0.56),
+    'thum-root': #333333
   ),
   'switch': (
     'checked-bg-color': #7f5af0,
