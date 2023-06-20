@@ -86,7 +86,7 @@ class TokensPageAssert {
 
   assertSeeNotNativeToken = async (tokenName: Asset, mode: 'extended' | 'popup') => {
     await this.assertSeeTokenItemBasicData(tokenName);
-    await this.assertSeeNotNativeTokenData(tokenName, mode);
+    await this.assertSeeNonNativeTokenData(tokenName, mode);
   };
 
   assertSeeTokenItemBasicData = async (tokenName: Asset) => {
@@ -109,7 +109,7 @@ class TokensPageAssert {
     }
   };
 
-  assertSeeNotNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
+  assertSeeNonNativeTokenData = async (tokenName: Asset, mode: 'extended' | 'popup') => {
     const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenName.name);
     const tokenValueFiat = await TokensPage.getTokenFiatBalanceByIndex(tokensTableIndex);
     await expect(tokenValueFiat).to.equal('-');
