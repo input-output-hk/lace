@@ -1,4 +1,5 @@
 import { vanillaExtractPlugin } from '@vanilla-extract/esbuild-plugin';
+import svgr from 'esbuild-plugin-svgr';
 import { ScssModulesPlugin } from 'esbuild-scss-modules-plugin';
 import { defineConfig } from 'tsup';
 import { peerDependencies } from './package.json';
@@ -13,6 +14,7 @@ const tsupConfig = defineConfig([
       // eslint-disable-next-line new-cap
       ScssModulesPlugin() as never,
       vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
+      svgr(),
     ],
     external: Object.keys(peerDependencies),
     format: ['esm', 'cjs'],

@@ -58,6 +58,7 @@
     "react-i18next": "^12.3.1"
   },
   "devDependencies": {
+    "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/ui": "^0.1.0",
     "@ladle/react": "^2.12.3",
@@ -69,6 +70,7 @@
     "antd": "^4.17.3",
     "bignumber.js": "^9.0.1",
     "concurrently": "^8.0.1",
+    "esbuild-plugin-svgr": "^2.0.0",
     "esbuild-scss-modules-plugin": "^1.1.1",
     "happy-dom": "^9.18.3",
     "lost-pixel": "^3.4.0",
@@ -78,10 +80,12 @@
     "typescript": "^4.9.5",
     "vite-plugin-checker": "^0.6.0",
     "vite-plugin-eslint": "^1.8.1",
+    "vite-plugin-svgr": "^3.2.0",
     "vitest": "^0.31.0",
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
+    "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/ui": "^0.1.0",
     "antd": "^4.17.3",
