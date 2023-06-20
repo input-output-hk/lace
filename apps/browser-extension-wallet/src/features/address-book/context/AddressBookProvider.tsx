@@ -22,7 +22,7 @@ export const cardanoNetworkMap = {
   LegacyTestnet: Wallet.Cardano.NetworkMagics.Testnet
 };
 
-const handleRecordValidation = async (list: AddressBookSchema[], record: AddressRecordParams) => {
+const handleRecordValidation = (list: AddressBookSchema[], record: AddressRecordParams) => {
   const [hasError, toastParams] = hasAddressBookItem(list, record);
   if (hasError) {
     toast.notify(toastParams);
@@ -40,13 +40,13 @@ export const AddressBookProvider = ({ children, initialState }: AddressBookProvi
   );
 
   const handleSaveAddress = async (record: AddressRecordParams, params: ToastProps) => {
-    await handleRecordValidation(list, record);
+    handleRecordValidation(list, record);
     return utils.saveRecord(record, params);
   };
 
   const handleUpdateAddress = async (id: number, record: AddressBookSchema, params: ToastProps) => {
     const currentList = list.filter((data) => data.id !== id);
-    await handleRecordValidation(currentList, record);
+    handleRecordValidation(currentList, record);
     return utils.updateRecord(id, record, params);
   };
 
