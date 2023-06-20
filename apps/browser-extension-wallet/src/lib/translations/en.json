@@ -83,6 +83,7 @@
       "maximumInputCountExceeded": "Maximum Input Count Exceeded",
       "bundleAmountIsEmpty": "Amount value missing",
       "incorrectAddress": "Incorrect address",
+      "incorrectHandle": "Handle not found",
       "wrongNetworkAddress": "This address belongs to a different network",
       "wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead."
     },
@@ -273,7 +274,8 @@
     "legals.termsOfService": "Terms of service",
     "support.faqs": "FAQ's",
     "support.feesExplained": "Fees explained",
-    "copyAddress": "Copy address"
+    "copyAddress": "Copy address",
+    "copyHandle": "Copy handle"
   },
   "dapp": {
     "nowallet.btn": "Create or restore a wallet",
@@ -409,7 +411,7 @@
     },
     "addressBook.title": "Address book",
     "addressBook.addressList.addItem.title": "Your saved addresses",
-    "addressBook.addressList.addItem.button": "+ Add new address",
+    "addressBook.addressList.addItem.button": "Add address",
     "addressBook.emptyState.title": "You don't have any saved addresses",
     "addressBook.emptyState.message": "Save your favorites to your address book for easy access right here",
     "addressBook.emptyState.button": "Add address",
@@ -436,6 +438,8 @@
     "addressBook.form.addressMissing": "Address field is required",
     "addressBook.form.addressHasWhiteSpace": "Address has unnecessary white space",
     "addressBook.form.incorrectCardanoAddress": "Incorrect Cardano address",
+    "addressBook.form.addNewAddress": "Add new address",
+    "addressBook.form.addNewSubtitle": "Save your favorite addresses to find them easily",
     "voting.pageTitle": "Voting",
     "voting.catalystRegistrationFlow.title": "Wallet registration",
     "voting.educationalList.title": "About governance",
@@ -1047,7 +1051,7 @@
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet."
     },
     "destinationAddressInput": {
-      "recipientAddress": "Recipient's address"
+      "recipientAddress": "Recipient's address or handle"
     },
     "editAddressForm": {
       "walletName": "Wallet name",
