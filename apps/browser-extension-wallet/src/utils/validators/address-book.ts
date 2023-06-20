@@ -9,6 +9,8 @@ import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
+const ADA_HANDLE_PREFIX = '$';
+const ADA_HANDLE_THRESHOLD = 2;
 
 // prettier-ignore
 const hasWhiteSpace = (s: string) => s.trim() !== s;
@@ -48,6 +50,9 @@ export const validateAddressBookName = (value: string, translateFn: TFunction): 
         message: translateFn('addressBook.errors.nameTooLong', { maxLength: MAX_ADDRESS_BOOK_NAME_LENGTH })
       }
     : { valid: true };
+
+export const validateHandle = (value: string): boolean =>
+  value && value.charAt(0) === ADA_HANDLE_PREFIX && value.length > ADA_HANDLE_THRESHOLD;
 
 export const validateMainnetAddress = (address: string): boolean =>
   // is Shelley era mainnet address

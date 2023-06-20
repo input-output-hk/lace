@@ -24,6 +24,7 @@ import { browser } from '@wdio/globals';
 import CollateralSettingsDrawer from '../elements/settings/extendedView/collateralSettingsDrawer';
 import HelpSettingsDrawer from '../elements/settings/extendedView/helpSettingsDrawer';
 import ModalAssert from '../assert/modalAssert';
+import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
@@ -252,6 +253,12 @@ When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+When(/^I remove wallet$/, async () => {
+  await menuHeaderPageObject.openSettings();
+  await settingsExtendedPageObject.clickOnRemoveWallet();
+  await Modal.confirmButton.click();
 });
 
 Then(/^I see "Show public key" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {

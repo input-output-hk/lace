@@ -9,7 +9,7 @@ import styles from './Footer.module.scss';
 import { Sections } from '../../types';
 import {
   useSections,
-  useBuitTxState,
+  useBuiltTxState,
   useSubmitingState,
   useTransactionProps,
   usePassword,
@@ -63,7 +63,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const triggerSubmit = () => confirmRef.current?.click();
   const { t } = useTranslation();
   const { hasInvalidOutputs, outputMap } = useTransactionProps();
-  const { builtTxData } = useBuitTxState();
+  const { builtTxData } = useBuiltTxState();
   const { setSection, currentSection } = useSections();
   const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
   const { inMemoryWallet, getKeyAgentType } = useWalletStore();

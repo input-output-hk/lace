@@ -7,5 +7,5 @@ export const useGetHandles = (): HandleInfo[] | undefined => {
   const { inMemoryWallet } = useWalletStore();
   const handles = useObservable(inMemoryWallet.handles$);
 
-  return isAdaHandleEnabled === 'true' ? handles : undefined;
+  return isAdaHandleEnabled ? handles : undefined;
 };

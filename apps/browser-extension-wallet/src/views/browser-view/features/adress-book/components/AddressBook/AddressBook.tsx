@@ -2,17 +2,18 @@ import React, { useMemo, useState, useCallback } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { WalletAddressList, WalletAddressItemProps } from '@lace/core';
+import { Button } from '@lace/common';
 import { withAddressBookContext, useAddressBookContext } from '@src/features/address-book/context';
 import { AddressBookSchema } from '@src/lib/storage';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import { SectionLayout, EducationalList, Layout } from '@src/views/browser-view/components';
-import { AddressForm } from '../AddressForm';
 import { AddressDetailDrawer } from '@src/features/address-book/components/AddressDetailDrawer';
 import { AddressBookEmpty } from '../AddressBookEmpty';
 import styles from './AddressBook.module.scss';
 import DeleteIcon from '@assets/icons/delete-icon.component.svg';
 import AddIcon from '@assets/icons/add.component.svg';
 import EditIcon from '@assets/icons/edit.component.svg';
+import PlusIcon from '@assets/icons/plus.component.svg';
 import Book from '@assets/icons/book.svg';
 import { PageTitle } from '@components/Layout';
 import { LACE_APP_ID } from '@src/utils/constants';
@@ -22,6 +23,7 @@ import {
   AnalyticsEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
+import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
 
 const ELLIPSIS_LEFT_SIDE_LENGTH = 34;
 const ELLIPSIS_RIGHT_SIDE_LENGTH = 34;
@@ -31,7 +33,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
   const { extendLimit, saveRecord: saveAddress, updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
-  const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const analytics = useAnalyticsContext();
 
   const addressListTranslations = {
@@ -71,7 +73,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_BROWSER
           });
           setAddressToEdit(address);
-          setIsFormVisible(true);
+          setIsDrawerOpen(true);
         },
         shouldUseEllipsisBeferoAfter: true,
         beforeEllipsis: ELLIPSIS_LEFT_SIDE_LENGTH,
@@ -101,23 +103,33 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
         });
   };
 
+  const handleAddAddressClick = () => {
+    setIsDrawerOpen(true);
+  };
+
   if (!isNumber(addressCount)) return <span />;
 
   const sidePanel = (
-    <>
-      <AddressForm initialValues={addressToEdit} onConfirmClick={onAddressSave} />
-      <div className={styles.educationalList}>
-        <EducationalList items={educationalList} title={translate('browserView.sidePanel.aboutYourWallet')} />
-      </div>
-    </>
+    <EducationalList items={educationalList} title={translate('browserView.sidePanel.aboutYourWallet')} />
   );
+
+  const addressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
+    ? AddressDetailsSteps.DETAILS
+    : AddressDetailsSteps.CREATE;
 
   return (
     <Layout>
       <SectionLayout sidePanelContent={sidePanel}>
-        <PageTitle amount={addressCount} data-testid="address-book-page-title">
-          {translate('browserView.addressBook.title')}
-        </PageTitle>
+        <div className={styles.titleContainer}>
+          <PageTitle amount={addressCount} data-testid="address-book-page-title">
+            {translate('browserView.addressBook.title')}
+          </PageTitle>
+          <Button onClick={handleAddAddressClick} className={styles.addAddressBtn}>
+            <PlusIcon className={styles.btnIcon} />
+            {translate('browserView.addressBook.addressList.addItem.button')}
+          </Button>
+        </div>
+
         {addressCount ? (
           <>
             <div className={styles.listContainer}>
@@ -138,7 +150,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
           initialValues={addressToEdit}
           onCancelClick={() => {
             setAddressToEdit({} as AddressBookSchema);
-            setIsFormVisible(false);
+            setIsDrawerOpen(false);
           }}
           onConfirmClick={onAddressSave}
           onDelete={(id) =>
@@ -147,7 +159,8 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
               icon: DeleteIcon
             })
           }
-          visible={isFormVisible}
+          visible={isDrawerOpen}
+          initialStep={addressDrawerInitialStep}
         />
       </SectionLayout>
     </Layout>
