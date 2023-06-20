@@ -19,7 +19,7 @@ import styles from './AddressInput.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { Banner } from '@components/Banner';
-import { useHandleResolver } from '@hooks/useAdaHandle';
+import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
@@ -67,7 +67,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
 
-  const isAddressInputValueHandle = isAdaHandleEnabled === 'true' && validateHandle(addressInputValue.toString());
+  const isAddressInputValueHandle = isAdaHandleEnabled && validateHandle(addressInputValue.toString());
 
   const clearInput = useCallback(() => {
     setAddressInputValue('');
