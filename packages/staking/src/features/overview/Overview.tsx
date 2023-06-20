@@ -1,5 +1,6 @@
-import { Box, Button, Flex, Text } from '@lace/ui';
+import { Box, Button, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
+import { DelegationCard } from './DelegationCard';
 import { StakingInfoCard } from './staking-info-card';
 
 // TODO: consume real data once SDK side is ready
@@ -31,7 +32,10 @@ const data = {
       totalRewards: '5',
       totalRewardsFiat: '1.70',
     },
-  ],
+  ].map((item, index) => ({
+    ...item,
+    color: PIE_CHART_DEFAULT_COLOR_SET[index] as PieChartColor,
+  })),
 };
 
 export const Overview = () => {
@@ -39,6 +43,16 @@ export const Overview = () => {
 
   return (
     <>
+      <Box mb={'$40'}>
+        <DelegationCard
+          distribution={data.staked.map(({ color, name, coinBalance }) => ({
+            color,
+            name,
+            value: Number(coinBalance),
+          }))}
+          status={'multi-staking'}
+        />
+      </Box>
       <Flex justifyContent={'space-between'} mb={'$16'}>
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
         <Button.Primary label={t('overview.yourPoolsSection.manageButtonLabel')} />

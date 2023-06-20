@@ -3,6 +3,7 @@ import { PropsWithChildren } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { initI18n } from '../../i18n';
 import '../reset.css';
+import { getThemeClassName } from '../../theme';
 import { StakingProps } from '../types';
 import { useI18n } from './useI18n';
 
@@ -17,9 +18,11 @@ export const Setup = ({ language, theme, children }: SetupProps) => {
     return <>Spinner</>;
   }
 
+  const themeColorScheme = theme === 'light' ? ThemeColorScheme.Light : ThemeColorScheme.Dark;
+
   return (
     <I18nextProvider i18n={i18n}>
-      <ThemeProvider colorScheme={theme === 'light' ? ThemeColorScheme.Light : ThemeColorScheme.Dark}>
+      <ThemeProvider colorScheme={themeColorScheme} className={getThemeClassName(themeColorScheme)}>
         {children}
       </ThemeProvider>
     </I18nextProvider>
