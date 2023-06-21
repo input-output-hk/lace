@@ -7164,6 +7164,7 @@ __metadata:
     jest-webextension-mock: ^3.7.19
     lodash: 4.17.21
     matomo-tracker: ^2.2.4
+    node-abort-controller: ^3.1.1
     p-debounce: ^4.0.0
     pluralize: ^8.0.0
     process: ^0.11.10
@@ -32607,6 +32608,13 @@ __metadata:
   dependencies:
     semver: ^7.3.5
   checksum: 59e5e00d9a15225087b6dd55b7d4f99686a6d64a8bdbe2c9aa98f4f74554873a7225d3dc975fa32718e7695eed8abcfeaae58b03db118a01392f6d25b0469b52
+  languageName: node
+  linkType: hard
+
+"node-abort-controller@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "node-abort-controller@npm:3.1.1"
+  checksum: 2c340916af9710328b11c0828223fc65ba320e0d082214a211311bf64c2891028e42ef276b9799188c4ada9e6e1c54cf7a0b7c05dd9d59fcdc8cd633304c8047
   languageName: node
   linkType: hard
 
