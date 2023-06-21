@@ -11,6 +11,10 @@ const transformManifest = (content, mode) => {
       '$CARDANO_SERVICES_URLS',
       `${process.env.CARDANO_SERVICES_URL_MAINNET} ${process.env.CARDANO_SERVICES_URL_PREPROD} ${process.env.CARDANO_SERVICES_URL_PREVIEW}`
     )
+    .replace(
+      '$ADA_HANDLE_URLS',
+      `${process.env.ADA_HANDLE_URL_MAINNET} ${process.env.ADA_HANDLE_URL_PREPROD} ${process.env.ADA_HANDLE_URL_PREVIEW}`
+    )
     .replace('$LOCALHOST_DEFAULT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
     .replace('$LOCALHOST_SCRIPT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
     .replace(

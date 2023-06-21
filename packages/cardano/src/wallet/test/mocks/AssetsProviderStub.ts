@@ -27,6 +27,7 @@ export const mockedAssets: Asset.AssetInfo[] = [
     },
     name: Cardano.AssetName('6e7574636f696e'),
     policyId: Cardano.PolicyId('b0d07d45fe9514f80213f4020e5a61241458be626841cde717cb38a7'),
+    quantity: BigInt('12000'),
     supply: BigInt('12000')
   }
 ];
@@ -40,7 +41,7 @@ export const assetsProviderStub = (assets: Asset.AssetInfo[] = mockedAssets): As
   getAssets: jest.fn().mockImplementation(
     ({ assetIds }) =>
       // eslint-disable-next-line promise/avoid-new
-      new Promise((resolve) => resolve(assets.find((asset) => assetIds.includes(asset.assetId)) || assets[0]))
+      new Promise((resolve) => resolve(assets.filter((asset) => assetIds.includes(asset.assetId)) || assets[0]))
   ),
   healthCheck: jest.fn().mockResolvedValue({ ok: true })
 });

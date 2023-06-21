@@ -13,9 +13,9 @@ Feature: Delegating funds to new pool E2E
     And I fill bundle 1 with "CopiedAddress" address with following assets:
       | type | assetName | amount |
       | ADA  | tADA      | 5      |
-    And I click "browserView.transaction.send.footer.review" button with custom timeout 15000
-    And I click "browserView.transaction.send.footer.confirm" button
-    And I fill correct password and confirm
+    And I click "Review transaction" button on "Send" page
+    And I click "Confirm" button on "Transaction summary" page
+    And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |
@@ -27,14 +27,14 @@ Feature: Delegating funds to new pool E2E
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "5.00 tADA" and tokens count 1
     And I navigate to Staking extended page
-    And I input "ADA Capital" to search bar
+    And I input "ADA Capital" to the search bar
     And I wait for single search result
-    And I click stake pool with the name "ADA Capital"
+    And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
-    And I save stakepool info
-    When I click "browserView.staking.details.stakeButtonText" button
-    And I click "browserView.staking.details.confirmation.button.confirm" button
-    And I fill new created wallet password and confirm
+    And I save stake pool info
+    When I click "Stake on this pool" button on stake pool details drawer
+    And I click "Next" button on staking confirmation drawer
+    And I enter newly created wallet password and confirm staking
     Then Initial Delegation success screen is displayed
     When I click "browserView.staking.details.fail.btn.close" button
     And I wait until current stake pool switch to "ADA Capital"
@@ -56,9 +56,9 @@ Feature: Delegating funds to new pool E2E
     And I fill bundle 1 with "CopiedAddress" address with following assets:
       | type | assetName | amount |
       | ADA  | tADA      | 5      |
-    And I click "browserView.transaction.send.footer.review" button with custom timeout 15000
-    And I click "browserView.transaction.send.footer.confirm" button
-    And I fill correct password and confirm
+    And I click "Review transaction" button on "Send" page
+    And I click "Confirm" button on "Transaction summary" page
+    And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |
@@ -71,14 +71,14 @@ Feature: Delegating funds to new pool E2E
     And I navigate to Transactions popup page
     Then the Received transaction is displayed with value: "5.00 tADA" and tokens count 1
     And I navigate to Staking popup page
-    And I input "ADA Capital" to search bar
+    And I input "ADA Capital" to the search bar
     And I wait for single search result
-    And I click stake pool with the name "ADA Capital"
+    And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
-    When I save stakepool info
-    When I click "browserView.staking.details.stakeButtonText" button
-    And I click "browserView.staking.details.confirmation.button.confirm" button
-    And I fill new created wallet password and confirm
+    When I save stake pool info
+    When I click "Stake on this pool" button on stake pool details drawer
+    And I click "Next" button on staking confirmation drawer
+    And I enter newly created wallet password and confirm staking
     Then Initial Delegation success screen is displayed
     When I click "browserView.staking.details.fail.btn.close" button
     And I wait until current stake pool switch to "ADA Capital"

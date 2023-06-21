@@ -1,6 +1,8 @@
-/* eslint-disable new-cap */
+import { vanillaExtractPlugin } from '@vanilla-extract/esbuild-plugin';
+import svgr from 'esbuild-plugin-svgr';
 import { ScssModulesPlugin } from 'esbuild-scss-modules-plugin';
 import { defineConfig } from 'tsup';
+import { peerDependencies } from './package.json';
 
 const tsupConfig = defineConfig([
   {
@@ -8,7 +10,13 @@ const tsupConfig = defineConfig([
     clean: true,
     dts: true,
     entry: ['./src/index.ts'],
-    esbuildPlugins: [ScssModulesPlugin() as never],
+    esbuildPlugins: [
+      // eslint-disable-next-line new-cap
+      ScssModulesPlugin() as never,
+      vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
+      svgr(),
+    ],
+    external: Object.keys(peerDependencies),
     format: ['esm', 'cjs'],
     name: 'lace/staking',
     outDir: './dist',

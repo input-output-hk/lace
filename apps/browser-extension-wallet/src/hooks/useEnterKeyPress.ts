@@ -9,6 +9,8 @@ export const buttonIds = {
   addressSaveBtn: 'addr-save-btn'
 };
 
+const isElementEnabled = (element: Element): boolean => !element.hasAttribute('disabled');
+
 // generic function, there are some sections that needs an specific handler for enter key event
 const handleClick = (elementId: string) => {
   const element: HTMLButtonElement = document.querySelector(`#${elementId}`);
@@ -42,12 +44,13 @@ const handleAddressBtn = () => {
   const addressEditBtn: HTMLButtonElement = document.querySelector('[data-testid="address-form-details-btn-edit"]');
   const addressSaveBtn: HTMLButtonElement = document.querySelector('[data-testid="address-form-button-save"]');
   const addressDeleteBtn: HTMLButtonElement = document.querySelector('[data-testid="delete-address-modal-confirm"]');
+  const isAddressDeleteButtonVisible = addressDeleteBtn?.offsetHeight;
 
-  if (addressDeleteBtn && !addressDeleteBtn.hasAttribute('disabled')) {
+  if (isAddressDeleteButtonVisible && isElementEnabled(addressDeleteBtn)) {
     addressDeleteBtn.click();
-  } else if (addressSaveBtn && !addressSaveBtn.hasAttribute('disabled')) {
+  } else if (addressSaveBtn && isElementEnabled(addressSaveBtn)) {
     addressSaveBtn.click();
-  } else if (addressEditBtn && !addressEditBtn.hasAttribute('disabled')) {
+  } else if (addressEditBtn && isElementEnabled(addressEditBtn)) {
     addressEditBtn.click();
   }
 };

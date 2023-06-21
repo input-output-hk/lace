@@ -2,8 +2,8 @@ import { isInternalLink } from '../is-internal-link';
 
 describe('Testing isInternalLink function', () => {
   test('should return true', () => {
-    const result = isInternalLink('/setup/create');
-    expect(result).toBe(true);
+    expect(isInternalLink('/setup/create')).toBe(true);
+    expect(isInternalLink('/')).toBe(true);
   });
 
   test('should return false', () => {

@@ -7,7 +7,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { BlockchainProviderSlice, WalletInfoSlice } from '@stores/types';
 import { walletInfoSlice } from '../wallet-info-slice';
 import {
-  mockSingleAddressWallet,
+  mockPersonalWallet,
   mockKeyAgentDataTestnet,
   mockInMemoryWallet,
   mockWalletInfoTestnet
@@ -49,7 +49,7 @@ describe('Testing wallet info slice', () => {
 
     await act(async () => {
       const cardanoWallet = {
-        wallet: mockSingleAddressWallet as any,
+        wallet: mockPersonalWallet as any,
         stores: { mock: 'store ' } as any,
         keyAgent: {
           serializableData: mockKeyAgentDataTestnet,
@@ -60,7 +60,7 @@ describe('Testing wallet info slice', () => {
       result.current.setCardanoWallet(cardanoWallet);
       await waitForNextUpdate();
 
-      expect(result.current.inMemoryWallet).toMatchObject(mockSingleAddressWallet);
+      expect(result.current.inMemoryWallet).toMatchObject(mockPersonalWallet);
       expect(result.current.cardanoWallet).toMatchObject(cardanoWallet);
     });
   });

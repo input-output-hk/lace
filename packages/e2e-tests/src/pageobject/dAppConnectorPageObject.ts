@@ -8,11 +8,14 @@ import AuthorizedDappsPage from '../elements/dappConnector/authorizedDAppsPage';
 import popupView from '../page/popupView';
 import ToastMessage from '../elements/toastMessage';
 import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
+import testContext from '../utils/testContext';
+import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
+import NoWalletModal from '../elements/dappConnector/noWalletModal';
 
 class DAppConnectorPageObject {
   TEST_DAPP_URL = this.getTestDAppUrl();
   TEST_DAPP_NAME = 'React App';
-  DAPP_AUTHORIZATION_MODAL_HANDLE = 'dappConnector.html';
+  DAPP_CONNECTOR_WINDOW_HANDLE = 'dappConnector.html';
 
   getTestDAppUrl(): string {
     if (process.env.TEST_DAPP_URL) return process.env.TEST_DAPP_URL;
@@ -23,9 +26,13 @@ class DAppConnectorPageObject {
     await browser.newWindow(this.TEST_DAPP_URL);
   }
 
-  async waitAndSwitchToAuthorizationWindow() {
-    await waitUntilExpectedNumberOfHandles(3);
-    await browser.switchWindow(this.DAPP_AUTHORIZATION_MODAL_HANDLE);
+  async waitAndSwitchToDAppConnectorWindow(expectedNumberOfHandles: number) {
+    await waitUntilExpectedNumberOfHandles(expectedNumberOfHandles);
+    await browser.switchWindow(this.DAPP_CONNECTOR_WINDOW_HANDLE);
+  }
+
+  async switchToTestDAppWindow() {
+    await browser.switchWindow(this.TEST_DAPP_NAME);
   }
 
   async clickButtonInDAppAuthorizationWindow(button: 'Authorize' | 'Cancel') {
@@ -40,6 +47,16 @@ class DAppConnectorPageObject {
     button === 'Always' ? await AuthorizeDappModal.alwaysButton.click() : await AuthorizeDappModal.onceButton.click();
   }
 
+  async clickButtonInDAppRemovalConfirmationModal(button: 'Back' | 'Disconnect DApp') {
+    await RemoveDAppModal.cancelButton.waitForDisplayed();
+    button === 'Back' ? await RemoveDAppModal.cancelButton.click() : await RemoveDAppModal.confirmButton.click();
+  }
+
+  async clickCreateRestoreButtonInDAppNoWalletModal() {
+    await NoWalletModal.createRestoreButton.waitForDisplayed();
+    await NoWalletModal.createRestoreButton.click();
+  }
+
   async deauthorizeAllDApps(mode: 'extended' | 'popup') {
     mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
     await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
@@ -52,6 +69,25 @@ class DAppConnectorPageObject {
 
       await ToastMessage.container.waitForDisplayed();
     }
+  }
+
+  async deauthorizeDApp(expectedDappName: string, mode: 'extended' | 'popup') {
+    mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
+    await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
+    await AuthorizedDappsPage.drawerHeaderTitle.waitForDisplayed();
+
+    for (const dAppName of await AuthorizedDappsPage.dAppNames) {
+      if ((await dAppName.getText()) === expectedDappName) {
+        await AuthorizedDappsPage.dAppRemoveButtons[dAppName.index].waitForClickable();
+        await AuthorizedDappsPage.dAppRemoveButtons[dAppName.index].click();
+      }
+    }
+  }
+
+  async saveDappTransactionFeeValue() {
+    let feeValue = await ConfirmTransactionPage.transactionAmountFee.getText();
+    feeValue = feeValue.replace(' ADA', '').replace('Fee: ', '');
+    await testContext.save('feeValueDAppTx', feeValue);
   }
 }
 

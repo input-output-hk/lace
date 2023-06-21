@@ -3,10 +3,9 @@ module.exports = {
     node: true,
   },
   extends: ['prettier'],
-  ignorePatterns: ['node_modules/**/*'],
   overrides: [
     {
-      files: ['src/**/*.d.ts', 'tsup.config.ts', 'vitest.config.ts', '.ladle/*.*'],
+      files: ['src/**/*.d.ts', 'tsup.config.ts', 'vitest.config.ts', '.ladle/*.*', '*.stories.{ts,tsx}'],
       rules: {
         'import/no-default-export': 'off',
       },

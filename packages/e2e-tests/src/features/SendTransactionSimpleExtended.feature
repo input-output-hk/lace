@@ -252,7 +252,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I’ve entered accepted values for all fields of simple Tx
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill incorrect password and confirm
+    And I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
   @LW-2376 @Testnet @Mainnet
@@ -511,9 +511,9 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
   @LW-1604 @Pending @Testnet
   #bug LW-5065
   Scenario: "Insufficient funds" error for extended view & advanced tx type for multiple assets
-    And I save token: "Cardano" balance in extended mode
-    And I save token: "LaceCoin" balance in extended mode
-    And I save token: "LaceCoin2" balance in extended mode
+    And I save token: "Cardano" balance
+    And I save token: "LaceCoin" balance
+    And I save token: "LaceCoin2" balance
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 110% of total "tADA" asset in bundle 1
@@ -617,7 +617,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I’ve entered accepted values for all fields of simple Tx
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    When I fill correct password and confirm
+    When I enter correct password and confirm the transaction
     Then The Transaction error screen is displayed:
       | Title: "Oops something went wrong!"                   |
       | Subtitle: "The transaction could not be submitted..." |

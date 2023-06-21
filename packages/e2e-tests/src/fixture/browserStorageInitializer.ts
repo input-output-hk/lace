@@ -1,13 +1,8 @@
 import { WalletConfig } from '../support/walletConfiguration';
 import { setBackgroundStorage, setMigrationState } from '../utils/browserStorage';
 import { Logger } from '../support/logger';
-import extensionUtils from '../utils/utils';
 
 export const initializeBrowserStorage = async (wallet: WalletConfig): Promise<void> => {
-  if (extensionUtils.isElectron()) {
-    return;
-  }
-
   try {
     await setBackgroundStorage({ mnemonic: wallet.backgroundStorage.mnemonic });
   } catch (error) {

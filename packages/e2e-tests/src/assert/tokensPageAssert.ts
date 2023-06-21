@@ -1,6 +1,5 @@
-import { TokensPage } from '../elements/tokensPage';
+import TokensPage from '../elements/tokensPage';
 import { TestnetPatterns } from '../support/patterns';
-import webTester from '../actor/webTester';
 import MenuHeader from '../elements/menuHeader';
 import { t } from '../utils/translationService';
 import { Logger } from '../support/logger';
@@ -17,35 +16,31 @@ type ExpectedTokenDetails = {
 
 class TokensPageAssert {
   assertSeeTitle = async () => {
-    const tokensPage = new TokensPage();
-    await tokensPage.title.waitForDisplayed({ timeout: 10_000 });
+    await TokensPage.title.waitForDisplayed({ timeout: 10_000 });
   };
 
   assertSeeTitleWithCounter = async () => {
-    const tokensPage = new TokensPage();
-    await tokensPage.title.waitForDisplayed();
-    await tokensPage.counter.waitForDisplayed();
-    await expect(await tokensPage.title.getText()).to.equal(await t('browserView.assets.title'));
-    await expect(await tokensPage.counter.getText()).to.match(TestnetPatterns.COUNTER_REGEX);
+    await TokensPage.title.waitForDisplayed();
+    await TokensPage.counter.waitForDisplayed();
+    await expect(await TokensPage.title.getText()).to.equal(await t('browserView.assets.title'));
+    await expect(await TokensPage.counter.getText()).to.match(TestnetPatterns.COUNTER_REGEX);
   };
 
   assertCounterNumberMatchesWalletTokens = async () => {
-    const tokensPage = new TokensPage();
-    const tokensCounterValue = Number((await tokensPage.counter.getText()).slice(1, -1));
-    if (tokensCounterValue > 0) await tokensPage.coinGeckoCredits.scrollIntoView();
+    const tokensCounterValue = Number((await TokensPage.counter.getText()).slice(1, -1));
+    if (tokensCounterValue > 0) await TokensPage.coinGeckoCredits.scrollIntoView();
     await browser.pause(1000);
-    const rowsNumber = (await tokensPage.getRows()).length;
+    const rowsNumber = (await TokensPage.getRows()).length;
     await expect(rowsNumber).to.equal(tokensCounterValue);
   };
 
   assertSeeTotalWalletBalance = async () => {
-    const tokensPage = new TokensPage();
-    await tokensPage.totalBalanceLabel.waitForDisplayed();
-    await expect(await tokensPage.totalBalanceLabel.getText()).to.equal(
+    await TokensPage.totalBalanceLabel.waitForDisplayed();
+    await expect(await TokensPage.totalBalanceLabel.getText()).to.equal(
       await t('browserView.assets.totalWalletBalance')
     );
-    await expect(await tokensPage.getTotalBalanceCurrency()).to.equal('USD');
-    const actualTotalBalance = Number(((await tokensPage.getTotalBalanceValue()) as string).replace(/,/g, ''));
+    await expect(await TokensPage.totalBalanceCurrency.getText()).to.equal('USD');
+    const actualTotalBalance = Number((await TokensPage.totalBalanceValue.getText()).replace(/,/g, ''));
     await expect(actualTotalBalance).to.be.greaterThan(0);
   };
 
@@ -55,95 +50,96 @@ class TokensPageAssert {
   };
 
   assertSeeReceiveAndSendButtonsInPopupMode = async (shouldSee: boolean) => {
-    const tokensPage = new TokensPage();
-    await tokensPage.sendButtonPopupMode.waitForDisplayed({ reverse: !shouldSee });
-    await tokensPage.receiveButtonPopupMode.waitForDisplayed({ reverse: !shouldSee });
-  };
-
-  assertSeeTableTitles = async () => {
-    const tokensPage = new TokensPage();
-    await webTester.seeWebElement(tokensPage.tokensTableTitle('Token'));
-    await webTester.seeWebElement(tokensPage.tokensTableTitle('Price / 24hr %'));
-    await webTester.seeWebElement(tokensPage.tokensTableTitle('Balance'));
+    await TokensPage.sendButtonPopupMode.waitForDisplayed({ reverse: !shouldSee });
+    await TokensPage.receiveButtonPopupMode.waitForDisplayed({ reverse: !shouldSee });
   };
 
   assertSeeTableItems = async (mode: 'extended' | 'popup') => {
-    const tokensPage = new TokensPage();
-
-    await browser.waitUntil(async () => (await tokensPage.getRows()).length > 1, {
+    await browser.waitUntil(async () => (await TokensPage.getRows()).length > 1, {
       timeout: 10_000,
       timeoutMsg: 'failed while waiting for all tokens'
     });
 
-    const rowsNumber = (await tokensPage.getRows()).length;
+    const rowsNumber = (await TokensPage.getRows()).length;
 
-    for (let i = 1; i <= rowsNumber; i++) {
-      await webTester.seeWebElement(tokensPage.tokensTableItemAvatar(i));
-      await webTester.seeWebElement(tokensPage.tokensTableItemTitle(i));
-      await webTester.seeWebElement(tokensPage.tokensTableItemSubTitle(i));
-      await webTester.seeWebElement(tokensPage.tokensTableItemValue(i, mode));
-      await webTester.seeWebElement(tokensPage.tokensTableItemValueFiat(i, mode));
+    for (let i = 0; i < rowsNumber; i++) {
+      await TokensPage.tokensAvatar(i).waitForDisplayed();
+      await TokensPage.tokenName(i).waitForDisplayed();
+      await TokensPage.tokenTicker(i).waitForDisplayed();
+      if (mode === 'extended') {
+        // TODO: verify price cells in extended mode
+      }
+      await TokensPage.tokenBalance(i).waitForDisplayed();
+      await TokensPage.tokenFiatBalance(i).waitForDisplayed();
     }
   };
 
   assertSeeCardanoItem = async (mode: 'extended' | 'popup') => {
-    const tokensPage = new TokensPage();
-    await expect(await tokensPage.getTokensTableItemTitle(1)).to.equal(Asset.CARDANO.name);
-    await expect(await tokensPage.getTokensTableItemSubTitle(1)).to.equal(Asset.CARDANO.ticker);
+    await expect(await TokensPage.tokenName(0).getText()).to.equal(Asset.CARDANO.name);
+    await expect(await TokensPage.tokenTicker(0).getText()).to.equal(Asset.CARDANO.ticker);
 
-    const tokensValue = await tokensPage.getTokenTableItemValueByIndex(1, mode);
-    await expect(tokensValue).to.be.greaterThan(0);
+    if (mode === 'extended') {
+      // TODO: verify price cells in extended mode
+    }
 
-    const tokenValueFiat = ((await tokensPage.getTokenTableItemValueFiatByIndex(1, mode)) as string).replace(',', '');
-    const tokenValueFiatFloat = Number.parseFloat(tokenValueFiat.split(' ')[0]);
+    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(0);
+    await expect(tokenBalance).to.be.greaterThan(0);
+
+    const tokenFiatBalance = (await TokensPage.tokenFiatBalance(0).getText()).replace(',', '');
+    const tokenValueFiatFloat = Number.parseFloat(tokenFiatBalance.split(' ')[0]);
     await expect(tokenValueFiatFloat).to.be.greaterThan(0);
   };
 
   assertSeeLaceCoinItem = async (mode: 'extended' | 'popup') => {
-    const tokensPage = new TokensPage();
+    await expect(await TokensPage.getTokenNames()).to.contain(Asset.LACE_COIN.name);
+    await expect(await TokensPage.getTokenTickers()).to.contain(Asset.LACE_COIN.ticker);
 
-    await expect(await tokensPage.getTokenNames()).to.contain(Asset.LACE_COIN.name);
-    await expect(await tokensPage.getTokenTickers()).to.contain(Asset.LACE_COIN.ticker);
+    const tokensTableIndex = await TokensPage.getTokenRowIndex(Asset.LACE_COIN.name);
 
-    const tokensTableIndex = await tokensPage.getTokenRowIndex(Asset.LACE_COIN.name);
-    const tokenValue = await tokensPage.getTokenTableItemValueByIndex(tokensTableIndex, mode);
-    await expect(tokenValue).to.be.greaterThan(0);
+    if (mode === 'extended') {
+      // TODO: verify price cells in extended mode
+    }
 
-    const tokenValueFiat = (await tokensPage.getTokenTableItemValueFiatByIndex(tokensTableIndex, mode)) as string;
-    await expect(tokenValueFiat).to.equal('-');
+    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
+    await expect(tokenBalance).to.be.greaterThan(0);
+
+    const tokenFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
+    await expect(tokenFiatBalance).to.equal('-');
   };
 
   assertSeeHoskyItem = async (mode: 'extended' | 'popup') => {
-    const tokensPage = new TokensPage();
+    await expect(await TokensPage.getTokenNames()).to.contain(Asset.HOSKY_TOKEN.name);
+    await expect(await TokensPage.getTokenTickers()).to.contain(Asset.HOSKY_TOKEN.ticker);
 
-    await expect(await tokensPage.getTokenNames()).to.contain(Asset.HOSKY_TOKEN.name);
-    await expect(await tokensPage.getTokenTickers()).to.contain(Asset.HOSKY_TOKEN.ticker);
+    const tokensTableIndex = await TokensPage.getTokenRowIndex(Asset.HOSKY_TOKEN.name);
+    if (mode === 'extended') {
+      // TODO: verify price cells in extended mode
+    }
+    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
+    await expect(tokenBalance).to.be.greaterThan(0);
 
-    const tokensTableIndex = await tokensPage.getTokenRowIndex(Asset.HOSKY_TOKEN.name);
-    const tokenValue = await tokensPage.getTokenTableItemValueByIndex(tokensTableIndex, mode);
-    await expect(tokenValue).to.be.greaterThan(0);
-
-    const tokenValueFiat = (await tokensPage.getTokenTableItemValueFiatByIndex(tokensTableIndex, mode)) as string;
-    await expect(tokenValueFiat).to.equal('-');
+    const tokenFiatBalance = await TokensPage.tokenFiatBalance(tokensTableIndex).getText();
+    await expect(tokenFiatBalance).to.equal('-');
   };
 
   async assertSeeToken(shouldSee: boolean, tokenDetails: ExpectedTokenDetails, mode: 'extended' | 'popup') {
-    const tokensPage = new TokensPage();
     if (shouldSee) {
-      await tokensPage.tokensTableItemWithName(tokenDetails.name).waitForDisplayed({ timeout: 10_000 });
-      await expect(await tokensPage.getTokenNames()).to.contain(tokenDetails.name);
-      await expect(await tokensPage.getTokenTickers()).to.contain(tokenDetails.ticker);
-      const tokensTableIndex = await tokensPage.getTokenRowIndex(tokenDetails.name);
-      const tokenValue = await tokensPage.getTokenTableItemValueByIndex(tokensTableIndex, mode);
-      await expect(tokenValue).to.equal(tokenDetails.value);
+      await TokensPage.tokensTableItemWithName(tokenDetails.name).waitForDisplayed({ timeout: 10_000 });
+      await expect(await TokensPage.getTokenNames()).to.contain(tokenDetails.name);
+      await expect(await TokensPage.getTokenTickers()).to.contain(tokenDetails.ticker);
+      const tokensTableIndex = await TokensPage.getTokenRowIndex(tokenDetails.name);
+      const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(tokensTableIndex);
+      await expect(tokenBalance).to.equal(tokenDetails.value);
+      if (mode === 'extended') {
+        // TODO: verify price cells in extended mode
+      }
     } else {
-      await expect(await tokensPage.getTokenNames()).to.not.contain(tokenDetails.name);
-      await expect(await tokensPage.getTokenTickers()).to.not.contain(tokenDetails.ticker);
+      await expect(await TokensPage.getTokenNames()).to.not.contain(tokenDetails.name);
+      await expect(await TokensPage.getTokenTickers()).to.not.contain(tokenDetails.ticker);
     }
   }
 
-  async assertSeeValueSubtracted(tokenName: string, subtractedAmount: string, fee: string, mode: 'extended' | 'popup') {
-    const tokensPage = new TokensPage();
+  async assertSeeValueSubtractedAda(tokenName: string, subtractedAmount: string, fee: string) {
     const expectedValue =
       Number.parseFloat(await testContext.load(`${Asset.getByName(tokenName).ticker}tokenBalance`)) -
       Number.parseFloat(subtractedAmount) -
@@ -152,9 +148,25 @@ class TokensPageAssert {
     Logger.log(`waiting for token: ${tokenName} with value: ${expectedValueRounded}`);
     await browser.waitUntil(
       async () =>
-        (await tokensPage.getTokenTableItemValueByName(tokenName, mode)) === expectedValueRounded + 0.01 ||
-        (await tokensPage.getTokenTableItemValueByName(tokenName, mode)) === expectedValueRounded - 0.01 ||
-        (await tokensPage.getTokenTableItemValueByName(tokenName, mode)) === expectedValueRounded,
+        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded + 0.01 ||
+        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded - 0.01 ||
+        (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded,
+      {
+        timeout: 30_000,
+        interval: 3000,
+        timeoutMsg: `failed while waiting for ${tokenName} value update`
+      }
+    );
+  }
+
+  async assertSeeValueSubtractedAsset(tokenName: string, subtractedAmount: string) {
+    const expectedValue =
+      Number.parseFloat(await testContext.load(`${Asset.getByName(tokenName).ticker}tokenBalance`)) -
+      Number.parseFloat(subtractedAmount);
+    const expectedValueRounded = Number.parseFloat(expectedValue.toFixed(2));
+    Logger.log(`waiting for token: ${tokenName} with value: ${expectedValueRounded}`);
+    await browser.waitUntil(
+      async () => (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded,
       {
         timeout: 30_000,
         interval: 3000,
@@ -164,12 +176,11 @@ class TokensPageAssert {
   }
 
   async assertSeeCoinGeckoCredits(shouldSee: boolean) {
-    const tokensPage = new TokensPage();
-    await tokensPage.coinGeckoCredits.waitForDisplayed({ reverse: !shouldSee });
+    await TokensPage.coinGeckoCredits.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
       const expectedCredits = `${await t('general.credit.poweredBy')}\n${await t('general.credit.coinGecko')}`;
-      await expect(await tokensPage.coinGeckoCredits.getText()).to.equal(expectedCredits);
-      await expect(await tokensPage.coinGeckoLink.isEnabled()).to.be.true;
+      await expect(await TokensPage.coinGeckoCredits.getText()).to.equal(expectedCredits);
+      await expect(await TokensPage.coinGeckoLink.isEnabled()).to.be.true;
     }
   }
 
@@ -177,6 +188,45 @@ class TokensPageAssert {
     const COINGECKO_URL = 'https://www.coingecko.com';
     const currentUrl = await browser.getUrl();
     expect(currentUrl).to.contain(COINGECKO_URL);
+  }
+
+  async assertDoNotSeeEyeIcon() {
+    await TokensPage.closedEyeIcon.waitForDisplayed({ reverse: true });
+    await TokensPage.openedEyeIcon.waitForDisplayed({ reverse: true });
+  }
+
+  async assertSeeClosedEyeIcon() {
+    await TokensPage.closedEyeIcon.waitForDisplayed();
+  }
+
+  async assertSeeOpenedEyeIcon() {
+    await TokensPage.openedEyeIcon.waitForDisplayed();
+  }
+
+  async assertTotalWalletBalanceIsMasked() {
+    await expect(await TokensPage.totalBalanceValue.getText()).to.equal('********');
+  }
+
+  async assertAllTokensBalancesAreMasked(shouldBeMasked: boolean) {
+    const rowsCounter = await TokensPage.getTokensCounterAsNumber();
+    if (rowsCounter > 0) await TokensPage.coinGeckoCredits.scrollIntoView();
+    for (let i = 0; i < rowsCounter; i++) {
+      await TokensPage.tokenBalance(i).waitForDisplayed();
+      await (shouldBeMasked
+        ? expect(await TokensPage.tokenBalance(i).getText()).to.equal('********')
+        : expect(await TokensPage.tokenBalance(i).getText()).to.not.equal('********'));
+    }
+  }
+
+  async assertAllTokensFiatBalancesAreMasked(shouldBeMasked: boolean) {
+    const rowsCounter = await TokensPage.getTokensCounterAsNumber();
+    if (rowsCounter > 0) await TokensPage.coinGeckoCredits.scrollIntoView();
+    for (let i = 0; i < rowsCounter; i++) {
+      await TokensPage.tokenFiatBalance(i).waitForDisplayed();
+      await (shouldBeMasked
+        ? expect(await TokensPage.tokenFiatBalance(i).getText()).to.equal('********')
+        : expect(await TokensPage.tokenFiatBalance(i).getText()).to.not.equal('********'));
+    }
   }
 }
 

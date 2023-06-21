@@ -1,12 +1,13 @@
 import React from 'react';
 import { InfoWallet } from '@lace/core';
 import { useTheme } from '@providers/ThemeProvider';
-import { useWalletStore } from '../../../../stores';
+import { useWalletStore } from '@src/stores';
 import styles from './QRInfoWalletDrawer.module.scss';
 import { useTranslation } from 'react-i18next';
 import { useDrawer } from '../../stores';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { useKeyboardShortcut } from '@hooks';
+import { useGetHandles } from '@hooks/useGetHandles';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
@@ -19,6 +20,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const { theme } = useTheme();
   const { name, address } = useWalletInformation();
   const [, closeDrawer] = useDrawer();
+  const handles = useGetHandles();
 
   const infoWalletTranslations = {
     copy: t('core.infoWallet.copy'),
@@ -31,7 +33,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     <div className={styles.infoContainer}>
       <InfoWallet
         getQRCodeOptions={() => getQRCodeOptions(theme)}
-        walletInfo={{ name, qrData: address.toString() }}
+        walletInfo={{ name: (handles?.length && handles[0]?.nftMetadata.name) || name, qrData: address?.toString() }}
         translations={infoWalletTranslations}
       />
     </div>

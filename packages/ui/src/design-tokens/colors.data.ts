@@ -1,4 +1,5 @@
 export const colors = {
+  $lace_typography_main_color: '',
   $lace_gradient: '',
 
   $buttons_primary_label_color: '',
@@ -22,12 +23,27 @@ export const colors = {
   $buttons_secondary_container_bgColor_disabled: '',
   $buttons_secondary_container_outlineColor: '',
 
-  $control_buttons_filled_label_color: '',
-  $control_buttons_filled_label_color_hover: '',
-  $control_buttons_filled_container_bgColor: '',
-  $control_buttons_filled_container_bgColor_hover: '',
-  $control_buttons_filled_container_bgColor_pressed: '',
-  $control_buttons_filled_container_outlineColor: '',
+  $card_elevated_backgroundColor: '',
+  $card_greyed_backgroundColor: '',
+  $card_outlined_backgroundColor: '',
+  $card_outlined_borderColor: '',
+
+  $control_buttons_label_color: '',
+  $control_buttons_label_color_danger: '',
+  $control_buttons_label_color_danger_pressed: '',
+  $control_buttons_label_color_hover: '',
+  $control_buttons_label_color_filled: '',
+  $control_buttons_label_color_filled_hover: '',
+  $control_buttons_container_bgColor: '',
+  $control_buttons_container_bgColor_hover: '',
+  $control_buttons_container_bgColor_filled: '',
+  $control_buttons_container_bgColor_filled_hover: '',
+  $control_buttons_container_bgColor_pressed: '',
+  $control_buttons_container_bgColor_danger: '',
+  $control_buttons_container_bgColor_danger_hover: '',
+  $control_buttons_container_outlineColor: '',
+  $control_buttons_borderColor: '',
+  $control_buttons_borderColor_danger: '',
 
   $transparent: '',
   $variants_table_bgColor: '',
@@ -55,12 +71,49 @@ export const colors = {
   $sub_navigation_item_label_color_hover: '',
   $sub_navigation_item_label_color_pressed: '',
   $sub_navigation_item_label_color_focused: '',
+
+  $navigation_button_container_bgColor: '',
+  $navigation_button_container_bgColor_hover: '',
+  $navigation_button_container_bgColor_pressed: '',
+  $navigation_button_container_outlineColor: '',
+  $navigation_button_label_color: '',
+  $navigation_button_label_color_pressed: '',
+
+  $profile_picture_avatar_label_color: '',
+  $profile_picture_initials_label_color: '',
+  $profile_picture_initials_container_bgColor: '',
+  $profile_picture_image_container_borderColor: '',
+  $profile_picture_image_container_borderColor_selected: '',
+
+  $scrollbar_thumb_container_bgColor: '',
+  $scrollbar_thumb_container_bgColor_hover: '',
+
+  $toggle_switch_label_color: '',
+  $toggle_switch_container_bgColor_on: '',
+  $toggle_switch_container_bgColor_off: '',
+  $toggle_switch_container_bgColor_disabled: '',
+  $toggle_switch_container_outline: '',
+  $toggle_switch_thumb_bgColor: '',
+
+  $assets_table_container_bgColor_hover: '',
+  $assets_table_label_primary_color: '',
+  $assets_table_label_secondary_color: '',
+  $assets_table_market_price_trend_up_label_color: '',
+  $assets_table_market_price_trend_down_label_color: '',
+
+  $side_drawer_container_bgColor: '',
+  $side_drawer_separator_bgColor: '',
+  $side_drawer_head_title_color: '',
+  $side_drawer_content_title_color: '',
+  $side_drawer_content_description_color: '',
 };
 
 export type Colors = typeof colors;
 
 export const laceGradient =
   'linear-gradient(94.22deg, #FF92E1 -18.3%, #FDC300 118.89%)';
+
+export const colorTransparent = 'rgba(0, 0, 0, 0)';
 
 export const lightColorScheme = {
   $primary_accent_purple: '#7F5AF0',
@@ -71,8 +124,8 @@ export const lightColorScheme = {
   $primary_black: '#3D3B39',
   $primary_grey: '#C0C0C0',
   $primary_light_grey_plus: '#EFEFEF',
-  $primary_light_grey: '#F9F9F9',
-  $primary_light_grey_0_56: 'rgba(249, 249, 249, 0.56)',
+  $primary_light_grey: '#EFEFEF',
+  $primary_light_grey_0_56: 'rgba(239, 239, 239, 0.56)',
   $primary_white: '#FFFFFF',
   $secondary_lace_pink: '#FF92DE',
   $secondary_data_pink: '#FF5470',
@@ -88,12 +141,12 @@ export const darkColorScheme = {
   $primary_accent_purple: '#7F5AF0',
   $primary_hover_purple: 'rgba(116, 82, 219, 1)',
   $primary_accent_purple_0_3: 'rgba(127, 90, 240, 0.3)',
-  $primary_light_grey: 'rgba(169, 169, 169, 1)',
+  $primary_light_grey: '#a9a9a9',
   $primary_white: '#FFFFFF',
   $primary_grey: '#383838',
   $primary_mid_grey: '#333333',
   $primary_dark_grey: '#2F2F2F',
-  $primary_dark_grey_plus: 'rgba(46, 46, 46, 1)',
+  $primary_dark_grey_plus: '#2E2E2E',
   $primary_light_black: '#282828',
   $primary_mid_black: '#252525',
   $primary_bg_black: '#1E1E1E',

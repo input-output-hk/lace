@@ -22,9 +22,9 @@ import transactionSubmittedExtendedAssert from '../assert/transaction/transactio
 import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
 import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
-import { getTestWallet } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedTransactionDetails } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import nftsPageObject from '../pageobject/nftsPageObject';
 import transactionsPageObject from '../pageobject/transactionsPageObject';
@@ -38,6 +38,7 @@ import AddAddressDrawer from '../elements/addressbook/popupView/AddAddressDrawer
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import { TransactionSubmittedPage } from '../elements/newTransaction/transactionSubmittedPage';
 import { browser } from '@wdio/globals';
+import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -368,10 +369,29 @@ When(/^I save fee value$/, async () => {
 Then(
   /^The Tx details are displayed as "([^"]*)" for ADA with value: ([^"]*) and wallet: "([^"]*)" address$/,
   async (type: string, adaValue: string, walletName: string) => {
-    const expectedTransactionDetails = {
+    const expectedTransactionDetails: ExpectedTransactionDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
-      hash: String(testContext.load('txHashValue')),
+      hash: testContext.load('txHashValue'),
       transactionData: [{ ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: getTestWallet(walletName).address }],
+      status: 'Success'
+    };
+    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+  }
+);
+
+Then(
+  /^The Tx details are displayed as "([^"]*)" for ADA with value: "([^"]*)" and LaceCoin2 with value: "([^"]*)" and wallet: "([^"]*)" address$/,
+  async (type: string, adaValue: string, laceCoin2Value: string, walletName: string) => {
+    const expectedTransactionDetails: ExpectedTransactionDetails = {
+      transactionDescription: `${await t(type)}\n(2)`,
+      hash: testContext.load('txHashValue'),
+      transactionData: [
+        {
+          ada: `${adaValue} ${Asset.CARDANO.ticker}`,
+          address: getTestWallet(walletName).address,
+          assets: [`${laceCoin2Value} LaceCoin2`]
+        }
+      ],
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
@@ -397,8 +417,7 @@ Then(
 );
 
 Then(/a popup asking if you're sure you'd like to close it is displayed$/, async () => {
-  await drawerSendExtendedAssert.assertSeeCancelTxWarningPopup(true);
-  await drawerSendExtendedAssert.assertCancelTxPopupTextContent();
+  await drawerSendExtendedAssert.assertSeeCancelTransactionModal(true);
 });
 
 Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, async (button: 'Agree' | 'Cancel') => {
@@ -501,6 +520,10 @@ Then(/^"Review transaction" button is (enabled|disabled) on "Send" page$/, async
   await drawerSendExtendedAssert.assertReviewTransactionButtonIsEnabled(state === 'enabled');
 });
 
+Then(/^"Review transaction" button (is|is not) displayed on "Send" page$/, async (state: 'is' | 'is not') => {
+  await drawerSendExtendedAssert.assertReviewTransactionButtonIsDisplayed(state === 'is');
+});
+
 Then(/^"Insufficient balance" error (is|is not) displayed on "Send" page$/, async (state: 'is' | 'is not') => {
   await drawerSendExtendedAssert.assertSeeAnyInsufficientBalanceError(state === 'is');
 });
@@ -578,4 +601,9 @@ When(/^I click "View transaction" button on submitted transaction page$/, async 
   const transactionSubmittedPage = new TransactionSubmittedPage();
   await transactionSubmittedPage.viewTransactionButton.waitForClickable();
   await transactionSubmittedPage.viewTransactionButton.click();
+});
+
+Then(/^I enter (correct|incorrect) password and confirm the transaction$/, async (type: string) => {
+  const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
+  await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
 });

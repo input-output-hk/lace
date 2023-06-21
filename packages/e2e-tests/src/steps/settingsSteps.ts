@@ -10,7 +10,7 @@ import publicKeyDrawerAssert from '../assert/settings/publicKeyDrawerAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import drawerNetworkSettingsAssert from '../assert/settings/drawerNetworkSettingsAssert';
 import drawerTermsAndConditionsSettingsAssert from '../assert/settings/drawerTermsAndConditionsSettingsAssert';
-import drawerPrivacyPolicySettingsAssert from '../assert/settings/drawerPrivacyPolicySettingsAssert';
+import PrivacyPolicyDrawerAssert from '../assert/settings/PrivacyPolicyDrawerAssert';
 import drawerHelpSettingsAssert from '../assert/settings/drawerHelpSettingsAssert';
 import { t } from '../utils/translationService';
 import passphraseDrawerAssert from '../assert/settings/passphraseDrawerAssert';
@@ -22,6 +22,9 @@ import Modal from '../elements/modal';
 import WalletAddressPage from '../elements/walletAddressPage';
 import { browser } from '@wdio/globals';
 import CollateralSettingsDrawer from '../elements/settings/extendedView/collateralSettingsDrawer';
+import HelpSettingsDrawer from '../elements/settings/extendedView/helpSettingsDrawer';
+import ModalAssert from '../assert/modalAssert';
+import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
@@ -127,8 +130,15 @@ Then(/the Terms and Conditions copy is displayed/, async () => {
   await drawerTermsAndConditionsSettingsAssert.assertTermsAndConditionsContent();
 });
 
-Then(/the Privacy policy copy is displayed/, async () => {
-  await drawerPrivacyPolicySettingsAssert.assertPrivacyPolicyContent();
+Then(/the Privacy policy copy is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  if (mode === 'extended') {
+    await PrivacyPolicyDrawerAssert.assertSeeDrawerNavigationTitle();
+    await PrivacyPolicyDrawerAssert.assertSeeDrawerCloseButton();
+  } else {
+    await PrivacyPolicyDrawerAssert.assertSeeDrawerBackButton();
+  }
+  await PrivacyPolicyDrawerAssert.assertSeePrivacyPolicyTitle();
+  await PrivacyPolicyDrawerAssert.assertSeePrivacyPolicyContent();
 });
 
 Then(/^the Cookie policy drawer is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
@@ -142,10 +152,17 @@ Then(/^the Cookie policy drawer is displayed in (extended|popup) mode$/, async (
   await CookiePolicyDrawerAssert.assertSeeCookiePolicyContent();
 });
 
-Then(/I see help details open in a drawer/, async () => {
-  await drawerCommonExtendedAssert.assertSeeDrawerWithTitle(await t('browserView.settings.help.support.help'), false);
-  await drawerHelpSettingsAssert.assertSeeHelpModal();
-  await drawerHelpSettingsAssert.assertSeeCreateNewTicketKeyButton();
+Then(/^I see help details drawer in (extended|popup) mode/, async (mode: 'extended' | 'popup') => {
+  await drawerHelpSettingsAssert.assertSeeHelpDrawer(mode);
+});
+
+Then(/^"Create a support ticket" button (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await drawerHelpSettingsAssert.assertSeeCreateASupportTicketButton(shouldBeDisplayed === 'is');
+});
+
+When(/^I click "Create a support ticket" button on Help drawer$/, async () => {
+  await HelpSettingsDrawer.createASupportTicketButton.waitForClickable();
+  await HelpSettingsDrawer.createASupportTicketButton.click();
 });
 
 Then(/I see analytics option with proper description and toggle/, async () => {
@@ -173,8 +190,8 @@ Then(/^"Password" field is displayed$/, async () => {
   await passphraseDrawerAssert.assertSeePasswordInputContainer();
 });
 
-Then(/^"Show passphrase" button is displayed$/, async () => {
-  await passphraseDrawerAssert.assertSeeShowPassphraseButton();
+Then(/^"Show passphrase" button (is|is not) displayed$/, async (isDisplayed: 'is' | 'is not') => {
+  await passphraseDrawerAssert.assertSeeShowPassphraseButton(isDisplayed === 'is');
 });
 
 Then(/^"Hide passphrase" button is displayed$/, async () => {
@@ -187,6 +204,15 @@ When(
     buttonType === 'Show passphrase'
       ? await PassphraseDrawer.showPassphraseButton.click()
       : await PassphraseDrawer.hidePassphraseButton.click();
+  }
+);
+
+Then(
+  /^"(Show passphrase|Hide passphrase)" button is (enabled|disabled) on "Show 24-word recovery phrase" drawer$/,
+  async (button: 'Show passphrase' | 'Hide passphrase', state: 'enabled' | 'disabled') => {
+    await (button === 'Show passphrase'
+      ? passphraseDrawerAssert.assertShowPassphraseButtonEnabled(state === 'enabled')
+      : passphraseDrawerAssert.assertHidePassphraseButtonEnabled(state === 'enabled'));
   }
 );
 
@@ -210,6 +236,11 @@ Then(/^all elements of (Inactive|Active) collateral drawer are displayed$/, asyn
 Then(/^Collateral drawer with not enough ADA error is displayed$/, async () => {
   await collateralDrawerAssert.assertSeeCollateralNotEnoughAdaDrawer();
 });
+
+Then(/^"Remove wallet" modal (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await ModalAssert.assertSeeRemoveWalletModal(shouldBeDisplayed === 'is');
+});
+
 When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (button: 'Back' | 'Remove wallet') => {
   await browser.pause(500);
   switch (button) {
@@ -222,6 +253,12 @@ When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+When(/^I remove wallet$/, async () => {
+  await menuHeaderPageObject.openSettings();
+  await settingsExtendedPageObject.clickOnRemoveWallet();
+  await Modal.confirmButton.click();
 });
 
 Then(/^I see "Show public key" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {

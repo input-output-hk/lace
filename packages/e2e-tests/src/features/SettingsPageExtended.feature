@@ -182,12 +182,12 @@ Feature: General Settings - Extended Browser View
     Then I see information about empty address book
 
   @LW-5471 @Testnet
-  Scenario: Extended View - Settings - Addresses are shared and saved when switching Test Preprod to Test Preview
+  Scenario: Extended View - Settings - Addresses entered in Preprod context are not available when switching to Preview
     Given I have 3 addresses in my address book in extended mode
     And I see address count: 3
     When I switch network to: "Preview" in extended mode
     And  I open address book in extended mode
-    And I see address count: 3
+    And I see address count: 0
     When I switch network to: "Preprod" in extended mode
     And  I open address book in extended mode
     Then I see address count: 3
@@ -202,7 +202,7 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Settings - Privacy policy copy
     When I open settings from header menu
     When I click on "Privacy policy" setting
-    Then the Privacy policy copy is displayed
+    Then the Privacy policy copy is displayed in extended mode
 
   @LW-5830 @Mainnet @Testnet
   Scenario: Extended View - Settings - Cookie policy copy
@@ -214,13 +214,13 @@ Feature: General Settings - Extended Browser View
   Scenario: Extended View - Settings - Visibility of Help drawer
     When I open settings from header menu
     When I click on "Help" setting
-    Then I see help details open in a drawer
+    Then I see help details drawer in extended mode
 
   @LW-2789 @Mainnet @Testnet
   Scenario: Extended View - Settings - Help Create a ticket
     When I open settings from header menu
     When I click on "Help" setting
-    And I click "browserView.settings.help.support.createASupportTicket" button in drawer
+    And I click "Create a support ticket" button on Help drawer
     Then New tab with url containing "iohk.zendesk.com/hc/en-us/requests/new" is opened
 
   @LW-3629 @Mainnet @Testnet
@@ -280,7 +280,7 @@ Feature: General Settings - Extended Browser View
     When I fill incorrect password
     And I click on "Show passphrase" button
     Then I see "browserView.transaction.send.error.invalidPassword" password error
-    And "browserView.settings.security.showPassphraseDrawer.showPassphrase" button is disabled
+    And "Show passphrase" button is disabled on "Show 24-word recovery phrase" drawer
 
   @LW-3875 @Mainnet @Testnet
   Scenario: Extended view - Settings - "Show passphrase" button enabled after user fills correct password on the "Show 24-word passphrase" side drawer
@@ -288,7 +288,7 @@ Feature: General Settings - Extended Browser View
     And I click on "Show recovery phrase" setting
     Then Side drawer "Show 24-word passphrase" is displayed
     When I fill correct password
-    Then "browserView.settings.security.showPassphraseDrawer.showPassphrase" button is enabled
+    Then "Show passphrase" button is enabled on "Show 24-word recovery phrase" drawer
 
   @LW-3877 @LW-3879 @Mainnet @Testnet
   Scenario: Extended view - Settings - When user clicks on "Hide passphrase"/"Show passphrase" button on the "Show 24-word passphrase" side drawer all mnemonics are blurred/visible
@@ -296,7 +296,7 @@ Feature: General Settings - Extended Browser View
     And I click on "Show recovery phrase" setting
     Then Side drawer "Show 24-word passphrase" is displayed
     When I fill correct password
-    Then "browserView.settings.security.showPassphraseDrawer.showPassphrase" button is enabled
+    Then "Show passphrase" button is enabled on "Show 24-word recovery phrase" drawer
     When I click on "Show passphrase" button
     Then all mnemonics from "TestAutomationWallet" wallet are listed
     When I click on "Hide passphrase" button
@@ -311,11 +311,11 @@ Feature: General Settings - Extended Browser View
     And I click on "Show recovery phrase" setting
     Then Side drawer "Show 24-word passphrase" is displayed
     When I fill correct password
-    Then "browserView.settings.security.showPassphraseDrawer.showPassphrase" button is enabled
+    Then "Show passphrase" button is enabled on "Show 24-word recovery phrase" drawer
     When I click on "Show passphrase" button
     And all mnemonics from "TestAutomationWallet" wallet are listed
     And "Hide passphrase" button is displayed
-    And "browserView.settings.security.showPassphraseDrawer.hidePassphrase" button is enabled
+    And "Hide passphrase" button is enabled on "Show 24-word recovery phrase" drawer
 
   @LW-4049 @Mainnet @Testnet
   Scenario Outline: Extended view - Settings - User has to enter password again after leaving "Show 24-word passphrase" side drawer - <action>
@@ -355,27 +355,27 @@ Feature: General Settings - Extended Browser View
     When I press keyboard Enter button
     Then all mnemonics are blurred
     When I press keyboard Escape button
-    Then I do not see "browserView.settings.security.showPassphraseDrawer.showPassphrase" button
+    Then "Show passphrase" button is not displayed
 
   @LW-4875 @Mainnet @Testnet
   Scenario: Extended View - Help setting - Escape button support
     When I open settings from header menu
     When I click on "Help" setting
-    Then I see "browserView.settings.help.support.createASupportTicket" button
+    Then "Create a support ticket" button is displayed
     When I press keyboard Escape button
-    Then I do not see "browserView.settings.help.support.createASupportTicket" button
+    Then "Create a support ticket" button is not displayed
 
   @LW-4876 @Mainnet @Testnet
   Scenario: Extended View - Remove wallet - Enter and Escape buttons support
     When I open settings from header menu
     And I click on Remove wallet button
-    Then An "browserView.settings.wallet.general.removeWalletAlert.title" text is displayed
+    Then "Remove wallet" modal is displayed
     When I press keyboard Enter button
-    Then No "browserView.settings.wallet.general.removeWalletAlert.title" text is displayed
+    Then "Remove wallet" modal is not displayed
     And I click on Remove wallet button
-    And An "browserView.settings.wallet.general.removeWalletAlert.title" text is displayed
+    Then "Remove wallet" modal is displayed
     When I press keyboard Escape button
-    Then No "browserView.settings.wallet.general.removeWalletAlert.title" text is displayed
+    Then "Remove wallet" modal is not displayed
 
   @LW-5821 @Mainnet @Testnet
   Scenario: Remove and Onboard new wallet - address has been changed defect - LW-5087

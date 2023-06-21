@@ -4,7 +4,7 @@
 
 .wrapper {
   padding-right: 0;
-  &.hasScollBar {
+  &.hasScrollBar {
     padding-right: size_unit(1);
   }
 }
@@ -21,7 +21,7 @@
   .MainContainer {
     padding: 0 size_unit(3);
     height: auto;
-    &.hasScollBar {
+    &.hasScrollBar {
       padding-right: calc(#{size_unit(3)} - #{size_unit(1)} - #{$scroll-bar-default-width});
     }
   }

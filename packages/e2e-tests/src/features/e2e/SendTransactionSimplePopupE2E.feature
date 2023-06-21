@@ -6,7 +6,7 @@ Feature: Send Simple Transactions - Popup view - E2E
 
   @LW-2409
   Scenario: Popup-view - Send ADA (single asset) E2E
-    And I save token: "Cardano" balance in popup mode
+    And I save token: "Cardano" balance
     And I click "Send" button on Tokens page in popup mode
     And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
       | type | assetName | ticker | amount |
@@ -14,7 +14,7 @@ Feature: Send Simple Transactions - Popup view - E2E
     And I click "Review transaction" button on "Send" page
     And I save fee value
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
+    And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |
@@ -23,7 +23,7 @@ Feature: Send Simple Transactions - Popup view - E2E
       | Button: "Close"                              |
     When I close the drawer by clicking close button
     And I navigate to Tokens popup page
-    Then the sent amount of: 1.123 with fee: saved for token "Cardano" is subtracted from the total balance in popup mode
+    Then the sent amount of: "1.123" with "saved" fee for token "Cardano" is subtracted from the total balance
     When I navigate to Transactions popup page
     Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
@@ -46,7 +46,7 @@ Feature: Send Simple Transactions - Popup view - E2E
       | ADA  | tADA      | 5      |
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
+    And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |
@@ -62,7 +62,7 @@ Feature: Send Simple Transactions - Popup view - E2E
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
+    And I enter correct password and confirm the transaction
     When I click "View transaction" button on submitted transaction page
     And I click on a transaction: 1
     And I click on a transaction hash

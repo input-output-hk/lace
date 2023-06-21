@@ -1,13 +1,13 @@
 # Root Level
-*                      @input-output-hk/lace-admins @input-output-hk/lace-tech-leads
-
+*                       @input-output-hk/lace-tech-leads
+yarn.lock               @input-output-hk/lace-core
 # Packages Teams
-/packages/ui           @input-output-hk/lace-ui
-/packages/staking      @input-output-hk/lace-staking
-/packages/cardano      @input-output-hk/lace-core
-/packages/common       @input-output-hk/lace-core
-/packages/core         @input-output-hk/lace-core
-/packages/e2e-test     @input-output-hk/lace-test-engineers
+/packages/ui/           @input-output-hk/lace-ui
+/packages/staking/      @input-output-hk/lace-staking
+/packages/cardano/      @input-output-hk/lace-core
+/packages/common/       @input-output-hk/lace-core
+/packages/core/         @input-output-hk/lace-core
+/packages/e2e-tests/    @input-output-hk/lace-test-engineers
 
 # Apps
-/apps                  @input-output-hk/lace-core
+/apps/                  @input-output-hk/lace-core

@@ -1,24 +1,12 @@
 import { When, Then } from '@cucumber/cucumber';
-import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
-import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import passwordInputAssert from '../assert/passwordInputAssert';
 import PasswordInput from '../elements/passwordInput';
 import { t } from '../utils/translationService';
-import testContext from '../utils/testContext';
-
-Then(/^I fill (correct|incorrect) password and confirm$/, async (type: string) => {
-  const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
-  await simpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
-});
-
-Then(/^I fill new created wallet password and confirm$/, async () => {
-  const { password } = testContext.load('newCreatedWallet') as WalletConfig;
-  await simpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
-});
 
 Then(/^I fill (correct|incorrect) password$/, async (type: string) => {
   const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
-  await simpleTxSideDrawerPageObject.fillPassword(password);
+  await PasswordInput.input.setValue(password);
 });
 
 Then(/^Password field value is hidden$/, async () => {
