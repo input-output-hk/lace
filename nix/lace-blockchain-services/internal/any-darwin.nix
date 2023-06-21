@@ -19,8 +19,16 @@ in rec {
       patch -p1 -i ${./cardano-js-sdk--darwin.patch}
     '';
 
+    # # FIXME: investigate more laster, but for now ↓, or else in v18.16, after `install_name_tool`, we’re
+    # # getting: `Check failed: VerifyChecksum(blob)` in `v8::internal::Snapshot::VerifyChecksum`
+    # nodejs-no-snapshot = cardano-js-sdk.nodejs.overrideAttrs (oldAttrs: {
+    #   configureFlags = (oldAttrs.configureFlags or []) ++ ["--without-snapshot"];
+    # });
+
     # For resolving the node_modules:
-    theirPackage = (pkgs.callPackage "${patchedSrc}/yarn-project.nix" {} {
+    theirPackage = (pkgs.callPackage "${patchedSrc}/yarn-project.nix" {
+      nodejs = pkgs.nodejs-16_x; # FIXME: temporarily 16.x; as it doesn’t have snapshots which break nix-bundle-exe
+    } {
       src = patchedSrc;
     });
 
@@ -126,14 +134,14 @@ in rec {
     mkdir -p "$app"/MacOS
     mkdir -p "$app"/Resources
 
-    cp ${infoPlist} "$app"/Info.plist
+    ln -s ${infoPlist} "$app"/Info.plist
 
     cp ${lace-blockchain-services-exe}/bin/* "$app"/MacOS/
     mkdir -p $out/bin/
     ln -s "$app"/MacOS/lace-blockchain-services $out/bin/
 
-    ln -s ${cardano-node}/bin/* "$app"/MacOS/
-    ln -s ${ogmios}/bin/* "$app"/MacOS/
+    ln -s ${cardano-node}/bin/cardano-node "$app"/MacOS/
+    ln -s ${ogmios}/bin/ogmios "$app"/MacOS/
     ln -s ${cardano-js-sdk.nodejs}/bin/node "$app"/MacOS/
 
     ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
@@ -141,5 +149,43 @@ in rec {
 
     ln -s ${icons}/iconset.icns "$app"/Resources/iconset.icns
   '';
+
+  nix-bundle-exe-same-dir = pkgs.runCommand "nix-bundle-exe-same-dir" {} ''
+    cp -R ${inputs.nix-bundle-exe} $out
+    chmod -R +w $out
+    sed -r 's+@executable_path/\$relative_bin_to_lib/\$lib_dir+@executable_path+g' -i $out/bundle-macos.sh
+  '';
+
+  # XXX: this has no dependency on /nix/store on the target machine
+  lace-blockchain-services-bundle = let
+    noSpaces = lib.replaceStrings [" "] [""] common.prettyName;
+    unbundled = lace-blockchain-services;
+    originalApp = lib.escapeShellArg "${unbundled}/Applications/${common.prettyName}.app/Contents";
+    bundled = (import nix-bundle-exe-same-dir {
+      inherit pkgs;
+      bin_dir = "MacOS";
+      exe_dir = "_unused_";
+      lib_dir = "MacOS";
+    } unbundled).overrideAttrs (drv: {
+      meta.mainProgram = lace-blockchain-services-exe.name;
+      buildCommand = (
+        builtins.replaceStrings
+          ["'${unbundled}/bin'"]
+          ["${originalApp}/MacOS -follow '(' -not -name cardano-node ')'"]
+          drv.buildCommand
+      ) + ''
+        # cardano-node is bundled by Haskell.nix; otherwise we’re getting missing symbols in dyld (TODO: investigate)
+        cp -f ${cardano-node}/bin/* $out/MacOS/
+
+        app="$out/Applications/"${lib.escapeShellArg common.prettyName}.app/Contents
+        mkdir -p "$app"
+        mv $out/MacOS "$app"/
+        echo 'Copying Resources…'
+        cp -r --dereference ${originalApp}/{Resources,Info.plist} "$app"/
+        mkdir -p $out/bin
+        ln -s "$app"/MacOS/lace-blockchain-services $out/bin/
+      '';
+    });
+  in bundled;
 
 }
