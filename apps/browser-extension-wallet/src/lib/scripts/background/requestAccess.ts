@@ -4,19 +4,21 @@ import { storage as webStorage, tabs } from 'webextension-polyfill';
 import { AuthorizedDappStorage } from '@src/types';
 
 import { authorizedDappsList, userPromptService } from './services/dappService';
-import { ensureUiIsOpenAndLoaded, getDappInfo, getLastActiveTab } from './util';
+import { ensureUiIsOpenAndLoaded, getDappInfoFromLastActiveTab, getLastActiveTab } from './util';
 import { authenticator } from './authenticator';
 import { AUTHORIZED_DAPPS_KEY } from '../types';
+import { Wallet } from '@lace/cardano';
+import { BehaviorSubject } from 'rxjs';
 
 const DEBOUNCE_THROTTLE = 500;
 
+export const dappInfo$ = new BehaviorSubject<Wallet.DappInfo>(undefined);
+
 export const requestAccess: RequestAccess = async (origin: Origin) => {
   const launchingTab = await getLastActiveTab();
-  const { logo, name, url } = await getDappInfo(origin);
-  const encodedName = encodeURIComponent(name);
-  const encodedLogo = encodeURIComponent(logo);
-  const dappUrl = `#/dapp/connect?url=${url}&name=${encodedName}&logo=${encodedLogo}`;
-  await ensureUiIsOpenAndLoaded(dappUrl);
+  const { logo, name, url } = await getDappInfoFromLastActiveTab();
+  dappInfo$.next({ logo, name, url });
+  await ensureUiIsOpenAndLoaded('#/dapp/connect');
   const isAllowed = await userPromptService.allowOrigin(origin);
   if (isAllowed === 'deny') return Promise.reject();
   if (isAllowed === 'allow') {

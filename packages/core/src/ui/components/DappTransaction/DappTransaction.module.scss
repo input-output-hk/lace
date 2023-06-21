@@ -120,9 +120,7 @@
 }
 
 .sub {
-  font-weight: 400;
-  font-size: var(--bodySmall);
-  line-height: size_unit(3);
+  @include text-bodySmall-medium;
   /* or 171% */
   letter-spacing: -0.015em;
   /* Data - Dark Grey */

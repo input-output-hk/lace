@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Button, useSearchParams } from '@lace/common';
+import React, { useEffect, useState } from 'react';
+import { Button } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
 import { AuthorizeDapp } from '@lace/core';
 import { sectionTitle, DAPP_VIEWS } from '../config';
 import styles from './Connect.module.scss';
 import Modal from 'antd/lib/modal/Modal';
-import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { runtime } from 'webextension-polyfill';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import * as cip30 from '@cardano-sdk/dapp-connector';
@@ -14,6 +14,8 @@ import { UserPromptService } from '@lib/scripts/background/services/dappService'
 import { of } from 'rxjs';
 import ShieldExclamation from '@assets/icons/shield-exclamation.svg';
 import { Banner } from '@components/Banner';
+import { DappDataService } from '@lib/scripts/types';
+import { Wallet } from '@lace/cardano';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -45,11 +47,31 @@ const authorize = (authorization: 'deny' | 'just-once' | 'allow', url: string) =
   }, DAPP_TOAST_DURATION);
 };
 
+const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getDappInfo'>>(
+  {
+    baseChannel: DAPP_CHANNELS.dappData,
+    properties: {
+      getDappInfo: RemoteApiPropertyType.MethodReturningPromise
+    }
+  },
+  { logger: console, runtime }
+);
+
 export const Connect = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isModalVisible, setModalVisible] = useState(false);
+  const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
-  const { logo, url, name } = useSearchParams(['logo', 'url', 'name']);
+  useEffect(() => {
+    dappDataApi
+      .getDappInfo()
+      .then(({ logo, name, url }) => {
+        setDappInfo({ logo, name, url });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   return (
     <Layout
@@ -59,7 +81,7 @@ export const Connect = (): React.ReactElement => {
     >
       <div className={styles.container}>
         <AuthorizeDapp
-          dappInfo={{ logo, name, url }}
+          dappInfo={dappInfo}
           warningBanner={
             <Banner
               className={styles.banner}
@@ -82,7 +104,7 @@ export const Connect = (): React.ReactElement => {
           className={styles.footerBtn}
           data-testid="connect-cancel-button"
           color="secondary"
-          onClick={() => authorize('deny', url)}
+          onClick={() => authorize('deny', dappInfo.url)}
         >
           {t('dapp.connect.btn.cancel')}
         </Button>
@@ -105,13 +127,13 @@ export const Connect = (): React.ReactElement => {
             {t('dapp.connect.modal.description')}
           </div>
           <div className={styles.modalActions}>
-            <Button block data-testid="connect-modal-accept-always" onClick={() => authorize('allow', url)}>
+            <Button block data-testid="connect-modal-accept-always" onClick={() => authorize('allow', dappInfo.url)}>
               {t('dapp.connect.modal.allowAlways')}
             </Button>
             <Button
               block
               data-testid="connect-modal-accept-once"
-              onClick={() => authorize('just-once', url)}
+              onClick={() => authorize('just-once', dappInfo.url)}
               color="secondary"
             >
               {t('dapp.connect.modal.allowOnce')}

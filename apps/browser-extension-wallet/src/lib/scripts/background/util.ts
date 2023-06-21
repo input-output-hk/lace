@@ -1,10 +1,10 @@
 /* eslint-disable no-magic-numbers */
-import { Origin } from '@cardano-sdk/dapp-connector';
 import { POPUP_WINDOW } from '@src/utils/constants';
 import { getRandomIcon } from '@src/utils/get-random-icon';
 import { runtime, Tabs, tabs, Windows, windows, storage as webStorage } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
+import uniqueId from 'lodash/uniqueId';
 
 type WindowPosition = {
   top: number;
@@ -74,14 +74,14 @@ export const getLastActiveTab: () => Promise<Tabs.Tab> = async () =>
   )[0];
 
 /**
- * getDappInfo
- * @param origin - URL of website calling dApp connector
+ * getDappInfoFromLastActiveTab
  * @returns {Promise<Wallet.DappInfo>}
  */
-export const getDappInfo = async (origin: Origin): Promise<Wallet.DappInfo> => {
+export const getDappInfoFromLastActiveTab: () => Promise<Wallet.DappInfo> = async () => {
   const lastActiveTab = await getLastActiveTab();
+  console.log('lastActiveTab.favIconUrl', lastActiveTab.favIconUrl);
   return {
-    logo: lastActiveTab.favIconUrl ?? getRandomIcon({ id: origin, size: 40 }),
+    logo: lastActiveTab.favIconUrl || getRandomIcon({ id: uniqueId(), size: 40 }),
     name: lastActiveTab.title || lastActiveTab.url.split('//')[1].trim(),
     url: lastActiveTab.url.replace(/\/$/, '')
   };
@@ -124,7 +124,7 @@ const createWindow = (
  */
 export const launchCip30Popup = async (url: string): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
-  const tab = await createTab(`../dappConnector.html${url}`);
+  const tab = await createTab(`../dappConnector.html${url}`, false);
   const newWindow = await createWindow(
     tab.id,
     calculatePopupWindowPositionAndSize(currentWindow, POPUP_WINDOW),

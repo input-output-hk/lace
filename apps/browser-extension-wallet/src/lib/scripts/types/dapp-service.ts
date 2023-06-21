@@ -9,4 +9,5 @@ export type DappDataService = {
       payload: Wallet.HexBlob;
     };
   }>;
+  getDappInfo: () => Promise<Wallet.DappInfo>;
 };

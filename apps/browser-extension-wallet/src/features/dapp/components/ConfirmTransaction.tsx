@@ -97,7 +97,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       {
         api$: of({
           async allowSignTx(): Promise<boolean> {
-            return Promise.resolve(false);
+            return Promise.reject();
           }
         }),
         baseChannel: DAPP_CHANNELS.userPrompt,
@@ -123,7 +123,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         },
         { logger: console, runtime }
       );
-    } catch {
+    } catch (error) {
+      console.log('error', error);
       redirectToSignFailure();
     }
   }, [setIsConfirmingTx, redirectToSignFailure]);
@@ -177,8 +178,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     const isMintTransaction = minted.length > 0;
     const isBurnTransaction = burned.length > 0;
 
-    // eslint-disable-next-line unicorn/no-nested-ternary
-    // TODO: improve
     let txType: 'Send' | 'Mint' | 'Burn';
     if (isMintTransaction) {
       txType = 'Mint';
