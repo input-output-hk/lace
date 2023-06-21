@@ -14,7 +14,7 @@ Feature: Send Simple Transactions - Extended view - E2E
     And I click "Review transaction" button on "Send" page
     And I save fee value
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
+    And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |
@@ -46,7 +46,7 @@ Feature: Send Simple Transactions - Extended view - E2E
       | ADA  | tADA      | 5      |
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
+    And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |
@@ -62,7 +62,7 @@ Feature: Send Simple Transactions - Extended view - E2E
       | ADA  | Cardano   | tADA   | 1.1234 |
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
+    And I enter correct password and confirm the transaction
     When I click "View transaction" button on submitted transaction page
     And I click on a transaction: 1
     And I click on a transaction hash
