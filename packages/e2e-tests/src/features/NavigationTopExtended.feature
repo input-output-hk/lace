@@ -120,3 +120,25 @@ Feature: Top Navigation - Extended view
     When I click the menu button
     Then wallet sync status component is visible
     And sync status displays "Not synced to the blockchain" state
+
+  @LW-6769
+  Scenario Outline: Extended view - Main Navigation - Collapsible Lace icon
+    And I navigate to Tokens extended page
+    When I resize the window to a width of: <width> and a height of: 840
+    Then I <should_see> expanded icon
+    Examples:
+      | width | should_see |
+      | 1070  | see        |
+      | 768   | do not see |
+
+  @LW-6907
+  Scenario Outline: Extended view - Main Navigation - Collapsible Lace menu
+    And I navigate to Tokens extended page
+    When I resize the window to a width of: <width> and a height of: 840
+    Then I see <menu_format> menu for <width> resolution
+    When I hover on the menu
+    Then I see expanded menu for <width> resolution
+    Examples:
+      | width | menu_format |
+      | 1024  | collapsed   |
+      | 1100  | expanded    |

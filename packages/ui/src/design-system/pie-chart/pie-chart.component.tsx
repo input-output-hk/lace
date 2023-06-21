@@ -21,7 +21,7 @@ import type { PickByValue } from 'utility-types';
 type PieChartDataProps = Partial<{
   overrides: CellProps;
 }>;
-type PieChartColor = ColorValueHex | PieChartGradientColor;
+export type PieChartColor = ColorValueHex | PieChartGradientColor;
 interface PieChartBaseProps<T extends object> {
   animate?: boolean;
   colors?: PieChartColor[];
