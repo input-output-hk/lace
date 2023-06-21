@@ -417,8 +417,7 @@ Then(
 );
 
 Then(/a popup asking if you're sure you'd like to close it is displayed$/, async () => {
-  await drawerSendExtendedAssert.assertSeeCancelTxWarningPopup(true);
-  await drawerSendExtendedAssert.assertCancelTxPopupTextContent();
+  await drawerSendExtendedAssert.assertSeeCancelTransactionModal(true);
 });
 
 Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, async (button: 'Agree' | 'Cancel') => {
