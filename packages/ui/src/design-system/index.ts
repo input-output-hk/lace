@@ -1,5 +1,6 @@
 export { Box } from './box';
 export * as Button from './buttons';
+export * as ControlButton from './control-buttons';
 export * as Card from './cards';
 export { Divider } from './divider';
 export { Flex } from './flex';
