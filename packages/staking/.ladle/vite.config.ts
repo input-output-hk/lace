@@ -2,10 +2,11 @@ import path from 'path';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import checker from 'vite-plugin-checker';
 import eslint from 'vite-plugin-eslint';
+import svgr from 'vite-plugin-svgr';
 
 export const ladleViteConfig = {
   plugins: [
-    vanillaExtractPlugin(),
+    vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
     checker({
       overlay: {
         position: 'br',
@@ -18,6 +19,7 @@ export const ladleViteConfig = {
       include: './**/*.{ts,tsx,json}',
       overrideConfigFile: '.eslintrc.cjs',
     }),
+    svgr(),
   ],
 };
 
