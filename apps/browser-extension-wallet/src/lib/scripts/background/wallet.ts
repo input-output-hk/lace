@@ -1,7 +1,7 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of } from 'rxjs';
 import { getProviders } from './config';
-import { PersonalWallet, SingleAddressDiscovery, storage } from '@cardano-sdk/wallet';
+import { PersonalWallet, storage } from '@cardano-sdk/wallet';
 
 import {
   StoresFactory,
@@ -35,8 +35,7 @@ const walletFactory: WalletFactory = {
         keyAgent: dependencies.keyAgent,
         logger,
         ...providers,
-        stores: dependencies.stores,
-        addressDiscovery: new SingleAddressDiscovery()
+        stores: dependencies.stores
       }
     );
   }
