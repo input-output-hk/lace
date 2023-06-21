@@ -22,7 +22,7 @@ import transactionSubmittedExtendedAssert from '../assert/transaction/transactio
 import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
 import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
-import { getTestWallet } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
 import transactionDetailsAssert, { ExpectedTransactionDetails } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
@@ -38,6 +38,7 @@ import AddAddressDrawer from '../elements/addressbook/popupView/AddAddressDrawer
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import { TransactionSubmittedPage } from '../elements/newTransaction/transactionSubmittedPage';
 import { browser } from '@wdio/globals';
+import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -601,4 +602,9 @@ When(/^I click "View transaction" button on submitted transaction page$/, async 
   const transactionSubmittedPage = new TransactionSubmittedPage();
   await transactionSubmittedPage.viewTransactionButton.waitForClickable();
   await transactionSubmittedPage.viewTransactionButton.click();
+});
+
+Then(/^I enter (correct|incorrect) password and confirm the transaction$/, async (type: string) => {
+  const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
+  await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
 });
