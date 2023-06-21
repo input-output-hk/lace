@@ -8,7 +8,7 @@ import * as cx from './sub-navigation.css';
 import type { Item } from './sub-navigation-item.component';
 import type { OmitClassName } from '../../types';
 
-export type SubNavigationRootProps = OmitClassName & {
+export type SubNavigationRootProps = OmitClassName<typeof Tabs.List> & {
   defaultValue?: string;
   children: ReactElement<typeof Item> | ReactElement<typeof Item>[];
   onValueChange?: (value: string) => void;

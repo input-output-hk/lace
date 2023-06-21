@@ -58,7 +58,7 @@ export const BundleInput = ({
       <ControlButtons.Filled
         onClick={onAddAsset}
         label="Add Asset"
-        icon={<PlusSmall />}
+        icon={<PlusSmall className={cx.icon} />}
         w="$fill"
         data-testid="bundle-input-add-asset-button"
       />

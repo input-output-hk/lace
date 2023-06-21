@@ -61,3 +61,18 @@ Feature: LW: Tokens tab - popup view
   Scenario: CoinGecko credits - redirection
     When I click on "CoinGecko" link
     Then "www.coingecko.com" page is displayed in new tab
+
+  @LW-6878 @Testnet @Mainnet
+  Scenario: Popup View - Hide my balance - positive balance - closed eye icon displayed by default
+    Then closed eye icon is displayed on Tokens page
+
+  @LW-6884 @Testnet @Mainnet
+  Scenario: Popup View - Hide my balance - positive balance - hide/reveal balance
+    When I click closed eye icon on Tokens page
+    Then opened eye icon is displayed on Tokens page
+    And total wallet balance is masked with asterisks
+    And balance and FIAT balance for each token are masked with asterisks
+    When I click opened eye icon on Tokens page
+    Then closed eye icon is displayed on Tokens page
+    And I see total wallet balance in USD
+    And balance and FIAT balance for each token are visible

@@ -56,3 +56,7 @@ Feature: Empty states
     When I open settings from header menu
     And I click on "Collateral" setting
     Then Collateral drawer with not enough ADA error is displayed
+
+  @LW-6874
+  Scenario: Extended view - Hide my balance - no eye icon for wallet with no funds
+    Then Eye icon is not displayed on Tokens page

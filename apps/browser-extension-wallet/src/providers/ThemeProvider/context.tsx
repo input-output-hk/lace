@@ -53,15 +53,15 @@ export const ThemeProvider = ({ children, customTheme, defaultThemeName }: Theme
   useEffect(() => {
     const preferedTheme = localStorage.getItem('mode') as themeTypes;
     let userAgentColorScheme: themeTypes = 'light';
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)')?.matches) {
       userAgentColorScheme = 'dark';
     }
 
     changeTheme(getThemeName(preferedTheme || userAgentColorScheme));
-    if (window.matchMedia('(prefers-color-scheme)').media !== 'not all') {
+    if (window.matchMedia('(prefers-color-scheme)')?.media !== 'not all') {
       const media = window.matchMedia('(prefers-color-scheme: dark)');
       const change = (e: MediaQueryListEvent) => changeTheme(e.matches ? 'dark' : 'light');
-      media.addEventListener('change', change);
+      media?.addEventListener('change', change);
 
       return () => media.removeEventListener('change', change);
     }

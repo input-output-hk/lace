@@ -11,6 +11,16 @@ $button_size: 52px;
   color: var(--text-color-secondary) !important;
 }
 
+:global(.anticon) {
+  &.valid {
+    color: green;
+  }
+
+  &.invalid {
+    color: red;
+  }
+}
+
 button.addressBookBtn {
   @include flex-center;
   background-color: var(--color-white, var(--dark-mode-grey, #ffffff));

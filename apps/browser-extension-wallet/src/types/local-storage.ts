@@ -1,5 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { AnalyticsConsentStatus } from '../providers/AnalyticsProvider/analyticsTracker/types';
+import { NFT } from '@utils/get-token-list';
 
 export interface WalletStorage {
   name: string;
@@ -41,4 +42,5 @@ export interface ILocalStorage {
   showDappBetaModal?: boolean;
   analyticsAccepted?: AnalyticsConsentStatus;
   isForgotPasswordFlow?: boolean;
+  handle?: NFT;
 }
