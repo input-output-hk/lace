@@ -8,6 +8,7 @@ import ConfirmTransactionPage from '../elements/dappConnector/confirmTransaction
 import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
 import AllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
 import TestDAppPage from '../elements/dappConnector/testDAppPage';
+import WalletUnlockScreenAssert from '../assert/walletUnlockScreenAssert';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -58,9 +59,14 @@ Then(/^I see DApp connection modal$/, async () => {
   await DAppConnectorAssert.assertSeeDAppConnectionModal();
 });
 
-Then(/^I see DApp no wallet modal$/, async () => {
-  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(2);
-  await DAppConnectorAssert.assertSeeNoWalletModal();
+Then(/^I see DApp no wallet page$/, async () => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeNoWalletPage();
+});
+
+Then(/^I see DApp unlock page$/, async () => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await WalletUnlockScreenAssert.assertSeeWalletUnlockScreen();
 });
 
 Then(/^I see DApp removal confirmation modal$/, async () => {
@@ -86,10 +92,15 @@ Then(
   }
 );
 
-Then(/^I see Lace wallet info in DApp when not connected$/, async () => {
-  await DAppConnectorPageObject.switchToTestDAppWindow();
-  await DAppConnectorAssert.assertWalletFoundButNotConnectedInTestDApp();
-});
+Then(
+  /^I see Lace wallet info in DApp when (not connected|connected)$/,
+  async (isConnected: 'not connected' | 'connected') => {
+    await DAppConnectorPageObject.switchToTestDAppWindow();
+    isConnected === 'connected'
+      ? await DAppConnectorAssert.assertWalletFoundAndConnectedInTestDApp()
+      : await DAppConnectorAssert.assertWalletFoundButNotConnectedInTestDApp();
+  }
+);
 
 Then(/^I see "Authorized DApps" section empty state in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await DAppConnectorAssert.assertSeeAuthorizedDAppsEmptyState(mode);
