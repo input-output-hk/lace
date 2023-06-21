@@ -1,8 +1,8 @@
 # These settings are synced to GitHub by https://probot.github.io/apps/settings/
 
 repository:
-  allow_merge_commit: true
-  allow_rebase_merge: false
+  allow_merge_commit: false
+  allow_rebase_merge: true
   allow_squash_merge: true
   default_branch: main
   delete_branch_on_merge: true
@@ -84,7 +84,7 @@ branches:
         dismissal_restrictions:
           apps: []
           users: []
-          teams: []
+          teams: ['lace-tech-leads']
       # Required. Require status checks to pass before merging. Set to null to disable
       required_status_checks:
         # Required. Require branches to be up to date before merging.
@@ -95,7 +95,7 @@ branches:
           - context: block-fixup
           - context: Build Staking Center
       # Required. Enforce all configured restrictions for administrators. Set to true to enforce required status checks for repository administrators. Set to null to disable.
-      enforce_admins: true
+      enforce_admins:
       # Prevent merge commits from being pushed to matching branches
       required_linear_history: false
       # Permits force pushes to the protected branch by anyone with write access to the repository.
