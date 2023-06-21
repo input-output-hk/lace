@@ -1,4 +1,4 @@
-import { Box, Button, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
+import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from './DelegationCard';
 import { StakingInfoCard } from './staking-info-card';
@@ -55,7 +55,7 @@ export const Overview = () => {
       </Box>
       <Flex justifyContent={'space-between'} mb={'$16'}>
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
-        <Button.Primary label={t('overview.yourPoolsSection.manageButtonLabel')} />
+        <ControlButton.Outlined label={t('overview.yourPoolsSection.manageButtonLabel')} />
       </Flex>
       {data.staked.map((item) => (
         <Box key={item.id} mb={'$24'}>

@@ -9,7 +9,7 @@ import { Scheme } from './control-button.data';
 
 import type { ControlButtonWithLabelProps } from './control-button.data';
 
-export const Filled = (
+export const Danger = (
   props: Readonly<ControlButtonWithLabelProps>,
 ): JSX.Element => {
   return (
@@ -18,12 +18,12 @@ export const Filled = (
       className={{
         container: cn(
           cx.container({
-            colorScheme: Scheme.Filled,
-            borderScheme: Scheme.Filled,
+            colorScheme: Scheme.Danger,
+            borderScheme: Scheme.Danger,
           }),
         ),
-        label: cx.label({ colorScheme: Scheme.Filled }),
-        icon: cx.icon({ colorScheme: Scheme.Filled }),
+        label: cx.label({ colorScheme: Scheme.Danger }),
+        icon: cx.icon({ colorScheme: Scheme.Danger }),
       }}
     />
   );
