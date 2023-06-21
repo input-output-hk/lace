@@ -1,8 +1,8 @@
 import webTester from '../actor/webTester';
 import PasswordInput from '../elements/passwordInput';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
-import { t } from '../utils/translationService';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
+import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
 
 class SimpleTxSideDrawerPageObject {
   fillTokenValue = async (value: string) => {
@@ -26,8 +26,9 @@ class SimpleTxSideDrawerPageObject {
   }
 
   async fillPasswordAndConfirm(password: string) {
-    await this.fillPassword(password);
-    await webTester.clickButton(await t('general.button.confirm'));
+    await TransactionPasswordPage.passwordInput.setValue(password);
+    await TransactionPasswordPage.nextButton.waitForClickable();
+    await TransactionPasswordPage.nextButton.click();
   }
 }
 

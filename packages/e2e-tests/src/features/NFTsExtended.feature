@@ -42,7 +42,7 @@ Feature: LW-423: NFTs - Extended view
   Scenario: Extended-view  - Send NFT - User enters invalid password
     Given I am on NFTs extended page
     And I'm sending an NFT with name: "Ibilecoin"
-    When I fill incorrect password and confirm
+    When I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
   @LW-2504 @Mainnet

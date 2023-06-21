@@ -23,11 +23,15 @@
   font-size: var(--body);
   font-weight: 500;
   gap: 3%;
-  grid-template-columns: 35% 62%;
+  grid-template-columns: 1fr 1fr;
   letter-spacing: -0.015em;
   line-height: size_unit(3);
   margin-bottom: size_unit(1);
   padding: 0px size_unit(2);
+
+  .nameHeader {
+    min-width: 310px;
+  }
 }
 
 .skeleton {

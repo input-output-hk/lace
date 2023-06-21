@@ -9,7 +9,23 @@ export type ConstructTranslationKeyUnion<T extends RecursiveStructure, K extends
   : never;
 
 type KeysStructure = {
+  browsePools: {
+    stakePoolTableBrowser: {
+      tableHeader: {
+        poolName: '';
+        ros: '';
+        cost: '';
+        saturation: '';
+      };
+      emptyMessage: '';
+    };
+  };
   overview: {
+    delegationCard: {
+      status: '';
+      balance: '';
+      pools: '';
+    };
     stakingInfoCard: {
       fee: '';
       margin: '';

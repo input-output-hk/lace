@@ -290,7 +290,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I set 2 bundles with the same assets
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    When I fill correct password and confirm
+    When I enter correct password and confirm the transaction
     Then The Transaction error screen is displayed:
       | Title: "Oops something went wrong!"                            |
       | Subtitle: "There was a problem submitting your transaction..." |
