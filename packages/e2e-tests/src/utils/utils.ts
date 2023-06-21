@@ -1,6 +1,7 @@
 import { Capabilities } from '@wdio/types';
 import localStorageManager from './localStorageManager';
 import { Logger } from '../support/logger';
+import { browser } from '@wdio/globals';
 
 class ExtensionUtils {
   async getBrowser(): Promise<string> {

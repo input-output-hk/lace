@@ -1,5 +1,6 @@
 import extensionUtils from './utils';
 import { Logger } from '../support/logger';
+import { browser } from '@wdio/globals';
 
 const verifyBrowserStorageSupport: any = async () => {
   const currentBrowser = await extensionUtils.getBrowser();
@@ -68,5 +69,18 @@ export const clearBackgroundStorageKey: any = async (): Promise<void> => {
     await browser.execute('await chrome.storage.local.remove("BACKGROUND_STORAGE");', []);
   } catch (error) {
     Logger.warn(`Clearing background storage key failed: ${error}`);
+  }
+};
+
+export const deleteFiatPriceFromBrowserStorage = async (): Promise<void> => {
+  const backgroundStorage = await getBackgroundStorage();
+  delete backgroundStorage.fiatPrices;
+  try {
+    await browser.execute(
+      `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(backgroundStorage)}})`,
+      []
+    );
+  } catch (error) {
+    throw new Error(`Setting browser storage failed: ${error}`);
   }
 };

@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
 import SectionTitle from './sectionTitle';
 import { ChainablePromiseElement } from 'webdriverio';
+import { browser } from '@wdio/globals';
+import TokensPageAssert from '../assert/tokensPageAssert';
 
 class TokensPage {
   private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
@@ -10,6 +12,8 @@ class TokensPage {
   private TOKEN_AVATAR = '[data-testid="asset-table-cell-logo"]';
   private TOKEN_NAME = '[data-testid="token-table-cell-name"]';
   private TOKEN_TICKER = '[data-testid="token-table-cell-ticker"]';
+  private TOKEN_PRICE = '[data-testid="token-table-cell-price"]';
+  private TOKEN_VARIATION = '[data-testid="token-table-cell-price-variation"]';
   private TOKEN_BALANCE = '[data-testid="token-table-cell-balance"]';
   private TOKEN_FIAT_BALANCE = '[data-testid="token-table-cell-fiat-balance"]';
   private COINGECKO_CREDITS = '[data-testid="coingecko-credits"]';
@@ -18,6 +22,7 @@ class TokensPage {
   private SEND_BUTTON_POPUP_MODE = 'main [data-testid="send-button"]';
   private CLOSED_EYE_ICON = '[data-testid="closed-eye-icon"]';
   private OPENED_EYE_ICON = '[data-testid="opened-eye-icon"]';
+  private PRICE_FETCH_ERROR_DESCRIPTION = '[data-testid="banner-description"]';
 
   get sendButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEND_BUTTON_POPUP_MODE);
@@ -67,6 +72,14 @@ class TokensPage {
     return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_FIAT_BALANCE);
   }
 
+  tokenPriceAda(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_PRICE);
+  }
+
+  tokenPriceChange(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TOKENS_TABLE_ROW)[index].$(this.TOKEN_VARIATION);
+  }
+
   tokensTableItemWithName(tokenName: string): ChainablePromiseElement<WebdriverIO.Element> {
     const selector = `${this.TOKENS_TABLE_ROW}[descendant::*[text()='${tokenName}']]`;
     return $(selector);
@@ -102,6 +115,18 @@ class TokensPage {
     return await this.getTokenBalanceAsFloatByIndex(tokenIndex);
   }
 
+  async getTokenPriceAdaByIndex(index: number): Promise<string> {
+    return await this.tokenPriceAda(index).getText();
+  }
+
+  async getTokenFiatBalanceByIndex(index: number): Promise<string | number> {
+    return await this.tokenFiatBalance(index).getText();
+  }
+
+  async getTokenPriceChangeByIndex(index: number): Promise<string | number> {
+    return await this.tokenPriceChange(index).getText();
+  }
+
   async getTokenNames(): Promise<string[]> {
     const rowsNumber = await this.getRows();
     const names = [];
@@ -125,8 +150,16 @@ class TokensPage {
     return tokens.indexOf(tokenName);
   }
 
+  get getPriceFetchErrorDescription(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PRICE_FETCH_ERROR_DESCRIPTION);
+  }
+
   async getTokensCounterAsNumber(): Promise<number> {
     return SectionTitle.getCounterAsNumber();
+  }
+
+  async waitForPricesToBeFetched() {
+    await browser.pause(TokensPageAssert.ADA_PRICE_CHECK_INTERVAL);
   }
 }
 
