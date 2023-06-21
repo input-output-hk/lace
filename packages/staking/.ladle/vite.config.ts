@@ -5,7 +5,7 @@ import eslint from 'vite-plugin-eslint';
 
 export const ladleViteConfig = {
   plugins: [
-    vanillaExtractPlugin(),
+    vanillaExtractPlugin({ esbuildOptions: { loader: { '.css': 'empty' } } }),
     checker({
       overlay: {
         position: 'br',

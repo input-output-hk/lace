@@ -10,6 +10,11 @@ export type ConstructTranslationKeyUnion<T extends RecursiveStructure, K extends
 
 type KeysStructure = {
   overview: {
+    delegationCard: {
+      status: '';
+      balance: '';
+      pools: '';
+    };
     stakingInfoCard: {
       fee: '';
       margin: '';
