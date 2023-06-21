@@ -15,6 +15,7 @@ import NoWalletModal from '../elements/dappConnector/noWalletModal';
 import extensionUtils from '../utils/utils';
 import TokensPageObject from '../pageobject/tokensPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
+import { browser } from '@wdio/globals';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;

@@ -24,3 +24,8 @@ export const removeButtonBox = style([
     right: calc.multiply(vars.spacing.$48, -1),
   },
 ]);
+
+export const icon = style({
+  maxWidth: '$12',
+  maxHeight: '$12',
+});
