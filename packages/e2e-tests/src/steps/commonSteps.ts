@@ -28,6 +28,7 @@ import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import menuMainExtended from '../elements/menuMainExtended';
+import { browser } from '@wdio/globals';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -194,6 +195,7 @@ Then(/^I switch to window with Lace$/, async () => {
 
 When(/^I resize the window to a width of: ([^"]*) and a height of: ([^"]*)$/, async (width: number, height: number) => {
   await browser.setWindowSize(Number(width), Number(height));
+  await browser.refresh();
 });
 
 Then(/^I (see|do not see) expanded icon$/, async (shouldSee: 'see' | 'do not see') => {
