@@ -1,6 +1,6 @@
+import { getRandomIcon } from '@lace/common';
 import BigNumber from 'bignumber.js';
 import cn from 'classnames';
-import { JdenticonConfig, toSvg } from 'jdenticon';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { StakePoolInfo } from './StakePoolInfo';
@@ -16,11 +16,6 @@ export const formatLocaleNumber = (value: string, decimalPlaces: number = DEFAUL
     groupSeparator: ',',
     groupSize: 3,
   });
-
-export const getRandomIcon = (iconConfig: { id: string; size: number; jdenticonConfig?: JdenticonConfig }): string => {
-  const icon = toSvg(iconConfig.id, iconConfig.size, iconConfig.jdenticonConfig);
-  return `data:image/svg+xml;utf8,${encodeURIComponent(icon)}`;
-};
 
 const formatNumericValue = (val: number | string, suffix: number | string): React.ReactElement => (
   <>

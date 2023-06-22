@@ -1,7 +1,7 @@
 import create, { UseStore } from 'zustand';
 import { Wallet } from '@lace/cardano';
 import { currencyCode, currencyMap, defaultCurrency, currencies } from './constants';
-import { CoinId, CurrencyInfo } from '../../types';
+import { CurrencyInfo } from '../../types';
 import { saveValueInLocalStorage } from '../../utils/local-storage';
 import { CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 
@@ -21,7 +21,7 @@ export const getSupportedCurrencies = (): CurrencyInfo[] =>
     }))
     .sort((a, b) => a.code.localeCompare(b.code));
 
-export const getCurrencyInfo = (code: string, cardanoCoin?: CoinId): CurrencyInfo => {
+export const getCurrencyInfo = (code: string, cardanoCoin?: Wallet.CoinId): CurrencyInfo => {
   if (process.env.USE_MULTI_CURRENCY !== 'true') {
     return defaultCurrency;
   }
@@ -45,7 +45,7 @@ export const getCurrencyInfo = (code: string, cardanoCoin?: CoinId): CurrencyInf
 
 export const createCurrencyStore = (
   currentFiatCurrency: string | undefined,
-  cardanoCoin: CoinId
+  cardanoCoin: Wallet.CoinId
 ): UseStore<ICurrencyStore> =>
   create<ICurrencyStore>((set) => ({
     supportedCurrencies: getSupportedCurrencies(),

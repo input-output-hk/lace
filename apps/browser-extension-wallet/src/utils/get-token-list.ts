@@ -2,13 +2,12 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import { PriceResult } from '@hooks';
 import { Wallet } from '@lace/cardano';
-import { addEllipsis } from '@lace/common';
+import { addEllipsis, getRandomIcon } from '@lace/common';
 import { nftImageSelector } from '@src/views/browser-view/features/nfts/selectors';
 import { SpentBalances } from '@src/views/browser-view/features/send-transaction/types';
 import isNil from 'lodash/isNil';
 import { getTokenAmountInFiat, parseFiat } from './assets-transformers';
 import { getAssetImageUrl } from './get-asset-image-url';
-import { getRandomIcon } from './get-random-icon';
 import { EnvironmentTypes } from '@stores';
 import { CurrencyInfo } from '@src/types';
 import { isNFT } from './is-nft';
