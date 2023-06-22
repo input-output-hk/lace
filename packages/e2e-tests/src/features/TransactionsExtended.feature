@@ -4,7 +4,7 @@ Feature: Transactions - Extended view
   Background:
     Given Wallet is synced
 
-  @LW-2551 @Testnet @Mainnet
+  @LW-2551 @Smoke @Testnet @Mainnet
   Scenario: Extended View - Transactions tab
     When I navigate to Transactions extended page
     Then Transactions section is displayed
@@ -36,12 +36,12 @@ Feature: Transactions - Extended view
     When I navigate to Transactions extended page
     Then all transactions are grouped by date
 
-  @LW-2558 @Testnet @Mainnet
+  @LW-2558 @Smoke @Testnet @Mainnet
   Scenario: Extended View - Transactions show relevant info
     When I navigate to Transactions extended page
     Then all transactions have icon, type of transaction, amount of tokens, value, and value in FIAT
 
-  @LW-2559 @Testnet @Mainnet
+  @LW-2559 @Smoke @Testnet @Mainnet
   Scenario: Extended View - Transactions details - Folded
     Given I am on the Transactions section - Extended view
     When click on a transaction

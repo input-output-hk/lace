@@ -23,6 +23,10 @@ class TokensPageObject {
     testContext.save(`${Asset.getByName(tokenName).ticker}tokenBalance`, tokenBalance);
   }
 
+  async loadTokenBalance(tokenName: string) {
+    return testContext.load(`${Asset.getByName(tokenName).ticker}tokenBalance`);
+  }
+
   async clickOnCoinGeckoCreditsLink() {
     await TokensPage.coinGeckoLink.click();
   }

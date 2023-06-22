@@ -35,8 +35,7 @@ Feature: LW-2923: [Send Flow] Show visual clue for metadata characters limit
     Then Metadata counter is displayed
     And Warning hint is not shown
 
-  @LW-6655 @Pending
-  #bug LW-6468
+  @LW-6655
   Scenario: Extended View - Send - Delete metadata
     When I click "Send" button on page header
     And I’ve entered accepted values for all fields of simple Tx

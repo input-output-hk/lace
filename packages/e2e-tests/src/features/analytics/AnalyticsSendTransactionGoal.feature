@@ -22,7 +22,7 @@ Feature: Analytics
     Then I validate latest analytics request(s) information:
       | Event Category   | Event Action | Event Name                 |
       | send-transaction | click-event  | confirm-tx-details-browser |
-    When I fill correct password and confirm
+    When I enter correct password and confirm the transaction
     Then I validate latest analytics request(s) information:
       | Event Category   | Event Action | Event Name                |
       | send-transaction | click-event  | input-tx-password-browser |

@@ -43,7 +43,13 @@ export const SideMenuContent = ({
   const { t } = useTranslate();
 
   return (
-    <Menu data-testid="side-menu" selectedKeys={[activeItemId]} onClick={onClick} mode="inline">
+    <Menu
+      className={styles.menuContainer}
+      data-testid="side-menu"
+      selectedKeys={[activeItemId]}
+      onClick={onClick}
+      mode="inline"
+    >
       {menuItems.map((menuItem) => (
         <SideMenuItem
           onMouseEnter={() => onMouseEnter(menuItem.id)}
@@ -55,7 +61,7 @@ export const SideMenuContent = ({
           {React.createElement(getIcon(menuItem, activeItemId, hoveredItemId), {
             className: classnames(styles.icon, menuItem.iconClassName)
           })}
-          <SideMenuLabel>{t(menuItem.label)}</SideMenuLabel>
+          <SideMenuLabel className={styles.concealableMenuLabel}>{t(menuItem.label)}</SideMenuLabel>
         </SideMenuItem>
       ))}
     </Menu>

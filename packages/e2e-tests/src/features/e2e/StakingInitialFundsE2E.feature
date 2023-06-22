@@ -15,7 +15,7 @@ Feature: Delegating funds to new pool E2E
       | ADA  | tADA      | 5      |
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
+    And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |
@@ -58,7 +58,7 @@ Feature: Delegating funds to new pool E2E
       | ADA  | tADA      | 5      |
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
+    And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |
