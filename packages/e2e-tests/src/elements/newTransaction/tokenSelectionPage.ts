@@ -8,7 +8,6 @@ import { ChainablePromiseElement } from 'webdriverio';
 
 export class TokenSelectionPage extends WebElement {
   protected CONTAINER;
-  private BUTTONS_CONTAINER = '//div[@data-testid="asset-selector-buttons"]';
   private TOKENS_BUTTON = '//input[@data-testid="asset-selector-button-tokens"]';
   private TOKEN_ROW = '//div[@data-testid="coin-search-row-info"]';
   private TOKEN_INFO = '//div[@data-testid="coin-search-row-info"]';
@@ -21,18 +20,18 @@ export class TokenSelectionPage extends WebElement {
   private NEUTRAL_FACE_ICON = '[data-testid="neutral-face-icon"]';
   private SAD_FACE_ICON = '[data-testid="sad-face-icon"]';
   private EMPTY_STATE_MESSAGE = '[data-testid="asset-list-empty-state-message"]';
+  private CANCEL_BUTTON = '[data-testid="cancel-button"]';
+  private CLEAR_BUTTON = '[data-testid="clear-button"]';
+  private SELECT_MULTIPLE_BUTTON = '[data-testid="select-multiple-button"]';
+  private ADD_TO_TRANSACTION_BUTTON = '[data-testid="add-to-transaction-button"]';
 
   constructor() {
     super();
     this.CONTAINER = new DrawerCommonExtended().container().toJSLocator();
   }
 
-  tokensButton(): WebElement {
-    return Factory.fromSelector(`${this.BUTTONS_CONTAINER}//label[1]`, 'xpath');
-  }
-
-  tokensCaption(): WebElement {
-    return Factory.fromSelector(`${this.TOKENS_BUTTON}/parent::span/following::span[1]`, 'xpath');
+  get tokensButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TOKENS_BUTTON).parentElement().parentElement();
   }
 
   tokenItem(): WebElement {
@@ -67,12 +66,8 @@ export class TokenSelectionPage extends WebElement {
     return Factory.fromSelector(`(${this.TOKEN_INFO})[${index}]`, 'xpath');
   }
 
-  nftsButton(): WebElement {
-    return Factory.fromSelector(`${this.BUTTONS_CONTAINER}//label[2]`, 'xpath');
-  }
-
-  nftsCaption(): WebElement {
-    return Factory.fromSelector(`${this.NFTS_BUTTON}/parent::span/following::span[1]`, 'xpath');
+  get nftsButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.NFTS_BUTTON).parentElement().parentElement();
   }
 
   nftsList(): WebElement {
@@ -116,6 +111,22 @@ export class TokenSelectionPage extends WebElement {
 
   get emptyStateMessage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EMPTY_STATE_MESSAGE);
+  }
+
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CANCEL_BUTTON);
+  }
+
+  get clearButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLEAR_BUTTON);
+  }
+
+  get selectMultipleButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SELECT_MULTIPLE_BUTTON);
+  }
+
+  get addToTransactionButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ADD_TO_TRANSACTION_BUTTON);
   }
 
   toJSLocator(): string {

@@ -19,7 +19,7 @@ class ExtensionUtils {
 
   getNetwork(): { name: string; id: number } {
     let network = 'Preprod';
-    let id = 0;
+    let id = 1;
     switch (process.env.ENV) {
       case 'preview': {
         network = 'Preview';
