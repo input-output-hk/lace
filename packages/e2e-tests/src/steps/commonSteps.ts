@@ -195,7 +195,6 @@ Then(/^I switch to window with Lace$/, async () => {
 
 When(/^I resize the window to a width of: ([^"]*) and a height of: ([^"]*)$/, async (width: number, height: number) => {
   await browser.setWindowSize(Number(width), Number(height));
-  await browser.refresh();
 });
 
 Then(/^I (see|do not see) expanded icon$/, async (shouldSee: 'see' | 'do not see') => {

@@ -49,7 +49,7 @@ Feature: Main Navigation - Extended view
   Scenario Outline: Extended view - Main Navigation - Right side panel not displayed in <section> section
     And I navigate to <section> extended page
     And I resize the window to a width of: 1350 and a height of: 840
-    Then I do not see an icon to open the right side panel
+    Then I do not see a button to open the right side panel
     And <step>
     Examples:
       | section      | step                                                                  |
@@ -60,12 +60,12 @@ Feature: Main Navigation - Extended view
       | Settings     | I see "About Lace" component                                          |
       | Address Book | I see Address Book "About your wallet" widget with all relevant items |
 
-  @LW-6661
+  @LW-6661 @test
   Scenario Outline: Extended view - Main Navigation - Right side panel displayed in <section> section
     And I navigate to <section> extended page
     And I resize the window to a width of: <width> and a height of: 840
     Then I do not see the right side panel for <section> section
-    Then I see an icon to open the right side panel
+    Then I see a button to open the right side panel
     When I click on right side panel icon
     Then I see the right side panel for <section> section
     And <step>

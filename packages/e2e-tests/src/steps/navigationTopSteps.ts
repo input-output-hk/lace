@@ -3,6 +3,7 @@ import topNavigationAssert from '../assert/topNavigationAssert';
 import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 import menuHeaderNetwork from '../elements/menuHeaderNetwork';
 import MenuHeader from '../elements/menuHeader';
+import { browser } from '@wdio/globals';
 
 When(/I click the menu button/, async () => {
   await menuHeaderPageObject.clickMenuButton();
@@ -129,7 +130,7 @@ When(/^I click "(Receive|Send)" button on page header$/, async (button: 'Receive
   }
 });
 
-Then(/^I (see|do not see) an icon to open the right side panel$/, async (shouldSee: 'see' | 'do not see') => {
+Then(/^I (see|do not see) a button to open the right side panel$/, async (shouldSee: 'see' | 'do not see') => {
   await topNavigationAssert.assertSeeRightSidePanelButton(shouldSee === 'see');
 });
 
