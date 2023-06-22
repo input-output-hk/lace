@@ -41,7 +41,7 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I see DApp authorization window
 
-  @LW-3754 @LW-4064 @LW-3753 @Testnet @Mainnet
+  @LW-3754 @LW-4064 @LW-3753 @Smoke @Testnet @Mainnet
   Scenario: Authorize app functions as expected when the user chooses 'Always'
     When I open test DApp
     And I see DApp authorization window

@@ -9,23 +9,23 @@ Feature: Main Navigation - Extended view
     When I see main navigation with all items in extended mode
     Then Each main navigation item contains icon and text
 
-  @LW-2693
+  @LW-2693 @Smoke
   Scenario: Extended view - Main Navigation - Tokens item click navigates to tokens page
     Given I am on NFTs extended page
     When I navigate to Tokens extended page
     Then I see Tokens counter with total number of tokens displayed
 
-  @LW-2694
+  @LW-2694 @Smoke
   Scenario: Extended view - Main Navigation - NFTs item click navigates to nfts page
     When I navigate to NFTs extended page
     Then I see NFTs counter with total number of NFTs displayed
 
-  @LW-2695
+  @LW-2695 @Smoke
   Scenario: Extended view - Main Navigation - Transactions item click navigates to transaction page
     When I navigate to Transactions extended page
     Then Transactions section is displayed
 
-  @LW-2696
+  @LW-2696 @Smoke
   Scenario: Extended view - Main Navigation - Staking item click navigates to staking page
     When I navigate to Staking extended page
     Then I see Staking title and counter with total number of pools displayed
