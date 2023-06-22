@@ -262,6 +262,7 @@ Feature: Address book - extended view
     And "core.addressForm.addAddress" button is disabled
 
   @LW-7146 @Pending
+  #Bug LW-7147
   Scenario: Extended-view - Address Book - Add address button is removed when right side panel is displayed
     Given I don't have any addresses added to my address book in extended mode
     And I resize the window to a width of: 1000 and a height of: 840
