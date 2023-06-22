@@ -75,14 +75,14 @@ Feature: Main Navigation - Extended view
     Examples:
       | section      | width | step                                                                  | should_see_scroll |
       | Tokens       | 1280  | I see Tokens "About your wallet" widget with all relevant items       | do not see        |
-      | Tokens       | 768   | I see Tokens "About your wallet" widget with all relevant items       | see               |
+      | Tokens       | 668   | I see Tokens "About your wallet" widget with all relevant items       | see               |
       | NFTs         | 1280  | I see "More on NFTs" widget with all relevant items                   | do not see        |
-      | NFTs         | 768   | I see "More on NFTs" widget with all relevant items                   | see               |
+      | NFTs         | 668   | I see "More on NFTs" widget with all relevant items                   | see               |
       | Transactions | 1280  | I see Transactions "Learn about" widget with all relevant items       | do not see        |
-      | Transactions | 768   | I see Transactions "Learn about" widget with all relevant items       | see               |
+      | Transactions | 668   | I see Transactions "Learn about" widget with all relevant items       | see               |
       | Staking      | 1280  | I see "About staking" widget with all relevant items                  | do not see        |
-      | Staking      | 768   | I see "About staking" widget with all relevant items                  | see               |
+      | Staking      | 668   | I see "About staking" widget with all relevant items                  | see               |
       | Settings     | 1280  | I see "About Lace" component                                          | do not see        |
-      | Settings     | 768   | I see "About Lace" component                                          | see               |
+      | Settings     | 668   | I see "About Lace" component                                          | see               |
       | Address Book | 1280  | I see Address Book "About your wallet" widget with all relevant items | do not see        |
-      | Address Book | 768   | I see Address Book "About your wallet" widget with all relevant items | see               |
+      | Address Book | 668   | I see Address Book "About your wallet" widget with all relevant items | see               |
