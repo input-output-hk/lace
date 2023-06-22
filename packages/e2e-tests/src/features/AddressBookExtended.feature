@@ -148,8 +148,7 @@ Feature: Address book - extended view
       | empty                     | empty                                                                                                           | Name field is required           | Address field is required           |
       | "name followed by space " | invalid_address                                                                                                 | Name has unnecessary white space | Incorrect Cardano address           |
 
-  @LW-4567 @Pending
-  #BUG: LW-7056
+  @LW-4567
   Scenario Outline: Extended-view - Address Book - Edit address book entry - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
