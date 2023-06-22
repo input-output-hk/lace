@@ -1,27 +1,3 @@
-@keyframes icon-move {
-  0% {
-    left: 0;
-  }
-  50% {
-    left: 2px;
-  }
-  100% {
-    left: 0;
-  }
-}
-
-@keyframes icon-move-active {
-  0% {
-    left: 2px;
-  }
-  50% {
-    left: 4px;
-  }
-  100% {
-    left: 2px;
-  }
-}
-
 .square {
   width: 20px;
   height: 20px;
@@ -31,12 +7,11 @@
   transition: all 0.25s ease-in-out;
 
   .icon {
-    display: none;
     position: absolute;
-    left: 0;
-    top: 20%;
-    width: 10px;
-    height: 10px;
+    left: 7.5px;
+    top: 30%;
+    width: 0px;
+    height: 6px;
   }
 }
 
@@ -81,12 +56,13 @@
         .icon {
           display: block;
           color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #a9a9a9));
-          animation: icon-move-active 0.5s linear infinite;
+          left: 4px;
         }
       }
 
       .switch {
         background-color: var(--dark-mode-light-grey, #fff);
+        border-left: none;
 
         &.active {
           width: 4px;
@@ -95,9 +71,11 @@
       }
 
       .icon {
+        left: 1px;
         display: block;
         color: var(--dark-mode-light-grey, #fff);
-        animation: icon-move 0.5s linear infinite;
+        width: 7.5px;
+        transition: all 0.5s ease;
       }
     }
   }
