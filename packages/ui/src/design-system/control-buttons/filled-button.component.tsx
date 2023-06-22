@@ -1,23 +1,29 @@
-import type { ReactNode } from 'react';
 import React from 'react';
 
-import classNames from 'classnames';
+import cn from 'classnames';
 
 import { SkeletonButton } from '../buttons';
 
-import * as cx from './filled-button.css';
+import * as cx from './control-button.css';
+import { Scheme } from './control-button.data';
 
-import type { ButtonProps } from '../buttons';
+import type { ControlButtonWithLabelProps } from './control-button.data';
 
-type Props = Omit<ButtonProps, 'className'> & { icon: ReactNode };
-
-export const Filled = (props: Readonly<Props>): JSX.Element => {
+export const Filled = (
+  props: Readonly<ControlButtonWithLabelProps>,
+): JSX.Element => {
   return (
     <SkeletonButton
       {...props}
       className={{
-        container: classNames(cx.container, cx.button),
-        label: cx.label,
+        container: cn(
+          cx.container({
+            colorScheme: Scheme.Filled,
+            borderScheme: Scheme.Filled,
+          }),
+        ),
+        label: cx.label({ colorScheme: Scheme.Filled }),
+        icon: cx.icon({ colorScheme: Scheme.Filled }),
       }}
     />
   );

@@ -4,7 +4,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
   Background:
     Given Wallet is synced
 
-  @LW-3546 @Testnet @Mainnet
+  @LW-3546 @Smoke @Testnet @Mainnet
   Scenario: Extended view - transaction drawer is displayed as specified
     When I click "Send" button on page header
     Then send drawer is displayed with all its components in extended mode
@@ -246,13 +246,13 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click show password button
     Then Password field is displayed with value "somePassword"
 
-  @LW-2373 @Testnet @Mainnet
+  @LW-2373 @Smoke @Testnet @Mainnet
   Scenario: Extended-view - Password error page - after entering invalid Password
     And I click "Send" button on page header
     When I’ve entered accepted values for all fields of simple Tx
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill incorrect password and confirm
+    And I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
   @LW-2376 @Testnet @Mainnet
@@ -617,7 +617,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I’ve entered accepted values for all fields of simple Tx
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    When I fill correct password and confirm
+    When I enter correct password and confirm the transaction
     Then The Transaction error screen is displayed:
       | Title: "Oops something went wrong!"                   |
       | Subtitle: "The transaction could not be submitted..." |
