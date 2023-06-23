@@ -1,7 +1,7 @@
 import create, { UseStore } from 'zustand';
 import { Wallet } from '@lace/cardano';
 import { currencyCode, currencyMap, defaultCurrency, currencies } from './constants';
-import { CurrencyInfo } from '../../types';
+import { CurrencyInfo } from '@src/types';
 import { saveValueInLocalStorage } from '../../utils/local-storage';
 import { CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 
