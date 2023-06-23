@@ -11,9 +11,6 @@ export const ReceiveInfoContainer = (): React.ReactElement => {
   const handles = useGetHandles();
 
   return (
-    <ReceiveInfo
-      wallet={{ ...walletInfo, name: (handles?.length && handles[0]?.nftMetadata.name) || walletInfo.name }}
-      goBack={redirectToOverview}
-    />
+    <ReceiveInfo name={walletInfo?.name} address={walletInfo?.address} handles={handles} goBack={redirectToOverview} />
   );
 };

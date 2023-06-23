@@ -1063,7 +1063,8 @@
     },
     "infoWallet": {
       "copy": "Copy",
-      "addressCopied": "Address copied"
+      "addressCopied": "Address copied",
+      "handleCopied": "Handle copied"
     },
     "nftDetail": {
       "title": "NFT detail",
