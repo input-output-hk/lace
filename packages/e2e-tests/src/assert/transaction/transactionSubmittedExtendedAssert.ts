@@ -1,6 +1,6 @@
 import webTester from '../../actor/webTester';
 import { TransactionSubmittedPage } from '../../elements/newTransaction/transactionSubmittedPage';
-import { TransactionErrorPage } from '../../elements/newTransaction/transactionErrorPage';
+import TransactionErrorPage from '../../elements/newTransaction/transactionErrorPage';
 import { Button } from '../../elements/button';
 import { Logger } from '../../support/logger';
 import { t } from '../../utils/translationService';
@@ -33,13 +33,30 @@ class TransactionSubmittedExtendedAssert {
   }
 
   async assertSeeTransactionErrorPage() {
-    const transactionErrorPage = new TransactionErrorPage();
-    await webTester.seeElement(transactionErrorPage.mainTitle().toJSLocator(), false, 10_000);
-    await webTester.seeWebElement(transactionErrorPage.subTitle());
-    await webTester.seeWebElement(transactionErrorPage.subTitle2());
+    await TransactionErrorPage.closeButton.waitForDisplayed();
+    await TransactionErrorPage.mainTitle.waitForDisplayed({ timeout: 10_000 });
+    await expect(await TransactionErrorPage.mainTitle.getText()).to.equal(
+      await t('browserView.transaction.fail.oopsSomethingWentWrong')
+    );
+    await TransactionErrorPage.descriptionLine1.waitForDisplayed();
+    await expect(await TransactionErrorPage.descriptionLine1.getText()).to.equal(
+      await t('browserView.transaction.fail.problemSubmittingYourTransaction')
+    );
+    await TransactionErrorPage.descriptionLine2.waitForDisplayed();
+    await expect(await TransactionErrorPage.descriptionLine2.getText()).to.equal(
+      await t('browserView.transaction.fail.clickBackAndTryAgain')
+    );
 
-    await webTester.seeWebElement(new Button(await t('browserView.transaction.send.footer.fail')));
-    await webTester.seeWebElement(new Button(await t('browserView.transaction.send.footer.cancel')));
+    await TransactionErrorPage.image.waitForDisplayed();
+
+    await TransactionErrorPage.cancelButton.waitForDisplayed();
+    await expect(await TransactionErrorPage.cancelButton.getText()).to.equal(
+      await t('browserView.transaction.send.footer.cancel')
+    );
+    await TransactionErrorPage.backButton.waitForDisplayed();
+    await expect(await TransactionErrorPage.backButton.getText()).to.equal(
+      await t('browserView.transaction.send.footer.fail')
+    );
   }
 }
 

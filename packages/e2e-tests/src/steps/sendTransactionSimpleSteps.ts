@@ -339,7 +339,7 @@ Then(/^The password screen is displayed:$/, async (_ignored: string) => {
   await transactionPasswordExtendedAssert.assertSeePasswordPage();
 });
 
-Then(/^The Transaction error screen is displayed:$/, async (_ignored: string) => {
+Then(/^The Transaction error screen is displayed$/, async () => {
   await transactionSubmittedExtendedAssert.assertSeeTransactionErrorPage();
 });
 
