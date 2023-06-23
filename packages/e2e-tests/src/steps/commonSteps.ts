@@ -28,6 +28,7 @@ import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import menuMainExtended from '../elements/menuMainExtended';
+import { browser } from '@wdio/globals';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();

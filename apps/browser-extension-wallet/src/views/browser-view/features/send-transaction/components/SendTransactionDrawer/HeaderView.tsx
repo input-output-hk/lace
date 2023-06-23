@@ -206,6 +206,13 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
           </Button>
         ) : shouldDisplayMutlipleSelectionBtn ? (
           <SelectTokenButton
+            testId={
+              isMultipleSelectionAvailable
+                ? selectedTokenList.length > 0
+                  ? 'clear-button'
+                  : 'cancel-button'
+                : 'select-multiple-button'
+            }
             label={isMultipleSelectionAvailable ? selectedTokenLabel : t('multipleSelection.selectMultiple')}
             onClick={selectedTokenClick}
             btnStyle={
@@ -269,6 +276,13 @@ export const HeaderTitle = ({
     ) : null
   ) : (
     <SelectTokenButton
+      testId={
+        isMultipleSelectionAvailable
+          ? selectedTokenList.length > 0
+            ? 'clear-button'
+            : 'cancel-button'
+          : 'select-multiple-button'
+      }
       count={selectedTokenList.length > 0 ? selectedTokenList.length : undefined}
       label={isMultipleSelectionAvailable ? selectedTokenLabel : t('multipleSelection.selectMultiple')}
       onClick={selectedTokenClick}

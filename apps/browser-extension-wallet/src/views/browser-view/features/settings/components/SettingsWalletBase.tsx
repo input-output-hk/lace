@@ -1,5 +1,4 @@
 import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
-import { Wallet } from '@lace/cardano';
 import { DappList as DappListDrawer } from '@views/browser/features/dapp';
 import { SettingsCard, SettingsLink, GeneralSettingsDrawer, Collateral } from './';
 import { useTranslation } from 'react-i18next';
@@ -58,12 +57,12 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const [closeDrawer] = useRedirection(walletRoutePaths.settings);
 
   const { t } = useTranslation();
-  const { environmentName, getKeyAgentType, inMemoryWallet } = useWalletStore();
+  const { environmentName, inMemoryWallet } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
   const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
+
   const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
   const backgroundServices = useBackgroundServiceAPIContext();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
 
@@ -99,17 +98,12 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         onClose={closeDrawer}
         popupView={popupView}
       />
-      {
-        // TODO: Remove isInMemory scope once LW-3951 is delivered.
-        isInMemory && (
-          <Collateral.CollateralDrawer
-            visible={activeDrawer === SettingsDrawer.collateral}
-            onClose={closeDrawer}
-            popupView={popupView}
-            hasCollateral={hasCollateral}
-          />
-        )
-      }
+      <Collateral.CollateralDrawer
+        visible={activeDrawer === SettingsDrawer.collateral}
+        onClose={closeDrawer}
+        popupView={popupView}
+        hasCollateral={hasCollateral}
+      />
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
@@ -153,23 +147,18 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           {t('browserView.settings.wallet.general.title')}
         </SettingsLink>
         {renderLocalNodeSlot && renderLocalNodeSlot({ activeDrawer, closeDrawer, openDrawer })}
-        {
-          // TODO: Remove isInMemory scope once LW-3951 is delivered.
-          isInMemory && (
-            <SettingsLink
-              onClick={() => openDrawer(SettingsDrawer.collateral)}
-              description={t('browserView.settings.wallet.collateral.description')}
-              data-testid="settings-wallet-collateral-link"
-              addon={
-                hasCollateral
-                  ? t('browserView.settings.wallet.collateral.active')
-                  : t('browserView.settings.wallet.collateral.inactive')
-              }
-            >
-              {t('browserView.settings.wallet.collateral.title')}
-            </SettingsLink>
-          )
-        }
+        <SettingsLink
+          onClick={() => openDrawer(SettingsDrawer.collateral)}
+          description={t('browserView.settings.wallet.collateral.description')}
+          data-testid="settings-wallet-collateral-link"
+          addon={
+            hasCollateral
+              ? t('browserView.settings.wallet.collateral.active')
+              : t('browserView.settings.wallet.collateral.inactive')
+          }
+        >
+          {t('browserView.settings.wallet.collateral.title')}
+        </SettingsLink>
       </SettingsCard>
     </>
   );

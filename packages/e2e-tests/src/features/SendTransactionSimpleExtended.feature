@@ -4,7 +4,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
   Background:
     Given Wallet is synced
 
-  @LW-3546 @Testnet @Mainnet
+  @LW-3546 @Smoke @Testnet @Mainnet
   Scenario: Extended view - transaction drawer is displayed as specified
     When I click "Send" button on page header
     Then send drawer is displayed with all its components in extended mode
@@ -246,7 +246,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click show password button
     Then Password field is displayed with value "somePassword"
 
-  @LW-2373 @Testnet @Mainnet
+  @LW-2373 @Smoke @Testnet @Mainnet
   Scenario: Extended-view - Password error page - after entering invalid Password
     And I click "Send" button on page header
     When I’ve entered accepted values for all fields of simple Tx

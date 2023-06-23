@@ -172,7 +172,9 @@ Then(/^coin selector contains two tabs: tokens & nfts$/, async () => {
 });
 
 Then(/^click on the (Tokens|NFTs) button in the coin selector dropdown$/, async (button: string) => {
-  await transactionExtendedPageObject.clickCoinSelectorButton(button);
+  button === 'Tokens'
+    ? await transactionExtendedPageObject.clickTokensButton()
+    : await transactionExtendedPageObject.clickNFTsButton();
 });
 
 Then(/click on an token with name: "([^"]*)"/, async (tokenName: string) => {
@@ -213,7 +215,7 @@ When(
           break;
         case 'NFT':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
-          await transactionExtendedPageObject.clickCoinSelectorButton('NFTs');
+          await transactionExtendedPageObject.clickNFTsButton();
           await nftsPageObject.clickNftItem(entry.assetName);
           break;
         case 'Token':

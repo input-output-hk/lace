@@ -1,5 +1,7 @@
+/* eslint-disable react/no-multi-comp */
 import React, { useState } from 'react';
 import { Button, useSearchParams } from '@lace/common';
+import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
 import { AuthorizeDapp } from '@lace/core';
@@ -12,12 +14,50 @@ import { DAPP_CHANNELS } from '@src/utils/constants';
 import * as cip30 from '@cardano-sdk/dapp-connector';
 import { UserPromptService } from '@lib/scripts/background/services/dappService';
 import { of } from 'rxjs';
-import ShieldExclamation from '@assets/icons/shield-exclamation.svg';
+import InfoIcon from '../../../assets/icons/info.component.svg';
+import ShieldExclamation from '@assets/icons/shield-exclamation.component.svg';
 import { Banner } from '@components/Banner';
+import { Tooltip } from 'antd';
+import { useWalletStore } from '@src/stores';
 
 const DAPP_TOAST_DURATION = 50;
 
 const closeWindow = () => window.close();
+
+const WarningBanner = () => {
+  const { t } = useTranslation();
+  return (
+    <Banner
+      className={styles.banner}
+      customIcon={<ShieldExclamation className={styles.bannerIcon} />}
+      withIcon
+      message={t('core.authorizeDapp.warning')}
+    />
+  );
+};
+
+const NonSSLBanner = () => {
+  const { t } = useTranslation();
+  return (
+    <Banner
+      className={cn(styles.banner, styles.nonssl)}
+      descriptionClassName={styles.bannerDescription}
+      customIcon={<ShieldExclamation className={cn(styles.bannerIcon, styles.nonsslIcon)} />}
+      withIcon
+      message={
+        <div className={styles.nonsslContent}>
+          <span>{t('core.authorizeDapp.nonssl')}</span>
+          <Tooltip
+            placement="topRight"
+            title={<div className={styles.nonsslTooltip}>{t('core.authorizeDapp.nonsslTooltip')}</div>}
+          >
+            <InfoIcon className={styles.infoIcon} />
+          </Tooltip>
+        </div>
+      }
+    />
+  );
+};
 
 const authorize = (authorization: 'deny' | 'just-once' | 'allow', url: string) => {
   const api$ = of({
@@ -48,9 +88,11 @@ const authorize = (authorization: 'deny' | 'just-once' | 'allow', url: string) =
 export const Connect = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isModalVisible, setModalVisible] = useState(false);
-
   const { logo, url, name } = useSearchParams(['logo', 'url', 'name']);
+  const isSSLEncrypted = url.startsWith('https:');
+  const { environmentName } = useWalletStore();
 
+  const showNonSSLBanner = !isSSLEncrypted && environmentName === 'Mainnet';
   return (
     <Layout
       pageClassname={styles.spaceBetween}
@@ -60,14 +102,7 @@ export const Connect = (): React.ReactElement => {
       <div className={styles.container}>
         <AuthorizeDapp
           dappInfo={{ logo, name, url }}
-          warningBanner={
-            <Banner
-              className={styles.banner}
-              customIcon={ShieldExclamation}
-              withIcon
-              message={t('core.authorizeDapp.warning')}
-            />
-          }
+          warningBanner={showNonSSLBanner ? <NonSSLBanner /> : <WarningBanner />}
         />
       </div>
       <div className={styles.footer}>

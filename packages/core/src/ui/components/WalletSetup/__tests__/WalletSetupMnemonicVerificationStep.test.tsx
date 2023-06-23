@@ -36,7 +36,8 @@ const Test = () => {
       onSubmit={jest.fn()}
       translations={{
         enterPassphrase: 'Enter passphrase',
-        passphraseError: 'Passphrase error'
+        passphraseError: 'Passphrase error',
+        enterPassphraseDescription: 'Enter passphrase description'
       }}
       setIsBackToMnemonic={jest.fn()}
       isBackToMnemonic={false}
@@ -74,5 +75,12 @@ describe('<WalletSetupMnemonicVerificationStep>', () => {
 
     const input16th = await findInputByIndex(16);
     expect(input16th).toHaveValue('');
+  });
+
+  it('should render proper description', async () => {
+    render(<Test />);
+
+    const { getByText } = within(screen.getByTestId('wallet-setup-step-subtitle'));
+    expect(getByText('Enter passphrase description')).toBeInTheDocument();
   });
 });

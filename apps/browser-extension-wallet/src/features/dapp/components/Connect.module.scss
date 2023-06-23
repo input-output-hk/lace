@@ -119,10 +119,44 @@
 
 .banner {
   padding: size_unit(2) size_unit(3);
-  img {
-    margin-top: size_unit(2.5) !important;
+
+  &.nonssl {
+    background-color: var(--light-mode-light-grey, var(--dark-mode-grey)) !important;
+
+    .nonsslContent {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nonsslIcon {
+      color: var(--text-color-red);
+    }
+
+    .bannerDescription {
+      flex: 1;
+
+      :global(.ant-typography) {
+        width: 100%;
+      }
+
+      .infoIcon {
+        font-size: 18px;
+        color: var(--light-mode-mid-grey, var(--dark-mode-light-grey)) !important;
+      }
+    }
   }
-  span {
-    margin-left: -#{size_unit(1.5)} !important;
+  @media (max-width: $breakpoint-popup) {
+    gap: 20px;
+    justify-content: flex-start;
   }
+
+  .bannerIcon {
+    font-size: 20px;
+    color: var(--data-orange);
+  }
+}
+
+.nonsslTooltip {
+  max-width: 150px !important;
 }

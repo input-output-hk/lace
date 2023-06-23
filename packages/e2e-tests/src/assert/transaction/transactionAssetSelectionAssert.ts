@@ -5,16 +5,6 @@ import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 
 class TransactionAssetSelectionAssert {
-  assertSeeTokensButton = async (): Promise<void> => {
-    const tokenSelectionPage = new TokenSelectionPage();
-    await webTester.waitUntilSeeElement(tokenSelectionPage.tokensButton());
-  };
-
-  assertSeeNFTsButton = async (): Promise<void> => {
-    const tokenSelectionPage = new TokenSelectionPage();
-    await webTester.waitUntilSeeElement(tokenSelectionPage.nftsButton());
-  };
-
   async assertAssetIsPresentInTokenList(assetName: string, shouldBeVisible: boolean) {
     await (shouldBeVisible
       ? webTester.waitUntilSeeElement(new TokenSearchResult(assetName).container())
