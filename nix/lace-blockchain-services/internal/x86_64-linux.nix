@@ -109,7 +109,7 @@ in rec {
     passAsFile = [ "script" ];
   } ''
     mkdir -p $out
-    target=$out/lace-blockchain-services-${revShort}-x86_64-linux.bin
+    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.bin
     cat $scriptPath >$target
     echo 'Compressing (xz)...'
     tar -cJ -C ${lace-blockchain-services-bundle} . >>$target
@@ -117,7 +117,7 @@ in rec {
 
     # Make it downloadable from Hydra:
     mkdir -p $out/nix-support
-    echo "file binary-dist \"$(echo $out/*.bin)\"" >$out/nix-support/hydra-build-products
+    echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
   '';
 
 }
