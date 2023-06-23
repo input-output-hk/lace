@@ -47,6 +47,7 @@ export type StakingInfoCardProps = {
   onStakePoolSelect: () => void;
   popupView?: boolean;
   cardanoCoinSymbol: string;
+  markerColor: string;
 };
 
 export const StakingInfoCard = ({
@@ -67,6 +68,7 @@ export const StakingInfoCard = ({
   onStakePoolSelect,
   popupView,
   cardanoCoinSymbol,
+  markerColor,
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -75,14 +77,16 @@ export const StakingInfoCard = ({
     <div className={cn(styles.panel, { className, [styles.popupView!]: popupView })}>
       <div className={styles.row}>
         <div className={styles.col}>
-          <StakePoolInfo
-            logo={logo ?? getRandomIcon({ id: id.toString(), size: 30 })}
-            name={name}
-            ticker={ticker}
-            id={id}
-            onClick={onStakePoolSelect}
-            popupView
-          />
+          <div className={styles.marker} style={{ background: markerColor }} />
+          <div>
+            <StakePoolInfo
+              logo={logo ?? getRandomIcon({ id: id.toString(), size: 30 })}
+              name={name}
+              ticker={ticker}
+              id={id}
+              onClick={onStakePoolSelect}
+            />
+          </div>
         </div>
         <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
           <Stats

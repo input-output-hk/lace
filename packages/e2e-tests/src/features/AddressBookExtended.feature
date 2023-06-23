@@ -18,7 +18,19 @@ Feature: Address book - extended view
       | Name    |
       | Address |
 
+
   @LW-4464 @Smoke
+  Scenario: Extended-view - Address Book - Add new address "Shelley_manual"
+    Given I don't have any addresses added to my address book in extended mode
+    And I click "Add address" button
+    And I see Add new address form
+    And "browserView.addressBook.addressForm.saveAddress" button is disabled
+    When I fill "Shelley_manual" and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address details outside drawer
+    And I click "browserView.addressBook.addressForm.saveAddress" button
+    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    And I see address with name "Shelley_manual" and address "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" on the list
+
+  @LW-4464
   Scenario Outline: Extended-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button
@@ -31,7 +43,6 @@ Feature: Address book - extended view
     Examples:
       | wallet_name          | address                                                                                                            |
       | Byron_manual         | 37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp |
-      | Shelley_manual       | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja       |
       | Icarus_manual        | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf                                              |
       | 12345678901234567890 | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja       |
       | !@#$%^&*(){}:,./     | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja       |
@@ -86,7 +97,7 @@ Feature: Address book - extended view
     And I click "browserView.addressBook.deleteModal.buttons.cancel" button
     Then I see address detail page
 
-  @LW-4468
+  @LW-4468 @Smoke
   Scenario Outline: Extended-view - Address Book - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in extended mode
     And I click "Add address" button
@@ -148,8 +159,7 @@ Feature: Address book - extended view
       | empty                     | empty                                                                                                           | Name field is required           | Address field is required           |
       | "name followed by space " | invalid_address                                                                                                 | Name has unnecessary white space | Incorrect Cardano address           |
 
-  @LW-4567 @Pending
-  #BUG: LW-7056
+  @LW-4567
   Scenario Outline: Extended-view - Address Book - Edit address book entry - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"

@@ -61,6 +61,7 @@ export const Overview = () => {
         <Box key={item.id} mb={'$24'}>
           <StakingInfoCard
             {...item}
+            markerColor={item.color}
             cardanoCoinSymbol={'tADA'}
             onStakePoolSelect={() => console.log('onStakePoolSelect')}
           />

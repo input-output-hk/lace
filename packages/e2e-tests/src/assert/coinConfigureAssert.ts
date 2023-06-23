@@ -20,14 +20,16 @@ class CoinConfigureAssert {
 
   async assertSeeTokenSelectionPageButtons() {
     const tokenSelectionPage = new TokenSelectionPage();
-    await webTester.seeWebElement(tokenSelectionPage.tokensButton());
-    await webTester.seeWebElement(tokenSelectionPage.nftsButton());
+    await tokenSelectionPage.tokensButton.waitForDisplayed();
+    await tokenSelectionPage.nftsButton.waitForDisplayed();
+    await tokenSelectionPage.selectMultipleButton.waitForDisplayed();
 
-    await expect(await webTester.getTextValueFromElement(tokenSelectionPage.tokensCaption())).to.equal(
+    await expect(await tokenSelectionPage.tokensButton.getText()).to.equal(
       await t('browserView.sideMenu.links.tokens')
     );
-    await expect(await webTester.getTextValueFromElement(tokenSelectionPage.nftsCaption())).to.equal(
-      await t('browserView.sideMenu.links.nfts')
+    await expect(await tokenSelectionPage.nftsButton.getText()).to.equal(await t('browserView.sideMenu.links.nfts'));
+    await expect(await tokenSelectionPage.selectMultipleButton.getText()).to.equal(
+      await t('multipleSelection.selectMultiple')
     );
   }
 
