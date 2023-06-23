@@ -395,8 +395,8 @@ in rec {
       icon_path = defines.get("icon_path", "/non-existent.icns")
       app_name = os.path.basename(app_path)
 
-      # bzip2 (UDBZ) is 147 MiB, gzip (UDZO) is ……… (and much faster)
-      format = "UDZO"
+      # UDBZ (bzip2) is 154 MiB, while UDZO (gzip) is 204 MiB
+      format = "UDBZ"
       size = None
       files = [app_path]
       symlinks = {"Applications": "/Applications"}
