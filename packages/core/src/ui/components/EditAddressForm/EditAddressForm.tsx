@@ -1,11 +1,16 @@
-import React, { ReactElement } from 'react';
+/* eslint-disable react/no-multi-comp */
+/* eslint-disable no-magic-numbers */
+/* eslint-disable consistent-return */
+import React, { ReactElement, useMemo } from 'react';
 import cn from 'classnames';
-import { Form } from 'antd';
-import { Input, TextArea } from '@lace/common';
+import { Form, FormInstance } from 'antd';
+import { Input, Button, Search } from '@lace/common';
 import styles from './EditAddressForm.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-
-type ValidationOptionsProps<T extends string> = Record<T, (key: string) => string>;
+import debounce from 'debounce-promise';
+import { isHandle } from '@src/ui/utils';
+import { useTranslation } from 'react-i18next';
+import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 
 type valuesPropType = {
   id?: number;
@@ -13,45 +18,107 @@ type valuesPropType = {
   address?: string;
 };
 
-type FormKeys = keyof Omit<valuesPropType, 'id'>;
+const keys = ['name', 'address'];
+
+type ValidatorFn = (_rule: any, value: string) => Promise<void>;
+type ResolveAddressValidatorFn = (_rule: any, value: string, handleResolver: any) => Promise<void>;
+
+export type EditAddressFormFooterProps = {
+  form: FormInstance;
+  isNewAddress?: boolean;
+  onConfirmClick: (values: valuesPropType) => void;
+  onCancelClick: (event?: React.MouseEvent<HTMLButtonElement>) => void;
+  onClose?: () => void;
+};
 
 export type EditAddressFormProps = {
+  form: FormInstance;
   initialValues: valuesPropType;
-  validations: ValidationOptionsProps<FormKeys>;
-  setFormValues: (values: valuesPropType) => void;
-  getFieldError: (keys: FormKeys) => string;
-  footer?: ReactElement;
+  validations: any;
   translations: TranslationsFor<'walletName' | 'address'>;
+  footer?: React.ReactNode;
+};
+
+export const EditAddressFormFooter = ({
+  form,
+  isNewAddress,
+  onConfirmClick,
+  onCancelClick,
+  onClose
+}: EditAddressFormFooterProps) => {
+  const { t } = useTranslation();
+  const nameValue = Form.useWatch('name', form);
+  const addressValue = Form.useWatch('address', form);
+
+  const onSubmit = async () => {
+    try {
+      await onConfirmClick({ name: nameValue, address: addressValue });
+      if (onClose) onClose();
+    } catch {
+      // TODO: add nicer way to handle errors, console messega removed by QA request
+    } finally {
+      form.resetFields();
+    }
+  };
+
+  return (
+    <div className={styles.footer} data-testid="address-form-buttons">
+      <Form.Item shouldUpdate className={styles.submitBtn}>
+        {() => {
+          const hasErrors = form.getFieldsError(keys).some(({ errors }) => errors?.length);
+          const isValidating = form.isFieldsValidating(keys);
+          const isTouched = form.isFieldsTouched(keys, false);
+          const isFormValid = !hasErrors && !isValidating && isTouched;
+
+          return (
+            <Button block disabled={!isFormValid} onClick={onSubmit} data-testid="address-form-button-save">
+              {isNewAddress
+                ? t('browserView.addressBook.addressForm.saveAddress')
+                : t('core.editAddressForm.doneButton')}
+            </Button>
+          );
+        }}
+      </Form.Item>
+      <Button block color="secondary" onClick={onCancelClick} data-testid="address-form-button-cancel">
+        {t('core.general.cancelButton')}
+      </Button>
+    </div>
+  );
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getValidator = (validate: (val: string) => string) => (_rule: any, value: string) => {
-  const res = validate(value);
-  return !res ? Promise.resolve() : Promise.reject(res);
+const getValidator =
+  (validate: (val: any) => string): ValidatorFn =>
+  (_rule: any, value: string) => {
+    const res = validate(value);
+    return !res ? Promise.resolve() : Promise.reject(res);
+  };
+
+const getValidatorWithResolver = (
+  validate: (val: string, handleResolver: any) => Promise<string>
+): ResolveAddressValidatorFn => {
+  const debouncedValidate = debounce(validate, 1000); // Debounce the validate function
+
+  return async (_rule: any, value: string, handleResolver: any) => {
+    const res = await debouncedValidate(value, handleResolver); // Call the debounced validate function
+    return !res ? Promise.resolve() : Promise.reject(res);
+  };
 };
 
 export const EditAddressForm = ({
+  form,
   initialValues,
-  setFormValues,
   validations,
-  getFieldError,
-  footer,
-  translations
+  translations,
+  footer
 }: EditAddressFormProps): ReactElement => {
-  const [form] = Form.useForm();
-  const addressValidator = getValidator(validations.address);
-  const nameValidator = getValidator(validations.name);
+  const addressValue = Form.useWatch('address', form);
 
-  const validateOnBlur = (targetField: string, dependingField: 'name' | 'address') => {
-    const hasErrors = form.getFieldsError([dependingField])[0].errors.length > 0;
-    const isFieldNotEmpty = form.getFieldValue(dependingField)?.length > 0;
-    const shouldValidateField = isFieldNotEmpty && !hasErrors;
-    if (shouldValidateField) {
-      form.validateFields([targetField]);
-    }
-    const areFieldsEmpty = !form.getFieldValue('name') && !form.getFieldValue('address');
-    if (areFieldsEmpty) form.resetFields();
-  };
+  const nameValidator = getValidator(validations.name);
+  const addressValidator = getValidator(validations.address);
+  const handleValidator = useMemo(() => getValidatorWithResolver(validations.handle), [getValidatorWithResolver]);
+
+  const isAddressHandle = isHandle(addressValue);
 
   return (
     <Form
@@ -61,36 +128,56 @@ export const EditAddressForm = ({
       initialValues={initialValues}
       autoComplete="off"
       className={styles.form}
-      onValuesChange={(_val: string, values: valuesPropType) => setFormValues(values)}
     >
-      <div className={styles.body}>
-        <div>
-          <Form.Item name="name" rules={[{ validator: nameValidator }]} className={styles.inputWrapper}>
-            <Input
-              onBlur={() => validateOnBlur('name', 'address')}
-              className={styles.input}
-              label={translations.walletName}
-              dataTestId="address-form-name-input"
-            />
-          </Form.Item>
-          <Form.Item name="address" className={styles.inputWrapper} rules={[{ validator: addressValidator }]}>
-            <TextArea
-              onBlur={() => validateOnBlur('address', 'name')}
-              className={cn(styles.input, styles.textArea)}
-              wrapperClassName={styles.textAreaWrapper}
-              invalid={!!getFieldError('address') || undefined}
-              label={translations.address}
-              dataTestId="address-form-address-input"
-            />
-          </Form.Item>
-        </div>
-      </div>
-      {footer && (
-        <div className={styles.footerContainer}>
-          <div className={styles.border} />
-          {footer}
-        </div>
-      )}
+      {() => {
+        const isAddressFieldValid = form.getFieldError('address').length === 0;
+        const isAddressFieldValidating = form.isFieldValidating('address');
+
+        const renderSuffix = () => {
+          if (!isAddressHandle) return;
+          return isAddressFieldValid ? (
+            <CheckCircleOutlined className={styles.valid} />
+          ) : (
+            <CloseCircleOutlined className={styles.invalid} />
+          );
+        };
+
+        return (
+          <>
+            <div className={styles.body}>
+              <div>
+                <Form.Item name="name" rules={[{ validator: nameValidator }]} className={styles.inputWrapper}>
+                  <Input
+                    className={styles.input}
+                    label={translations.walletName}
+                    dataTestId="address-form-name-input"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="address"
+                  className={styles.inputWrapper}
+                  rules={[{ validator: isAddressHandle ? handleValidator : addressValidator }]}
+                >
+                  <Search
+                    className={cn(styles.input, styles.textArea)}
+                    invalid={!isAddressFieldValid}
+                    label={translations.address}
+                    dataTestId="address-form-address-input"
+                    customIcon={!isAddressFieldValidating && renderSuffix()}
+                    loading={isAddressFieldValidating}
+                  />
+                </Form.Item>
+              </div>
+            </div>
+            {footer && (
+              <div className={styles.footerContainer}>
+                <div className={styles.border} />
+                {footer}
+              </div>
+            )}
+          </>
+        );
+      }}
     </Form>
   );
 };

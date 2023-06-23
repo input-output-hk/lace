@@ -29,6 +29,10 @@
     gap: size_unit(2);
   }
 
+  :global(.ant-select-selection-search-input) {
+    padding: 0 6px 0 16px !important;
+  }
+
   .dropdownHeader {
     display: flex;
     justify-content: space-between;

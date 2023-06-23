@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
-import { AutoComplete, Input } from 'antd';
+import { AutoComplete, Input, InputRef } from 'antd';
 import classnames from 'classnames';
 import { wordListSearch } from '../../utils/word-list-search';
 import { MnemonicWordContainer } from '../WalletSetup/MnemonicWordContainer';
@@ -28,7 +28,7 @@ export const MnemonicWordsAutoComplete = ({
   focus = false
 }: MnemonicWordsAutoCompleteProps): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<Input>(null);
+  const inputRef = useRef<InputRef>(null);
   const [options, setOptions] = useState<Array<{ value: string; label: string }>>([]);
   const [isMaskVisible, setIsMaskVisible] = useState(false);
   const [pickedOption, setPickedOption] = useState<string | undefined>();

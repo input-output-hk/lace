@@ -40,6 +40,7 @@ export const AddressBook = withAddressBookContext(() => {
       action: AnalyticsEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_POPUP
     });
+
     return 'id' in addressToEdit
       ? updateAddress(addressToEdit.id, address, {
           text: translate('browserView.addressBook.toast.editAddress'),
@@ -123,7 +124,10 @@ export const AddressBook = withAddressBookContext(() => {
           setAddressToEdit({} as AddressBookSchema);
           setIsEditAddressVisible(false);
         }}
-        onConfirmClick={onAddressSave}
+        onConfirmClick={async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) => {
+          await onAddressSave(address);
+          setAddressToEdit({} as AddressBookSchema);
+        }}
         onDelete={(id) =>
           deleteAddress(id, {
             text: translate('browserView.addressBook.toast.deleteAddress'),

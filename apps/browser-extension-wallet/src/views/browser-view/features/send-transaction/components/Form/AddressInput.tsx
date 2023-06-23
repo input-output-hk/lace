@@ -3,7 +3,7 @@
 import { Typography } from 'antd';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import cn from 'classnames';
-import { DestinationAddressInput, getInputLabel } from '@lace/core';
+import { DestinationAddressInput, getInputLabel, isHandle } from '@lace/core';
 import { useAddressState, useCurrentRow, useSections } from '../../store';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
 import { useAddressBookStore } from '@src/features/address-book/store';
@@ -11,7 +11,7 @@ import {
   validateWalletName,
   validateWalletAddress,
   isValidAddressPerNetwork,
-  validateHandle
+  verifyHandle
 } from '@src/utils/validators';
 import { Sections } from '../..';
 import { sectionsConfig } from '../../constants';
@@ -85,19 +85,14 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           return;
         }
 
-        try {
-          const handleString = addressInputValue.toString();
-          const resolvedHandles = await handleResolver.resolveHandles({ handles: [handleString.slice(1)] });
+        const handleString = addressInputValue.toString();
 
-          if (resolvedHandles.length === 0) {
-            setHandleVerificationState(HandleVerificationState.INVALID);
-          } else {
-            setAddressValue(row, resolvedHandles[0].resolvedAddresses.cardano.toString(), handleString);
-            setHandleVerificationState(HandleVerificationState.VALID);
-          }
-        } catch (error) {
-          console.error('Error occurred during handle verification:', error);
+        const { handles, valid } = await verifyHandle(handleString, handleResolver);
+        if (!valid) {
           setHandleVerificationState(HandleVerificationState.INVALID);
+        } else {
+          setHandleVerificationState(HandleVerificationState.VALID);
+          setAddressValue(row, handles[0].resolvedAddresses.cardano.toString(), handleString);
         }
       }, 1000),
     [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
@@ -108,7 +103,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
       return;
     }
 
-    if (validateHandle(addressInputValue.toString())) {
+    if (isHandle(addressInputValue.toString())) {
       setHandleVerificationState(HandleVerificationState.VERIFYING);
       resolveHandle();
     } else {

@@ -1,17 +1,16 @@
 /* eslint-disable complexity */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { Button, toast, Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
-import { EditAddressForm, valuesPropType, ValidationOptionsProps, FormKeys } from '@lace/core';
-import { validateWalletName, validateWalletAddress } from '@src/utils/validators/address-book';
+import { EditAddressForm, EditAddressFormFooter, valuesPropType } from '@lace/core';
+import { validateWalletName, validateWalletAddress, validateWalletHandle } from '@src/utils/validators/address-book';
 import { AddressDetailsSteps, AddressDetailsConfig, AddressDetailsSectionConfig } from './types';
 import { DeleteAddressModal } from '../DeleteAddressModal';
 import styles from './AddressDetailDrawer.module.scss';
 import Copy from '@src/assets/icons/copy.component.svg';
 import Icon from '@ant-design/icons';
-import EditAddressFormFooter from '@src/features/address-book/components/AddressDetailDrawer/EditAddressFormFooter';
 import { useAnalyticsContext } from '@providers';
 import {
   AnalyticsEventActions,
@@ -19,6 +18,8 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useKeyboardShortcut } from '@hooks';
+import { useHandleResolver } from '@hooks/useAdaHandle';
+import { Form } from 'antd';
 
 const config: AddressDetailsConfig = {
   [AddressDetailsSteps.DETAIL]: {
@@ -35,11 +36,6 @@ type InitialValuesProps = {
   address?: string;
   id?: number;
   name?: string;
-};
-
-const validations: ValidationOptionsProps<FormKeys> = {
-  name: validateWalletName,
-  address: validateWalletAddress
 };
 
 export type AddressDetailDrawerProps = {
@@ -64,11 +60,23 @@ export const AddressDetailDrawer = ({
   const [stepsConfig, setStepsConfig] = useState<AddressDetailsSectionConfig>(
     config[initialValues?.id ? AddressDetailsSteps.DETAIL : AddressDetailsSteps.FORM]
   );
+  const [form] = Form.useForm<{ name: string; address: string }>();
+
+  const handleResolver = useHandleResolver();
+
+  const validations = useMemo(
+    () => ({
+      name: validateWalletName,
+      address: validateWalletAddress,
+      handle: async (value: string) => await validateWalletHandle(value, handleResolver)
+    }),
+    []
+  );
+
   useEffect(() => {
     setStepsConfig(config[initialValues?.id ? AddressDetailsSteps.DETAIL : AddressDetailsSteps.FORM]);
   }, [initialValues?.id]);
   const showArrowIcon = stepsConfig.currentSection === AddressDetailsSteps.FORM || popupView;
-  const [formValues, setFormValues] = useState<valuesPropType>(initialValues || {});
   const analytics = useAnalyticsContext();
 
   const editAddressFormTranslations = {
@@ -98,8 +106,6 @@ export const AddressDetailDrawer = ({
     }
     config[stepsConfig.prevSection] ? onArrowIconClick() : onClose();
   });
-
-  const getFieldError = (key: FormKeys) => validations[key]?.(formValues[key]);
 
   const handleOnCancelClick = () => {
     if (!popupView || initialValues?.id) {
@@ -142,6 +148,15 @@ export const AddressDetailDrawer = ({
         }
         footer={
           <>
+            {stepsConfig.currentSection === AddressDetailsSteps.FORM && (
+              <EditAddressFormFooter
+                form={form}
+                isNewAddress={popupView && !initialValues?.id}
+                onConfirmClick={onConfirmClick}
+                onCancelClick={handleOnCancelClick}
+                onClose={onClose}
+              />
+            )}
             {stepsConfig.currentSection === AddressDetailsSteps.DETAIL && (
               <div className={styles.footer}>
                 <Button
@@ -177,18 +192,6 @@ export const AddressDetailDrawer = ({
                   {t('browserView.addressBook.addressDetail.btn.delete')}
                 </Button>
               </div>
-            )}
-            {stepsConfig.currentSection === AddressDetailsSteps.FORM && (
-              <EditAddressFormFooter
-                validations={validations}
-                formValues={formValues}
-                onCancelClick={handleOnCancelClick}
-                onConfirmClick={onConfirmClick}
-                getFieldError={getFieldError}
-                onClose={onClose}
-                isNewAddress={popupView && !initialValues?.id}
-                currentName={initialValues?.name}
-              />
             )}
           </>
         }
@@ -239,10 +242,9 @@ export const AddressDetailDrawer = ({
             {stepsConfig.currentSection === AddressDetailsSteps.FORM && (
               <div className={styles.container} data-testid="address-form-container">
                 <EditAddressForm
+                  form={form}
                   {...{
                     initialValues,
-                    setFormValues,
-                    getFieldError,
                     validations
                   }}
                   translations={editAddressFormTranslations}
