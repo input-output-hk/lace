@@ -292,7 +292,7 @@ export default new (class NewTransactionExtendedPageObject {
   }
 
   async saveTransactionHash() {
-    const txHashValue = TransactionSubmittedPage.txHash.getText();
+    const txHashValue = await TransactionSubmittedPage.txHash.getText();
     Logger.log(`saving tx hash: ${txHashValue}`);
     testContext.save('txHashValue', txHashValue);
   }
