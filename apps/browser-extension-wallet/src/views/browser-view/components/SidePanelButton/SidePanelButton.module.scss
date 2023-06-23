@@ -2,7 +2,7 @@
   width: 20px;
   height: 20px;
   border: solid 2px var(--light-mode-dark-grey, var(--dark-mode-light-grey, #a9a9a9));
-  border-radius: 3px;
+  border-radius: 5px;
   position: relative;
   transition: all 0.25s ease-in-out;
 
@@ -28,11 +28,12 @@
   height: 20px;
   width: 8px;
   border: solid 2px var(--light-mode-dark-grey, var(--dark-mode-light-grey, #a9a9a9));
-  border-radius: 0 3px 3px 0;
-  background-color: var(--dark-mode-light-grey, #fff);
+  border-radius: 0 5px 5px 0;
+  background-color: var(--bg-color-body, #fff);
   position: absolute;
   top: -2px;
   right: -2px;
+  transition: background-color 0.25s ease-in-out;
 }
 
 .active {
