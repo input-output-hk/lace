@@ -16,9 +16,7 @@ Feature: Delegating funds to new pool E2E
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
-    Then The Transaction submitted screen is displayed:
-      | Title: "All done"                            |
-      | Subtitle: "The transaction will complete..." |
+    Then The Transaction submitted screen is displayed in extended mode
     When I close the drawer by clicking close button
     And I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "5.00 tADA" and tokens count 1
@@ -59,9 +57,7 @@ Feature: Delegating funds to new pool E2E
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
-    Then The Transaction submitted screen is displayed:
-      | Title: "All done"                            |
-      | Subtitle: "The transaction will complete..." |
+    Then The Transaction submitted screen is displayed in extended mode
     When I close the drawer by clicking close button
     And I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "5.00 tADA" and tokens count 1

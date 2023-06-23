@@ -10,12 +10,7 @@ Feature: Send NFT - Extended Browser View - E2E
   Scenario: Extended-view - Send NFT E2E
     And I'm sending an NFT with name: "Ibilecoin"
     When I enter correct password and confirm the transaction
-    Then The Transaction submitted screen is displayed:
-      | Title: "All done"                            |
-      | Subtitle: "The transaction will complete..." |
-      | Text: transaction hash                       |
-      | Button: "View transaction"                   |
-      | Button: "Close"                              |
+    Then The Transaction submitted screen is displayed in extended mode
     When I close the drawer by clicking close button
     And I navigate to Transactions extended page
     Then the Sent transaction is displayed with NFT name: "Ibilecoin" in extended mode

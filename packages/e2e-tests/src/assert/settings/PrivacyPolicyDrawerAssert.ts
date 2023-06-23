@@ -13,11 +13,11 @@ class PrivacyPolicyDrawerAssert {
   };
 
   assertSeeDrawerCloseButton = async () => {
-    await PrivacyPolicySettingsDrawer.closeButton.waitForDisplayed();
+    await PrivacyPolicySettingsDrawer.drawerHeaderCloseButton.waitForDisplayed();
   };
 
   assertSeeDrawerBackButton = async () => {
-    await PrivacyPolicySettingsDrawer.backButton.waitForDisplayed();
+    await PrivacyPolicySettingsDrawer.drawerHeaderBackButton.waitForDisplayed();
   };
 
   async assertSeePrivacyPolicyTitle() {

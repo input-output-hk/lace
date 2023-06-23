@@ -13,6 +13,7 @@ import testContext from '../utils/testContext';
 import extensionUtils from '../utils/utils';
 import { shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
+import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 
 export default new (class NewTransactionExtendedPageObject {
   fillAddress = async (address: string, index?: number) => {
@@ -288,5 +289,11 @@ export default new (class NewTransactionExtendedPageObject {
         await this.clickNFTsButton();
       }
     }
+  }
+
+  async saveTransactionHash() {
+    const txHashValue = TransactionSubmittedPage.txHash.getText();
+    Logger.log(`saving tx hash: ${txHashValue}`);
+    testContext.save('txHashValue', txHashValue);
   }
 })();

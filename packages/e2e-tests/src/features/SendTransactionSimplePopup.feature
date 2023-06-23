@@ -689,4 +689,4 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
     When I enter correct password and confirm the transaction
-    Then The Transaction error screen is displayed
+    Then The Transaction error screen is displayed in popup mode
