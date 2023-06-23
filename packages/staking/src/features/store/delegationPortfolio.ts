@@ -18,9 +18,9 @@ export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set
   updatePoolWeight: ({ poolId, weight }) =>
     set(
       produce((draft: Draft<DelegationPortfolioState>) => {
-        const poolIndex = draft.delegationPortfolioPools.findIndex((pool) => pool.id === poolId);
-        if (poolIndex === -1) return;
-        draft.delegationPortfolioPools[poolIndex]!.weight = weight;
+        const poolEntry = draft.delegationPortfolioPools.find((pool) => pool.id === poolId);
+        if (!poolEntry) return;
+        poolEntry.weight = weight;
       })
     ),
 }));

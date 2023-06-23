@@ -39,7 +39,7 @@ describe('delegationPortfolioStore', () => {
     act(() => result.current.addPoolToPortfolio(dummyPool2));
     act(() => result.current.removePoolFromPortfolio({ poolId: dummyPool1.id }));
     expect(result.current.delegationPortfolioPools.length).toEqual(1);
-    expect(result.current.delegationPortfolioPools[0]!.id).toEqual(dummyPool2.id);
+    expect(result.current.delegationPortfolioPools[0]?.id).toEqual(dummyPool2.id);
   });
 
   it('updates the weight of specific pool', async () => {
@@ -48,8 +48,8 @@ describe('delegationPortfolioStore', () => {
     act(() => result.current.addPoolToPortfolio(dummyPool1));
     act(() => result.current.addPoolToPortfolio(dummyPool2));
     act(() => result.current.updatePoolWeight({ poolId: dummyPool1.id, weight: 0.75 }));
-    expect(result.current.delegationPortfolioPools[0]!.weight).toEqual(newWeight);
-    expect(result.current.delegationPortfolioPools[1]!.weight).toEqual(dummyPool2.weight);
+    expect(result.current.delegationPortfolioPools[0]?.weight).toEqual(newWeight);
+    expect(result.current.delegationPortfolioPools[1]?.weight).toEqual(dummyPool2.weight);
   });
 
   it('clears the portfolio', () => {
