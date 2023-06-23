@@ -41,7 +41,7 @@ in rec {
   lace-blockchain-services = pkgs.runCommand "lace-blockchain-services" {
     meta.mainProgram = lace-blockchain-services-exe.name;
   } ''
-    mkdir -p $out/bin $out/libexec $out/share/lace-blockchain-services
+    mkdir -p $out/bin $out/libexec $out/share
     cp ${lace-blockchain-services-exe}/bin/* $out/bin/
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/

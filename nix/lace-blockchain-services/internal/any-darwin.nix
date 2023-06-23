@@ -40,7 +40,13 @@ in rec {
         ["yarn workspaces focus --all --production"]
         self.configurePhase;
       buildPhase = ":";
-      installPhase = "mkdir -p $out && cp -r node_modules $out/";
+      installPhase = let ourArch = if lib.hasInfix "aarch64" targetSystem then "arm64" else "x86_64"; in ''
+        mkdir -p $out
+        echo 'Getting rid of alien architectures…'
+        find node_modules -iname '*.node' | xargs -d'\n' file | grep -Evi 'Mach-O.*(${ourArch}|universal)' \
+          | cut -d: -f1 | xargs -d'\n' rm -v
+        cp -r node_modules $out/
+      '';
     };
 
     self = pkgs.stdenv.mkDerivation {
@@ -60,6 +66,7 @@ in rec {
         cp -r ${runtime-deps}/node_modules $out/
       '';
       passthru.nodejs = theirPackage.nodejs;
+      passthru.runtime-deps = runtime-deps;
     };
   in self;
 
