@@ -6,7 +6,7 @@ export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Pr
   const { inMemoryWallet } = useWalletStore();
   const { delegationTxBuilder } = useDelegationStore();
   const signAndSubmitTransaction = useCallback(async () => {
-    const signedTx = await delegationTxBuilder.delegatePortfiolio().build().sign();
+    const signedTx = await delegationTxBuilder.build().sign();
     await inMemoryWallet.submitTx(signedTx.tx);
   }, [delegationTxBuilder, inMemoryWallet]);
 
