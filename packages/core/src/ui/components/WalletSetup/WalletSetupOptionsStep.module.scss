@@ -4,9 +4,6 @@
 .walletSetupOptionsStep {
   padding: size_unit(8) size_unit(9);
   height: 100%;
-  @media (max-width: 400px) {
-    padding: size_unit(3);
-  }
   .content {
     display: flex;
     flex-direction: column;
@@ -41,11 +38,6 @@
   .options {
     display: flex;
     gap: size_unit(2);
-    @media (max-width: 400px) {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-    }
   }
   .separator {
     width: 1px;
