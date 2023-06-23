@@ -80,6 +80,7 @@ func main() {
 	fmt.Printf("%s[%d]: running as %s@%s\n", OurLogPrefix, os.Getpid(),
 		ourpaths.Username, hostInfo.Hostname)
 	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
+	fmt.Printf("%s[%d]: executable: %s\n", OurLogPrefix, os.Getpid(), ourpaths.ExecutablePath)
 	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), ourpaths.WorkDir)
 	fmt.Printf("%s[%d]: timezone: %s\n", OurLogPrefix, os.Getpid(), time.Now().Format("UTC-07:00 (MST)"))
 	fmt.Printf("%s[%d]: HostID: %s\n", OurLogPrefix, os.Getpid(), hostInfo.HostID)
