@@ -1039,7 +1039,9 @@
       "beta": "DApp connector Beta"
     },
     "authorizeDapp": {
-      "warning": "Only connect to trusted DApps"
+      "warning": "Only connect to trusted DApps",
+      "nonssl": "This site is unsecured",
+      "nonsslTooltip": "This site does not follow common web standards"
     },
     "dappTransaction": {
       "transaction": "Transaction",
@@ -1135,6 +1137,7 @@
     "walletSetupMnemonicStep": {
       "writePassphrase": "Write down your secret passphrase",
       "enterPassphrase": "Enter your secret passphrase",
+      "enterPassphraseDescription": "Please enter each word of your recovery phrase in the right order to verify it and recover your wallet.",
       "body": "Now let's check you've got the correct secret passphrase. Enter each word of your passphrase in the right order to verify it.",
       "passphraseInfo1": "Make sure you create an offline backup of your secret passphrase.",
       "passphraseInfo2": "Do not store your backup digitally.",
