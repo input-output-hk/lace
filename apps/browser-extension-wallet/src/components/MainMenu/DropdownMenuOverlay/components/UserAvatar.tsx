@@ -3,7 +3,8 @@ import React from 'react';
 import cn from 'classnames';
 import styles from '../DropdownMenuOverlay.module.scss';
 import { Image } from 'antd';
-import { useAdaHandle } from '@hooks';
+import { useGetHandles } from '@hooks';
+import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 
 interface UserAvatarProps {
   walletName: string;
@@ -11,12 +12,13 @@ interface UserAvatarProps {
 }
 
 export const UserAvatar = ({ walletName, isPopup }: UserAvatarProps): React.ReactElement => {
-  const handle = useAdaHandle();
+  const [handle] = useGetHandles();
+  const handleImage = handle?.nftMetadata?.image;
 
   return (
     <div className={cn(styles.userAvatar, { [styles.isPopup]: isPopup })} data-testid="user-avatar">
-      {handle?.image ? (
-        <Image src={handle?.image} className={styles.userAvatarImage} preview={false} />
+      {handleImage ? (
+        <Image src={getAssetImageUrl(handleImage)} className={styles.userAvatarImage} preview={false} />
       ) : (
         <span>{walletName[0]?.toUpperCase()}</span>
       )}
