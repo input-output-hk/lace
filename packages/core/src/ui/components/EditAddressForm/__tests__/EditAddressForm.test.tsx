@@ -14,8 +14,7 @@ describe('Testing AddressForm component', () => {
   const nameErrorText = 'name error';
   const addressErrorText = 'address error';
   const props: EditAddressFormProps = {
-    setFormValues: jest.fn(),
-    getFieldError: jest.fn(),
+    form: undefined,
     initialValues: {},
     validations: {
       name: jest.fn().mockReturnValue(nameErrorText),

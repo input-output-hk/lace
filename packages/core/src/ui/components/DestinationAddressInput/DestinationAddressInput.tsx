@@ -97,7 +97,7 @@ export const DestinationAddressInput = ({
     <Search
       className={classnames(className, styles.searchAddress)}
       value={typeof value === 'object' ? value.address : value}
-      inputPlaceholder={translations.recipientAddress}
+      label={translations.recipientAddress}
       onChange={onChange}
       options={options}
       loading={handle === 'verifying'}
