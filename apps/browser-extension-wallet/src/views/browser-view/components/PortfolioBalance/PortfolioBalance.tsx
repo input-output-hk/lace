@@ -90,14 +90,18 @@ const renderVariation = (variation: number | string, size: TextSize, popupView: 
     ]);
 
     return (
-      <h4 className={classnames([variationStyle, textSize])}>
+      <h4 className={classnames([variationStyle, textSize])} data-testid="portfolio-balance-variation">
         {variation > 0 && '+'}
         {variation}%
       </h4>
     );
   }
 
-  return <h4 className={classnames([styles.variation, textSize])}>{variation}</h4>;
+  return (
+    <h4 className={classnames([styles.variation, textSize])} data-testid="portfolio-balance-variation">
+      {variation}
+    </h4>
+  );
 };
 
 export const PortfolioBalance = ({
@@ -141,7 +145,11 @@ export const PortfolioBalance = ({
           )}
           {canManageBalancesVisibility && (
             <span className={styles.iconWrapper} onClick={handleOnClick}>
-              {areBalancesVisible ? <EyeIconInvisible className={styles.icon} /> : <EyeIcon className={styles.icon} />}
+              {areBalancesVisible ? (
+                <EyeIconInvisible className={styles.icon} data-testid="closed-eye-icon" />
+              ) : (
+                <EyeIcon className={styles.icon} data-testid="opened-eye-icon" />
+              )}
             </span>
           )}
         </label>

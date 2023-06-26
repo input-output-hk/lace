@@ -1,12 +1,12 @@
 import { GlobalProvider, ThemeState } from '@ladle/react';
-import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
-import React, { useMemo } from 'react';
+import React from 'react';
+import 'antd/dist/antd.css';
+import 'normalize.css';
+import '@lace/browser-extension-wallet/src/styles/index.scss';
+import { Setup } from '../src/features/staking/setup';
 
-export const Provider: GlobalProvider = ({ children, globalState }) => {
-  const isLightTheme = useMemo(() => globalState.theme === ThemeState.Light, [globalState.theme]);
-  return (
-    <ThemeProvider colorScheme={isLightTheme ? ThemeColorScheme.Light : ThemeColorScheme.Dark}>
-      {children}
-    </ThemeProvider>
-  );
-};
+export const Provider: GlobalProvider = ({ children, globalState }) => (
+  <div id={'lace-app'}>
+    <Setup theme={globalState.theme === ThemeState.Light ? 'light' : 'dark'}>{children}</Setup>
+  </div>
+);

@@ -38,6 +38,7 @@
     "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
     "markdown:lint:fix": "yarn markdown:lint --fix",
     "prepare": "husky install & ts-patch install -s",
+    "staking": "APP_NAME=staking yarn $1",
     "storybook": "ENV=development start-storybook -p 6006",
     "prestorybook:build": "yarn build",
     "storybook:build": "ENV=development build-storybook --log-level error",

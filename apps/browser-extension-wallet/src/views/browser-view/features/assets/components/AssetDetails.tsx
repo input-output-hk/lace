@@ -51,7 +51,7 @@ export const AssetDetails = ({
 
   return (
     <div className={classnames(styles.detailsContainer, popupView && styles.popupDetails)}>
-      <div data-testid="asset-price">
+      <div data-testid="token-price">
         <PortfolioBalance
           balance={fiatPrice}
           currencyCode={fiatPrice === '-' ? '' : fiatCode}
@@ -63,7 +63,7 @@ export const AssetDetails = ({
         />
       </div>
 
-      <div data-testid="asset-balance">
+      <div data-testid="token-balance">
         <PortfolioBalance
           balance={balance}
           currencyCode={code}
@@ -82,7 +82,13 @@ export const AssetDetails = ({
               {activityListTitle.title}
             </Text>
             {activityListTitle.clickLabel && (
-              <Button variant="text" color="primary" className={styles.viewAll} onClick={activityListTitle?.onClick}>
+              <Button
+                variant="text"
+                color="primary"
+                className={styles.viewAll}
+                onClick={activityListTitle?.onClick}
+                data-testid="view-all-button"
+              >
                 {activityListTitle.clickLabel}
               </Button>
             )}

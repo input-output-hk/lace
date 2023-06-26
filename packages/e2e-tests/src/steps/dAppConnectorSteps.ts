@@ -8,6 +8,7 @@ import ConfirmTransactionPage from '../elements/dappConnector/confirmTransaction
 import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
 import AllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
 import TestDAppPage from '../elements/dappConnector/testDAppPage';
+import WalletUnlockScreenAssert from '../assert/walletUnlockScreenAssert';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -20,14 +21,14 @@ When(/^I open test DApp$/, async () => {
 });
 
 Then(/^I see DApp authorization window$/, async () => {
-  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow();
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
 });
 
 Then(
   /^I see DApp connector "Confirm transaction" page with: "([^"]*)" and: "([^"]*)" assets$/,
   async (adaValue: string, assetValue: string) => {
-    await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow();
+    await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
 
     const expectedTransactionData: ExpectedTransactionData = {
       typeOfTransaction: 'Send',
@@ -40,12 +41,12 @@ Then(
 );
 
 Then(/^I see DApp connector "Sign transaction" page$/, async () => {
-  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow();
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeSignTransactionPage();
 });
 
 Then(/^I see DApp connector "All done" page$/, async () => {
-  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow();
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAllDonePage();
 });
 
@@ -56,6 +57,16 @@ Then(/^I don't see DApp window$/, async () => {
 
 Then(/^I see DApp connection modal$/, async () => {
   await DAppConnectorAssert.assertSeeDAppConnectionModal();
+});
+
+Then(/^I see DApp no wallet page$/, async () => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeNoWalletPage();
+});
+
+Then(/^I see DApp unlock page$/, async () => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await WalletUnlockScreenAssert.assertSeeWalletUnlockScreen();
 });
 
 Then(/^I see DApp removal confirmation modal$/, async () => {
@@ -70,6 +81,10 @@ Then(/^I click "(Always|Only once)" button in DApp authorization modal$/, async 
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(button);
 });
 
+When(/^I click "Create or restore a wallet" button in DApp no wallet modal$/, async () => {
+  await DAppConnectorPageObject.clickCreateRestoreButtonInDAppNoWalletModal();
+});
+
 Then(
   /^I click "(Back|Disconnect DApp)" button in DApp removal confirmation modal$/,
   async (button: 'Back' | 'Disconnect DApp') => {
@@ -77,9 +92,15 @@ Then(
   }
 );
 
-Then(/^I see Lace wallet info in DApp when not connected$/, async () => {
-  await DAppConnectorAssert.assertWalletFoundButNotConnectedInTestDApp();
-});
+Then(
+  /^I see Lace wallet info in DApp when (not connected|connected)$/,
+  async (isConnected: 'not connected' | 'connected') => {
+    await DAppConnectorPageObject.switchToTestDAppWindow();
+    isConnected === 'connected'
+      ? await DAppConnectorAssert.assertWalletFoundAndConnectedInTestDApp()
+      : await DAppConnectorAssert.assertWalletFoundButNotConnectedInTestDApp();
+  }
+);
 
 Then(/^I see "Authorized DApps" section empty state in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await DAppConnectorAssert.assertSeeAuthorizedDAppsEmptyState(mode);
@@ -97,7 +118,7 @@ Then(/^I see test DApp on the Authorized DApps list$/, async () => {
 When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async (mode: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.openTestDApp();
 
-  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow();
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow('Authorize');
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(mode);

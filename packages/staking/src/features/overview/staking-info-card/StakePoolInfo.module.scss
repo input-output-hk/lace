@@ -1,0 +1,57 @@
+@import '../../../../../../packages/common/src/ui/styles/theme.scss';
+
+@mixin text-overflow-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stakePool {
+  align-items: center;
+  border-radius: size_unit(3);
+  cursor: pointer;
+  display: flex;
+  height: size_unit(8);
+  padding: size_unit(1);
+  &:hover {
+    background: var(--light-mode-light-grey);
+  }
+  p {
+    margin-bottom: 0;
+  }
+  .logo {
+    background-color: var(--bg-color-body, #ffffff);
+    border: 0.5px solid var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+    border-radius: 50%;
+    height: size_unit(6);
+    padding: 4px;
+    margin-right: 20px;
+    width: size_unit(6);
+  }
+  .body {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+    width: 100%;
+    overflow: hidden;
+    .title {
+      color: var(--text-color-primary);
+      font-size: var(--body);
+      font-style: normal;
+      font-weight: bold;
+      line-height: size_unit(3);
+      & > * {
+        @include text-overflow-ellipsis;
+      }
+    }
+    .subTitle {
+      color: var(--text-color-secondary);
+      font-size: var(--bodySmall);
+      font-weight: normal;
+      line-height: size_unit(3);
+      & > * {
+        @include text-overflow-ellipsis;
+      }
+    }
+  }
+}

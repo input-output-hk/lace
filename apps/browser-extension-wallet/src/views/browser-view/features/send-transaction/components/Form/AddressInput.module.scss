@@ -10,16 +10,16 @@
   display: flex;
   position: relative;
   flex-direction: column;
+  height: 80px;
 }
 
 .errorParagraph {
   color: var(--data-pink) !important;
-  bottom: -#{size_unit(2)};
   font-size: var(--bodySmall);
   font-weight: 500;
   line-height: size_unit(2);
   margin-left: size_unit(3);
-  position: absolute;
+  padding: size_unit(1) 0;
   text-align: left;
 }
 

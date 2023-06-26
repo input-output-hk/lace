@@ -190,6 +190,14 @@ class TopNavigationAssert {
     await MenuHeader.menuWalletName.waitForDisplayed();
     await expect(await MenuHeader.menuWalletName.getText()).to.equal(expectedWalletName);
   }
+
+  async assertSeeRightSidePanelButton(shouldBeVisible: boolean) {
+    await MenuHeader.rightSidePanelButton.waitForDisplayed({ reverse: !shouldBeVisible });
+  }
+
+  assertSeeExpandedIcon = async (shouldSee: boolean) => {
+    await MenuHeader.logo.waitForDisplayed({ reverse: !shouldSee });
+  };
 }
 
 export default new TopNavigationAssert();

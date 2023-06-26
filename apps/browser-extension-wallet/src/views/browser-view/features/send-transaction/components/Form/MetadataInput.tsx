@@ -33,7 +33,10 @@ export const MetadataInput = (): React.ReactElement => {
         value={value}
         onChange={handleChange}
         suffix={
-          <div className={classnames(styles.suffixContent, { [styles.focus]: focused || value?.length > 0 })}>
+          <div
+            data-testid="metadata-input-suffix"
+            className={classnames(styles.suffixContent, { [styles.focus]: focused || value?.length > 0 })}
+          >
             <TextBoxItem iconClassName={styles.iconSize} onClick={handleClick} disabled={!value} />
           </div>
         }

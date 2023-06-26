@@ -18,3 +18,5 @@ export * from './useWalletInfoSubscriber';
 export * from './useStakingRewards';
 export * from './useMaxAda';
 export * from './useSyncingTheFirstTime';
+export * from './useGetHandles';
+export * from './useHandleResolver';

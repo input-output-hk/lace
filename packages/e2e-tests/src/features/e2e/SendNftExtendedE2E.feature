@@ -9,7 +9,7 @@ Feature: Send NFT - Extended Browser View - E2E
   @LW-2502 @Smoke
   Scenario: Extended-view - Send NFT E2E
     And I'm sending an NFT with name: "Ibilecoin"
-    When I fill correct password and confirm
+    When I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed:
       | Title: "All done"                            |
       | Subtitle: "The transaction will complete..." |

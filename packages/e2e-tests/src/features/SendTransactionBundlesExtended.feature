@@ -164,7 +164,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
   @LW-3560 @Pending
   # bug: LW-4698
   Scenario: Extended View - Validation of insufficient balance error
-    When I save token: "Cardano" balance in extended mode
+    When I save token: "Cardano" balance
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 1
@@ -180,7 +180,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
   @LW-4686 @Pending
   # FIXME: LW-6715
   Scenario: Extended View - Validation of insufficient balance error when assets value is equal to 0
-    When I save token: "Cardano" balance in extended mode
+    When I save token: "Cardano" balance
     And I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 101% of total "tADA" asset in bundle 1
@@ -206,18 +206,15 @@ Feature: Send - Extended Browser View (Advanced Tx)
     Then Token with name: "LaceCoin" is displayed in coin selector
 
   @LW-4731
-  Scenario: Extended view: Send - NFT can be added once for each bundle
+  Scenario: Extended view: Send - NFT is not displayed in coin selector if it was already added to bundle
     When I click "Send" button on page header
     And I click "Add bundle" button on "Send" page
     And I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
     And I click on NFT with name: "Ibilecoin"
-    And I click "Add token or NFT" button for bundle 1
-    And click on the NFTs button in the coin selector dropdown
-    And I close the drawer by clicking back button
     And I click "Add token or NFT" button for bundle 2
     And click on the NFTs button in the coin selector dropdown
-    Then NFT with name: "Ibilecoin" is displayed in coin selector
+    Then NFT with name: "Ibilecoin" is not displayed in coin selector
 
   @LW-3748
   Scenario: Extended-view - send maximum amount of a token available in the wallet by clicking MAX button
@@ -267,8 +264,8 @@ Feature: Send - Extended Browser View (Advanced Tx)
   @LW-1605 @LW-1606 @Pending
   #bug LW-5065
   Scenario: "Insufficient funds" error for extended view & advanced tx type - summing values for multiple assets
-    And I save token: "Cardano" balance in extended mode
-    And I save token: "LaceCoin" balance in extended mode
+    And I save token: "Cardano" balance
+    And I save token: "LaceCoin" balance
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 1
@@ -290,7 +287,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I set 2 bundles with the same assets
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    When I fill correct password and confirm
+    When I enter correct password and confirm the transaction
     Then The Transaction error screen is displayed:
       | Title: "Oops something went wrong!"                            |
       | Subtitle: "There was a problem submitting your transaction..." |

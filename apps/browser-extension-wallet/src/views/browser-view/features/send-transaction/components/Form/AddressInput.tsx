@@ -7,20 +7,16 @@ import { DestinationAddressInput, getInputLabel, isHandle } from '@lace/core';
 import { useAddressState, useCurrentRow, useSections } from '../../store';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
 import { useAddressBookStore } from '@src/features/address-book/store';
-import {
-  validateWalletName,
-  validateWalletAddress,
-  isValidAddressPerNetwork,
-  verifyHandle
-} from '@src/utils/validators';
+import { validateWalletName, validateWalletAddress, isValidAddressPerNetwork } from '@src/utils/validators';
 import { Sections } from '../..';
 import { sectionsConfig } from '../../constants';
 import styles from './AddressInput.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { Banner } from '@components/Banner';
-import { useHandleResolver } from '@hooks/useAdaHandle';
+import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
+import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
 const TEMP_ADDRESS = 'tempAddress';
 
@@ -66,6 +62,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
 
+  const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(addressInputValue.toString());
+
   const clearInput = useCallback(() => {
     setAddressInputValue('');
     setAddressValue(row, '');
@@ -75,6 +73,10 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const handleInputChange = (value?: string) => {
     setAddressInputValue(value);
     setAddressValue(row, value);
+
+    if (value.length === 0) {
+      setHandleVerificationState(undefined);
+    }
   };
 
   const resolveHandle = useMemo(
@@ -85,14 +87,19 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           return;
         }
 
-        const handleString = addressInputValue.toString();
+        try {
+          const handleString = addressInputValue.toString();
+          const resolvedHandles = await handleResolver.resolveHandles({ handles: [handleString.slice(1)] });
 
-        const { handles, valid } = await verifyHandle(handleString, handleResolver);
-        if (!valid) {
+          if (resolvedHandles.length === 0) {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          } else {
+            setAddressValue(row, resolvedHandles[0].resolvedAddresses.cardano.toString(), handleString);
+            setHandleVerificationState(HandleVerificationState.VALID);
+          }
+        } catch (error) {
+          console.error('Error occurred during handle verification:', error);
           setHandleVerificationState(HandleVerificationState.INVALID);
-        } else {
-          setHandleVerificationState(HandleVerificationState.VALID);
-          setAddressValue(row, handles[0].resolvedAddresses.cardano.toString(), handleString);
         }
       }, 1000),
     [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
@@ -103,7 +110,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
       return;
     }
 
-    if (isHandle(addressInputValue.toString())) {
+    if (isAddressInputValueHandle) {
       setHandleVerificationState(HandleVerificationState.VERIFYING);
       resolveHandle();
     } else {
@@ -197,12 +204,12 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         translations={destinationAddressInputTranslations}
         data-testid="address-input"
       />
-      {!isAddressInputValueValid && address && (
+      {!isAddressInputValueValid && !isAddressInputValueHandle && address && (
         <Text className={styles.errorParagraph} data-testid="address-input-error">
           {t('general.errors.incorrectAddress')}
         </Text>
       )}
-      {address && handleVerificationState === HandleVerificationState.INVALID && (
+      {isAddressInputValueHandle && handleVerificationState === HandleVerificationState.INVALID && (
         <Text className={styles.errorParagraph} data-testid="handle-input-error">
           {t('general.errors.incorrectHandle')}
         </Text>

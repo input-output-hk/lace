@@ -9,7 +9,7 @@ import { CancelEditAddressModal } from './CancelEditAddressModal';
 import AddIcon from '../../../../../assets/icons/add.component.svg';
 import EditIcon from '../../../../../assets/icons/edit.component.svg';
 import { validateWalletAddress, validateWalletHandle, validateWalletName } from '@src/utils/validators';
-import { useHandleResolver } from '@hooks/useAdaHandle';
+import { useHandleResolver } from '@hooks/useHandleResolver';
 import { Form } from 'antd';
 
 interface AddressFormProps {

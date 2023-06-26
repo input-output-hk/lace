@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { AddressFormBrowserView, valuesPropType } from '@lace/core';
 import { validateWalletName, validateWalletHandle, validateWalletAddress } from '@src/utils/validators/address-book';
 import { useTranslation } from 'react-i18next';
-import { useHandleResolver } from '@hooks/useAdaHandle';
+import { useHandleResolver } from '@hooks/useHandleResolver';
 
 type InitialValuesProps = {
   address?: string;

@@ -1,6 +1,8 @@
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 
+import classNames from 'classnames';
+
 import { Box } from '../box';
 
 import { cell } from './cell.css';
@@ -21,13 +23,20 @@ export type Props = PropsWithChildren<
 
 export const Cell = ({
   children,
+  className,
   colStart = '$auto',
   colEnd = '$auto',
   rowStart = '$auto',
   rowEnd = '$auto',
   ...props
 }: Readonly<Props>): JSX.Element => (
-  <Box {...props} className={cell({ colStart, colEnd, rowStart, rowEnd })}>
+  <Box
+    {...props}
+    className={classNames(
+      cell({ colStart, colEnd, rowStart, rowEnd }),
+      className,
+    )}
+  >
     {children}
   </Box>
 );

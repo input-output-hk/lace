@@ -5,6 +5,8 @@ import { AddressBookContext } from './context';
 import { addressBookQueries, AddressBookSchema, addressBookSchema, useDbState } from '@src/lib/storage';
 import { useWalletStore } from '@src/stores';
 import { Wallet } from '@lace/cardano';
+import { toast, ToastProps } from '@lace/common';
+import { hasAddressBookItem } from '@utils/validators';
 
 interface AddressBookProviderProps {
   children: React.ReactNode;
@@ -13,19 +15,44 @@ interface AddressBookProviderProps {
 
 export type AddressRecordParams = Pick<AddressBookSchema, 'address' | 'name'>;
 
+export const cardanoNetworkMap = {
+  Mainnet: Wallet.Cardano.NetworkMagics.Mainnet,
+  Preprod: Wallet.Cardano.NetworkMagics.Preprod,
+  Preview: Wallet.Cardano.NetworkMagics.Preview,
+  LegacyTestnet: Wallet.Cardano.NetworkMagics.Testnet
+};
+
+const handleRecordValidation = (list: AddressBookSchema[], record: AddressRecordParams) => {
+  const [hasError, toastParams] = hasAddressBookItem(list, record);
+  if (hasError) {
+    toast.notify(toastParams);
+    throw new Error(toastParams.text);
+  }
+};
+
 export const AddressBookProvider = ({ children, initialState }: AddressBookProviderProps): React.ReactElement => {
   const { environmentName } = useWalletStore();
-  const queries = useMemo(
-    () =>
-      addressBookQueries(
-        environmentName === 'Mainnet' ? Wallet.Cardano.NetworkId.Mainnet : Wallet.Cardano.NetworkId.Testnet
-      ),
-    [environmentName]
+  const queries = useMemo(() => addressBookQueries(cardanoNetworkMap[environmentName]), [environmentName]);
+  const { list, count, utils } = useDbState<AddressBookSchema, AddressRecordParams>(
+    initialState,
+    addressBookSchema,
+    queries
   );
+
+  const handleSaveAddress = async (record: AddressRecordParams, params: ToastProps) => {
+    handleRecordValidation(list, record);
+    return utils.saveRecord(record, params);
+  };
+
+  const handleUpdateAddress = async (id: number, record: AddressBookSchema, params: ToastProps) => {
+    const currentList = list.filter((data) => data.id !== id);
+    handleRecordValidation(currentList, record);
+    return utils.updateRecord(id, record, params);
+  };
 
   return (
     <AddressBookContext.Provider
-      value={useDbState<AddressBookSchema, AddressRecordParams>(initialState, addressBookSchema, queries)}
+      value={{ list, count, utils: { ...utils, saveRecord: handleSaveAddress, updateRecord: handleUpdateAddress } }}
     >
       {children}
     </AddressBookContext.Provider>

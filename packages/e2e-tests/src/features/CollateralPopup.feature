@@ -26,14 +26,17 @@ Feature: Collateral - popup view
     When I click on "Collateral" setting
     And I fill correct password and confirm collateral
     Then I see collateral as: "Active" in settings
+    When I navigate to Transactions popup page
+    Then I can see transaction 1 with type "Self Transaction"
     When I switch network to: "Preview" in popup mode
-    Given Wallet is synced
+    And Wallet is synced
+    When I am on Settings popup page
     Then I see collateral as: "Inactive" in settings
     When I click on "Collateral" setting
     Then all elements of Inactive collateral drawer are displayed
     And I close the drawer by clicking back button
     When I switch network to: "Preprod" in popup mode
-    Given Wallet is synced
+    And Wallet is synced
     Then I see collateral as: "Active" in settings
     When I click on "Collateral" setting
     Then all elements of Active collateral drawer are displayed

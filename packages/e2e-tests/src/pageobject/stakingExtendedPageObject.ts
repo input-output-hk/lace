@@ -1,30 +1,21 @@
 import webTester from '../actor/webTester';
-import { StakingPage } from '../elements/staking/stakingPage';
+import StakingPage from '../elements/staking/stakingPage';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import testContext from '../utils/testContext';
 import StakePoolDetails from '../elements/staking/stakePoolDetails';
+import StakingPasswordDrawer from '../elements/staking/StakingPasswordDrawer';
 
-export default new (class StakingExtendedPageObject {
-  fillSearch = async (term: string) => {
-    await browser.pause(500);
-    await webTester.fillComponent(new StakingPage().stakingPageSearchInput(), term);
-    await browser.pause(500);
-  };
-
-  async clickStakepoolWithName(poolName: string) {
-    await webTester.clickElement(new StakePoolListItem().tableRowWithName(poolName));
-  }
-
-  async clickStakepoolListHeader(listHeader: string) {
-    await webTester.scrollIntoView(new StakingPage().stakingPoolListColumnHeader(listHeader));
-    await webTester.clickElement(new StakingPage().stakingPoolListColumnHeader(listHeader));
+class StakingExtendedPageObject {
+  async clickStakePoolListHeader(listHeader: string) {
+    await StakingPage.stakingPoolListColumnHeader(listHeader).scrollIntoView();
+    await StakingPage.stakingPoolListColumnHeader(listHeader).click();
   }
 
   async revealAllStakePools(): Promise<void> {
     const stakePoolListItem = new StakePoolListItem();
     await webTester.waitUntilSeeElement(stakePoolListItem.container(), 6000);
 
-    const expectedTotalRows = Number((await new StakingPage().counter.getText()).replace(/\D/g, ''));
+    const expectedTotalRows = Number((await StakingPage.counter.getText()).replace(/\D/g, ''));
     let displayedRows = (await stakePoolListItem.getRows()).length;
 
     while (displayedRows < expectedTotalRows) {
@@ -57,7 +48,7 @@ export default new (class StakingExtendedPageObject {
     return columnContent;
   }
 
-  saveStakepoolInfo = async () => {
+  saveStakePoolInfo = async () => {
     const poolName = (await StakePoolDetails.poolName.getText()) as string;
     testContext.save('poolName', poolName);
     const poolTicker = (await StakePoolDetails.poolTicker.getText()) as string;
@@ -65,4 +56,11 @@ export default new (class StakingExtendedPageObject {
     const poolID = (await StakePoolDetails.poolId.getText()) as string;
     testContext.save('poolID', poolID);
   };
-})();
+
+  async confirmStaking() {
+    await StakingPasswordDrawer.confirmButton.waitForClickable();
+    await StakingPasswordDrawer.confirmButton.click();
+  }
+}
+
+export default new StakingExtendedPageObject();

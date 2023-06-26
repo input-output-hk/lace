@@ -1,16 +1,25 @@
 import i18n, { TFunction } from 'i18next';
 import { Wallet } from '@lace/cardano';
 import { ValidationResult } from '@types';
-import { HandleProvider, HandleResolution } from '@cardano-sdk/core';
+import { AddressBookSchema } from '@lib/storage';
+import { AddressRecordParams } from '@src/features/address-book/context';
+import { ToastProps } from '@lace/common';
+import { addressErrorMessage, nameErrorMessage } from '@lib/storage/helpers';
+import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
+import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
+import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
+import { HandleResolution } from '@cardano-sdk/core';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
+const ADA_HANDLE_PREFIX = '$';
+const ADA_HANDLE_THRESHOLD = 2;
 
 // prettier-ignore
 const hasWhiteSpace = (s: string) => s.trim() !== s;
 
 export const verifyHandle = async (
   value: string,
-  handleResolver: HandleProvider
+  handleResolver: KoraLabsHandleProvider
 ): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
   try {
     const handleString = value.toString();
@@ -55,7 +64,7 @@ export const validateWalletAddress = (address: string): string => {
   return !isValid ? i18n.t('browserView.addressBook.form.incorrectCardanoAddress') : '';
 };
 
-export const validateWalletHandle = async (value: string, handleResolver: HandleProvider): Promise<string> => {
+export const validateWalletHandle = async (value: string, handleResolver: KoraLabsHandleProvider): Promise<string> => {
   const res = (await verifyHandle(value, handleResolver)).handles;
   if (!res) {
     return i18n.t('general.errors.incorrectHandle');
@@ -71,6 +80,9 @@ export const validateAddressBookName = (value: string, translateFn: TFunction): 
         message: translateFn('addressBook.errors.nameTooLong', { maxLength: MAX_ADDRESS_BOOK_NAME_LENGTH })
       }
     : { valid: true };
+
+export const validateHandle = (value: string): boolean =>
+  value && value.charAt(0) === ADA_HANDLE_PREFIX && value.length > ADA_HANDLE_THRESHOLD;
 
 export const validateMainnetAddress = (address: string): boolean =>
   // is Shelley era mainnet address
@@ -95,3 +107,29 @@ export const isValidAddressPerNetwork = ({
   address: string;
   network: Wallet.Cardano.NetworkId;
 }): boolean => !address || validateAddrPerNetwork[network](address);
+
+export const hasAddressBookItem = (
+  list: AddressBookSchema[],
+  record: AddressRecordParams
+): [boolean, ToastProps | undefined] => {
+  const toastParams = { duration: TOAST_DEFAULT_DURATION, icon: ErrorIcon };
+  if (list.some((item) => item.name === record.name))
+    return [
+      true,
+      {
+        text: i18n.t(nameErrorMessage),
+        ...toastParams
+      }
+    ];
+
+  if (list.some((item) => item.address === record.address))
+    return [
+      true,
+      {
+        text: i18n.t(addressErrorMessage),
+        ...toastParams
+      }
+    ];
+
+  return [false, undefined];
+};

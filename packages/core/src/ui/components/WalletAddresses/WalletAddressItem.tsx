@@ -20,6 +20,7 @@ export type WalletAddressItemProps = {
   beforeEllipsis?: number;
   afterEllipsis?: number;
   isSmall?: boolean;
+  shouldUseEllipsisBeforeAndAfter?: boolean;
 };
 
 const defaultBeforeEllipsis = 8;
@@ -33,7 +34,8 @@ export const WalletAddressItem = ({
   beforeEllipsis = defaultBeforeEllipsis,
   afterEllipsis = defaultAfterEllipsis,
   className,
-  isSmall = false
+  isSmall = false,
+  shouldUseEllipsisBeforeAndAfter
 }: WalletAddressItemProps): React.ReactElement => (
   <div
     onClick={() => onClick({ id, name, address })}
@@ -52,14 +54,14 @@ export const WalletAddressItem = ({
         </div>
       </div>
     </div>
-    <div className={styles.listItemBlock}>
+    <div className={cn(styles.listItemBlock, styles.addressBox)}>
       <Ellipsis
         dataTestId="address-list-item-address"
         text={address}
         textClassName={cn(styles.addressColor, styles.textField)}
         className={cn(styles.listItemBlock, styles.listItemAddress)}
         withTooltip={false}
-        {...(isSmall
+        {...(isSmall || shouldUseEllipsisBeforeAndAfter
           ? {
               beforeEllipsis,
               afterEllipsis

@@ -46,7 +46,7 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
   Scenario: Popup-view - Send NFT - User enters invalid password
     Given I am on NFTs popup page
     And I'm sending an NFT with name: "Ibilecoin"
-    When I fill incorrect password and confirm
+    When I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
   @LW-4373

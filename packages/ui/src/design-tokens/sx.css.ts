@@ -1,6 +1,6 @@
 import { defineProperties, createSprinkles } from '@vanilla-extract/sprinkles';
 
-import { vars } from './theme.css';
+import { vars } from './theme';
 
 const responsiveProperties = defineProperties({
   conditions: {
@@ -19,7 +19,7 @@ const responsiveProperties = defineProperties({
     'xLargeScreen',
   ],
   properties: {
-    display: ['none', 'flex', 'block', 'inline', 'inline-block'],
+    display: ['none', 'flex', 'block', 'inline', 'inline-block', 'grid'],
     flexDirection: ['row', 'column'],
     justifyContent: [
       'stretch',
