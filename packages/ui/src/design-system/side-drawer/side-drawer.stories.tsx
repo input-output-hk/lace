@@ -7,7 +7,7 @@ import { within, userEvent, waitFor, screen } from '@storybook/testing-library';
 import MediaQuery from 'react-responsive';
 
 import cardanoImage from '../../assets/images/cardano-blue-bg.png';
-import { ThemeColorScheme, ThemeProvider, sx } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider, sx } from '../../design-tokens';
 import { sleep } from '../../test';
 import { Box } from '../box';
 import * as Buttons from '../buttons';
@@ -381,7 +381,7 @@ export const Overview = ({ onBackClick, onCloseClick }: Props): JSX.Element => (
             </Variants.Row>
           </Variants.Table>
 
-          <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+          <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
             <Variants.Table>
               <Variants.Row>
                 <Variants.Cell>
@@ -394,7 +394,7 @@ export const Overview = ({ onBackClick, onCloseClick }: Props): JSX.Element => (
                 </Variants.Cell>
               </Variants.Row>
             </Variants.Table>
-          </ThemeProvider>
+          </LocalThemeProvider>
         </Section>
       </Cell>
     </Grid>
