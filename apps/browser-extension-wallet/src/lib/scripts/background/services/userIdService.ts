@@ -40,7 +40,6 @@ class UserIdService implements UserIdServiceInterface {
     console.debug('[ANALYTICS] Converting user ID into temporary');
     await setBackgroundStorage({ usePersistentUserId: false, userId: undefined });
     this.#setSessionTimeout();
-    return Promise.resolve();
   }
 
   async extendLifespan() {

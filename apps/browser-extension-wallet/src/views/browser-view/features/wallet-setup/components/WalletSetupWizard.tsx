@@ -75,7 +75,7 @@ export const WalletSetupWizard = ({
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<CreateWalletData | undefined>();
-  const [isAnalyticsAccepted, setSsAnalyticsAccepted] = useState(false);
+  const [isAnalyticsAccepted, setIsAnalyticsAccepted] = useState(false);
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [walletIsCreating, setWalletIsCreating] = useState(false);
@@ -223,7 +223,7 @@ export const WalletSetupWizard = ({
   );
 
   const handleAnalyticsChoice = (isAccepted: boolean) => {
-    setSsAnalyticsAccepted(isAccepted);
+    setIsAnalyticsAccepted(isAccepted);
     analytics.setOptedInForEnhancedAnalytics(
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );

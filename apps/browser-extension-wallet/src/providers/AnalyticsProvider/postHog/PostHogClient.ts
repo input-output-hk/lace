@@ -60,9 +60,9 @@ export class PostHogClient {
     const payload = {
       ...this.getEventMetadata(),
       ...properties,
-      // TODO: check if it works
       distinct_id: await this.userIdService.getId()
     };
+
     console.debug('[ANALYTICS] Logging event to PostHog', action, payload);
     posthog.capture(String(action), payload);
   };
