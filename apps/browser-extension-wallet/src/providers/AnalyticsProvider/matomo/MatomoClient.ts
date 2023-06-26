@@ -1,62 +1,54 @@
 /* eslint-disable camelcase */
 import MatomoTracker from 'matomo-tracker';
-import randomBytes from 'randombytes';
 import { Wallet } from '@lace/cardano';
-import { AnalyticsClient, EnhancedAnalyticsOptInStatus, Metadata, SendEventProps } from '../analyticsTracker/types';
-import { ANALYTICS_API_ENDPOINT, NETWORK_ID_TO_ANALYTICS_SITE_ID_MAP } from './config';
+import { Metadata, SendEventProps } from '../analyticsTracker/types';
+import { MATOMO_API_ENDPOINT, NETWORK_ID_TO_ANALYTICS_SITE_ID_MAP } from './config';
+import { UserIdService } from '@lib/scripts/types';
 
 /**
  * Matomo API reference:
  * https://developer.matomo.org/api-reference/tracking-api
  */
-export class MatomoClient implements AnalyticsClient {
+export class MatomoClient {
   private matomoTracker: typeof MatomoTracker;
-  userId: string;
 
-  constructor(chain: Wallet.Cardano.ChainId, private enhancedAnalyticsOptInStatus?: EnhancedAnalyticsOptInStatus) {
-    this.userId = this.getUserId();
-    if (!ANALYTICS_API_ENDPOINT) throw new Error('MATOMO_API_ENDPOINT url has not been provided');
-    this.matomoTracker = new MatomoTracker(this.getMatomoSiteId(chain), ANALYTICS_API_ENDPOINT);
+  constructor(chain: Wallet.Cardano.ChainId, private userIdService: UserIdService) {
+    if (!MATOMO_API_ENDPOINT) throw new Error('MATOMO_API_ENDPOINT url has not been provided');
+    this.matomoTracker = new MatomoTracker(this.getMatomoSiteId(chain), MATOMO_API_ENDPOINT);
   }
 
-  // TODO: implement with new requirements, provide one common, global implementation (in background service?)
-  getUserId(): string {
-    console.debug(`Analytics opt in status: ${this.enhancedAnalyticsOptInStatus}`);
-    // eslint-disable-next-line no-magic-numbers
-    return randomBytes(8).toString('hex');
-  }
-
-  getMetadata(): Metadata {
+  async getMetadata(): Promise<Metadata> {
     return {
-      _id: this.userId,
+      _id: await this.userIdService.getId(),
       url: this.getAnalyticsURL()
     };
   }
 
-  sendPageNavigationEvent = (pageTitle: string): void => {
+  sendPageNavigationEvent = async (pageTitle: string): Promise<void> => {
+    console.debug('[ANALYTICS] Logging page navigation event to Matomo', pageTitle);
     this.matomoTracker.track({
-      ...this.getMetadata(),
+      ...(await this.getMetadata()),
       action_name: pageTitle
     });
   };
 
-  sendEvent = ({ category, action, name, value }: SendEventProps): void => {
-    this.matomoTracker.track({
-      ...this.getMetadata(),
+  sendEvent = async ({ category, action, name, value }: SendEventProps): Promise<void> => {
+    const payload = {
+      ...(await this.getMetadata()),
       ca: 1,
       e_c: category,
       e_a: action,
       e_n: name,
       e_v: value
-    });
+    };
+    console.debug('[ANALYTICS] Logging event to Matomo', payload);
+    this.matomoTracker.track(payload);
   };
 
-  setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): void {
-    this.enhancedAnalyticsOptInStatus = status;
-  }
-
-  setSiteId(chain: Wallet.Cardano.ChainId): void {
-    this.matomoTracker = new MatomoTracker(this.getMatomoSiteId(chain), ANALYTICS_API_ENDPOINT);
+  setChain(chain: Wallet.Cardano.ChainId): void {
+    const siteId = this.getMatomoSiteId(chain);
+    console.debug('[ANALYTICS] Changing Matomo site ID', siteId);
+    this.matomoTracker = new MatomoTracker(siteId, MATOMO_API_ENDPOINT);
   }
 
   private getAnalyticsURL() {

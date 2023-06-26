@@ -1,10 +1,10 @@
-import { Wallet } from '@lace/cardano';
-
+// TODO: rename to MatomoEventActions (https://input-output.atlassian.net/browse/LW-7197)
 export enum AnalyticsEventActions {
   CLICK_EVENT = 'click-event',
   HOVER_EVENT = 'hover-event'
 }
 
+// TODO: rename to MatomoEventCategories (https://input-output.atlassian.net/browse/LW-7197)
 export enum AnalyticsEventCategories {
   SEND_TRANSACTION = 'send-transaction',
   WALLET_CREATE = 'wallet-create',
@@ -17,6 +17,7 @@ export enum AnalyticsEventCategories {
   STAKING = 'staking'
 }
 
+// TODO: rename to MatomoSendEventProps (https://input-output.atlassian.net/browse/LW-7197)
 export type SendEventProps = {
   category: AnalyticsEventCategories;
   action: AnalyticsEventActions;
@@ -24,11 +25,8 @@ export type SendEventProps = {
   value?: number;
 };
 
-export interface AnalyticsClient {
-  sendPageNavigationEvent(href: string): void;
-  sendEvent(props: SendEventProps): void;
-  setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): void;
-  setSiteId(chain: Wallet.Cardano.ChainId): void;
+export enum PostHogAction {
+  ActionName = 'flow | subflow | view | object | interaction'
 }
 
 export enum EnhancedAnalyticsOptInStatus {

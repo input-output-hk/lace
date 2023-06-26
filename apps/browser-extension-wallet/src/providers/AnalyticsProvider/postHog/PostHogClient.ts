@@ -1,85 +1,94 @@
 /* eslint-disable camelcase */
 import posthog from 'posthog-js';
-import randomBytes from 'randombytes';
 import { Wallet } from '@lace/cardano';
-import { AnalyticsClient, EnhancedAnalyticsOptInStatus, Metadata, SendEventProps } from '../analyticsTracker';
+import { EnhancedAnalyticsOptInStatus, Metadata, PostHogAction } from '../analyticsTracker';
 import {
   BASIC_ANALYTICS_CONFIG,
   ENHANCED_ANALYTICS_CONFIG,
   NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PUBLIC_POSTHOG_HOST
 } from './config';
+import { UserIdService } from '@lib/scripts/types';
 
 /**
  * PostHog API reference:
  * https://posthog.com/docs/libraries/js
  */
-export class PostHogClient implements AnalyticsClient {
-  userId: string;
+export class PostHogClient {
+  private initialized: false;
 
-  constructor(chain: Wallet.Cardano.ChainId, enhancedAnalyticsOptInStatus?: EnhancedAnalyticsOptInStatus) {
-    this.userId = this.getUserId();
-    posthog.init(this.getApiToken(chain), {
+  constructor(
+    private chain: Wallet.Cardano.ChainId,
+    private userIdService: UserIdService,
+    private enhancedAnalyticsOptInStatus?: EnhancedAnalyticsOptInStatus
+  ) {}
+
+  async init(): Promise<void> {
+    if (!PUBLIC_POSTHOG_HOST) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+
+    posthog.init(this.getApiToken(this.chain), {
       api_host: PUBLIC_POSTHOG_HOST,
       autocapture: false,
       disable_session_recording: true,
       capture_pageview: false,
       capture_pageleave: false,
-      bootstrap: {
-        distinctID: this.userId
-      },
       disable_compression: true,
-      ...(enhancedAnalyticsOptInStatus === EnhancedAnalyticsOptInStatus.OptedIn
+      ...(this.enhancedAnalyticsOptInStatus === EnhancedAnalyticsOptInStatus.OptedIn
         ? ENHANCED_ANALYTICS_CONFIG
         : BASIC_ANALYTICS_CONFIG)
     });
   }
 
-  // TODO: implement with new requirements, provide one common, global implementation (in background service?)
-  getUserId(): string {
-    // eslint-disable-next-line no-magic-numbers
-    return randomBytes(8).toString('hex');
-  }
+  sendPageNavigationEvent = async (pageTitle: string): Promise<void> => {
+    if (!this.initialized) {
+      await this.init();
+    }
 
-  getEventMetadata(): Metadata {
-    return {
-      url: this.getAnalyticsURL()
-    };
-  }
+    console.debug('[ANALYTICS] Logging page navigation event to PostHog', pageTitle);
 
-  sendPageNavigationEvent = (pageTitle: string): void => {
     posthog.capture('pageview', {
       ...this.getEventMetadata(),
       action_name: pageTitle
     });
   };
 
-  sendEvent = ({ category, action, name, value }: SendEventProps): void => {
-    posthog.capture(action, {
+  sendEvent = async (action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> => {
+    if (!this.initialized) {
+      await this.init();
+    }
+
+    const payload = {
       ...this.getEventMetadata(),
-      e_c: category,
-      e_n: name,
-      e_v: value
-    });
+      ...properties,
+      // TODO: check if it works
+      distinct_id: await this.userIdService.getId()
+    };
+    console.debug('[ANALYTICS] Logging event to PostHog', action, payload);
+    posthog.capture(String(action), payload);
   };
 
   setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): void {
+    console.debug('[ANALYTICS] Setting opt in status for PostHog', status);
     posthog.set_config(
       status === EnhancedAnalyticsOptInStatus.OptedIn ? ENHANCED_ANALYTICS_CONFIG : BASIC_ANALYTICS_CONFIG
     );
   }
 
-  setSiteId(chain: Wallet.Cardano.ChainId): void {
+  setChain(chain: Wallet.Cardano.ChainId): void {
+    const token = this.getApiToken(chain);
+    console.debug('[ANALYTICS] Changing PostHog API token', token);
     posthog.set_config({
-      token: this.getApiToken(chain)
+      token
     });
   }
 
-  private getAnalyticsURL() {
-    return `http://lace/${window.location.hash.replace('#/', '')}`;
+  protected getApiToken(chain: Wallet.Cardano.ChainId): string {
+    return NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
   }
 
-  protected getApiToken(chain: Wallet.Cardano.ChainId): string {
-    return NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkId];
+  protected getEventMetadata(): Metadata {
+    return {
+      url: window.location.href
+    };
   }
 }

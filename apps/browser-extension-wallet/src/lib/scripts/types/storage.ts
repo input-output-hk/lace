@@ -27,7 +27,10 @@ export interface BackgroundStorage {
   mnemonic?: string;
   keyAgentsByChain?: Wallet.KeyAgentsByChain;
   fiatPrices?: { prices: ADAPrices; timestamp: number };
+  userId?: string;
+  usePersistentUserId?: boolean;
 }
+
 export type BackgroundStorageKeys = keyof BackgroundStorage;
 
 // TODO: Improve use of extension storage (get/set). We have keys all over the place [LW-6495]

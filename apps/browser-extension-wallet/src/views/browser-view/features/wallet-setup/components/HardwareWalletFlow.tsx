@@ -57,7 +57,7 @@ export const HardwareWalletFlow = ({
   const history = useHistory();
   const location = useLocation();
   const { t } = useTranslation();
-  const [isAnalyticsAccepted, setSsAnalyticsAccepted] = useState(false);
+  const [isAnalyticsAccepted, setIsAnalyticsAccepted] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [hardwareWalletErrorCode, setHardwareWalletErrorCode] = useState<HWErrorCode>('common');
   const [isStartOverDialogVisible, setIsStartOverDialogVisible] = useState(false);
@@ -141,7 +141,7 @@ export const HardwareWalletFlow = ({
   );
 
   const handleAnalyticsChoice = (isAccepted: boolean) => {
-    setSsAnalyticsAccepted(isAccepted);
+    setIsAnalyticsAccepted(isAccepted);
     analytics.setOptedInForEnhancedAnalytics(
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
