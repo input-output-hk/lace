@@ -4,6 +4,7 @@ import { borders } from '../borders.data';
 import { colors } from '../colors.data';
 import { elevation } from '../elevation.data';
 import { opacities } from '../opacities.data';
+import { positions } from '../position.data';
 import { radius } from '../radius.data';
 import { spacing } from '../spacing.data';
 import {
@@ -24,6 +25,7 @@ export const vars = createThemeContract({
   radius,
   elevation,
   opacities,
+  positions,
 });
 
 export type Theme = typeof vars;

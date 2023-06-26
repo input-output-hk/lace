@@ -8,6 +8,7 @@ import {
   lightColorScheme,
 } from '../colors.data';
 import { opacities } from '../opacities.data';
+import { positions } from '../position.data';
 import { radius } from '../radius.data';
 import { spacing } from '../spacing.data';
 import {
@@ -217,4 +218,5 @@ export const lightTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
+  positions,
 });

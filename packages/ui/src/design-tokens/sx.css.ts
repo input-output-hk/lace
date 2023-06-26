@@ -76,6 +76,12 @@ const responsiveProperties = defineProperties({
   },
 });
 
+const layoutProperties = defineProperties({
+  properties: {
+    position: vars.positions,
+  },
+});
+
 const typographyProperties = defineProperties({
   properties: {
     fontSize: vars.fontSizes,
@@ -121,6 +127,7 @@ export const sx = createSprinkles(
   radiusProperties,
   elevationProperties,
   opacityProperties,
+  layoutProperties,
 );
 
 export type Sx = Parameters<typeof sx>[0];
