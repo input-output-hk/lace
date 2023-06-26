@@ -114,11 +114,12 @@ Then(
 
 Then(/^I see "Wallet Address" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await walletAddressPageAssert.assertSeeWalletAddressPage(mode);
-  await walletAddressPageAssert.assertSeeWalletNameAndAddress(getTestWallet(TestWalletName.TestAutomationWallet));
+  await walletAddressPageAssert.assertSeeWalletNameAndAddress(getTestWallet(TestWalletName.TestAutomationWallet), mode);
 });
 
 When(/^I click "Copy" button on "Wallet Address" page$/, async () => {
-  await walletAddressPage.copyButton.waitForClickable();
+  await walletAddressPage.addressCard.scrollIntoView();
+  await walletAddressPage.addressCard.moveTo();
   await walletAddressPage.copyButton.click();
 });
 
