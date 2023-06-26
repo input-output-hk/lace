@@ -14,6 +14,13 @@ export type DappInfo = {
   url: string;
 };
 
+export type CoinId = {
+  id: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+};
+
 export enum TransactionStatus {
   SUCCESS = 'success',
   PENDING = 'sending',
