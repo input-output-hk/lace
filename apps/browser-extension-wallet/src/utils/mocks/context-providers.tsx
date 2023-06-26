@@ -76,7 +76,7 @@ export const buildMockProviders = async (
                 >
                   <CurrencyStoreProvider>
                     <AxiosClientProvider>
-                      <AnalyticsProvider featureEnabled={false}>
+                      <AnalyticsProvider trackingDisabled>
                         <ExternalLinkOpenerProvider>
                           <HashRouter>{children}</HashRouter>
                         </ExternalLinkOpenerProvider>

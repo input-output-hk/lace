@@ -1,3 +1,5 @@
+import { Wallet } from '@lace/cardano';
+
 export enum AnalyticsEventActions {
   CLICK_EVENT = 'click-event',
   HOVER_EVENT = 'hover-event'
@@ -15,7 +17,7 @@ export enum AnalyticsEventCategories {
   STAKING = 'staking'
 }
 
-export type sendEventProps = {
+export type SendEventProps = {
   category: AnalyticsEventCategories;
   action: AnalyticsEventActions;
   name: string;
@@ -24,13 +26,14 @@ export type sendEventProps = {
 
 export interface AnalyticsClient {
   sendPageNavigationEvent(href: string): void;
-  sendEvent(props: sendEventProps): void;
-  toogleCookies?(isEnabled: boolean): void;
+  sendEvent(props: SendEventProps): void;
+  setOptedInForEnhancedTracking(status: EnhancedAnalyticsOptInStatus): void;
+  setSiteId(chain: Wallet.Cardano.ChainId): void;
 }
 
-export enum AnalyticsConsentStatus {
-  ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED'
+export enum EnhancedAnalyticsOptInStatus {
+  OptedIn = 'ACCEPTED',
+  OptedOut = 'REJECTED'
 }
 
 export type Metadata = {

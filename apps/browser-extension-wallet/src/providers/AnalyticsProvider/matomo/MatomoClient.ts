@@ -2,8 +2,8 @@
 import MatomoTracker from 'matomo-tracker';
 import randomBytes from 'randombytes';
 import { Wallet } from '@lace/cardano';
-import { AnalyticsConsentStatus, AnalyticsClient, Metadata, sendEventProps } from './types';
-import { ANALYTICS_API_ENDPOINT, NETWORK_TO_ANALYTICS_SITE_ID_MAP } from './config';
+import { AnalyticsClient, EnhancedAnalyticsOptInStatus, Metadata, SendEventProps } from '../analyticsTracker/types';
+import { ANALYTICS_API_ENDPOINT, NETWORK_ID_TO_ANALYTICS_SITE_ID_MAP } from './config';
 
 /**
  * Matomo API reference:
@@ -11,25 +11,23 @@ import { ANALYTICS_API_ENDPOINT, NETWORK_TO_ANALYTICS_SITE_ID_MAP } from './conf
  */
 export class MatomoClient implements AnalyticsClient {
   private matomoTracker: typeof MatomoTracker;
-  private allowCookies: boolean;
   userId: string;
 
-  constructor(chain: Wallet.Cardano.ChainId, analyticsAccepted?: AnalyticsConsentStatus) {
+  constructor(chain: Wallet.Cardano.ChainId, private enhancedAnalyticsOptInStatus?: EnhancedAnalyticsOptInStatus) {
     this.userId = this.getUserId();
-    this.allowCookies = analyticsAccepted === AnalyticsConsentStatus.ACCEPTED;
     if (!ANALYTICS_API_ENDPOINT) throw new Error('MATOMO_API_ENDPOINT url has not been provided');
     this.matomoTracker = new MatomoTracker(this.getMatomoSiteId(chain), ANALYTICS_API_ENDPOINT);
   }
 
-  // according to the docs _id must be a 16 characters hexadecimal string and address is bech32 format
+  // TODO: implement with new requirements, provide one common, global implementation (in background service?)
   getUserId(): string {
+    console.debug(`Analytics opt in status: ${this.enhancedAnalyticsOptInStatus}`);
     // eslint-disable-next-line no-magic-numbers
     return randomBytes(8).toString('hex');
   }
 
   getMetadata(): Metadata {
     return {
-      ...(this.allowCookies && { cookie: 1 }),
       _id: this.userId,
       url: this.getAnalyticsURL()
     };
@@ -42,7 +40,7 @@ export class MatomoClient implements AnalyticsClient {
     });
   };
 
-  sendEvent = ({ category, action, name, value }: sendEventProps): void => {
+  sendEvent = ({ category, action, name, value }: SendEventProps): void => {
     this.matomoTracker.track({
       ...this.getMetadata(),
       ca: 1,
@@ -53,15 +51,19 @@ export class MatomoClient implements AnalyticsClient {
     });
   };
 
+  setOptedInForEnhancedTracking(status: EnhancedAnalyticsOptInStatus): void {
+    this.enhancedAnalyticsOptInStatus = status;
+  }
+
+  setSiteId(chain: Wallet.Cardano.ChainId): void {
+    this.matomoTracker = new MatomoTracker(this.getMatomoSiteId(chain), ANALYTICS_API_ENDPOINT);
+  }
+
   private getAnalyticsURL() {
     return `http://lace/${window.location.hash.replace('#/', '')}`;
   }
 
   protected getMatomoSiteId(chain: Wallet.Cardano.ChainId): number {
-    return NETWORK_TO_ANALYTICS_SITE_ID_MAP[chain.networkId];
-  }
-
-  toogleCookies(areEnabled: boolean): void {
-    this.allowCookies = areEnabled;
+    return NETWORK_ID_TO_ANALYTICS_SITE_ID_MAP[chain.networkId];
   }
 }

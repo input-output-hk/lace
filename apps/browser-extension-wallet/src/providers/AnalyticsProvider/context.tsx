@@ -1,14 +1,17 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { AnalyticsTracker } from './analyticsTracker';
-import { AnalyticsConsentStatus } from './analyticsTracker/types';
-import { ANALYTICS_ACCEPTANCE_LS_KEY } from './analyticsTracker/config';
+import { EnhancedAnalyticsOptInStatus } from './analyticsTracker/types';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
 import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks/useLocalStorage';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
   tracker?: AnalyticsTracker;
-  featureEnabled?: boolean;
+  /**
+   * feature toggle to turn off tracking completely (eg. for automated testing)
+   */
+  trackingDisabled?: boolean;
 }
 
 type AnalyticsTrackerInstance = AnalyticsTracker;
@@ -25,15 +28,27 @@ export const useAnalyticsContext = (): AnalyticsTrackerInstance => {
 export const AnalyticsProvider = ({
   children,
   tracker,
-  featureEnabled = true
+  trackingDisabled
 }: AnalyticsProviderProps): React.ReactElement => {
   const { currentChain } = useWalletStore();
-  const [analyticsAccepted] = useLocalStorage(ANALYTICS_ACCEPTANCE_LS_KEY, AnalyticsConsentStatus.REJECTED);
+  const [optedInForEnhancedTracking] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
+  );
 
   const analyticsTracker = useMemo(
-    () => tracker || new AnalyticsTracker(currentChain, featureEnabled, analyticsAccepted),
-    [tracker, currentChain, analyticsAccepted, featureEnabled]
+    () => tracker || new AnalyticsTracker(currentChain, trackingDisabled, optedInForEnhancedTracking),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tracker, trackingDisabled]
   );
+
+  useEffect(() => {
+    analyticsTracker.setOptedInForEnhancedTracking(optedInForEnhancedTracking);
+  }, [optedInForEnhancedTracking, analyticsTracker]);
+
+  useEffect(() => {
+    analyticsTracker.setSiteId(currentChain);
+  }, [currentChain, analyticsTracker]);
 
   return <AnalyticsContext.Provider value={analyticsTracker}>{children}</AnalyticsContext.Provider>;
 };

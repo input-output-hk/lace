@@ -8,7 +8,7 @@ import { useRedirection } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import { useAnalyticsContext } from '@providers';
 import {
-  sendEventProps,
+  SendEventProps,
   AnalyticsEventActions,
   AnalyticsEventCategories,
   AnalyticsEventNames
@@ -33,7 +33,7 @@ export const SendWarningModal = ({ isPopupView }: SendWarningModalProps): React.
   const analytics = useAnalyticsContext();
 
   const sendAnalytics = useCallback(() => {
-    const props: Pick<sendEventProps, 'action' | 'category'> = {
+    const props: Pick<SendEventProps, 'action' | 'category'> = {
       action: AnalyticsEventActions.CLICK_EVENT,
       category: AnalyticsEventCategories.SEND_TRANSACTION
     };

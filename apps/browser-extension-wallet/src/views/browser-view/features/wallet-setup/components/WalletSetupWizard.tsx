@@ -19,7 +19,7 @@ import {
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
 import { WarningModal } from '@src/views/browser-view/components/WarningModal';
-import { AnalyticsConsentStatus, AnalyticsEventNames } from '@providers/AnalyticsProvider/analyticsTracker';
+import { AnalyticsEventNames, EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 
 import { PinExtension } from './PinExtension';
@@ -29,7 +29,7 @@ import { passwordTranslationMap } from '../constants';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { ILocalStorage } from '@src/types';
 import { useAnalyticsContext } from '@providers';
-import { ANALYTICS_ACCEPTANCE_LS_KEY } from '@providers/AnalyticsProvider/analyticsTracker/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import * as process from 'process';
 
 const WalletSetupModeStep = React.lazy(() =>
@@ -218,13 +218,15 @@ export const WalletSetupWizard = ({
   };
 
   const [, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
-    ANALYTICS_ACCEPTANCE_LS_KEY,
-    AnalyticsConsentStatus.REJECTED
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
   );
 
   const handleAnalyticsChoice = (isAccepted: boolean) => {
     setSsAnalyticsAccepted(isAccepted);
-    analytics.toogleCookies(isAccepted);
+    analytics.setOptedInForEnhancedTracking(
+      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+    );
     sendAnalytics(isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP);
     moveForward();
   };
@@ -246,7 +248,7 @@ export const WalletSetupWizard = ({
       });
       setWalletInstance(wallet);
       setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? AnalyticsConsentStatus.ACCEPTED : AnalyticsConsentStatus.REJECTED
+        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
       if (setupType === 'forgot_password') {
         deleteFromLocalStorage('isForgotPasswordFlow');

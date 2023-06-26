@@ -1,34 +1,51 @@
-import { AnalyticsConsentStatus, AnalyticsClient, sendEventProps } from './types';
+import { AnalyticsClient, EnhancedAnalyticsOptInStatus, SendEventProps } from './types';
 import { Wallet } from '@lace/cardano';
-import { NoopAnalyticsClient } from './noopAnalyticsClient';
-import { MatomoClient } from './MatomoClient';
+import { NoopAnalyticsClient } from '../noopAnalyticsClient';
+import { MatomoClient } from '../matomo';
+import { POSTHOG_ENABLED, PostHogClient } from '../postHog';
 
 export class AnalyticsTracker {
-  protected analyticsClient: AnalyticsClient;
+  protected matomoClient: AnalyticsClient;
+  protected postHogClient: AnalyticsClient;
 
-  constructor(protected chain: Wallet.Cardano.ChainId, enabled: boolean, analyticsAccepted?: AnalyticsConsentStatus) {
-    this.analyticsClient = NoopAnalyticsClient;
+  constructor(
+    chain: Wallet.Cardano.ChainId,
+    trackingDisabled: boolean,
+    enhancedAnalyticsOptInStatus?: EnhancedAnalyticsOptInStatus
+  ) {
+    this.matomoClient = NoopAnalyticsClient;
+    this.postHogClient = NoopAnalyticsClient;
 
-    if (!enabled) {
-      this.disableTracking();
-    } else {
-      this.analyticsClient = new MatomoClient(this.chain, analyticsAccepted);
+    if (!trackingDisabled) {
+      this.matomoClient = new MatomoClient(chain, enhancedAnalyticsOptInStatus);
+    }
+    if (!trackingDisabled && POSTHOG_ENABLED) {
+      this.postHogClient = new PostHogClient(chain, enhancedAnalyticsOptInStatus);
     }
   }
 
-  disableTracking(): void {
-    this.analyticsClient = NoopAnalyticsClient;
-  }
-
-  toogleCookies(isEnabled: boolean): void {
-    this.analyticsClient.toogleCookies(isEnabled);
+  setOptedInForEnhancedTracking(status: EnhancedAnalyticsOptInStatus): void {
+    this.matomoClient.setOptedInForEnhancedTracking(status);
+    this.postHogClient.setOptedInForEnhancedTracking(status);
   }
 
   sendPageNavigationEvent(path: string): void {
-    this.analyticsClient.sendPageNavigationEvent(path);
+    this.matomoClient.sendPageNavigationEvent(path);
+    this.postHogClient.sendPageNavigationEvent(path);
   }
 
-  sendEvent(props: sendEventProps): void {
-    this.analyticsClient.sendEvent(props);
+  // TODO: rename to sendEventToMatomo in separate PR
+  sendEvent(props: SendEventProps): void {
+    this.matomoClient.sendEvent(props);
+  }
+
+  // TODO: implement PostHog-specific type
+  sendEventToPostHog(props: SendEventProps): void {
+    this.postHogClient.sendEvent(props);
+  }
+
+  setSiteId(chain: Wallet.Cardano.ChainId): void {
+    this.matomoClient.setSiteId(chain);
+    this.postHogClient.setSiteId(chain);
   }
 }

@@ -19,12 +19,12 @@ import { PinExtension } from './PinExtension';
 import { ErrorDialog } from './ErrorDialog';
 import { StartOverDialog } from '@views/browser/features/wallet-setup/components/StartOverDialog';
 import { useTranslation } from 'react-i18next';
-import { AnalyticsConsentStatus, AnalyticsEventNames } from '@providers/AnalyticsProvider/analyticsTracker';
+import { AnalyticsEventNames, EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { isTrezorHWSupported } from '../helpers';
 import { useAnalyticsContext } from '@providers';
-import { ANALYTICS_ACCEPTANCE_LS_KEY } from '@providers/AnalyticsProvider/analyticsTracker/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -136,13 +136,15 @@ export const HardwareWalletFlow = ({
   );
 
   const [, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
-    ANALYTICS_ACCEPTANCE_LS_KEY,
-    AnalyticsConsentStatus.REJECTED
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
   );
 
   const handleAnalyticsChoice = (isAccepted: boolean) => {
     setSsAnalyticsAccepted(isAccepted);
-    analytics.toogleCookies(isAccepted);
+    analytics.setOptedInForEnhancedTracking(
+      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+    );
     sendAnalytics(isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP);
     navigateTo('connect');
   };
@@ -158,7 +160,7 @@ export const HardwareWalletFlow = ({
       });
       setWalletCreated(wallet);
       setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? AnalyticsConsentStatus.ACCEPTED : AnalyticsConsentStatus.REJECTED
+        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
       navigateTo('finish');
     } catch (error) {
