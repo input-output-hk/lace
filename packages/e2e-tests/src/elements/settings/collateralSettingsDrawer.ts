@@ -1,4 +1,6 @@
-class CollateralSettingsDrawer {
+import CommonDrawerElements from '../CommonDrawerElements';
+
+class CollateralSettingsDrawer extends CommonDrawerElements {
   private COLLATERAL_HEADER = '[data-testid="drawer-header-title"]';
   private COLLATERAL_DESCRIPTION = '[data-testid="collateral-description"]';
   private COLLATERAL_BANNER_DESCRIPTION = '[data-testid="banner-description"]';

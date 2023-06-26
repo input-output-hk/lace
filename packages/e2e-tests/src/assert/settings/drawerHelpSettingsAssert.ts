@@ -1,4 +1,4 @@
-import HelpSettingsDrawer from '../../elements/settings/extendedView/helpSettingsDrawer';
+import HelpSettingsDrawer from '../../elements/settings/helpSettingsDrawer';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 

@@ -1,4 +1,4 @@
-import AboutLaceWidget from './AboutLaceWidget';
+import AboutLaceWidget from './extendedView/AboutLaceWidget';
 import { SettingsLink } from './settingsLink';
 import { ChainablePromiseArray, ElementArray } from 'webdriverio';
 

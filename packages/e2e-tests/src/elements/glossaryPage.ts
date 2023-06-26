@@ -9,10 +9,6 @@ class GlossaryPage {
   get activeArticleTitle() {
     return $(this.ACTIVE_ARTICLE_TITLE);
   }
-
-  getActiveArticleTitleText() {
-    return this.activeArticleTitle.getText();
-  }
 }
 
 export default new GlossaryPage();

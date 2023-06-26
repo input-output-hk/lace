@@ -1,4 +1,4 @@
-import CookiePolicyDrawer from '../../elements/settings/extendedView/CookiePolicyDrawer';
+import CookiePolicyDrawer from '../../elements/settings/CookiePolicyDrawer';
 import { expect } from 'chai';
 import { readFromFile } from '../../utils/fileUtils';
 import { t } from '../../utils/translationService';

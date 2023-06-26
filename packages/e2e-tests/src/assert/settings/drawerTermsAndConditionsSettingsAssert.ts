@@ -1,4 +1,4 @@
-import TermsAndConditionsSettingsDrawer from '../../elements/settings/extendedView/termsAndConditionsSettingsDrawer';
+import TermsAndConditionsSettingsDrawer from '../../elements/settings/termsAndConditionsSettingsDrawer';
 import { expect } from 'chai';
 import { removeWhitespacesFromText } from '../../utils/textUtils';
 import { readFromFile } from '../../utils/fileUtils';

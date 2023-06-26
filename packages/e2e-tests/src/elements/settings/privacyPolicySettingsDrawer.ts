@@ -1,11 +1,9 @@
-/* eslint-disable no-undef */
-import CommonDrawerElements from '../../CommonDrawerElements';
-import { ChainablePromiseElement } from 'webdriverio';
+import CommonDrawerElements from '../CommonDrawerElements';
 
 class PrivacyPolicySettingsDrawer extends CommonDrawerElements {
   private PRIVACY_POLICY_CONTENT = '[data-testid="privacy-policy-content"]';
 
-  get privacyPolicyContent(): ChainablePromiseElement<WebdriverIO.Element> {
+  get privacyPolicyContent() {
     return $(this.PRIVACY_POLICY_CONTENT);
   }
 }

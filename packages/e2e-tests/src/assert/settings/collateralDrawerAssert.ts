@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
-import collateralSettingsDrawer from '../../elements/settings/extendedView/collateralSettingsDrawer';
-import SettingsPage from '../../elements/settings/extendedView/settingsPage';
+import collateralSettingsDrawer from '../../elements/settings/collateralSettingsDrawer';
+import SettingsPage from '../../elements/settings/settingsPage';
 import { TestnetPatterns } from '../../support/patterns';
 
 class CollateralDrawerAssert {

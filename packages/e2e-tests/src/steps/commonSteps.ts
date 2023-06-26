@@ -29,6 +29,7 @@ import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import menuMainExtended from '../elements/menuMainExtended';
 import { browser } from '@wdio/globals';
+import faqPageAssert from '../assert/faqPageAssert';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -109,6 +110,10 @@ Then(/^I click "([^"]*)" link$/, async (linkText: string) => {
 
 Then(/New tab with url containing "([^"]*)" is opened/, async (urlPart: string) => {
   await commonAssert.assertSeeTabWithUrl(urlPart);
+});
+
+Then(/^FAQ page is displayed$/, async () => {
+  await faqPageAssert.assertSeeFaqPage();
 });
 
 Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: string, mode: 'extended' | 'popup') => {

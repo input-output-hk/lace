@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { DataTable, Given, Then, When } from '@wdio/cucumber-framework';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
-import drawerGeneralSettingsAssert from '../assert/settings/drawerGeneralSettingsAssert';
+import drawerGeneralSettingsAssert from '../assert/settings/YourKeysDrawerAssert';
 import settingsPageExtendedAssert from '../assert/settings/settingsPageExtendedAssert';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
@@ -14,15 +14,15 @@ import PrivacyPolicyDrawerAssert from '../assert/settings/PrivacyPolicyDrawerAss
 import drawerHelpSettingsAssert from '../assert/settings/drawerHelpSettingsAssert';
 import { t } from '../utils/translationService';
 import passphraseDrawerAssert from '../assert/settings/passphraseDrawerAssert';
-import PassphraseDrawer from '../elements/settings/extendedView/passphraseDrawer';
+import PassphraseDrawer from '../elements/settings/passphraseDrawer';
 import localStorageAssert from '../assert/localStorageAssert';
 import collateralDrawerAssert from '../assert/settings/collateralDrawerAssert';
 import CookiePolicyDrawerAssert from '../assert/settings/CookiePolicyDrawerAssert';
 import Modal from '../elements/modal';
 import WalletAddressPage from '../elements/walletAddressPage';
 import { browser } from '@wdio/globals';
-import CollateralSettingsDrawer from '../elements/settings/extendedView/collateralSettingsDrawer';
-import HelpSettingsDrawer from '../elements/settings/extendedView/helpSettingsDrawer';
+import CollateralSettingsDrawer from '../elements/settings/collateralSettingsDrawer';
+import HelpSettingsDrawer from '../elements/settings/helpSettingsDrawer';
 import ModalAssert from '../assert/modalAssert';
 import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 

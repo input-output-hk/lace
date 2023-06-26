@@ -1,4 +1,4 @@
-import NetworkSettingsDrawer from '../../elements/settings/extendedView/networkSettingsDrawer';
+import NetworkSettingsDrawer from '../../elements/settings/networkSettingsDrawer';
 
 export default new (class DrawerNetworkSettingsAssert {
   async assertSeeNetworkRadioButtons() {

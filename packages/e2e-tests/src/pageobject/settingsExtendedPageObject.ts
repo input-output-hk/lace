@@ -1,6 +1,6 @@
-import GeneralSettingsDrawer from '../elements/settings/extendedView/generalSettingsDrawer';
-import SettingsPage from '../elements/settings/extendedView/settingsPage';
-import NetworkSettingsDrawer from '../elements/settings/extendedView/networkSettingsDrawer';
+import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
+import SettingsPage from '../elements/settings/settingsPage';
+import NetworkSettingsDrawer from '../elements/settings/networkSettingsDrawer';
 import menuHeaderPageObject from './menuHeaderPageObject';
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import localStorageManager from '../utils/localStorageManager';
@@ -35,7 +35,7 @@ class SettingsExtendedPageObject {
 
   clickOnRemoveWallet = async () => await SettingsPage.removeWalletButton.click();
 
-  clickOnShowPublicKey = async () => await GeneralSettingsDrawer.showPublicKeyButton.click();
+  clickOnShowPublicKey = async () => await YourKeysDrawer.showPublicKeyButton.click();
 
   clickOnNetworkRadioButton = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
     switch (network) {

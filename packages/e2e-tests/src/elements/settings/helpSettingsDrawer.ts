@@ -1,4 +1,4 @@
-import CommonDrawerElements from '../../CommonDrawerElements';
+import CommonDrawerElements from '../CommonDrawerElements';
 
 class HelpSettingsDrawer extends CommonDrawerElements {
   private HELP_CREATE_A_SUPPORT_TICKET_BUTTON = '[data-testid="create-new-ticket-button"]';

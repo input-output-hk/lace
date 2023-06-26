@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 import { DrawerCommonExtended } from './drawerCommonExtended';
-import NetworkSettingsDrawer from './settings/extendedView/networkSettingsDrawer';
+import NetworkSettingsDrawer from './settings/networkSettingsDrawer';
 
 export class MenuHeaderNetwork {
   private CONTAINER = '[data-testid="user-dropdown-network-info-section"]';

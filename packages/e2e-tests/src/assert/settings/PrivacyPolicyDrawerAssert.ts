@@ -1,4 +1,4 @@
-import PrivacyPolicySettingsDrawer from '../../elements/settings/extendedView/privacyPolicySettingsDrawer';
+import PrivacyPolicySettingsDrawer from '../../elements/settings/privacyPolicySettingsDrawer';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import { readFromFile } from '../../utils/fileUtils';

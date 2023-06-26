@@ -1,4 +1,4 @@
-import SettingsPage from '../../elements/settings/extendedView/settingsPage';
+import SettingsPage from '../../elements/settings/settingsPage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 
