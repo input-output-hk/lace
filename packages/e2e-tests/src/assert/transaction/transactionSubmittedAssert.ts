@@ -61,8 +61,8 @@ class TransactionSubmittedAssert {
     await expect(await TransactionErrorPage.cancelButton.getText()).to.equal(
       await t('browserView.transaction.send.footer.cancel')
     );
-    await TransactionErrorPage.drawerHeaderBackButton.waitForDisplayed();
-    await expect(await TransactionErrorPage.drawerHeaderBackButton.getText()).to.equal(
+    await TransactionErrorPage.backButton.waitForDisplayed();
+    await expect(await TransactionErrorPage.backButton.getText()).to.equal(
       await t('browserView.transaction.send.footer.fail')
     );
   }
