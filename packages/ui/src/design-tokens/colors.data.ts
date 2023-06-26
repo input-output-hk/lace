@@ -120,6 +120,10 @@ export const colors = {
   $search_box_clear_button_label_color: '',
   $search_box_clear_button_label_color_hover: '',
   $search_box_clear_button_label_color_pressed: '',
+
+  $flow_card_container_bgColor: '',
+  $flow_card_label_primary_color: '',
+  $flow_card_label_secondary_color: '',
 };
 
 export type Colors = typeof colors;
