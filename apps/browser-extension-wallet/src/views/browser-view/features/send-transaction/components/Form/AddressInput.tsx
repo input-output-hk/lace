@@ -124,7 +124,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   }, [address, addressInputValue, setHandleVerificationState, resolveHandle]);
 
   useEffect(() => {
-    getAddressBookByNameOrAddress({ value: address || '' });
+    getAddressBookByNameOrAddress({ value: handle || address || '' });
   }, [address, getAddressBookByNameOrAddress]);
 
   const validationObject = useMemo(() => {
@@ -172,7 +172,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     }
 
     if (!existingAddress && isAddressInputValueValid) {
-      setAddressToEdit({ name: '', address });
+      setAddressToEdit({ name: '', address: handle || address });
       section = Sections.ADDRESS_FORM;
     }
     setRowId(row);
