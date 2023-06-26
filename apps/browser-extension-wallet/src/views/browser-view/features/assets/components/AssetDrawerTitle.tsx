@@ -9,10 +9,10 @@ interface AssetDrawerTitleProps {
 
 export const AssetDrawerTitle = ({ logo, title, code }: AssetDrawerTitleProps): React.ReactElement => (
   <div className={styles.assetDetailsHeader} data-testid="asset-details-header">
-    <img src={logo} alt="asset-logo" />
-    <div className={styles.assetName} data-testid="asset-name">
-      <h1>{title}</h1>
-      <p>{code}</p>
+    <img src={logo} alt="asset-logo" data-testid="token-logo" />
+    <div className={styles.assetName}>
+      <h1 data-testid="token-name">{title}</h1>
+      <p data-testid="token-ticker">{code}</p>
     </div>
   </div>
 );

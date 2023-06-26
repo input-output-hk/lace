@@ -10,6 +10,7 @@ import commonAssert from '../assert/commonAssert';
 import { AddressDetails } from '../elements/addressbook/extendedview/AddressDetails';
 import testContext from '../utils/testContext';
 import { getAddressByName, shelley } from '../data/AddressData';
+import { browser } from '@wdio/globals';
 
 Then(/I see information about empty address book/, async () => {
   await addressBookExtendedAssert.assertSeeInformationAboutEmptyBook();
@@ -31,8 +32,8 @@ Then(/address list is displayed and each row consists of:/, async (rows) => {
 });
 
 When(/^I click address on the list with name "([^"]*)"$/, async (addressName: string) => {
-  const selectedRow = new AddressRow(addressName);
-  await webTester.clickElement(selectedRow.nameElement());
+  const selectedRow = new AddressRow(addressName).addressElement;
+  await selectedRow.click();
 });
 
 Then(/I see address detail page/, async () => {

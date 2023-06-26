@@ -1,10 +1,10 @@
 /* eslint-disable no-magic-numbers */
 import create, { StateSelector } from 'zustand';
 import { Wallet } from '@lace/cardano';
-import { getRandomIcon } from '@src/utils/get-random-icon';
+import { formatPercentages, getRandomIcon } from '@lace/common';
 import { CardanoStakePool } from '../../../types';
 import { DelegationStore, stakePoolDetailsSelectorProps } from '../types';
-import { formatNumber, formatPercentages } from '@src/utils/format-number';
+import { formatNumber } from '@src/utils/format-number';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 
 export const stakePoolDetailsSelector: StateSelector<DelegationStore, stakePoolDetailsSelectorProps> = ({

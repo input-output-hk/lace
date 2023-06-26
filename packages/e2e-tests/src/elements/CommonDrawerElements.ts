@@ -2,11 +2,16 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 class CommonDrawerElements {
+  private DRAWER_BODY = '#asset-drawer-body';
   private DRAWER_NAVIGATION_TITLE = '[data-testid="drawer-navigation-title"]';
   private BACK_BUTTON = '[data-testid="navigation-button-arrow"]';
   private CLOSE_BUTTON = '[data-testid="navigation-button-cross"]';
   private DRAWER_HEADER_TITLE = '[data-testid="drawer-header-title"]';
   private DRAWER_HEADER_SUBTITLE = '[data-testid="drawer-header-subtitle"]';
+
+  get drawerBody(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.DRAWER_BODY);
+  }
 
   get drawerNavigationTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DRAWER_NAVIGATION_TITLE);

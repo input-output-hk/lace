@@ -6,7 +6,6 @@ import { AddressInput } from '../elements/addressInput';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
-import { t } from '../utils/translationService';
 import nftsPageObject from './nftsPageObject';
 import { Asset } from '../data/Asset';
 import { Logger } from '../support/logger';
@@ -14,8 +13,6 @@ import testContext from '../utils/testContext';
 import extensionUtils from '../utils/utils';
 import { shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
-
-const coinInputSelectionNFTs = 'core.coinInputSelection.nfts';
 
 export default new (class NewTransactionExtendedPageObject {
   fillAddress = async (address: string, index?: number) => {
@@ -75,12 +72,6 @@ export default new (class NewTransactionExtendedPageObject {
     const asset = extensionUtils.isMainnet() && assetName === 'tADA' ? 'ADA' : assetName;
     await webTester.clickElement(new CoinConfigure(bundleIndex, asset).nameElement());
     await browser.pause(500);
-  };
-
-  clickCoinSelectorButton = async (button: string) => {
-    await (button === 'Tokens'
-      ? webTester.clickElement(new TokenSelectionPage().tokensButton())
-      : webTester.clickElement(new TokenSelectionPage().nftsButton()));
   };
 
   addAmountOfAssets = async (amount: number, assetType: string) => {
@@ -162,11 +153,11 @@ export default new (class NewTransactionExtendedPageObject {
   };
 
   clickTokensButton = async () => {
-    await webTester.clickElement(new TokenSelectionPage().tokensButton());
+    await new TokenSelectionPage().tokensButton.click();
   };
 
   clickNFTsButton = async () => {
-    await webTester.clickElement(new TokenSelectionPage().nftsButton());
+    await new TokenSelectionPage().nftsButton.click();
   };
 
   clickMaxButton = async (bundleIndex: number, assetName: string) => {
@@ -236,10 +227,10 @@ export default new (class NewTransactionExtendedPageObject {
     await new TransactionNewPage().addBundleButton.click();
     await this.fillAddress(shelley.getAddress(), 2);
     await this.clickCoinSelectorName(Asset.CARDANO.ticker, 2);
-    await this.clickCoinSelectorButton(await t(coinInputSelectionNFTs));
+    await this.clickNFTsButton();
     await nftsPageObject.clickNftItem(Asset.IBILECOIN.name);
     await this.clickAddAssetButtonMulti(2);
-    await this.clickCoinSelectorButton(await t(coinInputSelectionNFTs));
+    await this.clickNFTsButton();
     await nftsPageObject.clickNftItem(Asset.BISON_COIN.name);
     await this.fillTokenValue(1, Asset.IBILECOIN.name, 2);
     await this.fillTokenValue(1, Asset.BISON_COIN.name, 2);
@@ -258,10 +249,10 @@ export default new (class NewTransactionExtendedPageObject {
       extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name
     );
     await this.clickAddAssetButtonMulti(1);
-    await this.clickCoinSelectorButton(await t(coinInputSelectionNFTs));
+    await this.clickNFTsButton();
     await nftsPageObject.clickNftItem(Asset.IBILECOIN.name);
     await this.clickAddAssetButtonMulti(1);
-    await this.clickCoinSelectorButton(await t(coinInputSelectionNFTs));
+    await this.clickNFTsButton();
     await nftsPageObject.clickNftItem(Asset.BISON_COIN.name);
     await this.fillTokenValue(1, Asset.CARDANO.ticker);
     await this.fillTokenValue(2, extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.ticker : Asset.LACE_COIN.ticker);

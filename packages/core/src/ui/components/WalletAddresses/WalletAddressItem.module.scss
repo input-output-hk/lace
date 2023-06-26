@@ -15,7 +15,7 @@
   cursor: pointer;
   display: grid;
   gap: 3%;
-  grid-template-columns: 35% 62%;
+  grid-template-columns: 1fr 1fr;
   height: size_unit(9);
   padding: 0 size_unit(2);
   width: 100%;
@@ -46,6 +46,11 @@
   gap: size_unit(3);
   &.small {
     gap: size_unit(2);
+
+    .addressColor {
+      color: var(--text-color-secondary) !important;
+      text-align: right;
+    }
   }
   .listItemName {
     @include text-bodyLarge-bold;
@@ -53,7 +58,7 @@
     color: var(--text-color-primary) !important;
     display: flex;
     flex: 1;
-    min-width: 0;
+    min-width: 236px;
 
     &.small {
       font-size: var(--body) !important;
@@ -79,8 +84,13 @@
 
   .addressColor {
     color: var(--text-color-secondary) !important;
-    text-align: right;
+    text-align: left;
   }
+}
+
+.addressBox {
+  display: block;
+  min-width: 0;
 }
 
 .listItemAvatar {

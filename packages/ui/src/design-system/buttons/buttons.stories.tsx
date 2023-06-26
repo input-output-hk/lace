@@ -3,7 +3,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { ReactComponent as QuestionMark } from '../../assets/icons/question-mark.component.svg';
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { Variants, Section, page } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
@@ -150,11 +150,11 @@ export const Overview = (): JSX.Element => (
           <Buttons />
         </Variants.Table>
 
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <Buttons />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
     </Cell>
   </Grid>

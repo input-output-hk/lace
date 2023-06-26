@@ -82,6 +82,7 @@ module.exports = {
           args: true,
           vars: true,
           createVar: true,
+          ref: true,
         },
         replacements: {
           s: {

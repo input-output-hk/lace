@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "i18next": "^22.5.1",
+    "immer": "^10.0.2",
     "jdenticon": "^3.2.0",
     "react-i18next": "^12.3.1"
   },

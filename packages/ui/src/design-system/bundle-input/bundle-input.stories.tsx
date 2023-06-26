@@ -4,7 +4,7 @@ import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
@@ -125,11 +125,11 @@ export const Overview = (): JSX.Element => (
         <Variants.Table headers={['Rest']}>
           <MainComponents />
         </Variants.Table>
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <MainComponents />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
 
       <Divider my="$64" />
@@ -140,11 +140,11 @@ export const Overview = (): JSX.Element => (
         >
           <SecondaryItems />
         </Variants.Table>
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <SecondaryItems />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
     </Cell>
   </Grid>

@@ -5,7 +5,7 @@ import { stakingInfoSelector } from '@stores/selectors/staking-selectors';
 import { useWalletStore } from '@stores';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { useDelegationDetails, useLocalStorage } from '@src/hooks';
-import { stakePoolTransformer } from '@src/features/delegation/api/transformers';
+import { Wallet } from '@lace/cardano';
 import { StakingModal } from './StakingModal';
 
 const totalSaturationPercentage = 100;
@@ -36,7 +36,7 @@ export const StakingWarningModals = ({ popupView }: StakingWarningModalsProps): 
     saturation,
     retired,
     id: poolId
-  } = (delegationDetails && stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin })) || {};
+  } = (delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin })) || {};
 
   useEffect(() => {
     if (delegationDetails !== undefined && poolId !== lastStaking?.poolId) {

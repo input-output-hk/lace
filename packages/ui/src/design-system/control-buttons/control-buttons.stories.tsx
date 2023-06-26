@@ -3,7 +3,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { ReactComponent as PlusCircle } from '../../assets/icons/plus-circle.component.svg';
-import { sx, ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { sx, ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
@@ -160,11 +160,11 @@ export const Overview = (): JSX.Element => (
           <Buttons />
         </Variants.Table>
 
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <Buttons />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
     </Cell>
   </Grid>

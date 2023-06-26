@@ -2,7 +2,6 @@ import webTester from '../actor/webTester';
 import { TransactionsPage } from '../elements/transactionsPage';
 import testContext from '../utils/testContext';
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
-import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 
 export default new (class TransactionsPageObject {
   async clickTransaction(rowNumber: number) {
@@ -36,9 +35,5 @@ export default new (class TransactionsPageObject {
     let feeValue = (await new TransactionSummaryPage().getFeeValueAda()) as string;
     feeValue = feeValue.replace('ADA', '');
     await testContext.save('feeValue', feeValue);
-  }
-
-  async clickNFTsTab() {
-    await webTester.clickElement(new TokenSelectionPage().nftsCaption());
   }
 })();

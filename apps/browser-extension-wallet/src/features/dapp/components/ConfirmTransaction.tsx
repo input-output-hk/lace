@@ -80,14 +80,16 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const assetIds = useMemo(() => tx?.body?.outputs && getTransactionAssetsId(tx.body.outputs), [tx?.body?.outputs]);
 
   useEffect(() => {
-    const fetchAssetsInfo = async () => {
-      const result = await getAssetsInformation(assetIds, assets, {
-        assetProvider,
-        extraData: { nftMetadata: true, tokenMetadata: true }
-      });
-      setAssetsInfo(result);
-    };
-    fetchAssetsInfo();
+    if (assetIds?.length > 0) {
+      const fetchAssetsInfo = async () => {
+        const result = await getAssetsInformation(assetIds, assets, {
+          assetProvider,
+          extraData: { nftMetadata: true, tokenMetadata: true }
+        });
+        setAssetsInfo(result);
+      };
+      fetchAssetsInfo();
+    }
   }, [assetIds, assetProvider, assets]);
 
   const cancelTransaction = useCallback(() => {
@@ -95,7 +97,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       {
         api$: of({
           async allowSignTx(): Promise<boolean> {
-            return Promise.resolve(false);
+            return Promise.reject();
           }
         }),
         baseChannel: DAPP_CHANNELS.userPrompt,
@@ -142,11 +144,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       // eslint-disable-next-line unicorn/no-array-for-each
       txAssets.forEach(async (value, key) => {
         const walletAsset = assets.get(key) || assetsInfo?.get(key);
-        if (!walletAsset) {
-          // Trying to use an asset not in wallet
-          setErrorMessage(t('core.dappTransaction.tryingToUseAssetNotInWallet'));
-          return;
-        }
         assetList.push({
           name: walletAsset.name.toString() || key.toString(),
           ticker: walletAsset.tokenMetadata?.ticker || walletAsset.nftMetadata?.name,
@@ -185,7 +182,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       txType = 'Send';
     }
 
-    const externalOutputs = tx.body.outputs.filter((output) => output.address !== walletInfo.address);
+    const externalOutputs = tx.body.outputs.filter((output) => {
+      if (txType === 'Send') {
+        return output.address !== walletInfo.address;
+      }
+      return true;
+    });
     let totalCoins = BigInt(0);
 
     // eslint-disable-next-line unicorn/no-array-reduce

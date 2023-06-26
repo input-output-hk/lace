@@ -16,7 +16,7 @@ export interface WalletSetupMnemonicVerificationStepProps {
   onStepNext?: (currentStep: number) => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
-  translations: TranslationsFor<'enterPassphrase' | 'passphraseError'>;
+  translations: TranslationsFor<'enterPassphrase' | 'passphraseError' | 'enterPassphraseDescription'>;
   suggestionList?: Array<string>;
   isBackToMnemonic: boolean;
   setIsBackToMnemonic: (value: boolean) => void;
@@ -68,6 +68,7 @@ export const WalletSetupMnemonicVerificationStep = ({
   };
 
   const title = translations.enterPassphrase;
+  const description = translations.enterPassphraseDescription;
 
   const currentStepFirstWordIndex = mnemonicStep * mnemonicWordsInStep;
   const currentStepLastWordIndex = (mnemonicStep + 1) * mnemonicWordsInStep;
@@ -92,6 +93,7 @@ export const WalletSetupMnemonicVerificationStep = ({
   return (
     <WalletSetupStepLayout
       title={title}
+      description={description}
       stepInfoText={getStepInfoText()}
       onBack={handleBack}
       onNext={handleNext}

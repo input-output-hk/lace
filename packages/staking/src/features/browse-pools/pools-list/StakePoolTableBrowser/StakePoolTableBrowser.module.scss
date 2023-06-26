@@ -21,8 +21,8 @@
   .header {
     display: grid;
     flex: 1;
-    grid-template-columns: 58% 20% 22%;
-    padding: size_unit(2) 0;
+    grid-template-columns: 50% 25% 25%;
+    padding-bottom: size_unit(2);
     > * {
       align-items: center;
       display: flex;
