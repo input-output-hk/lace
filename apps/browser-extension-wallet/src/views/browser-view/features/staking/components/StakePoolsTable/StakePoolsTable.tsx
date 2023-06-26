@@ -2,16 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import debounce from 'lodash/debounce';
 import { Wallet, StakePoolTableBrowser, StakePoolItemBrowserProps, StakePoolSortOptions } from '@lace/cardano';
 import { Typography } from 'antd';
-import { Search } from '@lace/common';
+import { Search, getRandomIcon } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { stakePoolResultsSelector } from '@stores/selectors/staking-selectors';
-import { stakePoolTransformer } from '@src/features/delegation/api/transformers';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletStore } from '@stores';
 import { useStakePoolDetails } from '../../store';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import styles from './StakePoolsTable.modules.scss';
-import { getRandomIcon } from '@src/utils/get-random-icon';
 import { useAnalyticsContext } from '@providers';
 import {
   AnalyticsEventActions,
@@ -98,7 +96,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
   const list = useMemo(
     () =>
       stakePools?.map((pool: Wallet.Cardano.StakePool) => {
-        const stakePool = stakePoolTransformer({ stakePool: pool, cardanoCoin });
+        const stakePool = Wallet.util.stakePoolTransformer({ stakePool: pool, cardanoCoin });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
 
         return {
