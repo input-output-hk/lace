@@ -1,8 +1,6 @@
 /* eslint-disable no-magic-numbers */
-import { Cardano } from '@cardano-sdk/core';
 import { formatPercentages, getRandomIcon } from '@lace/common';
-import { CoinId } from '../types';
-import { lovelacesToAdaString } from './unit-converters';
+import * as Wallet from '@wallet';
 
 export interface StakePool {
   id: string;
@@ -24,9 +22,9 @@ export interface StakePool {
 }
 
 type StakePoolTransformerProp = {
-  stakePool: Cardano.StakePool;
+  stakePool: Wallet.Cardano.StakePool;
   delegatingPoolId?: string;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
 };
 
 export const stakePoolTransformer = ({
@@ -36,15 +34,15 @@ export const stakePoolTransformer = ({
 }: StakePoolTransformerProp): StakePool => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
   const { size, apy, saturation } = metrics;
-  const calcCost = cost ? ` + ${lovelacesToAdaString(cost.toString(), 0)}${cardanoCoin.symbol}` : '';
+  const calcCost = cost ? ` + ${Wallet.util.lovelacesToAdaString(cost.toString(), 0)}${cardanoCoin.symbol}` : '';
   const calcMargin = margin ? `${formatPercentages(margin.numerator / margin.denominator)}` : '-';
 
   return {
     hexId: hexId.toString(),
     margin: calcMargin,
-    pledge: pledge ? `${lovelacesToAdaString(pledge.toString())}${cardanoCoin.symbol}` : '-',
-    owners: owners ? owners.map((owner: Cardano.RewardAccount) => owner.toString()) : [],
-    retired: status === Cardano.StakePoolStatus.Retired,
+    pledge: pledge ? `${Wallet.util.lovelacesToAdaString(pledge.toString())}${cardanoCoin.symbol}` : '-',
+    owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
+    retired: status === Wallet.Cardano.StakePoolStatus.Retired,
     description: metadata?.description,
     size: `${size?.live ?? '-'} %`,
     id: id.toString(),
@@ -52,9 +50,9 @@ export const stakePoolTransformer = ({
     name: metadata?.name,
     ticker: metadata?.ticker,
     logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
-    apy: delegatingPoolId && formatPercentages(apy.valueOf()),
+    apy: apy && formatPercentages(apy.valueOf()),
     saturation: saturation && formatPercentages(saturation.valueOf()),
-    fee: lovelacesToAdaString(cost.toString()),
+    fee: Wallet.util.lovelacesToAdaString(cost.toString()),
     isStakingPool: delegatingPoolId ? delegatingPoolId === id.toString() : undefined
   };
 };

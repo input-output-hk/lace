@@ -73,7 +73,9 @@ $light-theme: (
   'shadows': $shadows,
   'scroll-bar': (
     'track': #fff,
-    'thum': #efefef
+    'thum': #efefef,
+    'track-root': #efefef66,
+    'thum-root': #00000033
   ),
   'switch': (
     'checked-bg-color': linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%),
