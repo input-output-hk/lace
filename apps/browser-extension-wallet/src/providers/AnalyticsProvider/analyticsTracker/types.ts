@@ -27,7 +27,7 @@ export type SendEventProps = {
 export interface AnalyticsClient {
   sendPageNavigationEvent(href: string): void;
   sendEvent(props: SendEventProps): void;
-  setOptedInForEnhancedTracking(status: EnhancedAnalyticsOptInStatus): void;
+  setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): void;
   setSiteId(chain: Wallet.Cardano.ChainId): void;
 }
 

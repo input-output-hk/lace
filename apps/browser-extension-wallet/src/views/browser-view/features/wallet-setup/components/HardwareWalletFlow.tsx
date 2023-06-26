@@ -142,7 +142,7 @@ export const HardwareWalletFlow = ({
 
   const handleAnalyticsChoice = (isAccepted: boolean) => {
     setSsAnalyticsAccepted(isAccepted);
-    analytics.setOptedInForEnhancedTracking(
+    analytics.setOptedInForEnhancedAnalytics(
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
     sendAnalytics(isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP);

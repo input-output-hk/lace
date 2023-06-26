@@ -10,23 +10,23 @@ export class AnalyticsTracker {
 
   constructor(
     chain: Wallet.Cardano.ChainId,
-    trackingDisabled: boolean,
+    analyticsDisabled: boolean,
     enhancedAnalyticsOptInStatus?: EnhancedAnalyticsOptInStatus
   ) {
     this.matomoClient = NoopAnalyticsClient;
     this.postHogClient = NoopAnalyticsClient;
 
-    if (!trackingDisabled) {
+    if (!analyticsDisabled) {
       this.matomoClient = new MatomoClient(chain, enhancedAnalyticsOptInStatus);
     }
-    if (!trackingDisabled && POSTHOG_ENABLED) {
+    if (!analyticsDisabled && POSTHOG_ENABLED) {
       this.postHogClient = new PostHogClient(chain, enhancedAnalyticsOptInStatus);
     }
   }
 
-  setOptedInForEnhancedTracking(status: EnhancedAnalyticsOptInStatus): void {
-    this.matomoClient.setOptedInForEnhancedTracking(status);
-    this.postHogClient.setOptedInForEnhancedTracking(status);
+  setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): void {
+    this.matomoClient.setOptedInForEnhancedAnalytics(status);
+    this.postHogClient.setOptedInForEnhancedAnalytics(status);
   }
 
   sendPageNavigationEvent(path: string): void {

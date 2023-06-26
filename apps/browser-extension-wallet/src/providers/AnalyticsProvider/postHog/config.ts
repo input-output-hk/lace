@@ -13,12 +13,12 @@ export const NETWORK_ID_TO_POSTHOG_TOKEN_MAP: Record<Wallet.Cardano.NetworkId, s
 type PersistenceConfig = Pick<PostHogConfig, 'disable_persistence' | 'disable_cookie' | 'persistence'>;
 
 /* eslint-disable camelcase */
-export const BASIC_TRACKING_CONFIG: PersistenceConfig = {
+export const BASIC_ANALYTICS_CONFIG: PersistenceConfig = {
   disable_persistence: true,
   disable_cookie: true,
   persistence: 'memory'
 };
-export const ENHANCED_TRACKING_CONFIG: PersistenceConfig = {
+export const ENHANCED_ANALYTICS_CONFIG: PersistenceConfig = {
   disable_persistence: false,
   disable_cookie: false,
   persistence: 'localStorage'

@@ -51,7 +51,7 @@ export class MatomoClient implements AnalyticsClient {
     });
   };
 
-  setOptedInForEnhancedTracking(status: EnhancedAnalyticsOptInStatus): void {
+  setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): void {
     this.enhancedAnalyticsOptInStatus = status;
   }
 

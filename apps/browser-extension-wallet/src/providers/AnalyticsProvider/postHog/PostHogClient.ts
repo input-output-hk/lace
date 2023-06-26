@@ -4,8 +4,8 @@ import randomBytes from 'randombytes';
 import { Wallet } from '@lace/cardano';
 import { AnalyticsClient, EnhancedAnalyticsOptInStatus, Metadata, SendEventProps } from '../analyticsTracker';
 import {
-  BASIC_TRACKING_CONFIG,
-  ENHANCED_TRACKING_CONFIG,
+  BASIC_ANALYTICS_CONFIG,
+  ENHANCED_ANALYTICS_CONFIG,
   NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PUBLIC_POSTHOG_HOST
 } from './config';
@@ -30,8 +30,8 @@ export class PostHogClient implements AnalyticsClient {
       },
       disable_compression: true,
       ...(enhancedAnalyticsOptInStatus === EnhancedAnalyticsOptInStatus.OptedIn
-        ? ENHANCED_TRACKING_CONFIG
-        : BASIC_TRACKING_CONFIG)
+        ? ENHANCED_ANALYTICS_CONFIG
+        : BASIC_ANALYTICS_CONFIG)
     });
   }
 
@@ -63,9 +63,9 @@ export class PostHogClient implements AnalyticsClient {
     });
   };
 
-  setOptedInForEnhancedTracking(status: EnhancedAnalyticsOptInStatus): void {
+  setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): void {
     posthog.set_config(
-      status === EnhancedAnalyticsOptInStatus.OptedIn ? ENHANCED_TRACKING_CONFIG : BASIC_TRACKING_CONFIG
+      status === EnhancedAnalyticsOptInStatus.OptedIn ? ENHANCED_ANALYTICS_CONFIG : BASIC_ANALYTICS_CONFIG
     );
   }
 

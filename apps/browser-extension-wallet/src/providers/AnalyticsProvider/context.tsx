@@ -11,7 +11,7 @@ interface AnalyticsProviderProps {
   /**
    * feature toggle to turn off tracking completely (eg. for automated testing)
    */
-  trackingDisabled?: boolean;
+  analyticsDisabled?: boolean;
 }
 
 type AnalyticsTrackerInstance = AnalyticsTracker;
@@ -28,23 +28,23 @@ export const useAnalyticsContext = (): AnalyticsTrackerInstance => {
 export const AnalyticsProvider = ({
   children,
   tracker,
-  trackingDisabled
+  analyticsDisabled
 }: AnalyticsProviderProps): React.ReactElement => {
   const { currentChain } = useWalletStore();
-  const [optedInForEnhancedTracking] = useLocalStorage(
+  const [optedInForEnhancedAnalytics] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
 
   const analyticsTracker = useMemo(
-    () => tracker || new AnalyticsTracker(currentChain, trackingDisabled, optedInForEnhancedTracking),
+    () => tracker || new AnalyticsTracker(currentChain, analyticsDisabled, optedInForEnhancedAnalytics),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tracker, trackingDisabled]
+    [tracker, analyticsDisabled]
   );
 
   useEffect(() => {
-    analyticsTracker.setOptedInForEnhancedTracking(optedInForEnhancedTracking);
-  }, [optedInForEnhancedTracking, analyticsTracker]);
+    analyticsTracker.setOptedInForEnhancedAnalytics(optedInForEnhancedAnalytics);
+  }, [optedInForEnhancedAnalytics, analyticsTracker]);
 
   useEffect(() => {
     analyticsTracker.setSiteId(currentChain);
