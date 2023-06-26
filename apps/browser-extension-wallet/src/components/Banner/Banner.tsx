@@ -15,6 +15,7 @@ export interface BannerProps {
   message: string | React.ReactElement;
   className?: string;
   descriptionClassName?: string;
+  popupView?: boolean;
   description?: React.ReactNode;
 }
 
@@ -24,7 +25,8 @@ export const Banner = ({
   customIcon,
   withIcon,
   className,
-  descriptionClassName
+  descriptionClassName,
+  popupView
 }: BannerProps): React.ReactElement => {
   const descriptionElement = shouldBeDisplayedAsText(description) ? (
     <Text className={styles.description}>{description}</Text>
@@ -32,10 +34,22 @@ export const Banner = ({
     description
   );
   return (
-    <div className={cn(styles.bannerContainer, { [className]: className })} data-testid="banner-container">
+    <div
+      className={cn(styles.bannerContainer, { [className]: className, [styles.popupView]: popupView })}
+      data-testid="banner-container"
+    >
       {withIcon && (
-        <div className={cn(styles.iconContainer, { [styles.withDescription]: !!description })}>
-          {customIcon || <DefaultIcon className={styles.icon} data-testid="banner-icon" />}
+        <div
+          className={cn(styles.iconContainer, {
+            [styles.withDescription]: !!description,
+            [styles.popupView]: popupView
+          })}
+        >
+          {customIcon ? (
+            React.cloneElement(customIcon, { 'data-testid': 'banner-icon' })
+          ) : (
+            <DefaultIcon className={styles.icon} data-testid="banner-icon" />
+          )}
         </div>
       )}
       <div
