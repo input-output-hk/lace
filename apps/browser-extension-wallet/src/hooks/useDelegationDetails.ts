@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import { Wallet } from '@lace/cardano';
 
-import { useObservable } from './useObservable';
+import { useObservable } from '.';
 import { useWalletStore } from '../stores';
 
 export const useDelegationDetails = (): Wallet.Cardano.StakePool => {

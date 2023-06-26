@@ -1,12 +1,11 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
 import { Wallet } from '@lace/cardano';
-import { Button, Drawer, DrawerHeader, DrawerNavigation, inputProps, Password } from '@lace/common';
+import { Button, Drawer, DrawerHeader, DrawerNavigation, inputProps, Password, Banner } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
 import { MnemonicWordsWritedown } from '@lace/core';
-import { Banner } from '@components/Banner';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useKeyboardShortcut, useWalletManager } from '@hooks';
 

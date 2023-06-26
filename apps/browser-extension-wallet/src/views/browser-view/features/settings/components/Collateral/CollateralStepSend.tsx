@@ -1,9 +1,8 @@
 import { Spin, Typography } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Banner } from '@components/Banner';
+import { Banner, inputProps, Password } from '@lace/common';
 import { renderAmountInfo, renderLabel, RowContainer } from '@lace/core';
-import { inputProps, Password } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import styles from '../SettingsLayout.module.scss';
 import { useFetchCoinPrice } from '@hooks';

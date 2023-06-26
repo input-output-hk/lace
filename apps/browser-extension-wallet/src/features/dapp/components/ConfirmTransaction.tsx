@@ -14,10 +14,9 @@ import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { useObservable } from '@hooks/useObservable';
+import { useObservable, useRedirection } from '@hooks';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { Skeleton } from 'antd';
-import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';

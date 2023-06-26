@@ -1,6 +1,6 @@
 import { useWalletStore } from '@src/stores';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
-import { useObservable } from './useObservable';
+import { useObservable } from '.';
 import { HandleInfo } from '@cardano-sdk/wallet';
 
 export const useGetHandles = (): HandleInfo[] => {
