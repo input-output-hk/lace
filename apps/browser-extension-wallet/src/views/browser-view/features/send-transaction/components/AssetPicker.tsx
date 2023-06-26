@@ -20,7 +20,7 @@ import isNil from 'lodash/isNil';
 import { getTokenList } from '@src/utils/get-token-list';
 import { SpentBalances } from '../types';
 import { getReachedMaxAmountList } from '../helpers';
-import { CoinId, CurrencyInfo } from '@src/types';
+import { CurrencyInfo } from '@src/types';
 import { firstValueFrom } from 'rxjs';
 import { WarningModal } from '@src/views/browser-view/components';
 import { walletBalanceTransformer } from '@src/api/transformers';
@@ -34,7 +34,7 @@ const formatAssetPickerLists = (
   prices: PriceResult,
   addCardanoAsAnAsset: boolean,
   tokensSpent: SpentBalances,
-  cardanoCoin: CoinId,
+  cardanoCoin: Wallet.CoinId,
   availableRewards: bigint,
   environmentName: EnvironmentTypes,
   fiatCurrency: CurrencyInfo

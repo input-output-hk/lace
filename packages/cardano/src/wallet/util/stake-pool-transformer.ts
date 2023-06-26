@@ -1,14 +1,30 @@
 /* eslint-disable no-magic-numbers */
-import { Wallet } from '@lace/cardano';
-import { StakePool } from '../types';
-import { getRandomIcon } from '@src/utils/get-random-icon';
-import { formatPercentages } from '@src/utils/format-number';
-import { CoinId } from '@src/types';
+import { formatPercentages, getRandomIcon } from '@lace/common';
+import * as Wallet from '@wallet';
+
+export interface StakePool {
+  id: string;
+  hexId: string;
+  pledge: string;
+  margin: string;
+  cost: string;
+  owners: string[];
+  name?: string;
+  description?: string;
+  ticker?: string;
+  logo?: string;
+  retired?: boolean;
+  apy?: number | string;
+  size?: string;
+  saturation?: number | string;
+  fee?: number | string;
+  isStakingPool?: boolean;
+}
 
 type StakePoolTransformerProp = {
   stakePool: Wallet.Cardano.StakePool;
   delegatingPoolId?: string;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
 };
 
 export const stakePoolTransformer = ({

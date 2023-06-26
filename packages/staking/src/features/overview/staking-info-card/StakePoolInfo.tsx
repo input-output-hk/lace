@@ -9,14 +9,12 @@ export const StakePoolInfo = ({
   ticker,
   id,
   onClick,
-  popupView,
 }: {
   logo: string;
   name?: string;
   ticker?: string;
   id: string;
   onClick?: () => void;
-  popupView: boolean;
 }): React.ReactElement => {
   const title = name || ticker || '-';
   const subTitle: string | React.ReactElement = ticker || (
@@ -24,12 +22,7 @@ export const StakePoolInfo = ({
   );
 
   return (
-    <div
-      data-testid="staking-pool-info"
-      onClick={onClick}
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      className={cn(styles.stakePool, { [styles.popupView!]: popupView })}
-    >
+    <div data-testid="staking-pool-info" onClick={onClick} className={cn(styles.stakePool)}>
       <img className={styles.logo} src={logo} alt="pool-logo" data-testid="stake-pool-logo" />
       <div className={styles.body}>
         <div className={styles.title} data-testid="stake-pool-name">

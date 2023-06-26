@@ -90,14 +90,18 @@ const renderVariation = (variation: number | string, size: TextSize, popupView: 
     ]);
 
     return (
-      <h4 className={classnames([variationStyle, textSize])}>
+      <h4 className={classnames([variationStyle, textSize])} data-testid="portfolio-balance-variation">
         {variation > 0 && '+'}
         {variation}%
       </h4>
     );
   }
 
-  return <h4 className={classnames([styles.variation, textSize])}>{variation}</h4>;
+  return (
+    <h4 className={classnames([styles.variation, textSize])} data-testid="portfolio-balance-variation">
+      {variation}
+    </h4>
+  );
 };
 
 export const PortfolioBalance = ({

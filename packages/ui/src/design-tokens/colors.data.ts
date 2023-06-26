@@ -106,6 +106,20 @@ export const colors = {
   $side_drawer_head_title_color: '',
   $side_drawer_content_title_color: '',
   $side_drawer_content_description_color: '',
+
+  $search_box_container_bgColor: '',
+  $search_box_container_bgColor_pressed: '',
+  $search_box_container_borderColor_hover: '',
+  $search_box_container_outlineColor: '',
+  $search_box_label_color: '',
+  $search_box_label_color_pressed: '',
+  $search_box_clear_button_container_bgColor: '',
+  $search_box_clear_button_container_bgColor_hover: '',
+  $search_box_clear_button_container_bgColor_pressed: '',
+  $search_box_clear_button_container_outlineColor: '',
+  $search_box_clear_button_label_color: '',
+  $search_box_clear_button_label_color_hover: '',
+  $search_box_clear_button_label_color_pressed: '',
 };
 
 export type Colors = typeof colors;
@@ -124,8 +138,9 @@ export const lightColorScheme = {
   $primary_black: '#3D3B39',
   $primary_grey: '#C0C0C0',
   $primary_light_grey_plus: '#EFEFEF',
-  $primary_light_grey: '#EFEFEF',
-  $primary_light_grey_0_56: 'rgba(239, 239, 239, 0.56)',
+  $primary_light_grey_plus_0_56: 'rgba(239, 239, 239, 0.56)',
+  $primary_light_grey: '#F9F9F9',
+  $primary_light_grey_0_56: 'rgba(249, 249, 249, 0.56)',
   $primary_white: '#FFFFFF',
   $secondary_lace_pink: '#FF92DE',
   $secondary_data_pink: '#FF5470',

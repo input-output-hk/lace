@@ -19,7 +19,6 @@ import { walletBalanceTransformer } from '@src/api/transformers';
 import { StakePoolDetails, StakingModals } from '../../stake-pool-details';
 import { Sections } from '@views/browser/features/staking/types';
 import { useStakePoolDetails } from '../../stake-pool-details/store';
-import { stakePoolTransformer } from '../api/transformers';
 import { useDelegationStore } from '../stores';
 import { DelegationLayout } from './DelegationLayout';
 
@@ -93,7 +92,11 @@ export const DelegationContainer = (): React.ReactElement => {
 
   const parseStakePools = () =>
     stakePoolSearchResults?.pageResults.map((pool) =>
-      stakePoolTransformer({ stakePool: pool, delegatingPoolId: delegationDetails?.id?.toString(), cardanoCoin })
+      Wallet.util.stakePoolTransformer({
+        stakePool: pool,
+        delegatingPoolId: delegationDetails?.id?.toString(),
+        cardanoCoin
+      })
     );
 
   useEffect(() => {
@@ -143,7 +146,9 @@ export const DelegationContainer = (): React.ReactElement => {
         searchValue={searchValue}
         handleSearchChange={handleSearch}
         handleAddFunds={redirectToReceive}
-        currentStakePool={delegationDetails && stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin })}
+        currentStakePool={
+          delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin })
+        }
         isLoading={isLoadingNetworkInfo}
         totalRewards={Wallet.util.lovelacesToAdaString(totalRewards.toString())}
         lastReward={Wallet.util.lovelacesToAdaString(lastReward.toString())}
