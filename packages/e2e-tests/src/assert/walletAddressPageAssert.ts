@@ -14,7 +14,7 @@ class WalletAddressPageAssert {
     } else {
       await expect(await WalletAddressPage.drawerHeaderTitle.getText()).to.equal(await t('qrInfo.receive'));
     }
-    await WalletAddressPage.closeButton.waitForDisplayed();
+    await WalletAddressPage.drawerHeaderCloseButton.waitForDisplayed();
     await WalletAddressPage.drawerHeaderSubtitle.waitForDisplayed();
     await expect(await WalletAddressPage.drawerHeaderSubtitle.getText()).to.equal(
       await t('qrInfo.scanQRCodeToConnectWallet')

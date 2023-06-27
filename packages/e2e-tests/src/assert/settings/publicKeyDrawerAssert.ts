@@ -25,13 +25,13 @@ class WalletPublicKeyDrawerAssert {
     await expect(await WalletAddressPage.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.wallet.general.showPubKey')
     );
-    await WalletAddressPage.backButton.waitForDisplayed();
+    await WalletAddressPage.drawerHeaderBackButton.waitForDisplayed();
     if (mode === 'extended') {
       await WalletAddressPage.drawerNavigationTitle.waitForDisplayed();
       await expect(await WalletAddressPage.drawerNavigationTitle.getText()).to.equal(
         await t('browserView.settings.heading')
       );
-      await WalletAddressPage.closeButton.waitForDisplayed();
+      await WalletAddressPage.drawerHeaderCloseButton.waitForDisplayed();
     }
     await this.assertSeeQrCode();
     await WalletAddressPage.walletName.waitForDisplayed();

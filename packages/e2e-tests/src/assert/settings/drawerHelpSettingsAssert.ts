@@ -29,8 +29,8 @@ class DrawerHelpSettingsAssert {
 
     const isExtended = mode === 'extended';
     await HelpSettingsDrawer.drawerNavigationTitle.waitForDisplayed({ reverse: !isExtended });
-    await HelpSettingsDrawer.closeButton.waitForDisplayed({ reverse: !isExtended });
-    await HelpSettingsDrawer.backButton.waitForDisplayed({ reverse: isExtended });
+    await HelpSettingsDrawer.drawerHeaderCloseButton.waitForDisplayed({ reverse: !isExtended });
+    await HelpSettingsDrawer.drawerHeaderBackButton.waitForDisplayed({ reverse: isExtended });
     if (isExtended) {
       await expect(await HelpSettingsDrawer.drawerNavigationTitle.getText()).to.equal(
         await t('browserView.settings.heading')
