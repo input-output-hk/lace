@@ -443,7 +443,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
             title={t('browserView.assets.welcome')}
             subtitle={t('browserView.assets.startYourWeb3Journey')}
             prompt={t('browserView.fundWalletBanner.prompt')}
-            walletAddress={walletInfo.address.toString()}
+            walletAddress={walletInfo.addresses[0].address.toString()}
           />
         )}
       </Skeleton>

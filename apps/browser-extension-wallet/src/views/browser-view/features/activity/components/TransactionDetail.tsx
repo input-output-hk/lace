@@ -31,22 +31,24 @@ export type AddressListType = {
 export const getTransactionData = ({
   addrOutputs,
   addrInputs,
-  walletAddress,
+  walletAddresses,
   isIncomingTransaction
 }: {
   addrOutputs: TxOutputInput[];
   addrInputs: TxOutputInput[];
-  walletAddress: string;
+  walletAddresses: string[];
   isIncomingTransaction: boolean;
 }): TxSummary[] => {
-  if (!addrOutputs || !addrInputs || !walletAddress) {
+  if (!addrOutputs || !addrInputs || !walletAddresses) {
     return [];
   }
 
   // For incomming type of tx the sender addresses will be all addresses available in transactionInfo?.tx.addrInputs list (except the current one)
   if (isIncomingTransaction) {
-    const outputData = addrOutputs.filter((input) => input.addr === walletAddress);
-    const addrs = uniq(flatMap(addrInputs, (input) => (input.addr !== walletAddress ? [input.addr] : []))) as string[];
+    const outputData = addrOutputs.filter((input) => walletAddresses.includes(input.addr));
+    const addrs = uniq(
+      flatMap(addrInputs, (input) => (!walletAddresses.includes(input.addr) ? [input.addr] : []))
+    ) as string[];
 
     return outputData.map((output) => ({
       ...output,
@@ -57,7 +59,7 @@ export const getTransactionData = ({
 
   // For outgoing/sent type of tx the receiver addresses will be all addresses available in transactionInfo?.tx.addrOutputs list (except the current one)
   return addrOutputs
-    .filter((output) => output.addr !== walletAddress)
+    .filter((output) => !walletAddresses.includes(output.addr))
     .map((output) => ({
       ...output,
       ...(!Array.isArray(output.addr) && { addr: [output.addr] })
@@ -120,10 +122,10 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
       getTransactionData({
         addrOutputs,
         addrInputs,
-        walletAddress: String(walletInfo.address),
+        walletAddresses: walletInfo.addresses.map((addr) => addr.address.toString()),
         isIncomingTransaction
       }),
-    [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.address]
+    [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.addresses]
   );
 
   if (fetchingTransactionInfo || !transactionInfo) return <Skeleton data-testid="transaction-details-skeleton" />;

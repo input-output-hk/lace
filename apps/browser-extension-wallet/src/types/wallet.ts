@@ -19,6 +19,5 @@ export interface TxMinimumCoinQuantity {
 }
 export interface WalletInfo {
   name: string;
-  address: Wallet.Cardano.PaymentAddress;
-  rewardAccount: Wallet.Cardano.RewardAccount;
+  addresses: Wallet.KeyManagement.GroupedAddress[];
 }

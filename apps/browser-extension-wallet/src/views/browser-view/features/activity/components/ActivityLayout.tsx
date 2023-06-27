@@ -141,7 +141,7 @@ export const ActivityLayout = (): ReactElement => {
               title={t('browserView.activity.fundWalletBanner.title')}
               subtitle={t('browserView.activity.fundWalletBanner.subtitle')}
               prompt={t('browserView.fundWalletBanner.prompt')}
-              walletAddress={walletInfo.address.toString()}
+              walletAddress={walletInfo.addresses[0].address.toString()}
               shouldHaveVerticalContent
             />
           )}

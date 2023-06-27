@@ -42,7 +42,7 @@ export const ReceiveInfo = ({ wallet, goBack }: ReceiveInfoProps): React.ReactEl
         <InfoWallet
           getQRCodeOptions={() => getQRCodeOptions(theme, QR_SIZE)}
           isPopupView
-          walletInfo={{ ...wallet, qrData: wallet.address.toString() }}
+          walletInfo={{ ...wallet, qrData: wallet.addresses[0].address.toString() }}
           translations={infoWalletTranslations}
         />
       </div>

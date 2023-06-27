@@ -185,13 +185,15 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       txType = 'Send';
     }
 
-    const externalOutputs = tx.body.outputs.filter((output) => output.address !== walletInfo.address);
+    const externalOutputs = tx.body.outputs.filter((output) =>
+      walletInfo.addresses.some((addr) => output.address !== addr.address)
+    );
     let totalCoins = BigInt(0);
 
     // eslint-disable-next-line unicorn/no-array-reduce
     const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
       // Don't show withdrawl tx's etc
-      if (txOut.address.toString() === walletInfo.address.toString()) return acc;
+      if (txOut.address.toString() === walletInfo.addresses[0].toString()) return acc;
       totalCoins += txOut.value.coins;
       if (totalCoins >= availableBalance?.coins) {
         setInsufficientFunds(true);
@@ -213,7 +215,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       outputs: txSummaryOutputs,
       type: txType
     };
-  }, [tx, availableBalance, walletInfo.address, createAssetList, addressToNameMap]);
+  }, [tx, availableBalance, walletInfo.addresses, createAssetList, addressToNameMap]);
 
   const translations = {
     transaction: t('core.dappTransaction.transaction'),
