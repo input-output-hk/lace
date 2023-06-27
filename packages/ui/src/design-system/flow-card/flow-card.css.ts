@@ -12,6 +12,5 @@ export const container = style([
     display: 'grid',
     gridTemplateAreas: `"profile details"`,
     boxSizing: 'border-box',
-    maxWidth: '700px',
   },
 ]);
