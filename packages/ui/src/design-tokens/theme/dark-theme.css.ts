@@ -182,6 +182,10 @@ const colors: Colors = {
   $search_box_clear_button_label_color_hover: darkColorScheme.$primary_white,
   $search_box_clear_button_label_color_pressed:
     darkColorScheme.$primary_light_grey,
+
+  $transaction_summary_label_color: darkColorScheme.$primary_white,
+  $transaction_summary_secondary_label_color:
+    darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {
