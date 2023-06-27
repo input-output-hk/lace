@@ -8,7 +8,9 @@ const tsupConfig = defineConfig([
   {
     bundle: true,
     clean: true,
-    dts: true,
+    dts: {
+      resolve: true,
+    },
     entry: ['./src/index.ts'],
     esbuildPlugins: [
       // eslint-disable-next-line new-cap
