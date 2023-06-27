@@ -3,7 +3,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 import isChromatic from 'chromatic/isChromatic';
 
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Section, Variants } from '../decorators';
 import { Cell, Grid } from '../grid';
 
@@ -159,7 +159,7 @@ export const Overview = (): JSX.Element => (
           '',
         ]}
       />
-      <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+      <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
         <Variants.Table headers={['', '', '', '', '']}>
           <Variants.Row>
             <Variants.Cell>
@@ -187,7 +187,7 @@ export const Overview = (): JSX.Element => (
             </Variants.Cell>
           </Variants.Row>
         </Variants.Table>
-      </ThemeProvider>
+      </LocalThemeProvider>
     </Section>
     <Section title="Responsive">
       <Grid columns="$8" rows="$none">

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import Icon from '@ant-design/icons';
-import { SortField } from '@cardano-sdk/core';
+import { Wallet } from '@lace/cardano';
 import { List, ListProps } from 'antd';
 import cn from 'classnames';
 import isNumber from 'lodash/isNumber';
@@ -15,7 +15,7 @@ type SortKey = 'name' | 'apy' | 'saturation';
 type SortDirection = 'asc' | 'desc';
 
 export type StakePoolSortOptions = {
-  field: SortField;
+  field: Wallet.SortField;
   order: SortDirection;
 };
 
