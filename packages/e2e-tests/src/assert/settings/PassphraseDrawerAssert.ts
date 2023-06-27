@@ -1,4 +1,4 @@
-import PassphraseDrawer from '../../elements/settings/passphraseDrawer';
+import PassphraseDrawer from '../../elements/settings/PassphraseDrawer';
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 

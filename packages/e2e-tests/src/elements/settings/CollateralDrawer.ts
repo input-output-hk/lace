@@ -1,6 +1,6 @@
 import CommonDrawerElements from '../CommonDrawerElements';
 
-class CollateralSettingsDrawer extends CommonDrawerElements {
+class CollateralDrawer extends CommonDrawerElements {
   private COLLATERAL_DESCRIPTION = '[data-testid="collateral-description"]';
   private COLLATERAL_BANNER_DESCRIPTION = '[data-testid="banner-description"]';
   private PASSWORD_INPUT = '[data-testid="password-input"]';
@@ -46,4 +46,4 @@ class CollateralSettingsDrawer extends CommonDrawerElements {
   }
 }
 
-export default new CollateralSettingsDrawer();
+export default new CollateralDrawer();

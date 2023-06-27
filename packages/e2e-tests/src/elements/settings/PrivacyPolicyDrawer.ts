@@ -1,6 +1,6 @@
 import CommonDrawerElements from '../CommonDrawerElements';
 
-class PrivacyPolicySettingsDrawer extends CommonDrawerElements {
+class PrivacyPolicyDrawer extends CommonDrawerElements {
   private PRIVACY_POLICY_CONTENT = '[data-testid="privacy-policy-content"]';
 
   get privacyPolicyContent() {
@@ -8,4 +8,4 @@ class PrivacyPolicySettingsDrawer extends CommonDrawerElements {
   }
 }
 
-export default new PrivacyPolicySettingsDrawer();
+export default new PrivacyPolicyDrawer();

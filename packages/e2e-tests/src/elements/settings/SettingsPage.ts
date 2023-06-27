@@ -1,5 +1,5 @@
 import AboutLaceWidget from './extendedView/AboutLaceWidget';
-import { SettingsLink } from './settingsLink';
+import { SettingsLink } from './SettingsLink';
 import { ChainablePromiseArray, ElementArray } from 'webdriverio';
 
 class SettingsPage {
