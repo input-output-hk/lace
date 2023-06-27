@@ -1,14 +1,20 @@
-import { sx } from '@lace/ui';
+import { style, sx } from '@lace/ui';
 
-export const barStyles = sx({
-  alignItems: 'center',
-  bottom: '$24',
-  display: 'flex',
-  justifyContent: 'space-between',
-  left: '$0',
-  padding: '$16',
-  position: '$sticky',
-  right: '$0',
-});
+export const barContainer = style([
+  sx({
+    bottom: '$24',
+    left: '$24',
+    padding: '$16',
+    right: '$24',
+  }),
+  {
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'space-between',
+    position: 'fixed',
+    // Sorry, had to do this, because of the side menu that has z-index: 100
+    zIndex: 101,
+  },
+]);
 
-export const spanBold = sx({ fontWeight: '$bold' });
+export const selectedPoolsLabel = sx({ fontWeight: '$bold' });

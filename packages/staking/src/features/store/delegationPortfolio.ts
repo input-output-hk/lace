@@ -6,11 +6,12 @@ const defaultState: DelegationPortfolioState = {
   delegationPortfolioPools: [],
 };
 
-export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set) => ({
+export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set, get) => ({
   ...defaultState,
   addPoolToPortfolio: (pool) =>
     set(({ delegationPortfolioPools }) => ({ delegationPortfolioPools: [...delegationPortfolioPools, pool] })),
   clearDelegationPortfolio: () => set(defaultState),
+  poolsCount: () => get().delegationPortfolioPools.length,
   removePoolFromPortfolio: ({ poolId }) =>
     set(({ delegationPortfolioPools }) => ({
       delegationPortfolioPools: delegationPortfolioPools.filter((pool) => pool.id !== poolId),
