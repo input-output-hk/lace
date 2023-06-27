@@ -73,7 +73,7 @@ export const grid = recipe({
         gridTemplateRows: 'none',
       },
       $fitContent: {
-        gridTemplateRows: 'min-content',
+        gridTemplateRows: 'auto minmax(0, 1fr)',
       },
     },
     gutters: {
