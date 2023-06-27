@@ -1,7 +1,6 @@
 import webTester from '../../actor/webTester';
 import { TransactionSummaryPage } from '../../elements/newTransaction/transactionSummaryPage';
 import { TestnetPatterns } from '../../support/patterns';
-import { Button } from '../../elements/button';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 
@@ -15,7 +14,7 @@ interface valuesToBeSend {
   currency: string;
 }
 
-class TransactionSummaryExtendedAssert {
+class TransactionSummaryAssert {
   async assertSeeSummaryPage(expectedTransactionSummaryData: ExpectedTransactionSummaryData[]) {
     const transactionSummary = new TransactionSummaryPage();
 
@@ -37,8 +36,14 @@ class TransactionSummaryExtendedAssert {
     );
     await expect((await transactionSummary.getFeeValueFiat()) as string).to.match(TestnetPatterns.USD_VALUE_REGEX);
 
-    await webTester.seeWebElement(new Button(await t('browserView.transaction.send.footer.confirm')));
-    await webTester.seeWebElement(new Button(await t('browserView.transaction.send.footer.cancel')));
+    await transactionSummary.confirmButton.waitForDisplayed();
+    await expect(await transactionSummary.confirmButton.getText()).to.equal(
+      await t('browserView.transaction.send.footer.confirm')
+    );
+    await transactionSummary.cancelButton.waitForDisplayed();
+    await expect(await transactionSummary.cancelButton.getText()).to.equal(
+      await t('browserView.transaction.send.footer.cancel')
+    );
   }
 
   async verifyBundle(
@@ -85,4 +90,4 @@ class TransactionSummaryExtendedAssert {
   }
 }
 
-export default new TransactionSummaryExtendedAssert();
+export default new TransactionSummaryAssert();
