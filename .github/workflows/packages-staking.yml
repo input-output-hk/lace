@@ -16,7 +16,7 @@ jobs:
     name: Build Staking Center
     runs-on: ubuntu-22.04
     container: mcr.microsoft.com/playwright:v1.32.2-jammy
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'staking')
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'staking') || contains(github.event.pull_request.labels.*.name, 'ui-toolkit')
     steps:
       - name: Setup Build Essential
         run: apt-get update && apt-get install build-essential -y
