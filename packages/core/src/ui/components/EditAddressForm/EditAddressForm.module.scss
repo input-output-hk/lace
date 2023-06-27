@@ -135,10 +135,10 @@ $drawer-width: 664px;
   margin-right: size_unit(1);
   
   &.valid {
-    color: green;
+    color: var(--text-color-green);
   }
 
   &.invalid {
-    color: red;
+    color: var(--text-color-red);
   }
 }

@@ -34,7 +34,7 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
       address: validateWalletAddress,
       handle: async (value: string) => await validateWalletHandle(value, handleResolver)
     }),
-    []
+    [handleResolver]
   );
 
   const editAddressFormTranslations = {

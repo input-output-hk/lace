@@ -13,11 +13,11 @@ $button_size: 52px;
 
 :global(.anticon) {
   &.valid {
-    color: green;
+    color: var(--text-color-green);
   }
 
   &.invalid {
-    color: red;
+    color: var(--text-color-red);
   }
 }
 

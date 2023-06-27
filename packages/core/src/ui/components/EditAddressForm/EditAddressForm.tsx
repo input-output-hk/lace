@@ -1,6 +1,5 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable no-magic-numbers */
-/* eslint-disable consistent-return */
 import React, { ReactElement, useMemo } from 'react';
 import cn from 'classnames';
 import { Form, FormInstance } from 'antd';
@@ -8,7 +7,7 @@ import { Input, Button, Search } from '@lace/common';
 import styles from './EditAddressForm.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import debounce from 'debounce-promise';
-import { isHandle } from '@src/ui/utils';
+import { HANDLE_DEBOUNCE_TIME, isHandle } from '@src/ui/utils';
 import { useTranslation } from 'react-i18next';
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 
@@ -18,7 +17,9 @@ type valuesPropType = {
   address?: string;
 };
 
-const keys = ['name', 'address'];
+const name = 'name';
+const address = 'address';
+const keys = [name, address];
 
 type ValidatorFn = (_rule: any, value: string) => Promise<void>;
 type ResolveAddressValidatorFn = (_rule: any, value: string, handleResolver: any) => Promise<void>;
@@ -45,10 +46,10 @@ export const EditAddressFormFooter = ({
   onConfirmClick,
   onCancelClick,
   onClose
-}: EditAddressFormFooterProps) => {
+}: EditAddressFormFooterProps): ReactElement => {
   const { t } = useTranslation();
-  const nameValue = Form.useWatch('name', form);
-  const addressValue = Form.useWatch('address', form);
+  const nameValue = Form.useWatch(name, form);
+  const addressValue = Form.useWatch(address, form);
 
   const onSubmit = async () => {
     try {
@@ -97,10 +98,10 @@ const getValidator =
 const getValidatorWithResolver = (
   validate: (val: string, handleResolver: any) => Promise<string>
 ): ResolveAddressValidatorFn => {
-  const debouncedValidate = debounce(validate, 1000); // Debounce the validate function
+  const debouncedValidate = debounce(validate, HANDLE_DEBOUNCE_TIME);
 
   return async (_rule: any, value: string, handleResolver: any) => {
-    const res = await debouncedValidate(value, handleResolver); // Call the debounced validate function
+    const res = await debouncedValidate(value, handleResolver);
     return !res ? Promise.resolve() : Promise.reject(res);
   };
 };
@@ -112,7 +113,7 @@ export const EditAddressForm = ({
   translations,
   footer
 }: EditAddressFormProps): ReactElement => {
-  const addressValue = Form.useWatch('address', form);
+  const addressValue = Form.useWatch(address, form);
 
   const nameValidator = getValidator(validations.name);
   const addressValidator = getValidator(validations.address);
@@ -130,11 +131,11 @@ export const EditAddressForm = ({
       className={styles.form}
     >
       {() => {
-        const isAddressFieldValid = form.getFieldError('address').length === 0;
-        const isAddressFieldValidating = form.isFieldValidating('address');
+        const isAddressFieldValid = form.getFieldError(address).length === 0;
+        const isAddressFieldValidating = form.isFieldValidating(address);
 
         const renderSuffix = () => {
-          if (!isAddressHandle) return;
+          if (!isAddressHandle) return {};
           return isAddressFieldValid ? (
             <CheckCircleOutlined className={styles.valid} />
           ) : (

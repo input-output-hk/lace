@@ -34,7 +34,7 @@ export const AddressForm = ({ initialValues, onConfirmClick }: AddressFormProps)
       address: validateWalletAddress,
       handle: async (value: string) => await validateWalletHandle(value, handleResolver)
     }),
-    []
+    [handleResolver]
   );
 
   return (

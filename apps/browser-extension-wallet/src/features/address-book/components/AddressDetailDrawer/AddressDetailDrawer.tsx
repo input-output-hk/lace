@@ -80,7 +80,7 @@ export const AddressDetailDrawer = ({
       address: validateWalletAddress,
       handle: async (value: string) => await validateWalletHandle(value, handleResolver)
     }),
-    []
+    [handleResolver]
   );
 
   const onClose = () => {

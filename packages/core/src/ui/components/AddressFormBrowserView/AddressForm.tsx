@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 /* eslint-disable consistent-return */
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Form } from 'antd';
@@ -9,7 +8,7 @@ import { ReactComponent as PlusIcon } from '../../assets/icons/plus.component.sv
 import { ReactComponent as PlusIconDisabled } from '../../assets/icons/plus-disabled.component.svg';
 import styles from './AddressForm.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-import { isHandle } from '@src/ui/utils';
+import { HANDLE_DEBOUNCE_TIME, isHandle } from '@src/ui/utils';
 import debounce from 'debounce-promise';
 
 type valueKeys = 'name' | 'address';
@@ -36,11 +35,11 @@ const getValidator =
     const res = validate(value);
     return !res ? Promise.resolve() : Promise.reject(res);
   };
-// eslint-disable-next-line no-magic-numbers
+
 const getValidatorWithResolver = (
   validate: (val: string, handleResolver: any) => Promise<string>
 ): ResolveAddressValidatorFn => {
-  const debouncedValidate = debounce(validate, 1000);
+  const debouncedValidate = debounce(validate, HANDLE_DEBOUNCE_TIME);
 
   return async (_rule: any, value: string, handleResolver: any) => {
     const res = await debouncedValidate(value, handleResolver);
@@ -55,7 +54,7 @@ export const AddressFormBrowserView = ({
   onClose,
   translations
 }: AddressFormPropsBrowserView): React.ReactElement => {
-  const [form] = Form.useForm<{ name: string; address: string }>();
+  const [form] = Form.useForm<valuesPropType>();
   const addressValue = Form.useWatch('address', form);
 
   const isAddressHandle = isHandle(addressValue);
@@ -79,7 +78,7 @@ export const AddressFormBrowserView = ({
       form.resetFields();
       if (onClose) onClose();
     } catch (error) {
-      console.log('error while submitting new address', error);
+      console.log('Error while submitting new address', error);
     }
   };
   const Plus = PlusIcon ? <PlusIcon className={styles.icon} /> : <PlusCircleOutlined />;
