@@ -55,11 +55,10 @@ export const AssetDetails = ({
         <PortfolioBalance
           balance={fiatPrice}
           currencyCode={fiatPrice === '-' ? '' : fiatCode}
-          variationPercentage={fiatPriceVariation}
+          balanceSubtitle={{ value: fiatPriceVariation, isPercentage: fiatPriceVariation !== '-' }}
           label={t(popupView ? 'browserView.assetDetails.price' : 'browserView.assetDetails.assetPrice')}
-          size="medium"
-          popupView={popupView}
-          isDrawerView={isDrawerView}
+          textSize="medium"
+          showInfoTooltip={!isDrawerView}
         />
       </div>
 
@@ -67,11 +66,10 @@ export const AssetDetails = ({
         <PortfolioBalance
           balance={balance}
           currencyCode={assetSymbol}
-          variationPercentage={balanceInFiat}
+          balanceSubtitle={{ value: balanceInFiat, isPercentage: false }}
           label={t('browserView.assetDetails.assetBalance')}
-          size="medium"
-          popupView={popupView}
-          isDrawerView={isDrawerView}
+          textSize="medium"
+          showInfoTooltip={!isDrawerView}
         />
       </div>
 
