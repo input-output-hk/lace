@@ -32,7 +32,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsc && tsup",
     "cleanup": "shx rm -rf dist node_modules && shx rm -rf ../../.cache/eslintcache",
     "dev": "ladle serve",
     "eslint:check": "eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '.*/**/*.{cjs,mjs,js,ts,tsx}'",
