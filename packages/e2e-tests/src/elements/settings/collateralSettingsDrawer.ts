@@ -1,7 +1,6 @@
 import CommonDrawerElements from '../CommonDrawerElements';
 
 class CollateralSettingsDrawer extends CommonDrawerElements {
-  private COLLATERAL_HEADER = '[data-testid="drawer-header-title"]';
   private COLLATERAL_DESCRIPTION = '[data-testid="collateral-description"]';
   private COLLATERAL_BANNER_DESCRIPTION = '[data-testid="banner-description"]';
   private PASSWORD_INPUT = '[data-testid="password-input"]';
@@ -13,9 +12,6 @@ class CollateralSettingsDrawer extends CommonDrawerElements {
   private SAD_FACE_ICON = '[data-testid="collateral-sad-face-icon"]';
   private ERROR_LABEL = '[data-testid="collateral-not-enough-ada-error"]';
 
-  get collateralHeader() {
-    return $(this.COLLATERAL_HEADER);
-  }
   get sadFaceIcon() {
     return $(this.SAD_FACE_ICON);
   }

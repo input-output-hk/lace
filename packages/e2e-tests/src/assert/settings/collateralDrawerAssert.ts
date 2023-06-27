@@ -6,8 +6,8 @@ import { TestnetPatterns } from '../../support/patterns';
 
 class CollateralDrawerAssert {
   async assertSeeCollateralDrawer(state: 'Active' | 'Inactive') {
-    await collateralSettingsDrawer.collateralHeader.waitForDisplayed();
-    expect(await collateralSettingsDrawer.collateralHeader.getText()).to.equal(
+    await collateralSettingsDrawer.drawerHeaderTitle.waitForDisplayed();
+    expect(await collateralSettingsDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.wallet.collateral.title')
     );
     if (state === 'Inactive') {
@@ -48,7 +48,7 @@ class CollateralDrawerAssert {
   }
 
   async assertSeeCollateralNotEnoughAdaDrawer() {
-    expect(await collateralSettingsDrawer.collateralHeader.getText()).to.equal(
+    expect(await collateralSettingsDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.wallet.collateral.title')
     );
     await collateralSettingsDrawer.passwordInputContainer.waitForDisplayed({
