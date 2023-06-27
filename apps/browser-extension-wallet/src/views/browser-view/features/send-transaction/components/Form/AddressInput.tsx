@@ -145,7 +145,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 
   useEffect(() => {
-    const existingAddress = getExistingAddress(address);
+    const existingAddress = getExistingAddress(handle || address);
     if (existingAddress) {
       setAddressInputValue({ name: existingAddress.walletName, address: existingAddress.walletAddress });
     } else {
