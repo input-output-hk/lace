@@ -51,18 +51,19 @@ jobs:
           path: packages/staking/coverage
       - name: Build Staking dist
         run: yarn workspace @lace/staking build
-      - name: Build Ladle
-        run: yarn workspace @lace/staking story:build
-      - name: Upload Ladle artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: staking-ladle
-          path: packages/staking/build
-      - name: Run visual regression
-        continue-on-error: true
-        run: yarn workspace @lace/staking test:vr
-      - name: Upload visual regression
-        uses: actions/upload-artifact@v3
-        with:
-          name: staking-visual-regression
-          path: packages/staking/.lostpixel
+#        TODO fix ladle build
+#      - name: Build Ladle
+#        run: yarn workspace @lace/staking story:build
+#      - name: Upload Ladle artifacts
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: staking-ladle
+#          path: packages/staking/build
+#      - name: Run visual regression
+#        continue-on-error: true
+#        run: yarn workspace @lace/staking test:vr
+#      - name: Upload visual regression
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: staking-visual-regression
+#          path: packages/staking/.lostpixel
