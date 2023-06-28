@@ -1,8 +1,8 @@
-import SettingsPage from '../../elements/settings/extendedView/settingsPage';
+import SettingsPage from '../../elements/settings/SettingsPage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 
-class SettingsPageExtendedAssert {
+class SettingsPageAssert {
   async assertSeeSubHeadings(popupView = false) {
     if (popupView) {
       expect(await SettingsPage.aboutLink.getTitleText()).to.equal(await t('browserView.settings.wallet.about.title'));
@@ -194,4 +194,4 @@ class SettingsPageExtendedAssert {
   }
 }
 
-export default new SettingsPageExtendedAssert();
+export default new SettingsPageAssert();

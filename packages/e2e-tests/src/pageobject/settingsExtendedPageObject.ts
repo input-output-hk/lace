@@ -1,6 +1,6 @@
-import GeneralSettingsDrawer from '../elements/settings/extendedView/generalSettingsDrawer';
-import SettingsPage from '../elements/settings/extendedView/settingsPage';
-import NetworkSettingsDrawer from '../elements/settings/extendedView/networkSettingsDrawer';
+import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
+import SettingsPage from '../elements/settings/SettingsPage';
+import NetworkDrawer from '../elements/settings/NetworkDrawer';
 import menuHeaderPageObject from './menuHeaderPageObject';
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import localStorageManager from '../utils/localStorageManager';
@@ -35,18 +35,18 @@ class SettingsExtendedPageObject {
 
   clickOnRemoveWallet = async () => await SettingsPage.removeWalletButton.click();
 
-  clickOnShowPublicKey = async () => await GeneralSettingsDrawer.showPublicKeyButton.click();
+  clickOnShowPublicKey = async () => await YourKeysDrawer.showPublicKeyButton.click();
 
   clickOnNetworkRadioButton = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
     switch (network) {
       case 'Mainnet':
-        await NetworkSettingsDrawer.mainnetRadioButton.click();
+        await NetworkDrawer.mainnetRadioButton.click();
         break;
       case 'Preprod':
-        await NetworkSettingsDrawer.preprodRadioButton.click();
+        await NetworkDrawer.preprodRadioButton.click();
         break;
       case 'Preview':
-        await NetworkSettingsDrawer.previewRadioButton.click();
+        await NetworkDrawer.previewRadioButton.click();
         break;
     }
   };

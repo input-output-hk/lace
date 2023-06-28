@@ -226,9 +226,8 @@ Feature: General Settings - Extended Browser View
   @LW-3629 @Mainnet @Testnet
   Scenario: Extended View - Settings - FAQ opening in a new tab
     When I open settings from header menu
-    When I click on "FAQs" setting
-    Then New tab with url containing "www.lace.io/faq" is opened
-    And An "FAQ" text is displayed
+    And I click on "FAQs" setting
+    Then FAQ page is displayed
 
 
   @LW-3058 @Mainnet @Testnet

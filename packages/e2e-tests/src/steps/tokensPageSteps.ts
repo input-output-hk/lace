@@ -6,7 +6,7 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
-import settingsPageExtendedAssert from '../assert/settings/settingsPageExtendedAssert';
+import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';

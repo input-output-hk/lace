@@ -1,4 +1,4 @@
-import CookiePolicyDrawer from '../../elements/settings/extendedView/CookiePolicyDrawer';
+import CookiePolicyDrawer from '../../elements/settings/CookiePolicyDrawer';
 import { expect } from 'chai';
 import { readFromFile } from '../../utils/fileUtils';
 import { t } from '../../utils/translationService';
@@ -12,11 +12,11 @@ class CookiePolicyDrawerAssert {
   };
 
   assertSeeDrawerCloseButton = async () => {
-    await CookiePolicyDrawer.crossButton.waitForDisplayed();
+    await CookiePolicyDrawer.drawerHeaderCloseButton.waitForDisplayed();
   };
 
   assertSeeDrawerBackButton = async () => {
-    await CookiePolicyDrawer.backButton.waitForDisplayed();
+    await CookiePolicyDrawer.drawerHeaderBackButton.waitForDisplayed();
   };
 
   assertSeeCookiePolicyTitle = async () => {

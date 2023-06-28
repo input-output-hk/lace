@@ -1,5 +1,6 @@
-class PassphraseDrawer {
-  private DRAWER_TITLE = '[data-testid="drawer-header-title"]';
+import CommonDrawerElements from '../CommonDrawerElements';
+
+class PassphraseDrawer extends CommonDrawerElements {
   private BANNER_ICON = '[data-testid="banner-icon"]';
   private PASSPHRASE_DRAWER_DESCRIPTION = '[data-testid="passphrase-drawer-description"]';
   private BANNER_DESCRIPTION = '[data-testid="banner-description"]';
@@ -8,10 +9,6 @@ class PassphraseDrawer {
   private HIDE_PASSPHRASE_BUTTON = '[data-testid="hide-passphrase-button"]';
   private MNEMONIC_WORD_CONTAINER = '[data-testid="mnemonic-word-container"]';
   private MNEMONIC_WORD_WRITEDOWN = '[data-testid="mnemonic-word-writedown"]';
-
-  get title() {
-    return $(this.DRAWER_TITLE);
-  }
 
   get description() {
     return $(this.PASSPHRASE_DRAWER_DESCRIPTION);
