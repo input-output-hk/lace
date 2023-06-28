@@ -144,20 +144,21 @@ in rec {
     </plist>
   '';
 
-  icons = let
+  svg2icns = source: let
     sizes = [16 18 19 22 24 32 40 48 64 128 256 512 1024];
     d2s = d: "${toString d}x${toString d}";
-    source = ./macos-app-icon.svg;
-  in pkgs.runCommand "darwin-icons" {
+  in pkgs.runCommand "${baseNameOf source}.icns" {
     buildInputs = with pkgs; [ imagemagick ];
   } ''
-    mkdir -p $out/iconset.iconset
+    mkdir -p iconset.iconset
     ${lib.concatMapStringsSep "\n" (dim: ''
-      convert -background none -size ${d2s dim}       ${source} $out/iconset.iconset/icon_${d2s dim}.png
-      convert -background none -size ${d2s (dim * 2)} ${source} $out/iconset.iconset/icon_${d2s dim}@2x.png
+      convert -background none -size ${d2s dim}       ${source} iconset.iconset/icon_${d2s dim}.png
+      convert -background none -size ${d2s (dim * 2)} ${source} iconset.iconset/icon_${d2s dim}@2x.png
     '') sizes}
-    /usr/bin/iconutil --convert icns --output $out/iconset.icns $out/iconset.iconset
+    /usr/bin/iconutil --convert icns --output $out iconset.iconset
   '';
+
+  icons = svg2icns ./macos-app-icon.svg;
 
   lace-blockchain-services = pkgs.runCommand "lace-blockchain-services" {
     meta.mainProgram = lace-blockchain-services-exe.name;
@@ -179,7 +180,7 @@ in rec {
     ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
     ln -s ${common.networkConfigs} "$app"/Resources/cardano-node-config
 
-    ln -s ${icons}/iconset.icns "$app"/Resources/iconset.icns
+    ln -s ${icons} "$app"/Resources/iconset.icns
   '';
 
   nix-bundle-exe-same-dir = pkgs.runCommand "nix-bundle-exe-same-dir" {} ''
@@ -434,6 +435,28 @@ in rec {
     preBuild = ''sed -r 's+/usr/bin/SetFile+${apple_SetFile}/bin/SetFile+g' -i src/dmgbuild/core.py''; # impure
   };
 
+  mkBadge = pkgs.writers.makePythonWriter pythonPackages.python pythonPackages pythonPackages "mkBadge" {
+    libraries = [ (dmgbuild.overrideDerivation (drv: {
+      preBuild = (drv.preBuild or "") + "\n" + ''
+        sed -r 's/^\s*position = \(0.5, 0.5\)\s*$//g' -i src/dmgbuild/badge.py
+        sed -r 's/^def badge_disk_icon\(badge_file, output_file/\0, position/g' -i src/dmgbuild/badge.py
+      '';
+    })) ];
+  } ''
+    import sys
+    import dmgbuild.badge
+    if len(sys.argv) != 5:
+        print("usage: " + sys.argv[0] + " <source.icns> <target.icns> " +
+              "<posx=0.5> <posy=0.5>")
+        sys.exit(1)
+    dmgbuild.badge.badge_disk_icon(sys.argv[1], sys.argv[2],
+                                   (float(sys.argv[3]), float(sys.argv[4])))
+  '';
+
+  badgeIcon = pkgs.runCommand "badge.icns" {} ''
+    ${mkBadge} ${svg2icns ./macos-dmg-inset.svg} $out 0.5 0.420
+  '';
+
   dmgImage = let
     revShort =
       if inputs.self ? shortRev
@@ -454,9 +477,7 @@ in rec {
       symlinks = {"Applications": "/Applications"}
       hide_extension = [ app_name ]
 
-      # FIXME: Badge icons require pyobjc-framework-Quartz.
-      badge_icon = icon_path
-      # icon = icon_path
+      icon = icon_path
 
       icon_locations = {app_name: (140, 120), "Applications": (500, 120)}
       background = "builtin-arrow"
@@ -491,7 +512,7 @@ in rec {
 
     ${dmgbuild}/bin/dmgbuild \
       -D app_path=${lace-blockchain-services-bundle}/Applications/${lib.escapeShellArg common.prettyName}.app \
-      -D icon_path=${icons}/iconset.icns \
+      -D icon_path=${badgeIcon} \
       -s ${settingsPy} \
       ${lib.escapeShellArg common.prettyName} $target
 
