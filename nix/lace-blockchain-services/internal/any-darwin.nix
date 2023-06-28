@@ -98,7 +98,7 @@ in rec {
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
     src = ./lace-blockchain-services;
-    vendorHash = "sha256-1iyb+4faqZAo6IZf7PYx3Dg+H2IULzhBW80c5loXBPw=";
+    vendorHash = "sha256-DjDyHOENtaFSNGQtX50wL3hIo+lmMY1BJBn/TaAcXU0=";
     nativeBuildInputs = with pkgs; [ imagemagick go-bindata ];
     buildInputs =
       (with pkgs; [ ])

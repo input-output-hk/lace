@@ -22,10 +22,10 @@ import (
 
 	"lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
 
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/mem"
-	"github.com/shirou/gopsutil/host"
-	"github.com/shirou/gopsutil/load"
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/load"
 	"github.com/sqweek/dialog"
 	"github.com/getlantern/systray"
 	"github.com/allan-simon/go-singleinstance"
@@ -43,17 +43,9 @@ func main() {
 		panic(err)
 	}
 
-	// FIXME: https://github.com/shirou/gopsutil/issues/1000
-	numCPUs := -1
-	cpuModel := "unknown-cpu"
 	cpuInfo, err := cpu.Info()
 	if err != nil {
-		if !(runtime.GOOS == "darwin" && runtime.GOARCH == "arm64") {
-			panic(err)
-		}
-	} else {
-		cpuModel = cpuInfo[0].ModelName
-		numCPUs = len(cpuInfo)
+		panic(err)
 	}
 
 	sep := string(filepath.Separator)
@@ -77,6 +69,13 @@ func main() {
 	closeOutputs := duplicateOutputToFile(logFile)
 	defer closeOutputs()
 
+	var stdArch string
+	switch runtime.GOARCH {
+	case "amd64": stdArch = "x86_64"
+	case "arm64": stdArch = "aarch64"
+	default: stdArch = runtime.GOARCH
+	}
+
 	fmt.Printf("%s[%d]: running as %s@%s\n", OurLogPrefix, os.Getpid(),
 		ourpaths.Username, hostInfo.Hostname)
 	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
@@ -85,9 +84,11 @@ func main() {
 	fmt.Printf("%s[%d]: timezone: %s\n", OurLogPrefix, os.Getpid(), time.Now().Format("UTC-07:00 (MST)"))
 	fmt.Printf("%s[%d]: HostID: %s\n", OurLogPrefix, os.Getpid(), hostInfo.HostID)
 	fmt.Printf("%s[%d]: OS: (%s-%s) %s %s %s (family: %s)\n", OurLogPrefix, os.Getpid(),
-		runtime.GOOS, runtime.GOARCH, hostInfo.OS, hostInfo.Platform, hostInfo.PlatformVersion,
-		hostInfo.PlatformFamily)
-	fmt.Printf("%s[%d]: CPU: %dx %s\n", OurLogPrefix, os.Getpid(), numCPUs, cpuModel)
+		stdArch, runtime.GOOS,
+		hostInfo.OS, hostInfo.Platform, hostInfo.PlatformVersion, hostInfo.PlatformFamily)
+	fmt.Printf("%s[%d]: CPU: %s (%d physical thread(s), %d core(s) each, at %.2f GHz)\n",
+		OurLogPrefix, os.Getpid(),
+		cpuInfo[0].ModelName, len(cpuInfo), cpuInfo[0].Cores, float64(cpuInfo[0].Mhz) / 1000.0)
 
 	logSystemHealth()
 	go func() {
