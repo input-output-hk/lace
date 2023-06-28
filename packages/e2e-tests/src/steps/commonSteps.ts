@@ -30,6 +30,7 @@ import ToastMessageAssert from '../assert/toastMessageAssert';
 import menuMainExtended from '../elements/menuMainExtended';
 import { browser } from '@wdio/globals';
 import faqPageAssert from '../assert/faqPageAssert';
+import { visit } from '../utils/pageUtils';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -70,6 +71,16 @@ When(
   /^I (navigate to|am on) (Tokens|NFTs|Transactions|Staking|Dapp Store|Voting|Address Book|Settings) (extended|popup) page$/,
   async (_ignored: string, targetPage: string, mode: 'extended' | 'popup') => {
     await mainMenuPageObject.navigateToSection(targetPage, mode);
+  }
+);
+
+When(
+  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address book) page in (extended|popup) mode$/,
+  async (
+    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book',
+    mode: 'extended' | 'popup'
+  ) => {
+    await visit(page, mode);
   }
 );
 
@@ -220,3 +231,14 @@ Then(
     await menuMainAssert.assertMenuFormat(menuFormat, width);
   }
 );
+
+When(/^I refresh the page$/, async () => {
+  await browser.refresh();
+});
+
+When(/^I reopen the page$/, async () => {
+  const currentPageUrl = await browser.getUrl();
+  await browser.newWindow('');
+  await closeAllTabsExceptActiveOne();
+  await browser.url(currentPageUrl);
+});
