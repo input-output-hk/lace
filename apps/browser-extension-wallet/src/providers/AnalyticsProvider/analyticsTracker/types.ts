@@ -67,6 +67,7 @@ export enum PostHogAction {
   OnboardingCreateEnterPassphrase01NextClick = 'onboarding | new wallet | enter passphrase #01 | next | click',
   OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
   OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
+  WalletChangeActivePage = 'wallet | change active page | view',
   OnboardingCreateDoneGoToWallet = 'onboarding | new wallet | all done | go to my wallet | click',
   OnboardingRestoreDoneGoToWallet = 'onboarding | restore wallet | all done | go to my wallet | click',
   OnboardingHWDoneGoToWallet = 'onboarding | hardware wallet | all done | go to my wallet | click'
