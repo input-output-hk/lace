@@ -1,15 +1,13 @@
-/* eslint-disable no-unused-vars */
 import { When, Then } from '@cucumber/cucumber';
-import webTester from '../actor/webTester';
 import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import transactionBundlesAssert from '../assert/transaction/transactionBundleAssert';
 import transactionSummaryAssert from '../assert/transaction/transactionSummaryAssert';
 import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
-import { t } from '../utils/translationService';
 import { Asset } from '../data/Asset';
 import transactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import extensionUtils from '../utils/utils';
 import { shelley, byron } from '../data/AddressData';
+import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
@@ -22,7 +20,7 @@ When(/^I remove output (\d) for advanced tx$/, async (index: number) => {
 When(/^I set multiple outputs for advanced transaction$/, async () => {
   await transactionExtendedPageObject.fillAddress(shelley.getAddress(), 1);
   await transactionExtendedPageObject.fillTokenValue(1, Asset.CARDANO.name);
-  await webTester.clickButton(await t('browserView.transaction.send.advanced.output'));
+  await new TransactionNewPage().addBundleButton.click();
   await transactionExtendedPageObject.fillAddress(shelley.getAddress(), 2);
   await transactionExtendedPageObject.fillTokenValue(2, Asset.CARDANO.name, 2);
 });
@@ -30,7 +28,7 @@ When(/^I set multiple outputs for advanced transaction$/, async () => {
 When(/^I set multiple outputs for advanced transaction with less than minimum value for Byron address$/, async () => {
   await transactionExtendedPageObject.fillAddress(byron.getAddress(), 1);
   await transactionExtendedPageObject.fillTokenValue(1, Asset.CARDANO.ticker);
-  await webTester.clickButton(await t('browserView.transaction.send.advanced.output'));
+  await new TransactionNewPage().addBundleButton.click();
   await transactionExtendedPageObject.fillAddress(byron.getAddress(), 2);
   await transactionExtendedPageObject.fillTokenValue(2, Asset.CARDANO.ticker, 2);
 });
