@@ -32,6 +32,7 @@ const WarningBanner = () => {
       customIcon={<ShieldExclamation className={styles.bannerIcon} />}
       withIcon
       message={t('core.authorizeDapp.warning')}
+      popupView
     />
   );
 };
