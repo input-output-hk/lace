@@ -7,8 +7,6 @@ import popupView from '../page/popupView';
 import commonAssert from '../assert/commonAssert';
 import { getTestWallet } from '../support/walletConfiguration';
 import helpAndSupportPageAssert from '../assert/helpAndSupportPageAssert';
-import webTester from '../actor/webTester';
-import { TextLink } from '../elements/textLink';
 import { t } from '../utils/translationService';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import localStorageManager from '../utils/localStorageManager';
@@ -30,6 +28,7 @@ import ToastMessageAssert from '../assert/toastMessageAssert';
 import menuMainExtended from '../elements/menuMainExtended';
 import { browser } from '@wdio/globals';
 import faqPageAssert from '../assert/faqPageAssert';
+import { visit } from '../utils/pageUtils';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -73,6 +72,16 @@ When(
   }
 );
 
+When(
+  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address book) page in (extended|popup) mode$/,
+  async (
+    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book',
+    mode: 'extended' | 'popup'
+  ) => {
+    await visit(page, mode);
+  }
+);
+
 Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
   switch (expectedResult) {
     case 'An': {
@@ -102,10 +111,6 @@ Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: st
 
 Then(/^I see "Help and support" page$/, async () => {
   await helpAndSupportPageAssert.assertSeeHelpAndSupportPage();
-});
-
-Then(/^I click "([^"]*)" link$/, async (linkText: string) => {
-  await webTester.clickElement(new TextLink(linkText));
 });
 
 Then(/New tab with url containing "([^"]*)" is opened/, async (urlPart: string) => {
@@ -220,3 +225,14 @@ Then(
     await menuMainAssert.assertMenuFormat(menuFormat, width);
   }
 );
+
+When(/^I refresh the page$/, async () => {
+  await browser.refresh();
+});
+
+When(/^I reopen the page$/, async () => {
+  const currentPageUrl = await browser.getUrl();
+  await browser.newWindow('');
+  await closeAllTabsExceptActiveOne();
+  await browser.url(currentPageUrl);
+});
