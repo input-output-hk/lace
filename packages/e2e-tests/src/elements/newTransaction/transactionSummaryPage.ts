@@ -20,7 +20,8 @@ export class TransactionSummaryPage extends WebElement {
   private METADATA_VALUE = '//span[@data-testid="metadata-value"]';
   private FEE_CONTAINER = '//div[@data-testid="summary-fee-container"]';
   private FEE_TITLE = '//p[@data-testid="summary-fee-label"]';
-  private CONFIRM_BUTTON = '#send-next-btn';
+  private CANCEL_BUTTON = '[data-testid="send-cancel-btn"]';
+  private CONFIRM_BUTTON = '[data-testid="send-next-btn"]';
 
   constructor() {
     super();
@@ -107,6 +108,10 @@ export class TransactionSummaryPage extends WebElement {
 
   get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONFIRM_BUTTON);
+  }
+
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CANCEL_BUTTON);
   }
 
   async getMainTitle(): Promise<string | number> {

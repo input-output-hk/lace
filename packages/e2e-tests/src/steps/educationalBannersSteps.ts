@@ -1,6 +1,7 @@
 import { When, Then } from '@cucumber/cucumber';
 import educationalListAssert from '../assert/educationalListAssert';
 import educationalBannerPageObject from '../pageobject/educationalBannerPageObject';
+import faqPageAssert from '../assert/faqPageAssert';
 import { switchToLastWindow } from '../utils/window';
 
 Then(/^I see Address Book "About your wallet" widget with all relevant items$/, async () => {
@@ -25,7 +26,7 @@ When(/^I see a "(FAQ|Glossary|Video)" article with title "([^"]*)"$/, async (typ
   }
   if (type === 'FAQ') {
     await switchToLastWindow();
-    await educationalListAssert.assertSeeFaqArticle(subTitle);
+    await faqPageAssert.assertSeeFaqArticle(subTitle);
   }
   if (type === 'Glossary') {
     await switchToLastWindow();

@@ -1,10 +1,10 @@
-import PassphraseDrawer from '../../elements/settings/extendedView/passphraseDrawer';
+import PassphraseDrawer from '../../elements/settings/PassphraseDrawer';
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 
 class PassphraseDrawerAssert {
   async assertSeeDrawerTitle(expectedTitle: string) {
-    const drawerTitle = await PassphraseDrawer.title;
+    const drawerTitle = await PassphraseDrawer.drawerHeaderTitle;
     await drawerTitle.waitForDisplayed();
     await browser.waitUntil(async () => (await drawerTitle.getText()) === expectedTitle, {
       timeoutMsg: `failed while waiting for drawer title: ${expectedTitle}`

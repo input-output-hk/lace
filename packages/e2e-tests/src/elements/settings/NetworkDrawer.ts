@@ -1,4 +1,6 @@
-class NetworkSettingsDrawer {
+import CommonDrawerElements from '../CommonDrawerElements';
+
+class NetworkDrawer extends CommonDrawerElements {
   private MAINNET_RADIO_BUTTON = '//label[span/input[@data-testid="network-mainnet-radio-button"]]';
   private PREPROD_RADIO_BUTTON = '//label[span/input[@data-testid="network-preprod-radio-button"]]';
   private PREVIEW_RADIO_BUTTON = '//label[span/input[@data-testid="network-preview-radio-button"]]';
@@ -16,4 +18,4 @@ class NetworkSettingsDrawer {
   }
 }
 
-export default new NetworkSettingsDrawer();
+export default new NetworkDrawer();

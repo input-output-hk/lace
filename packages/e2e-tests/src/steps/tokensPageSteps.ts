@@ -6,7 +6,7 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
-import settingsPageExtendedAssert from '../assert/settings/settingsPageExtendedAssert';
+import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';
@@ -114,11 +114,12 @@ Then(
 
 Then(/^I see "Wallet Address" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await walletAddressPageAssert.assertSeeWalletAddressPage(mode);
-  await walletAddressPageAssert.assertSeeWalletNameAndAddress(getTestWallet(TestWalletName.TestAutomationWallet));
+  await walletAddressPageAssert.assertSeeWalletNameAndAddress(getTestWallet(TestWalletName.TestAutomationWallet), mode);
 });
 
 When(/^I click "Copy" button on "Wallet Address" page$/, async () => {
-  await walletAddressPage.copyButton.waitForClickable();
+  await walletAddressPage.addressCard.scrollIntoView();
+  await walletAddressPage.addressCard.moveTo();
   await walletAddressPage.copyButton.click();
 });
 

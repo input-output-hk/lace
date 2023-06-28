@@ -27,9 +27,7 @@ Feature: Send Transaction bundles - E2E
     And I save fee value
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
-    Then The Transaction submitted screen is displayed:
-      | Title: "All done"                            |
-      | Subtitle: "The transaction will complete..." |
+    Then The Transaction submitted screen is displayed in extended mode
     When I close the drawer by clicking close button
     And I navigate to Tokens extended page
     Then the sent amount of: "4.50" with "saved" fee for token "Cardano" is subtracted from the total balance
