@@ -4,6 +4,7 @@ import { StakingError } from '@src/views/browser-view/features/staking/types';
 import { useWalletStore } from '../stores';
 import { useDelegationStore } from '../features/delegation/stores';
 import { InputSelectionFailure } from '@cardano-sdk/input-selection';
+import { Cardano } from '@cardano-sdk/core';
 
 const ERROR_MESSAGES: { [key: string]: StakingError } = {
   [InputSelectionFailure.UtxoFullyDepleted]: StakingError.UTXO_FULLY_DEPLETED,
@@ -20,7 +21,10 @@ export const useBuildDelegation = (): void => {
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
-        const tx = await txBuilder.delegate(selectedStakePool.id).build().inspect();
+        const tx = await txBuilder
+          .delegatePortfolio({ pools: [{ weight: 1, id: Cardano.PoolIdHex(selectedStakePool.id) }] })
+          .build()
+          .inspect();
         setDelegationTxBuilder(txBuilder);
         setDelegationTxFee(tx.body.fee.toString());
         setStakingError();
