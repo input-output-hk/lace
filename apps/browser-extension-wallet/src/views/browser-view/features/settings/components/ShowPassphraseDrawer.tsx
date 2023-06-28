@@ -1,13 +1,22 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
 import { Wallet } from '@lace/cardano';
-import { Button, Drawer, DrawerHeader, DrawerNavigation, inputProps, Password, Banner } from '@lace/common';
+import {
+  Button,
+  Drawer,
+  DrawerHeader,
+  DrawerNavigation,
+  inputProps,
+  Password,
+  Banner,
+  useKeyboardShortcut
+} from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
 import { MnemonicWordsWritedown } from '@lace/core';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
-import { useKeyboardShortcut, useWalletManager } from '@hooks';
+import { useWalletManager } from '@hooks';
 
 const { Text } = Typography;
 

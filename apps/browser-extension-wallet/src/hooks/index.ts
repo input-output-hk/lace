@@ -18,4 +18,3 @@ export * from './useMaxAda';
 export * from './useSyncingTheFirstTime';
 export * from './useGetHandles';
 export * from './useHandleResolver';
-export { useKeyboardShortcut, useObservable } from '@lace/common';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
 import { Layout } from './Layout';
@@ -14,7 +14,7 @@ import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { useObservable, useRedirection } from '@hooks';
+import { useRedirection } from '@hooks';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { Skeleton } from 'antd';
 import { dAppRoutePaths } from '@routes';

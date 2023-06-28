@@ -2,7 +2,7 @@ import { Cardano } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useCallback, useMemo, useState } from 'react';
-import { useObservable } from '.';
+import { useObservable } from '@lace/common';
 import { useMaxAda } from '@hooks/useMaxAda';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
