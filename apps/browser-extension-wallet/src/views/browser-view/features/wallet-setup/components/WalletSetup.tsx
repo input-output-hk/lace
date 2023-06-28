@@ -11,7 +11,9 @@ import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  ExtensionViews,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ILocalStorage } from '@src/types';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
@@ -98,13 +100,23 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
   const handleRestoreWallet = () => setIsConfirmRestoreOpen(true);
   const handleStartHardwareOnboarding = () => setIsDappConnectorWarningOpen(true);
 
-  const sendAnalytics = (category: SetupAnalyticsCategories, eventName: string, value = 1) =>
-    analytics.sendEvent({
+  const sendAnalytics = (
+    category: SetupAnalyticsCategories,
+    eventName: string,
+    value = 1,
+    postHogAction?: PostHogAction
+  ) => {
+    const event = {
       action: AnalyticsEventActions.CLICK_EVENT,
       category,
       name: eventName,
       value
-    });
+    };
+    analytics.sendEvent(event);
+    if (postHogAction) {
+      analytics.sendEventToPostHog(postHogAction, { view: ExtensionViews.Extended });
+    }
+  };
 
   return (
     <Portal>
@@ -162,8 +174,8 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupWizard
             setupType="create"
             onCancel={cancelWalletFlow}
-            sendAnalytics={(event: string, value: number) =>
-              sendAnalytics(AnalyticsEventCategories.WALLET_CREATE, event, value)
+            sendAnalytics={(event: string, postHogAction?: PostHogAction, value?: number) =>
+              sendAnalytics(AnalyticsEventCategories.WALLET_CREATE, event, value, postHogAction)
             }
             initialStep={initialStep}
           />
@@ -172,8 +184,8 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupWizard
             setupType={isForgotPasswordFlow ? 'forgot_password' : 'restore'}
             onCancel={cancelWalletFlow}
-            sendAnalytics={(event: string, value: number) =>
-              sendAnalytics(AnalyticsEventCategories.WALLET_RESTORE, event, value)
+            sendAnalytics={(event: string, postHogAction?: PostHogAction, value?: number) =>
+              sendAnalytics(AnalyticsEventCategories.WALLET_RESTORE, event, value, postHogAction)
             }
             initialStep={initialStep}
           />
@@ -182,8 +194,8 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <HardwareWalletFlow
             onCancel={cancelWalletFlow}
             onAppReload={() => location.reload()}
-            sendAnalytics={(event: string, value: number) =>
-              sendAnalytics(AnalyticsEventCategories.HW_CONNECT, event, value)
+            sendAnalytics={(event: string, postHogAction?: PostHogAction, value?: number) =>
+              sendAnalytics(AnalyticsEventCategories.HW_CONNECT, event, value, postHogAction)
             }
           />
         </Route>

@@ -19,7 +19,12 @@ import {
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
 import { WarningModal } from '@src/views/browser-view/components/WarningModal';
-import { AnalyticsEventNames, EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import {
+  AnalyticsEventNames,
+  EnhancedAnalyticsOptInStatus,
+  PostHogAction,
+  postHogOnboardingActions
+} from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 
 import { PinExtension } from './PinExtension';
@@ -57,7 +62,7 @@ const { WalletSetup: Events } = AnalyticsEventNames;
 export interface WalletSetupWizardProps {
   setupType: 'create' | 'restore' | 'forgot_password';
   onCancel: () => void;
-  sendAnalytics: (eventName: string, value?: number) => void;
+  sendAnalytics: (eventName: string, postHogAction?: PostHogAction, value?: number) => void;
   initialStep?: WalletSetupSteps;
 }
 
@@ -227,7 +232,13 @@ export const WalletSetupWizard = ({
     analytics.setOptedInForEnhancedAnalytics(
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
-    sendAnalytics(isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP);
+
+    const postHogAnalyticsAgreeAction = postHogOnboardingActions[setupType]?.ANALYTICS_AGREE_CLICK;
+    const postHogAnalyticcSkipAction = postHogOnboardingActions[setupType]?.ANALYTICS_SKIP_CLICK;
+
+    const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;
+    const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticcSkipAction;
+    sendAnalytics(matomoEvent, postHogAction);
     moveForward();
   };
 
@@ -364,7 +375,7 @@ export const WalletSetupWizard = ({
         <WalletSetupLegalStep
           onBack={moveBack}
           onNext={() => {
-            sendAnalytics(Events.LEGAL_STUFF_NEXT, calculateTimeSpentOnPage());
+            sendAnalytics(Events.LEGAL_STUFF_NEXT, undefined, calculateTimeSpentOnPage());
             moveForward();
           }}
           translations={walletSetupLegalStepTranslations}

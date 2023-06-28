@@ -1,5 +1,7 @@
+import { PostHogAction, PostHogOnboardingActionsType } from './types';
+
 const WalletSetup = {
-  ANALYTICS_AGREE: 'analytics-agree',
+  ANALYTICS_AGREE: 'analytics-agree_browser',
   ANALYTICS_SKIP: 'analytics-skip',
   CONNECT_HW_START: 'connect-hw-start',
   CREATE_WALLET_START: 'create-wallet-start',
@@ -16,6 +18,21 @@ const WalletSetup = {
   SETUP_FINISHED_NEXT: 'setup-finished-next', // Onboarding goal trigger
   WALLET_NAME_NEXT: 'wallet-name-next',
   WALLET_PASSWORD_NEXT: 'wallet-password-next'
+};
+
+export const postHogOnboardingActions: PostHogOnboardingActionsType = {
+  create: {
+    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingCreateAnalyticsAgreeClick,
+    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingCreateAnalyticsSkipClick
+  },
+  restore: {
+    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingRestoreAnalyticsAgreeClick,
+    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingRestoreAnalyticsSkipClick
+  },
+  hw: {
+    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingHWAnalyticsAgreeClick,
+    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingHWAnalyticsSkipClick
+  }
 };
 
 // TODO: can we have browser and popup as a custom dimension or similar instead of in the event name? [LW-5452]
