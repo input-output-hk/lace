@@ -7,8 +7,6 @@ import popupView from '../page/popupView';
 import commonAssert from '../assert/commonAssert';
 import { getTestWallet } from '../support/walletConfiguration';
 import helpAndSupportPageAssert from '../assert/helpAndSupportPageAssert';
-import webTester from '../actor/webTester';
-import { TextLink } from '../elements/textLink';
 import { t } from '../utils/translationService';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import localStorageManager from '../utils/localStorageManager';
@@ -102,10 +100,6 @@ Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: st
 
 Then(/^I see "Help and support" page$/, async () => {
   await helpAndSupportPageAssert.assertSeeHelpAndSupportPage();
-});
-
-Then(/^I click "([^"]*)" link$/, async (linkText: string) => {
-  await webTester.clickElement(new TextLink(linkText));
 });
 
 Then(/New tab with url containing "([^"]*)" is opened/, async (urlPart: string) => {
