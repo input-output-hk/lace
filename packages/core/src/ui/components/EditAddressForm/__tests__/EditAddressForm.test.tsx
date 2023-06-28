@@ -13,12 +13,14 @@ describe('Testing AddressForm component', () => {
   };
   const nameErrorText = 'name error';
   const addressErrorText = 'address error';
+  const handleErrorText = 'handle error';
   const props: EditAddressFormProps = {
     form: undefined,
     initialValues: {},
     validations: {
       name: jest.fn().mockReturnValue(nameErrorText),
-      address: jest.fn().mockReturnValue(addressErrorText)
+      address: jest.fn().mockReturnValue(addressErrorText),
+      handle: jest.fn().mockReturnValue(handleErrorText)
     },
     translations: {
       walletName: 'Wallet name',

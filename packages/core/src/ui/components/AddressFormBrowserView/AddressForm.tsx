@@ -8,43 +8,16 @@ import { ReactComponent as PlusIcon } from '../../assets/icons/plus.component.sv
 import { ReactComponent as PlusIconDisabled } from '../../assets/icons/plus-disabled.component.svg';
 import styles from './AddressForm.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-import { HANDLE_DEBOUNCE_TIME, isHandle } from '@src/ui/utils';
-import debounce from 'debounce-promise';
+import { AddressValidators, getValidator, getValidatorWithResolver, isHandle, valuesPropType } from '@src/ui/utils';
 
-type valueKeys = 'name' | 'address';
 export type ValidationOptionsProps<T extends string> = Record<T, (key: string) => string>;
-
-export type valuesPropType = Partial<Record<valueKeys, string>>;
-export type FormKeys = keyof valuesPropType;
-
-type ValidatorFn = (_rule: any, value: string) => Promise<void>;
-type ResolveAddressValidatorFn = (_rule: any, value: string, handleResolver: any) => Promise<void>;
 
 export type AddressFormPropsBrowserView = {
   initialValues: valuesPropType;
   onConfirmClick: (values: valuesPropType) => unknown;
-  validations: any;
+  validations: AddressValidators;
   onClose?: () => void;
   translations: TranslationsFor<'addAddress' | 'name' | 'address' | 'addNew' | 'addNewSubtitle'>;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getValidator =
-  (validate: (val: any) => string): ValidatorFn =>
-  (_rule: any, value: string) => {
-    const res = validate(value);
-    return !res ? Promise.resolve() : Promise.reject(res);
-  };
-
-const getValidatorWithResolver = (
-  validate: (val: string, handleResolver: any) => Promise<string>
-): ResolveAddressValidatorFn => {
-  const debouncedValidate = debounce(validate, HANDLE_DEBOUNCE_TIME);
-
-  return async (_rule: any, value: string, handleResolver: any) => {
-    const res = await debouncedValidate(value, handleResolver);
-    return !res ? Promise.resolve() : Promise.reject(res);
-  };
 };
 
 export const AddressFormBrowserView = ({
@@ -69,7 +42,7 @@ export const AddressFormBrowserView = ({
 
   const nameValidator = getValidator(validations.name);
   const addressValidator = getValidator(validations.address);
-  const handleValidator = useMemo(() => getValidatorWithResolver(validations.handle), [getValidatorWithResolver]);
+  const handleValidator = useMemo(() => getValidatorWithResolver(validations.handle), [validations.handle]);
 
   const onFormSubmit = async () => {
     try {
@@ -98,14 +71,12 @@ export const AddressFormBrowserView = ({
         const isAddressFieldValid = form.getFieldError('address').length === 0;
         const isAddressFieldValidating = form.isFieldValidating('address');
 
-        const renderSuffix = () => {
-          if (!isAddressHandle) return;
-          return isAddressFieldValid ? (
+        const renderSuffix = () =>
+          isAddressFieldValid ? (
             <CheckCircleOutlined className={styles.valid} />
           ) : (
             <CloseCircleOutlined className={styles.invalid} />
           );
-        };
 
         return (
           <>
@@ -127,7 +98,7 @@ export const AddressFormBrowserView = ({
                   invalid={!isAddressFieldValid}
                   label={translations.address}
                   dataTestId="address-form-address-input"
-                  customIcon={!isAddressFieldValidating && renderSuffix()}
+                  customIcon={!isAddressFieldValidating && isAddressHandle && renderSuffix()}
                   loading={isAddressFieldValidating}
                 />
               </Form.Item>

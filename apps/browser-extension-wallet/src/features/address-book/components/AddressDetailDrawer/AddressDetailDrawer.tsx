@@ -86,10 +86,8 @@ export const AddressDetailDrawer = ({
   const onClose = () => {
     if (!popupView) {
       setCurrentStepConfig(stepsConfiguration[AddressDetailsSteps.DETAILS]);
-      onCancelClick();
-    } else {
-      onCancelClick();
     }
+    onCancelClick();
   };
 
   const analytics = useAnalyticsContext();

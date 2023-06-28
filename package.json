@@ -91,8 +91,6 @@
     "trim-off-newlines": "^1.0.3"
   },
   "dependencies": {
-    "@types/debounce-promise": "^3.1.6",
-    "debounce-promise": "^3.1.2",
     "normalize.css": "^8.0.1"
   },
   "devDependencies": {

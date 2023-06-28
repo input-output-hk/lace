@@ -13,12 +13,14 @@ describe('Testing AddressForm component', () => {
   };
   const nameErrorText = 'name error';
   const addressErrorText = 'address error';
+  const handleErrorText = 'handle error';
   const props: AddressFormPropsBrowserView = {
     initialValues: {},
     onConfirmClick: jest.fn(),
     validations: {
       name: jest.fn().mockReturnValue(nameErrorText),
-      address: jest.fn().mockReturnValue(addressErrorText)
+      address: jest.fn().mockReturnValue(addressErrorText),
+      handle: jest.fn().mockReturnValue(handleErrorText)
     },
     translations: {
       addAddress: 'Add address',
@@ -71,7 +73,8 @@ describe('Testing AddressForm component', () => {
   test('should call confirm and cancel when submitted and valid ', async () => {
     const validations = {
       name: jest.fn().mockReturnValue(undefined),
-      address: jest.fn().mockReturnValue(undefined)
+      address: jest.fn().mockReturnValue(undefined),
+      handle: jest.fn().mockReturnValue(undefined)
     };
     const { findByTestId, getByText, queryAllByText } = render(
       <AddressFormBrowserView {...props} initialValues={initialValues} validations={validations} />
