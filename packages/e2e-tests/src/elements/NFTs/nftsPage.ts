@@ -14,7 +14,7 @@ class NftsPage {
   }
 
   get createFolderButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CREATE_FOLDER_BUTTON}`);
+    return $(this.CREATE_FOLDER_BUTTON);
   }
 }
 
