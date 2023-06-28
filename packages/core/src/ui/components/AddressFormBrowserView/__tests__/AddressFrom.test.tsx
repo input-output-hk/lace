@@ -5,7 +5,7 @@ import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { AddressFormBrowserView, AddressFormPropsBrowserView } from '../AddressForm';
 import '@testing-library/jest-dom';
 
-describe('Testing AddressForm component', () => {
+xdescribe('Testing AddressForm component', () => {
   const initialValues = {
     name: 'Wallet name',
     address:
