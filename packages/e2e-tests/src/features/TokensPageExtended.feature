@@ -115,19 +115,8 @@ Feature: LW: Tokens tab - extended view
     And total wallet balance is masked with asterisks
     And balance and FIAT balance for each token are masked with asterisks
 
-  @Testnet @Mainnet @LW-7121
-  Scenario: Popup View - Hide my balance - keep state after refreshing the page
-    When I click closed eye icon on Tokens page
-    Then opened eye icon is displayed on Tokens page
-    And total wallet balance is masked with asterisks
-    And balance and FIAT balance for each token are masked with asterisks
-    When I refresh the page
-    Then opened eye icon is displayed on Tokens page
-    And total wallet balance is masked with asterisks
-    And balance and FIAT balance for each token are masked with asterisks
-
-  @Testnet @Mainnet @LW-7123
-  Scenario Outline: Popup View - Hide my balance - keep state after <action> the page
+  @Testnet @Mainnet @LW-7121 @LW-7123
+  Scenario Outline: Extended View - Hide my balance - keep state after <action> the page
     When I click closed eye icon on Tokens page
     Then opened eye icon is displayed on Tokens page
     And total wallet balance is masked with asterisks
