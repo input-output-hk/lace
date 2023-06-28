@@ -485,7 +485,11 @@ func manageChildren(comm CommChannels_Manager) {
 							if (syncProgress >= 0) {
 								sp = fmt.Sprintf("%.2f%%", syncProgress * 100.0)
 							}
-							comm.CardanoNodeStatus <- "syncing · " + sp
+							textual := "syncing"
+							if (syncProgress == 1.0) {
+								textual = "synced"
+							}
+							comm.CardanoNodeStatus <- textual + " · " + sp
 						}
 					},
 					LogModifier: func(line string) string {
