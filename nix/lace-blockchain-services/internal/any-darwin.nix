@@ -27,7 +27,7 @@ in rec {
 
     # For resolving the node_modules:
     theirPackage = (pkgs.callPackage "${patchedSrc}/yarn-project.nix" {
-      nodejs = pkgs.nodejs-16_x; # FIXME: temporarily 16.x; as it doesn’t have snapshots which break nix-bundle-exe
+      nodejs = pkgs.nodejs-16_x; # FIXME: temporarily 16.x (doesn’t have snapshots breaking after install_name_tool)
     } {
       src = patchedSrc;
     });
@@ -40,6 +40,7 @@ in rec {
         ["yarn workspaces focus --all --production"]
         self.configurePhase;
       buildPhase = ":";
+      # TODO: since we’re not releasing universal, maybe unpack universal dylibs, keeping only our arch?
       installPhase = let ourArch = if lib.hasInfix "aarch64" targetSystem then "arm64" else "x86_64"; in ''
         mkdir -p $out
         echo 'Getting rid of alien architectures…'
@@ -49,6 +50,25 @@ in rec {
       '';
     };
 
+    # XXX: this is nasty, but seemingly there’s no other way
+    # (consulted with @tgunnoe) to patch a library (there’s no
+    # preinstall in yarn v3), so let’s hook clang++…
+    #
+    # kFSEventStreamEventFlagItemCloned is not available in MacOSX-SDK 10.12 on x86_64
+    clangWrapperWrapper = pkgs.writeShellScriptBin "clang++" ''
+      #!${pkgs.runtimeShell}
+      set -euo pipefail
+      if grep -qE 'node_modules/@parcel/watcher/build$' <<<"$PWD" ; then
+        if [ ! -e .already-patched ] ; then
+          touch .already-patched
+          echo >&2 'info: patching @parcel/watcher'
+          sed -r 's+\s*ignoredFlags\s*\|=\s*kFSEventStreamEventFlagItemCloned;+// \0+g' \
+            -i ../src/macos/FSEventsBackend.cc
+        fi
+      fi
+      exec ${pkgs.stdenv.cc}/bin/"$(basename "$0")" "$@"
+    '';
+
     self = pkgs.stdenv.mkDerivation {
       name = "cardano-js-sdk";
       src = toString inputs.cardano-js-sdk;
@@ -57,6 +77,9 @@ in rec {
         ++ (with pkgs; [ python3 pkgconfig xcbuild darwin.cctools rsync ])
         ++ (with pkgs.darwin.apple_sdk.frameworks; [ IOKit AppKit ]);
       inherit (theirPackage) npm_config_nodedir;
+      preConfigure = if targetSystem != "x86_64-darwin" then "" else ''
+        export PATH="${clangWrapperWrapper}/bin:$PATH"
+      '';
       configurePhase = theirPackage.configurePhase;
       buildPhase = "yarn build";
       installPhase = ''
@@ -65,8 +88,10 @@ in rec {
           -not -path '*/node_modules/*') $out/
         cp -r ${runtime-deps}/node_modules $out/
       '';
-      passthru.nodejs = theirPackage.nodejs;
-      passthru.runtime-deps = runtime-deps;
+      passthru = {
+        inherit (theirPackage) nodejs;
+        inherit runtime-deps clangWrapperWrapper;
+      };
     };
   in self;
 
@@ -277,12 +302,12 @@ in rec {
     postFixup = ''sed -r 's+main\(\)+main(sys.argv[1:])+g' -i $out/bin/.${pname}-wrapped'';
   };
 
-  # Apple do changes to the original libffi, e.g. adding this non-standard symbol: `ffi_find_closure_for_code_np`
+  # Apple make changes to the original libffi, e.g. adding this non-standard symbol: `ffi_find_closure_for_code_np`
   apple_libffi = pkgs.stdenv.mkDerivation {
     name = "apple-libffi";
     dontUnpack = true;
     installPhase = let
-      sdk = pkgs.darwin.apple_sdk.MacOSX-SDK;
+      sdk = buildTimeSDK.MacOSX-SDK;
     in ''
       mkdir -p $out/include $out/lib
       cp -r ${sdk}/usr/include/ffi $out/include/
@@ -290,8 +315,35 @@ in rec {
     '';
   };
 
+  # XXX: do not give that to code building target system binaries, or
+  # users will lose compatibility with older MacOS; but it’s fine to use
+  # the modern one for building tools we only use in build time
+  buildTimeSDK =
+    if targetSystem == "aarch64-darwin"
+    then pkgs.darwin.apple_sdk
+    else pkgs.darwin.apple_sdk_11_0;
+
   pyobjc = rec {
     version = "9.2";
+
+    commonPreBuild = ''
+      # Force it to target our ‘darwinMinVersion’, it’s not recognized correctly:
+      grep -RF -- '-DPyObjC_BUILD_RELEASE=%02d%02d' | cut -d: -f1 | while IFS= read -r file ; do
+        sed -r '/-DPyObjC_BUILD_RELEASE=%02d%02d/{s/%02d%02d/${
+          lib.concatMapStrings (lib.fixedWidthString 2 "0") (
+            lib.splitString "." buildTimeSDK.stdenv.targetPlatform.darwinMinVersion
+          )
+        }/;n;d;}' -i "$file"
+      done
+
+      # impurities:
+      ( grep -RF '/usr/bin/xcrun' || true ; ) | cut -d: -f1 | while IFS= read -r file ; do
+        sed -r "s+/usr/bin/xcrun+$(${lib.getExe pkgs.which} xcrun)+g" -i "$file"
+      done
+      ( grep -RF '/usr/bin/python' || true ; ) | cut -d: -f1 | while IFS= read -r file ; do
+        sed -r "s+/usr/bin/python+$(${lib.getExe pkgs.which} python)+g" -i "$file"
+      done
+    '';
 
     core = pythonPackages.buildPythonPackage rec {
       pname = "pyobjc-core";
@@ -300,22 +352,15 @@ in rec {
         inherit pname version;
         hash = "sha256-1zS5KR/skf9OOuOLnGg53r8Ct5wHMUR26H2o6QssaMM=";
       };
-      nativeBuildInputs = (with pkgs; [ which xcbuild darwin.cctools ]);
+      nativeBuildInputs = [ buildTimeSDK.xcodebuild pkgs.darwin.cctools ];
       buildInputs =
-        (with pkgs; [ darwin.objc4 ])
-        ++ [ apple_libffi ]
-        ++ (with pkgs.darwin.apple_sdk.libs; [ simd ])
-        ++ (with pkgs.darwin.apple_sdk.frameworks; [ Foundation GameplayKit MetalPerformanceShaders ]);
+        (with pkgs; [ ])
+        ++ [ buildTimeSDK.objc4 apple_libffi buildTimeSDK.libs.simd ]
+        ++ (with buildTimeSDK.frameworks; [ Foundation GameplayKit MetalPerformanceShaders ]);
       hardeningDisable = ["strictoverflow"]; # -fno-strict-overflow is not supported in clang on darwin
-      preBuild = ''
-        # impurities:
-        grep -RF '/usr/bin/xcrun' | cut -d: -f1 | while IFS= read -r file ; do
-          sed -r "s+/usr/bin/xcrun+$(which xcrun)+g" -i "$file"
-        done
-        grep -RF '/usr/bin/python' | cut -d: -f1 | while IFS= read -r file ; do
-          sed -r "s+/usr/bin/python+$(which python)+g" -i "$file"
-        done
-        sed -r 's+\(.*usr/include/objc/runtime\.h.*\)+("${pkgs.darwin.objc4}/include/objc/runtime.h")+g' -i setup.py
+      NIX_CFLAGS_COMPILE = [ "-Wno-error=deprecated-declarations" ];
+      preBuild = commonPreBuild + ''
+        sed -r 's+\(.*usr/include/objc/runtime\.h.*\)+("${buildTimeSDK.objc4}/include/objc/runtime.h")+g' -i setup.py
         sed -r 's+/usr/include/ffi+${apple_libffi}/include+g' -i setup.py
 
         # Turn off clang’s Link Time Optimization, or else we can’t recognize (and link) Objective C .o’s:
@@ -326,7 +371,7 @@ in rec {
           sed -r "s+"sw_vers"+"/usr/bin/sw_vers"+g" -i "$file"
         done
       '';
-      # XXX: We’re turning tests off, because it’s mostly working (0.54% failures among 4,600 tests),
+      # XXX: We’re turning tests off, because they’re mostly working (0.54% failures among 4,600 tests),
       # and I don’t have any more time to investigate now (maybe in a Nixpkgs contribution in the future):
       #
       # pyobjc-core> Ran 4600 tests in 273.830s
@@ -343,11 +388,11 @@ in rec {
         inherit pname version;
         hash = "sha256-79eAgIctjI3mwrl+Dk6smdYgOl0WN6oTXQcdRk6y21M=";
       };
-      nativeBuildInputs = (with pkgs; [ xcbuild darwin.cctools ]);
-      buildInputs = (with pkgs.darwin.apple_sdk.frameworks; [ Foundation AppKit ]);
+      nativeBuildInputs = [ buildTimeSDK.xcodebuild pkgs.darwin.cctools ];
+      buildInputs = (with buildTimeSDK.frameworks; [ Foundation AppKit ]);
       propagatedBuildInputs = [ core ];
       hardeningDisable = ["strictoverflow"]; # -fno-strict-overflow is not supported in clang on darwin
-      preBuild = ''sed -r 's+/usr/bin/xcrun+xcrun+g' -i pyobjc_setup.py''; # impure
+      preBuild = commonPreBuild;
       dontUseSetuptoolsCheck = true; # XXX: majority is passing
     };
 
@@ -358,11 +403,11 @@ in rec {
         inherit pname version;
         hash = "sha256-9YYYO5ue9/Fl8ERKe3FO2WXXn26SYXyq+GkVDc/Vpys=";
       };
-      nativeBuildInputs = (with pkgs; [ xcbuild darwin.cctools ]);
-      buildInputs = (with pkgs.darwin.apple_sdk.frameworks; [ Foundation CoreVideo Quartz ]);
+      nativeBuildInputs = [ buildTimeSDK.xcodebuild pkgs.darwin.cctools ];
+      buildInputs = (with buildTimeSDK.frameworks; [ Foundation CoreVideo Quartz ]);
       propagatedBuildInputs = [ framework-Cocoa ];
       hardeningDisable = ["strictoverflow"]; # -fno-strict-overflow is not supported in clang on darwin
-      preBuild = ''sed -r 's+/usr/bin/xcrun+xcrun+g' -i pyobjc_setup.py''; # impure
+      preBuild = commonPreBuild;
       dontUseSetuptoolsCheck = true; # XXX: majority is passing
     };
   };
@@ -370,7 +415,7 @@ in rec {
   # How to get it in a saner way?
   apple_SetFile = pkgs.runCommand "SetFile" {} ''
     mkdir -p $out/bin
-    ln -s ${pkgs.darwin.apple_sdk.CLTools_Executables}/usr/bin/SetFile $out/bin/
+    cp ${buildTimeSDK.CLTools_Executables}/usr/bin/SetFile $out/bin/
   '';
 
   # dmgbuild doesn’t rely on Finder to customize appearance of the mounted DMT directory
