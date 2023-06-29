@@ -52,7 +52,7 @@ export const AnalyticsProvider = ({
 
   // Track page changes with PostHog in order to keep the user session alive
   useEffect(() => {
-    const trackActivePageChange = () => analyticsTracker.sendEventToPostHog(PostHogAction.WalletChangeActivePage);
+    const trackActivePageChange = () => analyticsTracker.sendPageNavigationEvent(PostHogAction.WalletChangeActivePage);
     window.addEventListener('popstate', trackActivePageChange);
     return () => {
       window.removeEventListener('popstate', trackActivePageChange);
