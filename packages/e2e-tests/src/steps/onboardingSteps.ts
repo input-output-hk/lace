@@ -9,6 +9,7 @@ import buttonAssert from '../assert/buttonAssert';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
+import ModalAssert from '../assert/modalAssert';
 import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
 import OnboardingAllDonePageAssert from '../assert/onboarding/onboardingAllDonePageAssert';
 import OnboardingAnalyticsPage from '../elements/onboarding/analyticsPage';
@@ -212,6 +213,10 @@ Then(/^"Name your wallet" page is displayed$/, async () => {
 Then(/^"Wallet password" page is displayed(| in "Forgot password" flow)$/, async (flow: string) => {
   const expectedFlow = flow === ' in "Forgot password" flow' ? 'forgot_password' : 'onboarding';
   await OnboardingWalletPasswordPageAssert.assertSeePasswordPage(expectedFlow);
+});
+
+Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
+  await ModalAssert.assertSeeRestoringMultiAddressWalletModal();
 });
 
 Then(/^"([^"]*)?" button is (enabled|disabled)$/, async (text: string, expectedStatus: 'enabled' | 'disabled') => {
