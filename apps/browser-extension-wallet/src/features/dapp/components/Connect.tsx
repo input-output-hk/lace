@@ -102,18 +102,21 @@ export const Connect = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isModalVisible, setModalVisible] = useState(false);
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
-
+  const [isSSLEncrypted, setIsSSLEncrypted] = useState(true);
+  const { environmentName } = useWalletStore();
   useEffect(() => {
     dappDataApi
       .getDappInfo()
       .then(({ logo, name, url }) => {
         setDappInfo({ logo, name, url });
+        if (!url.startsWith('https:')) {
+          setIsSSLEncrypted(false);
+        }
       })
       .catch((error) => {
         console.log(error);
       });
   }, []);
-  const { environmentName } = useWalletStore();
 
   const showNonSSLBanner = !isSSLEncrypted && environmentName === 'Mainnet';
   return (
@@ -123,10 +126,7 @@ export const Connect = (): React.ReactElement => {
       data-testid="connect-layout"
     >
       <div className={styles.container}>
-        <AuthorizeDapp
-          dappInfo={dappInfo}
-          warningBanner={showNonSSLBanner ? <NonSSLBanner /> : <WarningBanner />}
-        />
+        <AuthorizeDapp dappInfo={dappInfo} warningBanner={showNonSSLBanner ? <NonSSLBanner /> : <WarningBanner />} />
       </div>
       <div className={styles.footer}>
         <Button
