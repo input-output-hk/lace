@@ -60,22 +60,6 @@ class NftDetails extends CommonDrawerElements {
     return $(this.ATTRIBUTES_SECTION);
   }
 
-  get collectionLabel() {
-    return this.attributesSection.$$(this.INFO_LIST_ITEM)[0].$(this.INFO_LIST_ITEM_KEY);
-  }
-
-  get collectionValue() {
-    return this.attributesSection.$$(this.INFO_LIST_ITEM)[0].$(this.INFO_LIST_ITEM_KEY);
-  }
-
-  get copyrightLabel() {
-    return this.attributesSection.$$(this.INFO_LIST_ITEM)[1].$(this.INFO_LIST_ITEM_KEY);
-  }
-
-  get copyrightValue() {
-    return this.attributesSection.$$(this.INFO_LIST_ITEM)[1].$(this.INFO_LIST_ITEM_KEY);
-  }
-
   get sendNFTButton() {
     return $(this.SEND_NFT_BUTTON);
   }

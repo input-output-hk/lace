@@ -20,7 +20,7 @@ Feature: LW-423: NFTs - Extended view
     Given I am on NFTs extended page
     Then each NFT has name and image displayed
 
-  @LW-2499 @Smoke @Mainnet
+  @LW-2499 @Smoke @Mainnet @test
   Scenario: Extended-view - Send button click
     And I am on NFTs extended page
     And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"

@@ -58,9 +58,11 @@ class NftAssert {
     }
   }
 
-  async assertSeeNftDetails(nftName: string, mode: 'extended' | 'popup') {
+  async assertSeeNFTDetailsHeader(mode: 'extended' | 'popup', nftName: string) {
+    await NftDetails.drawerBody.waitForDisplayed();
     await NftDetails.drawerNavigationTitle.waitForDisplayed({ reverse: mode === 'popup' });
     if (mode === 'extended') {
+      await NftDetails.drawerHeaderTitle.scrollIntoView();
       await expect(await NftDetails.drawerNavigationTitle.getText()).to.equal(await t('core.nftDetail.title'));
       await NftDetails.drawerHeaderTitle.waitForDisplayed();
       await expect(await NftDetails.drawerHeaderTitle.getText()).to.equal(nftName);
@@ -70,12 +72,11 @@ class NftAssert {
     }
     await NftDetails.drawerHeaderBackButton.waitForDisplayed({ reverse: mode === 'extended' });
     await NftDetails.drawerHeaderCloseButton.waitForDisplayed({ reverse: mode === 'popup' });
+  }
 
-    await NftDetails.image.waitForDisplayed();
+  async assertSeeNFTDetailsTokenInformationSection() {
     await NftDetails.tokenInfoSectionTitle.waitForDisplayed();
     await expect(await NftDetails.tokenInfoSectionTitle.getText()).to.equal(await t('core.nftDetail.tokenInformation'));
-    await NftDetails.attributesSectionTitle.waitForDisplayed();
-    await expect(await NftDetails.attributesSectionTitle.getText()).to.equal(await t('core.nftDetail.attributes'));
 
     await NftDetails.policyIdLabel.waitForDisplayed();
     await expect(await NftDetails.policyIdLabel.getText()).to.equal('Policy ID'); // TODO: replace with translation keys when LW-7278 is resolved
@@ -86,12 +87,20 @@ class NftAssert {
     await NftDetails.mediaUrlLabel.waitForDisplayed();
     await expect(await NftDetails.mediaUrlLabel.getText()).to.equal('Media URL');
     await NftDetails.mediaUrlValue.waitForDisplayed();
+  }
 
-    await NftDetails.collectionLabel.waitForDisplayed();
-    await NftDetails.collectionValue.waitForDisplayed();
-    await NftDetails.copyrightLabel.waitForDisplayed();
-    await NftDetails.copyrightValue.waitForDisplayed();
+  async assertSeeNFTDetailsAttributesSection() {
+    await NftDetails.attributesSectionTitle.waitForDisplayed();
+    await expect(await NftDetails.attributesSectionTitle.getText()).to.equal(await t('core.nftDetail.attributes'));
+    await NftDetails.attributesSection.waitForDisplayed();
+    // TODO: NFT attributes section content varies between NFTs hence it should be compared with values returned by back-end
+  }
 
+  async assertSeeNftDetails(nftName: string, mode: 'extended' | 'popup') {
+    await this.assertSeeNFTDetailsHeader(mode, nftName);
+    await NftDetails.image.waitForDisplayed();
+    await this.assertSeeNFTDetailsTokenInformationSection();
+    await this.assertSeeNFTDetailsAttributesSection();
     await this.assertSeeSendNFTButton(true);
   }
 
