@@ -4,13 +4,13 @@ import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { AddressInput } from './AddressInput';
 import { CoinInput } from './CoinInput';
 import { FormRowHeader } from './FormRowHeader';
 import {
   useOutputs,
-  useBuitTxState,
+  useBuiltTxState,
   useSections,
   useCurrentRow,
   useSpentBalances,
@@ -28,12 +28,12 @@ import {
   AnalyticsEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { CoinId, CurrencyInfo, Tokens } from '@src/types';
+import { CurrencyInfo, Tokens } from '@src/types';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
 
 import styles from './Form.module.scss';
 import { getReachedMaxAmountList } from '../../helpers';
-import { PriceResult, useObservable } from '@hooks';
+import { PriceResult } from '@hooks';
 
 const RowContainer = ({
   children,
@@ -71,7 +71,7 @@ const formatAdaAllocation = ({
 }: {
   missingCoins: string;
   fiat: number;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
   fiatCurrency: CurrencyInfo;
 }) => ({
   adaAmount: `${Wallet.util.lovelacesToAdaString(missingCoins)} ${cardanoCoin.symbol}`,
@@ -86,7 +86,7 @@ const getNextBundleCoinId = (
   assetBalances: Tokens,
   usedCoins: SpentBalances,
   info: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>,
-  cardanoCoin: CoinId
+  cardanoCoin: Wallet.CoinId
 ) => {
   const adaAmountInLovelace = usedCoins[cardanoCoin.id] ? usedCoins[cardanoCoin.id] : '0';
   const balanceInAda = Wallet.util.lovelacesToAdaString(balance);
@@ -129,7 +129,7 @@ export const Form = ({
     currentChain
   } = useWalletStore();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
-  const { builtTxData } = useBuitTxState();
+  const { builtTxData: { error, totalMinimumCoins, uiTx } = {} } = useBuiltTxState();
   const { setSection } = useSections();
   const [row, setCurrentRow] = useCurrentRow();
   const [isBundle, setIsBundle] = useState(false);
@@ -204,12 +204,10 @@ export const Form = ({
     setIsBundle(false);
   };
 
-  const fee = builtTxData?.tx?.body?.fee?.toString() ?? '0';
-  const totalCost = getFee(fee, prices?.cardano?.price, cardanoCoin, fiatCurrency);
+  const fee = uiTx?.fee?.toString() ?? '0';
+  const totalCost = getFee(fee.toString(), prices?.cardano?.price, cardanoCoin, fiatCurrency);
 
-  const hasMissingCoins =
-    builtTxData?.totalMinimumCoins?.coinMissing && builtTxData?.totalMinimumCoins?.coinMissing !== '0';
-
+  const hasMissingCoins = totalMinimumCoins?.coinMissing && totalMinimumCoins?.coinMissing !== '0';
   const bundleDisabled = spendableCoin
     ? !getNextBundleCoinId(spendableCoin?.toString(), assetBalances, tokensUsed, assets, cardanoCoin)?.length
     : false;
@@ -231,7 +229,7 @@ export const Form = ({
             assetBalances={assetBalances}
             coinBalance={coinBalance}
             prices={prices}
-            builtTxError={builtTxData?.error}
+            builtTxError={error}
             insufficientBalanceInputs={insufficientBalanceInputs}
             onAddAsset={() => handleAssetPicker(id)}
             openAssetPicker={(coinId) => handleAssetPicker(id, coinId)}
@@ -290,7 +288,7 @@ export const Form = ({
             label={t('browserView.transaction.send.adaAllocation')}
             tooltipContent={t('send.toSendAnNFTOrNativeToken')}
             {...formatAdaAllocation({
-              missingCoins: builtTxData?.totalMinimumCoins?.coinMissing,
+              missingCoins: totalMinimumCoins?.coinMissing,
               fiat: prices?.cardano?.price,
               cardanoCoin,
               fiatCurrency

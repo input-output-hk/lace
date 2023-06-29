@@ -8,6 +8,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { toast, addEllipsis } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
+import { useGetHandles } from '@hooks';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -30,15 +31,21 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
   const walletAddress = walletInfo.address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const walletName = addEllipsis(walletInfo.name.toString(), WALLET_NAME_MAX_LENGTH, 0);
+  const [handle] = useGetHandles();
+  const handleName = handle?.nftMetadata?.name;
 
   return (
     <Menu.ItemGroup className={classnames(styles.menuItem, styles.borderBottom)} data-testid="header-menu-user-info">
       <div className={styles.userInfoWrapper}>
-        <CopyToClipboard text={walletAddress}>
+        <CopyToClipboard text={handleName || walletAddress}>
           <AntdTooltip
             overlayInnerStyle={overlayInnerStyle}
             placement="top"
-            title={<span className={styles.tooltip}>{t('settings.copyAddress')}</span>}
+            title={
+              <span className={styles.tooltip}>
+                {handleName ? t('settings.copyHandle') : t('settings.copyAddress')}
+              </span>
+            }
           >
             <div
               className={styles.userInfo}
@@ -52,7 +59,7 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
                   {walletName}
                 </p>
                 <p className={styles.walletAddress} data-testid="header-menu-wallet-address">
-                  {shortenedWalletAddress}
+                  {handleName || shortenedWalletAddress}
                 </p>
               </div>
             </div>

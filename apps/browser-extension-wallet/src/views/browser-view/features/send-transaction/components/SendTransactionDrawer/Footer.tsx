@@ -9,7 +9,7 @@ import styles from './Footer.module.scss';
 import { Sections } from '../../types';
 import {
   useSections,
-  useBuitTxState,
+  useBuiltTxState,
   useSubmitingState,
   useTransactionProps,
   usePassword,
@@ -63,7 +63,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const triggerSubmit = () => confirmRef.current?.click();
   const { t } = useTranslation();
   const { hasInvalidOutputs, outputMap } = useTransactionProps();
-  const { builtTxData } = useBuitTxState();
+  const { builtTxData } = useBuiltTxState();
   const { setSection, currentSection } = useSections();
   const { setSubmitingTxState, isSubmitingTx, isPasswordValid } = useSubmitingState();
   const { inMemoryWallet, getKeyAgentType } = useWalletStore();
@@ -111,14 +111,9 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const isHwSummary = useMemo(() => isSummaryStep && !isInMemory, [isSummaryStep, isInMemory]);
 
   const signAndSubmitTransaction = useCallback(async () => {
-    const signedTx = await inMemoryWallet.finalizeTx({
-      tx: builtTxData.tx,
-      ...(builtTxData?.auxiliaryData && {
-        auxiliaryData: builtTxData.auxiliaryData
-      })
-    });
-    await inMemoryWallet.submitTx(signedTx);
-  }, [inMemoryWallet, builtTxData?.tx, builtTxData?.auxiliaryData]);
+    const { tx } = await builtTxData.tx.sign();
+    await inMemoryWallet.submitTx(tx);
+  }, [builtTxData, inMemoryWallet]);
 
   const handleVerifyPass = useCallback(async () => {
     if (isSubmitingTx) return;

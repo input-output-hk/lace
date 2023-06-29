@@ -1,5 +1,5 @@
-import { StakingPage } from '../elements/staking/stakingPage';
-import { NetworkComponent } from '../elements/staking/networkComponent';
+import StakingPage from '../elements/staking/stakingPage';
+import NetworkComponent from '../elements/staking/networkComponent';
 import { TestnetPatterns } from '../support/patterns';
 import webTester from '../actor/webTester';
 import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
@@ -13,44 +13,57 @@ import { expect } from 'chai';
 import { StakePool } from '../data/expectedStakePoolsData';
 import StakingPasswordDrawer from '../elements/staking/StakingPasswordDrawer';
 import StakingErrorDrawer from '../elements/staking/StakingErrorDrawer';
+import { browser } from '@wdio/globals';
 
 class StakingPageAssert {
   assertSeeTitleWithCounter = async () => {
-    const stakingPage = new StakingPage();
-    await stakingPage.title.waitForDisplayed();
-    await stakingPage.counter.waitForDisplayed();
-    await expect(await stakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
-    await expect(await stakingPage.counter.getText()).to.match(TestnetPatterns.COUNTER_REGEX);
+    await StakingPage.title.waitForDisplayed();
+    await StakingPage.counter.waitForDisplayed();
+    await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
+    await expect(await StakingPage.counter.getText()).to.match(TestnetPatterns.COUNTER_REGEX);
   };
 
   assertSeeTitle = async () => {
-    await expect(await new StakingPage().title.getText()).to.equal(await t('staking.sectionTitle'));
+    await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
   };
 
   assertNetworkContainerExistsWithContent = async () => {
-    const networkComponent = new NetworkComponent();
-    await expect(await networkComponent.getNetworkTitle()).to.equal(await t('cardano.networkInfo.title'));
-    await expect(await networkComponent.getCurrentEpochLabel()).to.equal(await t('cardano.networkInfo.currentEpoch'));
-    await webTester.waitUntilSeeElement(networkComponent.currentEpochDetail());
-    await expect(await networkComponent.getEpochEndLabel()).to.equal(await t('cardano.networkInfo.epochEnd'));
-    await webTester.waitUntilSeeElement(networkComponent.epochEndDetail());
-    await expect(await networkComponent.getTotalPoolsLabel()).to.equal(await t('cardano.networkInfo.totalPools'));
-    await webTester.waitUntilSeeElement(networkComponent.totalPoolsDetail());
-    await expect(await networkComponent.getPercentageStakedLabel()).to.equal(
+    await NetworkComponent.networkContainer.waitForDisplayed();
+    await NetworkComponent.networkTitle.waitForDisplayed();
+    await expect(await NetworkComponent.networkTitle.getText()).to.equal(await t('cardano.networkInfo.title'));
+    await NetworkComponent.currentEpochLabel.waitForDisplayed();
+    await expect(await NetworkComponent.currentEpochLabel.getText()).to.equal(
+      await t('cardano.networkInfo.currentEpoch')
+    );
+    await NetworkComponent.currentEpochDetail.waitForDisplayed();
+    await expect(await NetworkComponent.currentEpochDetail.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    await NetworkComponent.epochEndLabel.waitForDisplayed();
+    await expect(await NetworkComponent.epochEndLabel.getText()).to.equal(await t('cardano.networkInfo.epochEnd'));
+    await NetworkComponent.epochEndDetail.waitForDisplayed();
+    await NetworkComponent.totalPoolsLabel.waitForDisplayed();
+    await expect(await NetworkComponent.totalPoolsLabel.getText()).to.equal(await t('cardano.networkInfo.totalPools'));
+    await NetworkComponent.totalPoolsDetail.waitForDisplayed();
+    await expect(await NetworkComponent.totalPoolsDetail.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    await NetworkComponent.percentageStakedLabel.waitForDisplayed();
+    await expect(await NetworkComponent.percentageStakedLabel.getText()).to.equal(
       await t('cardano.networkInfo.percentageStaked')
     );
-    await webTester.waitUntilSeeElement(networkComponent.percentageStakedDetail());
-    // TODO temporarily disabled
-    // await expect(await networkComponent.getAvgAPYLabel()).to.equal(await t('cardano.networkInfo.averageRos'));
-    // await webTester.waitUntilSeeElement(networkComponent.apyDetail());
-    // await expect(await networkComponent.getAvgMarginLabel()).to.equal(await t('cardano.networkInfo.averageMargin'));
-    // await webTester.waitUntilSeeElement(networkComponent.marginDetail());
+    await NetworkComponent.percentageStakedDetail.waitForDisplayed();
+    await expect(await NetworkComponent.percentageStakedDetail.getText()).to.match(
+      TestnetPatterns.PERCENT_DOUBLE_REGEX
+    );
   };
 
-  assertSeeSearchComponent = async () => {
-    const stakingPage = new StakingPage();
-    await webTester.waitUntilSeeElement(stakingPage.stakingPageSearchIcon());
-    await webTester.waitUntilSeeElement(stakingPage.stakingPageSearchInput());
+  assertSeeSearchComponent = async (mode: 'extended' | 'popup') => {
+    await StakingPage.stakingPageSearchIcon.waitForDisplayed();
+    await StakingPage.stakingPageSearchInput.waitForDisplayed();
+    await (mode === 'extended'
+      ? expect(await StakingPage.stakingPageSearchInput.getAttribute('placeholder')).to.equal(
+          await t('browserView.staking.stakePoolsTable.searchPlaceholder')
+        )
+      : expect(await StakingPage.searchInputPlaceholderInPopup.getText()).to.equal(
+          await t('cardano.stakePoolSearch.searchPlaceholder')
+        ));
   };
 
   assertSeePopupSearch = async () => {
@@ -179,7 +192,11 @@ class StakingPageAssert {
     const resultsNum = Number(results);
     if (resultsNum === 0) {
       await expect(rowsNumber).to.equal(resultsNum);
-      await webTester.waitUntilSeeElementContainingText(await t('browserView.staking.stakePoolsTable.emptyMessage'));
+      await StakingPage.emptySearchResultsImage.waitForDisplayed();
+      await StakingPage.emptySearchResultsMessage.waitForDisplayed();
+      await expect(await StakingPage.emptySearchResultsMessage.getText()).to.equal(
+        await t('browserView.staking.stakePoolsTable.emptyMessage')
+      );
     } else {
       await webTester.seeWebElement(stakePoolListItem.logoWithIndex(1));
       await expect(await stakePoolListItem.getNameWithIndex(1)).to.equal(title);
@@ -196,7 +213,7 @@ class StakingPageAssert {
   };
 
   assertSeeSingleSearchResult = async () => {
-    await browser.waitUntil(async () => (await new StakingPage().counter.getText()) === '(1)', {
+    await browser.waitUntil(async () => (await StakingPage.counter.getText()) === '(1)', {
       timeout: 20_000,
       timeoutMsg: 'failed while waiting for single search result'
     });

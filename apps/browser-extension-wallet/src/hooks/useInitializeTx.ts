@@ -2,7 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
 import { BuiltTxData, OutputsMap } from '../views/browser-view/features/send-transaction/types';
 import { useSpentBalances } from '../views/browser-view/features/send-transaction/store';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 import { getReachedMaxAmountList } from '@src/views/browser-view/features/send-transaction/helpers';
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from './useMaxAda';
@@ -60,32 +60,41 @@ export const useInitializeTx = (
       cardanoCoin
     });
     if (hasInvalidOutputs || reachedMaxAmountList.length > 0) {
-      setBuiltTxData({ tx: undefined, totalMinimumCoins: undefined, error: undefined, reachedMaxAmountList });
+      setBuiltTxData({
+        uiTx: undefined,
+        tx: undefined,
+        totalMinimumCoins: undefined,
+        error: undefined,
+        reachedMaxAmountList
+      });
     } else {
       try {
         const partialTxProps = buildTransactionProps({ metadata, outputsMap: outputs, assetsInfo });
         const util = Wallet.createWalletUtil(inMemoryWallet);
         const minimumCoinQuantities = await util.validateOutputs(partialTxProps.outputs);
         const totalMinimumCoins = getTotalMinimumCoins(minimumCoinQuantities);
-
         const outputsWithMissingCoins = setMissingCoins(minimumCoinQuantities, partialTxProps.outputs);
+        const txBuilder = inMemoryWallet.createTxBuilder();
 
-        const finalTxProps = partialTxProps?.auxiliaryData
-          ? { ...outputsWithMissingCoins, auxiliaryData: partialTxProps.auxiliaryData }
-          : outputsWithMissingCoins;
-
-        const tx = await inMemoryWallet.initializeTx(finalTxProps);
-
+        outputsWithMissingCoins.outputs.forEach((output) => txBuilder.addOutput(output));
+        txBuilder.metadata(partialTxProps?.auxiliaryData?.blob || new Map());
+        const tx = txBuilder.build();
+        const inspection = await tx.inspect();
         setBuiltTxData({
+          uiTx: {
+            fee: inspection.inputSelection.fee,
+            hash: inspection.hash,
+            outputs: inspection.inputSelection.outputs
+          },
           tx,
           totalMinimumCoins,
-          auxiliaryData: partialTxProps?.auxiliaryData,
           error: undefined,
           reachedMaxAmountList: []
         });
       } catch (error) {
         console.error('error initializing transaction:', { error });
         setBuiltTxData({
+          uiTx: undefined,
           tx: undefined,
           error: error.message,
           reachedMaxAmountList: []

@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import isUndefined from 'lodash/isUndefined';
 import { useWalletStore } from '../../../../../stores';
-import { CardanoTxOut, CoinId, CurrencyInfo, TokensDetails } from '../../../../../types';
+import { CardanoTxOut, CurrencyInfo, TokensDetails } from '@src/types';
 import { Wallet } from '@lace/cardano';
-import { PriceResult, useFetchCoinPrice, useObservable } from '@hooks';
+import { PriceResult, useFetchCoinPrice } from '@hooks';
 import { walletBalanceTransformer } from '../../../../../api/transformers';
 import { OutputSummaryList, SentAssetsList, Costs, OutputSummaryProps } from '@lace/core';
-import { useBuitTxState, useMetadata } from '../store';
+import { useBuiltTxState, useMetadata } from '../store';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import styles from './SendTransactionSummary.module.scss';
@@ -19,6 +19,7 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
+import { useObservable } from '@lace/common';
 
 const { Text } = Typography;
 
@@ -34,7 +35,7 @@ const formatRow = ({
 }: {
   output: CardanoTxOut;
   assetInfo: Map<Wallet.Cardano.AssetId, TokensDetails>;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
   fiatCurrency: CurrencyInfo;
   prices?: PriceResult;
 }): SentAssetsList => {
@@ -73,7 +74,12 @@ const formatRow = ({
   return [cardano, ...assetList];
 };
 
-export const getFee = (fee: string, adaPrice: number, cardanoCoin: CoinId, fiatCurrency: CurrencyInfo): Costs => {
+export const getFee = (
+  fee: string,
+  adaPrice: number,
+  cardanoCoin: Wallet.CoinId,
+  fiatCurrency: CurrencyInfo
+): Costs => {
   if (!fee)
     return {
       ada: `0.00 ${cardanoCoin.symbol}`,
@@ -95,7 +101,7 @@ interface SendTransactionSummaryProps {
 export const SendTransactionSummary = withAddressBookContext(
   ({ isPopupView = false }: SendTransactionSummaryProps): React.ReactElement => {
     const { t } = useTranslation();
-    const { builtTxData } = useBuitTxState();
+    const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuiltTxState();
     const [metadata] = useMetadata();
     const { inMemoryWallet } = useWalletStore();
     const { priceResult } = useFetchCoinPrice();
@@ -127,10 +133,10 @@ export const SendTransactionSummary = withAddressBookContext(
       [addressList]
     );
 
-    const rows = [...(builtTxData?.tx?.inputSelection?.outputs?.values() ?? [])].map((item) => ({
+    const rows = [...(outputs?.values() ?? [])].map((item) => ({
       list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
       recipientAddress: item.address.toString(),
-      recipientName: addressToNameMap?.get(item.address.toString())
+      recipientName: addressToNameMap?.get(item.address.toString()) || item.handle
     }));
 
     // Where do we get the deposit field? LW-1363
@@ -139,7 +145,7 @@ export const SendTransactionSummary = withAddressBookContext(
         <OutputSummaryList
           rows={rows as OutputSummaryProps[]}
           txFee={{
-            ...getFee(builtTxData?.tx?.body?.fee?.toString(), priceResult?.cardano?.price, cardanoCoin, fiatCurrency),
+            ...getFee(fee?.toString(), priceResult?.cardano?.price, cardanoCoin, fiatCurrency),
             tootipText: t('send.theAmountYoullBeChargedToProcessYourTransaction')
           }}
           metadata={metadata}

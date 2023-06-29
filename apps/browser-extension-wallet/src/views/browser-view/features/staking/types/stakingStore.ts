@@ -34,6 +34,6 @@ export interface StakePoolDetails {
   setNoFundsVisible: (visibility: boolean) => void;
   isBuildingTx: boolean;
   setIsBuildingTx: (visibility: boolean) => void;
-  stakingError: StakingError | undefined;
-  setStakingError: (error: StakingError | undefined) => void;
+  stakingError?: StakingError;
+  setStakingError: (error?: StakingError) => void;
 }

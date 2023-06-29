@@ -1,16 +1,16 @@
 /* eslint-disable complexity */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-nested-ternary */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import { Skeleton } from 'antd';
 import Icon from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
-import { Button, Ellipsis } from '@lace/common';
+import { Button, Ellipsis, Banner, useObservable } from '@lace/common';
 import { RowContainer, renderLabel, renderAmountInfo } from '@lace/core';
-import { useBalances, useBuildDelegation, useDelegationDetails, useFetchCoinPrice, useObservable } from '@src/hooks';
+import { useBalances, useBuildDelegation, useDelegationDetails, useFetchCoinPrice } from '@src/hooks';
 import { useWalletStore } from '@stores';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { sectionsConfig, useStakePoolDetails } from '../../store';
@@ -22,7 +22,6 @@ import { useDelegationTransaction } from '@views/browser/features/staking/hooks'
 import { BrowserViewSections } from '@lib/scripts/types';
 import { ContinueInBrowserDialog } from '@components/ContinueInBrowserDialog';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
-import { Banner } from '@components/Banner';
 import ExclamationMarkIcon from '@src/assets/icons/exclamation-circle-small.svg';
 import {
   AnalyticsEventActions,
@@ -48,16 +47,17 @@ interface OpenTabStakingProps {
 
 export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { setIsBuildingTx, setStakingError, stakingError } = useStakePoolDetails();
+  const { stakingError } = useStakePoolDetails();
   const {
     inMemoryWallet,
     walletUI: { cardanoCoin }
   } = useWalletStore();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
+  const { delegationTxFee } = useDelegationStore();
 
-  const buildDelegationTx = useBuildDelegation();
-  const { setDelegationBuiltTx, delegationBuiltTx } = useDelegationStore();
+  useBuildDelegation();
+
   const {
     logo: poolLogo,
     id: poolId,
@@ -73,37 +73,11 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
     rewardAccounts && rewardAccounts[0]?.keyStatus !== Wallet.Cardano.StakeKeyStatus.Registered
       ? protocolParameters?.stakeKeyDeposit
       : undefined;
-  const fee = delegationBuiltTx ? delegationBuiltTx?.body?.fee : 0;
-
-  const buildTransaction = useCallback(async () => {
-    try {
-      setIsBuildingTx(true);
-      const builtTx = await buildDelegationTx();
-      setDelegationBuiltTx(builtTx);
-      // eslint-disable-next-line unicorn/no-useless-undefined
-      setStakingError(undefined);
-    } catch (error) {
-      console.error(error);
-      if (error?.failure === 'UTxO Fully Depleted') {
-        setStakingError(StakingError.UTXO_FULLY_DEPLETED);
-      } else if (error?.failure === 'UTxO Balance Insufficient') {
-        setStakingError(StakingError.UTXO_BALANCE_INSUFFICIENT);
-      }
-    } finally {
-      setIsBuildingTx(false);
-    }
-  }, [buildDelegationTx, setDelegationBuiltTx, setIsBuildingTx, setStakingError]);
 
   const ErrorMessages = {
     [StakingError.UTXO_FULLY_DEPLETED]: t('browserView.staking.details.errors.utxoFullyDepleted'),
     [StakingError.UTXO_BALANCE_INSUFFICIENT]: t('browserView.staking.details.errors.utxoBalanceInsufficient')
   };
-
-  useEffect(() => {
-    if (!delegationBuiltTx) {
-      buildTransaction();
-    }
-  }, [delegationBuiltTx, buildTransaction]);
 
   const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
     <div>
@@ -203,9 +177,9 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
               })}
               <div>
                 {renderAmountInfo(
-                  `${Wallet.util.lovelacesToAdaString(fee.toString())} ${cardanoCoin.symbol}`,
+                  `${Wallet.util.lovelacesToAdaString(delegationTxFee)} ${cardanoCoin.symbol}`,
                   `${Wallet.util.convertAdaToFiat({
-                    ada: Wallet.util.lovelacesToAdaString(fee.toString()),
+                    ada: Wallet.util.lovelacesToAdaString(delegationTxFee),
                     fiat: priceResult?.cardano?.price || 0
                   })} ${fiatCurrency?.symbol}`
                 )}

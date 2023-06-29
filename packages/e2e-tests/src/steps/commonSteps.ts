@@ -7,8 +7,6 @@ import popupView from '../page/popupView';
 import commonAssert from '../assert/commonAssert';
 import { getTestWallet } from '../support/walletConfiguration';
 import helpAndSupportPageAssert from '../assert/helpAndSupportPageAssert';
-import webTester from '../actor/webTester';
-import { TextLink } from '../elements/textLink';
 import { t } from '../utils/translationService';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import localStorageManager from '../utils/localStorageManager';
@@ -27,6 +25,10 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
+import menuMainExtended from '../elements/menuMainExtended';
+import { browser } from '@wdio/globals';
+import faqPageAssert from '../assert/faqPageAssert';
+import { visit } from '../utils/pageUtils';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -70,6 +72,16 @@ When(
   }
 );
 
+When(
+  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address book) page in (extended|popup) mode$/,
+  async (
+    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book',
+    mode: 'extended' | 'popup'
+  ) => {
+    await visit(page, mode);
+  }
+);
+
 Then(/(An|No) "([^"]*)" text is displayed/, async (expectedResult: string, expectedText: string) => {
   switch (expectedResult) {
     case 'An': {
@@ -101,12 +113,12 @@ Then(/^I see "Help and support" page$/, async () => {
   await helpAndSupportPageAssert.assertSeeHelpAndSupportPage();
 });
 
-Then(/^I click "([^"]*)" link$/, async (linkText: string) => {
-  await webTester.clickElement(new TextLink(linkText));
-});
-
 Then(/New tab with url containing "([^"]*)" is opened/, async (urlPart: string) => {
   await commonAssert.assertSeeTabWithUrl(urlPart);
+});
+
+Then(/^FAQ page is displayed$/, async () => {
+  await faqPageAssert.assertSeeFaqPage();
 });
 
 Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: string, mode: 'extended' | 'popup') => {
@@ -189,4 +201,38 @@ Then(/^I close all remaining tabs except current one$/, async () => {
 
 Then(/^I switch to window with Lace$/, async () => {
   await switchToWindowWithLace();
+});
+
+When(/^I resize the window to a width of: ([^"]*) and a height of: ([^"]*)$/, async (width: number, height: number) => {
+  await browser.setWindowSize(Number(width), Number(height));
+});
+
+Then(/^I (see|do not see) expanded icon$/, async (shouldSee: 'see' | 'do not see') => {
+  await topNavigationAssert.assertSeeExpandedIcon(shouldSee === 'see');
+});
+
+When(/^I hover on the menu$/, async () => {
+  await menuMainExtended.hoverOverMenu();
+});
+
+Then(/^I (see|do not see) a horizontal scroll$/, async (shouldSee: 'see' | 'do not see') => {
+  await commonAssert.assertSeeHorizontalScroll(shouldSee === 'see');
+});
+
+Then(
+  /^I see (expanded|collapsed) menu for ([^"]*) resolution$/,
+  async (menuFormat: 'collapsed' | 'expanded', width: number) => {
+    await menuMainAssert.assertMenuFormat(menuFormat, width);
+  }
+);
+
+When(/^I refresh the page$/, async () => {
+  await browser.refresh();
+});
+
+When(/^I reopen the page$/, async () => {
+  const currentPageUrl = await browser.getUrl();
+  await browser.newWindow('');
+  await closeAllTabsExceptActiveOne();
+  await browser.url(currentPageUrl);
 });

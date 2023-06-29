@@ -5,21 +5,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import isNumber from 'lodash/isNumber';
 import { Wallet } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
-import {
-  useRedirection,
-  useObservable,
-  useBalances,
-  useFetchCoinPrice,
-  useDelegationDetails,
-  useStakingRewards
-} from '@hooks';
+import { useRedirection, useBalances, useFetchCoinPrice, useDelegationDetails, useStakingRewards } from '@hooks';
 import { useWalletStore } from '@stores';
 import { networkInfoStatusSelector, stakePoolResultsSelector } from '@stores/selectors/staking-selectors';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import { StakePoolDetails, StakingModals } from '../../stake-pool-details';
 import { Sections } from '@views/browser/features/staking/types';
 import { useStakePoolDetails } from '../../stake-pool-details/store';
-import { stakePoolTransformer } from '../api/transformers';
 import { useDelegationStore } from '../stores';
 import { DelegationLayout } from './DelegationLayout';
 
@@ -31,6 +23,7 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
+import { useObservable } from '@lace/common';
 
 const STORAGE_MEMO_ENTRY_NAME = 'hideStakingHwDialog';
 const MIN_CHARS_TO_SEARCH = 3;
@@ -48,7 +41,8 @@ export const DelegationContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     getKeyAgentType,
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    blockchainProvider
   } = useWalletStore();
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
   const [searchValue, setSearchValue] = useState<string | undefined>();
@@ -92,7 +86,11 @@ export const DelegationContainer = (): React.ReactElement => {
 
   const parseStakePools = () =>
     stakePoolSearchResults?.pageResults.map((pool) =>
-      stakePoolTransformer({ stakePool: pool, delegatingPoolId: delegationDetails?.id?.toString(), cardanoCoin })
+      Wallet.util.stakePoolTransformer({
+        stakePool: pool,
+        delegatingPoolId: delegationDetails?.id?.toString(),
+        cardanoCoin
+      })
     );
 
   useEffect(() => {
@@ -102,7 +100,7 @@ export const DelegationContainer = (): React.ReactElement => {
     if (isHardwareWalletPopupTransition) return;
     if (searchValue?.length !== 0 && searchValue?.length < MIN_CHARS_TO_SEARCH) return;
     fetchStakePools({ searchString: searchValue || '', limit: MAX_ITEMS_TO_SHOW });
-  }, [searchValue, fetchStakePools, isInMemory]);
+  }, [searchValue, fetchStakePools, isInMemory, blockchainProvider]);
 
   const openDelagationConfirmation = useCallback(() => {
     setSection();
@@ -142,7 +140,9 @@ export const DelegationContainer = (): React.ReactElement => {
         searchValue={searchValue}
         handleSearchChange={handleSearch}
         handleAddFunds={redirectToReceive}
-        currentStakePool={delegationDetails && stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin })}
+        currentStakePool={
+          delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin })
+        }
         isLoading={isLoadingNetworkInfo}
         totalRewards={Wallet.util.lovelacesToAdaString(totalRewards.toString())}
         lastReward={Wallet.util.lovelacesToAdaString(lastReward.toString())}

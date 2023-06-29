@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { walletBalanceTransformer } from '../api/transformers';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 import { useWalletStore } from '../stores';
 import { WalletBalance } from '../types';
 

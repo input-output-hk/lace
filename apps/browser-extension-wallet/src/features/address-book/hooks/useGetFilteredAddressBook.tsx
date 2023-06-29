@@ -3,7 +3,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { AddressBookSchema, addressBookSchema } from '@src/lib/storage';
 import { useActionExecution } from '@src/hooks/useActionExecution';
 import { useWalletStore } from '@src/stores';
-import { Wallet } from '@lace/cardano';
+import { cardanoNetworkMap } from '@src/features/address-book/context';
 
 const DEFAULT_QUERY_LIMIT = 5;
 
@@ -46,8 +46,7 @@ export const useGetFilteredAddressBook = (): {
 
   const getAddressBookByNameOrAddress = useCallback(
     async ({ value, limit = DEFAULT_QUERY_LIMIT }: GetAddressByNameOrAddressArgs) => {
-      const network =
-        environmentName === 'Mainnet' ? Wallet.Cardano.NetworkId.Mainnet : Wallet.Cardano.NetworkId.Testnet;
+      const network = cardanoNetworkMap[environmentName];
 
       if (value.length <= 0) {
         setFilteredAddresses([]);

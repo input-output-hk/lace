@@ -1,3 +1,5 @@
+const path = require('node:path');
+
 module.exports = {
   $schema: 'https://json.schemastore.org/eslintrc.json',
   root: true,
@@ -16,6 +18,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: ['./tsconfig.eslint.json'],
+    tsconfigRootDir: path.resolve(__dirname),
   },
   plugins: [
     'eslint-plugin-import',
@@ -79,6 +82,7 @@ module.exports = {
           args: true,
           vars: true,
           createVar: true,
+          ref: true,
         },
         replacements: {
           s: {
@@ -130,7 +134,13 @@ module.exports = {
     'functional/immutable-data': [
       'error',
       {
-        ignoreAccessorPattern: ['draft.*', '**.parameters', '**.play'],
+        ignoreAccessorPattern: [
+          'draft.*',
+          '**.parameters',
+          '**.play',
+          '**.argTypes',
+          '**.args',
+        ],
       },
     ],
     'functional/functional-parameters': 'off',

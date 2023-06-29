@@ -4,9 +4,9 @@ Feature: Send Transactions from Dapp - E2E
   Background:
     Given Wallet is synced
 
-  @LW-3761 @Testnet
+  @LW-3761 @Testnet @Smoke
   Scenario: Send ADA from DApp E2E
-    And I save token: "Cardano" balance in extended mode
+    And I save token: "Cardano" balance
     And I open and authorize test DApp with "Only once" setting
     When I click "Send ADA" "Run" button in test DApp
     Then I see DApp connector "Confirm transaction" page with: "3.00 ADA" and: "0" assets
@@ -20,7 +20,7 @@ Feature: Send Transactions from Dapp - E2E
     And I don't see DApp window
     And I switch to window with Lace
     And I navigate to Tokens extended page
-    Then the sent amount of: "3" with "DApp transaction" fee for token "Cardano" is subtracted from the total balance in extended mode
+    Then the sent amount of: "3" with "DApp transaction" fee for token "Cardano" is subtracted from the total balance
     When I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "3.00 tADA" and tokens count 1
     And I click on a transaction: 1
@@ -33,7 +33,7 @@ Feature: Send Transactions from Dapp - E2E
 
   @LW-6797 @Testnet
   Scenario: Send Token from DApp E2E
-    And I save token: "LaceCoin2" balance in extended mode
+    And I save token: "LaceCoin2" balance
     And I open and authorize test DApp with "Only once" setting
     And I click "Send Token" button in test DApp
     When I click "Send Token" "Run" button in test DApp
@@ -48,7 +48,7 @@ Feature: Send Transactions from Dapp - E2E
     And I don't see DApp window
     And I switch to window with Lace
     And I navigate to Tokens extended page
-    Then the sent amount of: "2" for token "LaceCoin2" is subtracted from the total balance in extended mode
+    Then the sent amount of: "2" for token "LaceCoin2" is subtracted from the total balance
     When I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "1.38 tADA, 2 LaceCoin2" and tokens count 2
     And I click on a transaction: 1

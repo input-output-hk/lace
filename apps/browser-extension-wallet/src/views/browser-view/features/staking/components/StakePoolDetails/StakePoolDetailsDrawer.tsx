@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Drawer, DrawerNavigation } from '@lace/common';
+import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { sectionsConfig, useStakePoolDetails } from '../../store';
 import { Sections } from '../../types';
@@ -7,7 +7,6 @@ import { useWalletStore } from '@stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
-import { useKeyboardShortcut } from '@hooks';
 import { useTranslation } from 'react-i18next';
 
 export interface StakePoolDetailsDrawerProps {
@@ -45,7 +44,7 @@ export const StakePoolDetailsDrawer = ({
   //   () => simpleSendConfig.currentSection === Sections.SUCCESS_TX,
   //   [simpleSendConfig.currentSection]
   // );
-  const { setDelegationBuiltTx } = useDelegationStore();
+  const { setDelegationTxBuilder } = useDelegationStore();
   const backgroundService = useBackgroundServiceAPIContext();
 
   const closeDrawer = useCallback(() => {
@@ -53,7 +52,7 @@ export const StakePoolDetailsDrawer = ({
       setExitStakingVisible(true);
     } else {
       backgroundService.setWalletPassword();
-      setDelegationBuiltTx();
+      setDelegationTxBuilder();
       resetStates();
       removePassword();
       // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
@@ -66,7 +65,7 @@ export const StakePoolDetailsDrawer = ({
     simpleSendConfig.currentSection,
     setExitStakingVisible,
     backgroundService,
-    setDelegationBuiltTx,
+    setDelegationTxBuilder,
     resetStates,
     removePassword,
     // isInMemory,

@@ -1,6 +1,5 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useEffect, useMemo, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
 import debounce from 'lodash/debounce';
@@ -9,15 +8,10 @@ import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI'
 import { useTheme } from '@providers/ThemeProvider';
 import { BrowserViewSections, ChangeThemeData, Message, MessageTypes } from '@lib/scripts/types';
 import { useDrawer } from '../../stores';
-import { walletRoutePaths } from '@routes';
-import { SideMenu } from '../SideMenu';
 import { DrawerContent, DrawerUIContainer } from '../Drawer';
-
-import laceLogo from '../../../../assets/branding/lace-logo.svg';
-import laceLogoDarkMode from '../../../../assets/branding/lace-logo-dark-mode.svg';
-import styles from './Layout.module.scss';
-import { NetworkPill } from '@components/NetworkPill';
 import { useNetworkError } from '@hooks/useNetworkError';
+import { LeftSidePanel } from '../LeftSidePanel';
+import styles from './Layout.module.scss';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,7 +26,6 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
   const { t } = useTranslation();
   const [, setDrawerConfig] = useDrawer();
   const { theme, setTheme } = useTheme();
-  const history = useHistory();
   const backgroundServices = useBackgroundServiceAPIContext();
 
   useEffect(() => {
@@ -70,21 +63,7 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
       id="main"
       className={classnames(styles.layoutGridContainer, isFullWidth && styles.fullWidth, isFlexible && styles.flexible)}
     >
-      <nav id="nav" className={styles.navigation}>
-        <div className={styles.stickyMenuInner}>
-          <div className={styles.logoContainer}>
-            <img
-              className={styles.logo}
-              src={theme.name === 'dark' ? laceLogoDarkMode : laceLogo}
-              alt="LACE"
-              data-testid="header-logo"
-              onClick={() => history.push(walletRoutePaths.assets)}
-            />
-            <NetworkPill />
-          </div>
-          <SideMenu />
-        </div>
-      </nav>
+      <LeftSidePanel theme={theme.name} />
       {children}
       <DrawerUIContainer defaultContent={drawerUIDefaultContent} />
     </div>

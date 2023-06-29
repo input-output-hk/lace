@@ -9,13 +9,8 @@ Feature: Send NFT - Popup View - E2E
   @LW-2514
   Scenario: Popup-view - Send NFT E2E
     And I'm sending an NFT with name: "Ibilecoin"
-    When I fill correct password and confirm
-    Then The Transaction submitted screen is displayed:
-      | Title: "All done"                            |
-      | Subtitle: "The transaction will complete..." |
-      | Text: transaction hash                       |
-      | Button: "View"                               |
-      | Button: "Close"                              |
+    When I enter correct password and confirm the transaction
+    Then The Transaction submitted screen is displayed in popup mode
     When I close the drawer by clicking close button
     And I navigate to Transactions popup page
     Then the Sent transaction is displayed with NFT name: "Ibilecoin" in popup mode

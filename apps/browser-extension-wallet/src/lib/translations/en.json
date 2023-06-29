@@ -83,6 +83,7 @@
       "maximumInputCountExceeded": "Maximum Input Count Exceeded",
       "bundleAmountIsEmpty": "Amount value missing",
       "incorrectAddress": "Incorrect address",
+      "incorrectHandle": "Handle not found",
       "wrongNetworkAddress": "This address belongs to a different network",
       "wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead."
     },
@@ -273,7 +274,8 @@
     "legals.termsOfService": "Terms of service",
     "support.faqs": "FAQ's",
     "support.feesExplained": "Fees explained",
-    "copyAddress": "Copy address"
+    "copyAddress": "Copy address",
+    "copyHandle": "Copy handle"
   },
   "dapp": {
     "nowallet.btn": "Create or restore a wallet",
@@ -406,7 +408,7 @@
     },
     "addressBook.title": "Address book",
     "addressBook.addressList.addItem.title": "Your saved addresses",
-    "addressBook.addressList.addItem.button": "+ Add new address",
+    "addressBook.addressList.addItem.button": "Add address",
     "addressBook.emptyState.title": "You don't have any saved addresses",
     "addressBook.emptyState.message": "Save your favorites to your address book for easy access right here",
     "addressBook.emptyState.button": "Add address",
@@ -433,6 +435,8 @@
     "addressBook.form.addressMissing": "Address field is required",
     "addressBook.form.addressHasWhiteSpace": "Address has unnecessary white space",
     "addressBook.form.incorrectCardanoAddress": "Incorrect Cardano address",
+    "addressBook.form.addNewAddress": "Add new address",
+    "addressBook.form.addNewSubtitle": "Save your favorite addresses to find them easily",
     "voting.pageTitle": "Voting",
     "voting.catalystRegistrationFlow.title": "Wallet registration",
     "voting.educationalList.title": "About governance",
@@ -487,7 +491,7 @@
         "subtitle": "Have a look at the Glossary"
       },
       "stakePoolsTable.title": "Stake pools",
-      "stakePoolsTable.searchPlacehholder": "Search by type, token name or ID",
+      "stakePoolsTable.searchPlaceholder": "Search by type, token name or ID",
       "stakePoolsTable.emptyMessage": "No results matching your search",
       "details": {
         "title": "Stake pool detail",
@@ -928,6 +932,12 @@
       "btn.confirm": "Got it"
     }
   },
+  "corruptedData": {
+    "title": "Data Corrupted",
+    "errorDescription": "Looks like some of your data is missing or invalid. Don't worry your funds are safe.",
+    "actionDescription": "You will need to restore your wallet again with your recovery phrase.",
+    "btn.confirm": "Restore your wallet"
+  },
   "cardano": {
     "general": {
       "confirmButton": "Confirm",
@@ -1026,7 +1036,9 @@
       "beta": "DApp connector Beta"
     },
     "authorizeDapp": {
-      "warning": "Only connect to trusted DApps"
+      "warning": "Only connect to trusted DApps",
+      "nonssl": "This site is unsecured",
+      "nonsslTooltip": "This site does not follow common web standards"
     },
     "dappTransaction": {
       "transaction": "Transaction",
@@ -1038,7 +1050,7 @@
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet."
     },
     "destinationAddressInput": {
-      "recipientAddress": "Recipient's address"
+      "recipientAddress": "Recipient's address or handle"
     },
     "editAddressForm": {
       "walletName": "Wallet name",
@@ -1048,7 +1060,8 @@
     },
     "infoWallet": {
       "copy": "Copy",
-      "addressCopied": "Address copied"
+      "addressCopied": "Address copied",
+      "handleCopied": "Handle copied"
     },
     "nftDetail": {
       "title": "NFT detail",
@@ -1122,6 +1135,7 @@
     "walletSetupMnemonicStep": {
       "writePassphrase": "Write down your secret passphrase",
       "enterPassphrase": "Enter your secret passphrase",
+      "enterPassphraseDescription": "Please enter each word of your recovery phrase in the right order to verify it and recover your wallet.",
       "body": "Now let's check you've got the correct secret passphrase. Enter each word of your passphrase in the right order to verify it.",
       "passphraseInfo1": "Make sure you create an offline backup of your secret passphrase.",
       "passphraseInfo2": "Do not store your backup digitally.",

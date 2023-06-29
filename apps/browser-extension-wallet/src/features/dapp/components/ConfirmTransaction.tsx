@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
 import { Layout } from './Layout';
@@ -14,10 +14,9 @@ import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { useObservable } from '@hooks/useObservable';
+import { useRedirection } from '@hooks';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { Skeleton } from 'antd';
-import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
@@ -80,14 +79,16 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const assetIds = useMemo(() => tx?.body?.outputs && getTransactionAssetsId(tx.body.outputs), [tx?.body?.outputs]);
 
   useEffect(() => {
-    const fetchAssetsInfo = async () => {
-      const result = await getAssetsInformation(assetIds, assets, {
-        assetProvider,
-        extraData: { nftMetadata: true, tokenMetadata: true }
-      });
-      setAssetsInfo(result);
-    };
-    fetchAssetsInfo();
+    if (assetIds?.length > 0) {
+      const fetchAssetsInfo = async () => {
+        const result = await getAssetsInformation(assetIds, assets, {
+          assetProvider,
+          extraData: { nftMetadata: true, tokenMetadata: true }
+        });
+        setAssetsInfo(result);
+      };
+      fetchAssetsInfo();
+    }
   }, [assetIds, assetProvider, assets]);
 
   const cancelTransaction = useCallback(() => {
@@ -95,7 +96,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       {
         api$: of({
           async allowSignTx(): Promise<boolean> {
-            return Promise.resolve(false);
+            return Promise.reject();
           }
         }),
         baseChannel: DAPP_CHANNELS.userPrompt,
@@ -142,11 +143,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       // eslint-disable-next-line unicorn/no-array-for-each
       txAssets.forEach(async (value, key) => {
         const walletAsset = assets.get(key) || assetsInfo?.get(key);
-        if (!walletAsset) {
-          // Trying to use an asset not in wallet
-          setErrorMessage(t('core.dappTransaction.tryingToUseAssetNotInWallet'));
-          return;
-        }
         assetList.push({
           name: walletAsset.name.toString() || key.toString(),
           ticker: walletAsset.tokenMetadata?.ticker || walletAsset.nftMetadata?.name,
@@ -185,7 +181,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       txType = 'Send';
     }
 
-    const externalOutputs = tx.body.outputs.filter((output) => output.address !== walletInfo.address);
+    const externalOutputs = tx.body.outputs.filter((output) => {
+      if (txType === 'Send') {
+        return output.address !== walletInfo.address;
+      }
+      return true;
+    });
     let totalCoins = BigInt(0);
 
     // eslint-disable-next-line unicorn/no-array-reduce

@@ -1,9 +1,8 @@
 import { Spin, Typography } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Banner } from '@components/Banner';
+import { Banner, inputProps, Password } from '@lace/common';
 import { renderAmountInfo, renderLabel, RowContainer } from '@lace/core';
-import { inputProps, Password } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import styles from '../SettingsLayout.module.scss';
 import { useFetchCoinPrice } from '@hooks';
@@ -17,7 +16,7 @@ import { CurrencyInfo } from '@src/types';
 const { Text } = Typography;
 
 interface CollateralStepSendProps {
-  tx: Cardano.TxBodyWithHash;
+  txFee: Cardano.Lovelace;
   popupView?: boolean;
   hasEnoughAda: boolean;
   password: string;
@@ -30,7 +29,7 @@ interface CollateralStepSendProps {
 }
 
 export const CollateralStepSend = ({
-  tx,
+  txFee,
   hasEnoughAda,
   popupView = false,
   password,
@@ -85,7 +84,7 @@ export const CollateralStepSend = ({
             </div>
           )}
         </div>
-        {hasEnoughAda && tx && (
+        {hasEnoughAda && txFee && (
           <RowContainer>
             {renderLabel({
               label: t('staking.confirmation.transactionFee'),
@@ -94,9 +93,9 @@ export const CollateralStepSend = ({
             })}
             <div>
               {renderAmountInfo(
-                `${Wallet.util.lovelacesToAdaString(tx.body.fee.toString())} ${cardanoCoin.symbol}`,
+                `${Wallet.util.lovelacesToAdaString(txFee.toString())} ${cardanoCoin.symbol}`,
                 `${Wallet.util.convertAdaToFiat({
-                  ada: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
+                  ada: Wallet.util.lovelacesToAdaString(txFee.toString()),
                   fiat: priceResult?.cardano?.price || 0
                 })} ${fiatCurrency?.code}`
               )}

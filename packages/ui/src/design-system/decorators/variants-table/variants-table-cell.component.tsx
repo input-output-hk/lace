@@ -1,19 +1,22 @@
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import { Flex } from '../../flex';
 
 import * as cx from './variants-table-cell.css';
 
-interface Props {
-  children?: ReactNode | undefined;
-  align?: 'center' | 'left' | 'right';
-}
+import type { OmitClassName } from '../../../types';
+
+type CellProps = OmitClassName<'td'> &
+  PropsWithChildren<{
+    align?: 'center' | 'left' | 'right';
+  }>;
 
 export const Cell = ({
   children,
   align = 'center',
-}: Readonly<Props>): JSX.Element => {
+  ...props
+}: Readonly<CellProps>): JSX.Element => {
   const justifyContent = (): 'center' | 'flex-end' | 'flex-start' => {
     switch (align) {
       case 'center': {
@@ -29,7 +32,7 @@ export const Cell = ({
   };
 
   return (
-    <td className={cx.cell}>
+    <td className={cx.cell} {...props}>
       <Flex alignItems="center" justifyContent={justifyContent()}>
         {children}
       </Flex>

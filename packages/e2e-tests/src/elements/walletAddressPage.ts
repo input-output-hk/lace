@@ -1,10 +1,15 @@
 import CommonDrawerElements from './CommonDrawerElements';
 
 class WalletAddressPage extends CommonDrawerElements {
+  private ADDRESS_CARD = '[data-testid="address-card"]';
   private QR_CODE = '[data-testid="qr-code"]';
-  private WALLET_NAME = '[data-testid="info-wallet-name"]';
-  private WALLET_ADDRESS = '[data-testid="info-wallet-full-address"]';
+  private WALLET_NAME = '[data-testid="address-card-name"]';
+  private WALLET_ADDRESS = '[data-testid="address-card-address"]';
   private COPY_BUTTON = '[data-testid="copy-address-btn"]';
+
+  get addressCard() {
+    return $(this.ADDRESS_CARD);
+  }
 
   get qrCode() {
     return $(this.QR_CODE);

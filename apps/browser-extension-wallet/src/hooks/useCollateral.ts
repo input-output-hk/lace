@@ -2,29 +2,29 @@ import { Cardano } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useCallback, useMemo, useState } from 'react';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 import { useMaxAda } from '@hooks/useMaxAda';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
 import { isNotNil } from '@cardano-sdk/util';
 import { useSyncingTheFirstTime } from './useSyncingTheFirstTime';
+import { TxBuilder } from '@cardano-sdk/tx-construction';
 
 const COLLATERAL_ADA_AMOUNT = 5;
 export const COLLATERAL_AMOUNT_LOVELACES = BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT)));
-
-type TX_STATE = Cardano.TxBodyWithHash | null;
 
 type UseCollateralReturn = {
   initializeCollateralTx: () => Promise<void>;
   submitCollateralTx: () => Promise<void>;
   isInitializing: boolean;
   isSubmitting: boolean;
-  tx: TX_STATE;
+  txFee: Cardano.Lovelace;
   hasEnoughAda: boolean;
 };
 
 export const useCollateral = (): UseCollateralReturn => {
-  const [tx, setTx] = useState<TX_STATE>();
+  const [txFee, setTxFee] = useState<Cardano.Lovelace>();
+  const [txBuilder, setTxBuilder] = useState<TxBuilder>();
   const { inMemoryWallet, getKeyAgentType } = useWalletStore();
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
@@ -48,23 +48,22 @@ export const useCollateral = (): UseCollateralReturn => {
     // if the wallet has not been synced at least once or has no balance don't initialize Tx
     if (!hasEnoughAda || isSyncingForTheFirstTime) return;
     setIsInitializing(true);
-    const initialTx = await inMemoryWallet.initializeTx({ outputs: new Set([output]) });
-    setTx(initialTx);
+    const builder = inMemoryWallet.createTxBuilder().addOutput(output);
+    const tx = await builder.build().inspect();
+    setTxFee(tx.body.fee);
+    setTxBuilder(builder);
     setIsInitializing(false);
-  }, [inMemoryWallet, output, hasEnoughAda, isSyncingForTheFirstTime]);
+  }, [hasEnoughAda, isSyncingForTheFirstTime, inMemoryWallet, output]);
+
   const submitCollateralTx = async () => {
-    if (!tx) return;
+    if (!txBuilder) return;
     setIsSubmitting(true);
     try {
-      const signedTx = await inMemoryWallet.finalizeTx({
-        tx
-      });
-      await inMemoryWallet.submitTx(signedTx);
+      const { tx } = await txBuilder.build().sign();
+      await inMemoryWallet.submitTx(tx);
       const utxo = await firstValueFrom(
         inMemoryWallet.utxo.available$.pipe(
-          map((utxos) =>
-            utxos.find((o) => o[0].txId === signedTx.id && o[1].value.coins === COLLATERAL_AMOUNT_LOVELACES)
-          ),
+          map((utxos) => utxos.find((o) => o[0].txId === tx.id && o[1].value.coins === COLLATERAL_AMOUNT_LOVELACES)),
           filter(isNotNil),
           take(1)
         )
@@ -81,7 +80,7 @@ export const useCollateral = (): UseCollateralReturn => {
     submitCollateralTx,
     isInitializing,
     isSubmitting,
-    tx,
+    txFee,
     hasEnoughAda
   };
 };

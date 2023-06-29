@@ -1,8 +1,8 @@
 import webTester from '../actor/webTester';
 import PasswordInput from '../elements/passwordInput';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
-import { t } from '../utils/translationService';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
+import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
 
 class SimpleTxSideDrawerPageObject {
   fillTokenValue = async (value: string) => {
@@ -11,14 +11,14 @@ class SimpleTxSideDrawerPageObject {
 
   clickCloseDrawerButton = async () => {
     const commonDrawerElements = new CommonDrawerElements();
-    await commonDrawerElements.closeButton.waitForClickable();
-    await commonDrawerElements.closeButton.click();
+    await commonDrawerElements.drawerHeaderCloseButton.waitForClickable();
+    await commonDrawerElements.drawerHeaderCloseButton.click();
   };
 
   clickBackDrawerButton = async () => {
     const commonDrawerElements = new CommonDrawerElements();
-    await commonDrawerElements.backButton.waitForClickable();
-    await commonDrawerElements.backButton.click();
+    await commonDrawerElements.drawerHeaderBackButton.waitForClickable();
+    await commonDrawerElements.drawerHeaderBackButton.click();
   };
 
   async fillPassword(password: string) {
@@ -26,8 +26,9 @@ class SimpleTxSideDrawerPageObject {
   }
 
   async fillPasswordAndConfirm(password: string) {
-    await this.fillPassword(password);
-    await webTester.clickButton(await t('general.button.confirm'));
+    await TransactionPasswordPage.passwordInput.setValue(password);
+    await TransactionPasswordPage.nextButton.waitForClickable();
+    await TransactionPasswordPage.nextButton.click();
   }
 }
 

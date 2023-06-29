@@ -1,7 +1,7 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of } from 'rxjs';
 import { getProviders } from './config';
-import { PersonalWallet, storage } from '@cardano-sdk/wallet';
+import { PersonalWallet, SingleAddressDiscovery, storage } from '@cardano-sdk/wallet';
 
 import {
   StoresFactory,
@@ -14,6 +14,7 @@ import {
 } from '@cardano-sdk/web-extension';
 import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
+import { ADA_HANDLE_POLICY_ID } from '@src/features/ada-handle/config';
 
 const logger = console;
 
@@ -29,12 +30,13 @@ const walletFactory: WalletFactory = {
     const providers = getProviders(chainName);
 
     return new PersonalWallet(
-      { name: props.observableWalletName },
+      { name: props.observableWalletName, handlePolicyIds: [ADA_HANDLE_POLICY_ID] },
       {
         keyAgent: dependencies.keyAgent,
         logger,
         ...providers,
-        stores: dependencies.stores
+        stores: dependencies.stores,
+        addressDiscovery: new SingleAddressDiscovery()
       }
     );
   }

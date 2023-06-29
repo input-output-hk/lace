@@ -6,19 +6,19 @@ Feature: Staking Page - Switching pools - Popup View - E2E
 
   @LW-2660 @LW-4407
   Scenario: Popup View - Staking - Switching pool E2E
-    Given I save token: "Cardano" balance in popup mode
+    Given I save token: "Cardano" balance
     And I navigate to Staking popup page
     Then I see currently staking stake pool in popup mode and choose new pool as "OtherStakePool"
-    When I input "OtherStakePool" to search bar
+    When I input "OtherStakePool" to the search bar
     And I wait for single search result
-    And I click stake pool with the name "OtherStakePool"
+    And I click stake pool with name "OtherStakePool"
     Then I see drawer with "OtherStakePool" stake pool details and a button available for staking
-    And I save stakepool info
-    When I click "browserView.staking.details.stakeButtonText" button
-    And I click "browserView.staking.details.switchingPoolsModal.buttons.confirm" button
+    And I save stake pool info
+    When I click "Stake on this pool" button on stake pool details drawer
+    And I click "Fine by me" button on "Switching pool?" modal
     Then I see drawer with stakepool: "OtherStakePool" confirmation screen in popup mode
-    And I click "browserView.staking.details.confirmation.button.confirm" button
-    And I fill correct password and confirm
+    And I click "Next" button on staking confirmation drawer
+    And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed
     When I click "browserView.staking.details.fail.btn.close" button
     And I wait until current stake pool switch to "OtherStakePool"
@@ -32,15 +32,15 @@ Feature: Staking Page - Switching pools - Popup View - E2E
   Scenario: Popup View - Staking - Switching to a pool with no metadata
     And I navigate to Staking popup page
     Then I see currently staking stake pool in popup mode and choose new pool as "OtherNoMetadataStakePool"
-    When I input "OtherNoMetadataStakePool" to search bar
+    When I input "OtherNoMetadataStakePool" to the search bar
     And I wait for single search result
-    And I click stake pool with the name "-"
+    And I click stake pool with name "-"
     Then I see drawer with stake pool details without metadata and a button available for staking
-    When I save stakepool info
-    And I click "browserView.staking.details.stakeButtonText" button
-    And I click "browserView.staking.details.switchingPoolsModal.buttons.confirm" button
-    And I click "browserView.staking.details.confirmation.button.confirm" button
-    And I fill correct password and confirm
+    When I save stake pool info
+    And I click "Stake on this pool" button on stake pool details drawer
+    And I click "Fine by me" button on "Switching pool?" modal
+    And I click "Next" button on staking confirmation drawer
+    And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed
     When I click "browserView.staking.details.fail.btn.close" button
     And I wait until current stake pool switch to "-"

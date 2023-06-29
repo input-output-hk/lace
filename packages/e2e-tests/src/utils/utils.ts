@@ -19,21 +19,21 @@ class ExtensionUtils {
 
   getNetwork(): { name: string; id: number } {
     let network = 'Preprod';
-    let id = 0;
+    let id = 1;
     switch (process.env.ENV) {
       case 'preview': {
         network = 'Preview';
-        id = 0;
+        id = 2;
         break;
       }
       case 'preprod': {
         network = 'Preprod';
-        id = 0;
+        id = 1;
         break;
       }
       case 'mainnet': {
         network = 'Mainnet';
-        id = 1;
+        id = 764_824_073;
         break;
       }
       default: {

@@ -1,10 +1,11 @@
 /* eslint-disable no-magic-numbers */
 import create, { StateSelector } from 'zustand';
 import { Wallet } from '@lace/cardano';
-import { getRandomIcon } from '@src/utils/get-random-icon';
-import { CardanoStakePool, CardanoTxBuild } from '../../../types';
+import { formatPercentages, getRandomIcon } from '@lace/common';
+import { CardanoStakePool } from '../../../types';
 import { DelegationStore, stakePoolDetailsSelectorProps } from '../types';
-import { formatNumber, formatPercentages } from '@src/utils/format-number';
+import { formatNumber } from '@src/utils/format-number';
+import { TxBuilder } from '@cardano-sdk/tx-construction';
 
 export const stakePoolDetailsSelector: StateSelector<DelegationStore, stakePoolDetailsSelectorProps> = ({
   selectedStakePool
@@ -54,6 +55,8 @@ DelegationStore): stakePoolDetailsSelectorProps => {
  * returns a hook to access delegation store states and setters
  */
 export const useDelegationStore = create<DelegationStore>((set) => ({
+  delegationTxFee: '0',
   setSelectedStakePool: (pool: CardanoStakePool) => set({ selectedStakePool: pool }),
-  setDelegationBuiltTx: (tx?: CardanoTxBuild) => set({ delegationBuiltTx: tx })
+  setDelegationTxBuilder: (txBuilder?: TxBuilder) => set({ delegationTxBuilder: txBuilder }),
+  setDelegationTxFee: (fee?: string) => set({ delegationTxFee: fee })
 }));

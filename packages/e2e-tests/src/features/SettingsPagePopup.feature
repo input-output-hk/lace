@@ -170,6 +170,7 @@ Feature: General Settings - Popup View
     Given I am on Tokens popup page
     And I see "Preprod" specific tokens in popup mode
     When I switch network to: "Preview" in popup mode
+    Then Wallet is synced
     When I navigate to Tokens popup page
     Then I see "Preview" specific tokens in popup mode
     When I navigate to NFTs popup page
@@ -180,6 +181,7 @@ Feature: General Settings - Popup View
     Given I am on Tokens popup page
     And I see "Mainnet" specific tokens in popup mode
     When I switch network to: "Preview" in popup mode
+    Then Wallet is synced
     When I navigate to Tokens popup page
     Then I see "Preview" specific tokens in popup mode
     When I navigate to NFTs popup page
@@ -205,12 +207,12 @@ Feature: General Settings - Popup View
     Then I see information about empty address book
 
   @LW-5472 @Testnet
-  Scenario: Popup View - Settings - Addresses are shared and saved when switching Test Preprod to Test Preview
+  Scenario: Popup View - Settings - Addresses entered in Preprod context are not available when switching to Preview
     Given I have 3 addresses in my address book in popup mode
     And I see address count: 3
     When I switch network to: "Preview" in popup mode
     And  I open address book in popup mode
-    And I see address count: 3
+    And I see address count: 0
     When I switch network to: "Preprod" in popup mode
     And  I open address book in popup mode
     Then I see address count: 3
@@ -249,9 +251,8 @@ Feature: General Settings - Popup View
   @LW-3630 @Mainnet @Testnet
   Scenario: Popup View - Settings - FAQ opening in a new tab
     When I open settings from header menu
-    When I click on "FAQs" setting
-    Then New tab with url containing "www.lace.io/faq" is opened
-    And An "FAQ" text is displayed
+    And I click on "FAQs" setting
+    Then FAQ page is displayed
 
   @LW-3870 @Mainnet @Testnet
   Scenario: Extended view - Settings - Show passphrase displayed above Analytics under the Security section in the Settings page

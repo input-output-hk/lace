@@ -125,6 +125,7 @@ export const WalletSetupWizard = ({
     writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
     body: t('core.walletSetupMnemonicStep.body'),
     enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
+    enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
     passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),
     passphraseInfo2: t('core.walletSetupMnemonicStep.passphraseInfo2'),
     passphraseInfo3: t('core.walletSetupMnemonicStep.passphraseInfo3'),
@@ -350,7 +351,7 @@ export const WalletSetupWizard = ({
         }}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}
-        passphraseInfoLink={`${process.env.FAQ_URL}?question=what-is-my-private-key-what-is-my-secret-passphrase`}
+        passphraseInfoLink={`${process.env.FAQ_URL}?question=what-happens-if-i-lose-my-recovery-phrase`}
       />
     );
   };

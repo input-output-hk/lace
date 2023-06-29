@@ -1,15 +1,15 @@
-import { TokensPage } from '../elements/tokensPage';
+import TokensPage from '../elements/tokensPage';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
 
 class TokensPageObject {
   async clickTokenWithName(tokenName: string) {
-    await new TokensPage().tokensTableItemWithName(tokenName).click();
+    await TokensPage.tokensTableItemWithName(tokenName).click();
   }
 
   async waitUntilHeadersLoaded() {
-    await new TokensPage().title.waitForDisplayed({ timeout: 30_000 });
-    await new TokensPage().title.waitForDisplayed({ timeout: 30_000 });
+    await TokensPage.title.waitForDisplayed({ timeout: 30_000 });
+    await TokensPage.totalBalanceLabel.waitForDisplayed({ timeout: 30_000 });
   }
 
   async waitUntilCardanoTokenLoaded() {
@@ -17,15 +17,18 @@ class TokensPageObject {
     await $(selector).waitForDisplayed({ timeout: 30_000 });
   }
 
-  async saveTokenBalance(tokenName: string, mode: 'extended' | 'popup') {
-    const tokensPage = new TokensPage();
-    const rowIndex = await tokensPage.getTokenRowIndex(tokenName);
-    const tokenBalance = await tokensPage.getTokenTableItemValueByIndex(rowIndex, mode);
+  async saveTokenBalance(tokenName: string) {
+    const rowIndex = await TokensPage.getTokenRowIndex(tokenName);
+    const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(rowIndex);
     testContext.save(`${Asset.getByName(tokenName).ticker}tokenBalance`, tokenBalance);
   }
 
+  async loadTokenBalance(tokenName: string) {
+    return testContext.load(`${Asset.getByName(tokenName).ticker}tokenBalance`);
+  }
+
   async clickOnCoinGeckoCreditsLink() {
-    await new TokensPage().coinGeckoLink.click();
+    await TokensPage.coinGeckoLink.click();
   }
 }
 
