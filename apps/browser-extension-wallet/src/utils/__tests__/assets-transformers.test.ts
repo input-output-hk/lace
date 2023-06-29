@@ -6,7 +6,6 @@ const mockCalculateAssetBalance = jest.fn();
 import { Wallet } from '@lace/cardano';
 import * as common from '@lace/common';
 import * as getAssetImage from '@src/utils/get-asset-image-url';
-import * as getRandomIcon from '@src/utils/get-random-icon';
 import * as assetsTransformers from '../assets-transformers';
 import * as formatNumber from '@src/utils/format-number';
 import * as transformers from '@src/api/transformers';
@@ -419,7 +418,7 @@ describe('Testing assets transformers', () => {
     });
 
     test('to see proper icon in case icon is missing from assetMetadata', () => {
-      const getRandomIconSpy = jest.spyOn(getRandomIcon, 'getRandomIcon');
+      const getRandomIconSpy = jest.spyOn(common, 'getRandomIcon');
       getRandomIconSpy.mockReturnValue('getRandomIcon');
 
       expect(

@@ -2,7 +2,7 @@ import { cip30 as walletCip30 } from '@cardano-sdk/wallet';
 import { ensureUiIsOpenAndLoaded, getLastActiveTab } from './util';
 import { userPromptService } from './services/dappService';
 import { Wallet } from '@lace/cardano';
-import { getRandomIcon } from '@src/utils/get-random-icon';
+import { getRandomIcon } from '@lace/common';
 import { authenticator } from './authenticator';
 import { wallet$ } from './wallet';
 import { runtime } from 'webextension-polyfill';

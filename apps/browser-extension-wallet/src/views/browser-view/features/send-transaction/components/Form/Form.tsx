@@ -28,7 +28,7 @@ import {
   AnalyticsEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { CoinId, CurrencyInfo, Tokens } from '@src/types';
+import { CurrencyInfo, Tokens } from '@src/types';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
 
 import styles from './Form.module.scss';
@@ -71,7 +71,7 @@ const formatAdaAllocation = ({
 }: {
   missingCoins: string;
   fiat: number;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
   fiatCurrency: CurrencyInfo;
 }) => ({
   adaAmount: `${Wallet.util.lovelacesToAdaString(missingCoins)} ${cardanoCoin.symbol}`,
@@ -86,7 +86,7 @@ const getNextBundleCoinId = (
   assetBalances: Tokens,
   usedCoins: SpentBalances,
   info: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>,
-  cardanoCoin: CoinId
+  cardanoCoin: Wallet.CoinId
 ) => {
   const adaAmountInLovelace = usedCoins[cardanoCoin.id] ? usedCoins[cardanoCoin.id] : '0';
   const balanceInAda = Wallet.util.lovelacesToAdaString(balance);

@@ -1,5 +1,6 @@
 import { Page } from './page';
 import extensionUtils from '../utils/utils';
+import { browser } from '@wdio/globals';
 
 class PopupView implements Page {
   basePopupUrl = 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/popup.html';
@@ -28,6 +29,26 @@ class PopupView implements Page {
       await this.setPopupWindowSize();
     }
     await browser.url(this.basePopupUrl);
+  }
+
+  async visitTokensPage() {
+    await browser.url(`${this.basePopupUrl}#/assets`);
+    await this.setPopupWindowSize();
+  }
+
+  async visitNFTsPage() {
+    await browser.url(`${this.basePopupUrl}#/nfts`);
+    await this.setPopupWindowSize();
+  }
+
+  async visitActivityPage() {
+    await browser.url(`${this.basePopupUrl}#/activity`);
+    await this.setPopupWindowSize();
+  }
+
+  async visitStakingPage() {
+    await browser.url(`${this.basePopupUrl}#/staking`);
+    await this.setPopupWindowSize();
   }
 
   async visitSettings() {

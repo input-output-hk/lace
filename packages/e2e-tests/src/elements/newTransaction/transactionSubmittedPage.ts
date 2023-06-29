@@ -1,57 +1,36 @@
-/* eslint-disable no-undef */
-import webTester, { LocatorStrategy } from '../../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from '../webElement';
-import { ChainablePromiseElement } from 'webdriverio';
+import CommonDrawerElements from '../CommonDrawerElements';
 
-export class TransactionSubmittedPage extends WebElement {
-  private CONTAINER = '//div[@class="ant-drawer-body"]';
-  private IMAGE = '//img[@data-testid="result-message-img"]';
-  private MAIN_TITLE = '//h4[@data-testid="result-message-title"]';
-  private SUBTITLE = '//h5[@data-testid="result-message-description"]';
-  private TX_HASH = '//div[@data-testid="transaction-hash"]';
-  private VIEW_TRANSACTION_BUTTON = '#send-next-btn';
+class TransactionSubmittedPage extends CommonDrawerElements {
+  private IMAGE = '[data-testid="result-message-img"]';
+  private MAIN_TITLE = '[data-testid="result-message-title"]';
+  private SUBTITLE = '[data-testid="result-message-description"]';
+  private TX_HASH = '[data-testid="transaction-hash"]';
+  private VIEW_TRANSACTION_BUTTON = '[data-testid="send-next-btn"]';
+  private CLOSE_BUTTON = '[data-testid="send-cancel-btn"]';
 
-  constructor() {
-    super();
+  get image() {
+    return $(this.IMAGE);
   }
 
-  image(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.IMAGE}`, 'xpath');
+  get title() {
+    return $(this.MAIN_TITLE);
   }
 
-  mainTitle(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.MAIN_TITLE}`, 'xpath');
+  get subtitle() {
+    return $(this.SUBTITLE);
   }
 
-  subTitle(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.SUBTITLE}`, 'xpath');
+  get txHash() {
+    return $(this.TX_HASH);
   }
 
-  txHash(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TX_HASH}`, 'xpath');
-  }
-
-  get viewTransactionButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get viewTransactionButton() {
     return $(this.VIEW_TRANSACTION_BUTTON);
   }
 
-  async getMainTitle(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.mainTitle());
-  }
-
-  async getSubTitle(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.subTitle());
-  }
-
-  async getTxHash(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.txHash());
-  }
-
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
-
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
+  get closeButton() {
+    return $(this.CLOSE_BUTTON);
   }
 }
+
+export default new TransactionSubmittedPage();

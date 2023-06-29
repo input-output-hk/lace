@@ -81,6 +81,13 @@ Given(
   }
 );
 
+Given(
+  /^I (see|do not see) "Create folder" button on NFTs page in (popup|extended) mode$/,
+  async (shouldSee: 'see' | 'do not see', mode: 'extended' | 'popup') => {
+    await nftAssert.assertSeeCreateFolderButton(shouldSee === 'see', mode);
+  }
+);
+
 Then(/^A gallery view showing my NFTs is displayed$/, async () => {
   await $(new NftItem().container().toJSLocator()).waitForDisplayed({ timeout: 15_000 });
   await nftAssert.assertSeeNftList(1);

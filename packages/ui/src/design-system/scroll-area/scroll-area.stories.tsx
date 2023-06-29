@@ -2,7 +2,7 @@ import React from 'react';
 
 import type { Meta } from '@storybook/react';
 
-import { ThemeColorScheme, ThemeProvider, sx } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider, sx } from '../../design-tokens';
 import { Box } from '../box';
 import { page, Variants, Section } from '../decorators';
 import { Grid } from '../grid';
@@ -65,11 +65,11 @@ export const Overview = (): JSX.Element => (
           <ScrollAreaPreview />
         </Variants.Table>
 
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <ScrollAreaPreview />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
     </Cell>
   </Grid>

@@ -14,10 +14,11 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
     When I see NFTs counter with total number of NFTs displayed
     Then NFTs counter matches the number of wallet NFTs
 
-  @LW-2509 @Mainnet
+  @LW-2509 @LW-7238 @Mainnet
   Scenario: Popup-view - Owning NFTs
     Given I am on NFTs popup page
     Then A gallery view showing my NFTs is displayed
+    And I see "Create folder" button on NFTs page in popup mode
 
   @LW-2510 @Mainnet
   Scenario: Popup-view - Information displayed

@@ -1,33 +1,36 @@
-import { WebElement, WebElementFactory as Factory } from '../webElement';
-import { LocatorStrategy } from '../../actor/webTester';
+import CommonDrawerElements from '../CommonDrawerElements';
 
-export class TransactionErrorPage extends WebElement {
-  private CONTAINER = '//div[@class="ant-drawer-body"]';
-  private MAIN_TITLE_SELECTOR = '//div[@data-testid="send-error-title"]';
-  private SUBTITLE_SELECTOR = '//div[@data-testid="send-error-description"]';
-  private SUBTITLE_2_SELECTOR = '//div[@data-testid="send-error-description2"]';
+class TransactionErrorPage extends CommonDrawerElements {
+  private MAIN_TITLE_SELECTOR = '[data-testid="send-error-title"]';
+  private ERROR_DESCRIPTION_1 = '[data-testid="send-error-description"]';
+  private ERROR_DESCRIPTION_2 = '[data-testid="send-error-description2"]';
+  private ERROR_CANCEL_BUTTON = '[data-testid="send-cancel-btn"]';
+  private ERROR_BACK_BUTTON = '[data-testid="send-next-btn"]';
+  private ERROR_IMAGE = '[data-testid="result-message-img"]';
 
-  constructor() {
-    super();
+  get image() {
+    return $(this.ERROR_IMAGE);
   }
 
-  mainTitle(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.MAIN_TITLE_SELECTOR}`, 'xpath');
+  get mainTitle() {
+    return $(this.MAIN_TITLE_SELECTOR);
   }
 
-  subTitle(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.SUBTITLE_SELECTOR}`, 'xpath');
+  get descriptionLine1() {
+    return $(this.ERROR_DESCRIPTION_1);
   }
 
-  subTitle2(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.SUBTITLE_2_SELECTOR}`, 'xpath');
+  get descriptionLine2() {
+    return $(this.ERROR_DESCRIPTION_2);
   }
 
-  toJSLocator(): string {
-    return this.CONTAINER;
+  get cancelButton() {
+    return $(this.ERROR_CANCEL_BUTTON);
   }
 
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
+  get backButton() {
+    return $(this.ERROR_BACK_BUTTON);
   }
 }
+
+export default new TransactionErrorPage();
