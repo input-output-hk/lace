@@ -26,7 +26,6 @@ export type SendEventProps = {
 };
 
 export enum PostHogAction {
-  ActionName = 'flow | subflow | view | object | interaction',
   // Hardware wallet connect
   OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
   OnboardingHWAnalyticsSkipClick = 'onboarding | hardware wallet | analytics | skip | click',
