@@ -40,6 +40,7 @@
     "@vanilla-extract/recipes": "^0.3.0",
     "@vanilla-extract/sprinkles": "^1.5.1",
     "classnames": "^2.3.2",
+    "polished": "^4.2.2",
     "react-responsive": "^9.0.2",
     "recharts": "^2.6.2"
   },

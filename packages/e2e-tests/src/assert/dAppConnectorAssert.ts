@@ -12,6 +12,10 @@ import { Logger } from '../support/logger';
 import testContext from '../utils/testContext';
 import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 import NoWalletModal from '../elements/dappConnector/noWalletModal';
+import extensionUtils from '../utils/utils';
+import TokensPageObject from '../pageobject/tokensPageObject';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
+import { browser } from '@wdio/globals';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -95,7 +99,7 @@ class DAppConnectorAssert {
     await expect(await AuthorizeDAppModal.onceButton.getText()).to.equal(await t('dapp.connect.modal.allowOnce'));
   }
 
-  async assertSeeNoWalletModal() {
+  async assertSeeNoWalletPage() {
     await this.assertSeeHeader();
     await NoWalletModal.container.waitForDisplayed();
     await NoWalletModal.image.waitForDisplayed();
@@ -138,6 +142,36 @@ class DAppConnectorAssert {
     await expect(await ExampleDAppPage.walletUsedAddress.getText()).to.be.empty;
   }
 
+  async assertWalletFoundAndConnectedInTestDApp() {
+    await expect(await ExampleDAppPage.walletItem.getAttribute('value')).to.equal('lace');
+    await expect(await ExampleDAppPage.walletFound.getText()).to.equal('true');
+
+    await browser.waitUntil(async () => (await ExampleDAppPage.walletUsedAddress.getText()) !== '', {
+      timeout: 3000,
+      timeoutMsg: 'failed while waiting for DApp connection data'
+    });
+
+    await expect(await ExampleDAppPage.walletApiVersion.getText()).to.equal('0.1.0');
+    await expect(await ExampleDAppPage.walletName.getText()).to.equal('lace');
+    await expect(await ExampleDAppPage.walletNetworkId.getText()).to.equal(extensionUtils.isMainnet() ? '1' : '0');
+    await expect(await ExampleDAppPage.walletUtxo.getText()).not.to.be.empty;
+
+    const actualWalletLovelaceBalance = Number(
+      (Number(await TokensPageObject.loadTokenBalance('Cardano')) * 100).toFixed(0)
+    );
+    const dAppWalletLovelaceBalance = Math.trunc(Number(await ExampleDAppPage.walletBalance.getText()) / 10_000);
+
+    await expect(dAppWalletLovelaceBalance).to.be.closeTo(actualWalletLovelaceBalance, 1);
+
+    await expect(await ExampleDAppPage.walletChangeAddress.getText()).to.equal(
+      getTestWallet(TestWalletName.TestAutomationWallet).address
+    );
+    await expect(await ExampleDAppPage.walletStakingAddress.getText()).not.to.be.empty;
+    await expect(await ExampleDAppPage.walletUsedAddress.getText()).to.equal(
+      getTestWallet(TestWalletName.TestAutomationWallet).address
+    );
+  }
+
   async assertSeeAuthorizedDAppsEmptyState(mode: 'extended' | 'popup') {
     if (mode === 'extended') {
       await AuthorizedDAppsPage.drawerNavigationTitle.waitForDisplayed();
@@ -145,11 +179,11 @@ class DAppConnectorAssert {
         await t('browserView.settings.heading')
       );
 
-      await AuthorizedDAppsPage.closeButton.waitForDisplayed();
-      await AuthorizedDAppsPage.backButton.waitForDisplayed({ reverse: true });
+      await AuthorizedDAppsPage.drawerHeaderCloseButton.waitForDisplayed();
+      await AuthorizedDAppsPage.drawerHeaderBackButton.waitForDisplayed({ reverse: true });
     } else {
-      await AuthorizedDAppsPage.closeButton.waitForDisplayed({ reverse: true });
-      await AuthorizedDAppsPage.backButton.waitForDisplayed();
+      await AuthorizedDAppsPage.drawerHeaderCloseButton.waitForDisplayed({ reverse: true });
+      await AuthorizedDAppsPage.drawerHeaderBackButton.waitForDisplayed();
     }
 
     await AuthorizedDAppsPage.drawerHeaderTitle.waitForDisplayed();

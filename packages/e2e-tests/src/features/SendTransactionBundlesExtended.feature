@@ -206,18 +206,15 @@ Feature: Send - Extended Browser View (Advanced Tx)
     Then Token with name: "LaceCoin" is displayed in coin selector
 
   @LW-4731
-  Scenario: Extended view: Send - NFT can be added once for each bundle
+  Scenario: Extended view: Send - NFT is not displayed in coin selector if it was already added to bundle
     When I click "Send" button on page header
     And I click "Add bundle" button on "Send" page
     And I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
     And I click on NFT with name: "Ibilecoin"
-    And I click "Add token or NFT" button for bundle 1
-    And click on the NFTs button in the coin selector dropdown
-    And I close the drawer by clicking back button
     And I click "Add token or NFT" button for bundle 2
     And click on the NFTs button in the coin selector dropdown
-    Then NFT with name: "Ibilecoin" is displayed in coin selector
+    Then NFT with name: "Ibilecoin" is not displayed in coin selector
 
   @LW-3748
   Scenario: Extended-view - send maximum amount of a token available in the wallet by clicking MAX button
@@ -291,8 +288,4 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
     When I enter correct password and confirm the transaction
-    Then The Transaction error screen is displayed:
-      | Title: "Oops something went wrong!"                            |
-      | Subtitle: "There was a problem submitting your transaction..." |
-      | Button: "Back"                                                 |
-      | Button: "Cancel"                                               |
+    Then The Transaction error screen is displayed in extended mode

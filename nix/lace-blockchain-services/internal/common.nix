@@ -61,8 +61,8 @@ in rec {
   ogmios = {
     x86_64-linux = ogmiosProject.projectCross.musl64.hsPkgs.ogmios.components.exes.ogmios;
     x86_64-windows = throw "unimplemented";
-    x86_64-darwin = throw "unimplemented";
-    aarch64-darwin = throw "unimplemented";
+    x86_64-darwin = ogmiosProject.hsPkgs.ogmios.components.exes.ogmios;
+    aarch64-darwin = ogmiosProject.hsPkgs.ogmios.components.exes.ogmios;
   }.${targetSystem};
 
   cardano-node = {

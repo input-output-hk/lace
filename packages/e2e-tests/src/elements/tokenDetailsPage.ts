@@ -1,138 +1,84 @@
 /* eslint-disable no-undef */
-import webTester, { LocatorStrategy } from '../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from './webElement';
 
-export class TokenDetailsPage extends WebElement {
-  private CONTAINER = '//div[@id="asset-drawer-body"]';
-  private TOKEN_LOGO = '//div[@data-testid="asset-details-header"]/img';
-  private TOKEN_NAME = '//div[@data-testid="asset-name"]/h1';
-  private TOKEN_TICKER = '//div[@data-testid="asset-name"]/p';
+import CommonDrawerElements from './CommonDrawerElements';
 
-  private TOKEN_PRICE_LABEL = '//div[@data-testid="asset-price"]//label';
-  private TOKEN_PRICE_VALUE = '//div[@data-testid="asset-price"]//h1[@data-testid="portfolio-balance-value"]';
-  private TOKEN_PRICE_CURRENCY = '//div[@data-testid="asset-price"]//h4[@data-testid="portfolio-balance-currency"]';
-  private TOKEN_PRICE_CHANGE = '//div[@data-testid="asset-price"]/h4';
+class TokenDetailsPage extends CommonDrawerElements {
+  private TOKEN_LOGO = '[data-testid="token-logo"]';
+  private TOKEN_NAME = '[data-testid="token-name"]';
+  private TOKEN_TICKER = '[data-testid="token-ticker"]';
 
-  private TOKEN_BALANCE_LABEL = '//div[@data-testid="asset-balance"]//label';
-  private TOKEN_BALANCE_VALUE = '//div[@data-testid="asset-balance"]//h1[@data-testid="portfolio-balance-value"]';
-  private TOKEN_BALANCE_CURRENCY = '//div[@data-testid="asset-balance"]//h4[@data-testid="portfolio-balance-currency"]';
-  private TOKEN_BALANCE_TOTAL = '//div[@data-testid="asset-balance"]/h4';
+  private TOKEN_PRICE_COMPONENT = '[data-testid="token-price"]';
+  private TOKEN_BALANCE_COMPONENT = '[data-testid="token-balance"]';
+  private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
+  private BALANCE_CURRENCY = '[data-testid="portfolio-balance-currency"]';
+  private BALANCE_VALUE = '[data-testid="portfolio-balance-value"]';
+  private BALANCE_VARIATION = '[data-testid="portfolio-balance-variation"]';
 
-  private TRANSACTIONS_LIST_TITLE = '//span[@data-testid="asset-activity-list-title"]';
-  private TRANSACTION_ITEM = '//div[@data-testid="asset-activity-item"]';
+  private TRANSACTIONS_LIST_TITLE = '[data-testid="asset-activity-list-title"]';
+  private TRANSACTION_ITEM = '[data-testid="asset-activity-item"]';
 
-  private SEE_ALL_TRANSACTIONS_BUTTON = '//button[@data-testid="see-all-your-transactions-button"]';
+  private SEE_ALL_TRANSACTIONS_BUTTON = '[data-testid="see-all-your-transactions-button"]';
+  private VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
 
-  constructor() {
-    super();
+  get tokenLogo() {
+    return $(this.TOKEN_LOGO);
   }
 
-  tokenLogo(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_LOGO}`, 'xpath');
+  get tokenName() {
+    return $(this.TOKEN_NAME);
   }
 
-  tokenName(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_NAME}`, 'xpath');
+  get tokenTicker() {
+    return $(this.TOKEN_TICKER);
   }
 
-  tokenTicker(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_TICKER}`, 'xpath');
+  get tokenPriceLabel() {
+    return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_LABEL);
   }
 
-  tokenPriceLabel(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_PRICE_LABEL}`, 'xpath');
+  get tokenPriceValue() {
+    return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_VALUE);
   }
 
-  tokenPriceValue(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_PRICE_VALUE}`, 'xpath');
+  get tokenPriceCurrency() {
+    return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_CURRENCY);
   }
 
-  tokenPriceCurrency(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_PRICE_CURRENCY}`, 'xpath');
+  get tokenPriceChange() {
+    return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_VARIATION);
   }
 
-  tokenPriceChange(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_PRICE_CHANGE}`, 'xpath');
+  get tokenBalanceLabel() {
+    return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_LABEL);
   }
 
-  tokenBalanceLabel(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_BALANCE_LABEL}`, 'xpath');
+  get tokenBalanceValue() {
+    return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_VALUE);
   }
 
-  tokenBalanceValue(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_BALANCE_VALUE}`, 'xpath');
+  get tokenBalanceCurrency() {
+    return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_CURRENCY);
   }
 
-  tokenBalanceCurrency(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_BALANCE_CURRENCY}`, 'xpath');
+  get tokenFiatBalance() {
+    return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_VARIATION);
   }
 
-  tokenBalanceTotal(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TOKEN_BALANCE_TOTAL}`, 'xpath');
+  get transactionsListTitle() {
+    return $(this.TRANSACTIONS_LIST_TITLE);
   }
 
-  transactionsListTitle(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTIONS_LIST_TITLE}`, 'xpath');
+  get seeAllTransactionsButton() {
+    return $(this.SEE_ALL_TRANSACTIONS_BUTTON);
   }
 
-  async getTransactionsListItems(): Promise<WebdriverIO.ElementArray> {
-    return $$(`${this.CONTAINER}${this.TRANSACTION_ITEM}`);
+  get viewAllButton() {
+    return $(this.VIEW_ALL_BUTTON);
   }
 
-  seeAllTransactionsButton(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.SEE_ALL_TRANSACTIONS_BUTTON}`, 'xpath');
-  }
-
-  async getTokenName(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenName());
-  }
-
-  async getTokenTicker(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenTicker());
-  }
-
-  async getTokenPriceLabel(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenPriceLabel());
-  }
-
-  async getTokenPriceValue(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenPriceValue());
-  }
-
-  async getTokenPriceCurrency(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenPriceCurrency());
-  }
-
-  async getTokenPriceChange(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenPriceChange());
-  }
-
-  async getTokenBalanceLabel(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenBalanceLabel());
-  }
-
-  async getTokenBalanceValue(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenBalanceValue());
-  }
-
-  async getTokenBalanceCurrency(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenBalanceCurrency());
-  }
-
-  async getTokenBalanceTotal(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.tokenBalanceTotal());
-  }
-
-  async getTransactionsListTitle(): Promise<string | number> {
-    await webTester.waitUntilSeeElement(this.transactionsListTitle(), 20_000);
-    return await webTester.getTextValueFromElement(this.transactionsListTitle());
-  }
-
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
-
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
+  get transactionsListItems(): Promise<WebdriverIO.ElementArray> {
+    return $$(this.TRANSACTION_ITEM);
   }
 }
+
+export default new TokenDetailsPage();

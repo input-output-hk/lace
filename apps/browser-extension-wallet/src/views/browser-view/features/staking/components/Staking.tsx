@@ -11,7 +11,6 @@ import { StakeFundsBanner } from './StakeFundsBanner';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { useWalletStore } from '@stores';
 import { useFetchCoinPrice, useBalances, useObservable, useDelegationDetails, useStakingRewards } from '@src/hooks';
-import { stakePoolTransformer } from '@src/features/delegation/api/transformers';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import { StakePoolDetails } from './StakePoolDetails';
@@ -126,7 +125,7 @@ export const Staking = (): React.ReactElement => {
         <div className={styles.flexRow}>
           <StakingInfo
             {...{
-              ...stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
+              ...Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
               coinBalance,
               fiat: priceResult?.cardano?.price,
               totalRewards: Wallet.util.lovelacesToAdaString(totalRewards.toString()),

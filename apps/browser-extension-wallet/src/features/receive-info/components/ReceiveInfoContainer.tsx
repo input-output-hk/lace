@@ -12,7 +12,9 @@ export const ReceiveInfoContainer = (): React.ReactElement => {
 
   return (
     <ReceiveInfo
-      wallet={{ ...walletInfo, name: (handles?.length && handles[0]?.nftMetadata.name) || walletInfo.name }}
+      name={walletInfo?.name}
+      address={walletInfo?.addresses[0].address}
+      handles={handles}
       goBack={redirectToOverview}
     />
   );

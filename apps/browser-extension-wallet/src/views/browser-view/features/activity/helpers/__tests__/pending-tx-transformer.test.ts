@@ -91,7 +91,7 @@ describe('Testing tx transformers utils', () => {
         fiatPrice: 1,
         protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
         cardanoCoin,
-        time: new Date()
+        time
       });
       expect(result).toStrictEqual({
         type: 'incoming',

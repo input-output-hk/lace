@@ -1,12 +1,11 @@
 import EducationalList from '../elements/educationalList';
 import { expect } from 'chai';
 import { t } from '../utils/translationService';
-import { faqArticles, glossaryArticles, videoArticles } from '../data/EducationalArticles';
-import LearnVideoPage from '../elements/LearnVideoPage';
-import FaqPage from '../elements/faqPage';
-import GlossaryPage from '../elements/glossaryPage';
-import { browser } from '@wdio/globals';
 import AboutLaceWidget from '../elements/settings/extendedView/AboutLaceWidget';
+import { glossaryArticles, videoArticles } from '../data/EducationalArticles';
+import { browser } from '@wdio/globals';
+import GlossaryPage from '../elements/glossaryPage';
+import LearnVideoPage from '../elements/LearnVideoPage';
 
 class EducationalListAssert {
   glossaryTranslationPath = 'educationalBanners.title.glossary';
@@ -93,22 +92,13 @@ class EducationalListAssert {
     await this.assertSeeWidget(expectedTitle, expectedTitles, expectedSubtitles);
   }
 
-  async assertSeeFaqArticle(title: string) {
-    const faqArticle = faqArticles[title];
-    const expectedPath = `faq?question=${faqArticle.question}`;
-    const currentUrl = await browser.getUrl();
-    expect(currentUrl).to.contain(expectedPath);
-    await FaqPage.activeArticle.waitForDisplayed();
-    expect(await FaqPage.getActiveArticleTitleText()).to.equal(faqArticle.title);
-  }
-
   async assertSeeGlossaryArticle(title: string) {
     const glossaryArticle = glossaryArticles[title];
     const expectedPath = `glossary?term=${glossaryArticle.term}`;
     const currentUrl = await browser.getUrl();
     expect(currentUrl).to.contain(expectedPath);
     await GlossaryPage.activeArticle.waitForDisplayed();
-    expect(await GlossaryPage.getActiveArticleTitleText()).to.equal(glossaryArticle.title);
+    expect(await GlossaryPage.activeArticleTitle.getText()).to.equal(glossaryArticle.title);
   }
 
   async assertSeeVideoArticle(title: string) {

@@ -286,7 +286,6 @@ export const useWalletManager = (): UseWalletManager => {
       deleteFromLocalStorage('lastStaking');
       deleteFromLocalStorage('userInfo');
       deleteFromLocalStorage('keyAgentData');
-      deleteFromLocalStorage('handle');
       await backgroundService.clearBackgroundStorage(['message', 'mnemonic', 'keyAgentsByChain']);
       setKeyAgentData();
       resetWalletLock();
@@ -347,7 +346,6 @@ export const useWalletManager = (): UseWalletManager => {
       setCurrentChain(chainName);
       setCardanoCoin(chainId);
       setKeyAgentData(newKeyAgent);
-      deleteFromLocalStorage('handle');
     },
     [
       backgroundService,

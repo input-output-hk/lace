@@ -1,28 +1,28 @@
 /* eslint-disable max-len */
 import { DataTable, Given, Then, When } from '@wdio/cucumber-framework';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
-import drawerGeneralSettingsAssert from '../assert/settings/drawerGeneralSettingsAssert';
-import settingsPageExtendedAssert from '../assert/settings/settingsPageExtendedAssert';
+import drawerGeneralSettingsAssert from '../assert/settings/YourKeysDrawerAssert';
+import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import publicKeyDrawerAssert from '../assert/settings/publicKeyDrawerAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
-import drawerNetworkSettingsAssert from '../assert/settings/drawerNetworkSettingsAssert';
-import drawerTermsAndConditionsSettingsAssert from '../assert/settings/drawerTermsAndConditionsSettingsAssert';
+import drawerNetworkSettingsAssert from '../assert/settings/NetworkSettingsDrawerAssert';
+import drawerTermsAndConditionsSettingsAssert from '../assert/settings/TermsAndConditionsSettingsDrawerAssert';
 import PrivacyPolicyDrawerAssert from '../assert/settings/PrivacyPolicyDrawerAssert';
-import drawerHelpSettingsAssert from '../assert/settings/drawerHelpSettingsAssert';
+import drawerHelpSettingsAssert from '../assert/settings/HelpSettingsDrawerAssert';
 import { t } from '../utils/translationService';
 import passphraseDrawerAssert from '../assert/settings/passphraseDrawerAssert';
-import PassphraseDrawer from '../elements/settings/extendedView/passphraseDrawer';
+import PassphraseDrawer from '../elements/settings/PassphraseDrawer';
 import localStorageAssert from '../assert/localStorageAssert';
 import collateralDrawerAssert from '../assert/settings/collateralDrawerAssert';
 import CookiePolicyDrawerAssert from '../assert/settings/CookiePolicyDrawerAssert';
 import Modal from '../elements/modal';
 import WalletAddressPage from '../elements/walletAddressPage';
 import { browser } from '@wdio/globals';
-import CollateralSettingsDrawer from '../elements/settings/extendedView/collateralSettingsDrawer';
-import HelpSettingsDrawer from '../elements/settings/extendedView/helpSettingsDrawer';
+import CollateralDrawer from '../elements/settings/CollateralDrawer';
+import HelpDrawer from '../elements/settings/HelpDrawer';
 import ModalAssert from '../assert/modalAssert';
 import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 
@@ -161,8 +161,8 @@ Then(/^"Create a support ticket" button (is|is not) displayed$/, async (shouldBe
 });
 
 When(/^I click "Create a support ticket" button on Help drawer$/, async () => {
-  await HelpSettingsDrawer.createASupportTicketButton.waitForClickable();
-  await HelpSettingsDrawer.createASupportTicketButton.click();
+  await HelpDrawer.createASupportTicketButton.waitForClickable();
+  await HelpDrawer.createASupportTicketButton.click();
 });
 
 Then(/I see analytics option with proper description and toggle/, async () => {
@@ -276,13 +276,13 @@ When(/^I click "Copy" button on "Show public key" page$/, async () => {
 
 When(/^I fill (correct|incorrect) password and confirm collateral$/, async (type: string) => {
   const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
-  await CollateralSettingsDrawer.passwordInput.waitForEnabled();
-  await CollateralSettingsDrawer.passwordInput.setValue(password);
-  await CollateralSettingsDrawer.collateralButton.waitForClickable();
-  await CollateralSettingsDrawer.collateralButton.click();
+  await CollateralDrawer.passwordInput.waitForEnabled();
+  await CollateralDrawer.passwordInput.setValue(password);
+  await CollateralDrawer.collateralButton.waitForClickable();
+  await CollateralDrawer.collateralButton.click();
 });
 
 When(/^I click "Reclaim collateral" button on collateral drawer$/, async () => {
-  await CollateralSettingsDrawer.collateralButton.waitForClickable();
-  await CollateralSettingsDrawer.collateralButton.click();
+  await CollateralDrawer.collateralButton.waitForClickable();
+  await CollateralDrawer.collateralButton.click();
 });
