@@ -214,7 +214,6 @@ Then(/^total wallet balance is masked with asterisks$/, async () => {
 Then(
   /^balance and FIAT balance for each token are (masked with asterisks|visible)$/,
   async (shouldBeMasked: 'masked with asterisks' | 'visible') => {
-    await tokensPageAssert.assertAllTokensBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
-    await tokensPageAssert.assertAllTokensFiatBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
+    await tokensPageAssert.assertAllBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
   }
 );
