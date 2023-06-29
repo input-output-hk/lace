@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useState } from 'react';
-import { Button, useSearchParams } from '@lace/common';
+import { Banner, Button, useSearchParams } from '@lace/common';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
@@ -16,7 +16,6 @@ import { UserPromptService } from '@lib/scripts/background/services/dappService'
 import { of } from 'rxjs';
 import InfoIcon from '../../../assets/icons/info.component.svg';
 import ShieldExclamation from '@assets/icons/shield-exclamation.component.svg';
-import { Banner } from '@components/Banner';
 import { Tooltip } from 'antd';
 import { useWalletStore } from '@src/stores';
 

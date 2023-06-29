@@ -2,11 +2,11 @@
 /* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useBalances, useFetchCoinPrice, useObservable, useRedirection } from '@hooks';
+import { useBalances, useFetchCoinPrice, useRedirection } from '@hooks';
 import { Skeleton } from 'antd';
 import { useWalletStore } from '@src/stores';
 import { AssetTable, AssetTableProps, SendReceive } from '@lace/core';
-import { Drawer, DrawerNavigation } from '@lace/common';
+import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { useCurrencyStore } from '@providers/currency';
 import { useTranslation } from 'react-i18next';

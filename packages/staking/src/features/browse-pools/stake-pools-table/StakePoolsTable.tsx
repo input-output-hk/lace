@@ -2,6 +2,8 @@ import { Wallet } from '@lace/cardano';
 import { getRandomIcon } from '@lace/common';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useOutsideHandles } from '../../outside-handles-provider';
+import { useStakePoolDetails } from '../../store';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import { StakePoolSortOptions, StakePoolTableBrowser, StakePoolTableBrowserProps } from './StakePoolTableBrowser';
 
@@ -20,13 +22,6 @@ type StakePoolsTableProps = {
   scrollableTargetId: string;
 };
 
-const cardanoCoin = {
-  decimals: 6,
-  id: '1',
-  name: 'Cardano',
-  symbol: 'tADA',
-};
-
 export const StakePoolsTable = ({
   stakePools,
   loadMoreData,
@@ -36,6 +31,8 @@ export const StakePoolsTable = ({
   isLoadingList,
   scrollableTargetId,
 }: StakePoolsTableProps) => {
+  const { delegationStoreSetSelectedStakePool, walletStoreWalletUICardanoCoin } = useOutsideHandles();
+  const { setIsDrawerVisible } = useStakePoolDetails();
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const { t } = useTranslation();
   const tableHeaderTranslations = {
@@ -49,7 +46,7 @@ export const StakePoolsTable = ({
     () =>
       stakePools.map((pool) => {
         const stakePool = Wallet.util.stakePoolTransformer({
-          cardanoCoin,
+          cardanoCoin: walletStoreWalletUICardanoCoin,
           stakePool: pool,
         });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
@@ -57,13 +54,15 @@ export const StakePoolsTable = ({
         return {
           ...stakePool,
           logo,
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          onClick: () => {},
+          onClick: () => {
+            delegationStoreSetSelectedStakePool({ ...pool, logo });
+            setIsDrawerVisible(true);
+          },
           // eslint-disable-next-line @typescript-eslint/no-empty-function
           onStake: () => {},
         };
       }),
-    [stakePools]
+    [delegationStoreSetSelectedStakePool, setIsDrawerVisible, stakePools, walletStoreWalletUICardanoCoin]
   );
 
   return (
