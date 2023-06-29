@@ -124,7 +124,7 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
               />
               <ItemStatRenderer
                 text={balance?.total?.coinBalance}
-                subText={`${balance?.total?.fiatBalance} ${fiatCurrency?.code}`}
+                subText={`${balance?.total?.fiatBalance ?? '-'} ${fiatCurrency?.code}`}
               />
             </div>
             <Icon

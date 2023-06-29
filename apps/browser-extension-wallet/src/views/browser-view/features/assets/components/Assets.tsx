@@ -1,240 +1,100 @@
 /* eslint-disable sonarjs/cognitive-complexity */
-/* eslint-disable complexity */
-/* eslint-disable no-magic-numbers */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import isNil from 'lodash/isNil';
+import { AssetTableProps } from '@lace/core';
+import { useObservable } from '@lace/common';
 import { useBalances, useFetchCoinPrice, useRedirection } from '@hooks';
-import { Skeleton } from 'antd';
 import { useWalletStore } from '@src/stores';
-import { AssetTable, AssetTableProps, SendReceive } from '@lace/core';
-import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { useCurrencyStore } from '@providers/currency';
-import { useTranslation } from 'react-i18next';
-import { FundWalletBanner } from '@src/views/browser-view/components/FundWalletBanner';
-import { AssetDetailsDrawer } from './AssetDetailsDrawer';
-import { cardanoTransformer, assetTransformer, getTokenAmountInFiat } from '@src/utils/assets-transformers';
-import { useCoinStateSelector } from '../../send-transaction';
-import { TransactionDetail } from '@views/browser/features/activity';
-import { SectionLayout, EducationalList, PortfolioBalance, Layout } from '@src/views/browser-view/components';
+import { cardanoTransformer, assetTransformer } from '@src/utils/assets-transformers';
+import { SectionLayout, Layout } from '@src/views/browser-view/components';
 import { useDrawer } from '@src/views/browser-view/stores';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
-import styles from './Assets.module.scss';
 import { walletRoutePaths } from '@routes';
-import { APP_MODE_POPUP, LACE_APP_ID } from '@src/utils/constants';
-import Book from '@assets/icons/book.svg';
-import LightBulb from '@assets/icons/light.svg';
-import Video from '@assets/icons/video.svg';
-import { SectionTitle } from '@components/Layout/SectionTitle';
-import { ContentLayout, CONTENT_LAYOUT_ID } from '@components/Layout';
-import isNil from 'lodash/isNil';
+import { APP_MODE_POPUP } from '@src/utils/constants';
+import { ContentLayout } from '@components/Layout';
 import { useAnalyticsContext } from '@providers';
 import {
   AnalyticsEventCategories,
   AnalyticsEventActions,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { AssetSortBy } from '../types';
-import BigNumber from 'bignumber.js';
-import { TokenPrices } from '@lib/scripts/types';
-import { compactNumber } from '@src/utils/format-number';
 import { isNFT } from '@src/utils/is-nft';
+import { useCoinStateSelector } from '../../send-transaction';
+import { getTotalWalletBalance, sortAssets } from '../utils';
+import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
+import { AssetDetailsDrawer } from './AssetDetailsDrawer/AssetDetailsDrawer';
+import { AssetTransactionDetails } from './AssetTransactionDetails/AssetTransactionDetails';
+import { AssetEducationalList } from './AssetEducationalList/AssetEducationalList';
 
-const useStoreSelector = () =>
-  useWalletStore((state) => ({
-    inMemoryWallet: state.inMemoryWallet,
-    walletInfo: state.walletInfo,
-    setAssetDetails: state.setAssetDetails,
-    assetDetails: state.assetDetails,
-    transactionDetail: state.transactionDetail,
-    resetTransactionState: state.resetTransactionState,
-    walletUI: state.walletUI,
-    blockchainProvider: state.blockchainProvider,
-    setBalancesVisibility: state.setBalancesVisibility
-  }));
-
-const chunkSize = 12;
-const sendCoinOutputId = 'output1';
-const minutesUntilDisplayBanner = 3;
+const LIST_CHUNK_SIZE = 12;
+const SEND_COIN_OUTPUT_ID = 'output1';
 const ASSETS_OTHER_THAN_ADA = 2;
-const BALANCES_PLACEHOLDER_LENGTH = 8;
 
 interface AssetsProps {
   topSection?: React.ReactNode;
 }
 
-const sortAssets = ({ sortBy: tokenA }: AssetSortBy, { sortBy: tokenB }: AssetSortBy) => {
-  // 1. order by Fiat Balance (desc)
-  if (tokenA.fiatBalance !== undefined && tokenB.fiatBalance === undefined) return -1;
-  if (tokenA.fiatBalance === undefined && tokenB.fiatBalance !== undefined) return 1;
-  if (tokenA.fiatBalance !== tokenB.fiatBalance) return tokenB.fiatBalance - tokenA.fiatBalance;
-
-  // 2. order by token Balance (desc)
-  if (tokenA.amount !== undefined && tokenB.amount === undefined) return -1;
-  if (tokenA.amount === undefined && tokenB.amount !== undefined) return 1;
-  const BigNumberTokenA = new BigNumber(tokenA.amount);
-  const BigNumberTokenB = new BigNumber(tokenB.amount);
-
-  if (!BigNumberTokenA.isEqualTo(BigNumberTokenB)) return BigNumberTokenB.minus(BigNumberTokenA).isLessThan(0) ? -1 : 1;
-
-  // 3. order by Metadata Name (asc) if same Policy Id
-  if (tokenA.metadataName !== undefined && tokenB.metadataName === undefined) return -1;
-  if (tokenA.metadataName === undefined && tokenB.metadataName !== undefined) return 1;
-  if (tokenA.metadataName > tokenB.metadataName) return 1;
-  if (tokenA.metadataName < tokenB.metadataName) return -1;
-
-  // 4. order by Fingerprint (asc) if same Metadata Name
-  if (tokenA.fingerprint > tokenB.fingerprint) return 1;
-  if (tokenA.fingerprint < tokenB.fingerprint) return -1;
-
-  return 0;
-};
-
-const getTotalWalletBalance = (
-  adaInFiat: string,
-  tokenPrices: TokenPrices,
-  tokenBalances: Wallet.Cardano.TokenMap,
-  fiat: number,
-  tokens: Wallet.Assets
-) => {
-  if (!tokenBalances) return adaInFiat;
-  const totalTokenBalanceInFiat = tokenPrices
-    ? // eslint-disable-next-line unicorn/no-array-reduce
-      [...tokenPrices.entries()].reduce((total, [key, { priceInAda }]) => {
-        const balance = tokenBalances?.get(key);
-        const info = tokens?.get(key);
-        if (info?.tokenMetadata !== undefined && balance) {
-          const formatedBalance = Wallet.util.calculateAssetBalance(balance, info);
-          const balanceInFiat = getTokenAmountInFiat(formatedBalance, priceInAda, fiat);
-          return total.plus(balanceInFiat);
-        }
-
-        return total;
-      }, new BigNumber(0))
-    : new BigNumber(0);
-
-  return totalTokenBalanceInFiat.plus(adaInFiat).toString();
-};
-
 // eslint-disable-next-line max-statements
 export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
-  const { t } = useTranslation();
-  const [redirectToReceive] = useRedirection(walletRoutePaths.receive);
-  const [redirectToSend] = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
-  const [list, setList] = useState<AssetTableProps['rows']>();
-  const [isTxDetailsOpen, setIsTxDetailsOpen] = useState(false);
-  const [listItemsAmount, setListItemsAmount] = useState(chunkSize);
-  const [assetID, setAssetID] = useState<string | undefined>();
   const analytics = useAnalyticsContext();
-
+  const [, setSendDrawerVisibility] = useDrawer();
+  const { priceResult, status: fetchPriceStatus } = useFetchCoinPrice();
+  const { fiatCurrency } = useCurrencyStore();
+  const [redirectToSend] = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
   const {
     inMemoryWallet,
-    walletInfo,
-    walletUI: { cardanoCoin, appMode, canManageBalancesVisibility, areBalancesVisible, hiddenBalancesPlaceholder },
-    setBalancesVisibility,
+    walletUI: { cardanoCoin, appMode, areBalancesVisible, getHiddenBalancePlaceholder },
     setAssetDetails,
     assetDetails,
     transactionDetail,
     resetTransactionState,
-    blockchainProvider
-  } = useStoreSelector();
+    blockchainProvider,
+    environmentName
+  } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
-  const { priceResult, status, timestamp } = useFetchCoinPrice();
-  const { fiatCurrency } = useCurrencyStore();
-  const { balance } = useBalances(priceResult?.cardano?.price);
+  const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
+  const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
 
-  const [, setSendDrawerVisibility] = useDrawer();
-  const { setPickedCoin } = useCoinStateSelector(sendCoinOutputId);
+  const [isTransactionDetailsOpen, setIsTransactionDetailsOpen] = useState(false);
+  const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
+  const [listItemsAmount, setListItemsAmount] = useState(LIST_CHUNK_SIZE);
+  const [selectedAssetId, setSelectedAssetId] = useState<string | undefined>();
 
-  const total = useObservable(inMemoryWallet.balance.utxo.total$);
-  const rewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
 
-  const balanceWithAvailableRewards = useMemo(() => BigInt(total?.coins || 0) + BigInt(rewards || 0), [rewards, total]);
-
-  const openSend = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.SEND_TRANSACTION,
-      action: AnalyticsEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.SendTransaction.SEND_TX_BUTTON_POPUP
-    });
-    redirectToSend({ params: { id: '1' } });
-  };
-
-  const titles = {
-    glossary: t('educationalBanners.title.glossary'),
-    faq: t('educationalBanners.title.faq'),
-    video: t('educationalBanners.title.video')
-  };
-
-  const sendReceiveTranslation = {
-    send: t('core.sendReceive.send'),
-    receive: t('core.sendReceive.receive')
-  };
-
-  const educationalItems = [
-    {
-      title: titles.glossary,
-      subtitle: t('educationalBanners.subtitle.whatIsADigitalAsset'),
-      src: Book,
-      link: `${process.env.WEBSITE_URL}/glossary?term=asset`
-    },
-    {
-      title: titles.faq,
-      subtitle: t('educationalBanners.subtitle.howToSendReceiveFunds'),
-      src: LightBulb,
-      link: `${process.env.WEBSITE_URL}/faq?question=how-do-i-send-and-receive-digital-assets`
-    },
-    {
-      title: titles.video,
-      subtitle: t('educationalBanners.subtitle.secureSelfCustody'),
-      src: Video,
-      link: `${process.env.WEBSITE_URL}/learn?video=how-lace-gives-you-full-control-of-your-private-keys`
-    },
-    {
-      title: titles.video,
-      subtitle: t('educationalBanners.subtitle.connectingDApps'),
-      src: Video,
-      link: `${process.env.WEBSITE_URL}/learn?video=connecting-to-dapps-with-lace`
-    }
-  ];
+  // Wallet's coin balance in ADA and converted to fiat, including available rewards
+  const { balance: balanceInAdaAndFiat } = useBalances(priceResult?.cardano?.price);
+  // Wallet's coin balance in lovelace calculated from UTxOs (without rewards)
+  const utxoTotal = useObservable(inMemoryWallet.balance.utxo.total$);
+  // Wallet's available rewards (yet to be claimed) in lovelace
+  const lovelaceRewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
+  // Wallet's coin balance from UTxOs + available rewards in lovelace (without assets)
+  const lovelaceBalanceWithRewards = useMemo(
+    () => BigInt(utxoTotal?.coins || 0) + BigInt(lovelaceRewards || 0),
+    [lovelaceRewards, utxoTotal]
+  );
+  // Wait for initial wallet's balance and price loading
+  const isLoadingFirstTime = !utxoTotal || !priceResult.cardano;
 
   /**
-   * Means it has more than 1 asset (ADA) in portfolio for Assets list.
+   * Means it has more than 1 asset (ADA) in portfolio for Assets list that it's not an NFT.
    */
   const hasTokens = useMemo(() => {
-    if (isNil(total?.assets) || total?.assets?.size === 0) return false;
+    if (isNil(utxoTotal?.assets) || utxoTotal?.assets?.size === 0) return false;
     // Look for at least one asset that is not an NFT
-    for (const [assetId] of total.assets) {
+    for (const [assetId] of utxoTotal.assets) {
       const assetInfo = assetsInfo?.get(assetId);
       // If no assetInfo, assume it's not an NFT until the info is loaded
       if (!assetInfo || !isNFT(assetInfo)) return true;
     }
     // Return false if all assets are NFTs as we are not displaying them in this component
     return false;
-  }, [assetsInfo, total?.assets]);
+  }, [assetsInfo, utxoTotal?.assets]);
+
   /**
-   * Assets are loading if only ADA was populated in the list and there are more assets to load and append to the UI.
+   * Transforms a non NFT asset to an IRow component for the AssetTable
    */
-  const isBalanceLoading = useMemo(() => hasTokens && list.length < ASSETS_OTHER_THAN_ADA, [hasTokens, list]);
-
-  useEffect(() => {
-    if (transactionDetail) {
-      setAssetDetails();
-    }
-
-    if (!assetDetails && transactionDetail) {
-      setIsTxDetailsOpen(true);
-    }
-  }, [assetDetails, transactionDetail, setAssetDetails]);
-
-  const balancesPlaceholder = useMemo(
-    () =>
-      Array.from({ length: BALANCES_PLACEHOLDER_LENGTH })
-        .map(() => hiddenBalancesPlaceholder)
-        .join(''),
-    [hiddenBalancesPlaceholder]
-  );
-
   const getTransformedAsset = useCallback(
     (assetId, withVisibleBalances = true) => {
       const info = assetsInfo?.get(assetId);
@@ -245,85 +105,64 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
             key: assetId,
             fiat,
             token: info,
-            total,
+            total: utxoTotal,
             pricesInfo,
             fiatCurrency,
             areBalancesVisible: withVisibleBalances || areBalancesVisible,
-            balancesPlaceholder
+            balancesPlaceholder: hiddenBalancePlaceholder
           })
         : undefined;
     },
     [
       areBalancesVisible,
       assetsInfo,
-      balancesPlaceholder,
+      hiddenBalancePlaceholder,
       fiatCurrency,
       priceResult?.cardano?.price,
       priceResult?.tokens,
-      total
+      utxoTotal
     ]
   );
 
+  /**
+   * Transforms Cardano coin to an IRow component for the AssetTable
+   */
   const getTransformedCardano = useCallback(
     (withVisibleBalances) =>
       cardanoTransformer({
         total: {
-          ...total,
-          coins: balanceWithAvailableRewards
+          ...utxoTotal,
+          coins: lovelaceBalanceWithRewards
         },
         fiatPrice: priceResult?.cardano,
         cardanoCoin,
         fiatCode: fiatCurrency?.code,
         areBalancesVisible: withVisibleBalances || areBalancesVisible,
-        balancesPlaceholder
+        balancesPlaceholder: hiddenBalancePlaceholder
       }),
     [
       areBalancesVisible,
-      balancesPlaceholder,
+      hiddenBalancePlaceholder,
       cardanoCoin,
       fiatCurrency?.code,
       priceResult?.cardano,
-      total,
-      balanceWithAvailableRewards
+      utxoTotal,
+      lovelaceBalanceWithRewards
     ]
   );
 
-  // TODO: move this to store once https://input-output.atlassian.net/browse/LW-1494 is done
-  useEffect(() => {
-    const tokens = [];
+  /**
+   * Assets are loading if only ADA was populated in the list and there are more assets to load and append to the UI.
+   */
+  const isBalanceLoading = useMemo(
+    () => hasTokens && fullAssetList.length < ASSETS_OTHER_THAN_ADA,
+    [hasTokens, fullAssetList]
+  );
 
-    // TODO: refactor so we can use `getTokenList` [LW-6496]
-    if (hasTokens) {
-      for (const [assetId, assetBalance] of total.assets) {
-        if (assetBalance <= 0) return;
-        const asset = getTransformedAsset(assetId, false);
-        if (asset) tokens.push(asset);
-      }
-    }
-    tokens.sort(sortAssets);
+  // Asset Table Pagination
+  const paginatedAssetList = useMemo(() => fullAssetList?.slice(0, listItemsAmount), [fullAssetList, listItemsAmount]);
 
-    const cardano = balanceWithAvailableRewards > BigInt(0) ? [getTransformedCardano(false)] : [];
-
-    setList([...cardano, ...tokens]);
-  }, [
-    assetsInfo,
-    priceResult?.cardano,
-    total,
-    rewards,
-    cardanoCoin,
-    fiatCurrency?.code,
-    priceResult?.tokens,
-    fiatCurrency,
-    hasTokens,
-    areBalancesVisible,
-    balancesPlaceholder,
-    getTransformedAsset,
-    getTransformedCardano,
-    balanceWithAvailableRewards
-  ]);
-
-  const onScroll = () => setListItemsAmount((prevState) => prevState + chunkSize);
-  const onRowClick = (id: string) => {
+  const onAssetRowClick = (id: string) => {
     analytics.sendEvent({
       category: AnalyticsEventCategories.VIEW_TOKENS,
       action: AnalyticsEventActions.CLICK_EVENT,
@@ -333,11 +172,47 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     });
     const selectedAsset = id === cardanoCoin.id ? getTransformedCardano(true) : getTransformedAsset(id, true);
     setAssetDetails(selectedAsset);
-    setAssetID(id);
+    setSelectedAssetId(id);
   };
 
-  const onSendClick = (id: string) => {
-    setPickedCoin(sendCoinOutputId, { prev: cardanoCoin.id, next: id });
+  // Total amount of the portfolio balance in fiat, including assets and rewards
+  const totalWalletBalanceWithTokens = useMemo(
+    () =>
+      getTotalWalletBalance(
+        balanceInAdaAndFiat?.total?.fiatBalance,
+        priceResult.tokens,
+        utxoTotal?.assets,
+        priceResult?.cardano?.price || 0,
+        assetsInfo
+      ),
+    [
+      assetsInfo,
+      balanceInAdaAndFiat?.total?.fiatBalance,
+      priceResult?.cardano?.price,
+      priceResult.tokens,
+      utxoTotal?.assets
+    ]
+  );
+
+  const closeTransactionDetailsDrawer = () => setIsTransactionDetailsOpen(false);
+  const onTransactionDetailsBack = useCallback(() => {
+    resetTransactionState();
+    closeTransactionDetailsDrawer();
+    setAssetDetails(fullAssetList.find((item) => item.id === selectedAssetId));
+  }, [selectedAssetId, fullAssetList, resetTransactionState, setAssetDetails]);
+
+  const onTransactionDetailsVisibleChange = useCallback(
+    (visible: boolean) => {
+      // Clear transaction details from state after drawer is closed
+      if (!visible && transactionDetail) {
+        resetTransactionState();
+      }
+    },
+    [transactionDetail, resetTransactionState]
+  );
+
+  const onSendAssetClick = (id: string) => {
+    setPickedCoin(SEND_COIN_OUTPUT_ID, { prev: cardanoCoin.id, next: id });
     analytics.sendEvent({
       category: AnalyticsEventCategories.VIEW_TOKENS,
       action: AnalyticsEventActions.CLICK_EVENT,
@@ -354,151 +229,95 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     }
   };
 
-  const cleanTransactionDetails = (visible: boolean) => {
-    if (!visible && transactionDetail) {
-      resetTransactionState();
-    }
-  };
-
-  const closeTransactionDetails = () => setIsTxDetailsOpen(false);
-
-  const backToAssetDetails = () => {
-    resetTransactionState();
-    closeTransactionDetails();
-    setAssetDetails(list.find((item) => item.id === assetID));
-  };
-
-  const filteredList = useMemo(() => list?.slice(0, listItemsAmount), [list, listItemsAmount]);
-  const isLoadingFirstTime = !total || !priceResult.cardano;
-
-  const totalWalletBalanceWithTokens = useMemo(
-    () =>
-      getTotalWalletBalance(
-        balance?.total?.fiatBalance,
-        priceResult.tokens,
-        total?.assets,
-        priceResult?.cardano?.price || 0,
-        assetsInfo
-      ),
-    [assetsInfo, balance?.total?.fiatBalance, priceResult?.cardano?.price, priceResult.tokens, total?.assets]
-  );
-  const isBalanceDataFetchedCorrectly = useMemo(() => !['error', 'idle', 'fetching'].includes(status), [status]);
-  const isWarningBannerDisplayed = () => {
-    // if there is no timestamp, that means that we never saved a previous price, so we just check for if it has error
-    if (status === 'error' && timestamp) {
-      const passedMinutesSinceLastSavedPrice = (Date.now() - timestamp) / 60_000;
-      // display banner only after 3 minutes
-      return passedMinutesSinceLastSavedPrice > minutesUntilDisplayBanner;
-    }
-
-    return status === 'error';
-  };
-
-  const handleBalancesVisibility = useCallback(setBalancesVisibility, [setBalancesVisibility]);
-
-  const content = (
-    <Skeleton loading={isLoadingFirstTime}>
-      <SectionTitle
-        title={t('browserView.assets.title')}
-        sideText={`(${list?.length ?? '0'})`}
-        classname={styles.headerContainer}
-      />
-      <div className={styles.portfolio}>
-        <PortfolioBalance
-          loading={!balance || isBalanceLoading}
-          balance={compactNumber(totalWalletBalanceWithTokens)}
-          currencyCode={fiatCurrency.code}
-          label={t('browserView.assets.totalWalletBalance')}
-          popupView={popupView}
-          isBannerVisible={isWarningBannerDisplayed()}
-          lastPriceFetchedDate={timestamp}
-          canManageBalancesVisibility={total?.coins && canManageBalancesVisibility}
-          areBalancesVisible={areBalancesVisible || !total?.coins}
-          handleBalancesVisibility={handleBalancesVisibility}
-          hiddenBalancesPlaceholder={balancesPlaceholder}
-        />
-      </div>
-      {popupView && list?.length > 0 && (
-        <SendReceive
-          leftButtonOnClick={openSend}
-          rightButtonOnClick={redirectToReceive}
-          isReversed
-          popupView
-          sharedClass={styles.testPopupClass}
-          translations={sendReceiveTranslation}
-        />
-      )}
-      <Skeleton loading={!list}>
-        {balanceWithAvailableRewards > BigInt(0) ? (
-          <AssetTable
-            rows={filteredList}
-            onRowClick={onRowClick}
-            totalItems={list?.length ?? 0}
-            scrollableTargetId={popupView ? CONTENT_LAYOUT_ID : LACE_APP_ID}
-            onLoad={onScroll}
-            popupView={popupView}
-          />
-        ) : (
-          <FundWalletBanner
-            title={t('browserView.assets.welcome')}
-            subtitle={t('browserView.assets.startYourWeb3Journey')}
-            prompt={t('browserView.fundWalletBanner.prompt')}
-            walletAddress={walletInfo.address.toString()}
-          />
-        )}
-      </Skeleton>
-    </Skeleton>
-  );
-
-  const details = (
-    <AssetDetailsDrawer
-      fiatCode={fiatCurrency.code}
-      fiatPrice={priceResult?.cardano?.price}
-      openSendDrawer={onSendClick}
-      popupView={popupView}
-      isBalanceDataFetchedCorrectly={isBalanceDataFetchedCorrectly}
-    />
-  );
-
-  // Close asset tx details drawer if network (blockchainProvider) has changed
   useEffect(() => {
-    closeTransactionDetails();
+    if (transactionDetail) {
+      setAssetDetails();
+    }
+
+    if (!assetDetails && transactionDetail) {
+      setIsTransactionDetailsOpen(true);
+    }
+  }, [assetDetails, transactionDetail, setAssetDetails]);
+
+  // TODO: move this to store once LW-1494 is done
+  useEffect(() => {
+    const tokens = [];
+
+    // TODO: refactor so we can use `getTokenList` [LW-6496]
+    if (hasTokens) {
+      for (const [assetId, assetBalance] of utxoTotal.assets) {
+        if (assetBalance <= 0) return;
+        const asset = getTransformedAsset(assetId, false);
+        if (asset) tokens.push(asset);
+      }
+    }
+    tokens.sort(sortAssets);
+
+    const cardano = lovelaceBalanceWithRewards > BigInt(0) ? [getTransformedCardano(false)] : [];
+
+    setFullAssetList([...cardano, ...tokens]);
+  }, [
+    assetsInfo,
+    utxoTotal,
+    cardanoCoin,
+    priceResult,
+    fiatCurrency,
+    hasTokens,
+    areBalancesVisible,
+    getTransformedAsset,
+    getTransformedCardano,
+    lovelaceBalanceWithRewards,
+    environmentName,
+    hiddenBalancePlaceholder
+  ]);
+
+  useEffect(() => {
+    // Close asset tx details drawer if network (blockchainProvider) has changed
+    closeTransactionDetailsDrawer();
   }, [blockchainProvider]);
 
-  const txDrawer = (
-    <Drawer
-      afterVisibleChange={cleanTransactionDetails}
-      visible={isTxDetailsOpen}
-      onClose={closeTransactionDetails}
-      navigation={<DrawerNavigation onCloseIconClick={closeTransactionDetails} onArrowIconClick={backToAssetDetails} />}
-      popupView={popupView}
-    >
-      {transactionDetail && priceResult && (
-        <div className={styles.txDetailsContainer}>
-          <TransactionDetail price={priceResult} />
-        </div>
-      )}
-    </Drawer>
+  const assetsPortfolio = (
+    <AssetsPortfolio
+      appMode={appMode}
+      assetList={paginatedAssetList}
+      portfolioTotalBalance={totalWalletBalanceWithTokens}
+      isBalanceLoading={isBalanceLoading}
+      isLoadingFirstTime={isLoadingFirstTime}
+      onRowClick={onAssetRowClick}
+      onTableScroll={() => setListItemsAmount((prevState) => prevState + LIST_CHUNK_SIZE)}
+      totalAssets={fullAssetList?.length ?? 0}
+    />
+  );
+  const drawers = (
+    <>
+      <AssetTransactionDetails
+        afterVisibleChange={onTransactionDetailsVisibleChange}
+        appMode={appMode}
+        isVisible={isTransactionDetailsOpen}
+        onClose={closeTransactionDetailsDrawer}
+        onBack={onTransactionDetailsBack}
+      />
+      <AssetDetailsDrawer
+        fiatCode={fiatCurrency.code}
+        fiatPrice={priceResult?.cardano?.price}
+        openSendDrawer={onSendAssetClick}
+        popupView={popupView}
+        isBalanceDataFetchedCorrectly={fetchPriceStatus === 'fetched'}
+      />
+    </>
   );
 
   return popupView ? (
     <>
-      <ContentLayout hasCredit={list?.length > 0}>{content}</ContentLayout>
-      {details}
-      {txDrawer}
+      <ContentLayout hasCredit={fullAssetList?.length > 0}>{assetsPortfolio}</ContentLayout>
+      {drawers}
     </>
   ) : (
     <Layout>
-      <SectionLayout
-        hasCredit={list?.length > 0}
-        sidePanelContent={
-          <EducationalList items={educationalItems} title={t('browserView.sidePanel.aboutYourWallet')} />
-        }
-      >
+      <SectionLayout hasCredit={fullAssetList?.length > 0} sidePanelContent={<AssetEducationalList />}>
         {topSection}
-        {content}
-        {details}
-        {txDrawer}
+        {assetsPortfolio}
+        {drawers}
       </SectionLayout>
     </Layout>
   );

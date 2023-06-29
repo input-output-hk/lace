@@ -5,11 +5,20 @@ import { useWalletStore } from '../stores';
 import { WalletBalance } from '../types';
 
 export interface BalancesReturnedFields {
+  /**
+   * Wallet's balance in ADA and fiat, including rewards available to claim
+   */
   balance: {
     total: WalletBalance;
     available: WalletBalance;
   };
+  /**
+   * Rewards available to claim in ADA and fiat
+   */
   rewards: WalletBalance;
+  /**
+   * Available deposit in ADA and fiat
+   */
   deposit: WalletBalance;
 }
 
