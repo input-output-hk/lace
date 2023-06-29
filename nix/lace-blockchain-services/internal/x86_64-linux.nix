@@ -16,12 +16,10 @@ in rec {
 
   cardano-js-sdk = inputs.cardano-js-sdk.packages.${pkgs.system}.default;
 
-  # ----------------------------------------------------------------------------- #
-
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
     src = ./lace-blockchain-services;
-    vendorHash = "sha256-1iyb+4faqZAo6IZf7PYx3Dg+H2IULzhBW80c5loXBPw=";
+    vendorHash = "sha256-DjDyHOENtaFSNGQtX50wL3hIo+lmMY1BJBn/TaAcXU0=";
     nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
     buildInputs = with pkgs; [
       (libayatana-appindicator-gtk3.override {
@@ -43,7 +41,7 @@ in rec {
   lace-blockchain-services = pkgs.runCommand "lace-blockchain-services" {
     meta.mainProgram = lace-blockchain-services-exe.name;
   } ''
-    mkdir -p $out/bin $out/libexec $out/share/lace-blockchain-services
+    mkdir -p $out/bin $out/libexec $out/share
     cp ${lace-blockchain-services-exe}/bin/* $out/bin/
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/
@@ -111,7 +109,7 @@ in rec {
     passAsFile = [ "script" ];
   } ''
     mkdir -p $out
-    target=$out/lace-blockchain-services-${revShort}-x86_64-linux.bin
+    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.bin
     cat $scriptPath >$target
     echo 'Compressing (xz)...'
     tar -cJ -C ${lace-blockchain-services-bundle} . >>$target
@@ -119,7 +117,7 @@ in rec {
 
     # Make it downloadable from Hydra:
     mkdir -p $out/nix-support
-    echo "file binary-dist \"$(echo $out/*.bin)\"" >$out/nix-support/hydra-build-products
+    echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
   '';
 
 }
