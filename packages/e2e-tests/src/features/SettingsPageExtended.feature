@@ -395,7 +395,7 @@ Feature: General Settings - Extended Browser View
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
     Then "Get started" page is displayed
-    When I click "Restore" button on wallet setup page
+    When I click "Restore" button and confirm
     And I am on "All done!" page from "Restore wallet" using "TAWalletNoFunds" wallet
     And I click "Go to my wallet" button on "All done" page
     And I click "Got it" button on "DApp connector is now in Beta" modal
