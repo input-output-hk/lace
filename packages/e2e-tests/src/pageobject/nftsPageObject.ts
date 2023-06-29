@@ -1,12 +1,11 @@
 import webTester from '../actor/webTester';
 import { NftItem } from '../elements/NFTs/nftItem';
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
-import nftAssert from '../assert/nftAssert';
 import newTransactionExtendedPageObject from './newTransactionExtendedPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import extensionUtils from '../utils/utils';
 import testContext from '../utils/testContext';
-import { NftDetails } from '../elements/NFTs/nftDetails';
+import NftDetails from '../elements/NFTs/nftDetails';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
 
@@ -18,10 +17,8 @@ class NftsPageObject {
 
   async progressWithSendUntilPasswordPage(nftName: string): Promise<any> {
     await this.clickNftItem(nftName);
-    await webTester.waitUntilSeeElementContainingText(nftName);
-    await nftAssert.assertSeeNftDetails();
-    await new NftDetails().sendNFTButton.waitForClickable();
-    await new NftDetails().sendNFTButton.click();
+    await NftDetails.sendNFTButton.waitForClickable();
+    await NftDetails.sendNFTButton.click();
     const receiverWallet = getTestWallet(await this.getNonActiveNftWalletName());
     const receiverAddress = extensionUtils.isMainnet() ? receiverWallet.mainnetAddress : receiverWallet.address;
     await newTransactionExtendedPageObject.fillAddress(receiverAddress);
