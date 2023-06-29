@@ -83,13 +83,6 @@ export const AddressDetailDrawer = ({
     [handleResolver]
   );
 
-  const onClose = () => {
-    if (!popupView) {
-      setCurrentStepConfig(stepsConfiguration[AddressDetailsSteps.DETAILS]);
-    }
-    onCancelClick();
-  };
-
   const analytics = useAnalyticsContext();
 
   useEffect(() => {
@@ -141,6 +134,7 @@ export const AddressDetailDrawer = ({
     <>
       <Drawer
         keyboard={false}
+        zIndex={999}
         className={cn(styles.drawer, { [styles.popupView]: popupView })}
         onClose={onCancelClick}
         title={<DrawerHeader title={headerTitle} />}
@@ -151,6 +145,11 @@ export const AddressDetailDrawer = ({
             onArrowIconClick={showArrowIcon ? onArrowIconClick : undefined}
           />
         }
+        afterOpenChange={(open) => {
+          if (!open) {
+            form.resetFields();
+          }
+        }}
         footer={
           <>
             {showForm && (
@@ -159,7 +158,7 @@ export const AddressDetailDrawer = ({
                 isNewAddress={popupView && !initialValues?.id}
                 onConfirmClick={onConfirmClick}
                 onCancelClick={handleOnCancelClick}
-                onClose={onClose}
+                onClose={onCancelClick}
               />
             )}
             {currentStepConfig.currentSection === AddressDetailsSteps.DETAILS && (
