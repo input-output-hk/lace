@@ -51,6 +51,8 @@
 .detail {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
+
   > * {
     display: flex;
     flex: 0 1 50%;
@@ -81,6 +83,7 @@
       font-weight: 600;
       line-height: size_unit(3);
       font-size: var(--body);
+      word-break: break-all;
     }
 
     .rightAligned {

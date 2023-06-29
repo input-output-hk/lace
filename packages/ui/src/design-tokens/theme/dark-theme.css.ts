@@ -1,4 +1,4 @@
-import { createTheme } from '@vanilla-extract/css';
+import { createGlobalTheme } from '@vanilla-extract/css';
 import { rgba } from 'polished';
 
 import { borders } from '../borders.data';
@@ -162,6 +162,26 @@ const colors: Colors = {
   $side_drawer_head_title_color: darkColorScheme.$primary_white,
   $side_drawer_content_title_color: darkColorScheme.$primary_white,
   $side_drawer_content_description_color: darkColorScheme.$primary_light_grey,
+
+  $search_box_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $search_box_container_bgColor_pressed: darkColorScheme.$primary_mid_grey,
+  $search_box_container_borderColor_hover: darkColorScheme.$primary_grey,
+  $search_box_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $search_box_label_color: darkColorScheme.$primary_light_grey,
+  $search_box_label_color_pressed: darkColorScheme.$primary_white,
+  $search_box_clear_button_container_bgColor:
+    darkColorScheme.$primary_dark_grey,
+  $search_box_clear_button_container_bgColor_hover:
+    darkColorScheme.$primary_dark_grey,
+  $search_box_clear_button_container_bgColor_pressed:
+    darkColorScheme.$primary_dark_grey,
+  $search_box_clear_button_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $search_box_clear_button_label_color: darkColorScheme.$primary_light_grey,
+  $search_box_clear_button_label_color_hover: darkColorScheme.$primary_white,
+  $search_box_clear_button_label_color_pressed:
+    darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {
@@ -172,7 +192,7 @@ const elevation: Elevation = {
   $card: 'none',
 };
 
-export const darkTheme = createTheme(vars, {
+export const theme = {
   borders,
   spacing,
   fontWeights,
@@ -183,4 +203,6 @@ export const darkTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
-});
+};
+
+createGlobalTheme('[data-theme="dark"]:root', vars, theme);

@@ -21,7 +21,7 @@ jest.mock('../../../store', () => ({
   useStakePoolDetails: mockUseStakePoolDetails
 }));
 
-const handles$ = new BehaviorSubject(true);
+const handles$ = new BehaviorSubject([]);
 
 const inMemoryWallet = {
   handles$

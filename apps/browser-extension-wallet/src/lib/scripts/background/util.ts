@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { POPUP_WINDOW } from '@src/utils/constants';
-import { getRandomIcon } from '@src/utils/get-random-icon';
+import { getRandomIcon } from '@lace/common';
 import { runtime, Tabs, tabs, Windows, windows, storage as webStorage } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';

@@ -23,6 +23,7 @@ export const AssetPickerFooter = (): React.ReactElement => {
         className={styles.nextStep}
         disabled={selectedTokenList.length === 0}
         onClick={handleClick}
+        data-testid={'add-to-transaction-button'}
       >
         {t('multipleSelection.addToTransaction')}
       </Button>

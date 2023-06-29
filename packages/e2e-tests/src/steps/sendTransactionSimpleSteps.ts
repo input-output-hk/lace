@@ -16,9 +16,9 @@ import {
 import coinConfigureAssert from '../assert/coinConfigureAssert';
 import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import addressAddNewExtendedAssert from '../assert/addressBook/addressAddNewExtendedAssert';
-import transactionSummaryExtendedAssert from '../assert/transaction/transactionSummaryExtendedAssert';
+import transactionSummaryAssert from '../assert/transaction/transactionSummaryAssert';
 import transactionPasswordExtendedAssert from '../assert/transaction/transactionPasswordExtendedAssert';
-import transactionSubmittedExtendedAssert from '../assert/transaction/transactionSubmittedExtendedAssert';
+import transactionSubmittedAssert from '../assert/transaction/transactionSubmittedAssert';
 import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
 import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
@@ -36,7 +36,7 @@ import { TransactionNewPage } from '../elements/newTransaction/transactionNewPag
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
 import AddAddressDrawer from '../elements/addressbook/popupView/AddAddressDrawer';
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
-import { TransactionSubmittedPage } from '../elements/newTransaction/transactionSubmittedPage';
+import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
@@ -172,7 +172,9 @@ Then(/^coin selector contains two tabs: tokens & nfts$/, async () => {
 });
 
 Then(/^click on the (Tokens|NFTs) button in the coin selector dropdown$/, async (button: string) => {
-  await transactionExtendedPageObject.clickCoinSelectorButton(button);
+  button === 'Tokens'
+    ? await transactionExtendedPageObject.clickTokensButton()
+    : await transactionExtendedPageObject.clickNFTsButton();
 });
 
 Then(/click on an token with name: "([^"]*)"/, async (tokenName: string) => {
@@ -213,7 +215,7 @@ When(
           break;
         case 'NFT':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
-          await transactionExtendedPageObject.clickCoinSelectorButton('NFTs');
+          await transactionExtendedPageObject.clickNFTsButton();
           await nftsPageObject.clickNftItem(entry.assetName);
           break;
         case 'Token':
@@ -322,7 +324,7 @@ Then(/^The Tx summary screen is displayed:$/, async (_ignored: string) => {
     recipientAddress: shelley.getAddress(),
     valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker }]
   };
-  await transactionSummaryExtendedAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
+  await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
 });
 
 Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async (_ignored: string) => {
@@ -330,19 +332,20 @@ Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async
     recipientAddress: byron.getAddress(),
     valueToBeSent: [{ value: extensionUtils.isMainnet() ? '1.05' : '1.08', currency: Asset.CARDANO.ticker }]
   };
-  await transactionSummaryExtendedAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
+  await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
 });
 
 Then(/^The password screen is displayed:$/, async (_ignored: string) => {
   await transactionPasswordExtendedAssert.assertSeePasswordPage();
 });
 
-Then(/^The Transaction error screen is displayed:$/, async (_ignored: string) => {
-  await transactionSubmittedExtendedAssert.assertSeeTransactionErrorPage();
+Then(/^The Transaction error screen is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await transactionSubmittedAssert.assertSeeTransactionErrorPage(mode);
 });
 
-Then(/^The Transaction submitted screen is displayed:$/, async (_ignored: string) => {
-  await transactionSubmittedExtendedAssert.assertSeeTransactionSubmittedPage();
+Then(/^The Transaction submitted screen is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await transactionSubmittedAssert.assertSeeTransactionSubmittedPage(mode);
+  await transactionExtendedPageObject.saveTransactionHash();
 });
 
 Then(/^the 'Send' screen is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
@@ -598,9 +601,8 @@ Then(
 );
 
 When(/^I click "View transaction" button on submitted transaction page$/, async () => {
-  const transactionSubmittedPage = new TransactionSubmittedPage();
-  await transactionSubmittedPage.viewTransactionButton.waitForClickable();
-  await transactionSubmittedPage.viewTransactionButton.click();
+  await TransactionSubmittedPage.viewTransactionButton.waitForClickable();
+  await TransactionSubmittedPage.viewTransactionButton.click();
 });
 
 Then(/^I enter (correct|incorrect) password and confirm the transaction$/, async (type: string) => {

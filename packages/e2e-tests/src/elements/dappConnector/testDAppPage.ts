@@ -9,6 +9,7 @@ class TestDAppPage {
   private WALLET_API_VERSION = '[data-testid="wallet-api-version"]';
   private WALLET_NAME = '[data-testid="wallet-name"]';
   private WALLET_NETWORK_ID = '[data-testid="wallet-network-id"]';
+  private WALLET_UTXO = '[data-testid="wallet-utxo"]';
   private WALLET_BALANCE = '[data-testid="wallet-balance"]';
   private WALLET_CHANGE_ADDRESS = '[data-testid="wallet-change-address"]';
   private WALLET_STAKING_ADDRESS = '[data-testid="wallet-reward-address"]';
@@ -50,6 +51,10 @@ class TestDAppPage {
 
   get walletNetworkId(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.WALLET_NETWORK_ID);
+  }
+
+  get walletUtxo(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.WALLET_UTXO);
   }
 
   get walletBalance(): ChainablePromiseElement<WebdriverIO.Element> {

@@ -32,7 +32,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsc && tsup",
     "cleanup": "shx rm -rf dist node_modules && shx rm -rf ../../.cache/eslintcache",
     "dev": "ladle serve",
     "eslint:check": "eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '.*/**/*.{cjs,mjs,js,ts,tsx}'",
@@ -54,10 +54,12 @@
   },
   "dependencies": {
     "i18next": "^22.5.1",
+    "immer": "^10.0.2",
     "jdenticon": "^3.2.0",
     "react-i18next": "^12.3.1"
   },
   "devDependencies": {
+    "@cardano-sdk/util": "~0.11.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/ui": "^0.1.0",
@@ -85,6 +87,7 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
+    "@cardano-sdk/util": "~0.11.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/ui": "^0.1.0",

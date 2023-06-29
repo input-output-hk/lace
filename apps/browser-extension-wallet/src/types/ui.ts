@@ -1,6 +1,5 @@
 import { Wallet } from '@lace/cardano';
 import { AppMode } from '@src/utils/constants';
-import { CoinId } from './wallet';
 
 export enum NetworkConnectionStates {
   CONNNECTED = 'connected',
@@ -13,7 +12,7 @@ export interface WalletUIProps {
 }
 
 export interface WalletUI {
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
   appMode: AppMode;
   networkConnection: NetworkConnectionStates;
   areBalancesVisible: boolean;

@@ -6,7 +6,6 @@ import { Button, Ellipsis } from '@lace/common';
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
 import { useDelegationStore, stakePoolDetailsSelector } from '@src/features/delegation/stores';
 import { useDelegationDetails } from '@src/hooks';
-import { stakePoolTransformer } from '@src/features/delegation/api/transformers';
 import { Banner } from '@components/Banner';
 import { useStakePoolDetails } from '../../store';
 import { SocialNetworkIcon, SocialNetwork } from '@views/browser/components';
@@ -53,7 +52,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     walletUI: { cardanoCoin }
   } = useWalletStore();
   const currentDelegatedStakePool =
-    delegationDetails && stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin });
+    delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin });
   const { t } = useTranslation();
 
   const socialNetworks = [
@@ -229,7 +228,7 @@ export const StakePoolDetailFooter = ({
 
   const delegationDetails = useDelegationDetails();
   const currentDelegatedStakePool =
-    delegationDetails && stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin });
+    delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin });
   const isDelegatingToThisPool = currentDelegatedStakePool?.id === id;
 
   useEffect(() => {

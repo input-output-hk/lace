@@ -1,0 +1,64 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+$navigation-col-width: 215px;
+
+.navigation {
+  position: sticky;
+  top: 0;
+  left: 1px;
+  grid-area: nav;
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+  align-items: center;
+  justify-self: center;
+  padding: 0 24px;
+  background-color: var(--bg-color-body);
+  pointer-events: none;
+  z-index: 100;
+
+  &:hover {
+    box-shadow: var(--bg-color-body) 18px 0px 32px 12px;
+    &.shadowNone {
+      box-shadow: none;
+    }
+  }
+
+  @media (min-width: $breakpoint-xsmall) {
+    pointer-events: auto;
+    width: $navigation-col-width;
+    &:hover {
+      box-shadow: none;
+    }
+  }
+}
+
+.navigationShadow {
+  box-shadow: var(--bg-color-body) 18px 0px 32px 12px;
+}
+
+.stickyMenuInner {
+  position: sticky;
+  display: flex;
+  flex-direction: column;
+  gap: 52px;
+  top: 0;
+}
+
+.logoContainer {
+  max-height: 88px;
+  padding-top: size_unit(3);
+  display: flex;
+  align-items: center;
+
+  .logo {
+    cursor: pointer;
+  }
+}
+
+.shortenedLogo {
+  height: 40px;
+  width: 40px;
+  cursor: pointer;
+  pointer-events: auto;
+}

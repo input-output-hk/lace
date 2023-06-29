@@ -54,6 +54,11 @@ jobs:
         with:
           name: lace-build
           path: ./apps/browser-extension-wallet/dist
+      - name: Save Core build
+        uses: actions/upload-artifact@v3
+        with:
+          name: core-build
+          path: ./packages/core/dist
   run-tests-windows:
     needs: build-extension-linux
     runs-on: windows-2022
@@ -66,6 +71,11 @@ jobs:
         run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Decrypt test data
+        working-directory: ./packages/e2e-tests
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -76,6 +86,11 @@ jobs:
         with:
           name: lace-build
           path: ./apps/browser-extension-wallet/dist
+      - name: Get Core build
+        uses: actions/download-artifact@v3
+        with:
+          name: core-build
+          path: ./packages/core/dist
       - name: Node modules cache
         uses: actions/cache@v3
         with:

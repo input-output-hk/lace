@@ -194,6 +194,10 @@ class TopNavigationAssert {
   async assertSeeRightSidePanelButton(shouldBeVisible: boolean) {
     await MenuHeader.rightSidePanelButton.waitForDisplayed({ reverse: !shouldBeVisible });
   }
+
+  assertSeeExpandedIcon = async (shouldSee: boolean) => {
+    await MenuHeader.logo.waitForDisplayed({ reverse: !shouldSee });
+  };
 }
 
 export default new TopNavigationAssert();

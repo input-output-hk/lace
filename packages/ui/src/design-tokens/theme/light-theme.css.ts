@@ -1,4 +1,4 @@
-import { createTheme } from '@vanilla-extract/css';
+import { createGlobalTheme } from '@vanilla-extract/css';
 import { rgba } from 'polished';
 
 import { borders } from '../borders.data';
@@ -173,6 +173,29 @@ const colors: Colors = {
   $side_drawer_head_title_color: lightColorScheme.$primary_black,
   $side_drawer_content_title_color: lightColorScheme.$primary_black,
   $side_drawer_content_description_color: lightColorScheme.$primary_dark_grey,
+
+  $search_box_container_bgColor: lightColorScheme.$primary_light_grey,
+  $search_box_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $search_box_container_borderColor_hover:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $search_box_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $search_box_label_color: lightColorScheme.$primary_dark_grey,
+  $search_box_label_color_pressed: lightColorScheme.$primary_black,
+  $search_box_clear_button_container_bgColor:
+    lightColorScheme.$primary_light_grey_0_56,
+  $search_box_clear_button_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $search_box_clear_button_container_bgColor_pressed:
+    lightColorScheme.$primary_white,
+  $search_box_clear_button_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $search_box_clear_button_label_color: lightColorScheme.$primary_dark_grey,
+  $search_box_clear_button_label_color_hover:
+    lightColorScheme.$primary_dark_grey,
+  $search_box_clear_button_label_color_pressed:
+    lightColorScheme.$primary_dark_grey,
 };
 
 export const elevation: Elevation = {
@@ -183,7 +206,7 @@ export const elevation: Elevation = {
   $card: '0px 0px 20px rgba(167, 143, 160, 0.15)',
 } as const;
 
-export const lightTheme = createTheme(vars, {
+export const theme = {
   borders,
   spacing,
   fontWeights,
@@ -194,4 +217,6 @@ export const lightTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
-});
+};
+
+createGlobalTheme('[data-theme="light"]:root', vars, theme);
