@@ -115,13 +115,6 @@ class NftAssert {
       await expect(await NftDetails.sendNFTButton.getText()).to.equal(await t('core.nftDetail.sendNFT'));
     }
   }
-
-  async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
-    await NftsPage.createFolderButton.waitForDisplayed({ reverse: !shouldSee });
-    if (mode === 'extended' && shouldSee === true) {
-      await expect(await NftsPage.createFolderButton.getText()).to.equal(await t('browserView.nfts.createFolder'));
-    }
-  }
 }
 
 export default new NftAssert();
