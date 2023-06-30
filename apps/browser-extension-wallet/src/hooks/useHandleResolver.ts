@@ -20,7 +20,6 @@ export const useHandleResolver = (): KoraLabsHandleProvider => {
     const serverUrl = HANDLE_SERVER_URLS[networkMagic as keyof typeof HANDLE_SERVER_URLS];
     return new KoraLabsHandleProvider({
       serverUrl,
-      networkInfoProvider: blockchainProvider.networkInfoProvider,
       policyId: ADA_HANDLE_POLICY_ID
     });
   }, [blockchainProvider, networkMagic]);
