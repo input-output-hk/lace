@@ -40,7 +40,18 @@ export enum PostHogAction {
   OnboardingRestoreAnalyticsSkipClick = 'onboarding | restore wallet | analytics | skip | click',
   // Create new wallet
   OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
-  OnboardingCreateAnalyticsSkipClick = 'onboarding | new wallet | analytics | skip | click'
+  OnboardingCreateAnalyticsSkipClick = 'onboarding | new wallet | analytics | skip | click',
+  OnboardingCreateClick = 'onboarding | new wallet | create | click',
+  OnboardingCreateLaceTermsOfUseNextClick = 'onboarding | new wallet | lace terms of use | next | click',
+  OnboardingCreateWalletNameNextClick = 'onboarding | new wallet | wallet name | next | click',
+  OnboardingCreateWalletPasswordNextClick = 'onboarding | new wallet | wallet password | next | click',
+  OnboardingCreatePassphraseIntroNextClick = 'onboarding | new wallet | passphrase intro | next | click',
+  OnboardingCreateWritePassphrase01NextClick = 'onboarding | new wallet | write passphrase #01 | next | click',
+  OnboardingCreateWritePassphrase09NextClick = 'onboarding | new wallet | write passphrase #09 | next | click',
+  OnboardingCreateWritePassphrase17NextClick = 'onboarding | new wallet | write passphrase #17 | next | click',
+  OnboardingCreateEnterPassphrase01NextClick = 'onboarding | new wallet | enter passphrase #01 | next | click',
+  OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
+  OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
@@ -53,12 +64,21 @@ export enum ExtensionViews {
   Popup = 'popup'
 }
 
-export enum ExtensionViews {
-  Extended = 'extended',
-  Popup = 'popup'
-}
 export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password';
-export type PostHogActionsKeys = 'ANALYTICS_AGREE_CLICK' | 'ANALYTICS_SKIP_CLICK';
+export type PostHogActionsKeys =
+  | 'SETUP_OPTION_CLICK'
+  | 'ANALYTICS_AGREE_CLICK'
+  | 'ANALYTICS_SKIP_CLICK'
+  | 'LACE_TERMS_OF_USE_NEXT_CLICK'
+  | 'WALLET_NAME_NEXT_CLICK'
+  | 'WALLET_PASSWORD_NEXT_CLICK'
+  | 'PASSPHRASE_INTRO_NEXT_CLICK'
+  | 'WRITE_PASSPHRASE_01_NEXT_CLICK'
+  | 'WRITE_PASSPHRASE_09_NEXT_CLICK'
+  | 'WRITE_PASSPHRASE_17_NEXT_CLICK'
+  | 'ENTER_PASSPHRASE_01_NEXT_CLICK'
+  | 'ENTER_PASSPHRASE_09_NEXT_CLICK'
+  | 'ENTER_PASSPHRASE_17_NEXT_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogMetadata = {

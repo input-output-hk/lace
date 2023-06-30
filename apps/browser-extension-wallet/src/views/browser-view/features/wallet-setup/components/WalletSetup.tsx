@@ -12,7 +12,8 @@ import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
   AnalyticsEventNames,
-  PostHogAction
+  PostHogAction,
+  postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ILocalStorage } from '@src/types';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
@@ -129,7 +130,12 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupLayout>
             <WalletSetupOptionsStep
               onNewWalletRequest={() => {
-                sendAnalytics(AnalyticsEventCategories.WALLET_CREATE, Events.CREATE_WALLET_START);
+                sendAnalytics(
+                  AnalyticsEventCategories.WALLET_CREATE,
+                  Events.CREATE_WALLET_START,
+                  undefined,
+                  postHogOnboardingActions.create.SETUP_OPTION_CLICK
+                );
                 history.push(walletRoutePaths.setup.create);
               }}
               onHardwareWalletRequest={handleStartHardwareOnboarding}

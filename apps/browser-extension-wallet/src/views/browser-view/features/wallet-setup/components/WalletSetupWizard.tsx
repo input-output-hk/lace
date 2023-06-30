@@ -22,6 +22,7 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
+  ExtensionViews,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
@@ -315,15 +316,23 @@ export const WalletSetupWizard = ({
             /* eslint-disable no-magic-numbers */
             switch (step) {
               case 0:
-                sendAnalytics(Events.MNEMONICS_INPUT_0_NEXT);
+                sendAnalytics(
+                  Events.MNEMONICS_INPUT_0_NEXT,
+                  postHogOnboardingActions[setupType].ENTER_PASSPHRASE_01_NEXT_CLICK
+                );
                 break;
               case 1:
-                sendAnalytics(Events.MNEMONICS_INPUT_1_NEXT);
+                sendAnalytics(
+                  Events.MNEMONICS_INPUT_1_NEXT,
+                  postHogOnboardingActions[setupType].ENTER_PASSPHRASE_09_NEXT_CLICK
+                );
                 break;
               case 2:
-                sendAnalytics(Events.MNEMONICS_INPUT_2_NEXT);
+                sendAnalytics(
+                  Events.MNEMONICS_INPUT_2_NEXT,
+                  postHogOnboardingActions[setupType].WRITE_PASSPHRASE_17_NEXT_CLICK
+                );
             }
-            /* eslint-enable no-magic-numbers */
           }}
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
@@ -347,18 +356,36 @@ export const WalletSetupWizard = ({
           switch (step) {
             case 0:
               stage === 'input'
-                ? sendAnalytics(Events.MNEMONICS_INPUT_0_NEXT)
-                : sendAnalytics(Events.MNEMONICS_WRITEDOWN_0_NEXT);
+                ? sendAnalytics(
+                    Events.MNEMONICS_INPUT_0_NEXT,
+                    postHogOnboardingActions[setupType].ENTER_PASSPHRASE_01_NEXT_CLICK
+                  )
+                : sendAnalytics(
+                    Events.MNEMONICS_WRITEDOWN_0_NEXT,
+                    postHogOnboardingActions[setupType].WRITE_PASSPHRASE_01_NEXT_CLICK
+                  );
               break;
             case 1:
               stage === 'input'
-                ? sendAnalytics(Events.MNEMONICS_INPUT_1_NEXT)
-                : sendAnalytics(Events.MNEMONICS_WRITEDOWN_1_NEXT);
+                ? sendAnalytics(
+                    Events.MNEMONICS_INPUT_1_NEXT,
+                    postHogOnboardingActions[setupType].ENTER_PASSPHRASE_09_NEXT_CLICK
+                  )
+                : sendAnalytics(
+                    Events.MNEMONICS_WRITEDOWN_1_NEXT,
+                    postHogOnboardingActions[setupType].WRITE_PASSPHRASE_09_NEXT_CLICK
+                  );
               break;
             case 2:
               stage === 'input'
-                ? sendAnalytics(Events.MNEMONICS_INPUT_2_NEXT)
-                : sendAnalytics(Events.MNEMONICS_WRITEDOWN_2_NEXT);
+                ? sendAnalytics(
+                    Events.MNEMONICS_INPUT_2_NEXT,
+                    postHogOnboardingActions[setupType].ENTER_PASSPHRASE_17_NEXT_CLICK
+                  )
+                : sendAnalytics(
+                    Events.MNEMONICS_WRITEDOWN_2_NEXT,
+                    postHogOnboardingActions[setupType].WRITE_PASSPHRASE_17_NEXT_CLICK
+                  );
           }
           /* eslint-enable no-magic-numbers */
         }}
@@ -375,7 +402,11 @@ export const WalletSetupWizard = ({
         <WalletSetupLegalStep
           onBack={moveBack}
           onNext={() => {
-            sendAnalytics(Events.LEGAL_STUFF_NEXT, undefined, calculateTimeSpentOnPage());
+            sendAnalytics(
+              Events.LEGAL_STUFF_NEXT,
+              postHogOnboardingActions[setupType].LACE_TERMS_OF_USE_NEXT_CLICK,
+              calculateTimeSpentOnPage()
+            );
             moveForward();
           }}
           translations={walletSetupLegalStepTranslations}
@@ -392,7 +423,12 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.PreMnemonic && (
         <WalletSetupMnemonicIntroStep
           onBack={moveBack}
-          onNext={moveForward}
+          onNext={() => {
+            analytics.sendEventToPostHog(postHogOnboardingActions[setupType].PASSPHRASE_INTRO_NEXT_CLICK, {
+              view: ExtensionViews.Extended
+            });
+            moveForward();
+          }}
           translations={walletSetupMnemonicIntroStepTranslations}
         />
       )}
@@ -408,7 +444,7 @@ export const WalletSetupWizard = ({
         <WalletSetupRegisterStep
           onBack={goBackToMnemonic}
           onNext={(result) => {
-            sendAnalytics(Events.WALLET_NAME_NEXT);
+            sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions[setupType].WALLET_NAME_NEXT_CLICK);
             setWalletName(result.walletName);
             moveForward();
           }}
@@ -420,7 +456,7 @@ export const WalletSetupWizard = ({
         <WalletSetupPasswordStep
           onBack={setupType !== 'forgot_password' ? moveBack : undefined}
           onNext={(result) => {
-            sendAnalytics(Events.WALLET_PASSWORD_NEXT);
+            sendAnalytics(Events.WALLET_PASSWORD_NEXT, postHogOnboardingActions[setupType].WALLET_PASSWORD_NEXT_CLICK);
             setPassword(result.password);
             setupType === 'create'
               ? skipTo(WalletSetupSteps.PreMnemonic)
