@@ -4,10 +4,11 @@ import AddressBookPage from '../../elements/addressbook/AddressBookPage';
 
 class AddressBookPageAssert {
   assertSeeAddressBookTitle = async () => {
-    await AddressBookPage.titleElement.waitForDisplayed();
-    await expect(await AddressBookPage.titleElement.getText()).to.contain(await t('addressBook.sectionTitle'));
+    await AddressBookPage.pageTitle.waitForDisplayed();
+    await expect(await AddressBookPage.pageTitle.getText()).to.contain(await t('addressBook.sectionTitle'));
   };
   assertSeeAddressCount = async (expectedCount: number) => {
+    await AddressBookPage.addressCounter.waitForDisplayed();
     const currentValue = await AddressBookPage.getCounterValue();
     await expect(currentValue).to.equal(expectedCount);
   };
