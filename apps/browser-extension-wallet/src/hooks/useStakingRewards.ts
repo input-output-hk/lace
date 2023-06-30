@@ -2,7 +2,7 @@ import { useWalletStore } from '@src/stores';
 import BigNumber from 'bignumber.js';
 import { useMemo } from 'react';
 import { combineLatest, map } from 'rxjs';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 
 interface UseStakingRewardsReturns {
   totalRewards: BigInt | number;

@@ -246,8 +246,7 @@ describe('Testing assets transformers', () => {
         amount: '2',
         fiatBalance: 'NaN',
         fingerprint,
-        metadataName: 'tokenMetadata.name',
-        policyId: 'policyId'
+        metadataName: 'tokenMetadata.name'
       },
       ticker: 'fingerprint',
       variation: 'NaN'
@@ -294,7 +293,6 @@ describe('Testing assets transformers', () => {
         balance: 'compactNumberBalance',
         fiatBalance: `formattedFiatBalance ${fiatCurrency.code}`,
         sortBy: {
-          policyId,
           fiatBalance,
           metadataName: tokenMetadata?.name,
           fingerprint,

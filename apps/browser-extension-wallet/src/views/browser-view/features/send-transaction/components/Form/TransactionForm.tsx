@@ -6,8 +6,9 @@ import { Form } from './Form';
 import { FormLayout } from './FormLayout';
 import { TransitionAcknowledgmentDialog } from '@components/TransitionAcknowledgmentDialog';
 import { useWalletStore } from '@src/stores';
-import { useObservable, useFetchCoinPrice } from '@hooks';
+import { useFetchCoinPrice } from '@hooks';
 import { Wallet } from '@lace/cardano';
+import { useObservable } from '@lace/common';
 
 const STORAGE_MEMO_ENTRY_NAME = 'hideSendHwDialog';
 

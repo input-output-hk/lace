@@ -2,7 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
 import { BuiltTxData, OutputsMap } from '../views/browser-view/features/send-transaction/types';
 import { useSpentBalances } from '../views/browser-view/features/send-transaction/store';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 import { getReachedMaxAmountList } from '@src/views/browser-view/features/send-transaction/helpers';
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from './useMaxAda';

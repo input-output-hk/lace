@@ -595,7 +595,6 @@ export const mockAssetDetails = {
   balance: '9998999995',
   fiatBalance: '-',
   sortBy: {
-    policyId: 'f6f49b186751e61f1fb8c64e7504e771f968cea9f4d11f5222b169e3',
     metadataName: 'tHOSKY',
     fingerprint: 'asset15qks69wv4vk7clnhp4lq7x0rpk6vs0s6exw0ry',
     amount: '9998999995'

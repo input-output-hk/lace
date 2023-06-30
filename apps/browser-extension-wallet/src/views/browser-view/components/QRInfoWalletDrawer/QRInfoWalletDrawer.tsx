@@ -6,7 +6,7 @@ import styles from './QRInfoWalletDrawer.module.scss';
 import { useTranslation } from 'react-i18next';
 import { useDrawer } from '../../stores';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
-import { useKeyboardShortcut } from '@hooks';
+import { useKeyboardShortcut } from '@lace/common';
 import { useGetHandles } from '@hooks/useGetHandles';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 
