@@ -100,7 +100,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           setHandleVerificationState(HandleVerificationState.INVALID);
         } else {
           setHandleVerificationState(HandleVerificationState.VALID);
-          setAddressValue(row, handles[0].resolvedAddresses.cardano.toString(), handleString);
+          setAddressValue(row, handles[0].cardanoAddress.toString(), handleString);
         }
       }, HANDLE_DEBOUNCE_TIME),
     [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]

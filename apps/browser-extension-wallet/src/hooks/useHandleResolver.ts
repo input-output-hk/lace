@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
 import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
-import { Cardano } from '@cardano-sdk/core';
+import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import { ADA_HANDLE_POLICY_ID } from '@src/features/ada-handle/config';
 
 export const HANDLE_SERVER_URLS: Record<Exclude<Cardano.NetworkMagics, Cardano.NetworkMagics.Testnet>, string> = {
@@ -10,7 +10,7 @@ export const HANDLE_SERVER_URLS: Record<Exclude<Cardano.NetworkMagics, Cardano.N
   [Cardano.NetworkMagics.Preview]: 'https://preview.api.handle.me'
 };
 
-export const useHandleResolver = (): KoraLabsHandleProvider => {
+export const useHandleResolver = (): HandleProvider => {
   const {
     blockchainProvider,
     currentChain: { networkMagic }
@@ -21,6 +21,6 @@ export const useHandleResolver = (): KoraLabsHandleProvider => {
     return new KoraLabsHandleProvider({
       serverUrl,
       policyId: ADA_HANDLE_POLICY_ID
-    });
+    }) as unknown as HandleProvider;
   }, [blockchainProvider, networkMagic]);
 };
