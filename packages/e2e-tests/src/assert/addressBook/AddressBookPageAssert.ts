@@ -14,14 +14,14 @@ class AddressBookPageAssert {
   };
 
   assertAddressBookIsEmpty = async () => {
-    await expect(await AddressBookPage.getCounterValue()).to.equal(0);
+    await expect(Number(await AddressBookPage.getCounterValue())).to.equal(0);
     await AddressBookPage.emptyStateImage.waitForDisplayed();
     await AddressBookPage.emptyStateTitle.waitForDisplayed();
     await expect(await AddressBookPage.emptyStateTitle.getText()).to.equal(
       await t('browserView.addressBook.emptyState.title')
     );
     await AddressBookPage.emptyStateMessage.waitForDisplayed();
-    await expect(await AddressBookPage.emptyStateMessage.waitForDisplayed()).to.equal(
+    await expect(await AddressBookPage.emptyStateMessage.getText()).to.equal(
       await t('browserView.addressBook.emptyState.message')
     );
     await AddressBookPage.addressListHeader.waitForDisplayed({ reverse: true });
