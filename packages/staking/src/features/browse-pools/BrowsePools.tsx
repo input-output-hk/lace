@@ -1,6 +1,8 @@
 import { Percent } from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
 import { Box, Flex } from '@lace/ui';
+import { StakePoolDetails } from '../drawer';
+import { Sections } from '../store';
 import stakePoolsRaw from './data.json';
 import { Search } from './search';
 import { StakePoolsTable } from './stake-pools-table';
@@ -37,20 +39,38 @@ const stakePools = stakePoolsRaw.map<Wallet.Cardano.StakePool>((pool) => ({
   vrf: Wallet.Cardano.VrfVkHex(pool.vrf),
 }));
 
-export const BrowsePools = () => (
-  <Flex flexDirection={'column'} alignItems={'stretch'}>
-    <Search />
-    <Box mt={'$32'}>
-      <StakePoolsTable
-        stakePools={stakePools}
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        loadMoreData={() => {}}
-        totalResultCount={stakePoolsRaw.length}
-        isSearching={false}
-        fetchingPools={false}
-        isLoadingList={false}
-        scrollableTargetId={'lace-app'}
+const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
+
+const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
+
+export const BrowsePools = () => {
+  // TODO: compute real value
+  const hasNoFunds = false;
+  // eslint-disable-next-line unicorn/consistent-function-scoping,@typescript-eslint/no-empty-function
+  const onStake = () => {};
+
+  return (
+    <Flex flexDirection={'column'} alignItems={'stretch'}>
+      <Search />
+      <Box mt={'$32'}>
+        <StakePoolsTable
+          stakePools={stakePools}
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          loadMoreData={() => {}}
+          totalResultCount={stakePoolsRaw.length}
+          isSearching={false}
+          fetchingPools={false}
+          isLoadingList={false}
+          scrollableTargetId={'lace-app'}
+        />
+      </Box>
+      <StakePoolDetails
+        showCloseIcon
+        showBackIcon={(section: Sections): boolean => stepsWithBackBtn.has(section)}
+        showExitConfirmation={(section: Sections): boolean => stepsWithExitConfirmation.has(section)}
+        canDelegate={!hasNoFunds}
+        onStake={onStake}
       />
-    </Box>
-  </Flex>
-);
+    </Flex>
+  );
+};

@@ -45,14 +45,14 @@ export const NftDetail = ({
     </div>
     <div className={styles.info}>
       <div data-testid="nft-info" className={styles.section}>
-        <h4>{translations.tokenInformation}</h4>
+        <h4 data-testid="nft-info-label">{translations.tokenInformation}</h4>
         <InlineInfoList items={tokenInformation} />
       </div>
       {attributes && (
         <>
           <div className={styles.separator} />
           <div data-testid="nft-attributes" className={styles.section}>
-            <h4>{translations.attributes}</h4>
+            <h4 data-testid="nft-attributes-label">{translations.attributes}</h4>
             <InlineInfoList items={parseAttributes(JSON.parse(attributes))} />
           </div>
         </>

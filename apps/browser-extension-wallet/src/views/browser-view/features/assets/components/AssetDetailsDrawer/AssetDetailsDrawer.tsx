@@ -118,13 +118,13 @@ const renderAssetDetails =
     return (
       <Component
         balance={asset?.balance}
-        code={asset?.ticker}
+        assetSymbol={asset?.ticker}
         fiatPrice={asset?.price}
         fiatCode={fiatCode}
         fiatPriceVariation={asset?.variation || '-'}
         balanceInFiat={asset?.fiatBalance === '-' ? asset?.fiatBalance : `${asset?.fiatBalance}`}
-        list={activitiesList}
-        txListStatus={walletActivitiesStatus}
+        activityList={activitiesList}
+        activityListStatus={walletActivitiesStatus}
         onViewAllClick={handleOpenTransaction}
         popupView={popupView}
         isDrawerView

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { subtractValueQuantities } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 
 const { getTotalMinimumCoins, setMissingCoins } = Wallet;
 

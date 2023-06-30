@@ -1,19 +1,18 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-import { Steps } from '@lace/common';
+import { Steps, useObservable } from '@lace/common';
 import React, { useState } from 'react';
 import styles from './CatalystRegistrationFlow.module.scss';
 import {
-  DownloadCatalystStep,
-  CatalystPinStep,
-  CatalystRegisterStep,
   CatalystConfirmationStep,
   CatalystConfirmationStepProps,
+  CatalystPinStep,
+  CatalystRegisterStep,
   CatalystScanStep,
+  DownloadCatalystStep,
   Wallet
 } from '@lace/cardano';
 import { WalletBasicInfo } from '@lace/core';
 import { useWalletStore } from '@stores';
-import { useObservable } from '@hooks';
 import { DEFAULT_WALLET_BALANCE } from '@utils/constants';
 import { useTranslation } from 'react-i18next';
 

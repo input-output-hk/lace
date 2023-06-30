@@ -40,7 +40,7 @@ export const AssetActivityList = ({
         </div>
       }
       style={{ width: '100%', padding: 0 }}
-      data-testid="address-list"
+      data-testid="asset-activity-list"
       itemLayout="horizontal"
       dataSource={items}
       renderItem={(itemProps: AssetActivityItemProps) => (

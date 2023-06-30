@@ -2,13 +2,13 @@
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
-import { Button, inputProps, Password } from '@lace/common';
+import { Button, inputProps, Password, useObservable } from '@lace/common';
 import { useStakePoolDetails, sectionsConfig } from '../../store';
 import { Sections } from '../../types';
 import styles from './SignConfirmation.module.scss';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
-import { useDelegationDetails, useObservable, useWalletManager } from '@hooks';
+import { useDelegationDetails, useWalletManager } from '@hooks';
 import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
