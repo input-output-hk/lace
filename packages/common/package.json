@@ -26,8 +26,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "rollup -c rollup.config.js",
-    "cleanup": "shx rm -rf dist node_modules coverage .rollup.cache src/dist",
+    "build": "yarn g:rollup",
+    "cleanup": "yarn dlx shx rm -rf dist node_modules coverage .rollup.cache src/dist",
     "lint": "cd ../.. && yarn common:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",

@@ -26,9 +26,9 @@
   ],
   "scripts": {
     "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.prod.js --progress & webpack --config webpack.app.prod.js --progress",
-    "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress & webpack --config webpack.app.dev.js --progress",
-    "cleanup": "shx rm -rf dist node_modules",
-    "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress --watch & webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
+    "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & yarn g:webpack --config webpack.sw.dev.js --progress & yarn g:webpack --config webpack.app.dev.js --progress",
+    "cleanup": "yarn dlx shx rm -rf dist node_modules",
+    "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & yarn g:webpack --config webpack.sw.dev.js --progress --watch & webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
     "lint": "cd ../.. && yarn extension:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
@@ -104,7 +104,6 @@
     "fork-ts-checker-webpack-plugin": "^7.2.1",
     "jest-webextension-mock": "^3.7.19",
     "tsconfig-paths-webpack-plugin": "3.5.2",
-    "webassembly-loader-sw": "^1.1.0",
-    "webpack": "5.75.0"
+    "webassembly-loader-sw": "^1.1.0"
   }
 }

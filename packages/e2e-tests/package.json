@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "author": "IOHK",
   "scripts": {
-    "build": "shx echo 'No build required'",
+    "build": "yarn shx echo 'No build required'",
     "test": "shx echo 'User test:local'",
     "test:local:chrome": "wdio run wdio.conf.chrome.ts",
     "test:local:edge": "wdio run wdio.conf.edge.ts",

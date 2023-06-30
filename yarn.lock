@@ -7179,7 +7179,6 @@ __metadata:
     tsconfig-paths-webpack-plugin: 3.5.2
     webassembly-loader-sw: ^1.1.0
     webextension-polyfill: 0.8.0
-    webpack: 5.75.0
     zustand: 3.5.14
   languageName: unknown
   linkType: soft

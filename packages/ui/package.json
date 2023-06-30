@@ -16,7 +16,7 @@
   "module": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "rollup -c rollup.config.js",
+    "build": "yarn g:rollup",
     "build-storybook": "export NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
     "cleanup": "shx rm -rf node_modules",
     "format": "yarn prettier --write '**/*.tsx'",
