@@ -105,7 +105,7 @@ export const NftItem = ({ image, name, onClick, amount, selected, contextMenu }:
         {selected && SelectedIcon && <SelectedIcon className={styles.selectedIcon} />}
         <div data-testid="nft-item-img-container" className={styles.imageWrapper}>
           {selected && <div className={styles.overlay} />}
-          <NftImage image={image} />
+          <NftImage withBorder image={image} />
         </div>
         <p className={styles.name} data-testid="nft-item-name">
           {name}

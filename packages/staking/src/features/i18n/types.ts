@@ -11,6 +11,7 @@ export type ConstructTranslationKeyUnion<T extends RecursiveStructure, K extends
 type KeysStructure = {
   browsePools: {
     stakePoolTableBrowser: {
+      searchInputPlaceholder: '';
       tableHeader: {
         poolName: '';
         ros: '';
