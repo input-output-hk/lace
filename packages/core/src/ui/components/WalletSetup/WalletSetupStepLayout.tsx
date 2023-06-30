@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import styles from './WalletSetupStepLayout.module.scss';
 import cn from 'classnames';
 import { Button } from '@lace/common';
@@ -81,6 +81,7 @@ export const WalletSetupStepLayout = ({
   isHardwareWallet = false
 }: WalletSetupStepLayoutProps): React.ReactElement => {
   const { t } = useTranslate();
+  const nextButtonContainerRef = useRef(null);
 
   const defaultLabel = {
     next: t('package.core.walletSetupStep.next'),
@@ -135,8 +136,13 @@ export const WalletSetupStepLayout = ({
             </Button>
           )}
           {onNext && (
-            <Tooltip visible={!isNextEnabled && !!toolTipText} title={!isNextEnabled && toolTipText} placement="top">
-              <span>
+            <span ref={nextButtonContainerRef}>
+              <Tooltip
+                visible={!isNextEnabled && !!toolTipText}
+                title={!isNextEnabled && toolTipText}
+                getPopupContainer={() => nextButtonContainerRef.current}
+                autoAdjustOverflow={false}
+              >
                 <Button
                   disabled={!isNextEnabled}
                   onClick={onNext}
@@ -145,8 +151,8 @@ export const WalletSetupStepLayout = ({
                 >
                   {nextLabel || defaultLabel.next}
                 </Button>
-              </span>
-            </Tooltip>
+              </Tooltip>
+            </span>
           )}
         </div>
       </div>

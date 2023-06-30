@@ -3,7 +3,7 @@ import isUndefined from 'lodash/isUndefined';
 import { useWalletStore } from '../../../../../stores';
 import { CardanoTxOut, CurrencyInfo, TokensDetails } from '@src/types';
 import { Wallet } from '@lace/cardano';
-import { PriceResult, useFetchCoinPrice, useObservable } from '@hooks';
+import { PriceResult, useFetchCoinPrice } from '@hooks';
 import { walletBalanceTransformer } from '../../../../../api/transformers';
 import { OutputSummaryList, SentAssetsList, Costs, OutputSummaryProps } from '@lace/core';
 import { useBuiltTxState, useMetadata } from '../store';
@@ -19,6 +19,7 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
+import { useObservable } from '@lace/common';
 
 const { Text } = Typography;
 

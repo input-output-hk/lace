@@ -7,19 +7,19 @@ import { Button } from '@lace/common';
 import { StateStatus } from '@src/stores';
 import { Skeleton, Typography } from 'antd';
 import classnames from 'classnames';
-import ExpandIcon from '../../../../../assets/icons/expand-gradient.component.svg';
+import ExpandIcon from '../../../../../../assets/icons/expand-gradient.component.svg';
 
 const { Text } = Typography;
 
 export interface AssetDetailsProps {
   balance: string;
   balanceInFiat: string;
-  code: string;
+  assetSymbol: string;
+  fiatCode: string;
   fiatPrice: string;
   fiatPriceVariation: string;
-  fiatCode: string;
-  list: AssetActivityItemProps[];
-  txListStatus?: StateStatus;
+  activityList: AssetActivityItemProps[];
+  activityListStatus?: StateStatus;
   onViewAllClick?: () => void;
   popupView?: boolean;
   isDrawerView?: boolean;
@@ -27,19 +27,19 @@ export interface AssetDetailsProps {
 
 export const AssetDetails = ({
   balance,
-  code,
+  assetSymbol,
   fiatPrice,
   fiatCode,
   fiatPriceVariation,
   balanceInFiat,
-  list,
-  txListStatus,
+  activityList,
+  activityListStatus,
   onViewAllClick,
   popupView = false,
   isDrawerView = false
 }: AssetDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const isTxListLoading = txListStatus === StateStatus.IDLE || txListStatus === StateStatus.LOADING;
+  const isTxListLoading = activityListStatus === StateStatus.IDLE || activityListStatus === StateStatus.LOADING;
 
   const activityListTitle = popupView
     ? { title: t('browserView.assetDetails.recentTransactions') }
@@ -66,7 +66,7 @@ export const AssetDetails = ({
       <div data-testid="token-balance">
         <PortfolioBalance
           balance={balance}
-          currencyCode={code}
+          currencyCode={assetSymbol}
           variationPercentage={balanceInFiat}
           label={t('browserView.assetDetails.assetBalance')}
           size="medium"
@@ -93,7 +93,7 @@ export const AssetDetails = ({
               </Button>
             )}
           </div>
-          <AssetActivityList items={list} isDrawerView={isDrawerView} />
+          <AssetActivityList items={activityList} isDrawerView={isDrawerView} />
         </div>
       </Skeleton>
       {popupView && (

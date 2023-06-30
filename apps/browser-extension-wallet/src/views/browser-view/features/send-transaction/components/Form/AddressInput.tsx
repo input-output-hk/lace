@@ -18,7 +18,7 @@ import { sectionsConfig } from '../../constants';
 import styles from './AddressInput.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
-import { Banner } from '@components/Banner';
+import { Banner } from '@lace/common';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';

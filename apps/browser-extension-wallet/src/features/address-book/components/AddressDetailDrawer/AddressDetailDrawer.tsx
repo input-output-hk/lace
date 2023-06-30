@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { Button, toast, Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
+import { Button, toast, Drawer, DrawerHeader, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import { EditAddressForm, EditAddressFormFooter, valuesPropType } from '@lace/core';
 import { validateWalletName, validateWalletAddress, validateWalletHandle } from '@src/utils/validators/address-book';
 import { AddressDetailsSteps, AddressDetailsConfig, AddressDetailsSectionConfig } from './types';
@@ -18,7 +18,6 @@ import {
   AnalyticsEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { useKeyboardShortcut } from '@hooks';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import { Form } from 'antd';
 

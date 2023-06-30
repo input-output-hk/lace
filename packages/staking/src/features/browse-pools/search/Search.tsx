@@ -6,7 +6,7 @@ export const Search = () => (
     className={styles.search}
     withSearchIcon
     inputPlaceholder={'Search by type, token name or ID'}
-    onChange={() => console.log('on change')}
+    onChange={() => console.info('on change')}
     data-testid="search-input"
     loading={false}
   />

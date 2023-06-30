@@ -12,7 +12,7 @@ import { SendTransactionLayout } from './SendTransactionLayout';
 
 import { TransactionForm } from './Form';
 import { AssetPicker } from './AssetPicker';
-import { useKeyboardShortcut } from '@hooks';
+import { useKeyboardShortcut } from '@lace/common';
 import { useDrawer } from '@views/browser/stores';
 import { sectionsWithArrowIcon } from './SendTransactionDrawer';
 

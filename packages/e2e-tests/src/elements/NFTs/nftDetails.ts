@@ -1,46 +1,68 @@
-/* eslint-disable no-undef */
-import { WebElement, WebElementFactory as Factory } from '../webElement';
-import { DrawerCommonExtended } from '../drawerCommonExtended';
-import { InfoList } from '../infoList';
-import { ChainablePromiseElement } from 'webdriverio';
+import CommonDrawerElements from '../CommonDrawerElements';
 
-export class NftDetails extends WebElement {
-  protected CONTAINER;
-  private IMG_SELECTOR = '//img[@data-testid="nft-image"]';
-  private INFO_SECTION_SELECTOR = '//div[@data-testid="nft-info"]';
-  private ATTRIBUTES_SECTION_SELECTOR = '//div[@data-testid="nft-attributes"]';
+class NftDetails extends CommonDrawerElements {
+  private IMAGE = '[data-testid="nft-image"]';
+  private TOKEN_INFO_SECTION = '[data-testid="nft-info"]';
+  private TOKEN_INFORMATION_LABEL = '[data-testid="nft-info-label"]';
+  private ATTRIBUTES_SECTION = '[data-testid="nft-attributes"]';
+  private ATTRIBUTES_LABEL = '[data-testid="nft-attributes-label"]';
+  private INFO_LIST_ITEM = '[data-testid="info-list-item"]';
+  private INFO_LIST_ITEM_KEY = '[data-testid="info-list-item-key"]';
+  private INFO_LIST_ITEM_VALUE = '[data-testid="info-list-item-key"]';
   private SEND_NFT_BUTTON = '#send-nft-btn';
+  private NFT_TITLE_ON_POPUP = '[data-testid="drawer-content"] h2';
 
-  constructor() {
-    super();
-    this.CONTAINER = new DrawerCommonExtended().container().toJSLocator();
+  get nftTitleOnPopup() {
+    return $(this.NFT_TITLE_ON_POPUP);
   }
 
-  imageOfSpecificNft(nftName: string): WebElement {
-    return Factory.fromSelector(`//*[contains(text(),'${nftName}')]/../div/img`, 'xpath');
+  get image() {
+    return this.drawerBody.$(this.IMAGE);
   }
 
-  imageElement(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.IMG_SELECTOR}`, 'xpath');
+  get tokenInfoSection() {
+    return $(this.TOKEN_INFO_SECTION);
   }
 
-  infoSectionTitle(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.INFO_SECTION_SELECTOR}/h4`, 'xpath');
+  get tokenInfoSectionTitle() {
+    return this.drawerBody.$(this.TOKEN_INFORMATION_LABEL);
   }
 
-  infoSectionList(): InfoList {
-    return new InfoList(this.INFO_SECTION_SELECTOR);
+  get policyIdLabel() {
+    return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[0].$(this.INFO_LIST_ITEM_KEY);
   }
 
-  attributesSectionTitle(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.ATTRIBUTES_SECTION_SELECTOR}/h4`, 'xpath');
+  get policyIdValue() {
+    return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[0].$(this.INFO_LIST_ITEM_VALUE);
   }
 
-  attributesSectionList(): InfoList {
-    return new InfoList(this.ATTRIBUTES_SECTION_SELECTOR);
+  get assetIdLabel() {
+    return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[1].$(this.INFO_LIST_ITEM_KEY);
   }
 
-  get sendNFTButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get assetIdValue() {
+    return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[1].$(this.INFO_LIST_ITEM_VALUE);
+  }
+
+  get mediaUrlLabel() {
+    return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[2].$(this.INFO_LIST_ITEM_KEY);
+  }
+
+  get mediaUrlValue() {
+    return this.tokenInfoSection.$$(this.INFO_LIST_ITEM)[2].$(this.INFO_LIST_ITEM_VALUE);
+  }
+
+  get attributesSectionTitle() {
+    return this.drawerBody.$(this.ATTRIBUTES_LABEL);
+  }
+
+  get attributesSection() {
+    return $(this.ATTRIBUTES_SECTION);
+  }
+
+  get sendNFTButton() {
     return $(this.SEND_NFT_BUTTON);
   }
 }
+
+export default new NftDetails();

@@ -3,9 +3,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import flatten from 'lodash/flatten';
 import { useTranslation } from 'react-i18next';
-import { Button, Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
+import { Button, Drawer, DrawerHeader, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import { NftFolderItemProps } from '@lace/core';
-import { useKeyboardShortcut } from '@hooks';
 import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext } from '@src/features/nfts/context';
 import { NFT } from '@src/utils/get-token-list';
 import FolderIcon from '@assets/icons/new-folder-plain-icon.component.svg';

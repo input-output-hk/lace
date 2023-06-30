@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react';
-import { KeyCode } from '@types';
+
+export type KeyCode = 'Escape' | 'Enter' | 'Space' | 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight' | 'Tab';
 
 export const useKeyboardShortcut = (keyCodes: KeyCode[], callback: () => void, active = true): void => {
   const handler = useCallback(
