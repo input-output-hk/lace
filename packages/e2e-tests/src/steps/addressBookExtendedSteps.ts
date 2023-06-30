@@ -12,10 +12,6 @@ import testContext from '../utils/testContext';
 import { getAddressByName, shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
 
-Then(/I see information about empty address book/, async () => {
-  await addressBookExtendedAssert.assertSeeInformationAboutEmptyBook();
-});
-
 Then(/address list is displayed and each row consists of:/, async (rows) => {
   const addresses = ['Byron', 'Icarus', 'Shelley'];
   for (const addr of addresses) {
@@ -107,10 +103,6 @@ Then(
     if (addressError !== 'empty') await webTester.waitUntilSeeElementContainingText(addressError);
   }
 );
-
-When(/^I see address count: ([\d+])$/, async (expectedNumber: number) => {
-  await addressBookExtendedAssert.assertSeeAddressCount(expectedNumber);
-});
 
 Then(
   /^address input contains address "([^"]*)" and name "([^"]*)"$/,
