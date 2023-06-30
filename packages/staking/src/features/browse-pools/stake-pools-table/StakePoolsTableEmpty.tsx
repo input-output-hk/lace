@@ -12,7 +12,7 @@ export const StakePoolsTableEmpty = ({ title }: StakePoolsTableEmptyProps): Reac
 
   return (
     <div data-testid="stake-pool-table-empty" className={styles.container}>
-      <Empty data-testid="stake-pool-table-empty-image" />
+      <Empty data-testid="stake-pool-table-empty-image" className={styles.icon} />
       <div data-testid="stake-pool-table-empty-message" className={styles.text}>
         {title || translate('browsePools.stakePoolTableBrowser.emptyMessage')}
       </div>
