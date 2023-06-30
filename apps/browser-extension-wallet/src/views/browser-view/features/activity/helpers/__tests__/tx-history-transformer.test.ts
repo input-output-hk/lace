@@ -170,7 +170,10 @@ describe('Testing txHistoryTransformer function', () => {
     expect(getTxDirectionSpy).toBeCalledWith({
       type: 'self-rewards'
     });
-    expect(getRewardsAmountSpy).toBeCalledWith(props.tx?.body?.withdrawals, props.walletAddresses[0].rewardAccount);
+    expect(getRewardsAmountSpy).toBeCalledWith(
+      props.tx?.body?.withdrawals,
+      props.walletAddresses.map((addr) => addr.rewardAccount)
+    );
     expect(txTransformerSpy).toBeCalledWith({
       tx: props.tx,
       walletAddresses: props.walletAddresses,

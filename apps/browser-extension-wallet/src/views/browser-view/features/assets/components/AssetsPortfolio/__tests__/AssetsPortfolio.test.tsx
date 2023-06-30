@@ -4,10 +4,12 @@ const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: '
 const mockUseRedirection = jest.fn().mockReturnValue([jest.fn]);
 const mockUseWalletStore = jest.fn().mockReturnValue({
   walletInfo: {
-    address: {
-      toString: () =>
-        'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
-    }
+    addresses: [
+      {
+        address:
+          'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
+      }
+    ]
   },
   walletUI: { canManageBalancesVisibility: jest.fn, areBalancesVisible: true, getHiddenBalancePlaceholder: jest.fn },
   setBalancesVisibility: jest
