@@ -99,7 +99,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           if (resolvedHandles.length === 0) {
             setHandleVerificationState(HandleVerificationState.INVALID);
           } else {
-            setAddressValue(row, resolvedHandles[0].resolvedAddresses.cardano.toString(), handleString);
+            setAddressValue(row, resolvedHandles[0].cardanoAddress.toString(), handleString);
             setHandleVerificationState(HandleVerificationState.VALID);
           }
         } catch (error) {
