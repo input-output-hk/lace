@@ -330,7 +330,7 @@ export const WalletSetupWizard = ({
               case 2:
                 sendAnalytics(
                   Events.MNEMONICS_INPUT_2_NEXT,
-                  postHogOnboardingActions[setupType].WRITE_PASSPHRASE_17_NEXT_CLICK
+                  postHogOnboardingActions[setupType].ENTER_PASSPHRASE_17_NEXT_CLICK
                 );
             }
           }}
@@ -473,6 +473,9 @@ export const WalletSetupWizard = ({
           onBack={moveBack}
           onNext={(result) => {
             setMnemonicLength(result.recoveryPhraseLength);
+            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK, {
+              view: ExtensionViews.Extended
+            });
             moveForward();
           }}
           translations={walletSetupRecoveryPhraseLengthStepTranslations}

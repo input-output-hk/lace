@@ -38,6 +38,16 @@ export enum PostHogAction {
   // Restore wallet
   OnboardingRestoreAnalyticsAgreeClick = 'onboarding | restore wallet | analytics | agree | click',
   OnboardingRestoreAnalyticsSkipClick = 'onboarding | restore wallet | analytics | skip | click',
+  OnboardingRestoreClick = 'onboarding | restore wallet | restore | click',
+  OnboardingRestoreWarningMultiAddressWalletOkClick = 'onboarding | restore wallet | warning multi-address wallet | ok | click',
+  OnboardingRestoreWarningMultiAddressWalletCancelClick = 'onboarding | restore wallet | warning multi-address wallet | cancel | click',
+  OnboardingRestoreLaceTermsOfUseNextClick = 'onboarding | restore wallet | lace terms of use | next | click',
+  OnboardingRestoreWalletNameNextClick = 'onboarding | restore wallet | wallet name | next | click',
+  OnboardingRestoreWalletPasswordNextClick = 'onboarding | restore wallet | wallet password | next | click',
+  OnboardingRestoreRecoveryPhraseLengthNextClick = 'onboarding | restore wallet | recovery phrase length | next | click',
+  OnboardingRestoreEnterPassphrase01NextClick = 'onboarding | restore wallet | enter passphrase #01 | next | click',
+  OnboardingRestoreEnterPassphrase09NextClick = 'onboarding | restore wallet | enter passphrase #09 | next | click',
+  OnboardingRestoreEnterPassphrase17NextClick = 'onboarding | restore wallet | enter passphrase #17 | next | click',
   // Create new wallet
   OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
   OnboardingCreateAnalyticsSkipClick = 'onboarding | new wallet | analytics | skip | click',
@@ -78,7 +88,10 @@ export type PostHogActionsKeys =
   | 'WRITE_PASSPHRASE_17_NEXT_CLICK'
   | 'ENTER_PASSPHRASE_01_NEXT_CLICK'
   | 'ENTER_PASSPHRASE_09_NEXT_CLICK'
-  | 'ENTER_PASSPHRASE_17_NEXT_CLICK';
+  | 'ENTER_PASSPHRASE_17_NEXT_CLICK'
+  | 'RESTORE_MULTI_ADDR_OK_CLICK'
+  | 'RESTORE_MULTI_ADDR_CANCEL_CLICK'
+  | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogMetadata = {
