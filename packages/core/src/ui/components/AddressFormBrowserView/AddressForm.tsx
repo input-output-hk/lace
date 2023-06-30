@@ -10,8 +10,6 @@ import styles from './AddressForm.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { AddressValidators, getValidator, getValidatorWithResolver, isHandle, valuesPropType } from '@src/ui/utils';
 
-export type ValidationOptionsProps<T extends string> = Record<T, (key: string) => string>;
-
 export type AddressFormPropsBrowserView = {
   initialValues: valuesPropType;
   onConfirmClick: (values: valuesPropType) => unknown;
