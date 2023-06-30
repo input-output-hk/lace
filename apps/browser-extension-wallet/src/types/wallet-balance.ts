@@ -1,6 +1,6 @@
 export type WalletBalance = {
   coinBalance: string;
-  fiatBalance: string;
+  fiatBalance: string | undefined;
 };
 
 export type WalletBalanceApi = {

@@ -41,7 +41,12 @@
 :global(#lace-app) {
   height: 100%;
   overflow: auto;
-  @include scroll-bar-style;
+  @include scroll-bar-style(
+    $width: 10px,
+    $height: 10px,
+    $track-color: var(--scroll-bar-track-root),
+    $thum-color: var(--scroll-bar-thum-root)
+  );
 }
 
 :root {
@@ -156,5 +161,4 @@ body {
 body {
   background-color: var(--bg-color-body, #ffffff) !important;
   color: var(--text-color-primary, #3d3b39);
-  min-width: $breakpoint-popup !important;
 }

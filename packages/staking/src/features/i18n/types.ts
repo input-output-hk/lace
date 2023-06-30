@@ -20,6 +20,38 @@ type KeysStructure = {
       emptyMessage: '';
     };
   };
+  drawer: {
+    title: '';
+    titleSecond: '';
+    details: {
+      metrics: {
+        activeStake: '';
+        apy: '';
+        delegators: '';
+        saturation: '';
+      };
+      status: {
+        delegating: '';
+        retired: '';
+        retiring: '';
+        saturated: '';
+      };
+      switchingPoolBanner: {
+        title: '';
+        description: {
+          step1: '';
+          step2: '';
+          step3: '';
+        };
+      };
+      stakeOnPoolButton: '';
+      statistics: '';
+      information: '';
+      social: '';
+      poolIds: '';
+      owners: '';
+    };
+  };
   overview: {
     delegationCard: {
       status: '';

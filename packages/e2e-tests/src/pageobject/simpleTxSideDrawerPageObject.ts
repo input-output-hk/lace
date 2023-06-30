@@ -11,14 +11,14 @@ class SimpleTxSideDrawerPageObject {
 
   clickCloseDrawerButton = async () => {
     const commonDrawerElements = new CommonDrawerElements();
-    await commonDrawerElements.closeButton.waitForClickable();
-    await commonDrawerElements.closeButton.click();
+    await commonDrawerElements.drawerHeaderCloseButton.waitForClickable();
+    await commonDrawerElements.drawerHeaderCloseButton.click();
   };
 
   clickBackDrawerButton = async () => {
     const commonDrawerElements = new CommonDrawerElements();
-    await commonDrawerElements.backButton.waitForClickable();
-    await commonDrawerElements.backButton.click();
+    await commonDrawerElements.drawerHeaderBackButton.waitForClickable();
+    await commonDrawerElements.drawerHeaderBackButton.click();
   };
 
   async fillPassword(password: string) {
