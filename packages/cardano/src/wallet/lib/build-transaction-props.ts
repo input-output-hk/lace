@@ -47,7 +47,7 @@ export const buildTransactionProps = (props: {
           coins: BigInt(output.value.coins),
           ...(output?.value?.assets && { assets: convertAssetsToBigInt(output.value.assets, props.assetsInfo) })
         },
-        handle: output.handle
+        handle: output.handle?.slice(1)
       });
     }
   }
