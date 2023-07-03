@@ -150,7 +150,7 @@ export const DelegationContainer = (): React.ReactElement => {
         hasNoFunds={hasNoFunds}
         isDelegating={isDelegating}
         canDelegate={canDelegate}
-        walletAddress={walletInfo?.address}
+        walletAddress={walletInfo?.addresses[0].address}
         fiat={priceResult?.cardano?.price}
         onStakePoolSelect={() => onStakePoolSelect(delegationDetails)}
         onStakePoolClick={(poolId: string) => {

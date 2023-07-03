@@ -224,7 +224,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                 <FundWalletBanner
                   title={t('browserView.nfts.fundWalletBanner.title')}
                   subtitle={t('browserView.nfts.fundWalletBanner.subtitle')}
-                  walletAddress={walletInfo.address.toString()}
+                  walletAddress={walletInfo.addresses[0].address.toString()}
                   prompt={t('browserView.nfts.fundWalletBanner.prompt')}
                   shouldHaveVerticalContent
                 />

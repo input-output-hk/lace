@@ -74,14 +74,16 @@ describe('Testing tx transformers utils', () => {
       const time = new Date();
       const result = pendingTxTransformer({
         tx: { ...pendingTx, cbor: TxCBOR.serialize(pendingTx) },
-        walletAddresses: {
-          address: Wallet.Cardano.PaymentAddress(
-            'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
-          ),
-          rewardAccount: Wallet.Cardano.RewardAccount(
-            'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
-          )
-        },
+        walletAddresses: [
+          {
+            address: Wallet.Cardano.PaymentAddress(
+              'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
+            ),
+            rewardAccount: Wallet.Cardano.RewardAccount(
+              'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
+            )
+          }
+        ] as Wallet.KeyManagement.GroupedAddress[],
         fiatCurrency: {
           code: 'USD',
           symbol: '$'
