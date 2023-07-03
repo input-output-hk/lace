@@ -108,7 +108,7 @@ export const CatalystRegistrationFlow = ({
           <CatalystConfirmationStep
             walletPreview={
               <WalletBasicInfo
-                walletAddress={walletInfo.address.toString()}
+                walletAddress={walletInfo.addresses[0].address.toString()}
                 walletName={walletInfo.name}
                 balance={`${Wallet.util.lovelacesToAdaString(totalBalance.coins.toString())} ₳`}
                 translations={walletBasicInfoTranslations}

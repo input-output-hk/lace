@@ -101,7 +101,7 @@ export const Activity = (): React.ReactElement => {
               title={t('browserView.assets.welcome')}
               subtitle={t('browserView.activity.fundWalletBanner.title')}
               prompt={t('browserView.fundWalletBanner.prompt')}
-              walletAddress={walletInfo.address.toString()}
+              walletAddress={walletInfo.addresses[0].address.toString()}
             />
           </div>
         )}

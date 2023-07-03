@@ -7,11 +7,10 @@ import { CardanoTxOut, TxDirection } from '@src/types';
 export const filterOutputsByTxDirection = (
   outputs: CardanoTxOut[],
   direction: TxDirection,
-  destinationAddress: Wallet.Cardano.PaymentAddress
+  destinationAddresses: Wallet.Cardano.PaymentAddress[]
 ): CardanoTxOut[] => {
-  const destinationAddresses = new Set([destinationAddress]);
   const isIncomingTx = direction === 'Incoming';
   return outputs.filter((output) =>
-    isIncomingTx ? destinationAddresses.has(output.address) : !destinationAddresses.has(output.address)
+    isIncomingTx ? destinationAddresses.includes(output.address) : !destinationAddresses.includes(output.address)
   );
 };

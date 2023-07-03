@@ -118,7 +118,7 @@ export const Staking = (): React.ReactElement => {
           title={t('browserView.assets.welcome')}
           subtitle={t('browserView.staking.fundWalletBanner.subtitle')}
           prompt={t('browserView.fundWalletBanner.prompt')}
-          walletAddress={walletInfo.address.toString()}
+          walletAddress={walletInfo.addresses[0].address.toString()}
         />
       )}
       {canDelegate && <StakeFundsBanner balance={coinBalance} />}
