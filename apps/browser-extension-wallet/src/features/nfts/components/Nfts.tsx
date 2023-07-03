@@ -163,7 +163,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
               <FundWalletBanner
                 title={t('browserView.nfts.fundWalletBanner.title')}
                 prompt={t('browserView.nfts.fundWalletBanner.prompt')}
-                walletAddress={walletInfo.address.toString()}
+                walletAddress={walletInfo.addresses[0].address.toString()}
               />
             )}
           </div>

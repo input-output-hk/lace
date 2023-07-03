@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../browse-pools';
 import { Overview } from '../overview';
 import { Navigation, Page } from './Navigation';
+import { PortfolioBar } from './PortfolioBar';
 
 export const StakingView = () => {
   const { t } = useTranslation();
@@ -20,6 +21,7 @@ export const StakingView = () => {
           </Box>
         )}
       </Navigation>
+      <PortfolioBar />
     </>
   );
 };
