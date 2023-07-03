@@ -1,21 +1,22 @@
 /* eslint-disable new-cap, no-magic-numbers */
 import { Percent } from '@cardano-sdk/util';
-import { Wallet } from '../../..';
+import { Cardano } from '@cardano-sdk/core';
+import { StakePoolSearchResults, CoinId } from '@src/wallet';
 import { stakePoolTransformer } from '../stake-pool-transformer';
 
-const cardanoCoin: Wallet.CoinId = {
+const cardanoCoin: CoinId = {
   id: '1',
   name: 'Cardano',
   decimals: 6,
   symbol: 'ADA'
 };
 
-const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
+const cardanoStakePoolMock: StakePoolSearchResults = {
   pageResults: [
     {
       cost: BigInt('6040000'),
-      hexId: Wallet.Cardano.PoolIdHex('a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab'),
-      id: Wallet.Cardano.PoolId('pool1syqhydhdzcuqhwtt6q4m63f9g8e7262wzsvk7e0r0njsyjyd0yn'),
+      hexId: Cardano.PoolIdHex('a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab'),
+      id: Cardano.PoolId('pool1syqhydhdzcuqhwtt6q4m63f9g8e7262wzsvk7e0r0njsyjyd0yn'),
       margin: {
         denominator: 50,
         numerator: 1
@@ -28,7 +29,7 @@ const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
         ext: {
           serial: 1,
           pool: {
-            id: Wallet.Cardano.PoolIdHex('a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab')
+            id: Cardano.PoolIdHex('a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab')
           }
         }
       },
@@ -42,12 +43,12 @@ const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
         apy: Percent(0.013)
       },
       owners: [
-        Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
-        Wallet.Cardano.RewardAccount('stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx')
+        Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
+        Cardano.RewardAccount('stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx')
       ],
       pledge: BigInt('2000000000'),
-      rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
-      status: Wallet.Cardano.StakePoolStatus.Active,
+      rewardAccount: Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
+      status: Cardano.StakePoolStatus.Active,
       vrf: undefined,
       relays: undefined
     }

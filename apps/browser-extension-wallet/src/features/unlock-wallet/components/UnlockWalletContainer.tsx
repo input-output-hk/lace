@@ -6,7 +6,7 @@ import { useWalletStore } from '@src/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { Wallet } from '@src/../../../packages/cardano/dist';
 import { saveValueInLocalStorage } from '@src/utils/local-storage';
-import { useKeyboardShortcut } from '@hooks';
+import { useKeyboardShortcut } from '@lace/common';
 import { BrowserViewSections } from '@lib/scripts/types';
 
 export interface UnlockWalletContainerProps {

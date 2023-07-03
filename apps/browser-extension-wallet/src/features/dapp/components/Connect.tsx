@@ -19,6 +19,7 @@ import ShieldExclamation from '@assets/icons/shield-exclamation.component.svg';
 import { Banner } from '@components/Banner';
 import { DappDataService } from '@lib/scripts/types';
 import { Wallet } from '@lace/cardano';
+
 import { Tooltip } from 'antd';
 import { useWalletStore } from '@src/stores';
 

@@ -8,9 +8,9 @@ import { Skeleton } from 'antd';
 import Icon from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
-import { Button, Ellipsis } from '@lace/common';
+import { Button, Ellipsis, Banner, useObservable } from '@lace/common';
 import { RowContainer, renderLabel, renderAmountInfo } from '@lace/core';
-import { useBalances, useBuildDelegation, useDelegationDetails, useFetchCoinPrice, useObservable } from '@src/hooks';
+import { useBalances, useBuildDelegation, useDelegationDetails, useFetchCoinPrice } from '@src/hooks';
 import { useWalletStore } from '@stores';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { sectionsConfig, useStakePoolDetails } from '../../store';
@@ -22,7 +22,6 @@ import { useDelegationTransaction } from '@views/browser/features/staking/hooks'
 import { BrowserViewSections } from '@lib/scripts/types';
 import { ContinueInBrowserDialog } from '@components/ContinueInBrowserDialog';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
-import { Banner } from '@components/Banner';
 import ExclamationMarkIcon from '@src/assets/icons/exclamation-circle-small.svg';
 import {
   AnalyticsEventActions,
@@ -125,7 +124,7 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
               />
               <ItemStatRenderer
                 text={balance?.total?.coinBalance}
-                subText={`${balance?.total?.fiatBalance} ${fiatCurrency?.code}`}
+                subText={`${balance?.total?.fiatBalance ?? '-'} ${fiatCurrency?.code}`}
               />
             </div>
             <Icon

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { AssetSelectorOverlay, AssetSelectorOverlayProps } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
-import { useObservable, useFetchCoinPrice, PriceResult, useMaxAda } from '@hooks';
+import { useFetchCoinPrice, PriceResult, useMaxAda } from '@hooks';
 import { EnvironmentTypes, useWalletStore } from '@src/stores';
 import {
   useCoinStateSelector,
@@ -27,6 +27,7 @@ import { walletBalanceTransformer } from '@src/api/transformers';
 import styles from './AssetPicker.module.scss';
 import { useCurrencyStore } from '@providers';
 import { isNFT } from '@src/utils/is-nft';
+import { useObservable } from '@lace/common';
 
 const formatAssetPickerLists = (
   assetsInfo: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo> = new Map(),

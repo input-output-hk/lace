@@ -18,7 +18,7 @@ import { sectionsConfig } from '../../constants';
 import styles from './AddressInput.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
-import { Banner } from '@components/Banner';
+import { Banner } from '@lace/common';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
@@ -99,7 +99,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           if (resolvedHandles.length === 0) {
             setHandleVerificationState(HandleVerificationState.INVALID);
           } else {
-            setAddressValue(row, resolvedHandles[0].resolvedAddresses.cardano.toString(), handleString);
+            setAddressValue(row, resolvedHandles[0].cardanoAddress.toString(), handleString);
             setHandleVerificationState(HandleVerificationState.VALID);
           }
         } catch (error) {

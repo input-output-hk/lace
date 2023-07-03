@@ -17,5 +17,5 @@ export interface WalletUI {
   networkConnection: NetworkConnectionStates;
   areBalancesVisible: boolean;
   canManageBalancesVisibility: boolean;
-  hiddenBalancesPlaceholder?: string;
+  getHiddenBalancePlaceholder: (placeholderLength?: number, placeholderChar?: string) => string;
 }
