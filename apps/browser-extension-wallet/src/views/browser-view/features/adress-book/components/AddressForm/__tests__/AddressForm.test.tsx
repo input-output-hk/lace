@@ -14,7 +14,7 @@ jest.mock('react-router', () => ({
   useLocation: jest.fn().mockReturnValue({ pathname: '/crypto/address-book' })
 }));
 
-xdescribe('Testing AddressForm component', () => {
+describe('Testing AddressForm component', () => {
   const props: AddressFormProps = {
     initialValues: {
       name: 'name',

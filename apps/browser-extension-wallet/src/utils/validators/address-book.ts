@@ -11,7 +11,6 @@ import { HandleProvider, HandleResolution } from '@cardano-sdk/core';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
 
-// prettier-ignore
 const hasWhiteSpace = (s: string) => s.trim() !== s;
 
 export const verifyHandle = async (
@@ -19,8 +18,7 @@ export const verifyHandle = async (
   handleResolver: HandleProvider
 ): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
   try {
-    const handleString = value.toString();
-    const resolvedHandles = await handleResolver.resolveHandles({ handles: [handleString.slice(1)] });
+    const resolvedHandles = await handleResolver.resolveHandles({ handles: [value.slice(1)] });
 
     if (resolvedHandles.length === 0) {
       return { valid: false };
