@@ -1,17 +1,16 @@
 import { Draft, produce } from 'immer';
-import create from 'zustand';
+import create, { StateSelector } from 'zustand';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
   delegationPortfolioPools: [],
 };
 
-export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set, get) => ({
+export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set) => ({
   ...defaultState,
   addPoolToPortfolio: (pool) =>
     set(({ delegationPortfolioPools }) => ({ delegationPortfolioPools: [...delegationPortfolioPools, pool] })),
   clearDelegationPortfolio: () => set(defaultState),
-  poolsCount: () => get().delegationPortfolioPools.length,
   removePoolFromPortfolio: ({ poolId }) =>
     set(({ delegationPortfolioPools }) => ({
       delegationPortfolioPools: delegationPortfolioPools.filter((pool) => pool.id !== poolId),
@@ -25,3 +24,6 @@ export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set
       })
     ),
 }));
+
+export const selectPoolsCount: StateSelector<DelegationPortfolioState, number> = (store) =>
+  store.delegationPortfolioPools.length;

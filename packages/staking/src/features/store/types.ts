@@ -60,7 +60,6 @@ export type DelegationPortfolioState = Immutable<{
 }>;
 
 type DelegationPortfolioMutations = {
-  poolsCount: () => number;
   addPoolToPortfolio: (pool: Cip17Pool) => void;
   removePoolFromPortfolio: ({ poolId }: { poolId: PoolIdHex }) => void;
   updatePoolWeight: ({ poolId, weight }: { poolId: PoolIdHex; weight: number }) => void;
