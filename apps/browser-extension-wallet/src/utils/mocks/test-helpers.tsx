@@ -23,7 +23,7 @@ export const mockWalletInfoTestnet: WalletInfo = {
       ),
       rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj')
     }
-  ] as Partial<Wallet.KeyManagement.GroupedAddress[]>
+  ] as Wallet.KeyManagement.GroupedAddress[]
 };
 
 export const mockKeyAgentDataTestnet: Wallet.KeyManagement.SerializableKeyAgentData = {

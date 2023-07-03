@@ -83,7 +83,7 @@ describe('Testing tx transformers utils', () => {
               'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
             )
           }
-        ] as Partial<Wallet.KeyManagement.GroupedAddress[]>,
+        ] as Wallet.KeyManagement.GroupedAddress[],
         fiatCurrency: {
           code: 'USD',
           symbol: '$'

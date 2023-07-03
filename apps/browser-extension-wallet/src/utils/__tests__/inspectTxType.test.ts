@@ -60,9 +60,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: incomingTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('incoming');
@@ -90,9 +90,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: outgoingX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('outgoing');
@@ -111,9 +111,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: delegationTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('delegation');
@@ -126,9 +126,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: delegationTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).not.toBe('delegation');
@@ -141,9 +141,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: delegationTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).not.toBe('delegation');
@@ -161,9 +161,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: stakeKeyRegistrationTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('delegationRegistration');
@@ -181,9 +181,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: stakeKeyDeregistrationTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('delegationDeregistration');
@@ -201,9 +201,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('rewards');
@@ -221,9 +221,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [{ address: ADDRESS_2, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_2, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('rewards');
@@ -253,9 +253,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('self-rewards');
@@ -279,9 +279,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [{ address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('self');
@@ -299,9 +299,9 @@ describe('testing tx-inspection utils', () => {
 
       const result = inspectTxType({
         tx: withdrawalTX,
-        walletAddresses: [{ address: ADDRESS_2, rewardAccount: REWARD_ACCOUNT }] as Partial<
-          Wallet.KeyManagement.GroupedAddress[]
-        >
+        walletAddresses: [
+          { address: ADDRESS_2, rewardAccount: REWARD_ACCOUNT }
+        ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
       expect(result).toBe('incoming');
