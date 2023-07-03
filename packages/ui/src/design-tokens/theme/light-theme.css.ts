@@ -3,6 +3,7 @@ import { rgba } from 'polished';
 
 import { borders } from '../borders.data';
 import {
+  colorTransparent,
   darkColorScheme,
   laceGradient,
   lightColorScheme,
@@ -196,6 +197,15 @@ const colors: Colors = {
     lightColorScheme.$primary_dark_grey,
   $search_box_clear_button_label_color_pressed:
     lightColorScheme.$primary_dark_grey,
+
+  $icon_button_label_color: lightColorScheme.$primary_dark_grey,
+  $icon_button_label_color_pressed: lightColorScheme.$primary_black,
+  $icon_button_container_bgColor: colorTransparent,
+  $icon_button_container_bgColor_hover: lightColorScheme.$primary_light_grey,
+  $icon_button_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $icon_button_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
 };
 
 export const elevation: Elevation = {

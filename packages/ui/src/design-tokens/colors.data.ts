@@ -120,6 +120,13 @@ export const colors = {
   $search_box_clear_button_label_color: '',
   $search_box_clear_button_label_color_hover: '',
   $search_box_clear_button_label_color_pressed: '',
+
+  $icon_button_container_bgColor: '',
+  $icon_button_container_bgColor_hover: '',
+  $icon_button_container_bgColor_pressed: '',
+  $icon_button_container_outlineColor: '',
+  $icon_button_label_color: '',
+  $icon_button_label_color_pressed: '',
 };
 
 export type Colors = typeof colors;

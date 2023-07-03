@@ -182,6 +182,14 @@ const colors: Colors = {
   $search_box_clear_button_label_color_hover: darkColorScheme.$primary_white,
   $search_box_clear_button_label_color_pressed:
     darkColorScheme.$primary_light_grey,
+
+  $icon_button_label_color: darkColorScheme.$primary_light_grey,
+  $icon_button_label_color_pressed: darkColorScheme.$primary_white,
+  $icon_button_container_bgColor: colorTransparent,
+  $icon_button_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $icon_button_container_bgColor_pressed: darkColorScheme.$primary_dark_grey,
+  $icon_button_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
 };
 
 const elevation: Elevation = {
