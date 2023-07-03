@@ -49,7 +49,7 @@ export const EditAddressFormFooter = ({
         {() => {
           const hasErrors = form.getFieldsError(keys).some(({ errors }) => errors?.length);
           const isValidating = form.isFieldsValidating(keys);
-          const isTouched = form.isFieldsTouched(keys, false);
+          const isTouched = form.isFieldsTouched(keys, isNewAddress);
           const isFormValid = !hasErrors && !isValidating && isTouched;
 
           return (

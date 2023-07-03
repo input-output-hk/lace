@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo } from 'react';
+import React, { ReactElement, useLayoutEffect, useMemo } from 'react';
 import cn from 'classnames';
 import { Form, FormInstance } from 'antd';
 import { Input, Search } from '@lace/common';
@@ -39,6 +39,10 @@ export const EditAddressForm = ({
 
   const isAddressHandle = isHandle(addressValue);
 
+  useLayoutEffect(() => {
+    form.resetFields();
+  }, [form]);
+
   return (
     <Form
       form={form}
@@ -51,7 +55,6 @@ export const EditAddressForm = ({
       {() => {
         const isAddressFieldValid = form.getFieldError(addressKey).length === 0;
         const isAddressFieldValidating = form.isFieldValidating(addressKey);
-
         const renderSuffix = () =>
           isAddressFieldValid ? (
             <CheckCircleOutlined className={styles.valid} />
