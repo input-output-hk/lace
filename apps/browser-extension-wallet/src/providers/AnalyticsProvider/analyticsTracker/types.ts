@@ -39,3 +39,9 @@ export type Metadata = {
   cookie?: number;
   url: string;
 };
+
+export type PostHogMetadata = {
+  // eslint-disable-next-line camelcase
+  distinct_id?: string;
+  url: string;
+};
