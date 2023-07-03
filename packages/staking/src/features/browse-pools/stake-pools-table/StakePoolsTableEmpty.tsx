@@ -1,4 +1,3 @@
-import { Image } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import Empty from './empty.svg';
@@ -13,8 +12,7 @@ export const StakePoolsTableEmpty = ({ title }: StakePoolsTableEmptyProps): Reac
 
   return (
     <div data-testid="stake-pool-table-empty" className={styles.container}>
-      {/* @ts-ignore */}
-      <Image data-testid="stake-pool-table-empty-image" preview={false} src={Empty} />
+      <Empty data-testid="stake-pool-table-empty-image" className={styles.icon} />
       <div data-testid="stake-pool-table-empty-message" className={styles.text}>
         {title || translate('browsePools.stakePoolTableBrowser.emptyMessage')}
       </div>

@@ -1,14 +1,14 @@
 import Icon from '@ant-design/icons';
 import React from 'react';
-import { ReactComponent as Facebook } from './facebook-icon.component.svg';
-import { ReactComponent as Feed } from './feed-icon.component.svg';
-import { ReactComponent as GitHub } from './github-icon.component.svg';
-import { ReactComponent as Medium } from './medium-icon.component.svg';
-import { ReactComponent as Site } from './site-icon.component.svg';
+import Facebook from './facebook.svg';
+import Feed from './feed.svg';
+import GitHub from './github.svg';
+import Medium from './medium.svg';
+import Site from './site.svg';
 import styles from './SocialNetworkIcon.module.scss';
-import { ReactComponent as Telegram } from './telegram-icon.component.svg';
-import { ReactComponent as Twitter } from './twitter-icon.component.svg';
-import { ReactComponent as Youtube } from './youtube-icon.component.svg';
+import Telegram from './telegram.svg';
+import Twitter from './twitter.svg';
+import Youtube from './youtube.svg';
 
 const normalizeHref = (href: string) =>
   href && !href.startsWith('https://') ? `https://${href.replace(/^\/+/, '')}` : href;
