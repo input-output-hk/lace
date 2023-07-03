@@ -37,8 +37,7 @@ const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const ConfirmTransaction = withAddressBookContext((): React.ReactElement => {
   const {
-    utils: { setNextView },
-    dappInfo
+    utils: { setNextView }
   } = useViewsFlowContext();
   const { t } = useTranslation();
   const {
@@ -62,6 +61,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     [keyAgentType]
   );
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
+  const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
   const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
     const assetIds: Wallet.Cardano.AssetId[] = [];
@@ -80,14 +80,14 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
 
   useEffect(() => {
     if (assetIds?.length > 0) {
-      const fetchAssetsInfo = async () => {
-        const result = await getAssetsInformation(assetIds, assets, {
-          assetProvider,
-          extraData: { nftMetadata: true, tokenMetadata: true }
+      getAssetsInformation(assetIds, assets, {
+        assetProvider,
+        extraData: { nftMetadata: true, tokenMetadata: true }
+      })
+        .then((result) => setAssetsInfo(result))
+        .catch((error) => {
+          console.log(error);
         });
-        setAssetsInfo(result);
-      };
-      fetchAssetsInfo();
     }
   }, [assetIds, assetProvider, assets]);
 
@@ -122,7 +122,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         },
         { logger: console, runtime }
       );
-    } catch {
+    } catch (error) {
+      console.log('error', error);
       redirectToSignFailure();
     }
   }, [setIsConfirmingTx, redirectToSignFailure]);
@@ -130,8 +131,9 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   useEffect(() => {
     dappDataApi
       .getSignTxData()
-      .then(async (txData) => {
-        setTx(txData);
+      .then(({ dappInfo: backgroundDappInfo, tx: backgroundTx }) => {
+        setDappInfo(backgroundDappInfo);
+        setTx(backgroundTx);
       })
       .catch((error) => setErrorMessage(error));
   }, []);
@@ -170,8 +172,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     const isMintTransaction = minted.length > 0;
     const isBurnTransaction = burned.length > 0;
 
-    // eslint-disable-next-line unicorn/no-nested-ternary
-    // TODO: improve
     let txType: 'Send' | 'Mint' | 'Burn';
     if (isMintTransaction) {
       txType = 'Mint';

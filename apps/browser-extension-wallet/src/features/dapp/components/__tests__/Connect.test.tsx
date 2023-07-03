@@ -21,6 +21,18 @@ jest.mock('@src/stores', () => ({
   useWalletStore: mockUseWalletStore
 }));
 
+jest.mock('@cardano-sdk/web-extension', () => ({
+  ...jest.requireActual<any>('@cardano-sdk/web-extension'),
+  consumeRemoteApi: () => ({
+    getDappInfo: jest
+      .fn()
+      .mockResolvedValueOnce({ logo: 'image', url: 'http://example.com', name: 'test dapp' })
+      .mockResolvedValueOnce({ logo: 'image', url: 'https://example.com', name: 'test dapp' })
+      .mockResolvedValueOnce({ logo: 'image', url: 'http://example.com', name: 'test dapp' })
+      .mockResolvedValueOnce({ logo: 'image', url: 'https://example.com', name: 'test dapp' })
+  })
+}));
+
 const WrappedConnectComponent = () => (
   <I18nextProvider i18n={i18n}>
     <Connect />
@@ -36,12 +48,8 @@ describe('Connect Component: ', () => {
   });
   describe('Testing warning modals', () => {
     test('should render non ssl warning modal', async () => {
-      const protocol = 'http';
       mockUseWalletStore.mockReturnValue({
         environmentName: 'Mainnet'
-      });
-      mockUseLocation.mockReturnValue({
-        search: `?url=${protocol}://www.bbc.com`
       });
 
       render(<WrappedConnectComponent />);
@@ -54,12 +62,8 @@ describe('Connect Component: ', () => {
     });
 
     test('should render default warning modal for Mainnet env and https protocol', async () => {
-      const protocol = 'https';
       mockUseWalletStore.mockReturnValue({
         environmentName: 'Mainnet'
-      });
-      mockUseLocation.mockReturnValue({
-        search: `?url=${protocol}://www.bbc.com`
       });
 
       render(<WrappedConnectComponent />);
@@ -72,7 +76,6 @@ describe('Connect Component: ', () => {
     });
 
     test('should render default warning modal for any other than Mainnet env and http protocol', async () => {
-      const protocol = 'http';
       const assert = () => {
         const { getByText } = within(screen.getByTestId('banner-description'));
         expect(getByText('Only connect to trusted DApps')).toBeInTheDocument();
@@ -81,9 +84,6 @@ describe('Connect Component: ', () => {
 
       mockUseWalletStore.mockReturnValueOnce({
         environmentName: 'Preprod'
-      });
-      mockUseLocation.mockReturnValue({
-        search: `?url=${protocol}://www.bbc.com`
       });
 
       const { rerender } = render(<WrappedConnectComponent />);
@@ -103,7 +103,6 @@ describe('Connect Component: ', () => {
     });
 
     test('should render default warning modal for any other than Mainnet env and https protocol', async () => {
-      const protocol = 'https';
       const assert = () => {
         const { getByText } = within(screen.getByTestId('banner-description'));
         expect(getByText('Only connect to trusted DApps')).toBeInTheDocument();
@@ -113,10 +112,6 @@ describe('Connect Component: ', () => {
       mockUseWalletStore.mockReturnValueOnce({
         environmentName: 'Preprod'
       });
-      mockUseLocation.mockReturnValue({
-        search: `?url=${protocol}://www.bbc.com`
-      });
-
       const { rerender } = render(<WrappedConnectComponent />);
       await waitFor(assert);
 
