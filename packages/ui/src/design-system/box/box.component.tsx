@@ -1,5 +1,5 @@
 import React from 'react';
-import type { PropsWithChildren } from 'react';
+import type { CSSProperties, PropsWithChildren } from 'react';
 
 import classNames from 'classnames';
 
@@ -25,7 +25,7 @@ export type BoxProps = Pick<
   | 'px'
   | 'py'
   | 'w'
-> & { className?: string };
+> & { className?: string; style?: CSSProperties };
 
 export type Props = PropsWithChildren<BoxProps>;
 

@@ -196,6 +196,10 @@ const colors: Colors = {
     lightColorScheme.$primary_dark_grey,
   $search_box_clear_button_label_color_pressed:
     lightColorScheme.$primary_dark_grey,
+
+  $transaction_summary_label_color: lightColorScheme.$primary_black,
+  $transaction_summary_secondary_label_color:
+    lightColorScheme.$primary_dark_grey,
 };
 
 export const elevation: Elevation = {
