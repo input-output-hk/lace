@@ -14,7 +14,7 @@ jest.mock('react-router', () => ({
   useLocation: jest.fn().mockReturnValue({ pathname: '/crypto/address-book' })
 }));
 
-xdescribe('Testing AddressForm component', () => {
+describe('Testing AddressForm component', () => {
   const props: AddressFormProps = {
     initialValues: {
       name: 'name',
@@ -40,7 +40,8 @@ xdescribe('Testing AddressForm component', () => {
 
     expect(form).toBeVisible();
     expect(submitBtn).not.toBeDisabled();
-    fireEvent.click(submitBtn);
+
+    fireEvent.submit(form);
 
     await waitFor(() => {
       expect(props.onConfirmClick).toHaveBeenCalledWith(props.initialValues);

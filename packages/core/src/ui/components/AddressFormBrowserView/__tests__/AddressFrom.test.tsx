@@ -5,7 +5,7 @@ import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import { AddressFormBrowserView, AddressFormPropsBrowserView } from '../AddressForm';
 import '@testing-library/jest-dom';
 
-xdescribe('Testing AddressForm component', () => {
+describe('Testing AddressForm component', () => {
   const initialValues = {
     name: 'Wallet name',
     address:
@@ -48,7 +48,6 @@ xdescribe('Testing AddressForm component', () => {
     const { findByTestId } = render(<AddressFormBrowserView {...props} initialValues={initialValues} />);
 
     const form = await findByTestId('address-form');
-    // const btnsContainer = await findByTestId('address-form-buttons');
     const nameInput = await within(form).findByDisplayValue(initialValues.name);
     const addressInput = await within(form).findByDisplayValue(initialValues.address);
 
@@ -59,11 +58,10 @@ xdescribe('Testing AddressForm component', () => {
   test('should disable confirm btn and show error messages when invalid and submitted', async () => {
     const { findByTestId, getByText } = render(<AddressFormBrowserView {...props} />);
 
-    const btnsContainer = await findByTestId('address-form-buttons');
-    const confirmBtn = await within(btnsContainer).findByText(/add address/i);
+    const form = await findByTestId('address-form');
 
     expect(getByText(/add address/i).closest('button')).toBeDisabled();
-    fireEvent.click(confirmBtn);
+    fireEvent.submit(form);
 
     await waitFor(async () => {
       expect(props.onConfirmClick).not.toHaveBeenCalled();
@@ -76,18 +74,15 @@ xdescribe('Testing AddressForm component', () => {
       address: jest.fn().mockReturnValue(undefined),
       handle: jest.fn().mockReturnValue(undefined)
     };
-    const { findByTestId, getByText, queryAllByText } = render(
+    const { findByTestId, queryAllByText } = render(
       <AddressFormBrowserView {...props} initialValues={initialValues} validations={validations} />
     );
 
-    const btnsContainer = await findByTestId('address-form-buttons');
-    const confirmBtn = await within(btnsContainer).findByText(/add address/i);
+    const form = await findByTestId('address-form');
 
-    fireEvent.click(confirmBtn);
+    fireEvent.submit(form);
 
     await waitFor(async () => {
-      expect(getByText(/add address/i).closest('button')).not.toBeDisabled();
-
       expect(queryAllByText(nameErrorText)).toHaveLength(0);
       expect(queryAllByText(addressErrorText)).toHaveLength(0);
       expect(validations.name).toHaveBeenCalledWith(initialValues.name);
