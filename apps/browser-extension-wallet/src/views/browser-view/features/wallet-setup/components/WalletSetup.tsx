@@ -12,6 +12,7 @@ import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
   AnalyticsEventNames,
+  ExtensionViews,
   PostHogAction,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -98,7 +99,12 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
 
   const cancelWalletFlow = () => history.push(walletRoutePaths.setup.home);
 
-  const handleStartHardwareOnboarding = () => setIsDappConnectorWarningOpen(true);
+  const handleStartHardwareOnboarding = () => {
+    setIsDappConnectorWarningOpen(true);
+    analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK, {
+      view: ExtensionViews.Extended
+    });
+  };
 
   const sendAnalytics = (
     category: SetupAnalyticsCategories,

@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
+  ExtensionViews,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
@@ -213,7 +214,11 @@ export const HardwareWalletFlow = ({
       <WalletSetupLegalStep
         onBack={() => onCancel()}
         onNext={() => {
-          sendAnalytics(Events.LEGAL_STUFF_NEXT, undefined, calculateTimeSpentOnPage());
+          sendAnalytics(
+            Events.LEGAL_STUFF_NEXT,
+            postHogOnboardingActions.hw?.LACE_TERMS_OF_USE_NEXT_CLICK,
+            calculateTimeSpentOnPage()
+          );
           navigateTo('analytics');
         }}
         translations={walletSetupLegalStepTranslations}
@@ -236,6 +241,9 @@ export const HardwareWalletFlow = ({
         onConnect={handleConnect}
         onNext={() => {
           sendAnalytics(Events.SELECT_MODEL_NEXT);
+          analytics.sendEventToPostHog(postHogOnboardingActions.hw?.CONNECT_HW_NEXT_CLICK, {
+            view: ExtensionViews.Extended
+          });
           navigateTo('accounts');
         }}
         isNextEnable={!!deviceConnection}
@@ -248,7 +256,7 @@ export const HardwareWalletFlow = ({
         accounts={TOTAL_ACCOUNTS}
         onBack={showStartOverDialog}
         onSubmit={(account: number) => {
-          sendAnalytics(Events.SELECT_ACCOUNT_NEXT);
+          sendAnalytics(Events.SELECT_ACCOUNT_NEXT, postHogOnboardingActions.hw?.SELECT_HW_ACCOUNT_NEXT_CLICK);
           setAccountIndex(account);
           navigateTo('register');
         }}
@@ -259,7 +267,7 @@ export const HardwareWalletFlow = ({
       <WalletSetupWalletNameStep
         onBack={showStartOverDialog}
         onNext={(name: string) => {
-          sendAnalytics(Events.WALLET_NAME_NEXT);
+          sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions.hw?.WALLET_NAME_NEXT_CLICK);
           handleCreateWallet(name);
           navigateTo('create');
         }}
