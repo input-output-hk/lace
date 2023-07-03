@@ -120,6 +120,9 @@ export const colors = {
   $search_box_clear_button_label_color: '',
   $search_box_clear_button_label_color_hover: '',
   $search_box_clear_button_label_color_pressed: '',
+
+  $transaction_summary_label_color: '',
+  $transaction_summary_secondary_label_color: '',
 };
 
 export type Colors = typeof colors;
