@@ -85,7 +85,8 @@ Feature: Address book - extended view
     When I click address on the list with name "Byron"
     And I see address detail page in extended mode
     And I click "Delete" button on address details page
-    And I click "browserView.addressBook.deleteModal.buttons.confirm" button in modal
+    Then I see delete address modal
+    When I click "Delete address" button on delete address modal
     Then I don't see address with name "Byron" and address "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" on the list
 
   @LW-4467
@@ -94,7 +95,7 @@ Feature: Address book - extended view
     When I click address on the list with name "Byron"
     And I see address detail page in extended mode
     And I click "Delete" button on address details page
-    And I click "browserView.addressBook.deleteModal.buttons.cancel" button
+    And I click "Cancel" button on delete address modal
     Then I see address detail page in extended mode
 
   @LW-4468 @Smoke
