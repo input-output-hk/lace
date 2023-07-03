@@ -1,9 +1,10 @@
 import React, { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@lace/common';
+import { Button, toast } from '@lace/common';
 import { Form, FormInstance } from 'antd';
 import styles from './EditAddressForm.module.scss';
 import { addressKey, keys, nameKey } from '@src/ui/utils';
+import { ReactComponent as ErrorIcon } from '../../assets/icons/address-error-icon.component.svg';
 
 type valuesPropType = {
   id?: number;
@@ -35,7 +36,8 @@ export const EditAddressFormFooter = ({
       await onConfirmClick({ name: nameValue, address: addressValue });
       if (onClose) onClose();
     } catch {
-      // TODO: add nicer way to handle errors, console messega removed by QA request
+      // TODO: add nicer way to handle errors - LW-7233
+      toast.notify({ text: t('core.editAddressForm.submissionError'), icon: ErrorIcon });
     } finally {
       form.resetFields();
     }
