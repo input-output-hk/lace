@@ -9,7 +9,6 @@ import {
   lightColorScheme,
 } from '../colors.data';
 import { opacities } from '../opacities.data';
-import { positions } from '../position.data';
 import { radius } from '../radius.data';
 import { spacing } from '../spacing.data';
 import {
@@ -204,7 +203,6 @@ export const theme = {
   radius,
   elevation,
   opacities,
-  positions,
 };
 
 createGlobalTheme('[data-theme="dark"]:root', vars, theme);
