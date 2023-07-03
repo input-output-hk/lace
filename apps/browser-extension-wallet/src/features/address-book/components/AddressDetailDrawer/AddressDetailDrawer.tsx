@@ -154,7 +154,7 @@ export const AddressDetailDrawer = ({
             {showForm && (
               <EditAddressFormFooter
                 form={form}
-                isNewAddress={popupView && !initialValues?.id}
+                isNewAddress={currentStepConfig.currentSection === AddressDetailsSteps.CREATE}
                 onConfirmClick={onConfirmClick}
                 onCancelClick={handleOnCancelClick}
                 onClose={onCancelClick}
