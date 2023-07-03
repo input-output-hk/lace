@@ -83,8 +83,8 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Remove address
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
-    And I see address detail page
-    And I click "browserView.addressBook.addressDetail.btn.delete" button
+    And I see address detail page in extended mode
+    And I click "Delete" button on address details page
     And I click "browserView.addressBook.deleteModal.buttons.confirm" button in modal
     Then I don't see address with name "Byron" and address "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" on the list
 
@@ -92,10 +92,10 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Remove address and cancel
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
-    And I see address detail page
-    And I click "browserView.addressBook.addressDetail.btn.delete" button
+    And I see address detail page in extended mode
+    And I click "Delete" button on address details page
     And I click "browserView.addressBook.deleteModal.buttons.cancel" button
-    Then I see address detail page
+    Then I see address detail page in extended mode
 
   @LW-4468 @Smoke
   Scenario Outline: Extended-view - Address Book - Uniqueness validation and toast display with text <toast_message>
@@ -121,7 +121,7 @@ Feature: Address book - extended view
   Scenario Outline: Extended-view - Address Book - Edit address: <edited_address>
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "<edited_address>"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     And I fill "<wallet_name>" and "<address>" address details in drawer
     And I click "core.editAddressForm.doneButton" button
     Then I see a toast with message: "browserView.addressBook.toast.editAddress"
@@ -135,15 +135,15 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Edit address and cancel
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     When I click "browserView.addressBook.deleteModal.buttons.cancel" button
-    Then I see address detail page
+    Then I see address detail page in extended mode
 
   @LW-4565
   Scenario Outline: Extended-view - Address Book - Edit wallet name/address and display error message - name error: <name_error>, address error: <address_error>
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     And I fill "<wallet_name>" and "<address>" address details in drawer
     Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
     And "core.editAddressForm.doneButton" button is disabled
@@ -163,7 +163,7 @@ Feature: Address book - extended view
   Scenario Outline: Extended-view - Address Book - Edit address book entry - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     And I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" in drawer
     And I click "core.editAddressForm.doneButton" button
     Then I see a toast with message: "<toast_message>"
@@ -176,7 +176,7 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Edit address and click exit button
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     When I close the drawer by clicking close button
     Then address list is displayed and each row consists of:
       | Avatar  |
@@ -187,9 +187,9 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Edit address and click back button
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     When I close the drawer by clicking back button
-    Then I see address detail page
+    Then I see address detail page in extended mode
 
   @LW-4484
   Scenario: Extended-view - Address Book - "About your wallet" widget
@@ -210,11 +210,11 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Enter and Escape buttons support when editing address
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
-    Then I see address detail page
+    Then I see address detail page in extended mode
     When I press keyboard Enter button
     Then An "browserView.addressBook.editAddress.title" text is displayed
     When I press keyboard Escape button
-    And I see address detail page
+    And I see address detail page in extended mode
     When I press keyboard Enter button
     And I fill "Byron_edited" and "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" address details in drawer
     When I press keyboard Enter button
@@ -224,10 +224,9 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Escape button support when closing drawer
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
-    Then I see "browserView.addressBook.addressDetail.btn.edit" button
-    Then I see address detail page
+    Then I see address detail page in extended mode
     When I press keyboard Escape button
-    Then I do not see "browserView.addressBook.addressDetail.btn.edit" button
+    Then I do not see address detail page in extended mode
 
   @LW-4779
   Scenario: Extended-view - Address Book - Display error message after filling name and clicking outside with empty address
