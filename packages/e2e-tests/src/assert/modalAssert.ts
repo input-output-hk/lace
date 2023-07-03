@@ -40,8 +40,9 @@ class ModalAssert {
     const description = await t('browserView.walletSetup.confirmRestoreModal.content');
     const cancelButtonLabel = await t('general.button.cancel');
     const confirmButtonLabel = await t('browserView.walletSetup.confirmRestoreModal.confirm');
+    const parsedDescription = description.replace('<b>', '').replace('</b>', '');
 
-    await this.assertSeeModal(title, description, cancelButtonLabel, confirmButtonLabel);
+    await this.assertSeeModal(title, parsedDescription, cancelButtonLabel, confirmButtonLabel);
   }
 
   async assertSeeRemoveWalletModal(shouldBeDisplayed: boolean) {

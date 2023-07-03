@@ -7,7 +7,7 @@ import isNumber from 'lodash/isNumber';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { StakePoolItemBrowser, StakePoolItemBrowserProps } from '../StakePoolItemBrowser';
-import { ReactComponent as Arrow } from './arrow.component.svg';
+import Arrow from './arrow.svg';
 import styles from './StakePoolTableBrowser.module.scss';
 
 type TranslationsFor<T extends string> = Record<T, string>;
