@@ -251,9 +251,8 @@ Feature: General Settings - Popup View
   @LW-3630 @Mainnet @Testnet
   Scenario: Popup View - Settings - FAQ opening in a new tab
     When I open settings from header menu
-    When I click on "FAQs" setting
-    Then New tab with url containing "www.lace.io/faq" is opened
-    And An "FAQ" text is displayed
+    And I click on "FAQs" setting
+    Then FAQ page is displayed
 
   @LW-3870 @Mainnet @Testnet
   Scenario: Extended view - Settings - Show passphrase displayed above Analytics under the Security section in the Settings page

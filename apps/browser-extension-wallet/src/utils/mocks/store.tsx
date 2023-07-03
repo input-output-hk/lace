@@ -71,7 +71,8 @@ export const walletStoreMock = async (
       cardanoCoin,
       appMode: APP_MODE_BROWSER,
       areBalancesVisible: true,
-      canManageBalancesVisibility: true
+      canManageBalancesVisibility: true,
+      getHiddenBalancePlaceholder: jest.fn()
     },
     setBalancesVisibility: jest.fn(),
     setWalletManagerUi: jest.fn(),

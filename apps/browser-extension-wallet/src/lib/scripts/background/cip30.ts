@@ -1,8 +1,7 @@
 import { cip30 as walletCip30 } from '@cardano-sdk/wallet';
-import { ensureUiIsOpenAndLoaded, getLastActiveTab } from './util';
+import { ensureUiIsOpenAndLoaded, getDappInfoFromLastActiveTab } from './util';
 import { userPromptService } from './services/dappService';
 import { Wallet } from '@lace/cardano';
-import { getRandomIcon } from '@lace/common';
 import { authenticator } from './authenticator';
 import { wallet$ } from './wallet';
 import { runtime } from 'webextension-polyfill';
@@ -10,19 +9,13 @@ import { exposeApi, RemoteApiPropertyType, cip30 } from '@cardano-sdk/web-extens
 import { DAPP_CHANNELS } from '../../../utils/constants';
 import { DappDataService } from '../types';
 import { BehaviorSubject, of } from 'rxjs';
+import { dappInfo$ } from './requestAccess';
 
-const dappSignTxData$ = new BehaviorSubject<Wallet.Cardano.Tx>(undefined);
+const dappSignTxData$ = new BehaviorSubject<{ dappInfo: Wallet.DappInfo; tx: Wallet.Cardano.Tx }>(undefined);
 const dappSignData$ = new BehaviorSubject<{
-  addr: Wallet.Cardano.PaymentAddress;
-  payload: Wallet.HexBlob;
+  dappInfo: Wallet.DappInfo;
+  sign: { addr: Wallet.Cardano.PaymentAddress; payload: Wallet.HexBlob };
 }>(undefined);
-
-const getDappInfoFromLastActiveTab: () => Promise<Wallet.DappInfo> = async () =>
-  await getLastActiveTab().then((t) => ({
-    logo: t.favIconUrl || getRandomIcon({ id: origin, size: 40 }),
-    name: t.title || t.url.split('//')[1],
-    url: t.url.replace(/\/$/, '')
-  }));
 
 export const confirmationCallback: walletCip30.CallbackConfirmation = async (
   args: walletCip30.SignDataCallbackParams | walletCip30.SignTxCallbackParams | walletCip30.SubmitTxCallbackParams
@@ -38,22 +31,22 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = async (
     case walletCip30.Cip30ConfirmationCallbackType.SignTx: {
       try {
         const { logo, name, url } = await getDappInfoFromLastActiveTab();
-        dappSignTxData$.next(args.data);
-        await ensureUiIsOpenAndLoaded(`#/dapp/sign-tx?url=${url}&name=${name}&logo=${logo}`);
+        dappSignTxData$.next({ dappInfo: { logo, name, url }, tx: args.data });
+        await ensureUiIsOpenAndLoaded('#/dapp/sign-tx');
 
         return userPromptService.allowSignTx();
       } catch (error) {
         console.log(error);
         // eslint-disable-next-line unicorn/no-useless-undefined
         dappSignTxData$.next(undefined);
-        return false;
+        return Promise.reject();
       }
     }
     case walletCip30.Cip30ConfirmationCallbackType.SignData: {
       try {
         const { logo, name, url } = await getDappInfoFromLastActiveTab();
-        dappSignData$.next(args.data);
-        await ensureUiIsOpenAndLoaded(`#/dapp/sign-data?url=${url}&name=${name}&logo=${logo}`);
+        dappSignData$.next({ dappInfo: { logo, name, url }, sign: args.data });
+        await ensureUiIsOpenAndLoaded('#/dapp/sign-data');
 
         return userPromptService.allowSignData();
       } catch (error) {
@@ -79,11 +72,13 @@ exposeApi<DappDataService>(
     baseChannel: DAPP_CHANNELS.dappData,
     properties: {
       getSignTxData: RemoteApiPropertyType.MethodReturningPromise,
-      getSignDataData: RemoteApiPropertyType.MethodReturningPromise
+      getSignDataData: RemoteApiPropertyType.MethodReturningPromise,
+      getDappInfo: RemoteApiPropertyType.MethodReturningPromise
     },
     api$: of({
       getSignTxData: () => Promise.resolve(dappSignTxData$.value),
-      getSignDataData: () => Promise.resolve(dappSignData$.value)
+      getSignDataData: () => Promise.resolve(dappSignData$.value),
+      getDappInfo: () => Promise.resolve(dappInfo$.value)
     })
   },
   { logger: console, runtime }

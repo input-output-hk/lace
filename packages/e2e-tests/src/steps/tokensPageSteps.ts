@@ -6,7 +6,7 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
-import settingsPageExtendedAssert from '../assert/settings/settingsPageExtendedAssert';
+import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';
@@ -214,7 +214,6 @@ Then(/^total wallet balance is masked with asterisks$/, async () => {
 Then(
   /^balance and FIAT balance for each token are (masked with asterisks|visible)$/,
   async (shouldBeMasked: 'masked with asterisks' | 'visible') => {
-    await tokensPageAssert.assertAllTokensBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
-    await tokensPageAssert.assertAllTokensFiatBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
+    await tokensPageAssert.assertAllBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
   }
 );

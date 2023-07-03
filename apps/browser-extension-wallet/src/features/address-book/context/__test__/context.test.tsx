@@ -10,6 +10,8 @@ import { StoreProvider } from '@src/stores';
 import create from 'zustand';
 import { AppSettingsProvider } from '@providers';
 import { Cardano } from '@cardano-sdk/core';
+import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../AddressBookProvider', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,14 +52,16 @@ describe('testing useAddressBookState', () => {
     const { result, waitForNextUpdate } = renderHook(() => useAddressBookContext(), {
       wrapper: makeDbContextWrapper(db)
     });
-    expect(result.current.utils.deleteRecord).toBeDefined();
-    expect(result.current.utils.saveRecord).toBeDefined();
-    expect(result.current.utils.extendLimit).toBeDefined();
 
     await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.utils.deleteRecord).toBeDefined();
+      expect(result.current.utils.saveRecord).toBeDefined();
+      expect(result.current.utils.extendLimit).toBeDefined();
 
-    expect(result.current.list.length).toBe(10);
-    expect(result.current.count).toBe(15);
+      expect(result.current.list.length).toBe(10);
+      expect(result.current.count).toBe(15);
+    });
   });
 
   test('should add new address and extend limit', async () => {
@@ -67,22 +71,24 @@ describe('testing useAddressBookState', () => {
 
     await waitForNextUpdate();
 
-    result.current.utils.saveRecord({ address: 'addr_test16', name: 'test wallet 16' });
-
-    await waitForNextUpdate();
-
-    result.current.utils.extendLimit();
-
-    await waitForNextUpdate();
-
-    expect(result.current.list).toContainEqual({
-      address: 'addr_test16',
-      id: 16,
-      name: 'test wallet 16',
-      network: Cardano.NetworkMagics.Preprod
+    await act(async () => {
+      await result.current.utils.saveRecord({ address: 'addr_test16', name: 'test wallet 16' });
     });
-    expect(result.current.list.length).toBe(16);
-    expect(result.current.count).toBe(16);
+
+    act(() => {
+      result.current.utils.extendLimit();
+    });
+
+    await waitFor(() => {
+      expect(result.current.list).toContainEqual({
+        address: 'addr_test16',
+        id: 16,
+        name: 'test wallet 16',
+        network: Cardano.NetworkMagics.Preprod
+      });
+      expect(result.current.list.length).toBe(16);
+      expect(result.current.count).toBe(16);
+    });
   });
 
   test('should update address', async () => {
@@ -103,13 +109,15 @@ describe('testing useAddressBookState', () => {
       network: Cardano.NetworkMagics.Preprod
     };
 
-    result.current.utils.updateRecord(idToUpdate, addressData as AddressBookSchema);
+    await act(async () => {
+      await result.current.utils.updateRecord(idToUpdate, addressData as AddressBookSchema);
+    });
 
-    await waitForNextUpdate();
-
-    expect(result.current.list).toContainEqual({ ...addressData, id: idToUpdate });
-    expect(result.current.list.length).toBe(10);
-    expect(result.current.count).toBe(15);
+    await waitFor(() => {
+      expect(result.current.list).toContainEqual({ ...addressData, id: idToUpdate });
+      expect(result.current.list.length).toBe(10);
+      expect(result.current.count).toBe(15);
+    });
   });
 
   test('should delete address', async () => {
@@ -119,20 +127,22 @@ describe('testing useAddressBookState', () => {
 
     await waitForNextUpdate();
 
-    result.current.utils.deleteRecord(1);
-
-    await waitForNextUpdate();
-
-    result.current.utils.extendLimit();
-
-    await waitForNextUpdate();
-
-    expect(result.current.list).not.toContainEqual({
-      address: 'addr_test1',
-      name: 'test wallet',
-      id: 1
+    await act(async () => {
+      await result.current.utils.deleteRecord(1);
     });
-    expect(result.current.list.length).toBe(14);
-    expect(result.current.count).toBe(14);
+
+    act(() => {
+      result.current.utils.extendLimit();
+    });
+
+    await waitFor(() => {
+      expect(result.current.list).not.toContainEqual({
+        address: 'addr_test1',
+        name: 'test wallet',
+        id: 1
+      });
+      expect(result.current.list.length).toBe(14);
+      expect(result.current.count).toBe(14);
+    });
   });
 });

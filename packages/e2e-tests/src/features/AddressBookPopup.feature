@@ -7,7 +7,7 @@ Feature: Address book - popup view
   @LW-4473
   Scenario: Popup-view - Address Book - Empty the address book and confirm
     Given I don't have any addresses added to my address book in popup mode
-    Then I see no list entries in the address book
+    Then I see empty address book
 
   @LW-4474
   Scenario: Popup-view - Address Book - Copy address button
@@ -102,7 +102,7 @@ Feature: Address book - popup view
   @LW-4479
   Scenario Outline: Popup-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in popup mode
-    When I click to open add new address form
+    When I click "Add address" button on address book page
     Then I see Add new address form
     And "browserView.addressBook.addressForm.saveAddress" button is disabled
     When I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" in drawer
@@ -121,7 +121,7 @@ Feature: Address book - popup view
   @LW-4480
   Scenario Outline: Popup-view - Address Book - Add new address and display error message  - Name: <name_error> - Address: <address_error>
     Given I don't have any addresses added to my address book in popup mode
-    When I click to open add new address form
+    When I click "Add address" button on address book page
     And I fill "<wallet_name>" and "<address>" address details outside drawer
     Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
     And "browserView.addressBook.addressForm.saveAddress" button is disabled
@@ -136,7 +136,7 @@ Feature: Address book - popup view
   @LW-4555
   Scenario Outline: Popup-view - Address Book - Add empty name/address and display error message - Name: <name_error> - Address: <address_error>
     Given I don't have any addresses added to my address book in popup mode
-    When I click to open add new address form
+    When I click "Add address" button on address book page
     And I fill "<wallet_name>" and "<address>" address details outside drawer
     And I fill "<wallet_name2>" and "<address2>" address details outside drawer
     Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
@@ -150,7 +150,7 @@ Feature: Address book - popup view
   @LW-4481
   Scenario Outline: Popup-view - Address Book - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in popup mode
-    When I click to open add new address form
+    When I click "Add address" button on address book page
     And I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" outside drawer
     And I click "browserView.addressBook.addressForm.saveAddress" button
     Then I see a toast with message: "<toast_message>"
@@ -162,7 +162,7 @@ Feature: Address book - popup view
   @LW-4784
   Scenario: Popup-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in popup mode
-    When I click to open add new address form
+    When I click "Add address" button on address book page
     Then I see Add new address form
     When I fill "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address field in address book outside drawer
     When I fill "empty" name for address details outside drawer
@@ -172,7 +172,7 @@ Feature: Address book - popup view
   @LW-4783
   Scenario: Popup-view - Address Book - No error is displayed when leaving both fields empty
     Given I don't have any addresses added to my address book in popup mode
-    When I click to open add new address form
+    When I click "Add address" button on address book page
     Then I see Add new address form
     When I fill "name_ok" and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address details outside drawer
     And I remove Name field content in address book outside drawer
@@ -184,7 +184,7 @@ Feature: Address book - popup view
   @LW-4785
   Scenario: Popup-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in popup mode
-    When I click to open add new address form
+    When I click "Add address" button on address book page
     Then I see Add new address form
     When I fill "name_ok" name for address details in drawer
     And I fill "empty" address field in address book in drawer

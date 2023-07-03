@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Drawer, DrawerNavigation } from '@lace/common';
+import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { sectionsConfig, useStakePoolDetails } from '../../store';
 import { Sections } from '../../types';
@@ -7,7 +7,6 @@ import { useWalletStore } from '@stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
-import { useKeyboardShortcut } from '@hooks';
 import { useTranslation } from 'react-i18next';
 
 export interface StakePoolDetailsDrawerProps {

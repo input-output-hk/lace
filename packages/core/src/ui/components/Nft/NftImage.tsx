@@ -9,12 +9,14 @@ export interface NftImageProps {
   image?: string;
   popupView?: boolean;
   detailView?: boolean;
+  withBorder?: boolean;
 }
 
 export const NftImage = ({
   image = NFTPlaceholderImage,
   popupView = false,
-  detailView = false
+  detailView = false,
+  withBorder = false
 }: NftImageProps): React.ReactElement => {
   const [imageResponse, handleLoad] = useFetchImage({ url: image, fallback: NFTPlaceholderImage });
 
@@ -30,7 +32,11 @@ export const NftImage = ({
     );
   return (
     <img
-      className={cn(styles.nftImage, { [styles.popupView]: popupView, [styles.detailView]: detailView })}
+      className={cn(styles.nftImage, {
+        [styles.popupView]: popupView,
+        [styles.detailView]: detailView,
+        [styles.border]: withBorder
+      })}
       data-testid={'nft-image'}
       alt="NFT"
       src={imageResponse?.src}

@@ -121,10 +121,10 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
     <Layout>
       <SectionLayout sidePanelContent={sidePanel}>
         <div className={styles.titleContainer}>
-          <PageTitle amount={addressCount} data-testid="address-book-page-title">
+          <PageTitle amount={addressCount} data-testid="page-title">
             {translate('browserView.addressBook.title')}
           </PageTitle>
-          <Button onClick={handleAddAddressClick} className={styles.addAddressBtn}>
+          <Button onClick={handleAddAddressClick} className={styles.addAddressBtn} data-testid="add-address-button">
             <PlusIcon className={styles.btnIcon} />
             {translate('browserView.addressBook.addressList.addItem.button')}
           </Button>

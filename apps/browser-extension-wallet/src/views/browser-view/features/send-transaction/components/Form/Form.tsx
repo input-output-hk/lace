@@ -4,7 +4,7 @@ import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { AddressInput } from './AddressInput';
 import { CoinInput } from './CoinInput';
 import { FormRowHeader } from './FormRowHeader';
@@ -33,7 +33,7 @@ import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg
 
 import styles from './Form.module.scss';
 import { getReachedMaxAmountList } from '../../helpers';
-import { PriceResult, useObservable } from '@hooks';
+import { PriceResult } from '@hooks';
 
 const RowContainer = ({
   children,
