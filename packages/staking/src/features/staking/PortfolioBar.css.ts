@@ -17,4 +17,8 @@ export const barContainer = style([
   },
 ]);
 
+export const nextIcon = style({
+  fontSize: 24,
+});
+
 export const selectedPoolsLabel = sx({ fontWeight: '$bold' });

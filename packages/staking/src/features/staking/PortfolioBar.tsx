@@ -16,7 +16,7 @@ export const PortfolioBar = () => {
       </Text.Body.Normal>
       <Flex className={sx({ gap: '$16' })}>
         <Button.Secondary label="Clear" />
-        <Button.Primary label="Next" icon={<ArrowRight />} />
+        <Button.Primary label="Next" icon={<ArrowRight className={styles.nextIcon} />} />
       </Flex>
     </Card.Elevated>
   );
