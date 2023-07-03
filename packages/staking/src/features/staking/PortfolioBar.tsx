@@ -1,8 +1,8 @@
 import { Button, Card, Flex, Text, sx } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useDelegationPortfolioStore } from '../store';
+import ArrowRight from './arrow-right.svg';
 import * as styles from './PortfolioBar.css';
-import { ArrowRightIcon } from './PortfolioBar.data';
 
 export const PortfolioBar = () => {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ export const PortfolioBar = () => {
       </Text.Body.Normal>
       <Flex className={sx({ gap: '$16' })}>
         <Button.Secondary label="Clear" />
-        <Button.Primary label="Next" icon={<img src={ArrowRightIcon} alt="Go next" />} />
+        <Button.Primary label="Next" icon={<ArrowRight />} />
       </Flex>
     </Card.Elevated>
   );
