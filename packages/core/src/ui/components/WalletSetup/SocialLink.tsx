@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './SocialLink.module.scss';
-import { ReactComponent as ArrowRight } from '../../assets/icons/arrow-right.component.svg';
+import { ReactComponent as ArrowRight } from '../../assets/icons/chevron-right.component.svg';
 
 export interface SocialLinkProps {
   icon?: React.ReactNode;

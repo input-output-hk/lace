@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from
 import { Tooltip, Input } from 'antd';
 import { Button, getTextWidth } from '@lace/common';
 import { useTranslate } from '@src/ui/hooks/useTranslate';
-import { ReactComponent as Chevron } from '../../assets/icons/chrvro-right.component.svg';
+import { ReactComponent as Chevron } from '../../assets/icons/chevron-right.component.svg';
 import styles from './AssetInput.module.scss';
 import { validateNumericValue } from '@src/ui/utils/validate-numeric-value';
 import { sanitizeNumber } from '@ui/utils/sanitize-number';
