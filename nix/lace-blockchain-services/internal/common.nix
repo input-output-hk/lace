@@ -38,6 +38,16 @@ in rec {
 
   ogmiosCompiler = "ghc8107";
 
+  ogmiosPatched = {
+    outPath = toString (pkgs.runCommand "ogmios-patched" {} ''
+      cp -r ${inputs.ogmios} $out
+      chmod -R +w $out
+      cd $out
+      patch -p1 -i ${./ogmios--on-windows.patch}
+    '');
+    inherit (inputs.ogmios.sourceInfo) rev shortRev lastModified lastModifiedDate;
+  };
+
   ogmiosProject = let
     theirDefaultNix = __readFile "${inputs.ogmios}/default.nix";
   in
@@ -50,7 +60,7 @@ in rec {
       inputMap = { "https://input-output-hk.github.io/cardano-haskell-packages" = inputs.ogmios-CHaP; };
       src = haskell-nix.haskellLib.cleanSourceWith {
         name = "ogmios-src";
-        src = inputs.ogmios;
+        src = ogmiosPatched;
         subDir = "server";
         filter = path: type: builtins.all (x: x) [
           (baseNameOf path != "package.yaml")
@@ -60,7 +70,7 @@ in rec {
 
   ogmios = {
     x86_64-linux = ogmiosProject.projectCross.musl64.hsPkgs.ogmios.components.exes.ogmios;
-    x86_64-windows = throw "unimplemented";
+    x86_64-windows = ogmiosProject.projectCross.mingwW64.hsPkgs.ogmios.components.exes.ogmios;
     x86_64-darwin = ogmiosProject.hsPkgs.ogmios.components.exes.ogmios;
     aarch64-darwin = ogmiosProject.hsPkgs.ogmios.components.exes.ogmios;
   }.${targetSystem};

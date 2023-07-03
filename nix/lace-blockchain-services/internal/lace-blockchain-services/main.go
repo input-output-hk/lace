@@ -203,7 +203,7 @@ func setupTrayUI(
 	logFile string,
 	networks []string,
 ) func() { return func() {
-	iconData, err := Asset("cardano.png")
+	iconData, err := Asset("tray-icon")
 	if err != nil {
 	    panic(err)
 	}
@@ -364,9 +364,10 @@ type ManagedChild struct {
 	MkExtraEnv  func() []string
 	StatusCh    chan<- string
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
-	LogMonitor  func(string)
+	LogMonitor  func(string) LogMonitorStatus
 	LogModifier func(string) string // e.g. to drop redundant timestamps
 	AfterExit   func()
+	TerminateOnWindowsByClosingStdin bool
 }
 
 type HealthStatus struct {
@@ -374,6 +375,10 @@ type HealthStatus struct {
 	DoRestart bool            // restart everything (even before it's considered initialized)
 	NextProbeIn time.Duration // when to schedule the next HealthProbe
 	LastErr error
+}
+
+type LogMonitorStatus struct {
+	ForceKill bool
 }
 
 func manageChildren(comm CommChannels_Manager) {
@@ -390,6 +395,13 @@ func manageChildren(comm CommChannels_Manager) {
 	omitSleep := false
 	keepGoing := true
 
+	windowsPipeCounter := -1
+	mkNewWindowsPipeName := func() string {
+		windowsPipeCounter += 1
+		return fmt.Sprintf("\\\\.\\pipe\\cardano-node-%s.%d.%d",
+			network, os.Getpid(), windowsPipeCounter)
+	}
+
 	// XXX: we nest a function here, so that we can defer cleanups, and return early on errors etc.
 	for keepGoing { func() {
 		if !firstIteration && !omitSleep {
@@ -401,18 +413,26 @@ func manageChildren(comm CommChannels_Manager) {
 
 		fmt.Printf("%s[%d]: starting session for network %s\n", OurLogPrefix, os.Getpid(), network)
 
+/* -- cardano-services temporarily turned off, just to test the Ogmios integration on Windows --
 		cardanoServicesDir := (ourpaths.ResourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
 			sep + "cardano-services")
+*/
 		cardanoNodeConfigDir := ourpaths.NetworkConfigDir + sep + network
 		cardanoNodeSocket := ourpaths.WorkDir + sep + network + sep + "cardano-node.socket"
 
+		if (runtime.GOOS == "windows") {
+			cardanoNodeSocket = mkNewWindowsPipeName()
+		}
+
 		var ogmiosPort int
+/* -- cardano-services temporarily turned off, just to test the Ogmios integration on Windows --
 		var providerServerPort int
 
 		tokenMetadataServerUrl := "https://tokens.cardano.org"
 		if network != "mainnet" {
 			tokenMetadataServerUrl = "https://metadata.cardano-testnet.iohkdev.io/"
 		}
+*/
 
 		// XXX: we take that from Ogmios, we should probably calculate ourselves
 		syncProgress := -1.0
@@ -437,6 +457,7 @@ func manageChildren(comm CommChannels_Manager) {
 					}
 					return line
 				}
+				reValidatingChunk := regexp.MustCompile(`^.*ChainDB:Info.*Validating chunk no. \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
 				reReplayingLedger := regexp.MustCompile(`^.*ChainDB:Info.*Replayed block: slot \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
 				rePushingLedger := regexp.MustCompile(`^.*ChainDB:Info.*Pushing ledger state for block [0-9a-f]+ at slot \d+. Progress: (\d*\.\d+%)$`)
 				reSyncing := regexp.MustCompile(`^.*ChainDB:Notice.*Chain extended, new tip: [0-9a-f]+ at slot (\d+)$`)
@@ -445,7 +466,7 @@ func manageChildren(comm CommChannels_Manager) {
 					PrettyName: "cardano-node",
 					ExePath: ourpaths.LibexecDir + sep + "cardano-node" + exeSuffix,
 					MkArgv: func() []string {
-						return []string {
+						args := []string {
 							"run",
 							"--topology", cardanoNodeConfigDir + sep + "topology.json",
 							"--database-path", ourpaths.WorkDir + sep + network + sep +
@@ -455,11 +476,22 @@ func manageChildren(comm CommChannels_Manager) {
 							"--config", cardanoNodeConfigDir + sep + "config.json",
 							"--socket-path", cardanoNodeSocket,
 						}
+						if runtime.GOOS == "windows" {
+							// for `TerminateOnWindowsByClosingStdin`:
+							args = append(args, "--shutdown-ipc=0")
+						}
+						return args
 					},
 					MkExtraEnv: func() []string { return []string{} },
 					StatusCh: comm.CardanoNodeStatus,
 					HealthProbe: func(prev HealthStatus) HealthStatus {
-						err := probeUnixSocket(cardanoNodeSocket, 1 * time.Second)
+						tmout := 1 * time.Second
+						var err error
+						if runtime.GOOS == "windows" {
+							err = probeWindowsNamedPipe(cardanoNodeSocket, tmout)
+						} else {
+							err = probeUnixSocket(cardanoNodeSocket, tmout)
+						}
 						nextProbeIn := 1 * time.Second
 						if (err == nil) {
 							nextProbeIn = 60 * time.Second
@@ -471,8 +503,12 @@ func manageChildren(comm CommChannels_Manager) {
 							LastErr: err,
 						}
 					},
-					LogMonitor: func(line string) {
-						if strings.Index(line, "Started opening Ledger DB") != -1 {
+					LogMonitor: func(line string) LogMonitorStatus {
+					        if ms := reValidatingChunk.FindStringSubmatch(line); len(ms) > 0 {
+							comm.CardanoNodeStatus <- "validating chunks · " + ms[1]
+						} else if strings.Index(line, "Started opening Volatile DB") != -1 {
+							comm.CardanoNodeStatus <- "opening volatile DB…"
+						} else if strings.Index(line, "Started opening Ledger DB") != -1 {
 							comm.CardanoNodeStatus <- "opening ledger DB…"
 						} else if ms :=reReplayingLedger.FindStringSubmatch(line);len(ms)>0 {
 							comm.CardanoNodeStatus <- "replaying ledger · " + ms[1]
@@ -491,15 +527,27 @@ func manageChildren(comm CommChannels_Manager) {
 							}
 							comm.CardanoNodeStatus <- textual + " · " + sp
 						}
+						return LogMonitorStatus {
+							// XXX: for whatever reason, cardano-node is not exiting
+							// on Windows, but instead hangs, after closing the
+							// immutable DB; let’s kill it then, as it’s safe
+							ForceKill: (runtime.GOOS == "windows" &&
+								strings.Index(line, "Closed Immutable DB") != -1),
+						}
 					},
 					LogModifier: func(line string) string {
 						now := time.Now().UTC()
 						line = removeTimestamp(line, now)
 						line = removeTimestamp(line, now.Add(-1 * time.Second))
 						line = strings.ReplaceAll(line, droppedHostname, "[")
+						if (runtime.GOOS == "windows") {
+							// garbled output on cmd.exe instead:
+							line = stripansi.Strip(line)
+						}
 						return line
 					},
 					AfterExit: func() {},
+					TerminateOnWindowsByClosingStdin: true,
 				}
 			}(),
 			func() ManagedChild {
@@ -535,20 +583,25 @@ func manageChildren(comm CommChannels_Manager) {
 							LastErr: err,
 						}
 					},
-					LogMonitor: func(line string) {
+					LogMonitor: func(line string) LogMonitorStatus {
 						if ms := reSyncProgress.FindStringSubmatch(line); len(ms) > 0 {
 							num, err := strconv.ParseFloat(ms[1], 64)
 							if err == nil {
 								syncProgress = num
 							}
 						}
+						return LogMonitorStatus {
+							ForceKill: false,
+						}
 					},
 					LogModifier: func(line string) string { return line },
 					AfterExit: func() {
 						comm.SetOgmiosDashboard <- ""
 					},
+					TerminateOnWindowsByClosingStdin: false,
 				}
 			}(),
+/* -- cardano-services temporarily turned off, just to test the Ogmios integration on Windows --
 			func() ManagedChild {
 				return ManagedChild{
 					LogPrefix: "provider-server",
@@ -602,8 +655,10 @@ func manageChildren(comm CommChannels_Manager) {
 					AfterExit: func() {
 						comm.SetBackendUrl <- ""
 					},
+					TerminateOnWindowsByClosingStdin: false,
 				}
 			}(),
+*/
 		}
 
 		var wgChildren sync.WaitGroup
@@ -637,7 +692,8 @@ func manageChildren(comm CommChannels_Manager) {
 			childDidExit := false
 			childPid := 0
 			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(),
-				child.LogModifier, outputLines, terminateCh, &childPid)
+				child.LogModifier, outputLines, terminateCh, &childPid,
+				child.TerminateOnWindowsByClosingStdin)
 			defer func() {
 				if !childDidExit {
 					child.StatusCh <- "terminating…"
@@ -650,7 +706,13 @@ func manageChildren(comm CommChannels_Manager) {
 			go func() {
 				for line := range outputLines {
 					fmt.Printf("%s[%d]: %s\n", child.LogPrefix, childPid, line)
-					child.LogMonitor(line)
+					lmStatus := child.LogMonitor(line)
+					if lmStatus.ForceKill {
+						rawProcess, err := os.FindProcess(childPid)
+						if err == nil {
+							rawProcess.Kill()
+						}
+					}
 				}
 				childDidExit = true
 				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
@@ -802,6 +864,7 @@ func childProcess(
 	path string, argv []string, extraEnv []string,
 	logModifier func(string) string, // e.g. to drop redundant timestamps
 	outputLines chan<- string, terminate <-chan struct{}, pid *int,
+	terminateOnWindowsByClosingStdin bool,
 ) {
 	defer close(outputLines)
 
@@ -812,6 +875,12 @@ func childProcess(
 
 	if len(extraEnv) > 0 {
 		cmd.Env = append(os.Environ(), extraEnv...)
+	}
+
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		outputLines <- fmt.Sprintf("fatal: %s", err)
+		return
 	}
 
 	stderr, err := cmd.StderrPipe()
@@ -859,8 +928,17 @@ func childProcess(
 	select {
 	case <-terminate:
 		if runtime.GOOS == "windows" {
-			// FIXME: how to exit gracefully on Windows?
-			cmd.Process.Kill()
+			// XXX: there’s no standard way of signalling to a child to exit gracefully on Windows
+			// But `cardano-node` can watch whether its stdin was closed, we use that as a signal.
+			// cf. <https://github.com/input-output-hk/cardano-launcher/blob/6507cedbce45689fe98619b62596e1a17aaffee4/docs/windows-clean-shutdown.md>
+			// We also cannot use kernel32.dll’s `GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pid)`
+			// (or `CTRL_C_EVENT`), because that sends the interrupt, hkem, “signal” to the whole
+			// process group (sharing a “console”) – including ourselves.
+			if terminateOnWindowsByClosingStdin {
+				stdin.Close()
+			} else {
+				cmd.Process.Kill()
+			}
 		} else {
 			cmd.Process.Signal(syscall.SIGTERM)
 		}
@@ -882,8 +960,6 @@ func getFreeTCPPort() int {
 }
 
 func probeUnixSocket(path string, timeout time.Duration) error {
-	// XXX: for Windows named pipes this would be:
-	// net.DialTimeout("pipe", `\\.\pipe\mypipe`, timeout)
 	conn, err := net.DialTimeout("unix", path, timeout)
 	if err == nil {
 		defer conn.Close()
