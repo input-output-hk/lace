@@ -1,3 +1,4 @@
+import { Wallet } from '@lace/cardano';
 import { Immutable } from 'immer';
 
 // TODO: Replace with Cardano JS SDK types once feature LW-6702 is released
@@ -56,14 +57,16 @@ export interface StakePoolDetails {
 }
 
 export type DelegationPortfolioState = Immutable<{
-  delegationPortfolioPools: Cip17Pool[];
+  draftPortfolio: Cip17Pool[];
+  currentPortfolio: Cip17Pool[];
 }>;
 
 type DelegationPortfolioMutations = {
-  addPoolToPortfolio: (pool: Cip17Pool) => void;
-  removePoolFromPortfolio: ({ poolId }: { poolId: PoolIdHex }) => void;
+  setCurrentPortfolio: (rewardAccountInfo: Wallet.Cardano.RewardAccountInfo[], cardanoCoin: Wallet.CoinId) => void;
+  addPoolToDraft: (pool: Cip17Pool) => void;
+  removePoolFromDraft: ({ poolId }: { poolId: PoolIdHex }) => void;
   updatePoolWeight: ({ poolId, weight }: { poolId: PoolIdHex; weight: number }) => void;
-  clearDelegationPortfolio: () => void;
+  clearDraft: () => void;
 };
 
 export type DelegationPortfolioStore = DelegationPortfolioState & DelegationPortfolioMutations;

@@ -4,7 +4,7 @@ import { Banner, Button, Ellipsis } from '@lace/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useStakePoolDetails } from '../store';
+import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
 
@@ -179,12 +179,8 @@ type StakePoolDetailFooterProps = {
 export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { setNoFundsVisible } = useStakePoolDetails();
-  const {
-    delegationDetails,
-    delegationStoreSelectedStakePoolDetails: { id },
-    walletStoreGetKeyAgentType,
-    walletStoreWalletUICardanoCoin,
-  } = useOutsideHandles();
+  const { delegationStoreSelectedStakePoolDetails: selectedPool, walletStoreGetKeyAgentType } = useOutsideHandles();
+  const { currentPortfolio } = useDelegationPortfolioStore();
 
   const isInMemory = useMemo(
     () => walletStoreGetKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
@@ -199,10 +195,7 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
     }
   }, [canDelegate, onStake, setNoFundsVisible]);
 
-  const currentDelegatedStakePool =
-    delegationDetails &&
-    Wallet.util.stakePoolTransformer({ cardanoCoin: walletStoreWalletUICardanoCoin, stakePool: delegationDetails });
-  const isDelegatingToThisPool = currentDelegatedStakePool?.id === id;
+  const delegatingToThisPool = currentPortfolio.some(({ id }) => id === selectedPool.id);
 
   useEffect(() => {
     if (isInMemory) return;
@@ -214,7 +207,7 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
 
   return (
     <div className={styles.footer}>
-      {!isDelegatingToThisPool && (
+      {!delegatingToThisPool && (
         <Button data-testid="stake-pool-details-stake-btn" onClick={onStakeClick} className={styles.stakeBtn}>
           <span>{t('drawer.details.stakeOnPoolButton')}</span>
         </Button>
