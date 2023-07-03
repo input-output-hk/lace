@@ -85,7 +85,7 @@ export const AddressBook = withAddressBookContext(() => {
       <ContentLayout
         title={
           <div className={styles.title}>
-            <h1>
+            <h1 data-testid="page-title">
               {translate('addressBook.sectionTitle')}{' '}
               <span className={styles.subTitle} data-testid="counter">
                 ({addressCount})
@@ -96,7 +96,7 @@ export const AddressBook = withAddressBookContext(() => {
         id={scrollableTargetId}
       >
         <div className={styles.btnContainer}>
-          <Button data-testid="add-new-button" color="gradient" block onClick={() => setIsEditAddressVisible(true)}>
+          <Button data-testid="add-address-button" color="gradient" block onClick={() => setIsEditAddressVisible(true)}>
             <img src={PlusIcon} alt="plus-icon" />
             {translate('addressBook.empty.addNewAddress')}
           </Button>

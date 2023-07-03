@@ -131,6 +131,9 @@ export const colors = {
   $summary_expander_trigger_container_borderColor: '',
   $summary_expander_trigger_label_color: '',
   $summary_expander_trigger_label_color_pressed: '',
+
+  $transaction_summary_label_color: '',
+  $transaction_summary_secondary_label_color: '',
 };
 
 export type Colors = typeof colors;

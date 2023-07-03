@@ -7,7 +7,7 @@ import { ReactComponent as AddAddress } from '../../assets/icons/add.component.s
 import { ReactComponent as AvailableAddress } from '../../assets/icons/close-icon.component.svg';
 import styles from './DestinationAddressInput.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
 export type DestinationAddressInputProps = Omit<AutoCompleteProps, 'value'> & {
   value: string | { name: string; address: string };
@@ -66,7 +66,7 @@ export const DestinationAddressInput = ({
     if (handle === 'valid') {
       handleIcon = <CheckCircleOutlined className={styles.valid} />;
     } else if (handle === 'invalid') {
-      handleIcon = <CloseCircleOutlined className={styles.invalid} />;
+      handleIcon = <ExclamationCircleOutlined className={styles.invalid} />;
     }
     return (
       <>

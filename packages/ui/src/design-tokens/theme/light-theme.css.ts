@@ -214,6 +214,10 @@ const colors: Colors = {
     lightColorScheme.$primary_accent_purple_0_3,
   $summary_expander_trigger_container_borderColor:
     lightColorScheme.$primary_light_grey_plus,
+
+  $transaction_summary_label_color: lightColorScheme.$primary_black,
+  $transaction_summary_secondary_label_color:
+    lightColorScheme.$primary_dark_grey,
 };
 
 export const elevation: Elevation = {

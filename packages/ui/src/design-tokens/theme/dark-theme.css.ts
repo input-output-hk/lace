@@ -197,6 +197,10 @@ const colors: Colors = {
     darkColorScheme.$primary_accent_purple_0_3,
   $summary_expander_trigger_container_borderColor:
     darkColorScheme.$primary_mid_grey,
+
+  $transaction_summary_label_color: darkColorScheme.$primary_white,
+  $transaction_summary_secondary_label_color:
+    darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {

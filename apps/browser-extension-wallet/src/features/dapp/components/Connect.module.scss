@@ -119,7 +119,7 @@
 
 .banner {
   padding: size_unit(2) size_unit(3);
-
+  justify-content: flex-start;
   &.nonssl {
     background-color: var(--light-mode-light-grey, var(--dark-mode-grey)) !important;
 
@@ -145,10 +145,6 @@
         color: var(--light-mode-mid-grey, var(--dark-mode-light-grey)) !important;
       }
     }
-  }
-  @media (max-width: $breakpoint-popup) {
-    gap: 20px;
-    justify-content: flex-start;
   }
 
   .bannerIcon {

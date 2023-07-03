@@ -15,12 +15,7 @@ Feature: Send Simple Transactions - Popup view - E2E
     And I save fee value
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
-    Then The Transaction submitted screen is displayed:
-      | Title: "All done"                            |
-      | Subtitle: "The transaction will complete..." |
-      | Text: transaction hash                       |
-      | Button: "View transaction"                   |
-      | Button: "Close"                              |
+    Then The Transaction submitted screen is displayed in popup mode
     When I close the drawer by clicking close button
     And I navigate to Tokens popup page
     Then the sent amount of: "1.123" with "saved" fee for token "Cardano" is subtracted from the total balance
@@ -47,9 +42,7 @@ Feature: Send Simple Transactions - Popup view - E2E
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
-    Then The Transaction submitted screen is displayed:
-      | Title: "All done"                            |
-      | Subtitle: "The transaction will complete..." |
+    Then The Transaction submitted screen is displayed in popup mode
     When I close the drawer by clicking close button
     And I navigate to Transactions popup page
     And I can see transaction 1 with type "Self Transaction"

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Drawer, DrawerHeader, DrawerNavigation, Button } from '@lace/common';
+import { Drawer, DrawerHeader, DrawerNavigation, Button, useKeyboardShortcut } from '@lace/common';
 import { SettingsCard } from './';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { QRPublicKeyDrawer } from '@src/views/browser-view/components/QRPublicKeyDrawer';
-import { useKeyboardShortcut } from '@hooks';
 
 const { Text } = Typography;
 

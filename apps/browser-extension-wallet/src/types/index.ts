@@ -7,5 +7,4 @@ export * from './wallet';
 export * from './tx';
 export * from './dappConnector';
 export * from './ui';
-export * from './key-codes';
 export * from './side-menu';

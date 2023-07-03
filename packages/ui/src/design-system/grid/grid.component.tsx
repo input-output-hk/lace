@@ -15,7 +15,7 @@ export const Grid = ({
   columns = '$none',
   children,
   rows = '$none',
-  gutters = '$2',
+  gutters = '$16',
 }: Readonly<Props>): JSX.Element => (
   <div className={grid({ columns, rows, gutters })}>{children}</div>
 );

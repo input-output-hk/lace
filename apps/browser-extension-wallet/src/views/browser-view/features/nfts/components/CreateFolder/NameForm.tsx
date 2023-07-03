@@ -57,9 +57,10 @@ export const NameForm = ({
         label={t('browserView.nfts.folderDrawer.nameForm.inputPlaceholder')}
         value={name}
         onChange={handleNameChange}
+        dataTestId="folder-name-input"
       />
       {isDirty && nameValidationError && !isNameEmpty && (
-        <p className={styles.formError} data-testid="wallet-setup-register-name-error">
+        <p className={styles.formError} data-testid="folder-name-input-error">
           {t(nameValidationError, { length: MAX_CHARS })}
         </p>
       )}

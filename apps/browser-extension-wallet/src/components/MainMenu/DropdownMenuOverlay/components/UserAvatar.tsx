@@ -13,7 +13,7 @@ interface UserAvatarProps {
 
 export const UserAvatar = ({ walletName, isPopup }: UserAvatarProps): React.ReactElement => {
   const [handle] = useGetHandles();
-  const handleImage = handle?.nftMetadata?.image;
+  const handleImage = handle?.profilePic;
 
   return (
     <div className={cn(styles.userAvatar, { [styles.isPopup]: isPopup })} data-testid="user-avatar">
