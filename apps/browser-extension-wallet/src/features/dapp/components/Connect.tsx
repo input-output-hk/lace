@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useEffect, useState } from 'react';
-import { Button } from '@lace/common';
+import { Banner, Button } from '@lace/common';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
@@ -15,8 +15,7 @@ import * as cip30 from '@cardano-sdk/dapp-connector';
 import { UserPromptService } from '@lib/scripts/background/services/dappService';
 import { of } from 'rxjs';
 import InfoIcon from '../../../assets/icons/info.component.svg';
-import ShieldExclamation from '@assets/icons/shield-exclamation.component.svg';
-import { Banner } from '@components/Banner';
+import ShieldExclamation from '../../../assets/icons/shield-exclamation.component.svg';
 import { DappDataService } from '@lib/scripts/types';
 import { Wallet } from '@lace/cardano';
 

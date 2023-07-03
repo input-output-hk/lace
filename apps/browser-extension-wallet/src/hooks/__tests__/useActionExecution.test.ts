@@ -93,7 +93,7 @@ describe('Testing useActionExecution hook', () => {
     expect(mockNotify).toBeCalledWith({
       text: errorResult,
       duration: 'toastDuration',
-      icon: 'test-file-stub'
+      icon: 'div'
     });
 
     hook.rerender(false);
@@ -105,7 +105,7 @@ describe('Testing useActionExecution hook', () => {
     expect(mockNotify).toBeCalledWith({
       text: errorMessage,
       duration: 3,
-      icon: 'test-file-stub'
+      icon: 'div'
     });
   });
 });

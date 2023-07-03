@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography } from 'antd';
 import cn from 'classnames';
-import DefaultIcon from '../../assets/icons/banner-icon.component.svg';
+import { ReactComponent as DefaultIcon } from '../../assets/icons/banner-icon.component.svg';
 import styles from './Banner.module.scss';
 
 const { Text } = Typography;
