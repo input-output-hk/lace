@@ -1,16 +1,11 @@
 import { Wallet } from '@lace/cardano';
 import { getRandomIcon } from '@lace/common';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { useStakePoolDetails } from '../../store';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import { StakePoolSortOptions, StakePoolTableBrowser, StakePoolTableBrowserProps } from './StakePoolTableBrowser';
-
-const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'apy',
-  order: 'desc',
-};
 
 type StakePoolsTableProps = {
   stakePools: Wallet.Cardano.StakePool[];
@@ -20,6 +15,8 @@ type StakePoolsTableProps = {
   fetchingPools: boolean;
   isLoadingList: boolean;
   scrollableTargetId: string;
+  sort: StakePoolSortOptions;
+  setSort: (options: StakePoolSortOptions) => void;
 };
 
 export const StakePoolsTable = ({
@@ -30,10 +27,11 @@ export const StakePoolsTable = ({
   fetchingPools,
   isLoadingList,
   scrollableTargetId,
+  sort,
+  setSort,
 }: StakePoolsTableProps) => {
   const { delegationStoreSetSelectedStakePool, walletStoreWalletUICardanoCoin } = useOutsideHandles();
   const { setIsDrawerVisible } = useStakePoolDetails();
-  const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const { t } = useTranslation();
   const tableHeaderTranslations = {
     apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros'),

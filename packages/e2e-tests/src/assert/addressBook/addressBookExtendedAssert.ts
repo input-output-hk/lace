@@ -1,16 +1,9 @@
 import webTester from '../../actor/webTester';
 import { AddressRow } from '../../elements/addressbook/extendedview/AddressRow';
-import AddressPage from '../../elements/addressbook/extendedview/AddressPage';
 import { AddressInput } from '../../elements/addressInput';
-import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 
 class AddressBookExtendedAssert {
-  assertSeeInformationAboutEmptyBook = async () => {
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.addressBook.emptyState.title'));
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.addressBook.emptyState.message'));
-  };
-
   assertSeeAddressOnTheList = async (name: string, address: string, shouldSee: boolean) => {
     await browser.pause(500);
     const addressRow = new AddressRow(name);
@@ -20,15 +13,6 @@ class AddressBookExtendedAssert {
     } else {
       await webTester.dontSeeWebElement(addressRow.nameElement());
     }
-  };
-
-  assertSeeAddressCount = async (expectedCount: number) => {
-    const currentValue = (await AddressPage.getCounter()) as string;
-    await expect(currentValue).to.equal(expectedCount);
-  };
-
-  assertSeeAddressBookTitle = async () => {
-    await webTester.waitUntilSeeElementContainingText(await t('addressBook.sectionTitle'));
   };
 
   assertSeeAddressWithNameInAddressInput = async (address: string, name: string) => {

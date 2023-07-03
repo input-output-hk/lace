@@ -13,9 +13,13 @@ export const AddressBookEmpty = ({ subtitle }: AddressBookEmptyProps): React.Rea
 
   return (
     <div data-testid="address-book-empty" className={styles.container}>
-      <Image data-testid="address-book-empty-image" preview={false} src={Empty} />
-      <h2 className={styles.title}>{translate('browserView.addressBook.emptyState.title')}</h2>
-      <div className={styles.subtitle}>{subtitle || translate('browserView.addressBook.emptyState.message')}</div>
+      <Image data-testid="address-book-empty-state-image" preview={false} src={Empty} />
+      <h2 data-testid="address-book-empty-state-title" className={styles.title}>
+        {translate('browserView.addressBook.emptyState.title')}
+      </h2>
+      <div data-testid="address-book-empty-state-message" className={styles.subtitle}>
+        {subtitle || translate('browserView.addressBook.emptyState.message')}
+      </div>
     </div>
   );
 };

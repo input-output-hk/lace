@@ -15,7 +15,7 @@ import * as cip30 from '@cardano-sdk/dapp-connector';
 import { UserPromptService } from '@lib/scripts/background/services/dappService';
 import { of } from 'rxjs';
 import InfoIcon from '../../../assets/icons/info.component.svg';
-import ShieldExclamation from '@assets/icons/shield-exclamation.component.svg';
+import ShieldExclamation from '../../../assets/icons/shield-exclamation.component.svg';
 import { Tooltip } from 'antd';
 import { useWalletStore } from '@src/stores';
 

@@ -33,11 +33,11 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
         getQRCodeOptions={useCallback(() => getQRCodeOptions(theme, ADDRESS_CARD_QR_CODE_SIZE), [theme])}
         copiedMessage={t('core.infoWallet.addressCopied')}
       />
-      {handles?.map(({ nftMetadata }) => (
+      {handles?.map(({ nftMetadata, image }) => (
         <HandleAddressCard
           key={nftMetadata.name}
           name={nftMetadata.name}
-          image={getAssetImageUrl(nftMetadata.image)}
+          image={getAssetImageUrl(image || nftMetadata.image)}
           copiedMessage={t('core.infoWallet.handleCopied')}
         />
       ))}

@@ -2,6 +2,7 @@ import { Translations } from '../types';
 
 export const en: Translations = {
   'browsePools.stakePoolTableBrowser.emptyMessage': 'No results matching your search',
+  'browsePools.stakePoolTableBrowser.searchInputPlaceholder': 'Search by type, token name or ID',
   'browsePools.stakePoolTableBrowser.tableHeader.cost': 'Cost',
   'browsePools.stakePoolTableBrowser.tableHeader.poolName': 'Pool name',
   'browsePools.stakePoolTableBrowser.tableHeader.ros': 'ROS',
