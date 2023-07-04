@@ -60,4 +60,5 @@ export type PostHogMetadata = {
   // eslint-disable-next-line camelcase
   distinct_id?: string;
   url: string;
+  view: ExtensionViews;
 };

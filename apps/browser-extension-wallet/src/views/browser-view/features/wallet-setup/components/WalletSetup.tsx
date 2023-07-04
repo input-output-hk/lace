@@ -12,7 +12,6 @@ import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
   AnalyticsEventNames,
-  ExtensionViews,
   PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ILocalStorage } from '@src/types';
@@ -114,7 +113,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
     };
     analytics.sendEvent(event);
     if (postHogAction) {
-      analytics.sendEventToPostHog(postHogAction, { view: ExtensionViews.Extended });
+      analytics.sendEventToPostHog(postHogAction);
     }
   };
 

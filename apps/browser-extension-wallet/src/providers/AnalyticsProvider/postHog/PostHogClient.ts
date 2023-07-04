@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import posthog from 'posthog-js';
 import { Wallet } from '@lace/cardano';
-import { EnhancedAnalyticsOptInStatus, PostHogAction, PostHogMetadata } from '../analyticsTracker';
+import { EnhancedAnalyticsOptInStatus, ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTracker';
 import {
   BASIC_ANALYTICS_CONFIG,
   ENHANCED_ANALYTICS_CONFIG,
@@ -88,7 +88,10 @@ export class PostHogClient {
   protected async getEventMetadata(): Promise<PostHogMetadata> {
     return {
       url: window.location.href,
-      distinct_id: await this.userIdService.getId()
+      distinct_id: await this.userIdService.getId(),
+      // TODO: Since we only have onboarding flow event implemented, we hardcoded this to extended view,
+      // once we implement other flows, we'll need to make this dependable on the current user view (popup or extended) JIRA (TBD)
+      view: ExtensionViews.Extended
     };
   }
 }
