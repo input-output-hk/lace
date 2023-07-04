@@ -38,8 +38,6 @@ export const EditAddressFormFooter = ({
     } catch {
       // TODO: add nicer way to handle errors - LW-7233
       toast.notify({ text: t('core.editAddressForm.submissionError'), icon: ErrorIcon });
-    } finally {
-      form.resetFields();
     }
   };
 
