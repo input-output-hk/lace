@@ -22,7 +22,6 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
-  ExtensionViews,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
@@ -424,9 +423,7 @@ export const WalletSetupWizard = ({
         <WalletSetupMnemonicIntroStep
           onBack={moveBack}
           onNext={() => {
-            analytics.sendEventToPostHog(postHogOnboardingActions[setupType].PASSPHRASE_INTRO_NEXT_CLICK, {
-              view: ExtensionViews.Extended
-            });
+            analytics.sendEventToPostHog(postHogOnboardingActions[setupType].PASSPHRASE_INTRO_NEXT_CLICK);
             moveForward();
           }}
           translations={walletSetupMnemonicIntroStepTranslations}
@@ -473,9 +470,7 @@ export const WalletSetupWizard = ({
           onBack={moveBack}
           onNext={(result) => {
             setMnemonicLength(result.recoveryPhraseLength);
-            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK, {
-              view: ExtensionViews.Extended
-            });
+            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK);
             moveForward();
           }}
           translations={walletSetupRecoveryPhraseLengthStepTranslations}

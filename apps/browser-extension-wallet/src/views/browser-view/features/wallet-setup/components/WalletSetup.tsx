@@ -100,9 +100,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
 
   const handleRestoreWallet = () => {
     setIsConfirmRestoreOpen(true);
-    analytics.sendEventToPostHog(postHogOnboardingActions.restore?.SETUP_OPTION_CLICK, {
-      view: ExtensionViews.Extended
-    });
+    analytics.sendEventToPostHog(postHogOnboardingActions.restore?.SETUP_OPTION_CLICK);
   };
   const handleStartHardwareOnboarding = () => setIsDappConnectorWarningOpen(true);
 
@@ -165,9 +163,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
               confirmLabel={translate('browserView.walletSetup.confirmRestoreModal.confirm')}
               onCancel={() => {
                 setIsConfirmRestoreOpen(false);
-                analytics.sendEventToPostHog(postHogOnboardingActions.restore?.RESTORE_MULTI_ADDR_CANCEL_CLICK, {
-                  view: ExtensionViews.Extended
-                });
+                analytics.sendEventToPostHog(postHogOnboardingActions.restore?.RESTORE_MULTI_ADDR_CANCEL_CLICK);
               }}
               onConfirm={() => {
                 setIsConfirmRestoreOpen(false);
