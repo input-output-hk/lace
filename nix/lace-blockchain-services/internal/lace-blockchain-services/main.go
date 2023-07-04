@@ -368,6 +368,7 @@ type ManagedChild struct {
 	LogModifier func(string) string // e.g. to drop redundant timestamps
 	AfterExit   func()
 	TerminateOnWindowsByClosingStdin bool
+	ForceKillAfter time.Duration // graceful exit timeout, after which we SIGKILL the child
 }
 
 type HealthStatus struct {
@@ -548,6 +549,7 @@ func manageChildren(comm CommChannels_Manager) {
 					},
 					AfterExit: func() {},
 					TerminateOnWindowsByClosingStdin: true,
+					ForceKillAfter: 10 * time.Second,
 				}
 			}(),
 			func() ManagedChild {
@@ -599,6 +601,7 @@ func manageChildren(comm CommChannels_Manager) {
 						comm.SetOgmiosDashboard <- ""
 					},
 					TerminateOnWindowsByClosingStdin: false,
+					ForceKillAfter: 5 * time.Second,
 				}
 			}(),
 /* -- cardano-services temporarily turned off, just to test the Ogmios integration on Windows --
@@ -656,6 +659,7 @@ func manageChildren(comm CommChannels_Manager) {
 						comm.SetBackendUrl <- ""
 					},
 					TerminateOnWindowsByClosingStdin: false,
+					ForceKillAfter: 5 * time.Second,
 				}
 			}(),
 */
@@ -693,7 +697,8 @@ func manageChildren(comm CommChannels_Manager) {
 			childPid := 0
 			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(),
 				child.LogModifier, outputLines, terminateCh, &childPid,
-				child.TerminateOnWindowsByClosingStdin)
+				child.TerminateOnWindowsByClosingStdin,
+				child.ForceKillAfter)
 			defer func() {
 				if !childDidExit {
 					child.StatusCh <- "terminating…"
@@ -867,7 +872,7 @@ func childProcess(
 	path string, argv []string, extraEnv []string,
 	logModifier func(string) string, // e.g. to drop redundant timestamps
 	outputLines chan<- string, terminate <-chan struct{}, pid *int,
-	terminateOnWindowsByClosingStdin bool,
+	terminateOnWindowsByClosingStdin bool, gracefulExitTimeout time.Duration,
 ) {
 	defer close(outputLines)
 
@@ -946,7 +951,22 @@ func childProcess(
 		} else {
 			cmd.Process.Signal(syscall.SIGTERM)
 		}
-		<-waitDone
+
+		doForceKill := make(chan struct{}, 1)
+		go func() {
+			time.Sleep(gracefulExitTimeout)
+			doForceKill <- struct{}{}
+		}()
+		select {
+		case <-doForceKill:
+			fmt.Printf("%s[%d]: %s[%d] did not exit gracefully in %s, killing it forcefully...\n",
+				OurLogPrefix, os.Getpid(),
+				filepath.Base(path), cmd.Process.Pid, gracefulExitTimeout)
+			// In a rare event that it hangs, we cannot afford a deadlock here:
+			go cmd.Process.Kill()
+			<-waitDone
+		case <-waitDone:
+		}
 	case <-waitDone:
 	}
 }
