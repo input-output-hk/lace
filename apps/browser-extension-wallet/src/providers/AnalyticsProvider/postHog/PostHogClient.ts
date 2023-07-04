@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import posthog from 'posthog-js';
 import { Wallet } from '@lace/cardano';
-import { EnhancedAnalyticsOptInStatus, Metadata, PostHogAction } from '../analyticsTracker';
+import { EnhancedAnalyticsOptInStatus, PostHogAction, PostHogMetadata } from '../analyticsTracker';
 import {
   BASIC_ANALYTICS_CONFIG,
   ENHANCED_ANALYTICS_CONFIG,
@@ -47,7 +47,7 @@ export class PostHogClient {
     console.debug('[ANALYTICS] Logging page navigation event to PostHog', pageTitle);
 
     posthog.capture('pageview', {
-      ...this.getEventMetadata(),
+      ...(await this.getEventMetadata()),
       action_name: pageTitle
     });
   };
@@ -58,9 +58,8 @@ export class PostHogClient {
     }
 
     const payload = {
-      ...this.getEventMetadata(),
-      ...properties,
-      distinct_id: await this.userIdService.getId()
+      ...(await this.getEventMetadata()),
+      ...properties
     };
 
     console.debug('[ANALYTICS] Logging event to PostHog', action, payload);
@@ -86,9 +85,10 @@ export class PostHogClient {
     return NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
   }
 
-  protected getEventMetadata(): Metadata {
+  protected async getEventMetadata(): Promise<PostHogMetadata> {
     return {
-      url: window.location.href
+      url: window.location.href,
+      distinct_id: await this.userIdService.getId()
     };
   }
 }

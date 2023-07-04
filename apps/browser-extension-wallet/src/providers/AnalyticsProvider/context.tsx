@@ -47,7 +47,7 @@ export const AnalyticsProvider = ({
   }, [optedInForEnhancedAnalytics, analyticsTracker]);
 
   useEffect(() => {
-    analyticsTracker.setSiteId(currentChain);
+    analyticsTracker.setChain(currentChain);
   }, [currentChain, analyticsTracker]);
 
   return <AnalyticsContext.Provider value={analyticsTracker}>{children}</AnalyticsContext.Provider>;

@@ -38,24 +38,24 @@ export class AnalyticsTracker {
 
   async sendPageNavigationEvent(path: string): Promise<void> {
     await Promise.all([
-      this.matomoClient.sendPageNavigationEvent(path),
-      this.postHogClient.sendPageNavigationEvent(path)
+      this.matomoClient?.sendPageNavigationEvent(path),
+      this.postHogClient?.sendPageNavigationEvent(path)
     ]);
   }
 
   // TODO: rename to sendEventToMatomo  (https://input-output.atlassian.net/browse/LW-7197)
   async sendEvent(props: SendEventProps): Promise<void> {
-    await this.matomoClient.sendEvent(props);
+    await this.matomoClient?.sendEvent(props);
     await this.userIdService.extendLifespan();
   }
 
   async sendEventToPostHog(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
-    await this.postHogClient.sendEvent(action, properties);
+    await this.postHogClient?.sendEvent(action, properties);
     await this.userIdService.extendLifespan();
   }
 
-  setSiteId(chain: Wallet.Cardano.ChainId): void {
-    this.matomoClient.setChain(chain);
-    this.postHogClient.setChain(chain);
+  setChain(chain: Wallet.Cardano.ChainId): void {
+    this.matomoClient?.setChain(chain);
+    this.postHogClient?.setChain(chain);
   }
 }

@@ -56,3 +56,8 @@ export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password';
 export type PostHogActionsKeys = 'ANALYTICS_AGREE_CLICK' | 'ANALYTICS_SKIP_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
+export type PostHogMetadata = {
+  // eslint-disable-next-line camelcase
+  distinct_id?: string;
+  url: string;
+};
