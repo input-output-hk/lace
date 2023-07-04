@@ -3,7 +3,6 @@
 package main
 
 import (
-	"syscall"
 	"time"
 	"gopkg.in/natefinch/npipe.v2"
 )

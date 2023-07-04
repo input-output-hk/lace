@@ -528,9 +528,9 @@ func manageChildren(comm CommChannels_Manager) {
 							comm.CardanoNodeStatus <- textual + " · " + sp
 						}
 						return LogMonitorStatus {
-							// XXX: for whatever reason, cardano-node is not exiting
-							// on Windows, but instead hangs, after closing the
-							// immutable DB; let’s kill it then, as it’s safe
+							// XXX: for whatever reason, cardano-node is not always
+							// exiting on Windows, but instead hangs, after closing
+							// the immutable DB; let’s kill it then, as it’s safe
 							ForceKill: (runtime.GOOS == "windows" &&
 								strings.Index(line, "Closed Immutable DB") != -1),
 						}
@@ -708,10 +708,13 @@ func manageChildren(comm CommChannels_Manager) {
 					fmt.Printf("%s[%d]: %s\n", child.LogPrefix, childPid, line)
 					lmStatus := child.LogMonitor(line)
 					if lmStatus.ForceKill {
-						rawProcess, err := os.FindProcess(childPid)
-						if err == nil {
-							rawProcess.Kill()
-						}
+						// In a rare event that it hangs, we cannot afford a deadlock here:
+						go func() {
+							rawProcess, err := os.FindProcess(childPid)
+							if err == nil {
+								rawProcess.Kill()
+							}
+						}()
 					}
 				}
 				childDidExit = true
@@ -937,7 +940,8 @@ func childProcess(
 			if terminateOnWindowsByClosingStdin {
 				stdin.Close()
 			} else {
-				cmd.Process.Kill()
+				// In a rare event that it hangs, we cannot afford a deadlock here:
+				go cmd.Process.Kill()
 			}
 		} else {
 			cmd.Process.Signal(syscall.SIGTERM)
