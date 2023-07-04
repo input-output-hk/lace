@@ -17,11 +17,11 @@ type SetupProps = PropsWithChildren<StakingProps>;
 export const Setup = ({ language, theme, children }: SetupProps) => {
   const { i18n, loading } = useI18n(language);
   const { walletStoreInMemoryWallet, walletStoreWalletUICardanoCoin } = useOutsideHandles();
-  const { setCurrentPortfolio } = useDelegationPortfolioStore();
+  const { setCurrentPortfolio } = useDelegationPortfolioStore((s) => s.mutators);
   const rewardAccounts = useObservable(walletStoreInMemoryWallet.delegation.rewardAccounts$);
 
   useEffect(() => {
-    setCurrentPortfolio(rewardAccounts, walletStoreWalletUICardanoCoin);
+    setCurrentPortfolio({ cardanoCoin: walletStoreWalletUICardanoCoin, rewardAccountInfo: rewardAccounts });
   }, [rewardAccounts, setCurrentPortfolio, walletStoreWalletUICardanoCoin]);
 
   if (loading) {

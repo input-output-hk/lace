@@ -17,7 +17,7 @@ const dummyPool2: Cip17Pool = {
 describe('delegationPortfolioStore', () => {
   beforeEach(() => {
     const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.clearDraft());
+    act(() => result.current.mutators.clearDraft());
   });
 
   it('initializes the portfolio preferences', () => {
@@ -28,16 +28,16 @@ describe('delegationPortfolioStore', () => {
   it('adds pools to portfolio', () => {
     const newLength = 2;
     const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.addPoolToDraft(dummyPool1));
-    act(() => result.current.addPoolToDraft(dummyPool2));
+    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
+    act(() => result.current.mutators.addPoolToDraft(dummyPool2));
     expect(result.current.draftPortfolio.length).toEqual(newLength);
   });
 
   it('removes pool from portfolio', () => {
     const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.addPoolToDraft(dummyPool1));
-    act(() => result.current.addPoolToDraft(dummyPool2));
-    act(() => result.current.removePoolFromDraft({ poolId: dummyPool1.id }));
+    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
+    act(() => result.current.mutators.addPoolToDraft(dummyPool2));
+    act(() => result.current.mutators.removePoolFromDraft({ poolId: dummyPool1.id }));
     expect(result.current.draftPortfolio.length).toEqual(1);
     expect(result.current.draftPortfolio[0]?.id).toEqual(dummyPool2.id);
   });
@@ -45,17 +45,17 @@ describe('delegationPortfolioStore', () => {
   it('updates the weight of specific pool', async () => {
     const newWeight = 0.75;
     const { result } = renderHook(() => useDelegationPortfolioStore((state) => state));
-    act(() => result.current.addPoolToDraft(dummyPool1));
-    act(() => result.current.addPoolToDraft(dummyPool2));
-    act(() => result.current.updatePoolWeight({ poolId: dummyPool1.id, weight: 0.75 }));
+    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
+    act(() => result.current.mutators.addPoolToDraft(dummyPool2));
+    act(() => result.current.mutators.updatePoolWeight({ poolId: dummyPool1.id, weight: 0.75 }));
     expect(result.current.draftPortfolio[0]?.weight).toEqual(newWeight);
     expect(result.current.draftPortfolio[1]?.weight).toEqual(dummyPool2.weight);
   });
 
   it('clears the portfolio', () => {
     const { result } = renderHook(() => useDelegationPortfolioStore((state) => state));
-    act(() => result.current.addPoolToDraft(dummyPool1));
-    act(() => result.current.clearDraft());
+    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
+    act(() => result.current.mutators.clearDraft());
     expect(result.current.draftPortfolio.length).toEqual(0);
   });
 });

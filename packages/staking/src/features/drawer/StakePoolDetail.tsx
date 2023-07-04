@@ -204,6 +204,8 @@ type ButtonNames = 'addStakingPool' | 'manageDelegation' | 'stakeOnThisPool' | '
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 const tmpNoop = () => {};
+const getSpecOverride = (specOrBool: Partial<ActionButtonSpec> | boolean) =>
+  typeof specOrBool === 'boolean' ? {} : specOrBool;
 // TODO: translations for buttons labels
 const makeActionButtons = (
   t: TFunction,
@@ -213,7 +215,7 @@ const makeActionButtons = (
     selectForMultiStaking,
     stakeOnThisPool,
     unselectPool,
-  }: Record<ButtonNames, boolean>
+  }: Record<ButtonNames, boolean | Partial<ActionButtonSpec>>
 ): ActionButtonSpec[] =>
   (
     [
@@ -221,26 +223,31 @@ const makeActionButtons = (
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-stake-btn',
         label: t('drawer.details.stakeOnPoolButton'),
+        ...getSpecOverride(stakeOnThisPool),
       },
       selectForMultiStaking && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-select-for-multi-staking-btn',
         label: 'Select pool for multi-staking',
+        ...getSpecOverride(selectForMultiStaking),
       },
       addStakingPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-add-staking-pool-btn',
         label: 'Add staking pool',
+        ...getSpecOverride(addStakingPool),
       },
       unselectPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-unselect-pool-btn',
         label: 'Unselect pool',
+        ...getSpecOverride(unselectPool),
       },
       manageDelegation && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-manage-delegation-btn',
         label: 'Manage delegation',
+        ...getSpecOverride(manageDelegation),
       },
     ] as (ActionButtonSpec | false)[]
   ).filter(Boolean) as ActionButtonSpec[];
@@ -248,9 +255,10 @@ const makeActionButtons = (
 export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { setNoFundsVisible } = useStakePoolDetails();
-  const { delegationStoreSelectedStakePoolDetails: selectedPool, walletStoreGetKeyAgentType } = useOutsideHandles();
+  const { delegationStoreSelectedStakePoolDetails: poolDetails, walletStoreGetKeyAgentType } = useOutsideHandles();
   const { ableToSelectForDraft, ableToStakeOnlyOnThisPool, draftEmpty, draftFull, poolSelectedForDraft } =
-    useDelegationPortfolioStore(makeSelector(selectedPool));
+    useDelegationPortfolioStore(makeSelector(poolDetails));
+  const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
 
   const isInMemory = useMemo(
     () => walletStoreGetKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
@@ -265,6 +273,16 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
     }
   }, [canDelegate, onStake, setNoFundsVisible]);
 
+  const onSelectPool = useCallback(() => {
+    const { id, name, ticker } = poolDetails;
+    portfolioMutators.addPoolToDraft({
+      id,
+      name,
+      ticker,
+      weight: 1,
+    });
+  }, [poolDetails, portfolioMutators]);
+
   useEffect(() => {
     if (isInMemory) return;
     const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
@@ -276,13 +294,22 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
   const [callToActionButton, ...secondaryButtons] = useMemo(
     () =>
       makeActionButtons(t, {
-        addStakingPool: ableToSelectForDraft && !draftEmpty,
+        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onStake },
         manageDelegation: draftFull,
-        selectForMultiStaking: ableToSelectForDraft && draftEmpty,
+        selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelectPool },
         stakeOnThisPool: ableToStakeOnlyOnThisPool,
         unselectPool: poolSelectedForDraft,
       }),
-    [t, ableToSelectForDraft, draftEmpty, draftFull, ableToStakeOnlyOnThisPool, poolSelectedForDraft]
+    [
+      t,
+      ableToSelectForDraft,
+      draftEmpty,
+      onStake,
+      draftFull,
+      onSelectPool,
+      ableToStakeOnlyOnThisPool,
+      poolSelectedForDraft,
+    ]
   );
 
   return (
