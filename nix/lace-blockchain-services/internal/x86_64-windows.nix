@@ -92,11 +92,22 @@ in rec {
     cp -Lr ${common.networkConfigs} $out/cardano-node-config
   '';
 
-  # For easier testing, skipping the installer:
-  lace-blockchain-services-zip = pkgs.runCommand "lace-blockchain-services.zip" {} ''
+  # For easier testing, skipping the installer (for now):
+  lace-blockchain-services-zip = let
+    revShort =
+      if inputs.self ? shortRev
+      then builtins.substring 0 9 inputs.self.rev
+      else "dirty";
+  in pkgs.runCommand "lace-blockchain-services.zip" {} ''
     mkdir -p $out
+    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.zip
+
     ln -s ${lace-blockchain-services} lace-blockchain-services
-    ${with pkgs; lib.getExe zip} -q -r $out/lace-blockchain-services.zip lace-blockchain-services
+    ${with pkgs; lib.getExe zip} -q -r $target lace-blockchain-services
+
+    # Make it downloadable from Hydra:
+    mkdir -p $out/nix-support
+    echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
   '';
 
 }
