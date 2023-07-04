@@ -22,7 +22,6 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
-  PostHogAction,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
@@ -36,6 +35,7 @@ import { ILocalStorage } from '@src/types';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import * as process from 'process';
+import { SendOboardingAnalyticsEvent } from '../types';
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -62,7 +62,7 @@ const { WalletSetup: Events } = AnalyticsEventNames;
 export interface WalletSetupWizardProps {
   setupType: 'create' | 'restore' | 'forgot_password';
   onCancel: () => void;
-  sendAnalytics: (eventName: string, postHogAction?: PostHogAction, value?: number) => void;
+  sendAnalytics: SendOboardingAnalyticsEvent;
   initialStep?: WalletSetupSteps;
 }
 

@@ -17,6 +17,7 @@ import {
 import { ILocalStorage } from '@src/types';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { Portal } from './Portal';
+import { SendOboardingAnalyticsEvent } from '../types';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -117,6 +118,10 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
     }
   };
 
+  const getSendAnalyticsHandler: (eventCategory: SetupAnalyticsCategories) => SendOboardingAnalyticsEvent =
+    (eventCategory) => (event, postHogAction, value) =>
+      sendAnalytics(eventCategory, event, value, postHogAction);
+
   return (
     <Portal>
       <Switch>
@@ -173,9 +178,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupWizard
             setupType="create"
             onCancel={cancelWalletFlow}
-            sendAnalytics={(event: string, postHogAction?: PostHogAction, value?: number) =>
-              sendAnalytics(AnalyticsEventCategories.WALLET_CREATE, event, value, postHogAction)
-            }
+            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.WALLET_CREATE)}
             initialStep={initialStep}
           />
         </Route>
@@ -183,9 +186,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupWizard
             setupType={isForgotPasswordFlow ? 'forgot_password' : 'restore'}
             onCancel={cancelWalletFlow}
-            sendAnalytics={(event: string, postHogAction?: PostHogAction, value?: number) =>
-              sendAnalytics(AnalyticsEventCategories.WALLET_RESTORE, event, value, postHogAction)
-            }
+            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.WALLET_RESTORE)}
             initialStep={initialStep}
           />
         </Route>
@@ -193,9 +194,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <HardwareWalletFlow
             onCancel={cancelWalletFlow}
             onAppReload={() => location.reload()}
-            sendAnalytics={(event: string, postHogAction?: PostHogAction, value?: number) =>
-              sendAnalytics(AnalyticsEventCategories.HW_CONNECT, event, value, postHogAction)
-            }
+            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.HW_CONNECT)}
           />
         </Route>
       </Switch>
