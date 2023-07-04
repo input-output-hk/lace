@@ -22,7 +22,6 @@ import { useTranslation } from 'react-i18next';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
-  ExtensionViews,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
@@ -241,9 +240,7 @@ export const HardwareWalletFlow = ({
         onConnect={handleConnect}
         onNext={() => {
           sendAnalytics(Events.SELECT_MODEL_NEXT);
-          analytics.sendEventToPostHog(postHogOnboardingActions.hw?.CONNECT_HW_NEXT_CLICK, {
-            view: ExtensionViews.Extended
-          });
+          analytics.sendEventToPostHog(postHogOnboardingActions.hw?.CONNECT_HW_NEXT_CLICK);
           navigateTo('accounts');
         }}
         isNextEnable={!!deviceConnection}
