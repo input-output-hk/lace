@@ -17,7 +17,7 @@ export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set
       draftPortfolio: draftPortfolio.filter((pool) => pool.id !== poolId),
     })),
   setCurrentPortfolio: (rewardAccountInfo, cardanoCoin) => {
-    if (rewardAccountInfo.length === 0) return;
+    if (!rewardAccountInfo || rewardAccountInfo.length === 0) return;
     const delegatees = rewardAccountInfo.map((r) => r.delegatee).filter(Boolean) as Wallet.Cardano.Delegatee[];
     const stakePools = delegatees
       .map(({ currentEpoch, nextEpoch, nextNextEpoch }) => nextNextEpoch || nextEpoch || currentEpoch)

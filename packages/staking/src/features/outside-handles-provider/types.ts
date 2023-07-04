@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 
-type SelectedStakePoolDetails = {
+export type SelectedStakePoolDetails = {
   delegators: number | string;
   description: string;
   hexId: string;

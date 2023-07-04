@@ -1,9 +1,12 @@
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Banner, Button, Ellipsis } from '@lace/common';
+import { Banner, Ellipsis } from '@lace/common';
+import { Button, Flex } from '@lace/ui';
+import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
+import { SelectedStakePoolDetails } from '../outside-handles-provider/types';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
@@ -176,11 +179,78 @@ type StakePoolDetailFooterProps = {
   canDelegate?: boolean;
 };
 
+type SelectorParams = Parameters<Parameters<typeof useDelegationPortfolioStore>[0]>[0];
+
+const makeSelector =
+  (selectedPool: SelectedStakePoolDetails) =>
+  ({ currentPortfolio, draftPortfolio }: SelectorParams) => {
+    const poolInCurrentPortfolio = currentPortfolio.some(({ id }) => id === selectedPool.id);
+    const poolSelectedForDraft = draftPortfolio.some(({ id }) => id === selectedPool.id);
+    // TODO: use max pools count constant here
+    // eslint-disable-next-line no-magic-numbers
+    const draftFull = draftPortfolio.length === 5;
+
+    return {
+      ableToSelectForDraft: !poolSelectedForDraft && !draftFull,
+      ableToStakeOnlyOnThisPool: !poolInCurrentPortfolio || currentPortfolio.length > 1,
+      draftEmpty: draftPortfolio.length === 0,
+      draftFull,
+      poolSelectedForDraft,
+    };
+  };
+
+type ActionButtonSpec = { callback: () => void; dataTestId: string; label: string };
+type ButtonNames = 'addStakingPool' | 'manageDelegation' | 'stakeOnThisPool' | 'selectForMultiStaking' | 'unselectPool';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const tmpNoop = () => {};
+// TODO: translations for buttons labels
+const makeActionButtons = (
+  t: TFunction,
+  {
+    addStakingPool,
+    manageDelegation,
+    selectForMultiStaking,
+    stakeOnThisPool,
+    unselectPool,
+  }: Record<ButtonNames, boolean>
+): ActionButtonSpec[] =>
+  (
+    [
+      stakeOnThisPool && {
+        callback: tmpNoop,
+        dataTestId: 'stake-pool-details-stake-btn',
+        label: t('drawer.details.stakeOnPoolButton'),
+      },
+      selectForMultiStaking && {
+        callback: tmpNoop,
+        dataTestId: 'stake-pool-details-select-for-multi-staking-btn',
+        label: 'Select pool for multi-staking',
+      },
+      addStakingPool && {
+        callback: tmpNoop,
+        dataTestId: 'stake-pool-details-add-staking-pool-btn',
+        label: 'Add staking pool',
+      },
+      unselectPool && {
+        callback: tmpNoop,
+        dataTestId: 'stake-pool-details-unselect-pool-btn',
+        label: 'Unselect pool',
+      },
+      manageDelegation && {
+        callback: tmpNoop,
+        dataTestId: 'stake-pool-details-manage-delegation-btn',
+        label: 'Manage delegation',
+      },
+    ] as (ActionButtonSpec | false)[]
+  ).filter(Boolean) as ActionButtonSpec[];
+
 export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { setNoFundsVisible } = useStakePoolDetails();
   const { delegationStoreSelectedStakePoolDetails: selectedPool, walletStoreGetKeyAgentType } = useOutsideHandles();
-  const { currentPortfolio } = useDelegationPortfolioStore();
+  const { ableToSelectForDraft, ableToStakeOnlyOnThisPool, draftEmpty, draftFull, poolSelectedForDraft } =
+    useDelegationPortfolioStore(makeSelector(selectedPool));
 
   const isInMemory = useMemo(
     () => walletStoreGetKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
@@ -195,8 +265,6 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
     }
   }, [canDelegate, onStake, setNoFundsVisible]);
 
-  const delegatingToThisPool = currentPortfolio.some(({ id }) => id === selectedPool.id);
-
   useEffect(() => {
     if (isInMemory) return;
     const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
@@ -205,13 +273,31 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
     localStorage.removeItem('TEMP_POOLID');
   }, [isInMemory, onStakeClick]);
 
+  const [callToActionButton, ...secondaryButtons] = useMemo(
+    () =>
+      makeActionButtons(t, {
+        addStakingPool: ableToSelectForDraft && !draftEmpty,
+        manageDelegation: draftFull,
+        selectForMultiStaking: ableToSelectForDraft && draftEmpty,
+        stakeOnThisPool: ableToStakeOnlyOnThisPool,
+        unselectPool: poolSelectedForDraft,
+      }),
+    [t, ableToSelectForDraft, draftEmpty, draftFull, ableToStakeOnlyOnThisPool, poolSelectedForDraft]
+  );
+
   return (
-    <div className={styles.footer}>
-      {!delegatingToThisPool && (
-        <Button data-testid="stake-pool-details-stake-btn" onClick={onStakeClick} className={styles.stakeBtn}>
-          <span>{t('drawer.details.stakeOnPoolButton')}</span>
-        </Button>
+    <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
+      {callToActionButton && (
+        <Button.CallToAction
+          label={callToActionButton.label}
+          data-testid={callToActionButton.dataTestId}
+          onClick={callToActionButton.callback}
+          w={'$fill'}
+        />
       )}
-    </div>
+      {secondaryButtons.map(({ callback, dataTestId, label }) => (
+        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w={'$fill'} />
+      ))}
+    </Flex>
   );
 };

@@ -62,7 +62,7 @@ export type DelegationPortfolioState = Immutable<{
 }>;
 
 type DelegationPortfolioMutations = {
-  setCurrentPortfolio: (rewardAccountInfo: Wallet.Cardano.RewardAccountInfo[], cardanoCoin: Wallet.CoinId) => void;
+  setCurrentPortfolio: (rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[], cardanoCoin: Wallet.CoinId) => void;
   addPoolToDraft: (pool: Cip17Pool) => void;
   removePoolFromDraft: ({ poolId }: { poolId: PoolIdHex }) => void;
   updatePoolWeight: ({ poolId, weight }: { poolId: PoolIdHex; weight: number }) => void;
