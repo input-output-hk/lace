@@ -5,14 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import isNumber from 'lodash/isNumber';
 import { Wallet } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
-import {
-  useRedirection,
-  useObservable,
-  useBalances,
-  useFetchCoinPrice,
-  useDelegationDetails,
-  useStakingRewards
-} from '@hooks';
+import { useRedirection, useBalances, useFetchCoinPrice, useDelegationDetails, useStakingRewards } from '@hooks';
 import { useWalletStore } from '@stores';
 import { networkInfoStatusSelector, stakePoolResultsSelector } from '@stores/selectors/staking-selectors';
 import { walletBalanceTransformer } from '@src/api/transformers';
@@ -30,6 +23,7 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
+import { useObservable } from '@lace/common';
 
 const STORAGE_MEMO_ENTRY_NAME = 'hideStakingHwDialog';
 const MIN_CHARS_TO_SEARCH = 3;
@@ -156,7 +150,7 @@ export const DelegationContainer = (): React.ReactElement => {
         hasNoFunds={hasNoFunds}
         isDelegating={isDelegating}
         canDelegate={canDelegate}
-        walletAddress={walletInfo?.address}
+        walletAddress={walletInfo?.addresses[0].address}
         fiat={priceResult?.cardano?.price}
         onStakePoolSelect={() => onStakePoolSelect(delegationDetails)}
         onStakePoolClick={(poolId: string) => {

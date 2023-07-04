@@ -1,27 +1,8 @@
 import webTester from '../../actor/webTester';
-import { AddressCount } from '../../elements/addressbook/addressCount';
 import { AddressListRow } from '../../elements/addressbook/AddressListRow';
-import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 
 class AddressBookAssert {
-  assertSeeAddressBookTitle = async () => {
-    await webTester.waitUntilSeeElementContainingText(await t('addressBook.sectionTitle'));
-  };
-
-  assertAddAddressTitle = async () => {
-    await webTester.waitUntilSeeElementContainingText(await t('addressBook.empty.addNewAddress'));
-  };
-
-  assertAddressBookEmpty = async () => {
-    await webTester.dontSeeElement('[data-testid="address-list-item"]');
-  };
-
-  assertSeeAddressCount = async (expectedCount: number) => {
-    const currentValue = (await new AddressCount().getCounter()) as string;
-    await expect(currentValue.slice(1, -1)).to.equal(expectedCount);
-  };
-
   assertSeeAddressOnTheList = async (name: string, address: string, shouldSee: boolean) => {
     await browser.pause(500);
     const addressRow = new AddressListRow(name);

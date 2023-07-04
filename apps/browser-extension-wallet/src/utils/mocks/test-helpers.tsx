@@ -16,10 +16,14 @@ import { Percent } from '@cardano-sdk/util';
 
 export const mockWalletInfoTestnet: WalletInfo = {
   name: 'testnet wallet',
-  address: Wallet.Cardano.PaymentAddress(
-    'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
-  ),
-  rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj')
+  addresses: [
+    {
+      address: Wallet.Cardano.PaymentAddress(
+        'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
+      ),
+      rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj')
+    }
+  ] as Wallet.KeyManagement.GroupedAddress[]
 };
 
 export const mockKeyAgentDataTestnet: Wallet.KeyManagement.SerializableKeyAgentData = {
@@ -499,8 +503,9 @@ export const outgoingTransactionOutput: any = {
       addr: 'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95'
     }
   ],
-  walletAddress:
-    'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95',
+  walletAddresses: [
+    'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95'
+  ],
   incomingTransaction: false
 };
 
@@ -524,8 +529,9 @@ export const incomingTransactionOutput: any = {
       addr: 'addr_test1qqt3r9kd56aq9ajynjkz8hdfw3kc0pcv3tpzug8azxls62tvvz7nw9gmznn65g4ksrrfvyzhz52knc3mqxdyya47gz2qmcjmcq'
     }
   ],
-  walletAddress:
-    'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95',
+  walletAddresses: [
+    'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95'
+  ],
   incomingTransaction: true
 };
 
@@ -591,7 +597,6 @@ export const mockAssetDetails = {
   balance: '9998999995',
   fiatBalance: '-',
   sortBy: {
-    policyId: 'f6f49b186751e61f1fb8c64e7504e771f968cea9f4d11f5222b169e3',
     metadataName: 'tHOSKY',
     fingerprint: 'asset15qks69wv4vk7clnhp4lq7x0rpk6vs0s6exw0ry',
     amount: '9998999995'

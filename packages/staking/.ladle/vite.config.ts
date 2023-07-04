@@ -19,7 +19,11 @@ export const ladleViteConfig = {
       include: './**/*.{ts,tsx,json}',
       overrideConfigFile: '.eslintrc.cjs',
     }),
-    svgr(),
+    svgr({
+      svgrOptions: {
+        icon: true,
+      },
+    }),
   ],
 };
 

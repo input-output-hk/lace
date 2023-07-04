@@ -1,4 +1,4 @@
-/* eslint-disable consistent-return */
+/* eslint-disable consistent-return, unicorn/no-array-reduce */
 import {
   createTxInspector,
   delegationInspector,
@@ -36,10 +36,10 @@ export const getTxDirection = ({ type }: TxTypeProps): TxDirection => {
   }
 };
 
-const selfTxInspector = (address: Wallet.Cardano.PaymentAddress) => (tx: Wallet.Cardano.HydratedTx) => {
-  const notOwnInputs = tx.body.inputs.some((input) => input.address !== address);
+const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => (tx: Wallet.Cardano.HydratedTx) => {
+  const notOwnInputs = tx.body.inputs.some((input) => !addresses.includes(input.address));
   if (notOwnInputs) return false;
-  const notOwnOutputs = tx.body.outputs.some((output) => output.address !== address);
+  const notOwnOutputs = tx.body.outputs.some((output) => !addresses.includes(output.address));
   return !notOwnOutputs;
 };
 
@@ -47,24 +47,32 @@ export const inspectTxType = ({
   walletAddresses,
   tx
 }: {
-  walletAddresses: {
-    address: Wallet.Cardano.PaymentAddress;
-    rewardAccount: Wallet.Cardano.RewardAccount;
-  };
+  walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
 }): TransactionType | 'self-rewards' => {
+  const { paymentAddresses, rewardAccounts } = walletAddresses.reduce(
+    (acc, curr) => ({
+      paymentAddresses: [...acc.paymentAddresses, curr.address],
+      rewardAccounts: [...acc.rewardAccounts, curr.rewardAccount]
+    }),
+    { paymentAddresses: [], rewardAccounts: [] }
+  );
+
   const inspectionProperties = createTxInspector({
-    sent: sentInspector({ addresses: [walletAddresses.address], rewardAccounts: [walletAddresses.rewardAccount] }),
+    sent: sentInspector({
+      addresses: paymentAddresses,
+      rewardAccounts
+    }),
     totalWithdrawals: withdrawalInspector,
     delegation: delegationInspector,
     stakeKeyRegistration: stakeKeyRegistrationInspector,
     stakeKeyDeregistration: stakeKeyDeregistrationInspector,
-    selfTransaction: selfTxInspector(walletAddresses.address)
+    selfTransaction: selfTxInspector(paymentAddresses)
   })(tx);
 
   const withRewardsWithdrawal =
     inspectionProperties.totalWithdrawals > BigInt(0) &&
-    hasWalletStakeAddress(tx.body.withdrawals, walletAddresses.rewardAccount);
+    walletAddresses.some((addr) => hasWalletStakeAddress(tx.body.withdrawals, addr.rewardAccount));
 
   if (inspectionProperties.sent.inputs.length > 0) {
     switch (true) {
@@ -90,21 +98,23 @@ export const inspectTxType = ({
 };
 
 export const inspectTxValues = ({
-  address,
+  addresses,
   tx,
   direction
 }: {
-  address: Wallet.Cardano.PaymentAddress;
+  addresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
   direction: TxDirection;
 }): Wallet.Cardano.Value => {
-  const addresses =
+  const paymentAddresses = addresses.map((addr) => addr.address);
+
+  const targetAddresses =
     direction === TxDirections.Outgoing
-      ? tx.body.outputs.filter((item) => item.address !== address).map((item) => item.address)
-      : [address];
+      ? tx.body.outputs.filter((item) => !paymentAddresses.includes(item.address)).map((item) => item.address)
+      : paymentAddresses;
 
   const inspectionProperties = createTxInspector({
-    totalOutputsValue: totalAddressOutputsValueInspector(addresses)
+    totalOutputsValue: totalAddressOutputsValueInspector(targetAddresses)
   })(tx);
 
   return inspectionProperties.totalOutputsValue;

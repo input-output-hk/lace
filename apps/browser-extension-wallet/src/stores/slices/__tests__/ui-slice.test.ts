@@ -40,11 +40,11 @@ describe('Testing ui slice', () => {
     expect(result.current.walletUI.appMode).toEqual(APP_MODE_POPUP);
     expect(result.current.walletUI.areBalancesVisible).toEqual(true);
     expect(result.current.walletUI.canManageBalancesVisibility).toEqual(true);
-    expect(result.current.walletUI.hiddenBalancesPlaceholder).toEqual('*');
     expect(result.current.walletUI.networkConnection).toEqual(NetworkConnectionStates.CONNNECTED);
     expect(typeof result.current.setCardanoCoin).toEqual('function');
     expect(typeof result.current.setBalancesVisibility).toEqual('function');
     expect(typeof result.current.setNetworkConnection).toEqual('function');
+    expect(typeof result.current.walletUI.getHiddenBalancePlaceholder).toEqual('function');
   });
 
   describe('Cardano coin', () => {
@@ -73,6 +73,23 @@ describe('Testing ui slice', () => {
       });
       expect(result.current.walletUI.areBalancesVisible).toEqual(false);
       expect(localStorageSetSpy).toHaveBeenCalledWith('hideBalance', 'true');
+    });
+
+    test('should return hidden balance placeholder with default and custom length', async () => {
+      const useUiStoreHook = create<UISlice>((set, get) => uiSlice({ set, get }, props));
+      const { result } = renderHook(() => useUiStoreHook());
+
+      expect(result.current.walletUI.getHiddenBalancePlaceholder()).toEqual('********');
+      expect(result.current.walletUI.getHiddenBalancePlaceholder(5)).toEqual('*****');
+      expect(result.current.walletUI.getHiddenBalancePlaceholder(10)).toEqual('**********');
+    });
+
+    test('should return hidden balance placeholder with default and custom placeholder character', async () => {
+      const useUiStoreHook = create<UISlice>((set, get) => uiSlice({ set, get }, props));
+      const { result } = renderHook(() => useUiStoreHook());
+
+      expect(result.current.walletUI.getHiddenBalancePlaceholder(undefined, '?')).toEqual('????????');
+      expect(result.current.walletUI.getHiddenBalancePlaceholder(5, '_')).toEqual('_____');
     });
   });
 });
