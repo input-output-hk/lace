@@ -7,8 +7,8 @@ let
   inherit (pkgs) lib;
 in rec {
   common = import ./common.nix { inherit inputs targetSystem; };
-  package = pkgs.runCommand "unimplemented" {} "echo unimplemented && exit 1";
-  installer = package;
+  package = lace-blockchain-services;
+  installer = lace-blockchain-services-zip;
   inherit (common) cardano-node ogmios;
 
   # XXX: we have to be a bit creative to cross-compile Go code for Windows:
