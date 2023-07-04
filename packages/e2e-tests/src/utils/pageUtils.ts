@@ -1,5 +1,6 @@
 import ExtendedView from '../page/extendedView';
 import PopupView from '../page/popupView';
+import { browser } from '@wdio/globals';
 
 const visitPageInExtendedMode = async (
   page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book'
@@ -51,3 +52,5 @@ export const visit = async (
 ): Promise<void> => {
   await (mode === 'extended' ? visitPageInExtendedMode(page) : visitPageInPopupMode(page));
 };
+
+export const isPopupMode = async (): Promise<boolean> => (await browser.getUrl()).includes('popup.html');

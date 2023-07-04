@@ -1,13 +1,12 @@
 import { Then, When } from '@cucumber/cucumber';
 import webTester from '../actor/webTester';
 import addressBookExtendedAssert from '../assert/addressBook/addressBookExtendedAssert';
-import addressDetailsExtendedAssert from '../assert/addressBook/addressDetailsExtendedAssert';
 import addressAddNewExtendedAssert from '../assert/addressBook/addressAddNewExtendedAssert';
 import { AddressRow } from '../elements/addressbook/extendedview/AddressRow';
 import addressBookExtendedPageObject from '../pageobject/addressBookExtendedPageObject';
 import { FieldNameToCallback, fieldNameToLocator } from '../support/gherkin';
 import commonAssert from '../assert/commonAssert';
-import { AddressDetails } from '../elements/addressbook/extendedview/AddressDetails';
+import AddressDetails from '../elements/addressbook/AddressDetails';
 import testContext from '../utils/testContext';
 import { getAddressByName, shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
@@ -30,10 +29,6 @@ Then(/address list is displayed and each row consists of:/, async (rows) => {
 When(/^I click address on the list with name "([^"]*)"$/, async (addressName: string) => {
   const selectedRow = new AddressRow(addressName).addressElement;
   await selectedRow.click();
-});
-
-Then(/I see address detail page/, async () => {
-  await addressDetailsExtendedAssert.assertSeeAddressDetailsPage();
 });
 
 Then(/^I see Add new address form$/, async () => {
@@ -116,9 +111,9 @@ Then(/^address input (\d*) is empty$/, async (inputIndex: number) => {
 });
 
 When(/^I click on "Copy" button on address detail drawer$/, async () => {
-  const address = await new AddressDetails().getAddress();
+  const address = await AddressDetails.address.getText();
   await testContext.save('address', address);
-  await $(new AddressDetails().copyButton().toJSLocator()).click();
+  await AddressDetails.copyButton.click();
 });
 
 Then(/^address is saved to clipboard$/, async () => {
