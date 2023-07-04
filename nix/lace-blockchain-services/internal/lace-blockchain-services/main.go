@@ -1013,11 +1013,20 @@ func openWithDefaultApp(target string) error {
 	case "darwin":
 		cmd = exec.Command("open", target)
 	case "windows":
-		cmd = exec.Command("cmd", "/c", "start", target)
+		// XXX: if we don’t pass it through "explorer.exe", we can’t open the log file
+		// that’s currently being written to; the "explorer.exe" trick does it, though
+		cmd = exec.Command("cmd", "/c", "start", "explorer.exe", target)
 	default:
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
-	return cmd.Run()
+	err := cmd.Run()
+
+	if err != nil {
+		fmt.Printf("%s[%d]: error: failed to open '%s' with a default app: %s\n",
+			OurLogPrefix, os.Getpid(), target, err)
+	}
+
+	return err
 }
 
 func logSystemHealth() {
