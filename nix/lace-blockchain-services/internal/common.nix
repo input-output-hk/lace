@@ -15,10 +15,28 @@ in rec {
   networkConfigs = let
     selectedNetworks = [ "mainnet" "preprod" "preview" ];
     website = cardanoWorldFlake.${buildSystem}.cardano.packages.cardano-config-html-internal;
-  in pkgs.runCommand "network-configs" {} (lib.concatMapStringsSep "\n" (network: ''
+  in pkgs.runCommand "network-configs" {
+    nativeBuildInputs = [ pkgs.jq ];
+  } ((lib.concatMapStringsSep "\n" (network: ''
     mkdir -p $out/${network}
     cp -r ${website}/config/${network}/. $out/${network}
-  '') selectedNetworks);
+  '') selectedNetworks) + (if targetSystem != "x86_64-windows" then "" else ''
+    # Transform P2P topologies to non-P2P (or else, on Windows, we’d require C:\etc\resolv.conf)
+    chmod -R +w $out
+    find $out -type f -name 'topology.*' | while IFS= read -r file ; do
+      addr=$(jq -er '.PublicRoots[0].publicRoots.accessPoints[0].address' "$file") || continue
+      port=$(jq -er '.PublicRoots[0].publicRoots.accessPoints[0].port'    "$file") || continue
+      jq --arg addr "$addr" --argjson port "$port" --null-input \
+        '.Producers = [.addr = $addr | .port = $port | .valency = 1]' > tmp.json
+      mv tmp.json "$file"
+    done
+    find $out -type f -name 'config.*' | while IFS= read -r file ; do
+      if [ "$(jq .EnableP2P "$file")" == "true" ] ; then
+        jq '.EnableP2P = false' "$file" > tmp.json
+        mv tmp.json "$file"
+      fi
+    done
+  ''));
 
   # XXX: they don’t enable aarch64-darwin builds yet:
   cardanoNodeFlake = if targetSystem != "aarch64-darwin" then inputs.cardano-node else let
