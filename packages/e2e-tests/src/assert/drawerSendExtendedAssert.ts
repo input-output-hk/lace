@@ -22,7 +22,9 @@ class DrawerSendExtendedAssert {
     const transactionNewPage = new TransactionNewPage();
     const addressInput = new AddressInput();
     await webTester.seeWebElement(addressInput.input());
-    await webTester.waitUntilSeeElementContainingText(await t('core.destinationAddressInput.recipientAddress'));
+    await expect(await webTester.getTextValueFromElement(addressInput.container())).to.equal(
+      await t('core.destinationAddressInput.recipientAddress')
+    );
     await webTester.seeWebElement(addressInput.ctaButton());
     await coinConfigureAssert.assertSeeCoinConfigure();
     await assetInputAssert.assertSeeAssetInput();
