@@ -80,6 +80,12 @@ type KeysStructure = {
       overviewTitle: '';
     };
   };
+  portfolioBar: {
+    selectedPools: '';
+    maxPools: '';
+    clear: '';
+    next: '';
+  };
 };
 
 export type TranslationKey = ConstructTranslationKeyUnion<KeysStructure>;

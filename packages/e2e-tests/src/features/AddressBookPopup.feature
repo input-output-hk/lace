@@ -21,7 +21,7 @@ Feature: Address book - popup view
   Scenario Outline: Popup-view - Address Book - Edit address: <edited_address>
     Given I have 3 addresses in my address book in popup mode
     When I click address on the list with name "<edited_address>"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     And I fill "<wallet_name>" and "<address>" address details in drawer
     And I click "core.editAddressForm.doneButton" button
     Then I see a toast with message: "browserView.addressBook.toast.editAddress"
@@ -35,15 +35,15 @@ Feature: Address book - popup view
   Scenario: Popup-view - Address Book - Edit address and cancel
     Given I have 3 addresses in my address book in popup mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     When I click "browserView.addressBook.deleteModal.buttons.cancel" button
-    Then I see address detail page
+    Then I see address detail page in popup mode
 
   @LW-4566
   Scenario Outline: Popup-view - Address Book - Edit wallet name/address and display error message - name error: <name_error>, address error: <address_error>
     Given I have 3 addresses in my address book in popup mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     And I fill "<wallet_name>" and "<address>" address details in drawer
     Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
     And "core.editAddressForm.doneButton" button is disabled
@@ -63,7 +63,7 @@ Feature: Address book - popup view
   Scenario Outline: Popup-view - Address Book - Edit address book entry - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in popup mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     And I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" outside drawer
     And "core.editAddressForm.doneButton" button is enabled
     Then I click "core.editAddressForm.doneButton" button
@@ -77,27 +77,28 @@ Feature: Address book - popup view
   Scenario: Popup-view - Address Book - Edit address and click back button
     Given I have 3 addresses in my address book in popup mode
     And I click address on the list with name "Shelley"
-    And I click "browserView.addressBook.addressDetail.btn.edit" button
+    And I click "Edit" button on address details page
     When I close the drawer by clicking back button
-    Then I see address detail page
+    Then I see address detail page in popup mode
 
   @LW-4477
   Scenario: Popup-view - Address Book - Remove address
     Given I have 3 addresses in my address book in popup mode
     When I click address on the list with name "Byron"
-    And I see address detail page
-    And I click "browserView.addressBook.addressDetail.btn.delete" button
-    And I click "browserView.addressBook.deleteModal.buttons.confirm" button in modal
+    And I see address detail page in popup mode
+    And I click "Delete" button on address details page
+    Then I see delete address modal
+    When I click "Delete address" button on delete address modal
     Then I don't see address with name "Byron" and address "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" on the list
 
   @LW-4478
   Scenario: Popup-view - Address Book - Remove address and cancel
     Given I have 3 addresses in my address book in popup mode
     When I click address on the list with name "Byron"
-    And I see address detail page
-    And I click "browserView.addressBook.addressDetail.btn.delete" button
-    And I click "browserView.addressBook.deleteModal.buttons.cancel" button
-    Then I see address detail page
+    And I see address detail page in popup mode
+    And I click "Delete" button on address details page
+    And I click "Cancel" button on delete address modal
+    Then I see address detail page in popup mode
 
   @LW-4479
   Scenario Outline: Popup-view - Address Book - Add new address <wallet_name>

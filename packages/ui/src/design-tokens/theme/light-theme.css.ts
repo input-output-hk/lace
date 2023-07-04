@@ -3,6 +3,7 @@ import { rgba } from 'polished';
 
 import { borders } from '../borders.data';
 import {
+  colorTransparent,
   darkColorScheme,
   laceGradient,
   lightColorScheme,
@@ -195,6 +196,37 @@ const colors: Colors = {
   $search_box_clear_button_label_color_hover:
     lightColorScheme.$primary_dark_grey,
   $search_box_clear_button_label_color_pressed:
+    lightColorScheme.$primary_dark_grey,
+
+  $icon_button_label_color: lightColorScheme.$primary_dark_grey,
+  $icon_button_label_color_pressed: lightColorScheme.$primary_black,
+  $icon_button_container_bgColor: colorTransparent,
+  $icon_button_container_bgColor_hover: lightColorScheme.$primary_light_grey,
+  $icon_button_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $icon_button_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+
+  $summary_expander_container_borderColor:
+    lightColorScheme.$primary_light_grey_plus,
+  $summary_expander_label_color: lightColorScheme.$primary_black,
+  $summary_expander_trigger_label_color: lightColorScheme.$primary_black,
+  $summary_expander_trigger_label_color_pressed:
+    lightColorScheme.$primary_black,
+  $summary_expander_trigger_container_bgColor: lightColorScheme.$primary_white,
+  $summary_expander_trigger_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $summary_expander_trigger_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_plus,
+  $summary_expander_trigger_container_bgColor_focused:
+    lightColorScheme.$primary_white,
+  $summary_expander_trigger_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $summary_expander_trigger_container_borderColor:
+    lightColorScheme.$primary_light_grey_plus,
+
+  $transaction_summary_label_color: lightColorScheme.$primary_black,
+  $transaction_summary_secondary_label_color:
     lightColorScheme.$primary_dark_grey,
 };
 

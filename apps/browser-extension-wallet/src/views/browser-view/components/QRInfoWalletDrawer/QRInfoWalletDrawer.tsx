@@ -13,7 +13,7 @@ import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 const useWalletInformation = () =>
   useWalletStore((state) => ({
     name: state?.walletInfo?.name,
-    address: state?.walletInfo?.address
+    address: state?.walletInfo?.addresses[0].address
   }));
 
 export const QRInfoWalletDrawer = (): React.ReactElement => {

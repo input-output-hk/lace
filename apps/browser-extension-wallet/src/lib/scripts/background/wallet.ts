@@ -1,7 +1,7 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of } from 'rxjs';
 import { getProviders } from './config';
-import { PersonalWallet, SingleAddressDiscovery, storage } from '@cardano-sdk/wallet';
+import { PersonalWallet, storage } from '@cardano-sdk/wallet';
 import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
 import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
 import {
@@ -38,7 +38,6 @@ const walletFactory: WalletFactory = {
         logger,
         ...providers,
         stores: dependencies.stores,
-        addressDiscovery: new SingleAddressDiscovery(),
         handleProvider: new KoraLabsHandleProvider({
           serverUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
           adapter: axiosFetchAdapter,

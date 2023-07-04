@@ -17,3 +17,5 @@ export { ToggleSwitch } from './toggle-switch';
 export * as AssetsTable from './assets-table';
 export * as SideDrawer from './side-drawer';
 export { SearchBox } from './search-box';
+export * as IconButton from './icon-buttons';
+export * as TransactionSummary from './transaction-summary';

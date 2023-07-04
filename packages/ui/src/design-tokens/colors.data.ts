@@ -120,6 +120,27 @@ export const colors = {
   $search_box_clear_button_label_color: '',
   $search_box_clear_button_label_color_hover: '',
   $search_box_clear_button_label_color_pressed: '',
+
+  $icon_button_container_bgColor: '',
+  $icon_button_container_bgColor_hover: '',
+  $icon_button_container_bgColor_pressed: '',
+  $icon_button_container_outlineColor: '',
+  $icon_button_label_color: '',
+  $icon_button_label_color_pressed: '',
+
+  $summary_expander_label_color: '',
+  $summary_expander_container_borderColor: '',
+  $summary_expander_trigger_container_bgColor: '',
+  $summary_expander_trigger_container_bgColor_hover: '',
+  $summary_expander_trigger_container_bgColor_pressed: '',
+  $summary_expander_trigger_container_bgColor_focused: '',
+  $summary_expander_trigger_container_outlineColor: '',
+  $summary_expander_trigger_container_borderColor: '',
+  $summary_expander_trigger_label_color: '',
+  $summary_expander_trigger_label_color_pressed: '',
+
+  $transaction_summary_label_color: '',
+  $transaction_summary_secondary_label_color: '',
 };
 
 export type Colors = typeof colors;

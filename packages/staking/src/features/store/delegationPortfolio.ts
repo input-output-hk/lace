@@ -1,6 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { Draft, produce } from 'immer';
-import create from 'zustand';
+import create, { StateSelector } from 'zustand';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
@@ -38,3 +38,6 @@ export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set
       ),
   },
 }));
+
+export const selectPoolsCount: StateSelector<DelegationPortfolioState, number> = (store) =>
+  store.delegationPortfolioPools.length;

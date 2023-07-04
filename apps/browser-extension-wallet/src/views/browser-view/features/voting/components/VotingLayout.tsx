@@ -142,7 +142,7 @@ export const VotingLayout = (): React.ReactElement => {
               title={translate('browserView.voting.fundWalletBanner.title')}
               subtitle={translate('browserView.voting.fundWalletBanner.subtitle')}
               prompt={translate('browserView.fundWalletBanner.prompt')}
-              walletAddress={walletInfo.address.toString()}
+              walletAddress={walletInfo.addresses[0].address.toString()}
             />
             <ActionableAlert
               message={translate('browserView.voting.alert.registrationEnded.message')}
