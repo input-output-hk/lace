@@ -58,7 +58,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click "Add address" button  in address bar
-    And I see Add new address form in Send flow
+    And I see "Add address" drawer in send flow in extended mode
     Then Address field has filled "shelley" address
     When I fill "WalletName" name for address details in drawer
     And I click "Done" button on "Add address" drawer

@@ -5,6 +5,13 @@ import AddressDetailsAssert from '../assert/addressBook/AddressDetailsAssert';
 import AddressDetails from '../elements/addressbook/AddressDetails';
 import DeleteAddressModal from '../elements/addressbook/DeleteAddressModal';
 import DeleteAddressModalAssert from '../assert/addressBook/DeleteAddressModalAssert';
+import AddNewAddressDrawerAssert from '../assert/addressBook/AddNewAddressDrawerAssert';
+import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
+import EditAddressDrawer from '../elements/addressbook/EditAddressDrawer';
+import EditAddressDrawerAssert from '../assert/addressBook/EditAddressDrawerAssert';
+import AddressForm from '../elements/addressbook/AddressForm';
+import AddressFormAssert from '../assert/addressBook/AddressFormAssert';
+import { browser } from '@wdio/globals';
 
 Then(/^I see address book title$/, async () => {
   await AddressBookPageAssert.assertSeeAddressBookTitle();
@@ -16,6 +23,10 @@ Then(/^I see address count: ([\d+])$/, async (expectedNumber: number) => {
 
 When(/^I click "Add address" button on address book page$/, async () => {
   await AddressBookPage.clickAddAddressButton();
+});
+
+Then(/^I (see|do not see) "Add address" button on address book page$/, async (shouldSee: 'see' | 'do not see') => {
+  await AddressBookPageAssert.assertSeeAddNewAddressButton(shouldSee === 'see');
 });
 
 Then(/^I see empty address book$/, async () => {
@@ -67,5 +78,70 @@ When(
       default:
         throw new Error(`Unsupported button name: ${button}`);
     }
+  }
+);
+
+Then(/^I see "Add new address" drawer in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await AddNewAddressDrawerAssert.assertSeeAddNewAddressDrawer(mode);
+});
+
+Then(/^I see "Add address" drawer in send flow in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await AddNewAddressDrawerAssert.assertSeeAddNewAddressDrawer(mode, true);
+});
+
+Then(
+  /^"Save address" button is (enabled|disabled) on "Add new address" drawer$/,
+  async (state: 'enabled' | 'disabled') => {
+    await AddNewAddressDrawerAssert.assertSaveAddressButtonEnabled(state === 'enabled');
+  }
+);
+
+When(
+  /^I click "(Save address|Cancel)" button on "Add new address" drawer$/,
+  async (button: 'Save address' | 'Cancel') => {
+    switch (button) {
+      case 'Cancel':
+        await AddNewAddressDrawer.clickOnCancelButton();
+        break;
+      case 'Save address':
+        await AddNewAddressDrawer.clickOnSaveAddressButton();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
+  }
+);
+
+When(/^I click "(Cancel|Done)" button on "Edit address" drawer$/, async (button: 'Cancel' | 'Done') => {
+  switch (button) {
+    case 'Cancel':
+      await EditAddressDrawer.clickOnCancelButton();
+      break;
+    case 'Done':
+      await EditAddressDrawer.clickOnDoneButton();
+      break;
+    default:
+      throw new Error(`Unsupported button name: ${button}`);
+  }
+});
+
+Then(/^"Done" button is (enabled|disabled) on "Edit address" drawer$/, async (state: 'enabled' | 'disabled') => {
+  await EditAddressDrawerAssert.assertDoneButtonEnabled(state === 'enabled');
+});
+
+When(
+  /^I fill address form with ""?([^"]*[^"])""? name and ""?([^"]*[^"])""? address$/,
+  async (name: string, address: string) => {
+    await AddressForm.enterName(name === 'empty' ? '' : name);
+    await AddressForm.enterAddress(address === 'empty' ? '' : address);
+    await browser.pause(500); // Wait for input field value validation
+  }
+);
+
+Then(
+  /^Contact "([^"]*)" name error and "([^"]*)" address error are displayed$/,
+  async (nameError: string, addressError: string) => {
+    await AddressFormAssert.assertSeeNameError(nameError !== 'empty', nameError);
+    await AddressFormAssert.assertSeeAddressError(addressError !== 'empty', addressError);
   }
 );

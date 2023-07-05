@@ -1,7 +1,6 @@
 import { Then, When } from '@cucumber/cucumber';
 import webTester from '../actor/webTester';
 import addressBookExtendedAssert from '../assert/addressBook/addressBookExtendedAssert';
-import addressAddNewExtendedAssert from '../assert/addressBook/addressAddNewExtendedAssert';
 import { AddressRow } from '../elements/addressbook/extendedview/AddressRow';
 import addressBookExtendedPageObject from '../pageobject/addressBookExtendedPageObject';
 import { FieldNameToCallback, fieldNameToLocator } from '../support/gherkin';
@@ -31,14 +30,6 @@ When(/^I click address on the list with name "([^"]*)"$/, async (addressName: st
   await selectedRow.click();
 });
 
-Then(/^I see Add new address form$/, async () => {
-  await addressAddNewExtendedAssert.assertSeeAddNewAddressForm();
-});
-
-Then(/^I see Add new address form in Send flow$/, async () => {
-  await addressAddNewExtendedAssert.assertSeeAddNewAddressFormInSendFlow();
-});
-
 Then(
   /^I (see|don't see) address with name "([^"]*)" and address "([^"]*)" on the list$/,
   async (shouldSee: string, name: string, address: string) => {
@@ -47,19 +38,6 @@ Then(
     }
     const expectedShouldSee = shouldSee === 'see';
     await addressBookExtendedAssert.assertSeeAddressOnTheList(name, address, expectedShouldSee);
-  }
-);
-
-When(
-  /I fill ""?([^"]*[^"])""? and ""?([^"]*[^"])""? address details (outside drawer|in drawer)/,
-  async (name: string, address: string, target: string) => {
-    const inDrawer = target === 'in drawer';
-    await addressBookExtendedPageObject.fillNameAndAddress(
-      name === 'empty' ? '' : name,
-      address === 'empty' ? '' : address,
-      inDrawer
-    );
-    await browser.pause(1000);
   }
 );
 
@@ -88,14 +66,6 @@ When(
     const inDrawer = target === 'in drawer';
     await addressBookExtendedPageObject.fillAddress(address === 'empty' ? '' : address, inDrawer);
     await browser.pause(1000);
-  }
-);
-
-Then(
-  /^Contact name error: "([^"]*)" and address error: "([^"]*)" are displayed$/,
-  async (nameError: string, addressError: string) => {
-    if (nameError !== 'empty') await webTester.waitUntilSeeElementContainingText(nameError);
-    if (addressError !== 'empty') await webTester.waitUntilSeeElementContainingText(addressError);
   }
 );
 
