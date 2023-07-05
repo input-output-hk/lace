@@ -277,7 +277,7 @@ export const HardwareWalletFlow = ({
     finish: () => (
       <WalletSetupFinalStep
         onFinish={async () => {
-          sendAnalytics(Events.SETUP_FINISHED_NEXT, PostHogAction.OnboardingHWDoneGoToWallet);
+          await sendAnalytics(Events.SETUP_FINISHED_NEXT, PostHogAction.OnboardingHWDoneGoToWallet);
           await handleFinishCreation();
           // Workaround to enable staking with Ledger right after the onboarding LW-5564
           window.location.reload();

@@ -121,8 +121,8 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
   };
 
   const getSendAnalyticsHandler: (eventCategory: SetupAnalyticsCategories) => SendOboardingAnalyticsEvent =
-    (eventCategory) => (event, postHogAction, value) =>
-      sendAnalytics(eventCategory, event, value, postHogAction);
+    (eventCategory) => async (event, postHogAction, value) =>
+      await sendAnalytics(eventCategory, event, value, postHogAction);
 
   const handleRestoreWallet = () => {
     setIsConfirmRestoreOpen(true);
