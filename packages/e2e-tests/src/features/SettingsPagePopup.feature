@@ -193,7 +193,7 @@ Feature: General Settings - Popup View
     And I see address count: 3
     When I switch network to: "Mainnet" in popup mode
     And  I open address book in popup mode
-    Then I see information about empty address book
+    Then I see empty address book
     When I switch network to: "Preprod" in popup mode
     And  I open address book in popup mode
     Then I see address count: 3
@@ -204,7 +204,7 @@ Feature: General Settings - Popup View
     And I see address count: 3
     When I switch network to: "Preprod" in popup mode
     And  I open address book in popup mode
-    Then I see information about empty address book
+    Then I see empty address book
 
   @LW-5472 @Testnet
   Scenario: Popup View - Settings - Addresses entered in Preprod context are not available when switching to Preview
