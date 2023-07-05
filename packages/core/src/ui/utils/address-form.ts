@@ -1,4 +1,3 @@
-import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
 import debounce from 'debounce-promise';
 import { HANDLE_DEBOUNCE_TIME } from './handle';
 import { Rule } from 'antd/lib/form';
@@ -14,8 +13,6 @@ export const addressKey = 'address';
 export const keys = [nameKey, addressKey];
 
 export type ValidatorFn = (_rule: Rule, value: string) => Promise<void>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ResolveAddressValidatorFn = (_rule: Rule, value: string, handleResolver: any) => Promise<void>;
 
 export type AddressValidators = {
   name: (value: string) => string;
@@ -24,19 +21,17 @@ export type AddressValidators = {
 };
 
 export const getValidator =
-  (validate: (val: string) => string): ValidatorFn =>
+  (validate: AddressValidators['name']): ValidatorFn =>
   (_rule: Rule, value: string) => {
     const res = validate(value);
     return !res ? Promise.resolve() : Promise.reject(res);
   };
 
-export const getValidatorWithResolver = (
-  validate: (val: string, handleResolver: KoraLabsHandleProvider) => Promise<string>
-): ResolveAddressValidatorFn => {
+export const getValidatorWithResolver = (validate: AddressValidators['handle']): ValidatorFn => {
   const debouncedValidate = debounce(validate, HANDLE_DEBOUNCE_TIME);
 
-  return async (_rule: Rule, value: string, handleResolver: KoraLabsHandleProvider) => {
-    const res = await debouncedValidate(value, handleResolver);
+  return async (_rule: Rule, value: string) => {
+    const res = await debouncedValidate(value);
     return !res ? Promise.resolve() : Promise.reject(res);
   };
 };
