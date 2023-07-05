@@ -3,6 +3,10 @@ import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import NftFolderNameInput from '../elements/NFTs/nftFolderNameInput';
 import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
+import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
+import { Asset } from '../data/Asset';
+import testContext from '../utils/testContext';
+import NftItem from '../elements/NFTs/nftItem';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -12,7 +16,7 @@ class NftCreateFolderAssert {
     }
   }
 
-  async assertSeeCreateFolderPageDrawerNavigation(mode: 'extended' | 'popup') {
+  async assertSeeDrawerNavigation(mode: 'extended' | 'popup') {
     if (mode === 'popup') {
       await NftCreateFolderPage.drawerHeaderBackButton.waitForDisplayed();
     } else {
@@ -28,7 +32,7 @@ class NftCreateFolderAssert {
 
   async assertSeeCreateFolderPage(shouldSee: boolean, mode: 'extended' | 'popup') {
     if (shouldSee) {
-      await this.assertSeeCreateFolderPageDrawerNavigation(mode);
+      await this.assertSeeDrawerNavigation(mode);
       await NftCreateFolderPage.drawerHeaderTitle.waitForDisplayed();
       await expect(await NftCreateFolderPage.drawerHeaderTitle.getText()).to.equal(
         await t('browserView.nfts.folderDrawer.nameForm.title')
@@ -54,10 +58,61 @@ class NftCreateFolderAssert {
     await expect(await NftFolderNameInput.input.getValue()).to.be.empty;
   }
 
-  async assertSeeNextButtonEnabled(isEnabled: boolean) {
+  async assertSeeNextButtonEnabledOnCreateFolderPage(isEnabled: boolean) {
     await (isEnabled
       ? expect(await NftCreateFolderPage.nextButton.isEnabled()).to.be.true
       : expect(await NftCreateFolderPage.nextButton.isEnabled()).to.be.false);
+  }
+
+  async assertSeeNextButtonEnabledOnSelectNftsPage(isEnabled: boolean) {
+    await (isEnabled
+      ? expect(await NftSelectNftsPage.nextButton.isEnabled()).to.be.true
+      : expect(await NftSelectNftsPage.nextButton.isEnabled()).to.be.false);
+  }
+
+  async assertSeeSelectNFTsPage(shouldSee: boolean, mode: 'extended' | 'popup') {
+    if (shouldSee) {
+      await this.assertSeeDrawerNavigation(mode);
+      await NftCreateFolderPage.drawerHeaderTitle.waitForDisplayed();
+      await expect(await NftCreateFolderPage.drawerHeaderTitle.getText()).to.equal(
+        await t('browserView.nfts.folderDrawer.assetPicker.title')
+      );
+
+      await NftSelectNftsPage.searchInput.container.waitForDisplayed();
+      await expect(await NftSelectNftsPage.searchInput.input.getAttribute('placeholder')).to.equal(
+        await t('cardano.stakePoolSearch.searchPlaceholder')
+      );
+
+      await NftSelectNftsPage.assetSelectorContainer.waitForDisplayed();
+
+      const ibileCoin = await NftSelectNftsPage.getNftByName(Asset.IBILECOIN.name);
+      await ibileCoin.waitForDisplayed();
+      const bisonCoin = await NftSelectNftsPage.getNftByName(Asset.BISON_COIN.name);
+      await bisonCoin.waitForDisplayed();
+
+      await NftSelectNftsPage.nextButton.waitForDisplayed();
+      await expect(await NftSelectNftsPage.nextButton.getText()).to.equal(
+        await t('browserView.nfts.folderDrawer.cta.create')
+      );
+    } else {
+      await NftCreateFolderPage.drawerBody.waitForDisplayed({ reverse: true });
+    }
+  }
+
+  async verifySeeAllOwnedNfts() {
+    const ownedNftNames = testContext.load('ownedNfts');
+    const displayedNfts = await NftSelectNftsPage.getContainers();
+
+    const displayedNftNames: string[] = [];
+    for (const cont of displayedNfts) {
+      displayedNftNames.push(await cont.getText());
+    }
+
+    expect(ownedNftNames).to.have.ordered.members(displayedNftNames);
+  }
+
+  async verifyNoneNftIsSelected() {
+    await NftItem.selectedCheckmark.waitForDisplayed({ reverse: true });
   }
 }
 

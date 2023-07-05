@@ -71,7 +71,7 @@ export const AssetPicker = ({
   }, [selectedNFTs, onSetIsFormValid]);
 
   return (
-    <div className={styles.assetsSelectorWrapper}>
+    <div className={styles.assetsSelectorWrapper} data-testid="asset-selector-wrapper">
       <AssetSelectorOverlay
         nfts={nftList}
         nftListConfig={{ rows: isPopupView ? nftsPerRow.popupView : nftsPerRow.browserView }}

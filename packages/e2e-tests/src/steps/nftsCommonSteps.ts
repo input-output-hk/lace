@@ -10,8 +10,8 @@ import { getTestWallet } from '../support/walletConfiguration';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import topNavigationAssert from '../assert/topNavigationAssert';
-import { NftItem } from '../elements/NFTs/nftItem';
 import localStorageInitializer from '../fixture/localStorageInitializer';
+import NftItem from '../elements/NFTs/nftItem';
 
 When(/^I click on NFT with name: "([^"]*)"$/, async (nftName: string) => {
   await nftsPageObject.clickNftItem(nftName);
@@ -82,21 +82,25 @@ Given(
 );
 
 Then(/^A gallery view showing my NFTs is displayed$/, async () => {
-  await $(new NftItem().container().toJSLocator()).waitForDisplayed({ timeout: 15_000 });
+  await NftItem.nftContainer.waitForDisplayed({ timeout: 15_000 });
   await nftAssert.assertSeeNftList(1);
 });
 
 Then(/^Verify that "([^"]*)" (contains|doesn't contain) fallback image$/, async (nftName: string, contains: string) => {
-  await $(new NftItem().container().toJSLocator()).waitForDisplayed({ timeout: 15_000 });
+  await NftItem.nftContainer.waitForDisplayed({ timeout: 15_000 });
   await nftAssert.assertNftFallbackImage(nftName, contains === 'contains');
 });
 
 Then(/^each NFT has name and image displayed$/, async () => {
-  await $(new NftItem().container().toJSLocator()).waitForDisplayed({ timeout: 15_000 });
+  await NftItem.nftContainer.waitForDisplayed({ timeout: 15_000 });
   await nftAssert.assertSeeEachNftItem();
 });
 
 When(/^I open NFT receiving wallet$/, async () => {
   const walletToLoad = await nftsPageObject.getNonActiveNftWalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
+});
+
+When(/^I save all NFTs that I have$/, async () => {
+  await nftsPageObject.saveNfts();
 });

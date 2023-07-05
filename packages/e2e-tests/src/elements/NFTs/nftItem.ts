@@ -1,49 +1,52 @@
-import webTester, { LocatorStrategy } from '../../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from '../webElement';
+/* eslint-disable no-undef */
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
-export class NftItem extends WebElement {
-  protected CONTAINER = '//a[@data-testid="nft-item"]';
-  private IMAGE_SELECTOR = '//img[@data-testid="nft-image"]';
-  private NAME_SELECTOR = '//p[@data-testid="nft-item-name"]';
-  private AMOUNT_SELECTOR = '//div[@data-testid="nft-item-amount"]';
+class NftItem {
+  protected LIST_CONTAINER = '[data-testid="nft-list"]';
+  protected NFT_CONTAINER = '[data-testid="nft-item"]';
+  private NFT_IMAGE = '[data-testid="nft-image"]';
+  private NFT_NAME = '[data-testid="nft-item-name"]';
+  private SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
 
-  constructor(item = '0') {
-    super();
-
-    // eslint-disable-next-line unicorn/prefer-number-properties
-    if (isNaN(Number(item))) this.CONTAINER = `${this.CONTAINER}[.//p[contains(text(), '${item}')]]`;
-    else if (Number(item) !== 0) this.CONTAINER = `${this.CONTAINER}[${item}]`;
+  get listContainer() {
+    return $(this.LIST_CONTAINER);
   }
 
-  container(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}`, 'xpath');
+  get nftContainer() {
+    return $(this.NFT_CONTAINER);
   }
 
-  image(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.IMAGE_SELECTOR}`, 'xpath');
+  get image() {
+    return $(this.NFT_IMAGE);
   }
 
-  name(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.NAME_SELECTOR}`, 'xpath');
+  get name() {
+    return $(this.NFT_NAME);
   }
 
-  amount(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.AMOUNT_SELECTOR}`, 'xpath');
+  get selectedCheckmark() {
+    return $(this.SELECTED_CHECKMARK);
   }
 
-  async getName(): Promise<number | string> {
-    return await webTester.getTextValueFromElement(this.name());
+  get containers(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.NFT_CONTAINER);
   }
 
-  async getAmount(): Promise<number> {
-    return Number(await webTester.getTextValueFromElement(this.amount()));
+  async getNftByName(name: string): Promise<WebdriverIO.Element> {
+    return (await this.containers.find(
+      async (item) => (await item.$(this.NFT_NAME).getText()) === name
+    )) as WebdriverIO.Element;
   }
 
-  toJSLocator(): string {
-    return this.CONTAINER;
+  async getNftImageByName(name: string): Promise<WebdriverIO.Element> {
+    const nftContainer = await this.getNftByName(name);
+    return nftContainer.$(this.NFT_IMAGE);
   }
 
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
+  async getNftNameByName(name: string): Promise<WebdriverIO.Element> {
+    const nftContainer = await this.getNftByName(name);
+    return nftContainer.$(this.NFT_NAME);
   }
 }
+
+export default new NftItem();

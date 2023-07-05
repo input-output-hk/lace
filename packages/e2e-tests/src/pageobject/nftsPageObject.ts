@@ -1,5 +1,5 @@
-import webTester from '../actor/webTester';
-import { NftItem } from '../elements/NFTs/nftItem';
+/* eslint-disable no-undef */
+
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import newTransactionExtendedPageObject from './newTransactionExtendedPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
@@ -8,11 +8,13 @@ import testContext from '../utils/testContext';
 import NftDetails from '../elements/NFTs/nftDetails';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
+import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
+import NftItem from '../elements/NFTs/nftItem';
 
 class NftsPageObject {
   async clickNftItem(nftName: string) {
-    const nftItem = new NftItem(nftName);
-    await webTester.clickElement(nftItem.name());
+    const nftNameElement = await NftItem.getNftNameByName(nftName);
+    await nftNameElement.click();
   }
 
   async progressWithSendUntilPasswordPage(nftName: string): Promise<any> {
@@ -30,7 +32,7 @@ class NftsPageObject {
   }
 
   async isNftDisplayed(nftName: string): Promise<boolean> {
-    const nftItem = await $(new NftItem(nftName).toJSLocator());
+    const nftItem = await NftItem.getNftByName(nftName);
     return await nftItem.isDisplayed();
   }
 
@@ -38,6 +40,19 @@ class NftsPageObject {
     return testContext.load('activeWallet') === TestWalletName.WalletReceiveNftE2E
       ? TestWalletName.WalletSendNftE2E
       : TestWalletName.WalletReceiveNftE2E;
+  }
+
+  async setFolderName(name: string): Promise<any> {
+    await NftCreateFolderPage.folderNameInput.input.setValue(name);
+  }
+
+  async saveNfts(): Promise<any> {
+    const names: string[] = [];
+
+    for (const cont of await NftItem.containers) {
+      names.push(await cont.getText());
+    }
+    testContext.save('ownedNfts', names);
   }
 }
 
