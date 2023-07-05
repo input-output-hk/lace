@@ -12,14 +12,18 @@ describe('Testing WalletAddressItem component', () => {
     onClick: jest.fn()
   };
 
-  test('should render a wallet address item', async () => {
-    const elWidth = 300;
+  const elWidth = 300;
+
+  beforeAll(() => {
     // const originalOffsetWidth = window.HTMLElement.prototype.offsetWidth;
     Object.defineProperties(window.HTMLElement.prototype, {
       offsetWidth: {
         get: () => elWidth
       }
     });
+  });
+
+  test('should render a wallet address item with a correct address', async () => {
     const { findByTestId } = render(<WalletAddressItem {...props} />);
     const walletItem = await findByTestId('address-list-item');
 
@@ -37,6 +41,33 @@ describe('Testing WalletAddressItem component', () => {
     expect(walletAddress).toBeVisible();
     expect(walletNameText).toBeVisible();
     expect(walletAddressText).toBeVisible();
+  });
+
+  test('should render a wallet address item with an incorrect address', async () => {
+    const incorrectAddressProps: WalletAddressItemProps = {
+      isAddressWarningVisible: true,
+      ...props
+    };
+
+    const { findByTestId } = render(<WalletAddressItem {...incorrectAddressProps} />);
+    const walletItem = await findByTestId('address-list-item');
+
+    const walletAvatar = await findByTestId('address-list-item-avatar');
+    const avatarIcon = await within(walletItem).findByText(props.name.charAt(0).toLocaleUpperCase());
+
+    const walletName = await findByTestId('address-list-item-name');
+    const walletAddress = await findByTestId('address-list-item-address');
+    const walletNameText = await within(walletName).findByText(props.name);
+    const walletAddressText = await within(walletItem).findByText(props.address);
+    const walletAddressWarning = await within(walletItem).findByTestId('address-list-item-warning');
+
+    expect(walletAvatar).toBeVisible();
+    expect(avatarIcon).toBeVisible();
+    expect(walletName).toBeVisible();
+    expect(walletAddress).toBeVisible();
+    expect(walletNameText).toBeVisible();
+    expect(walletAddressText).toBeVisible();
+    expect(walletAddressWarning).toBeVisible();
   });
 
   test('should call the onClick function when clicking the item', async () => {

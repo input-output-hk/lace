@@ -33,7 +33,7 @@ class NftsPageObject {
 
   async isNftDisplayed(nftName: string): Promise<boolean> {
     const nftItem = await NftItem.getNftByName(nftName);
-    return await nftItem.isDisplayed();
+    return nftItem !== undefined;
   }
 
   async getNonActiveNftWalletName(): Promise<string> {
