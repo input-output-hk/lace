@@ -46,7 +46,7 @@ export class PostHogClient {
 
     console.debug('[ANALYTICS] Logging page navigation event to PostHog', eventName);
 
-    posthog.capture('pageview', {
+    posthog.capture('$pageview', {
       ...(await this.getEventMetadata()),
       event: eventName
     });
