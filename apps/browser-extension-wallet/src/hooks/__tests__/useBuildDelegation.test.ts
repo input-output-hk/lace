@@ -11,9 +11,9 @@ const mockInspect = jest.fn().mockResolvedValue({
   }
 });
 const mockBuild = jest.fn().mockReturnThis();
-const mockDelegate = jest.fn().mockReturnThis();
+const mockDelegatePortfolio = jest.fn().mockReturnThis();
 const mockCreateTxBuilder = jest.fn().mockReturnValue({
-  delegate: mockDelegate,
+  delegatePortfolio: mockDelegatePortfolio,
   build: mockBuild,
   inspect: mockInspect
 });
@@ -59,7 +59,7 @@ describe('Testing useBuildDelegation hook', () => {
 
       expect(mockSetIsBuildingTx).toBeCalled();
       expect(mockCreateTxBuilder).toBeCalled();
-      expect(mockDelegate).toBeCalledWith(cardanoStakePoolMock.pageResults[0].id);
+      expect(mockDelegatePortfolio).toBeCalled();
       expect(mockBuild).toBeCalled();
       expect(mockInspect).toBeCalled();
       await flushPromises();

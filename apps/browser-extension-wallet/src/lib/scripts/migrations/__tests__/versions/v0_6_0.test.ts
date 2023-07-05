@@ -44,8 +44,8 @@ const mockInitialStorage = async ({
   walletInfoData = {
     keyAgentData: { ...mockKeyAgentDataTestnet, __typename: keyAgentType },
     name: walletName,
-    address: mockWalletInfoTestnet.address,
-    rewardAccount: mockWalletInfoTestnet.rewardAccount,
+    address: mockWalletInfoTestnet.addresses[0].address,
+    rewardAccount: mockWalletInfoTestnet.addresses[0].rewardAccount,
     walletId: 'abcdef1234567890'
   },
   lock
@@ -290,8 +290,8 @@ describe('v0.6.0 migration', () => {
         initialStorage = await mockInitialStorage({
           walletInfoData: {
             keyAgentData: mockKeyAgentDataTestnet,
-            address: mockWalletInfoTestnet.address,
-            rewardAccount: mockWalletInfoTestnet.rewardAccount,
+            address: mockWalletInfoTestnet.addresses[0].address,
+            rewardAccount: mockWalletInfoTestnet.addresses[0].rewardAccount,
             walletId: 'abcdef1234567890'
           }
         });

@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	ExecutablePath string
 	Username string
 	WorkDir string
 	LibexecDir string
@@ -19,12 +20,14 @@ var (
 //   • we have to hook setting PATH before "github.com/atotto/clipboard".init() – otherwise xclip is not found,
 //   • and also set XKB_CONFIG_EXTRA_PATH before "github.com/sqweek/dialog".init() – otherwise gtk3 segfaults
 func init() {
-	executablePath, err := os.Executable()
+	var err error
+
+	ExecutablePath, err = os.Executable()
 	if err != nil {
 		panic(err)
 	}
 
-	executablePath, err = filepath.EvalSymlinks(executablePath)
+	ExecutablePath, err = filepath.EvalSymlinks(ExecutablePath)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +38,7 @@ func init() {
 	}
 	Username = currentUser.Username
 
-	binDir := filepath.Dir(executablePath)
+	binDir := filepath.Dir(ExecutablePath)
 
 	switch runtime.GOOS {
 	case "darwin":

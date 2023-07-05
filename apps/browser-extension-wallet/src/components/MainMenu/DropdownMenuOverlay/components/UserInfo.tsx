@@ -28,7 +28,7 @@ interface UserInfoProps {
 export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo } = useWalletStore();
-  const walletAddress = walletInfo.address.toString();
+  const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const walletName = addEllipsis(walletInfo.name.toString(), WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();

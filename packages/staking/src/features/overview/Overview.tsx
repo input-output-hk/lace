@@ -63,7 +63,7 @@ export const Overview = () => {
             {...item}
             markerColor={item.color}
             cardanoCoinSymbol={'tADA'}
-            onStakePoolSelect={() => console.log('onStakePoolSelect')}
+            onStakePoolSelect={() => console.info('onStakePoolSelect')}
           />
         </Box>
       ))}

@@ -18,3 +18,5 @@ export * as AssetsTable from './assets-table';
 export * as SideDrawer from './side-drawer';
 export { SearchBox } from './search-box';
 export * as FlowCard from './flow-card';
+export * as IconButton from './icon-buttons';
+export * as TransactionSummary from './transaction-summary';

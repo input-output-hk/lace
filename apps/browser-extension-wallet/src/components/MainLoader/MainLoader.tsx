@@ -12,8 +12,8 @@ export const MainLoader = ({ text }: MainLoaderProps): React.ReactElement => {
 
   return (
     <div className={styles.loaderContainer} data-testid="main-loader">
-      <Loader className={styles.loader} />
-      <p>{text ?? t('general.loading')}</p>
+      <Loader className={styles.loader} data-testid="main-loader-image" />
+      <p data-testid="main-loader-text">{text ?? t('general.loading')}</p>
     </div>
   );
 };

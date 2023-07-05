@@ -1,10 +1,10 @@
 /* eslint-disable no-magic-numbers */
-import { Origin } from '@cardano-sdk/dapp-connector';
 import { POPUP_WINDOW } from '@src/utils/constants';
 import { getRandomIcon } from '@lace/common';
 import { runtime, Tabs, tabs, Windows, windows, storage as webStorage } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
+import uniqueId from 'lodash/uniqueId';
 
 type WindowPosition = {
   top: number;
@@ -68,17 +68,24 @@ export const initMigrationState = async (): Promise<void> => {
   await webStorage.local.set(INITIAL_STORAGE);
 };
 
+export const getLastActiveTab: () => Promise<Tabs.Tab> = async () =>
+  await (
+    await tabs.query({ currentWindow: true, active: true })
+  )[0];
+
 /**
- * getDappInfo
- * @param origin - URL of website calling dApp connector
+ * getDappInfoFromLastActiveTab
  * @returns {Promise<Wallet.DappInfo>}
  */
-export const getDappInfo = async (origin: Origin): Promise<Wallet.DappInfo> =>
-  await tabs.query({ url: `${origin}/*` }).then((t) => ({
-    logo: t[0].favIconUrl || getRandomIcon({ id: origin, size: 40 }),
-    name: t[0].title || origin.split('//')[1],
-    url: origin
-  }));
+export const getDappInfoFromLastActiveTab: () => Promise<Wallet.DappInfo> = async () => {
+  const lastActiveTab = await getLastActiveTab();
+  console.log('lastActiveTab.favIconUrl', lastActiveTab.favIconUrl);
+  return {
+    logo: lastActiveTab.favIconUrl || getRandomIcon({ id: uniqueId(), size: 40 }),
+    name: lastActiveTab.title || lastActiveTab.url.split('//')[1].trim(),
+    url: lastActiveTab.url.replace(/\/$/, '')
+  };
+};
 
 const calculatePopupWindowPositionAndSize = (
   window: Windows.Window,
@@ -117,7 +124,7 @@ const createWindow = (
  */
 export const launchCip30Popup = async (url: string): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
-  const tab = await createTab(`../dappConnector.html${url}`);
+  const tab = await createTab(`../dappConnector.html${url}`, false);
   const newWindow = await createWindow(
     tab.id,
     calculatePopupWindowPositionAndSize(currentWindow, POPUP_WINDOW),
@@ -147,7 +154,6 @@ export const ensureUiIsOpenAndLoaded = async (url?: string): Promise<Tabs.Tab> =
   for (const tab of openTabs) {
     windows.remove(tab.windowId);
   }
-
   const tab = await launchCip30Popup(url);
   if (tab.status !== 'complete') {
     await waitForTabLoad(tab);
@@ -161,8 +167,3 @@ export const getWalletName = (): string => {
   }
   return `${process.env.WALLET_NAME}`;
 };
-
-export const getLastActiveTab: () => Promise<Tabs.Tab> = async () =>
-  await (
-    await tabs.query({ currentWindow: true, active: true })
-  )[0];

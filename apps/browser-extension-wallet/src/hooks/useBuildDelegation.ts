@@ -20,7 +20,10 @@ export const useBuildDelegation = (): void => {
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
-        const tx = await txBuilder.delegate(selectedStakePool.id).build().inspect();
+        const tx = await txBuilder
+          .delegatePortfolio({ pools: [{ weight: 1, id: selectedStakePool.hexId }] })
+          .build()
+          .inspect();
         setDelegationTxBuilder(txBuilder);
         setDelegationTxFee(tx.body.fee.toString());
         setStakingError();

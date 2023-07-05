@@ -74,7 +74,7 @@ export const assetTransformer = (params: {
     areBalancesVisible = true,
     balancesPlaceholder = ''
   } = params;
-  const { tokenMetadata, nftMetadata, fingerprint, policyId } = token;
+  const { tokenMetadata, nftMetadata, fingerprint } = token;
 
   const assetMetadata = {
     name: '-',
@@ -109,7 +109,6 @@ export const assetTransformer = (params: {
     balance: areBalancesVisible ? compactNumber(tokenBalance, decimals) : balancesPlaceholder,
     fiatBalance: areBalancesVisible ? formattedFiatBalance : balancesPlaceholder,
     sortBy: {
-      policyId,
       fiatBalance: fiatBalance?.toNumber(),
       metadataName: tokenMetadata?.name,
       fingerprint,

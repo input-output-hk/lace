@@ -168,7 +168,7 @@ Feature: General Settings - Extended Browser View
     And I see address count: 3
     When I switch network to: "Mainnet" in extended mode
     And  I open address book in extended mode
-    Then I see information about empty address book
+    Then I see empty address book
     When I switch network to: "Preprod" in extended mode
     And  I open address book in extended mode
     Then I see address count: 3
@@ -179,7 +179,7 @@ Feature: General Settings - Extended Browser View
     And I see address count: 3
     When I switch network to: "Preprod" in extended mode
     And  I open address book in extended mode
-    Then I see information about empty address book
+    Then I see empty address book
 
   @LW-5471 @Testnet
   Scenario: Extended View - Settings - Addresses entered in Preprod context are not available when switching to Preview
@@ -226,9 +226,8 @@ Feature: General Settings - Extended Browser View
   @LW-3629 @Mainnet @Testnet
   Scenario: Extended View - Settings - FAQ opening in a new tab
     When I open settings from header menu
-    When I click on "FAQs" setting
-    Then New tab with url containing "www.lace.io/faq" is opened
-    And An "FAQ" text is displayed
+    And I click on "FAQs" setting
+    Then FAQ page is displayed
 
 
   @LW-3058 @Mainnet @Testnet

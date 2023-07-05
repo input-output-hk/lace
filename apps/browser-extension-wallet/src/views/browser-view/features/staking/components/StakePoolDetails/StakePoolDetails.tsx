@@ -7,7 +7,7 @@ import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolC
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { TransactionSuccess, TransactionSuccessFooter } from './TransactionSuccess';
 import { TransactionFail, TransactionFailFooter } from './TransactionFail';
-import { useObservable } from '@hooks';
+import { useObservable } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { Wallet } from '@lace/cardano';
 

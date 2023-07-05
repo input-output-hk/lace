@@ -1,650 +1,4820 @@
 [
   {
-    "cost": "0.00% + 340tADA",
-    "description": "0AAAA test pool. Secure, Reliable and positive vibes only.",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "432759938261",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000000"
+      },
+      {
+        "activeStake": "422485310576",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000000"
+      },
+      {
+        "activeStake": "412055895745",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "340140448",
+        "memberROI": 0.000005958494889276331,
+        "memberRewards": "2395648",
+        "pledge": "10000000000"
+      }
+    ],
     "hexId": "54977486bc076ef24dab6f34652c1d33113f871ebc5e863b2488e03c",
     "id": "pool12jthfp4uqah0yndtdu6x2tqaxvgnlpc7h30gvwey3rsrc789tme",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23e5d0b2%22%20d%3D%22M9%209L9%203L12%203ZM15%203L21%203L21%206ZM21%2021L21%2027L18%2027ZM15%2027L9%2027L9%2024ZM3%2015L3%209L6%209ZM21%209L27%209L27%2012ZM27%2015L27%2021L24%2021ZM9%2021L3%2021L3%2018Z%22%2F%3E%3Cpath%20fill%3D%22%23cca166%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23996e32%22%20d%3D%22M9%209L15%209L15%2015L9%2015ZM12.9%2014.4L14.4%2011.4L11.4%2011.4ZM21%209L21%2015L15%2015L15%209ZM15.6%2012.9L18.6%2014.4L18.6%2011.4ZM21%2021L15%2021L15%2015L21%2015ZM17.1%2015.6L15.6%2018.6L18.6%2018.6ZM9%2021L9%2015L15%2015L15%2021ZM14.4%2017.1L11.4%2015.6L11.4%2018.6Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "0AAAA test pool",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 1295,
+      "delegators": 33,
+      "livePledge": "23503392548",
+      "saturation": 0.007376929558147081,
+      "size": {
+        "active": 0.9543450371477694,
+        "live": 0.045654962852230585
+      },
+      "stake": {
+        "active": "422485310576",
+        "live": "442696607758"
+      }
+    },
+    "pledge": "10000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "test-relay1.0aaaa.org"
+      },
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "test-relay2.0aaaa.org"
+      }
+    ],
+    "vrf": "d1b243a8f5b0dadbf54755bd438e199dcf08ef9c6ff6b16add73b4d4da23dff5",
     "owners": ["stake_test1ur4t5nhceyn2amfuj7z74uxmmj8jf9fmgd2egqw8c98ve3cp2g4wx"],
-    "pledge": "10000.00tADA",
-    "retired": false,
-    "saturation": "0.72",
-    "size": "0.047006601528742475 %",
-    "ticker": "999"
+    "rewardAccount": "stake_test1ur4t5nhceyn2amfuj7z74uxmmj8jf9fmgd2egqw8c98ve3cp2g4wx",
+    "status": "active",
+    "transactions": {
+      "registration": ["4ac12a91f3c0052bad5076a393db5da5a2b4b934842f2262c249a948fc11fc86"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "0AAAA test pool",
+      "ticker": "999",
+      "homepage": "https://0AAAA.org",
+      "description": "0AAAA test pool. Secure, Reliable and positive vibes only."
+    },
+    "metadataJson": {
+      "hash": "e5ce50080872955eaea4bf9184deafb04cadc91c926379be5b4324a0399cd894",
+      "url": "https://a4a.s3.eu-north-1.amazonaws.com/mdt.json"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "8BETA preprod pool for 8BALL",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1190849209739",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "1170773186449",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "1169747937580",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "344142175",
+        "memberROI": 0.0005763736100316242,
+        "memberRewards": "673635468",
+        "pledge": "1000000000"
+      }
+    ],
     "hexId": "39f2beff04e3497a9b9ded772ede1a54b92cee34bc7ef55d6788a5c8",
     "id": "pool188etalcyudyh4xuaa4mjahs62jujem35h3l02ht83zjusqvwdh7",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M15%206L12%209L9%206L12%203ZM18%209L15%206L18%203L21%206ZM15%2024L18%2021L21%2024L18%2027ZM12%2021L15%2024L12%2027L9%2024ZM9%2012L6%2015L3%2012L6%209ZM24%2015L21%2012L24%209L27%2012ZM21%2018L24%2015L27%2018L24%2021ZM6%2015L9%2018L6%2021L3%2018Z%22%2F%3E%3Cpath%20fill%3D%22%2386cc66%22%20d%3D%22M9%206L6%209L3%206L6%203ZM24%209L21%206L24%203L27%206ZM21%2024L24%2021L27%2024L24%2027ZM6%2021L9%2024L6%2027L3%2024ZM9%209L15%209L15%2015L9%2015ZM12.9%2014.4L14.4%2011.4L11.4%2011.4ZM21%209L21%2015L15%2015L15%209ZM15.6%2012.9L18.6%2014.4L18.6%2011.4ZM21%2021L15%2021L15%2015L21%2015ZM17.1%2015.6L15.6%2018.6L18.6%2018.6ZM9%2021L9%2015L15%2015L15%2021ZM14.4%2017.1L11.4%2015.6L11.4%2018.6Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "8BETA",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 2013,
+      "delegators": 18,
+      "livePledge": "7836479587",
+      "saturation": 0.0031260798981489523,
+      "size": {
+        "active": 6.2408268821521276,
+        "live": -5.2408268821521276
+      },
+      "stake": {
+        "active": "1170773186449",
+        "live": "187599048741"
+      }
+    },
+    "pledge": "1000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "relay1.preprod.metablx.com"
+      }
+    ],
+    "vrf": "511c24a6dda793785845563dc70e3f8e20f67968d7d721d1ab6d0fb527dcfa5b",
     "owners": ["stake_test1upg6uc032e8kq6pu9tpqxf3wkafghuq5j5kzjvt5jg0w9ysd7882j"],
-    "pledge": "1000.00tADA",
-    "retired": false,
-    "saturation": "0.31",
-    "size": "-5.249940679817007 %",
-    "ticker": "8BETA"
+    "rewardAccount": "stake_test1upg6uc032e8kq6pu9tpqxf3wkafghuq5j5kzjvt5jg0w9ysd7882j",
+    "status": "active",
+    "transactions": {
+      "registration": ["2311e20b2f48eb74e9a4580c08989de2dd046ae6e7d19627edc0ce918909366c"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "8BETA",
+      "ticker": "8BETA",
+      "homepage": "https://metablx.com",
+      "description": "8BETA preprod pool for 8BALL"
+    },
+    "metadataJson": {
+      "hash": "d0e87df6a5278609004f8fc66aa64239e73474799252d6b0db9e91d8c79af177",
+      "url": "https://bit.ly/8BETA_01"
+    }
   },
   {
-    "cost": "1.00% + 340tADA",
-    "description": "Your Trust is our Motivation - A CardanoLand [ACL]",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1105039678782",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "1104887276695",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "104505927939",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      }
+    ],
     "hexId": "91e5291c8ff5a96bab833f219b4a8e792b077cf6bb55f44ce8bfd30e",
     "id": "pool1j8jjj8y07k5kh2ur8usekj5w0y4swl8khd2lgn8ghlfsuwexwf9",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%239e84d6%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M3%209L3%203L6%203ZM21%203L27%203L27%206ZM27%2021L27%2027L24%2027ZM9%2027L3%2027L3%2024Z%22%2F%3E%3Cpath%20fill%3D%22%23cec1ea%22%20d%3D%22M11.4%2015a3.6%2C3.6%200%201%2C1%207.2%2C0a3.6%2C3.6%200%201%2C1%20-7.2%2C0%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "1.00",
-    "name": "A CardanoLand pool ACL - PreProd",
+    "margin": {
+      "denominator": 100,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 2079,
+      "delegators": 18,
+      "livePledge": "8519128695",
+      "saturation": 0.0017552511551240312,
+      "size": {
+        "active": 10.489339625015955,
+        "live": -9.489339625015955
+      },
+      "stake": {
+        "active": "1104887276695",
+        "live": "105334302844"
+      }
+    },
+    "pledge": "0",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "PreProd1.cardanoland.com"
+      },
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "PreProd2.cardanoland.com"
+      }
+    ],
+    "vrf": "31147b4bf3b20ff386c2560e1d181341ede74d58bb5d85557d889bdc0e864305",
     "owners": [
       "stake_test1uq9u0x5dusw8jdta9wyy4g6y0c52mdagu0kyyqd9dwgzu3cr3g8qm",
       "stake_test1uqx2205hf64sasuk2dj7azmktm7qf93082r4y2e628ukeqs34q6sq",
       "stake_test1uqah6clkjnm785l5ualednp8rkuf9w3kx6dwnrerde392xqvjeh2k",
       "stake_test1up2cntptsk5slmyxdkcnpsslnf4tv5p7qhsahq9nfd04kxgy0ffvs"
     ],
-    "pledge": "-",
-    "retired": false,
-    "saturation": "0.17",
-    "size": "0.0045330375030567804 %",
-    "ticker": "ACL"
+    "rewardAccount": "stake_test1uq9u0x5dusw8jdta9wyy4g6y0c52mdagu0kyyqd9dwgzu3cr3g8qm",
+    "status": "active",
+    "transactions": {
+      "registration": ["db07749568f3e723bb42381079204bfed36d61b64109f7c2d4b854fb03eceb86"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "A CardanoLand pool ACL - PreProd",
+      "ticker": "ACL",
+      "homepage": "https://cardanoland.com",
+      "description": "Your Trust is our Motivation - A CardanoLand [ACL]"
+    },
+    "metadataJson": {
+      "hash": "4d838571d9aa15ac438bd400796cb6d95a4539d2c2da0563419babef8b5133bc",
+      "url": "https://raw.githubusercontent.com/SViksha/A/master/PPACL.json"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "ADA Capital - PreProd Pool",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "10016739472074",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000000"
+      },
+      {
+        "activeStake": "9860672227747",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000000"
+      },
+      {
+        "activeStake": "9665598194883",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "1788195887",
+        "memberROI": 0.0007760386870892525,
+        "memberRewards": "6724839446",
+        "pledge": "1000000000000"
+      }
+    ],
     "hexId": "8aa469088eaf5c38c3d4faf0d3516ca670cd6df5545fafea2f70258b",
     "id": "pool132jxjzyw4awr3s75ltcdx5tv5ecv6m042306l630wqjckhfm32r",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%2366cc7c%22%20d%3D%22M9%209L9%203L12%203ZM15%203L21%203L21%206ZM21%2021L21%2027L18%2027ZM15%2027L9%2027L9%2024ZM3%2015L3%209L6%209ZM21%209L27%209L27%2012ZM27%2015L27%2021L24%2021ZM9%2021L3%2021L3%2018ZM4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M15%209L15%2013L12%209ZM21%2015L17%2015L21%2012ZM15%2021L15%2017L18%2021ZM9%2015L13%2015L9%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "ADA Capital",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 29635,
+      "delegators": 3079,
+      "livePledge": "1716086471877",
+      "saturation": 0.17008772672552125,
+      "size": {
+        "active": 0.9660575267317804,
+        "live": 0.03394247326821964
+      },
+      "stake": {
+        "active": "9860672227747",
+        "live": "10207127375847"
+      }
+    },
+    "pledge": "1000000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "20.90.201.81",
+        "ipv6": null,
+        "port": 3001
+      },
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "20.98.184.3",
+        "ipv6": null,
+        "port": 3001
+      }
+    ],
+    "vrf": "ff9d774cc7e3e85ec1827bfd68c475bc611a9e288e7c9e1fb159fce52d2703fd",
     "owners": ["stake_test1up3hm9j74c560trk9enccpc269wc9xfn4ah8ax8jp3rwtdgtr58qe"],
-    "pledge": "1000000.00tADA",
-    "retired": false,
-    "saturation": "16.63",
-    "size": "0.031396553359399615 %",
-    "ticker": "ADACT"
+    "rewardAccount": "stake_test1up3hm9j74c560trk9enccpc269wc9xfn4ah8ax8jp3rwtdgtr58qe",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "3086cddf6f97a82b569d17b351b68e274af539d987eed2d665b09adecb7e5d88",
+        "31840b1102e75068b35462af1c3829dea1827d4779ab45a5efad2f44cc37cf24",
+        "44a17933f5bd40ee1b49ebd53950d92b8e30681fe21ea25ee5dfb94f06140e45",
+        "70e52a7dc18a8a05130658b1317410b8d49fbd463be31ee889644e260a584321",
+        "9367670519eb78248168276ff186a33af45fa3b17e839cdeecc11bd6c9b3bcda",
+        "9f167402ea1791758e0ae6286f09d393e09055d4c200727dd3dccb6bb0f8d7ae",
+        "abdb790e9f76b68be16090f121ba7bdf453ad097dba244a7d748aa03a22faa10",
+        "95fcf12b362bc14b11323871a391b85fafcee0fb5d2cf859e5d9b4771046dd4e",
+        "d18b6daad3147fca7c6b243d9119ec7889a5017566a3e64cbf20dfa33b114f55",
+        "061bd9fd1d3a0b520f84750a75b75d85c2eda09eca62231040453e84ed74d9e3"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "ADA Capital",
+      "ticker": "ADACT",
+      "homepage": "https://adacapital.io",
+      "description": "ADA Capital - PreProd Pool"
+    },
+    "metadataJson": {
+      "hash": "ac5fbc53a3d1493b5ba0ea1772fd5d4fda3cd72ba89503ff2261a39052fcd2f5",
+      "url": "https://adacapital.io/adact_preprod.json"
+    }
   },
   {
-    "cost": "5.00% + 340tADA",
-    "description": "Energy-optimized Bare Metal Infrastructure | Adoption-focused written / visual guides | MD, US",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1382400733813",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "500000000000"
+      },
+      {
+        "activeStake": "1391609283762",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "500000000000"
+      },
+      {
+        "activeStake": "595710106410",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "661496051",
+        "memberROI": 0.00035125411788788333,
+        "memberRewards": "33618569",
+        "pledge": "500000000000"
+      }
+    ],
     "hexId": "0ed90e52db2166b3a80e0711885b94f7950fc0e3898a573a8b98b0e9",
     "id": "pool1pmvsu5kmy9nt82qwqugcsku5772sls8r3x99ww5tnzcwjzpvy4n",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M15%209L9%209L9%203ZM15%209L15%203L21%203ZM15%2021L21%2021L21%2027ZM15%2021L15%2027L9%2027ZM9%2015L3%2015L3%209ZM21%2015L21%209L27%209ZM21%2015L27%2015L27%2021ZM9%2015L9%2021L3%2021Z%22%2F%3E%3Cpath%20fill%3D%22%23e5e5e5%22%20d%3D%22M9%209L3%209L3%206ZM21%209L21%203L24%203ZM21%2021L27%2021L27%2024ZM9%2021L9%2027L6%2027Z%22%2F%3E%3Cpath%20fill%3D%22%2387cc66%22%20d%3D%22M9%209L15%209L15%2015L9%2015ZM11%2014.2L14.2%2014.2L14.2%2011L11%2011ZM21%209L21%2015L15%2015L15%209ZM15.8%2011L15.8%2014.2L19%2014.2L19%2011ZM21%2021L15%2021L15%2015L21%2015ZM19%2015.8L15.8%2015.8L15.8%2019L19%2019ZM9%2021L9%2015L15%2015L15%2021ZM14.2%2019L14.2%2015.8L11%2015.8L11%2019Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "5.00",
-    "name": "AdaNet.io",
+    "margin": {
+      "denominator": 20,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 10066,
+      "delegators": 18,
+      "livePledge": "537402233023",
+      "saturation": 0.023035789333225906,
+      "size": {
+        "active": 1.0066619679104576,
+        "live": -0.006661967910457589
+      },
+      "stake": {
+        "active": "1391609283762",
+        "live": "1382399780783"
+      }
+    },
+    "pledge": "500000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "relay0-preprod.adanet.io"
+      }
+    ],
+    "vrf": "318987874684b0cb053dd445b5562d7cbd65d3ff280f8b8877ab6af1bc3e0c4e",
     "owners": ["stake_test1uzk3xvansh84n5se205admtm2m4qfcezcw7v8034vvz6q2g3dp7x9"],
-    "pledge": "500000.00tADA",
-    "retired": false,
-    "saturation": "2.30",
-    "size": "0.5687785009339235 %",
-    "ticker": "ANET"
+    "rewardAccount": "stake_test1uzk3xvansh84n5se205admtm2m4qfcezcw7v8034vvz6q2g3dp7x9",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "4f73b6e1184363449ff09f8347cb7512ef1c76a22b490302802fa31db9793b4b",
+        "cbfa5f26d29d70cc15e3479458def16f688165be76cf4137b354d636fb996602",
+        "529ca9d6a7821469be6d1cc85e1c9b477e05292a2a85ace4dd51c699e304f0a9",
+        "505f45b148fee49872040ffc65cc4fc63640f4ad9130dc54d34efbfee39d17ec",
+        "0faee96da0b112958a0862a44485322a3722668eb7468d5b293a136382f47d44",
+        "e52a5b2f602defa2ee2af426f43a7bbc744fe81028219aad2a1b424ed6b78f96",
+        "c7f3573dac1ffe60656274c7b5e79520e049ef3d647c739f1c4cdef9e3de4581",
+        "db9c11e6d9046aa009f244559581fc3913f1876edf558ffaa837472ed863c41a",
+        "320b4c0ca244f736adc43d6038cbcfda359070a8c0585e0dedfa5e607c1e5abb",
+        "1bfaf5e813460496b4960e5d5dc5846caa468d604c5754d1e3e262cf08b76d58",
+        "fe8d4a7b8aaf139122dafea596fcab2f4cd4958aeaee3e13a4a8ec7b8c4a5576",
+        "93ee0484ab37b88094aaf1f391ef7ddffd9ee8ec19e440ef565a688fa439fb16"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "AdaNet.io",
+      "ticker": "ANET",
+      "homepage": "https://adanet.io",
+      "description": "Energy-optimized Bare Metal Infrastructure | Adoption-focused written / visual guides | MD, US"
+    },
+    "metadataJson": {
+      "hash": "e908c3a40a7850da314e59d1436885a2ccbc461bef46f1146e6bbd08f5b02c27",
+      "url": "https://adanet.io/preprodmeta.json"
+    }
   },
   {
-    "cost": "10.00% + 340tADA",
-    "description": "ADA NORTH POOL PREPROD NODE",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "314968064677",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "20000000000"
+      },
+      {
+        "activeStake": "320096126735",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "20000000000"
+      },
+      {
+        "activeStake": "225631271499",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "20000000000"
+      }
+    ],
     "hexId": "879d95a56b9f951bb1a6345dc80bc41984b1353cd37749f2b2d2f92d",
     "id": "pool1s7wetfttn723hvdxx3wusz7yrxztzdfu6dm5nu4j6tuj6xcz2sj",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23c1d5ea%22%20d%3D%22M15%203L15%209L9%209ZM21%209L15%209L15%203ZM15%2027L15%2021L21%2021ZM9%2021L15%2021L15%2027ZM9%209L9%2015L3%2015ZM27%2015L21%2015L21%209ZM21%2021L21%2015L27%2015ZM3%2015L9%2015L9%2021Z%22%2F%3E%3Cpath%20fill%3D%22%2384acd6%22%20d%3D%22M9%209L3%209L3%206ZM21%209L21%203L24%203ZM21%2021L27%2021L27%2024ZM9%2021L9%2027L6%2027Z%22%2F%3E%3Cpath%20fill%3D%22%235b5b5b%22%20d%3D%22M15%209L15%2013L12%209ZM21%2015L17%2015L21%2012ZM15%2021L15%2017L18%2021ZM9%2015L13%2015L9%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "10.00",
-    "name": "ADA NORTH POOL PREPROD",
+    "margin": {
+      "denominator": 10,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 1804,
+      "delegators": 18,
+      "livePledge": "39989773596",
+      "saturation": 0.005248459491299399,
+      "size": {
+        "active": 1.0162908404063182,
+        "live": -0.01629084040631823
+      },
+      "stake": {
+        "active": "320096126735",
+        "live": "314965080869"
+      }
+    },
+    "pledge": "20000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.adanorthpool.com"
+      }
+    ],
+    "vrf": "26fbeedc3c5ca9311bff2582e607cf2865cf70c21364a90c86327cf19a3405e2",
     "owners": ["stake_test1uppnxj43jfem8u73uxp9ta7jxfltv67t5f9l7ep5hp9cejckmhqmm"],
-    "pledge": "20000.00tADA",
-    "retired": false,
-    "saturation": "0.52",
-    "size": "0.28319865936821864 %",
-    "ticker": "ANP"
+    "rewardAccount": "stake_test1uppnxj43jfem8u73uxp9ta7jxfltv67t5f9l7ep5hp9cejckmhqmm",
+    "status": "active",
+    "transactions": {
+      "registration": ["f1749b052c8fa5a1cb7470f26d2e981e4b3d5bb5447c82a79b2571e6fbb3bae9"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "ADA NORTH POOL PREPROD",
+      "ticker": "ANP",
+      "homepage": "https://www.adanorthpool.com",
+      "description": "ADA NORTH POOL PREPROD NODE"
+    },
+    "metadataJson": {
+      "hash": "7655a011399043cd6caeff4be3a65827daeb34cbbe7f264b3db0b432d57e4806",
+      "url": "https://www.adanorthpool.com/ANPPRE.metadata.json"
+    }
   },
   {
-    "cost": "7.50% + 340tADA",
-    "description": "ARARE Stake Pool",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "2720633680533",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1400000000000"
+      },
+      {
+        "activeStake": "2708805201965",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1400000000000"
+      },
+      {
+        "activeStake": "2707208636967",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "1780206972",
+        "memberROI": 0.00004300163142313988,
+        "memberRewards": "56212104",
+        "pledge": "1400000000000"
+      }
+    ],
     "hexId": "bd66ac291ac521deaf22141fb0e5e2f0ed3da63159b9f49e1f500acf",
     "id": "pool1h4n2c2g6c5saatezzs0mpe0z7rknmf33txulf8sl2q9v7e72nky",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23545454%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23c675d1%22%20d%3D%22M3%206L6%203L9%206L6%209ZM24%203L27%206L24%209L21%206ZM27%2024L24%2027L21%2024L24%2021ZM6%2027L3%2024L6%2021L9%2024ZM9%209L15%209L15%2012L9%2012ZM9%2012L12%2012L12%2015L9%2015ZM15%2012L12%2015L12%2012ZM21%209L21%2015L18%2015L18%209ZM18%209L18%2012L15%2012L15%209ZM18%2015L15%2012L18%2012ZM21%2021L15%2021L15%2018L21%2018ZM21%2018L18%2018L18%2015L21%2015ZM15%2018L18%2015L18%2018ZM9%2021L9%2015L12%2015L12%2021ZM12%2021L12%2018L15%2018L15%2021ZM12%2015L15%2018L12%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "7.50",
-    "name": "AdaRare Stake Pool",
+    "margin": {
+      "denominator": 40,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 9186,
+      "delegators": 21,
+      "livePledge": "2600473583171",
+      "saturation": 0.04533568152321337,
+      "size": {
+        "active": 0.9956508487287052,
+        "live": 0.00434915127129476
+      },
+      "stake": {
+        "active": "2708805201965",
+        "live": "2720637666732"
+      }
+    },
+    "pledge": "1400000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "66.42.94.80",
+        "ipv6": null,
+        "port": 6000
+      },
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "170.187.201.55",
+        "ipv6": null,
+        "port": 6000
+      }
+    ],
+    "vrf": "469b832bd257b351a82f5b22ae6e1ccc254afebb17b53523654ec7ec765334d7",
     "owners": ["stake_test1url0eh64cw65trjq0zc4jhz4knzf4ce7asu43c4y4htv0vgazvd64"],
-    "pledge": "1400000.00tADA",
-    "retired": false,
-    "saturation": "4.53",
-    "size": "0.004307671216493003 %",
-    "ticker": "ARARE"
+    "rewardAccount": "stake_test1url0eh64cw65trjq0zc4jhz4knzf4ce7asu43c4y4htv0vgazvd64",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "d9dbd474131fd6d0aab27af59241982675a3819ae953425d50ae2ac1caaa4efb",
+        "f7c2976f517005ca6df035ce48efa9d3dc48098f735da21aeccc6aa732e25650",
+        "bd368243f830d4f5149ca73374aa026f65e9a6fb093d96eded505ff687b8070a",
+        "78f68221e3c60626b47f3011dea63e85df7037380e5c4728f3d4515ea5aa942a",
+        "abda67fb71ee124c9578f1b81a23d838891d1c1b32c7d5dd9b4ee13bae6e4cf3"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "AdaRare Stake Pool",
+      "ticker": "ARARE",
+      "homepage": "https://arare.io/",
+      "description": "ARARE Stake Pool"
+    },
+    "metadataJson": {
+      "hash": "16f0465deb5a55101cffb7cb6866b16344e9681f5e0ee64bcbf712158c42f540",
+      "url": "https://tinyurl.com/ARARE-PREPROD"
+    }
   },
   {
-    "cost": "7.50% + 340tADA",
-    "description": "ADASquirrel Testnet Node",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "105825543206",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "105825543206",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "105825543206",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      }
+    ],
     "hexId": "c997e00dd2174d86a6ed9d814daef42f2dce2babc234b4003bcb02bf",
     "id": "pool1ext7qrwjzaxcdfhdnkq5mth59ukuu2atcg6tgqpmevpt7ratkta",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23d175a9%22%20d%3D%22M15%209L9%209L9%203ZM15%209L15%203L21%203ZM15%2021L21%2021L21%2027ZM15%2021L15%2027L9%2027ZM9%2015L3%2015L3%209ZM21%2015L21%209L27%209ZM21%2015L27%2015L27%2021ZM9%2015L9%2021L3%2021Z%22%2F%3E%3Cpath%20fill%3D%22%23e8bad4%22%20d%3D%22M9%209L3%209L3%203ZM21%209L21%203L27%203ZM21%2021L27%2021L27%2027ZM9%2021L9%2027L3%2027Z%22%2F%3E%3Cpath%20fill%3D%22%23545454%22%20d%3D%22M9%209L15%209L15%2015L9%2015ZM10.5%2012.8L12.8%2015L15%2012.8L12.8%2010.5ZM21%209L21%2015L15%2015L15%209ZM17.3%2010.5L15%2012.8L17.3%2015L19.5%2012.8ZM21%2021L15%2021L15%2015L21%2015ZM19.5%2017.3L17.3%2015L15%2017.3L17.3%2019.5ZM9%2021L9%2015L15%2015L15%2021ZM12.8%2019.5L15%2017.3L12.8%2015L10.5%2017.3Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "7.50",
-    "name": "ADASquirrel",
+    "margin": {
+      "denominator": 40,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 726,
+      "delegators": 11,
+      "livePledge": "13867819421",
+      "saturation": 0.0017634369979332902,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "105825543206",
+        "live": "105825543206"
+      }
+    },
+    "pledge": "1000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "lamente.controlliamo.com"
+      }
+    ],
+    "vrf": "53904d9cbe59b52d6b54ce29a58090ef45b3e44bffdc6ab7c514a7c3934f2a74",
     "owners": ["stake_test1up5qkcr9y44aqrrf39663un7hqvjy68fupuhdrrzt7t06zgmcnprs"],
-    "pledge": "1000.00tADA",
-    "retired": false,
-    "saturation": "0.18",
-    "size": "0 %",
-    "ticker": "SQRL"
+    "rewardAccount": "stake_test1up5qkcr9y44aqrrf39663un7hqvjy68fupuhdrrzt7t06zgmcnprs",
+    "status": "active",
+    "transactions": {
+      "registration": ["7f623b6f8330159da9c03890e274481d6c451235162c90b77ae095c6eb3c7688"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "ADASquirrel",
+      "ticker": "SQRL",
+      "homepage": "https://adasquirrel.com",
+      "description": "ADASquirrel Testnet Node"
+    },
+    "metadataJson": {
+      "hash": "77ca30b9a2b04150cf3184557c5784558b34415023fd554670ce081d2a878f6d",
+      "url": "https://adasquirrel.com/meta/testnet/poolmeta.json"
+    }
   },
   {
-    "cost": "7.50% + 340tADA",
-    "description": "ADAvault Preprod",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1099421002588",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "500000000"
+      },
+      {
+        "activeStake": "1093639666402",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "500000000"
+      },
+      {
+        "activeStake": "1092659592229",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "415976564",
+        "memberROI": 0.0006495826050037984,
+        "memberRewards": "709447873",
+        "pledge": "500000000"
+      }
+    ],
     "hexId": "688d8f04100261e68f9e33476659a92c2366d48a5820d63f516abe9c",
     "id": "pool1dzxc7pqsqfs7dru7xdrkvkdf9s3kd4y2tqsdv063d2lfcxw6zmg",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%232e8c65%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23e3e3e3%22%20d%3D%22M9%209L3%209L3%203ZM21%209L21%203L27%203ZM21%2021L27%2021L27%2027ZM9%2021L9%2027L3%2027Z%22%2F%3E%3Cpath%20fill%3D%22%2359c799%22%20d%3D%22M9%209L15%209L15%2010L12.5%2015L9%2015ZM21%209L21%2015L20%2015L15%2012.5L15%209ZM21%2021L15%2021L15%2020L17.5%2015L21%2015ZM9%2021L9%2015L10%2015L15%2017.5L15%2021Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "7.50",
-    "name": "ADV",
+    "margin": {
+      "denominator": 40,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 3886,
+      "delegators": 10,
+      "livePledge": "26470326791",
+      "saturation": 0.01832033436122973,
+      "size": {
+        "active": 0.9947416447388068,
+        "live": 0.005258355261193226
+      },
+      "stake": {
+        "active": "1093639666402",
+        "live": "1099420811611"
+      }
+    },
+    "pledge": "500000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "gateway.adavault.com"
+      }
+    ],
+    "vrf": "190e206a35e7275c45b04f8db1b9cd166ab9717f7810840f150edbc556b7dfee",
     "owners": ["stake_test1ur5uc537jdf953she62atqeh44yrt2vrlx4yrrlsmggutqs896rz7"],
-    "pledge": "500.00tADA",
-    "retired": false,
-    "saturation": "1.83",
-    "size": "0.005309914067077148 %",
-    "ticker": "ADV"
+    "rewardAccount": "stake_test1ur5uc537jdf953she62atqeh44yrt2vrlx4yrrlsmggutqs896rz7",
+    "status": "active",
+    "transactions": {
+      "registration": ["c51d3a439de509dd366a8aff46f8543c1ca9e58a5ada8a956ccfe4a563eeec0e"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "ADV",
+      "ticker": "ADV",
+      "homepage": "https://adavault.com",
+      "description": "ADAvault Preprod"
+    },
+    "metadataJson": {
+      "hash": "8745ad893660a45658fc9441ee9296c5f50564aa7b9b8abb3688840afde187a7",
+      "url": "https://adavault.com/advpp.json"
+    }
   },
   {
-    "cost": "7.50% + 340tADA",
-    "description": "High-availability infrastructure on powerful bare metal servers in Sweden",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "32219139062",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "31837378605",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "75876029427",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      }
+    ],
     "hexId": "032a04334a846fdf542fd5633c9b3928998691b8276e004facbc8af1",
     "id": "pool1qv4qgv62s3ha74p0643nexee9zvcdydcyahqqnavhj90zheuykz",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%232e8c78%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23e3e3e3%22%20d%3D%22M9%206L6%209L3%206L6%203ZM24%209L21%206L24%203L27%206ZM21%2024L24%2021L27%2024L24%2027ZM6%2021L9%2024L6%2027L3%2024Z%22%2F%3E%3Cpath%20fill%3D%22%2359c7b0%22%20d%3D%22M15%209L15%2013L12%209ZM21%2015L17%2015L21%2012ZM15%2021L15%2017L18%2021ZM9%2015L13%2015L9%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "7.50",
-    "name": "AHLNET 🇸🇪",
+    "margin": {
+      "denominator": 40,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 273,
+      "delegators": 5,
+      "livePledge": "11473974253",
+      "saturation": 0.0005319723592353671,
+      "size": {
+        "active": 0.9972813029453826,
+        "live": 0.0027186970546173583
+      },
+      "stake": {
+        "active": "31837378605",
+        "live": "31924170754"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod-test.ahlnet.nu"
+      }
+    ],
+    "vrf": "514180cacf6f41cab0801283d5709e7088016a12d3464a8351c00776d271b721",
     "owners": ["stake_test1upsvd3whxxydar44e22cv6pzlt3l9vvz8kw5jzg7v3cwykctkwldh"],
-    "pledge": "5000.00tADA",
-    "retired": false,
-    "saturation": "0.05",
-    "size": "-1.3613597112105844 %",
-    "ticker": "AHL"
+    "rewardAccount": "stake_test1upsvd3whxxydar44e22cv6pzlt3l9vvz8kw5jzg7v3cwykctkwldh",
+    "status": "active",
+    "transactions": {
+      "registration": ["59a0d17988da24bce3cf6fdf0077c7324ffb5673687aa10febb0eb353f905cd8"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "AHLNET 🇸🇪",
+      "ticker": "AHL",
+      "homepage": "https://ahlnet.nu",
+      "description": "High-availability infrastructure on powerful bare metal servers in Sweden"
+    },
+    "metadataJson": {
+      "hash": "8f52b4840726c157c50c1b972fadb21b2f0c852e99004a48e649319218960c55",
+      "url": "https://ahlnet.nu/pool/preprod-meta.json"
+    }
   },
   {
-    "cost": "0.69% + 340tADA",
-    "description": "Alfa Cardano Pool. Professional operated high performance Baremetal Node with cloud Relays. 99,99% uptime! Support ADA decentralization.",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "17307143441370",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "210000000000"
+      },
+      {
+        "activeStake": "17260102980984",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "210000000000"
+      },
+      {
+        "activeStake": "17179437722189",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "659544907",
+        "memberROI": 0.0008484304057508151,
+        "memberRewards": "14397386932",
+        "pledge": "210000000000"
+      }
+    ],
     "hexId": "8ffb4c8e648c0662f2a91157c92feaa95f1a3d2728eaea8257b3d8d9",
     "id": "pool13la5erny3srx9u4fz9tujtl2490350f89r4w4qjhk0vdjmuv78v",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23545454%22%20d%3D%22M9%209L9%203L15%203ZM15%203L21%203L21%209ZM21%2021L21%2027L15%2027ZM15%2027L9%2027L9%2021ZM3%2015L3%209L9%209ZM21%209L27%209L27%2015ZM27%2015L27%2021L21%2021ZM9%2021L3%2021L3%2015Z%22%2F%3E%3Cpath%20fill%3D%22%23dfbae8%22%20d%3D%22M9%203L9%209L3%209ZM27%209L21%209L21%203ZM21%2027L21%2021L27%2021ZM3%2021L9%2021L9%2027Z%22%2F%3E%3Cpath%20fill%3D%22%23bf75d1%22%20d%3D%22M9%209L15%209L15%2015L9%2015ZM12.9%2014.4L14.4%2011.4L11.4%2011.4ZM21%209L21%2015L15%2015L15%209ZM15.6%2012.9L18.6%2014.4L18.6%2011.4ZM21%2021L15%2021L15%2015L21%2015ZM17.1%2015.6L15.6%2018.6L18.6%2018.6ZM9%2021L9%2015L15%2015L15%2021ZM14.4%2017.1L11.4%2015.6L11.4%2018.6Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.69",
-    "name": "Alfa Pool",
+    "margin": {
+      "denominator": 10000,
+      "numerator": 69
+    },
+    "metrics": {
+      "blocksCreated": 37079,
+      "delegators": 131,
+      "livePledge": "257556930075",
+      "saturation": 0.2881454984635341,
+      "size": {
+        "active": 0.9981618919233443,
+        "live": 0.0018381080766557423
+      },
+      "stake": {
+        "active": "17260102980984",
+        "live": "17291887338762"
+      }
+    },
+    "pledge": "210000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "132.226.203.38",
+        "ipv6": null,
+        "port": 6001
+      }
+    ],
+    "vrf": "41f661fcc0ee3e16b3c4105f993c169c89846bb77200bfb81ac15cac1eb38c6a",
     "owners": ["stake_test1ur9pv4652sv524d5qdy9q5h354er45jc3s562jp6vjykwwqyz0kzj"],
-    "pledge": "210000.00tADA",
-    "retired": false,
-    "saturation": "28.73",
-    "size": "0.0036362109422373168 %",
-    "ticker": "ALFA"
+    "rewardAccount": "stake_test1ur9pv4652sv524d5qdy9q5h354er45jc3s562jp6vjykwwqyz0kzj",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "a3e3650a64b11336804dd98eec886ad152ae3b8a84b90e23916e85a192182746",
+        "c292a39d7de78d3abebe6da0778dae8c29745a91a7a596f8a74c6ac8a99f16cd",
+        "f7995cc3e45496a6f6a50e8efa1e4ccc656c141f2e1339bf44c19d5afb144ac5",
+        "b8aa65a587e135e6f8bd1795f5db8fea28e63dea1b6ce4d3815f2b53e060e407",
+        "5438579b64538dc419b64205b0f194db41b91a20e8ad870ea26a59f9b868ba36",
+        "9e8436cab47850b28ffe52071b3161132e8105d12288d9dd8311ea793187d8e5",
+        "8fa1ad5310c9a81103da1d6a463a0046f74d5df166ad60d0be50a011a037eb16",
+        "4d4f55bfd80f8a8f5f63cf30f55925ef8b8bee198967e13e9018d36713cb4973",
+        "6ad4fda95070666799484a0ffefb18966eb99e945f40dfa5b47db9a7aeeab220",
+        "e6e7e7e137744d01d3e5a9ab2df3bd31dbc5720d5565e37dd0ef7b3ace486672"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Alfa Pool",
+      "ticker": "ALFA",
+      "homepage": "https://www.alfa-pool.com/",
+      "description": "Alfa Cardano Pool. Professional operated high performance Baremetal Node with cloud Relays. 99,99% uptime! Support ADA decentralization."
+    },
+    "metadataJson": {
+      "hash": "f5d13701d87a7a6d2642c194c7517a411ac662bfe63fa1d1c63f7558ed83e7ea",
+      "url": "https://tinyurl.com/2ku8unuf"
+    }
   },
   {
-    "cost": "5.00% + 340tADA",
-    "description": "Test pool for Alleycat Mining",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1126412115809",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1125544192998",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1124689011362",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "371447807",
+        "memberROI": 0.0004811140571476384,
+        "memberRewards": "538698123",
+        "pledge": "5000000000"
+      }
+    ],
     "hexId": "36aeed8d34d88f76bd53a1a24c2208741a14e4dc1b7283241e855d0c",
     "id": "pool1x6hwmrf5mz8hd02n5x3ycgsgwsdpfexurdegxfq7s4wsc79df2h",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23eaeaea%22%20d%3D%22M15%209L9%209L9%206ZM15%209L15%203L18%203ZM15%2021L21%2021L21%2024ZM15%2021L15%2027L12%2027ZM9%2015L3%2015L3%2012ZM21%2015L21%209L24%209ZM21%2015L27%2015L27%2018ZM9%2015L9%2021L6%2021Z%22%2F%3E%3Cpath%20fill%3D%22%235b5b5b%22%20d%3D%22M3%203L9%203L9%209ZM27%203L27%209L21%209ZM27%2027L21%2027L21%2021ZM3%2027L3%2021L9%2021Z%22%2F%3E%3Cpath%20fill%3D%22%238484d6%22%20d%3D%22M11%2011L15%2011L15%2015L11%2015ZM19%2011L19%2015L15%2015L15%2011ZM19%2019L15%2019L15%2015L19%2015ZM11%2019L11%2015L15%2015L15%2019Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "5.00",
-    "name": "Alleycat Test Pool",
+    "margin": {
+      "denominator": 20,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 3514,
+      "delegators": 9,
+      "livePledge": "6842887975",
+      "saturation": 0.018770107289421294,
+      "size": {
+        "active": 0.9992294802241393,
+        "live": 0.0007705197758607341
+      },
+      "stake": {
+        "active": "1125544192998",
+        "live": "1126412115809"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "172.8.215.51",
+        "ipv6": null,
+        "port": 3001
+      }
+    ],
+    "vrf": "46900e31b23914bca2001a09db61b515e698eb3d10d136cc85234c38123ed373",
     "owners": ["stake_test1updg3nmtre5mkrxv6fzyafgcyfvy7v349rrucg330h70wuqsec730"],
-    "pledge": "5000.00tADA",
-    "retired": false,
-    "saturation": "1.88",
-    "size": "0.0007597939213049854 %",
-    "ticker": "ALLEY"
+    "rewardAccount": "stake_test1updg3nmtre5mkrxv6fzyafgcyfvy7v349rrucg330h70wuqsec730",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "84395dec493fea7857562ef506ce317c72ef92a3e0327f6a1a7d5b075426d020",
+        "4f45d66ca19841ca2620a3d2ce16af6568c22d727334064f1498d5868932fc08"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Alleycat Test Pool",
+      "ticker": "ALLEY",
+      "homepage": "http://alleycatmining.com",
+      "description": "Test pool for Alleycat Mining"
+    },
+    "metadataJson": {
+      "hash": "3e21bfdb72178f53f520ff8771818cb7ff323717a68ef457a7b2b74d10f1670a",
+      "url": "http://fs.alleycatmining.com/acmTest.metadata.json"
+    }
   },
   {
-    "cost": "22.00% + 777tADA",
-    "description": "ANGEL pool at pre-production",
-    "fee": "777.00",
+    "cost": "777000000",
+    "epochRewards": [
+      {
+        "activeStake": "1286799961684",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "37777000000"
+      },
+      {
+        "activeStake": "1256097311447",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "37777000000"
+      },
+      {
+        "activeStake": "1246058521465",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "916959388",
+        "memberROI": 0.00034281283760574205,
+        "memberRewards": "414214417",
+        "pledge": "37777000000"
+      }
+    ],
     "hexId": "74f5dd2551c2c0fd71aebb95e1f58d0b742c0fd2ff1712644f709bdc",
     "id": "pool1wn6a6f23ctq06udwhw27ravdpd6zcr7jlut3yez0wzdackz3222",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23e5dbb2%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23ccb866%22%20d%3D%22M15%2012L15%2015L12%2015ZM18%2015L15%2015L15%2012ZM15%2018L15%2015L18%2015ZM12%2015L15%2015L15%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "22.00",
-    "name": "ANGEL stake pool",
+    "margin": {
+      "denominator": 50,
+      "numerator": 11
+    },
+    "metrics": {
+      "blocksCreated": 4378,
+      "delegators": 46,
+      "livePledge": "53787436904",
+      "saturation": 0.021435106563610896,
+      "size": {
+        "active": 0.9764883839808942,
+        "live": 0.023511616019105785
+      },
+      "stake": {
+        "active": "1256097311447",
+        "live": "1286341273540"
+      }
+    },
+    "pledge": "37777000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod-relay1.angelstakepool.net"
+      }
+    ],
+    "vrf": "7cc0d9a8931e434c5632d5a696a2c50483d7ed86f4f2e97e558f14e863a2ccbf",
     "owners": ["stake_test1uzn083tm8erradk0lwzzkegewdtwj6mukk2ep2r03g9j87g0020y2"],
-    "pledge": "37777.00tADA",
-    "retired": false,
-    "saturation": "2.14",
-    "size": "0.030825650579663355 %",
-    "ticker": "ANGEL"
+    "rewardAccount": "stake_test1uzn083tm8erradk0lwzzkegewdtwj6mukk2ep2r03g9j87g0020y2",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "0c3f02c9e08ed3687481f71e0581efca147813d5f0a0eb3716b7342e545b3f9e",
+        "ec46ebbe69288a007df2a9fd1dc173cfe5fd679e00c8ed9f652ac2c190d1ceb5"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "ANGEL stake pool",
+      "ticker": "ANGEL",
+      "homepage": "https://www.angelstakepool.net",
+      "description": "ANGEL pool at pre-production"
+    },
+    "metadataJson": {
+      "hash": "bf44709dd714742688eeff2b6ca5573fe312a2e5f49d564c4c2311923c63952c",
+      "url": "https://angelstakepool.net/preprod/angel.json"
+    }
   },
   {
-    "cost": "1.00% + 340tADA",
-    "description": "Building tools for Cardano (PreProd)",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "10051440417",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "10041797026",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "10032188437",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      }
+    ],
     "hexId": "30d3fdfaf69f59aa2e38baf04563b58519aae47b5454f42a32cf3326",
     "id": "pool1xrflm7hknav65t3chtcy2ca4s5v64erm2320g23jeuejvw60t7l",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23e8e8e8%22%20d%3D%22M9%206L12%203L15%206L12%209ZM18%203L21%206L18%209L15%206ZM21%2024L18%2027L15%2024L18%2021ZM12%2027L9%2024L12%2021L15%2024ZM3%2012L6%209L9%2012L6%2015ZM24%209L27%2012L24%2015L21%2012ZM27%2018L24%2021L21%2018L24%2015ZM6%2021L3%2018L6%2015L9%2018Z%22%2F%3E%3Cpath%20fill%3D%22%23a83865%22%20d%3D%22M3%209L3%203L9%203ZM21%203L27%203L27%209ZM27%2021L27%2027L21%2027ZM9%2027L3%2027L3%2021Z%22%2F%3E%3Cpath%20fill%3D%22%23d1759a%22%20d%3D%22M9%209L15%209L15%2012L9%2012ZM9%2012L12%2012L12%2015L9%2015ZM15%2012L12%2015L12%2012ZM21%209L21%2015L18%2015L18%209ZM18%209L18%2012L15%2012L15%209ZM18%2015L15%2012L18%2012ZM21%2021L15%2021L15%2018L21%2018ZM21%2018L18%2018L18%2015L21%2015ZM15%2018L18%2015L18%2018ZM9%2021L9%2015L12%2015L12%2021ZM12%2021L12%2018L15%2018L15%2021ZM12%2015L15%2018L12%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "1.00",
-    "name": "AnvilPreprod",
+    "margin": {
+      "denominator": 100,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 5,
+      "delegators": 2,
+      "livePledge": "9535623298",
+      "saturation": 0.00016749341716885141,
+      "size": {
+        "active": 0.9990405961135987,
+        "live": 0.0009594038864012555
+      },
+      "stake": {
+        "active": "10041797026",
+        "live": "10051440417"
+      }
+    },
+    "pledge": "1000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "pool-preprod.ada-anvil.app"
+      }
+    ],
+    "vrf": "8d323ea855159b9d6616ea8e4018334062c9ed339fe1c99f02f670765e515c6e",
     "owners": ["stake_test1ur74k4wluhnhrw0erzm4j60yax9kt53ah34ns8ca6pqmjssvwhrwf"],
-    "pledge": "1000.00tADA",
-    "retired": false,
-    "saturation": "0.02",
-    "size": "0.0009568595118106815 %",
-    "ticker": "ANVIL"
+    "rewardAccount": "stake_test1ur74k4wluhnhrw0erzm4j60yax9kt53ah34ns8ca6pqmjssvwhrwf",
+    "status": "active",
+    "transactions": {
+      "registration": ["425c8d0df64911464edb216e93a2402932f719de47890d8d7e2ee76a5bdc3c9e"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "AnvilPreprod",
+      "ticker": "ANVIL",
+      "homepage": "https://ada-anvil.io",
+      "description": "Building tools for Cardano (PreProd)"
+    },
+    "metadataJson": {
+      "hash": "26a0c973912ad901396acd8d14b197d43fb7d248fece9aee498edeaeb673598b",
+      "url": "https://anvil-testpool.s3.ca-central-1.amazonaws.com/meta.json"
+    }
   },
   {
-    "cost": "10.00% + 340tADA",
-    "description": "APEX Stake Pool: Low fees - 340 Fixed Cost and 10% Margin (variable fee). SPO with 24 years of IT experience, supporting the Cardano community and the decentralization of Cardano. Delegate to APEX Stake Pool!",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "2032941876898",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000000"
+      },
+      {
+        "activeStake": "2032249902262",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000000"
+      },
+      {
+        "activeStake": "2032664397430",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "598723610",
+        "memberROI": 0.0007695773316763188,
+        "memberRewards": "1487334710",
+        "pledge": "100000000000"
+      }
+    ],
     "hexId": "7facad662e180ce45e5c504957cd1341940c72a708728f7ecfc6e349",
     "id": "pool107k26e3wrqxwghju2py40ngngx2qcu48ppeg7lk0cm35jl2aenx",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23464646%22%20d%3D%22M15%209L9%209L9%203ZM15%209L15%203L21%203ZM15%2021L21%2021L21%2027ZM15%2021L15%2027L9%2027ZM9%2015L3%2015L3%209ZM21%2015L21%209L27%209ZM21%2015L27%2015L27%2021ZM9%2015L9%2021L3%2021Z%22%2F%3E%3Cpath%20fill%3D%22%2359bdc7%22%20d%3D%22M3%206L6%203L9%206L6%209ZM24%203L27%206L24%209L21%206ZM27%2024L24%2027L21%2024L24%2021ZM6%2027L3%2024L6%2021L9%2024ZM15%2012L15%2015L12%2015ZM18%2015L15%2015L15%2012ZM15%2018L15%2015L18%2015ZM12%2015L15%2015L15%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "10.00",
-    "name": "Apex Cardano Pool",
+    "margin": {
+      "denominator": 10,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 23309,
+      "delegators": 119,
+      "livePledge": "108142696799",
+      "saturation": 0.03445114330755467,
+      "size": {
+        "active": 0.9829760002811129,
+        "live": 0.01702399971888713
+      },
+      "stake": {
+        "active": "2032249902262",
+        "live": "2067446104158"
+      }
+    },
+    "pledge": "100000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "pp-relay1.apexpool.info"
+      }
+    ],
+    "vrf": "96c5e6a9fb8315143834eb2e446c06c18d39b61f284c1abf049ae202e19b9992",
     "owners": ["stake_test1up97ct2wt8jqlly2cnkhuwc7tvevmjpp7h6ts3rucpksy8c8cnspn"],
-    "pledge": "100000.00tADA",
-    "retired": false,
-    "saturation": "3.38",
-    "size": "-0.0007431069530481338 %",
-    "ticker": "APEX"
+    "rewardAccount": "stake_test1up97ct2wt8jqlly2cnkhuwc7tvevmjpp7h6ts3rucpksy8c8cnspn",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "2bb6dacde08dcc4971683b91b4136ef24c3407528583ae0298edc01c959552de",
+        "394b076716026987c75bb90112e99f677fd75d6a96628a104b4a40c097d9a6d3",
+        "e81f310ed9e23585e1148863fcb47f6697d4aaad1b7894f1015ad827a0595558",
+        "b9966c87a37db47e29527762838a8e6b3569d986b3272f8ac162f1e0b70c1c7d",
+        "ee3a009032ba19671d6980fc353bfd4e49d40b1bf275d9658b67430bf0df4a91",
+        "7ba85129a64a54a9420d82f5e82af6dd8bbcd3c9d8bf2daead914e0b2585fe67",
+        "f0693ef4147fb23cbc42b836cc74648cac733149d991a926aa7f796ee45895d8",
+        "94d22cb75cfe3d5bc734b48bc6e479367b2c5f7f0a4495b036de456334590d8d",
+        "cb2a3dc9b05945684e4336c816a0ce9fe09ac1bfed1a0787fdd01573055b89d6",
+        "e6127821f82371fcbc9ee54554e97c9352fd3d2e018b62baace567146d8e8efe",
+        "d45b924526068132f5220c9433e3ba7070a5784bcb49cbf2eb22f44a16c9cc34",
+        "8c89df90290139cbfcc15a448e12bf8bf7a8469dfe4d497418593fa24fa447df",
+        "f6e95aa570d79360581d9632be5d0a60efc18c7e1f202bebaea9cf9adc38640e"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Apex Cardano Pool",
+      "ticker": "APEX",
+      "homepage": "https://apexpool.info/",
+      "description": "APEX Stake Pool: Low fees - 340 Fixed Cost and 10% Margin (variable fee). SPO with 24 years of IT experience, supporting the Cardano community and the decentralization of Cardano. Delegate to APEX Stake Pool!"
+    },
+    "metadataJson": {
+      "hash": "a207f23a6255eeb0b508945e5170b169eb5c3220109d7fa17a7d88d462c8a199",
+      "url": "https://apexpool.info/preprod/poolmetadata.json"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "Arcadian Crypto Cardano Staking Pool",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "129496541294",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000000"
+      },
+      {
+        "activeStake": "129496541294",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000000"
+      },
+      {
+        "activeStake": "129496541294",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000000"
+      }
+    ],
     "hexId": "39d9c0a597acecd8bfd0766a47aa468ebe3f6734023fd642dd791c13",
     "id": "pool188vupfvh4nkd307swe4y02jx36lr7ee5qglavska0ywpxrqu8ra",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23eaeaea%22%20d%3D%22M15%209L9%209L9%206ZM15%209L15%203L18%203ZM15%2021L21%2021L21%2024ZM15%2021L15%2027L12%2027ZM9%2015L3%2015L3%2012ZM21%2015L21%209L24%209ZM21%2015L27%2015L27%2018ZM9%2015L9%2021L6%2021Z%22%2F%3E%3Cpath%20fill%3D%22%23848ed6%22%20d%3D%22M9%203L9%209L3%209ZM27%209L21%209L21%203ZM21%2027L21%2021L27%2021ZM3%2021L9%2021L9%2027Z%22%2F%3E%3Cpath%20fill%3D%22%233d4cb7%22%20d%3D%22M9%209L15%209L15%2015L9%2015ZM11.2%2012.7a1.6%2C1.6%200%201%2C0%203.1%2C0a1.6%2C1.6%200%201%2C0%20-3.1%2C0M21%209L21%2015L15%2015L15%209ZM15.7%2012.7a1.6%2C1.6%200%201%2C0%203.1%2C0a1.6%2C1.6%200%201%2C0%20-3.1%2C0M21%2021L15%2021L15%2015L21%2015ZM15.7%2017.3a1.6%2C1.6%200%201%2C0%203.1%2C0a1.6%2C1.6%200%201%2C0%20-3.1%2C0M9%2021L9%2015L15%2015L15%2021ZM11.2%2017.3a1.6%2C1.6%200%201%2C0%203.1%2C0a1.6%2C1.6%200%201%2C0%20-3.1%2C0%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "Arcadian Crypto Pool 1",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 1,
+      "livePledge": "129496541294",
+      "saturation": 0.00215788159405994,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "129496541294",
+        "live": "129496541294"
+      }
+    },
+    "pledge": "10000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "relay01.rkdn.app"
+      }
+    ],
+    "vrf": "1f2972d18bf671681635996ccaf7a6c5321cf5d8e0617bd12ec6a32083ef6947",
     "owners": ["stake_test1uztnt93hqxx8jy6pllx53rhjsfpgdqs4npmvry4yphkxpns280dt7"],
-    "pledge": "10000.00tADA",
-    "retired": false,
-    "saturation": "0.22",
-    "size": "0 %",
-    "ticker": "RKDN"
+    "rewardAccount": "stake_test1uztnt93hqxx8jy6pllx53rhjsfpgdqs4npmvry4yphkxpns280dt7",
+    "status": "active",
+    "transactions": {
+      "registration": ["6613e157322e230774b907c5e51c5c2d1e1b30c956a64d9dca1f9eeab9d9905f"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Arcadian Crypto Pool 1",
+      "ticker": "RKDN",
+      "homepage": "https://rkdn.app",
+      "description": "Arcadian Crypto Cardano Staking Pool"
+    },
+    "metadataJson": {
+      "hash": "9041c0be41c5549c47aa859425e35686c6ad5ce2714597b8b0c34eae8f6c7e6a",
+      "url": "https://rkdn.app/pool_Metadata.json"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "Your (preproduction) ticket to the moon",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1075711868724",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "1075056117681",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "1073839731482",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "361727885",
+        "memberROI": 0.0007027265814983933,
+        "memberRewards": "753912997",
+        "pledge": "1000000000"
+      }
+    ],
     "hexId": "b64b7aed0819d6b4d69dfe68d6566bb338e53accdebfdaed8f568e73",
     "id": "pool1ke9h4mggr8ttf45ale5dv4ntkvuw2wkvm6la4mv02688xuy99qp",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23d175a4%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M9%209L15%209L15%2015L9%2015ZM10.5%2012.8L12.8%2015L15%2012.8L12.8%2010.5ZM21%209L21%2015L15%2015L15%209ZM17.3%2010.5L15%2012.8L17.3%2015L19.5%2012.8ZM21%2021L15%2021L15%2015L21%2015ZM19.5%2017.3L17.3%2015L15%2017.3L17.3%2019.5ZM9%2021L9%2015L15%2015L15%2021ZM12.8%2019.5L15%2017.3L12.8%2015L10.5%2017.3Z%22%2F%3E%3Cpath%20fill%3D%22%23e8e8e8%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "Artemis Preprod Stakepool",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 3121,
+      "delegators": 10,
+      "livePledge": "30783084171",
+      "saturation": 0.0179255907543996,
+      "size": {
+        "active": 0.9993718220472527,
+        "live": 0.0006281779527472775
+      },
+      "stake": {
+        "active": "1075056117681",
+        "live": "1075731868724"
+      }
+    },
+    "pledge": "1000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "81.174.170.134",
+        "ipv6": null,
+        "port": 6001
+      }
+    ],
+    "vrf": "d8cd0338d85b63237c25f6747ec35fc652ff18fc9386b4cd2d2aa7bff7029e83",
     "owners": ["stake_test1uz00psvs2lst974ggknc7lc52nf3248kvj6ey808fnnhxksllv4d2"],
-    "pledge": "1000.00tADA",
-    "retired": false,
-    "saturation": "1.79",
-    "size": "0.0011314629803920173 %",
-    "ticker": "ARTMS"
+    "rewardAccount": "stake_test1uz00psvs2lst974ggknc7lc52nf3248kvj6ey808fnnhxksllv4d2",
+    "status": "active",
+    "transactions": {
+      "registration": ["1734c70da312aabb0cce3c02d7872aecd28033bc31bb56a417d72d9e43301eac"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Artemis Preprod Stakepool",
+      "ticker": "ARTMS",
+      "homepage": "https://artemispool.co.uk",
+      "description": "Your (preproduction) ticket to the moon"
+    },
+    "metadataJson": {
+      "hash": "fec26241c2ca3db3fbb657290ba662c01211809963164e4b251bae9df72d4f5a",
+      "url": "https://raw.githubusercontent.com/Bryans01/SP1/main/SP1.json"
+    }
   },
   {
-    "cost": "10.00% + 10000tADA",
-    "description": "Testnet Pool on the PreProd-Chain",
-    "fee": "10000.00",
+    "cost": "10000000000",
+    "epochRewards": [
+      {
+        "activeStake": "1608363669152",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "1607929718392",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "607465978000",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      }
+    ],
     "hexId": "1d9302a3fb4b3b1935e02b27f0339798d3f08a55fbfdcd43a449a96f",
     "id": "pool1rkfs9glmfva3jd0q9vnlqvuhnrflpzj4l07u6sayfx5k7d788us",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23545454%22%20d%3D%22M9%209L9%203L15%203ZM15%203L21%203L21%209ZM21%2021L21%2027L15%2027ZM15%2027L9%2027L9%2021ZM3%2015L3%209L9%209ZM21%209L27%209L27%2015ZM27%2015L27%2021L21%2021ZM9%2021L3%2021L3%2015Z%22%2F%3E%3Cpath%20fill%3D%22%23d175c9%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M11.4%2015a3.6%2C3.6%200%201%2C1%207.2%2C0a3.6%2C3.6%200%201%2C1%20-7.2%2C0%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "10.00",
-    "name": "ATADA Austria - PreProd Pool #1",
+    "margin": {
+      "denominator": 10,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 33953,
+      "delegators": 57,
+      "livePledge": "275881277004",
+      "saturation": 0.010137543072117764,
+      "size": {
+        "active": 2.643040339067746,
+        "live": -1.643040339067746
+      },
+      "stake": {
+        "active": "1607929718392",
+        "live": "608363669152"
+      }
+    },
+    "pledge": "0",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "185.164.6.221",
+        "ipv6": null,
+        "port": 54327
+      }
+    ],
+    "vrf": "f674517bc620a135812231c7975d862d27ff8b9758fe35032d14ef11770c7c03",
     "owners": ["stake_test1urqntq4wexjylnrdnp97qq79qkxxvrsa9lcnwr7ckjd6w0cr04y4p"],
-    "pledge": "-",
-    "retired": false,
-    "saturation": "1.01",
-    "size": "0.0007628190857762451 %",
-    "ticker": "ATADA"
+    "rewardAccount": "stake_test1urqntq4wexjylnrdnp97qq79qkxxvrsa9lcnwr7ckjd6w0cr04y4p",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "f70b022f7254996805009752be138ecd1e948867f920ddb2c2dfe16aa45558be",
+        "cb58219c4e0dc4246a335aede3ffbcb32ccc51ab498fc9359ea7adbd748b2b17",
+        "9b3ae3f11150373a96927ff105e822cb93bc3b5def4c805ccdebd9b272b25faf",
+        "4af97dd0f8be99bb602ffdeea029e50d1913f66b8d878919c87c7417d5faebec"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "ATADA Austria - PreProd Pool #1",
+      "ticker": "ATADA",
+      "homepage": "https://github.com/gitmachtl/scripts",
+      "description": "Testnet Pool on the PreProd-Chain"
+    },
+    "metadataJson": {
+      "hash": "d0c4676be0913b080be50e50e16fd0b7e16cbfc16a5f9d9bd83e62453e6128ae",
+      "url": "https://my-ip.at/test/preprodpool.metadata.json"
+    }
   },
   {
-    "cost": "1.00% + 500tADA",
-    "description": "AVA's testnet Pool",
-    "fee": "500.00",
+    "cost": "500000000",
+    "epochRewards": [
+      {
+        "activeStake": "1386331041429",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "1394793210905",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "1393572919467",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "504020607",
+        "memberROI": 0.00010188101679752798,
+        "memberRewards": "141876745",
+        "pledge": "1000000000"
+      }
+    ],
     "hexId": "829a399ce57191016df4a0ab79526ccb1ab698a0a7f1ad7dcd66f1f5",
     "id": "pool1s2drn889wxgszm055z4hj5nvevdtdx9q5lc66lwdvmcl2nvdq9y",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23d175a3%22%20d%3D%22M15%203L15%209L9%209ZM21%209L15%209L15%203ZM15%2027L15%2021L21%2021ZM9%2021L15%2021L15%2027ZM9%209L9%2015L3%2015ZM27%2015L21%2015L21%209ZM21%2021L21%2015L27%2015ZM3%2015L9%2015L9%2021ZM15%209L15%2013L12%209ZM21%2015L17%2015L21%2012ZM15%2021L15%2017L18%2021ZM9%2015L13%2015L9%2018Z%22%2F%3E%3Cpath%20fill%3D%22%23e8bad1%22%20d%3D%22M3%209L3%203L9%203ZM21%203L27%203L27%209ZM27%2021L27%2027L21%2027ZM9%2027L3%2027L3%2021Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "1.00",
-    "name": "AVA - Testnet Pool",
+    "margin": {
+      "denominator": 100,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 3592,
+      "delegators": 9,
+      "livePledge": "25751226763",
+      "saturation": 0.023101298380112448,
+      "size": {
+        "active": 1.00610400346174,
+        "live": -0.006104003461739893
+      },
+      "stake": {
+        "active": "1394793210905",
+        "live": "1386331041429"
+      }
+    },
+    "pledge": "1000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "ava1.sytes.net"
+      }
+    ],
+    "vrf": "63c6edeaa8e1a26c7cfa2f77fe0d0224534c02643dfb139117340cd1cbd14b01",
     "owners": ["stake_test1uz62y3tae5dqznur8jd9auwkswe9xarxyc8nywxzkjutpzcczasjj"],
-    "pledge": "1000.00tADA",
-    "retired": false,
-    "saturation": "2.31",
-    "size": "-0.006035545254261754 %",
-    "ticker": "AVA"
+    "rewardAccount": "stake_test1uz62y3tae5dqznur8jd9auwkswe9xarxyc8nywxzkjutpzcczasjj",
+    "status": "active",
+    "transactions": {
+      "registration": ["88c772be82a1ebc739922f3ad15c05e38b3504a28208c586b7a2c0579f45c0de"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "AVA - Testnet Pool",
+      "ticker": "AVA",
+      "homepage": "https://www.avacsp.com",
+      "description": "AVA's testnet Pool"
+    },
+    "metadataJson": {
+      "hash": "0217900fe6a73f0a6da658917f8015391b73accaa9e66d37b2c554405f82f1e8",
+      "url": "https://avacsp.com/metadata/AVApreprod-poolMetaData.json"
+    }
   },
   {
-    "cost": "2.00% + 340tADA",
-    "description": "AzureADA Preprod testnet",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1059716844432",
+        "epoch": 77,
+        "epochLength": 27843000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1058791060104",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1058685363498",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "351879061",
+        "memberROI": 0.00026976215561766177,
+        "memberRewards": "284244435",
+        "pledge": "5000000000"
+      }
+    ],
     "hexId": "9c86f8efcb2d8ef3a71d61c3734e16ee075650aea6260402089f10a9",
     "id": "pool1njr03m7t9k808fcav8phxnskacr4v59w5cnqgqsgnug2j2lvn85",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23b2e5c3%22%20d%3D%22M15%206L12%209L9%206L12%203ZM18%209L15%206L18%203L21%206ZM15%2024L18%2021L21%2024L18%2027ZM12%2021L15%2024L12%2027L9%2024ZM9%2012L6%2015L3%2012L6%209ZM24%2015L21%2012L24%209L27%2012ZM21%2018L24%2015L27%2018L24%2021ZM6%2015L9%2018L6%2021L3%2018Z%22%2F%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M6%203L9%206L6%209L3%206ZM27%206L24%209L21%206L24%203ZM24%2027L21%2024L24%2021L27%2024ZM3%2024L6%2021L9%2024L6%2027Z%22%2F%3E%3Cpath%20fill%3D%22%2366cc88%22%20d%3D%22M9%209L15%209L15%2013.2L11.4%2011.4L13.2%2015L9%2015ZM21%209L21%2015L16.8%2015L18.6%2011.4L15%2013.2L15%209ZM21%2021L15%2021L15%2016.8L18.6%2018.6L16.8%2015L21%2015ZM9%2021L9%2015L13.2%2015L11.4%2018.6L15%2016.8L15%2021Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "2.00",
-    "name": "AzureADA",
+    "margin": {
+      "denominator": 50,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 3228,
+      "delegators": 5,
+      "livePledge": "22199310073",
+      "saturation": 0.017658722392619192,
+      "size": {
+        "active": 0.9991263851916063,
+        "live": 0.0008736148083936524
+      },
+      "stake": {
+        "active": "1058791060104",
+        "live": "1059716844432"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.azureada.com"
+      }
+    ],
+    "vrf": "26e4ea63cb761ea932109c71e4eaedeeea1c323688a8601a2795425cadc74742",
     "owners": ["stake_test1uqecgdad0vm478qlms7jtq6kv786jfg28ak0cq0gffdhcfq6cmnml"],
-    "pledge": "5000.00tADA",
-    "retired": false,
-    "saturation": "1.76",
-    "size": "0.00009982763359339675 %",
-    "ticker": "AZUR"
+    "rewardAccount": "stake_test1uqecgdad0vm478qlms7jtq6kv786jfg28ak0cq0gffdhcfq6cmnml",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "5b3cfe5cdefe9ec015286715d1b43bec7a270f4487da606dba2145f56a7c8782",
+        "e623dc25f691f416ae0e6ffe8a9bfad3250088d3ea421f802af9518e36dd3acb"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "AzureADA",
+      "ticker": "AZUR",
+      "homepage": "https://azureada.com",
+      "description": "AzureADA Preprod testnet"
+    },
+    "metadataJson": {
+      "hash": "71c6d1f7d300000dd84dfb293e86bd1df8ec24ddd195f69f05659fe291546b56",
+      "url": "https://azureada.com/preprod/poolmeta.json"
+    }
   },
   {
-    "cost": "7.50% + 340tADA",
-    "description": "中国人的ada权益池。",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "966052631",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "2790843",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "2790843",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      }
+    ],
     "hexId": "e14bee3dc87c4b9e00703513c2122eb2dc53c4db19862c16228ca9d1",
     "id": "pool1u997u0wg039euqrsx5fuyy3wktw983xmrxrzc93z3j5azgfk6y6",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23e5e5e5%22%20d%3D%22M9%203L9%209L3%209ZM27%209L21%209L21%203ZM21%2027L21%2021L27%2021ZM3%2021L9%2021L9%2027Z%22%2F%3E%3Cpath%20fill%3D%22%2366cc6f%22%20d%3D%22M9%209L15%209L15%2012L9%2012ZM9%2012L12%2012L12%2015L9%2015ZM15%2012L12%2015L12%2012ZM21%209L21%2015L18%2015L18%209ZM18%209L18%2012L15%2012L15%209ZM18%2015L15%2012L18%2012ZM21%2021L15%2021L15%2018L21%2018ZM21%2018L18%2018L18%2015L21%2015ZM15%2018L18%2015L18%2018ZM9%2021L9%2015L12%2015L12%2021ZM12%2021L12%2018L15%2018L15%2021ZM12%2015L15%2018L12%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "7.50",
-    "name": "baidu",
+    "margin": {
+      "denominator": 40,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 1,
+      "livePledge": "966052631",
+      "saturation": 0.000016097846396704285,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "966052631",
+        "live": "966052631"
+      }
+    },
+    "pledge": "0",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "34.0.9.23",
+        "ipv6": null,
+        "port": 6000
+      }
+    ],
+    "vrf": "40983f267a1571ef3a6e300b85b6dd1501af2dfa74e478c56bd366190149a598",
     "owners": ["stake_test1uq5teukd4ta7wdf2fuyuhjxpyaa8y373jd2hwtklfwyu4es7clcde"],
-    "pledge": "-",
-    "retired": false,
-    "saturation": "0.00",
-    "size": "0.9971110859693937 %",
-    "ticker": "BAIDU"
+    "rewardAccount": "stake_test1uq5teukd4ta7wdf2fuyuhjxpyaa8y373jd2hwtklfwyu4es7clcde",
+    "status": "active",
+    "transactions": {
+      "registration": ["9f10fc69c2f2eedbd972c874aaa6f1501221e37fb4243f3c3049fe8b8be7714c"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "baidu",
+      "ticker": "BAIDU",
+      "homepage": "https://zjavax.github.io/cardano_doc/#/",
+      "description": "中国人的ada权益池。"
+    },
+    "metadataJson": {
+      "hash": "8c9fd4b8725ea8f442392e9ebb13255815f48538d2e6506f8ebdb8ba4c084b8c",
+      "url": "https://raw.githubusercontent.com/zjavax/ada/main/baidu.json"
+    }
   },
   {
-    "cost": "5.00% + 340tADA",
-    "description": "Trying to find my way!",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "16834719426652",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "65000000000"
+      },
+      {
+        "activeStake": "16490522308369",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "65000000000"
+      },
+      {
+        "activeStake": "16077066312644",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "2879142084",
+        "memberROI": 0.0007623203274746134,
+        "memberRewards": "12206323635",
+        "pledge": "65000000000"
+      }
+    ],
     "hexId": "e040920801b69d60c18e2bc00184655c899ddea7abad5cef45ecdc1e",
     "id": "pool1upqfyzqpk6wkpsvw90qqrpr9tjyemh484wk4em69anwpu586ehq",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%2384a2d6%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M9%209L15%209L15%2012L9%2012ZM9%2012L12%2012L12%2015L9%2015ZM15%2012L12%2015L12%2012ZM21%209L21%2015L18%2015L18%209ZM18%209L18%2012L15%2012L15%209ZM18%2015L15%2012L18%2012ZM21%2021L15%2021L15%2018L21%2018ZM21%2018L18%2018L18%2015L21%2015ZM15%2018L18%2015L18%2018ZM9%2021L9%2015L12%2015L12%2021ZM12%2021L12%2018L15%2018L15%2021ZM12%2015L15%2018L12%2018Z%22%2F%3E%3Cpath%20fill%3D%22%23c1d0ea%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "5.00",
-    "name": "BAZAR",
+    "margin": {
+      "denominator": 20,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 10087,
+      "delegators": 15,
+      "livePledge": "2076310052098",
+      "saturation": 0.268043721839508,
+      "size": {
+        "active": 1.046567208639792,
+        "live": -0.04656720863979191
+      },
+      "stake": {
+        "active": "16834719426652",
+        "live": "16085655357511"
+      }
+    },
+    "pledge": "65000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "144.24.168.10",
+        "ipv6": null,
+        "port": 3003
+      },
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "141.145.210.204",
+        "ipv6": null,
+        "port": 3003
+      }
+    ],
+    "vrf": "ef0decfc0e12c513d6725a5a5addc7fffedb6dcb215b58df32340a73eea8a124",
     "owners": ["stake_test1uzyy407v2k5fcvvqcaq5ddd4wflgt77r7sg873ljnkg4r6qssl3wm"],
-    "pledge": "65000.00tADA",
-    "retired": false,
-    "saturation": "26.36",
-    "size": "-0.016372474668101322 %",
-    "ticker": "BAZAR"
+    "rewardAccount": "stake_test1uzyy407v2k5fcvvqcaq5ddd4wflgt77r7sg873ljnkg4r6qssl3wm",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "ccaf398be9f93e9199e907a6e57534f17aef0a727546e1fd4d17945b3f1a83d1",
+        "7124464dccf45ae16fa2dbe3bb232b13f415baba06799c159bdb0904133ba019"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "BAZAR",
+      "ticker": "BAZAR",
+      "homepage": "https://github.com/stakepoolbazar/stakepoolbazar",
+      "description": "Trying to find my way!"
+    },
+    "metadataJson": {
+      "hash": "c69812db126d54d58916099a4edbff95f4f3d5c1b0c052e55237f5d539fc0d72",
+      "url": "https://bit.ly/3wKV2gW"
+    }
   },
   {
-    "cost": "1.90% + 340tADA",
-    "description": "Test Pre-Production Pool for WISH Pool",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "82177302491",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      },
+      {
+        "activeStake": "82158015782",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      },
+      {
+        "activeStake": "82119581577",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      }
+    ],
     "hexId": "8d1a25d1869fb9b3acd1150e25f8cae2f53e6b214993d9b430a0fad7",
     "id": "pool135dzt5vxn7um8tx3z58zt7x2ut6nu6epfxfandps5radw2zhzf0",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23a86938%22%20d%3D%22M15%203L15%209L12%209ZM21%209L15%209L15%206ZM15%2027L15%2021L18%2021ZM9%2021L15%2021L15%2024ZM9%209L9%2015L6%2015ZM27%2015L21%2015L21%2012ZM21%2021L21%2015L24%2015ZM3%2015L9%2015L9%2018Z%22%2F%3E%3Cpath%20fill%3D%22%23d19d75%22%20d%3D%22M3%209L3%203L9%203ZM21%203L27%203L27%209ZM27%2021L27%2027L21%2027ZM9%2027L3%2027L3%2021ZM9%209L15%209L15%2010L12.5%2015L9%2015ZM21%209L21%2015L20%2015L15%2012.5L15%209ZM21%2021L15%2021L15%2020L17.5%2015L21%2015ZM9%2021L9%2015L10%2015L15%2017.5L15%2021Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "1.90",
-    "name": "BCLens Preprod Pool",
+    "margin": {
+      "denominator": 1000,
+      "numerator": 19
+    },
+    "metrics": {
+      "blocksCreated": 2258,
+      "delegators": 7,
+      "livePledge": "29325604695",
+      "saturation": 0.0013693639028995932,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "82177302491",
+        "live": "82177302491"
+      }
+    },
+    "pledge": "100000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "pp.blockchainlens.org"
+      }
+    ],
+    "vrf": "c3043822b3ceafa82d0bec8053910e22b03afe859e9a964ed1980680db739b95",
     "owners": ["stake_test1urp4m363muj5nvvetpetamrnqzsxzt5h5u62wvrv2y7x94gg09jz4"],
-    "pledge": "100.00tADA",
-    "retired": false,
-    "saturation": "0.14",
-    "size": "0.0004678083402352984 %",
-    "ticker": "WISHP"
+    "rewardAccount": "stake_test1urp4m363muj5nvvetpetamrnqzsxzt5h5u62wvrv2y7x94gg09jz4",
+    "status": "active",
+    "transactions": {
+      "registration": ["65cda52c50a7e2ae2c7afb1feb6b70d39ef9f92ecbecad843e97e49e655fd07d"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "BCLens Preprod Pool",
+      "ticker": "WISHP",
+      "homepage": "http://blockchainlens.org",
+      "description": "Test Pre-Production Pool for WISH Pool"
+    },
+    "metadataJson": {
+      "hash": "aa216a0a5f4b8513a96c15996d7913a21acd1a824b10d8a9fd5c817fb48746da",
+      "url": "https://raw.githubusercontent.com/bclens/cardano/main/pp.json"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "In it for the decentralization",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "9497427729",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "125000000"
+      },
+      {
+        "activeStake": "9497427729",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "125000000"
+      },
+      {
+        "activeStake": "9497427729",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "125000000"
+      }
+    ],
     "hexId": "ada587f4df87441fb9222e42c99cf03eb5744fdb6749da0443cb26e2",
     "id": "pool14kjc0axlsazplwfz9epvn88s866hgn7mvaya5pzrevnwy5cvj6a",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M15%209L9%209L9%206ZM15%209L15%203L18%203ZM15%2021L21%2021L21%2024ZM15%2021L15%2027L12%2027ZM9%2015L3%2015L3%2012ZM21%2015L21%209L24%209ZM21%2015L27%2015L27%2018ZM9%2015L9%2021L6%2021Z%22%2F%3E%3Cpath%20fill%3D%22%237dcc66%22%20d%3D%22M6%209L3%206L6%203L9%206ZM21%206L24%203L27%206L24%209ZM24%2021L27%2024L24%2027L21%2024ZM9%2024L6%2027L3%2024L6%2021ZM9%209L15%209L15%2010L12.5%2015L9%2015ZM21%209L21%2015L20%2015L15%2012.5L15%209ZM21%2021L15%2021L15%2020L17.5%2015L21%2015ZM9%2021L9%2015L10%2015L15%2017.5L15%2021Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "betterloop",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 1,
+      "livePledge": "9497427729",
+      "saturation": 0.00015826155907371466,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "9497427729",
+        "live": "9497427729"
+      }
+    },
+    "pledge": "125000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "83.216.11.50",
+        "ipv6": null,
+        "port": 6000
+      }
+    ],
+    "vrf": "23354a5a7079aae6adfdf02477f61bdad7c9e958350e4e9ed6409e0a56d00b07",
     "owners": ["stake_test1uq9twsc473yyy40chp0p7ulnuu99ze4t5aqyw6vlv5qmd2suvm82y"],
-    "pledge": "125.00tADA",
-    "retired": false,
-    "saturation": "0.02",
-    "size": "0 %",
-    "ticker": "LOOP"
+    "rewardAccount": "stake_test1uq9twsc473yyy40chp0p7ulnuu99ze4t5aqyw6vlv5qmd2suvm82y",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "c6502009b629f5439e833b88f4fd7cb48202b90e0d44fa3c0c7fe5ae82a28eaa",
+        "9a1cc80a9c5ca6eaa9c48385c8b1deabf844ef903e9bd91a699469434cd7fe63"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "betterloop",
+      "ticker": "LOOP",
+      "homepage": "https://betterloop.eu/pages/cardano-stake-pool",
+      "description": "In it for the decentralization"
+    },
+    "metadataJson": {
+      "hash": "afd6490ea0165f5fb095b40e8b7d750f61f549ae8c95ddfdab25163a72cca095",
+      "url": "https://tinyurl.com/28awvbmb"
+    }
   },
   {
-    "cost": "4.00% + 340tADA",
-    "description": "Bierzo pool preprod tesnet",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "34181527945",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "2000000"
+      },
+      {
+        "activeStake": "34188896567",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "2000000"
+      },
+      {
+        "activeStake": "25390989206",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "2000000"
+      }
+    ],
     "hexId": "ff7b882facd434ac990c4293aa60f3b8a8016e7ad51644939597e90c",
     "id": "pool1laacstav6s62exgvg2f65c8nhz5qzmn665tyfyu4jl5sckpz52x",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23cc9e66%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M11%2011L14%2011L14%2014L11%2014ZM19%2011L19%2014L16%2014L16%2011ZM19%2019L16%2019L16%2016L19%2016ZM11%2019L11%2016L14%2016L14%2019Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "4.00",
-    "name": "Bierzopooltesnet",
+    "margin": {
+      "denominator": 25,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 1082,
+      "delegators": 2,
+      "livePledge": "25390989206",
+      "saturation": 0.0005529210956001764,
+      "size": {
+        "active": 1.0303656368664291,
+        "live": -0.030365636866429124
+      },
+      "stake": {
+        "active": "34188896567",
+        "live": "33181324516"
+      }
+    },
+    "pledge": "2000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "45.151.122.145",
+        "ipv6": null,
+        "port": 6000
+      }
+    ],
+    "vrf": "de7512f113868d949295667e47e91b5d977e21b46e7abc1a17f895ed69f1c973",
     "owners": ["stake_test1uqwwz8kv60c6d4pzc0xskk380h9lnu7z9cjvn460sh7t7qspl3jx0"],
-    "pledge": "2.00tADA",
-    "retired": false,
-    "saturation": "0.06",
-    "size": "0.257172199942158 %",
-    "ticker": "BZO"
+    "rewardAccount": "stake_test1uqwwz8kv60c6d4pzc0xskk380h9lnu7z9cjvn460sh7t7qspl3jx0",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "43860aecdc78f60aee5739dc1508835957b60a5a231c820e9984db9861adab2e",
+        "99ec4fcee3390dbf299d5cb3e2908178b2270a41ccf35a8d168740d36a6a8eea"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Bierzopooltesnet",
+      "ticker": "BZO",
+      "homepage": "https://github.com/ismakbierzo/Bierzo-pool-tesnet",
+      "description": "Bierzo pool preprod tesnet"
+    },
+    "metadataJson": {
+      "hash": "f2682001b634daa3711acc0dba91dff9941cdf93b3f7b27241ed45b4d4bab4fe",
+      "url": "https://cutt.ly/72sCRyn"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "BLADE Pool is operated by Conrad, from New York City. Site: bladepool.com. Email: conrad@bladepool.com. Phone: +1-212-213-1608.",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "4099771741846",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9000000000"
+      },
+      {
+        "activeStake": "4087076656321",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9000000000"
+      },
+      {
+        "activeStake": "4075838729569",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "359979402",
+        "memberROI": 0.0008066894893438972,
+        "memberRewards": "3280676058",
+        "pledge": "9000000000"
+      }
+    ],
     "hexId": "99ebbcff468e4f00be5246f21de5e2db0e8b38f8bc0a7801c658f8cb",
     "id": "pool1n84mel6x3e8sp0jjgmepme0zmv8gkw8chs98sqwxtruvkhhcsg8",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M9%209L9%203L12%203ZM15%203L21%203L21%206ZM21%2021L21%2027L18%2027ZM15%2027L9%2027L9%2024ZM3%2015L3%209L6%209ZM21%209L27%209L27%2012ZM27%2015L27%2021L24%2021ZM9%2021L3%2021L3%2018Z%22%2F%3E%3Cpath%20fill%3D%22%23cca866%22%20d%3D%22M3%206L6%203L9%206L6%209ZM24%203L27%206L24%209L21%206ZM27%2024L24%2027L21%2024L24%2021ZM6%2027L3%2024L6%2021L9%2024Z%22%2F%3E%3Cpath%20fill%3D%22%23e5d3b2%22%20d%3D%22M15%209L15%2013L12%209ZM21%2015L17%2015L21%2012ZM15%2021L15%2017L18%2021ZM9%2015L13%2015L9%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "BLADE Pool - bladepool.com",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 64239,
+      "delegators": 239,
+      "livePledge": "25389059897",
+      "saturation": 0.06793458465890159,
+      "size": {
+        "active": 1.0025159724454575,
+        "live": -0.002515972445457537
+      },
+      "stake": {
+        "active": "4087076656321",
+        "live": "4076819490817"
+      }
+    },
+    "pledge": "9000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.bladepool.com"
+      }
+    ],
+    "vrf": "141a2392e78ccbf1194c6f4e3ff2e745a52409ba936412e864648903949bf1bd",
     "owners": ["stake_test1ur45gka7xefh3nmxs58ag78k8q674ca5zl7lkqz0mk3c5wsnyml0s"],
-    "pledge": "9000.00tADA",
-    "retired": false,
-    "saturation": "6.78",
-    "size": "-0.0023489401248069086 %",
-    "ticker": "BLADE"
+    "rewardAccount": "stake_test1ur45gka7xefh3nmxs58ag78k8q674ca5zl7lkqz0mk3c5wsnyml0s",
+    "status": "active",
+    "transactions": {
+      "registration": ["434854a7b27101bdc5fc2159f7667cf21da07f3aeef3e32517ae1fc27b6edf9a"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "BLADE Pool - bladepool.com",
+      "ticker": "BLADE",
+      "homepage": "https://bladepool.com",
+      "description": "BLADE Pool is operated by Conrad, from New York City. Site: bladepool.com. Email: conrad@bladepool.com. Phone: +1-212-213-1608."
+    },
+    "metadataJson": {
+      "hash": "2738e2233800ab7f82bd2212a9a55f52d4851f9147f161684c63e6655bedb562",
+      "url": "https://public.bladepool.com/metadata.json"
+    }
   },
   {
-    "cost": "6.90% + 420tADA",
-    "description": "Delegate to BBHMM - Blockchain Better Have My Money 🔐",
-    "fee": "420.00",
+    "cost": "420000000",
+    "epochRewards": [
+      {
+        "activeStake": "1097944510610",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "69000000"
+      },
+      {
+        "activeStake": "1088296951544",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "69000000"
+      },
+      {
+        "activeStake": "1085182359749",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "487076943",
+        "memberROI": 0.0004620136684299652,
+        "memberRewards": "501337204",
+        "pledge": "69000000"
+      }
+    ],
     "hexId": "923fab952421d005d0b1edf513d801857f0f63c76d02f7bb3a07c44c",
     "id": "pool1jgl6h9fyy8gqt593ah638kqps4ls7c78d5p00we6qlzycdmhhvq",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%234c4c4c%22%20d%3D%22M9%206L12%203L15%206L12%209ZM18%203L21%206L18%209L15%206ZM21%2024L18%2027L15%2024L18%2021ZM12%2027L9%2024L12%2021L15%2024ZM3%2012L6%209L9%2012L6%2015ZM24%209L27%2012L24%2015L21%2012ZM27%2018L24%2021L21%2018L24%2015ZM6%2021L3%2018L6%2015L9%2018Z%22%2F%3E%3Cpath%20fill%3D%22%23e5e5e5%22%20d%3D%22M9%209L3%209L3%206ZM21%209L21%203L24%203ZM21%2021L27%2021L27%2024ZM9%2021L9%2027L6%2027Z%22%2F%3E%3Cpath%20fill%3D%22%23b6cc66%22%20d%3D%22M11.4%2015a3.6%2C3.6%200%201%2C1%207.2%2C0a3.6%2C3.6%200%201%2C1%20-7.2%2C0%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "6.90",
-    "name": "Blockchain Better Have My Money-Preprod",
+    "margin": {
+      "denominator": 1000,
+      "numerator": 69
+    },
+    "metrics": {
+      "blocksCreated": 853,
+      "delegators": 6,
+      "livePledge": "58130351589",
+      "saturation": 0.0015798257895605944,
+      "size": {
+        "active": 11.4790951342436,
+        "live": -10.4790951342436
+      },
+      "stake": {
+        "active": "1088296951544",
+        "live": "94806858800"
+      }
+    },
+    "pledge": "69000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "74.122.122.121",
+        "ipv6": null,
+        "port": 6100
+      }
+    ],
+    "vrf": "ec7f804386fe8ecfed4fa2a78426bd3ca889ce9e9c54e993749aa96c999d59d2",
     "owners": ["stake_test1updy5twkregjwdh426lc9pzc0pnznmllly65gkqywmh328cp7ayq5"],
-    "pledge": "69.00tADA",
-    "retired": false,
-    "saturation": "0.16",
-    "size": "-10.50947751637523 %",
-    "ticker": "BBHMM"
+    "rewardAccount": "stake_test1updy5twkregjwdh426lc9pzc0pnznmllly65gkqywmh328cp7ayq5",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "d8743d25b55b36f22cc07abc888c0588d949ca74656562e6dca9fb23d2515376",
+        "da8a657ede63d932180e1dd045e02fd3f74e5a7c9465c925f64b635e5db163da"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Blockchain Better Have My Money-Preprod",
+      "ticker": "BBHMM",
+      "homepage": "https://www.bbhmm.net/",
+      "description": "Delegate to BBHMM - Blockchain Better Have My Money 🔐"
+    },
+    "metadataJson": {
+      "hash": "061cd281ffd54148c815fcd903d26f1e6bc17597518fe82328c8554894cf2756",
+      "url": "https://pool.bbhmm.net/poolmeta-preprod.json"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "We are here to stay!",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "949336459750",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000000"
+      },
+      {
+        "activeStake": "954736737412",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000000"
+      },
+      {
+        "activeStake": "952173811687",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000000"
+      }
+    ],
     "hexId": "ad4396a0f7c47e3d69ee8bd792c80ca0bffee61945cec5c42b4ae90f",
     "id": "pool144pedg8hc3lr660w30te9jqv5zllaesegh8vt3ptft5s7qu45re",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23eaeaea%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%235b5b5b%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%239084d6%22%20d%3D%22M9%209L15%209L15%2010L12.5%2015L9%2015ZM21%209L21%2015L20%2015L15%2012.5L15%209ZM21%2021L15%2021L15%2020L17.5%2015L21%2015ZM9%2021L9%2015L10%2015L15%2017.5L15%2021Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "Block Labs",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 1291,
+      "delegators": 79,
+      "livePledge": "116425463946",
+      "saturation": 0.015819271629686996,
+      "size": {
+        "active": 1.0056956997618092,
+        "live": -0.00569569976180917
+      },
+      "stake": {
+        "active": "954736737412",
+        "live": "949329640803"
+      }
+    },
+    "pledge": "100000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "130.61.98.58",
+        "ipv6": null,
+        "port": 3002
+      },
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "138.2.174.95",
+        "ipv6": null,
+        "port": 3000
+      }
+    ],
+    "vrf": "ef8b7d8610ec49c189729f32273735d249c302d1ee3c42eca018c3f89fcff822",
     "owners": ["stake_test1up6maw0lssklw9kzz5ckufgckmmez88r868kd4798fv9zxc7gs70t"],
-    "pledge": "100000.00tADA",
-    "retired": false,
-    "saturation": "1.58",
-    "size": "-0.0029887737986458163 %",
-    "ticker": "BLABS"
+    "rewardAccount": "stake_test1up6maw0lssklw9kzz5ckufgckmmez88r868kd4798fv9zxc7gs70t",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "e8524c9d3e4c073baaf3cb216b5744a59d88ac38d417ddd24ed2b11e1fffcc57",
+        "7340e047f596b91ce9679cf9c51272b6d613b35fb1a4711d924409ae6e2d3275",
+        "0a191240dcd341d78cc8d7c1c5df0a6d1ae3992cc4d999c4968802352a19ddb0",
+        "b89de0cbb9d062fb578e6c9e8ec72fce9331bb532200991e5841385fb5ce3c96"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Block Labs",
+      "ticker": "BLABS",
+      "homepage": "https://www.blocklabs.info/",
+      "description": "We are here to stay!"
+    },
+    "metadataJson": {
+      "hash": "519ce726299852218cca3cb62a7293246f3aefa5bf78dc5724f27659e584dd43",
+      "url": "https://raw.githubusercontent.com/mogog/spm/master/m.json"
+    }
   },
   {
-    "cost": "7.50% + 340tADA",
-    "description": "BNTY1preprodnode",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1024729883833",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1023968040483",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1022997553463",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "406494287",
+        "memberROI": 0.0006293363366351994,
+        "memberRewards": "640662851",
+        "pledge": "5000000000"
+      }
+    ],
     "hexId": "63b49197a85d0ed90c3173d6ffc27a5c5455eb3c800c2a710d2bbd9c",
     "id": "pool1vw6fr9agt58djrp3w0t0lsn6t329t6eusqxz5ugd9w7ecyedsdv",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23d3bae8%22%20d%3D%22M9%206L12%203L15%206L12%209ZM18%203L21%206L18%209L15%206ZM21%2024L18%2027L15%2024L18%2021ZM12%2027L9%2024L12%2021L15%2024ZM3%2012L6%209L9%2012L6%2015ZM24%209L27%2012L24%2015L21%2012ZM27%2018L24%2021L21%2018L24%2015ZM6%2021L3%2018L6%2015L9%2018Z%22%2F%3E%3Cpath%20fill%3D%22%23545454%22%20d%3D%22M9%209L3%209L3%206ZM21%209L21%203L24%203ZM21%2021L27%2021L27%2024ZM9%2021L9%2027L6%2027Z%22%2F%3E%3Cpath%20fill%3D%22%23a875d1%22%20d%3D%22M9%209L15%209L15%2012L9%2012ZM9%2012L12%2012L12%2015L9%2015ZM15%2012L12%2015L12%2012ZM21%209L21%2015L18%2015L18%209ZM18%209L18%2012L15%2012L15%209ZM18%2015L15%2012L18%2012ZM21%2021L15%2021L15%2018L21%2018ZM21%2018L18%2018L18%2015L21%2015ZM15%2018L18%2015L18%2018ZM9%2021L9%2015L12%2015L12%2021ZM12%2021L12%2018L15%2018L15%2021ZM12%2015L15%2018L12%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "7.50",
-    "name": "BNTY1preprod",
+    "margin": {
+      "denominator": 40,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 795,
+      "delegators": 1,
+      "livePledge": "22231445346",
+      "saturation": 0.00037045433957132835,
+      "size": {
+        "active": 46.09371401114839,
+        "live": -45.09371401114839
+      },
+      "stake": {
+        "active": "1024729883833",
+        "live": "22231445346"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.cryptobounty.org"
+      }
+    ],
+    "vrf": "32252ba40e5c5773a5f03f979f5cdda7d84a756bba8517ccf3cad46005ef38f8",
     "owners": ["stake_test1ur07tmrmantvhnt7d7gkyzvfvqy7unr25w4mhnm6yy9gx8gvgrahd"],
-    "pledge": "5000.00tADA",
-    "retired": false,
-    "saturation": "0.04",
-    "size": "-46.70235875154174 %",
-    "ticker": "BNTY1"
+    "rewardAccount": "stake_test1ur07tmrmantvhnt7d7gkyzvfvqy7unr25w4mhnm6yy9gx8gvgrahd",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "093ba2acf5f510b2d56f137930f6c66ae335e1560d3f92fef1bd93155e94b2ce",
+        "8bb65f8e187868ee399c30362dc4fe3dda6f5840723005cdc475fc49094035bd"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "BNTY1preprod",
+      "ticker": "BNTY1",
+      "homepage": "https://github.com",
+      "description": "BNTY1preprodnode"
+    },
+    "metadataJson": {
+      "hash": "36be44ad5bd2825ede1bf91e76cae3cd8815cf74e372d08c72f2621adbf42b82",
+      "url": "https://tinyurl.com/a3spabve"
+    }
   },
   {
-    "cost": "4.00% + 340tADA",
-    "description": "Welcome to Boople!",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "844832740660",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "844832740660",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "844832740660",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      }
+    ],
     "hexId": "f885e00086d22ad261bf087695c1c6e208471f4358a51268841cbce9",
     "id": "pool1lzz7qqyx6g4dycdlppmftswxugyyw86rtzj3y6yyrj7wjl94rcx",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23ace0e3%22%20d%3D%22M9%203L15%203L15%209ZM21%203L21%209L15%209ZM21%2027L15%2027L15%2021ZM9%2027L9%2021L15%2021ZM3%209L9%209L9%2015ZM27%209L27%2015L21%2015ZM27%2021L21%2021L21%2015ZM3%2021L3%2015L9%2015Z%22%2F%3E%3Cpath%20fill%3D%22%2359c1c7%22%20d%3D%22M3%203L9%203L9%206ZM27%203L27%209L24%209ZM27%2027L21%2027L21%2024ZM3%2027L3%2021L6%2021ZM11.4%2015a3.6%2C3.6%200%201%2C1%207.2%2C0a3.6%2C3.6%200%201%2C1%20-7.2%2C0%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "4.00",
-    "name": "Boople",
+    "margin": {
+      "denominator": 25,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 2474,
+      "delegators": 7,
+      "livePledge": "35957537495",
+      "saturation": 0.014077895332088334,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "844832740660",
+        "live": "844832740660"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "stk-ada1.qa2.boople.co"
+      }
+    ],
+    "vrf": "37ec26be44375c9c57b9f72b9da8a95e4ca53e73d6e358c531e7327e30896ffa",
     "owners": ["stake_test1uzr3r2cjqspmwdgnrxpmvem0dqv973fgl8hl20dtwuxsmackvgh2t"],
-    "pledge": "5000.00tADA",
-    "retired": false,
-    "saturation": "1.41",
-    "size": "0 %",
-    "ticker": "BOOP"
+    "rewardAccount": "stake_test1uzr3r2cjqspmwdgnrxpmvem0dqv973fgl8hl20dtwuxsmackvgh2t",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "6229560e7547b6b0accb2c388736dd0d7cfdb1502db787a6bcfcc3f96980e45d",
+        "fbd6b7d474aea5d3a67112f8540ca79727e4fe79f86070fc88de4008ee5b6430"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Boople",
+      "ticker": "BOOP",
+      "homepage": "https://boople.co",
+      "description": "Welcome to Boople!"
+    },
+    "metadataJson": {
+      "hash": "137be508c4bd9f0bfe14390cda6887a2bb8dd280ed0e10b7d77f15fb0bb326f7",
+      "url": "https://adapublicmetadata.s3.eu-west-2.amazonaws.com/1.json"
+    }
   },
   {
-    "cost": "100.00% + 340tADA",
-    "description": "BUGS 2 preprod pool",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "11062185248",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "9584789375",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "9584789375",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      }
+    ],
     "hexId": "131ff6a0610a82e10e25649d822454f64fbfa531528ae212cba07709",
     "id": "pool1zv0ldgrpp2pwzr39vjwcyfz57e8mlff3229wyykt5pmsjt95jhc",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23959932%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23c8cc66%22%20d%3D%22M3%206L6%203L9%206L6%209ZM24%203L27%206L24%209L21%206ZM27%2024L24%2027L21%2024L24%2021ZM6%2027L3%2024L6%2021L9%2024ZM9%209L15%209L15%2010L12.5%2015L9%2015ZM21%209L21%2015L20%2015L15%2012.5L15%209ZM21%2021L15%2021L15%2020L17.5%2015L21%2015ZM9%2021L9%2015L10%2015L15%2017.5L15%2021Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "100.00",
-    "name": "BUGS 2 - Preprod Testnet Pool",
+    "margin": {
+      "denominator": 1,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 952,
+      "delegators": 4,
+      "livePledge": "9480830409",
+      "saturation": 0.000184864278962409,
+      "size": {
+        "active": 0.9971372063571223,
+        "live": 0.00286279364287767
+      },
+      "stake": {
+        "active": "11062185248",
+        "live": "11093944923"
+      }
+    },
+    "pledge": "1000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "210.54.38.228",
+        "ipv6": null,
+        "port": 3020
+      }
+    ],
+    "vrf": "392d334b0670323093e6cf60edf36961e4005de35b2c86f01e41ce2f7428837a",
     "owners": ["stake_test1up3unhlcs5npure9fwh87rxcca78474rew3hjmwwnu0pf5gkzuhy2"],
-    "pledge": "1000.00tADA",
-    "retired": false,
-    "saturation": "0.02",
-    "size": "0.13355370931499333 %",
-    "ticker": "BUGS2"
+    "rewardAccount": "stake_test1uz3xvaf53r6kkhvzh7ejd5c9pufqcfq0gsxqf5ay4rdfehgyyfc0n",
+    "status": "active",
+    "transactions": {
+      "registration": ["77cfc30a3c9072abcdd2360c261b443c2fecea077fd19803df84343926b26780"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "BUGS 2 - Preprod Testnet Pool",
+      "ticker": "BUGS2",
+      "homepage": "https://l3labs.org/preprod",
+      "description": "BUGS 2 preprod pool"
+    },
+    "metadataJson": {
+      "hash": "d3ca037652a9c37d9190a385e7fa69f00aca7d17068a81fbe739186cd3974803",
+      "url": "https://bit.ly/3Wm2Yjp"
+    }
   },
   {
-    "cost": "3.14% + 500tADA",
-    "description": "To advance the cardano community in canada through assistance, knowledge, interactive events and support for local charities, while providing a stable staking platform for our delegators.",
-    "fee": "500.00",
+    "cost": "500000000",
+    "epochRewards": [
+      {
+        "activeStake": "2020607424331",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "2019547034977",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1008944418651",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "677342910",
+        "memberROI": 0.0001733999460188409,
+        "memberRewards": "174083908",
+        "pledge": "5000000000"
+      }
+    ],
     "hexId": "632dc1a4d7ec972aa7c63ba56ce57e1a0fdd8a356f0949f0ded0723a",
     "id": "pool1vvkurfxhajtj4f7x8wjkeet7rg8amz34duy5nux76per5sn3npx",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23e5e5e5%22%20d%3D%22M12%203L15%206L12%209L9%206ZM21%206L18%209L15%206L18%203ZM18%2027L15%2024L18%2021L21%2024ZM9%2024L12%2021L15%2024L12%2027ZM6%209L9%2012L6%2015L3%2012ZM27%2012L24%2015L21%2012L24%209ZM24%2021L21%2018L24%2015L27%2018ZM3%2018L6%2015L9%2018L6%2021Z%22%2F%3E%3Cpath%20fill%3D%22%236bcc66%22%20d%3D%22M3%203L9%203L9%206ZM27%203L27%209L24%209ZM27%2027L21%2027L21%2024ZM3%2027L3%2021L6%2021ZM12%2013.5a1.5%2C1.5%200%201%2C1%203%2C0a1.5%2C1.5%200%201%2C1%20-3%2C0M15%2013.5a1.5%2C1.5%200%201%2C1%203%2C0a1.5%2C1.5%200%201%2C1%20-3%2C0M15%2016.5a1.5%2C1.5%200%201%2C1%203%2C0a1.5%2C1.5%200%201%2C1%20-3%2C0M12%2016.5a1.5%2C1.5%200%201%2C1%203%2C0a1.5%2C1.5%200%201%2C1%20-3%2C0%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "3.14",
-    "name": "CanadaStakes",
+    "margin": {
+      "denominator": 9182701,
+      "numerator": 288483
+    },
+    "metrics": {
+      "blocksCreated": 8354,
+      "delegators": 38,
+      "livePledge": "494358009756",
+      "saturation": 0.017007017756830604,
+      "size": {
+        "active": 1.9787696883557329,
+        "live": -0.9787696883557329
+      },
+      "stake": {
+        "active": "2019547034977",
+        "live": "1020607424331"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.canadastakes.ca"
+      }
+    ],
+    "vrf": "cf61fc2de833d55d6f16db3fa0ae28936b775976378de49844f35726a66ab7e7",
     "owners": ["stake_test1urkaxwavpp37j083cvafwymnpmqm5wl6hre4ev99pcyt3tcvq0gns"],
-    "pledge": "5000.00tADA",
-    "retired": false,
-    "saturation": "1.70",
-    "size": "0.010398946794602404 %",
-    "ticker": "CAN1"
+    "rewardAccount": "stake_test1urkaxwavpp37j083cvafwymnpmqm5wl6hre4ev99pcyt3tcvq0gns",
+    "status": "active",
+    "transactions": {
+      "registration": ["022972136e2031c25258033369875ba3db342b87af8575b18facf5f1b8a2f3ee"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "CanadaStakes",
+      "ticker": "CAN1",
+      "homepage": "https://www.canadastakes.ca",
+      "description": "To advance the cardano community in canada through assistance, knowledge, interactive events and support for local charities, while providing a stable staking platform for our delegators."
+    },
+    "metadataJson": {
+      "hash": "7be169056f2a272c90451cab50394c3154fd72450aab3e190056b522792fcc1c",
+      "url": "https://www.canadastakes.ca/metadata/can1-preprod-metadata.json"
+    }
   },
   {
-    "cost": "1.00% + 340tADA",
-    "description": "Making blocks since day 1 of ITN...",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "54816457953",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "54806814557",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "54789789644",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      }
+    ],
     "hexId": "b75e11cdd0ef22cf6c694b8e2fdaa8603dde4d578137fd9836cce1eb",
     "id": "pool1ka0prnwsau3v7mrffw8zlk4gvq7aun2hsymlmxpkens7kkpm5aw",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23d9bae8%22%20d%3D%22M9%203L15%203L15%206ZM21%203L21%209L18%209ZM21%2027L15%2027L15%2024ZM9%2027L9%2021L12%2021ZM3%209L9%209L9%2012ZM27%209L27%2015L24%2015ZM27%2021L21%2021L21%2018ZM3%2021L3%2015L6%2015Z%22%2F%3E%3Cpath%20fill%3D%22%23b475d1%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%238538a8%22%20d%3D%22M9%209L15%209L15%2015L9%2015ZM11%2014.2L14.2%2014.2L14.2%2011L11%2011ZM21%209L21%2015L15%2015L15%209ZM15.8%2011L15.8%2014.2L19%2014.2L19%2011ZM21%2021L15%2021L15%2015L21%2015ZM19%2015.8L15.8%2015.8L15.8%2019L19%2019ZM9%2021L9%2015L15%2015L15%2021ZM14.2%2019L14.2%2015.8L11%2015.8L11%2019Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "1.00",
-    "name": "Capital Stake Pool [PreProd - Testnet]",
+    "margin": {
+      "denominator": 100,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 1573,
+      "delegators": 4,
+      "livePledge": "15539997134",
+      "saturation": 0.0009135987411567195,
+      "size": {
+        "active": 0.9998215029657893,
+        "live": 0.00017849703421068952
+      },
+      "stake": {
+        "active": "54816457953",
+        "live": "54826244275"
+      }
+    },
+    "pledge": "1000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "sator89.ddns.net"
+      }
+    ],
+    "vrf": "2f2e89bfafc40296464b8decbf72dfff9c5e3a9f4aeb79f53b03ede96d1c3915",
     "owners": ["stake_test1uqjqgw94l47m0v699k9k2zgjv494fnagx0wk0x5jvgjpwwcq006un"],
-    "pledge": "1000.00tADA",
-    "retired": false,
-    "saturation": "0.09",
-    "size": "0.00031063496642913524 %",
-    "ticker": "CSP"
+    "rewardAccount": "stake_test1uqjqgw94l47m0v699k9k2zgjv494fnagx0wk0x5jvgjpwwcq006un",
+    "status": "active",
+    "transactions": {
+      "registration": ["e8ddb031b48e79bef68008eab70f2e631b2be223c162f544e56b73315e6d4fd7"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Capital Stake Pool [PreProd - Testnet]",
+      "ticker": "CSP",
+      "homepage": "https://capitalstakepool.info",
+      "description": "Making blocks since day 1 of ITN..."
+    },
+    "metadataJson": {
+      "hash": "5ce277d6b73426f14eb537582cea94a5e8c1d92b05e7a5b5f554e52d59b9112d",
+      "url": "https://capitalstakepool.info/CSP-preprod.json"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "A stakepool, based in Brazil, that supports education and diversity on Cardano Community. // Uma stakepool, com sede no Brasil, que apoia a educação e a diversidade na Comunidade Cardano. ",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1504297260821",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "19000000000"
+      },
+      {
+        "activeStake": "1502935383811",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "19000000000"
+      },
+      {
+        "activeStake": "1512847546758",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "364825178",
+        "memberROI": 0.0007057721219866868,
+        "memberRewards": "1054315953",
+        "pledge": "19000000000"
+      }
+    ],
     "hexId": "429e1cf4c75799b4148402452aa0edd512111485e5e1cbe7cf93b696",
     "id": "pool1g20peax827vmg9yyqfzj4g8d65fpz9y9uhsuhe70jwmfvaceg2m",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23e3e3e3%22%20d%3D%22M12%203L15%206L12%209L9%206ZM21%206L18%209L15%206L18%203ZM18%2027L15%2024L18%2021L21%2024ZM9%2024L12%2021L15%2024L12%2027ZM6%209L9%2012L6%2015L3%2012ZM27%2012L24%2015L21%2012L24%209ZM24%2021L21%2018L24%2015L27%2018ZM3%2018L6%2015L9%2018L6%2021Z%22%2F%3E%3Cpath%20fill%3D%22%2359abc7%22%20d%3D%22M6%209L3%206L6%203L9%206ZM21%206L24%203L27%206L24%209ZM24%2021L27%2024L24%2027L21%2024ZM9%2024L6%2027L3%2024L6%2021ZM15%209L15%2013L12%209ZM21%2015L17%2015L21%2012ZM15%2021L15%2017L18%2021ZM9%2015L13%2015L9%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "Cardanistas (PPE-Testnet) 🇧🇷 🇵🇹",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 5087,
+      "delegators": 29,
+      "livePledge": "35891641287",
+      "saturation": 0.025090412843029763,
+      "size": {
+        "active": 0.9990627862151397,
+        "live": 0.0009372137848603357
+      },
+      "stake": {
+        "active": "1504297260821",
+        "live": "1505708431519"
+      }
+    },
+    "pledge": "19000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "ppe-testnet-relay.cardanistas.io"
+      }
+    ],
+    "vrf": "ebf3524ed3f2ca11040828fd3cd9aa369866b078dbee272f832facb5ef1e2658",
     "owners": ["stake_test1ur5zrwq0h5ct2kfv78nun3qutuf4rv4u806t23u94gg796q25f2jh"],
-    "pledge": "19000.00tADA",
-    "retired": false,
-    "saturation": "2.50",
-    "size": "-0.006595202331231009 %",
-    "ticker": "CARDs"
+    "rewardAccount": "stake_test1ur5zrwq0h5ct2kfv78nun3qutuf4rv4u806t23u94gg796q25f2jh",
+    "status": "active",
+    "transactions": {
+      "registration": ["fd2759ac8c52afeae8e6d53d022a45c6f3e3313955273adb438167cbc0579e20"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Cardanistas (PPE-Testnet) 🇧🇷 🇵🇹",
+      "ticker": "CARDs",
+      "homepage": "https://www.cardanistas.io",
+      "description": "A stakepool, based in Brazil, that supports education and diversity on Cardano Community. // Uma stakepool, com sede no Brasil, que apoia a educação e a diversidade na Comunidade Cardano. "
+    },
+    "metadataJson": {
+      "hash": "30fb8325ebda2c1779136b6526d3954531157f1277b2bbb414934453f89eda0a",
+      "url": "https://stakepool.page.link/cards-ppe-testnet-metadata"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "We hope that free and bright daily life will return ASAP, and that a fair and happy life will continue! 自由で明るい日常生活が1日も早く戻り、公平で幸せな暮らしが続きますように！私たちは委任者様への還元とCardano分散化へ貢献します。",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1047251628180",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      },
+      {
+        "activeStake": "1046255381290",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      },
+      {
+        "activeStake": "1045409828766",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "348810342",
+        "memberROI": 0.0006212418740638959,
+        "memberRewards": "649390237",
+        "pledge": "100000000"
+      }
+    ],
     "hexId": "a3fb3d4d19a3a611964a0b79913d2954fcec3d09b6d272e98e4ef07b",
     "id": "pool150an6nge5wnpr9j2pduez0ff2n7wc0gfkmf896vwfmc8kqd7aek",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23e8e8e8%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23a8387c%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23d175ad%22%20d%3D%22M9%209L15%209L15%2012L9%2012ZM9%2012L12%2012L12%2015L9%2015ZM15%2012L12%2015L12%2012ZM21%209L21%2015L18%2015L18%209ZM18%209L18%2012L15%2012L15%209ZM18%2015L15%2012L18%2012ZM21%2021L15%2021L15%2018L21%2018ZM21%2018L18%2018L18%2015L21%2015ZM15%2018L18%2015L18%2018ZM9%2021L9%2015L12%2015L12%2021ZM12%2021L12%2018L15%2018L15%2021ZM12%2015L15%2018L12%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "Cardano ADEN Stake Pool",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 1575,
+      "delegators": 4,
+      "livePledge": "14688346790",
+      "saturation": 0.01761356019991113,
+      "size": {
+        "active": 0.9898286010698697,
+        "live": 0.010171398930130304
+      },
+      "stake": {
+        "active": "1046255381290",
+        "live": "1057006617266"
+      }
+    },
+    "pledge": "100000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "38.242.204.223",
+        "ipv6": null,
+        "port": 6000
+      }
+    ],
+    "vrf": "d3c247a1f7efbdae20e6fab5176c0a2285e3e72714dfd39d4700dedeb5343555",
     "owners": ["stake_test1upqkzfqptfsa2uwwz7fva8ns9tcc5qvu258p9kftqh62ejq6we836"],
-    "pledge": "100.00tADA",
-    "retired": false,
-    "saturation": "1.74",
-    "size": "0.000808170298686961 %",
-    "ticker": "ADEN"
+    "rewardAccount": "stake_test1upqkzfqptfsa2uwwz7fva8ns9tcc5qvu258p9kftqh62ejq6we836",
+    "status": "active",
+    "transactions": {
+      "registration": ["b4fa7b02996fb53454a8963027b91df3b63954bf757042a6da2a1b8e6c9469e6"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Cardano ADEN Stake Pool",
+      "ticker": "ADEN",
+      "homepage": "https://cardano-aden.com",
+      "description": "We hope that free and bright daily life will return ASAP, and that a fair and happy life will continue! 自由で明るい日常生活が1日も早く戻り、公平で幸せな暮らしが続きますように！私たちは委任者様への還元とCardano分散化へ貢献します。"
+    },
+    "metadataJson": {
+      "hash": "cc355e537030400b78b67bc8e3708e5767fda8cb93031d100f341f1cd84fbf1d",
+      "url": "https://cardano-aden.com/poolMetaData.json"
+    }
   },
   {
-    "cost": "100.00% + 340tADA",
-    "description": "Smart Chain preprod Cardano pool",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "29494765977",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "29494765977",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "19497630838",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      }
+    ],
     "hexId": "577fa51def6e59fda1b639a800ba275ce50da08486be369cf7da5ccb",
     "id": "pool12al62800devlmgdk8x5qpw38tnjsmgyys6lrd88hmfwvka2upuw",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23545454%22%20d%3D%22M10%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M16%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M10%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2012a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2018a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0%22%2F%3E%3Cpath%20fill%3D%22%23d175af%22%20d%3D%22M4%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%206a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M22%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M4%2024a2%2C2%200%201%2C1%204%2C0a2%2C2%200%201%2C1%20-4%2C0M9%209L15%209L15%2015L9%2015ZM10.5%2012.8L12.8%2015L15%2012.8L12.8%2010.5ZM21%209L21%2015L15%2015L15%209ZM17.3%2010.5L15%2012.8L17.3%2015L19.5%2012.8ZM21%2021L15%2021L15%2015L21%2015ZM19.5%2017.3L17.3%2015L15%2017.3L17.3%2019.5ZM9%2021L9%2015L15%2015L15%2021ZM12.8%2019.5L15%2017.3L12.8%2015L10.5%2017.3Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "100.00",
-    "name": "CardanoPPDSmartChain",
+    "margin": {
+      "denominator": 1,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 2,
+      "livePledge": "19497630838",
+      "saturation": 0.0004911506079496316,
+      "size": {
+        "active": 1.000684552274681,
+        "live": -0.0006845522746810051
+      },
+      "stake": {
+        "active": "29494765977",
+        "live": "29474589080"
+      }
+    },
+    "pledge": "0",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "51.159.206.110",
+        "ipv6": null,
+        "port": 6000
+      }
+    ],
+    "vrf": "a686183cc91f514ce836fac5e38c6dd85de47e6a65beb138a99fd75854c6f0fc",
     "owners": ["stake_test1urg5hvwcup6fxptl57g8r7c2y6q2rd3pxd3yvx7jlu9qumslukcek"],
-    "pledge": "-",
-    "retired": false,
-    "saturation": "0.05",
-    "size": "0.3389460742558785 %",
-    "ticker": "ADASC"
+    "rewardAccount": "stake_test1urg5hvwcup6fxptl57g8r7c2y6q2rd3pxd3yvx7jlu9qumslukcek",
+    "status": "active",
+    "transactions": {
+      "registration": ["2953cd39992df61d25ff9cd47d6ba5b77d09c51e3a187932c04d9059845dde61"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "CardanoPPDSmartChain",
+      "ticker": "ADASC",
+      "homepage": "https://preprod.stake.ada.smart-chain.fr",
+      "description": "Smart Chain preprod Cardano pool"
+    },
+    "metadataJson": {
+      "hash": "297c55edef213057ed9a1caf0829b1681b6ab4dac16a9fe24652e2e21832afca",
+      "url": "https://tinyurl.com/cardano-ppd-scfr"
+    }
   },
   {
-    "cost": "0.00% + 340tADA",
-    "description": "Cardano Turkiye Official Testnet Pool",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1056991404726",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "400000000"
+      },
+      {
+        "activeStake": "1056636746420",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "400000000"
+      },
+      {
+        "activeStake": "1036835785928",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "352486895",
+        "memberROI": 0.00045305446065774875,
+        "memberRewards": "469561856",
+        "pledge": "400000000"
+      }
+    ],
     "hexId": "8fe15627efc0a6695df2dfadb1329da3927c9f9757b30e61db526bb7",
     "id": "pool13ls4vfl0cznxjh0jm7kmzv5a5wf8e8uh27esucwm2f4mwt40sfv",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23e5e5e5%22%20d%3D%22M9%203L15%203L15%206ZM21%203L21%209L18%209ZM21%2027L15%2027L15%2024ZM9%2027L9%2021L12%2021ZM3%209L9%209L9%2012ZM27%209L27%2015L24%2015ZM27%2021L21%2021L21%2018ZM3%2021L3%2015L6%2015Z%22%2F%3E%3Cpath%20fill%3D%22%23cca566%22%20d%3D%22M9%203L9%209L6%209ZM27%209L21%209L21%206ZM21%2027L21%2021L24%2021ZM3%2021L9%2021L9%2024ZM9%209L15%209L15%2015L9%2015ZM12.9%2014.4L14.4%2011.4L11.4%2011.4ZM21%209L21%2015L15%2015L15%209ZM15.6%2012.9L18.6%2014.4L18.6%2011.4ZM21%2021L15%2021L15%2015L21%2015ZM17.1%2015.6L15.6%2018.6L18.6%2018.6ZM9%2021L9%2015L15%2015L15%2021ZM14.4%2017.1L11.4%2015.6L11.4%2018.6Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "0.00",
-    "name": "Cardano Turkiye Testnet",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 2163,
+      "delegators": 3,
+      "livePledge": "27568504231",
+      "saturation": 0.017613306719741238,
+      "size": {
+        "active": 0.9996644643424589,
+        "live": 0.00033553565754107506
+      },
+      "stake": {
+        "active": "1056636746420",
+        "live": "1056991404726"
+      }
+    },
+    "pledge": "400000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "turk-preprod1.cardanoturkiye.org"
+      },
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "turk-preprod2.cardanoturkiye.org"
+      }
+    ],
+    "vrf": "92bba123893c09aa8d058ca088285ca475efbdc1825a1a694321c2d8f2c9d1a2",
     "owners": ["stake_test1uqmqyqv6tc8hl8g0m5jg4v9xcs7qcur9dpa8vg7myhkgj0qlcshvu"],
-    "pledge": "400.00tADA",
-    "retired": false,
-    "saturation": "1.76",
-    "size": "0.018218685807732227 %",
-    "ticker": "tTURK"
+    "rewardAccount": "stake_test1uqmqyqv6tc8hl8g0m5jg4v9xcs7qcur9dpa8vg7myhkgj0qlcshvu",
+    "status": "active",
+    "transactions": {
+      "registration": ["543cf27799bbb7219267d3ee9227880dbe4a9f92ca2aaca7c7cbcf8714780263"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Cardano Turkiye Testnet",
+      "ticker": "tTURK",
+      "homepage": "https://cardanoturkiye.org",
+      "description": "Cardano Turkiye Official Testnet Pool"
+    },
+    "metadataJson": {
+      "hash": "028dbe2e2dc99b1608b03ad4c2391a6046816b75d2b27059e6655ec6f3342e85",
+      "url": "https://cardanoturkiye.org/testnet-metadata.json"
+    }
   },
   {
-    "cost": "1.99% + 340tADA",
-    "description": "Bare-metal, low energy, fiber connected with UPS.",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1174637341982",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9000000000"
+      },
+      {
+        "activeStake": "1173509020341",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9000000000"
+      },
+      {
+        "activeStake": "1172500078519",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "356709216",
+        "memberROI": 0.0005093263687221339,
+        "memberRewards": "592601270",
+        "pledge": "9000000000"
+      }
+    ],
     "hexId": "d5c7a849993870429398e85eaf3c696c1d0605c9faad021c81d33e50",
     "id": "pool16hr6sjve8pcy9yucap0270rfdswsvpwfl2ksy8yp6vl9qk8u6zx",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23464646%22%20d%3D%22M12%209L9%206L12%203L15%206ZM15%206L18%203L21%206L18%209ZM18%2021L21%2024L18%2027L15%2024ZM15%2024L12%2027L9%2024L12%2021ZM6%2015L3%2012L6%209L9%2012ZM21%2012L24%209L27%2012L24%2015ZM24%2015L27%2018L24%2021L21%2018ZM9%2018L6%2021L3%2018L6%2015Z%22%2F%3E%3Cpath%20fill%3D%22%2359c0c7%22%20d%3D%22M9%203L9%209L3%209ZM27%209L21%209L21%203ZM21%2027L21%2021L27%2021ZM3%2021L9%2021L9%2027Z%22%2F%3E%3Cpath%20fill%3D%22%23acdfe3%22%20d%3D%22M15%2012L15%2015L12%2015ZM18%2015L15%2015L15%2012ZM15%2018L15%2015L18%2015ZM12%2015L15%2015L15%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "1.99",
-    "name": "Carden Pool",
+    "margin": {
+      "denominator": 10000,
+      "numerator": 199
+    },
+    "metrics": {
+      "blocksCreated": 3879,
+      "delegators": 13,
+      "livePledge": "9000000000",
+      "saturation": 0.019698553722757837,
+      "size": {
+        "active": 0.9927080263159405,
+        "live": 0.007291973684059538
+      },
+      "stake": {
+        "active": "1173509020341",
+        "live": "1182129074443"
+      }
+    },
+    "pledge": "9000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "ppe.cardenpool.org"
+      },
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "ppe.cardenpool.org"
+      }
+    ],
+    "vrf": "ee7529aa15e3107a9d9a0c82aa796bf56a821b4a07365bbfdc54c61bd6fda7f3",
     "owners": ["stake_test1uppxzh0mfjpjnzzqssh7qrzdgyq533q8lup824tlvl73gggqzkdex"],
-    "pledge": "9000.00tADA",
-    "retired": false,
-    "saturation": "1.96",
-    "size": "0.0008597648629123933 %",
-    "ticker": "CRPL"
+    "rewardAccount": "stake_test1uzq0ykduvxaarq72pu0apjhs90q8cd3gls9r6qeysxe32rqv5lu5u",
+    "status": "active",
+    "transactions": {
+      "registration": ["cea252ddabd9eccefa7ded08f4d70a5ccedcd78ab12228efc4a11c0977feb6e3"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Carden Pool",
+      "ticker": "CRPL",
+      "homepage": "https://www.cardenpool.org",
+      "description": "Bare-metal, low energy, fiber connected with UPS."
+    },
+    "metadataJson": {
+      "hash": "955b1e90beadc1f636708a06b36bb595c3a93e5aadc52a2c95f482c2e209fd47",
+      "url": "https://www.cardenpool.org/ppeCRPL.metadata.json"
+    }
   },
   {
-    "cost": "7.50% + 340tADA",
-    "description": "Security, Decentralization, Innovation",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [],
+    "hexId": "4b7c850207812006121b5338caeeff0ae86aa039af46141a41891fe5",
+    "id": "pool1fd7g2qs8sysqvysm2vuv4mhlpt5x4gpe4arpgxjp3y072nqnm7q",
+    "margin": {
+      "denominator": 100,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 1,
+      "livePledge": "9497426981",
+      "saturation": 0.00015826064044338191,
+      "size": {
+        "active": 0,
+        "live": 1
+      },
+      "stake": {
+        "active": "0",
+        "live": "9497426981"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "testrl2.duckdns.org"
+      },
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "\\u001b[B\\u001b[B\\u001b[A\\u001b[D\\u001b[A\\u001b[D"
+      },
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "testrl.duckdns.org"
+      }
+    ],
+    "vrf": "610f8c930093f2537ebc944311ea59ef89ab72e4cc69e85d61f32ffde6f7685b",
+    "owners": ["stake_test1uqaqn8vxky9zl5ygnhfqj5zu98cywuzkuutcnrmdp759f2ccc9q6u"],
+    "rewardAccount": "stake_test1uqaqn8vxky9zl5ygnhfqj5zu98cywuzkuutcnrmdp759f2ccc9q6u",
+    "status": "activating",
+    "transactions": {
+      "registration": [
+        "03e9cbbcfd8b70d948a8ae86585a07674329ac7f2d0a5a8ad46d9747b90aa19b",
+        "4eb12ac2febdf57f60b21b4b5b92e86de95c1c1e833dd7158fc90d195256b41e"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "CCA2Test",
+      "ticker": "CCA2",
+      "homepage": "https://foo.com",
+      "description": "No Description"
+    },
+    "metadataJson": {
+      "hash": "17376a60fdba17849c0657722a5fbb7caaf64ec6683421c4eececae44036f42d",
+      "url": "https://ada-bamboo.com/testcca.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [],
+    "hexId": "4d1babf80ca83561d19426f286a1890c56414f8d068dc4357e9b9ba4",
+    "id": "pool1f5d6h7qv4q6kr5v5ymegdgvfp3tyznudq6xugdt7nwd6ga0szem",
+    "margin": {
+      "denominator": 100,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 1,
+      "livePledge": "9497622490",
+      "saturation": 0,
+      "size": {
+        "active": 0,
+        "live": 0
+      },
+      "stake": {
+        "active": "0",
+        "live": "0"
+      }
+    },
+    "pledge": "520000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "14.167.180.83",
+        "ipv6": null,
+        "port": 6000
+      },
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "192.168.5.135",
+        "ipv6": null,
+        "port": 6000
+      }
+    ],
+    "vrf": "c75b8eb9e523c1f58dbd738e5fd0977c77b9c171b3f1c0ede676822edbdaa10b",
+    "owners": ["stake_test1uz06m653l9syfy5het9crtvt35gfetqgzqdjcp9d5q0d7gclqu0vx"],
+    "rewardAccount": "stake_test1uz06m653l9syfy5het9crtvt35gfetqgzqdjcp9d5q0d7gclqu0vx",
+    "status": "activating",
+    "transactions": {
+      "registration": ["1202e5d9382b6e551f9a5080dca169380999330ae313dbccb263e7368878572f"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "CCBTest",
+      "ticker": "CCB",
+      "homepage": "https://foo.com",
+      "description": "HELLO"
+    },
+    "metadataJson": {
+      "hash": "cf16fb7749a1212a5b7e8277cfd242294eaeaf75a41df5ebe63690be2f4e82b7",
+      "url": "https://ada-bamboo.com/testccb.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1620268656168",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "90000000000"
+      },
+      {
+        "activeStake": "1618831194225",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "90000000000"
+      },
+      {
+        "activeStake": "1617466208114",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "556043497",
+        "memberROI": 0.0006166320557513138,
+        "memberRewards": "941884628",
+        "pledge": "90000000000"
+      }
+    ],
     "hexId": "eec73ca2652e1ae92852195ff3289dd991a83dbe5f989f06e1c96b64",
     "id": "pool1amrnegn99cdwj2zjr90lx2yamxg6s0d7t7vf7phpe94kga9gg86",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23d175c5%22%20d%3D%22M12%209L9%206L12%203L15%206ZM15%206L18%203L21%206L18%209ZM18%2021L21%2024L18%2027L15%2024ZM15%2024L12%2027L9%2024L12%2021ZM6%2015L3%2012L6%209L9%2012ZM21%2012L24%209L27%2012L24%2015ZM24%2015L27%2018L24%2021L21%2018ZM9%2018L6%2021L3%2018L6%2015Z%22%2F%3E%3Cpath%20fill%3D%22%23545454%22%20d%3D%22M3%209L3%203L6%203ZM21%203L27%203L27%206ZM27%2021L27%2027L24%2027ZM9%2027L3%2027L3%2024Z%22%2F%3E%3Cpath%20fill%3D%22%23e8bae2%22%20d%3D%22M15%2012L15%2015L12%2015ZM18%2015L15%2015L15%2012ZM15%2018L15%2015L18%2015ZM12%2015L15%2015L15%2018Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "7.50",
-    "name": "ChainCrucial.io",
+    "margin": {
+      "denominator": 40,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 1620,
+      "delegators": 9,
+      "livePledge": "196737382525",
+      "saturation": 0.010256824814436526,
+      "size": {
+        "active": 2.632334577863639,
+        "live": -1.632334577863639
+      },
+      "stake": {
+        "active": "1620268656168",
+        "live": "615525347649"
+      }
+    },
+    "pledge": "90000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "73.222.122.247",
+        "ipv6": null,
+        "port": 13001
+      }
+    ],
+    "vrf": "0cac02dc881b88519077ff88bb0cd06a6d8b22dcec21abde0cd4dc195a7486d0",
     "owners": [
       "stake_test1uq2r0kfj4jj0sjful26hhykgpqd3n82pzvmqspge7wlkchggp9x2h",
       "stake_test1uz5ah77y8xvnxs6cyp979hg7fhxezjw39jfrpardqymnz7sg7ea8y"
     ],
-    "pledge": "90000.00tADA",
-    "retired": false,
-    "saturation": "1.02",
-    "size": "-1.6348008638240614 %",
-    "ticker": "CCIO"
+    "rewardAccount": "stake_test1uz5ah77y8xvnxs6cyp979hg7fhxezjw39jfrpardqymnz7sg7ea8y",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "e9ae808af206cca861af076e0b594a4fdcfa3f2f0cce150fdea3852b2f660476",
+        "af2fc49dcaa6b1d48b5f427ee199ed8a2a9d370cb1c30bca43acc3bc761ded45",
+        "96ead54dca1b1797c57ac09f2edc293750c564a2bd7ae350d38b7cf24e431e17",
+        "a01835a9e385cb446c2ec57828c573be061aabc4ccb9661f8d0e2999c00a75b3"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "ChainCrucial.io",
+      "ticker": "CCIO",
+      "homepage": "https://chaincrucial.io",
+      "description": "Security, Decentralization, Innovation"
+    },
+    "metadataJson": {
+      "hash": "4f7565b0d7d4a1e561a67753ca6ca022b6daecae6353e8bbd9971e773c8db1b4",
+      "url": "https://chaincrucial.io/pool_metadata.json"
+    }
   },
   {
-    "cost": "7.50% + 340tADA",
-    "description": "No Description",
-    "fee": "340.00",
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1014498407459",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1014495080139",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "1009497622710",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "341030760",
+        "memberROI": 0.00001123326700321883,
+        "memberRewards": "11283790",
+        "pledge": "5000000000"
+      }
+    ],
     "hexId": "a39aa1cfa06e072018c377c7969dace286ce1a10c2a866942f1e2aa2",
     "id": "pool15wd2rnaqdcrjqxxrwlred8dvu2rvuxssc25xd9p0rc42y50cl89",
-    "logo": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2230%22%20height%3D%2230%22%20viewBox%3D%220%200%2030%2030%22%3E%3Cpath%20fill%3D%22%23a83891%22%20d%3D%22M15%203L15%209L9%209ZM21%209L15%209L15%203ZM15%2027L15%2021L21%2021ZM9%2021L15%2021L15%2027ZM9%209L9%2015L3%2015ZM27%2015L21%2015L21%209ZM21%2021L21%2015L27%2015ZM3%2015L9%2015L9%2021Z%22%2F%3E%3Cpath%20fill%3D%22%23e8e8e8%22%20d%3D%22M9%209L3%209L3%203ZM21%209L21%203L27%203ZM21%2021L27%2021L27%2027ZM9%2021L9%2027L3%2027Z%22%2F%3E%3Cpath%20fill%3D%22%23d175be%22%20d%3D%22M9%209L15%209L15%2013.2L11.4%2011.4L13.2%2015L9%2015ZM21%209L21%2015L16.8%2015L18.6%2011.4L15%2013.2L15%209ZM21%2021L15%2021L15%2016.8L18.6%2018.6L16.8%2015L21%2015ZM9%2021L9%2015L13.2%2015L11.4%2018.6L15%2016.8L15%2021Z%22%2F%3E%3C%2Fsvg%3E",
-    "margin": "7.50",
-    "name": "Chess",
+    "margin": {
+      "denominator": 40,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 48,
+      "delegators": 3,
+      "livePledge": "9838653470",
+      "saturation": 0.0002472774063044583,
+      "size": {
+        "active": 68.36501439522587,
+        "live": -67.36501439522587
+      },
+      "stake": {
+        "active": "1014498407459",
+        "live": "14839438219"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.chess-pool.net"
+      }
+    ],
+    "vrf": "3a86c6ba8c690895284596bce59e8d9e83a7c0bf31a3abee9bf054156f4b31f5",
     "owners": ["stake_test1upj37rvs95qjqdayu2n8avzz4705hvtj3x823jkrk9dh3ds9d2nnz"],
-    "pledge": "5000.00tADA",
-    "retired": false,
-    "saturation": "0.02",
-    "size": "-68.62817299518964 %",
-    "ticker": "CHESS"
+    "rewardAccount": "stake_test1upj37rvs95qjqdayu2n8avzz4705hvtj3x823jkrk9dh3ds9d2nnz",
+    "status": "active",
+    "transactions": {
+      "registration": ["b32bad3972b660db3915cca1c9580ce75636c2822379d34e8de4dac96cda8f65"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Chess",
+      "ticker": "CHESS",
+      "homepage": "https://golfingrecord.com",
+      "description": "No Description"
+    },
+    "metadataJson": {
+      "hash": "75182499aa405be35eff1c3404c56794299dc0abcbf974c61700208d26fb858f",
+      "url": "https://www.golfingrecord.com/stake-pool-chess.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "10162364716",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "10143077930",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "10124049837",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      }
+    ],
+    "hexId": "289a046cb7dc1639623a95ceeb6690ee96574bb921b5c3905dd15b45",
+    "id": "pool19zdqgm9hmstrjc36jh8wke5sa6t9wjaeyx6u8yza69d52crgvtd",
+    "margin": {
+      "denominator": 100,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 8,
+      "delegators": 2,
+      "livePledge": "9564715034",
+      "saturation": 0.0001693408640629807,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "10162364716",
+        "live": "10162364716"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.ada.chicando.net"
+      }
+    ],
+    "vrf": "aca403481041eaa2e83b1f019ba98f398e9f997f185f42cba4541ac1ade951a8",
+    "owners": ["stake_test1uq54c58slayvag6u2dt2qm9ex44pkupp0srvkrhzu42j3sqzxn5v4"],
+    "rewardAccount": "stake_test1uq54c58slayvag6u2dt2qm9ex44pkupp0srvkrhzu42j3sqzxn5v4",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "892346033e9d15776531211350fb5ee9da73024a774917df5a32fae5988dd5c4",
+        "860cff502c518cd7f9d3e71282706176e75e8cdeb4a15372e94e7f17ca703483"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Chicando",
+      "ticker": "CCDO",
+      "homepage": "https://chicando.net",
+      "description": "An independent stakepool. Supporting a decentralized world."
+    },
+    "metadataJson": {
+      "hash": "c2d117b0ee365a4717ae5e1c1659f5246db80a4cc12f1fc437eab19076b8c09b",
+      "url": "https://chicando.net/resources/metadata/ccdo.json"
+    }
+  },
+  {
+    "cost": "345000000",
+    "epochRewards": [
+      {
+        "activeStake": "1023091371264",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1234000000"
+      },
+      {
+        "activeStake": "1022647467677",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1234000000"
+      },
+      {
+        "activeStake": "1022520989695",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "387303872",
+        "memberROI": 0.0005981690593967534,
+        "memberRewards": "610902278",
+        "pledge": "1234000000"
+      }
+    ],
+    "hexId": "2f29763b1ebee8e1c1eb4d2d3bfa3e884e7ccca85a964eb684927922",
+    "id": "pool19u5hvwc7hm5wrs0tf5knh7373p88en9gt2tyad5yjfujy29676m",
+    "margin": {
+      "denominator": 125,
+      "numerator": 7
+    },
+    "metrics": {
+      "blocksCreated": 933,
+      "delegators": 2,
+      "livePledge": "9492365467",
+      "saturation": 0.0003248561937543539,
+      "size": {
+        "active": 52.47956883093128,
+        "live": -51.47956883093128
+      },
+      "stake": {
+        "active": "1023091371264",
+        "live": "19495041481"
+      }
+    },
+    "pledge": "1234000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "185.161.193.105",
+        "ipv6": null,
+        "port": 6013
+      }
+    ],
+    "vrf": "c91074e716e52d12cbbb56f31b1877b5774c714b3c62fdd151c7575ddd4baeb7",
+    "owners": ["stake_test1uqex9rrgmn880n485ns2yucamwueh7rkylcesg2yc7wy85cdu3j4x"],
+    "rewardAccount": "stake_test1uqavp5a5qg0vzv89dn2msnpalhmq9l2mahu5hm98quq0ungfp747u",
+    "status": "active",
+    "transactions": {
+      "registration": ["0277442e4f43c0aa9e9fd53e34d2f74eb073e344947c87219d19f010f9dd7ed0"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "CLIO1",
+      "ticker": "CLIO1",
+      "homepage": "https://clio.one",
+      "description": "What's past is prologue"
+    },
+    "metadataJson": {
+      "hash": "47530ba97c12e2ac40462e9c86eeb07ea555877d2a1f9d74b6ff8471839267d8",
+      "url": "https://clio.one/metadata/clio1_testnet.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1062978180640",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "1062394905442",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "0"
+      },
+      {
+        "activeStake": "1061695556076",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "371442063",
+        "memberROI": 0.0005626840901623176,
+        "memberRewards": "597399198",
+        "pledge": "0"
+      }
+    ],
+    "hexId": "a71a124e7504ab06afe9155efbe6b3e8f7d42efaa1662f98f11eedf0",
+    "id": "pool15udpynn4qj4sdtlfz400he4narmagth659nzlx83rmklq2773kg",
+    "margin": {
+      "denominator": 20,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 3720,
+      "delegators": 4,
+      "livePledge": "0",
+      "saturation": 0.017722920154050355,
+      "size": {
+        "active": 0.9994384728369974,
+        "live": 0.0005615271630026175
+      },
+      "stake": {
+        "active": "1062978180640",
+        "live": "1063575407121"
+      }
+    },
+    "pledge": "0",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "031e6928.cardano-relay.bison.run"
+      }
+    ],
+    "vrf": "143dba888613155a4820ee8d293dfdda563d09d342522e430af84a79c2bf7d2d",
+    "owners": ["stake_test1uqthws0lx6pv5wasmgkksdam0tjsq8vr6uxc3w0tnp7sxxskswefs"],
+    "rewardAccount": "stake_test1uqthws0lx6pv5wasmgkksdam0tjsq8vr6uxc3w0tnp7sxxskswefs",
+    "status": "active",
+    "transactions": {
+      "registration": ["6e26796e6f12cb01566efe07aae88922834cf6b885a48e77c6479df820c2b3da"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Coinbase Cloud",
+      "ticker": "CLOUD",
+      "homepage": "https://coinbase.com/cloud",
+      "description": "Coinbase Cloud provides secure and reliable blockchain infrastructure and APIs. Stake your crypto to our enterprise-grade validators."
+    },
+    "metadataJson": {
+      "hash": "64c1813d814e5c2abb5f65864ec26f0b060d49f3d206a31f34aa6428d7b682e3",
+      "url": "https://031e6928.cardano-metadata.bison.run/metadata.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1042572783849",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "15000000000"
+      },
+      {
+        "activeStake": "1042187021729",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "15000000000"
+      },
+      {
+        "activeStake": "1042187021729",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "358469343",
+        "memberROI": 0.0005942856520641004,
+        "memberRewards": "610442509",
+        "pledge": "15000000000"
+      }
+    ],
+    "hexId": "e4ba9ef73abf81cbfda27620f0c0dd7ecd811bc2e92ac9a11be3e1dc",
+    "id": "pool1ujafaae6h7quhldzwcs0psxa0mxczx7zay4vnggmu0sacycdgum",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 558,
+      "delegators": 2,
+      "livePledge": "31305867814",
+      "saturation": 0.0006883646469833028,
+      "size": {
+        "active": 25.23799335069291,
+        "live": -24.23799335069291
+      },
+      "stake": {
+        "active": "1042572783849",
+        "live": "41309654431"
+      }
+    },
+    "pledge": "15000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "relay1-preprod.contextsolutions.com"
+      }
+    ],
+    "vrf": "b384ef9b2752f155c2129c64aeb58833e35c8c85af5dc4ba28b1c78b1c626ff5",
+    "owners": ["stake_test1uqva333lc55cgecrnl23u063lzk2memfvu05cl8jrm52frchg4xdz"],
+    "rewardAccount": "stake_test1uqva333lc55cgecrnl23u063lzk2memfvu05cl8jrm52frchg4xdz",
+    "status": "active",
+    "transactions": {
+      "registration": ["81584d7ecf687807d21a4df090eaac186232c34da12f32787a9c2f2e8cd73b02"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Context Solutions Stake Pool",
+      "ticker": "CTX",
+      "homepage": "https://www.contextsolutions.com/",
+      "description": "Independent Stake Pool Operator"
+    },
+    "metadataJson": {
+      "hash": "f8b0a6a67c1e4368486517c7a452d7a01cd00c71cb8bbc0ee7510c3d030f8387",
+      "url": "https://www.contextsolutions.com/spo/poolMetaData.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1070457819399",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000"
+      },
+      {
+        "activeStake": "1059466728753",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000"
+      },
+      {
+        "activeStake": "1058419397112",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "453619119",
+        "memberROI": 0.0003758346081255612,
+        "memberRewards": "397786881",
+        "pledge": "10000000"
+      }
+    ],
+    "hexId": "ba2edef7d8bceb725ac92dde87900116a458a32667fe27bb412c49e5",
+    "id": "pool1hghdaa7chn4hykkf9h0g0yqpz6j93gexvllz0w6p93y72saukmp",
+    "margin": {
+      "denominator": 5,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 3918,
+      "delegators": 4,
+      "livePledge": "30766759020",
+      "saturation": 0.01785179286294267,
+      "size": {
+        "active": 0.9992052658748618,
+        "live": 0.0007947341251381967
+      },
+      "stake": {
+        "active": "1070457819399",
+        "live": "1071309225399"
+      }
+    },
+    "pledge": "10000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "51.77.24.220",
+        "ipv6": null,
+        "port": 4002
+      }
+    ],
+    "vrf": "a844e30844acf00049ae40166c4559a345b112d4fda61f0d7b4a12d020aef566",
+    "owners": ["stake_test1uq238mvwcmne8fjhpmzrafrpl9arydm9zjhzeaqnzml572s2ldezv"],
+    "rewardAccount": "stake_test1uq238mvwcmne8fjhpmzrafrpl9arydm9zjhzeaqnzml572s2ldezv",
+    "status": "active",
+    "transactions": {
+      "registration": ["b68c4ea03f206a50e64397e8f0a7c0196feecc6de34f39682c87643a9871b4f2"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "COOL",
+      "ticker": "COOL",
+      "homepage": "https://www.stakecool.io",
+      "description": "COOL"
+    },
+    "metadataJson": {
+      "hash": "aade4d000f39df2f9ebfc4e23c9a3c49850236fcb924edc1f4da9be844d9691f",
+      "url": "https://www.stakecool.io/pools/pre-cool.metadata.json"
+    }
+  },
+  {
+    "cost": "400000000",
+    "epochRewards": [
+      {
+        "activeStake": "1066393769788",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000"
+      },
+      {
+        "activeStake": "1065622301765",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000"
+      },
+      {
+        "activeStake": "1064776749653",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "442487851",
+        "memberROI": 0.0003932324577606615,
+        "memberRewards": "418704385",
+        "pledge": "1000000"
+      }
+    ],
+    "hexId": "d3f9468c1d40296aedc8b8611d6180f674cc057ba0ceb9d8380daee6",
+    "id": "pool160u5drqagq5k4mwghps36cvq7e6vcptm5r8tnkpcpkhwvrm2gad",
+    "margin": {
+      "denominator": 50,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 3518,
+      "delegators": 4,
+      "livePledge": "37707869384",
+      "saturation": 0.01795083364955708,
+      "size": {
+        "active": 0.9899197125460897,
+        "live": 0.01008028745391032
+      },
+      "stake": {
+        "active": "1066393769788",
+        "live": "1077252787547"
+      }
+    },
+    "pledge": "1000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "relay.preprod.crimsonpool.com"
+      }
+    ],
+    "vrf": "fdbe9c5ebad2e3e388de3aa996b5679c09dbdde346cf116f7257b8d36550e1fc",
+    "owners": ["stake_test1up3hhp7u25mdpypfhdq0wzdgs750fm2pn382te9h939nxjgvg233c"],
+    "rewardAccount": "stake_test1up3hhp7u25mdpypfhdq0wzdgs750fm2pn382te9h939nxjgvg233c",
+    "status": "active",
+    "transactions": {
+      "registration": ["8200982426d2b87b354d9d40ca9125a60d492a443764b0799b77e68092c31687"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "CrimsonPool",
+      "ticker": "RED",
+      "homepage": "https://crimsonpool.com",
+      "description": "Single stake pool operator"
+    },
+    "metadataJson": {
+      "hash": "c99377c275507b25b1c66e21a37cfb1ab0e0d06b8593c4f8057fb154b3f1f61e",
+      "url": "https://crimsonpool.com/crimsonpool.metadata.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "18494515876",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "2000000000"
+      },
+      {
+        "activeStake": "18494515876",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "2000000000"
+      },
+      {
+        "activeStake": "18494515876",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "2000000000"
+      }
+    ],
+    "hexId": "712de1a845cac59608e4e6395907bbb2cb44bc725e5c75122d34446a",
+    "id": "pool1wyk7r2z9etzevz8yucu4jpamkt95f0rjtew82y3dx3zx5maj92v",
+    "margin": {
+      "denominator": 200,
+      "numerator": 7
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 2,
+      "livePledge": "8496875126",
+      "saturation": 0.0003081839116658436,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "18494515876",
+        "live": "18494515876"
+      }
+    },
+    "pledge": "2000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "pool.cyberwright.io"
+      }
+    ],
+    "vrf": "f354a743c557ae5d4cbfd6d553968944b1bed87c8c68c75f2ab27d39c3941eee",
+    "owners": ["stake_test1upezcpr74kcwrr8p8k5jzhf0up2c5rehm67qc7s7zq25lasyx22nd"],
+    "rewardAccount": "stake_test1upezcpr74kcwrr8p8k5jzhf0up2c5rehm67qc7s7zq25lasyx22nd",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "fd6d9950741e305065f68ebe48a0b4e7dde31223cbb26a915daa5530f4977c85",
+        "6f19c5d079ab5842e858cc3b6ce59cf9a30c227f8923e32f0b74ee22b9e61fdc",
+        "d37146baaff6203c654e5f81fe1fedfa663f223f682500dd7e26df7ed9c8648e"
+      ],
+      "retirement": ["fe802412f1c5432aa1d280159064d8dd2bf6b1778578d5d4e5b0552cf625b2e5"]
+    },
+    "metadata": {
+      "name": "CYBERWRIGHT Pool",
+      "ticker": "CYBER",
+      "homepage": "https://cyberwright.io",
+      "description": "Bare-metal SSPO based in Western Australia"
+    },
+    "metadataJson": {
+      "hash": "09d900ac1f89d1d55780586f3127e619e9db4787433ad0e3fbfd575c0169976c",
+      "url": "https://cyberwright.io/pool.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "21717473789",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9000000000"
+      },
+      {
+        "activeStake": "21717473789",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9000000000"
+      },
+      {
+        "activeStake": "21717473789",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9000000000"
+      }
+    ],
+    "hexId": "f53fc8a36a1ed800c068d6cea131bb077a32641b83252f008c6494f6",
+    "id": "pool175lu3gm2rmvqpsrg6m82zvdmqaaryeqmsvjj7qyvvj20vxunc60",
+    "margin": {
+      "denominator": 50,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 235,
+      "delegators": 2,
+      "livePledge": "21318665327",
+      "saturation": 0.0003618897660619386,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "21717473789",
+        "live": "21717473789"
+      }
+    },
+    "pledge": "9000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "194.28.129.203",
+        "ipv6": null,
+        "port": 3001
+      }
+    ],
+    "vrf": "13f0667db7c95327ca6085f6917d80ffc331497ed4948f05f65a5517e1db0fac",
+    "owners": ["stake_test1urlv0hclrv5r9ecl5n5nz5rar0sfwy7mscgucau8wc7y78ch5ue0s"],
+    "rewardAccount": "stake_test1urlv0hclrv5r9ecl5n5nz5rar0sfwy7mscgucau8wc7y78ch5ue0s",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "0d363ffb2bbadda602299e6d30dacc3e21777e5c8570d5a67baa663b000849fc",
+        "55fc4cf95a663708d4e279213994883ff67f925472240e56b1a986576bc3ad77"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "dantetest",
+      "ticker": "DANTE",
+      "homepage": "https://blabla.io",
+      "description": "This is just a test POOL"
+    },
+    "metadataJson": {
+      "hash": "5b5df27bf897005dc00d4689c83fc7339b2d8c457638b698fb3302d9231b0cd6",
+      "url": "https://raw.githubusercontent.com/dante021/node/main/meta.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "2319695518724",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "2319693693025",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      },
+      {
+        "activeStake": "2319693693025",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "5000000000"
+      }
+    ],
+    "hexId": "302e04cab29e6f0a0adb1a824abdd6e096c77566287c883581cc25a3",
+    "id": "pool1xqhqfj4jnehs5zkmr2py40wkuztvwatx9p7gsdvpesj6x6tsyt2",
+    "margin": {
+      "denominator": 2,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 5484,
+      "delegators": 4,
+      "livePledge": "1291348962197",
+      "saturation": 0.03865431480484407,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "2319695518724",
+        "live": "2319695518724"
+      }
+    },
+    "pledge": "5000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "dyn.derksen-it.nl"
+      }
+    ],
+    "vrf": "3e38bbc53551fbad86dea15afc28758a2b08de13af54e87f1f3959d7c5ec4895",
+    "owners": ["stake_test1uz3mux0yc9r68qt222kwzqmqsxq29ddyafcwv2v6wfx4vpgz3jy3t"],
+    "rewardAccount": "stake_test1uz3mux0yc9r68qt222kwzqmqsxq29ddyafcwv2v6wfx4vpgz3jy3t",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "e222f5e85b59b7e58b1d4b0359af4b4d1619b1d3e6dba6100d4b351552d7ba77",
+        "b7724a546074e90887496ee572794502e05b46a5ea281084737b337449752878",
+        "91d18be26fd5f4c632cd5550d4458a06b70dc56bc4c87e8be9dff9f7954187d9"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Derksen IT preprod pool",
+      "ticker": "DRKSN",
+      "homepage": "https://github.com/ronaldderksen/cardano",
+      "description": "Derksen IT preprod pool"
+    },
+    "metadataJson": {
+      "hash": "5de06bbb28d3732d7a8d93053da34a71760893541baccb72d9ec162c1c541940",
+      "url": "https://www.derksen-it.nl/md-preprod.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1117696616382",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      },
+      {
+        "activeStake": "1116684064110",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      },
+      {
+        "activeStake": "1115857728688",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "356317690",
+        "memberROI": 0.00040864029374561094,
+        "memberRewards": "455943566",
+        "pledge": "100000000"
+      }
+    ],
+    "hexId": "647f00faaeef3a226d4375acb264b66b94c248f72919640a54a696f4",
+    "id": "pool1v3lsp74wauazym2rwkktye9kdw2vyj8h9yvkgzj556t0g390ecw",
+    "margin": {
+      "denominator": 40,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 755,
+      "delegators": 3,
+      "livePledge": "12008118457",
+      "saturation": 0.0018715807212122805,
+      "size": {
+        "active": 9.951358429295706,
+        "live": -8.951358429295706
+      },
+      "stake": {
+        "active": "1117696616382",
+        "live": "112315984227"
+      }
+    },
+    "pledge": "100000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "pp-relays.digitalfortress.online"
+      }
+    ],
+    "vrf": "fb2a2609018c94cc45d3a401a8635b0907d42e5c32e27a6b41b5415e78f8bf02",
+    "owners": ["stake_test1uq9947tw3wg5y7l0wmc59eyuz2fc4p76m6qjnwmw5ss58vsmzhs0n"],
+    "rewardAccount": "stake_test1uq9947tw3wg5y7l0wmc59eyuz2fc4p76m6qjnwmw5ss58vsmzhs0n",
+    "status": "active",
+    "transactions": {
+      "registration": ["fd8c21ca3dfd15cd6cda394982e87013a2cce5b6455619103a5a650f215d76eb"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "Digital Fortress",
+      "ticker": "DIGI",
+      "homepage": "https://digitalfortress.online",
+      "description": "Digital Fortress on pre-prod."
+    },
+    "metadataJson": {
+      "hash": "8fc2a414d3763e8a4b704ce5c245d398a593e5594e7afc1afbfc254b3773313b",
+      "url": "https://digitalfortress.online/digi-pp.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "36393692675",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9400000000"
+      },
+      {
+        "activeStake": "36393692675",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9400000000"
+      },
+      {
+        "activeStake": "36393692675",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "9400000000"
+      }
+    ],
+    "hexId": "217aee81f9662e80cd3241214893f2e4cdd90853a15f5a17b923bd50",
+    "id": "pool1y9awaq0evchgpnfjgys53yljunxajzzn590459aeyw74q9xkxzg",
+    "margin": {
+      "denominator": 1,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 2227,
+      "delegators": 1,
+      "livePledge": "36393692675",
+      "saturation": 0.0006064473730345543,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "36393692675",
+        "live": "36393692675"
+      }
+    },
+    "pledge": "9400000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "115.64.192.26",
+        "ipv6": null,
+        "port": 6007
+      },
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "14.201.4.90",
+        "ipv6": null,
+        "port": 6007
+      },
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "14.201.4.90",
+        "ipv6": null,
+        "port": 6008
+      },
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "58.171.185.219",
+        "ipv6": null,
+        "port": 6001
+      }
+    ],
+    "vrf": "63a9e42d61b8abe87b0a0018dbcd1cf41529047423f0e784d86d05566740727b",
+    "owners": ["stake_test1uzegezt3nzlr3qg2hk6r7kn36x498m55n8677z6m87wx3nctxnj2t"],
+    "rewardAccount": "stake_test1uzegezt3nzlr3qg2hk6r7kn36x498m55n8677z6m87wx3nctxnj2t",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "f67c5da23582411bfd6c3c0be07f682dcd7fa01d8028ee40aef7c6b8badac516",
+        "286045d6217ce1fff0af27569b9cc36fa0400d0840021c2ff97bf56ca8060c85"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "DP4D4",
+      "ticker": "DP4D4",
+      "homepage": "https://dpadapools.com",
+      "description": "PreProd 2 Testnet Stake Pool"
+    },
+    "metadataJson": {
+      "hash": "a1cbe9169ddbb426c53e5f3252bf217b6bab5a7963447affecd5f49bd643cf5b",
+      "url": "https://dpadapools.com/preprod2meta.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1096298906962",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000000"
+      },
+      {
+        "activeStake": "1090382743951",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "10000000000"
+      },
+      {
+        "activeStake": "1087412233330",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "453249403",
+        "memberROI": 0.00046042326386696995,
+        "memberRewards": "496065657",
+        "pledge": "10000000000"
+      }
+    ],
+    "hexId": "95096da69d3fb64416be72a0c9ce474c72c59da0db19a556dc430abc",
+    "id": "pool1j5ykmf5a87myg947w2svnnj8f3evt8dqmvv624kugv9tcwwk8vr",
+    "margin": {
+      "denominator": 20,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 3694,
+      "delegators": 5,
+      "livePledge": "47237414426",
+      "saturation": 0.018284028162637588,
+      "size": {
+        "active": 0.9991348219655799,
+        "live": 0.0008651780344200999
+      },
+      "stake": {
+        "active": "1096298906962",
+        "live": "1097248222022"
+      }
+    },
+    "pledge": "10000000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "168.138.37.117",
+        "ipv6": null,
+        "port": 6003
+      }
+    ],
+    "vrf": "8ecf63e602b53c1e9083ba8454bb1ea72a3df62cc0ef365e496e93999ccf5fb2",
+    "owners": ["stake_test1urekpyl72p28h79wsqasu2k7v5c8gnckyawn6sdjghvucjcp86q35"],
+    "rewardAccount": "stake_test1urekpyl72p28h79wsqasu2k7v5c8gnckyawn6sdjghvucjcp86q35",
+    "status": "active",
+    "transactions": {
+      "registration": ["e8511c3ed56a5405dee1c032c42d513957c940cdc0e1cc1204dbacfc82627041"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "ENVY Preprod Stake Pool",
+      "ticker": "ENVY",
+      "homepage": "https://envystakepool.com",
+      "description": "ENVY Stake Pool on preproduction"
+    },
+    "metadataJson": {
+      "hash": "b26fd13969792bbbc3b692c4c9606683853b4f6d4c03bea31fe16958fc5119a5",
+      "url": "https://tinyurl.com/29f3debv"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "9997655666",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "200000000"
+      },
+      {
+        "activeStake": "9997655666",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "200000000"
+      },
+      {
+        "activeStake": "9997655666",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "200000000"
+      }
+    ],
+    "hexId": "4981675b8bec82a60fcb8b02c5d6082791bf9b2b44c97a7af69f87c5",
+    "id": "pool1fxqkwkutajp2vr7t3vpvt4sgy7gmlxetgnyh57hkn7ru2rf96a2",
+    "margin": {
+      "denominator": 10,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 1,
+      "livePledge": "9997655666",
+      "saturation": 0.00016659622995217392,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "9997655666",
+        "live": "9997655666"
+      }
+    },
+    "pledge": "200000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "pre-prod.stakepool247.eu"
+      }
+    ],
+    "vrf": "2a4a2a216c389311b2834c9dc217b70b59dce9f84ebdf68048a11affa8593f7b",
+    "owners": ["stake_test1uz6xxqu8zjznqh6xxh9gk7agl3lr89k04zqk854xjklqvdgqycvru"],
+    "rewardAccount": "stake_test1uqhh55rd0l3u2nr2ghna9ayp3pf084s6vpv7tha3mm5y5xcd6ahf8",
+    "status": "active",
+    "transactions": {
+      "registration": ["5fdf013882e0e3fc5c7faec9f1ebd6e7d18f5e6d3f0dd95d9904640f18938ef9"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "EU01",
+      "ticker": "EU01",
+      "homepage": "https://www.stakepool247.eu/",
+      "description": "EU01 Pre-Prod Testnet"
+    },
+    "metadataJson": {
+      "hash": "d78545efd6ac5e058a58edc167496088b0749213a655a87c39db0d87e675d95f",
+      "url": "https://www.stakepool247.eu/eu01-pre-prod.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1143262627584",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "56326758765"
+      },
+      {
+        "activeStake": "1142278746051",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "56326758765"
+      },
+      {
+        "activeStake": "1141144637998",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "767331854",
+        "memberROI": 0.00033938957132630576,
+        "memberRewards": "368175875",
+        "pledge": "56326758765"
+      }
+    ],
+    "hexId": "b2040523c8f8b1cf6888c7d5ffdfbb94b8bc2e1465f2ad891fdce923",
+    "id": "pool1kgzq2g7glzcu76ygcl2llhamjjutcts5vhe2mzglmn5jxt2cnfs",
+    "margin": {
+      "denominator": 2,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 4147,
+      "delegators": 8,
+      "livePledge": "87077634092",
+      "saturation": 0.019069712135667785,
+      "size": {
+        "active": 0.999007768630548,
+        "live": 0.0009922313694520346
+      },
+      "stake": {
+        "active": "1143262627584",
+        "live": "1144398135313"
+      }
+    },
+    "pledge": "56326758765",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.euskalstakepool.win"
+      }
+    ],
+    "vrf": "d17c22f1c3617b5e963be0ce7fcf31e26eeb7b4d38b2276eda858d792cf0880f",
+    "owners": ["stake_test1upeq37708sf0glkzk8s7lwc03sk9almcyya3v3fqtny4zxgfe90dm"],
+    "rewardAccount": "stake_test1upeq37708sf0glkzk8s7lwc03sk9almcyya3v3fqtny4zxgfe90dm",
+    "status": "active",
+    "transactions": {
+      "registration": [
+        "c20e742871152261532138789150f7baff7077f5261e4cee4404db9c0fef75e2",
+        "4bd374a7849cecf2602f1110e53331a3b305ec668ad57081df98416b30473f5d"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "EUSKAL STAKE POOL TESTNET",
+      "ticker": "EUSKL",
+      "homepage": "https://euskalstakepool.win",
+      "description": "EUSKAL STAKE POOL TESTNET"
+    },
+    "metadataJson": {
+      "hash": "2e421355eb7b4499dd8f0bca206178131f4c9ad90e2bf369ae78aa0c7c4d9472",
+      "url": "https://git.io/JiZgb"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1293326494232",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "123000000"
+      },
+      {
+        "activeStake": "1296986956554",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "123000000"
+      },
+      {
+        "activeStake": "1295882188557",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "353207165",
+        "memberROI": 0.0005279828567234621,
+        "memberRewards": "684138638",
+        "pledge": "123000000"
+      }
+    ],
+    "hexId": "0b5ca58328f3f03438910f055bfd29fc785f8d4ba5bab80b51629da9",
+    "id": "pool1pdw2tqeg70crgwy3puz4hlffl3u9lr2t5katsz63v2w6jfl0gn2",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 4682,
+      "delegators": 26,
+      "livePledge": "25604268109",
+      "saturation": 0.0215686245535436,
+      "size": {
+        "active": 0.9992006729217111,
+        "live": 0.0007993270782888917
+      },
+      "stake": {
+        "active": "1293326494232",
+        "live": "1294361112118"
+      }
+    },
+    "pledge": "123000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "d.fluxpool.cc"
+      }
+    ],
+    "vrf": "e442049ed3f9ac3523cf124b1bf45ce7fb3df65078ab2c157b7bc367f147d2f8",
+    "owners": ["stake_test1uzx7l4yvm0fxtxhe3kz2lhk02vg36nl0h0qusgh728hwc2cv9nxru"],
+    "rewardAccount": "stake_test1uzx7l4yvm0fxtxhe3kz2lhk02vg36nl0h0qusgh728hwc2cv9nxru",
+    "status": "active",
+    "transactions": {
+      "registration": ["baabdd9d37873fb5e02749141a6e599c1e844ba8dc934941ce488412612d154e"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "flux",
+      "ticker": "FLUX",
+      "homepage": "https://twitter.com/cylonyx",
+      "description": "No Description"
+    },
+    "metadataJson": {
+      "hash": "f6700fd099e403f6535bbba625aeed07d6f95fe96d384f5c8a4a42e552859db4",
+      "url": "https://cylonyx.github.io/testnet_preprod.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1035433367298",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "1019703476023",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "1000000000"
+      },
+      {
+        "activeStake": "1018838702562",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "353349182",
+        "memberROI": 0.0006239392286827645,
+        "memberRewards": "635069495",
+        "pledge": "1000000000"
+      }
+    ],
+    "hexId": "abc0b34609b6df037fed7d0a65e99993b1d773fa379ffe971fdfe363",
+    "id": "pool140qtx3sfkm0sxlld059xt6vejwcawul6x70la9clml3kxruz6qp",
+    "margin": {
+      "denominator": 100,
+      "numerator": 1
+    },
+    "metrics": {
+      "blocksCreated": 733,
+      "delegators": 2,
+      "livePledge": "11947490436",
+      "saturation": 0.0005489657352478935,
+      "size": {
+        "active": 31.42996530519752,
+        "live": -30.42996530519752
+      },
+      "stake": {
+        "active": "1035433367298",
+        "live": "32944146048"
+      }
+    },
+    "pledge": "1000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "preprod.frcan.com"
+      }
+    ],
+    "vrf": "bd796083f26dd5a247749ba4c4775976aee473ada07bc28bb5603ac5fb05ad23",
+    "owners": ["stake_test1urajnth7rdqus4m3kqhs6zthedxn5nj3vcz44777rx05dac0dyyny"],
+    "rewardAccount": "stake_test1urajnth7rdqus4m3kqhs6zthedxn5nj3vcz44777rx05dac0dyyny",
+    "status": "active",
+    "transactions": {
+      "registration": ["39300d269918d2f2becdf6c37f1135f606a9f39551c29374f2d28bebeeb79411"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "FRCA 🇨🇦",
+      "ticker": "FRCA🍁",
+      "homepage": "https://www.frcan.com/",
+      "description": "First french canadian pool! Le premier pool québécois!"
+    },
+    "metadataJson": {
+      "hash": "ade52fe0bf2d23ed509ce2fc5b3990f4178ad8768f66ead1955a1f7e04b11c82",
+      "url": "https://raw.githubusercontent.com/Mikederel/prod/main/prod.json"
+    }
+  },
+  {
+    "cost": "345000000",
+    "epochRewards": [
+      {
+        "activeStake": "19794748697",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      },
+      {
+        "activeStake": "19794748697",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      },
+      {
+        "activeStake": "19794748697",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "100000000"
+      }
+    ],
+    "hexId": "ce325280faa2e9c78f6639c55cb1f8e2de10746c0223b0545bbb7317",
+    "id": "pool1ece99q865t5u0rmx88z4ev0cut0pqarvqg3mq4zmhde3wqsdhcq",
+    "margin": {
+      "denominator": 20,
+      "numerator": 3
+    },
+    "metrics": {
+      "blocksCreated": 0,
+      "delegators": 2,
+      "livePledge": "19497622798",
+      "saturation": 0.0003298503796901345,
+      "size": {
+        "active": 1,
+        "live": 0
+      },
+      "stake": {
+        "active": "19794748697",
+        "live": "19794748697"
+      }
+    },
+    "pledge": "100000000",
+    "relays": [
+      {
+        "__typename": "RelayByAddress",
+        "ipv4": "138.91.198.150",
+        "ipv6": null,
+        "port": 9999
+      }
+    ],
+    "vrf": "f6c079878e12b11ecf8c347c4e648a0bc88e2cce772193bae76cbe40c6421741",
+    "owners": ["stake_test1uppp0f6lpq73jc924dusqqrvdrevfgrwzx3x6nljzpjmhus2qcmnc"],
+    "rewardAccount": "stake_test1uppp0f6lpq73jc924dusqqrvdrevfgrwzx3x6nljzpjmhus2qcmnc",
+    "status": "active",
+    "transactions": {
+      "registration": ["c367c65a2b5921ac2bf592307638a29c69bac67dd2d017637db643a142feca7c"],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "FRK_Testnet",
+      "ticker": "FRKT",
+      "homepage": "https://frkcardanotest.com",
+      "description": "FRK's Testnet"
+    },
+    "metadataJson": {
+      "hash": "0a90f683b7d4d19f9d90e0da8e10b24e27f2de8edf0bcd2221d860bc11afb5e4",
+      "url": "https://raw.githubusercontent.com/mkk1985/c/c/poolMetaData.json"
+    }
+  },
+  {
+    "cost": "340000000",
+    "epochRewards": [
+      {
+        "activeStake": "1858419477599",
+        "epoch": 77,
+        "epochLength": 213065000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "450000000000"
+      },
+      {
+        "activeStake": "1781843434388",
+        "epoch": 76,
+        "epochLength": 432000000,
+        "leaderRewards": "0",
+        "memberROI": 0,
+        "memberRewards": "0",
+        "pledge": "450000000000"
+      },
+      {
+        "activeStake": "1729594031016",
+        "epoch": 75,
+        "epochLength": 432000000,
+        "leaderRewards": "1220105180",
+        "memberROI": 0.00005003211053521981,
+        "memberRewards": "64020790",
+        "pledge": "450000000000"
+      }
+    ],
+    "hexId": "9ed23a4a839826d08d7d10f277a91f0e2373ea90251fb33664d52c94",
+    "id": "pool1nmfr5j5rnqndprtazre802glpc3h865sy50mxdny65kfgf3e5eh",
+    "margin": {
+      "denominator": 1,
+      "numerator": 0
+    },
+    "metrics": {
+      "blocksCreated": 6675,
+      "delegators": 15,
+      "livePledge": "1747894661800",
+      "saturation": 0.03182235650326841,
+      "size": {
+        "active": 0.9731467545476631,
+        "live": 0.026853245452336916
+      },
+      "stake": {
+        "active": "1858419477599",
+        "live": "1909701151357"
+      }
+    },
+    "pledge": "1500000000000",
+    "relays": [
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "node1.cardano.gratis"
+      },
+      {
+        "__typename": "RelayByNameMultihost",
+        "dnsName": "node2.cardano.gratis"
+      }
+    ],
+    "vrf": "8d765404f01f210d1ba5ce1560dfb8252648f2dc74da9931f1350eeb4dd2c52e",
+    "owners": ["stake_test1upsupqa6d899u62xarwludqrfn5ys97pk65qdvgjwpssnkszjkvq2"],
+    "rewardAccount": "stake_test1upsupqa6d899u62xarwludqrfn5ys97pk65qdvgjwpssnkszjkvq2",
+    "status": "activating",
+    "transactions": {
+      "registration": [
+        "05c0037a756f87b0193000a83b7ba4ea4d546e7e2166cb9b69f17f92e859a19c",
+        "dd0197a75267bc62a4272c2db4f657a38ece66e54cdc7d851f234d979ada20d4",
+        "7ad4566c052e225f070d2303c94e799f9c8734ac52f31f01a5e02f8562c16ce2"
+      ],
+      "retirement": []
+    },
+    "metadata": {
+      "name": "GRADA Gratis ADA PreProd",
+      "ticker": "GRADA",
+      "homepage": "https://cardano.gratis",
+      "description": "GRADA on PreProd. Stake with GRADA stake pool and get gratis ADA kickback"
+    },
+    "metadataJson": {
+      "hash": "7b991f016c94350aadce2d5e34bc9b115dcf1a742a1c3401db684702072eb499",
+      "url": "https://cardano.gratis/poolMetaDataPreProd.json"
+    }
   }
 ]

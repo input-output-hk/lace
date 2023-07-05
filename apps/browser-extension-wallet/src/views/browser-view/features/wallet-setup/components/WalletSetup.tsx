@@ -125,7 +125,12 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
               content={
                 <div className={styles.confirmResetContent}>
                   <p>
-                    <Trans i18nKey="browserView.walletSetup.confirmRestoreModal.notVisible" />
+                    <Trans
+                      components={{
+                        b: <b />
+                      }}
+                      i18nKey="browserView.walletSetup.confirmRestoreModal.content"
+                    />
                   </p>
                 </div>
               }

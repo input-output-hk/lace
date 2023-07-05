@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 import { DrawerCommonExtended } from './drawerCommonExtended';
-import NetworkSettingsDrawer from './settings/extendedView/networkSettingsDrawer';
+import NetworkDrawer from './settings/NetworkDrawer';
 
 export class MenuHeaderNetwork {
   private CONTAINER = '[data-testid="user-dropdown-network-info-section"]';
@@ -25,15 +25,15 @@ export class MenuHeaderNetwork {
   }
 
   get mainnetRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return NetworkSettingsDrawer.mainnetRadioButton;
+    return NetworkDrawer.mainnetRadioButton;
   }
 
   get preprodRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return NetworkSettingsDrawer.preprodRadioButton;
+    return NetworkDrawer.preprodRadioButton;
   }
 
   get previewRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return NetworkSettingsDrawer.previewRadioButton;
+    return NetworkDrawer.previewRadioButton;
   }
 }
 
