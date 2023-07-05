@@ -21,7 +21,7 @@ export const Setup = ({ language, theme, children }: SetupProps) => {
   const rewardAccounts = useObservable(walletStoreInMemoryWallet.delegation.rewardAccounts$);
 
   useEffect(() => {
-    setCurrentPortfolio({ cardanoCoin: walletStoreWalletUICardanoCoin, rewardAccountInfo: rewardAccounts });
+    setCurrentPortfolio(rewardAccounts);
   }, [rewardAccounts, setCurrentPortfolio, walletStoreWalletUICardanoCoin]);
 
   if (loading) {

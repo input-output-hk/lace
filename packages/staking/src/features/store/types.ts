@@ -1,22 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { Immutable } from 'immer';
 
-// TODO: Replace with Cardano JS SDK types once feature LW-6702 is released
-// TODO START
-type PoolIdHex = string;
-export interface Cip17Pool {
-  id: PoolIdHex;
-  weight: number;
-  name?: string;
-  ticker?: string;
-}
-export interface Cip17DelegationPortfolio {
-  name: string;
-  pools: Cip17Pool[];
-  description?: string;
-  author?: string;
-}
-
 export enum Sections {
   DETAIL = 'detail',
   CONFIRMATION = 'confirmation',
@@ -24,7 +8,6 @@ export enum Sections {
   SUCCESS_TX = 'success_tx',
   FAIL_TX = 'fail_tx',
 }
-// TODO END
 
 export enum StakingError {
   UTXO_FULLY_DEPLETED = 'UTXO_FULLY_DEPLETED',
@@ -57,20 +40,15 @@ export interface StakePoolDetails {
 }
 
 export type DelegationPortfolioState = Immutable<{
-  draftPortfolio: Cip17Pool[];
-  currentPortfolio: Cip17Pool[];
+  draftPortfolio: Wallet.Cardano.Cip17Pool[];
+  currentPortfolio: Wallet.Cardano.Cip17Pool[];
 }>;
 
-type SetCurrentPortfolioParams = {
-  rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[];
-  cardanoCoin: Wallet.CoinId;
-};
-
 type DelegationPortfolioMutators = {
-  setCurrentPortfolio: (params: SetCurrentPortfolioParams) => void;
-  addPoolToDraft: (pool: Cip17Pool) => void;
-  removePoolFromDraft: ({ poolId }: { poolId: PoolIdHex }) => void;
-  updatePoolWeight: ({ poolId, weight }: { poolId: PoolIdHex; weight: number }) => void;
+  setCurrentPortfolio: (rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[]) => void;
+  addPoolToDraft: (pool: Wallet.Cardano.Cip17Pool) => void;
+  removePoolFromDraft: (params: Pick<Wallet.Cardano.Cip17Pool, 'id'>) => void;
+  updatePoolWeight: (params: Pick<Wallet.Cardano.Cip17Pool, 'id' | 'weight'>) => void;
   clearDraft: () => void;
 };
 

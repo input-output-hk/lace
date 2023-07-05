@@ -7,37 +7,38 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { SelectedStakePoolDetails } from '../outside-handles-provider/types';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
 
 const SATURATION_UPPER_BOUND = 100;
 
-type stakePoolDetailProps = {
-  setIsStaking: (isStakin: boolean) => void;
-};
-
-export const StakePoolDetail = ({ setIsStaking }: stakePoolDetailProps): React.ReactElement => {
+export const StakePoolDetail = (): React.ReactElement => {
   const {
     delegationDetails,
-    delegationStoreSelectedStakePoolDetails: {
-      delegators,
-      description,
-      id,
-      hexId,
-      owners = [],
-      apy,
-      saturation,
-      stake,
-      logo,
-      name,
-      ticker,
-      status,
-      contact,
-    },
+    delegationStoreSelectedStakePoolDetails: openPool,
     openExternalLink,
     walletStoreWalletUICardanoCoin,
   } = useOutsideHandles();
+
+  if (!openPool) throw new Error('Tried to open pool details but no data of the pool is available');
+
+  const {
+    delegators,
+    description,
+    id,
+    hexId,
+    owners = [],
+    apy,
+    saturation,
+    stake,
+    logo,
+    name,
+    ticker,
+    status,
+    contact,
+  } = openPool;
+
   const currentDelegatedStakePool =
     delegationDetails &&
     Wallet.util.stakePoolTransformer({ cardanoCoin: walletStoreWalletUICardanoCoin, stakePool: delegationDetails });
@@ -53,9 +54,6 @@ export const StakePoolDetail = ({ setIsStaking }: stakePoolDetailProps): React.R
   ];
 
   const isDelegatingToThisPool = currentDelegatedStakePool?.id === id;
-  useEffect(() => {
-    setIsStaking(isDelegatingToThisPool);
-  }, [setIsStaking, isDelegatingToThisPool]);
 
   const metricsTranslations = {
     activeStake: t('drawer.details.metrics.activeStake'),
@@ -182,19 +180,19 @@ type StakePoolDetailFooterProps = {
 type SelectorParams = Parameters<Parameters<typeof useDelegationPortfolioStore>[0]>[0];
 
 const makeSelector =
-  (selectedPool: SelectedStakePoolDetails) =>
+  (openPool?: SelectedStakePoolDetails) =>
   ({ currentPortfolio, draftPortfolio }: SelectorParams) => {
-    const poolInCurrentPortfolio = currentPortfolio.some(({ id }) => id === selectedPool.id);
-    const poolSelectedForDraft = draftPortfolio.some(({ id }) => id === selectedPool.id);
-    // TODO: use max pools count constant here
-    // eslint-disable-next-line no-magic-numbers
-    const draftFull = draftPortfolio.length === 5;
+    const poolInCurrentPortfolio =
+      !!openPool && currentPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
+    const poolSelectedForDraft =
+      !!openPool && draftPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
+    const draftFull = draftPortfolio.length === MAX_POOLS_COUNT;
 
     return {
       ableToSelectForDraft: !poolSelectedForDraft && !draftFull,
       ableToStakeOnlyOnThisPool: !poolInCurrentPortfolio || currentPortfolio.length > 1,
       draftEmpty: draftPortfolio.length === 0,
-      draftFull,
+      poolInCurrentPortfolio,
       poolSelectedForDraft,
     };
   };
@@ -255,9 +253,9 @@ const makeActionButtons = (
 export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { setNoFundsVisible } = useStakePoolDetails();
-  const { delegationStoreSelectedStakePoolDetails: poolDetails, walletStoreGetKeyAgentType } = useOutsideHandles();
-  const { ableToSelectForDraft, ableToStakeOnlyOnThisPool, draftEmpty, draftFull, poolSelectedForDraft } =
-    useDelegationPortfolioStore(makeSelector(poolDetails));
+  const { delegationStoreSelectedStakePoolDetails: openPool, walletStoreGetKeyAgentType } = useOutsideHandles();
+  const { ableToSelectForDraft, ableToStakeOnlyOnThisPool, draftEmpty, poolInCurrentPortfolio, poolSelectedForDraft } =
+    useDelegationPortfolioStore(makeSelector(openPool));
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
 
   const isInMemory = useMemo(
@@ -274,14 +272,22 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
   }, [canDelegate, onStake, setNoFundsVisible]);
 
   const onSelectPool = useCallback(() => {
-    const { id, name, ticker } = poolDetails;
+    if (!openPool) return;
+    const { hexId, name, ticker } = openPool;
     portfolioMutators.addPoolToDraft({
-      id,
+      id: Wallet.Cardano.PoolIdHex(hexId),
       name,
       ticker,
       weight: 1,
     });
-  }, [poolDetails, portfolioMutators]);
+  }, [openPool, portfolioMutators]);
+
+  const onUnselectPool = useCallback(() => {
+    if (!openPool) return;
+    portfolioMutators.removePoolFromDraft({
+      id: Wallet.Cardano.PoolIdHex(openPool.hexId),
+    });
+  }, [openPool, portfolioMutators]);
 
   useEffect(() => {
     if (isInMemory) return;
@@ -291,26 +297,33 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
     localStorage.removeItem('TEMP_POOLID');
   }, [isInMemory, onStakeClick]);
 
-  const [callToActionButton, ...secondaryButtons] = useMemo(
+  const actionButtons = useMemo(
     () =>
       makeActionButtons(t, {
-        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onStake },
-        manageDelegation: draftFull,
+        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onSelectPool },
+        // TODO: disabling this button for now
+        // eslint-disable-next-line sonarjs/no-redundant-boolean
+        manageDelegation: false && poolInCurrentPortfolio,
         selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelectPool },
-        stakeOnThisPool: ableToStakeOnlyOnThisPool,
-        unselectPool: poolSelectedForDraft,
+        stakeOnThisPool: draftEmpty && ableToStakeOnlyOnThisPool && { callback: onStake },
+        unselectPool: poolSelectedForDraft && { callback: onUnselectPool },
       }),
     [
       t,
       ableToSelectForDraft,
       draftEmpty,
-      onStake,
-      draftFull,
       onSelectPool,
+      poolInCurrentPortfolio,
       ableToStakeOnlyOnThisPool,
+      onStake,
       poolSelectedForDraft,
+      onUnselectPool,
     ]
   );
+
+  if (actionButtons.length === 0) return <></>;
+
+  const [callToActionButton, ...secondaryButtons] = actionButtons;
 
   return (
     <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>

@@ -22,7 +22,7 @@ export type SelectedStakePoolDetails = {
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   delegationDetails: Wallet.Cardano.StakePool;
-  delegationStoreSelectedStakePoolDetails: SelectedStakePoolDetails;
+  delegationStoreSelectedStakePoolDetails?: SelectedStakePoolDetails;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo: string }) => void;
   openExternalLink: (href: string) => void;
