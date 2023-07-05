@@ -309,9 +309,11 @@ Feature: Onboarding - Restore wallet
   @LW-4743
   Scenario: Restore wallet - Enter and Escape buttons support
     Given I click "Restore" button on wallet setup page
+    And "Restoring a multi-address wallet?" modal is displayed
     When I press keyboard Escape button
     Then "Get started" page is displayed
     Given I click "Restore" button on wallet setup page
+    And "Restoring a multi-address wallet?" modal is displayed
     When I press keyboard Enter button
     Then "Legal page" is displayed
     When I press keyboard Enter button

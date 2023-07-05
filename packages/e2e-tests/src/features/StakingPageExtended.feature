@@ -32,7 +32,7 @@ Feature: Staking Page - Extended Browser View
       | NED#                   | 0                 |                                  |                     |
       | PAN                    | 1                 | PANL Stake Pool (Pre-Production) | PANL                |
       | 123456                 | 0                 |                                  |                     |
-      | LB                     | 2                 | LBCrypt Preview/Preprod Pool     | LBCT2               |
+      | AZ                     | 2                 | AzureADA                         | AZUR                |
       | £££                    | 0                 |                                  |                     |
       | Amso                   | 0                 |                                  |                     |
 
