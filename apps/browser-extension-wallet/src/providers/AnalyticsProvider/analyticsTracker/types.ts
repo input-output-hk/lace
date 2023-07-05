@@ -25,6 +25,12 @@ export type SendEventProps = {
   value?: number;
 };
 
+export type Metadata = {
+  _id?: string;
+  cookie?: number;
+  url: string;
+};
+
 export enum PostHogAction {
   ActionName = 'flow | subflow | view | object | interaction'
 }
@@ -34,14 +40,14 @@ export enum EnhancedAnalyticsOptInStatus {
   OptedOut = 'REJECTED'
 }
 
-export type Metadata = {
-  _id?: string;
-  cookie?: number;
-  url: string;
-};
+export enum ExtensionViews {
+  Extended = 'extended',
+  Popup = 'popup'
+}
 
 export type PostHogMetadata = {
   // eslint-disable-next-line camelcase
   distinct_id?: string;
   url: string;
+  view: ExtensionViews;
 };
