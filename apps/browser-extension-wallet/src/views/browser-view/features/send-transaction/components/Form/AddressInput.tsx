@@ -1,9 +1,9 @@
-/* eslint-disable no-magic-numbers */
+/* eslint-disable complexity */
 /* eslint-disable unicorn/no-useless-undefined */
 import { Typography } from 'antd';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import cn from 'classnames';
-import { DestinationAddressInput, getInputLabel } from '@lace/core';
+import { DestinationAddressInput, getInputLabel, isHandle, HANDLE_DEBOUNCE_TIME } from '@lace/core';
 import { useAddressState, useCurrentRow, useSections } from '../../store';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
 import { useAddressBookStore } from '@src/features/address-book/store';
@@ -11,7 +11,7 @@ import {
   validateWalletName,
   validateWalletAddress,
   isValidAddressPerNetwork,
-  validateHandle
+  verifyHandle
 } from '@src/utils/validators';
 import { Sections } from '../..';
 import { sectionsConfig } from '../../constants';
@@ -33,7 +33,7 @@ interface AddressInputProps {
   isPopupView: boolean;
 }
 
-export type inputValue = string | { name: string; address: string };
+export type inputValue = { name?: string; address: string };
 
 const isWalletNameValid = (name: string) => !validateWalletName(name);
 const isWalletAddressValid = (address: string) => !validateWalletAddress(address);
@@ -48,7 +48,8 @@ enum HandleVerificationState {
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleResolver = useHandleResolver();
-  const [addressInputValue, setAddressInputValue] = useState<inputValue>('');
+  const [addressInputValue, setAddressInputValue] = useState<inputValue>({ address: '' });
+  // eslint-disable-next-line no-magic-numbers
   const MAX_ADDRESSES = isPopupView ? 3 : 5;
 
   const { setSection } = useSections();
@@ -67,16 +68,16 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
 
-  const isAddressInputValueHandle = isAdaHandleEnabled && validateHandle(addressInputValue.toString());
+  const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(addressInputValue.address.toString());
 
   const clearInput = useCallback(() => {
-    setAddressInputValue('');
+    setAddressInputValue({ address: '' });
     setAddressValue(row, '');
     setHandleVerificationState(undefined);
   }, [setAddressInputValue, setAddressValue, setHandleVerificationState, row]);
 
   const handleInputChange = (value?: string) => {
-    setAddressInputValue(value);
+    setAddressInputValue({ address: value });
     setAddressValue(row, value);
 
     if (value.length === 0) {
@@ -92,21 +93,16 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           return;
         }
 
-        try {
-          const handleString = addressInputValue.toString();
-          const resolvedHandles = await handleResolver.resolveHandles({ handles: [handleString.slice(1)] });
+        const handleString = addressInputValue.address.toString();
 
-          if (resolvedHandles.length === 0) {
-            setHandleVerificationState(HandleVerificationState.INVALID);
-          } else {
-            setAddressValue(row, resolvedHandles[0].cardanoAddress.toString(), handleString);
-            setHandleVerificationState(HandleVerificationState.VALID);
-          }
-        } catch (error) {
-          console.error('Error occurred during handle verification:', error);
+        const { handles, valid } = await verifyHandle(handleString, handleResolver);
+        if (!valid) {
           setHandleVerificationState(HandleVerificationState.INVALID);
+        } else {
+          setHandleVerificationState(HandleVerificationState.VALID);
+          setAddressValue(row, handles[0].cardanoAddress.toString(), handleString);
         }
-      }, 1000),
+      }, HANDLE_DEBOUNCE_TIME),
     [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
   );
 
@@ -126,11 +122,11 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     return () => {
       resolveHandle && resolveHandle.cancel();
     };
-  }, [address, addressInputValue, setHandleVerificationState, resolveHandle]);
+  }, [address, addressInputValue, setHandleVerificationState, resolveHandle, isAddressInputValueHandle]);
 
   useEffect(() => {
-    getAddressBookByNameOrAddress({ value: address || '' });
-  }, [address, getAddressBookByNameOrAddress]);
+    getAddressBookByNameOrAddress({ value: handle || address || '' });
+  }, [address, getAddressBookByNameOrAddress, handle]);
 
   const validationObject = useMemo(() => {
     const isNameValid = address && isWalletNameValid(address);
@@ -150,11 +146,11 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 
   useEffect(() => {
-    const existingAddress = getExistingAddress(address);
+    const existingAddress = getExistingAddress(handle || address);
     if (existingAddress) {
       setAddressInputValue({ name: existingAddress.walletName, address: existingAddress.walletAddress });
     } else {
-      setAddressInputValue(handle || address);
+      setAddressInputValue({ address: handle || address });
     }
   }, [address, handle, getExistingAddress]);
 
@@ -168,7 +164,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   );
 
   const onClick = () => {
-    const existingAddress = getExistingAddress(address);
+    const existingAddress = getExistingAddress(handle || address);
     let section = Sections.ADDRESS_LIST;
 
     if (existingAddress) {
@@ -177,7 +173,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     }
 
     if (!existingAddress && isAddressInputValueValid) {
-      setAddressToEdit({ name: '', address });
+      setAddressToEdit({ name: '', address: handle || address });
       section = Sections.ADDRESS_FORM;
     }
     setRowId(row);
@@ -187,7 +183,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   useEffect(() => {
     const tempAddress = getTempAddress();
     if (!tempAddress) return;
-    setAddressInputValue(tempAddress);
+    setAddressInputValue({ address: tempAddress });
     setAddressValue(row, tempAddress);
   }, [row, setAddressValue]);
 
@@ -202,7 +198,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         empty={!address}
         valid={isAddressInputValueValid}
         validationObject={validationObject}
-        exists={!!getExistingAddress(address)}
+        exists={!!getExistingAddress(handle || address)}
         className={styles.input}
         style={{ width: '100%' }}
         open

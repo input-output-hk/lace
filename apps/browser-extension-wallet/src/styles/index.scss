@@ -138,6 +138,10 @@ body {
   background-color: var(--dark-mode-mid-grey, #ffffff) !important;
 }
 
+:global(.ant-tooltip-arrow-content:before) {
+  background: var(--dark-mode-mid-grey, #ffffff) !important;
+}
+
 :global(.ant-modal-mask) {
   background: var(--light-mode-black, var(--dark-mode-bg-black)) !important;
   opacity: 0.9;
