@@ -11,6 +11,11 @@ export const ReceiveInfoContainer = (): React.ReactElement => {
   const handles = useGetHandles();
 
   return (
-    <ReceiveInfo name={walletInfo?.name} address={walletInfo?.address} handles={handles} goBack={redirectToOverview} />
+    <ReceiveInfo
+      name={walletInfo?.name}
+      address={walletInfo?.addresses[0].address}
+      handles={handles}
+      goBack={redirectToOverview}
+    />
   );
 };

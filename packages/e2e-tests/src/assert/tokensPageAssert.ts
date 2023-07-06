@@ -207,25 +207,26 @@ class TokensPageAssert {
     await expect(await TokensPage.totalBalanceValue.getText()).to.equal('********');
   }
 
-  async assertAllTokensBalancesAreMasked(shouldBeMasked: boolean) {
-    const rowsCounter = await TokensPage.getTokensCounterAsNumber();
-    if (rowsCounter > 0) await TokensPage.coinGeckoCredits.scrollIntoView();
-    for (let i = 0; i < rowsCounter; i++) {
-      await TokensPage.tokenBalance(i).waitForDisplayed();
-      await (shouldBeMasked
-        ? expect(await TokensPage.tokenBalance(i).getText()).to.equal('********')
-        : expect(await TokensPage.tokenBalance(i).getText()).to.not.equal('********'));
-    }
+  async assertTokenBalancesIsMasked(tokenIndex: number, shouldBeMasked: boolean) {
+    await TokensPage.tokenBalance(tokenIndex).waitForDisplayed();
+    await (shouldBeMasked
+      ? expect(await TokensPage.tokenBalance(tokenIndex).getText()).to.equal('********')
+      : expect(await TokensPage.tokenBalance(tokenIndex).getText()).to.not.equal('********'));
   }
 
-  async assertAllTokensFiatBalancesAreMasked(shouldBeMasked: boolean) {
-    const rowsCounter = await TokensPage.getTokensCounterAsNumber();
+  async assertTokenFiatBalancesIsMasked(tokenIndex: number, shouldBeMasked: boolean) {
+    await TokensPage.tokenFiatBalance(tokenIndex).waitForDisplayed();
+    await (shouldBeMasked
+      ? expect(await TokensPage.tokenFiatBalance(tokenIndex).getText()).to.equal('********')
+      : expect(await TokensPage.tokenFiatBalance(tokenIndex).getText()).to.not.equal('********'));
+  }
+
+  async assertAllBalancesAreMasked(shouldBeMasked: boolean) {
+    const rowsCounter = (await TokensPage.getRows()).length;
     if (rowsCounter > 0) await TokensPage.coinGeckoCredits.scrollIntoView();
     for (let i = 0; i < rowsCounter; i++) {
-      await TokensPage.tokenFiatBalance(i).waitForDisplayed();
-      await (shouldBeMasked
-        ? expect(await TokensPage.tokenFiatBalance(i).getText()).to.equal('********')
-        : expect(await TokensPage.tokenFiatBalance(i).getText()).to.not.equal('********'));
+      await this.assertTokenBalancesIsMasked(i, shouldBeMasked);
+      await this.assertTokenFiatBalancesIsMasked(i, shouldBeMasked);
     }
   }
 }

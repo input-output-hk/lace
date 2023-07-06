@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { subtractValueQuantities } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 
 const { getTotalMinimumCoins, setMissingCoins } = Wallet;
 
@@ -23,7 +23,7 @@ export const useMaxAda = (): BigInt => {
       // create and output with only the wallet tokens and nfts so we can calculate the mising coins for feature txs
       const outputs = new Set([
         {
-          address: walletInfo.address,
+          address: walletInfo.addresses[0].address,
           value: {
             coins: BigInt(0),
             assets: balance.assets || new Map()
@@ -52,7 +52,7 @@ export const useMaxAda = (): BigInt => {
     } else {
       setMaxADA(BigInt(0));
     }
-  }, [inMemoryWallet, walletInfo.address, balance, availableRewards]);
+  }, [inMemoryWallet, walletInfo.addresses, balance, availableRewards]);
 
   useEffect(() => {
     calculateMaxAda();

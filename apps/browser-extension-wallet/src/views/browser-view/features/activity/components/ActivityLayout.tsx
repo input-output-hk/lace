@@ -2,9 +2,9 @@ import React, { ReactElement, useEffect, useState, useCallback } from 'react';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import { GroupedAssetActivityList } from '@lace/core';
-import { useFetchCoinPrice, useObservable } from '../../../../../hooks';
+import { useFetchCoinPrice } from '../../../../../hooks';
 import { StateStatus, useWalletStore } from '../../../../../stores';
-import { Drawer, DrawerNavigation } from '@lace/common';
+import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { TransactionDetail } from './TransactionDetail';
 import { useCurrencyStore } from '../../../../../providers/currency';
 import { useTranslation } from 'react-i18next';
@@ -141,7 +141,7 @@ export const ActivityLayout = (): ReactElement => {
               title={t('browserView.activity.fundWalletBanner.title')}
               subtitle={t('browserView.activity.fundWalletBanner.subtitle')}
               prompt={t('browserView.fundWalletBanner.prompt')}
-              walletAddress={walletInfo.address.toString()}
+              walletAddress={walletInfo.addresses[0].address.toString()}
               shouldHaveVerticalContent
             />
           )}

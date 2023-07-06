@@ -7,6 +7,7 @@ import { SliceCreator, UISlice } from '../types';
 import { getValueFromLocalStorage, onStorageChangeEvent, saveValueInLocalStorage } from '@src/utils/local-storage';
 
 const HIDE_BALANCE_FEATURE_ENABLED = process.env.USE_HIDE_MY_BALANCE === 'true';
+const HIDE_BALANCE_PLACEHOLDER_LENGTH = 8;
 
 const setWalletUI = (
   {
@@ -46,7 +47,8 @@ const getWalletUI = ({ currentNetwork, appMode }: { currentNetwork: Wallet.Carda
     },
     networkConnection: NetworkConnectionStates.CONNNECTED,
     areBalancesVisible: !shouldHideBalance,
-    hiddenBalancesPlaceholder: '*',
+    getHiddenBalancePlaceholder: (placeholderLength = HIDE_BALANCE_PLACEHOLDER_LENGTH, placeholderChar = '*') =>
+      placeholderChar.repeat(placeholderLength),
     canManageBalancesVisibility: HIDE_BALANCE_FEATURE_ENABLED
   };
 };

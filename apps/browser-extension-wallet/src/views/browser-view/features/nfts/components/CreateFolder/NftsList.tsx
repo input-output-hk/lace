@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { NFT, getTokenList } from '@src/utils/get-token-list';
 import AddNft from '@assets/icons/add-nft-icon.component.svg';
 import { useWalletStore } from '../../../../../../stores';
-import { useObservable } from '../../../../../../hooks';
 import styles from './CreateFolderDrawer.module.scss';
 import { useCurrencyStore } from '@providers';
+import { useObservable } from '@lace/common';
 
 const nftsPerRow = {
   popupView: 2,

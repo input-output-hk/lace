@@ -1,28 +1,25 @@
 import BigNumber from 'bignumber.js';
 import { AssetActivityItemProps, TransactionType } from '@lace/core';
 import { Wallet } from '@lace/cardano';
-import { CoinId, CurrencyInfo, TxDirections } from '@types';
+import { CurrencyInfo, TxDirections } from '@types';
 import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
 import capitalize from 'lodash/capitalize';
 import { formatTime } from '@src/utils/format-date';
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight;
-  walletAddresses: {
-    address: Wallet.Cardano.PaymentAddress;
-    rewardAccount: Wallet.Cardano.RewardAccount;
-  };
+  walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   fiatCurrency: CurrencyInfo;
   fiatPrice?: number;
   protocolParameters: Wallet.ProtocolParameters;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
   time: Date;
   direction?: TxDirections;
   status?: Wallet.TransactionStatus;
   date?: string;
 }
 
-export const getFormattedAmount = ({ amount, cardanoCoin }: { amount: string; cardanoCoin: CoinId }): string => {
+export const getFormattedAmount = ({ amount, cardanoCoin }: { amount: string; cardanoCoin: Wallet.CoinId }): string => {
   const adaStringAmount = Wallet.util.lovelacesToAdaString(amount);
   return `${adaStringAmount} ${cardanoCoin.symbol}`;
 };
@@ -72,7 +69,7 @@ export const txTransformer = ({
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
   const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
   const { coins, assets } = inspectTxValues({
-    address: walletAddresses.address,
+    addresses: walletAddresses,
     tx: tx as unknown as Wallet.Cardano.HydratedTx,
     direction
   });

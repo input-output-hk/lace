@@ -1,0 +1,15 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.headerContainer {
+  margin-bottom: size_unit(2.5);
+}
+
+.portfolio {
+  margin-bottom: size_unit(5);
+}
+
+.testPopupClass {
+  @media (max-width: $breakpoint-popup) {
+    width: 1000px;
+  }
+}

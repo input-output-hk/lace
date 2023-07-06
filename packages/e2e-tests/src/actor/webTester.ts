@@ -4,16 +4,12 @@ import { browser } from '@wdio/globals';
 import { Button } from '../elements/button';
 import { WebElement } from '../elements/webElement';
 import { Logger } from '../support/logger';
-import { UseCase } from '../usecase/usecase';
-import { expect } from 'chai';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import crypto from 'crypto';
 
 export type LocatorStrategy = 'css selector' | 'xpath';
 
 export default new (class WebTester {
-  do = async (usecase: UseCase): Promise<void | any> => await usecase.run();
-
   async seeElement(selector: string, reverseOrder = false, timeoutMs = 3000) {
     Logger.log(`Assert see element ${selector}, reverse = ${reverseOrder}`);
     const shouldBeFound = reverseOrder ? 'should not be found' : 'should be found';
@@ -141,15 +137,6 @@ export default new (class WebTester {
       timeoutMsg: `button with text ${value} not active`
     });
     await this.clickElement(button, 3);
-  }
-
-  async seeTextInElement(element: WebElement, text: string, isExactMatch = true) {
-    Logger.log(`Assert see text ${text} for ${element.toJSLocator()}`);
-    if (isExactMatch) {
-      expect(await (await element.interact()).getText()).to.equal(text);
-    } else {
-      expect(await (await element.interact()).getText()).to.contain(text);
-    }
   }
 
   async getTextValueFromElement(element: WebElement): Promise<string | number> {

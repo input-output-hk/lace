@@ -1,4 +1,4 @@
-import { Banner } from '@components/Banner';
+import { Banner } from '@lace/common';
 import { Typography } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

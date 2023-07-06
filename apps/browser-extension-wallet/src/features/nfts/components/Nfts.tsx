@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-useless-undefined */
-import { useObservable, useRedirection } from '@hooks';
+import { useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
@@ -163,7 +163,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
               <FundWalletBanner
                 title={t('browserView.nfts.fundWalletBanner.title')}
                 prompt={t('browserView.nfts.fundWalletBanner.prompt')}
-                walletAddress={walletInfo.address.toString()}
+                walletAddress={walletInfo.addresses[0].address.toString()}
               />
             )}
           </div>

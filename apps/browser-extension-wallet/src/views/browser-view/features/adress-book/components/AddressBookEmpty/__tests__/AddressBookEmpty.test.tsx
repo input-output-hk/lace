@@ -29,7 +29,7 @@ describe('Testing AddressBookEmpty component', () => {
     );
 
     const container = await findByTestId('address-book-empty');
-    const image = await within(container).findByTestId('address-book-empty-image');
+    const image = await within(container).findByTestId('address-book-empty-state-image');
     const title = await within(container).findByText(titleText);
     const subtitle = await within(container).findByText(subtitleText);
 

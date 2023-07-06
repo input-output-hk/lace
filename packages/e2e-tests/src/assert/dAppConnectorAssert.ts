@@ -179,11 +179,11 @@ class DAppConnectorAssert {
         await t('browserView.settings.heading')
       );
 
-      await AuthorizedDAppsPage.closeButton.waitForDisplayed();
-      await AuthorizedDAppsPage.backButton.waitForDisplayed({ reverse: true });
+      await AuthorizedDAppsPage.drawerHeaderCloseButton.waitForDisplayed();
+      await AuthorizedDAppsPage.drawerHeaderBackButton.waitForDisplayed({ reverse: true });
     } else {
-      await AuthorizedDAppsPage.closeButton.waitForDisplayed({ reverse: true });
-      await AuthorizedDAppsPage.backButton.waitForDisplayed();
+      await AuthorizedDAppsPage.drawerHeaderCloseButton.waitForDisplayed({ reverse: true });
+      await AuthorizedDAppsPage.drawerHeaderBackButton.waitForDisplayed();
     }
 
     await AuthorizedDAppsPage.drawerHeaderTitle.waitForDisplayed();

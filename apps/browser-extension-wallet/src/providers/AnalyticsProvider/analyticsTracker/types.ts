@@ -25,6 +25,12 @@ export type SendEventProps = {
   value?: number;
 };
 
+export type Metadata = {
+  _id?: string;
+  cookie?: number;
+  url: string;
+};
+
 export enum PostHogAction {
   // Hardware wallet connect
   OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
@@ -42,11 +48,10 @@ export enum EnhancedAnalyticsOptInStatus {
   OptedOut = 'REJECTED'
 }
 
-export type Metadata = {
-  _id?: string;
-  cookie?: number;
-  url: string;
-};
+export enum ExtensionViews {
+  Extended = 'extended',
+  Popup = 'popup'
+}
 
 export enum ExtensionViews {
   Extended = 'extended',

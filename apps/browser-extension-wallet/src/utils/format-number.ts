@@ -1,10 +1,9 @@
 /* eslint-disable no-magic-numbers, new-cap */
-import { Percent } from '@cardano-sdk/util';
+import { DEFAULT_DECIMALS } from '@lace/common';
 import BigNumber from 'bignumber.js';
 import { unitsMap } from './constants';
 import { getNumberUnit } from './get-number-unit';
 
-const DEFAULT_DECIMALS = 2;
 const MILLION = 1_000_000;
 const BILLION = 1_000_000_000;
 const TRILLION = 1_000_000_000_000;
@@ -174,9 +173,6 @@ export const formatLocaleNumber = (value: string, decimalPlaces: number = DEFAUL
   });
 
 export const isNumeric = (str: string): boolean => !Number.isNaN(str) && !Number.isNaN(Number.parseFloat(str));
-
-export const formatPercentages = (number: number | Percent, decimalPlaces: number = DEFAULT_DECIMALS): string =>
-  (Math.round(number.valueOf() * 100 * 100) / 100).toFixed(decimalPlaces);
 
 export const compactNumber = (value: number | string, decimal?: number): string => {
   const numericValue = value ? Number(value) : 0;

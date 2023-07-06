@@ -73,21 +73,22 @@ export const grid = recipe({
         gridTemplateRows: 'none',
       },
       $fitContent: {
-        gridTemplateRows: 'min-content',
+        gridTemplateRows: 'auto minmax(0, 1fr)',
       },
     },
     gutters: {
       $0: sx({ gap: '$0' }),
-      $1: sx({ gap: '$8' }),
-      $2: sx({ gap: '$16' }),
-      $2_5: sx({ gap: '$20' }),
+      $8: sx({ gap: '$8' }),
+      $16: sx({ gap: '$16' }),
+      $20: sx({ gap: '$20' }),
+      $32: sx({ gap: '$32' }),
     },
   },
 
   defaultVariants: {
     columns: '$none',
     rows: '$none',
-    gutters: '$2_5',
+    gutters: '$20',
   },
 });
 

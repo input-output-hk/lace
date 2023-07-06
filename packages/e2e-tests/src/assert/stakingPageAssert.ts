@@ -5,7 +5,7 @@ import webTester from '../actor/webTester';
 import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
 import { t } from '../utils/translationService';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
-import { StakingSuccessDrawer } from '../elements/staking/stakingSuccessDrawer';
+import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
 import { Logger } from '../support/logger';
 import StakingExtendedPageObject from '../pageobject/stakingExtendedPageObject';
 import { sortColumnContent } from '../utils/stakePoolListContent';
@@ -162,28 +162,31 @@ class StakingPageAssert {
     await expect(tooltipText.replace(expectedTitle, '') as string).to.match(TestnetPatterns.USD_VALUE_NO_SUFFIX_REGEX);
   };
 
-  assertStakingSuccessDrawer = async (process: 'Initial' | 'Switching') => {
-    const stakingSuccessDrawer = new StakingSuccessDrawer();
-    await webTester.seeWebElement(stakingSuccessDrawer.icon());
-    await webTester.seeWebElement(stakingSuccessDrawer.button());
-
-    await expect(await webTester.getTextValueFromElement(stakingSuccessDrawer.title())).to.equal(
+  assertStakingSuccessDrawer = async (process: 'Initial' | 'Switching', mode: 'extended' | 'popup') => {
+    await StakingSuccessDrawer.drawerHeaderCloseButton.waitForDisplayed();
+    if (mode === 'extended') {
+      await StakingSuccessDrawer.drawerNavigationTitle.waitForDisplayed();
+      await expect(await StakingSuccessDrawer.drawerNavigationTitle.getText()).to.equal(
+        await t('browserView.staking.details.titleSecond')
+      );
+    }
+    await StakingSuccessDrawer.resultIcon.waitForDisplayed();
+    await StakingSuccessDrawer.resultTitle.waitForDisplayed();
+    await expect(await StakingSuccessDrawer.resultTitle.getText()).to.equal(
       process === 'Initial'
         ? await t('browserView.staking.details.success.title')
         : await t('browserView.staking.details.switchedPools.title')
     );
-
-    // TODO
-    // blocked by bug LW-4864
-    // await expect(await webTester.getTextValueFromElement(stakingSuccessDrawer.subtitle())).to.equal(
+    await StakingSuccessDrawer.resultSubtitle.waitForDisplayed();
+    // TODO: uncomment when LW-4864 is resolved
+    // await expect(await StakingSuccessDrawer.resultSubtitle.getText()).to.equal(
     //   process === 'Initial'
     //     ? await t('browserView.staking.details.success.subTitle')
     //     : await t('browserView.staking.details.switchedPools.subTitle')
     // );
 
-    await expect(await webTester.getTextValueFromElement(stakingSuccessDrawer.button())).to.equal(
-      await t('browserView.staking.details.fail.btn.close')
-    );
+    await StakingSuccessDrawer.closeButton.waitForDisplayed();
+    await expect(await StakingSuccessDrawer.closeButton.getText()).to.equal(await t('general.button.close'));
   };
 
   assertCheckResults = async (title: string, subTitle: string, results: number) => {

@@ -1,9 +1,9 @@
-import { useObservable, useRedirection } from '@hooks';
+import { useRedirection } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from './Nfts.module.scss';
-import { Button, Drawer, DrawerNavigation } from '@lace/common';
+import { Button, Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { nftDetailSelector } from '@src/views/browser-view/features/nfts/selectors';
 import { NftDetail as NftDetailView } from '@lace/core';

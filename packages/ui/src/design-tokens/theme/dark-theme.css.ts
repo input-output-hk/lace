@@ -1,4 +1,4 @@
-import { createTheme } from '@vanilla-extract/css';
+import { createGlobalTheme } from '@vanilla-extract/css';
 import { rgba } from 'polished';
 
 import { borders } from '../borders.data';
@@ -182,6 +182,37 @@ const colors: Colors = {
   $search_box_clear_button_label_color_hover: darkColorScheme.$primary_white,
   $search_box_clear_button_label_color_pressed:
     darkColorScheme.$primary_light_grey,
+
+  $flow_card_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $flow_card_label_primary_color: darkColorScheme.$primary_white,
+  $flow_card_label_secondary_color: darkColorScheme.$primary_light_grey,
+
+  $icon_button_label_color: darkColorScheme.$primary_light_grey,
+  $icon_button_label_color_pressed: darkColorScheme.$primary_white,
+  $icon_button_container_bgColor: colorTransparent,
+  $icon_button_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $icon_button_container_bgColor_pressed: darkColorScheme.$primary_dark_grey,
+  $icon_button_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+
+  $summary_expander_container_borderColor: darkColorScheme.$primary_mid_grey,
+  $summary_expander_label_color: darkColorScheme.$primary_white,
+  $summary_expander_trigger_label_color: darkColorScheme.$primary_white,
+  $summary_expander_trigger_label_color_pressed: darkColorScheme.$primary_white,
+  $summary_expander_trigger_container_bgColor: colorTransparent,
+  $summary_expander_trigger_container_bgColor_hover:
+    darkColorScheme.$primary_light_black,
+  $summary_expander_trigger_container_bgColor_pressed:
+    darkColorScheme.$primary_light_black,
+  $summary_expander_trigger_container_bgColor_focused: colorTransparent,
+  $summary_expander_trigger_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $summary_expander_trigger_container_borderColor:
+    darkColorScheme.$primary_mid_grey,
+
+  $transaction_summary_label_color: darkColorScheme.$primary_white,
+  $transaction_summary_secondary_label_color:
+    darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {
@@ -192,7 +223,7 @@ const elevation: Elevation = {
   $card: 'none',
 };
 
-export const darkTheme = createTheme(vars, {
+export const theme = {
   borders,
   spacing,
   fontWeights,
@@ -203,4 +234,6 @@ export const darkTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
-});
+};
+
+createGlobalTheme('[data-theme="dark"]:root', vars, theme);

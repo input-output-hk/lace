@@ -22,10 +22,10 @@ import (
 
 	"lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
 
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/mem"
-	"github.com/shirou/gopsutil/host"
-	"github.com/shirou/gopsutil/load"
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/load"
 	"github.com/sqweek/dialog"
 	"github.com/getlantern/systray"
 	"github.com/allan-simon/go-singleinstance"
@@ -69,16 +69,26 @@ func main() {
 	closeOutputs := duplicateOutputToFile(logFile)
 	defer closeOutputs()
 
+	var stdArch string
+	switch runtime.GOARCH {
+	case "amd64": stdArch = "x86_64"
+	case "arm64": stdArch = "aarch64"
+	default: stdArch = runtime.GOARCH
+	}
+
 	fmt.Printf("%s[%d]: running as %s@%s\n", OurLogPrefix, os.Getpid(),
 		ourpaths.Username, hostInfo.Hostname)
 	fmt.Printf("%s[%d]: logging to file: %s\n", OurLogPrefix, os.Getpid(), logFile)
+	fmt.Printf("%s[%d]: executable: %s\n", OurLogPrefix, os.Getpid(), ourpaths.ExecutablePath)
 	fmt.Printf("%s[%d]: work directory: %s\n", OurLogPrefix, os.Getpid(), ourpaths.WorkDir)
 	fmt.Printf("%s[%d]: timezone: %s\n", OurLogPrefix, os.Getpid(), time.Now().Format("UTC-07:00 (MST)"))
 	fmt.Printf("%s[%d]: HostID: %s\n", OurLogPrefix, os.Getpid(), hostInfo.HostID)
 	fmt.Printf("%s[%d]: OS: (%s-%s) %s %s %s (family: %s)\n", OurLogPrefix, os.Getpid(),
-		runtime.GOOS, runtime.GOARCH, hostInfo.OS, hostInfo.Platform, hostInfo.PlatformVersion,
-		hostInfo.PlatformFamily)
-	fmt.Printf("%s[%d]: CPU: %dx %s\n", OurLogPrefix, os.Getpid(), len(cpuInfo), cpuInfo[0].ModelName)
+		stdArch, runtime.GOOS,
+		hostInfo.OS, hostInfo.Platform, hostInfo.PlatformVersion, hostInfo.PlatformFamily)
+	fmt.Printf("%s[%d]: CPU: %s (%d physical thread(s), %d core(s) each, at %.2f GHz)\n",
+		OurLogPrefix, os.Getpid(),
+		cpuInfo[0].ModelName, len(cpuInfo), cpuInfo[0].Cores, float64(cpuInfo[0].Mhz) / 1000.0)
 
 	logSystemHealth()
 	go func() {
@@ -145,12 +155,19 @@ func main() {
 		}
 	}()
 
-	go systray.Run(setupTrayUI(commUI, logFile, networks), func(){})
-	defer systray.Quit()
+	// Both macOS and Windows require that UI happens on the main thread:
+	var wgManager sync.WaitGroup
+	wgManager.Add(1)
+	go func() {
+		defer systray.Quit()
+		defer wgManager.Done()
+		manageChildren(commManager)
+	}()
 
-	manageChildren(commManager)
-
-	fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
+	systray.Run(setupTrayUI(commUI, logFile, networks), func(){
+		wgManager.Wait()
+		fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
+	})
 }
 
 type AppConfig struct {
@@ -468,7 +485,11 @@ func manageChildren(comm CommChannels_Manager) {
 							if (syncProgress >= 0) {
 								sp = fmt.Sprintf("%.2f%%", syncProgress * 100.0)
 							}
-							comm.CardanoNodeStatus <- "syncing · " + sp
+							textual := "syncing"
+							if (syncProgress == 1.0) {
+								textual = "synced"
+							}
+							comm.CardanoNodeStatus <- textual + " · " + sp
 						}
 					},
 					LogModifier: func(line string) string {

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
 import { concat, of } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 
 export const useSyncingTheFirstTime = (): boolean => {
   const { inMemoryWallet } = useWalletStore();

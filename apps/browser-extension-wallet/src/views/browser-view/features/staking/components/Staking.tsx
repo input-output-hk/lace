@@ -10,8 +10,7 @@ import { stakePoolResultsSelector, stakingInfoSelector } from '@stores/selectors
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { useWalletStore } from '@stores';
-import { useFetchCoinPrice, useBalances, useObservable, useDelegationDetails, useStakingRewards } from '@src/hooks';
-import { stakePoolTransformer } from '@src/features/delegation/api/transformers';
+import { useBalances, useDelegationDetails, useFetchCoinPrice, useStakingRewards } from '@src/hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import { StakePoolDetails } from './StakePoolDetails';
@@ -22,6 +21,7 @@ import { StakingInfo } from './StakingInfo';
 import { useStakePoolDetails } from '../store';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { LACE_APP_ID } from '@src/utils/constants';
+import { useObservable } from '@lace/common';
 
 const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
 
@@ -118,7 +118,7 @@ export const Staking = (): React.ReactElement => {
           title={t('browserView.assets.welcome')}
           subtitle={t('browserView.staking.fundWalletBanner.subtitle')}
           prompt={t('browserView.fundWalletBanner.prompt')}
-          walletAddress={walletInfo.address.toString()}
+          walletAddress={walletInfo.addresses[0].address.toString()}
         />
       )}
       {canDelegate && <StakeFundsBanner balance={coinBalance} />}
@@ -126,7 +126,7 @@ export const Staking = (): React.ReactElement => {
         <div className={styles.flexRow}>
           <StakingInfo
             {...{
-              ...stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
+              ...Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
               coinBalance,
               fiat: priceResult?.cardano?.price,
               totalRewards: Wallet.util.lovelacesToAdaString(totalRewards.toString()),
