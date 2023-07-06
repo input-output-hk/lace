@@ -37,6 +37,10 @@ When(/^I enter a folder name "([^"]*)" into "Folder name" input$/, async (folder
   await NftCreateFolderPage.setFolderNameInput(folderName);
 });
 
+When(/^I clear "Folder name" input$/, async () => {
+  await NftCreateFolderPage.clearFolderNameInput();
+});
+
 Then(/^I (see|don't see) "Folder name" input max length (\d+) error$/, async (shouldSee: string, maxLength: number) => {
   await nftCreateFolderAssert.assertSeeInputMaxLengthError(shouldSee === 'see', maxLength);
 });

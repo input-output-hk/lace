@@ -14,8 +14,11 @@ class NftCreateFolderPage extends CommonDrawerElements {
   }
 
   async setFolderNameInput(value: string): Promise<void> {
+    await this.folderNameInput.input.setValue(value);
+  }
+
+  async clearFolderNameInput(): Promise<void> {
     await clearInputFieldValue(await this.folderNameInput.input);
-    (await this.folderNameInput.input).setValue(value);
   }
 }
 

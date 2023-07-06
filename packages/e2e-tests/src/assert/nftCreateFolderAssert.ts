@@ -65,7 +65,7 @@ class NftCreateFolderAssert {
       ? expect(await NftCreateFolderPage.folderNameInput.inputError.getText()).to.equal(
           (await t('browserView.nfts.folderDrawer.nameForm.inputError')).replace('{{length}}', maxLength.toString())
         )
-      : expect(await NftCreateFolderPage.folderNameInput.inputError.isExisting()).to.be.false);
+      : expect(await NftCreateFolderPage.folderNameInput.inputError.waitForDisplayed({ reverse: true })));
   }
 }
 

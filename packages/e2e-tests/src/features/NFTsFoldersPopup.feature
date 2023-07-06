@@ -22,6 +22,7 @@ Feature: NFT - Folders - Popup view
     When I enter a folder name "012345678901234567890" into "Folder name" input
     Then I see "Folder name" input max length 20 error
     And "Next" button is disabled on "Name your folder" page
-    When I enter a folder name "01234567890123456789" into "Folder name" input
+    When I clear "Folder name" input
+    And I enter a folder name "01234567890123456789" into "Folder name" input
     Then I don't see "Folder name" input max length 20 error
     And "Next" button is enabled on "Name your folder" page
