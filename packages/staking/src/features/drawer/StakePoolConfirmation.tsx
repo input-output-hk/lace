@@ -5,18 +5,17 @@ import Icon from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
 import { Banner, Button, Ellipsis, useObservable } from '@lace/common';
 import { RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
-import { useCurrencyStore } from '@providers';
-import ExclamationMarkIcon from '@src/assets/icons/exclamation-circle-small.svg';
-import { useBuildDelegation } from '@src/hooks';
+// import { useBuildDelegation } from '@src/hooks';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useMemo, useState } from 'react';
-// import { useTranslation } from 'react-i18next';
-import ArrowDown from '../../../../../../assets/icons/arrow-down.component.svg';
-import Cardano from '../../../../../../assets/images/cardano-blue-bg.png';
+import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { SelectedStakePoolDetails } from '../outside-handles-provider/types';
 import { Sections, StakingError, sectionsConfig, useStakePoolDetails } from '../store';
+import ArrowDown from './arrow-down.svg';
+import Cardano from './cardano-blue.png';
+import ExclamationMarkIcon from './exclamation-circle-small.svg';
 import styles from './StakePoolConfirmation.module.scss';
 
 type statRendererProps = {
@@ -29,8 +28,11 @@ type StakePoolConfirmationProps = {
   popupView?: boolean;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const useBuildDelegation = () => {};
+
 export const StakePoolConfirmation = (): React.ReactElement => {
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
   const { stakingError } = useStakePoolDetails();
   const {
     balancesBalance: balance,
@@ -44,11 +46,10 @@ export const StakePoolConfirmation = (): React.ReactElement => {
       ticker: poolTicker,
       name: poolName,
     } = {} as SelectedStakePoolDetails,
+    currencyStoreFiatCurrency: fiatCurrency,
   } = useOutsideHandles();
 
   useBuildDelegation();
-
-  const { fiatCurrency } = useCurrencyStore();
 
   const stakePoolName = poolName ?? '-';
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
@@ -59,8 +60,8 @@ export const StakePoolConfirmation = (): React.ReactElement => {
       : undefined;
 
   const ErrorMessages: Record<StakingError, string> = {
-    [StakingError.UTXO_FULLY_DEPLETED]: "t('browserView.staking.details.errors.utxoFullyDepleted')",
-    [StakingError.UTXO_BALANCE_INSUFFICIENT]: "t('browserView.staking.details.errors.utxoBalanceInsufficient')",
+    [StakingError.UTXO_FULLY_DEPLETED]: t('drawer.confirmation.errors.utxoFullyDepleted'),
+    [StakingError.UTXO_BALANCE_INSUFFICIENT]: t('drawer.confirmation.errors.utxoBalanceInsufficient'),
   };
 
   const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
@@ -84,10 +85,10 @@ export const StakePoolConfirmation = (): React.ReactElement => {
     <>
       <div className={styles.header}>
         <div data-testid="staking-confirmation-title" className={styles.title}>
-          {"t('browserView.staking.details.confirmation.title')"}
+          {t('drawer.confirmation.title')}
         </div>
         <div data-testid="staking-confirmation-subtitle" className={styles.subTitle}>
-          {"t('browserView.staking.details.confirmation.subTitle')"}
+          {t('drawer.confirmation.subTitle')}
         </div>
       </div>
       {stakingError && (
@@ -101,7 +102,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
             <div className={styles.item} data-testid="sp-confirmation-delegate-from-container">
               <ItemStatRenderer
                 img={Cardano}
-                text={"t('browserView.staking.details.confirmation.cardanoName')"}
+                text={t('drawer.confirmation.cardanoName')}
                 subText={cardanoCoin.symbol}
               />
               <ItemStatRenderer
@@ -116,14 +117,14 @@ export const StakePoolConfirmation = (): React.ReactElement => {
             </div>
           </div>
 
-          <h1 className={styles.totalCostTitle}>{"t('browserView.staking.details.confirmation.totalCost.title')"}</h1>
+          <h1 className={styles.totalCostTitle}>{t('drawer.confirmation.totalCost.title')}</h1>
           <div className={styles.txCostContainer} data-testid="summary-fee-container">
             {deposit && (
               <RowContainer>
                 {renderLabel({
                   dataTestId: 'sp-confirmation-staking-deposit',
-                  label: "t('staking.confirmation.stakingDeposit')",
-                  tooltipContent: "t('staking.confirmation.theAmountYoullBeChargedForRegisteringYourStakeKey')",
+                  label: t('drawer.confirmation.stakingDeposit'),
+                  tooltipContent: t('drawer.confirmation.theAmountYoullBeChargedForRegisteringYourStakeKey'),
                 })}
                 <div>
                   {renderAmountInfo(
@@ -140,8 +141,8 @@ export const StakePoolConfirmation = (): React.ReactElement => {
             <RowContainer>
               {renderLabel({
                 dataTestId: 'sp-confirmation-staking-fee',
-                label: "t('staking.confirmation.transactionFee')",
-                tooltipContent: "t('send.theAmountYoullBeChargedToProcessYourTransaction')",
+                label: t('drawer.confirmation.transactionFee'),
+                tooltipContent: t('drawer.confirmation.theAmountYoullBeChargedToProcessYourTransaction'),
               })}
               <div>
                 {renderAmountInfo(
@@ -161,7 +162,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
 };
 
 export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmationProps): React.ReactElement => {
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreGetKeyAgentType: getKeyAgentType,
@@ -206,13 +207,11 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const confirmLabel = useMemo(() => {
     if (!isInMemory) {
       const staleLabels = popupView
-        ? "t('browserView.staking.details.confirmation.button.continueInAdvancedView')"
-        : "t('browserView.staking.details.confirmation.button.confirmWithDevice', { hardwareWallet: keyAgentType })";
-      return isConfirmingTx ? "t('browserView.staking.details.confirmation.button.signing')" : staleLabels;
+        ? t('drawer.confirmation.button.continueInAdvancedView')
+        : t('drawer.confirmation.button.confirmWithDevice', { hardwareWallet: keyAgentType });
+      return isConfirmingTx ? t('drawer.confirmation.button.signing') : staleLabels;
     }
-    return popupView
-      ? "t('staking.details.confirmation.button.confirm')"
-      : "t('browserView.staking.details.confirmation.button.confirm')";
+    return t('drawer.confirmation.button.confirm');
   }, [isConfirmingTx, isInMemory, popupView]);
 
   return (

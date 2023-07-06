@@ -29,6 +29,11 @@ type Balance = {
   available: WalletBalance;
 };
 
+export interface CurrencyInfo {
+  code: string;
+  symbol: string;
+}
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   balancesBalance: Balance;
@@ -55,4 +60,5 @@ export type OutsideHandlesContextValue = {
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
+  currencyStoreFiatCurrency: CurrencyInfo;
 };
