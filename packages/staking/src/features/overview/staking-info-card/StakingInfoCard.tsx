@@ -41,7 +41,7 @@ export type StakingInfoCardProps = {
   onStakePoolSelect: () => void;
   popupView?: boolean;
   cardanoCoinSymbol: string;
-  markerColor: string;
+  markerColor?: string;
 };
 
 export const StakingInfoCard = ({
@@ -69,7 +69,7 @@ export const StakingInfoCard = ({
     <div className={cn(styles.panel, { className, [styles.popupView!]: popupView })}>
       <div className={styles.row}>
         <div className={styles.col}>
-          <div className={styles.marker} style={{ background: markerColor }} />
+          {markerColor && <div className={styles.marker} style={{ background: markerColor }} />}
           <div>
             <StakePoolInfo
               logo={logo ?? getRandomIcon({ id: id.toString(), size: 30 })}

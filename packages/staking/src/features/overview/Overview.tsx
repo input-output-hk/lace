@@ -1,5 +1,13 @@
 import { Wallet } from '@lace/cardano';
-import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
+import {
+  Box,
+  ControlButton,
+  Flex,
+  PIE_CHART_DEFAULT_COLOR_SET,
+  PieChartColor,
+  PieChartGradientColor,
+  Text,
+} from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { stakePoolsMock } from '../stake-pools';
@@ -35,6 +43,10 @@ export const Overview = () => {
       totalRewards: Wallet.util.lovelacesToAdaString(stakingRewards.totalRewards.toString()),
     }));
 
+  if (displayData.length === 1) {
+    displayData.forEach((item) => (item.color = PieChartGradientColor.LaceLinearGradient));
+  }
+
   return (
     <>
       <Box mb={'$40'}>
@@ -55,7 +67,7 @@ export const Overview = () => {
         <Box key={item.id} mb={'$24'}>
           <StakingInfoCard
             {...item}
-            markerColor={item.color}
+            markerColor={displayData.length > 1 ? item.color : undefined}
             cardanoCoinSymbol={'tADA'}
             onStakePoolSelect={() => console.info('onStakePoolSelect')}
           />
