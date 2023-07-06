@@ -33,8 +33,8 @@ Feature: Delegating funds to new pool E2E
     When I click "Stake on this pool" button on stake pool details drawer
     And I click "Next" button on staking confirmation drawer
     And I enter newly created wallet password and confirm staking
-    Then Initial Delegation success screen is displayed
-    When I click "browserView.staking.details.fail.btn.close" button
+    Then Initial Delegation success screen is displayed in extended mode
+    When I click "Close" button on staking success drawer
     And I wait until current stake pool switch to "ADA Capital"
     Then I see currently staking component for stake pool: "ADA Capital" in extended mode
     When I navigate to Transactions extended page
@@ -75,8 +75,8 @@ Feature: Delegating funds to new pool E2E
     When I click "Stake on this pool" button on stake pool details drawer
     And I click "Next" button on staking confirmation drawer
     And I enter newly created wallet password and confirm staking
-    Then Initial Delegation success screen is displayed
-    When I click "browserView.staking.details.fail.btn.close" button
+    Then Initial Delegation success screen is displayed in popup mode
+    When I click "Close" button on staking success drawer
     And I wait until current stake pool switch to "ADA Capital"
     Then I see currently staking component for stake pool: "ADA Capital" in popup mode
     When I navigate to Transactions popup page

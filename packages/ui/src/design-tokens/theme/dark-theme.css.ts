@@ -183,6 +183,10 @@ const colors: Colors = {
   $search_box_clear_button_label_color_pressed:
     darkColorScheme.$primary_light_grey,
 
+  $flow_card_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $flow_card_label_primary_color: darkColorScheme.$primary_white,
+  $flow_card_label_secondary_color: darkColorScheme.$primary_light_grey,
+
   $icon_button_label_color: darkColorScheme.$primary_light_grey,
   $icon_button_label_color_pressed: darkColorScheme.$primary_white,
   $icon_button_container_bgColor: colorTransparent,

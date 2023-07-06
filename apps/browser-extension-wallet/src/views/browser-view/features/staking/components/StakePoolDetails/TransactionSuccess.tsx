@@ -71,7 +71,12 @@ export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }):
 
   return (
     <div className={styles.footer}>
-      <Button onClick={() => closeDrawer()} className={styles.confirmBtn} size="large">
+      <Button
+        onClick={() => closeDrawer()}
+        className={styles.confirmBtn}
+        size="large"
+        data-testid="transaction-success-footer-close-button"
+      >
         {t('general.button.close')}
       </Button>
     </div>
