@@ -16,28 +16,24 @@ const SATURATION_UPPER_BOUND = 100;
 export const StakePoolDetail = (): React.ReactElement => {
   const {
     delegationDetails,
-    delegationStoreSelectedStakePoolDetails: openPool,
+    delegationStoreSelectedStakePoolDetails: {
+      delegators,
+      description,
+      id,
+      hexId,
+      owners = [],
+      apy,
+      saturation,
+      stake,
+      logo,
+      name,
+      ticker,
+      status,
+      contact,
+    } = {} as SelectedStakePoolDetails,
     openExternalLink,
     walletStoreWalletUICardanoCoin,
   } = useOutsideHandles();
-
-  if (!openPool) throw new Error('Tried to open pool details but no data of the pool is available');
-
-  const {
-    delegators,
-    description,
-    id,
-    hexId,
-    owners = [],
-    apy,
-    saturation,
-    stake,
-    logo,
-    name,
-    ticker,
-    status,
-    contact,
-  } = openPool;
 
   const currentDelegatedStakePool =
     delegationDetails &&

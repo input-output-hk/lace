@@ -87,6 +87,7 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
+    "@cardano-sdk/tx-construction": "~0.8.3",
     "@cardano-sdk/util": "0.13.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",

@@ -40,6 +40,8 @@ export type OutsideHandlesContextValue = {
   delegationStoreSelectedStakePoolDetails?: SelectedStakePoolDetails;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo: string }) => void;
+  delegationStoreDelegationTxFee?: string;
+  delegationStoreDelegationTxBuilder?: TxBuilder;
   fetchCoinPricePriceResult: {
     cardano: {
       price: number;
