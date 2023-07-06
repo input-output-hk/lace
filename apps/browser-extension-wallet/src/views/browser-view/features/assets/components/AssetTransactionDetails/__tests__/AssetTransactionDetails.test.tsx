@@ -38,7 +38,7 @@ describe('AssetTransactionDetails', () => {
         isVisible
       />
     );
-    expect(queryByTestId('custom-drawer')).toBeInTheDocument();
+    expect(queryByTestId('drawer-content')).toBeInTheDocument();
     expect(queryByTestId('transaction-detail-mock')).toBeInTheDocument();
   });
 
@@ -81,7 +81,7 @@ describe('AssetTransactionDetails', () => {
         onClose={onCloseMock}
       />
     );
-    expect(queryByTestId('custom-drawer')).not.toBeInTheDocument();
+    expect(queryByTestId('drawer-content')).not.toBeInTheDocument();
     expect(queryByTestId('transaction-detail-mock')).not.toBeInTheDocument();
   });
 });

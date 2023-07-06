@@ -10,7 +10,7 @@ import { TranslationsFor } from '@ui/utils/types';
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
 export type DestinationAddressInputProps = Omit<AutoCompleteProps, 'value'> & {
-  value: string | { name: string; address: string };
+  value: { name?: string; address: string };
   validationObject: { name: boolean; address: boolean };
   options: SearchProps['options'];
   onChange: SearchProps['onChange'];
@@ -51,7 +51,7 @@ export const DestinationAddressInput = ({
   const [focused, setFocused] = useState<boolean>(false);
 
   useEffect(() => {
-    if (typeof value === 'object') setFocused(false);
+    if (value.name) setFocused(false);
   }, [value]);
 
   const customIcon = useMemo(() => {
@@ -85,19 +85,19 @@ export const DestinationAddressInput = ({
   }, [handle, valid, empty, validationObject, exists, onClick]);
 
   const children = useMemo(() => {
-    if (typeof value === 'object') {
+    if (value.name) {
       return getInputLabel(value.name, value.address);
     }
     return validationObject?.address ? (
-      <Ellipsis className={styles.validAddress} withTooltip={false} text={value} ellipsisInTheMiddle />
+      <Ellipsis className={styles.validAddress} withTooltip={false} text={value.address} ellipsisInTheMiddle />
     ) : undefined;
   }, [value, validationObject?.address]);
 
   return (
     <Search
       className={classnames(className, styles.searchAddress)}
-      value={typeof value === 'object' ? value.address : value}
-      inputPlaceholder={translations.recipientAddress}
+      value={value.address}
+      label={translations.recipientAddress}
       onChange={onChange}
       options={options}
       loading={handle === 'verifying'}

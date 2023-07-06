@@ -11,7 +11,8 @@
   "contributors": [
     "Lucas Barros Araújo <lucas.araujo@iohk.io> (https://iohk.io)",
     "Przemysław Włodek <przemyslaw.wlodek@iohk.io> (https://iohk.io)",
-    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)"
+    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)",
+    "Michael Chappell <michael.chappell@iohk.io> (https://iohk.io)"
   ],
   "workspaces": [
     "packages/common",
