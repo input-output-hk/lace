@@ -1,30 +1,13 @@
 const { pathsToModuleNameMapper } = require('ts-jest');
 const { compilerOptions } = require('../src/tsconfig');
-const { jestEsmExceptions } = require('../../../test/jestEsmExceptions');
+const { createJestConfig } = require('../../../test/createJestConfig');
 
-//Modules, that are loaded in esm versions and require explicit transformation
-const esmExceptions = jestEsmExceptions([
-  'style-inject',
-  'tslib',
-  '@cardano-ogmios',
-  'nanoid',
-  'rxjs',
-  'esm-browser',
-  'uuid',
-  '@react-rxjs',
-  'dexie',
-  '@rxstate/core',
-  'intersection-observer-polyfill',
-  'p-retry'
-]);
-
-const rootDir = process.cwd();
-
-module.exports = {
-  rootDir,
+module.exports = createJestConfig({
   moduleNameMapper: {
     '.*\\.(scss|sass|css|less)$': '<rootDir>/test/__mocks__/styleMock.js',
-    '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)$': '<rootDir>/test/__mocks__/fileMock.js',
+    '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|ttf|woff|woff2)$': '<rootDir>/test/__mocks__/fileMock.js',
+    '^[.]*(?!.*\\.component\\.svg$).*\\.svg*$': '<rootDir>/test/__mocks__/fileMock.js',
+    'component\\.svg(\\?v=\\d+\\.d+\\.\\d+)?$': '<rootDir>/test/__mocks__/svgMock.js',
     '^lodash-es$': 'lodash',
     // https://github.com/LedgerHQ/ledger-live/issues/763
     '@ledgerhq/devices/hid-framing': '@ledgerhq/devices/lib/hid-framing',
@@ -32,15 +15,7 @@ module.exports = {
     uuid: require.resolve('uuid'),
     ...pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/src' })
   },
-  preset: 'ts-jest',
   roots: ['<rootDir>/src'],
-  transform: {
-    '^.+\\.test.ts?$': 'ts-jest',
-    '^.+\\.test.tsx?$': 'ts-jest',
-    '^.+\\.(ts|tsx)$': 'ts-jest',
-    ...esmExceptions.transform
-  },
-  transformIgnorePatterns: esmExceptions.transformIgnorePatterns,
   testTimeout: 60000,
   testEnvironment: 'jsdom',
   setupFiles: [
@@ -78,4 +53,4 @@ module.exports = {
       tsconfig: './src/tsconfig.json'
     }
   }
-};
+});

@@ -2,17 +2,16 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import BigNumber from 'bignumber.js';
 import { walletBalanceTransformer } from '@src/api/transformers';
-import { getRandomIcon } from '@src/utils/get-random-icon';
 
 import { Wallet } from '@lace/cardano';
 
 import CardanoLogo from '../assets/icons/browser-view/cardano-logo.svg';
 import { AssetSortBy, IAssetDetails } from '@views/browser/features/assets/types';
 import { compactNumber, formatLocaleNumber, isNumeric } from '@src/utils/format-number';
-import { addEllipsis } from '@lace/common';
+import { addEllipsis, getRandomIcon } from '@lace/common';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 import isNumber from 'lodash/isNumber';
-import { CoinId, CurrencyInfo } from '@src/types';
+import { CurrencyInfo } from '@src/types';
 import { TokenPrice } from '@lib/scripts/types';
 import { PriceResult } from '@hooks';
 
@@ -22,7 +21,7 @@ export const variationParser = (variation: number): string =>
 export const cardanoTransformer = (params: {
   total: Wallet.Cardano.Value;
   fiatPrice?: PriceResult['cardano'];
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
   fiatCode: string;
   areBalancesVisible?: boolean;
   balancesPlaceholder?: string;
@@ -75,7 +74,7 @@ export const assetTransformer = (params: {
     areBalancesVisible = true,
     balancesPlaceholder = ''
   } = params;
-  const { tokenMetadata, nftMetadata, fingerprint, policyId } = token;
+  const { tokenMetadata, nftMetadata, fingerprint } = token;
 
   const assetMetadata = {
     name: '-',
@@ -110,7 +109,6 @@ export const assetTransformer = (params: {
     balance: areBalancesVisible ? compactNumber(tokenBalance, decimals) : balancesPlaceholder,
     fiatBalance: areBalancesVisible ? formattedFiatBalance : balancesPlaceholder,
     sortBy: {
-      policyId,
       fiatBalance: fiatBalance?.toNumber(),
       metadataName: tokenMetadata?.name,
       fingerprint,

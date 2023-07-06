@@ -10,10 +10,11 @@ Feature: LW-423: NFTs - Extended view
     When I see NFTs counter with total number of NFTs displayed
     Then NFTs counter matches the number of wallet NFTs
 
-  @LW-2497 @Mainnet
+  @LW-2497 @LW-7237 @Mainnet
   Scenario: Extended-view - Owning NFTs
     Given I am on NFTs extended page
     Then A gallery view showing my NFTs is displayed
+    And I see "Create folder" button on NFTs page in extended mode
 
   @LW-2498 @Mainnet
   Scenario: Extended-view - Information displayed

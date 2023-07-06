@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ASSET_COMPONENTS, AssetSelectorOverlay } from '@lace/core';
 import { useWalletStore } from '@stores';
-import { useObservable } from '@hooks';
+import { useObservable } from '@lace/common';
 import styles from './CreateFolderDrawer.module.scss';
 import { formatNftsList } from '../utils';
 import { useCurrencyStore } from '@providers';

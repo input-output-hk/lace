@@ -29,6 +29,7 @@ export const SendReceive = ({
 }: SendReceiveProps): React.ReactElement => (
   <div
     className={classnames(styles.buttonsContainer, isReversed && styles.reversed, popupView && styles.popupContainer)}
+    data-testid="send-receive-container"
   >
     <Button className={sharedClass} block onClick={leftButtonOnClick} color="gradient" data-testid="send-button">
       <ArrowDiagonalUp className={popupView ? styles.popupIconArrowUp : styles.iconArrowUp} />

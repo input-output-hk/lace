@@ -35,6 +35,7 @@ import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import webTester from '../actor/webTester';
+import MainLoader from '../elements/MainLoader';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic;
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic;
@@ -537,6 +538,8 @@ Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (s
 When(
   /^I click "(Got it|Learn more)" button on "DApp connector is now in Beta" modal$/,
   async (button: 'Got it' | 'Learn more') => {
+    // Wait for main page to finish loading
+    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 3000 });
     if (button === 'Got it') {
       await Modal.cancelButton.waitForClickable();
       await Modal.cancelButton.click();

@@ -15,7 +15,6 @@ import { AssetInfo, SpentBalances } from '../../types';
 import BigNumber from 'bignumber.js';
 import { COIN_SELECTION_ERRORS, getErrorMessage as getErrorMessageFactory, PriceResult } from '@hooks';
 import { useWalletStore } from '@src/stores';
-import { CoinId } from '@src/types';
 import {
   compactNumber,
   getInlineCurrencyFormat,
@@ -36,7 +35,7 @@ const getMaxSpendableAmount = (balance = '0', usedCoins = '0', itemValue = '0') 
   return maxSpendableAmount.lte(0) || maxSpendableAmount.isNaN() ? '0' : maxSpendableAmount.toString();
 };
 
-const formatADACoinInfo = (balance: string, cardanoCoin: CoinId) => ({
+const formatADACoinInfo = (balance: string, cardanoCoin: Wallet.CoinId) => ({
   id: cardanoCoin.id,
   ticker: cardanoCoin.symbol,
   balance

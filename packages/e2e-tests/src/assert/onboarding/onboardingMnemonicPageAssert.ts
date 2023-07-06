@@ -2,6 +2,7 @@ import OnboardingMnemonicPage from '../../elements/onboarding/mnemonicPage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import OnboardingCommonAssert from './onboardingCommonAssert';
+import { browser } from '@wdio/globals';
 
 class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
   async assertSeeMnemonicWords(expectedNumber: number) {
@@ -59,7 +60,7 @@ class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
     await expect(await OnboardingMnemonicPage.findOutMoreLink.getText()).to.equal(
       await t('core.walletSetupMnemonicStep.passphraseInfo3')
     );
-    const expectedHref = 'https://www.lace.io/faq?question=what-is-my-private-key-what-is-my-secret-passphrase';
+    const expectedHref = 'https://www.lace.io/faq?question=what-happens-if-i-lose-my-recovery-phrase';
     const actualHref = await OnboardingMnemonicPage.findOutMoreLink.getAttribute('href');
     expect(actualHref).to.equal(expectedHref);
   }
@@ -70,7 +71,7 @@ class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
       'core.walletSetupMnemonicStep.passphraseInfo2'
     )} ${await t('core.walletSetupMnemonicStep.passphraseInfo3')}`;
     await this.assertSeeStepSubtitle(expectedSubtitle);
-    // await this.assertSeeFindOutMoreLink(); // TODO: uncomment when LW-6113 is resolved
+    await this.assertSeeFindOutMoreLink();
     await this.assertSeeMnemonicWords(8);
     await this.assertSeeFooterValue(expectedFooterNumber);
     await this.assertSeeBackButton();
@@ -81,8 +82,11 @@ class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
 
   async assertSeeMnemonicVerificationWordsPage(expectedFooterFirstNumber: number, expectedFooterSecondNumber = 24) {
     await this.assertSeeStepTitle(await t('core.walletSetupMnemonicStep.enterPassphrase'));
-    // TODO: uncomment when LW-6132 is resolved
-    // await this.assertSeeStepSubtitle(await t('core.walletSetupMnemonicStep.body'));
+    const url = await browser.getUrl();
+    const expectedSubtitle = url.endsWith('/create')
+      ? await t('core.walletSetupMnemonicStep.body') // create flow subtitle
+      : await t('core.walletSetupMnemonicStep.enterPassphraseDescription'); // restore flow subtitle
+    await this.assertSeeStepSubtitle(expectedSubtitle);
     await this.assertSeeFooterValue(expectedFooterFirstNumber, expectedFooterSecondNumber);
     // Check for LW-5757
     await this.assertSeeMnemonicInputWithDisabledAutocomplete();

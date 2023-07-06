@@ -83,7 +83,7 @@ const getWalletActivitiesObservable = async ({
   const historicalTransactions$ = transactions.history$;
   const pendingTransactions$ = transactions.outgoing.inFlight$;
 
-  const { address, rewardAccount } = walletInfo;
+  const { addresses } = walletInfo;
 
   const historicTransactionMapper = (
     tx: Wallet.Cardano.HydratedTx,
@@ -93,7 +93,7 @@ const getWalletActivitiesObservable = async ({
     const time = slotTimeCalc(tx.blockHeader.slot);
     const transformedTransaction = txHistoryTransformer({
       tx,
-      walletAddresses: { address, rewardAccount },
+      walletAddresses: addresses,
       fiatCurrency,
       fiatPrice: cardanoFiatPrice,
       time,
@@ -160,7 +160,7 @@ const getWalletActivitiesObservable = async ({
     }
     const transformedTransaction = pendingTxTransformer({
       tx,
-      walletAddresses: { address, rewardAccount },
+      walletAddresses: addresses,
       fiatPrice: cardanoFiatPrice,
       fiatCurrency,
       protocolParameters,
@@ -184,9 +184,10 @@ const getWalletActivitiesObservable = async ({
 
   const filterTransactionByAssetId = (tx: Wallet.Cardano.HydratedTx[]) =>
     tx.filter((item) => {
-      const type = inspectTxType({ walletAddresses: { address, rewardAccount }, tx: item });
+      const type = inspectTxType({ walletAddresses: addresses, tx: item });
       const direction = getTxDirection({ type });
-      return filterOutputsByTxDirection(item.body.outputs, direction, address).some((output) =>
+      const paymentAddresses: Wallet.Cardano.PaymentAddress[] = addresses.map((addr) => addr.address);
+      return filterOutputsByTxDirection(item.body.outputs, direction, paymentAddresses).some((output) =>
         isTxWithAssets(Wallet.Cardano.AssetId(assetDetails.id), output?.value?.assets)
       );
     });

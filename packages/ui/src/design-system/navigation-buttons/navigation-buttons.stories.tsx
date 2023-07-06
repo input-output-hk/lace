@@ -5,7 +5,7 @@ import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { userEvent, waitFor, within } from '@storybook/testing-library';
 
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
 import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
@@ -88,11 +88,11 @@ export const Overview = (): JSX.Element => (
           <Buttons />
         </Variants.Table>
 
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <Buttons />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
     </Cell>
   </Grid>

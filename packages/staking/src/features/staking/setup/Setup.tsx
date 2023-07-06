@@ -1,4 +1,4 @@
-import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
+import { LocalThemeProvider, ThemeColorScheme } from '@lace/ui';
 import { PropsWithChildren } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { initI18n } from '../../i18n';
@@ -22,9 +22,9 @@ export const Setup = ({ language, theme, children }: SetupProps) => {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <ThemeProvider colorScheme={themeColorScheme} className={getThemeClassName(themeColorScheme)}>
+      <LocalThemeProvider colorScheme={themeColorScheme} className={getThemeClassName(themeColorScheme)}>
         {children}
-      </ThemeProvider>
+      </LocalThemeProvider>
     </I18nextProvider>
   );
 };

@@ -6,7 +6,6 @@ export type IAssetDetails = Unpacked<AssetTableProps['rows']>;
 
 export interface AssetSortBy {
   sortBy: {
-    policyId: Wallet.Cardano.PolicyId;
     fiatBalance?: number;
     metadataName?: string;
     fingerprint: Wallet.Cardano.AssetFingerprint;

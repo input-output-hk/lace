@@ -31,16 +31,14 @@ describe('Testing useWalletInfoSubscriber hook', () => {
 
     expect(setWalletInfo).toBeCalledWith({
       name: 'name',
-      address: 'address',
-      rewardAccount: 'rewardAccount'
+      addresses: [{ address: 'address', rewardAccount: 'rewardAccount' }]
     });
     expect(setWalletInfo).toBeCalledTimes(1);
 
     inMemoryWallet.addresses$.next([{ rewardAccount: 'rewardAccount1', address: 'address1' }]);
     expect(setWalletInfo).toBeCalledWith({
       name: 'name',
-      address: 'address1',
-      rewardAccount: 'rewardAccount1'
+      addresses: [{ address: 'address1', rewardAccount: 'rewardAccount1' }]
     });
     expect(setWalletInfo).toBeCalledTimes(2);
   });
@@ -63,15 +61,13 @@ describe('Testing useWalletInfoSubscriber hook', () => {
 
     expect(setWalletInfo).toHaveBeenNthCalledWith(1, {
       name: 'Lace',
-      address: 'address',
-      rewardAccount: 'rewardAccount'
+      addresses: [{ address: 'address', rewardAccount: 'rewardAccount' }]
     });
     inMemoryWallet.addresses$.next([{ rewardAccount: 'rewardAccount1', address: 'address1' }]);
 
     expect(setWalletInfo).toHaveBeenNthCalledWith(2, {
       name: 'Lace',
-      address: 'address1',
-      rewardAccount: 'rewardAccount1'
+      addresses: [{ address: 'address1', rewardAccount: 'rewardAccount1' }]
     });
   });
 

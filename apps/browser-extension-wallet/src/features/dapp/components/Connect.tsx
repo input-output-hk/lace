@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useState } from 'react';
-import { Button, useSearchParams } from '@lace/common';
+import React, { useEffect, useState } from 'react';
+import { Banner, Button } from '@lace/common';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
@@ -8,15 +8,17 @@ import { AuthorizeDapp } from '@lace/core';
 import { sectionTitle, DAPP_VIEWS } from '../config';
 import styles from './Connect.module.scss';
 import Modal from 'antd/lib/modal/Modal';
-import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { runtime } from 'webextension-polyfill';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import * as cip30 from '@cardano-sdk/dapp-connector';
 import { UserPromptService } from '@lib/scripts/background/services/dappService';
 import { of } from 'rxjs';
 import InfoIcon from '../../../assets/icons/info.component.svg';
-import ShieldExclamation from '@assets/icons/shield-exclamation.component.svg';
-import { Banner } from '@components/Banner';
+import ShieldExclamation from '../../../assets/icons/shield-exclamation.component.svg';
+import { DappDataService } from '@lib/scripts/types';
+import { Wallet } from '@lace/cardano';
+
 import { Tooltip } from 'antd';
 import { useWalletStore } from '@src/stores';
 
@@ -32,6 +34,7 @@ const WarningBanner = () => {
       customIcon={<ShieldExclamation className={styles.bannerIcon} />}
       withIcon
       message={t('core.authorizeDapp.warning')}
+      popupView
     />
   );
 };
@@ -63,7 +66,7 @@ const authorize = (authorization: 'deny' | 'just-once' | 'allow', url: string) =
   const api$ = of({
     allowOrigin(origin: cip30.Origin): Promise<'deny' | 'just-once' | 'allow'> {
       /* eslint-disable-next-line promise/avoid-new */
-      if (origin !== url) {
+      if (!url.startsWith(origin)) {
         return Promise.reject();
       }
       return Promise.resolve(authorization);
@@ -85,12 +88,35 @@ const authorize = (authorization: 'deny' | 'just-once' | 'allow', url: string) =
   }, DAPP_TOAST_DURATION);
 };
 
+const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getDappInfo'>>(
+  {
+    baseChannel: DAPP_CHANNELS.dappData,
+    properties: {
+      getDappInfo: RemoteApiPropertyType.MethodReturningPromise
+    }
+  },
+  { logger: console, runtime }
+);
+
 export const Connect = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isModalVisible, setModalVisible] = useState(false);
-  const { logo, url, name } = useSearchParams(['logo', 'url', 'name']);
-  const isSSLEncrypted = url.startsWith('https:');
+  const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
+  const [isSSLEncrypted, setIsSSLEncrypted] = useState(true);
   const { environmentName } = useWalletStore();
+  useEffect(() => {
+    dappDataApi
+      .getDappInfo()
+      .then(({ logo, name, url }) => {
+        setDappInfo({ logo, name, url });
+        if (!url.startsWith('https:')) {
+          setIsSSLEncrypted(false);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   const showNonSSLBanner = !isSSLEncrypted && environmentName === 'Mainnet';
   return (
@@ -100,10 +126,7 @@ export const Connect = (): React.ReactElement => {
       data-testid="connect-layout"
     >
       <div className={styles.container}>
-        <AuthorizeDapp
-          dappInfo={{ logo, name, url }}
-          warningBanner={showNonSSLBanner ? <NonSSLBanner /> : <WarningBanner />}
-        />
+        <AuthorizeDapp dappInfo={dappInfo} warningBanner={showNonSSLBanner ? <NonSSLBanner /> : <WarningBanner />} />
       </div>
       <div className={styles.footer}>
         <Button
@@ -117,7 +140,7 @@ export const Connect = (): React.ReactElement => {
           className={styles.footerBtn}
           data-testid="connect-cancel-button"
           color="secondary"
-          onClick={closeWindow}
+          onClick={() => authorize('deny', dappInfo.url)}
         >
           {t('dapp.connect.btn.cancel')}
         </Button>
@@ -140,13 +163,13 @@ export const Connect = (): React.ReactElement => {
             {t('dapp.connect.modal.description')}
           </div>
           <div className={styles.modalActions}>
-            <Button block data-testid="connect-modal-accept-always" onClick={() => authorize('allow', url)}>
+            <Button block data-testid="connect-modal-accept-always" onClick={() => authorize('allow', dappInfo.url)}>
               {t('dapp.connect.modal.allowAlways')}
             </Button>
             <Button
               block
               data-testid="connect-modal-accept-once"
-              onClick={() => authorize('just-once', url)}
+              onClick={() => authorize('just-once', dappInfo.url)}
               color="secondary"
             >
               {t('dapp.connect.modal.allowOnce')}
