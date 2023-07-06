@@ -35,6 +35,10 @@ export enum PostHogAction {
   ActionName = 'flow | subflow | view | object | interaction'
 }
 
+export enum PostHogFlows {
+  Onboarding = 'onboarding'
+}
+
 export enum EnhancedAnalyticsOptInStatus {
   OptedIn = 'ACCEPTED',
   OptedOut = 'REJECTED'

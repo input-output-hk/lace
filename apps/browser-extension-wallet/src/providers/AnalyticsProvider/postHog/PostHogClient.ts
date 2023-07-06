@@ -5,8 +5,10 @@ import { EnhancedAnalyticsOptInStatus, ExtensionViews, PostHogAction, PostHogMet
 import {
   BASIC_ANALYTICS_CONFIG,
   ENHANCED_ANALYTICS_CONFIG,
-  NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
-  PUBLIC_POSTHOG_HOST
+  DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
+  PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
+  PUBLIC_POSTHOG_HOST,
+  PRODUCTION_TRACKING_MODE_ENABLED
 } from './config';
 import { UserIdService } from '@lib/scripts/types';
 
@@ -82,7 +84,9 @@ export class PostHogClient {
   }
 
   protected getApiToken(chain: Wallet.Cardano.ChainId): string {
-    return NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
+    return PRODUCTION_TRACKING_MODE_ENABLED
+      ? PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]
+      : DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
   }
 
   protected async getEventMetadata(): Promise<PostHogMetadata> {
