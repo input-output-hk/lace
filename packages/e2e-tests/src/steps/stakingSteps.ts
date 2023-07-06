@@ -18,6 +18,7 @@ import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDr
 import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
+import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
 
 Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
   await stakingPageAssert.assertSeeTitleWithCounter();
@@ -87,8 +88,15 @@ Then(/^I click pool name in currently staking component$/, async () => {
   await StakingPageObject.clickPoolNameInStakingInfoComponent();
 });
 
-Then(/^(Initial|Switching) Delegation success screen is displayed$/, async (process: 'Initial' | 'Switching') => {
-  await stakingPageAssert.assertStakingSuccessDrawer(process);
+Then(
+  /^(Initial|Switching) Delegation success screen is displayed in (extended|popup) mode$/,
+  async (process: 'Initial' | 'Switching', mode: 'extended' | 'popup') => {
+    await stakingPageAssert.assertStakingSuccessDrawer(process, mode);
+  }
+);
+
+Then(/^I click "Close" button on staking success drawer$/, async () => {
+  await StakingSuccessDrawer.clickCloseButton();
 });
 
 Then(/^the staking error screen is displayed$/, async () => {
