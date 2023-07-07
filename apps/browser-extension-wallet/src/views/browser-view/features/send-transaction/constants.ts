@@ -30,3 +30,5 @@ export const sectionsConfig: SimpleSectionsConfig<Sections> = {
 };
 
 export const METADATA_MAX_LENGTH = 160;
+export const MAX_NFT_TICKER_LENGTH = 10;
+export const MAX_TOKEN_TICKER_LENGTH = 5;
