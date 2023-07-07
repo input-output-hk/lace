@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 /* eslint-disable sonarjs/cognitive-complexity */
-import { PriceResult } from '@hooks';
+import { AssetOrHandleInfoMap, PriceResult } from '@hooks';
 import { Wallet } from '@lace/cardano';
 import { addEllipsis, getRandomIcon } from '@lace/common';
 import { nftImageSelector } from '@src/views/browser-view/features/nfts/selectors';
@@ -11,6 +11,7 @@ import { getAssetImageUrl } from './get-asset-image-url';
 import { EnvironmentTypes } from '@stores';
 import { CurrencyInfo } from '@src/types';
 import { isNFT } from './is-nft';
+import { getAssetImage } from './get-asset-image';
 
 export interface NFT {
   assetId: Wallet.Cardano.AssetId;
@@ -29,7 +30,7 @@ export interface NonNFTAsset {
 }
 
 export interface GetTokenListParams {
-  assetsInfo: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>;
+  assetsInfo: AssetOrHandleInfoMap;
   balance: Wallet.Cardano.Value['assets'];
   prices?: PriceResult;
   tokensSpent?: SpentBalances;
@@ -39,7 +40,7 @@ export interface GetTokenListParams {
 
 export const getTokenList = (params: GetTokenListParams): { tokenList: NonNFTAsset[]; nftList: NFT[] } => {
   const {
-    assetsInfo = new Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>(),
+    assetsInfo = new Map() as AssetOrHandleInfoMap,
     balance,
     prices,
     tokensSpent,
@@ -65,7 +66,7 @@ export const getTokenList = (params: GetTokenListParams): { tokenList: NonNFTAss
       nfts.push({
         assetId,
         name: info.nftMetadata?.name || `SingleNFT${environmentName || ''}`,
-        image: nftImageSelector(info.nftMetadata?.image),
+        image: nftImageSelector(getAssetImage(info)),
         amount
       });
     } else {
