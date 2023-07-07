@@ -2,11 +2,11 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { renderHook } from '@testing-library/react-hooks';
 import { useAutoFocus } from '../useAutoFocus';
-import { Input } from 'antd';
+import { Input, InputRef } from 'antd';
 import { render } from '@testing-library/react';
 
 describe('useAutoFocus', () => {
-  const inputRef = React.createRef<Input>();
+  const inputRef = React.createRef<InputRef>();
 
   test('focuses on the input if autoFocus set to true', async () => {
     const { queryByTestId } = render(<Input ref={inputRef} data-testid="test-input" />);

@@ -18,6 +18,7 @@ $drawer-width: 664px;
   flex: 1;
   justify-content: space-between;
   margin-top: size_unit(2);
+  
   @media (max-width: $breakpoint-popup) {
     width: 310px;
   }
@@ -87,6 +88,12 @@ $drawer-width: 664px;
   }
 }
 
+.textArea:global(.ant-input-suffix) {
+  width: 100%;
+    font-size: 18px;
+    flex-direction: row-reverse;
+}
+
 .footerContainer {
   position: absolute;
   bottom: 0;
@@ -112,5 +119,26 @@ $drawer-width: 664px;
   @media (max-width: $breakpoint-popup) {
     left: -#{size_unit(3)};
     width: calc(100% + #{size_unit(6)});
+  }
+}
+
+.submitBtn {
+  margin-bottom: size_unit(2) !important;
+
+  @media (max-width: $breakpoint-popup) {
+    margin-bottom: size_unit(1) !important;
+  }
+}
+
+:global(.anticon) {
+  font-size: size_unit(2.5);
+  margin-right: size_unit(1);
+  
+  &.valid {
+    color: var(--text-color-green);
+  }
+
+  &.invalid {
+    color: var(--text-color-red);
   }
 }

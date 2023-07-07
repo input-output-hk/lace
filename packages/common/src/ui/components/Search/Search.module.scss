@@ -25,16 +25,28 @@ $button_size: 52px;
   gap: size_unit(2) !important;
   height: size_unit(8) !important;
   justify-content: space-between !important;
-  padding: 0 size_unit(0.75) 0 size_unit(2.5) !important;
-
+  padding: 0 size_unit(0.75) 0 0 !important;
   border: 1.5px solid transparent !important;
 
+  @media (max-width: $breakpoint-popup) {
+    padding: 0 size_unit(0.75) 0 size_unit(2.5) !important;
+  }
+
   :global {
+    .ant-input-affix-wrapper-borderless {
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
     .ant-input {
       @include text-bodyLarge-semi-bold;
       color: var(--text-color-primary);
       padding: 0 !important;
       flex: 1;
+      background-color: transparent !important;
+      border: none !important;
+      
       &::placeholder {
         @include text-bodyLarge-semi-bold;
         color: var(--text-color-secondary) !important;
@@ -102,6 +114,20 @@ $button_size: 52px;
 @media (max-width: $breakpoint-popup) {
   .inputSearch {
     font-size: var(--bodyLarge, 18px) !important;
+
+    :global {
+      .ant-input-affix-wrapper-borderless {
+        padding-left: 0 !important;
+
+        .ant-input {
+          width: 100% !important;
+        }
+
+        &:hover {
+          border: none !important;
+        }
+      }
+    }
   }
   .dropdown {
     padding: size_unit(1) size_unit(2) !important;
@@ -173,6 +199,7 @@ button.clear {
 
 .content {
   width: 100%;
+  overflow-x: hidden;
   position: relative;
 }
 

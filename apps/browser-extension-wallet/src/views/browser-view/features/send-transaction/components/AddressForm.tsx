@@ -1,20 +1,16 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EditAddressForm, ValidationOptionsProps, FormKeys, valuesPropType } from '@lace/core';
+import { EditAddressForm, EditAddressFormFooter } from '@lace/core';
 import { withAddressBookContext, useAddressBookContext } from '@src/features/address-book/context';
-import { validateWalletName, validateWalletAddress } from '@src/utils/validators/address-book';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import { AddressBookSchema } from '@src/lib/storage';
 import { useSections } from '../store';
 import { CancelEditAddressModal } from './CancelEditAddressModal';
 import AddIcon from '../../../../../assets/icons/add.component.svg';
 import EditIcon from '../../../../../assets/icons/edit.component.svg';
-import EditAddressFormFooter from '@src/features/address-book/components/AddressDetailDrawer/EditAddressFormFooter';
-
-const validations: ValidationOptionsProps<FormKeys> = {
-  name: validateWalletName,
-  address: validateWalletAddress
-};
+import { validateWalletAddress, validateWalletHandle, validateWalletName } from '@src/utils/validators';
+import { useHandleResolver } from '@hooks/useHandleResolver';
+import { Form } from 'antd';
 
 interface AddressFormProps {
   isPopupView?: boolean;
@@ -28,14 +24,23 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
   const { utils } = useAddressBookContext();
   const { saveRecord: saveAddress, updateRecord: updateAddress } = utils;
-  const [formValues, setFormValues] = useState<valuesPropType>(addressToEdit);
+  const [form] = Form.useForm<{ name: string; address: string }>();
+
+  const handleResolver = useHandleResolver();
+
+  const validations = useMemo(
+    () => ({
+      name: validateWalletName,
+      address: validateWalletAddress,
+      handle: async (value: string) => await validateWalletHandle(value, handleResolver)
+    }),
+    [handleResolver]
+  );
 
   const editAddressFormTranslations = {
     walletName: t('core.editAddressForm.walletName'),
     address: t('core.editAddressForm.address')
   };
-
-  const getFieldError = (key: FormKeys) => validations[key]?.(formValues[key]);
 
   const onAddressSave = (address: AddressBookSchema): Promise<string> =>
     'id' in addressToEdit
@@ -58,25 +63,25 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
 
   return (
     <>
-      <EditAddressForm
-        {...{
-          initialValues: formValues,
-          validations,
-          setFormValues,
-          getFieldError,
-          footer: (
+      {
+        <EditAddressForm
+          {...{
+            initialValues: addressToEdit,
+            validations
+          }}
+          form={form}
+          footer={
             <EditAddressFormFooter
-              formValues={formValues}
-              getFieldError={getFieldError}
-              onCancelClick={onCancelClick}
+              form={form}
               onConfirmClick={onConfirmClick}
-              validations={validations}
+              onCancelClick={onCancelClick}
               onClose={setPrevSection}
             />
-          )
-        }}
-        translations={editAddressFormTranslations}
-      />
+          }
+          validations={validations}
+          translations={editAddressFormTranslations}
+        />
+      }
       <CancelEditAddressModal
         visible={isConfirmCancelVisible}
         onCancel={() => {
