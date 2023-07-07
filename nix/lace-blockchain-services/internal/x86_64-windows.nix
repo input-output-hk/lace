@@ -259,7 +259,7 @@ in rec {
             done
 
             ${mkSection "Patching ‘buildcheck/lib/findvs.js’"}
-            sed -r 's/execFileSync\(ps, args, execOpts\)/'"JSON.stringify($(cat Find-VisualStudio-cs-output.json | tr2 -d '\n' | sed 's/[\/&]/\\&/g'))"'/g' \
+            sed -r 's/execFileSync\(ps, args, execOpts\)/'"JSON.stringify($(cat Find-VisualStudio-cs-output.json | tr -d '\n' | sed 's/[\/&]/\\&/g'))"'/g' \
               -i node_modules/buildcheck/lib/findvs.js
 
             ${mkSection "Setting WINEPATH"}
