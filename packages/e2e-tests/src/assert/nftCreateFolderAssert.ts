@@ -60,12 +60,15 @@ class NftCreateFolderAssert {
       : expect(await NftCreateFolderPage.nextButton.isEnabled()).to.be.false);
   }
 
-  async assertSeeInputMaxLengthError(isTrue: boolean, maxLength: number) {
-    await (isTrue
-      ? expect(await NftCreateFolderPage.folderNameInput.inputError.getText()).to.equal(
-          (await t('browserView.nfts.folderDrawer.nameForm.inputError')).replace('{{length}}', maxLength.toString())
-        )
-      : expect(await NftCreateFolderPage.folderNameInput.inputError.waitForDisplayed({ reverse: true })));
+  async assertSeeInputMaxLengthError(shouldBeDisplayed: boolean, maxLength: number) {
+    await NftCreateFolderPage.folderNameInput.inputError.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      const expectedErrorMessage = (await t('browserView.nfts.folderDrawer.nameForm.inputError')).replace(
+        '{{length}}',
+        maxLength.toString()
+      );
+      expect(await NftCreateFolderPage.folderNameInput.inputError.getText()).to.equal(expectedErrorMessage);
+    }
   }
 }
 
