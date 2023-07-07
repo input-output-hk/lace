@@ -364,6 +364,11 @@ in rec {
       '';
     };
 
+    chromedriverVersion = __unsafeDiscardStringContext (__readFile (pkgs.runCommandLocal "chromedriver-version" {} ''
+      cat ${theirNodeModules}/node_modules/chromedriver/lib/chromedriver.js \
+        | grep -F 'exports.version' | grep -Po '\d+\.\d+\.\d+\.\d+' | tr -d '\n' >$out
+    ''));
+
     target = rec {
       nodejs = pkgs.fetchzip {
         url = "https://nodejs.org/dist/v${theirPackage.nodejs.version}/node-v${theirPackage.nodejs.version}-win-x64.zip";
@@ -376,9 +381,9 @@ in rec {
         stripRoot = false;
       };
 
-      # TODO: get the version programmatically
       chromedriverBin = pkgs.fetchurl {
-        url = "https://chromedriver.storage.googleapis.com/110.0.5481.77/chromedriver_win32.zip";
+        name = "chromedriver-${targetSystem}-${chromedriverVersion}.zip";
+        url = "https://chromedriver.storage.googleapis.com/${chromedriverVersion}/chromedriver_win32.zip";
         hash = "sha256-kM4G4AEcgelYopfWG5xVS+IvnXPB9F4lTpWCXivD3n0=";
       };
     };
