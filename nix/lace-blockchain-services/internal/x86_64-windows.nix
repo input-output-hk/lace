@@ -239,38 +239,28 @@ in rec {
 
             set +x
 
-            ${mkSection "Preparing the ‘info’ structure"}
+            ${mkSection "Preparing ‘Find-VisualStudio-cs-output.json’"}
             jq --null-input \
-              --arg msBuild      "$(winepath -w "$lx_VSINSTALLDIR/MSBuild/Current/Bin/MSBuild.exe")" \
-              --arg path         "$VCINSTALLDIR" \
-              --arg sdk          "$(ls ${msvc-installed}/kits/10/Include | head -n1)" \
-              --arg toolset      "$(ls "$lx_VSINSTALLDIR/VC/Redist/MSVC" | grep -E '^v[0-9]+$')" \
-              --arg version      "$(jq -r .info.productDisplayVersion <${msvc-cache}/*.manifest)" \
-              --arg versionMajor "$(jq -r .info.productDisplayVersion <${msvc-cache}/*.manifest | cut -d. -f1)" \
-              --arg versionMinor "$(jq -r .info.productDisplayVersion <${msvc-cache}/*.manifest | cut -d. -f2)" \
-              --arg versionYear  "$(jq -r .info.productLineVersion    <${msvc-cache}/*.manifest)" \
-              '{$msBuild,$path,$sdk,$toolset,$version,$versionMajor,$versionMinor,$versionYear}' \
-              > vs-info.json
+              --arg path "$VSINSTALLDIR" \
+              --arg version "$(jq -r .info.productDisplayVersion <${msvc-cache}/*.manifest)" \
+              --argjson packages "$( (
+                echo "Microsoft.VisualStudio.VC.MSBuild.Base"
+                echo "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+                echo "Microsoft.VisualStudio.Component.Windows10SDK.$(ls ${msvc-installed}/kits/10/Source | grep -oP '(?<=^10\.0\.)\d+(?=\.0$)')"
+              ) | jq -Rn '[inputs]')" \
+              '[{$path,$version,$packages}]' \
+              > Find-VisualStudio-cs-output.json
 
-            ${mkSection "Stubbing all **/node-gyp/lib/find-visualstudio.js"}
-            (
-              cat <<<${pkgs.lib.escapeShellArg ''
-                'use strict'
-                function findVisualStudio (nodeSemver, configMsvsVersion, callback) {
-                  process.nextTick(() => callback(null,
-              ''}
-              cat vs-info.json
-              cat <<<${pkgs.lib.escapeShellArg ''
-                  ));
-                }
-                module.exports = findVisualStudio
-              ''}
-            ) >our-find-visualstudio.js
-            cat our-find-visualstudio.js
-            echo ' '
+            ${mkSection "Patching all **/node-gyp/lib/find-visualstudio.js"}
             find -path '*/node-gyp/lib/find-visualstudio.js' | while IFS= read -r toPatch ; do
-              cp -v our-find-visualstudio.js "$toPatch"
+              echo "Patching ‘$toPatch’…"
+              sed -r 's/function findVisualStudio2017OrNewer.*/\0\n\nthis.parseData(undefined, '"JSON.stringify($(cat Find-VisualStudio-cs-output.json | tr -d '\n' | sed 's/[\/&]/\\&/g'))"', "", cb);\nreturn;\n/g' \
+                -i "$toPatch"
             done
+
+            ${mkSection "Patching ‘buildcheck/lib/findvs.js’"}
+            sed -r 's/execFileSync\(ps, args, execOpts\)/'"JSON.stringify($(cat Find-VisualStudio-cs-output.json | tr2 -d '\n' | sed 's/[\/&]/\\&/g'))"'/g' \
+              -i node_modules/buildcheck/lib/findvs.js
 
             ${mkSection "Setting WINEPATH"}
             export WINEPATH="$(winepath -w ${target.python})"
@@ -306,7 +296,10 @@ in rec {
             # Make it use our node_modules:
             export NODE_PATH="$(winepath -w ./node_modules)"
 
-            find -type f -name package.json | xargs grep -RF '"install":' | cut -d: -f1 | while IFS= read -r package
+            export CHROMEDRIVER_FILEPATH="$(winepath -w ${lib.escapeShellArg target.chromedriverBin})";
+
+            find -type f -name package.json | xargs grep -RF '"install":' | cut -d: -f1 \
+              | while IFS= read -r package
             do
               ${mkSection "Running the install script of ‘$package’"}
 
@@ -354,6 +347,12 @@ in rec {
         url = "https://www.python.org/ftp/python/3.10.11/python-3.10.11-embed-amd64.zip";
         hash = "sha256-p83yidrRg5Rz1vQpyRuZCb5F+s3ddgHt+JakPjgFgUc=";
         stripRoot = false;
+      };
+
+      # TODO: get the version programmatically
+      chromedriverBin = pkgs.fetchurl {
+        url = "https://chromedriver.storage.googleapis.com/110.0.5481.77/chromedriver_win32.zip";
+        hash = "sha256-kM4G4AEcgelYopfWG5xVS+IvnXPB9F4lTpWCXivD3n0=";
       };
     };
 
