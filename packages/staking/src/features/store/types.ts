@@ -22,7 +22,7 @@ export interface SectionConfig {
 
 export interface StakePoolDetails {
   simpleSendConfig: SectionConfig;
-  setSection: (section: SectionConfig) => void;
+  setSection: (section?: SectionConfig) => void;
   setPrevSection: () => void;
   resetStates: () => void;
   isDrawerVisible: boolean;

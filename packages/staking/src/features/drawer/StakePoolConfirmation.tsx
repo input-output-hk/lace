@@ -74,6 +74,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
         setDelegationTxFee(tx.body.fee.toString());
         setStakingError();
       } catch (error) {
+        // TODO: check for error instance after LW-6749
         if (isInputSelectionError(error)) {
           setStakingError(ERROR_MESSAGES[error.failure]);
         }
