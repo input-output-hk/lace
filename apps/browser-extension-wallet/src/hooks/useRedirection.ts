@@ -12,10 +12,10 @@ export type RedirectionHandler<R> = (...args: R extends never ? [] : [R]) => voi
 
 export const useRedirection = <R extends RouteConfig<GenericParams, GenericParams> = never>(
   path: string
-): [RedirectionHandler<R>] => {
+): RedirectionHandler<R> => {
   const history = useHistory();
 
-  const handleRedirection: RedirectionHandler<R> = useCallback(
+  return useCallback(
     (config = {}) => {
       let url = path;
       if (config.params) {
@@ -29,6 +29,4 @@ export const useRedirection = <R extends RouteConfig<GenericParams, GenericParam
     },
     [path, history]
   );
-
-  return [handleRedirection];
 };

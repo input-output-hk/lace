@@ -24,8 +24,8 @@ export const NftDetail = (): React.ReactElement => {
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
 
-  const [redirectToNfts] = useRedirection(walletRoutePaths.nfts);
-  const [redirectToSend] = useRedirection<{ params: { id?: string } }>(walletRoutePaths.send);
+  const redirectToNfts = useRedirection(walletRoutePaths.nfts);
+  const redirectToSend = useRedirection<{ params: { id?: string } }>(walletRoutePaths.send);
   const { id } = useParams<{ id: string }>();
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
   const setSendInitialState = useOutputInitialState();

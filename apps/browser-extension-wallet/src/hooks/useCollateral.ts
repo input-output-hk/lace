@@ -1,19 +1,22 @@
-import { Cardano } from '@cardano-sdk/core';
-import { Wallet } from '@lace/cardano';
-import { useWalletStore } from '@src/stores';
+/* eslint-disable unicorn/no-useless-undefined */
 import { useCallback, useMemo, useState } from 'react';
-import { useObservable } from '@lace/common';
+import { useObservable, toast } from '@lace/common';
 import { useMaxAda } from '@hooks/useMaxAda';
+import { useTranslation } from 'react-i18next';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
-import { isNotNil } from '@cardano-sdk/util';
-import { useSyncingTheFirstTime } from './useSyncingTheFirstTime';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
+import { Cardano } from '@cardano-sdk/core';
+import { isNotNil } from '@cardano-sdk/util';
+import { Wallet } from '@lace/cardano';
+import { useWalletStore } from '@src/stores';
+import { useSyncingTheFirstTime } from '@hooks/useSyncingTheFirstTime';
+import { useBuiltTxState } from '@src/views/browser-view/features/send-transaction';
 
-const COLLATERAL_ADA_AMOUNT = 5;
+export const COLLATERAL_ADA_AMOUNT = 5;
 export const COLLATERAL_AMOUNT_LOVELACES = BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT)));
 
-type UseCollateralReturn = {
+export type UseCollateralReturn = {
   initializeCollateralTx: () => Promise<void>;
   submitCollateralTx: () => Promise<void>;
   isInitializing: boolean;
@@ -23,10 +26,12 @@ type UseCollateralReturn = {
 };
 
 export const useCollateral = (): UseCollateralReturn => {
+  const { t } = useTranslation();
   const [txFee, setTxFee] = useState<Cardano.Lovelace>();
-  const [txBuilder, setTxBuilder] = useState<TxBuilder>();
+  const [txBuilder, setTxBuilder] = useState<TxBuilder | undefined>();
   const { inMemoryWallet, getKeyAgentType } = useWalletStore();
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const { setBuiltTxData } = useBuiltTxState();
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const addresses = useObservable(inMemoryWallet.addresses$);
@@ -55,11 +60,12 @@ export const useCollateral = (): UseCollateralReturn => {
     setIsInitializing(false);
   }, [hasEnoughAda, isSyncingForTheFirstTime, inMemoryWallet, output]);
 
-  const submitCollateralTx = async () => {
+  const submitCollateralTx = useCallback(async () => {
     if (!txBuilder) return;
     setIsSubmitting(true);
     try {
-      const { tx } = await txBuilder.build().sign();
+      const txBuilt = txBuilder.build();
+      const { tx } = await txBuilt.sign();
       await inMemoryWallet.submitTx(tx);
       const utxo = await firstValueFrom(
         inMemoryWallet.utxo.available$.pipe(
@@ -69,12 +75,33 @@ export const useCollateral = (): UseCollateralReturn => {
         )
       );
       await inMemoryWallet.utxo.setUnspendable([utxo]);
-      // TODO: Remove this workaround for Hardware Wallets alongside send flow and staking.
-      if (!isInMemory) window.location.reload();
+      // set tx data in case of hw for tx success/fail steps
+      if (!isInMemory) {
+        const txInspection = await txBuilt.inspect();
+        setBuiltTxData({
+          uiTx: {
+            fee: txInspection.inputSelection.fee,
+            hash: txInspection.hash,
+            outputs: txInspection.inputSelection.outputs
+          }
+        });
+      }
+      toast.notify({ text: t('browserView.settings.wallet.collateral.toast.add') });
+    } catch (error) {
+      // redirect to tx fail screen in case of hw
+      if (!isInMemory) {
+        console.log('submitCollateralTx fails with:', error?.message);
+        setBuiltTxData({
+          uiTx: undefined,
+          error: error.message
+        });
+        setTxBuilder(undefined);
+        throw error;
+      }
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [txBuilder, inMemoryWallet, isInMemory, t, setBuiltTxData]);
   return {
     initializeCollateralTx,
     submitCollateralTx,
