@@ -88,8 +88,10 @@ in rec {
     mkdir -p $out/libexec
     cp -Lr ${lace-blockchain-services-exe}/* $out/
     cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/
+    cp -L ${cardano-js-sdk.target.nodejs}/node.exe $out/libexec/
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
     cp -Lr ${common.networkConfigs} $out/cardano-node-config
+    cp -Lr ${cardano-js-sdk.ourPackage} $out/cardano-js-sdk
   '';
 
   # For easier testing, skipping the installer (for now):
@@ -100,10 +102,10 @@ in rec {
       else "dirty";
   in pkgs.runCommand "lace-blockchain-services.zip" {} ''
     mkdir -p $out
-    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.zip
+    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.7z
 
     ln -s ${lace-blockchain-services} lace-blockchain-services
-    ${with pkgs; lib.getExe zip} -q -r $target lace-blockchain-services
+    ${with pkgs; lib.getExe p7zip} a -r -l $target lace-blockchain-services
 
     # Make it downloadable from Hydra:
     mkdir -p $out/nix-support
@@ -140,6 +142,31 @@ in rec {
       '';
       dontFixup = true;
     });
+
+    # Let’s build the TS/JS files as on Linux, but then copy native Windows DLLs (${nativeModules} below)
+    ourPackage = pkgs.stdenv.mkDerivation {
+      name = "cardano-js-sdk";
+      src = toString inputs.cardano-js-sdk;
+      nativeBuildInputs = with pkgs; [ python3 rsync ];
+      inherit (theirPackage) buildInputs npm_config_nodedir configurePhase CHROMEDRIVER_FILEPATH;
+      buildPhase = "yarn build";
+      installPhase = ''
+        mkdir $out
+        rsync -Rah $(find . '(' '(' -type d -name 'dist' ')' -o -name 'package.json' ')' \
+          -not -path '*/node_modules/*') $out/
+
+        cp -r ${theirPackage.production-deps}/libexec/source/node_modules $out/
+        chmod -R +w $out
+
+        # Clear the Linux binaries:
+        find $out/node_modules/ -type f '(' -name '*.node' -o -name '*.o' -o -name '*.o.d' -o -name '*.target.mk' \
+          -o -name '*.Makefile' -o -name 'Makefile' -o -name 'config.gypi' ')' -exec rm -vf '{}' ';'
+
+        # Inject the Windows DLLs:
+        rsync -ah ${nativeModules}/. $out/
+      '';
+      dontFixup = true;
+    };
 
     # XXX: `pkgs.nodejs` lacks `uv/win.h`, `node.lib` etc., so:
     nodejsHeaders = pkgs.runCommand "nodejs-headers-${theirPackage.nodejs.version}" rec {

@@ -414,10 +414,8 @@ func manageChildren(comm CommChannels_Manager) {
 
 		fmt.Printf("%s[%d]: starting session for network %s\n", OurLogPrefix, os.Getpid(), network)
 
-/* -- cardano-services temporarily turned off, just to test the Ogmios integration on Windows --
 		cardanoServicesDir := (ourpaths.ResourcesDir + sep + "cardano-js-sdk" + sep + "packages" +
 			sep + "cardano-services")
-*/
 		cardanoNodeConfigDir := ourpaths.NetworkConfigDir + sep + network
 		cardanoNodeSocket := ourpaths.WorkDir + sep + network + sep + "cardano-node.socket"
 
@@ -426,14 +424,12 @@ func manageChildren(comm CommChannels_Manager) {
 		}
 
 		var ogmiosPort int
-/* -- cardano-services temporarily turned off, just to test the Ogmios integration on Windows --
 		var providerServerPort int
 
 		tokenMetadataServerUrl := "https://tokens.cardano.org"
 		if network != "mainnet" {
 			tokenMetadataServerUrl = "https://metadata.cardano-testnet.iohkdev.io/"
 		}
-*/
 
 		// XXX: we take that from Ogmios, we should probably calculate ourselves
 		syncProgress := -1.0
@@ -604,7 +600,6 @@ func manageChildren(comm CommChannels_Manager) {
 					ForceKillAfter: 5 * time.Second,
 				}
 			}(),
-/* -- cardano-services temporarily turned off, just to test the Ogmios integration on Windows --
 			func() ManagedChild {
 				return ManagedChild{
 					LogPrefix: "provider-server",
@@ -653,7 +648,11 @@ func manageChildren(comm CommChannels_Manager) {
 							LastErr: err,
 						}
 					},
-					LogMonitor: func(line string) {},
+					LogMonitor: func(line string) LogMonitorStatus {
+						return LogMonitorStatus {
+							ForceKill: false,
+						}
+					},
 					LogModifier: func(line string) string { return line },
 					AfterExit: func() {
 						comm.SetBackendUrl <- ""
@@ -662,7 +661,6 @@ func manageChildren(comm CommChannels_Manager) {
 					ForceKillAfter: 5 * time.Second,
 				}
 			}(),
-*/
 		}
 
 		var wgChildren sync.WaitGroup
