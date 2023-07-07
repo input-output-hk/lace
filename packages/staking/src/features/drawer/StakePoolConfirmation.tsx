@@ -1,14 +1,12 @@
-/* eslint-disable complexity */
 /* eslint-disable react/no-multi-comp */
-/* eslint-disable unicorn/no-nested-ternary */
 import Icon from '@ant-design/icons';
+import { InputSelectionFailure } from '@cardano-sdk/input-selection';
 import { Wallet } from '@lace/cardano';
 import { Banner, Button, Ellipsis, useObservable } from '@lace/common';
 import { RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
-// import { useBuildDelegation } from '@src/hooks';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { SelectedStakePoolDetails } from '../outside-handles-provider/types';
@@ -28,12 +26,20 @@ type StakePoolConfirmationProps = {
   popupView?: boolean;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-const useBuildDelegation = () => {};
+const ERROR_MESSAGES: { [key: string]: StakingError } = {
+  [InputSelectionFailure.UtxoFullyDepleted]: StakingError.UTXO_FULLY_DEPLETED,
+  [InputSelectionFailure.UtxoBalanceInsufficient]: StakingError.UTXO_BALANCE_INSUFFICIENT,
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isInputSelectionError = (error: any): error is { failure: InputSelectionFailure } =>
+  typeof error === 'object' &&
+  Object.hasOwn(error, 'failure') &&
+  Object.values(InputSelectionFailure).includes(error.failure);
 
 export const StakePoolConfirmation = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { stakingError } = useStakePoolDetails();
+  const { setIsBuildingTx, setStakingError, stakingError } = useStakePoolDetails();
   const {
     balancesBalance: balance,
     walletStoreInMemoryWallet: inMemoryWallet,
@@ -45,11 +51,37 @@ export const StakePoolConfirmation = (): React.ReactElement => {
       id: poolId,
       ticker: poolTicker,
       name: poolName,
+      // TODO: remove this dumb casting and solve the issue on a different level (components composition)
     } = {} as SelectedStakePoolDetails,
+    delegationStoreSelectedStakePool: openPool,
     currencyStoreFiatCurrency: fiatCurrency,
+    delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
+    delegationStoreSetDelegationTxFee: setDelegationTxFee,
   } = useOutsideHandles();
 
-  useBuildDelegation();
+  useEffect(() => {
+    (async () => {
+      if (!openPool?.hexId) return;
+      // TODO: move below logic to zustand store
+      try {
+        setIsBuildingTx(true);
+        const txBuilder = inMemoryWallet.createTxBuilder();
+        const tx = await txBuilder
+          .delegatePortfolio({ pools: [{ id: openPool.hexId, weight: 1 }] })
+          .build()
+          .inspect();
+        setDelegationTxBuilder(txBuilder);
+        setDelegationTxFee(tx.body.fee.toString());
+        setStakingError();
+      } catch (error) {
+        if (isInputSelectionError(error)) {
+          setStakingError(ERROR_MESSAGES[error.failure]);
+        }
+      } finally {
+        setIsBuildingTx(false);
+      }
+    })();
+  }, [inMemoryWallet, openPool, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx, setStakingError]);
 
   const stakePoolName = poolName ?? '-';
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
@@ -212,7 +244,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       return isConfirmingTx ? t('drawer.confirmation.button.signing') : staleLabels;
     }
     return t('drawer.confirmation.button.confirm');
-  }, [isConfirmingTx, isInMemory, popupView]);
+  }, [isConfirmingTx, isInMemory, keyAgentType, popupView, t]);
 
   return (
     <div className={styles.actions}>
