@@ -1,12 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { WalletSetupOptionsStep, WalletSetupSteps, useTranslate } from '@lace/core';
-import { HardwareWalletFlow } from './HardwareWalletFlow';
-import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
-import { WarningModal } from '@src/views/browser-view/components/WarningModal';
-import styles from './WalletSetup.module.scss';
-import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
-import { walletRoutePaths } from '@routes/wallet-paths';
-import { WalletSetupWizard } from './WalletSetupWizard';
+import { useTranslate, WalletSetupOptionsStep, WalletSetupSteps } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   AnalyticsEventActions,
@@ -15,10 +7,18 @@ import {
   PostHogAction,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
+import { walletRoutePaths } from '@routes/wallet-paths';
 import { ILocalStorage } from '@src/types';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
+import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
+import { WarningModal } from '@src/views/browser-view/components/WarningModal';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { HardwareWalletFlow } from './HardwareWalletFlow';
 import { Portal } from './Portal';
 import { SendOboardingAnalyticsEvent } from '../types';
+import styles from './WalletSetup.module.scss';
+import { WalletSetupWizard } from './WalletSetupWizard';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -103,27 +103,26 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
     analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
   };
 
-  const sendAnalytics = (
+  const sendAnalytics = async (
     category: SetupAnalyticsCategories,
     eventName: string,
     value = 1,
     postHogAction?: PostHogAction
   ) => {
-    const event = {
+    await analytics.sendEvent({
       action: AnalyticsEventActions.CLICK_EVENT,
       category,
       name: eventName,
       value
-    };
-    analytics.sendEvent(event);
+    });
     if (postHogAction) {
-      analytics.sendEventToPostHog(postHogAction);
+      await analytics.sendEventToPostHog(postHogAction);
     }
   };
 
   const getSendAnalyticsHandler: (eventCategory: SetupAnalyticsCategories) => SendOboardingAnalyticsEvent =
-    (eventCategory) => (event, postHogAction, value) =>
-      sendAnalytics(eventCategory, event, value, postHogAction);
+    (eventCategory) => async (event, postHogAction, value) =>
+      await sendAnalytics(eventCategory, event, value, postHogAction);
 
   const handleRestoreWallet = () => {
     setIsConfirmRestoreOpen(true);

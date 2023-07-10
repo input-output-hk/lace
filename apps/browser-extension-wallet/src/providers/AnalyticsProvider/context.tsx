@@ -1,9 +1,10 @@
+import { useLocalStorage } from '@src/hooks/useLocalStorage';
+import { useWalletStore } from '@src/stores';
+import debounce from 'lodash/debounce';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import { AnalyticsTracker } from './analyticsTracker';
+import { AnalyticsTracker, PostHogAction } from './analyticsTracker';
 import { EnhancedAnalyticsOptInStatus } from './analyticsTracker/types';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
-import { useWalletStore } from '@src/stores';
-import { useLocalStorage } from '@src/hooks/useLocalStorage';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -13,6 +14,8 @@ interface AnalyticsProviderProps {
    */
   analyticsDisabled?: boolean;
 }
+
+const PAGE_VIEW_DEBOUNCE_DELAY = 100;
 
 type AnalyticsTrackerInstance = AnalyticsTracker;
 
@@ -49,6 +52,18 @@ export const AnalyticsProvider = ({
   useEffect(() => {
     analyticsTracker.setChain(currentChain);
   }, [currentChain, analyticsTracker]);
+
+  // Track page changes with PostHog in order to keep the user session alive
+  useEffect(() => {
+    const trackActivePageChange = debounce(
+      () => analyticsTracker.sendPageNavigationEvent(PostHogAction.WalletChangeActivePage),
+      PAGE_VIEW_DEBOUNCE_DELAY
+    );
+    window.addEventListener('popstate', trackActivePageChange);
+    return () => {
+      window.removeEventListener('popstate', trackActivePageChange);
+    };
+  }, [analyticsTracker]);
 
   return <AnalyticsContext.Provider value={analyticsTracker}>{children}</AnalyticsContext.Provider>;
 };

@@ -34,7 +34,8 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     WRITE_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingCreateWritePassphrase17NextClick,
     ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase01NextClick,
     ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase09NextClick,
-    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase17NextClick
+    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase17NextClick,
+    DONE_GO_TO_WALLET: PostHogAction.OnboardingCreateDoneGoToWallet
   },
   restore: {
     ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingRestoreAnalyticsAgreeClick,
@@ -48,7 +49,8 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     RESTORE_MULTI_ADDR_OK_CLICK: PostHogAction.OnboardingRestoreWarningMultiAddressWalletOkClick,
     ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase01NextClick,
     ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase09NextClick,
-    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase17NextClick
+    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase17NextClick,
+    DONE_GO_TO_WALLET: PostHogAction.OnboardingRestoreDoneGoToWallet
   },
   hw: {
     ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingHWAnalyticsAgreeClick,
@@ -57,7 +59,8 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardinHWLaceTermsOfUseNextClick,
     CONNECT_HW_NEXT_CLICK: PostHogAction.OnboardingHWConnectNextClick,
     SELECT_HW_ACCOUNT_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
-    SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick
+    SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick,
+    DONE_GO_TO_WALLET: PostHogAction.OnboardingHWDoneGoToWallet
   }
 };
 
