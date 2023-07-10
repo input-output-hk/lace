@@ -85,7 +85,9 @@ in rec {
     doCheck = false;
   };
 
-  lace-blockchain-services = pkgs.runCommand "lace-blockchain-services" {} ''
+  lace-blockchain-services = mkPackage { withJS = true; };
+
+  mkPackage = { withJS }: pkgs.runCommand "lace-blockchain-services" {} ''
     mkdir -p $out/libexec
     cp -Lr ${lace-blockchain-services-exe}/* $out/
     cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/
@@ -93,11 +95,19 @@ in rec {
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
     cp -Lf ${sigbreak}/*.exe $out/libexec/
     cp -Lr ${common.networkConfigs} $out/cardano-node-config
-    # cp -Lr ${cardano-js-sdk.ourPackage} $out/cardano-js-sdk
+    ${if !withJS then "" else ''
+      cp -Lr ${cardano-js-sdk.ourPackage} $out/cardano-js-sdk
+    ''}
   '';
 
+  lace-blockchain-services-zip = mkArchive { withJS = true; };
+
+  # This is much smaller, and much quicker to unpack, and very useful
+  # if you want to just iteratively test the process manager:
+  lace-blockchain-services-zip-nojs = mkArchive { withJS = false; };
+
   # For easier testing, skipping the installer (for now):
-  lace-blockchain-services-zip = let
+  mkArchive = { withJS }: let
     revShort =
       if inputs.self ? shortRev
       then builtins.substring 0 9 inputs.self.rev
@@ -106,7 +116,7 @@ in rec {
     mkdir -p $out
     target=$out/lace-blockchain-services-${revShort}-${targetSystem}.7z
 
-    ln -s ${lace-blockchain-services} lace-blockchain-services
+    ln -s ${mkPackage { inherit withJS; }} lace-blockchain-services
     ${with pkgs; lib.getExe p7zip} a -r -l $target lace-blockchain-services
 
     # Make it downloadable from Hydra:
