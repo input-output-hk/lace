@@ -36,7 +36,7 @@ export const Activity = (): React.ReactElement => {
   const isLoading = walletActivitiesStatus !== StateStatus.LOADED;
   const layoutTitle = `${t('browserView.activity.title')}`;
   const layoutSideText = `(${activitiesCount})`;
-  const [redirectToAssets] = useRedirection(walletRoutePaths.assets);
+  const redirectToAssets = useRedirection(walletRoutePaths.assets);
   const analytics = useAnalyticsContext();
 
   const sendAnalytics = useCallback(() => {

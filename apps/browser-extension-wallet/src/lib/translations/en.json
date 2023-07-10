@@ -736,7 +736,11 @@
           "confirmWithLedger": "Confirm transaction with Ledger",
           "notEnoughAda": "You don't have enough ADA to proceed with the transaction.",
           "active": "Active",
-          "inactive": "Inactive"
+          "inactive": "Inactive",
+          "toast": {
+            "add": "Collateral added",
+            "claim": "Collateral reclaimed"
+          }
         },
         "network": {
           "title": "Network",
@@ -1050,7 +1054,8 @@
       "recipient": "Recipient",
       "insufficientFunds": "You do not have enough funds to complete the transaction",
       "signedSuccessfully": "The transaction was signed successfully.",
-      "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet."
+      "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
+      "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or handle"

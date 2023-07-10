@@ -1,4 +1,4 @@
 export * from './CollateralDrawer';
-export * from './CollateralFooter';
-export * from './CollateralStepSend';
-export * from './CollateralStepReclaim';
+export * from './reclaim/CollateralFooterReclaim';
+export * from './send/CollateralStepSend';
+export * from './reclaim/CollateralStepReclaim';

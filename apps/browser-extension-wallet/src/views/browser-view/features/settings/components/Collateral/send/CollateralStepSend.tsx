@@ -4,41 +4,36 @@ import { useTranslation } from 'react-i18next';
 import { Banner, inputProps, Password } from '@lace/common';
 import { renderAmountInfo, renderLabel, RowContainer } from '@lace/core';
 import { Wallet } from '@lace/cardano';
-import styles from '../SettingsLayout.module.scss';
+import styles from '../../SettingsLayout.module.scss';
 import { useFetchCoinPrice } from '@hooks';
 import { cardanoCoin } from '@src/utils/constants';
-import { Cardano } from '@cardano-sdk/core';
-import collateralStyles from './Collateral.module.scss';
+import collateralStyles from '../Collateral.module.scss';
 import SadFaceIcon from '@lace/core/src/ui/assets/icons/sad-face.component.svg';
-import { MainLoader } from '@components/MainLoader';
-import { CurrencyInfo } from '@src/types';
+import { useCurrencyStore } from '@providers';
+import { Cardano } from '@cardano-sdk/core';
 
 const { Text } = Typography;
 
 interface CollateralStepSendProps {
   txFee: Cardano.Lovelace;
   popupView?: boolean;
-  hasEnoughAda: boolean;
   password: string;
   setPassword: (password: string) => void;
   isInMemory: boolean;
   isPasswordValid: boolean;
   setIsPasswordValid: (isPasswordValid: boolean) => void;
-  isWalletSyncingForTheFirstTime?: boolean;
-  fiatCurrency: CurrencyInfo;
+  hasEnoughAda: boolean;
 }
 
 export const CollateralStepSend = ({
-  txFee,
-  hasEnoughAda,
   popupView = false,
   password,
   setPassword,
   isInMemory,
   isPasswordValid,
   setIsPasswordValid,
-  isWalletSyncingForTheFirstTime,
-  fiatCurrency
+  txFee,
+  hasEnoughAda
 }: CollateralStepSendProps): JSX.Element => {
   const { t } = useTranslation();
   const handleChange: inputProps['onChange'] = ({ target: { value } }) => {
@@ -46,11 +41,14 @@ export const CollateralStepSend = ({
     return setPassword(value);
   };
   const { priceResult } = useFetchCoinPrice();
-  // If the wallet is starting the sync process the first time, show the loader as we don't have the necessary values to display the correct state
-  return isWalletSyncingForTheFirstTime ? (
-    <MainLoader />
-  ) : (
-    <div className={popupView ? styles.popupContainer : undefined} style={{ height: '100%' }}>
+  const { fiatCurrency } = useCurrencyStore();
+
+  return (
+    <div
+      data-testid="collateral-send"
+      className={popupView ? styles.popupContainer : undefined}
+      style={{ height: '100%' }}
+    >
       <div className={collateralStyles.collateralContainer}>
         <div className={collateralStyles.contentContainer}>
           <Text className={styles.drawerDescription} data-testid="collateral-description">
@@ -62,7 +60,7 @@ export const CollateralStepSend = ({
             </div>
           )}
           {isInMemory && hasEnoughAda && (
-            <div className={styles.passwordContainerCollateral}>
+            <div data-testid="collateral-password" className={styles.passwordContainerCollateral}>
               <Spin spinning={false}>
                 <Password
                   onChange={handleChange}

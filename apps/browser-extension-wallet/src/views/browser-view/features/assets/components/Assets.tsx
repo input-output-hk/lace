@@ -41,7 +41,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const [, setSendDrawerVisibility] = useDrawer();
   const { priceResult, status: fetchPriceStatus } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
-  const [redirectToSend] = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
+  const redirectToSend = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
   const {
     inMemoryWallet,
     walletUI: { cardanoCoin, appMode, areBalancesVisible, getHiddenBalancePlaceholder },

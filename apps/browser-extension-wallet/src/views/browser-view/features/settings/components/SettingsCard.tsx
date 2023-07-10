@@ -6,5 +6,7 @@ interface SettingsCardProps {
 }
 
 export const SettingsCard = ({ children }: SettingsCardProps): React.ReactElement => (
-  <div className={styles.settingsCard}>{children}</div>
+  <div data-testid="settings-card" className={styles.settingsCard}>
+    {children}
+  </div>
 );
