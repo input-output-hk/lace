@@ -1,4 +1,5 @@
-import { setInputFieldValue, clearInputFieldValue } from '../../utils/inputFieldUtils';
+import { clearInputFieldValue } from '../../utils/inputFieldUtils';
+import { browser } from '@wdio/globals';
 
 class AddressForm {
   private NAME_INPUT = '[data-testid="address-form-name-input"]';
@@ -23,11 +24,13 @@ class AddressForm {
   }
 
   async enterName(name: string) {
-    await setInputFieldValue(await this.nameInput, name);
+    await clearInputFieldValue(await this.nameInput);
+    await browser.keys([...name]);
   }
 
   async enterAddress(address: string) {
-    await setInputFieldValue(await this.addressInput, address);
+    await clearInputFieldValue(await this.addressInput);
+    await browser.keys([...address]);
   }
 
   async clearNameFieldValue() {
