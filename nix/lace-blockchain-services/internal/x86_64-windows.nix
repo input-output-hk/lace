@@ -16,6 +16,7 @@ in rec {
   #   • Linux Go (but instructed to cross-compile),
   #   • and taking go-modules (vendor) from the Linux derivation – these are only sources
   lace-blockchain-services-exe = let
+    noConsoleWindow = true;
     go = pkgs.go;
     go-modules = inputs.self.internal.lace-blockchain-services.x86_64-linux.lace-blockchain-services-exe.go-modules;
   in pkgs.pkgsCross.mingwW64.stdenv.mkDerivation {
@@ -38,7 +39,7 @@ in rec {
     buildPhase = ''
       cp ${icon} tray-icon
       go-bindata -pkg main -o assets.go tray-icon
-      go build
+      go build ${if noConsoleWindow then "-ldflags -H=windowsgui" else ""}
     '';
     installPhase = ''
       mkdir -p $out
@@ -90,8 +91,9 @@ in rec {
     cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/
     cp -L ${cardano-js-sdk.target.nodejs}/node.exe $out/libexec/
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
+    cp -Lf ${sigbreak}/*.exe $out/libexec/
     cp -Lr ${common.networkConfigs} $out/cardano-node-config
-    cp -Lr ${cardano-js-sdk.ourPackage} $out/cardano-js-sdk
+    # cp -Lr ${cardano-js-sdk.ourPackage} $out/cardano-js-sdk
   '';
 
   # For easier testing, skipping the installer (for now):
@@ -100,7 +102,7 @@ in rec {
       if inputs.self ? shortRev
       then builtins.substring 0 9 inputs.self.rev
       else "dirty";
-  in pkgs.runCommand "lace-blockchain-services.zip" {} ''
+  in pkgs.runCommand "lace-blockchain-services.7z" {} ''
     mkdir -p $out
     target=$out/lace-blockchain-services-${revShort}-${targetSystem}.7z
 
@@ -110,6 +112,35 @@ in rec {
     # Make it downloadable from Hydra:
     mkdir -p $out/nix-support
     echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
+  '';
+
+  # XXX: we’re compiling it with MSVC so that it takes 122 kB, not 100× more…
+  sigbreak = pkgs.runCommandNoCC "sigbreak" {
+    buildInputs = with cardano-js-sdk.fresherPkgs; [ wineWowPackages.stableFull winetricks ];
+  } ''
+    export HOME=$(realpath $NIX_BUILD_TOP/home)
+    mkdir -p $HOME
+
+    cp ${./sigbreak.cc} sigbreak.cc
+
+    export WINEPATH="$(winepath -w ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/x64)"
+
+    inclPath_1="$(winepath -w ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/include)"
+    inclPath_2="$(winepath -w ${cardano-js-sdk.msvc-installed}/kits/10/Include/*/ucrt)"
+    inclPath_3="$(winepath -w ${cardano-js-sdk.msvc-installed}/kits/10/Include/*/um)"
+    inclPath_4="$(winepath -w ${cardano-js-sdk.msvc-installed}/kits/10/Include/*/shared)"
+
+    libPath_1="$(winepath -w ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/lib/x64)"
+    libPath_2="$(winepath -w ${cardano-js-sdk.msvc-installed}/kits/10/Lib/*/ucrt/x64)"
+    libPath_3="$(winepath -w ${cardano-js-sdk.msvc-installed}/kits/10/Lib/*/um/x64)"
+
+    wine cl.exe /EHsc "/I$inclPath_1" "/I$inclPath_2" "/I$inclPath_3" "/I$inclPath_4" /c sigbreak.cc
+
+    wine cl.exe sigbreak.obj /link "/LIBPATH:$libPath_1" "/LIBPATH:$libPath_2" "/LIBPATH:$libPath_3" \
+      /out:sigbreak.exe
+
+    mkdir -p $out
+    mv sigbreak.exe $out/
   '';
 
   # -------------------------------------- cardano-js-sdk ------------------------------------------ #

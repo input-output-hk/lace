@@ -281,8 +281,12 @@ func setupTrayUI(
 			menuItem := systray.AddMenuItem("", "")
 			menuItem.Disable()
 			go func(component string, statusCh <-chan string, menuItem *systray.MenuItem) {
+				prevStatus := "" // lessen refreshing, too often causes glitching on Windows
 				for newStatus := range statusCh {
-					menuItem.SetTitle(component + " · " + newStatus)
+					if newStatus != prevStatus {
+						menuItem.SetTitle(component + " · " + newStatus)
+						prevStatus = newStatus
+					}
 				}
 			}(component, statusCh, menuItem)
 		}
@@ -367,8 +371,8 @@ type ManagedChild struct {
 	LogMonitor  func(string) LogMonitorStatus
 	LogModifier func(string) string // e.g. to drop redundant timestamps
 	AfterExit   func()
-	TerminateOnWindowsByClosingStdin bool
 	ForceKillAfter time.Duration // graceful exit timeout, after which we SIGKILL the child
+	Enabled     bool // for isolated tests etc.
 }
 
 type HealthStatus struct {
@@ -419,6 +423,13 @@ func manageChildren(comm CommChannels_Manager) {
 		cardanoNodeConfigDir := ourpaths.NetworkConfigDir + sep + network
 		cardanoNodeSocket := ourpaths.WorkDir + sep + network + sep + "cardano-node.socket"
 
+		cardanoServicesAvailable := true
+		if _, err := os.Stat(cardanoServicesDir); os.IsNotExist(err) {
+			fmt.Printf("%s[%d]: warning: no cardano-services available, will run without them " +
+				"(No such file or directory: %s)\n", OurLogPrefix, os.Getpid(), cardanoServicesDir)
+			cardanoServicesAvailable = false
+		}
+
 		if (runtime.GOOS == "windows") {
 			cardanoNodeSocket = mkNewWindowsPipeName()
 		}
@@ -434,7 +445,7 @@ func manageChildren(comm CommChannels_Manager) {
 		// XXX: we take that from Ogmios, we should probably calculate ourselves
 		syncProgress := -1.0
 
-		childrenDefs := []ManagedChild{
+		childrenDefsAll := []ManagedChild{
 			func() ManagedChild {
 				hostname, _ := os.Hostname()
 				trimmedHostname := hostname
@@ -472,10 +483,6 @@ func manageChildren(comm CommChannels_Manager) {
 							"--host-addr", "0.0.0.0",
 							"--config", cardanoNodeConfigDir + sep + "config.json",
 							"--socket-path", cardanoNodeSocket,
-						}
-						if runtime.GOOS == "windows" {
-							// for `TerminateOnWindowsByClosingStdin`:
-							args = append(args, "--shutdown-ipc=0")
 						}
 						return args
 					},
@@ -544,8 +551,8 @@ func manageChildren(comm CommChannels_Manager) {
 						return line
 					},
 					AfterExit: func() {},
-					TerminateOnWindowsByClosingStdin: true,
 					ForceKillAfter: 10 * time.Second,
+					Enabled: true,
 				}
 			}(),
 			func() ManagedChild {
@@ -596,8 +603,8 @@ func manageChildren(comm CommChannels_Manager) {
 					AfterExit: func() {
 						comm.SetOgmiosDashboard <- ""
 					},
-					TerminateOnWindowsByClosingStdin: false,
 					ForceKillAfter: 5 * time.Second,
+					Enabled: true,
 				}
 			}(),
 			func() ManagedChild {
@@ -657,8 +664,8 @@ func manageChildren(comm CommChannels_Manager) {
 					AfterExit: func() {
 						comm.SetBackendUrl <- ""
 					},
-					TerminateOnWindowsByClosingStdin: false,
 					ForceKillAfter: 5 * time.Second,
+					Enabled: cardanoServicesAvailable,
 				}
 			}(),
 		}
@@ -671,13 +678,20 @@ func manageChildren(comm CommChannels_Manager) {
 			}
 			comm.BlockRestartUI <- true
 			wgChildren.Wait()
-			for _, child := range childrenDefs {
+			for _, child := range childrenDefsAll {
 				// Reset all statuses to "off" (not all children might’ve been started
 				// and they’re "waiting" now)
 				child.StatusCh <- "off"
 			}
 			fmt.Printf("%s[%d]: session ended for network %s\n", OurLogPrefix, os.Getpid(), networkMemo)
 		}("" + network)
+
+		var childrenDefs []ManagedChild
+		for _, childUnsafe := range childrenDefsAll {
+			if childUnsafe.Enabled {
+				childrenDefs = append(childrenDefs, childUnsafe)
+			}
+		}
 
 		anyChildExitedCh := make(chan struct{}, len(childrenDefs))
 
@@ -695,7 +709,6 @@ func manageChildren(comm CommChannels_Manager) {
 			childPid := 0
 			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(),
 				child.LogModifier, outputLines, terminateCh, &childPid,
-				child.TerminateOnWindowsByClosingStdin,
 				child.ForceKillAfter)
 			defer func() {
 				if !childDidExit {
@@ -870,7 +883,7 @@ func childProcess(
 	path string, argv []string, extraEnv []string,
 	logModifier func(string) string, // e.g. to drop redundant timestamps
 	outputLines chan<- string, terminate <-chan struct{}, pid *int,
-	terminateOnWindowsByClosingStdin bool, gracefulExitTimeout time.Duration,
+	gracefulExitTimeout time.Duration,
 ) {
 	defer close(outputLines)
 
@@ -879,14 +892,10 @@ func childProcess(
 
 	cmd := exec.Command(path, argv...)
 
+	cmd.SysProcAttr = makeSysProcAttr()
+
 	if len(extraEnv) > 0 {
 		cmd.Env = append(os.Environ(), extraEnv...)
-	}
-
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		outputLines <- fmt.Sprintf("fatal: %s", err)
-		return
 	}
 
 	stderr, err := cmd.StderrPipe()
@@ -934,18 +943,9 @@ func childProcess(
 	select {
 	case <-terminate:
 		if runtime.GOOS == "windows" {
-			// XXX: there’s no standard way of signalling to a child to exit gracefully on Windows
-			// But `cardano-node` can watch whether its stdin was closed, we use that as a signal.
-			// cf. <https://github.com/input-output-hk/cardano-launcher/blob/6507cedbce45689fe98619b62596e1a17aaffee4/docs/windows-clean-shutdown.md>
-			// We also cannot use kernel32.dll’s `GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pid)`
-			// (or `CTRL_C_EVENT`), because that sends the interrupt, hkem, “signal” to the whole
-			// process group (sharing a “console”) – including ourselves.
-			if terminateOnWindowsByClosingStdin {
-				stdin.Close()
-			} else {
-				// In a rare event that it hangs, we cannot afford a deadlock here:
-				go cmd.Process.Kill()
-			}
+			fmt.Printf("%s[%d]: sending CTRL_BREAK_EVENT to %s[%d]\n",
+				OurLogPrefix, os.Getpid(), filepath.Base(path), cmd.Process.Pid)
+			windowsSendCtrlBreak(cmd.Process.Pid)
 		} else {
 			cmd.Process.Signal(syscall.SIGTERM)
 		}
@@ -1011,9 +1011,10 @@ func openWithDefaultApp(target string) error {
 	case "darwin":
 		cmd = exec.Command("open", target)
 	case "windows":
-		// XXX: if we don’t pass it through "explorer.exe", we can’t open the log file
-		// that’s currently being written to; the "explorer.exe" trick does it, though
-		cmd = exec.Command("cmd", "/c", "start", "explorer.exe", target)
+		// XXX: there’s this "cmd.exe /c start ${target}" thing, but if we don’t pass our targets
+		// through "explorer.exe" instead, we can’t open the log file that’s currently being written to
+		// Note: don’t HideWindow, because then when opening the logs directory, it won’t show any window
+		cmd = exec.Command("explorer.exe", target)
 	default:
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
