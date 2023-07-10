@@ -98,7 +98,10 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
 
   const cancelWalletFlow = () => history.push(walletRoutePaths.setup.home);
 
-  const handleStartHardwareOnboarding = () => setIsDappConnectorWarningOpen(true);
+  const handleStartHardwareOnboarding = () => {
+    setIsDappConnectorWarningOpen(true);
+    analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
+  };
 
   const sendAnalytics = (
     category: SetupAnalyticsCategories,

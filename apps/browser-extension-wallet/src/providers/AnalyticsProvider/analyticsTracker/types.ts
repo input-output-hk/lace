@@ -35,6 +35,11 @@ export enum PostHogAction {
   // Hardware wallet connect
   OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
   OnboardingHWAnalyticsSkipClick = 'onboarding | hardware wallet | analytics | skip | click',
+  OnboardingHWClick = 'onboarding | hardware wallet | connect | click',
+  OnboardinHWLaceTermsOfUseNextClick = 'onboarding | hardware wallet | lace terms of use | next | click',
+  OnboardingHWConnectNextClick = 'onboarding | hardware wallet | connect hw | next | click',
+  OnboardingHWSelectAccountNextClick = 'onboarding | hardware wallet | select hw account | next | click',
+  OnboardingHWNameNextClick = 'onboarding | hardware wallet | name hw wallet | next | click',
   // Restore wallet
   OnboardingRestoreAnalyticsAgreeClick = 'onboarding | restore wallet | analytics | agree | click',
   OnboardingRestoreAnalyticsSkipClick = 'onboarding | restore wallet | analytics | skip | click',
@@ -91,7 +96,9 @@ export type PostHogActionsKeys =
   | 'ENTER_PASSPHRASE_17_NEXT_CLICK'
   | 'RESTORE_MULTI_ADDR_OK_CLICK'
   | 'RESTORE_MULTI_ADDR_CANCEL_CLICK'
-  | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK';
+  | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK'
+  | 'CONNECT_HW_NEXT_CLICK'
+  | 'SELECT_HW_ACCOUNT_NEXT_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogMetadata = {

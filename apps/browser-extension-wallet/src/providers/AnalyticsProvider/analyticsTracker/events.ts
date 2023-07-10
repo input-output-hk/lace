@@ -52,7 +52,12 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
   },
   hw: {
     ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingHWAnalyticsAgreeClick,
-    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingHWAnalyticsSkipClick
+    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingHWAnalyticsSkipClick,
+    WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingHWNameNextClick,
+    LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardinHWLaceTermsOfUseNextClick,
+    CONNECT_HW_NEXT_CLICK: PostHogAction.OnboardingHWConnectNextClick,
+    SELECT_HW_ACCOUNT_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
+    SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick
   }
 };
 
