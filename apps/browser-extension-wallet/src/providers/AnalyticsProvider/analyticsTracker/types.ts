@@ -32,7 +32,15 @@ export type Metadata = {
 };
 
 export enum PostHogAction {
-  ActionName = 'flow | subflow | view | object | interaction'
+  // Hardware wallet connect
+  OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
+  OnboardingHWAnalyticsSkipClick = 'onboarding | hardware wallet | analytics | skip | click',
+  // Restore wallet
+  OnboardingRestoreAnalyticsAgreeClick = 'onboarding | restore wallet | analytics | agree | click',
+  OnboardingRestoreAnalyticsSkipClick = 'onboarding | restore wallet | analytics | skip | click',
+  // Create new wallet
+  OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
+  OnboardingCreateAnalyticsSkipClick = 'onboarding | new wallet | analytics | skip | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
@@ -45,6 +53,14 @@ export enum ExtensionViews {
   Popup = 'popup'
 }
 
+export enum ExtensionViews {
+  Extended = 'extended',
+  Popup = 'popup'
+}
+export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password';
+export type PostHogActionsKeys = 'ANALYTICS_AGREE_CLICK' | 'ANALYTICS_SKIP_CLICK';
+export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
+export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogMetadata = {
   // eslint-disable-next-line camelcase
   distinct_id?: string;

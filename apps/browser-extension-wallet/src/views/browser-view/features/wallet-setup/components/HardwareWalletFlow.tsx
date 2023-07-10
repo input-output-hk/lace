@@ -19,12 +19,17 @@ import { PinExtension } from './PinExtension';
 import { ErrorDialog } from './ErrorDialog';
 import { StartOverDialog } from '@views/browser/features/wallet-setup/components/StartOverDialog';
 import { useTranslation } from 'react-i18next';
-import { AnalyticsEventNames, EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import {
+  AnalyticsEventNames,
+  EnhancedAnalyticsOptInStatus,
+  postHogOnboardingActions
+} from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { isTrezorHWSupported } from '../helpers';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
+import { SendOboardingAnalyticsEvent } from '../types';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -38,7 +43,7 @@ const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 export interface HardwareWalletFlowProps {
   onCancel: () => void;
   onAppReload: () => void;
-  sendAnalytics: (eventName: string, value?: number) => void;
+  sendAnalytics: SendOboardingAnalyticsEvent;
 }
 
 type HardwareWalletStep = 'legal' | 'analytics' | 'connect' | 'accounts' | 'register' | 'create' | 'finish';
@@ -145,7 +150,13 @@ export const HardwareWalletFlow = ({
     analytics.setOptedInForEnhancedAnalytics(
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
-    sendAnalytics(isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP);
+
+    const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;
+    const postHogAction = isAccepted
+      ? postHogOnboardingActions.hw?.ANALYTICS_AGREE_CLICK
+      : postHogOnboardingActions.hw?.ANALYTICS_SKIP_CLICK;
+
+    sendAnalytics(matomoEvent, postHogAction);
     navigateTo('connect');
   };
 
@@ -202,7 +213,7 @@ export const HardwareWalletFlow = ({
       <WalletSetupLegalStep
         onBack={() => onCancel()}
         onNext={() => {
-          sendAnalytics(Events.LEGAL_STUFF_NEXT, calculateTimeSpentOnPage());
+          sendAnalytics(Events.LEGAL_STUFF_NEXT, undefined, calculateTimeSpentOnPage());
           navigateTo('analytics');
         }}
         translations={walletSetupLegalStepTranslations}

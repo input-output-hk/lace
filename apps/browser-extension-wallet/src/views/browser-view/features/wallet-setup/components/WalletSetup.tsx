@@ -11,11 +11,13 @@ import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ILocalStorage } from '@src/types';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { Portal } from './Portal';
+import { SendOboardingAnalyticsEvent } from '../types';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -98,13 +100,27 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
   const handleRestoreWallet = () => setIsConfirmRestoreOpen(true);
   const handleStartHardwareOnboarding = () => setIsDappConnectorWarningOpen(true);
 
-  const sendAnalytics = (category: SetupAnalyticsCategories, eventName: string, value = 1) =>
-    analytics.sendEvent({
+  const sendAnalytics = (
+    category: SetupAnalyticsCategories,
+    eventName: string,
+    value = 1,
+    postHogAction?: PostHogAction
+  ) => {
+    const event = {
       action: AnalyticsEventActions.CLICK_EVENT,
       category,
       name: eventName,
       value
-    });
+    };
+    analytics.sendEvent(event);
+    if (postHogAction) {
+      analytics.sendEventToPostHog(postHogAction);
+    }
+  };
+
+  const getSendAnalyticsHandler: (eventCategory: SetupAnalyticsCategories) => SendOboardingAnalyticsEvent =
+    (eventCategory) => (event, postHogAction, value) =>
+      sendAnalytics(eventCategory, event, value, postHogAction);
 
   return (
     <Portal>
@@ -167,9 +183,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupWizard
             setupType="create"
             onCancel={cancelWalletFlow}
-            sendAnalytics={(event: string, value: number) =>
-              sendAnalytics(AnalyticsEventCategories.WALLET_CREATE, event, value)
-            }
+            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.WALLET_CREATE)}
             initialStep={initialStep}
           />
         </Route>
@@ -177,9 +191,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupWizard
             setupType={isForgotPasswordFlow ? 'forgot_password' : 'restore'}
             onCancel={cancelWalletFlow}
-            sendAnalytics={(event: string, value: number) =>
-              sendAnalytics(AnalyticsEventCategories.WALLET_RESTORE, event, value)
-            }
+            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.WALLET_RESTORE)}
             initialStep={initialStep}
           />
         </Route>
@@ -187,9 +199,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <HardwareWalletFlow
             onCancel={cancelWalletFlow}
             onAppReload={() => location.reload()}
-            sendAnalytics={(event: string, value: number) =>
-              sendAnalytics(AnalyticsEventCategories.HW_CONNECT, event, value)
-            }
+            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.HW_CONNECT)}
           />
         </Route>
       </Switch>
