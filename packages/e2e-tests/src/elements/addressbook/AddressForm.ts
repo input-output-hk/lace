@@ -1,9 +1,9 @@
-import { clearInputFieldValue } from '../../utils/inputFieldUtils';
-import { browser } from '@wdio/globals';
+import { clearInputFieldValue, setInputFieldValue } from '../../utils/inputFieldUtils';
 
 class AddressForm {
   private NAME_INPUT = '[data-testid="address-form-name-input"]';
   private ADDRESS_INPUT = '[data-testid="address-form-address-input"]';
+  private SEARCH_INPUT = '[data-testid="search-input"]';
   private FORM_ITEM = '.ant-form-item';
   private ERROR = '[role="alert"]';
 
@@ -12,7 +12,7 @@ class AddressForm {
   }
 
   get addressInput() {
-    return $(this.ADDRESS_INPUT);
+    return $(this.ADDRESS_INPUT).$(this.SEARCH_INPUT);
   }
 
   get nameError() {
@@ -24,13 +24,11 @@ class AddressForm {
   }
 
   async enterName(name: string) {
-    await clearInputFieldValue(await this.nameInput);
-    await browser.keys([...name]);
+    await setInputFieldValue(await this.nameInput, name);
   }
 
   async enterAddress(address: string) {
-    await clearInputFieldValue(await this.addressInput);
-    await browser.keys([...address]);
+    await setInputFieldValue(await this.addressInput, address);
   }
 
   async clearNameFieldValue() {
