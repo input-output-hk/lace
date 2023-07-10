@@ -89,11 +89,20 @@ export const AssetInput = ({
 
   useLayoutEffect(() => {
     if (focused) {
-      inputRef.current.focus({
-        cursor: 'end'
+      // place cursor at the end of the input in case user clicks outside of input but within the clickable area
+      inputRef.current.focus(document.activeElement !== inputRef.current.input ? { cursor: 'end' } : undefined);
+    }
+  }, [compactValue, focused, value]);
+
+  const onClick = useCallback(() => {
+    // place cursor at the end of the input in case the formatted(compact) value is different from the real one
+    if (value !== compactValue && !focused) {
+      setTimeout(() => {
+        inputRef.current.focus({ cursor: 'end' });
       });
     }
-  }, [focused]);
+  }, [compactValue, value, focused]);
+
   const { t } = useTranslate();
 
   useEffect(() => {
@@ -195,6 +204,7 @@ export const AssetInput = ({
 
           <Tooltip title={!isSameNumberFormat(value, compactValue) && !focused && displayValue}>
             <Input
+              onMouseDown={onClick}
               ref={inputRef}
               data-testid="coin-configure-input"
               placeholder={placeholderValue}
