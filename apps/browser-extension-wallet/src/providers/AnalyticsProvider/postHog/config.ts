@@ -12,10 +12,9 @@ export const DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP: Record<Wallet.Cardano.NetworkM
 };
 
 export const PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP: Record<Wallet.Cardano.NetworkMagic, string> = {
-  // TODO: add the correct project token
-  [Wallet.Cardano.NetworkMagics.Mainnet]: '1',
-  [Wallet.Cardano.NetworkMagics.Preprod]: '2',
-  [Wallet.Cardano.NetworkMagics.Preview]: '3'
+  [Wallet.Cardano.NetworkMagics.Mainnet]: 'phc_dCx1iT3Ud5tGIRwGqEvpeddFmPcKDGxBzk6rPP58RFE',
+  [Wallet.Cardano.NetworkMagics.Preprod]: 'phc_5sVVmLJ5x6IuipMBZwjudVk5bQcfcBSMjgEOe5gTOh0',
+  [Wallet.Cardano.NetworkMagics.Preview]: 'phc_p7GeKELpQtkValRMvzUXX38TPGhKQYItO7aBRYJfvhW'
 };
 
 type PersistenceConfig = Pick<PostHogConfig, 'disable_persistence' | 'disable_cookie' | 'persistence'>;

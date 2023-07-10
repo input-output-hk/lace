@@ -1,6 +1,5 @@
 /* eslint-disable no-magic-numbers */
 import { Wallet } from '@lace/cardano';
-import { PostHogFlows } from '@providers/AnalyticsProvider/analyticsTracker';
 import { EnvironmentTypes } from '@stores';
 
 type CardanoServiceUrls = {
@@ -20,7 +19,6 @@ export type Config = {
   AVAILABLE_CHAINS: Wallet.ChainName[];
   CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
   SAVED_PRICE_DURATION: number;
-  ENABLED_TRACKING_FLOWS: Array<PostHogFlows>;
 };
 
 // eslint-disable-next-line complexity
@@ -86,8 +84,6 @@ export const config = (): Config => {
     },
     SAVED_PRICE_DURATION: !Number.isNaN(Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES))
       ? Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)
-      : 720,
-    // list of enabled post hog flows that should be track
-    ENABLED_TRACKING_FLOWS: (process.env?.ENABLED_TRACKING_FLOWS?.split(',') as Array<PostHogFlows>) || []
+      : 720
   };
 };
