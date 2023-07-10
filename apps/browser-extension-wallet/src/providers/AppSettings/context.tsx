@@ -10,14 +10,12 @@ export interface AppSettingsProviderProps {
   initialState?: ILocalStorage['appSettings'];
 }
 
-const defaultSettings: ILocalStorage['appSettings'] = { chainName: config().CHAIN };
-
 const useAppSettings = (
   initialState?: ILocalStorage['appSettings']
 ): [ILocalStorage['appSettings'], React.Dispatch<React.SetStateAction<ILocalStorage['appSettings']>>] => {
   const [settings, { updateLocalStorage }] = useLocalStorage(
     appSettingsLocalStorageKey,
-    initialState || defaultSettings
+    initialState || { chainName: config().CHAIN }
   );
 
   return [settings, updateLocalStorage];

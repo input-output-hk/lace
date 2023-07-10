@@ -16,7 +16,7 @@ describe('Testing Drawer component', () => {
   test('should render drawer with content', async () => {
     const { findByTestId } = render(
       <div data-testid="container">
-        <Drawer visible>
+        <Drawer open>
           <>
             container
             <div>content</div>
@@ -25,15 +25,15 @@ describe('Testing Drawer component', () => {
       </div>
     );
 
-    const drawer = await findByTestId('custom-drawer');
-    expect(drawer).toBeInTheDocument();
-    expect(queryByText(drawer, 'content')).toBeInTheDocument();
+    const drawerContent = await findByTestId('drawer-content');
+    expect(drawerContent).toBeInTheDocument();
+    expect(queryByText(drawerContent, 'content')).toBeInTheDocument();
   });
 
   test('should have hiden drawer', async () => {
     const { findByTestId } = render(
       <div data-testid="container">
-        <Drawer visible={false}>
+        <Drawer open={false}>
           <>
             container
             <div>content</div>

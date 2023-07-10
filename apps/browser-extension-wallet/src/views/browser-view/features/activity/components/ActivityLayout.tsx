@@ -106,7 +106,7 @@ export const ActivityLayout = (): ReactElement => {
 
   useEffect(() => {
     if (!walletActivitiesObservable) return;
-    const subscription = walletActivitiesObservable.subscribe();
+    const subscription = walletActivitiesObservable?.subscribe();
     // eslint-disable-next-line consistent-return
     return () => subscription.unsubscribe();
   }, [walletActivitiesObservable]);

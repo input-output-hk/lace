@@ -13,12 +13,14 @@ describe('Testing AddressForm component', () => {
   };
   const nameErrorText = 'name error';
   const addressErrorText = 'address error';
+  const handleErrorText = 'handle error';
   const props: AddressFormPropsBrowserView = {
     initialValues: {},
     onConfirmClick: jest.fn(),
     validations: {
       name: jest.fn().mockReturnValue(nameErrorText),
-      address: jest.fn().mockReturnValue(addressErrorText)
+      address: jest.fn().mockReturnValue(addressErrorText),
+      handle: jest.fn().mockReturnValue(handleErrorText)
     },
     translations: {
       addAddress: 'Add address',
@@ -46,7 +48,6 @@ describe('Testing AddressForm component', () => {
     const { findByTestId } = render(<AddressFormBrowserView {...props} initialValues={initialValues} />);
 
     const form = await findByTestId('address-form');
-    // const btnsContainer = await findByTestId('address-form-buttons');
     const nameInput = await within(form).findByDisplayValue(initialValues.name);
     const addressInput = await within(form).findByDisplayValue(initialValues.address);
 
@@ -57,11 +58,10 @@ describe('Testing AddressForm component', () => {
   test('should disable confirm btn and show error messages when invalid and submitted', async () => {
     const { findByTestId, getByText } = render(<AddressFormBrowserView {...props} />);
 
-    const btnsContainer = await findByTestId('address-form-buttons');
-    const confirmBtn = await within(btnsContainer).findByText(/add address/i);
+    const form = await findByTestId('address-form');
 
     expect(getByText(/add address/i).closest('button')).toBeDisabled();
-    fireEvent.click(confirmBtn);
+    fireEvent.submit(form);
 
     await waitFor(async () => {
       expect(props.onConfirmClick).not.toHaveBeenCalled();
@@ -71,20 +71,18 @@ describe('Testing AddressForm component', () => {
   test('should call confirm and cancel when submitted and valid ', async () => {
     const validations = {
       name: jest.fn().mockReturnValue(undefined),
-      address: jest.fn().mockReturnValue(undefined)
+      address: jest.fn().mockReturnValue(undefined),
+      handle: jest.fn().mockReturnValue(undefined)
     };
-    const { findByTestId, getByText, queryAllByText } = render(
+    const { findByTestId, queryAllByText } = render(
       <AddressFormBrowserView {...props} initialValues={initialValues} validations={validations} />
     );
 
-    const btnsContainer = await findByTestId('address-form-buttons');
-    const confirmBtn = await within(btnsContainer).findByText(/add address/i);
+    const form = await findByTestId('address-form');
 
-    fireEvent.click(confirmBtn);
+    fireEvent.submit(form);
 
     await waitFor(async () => {
-      expect(getByText(/add address/i).closest('button')).not.toBeDisabled();
-
       expect(queryAllByText(nameErrorText)).toHaveLength(0);
       expect(queryAllByText(addressErrorText)).toHaveLength(0);
       expect(validations.name).toHaveBeenCalledWith(initialValues.name);

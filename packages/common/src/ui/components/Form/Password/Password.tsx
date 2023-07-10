@@ -1,4 +1,4 @@
-import { Input, InputProps } from 'antd';
+import { Input, InputProps, InputRef } from 'antd';
 import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import styles from './Password.module.scss';
 import { ReactComponent as OpenEye } from '../../../assets/icons/eye.component.svg';
@@ -35,7 +35,7 @@ export const Password = ({
   autoFocus = false,
   ...rest
 }: PasswordProps): React.ReactElement => {
-  const inputRef = useRef<Input>();
+  const inputRef = useRef<InputRef>();
   const [localVal, setLocalVal] = useState<string>('');
   const [isVisible, setIsVisible] = useState<boolean>(false);
 

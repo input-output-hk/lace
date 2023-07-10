@@ -38,16 +38,6 @@ export interface BuiltTxData {
   reachedMaxAmountList?: (string | Wallet.Cardano.AssetId)[];
 }
 
-// ====== Send sections types ======
-
-export interface SectionConfig {
-  currentSection: Sections;
-  nextSection?: Sections;
-  prevSection?: Sections;
-}
-
-export type SimpleSectionsConfig = Partial<Record<Sections, SectionConfig>>;
-
 export type SpentBalances = Record<string, string>;
 
 export interface AssetInfo {

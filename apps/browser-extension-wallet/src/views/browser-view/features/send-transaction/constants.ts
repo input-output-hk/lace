@@ -1,8 +1,9 @@
-import { SimpleSectionsConfig, Sections } from './types';
+import { SimpleSectionsConfig } from '../../stores/sections-store';
+import { Sections } from './types';
 
 export const defaultOutputKey = 'output1';
 
-export const sectionsConfig: SimpleSectionsConfig = {
+export const sectionsConfig: SimpleSectionsConfig<Sections> = {
   [Sections.FORM]: {
     currentSection: Sections.FORM,
     nextSection: Sections.SUMMARY

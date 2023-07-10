@@ -21,6 +21,7 @@
   flex: 1;
   justify-content: center;
   margin-right: size_unit(2.5);
+  overflow: hidden;
 
   @media (min-width: $breakpoint-minimum) {
     margin-right: size_unit(4);
@@ -30,9 +31,16 @@
     margin: 0;
     margin-bottom: size_unit(1);
     line-height: size_unit(3);
-    font-size: $font-size-bodyLarge;
+    font-size: $font-size-body;
     font-weight: $font-weight-bold;
     color: var(--text-color-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @media (min-width: $breakpoint-minimum) {
+      font-size: $font-size-bodyLarge;
+    }
   }
 
   .address {
