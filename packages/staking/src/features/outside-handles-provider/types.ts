@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 
-type SelectedStakePoolDetails = {
+export type SelectedStakePoolDetails = {
   delegators: number | string;
   description: string;
   hexId: string;
@@ -22,7 +22,7 @@ type SelectedStakePoolDetails = {
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   delegationDetails: Wallet.Cardano.StakePool;
-  delegationStoreSelectedStakePoolDetails: SelectedStakePoolDetails;
+  delegationStoreSelectedStakePoolDetails?: SelectedStakePoolDetails;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo: string }) => void;
   openExternalLink: (href: string) => void;

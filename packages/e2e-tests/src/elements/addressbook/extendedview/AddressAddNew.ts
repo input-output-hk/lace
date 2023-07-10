@@ -8,7 +8,8 @@ export class AddressAddNew extends WebElement {
   private FORM_TITLE_SELECTOR = '//div[@data-testid="drawer-header-title"]';
   private SUBTITLE_SELECTOR = '//div[contains(@class, "AddressForm-module_subTitle")]';
   private NAME_INPUT_SELECTOR = '//input[@data-testid="address-form-name-input"]';
-  private ADDRESS_INPUT_SELECTOR = '//textarea[@data-testid="address-form-address-input"]';
+  private ADDRESS_INPUT_SELECTOR =
+    '//div[@data-testid="address-form-address-input"]//input[@data-testid="search-input"]';
   private SAVE_BUTTON_SELECTOR = '//button[contains(@class, "AddressForm-module_submitBtn")]';
 
   constructor(drawer: boolean) {

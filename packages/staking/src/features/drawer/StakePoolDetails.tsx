@@ -1,8 +1,8 @@
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, useStakePoolDetails } from '../store';
+import { MAX_POOLS_COUNT, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { StakePoolDetail, StakePoolDetailFooter } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
 
@@ -21,15 +21,19 @@ export const StakePoolDetails = ({
   showBackIcon,
   showExitConfirmation,
 }: stakePoolDetailsProps): React.ReactElement => {
-  const { walletStoreInMemoryWallet } = useOutsideHandles();
+  const { walletStoreInMemoryWallet, delegationStoreSelectedStakePoolDetails: openPool } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
   const { simpleSendConfig } = useStakePoolDetails();
-  const [isStaking, setIsStaking] = useState<boolean>();
+  const { draftFull, openPoolSelectedInDraft } = useDelegationPortfolioStore(({ draftPortfolio }) => ({
+    draftFull: draftPortfolio.length === MAX_POOLS_COUNT,
+    openPoolSelectedInDraft:
+      openPool && draftPortfolio.some((pool) => pool.id === Wallet.Cardano.PoolIdHex(openPool.hexId)),
+  }));
   const isTherePendingDelegation = inFlightTx?.some(({ body }) => (body?.certificates?.length || 0) > 0);
 
   const sectionsMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
-      [Sections.DETAIL]: <StakePoolDetail setIsStaking={(staking) => setIsStaking(staking)} />,
+      [Sections.DETAIL]: <StakePoolDetail />,
       [Sections.CONFIRMATION]: <div />,
       [Sections.SIGN]: <div />,
       [Sections.SUCCESS_TX]: <div />,
@@ -49,11 +53,13 @@ export const StakePoolDetails = ({
     [onStake, canDelegate]
   );
 
+  const pendingDelegationAndAnyDetailsAreShown =
+    isTherePendingDelegation && simpleSendConfig.currentSection === Sections.DETAIL;
+  const cannotAddAnotherPoolToDraft = draftFull && !openPoolSelectedInDraft;
+  const footerHidden = cannotAddAnotherPoolToDraft || pendingDelegationAndAnyDetailsAreShown;
+
   const section = useMemo(() => sectionsMap[simpleSendConfig.currentSection], [simpleSendConfig, sectionsMap]);
-  const footer =
-    isStaking || (isTherePendingDelegation && simpleSendConfig.currentSection === Sections.DETAIL)
-      ? undefined
-      : footersMap[simpleSendConfig.currentSection];
+  const footer = footerHidden ? undefined : footersMap[simpleSendConfig.currentSection];
 
   return (
     <StakePoolDetailsDrawer

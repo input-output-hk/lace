@@ -53,7 +53,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
   const availableBalance = useObservable(inMemoryWallet.balance.utxo.available$);
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [redirectToSignFailure] = useRedirection(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const keyAgentType = getKeyAgentType();
   const isUsingHardwareWallet = useMemo(
@@ -135,7 +135,10 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         setDappInfo(backgroundDappInfo);
         setTx(backgroundTx);
       })
-      .catch((error) => setErrorMessage(error));
+      .catch((error) => {
+        setErrorMessage(error);
+        console.log(error);
+      });
   }, []);
 
   const createAssetList = useCallback(
@@ -153,7 +156,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       });
       return assetList;
     },
-    [assets, assetsInfo, t]
+    [assets, assetsInfo]
   );
 
   const addressToNameMap = useMemo(

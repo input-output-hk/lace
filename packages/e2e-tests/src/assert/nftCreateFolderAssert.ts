@@ -18,7 +18,7 @@ class NftCreateFolderAssert {
 
   async assertSeeDrawerNavigation(mode: 'extended' | 'popup') {
     if (mode === 'popup') {
-      await NftCreateFolderPage.drawerHeaderBackButton.waitForDisplayed();
+      await NftCreateFolderPage.drawerHeaderBackButton.waitForClickable();
     } else {
       await NftCreateFolderPage.drawerBody.waitForDisplayed();
       await NftCreateFolderPage.drawerNavigationTitle.waitForDisplayed();
@@ -33,7 +33,7 @@ class NftCreateFolderAssert {
   async assertSeeCreateFolderPage(shouldSee: boolean, mode: 'extended' | 'popup') {
     if (shouldSee) {
       await this.assertSeeDrawerNavigation(mode);
-      await NftCreateFolderPage.drawerHeaderTitle.waitForDisplayed();
+      await NftCreateFolderPage.drawerHeaderTitle.waitForClickable();
       await expect(await NftCreateFolderPage.drawerHeaderTitle.getText()).to.equal(
         await t('browserView.nfts.folderDrawer.nameForm.title')
       );
@@ -59,15 +59,11 @@ class NftCreateFolderAssert {
   }
 
   async assertSeeNextButtonEnabledOnCreateFolderPage(isEnabled: boolean) {
-    await (isEnabled
-      ? expect(await NftCreateFolderPage.nextButton.isEnabled()).to.be.true
-      : expect(await NftCreateFolderPage.nextButton.isEnabled()).to.be.false);
+    await NftCreateFolderPage.nextButton.waitForEnabled({ reverse: !isEnabled });
   }
 
   async assertSeeNextButtonEnabledOnSelectNftsPage(isEnabled: boolean) {
-    await (isEnabled
-      ? expect(await NftSelectNftsPage.nextButton.isEnabled()).to.be.true
-      : expect(await NftSelectNftsPage.nextButton.isEnabled()).to.be.false);
+    await NftSelectNftsPage.nextButton.waitForEnabled({ reverse: !isEnabled });
   }
 
   async assertSeeSelectNFTsPage(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -113,6 +109,17 @@ class NftCreateFolderAssert {
 
   async verifyNoneNftIsSelected() {
     await NftItem.selectedCheckmark.waitForDisplayed({ reverse: true });
+  }
+
+  async assertSeeInputMaxLengthError(shouldBeDisplayed: boolean, maxLength: number) {
+    await NftCreateFolderPage.folderNameInput.inputError.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      const expectedErrorMessage = (await t('browserView.nfts.folderDrawer.nameForm.inputError')).replace(
+        '{{length}}',
+        maxLength.toString()
+      );
+      expect(await NftCreateFolderPage.folderNameInput.inputError.getText()).to.equal(expectedErrorMessage);
+    }
   }
 }
 

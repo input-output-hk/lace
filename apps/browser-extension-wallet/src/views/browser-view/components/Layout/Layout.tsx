@@ -44,7 +44,7 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
   }, [backgroundServices, setDrawerConfig]);
 
   useEffect(() => {
-    const subscription = backgroundServices.requestMessage$.subscribe(({ type, data }: Message): void => {
+    const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
       if (type === MessageTypes.CHANGE_THEME) setTheme((data as ChangeThemeData).theme);
     });
     return () => subscription.unsubscribe();

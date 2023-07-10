@@ -2,6 +2,7 @@ import webTester from '../../actor/webTester';
 import { AddressRow } from '../../elements/addressbook/extendedview/AddressRow';
 import { AddressInput } from '../../elements/addressInput';
 import { expect } from 'chai';
+import { t } from '../../utils/translationService';
 
 class AddressBookExtendedAssert {
   assertSeeAddressOnTheList = async (name: string, address: string, shouldSee: boolean) => {
@@ -23,7 +24,7 @@ class AddressBookExtendedAssert {
 
   assertSeeEmptyAddressInput = async (index?: number) => {
     const text = await webTester.getTextValueFromElement(new AddressInput(index).container());
-    await expect(text).to.equal('');
+    await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
   };
 }
 

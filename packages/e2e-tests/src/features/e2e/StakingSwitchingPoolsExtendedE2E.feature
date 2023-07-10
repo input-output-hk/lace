@@ -19,8 +19,8 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Then I see drawer with stakepool: "OtherStakePool" confirmation screen in extended mode
     And I click "Next" button on staking confirmation drawer
     And I enter correct wallet password and confirm staking
-    Then Switching Delegation success screen is displayed
-    When I click "browserView.staking.details.fail.btn.close" button
+    Then Switching Delegation success screen is displayed in extended mode
+    When I click "Close" button on staking success drawer
     Then Staking exit modal is not displayed
     When I wait until current stake pool switch to "OtherStakePool"
     Then I see currently staking component for stake pool: "OtherStakePool" in extended mode
@@ -42,8 +42,8 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I click "Fine by me" button on "Switching pool?" modal
     And I click "Next" button on staking confirmation drawer
     And I enter correct wallet password and confirm staking
-    Then Switching Delegation success screen is displayed
-    When I click "browserView.staking.details.fail.btn.close" button
+    Then Switching Delegation success screen is displayed in extended mode
+    When I click "Close" button on staking success drawer
     And I wait until current stake pool switch to "-"
     Then I see currently staking component for stake pool: "-" without metadata in extended mode
     When I navigate to Transactions extended page

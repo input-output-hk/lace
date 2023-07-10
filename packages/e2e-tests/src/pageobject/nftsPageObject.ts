@@ -8,7 +8,6 @@ import testContext from '../utils/testContext';
 import NftDetails from '../elements/NFTs/nftDetails';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
-import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 import NftItem from '../elements/NFTs/nftItem';
 
 class NftsPageObject {
@@ -42,15 +41,11 @@ class NftsPageObject {
       : TestWalletName.WalletReceiveNftE2E;
   }
 
-  async setFolderName(name: string): Promise<any> {
-    await NftCreateFolderPage.folderNameInput.input.setValue(name);
-  }
-
   async saveNfts(): Promise<any> {
     const names: string[] = [];
 
-    for (const cont of await NftItem.containers) {
-      names.push(await cont.getText());
+    for (const nftContainer of await NftItem.containers) {
+      names.push(await nftContainer.getText());
     }
     testContext.save('ownedNfts', names);
   }

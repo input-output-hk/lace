@@ -2,7 +2,6 @@ import { When } from '@wdio/cucumber-framework';
 import { Given, Then } from '@cucumber/cucumber';
 import NftsPage from '../elements/NFTs/nftsPage';
 import nftCreateFolderAssert from '../assert/nftCreateFolderAssert';
-import NftsPageObject from '../pageobject/nftsPageObject';
 import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 
 Given(
@@ -52,14 +51,22 @@ When(/^I click "Next" button on "Name your folder" page$/, async () => {
   await NftCreateFolderPage.nextButton.click();
 });
 
-Given(/^I enter: "([^"]*)" into folder name input$/, async (folderName: string) => {
-  await NftsPageObject.setFolderName(folderName);
-});
-
 Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
 });
 
 Then(/^No NFT is selected$/, async () => {
   await nftCreateFolderAssert.verifyNoneNftIsSelected();
+});
+
+When(/^I enter a folder name "([^"]*)" into "Folder name" input$/, async (folderName: string) => {
+  await NftCreateFolderPage.setFolderNameInput(folderName);
+});
+
+When(/^I clear "Folder name" input$/, async () => {
+  await NftCreateFolderPage.clearFolderNameInput();
+});
+
+Then(/^I (see|don't see) "Folder name" input max length (\d+) error$/, async (shouldSee: string, maxLength: number) => {
+  await nftCreateFolderAssert.assertSeeInputMaxLengthError(shouldSee === 'see', maxLength);
 });

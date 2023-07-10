@@ -21,7 +21,7 @@ class NftAssert {
   }
 
   async assertSeeNftList(minimumNumberOfNfts: number) {
-    await NftItem.listContainer.waitForDisplayed();
+    await NftsPage.listContainer.waitForDisplayed();
 
     await browser.waitUntil(async () => (await NftItem.containers.length) >= minimumNumberOfNfts, {
       timeout: 60_000,

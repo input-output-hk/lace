@@ -1,11 +1,12 @@
 import React, { useRef } from 'react';
 import classnames from 'classnames';
 import Icon from '@ant-design/icons';
-import { AutoComplete, Input, AutoCompleteProps, Button } from 'antd';
+import { AutoComplete, AutoCompleteProps, Button, InputRef } from 'antd';
 import { ReactComponent as SearchIcon } from '../../assets/icons/search.component.svg';
 import { ReactComponent as Cross } from '../../assets/icons/cross.component.svg';
 import { ReactComponent as Loader } from '../../assets/icons/loader.component.svg';
 import styles from './Search.module.scss';
+import { Input } from '../Form';
 
 export type SearchProps = AutoCompleteProps & {
   customIcon?: React.ReactElement;
@@ -19,6 +20,8 @@ export type SearchProps = AutoCompleteProps & {
   invalid?: boolean;
   isFocus?: boolean;
   loading?: boolean;
+  label?: string;
+  dataTestId?: string;
 };
 
 const AUTO_COMPLETE_DROPDOWN_OFFSET_X = 0;
@@ -32,6 +35,7 @@ export const Search = ({
   showClear,
   onClearButtonClick,
   disabled,
+  label,
   className,
   invalid,
   onInputFocus,
@@ -40,9 +44,10 @@ export const Search = ({
   isFocus,
   options,
   loading,
+  dataTestId,
   ...rest
 }: SearchProps): React.ReactElement => {
-  const inputRef = useRef<Input>();
+  const inputRef = useRef<InputRef>();
   const onContainerClick = () => {
     if (inputRef?.current) {
       inputRef.current.focus();
@@ -55,7 +60,7 @@ export const Search = ({
         offset: [AUTO_COMPLETE_DROPDOWN_OFFSET_X, AUTO_COMPLETE_DROPDOWN_OFFSET_Y]
       }}
       dropdownClassName={styles.dropdown}
-      data-testid="search"
+      data-testid={dataTestId || 'search'}
       disabled={disabled}
       options={isFocus ? options : []}
       {...rest}
@@ -69,12 +74,12 @@ export const Search = ({
         {withSearchIcon && <SearchIcon className={styles.searchIcon} data-testid="search-icon" />}
         <div className={styles.content}>
           <Input
-            ref={inputRef}
             className={classnames({ [styles.invalid]: invalid })}
             disabled={disabled}
             value={value}
             data-testid="search-input"
             placeholder={inputPlaceholder}
+            label={label}
             bordered={false}
             onFocus={onInputFocus}
             onBlur={onInputBlur}

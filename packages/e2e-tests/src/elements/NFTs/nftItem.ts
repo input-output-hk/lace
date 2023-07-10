@@ -2,15 +2,10 @@
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class NftItem {
-  protected LIST_CONTAINER = '[data-testid="nft-list"]';
   protected NFT_CONTAINER = '[data-testid="nft-item"]';
   private NFT_IMAGE = '[data-testid="nft-image"]';
   private NFT_NAME = '[data-testid="nft-item-name"]';
   private SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
-
-  get listContainer() {
-    return $(this.LIST_CONTAINER);
-  }
 
   get nftContainer() {
     return $(this.NFT_CONTAINER);
