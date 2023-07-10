@@ -55,9 +55,18 @@ type KeysStructure = {
   };
   overview: {
     delegationCard: {
-      status: '';
-      balance: '';
-      pools: '';
+      label: {
+        status: '';
+        balance: '';
+        pools: '';
+      };
+      statuses: {
+        multiDelegation: '';
+        overStaked: '';
+        ready: '';
+        simpleDelegation: '';
+        underStaked: '';
+      };
     };
     stakingInfoCard: {
       fee: '';
