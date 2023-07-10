@@ -26,3 +26,35 @@ Feature: NFT - Folders - Extended view
     And I enter a folder name "01234567890123456789" into "Folder name" input
     Then I don't see "Folder name" input max length 20 error
     And "Next" button is enabled on "Name your folder" page
+
+  @LW-7244
+  Scenario Outline: Extended-view - NFT Folders - "Create folder" flow and warning modal when <action>
+    Given I navigate to NFTs extended page
+    And I click "Create folder" button on NFTs page
+    When <action>
+    Then I see "You'll have to start again" modal
+    Examples:
+      | action                                      |
+      | I close the drawer by clicking close button |
+      | I click outside the drawer                  |
+
+  @LW-7245
+  Scenario: Extended-view - NFT Folders - "Create folder" flow and warning modal cancellation
+    Given I navigate to NFTs extended page
+    And I click "Create folder" button on NFTs page
+    And I see "Create NFT folder" drawer in extended mode
+    And I close the drawer by clicking close button
+    When I click "Cancel" button on "You'll have to start again" modal for create NFTs folder
+    Then I don't see "You'll have to start again" modal
+    And I see "Create NFT folder" drawer in extended mode
+
+    @LW-7246
+    Scenario: Extended-view - NFT Folders - "Create folder" flow and warning modal confirmation
+      Given I navigate to NFTs extended page
+      And I click "Create folder" button on NFTs page
+      And I see "Create NFT folder" drawer in extended mode
+      And I close the drawer by clicking close button
+      When I click "Agree" button on "You'll have to start again" modal for create NFTs folder
+      Then I don't see "You'll have to start again" modal
+      And I don't see "Create NFT folder" drawer in extended mode
+      And A gallery view showing my NFTs is displayed

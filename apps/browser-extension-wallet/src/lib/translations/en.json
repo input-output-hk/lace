@@ -892,6 +892,12 @@
         "description2": "Don’t worry, you won’t loose your NFTs. They will be restored in your main gallery.",
         "confirm": "Confirm",
         "cancel": "Cancel"
+      },
+      "youllHaveToStartAgainModal": {
+        "title": "You'll have to start again",
+        "description": "Are you sure you want to exit? This will not be saved",
+        "cancel": "Cancel",
+        "agree": "Agree"
       }
     },
     "pinExtension.title": "Pin the wallet extension",

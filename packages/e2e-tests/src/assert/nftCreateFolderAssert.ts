@@ -3,6 +3,7 @@ import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import NftFolderNameInput from '../elements/NFTs/nftFolderNameInput';
 import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
+import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -12,23 +13,29 @@ class NftCreateFolderAssert {
     }
   }
 
-  async assertSeeCreateFolderPageDrawerNavigation(mode: 'extended' | 'popup') {
-    if (mode === 'popup') {
-      await NftCreateFolderPage.drawerHeaderBackButton.waitForDisplayed();
+  async assertSeeCreateFolderPageDrawerNavigation(shouldSee: boolean, mode: 'extended' | 'popup') {
+    if (shouldSee) {
+      if (mode === 'popup') {
+        await NftCreateFolderPage.drawerHeaderBackButton.waitForDisplayed();
+      } else {
+        await NftCreateFolderPage.drawerBody.waitForDisplayed();
+        await NftCreateFolderPage.drawerNavigationTitle.waitForDisplayed();
+        await NftCreateFolderPage.drawerNavigationTitle.scrollIntoView();
+        await expect(await NftCreateFolderPage.drawerNavigationTitle.getText()).to.equal(
+          await t('browserView.nfts.folderDrawer.header')
+        );
+        await NftCreateFolderPage.drawerHeaderCloseButton.waitForDisplayed();
+      }
+    } else if (mode === 'popup') {
+      await NftCreateFolderPage.drawerHeaderBackButton.waitForDisplayed({ reverse: true });
     } else {
-      await NftCreateFolderPage.drawerBody.waitForDisplayed();
-      await NftCreateFolderPage.drawerNavigationTitle.waitForDisplayed();
-      await NftCreateFolderPage.drawerNavigationTitle.scrollIntoView();
-      await expect(await NftCreateFolderPage.drawerNavigationTitle.getText()).to.equal(
-        await t('browserView.nfts.folderDrawer.header')
-      );
-      await NftCreateFolderPage.drawerHeaderCloseButton.waitForDisplayed();
+      await NftCreateFolderPage.drawerBody.waitForDisplayed({ reverse: true });
     }
   }
 
   async assertSeeCreateFolderPage(shouldSee: boolean, mode: 'extended' | 'popup') {
     if (shouldSee) {
-      await this.assertSeeCreateFolderPageDrawerNavigation(mode);
+      await this.assertSeeCreateFolderPageDrawerNavigation(shouldSee, mode);
       await NftCreateFolderPage.drawerHeaderTitle.waitForDisplayed();
       await expect(await NftCreateFolderPage.drawerHeaderTitle.getText()).to.equal(
         await t('browserView.nfts.folderDrawer.nameForm.title')
@@ -68,6 +75,33 @@ class NftCreateFolderAssert {
         maxLength.toString()
       );
       expect(await NftCreateFolderPage.folderNameInput.inputError.getText()).to.equal(expectedErrorMessage);
+    }
+  }
+
+  async assertSeeYoullHaveToStartAgainModal(shouldBeDisplayed: boolean) {
+    if (shouldBeDisplayed) {
+      await YoullHaveToStartAgainModal.container.waitForDisplayed();
+      await YoullHaveToStartAgainModal.title.waitForDisplayed();
+      await expect(await YoullHaveToStartAgainModal.title.getText()).to.equal(
+        await t('browserView.nfts.youllHaveToStartAgainModal.title')
+      );
+
+      await YoullHaveToStartAgainModal.description.waitForDisplayed();
+      await expect(await YoullHaveToStartAgainModal.description.getText()).to.equal(
+        await t('browserView.nfts.youllHaveToStartAgainModal.description')
+      );
+
+      await YoullHaveToStartAgainModal.cancelButton.waitForDisplayed();
+      await expect(await YoullHaveToStartAgainModal.cancelButton.getText()).to.equal(
+        await t('browserView.nfts.youllHaveToStartAgainModal.cancel')
+      );
+
+      await YoullHaveToStartAgainModal.agreeButton.waitForDisplayed();
+      await expect(await YoullHaveToStartAgainModal.agreeButton.getText()).to.equal(
+        await t('browserView.nfts.youllHaveToStartAgainModal.agree')
+      );
+    } else {
+      await YoullHaveToStartAgainModal.container.waitForDisplayed({ reverse: true });
     }
   }
 }
