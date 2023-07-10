@@ -5,8 +5,16 @@ import { t } from '../../utils/translationService';
 
 class AddNewAddressDrawerAssert {
   async assertSeeAddNewAddressDrawer(mode: 'extended' | 'popup', isSendFlow = false) {
-    await AddNewAddressDrawer.drawerHeaderBackButton.waitForDisplayed({ reverse: mode === 'extended' });
-    await AddNewAddressDrawer.drawerHeaderCloseButton.waitForDisplayed({ reverse: mode === 'popup' });
+    await AddNewAddressDrawer.drawerHeaderBackButton.waitForDisplayed({
+      reverse: isSendFlow ? false : mode === 'extended'
+    });
+    // TODO: uncomment and remove L15:17 when LW-7399 is resolved
+    // await AddNewAddressDrawer.drawerHeaderCloseButton.waitForDisplayed({
+    //   reverse: mode === 'popup'
+    // });
+    await AddNewAddressDrawer.drawerHeaderCloseButton.waitForDisplayed({
+      reverse: isSendFlow ? false : mode === 'popup'
+    });
     await AddNewAddressDrawer.drawerNavigationTitle.waitForDisplayed({ reverse: mode === 'popup' });
     if (mode === 'extended') {
       const expectedTitle = isSendFlow ? await t('core.sendReceive.send') : await t('browserView.addressBook.title');

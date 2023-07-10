@@ -1,4 +1,4 @@
-import { setInputFieldValue } from '../../utils/inputFieldUtils';
+import { setInputFieldValue, clearInputFieldValue } from '../../utils/inputFieldUtils';
 
 class AddressForm {
   private NAME_INPUT = '[data-testid="address-form-name-input"]';
@@ -28,6 +28,14 @@ class AddressForm {
 
   async enterAddress(address: string) {
     await setInputFieldValue(await this.addressInput, address);
+  }
+
+  async clearNameFieldValue() {
+    await clearInputFieldValue(await this.nameInput);
+  }
+
+  async clearAddressFieldValue() {
+    await clearInputFieldValue(await this.addressInput);
   }
 }
 

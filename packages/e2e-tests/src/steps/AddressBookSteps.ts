@@ -9,9 +9,8 @@ import AddNewAddressDrawerAssert from '../assert/addressBook/AddNewAddressDrawer
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
 import EditAddressDrawer from '../elements/addressbook/EditAddressDrawer';
 import EditAddressDrawerAssert from '../assert/addressBook/EditAddressDrawerAssert';
-import AddressForm from '../elements/addressbook/AddressForm';
-import AddressFormAssert from '../assert/addressBook/AddressFormAssert';
-import { browser } from '@wdio/globals';
+import testContext from '../utils/testContext';
+import commonAssert from '../assert/commonAssert';
 
 Then(/^I see address book title$/, async () => {
   await AddressBookPageAssert.assertSeeAddressBookTitle();
@@ -43,6 +42,7 @@ Then(
 When(/^I click "(Copy|Delete|Edit)" button on address details page$/, async (button: 'Copy' | 'Delete' | 'Edit') => {
   switch (button) {
     case 'Copy':
+      await testContext.save('address', await AddressDetails.address.getText());
       await AddressDetails.copyButton.waitForClickable();
       await AddressDetails.copyButton.click();
       break;
@@ -129,19 +129,7 @@ Then(/^"Done" button is (enabled|disabled) on "Edit address" drawer$/, async (st
   await EditAddressDrawerAssert.assertDoneButtonEnabled(state === 'enabled');
 });
 
-When(
-  /^I fill address form with ""?([^"]*[^"])""? name and ""?([^"]*[^"])""? address$/,
-  async (name: string, address: string) => {
-    await AddressForm.enterName(name === 'empty' ? '' : name);
-    await AddressForm.enterAddress(address === 'empty' ? '' : address);
-    await browser.pause(500); // Wait for input field value validation
-  }
-);
-
-Then(
-  /^Contact "([^"]*)" name error and "([^"]*)" address error are displayed$/,
-  async (nameError: string, addressError: string) => {
-    await AddressFormAssert.assertSeeNameError(nameError !== 'empty', nameError);
-    await AddressFormAssert.assertSeeAddressError(addressError !== 'empty', addressError);
-  }
-);
+Then(/^address is saved to clipboard$/, async () => {
+  const expectedWalletAddress = testContext.load('address') as string;
+  await commonAssert.assertClipboardContains(expectedWalletAddress);
+});

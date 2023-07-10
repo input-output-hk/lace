@@ -13,7 +13,7 @@ Feature: Address book - popup view
   Scenario: Popup-view - Address Book - Copy address button
     Given I have 3 addresses in my address book in popup mode
     When I click address on the list with name "Byron"
-    And I click on "Copy" button on address detail drawer
+    And I click "Copy" button on address details page
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
     And address is saved to clipboard
 
@@ -64,7 +64,7 @@ Feature: Address book - popup view
     Given I have 3 addresses in my address book in popup mode
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page
-    And I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" outside drawer
+    And I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
     And "Done" button is enabled on "Edit address" drawer
     Then I click "Done" button on "Edit address" drawer
     And I see a toast with message: "<toast_message>"
@@ -106,7 +106,7 @@ Feature: Address book - popup view
     When I click "Add address" button on address book page
     Then I see "Add new address" drawer in popup mode
     And "Save address" button is disabled on "Add new address" drawer
-    When I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" in drawer
+    When I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
     And I click "Save address" button on "Add new address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.addAddress"
     And I see address that has name "<name_label>" and shortened address "<wallet_address>" on the list
@@ -152,7 +152,7 @@ Feature: Address book - popup view
   Scenario Outline: Popup-view - Address Book - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in popup mode
     When I click "Add address" button on address book page
-    And I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" outside drawer
+    And I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
     And I click "Save address" button on "Add new address" drawer
     Then I see a toast with message: "<toast_message>"
     Examples:
@@ -165,9 +165,9 @@ Feature: Address book - popup view
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page
     Then I see "Add new address" drawer in popup mode
-    When I fill "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address field in address book outside drawer
-    When I fill "empty" name for address details outside drawer
-    And I click on address book background to lose focus in drawer
+    When I fill address form with "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
+    When I fill address form with "empty" name
+    And I click outside address form to lose focus
     Then Contact "Name field is required" name error and "empty" address error are displayed
 
   @LW-4783
@@ -176,9 +176,9 @@ Feature: Address book - popup view
     When I click "Add address" button on address book page
     Then I see "Add new address" drawer in popup mode
     When I fill address form with "name_ok" name and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
-    And I remove Name field content in address book outside drawer
-    And I remove Address field content in address book outside drawer
-    And I click on address book background to lose focus in drawer
+    And I clear name field value in address form
+    And I clear address field value in address form
+    And I click outside address form to lose focus
     Then Contact "empty" name error and "empty" address error are displayed
     And "Save address" button is disabled on "Add new address" drawer
 
@@ -187,7 +187,7 @@ Feature: Address book - popup view
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page
     Then I see "Add new address" drawer in popup mode
-    When I fill "name_ok" name for address details in drawer
-    And I fill "empty" address field in address book in drawer
-    And I click on address book background to lose focus in drawer
+    When I fill address form with "name_ok" name
+    And I fill address form with "empty" address
+    And I click outside address form to lose focus
     Then Contact "empty" name error and "Address field is required" address error are displayed

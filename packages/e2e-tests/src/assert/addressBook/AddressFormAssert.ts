@@ -20,6 +20,10 @@ class AddressFormAssert {
       expect(await AddressForm.addressError.getText()).to.equal(expectedAddressError);
     }
   };
+
+  assertSeeAddressInAddressInput = async (expectedAddress: string) => {
+    expect(await AddressForm.addressInput.getValue()).to.equal(expectedAddress);
+  };
 }
 
 export default new AddressFormAssert();
