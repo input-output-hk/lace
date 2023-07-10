@@ -7,13 +7,30 @@ import { ToastProps } from '@lace/common';
 import { addressErrorMessage, nameErrorMessage } from '@lib/storage/helpers';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
+import { HandleProvider, HandleResolution } from '@cardano-sdk/core';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
-const ADA_HANDLE_PREFIX = '$';
-const ADA_HANDLE_THRESHOLD = 2;
 
-// prettier-ignore
 const hasWhiteSpace = (s: string) => s.trim() !== s;
+
+export const verifyHandle = async (
+  value: string,
+  handleResolver: HandleProvider
+): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
+  try {
+    const resolvedHandles = await handleResolver.resolveHandles({ handles: [value.slice(1)] });
+
+    if (resolvedHandles.length === 0) {
+      return { valid: false };
+    }
+    return { valid: true, handles: resolvedHandles };
+  } catch (error) {
+    return {
+      valid: false,
+      message: `Error occurred during handle verification: ${error}`
+    };
+  }
+};
 
 export const isValidAddress = (address: string): boolean => {
   let isValid;
@@ -42,6 +59,14 @@ export const validateWalletAddress = (address: string): string => {
   return !isValid ? i18n.t('browserView.addressBook.form.incorrectCardanoAddress') : '';
 };
 
+export const validateWalletHandle = async (value: string, handleResolver: HandleProvider): Promise<string> => {
+  const res = (await verifyHandle(value, handleResolver)).handles;
+  if (!res) {
+    return i18n.t('general.errors.incorrectHandle');
+  }
+  return '';
+};
+
 // popup view specific validations
 export const validateAddressBookName = (value: string, translateFn: TFunction): ValidationResult =>
   value.length > MAX_ADDRESS_BOOK_NAME_LENGTH
@@ -50,9 +75,6 @@ export const validateAddressBookName = (value: string, translateFn: TFunction): 
         message: translateFn('addressBook.errors.nameTooLong', { maxLength: MAX_ADDRESS_BOOK_NAME_LENGTH })
       }
     : { valid: true };
-
-export const validateHandle = (value: string): boolean =>
-  value && value.charAt(0) === ADA_HANDLE_PREFIX && value.length > ADA_HANDLE_THRESHOLD;
 
 export const validateMainnetAddress = (address: string): boolean =>
   // is Shelley era mainnet address

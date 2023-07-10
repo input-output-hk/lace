@@ -1,5 +1,7 @@
+import { PostHogAction, PostHogOnboardingActionsType } from './types';
+
 const WalletSetup = {
-  ANALYTICS_AGREE: 'analytics-agree',
+  ANALYTICS_AGREE: 'analytics-agree_browser',
   ANALYTICS_SKIP: 'analytics-skip',
   CONNECT_HW_START: 'connect-hw-start',
   CREATE_WALLET_START: 'create-wallet-start',
@@ -16,6 +18,50 @@ const WalletSetup = {
   SETUP_FINISHED_NEXT: 'setup-finished-next', // Onboarding goal trigger
   WALLET_NAME_NEXT: 'wallet-name-next',
   WALLET_PASSWORD_NEXT: 'wallet-password-next'
+};
+
+export const postHogOnboardingActions: PostHogOnboardingActionsType = {
+  create: {
+    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingCreateAnalyticsAgreeClick,
+    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingCreateAnalyticsSkipClick,
+    SETUP_OPTION_CLICK: PostHogAction.OnboardingCreateClick,
+    LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardingCreateLaceTermsOfUseNextClick,
+    WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingCreateWalletNameNextClick,
+    WALLET_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingCreateWalletPasswordNextClick,
+    PASSPHRASE_INTRO_NEXT_CLICK: PostHogAction.OnboardingCreatePassphraseIntroNextClick,
+    WRITE_PASSPHRASE_01_NEXT_CLICK: PostHogAction.OnboardingCreateWritePassphrase01NextClick,
+    WRITE_PASSPHRASE_09_NEXT_CLICK: PostHogAction.OnboardingCreateWritePassphrase09NextClick,
+    WRITE_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingCreateWritePassphrase17NextClick,
+    ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase01NextClick,
+    ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase09NextClick,
+    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase17NextClick,
+    DONE_GO_TO_WALLET: PostHogAction.OnboardingCreateDoneGoToWallet
+  },
+  restore: {
+    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingRestoreAnalyticsAgreeClick,
+    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingRestoreAnalyticsSkipClick,
+    SETUP_OPTION_CLICK: PostHogAction.OnboardingRestoreClick,
+    LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardingRestoreLaceTermsOfUseNextClick,
+    WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNameNextClick,
+    WALLET_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletPasswordNextClick,
+    RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK: PostHogAction.OnboardingRestoreRecoveryPhraseLengthNextClick,
+    RESTORE_MULTI_ADDR_CANCEL_CLICK: PostHogAction.OnboardingRestoreWarningMultiAddressWalletCancelClick,
+    RESTORE_MULTI_ADDR_OK_CLICK: PostHogAction.OnboardingRestoreWarningMultiAddressWalletOkClick,
+    ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase01NextClick,
+    ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase09NextClick,
+    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase17NextClick,
+    DONE_GO_TO_WALLET: PostHogAction.OnboardingRestoreDoneGoToWallet
+  },
+  hw: {
+    ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingHWAnalyticsAgreeClick,
+    ANALYTICS_SKIP_CLICK: PostHogAction.OnboardingHWAnalyticsSkipClick,
+    WALLET_NAME_NEXT_CLICK: PostHogAction.OnboardingHWNameNextClick,
+    LACE_TERMS_OF_USE_NEXT_CLICK: PostHogAction.OnboardinHWLaceTermsOfUseNextClick,
+    CONNECT_HW_NEXT_CLICK: PostHogAction.OnboardingHWConnectNextClick,
+    SELECT_HW_ACCOUNT_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
+    SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick,
+    DONE_GO_TO_WALLET: PostHogAction.OnboardingHWDoneGoToWallet
+  }
 };
 
 // TODO: can we have browser and popup as a custom dimension or similar instead of in the event name? [LW-5452]

@@ -14,7 +14,7 @@ export const WalletStatusContainer = (): React.ReactElement => {
   const status$ = useSyncStatus();
 
   useEffect(() => {
-    const subscription = status$.subscribe((res: typeof DEFAULT_WALLET_STATUS) => {
+    const subscription = status$?.subscribe((res: typeof DEFAULT_WALLET_STATUS) => {
       setSyncStatus(res);
     });
 

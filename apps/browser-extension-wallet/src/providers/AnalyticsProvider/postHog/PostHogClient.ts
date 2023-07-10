@@ -41,16 +41,16 @@ export class PostHogClient {
     });
   }
 
-  sendPageNavigationEvent = async (pageTitle: string): Promise<void> => {
+  sendPageNavigationEvent = async (eventName: string): Promise<void> => {
     if (!this.initialized) {
       await this.init();
     }
 
-    console.debug('[ANALYTICS] Logging page navigation event to PostHog', pageTitle);
+    console.debug('[ANALYTICS] Logging page navigation event to PostHog', eventName);
 
-    posthog.capture('pageview', {
+    posthog.capture('$pageview', {
       ...(await this.getEventMetadata()),
-      action_name: pageTitle
+      event: eventName
     });
   };
 

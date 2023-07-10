@@ -27,7 +27,7 @@ export const SendWarningModal = ({ isPopupView }: SendWarningModalProps): React.
   const [, setIsDrawerVisible] = useDrawer();
   const reset = useResetStore();
   const resetUi = useResetUiStore();
-  const [redirectToOverview] = useRedirection(walletRoutePaths.assets);
+  const redirectToOverview = useRedirection(walletRoutePaths.assets);
   const { currentSection: section } = useSections();
 
   const analytics = useAnalyticsContext();

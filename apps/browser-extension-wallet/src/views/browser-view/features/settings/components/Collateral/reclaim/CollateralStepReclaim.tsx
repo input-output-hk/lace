@@ -2,8 +2,8 @@ import { Banner } from '@lace/common';
 import { Typography } from 'antd';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import styles from '../SettingsLayout.module.scss';
-import collateralStyles from './Collateral.module.scss';
+import styles from '../../SettingsLayout.module.scss';
+import collateralStyles from '../Collateral.module.scss';
 
 const { Text } = Typography;
 

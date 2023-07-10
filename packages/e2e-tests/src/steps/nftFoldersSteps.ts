@@ -2,6 +2,7 @@ import { When } from '@wdio/cucumber-framework';
 import { Given, Then } from '@cucumber/cucumber';
 import NftsPage from '../elements/NFTs/nftsPage';
 import nftCreateFolderAssert from '../assert/nftCreateFolderAssert';
+import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 
 Given(
   /^I (see|do not see) "Create folder" button on NFTs page in (popup|extended) mode$/,
@@ -31,3 +32,15 @@ Then(
     await nftCreateFolderAssert.assertSeeNextButtonEnabled(isButtonEnabled === 'enabled');
   }
 );
+
+When(/^I enter a folder name "([^"]*)" into "Folder name" input$/, async (folderName: string) => {
+  await NftCreateFolderPage.setFolderNameInput(folderName);
+});
+
+When(/^I clear "Folder name" input$/, async () => {
+  await NftCreateFolderPage.clearFolderNameInput();
+});
+
+Then(/^I (see|don't see) "Folder name" input max length (\d+) error$/, async (shouldSee: string, maxLength: number) => {
+  await nftCreateFolderAssert.assertSeeInputMaxLengthError(shouldSee === 'see', maxLength);
+});

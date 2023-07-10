@@ -46,7 +46,7 @@ export const DelegationContainer = (): React.ReactElement => {
   } = useWalletStore();
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
   const [searchValue, setSearchValue] = useState<string | undefined>();
-  const [redirectToReceive] = useRedirection(walletRoutePaths.receive);
+  const redirectToReceive = useRedirection(walletRoutePaths.receive);
   const dialogHiddenByUser = localStorage.getItem(STORAGE_MEMO_ENTRY_NAME) === 'true';
   const shouldShowAcknowledgmentDialog = !dialogHiddenByUser && !isInMemory;
   const [isTransitionAcknowledgmentDialogVisible, setIsTransitionAcknowledgmentDialogVisible] =

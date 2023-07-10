@@ -41,8 +41,8 @@ export const DappConfirmData = (): React.ReactElement => {
   } = useViewsFlowContext();
   const { getKeyAgentType } = useWalletStore();
   const { t } = useTranslation();
-  const [redirectToSignFailure] = useRedirection(dAppRoutePaths.dappTxSignFailure);
-  const [redirectToSignSuccess] = useRedirection(dAppRoutePaths.dappTxSignSuccess);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const isUsingHardwareWallet = useMemo(
