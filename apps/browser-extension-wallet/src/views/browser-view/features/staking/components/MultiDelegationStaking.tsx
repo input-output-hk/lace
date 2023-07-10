@@ -15,7 +15,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
   const { setWalletPassword } = useBackgroundServiceAPIContext();
   const delegationDetails = useDelegationDetails();
   const selectedStakePoolDetails = useDelegationStore(stakePoolDetailsSelector);
-  const { setDelegationTxBuilder, setDelegationTxFee, setSelectedStakePool, selectedStakePool } = useDelegationStore();
+  const { setDelegationTxBuilder, delegationTxFee, setDelegationTxFee, setSelectedStakePool, selectedStakePool } =
+    useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const { password, removePassword } = usePassword();
   const { setIsRestaking } = useSubmitingState();
@@ -38,6 +39,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreSetSelectedStakePool: setSelectedStakePool,
         delegationStoreSetDelegationTxFee: setDelegationTxFee,
+        delegationStoreDelegationTxFee: delegationTxFee,
         delegationStoreSelectedStakePool: selectedStakePool,
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
