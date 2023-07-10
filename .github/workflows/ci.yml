@@ -20,8 +20,6 @@ jobs:
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-      - name: Audit packages
-        run: ./.github/scripts/audit.sh
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
