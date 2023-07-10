@@ -55,7 +55,7 @@ func makeSysProcAttr() *syscall.SysProcAttr {
 func windowsSendCtrlBreak(pid int) {
 	path := ourpaths.LibexecDir + string(filepath.Separator) + "sigbreak.exe"
 	var cmd *exec.Cmd
-	cmd = exec.Command(path, fmt.Sprintf("%d", pid))
+	cmd = exec.Command(path, "break", fmt.Sprintf("%d", pid))
 	cmd.SysProcAttr =  &syscall.SysProcAttr{
 		// XXX: if we don’t create a new console for sigbreak.exe, the signal not always lands
 		CreationFlags: 0x00000010, // CREATE_NEW_CONSOLE not defined in syscall.*
