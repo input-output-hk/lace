@@ -14,7 +14,8 @@ export const chart = style({
 });
 
 export const info = style({
-  width: 300,
+  // TODO: change to 300 according to designs
+  width: 400,
 });
 
 export const infoLabel = style({

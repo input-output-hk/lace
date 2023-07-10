@@ -5,7 +5,7 @@ import { useBackgroundServiceAPIContext, useExternalLinkOpener, useTheme } from 
 // https://github.com/import-js/eslint-plugin-import/issues/1810
 // eslint-disable-next-line import/no-unresolved
 import '@lace/staking/index.css';
-import { useDelegationDetails } from '@hooks';
+import { useBalances, useDelegationDetails, useFetchCoinPrice, useStakingRewards } from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
@@ -19,6 +19,9 @@ export const MultiDelegationStaking = (): JSX.Element => {
   const openExternalLink = useExternalLinkOpener();
   const { password, removePassword } = usePassword();
   const { setIsRestaking } = useSubmitingState();
+  const { priceResult } = useFetchCoinPrice();
+  const { balance } = useBalances(priceResult?.cardano?.price);
+  const stakingRewards = useStakingRewards();
   const {
     getKeyAgentType,
     inMemoryWallet,
@@ -28,13 +31,16 @@ export const MultiDelegationStaking = (): JSX.Element => {
     <OutsideHandlesProvider
       {...{
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
+        balancesBalance: balance,
         delegationDetails,
         delegationStoreSelectedStakePoolDetails: selectedStakePoolDetails,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreSetSelectedStakePool: setSelectedStakePool,
+        fetchCoinPricePriceResult: priceResult,
         openExternalLink,
         password,
         passwordRemovePassword: removePassword,
+        stakingRewards,
         submittingStateSetIsRestaking: setIsRestaking,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
