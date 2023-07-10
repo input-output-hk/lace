@@ -22,8 +22,7 @@ import { useTranslation } from 'react-i18next';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
-  postHogOnboardingActions,
-  PostHogAction
+  postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 import { walletRoutePaths } from '@routes/wallet-paths';
@@ -277,7 +276,7 @@ export const HardwareWalletFlow = ({
     finish: () => (
       <WalletSetupFinalStep
         onFinish={async () => {
-          await sendAnalytics(Events.SETUP_FINISHED_NEXT, PostHogAction.OnboardingHWDoneGoToWallet);
+          await sendAnalytics(Events.SETUP_FINISHED_NEXT, postHogOnboardingActions.hw?.DONE_GO_TO_WALLET);
           await handleFinishCreation();
           // Workaround to enable staking with Ledger right after the onboarding LW-5564
           window.location.reload();

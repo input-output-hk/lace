@@ -22,8 +22,7 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
-  postHogOnboardingActions,
-  PostHogAction
+  postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 
@@ -483,12 +482,7 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Finish && (
         <WalletSetupFinalStep
           onFinish={() => {
-            sendAnalytics(
-              Events.SETUP_FINISHED_NEXT,
-              setupType === 'restore'
-                ? PostHogAction.OnboardingRestoreDoneGoToWallet
-                : PostHogAction.OnboardingCreateDoneGoToWallet
-            );
+            sendAnalytics(Events.SETUP_FINISHED_NEXT, postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
             goToMyWallet();
           }}
           translations={walletSetupFinalStepTranslations}
