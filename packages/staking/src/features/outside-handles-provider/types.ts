@@ -29,6 +29,11 @@ type Balance = {
   available: WalletBalance;
 };
 
+export interface CurrencyInfo {
+  code: string;
+  symbol: string;
+}
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   balancesBalance: Balance;
@@ -38,8 +43,12 @@ export type OutsideHandlesContextValue = {
   };
   delegationDetails: Wallet.Cardano.StakePool;
   delegationStoreSelectedStakePoolDetails?: SelectedStakePoolDetails;
+  delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo: string }) => void;
+  delegationStoreSetDelegationTxFee: (fee?: string) => void;
+  delegationStoreDelegationTxFee?: string;
+  delegationStoreDelegationTxBuilder?: TxBuilder;
   fetchCoinPricePriceResult: {
     cardano: {
       price: number;
@@ -53,4 +62,5 @@ export type OutsideHandlesContextValue = {
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
+  currencyStoreFiatCurrency: CurrencyInfo;
 };
