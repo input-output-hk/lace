@@ -13,8 +13,8 @@ import { useWalletStore } from '@src/stores';
 
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -212,9 +212,9 @@ export const StakePoolDetailFooter = ({
 
   const onStakeClick = useCallback(() => {
     if (canDelegate) {
-      analytics.sendEvent({
-        category: AnalyticsEventCategories.STAKING,
-        action: AnalyticsEventActions.CLICK_EVENT,
+      analytics.sendEventToMatomo({
+        category: MatomoEventCategories.STAKING,
+        action: MatomoEventActions.CLICK_EVENT,
         name: popupView
           ? AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_POPUP
           : AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_BROWSER

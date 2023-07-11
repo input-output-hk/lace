@@ -23,8 +23,8 @@ import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { getTokenList, NFT } from '@src/utils/get-token-list';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { DetailsDrawer } from './DetailsDrawer';
@@ -92,9 +92,9 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const onSelectNft = useCallback(
     (nft) => {
       setSelectedNft(nft);
-      analytics.sendEvent({
-        category: AnalyticsEventCategories.VIEW_NFT,
-        action: AnalyticsEventActions.CLICK_EVENT,
+      analytics.sendEventToMatomo({
+        category: MatomoEventCategories.VIEW_NFT,
+        action: MatomoEventActions.CLICK_EVENT,
         name: AnalyticsEventNames.ViewNFTs.VIEW_NFT_DETAILS_BROWSER
       });
     },
@@ -179,9 +179,9 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, [blockchainProvider]);
 
   const onSendAsset = useCallback(() => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_NFT,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_NFT,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewNFTs.SEND_NFT_BROWSER
     });
     closeNftDetails();

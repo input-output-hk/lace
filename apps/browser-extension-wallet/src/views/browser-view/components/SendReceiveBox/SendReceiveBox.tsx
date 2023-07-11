@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext as useAnalytics } from '@providers/AnalyticsProvider';
 import styles from './SendReceiveBox.module.scss';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -30,9 +30,9 @@ export const SendReceiveBox = (): React.ReactElement => {
       )
     });
   const openSend = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.SEND_TRANSACTION,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.SEND_TRANSACTION,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.SendTransaction.SEND_TX_BUTTON_BROWSER
     });
     setDrawerConfig({ content: DrawerContent.SEND_TRANSACTION });

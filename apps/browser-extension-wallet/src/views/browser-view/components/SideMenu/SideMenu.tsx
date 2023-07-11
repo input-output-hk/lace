@@ -4,8 +4,8 @@ import { useHistory } from 'react-router-dom';
 import { MenuItemList } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { sideMenuConfig } from './side-menu-config';
@@ -34,10 +34,10 @@ export const SideMenu = (): React.ReactElement => {
     return () => unregisterListener();
   }, [listen]);
 
-  const sendAnalytics = (category: AnalyticsEventCategories, name: string) => {
-    analytics.sendEvent({
+  const sendAnalytics = (category: MatomoEventCategories, name: string) => {
+    analytics.sendEventToMatomo({
       category,
-      action: AnalyticsEventActions.CLICK_EVENT,
+      action: MatomoEventActions.CLICK_EVENT,
       name
     });
   };
@@ -45,19 +45,19 @@ export const SideMenu = (): React.ReactElement => {
   const handleRedirection: MenuProps['onClick'] = (field) => {
     switch (field.key) {
       case routes.assets:
-        sendAnalytics(AnalyticsEventCategories.VIEW_TOKENS, AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_BROWSER);
+        sendAnalytics(MatomoEventCategories.VIEW_TOKENS, AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_BROWSER);
         break;
       case routes.staking:
-        sendAnalytics(AnalyticsEventCategories.STAKING, AnalyticsEventNames.Staking.VIEW_STAKING_BROWSER);
+        sendAnalytics(MatomoEventCategories.STAKING, AnalyticsEventNames.Staking.VIEW_STAKING_BROWSER);
         break;
       case routes.activity:
         sendAnalytics(
-          AnalyticsEventCategories.VIEW_TRANSACTIONS,
+          MatomoEventCategories.VIEW_TRANSACTIONS,
           AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_BROWSER
         );
         break;
       case routes.nfts:
-        sendAnalytics(AnalyticsEventCategories.VIEW_NFT, AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_BROWSER);
+        sendAnalytics(MatomoEventCategories.VIEW_NFT, AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_BROWSER);
     }
     push(field.key);
   };

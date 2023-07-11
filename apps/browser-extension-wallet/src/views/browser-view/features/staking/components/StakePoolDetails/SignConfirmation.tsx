@@ -10,8 +10,8 @@ import { useDelegationTransaction } from '@views/browser/features/staking/hooks'
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useDelegationDetails, useWalletManager } from '@hooks';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -75,9 +75,9 @@ export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): R
   }, [removePassword]);
 
   const sendAnalytics = useCallback(() => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.STAKING,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.STAKING,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_POPUP
         : AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_BROWSER

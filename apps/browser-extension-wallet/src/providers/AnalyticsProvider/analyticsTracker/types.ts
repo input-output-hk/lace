@@ -1,11 +1,9 @@
-// TODO: rename to MatomoEventActions (https://input-output.atlassian.net/browse/LW-7197)
-export enum AnalyticsEventActions {
+export enum MatomoEventActions {
   CLICK_EVENT = 'click-event',
   HOVER_EVENT = 'hover-event'
 }
 
-// TODO: rename to MatomoEventCategories (https://input-output.atlassian.net/browse/LW-7197)
-export enum AnalyticsEventCategories {
+export enum MatomoEventCategories {
   SEND_TRANSACTION = 'send-transaction',
   WALLET_CREATE = 'wallet-create',
   WALLET_RESTORE = 'wallet-restore',
@@ -17,10 +15,9 @@ export enum AnalyticsEventCategories {
   STAKING = 'staking'
 }
 
-// TODO: rename to MatomoSendEventProps (https://input-output.atlassian.net/browse/LW-7197)
-export type SendEventProps = {
-  category: AnalyticsEventCategories;
-  action: AnalyticsEventActions;
+export type MatomoSendEventProps = {
+  category: MatomoEventCategories;
+  action: MatomoEventActions;
   name: string;
   value?: number;
 };

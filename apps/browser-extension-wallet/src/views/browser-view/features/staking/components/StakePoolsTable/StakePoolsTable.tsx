@@ -12,8 +12,8 @@ import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import styles from './StakePoolsTable.modules.scss';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -103,9 +103,9 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           logo,
           ...stakePool,
           onClick: (): void => {
-            analytics.sendEvent({
-              category: AnalyticsEventCategories.STAKING,
-              action: AnalyticsEventActions.CLICK_EVENT,
+            analytics.sendEventToMatomo({
+              category: MatomoEventCategories.STAKING,
+              action: MatomoEventActions.CLICK_EVENT,
               name: AnalyticsEventNames.Staking.VIEW_STAKEPOOL_INFO_BROWSER
             });
             setSelectedStakePool({ logo, ...pool });
