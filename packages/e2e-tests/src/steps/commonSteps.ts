@@ -126,6 +126,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await localStorageManager.cleanLocalStorage();
   await localStorageInitializer.initializeWallet(walletName);
   await browser.refresh();
+  await topNavigationAssert.assertLogoPresent();
   await mainMenuPageObject.navigateToSection('Tokens', mode);
 });
 

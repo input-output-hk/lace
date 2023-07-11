@@ -67,6 +67,7 @@ When(
   /^I fill wallet name: "([^"]*)" and get address by name: "([^"]*)" (outside drawer|in drawer)$/,
   async (name: string, addressByName: string, target: string) => {
     const inDrawer = target === 'in drawer';
+    await browser.pause(50);
     await addressBookExtendedPageObject.fillNameAndAddress(
       name === 'empty' ? '' : name,
       addressByName === 'empty' ? '' : getAddressByName(addressByName),
