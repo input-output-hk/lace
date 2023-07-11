@@ -19,8 +19,8 @@ import { PageTitle } from '@components/Layout';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
@@ -67,9 +67,9 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
         address: item.address,
         name: item.name,
         onClick: (address: AddressBookSchema) => {
-          analytics.sendEvent({
-            category: AnalyticsEventCategories.ADDRESS_BOOK,
-            action: AnalyticsEventActions.CLICK_EVENT,
+          analytics.sendEventToMatomo({
+            category: MatomoEventCategories.ADDRESS_BOOK,
+            action: MatomoEventActions.CLICK_EVENT,
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_BROWSER
           });
           setAddressToEdit(address);
@@ -87,9 +87,9 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   }, [extendLimit]);
 
   const onAddressSave = (address: AddressBookSchema): Promise<string> => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.ADDRESS_BOOK,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.ADDRESS_BOOK,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_BROWSER
     });
     return 'id' in addressToEdit

@@ -13,8 +13,8 @@ import { usePassword } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletManager } from '@hooks';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -50,9 +50,9 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const analytics = useAnalyticsContext();
 
   const closeDrawer = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.STAKING,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.STAKING,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.Staking.STAKING_FAIL_POPUP
         : AnalyticsEventNames.Staking.STAKING_FAIL_BROWSER

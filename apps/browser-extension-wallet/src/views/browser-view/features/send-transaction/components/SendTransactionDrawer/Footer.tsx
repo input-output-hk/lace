@@ -22,8 +22,8 @@ import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
 import { useNetwork, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider/context';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
@@ -74,11 +74,11 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const analytics = useAnalyticsContext();
   const isOnline = useNetwork();
 
-  const sendEvent = useCallback(
+  const sendEventToMatomo = useCallback(
     (name: string, value?: number) =>
-      analytics.sendEvent({
-        action: AnalyticsEventActions.CLICK_EVENT,
-        category: AnalyticsEventCategories.SEND_TRANSACTION,
+      analytics.sendEventToMatomo({
+        action: MatomoEventActions.CLICK_EVENT,
+        category: MatomoEventCategories.SEND_TRANSACTION,
         name,
         value
       }),
@@ -90,21 +90,21 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const sendAnalytics = useCallback(() => {
     switch (currentSection.currentSection) {
       case Sections.FORM:
-        sendEvent(isPopupView ? Events.REVIEW_TX_DETAILS_POPUP : Events.REVIEW_TX_DETAILS_BROWSER);
+        sendEventToMatomo(isPopupView ? Events.REVIEW_TX_DETAILS_POPUP : Events.REVIEW_TX_DETAILS_BROWSER);
         break;
       case Sections.SUMMARY:
-        sendEvent(isPopupView ? Events.CONFIRM_TX_DETAILS_POPUP : Events.CONFIRM_TX_DETAILS_BROWSER);
+        sendEventToMatomo(isPopupView ? Events.CONFIRM_TX_DETAILS_POPUP : Events.CONFIRM_TX_DETAILS_BROWSER);
         break;
       case Sections.CONFIRMATION:
-        sendEvent(isPopupView ? Events.INPUT_TX_PASSWORD_POPUP : Events.INPUT_TX_PASSWORD_BROWSER);
+        sendEventToMatomo(isPopupView ? Events.INPUT_TX_PASSWORD_POPUP : Events.INPUT_TX_PASSWORD_BROWSER);
         break;
       case Sections.SUCCESS_TX:
-        sendEvent(isPopupView ? Events.SUCCESS_VIEW_TX_POPUP : Events.SUCCESS_VIEW_TX_BROWSER);
+        sendEventToMatomo(isPopupView ? Events.SUCCESS_VIEW_TX_POPUP : Events.SUCCESS_VIEW_TX_BROWSER);
         break;
       case Sections.FAIL_TX:
-        sendEvent(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
+        sendEventToMatomo(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
     }
-  }, [currentSection.currentSection, isPopupView, sendEvent]);
+  }, [currentSection.currentSection, isPopupView, sendEventToMatomo]);
 
   const keyAgentType = getKeyAgentType();
   const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
@@ -123,7 +123,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
       await signAndSubmitTransaction();
       removePassword();
       // Send amount of bundles as value
-      sendEvent(isPopupView ? Events.TX_SUCCESS_POPUP : Events.TX_SUCCESS_BROWSER, outputMap.size);
+      sendEventToMatomo(isPopupView ? Events.TX_SUCCESS_POPUP : Events.TX_SUCCESS_BROWSER, outputMap.size);
       setSection({ currentSection: Sections.SUCCESS_TX });
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
     } catch (error) {
@@ -133,7 +133,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
         // TODO: identify the errors and give them a value to send it with the event and track it [LW-6497]
-        sendEvent(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
+        sendEventToMatomo(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
         setSection({ currentSection: Sections.FAIL_TX });
         setSubmitingTxState({ isSubmitingTx: false });
       }
@@ -143,7 +143,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
     isSubmitingTx,
     outputMap,
     removePassword,
-    sendEvent,
+    sendEventToMatomo,
     setSection,
     setSubmitingTxState,
     signAndSubmitTransaction

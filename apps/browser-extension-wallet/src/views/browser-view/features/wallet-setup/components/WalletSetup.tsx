@@ -1,8 +1,8 @@
 import { useTranslate, WalletSetupOptionsStep, WalletSetupSteps } from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames,
   PostHogAction,
   postHogOnboardingActions
@@ -23,9 +23,9 @@ import { WalletSetupWizard } from './WalletSetupWizard';
 const { WalletSetup: Events } = AnalyticsEventNames;
 
 type SetupAnalyticsCategories =
-  | AnalyticsEventCategories.WALLET_CREATE
-  | AnalyticsEventCategories.WALLET_RESTORE
-  | AnalyticsEventCategories.HW_CONNECT;
+  | MatomoEventCategories.WALLET_CREATE
+  | MatomoEventCategories.WALLET_RESTORE
+  | MatomoEventCategories.HW_CONNECT;
 
 // This initial step is needed for configure the step that we want to snapshot
 export interface WalletSetupProps {
@@ -109,8 +109,8 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
     value = 1,
     postHogAction?: PostHogAction
   ) => {
-    await analytics.sendEvent({
-      action: AnalyticsEventActions.CLICK_EVENT,
+    await analytics.sendEventToMatomo({
+      action: MatomoEventActions.CLICK_EVENT,
       category,
       name: eventName,
       value
@@ -131,7 +131,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
 
   const handleCreateNewWallet = () => {
     sendAnalytics(
-      AnalyticsEventCategories.WALLET_CREATE,
+      MatomoEventCategories.WALLET_CREATE,
       Events.CREATE_WALLET_START,
       undefined,
       postHogOnboardingActions.create.SETUP_OPTION_CLICK
@@ -147,7 +147,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
   const handleConfirmRestoreWarning = () => {
     setIsConfirmRestoreOpen(false);
     sendAnalytics(
-      AnalyticsEventCategories.WALLET_RESTORE,
+      MatomoEventCategories.WALLET_RESTORE,
       Events.RESTORE_WALLET_START,
       undefined,
       postHogOnboardingActions.restore?.RESTORE_MULTI_ADDR_OK_CLICK
@@ -199,7 +199,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
               onCancel={() => setIsDappConnectorWarningOpen(false)}
               onConfirm={() => {
                 setIsDappConnectorWarningOpen(false);
-                sendAnalytics(AnalyticsEventCategories.HW_CONNECT, Events.CONNECT_HW_START);
+                sendAnalytics(MatomoEventCategories.HW_CONNECT, Events.CONNECT_HW_START);
                 history.push(walletRoutePaths.setup.hardware);
               }}
             />
@@ -209,7 +209,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupWizard
             setupType="create"
             onCancel={cancelWalletFlow}
-            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.WALLET_CREATE)}
+            sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_CREATE)}
             initialStep={initialStep}
           />
         </Route>
@@ -217,7 +217,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <WalletSetupWizard
             setupType={isForgotPasswordFlow ? 'forgot_password' : 'restore'}
             onCancel={cancelWalletFlow}
-            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.WALLET_RESTORE)}
+            sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_RESTORE)}
             initialStep={initialStep}
           />
         </Route>
@@ -225,7 +225,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
           <HardwareWalletFlow
             onCancel={cancelWalletFlow}
             onAppReload={() => location.reload()}
-            sendAnalytics={getSendAnalyticsHandler(AnalyticsEventCategories.HW_CONNECT)}
+            sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.HW_CONNECT)}
           />
         </Route>
       </Switch>
