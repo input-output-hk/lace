@@ -276,7 +276,7 @@ When(/^I click "Copy" button on "Show public key" page$/, async () => {
 
 When(/^I fill (correct|incorrect) password and confirm collateral$/, async (type: string) => {
   const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
-  await CollateralDrawer.passwordInput.waitForEnabled();
+  await CollateralDrawer.passwordInput.waitForClickable();
   await CollateralDrawer.passwordInput.setValue(password);
   await CollateralDrawer.collateralButton.waitForClickable();
   await CollateralDrawer.collateralButton.click();

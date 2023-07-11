@@ -5,7 +5,7 @@ import { t } from '../../utils/translationService';
 
 class CookiePolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
-    await CookiePolicyDrawer.drawerNavigationTitle.waitForDisplayed();
+    await CookiePolicyDrawer.drawerNavigationTitle.waitForClickable();
     await expect(await CookiePolicyDrawer.drawerNavigationTitle.getText()).to.equal(
       await t('browserView.settings.heading')
     );
@@ -16,7 +16,7 @@ class CookiePolicyDrawerAssert {
   };
 
   assertSeeDrawerBackButton = async () => {
-    await CookiePolicyDrawer.drawerHeaderBackButton.waitForDisplayed();
+    await CookiePolicyDrawer.drawerHeaderBackButton.waitForClickable();
   };
 
   assertSeeCookiePolicyTitle = async () => {

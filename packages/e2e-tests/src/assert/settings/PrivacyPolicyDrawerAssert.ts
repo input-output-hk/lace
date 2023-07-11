@@ -6,7 +6,7 @@ import { removeWhitespacesFromText } from '../../utils/textUtils';
 
 class PrivacyPolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
-    await PrivacyPolicyDrawer.drawerNavigationTitle.waitForDisplayed();
+    await PrivacyPolicyDrawer.drawerNavigationTitle.waitForClickable();
     await expect(await PrivacyPolicyDrawer.drawerNavigationTitle.getText()).to.equal(
       await t('browserView.settings.heading')
     );
@@ -17,7 +17,7 @@ class PrivacyPolicyDrawerAssert {
   };
 
   assertSeeDrawerBackButton = async () => {
-    await PrivacyPolicyDrawer.drawerHeaderBackButton.waitForDisplayed();
+    await PrivacyPolicyDrawer.drawerHeaderBackButton.waitForClickable();
   };
 
   async assertSeePrivacyPolicyTitle() {

@@ -6,7 +6,7 @@ import { TestnetPatterns } from '../support/patterns';
 
 class StakePoolDetailsAssert {
   async assertSeeStakePoolDetailsPage(expectedStakedPool: StakePool, staked: boolean, noMetaDataPool = false) {
-    await StakePoolDetails.poolName.waitForDisplayed();
+    await StakePoolDetails.poolName.waitForClickable();
     await StakePoolDetails.poolLogo.waitForDisplayed();
     await expect(await StakePoolDetails.poolName.getText()).to.equal(expectedStakedPool.name);
 
