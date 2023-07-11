@@ -16,6 +16,7 @@ import {
 import { ILocalStorage } from '@src/types';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { Portal } from './Portal';
+import { useKeyboardShortcut } from '@lace/common';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -58,24 +59,20 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
     }
   };
 
-  useEffect(() => {
-    const handleEnterKeyPress = (event: KeyboardEvent) => {
-      if (event.code === 'Enter') {
-        const nextBnt: HTMLButtonElement = document.querySelector('[data-testid="wallet-setup-step-btn-next"]');
-        const confirmGoBack: HTMLButtonElement = document.querySelector('[data-testid="delete-address-modal-confirm"]');
+  useKeyboardShortcut(['Enter'], () => {
+    const nextBnt: HTMLButtonElement = document.querySelector('[data-testid="wallet-setup-step-btn-next"]');
+    const confirmGoBack: HTMLButtonElement = document.querySelector('[data-testid="delete-address-modal-confirm"]');
 
-        if (confirmGoBack) {
-          confirmGoBack.click();
-        } else if (nextBnt && !nextBnt.getAttribute('disabled')) {
-          nextBnt.click();
-        }
-      }
-    };
-    document.addEventListener('keydown', handleEnterKeyPress);
-    return () => {
-      document.removeEventListener('keydown', handleEnterKeyPress);
-    };
-  }, []);
+    if (confirmGoBack) {
+      confirmGoBack.click();
+    } else if (nextBnt && !nextBnt.getAttribute('disabled')) {
+      console.log('nextBnt2-> clicking', {
+        nextBntDisabled: !nextBnt.getAttribute('disabled'),
+        disabled: nextBnt.getAttribute('disabled')
+      });
+      nextBnt.click();
+    }
+  });
 
   const clearWallet = useCallback(() => {
     deleteFromLocalStorage('wallet');

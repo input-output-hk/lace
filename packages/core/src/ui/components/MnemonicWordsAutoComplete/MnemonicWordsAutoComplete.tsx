@@ -17,6 +17,7 @@ export interface MnemonicWordsAutoCompleteProps {
   wordList?: Array<string>;
   max?: number;
   focus?: boolean;
+  onDropdownVisibleChange?: (visible: boolean) => void;
 }
 
 export const MnemonicWordsAutoComplete = ({
@@ -25,7 +26,8 @@ export const MnemonicWordsAutoComplete = ({
   wordList = [],
   onChange,
   max = DEFAULT_INPUT_MAX_LENGTH,
-  focus = false
+  focus = false,
+  onDropdownVisibleChange
 }: MnemonicWordsAutoCompleteProps): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<InputRef>(null);
@@ -49,6 +51,7 @@ export const MnemonicWordsAutoComplete = ({
   );
 
   const handleSelect = (select: string) => {
+    console.log('handleSelect', select);
     onChange(select);
     setPickedOption(select);
     setIsMaskVisible(false);
@@ -104,6 +107,7 @@ export const MnemonicWordsAutoComplete = ({
         backfill
         defaultActiveFirstOption
         bordered={false}
+        onDropdownVisibleChange={onDropdownVisibleChange}
         dropdownAlign={{
           offset: [AUTO_COMPLETE_DROPDOWN_OFFSET_X, AUTO_COMPLETE_DROPDOWN_OFFSET_Y]
         }}

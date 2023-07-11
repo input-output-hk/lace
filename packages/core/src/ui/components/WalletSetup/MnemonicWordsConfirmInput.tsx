@@ -8,13 +8,15 @@ export interface MnemonicWordsConfirmInputProps {
   onChange: (words: string[]) => void;
   suggestionList?: Array<string>;
   focus?: boolean;
+  onDropdownVisibleChange?: (visible: boolean) => void;
 }
 
 export const MnemonicWordsConfirmInput = ({
   firstWordNumber,
   words,
   onChange,
-  suggestionList
+  suggestionList,
+  onDropdownVisibleChange
 }: MnemonicWordsConfirmInputProps): React.ReactElement => (
   <div className={styles.mnemonicWordsConfirm}>
     {words.map((word, index) => (
@@ -29,6 +31,7 @@ export const MnemonicWordsConfirmInput = ({
         key={index}
         wordList={suggestionList}
         focus={index + firstWordNumber === firstWordNumber}
+        onDropdownVisibleChange={onDropdownVisibleChange}
       />
     ))}
   </div>

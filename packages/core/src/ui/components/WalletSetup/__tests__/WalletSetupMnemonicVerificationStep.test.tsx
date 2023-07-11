@@ -4,25 +4,17 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { WalletSetupMnemonicVerificationStep } from '../WalletSetupMnemonicVerificationStep';
-import { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
+import { useKeyboardShortcut } from '@lace/common';
 
 const Test = () => {
-  useEffect(() => {
-    const handleEnterKeyPress = (event: KeyboardEvent) => {
-      if (event.code === 'Enter') {
-        const nextBnt: HTMLButtonElement = document.querySelector('[data-testid="wallet-setup-step-btn-next"]');
+  useKeyboardShortcut(['Enter'], () => {
+    const nextBnt: HTMLButtonElement = document.querySelector('[data-testid="wallet-setup-step-btn-next"]');
 
-        if (nextBnt && !nextBnt.getAttribute('disabled')) {
-          nextBnt.click();
-        }
-      }
-    };
-    document.addEventListener('keydown', handleEnterKeyPress);
-    return () => {
-      document.removeEventListener('keydown', handleEnterKeyPress);
-    };
-  }, []);
+    if (nextBnt && !nextBnt.getAttribute('disabled')) {
+      nextBnt.click();
+    }
+  });
 
   const [mnemonic, setMnemonic] = React.useState<string[]>([
     ...'weapon shock brick category tragic grocery filter '.split(' '),
