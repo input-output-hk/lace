@@ -262,6 +262,15 @@ Given(/^I am on "Mnemonic writedown" page with words (8|16|24) of 24$/, async (e
   mnemonicWords.push(...(await OnboardingPageObject.openMnemonicWriteDownPage(expectedWords)));
   await OnboardingMnemonicPageAssert.assertSeeMnemonicWriteDownPage(expectedWords);
 });
+Given(/^I pass "Mnemonic writedown" page with words (8|16|24) of 24$/, async (expectedWords: number) => {
+  if (String(expectedWords) === '8') {
+    mnemonicWords.length = 0;
+  }
+  mnemonicWords.push(...(await OnboardingPageObject.passMnemonicWriteDownPage()));
+});
+Given(/^I pass "Mnemonic verification" page with words (8|16|24) of 24$/, async (expectedWords: number) => {
+  await OnboardingPageObject.passMnemonicVerificationPage(mnemonicWords, expectedWords);
+});
 
 Then(/^Words 1 - 8 (are|are not) the same$/, async (expectedMatch: string) => {
   const shouldBeEqual: boolean = expectedMatch === 'are';
