@@ -32,7 +32,6 @@ export type Metadata = {
 };
 
 export enum PostHogAction {
-  WalletChangeActivePage = 'wallet | change active page | view',
   // Hardware wallet connect
   OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
   OnboardingHWAnalyticsSkipClick = 'onboarding | hardware wallet | analytics | skip | click',
