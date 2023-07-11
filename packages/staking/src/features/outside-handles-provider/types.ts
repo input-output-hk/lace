@@ -19,12 +19,33 @@ export type SelectedStakePoolDetails = {
   contact: Wallet.Cardano.PoolContactData;
 };
 
+type WalletBalance = {
+  coinBalance: string;
+  fiatBalance: string | undefined;
+};
+
+type Balance = {
+  total: WalletBalance;
+  available: WalletBalance;
+};
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
+  balancesBalance: Balance;
+  stakingRewards: {
+    totalRewards: BigInt | number;
+    lastReward: BigInt | number;
+  };
   delegationDetails: Wallet.Cardano.StakePool;
   delegationStoreSelectedStakePoolDetails?: SelectedStakePoolDetails;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo: string }) => void;
+  fetchCoinPricePriceResult: {
+    cardano: {
+      price: number;
+      priceVariationPercentage24h: number;
+    };
+  };
   openExternalLink: (href: string) => void;
   password?: string;
   passwordRemovePassword: () => void;

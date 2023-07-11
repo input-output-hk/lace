@@ -1,3 +1,4 @@
+import { Wallet } from '@lace/cardano';
 import { getRandomIcon } from '@lace/common';
 import BigNumber from 'bignumber.js';
 import cn from 'classnames';
@@ -26,38 +27,34 @@ const formatNumericValue = (val: number | string, suffix: number | string): Reac
 
 export type StakingInfoCardProps = {
   className?: string;
-  coinBalance: string;
-  coinBalanceFiat?: string;
-  fee: string | number;
+  coinBalance: number;
+  fiat?: number;
+  fee?: string | number;
   id: string;
   logo?: string;
   margin: string | number;
   name?: string;
   totalRewards: string;
-  totalRewardsFiat?: string;
   lastReward: string;
-  lastRewardFiat?: string;
-  apy: string | number;
+  apy?: string | number;
   ticker?: string;
   onStakePoolSelect: () => void;
   popupView?: boolean;
   cardanoCoinSymbol: string;
-  markerColor: string;
+  markerColor?: string;
 };
 
 export const StakingInfoCard = ({
   className,
   coinBalance,
-  coinBalanceFiat,
+  fiat,
   fee,
   id,
   logo,
   margin,
   name,
   totalRewards,
-  totalRewardsFiat,
   lastReward,
-  lastRewardFiat,
   apy,
   ticker,
   onStakePoolSelect,
@@ -72,7 +69,7 @@ export const StakingInfoCard = ({
     <div className={cn(styles.panel, { className, [styles.popupView!]: popupView })}>
       <div className={styles.row}>
         <div className={styles.col}>
-          <div className={styles.marker} style={{ background: markerColor }} />
+          {markerColor && <div className={styles.marker} style={{ background: markerColor }} />}
           <div>
             <StakePoolInfo
               logo={logo ?? getRandomIcon({ id: id.toString(), size: 30 })}
@@ -86,13 +83,13 @@ export const StakingInfoCard = ({
         <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
           <Stats
             text={t('overview.stakingInfoCard.ros')}
-            value={formatNumericValue(apy, '%')}
+            value={apy && formatNumericValue(apy, '%')}
             popupView
             dataTestid="stats-apy"
           />
           <Stats
             text={t('overview.stakingInfoCard.fee')}
-            value={formatNumericValue(fee, cardanoCoinSymbol)}
+            value={fee && formatNumericValue(fee, cardanoCoinSymbol)}
             popupView
             dataTestid="stats-fee"
           />
@@ -110,7 +107,7 @@ export const StakingInfoCard = ({
             <Stats
               text={t('overview.stakingInfoCard.totalStaked')}
               value={
-                <Tooltip title={coinBalanceFiat && `$ ${coinBalanceFiat}`}>
+                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: coinBalance.toString(), fiat })}`}>
                   <span>{coinBalance}</span>
                   <span className={styles.suffix}>{cardanoCoinSymbol}</span>
                 </Tooltip>
@@ -124,7 +121,7 @@ export const StakingInfoCard = ({
             <Stats
               text={t('overview.stakingInfoCard.totalRewards')}
               value={
-                <Tooltip title={totalRewardsFiat && `$ ${totalRewardsFiat}`}>
+                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: totalRewards.toString(), fiat })}`}>
                   <span>{totalRewards}</span>
                   <span className={styles.suffix}>{cardanoCoinSymbol}</span>
                 </Tooltip>
@@ -137,7 +134,7 @@ export const StakingInfoCard = ({
           <Stats
             text={t('overview.stakingInfoCard.lastReward')}
             value={
-              <Tooltip title={lastRewardFiat && `$ ${lastRewardFiat}`}>
+              <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: lastReward.toString(), fiat })}`}>
                 <span>{lastReward}</span>
                 <span className={styles.suffix}>{cardanoCoinSymbol}</span>
               </Tooltip>
