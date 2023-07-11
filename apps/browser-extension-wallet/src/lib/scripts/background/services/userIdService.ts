@@ -1,8 +1,8 @@
 import { exposeApi, RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
-import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/util';
-import { UserIdService as UserIdServiceInterface, USER_ID_SERVICE_BASE_CHANNEL } from '@lib/scripts/types';
+import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/util';
+import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
 
 const SESSION_LENGTH = 60_000; // TODO: set to 30min
@@ -27,6 +27,13 @@ class UserIdService implements UserIdServiceInterface {
     console.debug(`[ANALYTICS] getId() called (current ID: ${this.#userId})`);
 
     return this.#userId;
+  }
+
+  async clearId() {
+    console.debug('[ANALYTICS] clearId() called');
+    this.#userId = undefined;
+    this.#clearSessionTimeout();
+    await clearBackgroundStorage(['userId', 'usePersistentUserId']);
   }
 
   async makePersistent() {
@@ -82,6 +89,7 @@ const userIdService = new UserIdService();
 
 export const userIdServiceProperties: RemoteApiProperties<UserIdService> = {
   getId: RemoteApiPropertyType.MethodReturningPromise,
+  clearId: RemoteApiPropertyType.MethodReturningPromise,
   makePersistent: RemoteApiPropertyType.MethodReturningPromise,
   makeTemporary: RemoteApiPropertyType.MethodReturningPromise,
   extendLifespan: RemoteApiPropertyType.MethodReturningPromise
