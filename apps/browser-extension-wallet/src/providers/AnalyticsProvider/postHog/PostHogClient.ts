@@ -1,13 +1,8 @@
 /* eslint-disable camelcase */
 import posthog from 'posthog-js';
 import { Wallet } from '@lace/cardano';
-import { EnhancedAnalyticsOptInStatus, ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTracker';
-import {
-  BASIC_ANALYTICS_CONFIG,
-  ENHANCED_ANALYTICS_CONFIG,
-  NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
-  PUBLIC_POSTHOG_HOST
-} from './config';
+import { ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTracker';
+import { NETWORK_ID_TO_POSTHOG_TOKEN_MAP, PUBLIC_POSTHOG_HOST } from './config';
 import { UserIdService } from '@lib/scripts/types';
 
 /**
@@ -17,11 +12,7 @@ import { UserIdService } from '@lib/scripts/types';
 export class PostHogClient {
   private initialized: false;
 
-  constructor(
-    private chain: Wallet.Cardano.ChainId,
-    private userIdService: UserIdService,
-    private enhancedAnalyticsOptInStatus?: EnhancedAnalyticsOptInStatus
-  ) {}
+  constructor(private chain: Wallet.Cardano.ChainId, private userIdService: UserIdService) {}
 
   async init(): Promise<void> {
     if (!PUBLIC_POSTHOG_HOST) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
@@ -34,22 +25,22 @@ export class PostHogClient {
       capture_pageview: false,
       capture_pageleave: false,
       disable_compression: true,
-      ...(this.enhancedAnalyticsOptInStatus === EnhancedAnalyticsOptInStatus.OptedIn
-        ? ENHANCED_ANALYTICS_CONFIG
-        : BASIC_ANALYTICS_CONFIG)
+      // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
+      disable_persistence: true,
+      disable_cookie: true,
+      persistence: 'memory'
     });
   }
 
-  sendPageNavigationEvent = async (eventName: string): Promise<void> => {
+  sendPageNavigationEvent = async (): Promise<void> => {
     if (!this.initialized) {
       await this.init();
     }
 
-    console.debug('[ANALYTICS] Logging page navigation event to PostHog', eventName);
+    console.debug('[ANALYTICS] Logging page navigation event to PostHog');
 
     posthog.capture('$pageview', {
-      ...(await this.getEventMetadata()),
-      event: eventName
+      ...(await this.getEventMetadata())
     });
   };
 
@@ -66,13 +57,6 @@ export class PostHogClient {
     console.debug('[ANALYTICS] Logging event to PostHog', action, payload);
     posthog.capture(String(action), payload);
   };
-
-  setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): void {
-    console.debug('[ANALYTICS] Setting opt in status for PostHog', status);
-    posthog.set_config(
-      status === EnhancedAnalyticsOptInStatus.OptedIn ? ENHANCED_ANALYTICS_CONFIG : BASIC_ANALYTICS_CONFIG
-    );
-  }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
     const token = this.getApiToken(chain);

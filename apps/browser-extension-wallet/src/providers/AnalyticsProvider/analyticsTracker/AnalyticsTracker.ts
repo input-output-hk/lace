@@ -1,4 +1,4 @@
-import { EnhancedAnalyticsOptInStatus, SendEventProps, PostHogAction } from './types';
+import { EnhancedAnalyticsOptInStatus, PostHogAction, SendEventProps } from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient } from '../matomo';
 import { POSTHOG_ENABLED, PostHogClient } from '../postHog';
@@ -10,23 +10,17 @@ export class AnalyticsTracker {
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
 
-  constructor(
-    chain: Wallet.Cardano.ChainId,
-    analyticsDisabled: boolean,
-    enhancedAnalyticsOptInStatus?: EnhancedAnalyticsOptInStatus
-  ) {
+  constructor(chain: Wallet.Cardano.ChainId, analyticsDisabled: boolean) {
     if (analyticsDisabled) return;
     this.userIdService = getUserIdService();
     this.matomoClient = new MatomoClient(chain, this.userIdService);
 
     if (POSTHOG_ENABLED) {
-      this.postHogClient = new PostHogClient(chain, this.userIdService, enhancedAnalyticsOptInStatus);
+      this.postHogClient = new PostHogClient(chain, this.userIdService);
     }
   }
 
   async setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): Promise<void> {
-    this.postHogClient?.setOptedInForEnhancedAnalytics(status);
-
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();

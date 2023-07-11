@@ -40,7 +40,7 @@ export const AnalyticsProvider = ({
   );
 
   const analyticsTracker = useMemo(
-    () => tracker || new AnalyticsTracker(currentChain, analyticsDisabled, optedInForEnhancedAnalytics),
+    () => tracker || new AnalyticsTracker(currentChain, analyticsDisabled),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tracker, analyticsDisabled]
   );
