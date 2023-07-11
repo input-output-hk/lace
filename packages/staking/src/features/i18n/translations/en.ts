@@ -42,8 +42,13 @@ export const en: Translations = {
   'drawer.details.switchingPoolBanner.description.step3': 'Follow the instructions in the staking flow',
   'drawer.details.switchingPoolBanner.title':
     'Unstaking is not yet available. Follow these steps if you wish to change stake pool',
+  'drawer.sign.confirmation.title': 'Staking confirmation',
+  'drawer.sign.enterWalletPasswordToConfirmTransaction': 'Enter your wallet password to confirm transaction',
+  'drawer.sign.error.invalidPassword': 'Wrong password',
+  'drawer.sign.passwordPlaceholder': 'Password',
   'drawer.title': 'Stake pool detail',
   'drawer.titleSecond': 'Manage delegation',
+  'general.button.confirm': 'Confirm',
   'overview.delegationCard.label.balance': 'Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',
