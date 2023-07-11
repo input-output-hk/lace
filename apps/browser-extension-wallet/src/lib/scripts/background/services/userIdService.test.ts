@@ -1,4 +1,4 @@
-import { USER_ID_BYTE_SIZE, UserIdService } from '.';
+import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from '.';
 
 describe.only('userIdService', () => {
   describe('restoring persistent user id', () => {
@@ -42,9 +42,8 @@ describe.only('userIdService', () => {
       };
       const getStorageMock = jest.fn(() => Promise.resolve(store));
       const setStorageMock = jest.fn();
-      const sessionLength = 10;
 
-      const userIdService = new UserIdService(getStorageMock, setStorageMock, sessionLength);
+      const userIdService = new UserIdService(getStorageMock, setStorageMock);
       await userIdService.makeTemporary();
 
       expect(setStorageMock).toHaveBeenCalledWith({
@@ -54,7 +53,7 @@ describe.only('userIdService', () => {
       // it should still retain the previously stored user id in memory
       expect(await userIdService.getId()).toEqual(store.userId);
       // simulate a session timeout
-      jest.advanceTimersByTime(sessionLength + 1);
+      jest.advanceTimersByTime(SESSION_LENGTH + 1);
       // assert new temporary user id being generated after session timeout
       expect(await userIdService.getId()).not.toEqual(store.userId);
       expect(Buffer.from(await userIdService.getId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
@@ -70,19 +69,18 @@ describe.only('userIdService', () => {
       };
       const getStorageMock = jest.fn(() => Promise.resolve(store));
       const setStorageMock = jest.fn();
-      const sessionLength = 10;
 
-      const userIdService = new UserIdService(getStorageMock, setStorageMock, sessionLength);
+      const userIdService = new UserIdService(getStorageMock, setStorageMock);
       await userIdService.makeTemporary();
 
       // simulate an almost session timeout
-      jest.advanceTimersByTime(sessionLength - 1);
+      jest.advanceTimersByTime(SESSION_LENGTH - 1);
       // it should still retain the previously stored user id in memory
       expect(await userIdService.getId()).toEqual(store.userId);
 
       await userIdService.extendLifespan();
       // simulate an almost session timeout
-      jest.advanceTimersByTime(sessionLength - 1);
+      jest.advanceTimersByTime(SESSION_LENGTH - 1);
       expect(await userIdService.getId()).toEqual(store.userId);
 
       // simulate a session timeout
