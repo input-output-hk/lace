@@ -14,8 +14,8 @@ import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
 import { getTokenList } from '@src/utils/get-token-list';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import FolderIcon from '@assets/icons/new-folder-icon.component.svg';
@@ -50,9 +50,9 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
 
   const onSelectNft = useCallback(
     (nft) => {
-      analytics.sendEvent({
-        category: AnalyticsEventCategories.VIEW_NFT,
-        action: AnalyticsEventActions.CLICK_EVENT,
+      analytics.sendEventToMatomo({
+        category: MatomoEventCategories.VIEW_NFT,
+        action: MatomoEventActions.CLICK_EVENT,
         name: AnalyticsEventNames.ViewNFTs.VIEW_NFT_DETAILS_POPUP
       });
       redirectToNftDetail({ params: { id: nft.assetId.toString() } });

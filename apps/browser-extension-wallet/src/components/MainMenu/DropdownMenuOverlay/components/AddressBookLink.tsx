@@ -6,8 +6,8 @@ import { Link } from 'react-router-dom';
 import styles from '../DropdownMenuOverlay.module.scss';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -16,9 +16,9 @@ export const AddressBookLink = ({ isPopup }: { isPopup: boolean }): React.ReactE
   const analytics = useAnalyticsContext();
 
   const handleOnClicked = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.ADDRESS_BOOK,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.ADDRESS_BOOK,
+      action: MatomoEventActions.CLICK_EVENT,
       name: isPopup
         ? AnalyticsEventNames.AddressBook.VIEW_ADDRESSES_POPUP
         : AnalyticsEventNames.AddressBook.VIEW_ADDRESSES_BROWSER

@@ -16,8 +16,8 @@ import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI'
 import { FetchWalletActivitiesReturn } from '@src/stores/slices';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
@@ -50,9 +50,9 @@ const renderAssetDetails =
     const analytics = useAnalyticsContext();
 
     const sendAnalytics = useCallback(() => {
-      analytics.sendEvent({
-        category: AnalyticsEventCategories.VIEW_TOKENS,
-        action: AnalyticsEventActions.CLICK_EVENT,
+      analytics.sendEventToMatomo({
+        category: MatomoEventCategories.VIEW_TOKENS,
+        action: MatomoEventActions.CLICK_EVENT,
         name: popupView
           ? AnalyticsEventNames.ViewTokens.VIEW_TOKEN_TX_DETAILS_POPUP
           : AnalyticsEventNames.ViewTokens.VIEW_TOKEN_TX_DETAILS_BROWSER

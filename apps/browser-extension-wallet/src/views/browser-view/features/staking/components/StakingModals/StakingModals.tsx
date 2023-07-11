@@ -7,8 +7,8 @@ import { useStakePoolDetails, sectionsConfig } from '../../store';
 import { Sections } from '../../types';
 import { StakingModal } from './StakingModal';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -52,9 +52,9 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
           {
             dataTestId: 'switch-pools-modal-confirm',
             onClick: () => {
-              analytics.sendEvent({
-                category: AnalyticsEventCategories.STAKING,
-                action: AnalyticsEventActions.CLICK_EVENT,
+              analytics.sendEventToMatomo({
+                category: MatomoEventCategories.STAKING,
+                action: MatomoEventActions.CLICK_EVENT,
                 name: popupView
                   ? AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_POPUP
                   : AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_BROWSER

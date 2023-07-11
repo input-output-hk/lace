@@ -15,8 +15,8 @@ import { APP_MODE_POPUP } from '@src/utils/constants';
 import { ContentLayout } from '@components/Layout';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventCategories,
-  AnalyticsEventActions,
+  MatomoEventCategories,
+  MatomoEventActions,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isNFT } from '@src/utils/is-nft';
@@ -163,9 +163,9 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const paginatedAssetList = useMemo(() => fullAssetList?.slice(0, listItemsAmount), [fullAssetList, listItemsAmount]);
 
   const onAssetRowClick = (id: string) => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_TOKENS,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_TOKENS,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_POPUP
         : AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_BROWSER
@@ -213,9 +213,9 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
 
   const onSendAssetClick = (id: string) => {
     setPickedCoin(SEND_COIN_OUTPUT_ID, { prev: cardanoCoin.id, next: id });
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_TOKENS,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_TOKENS,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.ViewTokens.SEND_TOKEN_POPUP
         : AnalyticsEventNames.ViewTokens.SEND_TOKEN_BROWSER

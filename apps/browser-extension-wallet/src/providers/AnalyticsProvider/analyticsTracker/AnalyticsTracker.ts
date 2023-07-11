@@ -1,4 +1,4 @@
-import { EnhancedAnalyticsOptInStatus, SendEventProps, PostHogAction } from './types';
+import { EnhancedAnalyticsOptInStatus, MatomoSendEventProps, PostHogAction } from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient } from '../matomo';
 import { POSTHOG_ENABLED, PostHogClient } from '../postHog';
@@ -42,8 +42,7 @@ export class AnalyticsTracker {
     ]);
   }
 
-  // TODO: rename to sendEventToMatomo  (https://input-output.atlassian.net/browse/LW-7197)
-  async sendEvent(props: SendEventProps): Promise<void> {
+  async sendEventToMatomo(props: MatomoSendEventProps): Promise<void> {
     await this.matomoClient?.sendEvent(props);
     await this.userIdService?.extendLifespan();
   }

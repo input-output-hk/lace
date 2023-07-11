@@ -8,9 +8,9 @@ import { useRedirection } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import { useAnalyticsContext } from '@providers';
 import {
-  SendEventProps,
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoSendEventProps,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { Sections } from '../types';
@@ -33,19 +33,19 @@ export const SendWarningModal = ({ isPopupView }: SendWarningModalProps): React.
   const analytics = useAnalyticsContext();
 
   const sendAnalytics = useCallback(() => {
-    const props: Pick<SendEventProps, 'action' | 'category'> = {
-      action: AnalyticsEventActions.CLICK_EVENT,
-      category: AnalyticsEventCategories.SEND_TRANSACTION
+    const props: Pick<MatomoSendEventProps, 'action' | 'category'> = {
+      action: MatomoEventActions.CLICK_EVENT,
+      category: MatomoEventCategories.SEND_TRANSACTION
     };
     switch (section.currentSection) {
       case Sections.SUMMARY:
-        analytics.sendEvent({
+        analytics.sendEventToMatomo({
           ...props,
           name: isPopupView ? Events.CANCEL_TX_DETAILS_POPUP : Events.CANCEL_TX_DETAILS_BROWSER
         });
         break;
       case Sections.CONFIRMATION:
-        analytics.sendEvent({
+        analytics.sendEventToMatomo({
           ...props,
           name: isPopupView ? Events.CANCEL_TX_PASSWORD_POPUP : Events.CANCEL_TX_PASSWORD_BROWSER
         });

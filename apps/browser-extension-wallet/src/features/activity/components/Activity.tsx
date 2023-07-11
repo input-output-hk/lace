@@ -12,8 +12,8 @@ import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
 import { FetchWalletActivitiesReturn } from '@src/stores/slices';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -40,9 +40,9 @@ export const Activity = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
 
   const sendAnalytics = useCallback(() => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_TRANSACTIONS,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_TRANSACTIONS,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_POPUP
     });
   }, [analytics]);
