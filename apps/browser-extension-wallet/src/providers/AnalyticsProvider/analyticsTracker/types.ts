@@ -32,6 +32,7 @@ export type Metadata = {
 };
 
 export enum PostHogAction {
+  WalletChangeActivePage = 'wallet | change active page | view',
   // Hardware wallet connect
   OnboardingHWAnalyticsAgreeClick = 'onboarding | hardware wallet | analytics | agree | click',
   OnboardingHWAnalyticsSkipClick = 'onboarding | hardware wallet | analytics | skip | click',
@@ -40,7 +41,9 @@ export enum PostHogAction {
   OnboardingHWConnectNextClick = 'onboarding | hardware wallet | connect hw | next | click',
   OnboardingHWSelectAccountNextClick = 'onboarding | hardware wallet | select hw account | next | click',
   OnboardingHWNameNextClick = 'onboarding | hardware wallet | name hw wallet | next | click',
+  OnboardingHWDoneGoToWallet = 'onboarding | hardware wallet | all done | go to my wallet | click',
   // Restore wallet
+  OnboardingRestoreDoneGoToWallet = 'onboarding | restore wallet | all done | go to my wallet | click',
   OnboardingRestoreAnalyticsAgreeClick = 'onboarding | restore wallet | analytics | agree | click',
   OnboardingRestoreAnalyticsSkipClick = 'onboarding | restore wallet | analytics | skip | click',
   OnboardingRestoreClick = 'onboarding | restore wallet | restore | click',
@@ -54,6 +57,7 @@ export enum PostHogAction {
   OnboardingRestoreEnterPassphrase09NextClick = 'onboarding | restore wallet | enter passphrase #09 | next | click',
   OnboardingRestoreEnterPassphrase17NextClick = 'onboarding | restore wallet | enter passphrase #17 | next | click',
   // Create new wallet
+  OnboardingCreateDoneGoToWallet = 'onboarding | new wallet | all done | go to my wallet | click',
   OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
   OnboardingCreateAnalyticsSkipClick = 'onboarding | new wallet | analytics | skip | click',
   OnboardingCreateClick = 'onboarding | new wallet | create | click',
@@ -98,7 +102,8 @@ export type PostHogActionsKeys =
   | 'RESTORE_MULTI_ADDR_CANCEL_CLICK'
   | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK'
   | 'CONNECT_HW_NEXT_CLICK'
-  | 'SELECT_HW_ACCOUNT_NEXT_CLICK';
+  | 'SELECT_HW_ACCOUNT_NEXT_CLICK'
+  | 'DONE_GO_TO_WALLET';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogMetadata = {

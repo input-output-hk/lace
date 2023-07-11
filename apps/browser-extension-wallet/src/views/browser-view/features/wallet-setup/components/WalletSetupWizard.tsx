@@ -482,7 +482,7 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Finish && (
         <WalletSetupFinalStep
           onFinish={() => {
-            sendAnalytics(Events.SETUP_FINISHED_NEXT);
+            sendAnalytics(Events.SETUP_FINISHED_NEXT, postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
             goToMyWallet();
           }}
           translations={walletSetupFinalStepTranslations}
