@@ -13,9 +13,6 @@ import { removeItemFromLocalStorage, getItemFromLocalStorage, setItemInLocalStor
 import { InvalidMigrationData } from '../errors';
 
 const MIGRATION_VERSION = '0.6.0';
-const throwInvalidDataError = (reason?: string) => {
-  throw new InvalidMigrationData(MIGRATION_VERSION, reason);
-};
 
 export const v0_6_0: Migration = {
   version: MIGRATION_VERSION,
@@ -139,6 +136,11 @@ export const v0_6_0: Migration = {
       },
       assert: async (): Promise<boolean> => {
         console.log('Checking migrated data for version', MIGRATION_VERSION);
+
+        const throwInvalidDataError = (reason?: string) => {
+          throw new InvalidMigrationData(MIGRATION_VERSION, 'upgrade', reason);
+        };
+
         // Temporary storage
         const tmpWalletInfo = getItemFromLocalStorage<any>('wallet_tmp');
         const tmpAppSettings = getItemFromLocalStorage<any>('appSettings_tmp');
@@ -242,6 +244,81 @@ export const v0_6_0: Migration = {
         removeItemFromLocalStorage('keyAgentData_tmp');
         removeItemFromLocalStorage('lock_tmp');
         await clearBackgroundStorage(['keyAgentsByChain_tmp' as BackgroundStorageKeys]);
+      }
+    };
+  },
+  // This reverts upgrade from 1.0.0 migration
+  downgrade: async () => {
+    const oldAppSettings = getItemFromLocalStorage<any>('appSettings');
+    const oldKeyAgentData = getItemFromLocalStorage<any>('keyAgentData');
+    const backgroundStorage = (await getBackgroundStorage()) as unknown as {
+      keyAgentsByChain?: { Preprod?: { keyAgentData: any } };
+    };
+    const preprodKeyAgentData = backgroundStorage?.keyAgentsByChain?.Preprod?.keyAgentData;
+    return {
+      prepare: () => {
+        // Save temporary storage. Revert if something fails
+        try {
+          console.log(`Saving temporary migration for downgrade to ${MIGRATION_VERSION}`);
+
+          if (oldKeyAgentData && !preprodKeyAgentData) {
+            throw new Error(
+              `Failing migration for downgrade to ${MIGRATION_VERSION} as the preprod key agent data needed is not present`
+            );
+          }
+          if (oldAppSettings) {
+            setItemInLocalStorage('appSettings_tmp', {
+              ...oldAppSettings,
+              chainName: 'Preprod'
+            });
+          }
+          if (oldKeyAgentData && preprodKeyAgentData) {
+            setItemInLocalStorage('keyAgentData_tmp', preprodKeyAgentData);
+          }
+        } catch (error) {
+          console.log(`Error saving temporary migrations for downgrade to ${MIGRATION_VERSION}, deleting...`, error);
+          removeItemFromLocalStorage('keyAgentData_tmp');
+          removeItemFromLocalStorage('appSettings_tmp');
+          throw error;
+        }
+      },
+      assert: async () => {
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        const throwInvalidDataError = (reason?: string) => {
+          throw new InvalidMigrationData(MIGRATION_VERSION, 'downgrade', reason);
+        };
+
+        const tmpAppSettings = getItemFromLocalStorage<any>('appSettings_tmp');
+        const tmpKeyAgentData = getItemFromLocalStorage<any>('keyAgentData_tmp');
+
+        if (tmpAppSettings && tmpAppSettings.chainName !== 'Preprod') {
+          throwInvalidDataError('appSettings_tmp.chainName is not Preprod');
+        }
+        if (tmpKeyAgentData && !isEqual(tmpKeyAgentData, preprodKeyAgentData)) {
+          throwInvalidDataError('keyAgentData_tmp is not equal to the Preprod key agent data');
+        }
+        return true;
+      },
+      persist: () => {
+        console.log(`Persisting migrated data for downgrade to ${MIGRATION_VERSION}`);
+        // Get temporary storage
+        const tmpAppSettings = getItemFromLocalStorage('appSettings_tmp');
+        const tmpKeyAgentData = getItemFromLocalStorage('keyAgentData_tmp');
+        // Replace actual storage
+        if (tmpAppSettings) setItemInLocalStorage('appSettings', tmpAppSettings);
+        if (tmpKeyAgentData) setItemInLocalStorage('keyAgentData', tmpKeyAgentData);
+        // Delete temporary storage
+        removeItemFromLocalStorage('appSettings_tmp');
+        removeItemFromLocalStorage('keyAgentData_tmp');
+      },
+      rollback: () => {
+        console.log(`Rollback migrated data for downgrade to ${MIGRATION_VERSION}`);
+        // Restore actual storage to their original values
+        if (oldAppSettings) setItemInLocalStorage('appSettings', oldAppSettings);
+        if (oldKeyAgentData) setItemInLocalStorage('keyAgentData', oldKeyAgentData);
+        // Delete any temporary storage that may have been created
+        removeItemFromLocalStorage('appSettings_tmp');
+        removeItemFromLocalStorage('keyAgentData_tmp');
       }
     };
   }

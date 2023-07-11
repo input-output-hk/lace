@@ -128,7 +128,7 @@ describe('v0.6.0 migration', () => {
         test('throws an error when there is temporary wallet data', async () => {
           localStorage.setItem('keyAgentData_tmp', JSON.stringify(mockKeyAgentDataTestnet));
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Wallet data should not exist')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Wallet data should not exist')
           );
         });
         test('resolves to true if there is no temporary data', async () => {
@@ -190,31 +190,31 @@ describe('v0.6.0 migration', () => {
         test('throws an error when there is no chainName in appSettings_tmp', async () => {
           localStorage.setItem('appSettings_tmp', JSON.stringify({ chainId: 'Preprod' }));
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Missing chain name in app settings')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Missing chain name in app settings')
           );
         });
         test('throws an error when keyAgentData_tmp is missing', async () => {
           localStorage.removeItem('keyAgentData_tmp');
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Wallet data missing')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Wallet data missing')
           );
         });
         test('throws an error when wallet_tmp is missing', async () => {
           localStorage.removeItem('wallet_tmp');
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Wallet data missing')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Wallet data missing')
           );
         });
         test('throws an error when keyAgentsByChain_tmp is missing', async () => {
           await storage.local.set({ BACKGROUND_STORAGE: {} });
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Wallet data missing')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Wallet data missing')
           );
         });
         test('throws an error when there is no name in wallet_tmp', async () => {
           localStorage.setItem('wallet_tmp', JSON.stringify({}));
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Missing name in wallet info')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Missing name in wallet info')
           );
         });
         test('throws an error when keyAgentData_tmp is missing a field', async () => {
@@ -222,7 +222,7 @@ describe('v0.6.0 migration', () => {
           delete keyAgentData_tmp.__typename;
           localStorage.setItem('keyAgentData_tmp', JSON.stringify(keyAgentData_tmp));
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Missing field in key agent data')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Missing field in key agent data')
           );
         });
         test('throws an error when keyAgentDataByChain_tmp is missing a chain', async () => {
@@ -230,14 +230,14 @@ describe('v0.6.0 migration', () => {
             BACKGROUND_STORAGE: { keyAgentsByChain_tmp: { Preprod: mockKeyAgentDataTestnet } }
           });
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Missing key agent for one or more chains')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Missing key agent for one or more chains')
           );
         });
         test('throws an error when decrypted lock_tmp is not the same as keyAgentsByChain_tmp', async () => {
           const wrongLock = await encryptData(mockWalletInfoTestnet, initialStorage.walletPassword);
           localStorage.setItem('lock_tmp', JSON.stringify(wrongLock));
           await expect(migrationPersistance.assert()).rejects.toThrow(
-            new InvalidMigrationData('0.6.0', 'Decrypted lock is not valid')
+            new InvalidMigrationData('0.6.0', 'upgrade', 'Decrypted lock is not valid')
           );
         });
       });
@@ -417,4 +417,5 @@ describe('v0.6.0 migration', () => {
       });
     });
   });
+  test.todo('add downgrade tests');
 });

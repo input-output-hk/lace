@@ -97,7 +97,7 @@ describe('v1.0.0 migration', () => {
         test('throws an error when chainName in temporary appSettings is not Mainnet', () => {
           localStorage.setItem('appSettings_tmp', JSON.stringify({ chainName: 'Preprod' }));
           expect(migrationPersistance.assert).toThrow(
-            new InvalidMigrationData('1.0.0', 'Chain name in app settings is not Mainnet')
+            new InvalidMigrationData('1.0.0', 'upgrade', 'Chain name in app settings is not Mainnet')
           );
         });
       });
@@ -168,13 +168,13 @@ describe('v1.0.0 migration', () => {
         test('throws an error when chainName in temporary appSettings is not Mainnet', () => {
           localStorage.setItem('appSettings_tmp', JSON.stringify({ chainName: 'Preprod' }));
           expect(migrationPersistance.assert).toThrow(
-            new InvalidMigrationData('1.0.0', 'Chain name in app settings is not Mainnet')
+            new InvalidMigrationData('1.0.0', 'upgrade', 'Chain name in app settings is not Mainnet')
           );
         });
         test('throws an error when keyAgentData_tmp does not match mainnet key agent', () => {
           localStorage.setItem('keyAgentData_tmp', JSON.stringify(initialStorage.keyAgentsByChain.Preprod));
           expect(migrationPersistance.assert).toThrow(
-            new InvalidMigrationData('1.0.0', 'Key agent data does not match Mainnet key agent')
+            new InvalidMigrationData('1.0.0', 'upgrade', 'Key agent data does not match Mainnet key agent')
           );
         });
       });
