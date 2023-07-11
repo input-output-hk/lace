@@ -3,6 +3,7 @@ import { clearInputFieldValue, setInputFieldValue } from '../utils/inputFieldUti
 
 class AddressBookExtendedPageObject {
   async fillName(name: string, inDrawer: boolean) {
+    await $(new AddressAddNew(inDrawer).nameInput().toJSLocator()).waitForClickable();
     await setInputFieldValue(new AddressAddNew(inDrawer).nameInput().toJSLocator(), name);
   }
 
