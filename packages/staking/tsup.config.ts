@@ -21,6 +21,9 @@ const tsupConfig = defineConfig([
     ],
     external: Object.keys(peerDependencies),
     format: ['esm', 'cjs'],
+    loader: {
+      '.png': 'dataurl',
+    },
     name: 'lace/staking',
     outDir: './dist',
     sourcemap: true,
