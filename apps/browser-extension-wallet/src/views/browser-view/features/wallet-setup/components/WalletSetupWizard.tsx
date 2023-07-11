@@ -66,12 +66,9 @@ const DEFAULT_MNEMONIC_LENGTH = 24;
 export const WalletSetupWizard = ({
   onCancel,
   setupType,
-  sendAnalytics,
-  initialStep = WalletSetupSteps.Legal
+  sendAnalytics
 }: WalletSetupWizardProps): React.ReactElement => {
-  const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(
-    setupType === 'forgot_password' ? WalletSetupSteps.Password : initialStep
-  );
+  const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(WalletSetupSteps.Mnemonic);
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<CreateWalletData | undefined>();

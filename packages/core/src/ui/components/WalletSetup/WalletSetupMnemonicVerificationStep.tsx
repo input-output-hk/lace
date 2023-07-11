@@ -38,6 +38,7 @@ export const WalletSetupMnemonicVerificationStep = ({
   const mnemonicLength = mnemonic.length;
   const mnemonicSteps = Math.round(mnemonicLength / mnemonicWordsInStep);
   const [mnemonicStep, setMnemonicStep] = useState(0);
+  const [isAutocompleteDropdownVisible, setIsAutocompleteDropdownVisible] = useState(false);
 
   const handleBack = () => {
     if (mnemonicStep > 0) {
@@ -80,14 +81,16 @@ export const WalletSetupMnemonicVerificationStep = ({
 
   useEffect(() => {
     if (!isBackToMnemonic) return;
-    console.log(isBackToMnemonic, LAST_MNEMONIC_STEP);
     setMnemonicStep(LAST_MNEMONIC_STEP);
     setIsBackToMnemonic(false);
   }, [isBackToMnemonic, setIsBackToMnemonic]);
 
   const isNextEnabled = useMemo(
-    () => currentStepWords.every((word) => word) && (mnemonicStep !== mnemonicSteps - 1 || isSubmitEnabled),
-    [mnemonicStep, currentStepWords, mnemonicSteps, isSubmitEnabled]
+    () =>
+      !isAutocompleteDropdownVisible &&
+      currentStepWords.every((word) => word) &&
+      (mnemonicStep !== mnemonicSteps - 1 || isSubmitEnabled),
+    [currentStepWords, mnemonicStep, mnemonicSteps, isSubmitEnabled, isAutocompleteDropdownVisible]
   );
 
   return (
@@ -106,7 +109,6 @@ export const WalletSetupMnemonicVerificationStep = ({
           onChange={(stepWords) => {
             const newMnemonic = [...mnemonic];
 
-            // eslint-disable-next-line unicorn/no-array-for-each
             stepWords.forEach((word, index) => {
               newMnemonic[index + currentStepFirstWordIndex] = word;
             });
@@ -115,6 +117,7 @@ export const WalletSetupMnemonicVerificationStep = ({
           }}
           firstWordNumber={firstWordNumber}
           suggestionList={suggestionList}
+          onDropdownVisibleChange={(visible) => setIsAutocompleteDropdownVisible(visible)}
         />
       </div>
       {mnemonicStep === mnemonicSteps - 1 && !isSubmitEnabled && !hasEmptyString(mnemonic) && (
