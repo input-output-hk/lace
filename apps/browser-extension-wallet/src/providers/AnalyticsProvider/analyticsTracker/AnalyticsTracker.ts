@@ -29,11 +29,8 @@ export class AnalyticsTracker {
     }
   }
 
-  async sendPageNavigationEvent(path: string): Promise<void> {
-    await Promise.all([
-      this.matomoClient?.sendPageNavigationEvent(path),
-      this.postHogClient?.sendPageNavigationEvent(path)
-    ]);
+  async sendPageNavigationEvent(): Promise<void> {
+    await this.postHogClient?.sendPageNavigationEvent();
   }
 
   // TODO: rename to sendEventToMatomo  (https://input-output.atlassian.net/browse/LW-7197)
