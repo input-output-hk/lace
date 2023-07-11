@@ -1,6 +1,6 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
 import React from 'react';
-import { useBackgroundServiceAPIContext, useExternalLinkOpener, useTheme } from '@providers';
+import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 // Disabling import/no-unresolved as it is not aware of the "exports" entry
 // https://github.com/import-js/eslint-plugin-import/issues/1810
 // eslint-disable-next-line import/no-unresolved
@@ -15,7 +15,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
   const { setWalletPassword } = useBackgroundServiceAPIContext();
   const delegationDetails = useDelegationDetails();
   const selectedStakePoolDetails = useDelegationStore(stakePoolDetailsSelector);
-  const { setDelegationTxBuilder, setSelectedStakePool } = useDelegationStore();
+  const { setDelegationTxBuilder, delegationTxFee, setDelegationTxFee, setSelectedStakePool, selectedStakePool } =
+    useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const { password, removePassword } = usePassword();
   const { setIsRestaking } = useSubmitingState();
@@ -27,6 +28,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
     inMemoryWallet,
     walletUI: { cardanoCoin }
   } = useWalletStore();
+  const { fiatCurrency } = useCurrencyStore();
   return (
     <OutsideHandlesProvider
       {...{
@@ -36,6 +38,9 @@ export const MultiDelegationStaking = (): JSX.Element => {
         delegationStoreSelectedStakePoolDetails: selectedStakePoolDetails,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreSetSelectedStakePool: setSelectedStakePool,
+        delegationStoreSetDelegationTxFee: setDelegationTxFee,
+        delegationStoreDelegationTxFee: delegationTxFee,
+        delegationStoreSelectedStakePool: selectedStakePool,
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
         password,
@@ -44,7 +49,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
         submittingStateSetIsRestaking: setIsRestaking,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
-        walletStoreWalletUICardanoCoin: cardanoCoin
+        walletStoreWalletUICardanoCoin: cardanoCoin,
+        currencyStoreFiatCurrency: fiatCurrency
       }}
     >
       <Staking theme={theme.name} />

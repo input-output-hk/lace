@@ -6,6 +6,7 @@ export const sectionsConfig: Record<Sections, SectionConfig> = {
     currentSection: Sections.DETAIL,
     nextSection: Sections.CONFIRMATION,
   },
+  // TODO: LW-7104 include management step
   [Sections.CONFIRMATION]: {
     currentSection: Sections.CONFIRMATION,
     nextSection: Sections.SIGN,
@@ -52,7 +53,7 @@ export const useStakePoolDetails = create<StakePoolDetails>((set, get) => ({
     }
     set({ simpleSendConfig: sectionsConfig[prevSection] });
   },
-  setSection: (section: SectionConfig) => {
+  setSection: (section?: SectionConfig) => {
     const { currentSection, nextSection } = get().simpleSendConfig;
     if (!nextSection) {
       console.error(`Tried to move to not existing section (previous of ${currentSection})`);
