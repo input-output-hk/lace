@@ -1,6 +1,6 @@
 import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from '.';
 
-describe.only('userIdService', () => {
+describe('userIdService', () => {
   describe('restoring persistent user id', () => {
     it('should restore a persistent user id', async () => {
       const store = {
