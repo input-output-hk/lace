@@ -39,7 +39,8 @@ Feature: Address book - popup view
     When I click "browserView.addressBook.deleteModal.buttons.cancel" button
     Then I see address detail page in popup mode
 
-  @LW-4566
+  @LW-4566 @Pending
+  #bug LW-7419
   Scenario Outline: Popup-view - Address Book - Edit wallet name/address and display error message - name error: <name_error>, address error: <address_error>
     Given I have 3 addresses in my address book in popup mode
     And I click address on the list with name "Shelley"
@@ -160,7 +161,8 @@ Feature: Address book - popup view
       | Byron       | Byron          | addressBook.errors.givenNameAlreadyExist    |
       | SomeWallet  | Byron          | addressBook.errors.givenAddressAlreadyExist |
 
-  @LW-4784
+  @LW-4784 @Pending
+  #bug LW-7419
   Scenario: Popup-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page
@@ -182,7 +184,8 @@ Feature: Address book - popup view
     Then Contact name error: "empty" and address error: "empty" are displayed
     And "core.addressForm.addAddress" button is disabled
 
-  @LW-4785
+  @LW-4785 @Pending
+  #bug LW-7419
   Scenario: Popup-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page

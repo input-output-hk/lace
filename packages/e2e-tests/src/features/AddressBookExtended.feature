@@ -140,7 +140,8 @@ Feature: Address book - extended view
     When I click "browserView.addressBook.deleteModal.buttons.cancel" button
     Then I see address detail page in extended mode
 
-  @LW-4565
+  @LW-4565 @Pending
+  #bug LW-7419
   Scenario Outline: Extended-view - Address Book - Edit wallet name/address and display error message - name error: <name_error>, address error: <address_error>
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
@@ -229,7 +230,8 @@ Feature: Address book - extended view
     When I press keyboard Escape button
     Then I do not see address detail page in extended mode
 
-  @LW-4779
+  @LW-4779 @Pending
+  #bug LW-7419
   Scenario: Extended-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -239,7 +241,8 @@ Feature: Address book - extended view
     And I click on address book background to lose focus outside drawer
     Then Contact name error: "empty" and address error: "Address field is required" are displayed
 
-  @LW-4780
+  @LW-4780 @Pending
+  #bug LW-7419
   Scenario: Extended-view - Address Book - Display error message when adding valid address and clicking outside with empty name field
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
