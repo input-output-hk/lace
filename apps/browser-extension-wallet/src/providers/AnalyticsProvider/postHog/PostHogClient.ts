@@ -27,6 +27,7 @@ export class PostHogClient {
     if (!PUBLIC_POSTHOG_HOST) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
 
     posthog.init(this.getApiToken(this.chain), {
+      request_batching: false,
       api_host: PUBLIC_POSTHOG_HOST,
       autocapture: false,
       disable_session_recording: true,
