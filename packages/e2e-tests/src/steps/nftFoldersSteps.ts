@@ -53,7 +53,7 @@ Then(/^I (see|don't see) "You'll have to start again" modal$/, async (shouldSee:
 Then(
   /^I (see|don't see) "Create NFT folder" drawer in (popup|extended) mode$/,
   async (shouldSee: string, mode: 'extended' | 'popup') => {
-    await nftCreateFolderAssert.assertSeeCreateFolderPageDrawerNavigation(shouldSee === 'see', mode);
+    await nftCreateFolderAssert.assertSeeCreateFolderPage(shouldSee === 'see', mode);
   }
 );
 
