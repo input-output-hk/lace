@@ -6,7 +6,6 @@ import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
 import { browser } from '@wdio/globals';
-import ToastMessage from '../elements/toastMessage';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -114,8 +113,6 @@ class SettingsExtendedPageObject {
     await (mode === 'extended'
       ? simpleTxSideDrawerPageObject.clickCloseDrawerButton()
       : simpleTxSideDrawerPageObject.clickBackDrawerButton());
-    await ToastMessage.closeButton.waitForClickable();
-    await ToastMessage.closeButton.click();
   };
 
   removeWallet = async () => {

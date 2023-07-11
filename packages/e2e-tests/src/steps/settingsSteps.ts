@@ -132,8 +132,8 @@ Then(/the Terms and Conditions copy is displayed/, async () => {
 
 Then(/the Privacy policy copy is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   if (mode === 'extended') {
-    await PrivacyPolicyDrawerAssert.assertSeeDrawerNavigationTitle();
     await PrivacyPolicyDrawerAssert.assertSeeDrawerCloseButton();
+    await PrivacyPolicyDrawerAssert.assertSeeDrawerNavigationTitle();
   } else {
     await PrivacyPolicyDrawerAssert.assertSeeDrawerBackButton();
   }
@@ -143,8 +143,8 @@ Then(/the Privacy policy copy is displayed in (extended|popup) mode$/, async (mo
 
 Then(/^the Cookie policy drawer is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   if (mode === 'extended') {
-    await CookiePolicyDrawerAssert.assertSeeDrawerNavigationTitle();
     await CookiePolicyDrawerAssert.assertSeeDrawerCloseButton();
+    await CookiePolicyDrawerAssert.assertSeeDrawerNavigationTitle();
   } else {
     await CookiePolicyDrawerAssert.assertSeeDrawerBackButton();
   }

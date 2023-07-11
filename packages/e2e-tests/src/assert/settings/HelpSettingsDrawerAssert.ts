@@ -13,7 +13,7 @@ class HelpSettingsDrawerAssert {
   }
 
   async assertSeeHelpDrawer(mode: 'extended' | 'popup') {
-    await HelpDrawer.drawerHeaderTitle.waitForDisplayed();
+    await HelpDrawer.drawerHeaderTitle.waitForClickable();
     await expect(await HelpDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.help.support.help')
     );

@@ -5,14 +5,14 @@ import { t } from '../../utils/translationService';
 
 class CookiePolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
-    await CookiePolicyDrawer.drawerNavigationTitle.waitForClickable();
+    await CookiePolicyDrawer.drawerNavigationTitle.waitForDisplayed();
     await expect(await CookiePolicyDrawer.drawerNavigationTitle.getText()).to.equal(
       await t('browserView.settings.heading')
     );
   };
 
   assertSeeDrawerCloseButton = async () => {
-    await CookiePolicyDrawer.drawerHeaderCloseButton.waitForDisplayed();
+    await CookiePolicyDrawer.drawerHeaderCloseButton.waitForClickable();
   };
 
   assertSeeDrawerBackButton = async () => {
