@@ -52,12 +52,43 @@ type KeysStructure = {
       poolIds: '';
       owners: '';
     };
+    confirmation: {
+      title: '';
+      subTitle: '';
+      cardanoName: '';
+      totalCost: {
+        title: '';
+      };
+      theAmountYoullBeChargedForRegisteringYourStakeKey: '';
+      stakingDeposit: '';
+      errors: {
+        utxoFullyDepleted: '';
+        utxoBalanceInsufficient: '';
+      };
+      transactionFee: '';
+      theAmountYoullBeChargedToProcessYourTransaction: '';
+      button: {
+        continueInAdvancedView: '';
+        confirmWithDevice: '';
+        signing: '';
+        confirm: '';
+      };
+    };
   };
   overview: {
     delegationCard: {
-      status: '';
-      balance: '';
-      pools: '';
+      label: {
+        status: '';
+        balance: '';
+        pools: '';
+      };
+      statuses: {
+        multiDelegation: '';
+        overStaked: '';
+        ready: '';
+        simpleDelegation: '';
+        underStaked: '';
+      };
     };
     stakingInfoCard: {
       fee: '';

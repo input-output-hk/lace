@@ -1,47 +1,12 @@
-import { Percent } from '@cardano-sdk/util';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
 import { Box, Flex } from '@lace/ui';
 import debounce from 'lodash/debounce';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { StakePoolDetails } from '../drawer';
+import { stakePoolsMock } from '../stake-pools';
 import { Sections, useStakePoolDetails } from '../store';
-import stakePoolsRaw from './data.json';
 import { Search } from './search';
 import { StakePoolsTable } from './stake-pools-table';
-
-const stakePoolsMock = stakePoolsRaw.map<Wallet.Cardano.StakePool>((pool) => ({
-  ...pool,
-  cost: BigInt(pool.cost),
-  hexId: Wallet.Cardano.PoolIdHex(pool.hexId),
-  id: Wallet.Cardano.PoolId(pool.id),
-  // @ts-ignore
-  metadataJson: pool.metadataJson,
-  metrics: {
-    ...pool.metrics,
-    livePledge: BigInt(pool.metrics.livePledge),
-    // eslint-disable-next-line new-cap
-    saturation: Percent(pool.metrics.saturation),
-    size: {
-      ...pool.metrics.size,
-      // eslint-disable-next-line new-cap
-      active: Percent(pool.metrics.size.active),
-      // eslint-disable-next-line new-cap
-      live: Percent(pool.metrics.size.live),
-    },
-    stake: {
-      ...pool.metrics.stake,
-      active: BigInt(pool.metrics.stake.active),
-      live: BigInt(pool.metrics.stake.live),
-    },
-  },
-  owners: pool.owners.map((owner) => Wallet.Cardano.RewardAccount(owner)),
-  pledge: BigInt(pool.pledge),
-  // @ts-ignore
-  relays: pool.relays,
-  rewardAccount: Wallet.Cardano.RewardAccount(pool.rewardAccount),
-  status: pool.status as Wallet.Cardano.StakePoolStatus,
-  vrf: Wallet.Cardano.VrfVkHex(pool.vrf),
-}));
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
   field: 'name',
@@ -88,7 +53,7 @@ export const BrowsePools = () => {
   const [isLoadingList, setIsLoadingList] = useState<boolean>(true);
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [searchValue, setSearchValue] = useState<string>('');
-  const { setIsDrawerVisible } = useStakePoolDetails();
+  const { setIsDrawerVisible, setSection } = useStakePoolDetails();
 
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [{ pageResults, totalResultCount }, setStakePoolSearchResults] = useState<Wallet.StakePoolSearchResults>({
@@ -103,8 +68,18 @@ export const BrowsePools = () => {
   const [fetchingPools, setFetchingPools] = useState(false);
   // TODO: compute real value
   const hasNoFunds = false;
-  // eslint-disable-next-line unicorn/consistent-function-scoping,@typescript-eslint/no-empty-function
-  const onStake = () => {};
+
+  const onStake = useCallback(() => {
+    // TODO: LW-7396 enable StakeConfirmation modal in the flow in the case of restaking
+    // if (isDelegating) {
+    //   setStakeConfirmationVisible(true);
+    //   return;
+    // }
+
+    setSection();
+    setIsDrawerVisible(true);
+  }, [setIsDrawerVisible, setSection]);
+
   const debouncedSearch = useMemo(
     () =>
       debounce((...args: Parameters<typeof fetchStakePools>) => {

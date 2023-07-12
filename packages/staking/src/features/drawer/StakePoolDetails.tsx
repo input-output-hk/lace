@@ -3,6 +3,7 @@ import { useObservable } from '@lace/common';
 import React, { useMemo } from 'react';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { MAX_POOLS_COUNT, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
 
@@ -34,7 +35,7 @@ export const StakePoolDetails = ({
   const sectionsMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetail />,
-      [Sections.CONFIRMATION]: <div />,
+      [Sections.CONFIRMATION]: <StakePoolConfirmation />,
       [Sections.SIGN]: <div />,
       [Sections.SUCCESS_TX]: <div />,
       [Sections.FAIL_TX]: <div />,
@@ -45,7 +46,7 @@ export const StakePoolDetails = ({
   const footersMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetailFooter canDelegate={canDelegate} onStake={onStake} />,
-      [Sections.CONFIRMATION]: <div />,
+      [Sections.CONFIRMATION]: <StakePoolConfirmationFooter />,
       [Sections.SIGN]: <div />,
       [Sections.SUCCESS_TX]: <div />,
       [Sections.FAIL_TX]: <div />,

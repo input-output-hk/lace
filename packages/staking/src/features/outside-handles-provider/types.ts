@@ -19,12 +19,42 @@ export type SelectedStakePoolDetails = {
   contact: Wallet.Cardano.PoolContactData;
 };
 
+type WalletBalance = {
+  coinBalance: string;
+  fiatBalance: string | undefined;
+};
+
+type Balance = {
+  total: WalletBalance;
+  available: WalletBalance;
+};
+
+export interface CurrencyInfo {
+  code: string;
+  symbol: string;
+}
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
+  balancesBalance: Balance;
+  stakingRewards: {
+    totalRewards: BigInt | number;
+    lastReward: BigInt | number;
+  };
   delegationDetails: Wallet.Cardano.StakePool;
   delegationStoreSelectedStakePoolDetails?: SelectedStakePoolDetails;
+  delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo: string }) => void;
+  delegationStoreSetDelegationTxFee: (fee?: string) => void;
+  delegationStoreDelegationTxFee?: string;
+  delegationStoreDelegationTxBuilder?: TxBuilder;
+  fetchCoinPricePriceResult: {
+    cardano: {
+      price: number;
+      priceVariationPercentage24h: number;
+    };
+  };
   openExternalLink: (href: string) => void;
   password?: string;
   passwordRemovePassword: () => void;
@@ -32,4 +62,5 @@ export type OutsideHandlesContextValue = {
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
+  currencyStoreFiatCurrency: CurrencyInfo;
 };

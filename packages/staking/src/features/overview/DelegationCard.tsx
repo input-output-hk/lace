@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n/types';
 import * as styles from './DelegationCard.css';
 
-type Status = 'multi-staking' | 'over-staked' | 'under-staked';
+type Status = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';
 
 type DelegationCardProps = {
   distribution: Array<{
@@ -15,10 +15,12 @@ type DelegationCardProps = {
   status: Status;
 };
 
-const mapOfStatusToLabel: Record<Status, string> = {
-  'multi-staking': 'Multi staking',
-  'over-staked': 'Over staked',
-  'under-staked': 'Under staked',
+const mapOfStatusToTranslationKey: Record<Status, TranslationKey> = {
+  'multi-delegation': 'overview.delegationCard.statuses.multiDelegation',
+  'over-staked': 'overview.delegationCard.statuses.overStaked',
+  ready: 'overview.delegationCard.statuses.ready',
+  'simple-delegation': 'overview.delegationCard.statuses.simpleDelegation',
+  'under-staked': 'overview.delegationCard.statuses.underStaked',
 };
 
 type MakeInfoDataParams = {
@@ -35,16 +37,16 @@ const makeInfoData = ({
   nameTranslationKey: TranslationKey;
   value: MakeInfoDataParams[keyof MakeInfoDataParams];
 }> => [
-  { nameTranslationKey: 'overview.delegationCard.status', value: status },
-  { nameTranslationKey: 'overview.delegationCard.balance', value: balance },
-  { nameTranslationKey: 'overview.delegationCard.pools', value: numberOfPools },
+  { nameTranslationKey: 'overview.delegationCard.label.status', value: status },
+  { nameTranslationKey: 'overview.delegationCard.label.balance', value: balance },
+  { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
 ];
 
 export const DelegationCard = ({ distribution, status }: DelegationCardProps) => {
   const { t } = useTranslation();
   const balance = distribution.reduce((acc, { value }) => acc + value, 0);
   const numberOfPools = distribution.length;
-  const infoData = makeInfoData({ balance, numberOfPools, status: mapOfStatusToLabel[status] });
+  const infoData = makeInfoData({ balance, numberOfPools, status: t(mapOfStatusToTranslationKey[status]) });
 
   return (
     <Card.Greyed>

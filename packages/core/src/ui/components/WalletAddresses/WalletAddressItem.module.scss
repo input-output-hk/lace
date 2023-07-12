@@ -59,6 +59,9 @@
     display: flex;
     flex: 1;
     min-width: 236px;
+    @media (max-width: $breakpoint-popup) {
+      min-width: 0;
+    }
 
     &.small {
       font-size: var(--body) !important;
@@ -97,6 +100,9 @@
 
 .addressBox {
   min-width: 0;
+  @media (max-width: $breakpoint-popup) {
+    justify-self: end;
+  }
 }
 
 .listItemAvatar {
