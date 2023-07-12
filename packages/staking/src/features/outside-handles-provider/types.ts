@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 
-export type SelectedStakePoolDetails = {
+export type LegacySelectedStakePoolDetails = {
   delegators: number | string;
   description: string;
   hexId: string;
@@ -24,7 +24,7 @@ type WalletBalance = {
   fiatBalance: string | undefined;
 };
 
-type Balance = {
+export type Balance = {
   total: WalletBalance;
   available: WalletBalance;
 };
@@ -42,7 +42,7 @@ export type OutsideHandlesContextValue = {
     lastReward: BigInt | number;
   };
   delegationDetails: Wallet.Cardano.StakePool;
-  delegationStoreSelectedStakePoolDetails?: SelectedStakePoolDetails;
+  delegationStoreSelectedStakePoolDetails?: LegacySelectedStakePoolDetails;
   delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo: string }) => void;
