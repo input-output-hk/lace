@@ -10,24 +10,30 @@ import { useAddressBookStore } from '@src/features/address-book/store';
 import AddIcon from '../../../../../../assets/icons/add.component.svg';
 import EditIcon from '../../../../../../assets/icons/edit.component.svg';
 import { useSections } from '../../store';
+import { getAddressToSave } from '@src/utils/validators';
+import { useHandleResolver } from '@hooks';
 
 export const AddressFormFooter = withAddressBookContext(() => {
   const { t } = useTranslation();
   const { utils } = useAddressBookContext();
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
   const { setPrevSection } = useSections();
+  const handleResolver = useHandleResolver();
   const { saveRecord: saveAddress, updateRecord: updateAddress } = utils;
 
-  const onAddressSave = (address: Partial<AddressBookSchema>): Promise<string> =>
-    'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, address, {
+  const onAddressSave = async (address: Omit<AddressBookSchema, 'id' | 'network'>): Promise<string> => {
+    const addressToSave = await getAddressToSave(address, handleResolver);
+
+    return 'id' in addressToEdit
+      ? updateAddress(addressToEdit.id, addressToSave, {
           text: t('browserView.addressBook.toast.editAddress'),
           icon: EditIcon
         })
-      : saveAddress(address, {
+      : saveAddress(addressToSave, {
           text: t('browserView.addressBook.toast.addAddress'),
           icon: AddIcon
         });
+  };
 
   const onFormSubmit = async () => {
     try {

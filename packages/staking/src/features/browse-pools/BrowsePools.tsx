@@ -1,7 +1,7 @@
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
 import { Box, Flex } from '@lace/ui';
 import debounce from 'lodash/debounce';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { StakePoolDetails } from '../drawer';
 import { stakePoolsMock } from '../stake-pools';
 import { Sections, useStakePoolDetails } from '../store';
@@ -53,7 +53,7 @@ export const BrowsePools = () => {
   const [isLoadingList, setIsLoadingList] = useState<boolean>(true);
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [searchValue, setSearchValue] = useState<string>('');
-  const { setIsDrawerVisible } = useStakePoolDetails();
+  const { setIsDrawerVisible, setSection } = useStakePoolDetails();
 
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [{ pageResults, totalResultCount }, setStakePoolSearchResults] = useState<Wallet.StakePoolSearchResults>({
@@ -68,8 +68,18 @@ export const BrowsePools = () => {
   const [fetchingPools, setFetchingPools] = useState(false);
   // TODO: compute real value
   const hasNoFunds = false;
-  // eslint-disable-next-line unicorn/consistent-function-scoping,@typescript-eslint/no-empty-function
-  const onStake = () => {};
+
+  const onStake = useCallback(() => {
+    // TODO: LW-7396 enable StakeConfirmation modal in the flow in the case of restaking
+    // if (isDelegating) {
+    //   setStakeConfirmationVisible(true);
+    //   return;
+    // }
+
+    setSection();
+    setIsDrawerVisible(true);
+  }, [setIsDrawerVisible, setSection]);
+
   const debouncedSearch = useMemo(
     () =>
       debounce((...args: Parameters<typeof fetchStakePools>) => {

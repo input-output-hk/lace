@@ -56,10 +56,10 @@ Feature: Send - Extended Browser View (Advanced Tx)
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click "Add address" button 1 in address bar
-    Then I see Add new address form in Send flow
-    And Address field has filled "shelley" address
-    When I fill "WalletName" name for address details in drawer
-    And I click "Done" button on "Add address" drawer
+    Then I see "Add address" drawer in send flow in extended mode
+    And address form is filled with "shelley" address
+    When I fill address form with "WalletName" name
+    And I click "Save" button on "Add address" drawer in send flow
     Then the "ADA" asset is displayed in bundle 1
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     And I click "Add bundle" button on "Send" page

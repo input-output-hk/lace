@@ -35,7 +35,7 @@
     "build": "tsc && tsup",
     "cleanup": "shx rm -rf dist node_modules && shx rm -rf ../../.cache/eslintcache",
     "dev": "ladle serve",
-    "eslint:check": "eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '.*/**/*.{cjs,mjs,js,ts,tsx}'",
+    "eslint:check": "eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '**/*.{cjs,mjs,js,ts,tsx}'",
     "eslint:fix": "yarn eslint:check --fix",
     "lint": "echo 'Staking package runs lint in its own CI'",
     "lint:all": "yarn eslint:check && yarn prettier:check",
@@ -53,17 +53,24 @@
     "watch": "tsup --watch"
   },
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
+    "classnames": "^2.3.2",
     "i18next": "^22.5.1",
     "immer": "^10.0.2",
+    "lodash": "4.17.21",
     "react-i18next": "^12.3.1"
   },
   "devDependencies": {
+    "@cardano-sdk/input-selection": "0.11.1",
+    "@cardano-sdk/tx-construction": "0.9.1",
     "@cardano-sdk/util": "0.13.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
+    "@lace/core": "0.1.0",
     "@lace/ui": "^0.1.0",
     "@ladle/react": "^2.12.3",
     "@svgr/plugin-jsx": "^8.0.1",
+    "@testing-library/react-hooks": "^8.0.1",
     "@tsconfig/create-react-app": "^1.0.3",
     "@vanilla-extract/css": "^1.11.1",
     "@vanilla-extract/esbuild-plugin": "^2.2.2",
@@ -76,24 +83,32 @@
     "esbuild-scss-modules-plugin": "^1.1.1",
     "happy-dom": "^9.18.3",
     "lost-pixel": "^3.4.0",
+    "normalize.css": "^8.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-infinite-scroll-component": "^6.1.0",
     "tsup": "^6.7.0",
     "typescript": "^4.9.5",
     "vite-plugin-checker": "^0.6.0",
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-svgr": "^3.2.0",
     "vitest": "^0.31.0",
-    "wait-on": "^7.0.1"
+    "wait-on": "^7.0.1",
+    "zustand": "3.5.14"
   },
   "peerDependencies": {
+    "@cardano-sdk/input-selection": "0.11.1",
+    "@cardano-sdk/tx-construction": "0.9.1",
     "@cardano-sdk/util": "0.13.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
+    "@lace/core": "0.1.0",
     "@lace/ui": "^0.1.0",
     "antd": "^4.17.3",
     "bignumber.js": "^9.0.1",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "react-infinite-scroll-component": "^6.1.0",
+    "zustand": "3.5.14"
   }
 }

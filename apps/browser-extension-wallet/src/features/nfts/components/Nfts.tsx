@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-useless-undefined */
-import { useRedirection } from '@hooks';
+import { useAssetInfo, useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { Button, useObservable } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
@@ -36,7 +36,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
   const { walletInfo, inMemoryWallet } = useWalletStore();
   const { t } = useTranslation();
-  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const assetsInfo = useAssetInfo();
   const assetsBalance = useObservable(inMemoryWallet.balance.utxo.total$, DEFAULT_WALLET_BALANCE.utxo.total$);
   const analytics = useAnalyticsContext();
   const { fiatCurrency } = useCurrencyStore();

@@ -7,6 +7,7 @@ import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 import { Asset } from '../data/Asset';
 import testContext from '../utils/testContext';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
+import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -117,6 +118,31 @@ class NftCreateFolderAssert {
         maxLength.toString()
       );
       expect(await NftCreateFolderPage.folderNameInput.inputError.getText()).to.equal(expectedErrorMessage);
+    }
+  }
+
+  async assertSeeYoullHaveToStartAgainModal(shouldBeDisplayed: boolean) {
+    await YoullHaveToStartAgainModal.container.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      await YoullHaveToStartAgainModal.title.waitForDisplayed();
+      await expect(await YoullHaveToStartAgainModal.title.getText()).to.equal(
+        await t('browserView.nfts.exitModal.header')
+      );
+
+      await YoullHaveToStartAgainModal.description.waitForDisplayed();
+      await expect(await YoullHaveToStartAgainModal.description.getText()).to.equal(
+        await t('browserView.nfts.exitModal.description')
+      );
+
+      await YoullHaveToStartAgainModal.cancelButton.waitForDisplayed();
+      await expect(await YoullHaveToStartAgainModal.cancelButton.getText()).to.equal(
+        await t('browserView.nfts.exitModal.cancel')
+      );
+
+      await YoullHaveToStartAgainModal.agreeButton.waitForDisplayed();
+      await expect(await YoullHaveToStartAgainModal.agreeButton.getText()).to.equal(
+        await t('browserView.nfts.exitModal.confirm')
+      );
     }
   }
 }

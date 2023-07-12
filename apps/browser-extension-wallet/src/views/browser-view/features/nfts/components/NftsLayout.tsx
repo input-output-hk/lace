@@ -32,6 +32,7 @@ import { NFTFolderDrawer } from './CreateFolder/CreateFolderDrawer';
 import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext } from '@src/features/nfts/context';
 import { RenameFolderDrawer } from './RenameFolderDrawer';
 import { NftFolderConfirmationModal } from './NftFolderConfirmationModal';
+import { useAssetInfo } from '@hooks';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;
 
@@ -40,7 +41,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const { walletInfo, inMemoryWallet, blockchainProvider, environmentName } = useWalletStore();
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
   const { t } = useTranslation();
-  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const assetsInfo = useAssetInfo();
   const assetsBalance = useObservable(inMemoryWallet.balance.utxo.total$, DEFAULT_WALLET_BALANCE.utxo.total$);
   const total = useObservable(inMemoryWallet.balance.utxo.total$);
   const analytics = useAnalyticsContext();
@@ -103,7 +104,12 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   // eslint-disable-next-line unicorn/no-useless-undefined
   const closeNftDetails = () => setSelectedNft(undefined);
   const nfts: NftItemProps[] = useMemo(() => {
-    const { nftList } = getTokenList({ assetsInfo, balance: assetsBalance?.assets, environmentName, fiatCurrency });
+    const { nftList } = getTokenList({
+      assetsInfo,
+      balance: assetsBalance?.assets,
+      environmentName,
+      fiatCurrency
+    });
     return nftList.map((nft) => ({
       ...nft,
       type: NftsItemsTypes.NFT,

@@ -8,6 +8,7 @@ import { addressErrorMessage, nameErrorMessage } from '@lib/storage/helpers';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
 import { HandleProvider, HandleResolution } from '@cardano-sdk/core';
+import { isHandle } from '@lace/core';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
 
@@ -19,7 +20,6 @@ export const verifyHandle = async (
 ): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
   try {
     const resolvedHandles = await handleResolver.resolveHandles({ handles: [value.slice(1)] });
-
     if (resolvedHandles.length === 0) {
       return { valid: false };
     }
@@ -59,11 +59,19 @@ export const validateWalletAddress = (address: string): string => {
   return !isValid ? i18n.t('browserView.addressBook.form.incorrectCardanoAddress') : '';
 };
 
-export const validateWalletHandle = async (value: string, handleResolver: HandleProvider): Promise<string> => {
-  const res = (await verifyHandle(value, handleResolver)).handles;
-  if (!res) {
-    return i18n.t('general.errors.incorrectHandle');
+type validateWalletHandleArgs = {
+  value: string;
+  handleResolver: HandleProvider;
+};
+
+export const validateWalletHandle = async ({ value, handleResolver }: validateWalletHandleArgs): Promise<string> => {
+  const response = await verifyHandle(value, handleResolver);
+  const handles = response.handles;
+
+  if (!handles) {
+    throw new Error(i18n.t('general.errors.incorrectHandle'));
   }
+
   return '';
 };
 
@@ -124,4 +132,19 @@ export const hasAddressBookItem = (
     ];
 
   return [false, undefined];
+};
+
+export const getAddressToSave = async (
+  address: AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>,
+  handleResolver: HandleProvider
+): Promise<AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>> => {
+  if (isHandle(address.address)) {
+    const result = await verifyHandle(address.address, handleResolver);
+
+    if (result.valid) {
+      return { ...address, handleResolution: result.handles[0] };
+    }
+  }
+
+  return address;
 };

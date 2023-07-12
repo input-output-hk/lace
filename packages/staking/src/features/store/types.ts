@@ -22,7 +22,7 @@ export interface SectionConfig {
 
 export interface StakePoolDetails {
   simpleSendConfig: SectionConfig;
-  setSection: (section: SectionConfig) => void;
+  setSection: (section?: SectionConfig) => void;
   setPrevSection: () => void;
   resetStates: () => void;
   isDrawerVisible: boolean;
@@ -39,16 +39,20 @@ export interface StakePoolDetails {
   setStakingError: (error?: StakingError) => void;
 }
 
+export interface DelegationPortfolioStakePool extends Wallet.Cardano.Cip17Pool {
+  logo?: string;
+}
+
 export type DelegationPortfolioState = Immutable<{
-  draftPortfolio: Wallet.Cardano.Cip17Pool[];
-  currentPortfolio: Wallet.Cardano.Cip17Pool[];
+  draftPortfolio: DelegationPortfolioStakePool[];
+  currentPortfolio: DelegationPortfolioStakePool[];
 }>;
 
 type DelegationPortfolioMutators = {
   setCurrentPortfolio: (rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[]) => void;
-  addPoolToDraft: (pool: Wallet.Cardano.Cip17Pool) => void;
-  removePoolFromDraft: (params: Pick<Wallet.Cardano.Cip17Pool, 'id'>) => void;
-  updatePoolWeight: (params: Pick<Wallet.Cardano.Cip17Pool, 'id' | 'weight'>) => void;
+  addPoolToDraft: (pool: DelegationPortfolioStakePool) => void;
+  removePoolFromDraft: (params: Pick<DelegationPortfolioStakePool, 'id'>) => void;
+  updatePoolWeight: (params: Pick<DelegationPortfolioStakePool, 'id' | 'weight'>) => void;
   clearDraft: () => void;
 };
 

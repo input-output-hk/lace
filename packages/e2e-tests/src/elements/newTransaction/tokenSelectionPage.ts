@@ -19,6 +19,7 @@ export class TokenSelectionPage extends WebElement {
   private NFT_CONTAINER = '[data-testid="nft-item"]';
   private NFT_ITEM_IMAGE = '[data-testid="nft-image"]';
   private NFT_ITEM_NAME = '[data-testid="nft-item-name"]';
+  private NFT_ITEM_OVERLAY = '[data-testid="nft-item-overlay"]';
   private NFT_ITEM_SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
   private ASSETS_SELECTION_COUNTER = '//div[@data-testid="assets-counter"]';
   private NEUTRAL_FACE_ICON = '[data-testid="neutral-face-icon"]';
@@ -122,12 +123,12 @@ export class TokenSelectionPage extends WebElement {
     return nftContainer.$(this.NFT_ITEM_NAME);
   }
 
-  grayedOutNFT(index: number): WebElement {
-    return Factory.fromSelector(`(${this.NFT_CONTAINER})[${index}]/div/div[contains(@class, 'overlay')]`, 'xpath');
+  async grayedOutNFT(index: number): Promise<WebdriverIO.Element> {
+    return this.nftContainers[index].$(this.NFT_ITEM_OVERLAY);
   }
 
-  checkmarkInSelectedNFT(index: number): WebElement {
-    return Factory.fromSelector(`(${this.NFT_CONTAINER})[${index}]/*[name()='svg']`, 'xpath');
+  async checkmarkInSelectedNFT(index: number): Promise<WebdriverIO.Element> {
+    return this.nftContainers[index].$(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
 
   assetsCounter(): WebElement {

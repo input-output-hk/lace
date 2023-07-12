@@ -30,6 +30,7 @@ export const AddressList = withAddressBookContext(
           id: item.id,
           address: item.address,
           name: item.name,
+          handleResolution: item.handleResolution,
           onClick: (addr: AddressBookSchema) => {
             setAddressValue(row, addr.address);
             setSection();
