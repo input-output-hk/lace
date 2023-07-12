@@ -5,7 +5,6 @@ import { browser } from '@wdio/globals';
 const visitPageInExtendedMode = async (
   page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book'
 ) => {
-  await ExtendedView.setExtendedWindowSize();
   switch (page) {
     case 'Tokens':
       await ExtendedView.visitTokensPage();
