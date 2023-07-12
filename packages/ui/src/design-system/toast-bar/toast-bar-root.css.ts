@@ -60,14 +60,6 @@ export const container = style([
     position: 'relative',
     overflow: 'hidden',
     width: 'fit-content',
-    selectors: {
-      '&[data-state="open"]': {
-        animation: `${slideIn} 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86) forwards`,
-      },
-      '&[data-state="closed"]': {
-        animation: `${hide} 100ms ease-in`,
-      },
-    },
   },
 ]);
 
