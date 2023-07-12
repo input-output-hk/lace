@@ -45,5 +45,6 @@ module.exports = {
     'sort-keys/sort-keys-fix': ['error', 'asc', { natural: true }],
     'unicorn/no-null': 'off',
     'unicorn/prefer-query-selector': 'off',
+    'import/no-extraneous-dependencies': 2,
   },
 };

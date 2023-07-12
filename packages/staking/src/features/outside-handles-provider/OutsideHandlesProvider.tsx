@@ -4,50 +4,8 @@ import { OutsideHandlesContextValue } from './types';
 
 type OutsideHandlesProviderProps = PropsWithChildren<OutsideHandlesContextValue>;
 
-export const OutsideHandlesProvider = ({
-  backgroundServiceAPIContextSetWalletPassword,
-  children,
-  delegationDetails,
-  delegationStoreSelectedStakePoolDetails,
-  delegationStoreSetDelegationTxBuilder,
-  delegationStoreSetSelectedStakePool,
-  openExternalLink,
-  password,
-  passwordRemovePassword,
-  submittingStateSetIsRestaking,
-  walletStoreGetKeyAgentType,
-  walletStoreInMemoryWallet,
-  walletStoreWalletUICardanoCoin,
-}: OutsideHandlesProviderProps) => {
-  const contextValue = useMemo<OutsideHandlesContextValue>(
-    () => ({
-      backgroundServiceAPIContextSetWalletPassword,
-      delegationDetails,
-      delegationStoreSelectedStakePoolDetails,
-      delegationStoreSetDelegationTxBuilder,
-      delegationStoreSetSelectedStakePool,
-      openExternalLink,
-      password,
-      passwordRemovePassword,
-      submittingStateSetIsRestaking,
-      walletStoreGetKeyAgentType,
-      walletStoreInMemoryWallet,
-      walletStoreWalletUICardanoCoin,
-    }),
-    [
-      backgroundServiceAPIContextSetWalletPassword,
-      delegationDetails,
-      delegationStoreSelectedStakePoolDetails,
-      delegationStoreSetDelegationTxBuilder,
-      delegationStoreSetSelectedStakePool,
-      openExternalLink,
-      password,
-      passwordRemovePassword,
-      submittingStateSetIsRestaking,
-      walletStoreGetKeyAgentType,
-      walletStoreInMemoryWallet,
-      walletStoreWalletUICardanoCoin,
-    ]
-  );
+export const OutsideHandlesProvider = ({ children, ...props }: OutsideHandlesProviderProps) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const contextValue = useMemo<OutsideHandlesContextValue>(() => props, Object.values(props));
   return <Provider value={contextValue}>{children}</Provider>;
 };
