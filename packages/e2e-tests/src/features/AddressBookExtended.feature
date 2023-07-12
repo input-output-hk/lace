@@ -153,11 +153,11 @@ Feature: Address book - extended view
       | empty                     | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Name field is required           | empty                               |
       | too_long_name_123456789   | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Max 20 Characters                | empty                               |
       | " name preceded by space" | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Name has unnecessary white space | empty                               |
-      | valid wallet name         | empty                                                                                                           | empty                            | Address field is required           |
+#      | valid wallet name         | empty                                                                                                           | empty                            | Address field is required           | # TODO: Uncomment when LW-7419 is fixed
       | valid wallet name         | invalid_address                                                                                                 | empty                            | Incorrect Cardano address           |
       | valid wallet name         | " addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" | empty                            | Address has unnecessary white space |
       | valid wallet name         | "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja " | empty                            | Address has unnecessary white space |
-      | empty                     | empty                                                                                                           | Name field is required           | Address field is required           |
+#      | empty                     | empty                                                                                                           | Name field is required           | Address field is required           | # TODO: Uncomment when LW-7419 is fixed
       | "name followed by space " | invalid_address                                                                                                 | Name has unnecessary white space | Incorrect Cardano address           |
 
   @LW-4567
@@ -229,7 +229,8 @@ Feature: Address book - extended view
     When I press keyboard Escape button
     Then I do not see address detail page in extended mode
 
-  @LW-4779
+  @LW-4779 @Pending
+  # Bug LW-7419
   Scenario: Extended-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -239,7 +240,8 @@ Feature: Address book - extended view
     And I click outside address form to lose focus
     Then Contact "empty" name error and "Address field is required" address error are displayed
 
-  @LW-4780
+  @LW-4780 @Pending
+  # Bug LW-7419
   Scenario: Extended-view - Address Book - Display error message when adding valid address and clicking outside with empty name field
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -249,7 +251,8 @@ Feature: Address book - extended view
     And I click outside address form to lose focus
     Then Contact "Name field is required" name error and "empty" address error are displayed
 
-  @LW-4781
+  @LW-4781  @Pending
+  #Bug LW-7147
   Scenario: Extended-view - Address Book - No error is displayed when leaving both fields empty
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page

@@ -24,10 +24,12 @@ class AddressForm {
   }
 
   async enterName(name: string) {
+    await this.nameInput.waitForClickable();
     await setInputFieldValue(await this.nameInput, name);
   }
 
   async enterAddress(address: string) {
+    await this.addressInput.waitForClickable();
     await setInputFieldValue(await this.addressInput, address);
   }
 
