@@ -5,7 +5,7 @@ import { t } from '../../utils/translationService';
 
 class AddNewAddressDrawerAssert {
   async assertSeeAddNewAddressDrawer(mode: 'extended' | 'popup', isSendFlow = false) {
-    await AddNewAddressDrawer.drawerHeaderBackButton.waitForDisplayed({
+    await AddNewAddressDrawer.drawerHeaderBackButton.waitForClickable({
       reverse: isSendFlow ? false : mode === 'extended'
     });
     // TODO: uncomment and remove L15:17 when LW-7399 is resolved
