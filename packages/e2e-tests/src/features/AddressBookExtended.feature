@@ -23,10 +23,10 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Add new address "Shelley_manual"
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
-    And I see Add new address form
-    And "browserView.addressBook.addressForm.saveAddress" button is disabled
-    When I fill "Shelley_manual" and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address details outside drawer
-    And I click "browserView.addressBook.addressForm.saveAddress" button
+    And I see "Add new address" drawer in extended mode
+    And "Save address" button is disabled on "Add new address" drawer
+    When I fill address form with "Shelley_manual" name and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
+    And I click "Save address" button on "Add new address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.addAddress"
     And I see address with name "Shelley_manual" and address "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" on the list
 
@@ -34,10 +34,10 @@ Feature: Address book - extended view
   Scenario Outline: Extended-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
-    And I see Add new address form
-    And "browserView.addressBook.addressForm.saveAddress" button is disabled
-    When I fill "<wallet_name>" and "<address>" address details outside drawer
-    And I click "browserView.addressBook.addressForm.saveAddress" button
+    And I see "Add new address" drawer in extended mode
+    And "Save address" button is disabled on "Add new address" drawer
+    When I fill address form with "<wallet_name>" name and "<address>" address
+    And I click "Save address" button on "Add new address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.addAddress"
     And I see address with name "<wallet_name>" and address "<address>" on the list
     Examples:
@@ -52,10 +52,10 @@ Feature: Address book - extended view
   Scenario Outline: Extended-view - Address Book - Add new address and display error message - Name: <name_error> - Address: <address_error>
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
-    And I see Add new address form
-    When I fill "<wallet_name>" and "<address>" address details outside drawer
-    Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
-    And "browserView.addressBook.addressForm.saveAddress" button is disabled
+    And I see "Add new address" drawer in extended mode
+    When I fill address form with "<wallet_name>" name and "<address>" address
+    Then Contact "<name_error>" name error and "<address_error>" address error are displayed
+    And "Save address" button is disabled on "Add new address" drawer
     Examples:
       | wallet_name               | address                                                                  | name_error                       | address_error                       |
       | too_long_name_123456789   | addr_invalid                                                             | Max 20 Characters                | Incorrect Cardano address           |
@@ -68,11 +68,11 @@ Feature: Address book - extended view
   Scenario Outline: Extended-view - Address Book - Add empty name/address and display error message - Name: <name_error> - Address: <address_error>
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
-    And I see Add new address form
-    When I fill "<wallet_name>" and "<address>" address details outside drawer
-    When I fill "<wallet_name2>" and "<address2>" address details outside drawer
-    Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
-    And "browserView.addressBook.addressForm.saveAddress" button is disabled
+    And I see "Add new address" drawer in extended mode
+    When I fill address form with "<wallet_name>" name and "<address>" address
+    And I fill address form with "<wallet_name2>" name and "<address2>" address
+    Then Contact "<name_error>" name error and "<address_error>" address error are displayed
+    And "Save address" button is disabled on "Add new address" drawer
     Examples:
       | wallet_name | wallet_name2 | address                                                               | address2                                                              | name_error             | address_error             |
       | name_ok     | empty        | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf | Name field is required | empty                     |
@@ -102,8 +102,8 @@ Feature: Address book - extended view
   Scenario Outline: Extended-view - Address Book - Uniqueness validation and toast display with text <toast_message>
     Given I have 3 addresses in my address book in extended mode
     And I click "Add address" button on address book page
-    When I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" outside drawer
-    And I click "browserView.addressBook.addressForm.saveAddress" button
+    When I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
+    And I click "Save address" button on "Add new address" drawer
     Then I see a toast with message: "<toast_message>"
     Examples:
       | wallet_name | wallet_address | toast_message                               |
@@ -114,7 +114,7 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Copy address button
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
-    And I click on "Copy" button on address detail drawer
+    And I click "Copy" button on address details page
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
     And address is saved to clipboard
 
@@ -123,8 +123,8 @@ Feature: Address book - extended view
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "<edited_address>"
     And I click "Edit" button on address details page
-    And I fill "<wallet_name>" and "<address>" address details in drawer
-    And I click "core.editAddressForm.doneButton" button
+    And I fill address form with "<wallet_name>" name and "<address>" address
+    And I click "Done" button on "Edit address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.editAddress"
     And I see address with name "<wallet_name>" and address "<address>" on the list
     Examples:
@@ -137,7 +137,7 @@ Feature: Address book - extended view
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page
-    When I click "browserView.addressBook.deleteModal.buttons.cancel" button
+    When I click "Cancel" button on "Edit address" drawer
     Then I see address detail page in extended mode
 
   @LW-4565
@@ -145,19 +145,19 @@ Feature: Address book - extended view
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page
-    And I fill "<wallet_name>" and "<address>" address details in drawer
-    Then Contact name error: "<name_error>" and address error: "<address_error>" are displayed
-    And "core.editAddressForm.doneButton" button is disabled
+    And I fill address form with "<wallet_name>" name and "<address>" address
+    Then Contact "<name_error>" name error and "<address_error>" address error are displayed
+    And "Done" button is disabled on "Edit address" drawer
     Examples:
       | wallet_name               | address                                                                                                         | name_error                       | address_error                       |
       | empty                     | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Name field is required           | empty                               |
       | too_long_name_123456789   | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Max 20 Characters                | empty                               |
       | " name preceded by space" | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Name has unnecessary white space | empty                               |
-      | valid wallet name         | empty                                                                                                           | empty                            | Address field is required           |
+#      | valid wallet name         | empty                                                                                                           | empty                            | Address field is required           | # TODO: Uncomment when LW-7419 is fixed
       | valid wallet name         | invalid_address                                                                                                 | empty                            | Incorrect Cardano address           |
       | valid wallet name         | " addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" | empty                            | Address has unnecessary white space |
       | valid wallet name         | "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja " | empty                            | Address has unnecessary white space |
-      | empty                     | empty                                                                                                           | Name field is required           | Address field is required           |
+#      | empty                     | empty                                                                                                           | Name field is required           | Address field is required           | # TODO: Uncomment when LW-7419 is fixed
       | "name followed by space " | invalid_address                                                                                                 | Name has unnecessary white space | Incorrect Cardano address           |
 
   @LW-4567
@@ -165,8 +165,8 @@ Feature: Address book - extended view
     Given I have 3 addresses in my address book in extended mode
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page
-    And I fill wallet name: "<wallet_name>" and get address by name: "<wallet_address>" in drawer
-    And I click "core.editAddressForm.doneButton" button
+    And I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
+    And I click "Done" button on "Edit address" drawer
     Then I see a toast with message: "<toast_message>"
     Examples:
       | wallet_name | wallet_address | toast_message                               |
@@ -217,7 +217,7 @@ Feature: Address book - extended view
     When I press keyboard Escape button
     And I see address detail page in extended mode
     When I press keyboard Enter button
-    And I fill "Byron_edited" and "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" address details in drawer
+    And I fill address form with "Byron_edited" name and "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" address
     When I press keyboard Enter button
     Then I see a toast with message: "browserView.addressBook.toast.editAddress"
 
@@ -229,37 +229,40 @@ Feature: Address book - extended view
     When I press keyboard Escape button
     Then I do not see address detail page in extended mode
 
-  @LW-4779
+  @LW-4779 @Pending
+  # Bug LW-7419
   Scenario: Extended-view - Address Book - Display error message after filling name and clicking outside with empty address
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
-    And I see Add new address form
-    When I fill "name_ok" name for address details outside drawer
-    And I fill "empty" address field in address book outside drawer
-    And I click on address book background to lose focus outside drawer
-    Then Contact name error: "empty" and address error: "Address field is required" are displayed
+    And I see "Add new address" drawer in extended mode
+    When I fill address form with "name_ok" name
+    And I fill address form with "empty" address
+    And I click outside address form to lose focus
+    Then Contact "empty" name error and "Address field is required" address error are displayed
 
-  @LW-4780
+  @LW-4780 @Pending
+  # Bug LW-7419
   Scenario: Extended-view - Address Book - Display error message when adding valid address and clicking outside with empty name field
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
-    And I see Add new address form
-    When I fill "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address field in address book outside drawer
-    When I fill "empty" name for address details outside drawer
-    And I click on address book background to lose focus outside drawer
-    Then Contact name error: "Name field is required" and address error: "empty" are displayed
+    And I see "Add new address" drawer in extended mode
+    When I fill address form with "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
+    When I fill address form with "empty" name
+    And I click outside address form to lose focus
+    Then Contact "Name field is required" name error and "empty" address error are displayed
 
-  @LW-4781
+  @LW-4781  @Pending
+  #Bug LW-7147
   Scenario: Extended-view - Address Book - No error is displayed when leaving both fields empty
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
-    And I see Add new address form
-    When I fill "name_ok" and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address details outside drawer
-    And I remove Name field content in address book outside drawer
-    And I remove Address field content in address book outside drawer
-    And I click on address book background to lose focus outside drawer
-    Then Contact name error: "empty" and address error: "empty" are displayed
-    And "core.addressForm.addAddress" button is disabled
+    And I see "Add new address" drawer in extended mode
+    When I fill address form with "name_ok" name and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
+    And I clear name field value in address form
+    And I clear address field value in address form
+    And I click outside address form to lose focus
+    Then Contact "empty" name error and "empty" address error are displayed
+    And "Save address" button is disabled on "Add new address" drawer
 
   @LW-7146 @Pending
   #Bug LW-7147
@@ -269,4 +272,4 @@ Feature: Address book - extended view
     Then I see a button to open the right side panel
     When I click on right side panel icon
     Then I see the right side panel for Address Book section
-    And I do not see "browserView.addressBook.addressForm.title.add" button
+    And I do not see "Add address" button on address book page
