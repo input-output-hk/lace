@@ -1,4 +1,4 @@
-import { useRedirection } from '@hooks';
+import { useAssetInfo, useRedirection } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
@@ -27,7 +27,7 @@ export const NftDetail = (): React.ReactElement => {
   const redirectToNfts = useRedirection(walletRoutePaths.nfts);
   const redirectToSend = useRedirection<{ params: { id?: string } }>(walletRoutePaths.send);
   const { id } = useParams<{ id: string }>();
-  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const assetsInfo = useAssetInfo();
   const setSendInitialState = useOutputInitialState();
 
   const assetId = Wallet.Cardano.AssetId(id);
