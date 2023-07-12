@@ -1,4 +1,10 @@
+import { BackgroundStorage } from '@lib/scripts/types';
 import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from '.';
+
+const generateStorageMocks = (store: Pick<BackgroundStorage, 'usePersistentUserId' | 'userId'> = {}) => ({
+  getStorageMock: jest.fn(() => Promise.resolve(store)),
+  setStorageMock: jest.fn()
+});
 
 describe('userIdService', () => {
   describe('restoring persistent user id', () => {
@@ -7,13 +13,13 @@ describe('userIdService', () => {
         usePersistentUserId: true,
         userId: 'test'
       };
-      const getStorageMock = jest.fn(() => Promise.resolve(store));
+      const { getStorageMock } = generateStorageMocks(store);
       const userIdService = new UserIdService(getStorageMock);
       expect(await userIdService.getId()).toEqual(store.userId);
     });
 
     it('should generate a random user id if none was stored', async () => {
-      const getStorageMock = jest.fn(() => Promise.resolve({}));
+      const { getStorageMock } = generateStorageMocks({});
       const userIdService = new UserIdService(getStorageMock);
       expect(Buffer.from(await userIdService.getId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
     });
@@ -21,8 +27,7 @@ describe('userIdService', () => {
 
   describe('making a user id persistent', () => {
     it('should save the temporary user id', async () => {
-      const getStorageMock = jest.fn(() => Promise.resolve({}));
-      const setStorageMock = jest.fn();
+      const { getStorageMock, setStorageMock } = generateStorageMocks({});
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
       await userIdService.makePersistent();
       const temporaryUserId = await userIdService.getId();
@@ -40,8 +45,7 @@ describe('userIdService', () => {
         usePersistentUserId: true,
         userId: 'test'
       };
-      const getStorageMock = jest.fn(() => Promise.resolve(store));
-      const setStorageMock = jest.fn();
+      const { getStorageMock, setStorageMock } = generateStorageMocks(store);
 
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
       await userIdService.makeTemporary();
@@ -67,8 +71,7 @@ describe('userIdService', () => {
         usePersistentUserId: true,
         userId: 'test'
       };
-      const getStorageMock = jest.fn(() => Promise.resolve(store));
-      const setStorageMock = jest.fn();
+      const { getStorageMock, setStorageMock } = generateStorageMocks(store);
 
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
       await userIdService.makeTemporary();
