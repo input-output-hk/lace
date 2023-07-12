@@ -1,13 +1,33 @@
 import { Page } from './page';
 import { browser } from '@wdio/globals';
+import extensionUtils from '../utils/utils';
 
 const EXTENSION_URL = 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/app.html';
 
 class ExtendedView implements Page {
+  extendedWidth = 1920;
+  extendedHeight = 1080;
+
   async getBaseUrl() {
     return EXTENSION_URL;
   }
 
+  async setExtendedWindowSize() {
+    if ((await extensionUtils.getBrowser()) === 'chrome') {
+      const ua = await extensionUtils.getUserAgent();
+      await browser.emulateDevice({
+        viewport: {
+          width: this.extendedWidth,
+          height: this.extendedHeight,
+          deviceScaleFactor: 1,
+          isMobile: false,
+          hasTouch: false,
+          isLandscape: false
+        },
+        userAgent: `${ua}`
+      });
+    }
+  }
   async visit() {
     await browser.url(await this.getBaseUrl());
   }
