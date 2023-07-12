@@ -14,7 +14,7 @@ Then(
 Given(
   /^I am on a NFT details on the (extended|popup) view for NFT with name: "([^"]*)"$/,
   async (mode: 'extended' | 'popup', nftName: string) => {
-    await nftsPageObject.clickNftItem(nftName);
+    await nftsPageObject.clickNftItemOnNftsPage(nftName);
     await nftAssert.assertSeeNftDetails(nftName, mode);
   }
 );

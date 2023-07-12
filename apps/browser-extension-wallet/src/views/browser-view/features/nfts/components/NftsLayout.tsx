@@ -217,7 +217,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                 </Button>
               )}
             </div>
-            <div className={styles.content}>
+            <div className={styles.content} data-testid="nft-list-container">
               {items.length > 0 ? (
                 <NftList items={items} rows={4} />
               ) : (

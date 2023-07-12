@@ -6,7 +6,7 @@ import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 import { Asset } from '../data/Asset';
 import testContext from '../utils/testContext';
-import NftItem from '../elements/NFTs/nftItem';
+import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -20,9 +20,8 @@ class NftCreateFolderAssert {
     if (mode === 'popup') {
       await NftCreateFolderPage.drawerHeaderBackButton.waitForClickable();
     } else {
-      await NftCreateFolderPage.drawerBody.waitForDisplayed();
+      await NftCreateFolderPage.drawerBody.waitForClickable();
       await NftCreateFolderPage.drawerNavigationTitle.waitForDisplayed();
-      await NftCreateFolderPage.drawerNavigationTitle.scrollIntoView();
       await expect(await NftCreateFolderPage.drawerNavigationTitle.getText()).to.equal(
         await t('browserView.nfts.folderDrawer.header')
       );
@@ -73,17 +72,16 @@ class NftCreateFolderAssert {
       await expect(await NftCreateFolderPage.drawerHeaderTitle.getText()).to.equal(
         await t('browserView.nfts.folderDrawer.assetPicker.title')
       );
-
       await NftSelectNftsPage.searchInput.container.waitForDisplayed();
       await expect(await NftSelectNftsPage.searchInput.input.getAttribute('placeholder')).to.equal(
         await t('cardano.stakePoolSearch.searchPlaceholder')
       );
-
       await NftSelectNftsPage.assetSelectorContainer.waitForDisplayed();
+      const tokenSelectionPage = new TokenSelectionPage();
 
-      const ibileCoin = await NftSelectNftsPage.getNftByName(Asset.IBILECOIN.name);
+      const ibileCoin = await tokenSelectionPage.getNftContainer(Asset.IBILECOIN.name);
       await ibileCoin.waitForDisplayed();
-      const bisonCoin = await NftSelectNftsPage.getNftByName(Asset.BISON_COIN.name);
+      const bisonCoin = await tokenSelectionPage.getNftContainer(Asset.BISON_COIN.name);
       await bisonCoin.waitForDisplayed();
 
       await NftSelectNftsPage.nextButton.waitForDisplayed();
@@ -97,18 +95,18 @@ class NftCreateFolderAssert {
 
   async verifySeeAllOwnedNfts() {
     const ownedNftNames = testContext.load('ownedNfts');
-    const displayedNfts = await NftSelectNftsPage.getContainers();
+    const displayedNfts = await new TokenSelectionPage().nftContainers;
 
     const displayedNftNames: string[] = [];
-    for (const cont of displayedNfts) {
-      displayedNftNames.push(await cont.getText());
+    for (const nftContainer of displayedNfts) {
+      displayedNftNames.push(await nftContainer.getText());
     }
 
     expect(ownedNftNames).to.have.ordered.members(displayedNftNames);
   }
 
   async verifyNoneNftIsSelected() {
-    await NftItem.selectedCheckmark.waitForDisplayed({ reverse: true });
+    await new TokenSelectionPage().nftItemSelectedCheckmark.waitForDisplayed({ reverse: true });
   }
 
   async assertSeeInputMaxLengthError(shouldBeDisplayed: boolean, maxLength: number) {

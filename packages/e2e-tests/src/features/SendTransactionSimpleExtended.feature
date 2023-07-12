@@ -166,7 +166,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
 
   @LW-2368 @Testnet @Mainnet
@@ -378,7 +378,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the NFT displays 1 in the value field
 
   @LW-3558 @Testnet @Mainnet
@@ -604,7 +604,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
     When I enter a value of: 1 to the "Ibilecoin" asset in bundle 1
     Then the NFT displays 1 in the value field

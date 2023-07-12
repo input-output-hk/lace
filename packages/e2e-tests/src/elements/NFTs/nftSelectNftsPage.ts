@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 import CommonDrawerElements from '../CommonDrawerElements';
 import SearchInput from '../searchInput';
-import NftItem from './nftItem';
 
 class NftSelectNftsPage extends CommonDrawerElements {
   private COUNTER = '[data-testid="assets-counter"]';
@@ -27,16 +26,6 @@ class NftSelectNftsPage extends CommonDrawerElements {
 
   get assetSelectorContainer() {
     return $(this.ASSET_SELECTOR_CONTAINER);
-  }
-
-  async getContainers(): Promise<WebdriverIO.ElementArray> {
-    return this.assetSelectorContainer.$$(await NftItem.nftContainer.selector);
-  }
-
-  async getNftByName(name: string): Promise<WebdriverIO.Element> {
-    return (await this.assetSelectorContainer
-      .$$(await NftItem.containers.selector)
-      .find(async (item) => (await item.$(await NftItem.name.selector).getText()) === name)) as WebdriverIO.Element;
   }
 }
 

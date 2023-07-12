@@ -8,16 +8,23 @@ import testContext from '../utils/testContext';
 import NftDetails from '../elements/NFTs/nftDetails';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
-import NftItem from '../elements/NFTs/nftItem';
+import NftsPage from '../elements/NFTs/nftsPage';
+import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 
 class NftsPageObject {
-  async clickNftItem(nftName: string) {
-    const nftNameElement = await NftItem.getNftNameByName(nftName);
+  async clickNftItemOnNftsPage(nftName: string) {
+    const nftNameElement = await NftsPage.getNftName(nftName);
+    await nftNameElement.click();
+  }
+
+  async clickNftItemInAssetSelector(nftName: string) {
+    const tokenSelectionPage = new TokenSelectionPage();
+    const nftNameElement = await tokenSelectionPage.getNftName(nftName);
     await nftNameElement.click();
   }
 
   async progressWithSendUntilPasswordPage(nftName: string): Promise<any> {
-    await this.clickNftItem(nftName);
+    await this.clickNftItemOnNftsPage(nftName);
     await NftDetails.sendNFTButton.waitForClickable();
     await NftDetails.sendNFTButton.click();
     const receiverWallet = getTestWallet(await this.getNonActiveNftWalletName());
@@ -31,7 +38,7 @@ class NftsPageObject {
   }
 
   async isNftDisplayed(nftName: string): Promise<boolean> {
-    const nftItem = await NftItem.getNftByName(nftName);
+    const nftItem = await NftsPage.getNftContainer(nftName);
     return nftItem !== undefined;
   }
 
@@ -44,7 +51,7 @@ class NftsPageObject {
   async saveNfts(): Promise<any> {
     const names: string[] = [];
 
-    for (const nftContainer of await NftItem.containers) {
+    for (const nftContainer of await NftsPage.nftContainers) {
       names.push(await nftContainer.getText());
     }
     testContext.save('ownedNfts', names);

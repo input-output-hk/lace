@@ -36,7 +36,7 @@ export const SectionTitle = ({
         icon={<ArrowLeftOutlined />}
       />
     )}
-    <div className={styles.sectionTitle}>
+    <div className={styles.sectionTitle} data-testid="section-title-container">
       <Text data-testid={rest['data-testid'] || 'section-title'} className={styles.title}>
         {title}
       </Text>
