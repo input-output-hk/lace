@@ -109,6 +109,10 @@ Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: st
   if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
 });
 
+Then(/^I don't see any toast message$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage('', false);
+});
+
 Then(/^I see "Help and support" page$/, async () => {
   await helpAndSupportPageAssert.assertSeeHelpAndSupportPage();
 });

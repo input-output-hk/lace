@@ -19,7 +19,6 @@ import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletCo
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
-import { browser } from '@wdio/globals';
 
 Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
   await stakingPageAssert.assertSeeTitleWithCounter();
@@ -142,7 +141,6 @@ Then(
       stakePoolName === 'OtherStakePool'
         ? getStakePoolByName(testContext.load(stakePoolName))
         : getStakePoolByName(stakePoolName, extensionUtils.isMainnet() ? 'mainnet' : 'testnet');
-    await browser.pause(100);
     await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
   }
 );
