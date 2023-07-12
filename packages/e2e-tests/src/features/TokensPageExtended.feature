@@ -114,7 +114,6 @@ Feature: LW: Tokens tab - extended view
     Then opened eye icon is displayed on Tokens page
     And total wallet balance is masked with asterisks
     And balance and FIAT balance for each token are masked with asterisks
-    Then I navigate to Transactions extended page
 
   @Testnet @Mainnet @LW-7121 @LW-7123
   Scenario Outline: Extended View - Hide my balance - keep state after <action> the page

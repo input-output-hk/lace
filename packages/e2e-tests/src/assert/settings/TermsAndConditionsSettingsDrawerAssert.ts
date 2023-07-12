@@ -5,6 +5,7 @@ import { readFromFile } from '../../utils/fileUtils';
 
 class TermsAndConditionsSettingsDrawerAssert {
   assertTermsAndConditionsContent = async () => {
+    await TermsAndConditionsDrawer.drawerHeaderBackButton.waitForClickable();
     await TermsAndConditionsDrawer.termsAndConditionsContent.waitForDisplayed();
     const actualContent = await removeWhitespacesFromText(
       await TermsAndConditionsDrawer.termsAndConditionsContent.getText()
