@@ -156,7 +156,6 @@ Then(/^I see drawer with stake pool details without metadata and a button availa
 });
 
 Then(/^I input "([^"]*)" to the search bar$/, async (term: string) => {
-  await browser.pause(500);
   await (term === 'OtherStakePool' || term === 'OtherNoMetadataStakePool'
     ? StakingPageObject.fillSearch(testContext.load(term))
     : StakingPageObject.fillSearch(term));
