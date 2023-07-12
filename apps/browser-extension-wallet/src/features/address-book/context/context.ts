@@ -6,6 +6,7 @@ export const AddressBookContext = createContext<useDbStateValue<AddressBookSchem
 
 export const useAddressBookContext = (): ReturnType<typeof useDbState> => {
   const bookContext = useContext(AddressBookContext);
+
   if (bookContext === null) throw new Error('AddressBookContext is not defined.');
   return bookContext;
 };
