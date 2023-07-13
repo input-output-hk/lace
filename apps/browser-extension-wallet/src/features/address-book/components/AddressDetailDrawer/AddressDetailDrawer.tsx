@@ -8,7 +8,7 @@ import { Button, toast, Drawer, DrawerHeader, DrawerNavigation, useKeyboardShort
 import { EditAddressForm, EditAddressFormFooter, valuesPropType } from '@lace/core';
 import { validateWalletName, validateWalletAddress, validateWalletHandle } from '@src/utils/validators/address-book';
 import { AddressDetailsSteps, AddressDetailsConfig, AddressDetailsSectionConfig } from './types';
-import { DeleteAddressModal } from '../DeleteAddressModal';
+import { AddressActionsModal, ACTIONS } from '../AddressActionsModal';
 import styles from './AddressDetailDrawer.module.scss';
 import Copy from '@src/assets/icons/copy.component.svg';
 import Icon from '@ant-design/icons';
@@ -255,7 +255,8 @@ export const AddressDetailDrawer = ({
           </>
         )}
       </Drawer>
-      <DeleteAddressModal
+      <AddressActionsModal
+        action={ACTIONS.DELETE}
         onCancel={() => {
           sendAnalytics(
             popupView

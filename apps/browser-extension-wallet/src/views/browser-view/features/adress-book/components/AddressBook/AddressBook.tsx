@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { WalletAddressList, WalletAddressItemProps } from '@lace/core';
@@ -7,7 +7,10 @@ import { withAddressBookContext, useAddressBookContext } from '@src/features/add
 import { AddressBookSchema } from '@src/lib/storage';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import { SectionLayout, EducationalList, Layout } from '@src/views/browser-view/components';
-import { AddressDetailDrawer } from '@src/features/address-book/components/AddressDetailDrawer';
+import {
+  AddressDetailDrawer,
+  AddressChangeDetailDrawer
+} from '@src/features/address-book/components/AddressDetailDrawer';
 import { AddressBookEmpty } from '../AddressBookEmpty';
 import styles from './AddressBook.module.scss';
 import DeleteIcon from '@assets/icons/delete-icon.component.svg';
@@ -24,20 +27,25 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
-import { getAddressToSave } from '@src/utils/validators';
 import { useHandleResolver } from '@hooks';
+import { CustomConflictError, getAddressToSave, hasHandleOwnerChanged } from '@src/utils/validators';
 
 const ELLIPSIS_LEFT_SIDE_LENGTH = 34;
 const ELLIPSIS_RIGHT_SIDE_LENGTH = 34;
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { t: translate } = useTranslation();
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
   const { extendLimit, saveRecord: saveAddress, updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
+  const [validatedAddressStatus, setValidatedAddressStatus] = useState<
+    Record<string, { isValid: boolean; error?: CustomConflictError }>
+  >({});
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
@@ -76,14 +84,50 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_BROWSER
           });
           setAddressToEdit(address);
-          setIsDrawerOpen(true);
+          if (validatedAddressStatus[address.address]?.isValid === false) {
+            setIsAddressDrawerOpen(true);
+          } else {
+            setIsDrawerOpen(true);
+          }
         },
         shouldUseEllipsisBeferoAfter: true,
+        isAddressWarningVisible: validatedAddressStatus[item.address]?.isValid === false ?? false,
         beforeEllipsis: ELLIPSIS_LEFT_SIDE_LENGTH,
         afterEllipsis: ELLIPSIS_RIGHT_SIDE_LENGTH
       })) || [],
-    [addressList, analytics, setAddressToEdit]
+    [addressList, analytics, setAddressToEdit, validatedAddressStatus]
   );
+
+  useEffect(() => {
+    const fiveSecondDelay = 5000;
+    const updateAddressStatus = (address: string, status: { isValid: boolean; error?: CustomConflictError }) => {
+      setValidatedAddressStatus((currentValidatedAddressStatus) => ({
+        ...currentValidatedAddressStatus,
+        [address]: status
+      }));
+    };
+
+    const validateAddresses = () => {
+      addressList?.forEach(async (item: AddressBookSchema) => {
+        try {
+          await hasHandleOwnerChanged({
+            value: item.address,
+            address: item.handleResolution?.cardanoAddress,
+            handleResolver
+          });
+          updateAddressStatus(item.address, { isValid: true });
+        } catch (error) {
+          if (error instanceof CustomConflictError) {
+            updateAddressStatus(item.address, { isValid: false, error });
+          }
+        }
+      });
+    };
+    validateAddresses();
+    const intervalId = setInterval(validateAddresses, fiveSecondDelay);
+
+    return () => clearInterval(intervalId);
+  }, [addressList, handleResolver]);
 
   const loadMoreData = useCallback(() => {
     extendLimit();
@@ -96,7 +140,8 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
       name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_BROWSER
     });
 
-    const addressToSave = await getAddressToSave(address, handleResolver);
+    const addressToSave = await getAddressToSave({ address, handleResolver });
+
     return 'id' in addressToEdit
       ? updateAddress(addressToEdit.id, addressToSave, {
           text: translate('browserView.addressBook.toast.editAddress'),
@@ -151,6 +196,22 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
         ) : (
           <AddressBookEmpty />
         )}
+        <AddressChangeDetailDrawer
+          visible={isAddressDrawerOpen}
+          onCancelClick={() => {
+            setIsAddressDrawerOpen(false);
+          }}
+          initialValues={addressToEdit}
+          expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress}
+          actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress}
+          onDelete={(id) =>
+            deleteAddress(id, {
+              text: translate('browserView.addressBook.toast.deleteAddress'),
+              icon: DeleteIcon
+            })
+          }
+          onConfirmClick={onAddressSave}
+        />
         <AddressDetailDrawer
           initialValues={addressToEdit}
           onCancelClick={() => {
@@ -158,6 +219,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             setIsDrawerOpen(false);
           }}
           onConfirmClick={onAddressSave}
+          // eslint-disable-next-line sonarjs/no-identical-functions
           onDelete={(id) =>
             deleteAddress(id, {
               text: translate('browserView.addressBook.toast.deleteAddress'),

@@ -62,6 +62,7 @@ const AddressBook = {
   ADD_ADDRESS_BROWSER: 'add-address-browser',
   VIEW_ADDRESS_DETAILS_BROWSER: 'view-address-details-browser',
   EDIT_ADDRESS_BROWSER: 'edit-address-browser',
+  UPDATE_ADDRESS_BROWSER: 'update-address-browser',
   DELETE_ADDRESS_PROMPT_BROWSER: 'delete-address-prompt-browser',
   CONFIRM_DELETE_ADDRESS_BROWSER: 'confirm-delete-address-browser',
   CANCEL_DELETE_ADDRESS_BROWSER: 'cancel-delete-address-browser',
@@ -69,9 +70,20 @@ const AddressBook = {
   ADD_ADDRESS_POPUP: 'add-address-popup',
   VIEW_ADDRESS_DETAILS_POPUP: 'view-address-details-popup',
   EDIT_ADDRESS_POPUP: 'edit-address-popup',
+  UPDATE_ADDRESS_POPUP: 'update-address-popup',
   DELETE_ADDRESS_PROMPT_POPUP: 'delete-address-prompt-popup',
   CONFIRM_DELETE_ADDRESS_POPUP: 'confirm-delete-address-popup',
-  CANCEL_DELETE_ADDRESS_POPUP: 'cancel-delete-address-popup'
+  CANCEL_DELETE_ADDRESS_POPUP: 'cancel-delete-address-popup',
+  CONFIRM_UPDATE_ADDRESS_POPUP: 'confirm-update-address-popup',
+  CONFIRM_UPDATE_ADDRESS_BROWSER: 'confirm-update-address-browser',
+  CANCEL_UPDATE_ADDRESS_POPUP: 'cancel-udpate-address-popup',
+  CANCEL_UPDATE_ADDRESS_BROWSER: 'cancel-update-address-browser',
+  CONFIRM_DELETE_UPDATE_ADDRESS_POPUP: 'confirm-delete-update-address-popup',
+  CONFIRM_DELETE_UPDATE_ADDRESS_BROWSER: 'confirm-delete-update-address-browser',
+  CANCEL_DELETE_UPDATE_ADDRESS_POPUP: 'cancel-delete-update-address-popup',
+  CANCEL_DELETE_UPDATE_ADDRESS_BROWSER: 'cancel-delete-update-address-browser',
+  DELETE_UPDATE_ADDRESS_PROMPT_POPUP: 'delete-update-address-prompt-popup',
+  DELETE_UPDATE_ADDRESS_PROMPT_BROWSER: 'delete-update-address-prompt-browser'
 };
 
 const ViewTokens = {
