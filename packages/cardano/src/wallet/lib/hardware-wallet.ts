@@ -1,4 +1,5 @@
 /* eslint-disable unicorn/no-null */
+import { firstValueFrom } from 'rxjs';
 import { Cardano, CML } from '@cardano-sdk/core';
 import { ObservableWallet, setupWallet, SetupWalletProps } from '@cardano-sdk/wallet';
 import * as KeyManagement from '../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
@@ -231,5 +232,6 @@ export const createHardwareWallet = async (
   );
 
   await activateWallet(walletManagerUi, keyAgent, name);
+  await firstValueFrom(wallet.syncStatus.isSettled$);
   return { name, wallet, keyAgent, keyAgentsByChain };
 };

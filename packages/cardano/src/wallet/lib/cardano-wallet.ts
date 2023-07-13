@@ -1,4 +1,5 @@
 /* eslint-disable unicorn/no-null */
+import { firstValueFrom } from 'rxjs';
 import {
   AssetProvider,
   Cardano,
@@ -182,6 +183,7 @@ export const createCardanoWallet = async (
   );
 
   await activateWallet(walletManagerUi, keyAgent, name);
+  await firstValueFrom(wallet.syncStatus.isSettled$);
   return { name, wallet, keyAgent, keyAgentsByChain };
 };
 
