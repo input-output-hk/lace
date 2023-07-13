@@ -24,6 +24,8 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
+import { getAddressToSave } from '@src/utils/validators';
+import { useHandleResolver } from '@hooks';
 
 const ELLIPSIS_LEFT_SIDE_LENGTH = 34;
 const ELLIPSIS_RIGHT_SIDE_LENGTH = 34;
@@ -35,6 +37,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { extendLimit, saveRecord: saveAddress, updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const analytics = useAnalyticsContext();
+  const handleResolver = useHandleResolver();
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
@@ -86,18 +89,20 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
     extendLimit();
   }, [extendLimit]);
 
-  const onAddressSave = (address: AddressBookSchema): Promise<string> => {
+  const onAddressSave = async (address: AddressBookSchema): Promise<string> => {
     analytics.sendEvent({
       category: AnalyticsEventCategories.ADDRESS_BOOK,
       action: AnalyticsEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_BROWSER
     });
+
+    const addressToSave = await getAddressToSave(address, handleResolver);
     return 'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, address, {
+      ? updateAddress(addressToEdit.id, addressToSave, {
           text: translate('browserView.addressBook.toast.editAddress'),
           icon: EditIcon
         })
-      : saveAddress(address, {
+      : saveAddress(addressToSave, {
           text: translate('browserView.addressBook.toast.addAddress'),
           icon: AddIcon
         });

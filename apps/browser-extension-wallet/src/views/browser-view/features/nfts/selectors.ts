@@ -3,6 +3,8 @@ import { Wallet } from '@lace/cardano';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 import i18n from 'i18next';
 import { EnvironmentTypes } from '@stores';
+import { AssetOrHandleInfo } from '@hooks';
+import { getAssetImage } from '@src/utils/get-asset-image';
 
 export const nftImageSelector = (imageUri: Wallet.Asset.Uri | Wallet.Asset.Uri[]): string | undefined => {
   const uri = Array.isArray(imageUri) ? imageUri[0] : imageUri;
@@ -22,21 +24,21 @@ const nftAttributesSelector = (metadata: Map<string, Wallet.Cardano.Metadatum>):
   return JSON.stringify(metadataRecord, undefined, JSON_INDENTATION);
 };
 
-export const nftDetailSelector = ({ policyId, assetId, nftMetadata }: Wallet.Asset.AssetInfo): NftDetailProps => {
-  const image = nftImageSelector(nftMetadata?.image);
+export const nftDetailSelector = (asset: AssetOrHandleInfo): NftDetailProps => {
+  const image = nftImageSelector(getAssetImage(asset));
 
-  const { otherProperties } = nftMetadata || {};
+  const { otherProperties } = asset.nftMetadata || {};
 
   return {
     image,
     tokenInformation: [
       {
         name: 'Policy ID',
-        value: policyId.toString()
+        value: asset.policyId.toString()
       },
       {
         name: 'Asset ID',
-        value: assetId.toString()
+        value: asset.assetId.toString()
       },
       {
         name: 'Media URL',

@@ -1,5 +1,6 @@
 import React from 'react';
 import cn from 'classnames';
+import { Cardano } from '@cardano-sdk/core';
 import { Typography, Tooltip } from 'antd';
 import { Ellipsis } from '@lace/common';
 import { ReactComponent as MissingIcon } from '../../assets/icons/missing.component.svg';
@@ -10,7 +11,7 @@ const { Text } = Typography;
 interface AddressBookSchema {
   id: number;
   name: string;
-  address: string;
+  address: Cardano.PaymentAddress | string;
 }
 
 export type WalletAddressItemProps = {

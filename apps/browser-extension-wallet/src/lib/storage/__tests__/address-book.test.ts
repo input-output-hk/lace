@@ -16,16 +16,17 @@ describe('Testing addressBook table', () => {
   });
   afterEach(() => db.delete());
 
-  test('should have an addressBook table with id, name and address fields', () => {
+  test('should have an addressBook table with id, name, address and handleResolution fields', () => {
     expect(db.table('addressBook')).toBeDefined();
     expect(db.getConnection(addressBookSchema)).toEqual(db.table('addressBook'));
     expect(db.getConnection(addressBookSchema).schema.primKey.name).toEqual('id');
-    expect(db.getConnection(addressBookSchema).schema.indexes).toHaveLength(3);
+    expect(db.getConnection(addressBookSchema).schema.indexes).toHaveLength(4);
     expect(db.getConnection(addressBookSchema).schema.indexes).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: 'name' }),
         expect.objectContaining({ name: 'address' }),
-        expect.objectContaining({ name: 'network' })
+        expect.objectContaining({ name: 'network' }),
+        expect.objectContaining({ name: 'handleResolution' })
       ])
     );
   });
