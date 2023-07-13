@@ -7,3 +7,4 @@ process.env.CEXPLORER_URL_PREVIEW = 'https://preview.cexplorer.io';
 process.env.CEXPLORER_URL_PREPROD = 'https://preprod.cexplorer.io';
 process.env.CEXPLORER_URL_TESTNET = 'https://testnet.cexplorer.io';
 process.env.USE_HIDE_MY_BALANCE = 'true';
+process.env.USE_POSTHOG_ANALYTICS = 'true';
