@@ -6,8 +6,8 @@ import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface }
 import randomBytes from 'randombytes';
 
 // eslint-disable-next-line no-magic-numbers
-const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
-const USER_ID_BYTE_SIZE = 8;
+export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
+export const USER_ID_BYTE_SIZE = 8;
 
 export class UserIdService implements UserIdServiceInterface {
   private userId?: string;
@@ -40,7 +40,6 @@ export class UserIdService implements UserIdServiceInterface {
   async clearId(): Promise<void> {
     console.debug('[ANALYTICS] clearId() called');
     this.userId = undefined;
-    await this.setStorage({ usePersistentUserId: false, userId: undefined });
     this.clearSessionTimeout();
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
