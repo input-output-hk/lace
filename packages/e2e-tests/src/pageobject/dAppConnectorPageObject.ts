@@ -74,7 +74,7 @@ class DAppConnectorPageObject {
   async deauthorizeDApp(expectedDappName: string, mode: 'extended' | 'popup') {
     mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
     await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
-    await AuthorizedDappsPage.drawerHeaderTitle.waitForDisplayed();
+    await AuthorizedDappsPage.drawerHeaderTitle.waitForClickable();
 
     for (const dAppName of await AuthorizedDappsPage.dAppNames) {
       if ((await dAppName.getText()) === expectedDappName) {
