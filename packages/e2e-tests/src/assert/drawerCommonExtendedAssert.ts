@@ -23,7 +23,7 @@ class DrawerCommonExtendedAssert {
   }
 
   async assertSeeDrawer(shouldSee: boolean) {
-    await $(new DrawerCommonExtended().drawerBodyContainer().toJSLocator()).waitForDisplayed({
+    await $(new DrawerCommonExtended().drawerBodyContainer().toJSLocator()).waitForClickable({
       reverse: !shouldSee,
       timeout: 2000,
       timeoutMsg: 'expected to not see drawer in 2s'

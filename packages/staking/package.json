@@ -35,7 +35,7 @@
     "build": "tsc && tsup",
     "cleanup": "shx rm -rf dist node_modules && shx rm -rf ../../.cache/eslintcache",
     "dev": "ladle serve",
-    "eslint:check": "eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '.*/**/*.{cjs,mjs,js,ts,tsx}'",
+    "eslint:check": "eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '**/*.{cjs,mjs,js,ts,tsx}'",
     "eslint:fix": "yarn eslint:check --fix",
     "lint": "echo 'Staking package runs lint in its own CI'",
     "lint:all": "yarn eslint:check && yarn prettier:check",
@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "classnames": "2.3.2",
+    "classnames": "^2.3.2",
     "i18next": "^22.5.1",
     "immer": "^10.0.2",
     "lodash": "4.17.21",
@@ -71,6 +71,7 @@
     "@lace/ui": "^0.1.0",
     "@ladle/react": "^2.12.3",
     "@svgr/plugin-jsx": "^8.0.1",
+    "@testing-library/react-hooks": "^8.0.1",
     "@tsconfig/create-react-app": "^1.0.3",
     "@vanilla-extract/css": "^1.11.1",
     "@vanilla-extract/esbuild-plugin": "^2.2.2",
@@ -86,6 +87,7 @@
     "normalize.css": "^8.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-infinite-scroll-component": "^6.1.0",
     "tsup": "^6.7.0",
     "typescript": "^4.9.5",
     "vite-plugin-checker": "^0.6.0",
@@ -105,6 +107,7 @@
     "antd": "^4.17.3",
     "bignumber.js": "^9.0.1",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "react-infinite-scroll-component": "^6.1.0"
   }
 }

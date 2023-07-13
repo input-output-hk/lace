@@ -2,9 +2,13 @@ import TermsAndConditionsDrawer from '../../elements/settings/TermsAndConditions
 import { expect } from 'chai';
 import { removeWhitespacesFromText } from '../../utils/textUtils';
 import { readFromFile } from '../../utils/fileUtils';
+import { isPopupMode } from '../../utils/pageUtils';
 
 class TermsAndConditionsSettingsDrawerAssert {
   assertTermsAndConditionsContent = async () => {
+    (await isPopupMode())
+      ? await TermsAndConditionsDrawer.drawerHeaderBackButton.waitForClickable()
+      : await TermsAndConditionsDrawer.drawerHeaderCloseButton.waitForClickable();
     await TermsAndConditionsDrawer.termsAndConditionsContent.waitForDisplayed();
     const actualContent = await removeWhitespacesFromText(
       await TermsAndConditionsDrawer.termsAndConditionsContent.getText()

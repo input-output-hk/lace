@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { AssetSelectorOverlay, AssetSelectorOverlayProps } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
-import { useFetchCoinPrice, PriceResult, useMaxAda } from '@hooks';
+import { useFetchCoinPrice, PriceResult, useMaxAda, AssetOrHandleInfoMap, useAssetInfo } from '@hooks';
 import { EnvironmentTypes, useWalletStore } from '@src/stores';
 import {
   useCoinStateSelector,
@@ -30,7 +30,7 @@ import { isNFT } from '@src/utils/is-nft';
 import { useObservable } from '@lace/common';
 
 const formatAssetPickerLists = (
-  assetsInfo: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo> = new Map(),
+  assetsInfo: AssetOrHandleInfoMap = new Map(),
   balance: Wallet.Cardano.Value,
   prices: PriceResult,
   addCardanoAsAnAsset: boolean,
@@ -133,7 +133,7 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
     environmentName
   } = useWalletStore();
   const [row] = useCurrentRow();
-  const assets = useObservable(inMemoryWallet.assetInfo$);
+  const assets = useAssetInfo();
   const { priceResult } = useFetchCoinPrice();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const availableRewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);

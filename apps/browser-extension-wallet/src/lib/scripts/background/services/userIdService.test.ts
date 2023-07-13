@@ -3,7 +3,8 @@ import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from '.';
 
 const generateStorageMocks = (store: Pick<BackgroundStorage, 'usePersistentUserId' | 'userId'> = {}) => ({
   getStorageMock: jest.fn(() => Promise.resolve(store)),
-  setStorageMock: jest.fn()
+  setStorageMock: jest.fn(),
+  clearStorageMock: jest.fn()
 });
 
 describe('userIdService', () => {
@@ -91,6 +92,15 @@ describe('userIdService', () => {
       // assert new temporary user id being generated after session timeout
       expect(await userIdService.getId()).not.toEqual(store.userId);
       expect(Buffer.from(await userIdService.getId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
+    });
+  });
+
+  describe('clearing the id', () => {
+    it('should should clear the correct props', () => {
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({});
+      const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
+      userIdService.clearId();
+      expect(clearStorageMock).toHaveBeenCalledWith(expect.arrayContaining(['userId', 'usePersistentUserId']));
     });
   });
 });

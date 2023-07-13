@@ -3,7 +3,7 @@ import * as React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WalletSetupMnemonicVerificationStep } from '../WalletSetupMnemonicVerificationStep';
+import { WalletSetupMnemonicVerificationStep } from '@ui/components/WalletSetup';
 import { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
@@ -40,8 +40,6 @@ const Test = () => {
         passphraseError: 'Passphrase error',
         enterPassphraseDescription: 'Enter passphrase description'
       }}
-      setIsBackToMnemonic={jest.fn()}
-      isBackToMnemonic={false}
       isSubmitEnabled
     />
   );

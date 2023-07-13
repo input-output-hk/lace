@@ -243,8 +243,8 @@ Feature: Onboarding - Create wallet
     Given I click "Create" button on wallet setup page
     And I am on "All done" page
     When I click "Go to my wallet" button on "All done" page
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
+    And I click "Got it" button on "DApp connector is now in Beta" modal
 
   @LW-3020
   Scenario: Create wallet - Legal page - next button tooltip

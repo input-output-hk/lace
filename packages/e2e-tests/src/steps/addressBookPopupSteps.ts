@@ -6,7 +6,6 @@ import indexedDB from '../fixture/indexedDB';
 import popupView from '../page/popupView';
 import { FieldNameToCallback, fieldNameToLocator } from '../support/gherkin';
 import extendedView from '../page/extendedView';
-import addressAddNewPopupAssert from '../assert/addressBook/addressAddNewPopupAssert';
 import { getAddressByName, shelley, byron, icarus } from '../data/AddressData';
 import AddressBookPageAssert from '../assert/addressBook/AddressBookPageAssert';
 
@@ -57,10 +56,6 @@ Then(/address list displays and each row consists of:/, async (rows) => {
       await fieldNameToLocator(fieldsAsserts, row).then(async (c) => await c());
     }
   }
-});
-
-Then(/^I see a drawer with the "Add address" form$/, async () => {
-  await addressAddNewPopupAssert.assertSeeAddNewAddressForm();
 });
 
 When(/^I click address list item with name "([^"]*)"$/, async (addressName: string) => {

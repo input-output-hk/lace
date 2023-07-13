@@ -5,7 +5,8 @@ import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } fr
 import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
 
-export const SESSION_LENGTH = 60_000; // TODO: set to 30min
+// eslint-disable-next-line no-magic-numbers
+export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
 export const USER_ID_BYTE_SIZE = 8;
 
 export class UserIdService implements UserIdServiceInterface {
@@ -16,6 +17,7 @@ export class UserIdService implements UserIdServiceInterface {
   constructor(
     private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
     private setStorage: typeof setBackgroundStorage = setBackgroundStorage,
+    private clearStorage: typeof clearBackgroundStorage = clearBackgroundStorage,
     private sessionLength: number = SESSION_LENGTH
   ) {}
 
@@ -39,7 +41,7 @@ export class UserIdService implements UserIdServiceInterface {
     console.debug('[ANALYTICS] clearId() called');
     this.userId = undefined;
     this.clearSessionTimeout();
-    await clearBackgroundStorage(['userId', 'usePersistentUserId']);
+    await this.clearStorage(['userId', 'usePersistentUserId']);
   }
 
   async makePersistent(): Promise<void> {

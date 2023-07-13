@@ -6,7 +6,7 @@ import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { SelectedStakePoolDetails } from '../outside-handles-provider/types';
+import { LegacySelectedStakePoolDetails } from '../outside-handles-provider/types';
 import { MAX_POOLS_COUNT, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
@@ -30,7 +30,7 @@ export const StakePoolDetail = (): React.ReactElement => {
       ticker,
       status,
       contact,
-    } = {} as SelectedStakePoolDetails,
+    } = {} as LegacySelectedStakePoolDetails,
     openExternalLink,
     walletStoreWalletUICardanoCoin,
   } = useOutsideHandles();
@@ -176,7 +176,7 @@ type StakePoolDetailFooterProps = {
 type SelectorParams = Parameters<Parameters<typeof useDelegationPortfolioStore>[0]>[0];
 
 const makeSelector =
-  (openPool?: SelectedStakePoolDetails) =>
+  (openPool?: LegacySelectedStakePoolDetails) =>
   ({ currentPortfolio, draftPortfolio }: SelectorParams) => {
     const poolInCurrentPortfolio =
       !!openPool && currentPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
@@ -269,9 +269,10 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
 
   const onSelectPool = useCallback(() => {
     if (!openPool) return;
-    const { hexId, name, ticker } = openPool;
+    const { hexId, name, ticker, logo } = openPool;
     portfolioMutators.addPoolToDraft({
       id: Wallet.Cardano.PoolIdHex(hexId),
+      logo,
       name,
       ticker,
       weight: 1,
