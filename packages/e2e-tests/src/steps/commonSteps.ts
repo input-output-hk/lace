@@ -109,6 +109,10 @@ Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: st
   if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
 });
 
+Then(/^I don't see any toast message$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage('', false);
+});
+
 Then(/^I see "Help and support" page$/, async () => {
   await helpAndSupportPageAssert.assertSeeHelpAndSupportPage();
 });
@@ -126,6 +130,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await localStorageManager.cleanLocalStorage();
   await localStorageInitializer.initializeWallet(walletName);
   await browser.refresh();
+  await topNavigationAssert.assertLogoPresent();
   await mainMenuPageObject.navigateToSection('Tokens', mode);
 });
 

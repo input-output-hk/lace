@@ -28,7 +28,7 @@ export const SendWarningModal = ({ isPopupView }: SendWarningModalProps): React.
   const reset = useResetStore();
   const resetUi = useResetUiStore();
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
-  const { currentSection: section } = useSections();
+  const { currentSection: section, resetSection } = useSections();
 
   const analytics = useAnalyticsContext();
 
@@ -55,6 +55,7 @@ export const SendWarningModal = ({ isPopupView }: SendWarningModalProps): React.
   const resetStates = () => {
     reset();
     resetUi();
+    resetSection();
   };
 
   const handleConfirm = () => {

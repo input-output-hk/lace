@@ -12,6 +12,7 @@ export interface SectionsStore<T> {
   currentSection?: SectionConfig<T>;
   setSection: (section?: SectionConfig<T>) => void;
   setPrevSection: () => void;
+  resetSection?: () => void;
   sectionsConfig?: SimpleSectionsConfig<T>;
 }
 
@@ -28,6 +29,9 @@ export const createSectionsStore = <T>({
     return {
       sectionsConfig,
       currentSection,
+      resetSection: () => {
+        set({ currentSection });
+      },
       setSection: (section) =>
         set({
           currentSection: section ?? get().sectionsConfig[get().currentSection.nextSection as Extract<T, string>]

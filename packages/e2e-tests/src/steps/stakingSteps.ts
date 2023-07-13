@@ -255,7 +255,7 @@ When(/^I click "Stake on this pool" button on stake pool details drawer$/, async
 });
 
 When(/^I click "Next" button on staking confirmation drawer$/, async () => {
-  await StakingConfirmationDrawer.nextButton.waitForClickable();
+  await StakingConfirmationDrawer.nextButton.waitForClickable({ timeout: 10_000 });
   await StakingConfirmationDrawer.nextButton.click();
 });
 

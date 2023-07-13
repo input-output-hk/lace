@@ -84,7 +84,6 @@ export const WalletSetupWizard = ({
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [walletIsCreating, setWalletIsCreating] = useState(false);
-  const [isBackToMnemonic, setIsBackToMnemonic] = useState<boolean>(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
 
@@ -284,11 +283,6 @@ export const WalletSetupWizard = ({
     setupType
   ]);
 
-  const goBackToMnemonic = () => {
-    setIsBackToMnemonic(true);
-    return moveBack();
-  };
-
   useEffect(() => {
     if (password && currentStep === WalletSetupSteps.Create && !walletIsCreating) {
       setWalletIsCreating(true);
@@ -336,8 +330,6 @@ export const WalletSetupWizard = ({
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
           suggestionList={wordList}
-          isBackToMnemonic={isBackToMnemonic}
-          setIsBackToMnemonic={setIsBackToMnemonic}
         />
       );
     }
@@ -439,7 +431,7 @@ export const WalletSetupWizard = ({
       )}
       {currentStep === WalletSetupSteps.Register && (
         <WalletSetupRegisterStep
-          onBack={goBackToMnemonic}
+          onBack={moveBack}
           onNext={(result) => {
             sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions[setupType].WALLET_NAME_NEXT_CLICK);
             setWalletName(result.walletName);
