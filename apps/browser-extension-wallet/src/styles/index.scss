@@ -129,7 +129,6 @@ body {
 }
 :global(.ant-tooltip-inner) {
   background-color: var(--dark-mode-mid-grey, #ffffff) !important;
-  box-shadow: var(--shadows-toast-tooltip) !important;
   border-radius: 11px !important;
   color: var(--dark-mode-light-grey, --light-mode-dark-grey) !important;
   padding: size_unit(1) size_unit(2) !important;

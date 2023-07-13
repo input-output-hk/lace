@@ -85,7 +85,8 @@
       "incorrectAddress": "Incorrect address",
       "incorrectHandle": "Handle not found",
       "wrongNetworkAddress": "This address belongs to a different network",
-      "wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead."
+      "wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead.",
+      "handleConflict": "There is an address conflict. We expected {{receivedAddress}} but got {{actualAddress}}."
     },
     "warnings": {
       "youHaveToStartAgain": "You'll have to start again",
@@ -247,7 +248,18 @@
     },
     "deleteModal.title": "Delete this address?",
     "deleteModal.description": "Are you sure? There is no way to undo this action",
-    "deleteModal.buttons.cancel": "No"
+    "deleteModal.buttons.cancel": "No",
+    "reviewModal": {
+      "title": "Review change to {{name}}'s handle",
+      "banner.description": "This handle may no longer belong to your contact {{name}}. Please, review to proceed.",
+      "confirmUpdate.button": "Accept changes",
+      "cancelUpdate.button": "Delete contact",
+      "previewsAddress.description": "Previews linked address",
+      "actualAddress.description": "New linked address"
+    },
+    "updateModal.title": "Are you sure?",
+    "updateModal.description": "Make sure you have confirmed the new ownership of this address.",
+    "updateModal.button.confirm": "Proceed"
   },
   "unlock": {
     "sectionTitle": "Welcome back!",
