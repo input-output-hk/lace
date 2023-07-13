@@ -46,7 +46,7 @@ Then(/^NFTs counter matches the number of wallet NFTs$/, async () => {
 When(
   /^I (see|do not see) NFT with name: "([^"]*)" on the NFTs page$/,
   async (shouldBeDisplayed: 'see' | 'do not see', nftName: string) => {
-    await nftAssert.assertNftDisplayed(nftName, shouldBeDisplayed === 'see');
+    await nftAssert.assertNftDisplayedOnNftsPage(nftName, shouldBeDisplayed === 'see');
   }
 );
 

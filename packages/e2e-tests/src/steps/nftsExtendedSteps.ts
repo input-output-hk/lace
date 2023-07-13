@@ -7,7 +7,7 @@ import NftDetails from '../elements/NFTs/nftDetails';
 Then(
   /^NFT with name: "([^"]*)" (is displayed|is not displayed) in coin selector$/,
   async (nftName: string, state: string) => {
-    await nftAssert.assertNftDisplayed(nftName, state === 'is displayed');
+    await nftAssert.assertNftDisplayedInCoinSelector(nftName, state === 'is displayed');
   }
 );
 

@@ -13,7 +13,7 @@ Feature: NFT - Folders - Extended view
     And "Next" button is disabled on "Name your folder" page
 
   @LW-7243
-  Scenario: Popup-view - NFT Folders - "Create NFT folder" page "Next" button enabled when name input is not empty
+  Scenario: Extended-view - NFT Folders - "Create NFT folder" page "Next" button enabled when name input is not empty
     Given I navigate to NFTs extended page
     And I click "Create folder" button on NFTs page
     When I enter a folder name "example folder" into "Folder name" input

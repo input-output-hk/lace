@@ -2,8 +2,6 @@
 import { LocatorStrategy } from '../../actor/webTester';
 import { WebElement, WebElementFactory as Factory } from '../webElement';
 import { DrawerCommonExtended } from '../drawerCommonExtended';
-import { AddressInput } from '../addressInput';
-import { TokenSearchResult } from './tokenSearchResult';
 import { ChainablePromiseElement } from 'webdriverio';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 
@@ -15,9 +13,7 @@ export class TokenSelectionPage extends WebElement {
   private TOKEN_ICON = '//div[@data-testid="coin-search-row-icon"]';
   private NFTS_BUTTON = '//input[@data-testid="asset-selector-button-nfts"]';
   private ASSET_SELECTOR_CONTAINER = '//div[@data-testid="asset-selector"]';
-  private NFT_LIST = '[data-testid="nft-list"]';
   private NFT_CONTAINER = '[data-testid="nft-item"]';
-  private NFT_ITEM_IMAGE = '[data-testid="nft-image"]';
   private NFT_ITEM_NAME = '[data-testid="nft-item-name"]';
   private NFT_ITEM_OVERLAY = '[data-testid="nft-item-overlay"]';
   private NFT_ITEM_SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
@@ -55,10 +51,6 @@ export class TokenSelectionPage extends WebElement {
     return Factory.fromSelector(`${this.TOKEN_ROW}//h6[text() = '${assetName}']/following-sibling::p`, 'xpath');
   }
 
-  tokenItemWithIndex(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKEN_ROW})[${index}]`, 'xpath');
-  }
-
   grayedOutTokenIcon(index: number): WebElement {
     return Factory.fromSelector(`(${this.TOKEN_ICON})[${index}]/div[contains(@class, 'overlay')]`, 'xpath');
   }
@@ -79,22 +71,6 @@ export class TokenSelectionPage extends WebElement {
     return $(this.ASSET_SELECTOR_CONTAINER);
   }
 
-  get nftsList(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.NFT_LIST);
-  }
-
-  get nftContainer(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.NFT_CONTAINER);
-  }
-
-  get nftItemImage(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.NFT_ITEM_IMAGE);
-  }
-
-  get nftItemName(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.NFT_ITEM_NAME);
-  }
-
   get nftItemSelectedCheckmark(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
@@ -113,11 +89,6 @@ export class TokenSelectionPage extends WebElement {
     )) as WebdriverIO.Element;
   }
 
-  async getNftImage(name: string): Promise<WebdriverIO.Element> {
-    const nftContainer = await this.getNftContainer(name);
-    return nftContainer.$(this.NFT_ITEM_IMAGE);
-  }
-
   async getNftName(name: string): Promise<WebdriverIO.Element> {
     const nftContainer = await this.getNftContainer(name);
     return nftContainer.$(this.NFT_ITEM_NAME);
@@ -133,14 +104,6 @@ export class TokenSelectionPage extends WebElement {
 
   assetsCounter(): WebElement {
     return Factory.fromSelector(`${this.ASSETS_SELECTION_COUNTER}`, 'xpath');
-  }
-
-  searchInput(): AddressInput {
-    return new AddressInput();
-  }
-
-  tokenSearchResult(): TokenSearchResult {
-    return new TokenSearchResult();
   }
 
   get neutralFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {

@@ -4,11 +4,10 @@ import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class NftsPage {
   protected LIST_CONTAINER = '[data-testid="nft-list-container"]';
-  protected NFT_LIST = '[data-testid="nft-list"]';
   private CREATE_FOLDER_BUTTON = '[data-testid="create-folder-button"]';
   protected NFT_CONTAINER = '[data-testid="nft-item"]';
-  private NFT_IMAGE = '[data-testid="nft-image"]';
-  private NFT_NAME = '[data-testid="nft-item-name"]';
+  public NFT_IMAGE = '[data-testid="nft-image"]';
+  public NFT_NAME = '[data-testid="nft-item-name"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -22,20 +21,8 @@ class NftsPage {
     return $(this.LIST_CONTAINER);
   }
 
-  get nftList() {
-    return $(this.NFT_LIST);
-  }
-
   get nftContainer() {
     return $(this.NFT_CONTAINER);
-  }
-
-  get image() {
-    return $(this.NFT_IMAGE);
-  }
-
-  get name() {
-    return $(this.NFT_NAME);
   }
 
   get createFolderButton() {

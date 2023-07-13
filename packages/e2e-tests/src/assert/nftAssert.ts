@@ -1,9 +1,11 @@
+/* eslint-disable no-undef */
 import { TestnetPatterns } from '../support/patterns';
 import NftsPage from '../elements/NFTs/nftsPage';
 import NftDetails from '../elements/NFTs/nftDetails';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
+import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 
 class NftAssert {
   async assertSeeTitleWithCounter() {
@@ -42,8 +44,8 @@ class NftAssert {
   async assertSeeNftItem(index: number) {
     const nft = await NftsPage.nftContainers[index];
     await nft.waitForDisplayed();
-    await nft.$(await NftsPage.image.selector).waitForDisplayed();
-    await nft.$(await NftsPage.name.selector).waitForDisplayed();
+    await nft.$(NftsPage.NFT_IMAGE).waitForDisplayed();
+    await nft.$(NftsPage.NFT_NAME).waitForDisplayed();
   }
 
   async assertSeeEachNftItemOnNftsPage() {
@@ -100,13 +102,23 @@ class NftAssert {
     await this.assertSeeSendNFTButton(true);
   }
 
-  async assertNftDisplayed(nftName: string, shouldBeDisplayed: boolean) {
-    const nftItem = await NftsPage.getNftContainer(nftName);
+  async assertNftDisplayed(shouldBeDisplayed: boolean, nftItem: WebdriverIO.Element) {
     if (shouldBeDisplayed) {
       await nftItem.waitForDisplayed({ timeout: 20_000 });
     } else {
       expect(nftItem).to.be.undefined;
     }
+  }
+
+  async assertNftDisplayedOnNftsPage(nftName: string, shouldBeDisplayed: boolean) {
+    const nftItem = await NftsPage.getNftContainer(nftName);
+    await this.assertNftDisplayed(shouldBeDisplayed, nftItem);
+  }
+
+  async assertNftDisplayedInCoinSelector(nftName: string, shouldBeDisplayed: boolean) {
+    const tokenSelectionPage = new TokenSelectionPage();
+    const nftItem = await tokenSelectionPage.getNftContainer(nftName);
+    await this.assertNftDisplayed(shouldBeDisplayed, nftItem);
   }
 
   async assertSeeSendNFTButton(shouldBeDisplayed: boolean) {
