@@ -215,7 +215,7 @@ When(
         case 'NFT':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
           await transactionExtendedPageObject.clickNFTsButton();
-          await nftsPageObject.clickNftItem(entry.assetName);
+          await nftsPageObject.clickNftItemInAssetSelector(entry.assetName);
           break;
         case 'Token':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);

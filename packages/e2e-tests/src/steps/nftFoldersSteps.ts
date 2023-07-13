@@ -23,6 +23,13 @@ Then(
   }
 );
 
+Then(
+  /^I (see|do not see) "Select NFTs" page in (popup|extended) mode$/,
+  async (shouldSee: 'see' | 'do not see', mode: 'extended' | 'popup') => {
+    await nftCreateFolderAssert.assertSeeSelectNFTsPage(shouldSee === 'see', mode);
+  }
+);
+
 Then(/^"Folder name" input is empty on "Name your folder" page$/, async () => {
   await nftCreateFolderAssert.assertSeeEmptyNameInput();
 });
@@ -30,9 +37,28 @@ Then(/^"Folder name" input is empty on "Name your folder" page$/, async () => {
 Then(
   /^"Next" button is (enabled|disabled) on "Name your folder" page$/,
   async (isButtonEnabled: 'enabled' | 'disabled') => {
-    await nftCreateFolderAssert.assertSeeNextButtonEnabled(isButtonEnabled === 'enabled');
+    await nftCreateFolderAssert.assertSeeNextButtonEnabledOnCreateFolderPage(isButtonEnabled === 'enabled');
   }
 );
+
+Then(
+  /^"Next" button is (enabled|disabled) on "Create folder" page$/,
+  async (isButtonEnabled: 'enabled' | 'disabled') => {
+    await nftCreateFolderAssert.assertSeeNextButtonEnabledOnSelectNftsPage(isButtonEnabled === 'enabled');
+  }
+);
+
+When(/^I click "Next" button on "Name your folder" page$/, async () => {
+  await NftCreateFolderPage.nextButton.click();
+});
+
+Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
+  await nftCreateFolderAssert.verifySeeAllOwnedNfts();
+});
+
+Then(/^No NFT is selected$/, async () => {
+  await nftCreateFolderAssert.verifyNoneNftIsSelected();
+});
 
 When(/^I enter a folder name "([^"]*)" into "Folder name" input$/, async (folderName: string) => {
   await NftCreateFolderPage.setFolderNameInput(folderName);
