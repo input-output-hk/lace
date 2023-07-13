@@ -6,6 +6,7 @@ import { MAX_POOLS_COUNT, Sections, useDelegationPortfolioStore, useStakePoolDet
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
+import { StakePoolPreferences } from './StakePoolPreferences';
 
 type stakePoolDetailsProps = {
   onStake: () => void;
@@ -35,6 +36,7 @@ export const StakePoolDetails = ({
   const sectionsMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetail />,
+      [Sections.PREFERENCES]: <StakePoolPreferences />,
       [Sections.CONFIRMATION]: <StakePoolConfirmation />,
       [Sections.SIGN]: <div />,
       [Sections.SUCCESS_TX]: <div />,
@@ -46,6 +48,7 @@ export const StakePoolDetails = ({
   const footersMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetailFooter canDelegate={canDelegate} onStake={onStake} />,
+      [Sections.PREFERENCES]: <div />,
       [Sections.CONFIRMATION]: <StakePoolConfirmationFooter />,
       [Sections.SIGN]: <div />,
       [Sections.SUCCESS_TX]: <div />,

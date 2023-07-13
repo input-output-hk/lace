@@ -1,7 +1,14 @@
 import { Button, Card, Flex, Text } from '@lace/ui';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MAX_POOLS_COUNT, selectDraftPoolsCount, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import {
+  MAX_POOLS_COUNT,
+  Sections,
+  sectionsConfig,
+  selectDraftPoolsCount,
+  useDelegationPortfolioStore,
+  useStakePoolDetails,
+} from '../store';
 import ArrowRight from './arrow-right.svg';
 import * as styles from './PortfolioBar.css';
 
@@ -19,7 +26,7 @@ export const PortfolioBar = () => {
     //   return;
     // }
 
-    setSection();
+    setSection(sectionsConfig[Sections.PREFERENCES]);
     setIsDrawerVisible(true);
   }, [setIsDrawerVisible, setSection]);
 

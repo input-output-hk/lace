@@ -3,6 +3,7 @@ import { Immutable } from 'immer';
 
 export enum Sections {
   DETAIL = 'detail',
+  PREFERENCES = 'preferences',
   CONFIRMATION = 'confirmation',
   SIGN = 'sign',
   SUCCESS_TX = 'success_tx',
