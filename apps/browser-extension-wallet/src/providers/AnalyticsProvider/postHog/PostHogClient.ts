@@ -10,16 +10,16 @@ import { UserIdService } from '@lib/scripts/types';
  * https://posthog.com/docs/libraries/js
  */
 export class PostHogClient {
-  private initialized: false;
-
-  constructor(private chain: Wallet.Cardano.ChainId, private userIdService: UserIdService) {}
-
-  async init(): Promise<void> {
-    if (!PUBLIC_POSTHOG_HOST) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+  constructor(
+    private chain: Wallet.Cardano.ChainId,
+    private userIdService: UserIdService,
+    private publicPosthogHost: string = PUBLIC_POSTHOG_HOST
+  ) {
+    if (!this.publicPosthogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
 
     posthog.init(this.getApiToken(this.chain), {
       request_batching: false,
-      api_host: PUBLIC_POSTHOG_HOST,
+      api_host: this.publicPosthogHost,
       autocapture: false,
       disable_session_recording: true,
       capture_pageview: false,
@@ -33,10 +33,6 @@ export class PostHogClient {
   }
 
   sendPageNavigationEvent = async (): Promise<void> => {
-    if (!this.initialized) {
-      await this.init();
-    }
-
     console.debug('[ANALYTICS] Logging page navigation event to PostHog');
 
     posthog.capture('$pageview', {
@@ -45,10 +41,6 @@ export class PostHogClient {
   };
 
   sendEvent = async (action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> => {
-    if (!this.initialized) {
-      await this.init();
-    }
-
     const payload = {
       ...(await this.getEventMetadata()),
       ...properties
