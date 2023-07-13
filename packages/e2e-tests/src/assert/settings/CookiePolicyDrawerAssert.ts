@@ -12,11 +12,11 @@ class CookiePolicyDrawerAssert {
   };
 
   assertSeeDrawerCloseButton = async () => {
-    await CookiePolicyDrawer.drawerHeaderCloseButton.waitForDisplayed();
+    await CookiePolicyDrawer.drawerHeaderCloseButton.waitForClickable();
   };
 
   assertSeeDrawerBackButton = async () => {
-    await CookiePolicyDrawer.drawerHeaderBackButton.waitForDisplayed();
+    await CookiePolicyDrawer.drawerHeaderBackButton.waitForClickable();
   };
 
   assertSeeCookiePolicyTitle = async () => {

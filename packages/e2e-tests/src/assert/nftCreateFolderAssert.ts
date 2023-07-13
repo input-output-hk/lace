@@ -15,9 +15,9 @@ class NftCreateFolderAssert {
 
   async assertSeeCreateFolderPageDrawerNavigation(mode: 'extended' | 'popup') {
     if (mode === 'popup') {
-      await NftCreateFolderPage.drawerHeaderBackButton.waitForDisplayed();
+      await NftCreateFolderPage.drawerHeaderBackButton.waitForClickable();
     } else {
-      await NftCreateFolderPage.drawerBody.waitForDisplayed();
+      await NftCreateFolderPage.drawerBody.waitForClickable();
       await NftCreateFolderPage.drawerNavigationTitle.waitForDisplayed();
       await NftCreateFolderPage.drawerNavigationTitle.scrollIntoView();
       await expect(await NftCreateFolderPage.drawerNavigationTitle.getText()).to.equal(

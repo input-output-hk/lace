@@ -3,11 +3,16 @@ import StakePoolDetails from '../elements/staking/stakePoolDetails';
 import { expect } from 'chai';
 import { t } from '../utils/translationService';
 import { TestnetPatterns } from '../support/patterns';
+import { isPopupMode } from '../utils/pageUtils';
 
 class StakePoolDetailsAssert {
   async assertSeeStakePoolDetailsPage(expectedStakedPool: StakePool, staked: boolean, noMetaDataPool = false) {
-    await StakePoolDetails.poolLogo.waitForDisplayed();
-    await StakePoolDetails.poolName.waitForDisplayed();
+    (await isPopupMode())
+      ? await StakePoolDetails.drawerHeaderBackButton.waitForClickable()
+      : await StakePoolDetails.drawerHeaderCloseButton.waitForClickable();
+
+    await this.assertSeeStakePoolDetailsCommonElements();
+
     await expect(await StakePoolDetails.poolName.getText()).to.equal(expectedStakedPool.name);
 
     if (noMetaDataPool) {
@@ -21,34 +26,6 @@ class StakePoolDetailsAssert {
       );
       await StakePoolDetails.socialWebsiteIcon.waitForDisplayed();
     }
-
-    await expect(await StakePoolDetails.statisticsTitle.getText()).to.equal(
-      await t('browserView.staking.details.statistics.title')
-    );
-    await expect(await StakePoolDetails.activeStakeTitle.getText()).to.equal(
-      await t('cardano.stakePoolMetricsBrowser.activeStake')
-    );
-    await expect(((await StakePoolDetails.activeStakeValue.getText()) as string).slice(0, -1)).to.match(
-      TestnetPatterns.NUMBER_DOUBLE_REGEX
-    );
-
-    await expect(await StakePoolDetails.saturationTitle.getText()).to.equal(
-      await t('cardano.stakePoolMetricsBrowser.saturation')
-    );
-    await expect((await StakePoolDetails.saturationValue.getText()) as string).to.match(
-      TestnetPatterns.PERCENT_DOUBLE_REGEX
-    );
-
-    await expect(await StakePoolDetails.delegatorsTitle.getText()).to.equal(
-      await t('cardano.stakePoolMetricsBrowser.delegators')
-    );
-    await expect((await StakePoolDetails.delegatorsValue.getText()) as string).to.match(
-      TestnetPatterns.NUMBER_DOUBLE_REGEX
-    );
-
-    await expect(await StakePoolDetails.apyTitle.getText()).to.equal('ROS');
-    // TODO BUG LW-5635
-    // await expect((await StakePoolDetails.apyValue.getText()) as string).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
 
     if (staked === true) {
       await StakePoolDetails.banner.container.waitForDisplayed();
@@ -79,6 +56,37 @@ class StakePoolDetailsAssert {
       const slicedString = (await owner.getText()).slice(0, 21);
       await expect(expectedStakedPool.owners.some((x) => x.includes(slicedString))).to.be.true;
     }
+  }
+
+  async assertSeeStakePoolDetailsCommonElements() {
+    await StakePoolDetails.poolName.waitForClickable();
+    await StakePoolDetails.poolLogo.waitForDisplayed();
+
+    await expect(await StakePoolDetails.statisticsTitle.getText()).to.equal(
+      await t('browserView.staking.details.statistics.title')
+    );
+    await expect(await StakePoolDetails.activeStakeTitle.getText()).to.equal(
+      await t('cardano.stakePoolMetricsBrowser.activeStake')
+    );
+    await expect(await StakePoolDetails.apyTitle.getText()).to.equal('ROS');
+    // TODO BUG LW-5635
+    // await expect((await StakePoolDetails.apyValue.getText()) as string).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+
+    await expect(((await StakePoolDetails.activeStakeValue.getText()) as string).slice(0, -1)).to.match(
+      TestnetPatterns.NUMBER_DOUBLE_REGEX
+    );
+    await expect(await StakePoolDetails.saturationTitle.getText()).to.equal(
+      await t('cardano.stakePoolMetricsBrowser.saturation')
+    );
+    await expect((await StakePoolDetails.saturationValue.getText()) as string).to.match(
+      TestnetPatterns.PERCENT_DOUBLE_REGEX
+    );
+    await expect(await StakePoolDetails.delegatorsTitle.getText()).to.equal(
+      await t('cardano.stakePoolMetricsBrowser.delegators')
+    );
+    await expect((await StakePoolDetails.delegatorsValue.getText()) as string).to.match(
+      TestnetPatterns.NUMBER_DOUBLE_REGEX
+    );
   }
 }
 
