@@ -6,7 +6,7 @@ import extensionUtils from '../utils/utils';
 
 class WalletAddressPageAssert {
   async assertSeeWalletAddressPage(mode: 'extended' | 'popup') {
-    await WalletAddressPage.drawerHeaderTitle.waitForDisplayed();
+    await WalletAddressPage.drawerHeaderTitle.waitForClickable();
     if (mode === 'extended') {
       await WalletAddressPage.drawerNavigationTitle.waitForDisplayed();
       await expect(await WalletAddressPage.drawerNavigationTitle.getText()).to.equal(await t('qrInfo.receive'));

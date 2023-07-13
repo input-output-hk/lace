@@ -11,7 +11,7 @@ class TokenDetailsAssert {
         await t('browserView.assetDetails.title')
       );
     }
-    await TokenDetailsPage.drawerHeaderCloseButton.waitForDisplayed();
+    await TokenDetailsPage.drawerHeaderCloseButton.waitForClickable();
   }
 
   async assertsSeeTokenDetailsTitle(tokenName: string, tokenTicker: string) {
