@@ -3,13 +3,11 @@ import { AddressFormBrowserView, valuesPropType } from '@lace/core';
 import { validateWalletName, validateWalletHandle, validateWalletAddress } from '@src/utils/validators/address-book';
 import { useTranslation } from 'react-i18next';
 import { useHandleResolver } from '@hooks/useHandleResolver';
-import { HandleResolution } from '@cardano-sdk/core';
 
 type InitialValuesProps = {
   address?: string;
   id?: number;
   name?: string;
-  handle?: HandleResolution;
 };
 
 export type AddressFormProps = {

@@ -27,15 +27,13 @@ type AddressChangeDetailDrawerProps = {
   initialValues: InitialValuesProps;
   expectedAddress: string;
   actualAddress: string;
-  currentTimelineStep?: string;
   visible: boolean;
   popupView?: boolean;
   beforeEllipsis?: number;
   afterEllipsis?: number;
-  shouldUseEllipsisBeforeAndAfter?: boolean;
+  shouldUseEllipsis?: boolean;
   onCancelClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
   onConfirmClick: (values: valuesPropType) => unknown;
-  onUpdateContact?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
   onDelete: (address: InitialValuesProps['id']) => unknown;
 };
 
@@ -53,7 +51,7 @@ export const AddressChangeDetailDrawer = ({
   popupView,
   beforeEllipsis = defaultBeforeEllipsis,
   afterEllipsis = defaultAfterEllipsis,
-  shouldUseEllipsisBeforeAndAfter,
+  shouldUseEllipsis,
   onDelete,
   onConfirmClick
 }: AddressChangeDetailDrawerProps): React.ReactElement => {
@@ -199,7 +197,7 @@ export const AddressChangeDetailDrawer = ({
                       text={expectedAddress}
                       className={cn(styles.addressDetails)}
                       withTooltip={false}
-                      {...(popupView || shouldUseEllipsisBeforeAndAfter
+                      {...(popupView || shouldUseEllipsis
                         ? {
                             beforeEllipsis,
                             afterEllipsis
@@ -239,7 +237,7 @@ export const AddressChangeDetailDrawer = ({
                       text={actualAddress}
                       className={cn(styles.addressDetails)}
                       withTooltip={false}
-                      {...(popupView || shouldUseEllipsisBeforeAndAfter
+                      {...(popupView || shouldUseEllipsis
                         ? {
                             beforeEllipsis,
                             afterEllipsis
@@ -273,10 +271,10 @@ export const AddressChangeDetailDrawer = ({
       </Drawer>
       <AddressActionsModal
         action={action}
-        onCancel={() => onHandleCancel()}
-        onConfirm={() => onHandleConfirm()}
+        onCancel={onHandleCancel}
+        onConfirm={onHandleConfirm}
         visible={!!selectedId}
-        isSmall={popupView}
+        isPopup={popupView}
       />
     </>
   );

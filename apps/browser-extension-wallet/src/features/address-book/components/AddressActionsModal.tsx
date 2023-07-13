@@ -16,7 +16,7 @@ export type AddressActionsModalProps = {
   action: string;
   onCancel: () => void;
   onConfirm: () => void;
-  isSmall?: boolean;
+  isPopup?: boolean;
 } & ModalProps;
 
 export const AddressActionsModal = ({
@@ -24,11 +24,12 @@ export const AddressActionsModal = ({
   onCancel,
   onConfirm,
   visible,
-  isSmall
+  isPopup
 }: AddressActionsModalProps): React.ReactElement => {
   const { t: translate } = useTranslation();
+  const isDeleteAction = action === ACTIONS.DELETE;
 
-  const getdescriptiontranslations = isSmall ? (
+  const descriptionTranslations = isPopup ? (
     <div>{translate('browserView.addressBook.deleteModal.description')}</div>
   ) : (
     <>
@@ -40,29 +41,29 @@ export const AddressActionsModal = ({
   return (
     <Modal
       centered
-      className={cn(styles.modal, { [styles.isSmall]: isSmall })}
+      className={cn(styles.modal, { [styles.isPopup]: isPopup })}
       onCancel={onCancel}
       // eslint-disable-next-line unicorn/no-null
       footer={null}
       closable={false}
       visible={visible}
-      width={isSmall ? 'calc(100% - 50px)' : modalWidth}
+      width={isPopup ? 'calc(100% - 50px)' : modalWidth}
       zIndex={1000}
     >
       <div data-testid="delete-address-modal-title" className={styles.header}>
-        {action === ACTIONS.DELETE
+        {isDeleteAction
           ? translate('browserView.addressBook.deleteModal.title')
           : translate('addressBook.updateModal.title')}
       </div>
       <div data-testid="delete-address-modal-description" className={styles.content}>
-        {action === ACTIONS.DELETE ? getdescriptiontranslations : translate('addressBook.updateModal.description')}
+        {isDeleteAction ? descriptionTranslations : translate('addressBook.updateModal.description')}
       </div>
       <div className={styles.footer}>
         <Button data-testid="delete-address-modal-cancel" onClick={onCancel} block color="secondary">
           {translate('browserView.addressBook.deleteModal.buttons.cancel')}
         </Button>
         <Button data-testid="delete-address-modal-confirm" block onClick={onConfirm}>
-          {action === ACTIONS.DELETE
+          {isDeleteAction
             ? translate('browserView.addressBook.deleteModal.buttons.confirm')
             : translate('addressBook.updateModal.button.confirm')}
         </Button>

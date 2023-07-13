@@ -107,18 +107,18 @@ export const hasHandleOwnerChanged = async ({
     return;
   }
 
-  try {
-    const response = await handleResolver.resolveHandles({ handles: [value.slice(1)] });
-    const handles = response[0];
+  const response = await handleResolver.resolveHandles({ handles: [value.slice(1)] });
+  const handles = response[0];
 
-    if (!handles) {
-      throw new Error(i18n.t('general.errors.incorrectHandle'));
-    }
+  if (!handles) {
+    throw new Error(i18n.t('general.errors.incorrectHandle'));
+  }
 
+  if (address && address !== handles.cardanoAddress) {
     const stakeKeyFromAddress = Cardano.Address.fromString(address).asBase().getStakingCredential();
     const stakeKeyFromHandles = Cardano.Address.fromString(handles.cardanoAddress).asBase().getStakingCredential();
 
-    if (address && stakeKeyFromAddress.hash !== stakeKeyFromHandles.hash) {
+    if (stakeKeyFromAddress.hash !== stakeKeyFromHandles.hash) {
       throw new CustomConflictError({
         message: `${i18n.t('general.errors.handleConflict', {
           receivedAddress: address,
@@ -128,9 +128,6 @@ export const hasHandleOwnerChanged = async ({
         actualAddress: handles.cardanoAddress
       });
     }
-    // eslint-disable-next-line sonarjs/no-useless-catch
-  } catch (error) {
-    throw error;
   }
 };
 

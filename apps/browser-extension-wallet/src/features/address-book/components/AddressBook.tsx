@@ -122,6 +122,12 @@ export const AddressBook = withAddressBookContext(() => {
     ? AddressDetailsSteps.DETAILS
     : AddressDetailsSteps.CREATE;
 
+  const onHandleDeleteContact = (id: number) =>
+    deleteAddress(id, {
+      text: translate('browserView.addressBook.toast.deleteAddress'),
+      icon: DeleteIcon
+    });
+
   return (
     <>
       <ContentLayout
@@ -169,19 +175,11 @@ export const AddressBook = withAddressBookContext(() => {
         onCancelClick={() => {
           setIsAddressDrawerOpen(false);
         }}
-        onUpdateContact={() => {
-          setIsAddressDrawerOpen(false);
-        }}
         initialValues={addressToEdit}
         expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress}
         actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress}
         popupView
-        onDelete={(id) =>
-          deleteAddress(id, {
-            text: translate('browserView.addressBook.toast.deleteAddress'),
-            icon: DeleteIcon
-          })
-        }
+        onDelete={(id) => onHandleDeleteContact(id)}
         onConfirmClick={async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) => {
           await onAddressSave(address);
           setAddressToEdit({} as AddressBookSchema);
@@ -198,13 +196,7 @@ export const AddressBook = withAddressBookContext(() => {
           await onAddressSave(address);
           setAddressToEdit({} as AddressBookSchema);
         }}
-        // eslint-disable-next-line sonarjs/no-identical-functions
-        onDelete={(id) =>
-          deleteAddress(id, {
-            text: translate('browserView.addressBook.toast.deleteAddress'),
-            icon: DeleteIcon
-          })
-        }
+        onDelete={(id) => onHandleDeleteContact(id)}
         visible={isEditAddressVisible}
         popupView
       />
