@@ -125,7 +125,7 @@ const MultipleStakePoolConfirmationBody = ({
           data-testid="sp-confirmation-delegate-to-container"
         >
           <ItemStatRenderer
-            img={stakePool.logo}
+            img={stakePool.displayData.logo}
             text={stakePool.name || '-'}
             subText={<span>{stakePool.ticker}</span>}
           />

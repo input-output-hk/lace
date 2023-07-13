@@ -2,36 +2,43 @@ import { Wallet } from '@lace/cardano';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { beforeEach, expect } from 'vitest';
 import { useDelegationPortfolioStore } from './delegationPortfolio';
+import { DelegationPortfolioStakePool } from './types';
 
-const dummyPool1: Wallet.Cardano.Cip17Pool = {
+const dummyPool1: DelegationPortfolioStakePool = {
+  displayData: {} as Wallet.util.StakePool,
   id: Wallet.Cardano.PoolIdHex('39deffa1dfcfe192ea0efeb3e9bcd9878190627fb590ec81f390cd6d'),
   name: '8BOOL',
   ticker: '8BOOL',
   weight: 1,
 };
-const dummyPool2: Wallet.Cardano.Cip17Pool = {
+const dummyPool2: DelegationPortfolioStakePool = {
+  displayData: {} as Wallet.util.StakePool,
   id: Wallet.Cardano.PoolIdHex('39faf89aba3daab2bce656a9698b0a2c05e679c0fb360ee6e3b46acb'),
   name: '8BOOM',
   ticker: '8BOOM',
   weight: 1,
 };
-const dummyPool3: Wallet.Cardano.Cip17Pool = {
+const dummyPool3: DelegationPortfolioStakePool = {
+  displayData: {} as Wallet.util.StakePool,
   id: Wallet.Cardano.PoolIdHex('3867a09729a1f954762eea035a82e2d9d3a14f1fa791a022ef0da242'),
   name: 'ADA Capital',
   ticker: 'ADACT',
   weight: 1,
 };
-const dummyPool4: Wallet.Cardano.Cip17Pool = {
+const dummyPool4: DelegationPortfolioStakePool = {
+  displayData: {} as Wallet.util.StakePool,
   id: Wallet.Cardano.PoolIdHex('a0e79024226e4febf20214164d88dcd269c54819fc3b810ca5cc45a5'),
   name: 'Example Pool 4',
   weight: 1,
 };
-const dummyPool5: Wallet.Cardano.Cip17Pool = {
+const dummyPool5: DelegationPortfolioStakePool = {
+  displayData: {} as Wallet.util.StakePool,
   id: Wallet.Cardano.PoolIdHex('cde2511b7638ab734db8534daebb9a2243c4ef1694c82f85b8825be9'),
   name: 'Example Pool 5',
   weight: 1,
 };
-const dummyPool6: Wallet.Cardano.Cip17Pool = {
+const dummyPool6: DelegationPortfolioStakePool = {
+  displayData: {} as Wallet.util.StakePool,
   id: Wallet.Cardano.PoolIdHex('b546d6339727ae557830265c581381735a4f797591ff8f56e14082c6'),
   name: 'Example Pool 6',
   weight: 1,
@@ -122,23 +129,26 @@ describe('delegationPortfolioStore', () => {
     const expectedLength = 3;
     const { result } = renderHook(() => useDelegationPortfolioStore());
     act(() =>
-      result.current.mutators.setCurrentPortfolio([
-        {
-          delegatee: {
-            currentEpoch: dummyStakePool1,
-          },
-        } as Wallet.Cardano.RewardAccountInfo,
-        {
-          delegatee: {
-            nextEpoch: dummyStakePool2,
-          },
-        } as Wallet.Cardano.RewardAccountInfo,
-        {
-          delegatee: {
-            nextNextEpoch: dummyStakePool3,
-          },
-        } as Wallet.Cardano.RewardAccountInfo,
-      ])
+      result.current.mutators.setCurrentPortfolio({
+        cardanoCoin: { symbol: 'ADA' } as Wallet.CoinId,
+        rewardAccountInfo: [
+          {
+            delegatee: {
+              currentEpoch: dummyStakePool1,
+            },
+          } as Wallet.Cardano.RewardAccountInfo,
+          {
+            delegatee: {
+              nextEpoch: dummyStakePool2,
+            },
+          } as Wallet.Cardano.RewardAccountInfo,
+          {
+            delegatee: {
+              nextNextEpoch: dummyStakePool3,
+            },
+          } as Wallet.Cardano.RewardAccountInfo,
+        ],
+      })
     );
     act(() => result.current.mutators.clearDraft());
     expect(result.current.currentPortfolio.length).toEqual(expectedLength);
