@@ -89,7 +89,7 @@ export const AddressBook = withAddressBookContext(() => {
   );
 
   useEffect(() => {
-    const fiveSecondDelay = 5000;
+    const interval = 5000;
 
     const updateAddressStatus = (address: string, status: { isValid: boolean; error?: CustomConflictError }) => {
       setValidatedAddressStatus((currentValidatedAddressStatus) => ({
@@ -109,7 +109,7 @@ export const AddressBook = withAddressBookContext(() => {
       });
     };
     validateAddresses();
-    const intervalId = setInterval(validateAddresses, fiveSecondDelay);
+    const intervalId = setInterval(validateAddresses, interval);
 
     return () => clearInterval(intervalId);
   }, [addressList, handleResolver]);
