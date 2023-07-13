@@ -273,12 +273,8 @@ export const AddressChangeDetailDrawer = ({
       </Drawer>
       <AddressActionsModal
         action={action}
-        onCancel={() => {
-          onHandleCancel();
-        }}
-        onConfirm={() => {
-          onHandleConfirm();
-        }}
+        onCancel={() => onHandleCancel()}
+        onConfirm={() => onHandleConfirm()}
         visible={!!selectedId}
         isSmall={popupView}
       />
