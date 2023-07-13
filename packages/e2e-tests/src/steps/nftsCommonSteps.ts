@@ -21,13 +21,6 @@ When(/^I click on NFT with name: "([^"]*)" in asset selector$/, async (nftName: 
   await nftsPageObject.clickNftItemInAssetSelector(nftName);
 });
 
-Given(
-  /^the NFT with name: "([^"]*)" is (removed from|displayed in) gallery$/,
-  async (nftName: string, shouldBeDisplayed: string) => {
-    await nftAssert.assertNftDisplayed(nftName, shouldBeDisplayed === 'displayed in');
-  }
-);
-
 Then(
   /^the (Received|Sent) transaction is displayed with NFT name: "([^"]*)" in (extended|popup) mode$/,
   async (transactionType: 'Received' | 'Sent', nftName: string, mode: 'extended' | 'popup') => {
@@ -50,9 +43,12 @@ Then(/^NFTs counter matches the number of wallet NFTs$/, async () => {
   await nftAssert.assertCounterNumberMatchesWalletNFTs();
 });
 
-When(/^I see NFT with name: "([^"]*)"$/, async (nftName: string) => {
-  await nftAssert.assertNftDisplayed(nftName, true);
-});
+When(
+  /^I (see|do not see) NFT with name: "([^"]*)" on the NFTs page$/,
+  async (shouldBeDisplayed: 'see' | 'do not see', nftName: string) => {
+    await nftAssert.assertNftDisplayed(nftName, shouldBeDisplayed === 'see');
+  }
+);
 
 Then(
   /^The Tx details are displayed as (sent|received) for NFT with name: "([^"]*)" and wallet: "([^"]*)" address$/,

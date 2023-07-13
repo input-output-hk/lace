@@ -4,7 +4,6 @@ import NftDetails from '../elements/NFTs/nftDetails';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
-import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 
 class NftAssert {
   async assertSeeTitleWithCounter() {
@@ -102,7 +101,7 @@ class NftAssert {
   }
 
   async assertNftDisplayed(nftName: string, shouldBeDisplayed: boolean) {
-    const nftItem = await new TokenSelectionPage().getNftContainer(nftName);
+    const nftItem = await NftsPage.getNftContainer(nftName);
     if (shouldBeDisplayed) {
       await nftItem.waitForDisplayed({ timeout: 20_000 });
     } else {

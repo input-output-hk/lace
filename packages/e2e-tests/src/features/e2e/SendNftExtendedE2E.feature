@@ -18,7 +18,7 @@ Feature: Send NFT - Extended Browser View - E2E
     Then The Tx details are displayed as sent for NFT with name: "Ibilecoin" and wallet: "WalletReceiveNftE2E" address
     When I close the drawer by clicking close button
     And I navigate to NFTs extended page
-    Then the NFT with name: "Ibilecoin" is removed from gallery
+    Then I do not see NFT with name: "Ibilecoin" on the NFTs page
     When I open NFT receiving wallet
     And Wallet is synced
     And I navigate to Transactions extended page
@@ -27,5 +27,5 @@ Feature: Send NFT - Extended Browser View - E2E
     Then The Tx details are displayed as received for NFT with name: "Ibilecoin" and wallet: "WalletSendNftE2E" address
     When I close the drawer by clicking close button
     And I navigate to NFTs extended page
-    Then the NFT with name: "Ibilecoin" is displayed in gallery
+    Then I see NFT with name: "Ibilecoin" on the NFTs page
 
