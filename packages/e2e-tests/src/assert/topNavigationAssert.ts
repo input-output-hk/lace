@@ -20,7 +20,7 @@ class TopNavigationAssert {
   }
 
   async assertLogoPresent() {
-    await MenuHeader.logo.waitForDisplayed();
+    await MenuHeader.logo.waitForDisplayed({ timeout: 15_000 });
   }
 
   async assertSeeMenuButton() {
@@ -85,6 +85,7 @@ class TopNavigationAssert {
   }
 
   async assertWalletIsInSyncedStatus() {
+    await this.assertLogoPresent();
     await MenuHeader.menuButton.waitForDisplayed();
     await MenuHeader.menuButton.click();
     await this.assertSeeWalletStatusComponent();

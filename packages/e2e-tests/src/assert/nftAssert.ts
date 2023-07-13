@@ -59,7 +59,7 @@ class NftAssert {
   }
 
   async assertSeeNFTDetailsHeader(mode: 'extended' | 'popup', nftName: string) {
-    await NftDetails.drawerBody.waitForDisplayed();
+    await NftDetails.drawerBody.waitForClickable();
     await NftDetails.drawerNavigationTitle.waitForDisplayed({ reverse: mode === 'popup' });
     if (mode === 'extended') {
       await NftDetails.drawerHeaderTitle.scrollIntoView();

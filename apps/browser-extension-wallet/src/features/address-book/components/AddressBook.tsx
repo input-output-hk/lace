@@ -20,6 +20,8 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { AddressDetailsSteps } from './AddressDetailDrawer/types';
+import { getAddressToSave } from '@src/utils/validators';
+import { useHandleResolver } from '@hooks';
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
@@ -29,25 +31,28 @@ export const AddressBook = withAddressBookContext(() => {
   const { setIsEditAddressVisible, isEditAddressVisible, setAddressToEdit, addressToEdit } = useAddressBookStore();
   const { t: translate } = useTranslation();
   const analytics = useAnalyticsContext();
+  const handleResolver = useHandleResolver();
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
     address: translate('core.walletAddressList.address')
   };
 
-  const onAddressSave = (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>): Promise<string> => {
+  const onAddressSave = async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>): Promise<string> => {
     analytics.sendEvent({
       category: AnalyticsEventCategories.ADDRESS_BOOK,
       action: AnalyticsEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_POPUP
     });
 
+    const addressToSave = await getAddressToSave(address, handleResolver);
+
     return 'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, address, {
+      ? updateAddress(addressToEdit.id, addressToSave, {
           text: translate('browserView.addressBook.toast.editAddress'),
           icon: EditIcon
         })
-      : saveAddress(address, {
+      : saveAddress(addressToSave, {
           text: translate('browserView.addressBook.toast.addAddress'),
           icon: AddIcon
         });

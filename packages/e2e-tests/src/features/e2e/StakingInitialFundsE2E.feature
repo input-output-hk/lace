@@ -4,7 +4,9 @@ Feature: Delegating funds to new pool E2E
   @LW-2685 @Smoke
   Scenario: Extended view - Staking - Delegating funds to new pool (if not staked yet) E2E.
     Given I create new wallet and save wallet information
+    And Wallet is synced
     When I open header menu
+    Then I don't see any toast message
     And I click on the user details button
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
     When I open wallet: "WalletSendingAdaToStakingE2E" in: extended mode
@@ -45,7 +47,9 @@ Feature: Delegating funds to new pool E2E
   @LW-2686
   Scenario: Popup view - Staking - Delegating funds to new pool (if not staked yet) E2E.
     Given I create new wallet and save wallet information
+    And Wallet is synced
     When I open header menu
+    Then I don't see any toast message
     And I click on the user details button
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
     When I open wallet: "WalletSendingAdaToStakingE2E" in: extended mode

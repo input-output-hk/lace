@@ -39,6 +39,10 @@
     height: size_unit(13);
     padding: 0px size_unit(4);
 
+    & + .item {
+      margin-top: size_unit(2);
+    }
+
     &:first-child {
       .itemData {
         gap: 4px;

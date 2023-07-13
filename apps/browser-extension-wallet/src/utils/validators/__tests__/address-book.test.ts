@@ -8,7 +8,8 @@ import { Wallet } from '@lace/cardano';
 import { ValidationResult } from '../../../types';
 import * as addressBook from '../address-book';
 import i18n from 'i18next';
-import { Cardano } from '@cardano-sdk/core';
+import { Cardano, HandleProvider } from '@cardano-sdk/core';
+import { validateWalletHandle } from '../address-book';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
@@ -225,6 +226,32 @@ describe('Testing address book validator', () => {
       expect(
         addressBook.hasAddressBookItem(mockAddressList, { name: 'test wallet 15', address: 'addr_test15' })[0]
       ).toBe(false);
+    });
+  });
+
+  describe('validateWalletHandle', () => {
+    const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
+    const value = 'sampleValue';
+
+    test('should throw an error if handles are not found', async () => {
+      (mockHandleResolver.resolveHandles as jest.Mock).mockReturnValue([]);
+
+      await expect(
+        async () => await validateWalletHandle({ value, handleResolver: mockHandleResolver })
+      ).rejects.toThrow('general.errors.incorrectHandle');
+    });
+
+    test('should return the handle information', async () => {
+      const resolvedHandles = [
+        {
+          cardanoAddress: Cardano.PaymentAddress(
+            'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
+          )
+        }
+      ];
+      (mockHandleResolver.resolveHandles as jest.Mock).mockReturnValue(resolvedHandles);
+
+      expect(await validateWalletHandle({ value, handleResolver: mockHandleResolver })).toBe('');
     });
   });
 });
