@@ -1,5 +1,6 @@
 import React from 'react';
-import Exclamation from './exclamation-circle-small.svg';
+import ExclamationSmall from './exclamation-circle-small.svg';
+import Exclamation from './exclamation-circle.svg';
 import styles from './ResultMessage.module.scss';
 import Success from './success-staking.svg';
 
@@ -10,14 +11,26 @@ const iconByStatus: Record<Status, React.FC<React.SVGProps<SVGSVGElement>>> = {
   success: Success,
 };
 
+// TODO discuss with design team if we can have 1 error icon and just manipulate its size
+const popupViewIconByStatus: Record<Status, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  ...iconByStatus,
+  error: ExclamationSmall,
+};
+
 export interface ResultMessageProps {
   status?: Status;
   title: React.ReactNode;
   description: React.ReactNode;
+  popupView?: boolean;
 }
 
-export const ResultMessage = ({ status = 'success', title, description }: ResultMessageProps): React.ReactElement => {
-  const Icon = iconByStatus[status];
+export const ResultMessage = ({
+  status = 'success',
+  title,
+  description,
+  popupView,
+}: ResultMessageProps): React.ReactElement => {
+  const Icon = popupView ? popupViewIconByStatus[status] : iconByStatus[status];
 
   return (
     <div className={styles.content} data-testid="result-message-content">

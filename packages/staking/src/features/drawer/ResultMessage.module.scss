@@ -51,9 +51,8 @@
     gap: size_unit(2);
   }
   .img {
-    // todo fix discrepancies with the latest designs
-    height: size_unit(10.5);
-    width: size_unit(10.5);
+    height: size_unit(14);
+    width: size_unit(14);
     @media (max-width: $breakpoint-popup) {
       width: size_unit(11);
     }
