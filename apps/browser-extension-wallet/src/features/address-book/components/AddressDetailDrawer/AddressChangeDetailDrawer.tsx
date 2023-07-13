@@ -273,11 +273,9 @@ export const AddressChangeDetailDrawer = ({
       </Drawer>
       <AddressActionsModal
         action={action}
-        // eslint-disable-next-line sonarjs/no-identical-functions
         onCancel={() => {
           onHandleCancel();
         }}
-        // eslint-disable-next-line sonarjs/no-identical-functions
         onConfirm={() => {
           onHandleConfirm();
         }}
