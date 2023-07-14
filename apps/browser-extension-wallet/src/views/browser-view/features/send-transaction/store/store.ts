@@ -54,7 +54,7 @@ export interface Store {
   removeExistingOutput: (id: string) => void;
   setInitialOutputState: (id: string, value?: string) => void;
   // ====== outputs coins handlers ======
-  setCoinValue: (id: string, asset: { id: string; value: string }) => void;
+  setCoinValue: (id: string, asset: AssetInfo) => void;
   setCoinValues: (id: string, assets: AssetInfo[]) => void;
   setPickedCoin: (id: string, assetIds: { prev: string; next: string }) => void;
   removeCoinFromOutputs: (id: string, asset: { id: string }) => void;
@@ -324,12 +324,12 @@ export const useOutputs = (): { ids: Array<string>; uiOutputs: OutputList } & Pi
     setAssetRowToOutput
   }));
 
-export const useCoinStateSelector = (
-  row: string
-): { uiOutputs: AssetInfo[] } & Pick<
+export type UseCoinStateSelector = { uiOutputs: AssetInfo[] } & Pick<
   Store,
   'setCoinValue' | 'setCoinValues' | 'setPickedCoin' | 'removeCoinFromOutputs'
-> =>
+>;
+
+export const useCoinStateSelector = (row: string): UseCoinStateSelector =>
   useStore(
     useCallback(
       ({ uiOutputs, setCoinValue, setCoinValues, setPickedCoin, removeCoinFromOutputs }) => ({

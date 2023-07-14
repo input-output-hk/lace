@@ -22,8 +22,7 @@ import { Banner } from '@lace/common';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
-
-const TEMP_ADDRESS = 'tempAddress';
+import { getTemporaryTxDataFromStorage } from '../../helpers';
 
 const { Text } = Typography;
 
@@ -37,7 +36,6 @@ export type inputValue = { name?: string; address: string };
 
 const isWalletNameValid = (name: string) => !validateWalletName(name);
 const isWalletAddressValid = (address: string) => !validateWalletAddress(address);
-const getTempAddress = () => localStorage.getItem(TEMP_ADDRESS);
 
 enum HandleVerificationState {
   VALID = 'valid',
@@ -181,7 +179,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   };
 
   useEffect(() => {
-    const tempAddress = getTempAddress();
+    const { tempAddress } = getTemporaryTxDataFromStorage();
     if (!tempAddress) return;
     setAddressInputValue({ address: tempAddress });
     setAddressValue(row, tempAddress);

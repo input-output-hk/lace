@@ -37,6 +37,7 @@ import { useWalletStore } from '@src/stores';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { SelectTokenButton } from '@components/AssetSelectionButton/SelectTokensButton';
 import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
+import { saveTemporaryTxDataInStorage } from '../../helpers';
 
 const { SendTransaction: Events } = AnalyticsEventNames;
 
@@ -178,9 +179,7 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const { address } = useAddressState(FIRST_ROW);
 
   const openTabExtensionSendFlow = () => {
-    localStorage.setItem('tempAddress', address);
-    localStorage.setItem('tempOutputs', JSON.stringify(uiOutputs));
-    localStorage.setItem('tempSource', 'popup');
+    saveTemporaryTxDataInStorage({ tempAddress: address, tempOutputs: uiOutputs, tempSource: 'popup' });
     backgroundServices.handleOpenBrowser({ section: BrowserViewSections.SEND_ADVANCED });
   };
 

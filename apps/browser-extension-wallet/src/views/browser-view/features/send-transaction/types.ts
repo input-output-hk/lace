@@ -54,3 +54,15 @@ export type OutputRow = {
 };
 
 export type OutputList = Record<string, OutputRow>;
+
+export enum TemporaryTransactionDataKeys {
+  TEMP_ADDRESS = 'tempAddress',
+  TEMP_OUTPUTS = 'tempOutputs',
+  TEMP_SOURCE = 'tempSource'
+}
+
+export interface TemporaryTransactionData {
+  [TemporaryTransactionDataKeys.TEMP_ADDRESS]: string;
+  [TemporaryTransactionDataKeys.TEMP_OUTPUTS]: AssetInfo[];
+  [TemporaryTransactionDataKeys.TEMP_SOURCE]: 'popup' | 'hardware-wallet';
+}
