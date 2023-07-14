@@ -7,7 +7,7 @@ import { ToastProps } from '@lace/common';
 import { addressErrorMessage, nameErrorMessage } from '@lib/storage/helpers';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
-import { HandleProvider, HandleResolution } from '@cardano-sdk/core';
+import { Cardano, HandleProvider, HandleResolution } from '@cardano-sdk/core';
 import { isHandle } from '@lace/core';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
@@ -31,6 +31,23 @@ export const verifyHandle = async (
     };
   }
 };
+
+type customErrorProps = {
+  message: string;
+  expectedAddress: Cardano.PaymentAddress;
+  actualAddress: Cardano.PaymentAddress;
+};
+export class CustomConflictError extends Error {
+  expectedAddress: Cardano.PaymentAddress;
+  actualAddress: Cardano.PaymentAddress;
+
+  constructor({ message, expectedAddress, actualAddress }: customErrorProps) {
+    super(message);
+    this.expectedAddress = expectedAddress;
+    this.actualAddress = actualAddress;
+    Object.setPrototypeOf(this, CustomConflictError.prototype);
+  }
+}
 
 export const isValidAddress = (address: string): boolean => {
   let isValid;
@@ -73,6 +90,45 @@ export const validateWalletHandle = async ({ value, handleResolver }: validateWa
   }
 
   return '';
+};
+
+type hasHandleOwnerChangedArgs = {
+  value: string;
+  address: Cardano.PaymentAddress;
+  handleResolver: HandleProvider;
+};
+
+export const hasHandleOwnerChanged = async ({
+  value,
+  address,
+  handleResolver
+}: hasHandleOwnerChangedArgs): Promise<void> => {
+  if (Cardano.isAddress(value)) {
+    return;
+  }
+
+  const response = await handleResolver.resolveHandles({ handles: [value.slice(1)] });
+  const handles = response[0];
+
+  if (!handles) {
+    throw new Error(i18n.t('general.errors.incorrectHandle'));
+  }
+
+  if (address && address !== handles.cardanoAddress) {
+    const stakeKeyFromAddress = Cardano.Address.fromString(address).asBase().getStakingCredential();
+    const stakeKeyFromHandles = Cardano.Address.fromString(handles.cardanoAddress).asBase().getStakingCredential();
+
+    if (stakeKeyFromAddress.hash !== stakeKeyFromHandles.hash) {
+      throw new CustomConflictError({
+        message: `${i18n.t('general.errors.handleConflict', {
+          receivedAddress: address,
+          actualAddress: handles.cardanoAddress
+        })}`,
+        expectedAddress: address,
+        actualAddress: handles.cardanoAddress
+      });
+    }
+  }
 };
 
 // popup view specific validations
@@ -134,13 +190,18 @@ export const hasAddressBookItem = (
   return [false, undefined];
 };
 
-export const getAddressToSave = async (
-  address: AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>,
-  handleResolver: HandleProvider
-): Promise<AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>> => {
+type addressToSaveArgs = {
+  address: AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>;
+  handleResolver: HandleProvider;
+};
+export const getAddressToSave = async ({
+  address,
+  handleResolver
+}: addressToSaveArgs): Promise<
+  AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>
+> => {
   if (isHandle(address.address)) {
     const result = await verifyHandle(address.address, handleResolver);
-
     if (result.valid) {
       return { ...address, handleResolution: result.handles[0] };
     }

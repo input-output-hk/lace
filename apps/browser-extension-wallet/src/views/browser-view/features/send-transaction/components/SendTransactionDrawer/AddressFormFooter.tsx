@@ -22,7 +22,7 @@ export const AddressFormFooter = withAddressBookContext(() => {
   const { saveRecord: saveAddress, updateRecord: updateAddress } = utils;
 
   const onAddressSave = async (address: Omit<AddressBookSchema, 'id' | 'network'>): Promise<string> => {
-    const addressToSave = await getAddressToSave(address, handleResolver);
+    const addressToSave = await getAddressToSave({ address, handleResolver });
 
     return 'id' in addressToEdit
       ? updateAddress(addressToEdit.id, addressToSave, {
