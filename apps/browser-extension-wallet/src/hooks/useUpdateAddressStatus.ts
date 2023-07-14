@@ -1,4 +1,4 @@
-import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
+import { HandleProvider } from '@cardano-sdk/core';
 import { AddressBookSchema } from '@lib/storage';
 import { CustomConflictError, hasHandleOwnerChanged } from '@src/utils/validators';
 import { useEffect, useState } from 'react';
@@ -6,13 +6,13 @@ import { useEffect, useState } from 'react';
 type updateAddressStatusType = Record<string, { isValid: boolean; error?: CustomConflictError }>;
 
 export const useUpdateAddressStatus = (
-  addressList: unknown[],
-  handleResolver: KoraLabsHandleProvider
+  addressList: AddressBookSchema[],
+  handleResolver: HandleProvider
 ): updateAddressStatusType => {
   const [validatedAddressStatus, setValidatedAddressStatus] = useState<updateAddressStatusType>({});
 
   useEffect(() => {
-    const interval = 5000;
+    const interval = 2000;
 
     const updateAddressStatus = (address: string, status: { isValid: boolean; error?: CustomConflictError }) => {
       setValidatedAddressStatus((currentValidatedAddressStatus) => ({

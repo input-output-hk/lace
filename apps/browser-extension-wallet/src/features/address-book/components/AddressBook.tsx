@@ -34,7 +34,7 @@ export const AddressBook = withAddressBookContext(() => {
   const { t: translate } = useTranslation();
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
-  const validatedAddressStatus = useUpdateAddressStatus(addressList, handleResolver);
+  const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),

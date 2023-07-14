@@ -6,8 +6,8 @@ import { Button, Banner, Drawer, DrawerNavigation, DrawerHeader, Ellipsis } from
 import styles from './AddressChangeDetailDrawer.module.scss';
 import { Timeline, Typography } from 'antd';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import Copy from '../../../../assets/icons/copy.component.svg';
-import Check from '../../../../assets/icons/check-success.component.svg';
+import Copy from '@assets/icons/copy.component.svg';
+import Check from '@assets/icons/check-success.component.svg';
 import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
@@ -180,7 +180,7 @@ export const AddressChangeDetailDrawer = ({
             <Banner withIcon message={t('addressBook.reviewModal.banner.description', { name: initialValues.name })} />
           </div>
           <div className={styles.addressContainer}>
-            <Timeline>
+            <Timeline className={cn(styles.sideTimeline)}>
               <Timeline.Item dot={<div className={styles.inactiveDot} />}>
                 <div className={cn(styles.addressDetailsContainer)}>
                   <div className={cn(styles.addressDataDetails)}>

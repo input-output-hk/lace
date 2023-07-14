@@ -43,7 +43,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
-  const validatedAddressStatus = useUpdateAddressStatus(addressList, handleResolver);
+  const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
