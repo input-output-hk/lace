@@ -7,6 +7,8 @@ class NftSelectNftsPage extends CommonDrawerElements {
   private CLEAR_BUTTON = '[data-testid="assets-clear"]';
   private NEXT_BUTTON = '[data-testid="create-folder-drawer-asset-picker-cta"]';
   private ASSET_SELECTOR_CONTAINER = '[data-testid="asset-selector-wrapper"]';
+  private SAD_FACE_ICON = '[data-testid="sad-face-icon"]';
+  private EMPTY_STATE_MESSAGE = '[data-testid="asset-list-empty-state-message"]';
 
   get counter() {
     return $(this.COUNTER);
@@ -26,6 +28,19 @@ class NftSelectNftsPage extends CommonDrawerElements {
 
   get assetSelectorContainer() {
     return $(this.ASSET_SELECTOR_CONTAINER);
+  }
+
+  get sadFaceIcon() {
+    return $(this.SAD_FACE_ICON);
+  }
+
+  get noResultsMessage() {
+    return $(this.EMPTY_STATE_MESSAGE);
+  }
+
+  async enterSearchPhrase(searchPhrase: string) {
+    await this.searchInput.input.waitForClickable();
+    await this.searchInput.input.setValue(searchPhrase);
   }
 }
 
