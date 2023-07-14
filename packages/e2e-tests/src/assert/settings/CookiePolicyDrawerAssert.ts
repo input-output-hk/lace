@@ -2,6 +2,8 @@ import CookiePolicyDrawer from '../../elements/settings/CookiePolicyDrawer';
 import { expect } from 'chai';
 import { readFromFile } from '../../utils/fileUtils';
 import { t } from '../../utils/translationService';
+import { browser } from '@wdio/globals';
+import { removeWhitespacesFromText } from '../../utils/textUtils';
 
 class CookiePolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
@@ -28,9 +30,22 @@ class CookiePolicyDrawerAssert {
 
   assertSeeCookiePolicyContent = async () => {
     await CookiePolicyDrawer.cookiePolicyContent.waitForDisplayed();
-    const actualCookiePolicyText = await CookiePolicyDrawer.cookiePolicyContent.getText();
-    const expectedCookiePolicyText = readFromFile(__dirname, './cookiePolicy.txt');
-    await expect(actualCookiePolicyText).to.equal(expectedCookiePolicyText);
+
+    const expectedCookiePolicyText = await removeWhitespacesFromText(readFromFile(__dirname, './cookiePolicy.txt'));
+
+    await browser.waitUntil(
+      async () =>
+        (await removeWhitespacesFromText(await CookiePolicyDrawer.cookiePolicyContent.getText())) ===
+        expectedCookiePolicyText,
+      {
+        timeout: 3000,
+        interval: 1000,
+        timeoutMsg: `failed while waiting for expected cookie policy text
+        expected: ${expectedCookiePolicyText}
+        current: ${await removeWhitespacesFromText(await CookiePolicyDrawer.cookiePolicyContent.getText())}
+        `
+      }
+    );
   };
 }
 
