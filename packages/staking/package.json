@@ -58,8 +58,7 @@
     "i18next": "^22.5.1",
     "immer": "^10.0.2",
     "lodash": "4.17.21",
-    "react-i18next": "^12.3.1",
-    "zustand": "4.3.9"
+    "react-i18next": "^12.3.1"
   },
   "devDependencies": {
     "@cardano-sdk/input-selection": "0.11.1",
@@ -94,7 +93,8 @@
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-svgr": "^3.2.0",
     "vitest": "^0.31.0",
-    "wait-on": "^7.0.1"
+    "wait-on": "^7.0.1",
+    "zustand": "3.5.14"
   },
   "peerDependencies": {
     "@cardano-sdk/input-selection": "0.11.1",
@@ -108,6 +108,7 @@
     "bignumber.js": "^9.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-infinite-scroll-component": "^6.1.0"
+    "react-infinite-scroll-component": "^6.1.0",
+    "zustand": "3.5.14"
   }
 }

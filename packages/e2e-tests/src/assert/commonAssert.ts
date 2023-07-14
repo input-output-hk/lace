@@ -4,6 +4,7 @@ import webTester from '../actor/webTester';
 import { expect } from 'chai';
 import { getNumberOfOpenedTabs, switchToLastWindow } from '../utils/window';
 import testContext from '../utils/testContext';
+import { browser } from '@wdio/globals';
 
 class CommonAssert {
   async assertClipboardContains(text: string) {
@@ -54,7 +55,7 @@ class CommonAssert {
 
   assertSeeHorizontalScroll = async (shouldBeVisible: boolean) => {
     const scrollBarWidth = 15;
-    const pageWidth = await browser.execute(() => document.querySelector('#main').scrollWidth);
+    const pageWidth = Number(await browser.execute(() => document?.querySelector('#main')?.scrollWidth));
     const viewportWidth = (await browser.execute(() => window.innerWidth)) - scrollBarWidth;
     const hasHorizontalScroll = pageWidth >= viewportWidth;
     await expect(hasHorizontalScroll).to.equal(shouldBeVisible);

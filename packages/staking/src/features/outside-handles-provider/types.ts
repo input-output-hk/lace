@@ -34,6 +34,14 @@ export interface CurrencyInfo {
   symbol: string;
 }
 
+export interface SubmittingState {
+  isRestaking: boolean;
+  setIsRestaking: (param: boolean) => void;
+  setSubmitingTxState: (args: { isSubmitingTx?: boolean; isPasswordValid?: boolean }) => void;
+  isSubmitingTx?: boolean;
+  isPasswordValid?: boolean;
+}
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   balancesBalance: Balance;
@@ -57,10 +65,12 @@ export type OutsideHandlesContextValue = {
   };
   openExternalLink: (href: string) => void;
   password?: string;
+  passwordSetPassword: (password: string) => void;
   passwordRemovePassword: () => void;
-  submittingStateSetIsRestaking: (param: boolean) => void;
+  submittingState: SubmittingState;
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
   currencyStoreFiatCurrency: CurrencyInfo;
+  executeWithPassword: <T>(password: string, promiseFn: () => Promise<T>, cleanPassword?: boolean) => Promise<T>;
 };

@@ -18,7 +18,7 @@ When(
   /^I fill address form with ""?([^"]*[^"])""? name and address from ""?([^"]*[^"])""? address$/,
   async (name: string, addressByName: string) => {
     await AddressForm.enterName(name === 'empty' ? '' : name);
-    await AddressForm.enterAddress(addressByName === 'empty' ? '' : getAddressByName(addressByName));
+    await AddressForm.enterAddress(addressByName === 'empty' ? '' : String(getAddressByName(addressByName)));
     await browser.pause(500); // Wait for input field value validation
   }
 );

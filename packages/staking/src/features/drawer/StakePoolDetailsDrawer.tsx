@@ -38,7 +38,7 @@ export const StakePoolDetailsDrawer = ({
     walletStoreGetKeyAgentType,
     password,
     passwordRemovePassword,
-    submittingStateSetIsRestaking,
+    submittingState: { setIsRestaking },
   } = useOutsideHandles();
 
   const isInMemory = useMemo(
@@ -58,7 +58,7 @@ export const StakePoolDetailsDrawer = ({
       // if (!isInMemory && isSuccessSection) window.location.reload();
       setIsDrawerVisible(false);
     }
-    submittingStateSetIsRestaking(false);
+    setIsRestaking(false);
   }, [
     showExitConfirmation,
     simpleSendConfig.currentSection,
@@ -70,7 +70,7 @@ export const StakePoolDetailsDrawer = ({
     // isInMemory,
     // isSuccessSection,
     setIsDrawerVisible,
-    submittingStateSetIsRestaking,
+    setIsRestaking,
   ]);
 
   const onArrowIconClick = useCallback(() => {

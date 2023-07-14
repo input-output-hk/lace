@@ -20,3 +20,4 @@ export { SearchBox } from './search-box';
 export * as FlowCard from './flow-card';
 export * as IconButton from './icon-buttons';
 export * as TransactionSummary from './transaction-summary';
+export { ToastBar } from './toast-bar';
