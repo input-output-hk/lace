@@ -28,7 +28,9 @@ class NftsPageObject {
     await NftDetails.sendNFTButton.waitForClickable();
     await NftDetails.sendNFTButton.click();
     const receiverWallet = getTestWallet(await this.getNonActiveNftWalletName());
-    const receiverAddress = extensionUtils.isMainnet() ? receiverWallet.mainnetAddress : receiverWallet.address;
+    const receiverAddress = extensionUtils.isMainnet()
+      ? String(receiverWallet.mainnetAddress)
+      : String(receiverWallet.address);
     await newTransactionExtendedPageObject.fillAddress(receiverAddress);
     await simpleTxSideDrawerPageObject.fillTokenValue('1');
     await new TransactionNewPage().reviewTransactionButton.waitForClickable({ timeout: 15_000 });

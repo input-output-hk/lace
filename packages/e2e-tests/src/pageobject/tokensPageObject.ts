@@ -20,11 +20,11 @@ class TokensPageObject {
   async saveTokenBalance(tokenName: string) {
     const rowIndex = await TokensPage.getTokenRowIndex(tokenName);
     const tokenBalance = await TokensPage.getTokenBalanceAsFloatByIndex(rowIndex);
-    testContext.save(`${Asset.getByName(tokenName).ticker}tokenBalance`, tokenBalance);
+    testContext.save(`${Asset.getByName(tokenName)?.ticker}tokenBalance`, tokenBalance);
   }
 
   async loadTokenBalance(tokenName: string) {
-    return testContext.load(`${Asset.getByName(tokenName).ticker}tokenBalance`);
+    return testContext.load(`${Asset.getByName(tokenName)?.ticker}tokenBalance`);
   }
 
   async clickOnCoinGeckoCreditsLink() {
