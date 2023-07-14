@@ -18,6 +18,7 @@ on:
         type: choice
         options:
           - chrome
+          - brave
           - edge
       network:
         type: choice
@@ -37,7 +38,7 @@ env:
 
 jobs:
   tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -46,6 +47,16 @@ jobs:
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+      - name: Install Brave
+        run: |
+           if [ ${BROWSER} == "brave" ]; then
+            sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+            echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"|sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+            sudo apt update
+            sudo apt install brave-browser
+           else
+             echo "Skipping Brave installation"
+           fi
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
@@ -56,7 +67,7 @@ jobs:
       - name: Start Chrome driver
         working-directory: /usr/local/share/chrome_driver
         run: |
-          if [ ${BROWSER} == "chrome" ]; then
+          if [ ${BROWSER} == "chrome" ]  || [ ${BROWSER} == "brave" ]; then
             ./chromedriver -port=4444 &
           else
             echo "Skipping start of ChromeDriver"
@@ -76,6 +87,7 @@ jobs:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           ENV: ${{ env.NETWORK }}
+          BRAVE_LOCATION: '/usr/bin/brave-browser'
         run: |
           if [ "$TAGS" == "empty" ]; then
             TAGS_TO_RUN="";
