@@ -145,6 +145,14 @@ class NftCreateFolderAssert {
       );
     }
   }
+
+  async assertNoResultsReturned() {
+    await NftSelectNftsPage.sadFaceIcon.waitForDisplayed();
+    await NftSelectNftsPage.noResultsMessage.waitForDisplayed();
+    expect(await NftSelectNftsPage.noResultsMessage.getText()).to.equal(
+      await t('package.core.assetSelectorOverlay.noMatchingResult')
+    );
+  }
 }
 
 export default new NftCreateFolderAssert();
