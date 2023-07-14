@@ -128,7 +128,7 @@ export default new (class NewTransactionExtendedPageObject {
     await webTester.clickElement(new TransactionNewPage().addressInput(index).ctaButton());
   };
 
-  clickAddAssetButtonMulti = async (bundleIndex?: number) => {
+  clickAddAssetButtonMulti = async (bundleIndex: number) => {
     await webTester.clickElement(new AssetInput().assetAddButtonMultiple(bundleIndex));
   };
 

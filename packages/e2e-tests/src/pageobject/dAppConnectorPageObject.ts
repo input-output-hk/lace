@@ -78,8 +78,8 @@ class DAppConnectorPageObject {
 
     for (const dAppName of await AuthorizedDappsPage.dAppNames) {
       if ((await dAppName.getText()) === expectedDappName) {
-        await AuthorizedDappsPage.dAppRemoveButtons[dAppName.index].waitForClickable();
-        await AuthorizedDappsPage.dAppRemoveButtons[dAppName.index].click();
+        await AuthorizedDappsPage.dAppRemoveButtons[Number(dAppName.index)].waitForClickable();
+        await AuthorizedDappsPage.dAppRemoveButtons[Number(dAppName.index)].click();
       }
     }
   }

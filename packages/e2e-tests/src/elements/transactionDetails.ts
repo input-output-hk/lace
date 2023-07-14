@@ -236,7 +236,7 @@ export class TransactionDetailsPage extends WebElement {
     return await webTester.getTextValuesFromArrayElement(await this.transactionSentTokensForBundle(index));
   }
 
-  async getTransactionSentTokensWithoutDuplicates(): Promise<string[]> {
+  async getTransactionSentTokensWithoutDuplicates(): Promise<unknown[]> {
     return await webTester.getTextValuesFromArrayElementWithoutDuplicates(await this.transactionSentTokens());
   }
 
