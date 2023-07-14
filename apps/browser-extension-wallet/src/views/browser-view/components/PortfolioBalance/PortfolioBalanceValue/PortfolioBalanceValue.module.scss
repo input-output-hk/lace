@@ -1,0 +1,114 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.balance {
+  display: flex;
+  align-items: baseline;
+  gap: size_unit(1);
+  line-height: 70px;
+
+  .codeTextLarge,
+  .codeTextMedium {
+    color: var(--text-color-secondary);
+    font-weight: 700;
+    text-align: left;
+    margin: 0;
+  }
+
+  .codeTextLarge {
+    @include text-subHeading-bold;
+  }
+
+  .codeTextMedium {
+    font-size: var(--bodyLarge);
+    line-height: size_unit(4);
+  }
+
+  .balanceTextLarge,
+  .balanceTextMedium,
+  .balanceTextLargePopup .balanceTextMediumPopup {
+    color: $theme-text-color-black;
+    font-weight: 600;
+    text-align: left;
+    margin: 0;
+  }
+
+  .balanceTextLarge {
+    font-size: var(--display);
+    @media (max-width: $breakpoint-popup) {
+      @include text-pageHeading;
+    }
+  }
+
+  .balanceTextMedium {
+    @include text-pageHeading;
+  }
+}
+
+.subtitleTextLarge,
+.subtitleTextMedium {
+  font-weight: 600;
+  text-align: left;
+  color: $theme-text-color-light-grey;
+  margin: 0;
+}
+
+.subtitleTextLarge {
+  font-size: var(--subHeading);
+  line-height: size_unit(5);
+}
+
+.subtitleTextMedium {
+  font-size: var(--bodyLarge);
+  line-height: size_unit(3);
+}
+
+.positive {
+  color: var(--text-color-green, #2cb67d);
+}
+
+.negative {
+  color: var(--text-color-red, #ff5470);
+}
+
+.neutral {
+  color: var(--text-color-secondary) !important;
+}
+
+.popupView {
+  &.balance {
+    .balanceTextLarge {
+      @include text-pageHeading;
+    }
+    .balanceTextXLarge {
+      @include text-display;
+      margin-bottom: -#{size_unit(1)};
+    }
+
+    .balanceTextMedium {
+      font-size: var(--heading);
+      line-height: size_unit(5);
+    }
+
+    .codeTextLarge {
+      font-size: var(--bodyLarge);
+      line-height: size_unit(4);
+      font-weight: 700;
+    }
+
+    .codeTextMedium {
+      @include text-body-bold;
+    }
+  }
+
+  &.subtitleTextLarge {
+    font-size: size_unit(2);
+    line-height: size_unit(3);
+  }
+
+  &.subtitleTextMedium {
+    font-size: size_unit(2);
+    line-height: size_unit(3);
+    margin-top: 0;
+  }
+}
