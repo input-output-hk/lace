@@ -77,7 +77,7 @@ Then(
     const expectedShouldSee = shouldSee === 'see';
     await addressBookAssert.assertSeeShortenedAddressOnTheList(
       name,
-      getAddressByName(addressByName),
+      String(getAddressByName(addressByName)),
       expectedShouldSee
     );
   }

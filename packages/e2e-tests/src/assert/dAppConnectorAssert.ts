@@ -173,6 +173,8 @@ class DAppConnectorAssert {
   }
 
   async assertSeeAuthorizedDAppsEmptyState(mode: 'extended' | 'popup') {
+    await AuthorizedDAppsPage.drawerHeaderTitle.waitForClickable();
+
     if (mode === 'extended') {
       await AuthorizedDAppsPage.drawerNavigationTitle.waitForDisplayed();
       await expect(await AuthorizedDAppsPage.drawerNavigationTitle.getText()).to.equal(
@@ -186,7 +188,6 @@ class DAppConnectorAssert {
       await AuthorizedDAppsPage.drawerHeaderBackButton.waitForDisplayed();
     }
 
-    await AuthorizedDAppsPage.drawerHeaderTitle.waitForDisplayed();
     await expect(await AuthorizedDAppsPage.drawerHeaderTitle.getText()).to.equal(await t('dapp.list.title'));
 
     await AuthorizedDAppsPage.drawerHeaderSubtitle.waitForDisplayed();
@@ -200,6 +201,7 @@ class DAppConnectorAssert {
   }
 
   async assertSeeAuthorizedDAppsOnTheList(expectedDApps: ExpectedDAppDetails[]) {
+    await AuthorizedDAppsPage.drawerBody.waitForClickable();
     expect(await AuthorizedDAppsPage.dAppContainers.length).to.equal(expectedDApps.length);
     for (const [i, expectedDapp] of expectedDApps.entries()) {
       await AuthorizedDAppsPage.dAppLogos[i].waitForDisplayed({ reverse: !expectedDApps[i].hasLogo });

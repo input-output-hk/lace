@@ -149,6 +149,7 @@ export const NFTFolderDrawer = withNftsFoldersContext(
           count={selectedTokenIds.length}
           label={t('multipleSelection.clear')}
           onClick={() => setSelectedTokenIds([])}
+          testId="assets-clear"
         />
       </div>
     );

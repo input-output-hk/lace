@@ -29,7 +29,7 @@ describe('Search', () => {
   test('displays clear input button and calls onClearButtonClick when clicked', () => {
     const onClearButtonClick = jest.fn();
     const { queryByTestId } = render(<Search showClear onClearButtonClick={onClearButtonClick} />);
-    const clearButton = queryByTestId('address-book-btn');
+    const clearButton = queryByTestId('search-clear-button');
     expect(clearButton).toBeInTheDocument();
     act(() => {
       fireEvent.click(clearButton);

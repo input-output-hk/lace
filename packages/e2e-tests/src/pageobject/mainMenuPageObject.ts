@@ -4,15 +4,13 @@ import menuHeaderPageObject from './menuHeaderPageObject';
 
 class MainMenuPageObject {
   tokens = async (mode: 'extended' | 'popup') =>
-    mode === 'extended' ? await MenuMainExtended.tokensButton.click() : await MenuMainPopup.tokensButton.click();
+    mode === 'extended' ? await MenuMainExtended.clickOnTokensButton() : await MenuMainPopup.clickOnTokensButton();
   nfts = async (mode: 'extended' | 'popup') =>
-    mode === 'extended' ? await MenuMainExtended.nftsButton.click() : await MenuMainPopup.nftsButton.click();
-  transactions = async (mode: 'extended' | 'popup') =>
-    mode === 'extended'
-      ? await MenuMainExtended.transactionsButton.click()
-      : await MenuMainPopup.transactionsButton.click();
+    mode === 'extended' ? await MenuMainExtended.clickOnNFTsButton() : await MenuMainPopup.clickOnNFTsButton();
+  activity = async (mode: 'extended' | 'popup') =>
+    mode === 'extended' ? await MenuMainExtended.clickOnActivityButton() : await MenuMainPopup.clickOnActivityButton();
   staking = async (mode: 'extended' | 'popup') =>
-    mode === 'extended' ? await MenuMainExtended.stakingButton.click() : await MenuMainPopup.stakingButton.click();
+    mode === 'extended' ? await MenuMainExtended.clickOnStakingButton() : await MenuMainPopup.clickOnStakingButton();
 
   async navigateToSection(targetPage: string, mode: 'extended' | 'popup') {
     switch (targetPage) {
@@ -23,7 +21,7 @@ class MainMenuPageObject {
         await this.nfts(mode);
         break;
       case 'Transactions':
-        await this.transactions(mode);
+        await this.activity(mode);
         break;
       case 'Staking':
         await this.staking(mode);
