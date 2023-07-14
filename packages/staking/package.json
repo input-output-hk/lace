@@ -61,8 +61,8 @@
     "react-i18next": "^12.3.1"
   },
   "devDependencies": {
-    "@cardano-sdk/input-selection": "0.11.1",
-    "@cardano-sdk/tx-construction": "0.9.1",
+    "@cardano-sdk/input-selection": "0.11.2",
+    "@cardano-sdk/tx-construction": "0.9.2",
     "@cardano-sdk/util": "0.13.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
@@ -97,8 +97,8 @@
     "zustand": "3.5.14"
   },
   "peerDependencies": {
-    "@cardano-sdk/input-selection": "0.11.1",
-    "@cardano-sdk/tx-construction": "0.9.1",
+    "@cardano-sdk/input-selection": "0.11.2",
+    "@cardano-sdk/tx-construction": "0.9.2",
     "@cardano-sdk/util": "0.13.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
