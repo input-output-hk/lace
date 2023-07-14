@@ -5,8 +5,15 @@ import menuHeaderPageObject from './menuHeaderPageObject';
 class MainMenuPageObject {
   tokens = async (mode: 'extended' | 'popup') =>
     mode === 'extended' ? await MenuMainExtended.tokensButton.click() : await MenuMainPopup.tokensButton.click();
-  nfts = async (mode: 'extended' | 'popup') =>
-    mode === 'extended' ? await MenuMainExtended.nftsButton.click() : await MenuMainPopup.nftsButton.click();
+  nfts = async (mode: 'extended' | 'popup') => {
+    if (mode === 'extended') {
+      await MenuMainExtended.nftsButton.waitForClickable();
+      await MenuMainExtended.nftsButton.click();
+    } else {
+      await MenuMainPopup.nftsButton.waitForClickable();
+      await MenuMainPopup.nftsButton.click();
+    }
+  };
   transactions = async (mode: 'extended' | 'popup') =>
     mode === 'extended'
       ? await MenuMainExtended.transactionsButton.click()
