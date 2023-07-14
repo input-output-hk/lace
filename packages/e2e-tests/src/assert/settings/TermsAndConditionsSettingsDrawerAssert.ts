@@ -10,6 +10,10 @@ class TermsAndConditionsSettingsDrawerAssert {
       ? await TermsAndConditionsDrawer.drawerHeaderBackButton.waitForClickable()
       : await TermsAndConditionsDrawer.drawerHeaderCloseButton.waitForClickable();
     await TermsAndConditionsDrawer.termsAndConditionsContent.waitForDisplayed();
+    await browser.pause(500);
+    const paragraphs = await TermsAndConditionsDrawer.paragraphs;
+    await paragraphs[paragraphs.length - 1].scrollIntoView({ block: 'end' });
+
     const actualContent = await removeWhitespacesFromText(
       await TermsAndConditionsDrawer.termsAndConditionsContent.getText()
     );

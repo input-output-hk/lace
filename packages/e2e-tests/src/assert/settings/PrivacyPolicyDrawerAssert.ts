@@ -30,6 +30,11 @@ class PrivacyPolicyDrawerAssert {
   async assertSeePrivacyPolicyContent() {
     const expectedPolicy = readFromFile(__dirname, '../settings/privacyPolicy.txt');
     await PrivacyPolicyDrawer.privacyPolicyContent.waitForDisplayed();
+
+    await browser.pause(500);
+    const paragraphs = await PrivacyPolicyDrawer.paragraphs;
+    await paragraphs[paragraphs.length - 1].scrollIntoView({ block: 'end' });
+
     const currentPolicy = await PrivacyPolicyDrawer.privacyPolicyContent.getText();
     await expect(await removeWhitespacesFromText(currentPolicy)).to.equal(
       await removeWhitespacesFromText(expectedPolicy)

@@ -28,6 +28,11 @@ class CookiePolicyDrawerAssert {
 
   assertSeeCookiePolicyContent = async () => {
     await CookiePolicyDrawer.cookiePolicyContent.waitForDisplayed();
+
+    await browser.pause(500);
+    const paragraphs = await CookiePolicyDrawer.paragraphs;
+    await paragraphs[paragraphs.length - 1].scrollIntoView({ block: 'end' });
+
     const actualCookiePolicyText = await CookiePolicyDrawer.cookiePolicyContent.getText();
     const expectedCookiePolicyText = readFromFile(__dirname, './cookiePolicy.txt');
     await expect(actualCookiePolicyText).to.equal(expectedCookiePolicyText);
