@@ -104,19 +104,6 @@ button.addressBookBtn {
     top: 8px;
     left: 0;
   }
-
-  .validAddress {
-    color: var(--text-color-primary);
-    font-size: var(--bodyLarge);
-    font-weight: 500;
-    justify-content: space-between;
-    letter-spacing: -0.015em;
-    line-height: size_unit(3);
-
-    p {
-      margin: 0 !important;
-    }
-  }
 }
 
 .addressOption {

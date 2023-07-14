@@ -84,14 +84,7 @@ export const DestinationAddressInput = ({
     );
   }, [handle, valid, empty, validationObject, exists, onClick]);
 
-  const children = useMemo(() => {
-    if (value.name) {
-      return getInputLabel(value.name, value.address);
-    }
-    return validationObject?.address ? (
-      <Ellipsis className={styles.validAddress} withTooltip={false} text={value.address} ellipsisInTheMiddle />
-    ) : undefined;
-  }, [value, validationObject?.address]);
+  const children = useMemo(() => value.name && getInputLabel(value.name, value.address), [value]);
 
   return (
     <Search
