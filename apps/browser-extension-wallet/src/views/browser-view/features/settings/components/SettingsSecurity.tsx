@@ -107,6 +107,7 @@ export const SettingsSecurity = ({
           description={t('browserView.settings.security.analytics.description')}
           addon={
             <Switch
+              testId="settings-analytics-switch"
               checked={analyticsAccepted === EnhancedAnalyticsOptInStatus.OptedIn}
               onChange={handleAnalyticsChoice}
               className={styles.analyticsSwitch}
