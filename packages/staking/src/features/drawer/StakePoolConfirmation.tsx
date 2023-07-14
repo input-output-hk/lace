@@ -130,7 +130,7 @@ const MultipleStakePoolConfirmationBody = ({
             subText={<span>{stakePool.ticker}</span>}
           />
           <div className={styles.itemData}>
-            <Ellipsis beforeEllipsis={10} afterEllipsis={8} text={stakePool.id} ellipsisInTheMiddle />;
+            <Ellipsis beforeEllipsis={10} afterEllipsis={8} text={stakePool.id} ellipsisInTheMiddle />
           </div>
         </div>
       ))}
@@ -157,15 +157,16 @@ export const StakePoolConfirmation = (): React.ReactElement => {
 
   useEffect(() => {
     (async () => {
-      if (!openPool?.hexId) return;
+      if (!openPool?.hexId || draftPortfolio.length === 0) return;
       // TODO: move below logic to zustand store
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
-        const tx = await txBuilder
-          .delegatePortfolio({ pools: [{ id: openPool.hexId, weight: 1 }] })
-          .build()
-          .inspect();
+        const pools =
+          draftPortfolio.length > 0
+            ? draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.weight }))
+            : [{ id: openPool.hexId, weight: 1 }];
+        const tx = await txBuilder.delegatePortfolio({ pools }).build().inspect();
         setDelegationTxBuilder(txBuilder);
         setDelegationTxFee(tx.body.fee.toString());
         setStakingError();
@@ -277,12 +278,13 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreGetKeyAgentType: getKeyAgentType,
-    submittingStateSetIsRestaking: setIsRestaking,
+    submittingState: { setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     delegationDetails,
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakePoolDetails();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
+  const draftPortfolio = useDelegationPortfolioStore((store) => store.draftPortfolio);
 
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
 
@@ -291,6 +293,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
 
   const { setSection } = useStakePoolDetails();
 
+  // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
     const signedTx = await delegationTxBuilder.build().sign();
@@ -303,7 +306,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       setIsConfirmingTx(true);
       try {
         await signAndSubmitTransaction();
-        const isDelegating = !!(rewardAccounts && delegationDetails);
+        const isDelegating = !!(rewardAccounts && (delegationDetails || draftPortfolio.length > 0));
         setIsRestaking(isDelegating);
         return setSection(sectionsConfig[Sections.SUCCESS_TX]);
       } catch {

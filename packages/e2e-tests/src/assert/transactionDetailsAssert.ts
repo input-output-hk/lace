@@ -51,9 +51,7 @@ class TransactionsDetailsAssert {
       for (let i = 0; i < expectedTransactionDetails.transactionData.length; i++) {
         if (expectedTransactionDetails.transactionData[i].assets) {
           const actualAssets = await transactionsDetails.getTransactionSentTokensForBundle(i + 1);
-          await expect(actualAssets.toString()).to.equal(
-            expectedTransactionDetails.transactionData[i].assets.toString()
-          );
+          await expect(actualAssets.toString()).to.equal(String(expectedTransactionDetails.transactionData[i].assets));
         }
         await expect(
           await webTester.getTextValueFromElement(transactionsDetails.transactionDetailsSentAda(i + 1))

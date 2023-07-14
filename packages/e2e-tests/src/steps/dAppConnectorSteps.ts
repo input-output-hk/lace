@@ -34,7 +34,7 @@ Then(
       typeOfTransaction: 'Send',
       amountADA: adaValue,
       amountAsset: assetValue,
-      recipientAddress: getTestWallet('WalletReceiveSimpleTransactionE2E').address
+      recipientAddress: String(getTestWallet('WalletReceiveSimpleTransactionE2E').address)
     };
     await DAppConnectorAssert.assertSeeConfirmTransactionPage(testDAppDetails, expectedTransactionData);
   }
