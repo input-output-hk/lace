@@ -28,6 +28,10 @@ func mkStartupInfoLpReserved2(handlesToMap []syscall.Handle) []byte {
 		uintptr(len(handlesToMap)) * unsafe.Sizeof(uintptr(0))
 	buf := make([]byte, bufSize)
 
+	if len(handlesToMap) < 3 {
+		panic("in lpReserved2, you have to pass at least stdin, stdout, and stderr (in this order)")
+	}
+
 	if len(handlesToMap) > 255 {
 		panic("we cannnot map more than 255 handles in lpReserved2")
 	}
@@ -68,7 +72,11 @@ func mkStartupInfoLpReserved2(handlesToMap []syscall.Handle) []byte {
 
 	for idx, handle := range handlesToMap {
 		// XXX: if we passed something else than an os.Pipe() end, the flags would likely have to change!
-		setFlags(idx, FOPEN | FPIPE)
+		if idx <= 2 {
+			setFlags(idx, FOPEN | FDEV)
+		} else {
+			setFlags(idx, FOPEN | FPIPE)
+		}
 		setHandle(idx, handle)
 	}
 

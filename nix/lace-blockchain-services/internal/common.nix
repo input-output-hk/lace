@@ -32,9 +32,13 @@ in rec {
     done
     find $out -type f -name 'config.*' | while IFS= read -r file ; do
       if [ "$(jq .EnableP2P "$file")" == "true" ] ; then
-        jq '.EnableP2P = false' "$file" > tmp.json
+        jq '.EnableP2P = false' "$file" >tmp.json
         mv tmp.json "$file"
       fi
+
+      # With '.hasPrometheus', cardano-node hangs during graceful exit on Windows:
+      jq 'del(.hasPrometheus)' "$file" >tmp.json
+      mv tmp.json "$file"
     done
   ''));
 

@@ -21,7 +21,7 @@ in rec {
   #   • and taking go-modules (vendor) from the Linux derivation – these are only sources
   lace-blockchain-services-exe = let
     noConsoleWindow = true;
-    go = pkgs.go;
+    go = patchedGo;
     go-modules = inputs.self.internal.lace-blockchain-services.x86_64-linux.lace-blockchain-services-exe.go-modules;
   in pkgs.pkgsCross.mingwW64.stdenv.mkDerivation {
     name = "lace-blockchain-services";
