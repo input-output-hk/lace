@@ -2,6 +2,7 @@ import CookiePolicyDrawer from '../../elements/settings/CookiePolicyDrawer';
 import { expect } from 'chai';
 import { readFromFile } from '../../utils/fileUtils';
 import { t } from '../../utils/translationService';
+import { browser } from '@wdio/globals';
 
 class CookiePolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
@@ -29,13 +30,19 @@ class CookiePolicyDrawerAssert {
   assertSeeCookiePolicyContent = async () => {
     await CookiePolicyDrawer.cookiePolicyContent.waitForDisplayed();
 
-    await browser.pause(500);
-    const paragraphs = await CookiePolicyDrawer.paragraphs;
-    await paragraphs[paragraphs.length - 1].scrollIntoView({ block: 'end' });
-
-    const actualCookiePolicyText = await CookiePolicyDrawer.cookiePolicyContent.getText();
     const expectedCookiePolicyText = readFromFile(__dirname, './cookiePolicy.txt');
-    await expect(actualCookiePolicyText).to.equal(expectedCookiePolicyText);
+
+    await browser.waitUntil(
+      async () => (await CookiePolicyDrawer.cookiePolicyContent.getText()) === expectedCookiePolicyText,
+      {
+        timeout: 3000,
+        interval: 1000,
+        timeoutMsg: `failed while waiting for expected cookie policy text
+        expected: ${expectedCookiePolicyText}
+        current: ${await CookiePolicyDrawer.cookiePolicyContent.getText()}
+        `
+      }
+    );
   };
 }
 
