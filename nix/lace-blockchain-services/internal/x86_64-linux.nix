@@ -19,7 +19,7 @@ in rec {
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
     src = ./lace-blockchain-services;
-    vendorHash = "sha256-DjDyHOENtaFSNGQtX50wL3hIo+lmMY1BJBn/TaAcXU0=";
+    vendorHash = "sha256-1slTIiIGxraIFdtKNeH4llXjrtSEaEQ7IIbOM3LL3N0=";
     nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
     buildInputs = with pkgs; [
       (libayatana-appindicator-gtk3.override {
@@ -34,7 +34,8 @@ in rec {
     };
     preBuild = ''
       convert -background none -size 44x44 cardano.svg cardano.png
-      go-bindata -pkg main -o assets.go cardano.png
+      cp cardano.png tray-icon
+      go-bindata -pkg main -o assets.go tray-icon
     '';
   };
 
