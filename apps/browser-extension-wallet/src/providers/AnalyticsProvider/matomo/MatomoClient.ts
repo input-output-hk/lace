@@ -24,15 +24,15 @@ export class MatomoClient {
     };
   }
 
-  sendPageNavigationEvent = async (pageTitle: string): Promise<void> => {
+  async sendPageNavigationEvent(pageTitle: string): Promise<void> {
     console.debug('[ANALYTICS] Logging page navigation event to Matomo', pageTitle);
     this.matomoTracker.track({
       ...(await this.getMetadata()),
       action_name: pageTitle
     });
-  };
+  }
 
-  sendEvent = async ({ category, action, name, value }: SendEventProps): Promise<void> => {
+  async sendEvent({ category, action, name, value }: SendEventProps): Promise<void> {
     const payload = {
       ...(await this.getMetadata()),
       ca: 1,
@@ -43,7 +43,7 @@ export class MatomoClient {
     };
     console.debug('[ANALYTICS] Logging event to Matomo', payload);
     this.matomoTracker.track(payload);
-  };
+  }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
     const siteId = this.getMatomoSiteId(chain);
