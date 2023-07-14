@@ -29,9 +29,6 @@ type AddressChangeDetailDrawerProps = {
   actualAddress: string;
   visible: boolean;
   popupView?: boolean;
-  beforeEllipsis?: number;
-  afterEllipsis?: number;
-  shouldUseEllipsis?: boolean;
   onCancelClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
   onConfirmClick: (values: valuesPropType) => unknown;
   onDelete: (address: InitialValuesProps['id']) => unknown;
@@ -49,9 +46,6 @@ export const AddressChangeDetailDrawer = ({
   onCancelClick,
   visible,
   popupView,
-  beforeEllipsis = defaultBeforeEllipsis,
-  afterEllipsis = defaultAfterEllipsis,
-  shouldUseEllipsis,
   onDelete,
   onConfirmClick
 }: AddressChangeDetailDrawerProps): React.ReactElement => {
@@ -197,10 +191,10 @@ export const AddressChangeDetailDrawer = ({
                       text={expectedAddress}
                       className={cn(styles.addressDetails)}
                       withTooltip={false}
-                      {...(popupView || shouldUseEllipsis
+                      {...(popupView
                         ? {
-                            beforeEllipsis,
-                            afterEllipsis
+                            beforeEllipsis: defaultBeforeEllipsis,
+                            afterEllipsis: defaultAfterEllipsis
                           }
                         : { ellipsisInTheMiddle: true })}
                     />
@@ -237,10 +231,10 @@ export const AddressChangeDetailDrawer = ({
                       text={actualAddress}
                       className={cn(styles.addressDetails)}
                       withTooltip={false}
-                      {...(popupView || shouldUseEllipsis
+                      {...(popupView
                         ? {
-                            beforeEllipsis,
-                            afterEllipsis
+                            beforeEllipsis: defaultBeforeEllipsis,
+                            afterEllipsis: defaultAfterEllipsis
                           }
                         : { ellipsisInTheMiddle: true })}
                     />
