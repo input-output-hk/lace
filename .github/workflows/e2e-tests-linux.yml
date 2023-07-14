@@ -80,60 +80,62 @@ jobs:
           if [ "$TAGS" == "empty" ]; then
             TAGS_TO_RUN="";
           else
-            TAGS_TO_RUN="--cucumberOpts.tagExpression=${TAGS}";
+            TAGS_TO_RUN="--cucumberOpts.tagExpression='${{ env.TAGS }}'";
           fi
-          ./node_modules/.bin/wdio run wdio.conf.${BROWSER}.ts $TAGS_TO_RUN
-      - name: Create allure properties
-        if: always()
-        working-directory: ./packages/e2e-tests/reports/allure/results
-        run: |
-          pendingCount=`grep -r "@Pending" ../../../src/features | wc -l | xargs`
-          pending=`grep -r -h "@Pending" ../../../src/features -A 2 | grep -v -- "^--$" | sed "s/@Pending//g" | awk '{$1=$1};1' | sed "/^@/s/ /./g;/^#/s/ /./g" | xargs | sed "s/@[^ ]*/\n&/g" | sed "s/ /./"`
-          echo "
-          env=${NETWORK}
-          browser=${BROWSER}
-          tags=${TAGS}
-          platform=Linux
-          Pending.Count=${pendingCount}
-          @Pending.Scenarios=
-          ${pending}
-          " > environment.properties
-      - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v1.0.1
-        if: always()
-        env:
-          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_ACCESS_KEY }}
-        with:
-          storageType: s3
-          resultsGlob: './packages/e2e-tests/reports/allure/results/*'
-          bucket: lightwallet
-          prefix: 'linux/${BROWSER}/${RUN}'
-          copyLatest: true
-          ignoreMissingResults: true
-      - name: Publish artifacts (logs, reports, screenshots)
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: test-artifacts
-          path: |
-            ./packages/e2e-tests/screenshots
-            ./packages/e2e-tests/logs
-            ./packages/e2e-tests/reports
-          retention-days: 10
-      - name: Add link to summary
-        if: always()
-        run: |
-          echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2.2.0
-        if: always()
-        env:
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
-          SLACK_TITLE: 'Test automation results :rocket:'
-          SLACK_USERNAME: lace-qa-bot
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          runCommand="./node_modules/.bin/wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
+          echo "${runCommand}";
+          eval "$runCommand";
+#      - name: Create allure properties
+#        if: always()
+#        working-directory: ./packages/e2e-tests/reports/allure/results
+#        run: |
+#          pendingCount=`grep -r "@Pending" ../../../src/features | wc -l | xargs`
+#          pending=`grep -r -h "@Pending" ../../../src/features -A 2 | grep -v -- "^--$" | sed "s/@Pending//g" | awk '{$1=$1};1' | sed "/^@/s/ /./g;/^#/s/ /./g" | xargs | sed "s/@[^ ]*/\n&/g" | sed "s/ /./"`
+#          echo "
+#          env=${NETWORK}
+#          browser=${BROWSER}
+#          tags=${TAGS}
+#          platform=Linux
+#          Pending.Count=${pendingCount}
+#          @Pending.Scenarios=
+#          ${pending}
+#          " > environment.properties
+#      - name: Publish allure report to S3
+#        uses: andrcuns/allure-publish-action@v1.0.1
+#        if: always()
+#        env:
+#          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+#          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_ACCESS_KEY }}
+#        with:
+#          storageType: s3
+#          resultsGlob: './packages/e2e-tests/reports/allure/results/*'
+#          bucket: lightwallet
+#          prefix: 'linux/${BROWSER}/${RUN}'
+#          copyLatest: true
+#          ignoreMissingResults: true
+#      - name: Publish artifacts (logs, reports, screenshots)
+#        uses: actions/upload-artifact@v3
+#        if: always()
+#        with:
+#          name: test-artifacts
+#          path: |
+#            ./packages/e2e-tests/screenshots
+#            ./packages/e2e-tests/logs
+#            ./packages/e2e-tests/reports
+#          retention-days: 10
+#      - name: Add link to summary
+#        if: always()
+#        run: |
+#          echo "TEST RESULTS:"
+#          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
+#      - name: Slack Notification
+#        uses: rtCamp/action-slack-notify@v2.2.0
+#        if: always()
+#        env:
+#          SLACK_COLOR: ${{ job.status }}
+#          SLACK_ICON_EMOJI: ':lace:'
+#          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | tags: ${{ env.TAGS }} | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
+#          SLACK_TITLE: 'Test automation results :rocket:'
+#          SLACK_USERNAME: lace-qa-bot
+#          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
