@@ -143,7 +143,7 @@ describe('Testing formatNumber', () => {
   });
 });
 
-describe('Testing formatCurrencyValue function', () => {
+describe('Testing formatValueToLocale function', () => {
   let languageGetter: ReturnType<typeof jest.spyOn>;
   const value = '10200';
   beforeEach(() => {
@@ -151,38 +151,38 @@ describe('Testing formatCurrencyValue function', () => {
   });
 
   test('should use en locale by default', async () => {
-    const result = formatNumber.formatCurrencyValue(value);
+    const result = formatNumber.formatValueToLocale(value);
     expect(result).toEqual('10,200.00');
   });
 
   // TODO: unskip when system locale formatting implemented
   test.skip('Should format number with es locale and two decimal values', async () => {
     languageGetter.mockReturnValue('es');
-    const result = formatNumber.formatCurrencyValue(value);
+    const result = formatNumber.formatValueToLocale(value);
     expect(result).toEqual('10.200,00');
   });
 
   test('Should format number with en locale and two decimal values', async () => {
     languageGetter.mockReturnValue('en');
-    const result = formatNumber.formatCurrencyValue(value);
+    const result = formatNumber.formatValueToLocale(value);
     expect(result).toEqual('10,200.00');
   });
 
   test('should not use 1 as maximumFractionDigits as default is 2, number should have 2 decimal places', async () => {
-    const result = formatNumber.formatCurrencyValue(value, 1);
+    const result = formatNumber.formatValueToLocale(value, 1);
     expect(result).toEqual('10,200.00');
   });
 
   test('should have 6 decimal places', async () => {
     const decimalPlaces = 6;
-    const result = formatNumber.formatCurrencyValue('10.9283627182', decimalPlaces);
+    const result = formatNumber.formatValueToLocale('10.9283627182', decimalPlaces);
     const decimalsLength = result.split('.')[1].length;
     expect(decimalsLength).toEqual(decimalPlaces);
   });
 
   test('should default to max 15 decimal places', async () => {
     const decimalPlaces = 30;
-    const result = formatNumber.formatCurrencyValue('10.9283627182928362718292836271829283627182', decimalPlaces);
+    const result = formatNumber.formatValueToLocale('10.9283627182928362718292836271829283627182', decimalPlaces);
     const decimalsLength = result.split('.')[1].length;
     expect(decimalsLength).toEqual(15);
   });
@@ -202,22 +202,23 @@ describe('Testing getInlineCurrencyFormat', () => {
       BigInt('123').toLocaleString('fullwide', { useGrouping: true })
     );
 
-    const shortenNumberResult = 'shortenNumberResult';
-    const shortenNumberSpy = jest.spyOn(formatNumber, 'shortenNumber').mockReturnValue(shortenNumberResult);
+    const shortenNumberSpy = jest.spyOn(formatNumber, 'shortenNumber');
 
     expect(formatNumber.getInlineCurrencyFormat('123a.123', 1)).toEqual(
       `${BigInt('123').toLocaleString('fullwide', {
         useGrouping: true
-      })}.${shortenNumberResult}`
+      })}.1`
     );
+    expect(shortenNumberSpy).toBeCalledTimes(1);
     expect(shortenNumberSpy).toBeCalledWith('123', 1);
+    shortenNumberSpy.mockClear();
 
     expect(formatNumber.getInlineCurrencyFormat('123a.123.123', 1)).toEqual(
       `${BigInt('123').toLocaleString('fullwide', {
         useGrouping: true
       })}.${'123123'}`
     );
-    expect(shortenNumberSpy).toBeCalledTimes(1);
+    shortenNumberSpy.mockClear();
 
     expect(formatNumber.getInlineCurrencyFormat('123a.123.123')).toEqual(
       BigInt('123').toLocaleString('fullwide', {

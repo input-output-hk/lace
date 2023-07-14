@@ -24,24 +24,28 @@ type GetNumberMapKey = (
    * this key should exist on units map
    */
   fallbackKey?: string
-) => { unit: string; value: BigNumber };
+) => { unit: string; unitThreshold: BigNumber };
 
 /**
- * returns the unit that the given number belongs
- * @type GetNumberMapKey
+ * Returns the number unit and its threshold based on the given value
+ *
+ * @example
+ * const result = getNumberUnit(new BigNumber(2500), unitsMap.keys());
+ * console.log(result);
+ * // Output: { unit: 'K', unitThreshold: new BigNumber(1000) }
  */
 export const getNumberUnit: GetNumberMapKey = (value, keys, units = unitsMap, fallbackKey = 'B') => {
   const resultKey = keys.next();
 
   if (resultKey.done) {
     const fallbackUnitRange = units.get(fallbackKey);
-    return { unit: fallbackKey, value: fallbackUnitRange.gt };
+    return { unit: fallbackKey, unitThreshold: fallbackUnitRange.gt };
   }
 
   const unitRange = units.get(resultKey.value);
 
   if (value.gte(unitRange.gt) && value.lt(unitRange.lt)) {
-    return { unit: resultKey.value, value: unitRange.gt };
+    return { unit: resultKey.value, unitThreshold: unitRange.gt };
   }
 
   return getNumberUnit(value, keys, units, fallbackKey);
