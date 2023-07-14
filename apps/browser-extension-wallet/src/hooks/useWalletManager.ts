@@ -5,10 +5,11 @@ import { useWalletStore } from '@stores';
 import { useCardanoWalletManagerContext } from '@providers/CardanoWalletManager';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
-import { AddressBookSchema, NftFoldersSchema, addressBookSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
+import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
 import { deleteFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
 import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
+import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 
@@ -83,6 +84,7 @@ export const useWalletManager = (): UseWalletManager => {
     utils: { clearTable: clearNftsFolders }
   } = useDbState<NftFoldersSchema, NftFoldersSchema>([], nftFoldersSchema);
   const backgroundService = useBackgroundServiceAPIContext();
+  const userIdService = getUserIdService();
 
   const storeMnemonicInBackgroundScript = useCallback(
     async (mnemonic: string[], password: string) => {
@@ -295,6 +297,7 @@ export const useWalletManager = (): UseWalletManager => {
       if (!isForgotPasswordFlow) {
         deleteFromLocalStorage('wallet');
         deleteFromLocalStorage('analyticsAccepted');
+        await userIdService.clearId();
         clearAddressBook();
         clearNftsFolders();
       }
@@ -302,6 +305,7 @@ export const useWalletManager = (): UseWalletManager => {
     [
       walletManagerUi,
       backgroundService,
+      userIdService,
       clearAddressBook,
       clearNftsFolders,
       setKeyAgentData,

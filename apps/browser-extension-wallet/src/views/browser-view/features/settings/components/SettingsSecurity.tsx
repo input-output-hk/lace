@@ -8,8 +8,8 @@ import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks';
 import { useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
-import { AnalyticsConsentStatus } from '@providers/AnalyticsProvider/analyticsTracker';
-import { ANALYTICS_ACCEPTANCE_LS_KEY } from '@providers/AnalyticsProvider/analyticsTracker/config';
+import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 
 const { Title } = Typography;
 
@@ -32,16 +32,18 @@ export const SettingsSecurity = ({
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
-  const [analyticsAccepted, { updateLocalStorage: setIsTrackingEnabled }] = useLocalStorage(
-    ANALYTICS_ACCEPTANCE_LS_KEY,
-    AnalyticsConsentStatus.REJECTED
+  const [analyticsAccepted, { updateLocalStorage: setEnhancedAnalyticsOptInStatus }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
   );
   const backgroundService = useBackgroundServiceAPIContext();
 
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
 
-  const handleAnalyticsChoise = (isAccepted: boolean) => {
-    setIsTrackingEnabled(isAccepted ? AnalyticsConsentStatus.ACCEPTED : AnalyticsConsentStatus.REJECTED);
+  const handleAnalyticsChoice = (isOptedIn: boolean) => {
+    setEnhancedAnalyticsOptInStatus(
+      isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+    );
   };
 
   const isMnemonicAvailable = useCallback(async () => {
@@ -105,8 +107,8 @@ export const SettingsSecurity = ({
           description={t('browserView.settings.security.analytics.description')}
           addon={
             <Switch
-              checked={analyticsAccepted === AnalyticsConsentStatus.ACCEPTED}
-              onChange={handleAnalyticsChoise}
+              checked={analyticsAccepted === EnhancedAnalyticsOptInStatus.OptedIn}
+              onChange={handleAnalyticsChoice}
               className={styles.analyticsSwitch}
             />
           }

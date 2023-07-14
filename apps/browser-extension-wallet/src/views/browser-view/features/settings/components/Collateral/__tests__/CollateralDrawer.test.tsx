@@ -121,7 +121,7 @@ const getWrapper =
           <DatabaseProvider>
             <StoreProvider appMode={APP_MODE_BROWSER}>
               <I18nextProvider i18n={i18n}>
-                <AnalyticsProvider featureEnabled={false}>
+                <AnalyticsProvider analyticsDisabled>
                   <CurrencyStoreProvider>
                     <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
                   </CurrencyStoreProvider>

@@ -1,0 +1,1 @@
+export { MatomoClient } from './MatomoClient';

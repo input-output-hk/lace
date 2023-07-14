@@ -15,7 +15,8 @@ const esmExceptions = jestEsmExceptions([
   'dexie',
   '@rxstate/core',
   'intersection-observer-polyfill',
-  'p-retry'
+  'p-retry',
+  'p-debounce'
 ]);
 
 const rootDir = process.cwd();

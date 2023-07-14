@@ -27,7 +27,7 @@ describe('Testing SideMenu component', () => {
 
   const TestSideMenu = () => (
     <I18nextProvider i18n={i18n}>
-      <AnalyticsProvider featureEnabled={false}>
+      <AnalyticsProvider analyticsDisabled>
         <BrowserRouter>
           <SideMenu />
           <Switch>
