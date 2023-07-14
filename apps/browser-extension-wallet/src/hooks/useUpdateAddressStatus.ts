@@ -3,13 +3,13 @@ import { AddressBookSchema } from '@lib/storage';
 import { CustomConflictError, hasHandleOwnerChanged } from '@src/utils/validators';
 import { useEffect, useState } from 'react';
 
+type updateAddressStatusType = Record<string, { isValid: boolean; error?: CustomConflictError }>;
+
 export const useUpdateAddressStatus = (
   addressList: unknown[],
   handleResolver: KoraLabsHandleProvider
-): Record<string, { isValid: boolean; error?: CustomConflictError }> => {
-  const [validatedAddressStatus, setValidatedAddressStatus] = useState<
-    Record<string, { isValid: boolean; error?: CustomConflictError }>
-  >({});
+): updateAddressStatusType => {
+  const [validatedAddressStatus, setValidatedAddressStatus] = useState<updateAddressStatusType>({});
 
   useEffect(() => {
     const interval = 5000;
