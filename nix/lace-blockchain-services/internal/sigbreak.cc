@@ -8,8 +8,7 @@
 // TRUE means we handled it, and FALSE passes the event to the next registered handler (the
 // default one in this case).
 
-BOOL WINAPI IgnoringCtrlHandler(DWORD fdwCtrlType)
-{
+BOOL WINAPI IgnoringCtrlHandler(DWORD fdwCtrlType) {
   switch (fdwCtrlType) {
 
   case CTRL_C_EVENT:

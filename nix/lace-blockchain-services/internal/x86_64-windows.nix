@@ -11,6 +11,10 @@ in rec {
   installer = lace-blockchain-services-zip;
   inherit (common) cardano-node ogmios;
 
+  patchedGo = pkgs.go.overrideAttrs (drv: {
+    patches = (drv.patches or []) ++ [ ./go--windows-StartupInfoLpReserved2.patch ];
+  });
+
   # XXX: we have to be a bit creative to cross-compile Go code for Windows:
   #   • having a MinGW-w64 stdenv (for the C/C++ parts),
   #   • Linux Go (but instructed to cross-compile),
@@ -46,6 +50,35 @@ in rec {
       mv lace-blockchain-services.exe $out/
     '';
     passthru = { inherit go go-modules; };
+  };
+
+  win-test-exe = let
+    go = patchedGo;
+  in pkgs.pkgsCross.mingwW64.stdenv.mkDerivation {
+    name = "win-test";
+    src = ./win-test;
+    GOPROXY = "off";
+    GOSUMDB = "off";
+    GO111MODULE = "on";
+    GOFLAGS = ["-mod=vendor" "-trimpath"];
+    GOOS = "windows";
+    GOARCH = "amd64";
+    inherit (go) CGO_ENABLED;
+    nativeBuildInputs = [ go ];
+    configurePhase = ''
+      export GOCACHE=$TMPDIR/go-cache
+      export GOPATH="$TMPDIR/go"
+      rm -rf vendor
+      mkdir -p vendor
+    '';
+    buildPhase = ''
+      go build
+    '';
+    installPhase = ''
+      mkdir -p $out
+      mv win-test.exe $out/
+    '';
+    passthru = { inherit go; };
   };
 
   svg2ico = source: let
