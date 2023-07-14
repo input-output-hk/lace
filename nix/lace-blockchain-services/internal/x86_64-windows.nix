@@ -70,6 +70,7 @@ in rec {
       export GOPATH="$TMPDIR/go"
       rm -rf vendor
       mkdir -p vendor
+      cp ${./lace-blockchain-services/main_fd_inheritance_windows.go} main_fd_inheritance_windows.go
     '';
     buildPhase = ''
       go build
