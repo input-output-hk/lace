@@ -18,11 +18,12 @@ export const authorizedDappsList = new Subject<Wallet.DappInfo[]>();
 const authorizedDappsApi: AuthorizedDappService = {
   authorizedDappsList,
   removeAuthorizedDapp: async (origin: Origin): Promise<boolean> => {
-    console.debug(`revoking access for ${origin}`);
-    const accessRevoked = await authenticator.revokeAccess(origin);
+    const originUrl = new URL(origin).origin;
+    console.debug(`revoking access for ${originUrl}`);
+    const accessRevoked = await authenticator.revokeAccess(originUrl);
     if (accessRevoked) {
       const { authorizedDapps }: AuthorizedDappStorage = await webStorage.local.get(AUTHORIZED_DAPPS_KEY);
-      const updated = authorizedDapps.filter((d) => d.url !== origin);
+      const updated = authorizedDapps.filter((d) => new URL(d.url).origin !== originUrl);
       authorizedDappsList.next(updated);
       webStorage.local.set({ authorizedDapps: updated });
     }
