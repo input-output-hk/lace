@@ -102,7 +102,7 @@ export const hasHandleOwnerChanged = async ({
   value,
   address,
   handleResolver
-}: hasHandleOwnerChangedArgs): Promise<string | void> => {
+}: hasHandleOwnerChangedArgs): Promise<void> => {
   if (Cardano.isAddress(value)) {
     return;
   }

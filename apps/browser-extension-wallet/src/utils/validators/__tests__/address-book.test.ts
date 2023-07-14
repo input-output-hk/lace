@@ -294,7 +294,7 @@ describe('Testing address book validator', () => {
 
     const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
 
-    test.only('getAddressToSave returns the modified address with handleResolution if the address is a valid handle', async () => {
+    test('getAddressToSave returns the modified address with handleResolution if the address is a valid handle', async () => {
       const mockAddress = {
         id: 2,
         address: '$single_handle',

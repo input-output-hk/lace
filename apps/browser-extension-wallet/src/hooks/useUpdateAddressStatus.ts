@@ -22,17 +22,17 @@ export const useUpdateAddressStatus = (
     };
     const validateAddresses = () => {
       addressList?.map(async (item: AddressBookSchema) => {
-        hasHandleOwnerChanged({
-          value: item.address,
-          address: item.handleResolution?.cardanoAddress,
-          handleResolver
-        })
-          .then(() => updateAddressStatus(item.address, { isValid: true }))
-          .catch((error) => {
-            if (error instanceof CustomConflictError) {
-              updateAddressStatus(item.address, { isValid: false, error });
-            }
-          });
+        try {
+          await hasHandleOwnerChanged({
+            value: item.address,
+            address: item.handleResolution?.cardanoAddress,
+            handleResolver
+          }).then(() => updateAddressStatus(item.address, { isValid: true }));
+        } catch (error) {
+          if (error instanceof CustomConflictError) {
+            updateAddressStatus(item.address, { isValid: false, error });
+          }
+        }
       });
     };
     validateAddresses();

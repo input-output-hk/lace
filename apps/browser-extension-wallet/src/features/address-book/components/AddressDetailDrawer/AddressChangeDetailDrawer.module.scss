@@ -1,4 +1,3 @@
-@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
 @import '../../../../styles/index';
 
 .body {
@@ -62,9 +61,7 @@
     
     .addressDetails {
         color: var(--text-color-secondary);
-        font-size: var(--body);
-        font-weight: 400;
-        line-height: size_unit(3);
+        @include text-body-medium;
         letter-spacing: -0.015em;
     }
 }
@@ -79,10 +76,10 @@
     color: var(--text-color-secondary, #878e9e);
 }
 
- .copyContainer {
+.copyContainer {
     display: flex;
     align-items: center;
-    background: var(--light-mode-light-grey-plus,--dark-mode-dark-grey-plus);
+    background: var(--light-mode-light-grey-plus, var(--dark-mode-dark-grey-plus));
     padding: size_unit(1.2) size_unit(2.5);
     margin-top: size_unit(1);
     border-radius: size_unit(1.5);
@@ -92,26 +89,22 @@
         width: fit-content;
     }
 
-     span.copy {
-         font-size: var(--bodySmall);
-         font-weight: 500;
-         line-height: size_unit(3);
-         text-align: center;
-         color: var(--text-color-secondary, #878e9e);
+    span.copy {
+        @include text-bodySmall-semi-bold;
+        text-align: center;
+        color: var(--text-color-secondary, #878e9e);
 
-         @media (max-width: $breakpoint-popup) {
-             font-size: var(--bodyXS);
-             line-height: size_unit(3);
-             color: var(--text-color-secondary, #878e9e);
-         }
-     }
- }
+        @media (max-width: $breakpoint-popup) {
+            font-size: var(--bodyXS);
+            line-height: size_unit(3);
+            color: var(--text-color-secondary, #878e9e);
+        }
+    }
+}
 
 .activeText {
     color: var(--text-color-primary);
-    font-size: var(--body);
-    font-weight: 600;
-    line-height: size_unit(3);
+    @include text-body-bold;
     letter-spacing: -0.015em;
     text-align: left;
 
@@ -150,8 +143,7 @@
 .inactiveDot {
     @extend .dot;
     border: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-    background-color: var(--bg-color-body, var(--bg-color-body));
-}
+    background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));}
 
 .warningBanner { 
     margin-top: size_unit(2);
