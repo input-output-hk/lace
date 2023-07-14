@@ -19,3 +19,4 @@ export * from './useSyncingTheFirstTime';
 export * from './useGetHandles';
 export * from './useHandleResolver';
 export * from './useAssetInfo';
+export * from './useUpdateAddressStatus';

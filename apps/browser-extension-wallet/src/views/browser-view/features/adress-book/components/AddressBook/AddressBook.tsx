@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { WalletAddressList, WalletAddressItemProps } from '@lace/core';
@@ -27,8 +27,8 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
-import { useHandleResolver } from '@hooks';
-import { CustomConflictError, getAddressToSave, hasHandleOwnerChanged } from '@src/utils/validators';
+import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
+import { getAddressToSave } from '@src/utils/validators';
 
 const ELLIPSIS_LEFT_SIDE_LENGTH = 34;
 const ELLIPSIS_RIGHT_SIDE_LENGTH = 34;
@@ -43,9 +43,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
-  const [validatedAddressStatus, setValidatedAddressStatus] = useState<
-    Record<string, { isValid: boolean; error?: CustomConflictError }>
-  >({});
+  const validatedAddressStatus = useUpdateAddressStatus(addressList, handleResolver);
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
@@ -97,37 +95,6 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
       })) || [],
     [addressList, analytics, setAddressToEdit, validatedAddressStatus]
   );
-
-  useEffect(() => {
-    const interval = 5000;
-    const updateAddressStatus = (address: string, status: { isValid: boolean; error?: CustomConflictError }) => {
-      setValidatedAddressStatus((currentValidatedAddressStatus) => ({
-        ...currentValidatedAddressStatus,
-        [address]: status
-      }));
-    };
-
-    const validateAddresses = () => {
-      addressList?.forEach(async (item: AddressBookSchema) => {
-        try {
-          await hasHandleOwnerChanged({
-            value: item.address,
-            address: item.handleResolution?.cardanoAddress,
-            handleResolver
-          });
-          updateAddressStatus(item.address, { isValid: true });
-        } catch (error) {
-          if (error instanceof CustomConflictError) {
-            updateAddressStatus(item.address, { isValid: false, error });
-          }
-        }
-      });
-    };
-    validateAddresses();
-    const intervalId = setInterval(validateAddresses, interval);
-
-    return () => clearInterval(intervalId);
-  }, [addressList, handleResolver]);
 
   const loadMoreData = useCallback(() => {
     extendLimit();
@@ -197,7 +164,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
           <AddressBookEmpty />
         )}
         <AddressChangeDetailDrawer
-          open={isAddressDrawerOpen}
+          visible={isAddressDrawerOpen}
           onCancelClick={() => {
             setIsAddressDrawerOpen(false);
           }}

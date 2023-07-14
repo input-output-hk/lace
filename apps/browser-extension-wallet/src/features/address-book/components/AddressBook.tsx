@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { WalletAddressList, WalletAddressItemProps } from '@lace/core';
 import { Button } from '@lace/common';
@@ -20,8 +20,8 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { AddressDetailsSteps } from './AddressDetailDrawer/types';
-import { useHandleResolver } from '@hooks';
-import { CustomConflictError, getAddressToSave, hasHandleOwnerChanged } from '@src/utils/validators';
+import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
+import { getAddressToSave } from '@src/utils/validators';
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
@@ -33,10 +33,8 @@ export const AddressBook = withAddressBookContext(() => {
   const { setIsEditAddressVisible, isEditAddressVisible, setAddressToEdit, addressToEdit } = useAddressBookStore();
   const { t: translate } = useTranslation();
   const analytics = useAnalyticsContext();
-  const [validatedAddressStatus, setValidatedAddressStatus] = useState<
-    Record<string, { isValid: boolean; error?: CustomConflictError }>
-  >({});
   const handleResolver = useHandleResolver();
+  const validatedAddressStatus = useUpdateAddressStatus(addressList, handleResolver);
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
@@ -87,37 +85,6 @@ export const AddressBook = withAddressBookContext(() => {
       })) || [],
     [addressList, analytics, setAddressToEdit, setIsEditAddressVisible, validatedAddressStatus]
   );
-
-  useEffect(() => {
-    const interval = 5000;
-
-    const updateAddressStatus = (address: string, status: { isValid: boolean; error?: CustomConflictError }) => {
-      setValidatedAddressStatus((currentValidatedAddressStatus) => ({
-        ...currentValidatedAddressStatus,
-        [address]: status
-      }));
-    };
-    const validateAddresses = () => {
-      addressList?.forEach(async (item: AddressBookSchema) => {
-        try {
-          await hasHandleOwnerChanged({
-            value: item.address,
-            address: item.handleResolution?.cardanoAddress,
-            handleResolver
-          });
-          updateAddressStatus(item.address, { isValid: true });
-        } catch (error) {
-          if (error instanceof CustomConflictError) {
-            updateAddressStatus(item.address, { isValid: false, error });
-          }
-        }
-      });
-    };
-    validateAddresses();
-    const intervalId = setInterval(validateAddresses, interval);
-
-    return () => clearInterval(intervalId);
-  }, [addressList, handleResolver]);
 
   const loadMoreData = useCallback(() => {
     extendLimit();
@@ -176,7 +143,7 @@ export const AddressBook = withAddressBookContext(() => {
         )}
       </ContentLayout>
       <AddressChangeDetailDrawer
-        open={isAddressDrawerOpen}
+        visible={isAddressDrawerOpen}
         onCancelClick={() => {
           setIsAddressDrawerOpen(false);
         }}

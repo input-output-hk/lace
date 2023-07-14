@@ -277,7 +277,7 @@ export const AddressDetailDrawer = ({
           setSelectedId(null);
           onCancelClick();
         }}
-        open={!!selectedId}
+        visible={!!selectedId}
         isPopup={popupView}
       />
     </>
