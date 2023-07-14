@@ -7,6 +7,8 @@ import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
+import { TransactionFail, TransactionFailFooter } from './TransactionFail';
+import { TransactionSuccess, TransactionSuccessFooter } from './TransactionSuccess';
 
 type stakePoolDetailsProps = {
   onStake: () => void;
@@ -38,8 +40,8 @@ export const StakePoolDetails = ({
       [Sections.DETAIL]: <StakePoolDetail />,
       [Sections.CONFIRMATION]: <StakePoolConfirmation />,
       [Sections.SIGN]: <SignConfirmation />,
-      [Sections.SUCCESS_TX]: <div />,
-      [Sections.FAIL_TX]: <div />,
+      [Sections.SUCCESS_TX]: <TransactionSuccess />,
+      [Sections.FAIL_TX]: <TransactionFail />,
     }),
     []
   );
@@ -49,8 +51,8 @@ export const StakePoolDetails = ({
       [Sections.DETAIL]: <StakePoolDetailFooter canDelegate={canDelegate} onStake={onStake} />,
       [Sections.CONFIRMATION]: <StakePoolConfirmationFooter />,
       [Sections.SIGN]: <SignConfirmationFooter />,
-      [Sections.SUCCESS_TX]: <div />,
-      [Sections.FAIL_TX]: <div />,
+      [Sections.SUCCESS_TX]: <TransactionSuccessFooter />,
+      [Sections.FAIL_TX]: <TransactionFailFooter />,
     }),
     [onStake, canDelegate]
   );

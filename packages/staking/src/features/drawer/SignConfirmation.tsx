@@ -4,7 +4,7 @@ import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import styles from './SignConfirmation.module.scss';
 
 interface SignConfirmationProps {
@@ -14,8 +14,7 @@ interface SignConfirmationProps {
 export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    password,
-    passwordSetPassword: setPassword,
+    password: { password, setPassword },
     submittingState: { isPasswordValid },
   } = useOutsideHandles();
 
@@ -54,19 +53,18 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
 export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): ReactElement => {
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
-    password,
-    passwordRemovePassword: removePassword,
+    password: { password, removePassword },
     submittingState: { setSubmitingTxState, isSubmitingTx, setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     delegationDetails,
-    executeWithPassword,
+    walletManagerExecuteWithPassword: executeWithPassword,
   } = useOutsideHandles();
   const { draftPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     draftPortfolio: store.draftPortfolio,
     portfolioMutators: store.mutators,
   }));
   const { t } = useTranslation();
-  const { setPrevSection, setIsDrawerVisible } = useStakePoolDetails();
+  const { setSection } = useStakePoolDetails();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const isDelegating = !!(rewardAccounts && (delegationDetails || draftPortfolio.length > 0));
 
@@ -106,12 +104,8 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       cleanPasswordInput();
       sendAnalytics();
       setIsRestaking(isDelegating);
-      // v TODO replace this block with setSection(sectionsConfig[Sections.SUCCESS_TX]); when Success section is implemented
-      setIsDrawerVisible(false);
-      setPrevSection();
-      setPrevSection();
       portfolioMutators.clearDraft();
-      // ^ TODO replace this block with setSection(sectionsConfig[Sections.SUCCESS_TX]); when Success section is implemented
+      setSection(sectionsConfig[Sections.SUCCESS_TX]);
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
     } catch (error) {
       // Error name is 'AuthenticationError' in dev build but 'W' in prod build
@@ -119,11 +113,20 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       if (error.message?.includes('Authentication failure')) {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
-        // setSection(sectionsConfig[Sections.FAIL_TX]);
+        setSection(sectionsConfig[Sections.FAIL_TX]);
         setSubmitingTxState({ isSubmitingTx: false });
       }
     }
-  }, [setSubmitingTxState, signAndSubmitTransaction, cleanPasswordInput, sendAnalytics, setIsRestaking, isDelegating]);
+  }, [
+    setSubmitingTxState,
+    signAndSubmitTransaction,
+    cleanPasswordInput,
+    sendAnalytics,
+    setIsRestaking,
+    isDelegating,
+    portfolioMutators,
+    setSection,
+  ]);
 
   return (
     <div className={styles.footer}>
