@@ -197,7 +197,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
           <AddressBookEmpty />
         )}
         <AddressChangeDetailDrawer
-          visible={isAddressDrawerOpen}
+          open={isAddressDrawerOpen}
           onCancelClick={() => {
             setIsAddressDrawerOpen(false);
           }}

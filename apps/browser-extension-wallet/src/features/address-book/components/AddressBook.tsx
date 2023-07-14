@@ -98,14 +98,19 @@ export const AddressBook = withAddressBookContext(() => {
       }));
     };
     const validateAddresses = () => {
-      addressList?.map(async (item: AddressBookSchema) => {
-        hasHandleOwnerChanged({ value: item.address, address: item.handleResolution?.cardanoAddress, handleResolver })
-          .then(() => updateAddressStatus(item.address, { isValid: true }))
-          .catch((error) => {
-            if (error instanceof CustomConflictError) {
-              updateAddressStatus(item.address, { isValid: false, error });
-            }
+      addressList?.forEach(async (item: AddressBookSchema) => {
+        try {
+          await hasHandleOwnerChanged({
+            value: item.address,
+            address: item.handleResolution?.cardanoAddress,
+            handleResolver
           });
+          updateAddressStatus(item.address, { isValid: true });
+        } catch (error) {
+          if (error instanceof CustomConflictError) {
+            updateAddressStatus(item.address, { isValid: false, error });
+          }
+        }
       });
     };
     validateAddresses();
@@ -171,7 +176,7 @@ export const AddressBook = withAddressBookContext(() => {
         )}
       </ContentLayout>
       <AddressChangeDetailDrawer
-        visible={isAddressDrawerOpen}
+        open={isAddressDrawerOpen}
         onCancelClick={() => {
           setIsAddressDrawerOpen(false);
         }}

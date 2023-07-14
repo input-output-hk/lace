@@ -6,8 +6,8 @@ import { Button, Banner, Drawer, DrawerNavigation, DrawerHeader, Ellipsis } from
 import styles from './AddressChangeDetailDrawer.module.scss';
 import { Timeline, Typography } from 'antd';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import Copy from '../../../../assets/icons/copy.component.svg';
-import Check from '../../../../assets/icons/check-success.component.svg';
+import Copy from '@assets/icons/copy.component.svg';
+import Check from '@assets/icons/check-success.component.svg';
 import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
@@ -27,7 +27,7 @@ type AddressChangeDetailDrawerProps = {
   initialValues: InitialValuesProps;
   expectedAddress: string;
   actualAddress: string;
-  visible: boolean;
+  open: boolean;
   popupView?: boolean;
   onCancelClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
   onConfirmClick: (values: valuesPropType) => unknown;
@@ -44,7 +44,7 @@ export const AddressChangeDetailDrawer = ({
   expectedAddress,
   actualAddress,
   onCancelClick,
-  visible,
+  open,
   popupView,
   onDelete,
   onConfirmClick
@@ -128,11 +128,11 @@ export const AddressChangeDetailDrawer = ({
         onClose={onCancelClick}
         className={cn(styles.drawer, { [styles.popupView]: popupView })}
         title={<DrawerHeader title={t('addressBook.reviewModal.title', { name: initialValues.name })} />}
-        open={visible}
+        open={open}
         navigation={
           <DrawerNavigation
-            onCloseIconClick={!popupView ? onCancelClick : undefined}
-            onArrowIconClick={popupView ? onCancelClick : undefined}
+            onCloseIconClick={!popupView && onCancelClick}
+            onArrowIconClick={popupView && onCancelClick}
           />
         }
         footer={
@@ -267,7 +267,7 @@ export const AddressChangeDetailDrawer = ({
         action={action}
         onCancel={onHandleCancel}
         onConfirm={onHandleConfirm}
-        visible={!!selectedId}
+        open={!!selectedId}
         isPopup={popupView}
       />
     </>
