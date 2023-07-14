@@ -17,7 +17,7 @@ export class Asset {
     Asset.assets.push(this);
   }
 
-  public static getByName(assetName: string): Asset {
+  public static getByName(assetName: string): Asset | undefined {
     return Asset.assets.find((element) => element.name === assetName);
   }
 }

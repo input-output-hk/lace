@@ -12,6 +12,25 @@ Feature: NFT - Folders - Popup view
     And "Folder name" input is empty on "Name your folder" page
     And "Next" button is disabled on "Name your folder" page
 
+  @LW-7261
+  Scenario: Popup-view - NFT Folders - "Create NFT folder" page "Next" button enabled when name input is not empty
+    Given I navigate to NFTs popup page
+    And I click "Create folder" button on NFTs page
+    When I enter a folder name "example folder" into "Folder name" input
+    Then "Next" button is enabled on "Name your folder" page
+
+  @LW-7268 @LW-7269
+  Scenario: Popup-view - NFT Folders - Select NFTs page displayed
+    Given I navigate to NFTs popup page
+    And I save all NFTs that I have
+    When I click "Create folder" button on NFTs page
+    And I enter a folder name "example folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    Then I see "Select NFTs" page in popup mode
+    And No NFT is selected
+    And "Select NFTs" page is showing all NFTs that I have
+    And "Next" button is disabled on "Create folder" page
+
   @LW-7265
   Scenario: Popup-view - NFT Folders - Trying to create folder using too long name
     Given I navigate to NFTs popup page
@@ -54,3 +73,15 @@ Feature: NFT - Folders - Popup view
     Then I don't see "You'll have to start again" modal
     And I don't see "Create NFT folder" drawer in popup mode
     And A gallery view showing my NFTs is displayed
+
+  @LW-7270
+  Scenario: Popup-view - NFT Folders - Select NFTs page - back button click
+    Given I navigate to "Select NFTs" page in popup mode
+    When I close the drawer by clicking back button
+    Then I see "Create NFT folder" drawer in popup mode
+
+  @LW-7274
+  Scenario: Popup-view - NFT Folders - Select NFTs page - search for NFT - no results
+    Given I navigate to "Select NFTs" page in popup mode
+    When I enter "some random phrase" into the search bar on "Select NFTs" drawer
+    Then I see no results for "Select NFTs" drawer

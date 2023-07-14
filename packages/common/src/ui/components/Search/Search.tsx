@@ -94,7 +94,7 @@ export const Search = ({
         )}
         {customIcon}
         {showClear && (
-          <Button data-testid="address-book-btn" onClick={onClearButtonClick} className={styles.clear} size="small">
+          <Button data-testid="search-clear-button" onClick={onClearButtonClick} className={styles.clear} size="small">
             <Cross className={styles.icon} />
           </Button>
         )}

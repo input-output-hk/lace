@@ -77,17 +77,6 @@ Feature: LW: Tokens tab - popup view
     And I see total wallet balance in USD
     And balance and FIAT balance for each token are visible
 
-  @Testnet @Mainnet @LW-7126
-  Scenario: Popup View - Hide my balance - keep state after switching to extended view
-    When I click closed eye icon on Tokens page
-    Then opened eye icon is displayed on Tokens page
-    And total wallet balance is masked with asterisks
-    And balance and FIAT balance for each token are masked with asterisks
-    When I visit Tokens page in extended mode
-    Then opened eye icon is displayed on Tokens page
-    And total wallet balance is masked with asterisks
-    And balance and FIAT balance for each token are masked with asterisks
-
   @Testnet @Mainnet @LW-7122 @LW-7124
   Scenario Outline: Popup View - Hide my balance - keep state after <action> the page
     When I click closed eye icon on Tokens page
@@ -103,3 +92,13 @@ Feature: LW: Tokens tab - popup view
       | refreshing | I refresh the page |
       | reopening  | I reopen the page  |
 
+  @Testnet @Mainnet @LW-7126
+  Scenario: Popup View - Hide my balance - keep state after switching to extended view
+    When I click closed eye icon on Tokens page
+    Then opened eye icon is displayed on Tokens page
+    And total wallet balance is masked with asterisks
+    And balance and FIAT balance for each token are masked with asterisks
+    When I visit Tokens page in extended mode
+    Then opened eye icon is displayed on Tokens page
+    And total wallet balance is masked with asterisks
+    And balance and FIAT balance for each token are masked with asterisks

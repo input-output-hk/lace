@@ -3,8 +3,8 @@ import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 
 export const shelley = new Address(
   'Shelley',
-  getTestWallet(TestWalletName.TAWalletDelegatedFunds).address,
-  getTestWallet(TestWalletName.TAWalletDelegatedFunds).mainnetAddress
+  String(getTestWallet(TestWalletName.TAWalletDelegatedFunds).address),
+  String(getTestWallet(TestWalletName.TAWalletDelegatedFunds).mainnetAddress)
 );
 
 export const byron = new Address(
@@ -81,6 +81,7 @@ export const testAddresses = new Map<string, Address>([
   ['Valid address6', validAddress6]
 ]);
 
-export const getAddressByName = (addressName: string): string => testAddresses.get(addressName).getAddress();
+export const getAddressByName = (addressName: string): string | undefined =>
+  testAddresses.get(addressName)?.getAddress();
 
-export const getAddressDetailsByName = (addressName: string): Address => testAddresses.get(addressName);
+export const getAddressDetailsByName = (addressName: string): Address | undefined => testAddresses.get(addressName);
