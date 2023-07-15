@@ -6,15 +6,22 @@ import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface }
 import randomBytes from 'randombytes';
 
 // eslint-disable-next-line no-magic-numbers
-const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
-const USER_ID_BYTE_SIZE = 8;
+export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
+export const USER_ID_BYTE_SIZE = 8;
 
-class UserIdService implements UserIdServiceInterface {
+export class UserIdService implements UserIdServiceInterface {
   private userId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
 
-  async getId() {
+  constructor(
+    private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
+    private setStorage: typeof setBackgroundStorage = setBackgroundStorage,
+    private clearStorage: typeof clearBackgroundStorage = clearBackgroundStorage,
+    private sessionLength: number = SESSION_LENGTH
+  ) {}
+
+  async getId(): Promise<string> {
     if (!this.userIdRestored) {
       console.debug('[ANALYTICS] Restoring user ID...');
       await this.restoreUserId();
@@ -30,28 +37,27 @@ class UserIdService implements UserIdServiceInterface {
     return this.userId;
   }
 
-  async clearId() {
+  async clearId(): Promise<void> {
     console.debug('[ANALYTICS] clearId() called');
     this.userId = undefined;
-    await setBackgroundStorage({ usePersistentUserId: false, userId: undefined });
     this.clearSessionTimeout();
-    await clearBackgroundStorage(['userId', 'usePersistentUserId']);
+    await this.clearStorage(['userId', 'usePersistentUserId']);
   }
 
-  async makePersistent() {
+  async makePersistent(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into persistent');
     this.clearSessionTimeout();
     const userId = await this.getId();
-    await setBackgroundStorage({ usePersistentUserId: true, userId });
+    await this.setStorage({ usePersistentUserId: true, userId });
   }
 
-  async makeTemporary() {
+  async makeTemporary(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into temporary');
-    await setBackgroundStorage({ usePersistentUserId: false, userId: undefined });
+    await this.setStorage({ usePersistentUserId: false, userId: undefined });
     this.setSessionTimeout();
   }
 
-  async extendLifespan() {
+  async extendLifespan(): Promise<void> {
     if (!this.sessionTimeout) {
       return;
     }
@@ -60,8 +66,8 @@ class UserIdService implements UserIdServiceInterface {
     this.setSessionTimeout();
   }
 
-  private async restoreUserId() {
-    const { userId, usePersistentUserId } = await getBackgroundStorage();
+  private async restoreUserId(): Promise<void> {
+    const { userId, usePersistentUserId } = await this.getStorage();
 
     if (usePersistentUserId) {
       console.debug('[ANALYTICS] Restoring user ID from extension storage');
@@ -71,17 +77,17 @@ class UserIdService implements UserIdServiceInterface {
     this.userIdRestored = true;
   }
 
-  private setSessionTimeout() {
+  private setSessionTimeout(): void {
     if (this.sessionTimeout) {
       return;
     }
     this.sessionTimeout = setTimeout(() => {
       this.userId = undefined;
       console.debug('[ANALYTICS] Session timed out');
-    }, SESSION_LENGTH);
+    }, this.sessionLength);
   }
 
-  private clearSessionTimeout() {
+  private clearSessionTimeout(): void {
     clearTimeout(this.sessionTimeout);
     this.sessionTimeout = undefined;
   }

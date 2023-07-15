@@ -67,6 +67,16 @@ jest.mock('@lace/cardano', () => {
   };
 });
 
+jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
+  const actual = jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService');
+  return {
+    getUserIdService: () => ({
+      ...actual,
+      clearId: jest.fn()
+    })
+  };
+});
+
 const getWrapper =
   ({
     backgroundService,
