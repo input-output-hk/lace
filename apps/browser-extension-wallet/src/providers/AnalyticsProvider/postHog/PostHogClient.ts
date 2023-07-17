@@ -2,7 +2,12 @@
 import posthog from 'posthog-js';
 import { Wallet } from '@lace/cardano';
 import { ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTracker';
-import { NETWORK_ID_TO_POSTHOG_TOKEN_MAP, PUBLIC_POSTHOG_HOST } from './config';
+import {
+  DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
+  PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
+  PUBLIC_POSTHOG_HOST,
+  PRODUCTION_TRACKING_MODE_ENABLED
+} from './config';
 import { UserIdService } from '@lib/scripts/types';
 
 /**
@@ -67,7 +72,9 @@ export class PostHogClient {
   }
 
   protected getApiToken(chain: Wallet.Cardano.ChainId): string {
-    return NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
+    return PRODUCTION_TRACKING_MODE_ENABLED
+      ? PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]
+      : DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
   }
 
   protected async getEventMetadata(): Promise<PostHogMetadata> {
