@@ -36,9 +36,8 @@ export const StakePoolDetailsDrawer = ({
     backgroundServiceAPIContextSetWalletPassword,
     delegationStoreSetDelegationTxBuilder,
     walletStoreGetKeyAgentType,
-    password,
-    passwordRemovePassword,
-    submittingStateSetIsRestaking,
+    password: { password, removePassword },
+    submittingState: { setIsRestaking },
   } = useOutsideHandles();
 
   const isInMemory = useMemo(
@@ -53,12 +52,12 @@ export const StakePoolDetailsDrawer = ({
       backgroundServiceAPIContextSetWalletPassword();
       delegationStoreSetDelegationTxBuilder();
       resetStates();
-      passwordRemovePassword();
+      removePassword();
       // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
       // if (!isInMemory && isSuccessSection) window.location.reload();
       setIsDrawerVisible(false);
     }
-    submittingStateSetIsRestaking(false);
+    setIsRestaking(false);
   }, [
     showExitConfirmation,
     simpleSendConfig.currentSection,
@@ -66,17 +65,17 @@ export const StakePoolDetailsDrawer = ({
     backgroundServiceAPIContextSetWalletPassword,
     delegationStoreSetDelegationTxBuilder,
     resetStates,
-    passwordRemovePassword,
+    removePassword,
     // isInMemory,
     // isSuccessSection,
     setIsDrawerVisible,
-    submittingStateSetIsRestaking,
+    setIsRestaking,
   ]);
 
   const onArrowIconClick = useCallback(() => {
     if (password) {
       backgroundServiceAPIContextSetWalletPassword();
-      passwordRemovePassword();
+      removePassword();
     }
     if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemory) {
       return setSection(sectionsConfig[Sections.DETAIL]);
@@ -89,7 +88,7 @@ export const StakePoolDetailsDrawer = ({
     closeDrawer,
     isInMemory,
     password,
-    passwordRemovePassword,
+    removePassword,
     setPrevSection,
     setSection,
     simpleSendConfig.currentSection,

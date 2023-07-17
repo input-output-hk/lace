@@ -31,7 +31,7 @@ class WalletAddressPageAssert {
 
   async assertSeeWalletNameAndAddress(wallet: WalletConfig, mode: 'extended' | 'popup') {
     await expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
-    const address = extensionUtils.isMainnet() ? wallet.mainnetAddress : wallet.address;
+    const address = String(extensionUtils.isMainnet() ? wallet.mainnetAddress : wallet.address);
     const expectedAddress = mode === 'extended' ? address : `${address.slice(0, 7)}...${address.slice(-8)}`;
     await expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
   }

@@ -51,6 +51,10 @@ if (!process.env.CI) {
     'devtools',
     'intercept'
   ];
+} else {
+  fetch('http://127.0.0.1:4444/wd/hub').catch(() => {
+    throw new Error("chromedriver doesn't seem to be running, please start it first");
+  });
 }
 
 export const config: WebdriverIO.Config = { ...baseConfig, ...chromeConfig };

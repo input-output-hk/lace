@@ -34,6 +34,20 @@ export interface CurrencyInfo {
   symbol: string;
 }
 
+export interface SubmittingState {
+  isRestaking: boolean;
+  setIsRestaking: (param: boolean) => void;
+  setSubmitingTxState: (args: { isSubmitingTx?: boolean; isPasswordValid?: boolean }) => void;
+  isSubmitingTx?: boolean;
+  isPasswordValid?: boolean;
+}
+
+export interface PasswordHook {
+  password?: string;
+  setPassword: (pass: string) => void;
+  removePassword: () => void;
+}
+
 export enum StateStatus {
   IDLE = 'idle',
   LOADING = 'loading',
@@ -73,12 +87,16 @@ export type OutsideHandlesContextValue = {
     };
   };
   openExternalLink: (href: string) => void;
-  password?: string;
-  passwordRemovePassword: () => void;
-  submittingStateSetIsRestaking: (param: boolean) => void;
+  password: PasswordHook;
+  submittingState: SubmittingState;
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
+  walletManagerExecuteWithPassword: <T>(
+    password: string,
+    promiseFn: () => Promise<T>,
+    cleanPassword?: boolean
+  ) => Promise<T>;
   walletStoreStakePoolSearchResults: Wallet.StakePoolSearchResults & {
     skip?: number;
     limit?: number;

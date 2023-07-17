@@ -3,9 +3,12 @@ import { useObservable } from '@lace/common';
 import React, { useMemo } from 'react';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { MAX_POOLS_COUNT, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
+import { TransactionFail, TransactionFailFooter } from './TransactionFail';
+import { TransactionSuccess, TransactionSuccessFooter } from './TransactionSuccess';
 
 type stakePoolDetailsProps = {
   onStake: () => void;
@@ -36,9 +39,9 @@ export const StakePoolDetails = ({
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetail />,
       [Sections.CONFIRMATION]: <StakePoolConfirmation />,
-      [Sections.SIGN]: <div />,
-      [Sections.SUCCESS_TX]: <div />,
-      [Sections.FAIL_TX]: <div />,
+      [Sections.SIGN]: <SignConfirmation />,
+      [Sections.SUCCESS_TX]: <TransactionSuccess />,
+      [Sections.FAIL_TX]: <TransactionFail />,
     }),
     []
   );
@@ -47,9 +50,9 @@ export const StakePoolDetails = ({
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetailFooter canDelegate={canDelegate} onStake={onStake} />,
       [Sections.CONFIRMATION]: <StakePoolConfirmationFooter />,
-      [Sections.SIGN]: <div />,
-      [Sections.SUCCESS_TX]: <div />,
-      [Sections.FAIL_TX]: <div />,
+      [Sections.SIGN]: <SignConfirmationFooter />,
+      [Sections.SUCCESS_TX]: <TransactionSuccessFooter />,
+      [Sections.FAIL_TX]: <TransactionFailFooter />,
     }),
     [onStake, canDelegate]
   );
