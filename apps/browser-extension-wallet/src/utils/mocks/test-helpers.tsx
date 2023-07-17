@@ -630,7 +630,6 @@ export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest
 };
 
 export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, jest.Mock> = {
-  init: jest.fn(),
   sendEvent: jest.fn(),
   sendPageNavigationEvent: jest.fn(),
   setChain: jest.fn()
