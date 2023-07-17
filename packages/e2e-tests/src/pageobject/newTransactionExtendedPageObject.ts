@@ -79,14 +79,14 @@ export default new (class NewTransactionExtendedPageObject {
     for (let i = 1; i <= amount; i++) {
       await (assetType === 'Tokens'
         ? webTester.clickElement(new TokenSelectionPage().tokenItemInfo(i))
-        : webTester.clickElement(new TokenSelectionPage().nftsItemName(i)));
+        : await new TokenSelectionPage().nftNames[i].click());
     }
   };
 
   deselectToken = async (assetType: string, index: number) => {
     await (assetType === 'Tokens'
       ? webTester.clickElement(new TokenSelectionPage().tokenItemInfo(index))
-      : webTester.clickElement(new TokenSelectionPage().nftsItemName(index)));
+      : await new TokenSelectionPage().nftNames[index].click());
   };
 
   saveSelectedTokens = async (assetType: string, bundle: number) => {
@@ -103,7 +103,7 @@ export default new (class NewTransactionExtendedPageObject {
             : String(await webTester.getTextValueFromElement(tokenSelectionPage.tokenTicker(i))).slice(0, 10);
         testContext.save(`bundle${String(bundle)}asset${String(i)}`, asset);
       } else {
-        const asset = String(await webTester.getTextValueFromElement(tokenSelectionPage.nftsItemName(i))).slice(0, 10);
+        const asset = String(await tokenSelectionPage.nftNames[i].getText()).slice(0, 10);
         testContext.save(`bundle${String(bundle)}asset${String(i)}`, asset);
       }
     }
@@ -128,7 +128,7 @@ export default new (class NewTransactionExtendedPageObject {
     await webTester.clickElement(new TransactionNewPage().addressInput(index).ctaButton());
   };
 
-  clickAddAssetButtonMulti = async (bundleIndex?: number) => {
+  clickAddAssetButtonMulti = async (bundleIndex: number) => {
     await webTester.clickElement(new AssetInput().assetAddButtonMultiple(bundleIndex));
   };
 
@@ -183,11 +183,12 @@ export default new (class NewTransactionExtendedPageObject {
     return tokenInfo;
   };
 
-  getNFTsInfo = async () => {
+  getNftNames = async () => {
     const nftInfo = [];
-    const numberOfNFTs = await webTester.getElementCount(new TokenSelectionPage().nftsItem().toJSLocator(), 'xpath');
-    for (let nft = 1; nft <= numberOfNFTs; nft++) {
-      nftInfo.push((await webTester.getTextValueFromElement(new TokenSelectionPage().nftsItemName(nft))) as string);
+    const tokenSelectionPage = new TokenSelectionPage();
+    const numberOfNFTs = await tokenSelectionPage.nftNames.length;
+    for (let i = 0; i < numberOfNFTs; i++) {
+      nftInfo.push(await tokenSelectionPage.nftNames[i].getText());
     }
     return nftInfo;
   };
@@ -229,10 +230,10 @@ export default new (class NewTransactionExtendedPageObject {
     await this.fillAddress(shelley.getAddress(), 2);
     await this.clickCoinSelectorName(Asset.CARDANO.ticker, 2);
     await this.clickNFTsButton();
-    await nftsPageObject.clickNftItem(Asset.IBILECOIN.name);
+    await nftsPageObject.clickNftItemInAssetSelector(Asset.IBILECOIN.name);
     await this.clickAddAssetButtonMulti(2);
     await this.clickNFTsButton();
-    await nftsPageObject.clickNftItem(Asset.BISON_COIN.name);
+    await nftsPageObject.clickNftItemInAssetSelector(Asset.BISON_COIN.name);
     await this.fillTokenValue(1, Asset.IBILECOIN.name, 2);
     await this.fillTokenValue(1, Asset.BISON_COIN.name, 2);
   }
@@ -251,10 +252,10 @@ export default new (class NewTransactionExtendedPageObject {
     );
     await this.clickAddAssetButtonMulti(1);
     await this.clickNFTsButton();
-    await nftsPageObject.clickNftItem(Asset.IBILECOIN.name);
+    await nftsPageObject.clickNftItemInAssetSelector(Asset.IBILECOIN.name);
     await this.clickAddAssetButtonMulti(1);
     await this.clickNFTsButton();
-    await nftsPageObject.clickNftItem(Asset.BISON_COIN.name);
+    await nftsPageObject.clickNftItemInAssetSelector(Asset.BISON_COIN.name);
     await this.fillTokenValue(1, Asset.CARDANO.ticker);
     await this.fillTokenValue(2, extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.ticker : Asset.LACE_COIN.ticker);
     await this.fillTokenValue(1, Asset.IBILECOIN.name);
@@ -279,11 +280,11 @@ export default new (class NewTransactionExtendedPageObject {
   async addAllAvailableNftTypes(bundleIndex: number) {
     await this.clickAddAssetButtonMulti(bundleIndex);
     await this.clickNFTsButton();
-    const nfts = await this.getNFTsInfo();
-    let nftsCount = nfts.length;
-    for (const nft of nfts) {
+    const nftNames = await this.getNftNames();
+    let nftsCount = nftNames.length;
+    for (const nftName of nftNames) {
       nftsCount--;
-      await nftsPageObject.clickNftItem(nft);
+      await nftsPageObject.clickNftItemInAssetSelector(nftName);
       if (nftsCount) {
         await this.clickAddAssetButtonMulti(bundleIndex);
         await this.clickNFTsButton();

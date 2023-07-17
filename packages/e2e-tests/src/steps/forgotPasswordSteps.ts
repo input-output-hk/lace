@@ -12,7 +12,7 @@ import { browser } from '@wdio/globals';
 import OnboardingMnemonicPage from '../elements/onboarding/mnemonicPage';
 
 const validPassword = 'N_8J@bne87A';
-const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic;
+const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 
 When(/^I click on "Forgot password\?" button on unlock screen$/, async () => {
   await WalletUnlockPage.forgotPassword.waitForClickable();

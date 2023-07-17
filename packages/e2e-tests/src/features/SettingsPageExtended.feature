@@ -148,7 +148,7 @@ Feature: General Settings - Extended Browser View
     When I navigate to Tokens extended page
     Then I see "Preview" specific tokens in extended mode
     When I navigate to NFTs extended page
-    Then I see NFT with name: "Lace NFT Preview"
+    Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
   @LW-2718 @Mainnet
   Scenario: Extended View - Settings - Token/NFTs updated after network switching
@@ -160,7 +160,7 @@ Feature: General Settings - Extended Browser View
     When I navigate to Tokens extended page
     Then I see "Preview" specific tokens in extended mode
     When I navigate to NFTs extended page
-    Then I see NFT with name: "Lace NFT Preview"
+    Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
   @W-4805 @Testnet
   Scenario: Extended View - Settings - Addresses are NOT shared and saved when switching Mainnet to Test Network
