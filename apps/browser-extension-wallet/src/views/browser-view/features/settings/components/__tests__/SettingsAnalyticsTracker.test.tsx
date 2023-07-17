@@ -1,13 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable import/imports-first */
-const mockMatomoSetChain = jest.fn();
-const mockMatomoSendEvent = jest.fn();
-const mockPostHogSendEvent = jest.fn();
-const mockPostHogSetChain = jest.fn();
-const mockExtendLifespan = jest.fn();
-const mockMakePersisten = jest.fn();
-const mockMakeTemporary = jest.fn();
-const mockGetBackgroundStorage = jest.fn();
+import { userIdServiceMock, matomoClientMocks, postHogClientMocks } from '@src/utils/mocks/test-helpers';
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
@@ -24,27 +16,17 @@ import { BehaviorSubject } from 'rxjs';
 
 jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService'),
-  getUserIdService: jest.fn().mockReturnValue({
-    extendLifespan: mockExtendLifespan,
-    makePersistent: mockMakePersisten,
-    makeTemporary: mockMakeTemporary
-  })
+  getUserIdService: jest.fn().mockReturnValue(userIdServiceMock)
 }));
 
 jest.mock('@providers/AnalyticsProvider/matomo/MatomoClient', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/matomo/MatomoClient'),
-  MatomoClient: jest.fn().mockReturnValue({
-    sendEvent: mockMatomoSendEvent,
-    setChain: mockMatomoSetChain
-  })
+  MatomoClient: jest.fn().mockReturnValue(matomoClientMocks)
 }));
 
 jest.mock('@providers/AnalyticsProvider/postHog/PostHogClient', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/postHog/PostHogClient'),
-  PostHogClient: jest.fn().mockReturnValue({
-    sendEvent: mockPostHogSendEvent,
-    setChain: mockPostHogSetChain
-  })
+  PostHogClient: jest.fn().mockReturnValue(postHogClientMocks)
 }));
 
 jest.mock('@stores', () => ({
@@ -61,7 +43,7 @@ jest.mock('@hooks/useWalletManager', () => ({
 const tokenPrices$ = new BehaviorSubject({});
 const adaPrices$ = new BehaviorSubject({});
 const backgroundService = {
-  getBackgroundStorage: mockGetBackgroundStorage,
+  getBackgroundStorage: jest.fn(),
   coinPrices: { tokenPrices$, adaPrices$ }
 } as unknown as BackgroundServiceAPIProviderProps['value'];
 
@@ -78,29 +60,29 @@ const SettingsSecurityComponentTest = () => (
 );
 
 describe('Testing Analytics tracker on SettingsWalletBase component', () => {
-  test('should call makePersisten when enabling analytics', async () => {
+  test('should call makePersistent when enabling analytics', async () => {
     const { findByTestId } = render(<SettingsSecurityComponentTest />);
 
-    mockMakePersisten.mockReset();
-    mockMakeTemporary.mockReset();
+    userIdServiceMock.makePersistent.mockReset();
+    userIdServiceMock.makeTemporary.mockReset();
 
     const analyticsSwitch = await findByTestId('settings-analytics-switch');
     expect(analyticsSwitch).toHaveAttribute('aria-checked', 'false');
     fireEvent.click(analyticsSwitch);
-    await waitFor(() => expect(mockMakeTemporary).not.toHaveBeenCalled());
-    await waitFor(() => expect(mockMakePersisten).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(userIdServiceMock.makeTemporary).not.toHaveBeenCalled());
+    await waitFor(() => expect(userIdServiceMock.makePersistent).toHaveBeenCalledTimes(1));
   });
 
   test('should call makeTemporary when disabling analytics', async () => {
     const { findByTestId } = render(<SettingsSecurityComponentTest />);
 
-    mockMakePersisten.mockReset();
-    mockMakeTemporary.mockReset();
+    userIdServiceMock.makePersistent.mockReset();
+    userIdServiceMock.makeTemporary.mockReset();
 
     const analyticsSwitch = await findByTestId('settings-analytics-switch');
     expect(analyticsSwitch).toHaveAttribute('aria-checked', 'true');
     fireEvent.click(analyticsSwitch);
-    await waitFor(() => expect(mockMakePersisten).not.toHaveBeenCalled());
-    await waitFor(() => expect(mockMakeTemporary).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(userIdServiceMock.makePersistent).not.toHaveBeenCalled());
+    await waitFor(() => expect(userIdServiceMock.makeTemporary).toHaveBeenCalledTimes(1));
   });
 });

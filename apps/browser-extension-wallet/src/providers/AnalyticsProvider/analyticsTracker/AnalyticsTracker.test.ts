@@ -1,14 +1,5 @@
-/* eslint-disable import/imports-first */
-const userIdServiceMock: UserIdService = {
-  getId: jest.fn(),
-  extendLifespan: jest.fn(),
-  makeTemporary: jest.fn(),
-  makePersistent: jest.fn(),
-  clearId: jest.fn()
-};
-
+import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import { Wallet } from '@lace/cardano';
-import { UserIdService } from '@lib/scripts/types';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { MatomoClient } from '@providers/AnalyticsProvider/matomo';
 import { PostHogClient } from '@providers/AnalyticsProvider/postHog';

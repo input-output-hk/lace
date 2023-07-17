@@ -1,13 +1,6 @@
 /* eslint-disable no-magic-numbers */
-/* eslint-disable import/imports-first */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const mockMatomoSetChain = jest.fn();
-const mockMatomoSendEvent = jest.fn();
-const mockPostHogSendEvent = jest.fn();
-const mockPostHogSetChain = jest.fn();
-const mockExtendLifespan = jest.fn();
-const mockMakePersisten = jest.fn();
-const mockMakeTemporary = jest.fn();
+import { userIdServiceMock, matomoClientMocks, postHogClientMocks } from '@src/utils/mocks/test-helpers';
 import '@testing-library/jest-dom';
 import React from 'react';
 import i18n from '@lib/i18n';
@@ -27,27 +20,17 @@ jest.mock('@stores', () => ({
 
 jest.mock('@providers/AnalyticsProvider/matomo/MatomoClient', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/matomo/MatomoClient'),
-  MatomoClient: jest.fn().mockReturnValue({
-    sendEvent: mockMatomoSendEvent,
-    setChain: mockMatomoSetChain
-  })
+  MatomoClient: jest.fn().mockReturnValue(matomoClientMocks)
 }));
 
 jest.mock('@providers/AnalyticsProvider/postHog/PostHogClient', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/postHog/PostHogClient'),
-  PostHogClient: jest.fn().mockReturnValue({
-    sendEvent: mockPostHogSendEvent,
-    setChain: mockPostHogSetChain
-  })
+  PostHogClient: jest.fn().mockReturnValue(postHogClientMocks)
 }));
 
 jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService'),
-  getUserIdService: jest.fn().mockReturnValue({
-    extendLifespan: mockExtendLifespan,
-    makePersistent: mockMakePersisten,
-    makeTemporary: mockMakeTemporary
-  })
+  getUserIdService: jest.fn().mockReturnValue(userIdServiceMock)
 }));
 
 jest.mock('@hooks', () => ({
@@ -85,35 +68,35 @@ describe('Testing Analytics Agreement step', () => {
     const nextAnalyticsAccept = await findByTestId('wallet-setup-step-btn-next');
     fireEvent.click(nextAnalyticsAccept);
 
-    await waitFor(() => expect(mockMatomoSendEvent).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(mockPostHogSendEvent).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(mockExtendLifespan).toHaveBeenCalledTimes(2)); // this is being called twice, once per tracker, is this correct?
+    await waitFor(() => expect(matomoClientMocks.sendEvent).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(postHogClientMocks.sendEvent).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(userIdServiceMock.extendLifespan).toHaveBeenCalledTimes(2)); // this is being called twice, once per tracker, is this correct?
   });
 
-  test('should call makePersisten when clicking agree', async () => {
+  test('should call makePersistent when clicking agree', async () => {
     const { findByTestId } = render(<SetupContainerTest />);
 
     // since AnalyticsProvider already made a call to setOptedInForEnhancedAnalytics on render, we need to clear the mocks to make the proper test
-    mockMakePersisten.mockClear();
-    mockMakeTemporary.mockClear();
+    userIdServiceMock.makePersistent.mockReset();
+    userIdServiceMock.makeTemporary.mockReset();
 
     const agreeAnalyticsBtn = await findByTestId('wallet-setup-step-btn-next');
     fireEvent.click(agreeAnalyticsBtn);
 
-    await waitFor(() => expect(mockMakePersisten).toHaveBeenCalled());
-    await waitFor(() => expect(mockMakeTemporary).not.toHaveBeenCalled());
+    await waitFor(() => expect(userIdServiceMock.makePersistent).toHaveBeenCalled());
+    await waitFor(() => expect(userIdServiceMock.makeTemporary).not.toHaveBeenCalled());
   });
 
   test('should call makeTemporary when clicking skip', async () => {
     const { findByTestId } = render(<SetupContainerTest />);
 
-    mockMakePersisten.mockClear();
-    mockMakeTemporary.mockClear();
+    userIdServiceMock.makePersistent.mockReset();
+    userIdServiceMock.makeTemporary.mockReset();
 
     const skipAnalyticsBtn = await findByTestId('wallet-setup-step-btn-skip');
     fireEvent.click(skipAnalyticsBtn);
 
-    await waitFor(() => expect(mockMakePersisten).not.toHaveBeenCalled());
-    await waitFor(() => expect(mockMakeTemporary).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(userIdServiceMock.makePersistent).not.toHaveBeenCalled());
+    await waitFor(() => expect(userIdServiceMock.makeTemporary).toHaveBeenCalledTimes(1));
   });
 });

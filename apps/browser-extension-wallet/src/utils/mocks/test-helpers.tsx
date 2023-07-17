@@ -13,6 +13,9 @@ import { fakeApiRequest } from './fake-api-request';
 import { Observable, of } from 'rxjs';
 import { PriceResult } from '@hooks';
 import { Percent } from '@cardano-sdk/util';
+import { UserIdService } from '@lib/scripts/types';
+import { MatomoClient } from '@providers/AnalyticsProvider/matomo';
+import { PostHogClient } from '@providers/AnalyticsProvider/postHog';
 
 export const mockWalletInfoTestnet: WalletInfo = {
   name: 'testnet wallet',
@@ -609,4 +612,26 @@ export const mockPrices: PriceResult = {
     priceVariationPercentage24h: 1.293
   },
   tokens: new Map()
+};
+
+export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
+  getId: jest.fn(),
+  extendLifespan: jest.fn(),
+  makeTemporary: jest.fn(),
+  makePersistent: jest.fn(),
+  clearId: jest.fn()
+};
+
+export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {
+  sendPageNavigationEvent: jest.fn(),
+  sendEvent: jest.fn(),
+  setChain: jest.fn(),
+  getMetadata: jest.fn()
+};
+
+export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, jest.Mock> = {
+  init: jest.fn(),
+  sendEvent: jest.fn(),
+  sendPageNavigationEvent: jest.fn(),
+  setChain: jest.fn()
 };
