@@ -1,7 +1,7 @@
 import create from 'zustand';
 import { SectionConfig, Sections, StakePoolDetails, StakingError } from './types';
 
-export const sectionsConfig: Record<Sections, SectionConfig> = {
+export const sectionsConfig = {
   [Sections.DETAIL]: {
     currentSection: Sections.DETAIL,
     nextSection: Sections.CONFIRMATION,
@@ -24,7 +24,7 @@ export const sectionsConfig: Record<Sections, SectionConfig> = {
     currentSection: Sections.FAIL_TX,
     prevSection: Sections.SIGN,
   },
-};
+} as const;
 
 const storeDefaultState: Pick<StakePoolDetails, 'simpleSendConfig'> = {
   simpleSendConfig: sectionsConfig[Sections.DETAIL],
@@ -54,12 +54,18 @@ export const useStakePoolDetails = create<StakePoolDetails>((set, get) => ({
     set({ simpleSendConfig: sectionsConfig[prevSection] });
   },
   setSection: (section?: SectionConfig) => {
-    const { currentSection, nextSection } = get().simpleSendConfig;
-    if (!nextSection) {
-      console.error(`Tried to move to not existing section (previous of ${currentSection})`);
+    if (section) {
+      set({ simpleSendConfig: section });
       return;
     }
-    set({ simpleSendConfig: section ?? sectionsConfig[nextSection] });
+
+    const { currentSection, nextSection } = get().simpleSendConfig;
+    if (!nextSection) {
+      console.error(`useStakePoolDetails::setSection: missing nextSection config for section: "${currentSection}"`);
+      return;
+    }
+
+    set({ simpleSendConfig: sectionsConfig[nextSection] });
   },
   setStakeConfirmationVisible: (visibility: boolean) => set({ isStakeConfirmationVisible: visibility }),
   setStakingError: (error: StakingError | undefined) => set({ stakingError: error }),

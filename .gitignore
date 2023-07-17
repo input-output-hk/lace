@@ -21,4 +21,4 @@ coverage
 /.cache
 
 # Nix
-result*
+result

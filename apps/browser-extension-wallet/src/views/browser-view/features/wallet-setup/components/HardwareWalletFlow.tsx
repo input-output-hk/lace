@@ -104,11 +104,13 @@ export const HardwareWalletFlow = ({
 
   const walletSetupConnectHardwareWalletStepTranslations = {
     title: t('core.walletSetupConnectHardwareWalletStep.title'),
-    subTitle: t('core.walletSetupConnectHardwareWalletStep.subTitle'),
+    subTitle: t(`core.walletSetupConnectHardwareWalletStep.${isTrezorHWSupported() ? 'subTitleFull' : 'subTitle'}`),
     supportedDevices: t(
       `core.walletSetupConnectHardwareWalletStep.${isTrezorHWSupported() ? 'supportedDevicesFull' : 'supportedDevices'}`
     ),
-    connectDevice: t('core.walletSetupConnectHardwareWalletStep.connectDevice')
+    connectDevice: t(
+      `core.walletSetupConnectHardwareWalletStep.${isTrezorHWSupported() ? 'connectDeviceFull' : 'connectDevice'}`
+    )
   };
 
   const walletSetupFinalStepTranslations = {

@@ -1,8 +1,8 @@
 import TermsAndConditionsDrawer from '../../elements/settings/TermsAndConditionsDrawer';
-import { expect } from 'chai';
 import { removeWhitespacesFromText } from '../../utils/textUtils';
 import { readFromFile } from '../../utils/fileUtils';
 import { isPopupMode } from '../../utils/pageUtils';
+import { browser } from '@wdio/globals';
 
 class TermsAndConditionsSettingsDrawerAssert {
   assertTermsAndConditionsContent = async () => {
@@ -10,11 +10,22 @@ class TermsAndConditionsSettingsDrawerAssert {
       ? await TermsAndConditionsDrawer.drawerHeaderBackButton.waitForClickable()
       : await TermsAndConditionsDrawer.drawerHeaderCloseButton.waitForClickable();
     await TermsAndConditionsDrawer.termsAndConditionsContent.waitForDisplayed();
-    const actualContent = await removeWhitespacesFromText(
-      await TermsAndConditionsDrawer.termsAndConditionsContent.getText()
+
+    const expectedPolicy = await removeWhitespacesFromText(readFromFile(__dirname, './termsAndConditions.txt'));
+
+    await browser.waitUntil(
+      async () =>
+        (await removeWhitespacesFromText(await TermsAndConditionsDrawer.termsAndConditionsContent.getText())) ===
+        expectedPolicy,
+      {
+        timeout: 3000,
+        interval: 1000,
+        timeoutMsg: `failed while waiting for expected T&C policy text
+        expected: ${expectedPolicy}
+        current: ${await removeWhitespacesFromText(await TermsAndConditionsDrawer.termsAndConditionsContent.getText())}
+        `
+      }
     );
-    const expectedContent = await removeWhitespacesFromText(readFromFile(__dirname, './termsAndConditions.txt'));
-    await expect(actualContent).to.equal(expectedContent);
   };
 }
 
