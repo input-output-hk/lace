@@ -1,8 +1,9 @@
 import { Wallet } from '@lace/cardano';
 import { UserIdService } from '@lib/scripts/types';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/AnalyticsProvider/postHog/config';
+import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/AnalyticsProvider/postHog/config';
 import { PostHogClient } from '@providers/AnalyticsProvider/postHog/PostHogClient';
+import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
 
 jest.mock('posthog-js');
@@ -12,18 +13,15 @@ describe('PostHogClient', () => {
   const chain = Wallet.Cardano.ChainIds.Preprod;
   const userId = 'userId';
   const mockUserIdService: UserIdService = {
-    getId: () => Promise.resolve(userId),
-    extendLifespan: jest.fn(),
-    makeTemporary: jest.fn(),
-    makePersistent: jest.fn(),
-    clearId: jest.fn()
+    ...userIdServiceMock,
+    getId: () => Promise.resolve(userId)
   };
 
   it('should initialize posthog on construction', () => {
     // eslint-disable-next-line no-new
     new PostHogClient(chain, mockUserIdService, publicPosthogHost);
     expect(posthog.init).toHaveBeenCalledWith(
-      expect.stringContaining(NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]),
+      expect.stringContaining(DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]),
       expect.objectContaining({
         // eslint-disable-next-line camelcase
         api_host: publicPosthogHost
@@ -67,7 +65,7 @@ describe('PostHogClient', () => {
     client.setChain(previewChain);
     expect(posthog.set_config).toHaveBeenCalledWith(
       expect.objectContaining({
-        token: NETWORK_ID_TO_POSTHOG_TOKEN_MAP[previewChain.networkMagic]
+        token: DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[previewChain.networkMagic]
       })
     );
   });

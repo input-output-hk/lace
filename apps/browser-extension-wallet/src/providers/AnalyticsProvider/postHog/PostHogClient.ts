@@ -37,15 +37,15 @@ export class PostHogClient {
     });
   }
 
-  sendPageNavigationEvent = async (): Promise<void> => {
+  async sendPageNavigationEvent(): Promise<void> {
     console.debug('[ANALYTICS] Logging page navigation event to PostHog');
 
     posthog.capture('$pageview', {
       ...(await this.getEventMetadata())
     });
-  };
+  }
 
-  sendEvent = async (action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> => {
+  async sendEvent(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
     const payload = {
       ...(await this.getEventMetadata()),
       ...properties
@@ -53,7 +53,7 @@ export class PostHogClient {
 
     console.debug('[ANALYTICS] Logging event to PostHog', action, payload);
     posthog.capture(String(action), payload);
-  };
+  }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
     const token = this.getApiToken(chain);
