@@ -132,8 +132,8 @@ Then(/the Terms and Conditions copy is displayed/, async () => {
 
 Then(/the Privacy policy copy is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   if (mode === 'extended') {
-    await PrivacyPolicyDrawerAssert.assertSeeDrawerNavigationTitle();
     await PrivacyPolicyDrawerAssert.assertSeeDrawerCloseButton();
+    await PrivacyPolicyDrawerAssert.assertSeeDrawerNavigationTitle();
   } else {
     await PrivacyPolicyDrawerAssert.assertSeeDrawerBackButton();
   }
@@ -143,8 +143,8 @@ Then(/the Privacy policy copy is displayed in (extended|popup) mode$/, async (mo
 
 Then(/^the Cookie policy drawer is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   if (mode === 'extended') {
-    await CookiePolicyDrawerAssert.assertSeeDrawerNavigationTitle();
     await CookiePolicyDrawerAssert.assertSeeDrawerCloseButton();
+    await CookiePolicyDrawerAssert.assertSeeDrawerNavigationTitle();
   } else {
     await CookiePolicyDrawerAssert.assertSeeDrawerBackButton();
   }
@@ -217,7 +217,7 @@ Then(
 );
 
 Then(/^all mnemonics from "([^"]*)" wallet are listed$/, async (walletName: string) => {
-  const expectedMnemonics = getTestWallet(walletName).mnemonic;
+  const expectedMnemonics = getTestWallet(walletName).mnemonic ?? [];
   await passphraseDrawerAssert.assertAllMnemonicsAreListed(expectedMnemonics);
 });
 
@@ -275,8 +275,9 @@ When(/^I click "Copy" button on "Show public key" page$/, async () => {
 });
 
 When(/^I fill (correct|incorrect) password and confirm collateral$/, async (type: string) => {
-  const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
-  await CollateralDrawer.passwordInput.waitForEnabled();
+  const password =
+    type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
+  await CollateralDrawer.passwordInput.waitForClickable();
   await CollateralDrawer.passwordInput.setValue(password);
   await CollateralDrawer.collateralButton.waitForClickable();
   await CollateralDrawer.collateralButton.click();

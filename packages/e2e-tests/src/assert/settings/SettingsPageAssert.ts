@@ -135,8 +135,10 @@ class SettingsPageAssert {
   }
 
   async assertShowRecoveryPhraseIsDisplayedUnderSecuritySection() {
-    const firstElementInSecuritySection = await SettingsPage.securitySettingsElements()[0];
-    expect(await firstElementInSecuritySection.getText()).to.contain(
+    await SettingsPage.securitySettingsElements()[0].waitForClickable();
+    // eslint-disable-next-line no-undef
+    const firstElementInSecuritySection = (await SettingsPage.securitySettingsElements()[0]) as WebdriverIO.Element;
+    expect(await firstElementInSecuritySection?.getText()).to.contain(
       await t('browserView.settings.security.showPassphrase.title')
     );
   }

@@ -5,6 +5,7 @@ import menuHeaderPageObject from './menuHeaderPageObject';
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
+import { browser } from '@wdio/globals';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -40,12 +41,15 @@ class SettingsExtendedPageObject {
   clickOnNetworkRadioButton = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
     switch (network) {
       case 'Mainnet':
+        await NetworkDrawer.mainnetRadioButton.waitForClickable();
         await NetworkDrawer.mainnetRadioButton.click();
         break;
       case 'Preprod':
+        await NetworkDrawer.preprodRadioButton.waitForClickable();
         await NetworkDrawer.preprodRadioButton.click();
         break;
       case 'Preview':
+        await NetworkDrawer.previewRadioButton.waitForClickable();
         await NetworkDrawer.previewRadioButton.click();
         break;
     }
@@ -102,7 +106,6 @@ class SettingsExtendedPageObject {
   switchNetwork = async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
     await menuHeaderPageObject.openSettings();
     await this.clickOnNetwork();
-    await browser.pause(1000);
     await this.clickOnNetworkRadioButton(network);
     await browser.waitUntil(
       async () => JSON.parse(await localStorageManager.getItem('appSettings')).chainName === network

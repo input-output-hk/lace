@@ -11,7 +11,7 @@ class StakingPageObject {
   }
 
   async fillSearch(term: string) {
-    await StakingPage.stakingPageSearchInput.waitForEnabled();
+    await StakingPage.stakingPageSearchInput.waitForClickable();
     await StakingPage.stakingPageSearchInput.scrollIntoView();
     await StakingPage.stakingPageSearchInput.click();
     await browser.keys([...term]);

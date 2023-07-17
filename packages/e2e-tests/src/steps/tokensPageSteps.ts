@@ -152,7 +152,7 @@ Then(
         fee = await testContext.load('feeValueDAppTx');
         break;
       default:
-        break;
+        throw new Error('Unsupported fee type');
     }
     await tokensPageAssert.assertSeeValueSubtractedAda(tokenName, subtractedAmount, fee);
   }

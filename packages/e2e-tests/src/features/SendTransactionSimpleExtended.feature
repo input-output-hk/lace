@@ -58,10 +58,10 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click "Add address" button  in address bar
-    And I see Add new address form in Send flow
-    Then Address field has filled "shelley" address
-    When I fill "WalletName" name for address details in drawer
-    And I click "Done" button on "Add address" drawer
+    And I see "Add address" drawer in send flow in extended mode
+    Then address form is filled with "shelley" address
+    When I fill address form with "WalletName" name
+    And I click "Save" button on "Add address" drawer in send flow
     And I see a toast with message: "browserView.addressBook.toast.addAddress"
     And I close the drawer by clicking close button
     And I click "Agree" button on "You'll have to start again" modal
@@ -166,7 +166,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
 
   @LW-2368 @Testnet @Mainnet
@@ -378,7 +378,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the NFT displays 1 in the value field
 
   @LW-3558 @Testnet @Mainnet
@@ -604,7 +604,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
     When I enter a value of: 1 to the "Ibilecoin" asset in bundle 1
     Then the NFT displays 1 in the value field

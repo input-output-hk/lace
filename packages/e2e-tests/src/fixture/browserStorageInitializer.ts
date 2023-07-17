@@ -4,13 +4,13 @@ import { Logger } from '../support/logger';
 
 export const initializeBrowserStorage = async (wallet: WalletConfig): Promise<void> => {
   try {
-    await setBackgroundStorage({ mnemonic: wallet.backgroundStorage.mnemonic });
+    await setBackgroundStorage({ mnemonic: wallet?.backgroundStorage?.mnemonic });
   } catch (error) {
     Logger.log(`Failed to set mnemonic in browser storage due to: ${error}`);
   }
 
   try {
-    await setBackgroundStorage({ keyAgentsByChain: JSON.parse(wallet.backgroundStorage.keyAgentsByChain) });
+    await setBackgroundStorage({ keyAgentsByChain: JSON.parse(String(wallet?.backgroundStorage?.keyAgentsByChain)) });
   } catch (error) {
     Logger.log(`Failed to set keyAgentsByChain in browser storage due to: ${error}`);
   }

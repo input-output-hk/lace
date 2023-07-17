@@ -4,7 +4,7 @@ import { expect } from 'chai';
 
 class HelpSettingsDrawerAssert {
   async assertSeeCreateASupportTicketButton(shouldBeDisplayed: boolean) {
-    await HelpDrawer.createASupportTicketButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await HelpDrawer.createASupportTicketButton.waitForClickable({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
       await expect(await HelpDrawer.createASupportTicketButton.getText()).to.equal(
         await t('browserView.settings.help.support.createASupportTicket')
@@ -13,7 +13,7 @@ class HelpSettingsDrawerAssert {
   }
 
   async assertSeeHelpDrawer(mode: 'extended' | 'popup') {
-    await HelpDrawer.drawerHeaderTitle.waitForDisplayed();
+    await HelpDrawer.drawerHeaderTitle.waitForClickable();
     await expect(await HelpDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.help.support.help')
     );

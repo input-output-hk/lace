@@ -174,7 +174,7 @@ Feature: General Settings - Popup View
     When I navigate to Tokens popup page
     Then I see "Preview" specific tokens in popup mode
     When I navigate to NFTs popup page
-    Then I see NFT with name: "Lace NFT Preview"
+    Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
   @LW-2719 @Mainnet
   Scenario: Popup View - Settings - Token/NFTs updated after network switching
@@ -185,7 +185,7 @@ Feature: General Settings - Popup View
     When I navigate to Tokens popup page
     Then I see "Preview" specific tokens in popup mode
     When I navigate to NFTs popup page
-    Then I see NFT with name: "Lace NFT Preview"
+    Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
   @LW-4806 @Testnet
   Scenario: Popup View - Settings - Addresses are NOT shared and saved when switching Mainnet to Test Network

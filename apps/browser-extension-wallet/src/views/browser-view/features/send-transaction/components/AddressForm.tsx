@@ -8,7 +8,12 @@ import { useSections } from '../store';
 import { CancelEditAddressModal } from './CancelEditAddressModal';
 import AddIcon from '../../../../../assets/icons/add.component.svg';
 import EditIcon from '../../../../../assets/icons/edit.component.svg';
-import { validateWalletAddress, validateWalletHandle, validateWalletName } from '@src/utils/validators';
+import {
+  getAddressToSave,
+  validateWalletAddress,
+  validateWalletHandle,
+  validateWalletName
+} from '@src/utils/validators';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import { Form } from 'antd';
 
@@ -32,7 +37,7 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
     () => ({
       name: validateWalletName,
       address: validateWalletAddress,
-      handle: async (value: string) => await validateWalletHandle(value, handleResolver)
+      handle: async (value: string) => await validateWalletHandle({ value, handleResolver })
     }),
     [handleResolver]
   );
@@ -42,16 +47,19 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
     address: t('core.editAddressForm.address')
   };
 
-  const onAddressSave = (address: AddressBookSchema): Promise<string> =>
-    'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, address, {
+  const onAddressSave = async (address: AddressBookSchema): Promise<string> => {
+    const addressToSave = await getAddressToSave(address, handleResolver);
+
+    return 'id' in addressToEdit
+      ? updateAddress(addressToEdit.id, addressToSave, {
           text: t('browserView.addressBook.toast.editAddress'),
           icon: EditIcon
         })
-      : saveAddress(address, {
+      : saveAddress(addressToSave, {
           text: t('browserView.addressBook.toast.addAddress'),
           icon: AddIcon
         });
+  };
 
   const onConfirmClick = (address: AddressBookSchema) => {
     onAddressSave(address);

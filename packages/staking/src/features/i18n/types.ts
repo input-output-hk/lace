@@ -9,6 +9,11 @@ export type ConstructTranslationKeyUnion<T extends RecursiveStructure, K extends
   : never;
 
 type KeysStructure = {
+  general: {
+    button: {
+      confirm: '';
+    };
+  };
   browsePools: {
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
@@ -24,6 +29,16 @@ type KeysStructure = {
   drawer: {
     title: '';
     titleSecond: '';
+    sign: {
+      confirmation: {
+        title: '';
+      };
+      passwordPlaceholder: '';
+      enterWalletPasswordToConfirmTransaction: '';
+      error: {
+        invalidPassword: '';
+      };
+    };
     details: {
       metrics: {
         activeStake: '';

@@ -126,9 +126,11 @@ jobs:
           if [ "$TAGS" == "empty" ]; then
             TAGS_TO_RUN="";
           else
-            TAGS_TO_RUN="--cucumberOpts.tagExpression=${TAGS}";
+            TAGS_TO_RUN="--cucumberOpts.tagExpression='${{ env.TAGS }}'";
           fi
           ./node_modules/.bin/wdio run wdio.conf.${BROWSER}.ts $TAGS_TO_RUN
+          runCommand="./node_modules/.bin/wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
+          eval "$runCommand";
       - name: Create allure properties
         if: always()
         working-directory: ./packages/e2e-tests/reports/allure/results

@@ -255,7 +255,7 @@ When(/^I click "Stake on this pool" button on stake pool details drawer$/, async
 });
 
 When(/^I click "Next" button on staking confirmation drawer$/, async () => {
-  await StakingConfirmationDrawer.nextButton.waitForClickable();
+  await StakingConfirmationDrawer.nextButton.waitForClickable({ timeout: 15_000 });
   await StakingConfirmationDrawer.nextButton.click();
 });
 
@@ -280,14 +280,14 @@ Then(
     let password;
     switch (type) {
       case 'newly created':
-        password = (testContext.load('newCreatedWallet') as WalletConfig).password;
+        password = String((testContext.load('newCreatedWallet') as WalletConfig).password);
         break;
       case 'incorrect':
         password = 'somePassword';
         break;
       case 'correct':
       default:
-        password = getTestWallet(TestWalletName.TestAutomationWallet).password;
+        password = String(getTestWallet(TestWalletName.TestAutomationWallet).password);
     }
     await SimpleTxSideDrawerPageObject.fillPassword(password);
     await stakingExtendedPageObject.confirmStaking();

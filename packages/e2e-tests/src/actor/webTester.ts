@@ -1,7 +1,6 @@
 /* eslint-disable promise/no-return-wrap */
 
 import { browser } from '@wdio/globals';
-import { Button } from '../elements/button';
 import { WebElement } from '../elements/webElement';
 import { Logger } from '../support/logger';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
@@ -127,18 +126,6 @@ export default new (class WebTester {
     await $(element.toJSLocator()).scrollIntoView();
   }
 
-  async clickButton(value: string, customTimeout = 5000): Promise<void> {
-    await browser.pause(1000);
-    const button = new Button(value);
-
-    await browser.waitUntil(async () => (await $(button.toJSLocator()).isEnabled()) === true, {
-      timeout: customTimeout,
-      interval: 500,
-      timeoutMsg: `button with text ${value} not active`
-    });
-    await this.clickElement(button, 3);
-  }
-
   async getTextValueFromElement(element: WebElement): Promise<string | number> {
     return await this.getTextValue(element.toJSLocator());
   }
@@ -149,7 +136,7 @@ export default new (class WebTester {
   }
 
   // eslint-disable-next-line no-undef
-  async getTextValuesFromArrayElementWithoutDuplicates(array: WebdriverIO.ElementArray): Promise<string[]> {
+  async getTextValuesFromArrayElementWithoutDuplicates(array: WebdriverIO.ElementArray): Promise<unknown[]> {
     const arr = Promise.all(array.map(async (element) => (await element.getText()).split(' ').pop()));
     return [...new Set(await arr)];
   }
@@ -175,14 +162,6 @@ export default new (class WebTester {
 
   async getAttributeValueFromElement(element: WebElement, attribute: string): Promise<string | number> {
     return await this.getAttributeValue(element.toJSLocator(), attribute);
-  }
-
-  async getValue(selector: string) {
-    Logger.log(`Get value for selector ${selector}`);
-    await $(selector).waitForDisplayed();
-    return await $(selector)
-      .getValue()
-      .then((v) => v);
   }
 
   async getElementCount(selector: string, by: LocatorStrategy): Promise<number> {

@@ -15,7 +15,6 @@ import {
 } from '../data/AddressData';
 import coinConfigureAssert from '../assert/coinConfigureAssert';
 import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
-import addressAddNewExtendedAssert from '../assert/addressBook/addressAddNewExtendedAssert';
 import transactionSummaryAssert from '../assert/transaction/transactionSummaryAssert';
 import transactionPasswordExtendedAssert from '../assert/transaction/transactionPasswordExtendedAssert';
 import transactionSubmittedAssert from '../assert/transaction/transactionSubmittedAssert';
@@ -34,11 +33,11 @@ import extensionUtils from '../utils/utils';
 import Modal from '../elements/modal';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
-import AddAddressDrawer from '../elements/addressbook/popupView/AddAddressDrawer';
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
+import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -205,7 +204,9 @@ When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
     await transactionExtendedPageObject.fillAddress(
-      receivingAddress === 'CopiedAddress' ? await clipboard.read() : getTestWallet(receivingAddress).address,
+      receivingAddress === 'CopiedAddress'
+        ? String(await clipboard.read())
+        : String(getTestWallet(receivingAddress).address),
       bundleIndex
     );
     await browser.pause(1000);
@@ -216,7 +217,7 @@ When(
         case 'NFT':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
           await transactionExtendedPageObject.clickNFTsButton();
-          await nftsPageObject.clickNftItem(entry.assetName);
+          await nftsPageObject.clickNftItemInAssetSelector(entry.assetName);
           break;
         case 'Token':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
@@ -245,25 +246,6 @@ When(/^I click to loose focus from value field$/, async () => {
 
 When(/^I hover over the ticker for "([^"]*)" asset in bundle (\d)$/, async (assetName: string, bundleIndex: number) => {
   await transactionExtendedPageObject.hoverOverTheTokenName(bundleIndex, assetName);
-});
-
-Then(/^Address field has filled "([^"]*)" address$/, async (address: string) => {
-  let addr;
-  switch (address) {
-    case 'shelley':
-      addr = shelley.getAddress();
-      break;
-    case 'byron':
-      addr = byron.getAddress();
-      break;
-    case 'icarus':
-      addr = icarus.getAddress();
-      break;
-    default:
-      addr = address;
-      break;
-  }
-  await addressAddNewExtendedAssert.assertSeeAddressInAddressInput(true, addr);
 });
 
 Then(
@@ -375,7 +357,9 @@ Then(
     const expectedTransactionDetails: ExpectedTransactionDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
-      transactionData: [{ ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: getTestWallet(walletName).address }],
+      transactionData: [
+        { ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: String(getTestWallet(walletName).address) }
+      ],
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
@@ -391,7 +375,7 @@ Then(
       transactionData: [
         {
           ada: `${adaValue} ${Asset.CARDANO.ticker}`,
-          address: getTestWallet(walletName).address,
+          address: String(getTestWallet(walletName).address),
           assets: [`${laceCoin2Value} LaceCoin2`]
         }
       ],
@@ -558,13 +542,13 @@ When(/^I click "Confirm" button on "Transaction summary" page$/, async () => {
   await transactionSummaryPage.confirmButton.click();
 });
 
-When(/^I click "(Done|Cancel)" button on "Add address" drawer$/, async (button: 'Done' | 'Cancel') => {
+When(/^I click "(Save|Cancel)" button on "Add address" drawer in send flow$/, async (button: 'Save' | 'Cancel') => {
   switch (button) {
     case 'Cancel':
-      await AddAddressDrawer.cancelButton.click();
+      await AddNewAddressDrawer.clickOnCancelButton();
       break;
-    case 'Done':
-      await AddAddressDrawer.saveAddressButton.click();
+    case 'Save':
+      await AddNewAddressDrawer.clickOnSaveAddressButton();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
@@ -606,6 +590,7 @@ When(/^I click "View transaction" button on submitted transaction page$/, async 
 });
 
 Then(/^I enter (correct|incorrect) password and confirm the transaction$/, async (type: string) => {
-  const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
+  const password =
+    type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
   await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
 });

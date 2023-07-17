@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Wallet } from '@lace/cardano';
 
-export type SelectedStakePoolDetails = {
+export type LegacySelectedStakePoolDetails = {
   delegators: number | string;
   description: string;
   hexId: string;
@@ -24,7 +24,7 @@ type WalletBalance = {
   fiatBalance: string | undefined;
 };
 
-type Balance = {
+export type Balance = {
   total: WalletBalance;
   available: WalletBalance;
 };
@@ -32,6 +32,14 @@ type Balance = {
 export interface CurrencyInfo {
   code: string;
   symbol: string;
+}
+
+export interface SubmittingState {
+  isRestaking: boolean;
+  setIsRestaking: (param: boolean) => void;
+  setSubmitingTxState: (args: { isSubmitingTx?: boolean; isPasswordValid?: boolean }) => void;
+  isSubmitingTx?: boolean;
+  isPasswordValid?: boolean;
 }
 
 export type OutsideHandlesContextValue = {
@@ -42,7 +50,7 @@ export type OutsideHandlesContextValue = {
     lastReward: BigInt | number;
   };
   delegationDetails: Wallet.Cardano.StakePool;
-  delegationStoreSelectedStakePoolDetails?: SelectedStakePoolDetails;
+  delegationStoreSelectedStakePoolDetails?: LegacySelectedStakePoolDetails;
   delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo: string }) => void;
@@ -57,10 +65,12 @@ export type OutsideHandlesContextValue = {
   };
   openExternalLink: (href: string) => void;
   password?: string;
+  passwordSetPassword: (password: string) => void;
   passwordRemovePassword: () => void;
-  submittingStateSetIsRestaking: (param: boolean) => void;
+  submittingState: SubmittingState;
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
   currencyStoreFiatCurrency: CurrencyInfo;
+  executeWithPassword: <T>(password: string, promiseFn: () => Promise<T>, cleanPassword?: boolean) => Promise<T>;
 };

@@ -99,7 +99,8 @@ Then(
   /I see that content of "([^"]*)" (public key|address) is in clipboard/,
   async (walletName: string, walletProperty: string) => {
     const testWallet = getTestWallet(walletName);
-    const walletPropertyValue = walletProperty === 'public key' ? testWallet.publicKey : testWallet.address;
+    const walletPropertyValue =
+      walletProperty === 'public key' ? String(testWallet.publicKey) : String(testWallet.address);
     await commonAssert.assertClipboardContains(walletPropertyValue);
   }
 );
@@ -107,6 +108,10 @@ Then(
 Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
   await ToastMessageAssert.assertSeeToastMessage(await t(toastText), shouldSee === 'see');
   if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
+});
+
+Then(/^I don't see any toast message$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage('', false);
 });
 
 Then(/^I see "Help and support" page$/, async () => {
@@ -126,6 +131,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await localStorageManager.cleanLocalStorage();
   await localStorageInitializer.initializeWallet(walletName);
   await browser.refresh();
+  await topNavigationAssert.assertLogoPresent();
   await mainMenuPageObject.navigateToSection('Tokens', mode);
 });
 

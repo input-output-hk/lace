@@ -38,13 +38,20 @@ const useStore = create<UIStore>((set) => ({
 export const useDrawer = (): [UIStore['isDrawerVisible'], UIStore['setIsDrawerVisible']] =>
   useStore((state) => [state.isDrawerVisible, state.setIsDrawerVisible]);
 
-const useSectionsStore = createSectionsStore<Sections>({ section: sectionsConfig.form, config: sectionsConfig });
+const useSectionsStore = createSectionsStore<Sections>({
+  section: sectionsConfig.form,
+  config: sectionsConfig
+});
 
-export const useSections = (): Pick<SectionsStore<Sections>, 'currentSection' | 'setPrevSection' | 'setSection'> =>
-  useSectionsStore(({ currentSection, setSection, setPrevSection }) => ({
+export const useSections = (): Pick<
+  SectionsStore<Sections>,
+  'currentSection' | 'setPrevSection' | 'setSection' | 'resetSection'
+> =>
+  useSectionsStore(({ currentSection, setSection, setPrevSection, resetSection }) => ({
     currentSection,
     setSection,
-    setPrevSection
+    setPrevSection,
+    resetSection
   }));
 
 export const useWarningModal = (): [UIStore['isWarningModalVisible'], UIStore['setWarnigModalVisibility']] =>

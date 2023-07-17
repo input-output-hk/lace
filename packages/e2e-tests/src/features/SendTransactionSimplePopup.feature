@@ -53,10 +53,10 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I click "Send" button on Tokens page in popup mode
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click "Add address" button  in address bar
-    And I see Add new address form in Send flow
-    Then Address field has filled "shelley" address
-    When I fill "WalletName" name for address details in drawer
-    And I click "Done" button on "Add address" drawer
+    And I see "Add address" drawer in send flow in popup mode
+    Then address form is filled with "shelley" address
+    When I fill address form with "WalletName" name
+    And I click "Save" button on "Add address" drawer in send flow
     And I see a toast with message: "browserView.addressBook.toast.addAddress"
     And I close the drawer by clicking back button
     And I click "Agree" button on "You'll have to start again" modal
@@ -159,7 +159,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I click "Send" button on Tokens page in popup mode
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
 
   @LW-2402 @Testnet @Mainnet
@@ -407,7 +407,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the NFT displays 1 in the value field
 
   @LW-3559 @Testnet @Mainnet
@@ -485,12 +485,12 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then the maximum available amount is displayed in bundle: 1 for "LaceCoin1" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Ibilecoin"
+    And I click on NFT with name: "Ibilecoin" in asset selector
     And I click MAX button in bundle 1 for "Ibilecoin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Bison Coin"
+    And I click on NFT with name: "Bison Coin" in asset selector
     And I click MAX button in bundle 1 for "Bison Coin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page
@@ -510,12 +510,12 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then the maximum available amount is displayed in bundle: 1 for "SUNDAE" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Ibilecoin"
+    And I click on NFT with name: "Ibilecoin" in asset selector
     And I click MAX button in bundle 1 for "Ibilecoin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Bison Coin"
+    And I click on NFT with name: "Bison Coin" in asset selector
     And I click MAX button in bundle 1 for "Bison Coin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page
@@ -615,7 +615,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
     When I save ticker for the NFT with name: <nft>
-    And I click on NFT with name: "<nft>"
+    And I click on NFT with name: "<nft>" in asset selector
     Then the displayed ticker for NFTs has the correct amount of characters
     When I hover over the ticker for "<nft>" asset in bundle 1
     Then I see a tooltip showing full name: "<nft>" for NFTs
@@ -675,7 +675,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
     When I enter a value of: 1 to the "Ibilecoin" asset in bundle 1
     Then the NFT displays 1 in the value field

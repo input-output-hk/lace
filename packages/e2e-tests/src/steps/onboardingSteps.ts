@@ -1,4 +1,3 @@
-import { browser } from '@wdio/globals';
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
 import { defaultAppSettings, getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
@@ -37,10 +36,10 @@ import testContext from '../utils/testContext';
 import webTester from '../actor/webTester';
 import MainLoader from '../elements/MainLoader';
 
-const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic;
-const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic;
-const twelveMnemonicWords: string[] = getTestWallet(TestWalletName.TwelveWordsMnemonic).mnemonic;
-const fifteenMnemonicWords: string[] = getTestWallet(TestWalletName.FifteenWordsMnemonic).mnemonic;
+const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
+const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
+const twelveMnemonicWords: string[] = getTestWallet(TestWalletName.TwelveWordsMnemonic).mnemonic ?? [];
+const fifteenMnemonicWords: string[] = getTestWallet(TestWalletName.FifteenWordsMnemonic).mnemonic ?? [];
 
 const mnemonicWordsForReference: string[] = [];
 const validPassword = 'N_8J@bne87A';
@@ -323,7 +322,7 @@ Given(
 );
 
 Given(/^I am on "All done!" page from "Restore wallet" using "([^"]*)" wallet$/, async (walletName: string) => {
-  await OnboardingPageObject.openAllDonePageFromWalletRestore(getTestWallet(walletName).mnemonic);
+  await OnboardingPageObject.openAllDonePageFromWalletRestore(getTestWallet(walletName).mnemonic ?? []);
 });
 
 Given(
@@ -473,10 +472,10 @@ Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingPageObject.openAllDonePage();
   await OnboardingAllDonePageAssert.assertSeeAllDonePage();
   await OnboardingAllDonePage.nextButton.click();
+  await TopNavigationAssert.assertLogoPresent();
   await Modal.cancelButton.waitForDisplayed();
   await Modal.cancelButton.click();
   await settingsExtendedPageObject.switchNetwork('Preprod', 'extended');
-  await browser.pause(2000);
   const newCreatedWallet: WalletConfig = {
     password: 'N_8J@bne87A',
     name: 'newCreatedWallet',
@@ -492,7 +491,6 @@ Given(/^I create new wallet and save wallet information$/, async () => {
     }
   };
   testContext.save('newCreatedWallet', newCreatedWallet);
-  await browser.pause(2000);
 });
 
 Then(/^the mnemonic input contains the word "([^"]*)"$/, async (expectedWord: string) => {
@@ -539,7 +537,7 @@ When(
   /^I click "(Got it|Learn more)" button on "DApp connector is now in Beta" modal$/,
   async (button: 'Got it' | 'Learn more') => {
     // Wait for main page to finish loading
-    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 3000 });
+    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 15_000 });
     if (button === 'Got it') {
       await Modal.cancelButton.waitForClickable();
       await Modal.cancelButton.click();

@@ -35,6 +35,26 @@ class MenuMainExtended {
   async hoverOverMenu(): Promise<void> {
     await this.container.moveTo();
   }
+
+  async clickOnTokensButton() {
+    await this.tokensButton.waitForClickable();
+    await this.tokensButton.click();
+  }
+
+  async clickOnNFTsButton() {
+    await this.nftsButton.waitForClickable();
+    await this.nftsButton.click();
+  }
+
+  async clickOnActivityButton() {
+    await this.transactionsButton.waitForClickable();
+    await this.transactionsButton.click();
+  }
+
+  async clickOnStakingButton() {
+    await this.stakingButton.waitForClickable();
+    await this.stakingButton.click();
+  }
 }
 
 export default new MenuMainExtended();
