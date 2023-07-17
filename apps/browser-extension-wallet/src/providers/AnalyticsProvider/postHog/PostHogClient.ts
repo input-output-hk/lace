@@ -5,8 +5,8 @@ import { ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTrac
 import {
   DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
-  PUBLIC_POSTHOG_HOST,
-  PRODUCTION_TRACKING_MODE_ENABLED
+  PRODUCTION_TRACKING_MODE_ENABLED,
+  PUBLIC_POSTHOG_HOST
 } from './config';
 import { UserIdService } from '@lib/scripts/types';
 
@@ -15,16 +15,16 @@ import { UserIdService } from '@lib/scripts/types';
  * https://posthog.com/docs/libraries/js
  */
 export class PostHogClient {
-  private initialized: false;
-
-  constructor(private chain: Wallet.Cardano.ChainId, private userIdService: UserIdService) {}
-
-  async init(): Promise<void> {
-    if (!PUBLIC_POSTHOG_HOST) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+  constructor(
+    private chain: Wallet.Cardano.ChainId,
+    private userIdService: UserIdService,
+    private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
+  ) {
+    if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
 
     posthog.init(this.getApiToken(this.chain), {
       request_batching: false,
-      api_host: PUBLIC_POSTHOG_HOST,
+      api_host: this.publicPostHogHost,
       autocapture: false,
       disable_session_recording: true,
       capture_pageview: false,
@@ -37,23 +37,15 @@ export class PostHogClient {
     });
   }
 
-  async sendPageNavigationEvent(): Promise<void> {
-    if (!this.initialized) {
-      await this.init();
-    }
-
+  sendPageNavigationEvent = async (): Promise<void> => {
     console.debug('[ANALYTICS] Logging page navigation event to PostHog');
 
     posthog.capture('$pageview', {
       ...(await this.getEventMetadata())
     });
-  }
+  };
 
-  async sendEvent(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
-    if (!this.initialized) {
-      await this.init();
-    }
-
+  sendEvent = async (action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> => {
     const payload = {
       ...(await this.getEventMetadata()),
       ...properties
@@ -61,7 +53,7 @@ export class PostHogClient {
 
     console.debug('[ANALYTICS] Logging event to PostHog', action, payload);
     posthog.capture(String(action), payload);
-  }
+  };
 
   setChain(chain: Wallet.Cardano.ChainId): void {
     const token = this.getApiToken(chain);
