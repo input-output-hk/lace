@@ -280,14 +280,14 @@ Then(
     let password;
     switch (type) {
       case 'newly created':
-        password = (testContext.load('newCreatedWallet') as WalletConfig).password;
+        password = String((testContext.load('newCreatedWallet') as WalletConfig).password);
         break;
       case 'incorrect':
         password = 'somePassword';
         break;
       case 'correct':
       default:
-        password = getTestWallet(TestWalletName.TestAutomationWallet).password;
+        password = String(getTestWallet(TestWalletName.TestAutomationWallet).password);
     }
     await SimpleTxSideDrawerPageObject.fillPassword(password);
     await stakingExtendedPageObject.confirmStaking();

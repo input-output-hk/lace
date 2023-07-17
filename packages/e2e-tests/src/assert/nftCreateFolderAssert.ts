@@ -12,7 +12,7 @@ import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainMo
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
     await NftsPage.createFolderButton.waitForDisplayed({ reverse: !shouldSee });
-    if (mode === 'extended' && shouldSee === true) {
+    if (mode === 'extended' && shouldSee) {
       await expect(await NftsPage.createFolderButton.getText()).to.equal(await t('browserView.nfts.createFolder'));
     }
   }
@@ -144,6 +144,20 @@ class NftCreateFolderAssert {
         await t('browserView.nfts.exitModal.confirm')
       );
     }
+  }
+
+  async assertNoResultsReturned() {
+    await NftSelectNftsPage.sadFaceIcon.waitForDisplayed();
+    await NftSelectNftsPage.noResultsMessage.waitForDisplayed();
+    expect(await NftSelectNftsPage.noResultsMessage.getText()).to.equal(
+      await t('package.core.assetSelectorOverlay.noMatchingResult')
+    );
+  }
+
+  async assertIsNFTSelected(nftName: string, shouldBeSelected: boolean) {
+    const nft = await NftSelectNftsPage.getNftByName(nftName);
+    const nftWithCheckmark = await nft.$(NftSelectNftsPage.NFT_ITEM_SELECTED_CHECKMARK);
+    await nftWithCheckmark.waitForDisplayed({ reverse: !shouldBeSelected });
   }
 }
 

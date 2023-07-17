@@ -42,7 +42,7 @@ class NftAssert {
   }
 
   async assertSeeNftItem(index: number) {
-    const nft = await NftsPage.nftContainers[index];
+    const nft = (await NftsPage.nftContainers[index]) as WebdriverIO.Element;
     await nft.waitForDisplayed();
     await nft.$(NftsPage.NFT_IMAGE).waitForDisplayed();
     await nft.$(NftsPage.NFT_NAME).waitForDisplayed();
