@@ -24,7 +24,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
     selectedStakePool
   } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
-  const { password, setPassword, removePassword } = usePassword();
+  const password = usePassword();
   const submittingState = useSubmitingState();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
@@ -53,16 +53,13 @@ export const MultiDelegationStaking = (): JSX.Element => {
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
         password,
-        setPassword,
-        passwordRemovePassword: removePassword,
-        passwordSetPassword: setPassword,
         stakingRewards,
         submittingState,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,
         currencyStoreFiatCurrency: fiatCurrency,
-        executeWithPassword
+        walletManagerExecuteWithPassword: executeWithPassword
       }}
     >
       <Staking theme={theme.name} />

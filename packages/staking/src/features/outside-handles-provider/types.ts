@@ -42,6 +42,12 @@ export interface SubmittingState {
   isPasswordValid?: boolean;
 }
 
+export interface PasswordHook {
+  password?: string;
+  setPassword: (pass: string) => void;
+  removePassword: () => void;
+}
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   balancesBalance: Balance;
@@ -64,13 +70,15 @@ export type OutsideHandlesContextValue = {
     };
   };
   openExternalLink: (href: string) => void;
-  password?: string;
-  passwordSetPassword: (password: string) => void;
-  passwordRemovePassword: () => void;
+  password: PasswordHook;
   submittingState: SubmittingState;
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
+  walletManagerExecuteWithPassword: <T>(
+    password: string,
+    promiseFn: () => Promise<T>,
+    cleanPassword?: boolean
+  ) => Promise<T>;
   currencyStoreFiatCurrency: CurrencyInfo;
-  executeWithPassword: <T>(password: string, promiseFn: () => Promise<T>, cleanPassword?: boolean) => Promise<T>;
 };
