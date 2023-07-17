@@ -18,13 +18,13 @@ export class PostHogClient {
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
-    private publicPosthogHost: string = PUBLIC_POSTHOG_HOST
+    private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
-    if (!this.publicPosthogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+    if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
 
     posthog.init(this.getApiToken(this.chain), {
       request_batching: false,
-      api_host: this.publicPosthogHost,
+      api_host: this.publicPostHogHost,
       autocapture: false,
       disable_session_recording: true,
       capture_pageview: false,
