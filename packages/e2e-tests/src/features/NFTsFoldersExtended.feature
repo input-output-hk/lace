@@ -67,13 +67,25 @@ Feature: NFT - Folders - Extended view
     Then I don't see "You'll have to start again" modal
     And I see "Create NFT folder" drawer in extended mode
 
-    @LW-7246
-    Scenario: Extended-view - NFT Folders - "Create folder" flow and warning modal confirmation
-      Given I navigate to NFTs extended page
-      And I click "Create folder" button on NFTs page
-      And I see "Create NFT folder" drawer in extended mode
-      And I close the drawer by clicking close button
-      When I click "Agree" button on "You'll have to start again" modal for create NFTs folder
-      Then I don't see "You'll have to start again" modal
-      And I don't see "Create NFT folder" drawer in extended mode
-      And A gallery view showing my NFTs is displayed
+  @LW-7246
+  Scenario: Extended-view - NFT Folders - "Create folder" flow and warning modal confirmation
+    Given I navigate to NFTs extended page
+    And I click "Create folder" button on NFTs page
+    And I see "Create NFT folder" drawer in extended mode
+    And I close the drawer by clicking close button
+    When I click "Agree" button on "You'll have to start again" modal for create NFTs folder
+    Then I don't see "You'll have to start again" modal
+    And I don't see "Create NFT folder" drawer in extended mode
+    And A gallery view showing my NFTs is displayed
+
+  @LW-7252
+  Scenario: Extended-view - NFT Folders - Select NFTs page - back button click
+    Given I navigate to "Select NFTs" page in extended mode
+    When I close the drawer by clicking back button
+    Then I see "Create NFT folder" drawer in extended mode
+
+  @LW-7257
+  Scenario: Extended-view - NFT Folders - Select NFTs page - search for NFT - no results
+    Given I navigate to "Select NFTs" page in extended mode
+    When I enter "some random phrase" into the search bar on "Select NFTs" drawer
+    Then I see no results for "Select NFTs" drawer

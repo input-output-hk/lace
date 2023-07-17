@@ -217,7 +217,7 @@ Then(
 );
 
 Then(/^all mnemonics from "([^"]*)" wallet are listed$/, async (walletName: string) => {
-  const expectedMnemonics = getTestWallet(walletName).mnemonic;
+  const expectedMnemonics = getTestWallet(walletName).mnemonic ?? [];
   await passphraseDrawerAssert.assertAllMnemonicsAreListed(expectedMnemonics);
 });
 
@@ -275,7 +275,8 @@ When(/^I click "Copy" button on "Show public key" page$/, async () => {
 });
 
 When(/^I fill (correct|incorrect) password and confirm collateral$/, async (type: string) => {
-  const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
+  const password =
+    type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
   await CollateralDrawer.passwordInput.waitForClickable();
   await CollateralDrawer.passwordInput.setValue(password);
   await CollateralDrawer.collateralButton.waitForClickable();

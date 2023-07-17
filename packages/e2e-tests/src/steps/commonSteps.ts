@@ -99,7 +99,8 @@ Then(
   /I see that content of "([^"]*)" (public key|address) is in clipboard/,
   async (walletName: string, walletProperty: string) => {
     const testWallet = getTestWallet(walletName);
-    const walletPropertyValue = walletProperty === 'public key' ? testWallet.publicKey : testWallet.address;
+    const walletPropertyValue =
+      walletProperty === 'public key' ? String(testWallet.publicKey) : String(testWallet.address);
     await commonAssert.assertClipboardContains(walletPropertyValue);
   }
 );

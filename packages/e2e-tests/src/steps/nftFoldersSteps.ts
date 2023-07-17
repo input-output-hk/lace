@@ -4,6 +4,8 @@ import NftsPage from '../elements/NFTs/nftsPage';
 import nftCreateFolderAssert from '../assert/nftCreateFolderAssert';
 import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
+import mainMenuPageObject from '../pageobject/mainMenuPageObject';
+import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 
 Given(
   /^I (see|do not see) "Create folder" button on NFTs page in (popup|extended) mode$/,
@@ -100,3 +102,20 @@ Then(
     }
   }
 );
+
+When(/^I navigate to "Select NFTs" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await mainMenuPageObject.navigateToSection('NFTs', mode);
+  await NftsPage.createFolderButton.waitForClickable();
+  await NftsPage.createFolderButton.click();
+  await NftCreateFolderPage.setFolderNameInput('Sample NFT folder');
+  await NftCreateFolderPage.nextButton.waitForClickable();
+  await NftCreateFolderPage.nextButton.click();
+});
+
+When(/^I enter "([^"]*)" into the search bar on "Select NFTs" drawer$/, async (searchPhrase: string) => {
+  await NftSelectNftsPage.enterSearchPhrase(searchPhrase);
+});
+
+Then(/^I see no results for "Select NFTs" drawer$/, async () => {
+  await nftCreateFolderAssert.assertNoResultsReturned();
+});
