@@ -8,6 +8,7 @@ import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
+import NftSelectNftsAssert from '../assert/nftSelectNftsAssert';
 
 Given(
   /^I (see|do not see) "Create folder" button on NFTs page in (popup|extended) mode$/,
@@ -161,4 +162,20 @@ Then(
 
 Then(/^I see a toast with text: "Folder created successfully"$/, async () => {
   await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.create'), true);
+});
+
+Then(/^I select (\d+) NFTs$/, async (numberOfNFTs: number) => {
+  await NftSelectNftsPage.selectNFTs(numberOfNFTs);
+});
+
+Then(/^I see NFTs counter showing (\d+) selected NFTs$/, async (counter: number) => {
+  await NftSelectNftsAssert.assertCounterNumber(counter);
+});
+
+Then(/^I see "Clear" button next to NFTs counter$/, async () => {
+  await NftSelectNftsAssert.assertSeeClearButton();
+});
+
+When(/^I click "Clear" button next to NFTs counter$/, async () => {
+  await NftSelectNftsPage.clearButton.click();
 });
