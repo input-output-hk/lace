@@ -525,9 +525,11 @@ When(
         await newTransactionPage.reviewTransactionButton.click();
         break;
       case 'Cancel':
+        await newTransactionPage.cancelTransactionButton.waitForClickable();
         await newTransactionPage.cancelTransactionButton.click();
         break;
       case 'Add bundle':
+        await newTransactionPage.addBundleButton.waitForClickable();
         await newTransactionPage.addBundleButton.click();
         break;
       default:
