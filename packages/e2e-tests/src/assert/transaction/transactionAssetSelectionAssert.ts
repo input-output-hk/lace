@@ -18,18 +18,23 @@ class TransactionAssetSelectionAssert {
   }
 
   async assertSpecificAssetSelected(shouldBeSelected: boolean, assetType: string, index: number) {
+    const tokenSelectionPage = new TokenSelectionPage();
     if (assetType === 'Tokens') {
-      await $(new TokenSelectionPage().grayedOutTokenIcon(index).toJSLocator()).waitForDisplayed({
+      await $(tokenSelectionPage.grayedOutTokenIcon(index).toJSLocator()).waitForDisplayed({
         reverse: !shouldBeSelected
       });
-      await $(new TokenSelectionPage().checkmarkInSelectedToken(index).toJSLocator()).waitForDisplayed({
+      await $(tokenSelectionPage.checkmarkInSelectedToken(index).toJSLocator()).waitForDisplayed({
         reverse: !shouldBeSelected
       });
     } else {
-      await $(new TokenSelectionPage().grayedOutNFT(index).toJSLocator()).waitForDisplayed({
+      await (
+        await tokenSelectionPage.grayedOutNFT(index)
+      ).waitForDisplayed({
         reverse: !shouldBeSelected
       });
-      await $(new TokenSelectionPage().checkmarkInSelectedNFT(index).toJSLocator()).waitForDisplayed({
+      await (
+        await tokenSelectionPage.checkmarkInSelectedNFT(index)
+      ).waitForDisplayed({
         reverse: !shouldBeSelected
       });
     }
