@@ -80,6 +80,14 @@ Feature: NFT - Folders - Popup view
     When I close the drawer by clicking back button
     Then I see "Create NFT folder" drawer in popup mode
 
+  @LW-7273
+  Scenario: Popup-view - NFT Folders - Select NFTs page - select and unselect a NFT
+    Given I navigate to "Select NFTs" page in popup mode
+    When I click NFT with name "Ibilecoin"
+    Then NFT with name "Ibilecoin" is selected
+    When I click NFT with name "Ibilecoin"
+    Then NFT with name "Ibilecoin" is not selected
+
   @LW-7274
   Scenario: Popup-view - NFT Folders - Select NFTs page - search for NFT - no results
     Given I navigate to "Select NFTs" page in popup mode
