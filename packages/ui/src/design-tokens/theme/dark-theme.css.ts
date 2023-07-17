@@ -213,10 +213,15 @@ const colors: Colors = {
   $transaction_summary_label_color: darkColorScheme.$primary_white,
   $transaction_summary_secondary_label_color:
     darkColorScheme.$primary_light_grey,
+
+  $toast_bar_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $toast_bar_label_color: darkColorScheme.$primary_white,
+  $toast_bar_icon_container_bgColor: darkColorScheme.$primary_grey,
+  $toast_bar_icon_label_color: darkColorScheme.$primary_light_grey_plus,
 };
 
 const elevation: Elevation = {
-  $tooltip: '0px 0px 16px rgba(167, 143, 160, 0.2)',
+  $tooltip: 'none',
   $dialog: 'none',
   $primaryButton: 'none',
   $assets: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 0px 10px rgba(0, 0, 0, 0.05)',

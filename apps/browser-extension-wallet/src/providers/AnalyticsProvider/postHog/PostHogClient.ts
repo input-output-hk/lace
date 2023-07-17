@@ -2,7 +2,12 @@
 import posthog from 'posthog-js';
 import { Wallet } from '@lace/cardano';
 import { ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTracker';
-import { NETWORK_ID_TO_POSTHOG_TOKEN_MAP, PUBLIC_POSTHOG_HOST } from './config';
+import {
+  DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
+  PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
+  PUBLIC_POSTHOG_HOST,
+  PRODUCTION_TRACKING_MODE_ENABLED
+} from './config';
 import { UserIdService } from '@lib/scripts/types';
 
 /**
@@ -32,7 +37,7 @@ export class PostHogClient {
     });
   }
 
-  sendPageNavigationEvent = async (): Promise<void> => {
+  async sendPageNavigationEvent(): Promise<void> {
     if (!this.initialized) {
       await this.init();
     }
@@ -42,9 +47,9 @@ export class PostHogClient {
     posthog.capture('$pageview', {
       ...(await this.getEventMetadata())
     });
-  };
+  }
 
-  sendEvent = async (action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> => {
+  async sendEvent(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
     if (!this.initialized) {
       await this.init();
     }
@@ -56,7 +61,7 @@ export class PostHogClient {
 
     console.debug('[ANALYTICS] Logging event to PostHog', action, payload);
     posthog.capture(String(action), payload);
-  };
+  }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
     const token = this.getApiToken(chain);
@@ -67,7 +72,9 @@ export class PostHogClient {
   }
 
   protected getApiToken(chain: Wallet.Cardano.ChainId): string {
-    return NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
+    return PRODUCTION_TRACKING_MODE_ENABLED
+      ? PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]
+      : DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
   }
 
   protected async getEventMetadata(): Promise<PostHogMetadata> {

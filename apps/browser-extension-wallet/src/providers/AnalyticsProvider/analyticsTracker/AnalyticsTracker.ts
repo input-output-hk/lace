@@ -10,12 +10,12 @@ export class AnalyticsTracker {
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
 
-  constructor(chain: Wallet.Cardano.ChainId, analyticsDisabled: boolean) {
+  constructor(chain: Wallet.Cardano.ChainId, analyticsDisabled = false, isPostHogEnabled = POSTHOG_ENABLED) {
     if (analyticsDisabled) return;
     this.userIdService = getUserIdService();
     this.matomoClient = new MatomoClient(chain, this.userIdService);
 
-    if (POSTHOG_ENABLED) {
+    if (isPostHogEnabled) {
       this.postHogClient = new PostHogClient(chain, this.userIdService);
     }
   }

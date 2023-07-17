@@ -2,9 +2,8 @@
 import { LocatorStrategy } from '../../actor/webTester';
 import { WebElement, WebElementFactory as Factory } from '../webElement';
 import { DrawerCommonExtended } from '../drawerCommonExtended';
-import { AddressInput } from '../addressInput';
-import { TokenSearchResult } from './tokenSearchResult';
 import { ChainablePromiseElement } from 'webdriverio';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 export class TokenSelectionPage extends WebElement {
   protected CONTAINER;
@@ -13,9 +12,11 @@ export class TokenSelectionPage extends WebElement {
   private TOKEN_INFO = '//div[@data-testid="coin-search-row-info"]';
   private TOKEN_ICON = '//div[@data-testid="coin-search-row-icon"]';
   private NFTS_BUTTON = '//input[@data-testid="asset-selector-button-nfts"]';
-  private NFT_LIST = '//div[@data-testid="nft-list"]';
-  private NFT_ITEM = '//a[@data-testid="nft-item"]';
-  private NFT_ITEM_NAME = '//p[@data-testid="nft-item-name"]';
+  private ASSET_SELECTOR_CONTAINER = '//div[@data-testid="asset-selector"]';
+  private NFT_CONTAINER = '[data-testid="nft-item"]';
+  private NFT_ITEM_NAME = '[data-testid="nft-item-name"]';
+  private NFT_ITEM_OVERLAY = '[data-testid="nft-item-overlay"]';
+  private NFT_ITEM_SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
   private ASSETS_SELECTION_COUNTER = '//div[@data-testid="assets-counter"]';
   private NEUTRAL_FACE_ICON = '[data-testid="neutral-face-icon"]';
   private SAD_FACE_ICON = '[data-testid="sad-face-icon"]';
@@ -50,10 +51,6 @@ export class TokenSelectionPage extends WebElement {
     return Factory.fromSelector(`${this.TOKEN_ROW}//h6[text() = '${assetName}']/following-sibling::p`, 'xpath');
   }
 
-  tokenItemWithIndex(index: number): WebElement {
-    return Factory.fromSelector(`(${this.TOKEN_ROW})[${index}]`, 'xpath');
-  }
-
   grayedOutTokenIcon(index: number): WebElement {
     return Factory.fromSelector(`(${this.TOKEN_ICON})[${index}]/div[contains(@class, 'overlay')]`, 'xpath');
   }
@@ -70,41 +67,49 @@ export class TokenSelectionPage extends WebElement {
     return $(this.NFTS_BUTTON).parentElement().parentElement();
   }
 
-  nftsList(): WebElement {
-    return Factory.fromSelector(`${this.NFT_LIST}`, 'xpath');
+  get assetSelectorContainer(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ASSET_SELECTOR_CONTAINER);
   }
 
-  nftsItem(): WebElement {
-    return Factory.fromSelector(`${this.NFT_ITEM}`, 'xpath');
+  get nftItemSelectedCheckmark(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
 
-  nftsItemName(index: number): WebElement {
-    return Factory.fromSelector(`(${this.NFT_ITEM_NAME})[${index}]`, 'xpath');
+  get nftContainers(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return this.assetSelectorContainer.$$(this.NFT_CONTAINER);
   }
 
-  grayedOutNFT(index: number): WebElement {
-    return Factory.fromSelector(`(${this.NFT_ITEM})[${index}]/div/div[contains(@class, 'overlay')]`, 'xpath');
+  get nftNames(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return this.assetSelectorContainer.$$(this.NFT_ITEM_NAME);
   }
 
-  checkmarkInSelectedNFT(index: number): WebElement {
-    return Factory.fromSelector(`(${this.NFT_ITEM})[${index}]/*[name()='svg']`, 'xpath');
+  async getNftContainer(name: string): Promise<WebdriverIO.Element> {
+    return (await this.nftContainers.find(
+      async (item) => (await item.$(this.NFT_ITEM_NAME).getText()) === name
+    )) as WebdriverIO.Element;
+  }
+
+  async getNftName(name: string): Promise<WebdriverIO.Element> {
+    const nftContainer = await this.getNftContainer(name);
+    return nftContainer.$(this.NFT_ITEM_NAME);
+  }
+
+  async grayedOutNFT(index: number): Promise<WebdriverIO.Element> {
+    return this.nftContainers[index].$(this.NFT_ITEM_OVERLAY);
+  }
+
+  async checkmarkInSelectedNFT(index: number): Promise<WebdriverIO.Element> {
+    return this.nftContainers[index].$(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
 
   assetsCounter(): WebElement {
     return Factory.fromSelector(`${this.ASSETS_SELECTION_COUNTER}`, 'xpath');
   }
 
-  searchInput(): AddressInput {
-    return new AddressInput();
-  }
-
-  tokenSearchResult(): TokenSearchResult {
-    return new TokenSearchResult();
-  }
-
   get neutralFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEUTRAL_FACE_ICON);
   }
+
   get sadFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SAD_FACE_ICON);
   }

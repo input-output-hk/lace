@@ -4,8 +4,9 @@ import { initializeBrowserStorage } from './browserStorageInitializer';
 import extensionUtils from '../utils/utils';
 import { cleanBrowserStorage } from '../utils/browserStorage';
 import localStorageManager from '../utils/localStorageManager';
+import { browser } from '@wdio/globals';
 
-export default new (class LocalStorageInitializer {
+class LocalStorageInitializer {
   async initializeLastStaking(): Promise<void> {
     await localStorageManager.setItem('lastStaking', JSON.stringify({}));
   }
@@ -28,7 +29,7 @@ export default new (class LocalStorageInitializer {
     const network = extensionUtils.getNetwork().name;
     const wallet: WalletConfig =
       walletName === 'newCreatedWallet' ? testContext.load('newCreatedWallet') : getTestWallet(walletName);
-    const keyAgentData = JSON.parse(wallet.backgroundStorage.keyAgentsByChain);
+    const keyAgentData = JSON.parse(String(wallet?.backgroundStorage?.keyAgentsByChain));
 
     await localStorageManager.setItem('keyAgentData', JSON.stringify(keyAgentData[network].keyAgentData));
   }
@@ -40,10 +41,10 @@ export default new (class LocalStorageInitializer {
       walletName === 'newCreatedWallet' ? testContext.load('newCreatedWallet') : getTestWallet(walletName);
     // Initialize 'Lock' only for TestAutomationWallet where we are triggering passphrase tests
     if (walletName === 'TestAutomationWallet')
-      await localStorageManager.setItem('lock', wallet.walletLocalStorageData.lock);
+      await localStorageManager.setItem('lock', String(wallet?.walletLocalStorageData?.lock));
     testContext.saveWithOverride('activeWallet', walletName);
-    await localStorageManager.setItem('wallet', wallet.walletLocalStorageData.wallet);
-    await localStorageManager.setItem('analyticsAccepted', wallet.walletLocalStorageData.analyticsAccepted);
+    await localStorageManager.setItem('wallet', String(wallet?.walletLocalStorageData?.wallet));
+    await localStorageManager.setItem('analyticsAccepted', String(wallet?.walletLocalStorageData?.analyticsAccepted));
     await localStorageManager.setItem('showDappBetaModal', 'false');
     await initializeBrowserStorage(wallet);
     await this.initializeAppSettings();
@@ -56,4 +57,6 @@ export default new (class LocalStorageInitializer {
     await this.initializeWallet(walletName);
     await browser.refresh();
   };
-})();
+}
+
+export default new LocalStorageInitializer();
