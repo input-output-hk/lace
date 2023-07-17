@@ -12,7 +12,7 @@ import {
 } from '.';
 
 jest.mock('../matomo/MatomoClient');
-jest.mock('../posthog/PostHogClient');
+jest.mock('../postHog/PostHogClient');
 jest.mock('../getUserIdService', () => ({
   getUserIdService: jest.fn().mockReturnValue(userIdServiceMock)
 }));
