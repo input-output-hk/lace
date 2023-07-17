@@ -119,3 +119,13 @@ When(/^I enter "([^"]*)" into the search bar on "Select NFTs" drawer$/, async (s
 Then(/^I see no results for "Select NFTs" drawer$/, async () => {
   await nftCreateFolderAssert.assertNoResultsReturned();
 });
+
+Then(/^I click NFT with name "([^"]*)"$/, async (nftName: string) => {
+  const nft = await NftSelectNftsPage.getNftByName(nftName);
+  await nft.waitForClickable();
+  await nft.click();
+});
+
+Then(/^NFT with name "([^"]*)" (is|is not) selected$/, async (nftName: string, shouldBeSelected: 'is' | 'is not') => {
+  await nftCreateFolderAssert.assertIsNFTSelected(nftName, shouldBeSelected === 'is');
+});
