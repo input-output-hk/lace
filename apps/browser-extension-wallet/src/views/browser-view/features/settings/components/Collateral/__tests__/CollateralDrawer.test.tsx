@@ -99,6 +99,11 @@ jest.mock('@lace/common', () => {
   };
 });
 
+jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
+  ...jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService'),
+  getUserIdService: jest.fn()
+}));
+
 const testIds = {
   collateralSend: 'collateral-send',
   collateralPassword: 'collateral-password',
