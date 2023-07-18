@@ -7,6 +7,7 @@ import StakingPage from '../elements/staking/stakingPage';
 
 class StakingPageObject {
   async clickStakePoolWithName(poolName: string) {
+    await StakingPage.stakingPoolWithName(poolName).waitForClickable();
     await StakingPage.stakingPoolWithName(poolName).click();
   }
 
