@@ -32,8 +32,24 @@ export const MultiDelegationStaking = (): JSX.Element => {
   const {
     getKeyAgentType,
     inMemoryWallet,
-    walletUI: { cardanoCoin }
-  } = useWalletStore();
+    walletUI: { cardanoCoin },
+    stakePoolSearchResults,
+    stakePoolSearchResultsStatus,
+    fetchStakePools,
+    fetchNetworkInfo,
+    networkInfo,
+    blockchainProvider
+  } = useWalletStore((state) => ({
+    getKeyAgentType: state.getKeyAgentType,
+    inMemoryWallet: state.inMemoryWallet,
+    walletUI: { cardanoCoin: state.walletUI.cardanoCoin },
+    stakePoolSearchResults: state.stakePoolSearchResults,
+    stakePoolSearchResultsStatus: state.stakePoolSearchResultsStatus,
+    fetchStakePools: state.fetchStakePools,
+    networkInfo: state.networkInfo,
+    fetchNetworkInfo: state.fetchNetworkInfo,
+    blockchainProvider: state.blockchainProvider
+  }));
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
 
@@ -59,7 +75,13 @@ export const MultiDelegationStaking = (): JSX.Element => {
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,
         currencyStoreFiatCurrency: fiatCurrency,
-        walletManagerExecuteWithPassword: executeWithPassword
+        walletManagerExecuteWithPassword: executeWithPassword,
+        walletStoreStakePoolSearchResults: stakePoolSearchResults,
+        walletStoreStakePoolSearchResultsStatus: stakePoolSearchResultsStatus,
+        walletStoreFetchStakePools: fetchStakePools,
+        walletStoreFetchNetworkInfo: fetchNetworkInfo,
+        walletStoreNetworkInfo: networkInfo,
+        walletStoreBlockchainProvider: blockchainProvider
       }}
     >
       <Staking theme={theme.name} />

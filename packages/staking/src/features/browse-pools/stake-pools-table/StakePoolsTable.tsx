@@ -1,38 +1,56 @@
-import { Wallet } from '@lace/cardano';
-import { getRandomIcon } from '@lace/common';
-import { useMemo } from 'react';
+import { StakePoolItemBrowserProps, Wallet } from '@lace/cardano';
+import { Search, getRandomIcon } from '@lace/common';
+import { Box, Flex } from '@lace/ui';
+import debounce from 'lodash/debounce';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../../outside-handles-provider';
+import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { useStakePoolDetails } from '../../store';
+import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
-import { StakePoolSortOptions, StakePoolTableBrowser, StakePoolTableBrowserProps } from './StakePoolTableBrowser';
+import { StakePoolSortOptions, StakePoolTableBrowser } from './StakePoolTableBrowser';
 
 type StakePoolsTableProps = {
-  stakePools: Wallet.Cardano.StakePool[];
-  loadMoreData: StakePoolTableBrowserProps['loadMoreData'];
-  isSearching: boolean;
-  totalResultCount: number;
-  fetchingPools: boolean;
-  isLoadingList: boolean;
+  onStake: (id: StakePoolItemBrowserProps['id']) => void;
   scrollableTargetId: string;
-  sort: StakePoolSortOptions;
-  setSort: (options: StakePoolSortOptions) => void;
 };
 
-export const StakePoolsTable = ({
-  stakePools,
-  loadMoreData,
-  totalResultCount,
-  isSearching,
-  fetchingPools,
-  isLoadingList,
-  scrollableTargetId,
-  sort,
-  setSort,
-}: StakePoolsTableProps) => {
-  const { delegationStoreSetSelectedStakePool, walletStoreWalletUICardanoCoin } = useOutsideHandles();
-  const { setIsDrawerVisible } = useStakePoolDetails();
+const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
+  field: 'apy',
+  order: 'desc',
+};
+
+const searchDebounce = 300;
+const defaultFetchLimit = 10;
+
+export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTableProps) => {
   const { t } = useTranslation();
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [isSearching, setIsSearching] = useState<boolean>(true);
+  const [isLoadingList, setIsLoadingList] = useState<boolean>(true);
+  const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
+  const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
+  const [skip, setSkip] = useState<number>(0);
+
+  const { setIsDrawerVisible } = useStakePoolDetails();
+
+  const {
+    walletStoreWalletUICardanoCoin: cardanoCoin,
+    walletStoreBlockchainProvider: blockchainProvider,
+    delegationStoreSetSelectedStakePool: setSelectedStakePool,
+    walletStoreStakePoolSearchResults: {
+      pageResults,
+      totalResultCount,
+      skip: searchSkip = 0,
+      searchQuery,
+      searchFilters,
+    },
+    walletStoreStakePoolSearchResultsStatus,
+    walletStoreFetchStakePools: fetchStakePools,
+  } = useOutsideHandles();
+
+  const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
+
   const tableHeaderTranslations = {
     apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros'),
     cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost'),
@@ -40,44 +58,89 @@ export const StakePoolsTable = ({
     saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation'),
   };
 
-  const items = useMemo(
+  const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
+
+  useEffect(() => {
+    // Close pool details drawer & fetch pools on mount, network switching, searchValue change and sort change
+    setIsLoadingList(true);
+    setIsDrawerVisible(false);
+    debouncedSearch({ searchString: searchValue, sort });
+  }, [blockchainProvider, searchValue, sort, debouncedSearch, setIsDrawerVisible]);
+
+  const loadMoreData = () => fetchStakePools({ searchString: searchValue, skip: skip + defaultFetchLimit, sort });
+
+  useEffect(() => {
+    // Check query parameters to see if it's making a new search
+    const queryMatches = searchQuery === searchValue;
+    const filterMatch = searchFilters?.field === sort?.field && searchFilters?.order === sort?.order;
+    setIsSearching(!queryMatches || !filterMatch);
+  }, [searchQuery, searchFilters, searchValue, sort]);
+
+  useEffect(() => {
+    console.log('pageResults', pageResults);
+    // Update stake pool list and new offset position
+    setStakePools((prevPools: Wallet.StakePoolSearchResults['pageResults']) =>
+      searchSkip === 0 ? pageResults : [...prevPools, ...pageResults]
+    );
+    setSkip(searchSkip);
+    setIsLoadingList(false);
+  }, [pageResults, searchSkip]);
+
+  const onSearch = (searchString: string) => {
+    setIsSearching(true);
+    setSearchValue(searchString);
+  };
+
+  const list = useMemo(
     () =>
-      stakePools.map((pool) => {
-        const stakePool = Wallet.util.stakePoolTransformer({
-          cardanoCoin: walletStoreWalletUICardanoCoin,
-          stakePool: pool,
-        });
+      stakePools?.map((pool: Wallet.Cardano.StakePool) => {
+        const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
 
         return {
-          ...stakePool,
           logo,
-          onClick: () => {
-            delegationStoreSetSelectedStakePool({ ...pool, logo });
+          ...stakePool,
+          onClick: (): void => {
+            setSelectedStakePool({ logo, ...pool });
             setIsDrawerVisible(true);
           },
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          onStake: () => {},
+          onStake: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, poolId: string) => {
+            e.stopPropagation();
+            setSelectedStakePool(pool);
+            onStake(poolId);
+          },
         };
-      }),
-    [delegationStoreSetSelectedStakePool, setIsDrawerVisible, stakePools, walletStoreWalletUICardanoCoin]
+      }) || [],
+    [stakePools, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, onStake]
   );
 
   return (
-    <StakePoolTableBrowser
-      items={items}
-      loadMoreData={loadMoreData}
-      locale={{ emptyText: true }}
-      // TODO: there are too many loading states and it's confusing, we should refactor this and reduce them
-      // do not show loader if we are already searching/filtering
-      total={isSearching ? 0 : totalResultCount}
-      emptyPlaceholder={!fetchingPools && !isSearching && <StakePoolsTableEmpty />}
-      // Show skeleton if it's loading the list while a search is not being performed
-      showSkeleton={isLoadingList && !isSearching}
-      scrollableTargetId={scrollableTargetId}
-      translations={tableHeaderTranslations}
-      activeSort={sort}
-      setActiveSort={setSort}
-    />
+    <Flex flexDirection={'column'} alignItems={'stretch'} data-testid="stake-pool-table">
+      <Search
+        className={styles.search}
+        withSearchIcon
+        inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}
+        onChange={onSearch}
+        data-testid="search-input"
+        loading={fetchingPools}
+      />
+      <Box mt={'$32'}>
+        <StakePoolTableBrowser
+          items={list}
+          loadMoreData={loadMoreData}
+          locale={{ emptyText: true }}
+          // TODO: there are too many loading states and it's confusing, we should refactor this and reduce them
+          // do not show loader if we are already searching/filtering
+          total={isSearching ? 0 : totalResultCount}
+          emptyPlaceholder={!fetchingPools && !isSearching && <StakePoolsTableEmpty />}
+          // Show skeleton if it's loading the list while a search is not being performed
+          showSkeleton={isLoadingList && !isSearching}
+          scrollableTargetId={scrollableTargetId}
+          translations={tableHeaderTranslations}
+          activeSort={sort}
+          setActiveSort={setSort}
+        />
+      </Box>
+    </Flex>
   );
 };
