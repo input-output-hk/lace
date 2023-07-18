@@ -6,6 +6,7 @@ import BigNumber from 'bignumber.js';
 import cn from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { TranslationKey } from '../../i18n';
 import MoonIcon from './moon.component.svg';
 import { StakePoolInfo } from './StakePoolInfo';
 import styles from './StakingInfoCard.module.scss';
@@ -29,6 +30,8 @@ const formatNumericValue = (val: number | string, suffix: number | string): Reac
   </>
 );
 
+type Status = 'retired' | 'saturated';
+
 export type StakingInfoCardProps = {
   className?: string;
   coinBalance: number;
@@ -46,7 +49,17 @@ export type StakingInfoCardProps = {
   popupView?: boolean;
   cardanoCoinSymbol: string;
   markerColor?: string;
-  status?: 'retired' | 'saturated';
+  status?: Status;
+};
+
+const mapOfStatusToIcon: Record<Status, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  retired: MoonIcon,
+  saturated: WarningIon,
+};
+
+const mapOfStatusToLabel: Record<Status, TranslationKey> = {
+  retired: 'overview.stakingInfoCard.poolRetired',
+  saturated: 'overview.stakingInfoCard.poolSaturated',
 };
 
 // eslint-disable-next-line complexity
@@ -67,7 +80,7 @@ export const StakingInfoCard = ({
   popupView,
   cardanoCoinSymbol,
   markerColor,
-  status,
+  status = 'retired',
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -85,8 +98,11 @@ export const StakingInfoCard = ({
               id={id}
               onClick={onStakePoolSelect}
             />
-            {status === 'retired' && <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={MoonIcon} />}
-            {status === 'saturated' && <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={WarningIon} />}
+            {(status === 'retired' || status === 'saturated') && (
+              <Tooltip content={t(mapOfStatusToLabel[status])}>
+                <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={mapOfStatusToIcon[status]} />
+              </Tooltip>
+            )}
           </Flex>
         </div>
         <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
