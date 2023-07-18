@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import NftsPage from '../elements/NFTs/nftsPage';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
@@ -8,6 +9,7 @@ import { Asset } from '../data/Asset';
 import testContext from '../utils/testContext';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
+import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -158,6 +160,52 @@ class NftCreateFolderAssert {
     const nft = await NftSelectNftsPage.getNftByName(nftName);
     const nftWithCheckmark = await nft.$(NftSelectNftsPage.NFT_ITEM_SELECTED_CHECKMARK);
     await nftWithCheckmark.waitForDisplayed({ reverse: !shouldBeSelected });
+  }
+
+  async assertSeeFolderOnNftsList(folderName: string, shouldSee: boolean) {
+    const nftFolder = await NftsPage.getFolder(folderName);
+    if (shouldSee) await nftFolder.waitForDisplayed();
+    else expect(nftFolder).to.be.undefined;
+  }
+
+  async verifyNftCounterOnFolderPageMatchesNumberOfNfts() {
+    const displayedCount = (await NftsFolderPage.nftCounter.getText()).slice(1, -1);
+    const realNftCount = String(await NftsFolderPage.nfts.length);
+    expect(displayedCount).to.equal(realNftCount);
+  }
+
+  async verifyNftItemOnFolderPage(nftItem: WebdriverIO.Element) {
+    await nftItem.waitForDisplayed();
+    await nftItem.$(NftsFolderPage.NFT_IMAGE).waitForDisplayed();
+    await nftItem.$(NftsFolderPage.NFT_NAME).waitForDisplayed();
+  }
+
+  async assertSeeNftItemOnFolderPage(nftName: string, shouldSee: boolean) {
+    const nft = await NftsFolderPage.getNft(nftName);
+    if (shouldSee) {
+      await this.verifyNftItemOnFolderPage(nft);
+    } else {
+      expect(nft).to.be.undefined;
+    }
+  }
+
+  async assertSeeFolderPage(folderName: string, mode: 'extended' | 'popup') {
+    await (mode === 'extended'
+      ? NftsFolderPage.drawerHeaderCloseButton.waitForClickable()
+      : NftsFolderPage.drawerHeaderBackButton.waitForClickable());
+
+    await NftsFolderPage.title.waitForDisplayed();
+    expect(await NftsFolderPage.title.getText()).to.equal(folderName);
+
+    await NftsFolderPage.nftCounter.waitForDisplayed();
+    await this.verifyNftCounterOnFolderPageMatchesNumberOfNfts();
+
+    await NftsFolderPage.addNftButton.waitForDisplayed();
+    expect(await NftsFolderPage.nfts.length).to.be.greaterThanOrEqual(1);
+
+    for (const nftItem of await NftsFolderPage.nfts) {
+      await this.verifyNftItemOnFolderPage(nftItem);
+    }
   }
 }
 

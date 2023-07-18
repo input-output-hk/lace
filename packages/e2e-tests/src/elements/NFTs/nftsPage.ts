@@ -8,6 +8,7 @@ class NftsPage {
   protected NFT_CONTAINER = '[data-testid="nft-item"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
   public NFT_NAME = '[data-testid="nft-item-name"]';
+  protected FOLDER_CONTAINER = '[data-testid="folder-item"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -33,6 +34,10 @@ class NftsPage {
     return this.listContainer.$$(this.NFT_CONTAINER);
   }
 
+  get folderContainers(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return this.listContainer.$$(this.FOLDER_CONTAINER);
+  }
+
   async getNftContainer(name: string): Promise<WebdriverIO.Element> {
     return (await this.nftContainers.find(
       async (item) => (await item.$(this.NFT_NAME).getText()) === name
@@ -47,6 +52,12 @@ class NftsPage {
   async getNftName(name: string): Promise<WebdriverIO.Element> {
     const nftContainer = await this.getNftContainer(name);
     return nftContainer.$(this.NFT_NAME);
+  }
+
+  async getFolder(name: string): Promise<WebdriverIO.Element> {
+    return (await this.folderContainers.find(
+      async (item) => (await item.$(this.NFT_NAME).getText()) === name
+    )) as WebdriverIO.Element;
   }
 }
 
