@@ -295,6 +295,17 @@ class DrawerSendExtendedAssert {
       );
     }
   }
+
+  assertSeeAddressWithNameInRecipientsAddressInput = async (address: string, name: string) => {
+    await webTester.waitUntilSeeElementContainingText(name);
+    const text = await webTester.getTextValueFromElement(new AddressInput().container());
+    await expect(text).contains(address);
+  };
+
+  assertSeeEmptyRecipientsAddressInput = async (index?: number) => {
+    const text = await webTester.getTextValueFromElement(new AddressInput(index).container());
+    await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
+  };
 }
 
 export default new DrawerSendExtendedAssert();

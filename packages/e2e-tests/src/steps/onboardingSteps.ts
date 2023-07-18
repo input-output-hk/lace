@@ -483,6 +483,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
       wallet: await localStorageManager.getItem('wallet'),
       lock: await localStorageManager.getItem('lock'),
       keyAgentData: await localStorageManager.getItem('keyAgentData'),
+      analyticsAccepted: await localStorageManager.getItem('analyticsAccepted'),
       appSettings: defaultAppSettings
     },
     backgroundStorage: {

@@ -2,7 +2,7 @@
 Feature: Staking Page - Extended Browser View
 
   Background:
-    Given Lace is ready for test
+    Given Wallet is synced
 
   @LW-2424 @Testnet @Mainnet
   Scenario: Extended View - Staking page is present with title and counter
