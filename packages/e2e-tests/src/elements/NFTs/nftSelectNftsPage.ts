@@ -17,10 +17,6 @@ class NftSelectNftsPage extends CommonDrawerElements {
     return $(this.COUNTER);
   }
 
-  get nftItemSelectedCheckmark() {
-    return $$(this.NFT_ITEM_SELECTED_CHECKMARK);
-  }
-
   get clearButton() {
     return $(this.CLEAR_BUTTON);
   }
