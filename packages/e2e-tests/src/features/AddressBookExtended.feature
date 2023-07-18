@@ -206,7 +206,7 @@ Feature: Address book - extended view
     When I click address on the list with name "Byron"
     Then I see address detail page in extended mode
     When I press keyboard Enter button
-    Then An "browserView.addressBook.editAddress.title" text is displayed
+    Then I see "Edit address" drawer in extended mode
     When I press keyboard Escape button
     And I see address detail page in extended mode
     When I press keyboard Enter button

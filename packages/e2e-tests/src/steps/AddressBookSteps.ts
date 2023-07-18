@@ -19,7 +19,6 @@ import { browser } from '@wdio/globals';
 
 Given(
   /^I don't have any addresses added to my address book in (popup|extended) mode$/,
-  {},
   async (mode: 'popup' | 'extended') => {
     await indexedDB.clearAddressBook();
     await browser.pause(500);
@@ -176,6 +175,10 @@ When(
     }
   }
 );
+
+Then(/^I see "Edit address" drawer in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await EditAddressDrawerAssert.assertSeeEditAddressDrawer(mode);
+});
 
 When(/^I click "(Cancel|Done)" button on "Edit address" drawer$/, async (button: 'Cancel' | 'Done') => {
   switch (button) {
