@@ -596,3 +596,14 @@ Then(/^I enter (correct|incorrect) password and confirm the transaction$/, async
     type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
   await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
 });
+
+Then(
+  /^recipients address input contains address "([^"]*)" and name "([^"]*)"$/,
+  async (lastCharsOfAddress: string, addressName: string) => {
+    await drawerSendExtendedAssert.assertSeeAddressWithNameInRecipientsAddressInput(lastCharsOfAddress, addressName);
+  }
+);
+
+Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
+  await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
+});

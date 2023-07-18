@@ -80,9 +80,9 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And click "Add address" button 2 in address bar
     And I click address on the list with name "Shelley"
     And click "Remove address" button 1 in address bar
-    Then address input 1 is empty
+    Then recipients address input 1 is empty
     When click "Remove address" button 2 in address bar
-    Then address input 2 is empty
+    Then recipients address input 2 is empty
 
   @LW-3265
   Scenario: Extended-view - use new invalid address in bundle outputs
