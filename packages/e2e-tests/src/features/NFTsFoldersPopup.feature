@@ -105,7 +105,7 @@ Feature: NFT - Folders - Popup view
     And I click "Next" button on "Select NFTs" page
     Then I see a toast with text: "Folder created successfully"
     And I do not see "Select NFTs" page in popup mode
-    And I see folder with name "Sample NFT folder" on the nfts list
+    And I see folder with name "Sample NFT folder" on the NFTs list
     When I click the NFT folder with name "Sample NFT folder"
     Then I see "Sample NFT folder" NFT folder page in popup mode
     And I see NFT with name "Ibilecoin" on the NFT folder page

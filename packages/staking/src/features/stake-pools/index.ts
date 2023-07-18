@@ -1,1 +1,0 @@
-export { stakePoolsMock } from './stakePools';

@@ -19,14 +19,14 @@ class NftCreateFolderAssert {
     }
   }
 
-  async assertSeeDrawerNavigation(mode: 'extended' | 'popup') {
+  async assertSeeDrawerNavigation(mode: 'extended' | 'popup', drawerTitleTranslationKey: string) {
     if (mode === 'popup') {
       await NftCreateFolderPage.drawerHeaderBackButton.waitForClickable();
     } else {
       await NftCreateFolderPage.drawerBody.waitForClickable();
       await NftCreateFolderPage.drawerNavigationTitle.waitForDisplayed();
       await expect(await NftCreateFolderPage.drawerNavigationTitle.getText()).to.equal(
-        await t('browserView.nfts.folderDrawer.header')
+        await t(drawerTitleTranslationKey)
       );
       await NftCreateFolderPage.drawerHeaderCloseButton.waitForDisplayed();
     }
@@ -34,7 +34,7 @@ class NftCreateFolderAssert {
 
   async assertSeeCreateFolderPage(shouldSee: boolean, mode: 'extended' | 'popup') {
     if (shouldSee) {
-      await this.assertSeeDrawerNavigation(mode);
+      await this.assertSeeDrawerNavigation(mode, 'browserView.nfts.folderDrawer.header');
       await NftCreateFolderPage.drawerHeaderTitle.waitForClickable();
       await expect(await NftCreateFolderPage.drawerHeaderTitle.getText()).to.equal(
         await t('browserView.nfts.folderDrawer.nameForm.title')
@@ -70,7 +70,7 @@ class NftCreateFolderAssert {
 
   async assertSeeSelectNFTsPage(shouldSee: boolean, mode: 'extended' | 'popup') {
     if (shouldSee) {
-      await this.assertSeeDrawerNavigation(mode);
+      await this.assertSeeDrawerNavigation(mode, 'browserView.nfts.folderDrawer.header');
       await NftCreateFolderPage.drawerHeaderTitle.waitForDisplayed();
       await expect(await NftCreateFolderPage.drawerHeaderTitle.getText()).to.equal(
         await t('browserView.nfts.folderDrawer.assetPicker.title')
@@ -164,8 +164,7 @@ class NftCreateFolderAssert {
 
   async assertSeeFolderOnNftsList(folderName: string, shouldSee: boolean) {
     const nftFolder = await NftsPage.getFolder(folderName);
-    if (shouldSee) await nftFolder.waitForDisplayed();
-    else expect(nftFolder).to.be.undefined;
+    shouldSee ? await nftFolder.waitForDisplayed() : expect(nftFolder).to.be.undefined;
   }
 
   async verifyNftCounterOnFolderPageMatchesNumberOfNfts() {
@@ -190,9 +189,7 @@ class NftCreateFolderAssert {
   }
 
   async assertSeeFolderPage(folderName: string, mode: 'extended' | 'popup') {
-    await (mode === 'extended'
-      ? NftsFolderPage.drawerHeaderCloseButton.waitForClickable()
-      : NftsFolderPage.drawerHeaderBackButton.waitForClickable());
+    await this.assertSeeDrawerNavigation(mode, 'browserView.nfts.folderDrawer.existingFolderHeader');
 
     await NftsFolderPage.title.waitForDisplayed();
     expect(await NftsFolderPage.title.getText()).to.equal(folderName);

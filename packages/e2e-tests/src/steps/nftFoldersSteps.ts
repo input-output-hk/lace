@@ -135,7 +135,7 @@ Then(/^NFT with name "([^"]*)" (is|is not) selected$/, async (nftName: string, s
 });
 
 Then(
-  /^I (see|do not see) folder with name "([^"]*)" on the nfts list$/,
+  /^I (see|do not see) folder with name "([^"]*)" on the NFTs list$/,
   async (shouldSee: 'see' | 'do not see', folderName: string) => {
     await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, shouldSee === 'see');
   }
