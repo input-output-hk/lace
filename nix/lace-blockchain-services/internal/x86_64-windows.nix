@@ -8,7 +8,7 @@ let
 in rec {
   common = import ./common.nix { inherit inputs targetSystem; };
   package = lace-blockchain-services;
-  installer = lace-blockchain-services-zip;
+  installer = unsignedInstaller;
   inherit (common) cardano-node ogmios;
 
   patchedGo = pkgs.go.overrideAttrs (drv: {
@@ -185,6 +185,77 @@ in rec {
 
     mkdir -p $out
     mv sigbreak.exe $out/
+  '';
+
+  make-windows-installer = let
+    project = common.haskell-nix.project {
+      compiler-nix-name = "ghc8107";
+      projectFileName = "cabal.project";
+      src = ./make-windows-installer;
+    };
+  in project.make-windows-installer.components.exes.make-windows-installer;
+
+  nsis = import ./nsis.nix { inherit pkgs; };
+
+  unsignedUninstaller = pkgs.runCommand "unsigned-uninstaller" {
+    buildInputs = [
+      make-windows-installer
+      pkgs.glibcLocales  # ← or else: commitBuffer: invalid argument (invalid character)
+      nsis
+      cardano-js-sdk.fresherPkgs.wineWowPackages.stableFull
+    ];
+  } ''
+    # ↓ or else: commitBuffer: invalid argument (invalid character)
+    export LANG=en_US.UTF-8
+
+    make-windows-installer \
+      --spaced-name ${lib.escapeShellArg common.prettyName} \
+      --install-dir ${lib.escapeShellArg common.prettyName} \
+      --full-version "1.2.3.4" \
+      --out-name "installer.exe" \
+      --icon-path icon.ico \
+      --banner-bmp banner.bmp \
+      --lock-file '$APPDATA\lace-blockchain-services\instance.lock' \
+      --shortcut-exe "lace-blockchain-services.exe" \
+      --contents-dir 'contents\*'
+
+    makensis uninstaller.nsi -V4
+
+    mkdir home
+    export HOME="$(realpath ./home)"
+    wine tempinstaller.exe /S
+
+    mkdir -p $out
+    cp -v installer.nsi $HOME/.wine/drive_c/uninstall.exe $out/
+  '';
+
+  unsignedInstaller = let
+    revShort =
+      if inputs.self ? shortRev
+      then builtins.substring 0 9 inputs.self.rev
+      else "dirty";
+  in pkgs.runCommand "unsigned-installer" {
+    buildInputs = [
+      pkgs.glibcLocales  # ← or else: commitBuffer: invalid argument (invalid character)
+      nsis
+    ];
+  } ''
+    cp ${unsignedUninstaller}/* ./
+    cp ${icon} icon.ico
+    cp ${./windows-nsis-banner.bmp} banner.bmp
+
+    ln -s ${mkPackage { withJS = true; }} contents
+
+    makensis installer.nsi -V4
+
+    mkdir -p $out
+    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.exe
+
+    mv installer.exe "$target"
+
+    # Make it downloadable from Hydra:
+    mkdir -p $out/nix-support
+    echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
   '';
 
   # -------------------------------------- cardano-js-sdk ------------------------------------------ #
