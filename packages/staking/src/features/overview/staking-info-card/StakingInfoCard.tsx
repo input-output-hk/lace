@@ -1,13 +1,17 @@
+import Icon from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
 import { getRandomIcon } from '@lace/common';
+import { Flex } from '@lace/ui';
 import BigNumber from 'bignumber.js';
 import cn from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import MoonIcon from './moon.component.svg';
 import { StakePoolInfo } from './StakePoolInfo';
 import styles from './StakingInfoCard.module.scss';
 import { Stats } from './Stats';
 import { Tooltip } from './StatsTooltip';
+import WarningIon from './warning.component.svg';
 
 const DEFAULT_DECIMALS = 2;
 
@@ -42,8 +46,10 @@ export type StakingInfoCardProps = {
   popupView?: boolean;
   cardanoCoinSymbol: string;
   markerColor?: string;
+  status?: 'retired' | 'saturated';
 };
 
+// eslint-disable-next-line complexity
 export const StakingInfoCard = ({
   className,
   coinBalance,
@@ -61,6 +67,7 @@ export const StakingInfoCard = ({
   popupView,
   cardanoCoinSymbol,
   markerColor,
+  status,
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -70,7 +77,7 @@ export const StakingInfoCard = ({
       <div className={styles.row}>
         <div className={styles.col}>
           {markerColor && <div className={styles.marker} style={{ background: markerColor }} />}
-          <div>
+          <Flex justifyContent={'space-between'} alignItems={'center'} w={'$fill'}>
             <StakePoolInfo
               logo={logo ?? getRandomIcon({ id: id.toString(), size: 30 })}
               name={name}
@@ -78,7 +85,9 @@ export const StakingInfoCard = ({
               id={id}
               onClick={onStakePoolSelect}
             />
-          </div>
+            {status === 'retired' && <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={MoonIcon} />}
+            {status === 'saturated' && <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={WarningIon} />}
+          </Flex>
         </div>
         <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
           <Stats
