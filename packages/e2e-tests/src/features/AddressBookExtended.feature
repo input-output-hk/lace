@@ -13,11 +13,7 @@ Feature: Address book - extended view
   Scenario: Extended-view - Address Book - Addresses list verification
     Given I have 3 addresses in my address book in extended mode
     When I see address count: 3
-    Then address list is displayed and each row consists of:
-      | Avatar  |
-      | Name    |
-      | Address |
-
+    Then address list is displayed and each row consists of avatar, name and address
 
   @LW-4464 @Smoke
   Scenario: Extended-view - Address Book - Add new address "Shelley_manual"
@@ -28,7 +24,7 @@ Feature: Address book - extended view
     When I fill address form with "Shelley_manual" name and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
     And I click "Save address" button on "Add new address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.addAddress"
-    And I see address with name "Shelley_manual" and address "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" on the list
+    And I see address row with name "Shelley_manual" and address "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" on the list in extended mode
 
   @LW-4464
   Scenario Outline: Extended-view - Address Book - Add new address <wallet_name>
@@ -39,7 +35,7 @@ Feature: Address book - extended view
     When I fill address form with "<wallet_name>" name and "<address>" address
     And I click "Save address" button on "Add new address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.addAddress"
-    And I see address with name "<wallet_name>" and address "<address>" on the list
+    And I see address row with name "<wallet_name>" and address "<address>" on the list in extended mode
     Examples:
       | wallet_name          | address                                                                                                            |
       | Byron_manual         | 37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp |
@@ -87,7 +83,7 @@ Feature: Address book - extended view
     And I click "Delete" button on address details page
     Then I see delete address modal
     When I click "Delete address" button on delete address modal
-    Then I don't see address with name "Byron" and address "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" on the list
+    Then I don't see address row with name "Byron" and address "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" on the list in extended mode
 
   @LW-4467
   Scenario: Extended-view - Address Book - Remove address and cancel
@@ -126,7 +122,7 @@ Feature: Address book - extended view
     And I fill address form with "<wallet_name>" name and "<address>" address
     And I click "Done" button on "Edit address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.editAddress"
-    And I see address with name "<wallet_name>" and address "<address>" on the list
+    And I see address row with name "<wallet_name>" and address "<address>" on the list in extended mode
     Examples:
       | edited_address | wallet_name    | address                                                                                                            |
       | Shelley        | Shelley_edited | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja       |
@@ -179,10 +175,7 @@ Feature: Address book - extended view
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page
     When I close the drawer by clicking close button
-    Then address list is displayed and each row consists of:
-      | Avatar  |
-      | Name    |
-      | Address |
+    Then address list is displayed and each row consists of avatar, name and address
 
   @LW-4536
   Scenario: Extended-view - Address Book - Edit address and click back button
@@ -252,7 +245,7 @@ Feature: Address book - extended view
     Then Contact "Name field is required" name error and "empty" address error are displayed
 
   @LW-4781  @Pending
-  #Bug LW-7147
+  #Bug LW-7419
   Scenario: Extended-view - Address Book - No error is displayed when leaving both fields empty
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page

@@ -1,4 +1,4 @@
-import { Then, When } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import AddressBookPageAssert from '../assert/addressBook/AddressBookPageAssert';
 import AddressBookPage from '../elements/addressbook/AddressBookPage';
 import AddressDetailsAssert from '../assert/addressBook/AddressDetailsAssert';
@@ -11,6 +11,45 @@ import EditAddressDrawer from '../elements/addressbook/EditAddressDrawer';
 import EditAddressDrawerAssert from '../assert/addressBook/EditAddressDrawerAssert';
 import testContext from '../utils/testContext';
 import commonAssert from '../assert/commonAssert';
+import { byron, getAddressByName, icarus, shelley } from '../data/AddressData';
+import indexedDB from '../fixture/indexedDB';
+import popupView from '../page/popupView';
+import extendedView from '../page/extendedView';
+import { browser } from '@wdio/globals';
+
+Given(
+  /^I don't have any addresses added to my address book in (popup|extended) mode$/,
+  {},
+  async (mode: 'popup' | 'extended') => {
+    await indexedDB.clearAddressBook();
+    await browser.pause(500);
+    await (mode === 'popup' ? popupView.visitAddressBook() : extendedView.visitAddressBook());
+    await AddressBookPageAssert.assertSeeAddressBookTitle();
+  }
+);
+
+Given(/^I have 3 addresses in my address book in (popup|extended) mode$/, async (mode: 'popup' | 'extended') => {
+  await indexedDB.clearAddressBook();
+  await indexedDB.insertAddress(shelley);
+  await indexedDB.insertAddress(byron);
+  await indexedDB.insertAddress(icarus);
+  await browser.pause(500);
+  if (mode === 'popup') {
+    await popupView.visitAddressBook();
+    await AddressBookPageAssert.assertSeeAddressBookTitle();
+  } else {
+    await extendedView.visitAddressBook();
+  }
+});
+
+Given(/^I open address book in (popup|extended) mode$/, async (mode: 'popup' | 'extended') => {
+  if (mode === 'popup') {
+    await popupView.visitAddressBook();
+    await AddressBookPageAssert.assertSeeAddressBookTitle();
+  } else {
+    await extendedView.visitAddressBook();
+  }
+});
 
 Then(/^I see address book title$/, async () => {
   await AddressBookPageAssert.assertSeeAddressBookTitle();
@@ -18,6 +57,32 @@ Then(/^I see address book title$/, async () => {
 
 Then(/^I see address count: ([\d+])$/, async (expectedNumber: number) => {
   await AddressBookPageAssert.assertSeeAddressCount(expectedNumber);
+});
+
+When(/^I click address on the list with name "([^"]*)"$/, async (addressName: string) => {
+  const selectedRow = await AddressBookPage.getAddressRowByName(addressName);
+  await selectedRow.click();
+});
+
+Then(
+  /^I (see|don't see) address row with name "([^"]*)" and address "([^"]*)" on the list in (extended|popup) mode$/,
+  async (shouldSee: string, name: string, address: string, mode: 'extended' | 'popup') => {
+    await AddressBookPageAssert.assertSeeAddressOnTheList(
+      name,
+      String(getAddressByName(address) ?? address),
+      shouldSee === 'see',
+      mode
+    );
+  }
+);
+
+Then(/^address list is displayed and each row consists of avatar, name and address/, async () => {
+  const rows = await AddressBookPage.getAddressListRows();
+  for (const row of rows) {
+    await row.$(AddressBookPage.ADDRESS_LIST_ITEM_AVATAR).waitForDisplayed();
+    await row.$(AddressBookPage.ADDRESS_LIST_ITEM_NAME).waitForDisplayed();
+    await row.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).waitForDisplayed();
+  }
 });
 
 When(/^I click "Add address" button on address book page$/, async () => {

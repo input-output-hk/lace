@@ -34,6 +34,29 @@ class AddressBookPageAssert {
     await AddressBookPage.addressListHeader.waitForDisplayed({ reverse: true });
     await AddressBookPage.addressList.waitForDisplayed({ reverse: true });
   };
+
+  assertSeeAddressOnTheList = async (name: string, address: string, shouldSee: boolean, mode: 'extended' | 'popup') => {
+    const addressRow = await AddressBookPage.getAddressRowByName(name);
+    if (shouldSee) {
+      await addressRow.waitForDisplayed();
+      await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_AVATAR).waitForDisplayed();
+      await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_NAME).waitForDisplayed();
+      await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).waitForDisplayed();
+      const actualAddress = await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).getText();
+      const expectedAddress1stPart = mode === 'extended' ? `${address.slice(0, 22)}` : `${address.slice(0, 8)}`;
+      const expectedAddress2ndPart = mode === 'extended' ? `${address.slice(-23)}` : `${address.slice(-3)}`;
+      expect(
+        actualAddress.startsWith(expectedAddress1stPart),
+        `ACTUAL DISPLAYED ADDRESS: ${actualAddress}\nEXPECTED 1ST PART OF ADDRESS: ${expectedAddress1stPart}`
+      ).to.be.true;
+      expect(
+        actualAddress.endsWith(expectedAddress2ndPart),
+        `ACTUAL DISPLAYED ADDRESS: ${actualAddress}\nEXPECTED 2ND PART OF ADDRESS: ${expectedAddress2ndPart}`
+      ).to.be.true;
+    } else {
+      expect(await addressRow).to.be.undefined;
+    }
+  };
 }
 
 export default new AddressBookPageAssert();
