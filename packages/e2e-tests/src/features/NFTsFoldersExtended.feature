@@ -128,6 +128,7 @@ Feature: NFT - Folders - Extended view
   @LW-7255
   Scenario: Extended-view - NFT Folders - Select NFTs page - clear button
     Given I navigate to "Select NFTs" page in extended mode
+    And I do not see "Clear" button next to NFTs counter
     When I select 5 NFTs
     Then I see "Clear" button next to NFTs counter
     When I click "Clear" button next to NFTs counter
@@ -136,5 +137,6 @@ Feature: NFT - Folders - Extended view
   @LW-7254
   Scenario: Extended-view - NFT Folders - Select NFTs page - selected NFTs counter
     Given I navigate to "Select NFTs" page in extended mode
+    And I do not see "Clear" button next to NFTs counter
     When I select 5 NFTs
     Then I see NFTs counter showing 5 selected NFTs

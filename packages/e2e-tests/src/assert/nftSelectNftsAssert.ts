@@ -3,14 +3,16 @@ import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 import { t } from '../utils/translationService';
 
 class NftSelectNftsAssert {
-  async assertSeeClearButton() {
-    await NftSelectNftsPage.clearButton.waitForDisplayed();
-    expect(await NftSelectNftsPage.clearButton.getText()).to.equal(await t('multipleSelection.clear'));
+  async assertSeeClearButton(shouldSee: boolean) {
+    await NftSelectNftsPage.clearButton.waitForClickable({ reverse: !shouldSee });
+    if (shouldSee) {
+      expect(await NftSelectNftsPage.clearButton.getText()).to.equal(await t('multipleSelection.clear'));
+    }
   }
 
   async assertCounterNumber(counter: number) {
     await NftSelectNftsPage.counter.waitForDisplayed();
-    expect(await NftSelectNftsPage.counterNumber.getText()).to.equal(counter.toString());
+    expect(await NftSelectNftsPage.counter.getText()).to.equal(String(counter));
   }
 }
 

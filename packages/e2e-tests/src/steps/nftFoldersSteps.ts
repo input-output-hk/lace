@@ -172,10 +172,11 @@ Then(/^I see NFTs counter showing (\d+) selected NFTs$/, async (counter: number)
   await NftSelectNftsAssert.assertCounterNumber(counter);
 });
 
-Then(/^I see "Clear" button next to NFTs counter$/, async () => {
-  await NftSelectNftsAssert.assertSeeClearButton();
+Then(/^I (see|do not see) "Clear" button next to NFTs counter$/, async (shouldSee: string) => {
+  await NftSelectNftsAssert.assertSeeClearButton(shouldSee === 'see');
 });
 
 When(/^I click "Clear" button next to NFTs counter$/, async () => {
+  await NftSelectNftsPage.clearButton.waitForClickable();
   await NftSelectNftsPage.clearButton.click();
 });

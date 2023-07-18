@@ -4,7 +4,6 @@ import SearchInput from '../searchInput';
 
 class NftSelectNftsPage extends CommonDrawerElements {
   private COUNTER = '[data-testid="assets-counter"]';
-  private COUNTER_NUMBER = '[data-testid="assets-counter"] p';
   private CLEAR_BUTTON = '[data-testid="assets-clear"]';
   private NEXT_BUTTON = '[data-testid="create-folder-drawer-asset-picker-cta"]';
   private ASSET_SELECTOR_CONTAINER = '[data-testid="asset-selector-wrapper"]';
@@ -13,15 +12,9 @@ class NftSelectNftsPage extends CommonDrawerElements {
   private NFT_CONTAINER = '[data-testid="nft-item"]';
   private NFT_NAME = '[data-testid="nft-item-name"]';
   public NFT_ITEM_SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
-  private DRAWER_CONTENT = '[data-testid="drawer-content"]';
-  private NFT_IMAGE = '[data-testid="nft-image"]';
 
   get counter() {
     return $(this.COUNTER);
-  }
-
-  get counterNumber() {
-    return $(this.COUNTER_NUMBER);
   }
 
   get nftItemSelectedCheckmark() {
@@ -69,8 +62,8 @@ class NftSelectNftsPage extends CommonDrawerElements {
 
   async selectNFTs(numberOfNFTs: number) {
     for (let i = 0; i < numberOfNFTs; i++) {
-      await $(this.DRAWER_CONTENT).$$(this.NFT_IMAGE)[i].waitForClickable();
-      await $(this.DRAWER_CONTENT).$$(this.NFT_IMAGE)[i].click();
+      await this.nfts[i].waitForClickable();
+      await this.nfts[i].click();
     }
   }
 }
