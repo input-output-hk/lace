@@ -107,3 +107,20 @@ Feature: NFT - Folders - Extended view
     Given I navigate to "Select NFTs" page in extended mode
     When I enter "some random phrase" into the search bar on "Select NFTs" drawer
     Then I see no results for "Select NFTs" drawer
+
+  @LW-7249
+  Scenario: Extended-view - NFT Folders - Creating a folder happy path
+    Given I navigate to NFTs extended page
+    And I click "Create folder" button on NFTs page
+    And I enter a folder name "Sample NFT folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    And I click NFT with name "Ibilecoin"
+    And I click NFT with name "Bison Coin"
+    When I click "Next" button on "Select NFTs" page
+    Then I see a toast with text: "Folder created successfully"
+    And I do not see "Select NFTs" page in extended mode
+    And I see folder with name "Sample NFT folder" on the NFTs list
+    When I click the NFT folder with name "Sample NFT folder"
+    Then I see "Sample NFT folder" NFT folder page in extended mode
+    And I see NFT with name "Ibilecoin" on the NFT folder page
+    And I see NFT with name "Bison Coin" on the NFT folder page
