@@ -4,7 +4,6 @@ import { defaultAppSettings, getTestWallet, TestWalletName, WalletConfig } from 
 import { getBackgroundStorageItem } from '../utils/browserStorage';
 import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
-import buttonAssert from '../assert/buttonAssert';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
@@ -223,10 +222,6 @@ Then(/^"Wallet password" page is displayed(| in "Forgot password" flow)$/, async
 
 Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
   await ModalAssert.assertSeeRestoringMultiAddressWalletModal();
-});
-
-Then(/^"([^"]*)?" button is (enabled|disabled)$/, async (text: string, expectedStatus: 'enabled' | 'disabled') => {
-  await buttonAssert.assertButtonIsEnabled(await t(text), expectedStatus === 'enabled');
 });
 
 Then(/^I accept "T&C" checkbox$/, async () => {

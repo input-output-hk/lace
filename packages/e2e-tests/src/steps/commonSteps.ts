@@ -11,7 +11,6 @@ import { t } from '../utils/translationService';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import localStorageManager from '../utils/localStorageManager';
 import networkManager from '../utils/networkManager';
-import { DrawerCommonExtended } from '../elements/drawerCommonExtended';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
 import { cleanBrowserStorage } from '../utils/browserStorage';
@@ -29,6 +28,7 @@ import menuMainExtended from '../elements/menuMainExtended';
 import { browser } from '@wdio/globals';
 import faqPageAssert from '../assert/faqPageAssert';
 import { visit } from '../utils/pageUtils';
+import CommonDrawerElements from '../elements/CommonDrawerElements';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -147,7 +147,7 @@ When(
 );
 
 When(/^I click outside the drawer$/, async () => {
-  await $(new DrawerCommonExtended().areaOutsideDrawer().toJSLocator()).click();
+  await new CommonDrawerElements().areaOutsideDrawer.click();
 });
 
 Then(/^Mnemonic is not stored in background storage$/, async () => {

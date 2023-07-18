@@ -3,6 +3,7 @@ import { ChainablePromiseElement } from 'webdriverio';
 
 class CommonDrawerElements {
   private DRAWER_BODY = '.ant-drawer-body';
+  private AREA_OUTSIDE_DRAWER = '.ant-drawer-mask';
   private DRAWER_NAVIGATION_TITLE = '[data-testid="drawer-navigation-title"]';
   private DRAWER_HEADER_BACK_BUTTON = '[data-testid="navigation-button-arrow"]';
   private DRAWER_HEADER_CLOSE_BUTTON = '[data-testid="navigation-button-cross"]';
@@ -31,6 +32,20 @@ class CommonDrawerElements {
 
   get drawerHeaderSubtitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DRAWER_HEADER_SUBTITLE);
+  }
+
+  get areaOutsideDrawer() {
+    return $(this.AREA_OUTSIDE_DRAWER);
+  }
+
+  async clickHeaderBackButton(): Promise<void> {
+    await this.drawerHeaderBackButton.waitForClickable();
+    await this.drawerHeaderBackButton.click();
+  }
+
+  async clickHeaderCloseButton(): Promise<void> {
+    await this.drawerHeaderCloseButton.waitForClickable();
+    await this.drawerHeaderCloseButton.click();
   }
 }
 
