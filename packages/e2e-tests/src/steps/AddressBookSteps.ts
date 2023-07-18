@@ -76,12 +76,7 @@ Then(
 );
 
 Then(/^address list is displayed and each row consists of avatar, name and address/, async () => {
-  const rows = await AddressBookPage.getAddressListRows();
-  for (const row of rows) {
-    await row.$(AddressBookPage.ADDRESS_LIST_ITEM_AVATAR).waitForDisplayed();
-    await row.$(AddressBookPage.ADDRESS_LIST_ITEM_NAME).waitForDisplayed();
-    await row.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).waitForDisplayed();
-  }
+  await AddressBookPageAssert.assertSeeEachAddressRow();
 });
 
 When(/^I click "Add address" button on address book page$/, async () => {

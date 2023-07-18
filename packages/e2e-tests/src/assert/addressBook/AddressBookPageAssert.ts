@@ -14,6 +14,7 @@ class AddressBookPageAssert {
     await AddressBookPage.pageTitle.waitForDisplayed();
     expect(await AddressBookPage.pageTitle.getText()).to.contain(await t('addressBook.sectionTitle'));
   };
+
   assertSeeAddressCount = async (expectedCount: number) => {
     await AddressBookPage.addressCounter.waitForDisplayed();
     const currentValue = await AddressBookPage.getCounterValue();
@@ -55,6 +56,15 @@ class AddressBookPageAssert {
       ).to.be.true;
     } else {
       expect(await addressRow).to.be.undefined;
+    }
+  };
+
+  assertSeeEachAddressRow = async () => {
+    const rows = await AddressBookPage.getAddressListRows();
+    for (const row of rows) {
+      await row.$(AddressBookPage.ADDRESS_LIST_ITEM_AVATAR).waitForDisplayed();
+      await row.$(AddressBookPage.ADDRESS_LIST_ITEM_NAME).waitForDisplayed();
+      await row.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).waitForDisplayed();
     }
   };
 }
