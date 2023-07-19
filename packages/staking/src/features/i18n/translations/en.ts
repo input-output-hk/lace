@@ -74,6 +74,7 @@ export const en: Translations = {
   'overview.stakingInfoCard.poolRetired': 'Pool retired',
   'overview.stakingInfoCard.poolSaturated': 'Pool over-saturated',
   'overview.stakingInfoCard.ros': 'ROS',
+  'overview.stakingInfoCard.tooltipFiatLabel': 'USD Value',
   'overview.stakingInfoCard.totalRewards': 'Total rewards',
   'overview.stakingInfoCard.totalStaked': 'Total staked',
   'overview.yourPoolsSection.heading': 'Your pools',
