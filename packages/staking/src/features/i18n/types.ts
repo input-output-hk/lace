@@ -134,6 +134,8 @@ type KeysStructure = {
       ros: '';
       totalRewards: '';
       totalStaked: '';
+      poolRetired: '';
+      poolSaturated: '';
     };
     yourPoolsSection: {
       heading: '';

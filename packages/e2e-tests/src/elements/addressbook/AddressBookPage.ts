@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 class AddressBookPage {
   private TITLE = '[data-testid="page-title"]';
   private COUNTER = '[data-testid="counter"]';
@@ -7,6 +8,10 @@ class AddressBookPage {
   private ADDRESS_BOOK_EMPTY_STATE_MESSAGE = '[data-testid="address-book-empty-state-message"]';
   private ADDRESS_LIST = '[data-testid="address-list"]';
   private ADDRESS_LIST_HEADER = '[data-testid="address-list-header"]';
+  private ADDRESS_LIST_ITEM = '[data-testid="address-list-item"]';
+  public ADDRESS_LIST_ITEM_AVATAR = '[data-testid="address-list-item-avatar"]';
+  public ADDRESS_LIST_ITEM_NAME = '[data-testid="address-list-item-name"]';
+  public ADDRESS_LIST_ITEM_ADDRESS = '[data-testid="address-list-item-address"]';
 
   get pageTitle() {
     return $(this.TITLE);
@@ -36,6 +41,10 @@ class AddressBookPage {
     return $(this.ADDRESS_LIST);
   }
 
+  getAddressListRows() {
+    return this.addressList.$$(this.ADDRESS_LIST_ITEM);
+  }
+
   get addressListHeader() {
     return $(this.ADDRESS_LIST_HEADER);
   }
@@ -48,6 +57,12 @@ class AddressBookPage {
   async clickAddAddressButton() {
     await this.addAddressButton.waitForClickable();
     await this.addAddressButton.click();
+  }
+
+  async getAddressRowByName(name: string) {
+    return (await this.getAddressListRows().find(
+      async (row) => (await row.$(this.ADDRESS_LIST_ITEM_NAME).getText()) === name
+    )) as WebdriverIO.Element;
   }
 }
 

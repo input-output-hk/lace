@@ -1,12 +1,9 @@
 /* eslint-disable no-undef */
-import { LocatorStrategy } from '../../actor/webTester';
 import { WebElement, WebElementFactory as Factory } from '../webElement';
-import { DrawerCommonExtended } from '../drawerCommonExtended';
 import { ChainablePromiseElement } from 'webdriverio';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 export class TokenSelectionPage extends WebElement {
-  protected CONTAINER;
   private TOKENS_BUTTON = '//input[@data-testid="asset-selector-button-tokens"]';
   private TOKEN_ROW = '//div[@data-testid="coin-search-row-info"]';
   private TOKEN_INFO = '//div[@data-testid="coin-search-row-info"]';
@@ -28,7 +25,6 @@ export class TokenSelectionPage extends WebElement {
 
   constructor() {
     super();
-    this.CONTAINER = new DrawerCommonExtended().container().toJSLocator();
   }
 
   get tokensButton(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -132,13 +128,5 @@ export class TokenSelectionPage extends WebElement {
 
   get addToTransactionButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADD_TO_TRANSACTION_BUTTON);
-  }
-
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
-
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
   }
 }

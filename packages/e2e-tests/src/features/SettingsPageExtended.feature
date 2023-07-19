@@ -162,7 +162,7 @@ Feature: General Settings - Extended Browser View
     When I navigate to NFTs extended page
     Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
-  @W-4805 @Testnet
+  @LW-4805 @Testnet
   Scenario: Extended View - Settings - Addresses are NOT shared and saved when switching Mainnet to Test Network
     Given I have 3 addresses in my address book in extended mode
     And I see address count: 3
@@ -173,7 +173,7 @@ Feature: General Settings - Extended Browser View
     And  I open address book in extended mode
     Then I see address count: 3
 
-  @W-4805 @Mainnet
+  @LW-4805 @Mainnet
   Scenario: Extended View - Settings - Addresses are NOT shared and saved when switching Mainnet to Test Network
     Given I have 3 addresses in my address book in extended mode
     And I see address count: 3

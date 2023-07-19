@@ -1,6 +1,5 @@
 import { TransactionsPage } from '../elements/transactionsPage';
 import { TransactionDetailsPage } from '../elements/transactionDetails';
-import { DrawerCommonExtended } from '../elements/drawerCommonExtended';
 import webTester from '../actor/webTester';
 import { expect } from 'chai';
 import testContext from '../utils/testContext';
@@ -90,7 +89,6 @@ class TransactionsDetailsAssert {
     const transactionsPage = new TransactionsPage();
     await this.waitForTransactionsLoaded();
     const transactionsDetails = new TransactionDetailsPage();
-    const sideDrawer = new DrawerCommonExtended();
     const rowsNumber = (await transactionsPage.getRows()).length;
 
     for (let i = 1; i <= rowsNumber && i < 10; i++) {
@@ -109,14 +107,8 @@ class TransactionsDetailsAssert {
         await webTester.seeWebElement(transactionsDetails.transactionDetailsStakepoolTicker());
         await transactionsDetails.transactionDetailsStakePoolId.waitForDisplayed();
       }
-      switch (mode) {
-        case 'extended':
-          await webTester.clickElement(sideDrawer.closeButton());
-          break;
-        case 'popup':
-          await webTester.clickElement(sideDrawer.backButton());
-          break;
-      }
+
+      await transactionsDetails.closeTransactionDetails(mode);
     }
   }
 
@@ -124,7 +116,6 @@ class TransactionsDetailsAssert {
     await this.waitForTransactionsLoaded();
     const transactionsPage = new TransactionsPage();
     const transactionsDetails = new TransactionDetailsPage();
-    const sideDrawer = new DrawerCommonExtended();
     const rowsNumber = (await transactionsPage.getRows()).length;
 
     for (let i = 1; i <= rowsNumber && i < 10; i++) {
@@ -141,16 +132,8 @@ class TransactionsDetailsAssert {
       await webTester.seeWebElement(transactionsDetails.transactionDetailsOutputAdaAmount());
       await webTester.seeWebElement(transactionsDetails.transactionDetailsOutputFiatAmount());
       // await webTester.seeWebElement(transactionsDetails.transactionDetailsOutputTokens());
-      switch (mode) {
-        case 'extended':
-          await webTester.scrollIntoView(sideDrawer.closeButton());
-          await webTester.clickElement(sideDrawer.closeButton());
-          break;
-        case 'popup':
-          await webTester.scrollIntoView(sideDrawer.backButton());
-          await webTester.clickElement(sideDrawer.backButton());
-          break;
-      }
+
+      await transactionsDetails.closeTransactionDetails(mode);
     }
   }
 
@@ -158,7 +141,6 @@ class TransactionsDetailsAssert {
     await this.waitForTransactionsLoaded();
     const transactionsPage = new TransactionsPage();
     const transactionsDetails = new TransactionDetailsPage();
-    const sideDrawer = new DrawerCommonExtended();
     const rowsNumber = (await transactionsPage.getRows()).length;
 
     for (let i = 1; i <= rowsNumber && i < 10; i++) {
@@ -191,14 +173,8 @@ class TransactionsDetailsAssert {
       await expect(txDetailsOutputFiatValue).to.be.greaterThan(0);
       await expect(txDetailsFeeADAValue).to.be.greaterThan(0);
       await expect(txDetailsFeeFiatValue).to.be.greaterThan(0);
-      switch (mode) {
-        case 'extended':
-          await webTester.clickElement(sideDrawer.closeButton());
-          break;
-        case 'popup':
-          await webTester.clickElement(sideDrawer.backButton());
-          break;
-      }
+
+      await transactionsDetails.closeTransactionDetails(mode);
     }
   }
 
@@ -206,7 +182,6 @@ class TransactionsDetailsAssert {
     const transactionsPage = new TransactionsPage();
     await this.waitForTransactionsLoaded();
     const transactionsDetails = new TransactionDetailsPage();
-    const sideDrawer = new DrawerCommonExtended();
     const rowsNumber = (await transactionsPage.getRows()).length;
 
     for (let i = 1; i <= rowsNumber && i <= 10; i++) {
@@ -217,14 +192,8 @@ class TransactionsDetailsAssert {
         await webTester.seeWebElement(transactionsDetails.transactionDetailsSent());
         await webTester.seeWebElement(transactionsDetails.transactionDetailsToAddress());
       }
-      switch (mode) {
-        case 'extended':
-          await webTester.clickElement(sideDrawer.closeButton());
-          break;
-        case 'popup':
-          await webTester.clickElement(sideDrawer.backButton());
-          break;
-      }
+
+      await transactionsDetails.closeTransactionDetails(mode);
     }
   }
 
@@ -232,7 +201,6 @@ class TransactionsDetailsAssert {
     const transactionsPage = new TransactionsPage();
     await this.waitForTransactionsLoaded();
     const transactionsDetails = new TransactionDetailsPage();
-    const sideDrawer = new DrawerCommonExtended();
     const rowsNumber = (await transactionsPage.getRows()).length;
 
     for (let i = 1; i <= rowsNumber && i <= 10; i++) {
@@ -249,14 +217,8 @@ class TransactionsDetailsAssert {
           tokensDescriptionAmount = tokensDescriptionAmount.replace('(', '').replace(')', '');
           await expect(tokensAmountSummary).to.equal(Number(tokensDescriptionAmount));
         }
-        switch (mode) {
-          case 'extended':
-            await webTester.clickElement(sideDrawer.closeButton());
-            break;
-          case 'popup':
-            await webTester.clickElement(sideDrawer.backButton());
-            break;
-        }
+
+        await transactionsDetails.closeTransactionDetails(mode);
       }
     }
   }
