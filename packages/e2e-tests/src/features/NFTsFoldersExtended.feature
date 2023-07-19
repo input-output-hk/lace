@@ -84,8 +84,43 @@ Feature: NFT - Folders - Extended view
     When I close the drawer by clicking back button
     Then I see "Create NFT folder" drawer in extended mode
 
+  @LW-7253
+  Scenario Outline: Extended-view - NFT Folders - Select NFTs page - warning modal when <action>
+    Given I navigate to "Select NFTs" page in extended mode
+    When <action>
+    Then I see "You'll have to start again" modal
+    Examples:
+      | action                                      |
+      | I close the drawer by clicking close button |
+      | I click outside the drawer                  |
+
+  @LW-7256
+  Scenario: Extended-view - NFT Folders - Select NFTs page - select and unselect a NFT
+    Given I navigate to "Select NFTs" page in extended mode
+    When I click NFT with name "Ibilecoin"
+    Then NFT with name "Ibilecoin" is selected
+    When I click NFT with name "Ibilecoin"
+    Then NFT with name "Ibilecoin" is not selected
+
   @LW-7257
   Scenario: Extended-view - NFT Folders - Select NFTs page - search for NFT - no results
     Given I navigate to "Select NFTs" page in extended mode
     When I enter "some random phrase" into the search bar on "Select NFTs" drawer
     Then I see no results for "Select NFTs" drawer
+
+  @LW-7249
+  Scenario: Extended-view - NFT Folders - Creating a folder happy path
+    Given I navigate to NFTs extended page
+    And I click "Create folder" button on NFTs page
+    And I enter a folder name "Sample NFT folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    And I click NFT with name "Ibilecoin"
+    And I click NFT with name "Bison Coin"
+    When I click "Next" button on "Select NFTs" page
+    Then I see a toast with text: "Folder created successfully"
+    And I do not see "Select NFTs" page in extended mode
+    And I see folder with name "Sample NFT folder" on the NFTs list
+    When I click the NFT folder with name "Sample NFT folder"
+    Then I see "Sample NFT folder" NFT folder page in extended mode
+    And I see NFT with name "Ibilecoin" on the NFT folder page
+    And I see NFT with name "Bison Coin" on the NFT folder page

@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
-import { DataTable, Given, Then, When } from '@wdio/cucumber-framework';
+import { Given, Then, When } from '@wdio/cucumber-framework';
+import { DataTable } from '@cucumber/cucumber';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import drawerGeneralSettingsAssert from '../assert/settings/YourKeysDrawerAssert';
 import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';

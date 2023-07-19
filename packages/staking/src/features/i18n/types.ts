@@ -12,6 +12,7 @@ type KeysStructure = {
   general: {
     button: {
       confirm: '';
+      close: '';
     };
   };
   browsePools: {
@@ -37,6 +38,23 @@ type KeysStructure = {
       enterWalletPasswordToConfirmTransaction: '';
       error: {
         invalidPassword: '';
+      };
+    };
+    success: {
+      title: '';
+      subTitle: '';
+      switchedPools: {
+        title: '';
+        subTitle: '';
+      };
+    };
+    failure: {
+      title: '';
+      subTitle: '';
+      button: {
+        close: '';
+        back: '';
+        retry: '';
       };
     };
     details: {
@@ -88,6 +106,10 @@ type KeysStructure = {
         signing: '';
         confirm: '';
       };
+    };
+    preferences: {
+      selectedStakePools: '';
+      partOfBalance: '';
     };
   };
   overview: {

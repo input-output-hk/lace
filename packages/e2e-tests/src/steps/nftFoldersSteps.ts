@@ -6,6 +6,8 @@ import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
+import ToastMessageAssert from '../assert/toastMessageAssert';
+import { t } from '../utils/translationService';
 
 Given(
   /^I (see|do not see) "Create folder" button on NFTs page in (popup|extended) mode$/,
@@ -50,8 +52,10 @@ Then(
   }
 );
 
-When(/^I click "Next" button on "Name your folder" page$/, async () => {
-  await NftCreateFolderPage.nextButton.click();
+When(/^I click "Next" button on "(Name your folder|Select NFTs)" page$/, async (targetPage: string) => {
+  await (targetPage === 'Name your folder'
+    ? NftCreateFolderPage.nextButton.click()
+    : NftSelectNftsPage.nextButton.click());
 });
 
 Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
@@ -118,4 +122,43 @@ When(/^I enter "([^"]*)" into the search bar on "Select NFTs" drawer$/, async (s
 
 Then(/^I see no results for "Select NFTs" drawer$/, async () => {
   await nftCreateFolderAssert.assertNoResultsReturned();
+});
+
+Then(/^I click NFT with name "([^"]*)"$/, async (nftName: string) => {
+  const nft = await NftSelectNftsPage.getNftByName(nftName);
+  await nft.waitForClickable();
+  await nft.click();
+});
+
+Then(/^NFT with name "([^"]*)" (is|is not) selected$/, async (nftName: string, shouldBeSelected: 'is' | 'is not') => {
+  await nftCreateFolderAssert.assertIsNFTSelected(nftName, shouldBeSelected === 'is');
+});
+
+Then(
+  /^I (see|do not see) folder with name "([^"]*)" on the NFTs list$/,
+  async (shouldSee: 'see' | 'do not see', folderName: string) => {
+    await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, shouldSee === 'see');
+  }
+);
+
+When(/^I click the NFT folder with name "([^"]*)"$/, async (folderName: string) => {
+  await (await NftsPage.getFolder(folderName)).click();
+});
+
+When(
+  /^I see "([^"]*)" NFT folder page in (extended|popup) mode$/,
+  async (folderName: string, mode: 'extended' | 'popup') => {
+    await nftCreateFolderAssert.assertSeeFolderPage(folderName, mode);
+  }
+);
+
+Then(
+  /^I (see|do not see) NFT with name "([^"]*)" on the NFT folder page$/,
+  async (shouldSee: 'see' | 'do not see', nftName: string) => {
+    await nftCreateFolderAssert.assertSeeNftItemOnFolderPage(nftName, shouldSee === 'see');
+  }
+);
+
+Then(/^I see a toast with text: "Folder created successfully"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.create'), true);
 });
