@@ -203,6 +203,7 @@ in rec {
 
     cp ${./sigbreak.cc} sigbreak.cc
 
+    export WINEDEBUG=-all  # comment out to get normal output (err,fixme), or set to +all for a flood
     export WINEPATH="$(winepath -w ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/x64)"
 
     inclPath_1="$(winepath -w ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/include)"
@@ -259,6 +260,7 @@ in rec {
 
     mkdir home
     export HOME="$(realpath ./home)"
+    export WINEDEBUG=-all  # comment out to get normal output (err,fixme), or set to +all for a flood
     wine tempinstaller.exe /S
 
     mkdir -p $out
@@ -412,6 +414,8 @@ in rec {
           --server-args="-screen 0 1920x1080x24 +extension GLX +extension RENDER -ac -noreset" \
           ${pkgs.writeShellScript "wine-setup-inside-xvfb" ''
             set -euo pipefail
+
+            export WINEDEBUG=-all  # comment out to get normal output (err,fixme), or set to +all for a flood
 
             ${mkSection "Setting Windows system version"}
             winetricks -q win81
