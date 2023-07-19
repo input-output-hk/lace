@@ -1,5 +1,6 @@
 import { Tooltip as AntdTooltip } from 'antd';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './Stats.module.scss';
 
 export const Tooltip = ({
@@ -11,11 +12,12 @@ export const Tooltip = ({
   children: string | React.ReactElement | React.ReactNode;
   content?: React.ReactNode;
 }): React.ReactElement => {
+  const { t } = useTranslation();
   const body =
     content ||
     (title && (
       <>
-        <div>{'USD Value'}</div>
+        <div>{t('overview.stakingInfoCard.tooltipFiatLabel')}</div>
         <div>{title}</div>
       </>
     ));
