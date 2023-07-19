@@ -378,8 +378,8 @@
     "walletSetup.mnemonicResetModal.content": "In order to keep you safe, we'll show you a new set of 24 words.",
     "walletSetup.mnemonicResetModal.cancel": "Cancel",
     "walletSetup.mnemonicResetModal.confirm": "OK",
-    "walletSetup.confirmRestoreModal.header": "Restoring a multi-address wallet?",
-    "walletSetup.confirmRestoreModal.notVisible": "If you're restoring a wallet created in another application, you may find some of your assets are not visible. Don't worry. Create a new wallet and send your assets to your new Lace wallet address and everything should be visible again.",
+    "walletSetup.confirmRestoreModal.header": "Multi-address wallet balance is now visible!",
+    "walletSetup.confirmRestoreModal.content": "<b>Lace is compatible with multi-address wallets created by other applications.</b> This means you can see and spend tokens that are not owned by the displayed address. Lace currently supports a one-time discovery of assets and addresses when you restore your wallet.",
     "walletSetup.confirmRestoreModal.confirm": "OK",
     "walletSetup.confirmExperimentalHwDapp.header": "Limited support for Dapp connection",
     "walletSetup.confirmExperimentalHwDapp.content": "This current version does not support signing transactions through the Dapp connection feature with hardware wallets. Please stay tuned for upcoming releases and new features through @lace on Twitter.",
@@ -736,7 +736,11 @@
           "confirmWithLedger": "Confirm transaction with Ledger",
           "notEnoughAda": "You don't have enough ADA to proceed with the transaction.",
           "active": "Active",
-          "inactive": "Inactive"
+          "inactive": "Inactive",
+          "toast": {
+            "add": "Collateral added",
+            "claim": "Collateral reclaimed"
+          }
         },
         "network": {
           "title": "Network",
@@ -1039,7 +1043,9 @@
       "beta": "DApp connector Beta"
     },
     "authorizeDapp": {
-      "warning": "Only connect to trusted DApps"
+      "warning": "Only connect to trusted DApps",
+      "nonssl": "This site is unsecured",
+      "nonsslTooltip": "This site does not follow common web standards"
     },
     "dappTransaction": {
       "transaction": "Transaction",
@@ -1048,7 +1054,8 @@
       "recipient": "Recipient",
       "insufficientFunds": "You do not have enough funds to complete the transaction",
       "signedSuccessfully": "The transaction was signed successfully.",
-      "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet."
+      "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
+      "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or handle"
@@ -1061,7 +1068,8 @@
     },
     "infoWallet": {
       "copy": "Copy",
-      "addressCopied": "Address copied"
+      "addressCopied": "Address copied",
+      "handleCopied": "Handle copied"
     },
     "nftDetail": {
       "title": "NFT detail",
@@ -1111,11 +1119,13 @@
       "personalData": "Not sell your personal data"
     },
     "walletSetupConnectHardwareWalletStep": {
-      "title": "Connect Hardware Wallet",
+      "title": "Connect hardware wallet",
       "subTitle": "Choose the brand of your hardware wallet.",
-      "supportedDevicesFull": "Lace is supporting Ledger Nano X, Nano S, Nano S Plus and Trezor Model T",
+      "subTitleFull": "Select your hardware wallet brand",
+      "supportedDevicesFull": "Lace supports Ledger Nano X, Nano S, Nano S Plus, and Trezor Model T",
       "supportedDevices": "Lace is supporting Ledger Nano X, Nano S and Nano S Plus",
-      "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue."
+      "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue.",
+      "connectDeviceFull": "Just connect your device to your computer and unlock it to continue. If you're using a Ledger device, make sure you open the Cardano App."
     },
     "walletSetupCreateStep": {
       "title": "Creating your wallet",
@@ -1135,6 +1145,7 @@
     "walletSetupMnemonicStep": {
       "writePassphrase": "Write down your secret passphrase",
       "enterPassphrase": "Enter your secret passphrase",
+      "enterPassphraseDescription": "Please enter each word of your recovery phrase in the right order to verify it and recover your wallet.",
       "body": "Now let's check you've got the correct secret passphrase. Enter each word of your passphrase in the right order to verify it.",
       "passphraseInfo1": "Make sure you create an offline backup of your secret passphrase.",
       "passphraseInfo2": "Do not store your backup digitally.",
@@ -1189,7 +1200,7 @@
       "selectAccount": "Select Account",
       "exportKeys": "Next",
       "chooseAccountToExport": "Choose which account you would like to export.",
-      "useHWToConfirm": "Use your {{wallet}} device to confirm exporting keys",
+      "useHWToConfirm": "Use your device to confirm the export of your public key",
       "account": "Account"
     },
     "walletSetupWalletNameStep": {

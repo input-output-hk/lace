@@ -67,12 +67,16 @@ describe('Testing txHistoryTransformer function', () => {
   test('should return parsed incoming tx', async () => {
     const result: any = txHistoryTransformers.txHistoryTransformer({
       tx: txHistory,
-      walletAddresses: {
-        address: Wallet.Cardano.PaymentAddress(
-          'addr_test1qpr3akacs72xelgd60ucdz0j4uw8dkg86jhntqd6gjpk84adv3qw0nafy8arl48xwhhnlzxre3cwx0xjnlwxfm77l00smqpvpz'
-        ),
-        rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx')
-      },
+      walletAddresses: [
+        {
+          address: Wallet.Cardano.PaymentAddress(
+            'addr_test1qpr3akacs72xelgd60ucdz0j4uw8dkg86jhntqd6gjpk84adv3qw0nafy8arl48xwhhnlzxre3cwx0xjnlwxfm77l00smqpvpz'
+          ),
+          rewardAccount: Wallet.Cardano.RewardAccount(
+            'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
+          )
+        }
+      ] as Wallet.KeyManagement.GroupedAddress[],
       time: date,
       fiatCurrency: {
         code: 'USD',
@@ -89,12 +93,16 @@ describe('Testing txHistoryTransformer function', () => {
   test('should return parsed outgoing tx', async () => {
     const result: any = txHistoryTransformers.txHistoryTransformer({
       tx: txHistory,
-      walletAddresses: {
-        address: Wallet.Cardano.PaymentAddress(
-          'addr_test1qpeg0n942wz3kx7vhmcgwa9t58r9spp4x2x32vfllm4ddkj2he0ldswjwtvp7drsjqmyzugmjhmypdhu3vez5rkkuj5s74q4yw'
-        ),
-        rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx')
-      },
+      walletAddresses: [
+        {
+          address: Wallet.Cardano.PaymentAddress(
+            'addr_test1qpeg0n942wz3kx7vhmcgwa9t58r9spp4x2x32vfllm4ddkj2he0ldswjwtvp7drsjqmyzugmjhmypdhu3vez5rkkuj5s74q4yw'
+          ),
+          rewardAccount: Wallet.Cardano.RewardAccount(
+            'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
+          )
+        }
+      ] as Wallet.KeyManagement.GroupedAddress[],
       time: date,
       fiatCurrency: {
         code: 'USD',
@@ -134,12 +142,16 @@ describe('Testing txHistoryTransformer function', () => {
 
     const props = {
       tx: txHistory,
-      walletAddresses: {
-        address: Wallet.Cardano.PaymentAddress(
-          'addr_test1qpr3akacs72xelgd60ucdz0j4uw8dkg86jhntqd6gjpk84adv3qw0nafy8arl48xwhhnlzxre3cwx0xjnlwxfm77l00smqpvpz'
-        ),
-        rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx')
-      },
+      walletAddresses: [
+        {
+          address: Wallet.Cardano.PaymentAddress(
+            'addr_test1qpr3akacs72xelgd60ucdz0j4uw8dkg86jhntqd6gjpk84adv3qw0nafy8arl48xwhhnlzxre3cwx0xjnlwxfm77l00smqpvpz'
+          ),
+          rewardAccount: Wallet.Cardano.RewardAccount(
+            'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
+          )
+        }
+      ] as Wallet.KeyManagement.GroupedAddress[],
       time: date,
       fiatCurrency: {
         code: 'USD',
@@ -158,7 +170,10 @@ describe('Testing txHistoryTransformer function', () => {
     expect(getTxDirectionSpy).toBeCalledWith({
       type: 'self-rewards'
     });
-    expect(getRewardsAmountSpy).toBeCalledWith(props.tx?.body?.withdrawals, props.walletAddresses.rewardAccount);
+    expect(getRewardsAmountSpy).toBeCalledWith(
+      props.tx?.body?.withdrawals,
+      props.walletAddresses.map((addr) => addr.rewardAccount)
+    );
     expect(txTransformerSpy).toBeCalledWith({
       tx: props.tx,
       walletAddresses: props.walletAddresses,

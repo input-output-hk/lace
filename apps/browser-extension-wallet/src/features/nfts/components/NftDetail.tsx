@@ -1,9 +1,9 @@
-import { useObservable, useRedirection } from '@hooks';
+import { useAssetInfo, useRedirection } from '@hooks';
 import { walletRoutePaths } from '@routes';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from './Nfts.module.scss';
-import { Button, Drawer, DrawerNavigation } from '@lace/common';
+import { Button, Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { nftDetailSelector } from '@src/views/browser-view/features/nfts/selectors';
 import { NftDetail as NftDetailView } from '@lace/core';
@@ -24,10 +24,10 @@ export const NftDetail = (): React.ReactElement => {
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
 
-  const [redirectToNfts] = useRedirection(walletRoutePaths.nfts);
-  const [redirectToSend] = useRedirection<{ params: { id?: string } }>(walletRoutePaths.send);
+  const redirectToNfts = useRedirection(walletRoutePaths.nfts);
+  const redirectToSend = useRedirection<{ params: { id?: string } }>(walletRoutePaths.send);
   const { id } = useParams<{ id: string }>();
-  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const assetsInfo = useAssetInfo();
   const setSendInitialState = useOutputInitialState();
 
   const assetId = Wallet.Cardano.AssetId(id);

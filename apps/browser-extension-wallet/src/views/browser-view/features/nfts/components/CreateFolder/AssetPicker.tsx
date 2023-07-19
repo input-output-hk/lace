@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ASSET_COMPONENTS, AssetSelectorOverlay } from '@lace/core';
 import { useWalletStore } from '@stores';
-import { useObservable } from '@hooks';
+import { useObservable } from '@lace/common';
 import styles from './CreateFolderDrawer.module.scss';
 import { formatNftsList } from '../utils';
 import { useCurrencyStore } from '@providers';
+import { useAssetInfo } from '@hooks';
 
 const nftsPerRow = {
   popupView: 2,
@@ -30,7 +31,7 @@ export const AssetPicker = ({
 }: AssetPickerProps): React.ReactElement => {
   const { t } = useTranslation();
   const { inMemoryWallet, environmentName } = useWalletStore();
-  const assets = useObservable(inMemoryWallet.assetInfo$);
+  const assets = useAssetInfo();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const { fiatCurrency } = useCurrencyStore();
 
@@ -71,7 +72,7 @@ export const AssetPicker = ({
   }, [selectedNFTs, onSetIsFormValid]);
 
   return (
-    <div className={styles.assetsSelectorWrapper}>
+    <div className={styles.assetsSelectorWrapper} data-testid="asset-selector-wrapper">
       <AssetSelectorOverlay
         nfts={nftList}
         nftListConfig={{ rows: isPopupView ? nftsPerRow.popupView : nftsPerRow.browserView }}

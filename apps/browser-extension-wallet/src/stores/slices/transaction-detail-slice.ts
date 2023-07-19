@@ -54,11 +54,14 @@ const getTransactionDetail =
   >): TransactionDetailSlice['getTransactionDetails'] =>
   // eslint-disable-next-line max-statements
   async ({ coinPrices, fiatCurrency }) => {
-    const { tx, status, direction, type } = get().transactionDetail;
-    const { chainHistoryProvider, stakePoolProvider, assetProvider } = get().blockchainProvider;
-    const wallet = get().inMemoryWallet;
+    const {
+      blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
+      inMemoryWallet: wallet,
+      transactionDetail: { tx, status, direction, type },
+      walletInfo
+    } = get();
+
     const walletAssets = await firstValueFrom(wallet.assetInfo$);
-    const [{ address, rewardAccount }] = await firstValueFrom(wallet.addresses$);
     const protocolParameters = await firstValueFrom(wallet.protocolParameters$);
     set({ fetchingTransactionInfo: true });
 
@@ -69,7 +72,8 @@ const getTransactionDetail =
       extraData: { nftMetadata: true, tokenMetadata: true }
     });
     const tokensSize =
-      inspectTxValues({ address, tx: tx as unknown as Wallet.Cardano.HydratedTx, direction })?.assets?.size || 0;
+      inspectTxValues({ addresses: walletInfo.addresses, tx: tx as unknown as Wallet.Cardano.HydratedTx, direction })
+        ?.assets?.size || 0;
     const assetAmount = tokensSize + 1;
 
     // Inputs
@@ -153,7 +157,10 @@ const getTransactionDetail =
       and then adds this property rewards to the transaction information
     */
     if (type === 'rewards') {
-      const rewards = getRewardsAmount(tx?.body?.withdrawals, rewardAccount);
+      const rewards = getRewardsAmount(
+        tx?.body?.withdrawals,
+        walletInfo.addresses.map((addr) => addr.rewardAccount)
+      );
       transaction = {
         ...transaction,
         rewards: Wallet.util.lovelacesToAdaString(rewards)

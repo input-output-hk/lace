@@ -1,12 +1,18 @@
+import Icon from '@ant-design/icons';
+import { Wallet } from '@lace/cardano';
+import { getRandomIcon } from '@lace/common';
+import { Flex } from '@lace/ui';
 import BigNumber from 'bignumber.js';
 import cn from 'classnames';
-import { JdenticonConfig, toSvg } from 'jdenticon';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { TranslationKey } from '../../i18n';
+import MoonIcon from './moon.component.svg';
 import { StakePoolInfo } from './StakePoolInfo';
 import styles from './StakingInfoCard.module.scss';
 import { Stats } from './Stats';
 import { Tooltip } from './StatsTooltip';
+import WarningIon from './warning.component.svg';
 
 const DEFAULT_DECIMALS = 2;
 
@@ -17,11 +23,6 @@ export const formatLocaleNumber = (value: string, decimalPlaces: number = DEFAUL
     groupSize: 3,
   });
 
-export const getRandomIcon = (iconConfig: { id: string; size: number; jdenticonConfig?: JdenticonConfig }): string => {
-  const icon = toSvg(iconConfig.id, iconConfig.size, iconConfig.jdenticonConfig);
-  return `data:image/svg+xml;utf8,${encodeURIComponent(icon)}`;
-};
-
 const formatNumericValue = (val: number | string, suffix: number | string): React.ReactElement => (
   <>
     {val ? formatLocaleNumber(String(val)) : '-'}
@@ -29,44 +30,57 @@ const formatNumericValue = (val: number | string, suffix: number | string): Reac
   </>
 );
 
+type Status = 'retired' | 'saturated';
+
 export type StakingInfoCardProps = {
   className?: string;
-  coinBalance: string;
-  coinBalanceFiat?: string;
-  fee: string | number;
+  coinBalance: number;
+  fiat?: number;
+  fee?: string | number;
   id: string;
   logo?: string;
   margin: string | number;
   name?: string;
   totalRewards: string;
-  totalRewardsFiat?: string;
   lastReward: string;
-  lastRewardFiat?: string;
-  apy: string | number;
+  apy?: string | number;
   ticker?: string;
   onStakePoolSelect: () => void;
   popupView?: boolean;
   cardanoCoinSymbol: string;
+  markerColor?: string;
+  status?: Status;
 };
 
+const mapOfStatusToIcon: Record<Status, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  retired: MoonIcon,
+  saturated: WarningIon,
+};
+
+const mapOfStatusToLabel: Record<Status, TranslationKey> = {
+  retired: 'overview.stakingInfoCard.poolRetired',
+  saturated: 'overview.stakingInfoCard.poolSaturated',
+};
+
+// eslint-disable-next-line complexity
 export const StakingInfoCard = ({
   className,
   coinBalance,
-  coinBalanceFiat,
+  fiat,
   fee,
   id,
   logo,
   margin,
   name,
   totalRewards,
-  totalRewardsFiat,
   lastReward,
-  lastRewardFiat,
   apy,
   ticker,
   onStakePoolSelect,
   popupView,
   cardanoCoinSymbol,
+  markerColor,
+  status = 'retired',
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -75,25 +89,32 @@ export const StakingInfoCard = ({
     <div className={cn(styles.panel, { className, [styles.popupView!]: popupView })}>
       <div className={styles.row}>
         <div className={styles.col}>
-          <StakePoolInfo
-            logo={logo ?? getRandomIcon({ id: id.toString(), size: 30 })}
-            name={name}
-            ticker={ticker}
-            id={id}
-            onClick={onStakePoolSelect}
-            popupView
-          />
+          {markerColor && <div className={styles.marker} style={{ background: markerColor }} />}
+          <Flex justifyContent={'space-between'} alignItems={'center'} w={'$fill'}>
+            <StakePoolInfo
+              logo={logo ?? getRandomIcon({ id: id.toString(), size: 30 })}
+              name={name}
+              ticker={ticker}
+              id={id}
+              onClick={onStakePoolSelect}
+            />
+            {(status === 'retired' || status === 'saturated') && (
+              <Tooltip content={t(mapOfStatusToLabel[status])}>
+                <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={mapOfStatusToIcon[status]} />
+              </Tooltip>
+            )}
+          </Flex>
         </div>
         <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
           <Stats
             text={t('overview.stakingInfoCard.ros')}
-            value={formatNumericValue(apy, '%')}
+            value={apy && formatNumericValue(apy, '%')}
             popupView
             dataTestid="stats-apy"
           />
           <Stats
             text={t('overview.stakingInfoCard.fee')}
-            value={formatNumericValue(fee, cardanoCoinSymbol)}
+            value={fee && formatNumericValue(fee, cardanoCoinSymbol)}
             popupView
             dataTestid="stats-fee"
           />
@@ -111,7 +132,7 @@ export const StakingInfoCard = ({
             <Stats
               text={t('overview.stakingInfoCard.totalStaked')}
               value={
-                <Tooltip title={coinBalanceFiat && `$ ${coinBalanceFiat}`}>
+                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: coinBalance.toString(), fiat })}`}>
                   <span>{coinBalance}</span>
                   <span className={styles.suffix}>{cardanoCoinSymbol}</span>
                 </Tooltip>
@@ -125,7 +146,7 @@ export const StakingInfoCard = ({
             <Stats
               text={t('overview.stakingInfoCard.totalRewards')}
               value={
-                <Tooltip title={totalRewardsFiat && `$ ${totalRewardsFiat}`}>
+                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: totalRewards.toString(), fiat })}`}>
                   <span>{totalRewards}</span>
                   <span className={styles.suffix}>{cardanoCoinSymbol}</span>
                 </Tooltip>
@@ -138,7 +159,7 @@ export const StakingInfoCard = ({
           <Stats
             text={t('overview.stakingInfoCard.lastReward')}
             value={
-              <Tooltip title={lastRewardFiat && `$ ${lastRewardFiat}`}>
+              <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: lastReward.toString(), fiat })}`}>
                 <span>{lastReward}</span>
                 <span className={styles.suffix}>{cardanoCoinSymbol}</span>
               </Tooltip>

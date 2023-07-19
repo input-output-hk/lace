@@ -45,8 +45,8 @@ export const WalletAddressList = ({
   return (
     <div id={SCROLLABLE_CONTAINER_ID} className={styles.wrapper}>
       {withHeader && (
-        <div data-testid="stake-pool-list-header" className={styles.header}>
-          <div>{translations.name}</div>
+        <div data-testid="address-list-header" className={styles.header}>
+          <div className={styles.nameHeader}>{translations.name}</div>
           <div>{translations.address}</div>
         </div>
       )}

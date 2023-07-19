@@ -18,6 +18,7 @@ import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDr
 import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
+import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
 
 Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
   await stakingPageAssert.assertSeeTitleWithCounter();
@@ -87,8 +88,15 @@ Then(/^I click pool name in currently staking component$/, async () => {
   await StakingPageObject.clickPoolNameInStakingInfoComponent();
 });
 
-Then(/^(Initial|Switching) Delegation success screen is displayed$/, async (process: 'Initial' | 'Switching') => {
-  await stakingPageAssert.assertStakingSuccessDrawer(process);
+Then(
+  /^(Initial|Switching) Delegation success screen is displayed in (extended|popup) mode$/,
+  async (process: 'Initial' | 'Switching', mode: 'extended' | 'popup') => {
+    await stakingPageAssert.assertStakingSuccessDrawer(process, mode);
+  }
+);
+
+Then(/^I click "Close" button on staking success drawer$/, async () => {
+  await StakingSuccessDrawer.clickCloseButton();
 });
 
 Then(/^the staking error screen is displayed$/, async () => {
@@ -247,7 +255,7 @@ When(/^I click "Stake on this pool" button on stake pool details drawer$/, async
 });
 
 When(/^I click "Next" button on staking confirmation drawer$/, async () => {
-  await StakingConfirmationDrawer.nextButton.waitForClickable();
+  await StakingConfirmationDrawer.nextButton.waitForClickable({ timeout: 15_000 });
   await StakingConfirmationDrawer.nextButton.click();
 });
 
@@ -272,14 +280,14 @@ Then(
     let password;
     switch (type) {
       case 'newly created':
-        password = (testContext.load('newCreatedWallet') as WalletConfig).password;
+        password = String((testContext.load('newCreatedWallet') as WalletConfig).password);
         break;
       case 'incorrect':
         password = 'somePassword';
         break;
       case 'correct':
       default:
-        password = getTestWallet(TestWalletName.TestAutomationWallet).password;
+        password = String(getTestWallet(TestWalletName.TestAutomationWallet).password);
     }
     await SimpleTxSideDrawerPageObject.fillPassword(password);
     await stakingExtendedPageObject.confirmStaking();

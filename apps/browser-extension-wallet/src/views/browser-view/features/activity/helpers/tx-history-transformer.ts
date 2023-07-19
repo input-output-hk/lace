@@ -26,11 +26,12 @@ interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
 */
 export const getRewardsAmount = (
   withdrawals: Wallet.Cardano.Withdrawal[],
-  rewardAccount: Wallet.Cardano.RewardAccount
+  rewardAccounts: Wallet.Cardano.RewardAccount[]
 ): string =>
   withdrawals
     ?.reduce(
-      (total, { quantity, stakeAddress }) => (stakeAddress === rewardAccount ? total.plus(quantity.toString()) : total),
+      (total, { quantity, stakeAddress }) =>
+        rewardAccounts.includes(stakeAddress) ? total.plus(quantity.toString()) : total,
       new BigNumber(0)
     )
     ?.toString() || '0';
@@ -67,7 +68,10 @@ export const txHistoryTransformer = ({
     given this, we will keep the original send transaction type and we will add this new Rewards record
     */
   if (type === 'rewards' || type === 'self-rewards') {
-    const rewardsAmount = getRewardsAmount(tx?.body?.withdrawals, walletAddresses.rewardAccount);
+    const rewardsAmount = getRewardsAmount(
+      tx?.body?.withdrawals,
+      walletAddresses.map((addr) => addr.rewardAccount)
+    );
     // TODO: create a type for this and replace AssetActivityItemProps type in other place (JIRA: LW-5490)
     return [
       {

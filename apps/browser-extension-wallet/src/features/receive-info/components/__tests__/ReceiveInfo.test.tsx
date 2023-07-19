@@ -27,7 +27,8 @@ describe('Testing ReceiveInfo component', () => {
   });
 
   const props: ReceiveInfoProps = {
-    wallet: mockWalletInfoTestnet,
+    name: mockWalletInfoTestnet.name,
+    address: mockWalletInfoTestnet.addresses[0].address,
     goBack: jest.fn()
   };
   test('should render a back button and the addressQR screen', async () => {

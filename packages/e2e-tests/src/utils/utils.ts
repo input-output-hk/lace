@@ -5,7 +5,7 @@ import { browser } from '@wdio/globals';
 
 class ExtensionUtils {
   async getBrowser(): Promise<string> {
-    return (browser.capabilities as Capabilities.Capabilities).browserName;
+    return String((browser.capabilities as Capabilities.Capabilities).browserName);
   }
 
   async getUserAgent(): Promise<string> {
@@ -20,7 +20,7 @@ class ExtensionUtils {
 
   getNetwork(): { name: string; id: number } {
     let network = 'Preprod';
-    let id = 0;
+    let id = 1;
     switch (process.env.ENV) {
       case 'preview': {
         network = 'Preview';

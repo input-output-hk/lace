@@ -11,7 +11,8 @@
   "contributors": [
     "Lucas Barros Araújo <lucas.araujo@iohk.io> (https://iohk.io)",
     "Przemysław Włodek <przemyslaw.wlodek@iohk.io> (https://iohk.io)",
-    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)"
+    "Rhys Bartels-Waller <rhys.bartelswaller@iohk.io> (https://iohk.io)",
+    "Michael Chappell <michael.chappell@iohk.io> (https://iohk.io)"
   ],
   "workspaces": [
     "packages/common",
@@ -38,13 +39,14 @@
     "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
     "markdown:lint:fix": "yarn markdown:lint --fix",
     "prepare": "husky install & ts-patch install -s",
+    "staking": "APP_NAME=staking yarn $1",
     "storybook": "ENV=development start-storybook -p 6006",
     "prestorybook:build": "yarn build",
     "storybook:build": "ENV=development build-storybook --log-level error",
     "test": "yarn workspaces run test",
     "test:coverage": "yarn workspaces run test:coverage",
     "version": "standard-version",
-    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)' -c watch",
+    "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*DTS.*Build success)' -c watch",
     "watch-deps": "EXCLUDE_APP=true yarn watch"
   },
   "lint-staged": {

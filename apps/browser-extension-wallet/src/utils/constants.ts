@@ -1,7 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { Wallet } from '@lace/cardano';
 import BigNumber from 'bignumber.js';
-import { CoinId } from '../types';
 
 export const LACE_APP_ID = 'lace-app';
 
@@ -28,7 +27,7 @@ export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADAEnumTy
   [Wallet.Cardano.NetworkId.Testnet]: 'tADA'
 };
 
-export const cardanoCoin: CoinId = {
+export const cardanoCoin: Wallet.CoinId = {
   id: '1',
   name: 'Cardano',
   decimals: 6,

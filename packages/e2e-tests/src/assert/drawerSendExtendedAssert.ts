@@ -5,7 +5,6 @@ import { TestnetPatterns } from '../support/patterns';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import { AddressInput } from '../elements/addressInput';
-import { TransactionCancelPopup } from '../elements/newTransaction/transactionCancelPopup';
 import coinConfigureAssert from './coinConfigureAssert';
 import assetInputAssert from './assetInputAssert';
 import { AssetInput } from '../elements/newTransaction/assetInput';
@@ -14,6 +13,7 @@ import testContext from '../utils/testContext';
 import Banner from '../elements/banner';
 import { getAddressByName, validAddress, validAddress2 } from '../data/AddressData';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
+import ModalAssert from './modalAssert';
 
 class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
@@ -22,7 +22,7 @@ class DrawerSendExtendedAssert {
     const transactionNewPage = new TransactionNewPage();
     const addressInput = new AddressInput();
     await webTester.seeWebElement(addressInput.input());
-    await expect(await webTester.getAttributeValueFromElement(addressInput.input(), 'placeholder')).to.equal(
+    await expect(await webTester.getTextValueFromElement(addressInput.label())).to.equal(
       await t('core.destinationAddressInput.recipientAddress')
     );
     await webTester.seeWebElement(addressInput.ctaButton());
@@ -162,25 +162,17 @@ class DrawerSendExtendedAssert {
     await expect(tokenAmount).to.equal(expectedValue);
   }
 
-  async assertSeeCancelTxWarningPopup(shouldSee: boolean) {
-    const cancelTxPopup = new TransactionCancelPopup().cancelTxPopup();
-    await (shouldSee ? webTester.seeWebElement(cancelTxPopup) : webTester.dontSeeWebElement(cancelTxPopup));
-  }
-
-  async assertCancelTxPopupTextContent() {
-    const transactionCancelPopup = new TransactionCancelPopup();
-    await webTester.seeWebElement(transactionCancelPopup.cancelTxPopupTitle());
-    await webTester.seeWebElement(transactionCancelPopup.cancelTxPopupText());
-    const popupTitleText = (await transactionCancelPopup.getCancelTxPopupTitle()) as string;
-    await expect(popupTitleText).to.equal(await t('general.warnings.youHaveToStartAgain'));
-    let popupContentText = (await transactionCancelPopup.getCancelTxPopupText()) as string;
-    popupContentText = popupContentText.replace(new RegExp(/(\r\n|\n|\r)/gm), ' ');
-    const expectedTextLine1 = (await t('general.warnings.areYouSureYouWantToExit')) as string;
-    const expectedTextLine2 = (await t('general.warnings.thisWillNotBeSaved')) as string;
-    const expectedText = `${expectedTextLine1} ${expectedTextLine2}`;
-    await expect(popupContentText).to.equal(expectedText);
-    await webTester.seeWebElement(transactionCancelPopup.cancelTxPopupCancelBttn());
-    await webTester.seeWebElement(transactionCancelPopup.cancelTxPopupAgreeBttn());
+  async assertSeeCancelTransactionModal(shouldSee: boolean) {
+    await ModalAssert.assertSeeModalContainer(shouldSee);
+    if (shouldSee) {
+      const title = await t('general.warnings.youHaveToStartAgain');
+      const expectedTextLine1 = await t('general.warnings.areYouSureYouWantToExit');
+      const expectedTextLine2 = await t('general.warnings.thisWillNotBeSaved');
+      const description = `${expectedTextLine1}\n${expectedTextLine2}`;
+      const cancelButtonLabel = await t('general.button.cancel');
+      const confirmButtonLabel = await t('general.button.agree');
+      await ModalAssert.assertSeeModal(title, description, cancelButtonLabel, confirmButtonLabel);
+    }
   }
 
   async assertDefaultInputsDoNotContainValues() {
@@ -303,6 +295,17 @@ class DrawerSendExtendedAssert {
       );
     }
   }
+
+  assertSeeAddressWithNameInRecipientsAddressInput = async (address: string, name: string) => {
+    await webTester.waitUntilSeeElementContainingText(name);
+    const text = await webTester.getTextValueFromElement(new AddressInput().container());
+    await expect(text).contains(address);
+  };
+
+  assertSeeEmptyRecipientsAddressInput = async (index?: number) => {
+    const text = await webTester.getTextValueFromElement(new AddressInput(index).container());
+    await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
+  };
 }
 
 export default new DrawerSendExtendedAssert();

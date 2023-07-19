@@ -3,7 +3,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { ReactComponent as InfoIcon } from '../../assets/icons/info.component.svg';
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Variants, Section } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
@@ -190,11 +190,11 @@ export const Overview = (): JSX.Element => (
           <ToggleSwitchPreview />
         </Variants.Table>
 
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <ToggleSwitchPreview />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
       <Divider my="$64" />
       <Section title="Toggle switch items 🔒">
@@ -204,11 +204,11 @@ export const Overview = (): JSX.Element => (
           <SwitchPreview />
         </Variants.Table>
 
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <SwitchPreview />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
     </Cell>
   </Grid>

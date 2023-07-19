@@ -1,5 +1,8 @@
 {
   "package.core": {
+    "addressBook": {
+      "addressHandleTooltip": "The address linked to this handle has changed, click to update or delete."
+    },
     "assetActivityItem": {
       "entry": {
         "asset": "asset",

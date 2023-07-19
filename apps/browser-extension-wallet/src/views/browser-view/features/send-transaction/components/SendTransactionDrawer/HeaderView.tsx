@@ -54,15 +54,16 @@ export const useHandleClose = (): {
   const resetUi = useResetUiStore();
   const { hasOutput } = useTransactionProps();
   const [, setIsDrawerVisible] = useDrawer();
-  const { currentSection: section } = useSections();
-  const [reditectToTransactions] = useRedirection(walletRoutePaths.activity);
-  const [reditectToOverview] = useRedirection(walletRoutePaths.assets);
+  const { currentSection: section, resetSection } = useSections();
+  const reditectToTransactions = useRedirection(walletRoutePaths.activity);
+  const reditectToOverview = useRedirection(walletRoutePaths.assets);
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const resetStates = useCallback(() => {
     reset();
     resetUi();
-  }, [reset, resetUi]);
+    resetSection();
+  }, [reset, resetUi, resetSection]);
 
   const closeDrawer = useCallback(() => {
     resetStates();
@@ -206,6 +207,13 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
           </Button>
         ) : shouldDisplayMutlipleSelectionBtn ? (
           <SelectTokenButton
+            testId={
+              isMultipleSelectionAvailable
+                ? selectedTokenList.length > 0
+                  ? 'clear-button'
+                  : 'cancel-button'
+                : 'select-multiple-button'
+            }
             label={isMultipleSelectionAvailable ? selectedTokenLabel : t('multipleSelection.selectMultiple')}
             onClick={selectedTokenClick}
             btnStyle={
@@ -269,6 +277,13 @@ export const HeaderTitle = ({
     ) : null
   ) : (
     <SelectTokenButton
+      testId={
+        isMultipleSelectionAvailable
+          ? selectedTokenList.length > 0
+            ? 'clear-button'
+            : 'cancel-button'
+          : 'select-multiple-button'
+      }
       count={selectedTokenList.length > 0 ? selectedTokenList.length : undefined}
       label={isMultipleSelectionAvailable ? selectedTokenLabel : t('multipleSelection.selectMultiple')}
       onClick={selectedTokenClick}

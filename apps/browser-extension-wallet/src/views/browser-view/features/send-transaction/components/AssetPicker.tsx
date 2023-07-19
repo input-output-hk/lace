@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { AssetSelectorOverlay, AssetSelectorOverlayProps } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
-import { useObservable, useFetchCoinPrice, PriceResult, useMaxAda } from '@hooks';
+import { useFetchCoinPrice, PriceResult, useMaxAda, AssetOrHandleInfoMap, useAssetInfo } from '@hooks';
 import { EnvironmentTypes, useWalletStore } from '@src/stores';
 import {
   useCoinStateSelector,
@@ -20,21 +20,22 @@ import isNil from 'lodash/isNil';
 import { getTokenList } from '@src/utils/get-token-list';
 import { SpentBalances } from '../types';
 import { getReachedMaxAmountList } from '../helpers';
-import { CoinId, CurrencyInfo } from '@src/types';
+import { CurrencyInfo } from '@src/types';
 import { firstValueFrom } from 'rxjs';
 import { WarningModal } from '@src/views/browser-view/components';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import styles from './AssetPicker.module.scss';
 import { useCurrencyStore } from '@providers';
 import { isNFT } from '@src/utils/is-nft';
+import { useObservable } from '@lace/common';
 
 const formatAssetPickerLists = (
-  assetsInfo: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo> = new Map(),
+  assetsInfo: AssetOrHandleInfoMap = new Map(),
   balance: Wallet.Cardano.Value,
   prices: PriceResult,
   addCardanoAsAnAsset: boolean,
   tokensSpent: SpentBalances,
-  cardanoCoin: CoinId,
+  cardanoCoin: Wallet.CoinId,
   availableRewards: bigint,
   environmentName: EnvironmentTypes,
   fiatCurrency: CurrencyInfo
@@ -132,7 +133,7 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
     environmentName
   } = useWalletStore();
   const [row] = useCurrentRow();
-  const assets = useObservable(inMemoryWallet.assetInfo$);
+  const assets = useAssetInfo();
   const { priceResult } = useFetchCoinPrice();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const availableRewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);

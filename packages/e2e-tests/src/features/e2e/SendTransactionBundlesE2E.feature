@@ -1,7 +1,7 @@
 @SendTransactionBundles-E2E @Testnet
 Feature: Send Transaction bundles - E2E
 
-  @LW-4121 @LW-4122 @LW-3556
+  @LW-4121 @LW-4122 @LW-3556 @Smoke
   Scenario: Extended view - Sending multiple assets and bundles E2E
     Given Wallet is synced
     And I save token: "Cardano" balance
@@ -26,10 +26,8 @@ Feature: Send Transaction bundles - E2E
     And I click "Review transaction" button on "Send" page
     And I save fee value
     And I click "Confirm" button on "Transaction summary" page
-    And I fill correct password and confirm
-    Then The Transaction submitted screen is displayed:
-      | Title: "All done"                            |
-      | Subtitle: "The transaction will complete..." |
+    And I enter correct password and confirm the transaction
+    Then The Transaction submitted screen is displayed in extended mode
     When I close the drawer by clicking close button
     And I navigate to Tokens extended page
     Then the sent amount of: "4.50" with "saved" fee for token "Cardano" is subtracted from the total balance

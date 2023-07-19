@@ -12,7 +12,7 @@ import type { Sx } from '../../design-tokens';
 import type { BoxProps } from '../box';
 
 export type FlexProps = BoxProps &
-  Pick<Sx, 'alignItems' | 'flexDirection' | 'justifyContent'>;
+  Pick<Sx, 'alignItems' | 'flexDirection' | 'gap' | 'justifyContent'>;
 
 export type Props = PropsWithChildren<Readonly<FlexProps>>;
 
@@ -20,6 +20,7 @@ export const Flex = ({
   children,
   alignItems = 'flex-start',
   flexDirection = 'row',
+  gap = '$0',
   justifyContent = 'flex-start',
   className,
   ...props
@@ -27,7 +28,7 @@ export const Flex = ({
   <Box
     {...props}
     className={classNames(
-      sx({ alignItems, flexDirection, justifyContent }),
+      sx({ alignItems, flexDirection, gap, justifyContent }),
       className,
       cx.flex,
     )}

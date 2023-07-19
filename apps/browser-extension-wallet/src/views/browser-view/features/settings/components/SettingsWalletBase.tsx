@@ -1,5 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
-import { Wallet } from '@lace/cardano';
 import { DappList as DappListDrawer } from '@views/browser/features/dapp';
 import { SettingsCard, SettingsLink, GeneralSettingsDrawer, Collateral } from './';
 import { useTranslation } from 'react-i18next';
@@ -9,10 +9,10 @@ import { NetworkChoiceDrawer } from './NetworkChoiceDrawer';
 import { useWalletStore } from '@src/stores';
 import { AboutDrawer } from './AboutDrawer';
 import { config } from '@src/config';
-import { COLLATERAL_AMOUNT_LOVELACES, useObservable, useRedirection } from '@hooks';
+import { COLLATERAL_AMOUNT_LOVELACES, useRedirection } from '@hooks';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { useBackgroundServiceAPIContext } from '@providers';
-import { useSearchParams } from '@lace/common';
+import { useSearchParams, useObservable } from '@lace/common';
 import { walletRoutePaths } from '@routes/wallet-paths';
 
 const { Title } = Typography;
@@ -40,32 +40,31 @@ export interface SettingsWalletProps<AdditionalDrawers extends string = never> {
   popupView?: boolean;
 }
 
-const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true';
-
 // eslint-disable-next-line complexity
 export const SettingsWalletBase = <AdditionalDrawers extends string>({
   renderLocalNodeSlot,
   popupView = false
 }: SettingsWalletProps<AdditionalDrawers>): React.ReactElement => {
   const { activeDrawer } = useSearchParams<keyof SettingsSearchParams<AdditionalDrawers>>(['activeDrawer']);
-  const [redirectToSettings] = useRedirection<{ search: SettingsSearchParams<AdditionalDrawers> }>(
+  const redirectToSettings = useRedirection<{ search: SettingsSearchParams<AdditionalDrawers> }>(
     walletRoutePaths.settings
   );
   const openDrawer = useCallback(
     (drawer: SettingsDrawer | AdditionalDrawers) => redirectToSettings({ search: { activeDrawer: drawer } }),
     [redirectToSettings]
   );
-  const [closeDrawer] = useRedirection(walletRoutePaths.settings);
+  const closeDrawer = useRedirection(walletRoutePaths.settings);
 
   const { t } = useTranslation();
-  const { environmentName, getKeyAgentType, inMemoryWallet } = useWalletStore();
+  const { environmentName, inMemoryWallet } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
   const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
+
   const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
   const backgroundServices = useBackgroundServiceAPIContext();
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
+  const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true';
 
   useEffect(() => {
     const openCollateralDrawer = async () => {
@@ -89,27 +88,6 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         onClose={closeDrawer}
         popupView={popupView}
       />
-      <DappListDrawer
-        visible={activeDrawer === SettingsDrawer.dappList}
-        onCancelClick={closeDrawer}
-        popupView={popupView}
-      />
-      <NetworkChoiceDrawer
-        visible={activeDrawer === SettingsDrawer.networkChoice}
-        onClose={closeDrawer}
-        popupView={popupView}
-      />
-      {
-        // TODO: Remove isInMemory scope once LW-3951 is delivered.
-        isInMemory && (
-          <Collateral.CollateralDrawer
-            visible={activeDrawer === SettingsDrawer.collateral}
-            onClose={closeDrawer}
-            popupView={popupView}
-            hasCollateral={hasCollateral}
-          />
-        )
-      }
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
@@ -127,23 +105,37 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           </>
         )}
         {isNetworkChoiceEnabled && (
-          <SettingsLink
-            onClick={() => openDrawer(SettingsDrawer.networkChoice)}
-            description={t('browserView.settings.wallet.network.description')}
-            addon={environmentName}
-            data-testid="settings-wallet-network-link"
-          >
-            {t('browserView.settings.wallet.network.title')}
-          </SettingsLink>
+          <>
+            <NetworkChoiceDrawer
+              visible={activeDrawer === SettingsDrawer.networkChoice}
+              onClose={closeDrawer}
+              popupView={popupView}
+            />
+            <SettingsLink
+              onClick={() => openDrawer(SettingsDrawer.networkChoice)}
+              description={t('browserView.settings.wallet.network.description')}
+              addon={environmentName}
+              data-testid="settings-wallet-network-link"
+            >
+              {t('browserView.settings.wallet.network.title')}
+            </SettingsLink>
+          </>
         )}
         {authorizedAppsEnabled && (
-          <SettingsLink
-            onClick={() => openDrawer(SettingsDrawer.dappList)}
-            description={t('browserView.settings.wallet.authorizedDApps.description')}
-            data-testid="settings-wallet-authorized-dapps-link"
-          >
-            {t('browserView.settings.wallet.authorizedDApps.title')}
-          </SettingsLink>
+          <>
+            <DappListDrawer
+              visible={activeDrawer === SettingsDrawer.dappList}
+              onCancelClick={closeDrawer}
+              popupView={popupView}
+            />
+            <SettingsLink
+              onClick={() => openDrawer(SettingsDrawer.dappList)}
+              description={t('browserView.settings.wallet.authorizedDApps.description')}
+              data-testid="settings-wallet-authorized-dapps-link"
+            >
+              {t('browserView.settings.wallet.authorizedDApps.title')}
+            </SettingsLink>
+          </>
         )}
         <SettingsLink
           onClick={() => openDrawer(SettingsDrawer.general)}
@@ -153,23 +145,24 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           {t('browserView.settings.wallet.general.title')}
         </SettingsLink>
         {renderLocalNodeSlot && renderLocalNodeSlot({ activeDrawer, closeDrawer, openDrawer })}
-        {
-          // TODO: Remove isInMemory scope once LW-3951 is delivered.
-          isInMemory && (
-            <SettingsLink
-              onClick={() => openDrawer(SettingsDrawer.collateral)}
-              description={t('browserView.settings.wallet.collateral.description')}
-              data-testid="settings-wallet-collateral-link"
-              addon={
-                hasCollateral
-                  ? t('browserView.settings.wallet.collateral.active')
-                  : t('browserView.settings.wallet.collateral.inactive')
-              }
-            >
-              {t('browserView.settings.wallet.collateral.title')}
-            </SettingsLink>
-          )
-        }
+        <SettingsLink
+          onClick={() => openDrawer(SettingsDrawer.collateral)}
+          description={t('browserView.settings.wallet.collateral.description')}
+          data-testid="settings-wallet-collateral-link"
+          addon={
+            hasCollateral
+              ? t('browserView.settings.wallet.collateral.active')
+              : t('browserView.settings.wallet.collateral.inactive')
+          }
+        >
+          {t('browserView.settings.wallet.collateral.title')}
+        </SettingsLink>
+        <Collateral.CollateralDrawer
+          visible={activeDrawer === SettingsDrawer.collateral}
+          onClose={closeDrawer}
+          hasCollateral={hasCollateral}
+          unspendableLoaded={unspendable?.coins !== undefined}
+        />
       </SettingsCard>
     </>
   );

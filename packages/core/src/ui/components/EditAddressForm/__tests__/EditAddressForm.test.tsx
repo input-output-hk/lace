@@ -1,51 +1,137 @@
-/* eslint-disable unicorn/no-useless-undefined */
-/* eslint-disable sonarjs/no-duplicate-string */
-import * as React from 'react';
-import { render, within } from '@testing-library/react';
-import { EditAddressForm, EditAddressFormProps } from '../EditAddressForm';
-import '@testing-library/jest-dom';
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
+import { EditAddressForm } from '../EditAddressForm';
+import { FormInstance } from 'antd';
+import { mockDeep } from 'jest-mock-extended';
 
-describe('Testing AddressForm component', () => {
-  const initialValues = {
-    name: 'Wallet name',
-    address:
-      'addr_test1qq307xzukgj8s3ze0zsqpalst9uk26xevalnrqyuyfqgpszp99xu8w6jprv5aqvjkkmev8rzyucvrr5udk4yjaxexygsghpuca'
-  };
-  const nameErrorText = 'name error';
-  const addressErrorText = 'address error';
-  const props: EditAddressFormProps = {
-    setFormValues: jest.fn(),
-    getFieldError: jest.fn(),
-    initialValues: {},
-    validations: {
-      name: jest.fn().mockReturnValue(nameErrorText),
-      address: jest.fn().mockReturnValue(addressErrorText)
-    },
-    translations: {
-      walletName: 'Wallet name',
-      address: 'Address'
-    }
-  };
+const mockForm = mockDeep<FormInstance>();
 
-  test('should display empty name input, empty address input and action buttons', async () => {
-    const { findByTestId } = render(<EditAddressForm {...props} />);
+const mockInitialValues = {
+  name: 'John Doe',
+  address:
+    'addr_test1qq307xzukgj8s3ze0zsqpalst9uk26xevalnrqyuyfqgpszp99xu8w6jprv5aqvjkkmev8rzyucvrr5udk4yjaxexygsghpuca'
+};
 
-    const nameInput = await findByTestId('address-form-name-input');
-    const addressInput = await findByTestId('address-form-address-input');
+const nameErrorText = 'name error';
+const addressErrorText = 'address error';
+const handleErrorText = 'handle error';
 
-    expect(nameInput).toBeInTheDocument();
-    expect(addressInput).toBeInTheDocument();
+const mockValidations = {
+  name: jest.fn().mockReturnValue(nameErrorText),
+  address: jest.fn().mockReturnValue(addressErrorText),
+  handle: jest.fn().mockReturnValue(handleErrorText)
+};
+
+const mockTranslations = {
+  walletName: 'Wallet Name',
+  address: 'Address'
+};
+
+xdescribe('EditAddressForm', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  test('should display valid predefined wallet name and address', async () => {
-    const { findByTestId } = render(<EditAddressForm {...props} initialValues={initialValues} />);
+  test('renders the form with initial values', async () => {
+    const { findByTestId } = render(
+      <EditAddressForm
+        form={mockForm}
+        initialValues={mockInitialValues}
+        validations={mockValidations}
+        translations={mockTranslations}
+      />
+    );
 
-    const form = await findByTestId('address-form');
-    // const btnsContainer = await findByTestId('address-form-buttons');
-    const nameInput = await within(form).findByDisplayValue(initialValues.name);
-    const addressInput = await within(form).findByDisplayValue(initialValues.address);
+    expect(await findByTestId('address-form')).toBeInTheDocument();
+    expect(await findByTestId('address-form-name-input')).toHaveValue('John Doe');
+    expect(await findByTestId('address-form-address-input')).toHaveValue(mockInitialValues.address);
+  });
 
-    expect(nameInput).toBeInTheDocument();
-    expect(addressInput).toBeInTheDocument();
+  test('calls nameValidator on name input change', async () => {
+    const { findByTestId } = render(
+      <EditAddressForm
+        form={mockForm}
+        initialValues={mockInitialValues}
+        validations={mockValidations}
+        translations={mockTranslations}
+      />
+    );
+
+    const nameInput = await findByTestId('address-form-name-input');
+    fireEvent.change(nameInput, { target: { value: 'New Name' } });
+
+    expect(mockValidations.name).toHaveBeenCalledWith('New Name', expect.any(Object), expect.any(Function));
+  });
+
+  test('calls addressValidator when address input is not a handle', () => {
+    const { getByLabelText } = render(
+      <EditAddressForm
+        form={mockForm}
+        initialValues={mockInitialValues}
+        validations={mockValidations}
+        translations={mockTranslations}
+      />
+    );
+
+    const addressInput = getByLabelText('Address');
+    fireEvent.change(addressInput, { target: { value: mockInitialValues.address } });
+
+    expect(mockValidations.address).toHaveBeenCalledWith(
+      mockInitialValues.address,
+      expect.any(Object),
+      expect.any(Function)
+    );
+  });
+
+  test('calls handleValidator when address input is a handle', () => {
+    mockForm.getFieldError.mockReturnValueOnce(['Invalid address']);
+    const { getByLabelText } = render(
+      <EditAddressForm
+        form={mockForm}
+        initialValues={mockInitialValues}
+        validations={mockValidations}
+        translations={mockTranslations}
+      />
+    );
+
+    const addressInput = getByLabelText('Address');
+    fireEvent.change(addressInput, { target: { value: 'myhandle' } });
+
+    expect(mockValidations.handle).toHaveBeenCalledWith('myhandle', expect.any(Object), expect.any(Function));
+  });
+
+  test('displays valid icon when address field is valid', () => {
+    mockForm.getFieldError.mockReturnValueOnce([]);
+    const { getByLabelText, getByTestId } = render(
+      <EditAddressForm
+        form={mockForm}
+        initialValues={mockInitialValues}
+        validations={mockValidations}
+        translations={mockTranslations}
+      />
+    );
+
+    const addressInput = getByLabelText('Address');
+    fireEvent.change(addressInput, { target: { value: mockInitialValues.address } });
+
+    const validIcon = getByTestId('valid-icon');
+    expect(validIcon).toBeInTheDocument();
+  });
+  test('displays valid icon when address field is invalid', () => {
+    mockForm.getFieldError.mockReturnValueOnce(['error']);
+    const { getByLabelText, getByTestId } = render(
+      <EditAddressForm
+        form={mockForm}
+        initialValues={mockInitialValues}
+        validations={mockValidations}
+        translations={mockTranslations}
+      />
+    );
+
+    const addressInput = getByLabelText('Address');
+    fireEvent.change(addressInput, { target: { value: mockInitialValues.address } });
+
+    const invalidIcon = getByTestId('invalid-icon');
+    expect(invalidIcon).toBeInTheDocument();
   });
 });

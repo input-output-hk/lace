@@ -34,6 +34,13 @@
   }
 }
 
+.marker {
+  border-radius: 2px;
+  height: 40px;
+  margin-right: 16px;
+  width: 4px;
+}
+
 .suffix {
   color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
   font-size: var(--bodySmall);

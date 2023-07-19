@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import isUndefined from 'lodash/isUndefined';
 import { useWalletStore } from '../../../../../stores';
-import { CardanoTxOut, CoinId, CurrencyInfo, TokensDetails } from '../../../../../types';
+import { CardanoTxOut, CurrencyInfo, TokensDetails } from '@src/types';
 import { Wallet } from '@lace/cardano';
-import { PriceResult, useFetchCoinPrice, useObservable } from '@hooks';
+import { PriceResult, useFetchCoinPrice } from '@hooks';
 import { walletBalanceTransformer } from '../../../../../api/transformers';
 import { OutputSummaryList, SentAssetsList, Costs, OutputSummaryProps } from '@lace/core';
 import { useBuiltTxState, useMetadata } from '../store';
@@ -19,6 +19,7 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
+import { useObservable } from '@lace/common';
 
 const { Text } = Typography;
 
@@ -34,7 +35,7 @@ const formatRow = ({
 }: {
   output: CardanoTxOut;
   assetInfo: Map<Wallet.Cardano.AssetId, TokensDetails>;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
   fiatCurrency: CurrencyInfo;
   prices?: PriceResult;
 }): SentAssetsList => {
@@ -73,7 +74,12 @@ const formatRow = ({
   return [cardano, ...assetList];
 };
 
-export const getFee = (fee: string, adaPrice: number, cardanoCoin: CoinId, fiatCurrency: CurrencyInfo): Costs => {
+export const getFee = (
+  fee: string,
+  adaPrice: number,
+  cardanoCoin: Wallet.CoinId,
+  fiatCurrency: CurrencyInfo
+): Costs => {
   if (!fee)
     return {
       ada: `0.00 ${cardanoCoin.symbol}`,

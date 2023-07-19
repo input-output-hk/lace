@@ -9,7 +9,7 @@ export const useNetworkError = (cb: () => void): void => {
   const backgroundServices = useBackgroundServiceAPIContext();
 
   useEffect(() => {
-    const subscription = backgroundServices.requestMessage$.subscribe(({ type, data }): void => {
+    const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }): void => {
       if (type === MessageTypes.HTTP_CONNECTION) {
         const isConnected = (data as HTTPConnectionStatus).connected;
         if (!isConnected) {

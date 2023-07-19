@@ -4,6 +4,7 @@ import walletLockScreenAssert from '../assert/walletLockScreenAssert';
 import walletUnlockScreenAssert from '../assert/walletUnlockScreenAssert';
 import WalletUnlockPage from '../elements/walletUnlockPage';
 import popupView from '../page/popupView';
+import { browser } from '@wdio/globals';
 
 Given(/^I see locked wallet screen$/, async () => {
   await walletLockScreenAssert.assertSeeWalletLockScreen();
@@ -28,7 +29,7 @@ Given(/^I lock my wallet$/, async () => {
 });
 
 When(/^I fill password input with (correct|incorrect) password$/, async (type: 'correct' | 'incorrect') => {
-  const password = type === 'correct' ? process.env.WALLET_1_PASSWORD : 'wrongPassword';
+  const password = type === 'correct' ? String(process.env.WALLET_1_PASSWORD) : 'wrongPassword';
   await WalletUnlockPage.passwordInput.setValue(password);
 });
 

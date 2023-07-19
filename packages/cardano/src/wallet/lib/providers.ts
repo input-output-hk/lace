@@ -36,7 +36,13 @@ export interface ProvidersConfig {
 }
 
 export const createProviders = ({ axiosAdapter, httpProviders }: ProvidersConfig): WalletProvidersDependencies => {
-  const httpProviderConfig = (baseUrl: string) => ({ baseUrl, logger: console, adapter: axiosAdapter });
+  const httpProviderConfig = (baseUrl: string) => ({
+    baseUrl,
+    logger: console,
+    adapter: axiosAdapter,
+    // See openApi.json in @cardano-sdk/cardano-services
+    version: { software: '3.0.0', api: '1.0.0' }
+  });
 
   return {
     assetProvider: assetInfoHttpProvider(httpProviderConfig(httpProviders.assetProvider)),

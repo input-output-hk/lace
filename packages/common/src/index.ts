@@ -4,6 +4,7 @@ export * from '@ui/components/Ellipsis';
 export * from '@ui/components/TextAvatar';
 export * from '@ui/components/CustomTooltip';
 export * from '@ui/components/Form';
+export * from '@ui/components/Banner';
 export * from '@ui/components/Button';
 export * from '@ui/components/DropDownMenu';
 export * from '@ui/components/Search';

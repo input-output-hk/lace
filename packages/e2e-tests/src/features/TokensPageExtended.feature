@@ -17,7 +17,7 @@ Feature: LW: Tokens tab - extended view
   Scenario: Receive & Send buttons in header
     Then I see Receive & Send buttons in header
 
-  @LW-2334 @Testnet
+  @LW-2334 @Smoke @Testnet
   Scenario: Tokens list
     Then I see Cardano & LaceCoin tokens on the list with all the details in extended mode
 
@@ -103,6 +103,32 @@ Feature: LW: Tokens tab - extended view
     Then closed eye icon is displayed on Tokens page
     And I see total wallet balance in USD
     And balance and FIAT balance for each token are visible
+
+  @Testnet @Mainnet @LW-7121 @LW-7123
+  Scenario Outline: Extended View - Hide my balance - keep state after <action> the page
+    When I click closed eye icon on Tokens page
+    Then opened eye icon is displayed on Tokens page
+    And total wallet balance is masked with asterisks
+    And balance and FIAT balance for each token are masked with asterisks
+    When <step>
+    Then opened eye icon is displayed on Tokens page
+    And total wallet balance is masked with asterisks
+    And balance and FIAT balance for each token are masked with asterisks
+    Examples:
+      | action     | step               |
+      | refreshing | I refresh the page |
+      | reopening  | I reopen the page  |
+
+  @Testnet @Mainnet @LW-7125
+  Scenario: Extended view - Hide my balance - keep state after switching to popup view
+    When I click closed eye icon on Tokens page
+    Then opened eye icon is displayed on Tokens page
+    And total wallet balance is masked with asterisks
+    And balance and FIAT balance for each token are masked with asterisks
+    When I visit Tokens page in popup mode
+    Then opened eye icon is displayed on Tokens page
+    And total wallet balance is masked with asterisks
+    And balance and FIAT balance for each token are masked with asterisks
 
   @LW-6889 @Testnet @Mainnet
   Scenario: Price fetch expired error is displayed

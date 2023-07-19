@@ -1,11 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { WalletSetupStepLayout, WalletTimelineSteps } from './WalletSetupStepLayout';
 import { MnemonicWordsConfirmInput } from './MnemonicWordsConfirmInput';
 import styles from './WalletSetupOption.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { defaultMnemonicWordsInStep } from '@src/ui/utils/constants';
 
-const LAST_MNEMONIC_STEP = 2;
 export const hasEmptyString = (arr: string[]): boolean => arr.includes('');
 
 export interface WalletSetupMnemonicVerificationStepProps {
@@ -16,10 +15,8 @@ export interface WalletSetupMnemonicVerificationStepProps {
   onStepNext?: (currentStep: number) => void;
   isSubmitEnabled: boolean;
   mnemonicWordsInStep?: number;
-  translations: TranslationsFor<'enterPassphrase' | 'passphraseError'>;
+  translations: TranslationsFor<'enterPassphrase' | 'passphraseError' | 'enterPassphraseDescription'>;
   suggestionList?: Array<string>;
-  isBackToMnemonic: boolean;
-  setIsBackToMnemonic: (value: boolean) => void;
 }
 
 export const WalletSetupMnemonicVerificationStep = ({
@@ -31,9 +28,7 @@ export const WalletSetupMnemonicVerificationStep = ({
   isSubmitEnabled,
   mnemonicWordsInStep = defaultMnemonicWordsInStep,
   translations,
-  suggestionList,
-  isBackToMnemonic,
-  setIsBackToMnemonic
+  suggestionList
 }: WalletSetupMnemonicVerificationStepProps): React.ReactElement => {
   const mnemonicLength = mnemonic.length;
   const mnemonicSteps = Math.round(mnemonicLength / mnemonicWordsInStep);
@@ -68,6 +63,7 @@ export const WalletSetupMnemonicVerificationStep = ({
   };
 
   const title = translations.enterPassphrase;
+  const description = translations.enterPassphraseDescription;
 
   const currentStepFirstWordIndex = mnemonicStep * mnemonicWordsInStep;
   const currentStepLastWordIndex = (mnemonicStep + 1) * mnemonicWordsInStep;
@@ -77,13 +73,6 @@ export const WalletSetupMnemonicVerificationStep = ({
     [currentStepFirstWordIndex, currentStepLastWordIndex, mnemonic]
   );
 
-  useEffect(() => {
-    if (!isBackToMnemonic) return;
-    console.log(isBackToMnemonic, LAST_MNEMONIC_STEP);
-    setMnemonicStep(LAST_MNEMONIC_STEP);
-    setIsBackToMnemonic(false);
-  }, [isBackToMnemonic, setIsBackToMnemonic]);
-
   const isNextEnabled = useMemo(
     () => currentStepWords.every((word) => word) && (mnemonicStep !== mnemonicSteps - 1 || isSubmitEnabled),
     [mnemonicStep, currentStepWords, mnemonicSteps, isSubmitEnabled]
@@ -92,6 +81,7 @@ export const WalletSetupMnemonicVerificationStep = ({
   return (
     <WalletSetupStepLayout
       title={title}
+      description={description}
       stepInfoText={getStepInfoText()}
       onBack={handleBack}
       onNext={handleNext}

@@ -174,7 +174,7 @@ Feature: General Settings - Popup View
     When I navigate to Tokens popup page
     Then I see "Preview" specific tokens in popup mode
     When I navigate to NFTs popup page
-    Then I see NFT with name: "Lace NFT Preview"
+    Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
   @LW-2719 @Mainnet
   Scenario: Popup View - Settings - Token/NFTs updated after network switching
@@ -185,7 +185,7 @@ Feature: General Settings - Popup View
     When I navigate to Tokens popup page
     Then I see "Preview" specific tokens in popup mode
     When I navigate to NFTs popup page
-    Then I see NFT with name: "Lace NFT Preview"
+    Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
   @LW-4806 @Testnet
   Scenario: Popup View - Settings - Addresses are NOT shared and saved when switching Mainnet to Test Network
@@ -193,7 +193,7 @@ Feature: General Settings - Popup View
     And I see address count: 3
     When I switch network to: "Mainnet" in popup mode
     And  I open address book in popup mode
-    Then I see information about empty address book
+    Then I see empty address book
     When I switch network to: "Preprod" in popup mode
     And  I open address book in popup mode
     Then I see address count: 3
@@ -204,7 +204,7 @@ Feature: General Settings - Popup View
     And I see address count: 3
     When I switch network to: "Preprod" in popup mode
     And  I open address book in popup mode
-    Then I see information about empty address book
+    Then I see empty address book
 
   @LW-5472 @Testnet
   Scenario: Popup View - Settings - Addresses entered in Preprod context are not available when switching to Preview
@@ -251,9 +251,8 @@ Feature: General Settings - Popup View
   @LW-3630 @Mainnet @Testnet
   Scenario: Popup View - Settings - FAQ opening in a new tab
     When I open settings from header menu
-    When I click on "FAQs" setting
-    Then New tab with url containing "www.lace.io/faq" is opened
-    And An "FAQ" text is displayed
+    And I click on "FAQs" setting
+    Then FAQ page is displayed
 
   @LW-3870 @Mainnet @Testnet
   Scenario: Extended view - Settings - Show passphrase displayed above Analytics under the Security section in the Settings page

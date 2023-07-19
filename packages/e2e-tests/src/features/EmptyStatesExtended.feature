@@ -12,10 +12,11 @@ Feature: Empty states
     When I click "Copy" button on empty state banner
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
 
-  @LW-2516
+  @LW-2516 @LW-7236
   Scenario: Extended View - NFTs empty state
     When I navigate to NFTs extended page
     Then I see empty state banner for NFTs page in extended mode
+    And I do not see "Create folder" button on NFTs page in extended mode
     When I click "Copy" button on empty state banner
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
 

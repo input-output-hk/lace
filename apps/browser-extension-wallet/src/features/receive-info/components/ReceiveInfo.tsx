@@ -1,34 +1,24 @@
-import React from 'react';
-import { InfoWallet } from '@lace/core';
+import React, { useCallback } from 'react';
+import { ADDRESS_CARD_QR_CODE_SIZE_POPUP, AddressCard, HandleAddressCard } from '@lace/core';
 import { Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import styles from './ReceiveInfo.module.scss';
-import { WalletInfo } from '@src/types';
 import { useTheme } from '@providers/ThemeProvider';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
-
-const QR_SIZE = 168;
+import { HandleInfo } from '@cardano-sdk/wallet';
+import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 
 export interface ReceiveInfoProps {
-  /**
-   * Wallet basic information
-   */
-  wallet: WalletInfo;
-  /**
-   * Redirection when pressing the back button
-   */
+  name: string;
+  address: string;
+  handles?: HandleInfo[];
   goBack: () => void;
 }
 
-export const ReceiveInfo = ({ wallet, goBack }: ReceiveInfoProps): React.ReactElement => {
+export const ReceiveInfo = ({ name, address, handles, goBack }: ReceiveInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const handleOnClose = () => goBack();
-
-  const infoWalletTranslations = {
-    copy: t('core.infoWallet.copy'),
-    copiedMessage: t('core.infoWallet.addressCopied')
-  };
 
   return (
     <Drawer
@@ -39,12 +29,21 @@ export const ReceiveInfo = ({ wallet, goBack }: ReceiveInfoProps): React.ReactEl
       popupView
     >
       <div className={styles.container} data-testid="receive-address-qr">
-        <InfoWallet
-          getQRCodeOptions={() => getQRCodeOptions(theme, QR_SIZE)}
+        <AddressCard
+          name={name}
           isPopupView
-          walletInfo={{ ...wallet, qrData: wallet.address.toString() }}
-          translations={infoWalletTranslations}
+          address={address?.toString()}
+          getQRCodeOptions={useCallback(() => getQRCodeOptions(theme, ADDRESS_CARD_QR_CODE_SIZE_POPUP), [theme])}
+          copiedMessage={t('core.infoWallet.addressCopied')}
         />
+        {handles?.map(({ nftMetadata, image }) => (
+          <HandleAddressCard
+            key={nftMetadata.name}
+            name={nftMetadata.name}
+            image={getAssetImageUrl(image || nftMetadata.image)}
+            copiedMessage={t('core.infoWallet.handleCopied')}
+          />
+        ))}
       </div>
     </Drawer>
   );

@@ -11,7 +11,6 @@ import { ExpandViewBanner } from './ExpandViewBanner';
 import styles from './DelegationLayout.module.scss';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { useWalletStore } from '@src/stores';
-import { CoinId } from '@src/types';
 
 const { Text } = Typography;
 
@@ -45,7 +44,7 @@ export type DelegationLayoutProps = {
   lastReward: string;
   onStakePoolSelect: () => void;
   onStakePoolClick?: (id: string) => void;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
 };
 
 export const DelegationLayout = ({

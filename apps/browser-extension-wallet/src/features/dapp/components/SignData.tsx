@@ -20,8 +20,8 @@ export const SignData = (): React.ReactElement => {
   const {
     utils: { setPreviousView }
   } = useViewsFlowContext();
-  const [redirectToSignFailure] = useRedirection(dAppRoutePaths.dappTxSignFailure);
-  const [redirectToSignSuccess] = useRedirection(dAppRoutePaths.dappTxSignSuccess);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const { executeWithPassword } = useWalletManager();
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState<string>();
