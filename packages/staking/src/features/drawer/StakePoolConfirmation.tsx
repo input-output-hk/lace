@@ -10,8 +10,7 @@ import { Immutable } from 'immer';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../outside-handles-provider';
-import { Balance, CurrencyInfo, LegacySelectedStakePoolDetails } from '../outside-handles-provider/types';
+import { Balance, CurrencyInfo, LegacySelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
 import {
   DelegationPortfolioStakePool,
   Sections,

@@ -1,7 +1,7 @@
 import { Card, Cell, Grid, PieChart, PieChartColor, Text } from '@lace/ui';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TranslationKey } from '../i18n/types';
+import { TranslationKey } from '../i18n';
 import * as styles from './DelegationCard.css';
 
 type Status = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';

@@ -71,6 +71,8 @@ export const en: Translations = {
   'overview.stakingInfoCard.fee': 'Fee',
   'overview.stakingInfoCard.lastReward': 'Last reward',
   'overview.stakingInfoCard.margin': 'Margin',
+  'overview.stakingInfoCard.poolRetired': 'Pool retired',
+  'overview.stakingInfoCard.poolSaturated': 'Pool over-saturated',
   'overview.stakingInfoCard.ros': 'ROS',
   'overview.stakingInfoCard.totalRewards': 'Total rewards',
   'overview.stakingInfoCard.totalStaked': 'Total staked',
