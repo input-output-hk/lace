@@ -14,6 +14,10 @@ in rec {
 
   cardanoWorldFlake = (flake-compat { src = inputs.cardano-world; }).defaultNix;
 
+  # These are configs of ‘cardano-node’ for all networks we make available from the UI.
+  # The patching of the official networks needs to happen to:
+  #   • turn off ‘EnableP2P’ (and modify topology accordingly), because it doesn’t work on Windows,
+  #   • and turn off ‘hadPrometheus’, because it makes cardano-node hang on Windows during graceful exit.
   networkConfigs = let
     selectedNetworks = [ "mainnet" "preprod" "preview" ];
     website = cardanoWorldFlake.${buildSystem}.cardano.packages.cardano-config-html-internal;
@@ -22,7 +26,7 @@ in rec {
   } ((lib.concatMapStringsSep "\n" (network: ''
     mkdir -p $out/${network}
     cp -r ${website}/config/${network}/. $out/${network}
-  '') selectedNetworks) + (if targetSystem != "x86_64-windows" then "" else ''
+  '') selectedNetworks) + (lib.optionalString (targetSystem == "x86_64-windows") ''
     # Transform P2P topologies to non-P2P (or else, on Windows, we’d require C:\etc\resolv.conf)
     chmod -R +w $out
     find $out -type f -name 'topology.*' | while IFS= read -r file ; do
