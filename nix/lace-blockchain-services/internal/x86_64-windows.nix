@@ -96,6 +96,42 @@ in rec {
 
   icon = svg2ico ./lace-blockchain-services/cardano.svg;
 
+  # FIXME: This is terrible, we have to do it better, but I can’t get the Go cross-compiler
+  # to embed Windows resources properly in the EXE. The file increases in size, but is still
+  # missing something. I have no time to investigate now, so let’s have this dirty hack.
+  lace-blockchain-services-exe-with-icon = pkgs.runCommand "lace-blockchain-services-with-icon" {
+    buildInputs = with cardano-js-sdk.fresherPkgs; [
+      wineWowPackages.stableFull
+      winetricks samba /*samba for bin/ntlm_auth*/
+    ];
+  } ''
+    export HOME=$(realpath $NIX_BUILD_TOP/home)
+    mkdir -p $HOME
+    ${pkgs.xvfb-run}/bin/xvfb-run \
+      --server-args="-screen 0 1920x1080x24 +extension GLX +extension RENDER -ac -noreset" \
+      ${pkgs.writeShellScript "wine-setup-inside-xvfb" ''
+        set -euo pipefail
+        export WINEDEBUG=-all  # comment out to get normal output (err,fixme), or set to +all for a flood
+        set +e
+        wine ${resourceHacker}/ResourceHacker.exe \
+          -log res-hack.log \
+          -open "$(winepath -w ${lace-blockchain-services-exe}/*.exe)" \
+          -save with-icon.exe \
+          -action addoverwrite \
+          -res "$(winepath -w ${icon})" \
+          -mask ICONGROUP,MAINICON,
+        wine_ec="$?"
+        set -e
+        echo "wine exit code: $wine_ec"
+        cat res-hack.log
+        if [ "$wine_ec" != 0 ] ; then
+          exit "$wine_ec"
+        fi
+      ''}
+    mkdir -p $out
+    mv with-icon.exe $out/lace-blockchain-services.exe
+  '';
+
   go-rsrc = pkgs.buildGoModule rec {
     pname = "go-rsrc";
     version = "0.10.2";
@@ -123,7 +159,7 @@ in rec {
 
   mkPackage = { withJS }: pkgs.runCommand "lace-blockchain-services" {} ''
     mkdir -p $out/libexec
-    cp -Lr ${lace-blockchain-services-exe}/* $out/
+    cp -Lr ${lace-blockchain-services-exe-with-icon}/* $out/
     cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/
     cp -L ${cardano-js-sdk.target.nodejs}/node.exe $out/libexec/
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
@@ -257,6 +293,13 @@ in rec {
     mkdir -p $out/nix-support
     echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
   '';
+
+  resourceHacker = pkgs.fetchzip {
+    name = "resource-hacker-5.1.7";
+    url = "http://www.angusj.com/resourcehacker/resource_hacker.zip";
+    hash = "sha256-W5TmyjNNXE3nvn37XYbTM+DBeupPijE4M70LJVKJupU=";
+    stripRoot = false;
+  };
 
   # -------------------------------------- cardano-js-sdk ------------------------------------------ #
 
