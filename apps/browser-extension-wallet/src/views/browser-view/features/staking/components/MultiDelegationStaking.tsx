@@ -83,6 +83,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
         walletStoreFetchNetworkInfo: fetchNetworkInfo,
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
+        // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber
       }}
     >

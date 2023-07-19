@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Cardano } from '@cardano-sdk/core';
-import { Box, Card, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, Text } from '@lace/ui';
+import { Box, Card, ColorValueHex, ControlButton, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
@@ -12,9 +12,10 @@ interface PoolDetailsCardProps {
   name: string;
   index: number;
   draftPortfolioLength: number;
+  colorSet: ColorValueHex[];
 }
 
-export const PoolDetailsCard = ({ name, index, poolId, draftPortfolioLength }: PoolDetailsCardProps) => {
+export const PoolDetailsCard = ({ name, index, poolId, draftPortfolioLength, colorSet }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
   const removePoolFromDraft = useDelegationPortfolioStore((state) => state.mutators.removePoolFromDraft);
   const { balancesBalance, compactNumber } = useOutsideHandles();
@@ -28,7 +29,7 @@ export const PoolDetailsCard = ({ name, index, poolId, draftPortfolioLength }: P
       <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
         <Flex justifyContent={'space-between'} alignItems={'center'}>
           <Flex alignItems={'center'} gap={'$32'}>
-            <Box className={PoolIndicator} style={{ backgroundColor: PIE_CHART_DEFAULT_COLOR_SET[index] }} />
+            <Box className={PoolIndicator} style={{ backgroundColor: colorSet[index] }} />
             <Text.SubHeading>{name}</Text.SubHeading>
           </Flex>
           <ControlButton.Icon icon={<TrashIcon />} onClick={handleRemovePoolFromPortfolio} />

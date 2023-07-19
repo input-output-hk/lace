@@ -1,8 +1,8 @@
 import { Button, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../overview/DelegationCard';
 import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
-import { useTranslation } from 'react-i18next';
 
 export const StakePoolPreferencesFooter = () => {
   const { setSection, setIsDrawerVisible } = useStakePoolDetails();
@@ -50,6 +50,7 @@ export const StakePoolPreferences = () => {
             poolId={id}
             name={name || ''}
             draftPortfolioLength={draftPortfolio.length}
+            colorSet={PIE_CHART_DEFAULT_COLOR_SET}
           />
         ))}
       </Flex>
