@@ -2,12 +2,12 @@ import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import transactionsPageAssert, { ExpectedTransactionRowAssetDetails } from '../assert/transactionsPageAssert';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
-import transactionsPageObject from '../pageobject/transactionsPageObject';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import testContext from '../utils/testContext';
 import { TransactionDetailsPage } from '../elements/transactionDetails';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
+import TransactionsPage from '../elements/transactionsPage';
 
 Given(/^I am on the Transactions section - Extended view$/, async () => {
   await mainMenuPageObject.navigateToSection('Transactions', 'extended');
@@ -49,7 +49,7 @@ When(/^click on a transaction$/, async () => {
 });
 
 When(/^I click on a transaction: (\d)$/, async (rowNumber: number) => {
-  await transactionsPageObject.clickTransaction(rowNumber);
+  await TransactionsPage.clickOnTransactionRow(rowNumber - 1);
 });
 
 When(/^I click on a transaction hash and save hash information$/, async () => {
@@ -73,10 +73,10 @@ When(
   async (valueForCheck: string) => {
     const transactionsDetails = new TransactionDetailsPage();
     await transactionsPageAssert.waitRowsToLoad();
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 0; i < 10; i++) {
       let actualValue;
       let expectedValue;
-      await transactionsPageObject.clickTransaction(i);
+      await TransactionsPage.clickOnTransactionRow(i);
       await transactionsDetails.transactionDetailsSkeleton.waitForDisplayed({ timeout: 30_000, reverse: true });
       if (valueForCheck === 'hash') {
         actualValue = await transactionsDetails.transactionDetailsHash.getText();
@@ -144,11 +144,11 @@ Then(
 );
 
 When(/^I scroll to the row: (\d*)$/, async (index: number) => {
-  await transactionsPageObject.scrollToTheRow(index);
+  await TransactionsPage.scrollToTheRow(index);
 });
 
 When(/^I scroll to the last row$/, async () => {
-  await transactionsPageObject.scrollToTheLastRow();
+  await TransactionsPage.scrollToTheLastRow();
 });
 
 Then(/^a skeleton (is|is not) displayed at the bottom of the page/, async (shouldBeDisplayed: 'is' | 'is not') => {
@@ -156,7 +156,7 @@ Then(/^a skeleton (is|is not) displayed at the bottom of the page/, async (shoul
 });
 
 When(/^I save number of visible rows$/, async () => {
-  await transactionsPageObject.saveNumberOfVisibleRows();
+  await TransactionsPage.saveNumberOfVisibleRows();
 });
 
 Then(/^more transactions are loaded$/, async () => {
