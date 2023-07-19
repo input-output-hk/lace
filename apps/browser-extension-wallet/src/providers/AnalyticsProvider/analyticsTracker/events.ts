@@ -1,7 +1,7 @@
 import { PostHogAction, PostHogOnboardingActionsType } from './types';
 
 const WalletSetup = {
-  ANALYTICS_AGREE: 'analytics-agree_browser',
+  ANALYTICS_AGREE: 'analytics-agree',
   ANALYTICS_SKIP: 'analytics-skip',
   CONNECT_HW_START: 'connect-hw-start',
   CREATE_WALLET_START: 'create-wallet-start',
