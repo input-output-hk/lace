@@ -1,8 +1,16 @@
 import { Wallet } from '@lace/cardano';
-import { AssetInfo, CardanoOutput, OutputList, SpentBalances } from './types';
+import {
+  AssetInfo,
+  CardanoOutput,
+  OutputList,
+  SpentBalances,
+  TemporaryTransactionDataKeys,
+  TemporaryTransactionData
+} from './types';
 import BigNumber from 'bignumber.js';
+import isNil from 'lodash/isNil';
 
-export const calculateSpentBalance = (outputs: OutputList): Record<string, string> => {
+export const calculateSpentBalance = (outputs: OutputList): SpentBalances => {
   let spentBalances: Record<string, string> = {};
   const values = Object.values(outputs);
 
@@ -77,4 +85,50 @@ export const getReachedMaxAmountList = ({
     : [];
 
   return reachedMaxAmountAda ? [...reachedMaxAmountAssets, cardanoCoin.id] : reachedMaxAmountAssets;
+};
+
+/**
+ * Saves temporary transaction data to localStorage.
+ * @param data The temporary transaction data to save in storage.
+ */
+export const saveTemporaryTxDataInStorage = ({
+  tempAddress,
+  tempOutputs,
+  tempSource
+}: Partial<TemporaryTransactionData>): void => {
+  if (!isNil(tempAddress)) localStorage.setItem(TemporaryTransactionDataKeys.TEMP_ADDRESS, tempAddress);
+  if (!isNil(tempOutputs)) localStorage.setItem(TemporaryTransactionDataKeys.TEMP_OUTPUTS, JSON.stringify(tempOutputs));
+  if (!isNil(tempSource)) localStorage.setItem(TemporaryTransactionDataKeys.TEMP_SOURCE, tempSource);
+};
+
+/**
+ * Gets temporary transaction data from localStorage.
+ * @returns The temporary transaction data saved in storage. Returns `null` for each key that is not available
+ */
+export const getTemporaryTxDataFromStorage = (): TemporaryTransactionData => {
+  const tempAddress = localStorage.getItem(TemporaryTransactionDataKeys.TEMP_ADDRESS);
+  const tempOutputs = localStorage.getItem(TemporaryTransactionDataKeys.TEMP_OUTPUTS);
+  const tempSource = localStorage.getItem(TemporaryTransactionDataKeys.TEMP_SOURCE);
+
+  return {
+    tempAddress,
+    tempSource: tempSource as TemporaryTransactionData['tempSource'] | null,
+    tempOutputs: !isNil(tempOutputs) ? JSON.parse(tempOutputs) : tempOutputs
+  };
+};
+
+/**
+ * Clears temporary transaction data from localStorage.
+ * @param args An array of keys to clear. If no array is provided, **ALL** keys will be cleared.
+ */
+export const clearTemporaryTxDataFromStorage = (args?: (keyof TemporaryTransactionData)[]): void => {
+  if (!args || args.includes(TemporaryTransactionDataKeys.TEMP_ADDRESS)) {
+    localStorage.removeItem(TemporaryTransactionDataKeys.TEMP_ADDRESS);
+  }
+  if (!args || args.includes(TemporaryTransactionDataKeys.TEMP_OUTPUTS)) {
+    localStorage.removeItem(TemporaryTransactionDataKeys.TEMP_OUTPUTS);
+  }
+  if (!args || args.includes(TemporaryTransactionDataKeys.TEMP_SOURCE)) {
+    localStorage.removeItem(TemporaryTransactionDataKeys.TEMP_SOURCE);
+  }
 };
