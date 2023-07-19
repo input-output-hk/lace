@@ -265,7 +265,7 @@ in rec {
       else "dirty";
   in pkgs.runCommand "lace-blockchain-services-dmg" {} ''
     mkdir -p $out
-    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.dmg
+    target=$out/lace-blockchain-services-${common.laceVersion}-${revShort}-${targetSystem}.dmg
 
     /usr/bin/hdiutil makehybrid -iso -joliet -o tmp.iso \
       ${lace-blockchain-services-bundle}/Applications
@@ -509,7 +509,7 @@ in rec {
     '';
   in pkgs.runCommand "lace-blockchain-services-dmg" {} ''
     mkdir -p $out
-    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.dmg
+    target=$out/lace-blockchain-services-${common.laceVersion}-${revShort}-${targetSystem}.dmg
 
     ${dmgbuild}/bin/dmgbuild \
       -D app_path=${lace-blockchain-services-bundle}/Applications/${lib.escapeShellArg common.prettyName}.app \

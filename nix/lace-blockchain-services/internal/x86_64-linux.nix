@@ -110,7 +110,7 @@ in rec {
     passAsFile = [ "script" ];
   } ''
     mkdir -p $out
-    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.bin
+    target=$out/lace-blockchain-services-${common.laceVersion}-${revShort}-${targetSystem}.bin
     cat $scriptPath >$target
     echo 'Compressing (xz)...'
     tar -cJ -C ${lace-blockchain-services-bundle} . >>$target

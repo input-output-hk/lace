@@ -184,7 +184,7 @@ in rec {
       else "dirty";
   in pkgs.runCommand "lace-blockchain-services.7z" {} ''
     mkdir -p $out
-    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.7z
+    target=$out/lace-blockchain-services-${common.laceVersion}-${revShort}-${targetSystem}.7z
 
     ln -s ${mkPackage { inherit withJS; }} lace-blockchain-services
     ${with pkgs; lib.getExe p7zip} a -r -l $target lace-blockchain-services
@@ -248,7 +248,7 @@ in rec {
     make-windows-installer \
       --spaced-name ${lib.escapeShellArg common.prettyName} \
       --install-dir ${lib.escapeShellArg common.prettyName} \
-      --full-version "1.2.3.4" \
+      --full-version ${lib.escapeShellArg common.laceVersion} \
       --out-name "installer.exe" \
       --icon-path icon.ico \
       --banner-bmp banner.bmp \
@@ -287,7 +287,7 @@ in rec {
     makensis installer.nsi -V4
 
     mkdir -p $out
-    target=$out/lace-blockchain-services-${revShort}-${targetSystem}.exe
+    target=$out/lace-blockchain-services-${common.laceVersion}-${revShort}-${targetSystem}.exe
 
     mv installer.exe "$target"
 
