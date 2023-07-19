@@ -8,12 +8,12 @@ import { AddressInput } from '../elements/addressInput';
 import coinConfigureAssert from './coinConfigureAssert';
 import assetInputAssert from './assetInputAssert';
 import { AssetInput } from '../elements/newTransaction/assetInput';
-import { DrawerCommonExtended } from '../elements/drawerCommonExtended';
 import testContext from '../utils/testContext';
 import Banner from '../elements/banner';
 import { getAddressByName, validAddress, validAddress2 } from '../data/AddressData';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import ModalAssert from './modalAssert';
+import CommonDrawerElements from '../elements/CommonDrawerElements';
 
 class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
@@ -44,10 +44,10 @@ class DrawerSendExtendedAssert {
         await expect(await transactionNewPage.getBundleDescription()).to.equal(
           await t('browserView.transaction.send.advancedFlowText')
         );
-        await webTester.seeWebElement(new DrawerCommonExtended().closeButton());
+        await new CommonDrawerElements().drawerHeaderCloseButton.waitForClickable();
         break;
       case 'popup':
-        await webTester.seeWebElement(new DrawerCommonExtended().backButton());
+        await new CommonDrawerElements().drawerHeaderBackButton.waitForClickable();
         await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.drawer.addBundle'));
         break;
     }
@@ -227,7 +227,7 @@ class DrawerSendExtendedAssert {
 
   async assertTokenTickerDisplayedInTooltip(isVisible: boolean, assetType: string) {
     const savedTicker = String(testContext.load('savedTicker'));
-    if (isVisible === true) {
+    if (isVisible) {
       if (assetType === 'Tokens') {
         const textInTooltip = (await webTester.getTextValueFromElement(new CoinConfigure().tooltip())) as string;
         if (savedTicker.slice(0, 6) === 'asset1') {
@@ -250,7 +250,7 @@ class DrawerSendExtendedAssert {
 
   async assertTokenValueDisplayedInTooltip(isVisible: boolean, expectedValue: string) {
     const coinConfigure = new CoinConfigure();
-    await (isVisible === true
+    await (isVisible
       ? expect(await webTester.getTextValueFromElement(coinConfigure.tooltip())).to.equal(expectedValue)
       : webTester.dontSeeWebElement(coinConfigure.tooltip()));
   }

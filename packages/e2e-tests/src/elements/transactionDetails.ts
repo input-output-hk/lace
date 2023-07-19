@@ -1,11 +1,11 @@
 /* eslint-disable no-undef */
-import webTester, { LocatorStrategy } from '../actor/webTester';
-import { DrawerCommonExtended } from './drawerCommonExtended';
+import webTester from '../actor/webTester';
 import { WebElement, WebElementFactory as Factory } from './webElement';
 import { ChainablePromiseElement } from 'webdriverio';
+import CommonDrawerElements from './CommonDrawerElements';
 
-export class TransactionDetailsPage extends WebElement {
-  protected CONTAINER = '//div[@id="asset-drawer-body"]';
+export class TransactionDetailsPage extends CommonDrawerElements {
+  protected CONTAINER = '//div[@class="ant-drawer-content"]';
   private TRANSACTION_DETAILS_SKELETON = '.ant-drawer-body .ant-skeleton';
   private TRANSACTION_DETAILS_DESCRIPTION = '//div[@data-testid="tx-description"]';
   private TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS = '//div[@data-testid="tx-description"]//div[2]';
@@ -35,7 +35,6 @@ export class TransactionDetailsPage extends WebElement {
   private TRANSACTION_STAKE_POOL_ID = '//div[@data-testid="tx-pool-id"]';
   constructor() {
     super();
-    this.CONTAINER = new DrawerCommonExtended().container().toJSLocator();
   }
 
   get transactionDetailsSkeleton(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -248,11 +247,7 @@ export class TransactionDetailsPage extends WebElement {
     return await webTester.getTextValueFromElement(this.transactionDetailsAmountOfTokens());
   }
 
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
-
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
+  async closeTransactionDetails(mode: 'extended' | 'popup'): Promise<void> {
+    mode === 'popup' ? await this.clickHeaderBackButton() : await this.clickHeaderCloseButton();
   }
 }
