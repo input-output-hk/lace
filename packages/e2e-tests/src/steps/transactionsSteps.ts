@@ -41,7 +41,7 @@ Then(/^all transactions have icon, type of transaction, amount of tokens, value,
 });
 
 Then(/^I can see transaction ([^"]*) with type "([^"]*)"$/, async (index: number, type: string) => {
-  await transactionsPageAssert.assertTableItemDetails(index, type);
+  await transactionsPageAssert.assertTableItemDetails(index - 1, type);
 });
 
 When(/^click on a transaction$/, async () => {
@@ -172,7 +172,7 @@ Then(
       tokensAmount: `${tokenValue}`,
       tokensCount: Number(tokenCount)
     };
-    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(1, expectedTransactionRowAssetDetailsSent);
+    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
   }
 );
 
