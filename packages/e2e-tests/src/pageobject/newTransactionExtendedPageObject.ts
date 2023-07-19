@@ -18,6 +18,7 @@ import TransactionSubmittedPage from '../elements/newTransaction/transactionSubm
 export default new (class NewTransactionExtendedPageObject {
   fillAddress = async (address: string, index?: number) => {
     // Workaround - native method setValue() is failing during filling multiple bundles
+    await browser.pause(500); // TODO: refactor AddressInput class and use waitForClickable() method
     await $(new AddressInput(index).input().toJSLocator()).click();
     await browser.execute(`document.execCommand('insertText', false, '${address}');`);
     Logger.log(`Filled address: ${address}`);

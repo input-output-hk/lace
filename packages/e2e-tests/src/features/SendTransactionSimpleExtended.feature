@@ -66,7 +66,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I close the drawer by clicking close button
     And I click "Agree" button on "You'll have to start again" modal
     And I open address book from header menu
-    Then I see address row with name "WalletName" and address "shelley" on the list in extended mode
+    Then I see address row with name "WalletName" and address "Shelley" on the list in extended mode
 
   @LW-2362 @Testnet
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
