@@ -21,7 +21,7 @@ export const walletBalanceTransformer = (lovelaceBalance: string, fiat?: number)
 
   return {
     coinBalance: adaValue,
-    fiatBalance: fiat ? `${Wallet.util.convertAdaToFiat({ ada: adaValue, fiat })}` : '-'
+    fiatBalance: fiat ? Wallet.util.convertAdaToFiat({ ada: adaValue, fiat }) : undefined
   };
 };
 

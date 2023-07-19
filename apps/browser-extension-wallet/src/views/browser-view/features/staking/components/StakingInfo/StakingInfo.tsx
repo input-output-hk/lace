@@ -8,9 +8,8 @@ import styles from './StakingInfo.module.scss';
 import { StakePoolInfo } from './StakePoolInfo';
 import { Stats } from './Stats';
 import { Tooltip } from './StatsTooltip';
-import { getRandomIcon } from '@src/utils/get-random-icon';
+import { getRandomIcon } from '@lace/common';
 import { formatLocaleNumber } from '@utils/format-number';
-import { CoinId } from '@src/types';
 
 const formatNumericValue = (val: number | string, suffix: number | string): React.ReactElement => (
   <>
@@ -34,7 +33,7 @@ type stakingInfoPanelProps = {
   ticker?: string;
   onStakePoolSelect: () => void;
   popupView?: boolean;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
 };
 
 export const StakingInfo = ({

@@ -7,13 +7,15 @@ import StakingPage from '../elements/staking/stakingPage';
 
 class StakingPageObject {
   async clickStakePoolWithName(poolName: string) {
+    await StakingPage.stakingPoolWithName(poolName).waitForClickable();
     await StakingPage.stakingPoolWithName(poolName).click();
   }
 
   async fillSearch(term: string) {
-    await StakingPage.stakingPageSearchInput.waitForEnabled();
+    await StakingPage.stakingPageSearchInput.waitForClickable();
     await StakingPage.stakingPageSearchInput.scrollIntoView();
-    await StakingPage.stakingPageSearchInput.setValue(term);
+    await StakingPage.stakingPageSearchInput.click();
+    await browser.keys([...term]);
     await browser.pause(500);
   }
 

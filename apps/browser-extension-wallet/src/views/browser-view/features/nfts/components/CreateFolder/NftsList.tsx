@@ -5,9 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { NFT, getTokenList } from '@src/utils/get-token-list';
 import AddNft from '@assets/icons/add-nft-icon.component.svg';
 import { useWalletStore } from '../../../../../../stores';
-import { useObservable } from '../../../../../../hooks';
 import styles from './CreateFolderDrawer.module.scss';
 import { useCurrencyStore } from '@providers';
+import { useObservable } from '@lace/common';
+import { useAssetInfo } from '@hooks';
 
 const nftsPerRow = {
   popupView: 2,
@@ -31,7 +32,7 @@ export const NftsList = ({
 }: NftsListProps): React.ReactElement => {
   const { t } = useTranslation();
   const { inMemoryWallet, environmentName } = useWalletStore();
-  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const assetsInfo = useAssetInfo();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const nftsIds = useMemo(() => nfts?.map(({ assetId }) => assetId), [nfts]);
   const { fiatCurrency } = useCurrencyStore();

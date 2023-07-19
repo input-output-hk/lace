@@ -7,10 +7,10 @@ import { ReactComponent as AddAddress } from '../../assets/icons/add.component.s
 import { ReactComponent as AvailableAddress } from '../../assets/icons/close-icon.component.svg';
 import styles from './DestinationAddressInput.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
 export type DestinationAddressInputProps = Omit<AutoCompleteProps, 'value'> & {
-  value: string | { name: string; address: string };
+  value: { name?: string; address: string };
   validationObject: { name: boolean; address: boolean };
   options: SearchProps['options'];
   onChange: SearchProps['onChange'];
@@ -51,7 +51,7 @@ export const DestinationAddressInput = ({
   const [focused, setFocused] = useState<boolean>(false);
 
   useEffect(() => {
-    if (typeof value === 'object') setFocused(false);
+    if (value.name) setFocused(false);
   }, [value]);
 
   const customIcon = useMemo(() => {
@@ -66,7 +66,7 @@ export const DestinationAddressInput = ({
     if (handle === 'valid') {
       handleIcon = <CheckCircleOutlined className={styles.valid} />;
     } else if (handle === 'invalid') {
-      handleIcon = <CloseCircleOutlined className={styles.invalid} />;
+      handleIcon = <ExclamationCircleOutlined className={styles.invalid} />;
     }
     return (
       <>
@@ -84,20 +84,13 @@ export const DestinationAddressInput = ({
     );
   }, [handle, valid, empty, validationObject, exists, onClick]);
 
-  const children = useMemo(() => {
-    if (typeof value === 'object') {
-      return getInputLabel(value.name, value.address);
-    }
-    return validationObject?.address ? (
-      <Ellipsis className={styles.validAddress} withTooltip={false} text={value} ellipsisInTheMiddle />
-    ) : undefined;
-  }, [value, validationObject?.address]);
+  const children = useMemo(() => value.name && getInputLabel(value.name, value.address), [value]);
 
   return (
     <Search
       className={classnames(className, styles.searchAddress)}
-      value={typeof value === 'object' ? value.address : value}
-      inputPlaceholder={translations.recipientAddress}
+      value={value.address}
+      label={translations.recipientAddress}
       onChange={onChange}
       options={options}
       loading={handle === 'verifying'}

@@ -6,7 +6,7 @@
   border-radius: size_unit(2);
   cursor: pointer;
   display: grid;
-  grid-template-columns: 38% 18% 28% 16%;
+  grid-template-columns: 38% 12% 34% 16%;
   min-height: size_unit(8);
   width: 100%;
   &:hover {
@@ -20,7 +20,6 @@
     align-items: center;
     display: flex;
     gap: size_unit(3);
-    padding-right: size_unit(4);
     &:last-child {
       justify-content: flex-end;
       padding-right: 0;
@@ -72,6 +71,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      padding-right: size_unit(2);
+
+      @media (max-width: 1024px) {
+       max-width: 160px;
+      }
     }
     p {
       display: block;

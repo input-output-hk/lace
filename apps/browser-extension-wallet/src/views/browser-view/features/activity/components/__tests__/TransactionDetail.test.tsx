@@ -21,11 +21,11 @@ jest.mock('../../../../../../providers/currency', () => ({
 
 describe('Testing Transaction details data function', () => {
   test('should return correct data for incoming transactions', async () => {
-    const { outputs, inputs, walletAddress, incomingTransaction } = incomingTransactionOutput;
+    const { outputs, inputs, walletAddresses, incomingTransaction } = incomingTransactionOutput;
     const result = getTransactionData({
       addrInputs: inputs,
       addrOutputs: outputs,
-      walletAddress,
+      walletAddresses,
       isIncomingTransaction: incomingTransaction
     });
 
@@ -33,11 +33,11 @@ describe('Testing Transaction details data function', () => {
   });
 
   test('should return correct data for outgoing transactions', async () => {
-    const { outputs, walletAddress, incomingTransaction } = outgoingTransactionOutput;
+    const { outputs, walletAddresses, incomingTransaction } = outgoingTransactionOutput;
     const result = getTransactionData({
       addrInputs: [],
       addrOutputs: outputs,
-      walletAddress,
+      walletAddresses,
       isIncomingTransaction: incomingTransaction
     });
 
@@ -45,11 +45,11 @@ describe('Testing Transaction details data function', () => {
   });
 
   test('should return empty array when data is missing', async () => {
-    const { outputs, inputs, walletAddress, incomingTransaction } = missingDataTransactionOutput;
+    const { outputs, inputs, walletAddresses, incomingTransaction } = missingDataTransactionOutput;
     const result = getTransactionData({
       addrInputs: inputs,
       addrOutputs: outputs,
-      walletAddress,
+      walletAddresses,
       isIncomingTransaction: incomingTransaction
     });
 

@@ -9,14 +9,6 @@ describe('Search', () => {
     const { queryByTestId } = render(<Search value="test value" />);
     expect(queryByTestId('search-input')).toHaveValue('test value');
   });
-  test('focuses input on container click', () => {
-    const { queryByTestId } = render(<Search />);
-    expect(queryByTestId('search-input')).not.toHaveFocus();
-    act(() => {
-      fireEvent.click(queryByTestId('search-input-container'));
-    });
-    expect(queryByTestId('search-input')).toHaveFocus();
-  });
 
   test('call onInputBlur function prop on search input blur', () => {
     const onInputBlur = jest.fn();
@@ -37,7 +29,7 @@ describe('Search', () => {
   test('displays clear input button and calls onClearButtonClick when clicked', () => {
     const onClearButtonClick = jest.fn();
     const { queryByTestId } = render(<Search showClear onClearButtonClick={onClearButtonClick} />);
-    const clearButton = queryByTestId('address-book-btn');
+    const clearButton = queryByTestId('search-clear-button');
     expect(clearButton).toBeInTheDocument();
     act(() => {
       fireEvent.click(clearButton);

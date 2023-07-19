@@ -13,7 +13,7 @@ interface AddressBookProviderProps {
   initialState?: Array<AddressBookSchema>;
 }
 
-export type AddressRecordParams = Pick<AddressBookSchema, 'address' | 'name'>;
+export type AddressRecordParams = Pick<AddressBookSchema, 'address' | 'name' | 'handleResolution'>;
 
 export const cardanoNetworkMap = {
   Mainnet: Wallet.Cardano.NetworkMagics.Mainnet,

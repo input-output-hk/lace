@@ -1,38 +1,48 @@
-import PrivacyPolicySettingsDrawer from '../../elements/settings/extendedView/privacyPolicySettingsDrawer';
+import PrivacyPolicyDrawer from '../../elements/settings/PrivacyPolicyDrawer';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import { readFromFile } from '../../utils/fileUtils';
 import { removeWhitespacesFromText } from '../../utils/textUtils';
+import { browser } from '@wdio/globals';
 
 class PrivacyPolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
-    await PrivacyPolicySettingsDrawer.drawerNavigationTitle.waitForDisplayed();
-    await expect(await PrivacyPolicySettingsDrawer.drawerNavigationTitle.getText()).to.equal(
+    await PrivacyPolicyDrawer.drawerNavigationTitle.waitForDisplayed();
+    await expect(await PrivacyPolicyDrawer.drawerNavigationTitle.getText()).to.equal(
       await t('browserView.settings.heading')
     );
   };
 
   assertSeeDrawerCloseButton = async () => {
-    await PrivacyPolicySettingsDrawer.closeButton.waitForDisplayed();
+    await PrivacyPolicyDrawer.drawerHeaderCloseButton.waitForClickable();
   };
 
   assertSeeDrawerBackButton = async () => {
-    await PrivacyPolicySettingsDrawer.backButton.waitForDisplayed();
+    await PrivacyPolicyDrawer.drawerHeaderBackButton.waitForClickable();
   };
 
   async assertSeePrivacyPolicyTitle() {
-    await PrivacyPolicySettingsDrawer.drawerHeaderTitle.waitForDisplayed();
-    await expect(await PrivacyPolicySettingsDrawer.drawerHeaderTitle.getText()).to.equal(
+    await PrivacyPolicyDrawer.drawerHeaderTitle.waitForDisplayed();
+    await expect(await PrivacyPolicyDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.legal.privacyPolicy.title')
     );
   }
 
   async assertSeePrivacyPolicyContent() {
-    const expectedPolicy = readFromFile(__dirname, '../settings/privacyPolicy.txt');
-    await PrivacyPolicySettingsDrawer.privacyPolicyContent.waitForDisplayed();
-    const currentPolicy = await PrivacyPolicySettingsDrawer.privacyPolicyContent.getText();
-    await expect(await removeWhitespacesFromText(currentPolicy)).to.equal(
-      await removeWhitespacesFromText(expectedPolicy)
+    const expectedPolicy = await removeWhitespacesFromText(readFromFile(__dirname, '../settings/privacyPolicy.txt'));
+    await PrivacyPolicyDrawer.privacyPolicyContent.waitForDisplayed();
+
+    await browser.waitUntil(
+      async () =>
+        (await removeWhitespacesFromText(await PrivacyPolicyDrawer.privacyPolicyContent.getText())) === expectedPolicy,
+      {
+        timeout: 3000,
+        interval: 1000,
+        timeoutMsg: `failed while waiting for expected privacy policy text
+        expected: ${expectedPolicy}
+        current: ${await removeWhitespacesFromText(await PrivacyPolicyDrawer.privacyPolicyContent.getText())}
+        `
+      }
     );
   }
 }

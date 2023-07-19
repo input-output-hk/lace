@@ -9,8 +9,15 @@ export type ConstructTranslationKeyUnion<T extends RecursiveStructure, K extends
   : never;
 
 type KeysStructure = {
+  general: {
+    button: {
+      confirm: '';
+      close: '';
+    };
+  };
   browsePools: {
     stakePoolTableBrowser: {
+      searchInputPlaceholder: '';
       tableHeader: {
         poolName: '';
         ros: '';
@@ -20,11 +27,101 @@ type KeysStructure = {
       emptyMessage: '';
     };
   };
+  drawer: {
+    title: '';
+    titleSecond: '';
+    sign: {
+      confirmation: {
+        title: '';
+      };
+      passwordPlaceholder: '';
+      enterWalletPasswordToConfirmTransaction: '';
+      error: {
+        invalidPassword: '';
+      };
+    };
+    success: {
+      title: '';
+      subTitle: '';
+      switchedPools: {
+        title: '';
+        subTitle: '';
+      };
+    };
+    failure: {
+      title: '';
+      subTitle: '';
+      button: {
+        close: '';
+        back: '';
+        retry: '';
+      };
+    };
+    details: {
+      metrics: {
+        activeStake: '';
+        apy: '';
+        delegators: '';
+        saturation: '';
+      };
+      status: {
+        delegating: '';
+        retired: '';
+        retiring: '';
+        saturated: '';
+      };
+      switchingPoolBanner: {
+        title: '';
+        description: {
+          step1: '';
+          step2: '';
+          step3: '';
+        };
+      };
+      stakeOnPoolButton: '';
+      statistics: '';
+      information: '';
+      social: '';
+      poolIds: '';
+      owners: '';
+    };
+    confirmation: {
+      title: '';
+      subTitle: '';
+      cardanoName: '';
+      totalCost: {
+        title: '';
+      };
+      theAmountYoullBeChargedForRegisteringYourStakeKey: '';
+      stakingDeposit: '';
+      errors: {
+        utxoFullyDepleted: '';
+        utxoBalanceInsufficient: '';
+      };
+      transactionFee: '';
+      theAmountYoullBeChargedToProcessYourTransaction: '';
+      button: {
+        continueInAdvancedView: '';
+        confirmWithDevice: '';
+        signing: '';
+        confirm: '';
+      };
+    };
+  };
   overview: {
     delegationCard: {
-      status: '';
-      balance: '';
-      pools: '';
+      label: {
+        status: '';
+        balance: '';
+        pools: '';
+      };
+      statuses: {
+        multiDelegation: '';
+        overStaked: '';
+        ready: '';
+        simpleDelegation: '';
+        underStaked: '';
+      };
     };
     stakingInfoCard: {
       fee: '';
@@ -46,6 +143,12 @@ type KeysStructure = {
       title: '';
       overviewTitle: '';
     };
+  };
+  portfolioBar: {
+    selectedPools: '';
+    maxPools: '';
+    clear: '';
+    next: '';
   };
 };
 

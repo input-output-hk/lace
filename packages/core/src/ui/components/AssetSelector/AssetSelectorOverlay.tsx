@@ -197,7 +197,7 @@ export const AssetSelectorOverlay = ({
   }, [filterAssets]);
 
   return (
-    <div data-testid="coins-dropdown" className={cn(styles.assetsContainer, { [className]: className })}>
+    <div data-testid="asset-selector" className={cn(styles.assetsContainer, { [className]: className })}>
       {groups.length > 1 && (
         <div className={styles.radioButtons}>
           <Radio.Group

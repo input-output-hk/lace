@@ -1,5 +1,7 @@
-import { createTheme } from '@vanilla-extract/css';
+import { createGlobalTheme } from '@vanilla-extract/css';
+import { rgba } from 'polished';
 
+import { borders } from '../borders.data';
 import {
   colorTransparent,
   darkColorScheme,
@@ -58,14 +60,30 @@ const colors: Colors = {
   $card_outlined_backgroundColor: darkColorScheme.$primary_mid_black,
   $card_outlined_borderColor: colorTransparent,
 
-  $control_buttons_filled_label_color: darkColorScheme.$primary_light_grey,
-  $control_buttons_filled_label_color_hover: darkColorScheme.$primary_white,
-  $control_buttons_filled_container_bgColor: darkColorScheme.$primary_grey,
-  $control_buttons_filled_container_bgColor_hover:
+  $control_buttons_label_color: darkColorScheme.$primary_white,
+  $control_buttons_label_color_hover: darkColorScheme.$primary_light_grey,
+  $control_buttons_label_color_filled: darkColorScheme.$primary_light_grey,
+  $control_buttons_label_color_filled_hover: darkColorScheme.$primary_white,
+  $control_buttons_label_color_danger: darkColorScheme.$primary_white,
+  $control_buttons_label_color_danger_pressed: rgba(
+    darkColorScheme.$primary_white,
+    0.8,
+  ),
+  $control_buttons_container_bgColor_filled: darkColorScheme.$primary_grey,
+  $control_buttons_container_bgColor_filled_hover:
     darkColorScheme.$primary_mid_grey,
-  $control_buttons_filled_container_bgColor_pressed:
+  $control_buttons_container_bgColor: darkColorScheme.$primary_bg_black,
+  $control_buttons_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $control_buttons_container_bgColor_pressed:
     darkColorScheme.$primary_dark_grey,
-  $control_buttons_filled_container_outlineColor:
+  $control_buttons_container_bgColor_danger:
+    darkColorScheme.$secondary_data_pink,
+  $control_buttons_container_bgColor_danger_hover:
+    darkColorScheme.$secondary_hover_data_pink,
+  $control_buttons_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $control_buttons_borderColor: darkColorScheme.$primary_dark_grey_plus,
+  $control_buttons_borderColor_danger:
     darkColorScheme.$primary_accent_purple_0_3,
 
   $variants_table_bgColor: '#1E1E1E',
@@ -144,17 +162,74 @@ const colors: Colors = {
   $side_drawer_head_title_color: darkColorScheme.$primary_white,
   $side_drawer_content_title_color: darkColorScheme.$primary_white,
   $side_drawer_content_description_color: darkColorScheme.$primary_light_grey,
+
+  $search_box_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $search_box_container_bgColor_pressed: darkColorScheme.$primary_mid_grey,
+  $search_box_container_borderColor_hover: darkColorScheme.$primary_grey,
+  $search_box_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $search_box_label_color: darkColorScheme.$primary_light_grey,
+  $search_box_label_color_pressed: darkColorScheme.$primary_white,
+  $search_box_clear_button_container_bgColor:
+    darkColorScheme.$primary_dark_grey,
+  $search_box_clear_button_container_bgColor_hover:
+    darkColorScheme.$primary_dark_grey,
+  $search_box_clear_button_container_bgColor_pressed:
+    darkColorScheme.$primary_dark_grey,
+  $search_box_clear_button_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $search_box_clear_button_label_color: darkColorScheme.$primary_light_grey,
+  $search_box_clear_button_label_color_hover: darkColorScheme.$primary_white,
+  $search_box_clear_button_label_color_pressed:
+    darkColorScheme.$primary_light_grey,
+
+  $flow_card_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $flow_card_label_primary_color: darkColorScheme.$primary_white,
+  $flow_card_label_secondary_color: darkColorScheme.$primary_light_grey,
+
+  $icon_button_label_color: darkColorScheme.$primary_light_grey,
+  $icon_button_label_color_pressed: darkColorScheme.$primary_white,
+  $icon_button_container_bgColor: colorTransparent,
+  $icon_button_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $icon_button_container_bgColor_pressed: darkColorScheme.$primary_dark_grey,
+  $icon_button_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+
+  $summary_expander_container_borderColor: darkColorScheme.$primary_mid_grey,
+  $summary_expander_label_color: darkColorScheme.$primary_white,
+  $summary_expander_trigger_label_color: darkColorScheme.$primary_white,
+  $summary_expander_trigger_label_color_pressed: darkColorScheme.$primary_white,
+  $summary_expander_trigger_container_bgColor: colorTransparent,
+  $summary_expander_trigger_container_bgColor_hover:
+    darkColorScheme.$primary_light_black,
+  $summary_expander_trigger_container_bgColor_pressed:
+    darkColorScheme.$primary_light_black,
+  $summary_expander_trigger_container_bgColor_focused: colorTransparent,
+  $summary_expander_trigger_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $summary_expander_trigger_container_borderColor:
+    darkColorScheme.$primary_mid_grey,
+
+  $transaction_summary_label_color: darkColorScheme.$primary_white,
+  $transaction_summary_secondary_label_color:
+    darkColorScheme.$primary_light_grey,
+
+  $toast_bar_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $toast_bar_label_color: darkColorScheme.$primary_white,
+  $toast_bar_icon_container_bgColor: darkColorScheme.$primary_grey,
+  $toast_bar_icon_label_color: darkColorScheme.$primary_light_grey_plus,
 };
 
 const elevation: Elevation = {
-  $tooltip: '0px 0px 16px rgba(167, 143, 160, 0.2)',
+  $tooltip: 'none',
   $dialog: 'none',
   $primaryButton: 'none',
   $assets: '0px 0px 5px rgba(0, 0, 0, 0.05), 0px 0px 10px rgba(0, 0, 0, 0.05)',
   $card: 'none',
 };
 
-export const darkTheme = createTheme(vars, {
+export const theme = {
+  borders,
   spacing,
   fontWeights,
   fontSizes,
@@ -164,4 +239,6 @@ export const darkTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
-});
+};
+
+createGlobalTheme('[data-theme="dark"]:root', vars, theme);

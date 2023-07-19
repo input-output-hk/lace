@@ -1,4 +1,4 @@
-import { useObservable } from '@hooks/useObservable';
+import { useObservable } from '@lace/common';
 import React, { useMemo } from 'react';
 import { map } from 'rxjs';
 import { useWalletStore } from '../../../../stores';

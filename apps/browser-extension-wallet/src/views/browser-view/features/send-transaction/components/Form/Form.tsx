@@ -4,7 +4,7 @@ import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { AddressInput } from './AddressInput';
 import { CoinInput } from './CoinInput';
 import { FormRowHeader } from './FormRowHeader';
@@ -28,12 +28,12 @@ import {
   AnalyticsEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { CoinId, CurrencyInfo, Tokens } from '@src/types';
+import { CurrencyInfo, Tokens } from '@src/types';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
 
 import styles from './Form.module.scss';
 import { getReachedMaxAmountList } from '../../helpers';
-import { PriceResult, useObservable } from '@hooks';
+import { PriceResult } from '@hooks';
 
 const RowContainer = ({
   children,
@@ -71,7 +71,7 @@ const formatAdaAllocation = ({
 }: {
   missingCoins: string;
   fiat: number;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
   fiatCurrency: CurrencyInfo;
 }) => ({
   adaAmount: `${Wallet.util.lovelacesToAdaString(missingCoins)} ${cardanoCoin.symbol}`,
@@ -86,7 +86,7 @@ const getNextBundleCoinId = (
   assetBalances: Tokens,
   usedCoins: SpentBalances,
   info: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>,
-  cardanoCoin: CoinId
+  cardanoCoin: Wallet.CoinId
 ) => {
   const adaAmountInLovelace = usedCoins[cardanoCoin.id] ? usedCoins[cardanoCoin.id] : '0';
   const balanceInAda = Wallet.util.lovelacesToAdaString(balance);

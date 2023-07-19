@@ -3,8 +3,9 @@ import * as React from 'react';
 import '@testing-library/jest-dom';
 import { fireEvent, render, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WalletSetupMnemonicVerificationStep } from '../WalletSetupMnemonicVerificationStep';
+import { WalletSetupMnemonicVerificationStep } from '@ui/components/WalletSetup';
 import { useEffect } from 'react';
+import { act } from 'react-dom/test-utils';
 
 const Test = () => {
   useEffect(() => {
@@ -36,10 +37,9 @@ const Test = () => {
       onSubmit={jest.fn()}
       translations={{
         enterPassphrase: 'Enter passphrase',
-        passphraseError: 'Passphrase error'
+        passphraseError: 'Passphrase error',
+        enterPassphraseDescription: 'Enter passphrase description'
       }}
-      setIsBackToMnemonic={jest.fn()}
-      isBackToMnemonic={false}
       isSubmitEnabled
     />
   );
@@ -53,7 +53,9 @@ const findInputByIndex = async (index: number): Promise<HTMLElement> => {
 describe('<WalletSetupMnemonicVerificationStep>', () => {
   it('should render IogSwitch component', async () => {
     const user = userEvent.setup();
-    render(<Test />);
+    act(() => {
+      render(<Test />);
+    });
 
     const input1th = await findInputByIndex(1);
     expect(input1th).toHaveValue('weapon');
@@ -61,11 +63,15 @@ describe('<WalletSetupMnemonicVerificationStep>', () => {
     const input8th = await findInputByIndex(8);
     expect(input8th).toHaveValue('');
 
-    fireEvent.change(input8th, {
-      target: { value: 'lecture' }
+    act(() => {
+      fireEvent.change(input8th, {
+        target: { value: 'lecture' }
+      });
     });
 
-    await user.type(input8th, '{enter}');
+    await act(async () => {
+      await user.type(input8th, '{enter}');
+    });
 
     expect(window.document.activeElement.id).toBe('mnemonic-word-9');
 
@@ -74,5 +80,14 @@ describe('<WalletSetupMnemonicVerificationStep>', () => {
 
     const input16th = await findInputByIndex(16);
     expect(input16th).toHaveValue('');
+  });
+
+  it('should render proper description', async () => {
+    act(() => {
+      render(<Test />);
+    });
+
+    const { getByText } = within(screen.getByTestId('wallet-setup-step-subtitle'));
+    expect(getByText('Enter passphrase description')).toBeInTheDocument();
   });
 });

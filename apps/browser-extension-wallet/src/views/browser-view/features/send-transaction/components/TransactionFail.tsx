@@ -7,7 +7,7 @@ export const TransactionFail = (): React.ReactElement => {
   const { t } = useTranslation();
 
   return (
-    <div className={styles.successTxContainer}>
+    <div data-testid="tx-fail-container" className={styles.successTxContainer}>
       <ResultMessage
         status="error"
         title={

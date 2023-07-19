@@ -6,7 +6,7 @@ import InfoIcon from '../../../../assets/icons/browser-view/info-icon.component.
 import EyeIcon from '../../../../assets/icons/browser-view/eye-icon.component.svg';
 import EyeIconInvisible from '../../../../assets/icons/browser-view/eye-icon-invisible.component.svg';
 import { useTranslation } from 'react-i18next';
-import { Banner } from '@components/Banner';
+import { Banner } from '@lace/common';
 import QuestionMarkIcon from '../../../../assets/icons/purple-question-mark.svg';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
@@ -90,14 +90,18 @@ const renderVariation = (variation: number | string, size: TextSize, popupView: 
     ]);
 
     return (
-      <h4 className={classnames([variationStyle, textSize])}>
+      <h4 className={classnames([variationStyle, textSize])} data-testid="portfolio-balance-variation">
         {variation > 0 && '+'}
         {variation}%
       </h4>
     );
   }
 
-  return <h4 className={classnames([styles.variation, textSize])}>{variation}</h4>;
+  return (
+    <h4 className={classnames([styles.variation, textSize])} data-testid="portfolio-balance-variation">
+      {variation}
+    </h4>
+  );
 };
 
 export const PortfolioBalance = ({

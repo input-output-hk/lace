@@ -1,7 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { AssetInfo, CardanoOutput, OutputList, SpentBalances } from './types';
 import BigNumber from 'bignumber.js';
-import { CoinId } from '@src/types';
 
 export const calculateSpentBalance = (outputs: OutputList): Record<string, string> => {
   let spentBalances: Record<string, string> = {};
@@ -18,7 +17,7 @@ export const calculateSpentBalance = (outputs: OutputList): Record<string, strin
   return spentBalances;
 };
 
-export const getOutputValues = (assets: Array<AssetInfo>, cardanoCoin: CoinId): CardanoOutput['value'] => {
+export const getOutputValues = (assets: Array<AssetInfo>, cardanoCoin: Wallet.CoinId): CardanoOutput['value'] => {
   const assetsMap = new Map();
   let coins = '0';
 
@@ -55,7 +54,7 @@ export const getReachedMaxAmountList = ({
   spendableCoin: BigInt;
   balance: Wallet.Cardano.Value;
   exceed?: boolean;
-  cardanoCoin: CoinId;
+  cardanoCoin: Wallet.CoinId;
 }): (string | Wallet.Cardano.AssetId)[] => {
   const reachedMaxAmountAda =
     tokensUsed[cardanoCoin.id] && spendableCoin

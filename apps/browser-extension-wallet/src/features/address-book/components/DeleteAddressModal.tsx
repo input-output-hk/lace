@@ -30,6 +30,7 @@ export const DeleteAddressModal = ({
       closable={false}
       visible={visible}
       width={isSmall ? 'calc(100% - 50px)' : modalWidth}
+      zIndex={1000}
     >
       <div data-testid="delete-address-modal-title" className={styles.header}>
         {translate('browserView.addressBook.deleteModal.title')}

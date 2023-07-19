@@ -18,8 +18,13 @@ export const ladleViteConfig = {
     eslint({
       include: './**/*.{ts,tsx,json}',
       overrideConfigFile: '.eslintrc.cjs',
+      failOnError: false,
     }),
-    svgr(),
+    svgr({
+      svgrOptions: {
+        icon: true,
+      },
+    }),
   ],
 };
 

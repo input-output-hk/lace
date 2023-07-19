@@ -6,13 +6,15 @@ import { ReceiveInfo } from './ReceiveInfo';
 import { useGetHandles } from '@hooks/useGetHandles';
 
 export const ReceiveInfoContainer = (): React.ReactElement => {
-  const [redirectToOverview] = useRedirection(walletRoutePaths.assets);
+  const redirectToOverview = useRedirection(walletRoutePaths.assets);
   const { walletInfo } = useWalletStore();
   const handles = useGetHandles();
 
   return (
     <ReceiveInfo
-      wallet={{ ...walletInfo, name: (handles?.length && handles[0]?.nftMetadata.name) || walletInfo.name }}
+      name={walletInfo?.name}
+      address={walletInfo?.addresses[0].address}
+      handles={handles}
       goBack={redirectToOverview}
     />
   );

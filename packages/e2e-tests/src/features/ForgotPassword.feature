@@ -114,7 +114,7 @@ Feature: Forgot password
       | mnemonic verification 16/24 |
       | mnemonic verification 24/24 |
 
-  @LW-2786 @LW-2440
+  @LW-2786 @LW-2440 @Smoke
   Scenario: "Forgot password?" - happy path
     Given I am on lock screen
     And I navigate to home page on popup view

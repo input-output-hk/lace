@@ -4,7 +4,7 @@ import React from 'react';
 import type { ComponentStory, Meta } from '@storybook/react';
 
 import cardanoImage from '../../assets/images/cardano-blue-bg.png';
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
+import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
@@ -135,11 +135,11 @@ export const Overview = (): JSX.Element => (
         <Variants.Table headers={['Rest', 'Hover / Focused']}>
           <MainComponents />
         </Variants.Table>
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
+        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
           <Variants.Table>
             <MainComponents />
           </Variants.Table>
-        </ThemeProvider>
+        </LocalThemeProvider>
       </Section>
     </Cell>
   </Grid>

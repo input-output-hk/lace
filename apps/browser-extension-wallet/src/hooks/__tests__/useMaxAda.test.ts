@@ -4,6 +4,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
 import { Subject, of } from 'rxjs';
 import { Wallet } from '@lace/cardano';
+import { waitFor } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 const mockInitializeTx = jest.fn();
 
 const inMemoryWallet = {
@@ -47,11 +49,14 @@ describe('Testing useMaxAda hook', () => {
   });
 
   test('should return 0 in case balance.coins is empty', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useMaxAda());
-    inMemoryWallet.balance.utxo.available$.next({ coins: undefined });
+    const { result } = renderHook(() => useMaxAda());
+    act(() => {
+      inMemoryWallet.balance.utxo.available$.next({ coins: undefined });
+    });
 
-    await waitForNextUpdate();
-    expect(result.current.toString()).toBe('0');
+    await waitFor(() => {
+      expect(result.current.toString()).toBe('0');
+    });
   });
 
   test('should return 0 in case there is an error', async () => {
@@ -59,33 +64,43 @@ describe('Testing useMaxAda hook', () => {
     mockInitializeTx.mockImplementation(async () => {
       throw new Error('init tx error');
     });
-    const { result, waitForNextUpdate } = renderHook(() => useMaxAda());
+    const { result } = renderHook(() => useMaxAda());
 
-    inMemoryWallet.balance.utxo.available$.next({ coins: BigInt('10000000') });
-
-    await waitForNextUpdate();
-    expect(result.current.toString()).toBe('0');
+    act(() => {
+      inMemoryWallet.balance.utxo.available$.next({ coins: BigInt('10000000') });
+    });
+    await waitFor(() => {
+      expect(result.current.toString()).toBe('0');
+    });
   });
 
   test('should return 7874869', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useMaxAda());
-    inMemoryWallet.balance.utxo.available$.next({ coins: BigInt('10000000') });
-    await waitForNextUpdate();
-    expect(result.current.toString()).toBe('7874869');
+    const { result } = renderHook(() => useMaxAda());
+
+    act(() => {
+      inMemoryWallet.balance.utxo.available$.next({ coins: BigInt('10000000') });
+    });
+    await waitFor(() => {
+      expect(result.current.toString()).toBe('7874869');
+    });
   });
 
   test('should return 7689539', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useMaxAda());
-    inMemoryWallet.balance.utxo.available$.next({
-      coins: BigInt('10000000'),
-      assets: new Map([
-        [
-          Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
-          BigInt('100000000')
-        ]
-      ])
+    const { result } = renderHook(() => useMaxAda());
+    act(() => {
+      inMemoryWallet.balance.utxo.available$.next({
+        coins: BigInt('10000000'),
+        assets: new Map([
+          [
+            Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
+            BigInt('100000000')
+          ]
+        ])
+      });
     });
-    await waitForNextUpdate();
-    expect(result.current.toString()).toBe('7689539');
+
+    await waitFor(() => {
+      expect(result.current.toString()).toBe('7689539');
+    });
   });
 });

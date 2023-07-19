@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
 import { Layout } from './Layout';
@@ -14,10 +14,9 @@ import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { useObservable } from '@hooks/useObservable';
+import { useRedirection } from '@hooks';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { Skeleton } from 'antd';
-import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
@@ -38,8 +37,7 @@ const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const ConfirmTransaction = withAddressBookContext((): React.ReactElement => {
   const {
-    utils: { setNextView },
-    dappInfo
+    utils: { setNextView }
   } = useViewsFlowContext();
   const { t } = useTranslation();
   const {
@@ -55,7 +53,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
   const availableBalance = useObservable(inMemoryWallet.balance.utxo.available$);
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [redirectToSignFailure] = useRedirection(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const keyAgentType = getKeyAgentType();
   const isUsingHardwareWallet = useMemo(
@@ -63,6 +61,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     [keyAgentType]
   );
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
+  const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
 
   const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
     const assetIds: Wallet.Cardano.AssetId[] = [];
@@ -80,14 +79,16 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const assetIds = useMemo(() => tx?.body?.outputs && getTransactionAssetsId(tx.body.outputs), [tx?.body?.outputs]);
 
   useEffect(() => {
-    const fetchAssetsInfo = async () => {
-      const result = await getAssetsInformation(assetIds, assets, {
+    if (assetIds?.length > 0) {
+      getAssetsInformation(assetIds, assets, {
         assetProvider,
         extraData: { nftMetadata: true, tokenMetadata: true }
-      });
-      setAssetsInfo(result);
-    };
-    fetchAssetsInfo();
+      })
+        .then((result) => setAssetsInfo(result))
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }, [assetIds, assetProvider, assets]);
 
   const cancelTransaction = useCallback(() => {
@@ -95,7 +96,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       {
         api$: of({
           async allowSignTx(): Promise<boolean> {
-            return Promise.resolve(false);
+            return Promise.reject();
           }
         }),
         baseChannel: DAPP_CHANNELS.userPrompt,
@@ -121,7 +122,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         },
         { logger: console, runtime }
       );
-    } catch {
+    } catch (error) {
+      console.log('error', error);
       redirectToSignFailure();
     }
   }, [setIsConfirmingTx, redirectToSignFailure]);
@@ -129,10 +131,14 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   useEffect(() => {
     dappDataApi
       .getSignTxData()
-      .then(async (txData) => {
-        setTx(txData);
+      .then(({ dappInfo: backgroundDappInfo, tx: backgroundTx }) => {
+        setDappInfo(backgroundDappInfo);
+        setTx(backgroundTx);
       })
-      .catch((error) => setErrorMessage(error));
+      .catch((error) => {
+        setErrorMessage(error);
+        console.log(error);
+      });
   }, []);
 
   const createAssetList = useCallback(
@@ -142,11 +148,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       // eslint-disable-next-line unicorn/no-array-for-each
       txAssets.forEach(async (value, key) => {
         const walletAsset = assets.get(key) || assetsInfo?.get(key);
-        if (!walletAsset) {
-          // Trying to use an asset not in wallet
-          setErrorMessage(t('core.dappTransaction.tryingToUseAssetNotInWallet'));
-          return;
-        }
         assetList.push({
           name: walletAsset.name.toString() || key.toString(),
           ticker: walletAsset.tokenMetadata?.ticker || walletAsset.nftMetadata?.name,
@@ -155,7 +156,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       });
       return assetList;
     },
-    [assets, assetsInfo, t]
+    [assets, assetsInfo]
   );
 
   const addressToNameMap = useMemo(
@@ -174,8 +175,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     const isMintTransaction = minted.length > 0;
     const isBurnTransaction = burned.length > 0;
 
-    // eslint-disable-next-line unicorn/no-nested-ternary
-    // TODO: improve
     let txType: 'Send' | 'Mint' | 'Burn';
     if (isMintTransaction) {
       txType = 'Mint';
@@ -185,13 +184,18 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       txType = 'Send';
     }
 
-    const externalOutputs = tx.body.outputs.filter((output) => output.address !== walletInfo.address);
+    const externalOutputs = tx.body.outputs.filter((output) => {
+      if (txType === 'Send') {
+        return walletInfo.addresses.every((addr) => output.address !== addr.address);
+      }
+      return true;
+    });
     let totalCoins = BigInt(0);
 
     // eslint-disable-next-line unicorn/no-array-reduce
     const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
       // Don't show withdrawl tx's etc
-      if (txOut.address.toString() === walletInfo.address.toString()) return acc;
+      if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
       totalCoins += txOut.value.coins;
       if (totalCoins >= availableBalance?.coins) {
         setInsufficientFunds(true);
@@ -213,7 +217,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       outputs: txSummaryOutputs,
       type: txType
     };
-  }, [tx, availableBalance, walletInfo.address, createAssetList, addressToNameMap]);
+  }, [tx, availableBalance, walletInfo.addresses, createAssetList, addressToNameMap]);
 
   const translations = {
     transaction: t('core.dappTransaction.transaction'),

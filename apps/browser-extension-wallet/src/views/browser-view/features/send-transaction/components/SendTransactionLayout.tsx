@@ -20,7 +20,8 @@ export const SendTransactionLayout = ({ children, isPopupView }: SendTransaction
   const { onClose } = useHandleClose();
   const [, setIsDrawerVisible] = useDrawer();
   const {
-    currentSection: { currentSection }
+    currentSection: { currentSection },
+    resetSection
   } = useSections();
   const reset = useResetStore();
   const resetUi = useResetUiStore();
@@ -32,7 +33,8 @@ export const SendTransactionLayout = ({ children, isPopupView }: SendTransaction
     setIsDrawerVisible();
     resetUi();
     reset();
-  }, [reset, resetUi, setIsDrawerVisible]);
+    resetSection();
+  }, [reset, resetUi, resetSection, setIsDrawerVisible]);
 
   // TODO: review if there's a better way to do this [LW-5456]
   useEffect(() => {

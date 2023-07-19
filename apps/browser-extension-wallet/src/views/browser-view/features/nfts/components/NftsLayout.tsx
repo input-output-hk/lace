@@ -5,11 +5,10 @@ import styles from './NftsLayout.module.scss';
 import { useWalletStore } from '@stores';
 import { useTranslation } from 'react-i18next';
 import { NftItemProps, NftList, NftListProps, NftFolderItemProps, NftsItemsTypes } from '@lace/core';
-import { useObservable } from '@src/hooks';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
 import { useOutputInitialState } from '../../send-transaction';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import { Skeleton } from 'antd';
 import { SectionLayout, EducationalList, FundWalletBanner, Layout } from '@src/views/browser-view/components';
@@ -33,6 +32,7 @@ import { NFTFolderDrawer } from './CreateFolder/CreateFolderDrawer';
 import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext } from '@src/features/nfts/context';
 import { RenameFolderDrawer } from './RenameFolderDrawer';
 import { NftFolderConfirmationModal } from './NftFolderConfirmationModal';
+import { useAssetInfo } from '@hooks';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;
 
@@ -41,7 +41,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const { walletInfo, inMemoryWallet, blockchainProvider, environmentName } = useWalletStore();
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
   const { t } = useTranslation();
-  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const assetsInfo = useAssetInfo();
   const assetsBalance = useObservable(inMemoryWallet.balance.utxo.total$, DEFAULT_WALLET_BALANCE.utxo.total$);
   const total = useObservable(inMemoryWallet.balance.utxo.total$);
   const analytics = useAnalyticsContext();
@@ -104,7 +104,12 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   // eslint-disable-next-line unicorn/no-useless-undefined
   const closeNftDetails = () => setSelectedNft(undefined);
   const nfts: NftItemProps[] = useMemo(() => {
-    const { nftList } = getTokenList({ assetsInfo, balance: assetsBalance?.assets, environmentName, fiatCurrency });
+    const { nftList } = getTokenList({
+      assetsInfo,
+      balance: assetsBalance?.assets,
+      environmentName,
+      fiatCurrency
+    });
     return nftList.map((nft) => ({
       ...nft,
       type: NftsItemsTypes.NFT,
@@ -218,14 +223,14 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                 </Button>
               )}
             </div>
-            <div className={styles.content}>
+            <div className={styles.content} data-testid="nft-list-container">
               {items.length > 0 ? (
                 <NftList items={items} rows={4} />
               ) : (
                 <FundWalletBanner
                   title={t('browserView.nfts.fundWalletBanner.title')}
                   subtitle={t('browserView.nfts.fundWalletBanner.subtitle')}
-                  walletAddress={walletInfo.address.toString()}
+                  walletAddress={walletInfo.addresses[0].address.toString()}
                   prompt={t('browserView.nfts.fundWalletBanner.prompt')}
                   shouldHaveVerticalContent
                 />

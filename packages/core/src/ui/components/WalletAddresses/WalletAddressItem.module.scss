@@ -15,7 +15,7 @@
   cursor: pointer;
   display: grid;
   gap: 3%;
-  grid-template-columns: 35% 62%;
+  grid-template-columns: 1fr 1fr;
   height: size_unit(9);
   padding: 0 size_unit(2);
   width: 100%;
@@ -43,9 +43,14 @@
 .listItemBlock {
   align-items: center;
   display: flex;
-  gap: size_unit(3);
+  gap: size_unit(1);
   &.small {
     gap: size_unit(2);
+
+    .addressColor {
+      color: var(--text-color-secondary) !important;
+      text-align: right;
+    }
   }
   .listItemName {
     @include text-bodyLarge-bold;
@@ -53,7 +58,10 @@
     color: var(--text-color-primary) !important;
     display: flex;
     flex: 1;
-    min-width: 0;
+    min-width: 236px;
+    @media (max-width: $breakpoint-popup) {
+      min-width: 0;
+    }
 
     &.small {
       font-size: var(--body) !important;
@@ -68,6 +76,13 @@
     & > * {
       width: 100%;
     }
+    @media ( max-width: $breakpoint-popup) {
+      flex: initial;
+    }
+  }
+  .listItemWarning {
+    min-width: size_unit(2.5);
+    min-height: size_unit(2.5);
   }
   .textField {
     color: var(--text-color-primary) !important;
@@ -79,7 +94,14 @@
 
   .addressColor {
     color: var(--text-color-secondary) !important;
-    text-align: right;
+    text-align: left;
+  }
+}
+
+.addressBox {
+  min-width: 0;
+  @media (max-width: $breakpoint-popup) {
+    justify-self: end;
   }
 }
 

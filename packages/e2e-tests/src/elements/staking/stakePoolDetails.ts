@@ -1,8 +1,9 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 import Banner from '../banner';
+import CommonDrawerElements from '../CommonDrawerElements';
 
-class StakePoolDetails {
+class StakePoolDetails extends CommonDrawerElements {
   private CONTAINER = '//div[@data-testid="stake-pool-details"]';
   private POOL_NAME = '//div[@data-testid="stake-pool-item-name"]';
   private POOL_LOGO = '//img[@data-testid="stake-pool-item-logo"]';

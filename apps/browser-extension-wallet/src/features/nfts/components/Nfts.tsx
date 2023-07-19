@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-useless-undefined */
-import { useObservable, useRedirection } from '@hooks';
+import { useAssetInfo, useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
-import { Button } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
@@ -29,14 +29,14 @@ import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 
 export const Nfts = withNftsFoldersContext((): React.ReactElement => {
-  const [redirectToNftDetail] = useRedirection<{ params: { id: string } }>(walletRoutePaths.nftDetail);
+  const redirectToNftDetail = useRedirection<{ params: { id: string } }>(walletRoutePaths.nftDetail);
   const [isCreateFolderDrawerOpen, setIsCreateFolderDrawerOpen] = useState(false);
   const { environmentName } = useWalletStore();
 
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
   const { walletInfo, inMemoryWallet } = useWalletStore();
   const { t } = useTranslation();
-  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const assetsInfo = useAssetInfo();
   const assetsBalance = useObservable(inMemoryWallet.balance.utxo.total$, DEFAULT_WALLET_BALANCE.utxo.total$);
   const analytics = useAnalyticsContext();
   const { fiatCurrency } = useCurrencyStore();
@@ -156,14 +156,14 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
         mainClassName={styles.nftsLayout}
       >
         <div className={styles.nfts}>
-          <div className={styles.content}>
+          <div className={styles.content} data-testid="nft-list-container">
             {items.length > 0 ? (
               <NftList items={items} rows={2} />
             ) : (
               <FundWalletBanner
                 title={t('browserView.nfts.fundWalletBanner.title')}
                 prompt={t('browserView.nfts.fundWalletBanner.prompt')}
-                walletAddress={walletInfo.address.toString()}
+                walletAddress={walletInfo.addresses[0].address.toString()}
               />
             )}
           </div>

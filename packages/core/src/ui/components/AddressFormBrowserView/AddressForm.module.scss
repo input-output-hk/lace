@@ -38,6 +38,7 @@
   }
 
   &:nth-child(2) {
+    margin-top: size_unit(1.5);
     margin-bottom: size_unit(1);
   }
 
@@ -50,7 +51,6 @@
 
   .textArea {
     min-height: 64px !important;
-
     &::placeholder {
       margin-left: 4px !important;
     }
@@ -84,6 +84,28 @@
   }
 }
 
+.input {
+  :global(.ant-input-suffix) {
+    width: 100%;
+    font-size: size_unit(2.5);
+    flex-direction: row-reverse;
+  }
+
+  :global(.ant-input) {
+    width: calc(100% - 72px) !important;
+  }
+}
+
 .icon {
   font-size: $font-size-bodyLarge;
+}
+
+:global(.anticon) {
+  &.valid {
+    color: var(--text-color-green);
+  }
+
+  &.invalid {
+    color: var(--text-color-red);
+  }
 }

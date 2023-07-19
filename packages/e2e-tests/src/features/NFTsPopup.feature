@@ -14,10 +14,11 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
     When I see NFTs counter with total number of NFTs displayed
     Then NFTs counter matches the number of wallet NFTs
 
-  @LW-2509 @Mainnet
+  @LW-2509 @LW-7238 @Mainnet
   Scenario: Popup-view - Owning NFTs
     Given I am on NFTs popup page
     Then A gallery view showing my NFTs is displayed
+    And I see "Create folder" button on NFTs page in popup mode
 
   @LW-2510 @Mainnet
   Scenario: Popup-view - Information displayed
@@ -46,7 +47,7 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
   Scenario: Popup-view - Send NFT - User enters invalid password
     Given I am on NFTs popup page
     And I'm sending an NFT with name: "Ibilecoin"
-    When I fill incorrect password and confirm
+    When I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
   @LW-4373

@@ -1,6 +1,9 @@
-import { createTheme } from '@vanilla-extract/css';
+import { createGlobalTheme } from '@vanilla-extract/css';
+import { rgba } from 'polished';
 
+import { borders } from '../borders.data';
 import {
+  colorTransparent,
   darkColorScheme,
   laceGradient,
   lightColorScheme,
@@ -61,14 +64,33 @@ const colors: Colors = {
   $card_outlined_backgroundColor: lightColorScheme.$primary_white,
   $card_outlined_borderColor: lightColorScheme.$primary_light_grey_plus,
 
-  $control_buttons_filled_label_color: lightColorScheme.$primary_dark_grey,
-  $control_buttons_filled_label_color_hover: lightColorScheme.$primary_black,
-  $control_buttons_filled_container_bgColor: lightColorScheme.$primary_white,
-  $control_buttons_filled_container_bgColor_hover:
+  $control_buttons_label_color: lightColorScheme.$primary_black,
+  $control_buttons_label_color_hover: lightColorScheme.$primary_black,
+  $control_buttons_label_color_filled: lightColorScheme.$primary_dark_grey,
+  $control_buttons_label_color_filled_hover: lightColorScheme.$primary_black,
+  $control_buttons_label_color_danger: lightColorScheme.$primary_white,
+  $control_buttons_label_color_danger_pressed: rgba(
     lightColorScheme.$primary_white,
-  $control_buttons_filled_container_bgColor_pressed:
+    0.8,
+  ),
+  $control_buttons_container_bgColor: lightColorScheme.$primary_white,
+  $control_buttons_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $control_buttons_container_bgColor_filled: lightColorScheme.$primary_white,
+  $control_buttons_container_bgColor_filled_hover:
     lightColorScheme.$primary_white,
-  $control_buttons_filled_container_outlineColor:
+  $control_buttons_container_bgColor_pressed: rgba(
+    lightColorScheme.$primary_light_grey,
+    0.56,
+  ),
+  $control_buttons_container_bgColor_danger:
+    lightColorScheme.$secondary_data_pink,
+  $control_buttons_container_bgColor_danger_hover:
+    lightColorScheme.$secondary_hover_data_pink,
+  $control_buttons_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $control_buttons_borderColor: lightColorScheme.$primary_light_grey_plus,
+  $control_buttons_borderColor_danger:
     lightColorScheme.$primary_accent_purple_0_3,
 
   $variants_table_bgColor: lightColorScheme.$primary_light_grey_0_56,
@@ -152,6 +174,69 @@ const colors: Colors = {
   $side_drawer_head_title_color: lightColorScheme.$primary_black,
   $side_drawer_content_title_color: lightColorScheme.$primary_black,
   $side_drawer_content_description_color: lightColorScheme.$primary_dark_grey,
+
+  $search_box_container_bgColor: lightColorScheme.$primary_light_grey,
+  $search_box_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $search_box_container_borderColor_hover:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $search_box_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $search_box_label_color: lightColorScheme.$primary_dark_grey,
+  $search_box_label_color_pressed: lightColorScheme.$primary_black,
+  $search_box_clear_button_container_bgColor:
+    lightColorScheme.$primary_light_grey_0_56,
+  $search_box_clear_button_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $search_box_clear_button_container_bgColor_pressed:
+    lightColorScheme.$primary_white,
+  $search_box_clear_button_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $search_box_clear_button_label_color: lightColorScheme.$primary_dark_grey,
+  $search_box_clear_button_label_color_hover:
+    lightColorScheme.$primary_dark_grey,
+  $search_box_clear_button_label_color_pressed:
+    lightColorScheme.$primary_dark_grey,
+
+  $flow_card_container_bgColor: lightColorScheme.$primary_light_grey,
+  $flow_card_label_primary_color: lightColorScheme.$primary_black,
+  $flow_card_label_secondary_color: lightColorScheme.$primary_dark_grey,
+
+  $icon_button_label_color: lightColorScheme.$primary_dark_grey,
+  $icon_button_label_color_pressed: lightColorScheme.$primary_black,
+  $icon_button_container_bgColor: colorTransparent,
+  $icon_button_container_bgColor_hover: lightColorScheme.$primary_light_grey,
+  $icon_button_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $icon_button_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+
+  $summary_expander_container_borderColor:
+    lightColorScheme.$primary_light_grey_plus,
+  $summary_expander_label_color: lightColorScheme.$primary_black,
+  $summary_expander_trigger_label_color: lightColorScheme.$primary_black,
+  $summary_expander_trigger_label_color_pressed:
+    lightColorScheme.$primary_black,
+  $summary_expander_trigger_container_bgColor: lightColorScheme.$primary_white,
+  $summary_expander_trigger_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $summary_expander_trigger_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_plus,
+  $summary_expander_trigger_container_bgColor_focused:
+    lightColorScheme.$primary_white,
+  $summary_expander_trigger_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $summary_expander_trigger_container_borderColor:
+    lightColorScheme.$primary_light_grey_plus,
+
+  $transaction_summary_label_color: lightColorScheme.$primary_black,
+  $transaction_summary_secondary_label_color:
+    lightColorScheme.$primary_dark_grey,
+
+  $toast_bar_container_bgColor: lightColorScheme.$primary_white,
+  $toast_bar_label_color: lightColorScheme.$primary_black,
+  $toast_bar_icon_container_bgColor: lightColorScheme.$primary_light_grey,
+  $toast_bar_icon_label_color: lightColorScheme.$primary_dark_grey,
 };
 
 export const elevation: Elevation = {
@@ -162,7 +247,8 @@ export const elevation: Elevation = {
   $card: '0px 0px 20px rgba(167, 143, 160, 0.15)',
 } as const;
 
-export const lightTheme = createTheme(vars, {
+export const theme = {
+  borders,
   spacing,
   fontWeights,
   fontSizes,
@@ -172,4 +258,6 @@ export const lightTheme = createTheme(vars, {
   radius,
   elevation,
   opacities,
-});
+};
+
+createGlobalTheme('[data-theme="light"]:root', vars, theme);

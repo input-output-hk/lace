@@ -4,7 +4,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
   Background:
     Given Wallet is synced
 
-  @LW-3546 @Testnet @Mainnet
+  @LW-3546 @Smoke @Testnet @Mainnet
   Scenario: Extended view - transaction drawer is displayed as specified
     When I click "Send" button on page header
     Then send drawer is displayed with all its components in extended mode
@@ -58,15 +58,15 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click "Add address" button  in address bar
-    And I see Add new address form in Send flow
-    Then Address field has filled "shelley" address
-    When I fill "WalletName" name for address details in drawer
-    And I click "Done" button on "Add address" drawer
+    And I see "Add address" drawer in send flow in extended mode
+    Then address form is filled with "shelley" address
+    When I fill address form with "WalletName" name
+    And I click "Save" button on "Add address" drawer in send flow
     And I see a toast with message: "browserView.addressBook.toast.addAddress"
     And I close the drawer by clicking close button
     And I click "Agree" button on "You'll have to start again" modal
     And I open address book from header menu
-    Then I see address with name "WalletName" and address "shelley" on the list
+    Then I see address row with name "WalletName" and address "shelley" on the list in extended mode
 
   @LW-2362 @Testnet
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
@@ -75,7 +75,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then address input contains address "qfwr6ja" and name "Shelley"
+    Then recipients address input contains address "qfwr6ja" and name "Shelley"
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
@@ -86,7 +86,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then address input contains address "q2c767z" and name "Shelley"
+    Then recipients address input contains address "q2c767z" and name "Shelley"
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
@@ -114,9 +114,9 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Byron"
-    Then address input contains address "7oNj7Dzp" and name "Byron"
+    Then recipients address input contains address "7oNj7Dzp" and name "Byron"
     And click "Remove address" button  in address bar
-    Then address input  is empty
+    Then recipients address input  is empty
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is disabled on "Send" page
 
@@ -127,9 +127,9 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     And I click address on the list with name "Byron"
-    Then address input contains address "kNFiPvM4" and name "Byron"
+    Then recipients address input contains address "kNFiPvM4" and name "Byron"
     And click "Remove address" button  in address bar
-    And address input  is empty
+    And recipients address input  is empty
     And I enter a value of: 1 to the "ADA" asset in bundle 1
     And "Review transaction" button is disabled on "Send" page
 
@@ -166,7 +166,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
 
   @LW-2368 @Testnet @Mainnet
@@ -246,13 +246,13 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click show password button
     Then Password field is displayed with value "somePassword"
 
-  @LW-2373 @Testnet @Mainnet
+  @LW-2373 @Smoke @Testnet @Mainnet
   Scenario: Extended-view - Password error page - after entering invalid Password
     And I click "Send" button on page header
     When I’ve entered accepted values for all fields of simple Tx
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    And I fill incorrect password and confirm
+    And I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
   @LW-2376 @Testnet @Mainnet
@@ -378,7 +378,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the NFT displays 1 in the value field
 
   @LW-3558 @Testnet @Mainnet
@@ -604,7 +604,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin"
+    When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
     When I enter a value of: 1 to the "Ibilecoin" asset in bundle 1
     Then the NFT displays 1 in the value field
@@ -617,9 +617,5 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I’ve entered accepted values for all fields of simple Tx
     And I click "Review transaction" button on "Send" page
     And I click "Confirm" button on "Transaction summary" page
-    When I fill correct password and confirm
-    Then The Transaction error screen is displayed:
-      | Title: "Oops something went wrong!"                   |
-      | Subtitle: "The transaction could not be submitted..." |
-      | Button: "View"                                        |
-      | Button: "Cancel"                                      |
+    When I enter correct password and confirm the transaction
+    Then The Transaction error screen is displayed in extended mode

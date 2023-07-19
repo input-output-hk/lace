@@ -4,23 +4,24 @@ Feature: LW-423: NFTs - Extended view
   Background:
     Given Wallet is synced
 
-  @LW-2495 @Mainnet
+  @LW-2495 @Smoke @Mainnet
   Scenario: Extended-view - NFTs title and counter
     Given I am on NFTs extended page
     When I see NFTs counter with total number of NFTs displayed
     Then NFTs counter matches the number of wallet NFTs
 
-  @LW-2497 @Mainnet
+  @LW-2497 @LW-7237 @Mainnet
   Scenario: Extended-view - Owning NFTs
     Given I am on NFTs extended page
     Then A gallery view showing my NFTs is displayed
+    And I see "Create folder" button on NFTs page in extended mode
 
   @LW-2498 @Mainnet
   Scenario: Extended-view - Information displayed
     Given I am on NFTs extended page
     Then each NFT has name and image displayed
 
-  @LW-2499 @Mainnet
+  @LW-2499 @Smoke @Mainnet
   Scenario: Extended-view - Send button click
     And I am on NFTs extended page
     And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
@@ -42,7 +43,7 @@ Feature: LW-423: NFTs - Extended view
   Scenario: Extended-view  - Send NFT - User enters invalid password
     Given I am on NFTs extended page
     And I'm sending an NFT with name: "Ibilecoin"
-    When I fill incorrect password and confirm
+    When I enter incorrect password and confirm the transaction
     Then I see "browserView.transaction.send.error.invalidPassword" password error
 
   @LW-2504 @Mainnet

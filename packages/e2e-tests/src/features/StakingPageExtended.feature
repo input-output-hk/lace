@@ -2,7 +2,7 @@
 Feature: Staking Page - Extended Browser View
 
   Background:
-    Given Lace is ready for test
+    Given Wallet is synced
 
   @LW-2424 @Testnet @Mainnet
   Scenario: Extended View - Staking page is present with title and counter
@@ -32,7 +32,7 @@ Feature: Staking Page - Extended Browser View
       | NED#                   | 0                 |                                  |                     |
       | PAN                    | 1                 | PANL Stake Pool (Pre-Production) | PANL                |
       | 123456                 | 0                 |                                  |                     |
-      | LB                     | 2                 | LBCrypt Preview/Preprod Pool     | LBCT2               |
+      | AZ                     | 2                 | AzureADA                         | AZUR                |
       | £££                    | 0                 |                                  |                     |
       | Amso                   | 0                 |                                  |                     |
 

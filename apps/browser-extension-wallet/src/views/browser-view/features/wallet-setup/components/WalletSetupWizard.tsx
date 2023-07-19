@@ -79,7 +79,6 @@ export const WalletSetupWizard = ({
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [walletIsCreating, setWalletIsCreating] = useState(false);
-  const [isBackToMnemonic, setIsBackToMnemonic] = useState<boolean>(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
 
@@ -125,6 +124,7 @@ export const WalletSetupWizard = ({
     writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
     body: t('core.walletSetupMnemonicStep.body'),
     enterPassphrase: t('core.walletSetupMnemonicStep.enterPassphrase'),
+    enterPassphraseDescription: t('core.walletSetupMnemonicStep.enterPassphraseDescription'),
     passphraseInfo1: t('core.walletSetupMnemonicStep.passphraseInfo1'),
     passphraseInfo2: t('core.walletSetupMnemonicStep.passphraseInfo2'),
     passphraseInfo3: t('core.walletSetupMnemonicStep.passphraseInfo3'),
@@ -270,11 +270,6 @@ export const WalletSetupWizard = ({
     setupType
   ]);
 
-  const goBackToMnemonic = () => {
-    setIsBackToMnemonic(true);
-    return moveBack();
-  };
-
   useEffect(() => {
     if (password && currentStep === WalletSetupSteps.Create && !walletIsCreating) {
       setWalletIsCreating(true);
@@ -314,8 +309,6 @@ export const WalletSetupWizard = ({
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
           suggestionList={wordList}
-          isBackToMnemonic={isBackToMnemonic}
-          setIsBackToMnemonic={setIsBackToMnemonic}
         />
       );
     }
@@ -392,7 +385,7 @@ export const WalletSetupWizard = ({
       )}
       {currentStep === WalletSetupSteps.Register && (
         <WalletSetupRegisterStep
-          onBack={goBackToMnemonic}
+          onBack={moveBack}
           onNext={(result) => {
             sendAnalytics(Events.WALLET_NAME_NEXT);
             setWalletName(result.walletName);

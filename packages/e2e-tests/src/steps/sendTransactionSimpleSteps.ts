@@ -15,14 +15,13 @@ import {
 } from '../data/AddressData';
 import coinConfigureAssert from '../assert/coinConfigureAssert';
 import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
-import addressAddNewExtendedAssert from '../assert/addressBook/addressAddNewExtendedAssert';
-import transactionSummaryExtendedAssert from '../assert/transaction/transactionSummaryExtendedAssert';
+import transactionSummaryAssert from '../assert/transaction/transactionSummaryAssert';
 import transactionPasswordExtendedAssert from '../assert/transaction/transactionPasswordExtendedAssert';
-import transactionSubmittedExtendedAssert from '../assert/transaction/transactionSubmittedExtendedAssert';
+import transactionSubmittedAssert from '../assert/transaction/transactionSubmittedAssert';
 import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
 import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
-import { getTestWallet } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
 import transactionDetailsAssert, { ExpectedTransactionDetails } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
@@ -34,10 +33,11 @@ import extensionUtils from '../utils/utils';
 import Modal from '../elements/modal';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
-import AddAddressDrawer from '../elements/addressbook/popupView/AddAddressDrawer';
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
-import { TransactionSubmittedPage } from '../elements/newTransaction/transactionSubmittedPage';
+import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import { browser } from '@wdio/globals';
+import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
+import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -171,7 +171,9 @@ Then(/^coin selector contains two tabs: tokens & nfts$/, async () => {
 });
 
 Then(/^click on the (Tokens|NFTs) button in the coin selector dropdown$/, async (button: string) => {
-  await transactionExtendedPageObject.clickCoinSelectorButton(button);
+  button === 'Tokens'
+    ? await transactionExtendedPageObject.clickTokensButton()
+    : await transactionExtendedPageObject.clickNFTsButton();
 });
 
 Then(/click on an token with name: "([^"]*)"/, async (tokenName: string) => {
@@ -202,7 +204,9 @@ When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
     await transactionExtendedPageObject.fillAddress(
-      receivingAddress === 'CopiedAddress' ? await clipboard.read() : getTestWallet(receivingAddress).address,
+      receivingAddress === 'CopiedAddress'
+        ? String(await clipboard.read())
+        : String(getTestWallet(receivingAddress).address),
       bundleIndex
     );
     await browser.pause(1000);
@@ -212,8 +216,8 @@ When(
           break;
         case 'NFT':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
-          await transactionExtendedPageObject.clickCoinSelectorButton('NFTs');
-          await nftsPageObject.clickNftItem(entry.assetName);
+          await transactionExtendedPageObject.clickNFTsButton();
+          await nftsPageObject.clickNftItemInAssetSelector(entry.assetName);
           break;
         case 'Token':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
@@ -242,25 +246,6 @@ When(/^I click to loose focus from value field$/, async () => {
 
 When(/^I hover over the ticker for "([^"]*)" asset in bundle (\d)$/, async (assetName: string, bundleIndex: number) => {
   await transactionExtendedPageObject.hoverOverTheTokenName(bundleIndex, assetName);
-});
-
-Then(/^Address field has filled "([^"]*)" address$/, async (address: string) => {
-  let addr;
-  switch (address) {
-    case 'shelley':
-      addr = shelley.getAddress();
-      break;
-    case 'byron':
-      addr = byron.getAddress();
-      break;
-    case 'icarus':
-      addr = icarus.getAddress();
-      break;
-    default:
-      addr = address;
-      break;
-  }
-  await addressAddNewExtendedAssert.assertSeeAddressInAddressInput(true, addr);
 });
 
 Then(
@@ -321,7 +306,7 @@ Then(/^The Tx summary screen is displayed:$/, async (_ignored: string) => {
     recipientAddress: shelley.getAddress(),
     valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker }]
   };
-  await transactionSummaryExtendedAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
+  await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
 });
 
 Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async (_ignored: string) => {
@@ -329,19 +314,20 @@ Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async
     recipientAddress: byron.getAddress(),
     valueToBeSent: [{ value: extensionUtils.isMainnet() ? '1.05' : '1.08', currency: Asset.CARDANO.ticker }]
   };
-  await transactionSummaryExtendedAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
+  await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
 });
 
 Then(/^The password screen is displayed:$/, async (_ignored: string) => {
   await transactionPasswordExtendedAssert.assertSeePasswordPage();
 });
 
-Then(/^The Transaction error screen is displayed:$/, async (_ignored: string) => {
-  await transactionSubmittedExtendedAssert.assertSeeTransactionErrorPage();
+Then(/^The Transaction error screen is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await transactionSubmittedAssert.assertSeeTransactionErrorPage(mode);
 });
 
-Then(/^The Transaction submitted screen is displayed:$/, async (_ignored: string) => {
-  await transactionSubmittedExtendedAssert.assertSeeTransactionSubmittedPage();
+Then(/^The Transaction submitted screen is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await transactionSubmittedAssert.assertSeeTransactionSubmittedPage(mode);
+  await transactionExtendedPageObject.saveTransactionHash();
 });
 
 Then(/^the 'Send' screen is displayed in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
@@ -371,7 +357,9 @@ Then(
     const expectedTransactionDetails: ExpectedTransactionDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
-      transactionData: [{ ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: getTestWallet(walletName).address }],
+      transactionData: [
+        { ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: String(getTestWallet(walletName).address) }
+      ],
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
@@ -387,7 +375,7 @@ Then(
       transactionData: [
         {
           ada: `${adaValue} ${Asset.CARDANO.ticker}`,
-          address: getTestWallet(walletName).address,
+          address: String(getTestWallet(walletName).address),
           assets: [`${laceCoin2Value} LaceCoin2`]
         }
       ],
@@ -416,8 +404,7 @@ Then(
 );
 
 Then(/a popup asking if you're sure you'd like to close it is displayed$/, async () => {
-  await drawerSendExtendedAssert.assertSeeCancelTxWarningPopup(true);
-  await drawerSendExtendedAssert.assertCancelTxPopupTextContent();
+  await drawerSendExtendedAssert.assertSeeCancelTransactionModal(true);
 });
 
 Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, async (button: 'Agree' | 'Cancel') => {
@@ -538,9 +525,11 @@ When(
         await newTransactionPage.reviewTransactionButton.click();
         break;
       case 'Cancel':
+        await newTransactionPage.cancelTransactionButton.waitForClickable();
         await newTransactionPage.cancelTransactionButton.click();
         break;
       case 'Add bundle':
+        await newTransactionPage.addBundleButton.waitForClickable();
         await newTransactionPage.addBundleButton.click();
         break;
       default:
@@ -555,13 +544,13 @@ When(/^I click "Confirm" button on "Transaction summary" page$/, async () => {
   await transactionSummaryPage.confirmButton.click();
 });
 
-When(/^I click "(Done|Cancel)" button on "Add address" drawer$/, async (button: 'Done' | 'Cancel') => {
+When(/^I click "(Save|Cancel)" button on "Add address" drawer in send flow$/, async (button: 'Save' | 'Cancel') => {
   switch (button) {
     case 'Cancel':
-      await AddAddressDrawer.cancelButton.click();
+      await AddNewAddressDrawer.clickOnCancelButton();
       break;
-    case 'Done':
-      await AddAddressDrawer.saveAddressButton.click();
+    case 'Save':
+      await AddNewAddressDrawer.clickOnSaveAddressButton();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
@@ -598,7 +587,23 @@ Then(
 );
 
 When(/^I click "View transaction" button on submitted transaction page$/, async () => {
-  const transactionSubmittedPage = new TransactionSubmittedPage();
-  await transactionSubmittedPage.viewTransactionButton.waitForClickable();
-  await transactionSubmittedPage.viewTransactionButton.click();
+  await TransactionSubmittedPage.viewTransactionButton.waitForClickable();
+  await TransactionSubmittedPage.viewTransactionButton.click();
+});
+
+Then(/^I enter (correct|incorrect) password and confirm the transaction$/, async (type: string) => {
+  const password =
+    type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
+  await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
+});
+
+Then(
+  /^recipients address input contains address "([^"]*)" and name "([^"]*)"$/,
+  async (lastCharsOfAddress: string, addressName: string) => {
+    await drawerSendExtendedAssert.assertSeeAddressWithNameInRecipientsAddressInput(lastCharsOfAddress, addressName);
+  }
+);
+
+Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
+  await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
 });

@@ -41,7 +41,11 @@ export const Input = ({
       ref={inputRef}
       onChange={onValChange}
       {...(label && {
-        prefix: <div className={cn(styles.label, { [styles.filled]: localVal })}>{label}</div>
+        prefix: (
+          <div className={cn(styles.label, { [styles.filled]: localVal })} data-testid="input-label">
+            {label}
+          </div>
+        )
       })}
       value={localVal}
       data-testid={dataTestId}

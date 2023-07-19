@@ -1,0 +1,54 @@
+@import '../../../../../common/src/ui/styles/theme.scss';
+@import '../../../../../common/src/ui/styles/abstracts/typography';
+
+.qrCodeContainer {
+  @include flex-center;
+  margin-right: size_unit(2.5);
+  box-shadow: 100px 100px 100px 100px var(--bg-color-container, #ffffff) inset;
+  border: 2px solid transparent;
+  background: var(--primary-gradient, linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%)) border-box;
+  border-radius: size_unit(1.5);
+
+  @media (min-width: $breakpoint-minimum) {
+    margin-right: size_unit(4);
+    padding: size_unit(1.5);
+  }
+}
+
+.infoContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  margin-right: size_unit(2.5);
+  overflow: hidden;
+
+  @media (min-width: $breakpoint-minimum) {
+    margin-right: size_unit(4);
+  }
+
+  .name {
+    margin: 0;
+    margin-bottom: size_unit(1);
+    line-height: size_unit(3);
+    font-size: $font-size-body;
+    font-weight: $font-weight-bold;
+    color: var(--text-color-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @media (min-width: $breakpoint-minimum) {
+      font-size: $font-size-bodyLarge;
+    }
+  }
+
+  .address {
+    margin: 0;
+    font-size: $font-size-bodySmall;
+    font-weight: $font-weight-semi-bold;
+    line-height: size_unit(3);
+    line-break: anywhere;
+    color: var(--text-color-secondary);
+  }
+}

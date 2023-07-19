@@ -23,6 +23,7 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/switch-exhaustiveness-check': 'error',
     'import/no-default-export': 'error',
+    'import/no-extraneous-dependencies': 2,
     'import/no-unresolved': 'off',
     'import/order': [
       'error',

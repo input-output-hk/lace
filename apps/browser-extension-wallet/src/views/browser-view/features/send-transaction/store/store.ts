@@ -48,6 +48,7 @@ export interface Store {
   // ====== Built transaction ======
   builtTxData?: BuiltTxData;
   setBuiltTxData?: (tx: Partial<BuiltTxData>) => void;
+  clearBuiltTxData?: () => void;
   // ====== outputs handlers ======
   setNewOutput: (id: string) => void;
   removeExistingOutput: (id: string) => void;
@@ -275,6 +276,7 @@ const useStore = create<Store>((set, get) => ({
   ...initialState,
   ...stateHandlers(get, set),
   setBuiltTxData: (updateData) => set({ builtTxData: { ...get().builtTxData, ...updateData } }),
+  clearBuiltTxData: () => set({ builtTxData: {} }),
   setCurrentRow: (row, coinId) => set({ currentRow: row, currentCoinToChange: coinId }),
   setInitialOutputState: (id, value) =>
     set({
@@ -419,8 +421,8 @@ export const useTransactionProps = (): {
 export const useOutputInitialState = (): Store['setInitialOutputState'] =>
   useStore((state) => state.setInitialOutputState);
 
-export const useBuiltTxState = (): Pick<Store, 'setBuiltTxData' | 'builtTxData'> =>
-  useStore(({ setBuiltTxData, builtTxData }) => ({ setBuiltTxData, builtTxData }));
+export const useBuiltTxState = (): Pick<Store, 'setBuiltTxData' | 'builtTxData' | 'clearBuiltTxData'> =>
+  useStore(({ setBuiltTxData, builtTxData, clearBuiltTxData }) => ({ setBuiltTxData, builtTxData, clearBuiltTxData }));
 
 export const useCurrentRow = (): [Store['currentRow'], Store['setCurrentRow']] =>
   useStore((state) => [state.currentRow, state.setCurrentRow]);

@@ -148,7 +148,7 @@ Feature: General Settings - Extended Browser View
     When I navigate to Tokens extended page
     Then I see "Preview" specific tokens in extended mode
     When I navigate to NFTs extended page
-    Then I see NFT with name: "Lace NFT Preview"
+    Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
   @LW-2718 @Mainnet
   Scenario: Extended View - Settings - Token/NFTs updated after network switching
@@ -160,26 +160,26 @@ Feature: General Settings - Extended Browser View
     When I navigate to Tokens extended page
     Then I see "Preview" specific tokens in extended mode
     When I navigate to NFTs extended page
-    Then I see NFT with name: "Lace NFT Preview"
+    Then I see NFT with name: "Lace NFT Preview" on the NFTs page
 
-  @W-4805 @Testnet
+  @LW-4805 @Testnet
   Scenario: Extended View - Settings - Addresses are NOT shared and saved when switching Mainnet to Test Network
     Given I have 3 addresses in my address book in extended mode
     And I see address count: 3
     When I switch network to: "Mainnet" in extended mode
     And  I open address book in extended mode
-    Then I see information about empty address book
+    Then I see empty address book
     When I switch network to: "Preprod" in extended mode
     And  I open address book in extended mode
     Then I see address count: 3
 
-  @W-4805 @Mainnet
+  @LW-4805 @Mainnet
   Scenario: Extended View - Settings - Addresses are NOT shared and saved when switching Mainnet to Test Network
     Given I have 3 addresses in my address book in extended mode
     And I see address count: 3
     When I switch network to: "Preprod" in extended mode
     And  I open address book in extended mode
-    Then I see information about empty address book
+    Then I see empty address book
 
   @LW-5471 @Testnet
   Scenario: Extended View - Settings - Addresses entered in Preprod context are not available when switching to Preview
@@ -226,9 +226,8 @@ Feature: General Settings - Extended Browser View
   @LW-3629 @Mainnet @Testnet
   Scenario: Extended View - Settings - FAQ opening in a new tab
     When I open settings from header menu
-    When I click on "FAQs" setting
-    Then New tab with url containing "www.lace.io/faq" is opened
-    And An "FAQ" text is displayed
+    And I click on "FAQs" setting
+    Then FAQ page is displayed
 
 
   @LW-3058 @Mainnet @Testnet

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useObservable } from './useObservable';
+import { useObservable } from '@lace/common';
 import { TokenPrices, StatusTypes, ADAPricesKeys } from '@lib/scripts/types';
 import { useBackgroundServiceAPIContext, useCurrencyStore } from '../providers';
 import { CARDANO_COIN_SYMBOL } from '@src/utils/constants';
