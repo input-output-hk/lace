@@ -102,3 +102,30 @@ Feature: LW: Tokens tab - popup view
     Then opened eye icon is displayed on Tokens page
     And total wallet balance is masked with asterisks
     And balance and FIAT balance for each token are masked with asterisks
+
+  @LW-6684 @Testnet @Mainnet
+  Scenario: Price fetch expired error is displayed
+    Given ADA fiat price has been fetched
+    And I enable network interception to fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*"
+    Then fiat prices expired fetch error is displayed
+    And I disable network interception
+    Then ADA fiat price has been fetched
+
+  @LW-6682 @Testnet @Mainnet
+  Scenario: Fiat price unable to fetch error is displayed on failed request
+    Given ADA fiat price has been fetched
+    And I enable network interception to fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*"
+    And I delete fiat price from local storage
+    Then fiat prices unable to fetch error is displayed
+    And I disable network interception
+    Then ADA fiat price has been fetched
+
+  @LW-6683 @Testnet @Mainnet @Pending
+  #bug LW-6798
+  Scenario: Fiat price unable to fetch error is displayed on error request
+    Given ADA fiat price has been fetched
+    And I enable network interception to finish and fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*" with error 500
+    And I delete fiat price from local storage
+    Then fiat prices expired fetch error is displayed
+    And I disable network interception
+    Then ADA fiat price has been fetched
