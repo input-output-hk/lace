@@ -123,6 +123,6 @@ Feature: NFT - Folders - Popup view
   @LW-7271
   Scenario: Popup-view - NFT Folders - Select NFTs page - selected NFTs counter
     Given I navigate to "Select NFTs" page in popup mode
-    And I do not see "Clear" button next to NFTs counter
+    And I do not see NFTs counter
     When I select 5 NFTs
     Then I see NFTs counter showing 5 selected NFTs

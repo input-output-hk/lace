@@ -10,6 +10,10 @@ class NftSelectNftsAssert {
     }
   }
 
+  async assertSeeCounter(shouldSee: boolean) {
+    await NftSelectNftsPage.counter.waitForDisplayed({ reverse: !shouldSee });
+  }
+
   async assertCounterNumber(counter: number) {
     await NftSelectNftsPage.counter.waitForDisplayed();
     expect(await NftSelectNftsPage.counter.getText()).to.equal(String(counter));
