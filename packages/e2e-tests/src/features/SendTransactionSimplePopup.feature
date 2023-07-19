@@ -61,7 +61,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I close the drawer by clicking back button
     And I click "Agree" button on "You'll have to start again" modal
     And I open address book from header menu
-    Then I see address row with name "WalletName" and address "shelley" on the list in popup mode
+    Then I see address row with name "WalletName" and address "Shelley" on the list in popup mode
 
   @LW-2740 @Testnet @Mainnet
   Scenario: Popup-view - Send flow - Search contact
