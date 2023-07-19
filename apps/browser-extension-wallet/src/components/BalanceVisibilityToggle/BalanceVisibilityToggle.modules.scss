@@ -1,0 +1,12 @@
+.iconWrapper {
+  cursor: pointer;
+  display: flex;
+}
+
+.icon {
+  color: var(--text-color-secondary);
+  font-size: 19px;
+  &:hover {
+    color: var(--text-color-primary);
+  }
+}

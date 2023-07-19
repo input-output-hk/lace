@@ -12,7 +12,7 @@ class TokenDetailsPage extends CommonDrawerElements {
   private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
   private BALANCE_CURRENCY = '[data-testid="portfolio-balance-currency"]';
   private BALANCE_VALUE = '[data-testid="portfolio-balance-value"]';
-  private BALANCE_VARIATION = '[data-testid="portfolio-balance-variation"]';
+  private BALANCE_SUBTITLE = '[data-testid="portfolio-balance-subtitle"]';
 
   private TRANSACTIONS_LIST_TITLE = '[data-testid="asset-activity-list-title"]';
   private TRANSACTION_ITEM = '[data-testid="asset-activity-item"]';
@@ -45,7 +45,7 @@ class TokenDetailsPage extends CommonDrawerElements {
   }
 
   get tokenPriceChange() {
-    return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_VARIATION);
+    return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_SUBTITLE);
   }
 
   get tokenBalanceLabel() {
@@ -61,7 +61,7 @@ class TokenDetailsPage extends CommonDrawerElements {
   }
 
   get tokenFiatBalance() {
-    return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_VARIATION);
+    return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_SUBTITLE);
   }
 
   get transactionsListTitle() {
