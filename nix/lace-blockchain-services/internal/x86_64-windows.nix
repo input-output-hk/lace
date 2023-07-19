@@ -232,7 +232,7 @@ in rec {
     };
   in project.make-windows-installer.components.exes.make-windows-installer;
 
-  nsis = import ./nsis.nix { inherit pkgs; };
+  nsis = import ./nsis.nix { nsisNixpkgs = inputs.nixpkgs-nsis; };
 
   unsignedUninstaller = pkgs.runCommand "unsigned-uninstaller" {
     buildInputs = [

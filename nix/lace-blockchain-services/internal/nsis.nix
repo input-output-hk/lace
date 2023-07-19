@@ -1,16 +1,8 @@
-{ pkgs }:
+{ nsisNixpkgs }:
 
 # the native makensis binary, with cross-compiled windows stubs
 
 let
-  # TODO, nsis can't cross-compile with the nixpkgs daedalus currently uses
-  nsisNixpkgs = pkgs.fetchFromGitHub {
-    owner = "input-output-hk";
-    repo = "nixpkgs";
-    rev = "be445a9074f139d63e704fa82610d25456562c3d";
-    hash = "sha256-ivcmGg01aeeod0rzjMJ86exUNHHRJu4526rGq9s7rJU=";
-  };
-
   nsisPkgs = import nsisNixpkgs { system = "x86_64-linux"; };
 
   nsis = { pkgs }: let
