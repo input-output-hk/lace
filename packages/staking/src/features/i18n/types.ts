@@ -132,6 +132,7 @@ type KeysStructure = {
       totalStaked: '';
       poolRetired: '';
       poolSaturated: '';
+      tooltipFiatLabel: '';
     };
     yourPoolsSection: {
       heading: '';
