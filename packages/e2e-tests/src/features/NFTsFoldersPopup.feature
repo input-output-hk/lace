@@ -126,3 +126,12 @@ Feature: NFT - Folders - Popup view
     And I do not see NFTs counter
     When I select 5 NFTs
     Then I see NFTs counter showing 5 selected NFTs
+
+  @LW-7275
+  Scenario: Popup-view - NFT Folders - Select NFTs page - search for existing NFTs and clear
+    Given I navigate to "Select NFTs" page in popup mode
+    And I save all NFTs that I have
+    When I enter "coin" into the search bar
+    Then I see NFTs containing "coin" on the "Select NFTs" page
+    When I press "Clear" button in search bar
+    And "Select NFTs" page is showing all NFTs that I have

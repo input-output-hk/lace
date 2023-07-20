@@ -18,6 +18,20 @@ class NftSelectNftsAssert {
     await NftSelectNftsPage.counter.waitForDisplayed();
     expect(await NftSelectNftsPage.counter.getText()).to.equal(String(counter));
   }
+
+  async assertSeeNFTsWithSearchPhrase(searchPhrase: string) {
+    const displayedNfts = await NftSelectNftsPage.nfts;
+    const displayedNftNames: string[] = [];
+    const displayedNftNamesMatched: string[] = [];
+
+    for (const nft of displayedNfts) {
+      displayedNftNames.push(await nft.getText());
+      if ((await nft.getText()).toLowerCase().includes(searchPhrase.toLowerCase())) {
+        displayedNftNamesMatched.push(await nft.getText());
+      }
+    }
+    expect(displayedNftNamesMatched).to.have.ordered.members(displayedNftNames);
+  }
 }
 
 export default new NftSelectNftsAssert();
