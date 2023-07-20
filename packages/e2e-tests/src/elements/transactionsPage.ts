@@ -8,7 +8,7 @@ import { browser } from '@wdio/globals';
 class TransactionsPage {
   private TRANSACTIONS_DATE = '[data-testid="transaction-date"]';
   private TRANSACTIONS_GROUPED_BY_DATE = '[data-testid="grouped-asset-activity-list-item"]';
-  private TRANSACTIONS_TABLE_ROW = '[data-testid="asset-activity-item"]';
+  private TRANSACTIONS_TABLE_ROW = '//div[@data-testid="asset-activity-item"]';
   private TRANSACTIONS_TABLE_ITEM_ICON = '[data-testid="asset-icon"]';
   private TRANSACTIONS_TABLE_ITEM_TYPE = '[data-testid="transaction-type"]';
   private TRANSACTIONS_TABLE_ITEM_TOKENS_AMOUNT = '[data-testid="total-amount"]';
@@ -32,8 +32,9 @@ class TransactionsPage {
     return $$(this.TRANSACTIONS_TABLE_ROW);
   }
 
-  transactionsTableRow(index: number): ChainablePromiseElement<WebdriverIO.Element | undefined> {
-    return $$(this.TRANSACTIONS_TABLE_ROW)[index];
+  transactionsTableRow(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    const selector = `(${this.TRANSACTIONS_TABLE_ROW})[${index + 1}]`;
+    return $(selector);
   }
 
   transactionsDate(index: number): ChainablePromiseElement<WebdriverIO.Element | undefined> {
@@ -66,8 +67,8 @@ class TransactionsPage {
 
   async clickOnTransactionRow(index: number): Promise<void> {
     const row = await this.transactionsTableRow(index);
-    await row?.waitForClickable();
-    await row?.click();
+    await row.waitForClickable();
+    await row.click();
   }
 
   async scrollToTheRow(index: number) {
