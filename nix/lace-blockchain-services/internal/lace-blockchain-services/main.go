@@ -203,7 +203,7 @@ func setupTrayUI(
 	logFile string,
 	networks []string,
 ) func() { return func() {
-	iconData, err := Asset("cardano.png")
+	iconData, err := Asset("tray-icon")
 	if err != nil {
 	    panic(err)
 	}
@@ -281,8 +281,12 @@ func setupTrayUI(
 			menuItem := systray.AddMenuItem("", "")
 			menuItem.Disable()
 			go func(component string, statusCh <-chan string, menuItem *systray.MenuItem) {
+				prevStatus := "" // lessen refreshing, too often causes glitching on Windows
 				for newStatus := range statusCh {
-					menuItem.SetTitle(component + " · " + newStatus)
+					if newStatus != prevStatus {
+						menuItem.SetTitle(component + " · " + newStatus)
+						prevStatus = newStatus
+					}
 				}
 			}(component, statusCh, menuItem)
 		}
@@ -367,6 +371,9 @@ type ManagedChild struct {
 	LogMonitor  func(string)
 	LogModifier func(string) string // e.g. to drop redundant timestamps
 	AfterExit   func()
+	TerminateGracefullyByInheritedFd3 bool // <https://github.com/input-output-hk/cardano-node/issues/726>
+	ForceKillAfter time.Duration // graceful exit timeout, after which we SIGKILL the child
+	Enabled     bool // for isolated tests etc.
 }
 
 type HealthStatus struct {
@@ -390,6 +397,13 @@ func manageChildren(comm CommChannels_Manager) {
 	omitSleep := false
 	keepGoing := true
 
+	windowsPipeCounter := -1
+	mkNewWindowsPipeName := func() string {
+		windowsPipeCounter += 1
+		return fmt.Sprintf("\\\\.\\pipe\\cardano-node-%s.%d.%d",
+			network, os.Getpid(), windowsPipeCounter)
+	}
+
 	// XXX: we nest a function here, so that we can defer cleanups, and return early on errors etc.
 	for keepGoing { func() {
 		if !firstIteration && !omitSleep {
@@ -406,6 +420,17 @@ func manageChildren(comm CommChannels_Manager) {
 		cardanoNodeConfigDir := ourpaths.NetworkConfigDir + sep + network
 		cardanoNodeSocket := ourpaths.WorkDir + sep + network + sep + "cardano-node.socket"
 
+		cardanoServicesAvailable := true
+		if _, err := os.Stat(cardanoServicesDir); os.IsNotExist(err) {
+			fmt.Printf("%s[%d]: warning: no cardano-services available, will run without them " +
+				"(No such file or directory: %s)\n", OurLogPrefix, os.Getpid(), cardanoServicesDir)
+			cardanoServicesAvailable = false
+		}
+
+		if (runtime.GOOS == "windows") {
+			cardanoNodeSocket = mkNewWindowsPipeName()
+		}
+
 		var ogmiosPort int
 		var providerServerPort int
 
@@ -417,7 +442,7 @@ func manageChildren(comm CommChannels_Manager) {
 		// XXX: we take that from Ogmios, we should probably calculate ourselves
 		syncProgress := -1.0
 
-		childrenDefs := []ManagedChild{
+		childrenDefsAll := []ManagedChild{
 			func() ManagedChild {
 				hostname, _ := os.Hostname()
 				trimmedHostname := hostname
@@ -437,6 +462,7 @@ func manageChildren(comm CommChannels_Manager) {
 					}
 					return line
 				}
+				reValidatingChunk := regexp.MustCompile(`^.*ChainDB:Info.*Validating chunk no. \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
 				reReplayingLedger := regexp.MustCompile(`^.*ChainDB:Info.*Replayed block: slot \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
 				rePushingLedger := regexp.MustCompile(`^.*ChainDB:Info.*Pushing ledger state for block [0-9a-f]+ at slot \d+. Progress: (\d*\.\d+%)$`)
 				reSyncing := regexp.MustCompile(`^.*ChainDB:Notice.*Chain extended, new tip: [0-9a-f]+ at slot (\d+)$`)
@@ -454,12 +480,19 @@ func manageChildren(comm CommChannels_Manager) {
 							"--host-addr", "0.0.0.0",
 							"--config", cardanoNodeConfigDir + sep + "config.json",
 							"--socket-path", cardanoNodeSocket,
+							"--shutdown-ipc=3",
 						}
 					},
 					MkExtraEnv: func() []string { return []string{} },
 					StatusCh: comm.CardanoNodeStatus,
 					HealthProbe: func(prev HealthStatus) HealthStatus {
-						err := probeUnixSocket(cardanoNodeSocket, 1 * time.Second)
+						tmout := 1 * time.Second
+						var err error
+						if runtime.GOOS == "windows" {
+							err = probeWindowsNamedPipe(cardanoNodeSocket, tmout)
+						} else {
+							err = probeUnixSocket(cardanoNodeSocket, tmout)
+						}
 						nextProbeIn := 1 * time.Second
 						if (err == nil) {
 							nextProbeIn = 60 * time.Second
@@ -472,7 +505,11 @@ func manageChildren(comm CommChannels_Manager) {
 						}
 					},
 					LogMonitor: func(line string) {
-						if strings.Index(line, "Started opening Ledger DB") != -1 {
+					        if ms := reValidatingChunk.FindStringSubmatch(line); len(ms) > 0 {
+							comm.CardanoNodeStatus <- "validating chunks · " + ms[1]
+						} else if strings.Index(line, "Started opening Volatile DB") != -1 {
+							comm.CardanoNodeStatus <- "opening volatile DB…"
+						} else if strings.Index(line, "Started opening Ledger DB") != -1 {
 							comm.CardanoNodeStatus <- "opening ledger DB…"
 						} else if ms :=reReplayingLedger.FindStringSubmatch(line);len(ms)>0 {
 							comm.CardanoNodeStatus <- "replaying ledger · " + ms[1]
@@ -497,9 +534,16 @@ func manageChildren(comm CommChannels_Manager) {
 						line = removeTimestamp(line, now)
 						line = removeTimestamp(line, now.Add(-1 * time.Second))
 						line = strings.ReplaceAll(line, droppedHostname, "[")
+						if (runtime.GOOS == "windows") {
+							// garbled output on cmd.exe instead:
+							line = stripansi.Strip(line)
+						}
 						return line
 					},
 					AfterExit: func() {},
+					TerminateGracefullyByInheritedFd3: true,
+					ForceKillAfter: 10 * time.Second,
+					Enabled: true,
 				}
 			}(),
 			func() ManagedChild {
@@ -547,6 +591,9 @@ func manageChildren(comm CommChannels_Manager) {
 					AfterExit: func() {
 						comm.SetOgmiosDashboard <- ""
 					},
+					TerminateGracefullyByInheritedFd3: false,
+					ForceKillAfter: 5 * time.Second,
+					Enabled: true,
 				}
 			}(),
 			func() ManagedChild {
@@ -602,6 +649,9 @@ func manageChildren(comm CommChannels_Manager) {
 					AfterExit: func() {
 						comm.SetBackendUrl <- ""
 					},
+					TerminateGracefullyByInheritedFd3: false,
+					ForceKillAfter: 5 * time.Second,
+					Enabled: cardanoServicesAvailable,
 				}
 			}(),
 		}
@@ -614,13 +664,20 @@ func manageChildren(comm CommChannels_Manager) {
 			}
 			comm.BlockRestartUI <- true
 			wgChildren.Wait()
-			for _, child := range childrenDefs {
+			for _, child := range childrenDefsAll {
 				// Reset all statuses to "off" (not all children might’ve been started
 				// and they’re "waiting" now)
 				child.StatusCh <- "off"
 			}
 			fmt.Printf("%s[%d]: session ended for network %s\n", OurLogPrefix, os.Getpid(), networkMemo)
 		}("" + network)
+
+		var childrenDefs []ManagedChild
+		for _, childUnsafe := range childrenDefsAll {
+			if childUnsafe.Enabled {
+				childrenDefs = append(childrenDefs, childUnsafe)
+			}
+		}
 
 		anyChildExitedCh := make(chan struct{}, len(childrenDefs))
 
@@ -637,7 +694,9 @@ func manageChildren(comm CommChannels_Manager) {
 			childDidExit := false
 			childPid := 0
 			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(),
-				child.LogModifier, outputLines, terminateCh, &childPid)
+				child.LogModifier, outputLines, terminateCh, &childPid,
+				child.TerminateGracefullyByInheritedFd3,
+				child.ForceKillAfter)
 			defer func() {
 				if !childDidExit {
 					child.StatusCh <- "terminating…"
@@ -802,30 +861,40 @@ func childProcess(
 	path string, argv []string, extraEnv []string,
 	logModifier func(string) string, // e.g. to drop redundant timestamps
 	outputLines chan<- string, terminate <-chan struct{}, pid *int,
+	terminateGracefullyByInheritedFd3 bool,
+	gracefulExitTimeout time.Duration,
 ) {
 	defer close(outputLines)
+
+	var terminationPipeReader *os.File
+	var terminationPipeWriter *os.File
+	if terminateGracefullyByInheritedFd3 {
+		var err error
+		terminationPipeReader, terminationPipeWriter, err = os.Pipe()
+		if err != nil {
+			outputLines <- fmt.Sprintf("fatal: %v", err)
+			return
+		}
+	}
 
 	var wgOuts sync.WaitGroup
 	wgOuts.Add(2)
 
 	cmd := exec.Command(path, argv...)
 
+	setManagedChildSysProcAttr(cmd)
+
 	if len(extraEnv) > 0 {
 		cmd.Env = append(os.Environ(), extraEnv...)
 	}
 
-	stderr, err := cmd.StderrPipe()
+	// Starting a process with no stdin can confuse it:
+	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		outputLines <- fmt.Sprintf("fatal: %s", err)
 		return
 	}
-	go func() {
-		scanner := bufio.NewScanner(stderr)
-		for scanner.Scan() {
-			outputLines <- "[stderr] " + logModifier(scanner.Text())
-		}
-		wgOuts.Done()
-	}()
+	defer stdin.Close()
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -840,9 +909,30 @@ func childProcess(
 		wgOuts.Done()
 	}()
 
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		outputLines <- fmt.Sprintf("fatal: %s", err)
+		return
+	}
+	go func() {
+		scanner := bufio.NewScanner(stderr)
+		for scanner.Scan() {
+			outputLines <- "[stderr] " + logModifier(scanner.Text())
+		}
+		wgOuts.Done()
+	}()
+
+	if terminateGracefullyByInheritedFd3 {
+		inheritExtraFiles(cmd, []*os.File{terminationPipeReader})
+	}
+
 	if err := cmd.Start(); err != nil {
 		outputLines <- fmt.Sprintf("fatal: %s", err)
 		return
+	}
+
+	if terminateGracefullyByInheritedFd3 {
+		terminationPipeReader.Close() // close child’s end in our process
 	}
 
 	if (pid != nil) {
@@ -858,13 +948,36 @@ func childProcess(
 
 	select {
 	case <-terminate:
-		if runtime.GOOS == "windows" {
-			// FIXME: how to exit gracefully on Windows?
-			cmd.Process.Kill()
+		if terminateGracefullyByInheritedFd3 {
+			fmt.Printf("%s[%d]: closing shutdown IPC pipe (fd %v) of %s[%d]\n",
+				OurLogPrefix, os.Getpid(), terminationPipeWriter.Fd(),
+				filepath.Base(path), cmd.Process.Pid)
+			terminationPipeWriter.Close()
+		} else if runtime.GOOS == "windows" {
+			fmt.Printf("%s[%d]: sending CTRL_BREAK_EVENT to %s[%d]\n",
+				OurLogPrefix, os.Getpid(), filepath.Base(path), cmd.Process.Pid)
+			windowsSendCtrlBreak(cmd.Process.Pid)
 		} else {
+			fmt.Printf("%s[%d]: sending SIGTERM to %s[%d]\n",
+				OurLogPrefix, os.Getpid(), filepath.Base(path), cmd.Process.Pid)
 			cmd.Process.Signal(syscall.SIGTERM)
 		}
-		<-waitDone
+
+		doForceKill := make(chan struct{}, 1)
+		go func() {
+			time.Sleep(gracefulExitTimeout)
+			doForceKill <- struct{}{}
+		}()
+		select {
+		case <-doForceKill:
+			fmt.Printf("%s[%d]: %s[%d] did not exit gracefully in %s, killing it forcefully...\n",
+				OurLogPrefix, os.Getpid(),
+				filepath.Base(path), cmd.Process.Pid, gracefulExitTimeout)
+			// In a rare event that it hangs, we cannot afford a deadlock here:
+			go cmd.Process.Kill()
+			<-waitDone
+		case <-waitDone:
+		}
 	case <-waitDone:
 	}
 }
@@ -882,8 +995,6 @@ func getFreeTCPPort() int {
 }
 
 func probeUnixSocket(path string, timeout time.Duration) error {
-	// XXX: for Windows named pipes this would be:
-	// net.DialTimeout("pipe", `\\.\pipe\mypipe`, timeout)
 	conn, err := net.DialTimeout("unix", path, timeout)
 	if err == nil {
 		defer conn.Close()
@@ -913,11 +1024,21 @@ func openWithDefaultApp(target string) error {
 	case "darwin":
 		cmd = exec.Command("open", target)
 	case "windows":
-		cmd = exec.Command("cmd", "/c", "start", target)
+		// XXX: there’s this "cmd.exe /c start ${target}" thing, but if we don’t pass our targets
+		// through "explorer.exe" instead, we can’t open the log file that’s currently being written to
+		// Note: don’t HideWindow, because then when opening the logs directory, it won’t show any window
+		cmd = exec.Command("explorer.exe", target)
 	default:
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
-	return cmd.Run()
+	err := cmd.Run()
+
+	if err != nil {
+		fmt.Printf("%s[%d]: error: failed to open '%s' with a default app: %s\n",
+			OurLogPrefix, os.Getpid(), target, err)
+	}
+
+	return err
 }
 
 func logSystemHealth() {
