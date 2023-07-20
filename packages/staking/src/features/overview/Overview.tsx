@@ -1,13 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import {
-  Box,
-  ControlButton,
-  Flex,
-  PIE_CHART_DEFAULT_COLOR_SET,
-  PieChartColor,
-  PieChartGradientColor,
-  Text,
-} from '@lace/ui';
+import { Box, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
@@ -76,7 +68,6 @@ export const Overview = () => {
       </Box>
       <Flex justifyContent={'space-between'} mb={'$16'}>
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
-        <ControlButton.Outlined label={t('overview.yourPoolsSection.manageButtonLabel')} />
       </Flex>
       {displayData.map((item) => (
         <Box key={item.id} mb={'$24'}>

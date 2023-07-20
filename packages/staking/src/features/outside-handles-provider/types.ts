@@ -121,4 +121,5 @@ export type OutsideHandlesContextValue = {
   walletStoreFetchNetworkInfo: () => Promise<void>;
   walletStoreBlockchainProvider: IBlockchainProvider;
   currencyStoreFiatCurrency: CurrencyInfo;
+  compactNumber: (value: number | string, decimal?: number) => string;
 };

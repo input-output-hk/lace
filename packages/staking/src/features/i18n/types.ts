@@ -107,6 +107,10 @@ type KeysStructure = {
         confirm: '';
       };
     };
+    preferences: {
+      selectedStakePools: '';
+      partOfBalance: '';
+    };
   };
   overview: {
     delegationCard: {

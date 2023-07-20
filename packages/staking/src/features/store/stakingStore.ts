@@ -4,13 +4,17 @@ import { SectionConfig, Sections, StakePoolDetails, StakingError } from './types
 export const sectionsConfig = {
   [Sections.DETAIL]: {
     currentSection: Sections.DETAIL,
-    nextSection: Sections.CONFIRMATION,
+    nextSection: Sections.PREFERENCES,
   },
-  // TODO: LW-7104 include management step
+  [Sections.PREFERENCES]: {
+    currentSection: Sections.PREFERENCES,
+    nextSection: Sections.CONFIRMATION,
+    prevSection: Sections.DETAIL,
+  },
   [Sections.CONFIRMATION]: {
     currentSection: Sections.CONFIRMATION,
     nextSection: Sections.SIGN,
-    prevSection: Sections.DETAIL,
+    prevSection: Sections.PREFERENCES,
   },
   [Sections.SIGN]: {
     currentSection: Sections.SIGN,
