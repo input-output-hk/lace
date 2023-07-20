@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import MatomoTracker from 'matomo-tracker';
 import { Wallet } from '@lace/cardano';
-import { Metadata, SendEventProps } from '../analyticsTracker/types';
+import { Metadata, MatomoSendEventProps } from '../analyticsTracker/types';
 import { MATOMO_API_ENDPOINT, NETWORK_ID_TO_ANALYTICS_SITE_ID_MAP } from './config';
 import { UserIdService } from '@lib/scripts/types';
 
@@ -32,7 +32,7 @@ export class MatomoClient {
     });
   }
 
-  async sendEvent({ category, action, name, value }: SendEventProps): Promise<void> {
+  async sendEvent({ category, action, name, value }: MatomoSendEventProps): Promise<void> {
     const payload = {
       ...(await this.getMetadata()),
       ca: 1,

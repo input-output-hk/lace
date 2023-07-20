@@ -4,8 +4,8 @@ import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService'
 import { MatomoClient } from '@providers/AnalyticsProvider/matomo';
 import { PostHogClient } from '@providers/AnalyticsProvider/postHog';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsTracker,
   EnhancedAnalyticsOptInStatus,
   PostHogAction
@@ -75,11 +75,11 @@ describe('AnalyticsTracker', () => {
       const tracker = new AnalyticsTracker(preprodChain);
       const mockedMatomoClient = (MatomoClient as jest.Mock<MatomoClient>).mock.instances[0];
       const event = {
-        category: AnalyticsEventCategories.WALLET_RESTORE,
-        action: AnalyticsEventActions.CLICK_EVENT,
+        category: MatomoEventCategories.WALLET_RESTORE,
+        action: MatomoEventActions.CLICK_EVENT,
         name: 'test'
       };
-      await tracker.sendEvent(event);
+      await tracker.sendEventToMatomo(event);
       expect(mockedMatomoClient.sendEvent).toHaveBeenCalledTimes(1);
       expect(mockedMatomoClient.sendEvent).toHaveBeenCalledWith(event);
       expect(userIdServiceMock.extendLifespan).toHaveBeenCalledTimes(1);

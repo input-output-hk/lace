@@ -14,8 +14,8 @@ import Copy from '@src/assets/icons/copy.component.svg';
 import Icon from '@ant-design/icons';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useHandleResolver } from '@hooks/useHandleResolver';
@@ -114,9 +114,9 @@ export const AddressDetailDrawer = ({
   };
 
   const sendAnalytics = (name: string) => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.ADDRESS_BOOK,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.ADDRESS_BOOK,
+      action: MatomoEventActions.CLICK_EVENT,
       name
     });
   };

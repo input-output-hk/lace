@@ -10,8 +10,8 @@ import { useStakePoolDetails } from '../../store';
 import styles from './TransactionComplete.module.scss';
 import Success from '@src/assets/icons/success-staking.svg';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -55,9 +55,9 @@ export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }):
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const closeDrawer = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.STAKING,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.STAKING,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.Staking.STAKING_SUCCESS_POPUP
         : AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER

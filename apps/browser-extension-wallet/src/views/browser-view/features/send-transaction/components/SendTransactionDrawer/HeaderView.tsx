@@ -28,8 +28,8 @@ import { walletRoutePaths } from '@routes';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -136,9 +136,9 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
 
   const sendAnalytics = useCallback(() => {
     if (section.currentSection === Sections.SUMMARY) {
-      analytics.sendEvent({
-        action: AnalyticsEventActions.CLICK_EVENT,
-        category: AnalyticsEventCategories.SEND_TRANSACTION,
+      analytics.sendEventToMatomo({
+        action: MatomoEventActions.CLICK_EVENT,
+        category: MatomoEventCategories.SEND_TRANSACTION,
         name: isPopupView ? Events.BACK_TX_DETAILS_POPUP : Events.BACK_TX_DETAILS_BROWSER
       });
     }

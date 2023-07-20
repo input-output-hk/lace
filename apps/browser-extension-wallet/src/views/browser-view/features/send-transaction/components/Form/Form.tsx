@@ -24,8 +24,8 @@ import { useMaxAda } from '@hooks/useMaxAda';
 import BigNumber from 'bignumber.js';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { CurrencyInfo, Tokens } from '@src/types';
@@ -275,9 +275,9 @@ export const Form = ({
           fiatAmount={totalCost.fiat}
           tooltipContent={t('send.theAmountYoullBeChargedToProcessYourTransaction')}
           onTooltipHover={() =>
-            analytics.sendEvent({
-              action: AnalyticsEventActions.HOVER_EVENT,
-              category: AnalyticsEventCategories.SEND_TRANSACTION,
+            analytics.sendEventToMatomo({
+              action: MatomoEventActions.HOVER_EVENT,
+              category: MatomoEventCategories.SEND_TRANSACTION,
               name: AnalyticsEventNames.SendTransaction.SEE_TX_FEE_INFO
             })
           }
@@ -294,9 +294,9 @@ export const Form = ({
               fiatCurrency
             })}
             onTooltipHover={() =>
-              analytics.sendEvent({
-                action: AnalyticsEventActions.HOVER_EVENT,
-                category: AnalyticsEventCategories.SEND_TRANSACTION,
+              analytics.sendEventToMatomo({
+                action: MatomoEventActions.HOVER_EVENT,
+                category: MatomoEventCategories.SEND_TRANSACTION,
                 name: AnalyticsEventNames.SendTransaction.SEE_ADA_ALLOCATION_INFO
               })
             }

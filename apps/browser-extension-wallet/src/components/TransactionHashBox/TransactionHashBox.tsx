@@ -7,8 +7,8 @@ import Check from '../../assets/icons/check-success.component.svg';
 import styles from './TransactionHashBox.module.scss';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -33,9 +33,9 @@ export const TransactionHashBox = ({ hash }: TransactionHashBoxProps): React.Rea
   };
 
   const handleCopy = (_text: string, result: boolean) => {
-    analytics.sendEvent({
-      action: AnalyticsEventActions.CLICK_EVENT,
-      category: AnalyticsEventCategories.SEND_TRANSACTION,
+    analytics.sendEventToMatomo({
+      action: MatomoEventActions.CLICK_EVENT,
+      category: MatomoEventCategories.SEND_TRANSACTION,
       name: AnalyticsEventNames.SendTransaction.COPY_TX_HASH
     });
     setHasBeenCopied(result);
