@@ -80,9 +80,9 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And click "Add address" button 2 in address bar
     And I click address on the list with name "Shelley"
     And click "Remove address" button 1 in address bar
-    Then address input 1 is empty
+    Then recipients address input 1 is empty
     When click "Remove address" button 2 in address bar
-    Then address input 2 is empty
+    Then recipients address input 2 is empty
 
   @LW-3265
   Scenario: Extended-view - use new invalid address in bundle outputs
@@ -191,7 +191,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I click "Add bundle" button on "Send" page
     And I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Ibilecoin"
+    And I click on NFT with name: "Ibilecoin" in asset selector
     And I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
     And I close the drawer by clicking back button
@@ -222,12 +222,12 @@ Feature: Send - Extended Browser View (Advanced Tx)
     Then the maximum available amount is displayed in bundle: 1 for "HOSKY" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Ibilecoin"
+    And I click on NFT with name: "Ibilecoin" in asset selector
     And I click MAX button in bundle 1 for "Ibilecoin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Bison Coin"
+    And I click on NFT with name: "Bison Coin" in asset selector
     And I click MAX button in bundle 1 for "Bison Coin" asset
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page

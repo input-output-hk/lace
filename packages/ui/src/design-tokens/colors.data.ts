@@ -145,6 +145,11 @@ export const colors = {
 
   $transaction_summary_label_color: '',
   $transaction_summary_secondary_label_color: '',
+
+  $toast_bar_container_bgColor: '',
+  $toast_bar_label_color: '',
+  $toast_bar_icon_container_bgColor: '',
+  $toast_bar_icon_label_color: '',
 };
 
 export type Colors = typeof colors;
@@ -182,6 +187,7 @@ export const darkColorScheme = {
   $primary_hover_purple: 'rgba(116, 82, 219, 1)',
   $primary_accent_purple_0_3: 'rgba(127, 90, 240, 0.3)',
   $primary_light_grey: '#a9a9a9',
+  $primary_light_grey_plus: '#f9f9f9',
   $primary_white: '#FFFFFF',
   $primary_grey: '#383838',
   $primary_mid_grey: '#333333',

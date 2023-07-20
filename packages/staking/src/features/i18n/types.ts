@@ -9,6 +9,12 @@ export type ConstructTranslationKeyUnion<T extends RecursiveStructure, K extends
   : never;
 
 type KeysStructure = {
+  general: {
+    button: {
+      confirm: '';
+      close: '';
+    };
+  };
   browsePools: {
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
@@ -24,6 +30,33 @@ type KeysStructure = {
   drawer: {
     title: '';
     titleSecond: '';
+    sign: {
+      confirmation: {
+        title: '';
+      };
+      passwordPlaceholder: '';
+      enterWalletPasswordToConfirmTransaction: '';
+      error: {
+        invalidPassword: '';
+      };
+    };
+    success: {
+      title: '';
+      subTitle: '';
+      switchedPools: {
+        title: '';
+        subTitle: '';
+      };
+    };
+    failure: {
+      title: '';
+      subTitle: '';
+      button: {
+        close: '';
+        back: '';
+        retry: '';
+      };
+    };
     details: {
       metrics: {
         activeStake: '';
@@ -74,6 +107,10 @@ type KeysStructure = {
         confirm: '';
       };
     };
+    preferences: {
+      selectedStakePools: '';
+      partOfBalance: '';
+    };
   };
   overview: {
     delegationCard: {
@@ -97,6 +134,9 @@ type KeysStructure = {
       ros: '';
       totalRewards: '';
       totalStaked: '';
+      poolRetired: '';
+      poolSaturated: '';
+      tooltipFiatLabel: '';
     };
     yourPoolsSection: {
       heading: '';

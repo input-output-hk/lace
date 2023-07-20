@@ -12,6 +12,25 @@ Feature: NFT - Folders - Popup view
     And "Folder name" input is empty on "Name your folder" page
     And "Next" button is disabled on "Name your folder" page
 
+  @LW-7261
+  Scenario: Popup-view - NFT Folders - "Create NFT folder" page "Next" button enabled when name input is not empty
+    Given I navigate to NFTs popup page
+    And I click "Create folder" button on NFTs page
+    When I enter a folder name "example folder" into "Folder name" input
+    Then "Next" button is enabled on "Name your folder" page
+
+  @LW-7268 @LW-7269
+  Scenario: Popup-view - NFT Folders - Select NFTs page displayed
+    Given I navigate to NFTs popup page
+    And I save all NFTs that I have
+    When I click "Create folder" button on NFTs page
+    And I enter a folder name "example folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    Then I see "Select NFTs" page in popup mode
+    And No NFT is selected
+    And "Select NFTs" page is showing all NFTs that I have
+    And "Next" button is disabled on "Create folder" page
+
   @LW-7265
   Scenario: Popup-view - NFT Folders - Trying to create folder using too long name
     Given I navigate to NFTs popup page
@@ -54,3 +73,56 @@ Feature: NFT - Folders - Popup view
     Then I don't see "You'll have to start again" modal
     And I don't see "Create NFT folder" drawer in popup mode
     And A gallery view showing my NFTs is displayed
+
+  @LW-7270
+  Scenario: Popup-view - NFT Folders - Select NFTs page - back button click
+    Given I navigate to "Select NFTs" page in popup mode
+    When I close the drawer by clicking back button
+    Then I see "Create NFT folder" drawer in popup mode
+
+  @LW-7273
+  Scenario: Popup-view - NFT Folders - Select NFTs page - select and unselect a NFT
+    Given I navigate to "Select NFTs" page in popup mode
+    When I click NFT with name "Ibilecoin"
+    Then NFT with name "Ibilecoin" is selected
+    When I click NFT with name "Ibilecoin"
+    Then NFT with name "Ibilecoin" is not selected
+
+  @LW-7274
+  Scenario: Popup-view - NFT Folders - Select NFTs page - search for NFT - no results
+    Given I navigate to "Select NFTs" page in popup mode
+    When I enter "some random phrase" into the search bar on "Select NFTs" drawer
+    Then I see no results for "Select NFTs" drawer
+
+  @LW-7267
+  Scenario: Popup-view - NFT Folders - Creating a folder happy path
+    Given I navigate to NFTs popup page
+    And I click "Create folder" button on NFTs page
+    And I enter a folder name "Sample NFT folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    And I click NFT with name "Ibilecoin"
+    And I click NFT with name "Bison Coin"
+    And I click "Next" button on "Select NFTs" page
+    Then I see a toast with text: "Folder created successfully"
+    And I do not see "Select NFTs" page in popup mode
+    And I see folder with name "Sample NFT folder" on the NFTs list
+    When I click the NFT folder with name "Sample NFT folder"
+    Then I see "Sample NFT folder" NFT folder page in popup mode
+    And I see NFT with name "Ibilecoin" on the NFT folder page
+    And I see NFT with name "Bison Coin" on the NFT folder page
+
+  @LW-7272
+  Scenario: Popup-view - NFT Folders - Select NFTs page - clear button
+    Given I navigate to "Select NFTs" page in popup mode
+    And I do not see "Clear" button next to NFTs counter
+    When I select 5 NFTs
+    Then I see "Clear" button next to NFTs counter
+    When I click "Clear" button next to NFTs counter
+    Then No NFT is selected
+
+  @LW-7271
+  Scenario: Popup-view - NFT Folders - Select NFTs page - selected NFTs counter
+    Given I navigate to "Select NFTs" page in popup mode
+    And I do not see NFTs counter
+    When I select 5 NFTs
+    Then I see NFTs counter showing 5 selected NFTs

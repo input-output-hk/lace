@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import OnboardingMnemonicPage from '../../elements/onboarding/mnemonicPage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
@@ -14,18 +15,18 @@ class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeMnemonicInputWithDisabledAutocomplete() {
-    const mnemonicInput = await OnboardingMnemonicPage.mnemonicInputs[0];
-    expect(await mnemonicInput.getAttribute('autocomplete')).to.equal('off');
+    const mnemonicInput = (await OnboardingMnemonicPage.mnemonicInputs[0]) as WebdriverIO.Element;
+    expect(await mnemonicInput?.getAttribute('autocomplete')).to.equal('off');
   }
 
   async assertSeeMnemonicInputWithText(mnemonicIndex: number, expectedText: string) {
-    const currentMnemonicInput = await OnboardingMnemonicPage.mnemonicInputs[mnemonicIndex];
-    expect(await currentMnemonicInput.getValue()).to.equal(expectedText);
+    const currentMnemonicInput = (await OnboardingMnemonicPage.mnemonicInputs[mnemonicIndex]) as WebdriverIO.Element;
+    expect(await currentMnemonicInput?.getValue()).to.equal(expectedText);
   }
 
   async assertMnemonicInputLength(mnemonicIndex: number, expectedLength: number) {
-    const currentMnemonicInput = await OnboardingMnemonicPage.mnemonicInputs[mnemonicIndex];
-    const currentMnemonicInputLength = (await currentMnemonicInput.getValue()).length;
+    const currentMnemonicInput = (await OnboardingMnemonicPage.mnemonicInputs[mnemonicIndex]) as WebdriverIO.Element;
+    const currentMnemonicInputLength = currentMnemonicInput ? (await currentMnemonicInput.getValue()).length : 0;
     expect(currentMnemonicInputLength).to.equal(expectedLength);
   }
 

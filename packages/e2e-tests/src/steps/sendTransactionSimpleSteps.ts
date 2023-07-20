@@ -204,7 +204,9 @@ When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
     await transactionExtendedPageObject.fillAddress(
-      receivingAddress === 'CopiedAddress' ? await clipboard.read() : getTestWallet(receivingAddress).address,
+      receivingAddress === 'CopiedAddress'
+        ? String(await clipboard.read())
+        : String(getTestWallet(receivingAddress).address),
       bundleIndex
     );
     await browser.pause(1000);
@@ -215,7 +217,7 @@ When(
         case 'NFT':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
           await transactionExtendedPageObject.clickNFTsButton();
-          await nftsPageObject.clickNftItem(entry.assetName);
+          await nftsPageObject.clickNftItemInAssetSelector(entry.assetName);
           break;
         case 'Token':
           await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
@@ -355,7 +357,9 @@ Then(
     const expectedTransactionDetails: ExpectedTransactionDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
-      transactionData: [{ ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: getTestWallet(walletName).address }],
+      transactionData: [
+        { ada: `${adaValue} ${Asset.CARDANO.ticker}`, address: String(getTestWallet(walletName).address) }
+      ],
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
@@ -371,7 +375,7 @@ Then(
       transactionData: [
         {
           ada: `${adaValue} ${Asset.CARDANO.ticker}`,
-          address: getTestWallet(walletName).address,
+          address: String(getTestWallet(walletName).address),
           assets: [`${laceCoin2Value} LaceCoin2`]
         }
       ],
@@ -521,9 +525,11 @@ When(
         await newTransactionPage.reviewTransactionButton.click();
         break;
       case 'Cancel':
+        await newTransactionPage.cancelTransactionButton.waitForClickable();
         await newTransactionPage.cancelTransactionButton.click();
         break;
       case 'Add bundle':
+        await newTransactionPage.addBundleButton.waitForClickable();
         await newTransactionPage.addBundleButton.click();
         break;
       default:
@@ -586,6 +592,18 @@ When(/^I click "View transaction" button on submitted transaction page$/, async 
 });
 
 Then(/^I enter (correct|incorrect) password and confirm the transaction$/, async (type: string) => {
-  const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
+  const password =
+    type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
   await SimpleTxSideDrawerPageObject.fillPasswordAndConfirm(password);
+});
+
+Then(
+  /^recipients address input contains address "([^"]*)" and name "([^"]*)"$/,
+  async (lastCharsOfAddress: string, addressName: string) => {
+    await drawerSendExtendedAssert.assertSeeAddressWithNameInRecipientsAddressInput(lastCharsOfAddress, addressName);
+  }
+);
+
+Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
+  await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
 });

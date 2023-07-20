@@ -4,7 +4,6 @@ import { defaultAppSettings, getTestWallet, TestWalletName, WalletConfig } from 
 import { getBackgroundStorageItem } from '../utils/browserStorage';
 import { switchToLastWindow } from '../utils/window';
 import { t } from '../utils/translationService';
-import buttonAssert from '../assert/buttonAssert';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
@@ -36,10 +35,10 @@ import testContext from '../utils/testContext';
 import webTester from '../actor/webTester';
 import MainLoader from '../elements/MainLoader';
 
-const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic;
-const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic;
-const twelveMnemonicWords: string[] = getTestWallet(TestWalletName.TwelveWordsMnemonic).mnemonic;
-const fifteenMnemonicWords: string[] = getTestWallet(TestWalletName.FifteenWordsMnemonic).mnemonic;
+const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
+const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
+const twelveMnemonicWords: string[] = getTestWallet(TestWalletName.TwelveWordsMnemonic).mnemonic ?? [];
+const fifteenMnemonicWords: string[] = getTestWallet(TestWalletName.FifteenWordsMnemonic).mnemonic ?? [];
 
 const mnemonicWordsForReference: string[] = [];
 const validPassword = 'N_8J@bne87A';
@@ -225,10 +224,6 @@ Then(/^"Restoring a multi-address wallet\?" modal is displayed$/, async () => {
   await ModalAssert.assertSeeRestoringMultiAddressWalletModal();
 });
 
-Then(/^"([^"]*)?" button is (enabled|disabled)$/, async (text: string, expectedStatus: 'enabled' | 'disabled') => {
-  await buttonAssert.assertButtonIsEnabled(await t(text), expectedStatus === 'enabled');
-});
-
 Then(/^I accept "T&C" checkbox$/, async () => {
   await OnboardingPageObject.acceptTCCheckbox();
 });
@@ -322,7 +317,7 @@ Given(
 );
 
 Given(/^I am on "All done!" page from "Restore wallet" using "([^"]*)" wallet$/, async (walletName: string) => {
-  await OnboardingPageObject.openAllDonePageFromWalletRestore(getTestWallet(walletName).mnemonic);
+  await OnboardingPageObject.openAllDonePageFromWalletRestore(getTestWallet(walletName).mnemonic ?? []);
 });
 
 Given(
@@ -483,6 +478,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
       wallet: await localStorageManager.getItem('wallet'),
       lock: await localStorageManager.getItem('lock'),
       keyAgentData: await localStorageManager.getItem('keyAgentData'),
+      analyticsAccepted: await localStorageManager.getItem('analyticsAccepted'),
       appSettings: defaultAppSettings
     },
     backgroundStorage: {

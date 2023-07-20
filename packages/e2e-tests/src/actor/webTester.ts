@@ -122,10 +122,6 @@ export default new (class WebTester {
     }
   }
 
-  async scrollIntoView(element: WebElement) {
-    await $(element.toJSLocator()).scrollIntoView();
-  }
-
   async getTextValueFromElement(element: WebElement): Promise<string | number> {
     return await this.getTextValue(element.toJSLocator());
   }
@@ -136,7 +132,7 @@ export default new (class WebTester {
   }
 
   // eslint-disable-next-line no-undef
-  async getTextValuesFromArrayElementWithoutDuplicates(array: WebdriverIO.ElementArray): Promise<string[]> {
+  async getTextValuesFromArrayElementWithoutDuplicates(array: WebdriverIO.ElementArray): Promise<unknown[]> {
     const arr = Promise.all(array.map(async (element) => (await element.getText()).split(' ').pop()));
     return [...new Set(await arr)];
   }

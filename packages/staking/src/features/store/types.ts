@@ -3,6 +3,7 @@ import { Immutable } from 'immer';
 
 export enum Sections {
   DETAIL = 'detail',
+  PREFERENCES = 'preferences',
   CONFIRMATION = 'confirmation',
   SIGN = 'sign',
   SUCCESS_TX = 'success_tx',
@@ -39,17 +40,20 @@ export interface StakePoolDetails {
   setStakingError: (error?: StakingError) => void;
 }
 
-export interface DelegationPortfolioStakePool extends Wallet.Cardano.Cip17Pool {
-  logo?: string;
-}
+export type DelegationPortfolioStakePool = Wallet.Cardano.Cip17Pool & {
+  displayData: Wallet.util.StakePool;
+};
 
 export type DelegationPortfolioState = Immutable<{
-  draftPortfolio: DelegationPortfolioStakePool[];
   currentPortfolio: DelegationPortfolioStakePool[];
+  draftPortfolio: DelegationPortfolioStakePool[];
 }>;
 
 type DelegationPortfolioMutators = {
-  setCurrentPortfolio: (rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[]) => void;
+  setCurrentPortfolio: (params: {
+    rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[];
+    cardanoCoin: Wallet.CoinId;
+  }) => Promise<void>;
   addPoolToDraft: (pool: DelegationPortfolioStakePool) => void;
   removePoolFromDraft: (params: Pick<DelegationPortfolioStakePool, 'id'>) => void;
   updatePoolWeight: (params: Pick<DelegationPortfolioStakePool, 'id' | 'weight'>) => void;

@@ -1,0 +1,103 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.balance {
+  display: flex;
+  align-items: baseline;
+  gap: size_unit(1);
+
+  .codeTextLarge,
+  .codeTextMedium {
+    color: var(--text-color-secondary);
+    text-align: left;
+    margin: 0;
+  }
+
+  .codeTextLarge {
+    @include text-subHeading-bold;
+  }
+
+  .codeTextMedium {
+    @include text-bodyLarge-bold;
+  }
+
+  .balanceTextLarge,
+  .balanceTextMedium,
+  .balanceTextLargePopup .balanceTextMediumPopup {
+    color: $theme-text-color-black;
+    font-weight: $font-weight-bold;
+    text-align: left;
+    margin: 0;
+  }
+
+  .balanceTextLarge {
+    font-size: var(--display);
+    @media (max-width: $breakpoint-popup) {
+      @include text-display;
+    }
+  }
+
+  .balanceTextMedium {
+    @include text-pageHeading;
+  }
+}
+
+.subtitleTextLarge,
+.subtitleTextMedium {
+  text-align: left;
+  color: $theme-text-color-light-grey;
+  margin: 0;
+}
+
+.subtitleTextLarge {
+  @include text-subHeading-semi-bold;
+}
+
+.subtitleTextMedium {
+  @include text-bodyLarge-semi-bold;
+}
+
+.positive {
+  color: var(--text-color-green, #2cb67d);
+}
+
+.negative {
+  color: var(--text-color-red, #ff5470);
+}
+
+.neutral {
+  color: var(--text-color-secondary) !important;
+}
+
+.popupView {
+  &.balance {
+    .balanceTextLarge {
+      @include text-pageHeading;
+    }
+    .balanceTextXLarge {
+      @include text-display;
+      margin-bottom: -#{size_unit(1)};
+    }
+
+    .balanceTextMedium {
+      @include text-heading;
+    }
+
+    .codeTextLarge {
+      @include text-bodyLarge-bold;
+    }
+
+    .codeTextMedium {
+      @include text-body-bold;
+    }
+  }
+
+  &.subtitleTextLarge {
+    @include text-bodyLarge-semi-bold;
+  }
+
+  &.subtitleTextMedium {
+    @include text-body-semi-bold;
+    margin-top: 0;
+  }
+}

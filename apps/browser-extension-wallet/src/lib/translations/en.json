@@ -1131,11 +1131,13 @@
       "personalData": "Not sell your personal data"
     },
     "walletSetupConnectHardwareWalletStep": {
-      "title": "Connect Hardware Wallet",
+      "title": "Connect hardware wallet",
       "subTitle": "Choose the brand of your hardware wallet.",
-      "supportedDevicesFull": "Lace is supporting Ledger Nano X, Nano S, Nano S Plus and Trezor Model T",
+      "subTitleFull": "Select your hardware wallet brand",
+      "supportedDevicesFull": "Lace supports Ledger Nano X, Nano S, Nano S Plus, and Trezor Model T",
       "supportedDevices": "Lace is supporting Ledger Nano X, Nano S and Nano S Plus",
-      "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue."
+      "connectDevice": "Just connect your device to your computer, unlock and open the Cardano app to hit continue.",
+      "connectDeviceFull": "Just connect your device to your computer and unlock it to continue. If you're using a Ledger device, make sure you open the Cardano App."
     },
     "walletSetupCreateStep": {
       "title": "Creating your wallet",
@@ -1210,7 +1212,7 @@
       "selectAccount": "Select Account",
       "exportKeys": "Next",
       "chooseAccountToExport": "Choose which account you would like to export.",
-      "useHWToConfirm": "Use your {{wallet}} device to confirm exporting keys",
+      "useHWToConfirm": "Use your device to confirm the export of your public key",
       "account": "Account"
     },
     "walletSetupWalletNameStep": {

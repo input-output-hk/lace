@@ -1,140 +1,56 @@
-import { StakePoolSortOptions, Wallet } from '@lace/cardano';
-import { Box, Flex } from '@lace/ui';
-import debounce from 'lodash/debounce';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { StakePoolDetails } from '../drawer';
-import { stakePoolsMock } from '../stake-pools';
-import { Sections, useStakePoolDetails } from '../store';
-import { Search } from './search';
+import { StakePoolItemBrowserProps, Wallet } from '@lace/cardano';
+import { useEffect, useMemo } from 'react';
+import { StateStatus, useOutsideHandles } from '../outside-handles-provider';
+import { useStakePoolDetails } from '../store';
 import { StakePoolsTable } from './stake-pools-table';
 
-const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'name',
-  order: 'asc',
+const LACE_APP_ID = 'lace-app';
+
+type BrowsePoolsProps = {
+  onStake: (id: StakePoolItemBrowserProps['id']) => void;
 };
-const searchDebounce = 300;
-const mockFetchDelay = 500;
 
-const fetchStakePools = async ({
-  searchString,
-  sort,
-}: {
-  searchString: string;
-  skip?: number;
-  limit?: number;
-  sort?: StakePoolSortOptions;
-}) =>
-  new Promise<Wallet.Cardano.StakePool[]>((resolve) => {
-    setTimeout(() => {
-      const data = stakePoolsMock.filter((pool) => pool.metadata?.name.includes(searchString));
+export const BrowsePools = ({ onStake }: BrowsePoolsProps) => {
+  const { setIsDrawerVisible } = useStakePoolDetails();
 
-      if (!sort) return resolve(data);
+  const {
+    walletStoreStakePoolSearchResults: stakePoolSearchResults,
+    walletStoreStakePoolSearchResultsStatus: stakePoolSearchResultsStatus,
+    walletStoreFetchStakePools: fetchStakePools,
+    delegationStoreSetSelectedStakePool: setSelectedStakePool,
+    walletStoreNetworkInfo: networkInfo,
+    walletStoreGetKeyAgentType: getKeyAgentType,
+  } = useOutsideHandles();
 
-      const dataSorted =
-        sort.field === 'name'
-          ? // mock data is already sorted
-            data
-          : sort.field === 'saturation'
-          ? // @ts-ignore
-            data.sort((poolA, poolB) => poolA.metrics.saturation - poolB.metrics.saturation)
-          : // @ts-ignore
-            data.sort((poolA, poolB) => poolA[sort.field] - poolB[sort.field]);
+  const isSearching = stakePoolSearchResultsStatus === StateStatus.LOADING;
 
-      return sort.order === 'asc' ? resolve(dataSorted) : resolve(dataSorted.reverse());
-    }, mockFetchDelay);
-  });
-
-const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
-
-const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
-
-export const BrowsePools = () => {
-  const [isSearching, setIsSearching] = useState<boolean>(true);
-  const [isLoadingList, setIsLoadingList] = useState<boolean>(true);
-  const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
-  const [searchValue, setSearchValue] = useState<string>('');
-  const { setIsDrawerVisible, setSection } = useStakePoolDetails();
-
-  const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
-  const [{ pageResults, totalResultCount }, setStakePoolSearchResults] = useState<Wallet.StakePoolSearchResults>({
-    pageResults: [],
-    totalResultCount: 0,
-  });
-
-  const onSearch = (searchString: string) => {
-    setIsSearching(true);
-    setSearchValue(searchString);
-  };
-  const [fetchingPools, setFetchingPools] = useState(false);
-  // TODO: compute real value
-  const hasNoFunds = false;
-
-  const onStake = useCallback(() => {
-    // TODO: LW-7396 enable StakeConfirmation modal in the flow in the case of restaking
-    // if (isDelegating) {
-    //   setStakeConfirmationVisible(true);
-    //   return;
-    // }
-
-    setSection();
-    setIsDrawerVisible(true);
-  }, [setIsDrawerVisible, setSection]);
-
-  const debouncedSearch = useMemo(
-    () =>
-      debounce((...args: Parameters<typeof fetchStakePools>) => {
-        setFetchingPools(true);
-        // eslint-disable-next-line promise/catch-or-return
-        fetchStakePools(...args).then((pools) => {
-          setStakePoolSearchResults({
-            pageResults: pools,
-            totalResultCount: pools.length,
-          });
-          setFetchingPools(false);
-          setIsSearching(false);
-        });
-      }, searchDebounce),
-    []
-  );
+  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   useEffect(() => {
-    // Close pool details drawer & fetch pools on mount, network switching, searchValue change and sort change
-    setIsLoadingList(true);
-    setIsDrawerVisible(false);
-    // @ts-ignore
-    debouncedSearch({ searchString: searchValue, sort });
-  }, [searchValue, sort, debouncedSearch, setIsDrawerVisible]);
+    const fetchSelectedStakePool = async () => {
+      if (isInMemory || !networkInfo) return;
+      const stakePoolId = localStorage.getItem('TEMP_POOLID');
+      if (!stakePoolId) return;
+      const searchString = String(stakePoolId);
+      await fetchStakePools({ searchString });
+      const foundStakePool = stakePoolSearchResults.pageResults.find(
+        (pool: Wallet.Cardano.StakePool) => pool?.id?.toString() === stakePoolId
+      );
+      if (!foundStakePool) return;
+      setSelectedStakePool(foundStakePool);
+      setIsDrawerVisible(true);
+      fetchStakePools({ searchString: '' });
+    };
+    fetchSelectedStakePool();
+  }, [
+    setIsDrawerVisible,
+    setSelectedStakePool,
+    stakePoolSearchResults,
+    networkInfo,
+    isSearching,
+    isInMemory,
+    fetchStakePools,
+  ]);
 
-  useEffect(() => {
-    // Update stake pool list and new offset position
-    setStakePools(pageResults);
-    setIsLoadingList(false);
-  }, [pageResults]);
-
-  return (
-    <Flex flexDirection={'column'} alignItems={'stretch'}>
-      <Search onChange={onSearch} loading={fetchingPools} />
-      <Box mt={'$32'}>
-        <StakePoolsTable
-          stakePools={stakePools}
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          loadMoreData={() => {}}
-          totalResultCount={totalResultCount}
-          isSearching={isSearching}
-          fetchingPools={fetchingPools}
-          isLoadingList={isLoadingList}
-          scrollableTargetId={'lace-app'}
-          sort={sort}
-          setSort={setSort}
-        />
-      </Box>
-      <StakePoolDetails
-        showCloseIcon
-        showBackIcon={(section: Sections): boolean => stepsWithBackBtn.has(section)}
-        showExitConfirmation={(section: Sections): boolean => stepsWithExitConfirmation.has(section)}
-        canDelegate={!hasNoFunds}
-        onStake={onStake}
-      />
-    </Flex>
-  );
+  return <StakePoolsTable scrollableTargetId={LACE_APP_ID} onStake={onStake} />;
 };

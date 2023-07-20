@@ -5,30 +5,55 @@ import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener
 // https://github.com/import-js/eslint-plugin-import/issues/1810
 // eslint-disable-next-line import/no-unresolved
 import '@lace/staking/index.css';
-import { useBalances, useDelegationDetails, useFetchCoinPrice, useStakingRewards } from '@hooks';
+import { useBalances, useDelegationDetails, useFetchCoinPrice, useStakingRewards, useWalletManager } from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
+import { compactNumber } from '@utils/format-number';
 
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
   const { setWalletPassword } = useBackgroundServiceAPIContext();
   const delegationDetails = useDelegationDetails();
   const selectedStakePoolDetails = useDelegationStore(stakePoolDetailsSelector);
-  const { setDelegationTxBuilder, delegationTxFee, setDelegationTxFee, setSelectedStakePool, selectedStakePool } =
-    useDelegationStore();
+  const {
+    delegationTxBuilder,
+    setDelegationTxBuilder,
+    delegationTxFee,
+    setDelegationTxFee,
+    setSelectedStakePool,
+    selectedStakePool
+  } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
-  const { password, removePassword } = usePassword();
-  const { setIsRestaking } = useSubmitingState();
+  const password = usePassword();
+  const submittingState = useSubmitingState();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
   const stakingRewards = useStakingRewards();
   const {
     getKeyAgentType,
     inMemoryWallet,
-    walletUI: { cardanoCoin }
-  } = useWalletStore();
+    walletUI: { cardanoCoin },
+    stakePoolSearchResults,
+    stakePoolSearchResultsStatus,
+    fetchStakePools,
+    fetchNetworkInfo,
+    networkInfo,
+    blockchainProvider
+  } = useWalletStore((state) => ({
+    getKeyAgentType: state.getKeyAgentType,
+    inMemoryWallet: state.inMemoryWallet,
+    walletUI: { cardanoCoin: state.walletUI.cardanoCoin },
+    stakePoolSearchResults: state.stakePoolSearchResults,
+    stakePoolSearchResultsStatus: state.stakePoolSearchResultsStatus,
+    fetchStakePools: state.fetchStakePools,
+    networkInfo: state.networkInfo,
+    fetchNetworkInfo: state.fetchNetworkInfo,
+    blockchainProvider: state.blockchainProvider
+  }));
   const { fiatCurrency } = useCurrencyStore();
+  const { executeWithPassword } = useWalletManager();
+
   return (
     <OutsideHandlesProvider
       {...{
@@ -37,6 +62,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
         delegationDetails,
         delegationStoreSelectedStakePoolDetails: selectedStakePoolDetails,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
+        delegationStoreDelegationTxBuilder: delegationTxBuilder,
         delegationStoreSetSelectedStakePool: setSelectedStakePool,
         delegationStoreSetDelegationTxFee: setDelegationTxFee,
         delegationStoreDelegationTxFee: delegationTxFee,
@@ -44,13 +70,21 @@ export const MultiDelegationStaking = (): JSX.Element => {
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
         password,
-        passwordRemovePassword: removePassword,
         stakingRewards,
-        submittingStateSetIsRestaking: setIsRestaking,
+        submittingState,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,
-        currencyStoreFiatCurrency: fiatCurrency
+        currencyStoreFiatCurrency: fiatCurrency,
+        walletManagerExecuteWithPassword: executeWithPassword,
+        walletStoreStakePoolSearchResults: stakePoolSearchResults,
+        walletStoreStakePoolSearchResultsStatus: stakePoolSearchResultsStatus,
+        walletStoreFetchStakePools: fetchStakePools,
+        walletStoreFetchNetworkInfo: fetchNetworkInfo,
+        walletStoreNetworkInfo: networkInfo,
+        walletStoreBlockchainProvider: blockchainProvider,
+        // TODO: LW-7575 make compactNumber reusable and not pass it here.
+        compactNumber
       }}
     >
       <Staking theme={theme.name} />

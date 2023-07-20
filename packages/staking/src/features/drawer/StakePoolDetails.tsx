@@ -3,9 +3,13 @@ import { useObservable } from '@lace/common';
 import React, { useMemo } from 'react';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { MAX_POOLS_COUNT, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
+import { StakePoolPreferences, StakePoolPreferencesFooter } from './StakePoolPreferences';
+import { TransactionFail, TransactionFailFooter } from './TransactionFail';
+import { TransactionSuccess, TransactionSuccessFooter } from './TransactionSuccess';
 
 type stakePoolDetailsProps = {
   onStake: () => void;
@@ -35,10 +39,11 @@ export const StakePoolDetails = ({
   const sectionsMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetail />,
+      [Sections.PREFERENCES]: <StakePoolPreferences />,
       [Sections.CONFIRMATION]: <StakePoolConfirmation />,
-      [Sections.SIGN]: <div />,
-      [Sections.SUCCESS_TX]: <div />,
-      [Sections.FAIL_TX]: <div />,
+      [Sections.SIGN]: <SignConfirmation />,
+      [Sections.SUCCESS_TX]: <TransactionSuccess />,
+      [Sections.FAIL_TX]: <TransactionFail />,
     }),
     []
   );
@@ -46,10 +51,11 @@ export const StakePoolDetails = ({
   const footersMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetailFooter canDelegate={canDelegate} onStake={onStake} />,
+      [Sections.PREFERENCES]: <StakePoolPreferencesFooter />,
       [Sections.CONFIRMATION]: <StakePoolConfirmationFooter />,
-      [Sections.SIGN]: <div />,
-      [Sections.SUCCESS_TX]: <div />,
-      [Sections.FAIL_TX]: <div />,
+      [Sections.SIGN]: <SignConfirmationFooter />,
+      [Sections.SUCCESS_TX]: <TransactionSuccessFooter />,
+      [Sections.FAIL_TX]: <TransactionFailFooter />,
     }),
     [onStake, canDelegate]
   );

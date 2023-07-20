@@ -7,14 +7,14 @@ import NftDetails from '../elements/NFTs/nftDetails';
 Then(
   /^NFT with name: "([^"]*)" (is displayed|is not displayed) in coin selector$/,
   async (nftName: string, state: string) => {
-    await nftAssert.assertNftDisplayed(nftName, state === 'is displayed');
+    await nftAssert.assertNftDisplayedInCoinSelector(nftName, state === 'is displayed');
   }
 );
 
 Given(
   /^I am on a NFT details on the (extended|popup) view for NFT with name: "([^"]*)"$/,
   async (mode: 'extended' | 'popup', nftName: string) => {
-    await nftsPageObject.clickNftItem(nftName);
+    await nftsPageObject.clickNftItemOnNftsPage(nftName);
     await nftAssert.assertSeeNftDetails(nftName, mode);
   }
 );

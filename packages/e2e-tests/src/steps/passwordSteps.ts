@@ -5,7 +5,8 @@ import PasswordInput from '../elements/passwordInput';
 import { t } from '../utils/translationService';
 
 Then(/^I fill (correct|incorrect) password$/, async (type: string) => {
-  const password = type === 'correct' ? getTestWallet(TestWalletName.TestAutomationWallet).password : 'somePassword';
+  const password =
+    type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
   await PasswordInput.input.setValue(password);
 });
 

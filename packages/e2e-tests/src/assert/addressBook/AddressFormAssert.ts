@@ -7,6 +7,13 @@ class AddressFormAssert {
     await AddressForm.addressInput.waitForDisplayed();
   };
 
+  assertSeeAddressFormInputsPopulated = async () => {
+    await AddressForm.nameInput.waitForDisplayed();
+    expect(await AddressForm.nameInput.getValue()).to.match(/^(?!\\s*$).+/);
+    await AddressForm.addressInput.waitForDisplayed();
+    expect(await AddressForm.addressInput.getValue()).to.match(/^(?!\s*$).+/);
+  };
+
   assertSeeNameError = async (shouldBeDisplayed: boolean, expectedNameError?: string) => {
     await AddressForm.nameError.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {

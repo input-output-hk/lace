@@ -2,10 +2,16 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { act, fireEvent, queryByTestId as queryByTestIdInContainer, render } from '@testing-library/react';
+import { I18nextProvider } from 'react-i18next';
 import { AssetDetails, AssetDetailsProps } from '../AssetDetails';
 import { StateStatus } from '@src/stores/types';
-import { I18nextProvider } from 'react-i18next';
 import i18n from '@lib/i18n';
+import * as Stores from '@src/stores';
+
+jest.mock('@src/stores', (): typeof Stores => ({
+  ...jest.requireActual<typeof Stores>('@src/stores'),
+  useWalletStore: () => ({ walletUI: { getHiddenBalancePlaceholder: jest.fn() } } as unknown as Stores.WalletStore)
+}));
 
 const AssetDetailsWrapped = (props: AssetDetailsProps) => (
   <I18nextProvider i18n={i18n}>
@@ -31,12 +37,10 @@ describe('AssetDetails', () => {
 
     expect(queryByTestIdInContainer(assetFiatPriceContainer, 'portfolio-balance-value')).toHaveTextContent('5');
     expect(queryByTestIdInContainer(assetFiatPriceContainer, 'portfolio-balance-currency')).toHaveTextContent('USD');
-    expect(queryByTestIdInContainer(assetFiatPriceContainer, 'portfolio-balance-variation')).toHaveTextContent('0%');
+    expect(queryByTestIdInContainer(assetFiatPriceContainer, 'portfolio-balance-subtitle')).toHaveTextContent('0%');
     expect(queryByTestIdInContainer(assetBalanceContainer, 'portfolio-balance-value')).toHaveTextContent('200');
     expect(queryByTestIdInContainer(assetBalanceContainer, 'portfolio-balance-currency')).toHaveTextContent('AST');
-    expect(queryByTestIdInContainer(assetBalanceContainer, 'portfolio-balance-variation')).toHaveTextContent(
-      '1000 USD'
-    );
+    expect(queryByTestIdInContainer(assetBalanceContainer, 'portfolio-balance-subtitle')).toHaveTextContent('1000 USD');
   });
 
   test('displays "see all your transactions button" if is popup view', async () => {

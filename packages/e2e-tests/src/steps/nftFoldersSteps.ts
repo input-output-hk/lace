@@ -4,6 +4,11 @@ import NftsPage from '../elements/NFTs/nftsPage';
 import nftCreateFolderAssert from '../assert/nftCreateFolderAssert';
 import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
+import mainMenuPageObject from '../pageobject/mainMenuPageObject';
+import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
+import ToastMessageAssert from '../assert/toastMessageAssert';
+import { t } from '../utils/translationService';
+import NftSelectNftsAssert from '../assert/nftSelectNftsAssert';
 
 Given(
   /^I (see|do not see) "Create folder" button on NFTs page in (popup|extended) mode$/,
@@ -23,6 +28,13 @@ Then(
   }
 );
 
+Then(
+  /^I (see|do not see) "Select NFTs" page in (popup|extended) mode$/,
+  async (shouldSee: 'see' | 'do not see', mode: 'extended' | 'popup') => {
+    await nftCreateFolderAssert.assertSeeSelectNFTsPage(shouldSee === 'see', mode);
+  }
+);
+
 Then(/^"Folder name" input is empty on "Name your folder" page$/, async () => {
   await nftCreateFolderAssert.assertSeeEmptyNameInput();
 });
@@ -30,9 +42,30 @@ Then(/^"Folder name" input is empty on "Name your folder" page$/, async () => {
 Then(
   /^"Next" button is (enabled|disabled) on "Name your folder" page$/,
   async (isButtonEnabled: 'enabled' | 'disabled') => {
-    await nftCreateFolderAssert.assertSeeNextButtonEnabled(isButtonEnabled === 'enabled');
+    await nftCreateFolderAssert.assertSeeNextButtonEnabledOnCreateFolderPage(isButtonEnabled === 'enabled');
   }
 );
+
+Then(
+  /^"Next" button is (enabled|disabled) on "Create folder" page$/,
+  async (isButtonEnabled: 'enabled' | 'disabled') => {
+    await nftCreateFolderAssert.assertSeeNextButtonEnabledOnSelectNftsPage(isButtonEnabled === 'enabled');
+  }
+);
+
+When(/^I click "Next" button on "(Name your folder|Select NFTs)" page$/, async (targetPage: string) => {
+  await (targetPage === 'Name your folder'
+    ? NftCreateFolderPage.nextButton.click()
+    : NftSelectNftsPage.nextButton.click());
+});
+
+Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
+  await nftCreateFolderAssert.verifySeeAllOwnedNfts();
+});
+
+Then(/^No NFT is selected$/, async () => {
+  await nftCreateFolderAssert.verifyNoneNftIsSelected();
+});
 
 When(/^I enter a folder name "([^"]*)" into "Folder name" input$/, async (folderName: string) => {
   await NftCreateFolderPage.setFolderNameInput(folderName);
@@ -74,3 +107,80 @@ Then(
     }
   }
 );
+
+When(/^I navigate to "Select NFTs" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await mainMenuPageObject.navigateToSection('NFTs', mode);
+  await NftsPage.createFolderButton.waitForClickable();
+  await NftsPage.createFolderButton.click();
+  await NftCreateFolderPage.setFolderNameInput('Sample NFT folder');
+  await NftCreateFolderPage.nextButton.waitForClickable();
+  await NftCreateFolderPage.nextButton.click();
+});
+
+When(/^I enter "([^"]*)" into the search bar on "Select NFTs" drawer$/, async (searchPhrase: string) => {
+  await NftSelectNftsPage.enterSearchPhrase(searchPhrase);
+});
+
+Then(/^I see no results for "Select NFTs" drawer$/, async () => {
+  await nftCreateFolderAssert.assertNoResultsReturned();
+});
+
+Then(/^I click NFT with name "([^"]*)"$/, async (nftName: string) => {
+  const nft = await NftSelectNftsPage.getNftByName(nftName);
+  await nft.waitForClickable();
+  await nft.click();
+});
+
+Then(/^NFT with name "([^"]*)" (is|is not) selected$/, async (nftName: string, shouldBeSelected: 'is' | 'is not') => {
+  await nftCreateFolderAssert.assertIsNFTSelected(nftName, shouldBeSelected === 'is');
+});
+
+Then(
+  /^I (see|do not see) folder with name "([^"]*)" on the NFTs list$/,
+  async (shouldSee: 'see' | 'do not see', folderName: string) => {
+    await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, shouldSee === 'see');
+  }
+);
+
+When(/^I click the NFT folder with name "([^"]*)"$/, async (folderName: string) => {
+  await (await NftsPage.getFolder(folderName)).click();
+});
+
+When(
+  /^I see "([^"]*)" NFT folder page in (extended|popup) mode$/,
+  async (folderName: string, mode: 'extended' | 'popup') => {
+    await nftCreateFolderAssert.assertSeeFolderPage(folderName, mode);
+  }
+);
+
+Then(
+  /^I (see|do not see) NFT with name "([^"]*)" on the NFT folder page$/,
+  async (shouldSee: 'see' | 'do not see', nftName: string) => {
+    await nftCreateFolderAssert.assertSeeNftItemOnFolderPage(nftName, shouldSee === 'see');
+  }
+);
+
+Then(/^I see a toast with text: "Folder created successfully"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.create'), true);
+});
+
+Then(/^I select (\d+) NFTs$/, async (numberOfNFTs: number) => {
+  await NftSelectNftsPage.selectNFTs(numberOfNFTs);
+});
+
+Then(/^I see NFTs counter showing (\d+) selected NFTs$/, async (counter: number) => {
+  await NftSelectNftsAssert.assertCounterNumber(counter);
+});
+
+Then(/^I (see|do not see) "Clear" button next to NFTs counter$/, async (shouldSee: string) => {
+  await NftSelectNftsAssert.assertSeeClearButton(shouldSee === 'see');
+});
+
+Then(/^I (see|do not see) NFTs counter$/, async (shouldSee: string) => {
+  await NftSelectNftsAssert.assertSeeCounter(shouldSee === 'see');
+});
+
+When(/^I click "Clear" button next to NFTs counter$/, async () => {
+  await NftSelectNftsPage.clearButton.waitForClickable();
+  await NftSelectNftsPage.clearButton.click();
+});

@@ -149,6 +149,7 @@ export const NFTFolderDrawer = withNftsFoldersContext(
           count={selectedTokenIds.length}
           label={t('multipleSelection.clear')}
           onClick={() => setSelectedTokenIds([])}
+          testId="assets-clear"
         />
       </div>
     );
@@ -159,8 +160,10 @@ export const NFTFolderDrawer = withNftsFoldersContext(
           popupView={isPopupView}
           title={
             <div className={styles.nftFolderDrawerTitle}>
-              <span>{selectedFolder?.name}</span>
-              <span className={styles.nftFolderDrawerTitleSideText}>({selectedFolder?.nfts?.length || 0})</span>
+              <span data-testid="selected-folder-title">{selectedFolder?.name}</span>
+              <span data-testid="selected-folder-nft-counter" className={styles.nftFolderDrawerTitleSideText}>
+                ({selectedFolder?.nfts?.length || 0})
+              </span>
             </div>
           }
         />
@@ -183,7 +186,7 @@ export const NFTFolderDrawer = withNftsFoldersContext(
 
     const sectionMap: Record<Sections, React.ReactElement> = {
       [Sections.FOLDER]: (
-        <span className={styles.nftFolderDrawerList}>
+        <span className={styles.nftFolderDrawerList} data-testid="asset-selector-wrapper">
           <NftsList
             nfts={selectedFolder?.nfts}
             onSelectNft={onSelectNft}

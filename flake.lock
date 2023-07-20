@@ -576,6 +576,23 @@
         "type": "github"
       }
     },
+    "nixpkgs-nsis": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1547508252,
+        "narHash": "sha256-ivcmGg01aeeod0rzjMJ86exUNHHRJu4526rGq9s7rJU=",
+        "owner": "input-output-hk",
+        "repo": "nixpkgs",
+        "rev": "be445a9074f139d63e704fa82610d25456562c3d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "input-output-hk",
+        "repo": "nixpkgs",
+        "rev": "be445a9074f139d63e704fa82610d25456562c3d",
+        "type": "github"
+      }
+    },
     "nixpkgs-regression": {
       "locked": {
         "lastModified": 1643052045,
@@ -726,6 +743,7 @@
         "cardano-world": "cardano-world",
         "nix-bundle-exe": "nix-bundle-exe",
         "nixpkgs": "nixpkgs_4",
+        "nixpkgs-nsis": "nixpkgs-nsis",
         "ogmios": "ogmios",
         "ogmios-CHaP": "ogmios-CHaP"
       }
