@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { HeaderTitle } from '@src/views/browser-view/features/send-transaction/components/SendTransactionDrawer/HeaderView';
 import styles from './Send.module.scss';
+import { saveTemporaryTxDataInStorage } from '@src/views/browser-view/features/send-transaction/helpers';
 
 const FIRST_ROW = 'output1';
 
@@ -35,9 +36,7 @@ export const Send = (): React.ReactElement => {
   const { address } = useAddressState(FIRST_ROW);
 
   const openTabExtensionSendFlow = (): Promise<void> => {
-    localStorage.setItem('tempAddress', address);
-    localStorage.setItem('tempOutputs', JSON.stringify(uiOutputs));
-    localStorage.setItem('tempSource', 'hardware-wallet');
+    saveTemporaryTxDataInStorage({ tempAddress: address, tempOutputs: uiOutputs, tempSource: 'hardware-wallet' });
     return backgroundServices.handleOpenBrowser({ section: BrowserViewSections.SEND_ADVANCED });
   };
 

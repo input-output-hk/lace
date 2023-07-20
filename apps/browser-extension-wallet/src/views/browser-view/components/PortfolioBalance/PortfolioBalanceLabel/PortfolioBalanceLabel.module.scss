@@ -1,0 +1,44 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.titleContainer {
+  display: flex;
+  gap: size_unit(0.5);
+  margin-top: size_unit(1.5);
+  span {
+    display: flex;
+  }
+
+  label {
+    @include text-bodyLarge-semi-bold;
+    color: $theme-text-color-light-grey;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: size_unit(1);
+    width: 100%;
+  }
+
+  @media (max-width: $breakpoint-popup) {
+    margin-top: 0;
+  }
+}
+
+.iconWrapper {
+  cursor: pointer;
+  display: flex;
+}
+
+.icon {
+  color: var(--text-color-secondary);
+  font-size: 19px;
+  &:hover {
+    color: var(--text-color-primary);
+  }
+}
+
+.popupView {
+  &.titleContainer {
+    margin-bottom: size_unit(0.5);
+  }
+}

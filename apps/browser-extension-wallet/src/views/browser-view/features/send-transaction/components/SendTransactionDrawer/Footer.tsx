@@ -28,12 +28,9 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
+import { clearTemporaryTxDataFromStorage, getTemporaryTxDataFromStorage } from '../../helpers';
 
 const { SendTransaction: Events } = AnalyticsEventNames;
-
-const TEMP_OUTPUTS = 'tempOutputs';
-const TEMP_ADDRESS = 'tempAddress';
-const TEMP_SOURCE = 'tempSource';
 
 export const nextStepBtnLabels: Partial<Record<Sections, string>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -44,13 +41,9 @@ export const nextStepBtnLabels: Partial<Record<Sections, string>> = {
   [Sections.ADDRESS_FORM]: 'browserView.transaction.send.footer.save'
 };
 
-const hasTempTxData = () => localStorage.getItem(TEMP_OUTPUTS) !== null || localStorage.getItem(TEMP_ADDRESS) !== null;
-const tempDataSource = localStorage.getItem(TEMP_SOURCE);
-
-const clearTempData = () => {
-  localStorage.removeItem(TEMP_OUTPUTS);
-  localStorage.removeItem(TEMP_ADDRESS);
-  localStorage.removeItem(TEMP_SOURCE);
+const hasTempTxData = () => {
+  const { tempOutputs, tempAddress } = getTemporaryTxDataFromStorage();
+  return tempOutputs !== null || tempAddress !== null;
 };
 
 interface FooterProps {
@@ -156,7 +149,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
     const txHasFailed = currentSection.currentSection === Sections.FAIL_TX;
 
     if (hasTempTxData()) {
-      clearTempData();
+      clearTemporaryTxDataFromStorage();
     }
 
     switch (true) {
@@ -221,13 +214,15 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   useEffect(() => {
     const cleanup = () => {
       if (hasTempTxData()) {
-        clearTempData();
+        clearTemporaryTxDataFromStorage();
       }
     };
     if (isPopupView) return cleanup;
     if (isSubmitingTx) return cleanup;
     if (isConfirmButtonDisabled) return cleanup;
-    if (hasTempTxData() && tempDataSource === 'hardware-wallet') {
+
+    const { tempSource } = getTemporaryTxDataFromStorage();
+    if (hasTempTxData() && tempSource === 'hardware-wallet') {
       submitHwFormStep();
     }
   }, [isConfirmButtonDisabled, isHwSummary, isPopupView, isSubmitingTx, submitHwFormStep]);

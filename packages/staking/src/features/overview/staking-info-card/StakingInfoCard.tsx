@@ -80,7 +80,7 @@ export const StakingInfoCard = ({
   popupView,
   cardanoCoinSymbol,
   markerColor,
-  status = 'retired',
+  status,
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
 
