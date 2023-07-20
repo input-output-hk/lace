@@ -8,8 +8,7 @@ import { Wallet } from '@lace/cardano';
 import { ValidationResult } from '../../../types';
 import * as addressBook from '../address-book';
 import i18n from 'i18next';
-import { Cardano, HandleProvider } from '@cardano-sdk/core';
-import { validateWalletHandle } from '../address-book';
+import { Cardano, HandleProvider, Asset } from '@cardano-sdk/core';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
@@ -229,19 +228,56 @@ describe('Testing address book validator', () => {
     });
   });
 
-  describe('validateWalletHandle', () => {
+  describe('ensureHandleOwnerHasntChanged', () => {
     const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
-    const value = 'sampleValue';
+    const mockHandleResolution = {
+      backgroundImage: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd'),
+      cardanoAddress: Cardano.PaymentAddress(
+        'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
+      ),
+      handle: 'sampleValue',
+      hasDatum: false,
+      image: Asset.Uri('ipfs://c8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe'),
+      policyId: Cardano.PolicyId('50fdcdbfa3154db86a87e4b5697ae30d272e0bbcfa8122efd3e301cb'),
+      profilePic: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd1')
+    };
 
     test('should throw an error if handles are not found', async () => {
       (mockHandleResolver.resolveHandles as jest.Mock).mockReturnValue([]);
 
       await expect(
-        async () => await validateWalletHandle({ value, handleResolver: mockHandleResolver })
+        async () =>
+          await addressBook.ensureHandleOwnerHasntChanged({
+            handleResolution: mockHandleResolution,
+            handleResolver: mockHandleResolver
+          })
       ).rejects.toThrow('general.errors.incorrectHandle');
     });
 
-    test('should return the handle information', async () => {
+    test('should throw an error if stake keys are not matching', async () => {
+      (mockHandleResolver.resolveHandles as jest.Mock).mockReturnValue([
+        {
+          cardanoAddress: Cardano.PaymentAddress(
+            'addr_test1qrrx8s34r6m0w835qe9tj8mqa4ugkwhllw5l4hwpmhakpy8hukqufzmfnrvvr24tschssxw96z8dq9dz09xkg9eghtkqe07423'
+          )
+        }
+      ]);
+
+      await expect(
+        async () =>
+          await addressBook.ensureHandleOwnerHasntChanged({
+            handleResolution: {
+              ...mockHandleResolution,
+              cardanoAddress: Cardano.PaymentAddress(
+                'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
+              )
+            },
+            handleResolver: mockHandleResolver
+          })
+      ).rejects.toThrow('general.errors.handleConflict');
+    });
+
+    test('should return false if the handle ownership has not changed', async () => {
       const resolvedHandles = [
         {
           cardanoAddress: Cardano.PaymentAddress(
@@ -251,7 +287,66 @@ describe('Testing address book validator', () => {
       ];
       (mockHandleResolver.resolveHandles as jest.Mock).mockReturnValue(resolvedHandles);
 
-      expect(await validateWalletHandle({ value, handleResolver: mockHandleResolver })).toBe('');
+      expect(
+        await addressBook.ensureHandleOwnerHasntChanged({
+          handleResolution: mockHandleResolution,
+          handleResolver: mockHandleResolver
+        })
+      ).toBeUndefined();
+    });
+  });
+
+  describe('getAddressToSave', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const mockHandleResolution = {
+      backgroundImage: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd'),
+      cardanoAddress: Cardano.PaymentAddress(
+        'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g'
+      ),
+      handle: 'single_handle',
+      hasDatum: false,
+      image: Asset.Uri('ipfs://c8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe'),
+      policyId: Cardano.PolicyId('50fdcdbfa3154db86a87e4b5697ae30d272e0bbcfa8122efd3e301cb'),
+      profilePic: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd1')
+    };
+
+    const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
+
+    test('getAddressToSave returns the modified address with handleResolution if the address is a valid handle', async () => {
+      const mockAddress = {
+        id: 2,
+        address: '$single_handle',
+        name: 'Other wallet'
+      };
+
+      (mockHandleResolver.resolveHandles as jest.Mock).mockResolvedValue([mockHandleResolution]);
+
+      const result = await addressBook.getAddressToSave({
+        address: mockAddress,
+        handleResolver: mockHandleResolver
+      });
+
+      expect(result).toEqual({
+        ...mockAddress,
+        handleResolution: mockHandleResolution
+      });
+    });
+
+    test('getAddressToSave returns the same address if the address is not a valid handle', async () => {
+      const mockAddress = {
+        address: '$single_hanlde',
+        name: 'Other wallet',
+        id: 1
+      };
+
+      (mockHandleResolver.resolveHandles as jest.Mock).mockResolvedValue([]);
+
+      const result = await addressBook.getAddressToSave({ address: mockAddress, handleResolver: mockHandleResolver });
+
+      expect(result).toEqual(mockAddress);
     });
   });
 });

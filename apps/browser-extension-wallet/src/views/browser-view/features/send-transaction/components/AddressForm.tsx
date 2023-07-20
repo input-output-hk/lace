@@ -48,7 +48,7 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
   };
 
   const onAddressSave = async (address: AddressBookSchema): Promise<string> => {
-    const addressToSave = await getAddressToSave(address, handleResolver);
+    const addressToSave = await getAddressToSave({ address, handleResolver });
 
     return 'id' in addressToEdit
       ? updateAddress(addressToEdit.id, addressToSave, {
