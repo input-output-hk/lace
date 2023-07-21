@@ -19,6 +19,7 @@ import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletCo
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
+import StakingExitModal from '../elements/staking/StakingExitModal';
 
 Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
   await stakingPageAssert.assertSeeTitleWithCounter();
@@ -259,6 +260,24 @@ When(/^I click "Next" button on staking confirmation drawer$/, async () => {
   await StakingConfirmationDrawer.nextButton.click();
 });
 
+Then(
+  /^I click "(Cancel|Exit)" button for staking "You'll have to start again" modal$/,
+  async (button: 'Cancel' | 'Exit') => {
+    switch (button) {
+      case 'Cancel':
+        await StakingExitModal.cancelButton.waitForClickable();
+        await StakingExitModal.cancelButton.click();
+        break;
+      case 'Exit':
+        await StakingExitModal.exitButton.waitForClickable();
+        await StakingExitModal.exitButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
+  }
+);
+
 When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async (button: 'Cancel' | 'Fine by me') => {
   switch (button) {
     case 'Cancel':
@@ -291,5 +310,12 @@ Then(
     }
     await SimpleTxSideDrawerPageObject.fillPassword(password);
     await stakingExtendedPageObject.confirmStaking();
+  }
+);
+
+Then(
+  /^"Next" button is (enabled|disabled) on "Staking confirmation" page$/,
+  async (isButtonEnabled: 'enabled' | 'disabled') => {
+    await stakingConfirmationScreenAssert.assertSeeNextButtonEnabled(isButtonEnabled === 'enabled');
   }
 );

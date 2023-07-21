@@ -129,7 +129,7 @@ export const Form = ({
     currentChain
   } = useWalletStore();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
-  const { builtTxData: { error, totalMinimumCoins, uiTx } = {} } = useBuiltTxState();
+  const { builtTxData: { totalMinimumCoins, uiTx } = {} } = useBuiltTxState();
   const { setSection } = useSections();
   const [row, setCurrentRow] = useCurrentRow();
   const [isBundle, setIsBundle] = useState(false);
@@ -185,7 +185,7 @@ export const Form = ({
     }
   }, [reachedMaxAmountList, lastFocusedInput]);
 
-  const canAddMoreAssets = (outputId: string) => {
+  const canAddMoreAssets = (outputId: string): boolean => {
     const assetsIdsUsedInOutput = new Set(uiOutputs[outputId].assets.map(({ id }: AssetInfo) => id));
 
     return (
@@ -214,29 +214,30 @@ export const Form = ({
 
   return (
     <Skeleton loading={isLoading}>
-      {ids.map((id, idx) => (
-        <RowContainer key={id} id={id} focusRow={row} data-testid="asset-bundle-container" isBundle={isBundle}>
+      {ids.map((bundleId, idx) => (
+        <RowContainer
+          key={bundleId}
+          id={bundleId}
+          focusRow={row}
+          data-testid="asset-bundle-container"
+          isBundle={isBundle}
+        >
           {ids.length > 1 && (
             <FormRowHeader
               title={t('browserView.transaction.send.advanced.bundleTitle', { index: idx + 1 })}
-              onDeleteRow={() => handleRemoveRow(id)}
+              onDeleteRow={() => handleRemoveRow(bundleId)}
             />
           )}
-          <AddressInput row={id} currentNetwork={currentChain.networkId} isPopupView={isPopupView} />
+          <AddressInput row={bundleId} currentNetwork={currentChain.networkId} isPopupView={isPopupView} />
           <CoinInput
-            row={id}
+            bundleId={bundleId}
             assets={assets}
             assetBalances={assetBalances}
             coinBalance={coinBalance}
-            prices={prices}
-            builtTxError={error}
             insufficientBalanceInputs={insufficientBalanceInputs}
-            onAddAsset={() => handleAssetPicker(id)}
-            openAssetPicker={(coinId) => handleAssetPicker(id, coinId)}
-            canAddMoreAssets={canAddMoreAssets(id)}
-            tokensUsed={tokensUsed}
-            spendableCoin={spendableCoin?.toString()}
-            isPopupView={isPopupView}
+            onAddAsset={() => handleAssetPicker(bundleId)}
+            openAssetPicker={(coinId) => handleAssetPicker(bundleId, coinId)}
+            canAddMoreAssets={canAddMoreAssets(bundleId)}
           />
         </RowContainer>
       ))}

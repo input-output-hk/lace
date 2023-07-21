@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { WalletAddressList, WalletAddressItemProps } from '@lace/core';
 import { Button } from '@lace/common';
@@ -6,7 +6,7 @@ import { ContentLayout } from '@src/components/Layout';
 import { AddressBookSchema } from '@src/lib/storage';
 import { AddressBookEmpty } from '@src/views/browser-view/features/adress-book/components/AddressBookEmpty';
 import { withAddressBookContext, useAddressBookContext } from '../context';
-import { AddressDetailDrawer } from '../components/AddressDetailDrawer';
+import { AddressDetailDrawer, AddressChangeDetailDrawer } from '../components/AddressDetailDrawer';
 import { useAddressBookStore } from '../store';
 import styles from './AddressBook.modules.scss';
 import DeleteIcon from '../../../assets/icons/delete-icon.component.svg';
@@ -20,18 +20,20 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { AddressDetailsSteps } from './AddressDetailDrawer/types';
+import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
 import { getAddressToSave } from '@src/utils/validators';
-import { useHandleResolver } from '@hooks';
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
 export const AddressBook = withAddressBookContext(() => {
+  const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
   const { saveRecord: saveAddress, updateRecord: updateAddress, extendLimit, deleteRecord: deleteAddress } = utils;
   const { setIsEditAddressVisible, isEditAddressVisible, setAddressToEdit, addressToEdit } = useAddressBookStore();
   const { t: translate } = useTranslation();
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
+  const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
@@ -45,7 +47,7 @@ export const AddressBook = withAddressBookContext(() => {
       name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_POPUP
     });
 
-    const addressToSave = await getAddressToSave(address, handleResolver);
+    const addressToSave = await getAddressToSave({ address, handleResolver });
 
     return 'id' in addressToEdit
       ? updateAddress(addressToEdit.id, addressToSave, {
@@ -71,11 +73,16 @@ export const AddressBook = withAddressBookContext(() => {
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_POPUP
           });
           setAddressToEdit(address);
-          setIsEditAddressVisible(true);
+          if (validatedAddressStatus[address.address]?.isValid === false) {
+            setIsAddressDrawerOpen(true);
+          } else {
+            setIsEditAddressVisible(true);
+          }
         },
-        isSmall: true
+        isSmall: true,
+        isAddressWarningVisible: validatedAddressStatus[item.address]?.isValid === false ?? false
       })) || [],
-    [addressList, analytics, setAddressToEdit, setIsEditAddressVisible]
+    [addressList, analytics, setAddressToEdit, setIsEditAddressVisible, validatedAddressStatus]
   );
 
   const loadMoreData = useCallback(() => {
@@ -85,6 +92,14 @@ export const AddressBook = withAddressBookContext(() => {
   const addressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
     ? AddressDetailsSteps.DETAILS
     : AddressDetailsSteps.CREATE;
+
+  const onHandleDeleteContact = (id: number) => {
+    deleteAddress(id, {
+      text: translate('browserView.addressBook.toast.deleteAddress'),
+      icon: DeleteIcon
+    });
+    setAddressToEdit({} as AddressBookSchema);
+  };
 
   return (
     <>
@@ -128,6 +143,23 @@ export const AddressBook = withAddressBookContext(() => {
           </div>
         )}
       </ContentLayout>
+      <AddressChangeDetailDrawer
+        visible={isAddressDrawerOpen}
+        onCancelClick={() => {
+          setAddressToEdit({} as AddressBookSchema);
+          setIsAddressDrawerOpen(false);
+        }}
+        initialValues={addressToEdit}
+        expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? ''}
+        actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? ''}
+        popupView
+        onDelete={(id) => onHandleDeleteContact(id)}
+        onConfirmClick={async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) => {
+          await onAddressSave(address);
+          setIsAddressDrawerOpen(false);
+          setAddressToEdit({} as AddressBookSchema);
+        }}
+      />
       <AddressDetailDrawer
         initialStep={addressDrawerInitialStep}
         initialValues={addressToEdit}
@@ -139,12 +171,7 @@ export const AddressBook = withAddressBookContext(() => {
           await onAddressSave(address);
           setAddressToEdit({} as AddressBookSchema);
         }}
-        onDelete={(id) =>
-          deleteAddress(id, {
-            text: translate('browserView.addressBook.toast.deleteAddress'),
-            icon: DeleteIcon
-          })
-        }
+        onDelete={(id) => onHandleDeleteContact(id)}
         visible={isEditAddressVisible}
         popupView
       />

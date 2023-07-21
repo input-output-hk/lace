@@ -4,11 +4,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { Button, toast, Drawer, DrawerHeader, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
+import { Button, toast, Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
 import { EditAddressForm, EditAddressFormFooter, valuesPropType } from '@lace/core';
 import { validateWalletName, validateWalletAddress, validateWalletHandle } from '@src/utils/validators/address-book';
 import { AddressDetailsSteps, AddressDetailsConfig, AddressDetailsSectionConfig } from './types';
-import { DeleteAddressModal } from '../DeleteAddressModal';
+import { AddressActionsModal, ACTIONS } from '../AddressActionsModal';
 import styles from './AddressDetailDrawer.module.scss';
 import Copy from '@src/assets/icons/copy.component.svg';
 import Icon from '@ant-design/icons';
@@ -96,15 +96,6 @@ export const AddressDetailDrawer = ({
       ? onCancelClick()
       : setCurrentStepConfig(stepsConfiguration[currentStepConfig.prevSection]);
 
-  useKeyboardShortcut(['Escape'], () => {
-    if (selectedId) {
-      // eslint-disable-next-line unicorn/no-null
-      setSelectedId(null);
-      return;
-    }
-    stepsConfiguration[currentStepConfig.prevSection] ? onArrowIconClick() : onCancelClick();
-  });
-
   const handleOnCancelClick = () => {
     if (currentStepConfig.currentSection === AddressDetailsSteps.CREATE) {
       onCancelClick();
@@ -135,7 +126,6 @@ export const AddressDetailDrawer = ({
   return (
     <>
       <Drawer
-        keyboard={false}
         zIndex={999}
         className={cn(styles.drawer, { [styles.popupView]: popupView })}
         onClose={onCancelClick}
@@ -255,7 +245,8 @@ export const AddressDetailDrawer = ({
           </>
         )}
       </Drawer>
-      <DeleteAddressModal
+      <AddressActionsModal
+        action={ACTIONS.DELETE}
         onCancel={() => {
           sendAnalytics(
             popupView
@@ -277,7 +268,7 @@ export const AddressDetailDrawer = ({
           onCancelClick();
         }}
         visible={!!selectedId}
-        isSmall={popupView}
+        isPopup={popupView}
       />
     </>
   );

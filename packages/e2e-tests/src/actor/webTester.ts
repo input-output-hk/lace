@@ -122,10 +122,6 @@ export default new (class WebTester {
     }
   }
 
-  async scrollIntoView(element: WebElement) {
-    await $(element.toJSLocator()).scrollIntoView();
-  }
-
   async getTextValueFromElement(element: WebElement): Promise<string | number> {
     return await this.getTextValue(element.toJSLocator());
   }

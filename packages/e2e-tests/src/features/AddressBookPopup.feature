@@ -25,10 +25,10 @@ Feature: Address book - popup view
     And I fill address form with "<wallet_name>" name and "<address>" address
     And I click "Done" button on "Edit address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.editAddress"
-    And I see address with name "<wallet_name>" and address "<address_label>" on the list
+    And I see address row with name "<wallet_name>" and address "<address_label>" on the list in popup mode
     Examples:
       | edited_address | wallet_name  | address                                                                                                            | address_label  |
-      | Shelley        | Shelley_edit | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja       | addr_tes...cek |
+      | Shelley        | Shelley_edit | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja       | addr_tes...6ja |
       | Byron          | Byron_edit   | 37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp | 37btjrVy...Dzp |
 
   @LW-4476
@@ -89,7 +89,7 @@ Feature: Address book - popup view
     And I click "Delete" button on address details page
     Then I see delete address modal
     When I click "Delete address" button on delete address modal
-    Then I don't see address with name "Byron" and address "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" on the list
+    Then I don't see address row with name "Byron" and address "37btjrVyb4KC6N6XtRHwEuLPQW2aa9JA89gbnm67PArSi8E7vGeqgA6W1pFBphc1hhrk1WKGPZpUbnvYRimVLRVnUH6M6d3dsVdxYoAC4m7oNj7Dzp" on the list in popup mode
 
   @LW-4478
   Scenario: Popup-view - Address Book - Remove address and cancel
@@ -109,15 +109,15 @@ Feature: Address book - popup view
     When I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
     And I click "Save address" button on "Add new address" drawer
     Then I see a toast with message: "browserView.addressBook.toast.addAddress"
-    And I see address that has name "<name_label>" and shortened address "<wallet_address>" on the list
+    And I see address row with name "<wallet_name>" and address "<wallet_address>" on the list in popup mode
     Examples:
-      | wallet_name          | wallet_address | name_label  |
-      | Byron_man            | Byron          | Byron_man   |
-      | Shelley_man          | Shelley        | Shelley_man |
-      | Icarus_man           | Icarus         | Icarus_man  |
-      | 12345678901234567890 | Shelley        | 12345678    |
-      | !@#$%^&*(){}:,./     | Shelley        | !@#$%^&*()  |
-      | ęóąśłżźćń_ASDFÓŚ     | Shelley        | ęóąśłżźćń   |
+      | wallet_name          | wallet_address |
+      | Byron_man            | Byron          |
+      | Shelley_man          | Shelley        |
+      | Icarus_man           | Icarus         |
+      | 12345678901234567890 | Shelley        |
+      | !@#$%^&*(){}:,./     | Shelley        |
+      | ęóąśłżźćń_ASDFÓŚ     | Shelley        |
 
   @LW-4480
   Scenario Outline: Popup-view - Address Book - Add new address and display error message  - Name: <name_error> - Address: <address_error>

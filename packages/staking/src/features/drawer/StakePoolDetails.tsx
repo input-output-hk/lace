@@ -7,6 +7,7 @@ import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
+import { StakePoolPreferences, StakePoolPreferencesFooter } from './StakePoolPreferences';
 import { TransactionFail, TransactionFailFooter } from './TransactionFail';
 import { TransactionSuccess, TransactionSuccessFooter } from './TransactionSuccess';
 
@@ -38,6 +39,7 @@ export const StakePoolDetails = ({
   const sectionsMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetail />,
+      [Sections.PREFERENCES]: <StakePoolPreferences />,
       [Sections.CONFIRMATION]: <StakePoolConfirmation />,
       [Sections.SIGN]: <SignConfirmation />,
       [Sections.SUCCESS_TX]: <TransactionSuccess />,
@@ -49,6 +51,7 @@ export const StakePoolDetails = ({
   const footersMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: <StakePoolDetailFooter canDelegate={canDelegate} onStake={onStake} />,
+      [Sections.PREFERENCES]: <StakePoolPreferencesFooter />,
       [Sections.CONFIRMATION]: <StakePoolConfirmationFooter />,
       [Sections.SIGN]: <SignConfirmationFooter />,
       [Sections.SUCCESS_TX]: <TransactionSuccessFooter />,

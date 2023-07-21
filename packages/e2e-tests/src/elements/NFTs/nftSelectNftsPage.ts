@@ -55,6 +55,13 @@ class NftSelectNftsPage extends CommonDrawerElements {
       async (nft) => (await nft.$(this.NFT_NAME).getText()) === nftName
     )) as WebdriverIO.Element;
   }
+
+  async selectNFTs(numberOfNFTs: number) {
+    for (let i = 0; i < numberOfNFTs; i++) {
+      await this.nfts[i].waitForClickable();
+      await this.nfts[i].click();
+    }
+  }
 }
 
 export default new NftSelectNftsPage();

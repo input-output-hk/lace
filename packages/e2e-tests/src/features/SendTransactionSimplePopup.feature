@@ -61,7 +61,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I close the drawer by clicking back button
     And I click "Agree" button on "You'll have to start again" modal
     And I open address book from header menu
-    Then I see address with name "WalletName" and address "shelley" on the list
+    Then I see address row with name "WalletName" and address "Shelley" on the list in popup mode
 
   @LW-2740 @Testnet @Mainnet
   Scenario: Popup-view - Send flow - Search contact
@@ -85,7 +85,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I click "Send" button on Tokens page in popup mode
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then address input contains address "qfwr6ja" and name "Shelley"
+    Then recipients address input contains address "qfwr6ja" and name "Shelley"
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
@@ -96,7 +96,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I click "Send" button on Tokens page in popup mode
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then address input contains address "q2c767z" and name "Shelley"
+    Then recipients address input contains address "q2c767z" and name "Shelley"
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
@@ -107,9 +107,9 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I click "Send" button on Tokens page in popup mode
     And click "Add address" button  in address bar
     When I click address on the list with name "Byron"
-    And address input contains address "oNj7Dzp" and name "Byron"
+    And recipients address input contains address "oNj7Dzp" and name "Byron"
     And click "Remove address" button  in address bar
-    Then address input  is empty
+    Then recipients address input  is empty
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is disabled on "Send" page
 
@@ -120,9 +120,9 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I click "Send" button on Tokens page in popup mode
     And click "Add address" button  in address bar
     When I click address on the list with name "Byron"
-    And address input contains address "FiPvM4" and name "Byron"
+    And recipients address input contains address "FiPvM4" and name "Byron"
     And click "Remove address" button  in address bar
-    Then address input  is empty
+    Then recipients address input  is empty
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     Then "Review transaction" button is disabled on "Send" page
 

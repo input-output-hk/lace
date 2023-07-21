@@ -10,15 +10,43 @@ in rec {
 
   prettyName = "Lace Blockchain Services";
 
+  laceVersion = (builtins.fromJSON (builtins.readFile ../../../package.json)).version;
+
   cardanoWorldFlake = (flake-compat { src = inputs.cardano-world; }).defaultNix;
 
+  # These are configs of ‘cardano-node’ for all networks we make available from the UI.
+  # The patching of the official networks needs to happen to:
+  #   • turn off ‘EnableP2P’ (and modify topology accordingly), because it doesn’t work on Windows,
+  #   • and turn off ‘hadPrometheus’, because it makes cardano-node hang on Windows during graceful exit.
   networkConfigs = let
     selectedNetworks = [ "mainnet" "preprod" "preview" ];
     website = cardanoWorldFlake.${buildSystem}.cardano.packages.cardano-config-html-internal;
-  in pkgs.runCommand "network-configs" {} (lib.concatMapStringsSep "\n" (network: ''
+  in pkgs.runCommand "network-configs" {
+    nativeBuildInputs = [ pkgs.jq ];
+  } ((lib.concatMapStringsSep "\n" (network: ''
     mkdir -p $out/${network}
     cp -r ${website}/config/${network}/. $out/${network}
-  '') selectedNetworks);
+  '') selectedNetworks) + (lib.optionalString (targetSystem == "x86_64-windows") ''
+    # Transform P2P topologies to non-P2P (or else, on Windows, we’d require C:\etc\resolv.conf)
+    chmod -R +w $out
+    find $out -type f -name 'topology.*' | while IFS= read -r file ; do
+      addr=$(jq -er '.PublicRoots[0].publicRoots.accessPoints[0].address' "$file") || continue
+      port=$(jq -er '.PublicRoots[0].publicRoots.accessPoints[0].port'    "$file") || continue
+      jq --arg addr "$addr" --argjson port "$port" --null-input \
+        '.Producers = [.addr = $addr | .port = $port | .valency = 1]' > tmp.json
+      mv tmp.json "$file"
+    done
+    find $out -type f -name 'config.*' | while IFS= read -r file ; do
+      if [ "$(jq .EnableP2P "$file")" == "true" ] ; then
+        jq '.EnableP2P = false' "$file" >tmp.json
+        mv tmp.json "$file"
+      fi
+
+      # With '.hasPrometheus', cardano-node hangs during graceful exit on Windows:
+      jq 'del(.hasPrometheus)' "$file" >tmp.json
+      mv tmp.json "$file"
+    done
+  ''));
 
   # XXX: they don’t enable aarch64-darwin builds yet:
   cardanoNodeFlake = if targetSystem != "aarch64-darwin" then inputs.cardano-node else let
@@ -38,6 +66,16 @@ in rec {
 
   ogmiosCompiler = "ghc8107";
 
+  ogmiosPatched = {
+    outPath = toString (pkgs.runCommand "ogmios-patched" {} ''
+      cp -r ${inputs.ogmios} $out
+      chmod -R +w $out
+      cd $out
+      patch -p1 -i ${./ogmios--on-windows.patch}
+    '');
+    inherit (inputs.ogmios.sourceInfo) rev shortRev lastModified lastModifiedDate;
+  };
+
   ogmiosProject = let
     theirDefaultNix = __readFile "${inputs.ogmios}/default.nix";
   in
@@ -50,7 +88,7 @@ in rec {
       inputMap = { "https://input-output-hk.github.io/cardano-haskell-packages" = inputs.ogmios-CHaP; };
       src = haskell-nix.haskellLib.cleanSourceWith {
         name = "ogmios-src";
-        src = inputs.ogmios;
+        src = ogmiosPatched;
         subDir = "server";
         filter = path: type: builtins.all (x: x) [
           (baseNameOf path != "package.yaml")
@@ -60,7 +98,7 @@ in rec {
 
   ogmios = {
     x86_64-linux = ogmiosProject.projectCross.musl64.hsPkgs.ogmios.components.exes.ogmios;
-    x86_64-windows = throw "unimplemented";
+    x86_64-windows = ogmiosProject.projectCross.mingwW64.hsPkgs.ogmios.components.exes.ogmios;
     x86_64-darwin = ogmiosProject.hsPkgs.ogmios.components.exes.ogmios;
     aarch64-darwin = ogmiosProject.hsPkgs.ogmios.components.exes.ogmios;
   }.${targetSystem};

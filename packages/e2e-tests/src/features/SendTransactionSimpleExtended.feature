@@ -66,7 +66,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I close the drawer by clicking close button
     And I click "Agree" button on "You'll have to start again" modal
     And I open address book from header menu
-    Then I see address with name "WalletName" and address "shelley" on the list
+    Then I see address row with name "WalletName" and address "Shelley" on the list in extended mode
 
   @LW-2362 @Testnet
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
@@ -75,7 +75,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then address input contains address "qfwr6ja" and name "Shelley"
+    Then recipients address input contains address "qfwr6ja" and name "Shelley"
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
@@ -86,7 +86,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then address input contains address "q2c767z" and name "Shelley"
+    Then recipients address input contains address "q2c767z" and name "Shelley"
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
@@ -114,9 +114,9 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Byron"
-    Then address input contains address "7oNj7Dzp" and name "Byron"
+    Then recipients address input contains address "7oNj7Dzp" and name "Byron"
     And click "Remove address" button  in address bar
-    Then address input  is empty
+    Then recipients address input  is empty
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is disabled on "Send" page
 
@@ -127,9 +127,9 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     And I click address on the list with name "Byron"
-    Then address input contains address "kNFiPvM4" and name "Byron"
+    Then recipients address input contains address "kNFiPvM4" and name "Byron"
     And click "Remove address" button  in address bar
-    And address input  is empty
+    And recipients address input  is empty
     And I enter a value of: 1 to the "ADA" asset in bundle 1
     And "Review transaction" button is disabled on "Send" page
 

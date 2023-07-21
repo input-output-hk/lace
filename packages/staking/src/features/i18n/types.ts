@@ -107,6 +107,10 @@ type KeysStructure = {
         confirm: '';
       };
     };
+    preferences: {
+      selectedStakePools: '';
+      partOfBalance: '';
+    };
   };
   overview: {
     delegationCard: {
@@ -130,6 +134,9 @@ type KeysStructure = {
       ros: '';
       totalRewards: '';
       totalStaked: '';
+      poolRetired: '';
+      poolSaturated: '';
+      tooltipFiatLabel: '';
     };
     yourPoolsSection: {
       heading: '';

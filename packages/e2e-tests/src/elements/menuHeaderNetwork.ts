@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
-import { DrawerCommonExtended } from './drawerCommonExtended';
 import NetworkDrawer from './settings/NetworkDrawer';
+import CommonDrawerElements from './CommonDrawerElements';
 
 export class MenuHeaderNetwork {
   private CONTAINER = '[data-testid="user-dropdown-network-info-section"]';
@@ -13,7 +13,7 @@ export class MenuHeaderNetwork {
   }
 
   get backButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(new DrawerCommonExtended().backButton().toJSLocator());
+    return new CommonDrawerElements().drawerHeaderBackButton;
   }
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {

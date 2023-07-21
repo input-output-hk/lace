@@ -263,14 +263,6 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
     [walletStoreGetKeyAgentType]
   );
 
-  const onStakeClick = useCallback(() => {
-    if (canDelegate) {
-      onStake();
-    } else {
-      setNoFundsVisible(true);
-    }
-  }, [canDelegate, onStake, setNoFundsVisible]);
-
   const onSelectPool = useCallback(() => {
     if (!openPoolDetails || !openPool) return;
     const { hexId, name, ticker } = openPoolDetails;
@@ -285,6 +277,15 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
       weight: 1,
     });
   }, [openPool, openPoolDetails, portfolioMutators, walletStoreWalletUICardanoCoin]);
+
+  const onStakeClick = useCallback(() => {
+    if (canDelegate) {
+      onSelectPool();
+      onStake();
+    } else {
+      setNoFundsVisible(true);
+    }
+  }, [canDelegate, onStake, setNoFundsVisible]);
 
   const onUnselectPool = useCallback(() => {
     if (!openPoolDetails) return;
@@ -309,7 +310,7 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
         // eslint-disable-next-line sonarjs/no-redundant-boolean
         manageDelegation: false && poolInCurrentPortfolio,
         selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelectPool },
-        stakeOnThisPool: draftEmpty && ableToStakeOnlyOnThisPool && { callback: onStake },
+        stakeOnThisPool: draftEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeClick },
         unselectPool: poolSelectedForDraft && { callback: onUnselectPool },
       }),
     [

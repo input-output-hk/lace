@@ -53,8 +53,7 @@ export const AssetsPortfolio = ({
   const { t } = useTranslation();
   const {
     walletInfo,
-    walletUI: { canManageBalancesVisibility, areBalancesVisible, getHiddenBalancePlaceholder },
-    setBalancesVisibility
+    walletUI: { canManageBalancesVisibility, areBalancesVisible }
   } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
   const redirectToReceive = useRedirection(walletRoutePaths.receive);
@@ -100,13 +99,11 @@ export const AssetsPortfolio = ({
           balance={compactNumber(portfolioBalanceAsBigNumber.toString())}
           currencyCode={fiatCurrency.code}
           label={t('browserView.assets.totalWalletBalance')}
-          popupView={isPopupView}
-          isBannerVisible={isPriceOutdated}
+          isPriceOutdatedBannerVisible={isPriceOutdated}
           lastPriceFetchedDate={coinPrice.timestamp}
-          canManageBalancesVisibility={!portfolioBalanceAsBigNumber.eq(0) && canManageBalancesVisibility}
-          areBalancesVisible={areBalancesVisible || portfolioBalanceAsBigNumber.eq(0)}
-          handleBalancesVisibility={setBalancesVisibility}
-          hiddenBalancesPlaceholder={getHiddenBalancePlaceholder()}
+          showInfoTooltip
+          showBalanceVisibilityToggle={!portfolioBalanceAsBigNumber.eq(0) && canManageBalancesVisibility}
+          isBalanceVisible={areBalancesVisible || portfolioBalanceAsBigNumber.eq(0)}
         />
       </div>
       {isPopupView && totalAssets > 0 && (

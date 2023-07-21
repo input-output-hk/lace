@@ -26,6 +26,10 @@
 
     nix-bundle-exe.url = "github:3noch/nix-bundle-exe";
     nix-bundle-exe.flake = false;
+
+    # FIXME: ‘nsis’ can’t cross-compile with the regular Nixpkgs (above)
+    nixpkgs-nsis.url = "github:input-output-hk/nixpkgs/be445a9074f139d63e704fa82610d25456562c3d";
+    nixpkgs-nsis.flake = false; # too old
   };
 
   outputs = inputs: let
@@ -45,8 +49,7 @@
         x86_64-linux   = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer;
         x86_64-darwin  = inputs.self.packages.x86_64-darwin.lace-blockchain-services-installer;
         aarch64-darwin  = inputs.self.packages.aarch64-darwin.lace-blockchain-services-installer;
-        # Uncomment once implemented:
-        # x86_64-windows = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer-x86_64-windows;
+        x86_64-windows = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer-x86_64-windows;
       };
 
       required = inputs.nixpkgs.legacyPackages.x86_64-linux.releaseTools.aggregate {
