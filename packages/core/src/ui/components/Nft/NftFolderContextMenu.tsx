@@ -19,9 +19,19 @@ const NftFolderContextMenu = ({
   useOnClickOutside(contextMenuRef, closeContextMenu);
 
   return (
-    <div ref={contextMenuRef} className={styles.contextMenuContainer} style={{ left: `${x}px`, top: `${y}px` }}>
+    <div
+      data-testid="nft-folder-context-menu"
+      ref={contextMenuRef}
+      className={styles.contextMenuContainer}
+      style={{ left: `${x}px`, top: `${y}px` }}
+    >
       {contextMenuItems.map(({ label, onClick }) => (
-        <div key={label} onClick={onClick} className={styles.contextMenuItem}>
+        <div
+          data-testid={`context-menu-item-${label.toLowerCase()}`}
+          key={label}
+          onClick={onClick}
+          className={styles.contextMenuItem}
+        >
           {label}
         </div>
       ))}
