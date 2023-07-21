@@ -184,3 +184,15 @@ When(/^I click "Clear" button next to NFTs counter$/, async () => {
   await NftSelectNftsPage.clearButton.waitForClickable();
   await NftSelectNftsPage.clearButton.click();
 });
+
+When(/^I enter "([^"]*)" into the search bar$/, async (searchPhrase: string) => {
+  await NftSelectNftsPage.enterSearchPhrase(searchPhrase);
+});
+
+Then(/^I see NFTs containing "([^"]*)" on the "Select NFTs" page$/, async (searchPhrase: string) => {
+  await NftSelectNftsAssert.assertSeeNFTsWithSearchPhrase(searchPhrase);
+});
+
+Then(/^I press "Clear" button in search bar$/, async () => {
+  await NftSelectNftsPage.clearSearchBarInput();
+});

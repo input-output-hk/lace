@@ -140,3 +140,12 @@ Feature: NFT - Folders - Extended view
     And I do not see NFTs counter
     When I select 5 NFTs
     Then I see NFTs counter showing 5 selected NFTs
+
+  @LW-7258
+  Scenario: Extended-view - NFT Folders - Select NFTs page - search for existing NFTs and clear
+    Given I navigate to "Select NFTs" page in extended mode
+    And I save all NFTs that I have
+    When I enter "coin" into the search bar
+    Then I see NFTs containing "coin" on the "Select NFTs" page
+    When I press "Clear" button in search bar
+    And "Select NFTs" page is showing all NFTs that I have
