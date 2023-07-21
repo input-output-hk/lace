@@ -526,4 +526,15 @@ in rec {
     echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
   '';
 
+  mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
+    mkdir -p $out/bin
+    cp ${common.mithril-bin}/${
+      if targetSystem == "aarch64-darwin"
+      then "bin/mithril-client"
+      else "mithril-client"
+    } $out/bin/
+    chmod +x $out/bin/mithril-client
+    $out/bin/mithril-client --version
+  '';
+
 }

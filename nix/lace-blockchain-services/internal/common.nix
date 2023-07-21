@@ -185,4 +185,36 @@ in rec {
     }} $out/highlight.js/default.min.css
   '';
 
+  # FIXME: build from source (Linux, and Darwins are available in their flake.nix, but Windows not)
+  mithril-bin = let
+    ver = "2329.0";
+  in {
+    x86_64-linux = pkgs.fetchzip {
+      url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-linux-x64.tar.gz";
+      hash = "sha256-oyBhhSG/kvZge3tpZfheGHtD1ivY56+jYgSAH09rswE=";
+      stripRoot = false;
+    };
+    x86_64-windows = pkgs.fetchzip {
+      url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-windows-x64.tar.gz";
+      hash = "sha256-SWPk9zTlmRElOe3l7Ic+jeqo3VNST6wuXfiFogkcrA4=";
+    };
+    x86_64-darwin = pkgs.fetchzip {
+      url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-macos-x64.tar.gz";
+      hash = "sha256-u0S9ClTE38Uv5uyFO4dlS0P/O1cAjeUwl3zarhwk9no=";
+    };
+    aarch64-darwin = (flake-compat {
+      src = let
+        raw = pkgs.fetchFromGitHub {
+          owner = "input-output-hk"; repo = "mithril";
+          rev = ver;
+          hash = "sha256-XBWz61dMzsZhX0dtbXm/5WfdYUZ7Z1hpq7vlw5d9mq0=";
+        };
+      in {
+        outPath = toString raw;
+        inherit (raw) rev lastModified lastModifiedDate;
+        shortRev = lib.substring 0 7 raw.rev;
+      };
+    }).defaultNix.packages.aarch64-darwin.mithril-client;
+  }.${targetSystem} // { version = ver; };
+
 }

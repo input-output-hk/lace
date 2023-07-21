@@ -649,4 +649,10 @@ in rec {
     };
   };
 
+  mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
+    mkdir -p $out
+    cp ${common.mithril-bin}/mithril-client.exe $out/
+    cp ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/arm/vcruntime140.dll $out/
+  '';
+
 }
