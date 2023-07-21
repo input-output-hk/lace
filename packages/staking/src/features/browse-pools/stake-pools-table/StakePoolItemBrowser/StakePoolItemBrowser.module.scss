@@ -72,10 +72,14 @@
     background-color: var(--bg-color-body, #ffffff);
     border: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-light-grey));
     height: size_unit(6);
+    margin-left: 4px;
     min-height: size_unit(6);
     min-width: size_unit(6);
     padding: size_unit(0.5);
     width: size_unit(6);
+  }
+  .imageSelected {
+    box-shadow: 0 0 0 3px var(--bg-color-body), 0 0 0 4px var(--lace-yellow);
   }
 
   > div {

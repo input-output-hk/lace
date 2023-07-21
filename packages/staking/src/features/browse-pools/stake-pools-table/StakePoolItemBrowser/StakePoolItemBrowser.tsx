@@ -5,12 +5,12 @@ import { Button } from '@lace/ui';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
+import { useDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
 export interface StakePoolItemBrowserProps {
   id: string;
   hexId: Wallet.Cardano.PoolIdHex;
-  includedInDraft: boolean;
   name?: string;
   ticker?: string;
   apy?: number | string;
@@ -18,7 +18,8 @@ export interface StakePoolItemBrowserProps {
   cost?: number | string;
   logo: string;
   onClick: (id: string) => unknown;
-  onStakingSelect: () => void;
+  addToDraft: () => void;
+  removeFromDraft: () => void;
 }
 
 export const getSaturationLevel = (saturation: number): string => {
@@ -37,14 +38,15 @@ export const getSaturationLevel = (saturation: number): string => {
 
 export const StakePoolItemBrowser = ({
   id,
+  hexId,
   name,
-  includedInDraft,
   ticker,
   saturation,
   logo,
   apy,
   onClick,
-  onStakingSelect,
+  addToDraft,
+  removeFromDraft,
 }: StakePoolItemBrowserProps): React.ReactElement => {
   let title = name;
   let subTitle: string | React.ReactElement = ticker || '-';
@@ -52,11 +54,22 @@ export const StakePoolItemBrowser = ({
     title = ticker || '-';
     subTitle = <Ellipsis className={styles.id} text={id} beforeEllipsis={6} afterEllipsis={8} />;
   }
+  const draftPortfolioLength = useDelegationPortfolioStore((state) => state.draftPortfolio.length);
+  const draftPortfolioExists = draftPortfolioLength > 0;
+  const includedInDraft = useDelegationPortfolioStore((state) => state.poolIncludedInDraft(hexId));
+
+  const StakeButtonComponent = includedInDraft ? Button.Secondary : Button.CallToAction;
+  const stakePoolStateLabel = includedInDraft ? 'Unselect' : draftPortfolioExists ? 'Add pool' : 'Stake';
 
   return (
     <div data-testid="stake-pool-table-item" className={styles.row} onClick={() => onClick(id)}>
       <div className={styles.name}>
-        <img data-testid="stake-pool-list-logo" src={logo} alt="" className={styles.image} />
+        <img
+          data-testid="stake-pool-list-logo"
+          src={logo}
+          alt=""
+          className={cn([styles.image, includedInDraft && styles.imageSelected])}
+        />
         <div>
           <div>
             <h6 data-testid="stake-pool-list-name">{title}</h6>
@@ -80,11 +93,11 @@ export const StakePoolItemBrowser = ({
         </p>
       </div>
       <div className={styles.actions}>
-        <Button.CallToAction
-          label={includedInDraft ? 'Unselect' : 'Add pool'}
+        <StakeButtonComponent
+          label={stakePoolStateLabel}
           onClick={(event) => {
             event.stopPropagation();
-            onStakingSelect();
+            includedInDraft ? removeFromDraft() : addToDraft();
           }}
         />
       </div>
