@@ -5,6 +5,7 @@ import { Button } from '@lace/ui';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
@@ -48,6 +49,7 @@ export const StakePoolItemBrowser = ({
   addToDraft,
   removeFromDraft,
 }: StakePoolItemBrowserProps): React.ReactElement => {
+  const { t } = useTranslation();
   let title = name;
   let subTitle: string | React.ReactElement = ticker || '-';
   if (!name) {
@@ -59,7 +61,11 @@ export const StakePoolItemBrowser = ({
   const includedInDraft = useDelegationPortfolioStore((state) => state.poolIncludedInDraft(hexId));
 
   const StakeButtonComponent = includedInDraft ? Button.Secondary : Button.CallToAction;
-  const stakePoolStateLabel = includedInDraft ? 'Unselect' : draftPortfolioExists ? 'Add pool' : 'Stake';
+  const stakePoolStateLabel = includedInDraft
+    ? t('browsePools.stakePoolTableBrowser.unselect')
+    : draftPortfolioExists
+    ? t('browsePools.stakePoolTableBrowser.addPool')
+    : t('browsePools.stakePoolTableBrowser.stake');
 
   return (
     <div data-testid="stake-pool-table-item" className={styles.row} onClick={() => onClick(id)}>

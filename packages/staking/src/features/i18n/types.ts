@@ -25,6 +25,9 @@ type KeysStructure = {
         saturation: '';
       };
       emptyMessage: '';
+      stake: '';
+      unselect: '';
+      addPool: '';
     };
   };
   drawer: {
