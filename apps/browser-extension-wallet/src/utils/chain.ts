@@ -20,3 +20,10 @@ export const getBaseUrlForChain = (chainName: Wallet.ChainName): string => {
   if (!AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
   return url;
 };
+
+export const CHAIN_NAME_BY_NETWORK_MAGIC_MAPPPER: Record<Wallet.Cardano.NetworkMagic, Wallet.ChainName> = {
+  [Wallet.Cardano.NetworkMagics.Mainnet]: 'Mainnet',
+  [Wallet.Cardano.NetworkMagics.Preprod]: 'Preprod',
+  [Wallet.Cardano.NetworkMagics.Testnet]: 'LegacyTestnet',
+  [Wallet.Cardano.NetworkMagics.Preview]: 'Preview'
+};

@@ -10,6 +10,7 @@ import {
   PUBLIC_POSTHOG_HOST
 } from './config';
 import { UserIdService } from '@lib/scripts/types';
+import { CHAIN_NAME_BY_NETWORK_MAGIC_MAPPPER } from '@src/utils/chain';
 
 /**
  * PostHog API reference:
@@ -49,6 +50,17 @@ export class PostHogClient {
     });
   }
 
+  async sendAliasEvent(): Promise<void> {
+    const { alias_id, distinct_id } = await this.getEventMetadata();
+    // If one of this does not exist, should not send the alias event
+    if (!alias_id || !distinct_id) {
+      console.debug('[ANALYTICS] IDs were not found');
+      return;
+    }
+    console.debug('[ANALYTICS] Linking temporary ID with permanent user ID');
+    posthog.alias(alias_id, distinct_id);
+  }
+
   async sendEvent(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
     const payload = {
       ...(await this.getEventMetadata()),
@@ -74,11 +86,29 @@ export class PostHogClient {
   }
 
   protected async getEventMetadata(): Promise<PostHogMetadata> {
+    // Check if it is opted in user
+    const isPersistentId = await this.userIdService.getIsPersistentId();
+    // There is no way to get the PK before creating/restoring the wallet. So this will be undefined if the wallet was not created
+    const hashId = await this.userIdService.getHashId(CHAIN_NAME_BY_NETWORK_MAGIC_MAPPPER[this.chain.networkMagic]);
+    // Gets temporary user id, this will be used as alias for opted in user, for opted out user keeps as distinct_id
+    const userId = await this.userIdService.getId();
+    // Checks if wallet has been created
+    const hasTheWalletBeenCreated = !!hashId;
+    const isOptedInUserWithHashId = hasTheWalletBeenCreated && isPersistentId;
+    const idsMetadata = isOptedInUserWithHashId
+      ? {
+          distinct_id: hashId,
+          alias_id: userId
+        }
+      : {
+          distinct_id: userId
+        };
+
     return {
       url: window.location.href,
-      distinct_id: await this.userIdService.getId(),
       view: this.view,
-      sent_at_local: dayjs().format()
+      sent_at_local: dayjs().format(),
+      ...idsMetadata
     };
   }
 }

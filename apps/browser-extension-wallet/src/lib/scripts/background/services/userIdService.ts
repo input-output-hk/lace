@@ -1,10 +1,12 @@
 import { exposeApi } from '@cardano-sdk/web-extension';
+import { Wallet } from '@lace/cardano';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/util';
 import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
+import blake2b from 'blake2b-no-wasm';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -12,6 +14,7 @@ export const USER_ID_BYTE_SIZE = 8;
 
 export class UserIdService implements UserIdServiceInterface {
   private userId?: string;
+  private hashId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
 
@@ -21,6 +24,31 @@ export class UserIdService implements UserIdServiceInterface {
     private clearStorage: typeof clearBackgroundStorage = clearBackgroundStorage,
     private sessionLength: number = SESSION_LENGTH
   ) {}
+
+  async getIsPersistentId(): Promise<boolean> {
+    const { usePersistentUserId } = await this.getStorage();
+    return usePersistentUserId;
+  }
+
+  async getHashId(chainName: Wallet.ChainName): Promise<string> {
+    console.debug('[ANALYTICS] Getting key agents');
+    const keyAgentsByChain = (await this.getStorage())?.keyAgentsByChain;
+
+    if (!keyAgentsByChain) {
+      console.debug('[ANALYTICS] Key agents not found - Wallet not created yet');
+      return this.hashId;
+    }
+
+    if (!this.hashId) {
+      console.debug('[ANALYTICS] Hash ID not found - generating new one');
+      // eslint-disable-next-line no-magic-numbers
+      const output = new Uint8Array(64);
+      const input = Buffer.from(keyAgentsByChain[chainName].keyAgentData.extendedAccountPublicKey);
+      this.hashId = blake2b(output.length).update(input).digest('hex');
+    }
+    console.debug(`[ANALYTICS] getHashId() called (current Hash ID: ${this.hashId})`);
+    return this.hashId;
+  }
 
   async getId(): Promise<string> {
     if (!this.userIdRestored) {
@@ -41,6 +69,7 @@ export class UserIdService implements UserIdServiceInterface {
   async clearId(): Promise<void> {
     console.debug('[ANALYTICS] clearId() called');
     this.userId = undefined;
+    this.hashId = undefined;
     this.clearSessionTimeout();
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
@@ -55,6 +84,7 @@ export class UserIdService implements UserIdServiceInterface {
   async makeTemporary(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into temporary');
     await this.setStorage({ usePersistentUserId: false, userId: undefined });
+    this.userId = undefined;
     this.setSessionTimeout();
   }
 

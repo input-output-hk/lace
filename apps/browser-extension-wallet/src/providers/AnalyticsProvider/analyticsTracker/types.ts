@@ -134,6 +134,7 @@ export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKey
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogMetadata = {
   distinct_id?: string;
+  alias_id?: string;
   url: string;
   view: ExtensionViews;
   sent_at_local: string;

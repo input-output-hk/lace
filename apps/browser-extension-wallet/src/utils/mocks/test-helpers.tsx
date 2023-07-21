@@ -619,7 +619,9 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   extendLifespan: jest.fn(),
   makeTemporary: jest.fn(),
   makePersistent: jest.fn(),
-  clearId: jest.fn()
+  clearId: jest.fn(),
+  getHashId: jest.fn(),
+  getIsPersistentId: jest.fn()
 };
 
 export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {
@@ -632,5 +634,6 @@ export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest
 export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, jest.Mock> = {
   sendEvent: jest.fn(),
   sendPageNavigationEvent: jest.fn(),
-  setChain: jest.fn()
+  setChain: jest.fn(),
+  sendAliasEvent: jest.fn()
 };

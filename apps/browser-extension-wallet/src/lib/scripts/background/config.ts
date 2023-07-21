@@ -53,5 +53,7 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   clearId: RemoteApiPropertyType.MethodReturningPromise,
   makePersistent: RemoteApiPropertyType.MethodReturningPromise,
   makeTemporary: RemoteApiPropertyType.MethodReturningPromise,
-  extendLifespan: RemoteApiPropertyType.MethodReturningPromise
+  extendLifespan: RemoteApiPropertyType.MethodReturningPromise,
+  getHashId: RemoteApiPropertyType.MethodReturningPromise,
+  getIsPersistentId: RemoteApiPropertyType.MethodReturningPromise
 };
