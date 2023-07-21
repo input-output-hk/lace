@@ -100,6 +100,7 @@ Feature: NFT - Folders - Popup view
   Scenario: Popup-view - NFT Folders - Deleting a folder
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
     And I navigate to NFTs popup page
+    And I do not see NFT with name: "Bored Ape" on the NFTs page
     And I right click on the NFT folder with name "Sample NFT folder"
     When I click "Delete" option in NFT folder context menu
     When I click "Confirm" button in delete folder modal
@@ -107,7 +108,7 @@ Feature: NFT - Folders - Popup view
     And I do not see delete folder modal
     And A gallery view showing my NFTs is displayed
     And I do not see folder with name "Sample NFT folder" on the NFTs page
-    And I see NFT with name: "Ibilecoin" on the NFTs page
+    And I see NFT with name: "Bored Ape" on the NFTs page
 
   @LW-7260
   Scenario: Popup-view - NFT Folders - "Create folder" button click
