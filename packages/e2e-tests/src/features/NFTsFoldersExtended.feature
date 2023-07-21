@@ -12,9 +12,9 @@ Feature: NFT - Folders - Extended view
     When I right click on <element_to_click>
     Then NFT folder context menu with "Rename" & "Delete" options <is_displayed> displayed
     Examples:
-      | element_to_click                           | is_displayed |
-      | the NFT folder with name "NFT Folder 1"    | is           |
-      | the NFT with name "Ibilecoin" on NFTs page | is not       |
+      | element_to_click                             | is_displayed |
+      | the NFT folder with name "Sample NFT folder" | is           |
+      | the NFT with name "Ibilecoin" on NFTs page   | is not       |
 
   @LW-7203
   Scenario: Extended-view - NFT Folders - Closing context menu with "Rename" & "Delete" options

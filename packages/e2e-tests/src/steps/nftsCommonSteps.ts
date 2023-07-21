@@ -12,6 +12,7 @@ import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import NftsPage from '../elements/NFTs/nftsPage';
+import { browser } from '@wdio/globals';
 
 When(
   /^I (|left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
