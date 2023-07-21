@@ -1,11 +1,12 @@
 import { Logger } from '../support/logger';
 import extensionUtils from '../utils/utils';
 import { Address } from '../data/Address';
+import { NFTFolder } from '../data/NFTFolder';
 
 /* eslint-disable @typescript-eslint/no-shadow */
-export default new (class IndexedDB {
+class IndexedDB {
   async clearAddressBook() {
-    Logger.log('Clearing OneWalletDB');
+    Logger.log('Clearing address book store in OneWalletDB');
     await driver.execute(() => {
       const openRequest = window.indexedDB.open('OneWalletDB');
       openRequest.onsuccess = function () {
@@ -42,4 +43,45 @@ export default new (class IndexedDB {
       networkId
     );
   }
-})();
+
+  async clearNFTFolders() {
+    Logger.log('Clearing NFT folders store in OneWalletDB');
+    await driver.execute(() => {
+      const openRequest = window.indexedDB.open('OneWalletDB');
+      openRequest.onsuccess = function () {
+        const db = openRequest.result;
+        const transaction = db.transaction(['nftFolders'], 'readwrite');
+        const objectStore = transaction.objectStore('nftFolders');
+        objectStore.clear();
+      };
+    });
+  }
+
+  async insertNFTFolder(nftFolder: NFTFolder) {
+    const network = extensionUtils.getNetwork().name;
+    Logger.log(
+      `Inserting NFT folder to OneWalletDB, name: ${nftFolder.getName()}, assets: ${nftFolder.getAssets()}, network: ${network}`
+    );
+    await driver.execute(
+      (name: string, assets: string[], network: string) => {
+        const openRequest = window.indexedDB.open('OneWalletDB');
+        openRequest.onsuccess = function () {
+          const db = openRequest.result;
+          const transaction = db.transaction(['nftFolders'], 'readwrite');
+          const objectStore = transaction.objectStore('nftFolders');
+          const item = {
+            name,
+            assets,
+            network
+          };
+          objectStore.add(item);
+        };
+      },
+      nftFolder.getName(),
+      nftFolder.getAssets(),
+      network
+    );
+  }
+}
+
+export default new IndexedDB();
