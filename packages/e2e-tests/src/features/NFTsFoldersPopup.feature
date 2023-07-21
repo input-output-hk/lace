@@ -5,7 +5,7 @@ Feature: NFT - Folders - Popup view
     Given Wallet is synced
     And all NFT folders are removed
 
-  @LW-7193
+  @LW-7211
   Scenario Outline: Popup-view - NFT Folders - Context menu with "Rename" & "Delete" options <is_displayed> displayed
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
     And I navigate to NFTs popup page
@@ -16,7 +16,7 @@ Feature: NFT - Folders - Popup view
       | the NFT folder with name "Sample NFT folder" | is           |
       | the NFT with name "Ibilecoin" on NFTs page   | is not       |
 
-  @LW-7194
+  @LW-7212
   Scenario: Popup-view - NFT Folders - Closing context menu with "Rename" & "Delete" options
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
     And I navigate to NFTs popup page
