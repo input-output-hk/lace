@@ -62,6 +62,11 @@ export const en: Translations = {
   'drawer.titleSecond': 'Manage delegation',
   'general.button.close': 'Close',
   'general.button.confirm': 'Confirm',
+  'modals.changingPreferences.buttons.cancel': 'Cancel',
+  'modals.changingPreferences.buttons.confirm': 'Fine by me',
+  'modals.changingPreferences.description':
+    "That's totally fine! Just please note that you'll continue receiving rewards from your former pool(s) for two epochs. After that, you'll start to receiving rewards from your new pool(s).",
+  'modals.changingPreferences.title': 'Changing staking preferences?',
   'overview.delegationCard.label.balance': 'ADA Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',

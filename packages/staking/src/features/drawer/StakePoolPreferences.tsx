@@ -5,19 +5,13 @@ import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDeta
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 export const StakePoolPreferencesFooter = () => {
-  const { setSection, setIsDrawerVisible } = useStakePoolDetails();
+  const { setSection } = useStakePoolDetails();
   return (
     <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
       <Button.CallToAction
         label={'Next'}
         data-testid={'preferencesNextButton'}
         onClick={() => setSection(sectionsConfig[Sections.CONFIRMATION])}
-        w={'$fill'}
-      />
-      <Button.Secondary
-        onClick={() => setIsDrawerVisible(false)}
-        data-testid={'preferencesCancel'}
-        label={'Cancel'}
         w={'$fill'}
       />
     </Flex>

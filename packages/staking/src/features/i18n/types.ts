@@ -112,6 +112,16 @@ type KeysStructure = {
       partOfBalance: '';
     };
   };
+  modals: {
+    changingPreferences: {
+      title: '';
+      description: '';
+      buttons: {
+        cancel: '';
+        confirm: '';
+      };
+    };
+  };
   overview: {
     delegationCard: {
       label: {

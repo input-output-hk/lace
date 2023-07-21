@@ -5,23 +5,22 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import { MAX_POOLS_COUNT, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
-import { StakePoolDetail, StakePoolDetailFooter } from './StakePoolDetail';
+import { StakePoolDetail, StakePoolDetailFooter, StakePoolDetailFooterProps } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
 import { StakePoolPreferences, StakePoolPreferencesFooter } from './StakePoolPreferences';
 import { TransactionFail, TransactionFailFooter } from './TransactionFail';
 import { TransactionSuccess, TransactionSuccessFooter } from './TransactionSuccess';
 
-type stakePoolDetailsProps = {
-  onStake: () => void;
-  canDelegate?: boolean;
+type stakePoolDetailsProps = StakePoolDetailFooterProps & {
   showBackIcon?: boolean | ((section: Sections) => boolean);
   showCloseIcon?: boolean | ((section: Sections) => boolean);
   showExitConfirmation?: (section: Sections) => boolean;
 };
 
 export const StakePoolDetails = ({
-  onStake,
-  canDelegate,
+  onStakeOnThisPool,
+  onUnselect,
+  onSelect,
   showCloseIcon,
   showBackIcon,
   showExitConfirmation,
@@ -50,14 +49,16 @@ export const StakePoolDetails = ({
 
   const footersMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
-      [Sections.DETAIL]: <StakePoolDetailFooter canDelegate={canDelegate} onStake={onStake} />,
+      [Sections.DETAIL]: (
+        <StakePoolDetailFooter onSelect={onSelect} onStakeOnThisPool={onStakeOnThisPool} onUnselect={onUnselect} />
+      ),
       [Sections.PREFERENCES]: <StakePoolPreferencesFooter />,
       [Sections.CONFIRMATION]: <StakePoolConfirmationFooter />,
       [Sections.SIGN]: <SignConfirmationFooter />,
       [Sections.SUCCESS_TX]: <TransactionSuccessFooter />,
       [Sections.FAIL_TX]: <TransactionFailFooter />,
     }),
-    [onStake, canDelegate]
+    [onSelect, onStakeOnThisPool, onUnselect]
   );
 
   const pendingDelegationAndAnyDetailsAreShown =

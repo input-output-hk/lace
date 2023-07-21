@@ -1,0 +1,47 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.modal {
+  :global(.ant-modal-content) {
+    background: var(--color-white, var(--dark-mode-light-black));
+    box-shadow: var(--dark-mode-shadow-setup-box, var(--shadow-setup-box)) !important;
+    border-radius: size_unit(4) !important;
+  }
+  :global(.ant-modal-body) {
+    display: flex;
+    flex-direction: column;
+    padding: size_unit(5) !important;
+  }
+  :global(.ant-modal-close-x) {
+    display: none;
+  }
+}
+
+.header {
+  color: var(--text-color-primary);
+  font-size: var(--subHeading);
+  font-weight: bold;
+  line-height: size_unit(4);
+  padding-bottom: size_unit(3);
+  text-align: center;
+}
+
+.content {
+  color: var(--text-color-secondary);
+  font-size: var(--body);
+  font-weight: 500;
+  line-height: size_unit(3);
+  padding-bottom: size_unit(3);
+  text-align: center;
+}
+
+.footer {
+  display: flex;
+  gap: size_unit(2);
+  justify-content: space-between;
+}
+
+.modal.popupView {
+  .footer {
+    flex-direction: column-reverse;
+  }
+}
