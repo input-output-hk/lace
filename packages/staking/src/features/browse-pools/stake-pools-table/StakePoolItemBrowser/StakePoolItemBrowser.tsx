@@ -1,5 +1,7 @@
 /* eslint-disable no-magic-numbers */
+import { Wallet } from '@lace/cardano';
 import { Ellipsis } from '@lace/common';
+import { Button } from '@lace/ui';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
@@ -7,13 +9,16 @@ import styles from './StakePoolItemBrowser.module.scss';
 
 export interface StakePoolItemBrowserProps {
   id: string;
+  hexId: Wallet.Cardano.PoolIdHex;
+  includedInDraft: boolean;
   name?: string;
   ticker?: string;
   apy?: number | string;
   saturation?: number | string;
   cost?: number | string;
   logo: string;
-  onClick: (id: StakePoolItemBrowserProps['id']) => unknown;
+  onClick: (id: string) => unknown;
+  onStakingSelect: () => void;
 }
 
 export const getSaturationLevel = (saturation: number): string => {
@@ -33,11 +38,13 @@ export const getSaturationLevel = (saturation: number): string => {
 export const StakePoolItemBrowser = ({
   id,
   name,
+  includedInDraft,
   ticker,
   saturation,
   logo,
   apy,
   onClick,
+  onStakingSelect,
 }: StakePoolItemBrowserProps): React.ReactElement => {
   let title = name;
   let subTitle: string | React.ReactElement = ticker || '-';
@@ -60,7 +67,7 @@ export const StakePoolItemBrowser = ({
       <div className={styles.apy}>
         <p data-testid="stake-pool-list-apy">{apy ?? '-'}%</p>
       </div>
-      <div>
+      <div className={styles.saturation}>
         <p data-testid="stake-pool-list-saturation">
           {!isNil(saturation) ? (
             <>
@@ -71,6 +78,15 @@ export const StakePoolItemBrowser = ({
             '-'
           )}
         </p>
+      </div>
+      <div className={styles.actions}>
+        <Button.CallToAction
+          label={includedInDraft ? 'Unselect' : 'Add pool'}
+          onClick={(event) => {
+            event.stopPropagation();
+            onStakingSelect();
+          }}
+        />
       </div>
     </div>
   );

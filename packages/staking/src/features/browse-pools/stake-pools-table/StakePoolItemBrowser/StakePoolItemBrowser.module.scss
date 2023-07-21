@@ -2,6 +2,7 @@
 
 .row {
   align-items: center;
+  justify-content: space-between;
   background: var(--bg-color-body, #ffffff);
   border-radius: size_unit(2);
   cursor: pointer;
@@ -10,9 +11,16 @@
   min-height: size_unit(8);
   width: 100%;
   &:hover {
+    display: flex;
     background: var(--light-mode-light-grey, var(--dark-mode-mid-grey));
+    .apy {
+      display: none;
+    }
+    .saturation {
+      display: none;
+    }
     .actions {
-      opacity: 1;
+      display: flex;
     }
   }
 
@@ -40,7 +48,17 @@
   }
 
   .apy {
+    display: flex;
     padding-left: size_unit(0.5);
+  }
+
+  .saturation {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .actions {
+    display: none;
   }
 
   .cost {

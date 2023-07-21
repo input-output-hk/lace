@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { useStakePoolDetails } from '../../store';
+import { useDelegationPortfolioStore, useStakePoolDetails } from '../../store';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import { StakePoolSortOptions, StakePoolTableBrowser } from './StakePoolTableBrowser';
@@ -31,6 +31,8 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
+  const { addPoolToDraft, removePoolFromDraft } = useDelegationPortfolioStore((state) => state.mutators);
+  const poolIncludedInDraft = useDelegationPortfolioStore((state) => state.poolIncludedInDraft);
 
   const { setIsDrawerVisible } = useStakePoolDetails();
 
@@ -96,10 +98,14 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
       stakePools?.map((pool: Wallet.Cardano.StakePool) => {
         const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
+        const hexId = Wallet.Cardano.PoolIdHex(stakePool.hexId);
+        const includedInDraft = poolIncludedInDraft(hexId);
 
         return {
           logo,
           ...stakePool,
+          hexId,
+          includedInDraft,
           onClick: (): void => {
             setSelectedStakePool({ logo, ...pool });
             setIsDrawerVisible(true);
@@ -108,6 +114,10 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
             e.stopPropagation();
             setSelectedStakePool(pool);
             onStake(poolId);
+          },
+          onStakingSelect: () => {
+            if (includedInDraft) return removePoolFromDraft({ id: hexId });
+            return addPoolToDraft({ displayData: stakePool, id: hexId, weight: 1 });
           },
         };
       }) || [],
