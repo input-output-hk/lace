@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 import CommonDrawerElements from '../CommonDrawerElements';
 import SearchInput from '../searchInput';
-import { expect } from 'chai';
 
 class NftSelectNftsPage extends CommonDrawerElements {
   private COUNTER = '[data-testid="assets-counter"]';
@@ -46,10 +45,6 @@ class NftSelectNftsPage extends CommonDrawerElements {
     return this.assetSelectorContainer.$$(this.NFT_CONTAINER);
   }
 
-  get nftName() {
-    return this.assetSelectorContainer.$(this.NFT_NAME);
-  }
-
   async enterSearchPhrase(searchPhrase: string) {
     await this.searchInput.input.waitForClickable();
     await this.searchInput.input.setValue(searchPhrase);
@@ -66,16 +61,6 @@ class NftSelectNftsPage extends CommonDrawerElements {
       await this.nfts[i].waitForClickable();
       await this.nfts[i].click();
     }
-  }
-
-  async assertSeeNFTsWithSearchPhrase(searchPhrase: string) {
-    let total = 0;
-    for await (const nft of this.nfts) {
-      if ((await nft.$(this.NFT_NAME).getText()).toLowerCase() === searchPhrase) {
-        total++;
-      }
-    }
-    expect(await this.nfts.length).to.equal(total);
   }
 
   async clearSearchBarInput() {
