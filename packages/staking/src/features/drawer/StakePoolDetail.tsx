@@ -247,7 +247,7 @@ const makeActionButtons = (
 
 export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { setNoFundsVisible } = useStakePoolDetails();
+  const { setNoFundsVisible, setIsDrawerVisible } = useStakePoolDetails();
   const {
     delegationStoreSelectedStakePoolDetails: openPoolDetails,
     delegationStoreSelectedStakePool: openPool,
@@ -292,7 +292,13 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
     portfolioMutators.removePoolFromDraft({
       id: Wallet.Cardano.PoolIdHex(openPoolDetails.hexId),
     });
+    setIsDrawerVisible(false);
   }, [openPoolDetails, portfolioMutators]);
+
+  const onSelectForMultiStaking = useCallback(() => {
+    onSelectPool();
+    setIsDrawerVisible(false);
+  }, [onSelectPool]);
 
   useEffect(() => {
     if (isInMemory) return;
@@ -305,11 +311,11 @@ export const StakePoolDetailFooter = ({ onStake, canDelegate }: StakePoolDetailF
   const actionButtons = useMemo(
     () =>
       makeActionButtons(t, {
-        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onSelectPool },
+        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onSelectForMultiStaking },
         // TODO: disabling this button for now
         // eslint-disable-next-line sonarjs/no-redundant-boolean
         manageDelegation: false && poolInCurrentPortfolio,
-        selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelectPool },
+        selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelectForMultiStaking },
         stakeOnThisPool: draftEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeClick },
         unselectPool: poolSelectedForDraft && { callback: onUnselectPool },
       }),

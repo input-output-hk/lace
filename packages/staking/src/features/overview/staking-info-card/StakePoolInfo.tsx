@@ -26,10 +26,10 @@ export const StakePoolInfo = ({
       <img className={styles.logo} src={logo} alt="pool-logo" data-testid="stake-pool-logo" />
       <div className={styles.body}>
         <div className={styles.title} data-testid="stake-pool-name">
-          <div>{title}</div>
+          {title}
         </div>
         <div className={styles.subTitle} data-testid="stake-pool-ticker">
-          <div>{subTitle}</div>
+          {subTitle}
         </div>
       </div>
     </div>
