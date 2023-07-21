@@ -20,17 +20,13 @@ class NftSelectNftsAssert {
   }
 
   async assertSeeNFTsWithSearchPhrase(searchPhrase: string) {
-    const displayedNfts = await NftSelectNftsPage.nfts;
-    const displayedNftNames: string[] = [];
-    const displayedNftNamesMatched: string[] = [];
-
-    for (const nft of displayedNfts) {
-      displayedNftNames.push(await nft.getText());
-      if ((await nft.getText()).toLowerCase().includes(searchPhrase.toLowerCase())) {
-        displayedNftNamesMatched.push(await nft.getText());
-      }
-    }
-    expect(displayedNftNamesMatched).to.have.ordered.members(displayedNftNames);
+    const displayedNFTNames = await Promise.all(
+      await NftSelectNftsPage.nfts.map(async (nft) => (await nft.getText()).toLowerCase())
+    );
+    expect(
+      displayedNFTNames.every((name) => name.includes(searchPhrase.toLowerCase())),
+      `All displayed NFT names [${displayedNFTNames}] should contain phrase "${searchPhrase.toLowerCase()}"`
+    ).to.be.true;
   }
 }
 
