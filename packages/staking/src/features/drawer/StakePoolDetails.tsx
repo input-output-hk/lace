@@ -61,10 +61,9 @@ export const StakePoolDetails = ({
     [onSelect, onStakeOnThisPool, onUnselect]
   );
 
-  const pendingDelegationAndAnyDetailsAreShown =
-    isTherePendingDelegation && simpleSendConfig.currentSection === Sections.DETAIL;
   const cannotAddAnotherPoolToDraft = draftFull && !openPoolSelectedInDraft;
-  const footerHidden = cannotAddAnotherPoolToDraft || pendingDelegationAndAnyDetailsAreShown;
+  const footerHidden =
+    simpleSendConfig.currentSection === Sections.DETAIL && (isTherePendingDelegation || cannotAddAnotherPoolToDraft);
 
   const section = useMemo(() => sectionsMap[simpleSendConfig.currentSection], [simpleSendConfig, sectionsMap]);
   const footer = footerHidden ? undefined : footersMap[simpleSendConfig.currentSection];
