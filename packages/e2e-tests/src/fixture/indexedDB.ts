@@ -5,17 +5,21 @@ import { NFTFolder } from '../data/NFTFolder';
 
 /* eslint-disable @typescript-eslint/no-shadow */
 class IndexedDB {
-  async clearAddressBook() {
-    Logger.log('Clearing address book store in OneWalletDB');
-    await driver.execute(() => {
+  private async clearObjectStore(objectStoreName: string) {
+    await driver.execute((objectStoreName) => {
       const openRequest = window.indexedDB.open('OneWalletDB');
       openRequest.onsuccess = function () {
         const db = openRequest.result;
-        const transaction = db.transaction(['addressBook'], 'readwrite');
-        const objectStore = transaction.objectStore('addressBook');
+        const transaction = db.transaction([objectStoreName], 'readwrite');
+        const objectStore = transaction.objectStore(objectStoreName);
         objectStore.clear();
       };
-    });
+    }, objectStoreName);
+  }
+
+  async clearAddressBook() {
+    Logger.log('Clearing address book store in OneWalletDB');
+    await this.clearObjectStore('addressBook');
   }
 
   async insertAddress(address: Address) {
@@ -46,15 +50,7 @@ class IndexedDB {
 
   async clearNFTFolders() {
     Logger.log('Clearing NFT folders store in OneWalletDB');
-    await driver.execute(() => {
-      const openRequest = window.indexedDB.open('OneWalletDB');
-      openRequest.onsuccess = function () {
-        const db = openRequest.result;
-        const transaction = db.transaction(['nftFolders'], 'readwrite');
-        const objectStore = transaction.objectStore('nftFolders');
-        objectStore.clear();
-      };
-    });
+    await this.clearObjectStore('nftFolders');
   }
 
   async insertNFTFolder(nftFolder: NFTFolder) {
