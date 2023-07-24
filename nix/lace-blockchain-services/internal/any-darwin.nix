@@ -179,6 +179,7 @@ in rec {
     ln -s ${cardano-node}/bin/cardano-node "$app"/MacOS/
     ln -s ${ogmios}/bin/ogmios "$app"/MacOS/
     ln -s ${cardano-js-sdk.nodejs}/bin/node "$app"/MacOS/
+    ln -s ${mithril-client}/bin/mithril-client "$app"/MacOS/
 
     ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
     ln -s ${common.networkConfigs} "$app"/Resources/cardano-node-config

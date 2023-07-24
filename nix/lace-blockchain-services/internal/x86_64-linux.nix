@@ -48,6 +48,7 @@ in rec {
     cp ${lace-blockchain-services-exe}/bin/* $out/bin/
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/
+    ln -s ${mithril-client}/bin/* $out/libexec/
     ln -s ${cardano-js-sdk.nodejs}/bin/node $out/libexec
     ln -s ${pkgs.xclip}/bin/xclip $out/libexec
 

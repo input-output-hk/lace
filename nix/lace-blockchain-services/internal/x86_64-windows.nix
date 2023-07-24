@@ -162,6 +162,7 @@ in rec {
   mkPackage = { withJS }: pkgs.runCommand "lace-blockchain-services" {} ''
     mkdir -p $out/libexec
     cp -Lr ${lace-blockchain-services-exe-with-icon}/* $out/
+    cp -L ${mithril-client}/*.{exe,dll} $out/libexec
     cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/
     cp -L ${cardano-js-sdk.target.nodejs}/node.exe $out/libexec/
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
