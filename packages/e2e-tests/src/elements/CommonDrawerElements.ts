@@ -34,7 +34,7 @@ class CommonDrawerElements {
     return $(this.DRAWER_HEADER_SUBTITLE);
   }
 
-  get areaOutsideDrawer() {
+  get areaOutsideDrawer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.AREA_OUTSIDE_DRAWER);
   }
 

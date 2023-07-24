@@ -40,11 +40,11 @@ export const StakePoolPreferences = () => {
         {draftPortfolio.map(({ name, id }, i) => (
           <PoolDetailsCard
             key={i}
-            index={i}
             poolId={id}
             name={name || ''}
             draftPortfolioLength={draftPortfolio.length}
-            colorSet={PIE_CHART_DEFAULT_COLOR_SET}
+            color={PIE_CHART_DEFAULT_COLOR_SET[i]!}
+            deleteEnabled={draftPortfolio.length > 1}
           />
         ))}
       </Flex>

@@ -31,7 +31,7 @@ Then(
         mode === 'extended' ? `1.17 ${Asset.CARDANO.ticker}, 1 ${nftName}` : `1.17 ${Asset.CARDANO.ticker} , +1`,
       tokensCount: 2
     };
-    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(1, expectedTransactionRowAssetDetailsSent);
+    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
   }
 );
 

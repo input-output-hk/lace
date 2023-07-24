@@ -110,6 +110,7 @@ type KeysStructure = {
     preferences: {
       selectedStakePools: '';
       partOfBalance: '';
+      pickMorePools: '';
     };
   };
   modals: {
