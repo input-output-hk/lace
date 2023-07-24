@@ -7,14 +7,18 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"bytes"
+	"strconv"
 
 	t "lace.io/lace-blockchain-services/types"
 	_ "lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
 	"lace.io/lace-blockchain-services/assets"
 	"lace.io/lace-blockchain-services/appconfig"
+	"lace.io/lace-blockchain-services/mainthread"
 
 	"github.com/getlantern/systray"
 	"github.com/atotto/clipboard"
+	"github.com/sqweek/dialog"
 )
 
 func setupTrayUI(
@@ -188,6 +192,32 @@ func setupTrayUI(
 
 	systray.AddSeparator()
 
+	mResyncMithril := systray.AddMenuItem("Resync with Mithril", "")
+	go func() {
+		// FIXME: calculate those:
+		eta := map[string](string) {
+			"preview": "about 15 minutes",
+			"preprod": "about 15 minutes",
+			"mainnet": "about 2 hours",
+		}
+		_ = eta
+		for range mResyncMithril.ClickedCh {
+			fmt.Printf("%s[%d]: info: Mithril from goroutine %v\n",
+				OurLogPrefix, os.Getpid(), goid())
+
+			mainthread.Schedule(func() {
+				fmt.Printf("%s[%d]: info: Mithril from goroutine %v\n",
+					OurLogPrefix, os.Getpid(), goid())
+				dialog.Message(
+					"Resync the entire blockchain from scratch with Mithril?\n\n" +
+					"This will delete your current cardano-node DB.\n\n" +
+					"Estimated time: %s",
+					eta[currentNetwork]).Title("Resync with Mithril?").YesNo()
+			})
+
+		}
+	}()
+
 	mForceRestart := systray.AddMenuItem("Force Restart", "")
 	go func() {
 		for range mForceRestart.ClickedCh {
@@ -245,4 +275,17 @@ func openWithDefaultApp(target string) error {
 	}
 
 	return err
+}
+
+func goid() int {
+	buf := make([]byte, 32)
+	n := runtime.Stack(buf, false)
+	buf = buf[:n]
+	buf, ok := bytes.CutPrefix(buf, []byte("goroutine "))
+	if !ok { return -1 }
+	i := bytes.IndexByte(buf, ' ')
+	if i < 0 { return -1 }
+	rv, err := strconv.Atoi(string(buf[:i]))
+	if err != nil { return -1 }
+	return rv
 }
