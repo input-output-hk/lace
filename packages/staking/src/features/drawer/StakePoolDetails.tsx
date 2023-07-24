@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
 import React, { useMemo } from 'react';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { MAX_POOLS_COUNT, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { MAX_POOLS_COUNT, Page, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter, StakePoolDetailFooterProps } from './StakePoolDetail';
@@ -27,7 +27,7 @@ export const StakePoolDetails = ({
 }: stakePoolDetailsProps): React.ReactElement => {
   const { walletStoreInMemoryWallet, delegationStoreSelectedStakePoolDetails: openPool } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
-  const { simpleSendConfig } = useStakePoolDetails();
+  const { activePage, simpleSendConfig } = useStakePoolDetails();
   const { draftFull, openPoolSelectedInDraft } = useDelegationPortfolioStore(({ draftPortfolio }) => ({
     draftFull: draftPortfolio.length === MAX_POOLS_COUNT,
     openPoolSelectedInDraft:
@@ -63,7 +63,8 @@ export const StakePoolDetails = ({
 
   const cannotAddAnotherPoolToDraft = draftFull && !openPoolSelectedInDraft;
   const footerHidden =
-    simpleSendConfig.currentSection === Sections.DETAIL && (isTherePendingDelegation || cannotAddAnotherPoolToDraft);
+    activePage !== Page.browsePools ||
+    (simpleSendConfig.currentSection === Sections.DETAIL && (isTherePendingDelegation || cannotAddAnotherPoolToDraft));
 
   const section = useMemo(() => sectionsMap[simpleSendConfig.currentSection], [simpleSendConfig, sectionsMap]);
   const footer = footerHidden ? undefined : footersMap[simpleSendConfig.currentSection];

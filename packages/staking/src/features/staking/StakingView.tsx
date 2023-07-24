@@ -7,8 +7,8 @@ import { StakePoolDetails } from '../drawer';
 import { ChangingPreferencesModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
-import { Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
-import { Navigation, Page } from './Navigation';
+import { Page, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Navigation } from './Navigation';
 import { PortfolioBar } from './PortfolioBar';
 
 const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
