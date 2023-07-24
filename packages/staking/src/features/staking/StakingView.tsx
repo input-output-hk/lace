@@ -13,7 +13,8 @@ import { PortfolioBar } from './PortfolioBar';
 
 const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
 
-const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
+// TODO: enable exit confirmation. Legacy implementation had it for: Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX
+const stepsWithExitConfirmation = new Set<Sections>([]);
 
 export const StakingView = () => {
   const { t } = useTranslation();
