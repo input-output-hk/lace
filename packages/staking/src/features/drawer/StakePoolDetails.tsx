@@ -33,7 +33,11 @@ export const StakePoolDetails = ({
     openPoolSelectedInDraft:
       openPool && draftPortfolio.some((pool) => pool.id === Wallet.Cardano.PoolIdHex(openPool.hexId)),
   }));
-  const isTherePendingDelegation = inFlightTx?.some(({ body }) => (body?.certificates?.length || 0) > 0);
+  const delegationPending = inFlightTx
+    ?.map(({ body: { certificates } }) =>
+      (certificates ?? []).filter((c) => c.__typename === Wallet.Cardano.CertificateType.StakeDelegation)
+    )
+    .some((certificates) => certificates?.length > 0);
 
   const sectionsMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
@@ -61,13 +65,14 @@ export const StakePoolDetails = ({
     [onSelect, onStakeOnThisPool, onUnselect]
   );
 
-  const cannotAddAnotherPoolToDraft = draftFull && !openPoolSelectedInDraft;
-  const footerHidden =
-    activePage !== Page.browsePools ||
-    (simpleSendConfig.currentSection === Sections.DETAIL && (isTherePendingDelegation || cannotAddAnotherPoolToDraft));
+  const selectionActionsAllowed = !draftFull || openPoolSelectedInDraft;
+  const currentlyOnPageWhereDrawerButtonsAllowed = activePage === Page.browsePools;
+  const drawerShowingDetails = simpleSendConfig.currentSection === Sections.DETAIL;
+  const footerVisible =
+    currentlyOnPageWhereDrawerButtonsAllowed && drawerShowingDetails && !delegationPending && selectionActionsAllowed;
 
   const section = useMemo(() => sectionsMap[simpleSendConfig.currentSection], [simpleSendConfig, sectionsMap]);
-  const footer = footerHidden ? undefined : footersMap[simpleSendConfig.currentSection];
+  const footer = footerVisible ? footersMap[simpleSendConfig.currentSection] : undefined;
 
   return (
     <StakePoolDetailsDrawer

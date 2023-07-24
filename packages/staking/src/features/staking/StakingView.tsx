@@ -72,7 +72,7 @@ export const StakingView = () => {
       setPendingSelection(true);
     }
     initiateStaking();
-    // TODO: implement no funds modal
+    // TODO: LW-7668 implement no funds modal
     // if (canDelegate) {
     // } else {
     // setNoFundsVisible(true);
