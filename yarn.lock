@@ -11436,13 +11436,13 @@
     loupe "^2.3.6"
     pretty-format "^27.5.1"
 
-"@wdio/allure-reporter@8.11.3":
-  version "8.11.3"
-  resolved "https://registry.yarnpkg.com/@wdio/allure-reporter/-/allure-reporter-8.11.3.tgz#136fc077b1d7afd0a045e229f844daac96e2a87a"
-  integrity sha512-H6RMuqsZU/FwU/y9TRblnUY0jzUPj7W23oJVaszDmybUDkBR2y4kbJjtHJuCfSRetDE9hYxUcuYG6v6ddyzjBg==
+"@wdio/allure-reporter@8.12.3":
+  version "8.12.3"
+  resolved "https://registry.yarnpkg.com/@wdio/allure-reporter/-/allure-reporter-8.12.3.tgz#73ab06caf67ae1615c3ea94e8f5ff527d2098c12"
+  integrity sha512-H+ocM3CeQvkMvKt6El7iEGaEp4igNkzqcvCezCo2ijgczpdqn1B9MhuoAdIwUW8/tI8gWsN7/SD93BWC4eH85w==
   dependencies:
     "@types/node" "^20.1.0"
-    "@wdio/reporter" "8.11.0"
+    "@wdio/reporter" "8.12.2"
     "@wdio/types" "8.10.4"
     allure-js-commons "^2.0.0"
     csv-stringify "^6.0.4"
@@ -11607,6 +11607,18 @@
     diff "^5.0.0"
     object-inspect "^1.12.0"
     supports-color "9.3.1"
+
+"@wdio/reporter@8.12.2":
+  version "8.12.2"
+  resolved "https://registry.yarnpkg.com/@wdio/reporter/-/reporter-8.12.2.tgz#c494985a3f2936179c3bf57ba41f486e20cc081c"
+  integrity sha512-xCbppY74dm9jZIgC3Oo5eSMM6pnCXIytol4lFZV1l6LkqWl9WdhBj38cU3Y65XX6gwW+rGnFo36yitxvAXnTaA==
+  dependencies:
+    "@types/node" "^20.1.0"
+    "@wdio/logger" "8.11.0"
+    "@wdio/types" "8.10.4"
+    diff "^5.0.0"
+    object-inspect "^1.12.0"
+    supports-color "9.4.0"
 
 "@wdio/runner@8.11.3":
   version "8.11.3"
@@ -32111,6 +32123,11 @@ supports-color@9.3.1:
   version "9.3.1"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-9.3.1.tgz#34e4ad3c71c9a39dae3254ecc46c9b74e89e15a6"
   integrity sha512-knBY82pjmnIzK3NifMo3RxEIRD9E0kIzV4BKcyTZ9+9kWgLMxd4PrsTSMoFQUabgRBbF8KOLRDCyKgNV+iK44Q==
+
+supports-color@9.4.0:
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-9.4.0.tgz#17bfcf686288f531db3dea3215510621ccb55954"
+  integrity sha512-VL+lNrEoIXww1coLPOmiEmK/0sGigko5COxI09KzHc2VJXJsQ37UaQ+8quuxjDeA7+KnLGTWRyOXSLLR2Wb4jw==
 
 supports-color@^2.0.0:
   version "2.0.0"

@@ -30,7 +30,7 @@
     "@types/flat": "5.0.2",
     "@typescript-eslint/eslint-plugin": "6.0.0",
     "@typescript-eslint/parser": "6.0.0",
-    "@wdio/allure-reporter": "8.11.3",
+    "@wdio/allure-reporter": "8.12.3",
     "@wdio/cli": "8.11.4",
     "@wdio/config": "8.11.3",
     "@wdio/cucumber-framework": "8.11.3",
