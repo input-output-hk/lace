@@ -31,7 +31,7 @@ export const en: Translations = {
   'drawer.details.owners': 'Owners',
   'drawer.details.poolIds': 'Pool IDs',
   'drawer.details.social': 'Social links',
-  'drawer.details.stakeOnPoolButton': 'Stake on this pool',
+  'drawer.details.stakeOnPoolButton': 'Stake all on this pool',
   'drawer.details.statistics': 'Statistics',
   'drawer.details.status.delegating': 'You are delegating to this pool',
   'drawer.details.status.retired': 'This pool is retired. Re-delegate to an other pool to receive rewards',

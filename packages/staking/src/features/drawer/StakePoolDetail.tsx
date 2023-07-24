@@ -3,10 +3,10 @@ import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/car
 import { Banner, Ellipsis } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import { TFunction } from 'i18next';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LegacySelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
-import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
 
@@ -252,6 +252,7 @@ export const StakePoolDetailFooter = ({
   onUnselect,
 }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { setIsDrawerVisible } = useStakePoolDetails();
   const { delegationStoreSelectedStakePoolDetails: openPoolDetails, walletStoreGetKeyAgentType } = useOutsideHandles();
   const { ableToSelectForDraft, ableToStakeOnlyOnThisPool, draftEmpty, poolInCurrentPortfolio, poolSelectedForDraft } =
     useDelegationPortfolioStore(makeSelector(openPoolDetails));
@@ -269,27 +270,37 @@ export const StakePoolDetailFooter = ({
     localStorage.removeItem('TEMP_POOLID');
   }, [isInMemory, onStakeOnThisPool]);
 
+  const onSelectClick = useCallback(() => {
+    setIsDrawerVisible(false);
+    onSelect();
+  }, [onSelect, setIsDrawerVisible]);
+
+  const onUnselectClick = useCallback(() => {
+    setIsDrawerVisible(false);
+    onUnselect();
+  }, [onUnselect, setIsDrawerVisible]);
+
   const actionButtons = useMemo(
     () =>
       makeActionButtons(t, {
-        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onSelect },
+        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onSelectClick },
         // TODO: disabling this button for now
         // eslint-disable-next-line sonarjs/no-redundant-boolean
         manageDelegation: false && poolInCurrentPortfolio,
-        selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelect },
+        selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelectClick },
         stakeOnThisPool: draftEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
-        unselectPool: poolSelectedForDraft && { callback: onUnselect },
+        unselectPool: poolSelectedForDraft && { callback: onUnselectClick },
       }),
     [
       t,
       ableToSelectForDraft,
       draftEmpty,
-      onSelect,
+      onSelectClick,
       poolInCurrentPortfolio,
       ableToStakeOnlyOnThisPool,
       onStakeOnThisPool,
       poolSelectedForDraft,
-      onUnselect,
+      onUnselectClick,
     ]
   );
 
