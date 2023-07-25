@@ -1,2 +1,2 @@
-export * from './DelegationContainer';
+export * from './DelegationContent';
 export * from './DelegationLayout';

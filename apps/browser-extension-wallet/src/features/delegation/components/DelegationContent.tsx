@@ -37,7 +37,7 @@ const PoolDetailsStepsWithExitBtn = new Set([
 const PoolDetailsStepsWithExitConfirm = new Set([Sections.CONFIRMATION, Sections.SIGN]);
 const PoolDetailsStepsWithBackBtn = new Set([Sections.DETAIL, Sections.CONFIRMATION, Sections.SIGN]);
 
-export const DelegationContainer = (): React.ReactElement => {
+export const DelegationContent = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     getKeyAgentType,

@@ -6,7 +6,7 @@ import { MainLayout } from '../components/Layout';
 import { PopupAssets } from '../features/assets';
 import { Send } from '../features/send';
 import { walletRoutePaths } from './wallet-paths';
-import { DelegationContainer } from '../features/delegation';
+import { DelegationContent } from '../features/delegation';
 import { StakingWarningModals } from '@views/browser/features/staking/components/StakingModals';
 import { AddressBook } from '../features/address-book';
 import { Settings } from '../features/settings';
@@ -20,7 +20,7 @@ export const ExtensionRoutes = (): React.ReactElement => (
       <Route exact path={walletRoutePaths.activity} component={Activity} />
       <Route exact path={walletRoutePaths.send} component={Send} />
       <Route exact path={walletRoutePaths.nftDetail} component={NftDetail} />
-      <Route exact path={walletRoutePaths.earn} component={DelegationContainer} />
+      <Route exact path={walletRoutePaths.earn} component={DelegationContent} />
       <Route exact path={walletRoutePaths.addressBook} component={AddressBook} />
       <Route exact path={walletRoutePaths.settings} component={Settings} />
       <Route exact path={walletRoutePaths.nfts} component={Nfts} />
