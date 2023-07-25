@@ -23,7 +23,7 @@ Given(/^all NFT folders are removed$/, async () => {
 
 Then(/^the NFT folder with name "([^"]*)" and 1 NFT was created$/, async (folderName: string) => {
   const nftFolder = new NFTFolder(folderName, [
-    '1065b4d177376927ca03922b2037bf382a6588c97c0eb6a3e358bab5426f726564415045' // Bored Ape NFT
+    '63f01fe6cd68ec6438c95a46cea4a6cd27efb791b5e8cc1fa92af3294c6163654e46542336' // LaceNFT assetId
   ]);
   await IndexedDB.insertNFTFolder(nftFolder);
   await browser.pause(500);
