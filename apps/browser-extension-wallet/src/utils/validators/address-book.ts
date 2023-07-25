@@ -9,6 +9,7 @@ import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
 import { Cardano, HandleProvider, HandleResolution } from '@cardano-sdk/core';
 import { isHandle } from '@lace/core';
+import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
 
@@ -168,10 +169,14 @@ export const validateMainnetAddress = (address: string): boolean =>
   // is Byron era mainnet Icarus-style address
   address.startsWith('Ae2') ||
   // is Byron era mainnet Daedalus-style address
-  address.startsWith('DdzFF');
+  address.startsWith('DdzFF') ||
+  // address is a handle
+  (isAdaHandleEnabled && address.startsWith('$'));
 
 export const validateTestnetAddress = (address: string): boolean =>
-  address.startsWith('addr_test') || (!validateMainnetAddress(address) && Wallet.Cardano.Address.isValidByron(address));
+  address.startsWith('addr_test') ||
+  address.startsWith('$') ||
+  (!validateMainnetAddress(address) && Wallet.Cardano.Address.isValidByron(address));
 
 export const validateAddrPerNetwork: Record<Wallet.Cardano.NetworkId, (address: string) => boolean> = {
   [Wallet.Cardano.NetworkId.Mainnet]: (address: string) => validateMainnetAddress(address),

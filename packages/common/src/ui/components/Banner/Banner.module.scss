@@ -56,9 +56,18 @@
     }
   }
 
-  .descriptionContainer {
-    width: 100%;
+  .contentContainer {
     display: flex;
+    width: 100%; 
+    justify-content: space-between;
+  }
+
+  .buttonContainer { 
+    height: 60%;
+    padding-left: size_unit(1.25);
+  }
+
+  .descriptionContainer {
     flex-direction: column;
     @media (max-width: $breakpoint-popup) {
       width: auto;

@@ -24,13 +24,13 @@ export interface BannerProps {
 
 export const Banner = ({
   message,
-  description = 'Hola buenos dias',
+  description,
   customIcon,
   withIcon,
   className,
   descriptionClassName,
   popupView,
-  withButton = false,
+  withButton,
   onButtonClick
 }: BannerProps): React.ReactElement => {
   const descriptionElement = shouldBeDisplayedAsText(description) ? (
@@ -58,12 +58,16 @@ export const Banner = ({
         </div>
       )}
       <div
-        className={cn(styles.descriptionContainer, { [descriptionClassName]: descriptionClassName })}
+        className={cn(styles.contentContainer, { [descriptionClassName]: descriptionClassName })}
         data-testid="banner-description"
       >
-        <Text className={styles.message}>{message}</Text>
-        {description && <div>{descriptionElement}</div>}
-        {withButton && <Button onClick={onButtonClick}> Hello </Button>}
+        <div className={cn(styles.descriptionContainer)}>
+          <Text className={styles.message}>{message}</Text>
+          {description && <div>{descriptionElement}</div>}
+        </div>
+        <div className={cn(styles.buttonContainer)}>
+          {withButton && <Button onClick={onButtonClick}> Review </Button>}
+        </div>
       </div>
     </div>
   );

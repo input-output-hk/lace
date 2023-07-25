@@ -11,6 +11,7 @@ import omit from 'lodash/omit';
 import { useWalletStore } from '@src/stores';
 import { isValidAddress, isValidAddressPerNetwork } from '@src/utils/validators';
 import { compactNumber, getInlineCurrencyFormat } from '@src/utils/format-number';
+import { isHandle } from '@lace/core';
 
 // ====== initial values ======
 
@@ -355,6 +356,9 @@ export const useAddressState = (row: string): { address: string; handle?: string
     )
   );
 
+const isValidDestination = (address: string) =>
+  isHandle(address) ? isHandle(address) : isValidAddress(address.trim());
+
 export const useTransactionProps = (): {
   outputMap: OutputsMap;
   hasInvalidOutputs: boolean;
@@ -371,7 +375,7 @@ export const useTransactionProps = (): {
     () =>
       Object.values(outputs).some(
         (item) =>
-          !isValidAddress(item.address.trim()) ||
+          !isValidDestination(item.address) ||
           !isValidAddressPerNetwork({
             address: item.address.trim(),
             network: currentChain.networkId

@@ -89,30 +89,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     }
   };
 
-  // const resolveHandle = useMemo(
-  //   () =>
-  //     debounce(async () => {
-  //       console.log('handle::::', handle);
-  //       if (handle) {
-  //         setHandleVerificationState(HandleVerificationState.VALID);
-  //         return;
-  //       }
-
-  //       const handleString = addressInputValue.address.toString();
-  //       console.log('string:', handleString);
-
-  //       const { handles, valid } = await verifyHandle(handleString, handleResolver);
-  //       console.log('handles and validity:', valid);
-  //       if (!valid) {
-  //         setHandleVerificationState(HandleVerificationState.INVALID);
-  //       } else {
-  //         setHandleVerificationState(HandleVerificationState.VALID);
-  //         setAddressValue(row, handles[0].cardanoAddress.toString(), handleString);
-  //       }
-  //     }, HANDLE_DEBOUNCE_TIME),
-  //   [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
-  // );
-
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
@@ -128,7 +104,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
             handleResolution: addressInputValue?.handleResolution,
             handleResolver
           });
-          console.log('response', isUpdatedValidHandle);
           isUpdatedValidHandle && setHandleVerificationState(HandleVerificationState.VALID);
         } catch (error) {
           // todo: do I need the validHandle
@@ -185,7 +160,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   useEffect(() => {
     // todo: debounce this
     const existingAddress = getExistingAddress(handle || address);
-    console.log('existingAddress:::>>>>>', existingAddress);
+
     if (existingAddress) {
       setAddressInputValue({
         name: existingAddress.walletName,
@@ -267,13 +242,13 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           withIcon
         />
       )}
-      {/* {handleVerificationState && handleVerificationState === HandleVerificationState.CHANGED_OWNERSHIP && ( */}
-      <Banner
-        withIcon
-        message={t('addressBook.reviewModal.banner.description', { name: addressInputValue.name })}
-        withButton
-      />
-      {/* )} */}
+      {handleVerificationState && handleVerificationState === HandleVerificationState.CHANGED_OWNERSHIP && (
+        <Banner
+          withIcon
+          message={t('addressBook.reviewModal.banner.description', { name: addressInputValue.name })}
+          withButton
+        />
+      )}
     </span>
   );
 };
