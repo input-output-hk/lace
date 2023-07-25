@@ -51,6 +51,10 @@ export type DelegationPortfolioState = Immutable<{
   draftPortfolio: DelegationPortfolioStakePool[];
 }>;
 
+export type DelegationPortfolioQueries = {
+  poolIncludedInDraft: (id: Wallet.Cardano.PoolIdHex) => boolean;
+};
+
 type DelegationPortfolioMutators = {
   setCurrentPortfolio: (params: {
     rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[];
@@ -62,9 +66,10 @@ type DelegationPortfolioMutators = {
   clearDraft: () => void;
 };
 
-export type DelegationPortfolioStore = DelegationPortfolioState & {
-  mutators: DelegationPortfolioMutators;
-};
+export type DelegationPortfolioStore = DelegationPortfolioState &
+  DelegationPortfolioQueries & {
+    mutators: DelegationPortfolioMutators;
+  };
 
 export enum Page {
   overview = 'overview',

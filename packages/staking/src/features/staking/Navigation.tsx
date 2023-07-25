@@ -22,8 +22,8 @@ export const Navigation = ({ children }: NavigationProps) => {
   return (
     <>
       <SubNavigation.Root aria-label={t('root.nav.title')} value={activePage} onValueChange={onValueChange}>
-        <SubNavigation.Item name={t('root.nav.overviewTitle')} value={Page.overview} />
-        <SubNavigation.Item name={t('root.nav.browsePoolsTitle')} value={Page.browsePools} />
+        <SubNavigation.Item name={t('root.nav.overviewTitle')} value={Page.overview} data-testid="overview-tab" />
+        <SubNavigation.Item name={t('root.nav.browsePoolsTitle')} value={Page.browsePools} data-testid="browse-tab" />
       </SubNavigation.Root>
       {children(activePage)}
     </>
