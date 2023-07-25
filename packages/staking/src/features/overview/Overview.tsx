@@ -70,7 +70,7 @@ export const Overview = () => {
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
       </Flex>
       {displayData.map((item) => (
-        <Box key={item.id} mb={'$24'}>
+        <Box key={item.id} mb={'$24'} data-testid="delegated-pool-item">
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}

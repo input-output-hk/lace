@@ -60,7 +60,7 @@ export const en: Translations = {
   'drawer.success.switchedPools.title': "Hurray! You've switched pools",
   'drawer.success.title': "Hurray! You've staked your funds",
   'drawer.title': 'Stake pool detail',
-  'drawer.titleSecond': 'Manage delegation',
+  'drawer.titleSecond': 'Manage staking',
   'general.button.close': 'Close',
   'general.button.confirm': 'Confirm',
   'overview.delegationCard.label.balance': 'ADA Balance',
