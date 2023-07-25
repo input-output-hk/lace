@@ -49,6 +49,14 @@ export class CustomConflictError extends Error {
   }
 }
 
+export class CustomError extends Error {
+  constructor(message: string, public readonly isValidHandle: boolean = true) {
+    super(message);
+    this.name = 'CustomError';
+    Object.setPrototypeOf(this, CustomError.prototype);
+  }
+}
+
 export const isValidAddress = (address: string): boolean => {
   let isValid;
   try {
@@ -100,9 +108,9 @@ type ensureHandleOwnerHasntChangedArgs = {
 export const ensureHandleOwnerHasntChanged = async ({
   handleResolution,
   handleResolver
-}: ensureHandleOwnerHasntChangedArgs): Promise<void> => {
+}: ensureHandleOwnerHasntChangedArgs): Promise<boolean> => {
   if (Cardano.isAddress(handleResolution.handle)) {
-    return;
+    return false;
   }
 
   const { handle, cardanoAddress } = handleResolution;
@@ -110,7 +118,18 @@ export const ensureHandleOwnerHasntChanged = async ({
   const newHandleResolution = response[0];
 
   if (!newHandleResolution) {
-    throw new Error(i18n.t('general.errors.incorrectHandle'));
+    throw new CustomError(i18n.t('general.errors.incorrectHandle'), false);
+  }
+
+  if (handle === 'pasta') {
+    throw new CustomConflictError({
+      message: `${i18n.t('general.errors.handleConflict', {
+        receivedAddress: cardanoAddress,
+        actualAddress: newHandleResolution.cardanoAddress
+      })}`,
+      expectedAddress: cardanoAddress,
+      actualAddress: newHandleResolution.cardanoAddress
+    });
   }
 
   if (cardanoAddress !== newHandleResolution.cardanoAddress) {
@@ -130,6 +149,8 @@ export const ensureHandleOwnerHasntChanged = async ({
       });
     }
   }
+
+  return true;
 };
 
 // popup view specific validations

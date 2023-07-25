@@ -21,7 +21,7 @@ export type DestinationAddressInputProps = Omit<AutoCompleteProps, 'value'> & {
   exists?: boolean;
   showClear?: boolean;
   onClear?: () => void;
-  handle?: 'valid' | 'verifying' | 'invalid';
+  handle?: 'valid' | 'verifying' | 'invalid' | 'changedOwnership';
   translations: TranslationsFor<'recipientAddress'>;
 };
 
@@ -63,7 +63,7 @@ export const DestinationAddressInput = ({
     }
 
     let handleIcon;
-    if (handle === 'valid') {
+    if (handle === 'valid' || handle === 'changedOwnership') {
       handleIcon = <CheckCircleOutlined className={styles.valid} />;
     } else if (handle === 'invalid') {
       handleIcon = <ExclamationCircleOutlined className={styles.invalid} />;

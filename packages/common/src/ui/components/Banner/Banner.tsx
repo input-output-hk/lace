@@ -3,6 +3,7 @@ import { Typography } from 'antd';
 import cn from 'classnames';
 import { ReactComponent as DefaultIcon } from '../../assets/icons/banner-icon.component.svg';
 import styles from './Banner.module.scss';
+import { Button } from '../Button';
 
 const { Text } = Typography;
 
@@ -17,16 +18,20 @@ export interface BannerProps {
   descriptionClassName?: string;
   popupView?: boolean;
   description?: React.ReactNode;
+  withButton?: boolean;
+  onButtonClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
 }
 
 export const Banner = ({
   message,
-  description,
+  description = 'Hola buenos dias',
   customIcon,
   withIcon,
   className,
   descriptionClassName,
-  popupView
+  popupView,
+  withButton = false,
+  onButtonClick
 }: BannerProps): React.ReactElement => {
   const descriptionElement = shouldBeDisplayedAsText(description) ? (
     <Text className={styles.description}>{description}</Text>
@@ -58,6 +63,7 @@ export const Banner = ({
       >
         <Text className={styles.message}>{message}</Text>
         {description && <div>{descriptionElement}</div>}
+        {withButton && <Button onClick={onButtonClick}> Hello </Button>}
       </div>
     </div>
   );

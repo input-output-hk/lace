@@ -5,14 +5,17 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import cn from 'classnames';
 import { DestinationAddressInput, getInputLabel, isHandle, HANDLE_DEBOUNCE_TIME } from '@lace/core';
 import { useAddressState, useCurrentRow, useSections } from '../../store';
-import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
-import { useAddressBookStore } from '@src/features/address-book/store';
 import {
+  CustomError,
+  CustomConflictError,
   validateWalletName,
   validateWalletAddress,
   isValidAddressPerNetwork,
-  verifyHandle
+  // verifyHandle,
+  ensureHandleOwnerHasntChanged
 } from '@src/utils/validators';
+import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
+import { useAddressBookStore } from '@src/features/address-book/store';
 import { Sections } from '../..';
 import { sectionsConfig } from '../../constants';
 import styles from './AddressInput.module.scss';
@@ -23,6 +26,7 @@ import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 import { getTemporaryTxDataFromStorage } from '../../helpers';
+import { HandleResolution } from '@cardano-sdk/core';
 
 const { Text } = Typography;
 
@@ -32,7 +36,7 @@ interface AddressInputProps {
   isPopupView: boolean;
 }
 
-export type inputValue = { name?: string; address: string };
+export type inputValue = { name?: string; address: string; handleResolution?: HandleResolution };
 
 const isWalletNameValid = (name: string) => !validateWalletName(name);
 const isWalletAddressValid = (address: string) => !validateWalletAddress(address);
@@ -40,12 +44,14 @@ const isWalletAddressValid = (address: string) => !validateWalletAddress(address
 enum HandleVerificationState {
   VALID = 'valid',
   INVALID = 'invalid',
-  VERIFYING = 'verifying'
+  VERIFYING = 'verifying',
+  CHANGED_OWNERSHIP = 'changedOwnership'
 }
 
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleResolver = useHandleResolver();
+  // todo: this is really a contact
   const [addressInputValue, setAddressInputValue] = useState<inputValue>({ address: '' });
   // eslint-disable-next-line no-magic-numbers
   const MAX_ADDRESSES = isPopupView ? 3 : 5;
@@ -65,7 +71,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const destinationAddressInputTranslations = {
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
-
+  // todo: do we need to check here whether the flag is enabled?
   const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(addressInputValue.address.toString());
 
   const clearInput = useCallback(() => {
@@ -83,25 +89,58 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     }
   };
 
+  // const resolveHandle = useMemo(
+  //   () =>
+  //     debounce(async () => {
+  //       console.log('handle::::', handle);
+  //       if (handle) {
+  //         setHandleVerificationState(HandleVerificationState.VALID);
+  //         return;
+  //       }
+
+  //       const handleString = addressInputValue.address.toString();
+  //       console.log('string:', handleString);
+
+  //       const { handles, valid } = await verifyHandle(handleString, handleResolver);
+  //       console.log('handles and validity:', valid);
+  //       if (!valid) {
+  //         setHandleVerificationState(HandleVerificationState.INVALID);
+  //       } else {
+  //         setHandleVerificationState(HandleVerificationState.VALID);
+  //         setAddressValue(row, handles[0].cardanoAddress.toString(), handleString);
+  //       }
+  //     }, HANDLE_DEBOUNCE_TIME),
+  //   [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
+  // );
+
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
-        if (handle) {
-          setHandleVerificationState(HandleVerificationState.VALID);
-          return;
-        }
+        // if (!handle) return;
 
-        const handleString = addressInputValue.address.toString();
-
-        const { handles, valid } = await verifyHandle(handleString, handleResolver);
-        if (!valid) {
-          setHandleVerificationState(HandleVerificationState.INVALID);
-        } else {
-          setHandleVerificationState(HandleVerificationState.VALID);
-          setAddressValue(row, handles[0].cardanoAddress.toString(), handleString);
+        // console.log('whats this:', typeof addressInputValue.address, addressInputValue);
+        // const handleString = addressInputValue.address.toString();
+        // console.log('what string:::', typeof handleString);
+        // send the handleString that we get from addressBook
+        try {
+          // todo: I can just throw this .. and catch the errors
+          const isUpdatedValidHandle = await ensureHandleOwnerHasntChanged({
+            handleResolution: addressInputValue?.handleResolution,
+            handleResolver
+          });
+          console.log('response', isUpdatedValidHandle);
+          isUpdatedValidHandle && setHandleVerificationState(HandleVerificationState.VALID);
+        } catch (error) {
+          // todo: do I need the validHandle
+          if (error instanceof CustomError && error.isValidHandle === false) {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          }
+          if (error instanceof CustomConflictError) {
+            setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
+          }
         }
       }, HANDLE_DEBOUNCE_TIME),
-    [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
+    [addressInputValue, handleResolver]
   );
 
   useEffect(() => {
@@ -144,9 +183,16 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 
   useEffect(() => {
+    // todo: debounce this
     const existingAddress = getExistingAddress(handle || address);
+    console.log('existingAddress:::>>>>>', existingAddress);
     if (existingAddress) {
-      setAddressInputValue({ name: existingAddress.walletName, address: existingAddress.walletAddress });
+      setAddressInputValue({
+        name: existingAddress.walletName,
+        address: existingAddress.walletAddress,
+        // check whether we can ensure there is a handle resolution
+        handleResolution: existingAddress.walletHandleResolution || undefined
+      });
     } else {
       setAddressInputValue({ address: handle || address });
     }
@@ -203,6 +249,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         translations={destinationAddressInputTranslations}
         data-testid="address-input"
       />
+
       {!isAddressInputValueValid && !isAddressInputValueHandle && address && (
         <Text className={styles.errorParagraph} data-testid="address-input-error">
           {t('general.errors.incorrectAddress')}
@@ -220,6 +267,13 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           withIcon
         />
       )}
+      {/* {handleVerificationState && handleVerificationState === HandleVerificationState.CHANGED_OWNERSHIP && ( */}
+      <Banner
+        withIcon
+        message={t('addressBook.reviewModal.banner.description', { name: addressInputValue.name })}
+        withButton
+      />
+      {/* )} */}
     </span>
   );
 };
