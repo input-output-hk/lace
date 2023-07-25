@@ -228,7 +228,9 @@ export const StakePoolConfirmation = (): React.ReactElement => {
               />
             )
           )}
-          <h1 className={styles.totalCostTitle}>{t('drawer.confirmation.totalCost.title')}</h1>
+          <h1 className={styles.totalCostTitle} data-testid="transaction-cost-title">
+            {t('drawer.confirmation.totalCost.title')}
+          </h1>
           <div className={styles.txCostContainer} data-testid="summary-fee-container">
             {deposit && (
               <RowContainer>
