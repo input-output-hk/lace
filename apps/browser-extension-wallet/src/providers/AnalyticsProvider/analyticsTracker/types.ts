@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 export enum MatomoEventActions {
   CLICK_EVENT = 'click-event',
   HOVER_EVENT = 'hover-event'
@@ -103,8 +104,8 @@ export type PostHogActionsKeys =
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogMetadata = {
-  // eslint-disable-next-line camelcase
   distinct_id?: string;
   url: string;
   view: ExtensionViews;
+  sent_at_local: string;
 };

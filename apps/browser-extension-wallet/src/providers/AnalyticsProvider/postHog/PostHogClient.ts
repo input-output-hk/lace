@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import posthog from 'posthog-js';
+import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
 import { ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTracker';
 import {
@@ -74,7 +75,8 @@ export class PostHogClient {
     return {
       url: window.location.href,
       distinct_id: await this.userIdService.getId(),
-      view: this.view
+      view: this.view,
+      sent_at_local: dayjs().format()
     };
   }
 }

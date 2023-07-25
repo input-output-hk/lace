@@ -1,10 +1,13 @@
 import { Wallet } from '@lace/cardano';
+import dayjs from 'dayjs';
 import { UserIdService } from '@lib/scripts/types';
 import { ExtensionViews, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/AnalyticsProvider/postHog/config';
 import { PostHogClient } from '@providers/AnalyticsProvider/postHog/PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
+
+const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
 
 jest.mock('posthog-js');
 
@@ -99,6 +102,22 @@ describe('PostHogClient', () => {
       event,
       expect.objectContaining({
         view: 'extended'
+      })
+    );
+  });
+
+  it('should send events with property sent at local', async () => {
+    jest.useFakeTimers().setSystemTime(mockSentDate);
+    const client = new PostHogClient(chain, mockUserIdService, ExtensionViews.Extended, publicPosthogHost);
+    const event = PostHogAction.OnboardingCreateClick;
+
+    await client.sendEvent(event);
+
+    expect(posthog.capture).toHaveBeenCalledWith(
+      event,
+      expect.objectContaining({
+        // eslint-disable-next-line camelcase
+        sent_at_local: dayjs(mockSentDate).format()
       })
     );
   });
