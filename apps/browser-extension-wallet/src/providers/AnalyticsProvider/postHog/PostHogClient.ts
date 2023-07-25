@@ -35,7 +35,8 @@ export class PostHogClient {
       // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
       disable_persistence: true,
       disable_cookie: true,
-      persistence: 'memory'
+      persistence: 'memory',
+      property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time']
     });
   }
 
