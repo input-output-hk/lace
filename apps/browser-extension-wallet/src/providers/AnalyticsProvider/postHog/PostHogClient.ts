@@ -18,6 +18,7 @@ export class PostHogClient {
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
+    private view: ExtensionViews = ExtensionViews.Extended,
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
@@ -73,9 +74,7 @@ export class PostHogClient {
     return {
       url: window.location.href,
       distinct_id: await this.userIdService.getId(),
-      // TODO: Since we only have onboarding flow event implemented, we hardcoded this to extended view,
-      // once we implement other flows, we'll need to make this dependable on the current user view (popup or extended) JIRA (TBD)
-      view: ExtensionViews.Extended
+      view: this.view
     };
   }
 }
