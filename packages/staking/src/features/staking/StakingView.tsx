@@ -7,7 +7,6 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
 import { Sections, useStakePoolDetails } from '../store';
 import { Navigation, Page } from './Navigation';
-import { PortfolioBar } from './PortfolioBar';
 
 const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
 
@@ -50,7 +49,6 @@ export const StakingView = () => {
           </Box>
         )}
       </Navigation>
-      <PortfolioBar onStake={onStake} />
       <StakePoolDetails
         showCloseIcon
         showBackIcon={(section: Sections): boolean => stepsWithBackBtn.has(section)}

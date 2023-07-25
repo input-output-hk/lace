@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { useStakePoolDetails } from '../../store';
+import { useDelegationPortfolioStore, useStakePoolDetails } from '../../store';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import { StakePoolSortOptions, StakePoolTableBrowser } from './StakePoolTableBrowser';
@@ -31,6 +31,7 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
+  const { addPoolToDraft, removePoolFromDraft } = useDelegationPortfolioStore((state) => state.mutators);
 
   const { setIsDrawerVisible } = useStakePoolDetails();
 
@@ -96,10 +97,13 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
       stakePools?.map((pool: Wallet.Cardano.StakePool) => {
         const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
+        const hexId = Wallet.Cardano.PoolIdHex(stakePool.hexId);
 
         return {
           logo,
           ...stakePool,
+          addToDraft: () => addPoolToDraft({ displayData: stakePool, id: hexId, weight: 1 }),
+          hexId,
           onClick: (): void => {
             setSelectedStakePool({ logo, ...pool });
             setIsDrawerVisible(true);
@@ -109,9 +113,10 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
             setSelectedStakePool(pool);
             onStake(poolId);
           },
+          removeFromDraft: () => removePoolFromDraft({ id: hexId }),
         };
       }) || [],
-    [stakePools, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, onStake]
+    [stakePools, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, onStake, removePoolFromDraft, addPoolToDraft]
   );
 
   return (

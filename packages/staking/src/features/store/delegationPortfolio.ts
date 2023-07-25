@@ -10,7 +10,7 @@ const defaultState: DelegationPortfolioState = {
 
 export const MAX_POOLS_COUNT = 5;
 
-export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set) => ({
+export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set, get) => ({
   ...defaultState,
   mutators: {
     addPoolToDraft: (poolData) =>
@@ -54,6 +54,10 @@ export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set
           poolEntry.weight = weight;
         })
       ),
+  },
+  poolIncludedInDraft: (id) => {
+    const { draftPortfolio } = get();
+    return !!draftPortfolio?.find((pool) => pool.id === id);
   },
 }));
 
