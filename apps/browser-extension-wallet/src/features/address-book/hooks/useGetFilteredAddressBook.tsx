@@ -71,7 +71,6 @@ export const useGetFilteredAddressBook = (): {
             .limit(limit)
             .toArray();
 
-          console.log('WHATS IN THE SCHEMA:::', result);
           const addressList = result.map((element) => getAddressBookByNameOrAddressTransformer(element));
           setFilteredAddresses(addressList);
         });
