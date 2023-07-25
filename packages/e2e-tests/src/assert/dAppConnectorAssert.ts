@@ -39,6 +39,7 @@ class DAppConnectorAssert {
   }
 
   async assertSeeTitleAndDappDetails(expectedTitleKey: string, expectedDappDetails: ExpectedDAppDetails) {
+    const currentDAppUrl = new URL(expectedDappDetails.url);
     const commonDappPageElements = new CommonDappPageElements();
     await commonDappPageElements.pageTitle.waitForDisplayed();
     await expect(await commonDappPageElements.pageTitle.getText()).to.equal(await t(expectedTitleKey));
@@ -46,7 +47,9 @@ class DAppConnectorAssert {
     await commonDappPageElements.dAppName.waitForDisplayed();
     await expect(await commonDappPageElements.dAppName.getText()).to.equal(expectedDappDetails.name);
     await commonDappPageElements.dAppUrl.waitForDisplayed();
-    await expect(await commonDappPageElements.dAppUrl.getText()).to.equal(expectedDappDetails.url);
+    await expect(await commonDappPageElements.dAppUrl.getText()).to.equal(
+      `${currentDAppUrl.protocol}//${currentDAppUrl.host}`
+    );
   }
 
   async assertSeeAuthorizeDAppPage(expectedDappDetails: ExpectedDAppDetails) {
