@@ -12,9 +12,9 @@ import NftsPage from '../elements/NFTs/nftsPage';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 
 class NftsPageObject {
-  async clickNftItemOnNftsPage(nftName: string) {
+  async clickNftItemOnNftsPage(nftName: string, clickType: 'left' | 'right' = 'left') {
     const nftNameElement = await NftsPage.getNftName(nftName);
-    await nftNameElement.click();
+    await nftNameElement.click({ button: clickType });
   }
 
   async clickNftItemInAssetSelector(nftName: string) {
