@@ -69,7 +69,8 @@ export const StakePoolDetails = ({
   const currentlyOnPageWhereDrawerButtonsAllowed = activePage === Page.browsePools;
   const drawerShowingDetails = simpleSendConfig.currentSection === Sections.DETAIL;
   const footerVisible =
-    currentlyOnPageWhereDrawerButtonsAllowed && drawerShowingDetails && !delegationPending && selectionActionsAllowed;
+    currentlyOnPageWhereDrawerButtonsAllowed &&
+    (!drawerShowingDetails || (!delegationPending && selectionActionsAllowed));
 
   const section = useMemo(() => sectionsMap[simpleSendConfig.currentSection], [simpleSendConfig, sectionsMap]);
   const footer = footerVisible ? footersMap[simpleSendConfig.currentSection] : undefined;
