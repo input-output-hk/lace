@@ -36,7 +36,8 @@ export class PostHogClient {
       disable_persistence: true,
       disable_cookie: true,
       persistence: 'memory',
-      property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time']
+      property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time'],
+      ip: true
     });
   }
 
