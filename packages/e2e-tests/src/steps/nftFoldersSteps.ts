@@ -16,6 +16,7 @@ import NftRenameFolderAsserts from '../assert/NftRenameFolderAsserts';
 import NftRenameFolderPage from '../elements/NFTs/NftRenameFolderPage';
 import { browser } from '@wdio/globals';
 import DeleteFolderModal from '../elements/NFTs/DeleteFolderModal';
+import NftAssert from '../assert/nftAssert';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -314,4 +315,20 @@ When(/^I click "(Cancel|Confirm)" button in delete folder modal$/, async (button
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+When(/^I create folder with name: "([^"]*)" and first available NFT$/, async (folderName: string) => {
+  await NftsPage.createFolderButton.click();
+  await NftCreateFolderPage.setFolderNameInput(folderName);
+  await NftCreateFolderPage.nextButton.waitForClickable();
+  await NftCreateFolderPage.nextButton.click();
+  await NftSelectNftsPage.selectNFTs(1);
+  await NftSelectNftsPage.nextButton.waitForClickable();
+  await NftSelectNftsPage.nextButton.click();
+  await NftsPage.createFolderButton.waitForClickable();
+  await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, true);
+});
+
+Then(/^I see folders on the NFTs page in the alphabetical order$/, async () => {
+  await NftAssert.assertSeeFoldersInAlphabeticalOrder();
 });
