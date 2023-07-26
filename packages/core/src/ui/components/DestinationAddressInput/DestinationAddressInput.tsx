@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import { AutoCompleteProps, Button } from 'antd';
 import { Search, SearchProps, Ellipsis } from '@lace/common';
+import { HandleResolution } from '@cardano-sdk/core';
 import { ReactComponent as BookIcon } from '../../assets/icons/book-icon.component.svg';
 import { ReactComponent as AddAddress } from '../../assets/icons/add.component.svg';
 import { ReactComponent as AvailableAddress } from '../../assets/icons/close-icon.component.svg';
@@ -9,8 +10,19 @@ import styles from './DestinationAddressInput.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
+enum HandleVerificationState {
+  VALID = 'valid',
+  INVALID = 'invalid',
+  VERIFYING = 'verifying',
+  CHANGED_OWNERSHIP = 'changedOwnership'
+}
+
+type HandleIcons = {
+  [key in HandleVerificationState]: JSX.Element | undefined;
+};
+
 export type DestinationAddressInputProps = Omit<AutoCompleteProps, 'value'> & {
-  value: { name?: string; address: string };
+  value: { name?: string; address: string; handleResolution?: HandleResolution };
   validationObject: { name: boolean; address: boolean };
   options: SearchProps['options'];
   onChange: SearchProps['onChange'];
@@ -21,7 +33,7 @@ export type DestinationAddressInputProps = Omit<AutoCompleteProps, 'value'> & {
   exists?: boolean;
   showClear?: boolean;
   onClear?: () => void;
-  handle?: 'valid' | 'verifying' | 'invalid' | 'changedOwnership';
+  handle?: HandleVerificationState;
   translations: TranslationsFor<'recipientAddress'>;
 };
 
@@ -62,17 +74,22 @@ export const DestinationAddressInput = ({
       Icon = validationObject?.address ? <AddAddress className={styles.icon} /> : <BookIcon className={styles.icon} />;
     }
 
-    let handleIcon;
-    if (handle === 'valid' || handle === 'changedOwnership') {
-      handleIcon = <CheckCircleOutlined className={styles.valid} />;
-    } else if (handle === 'invalid') {
-      handleIcon = <ExclamationCircleOutlined className={styles.invalid} />;
-    }
+    const handleIcons: HandleIcons = {
+      [HandleVerificationState.VALID]: <CheckCircleOutlined className={styles.valid} />,
+      [HandleVerificationState.CHANGED_OWNERSHIP]: <CheckCircleOutlined className={styles.valid} />,
+      [HandleVerificationState.INVALID]: <ExclamationCircleOutlined className={styles.invalid} />,
+      [HandleVerificationState.VERIFYING]: undefined
+    };
+    const handleIcon = handleIcons[handle] || undefined;
+
+    const shouldClearButtonBeDisabled =
+      (!valid && !empty) ||
+      (handle && handle !== HandleVerificationState.VALID && handle !== HandleVerificationState.CHANGED_OWNERSHIP);
     return (
       <>
         {handleIcon}
         <Button
-          disabled={(!valid && !empty) || (handle && handle !== 'valid')}
+          disabled={shouldClearButtonBeDisabled}
           data-testid="address-book-btn"
           onClick={valid || empty ? onClick : undefined}
           className={styles.addressBookBtn}
@@ -84,7 +101,12 @@ export const DestinationAddressInput = ({
     );
   }, [handle, valid, empty, validationObject, exists, onClick]);
 
-  const children = useMemo(() => value.name && getInputLabel(value.name, value.address), [value]);
+  const children = useMemo(() => {
+    if (handle === HandleVerificationState.CHANGED_OWNERSHIP) {
+      return value.name && getInputLabel(`$${value.handleResolution.handle}`, value.handleResolution.cardanoAddress);
+    }
+    return value.name && getInputLabel(value.name, value.address);
+  }, [handle, value]);
 
   return (
     <Search
@@ -93,7 +115,7 @@ export const DestinationAddressInput = ({
       label={translations.recipientAddress}
       onChange={onChange}
       options={options}
-      loading={handle === 'verifying'}
+      loading={handle === HandleVerificationState.VERIFYING}
       customIcon={customIcon}
       disabled={exists}
       invalid={valid === false}

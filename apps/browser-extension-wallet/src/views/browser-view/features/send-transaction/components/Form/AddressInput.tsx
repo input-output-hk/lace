@@ -11,7 +11,6 @@ import {
   validateWalletName,
   validateWalletAddress,
   isValidAddressPerNetwork,
-  // verifyHandle,
   ensureHandleOwnerHasntChanged
 } from '@src/utils/validators';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
@@ -41,7 +40,7 @@ export type inputValue = { name?: string; address: string; handleResolution?: Ha
 const isWalletNameValid = (name: string) => !validateWalletName(name);
 const isWalletAddressValid = (address: string) => !validateWalletAddress(address);
 
-enum HandleVerificationState {
+export enum HandleVerificationState {
   VALID = 'valid',
   INVALID = 'invalid',
   VERIFYING = 'verifying',
@@ -71,7 +70,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const destinationAddressInputTranslations = {
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
-  // todo: do we need to check here whether the flag is enabled?
+
   const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(addressInputValue.address.toString());
 
   const clearInput = useCallback(() => {
@@ -92,25 +91,36 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
-        // send the handleString that we get from addressBook
         try {
-          // todo: I can just throw this .. and catch the errors
           const isUpdatedValidHandle = await ensureHandleOwnerHasntChanged({
             handleResolution: addressInputValue?.handleResolution,
             handleResolver
           });
+
           isUpdatedValidHandle && setHandleVerificationState(HandleVerificationState.VALID);
+          setAddressValue(
+            row,
+            addressInputValue?.handleResolution.cardanoAddress.toString(),
+            addressInputValue.address.toString(),
+            true
+          );
         } catch (error) {
-          // todo: do I need the validHandle
           if (error instanceof CustomError && error.isValidHandle === false) {
             setHandleVerificationState(HandleVerificationState.INVALID);
           }
           if (error instanceof CustomConflictError) {
             setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
           }
+
+          setAddressValue(
+            row,
+            addressInputValue?.handleResolution.cardanoAddress.toString(),
+            addressInputValue.address.toString(),
+            false
+          );
         }
       }, HANDLE_DEBOUNCE_TIME),
-    [addressInputValue, handleResolver]
+    [addressInputValue, handleResolver, row, setAddressValue]
   );
 
   useEffect(() => {
@@ -141,6 +151,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     return {
       name: isNameValid,
       address: isAddressValid,
+      isHandleOwnershipValid: handleVerificationState === HandleVerificationState.VALID,
       isValidAddressPerNetwork:
         !isAddressValid ||
         isValidAddressPerNetwork({
@@ -148,19 +159,17 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           network: currentNetwork
         })
     };
-  }, [address, currentNetwork]);
+  }, [address, currentNetwork, handleVerificationState]);
 
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 
   useEffect(() => {
     // todo: debounce this
     const existingAddress = getExistingAddress(handle || address);
-
     if (existingAddress) {
       setAddressInputValue({
         name: existingAddress.walletName,
         address: existingAddress.walletAddress,
-        // check whether we can ensure there is a handle resolution
         handleResolution: existingAddress.walletHandleResolution || undefined
       });
     } else {
