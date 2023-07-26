@@ -70,7 +70,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const destinationAddressInputTranslations = {
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
-  // todo: do we need to check here whether the flag is enabled?
+
   const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(addressInputValue.address.toString());
 
   const clearInput = useCallback(() => {
@@ -92,7 +92,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     () =>
       debounce(async () => {
         try {
-          // todo: I can just throw this .. and catch the errors
           const isUpdatedValidHandle = await ensureHandleOwnerHasntChanged({
             handleResolution: addressInputValue?.handleResolution,
             handleResolver
@@ -102,16 +101,23 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           setAddressValue(
             row,
             addressInputValue?.handleResolution.cardanoAddress.toString(),
-            addressInputValue.address.toString()
+            addressInputValue.address.toString(),
+            true
           );
         } catch (error) {
-          // todo: do I need the validHandle
           if (error instanceof CustomError && error.isValidHandle === false) {
             setHandleVerificationState(HandleVerificationState.INVALID);
           }
           if (error instanceof CustomConflictError) {
             setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
           }
+
+          setAddressValue(
+            row,
+            addressInputValue?.handleResolution.cardanoAddress.toString(),
+            addressInputValue.address.toString(),
+            false
+          );
         }
       }, HANDLE_DEBOUNCE_TIME),
     [addressInputValue, handleResolver, row, setAddressValue]
@@ -145,6 +151,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     return {
       name: isNameValid,
       address: isAddressValid,
+      isHandleOwnershipValid: handleVerificationState === HandleVerificationState.VALID,
       isValidAddressPerNetwork:
         !isAddressValid ||
         isValidAddressPerNetwork({
@@ -152,10 +159,9 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           network: currentNetwork
         })
     };
-  }, [address, currentNetwork]);
+  }, [address, currentNetwork, handleVerificationState]);
 
   const isAddressInputValueValid = validationObject.name || validationObject.address;
-  console.log('is addressInputValue', validationObject.name, validationObject.address);
 
   useEffect(() => {
     // todo: debounce this
@@ -164,14 +170,13 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
       setAddressInputValue({
         name: existingAddress.walletName,
         address: existingAddress.walletAddress,
-        // check whether we can ensure there is a handle resolution
         handleResolution: existingAddress.walletHandleResolution || undefined
       });
     } else {
       setAddressInputValue({ address: handle || address });
     }
   }, [address, handle, getExistingAddress]);
-  console.log('HERE');
+
   const addressList = useMemo(
     () =>
       filteredAddresses?.slice(0, MAX_ADDRESSES)?.map(({ walletAddress, walletName }) => ({
@@ -205,7 +210,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     setAddressValue(row, tempAddress);
   }, [row, setAddressValue]);
 
-  console.log('handle verification state:', handleVerificationState);
   return (
     <span className={styles.container}>
       <DestinationAddressInput
