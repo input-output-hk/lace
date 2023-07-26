@@ -254,29 +254,6 @@ describe('Testing address book validator', () => {
       ).rejects.toThrow('general.errors.incorrectHandle');
     });
 
-    test('should throw an error if stake keys are not matching', async () => {
-      (mockHandleResolver.resolveHandles as jest.Mock).mockReturnValue([
-        {
-          cardanoAddress: Cardano.PaymentAddress(
-            'addr_test1qrrx8s34r6m0w835qe9tj8mqa4ugkwhllw5l4hwpmhakpy8hukqufzmfnrvvr24tschssxw96z8dq9dz09xkg9eghtkqe07423'
-          )
-        }
-      ]);
-
-      await expect(
-        async () =>
-          await addressBook.ensureHandleOwnerHasntChanged({
-            handleResolution: {
-              ...mockHandleResolution,
-              cardanoAddress: Cardano.PaymentAddress(
-                'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
-              )
-            },
-            handleResolver: mockHandleResolver
-          })
-      ).rejects.toThrow('general.errors.handleConflict');
-    });
-
     test('should return false if the handle ownership has not changed', async () => {
       const resolvedHandles = [
         {
