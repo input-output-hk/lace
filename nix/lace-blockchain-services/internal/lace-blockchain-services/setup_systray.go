@@ -8,6 +8,8 @@ import (
 	"runtime"
 
 	_ "lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
+	"lace.io/lace-blockchain-services/assets"
+	"lace.io/lace-blockchain-services/appconfig"
 
 	"github.com/getlantern/systray"
 	"github.com/atotto/clipboard"
@@ -17,16 +19,15 @@ func setupTrayUI(
 	comm CommChannels_UI,
 	logFile string,
 	networks []string,
+	appConfig appconfig.AppConfig,
 ) func() { return func() {
-	iconData, err := Asset("tray-icon")
+	iconData, err := assets.Asset("tray-icon")
 	if err != nil {
 	    panic(err)
 	}
 	systray.SetTemplateIcon(iconData, iconData)
 
 	mChooseNetwork := systray.AddMenuItem("Network", "")
-
-	appConfig := loadAppConfig()
 
 	mNetworks := make(map[string](*systray.MenuItem))
 	currentNetwork := ""
@@ -46,7 +47,7 @@ func setupTrayUI(
 					fmt.Printf("%s[%d]: switching network to: %s\n",
 						OurLogPrefix, os.Getpid(), network)
 					appConfig.LastNetwork = network
-					saveAppConfig(appConfig)
+					appconfig.Save(appConfig)
 					comm.NetworkSwitch <- network
 				}
 			}
@@ -55,7 +56,7 @@ func setupTrayUI(
 
 	if _, cfgNetExists := mNetworks[appConfig.LastNetwork]; !cfgNetExists {
 		appConfig.LastNetwork = networks[0]
-		saveAppConfig(appConfig)
+		appconfig.Save(appConfig)
 	}
 
 	mNetworks[appConfig.LastNetwork].ClickedCh <- struct{}{}
@@ -64,22 +65,14 @@ func setupTrayUI(
 
 	mCopyUrl := systray.AddMenuItem("Copy Backend URL", "")
 	go func() {
-		url := ""
-		mCopyUrl.Disable()
-		for { select {
-		case <-mCopyUrl.ClickedCh:
+		for range mCopyUrl.ClickedCh {
+			url := fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort)
 			err := clipboard.WriteAll(url)
 			if err != nil {
 				fmt.Printf("%s[%d]: error: failed to copy '%s' to clipboard: %s\n",
 					OurLogPrefix, os.Getpid(), url, err)
 			}
-		case url = <-comm.SetBackendUrl:
-			if url == "" {
-				mCopyUrl.Disable()
-			} else {
-				mCopyUrl.Enable()
-			}
-		}}
+		}
 	}()
 
 	systray.AddSeparator()
@@ -120,6 +113,14 @@ func setupTrayUI(
 	go func() {
 		for range mLogsDirectory.ClickedCh {
 			openWithDefaultApp(filepath.Dir(logFile))
+		}
+	}()
+
+	mSwaggerUI := systray.AddMenuItem("Swagger UI", "")
+	go func() {
+		for range mSwaggerUI.ClickedCh {
+			url := fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort)
+			openWithDefaultApp(url)
 		}
 	}()
 

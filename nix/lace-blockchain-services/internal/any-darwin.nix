@@ -109,7 +109,8 @@ in rec {
     preBuild = ''
       convert -background none -size 66x66 cardano-template.svg cardano.png
       cp cardano.png tray-icon
-      go-bindata -pkg main -o assets.go tray-icon
+      cp ${common.openApiJson} openapi.json
+      go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
     '';
   };
 
@@ -180,6 +181,7 @@ in rec {
 
     ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
     ln -s ${common.networkConfigs} "$app"/Resources/cardano-node-config
+    ln -s ${common.swagger-ui} "$app"/Resources/swagger-ui
 
     ln -s ${icons} "$app"/Resources/iconset.icns
   '';

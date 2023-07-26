@@ -7,6 +7,10 @@ import (
 	"runtime"
 )
 
+const (
+	OurLogPrefix = "lace-blockchain-services"
+)
+
 var (
 	ExecutablePath string
 	Username string

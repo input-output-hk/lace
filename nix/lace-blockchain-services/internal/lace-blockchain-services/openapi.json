@@ -1,0 +1,118 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API",
+    "description": "OpenAPI specification of endpoints to control the self-hosted backend."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:12345"
+    }
+  ],
+  "tags": [
+    { "name": "default" }
+  ],
+  "paths": {
+    "/v1/info": {
+      "get": {
+        "operationId": "381bbe97-e5d8-4f25-8249-a168e2f15f53",
+        "summary": "Information about capabilities",
+        "description": "Get information about which services are currently available and under which URLs",
+        "tags": ["default"],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "currentNetwork": { "$ref": "#/components/schemas/NetworkMagic" },
+                    "availableNetworks": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/NetworkMagic" }
+                    },
+                    "services": {
+                      "type": "object",
+                      "properties": {
+                        "lace-blockchain-services": { "$ref": "#/components/schemas/ServiceStatus" },
+                        "cardano-node": { "$ref": "#/components/schemas/ServiceStatus" },
+                        "ogmios": { "$ref": "#/components/schemas/ServiceStatus" },
+                        "provider-server": { "$ref": "#/components/schemas/ServiceStatus" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/switch-network/{networkMagic}": {
+      "put": {
+        "operationId": "6baa086b-9fc7-4ec6-b8ca-f9b2c025f523",
+        "summary": "Switch network",
+        "description": "Run local `cardano-node` and other services for a different network",
+        "tags": ["default"],
+        "parameters": [
+          {
+            "name": "networkMagic",
+            "in": "path",
+            "description": "The parameter value to be used to retrieve the resource.",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/NetworkMagic" }
+          }
+        ],
+        "requestBody": {
+          "description": "empty",
+          "content": {}
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {}
+          },
+          "404": {
+            "description": "Unknown network"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NetworkMagic": {
+        "type": "integer",
+        "enum": [764824073, 1, 2]
+      },
+      "ServiceStatus": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL under which the service can be accessed (sometimes empty)",
+            "example": "http://localhost:3001"
+          },
+          "state": {
+            "type": "string",
+            "description": "Current state of the service",
+            "example": "listening"
+          },
+          "version": {
+            "type": "string",
+            "description": "Version (release)",
+            "example": "8.1.2"
+          },
+          "revision": {
+            "type": "string",
+            "description": "Git commit ID",
+            "example": "d2d90b48c5577b4412d5c9c9968b55f8ab4b9767"
+          }
+        }
+      }
+    }
+  }
+}

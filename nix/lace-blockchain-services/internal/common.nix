@@ -10,7 +10,7 @@ in rec {
 
   prettyName = "Lace Blockchain Services";
 
-  laceVersion = (builtins.fromJSON (builtins.readFile ../../../package.json)).version;
+  laceVersion = (builtins.fromJSON (builtins.readFile ../../../apps/browser-extension-wallet/package.json)).version;
 
   cardanoWorldFlake = (flake-compat { src = inputs.cardano-world; }).defaultNix;
 
@@ -109,5 +109,43 @@ in rec {
     x86_64-darwin = cardanoNodeFlake.packages.x86_64-darwin.cardano-node;
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
+
+  swagger-ui = let
+    name = "swagger-ui";
+    version = "5.2.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "swagger-api"; repo = name;
+      rev = "v${version}";
+      hash = "sha256-gF2bUTr181MePC+FJN+BV2KQ7ZEW7sa4Mib7K0sgi4s=";
+    };
+  in pkgs.runCommand "${name}-${version}" {} ''
+    cp -r ${src}/dist $out
+    chmod -R +w $out
+    sed -r 's|url:.*,|url: window.location.origin + "/openapi.json",|' -i $out/swagger-initializer.js
+  '';
+
+  # OpenAPI linter
+  vacuum = pkgs.buildGoModule rec {
+    pname = "vacuum";
+    version = "0.2.6";
+    src = pkgs.fetchFromGitHub {
+      owner = "daveshanley"; repo = pname;
+      rev = "v${version}";
+      hash = "sha256-G0NzCqxu1rDrgnOrbDGuOv4Vq9lZJGeNyXzKRBvtf4o=";
+    };
+    vendorHash = "sha256-5aAnKf/pErRlugyk1/iJMaI4YtY/2Vs8GpB3y8tsjh4=";
+    doCheck = false;  # some segfault in OAS 2.0 tests…
+  };
+
+  openApiJson = pkgs.runCommand "openapi.json" {
+    buildInputs = [ pkgs.jq vacuum ];
+  } ''
+    vacuum lint --details ${./lace-blockchain-services/openapi.json}
+
+    jq --sort-keys\
+      --arg title ${lib.escapeShellArg "${prettyName} API"} \
+      '.info.title = $title' \
+      ${./lace-blockchain-services/openapi.json} >$out
+  '';
 
 }

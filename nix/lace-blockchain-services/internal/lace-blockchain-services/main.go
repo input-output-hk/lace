@@ -13,6 +13,8 @@ import (
 	"sort"
 
 	"lace.io/lace-blockchain-services/ourpaths"
+	"lace.io/lace-blockchain-services/appconfig"
+	"lace.io/lace-blockchain-services/httpapi"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -24,7 +26,7 @@ import (
 )
 
 const (
-	OurLogPrefix = "lace-blockchain-services"
+	OurLogPrefix = ourpaths.OurLogPrefix
 )
 
 func main() {
@@ -102,6 +104,14 @@ func main() {
 		setOgmiosDashboard := make(chan string)
 		blockRestartUI := make(chan bool)
 
+		// FIXME: get rid of that, right now we have to slurp the channel, or writing to it will block
+		go func(){
+			for url := range setBackendUrl {
+				fmt.Printf("%s[%d]: info: new provider-server: %s\n",
+					OurLogPrefix, os.Getpid(), url)
+			}
+		}()
+
 		networkSwitch := make(chan string)
 		initiateShutdownCh := make(chan struct{}, 1)
 
@@ -145,6 +155,15 @@ func main() {
 		}
 	}()
 
+	appConfig := appconfig.Load()
+
+	go func(){ for {
+		err := httpapi.Run(appConfig, []int{764824073, 1, 2})
+		fmt.Fprintf(os.Stderr, "%s[%d]: HTTP server failed: %v\n",
+			OurLogPrefix, os.Getpid(), err)
+		time.Sleep(1 * time.Second)
+	}}()
+
 	// Both macOS and Windows require that UI happens on the main thread:
 	var wgManager sync.WaitGroup
 	wgManager.Add(1)
@@ -154,7 +173,7 @@ func main() {
 		manageChildren(commManager)
 	}()
 
-	systray.Run(setupTrayUI(commUI, logFile, networks), func(){
+	systray.Run(setupTrayUI(commUI, logFile, networks, appConfig), func(){
 		wgManager.Wait()
 		fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 	})

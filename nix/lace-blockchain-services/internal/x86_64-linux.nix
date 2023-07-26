@@ -35,7 +35,8 @@ in rec {
     preBuild = ''
       convert -background none -size 44x44 cardano.svg cardano.png
       cp cardano.png tray-icon
-      go-bindata -pkg main -o assets.go tray-icon
+      cp ${common.openApiJson} openapi.json
+      go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
     '';
   };
 
@@ -53,6 +54,7 @@ in rec {
     ln -s ${cardano-js-sdk}/libexec/source $out/share/cardano-js-sdk
     ln -s ${pkgs.xkeyboard_config}/share/X11/xkb $out/share/xkb
     ln -s ${common.networkConfigs} $out/share/cardano-node-config
+    ln -s ${common.swagger-ui} $out/share/swagger-ui
   '';
 
   # XXX: this has no dependency on /nix/store on the target machine

@@ -1,4 +1,4 @@
-package main
+package appconfig
 
 import (
 	"fmt"
@@ -10,14 +10,20 @@ import (
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
+const (
+	OurLogPrefix = ourpaths.OurLogPrefix
+)
+
 type AppConfig struct {
-	LastNetwork string `json:"lastNetwork"`
+	ApiPort     int     `json:"apiPort"`
+	LastNetwork string  `json:"lastNetwork"`
 }
 
-func loadAppConfig() AppConfig {
+func Load() AppConfig {
 	configFile := ourpaths.WorkDir + string(filepath.Separator) + "app-config.json"
 
 	defaults := AppConfig {
+		ApiPort: 52910,
 		LastNetwork: "mainnet",
 	}
 
@@ -42,7 +48,7 @@ func loadAppConfig() AppConfig {
 	return defaults
 }
 
-func saveAppConfig(config AppConfig) {
+func Save(config AppConfig) {
 	configFile := ourpaths.WorkDir + string(filepath.Separator) + "app-config.json"
 
 	data, err := json.MarshalIndent(config, "", "  ")
