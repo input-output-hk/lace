@@ -274,6 +274,31 @@ Feature: NFT - Folders - Extended view
     When I press "Clear" button in search bar
     And "Select NFTs" page is showing all NFTs that I have
 
+  @LW-7184
+  Scenario: Extended-view - NFT Folders - "Add NFT" button avalibility and click withint the NFT folder
+    Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
+    And I navigate to NFTs extended page
+    And I save all NFTs that I have
+    When I open the NFT folder with name "Sample NFT folder"
+    Then I can see "Add NFT" button active
+    When I click "Add NFT" button within the NFT folder
+    Then "Select NFTs" page is showing all NFTs that I have
+
+  @LW-7185
+  Scenario: Extended-view - NFT Folders - Adding NFTs to existing folder
+    Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
+    And I navigate to NFTs extended page
+    And I open the NFT folder with name "Sample NFT folder"
+    And I can see "Add NFT" button active
+    And I click "Add NFT" button within the NFT folder
+    And I click NFT with name "Ibilecoin"
+    And I click NFT with name "Bison Coin"
+    When I click "Next" button on "Select NFTs" page
+    Then I see a toast with text: "NFTs added to folder"
+    And I see drawer with NFT folder contents
+    And I see NFT with name "Ibilecoin" on the NFT folder page
+    And I see NFT with name "Bison Coin" on the NFT folder page
+
   @LW-7187
   Scenario Outline: Extended-view - NFT Folders - Context menu with "Remove from folder" option is displayed: <is_displayed>
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
