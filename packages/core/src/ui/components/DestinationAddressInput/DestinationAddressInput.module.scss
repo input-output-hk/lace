@@ -116,6 +116,10 @@ button.addressBookBtn {
   }
 }
 
+.searchAddress {
+  padding-bottom: size_unit(1.25);
+}
+
 @media (max-width: $breakpoint-popup) {
   .addressOption {
     color: var(--text-color-primary) !important;

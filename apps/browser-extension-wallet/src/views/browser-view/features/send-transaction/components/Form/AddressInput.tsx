@@ -11,7 +11,8 @@ import {
   validateWalletName,
   validateWalletAddress,
   isValidAddressPerNetwork,
-  ensureHandleOwnerHasntChanged
+  ensureHandleOwnerHasntChanged,
+  verifyHandle
 } from '@src/utils/validators';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
 import { useAddressBookStore } from '@src/features/address-book/store';
@@ -26,6 +27,7 @@ import debounce from 'lodash/debounce';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 import { getTemporaryTxDataFromStorage } from '../../helpers';
 import { HandleResolution } from '@cardano-sdk/core';
+import ExclamationCircleOutline from '@src/assets/icons/red-exclamation-circle.component.svg';
 
 const { Text } = Typography;
 
@@ -50,7 +52,6 @@ export enum HandleVerificationState {
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleResolver = useHandleResolver();
-  // todo: this is really a contact
   const [addressInputValue, setAddressInputValue] = useState<inputValue>({ address: '' });
   // eslint-disable-next-line no-magic-numbers
   const MAX_ADDRESSES = isPopupView ? 3 : 5;
@@ -91,6 +92,18 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
+        if (!addressInputValue.handleResolution) {
+          console.log('I get in here:');
+          const { valid, handles } = await verifyHandle(addressInputValue.address, handleResolver);
+          console.log('result:', valid, handles);
+
+          if (valid) {
+            setAddressValue(row, handles[0].cardanoAddress, addressInputValue.address, true);
+            setHandleVerificationState(HandleVerificationState.VALID);
+          } else {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          }
+        }
         try {
           const isUpdatedValidHandle = await ensureHandleOwnerHasntChanged({
             handleResolution: addressInputValue?.handleResolution,
@@ -98,12 +111,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           });
 
           isUpdatedValidHandle && setHandleVerificationState(HandleVerificationState.VALID);
-          setAddressValue(
-            row,
-            addressInputValue?.handleResolution.cardanoAddress.toString(),
-            addressInputValue.address.toString(),
-            true
-          );
+          console.log('isUpdate valid handle', isUpdatedValidHandle);
+          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, true);
         } catch (error) {
           if (error instanceof CustomError && error.isValidHandle === false) {
             setHandleVerificationState(HandleVerificationState.INVALID);
@@ -112,12 +121,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
             setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
           }
 
-          setAddressValue(
-            row,
-            addressInputValue?.handleResolution.cardanoAddress.toString(),
-            addressInputValue.address.toString(),
-            false
-          );
+          console.log('addressINput resolution:', addressInputValue.handleResolution);
+          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, false);
         }
       }, HANDLE_DEBOUNCE_TIME),
     [addressInputValue, handleResolver, row, setAddressValue]
@@ -251,6 +256,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           withIcon
           message={t('addressBook.reviewModal.banner.description', { name: addressInputValue.name })}
           withButton
+          customIcon={<ExclamationCircleOutline />}
         />
       )}
     </span>
