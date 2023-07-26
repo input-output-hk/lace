@@ -391,7 +391,7 @@
     "walletSetup.mnemonicResetModal.cancel": "Cancel",
     "walletSetup.mnemonicResetModal.confirm": "OK",
     "walletSetup.confirmRestoreModal.header": "Multi-address wallet balance is now visible!",
-    "walletSetup.confirmRestoreModal.content": "<b>Lace is compatible with multi-address wallets created by other applications.</b> This means you can see and spend tokens that are not owned by the displayed address. Lace currently supports a one-time discovery of assets and addresses when you restore your wallet.",
+    "walletSetup.confirmRestoreModal.content": "<b>Lace is compatible with multi-address wallets created by other applications.</b> This means you can see and spend tokens that are not owned by the displayed address. Lace currently supports a one-time discovery of addresses when you restore your wallet.",
     "walletSetup.confirmRestoreModal.confirm": "OK",
     "walletSetup.confirmExperimentalHwDapp.header": "Limited support for Dapp connection",
     "walletSetup.confirmExperimentalHwDapp.content": "This current version does not support signing transactions through the Dapp connection feature with hardware wallets. Please stay tuned for upcoming releases and new features through @lace on Twitter.",
