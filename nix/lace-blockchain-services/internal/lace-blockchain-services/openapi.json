@@ -34,15 +34,7 @@
                       "type": "array",
                       "items": { "$ref": "#/components/schemas/NetworkMagic" }
                     },
-                    "services": {
-                      "type": "object",
-                      "properties": {
-                        "lace-blockchain-services": { "$ref": "#/components/schemas/ServiceStatus" },
-                        "cardano-node": { "$ref": "#/components/schemas/ServiceStatus" },
-                        "ogmios": { "$ref": "#/components/schemas/ServiceStatus" },
-                        "provider-server": { "$ref": "#/components/schemas/ServiceStatus" }
-                      }
-                    }
+                    "services": { "$ref": "#/components/schemas/AllServicesState" }
                   }
                 }
               }
@@ -80,6 +72,82 @@
           }
         }
       }
+    },
+    "/v1/websocket": {
+      "get": {
+        "operationId": "32f90caf-abdd-4a7a-b9a5-795616c44a0a",
+        "summary": "Notifications about service and network changes over a WebSocket",
+        "description": "Similar to `/v1/info`, but in real time. Also has logs.\n\nThis endpoint is modeled as a `GET` here, but in reality it’s a WebSocket with a few [JSON RPC 2.0](https://www.jsonrpc.org/specification) notifications (see responses). There are no requests.",
+        "tags": ["default"],
+        "parameters": [
+          {
+            "name": "withLog",
+            "in": "query",
+            "description": "Include `Log` messages with `stdout`/`stderr` of services?",
+            "required": false,
+            "schema": { "type": "boolean", "example": true, "default": true }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "jsonrpc": { "type": "string", "example": "2.0" },
+                          "method":  { "type": "string", "example": "NetworkChange" },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+                              "networkMagic": { "$ref": "#/components/schemas/NetworkMagic" }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "jsonrpc": { "type": "string", "example": "2.0" },
+                          "method":  { "type": "string", "example": "Log" },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+                              "timestamp": { "type": "string", "format": "date-time" },
+                              "service": { "type": "string", "example": "cardano-node" },
+                              "pid": { "type": "integer", "example": 10462 },
+                              "stderr": { "type": "boolean", "example": false },
+                              "line": { "type": "string", "example": "[ChainDB:Notice:52] Chain extended, new tip: 35cc8694d0f1d34146c93ea48357fe364f8a5487462ee79f5bb5cef92a7f7b9e at slot 33780262" }
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "jsonrpc": { "type": "string", "example": "2.0" },
+                          "method":  { "type": "string", "example": "ServiceState" },
+                          "params": {
+                            "type": "object",
+                            "properties": {
+                              "services": { "$ref": "#/components/schemas/AllServicesState" }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -88,7 +156,7 @@
         "type": "integer",
         "enum": [764824073, 1, 2]
       },
-      "ServiceStatus": {
+      "ServiceState": {
         "type": "object",
         "properties": {
           "url": {
@@ -111,6 +179,15 @@
             "description": "Git commit ID",
             "example": "d2d90b48c5577b4412d5c9c9968b55f8ab4b9767"
           }
+        }
+      },
+      "AllServicesState": {
+        "type": "object",
+        "properties": {
+          "lace-blockchain-services": { "$ref": "#/components/schemas/ServiceState" },
+          "cardano-node": { "$ref": "#/components/schemas/ServiceState" },
+          "ogmios": { "$ref": "#/components/schemas/ServiceState" },
+          "provider-server": { "$ref": "#/components/schemas/ServiceState" }
         }
       }
     }

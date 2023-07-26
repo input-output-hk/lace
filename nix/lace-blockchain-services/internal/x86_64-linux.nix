@@ -123,4 +123,16 @@ in rec {
     echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
   '';
 
+  swagger-ui-preview = let
+    port = 12345;
+  in pkgs.writeShellScriptBin "swagger-ui-preview" ''
+    set -euo pipefail
+    openapi=$(realpath -e nix/lace-blockchain-services/internal/lace-blockchain-services/openapi.json)
+    cd $(mktemp -d)
+    ln -s ${common.swagger-ui} ./swagger-ui
+    ln -s "$openapi" ./openapi.json
+    ( sleep 0.5 ; xdg-open http://127.0.0.1:${toString port}/swagger-ui/ ; ) &
+    ${lib.getExe pkgs.python3} -m http.server ${toString port}
+  '';
+
 }
