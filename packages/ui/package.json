@@ -1,6 +1,6 @@
 {
-  "name": "@lace/ui",
-  "version": "0.1.0",
+  "name": "@pczeglik-iohk/ui",
+  "version": "0.5.0",
   "description": "Lace UI Toolkit",
   "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/ui/README.md",
   "bugs": {
