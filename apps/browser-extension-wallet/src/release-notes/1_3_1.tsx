@@ -5,7 +5,6 @@ const ReleaseNote_1_3_1 = (): React.ReactElement => (
   <>
     <p>Introducing Lace 1.3.1 This hotfix version solves:</p>
     <ul style={{ listStyleType: 'disc', margin: 0 }}>
-      <li>Intermittent issue with Restoring HW wallet</li>
       <li>Issues with HD wallets interacting with dApps</li>
     </ul>
     <p>
