@@ -44,6 +44,11 @@
       color: #ff8e3c;
     }
 
+    svg {
+      height: 20px;
+      width: 20px;
+    }
+
     &.popupView {
       @include popupViewIconContainer;
     }

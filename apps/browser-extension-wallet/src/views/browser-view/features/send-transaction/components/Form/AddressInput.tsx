@@ -26,6 +26,7 @@ import debounce from 'lodash/debounce';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 import { getTemporaryTxDataFromStorage } from '../../helpers';
 import { HandleResolution } from '@cardano-sdk/core';
+import ExclamationCircleOutline from '@src/assets/icons/red-exclamation-circle.component.svg';
 
 const { Text } = Typography;
 
@@ -250,6 +251,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           withIcon
           message={t('addressBook.reviewModal.banner.description', { name: addressInputValue.name })}
           withButton
+          customIcon={<ExclamationCircleOutline />}
         />
       )}
     </span>
