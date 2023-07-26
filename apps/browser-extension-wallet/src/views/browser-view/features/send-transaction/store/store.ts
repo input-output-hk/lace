@@ -359,11 +359,6 @@ export const useAddressState = (row: string): { address: string; handle?: string
 const isValidDestination = (address: string) =>
   isHandle(address) ? isHandle(address) : isValidAddress(address.trim());
 
-// const isValidDestination = async (address: string) => {
-//   if (isHandle(address)) {
-//     const response = await ensureHandleOwnerHasntChanged();
-//   }
-// };
 export const useTransactionProps = (): {
   outputMap: OutputsMap;
   hasInvalidOutputs: boolean;

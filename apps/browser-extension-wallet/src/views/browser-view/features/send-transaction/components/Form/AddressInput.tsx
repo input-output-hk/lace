@@ -11,7 +11,6 @@ import {
   validateWalletName,
   validateWalletAddress,
   isValidAddressPerNetwork,
-  // verifyHandle,
   ensureHandleOwnerHasntChanged
 } from '@src/utils/validators';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
@@ -41,7 +40,7 @@ export type inputValue = { name?: string; address: string; handleResolution?: Ha
 const isWalletNameValid = (name: string) => !validateWalletName(name);
 const isWalletAddressValid = (address: string) => !validateWalletAddress(address);
 
-enum HandleVerificationState {
+export enum HandleVerificationState {
   VALID = 'valid',
   INVALID = 'invalid',
   VERIFYING = 'verifying',
@@ -92,14 +91,19 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
-        // send the handleString that we get from addressBook
         try {
           // todo: I can just throw this .. and catch the errors
           const isUpdatedValidHandle = await ensureHandleOwnerHasntChanged({
             handleResolution: addressInputValue?.handleResolution,
             handleResolver
           });
+
           isUpdatedValidHandle && setHandleVerificationState(HandleVerificationState.VALID);
+          setAddressValue(
+            row,
+            addressInputValue?.handleResolution.cardanoAddress.toString(),
+            addressInputValue.address.toString()
+          );
         } catch (error) {
           // todo: do I need the validHandle
           if (error instanceof CustomError && error.isValidHandle === false) {
@@ -110,7 +114,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           }
         }
       }, HANDLE_DEBOUNCE_TIME),
-    [addressInputValue, handleResolver]
+    [addressInputValue, handleResolver, row, setAddressValue]
   );
 
   useEffect(() => {
@@ -151,11 +155,11 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   }, [address, currentNetwork]);
 
   const isAddressInputValueValid = validationObject.name || validationObject.address;
+  console.log('is addressInputValue', validationObject.name, validationObject.address);
 
   useEffect(() => {
     // todo: debounce this
     const existingAddress = getExistingAddress(handle || address);
-
     if (existingAddress) {
       setAddressInputValue({
         name: existingAddress.walletName,
@@ -167,7 +171,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
       setAddressInputValue({ address: handle || address });
     }
   }, [address, handle, getExistingAddress]);
-
+  console.log('HERE');
   const addressList = useMemo(
     () =>
       filteredAddresses?.slice(0, MAX_ADDRESSES)?.map(({ walletAddress, walletName }) => ({
@@ -201,6 +205,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     setAddressValue(row, tempAddress);
   }, [row, setAddressValue]);
 
+  console.log('handle verification state:', handleVerificationState);
   return (
     <span className={styles.container}>
       <DestinationAddressInput
