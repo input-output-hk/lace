@@ -11,7 +11,8 @@ import {
   validateWalletName,
   validateWalletAddress,
   isValidAddressPerNetwork,
-  ensureHandleOwnerHasntChanged
+  ensureHandleOwnerHasntChanged,
+  verifyHandle
 } from '@src/utils/validators';
 import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
 import { useAddressBookStore } from '@src/features/address-book/store';
@@ -91,6 +92,18 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
+        if (!addressInputValue.handleResolution) {
+          console.log('I get in here:');
+          const { valid, handles } = await verifyHandle(addressInputValue.address, handleResolver);
+          console.log('result:', valid, handles);
+
+          if (valid) {
+            setAddressValue(row, handles[0].cardanoAddress, addressInputValue.address, true);
+            setHandleVerificationState(HandleVerificationState.VALID);
+          } else {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          }
+        }
         try {
           const isUpdatedValidHandle = await ensureHandleOwnerHasntChanged({
             handleResolution: addressInputValue?.handleResolution,
@@ -98,12 +111,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           });
 
           isUpdatedValidHandle && setHandleVerificationState(HandleVerificationState.VALID);
-          setAddressValue(
-            row,
-            addressInputValue?.handleResolution.cardanoAddress.toString(),
-            addressInputValue.address.toString(),
-            true
-          );
+          console.log('isUpdate valid handle', isUpdatedValidHandle);
+          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, true);
         } catch (error) {
           if (error instanceof CustomError && error.isValidHandle === false) {
             setHandleVerificationState(HandleVerificationState.INVALID);
@@ -112,12 +121,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
             setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
           }
 
-          setAddressValue(
-            row,
-            addressInputValue?.handleResolution.cardanoAddress.toString(),
-            addressInputValue.address.toString(),
-            false
-          );
+          console.log('addressINput resolution:', addressInputValue.handleResolution);
+          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, false);
         }
       }, HANDLE_DEBOUNCE_TIME),
     [addressInputValue, handleResolver, row, setAddressValue]

@@ -20,7 +20,6 @@ interface FilteredAddressList {
   walletHandleResolution?: HandleResolution;
 }
 
-// this is more a contact than a wallet
 const getAddressBookByNameOrAddressTransformer = ({
   address,
   name,
@@ -72,7 +71,6 @@ export const useGetFilteredAddressBook = (): {
             .toArray();
 
           const addressList = result.map((element) => getAddressBookByNameOrAddressTransformer(element));
-
           setFilteredAddresses(addressList);
         });
       }
