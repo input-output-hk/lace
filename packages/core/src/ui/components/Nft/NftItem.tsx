@@ -35,6 +35,7 @@ const ContextMenu = ({ setClicked, children, onRender, points }: ContextMenuProp
         setClicked(false);
       }}
       className={styles.portal}
+      data-testid="portal"
     >
       <div ref={contextRef} className={styles.contextMenu} style={{ top: points.y, right: points.x }}>
         {children}

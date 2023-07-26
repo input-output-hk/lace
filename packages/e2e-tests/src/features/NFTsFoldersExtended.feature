@@ -273,3 +273,46 @@ Feature: NFT - Folders - Extended view
     Then I see NFTs containing "coin" on the "Select NFTs" page
     When I press "Clear" button in search bar
     And "Select NFTs" page is showing all NFTs that I have
+
+  @LW-7187
+  Scenario Outline: Extended-view - NFT Folders - Context menu with "Remove from folder" option is displayed: <is_displayed>
+    Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
+    And I navigate to NFTs extended page
+    And I left click on the NFT folder with name "Sample NFT folder"
+    And I see "Sample NFT folder" NFT folder page in extended mode
+    When I <action> on the NFT folder page
+    Then NFT context menu with "Remove" option <is_displayed> displayed
+    Examples:
+      | action                                     | is_displayed |
+      | right click on the NFT with name "LaceNFT" | is           |
+      | right click on the add NFT button          | is not       |
+
+  @LW-7188
+  Scenario: Extended-view - NFT Folders - Closing context menu with "Remove from folder" option
+    Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
+    And I navigate to NFTs extended page
+    And I left click on the NFT folder with name "Sample NFT folder"
+    And I see "Sample NFT folder" NFT folder page in extended mode
+    When I right click on the NFT with name "LaceNFT" on the NFT folder page
+    Then NFT context menu with "Remove" option is displayed
+    When I click outside the NFT folder context menu
+    Then NFT context menu with "Remove" option is not displayed
+
+  @LW-7189
+  Scenario: Extended-view - NFT Folders - Removing NFTs from existing folder
+    Given the NFT folder with name "Sample NFT folder" and 2 NFT was created
+    And I navigate to NFTs extended page
+    And I do not see NFT with name: "LaceNFT" on the NFTs page
+    And I do not see NFT with name: "Ibilecoin" on the NFTs page
+    And I left click on the NFT folder with name "Sample NFT folder"
+    And I see "Sample NFT folder" NFT folder page in extended mode
+    And I see NFT with name "Ibilecoin" on the NFT folder page
+    And I see NFT with name "LaceNFT" on the NFT folder page
+    And I right click on the NFT with name "LaceNFT" on the NFT folder page
+    When I click "Remove from folder" option in NFT folder context menu
+    Then I see a toast with text: "NFT removed"
+    And I see NFT with name "Ibilecoin" on the NFT folder page
+    And I do not see NFT with name "LaceNFT" on the NFT folder page
+    And I close the drawer by clicking close button
+    And I see NFT with name: "LaceNFT" on the NFTs page
+    And I do not see NFT with name: "Ibilecoin" on the NFTs page
