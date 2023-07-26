@@ -98,7 +98,7 @@ Before(
 );
 
 Before(
-  { tags: '@Staking-DelegatedFunds-Extended' },
+  { tags: '@Staking-DelegatedFunds-Extended or @MultidelegationDelegatedFunds-Extended' },
   async () => await extendedViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
 );
 

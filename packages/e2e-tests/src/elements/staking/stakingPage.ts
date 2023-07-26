@@ -9,6 +9,8 @@ class StakingPage {
   private EMPTY_SEARCH_RESULTS_IMAGE = '[data-testid="stake-pool-table-empty-image"]';
   private EMPTY_SEARCH_RESULTS_MESSAGE = '[data-testid="stake-pool-table-empty-message"]';
   private SEARCH_LOADER = '[data-testid="search-loader"]';
+  private OVERVIEW_TAB = '[data-testid="overview-tab"]';
+  private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
 
   get title() {
     return SectionTitle.sectionTitle;

@@ -29,15 +29,15 @@ export class StakingInfoComponent extends WebElement {
   }
 
   poolLogo(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.POOL_LOGO}`, 'xpath');
+    return Factory.fromSelector(`${this.POOL_LOGO}`, 'xpath');
   }
 
   poolName(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.POOL_NAME}`, 'xpath');
+    return Factory.fromSelector(`${this.POOL_NAME}`, 'xpath');
   }
 
   poolTicker(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.POOL_TICKER}`, 'xpath');
+    return Factory.fromSelector(`${this.POOL_TICKER}`, 'xpath');
   }
 
   statsApy(): StatsComponent {
