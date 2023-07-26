@@ -72,7 +72,7 @@ export const useGetFilteredAddressBook = (): {
             .toArray();
 
           const addressList = result.map((element) => getAddressBookByNameOrAddressTransformer(element));
-          console.log('addressbook filer:>>>>', addressList);
+
           setFilteredAddresses(addressList);
         });
       }

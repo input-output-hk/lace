@@ -173,11 +173,11 @@ const stateHandlers = (get: GetState<Store>, set: SetState<Store>) => {
     set({ uiOutputs: updatedOutputs });
   };
 
-  const setAddressValue = (id: string, address: string, handle?: string, isHandleValid?: boolean) => {
+  const setAddressValue = (id: string, address: string, handle?: string, hasHandleOwnershipChanged?: boolean) => {
     const rows = get().uiOutputs;
     const row = rows[id];
     if (!row) return;
-    const updatedRow = { ...row, address, handle, isHandleValid };
+    const updatedRow = { ...row, address, handle, hasHandleOwnershipChanged };
     const outputs = { ...rows, [id]: updatedRow };
 
     set({ uiOutputs: outputs });
@@ -346,13 +346,13 @@ export const useCoinStateSelector = (row: string): UseCoinStateSelector =>
 
 export const useAddressState = (
   row: string
-): { address: string; handle?: string; isHandleValid?: boolean } & Pick<Store, 'setAddressValue'> =>
+): { address: string; handle?: string; hasHandleOwnershipChanged?: boolean } & Pick<Store, 'setAddressValue'> =>
   useStore(
     useCallback(
       ({ uiOutputs, setAddressValue }) => ({
         address: !uiOutputs[row] ? '' : uiOutputs[row].address,
         handle: !uiOutputs[row] ? '' : uiOutputs[row].handle,
-        isHandleValid: !uiOutputs[row] ? true : uiOutputs[row].hasHandleOwnershipChanged,
+        hasHandleOwnershipChanged: !uiOutputs[row] ? true : uiOutputs[row].hasHandleOwnershipChanged,
         setAddressValue
       }),
       [row]
@@ -376,10 +376,8 @@ export const useTransactionProps = (): {
   }));
   const hasInvalidOutputs = useMemo(
     () =>
-      Object.values(outputs).some((item) => {
-        console.log('whats here in invalid outputs:', outputs, item);
-        // destinationAddressChanged
-        return (
+      Object.values(outputs).some(
+        (item) =>
           !isValidDestination(item.address) ||
           !isValidAddressPerNetwork({
             address: item.address.trim(),
@@ -387,8 +385,7 @@ export const useTransactionProps = (): {
           }) ||
           item.assets.every((asset) => !(asset.value && Number(asset.value))) ||
           !item.hasHandleOwnershipChanged
-        );
-      }),
+      ),
     [outputs, currentChain]
   );
 

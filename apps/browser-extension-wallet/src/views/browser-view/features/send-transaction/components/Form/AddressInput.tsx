@@ -50,7 +50,6 @@ export enum HandleVerificationState {
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleResolver = useHandleResolver();
-  // todo: this is really a contact
   const [addressInputValue, setAddressInputValue] = useState<inputValue>({ address: '' });
   // eslint-disable-next-line no-magic-numbers
   const MAX_ADDRESSES = isPopupView ? 3 : 5;
