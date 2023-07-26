@@ -92,11 +92,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
-        // if (!handle) return;
-
-        // console.log('whats this:', typeof addressInputValue.address, addressInputValue);
-        // const handleString = addressInputValue.address.toString();
-        // console.log('what string:::', typeof handleString);
         // send the handleString that we get from addressBook
         try {
           // todo: I can just throw this .. and catch the errors

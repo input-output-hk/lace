@@ -359,6 +359,11 @@ export const useAddressState = (row: string): { address: string; handle?: string
 const isValidDestination = (address: string) =>
   isHandle(address) ? isHandle(address) : isValidAddress(address.trim());
 
+// const isValidDestination = async (address: string) => {
+//   if (isHandle(address)) {
+//     const response = await ensureHandleOwnerHasntChanged();
+//   }
+// };
 export const useTransactionProps = (): {
   outputMap: OutputsMap;
   hasInvalidOutputs: boolean;
@@ -373,15 +378,17 @@ export const useTransactionProps = (): {
   }));
   const hasInvalidOutputs = useMemo(
     () =>
-      Object.values(outputs).some(
-        (item) =>
+      Object.values(outputs).some((item) => {
+        console.log('whats here in invalid outputs:', outputs, item);
+        return (
           !isValidDestination(item.address) ||
           !isValidAddressPerNetwork({
             address: item.address.trim(),
             network: currentChain.networkId
           }) ||
           item.assets.every((asset) => !(asset.value && Number(asset.value)))
-      ),
+        );
+      }),
     [outputs, currentChain]
   );
 
