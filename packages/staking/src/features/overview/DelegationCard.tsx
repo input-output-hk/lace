@@ -57,8 +57,8 @@ export const DelegationCard = ({ distribution, status, showDistribution = false 
 
   return (
     <Card.Greyed>
-      <div className={styles.content}>
-        <div className={styles.chart}>
+      <div className={styles.content} data-testid="delegation-info-card">
+        <div className={styles.chart} data-testid="delegation-chart">
           <PieChart data={distribution} colors={distribution.map((d) => d.color)} />
           {showDistribution && <Text.SubHeading className={styles.counter}>100%</Text.SubHeading>}
         </div>
@@ -67,10 +67,14 @@ export const DelegationCard = ({ distribution, status, showDistribution = false 
             {infoData.map(({ nameTranslationKey, value }) => (
               <Fragment key={nameTranslationKey}>
                 <Cell className={styles.infoLabel}>
-                  <Text.Body.Large weight={'$semibold'}>{t(nameTranslationKey)}</Text.Body.Large>
+                  <Text.Body.Large weight={'$semibold'} data-testid={`${nameTranslationKey}-label`}>
+                    {t(nameTranslationKey)}
+                  </Text.Body.Large>
                 </Cell>
                 <Cell className={styles.infoValue}>
-                  <Text.Body.Large weight={'$bold'}>{value}</Text.Body.Large>
+                  <Text.Body.Large weight={'$bold'} data-testid={`${nameTranslationKey}-value`}>
+                    {value}
+                  </Text.Body.Large>
                 </Cell>
               </Fragment>
             ))}

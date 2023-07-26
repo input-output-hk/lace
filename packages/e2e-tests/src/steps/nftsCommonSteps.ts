@@ -12,10 +12,14 @@ import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import NftsPage from '../elements/NFTs/nftsPage';
+import { browser } from '@wdio/globals';
 
-When(/^I click on NFT with name: "([^"]*)" on NFTs page$/, async (nftName: string) => {
-  await nftsPageObject.clickNftItemOnNftsPage(nftName);
-});
+When(
+  /^I (|left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
+  async (clickType: 'left' | 'right' | '', nftName: string) => {
+    await nftsPageObject.clickNftItemOnNftsPage(nftName, clickType === '' ? 'left' : clickType);
+  }
+);
 
 When(/^I click on NFT with name: "([^"]*)" in asset selector$/, async (nftName: string) => {
   await nftsPageObject.clickNftItemInAssetSelector(nftName);

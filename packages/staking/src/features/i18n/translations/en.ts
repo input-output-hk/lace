@@ -1,12 +1,15 @@
 import { Translations } from '../types';
 
 export const en: Translations = {
+  'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
   'browsePools.stakePoolTableBrowser.emptyMessage': 'No results matching your search',
   'browsePools.stakePoolTableBrowser.searchInputPlaceholder': 'Search by type, token name or ID',
+  'browsePools.stakePoolTableBrowser.stake': 'Stake',
   'browsePools.stakePoolTableBrowser.tableHeader.cost': 'Cost',
   'browsePools.stakePoolTableBrowser.tableHeader.poolName': 'Pool name',
   'browsePools.stakePoolTableBrowser.tableHeader.ros': 'ROS',
   'browsePools.stakePoolTableBrowser.tableHeader.saturation': 'Saturation',
+  'browsePools.stakePoolTableBrowser.unselect': 'Unselect',
   'drawer.confirmation.button.confirm': 'Next',
   'drawer.confirmation.button.confirmWithDevice': 'Confirm with {{hardwareWallet}}',
   'drawer.confirmation.button.continueInAdvancedView': 'Continue in Advanced View',
@@ -60,7 +63,7 @@ export const en: Translations = {
   'drawer.success.switchedPools.title': "Hurray! You've switched pools",
   'drawer.success.title': "Hurray! You've staked your funds",
   'drawer.title': 'Stake pool detail',
-  'drawer.titleSecond': 'Manage delegation',
+  'drawer.titleSecond': 'Manage staking',
   'general.button.close': 'Close',
   'general.button.confirm': 'Confirm',
   'overview.delegationCard.label.balance': 'ADA Balance',

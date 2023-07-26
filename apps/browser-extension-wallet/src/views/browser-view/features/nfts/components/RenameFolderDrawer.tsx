@@ -59,7 +59,7 @@ export const RenameFolderDrawer = withNftsFoldersContext(
           block
           disabled={!isFormValid}
           onClick={changeFolderName}
-          data-testid={'rename-folder-drawer-form-cta'}
+          data-testid={'rename-folder-drawer-form-confirm-button'}
         >
           {t('general.button.confirm')}
         </Button>
@@ -68,7 +68,7 @@ export const RenameFolderDrawer = withNftsFoldersContext(
           block
           color="secondary"
           onClick={onCloseDrawer}
-          data-testid={'rename-folder-drawer-form-cta'}
+          data-testid={'rename-folder-drawer-form-cancel-button'}
         >
           {t('general.button.cancel')}
         </Button>
