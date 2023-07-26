@@ -11,6 +11,7 @@ import omit from 'lodash/omit';
 import { useWalletStore } from '@src/stores';
 import { isValidAddress, isValidAddressPerNetwork } from '@src/utils/validators';
 import { compactNumberWithUnit, formatNumberForDisplay } from '@src/utils/format-number';
+import { isHandle } from '@lace/core';
 
 // ====== initial values ======
 
@@ -60,7 +61,7 @@ export interface Store {
   removeCoinFromOutputs: (id: string, asset: { id: string }) => void;
   setAssetRowToOutput: (id: string, availableCoins: IAssetInfo[]) => void;
   // ====== output address handlers ======
-  setAddressValue: (id: string, address: string, handle?: string) => void;
+  setAddressValue: (id: string, address: string, handle?: string, hasHandleOwnershipChanged?: boolean) => void;
   // ====== address book picker ======
   currentRow?: string | undefined;
   currentCoinToChange?: string | undefined;
@@ -172,11 +173,11 @@ const stateHandlers = (get: GetState<Store>, set: SetState<Store>) => {
     set({ uiOutputs: updatedOutputs });
   };
 
-  const setAddressValue = (id: string, address: string, handle?: string) => {
+  const setAddressValue = (id: string, address: string, handle?: string, hasHandleOwnershipChanged?: boolean) => {
     const rows = get().uiOutputs;
     const row = rows[id];
     if (!row) return;
-    const updatedRow = { ...row, address, handle };
+    const updatedRow = { ...row, address, handle, hasHandleOwnershipChanged };
     const outputs = { ...rows, [id]: updatedRow };
 
     set({ uiOutputs: outputs });
@@ -343,17 +344,23 @@ export const useCoinStateSelector = (row: string): UseCoinStateSelector =>
     )
   );
 
-export const useAddressState = (row: string): { address: string; handle?: string } & Pick<Store, 'setAddressValue'> =>
+export const useAddressState = (
+  row: string
+): { address: string; handle?: string; hasHandleOwnershipChanged?: boolean } & Pick<Store, 'setAddressValue'> =>
   useStore(
     useCallback(
       ({ uiOutputs, setAddressValue }) => ({
         address: !uiOutputs[row] ? '' : uiOutputs[row].address,
         handle: !uiOutputs[row] ? '' : uiOutputs[row].handle,
+        hasHandleOwnershipChanged: !uiOutputs[row] ? true : uiOutputs[row].hasHandleOwnershipChanged,
         setAddressValue
       }),
       [row]
     )
   );
+
+const isValidDestination = (address: string) =>
+  isHandle(address) ? isHandle(address) : isValidAddress(address.trim());
 
 export const useTransactionProps = (): {
   outputMap: OutputsMap;
@@ -371,12 +378,13 @@ export const useTransactionProps = (): {
     () =>
       Object.values(outputs).some(
         (item) =>
-          !isValidAddress(item.address.trim()) ||
+          !isValidDestination(item.address) ||
           !isValidAddressPerNetwork({
             address: item.address.trim(),
             network: currentChain.networkId
           }) ||
-          item.assets.every((asset) => !(asset.value && Number(asset.value)))
+          item.assets.every((asset) => !(asset.value && Number(asset.value))) ||
+          (item.hasHandleOwnershipChanged !== undefined && !item.hasHandleOwnershipChanged)
       ),
     [outputs, currentChain]
   );

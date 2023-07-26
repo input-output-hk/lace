@@ -5,14 +5,17 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import cn from 'classnames';
 import { DestinationAddressInput, getInputLabel, isHandle, HANDLE_DEBOUNCE_TIME } from '@lace/core';
 import { useAddressState, useCurrentRow, useSections } from '../../store';
-import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
-import { useAddressBookStore } from '@src/features/address-book/store';
 import {
+  CustomError,
+  CustomConflictError,
   validateWalletName,
   validateWalletAddress,
   isValidAddressPerNetwork,
+  ensureHandleOwnerHasntChanged,
   verifyHandle
 } from '@src/utils/validators';
+import { useGetFilteredAddressBook } from '@src/features/address-book/hooks';
+import { useAddressBookStore } from '@src/features/address-book/store';
 import { Sections } from '../..';
 import { sectionsConfig } from '../../constants';
 import styles from './AddressInput.module.scss';
@@ -23,6 +26,8 @@ import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 import { getTemporaryTxDataFromStorage } from '../../helpers';
+import { HandleResolution } from '@cardano-sdk/core';
+import ExclamationCircleOutline from '@src/assets/icons/red-exclamation-circle.component.svg';
 
 const { Text } = Typography;
 
@@ -32,15 +37,16 @@ interface AddressInputProps {
   isPopupView: boolean;
 }
 
-export type inputValue = { name?: string; address: string };
+export type inputValue = { name?: string; address: string; handleResolution?: HandleResolution };
 
 const isWalletNameValid = (name: string) => !validateWalletName(name);
 const isWalletAddressValid = (address: string) => !validateWalletAddress(address);
 
-enum HandleVerificationState {
+export enum HandleVerificationState {
   VALID = 'valid',
   INVALID = 'invalid',
-  VERIFYING = 'verifying'
+  VERIFYING = 'verifying',
+  CHANGED_OWNERSHIP = 'changedOwnership'
 }
 
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
@@ -84,24 +90,40 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   };
 
   const resolveHandle = useMemo(
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     () =>
       debounce(async () => {
-        if (handle) {
-          setHandleVerificationState(HandleVerificationState.VALID);
+        if (!addressInputValue.handleResolution) {
+          const { valid, handles } = await verifyHandle(addressInputValue.address, handleResolver);
+
+          if (valid) {
+            setAddressValue(row, handles[0].cardanoAddress, addressInputValue.address, true);
+            setHandleVerificationState(HandleVerificationState.VALID);
+          } else {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          }
           return;
         }
 
-        const handleString = addressInputValue.address.toString();
+        try {
+          await ensureHandleOwnerHasntChanged({
+            handleResolution: addressInputValue?.handleResolution,
+            handleResolver
+          });
 
-        const { handles, valid } = await verifyHandle(handleString, handleResolver);
-        if (!valid) {
-          setHandleVerificationState(HandleVerificationState.INVALID);
-        } else {
           setHandleVerificationState(HandleVerificationState.VALID);
-          setAddressValue(row, handles[0].cardanoAddress.toString(), handleString);
+          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, true);
+        } catch (error) {
+          if (error instanceof CustomError && error.isValidHandle === false) {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          }
+          if (error instanceof CustomConflictError) {
+            setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
+          }
+          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, false);
         }
       }, HANDLE_DEBOUNCE_TIME),
-    [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
+    [addressInputValue.address, addressInputValue.handleResolution, handleResolver, row, setAddressValue]
   );
 
   useEffect(() => {
@@ -132,6 +154,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     return {
       name: isNameValid,
       address: isAddressValid,
+      isHandleOwnershipValid: handleVerificationState === HandleVerificationState.VALID,
       isValidAddressPerNetwork:
         !isAddressValid ||
         isValidAddressPerNetwork({
@@ -139,14 +162,18 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           network: currentNetwork
         })
     };
-  }, [address, currentNetwork]);
+  }, [address, currentNetwork, handleVerificationState]);
 
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 
   useEffect(() => {
     const existingAddress = getExistingAddress(handle || address);
     if (existingAddress) {
-      setAddressInputValue({ name: existingAddress.walletName, address: existingAddress.walletAddress });
+      setAddressInputValue({
+        name: existingAddress.walletName,
+        address: existingAddress.walletAddress,
+        handleResolution: existingAddress.walletHandleResolution || undefined
+      });
     } else {
       setAddressInputValue({ address: handle || address });
     }
@@ -185,6 +212,10 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     setAddressValue(row, tempAddress);
   }, [row, setAddressValue]);
 
+  const bannerDescription = isPopupView
+    ? 'addressBook.reviewModal.banner.popUpDescription'
+    : 'addressBook.reviewModal.banner.browserDescription';
+
   return (
     <span className={styles.container}>
       <DestinationAddressInput
@@ -218,6 +249,19 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           className={cn(styles.banner, { [styles.popupView]: isPopupView })}
           message={t('general.errors.wrongNetworkAddress')}
           withIcon
+        />
+      )}
+      {handleVerificationState && handleVerificationState === HandleVerificationState.CHANGED_OWNERSHIP && (
+        <Banner
+          withIcon
+          popupView={isPopupView}
+          message={t(bannerDescription, { name: addressInputValue.name })}
+          messagePartTwo={t('addressBook.reviewModal.banner.popUpDescriptionEnd')}
+          withButton={!isPopupView}
+          buttonMessage={t('addressBook.reviewModal.banner.confirmReview.button')}
+          withLink={isPopupView}
+          linkMessage={t('addressBook.reviewModal.banner.confirmReview.link')}
+          customIcon={<ExclamationCircleOutline />}
         />
       )}
     </span>
