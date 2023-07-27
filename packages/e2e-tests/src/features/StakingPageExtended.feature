@@ -57,6 +57,7 @@ Feature: Staking Page - Extended Browser View
   Scenario: Extended View - Selecting stake pool from list opens drawer with appropriate details
     When I navigate to Staking extended page
     And I see the stake pool search control with appropriate content in extended mode
+    And I click browse pools tab
     And I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
@@ -127,6 +128,7 @@ Feature: Staking Page - Extended Browser View
   @LW-4559 @Testnet @Mainnet
   Scenario: Extended View - Staking - Close modal - Open stake pool
     Given I am on Staking extended page
+    And I click browse pools tab
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
@@ -138,6 +140,7 @@ Feature: Staking Page - Extended Browser View
     #BUG https://input-output.atlassian.net/browse/LW-7563
   Scenario Outline: Extended View - Staking - Close modal - Staking confirmation step - <action>
     Given I am on Staking extended page
+    When I click browse pools tab
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     And I click "Stake on this pool" button on stake pool details drawer
@@ -156,6 +159,7 @@ Feature: Staking Page - Extended Browser View
     #BUG https://input-output.atlassian.net/browse/LW-7563
   Scenario: Extended View - Staking - Close modal - Password input
     Given I am on Staking extended page
+    When I click browse pools tab
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     And I click "Stake on this pool" button on stake pool details drawer
