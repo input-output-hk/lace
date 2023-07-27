@@ -7,13 +7,23 @@ class NftFolderAssert {
   async assertSeeNftFolderContextMenu(shouldBeDisplayed: boolean) {
     await NftFolderContextMenu.folderContextMenu.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      await NftFolderContextMenu.deleteOption.waitForDisplayed();
-      expect(await NftFolderContextMenu.deleteOption.getText()).to.equal(
+      await NftFolderContextMenu.deleteFolderOption.waitForDisplayed();
+      expect(await NftFolderContextMenu.deleteFolderOption.getText()).to.equal(
         await t('browserView.nfts.contextMenu.delete')
       );
-      await NftFolderContextMenu.renameOption.waitForDisplayed();
-      expect(await NftFolderContextMenu.renameOption.getText()).to.equal(
+      await NftFolderContextMenu.renameFolderOption.waitForDisplayed();
+      expect(await NftFolderContextMenu.renameFolderOption.getText()).to.equal(
         await t('browserView.nfts.contextMenu.rename')
+      );
+    }
+  }
+
+  async assertSeeNftContextMenu(shouldBeDisplayed: boolean) {
+    await NftFolderContextMenu.folderContextMenu.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      await NftFolderContextMenu.removeNFTOption.waitForDisplayed();
+      expect(await NftFolderContextMenu.removeNFTOption.getText()).to.equal(
+        await t('browserView.nfts.folderDrawer.contextMenu.remove')
       );
     }
   }
