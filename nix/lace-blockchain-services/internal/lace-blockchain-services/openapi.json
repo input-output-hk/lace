@@ -34,7 +34,10 @@
                       "type": "array",
                       "items": { "$ref": "#/components/schemas/NetworkMagic" }
                     },
-                    "services": { "$ref": "#/components/schemas/AllServicesState" }
+                    "services": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/ServiceState" }
+                    }
                   }
                 }
               }
@@ -74,10 +77,10 @@
       }
     },
     "/v1/websocket": {
-      "get": {
+      "head": {
         "operationId": "32f90caf-abdd-4a7a-b9a5-795616c44a0a",
         "summary": "Notifications about service and network changes over a WebSocket",
-        "description": "Similar to `/v1/info`, but in real time. Also has logs.\n\nThis endpoint is modeled as a `GET` here, but in reality it’s a WebSocket with a few [JSON RPC 2.0](https://www.jsonrpc.org/specification) notifications (see responses). There are no requests.",
+        "description": "Similar to `/v1/info`, but in real time. Also has logs.\n\nThis endpoint is modeled as a `HEAD` here, but in reality it’s a WebSocket with a few [JSON RPC 2.0](https://www.jsonrpc.org/specification) notifications (see responses below). There are no requests.",
         "tags": ["default"],
         "parameters": [
           {
@@ -105,7 +108,11 @@
                           "params": {
                             "type": "object",
                             "properties": {
-                              "networkMagic": { "$ref": "#/components/schemas/NetworkMagic" }
+                              "currentNetwork": { "$ref": "#/components/schemas/NetworkMagic" },
+                              "availableNetworks": {
+                                "type": "array",
+                                "items": { "$ref": "#/components/schemas/NetworkMagic" }
+                              }
                             }
                           }
                         }
@@ -118,8 +125,8 @@
                           "params": {
                             "type": "object",
                             "properties": {
-                              "timestamp": { "type": "string", "format": "date-time" },
-                              "service": { "type": "string", "example": "cardano-node" },
+                              "timestamp": { "type": "string", "format": "date-time", "example": "2023-07-27T09:12:34.022511785Z" },
+                              "serviceName": { "$ref": "#/components/schemas/ServiceName" },
                               "pid": { "type": "integer", "example": 10462 },
                               "stderr": { "type": "boolean", "example": false },
                               "line": { "type": "string", "example": "[ChainDB:Notice:52] Chain extended, new tip: 35cc8694d0f1d34146c93ea48357fe364f8a5487462ee79f5bb5cef92a7f7b9e at slot 33780262" }
@@ -132,12 +139,7 @@
                         "properties": {
                           "jsonrpc": { "type": "string", "example": "2.0" },
                           "method":  { "type": "string", "example": "ServiceState" },
-                          "params": {
-                            "type": "object",
-                            "properties": {
-                              "services": { "$ref": "#/components/schemas/AllServicesState" }
-                            }
-                          }
+                          "params": { "$ref": "#/components/schemas/ServiceState" }
                         }
                       }
                     ]
@@ -156,13 +158,18 @@
         "type": "integer",
         "enum": [764824073, 1, 2]
       },
+      "ServiceName": {
+        "type": "string",
+        "enum": ["cardano-node", "ogmios", "provider-server", "lace-blockchain-services"]
+      },
       "ServiceState": {
         "type": "object",
         "properties": {
+          "serviceName": { "$ref": "#/components/schemas/ServiceName" },
           "url": {
             "type": "string",
             "description": "URL under which the service can be accessed (sometimes empty)",
-            "example": "http://localhost:3001"
+            "example": "http://127.0.0.1:3001"
           },
           "state": {
             "type": "string",
@@ -179,15 +186,6 @@
             "description": "Git commit ID",
             "example": "d2d90b48c5577b4412d5c9c9968b55f8ab4b9767"
           }
-        }
-      },
-      "AllServicesState": {
-        "type": "object",
-        "properties": {
-          "lace-blockchain-services": { "$ref": "#/components/schemas/ServiceState" },
-          "cardano-node": { "$ref": "#/components/schemas/ServiceState" },
-          "ogmios": { "$ref": "#/components/schemas/ServiceState" },
-          "provider-server": { "$ref": "#/components/schemas/ServiceState" }
         }
       }
     }

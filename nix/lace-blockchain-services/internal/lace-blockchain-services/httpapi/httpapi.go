@@ -62,5 +62,9 @@ func openApiJson(appConfig appconfig.AppConfig, availableNetworks []int) ([]byte
 	doc["components"].(map[string]interface{})["schemas"].(map[string]interface{})["NetworkMagic"].
 		(map[string]interface{})["enum"] = availableNetworks
 
+	doc["components"].(map[string]interface{})["schemas"].(map[string]interface{})["ServiceName"].
+		(map[string]interface{})["enum"] = []string{
+		"cardano-node", "ogmios", "provider-server", "lace-blockchain-services"}
+
 	return json.Marshal(doc)
 }

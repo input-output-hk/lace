@@ -116,10 +116,10 @@ func setupTrayUI(
 		}
 	}()
 
-	mSwaggerUI := systray.AddMenuItem("Swagger UI", "")
+	mSwaggerUI := systray.AddMenuItem("OpenAPI Specification v3.0", "")
 	go func() {
 		for range mSwaggerUI.ClickedCh {
-			url := fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort)
+			url := fmt.Sprintf("http://127.0.0.1:%d/swagger-ui/", appConfig.ApiPort)
 			openWithDefaultApp(url)
 		}
 	}()
