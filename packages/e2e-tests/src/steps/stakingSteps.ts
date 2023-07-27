@@ -161,6 +161,10 @@ Then(/^I input "([^"]*)" to the search bar$/, async (term: string) => {
   await StakingPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
 
+Then(/^I click browse pools tab$/, async () => {
+  await StakingPage.clickBrowsePoolsTab();
+});
+
 Then(
   /^there are (.*) results and "([^"]*)" and "([^"]*)" are populated if applicable$/,
   async (results: number, resultTitle: string, resultSubTitle: string) => {

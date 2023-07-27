@@ -43,6 +43,14 @@ class StakingPage {
   get searchLoader() {
     return $(this.SEARCH_LOADER);
   }
+  get browsePoolTab() {
+    return $(this.BROWSE_POOLS_TAB);
+  }
+
+  async clickBrowsePoolsTab() {
+    await this.browsePoolTab.waitForClickable();
+    await this.browsePoolTab.click();
+  }
 
   stakingPoolListColumnHeader(listHeader: string) {
     const headerColumnSelector = this.STAKE_POOL_LIST_HEADER_TEMPLATE.replace(
