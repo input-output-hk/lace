@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable complexity */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable sonarjs/cognitive-complexity */
@@ -18,7 +19,8 @@ import {
   usePassword,
   useSubmitingState,
   useMultipleSelection,
-  useSelectedTokenList
+  useSelectedTokenList,
+  useTriggerPoint
 } from '../../store';
 import { useCoinStateSelector, useAddressState } from '@src/views/browser-view/features/send-transaction';
 import { useDrawer } from '@src/views/browser-view/stores';
@@ -135,6 +137,7 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const analytics = useAnalyticsContext();
   const [isMultipleSelectionAvailable, setMultipleSelection] = useMultipleSelection();
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
+  const { triggerPoint } = useTriggerPoint();
 
   const sendAnalytics = useCallback(() => {
     if (section.currentSection === Sections.SUMMARY) {
@@ -178,9 +181,9 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
 
   const onCrossIconClick = () => {
     if (section.currentSection === Sections.SUCCESS_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick);
+      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick, { trigger_point: triggerPoint });
     } else if (section.currentSection === Sections.FAIL_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick);
+      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick, { trigger_point: triggerPoint });
     }
     onClose();
   };

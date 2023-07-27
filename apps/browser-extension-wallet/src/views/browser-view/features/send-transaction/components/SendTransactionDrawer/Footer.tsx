@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable max-statements */
 /* eslint-disable unicorn/no-null */
 import React, { useCallback, useMemo, useEffect, useRef } from 'react';
@@ -13,7 +14,8 @@ import {
   useSubmitingState,
   useTransactionProps,
   usePassword,
-  useMetadata
+  useMetadata,
+  useTriggerPoint
 } from '../../store';
 import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
@@ -56,6 +58,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const confirmRef = useRef<HTMLButtonElement>();
   const triggerSubmit = () => confirmRef.current?.click();
   const { t } = useTranslation();
+  const { triggerPoint } = useTriggerPoint();
   const { hasInvalidOutputs, outputMap } = useTransactionProps();
   const { builtTxData } = useBuiltTxState();
   const { setSection, currentSection } = useSections();
@@ -81,31 +84,34 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
 
   const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
+  const sendEventToPostHog = (action: PostHogAction) =>
+    analytics.sendEventToPostHog(action, { trigger_point: triggerPoint });
+
   const sendAnalytics = useCallback(() => {
     switch (currentSection.currentSection) {
       case Sections.FORM: {
         sendEventToMatomo(isPopupView ? Events.REVIEW_TX_DETAILS_POPUP : Events.REVIEW_TX_DETAILS_BROWSER);
-        analytics.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
+        sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
         break;
       }
       case Sections.SUMMARY: {
         sendEventToMatomo(isPopupView ? Events.CONFIRM_TX_DETAILS_POPUP : Events.CONFIRM_TX_DETAILS_BROWSER);
-        analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick);
+        sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick);
         break;
       }
       case Sections.CONFIRMATION: {
         sendEventToMatomo(isPopupView ? Events.INPUT_TX_PASSWORD_POPUP : Events.INPUT_TX_PASSWORD_BROWSER);
-        analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick);
+        sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick);
         break;
       }
       case Sections.SUCCESS_TX: {
         sendEventToMatomo(isPopupView ? Events.SUCCESS_VIEW_TX_POPUP : Events.SUCCESS_VIEW_TX_BROWSER);
-        analytics.sendEventToPostHog(PostHogAction.SendAllDoneViewTransactionClick);
+        sendEventToPostHog(PostHogAction.SendAllDoneViewTransactionClick);
         break;
       }
       case Sections.FAIL_TX: {
         sendEventToMatomo(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
-        analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongBackClick);
+        sendEventToPostHog(PostHogAction.SendSomethingWentWrongBackClick);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -197,9 +203,9 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
 
   const handleClose = () => {
     if (currentSection.currentSection === Sections.SUCCESS_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendAllDoneCloseClick);
+      sendEventToPostHog(PostHogAction.SendAllDoneCloseClick);
     } else if (currentSection.currentSection === Sections.FAIL_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongCancelClick);
+      sendEventToPostHog(PostHogAction.SendSomethingWentWrongCancelClick);
     }
 
     onClose();
