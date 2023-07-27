@@ -316,3 +316,11 @@ Feature: NFT - Folders - Extended view
     And I close the drawer by clicking close button
     And I see NFT with name: "LaceNFT" on the NFTs page
     And I do not see NFT with name: "Ibilecoin" on the NFTs page
+
+  @LW-7259
+  Scenario: Extended-view - NFT Folders - NFT folders sorted alphabetically
+    Given I navigate to NFTs extended page
+    When I create folder with name: "abc" and first available NFT
+    And I create folder with name: "bcd" and first available NFT
+    And I create folder with name: "cde" and first available NFT
+    Then I see folders on the NFTs page in the alphabetical order

@@ -255,7 +255,6 @@ Feature: NFT - Folders - Popup view
     When I press "Clear" button in search bar
     And "Select NFTs" page is showing all NFTs that I have
 
-
   @LW-7193
   Scenario Outline: Popup-view - NFT Folders - Context menu with "Remove from folder" option is displayed: <is_displayed>
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
@@ -298,3 +297,11 @@ Feature: NFT - Folders - Popup view
     And I close the drawer by clicking back button
     And I see NFT with name: "LaceNFT" on the NFTs page
     And I do not see NFT with name: "Ibilecoin" on the NFTs page
+
+  @LW-7276
+  Scenario: Popup-view - NFT Folders - NFT folders sorted alphabetically
+    Given I navigate to NFTs popup page
+    When I create folder with name: "abc" and first available NFT
+    And I create folder with name: "bcd" and first available NFT
+    And I create folder with name: "cde" and first available NFT
+    Then I see folders on the NFTs page in the alphabetical order

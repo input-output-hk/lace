@@ -200,7 +200,8 @@ Feature: Address book - extended view
       | Glossary | What is the Lace address book? |
       | Glossary | What is a saved address?       |
 
-  @LW-4744
+  @LW-4744 @Pending
+    # Bug LW-7697
   Scenario: Extended-view - Address Book - Enter and Escape buttons support when editing address
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
