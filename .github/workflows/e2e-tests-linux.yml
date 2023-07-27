@@ -103,11 +103,11 @@ jobs:
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
           resultsGlob: './packages/e2e-tests/reports/allure/results/*'
-          bucket: lightwallet
+          bucket: lace-e2e-test-results
           prefix: 'linux/${BROWSER}/${RUN}'
           copyLatest: true
           ignoreMissingResults: true
