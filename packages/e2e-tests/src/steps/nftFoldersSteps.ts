@@ -18,8 +18,6 @@ import { browser } from '@wdio/globals';
 import DeleteFolderModal from '../elements/NFTs/DeleteFolderModal';
 import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import NftAssert from '../assert/nftAssert';
-import NftAddNftToFolderPage from '../elements/NFTs/nftAddNftToFolderPage';
-import NftAddNftToFolderAssert from '../assert/nftAddNftToFolderAssert';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -184,20 +182,20 @@ Then(
   }
 );
 
-When(/^I open the NFT folder with name "([^"]*)"$/, async (folderName: string) => {
-  const nftFolder = await NftsPage.getFolder(folderName);
-  await nftFolder.waitForClickable();
-  await nftFolder.click();
-});
+// When(/^I open the NFT folder with name "([^"]*)"$/, async (folderName: string) => {
+//   const nftFolder = await NftsPage.getFolder(folderName);
+//   await nftFolder.waitForClickable();
+//   await nftFolder.click();
+// });
 
 When(/^I click "Add NFT" button within the NFT folder$/, async () => {
-  const addNFTButton = NftAddNftToFolderPage.placeholderItem;
+  const addNFTButton = NftsFolderPage.addNftButton;
   await addNFTButton.waitForClickable();
   await addNFTButton.click();
 });
 
 Then(/^I can see "Add NFT" button active$/, async () => {
-  await NftAddNftToFolderAssert.assertSeeAddNftButton();
+  await NftFolderAssert.assertSeeAddNftButton();
 });
 
 When(
@@ -256,10 +254,6 @@ Then(
 
 Then(/^I see a toast with text: "NFTs added to folder"$/, async () => {
   await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.update'), true);
-});
-
-Then(/^I see drawer with NFT folder contents$/, async () => {
-  await NftAddNftToFolderAssert.assertSeeNftAddNftToFolderPage();
 });
 
 Then(/^I see a toast with text: "NFT removed"$/, async () => {

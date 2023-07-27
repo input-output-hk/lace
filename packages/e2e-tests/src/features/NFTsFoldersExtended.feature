@@ -279,7 +279,7 @@ Feature: NFT - Folders - Extended view
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
     And I navigate to NFTs extended page
     And I save all NFTs that I have
-    When I open the NFT folder with name "Sample NFT folder"
+    When I left click on the NFT folder with name "Sample NFT folder"
     Then I can see "Add NFT" button active
     When I click "Add NFT" button within the NFT folder
     Then "Select NFTs" page is showing all NFTs that I have
@@ -288,14 +288,14 @@ Feature: NFT - Folders - Extended view
   Scenario: Extended-view - NFT Folders - Adding NFTs to existing folder
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
     And I navigate to NFTs extended page
-    And I open the NFT folder with name "Sample NFT folder"
+    When I left click on the NFT folder with name "Sample NFT folder"
     And I can see "Add NFT" button active
     And I click "Add NFT" button within the NFT folder
     And I click NFT with name "Ibilecoin"
     And I click NFT with name "Bison Coin"
-    When I click "Next" button on "Select NFTs" page
+    When I click "Add selected NFTs" button on "Select NFTs" page
     Then I see a toast with text: "NFTs added to folder"
-    And I see drawer with NFT folder contents
+    And I see "Sample NFT folder" NFT folder page in extended mode
     And I see NFT with name "Ibilecoin" on the NFT folder page
     And I see NFT with name "Bison Coin" on the NFT folder page
 
