@@ -9,7 +9,9 @@ import (
 	"path/filepath"
 	"encoding/json"
 	"sort"
+	"unsafe"
 
+	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/assets"
 	"lace.io/lace-blockchain-services/appconfig"
@@ -20,12 +22,12 @@ const (
 )
 
 type CommChannels struct {
-	SwitchNetwork    chan<- int
+	SwitchNetwork    chan<- t.NetworkMagic
 
-	SwitchedNetwork  <-chan int
+	SwitchedNetwork  <-chan t.NetworkMagic
 }
 
-func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map[int]string) error {
+func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map[t.NetworkMagic]string) error {
 	info := Info{
 		CurrentNetwork: -1,
 		AvailableNetworks: networksToMagics(availableNetworks),
@@ -49,16 +51,16 @@ func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map
 }
 
 type Info struct {
-	CurrentNetwork    int    `json:"currentNetwork"`
-	AvailableNetworks []int  `json:"availableNetworks"`
 	Services          []int  `json:"services"`
+	CurrentNetwork    t.NetworkMagic   `json:"currentNetwork"`
+	AvailableNetworks []t.NetworkMagic `json:"availableNetworks"`
 }
 
 func handler(
 	appConfig appconfig.AppConfig,
 	comm CommChannels,
 	info *Info,
-	availableNetworks map[int]string,
+	availableNetworks map[t.NetworkMagic]string,
 ) func(http.ResponseWriter, *http.Request) { return func(w http.ResponseWriter, r *http.Request) {
 	swaggerUiPrefix := "swagger-ui"
 
@@ -80,7 +82,8 @@ func handler(
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
 	} else if strings.HasPrefix(r.URL.Path, "/v1/switch-network/") && r.Method == http.MethodPut {
-		magic, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/v1/switch-network/"))
+		magicInt, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/v1/switch-network/"))
+		magic := t.NetworkMagic(magicInt)
 		_, exists := availableNetworks[magic]
 		if err == nil && exists {
 			fmt.Printf("%s[%d]: HTTP switching to magic: %v\n", OurLogPrefix, os.Getpid(), magic)
@@ -93,15 +96,15 @@ func handler(
 	}
 }}
 
-func networksToMagics(availableNetworks map[int]string) []int {
-	// We want to show largest magics first (mainnet), for clearer examples in docs:
-	magics := []int{}
+func networksToMagics(availableNetworks map[t.NetworkMagic]string) []t.NetworkMagic {
+	magics := []t.NetworkMagic{}
 	for magic, _ := range availableNetworks { magics = append(magics, magic) }
-	sort.Sort(sort.Reverse(sort.IntSlice(magics)))
+	// We want to show largest magics first (mainnet), for clearer examples in docs:
+	sort.Sort(sort.Reverse(sort.IntSlice(  *(*[]int)(unsafe.Pointer(&magics))  )))
 	return magics
 }
 
-func openApiJson(appConfig appconfig.AppConfig, availableNetworks map[int]string) ([]byte, error) {
+func openApiJson(appConfig appconfig.AppConfig, availableNetworks map[t.NetworkMagic]string) ([]byte, error) {
 	raw, err := assets.Asset("openapi.json")
 	if err != nil { return nil, err }
 

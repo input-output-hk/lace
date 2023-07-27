@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sort"
 
+	t "lace.io/lace-blockchain-services/types"
 	_ "lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
 	"lace.io/lace-blockchain-services/assets"
 	"lace.io/lace-blockchain-services/appconfig"
@@ -19,7 +20,7 @@ import (
 func setupTrayUI(
 	comm CommChannels_UI,
 	logFile string,
-	networks map[int]string,
+	networks map[t.NetworkMagic]string,
 	appConfig appconfig.AppConfig,
 ) func() { return func() {
 	iconData, err := assets.Asset("tray-icon")
@@ -33,7 +34,7 @@ func setupTrayUI(
 	mNetworks := make(map[string](*systray.MenuItem))
 	currentNetwork := ""
 	{
-		reverseNetworks := map[string]int{}
+		reverseNetworks := map[string]t.NetworkMagic{}
 		sortedNames := []string{}
 		for a, b := range networks { reverseNetworks[b] = a; sortedNames = append(sortedNames, b) }
 		sort.Strings(sortedNames)

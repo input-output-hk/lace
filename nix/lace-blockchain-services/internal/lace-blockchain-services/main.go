@@ -12,6 +12,7 @@ import (
 	"time"
 	"encoding/json"
 
+	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/appconfig"
 	"lace.io/lace-blockchain-services/httpapi"
@@ -113,12 +114,12 @@ func main() {
 		}()
 
 		networkFromUI := make(chan string)
-		networkFromHttp := make(chan int)
-		networkToHttp := make(chan int)
+		networkFromHttp := make(chan t.NetworkMagic)
+		networkToHttp := make(chan t.NetworkMagic)
 		networkToManager := make(chan string)
 
 		go func(){
-			reverseNetworks := map[string]int{}
+			reverseNetworks := map[string]t.NetworkMagic{}
 			for a, b := range networks { reverseNetworks[b] = a }
 			for name := range networkFromUI {
 				networkToManager <- name
@@ -204,7 +205,7 @@ type CommChannels_UI struct {
 	SetOgmiosDashboard   <-chan string
 	BlockRestartUI       <-chan bool
 
-	HttpSwitchesNetwork  <-chan int
+	HttpSwitchesNetwork  <-chan t.NetworkMagic
 
 	NetworkSwitch        chan<- string
 	InitiateShutdownCh   chan<- struct{}
@@ -244,8 +245,8 @@ func logSystemHealth() {
 }
 
 // A map from network magic to name
-func readAvailableNetworks() (map[int]string, error) {
-	rv := map[int]string{}
+func readAvailableNetworks() (map[t.NetworkMagic]string, error) {
+	rv := map[t.NetworkMagic]string{}
 	sep := string(filepath.Separator)
 	names, err := readDirAsStrings(ourpaths.NetworkConfigDir)
 	if err != nil { return nil, err }
@@ -267,7 +268,8 @@ func readAvailableNetworks() (map[int]string, error) {
 		err = json.Unmarshal(byronBytes, &byron)
 		if err != nil { return nil, err }
 
-		magic := int(byron["protocolConsts"].(map[string]interface{})["protocolMagic"].(float64))
+		magic := t.NetworkMagic(int(
+			byron["protocolConsts"].(map[string]interface{})["protocolMagic"].(float64)))
 
 		rv[magic] = name
 	}
