@@ -273,3 +273,11 @@ Feature: NFT - Folders - Extended view
     Then I see NFTs containing "coin" on the "Select NFTs" page
     When I press "Clear" button in search bar
     And "Select NFTs" page is showing all NFTs that I have
+
+  @LW-7259
+  Scenario: Extended-view - NFT Folders - NFT folders sorted alphabetically
+    Given I navigate to NFTs extended page
+    When I create folder with name: "abc" and first available NFT
+    And I create folder with name: "bcd" and first available NFT
+    And I create folder with name: "cde" and first available NFT
+    Then I see folders on the NFTs page in the alphabetical order

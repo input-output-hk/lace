@@ -3,9 +3,12 @@ import { TestnetPatterns } from '../support/patterns';
 import NftsPage from '../elements/NFTs/nftsPage';
 import NftDetails from '../elements/NFTs/nftDetails';
 import { t } from '../utils/translationService';
-import { expect } from 'chai';
+import { expect, use } from 'chai';
 import { browser } from '@wdio/globals';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
+import chaiSorted from 'chai-sorted';
+
+use(chaiSorted);
 
 class NftAssert {
   async assertSeeTitleWithCounter() {
@@ -126,6 +129,11 @@ class NftAssert {
     if (shouldBeDisplayed) {
       await expect(await NftDetails.sendNFTButton.getText()).to.equal(await t('core.nftDetail.sendNFT'));
     }
+  }
+
+  async assertSeeFoldersInAlphabeticalOrder() {
+    const folderNames = await NftsPage.folderContainers.map((folder) => folder.getText());
+    await expect(folderNames).to.be.ascending;
   }
 }
 
