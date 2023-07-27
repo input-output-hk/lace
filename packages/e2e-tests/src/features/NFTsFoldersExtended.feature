@@ -309,7 +309,7 @@ Feature: NFT - Folders - Extended view
     And I see NFT with name "Ibilecoin" on the NFT folder page
     And I see NFT with name "LaceNFT" on the NFT folder page
     And I right click on the NFT with name "LaceNFT" on the NFT folder page
-    When I click "Remove from folder" option in NFT folder context menu
+    When I click "Remove from folder" option in NFT context menu
     Then I see a toast with text: "NFT removed"
     And I see NFT with name "Ibilecoin" on the NFT folder page
     And I do not see NFT with name "LaceNFT" on the NFT folder page

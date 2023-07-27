@@ -286,24 +286,22 @@ When(/^I click outside the NFT folder context menu$/, async () => {
     : NftsPage.title.click());
 });
 
-When(
-  /^I click "(Delete|Rename|Remove from folder)" option in NFT folder context menu$/,
-  async (option: 'Delete' | 'Rename' | 'Remove from folder') => {
-    switch (option) {
-      case 'Delete':
-        await NftFolderContextMenu.clickDeleteFolderOption();
-        break;
-      case 'Rename':
-        await NftFolderContextMenu.clickRenameFolderOption();
-        break;
-      case 'Remove from folder':
-        await NftFolderContextMenu.clickRemoveNFTOption();
-        break;
-      default:
-        throw new Error(`Unsupported option name: ${option}`);
-    }
+When(/^I click "(Delete|Rename)" option in NFT folder context menu$/, async (option: 'Delete' | 'Rename') => {
+  switch (option) {
+    case 'Delete':
+      await NftFolderContextMenu.clickDeleteFolderOption();
+      break;
+    case 'Rename':
+      await NftFolderContextMenu.clickRenameFolderOption();
+      break;
+    default:
+      throw new Error(`Unsupported option name: ${option}`);
   }
-);
+});
+
+When(/^I click "Remove from folder" option in NFT context menu$/, async () => {
+  await NftFolderContextMenu.clickRemoveNFTOption();
+});
 
 Then(
   /^I (see|do not see) "Rename your folder" drawer in (extended|popup) mode$/,
