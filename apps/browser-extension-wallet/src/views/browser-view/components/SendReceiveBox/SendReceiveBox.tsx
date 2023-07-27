@@ -10,7 +10,8 @@ import styles from './SendReceiveBox.module.scss';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const SendReceiveBox = (): React.ReactElement => {
@@ -35,6 +36,7 @@ export const SendReceiveBox = (): React.ReactElement => {
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.SendTransaction.SEND_TX_BUTTON_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.SendClick);
     setDrawerConfig({ content: DrawerContent.SEND_TRANSACTION });
   };
 

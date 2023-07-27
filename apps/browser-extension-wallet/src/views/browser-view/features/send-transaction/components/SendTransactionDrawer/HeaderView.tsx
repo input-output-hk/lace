@@ -30,7 +30,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 import { useWalletStore } from '@src/stores';
@@ -175,6 +176,15 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
     }
   };
 
+  const onCrossIconClick = () => {
+    if (section.currentSection === Sections.SUCCESS_TX) {
+      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick);
+    } else if (section.currentSection === Sections.FAIL_TX) {
+      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick);
+    }
+    onClose();
+  };
+
   const { uiOutputs } = useCoinStateSelector(FIRST_ROW);
   const { address } = useAddressState(FIRST_ROW);
 
@@ -222,7 +232,7 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
             }
           />
         ) : shouldRenderCross ? (
-          <NavigationButton icon="cross" onClick={onClose} />
+          <NavigationButton icon="cross" onClick={onCrossIconClick} />
         ) : undefined
       }
     />

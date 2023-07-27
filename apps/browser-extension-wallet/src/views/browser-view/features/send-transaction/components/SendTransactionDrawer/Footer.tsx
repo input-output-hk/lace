@@ -24,7 +24,8 @@ import { useAnalyticsContext } from '@providers/AnalyticsProvider/context';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -82,21 +83,32 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
 
   const sendAnalytics = useCallback(() => {
     switch (currentSection.currentSection) {
-      case Sections.FORM:
+      case Sections.FORM: {
         sendEventToMatomo(isPopupView ? Events.REVIEW_TX_DETAILS_POPUP : Events.REVIEW_TX_DETAILS_BROWSER);
+        analytics.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
         break;
-      case Sections.SUMMARY:
+      }
+      case Sections.SUMMARY: {
         sendEventToMatomo(isPopupView ? Events.CONFIRM_TX_DETAILS_POPUP : Events.CONFIRM_TX_DETAILS_BROWSER);
+        analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick);
         break;
-      case Sections.CONFIRMATION:
+      }
+      case Sections.CONFIRMATION: {
         sendEventToMatomo(isPopupView ? Events.INPUT_TX_PASSWORD_POPUP : Events.INPUT_TX_PASSWORD_BROWSER);
+        analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick);
         break;
-      case Sections.SUCCESS_TX:
+      }
+      case Sections.SUCCESS_TX: {
         sendEventToMatomo(isPopupView ? Events.SUCCESS_VIEW_TX_POPUP : Events.SUCCESS_VIEW_TX_BROWSER);
+        analytics.sendEventToPostHog(PostHogAction.SendAllDoneViewTransactionClick);
         break;
-      case Sections.FAIL_TX:
+      }
+      case Sections.FAIL_TX: {
         sendEventToMatomo(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
+        analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongBackClick);
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSection.currentSection, isPopupView, sendEventToMatomo]);
 
   const keyAgentType = getKeyAgentType();
@@ -183,6 +195,16 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
     sendAnalytics
   ]);
 
+  const handleClose = () => {
+    if (currentSection.currentSection === Sections.SUCCESS_TX) {
+      analytics.sendEventToPostHog(PostHogAction.SendAllDoneCloseClick);
+    } else if (currentSection.currentSection === Sections.FAIL_TX) {
+      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongCancelClick);
+    }
+
+    onClose();
+  };
+
   const confirmDisable = useMemo(
     () => !builtTxData.tx || hasInvalidOutputs || metadata?.length > METADATA_MAX_LENGTH,
     [builtTxData.tx, hasInvalidOutputs, metadata]
@@ -248,7 +270,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
       >
         {confirmButtonLabel}
       </Button>
-      <Button color="secondary" size="large" block onClick={onClose} data-testid="send-cancel-btn">
+      <Button color="secondary" size="large" block onClick={handleClose} data-testid="send-cancel-btn">
         {currentSection.currentSection === Sections.SUCCESS_TX
           ? t('browserView.transaction.send.footer.close')
           : t('browserView.transaction.send.footer.cancel')}

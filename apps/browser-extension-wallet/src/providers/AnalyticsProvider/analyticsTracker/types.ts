@@ -66,7 +66,20 @@ export enum PostHogAction {
   OnboardingCreateWritePassphrase17NextClick = 'onboarding | new wallet | write passphrase #17 | next | click',
   OnboardingCreateEnterPassphrase01NextClick = 'onboarding | new wallet | enter passphrase #01 | next | click',
   OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
-  OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click'
+  OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
+  // Send Flow
+  SendClick = 'send | send | click',
+  SendTransactionDataReviewTransactionClick = 'send | transaction data | review transaction | click',
+  SendTransactionSummaryConfirmClick = 'send | transaction summary | confirm | click',
+  SendTransactionConfirmationConfirmClick = 'send | transaction confirmation | confirm | click',
+  SendAllDoneView = 'send | all done | view',
+  SendAllDoneViewTransactionClick = 'send | all done | view transaction | click',
+  SendAllDoneCloseClick = 'send | all done | close | click',
+  SendAllDoneXClick = 'send | all done | x | click',
+  SendSomethingWentWrongView = 'send | something went wrong | view',
+  SendSomethingWentWrongBackClick = 'send | something went wrong | back | click',
+  SendSomethingWentWrongCancelClick = 'send | something went wrong | cancel | click',
+  SendSomethingWentWrongXClick = 'send | something went wrong | x | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
