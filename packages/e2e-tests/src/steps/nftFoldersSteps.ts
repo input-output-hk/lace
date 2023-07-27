@@ -19,7 +19,7 @@ import DeleteFolderModal from '../elements/NFTs/DeleteFolderModal';
 import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import NftAssert from '../assert/nftAssert';
 import NftAddNftToFolderPage from '../elements/NFTs/nftAddNftToFolderPage';
-import nftAddNftToFolderAssert from '../assert/nftAddNftToFolderAssert';
+import NftAddNftToFolderAssert from '../assert/nftAddNftToFolderAssert';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -197,7 +197,7 @@ When(/^I click "Add NFT" button within the NFT folder$/, async () => {
 });
 
 Then(/^I can see "Add NFT" button active$/, async () => {
-  await nftAddNftToFolderAssert.assertSeeAddNftButton();
+  await NftAddNftToFolderAssert.assertSeeAddNftButton();
 });
 
 When(
@@ -259,7 +259,7 @@ Then(/^I see a toast with text: "NFTs added to folder"$/, async () => {
 });
 
 Then(/^I see drawer with NFT folder contents$/, async () => {
-  await nftAddNftToFolderAssert.assertSeeNftAddNftToFolderPage();
+  await NftAddNftToFolderAssert.assertSeeNftAddNftToFolderPage();
 });
 
 Then(/^I see a toast with text: "NFT removed"$/, async () => {

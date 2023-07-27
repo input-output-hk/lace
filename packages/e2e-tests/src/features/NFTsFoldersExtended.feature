@@ -275,7 +275,7 @@ Feature: NFT - Folders - Extended view
     And "Select NFTs" page is showing all NFTs that I have
 
   @LW-7184
-  Scenario: Extended-view - NFT Folders - "Add NFT" button avalibility and click withint the NFT folder
+  Scenario: Extended-view - NFT Folders - "Add NFT" button availability and click within the NFT folder
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
     And I navigate to NFTs extended page
     And I save all NFTs that I have
