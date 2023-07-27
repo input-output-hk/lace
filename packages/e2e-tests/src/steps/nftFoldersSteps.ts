@@ -182,12 +182,6 @@ Then(
   }
 );
 
-// When(/^I open the NFT folder with name "([^"]*)"$/, async (folderName: string) => {
-//   const nftFolder = await NftsPage.getFolder(folderName);
-//   await nftFolder.waitForClickable();
-//   await nftFolder.click();
-// });
-
 When(/^I click "Add NFT" button within the NFT folder$/, async () => {
   const addNFTButton = NftsFolderPage.addNftButton;
   await addNFTButton.waitForClickable();
