@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 
 	_ "lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
 	"lace.io/lace-blockchain-services/assets"
@@ -18,7 +19,7 @@ import (
 func setupTrayUI(
 	comm CommChannels_UI,
 	logFile string,
-	networks []string,
+	networks map[int]string,
 	appConfig appconfig.AppConfig,
 ) func() { return func() {
 	iconData, err := assets.Asset("tray-icon")
@@ -31,8 +32,14 @@ func setupTrayUI(
 
 	mNetworks := make(map[string](*systray.MenuItem))
 	currentNetwork := ""
-	for _, network := range networks {
-		mNetworks[network] = mChooseNetwork.AddSubMenuItemCheckbox(network, "", false)
+	{
+		reverseNetworks := map[string]int{}
+		sortedNames := []string{}
+		for a, b := range networks { reverseNetworks[b] = a; sortedNames = append(sortedNames, b) }
+		sort.Strings(sortedNames)
+		for _, network := range sortedNames {
+			mNetworks[network] = mChooseNetwork.AddSubMenuItemCheckbox(network, "", false)
+		}
 	}
 	for _, network := range networks {
 		go func(network string) {
@@ -60,6 +67,12 @@ func setupTrayUI(
 	}
 
 	mNetworks[appConfig.LastNetwork].ClickedCh <- struct{}{}
+
+	go func() {
+		for httpMagic := range comm.HttpNetworkSwitch {
+			mNetworks[networks[httpMagic]].ClickedCh <- struct{}{}
+		}
+	}()
 
 	//systray.AddMenuItemCheckbox("Run Full Backend (projector)", "", false)
 

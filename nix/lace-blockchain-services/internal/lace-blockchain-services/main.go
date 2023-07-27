@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
-	"sort"
+	"encoding/json"
 
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/appconfig"
@@ -90,10 +90,10 @@ func main() {
 		}
 	}()
 
-	networks := readDirAsStrings(ourpaths.NetworkConfigDir)
-	sort.Strings(networks)
+	networks, err := readAvailableNetworks()
+	if err != nil { panic(err) }
 
-	commUI, commManager := func() (CommChannels_UI, CommChannels_Manager) {
+	commUI, commManager, commHttp := func() (CommChannels_UI, CommChannels_Manager, httpapi.CommChannels) {
 		ogmiosStatus := make(chan string, 1)
 		ogmiosStatus <- "off"
 		cardanoNodeStatus := make(chan string, 1)
@@ -103,6 +103,7 @@ func main() {
 		setBackendUrl := make(chan string)
 		setOgmiosDashboard := make(chan string)
 		blockRestartUI := make(chan bool)
+		httpNetworkSwitch := make(chan int)
 
 		// FIXME: get rid of that, right now we have to slurp the channel, or writing to it will block
 		go func(){
@@ -122,6 +123,7 @@ func main() {
 			SetBackendUrl: setBackendUrl,
 			SetOgmiosDashboard: setOgmiosDashboard,
 			BlockRestartUI: blockRestartUI,
+			HttpNetworkSwitch: httpNetworkSwitch,
 			NetworkSwitch: networkSwitch,
 			InitiateShutdownCh: initiateShutdownCh,
 		}, CommChannels_Manager {
@@ -133,6 +135,8 @@ func main() {
 			BlockRestartUI: blockRestartUI,
 			NetworkSwitch: networkSwitch,
 			InitiateShutdownCh: initiateShutdownCh,
+		}, httpapi.CommChannels {
+			SwitchNetwork: httpNetworkSwitch,
 		}
 	}()
 
@@ -158,7 +162,7 @@ func main() {
 	appConfig := appconfig.Load()
 
 	go func(){ for {
-		err := httpapi.Run(appConfig, []int{764824073, 1, 2})
+		err := httpapi.Run(appConfig, commHttp, networks)
 		fmt.Fprintf(os.Stderr, "%s[%d]: HTTP server failed: %v\n",
 			OurLogPrefix, os.Getpid(), err)
 		time.Sleep(1 * time.Second)
@@ -186,6 +190,8 @@ type CommChannels_UI struct {
 	SetBackendUrl        <-chan string
 	SetOgmiosDashboard   <-chan string
 	BlockRestartUI       <-chan bool
+
+	HttpNetworkSwitch    <-chan int
 
 	NetworkSwitch        chan<- string
 	InitiateShutdownCh   chan<- struct{}
@@ -224,11 +230,40 @@ func logSystemHealth() {
 		avgStat.Load1, avgStat.Load5, avgStat.Load15)
 }
 
-func readDirAsStrings(dirPath string) []string {
-	files, err := ioutil.ReadDir(ourpaths.NetworkConfigDir)
-	if err != nil {
-		panic(err)
+// A map from network magic to name
+func readAvailableNetworks() (map[int]string, error) {
+	rv := map[int]string{}
+	sep := string(filepath.Separator)
+	names, err := readDirAsStrings(ourpaths.NetworkConfigDir)
+	if err != nil { return nil, err }
+	for _, name := range names {
+		configFile := ourpaths.NetworkConfigDir + sep + name + sep + "config.json"
+
+		configBytes, err := ioutil.ReadFile(configFile)
+		var config map[string]interface{}
+		err = json.Unmarshal(configBytes, &config)
+		if err != nil { return nil, err }
+
+		byronFile := config["ByronGenesisFile"].(string)
+		if !filepath.IsAbs(byronFile) {
+			byronFile = filepath.Join(filepath.Dir(configFile), byronFile)
+		}
+
+		byronBytes, err := ioutil.ReadFile(byronFile)
+		var byron map[string]interface{}
+		err = json.Unmarshal(byronBytes, &byron)
+		if err != nil { return nil, err }
+
+		magic := int(byron["protocolConsts"].(map[string]interface{})["protocolMagic"].(float64))
+
+		rv[magic] = name
 	}
+	return rv, nil
+}
+
+func readDirAsStrings(dirPath string) ([]string, error) {
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil { return nil, err }
 	rv := []string{}
 	for _, file := range files {
 		name := file.Name()
@@ -237,5 +272,5 @@ func readDirAsStrings(dirPath string) []string {
 		}
 		rv = append(rv, name)
 	}
-	return rv
+	return rv, nil
 }
