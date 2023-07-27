@@ -280,8 +280,6 @@ Feature: NFT - Folders - Popup view
     And I see NFT with name "Ibilecoin" on the NFT folder page
     And I see NFT with name "Bison Coin" on the NFT folder page
 
-
-
   @LW-7193
   Scenario Outline: Popup-view - NFT Folders - Context menu with "Remove from folder" option is displayed: <is_displayed>
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
