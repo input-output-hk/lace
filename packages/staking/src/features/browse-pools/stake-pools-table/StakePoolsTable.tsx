@@ -102,7 +102,14 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
         return {
           logo,
           ...stakePool,
-          addToDraft: () => addPoolToDraft({ displayData: stakePool, id: hexId, weight: 1 }),
+          addToDraft: () =>
+            addPoolToDraft({
+              displayData: stakePool,
+              id: hexId,
+              name: stakePool.name,
+              ticker: stakePool.ticker,
+              weight: 1,
+            }),
           hexId,
           onClick: (): void => {
             setSelectedStakePool({ logo, ...pool });

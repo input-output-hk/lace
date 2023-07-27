@@ -1,5 +1,5 @@
 import create from 'zustand';
-import { SectionConfig, Sections, StakePoolDetails, StakingError } from './types';
+import { Page, SectionConfig, Sections, StakePoolDetails, StakingError } from './types';
 
 export const sectionsConfig = {
   [Sections.DETAIL]: {
@@ -39,12 +39,14 @@ const storeDefaultState: Pick<StakePoolDetails, 'simpleSendConfig'> = {
  */
 export const useStakePoolDetails = create<StakePoolDetails>((set, get) => ({
   ...storeDefaultState,
+  activePage: Page.overview,
   isBuildingTx: false,
   isDrawerVisible: false,
   isExitStakingVisible: false,
   isNoFundsVisible: false,
   isStakeConfirmationVisible: false,
   resetStates: () => set((state: StakePoolDetails) => ({ ...state, ...storeDefaultState })),
+  setActivePage: (activePage) => set({ activePage }),
   setExitStakingVisible: (visibility: boolean) => set({ isExitStakingVisible: visibility }),
   setIsBuildingTx: (visibility: boolean) => set({ isBuildingTx: visibility }),
   setIsDrawerVisible: (visibility: boolean) => set({ isDrawerVisible: visibility }),

@@ -24,6 +24,8 @@ export interface SectionConfig {
 export interface StakePoolDetails {
   simpleSendConfig: SectionConfig;
   setSection: (section?: SectionConfig) => void;
+  activePage: Page;
+  setActivePage: (page: Page) => void;
   setPrevSection: () => void;
   resetStates: () => void;
   isDrawerVisible: boolean;
@@ -68,3 +70,8 @@ export type DelegationPortfolioStore = DelegationPortfolioState &
   DelegationPortfolioQueries & {
     mutators: DelegationPortfolioMutators;
   };
+
+export enum Page {
+  overview = 'overview',
+  browsePools = 'browsePools',
+}
