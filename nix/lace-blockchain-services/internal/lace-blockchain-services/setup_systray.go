@@ -69,7 +69,7 @@ func setupTrayUI(
 	mNetworks[appConfig.LastNetwork].ClickedCh <- struct{}{}
 
 	go func() {
-		for httpMagic := range comm.HttpNetworkSwitch {
+		for httpMagic := range comm.HttpSwitchesNetwork {
 			mNetworks[networks[httpMagic]].ClickedCh <- struct{}{}
 		}
 	}()

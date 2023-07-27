@@ -20,13 +20,27 @@ const (
 )
 
 type CommChannels struct {
-	SwitchNetwork   chan<- int
+	SwitchNetwork    chan<- int
+
+	SwitchedNetwork  <-chan int
 }
 
 func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map[int]string) error {
+	info := Info{
+		CurrentNetwork: -1,
+		AvailableNetworks: networksToMagics(availableNetworks),
+		Services: []int{},
+	}
+
+	go func(){
+		for magic := range comm.SwitchedNetwork {
+			info.CurrentNetwork = magic
+		}
+	}()
+
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%d", appConfig.ApiPort),
-		Handler: http.HandlerFunc(handler(appConfig, comm, availableNetworks)),
+		Handler: http.HandlerFunc(handler(appConfig, comm, &info, availableNetworks)),
 	}
 
 	fmt.Printf("%s[%d]: starting HTTP server: http://127.0.0.1:%d\n", OurLogPrefix, os.Getpid(),
@@ -34,7 +48,18 @@ func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map
 	return server.ListenAndServe()
 }
 
-func handler(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map[int]string) func(http.ResponseWriter, *http.Request) { return func(w http.ResponseWriter, r *http.Request) {
+type Info struct {
+	CurrentNetwork    int    `json:"currentNetwork"`
+	AvailableNetworks []int  `json:"availableNetworks"`
+	Services          []int  `json:"services"`
+}
+
+func handler(
+	appConfig appconfig.AppConfig,
+	comm CommChannels,
+	info *Info,
+	availableNetworks map[int]string,
+) func(http.ResponseWriter, *http.Request) { return func(w http.ResponseWriter, r *http.Request) {
 	swaggerUiPrefix := "swagger-ui"
 
 	if (r.URL.Path == "/" || r.URL.Path == "/" + swaggerUiPrefix) && r.Method == http.MethodGet {
@@ -48,6 +73,12 @@ func handler(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks
 		if err != nil { panic(err) }
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(resp)
+
+	} else if r.URL.Path == "/v1/info" && r.Method == http.MethodGet {
+		bytes, err := json.Marshal(*info)
+		if err != nil { panic(err) }
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bytes)
 	} else if strings.HasPrefix(r.URL.Path, "/v1/switch-network/") && r.Method == http.MethodPut {
 		magic, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/v1/switch-network/"))
 		_, exists := availableNetworks[magic]
@@ -62,6 +93,14 @@ func handler(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks
 	}
 }}
 
+func networksToMagics(availableNetworks map[int]string) []int {
+	// We want to show largest magics first (mainnet), for clearer examples in docs:
+	magics := []int{}
+	for magic, _ := range availableNetworks { magics = append(magics, magic) }
+	sort.Sort(sort.Reverse(sort.IntSlice(magics)))
+	return magics
+}
+
 func openApiJson(appConfig appconfig.AppConfig, availableNetworks map[int]string) ([]byte, error) {
 	raw, err := assets.Asset("openapi.json")
 	if err != nil { return nil, err }
@@ -74,13 +113,8 @@ func openApiJson(appConfig appconfig.AppConfig, availableNetworks map[int]string
 		"url": fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort),
 	}}
 
-	// We want to show largest magics first (mainnet), for clearer examples in docs:
-	magics := []int{}
-	for m, _ := range availableNetworks { magics = append(magics, m) }
-	sort.Sort(sort.Reverse(sort.IntSlice(magics)))
-
 	doc["components"].(map[string]interface{})["schemas"].(map[string]interface{})["NetworkMagic"].
-		(map[string]interface{})["enum"] = magics
+		(map[string]interface{})["enum"] = networksToMagics(availableNetworks)
 
 	doc["components"].(map[string]interface{})["schemas"].(map[string]interface{})["ServiceName"].
 		(map[string]interface{})["enum"] = []string{

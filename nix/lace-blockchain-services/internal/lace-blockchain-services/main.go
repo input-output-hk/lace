@@ -103,7 +103,6 @@ func main() {
 		setBackendUrl := make(chan string)
 		setOgmiosDashboard := make(chan string)
 		blockRestartUI := make(chan bool)
-		httpNetworkSwitch := make(chan int)
 
 		// FIXME: get rid of that, right now we have to slurp the channel, or writing to it will block
 		go func(){
@@ -113,7 +112,20 @@ func main() {
 			}
 		}()
 
-		networkSwitch := make(chan string)
+		networkFromUI := make(chan string)
+		networkFromHttp := make(chan int)
+		networkToHttp := make(chan int)
+		networkToManager := make(chan string)
+
+		go func(){
+			reverseNetworks := map[string]int{}
+			for a, b := range networks { reverseNetworks[b] = a }
+			for name := range networkFromUI {
+				networkToManager <- name
+				networkToHttp <- reverseNetworks[name]
+			}
+		}()
+
 		initiateShutdownCh := make(chan struct{}, 1)
 
 		return CommChannels_UI {
@@ -123,8 +135,8 @@ func main() {
 			SetBackendUrl: setBackendUrl,
 			SetOgmiosDashboard: setOgmiosDashboard,
 			BlockRestartUI: blockRestartUI,
-			HttpNetworkSwitch: httpNetworkSwitch,
-			NetworkSwitch: networkSwitch,
+			HttpSwitchesNetwork: networkFromHttp,
+			NetworkSwitch: networkFromUI,
 			InitiateShutdownCh: initiateShutdownCh,
 		}, CommChannels_Manager {
 			OgmiosStatus: ogmiosStatus,
@@ -133,10 +145,11 @@ func main() {
 			SetBackendUrl: setBackendUrl,
 			SetOgmiosDashboard: setOgmiosDashboard,
 			BlockRestartUI: blockRestartUI,
-			NetworkSwitch: networkSwitch,
+			NetworkSwitch: networkToManager,
 			InitiateShutdownCh: initiateShutdownCh,
 		}, httpapi.CommChannels {
-			SwitchNetwork: httpNetworkSwitch,
+			SwitchNetwork: networkFromHttp,
+			SwitchedNetwork: networkToHttp,
 		}
 	}()
 
@@ -191,7 +204,7 @@ type CommChannels_UI struct {
 	SetOgmiosDashboard   <-chan string
 	BlockRestartUI       <-chan bool
 
-	HttpNetworkSwitch    <-chan int
+	HttpSwitchesNetwork  <-chan int
 
 	NetworkSwitch        chan<- string
 	InitiateShutdownCh   chan<- struct{}
