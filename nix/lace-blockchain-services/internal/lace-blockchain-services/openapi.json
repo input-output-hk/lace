@@ -36,7 +36,7 @@
                     },
                     "services": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/ServiceState" }
+                      "items": { "$ref": "#/components/schemas/ServiceStatus" }
                     }
                   }
                 }
@@ -138,8 +138,8 @@
                         "type": "object",
                         "properties": {
                           "jsonrpc": { "type": "string", "example": "2.0" },
-                          "method":  { "type": "string", "example": "ServiceState" },
-                          "params": { "$ref": "#/components/schemas/ServiceState" }
+                          "method":  { "type": "string", "example": "ServiceStatus" },
+                          "params": { "$ref": "#/components/schemas/ServiceStatus" }
                         }
                       }
                     ]
@@ -162,7 +162,7 @@
         "type": "string",
         "enum": ["cardano-node", "ogmios", "provider-server", "lace-blockchain-services"]
       },
-      "ServiceState": {
+      "ServiceStatus": {
         "type": "object",
         "properties": {
           "serviceName": { "$ref": "#/components/schemas/ServiceName" },
@@ -171,9 +171,9 @@
             "description": "URL under which the service can be accessed (sometimes empty)",
             "example": "http://127.0.0.1:3001"
           },
-          "state": {
+          "status": {
             "type": "string",
-            "description": "Current state of the service",
+            "description": "Current status of the service",
             "example": "listening"
           },
           "version": {

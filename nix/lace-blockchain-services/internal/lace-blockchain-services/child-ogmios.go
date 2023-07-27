@@ -10,7 +10,7 @@ import (
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
-func childOgmios(shared SharedState, statusCh chan<- string, setOgmiosDashboard chan<- string) ManagedChild {
+func childOgmios(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
 	sep := string(filepath.Separator)
 
 	reSyncProgress := regexp.MustCompile(`"networkSynchronization"\s*:\s*(\d*\.\d+)`)
@@ -19,6 +19,8 @@ func childOgmios(shared SharedState, statusCh chan<- string, setOgmiosDashboard 
 		LogPrefix: "ogmios",
 		PrettyName: "Ogmios",
 		ExePath: ourpaths.LibexecDir + sep + "ogmios" + ourpaths.ExeSuffix,
+		Version: "0.0.0",
+		Revision: "0000000000000000000000000000000000000000",
 		MkArgv: func() []string {
 			*shared.OgmiosPort = getFreeTCPPort()
 			return []string{
@@ -35,8 +37,11 @@ func childOgmios(shared SharedState, statusCh chan<- string, setOgmiosDashboard 
 			err := probeHttp200(ogmiosUrl + "/health", 1 * time.Second)
 			nextProbeIn := 1 * time.Second
 			if (err == nil) {
-				statusCh <- "listening"
-				setOgmiosDashboard <- ogmiosUrl
+				statusCh <- StatusAndUrl {
+					Status: "listening",
+					Url: ogmiosUrl,
+					OmitUrl: false,
+				}
 				nextProbeIn = 60 * time.Second
 			}
 			return HealthStatus {
@@ -55,9 +60,6 @@ func childOgmios(shared SharedState, statusCh chan<- string, setOgmiosDashboard 
 			}
 		},
 		LogModifier: func(line string) string { return line },
-		AfterExit: func() {
-			setOgmiosDashboard <- ""
-		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
 	}

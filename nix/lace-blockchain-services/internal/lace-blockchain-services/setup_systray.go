@@ -75,6 +75,26 @@ func setupTrayUI(
 		}
 	}()
 
+	// FIXME: this has to be done smarter
+	fixme_CardanoNodeStatus := make(chan string)
+	fixme_OgmiosStatus := make(chan string)
+	fixme_SetOgmiosDashboard := make(chan string)
+	fixme_ProviderServerStatus := make(chan string)
+
+	go func(){
+		for upd := range comm.ServiceUpdate {
+			switch upd.ServiceName {
+			case "cardano-node":
+				fixme_CardanoNodeStatus <- upd.Status
+			case "ogmios":
+				fixme_OgmiosStatus <- upd.Status
+				fixme_SetOgmiosDashboard <- upd.Url
+			case "provider-server":
+				fixme_ProviderServerStatus <- upd.Status
+			}
+		}
+	}()
+
 	//systray.AddMenuItemCheckbox("Run Full Backend (projector)", "", false)
 
 	mCopyUrl := systray.AddMenuItem("Copy Backend URL", "")
@@ -93,9 +113,9 @@ func setupTrayUI(
 
 	// XXX: this weird type because we want order, and there are no tuples:
 	statuses := []map[string](<-chan string) {
-		{ "cardano-node":    comm.CardanoNodeStatus },
-		{ "Ogmios":          comm.OgmiosStatus },
-		{ "provider-server": comm.ProviderServerStatus },
+		{ "cardano-node":    fixme_CardanoNodeStatus },
+		{ "Ogmios":          fixme_OgmiosStatus },
+		{ "provider-server": fixme_ProviderServerStatus },
 	}
 
 	for _, statusItem := range statuses {
@@ -145,7 +165,7 @@ func setupTrayUI(
 		for { select {
 		case <-mOgmiosDashboard.ClickedCh:
 			openWithDefaultApp(url)
-		case url = <-comm.SetOgmiosDashboard:
+		case url = <-fixme_SetOgmiosDashboard:
 			if url == "" {
 				mOgmiosDashboard.Disable()
 			} else {

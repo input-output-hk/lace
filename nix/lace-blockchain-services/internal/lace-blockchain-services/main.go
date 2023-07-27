@@ -95,23 +95,11 @@ func main() {
 	if err != nil { panic(err) }
 
 	commUI, commManager, commHttp := func() (CommChannels_UI, CommChannels_Manager, httpapi.CommChannels) {
-		ogmiosStatus := make(chan string, 1)
-		ogmiosStatus <- "off"
-		cardanoNodeStatus := make(chan string, 1)
-		cardanoNodeStatus <- "off"
-		providerServerStatus := make(chan string, 1)
-		providerServerStatus <- "off"
-		setBackendUrl := make(chan string)
-		setOgmiosDashboard := make(chan string)
 		blockRestartUI := make(chan bool)
 
-		// FIXME: get rid of that, right now we have to slurp the channel, or writing to it will block
-		go func(){
-			for url := range setBackendUrl {
-				fmt.Printf("%s[%d]: info: new provider-server: %s\n",
-					OurLogPrefix, os.Getpid(), url)
-			}
-		}()
+		serviceUpdateFromManager := make(chan t.ServiceStatus)
+		serviceUpdateToUI := make(chan t.ServiceStatus)
+		serviceUpdateToHttp := make(chan t.ServiceStatus)
 
 		networkFromUI := make(chan string)
 		networkFromHttp := make(chan t.NetworkMagic)
@@ -127,30 +115,30 @@ func main() {
 			}
 		}()
 
+		go func(){
+			for ss := range serviceUpdateFromManager {
+				serviceUpdateToUI <- ss
+				serviceUpdateToHttp <- ss
+			}
+		}()
+
 		initiateShutdownCh := make(chan struct{}, 1)
 
 		return CommChannels_UI {
-			OgmiosStatus: ogmiosStatus,
-			CardanoNodeStatus: cardanoNodeStatus,
-			ProviderServerStatus: providerServerStatus,
-			SetBackendUrl: setBackendUrl,
-			SetOgmiosDashboard: setOgmiosDashboard,
+			ServiceUpdate: serviceUpdateToUI,
 			BlockRestartUI: blockRestartUI,
 			HttpSwitchesNetwork: networkFromHttp,
 			NetworkSwitch: networkFromUI,
 			InitiateShutdownCh: initiateShutdownCh,
 		}, CommChannels_Manager {
-			OgmiosStatus: ogmiosStatus,
-			CardanoNodeStatus: cardanoNodeStatus,
-			ProviderServerStatus: providerServerStatus,
-			SetBackendUrl: setBackendUrl,
-			SetOgmiosDashboard: setOgmiosDashboard,
+			ServiceUpdate: serviceUpdateFromManager,
 			BlockRestartUI: blockRestartUI,
 			NetworkSwitch: networkToManager,
 			InitiateShutdownCh: initiateShutdownCh,
 		}, httpapi.CommChannels {
 			SwitchNetwork: networkFromHttp,
 			SwitchedNetwork: networkToHttp,
+			ServiceUpdate: serviceUpdateToHttp,
 		}
 	}()
 
@@ -198,13 +186,8 @@ func main() {
 }
 
 type CommChannels_UI struct {
-	OgmiosStatus         <-chan string
-	CardanoNodeStatus    <-chan string
-	ProviderServerStatus <-chan string
-	SetBackendUrl        <-chan string
-	SetOgmiosDashboard   <-chan string
+	ServiceUpdate        <-chan t.ServiceStatus
 	BlockRestartUI       <-chan bool
-
 	HttpSwitchesNetwork  <-chan t.NetworkMagic
 
 	NetworkSwitch        chan<- string
@@ -212,11 +195,7 @@ type CommChannels_UI struct {
 }
 
 type CommChannels_Manager struct {
-	OgmiosStatus         chan<- string
-	CardanoNodeStatus    chan<- string
-	ProviderServerStatus chan<- string
-	SetBackendUrl        chan<- string
-	SetOgmiosDashboard   chan<- string
+	ServiceUpdate        chan<- t.ServiceStatus
 	BlockRestartUI       chan<- bool
 
 	NetworkSwitch        <-chan string

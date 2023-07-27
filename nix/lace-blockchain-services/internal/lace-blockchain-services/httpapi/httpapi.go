@@ -25,18 +25,32 @@ type CommChannels struct {
 	SwitchNetwork    chan<- t.NetworkMagic
 
 	SwitchedNetwork  <-chan t.NetworkMagic
+	ServiceUpdate    <-chan t.ServiceStatus
 }
 
 func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map[t.NetworkMagic]string) error {
 	info := Info{
 		CurrentNetwork: -1,
 		AvailableNetworks: networksToMagics(availableNetworks),
-		Services: []int{},
+		Services: []t.ServiceStatus{},
 	}
 
 	go func(){
 		for magic := range comm.SwitchedNetwork {
 			info.CurrentNetwork = magic
+		}
+	}()
+
+	go func(){
+		for next := range comm.ServiceUpdate {
+			for idx, ss := range info.Services {
+				if ss.ServiceName == next.ServiceName {
+					info.Services[idx] = next
+					goto nextMsg
+				}
+			}
+			info.Services = append(info.Services, next)
+		nextMsg:
 		}
 	}()
 
@@ -51,9 +65,9 @@ func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map
 }
 
 type Info struct {
-	Services          []int  `json:"services"`
 	CurrentNetwork    t.NetworkMagic   `json:"currentNetwork"`
 	AvailableNetworks []t.NetworkMagic `json:"availableNetworks"`
+	Services          []t.ServiceStatus `json:"services"`
 }
 
 func handler(

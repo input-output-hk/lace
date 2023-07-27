@@ -8,7 +8,7 @@ import (
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
-func childProviderServer(shared SharedState, statusCh chan<- string, setBackendUrl chan<- string) ManagedChild {
+func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
 	sep := string(filepath.Separator)
 
 	tokenMetadataServerUrl := "https://tokens.cardano.org"
@@ -22,6 +22,8 @@ func childProviderServer(shared SharedState, statusCh chan<- string, setBackendU
 		LogPrefix: "provider-server",
 		PrettyName: "provider-server",
 		ExePath: ourpaths.LibexecDir + sep + "node" + ourpaths.ExeSuffix,
+		Version: "0.0.0",
+		Revision: "0000000000000000000000000000000000000000",
 		MkArgv: func() []string {
 			return []string{
 				ourpaths.CardanoServicesDir + sep + "dist" + sep + "cjs" +
@@ -54,8 +56,11 @@ func childProviderServer(shared SharedState, statusCh chan<- string, setBackendU
 			err := probeHttp200(backendUrl + "/health", 1 * time.Second)
 			nextProbeIn := 1 * time.Second
 			if (err == nil) {
-				statusCh <- "listening"
-				setBackendUrl <- backendUrl
+				statusCh <- StatusAndUrl {
+					Status: "listening",
+					Url: backendUrl,
+					OmitUrl: false,
+				}
 				nextProbeIn = 60 * time.Second
 			}
 			return HealthStatus {
@@ -67,9 +72,6 @@ func childProviderServer(shared SharedState, statusCh chan<- string, setBackendU
 		},
 		LogMonitor: func(line string) {},
 		LogModifier: func(line string) string { return line },
-		AfterExit: func() {
-			setBackendUrl <- ""
-		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
 	}

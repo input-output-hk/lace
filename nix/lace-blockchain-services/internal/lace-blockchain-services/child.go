@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"time"
 
+	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
@@ -18,15 +19,22 @@ type ManagedChild struct {
 	LogPrefix   string
 	PrettyName  string // used in auto-generated messages to StatusCh
 	ExePath     string
+	Version     string
+	Revision    string
 	MkArgv      func() []string // XXX: it’s a func to run `getFreeTCPPort()` at the very last moment
 	MkExtraEnv  func() []string
-	StatusCh    chan<- string
+	StatusCh    chan<- StatusAndUrl
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
 	LogMonitor  func(string)
 	LogModifier func(string) string // e.g. to drop redundant timestamps
-	AfterExit   func()
 	TerminateGracefullyByInheritedFd3 bool // <https://github.com/input-output-hk/cardano-node/issues/726>
 	ForceKillAfter time.Duration // graceful exit timeout, after which we SIGKILL the child
+}
+
+type StatusAndUrl struct {
+	Status  string
+	Url     string
+	OmitUrl bool
 }
 
 type HealthStatus struct {
@@ -91,14 +99,39 @@ func manageChildren(comm CommChannels_Manager) {
 			cardanoServicesAvailable = false
 		}
 
-		childrenDefs := []ManagedChild{
-			childCardanoNode(shared, comm.CardanoNodeStatus),
-			childOgmios(shared, comm.OgmiosStatus, comm.SetOgmiosDashboard),
+		usedChildren := []func(SharedState, chan<- StatusAndUrl)ManagedChild{
+			childCardanoNode,
+			childOgmios,
 		}
+		if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
 
-		if cardanoServicesAvailable {
-			childrenDefs = append(childrenDefs,
-				childProviderServer(shared, comm.ProviderServerStatus, comm.SetBackendUrl))
+		childrenDefs := []ManagedChild{}
+		for _, mkChild := range usedChildren {
+			statusCh := make(chan StatusAndUrl, 1)
+			initialStatus := StatusAndUrl{
+				Status: "off",
+				Url: "",
+			}
+			statusCh <- initialStatus
+			def := mkChild(shared, statusCh)
+			def.StatusCh = statusCh
+			go func(){
+				fullStatus := t.ServiceStatus {
+					ServiceName: def.LogPrefix,
+					Status:      initialStatus.Status,
+					Url:         initialStatus.Url,
+					Version:     def.Version,
+					Revision:    def.Revision,
+				}
+				for upd := range statusCh {
+					fullStatus.Status = upd.Status
+					if !upd.OmitUrl {
+						fullStatus.Url = upd.Url
+					}
+					comm.ServiceUpdate <- fullStatus
+				}
+			}()
+			childrenDefs = append(childrenDefs, def)
 		}
 
 		var wgChildren sync.WaitGroup
@@ -112,7 +145,12 @@ func manageChildren(comm CommChannels_Manager) {
 			for _, child := range childrenDefs {
 				// Reset all statuses to "off" (not all children might’ve been started
 				// and they’re "waiting" now)
-				child.StatusCh <- "off"
+				child.StatusCh <- StatusAndUrl{
+					Status: "off",
+					Url: "",
+					OmitUrl: false,
+				}
+				close(child.StatusCh)
 			}
 			fmt.Printf("%s[%d]: session ended for network %s\n", OurLogPrefix, os.Getpid(), networkMemo)
 		}("" + network)
@@ -124,9 +162,13 @@ func manageChildren(comm CommChannels_Manager) {
 			wgChildren.Add(1)
 			fmt.Printf("%s[%d]: starting %s...\n", OurLogPrefix, os.Getpid(), child.LogPrefix)
 			for _, dependant := range childrenDefs[(childIdx+1):] {
-				dependant.StatusCh <- fmt.Sprintf("waiting for %s", child.PrettyName)
+				dependant.StatusCh <- StatusAndUrl{
+					Status: fmt.Sprintf("waiting for %s", child.PrettyName),
+					Url: "",
+					OmitUrl: true,
+				}
 			}
-			child.StatusCh <- "starting…"
+			child.StatusCh <- StatusAndUrl { Status: "starting…", Url: "", OmitUrl: true }
 			outputLines := make(chan string)
 			terminateCh := make(chan struct{}, 1)
 			childDidExit := false
@@ -137,7 +179,11 @@ func manageChildren(comm CommChannels_Manager) {
 				child.ForceKillAfter)
 			defer func() {
 				if !childDidExit {
-					child.StatusCh <- "terminating…"
+					child.StatusCh <- StatusAndUrl {
+						Status: "terminating…",
+						Url: "",
+						OmitUrl: true,
+					}
 					terminateCh <- struct{}{}
 				}
 			}()
@@ -152,8 +198,11 @@ func manageChildren(comm CommChannels_Manager) {
 				childDidExit = true
 				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
 					child.LogPrefix, childPid)
-				child.AfterExit()
-				child.StatusCh <- "off"
+				child.StatusCh <- StatusAndUrl{
+					Status: "off",
+					Url: "",
+					OmitUrl: false,
+				}
 				wgChildren.Done()
 				anyChildExitedCh <- struct{}{}
 			}()
