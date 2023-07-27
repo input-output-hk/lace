@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"lace.io/lace-blockchain-services/versions"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
@@ -22,8 +23,8 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 		LogPrefix: "provider-server",
 		PrettyName: "provider-server",
 		ExePath: ourpaths.LibexecDir + sep + "node" + ourpaths.ExeSuffix,
-		Version: "0.0.0",
-		Revision: "0000000000000000000000000000000000000000",
+		Version: versions.ProviderServerVersion,
+		Revision: versions.ProviderServerRevision,
 		MkArgv: func() []string {
 			return []string{
 				ourpaths.CardanoServicesDir + sep + "dist" + sep + "cjs" +

@@ -10,6 +10,7 @@ import (
 	"regexp"
 
 	"lace.io/lace-blockchain-services/ourpaths"
+	"lace.io/lace-blockchain-services/versions"
 
 	"github.com/acarl005/stripansi"
 )
@@ -50,8 +51,8 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 		LogPrefix: "cardano-node",
 		PrettyName: "cardano-node",
 		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + ourpaths.ExeSuffix,
-		Version: "0.0.0",
-		Revision: "0000000000000000000000000000000000000000",
+		Version: versions.CardanoNodeVersion,
+		Revision: versions.CardanoNodeRevision,
 		MkArgv: func() []string {
 			return []string {
 				"run",

@@ -110,6 +110,21 @@ in rec {
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
 
+  hardcodedVersions = pkgs.writeText "version.go" ''
+    package versions
+
+    const (
+      LaceBlockchainServicesVersion = ${__toJSON laceVersion}
+      LaceBlockchainServicesRevision = ${__toJSON (inputs.self.rev or "dirty")}
+      CardanoNodeVersion = ${__toJSON cardano-node.version}
+      CardanoNodeRevision = ${__toJSON inputs.cardano-node.sourceInfo.rev}
+      OgmiosVersion = ${__toJSON ogmios.version}
+      OgmiosRevision = ${__toJSON inputs.ogmios.rev}
+      ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
+      ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
+    )
+  '';
+
   swagger-ui = let
     name = "swagger-ui";
     version = "5.2.0";

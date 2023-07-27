@@ -44,6 +44,7 @@ in rec {
       cp ${icon} tray-icon
       cp ${common.openApiJson} openapi.json
       go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
+      mkdir -p versions && cp ${common.hardcodedVersions} versions/versions.go
       go build ${if noConsoleWindow then "-ldflags -H=windowsgui" else ""}
     '';
     installPhase = ''

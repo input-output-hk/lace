@@ -37,6 +37,7 @@ in rec {
       cp cardano.png tray-icon
       cp ${common.openApiJson} openapi.json
       go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
+      mkdir -p versions && cp ${common.hardcodedVersions} versions/versions.go
     '';
   };
 

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"regexp"
 
+	"lace.io/lace-blockchain-services/versions"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
@@ -19,8 +20,8 @@ func childOgmios(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild 
 		LogPrefix: "ogmios",
 		PrettyName: "Ogmios",
 		ExePath: ourpaths.LibexecDir + sep + "ogmios" + ourpaths.ExeSuffix,
-		Version: "0.0.0",
-		Revision: "0000000000000000000000000000000000000000",
+		Version: versions.OgmiosVersion,
+		Revision: versions.OgmiosRevision,
 		MkArgv: func() []string {
 			*shared.OgmiosPort = getFreeTCPPort()
 			return []string{

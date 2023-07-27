@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 
 	t "lace.io/lace-blockchain-services/types"
+	"lace.io/lace-blockchain-services/versions"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/appconfig"
 	"lace.io/lace-blockchain-services/httpapi"
@@ -94,6 +95,8 @@ func main() {
 	networks, err := readAvailableNetworks()
 	if err != nil { panic(err) }
 
+	appConfig := appconfig.Load()
+
 	commUI, commManager, commHttp := func() (CommChannels_UI, CommChannels_Manager, httpapi.CommChannels) {
 		blockRestartUI := make(chan bool)
 
@@ -121,6 +124,14 @@ func main() {
 				serviceUpdateToHttp <- ss
 			}
 		}()
+
+		serviceUpdateFromManager <- t.ServiceStatus {
+			ServiceName: "lace-blockchain-services",
+			Status: "listening",
+			Url: fmt.Sprintf("http:/127.0.0.1:%d", appConfig.ApiPort),
+			Version: versions.LaceBlockchainServicesVersion,
+			Revision: versions.LaceBlockchainServicesRevision,
+		}
 
 		initiateShutdownCh := make(chan struct{}, 1)
 
@@ -160,8 +171,6 @@ func main() {
 			}
 		}
 	}()
-
-	appConfig := appconfig.Load()
 
 	go func(){ for {
 		err := httpapi.Run(appConfig, commHttp, networks)
