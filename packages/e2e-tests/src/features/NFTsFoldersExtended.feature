@@ -325,7 +325,8 @@ Feature: NFT - Folders - Extended view
     And I create folder with name: "cde" and first available NFT
     Then I see folders on the NFTs page in the alphabetical order
 
-  @LW-7228
+  @LW-7228 @Pending
+  #Bug: LW-7632
   Scenario: Extended-view - NFT Folders - Trying to rename folder using name that already exists
     Given the NFT folder with name "Sample NFT folder1" and 1 NFT was created
     And the NFT folder with name "Sample NFT folder2" and 1 NFT was created
