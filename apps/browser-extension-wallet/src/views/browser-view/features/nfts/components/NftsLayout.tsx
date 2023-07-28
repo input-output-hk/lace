@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { NftItemProps, NftList, NftListProps, NftFolderItemProps, NftsItemsTypes } from '@lace/core';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
-import { SendFlowAnalyticsProperties, useOutputInitialState, useTriggerPoint } from '../../send-transaction';
+import { useOutputInitialState, useAnalyticsSendFlowTriggerPoint, SendFlowTriggerPoints } from '../../send-transaction';
 import { Button, useObservable } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import { Skeleton } from 'antd';
@@ -52,7 +52,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     utils: { deleteRecord }
   } = useNftsFoldersContext();
   const { fiatCurrency } = useCurrencyStore();
-  const { setTriggerPoint } = useTriggerPoint();
+  const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const [, setDrawerConfig] = useDrawer();
   const setSendInitialState = useOutputInitialState();
 
@@ -180,18 +180,17 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, [blockchainProvider]);
 
   const onSendAsset = useCallback(() => {
-    // eslint-disable-next-line camelcase
-    const postHogProperties: SendFlowAnalyticsProperties = { trigger_point: 'nft page' };
     analytics.sendEventToMatomo({
       category: MatomoEventCategories.VIEW_NFT,
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewNFTs.SEND_NFT_BROWSER
     });
-    analytics.sendEventToPostHog(PostHogAction.SendClick, postHogProperties);
+    // eslint-disable-next-line camelcase
+    analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.NFTS });
     closeNftDetails();
     setSendInitialState(selectedNft?.assetId.toString());
     setDrawerConfig({ content: DrawerContent.SEND_TRANSACTION });
-    setTriggerPoint('tokens page');
+    setTriggerPoint(SendFlowTriggerPoints.NFTS);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setDrawerConfig, analytics, selectedNft?.assetId, setSendInitialState]);
 

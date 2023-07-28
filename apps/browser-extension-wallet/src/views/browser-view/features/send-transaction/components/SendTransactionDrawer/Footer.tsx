@@ -15,7 +15,7 @@ import {
   useTransactionProps,
   usePassword,
   useMetadata,
-  useTriggerPoint
+  useAnalyticsSendFlowTriggerPoint
 } from '../../store';
 import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
@@ -58,7 +58,7 @@ export const Footer = ({ isPopupView, openContinueDialog }: FooterProps): React.
   const confirmRef = useRef<HTMLButtonElement>();
   const triggerSubmit = () => confirmRef.current?.click();
   const { t } = useTranslation();
-  const { triggerPoint } = useTriggerPoint();
+  const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const { hasInvalidOutputs, outputMap } = useTransactionProps();
   const { builtTxData } = useBuiltTxState();
   const { setSection, currentSection } = useSections();

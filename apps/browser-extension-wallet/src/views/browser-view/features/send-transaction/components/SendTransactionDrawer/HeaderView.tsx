@@ -20,7 +20,7 @@ import {
   useSubmitingState,
   useMultipleSelection,
   useSelectedTokenList,
-  useTriggerPoint
+  useAnalyticsSendFlowTriggerPoint
 } from '../../store';
 import { useCoinStateSelector, useAddressState } from '@src/views/browser-view/features/send-transaction';
 import { useDrawer } from '@src/views/browser-view/stores';
@@ -137,7 +137,7 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const analytics = useAnalyticsContext();
   const [isMultipleSelectionAvailable, setMultipleSelection] = useMultipleSelection();
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
-  const { triggerPoint } = useTriggerPoint();
+  const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
   const sendAnalytics = useCallback(() => {
     if (section.currentSection === Sections.SUMMARY) {

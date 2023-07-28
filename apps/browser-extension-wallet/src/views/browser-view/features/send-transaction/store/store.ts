@@ -8,7 +8,7 @@ import {
   OutputList,
   AssetInfo,
   FormOptions,
-  SendFlowTriggerPoint
+  SendFlowTriggerPoints
 } from '../types';
 import { Wallet } from '@lace/cardano';
 import { calculateSpentBalance, getOutputValues } from '../helpers';
@@ -97,8 +97,8 @@ export interface Store {
   lastFocusedInput?: string;
   setLastFocusedInput: (param?: string) => void;
   // Analytics specific properties
-  triggerPoint?: SendFlowTriggerPoint;
-  setTriggerPoint: (param: SendFlowTriggerPoint) => void;
+  triggerPoint?: SendFlowTriggerPoints;
+  setTriggerPoint: (param: SendFlowTriggerPoints) => void;
 }
 
 // ====== state setters ======
@@ -522,7 +522,7 @@ export const useLastFocusedInput = (): {
     setLastFocusedInput
   }));
 
-export const useTriggerPoint = (): {
+export const useAnalyticsSendFlowTriggerPoint = (): {
   triggerPoint: Store['triggerPoint'];
   setTriggerPoint: Store['setTriggerPoint'];
 } => useStore(({ triggerPoint, setTriggerPoint }) => ({ triggerPoint, setTriggerPoint }));

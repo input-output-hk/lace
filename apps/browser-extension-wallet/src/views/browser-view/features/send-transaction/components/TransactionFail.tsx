@@ -4,12 +4,12 @@ import { ResultMessage } from '@components/ResultMessage';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './TransactionSuccessView.module.scss';
-import { useTriggerPoint } from '../store';
+import { useAnalyticsSendFlowTriggerPoint } from '../store';
 
 export const TransactionFail = (): React.ReactElement => {
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
-  const { triggerPoint } = useTriggerPoint();
+  const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
   useEffect(() => {
     // eslint-disable-next-line camelcase
