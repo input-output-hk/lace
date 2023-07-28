@@ -152,7 +152,7 @@ class SettingsPageAssert {
   }
 
   async assertSeeAboutLaceComponent() {
-    await SettingsPage.aboutLaceWidget.title.waitForDisplayed();
+    await SettingsPage.aboutLaceWidget.title.waitForClickable();
     expect(await SettingsPage.aboutLaceWidget.title.getText()).to.equal(
       (await t('browserView.settings.wallet.about.content.title')).replace('{{name}}', 'Lace')
     );
