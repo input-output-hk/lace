@@ -274,7 +274,7 @@ Feature: NFT - Folders - Popup view
     And I click "Add NFT" button within the NFT folder
     And I click NFT with name "Ibilecoin"
     And I click NFT with name "Bison Coin"
-    When I click "Add Selected NFTs" button on "Select NFTs" page
+    When I click "Add selected NFTs" button on "Select NFTs" page
     Then I see a toast with text: "NFTs added to folder"
     And I see "Sample NFT folder" NFT folder page in popup mode
     And I see NFT with name "Ibilecoin" on the NFT folder page

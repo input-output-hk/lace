@@ -83,14 +83,16 @@ Then(
   }
 );
 
-When(
-  /^I click "([^"]*)" button on "(Name your folder|Select NFTs)" page$/,
-  async (_ignored: string, targetPage: string) => {
-    await (targetPage === 'Name your folder'
-      ? NftCreateFolderPage.nextButton.click()
-      : NftSelectNftsPage.nextButton.click());
-  }
-);
+When(/^I click "Next" button on "(Name your folder|Select NFTs)" page$/, async (targetPage: string) => {
+  await (targetPage === 'Name your folder'
+    ? NftCreateFolderPage.nextButton.click()
+    : NftSelectNftsPage.nextButton.click());
+});
+
+When(/^I click "Add selected NFTs" button on "Select NFTs" page$/, async () => {
+  await NftSelectNftsPage.nextButton.waitForClickable();
+  await NftSelectNftsPage.nextButton.click();
+});
 
 Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
