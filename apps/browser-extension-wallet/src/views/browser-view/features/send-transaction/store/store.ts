@@ -10,7 +10,7 @@ import { v4 as uuid } from 'uuid';
 import omit from 'lodash/omit';
 import { useWalletStore } from '@src/stores';
 import { isValidAddress, isValidAddressPerNetwork } from '@src/utils/validators';
-import { compactNumber, getInlineCurrencyFormat } from '@src/utils/format-number';
+import { compactNumberWithUnit, formatNumberForDisplay } from '@src/utils/format-number';
 
 // ====== initial values ======
 
@@ -284,7 +284,7 @@ const useStore = create<Store>((set, get) => ({
         [defaultOutputKey]: {
           address: '',
           assets: value
-            ? [{ id, value, compactValue: compactNumber(value), displayValue: getInlineCurrencyFormat(value) }]
+            ? [{ id, value, compactValue: compactNumberWithUnit(value), displayValue: formatNumberForDisplay(value) }]
             : [{ id }]
         }
       }

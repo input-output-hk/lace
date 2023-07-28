@@ -9,7 +9,7 @@ import {
 } from '../types';
 import { Wallet } from '@lace/cardano';
 import { addEllipsis } from '@lace/common';
-import { formatNumber } from '../utils/format-number';
+import { getNumberWithUnit } from '../utils/format-number';
 import { TxOutputInput, CoinItemProps } from '@lace/core';
 import { formatDate, formatTime } from '../utils/format-date';
 import { TokenInfo } from '@src/utils/get-assets-information';
@@ -40,7 +40,7 @@ export const networkInfoTransformer = (
   },
   poolStats: Wallet.StakePoolStats
 ): NetworkInformation => ({
-  totalStaked: formatNumber(Wallet.util.lovelacesToAdaString(stake.active.toString())),
+  totalStaked: getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake.active.toString())),
   totalStakedPercentage:
     Number.parseInt(((stake.active * BigInt(coercionMult)) / lovelaceSupply.circulating).toString()) / coercionDiv,
   nextEpochIn: currentEpoch.lastSlot.date,

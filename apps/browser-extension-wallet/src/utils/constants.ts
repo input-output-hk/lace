@@ -1,24 +1,6 @@
-/* eslint-disable no-magic-numbers */
 import { Wallet } from '@lace/cardano';
-import BigNumber from 'bignumber.js';
 
 export const LACE_APP_ID = 'lace-app';
-
-export const zero = new BigNumber(0);
-export const thousand = new BigNumber(1e3);
-export const million = new BigNumber(1e6);
-export const billion = new BigNumber(1e9);
-export const trillion = new BigNumber(1e12);
-export const quadrillion = new BigNumber(1e15);
-
-export const unitsMap = new Map([
-  ['', { gt: zero, lt: thousand }],
-  ['K', { gt: thousand, lt: million }],
-  ['M', { gt: million, lt: billion }],
-  ['B', { gt: billion, lt: trillion }],
-  ['T', { gt: trillion, lt: quadrillion }],
-  ['Q', { gt: quadrillion, lt: new BigNumber(1e18) }]
-]);
 
 type ADAEnumType = 'ADA' | 'tADA';
 

@@ -15,12 +15,7 @@ import { useMaxAda } from '@hooks/useMaxAda';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@src/stores';
 import { useCurrencyStore } from '@providers/currency';
-import {
-  compactNumber,
-  getCaretPositionForFormattedCurrency,
-  getChangedValue,
-  getInlineCurrencyFormat
-} from '@src/utils/format-number';
+import { compactNumberWithUnit, handleFormattedValueChange, formatNumberForDisplay } from '@src/utils/format-number';
 import { getADACoinProperties, getAssetFiatValue, getAssetProperties } from './util';
 import { isValidAddress } from '@src/utils/validators';
 import { shortenString } from '@src/utils/format-string';
@@ -108,21 +103,19 @@ export const useSelectedCoins = ({
       const { prevValue = '', element: inputElement, value: currentValue, maxDecimals } = params;
       const coinValue = !currentValue ? '' : inputElement?.value;
 
-      const { currentDisplayValue, value, currentCursorPosition } = getChangedValue({
-        displayValue: getInlineCurrencyFormat(prevValue, maxDecimals),
-        currentDisplayValue: inputElement ? coinValue : currentValue,
-        currentCursorPosition: inputElement && inputElement.selectionEnd
-      });
-      const displayValue = getInlineCurrencyFormat(value, maxDecimals);
-      const startPosition = getCaretPositionForFormattedCurrency({
-        currentDisplayValue,
-        displayValue,
-        currentCursorPosition
-      });
-
-      setCoinValue(bundleId, { ...params, displayValue });
+      const { formattedValue, characterOffset } = handleFormattedValueChange(
+        {
+          previousFormattedValue: formatNumberForDisplay(prevValue, maxDecimals),
+          newFormattedValue: inputElement ? coinValue : currentValue
+        },
+        maxDecimals
+      );
+      // This has to go before calling setCoinValue, otherwise element.selectionEnd will be changed by it
+      const newCursorPosition = Math.max(0, (inputElement?.selectionEnd ?? 0) + (characterOffset ?? 0));
+      setCoinValue(bundleId, { ...params, displayValue: formattedValue });
       setTimeout(() => {
-        inputElement && inputElement.setSelectionRange(startPosition, startPosition);
+        // Needs a timeout to make sure this is called after setCoinValue
+        inputElement?.setSelectionRange(newCursorPosition, newCursorPosition);
       }, 0);
     },
     [bundleId, setCoinValue]
@@ -133,8 +126,8 @@ export const useSelectedCoins = ({
       const { value, maxDecimals } = params;
       setCoinValue(bundleId, {
         ...params,
-        compactValue: compactNumber(value),
-        displayValue: getInlineCurrencyFormat(value, maxDecimals)
+        compactValue: compactNumberWithUnit(value),
+        displayValue: formatNumberForDisplay(value, maxDecimals)
       });
     },
     [bundleId, setCoinValue]
@@ -143,7 +136,7 @@ export const useSelectedCoins = ({
   const handleOnFocusCoin = useCallback(
     (params: InputFieldActionParams) => {
       const { value, maxDecimals } = params;
-      setCoinValue(bundleId, { ...params, displayValue: value && getInlineCurrencyFormat(value, maxDecimals) });
+      setCoinValue(bundleId, { ...params, displayValue: value && formatNumberForDisplay(value, maxDecimals) });
     },
     [bundleId, setCoinValue]
   );
@@ -161,7 +154,7 @@ export const useSelectedCoins = ({
       onBlur: handleOnBlurCoin,
       onFocus: handleOnFocusCoin,
       displayValue: assetInputItem.displayValue,
-      compactValue: assetInputItem.compactValue || compactNumber(assetInputItem.value),
+      compactValue: assetInputItem.compactValue || compactNumberWithUnit(assetInputItem.value),
       value: assetInputItem.value,
       hasMaxBtn: true,
       invalid: !!error,
@@ -191,9 +184,9 @@ export const useSelectedCoins = ({
         coin: {
           id: cardanoCoin.id,
           ticker: cardanoCoin.symbol,
-          balance: t('send.balanceAmount', { amount: compactNumber(availableADA) })
+          balance: t('send.balanceAmount', { amount: compactNumberWithUnit(availableADA) })
         },
-        formattedFiatValue: `= ${compactNumber(fiatValue)} ${fiatCurrency?.code}`,
+        formattedFiatValue: `= ${compactNumberWithUnit(fiatValue)} ${fiatCurrency?.code}`,
         fiatValue: `= ${fiatValue} ${fiatCurrency?.code}`,
         maxDecimals: cardanoCoin.decimals
       } as AssetInputListProps['rows'][number];
@@ -214,7 +207,7 @@ export const useSelectedCoins = ({
         id: assetInputItem.id,
         ticker,
         balance: t('send.balanceAmount', {
-          amount: compactNumber(totalAssetBalance)
+          amount: compactNumberWithUnit(totalAssetBalance)
         }),
         ...(appMode === APP_MODE_POPUP && {
           shortTicker: shortenString(ticker, isNFT(assetInfo) ? MAX_NFT_TICKER_LENGTH : MAX_TOKEN_TICKER_LENGTH)
