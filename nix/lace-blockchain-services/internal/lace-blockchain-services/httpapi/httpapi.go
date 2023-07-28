@@ -10,11 +10,14 @@ import (
 	"encoding/json"
 	"sort"
 	"unsafe"
+	"sync"
 
 	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/assets"
 	"lace.io/lace-blockchain-services/appconfig"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -35,14 +38,18 @@ func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map
 		Services: []t.ServiceStatus{},
 	}
 
+	hub := runWebSocketHub()
+
 	go func(){
 		for magic := range comm.SwitchedNetwork {
 			info.CurrentNetwork = magic
+			broadcastNetworkChange(hub, &info)
 		}
 	}()
 
 	go func(){
 		for next := range comm.ServiceUpdate {
+			broadcastServiceStatus(hub, next)
 			for idx, ss := range info.Services {
 				if ss.ServiceName == next.ServiceName {
 					info.Services[idx] = next
@@ -56,7 +63,7 @@ func Run(appConfig appconfig.AppConfig, comm CommChannels, availableNetworks map
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%d", appConfig.ApiPort),
-		Handler: http.HandlerFunc(handler(appConfig, comm, &info, availableNetworks)),
+		Handler: http.HandlerFunc(handler(hub, appConfig, comm, &info, availableNetworks)),
 	}
 
 	fmt.Printf("%s[%d]: starting HTTP server: http://127.0.0.1:%d\n", OurLogPrefix, os.Getpid(),
@@ -71,6 +78,7 @@ type Info struct {
 }
 
 func handler(
+	hub WebSocketHub,
 	appConfig appconfig.AppConfig,
 	comm CommChannels,
 	info *Info,
@@ -105,6 +113,8 @@ func handler(
 		} else {
 			http.Error(w, "Not found", http.StatusNotFound)
 		}
+	} else if r.URL.Path == "/v1/websocket" && r.Method == http.MethodGet {
+		handleWebsocket(hub, availableNetworks)(w, r)
 	} else {
 		http.Error(w, "Not found", http.StatusNotFound)
 	}
@@ -138,4 +148,97 @@ func openApiJson(appConfig appconfig.AppConfig, availableNetworks map[t.NetworkM
 		"cardano-node", "ogmios", "provider-server", "lace-blockchain-services"}
 
 	return json.Marshal(doc)
+}
+
+type WebSocketHub struct {
+	broadcast      chan<- []byte
+	addClient      func(*websocket.Conn)
+	removeClient   func(*websocket.Conn)
+}
+
+func handleWebsocket(
+	hub WebSocketHub,
+	availableNetworks map[t.NetworkMagic]string,
+) func(http.ResponseWriter, *http.Request) { return func(w http.ResponseWriter, r *http.Request) {
+	upgrader := websocket.Upgrader{}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		fmt.Printf("%s[%d]: HTTP upgrading to WebSocket failed: %v\n", OurLogPrefix, os.Getpid(), err)
+		return
+	}
+
+	hub.addClient(conn)
+	defer hub.removeClient(conn)
+
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {	break }  // connection closed
+		bytes, err := json.Marshal(map[string]interface{}{
+			"jsonrpc": "2.0",
+			"error": map[string]interface{}{
+				"code": -32600,
+				"message": "Invalid Request",
+			},
+			"id": nil,
+		})
+		if err != nil { panic(err) }
+		conn.WriteMessage(websocket.TextMessage, bytes)
+	}
+}}
+
+func broadcastNetworkChange(hub WebSocketHub, info *Info) {
+	bytes, err := json.Marshal(map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method": "NetworkChange",
+		"params": map[string]interface{}{
+			"availableNetworks": info.AvailableNetworks,
+			"currentNetwork": info.CurrentNetwork,
+		},
+	})
+	if err != nil { panic(err) }
+	hub.broadcast <- bytes
+}
+
+func broadcastServiceStatus(hub WebSocketHub, ss t.ServiceStatus) {
+	bytes, err := json.Marshal(map[string]interface{}{
+		"jsonrpc": "2.0",
+		"method": "ServiceStatus",
+		"params": ss,
+	})
+	if err != nil { panic(err) }
+	hub.broadcast <- bytes
+}
+
+func runWebSocketHub() WebSocketHub {
+	var mutex sync.Mutex
+	clients := map[*websocket.Conn]struct{}{}
+	broadcast := make(chan []byte)
+
+	hub := WebSocketHub{
+		broadcast: broadcast,
+		addClient: func(client *websocket.Conn){
+			mutex.Lock()
+			defer mutex.Unlock()
+			clients[client] = struct{}{}
+		},
+		removeClient: func(client *websocket.Conn){
+			mutex.Lock()
+			defer mutex.Unlock()
+			delete(clients, client)
+			client.Close()
+		},
+	}
+
+	go func(){ for { func(){
+		msg := <-broadcast
+		mutex.Lock()
+		defer mutex.Unlock()
+		for client, _ := range clients {
+			err := client.WriteMessage(websocket.TextMessage, msg)
+			if err != nil { go hub.removeClient(client) }
+		}
+	}()}}()
+
+	return hub
 }
