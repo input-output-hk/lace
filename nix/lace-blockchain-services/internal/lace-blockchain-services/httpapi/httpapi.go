@@ -103,7 +103,9 @@ func handler(
 		} else { return false }
 	}
 
-	if r.URL.Path == "/" && r.Method == http.MethodGet {
+	if r.Method == http.MethodOptions {
+		// fine
+	} else if r.URL.Path == "/" && r.Method == http.MethodGet {
 		http.Redirect(w, r, "/swagger-ui/", http.StatusSeeOther)
 	} else if tryStatic("swagger-ui") {
 	} else if tryStatic("websocket-ui") {

@@ -47,6 +47,54 @@
           width: 13em;
           padding: 1em 1em;
           box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+          overflow-x: hidden;
+          overflow-y: auto;
+      }
+
+      #side-panel h3 { margin-bottom: 1em; font-size: 1.25em; }
+      #side-panel .section { margin-bottom: 2em; }
+
+      #side-panel a.network {
+          display: block;
+          text-decoration: none;
+          height: 30px;
+          border-radius: 4px;
+          background-color: #ccc;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0.5em 0;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          color: #666;
+      }
+
+      #side-panel a.network.active {
+          background-color: #bbb;
+          color: #eee;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      #side-panel .service {
+          margin-bottom: 1em;
+      }
+
+      #side-panel .service .name {
+          font-weight: bold;
+          font-size: 0.9em;
+      }
+
+      #side-panel .service .status {
+          font-family: monospace;
+          background: #f7f7f7;
+          color: #333;
+          padding: 0.5em;
+          margin: 0.25em;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      #side-panel .service a {
+          margin: 0.25em;
       }
 
       #content-wrapper {
@@ -89,9 +137,15 @@
     </header>
     <div id="main-content">
       <div id="side-panel">
+        <h3>Network switch</h3>
+        <div class="section networks">
           <p>Some</p>
           <p>side</p>
           <p>lines</p>
+        </div>
+        <h3>Services</h3>
+        <div class="section services">
+        </div>
       </div>
       <div id="content-wrapper">
         <div id="content">
@@ -102,16 +156,75 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
   <script>
     (function(){
-      const wsUrl = window.location.origin.replace(/^http/, 'ws') + '/v1/websocket';
+      const apiUrl = window.location.origin;
+      const wsUrl = apiUrl.replace(/^http/, 'ws') + '/v1/websocket';
 
       const eLink = document.querySelector('#header a');
       eLink.href = wsUrl;
-      eLink.innerText = wsUrl;
+      eLink.textContent = wsUrl;
+
+      const eNetworks = document.querySelector('#side-panel .networks');
+      const eServices = document.querySelector('#side-panel .services');
+
+      const redrawNetworks = function(json) {
+        eNetworks.textContent = '';
+        for (const magic of json.availableNetworks) {
+          const eA = document.createElement('a');
+          eA.href = '#';
+          eA.textContent = magic;
+          eA.classList.add('network');
+          if (magic == json.currentNetwork) {
+            eA.classList.add('active');
+          }
+          eA.addEventListener('click', function(event) {
+            event.preventDefault();
+            fetch(apiUrl + '/v1/switch-network/' + magic, { method: 'PUT' });
+          });
+          eNetworks.appendChild(eA);
+        }
+      };
+
+      const redrawService = function(json) {
+        let eService = eServices.querySelector('.' + json.serviceName);
+        if (!eService) {
+          eService = document.createElement('div');
+          eService.classList.add('service');
+          eService.classList.add(json.serviceName);
+
+          const eName = document.createElement('div');
+          eName.classList.add('name');
+          eName.textContent = json.serviceName;
+          eService.appendChild(eName);
+
+          const eStatus = document.createElement('div');
+          eStatus.classList.add('status');
+          eService.appendChild(eStatus);
+
+          const eUrl = document.createElement('div');
+          const eA = document.createElement('a')
+          eA.classList.add('url');
+          eA.setAttribute('target', '_blank');
+          eUrl.appendChild(eA);
+          eService.appendChild(eUrl);
+
+          eServices.appendChild(eService);
+        }
+        eService.querySelector('.status').textContent = json.status;
+        eService.querySelector('.url').textContent = json.url;
+        eService.querySelector('.url').href = json.url;
+      };
+
+      fetch(apiUrl + '/v1/info').then((r) => { return r.json(); }).then((json) => {
+        redrawNetworks(json);
+        for (const service of json.services) {
+          redrawService(service);
+        }
+      });
 
       const eContentWrapper = document.querySelector('#content-wrapper');
 
       const eContent = document.querySelector('#content');
-      eContent.innerText = '';
+      eContent.textContent = '';
 
       const logEvent = function(text, json) {
         const eEvent = document.createElement('div');
@@ -135,6 +248,12 @@
             hljs.highlightElement(eJson);
           }
           eEvent.appendChild(eJson);
+
+          if (json.method === 'NetworkChange') {
+            redrawNetworks(json.params);
+          } else if (json.method === 'ServiceStatus') {
+            redrawService(json.params);
+          }
         }
 
         const wasScrolledToBottom = (
