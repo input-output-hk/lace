@@ -123,12 +123,8 @@ func setupTrayUI(
 			menuItem := systray.AddMenuItem("", "")
 			menuItem.Disable()
 			go func(component string, statusCh <-chan string, menuItem *systray.MenuItem) {
-				prevStatus := "" // lessen refreshing, too often causes glitching on Windows
 				for newStatus := range statusCh {
-					if newStatus != prevStatus {
-						menuItem.SetTitle(component + " · " + newStatus)
-						prevStatus = newStatus
-					}
+					menuItem.SetTitle(component + " · " + newStatus)
 				}
 			}(component, statusCh, menuItem)
 		}

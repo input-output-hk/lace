@@ -124,11 +124,15 @@ func manageChildren(comm CommChannels_Manager) {
 					Revision:    def.Revision,
 				}
 				for upd := range statusCh {
-					fullStatus.Status = upd.Status
-					if !upd.OmitUrl {
-						fullStatus.Url = upd.Url
+					// lessen refreshing, too often causes glitching tray UI on Windows
+					if upd.Status != fullStatus.Status ||
+						(!upd.OmitUrl && upd.Url != fullStatus.Url) {
+						fullStatus.Status = upd.Status
+						if !upd.OmitUrl {
+							fullStatus.Url = upd.Url
+						}
+						comm.ServiceUpdate <- fullStatus
 					}
-					comm.ServiceUpdate <- fullStatus
 				}
 			}()
 			childrenDefs = append(childrenDefs, def)
