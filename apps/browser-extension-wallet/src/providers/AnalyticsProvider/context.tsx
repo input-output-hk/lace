@@ -3,8 +3,9 @@ import { useWalletStore } from '@src/stores';
 import debounce from 'lodash/debounce';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { AnalyticsTracker } from './analyticsTracker';
-import { EnhancedAnalyticsOptInStatus } from './analyticsTracker/types';
+import { EnhancedAnalyticsOptInStatus, ExtensionViews } from './analyticsTracker/types';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
+import shallow from 'zustand/shallow';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -33,14 +34,22 @@ export const AnalyticsProvider = ({
   tracker,
   analyticsDisabled
 }: AnalyticsProviderProps): React.ReactElement => {
-  const { currentChain } = useWalletStore();
+  const { currentChain, view } = useWalletStore(
+    (state) => ({ currentChain: state?.currentChain, view: state.walletUI.appMode }),
+    shallow
+  );
   const [optedInForEnhancedAnalytics] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
 
   const analyticsTracker = useMemo(
-    () => tracker || new AnalyticsTracker(currentChain, analyticsDisabled),
+    () =>
+      tracker ||
+      new AnalyticsTracker(
+        { chain: currentChain, view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended },
+        analyticsDisabled
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tracker, analyticsDisabled]
   );

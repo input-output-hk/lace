@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import posthog from 'posthog-js';
+import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
 import { ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTracker';
 import {
@@ -18,6 +19,7 @@ export class PostHogClient {
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
+    private view: ExtensionViews = ExtensionViews.Extended,
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
@@ -33,7 +35,9 @@ export class PostHogClient {
       // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
       disable_persistence: true,
       disable_cookie: true,
-      persistence: 'memory'
+      persistence: 'memory',
+      property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time'],
+      ip: true
     });
   }
 
@@ -73,9 +77,8 @@ export class PostHogClient {
     return {
       url: window.location.href,
       distinct_id: await this.userIdService.getId(),
-      // TODO: Since we only have onboarding flow event implemented, we hardcoded this to extended view,
-      // once we implement other flows, we'll need to make this dependable on the current user view (popup or extended) JIRA (TBD)
-      view: ExtensionViews.Extended
+      view: this.view,
+      sent_at_local: dayjs().format()
     };
   }
 }

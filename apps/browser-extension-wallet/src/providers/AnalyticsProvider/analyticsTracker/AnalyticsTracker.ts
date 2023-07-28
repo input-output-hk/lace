@@ -1,4 +1,4 @@
-import { EnhancedAnalyticsOptInStatus, MatomoSendEventProps, PostHogAction } from './types';
+import { EnhancedAnalyticsOptInStatus, ExtensionViews, MatomoSendEventProps, PostHogAction } from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient } from '../matomo';
 import { POSTHOG_ENABLED, PostHogClient } from '../postHog';
@@ -10,13 +10,20 @@ export class AnalyticsTracker {
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
 
-  constructor(chain: Wallet.Cardano.ChainId, analyticsDisabled = false, isPostHogEnabled = POSTHOG_ENABLED) {
+  constructor(
+    extensionParams: {
+      chain: Wallet.Cardano.ChainId;
+      view?: ExtensionViews;
+    },
+    analyticsDisabled = false,
+    isPostHogEnabled = POSTHOG_ENABLED
+  ) {
     if (analyticsDisabled) return;
     this.userIdService = getUserIdService();
-    this.matomoClient = new MatomoClient(chain, this.userIdService);
+    this.matomoClient = new MatomoClient(extensionParams.chain, this.userIdService);
 
     if (isPostHogEnabled) {
-      this.postHogClient = new PostHogClient(chain, this.userIdService);
+      this.postHogClient = new PostHogClient(extensionParams.chain, this.userIdService, extensionParams?.view);
     }
   }
 
