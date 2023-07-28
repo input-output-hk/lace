@@ -9,7 +9,8 @@ import { StakingModal } from './StakingModal';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { DrawerHeader, DrawerNavigation } from '@lace/common';
@@ -59,6 +60,7 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
                   ? AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_POPUP
                   : AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_BROWSER
               });
+              analytics.sendEventToPostHog(PostHogAction.StakingSwitchingPoolFineByMeClick);
               setStakeConfirmationVisible(false);
               setSection(sectionsConfig[Sections.CONFIRMATION]);
               setIsDrawerVisible(true);

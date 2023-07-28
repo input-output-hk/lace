@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@lace/common';
@@ -12,7 +12,8 @@ import Success from '@src/assets/icons/success-staking.svg';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 
@@ -26,6 +27,13 @@ type TransactionSuccessProps = {
 export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): React.ReactElement => {
   const { t } = useTranslation();
   const { isRestaking } = useSubmitingState();
+
+  const analytics = useAnalyticsContext();
+
+  useEffect(() => {
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayView);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className={cn(styles.container, { [styles.popupView]: popupView })}>
@@ -62,6 +70,7 @@ export const TransactionSuccessFooter = ({ popupView }: { popupView: boolean }):
         ? AnalyticsEventNames.Staking.STAKING_SUCCESS_POPUP
         : AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayCloseClick);
     setDelegationTxBuilder();
     setIsDrawerVisible(false);
     resetStates();

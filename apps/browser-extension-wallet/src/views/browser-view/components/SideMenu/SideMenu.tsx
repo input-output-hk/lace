@@ -6,7 +6,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { sideMenuConfig } from './side-menu-config';
 import { SideMenuContent } from './SideMenuContent';
@@ -40,6 +41,8 @@ export const SideMenu = (): React.ReactElement => {
       action: MatomoEventActions.CLICK_EVENT,
       name
     });
+
+    analytics.sendEventToPostHog(PostHogAction.StakingClick);
   };
 
   const handleRedirection: MenuProps['onClick'] = (field) => {

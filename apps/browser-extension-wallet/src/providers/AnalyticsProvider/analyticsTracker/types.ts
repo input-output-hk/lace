@@ -67,7 +67,20 @@ export enum PostHogAction {
   OnboardingCreateWritePassphrase17NextClick = 'onboarding | new wallet | write passphrase #17 | next | click',
   OnboardingCreateEnterPassphrase01NextClick = 'onboarding | new wallet | enter passphrase #01 | next | click',
   OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
-  OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click'
+  OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
+  // Staking
+  StakingClick = 'staking | staking | click',
+  StakingStakePoolClick = 'staking | staking | stake pool | click',
+  StakingStakePoolDetailStakeOnThisPoolClick = 'staking | stake pool detail | stake on this pool | click',
+  StakingSwitchingPoolFineByMeClick = 'staking | Switching pool? | fine by me | click',
+  StakingManageDelegationStakePoolConfirmationNextClick = 'staking | manage delegation | stake pool confirmation | next | click',
+  StakingManageDelegationPasswordConfirmationConfirmClick = 'staking | manage delegation | password confirmation | confirm | click',
+  StakingManageDelegationHurrayView = 'staking | manage delegation | Hurray! | view',
+  StakingManageDelegationHurrayCloseClick = 'staking | manage delegation | hurray! | close | click',
+  StakingManageDelegationHurrayXClick = 'staking | manage delegation | hurray! | x | click',
+  StakingManageDelegationSomethingWentWrongBackClick = 'staking | manage delegation | something went wrong | back | click',
+  StakingManageDelegationSomethingWentWrongCancelClick = 'staking | manage delegation | something went wrong | cancel | click',
+  StakingManageDelegationSomethingWentWrongXClick = 'staking | manage delegation | something went wrong | x | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {

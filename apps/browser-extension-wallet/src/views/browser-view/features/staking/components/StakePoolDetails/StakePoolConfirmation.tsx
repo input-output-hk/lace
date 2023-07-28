@@ -26,7 +26,8 @@ import ExclamationMarkIcon from '@src/assets/icons/exclamation-circle-small.svg'
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
@@ -234,6 +235,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
         ? AnalyticsEventNames.Staking.STAKING_CONFIRMATION_POPUP
         : AnalyticsEventNames.Staking.STAKING_CONFIRMATION_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationStakePoolConfirmationNextClick);
   }, [analytics, popupView]);
 
   const handleConfirmation = useCallback(async () => {

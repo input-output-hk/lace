@@ -15,7 +15,8 @@ import { useWalletManager } from '@hooks';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 
@@ -57,6 +58,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
         ? AnalyticsEventNames.Staking.STAKING_FAIL_POPUP
         : AnalyticsEventNames.Staking.STAKING_FAIL_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongCancelClick);
     setDelegationTxBuilder();
     setIsDrawerVisible(false);
     resetStates();
@@ -90,7 +92,10 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       </Button>
       {popupView ? (
         <Button
-          onClick={() => setSection(sectionsConfig[sectionsConfig.fail_tx.prevSection])}
+          onClick={() => {
+            analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongBackClick);
+            setSection(sectionsConfig[sectionsConfig.fail_tx.prevSection]);
+          }}
           color="primary"
           className={styles.btn}
           size="large"

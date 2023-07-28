@@ -15,7 +15,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const SATURATION_UPPER_BOUND = 100;
@@ -219,6 +220,7 @@ export const StakePoolDetailFooter = ({
           ? AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_POPUP
           : AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_BROWSER
       });
+      analytics.sendEventToPostHog(PostHogAction.StakingStakePoolDetailStakeOnThisPoolClick);
       onStake();
     } else {
       setNoFundsVisible(true);
