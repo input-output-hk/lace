@@ -25,8 +25,13 @@ export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
         <span>{t('portfolioBar.maxPools', { maxPoolsCount: MAX_POOLS_COUNT })}</span>
       </Text.Body.Normal>
       <Flex className={styles.buttons}>
-        <Button.Secondary label="Clear" onClick={portfolioMutators.clearDraft} />
-        <Button.Primary label="Next" icon={<ArrowRight className={styles.nextIcon} />} onClick={onStake} />
+        <Button.Secondary label="Clear" onClick={portfolioMutators.clearDraft} data-testid="portfolioBar-btn-clear" />
+        <Button.Primary
+          label="Next"
+          icon={<ArrowRight className={styles.nextIcon} />}
+          onClick={onStake}
+          data-testid="portfolioBar-btn-next"
+        />
       </Flex>
     </Card.Elevated>
   );

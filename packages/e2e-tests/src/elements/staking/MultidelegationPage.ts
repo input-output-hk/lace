@@ -1,0 +1,127 @@
+/* eslint-disable no-undef */
+import SectionTitle from '../sectionTitle';
+import MultidelegationPageAssert from '../../assert/multidelegationPageAssert';
+import { browser } from '@wdio/globals';
+import { clearInputFieldValue } from '../../utils/inputFieldUtils';
+
+class MultidelegationPage {
+  private OVERVIEW_TAB = '[data-testid="overview-tab"]';
+  private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
+  private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
+  private SEARCH_INPUT = '.ant-select-selection-search input';
+  private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
+  private POOL_NAME = '[data-testid="stake-pool-list-name"]';
+  private STAKE_BUTTON = '[data-testid="stake-button"]';
+  private PORTFOLIO_BAR_BTN_NEXT = '[data-testid="portfolioBar-btn-next"]';
+  private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferencesNextButton"]';
+  private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
+
+  get title() {
+    return SectionTitle.sectionTitle;
+  }
+
+  get overviewTab() {
+    return $(this.OVERVIEW_TAB);
+  }
+
+  get browseTab() {
+    return $(this.BROWSE_POOLS_TAB);
+  }
+
+  get delegationcardPoolsValue() {
+    return $(this.DELEGATIONCARD_POOLS_VALUE);
+  }
+
+  get stakingPageSearchInput() {
+    return $(this.SEARCH_INPUT);
+  }
+
+  get poolsItems() {
+    return $$(this.POOL_ITEM);
+  }
+
+  async getPoolByName(name: string) {
+    return (await this.poolsItems.find(
+      async (item) => (await item.$(this.POOL_NAME).getText()) === name
+    )) as WebdriverIO.Element;
+  }
+
+  get stakeButton() {
+    return $(this.STAKE_BUTTON);
+  }
+
+  get portfolioBarBtnNext() {
+    return $(this.PORTFOLIO_BAR_BTN_NEXT);
+  }
+
+  get manageStakingBtnNext() {
+    return $(this.MANAGE_STAKING_BTN_NEXT);
+  }
+
+  get confirmationBtnNext() {
+    return $(this.CONFIRMATION_BTN_NEXT);
+  }
+
+  async clickOnTab(tab: string) {
+    await this.overviewTab.waitForClickable();
+    if (tab === 'Overview') await this.overviewTab.click();
+    if (tab === 'Browse pools') await this.browseTab.click();
+  }
+
+  async markPoolsForDelegation(poolsToStake: string) {
+    const poolsToMark: string[] = [];
+    poolsToStake.split(',').forEach((poolName) => {
+      poolsToMark.push(poolName.replace("'", '').trim());
+    });
+    for (const poolName of poolsToMark) {
+      await this.fillSearch(poolName);
+      await MultidelegationPageAssert.assertSeeSearchResultsCount(1);
+      await this.markStakePoolWithName(poolName);
+      await this.stakingPageSearchInput.click();
+      await clearInputFieldValue(await this.stakingPageSearchInput);
+      await MultidelegationPageAssert.assertSeeSearchResultsCount(6);
+    }
+  }
+
+  async fillSearch(poolName: string) {
+    await this.stakingPageSearchInput.waitForClickable();
+    await this.stakingPageSearchInput.scrollIntoView();
+    await this.stakingPageSearchInput.click();
+    await browser.keys([...poolName]);
+    await browser.pause(500);
+  }
+
+  async markStakePoolWithName(poolName: string) {
+    await this.hoverOverPoolWithName(poolName);
+    await this.markPoolForStaking();
+  }
+
+  private async hoverOverPoolWithName(poolName: string) {
+    const poolItem = await this.getPoolByName(poolName);
+    await poolItem.moveTo();
+  }
+
+  private async markPoolForStaking() {
+    await this.stakeButton.waitForClickable();
+    await this.stakeButton.click();
+  }
+
+  async clickButtonOnSection(buttonName: string, section: string) {
+    switch (section) {
+      case 'portfolio bar':
+        await this.portfolioBarBtnNext.waitForClickable();
+        buttonName === 'Next' ? await this.portfolioBarBtnNext.click() : '';
+        break;
+      case 'manage staking':
+        await this.manageStakingBtnNext.waitForClickable();
+        buttonName === 'Next' ? await this.manageStakingBtnNext.click() : '';
+        break;
+      case 'confirmation':
+        await this.confirmationBtnNext.waitForClickable();
+        await this.confirmationBtnNext.click();
+        break;
+    }
+  }
+}
+
+export default new MultidelegationPage();
