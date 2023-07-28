@@ -165,4 +165,14 @@ in rec {
       ${./lace-blockchain-services/openapi.json} >$out
   '';
 
+  websocket-ui = pkgs.runCommand "websocket-ui" {
+    buildInputs = with pkgs; [ imagemagick ];
+  } ''
+    cp -r ${./websocket-ui} $out
+    chmod -R +w $out
+    convert -background none -size 32x32 ${./websocket-ui/favicon.svg} $out/favicon-32x32.png
+    convert -background none -size 16x16 ${./websocket-ui/favicon.svg} $out/favicon-16x16.png
+    convert $out/favicon-*.png $out/favicon.ico
+  '';
+
 }

@@ -80,7 +80,7 @@
       "head": {
         "operationId": "32f90caf-abdd-4a7a-b9a5-795616c44a0a",
         "summary": "Notifications about service and network changes over a WebSocket",
-        "description": "Similar to `/v1/info`, but in real time. Also has logs.\n\nThis endpoint is modeled as a `HEAD` here, but in reality it’s a WebSocket with a few [JSON RPC 2.0](https://www.jsonrpc.org/specification) notifications (see responses below). There are no requests.",
+        "description": "Similar to `/v1/info`, but in real time. Also has logs.\n\nThis endpoint is modeled as a `HEAD` here, but in reality it’s a WebSocket with a few [JSON RPC 2.0](https://www.jsonrpc.org/specification) notifications (see responses below). There are no requests.\n\nTry the [WebSocket UI](/websocket-ui/).",
         "tags": ["default"],
         "parameters": [
           {

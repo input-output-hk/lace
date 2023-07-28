@@ -150,10 +150,20 @@ func setupTrayUI(
 		}
 	}()
 
+	systray.AddSeparator()
+
 	mSwaggerUI := systray.AddMenuItem("OpenAPI Specification v3.0", "")
 	go func() {
 		for range mSwaggerUI.ClickedCh {
 			url := fmt.Sprintf("http://127.0.0.1:%d/swagger-ui/", appConfig.ApiPort)
+			openWithDefaultApp(url)
+		}
+	}()
+
+	mWebSocketUI := systray.AddMenuItem("WebSocket UI", "")
+	go func() {
+		for range mWebSocketUI.ClickedCh {
+			url := fmt.Sprintf("http://127.0.0.1:%d/websocket-ui/", appConfig.ApiPort)
 			openWithDefaultApp(url)
 		}
 	}()

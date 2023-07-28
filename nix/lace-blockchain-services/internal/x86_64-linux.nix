@@ -56,6 +56,7 @@ in rec {
     ln -s ${pkgs.xkeyboard_config}/share/X11/xkb $out/share/xkb
     ln -s ${common.networkConfigs} $out/share/cardano-node-config
     ln -s ${common.swagger-ui} $out/share/swagger-ui
+    ln -s ${common.websocket-ui} $out/share/websocket-ui
   '';
 
   # XXX: this has no dependency on /nix/store on the target machine

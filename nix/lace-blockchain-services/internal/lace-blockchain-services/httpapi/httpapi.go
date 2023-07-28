@@ -11,6 +11,7 @@ import (
 	"sort"
 	"unsafe"
 	"sync"
+	"time"
 
 	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
@@ -84,14 +85,28 @@ func handler(
 	info *Info,
 	availableNetworks map[t.NetworkMagic]string,
 ) func(http.ResponseWriter, *http.Request) { return func(w http.ResponseWriter, r *http.Request) {
-	swaggerUiPrefix := "swagger-ui"
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-	if (r.URL.Path == "/" || r.URL.Path == "/" + swaggerUiPrefix) && r.Method == http.MethodGet {
-		http.Redirect(w, r, "/" + swaggerUiPrefix + "/", http.StatusSeeOther)
-	} else if strings.HasPrefix(r.URL.Path, "/" + swaggerUiPrefix + "/") {
-		sep := string(filepath.Separator)
-		http.StripPrefix("/" + swaggerUiPrefix + "/",
-			http.FileServer(http.Dir(ourpaths.ResourcesDir + sep + "swagger-ui"))).ServeHTTP(w, r)
+	fmt.Printf("%s[%d]: HTTP request: %v\n", OurLogPrefix, os.Getpid(), *r)
+
+	tryStatic := func(prefix string) bool {
+		if r.URL.Path == "/" + prefix && r.Method == http.MethodGet {
+			http.Redirect(w, r, "/" + prefix + "/", http.StatusSeeOther)
+			return true
+		} else if strings.HasPrefix(r.URL.Path, "/" + prefix + "/") {
+			sep := string(filepath.Separator)
+			http.StripPrefix("/" + prefix + "/",
+				http.FileServer(http.Dir(ourpaths.ResourcesDir + sep + prefix))).ServeHTTP(w, r)
+			return true
+		} else { return false }
+	}
+
+	if r.URL.Path == "/" && r.Method == http.MethodGet {
+		http.Redirect(w, r, "/swagger-ui/", http.StatusSeeOther)
+	} else if tryStatic("swagger-ui") {
+	} else if tryStatic("websocket-ui") {
 	} else if r.URL.Path == "/openapi.json" && r.Method == http.MethodGet {
 		resp, err := openApiJson(appConfig, availableNetworks)
 		if err != nil { panic(err) }
@@ -160,7 +175,10 @@ func handleWebsocket(
 	hub WebSocketHub,
 	availableNetworks map[t.NetworkMagic]string,
 ) func(http.ResponseWriter, *http.Request) { return func(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{}
+	upgrader := websocket.Upgrader{
+		HandshakeTimeout: 5 * time.Second,
+		CheckOrigin: func(_ *http.Request) bool { return true },
+	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
