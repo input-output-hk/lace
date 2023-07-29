@@ -24,15 +24,11 @@ import { WalletManagerActivateProps, WalletManagerUi } from '@cardano-sdk/web-ex
 import { ChainName, WalletManagerProviderTypes } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
 
-export interface ExposedKeyAgent {
-  serializableData: KeyManagement.SerializableKeyAgentData;
-}
-
 export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.SerializableKeyAgentData }>;
 
 export interface CardanoWallet {
   wallet: ObservableWallet;
-  keyAgent: ExposedKeyAgent;
+  keyAgent: KeyManagement.KeyAgent;
   name: string;
 }
 export type CardanoWalletByChain = CardanoWallet & { keyAgentsByChain: KeyAgentsByChain };
@@ -84,22 +80,28 @@ export const createCardanoWalletsByChain = async (
   const keyAgentsByChain: KeyAgentsByChain = {} as KeyAgentsByChain;
   let activeChainName: ChainName;
 
+  const setup = async ({ chainId }: { chainId: Cardano.ChainId }) => {
+    const { keyAgent, ...rest } = await setupWallet({
+      createKeyAgent: async (dependencies) =>
+        await KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
+          {
+            mnemonicWords,
+            getPassphrase: getPassword,
+            chainId
+          },
+          { ...dependencies }
+        ),
+      createWallet,
+      logger: console,
+      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
+    });
+
+    return { keyAgent, ...rest };
+  };
+
   // Key agent for wallet to activate
   // getPassphrase referrs to user's spending password. Change introduced in https://github.com/input-output-hk/cardano-js-sdk/releases/tag/%40cardano-sdk%2Fwallet%400.8.0
-  const { keyAgent: activeKeyAgent, wallet } = await setupWallet({
-    createKeyAgent: async (dependencies) =>
-      await KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
-        {
-          mnemonicWords,
-          getPassphrase: getPassword,
-          chainId: activeChainId
-        },
-        { ...dependencies }
-      ),
-    createWallet,
-    logger: console,
-    bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
-  });
+  const { keyAgent: activeKeyAgent, wallet } = await setup({ chainId: activeChainId });
   for (const [chainName, chainId] of Object.entries(Cardano.ChainIds)) {
     if (chainId.networkId === activeChainId.networkId && chainId.networkMagic === activeChainId.networkMagic)
       activeChainName = chainName as ChainName;
@@ -113,20 +115,8 @@ export const createCardanoWalletsByChain = async (
       .filter(([chainName]) => chainName !== activeChainName)
       .map(async ([chainName, chainId]) => {
         // Create a key agent for each chain id to save in storage
-        const { keyAgent } = await setupWallet({
-          createKeyAgent: async (dependencies) =>
-            await KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
-              {
-                mnemonicWords,
-                getPassphrase: getPassword,
-                chainId
-              },
-              dependencies
-            ),
-          createWallet,
-          logger: console,
-          bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
-        });
+        const { keyAgent } = await setup({ chainId });
+
         // Build object with key agents for all chains to be able to switch to eventually
         keyAgentsByChain[chainName as ChainName] = { keyAgentData: keyAgent.serializableData };
       })
@@ -222,13 +212,9 @@ export const restoreWalletFromKeyAgent = async (
   const asyncKeyAgent = createAsyncKeyAgentWithCallback(keyAgent, callback);
 
   if (activateOnRestore) {
-    await walletManagerUi.activate({
-      keyAgent: asyncKeyAgent,
-      observableWalletName: name,
-      provider: {
-        type: WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER,
-        options: { chainName }
-      }
+    await activateWallet(walletManagerUi, keyAgent, name, {
+      type: WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER,
+      options: { chainName }
     });
   }
 

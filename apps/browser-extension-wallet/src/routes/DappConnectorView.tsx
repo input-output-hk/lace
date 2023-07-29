@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
-import { useRedirection, useWalletInfoSubscriber, useWalletManager } from '@src/hooks';
+import { useRedirection, useWalletInfoSubscriber, useWalletManager, useAppInit } from '@src/hooks';
 import { dAppRoutePaths } from '@routes';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
@@ -17,8 +17,6 @@ import {
 } from '../features/dapp';
 import { Loader } from '@lace/common';
 import styles from './DappConnectorView.module.scss';
-import { WalletManagerUi } from '@cardano-sdk/web-extension';
-import { runtime } from 'webextension-polyfill';
 import { getValueFromLocalStorage } from '@src/utils/local-storage';
 import { lockWalletSelector } from '@src/features/unlock-wallet/selectors';
 import { useAppSettingsContext } from '@providers';
@@ -36,7 +34,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const DappConnectorView = (): React.ReactElement => {
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
-  const { inMemoryWallet, keyAgentData, currentChain, setWalletManagerUi, walletInfo, setKeyAgentData } =
+  const { inMemoryWallet, keyAgentData, currentChain, walletInfo, setKeyAgentData, addressesDiscoveryCompleted } =
     useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
   const [hasNoAvailableWallet, setHasNoAvailableWallet] = useState(false);
@@ -45,12 +43,8 @@ export const DappConnectorView = (): React.ReactElement => {
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
 
+  useAppInit();
   useWalletInfoSubscriber();
-
-  useEffect(() => {
-    const walletManager = new WalletManagerUi({ walletName: process.env.WALLET_NAME }, { logger: console, runtime });
-    setWalletManagerUi(walletManager);
-  }, [setWalletManagerUi]);
 
   useEffect(() => {
     const load = async () => {
@@ -98,7 +92,7 @@ export const DappConnectorView = (): React.ReactElement => {
     return <UnlockWalletContainer />;
   }
 
-  if (keyAgentData && walletInfo && inMemoryWallet) {
+  if (keyAgentData && walletInfo && inMemoryWallet && addressesDiscoveryCompleted) {
     return (
       <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
         <Switch>

@@ -9,12 +9,10 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { BrowserViewSections } from '@lib/scripts/types';
-import { WalletManagerUi } from '@cardano-sdk/web-extension';
-import { runtime } from 'webextension-polyfill';
 import { useEnterKeyPress } from '@hooks/useEnterKeyPress';
 import { getValueFromLocalStorage } from '@src/utils/local-storage';
 import { MainLoader } from '@components/MainLoader';
-import { useWalletInfoSubscriber } from '@hooks';
+import { useWalletInfoSubscriber, useAppInit } from '@hooks';
 import { ILocalStorage } from '@src/types';
 
 dayjs.extend(duration);
@@ -28,19 +26,15 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const PopupView = (): React.ReactElement => {
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
-  const { inMemoryWallet, keyAgentData, currentChain, setWalletManagerUi, walletInfo, setKeyAgentData } =
+  const { inMemoryWallet, keyAgentData, currentChain, walletInfo, setKeyAgentData, addressesDiscoveryCompleted } =
     useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
   const { loadWallet } = useWalletManager();
   const backgroundServices = useBackgroundServiceAPIContext();
 
+  useAppInit();
   useEnterKeyPress();
   useWalletInfoSubscriber();
-
-  useEffect(() => {
-    const walletManager = new WalletManagerUi({ walletName: process.env.WALLET_NAME }, { logger: console, runtime });
-    setWalletManagerUi(walletManager);
-  }, [setWalletManagerUi]);
 
   useEffect(() => {
     const load = async () => {
@@ -77,7 +71,7 @@ export const PopupView = (): React.ReactElement => {
   }
 
   // Wallet loaded
-  if (keyAgentData && walletInfo && inMemoryWallet) {
+  if (keyAgentData && walletInfo && inMemoryWallet && addressesDiscoveryCompleted) {
     return <ExtensionRoutes />;
   }
 

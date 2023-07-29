@@ -54,7 +54,7 @@ describe('Testing wallet info slice', () => {
         keyAgent: {
           serializableData: mockKeyAgentDataTestnet,
           unsubscribe: jest.fn()
-        },
+        } as unknown as Wallet.KeyManagement.KeyAgent,
         name: 'any'
       };
       result.current.setCardanoWallet(cardanoWallet);

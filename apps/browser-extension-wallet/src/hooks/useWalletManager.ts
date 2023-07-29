@@ -38,9 +38,6 @@ export interface CreateHardwareWallet {
   chainId: Wallet.Cardano.ChainId;
   connectedDevice: Wallet.HardwareWallets;
 }
-export interface DeleteWallet {
-  isForgotPasswordFlow?: boolean;
-}
 
 export interface UseWalletManager {
   lockWallet: () => void;

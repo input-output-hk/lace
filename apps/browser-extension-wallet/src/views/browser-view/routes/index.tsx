@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import React, { useEffect, useState, useCallback, ComponentType } from 'react';
+import React, { useEffect, useState, ComponentType } from 'react';
 import { Wallet } from '@lace/cardano';
 import { Switch, Redirect, Route } from 'react-router-dom';
 import { useWalletStore } from '../../../stores';
@@ -24,7 +24,7 @@ import { useAppSettingsContext } from '@providers/AppSettings';
 import { config } from '@src/config';
 import { Portal } from '../features/wallet-setup/components/Portal';
 import { MainLoader } from '@components/MainLoader';
-import { useWalletInfoSubscriber } from '@hooks';
+import { useAppInit, useWalletInfoSubscriber } from '@hooks';
 import { DappBetaModal } from '../features/dapp';
 
 export const defaultRoutes: RouteMap = [
@@ -94,12 +94,14 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     setCardanoCoin,
     currentChain,
     setCurrentChain,
-    getKeyAgentType
+    getKeyAgentType,
+    addressesDiscoveryCompleted
   } = useWalletStore();
   const { loadWallet } = useWalletManager();
   const [{ chainName }] = useAppSettingsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
 
+  useAppInit();
   useEnterKeyPress();
   useWalletInfoSubscriber();
 
@@ -120,15 +122,6 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }, [setCurrentChain]);
 
-  const generateWalletManagerUi = useCallback(() => {
-    const walletManager = new WalletManagerUi({ walletName: process.env.WALLET_NAME }, { logger: console, runtime });
-    setWalletManagerUi(walletManager);
-  }, [setWalletManagerUi]);
-
-  useEffect(() => {
-    generateWalletManagerUi();
-  }, [setWalletManagerUi, generateWalletManagerUi]);
-
   useEffect(() => {
     setIsLoadingWalletInfo(true);
     // try to get key agent data from local storage if exist and initialize state
@@ -143,14 +136,20 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     const resetTimer = debounce(() => {
       clearTimeout(time);
       time = setTimeout(() => {
-        window.addEventListener('focus', generateWalletManagerUi);
+        window.addEventListener('focus', () => {
+          const walletManager = new WalletManagerUi(
+            { walletName: process.env.WALLET_NAME },
+            { logger: console, runtime }
+          );
+          setWalletManagerUi(walletManager);
+        });
       }, 600_000);
     }, 500);
     window.addEventListener('load', resetTimer);
     document.addEventListener('onmousemove', resetTimer);
     document.addEventListener('onkeydown', resetTimer);
     () => resetTimer();
-  }, [generateWalletManagerUi]);
+  }, [setWalletManagerUi]);
 
   useEffect(() => {
     loadWallet();
@@ -186,7 +185,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet) {
+  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet && addressesDiscoveryCompleted) {
     return (
       <>
         <Switch>
