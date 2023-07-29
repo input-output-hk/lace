@@ -1,14 +1,15 @@
 /* eslint-disable unicorn/no-null */
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
+import { Wallet } from '@lace/cardano';
+import { useBackgroundServiceAPIContext } from '@providers';
 import { useWalletStore } from '@stores';
 import { getValueFromLocalStorage, saveValueInLocalStorage } from '@utils/local-storage';
-import { useEffect, useRef } from 'react';
-import { Subscription } from 'rxjs';
+import { useEffect } from 'react';
 import { runtime } from 'webextension-polyfill';
 
 export const useAppInit = (): void => {
-  const subscription = useRef<Subscription | null>(null);
-  const { setAddressesDiscoveryCompleted, setWalletManagerUi, walletManagerUi } = useWalletStore();
+  const { environmentName, setAddressesDiscoveryCompleted, setWalletManagerUi, walletManagerUi } = useWalletStore();
+  const backgroundService = useBackgroundServiceAPIContext();
 
   useEffect(() => {
     const walletManager = new WalletManagerUi({ walletName: process.env.WALLET_NAME }, { logger: console, runtime });
@@ -16,11 +17,16 @@ export const useAppInit = (): void => {
   }, [setWalletManagerUi]);
 
   useEffect(() => {
-    if (!walletManagerUi?.wallet || subscription.current) return () => void 0;
+    if (!walletManagerUi?.wallet) return () => void 0;
 
-    subscription.current = walletManagerUi?.wallet.addresses$.subscribe((knownAddresses) => {
+    const subscription = walletManagerUi.wallet.addresses$.subscribe(async (knownAddresses) => {
+      const backgroundStorage = await backgroundService.getBackgroundStorage();
       const currentKeyAgentData = getValueFromLocalStorage('keyAgentData');
-      const nextKeyAgentData = {
+
+      if (!backgroundStorage || !currentKeyAgentData) return;
+      const { keyAgentsByChain } = backgroundStorage;
+
+      const nextKeyAgentData: Wallet.KeyManagement.SerializableKeyAgentData = {
         ...currentKeyAgentData,
         knownAddresses
       };
@@ -29,13 +35,14 @@ export const useAppInit = (): void => {
         key: 'keyAgentData',
         value: nextKeyAgentData
       });
+      keyAgentsByChain[environmentName].keyAgentData = nextKeyAgentData;
+      await backgroundService.setBackgroundStorage({ keyAgentsByChain });
+
       setAddressesDiscoveryCompleted(true);
     });
 
     return () => {
-      if (!subscription.current) return;
-      subscription.current.unsubscribe();
-      subscription.current = null;
+      subscription.unsubscribe();
     };
-  }, [walletManagerUi?.wallet, setAddressesDiscoveryCompleted]);
+  }, [backgroundService, environmentName, setAddressesDiscoveryCompleted, walletManagerUi?.wallet]);
 };
