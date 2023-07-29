@@ -19,7 +19,6 @@ export const useAppInit = (): void => {
     if (!walletManagerUi?.wallet || subscription.current) return () => void 0;
 
     subscription.current = walletManagerUi?.wallet.addresses$.subscribe((knownAddresses) => {
-      console.log('known addresses, received', knownAddresses);
       const currentKeyAgentData = getValueFromLocalStorage('keyAgentData');
       const nextKeyAgentData = {
         ...currentKeyAgentData,
