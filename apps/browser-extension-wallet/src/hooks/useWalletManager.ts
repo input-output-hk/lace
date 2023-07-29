@@ -52,6 +52,7 @@ export interface UseWalletManager {
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<void>;
   executeWithPassword: <T>(password: string, promiseFn: () => Promise<T>, cleanPassword?: boolean) => Promise<T>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
+  updateKeyAgentData: (newKeyAgentData: Wallet.KeyManagement.SerializableKeyAgentData) => Promise<void>;
 }
 
 /** Connects a hardware wallet device */
@@ -356,6 +357,23 @@ export const useWalletManager = (): UseWalletManager => {
     ]
   );
 
+  const updateKeyAgentData = useCallback(
+    async (newKeyAgentData: Wallet.KeyManagement.SerializableKeyAgentData) => {
+      const backgroundStorage = await backgroundService.getBackgroundStorage();
+
+      if (!backgroundStorage) throw new Error("Couldn't access background storage");
+      const { keyAgentsByChain } = backgroundStorage;
+
+      saveValueInLocalStorage({
+        key: 'keyAgentData',
+        value: newKeyAgentData
+      });
+      keyAgentsByChain[environmentName].keyAgentData = newKeyAgentData;
+      await backgroundService.setBackgroundStorage({ keyAgentsByChain });
+    },
+    [backgroundService, environmentName]
+  );
+
   return {
     lockWallet,
     unlockWallet,
@@ -368,6 +386,7 @@ export const useWalletManager = (): UseWalletManager => {
     saveHardwareWallet,
     deleteWallet,
     executeWithPassword,
-    switchNetwork
+    switchNetwork,
+    updateKeyAgentData
   };
 };
