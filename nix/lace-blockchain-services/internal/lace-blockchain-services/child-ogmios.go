@@ -11,7 +11,7 @@ import (
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
-func childOgmios(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
+func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusAndUrl) ManagedChild { return func(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
 	sep := string(filepath.Separator)
 
 	reSyncProgress := regexp.MustCompile(`"networkSynchronization"\s*:\s*(\d*\.\d+)`)
@@ -56,7 +56,7 @@ func childOgmios(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild 
 			if ms := reSyncProgress.FindStringSubmatch(line); len(ms) > 0 {
 				num, err := strconv.ParseFloat(ms[1], 64)
 				if err == nil {
-					*shared.SyncProgress = num
+					syncProgressCh <- num
 				}
 			}
 		},
@@ -64,4 +64,4 @@ func childOgmios(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild 
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
 	}
-}
+}}

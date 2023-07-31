@@ -99,9 +99,12 @@ func manageChildren(comm CommChannels_Manager) {
 			cardanoServicesAvailable = false
 		}
 
+		ogmiosSyncProgressCh := make(chan float64)
+		defer close(ogmiosSyncProgressCh)
+
 		usedChildren := []func(SharedState, chan<- StatusAndUrl)ManagedChild{
 			childCardanoNode,
-			childOgmios,
+			childOgmios(ogmiosSyncProgressCh),
 		}
 		if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
 
@@ -141,6 +144,27 @@ func manageChildren(comm CommChannels_Manager) {
 			}()
 			childrenDefs = append(childrenDefs, def)
 		}
+
+		// We want to fake an update to cardano-node’s ServiceStatus as soon as Ogmios returns progress:
+		go func(){
+			var cardanoNodeStatusCh chan<- StatusAndUrl
+			for _, child := range childrenDefs {
+				if child.ServiceName == "cardano-node" {
+					cardanoNodeStatusCh = child.StatusCh
+					break
+				}
+			}
+			for syncProgress := range ogmiosSyncProgressCh {
+				*shared.SyncProgress = syncProgress
+				textual := "syncing"
+				if syncProgress == 1.0 { textual = "synced" }
+				cardanoNodeStatusCh <- StatusAndUrl {
+					Status: textual,
+					Progress: syncProgress,
+					OmitUrl: true,
+				}
+			}
+		}()
 
 		var wgChildren sync.WaitGroup
 
