@@ -110,7 +110,7 @@ func handler(
 	} else if tryStatic("swagger-ui") {
 	} else if tryStatic("websocket-ui") {
 	} else if r.URL.Path == "/openapi.json" && r.Method == http.MethodGet {
-		resp, err := openApiJson(appConfig, availableNetworks)
+		resp, err := openApiJson(appConfig, info)
 		if err != nil { panic(err) }
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(resp)
@@ -145,7 +145,7 @@ func networksToMagics(availableNetworks map[t.NetworkMagic]string) []t.NetworkMa
 	return magics
 }
 
-func openApiJson(appConfig appconfig.AppConfig, availableNetworks map[t.NetworkMagic]string) ([]byte, error) {
+func openApiJson(appConfig appconfig.AppConfig, info *Info) ([]byte, error) {
 	raw, err := assets.Asset("openapi.json")
 	if err != nil { return nil, err }
 
@@ -158,11 +158,15 @@ func openApiJson(appConfig appconfig.AppConfig, availableNetworks map[t.NetworkM
 	}}
 
 	doc["components"].(map[string]interface{})["schemas"].(map[string]interface{})["NetworkMagic"].
-		(map[string]interface{})["enum"] = networksToMagics(availableNetworks)
+		(map[string]interface{})["enum"] = info.AvailableNetworks
+
+	availableServices := []string{}
+	for _, ss := range info.Services {
+		availableServices = append(availableServices, ss.ServiceName)
+	}
 
 	doc["components"].(map[string]interface{})["schemas"].(map[string]interface{})["ServiceName"].
-		(map[string]interface{})["enum"] = []string{
-		"cardano-node", "ogmios", "provider-server", "lace-blockchain-services"}
+		(map[string]interface{})["enum"] = availableServices
 
 	return json.Marshal(doc)
 }
