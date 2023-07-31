@@ -9,7 +9,6 @@ class NftsFolderPage extends CommonDrawerElements {
   public NFT_CONTAINER = '[data-testid="nft-item"]';
   public NFT_NAME = '[data-testid="nft-item-name"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
-  private DRAWER_CONTENT = '.ant-drawer-content';
 
   get title() {
     return $(this.FOLDER_TITLE);
@@ -29,10 +28,6 @@ class NftsFolderPage extends CommonDrawerElements {
 
   get nfts() {
     return this.assetSelectorContainer.$$(this.NFT_CONTAINER);
-  }
-
-  get drawerContent() {
-    return $(this.DRAWER_CONTENT);
   }
 
   async getNft(nftName: string) {
