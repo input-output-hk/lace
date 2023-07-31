@@ -20,8 +20,7 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 	var providerServerPort int
 
 	return ManagedChild{
-		LogPrefix: "provider-server",
-		PrettyName: "provider-server",
+		ServiceName: "provider-server",
 		ExePath: ourpaths.LibexecDir + sep + "node" + ourpaths.ExeSuffix,
 		Version: versions.ProviderServerVersion,
 		Revision: versions.ProviderServerRevision,

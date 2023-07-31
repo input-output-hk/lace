@@ -16,8 +16,7 @@ import (
 )
 
 type ManagedChild struct {
-	LogPrefix   string
-	PrettyName  string // used in auto-generated messages to StatusCh
+	ServiceName   string
 	ExePath     string
 	Version     string
 	Revision    string
@@ -119,7 +118,7 @@ func manageChildren(comm CommChannels_Manager) {
 			def.StatusCh = statusCh
 			go func(){
 				fullStatus := t.ServiceStatus {
-					ServiceName: def.LogPrefix,
+					ServiceName: def.ServiceName,
 					Status:      initialStatus.Status,
 					Progress:    -1,
 					Url:         initialStatus.Url,
@@ -170,10 +169,10 @@ func manageChildren(comm CommChannels_Manager) {
 		for childIdx, childUnsafe := range childrenDefs {
 			child := childUnsafe // or else all interations will get the same ref (last child)
 			wgChildren.Add(1)
-			fmt.Printf("%s[%d]: starting %s...\n", OurLogPrefix, os.Getpid(), child.LogPrefix)
+			fmt.Printf("%s[%d]: starting %s...\n", OurLogPrefix, os.Getpid(), child.ServiceName)
 			for _, dependant := range childrenDefs[(childIdx+1):] {
 				dependant.StatusCh <- StatusAndUrl{
-					Status: fmt.Sprintf("waiting for %s", child.PrettyName),
+					Status: fmt.Sprintf("waiting for %s", child.ServiceName),
 					Progress: -1,
 					Url: "",
 					OmitUrl: true,
@@ -204,12 +203,12 @@ func manageChildren(comm CommChannels_Manager) {
 			// monitor output:
 			go func() {
 				for line := range outputLines {
-					fmt.Printf("%s[%d]: %s\n", child.LogPrefix, childPid, line)
+					fmt.Printf("%s[%d]: %s\n", child.ServiceName, childPid, line)
 					child.LogMonitor(line)
 				}
 				childDidExit = true
 				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
-					child.LogPrefix, childPid)
+					child.ServiceName, childPid)
 				child.StatusCh <- StatusAndUrl{
 					Status: "off",
 					Progress: -1,
@@ -232,14 +231,14 @@ func manageChildren(comm CommChannels_Manager) {
 					next := child.HealthProbe(prev)
 					if next.DoRestart {
 						fmt.Printf("%s[%d]: health probe of %s[%d] requested restart\n",
-							OurLogPrefix, os.Getpid(), child.LogPrefix, childPid)
+							OurLogPrefix, os.Getpid(), child.ServiceName, childPid)
 						terminateCh <- struct{}{}
 						return
 					}
 					next.Initialized = prev.Initialized || next.Initialized // remember true
 					if !prev.Initialized && next.Initialized {
 						fmt.Printf("%s[%d]: health probe reported %s[%d] as initialized\n",
-							OurLogPrefix, os.Getpid(), child.LogPrefix, childPid)
+							OurLogPrefix, os.Getpid(), child.ServiceName, childPid)
 						initializedCh <- struct{}{} // continue launching the next process
 					}
 					time.Sleep(next.NextProbeIn)

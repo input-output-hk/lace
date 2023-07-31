@@ -17,8 +17,7 @@ func childOgmios(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild 
 	reSyncProgress := regexp.MustCompile(`"networkSynchronization"\s*:\s*(\d*\.\d+)`)
 
 	return ManagedChild{
-		LogPrefix: "ogmios",
-		PrettyName: "Ogmios",
+		ServiceName: "ogmios",
 		ExePath: ourpaths.LibexecDir + sep + "ogmios" + ourpaths.ExeSuffix,
 		Version: versions.OgmiosVersion,
 		Revision: versions.OgmiosRevision,

@@ -120,7 +120,7 @@ func setupTrayUI(
 	// XXX: this weird type because we want order, and there are no tuples:
 	statuses := []map[string](<-chan string) {
 		{ "cardano-node":    fixme_CardanoNodeStatus },
-		{ "Ogmios":          fixme_OgmiosStatus },
+		{ "ogmios":          fixme_OgmiosStatus },
 		{ "provider-server": fixme_ProviderServerStatus },
 	}
 

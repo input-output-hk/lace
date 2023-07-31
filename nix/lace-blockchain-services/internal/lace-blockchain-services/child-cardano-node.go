@@ -51,8 +51,7 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 		`^.*ChainDB:Notice.*Chain extended, new tip: [0-9a-f]+ at slot (\d+)$`)
 
 	return ManagedChild{
-		LogPrefix: "cardano-node",
-		PrettyName: "cardano-node",
+		ServiceName: "cardano-node",
 		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + ourpaths.ExeSuffix,
 		Version: versions.CardanoNodeVersion,
 		Revision: versions.CardanoNodeRevision,
