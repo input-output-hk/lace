@@ -48,7 +48,7 @@ export enum HandleVerificationState {
   VERIFYING = 'verifying',
   CHANGED_OWNERSHIP = 'changedOwnership'
 }
-const isHandleAddressBookEnabled = process.env.USE_HANDLE_AB === 'true';
+const isHandleAddressBookEnabled = process.env.USE_HANDLE_SEND_UPDATE === 'true';
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
