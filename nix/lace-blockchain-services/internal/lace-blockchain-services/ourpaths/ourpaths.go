@@ -14,6 +14,8 @@ var (
 	LibexecDir string
 	ResourcesDir string
 	NetworkConfigDir string
+	CardanoServicesDir string
+	ExeSuffix string
 )
 
 // XXX: we do this because:
@@ -57,7 +59,16 @@ func init() {
 		panic("cannot happen, unknown OS: " + runtime.GOOS)
 	}
 
-	NetworkConfigDir = ResourcesDir + string(filepath.Separator) + "cardano-node-config"
+	sep := string(filepath.Separator)
+
+	NetworkConfigDir = ResourcesDir + sep + "cardano-node-config"
+
+	CardanoServicesDir = ResourcesDir + sep + "cardano-js-sdk" + sep + "packages" + sep + "cardano-services"
+
+	ExeSuffix = ""
+	if (runtime.GOOS == "windows") {
+		ExeSuffix = ".exe"
+	}
 
 	// Prepend our libexec to PATH – e.g. for xclip on Linux, which is not installed on all distributions
 	err = os.Setenv("PATH", LibexecDir + string(filepath.ListSeparator) + os.Getenv("PATH"))

@@ -2,6 +2,7 @@ import NftFolderContextMenu from '../elements/NFTs/NftFolderContextMenu';
 import { expect } from 'chai';
 import { t } from '../utils/translationService';
 import DeleteFolderModal from '../elements/NFTs/DeleteFolderModal';
+import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 
 class NftFolderAssert {
   async assertSeeNftFolderContextMenu(shouldBeDisplayed: boolean) {
@@ -51,6 +52,10 @@ class NftFolderAssert {
         await t('browserView.nfts.deleteFolderModal.confirm')
       );
     }
+  }
+
+  async assertSeeAddNftButton() {
+    await NftsFolderPage.addNftButton.waitForClickable();
   }
 }
 
