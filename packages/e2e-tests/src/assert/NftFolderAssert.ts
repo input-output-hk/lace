@@ -55,7 +55,6 @@ class NftFolderAssert {
   }
 
   async assertSeeAddNftButton() {
-    await NftsFolderPage.addNftButton.waitForDisplayed();
     await NftsFolderPage.addNftButton.waitForClickable();
   }
 }

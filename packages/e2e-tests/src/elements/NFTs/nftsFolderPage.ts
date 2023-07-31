@@ -9,8 +9,6 @@ class NftsFolderPage extends CommonDrawerElements {
   public NFT_CONTAINER = '[data-testid="nft-item"]';
   public NFT_NAME = '[data-testid="nft-item-name"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
-  private SELECTED_FOLDER_TITLE = '[data-testid="selected-folder-title"]';
-  private SELECTED_FOLDER_NFT_COUNTER = '[data-testid="selected-folder-nft-counter"]';
   private DRAWER_CONTENT = '.ant-drawer-content';
 
   get title() {
@@ -31,14 +29,6 @@ class NftsFolderPage extends CommonDrawerElements {
 
   get nfts() {
     return this.assetSelectorContainer.$$(this.NFT_CONTAINER);
-  }
-
-  get selectedFolderTitle() {
-    return $(this.SELECTED_FOLDER_TITLE);
-  }
-
-  get selectedFolderNftCount() {
-    return $(this.SELECTED_FOLDER_NFT_COUNTER);
   }
 
   get drawerContent() {
