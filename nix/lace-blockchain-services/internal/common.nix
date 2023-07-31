@@ -173,6 +173,16 @@ in rec {
     convert -background none -size 32x32 ${./websocket-ui/favicon.svg} $out/favicon-32x32.png
     convert -background none -size 16x16 ${./websocket-ui/favicon.svg} $out/favicon-16x16.png
     convert $out/favicon-*.png $out/favicon.ico
+
+    mkdir -p $out/highlight.js
+    cp ${pkgs.fetchurl {
+      url = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js";
+      hash = "sha256-RJn/k21P1WKtylpcvlEtwZ64CULu6GGNr7zrxPeXS9s=";
+    }} $out/highlight.js/highlight.min.js
+    cp ${pkgs.fetchurl {
+      url = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css";
+      hash = "sha256-+94KwJIdhsNWxBUy5zGciHojvRuP8ABgyrRHJJ8Dx88=";
+    }} $out/highlight.js/default.min.css
   '';
 
 }
