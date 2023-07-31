@@ -128,6 +128,7 @@ func main() {
 		serviceUpdateFromManager <- t.ServiceStatus {
 			ServiceName: "lace-blockchain-services",
 			Status: "listening",
+			Progress: -1,
 			Url: fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort),
 			Version: versions.LaceBlockchainServicesVersion,
 			Revision: versions.LaceBlockchainServicesRevision,

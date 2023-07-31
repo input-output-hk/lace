@@ -209,7 +209,15 @@
 
           eServices.appendChild(eService);
         }
-        eService.querySelector('.status').textContent = json.status;
+
+        let progress = '';
+        if (json.progress >= 0 && json.progress <= 1) {
+          progress = ' · ' + (json.progress * 100.0).toFixed(2) + '%';
+        } else if (json.progress >= 0) {
+          progress = ' · ' + json.progress.toFixed(0);
+        }
+
+        eService.querySelector('.status').textContent = json.status + progress;
         eService.querySelector('.url').textContent = json.url;
         eService.querySelector('.url').href = json.url;
       };

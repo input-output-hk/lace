@@ -40,6 +40,7 @@ func childOgmios(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild 
 			if (err == nil) {
 				statusCh <- StatusAndUrl {
 					Status: "listening",
+					Progress: -1,
 					Url: ogmiosUrl,
 					OmitUrl: false,
 				}

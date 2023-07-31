@@ -83,14 +83,20 @@ func setupTrayUI(
 
 	go func(){
 		for upd := range comm.ServiceUpdate {
+			formatted := upd.Status
+			if upd.Progress >= 0 && upd.Progress <= 1 {
+				formatted += fmt.Sprintf(" · %0.2f%%", upd.Progress * 100)
+			} else if upd.Progress >= 0 {
+				formatted += fmt.Sprintf(" · %0.0f", upd.Progress)
+			}
 			switch upd.ServiceName {
 			case "cardano-node":
-				fixme_CardanoNodeStatus <- upd.Status
+				fixme_CardanoNodeStatus <- formatted
 			case "ogmios":
 				fixme_OgmiosStatus <- upd.Status
-				fixme_SetOgmiosDashboard <- upd.Url
+				fixme_SetOgmiosDashboard <- formatted
 			case "provider-server":
-				fixme_ProviderServerStatus <- upd.Status
+				fixme_ProviderServerStatus <- formatted
 			}
 		}
 	}()

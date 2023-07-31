@@ -59,6 +59,7 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 			if (err == nil) {
 				statusCh <- StatusAndUrl {
 					Status: "listening",
+					Progress: -1,
 					Url: backendUrl,
 					OmitUrl: false,
 				}

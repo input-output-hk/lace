@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+	"strconv"
 	"strings"
 	"regexp"
 
@@ -39,11 +40,11 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 	}
 
 	reValidatingChunk := regexp.MustCompile(
-		`^.*ChainDB:Info.*Validating chunk no. \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
+		`^.*ChainDB:Info.*Validating chunk no. \d+ out of \d+\. Progress: (\d*\.\d+)%$`)
 	reReplayingLedger := regexp.MustCompile(
-		`^.*ChainDB:Info.*Replayed block: slot \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
+		`^.*ChainDB:Info.*Replayed block: slot \d+ out of \d+\. Progress: (\d*\.\d+)%$`)
 	rePushingLedger := regexp.MustCompile(
-		`^.*ChainDB:Info.*Pushing ledger state for block [0-9a-f]+ at slot \d+. Progress: (\d*\.\d+%)$`)
+		`^.*ChainDB:Info.*Pushing ledger state for block [0-9a-f]+ at slot \d+. Progress: (\d*\.\d+)%$`)
 	reSyncing := regexp.MustCompile(
 		`^.*ChainDB:Notice.*Chain extended, new tip: [0-9a-f]+ at slot (\d+)$`)
 
@@ -89,27 +90,30 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 		},
 		LogMonitor: func(line string) {
 			if ms := reValidatingChunk.FindStringSubmatch(line); len(ms) > 0 {
-				statusCh <- StatusAndUrl { Status: "validating chunks · " + ms[1] }
+				pr, _ := strconv.ParseFloat(ms[1], 64)
+				statusCh <- StatusAndUrl { Status: "validating chunks", Progress: pr/100 }
 			} else if strings.Index(line, "Started opening Volatile DB") != -1 {
-				statusCh <- StatusAndUrl { Status: "opening volatile DB…" }
+				statusCh <- StatusAndUrl { Status: "opening volatile DB", Progress: -1 }
 			} else if strings.Index(line, "Started opening Ledger DB") != -1 {
-				statusCh <- StatusAndUrl { Status: "opening ledger DB…" }
+				statusCh <- StatusAndUrl { Status: "opening ledger DB", Progress: -1 }
 			} else if ms :=reReplayingLedger.FindStringSubmatch(line);len(ms)>0 {
-				statusCh <- StatusAndUrl { Status: "replaying ledger · " + ms[1] }
+				pr, _ := strconv.ParseFloat(ms[1], 64)
+				statusCh <- StatusAndUrl { Status: "replaying ledger", Progress: pr/100 }
 			} else if strings.Index(line, "Opened lgr db") != -1 {
-				statusCh <- StatusAndUrl { Status: "replaying ledger · 100.00%" }
+				statusCh <- StatusAndUrl { Status: "replaying ledger", Progress: 1.0 }
 			} else if ms := rePushingLedger.FindStringSubmatch(line); len(ms)>0 {
-				statusCh <- StatusAndUrl { Status: "pushing ledger · " + ms[1] }
+				pr, _ := strconv.ParseFloat(ms[1], 64)
+				statusCh <- StatusAndUrl { Status: "pushing ledger", Progress: pr/100 }
 			} else if ms := reSyncing.FindStringSubmatch(line); len(ms) > 0 {
-				sp := ms[1] // fallback
+				pr, _ := strconv.ParseFloat(ms[1], 64)  // fallback
 				if (*shared.SyncProgress >= 0) {
-					sp = fmt.Sprintf("%.2f%%", *shared.SyncProgress * 100.0)
+					pr = *shared.SyncProgress
 				}
 				textual := "syncing"
 				if (*shared.SyncProgress == 1.0) {
 					textual = "synced"
 				}
-				statusCh <- StatusAndUrl { Status: textual + " · " + sp }
+				statusCh <- StatusAndUrl { Status: textual, Progress: pr }
 			}
 		},
 		LogModifier: func(line string) string {

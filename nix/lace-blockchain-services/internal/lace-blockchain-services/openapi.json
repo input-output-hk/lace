@@ -176,6 +176,12 @@
             "description": "Current status of the service",
             "example": "listening"
           },
+          "progress": {
+            "type": "number",
+            "format": "double",
+            "description": "Progress of the `status` – usually between 0.0 and 1.0",
+            "example": "0.53778"
+          },
           "version": {
             "type": "string",
             "description": "Version (release)",

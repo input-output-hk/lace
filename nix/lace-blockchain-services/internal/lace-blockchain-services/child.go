@@ -32,9 +32,10 @@ type ManagedChild struct {
 }
 
 type StatusAndUrl struct {
-	Status  string
-	Url     string
-	OmitUrl bool
+	Status   string
+	Progress float64
+	Url      string
+	OmitUrl  bool
 }
 
 type HealthStatus struct {
@@ -110,6 +111,7 @@ func manageChildren(comm CommChannels_Manager) {
 			statusCh := make(chan StatusAndUrl, 1)
 			initialStatus := StatusAndUrl{
 				Status: "off",
+				Progress: -1,
 				Url: "",
 			}
 			statusCh <- initialStatus
@@ -119,6 +121,7 @@ func manageChildren(comm CommChannels_Manager) {
 				fullStatus := t.ServiceStatus {
 					ServiceName: def.LogPrefix,
 					Status:      initialStatus.Status,
+					Progress:    -1,
 					Url:         initialStatus.Url,
 					Version:     def.Version,
 					Revision:    def.Revision,
@@ -126,8 +129,10 @@ func manageChildren(comm CommChannels_Manager) {
 				for upd := range statusCh {
 					// lessen refreshing, too often causes glitching tray UI on Windows
 					if upd.Status != fullStatus.Status ||
+						upd.Progress != fullStatus.Progress ||
 						(!upd.OmitUrl && upd.Url != fullStatus.Url) {
 						fullStatus.Status = upd.Status
+						fullStatus.Progress = upd.Progress
 						if !upd.OmitUrl {
 							fullStatus.Url = upd.Url
 						}
@@ -151,6 +156,7 @@ func manageChildren(comm CommChannels_Manager) {
 				// and they’re "waiting" now)
 				child.StatusCh <- StatusAndUrl{
 					Status: "off",
+					Progress: -1,
 					Url: "",
 					OmitUrl: false,
 				}
@@ -168,11 +174,12 @@ func manageChildren(comm CommChannels_Manager) {
 			for _, dependant := range childrenDefs[(childIdx+1):] {
 				dependant.StatusCh <- StatusAndUrl{
 					Status: fmt.Sprintf("waiting for %s", child.PrettyName),
+					Progress: -1,
 					Url: "",
 					OmitUrl: true,
 				}
 			}
-			child.StatusCh <- StatusAndUrl { Status: "starting…", Url: "", OmitUrl: true }
+			child.StatusCh <- StatusAndUrl { Status: "starting…", Progress: -1, Url: "", OmitUrl: true }
 			outputLines := make(chan string)
 			terminateCh := make(chan struct{}, 1)
 			childDidExit := false
@@ -185,6 +192,7 @@ func manageChildren(comm CommChannels_Manager) {
 				if !childDidExit {
 					child.StatusCh <- StatusAndUrl {
 						Status: "terminating…",
+						Progress: -1,
 						Url: "",
 						OmitUrl: true,
 					}
@@ -204,6 +212,7 @@ func manageChildren(comm CommChannels_Manager) {
 					child.LogPrefix, childPid)
 				child.StatusCh <- StatusAndUrl{
 					Status: "off",
+					Progress: -1,
 					Url: "",
 					OmitUrl: false,
 				}
