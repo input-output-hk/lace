@@ -90,7 +90,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   };
 
   const resolveHandle = useMemo(
-    // eslint-disable-next-line sonarjs/cognitive-complexity
     () =>
       debounce(async () => {
         if (!addressInputValue.handleResolution) {
@@ -216,6 +215,10 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     ? 'addressBook.reviewModal.banner.popUpDescription'
     : 'addressBook.reviewModal.banner.browserDescription';
 
+  const getButtonText = !isPopupView && t('addressBook.reviewModal.banner.confirmReview.button');
+  const getLinkMessage = isPopupView && t('addressBook.reviewModal.banner.confirmReview.link');
+  const getMessagePartTwo = isPopupView && t('addressBook.reviewModal.banner.popUpDescriptionEnd');
+
   return (
     <span className={styles.container}>
       <DestinationAddressInput
@@ -256,11 +259,9 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           withIcon
           popupView={isPopupView}
           message={t(bannerDescription, { name: addressInputValue.name })}
-          messagePartTwo={t('addressBook.reviewModal.banner.popUpDescriptionEnd')}
-          withButton={!isPopupView}
-          buttonMessage={t('addressBook.reviewModal.banner.confirmReview.button')}
-          withLink={isPopupView}
-          linkMessage={t('addressBook.reviewModal.banner.confirmReview.link')}
+          messagePartTwo={getMessagePartTwo}
+          buttonMessage={getButtonText}
+          linkMessage={getLinkMessage}
           customIcon={<ExclamationCircleOutline />}
         />
       )}

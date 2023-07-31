@@ -22,9 +22,7 @@ export interface BannerProps {
   descriptionClassName?: string;
   popupView?: boolean;
   description?: React.ReactNode;
-  withLink?: boolean;
   onLinkClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
-  withButton?: boolean;
   onButtonClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
 }
 
@@ -36,8 +34,6 @@ export const Banner = ({
   className,
   descriptionClassName,
   popupView,
-  withLink,
-  withButton,
   onButtonClick,
   linkMessage,
   messagePartTwo,
@@ -73,16 +69,12 @@ export const Banner = ({
       >
         <div className={cn(styles.descriptionContainer)}>
           <Text className={styles.message}>{message}</Text>
-          {withLink && (
-            <>
-              <Link to="">{linkMessage}</Link>
-              <Text className={styles.message}>{messagePartTwo}</Text>
-            </>
-          )}
+          {linkMessage && <Link to="">{linkMessage}</Link>}
+          {messagePartTwo && <Text className={styles.message}>{messagePartTwo}</Text>}
           {description && <div>{descriptionElement}</div>}
         </div>
         <div className={cn(styles.buttonContainer)}>
-          {withButton && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
+          {buttonMessage && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
         </div>
       </div>
     </div>
