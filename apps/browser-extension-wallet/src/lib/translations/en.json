@@ -745,7 +745,7 @@
           "confirm": "Confirm",
           "reclaimCollateral": "Reclaim collateral",
           "continueInAdvancedView": "Continue in Advanced View",
-          "confirmWithLedger": "Confirm transaction with Ledger",
+          "confirmWithDevice": "Confirm transaction with {{ hardwareWallet }}",
           "notEnoughAda": "You don't have enough ADA to proceed with the transaction.",
           "active": "Active",
           "inactive": "Inactive",
