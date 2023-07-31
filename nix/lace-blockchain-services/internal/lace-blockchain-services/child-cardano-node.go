@@ -45,6 +45,8 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 		`^.*ChainDB:Info.*Replayed block: slot \d+ out of \d+\. Progress: (\d*\.\d+)%$`)
 	rePushingLedger := regexp.MustCompile(
 		`^.*ChainDB:Info.*Pushing ledger state for block [0-9a-f]+ at slot \d+. Progress: (\d*\.\d+)%$`)
+	reSyncingInit := regexp.MustCompile(
+		`^.*ChainDB:Info.*Opened db with immutable tip at [0-9a-f]+ at slot \d+ and tip [0-9a-f]+ at slot (\d+)$`)
 	reSyncing := regexp.MustCompile(
 		`^.*ChainDB:Notice.*Chain extended, new tip: [0-9a-f]+ at slot (\d+)$`)
 
@@ -89,6 +91,18 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 			}
 		},
 		LogMonitor: func(line string) {
+			reportSyncing := func(slotNum string){
+				pr, _ := strconv.ParseFloat(slotNum, 64)  // fallback
+				if (*shared.SyncProgress >= 0) {
+					pr = *shared.SyncProgress
+				}
+				textual := "syncing"
+				if (*shared.SyncProgress == 1.0) {
+					textual = "synced"
+				}
+				statusCh <- StatusAndUrl { Status: textual, Progress: pr }
+			}
+
 			if ms := reValidatingChunk.FindStringSubmatch(line); len(ms) > 0 {
 				pr, _ := strconv.ParseFloat(ms[1], 64)
 				statusCh <- StatusAndUrl { Status: "validating chunks", Progress: pr/100 }
@@ -104,16 +118,12 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 			} else if ms := rePushingLedger.FindStringSubmatch(line); len(ms)>0 {
 				pr, _ := strconv.ParseFloat(ms[1], 64)
 				statusCh <- StatusAndUrl { Status: "pushing ledger", Progress: pr/100 }
+			} else if strings.Index(line, "Initial chain selected") != -1 {
+				statusCh <- StatusAndUrl { Status: "syncing", Progress: -1 }
+			} else if ms := reSyncingInit.FindStringSubmatch(line); len(ms) > 0 {
+				reportSyncing(ms[1])
 			} else if ms := reSyncing.FindStringSubmatch(line); len(ms) > 0 {
-				pr, _ := strconv.ParseFloat(ms[1], 64)  // fallback
-				if (*shared.SyncProgress >= 0) {
-					pr = *shared.SyncProgress
-				}
-				textual := "syncing"
-				if (*shared.SyncProgress == 1.0) {
-					textual = "synced"
-				}
-				statusCh <- StatusAndUrl { Status: textual, Progress: pr }
+				reportSyncing(ms[1])
 			}
 		},
 		LogModifier: func(line string) string {
