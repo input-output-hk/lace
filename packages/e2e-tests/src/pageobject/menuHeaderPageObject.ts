@@ -50,6 +50,7 @@ class MenuHeaderPageObject {
 
   async setExtensionTheme(mode: 'light' | 'dark') {
     if (mode !== ((await MenuHeader.menuThemeSwitcher.getAttribute('aria-checked')) === 'true' ? 'light' : 'dark')) {
+      await MenuHeader.menuThemeSwitcher.waitForClickable();
       await MenuHeader.menuThemeSwitcher.click();
     }
   }
