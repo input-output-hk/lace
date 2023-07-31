@@ -50,6 +50,7 @@ export interface AssetInfo {
 export type OutputRow = {
   address: string;
   handle?: string;
+  isHandleVerified?: boolean;
   assets: Array<AssetInfo>;
 };
 

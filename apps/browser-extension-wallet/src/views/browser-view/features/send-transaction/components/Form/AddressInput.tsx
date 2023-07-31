@@ -51,7 +51,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const MAX_ADDRESSES = isPopupView ? 3 : 5;
 
   const { setSection } = useSections();
-  const { address, handle, setAddressValue } = useAddressState(row);
+  const { address, handle, isHandleVerified, setAddressValue } = useAddressState(row);
   const { filteredAddresses, getAddressBookByNameOrAddress } = useGetFilteredAddressBook();
   const { setAddressToEdit } = useAddressBookStore();
   const [, setRowId] = useCurrentRow();
@@ -98,7 +98,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           setHandleVerificationState(HandleVerificationState.INVALID);
         } else {
           setHandleVerificationState(HandleVerificationState.VALID);
-          setAddressValue(row, handles[0].cardanoAddress.toString(), handleString);
+          setAddressValue(row, handles[0].cardanoAddress.toString(), handleString, true);
         }
       }, HANDLE_DEBOUNCE_TIME),
     [handle, setHandleVerificationState, addressInputValue, handleResolver, setAddressValue, row]
@@ -106,6 +106,11 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
 
   useEffect(() => {
     if (!address) {
+      return;
+    }
+
+    if (isHandleVerified === true) {
+      setHandleVerificationState(HandleVerificationState.VALID);
       return;
     }
 
@@ -120,7 +125,14 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     return () => {
       resolveHandle && resolveHandle.cancel();
     };
-  }, [address, addressInputValue, setHandleVerificationState, resolveHandle, isAddressInputValueHandle]);
+  }, [
+    address,
+    addressInputValue,
+    setHandleVerificationState,
+    resolveHandle,
+    isAddressInputValueHandle,
+    isHandleVerified
+  ]);
 
   useEffect(() => {
     getAddressBookByNameOrAddress({ value: handle || address || '' });

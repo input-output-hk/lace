@@ -21,7 +21,7 @@ const initialState = {
   isRestaking: false,
   ids: [defaultOutputKey],
   uiOutputs: {
-    [defaultOutputKey]: { address: '', handle: '', assets: [{ id: cardanoCoin.id }] }
+    [defaultOutputKey]: { address: '', handle: '', assets: [{ id: cardanoCoin.id }], isHandleVerified: false }
   },
   builtTxData: {
     totalMinimumCoins: { coinMissing: '0', minimumCoin: '0' }
@@ -60,7 +60,7 @@ export interface Store {
   removeCoinFromOutputs: (id: string, asset: { id: string }) => void;
   setAssetRowToOutput: (id: string, availableCoins: IAssetInfo[]) => void;
   // ====== output address handlers ======
-  setAddressValue: (id: string, address: string, handle?: string) => void;
+  setAddressValue: (id: string, address: string, handle?: string, isHandleVerified?: boolean) => void;
   // ====== address book picker ======
   currentRow?: string | undefined;
   currentCoinToChange?: string | undefined;
@@ -172,11 +172,11 @@ const stateHandlers = (get: GetState<Store>, set: SetState<Store>) => {
     set({ uiOutputs: updatedOutputs });
   };
 
-  const setAddressValue = (id: string, address: string, handle?: string) => {
+  const setAddressValue = (id: string, address: string, handle?: string, isHandleVerified?: boolean) => {
     const rows = get().uiOutputs;
     const row = rows[id];
     if (!row) return;
-    const updatedRow = { ...row, address, handle };
+    const updatedRow = { ...row, address, handle, isHandleVerified };
     const outputs = { ...rows, [id]: updatedRow };
 
     set({ uiOutputs: outputs });
@@ -343,12 +343,15 @@ export const useCoinStateSelector = (row: string): UseCoinStateSelector =>
     )
   );
 
-export const useAddressState = (row: string): { address: string; handle?: string } & Pick<Store, 'setAddressValue'> =>
+export const useAddressState = (
+  row: string
+): { address: string; handle?: string; isHandleVerified?: boolean } & Pick<Store, 'setAddressValue'> =>
   useStore(
     useCallback(
       ({ uiOutputs, setAddressValue }) => ({
         address: !uiOutputs[row] ? '' : uiOutputs[row].address,
         handle: !uiOutputs[row] ? '' : uiOutputs[row].handle,
+        isHandleVerified: !uiOutputs[row] ? false : uiOutputs[row].isHandleVerified,
         setAddressValue
       }),
       [row]
