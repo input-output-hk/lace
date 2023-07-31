@@ -168,7 +168,7 @@ in rec {
     cp -Lf ${sigbreak}/*.exe $out/libexec/
     cp -Lr ${common.networkConfigs} $out/cardano-node-config
     cp -Lr ${common.swagger-ui} $out/swagger-ui
-    cp -Lr ${common.websocket-ui} $out/share/websocket-ui
+    cp -Lr ${common.websocket-ui} $out/websocket-ui
     ${if !withJS then "" else ''
       cp -Lr ${cardano-js-sdk.ourPackage} $out/cardano-js-sdk
     ''}
