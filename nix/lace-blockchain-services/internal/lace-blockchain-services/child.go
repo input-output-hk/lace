@@ -57,6 +57,8 @@ func manageChildren(comm CommChannels_Manager) {
 
 	network := <-comm.NetworkSwitch
 
+	runMithril := false
+
 	firstIteration := true
 	omitSleep := false
 	keepGoing := true
@@ -77,7 +79,12 @@ func manageChildren(comm CommChannels_Manager) {
 		omitSleep = false
 		comm.BlockRestartUI <- false
 
-		fmt.Printf("%s[%d]: starting session for network %s\n", OurLogPrefix, os.Getpid(), network)
+		if !runMithril {
+			fmt.Printf("%s[%d]: starting session for network %s\n", OurLogPrefix, os.Getpid(), network)
+		} else {
+			fmt.Printf("%s[%d]: resyncing with Mithril for network %s\n", OurLogPrefix, os.Getpid(),
+				network)
+		}
 
 		shared := SharedState{
 			Network: network,
@@ -102,11 +109,16 @@ func manageChildren(comm CommChannels_Manager) {
 		ogmiosSyncProgressCh := make(chan float64)
 		defer close(ogmiosSyncProgressCh)
 
-		usedChildren := []func(SharedState, chan<- StatusAndUrl)ManagedChild{
-			childCardanoNode,
-			childOgmios(ogmiosSyncProgressCh),
+		usedChildren := []func(SharedState, chan<- StatusAndUrl)ManagedChild{}
+
+		if !runMithril {
+			usedChildren = append(usedChildren, childCardanoNode)
+			usedChildren = append(usedChildren, childOgmios(ogmiosSyncProgressCh))
+			if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
+		} else {
+			usedChildren = append(usedChildren, childMithril)
+			runMithril = false  // one-time thing (restart to regular mode – successfully or by force)
 		}
-		if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
 
 		childrenDefs := []ManagedChild{}
 		for _, mkChild := range usedChildren {
@@ -288,6 +300,10 @@ func manageChildren(comm CommChannels_Manager) {
 					omitSleep = true
 					network = newNetwork
 				}
+				return
+			case <-comm.TriggerMithril:
+				runMithril = true
+				omitSleep = true
 				return
 			case <-comm.InitiateShutdownCh:
 				fmt.Printf("%s[%d]: initiating a graceful shutdown...\n", OurLogPrefix, os.Getpid())

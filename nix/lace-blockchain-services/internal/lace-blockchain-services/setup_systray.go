@@ -208,13 +208,15 @@ func setupTrayUI(
 			mainthread.Schedule(func() {
 				fmt.Printf("%s[%d]: info: Mithril from goroutine %v\n",
 					OurLogPrefix, os.Getpid(), goid())
-				dialog.Message(
+				ans := dialog.Message(
 					"Resync the entire blockchain from scratch with Mithril?\n\n" +
 					"This will delete your current cardano-node DB.\n\n" +
-					"Estimated time: %s",
+					"Estimated time: %s.",
 					eta[currentNetwork]).Title("Resync with Mithril?").YesNo()
+				if ans {
+					comm.TriggerMithril <- struct{}{}
+				}
 			})
-
 		}
 	}()
 

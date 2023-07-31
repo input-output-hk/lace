@@ -124,6 +124,8 @@ in rec {
       OgmiosRevision = ${__toJSON inputs.ogmios.rev}
       ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
       ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
+      MithrilClientRevision = ${__toJSON mithril-bin.version}
+      MithrilClientVersion = ${__toJSON mithril-bin.version}
     )
   '';
 
