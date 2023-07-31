@@ -349,3 +349,21 @@ Feature: NFT - Folders - Extended view
     And I create folder with name: "bcd" and first available NFT
     And I create folder with name: "cde" and first available NFT
     Then I see folders on the NFTs page in the alphabetical order
+
+  @LW-7228 @Pending
+  #Bug: LW-7632
+  Scenario: Extended-view - NFT Folders - Trying to rename folder using name that already exists
+    Given I navigate to NFTs extended page
+    When I create folder with name: "Sample NFT folder1" and first available NFT
+    And I create folder with name: "Sample NFT folder2" and first available NFT
+    And I right click on the NFT folder with name "Sample NFT folder1"
+    And I click "Rename" option in NFT folder context menu
+    And I see "Rename your folder" drawer in extended mode
+    When I clear "Folder name" input
+    And I enter a folder name "Sample NFT folder2" into "Folder name" input
+    Then I see "Given name already exists" error on "Name your folder" page
+    And "Confirm" button is disabled on "Rename your folder" drawer
+    When I clear "Folder name" input
+    And I enter a folder name "Sample NFT folder3" into "Folder name" input
+    Then I do not see "Given name already exists" error on "Name your folder" page
+    And "Confirm" button is enabled on "Rename your folder" drawer
