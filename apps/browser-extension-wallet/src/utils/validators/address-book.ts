@@ -49,6 +49,14 @@ export class CustomConflictError extends Error {
   }
 }
 
+export class CustomError extends Error {
+  constructor(message: string, public readonly isValidHandle: boolean = true) {
+    super(message);
+    this.name = 'CustomError';
+    Object.setPrototypeOf(this, CustomError.prototype);
+  }
+}
+
 export const isValidAddress = (address: string): boolean => {
   let isValid;
   try {
@@ -110,7 +118,7 @@ export const ensureHandleOwnerHasntChanged = async ({
   const newHandleResolution = response[0];
 
   if (!newHandleResolution) {
-    throw new Error(i18n.t('general.errors.incorrectHandle'));
+    throw new CustomError(i18n.t('general.errors.incorrectHandle'), false);
   }
 
   if (!Cardano.util.addressesShareAnyKey(cardanoAddress, newHandleResolution.cardanoAddress)) {
@@ -140,10 +148,14 @@ export const validateMainnetAddress = (address: string): boolean =>
   // is Byron era mainnet Icarus-style address
   address.startsWith('Ae2') ||
   // is Byron era mainnet Daedalus-style address
-  address.startsWith('DdzFF');
+  address.startsWith('DdzFF') ||
+  // address is a handle
+  isHandle(address);
 
 export const validateTestnetAddress = (address: string): boolean =>
-  address.startsWith('addr_test') || (!validateMainnetAddress(address) && Wallet.Cardano.Address.isValidByron(address));
+  address.startsWith('addr_test') ||
+  isHandle(address) ||
+  (!validateMainnetAddress(address) && Wallet.Cardano.Address.isValidByron(address));
 
 export const validateAddrPerNetwork: Record<Wallet.Cardano.NetworkId, (address: string) => boolean> = {
   [Wallet.Cardano.NetworkId.Mainnet]: (address: string) => validateMainnetAddress(address),
