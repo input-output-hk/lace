@@ -5,6 +5,7 @@ import { runtime, Tabs, tabs, Windows, windows, storage as webStorage } from 'we
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
 import uniqueId from 'lodash/uniqueId';
+import blake2b from 'blake2b-no-wasm';
 
 type WindowPosition = {
   top: number;
@@ -164,4 +165,10 @@ export const getWalletName = (): string => {
     throw new Error('No wallet name declared in .env');
   }
   return `${process.env.WALLET_NAME}`;
+};
+
+export const hashExtendedAccountPublicKey = (extendedAccountPublicKey: string): string => {
+  const output = new Uint8Array(64);
+  const input = Buffer.from(extendedAccountPublicKey);
+  return blake2b(output.length).update(input).digest('hex');
 };

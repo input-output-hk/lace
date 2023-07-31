@@ -2,11 +2,15 @@ import { exposeApi } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
-import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/util';
+import {
+  clearBackgroundStorage,
+  getBackgroundStorage,
+  hashExtendedAccountPublicKey,
+  setBackgroundStorage
+} from '@lib/scripts/background/util';
 import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
-import blake2b from 'blake2b-no-wasm';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -41,10 +45,8 @@ export class UserIdService implements UserIdServiceInterface {
 
     if (!this.hashId) {
       console.debug('[ANALYTICS] Hash ID not found - generating new one');
-      // eslint-disable-next-line no-magic-numbers
-      const output = new Uint8Array(64);
-      const input = Buffer.from(keyAgentsByChain[chainName].keyAgentData.extendedAccountPublicKey);
-      this.hashId = blake2b(output.length).update(input).digest('hex');
+      const hash = hashExtendedAccountPublicKey(keyAgentsByChain[chainName].keyAgentData.extendedAccountPublicKey);
+      this.hashId = hashExtendedAccountPublicKey(hash);
     }
     console.debug(`[ANALYTICS] getHashId() called (current Hash ID: ${this.hashId})`);
     return this.hashId;
@@ -84,7 +86,6 @@ export class UserIdService implements UserIdServiceInterface {
   async makeTemporary(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into temporary');
     await this.setStorage({ usePersistentUserId: false, userId: undefined });
-    this.userId = undefined;
     this.setSessionTimeout();
   }
 

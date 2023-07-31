@@ -128,7 +128,7 @@ describe('userIdService', () => {
       const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
       const hashId = await userIdService.getHashId('Preview');
       expect(hashId).toEqual(mockHashId);
-      expect(mockBlake2b).toHaveBeenCalledTimes(1);
+      expect(mockBlake2b).toHaveBeenCalledTimes(2);
     });
 
     it('should not generate hash ID twice - should retrieve hash from memory', async () => {
@@ -140,7 +140,7 @@ describe('userIdService', () => {
       await userIdService.getHashId('Preview');
       const hashId = await userIdService.getHashId('Preview');
       expect(hashId).toEqual(mockHashId);
-      expect(mockBlake2b).toHaveBeenCalledTimes(1);
+      expect(mockBlake2b).toHaveBeenCalledTimes(2);
     });
 
     it('should not generate hash ID if keyAgentsByChain is not defined', async () => {
