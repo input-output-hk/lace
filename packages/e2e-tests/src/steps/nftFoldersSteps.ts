@@ -89,6 +89,11 @@ When(/^I click "Next" button on "(Name your folder|Select NFTs)" page$/, async (
     : NftSelectNftsPage.nextButton.click());
 });
 
+When(/^I click "Add selected NFTs" button on "Select NFTs" page$/, async () => {
+  await NftSelectNftsPage.nextButton.waitForClickable();
+  await NftSelectNftsPage.nextButton.click();
+});
+
 Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
 });
@@ -110,7 +115,7 @@ Then(/^I (see|don't see) "Folder name" input max length (\d+) error$/, async (sh
 });
 
 Then(
-  /^I (see|do not see) "Given name already exists" error on "Name your folder" page$/,
+  /^I (see|do not see) "Given name already exists" error on "Name your folder|Rename your folder" page$/,
   async (shouldSee: 'see' | 'do not see') => {
     await nftCreateFolderAssert.assertSeeGivenNameAlreadyExistsError(shouldSee === 'see');
   }
@@ -179,6 +184,16 @@ Then(
   }
 );
 
+When(/^I click "Add NFT" button within the NFT folder$/, async () => {
+  const addNFTButton = NftsFolderPage.addNftButton;
+  await addNFTButton.waitForClickable();
+  await addNFTButton.click();
+});
+
+Then(/^I can see "Add NFT" button active$/, async () => {
+  await NftFolderAssert.assertSeeAddNftButton();
+});
+
 When(
   /^I (left|right) click on the NFT folder with name "([^"]*)"$/,
   async (clickType: 'left' | 'right', folderName: string) => {
@@ -232,6 +247,10 @@ Then(
     await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
   }
 );
+
+Then(/^I see a toast with text: "NFTs added to folder"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.update'), true);
+});
 
 Then(/^I see a toast with text: "NFT removed"$/, async () => {
   await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.delete'), true);

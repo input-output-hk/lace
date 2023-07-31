@@ -24,10 +24,10 @@ import { Wallet } from '@lace/cardano';
 import { Banner } from '@lace/common';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
-import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 import { getTemporaryTxDataFromStorage } from '../../helpers';
 import { HandleResolution } from '@cardano-sdk/core';
 import ExclamationCircleOutline from '@src/assets/icons/red-exclamation-circle.component.svg';
+import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
 const { Text } = Typography;
 
@@ -48,7 +48,9 @@ export enum HandleVerificationState {
   VERIFYING = 'verifying',
   CHANGED_OWNERSHIP = 'changedOwnership'
 }
+const isHandleAddressBookEnabled = process.env.USE_HANDLE_AB === 'true';
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleResolver = useHandleResolver();
@@ -57,7 +59,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const MAX_ADDRESSES = isPopupView ? 3 : 5;
 
   const { setSection } = useSections();
-  const { address, handle, setAddressValue } = useAddressState(row);
+  const { address, handle, handleStatus, setAddressValue } = useAddressState(row);
   const { filteredAddresses, getAddressBookByNameOrAddress } = useGetFilteredAddressBook();
   const { setAddressToEdit } = useAddressBookStore();
   const [, setRowId] = useCurrentRow();
@@ -96,11 +98,11 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           const { valid, handles } = await verifyHandle(addressInputValue.address, handleResolver);
 
           if (valid) {
-            setAddressValue(row, handles[0].cardanoAddress, addressInputValue.address, true);
             setHandleVerificationState(HandleVerificationState.VALID);
           } else {
             setHandleVerificationState(HandleVerificationState.INVALID);
           }
+          setAddressValue(row, handles[0].cardanoAddress, addressInputValue.address, { isVerified: true });
           return;
         }
 
@@ -111,15 +113,24 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           });
 
           setHandleVerificationState(HandleVerificationState.VALID);
-          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, true);
+          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, {
+            hasHandleOwnershipChanged: false,
+            isVerified: true
+          });
         } catch (error) {
           if (error instanceof CustomError && error.isValidHandle === false) {
             setHandleVerificationState(HandleVerificationState.INVALID);
+            setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, {
+              isVerified: true
+            });
           }
           if (error instanceof CustomConflictError) {
             setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
+            setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, {
+              hasHandleOwnershipChanged: true,
+              isVerified: true
+            });
           }
-          setAddressValue(row, addressInputValue?.handleResolution.cardanoAddress, addressInputValue.address, false);
         }
       }, HANDLE_DEBOUNCE_TIME),
     [addressInputValue.address, addressInputValue.handleResolution, handleResolver, row, setAddressValue]
@@ -127,6 +138,16 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
 
   useEffect(() => {
     if (!address) {
+      return;
+    }
+
+    if (handleStatus.isVerified === true) {
+      if (handleStatus.hasHandleOwnershipChanged) {
+        setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
+      } else {
+        setHandleVerificationState(HandleVerificationState.VALID);
+      }
+
       return;
     }
 
@@ -141,7 +162,15 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     return () => {
       resolveHandle && resolveHandle.cancel();
     };
-  }, [address, addressInputValue, setHandleVerificationState, resolveHandle, isAddressInputValueHandle]);
+  }, [
+    address,
+    addressInputValue,
+    setHandleVerificationState,
+    resolveHandle,
+    isAddressInputValueHandle,
+    handleStatus.isVerified,
+    handleStatus.hasHandleOwnershipChanged
+  ]);
 
   useEffect(() => {
     getAddressBookByNameOrAddress({ value: handle || address || '' });
@@ -211,9 +240,10 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     setAddressValue(row, tempAddress);
   }, [row, setAddressValue]);
 
-  const bannerDescription = isPopupView
-    ? 'addressBook.reviewModal.banner.popUpDescription'
-    : 'addressBook.reviewModal.banner.browserDescription';
+  const bannerDescription =
+    isPopupView && isHandleAddressBookEnabled
+      ? 'addressBook.reviewModal.banner.popUpDescription'
+      : 'addressBook.reviewModal.banner.browserDescription';
 
   const getButtonText = !isPopupView && t('addressBook.reviewModal.banner.confirmReview.button');
   const getLinkMessage = isPopupView && t('addressBook.reviewModal.banner.confirmReview.link');
@@ -259,9 +289,9 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           withIcon
           popupView={isPopupView}
           message={t(bannerDescription, { name: addressInputValue.name })}
-          messagePartTwo={getMessagePartTwo}
-          buttonMessage={getButtonText}
-          linkMessage={getLinkMessage}
+          messagePartTwo={isHandleAddressBookEnabled && getMessagePartTwo}
+          buttonMessage={isHandleAddressBookEnabled && getButtonText}
+          linkMessage={isHandleAddressBookEnabled && getLinkMessage}
           customIcon={<ExclamationCircleOutline />}
         />
       )}

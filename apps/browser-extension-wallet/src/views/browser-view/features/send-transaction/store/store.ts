@@ -22,7 +22,7 @@ const initialState = {
   isRestaking: false,
   ids: [defaultOutputKey],
   uiOutputs: {
-    [defaultOutputKey]: { address: '', handle: '', assets: [{ id: cardanoCoin.id }] }
+    [defaultOutputKey]: { address: '', handle: '', assets: [{ id: cardanoCoin.id }], isHandleVerified: false }
   },
   builtTxData: {
     totalMinimumCoins: { coinMissing: '0', minimumCoin: '0' }
@@ -61,7 +61,15 @@ export interface Store {
   removeCoinFromOutputs: (id: string, asset: { id: string }) => void;
   setAssetRowToOutput: (id: string, availableCoins: IAssetInfo[]) => void;
   // ====== output address handlers ======
-  setAddressValue: (id: string, address: string, handle?: string, hasHandleOwnershipChanged?: boolean) => void;
+  setAddressValue: (
+    id: string,
+    address: string,
+    handle?: string,
+    handleStatus?: {
+      isVerified?: boolean;
+      hasHandleOwnershipChanged?: boolean;
+    }
+  ) => void;
   // ====== address book picker ======
   currentRow?: string | undefined;
   currentCoinToChange?: string | undefined;
@@ -173,11 +181,22 @@ const stateHandlers = (get: GetState<Store>, set: SetState<Store>) => {
     set({ uiOutputs: updatedOutputs });
   };
 
-  const setAddressValue = (id: string, address: string, handle?: string, hasHandleOwnershipChanged?: boolean) => {
+  // <<<<<<< HEAD
+  const setAddressValue = (
+    id: string,
+    address: string,
+    handle?: string,
+    handleStatus?: {
+      isVerified: boolean;
+      hasHandleOwnershipChanged: boolean;
+    }
+    // hasHandleOwnershipChanged?: boolean,
+    // isHandleVerified?: boolean
+  ) => {
     const rows = get().uiOutputs;
     const row = rows[id];
     if (!row) return;
-    const updatedRow = { ...row, address, handle, hasHandleOwnershipChanged };
+    const updatedRow = { ...row, address, handle, handleStatus };
     const outputs = { ...rows, [id]: updatedRow };
 
     set({ uiOutputs: outputs });
@@ -346,13 +365,25 @@ export const useCoinStateSelector = (row: string): UseCoinStateSelector =>
 
 export const useAddressState = (
   row: string
-): { address: string; handle?: string; hasHandleOwnershipChanged?: boolean } & Pick<Store, 'setAddressValue'> =>
+): {
+  address: string;
+  handle?: string;
+  handleStatus?: {
+    isVerified: boolean;
+    hasHandleOwnershipChanged: boolean;
+  };
+} & Pick<Store, 'setAddressValue'> =>
   useStore(
     useCallback(
       ({ uiOutputs, setAddressValue }) => ({
         address: !uiOutputs[row] ? '' : uiOutputs[row].address,
         handle: !uiOutputs[row] ? '' : uiOutputs[row].handle,
-        hasHandleOwnershipChanged: !uiOutputs[row] ? true : uiOutputs[row].hasHandleOwnershipChanged,
+        handleStatus: {
+          hasHandleOwnershipChanged: !uiOutputs[row].handleStatus
+            ? true
+            : uiOutputs[row].handleStatus.hasHandleOwnershipChanged,
+          isVerified: !uiOutputs[row].handleStatus ? false : uiOutputs[row].handleStatus.isVerified
+        },
         setAddressValue
       }),
       [row]
@@ -384,7 +415,7 @@ export const useTransactionProps = (): {
             network: currentChain.networkId
           }) ||
           item.assets.every((asset) => !(asset.value && Number(asset.value))) ||
-          (item.hasHandleOwnershipChanged !== undefined && !item.hasHandleOwnershipChanged)
+          (item.handleStatus?.hasHandleOwnershipChanged !== undefined && item.handleStatus?.hasHandleOwnershipChanged)
       ),
     [outputs, currentChain]
   );

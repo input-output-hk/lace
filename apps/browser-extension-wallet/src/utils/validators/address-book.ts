@@ -121,22 +121,15 @@ export const ensureHandleOwnerHasntChanged = async ({
     throw new CustomError(i18n.t('general.errors.incorrectHandle'), false);
   }
 
-  if (cardanoAddress !== newHandleResolution.cardanoAddress) {
-    const stakeKeyFromAddress = Cardano.Address.fromString(cardanoAddress).asBase().getStakingCredential();
-    const stakeKeyFromHandles = Cardano.Address.fromString(newHandleResolution.cardanoAddress)
-      .asBase()
-      .getStakingCredential();
-
-    if (stakeKeyFromAddress.hash !== stakeKeyFromHandles.hash) {
-      throw new CustomConflictError({
-        message: `${i18n.t('general.errors.handleConflict', {
-          receivedAddress: cardanoAddress,
-          actualAddress: newHandleResolution.cardanoAddress
-        })}`,
-        expectedAddress: cardanoAddress,
+  if (!Cardano.util.addressesShareAnyKey(cardanoAddress, newHandleResolution.cardanoAddress)) {
+    throw new CustomConflictError({
+      message: `${i18n.t('general.errors.handleConflict', {
+        receivedAddress: cardanoAddress,
         actualAddress: newHandleResolution.cardanoAddress
-      });
-    }
+      })}`,
+      expectedAddress: cardanoAddress,
+      actualAddress: newHandleResolution.cardanoAddress
+    });
   }
 };
 

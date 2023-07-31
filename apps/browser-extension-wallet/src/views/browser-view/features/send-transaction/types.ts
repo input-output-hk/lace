@@ -51,7 +51,10 @@ export type OutputRow = {
   address: string;
   handle?: string;
   handleResolution?: HandleResolution;
-  hasHandleOwnershipChanged?: boolean;
+  handleStatus?: {
+    hasHandleOwnershipChanged?: boolean;
+    isVerified?: boolean;
+  };
   assets: Array<AssetInfo>;
 };
 
