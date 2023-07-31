@@ -1,7 +1,7 @@
 import { Page } from './page';
 import { browser } from '@wdio/globals';
 
-const EXTENSION_URL = 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/app.html';
+const EXTENSION_URL = 'chrome-extension://ogahcgklekamkoedlkljmkmeamnkeihi/app.html';
 
 class ExtendedView implements Page {
   async getBaseUrl() {
