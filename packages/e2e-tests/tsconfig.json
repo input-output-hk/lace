@@ -10,6 +10,7 @@
       "@wdio/cucumber-framework",
       "expect-webdriverio",
       "chai",
+      "@types/chai-sorted",
       "@wdio/devtools-service",
       "wdio-intercept-service"
     ],

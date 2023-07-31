@@ -116,6 +116,16 @@ type KeysStructure = {
       pickMorePools: '';
     };
   };
+  modals: {
+    changingPreferences: {
+      title: '';
+      description: '';
+      buttons: {
+        cancel: '';
+        confirm: '';
+      };
+    };
+  };
   overview: {
     delegationCard: {
       label: {

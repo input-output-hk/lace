@@ -138,7 +138,7 @@ describe('useSelectedCoin', () => {
             value: '100',
             maxDecimals: 5,
             prevValue: '',
-            element: { setSelectionRange: jest.fn(), value: '10000.123456789', selectionEnd: 10 }
+            element: { setSelectionRange: jest.fn(), value: '10000.123456789', selectionEnd: 15 }
           };
           result.current.selectedCoins[0].onChange(params);
           expect(mockCoinStateSelector.setCoinValue).toHaveBeenCalledWith('bundleId', {
@@ -146,7 +146,7 @@ describe('useSelectedCoin', () => {
             displayValue: '10,000.12345'
           });
           await waitFor(() => {
-            expect(params.element.setSelectionRange).toHaveBeenCalledWith(10, 10);
+            expect(params.element.setSelectionRange).toHaveBeenCalledWith(12, 12);
           });
         });
         test('onBlur function formats compact and display values', () => {

@@ -8,21 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"syscall"
-	"time"
 
 	"lace.io/lace-blockchain-services/ourpaths"
-
-	"gopkg.in/natefinch/npipe.v2"
 )
-
-func probeWindowsNamedPipe(path string, timeout time.Duration) error {
-	conn, err := npipe.DialTimeout(path, timeout)
-	if err == nil {
-		defer conn.Close()
-	}
-
-	return err
-}
 
 // XXX: Reading:
 //   · https://learn.microsoft.com/en-us/windows/console/generateconsolectrlevent

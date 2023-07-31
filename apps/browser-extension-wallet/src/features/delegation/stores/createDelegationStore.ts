@@ -4,7 +4,7 @@ import { Wallet } from '@lace/cardano';
 import { formatPercentages, getRandomIcon } from '@lace/common';
 import { CardanoStakePool } from '../../../types';
 import { DelegationStore, stakePoolDetailsSelectorProps } from '../types';
-import { formatNumber } from '@src/utils/format-number';
+import { getNumberWithUnit } from '@src/utils/format-number';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 
 export const stakePoolDetailsSelector: StateSelector<DelegationStore, stakePoolDetailsSelectorProps> = ({
@@ -37,7 +37,7 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
       saturation: saturation && formatPercentages(saturation),
       stake: stake?.active
-        ? formatNumber(Wallet.util.lovelacesToAdaString(stake?.active?.toString()))
+        ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake?.active?.toString()))
         : { number: '-' },
       ticker,
       status,

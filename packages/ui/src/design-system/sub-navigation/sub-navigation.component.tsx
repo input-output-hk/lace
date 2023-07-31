@@ -12,17 +12,20 @@ export type SubNavigationRootProps = OmitClassName<typeof Tabs.List> & {
   defaultValue?: string;
   children: ReactElement<typeof Item> | ReactElement<typeof Item>[];
   onValueChange?: (value: string) => void;
+  value?: string;
 };
 
 export const SubNavigation = ({
   children,
   defaultValue,
   onValueChange,
+  value,
   ...props
 }: Readonly<SubNavigationRootProps>): JSX.Element => (
   <Tabs.Root
     className={cx.root}
     defaultValue={defaultValue}
+    value={value}
     onValueChange={onValueChange}
   >
     <Tabs.List {...props}>{children}</Tabs.List>
