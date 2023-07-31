@@ -328,9 +328,9 @@ Feature: NFT - Folders - Extended view
   @LW-7228 @Pending
   #Bug: LW-7632
   Scenario: Extended-view - NFT Folders - Trying to rename folder using name that already exists
-    Given the NFT folder with name "Sample NFT folder1" and 1 NFT was created
-    And the NFT folder with name "Sample NFT folder2" and 1 NFT was created
-    And I navigate to NFTs extended page
+    Given I navigate to NFTs extended page
+    When I create folder with name: "Sample NFT folder1" and first available NFT
+    And I create folder with name: "Sample NFT folder2" and first available NFT
     And I right click on the NFT folder with name "Sample NFT folder1"
     And I click "Rename" option in NFT folder context menu
     And I see "Rename your folder" drawer in extended mode

@@ -309,9 +309,9 @@ Feature: NFT - Folders - Popup view
   @LW-7229 @Pending
   #Bug: LW-7632
   Scenario: Popup-view - NFT Folders - Trying to rename folder using name that already exists
-    Given the NFT folder with name "Sample NFT folder1" and 1 NFT was created
-    And the NFT folder with name "Sample NFT folder2" and 1 NFT was created
-    And I navigate to NFTs popup page
+    Given I navigate to NFTs popup page
+    When I create folder with name: "Sample NFT folder1" and first available NFT
+    And I create folder with name: "Sample NFT folder2" and first available NFT
     And I right click on the NFT folder with name "Sample NFT folder1"
     And I click "Rename" option in NFT folder context menu
     And I see "Rename your folder" drawer in popup mode
