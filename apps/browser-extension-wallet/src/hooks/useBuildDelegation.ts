@@ -40,7 +40,7 @@ export const useBuildDelegation = (): void => {
     buildDelegation();
   }, [
     inMemoryWallet,
-    selectedStakePool.id,
+    selectedStakePool.hexId,
     setDelegationTxBuilder,
     setDelegationTxFee,
     setIsBuildingTx,
