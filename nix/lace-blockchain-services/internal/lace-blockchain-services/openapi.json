@@ -86,7 +86,7 @@
           {
             "name": "withLog",
             "in": "query",
-            "description": "Include `Log` messages with `stdout`/`stderr` of services?",
+            "description": "Include `Log` messages with `stdout`/`stderr` of services? (Currently does nothing.)",
             "required": false,
             "schema": { "type": "boolean", "example": true, "default": true }
           }
@@ -180,7 +180,7 @@
             "type": "number",
             "format": "double",
             "description": "Progress of the `status` – usually between 0.0 and 1.0",
-            "example": "0.53778"
+            "example": 0.53778
           },
           "version": {
             "type": "string",
