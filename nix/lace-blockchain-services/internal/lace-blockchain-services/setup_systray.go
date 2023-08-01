@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -80,6 +81,7 @@ func setupTrayUI(
 	}()
 
 	// FIXME: this has to be done smarter
+	chMithrilStatus := make(chan t.ServiceStatus)
 	fixme_CardanoNodeStatus := make(chan string)
 	fixme_OgmiosStatus := make(chan string)
 	fixme_SetOgmiosDashboard := make(chan string)
@@ -101,6 +103,8 @@ func setupTrayUI(
 				fixme_SetOgmiosDashboard <- upd.Url
 			case "provider-server":
 				fixme_ProviderServerStatus <- formatted
+			case "mithril-client":
+				chMithrilStatus <- upd
 			}
 		}
 	}()
@@ -139,6 +143,40 @@ func setupTrayUI(
 			}(component, statusCh, menuItem)
 		}
 	}
+
+	mMithrilStatus := systray.AddMenuItem("", "")
+	mMithrilStatus.Hide()
+	mMithrilStatusDledSize := mMithrilStatus.AddSubMenuItem("", "")
+	mMithrilStatusDledSize.Disable()
+	mMithrilStatusTotalSize := mMithrilStatus.AddSubMenuItem("", "")
+	mMithrilStatusTotalSize.Disable()
+	mMithrilStatusETA := mMithrilStatus.AddSubMenuItem("", "")
+	mMithrilStatusETA.Disable()
+	go func(){
+		for upd := range chMithrilStatus {
+			if upd.Status == "off" { mMithrilStatus.Hide() } else {	mMithrilStatus.Show() }
+
+			formatted := upd.Status
+			if upd.Progress >= 0 && upd.Progress <= 1 {
+				formatted += fmt.Sprintf(" · %0.2f%%", upd.Progress * 100)
+			}
+			mMithrilStatus.SetTitle("mithril · " + formatted)
+
+			downloaded := "—                 "  // extra spaces to accomodate future value in UI
+			if upd.Progress >= 0 && upd.TaskSize >= 0 {
+				downloaded = bytesToHuman(upd.Progress * upd.TaskSize)
+			}
+			mMithrilStatusDledSize.SetTitle("Downloaded: " + downloaded)
+
+			total := "—"
+			if upd.TaskSize >= 0 { total = bytesToHuman(upd.TaskSize) }
+			mMithrilStatusTotalSize.SetTitle("Total: " + total)
+
+			eta := "—"
+			if upd.SecondsLeft >= 0 { eta = "in " + secondsToHuman(upd.SecondsLeft) }
+			mMithrilStatusETA.SetTitle("ETA: " + eta)
+		}
+	}()
 
 	systray.AddSeparator()
 
@@ -194,10 +232,10 @@ func setupTrayUI(
 
 	mResyncMithril := systray.AddMenuItem("Resync with Mithril", "")
 	go func() {
-		// FIXME: calculate those:
+		// Calculate these? How?
 		eta := map[string](string) {
-			"preview": "about 15 minutes",
-			"preprod": "about 15 minutes",
+			"preview": "about 5 minutes",
+			"preprod": "about 5 minutes",
 			"mainnet": "about 2 hours",
 		}
 		_ = eta
@@ -290,4 +328,27 @@ func goid() int {
 	rv, err := strconv.Atoi(string(buf[:i]))
 	if err != nil { return -1 }
 	return rv
+}
+
+func bytesToHuman(bytes float64) string {
+	if bytes > 1024*1024*1024 { return fmt.Sprintf("%.2f GiB", bytes / (1024*1024*1024)) }
+	if bytes > 1024*1024      { return fmt.Sprintf("%.2f MiB", bytes / (1024*1024)) }
+	if bytes > 1024           { return fmt.Sprintf("%.2f KiB", bytes / (1024)) }
+	return fmt.Sprintf("%.0f B", bytes)
+}
+
+func secondsToHuman(seconds float64) string {
+	if seconds > 24*60*60 {
+		days := math.Floor(seconds / (24*60*60))
+		return fmt.Sprintf("%.0fd %s", days, secondsToHuman(seconds - days * (24*60*60)))
+	}
+	if seconds > 60*60 {
+		hours := math.Floor(seconds / (60*60))
+		return fmt.Sprintf("%.0fh %s", hours, secondsToHuman(seconds - hours * (60*60)))
+	}
+	if seconds > 60 {
+		minutes := math.Floor(seconds / (60))
+		return fmt.Sprintf("%.0fm %s", minutes, secondsToHuman(seconds - minutes * (60)))
+	}
+	return fmt.Sprintf("%.0fs", seconds)
 }
