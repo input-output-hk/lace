@@ -23,7 +23,9 @@
   },
   "dependencies": {
     "@types/chai": "4.3.5",
-    "chai": "4.3.7"
+    "@types/chai-sorted": "0.2.0",
+    "chai": "4.3.7",
+    "chai-sorted": "0.2.0"
   },
   "devDependencies": {
     "@rpii/wdio-report-events": "8.0.2",

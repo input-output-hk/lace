@@ -42,13 +42,13 @@ export const NftFolderConfirmationModal = ({
     visible={visible}
     width={popupView ? popupModalWidth : extendedModalWidth}
   >
-    <div data-testid="create-foler-modal-title" className={styles.header}>
+    <div data-testid="create-folder-modal-title" className={styles.header}>
       {title}
     </div>
-    <div data-testid="create-foler-modal-description" className={styles.content}>
+    <div data-testid="create-folder-modal-description" className={styles.content}>
       {description}
     </div>
-    <div data-testid="create-foler-modal-actions" className={styles.footer}>
+    <div data-testid="create-folder-modal-actions" className={styles.footer}>
       {actions.map(
         ({ dataTestId, body, ...action }: actionProps): React.ReactElement => (
           <Button key={dataTestId} data-testid={dataTestId} {...action} block>

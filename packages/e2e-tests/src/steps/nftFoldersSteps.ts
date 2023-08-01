@@ -16,18 +16,29 @@ import NftRenameFolderAsserts from '../assert/NftRenameFolderAsserts';
 import NftRenameFolderPage from '../elements/NFTs/NftRenameFolderPage';
 import { browser } from '@wdio/globals';
 import DeleteFolderModal from '../elements/NFTs/DeleteFolderModal';
+import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
+import NftAssert from '../assert/nftAssert';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
 });
 
-Then(/^the NFT folder with name "([^"]*)" and 1 NFT was created$/, async (folderName: string) => {
-  const nftFolder = new NFTFolder(folderName, [
-    '63f01fe6cd68ec6438c95a46cea4a6cd27efb791b5e8cc1fa92af3294c6163654e46542336' // LaceNFT assetId
-  ]);
-  await IndexedDB.insertNFTFolder(nftFolder);
-  await browser.pause(500);
-});
+Then(
+  /^the NFT folder with name "([^"]*)" and (1|2) NFT was created$/,
+  async (folderName: string, numberOfAssets: string) => {
+    const assets: string[] = [
+      '63f01fe6cd68ec6438c95a46cea4a6cd27efb791b5e8cc1fa92af3294c6163654e46542336' // LaceNFT assetId
+    ];
+
+    if (numberOfAssets === '2') {
+      assets.push('63f01fe6cd68ec6438c95a46cea4a6cd27efb791b5e8cc1fa92af3294962696c65636f696e3439'); // Ibilecoin
+    }
+
+    const nftFolder = new NFTFolder(folderName, assets);
+    await IndexedDB.insertNFTFolder(nftFolder);
+    await browser.pause(500);
+  }
+);
 
 Given(
   /^I (see|do not see) "Create folder" button on NFTs page in (popup|extended) mode$/,
@@ -78,6 +89,11 @@ When(/^I click "Next" button on "(Name your folder|Select NFTs)" page$/, async (
     : NftSelectNftsPage.nextButton.click());
 });
 
+When(/^I click "Add selected NFTs" button on "Select NFTs" page$/, async () => {
+  await NftSelectNftsPage.nextButton.waitForClickable();
+  await NftSelectNftsPage.nextButton.click();
+});
+
 Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
 });
@@ -99,7 +115,7 @@ Then(/^I (see|don't see) "Folder name" input max length (\d+) error$/, async (sh
 });
 
 Then(
-  /^I (see|do not see) "Given name already exists" error on "Name your folder" page$/,
+  /^I (see|do not see) "Given name already exists" error on "Name your folder|Rename your folder" page$/,
   async (shouldSee: 'see' | 'do not see') => {
     await nftCreateFolderAssert.assertSeeGivenNameAlreadyExistsError(shouldSee === 'see');
   }
@@ -168,12 +184,33 @@ Then(
   }
 );
 
+When(/^I click "Add NFT" button within the NFT folder$/, async () => {
+  const addNFTButton = NftsFolderPage.addNftButton;
+  await addNFTButton.waitForClickable();
+  await addNFTButton.click();
+});
+
+Then(/^I can see "Add NFT" button active$/, async () => {
+  await NftFolderAssert.assertSeeAddNftButton();
+});
+
 When(
   /^I (left|right) click on the NFT folder with name "([^"]*)"$/,
   async (clickType: 'left' | 'right', folderName: string) => {
     await (await NftsPage.getFolder(folderName)).click({ button: clickType });
   }
 );
+
+When(
+  /^I (left|right) click on the NFT with name "([^"]*)" on the NFT folder page$/,
+  async (clickType: 'left' | 'right', nftName: string) => {
+    await (await NftsFolderPage.getNft(nftName)).click({ button: clickType });
+  }
+);
+
+When(/^I (left|right) click on the add NFT button on the NFT folder page$/, async (clickType: 'left' | 'right') => {
+  await (await NftsFolderPage.addNftButton).click({ button: clickType });
+});
 
 When(
   /^I see "([^"]*)" NFT folder page in (extended|popup) mode$/,
@@ -210,6 +247,14 @@ Then(
     await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
   }
 );
+
+Then(/^I see a toast with text: "NFTs added to folder"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.update'), true);
+});
+
+Then(/^I see a toast with text: "NFT removed"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.delete'), true);
+});
 
 Then(/^I select (\d+) NFTs$/, async (numberOfNFTs: number) => {
   await NftSelectNftsPage.selectNFTs(numberOfNFTs);
@@ -251,21 +296,31 @@ Then(
   }
 );
 
+Then(/^NFT context menu with "Remove" option (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await NftFolderAssert.assertSeeNftContextMenu(shouldBeDisplayed === 'is');
+});
+
 When(/^I click outside the NFT folder context menu$/, async () => {
-  await NftsPage.title.click();
+  await ((await NftFolderContextMenu.overlay.isDisplayed())
+    ? NftFolderContextMenu.overlay.click()
+    : NftsPage.title.click());
 });
 
 When(/^I click "(Delete|Rename)" option in NFT folder context menu$/, async (option: 'Delete' | 'Rename') => {
   switch (option) {
     case 'Delete':
-      await NftFolderContextMenu.clickDeleteOption();
+      await NftFolderContextMenu.clickDeleteFolderOption();
       break;
     case 'Rename':
-      await NftFolderContextMenu.clickRenameOption();
+      await NftFolderContextMenu.clickRenameFolderOption();
       break;
     default:
       throw new Error(`Unsupported option name: ${option}`);
   }
+});
+
+When(/^I click "Remove from folder" option in NFT context menu$/, async () => {
+  await NftFolderContextMenu.clickRemoveNFTOption();
 });
 
 Then(
@@ -314,4 +369,20 @@ When(/^I click "(Cancel|Confirm)" button in delete folder modal$/, async (button
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+When(/^I create folder with name: "([^"]*)" and first available NFT$/, async (folderName: string) => {
+  await NftsPage.createFolderButton.click();
+  await NftCreateFolderPage.setFolderNameInput(folderName);
+  await NftCreateFolderPage.nextButton.waitForClickable();
+  await NftCreateFolderPage.nextButton.click();
+  await NftSelectNftsPage.selectNFTs(1);
+  await NftSelectNftsPage.nextButton.waitForClickable();
+  await NftSelectNftsPage.nextButton.click();
+  await NftsPage.createFolderButton.waitForClickable();
+  await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, true);
+});
+
+Then(/^I see folders on the NFTs page in the alphabetical order$/, async () => {
+  await NftAssert.assertSeeFoldersInAlphabeticalOrder();
 });
