@@ -6,7 +6,7 @@ import { AssetTable, IRow, SendReceive } from '@lace/core';
 import { CONTENT_LAYOUT_ID } from '@components/Layout/ContentLayout';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { APP_MODE_POPUP, AppMode, LACE_APP_ID } from '@src/utils/constants';
-import { compactNumber } from '@src/utils/format-number';
+import { compactNumberWithUnit } from '@src/utils/format-number';
 import { FundWalletBanner, PortfolioBalance } from '@src/views/browser-view/components';
 import { useCurrencyStore } from '@providers/currency';
 import { useWalletStore } from '@src/stores';
@@ -17,7 +17,8 @@ import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   MatomoEventCategories,
   MatomoEventActions,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
@@ -73,6 +74,7 @@ export const AssetsPortfolio = ({
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.SendTransaction.SEND_TX_BUTTON_POPUP
     });
+    analytics.sendEventToPostHog(PostHogAction.SendClick);
     redirectToSend({ params: { id: '1' } });
   };
 
@@ -96,7 +98,7 @@ export const AssetsPortfolio = ({
       <div className={styles.portfolio}>
         <PortfolioBalance
           loading={isPortfolioBalanceLoading}
-          balance={compactNumber(portfolioBalanceAsBigNumber.toString())}
+          balance={compactNumberWithUnit(portfolioBalanceAsBigNumber.toString())}
           currencyCode={fiatCurrency.code}
           label={t('browserView.assets.totalWalletBalance')}
           isPriceOutdatedBannerVisible={isPriceOutdated}

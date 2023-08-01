@@ -22,9 +22,11 @@ import { useAnalyticsContext } from '@providers';
 import { AddressDetailsSteps } from './AddressDetailDrawer/types';
 import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
 import { getAddressToSave } from '@src/utils/validators';
+import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressBook = withAddressBookContext(() => {
   const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
@@ -59,7 +61,6 @@ export const AddressBook = withAddressBookContext(() => {
           icon: AddIcon
         });
   };
-
   const list: WalletAddressItemProps[] = useMemo(
     () =>
       addressList?.map((item: AddressBookSchema) => ({
@@ -73,14 +74,15 @@ export const AddressBook = withAddressBookContext(() => {
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_POPUP
           });
           setAddressToEdit(address);
-          if (validatedAddressStatus[address.address]?.isValid === false) {
+          if (isAdaHandleEnabled && validatedAddressStatus[address.address]?.isValid === false) {
             setIsAddressDrawerOpen(true);
           } else {
             setIsEditAddressVisible(true);
           }
         },
         isSmall: true,
-        isAddressWarningVisible: validatedAddressStatus[item.address]?.isValid === false ?? false
+        isAddressWarningVisible:
+          (isAdaHandleEnabled && validatedAddressStatus[item.address]?.isValid === false) ?? false
       })) || [],
     [addressList, analytics, setAddressToEdit, setIsEditAddressVisible, validatedAddressStatus]
   );
@@ -143,23 +145,25 @@ export const AddressBook = withAddressBookContext(() => {
           </div>
         )}
       </ContentLayout>
-      <AddressChangeDetailDrawer
-        visible={isAddressDrawerOpen}
-        onCancelClick={() => {
-          setAddressToEdit({} as AddressBookSchema);
-          setIsAddressDrawerOpen(false);
-        }}
-        initialValues={addressToEdit}
-        expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? ''}
-        actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? ''}
-        popupView
-        onDelete={(id) => onHandleDeleteContact(id)}
-        onConfirmClick={async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) => {
-          await onAddressSave(address);
-          setIsAddressDrawerOpen(false);
-          setAddressToEdit({} as AddressBookSchema);
-        }}
-      />
+      {isAdaHandleEnabled && (
+        <AddressChangeDetailDrawer
+          visible={isAddressDrawerOpen}
+          onCancelClick={() => {
+            setAddressToEdit({} as AddressBookSchema);
+            setIsAddressDrawerOpen(false);
+          }}
+          initialValues={addressToEdit}
+          expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? ''}
+          actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? ''}
+          popupView
+          onDelete={(id) => onHandleDeleteContact(id)}
+          onConfirmClick={async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) => {
+            await onAddressSave(address);
+            setIsAddressDrawerOpen(false);
+            setAddressToEdit({} as AddressBookSchema);
+          }}
+        />
+      )}
       <AddressDetailDrawer
         initialStep={addressDrawerInitialStep}
         initialValues={addressToEdit}

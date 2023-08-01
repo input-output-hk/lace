@@ -268,7 +268,7 @@ describe('Testing assets transformers', () => {
       const variationParserSpy = jest.spyOn(assetsTransformers, 'variationParser');
       variationParserSpy.mockReturnValue('variationParser');
 
-      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumber');
+      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumberWithUnit');
       compactNumberSpy.mockReturnValue('compactNumberBalance');
 
       const mockedTokenBalance = '100';
@@ -326,7 +326,7 @@ describe('Testing assets transformers', () => {
     test('to see proper name, icon, decimals taken from tokenMetadata level', () => {
       const getAssetImageUrlSpy = jest.spyOn(getAssetImage, 'getAssetImageUrl');
       getAssetImageUrlSpy.mockImplementation((str: string) => str);
-      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumber');
+      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumberWithUnit');
       compactNumberSpy.mockReturnValue('tokenMetadatacCompactNumberBalance');
       const tokenMetadataName = 'tokenMetadataName';
       const tokenMetadataIcon = 'tokenMetadataIcon';
@@ -356,7 +356,7 @@ describe('Testing assets transformers', () => {
     test('to see proper name, icon, decimals taken from nftMetadata level', () => {
       const getAssetImageUrlSpy = jest.spyOn(getAssetImage, 'getAssetImageUrl');
       getAssetImageUrlSpy.mockImplementation((str: string) => str);
-      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumber');
+      const compactNumberSpy = jest.spyOn(formatNumber, 'compactNumberWithUnit');
       compactNumberSpy.mockReturnValue('nftMetadatacCompactNumberBalance');
       const nftMetadataName = 'nftMetadataName';
       const nftMetadataIcon = 'nftMetadataIcon';

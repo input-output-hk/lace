@@ -13,7 +13,7 @@ env:
 jobs:
   smokeTests:
     name: Smoke Tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -44,10 +44,9 @@ jobs:
         run: |
           Xvfb :99 &
       - name: Start Chrome driver
-        working-directory: /usr/local/share/chrome_driver
         run: |
           if [ ${BROWSER} == "chrome" ]; then
-            ./chromedriver -port=4444 &
+            ${CHROMEWEBDRIVER}/chromedriver -port=4444 &
           else
             echo "Skipping start of ChromeDriver"
           fi
@@ -78,7 +77,7 @@ jobs:
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
           resultsGlob: './packages/e2e-tests/reports/allure/results'

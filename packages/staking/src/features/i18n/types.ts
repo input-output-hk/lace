@@ -25,6 +25,9 @@ type KeysStructure = {
         saturation: '';
       };
       emptyMessage: '';
+      stake: '';
+      unselect: '';
+      addPool: '';
     };
   };
   drawer: {
@@ -111,6 +114,16 @@ type KeysStructure = {
       selectedStakePools: '';
       partOfBalance: '';
       pickMorePools: '';
+    };
+  };
+  modals: {
+    changingPreferences: {
+      title: '';
+      description: '';
+      buttons: {
+        cancel: '';
+        confirm: '';
+      };
     };
   };
   overview: {

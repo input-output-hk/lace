@@ -16,6 +16,7 @@ const mockUseSyncingTheFirstTime = jest.fn();
 const setSection = jest.fn();
 const mockUseRedirection = jest.fn();
 const mockNotify = jest.fn();
+const mockUseAnalyticsSendFlowTriggerPoint = jest.fn();
 import * as React from 'react';
 import { screen, cleanup, fireEvent, render, within, waitFor } from '@testing-library/react';
 import { CollateralDrawer } from '../CollateralDrawer';
@@ -74,7 +75,8 @@ jest.mock('@src/views/browser-view/features/send-transaction', () => {
   return {
     __esModule: true,
     ...original,
-    useBuiltTxState: mockUseBuitTxState
+    useBuiltTxState: mockUseBuitTxState,
+    useAnalyticsSendFlowTriggerPoint: mockUseAnalyticsSendFlowTriggerPoint
   };
 });
 
@@ -156,6 +158,7 @@ describe('Testing CollateralDrawer component', () => {
       setBuiltTxData,
       builtTxData: {} as unknown as sendTx.BuiltTxData
     });
+    mockUseAnalyticsSendFlowTriggerPoint.mockReturnValue({ triggerPoint: '', setTriggerPoint: jest.fn() });
     mockUseCollateral.mockReturnValue(useCollateral);
     mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
     mockUseWalletStore.mockImplementation(() => ({

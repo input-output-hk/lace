@@ -80,7 +80,20 @@ export enum PostHogAction {
   StakingManageDelegationHurrayXClick = 'staking | manage delegation | hurray! | x | click',
   StakingManageDelegationSomethingWentWrongBackClick = 'staking | manage delegation | something went wrong | back | click',
   StakingManageDelegationSomethingWentWrongCancelClick = 'staking | manage delegation | something went wrong | cancel | click',
-  StakingManageDelegationSomethingWentWrongXClick = 'staking | manage delegation | something went wrong | x | click'
+  StakingManageDelegationSomethingWentWrongXClick = 'staking | manage delegation | something went wrong | x | click',
+  // Send Flow
+  SendClick = 'send | send | click',
+  SendTransactionDataReviewTransactionClick = 'send | transaction data | review transaction | click',
+  SendTransactionSummaryConfirmClick = 'send | transaction summary | confirm | click',
+  SendTransactionConfirmationConfirmClick = 'send | transaction confirmation | confirm | click',
+  SendAllDoneView = 'send | all done | view',
+  SendAllDoneViewTransactionClick = 'send | all done | view transaction | click',
+  SendAllDoneCloseClick = 'send | all done | close | click',
+  SendAllDoneXClick = 'send | all done | x | click',
+  SendSomethingWentWrongView = 'send | something went wrong | view',
+  SendSomethingWentWrongBackClick = 'send | something went wrong | back | click',
+  SendSomethingWentWrongCancelClick = 'send | something went wrong | cancel | click',
+  SendSomethingWentWrongXClick = 'send | something went wrong | x | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {

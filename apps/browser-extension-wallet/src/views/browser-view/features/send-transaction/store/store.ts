@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { cardanoCoin } from '@src/utils/constants';
 import create, { SetState, GetState } from 'zustand';
-import { OutputsMap, BuiltTxData, SpentBalances, OutputList, AssetInfo, FormOptions } from '../types';
+import {
+  OutputsMap,
+  BuiltTxData,
+  SpentBalances,
+  OutputList,
+  AssetInfo,
+  FormOptions,
+  SendFlowTriggerPoints
+} from '../types';
 import { Wallet } from '@lace/cardano';
 import { calculateSpentBalance, getOutputValues } from '../helpers';
 import { useCallback, useMemo } from 'react';
@@ -10,7 +18,8 @@ import { v4 as uuid } from 'uuid';
 import omit from 'lodash/omit';
 import { useWalletStore } from '@src/stores';
 import { isValidAddress, isValidAddressPerNetwork } from '@src/utils/validators';
-import { compactNumber, getInlineCurrencyFormat } from '@src/utils/format-number';
+import { compactNumberWithUnit, formatNumberForDisplay } from '@src/utils/format-number';
+import { isHandle } from '@lace/core';
 
 // ====== initial values ======
 
@@ -21,7 +30,7 @@ const initialState = {
   isRestaking: false,
   ids: [defaultOutputKey],
   uiOutputs: {
-    [defaultOutputKey]: { address: '', handle: '', assets: [{ id: cardanoCoin.id }] }
+    [defaultOutputKey]: { address: '', handle: '', assets: [{ id: cardanoCoin.id }], isHandleVerified: false }
   },
   builtTxData: {
     totalMinimumCoins: { coinMissing: '0', minimumCoin: '0' }
@@ -60,7 +69,15 @@ export interface Store {
   removeCoinFromOutputs: (id: string, asset: { id: string }) => void;
   setAssetRowToOutput: (id: string, availableCoins: IAssetInfo[]) => void;
   // ====== output address handlers ======
-  setAddressValue: (id: string, address: string, handle?: string) => void;
+  setAddressValue: (
+    id: string,
+    address: string,
+    handle?: string,
+    handleStatus?: {
+      isVerified?: boolean;
+      hasHandleOwnershipChanged?: boolean;
+    }
+  ) => void;
   // ====== address book picker ======
   currentRow?: string | undefined;
   currentCoinToChange?: string | undefined;
@@ -88,6 +105,9 @@ export interface Store {
   setIsRestaking: (param: boolean) => void;
   lastFocusedInput?: string;
   setLastFocusedInput: (param?: string) => void;
+  // Analytics specific properties
+  triggerPoint?: SendFlowTriggerPoints;
+  setTriggerPoint: (param: SendFlowTriggerPoints) => void;
 }
 
 // ====== state setters ======
@@ -172,11 +192,22 @@ const stateHandlers = (get: GetState<Store>, set: SetState<Store>) => {
     set({ uiOutputs: updatedOutputs });
   };
 
-  const setAddressValue = (id: string, address: string, handle?: string) => {
+  // <<<<<<< HEAD
+  const setAddressValue = (
+    id: string,
+    address: string,
+    handle?: string,
+    handleStatus?: {
+      isVerified: boolean;
+      hasHandleOwnershipChanged: boolean;
+    }
+    // hasHandleOwnershipChanged?: boolean,
+    // isHandleVerified?: boolean
+  ) => {
     const rows = get().uiOutputs;
     const row = rows[id];
     if (!row) return;
-    const updatedRow = { ...row, address, handle };
+    const updatedRow = { ...row, address, handle, handleStatus };
     const outputs = { ...rows, [id]: updatedRow };
 
     set({ uiOutputs: outputs });
@@ -284,13 +315,20 @@ const useStore = create<Store>((set, get) => ({
         [defaultOutputKey]: {
           address: '',
           assets: value
-            ? [{ id, value, compactValue: compactNumber(value), displayValue: getInlineCurrencyFormat(value) }]
+            ? [{ id, value, compactValue: compactNumberWithUnit(value), displayValue: formatNumberForDisplay(value) }]
             : [{ id }]
         }
       }
     }),
   resetStates: () =>
-    set((state) => ({ ...state, ...initialState, currentRow: undefined, metadata: undefined, password: undefined })),
+    set((state) => ({
+      ...state,
+      ...initialState,
+      currentRow: undefined,
+      metadata: undefined,
+      password: undefined,
+      triggerPoint: undefined
+    })),
   setMetadataMsg: (msg) => set({ metadata: msg }),
   setSubmitingTxState: (params) =>
     set({
@@ -307,7 +345,8 @@ const useStore = create<Store>((set, get) => ({
     ),
   resetTokenList: () => set({ selectedTokenList: [], selectedNFTs: [] }),
   setIsRestaking: (isRestaking) => set({ isRestaking }),
-  setLastFocusedInput: (lastFocusedInput) => set({ lastFocusedInput }) // keep track of the last focused input element, this way we know where to display the error
+  setLastFocusedInput: (lastFocusedInput) => set({ lastFocusedInput }), // keep track of the last focused input element, this way we know where to display the error
+  setTriggerPoint: (triggerPoint) => set({ triggerPoint })
 }));
 
 // ====== selectors ======
@@ -343,17 +382,35 @@ export const useCoinStateSelector = (row: string): UseCoinStateSelector =>
     )
   );
 
-export const useAddressState = (row: string): { address: string; handle?: string } & Pick<Store, 'setAddressValue'> =>
+export const useAddressState = (
+  row: string
+): {
+  address: string;
+  handle?: string;
+  handleStatus?: {
+    isVerified: boolean;
+    hasHandleOwnershipChanged: boolean;
+  };
+} & Pick<Store, 'setAddressValue'> =>
   useStore(
     useCallback(
       ({ uiOutputs, setAddressValue }) => ({
         address: !uiOutputs[row] ? '' : uiOutputs[row].address,
         handle: !uiOutputs[row] ? '' : uiOutputs[row].handle,
+        handleStatus: {
+          hasHandleOwnershipChanged: !uiOutputs[row].handleStatus
+            ? true
+            : uiOutputs[row].handleStatus.hasHandleOwnershipChanged,
+          isVerified: !uiOutputs[row].handleStatus ? false : uiOutputs[row].handleStatus.isVerified
+        },
         setAddressValue
       }),
       [row]
     )
   );
+
+const isValidDestination = (address: string) =>
+  isHandle(address) ? isHandle(address) : isValidAddress(address.trim());
 
 export const useTransactionProps = (): {
   outputMap: OutputsMap;
@@ -371,12 +428,13 @@ export const useTransactionProps = (): {
     () =>
       Object.values(outputs).some(
         (item) =>
-          !isValidAddress(item.address.trim()) ||
+          !isValidDestination(item.address) ||
           !isValidAddressPerNetwork({
             address: item.address.trim(),
             network: currentChain.networkId
           }) ||
-          item.assets.every((asset) => !(asset.value && Number(asset.value)))
+          item.assets.every((asset) => !(asset.value && Number(asset.value))) ||
+          (item.handleStatus?.hasHandleOwnershipChanged !== undefined && item.handleStatus?.hasHandleOwnershipChanged)
       ),
     [outputs, currentChain]
   );
@@ -502,5 +560,10 @@ export const useLastFocusedInput = (): {
     lastFocusedInput,
     setLastFocusedInput
   }));
+
+export const useAnalyticsSendFlowTriggerPoint = (): {
+  triggerPoint: Store['triggerPoint'];
+  setTriggerPoint: Store['setTriggerPoint'];
+} => useStore(({ triggerPoint, setTriggerPoint }) => ({ triggerPoint, setTriggerPoint }));
 
 export { useStore as sendTransactionStore };

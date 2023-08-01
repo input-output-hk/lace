@@ -17,10 +17,16 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventCategories,
   MatomoEventActions,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isNFT } from '@src/utils/is-nft';
-import { useCoinStateSelector } from '../../send-transaction';
+import {
+  SendFlowAnalyticsProperties,
+  useCoinStateSelector,
+  useAnalyticsSendFlowTriggerPoint,
+  SendFlowTriggerPoints
+} from '../../send-transaction';
 import { getTotalWalletBalance, sortAssets } from '../utils';
 import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
 import { AssetDetailsDrawer } from './AssetDetailsDrawer/AssetDetailsDrawer';
@@ -55,6 +61,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const popupView = appMode === APP_MODE_POPUP;
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
   const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
+  const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
   const [isTransactionDetailsOpen, setIsTransactionDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
@@ -212,7 +219,10 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   );
 
   const onSendAssetClick = (id: string) => {
+    // eslint-disable-next-line camelcase
+    const postHogProperties: SendFlowAnalyticsProperties = { trigger_point: SendFlowTriggerPoints.TOKENS };
     setPickedCoin(SEND_COIN_OUTPUT_ID, { prev: cardanoCoin.id, next: id });
+    setTriggerPoint(SendFlowTriggerPoints.TOKENS);
     analytics.sendEventToMatomo({
       category: MatomoEventCategories.VIEW_TOKENS,
       action: MatomoEventActions.CLICK_EVENT,
@@ -221,6 +231,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         : AnalyticsEventNames.ViewTokens.SEND_TOKEN_BROWSER
     });
 
+    analytics.sendEventToPostHog(PostHogAction.SendClick, postHogProperties);
     if (popupView) {
       redirectToSend({ params: { id } });
     } else {
