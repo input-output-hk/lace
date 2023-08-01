@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { CardanoTxOut, TxMinimumCoinQuantity } from '../../../../types';
 import { Wallet } from '@lace/cardano';
 import { Handle } from '@cardano-sdk/core';
@@ -66,3 +67,14 @@ export interface TemporaryTransactionData {
   [TemporaryTransactionDataKeys.TEMP_OUTPUTS]: AssetInfo[];
   [TemporaryTransactionDataKeys.TEMP_SOURCE]: 'popup' | 'hardware-wallet';
 }
+
+export enum SendFlowTriggerPoints {
+  NFTS = 'nfts page',
+  SEND_BUTTON = 'send button',
+  TOKENS = 'tokens page'
+}
+
+export type SendFlowAnalyticsProperties = {
+  trigger_point: SendFlowTriggerPoints;
+  // TODO: add rest of the porpeties (LW-7711)
+};

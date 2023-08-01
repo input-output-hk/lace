@@ -17,7 +17,8 @@ import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   MatomoEventCategories,
   MatomoEventActions,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
@@ -73,6 +74,7 @@ export const AssetsPortfolio = ({
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.SendTransaction.SEND_TX_BUTTON_POPUP
     });
+    analytics.sendEventToPostHog(PostHogAction.SendClick);
     redirectToSend({ params: { id: '1' } });
   };
 
