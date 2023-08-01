@@ -71,7 +71,6 @@ export const StakePoolDetailsDrawer = ({
     if (simpleSendConfig.currentSection === Sections.FAIL_TX) {
       analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongXClick);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     showExitConfirmation,
     simpleSendConfig.currentSection,
@@ -83,7 +82,8 @@ export const StakePoolDetailsDrawer = ({
     // isInMemory,
     // isSuccessSection,
     setIsDrawerVisible,
-    setIsRestaking
+    setIsRestaking,
+    analytics
   ]);
 
   const onArrowIconClick = useCallback(() => {
