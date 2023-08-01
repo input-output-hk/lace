@@ -30,7 +30,7 @@ class TransactionsDetailsAssert {
 
   async assertSeeTransactionDetails(expectedTransactionDetails: ExpectedTransactionDetails) {
     const transactionsDetails = new TransactionDetailsPage();
-    await webTester.waitUntilSeeElement(transactionsDetails.transactionDetailsDescription(), 15_000);
+    await $(transactionsDetails.transactionDetailsDescription().toJSLocator()).waitForClickable({ timeout: 15_000 });
 
     await expect(await webTester.getTextValueFromElement(transactionsDetails.transactionDetailsDescription())).contains(
       `${expectedTransactionDetails.transactionDescription}`

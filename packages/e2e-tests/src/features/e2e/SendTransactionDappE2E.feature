@@ -4,8 +4,7 @@ Feature: Send Transactions from Dapp - E2E
   Background:
     Given Wallet is synced
 
-  @Pending @LW-3761 @Testnet @Smoke
-    # Bug LW-7482
+  @LW-3761 @Testnet @Smoke
   Scenario: Send ADA from DApp E2E
     And I save token: "Cardano" balance
     And I open and authorize test DApp with "Only once" setting
@@ -32,8 +31,7 @@ Feature: Send Transactions from Dapp - E2E
     And I click on a transaction: 1
     Then The Tx details are displayed as "package.core.transactionDetailBrowser.received" for ADA with value: 3.00 and wallet: "WalletSendSimpleTransactionE2E" address
 
-  @Pending @LW-6797 @Testnet
-    # Bug LW-7482
+  @LW-6797 @Testnet
   Scenario: Send Token from DApp E2E
     And I save token: "LaceCoin2" balance
     And I open and authorize test DApp with "Only once" setting
