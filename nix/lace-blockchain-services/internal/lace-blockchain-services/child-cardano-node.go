@@ -11,7 +11,7 @@ import (
 	"regexp"
 
 	"lace.io/lace-blockchain-services/ourpaths"
-	"lace.io/lace-blockchain-services/versions"
+	"lace.io/lace-blockchain-services/constants"
 
 	"github.com/acarl005/stripansi"
 )
@@ -53,9 +53,9 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 	return ManagedChild{
 		ServiceName: "cardano-node",
 		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + ourpaths.ExeSuffix,
-		Version: versions.CardanoNodeVersion,
-		Revision: versions.CardanoNodeRevision,
-		MkArgv: func() []string {
+		Version: constants.CardanoNodeVersion,
+		Revision: constants.CardanoNodeRevision,
+		MkArgv: func() ([]string, error) {
 			return []string {
 				"run",
 				"--topology", shared.CardanoNodeConfigDir + sep + "topology.json",
@@ -66,7 +66,7 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 				"--config", shared.CardanoNodeConfigDir + sep + "config.json",
 				"--socket-path", shared.CardanoNodeSocket,
 				"--shutdown-ipc=3",
-			}
+			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
 		StatusCh: statusCh,

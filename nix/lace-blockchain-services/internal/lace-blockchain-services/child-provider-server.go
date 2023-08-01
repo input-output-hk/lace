@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"lace.io/lace-blockchain-services/versions"
+	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
@@ -22,14 +22,14 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 	return ManagedChild{
 		ServiceName: "provider-server",
 		ExePath: ourpaths.LibexecDir + sep + "node" + ourpaths.ExeSuffix,
-		Version: versions.ProviderServerVersion,
-		Revision: versions.ProviderServerRevision,
-		MkArgv: func() []string {
+		Version: constants.ProviderServerVersion,
+		Revision: constants.ProviderServerRevision,
+		MkArgv: func() ([]string, error) {
 			return []string{
 				ourpaths.CardanoServicesDir + sep + "dist" + sep + "cjs" +
 					sep + "cli.js",
 				"start-provider-server",
-			}
+			}, nil
 		},
 		MkExtraEnv: func() []string {
 			providerServerPort = getFreeTCPPort()

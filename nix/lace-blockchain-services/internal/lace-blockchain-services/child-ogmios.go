@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"regexp"
 
-	"lace.io/lace-blockchain-services/versions"
+	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
@@ -19,16 +19,16 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 	return ManagedChild{
 		ServiceName: "ogmios",
 		ExePath: ourpaths.LibexecDir + sep + "ogmios" + ourpaths.ExeSuffix,
-		Version: versions.OgmiosVersion,
-		Revision: versions.OgmiosRevision,
-		MkArgv: func() []string {
+		Version: constants.OgmiosVersion,
+		Revision: constants.OgmiosRevision,
+		MkArgv: func() ([]string, error) {
 			*shared.OgmiosPort = getFreeTCPPort()
 			return []string{
 				"--host", "127.0.0.1",
 				"--port", fmt.Sprintf("%d", *shared.OgmiosPort),
 				"--node-config", shared.CardanoNodeConfigDir + sep + "config.json",
 				"--node-socket", shared.CardanoNodeSocket,
-			}
+			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
 		StatusCh: statusCh,

@@ -13,7 +13,7 @@ import (
 	"encoding/json"
 
 	t "lace.io/lace-blockchain-services/types"
-	"lace.io/lace-blockchain-services/versions"
+	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/appconfig"
 	"lace.io/lace-blockchain-services/httpapi"
@@ -132,8 +132,8 @@ func main() {
 			Status: "listening",
 			Progress: -1,
 			Url: fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort),
-			Version: versions.LaceBlockchainServicesVersion,
-			Revision: versions.LaceBlockchainServicesRevision,
+			Version: constants.LaceBlockchainServicesVersion,
+			Revision: constants.LaceBlockchainServicesRevision,
 		}
 
 		initiateShutdownCh := make(chan struct{}, 1)

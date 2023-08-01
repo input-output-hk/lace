@@ -112,8 +112,8 @@ in rec {
 
   lace-blockchain-services-exe-vendorHash = "sha256-kEFdxqSs3nY1a6maUSPkc30uENePhcmYkkV1Q0fF/Io=";
 
-  hardcodedVersions = pkgs.writeText "version.go" ''
-    package versions
+  constants = pkgs.writeText "constants.go" ''
+    package constants
 
     const (
       LaceBlockchainServicesVersion = ${__toJSON laceVersion}
@@ -126,6 +126,9 @@ in rec {
       ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
       MithrilClientRevision = ${__toJSON mithril-bin.version}
       MithrilClientVersion = ${__toJSON mithril-bin.version}
+      MithrilGVKPreview = ${__toJSON mithrilGenesisVerificationKeys.preview}
+      MithrilGVKPreprod = ${__toJSON mithrilGenesisVerificationKeys.preprod}
+      MithrilGVKMainnet = ${__toJSON mithrilGenesisVerificationKeys.mainnet}
     )
   '';
 
@@ -186,6 +189,27 @@ in rec {
       hash = "sha256-+94KwJIdhsNWxBUy5zGciHojvRuP8ABgyrRHJJ8Dx88=";
     }} $out/highlight.js/default.min.css
   '';
+
+  mithrilGenesisVerificationKeys = {
+    preview = builtins.readFile (pkgs.fetchurl {
+      url =
+        "https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration"
+        + "/pre-release-preview/genesis.vkey";
+        hash = "sha256-kNqbbOdx5lm34zhiBaM6TzIs+J0MsuANCkhwp43LiN8=";
+    });
+    preprod = builtins.readFile (pkgs.fetchurl {
+      url =
+        "https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration"
+        + "/release-preprod/genesis.vkey";
+        hash = "sha256-kNqbbOdx5lm34zhiBaM6TzIs+J0MsuANCkhwp43LiN8=";
+    });
+    mainnet = builtins.readFile (pkgs.fetchurl {
+      url =
+        "https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration"
+        + "/release-mainnet/genesis.vkey";
+        hash = "sha256-Fdav0t8HG3XTfn6EUTYphrOETShXUaOuwjwaKWkJZwY=";
+    });
+  };
 
   # FIXME: build from source (Linux, and Darwins are available in their flake.nix, but Windows not)
   mithril-bin = let

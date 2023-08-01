@@ -20,7 +20,7 @@ type ManagedChild struct {
 	ExePath     string
 	Version     string
 	Revision    string
-	MkArgv      func() []string // XXX: it’s a func to run `getFreeTCPPort()` at the very last moment
+	MkArgv      func() ([]string, error) // XXX: it’s a func to run `getFreeTCPPort()` at the very last moment
 	MkExtraEnv  func() []string
 	StatusCh    chan<- StatusAndUrl
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
@@ -204,6 +204,14 @@ func manageChildren(comm CommChannels_Manager) {
 
 		for childIdx, childUnsafe := range childrenDefs {
 			child := childUnsafe // or else all interations will get the same ref (last child)
+
+			childArgv, err := child.MkArgv()
+			if err != nil {
+				fmt.Printf("%s[%d]: failed to create argv for %s: %v\n", OurLogPrefix, os.Getpid(),
+					child.ServiceName, err)
+				return  // scrap everything and restart
+			}
+
 			wgChildren.Add(1)
 			fmt.Printf("%s[%d]: starting %s...\n", OurLogPrefix, os.Getpid(), child.ServiceName)
 			for _, dependant := range childrenDefs[(childIdx+1):] {
@@ -219,7 +227,8 @@ func manageChildren(comm CommChannels_Manager) {
 			terminateCh := make(chan struct{}, 1)
 			childDidExit := false
 			childPid := 0
-			go childProcess(child.ExePath, child.MkArgv(), child.MkExtraEnv(),
+
+			go childProcess(child.ExePath, childArgv, child.MkExtraEnv(),
 				child.LogModifier, outputLines, terminateCh, &childPid,
 				child.TerminateGracefullyByInheritedFd3,
 				child.ForceKillAfter)
