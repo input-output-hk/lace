@@ -5,13 +5,7 @@ package main
 import (
 	"os"
 	"os/exec"
-	"time"
-	"errors"
 )
-
-func probeWindowsNamedPipe(path string, timeout time.Duration) error {
-	return errors.New("probeWindowsNamedPipe is only supported on Windows")
-}
 
 func setManagedChildSysProcAttr(cmd *exec.Cmd) {
 }

@@ -9,7 +9,7 @@ import { useBalances, useDelegationDetails, useFetchCoinPrice, useStakingRewards
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
-import { compactNumber } from '@utils/format-number';
+import { compactNumberWithUnit } from '@utils/format-number';
 
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
@@ -84,7 +84,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
-        compactNumber
+        compactNumber: compactNumberWithUnit
       }}
     >
       <Staking theme={theme.name} />

@@ -1,5 +1,6 @@
 import { useDatabaseContext } from '@src/providers/DatabaseProvider';
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { HandleResolution } from '@cardano-sdk/core';
 import { AddressBookSchema, addressBookSchema } from '@src/lib/storage';
 import { useActionExecution } from '@src/hooks/useActionExecution';
 import { useWalletStore } from '@src/stores';
@@ -16,12 +17,19 @@ interface FilteredAddressList {
   id: number;
   walletName: string;
   walletAddress: string;
+  walletHandleResolution?: HandleResolution;
 }
 
-const getAddressBookByNameOrAddressTransformer = ({ address, name, id }: AddressBookSchema): FilteredAddressList => ({
+const getAddressBookByNameOrAddressTransformer = ({
+  address,
+  name,
+  id,
+  handleResolution
+}: AddressBookSchema): FilteredAddressList => ({
   walletAddress: address,
   walletName: name,
-  id
+  id,
+  walletHandleResolution: handleResolution
 });
 
 export const useGetFilteredAddressBook = (): {

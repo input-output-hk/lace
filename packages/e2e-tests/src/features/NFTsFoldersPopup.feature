@@ -255,6 +255,31 @@ Feature: NFT - Folders - Popup view
     When I press "Clear" button in search bar
     And "Select NFTs" page is showing all NFTs that I have
 
+  @LW-7190
+  Scenario: Popup-view - NFT Folders - "Add NFT" button availability and click within the NFT folder
+    Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
+    And I navigate to NFTs popup page
+    And I save all NFTs that I have
+    When I left click on the NFT folder with name "Sample NFT folder"
+    Then I can see "Add NFT" button active
+    When I click "Add NFT" button within the NFT folder
+    Then "Select NFTs" page is showing all NFTs that I have
+
+  @LW-7191
+  Scenario: Popup-view - NFT Folders - Adding NFTs to existing folder
+    Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
+    And I navigate to NFTs popup page
+    When I left click on the NFT folder with name "Sample NFT folder"
+    And I can see "Add NFT" button active
+    And I click "Add NFT" button within the NFT folder
+    And I click NFT with name "Ibilecoin"
+    And I click NFT with name "Bison Coin"
+    When I click "Add selected NFTs" button on "Select NFTs" page
+    Then I see a toast with text: "NFTs added to folder"
+    And I see "Sample NFT folder" NFT folder page in popup mode
+    And I see NFT with name "Ibilecoin" on the NFT folder page
+    And I see NFT with name "Bison Coin" on the NFT folder page
+
   @LW-7193
   Scenario Outline: Popup-view - NFT Folders - Context menu with "Remove from folder" option is displayed: <is_displayed>
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
@@ -305,3 +330,21 @@ Feature: NFT - Folders - Popup view
     And I create folder with name: "bcd" and first available NFT
     And I create folder with name: "cde" and first available NFT
     Then I see folders on the NFTs page in the alphabetical order
+
+  @LW-7229 @Pending
+  #Bug: LW-7632
+  Scenario: Popup-view - NFT Folders - Trying to rename folder using name that already exists
+    Given I navigate to NFTs popup page
+    When I create folder with name: "Sample NFT folder1" and first available NFT
+    And I create folder with name: "Sample NFT folder2" and first available NFT
+    And I right click on the NFT folder with name "Sample NFT folder1"
+    And I click "Rename" option in NFT folder context menu
+    And I see "Rename your folder" drawer in popup mode
+    When I clear "Folder name" input
+    And I enter a folder name "Sample NFT folder2" into "Folder name" input
+    Then I see "Given name already exists" error on "Name your folder" page
+    And "Confirm" button is disabled on "Rename your folder" drawer
+    When I clear "Folder name" input
+    And I enter a folder name "Sample NFT folder3" into "Folder name" input
+    Then I do not see "Given name already exists" error on "Name your folder" page
+    And "Confirm" button is enabled on "Rename your folder" drawer

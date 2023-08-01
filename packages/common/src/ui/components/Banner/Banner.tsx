@@ -3,6 +3,8 @@ import { Typography } from 'antd';
 import cn from 'classnames';
 import { ReactComponent as DefaultIcon } from '../../assets/icons/banner-icon.component.svg';
 import styles from './Banner.module.scss';
+import { Button } from '../Button';
+import { Link } from 'react-router-dom';
 
 const { Text } = Typography;
 
@@ -13,10 +15,15 @@ export interface BannerProps {
   withIcon?: boolean;
   customIcon?: React.ReactElement;
   message: string | React.ReactElement;
+  messagePartTwo?: string | React.ReactElement;
+  linkMessage?: string | React.ReactElement;
+  buttonMessage?: string | React.ReactElement;
   className?: string;
   descriptionClassName?: string;
   popupView?: boolean;
   description?: React.ReactNode;
+  onLinkClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
+  onButtonClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
 }
 
 export const Banner = ({
@@ -26,7 +33,11 @@ export const Banner = ({
   withIcon,
   className,
   descriptionClassName,
-  popupView
+  popupView,
+  onButtonClick,
+  linkMessage,
+  messagePartTwo,
+  buttonMessage
 }: BannerProps): React.ReactElement => {
   const descriptionElement = shouldBeDisplayedAsText(description) ? (
     <Text className={styles.description}>{description}</Text>
@@ -53,11 +64,18 @@ export const Banner = ({
         </div>
       )}
       <div
-        className={cn(styles.descriptionContainer, { [descriptionClassName]: descriptionClassName })}
+        className={cn(styles.contentContainer, { [descriptionClassName]: descriptionClassName })}
         data-testid="banner-description"
       >
-        <Text className={styles.message}>{message}</Text>
-        {description && <div>{descriptionElement}</div>}
+        <div className={cn(styles.descriptionContainer)}>
+          <Text className={styles.message}>{message}</Text>
+          {linkMessage && <Link to="">{linkMessage}</Link>}
+          {messagePartTwo && <Text className={styles.message}>{messagePartTwo}</Text>}
+          {description && <div>{descriptionElement}</div>}
+        </div>
+        <div className={cn(styles.buttonContainer)}>
+          {buttonMessage && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
+        </div>
       </div>
     </div>
   );
