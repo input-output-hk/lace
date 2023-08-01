@@ -1,48 +1,121 @@
 /* eslint-disable no-magic-numbers */
 import '@testing-library/jest-dom';
 import BigNumber from 'bignumber.js';
-import { unitsMap } from '../constants';
-import { getNumberUnit } from '../get-number-unit';
+import { getNumberUnit, UnitSymbol, UnitThreshold } from '../get-number-unit';
 
-describe('Testing getNumberUnit component', () => {
-  test('should return empty string if it is less than 1000', async () => {
-    const keys = unitsMap.keys();
-    const result = getNumberUnit(new BigNumber('100'), keys);
-
-    expect(JSON.stringify(result)).toBe(JSON.stringify({ unit: '', unitThreshold: new BigNumber(0) }));
+describe('get-number-unit', () => {
+  describe('returns no unit and 0 as threshold', () => {
+    test('when absolute value is exactly 0', () => {
+      expect(getNumberUnit(0)).toEqual({ unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO });
+      expect(getNumberUnit('0')).toEqual({ unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO });
+      expect(getNumberUnit(UnitSymbol.ZERO)).toEqual({ unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO });
+    });
+    test('when absolute value is greater than 0 and less than 1000', () => {
+      expect(getNumberUnit(500)).toEqual({ unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO });
+      expect(getNumberUnit(-500)).toEqual({ unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO });
+      expect(getNumberUnit('999.99')).toEqual({ unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO });
+      expect(getNumberUnit('-999')).toEqual({ unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO });
+    });
+    test('when value is not a valid number', () => {
+      expect(getNumberUnit('NaN')).toEqual({ unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO });
+      expect(getNumberUnit(new BigNumber('something'))).toEqual({
+        unit: UnitSymbol.ZERO,
+        unitThreshold: UnitThreshold.ZERO
+      });
+    });
   });
 
-  test('should handle last iteration', async () => {
-    const keys = new Map().keys();
-    const result = getNumberUnit(new BigNumber('100'), keys);
-
-    expect(JSON.stringify(result)).toBe(JSON.stringify({ unit: 'B', unitThreshold: unitsMap.get('B').gt }));
+  describe('returns K as unit and 1000 as threshold', () => {
+    test('when absolute value is exactly 1000', () => {
+      expect(getNumberUnit(1000)).toEqual({ unit: UnitSymbol.THOUSAND, unitThreshold: UnitThreshold.THOUSAND });
+      expect(getNumberUnit(-1000)).toEqual({ unit: UnitSymbol.THOUSAND, unitThreshold: UnitThreshold.THOUSAND });
+      expect(getNumberUnit('1000')).toEqual({ unit: UnitSymbol.THOUSAND, unitThreshold: UnitThreshold.THOUSAND });
+    });
+    test('when absolute value is greater than 1000 and less than 1000000', () => {
+      expect(getNumberUnit(500_000)).toEqual({ unit: UnitSymbol.THOUSAND, unitThreshold: UnitThreshold.THOUSAND });
+      expect(getNumberUnit(-500_000)).toEqual({ unit: UnitSymbol.THOUSAND, unitThreshold: UnitThreshold.THOUSAND });
+      expect(getNumberUnit('999999.99')).toEqual({ unit: UnitSymbol.THOUSAND, unitThreshold: UnitThreshold.THOUSAND });
+      expect(getNumberUnit('-999999')).toEqual({ unit: UnitSymbol.THOUSAND, unitThreshold: UnitThreshold.THOUSAND });
+    });
   });
 
-  test('should return K when is greater-equal 1000 less 1000000', async () => {
-    const keys = unitsMap.keys();
-    const result = getNumberUnit(new BigNumber('10000'), keys);
-
-    expect(JSON.stringify(result)).toBe(JSON.stringify({ unit: 'K', unitThreshold: new BigNumber(1e3) }));
+  describe('returns M as unit and 1_000_000 as threshold', () => {
+    test('when absolute value is exactly 1_000_000', () => {
+      expect(getNumberUnit(1_000_000)).toEqual({ unit: UnitSymbol.MILLION, unitThreshold: UnitThreshold.MILLION });
+      expect(getNumberUnit(-1_000_000)).toEqual({ unit: UnitSymbol.MILLION, unitThreshold: UnitThreshold.MILLION });
+      expect(getNumberUnit('1000000')).toEqual({ unit: UnitSymbol.MILLION, unitThreshold: UnitThreshold.MILLION });
+    });
+    test('when absolute value is greater than 1_000_000 and less than 1_000_000_000', () => {
+      expect(getNumberUnit(500_000_000)).toEqual({ unit: UnitSymbol.MILLION, unitThreshold: UnitThreshold.MILLION });
+      expect(getNumberUnit(-500_000_000)).toEqual({ unit: UnitSymbol.MILLION, unitThreshold: UnitThreshold.MILLION });
+      expect(getNumberUnit('999999999.99')).toEqual({ unit: UnitSymbol.MILLION, unitThreshold: UnitThreshold.MILLION });
+      expect(getNumberUnit('-999999999')).toEqual({ unit: UnitSymbol.MILLION, unitThreshold: UnitThreshold.MILLION });
+    });
   });
 
-  test('should return M is greater-equal 1000000 less 1000000000', async () => {
-    const keys = unitsMap.keys();
-    const result = getNumberUnit(new BigNumber('10000000'), keys);
-
-    expect(JSON.stringify(result)).toBe(JSON.stringify({ unit: 'M', unitThreshold: new BigNumber(1e6) }));
+  describe('returns B as unit and 1_000_000_000 as threshold', () => {
+    test('when absolute value is exactly 1_000_000_000', () => {
+      expect(getNumberUnit(1e9)).toEqual({ unit: UnitSymbol.BILLION, unitThreshold: UnitThreshold.BILLION });
+      expect(getNumberUnit(-1e9)).toEqual({ unit: UnitSymbol.BILLION, unitThreshold: UnitThreshold.BILLION });
+      expect(getNumberUnit('1000000000')).toEqual({ unit: UnitSymbol.BILLION, unitThreshold: UnitThreshold.BILLION });
+    });
+    test('when absolute value is greater than 1_000_000_000 and less than 1_000_000_000_000', () => {
+      expect(getNumberUnit(5e11)).toEqual({ unit: UnitSymbol.BILLION, unitThreshold: UnitThreshold.BILLION });
+      expect(getNumberUnit(-5e11)).toEqual({ unit: UnitSymbol.BILLION, unitThreshold: UnitThreshold.BILLION });
+      expect(getNumberUnit('999999999999.99')).toEqual({
+        unit: UnitSymbol.BILLION,
+        unitThreshold: UnitThreshold.BILLION
+      });
+      expect(getNumberUnit('-999999999999')).toEqual({
+        unit: UnitSymbol.BILLION,
+        unitThreshold: UnitThreshold.BILLION
+      });
+    });
   });
 
-  test('should return B greater-equal than 1000000000', async () => {
-    const keys = unitsMap.keys();
-    const result = getNumberUnit(new BigNumber('10000000000'), keys);
-
-    expect(JSON.stringify(result)).toBe(JSON.stringify({ unit: 'B', unitThreshold: new BigNumber(1e9) }));
+  describe('returns T as unit and 1_000_000_000_000 as threshold', () => {
+    test('when absolute value is exactly 1_000_000_000_000', () => {
+      expect(getNumberUnit(1e12)).toEqual({ unit: UnitSymbol.TRILLION, unitThreshold: UnitThreshold.TRILLION });
+      expect(getNumberUnit(-1e12)).toEqual({ unit: UnitSymbol.TRILLION, unitThreshold: UnitThreshold.TRILLION });
+      expect(getNumberUnit('1000000000000')).toEqual({
+        unit: UnitSymbol.TRILLION,
+        unitThreshold: UnitThreshold.TRILLION
+      });
+    });
+    test('when absolute value is greater than 1_000_000_000_000 and less than 1_000_000_000_000_000', () => {
+      expect(getNumberUnit(5e14)).toEqual({ unit: UnitSymbol.TRILLION, unitThreshold: UnitThreshold.TRILLION });
+      expect(getNumberUnit(-5e14)).toEqual({ unit: UnitSymbol.TRILLION, unitThreshold: UnitThreshold.TRILLION });
+      expect(getNumberUnit('999999999999999.99')).toEqual({
+        unit: UnitSymbol.TRILLION,
+        unitThreshold: UnitThreshold.TRILLION
+      });
+      expect(getNumberUnit('-999999999999999')).toEqual({
+        unit: UnitSymbol.TRILLION,
+        unitThreshold: UnitThreshold.TRILLION
+      });
+    });
   });
 
-  test('should return T greater-equal than 10000000000000', async () => {
-    const keys = unitsMap.keys();
-    const result2 = getNumberUnit(new BigNumber('10000000000000'), keys);
-    expect(JSON.stringify(result2)).toBe(JSON.stringify({ unit: 'T', unitThreshold: new BigNumber(1e12) }));
+  describe('returns Q as unit and 1_000_000_000_000_000 as threshold', () => {
+    test('when absolute value is exactly 1_000_000_000_000_000', () => {
+      expect(getNumberUnit(1e15)).toEqual({ unit: UnitSymbol.QUADRILLION, unitThreshold: UnitThreshold.QUADRILLION });
+      expect(getNumberUnit(-1e15)).toEqual({ unit: UnitSymbol.QUADRILLION, unitThreshold: UnitThreshold.QUADRILLION });
+      expect(getNumberUnit('1000000000000000')).toEqual({
+        unit: UnitSymbol.QUADRILLION,
+        unitThreshold: UnitThreshold.QUADRILLION
+      });
+    });
+    test('when absolute value is greater than 1_000_000_000_000_000', () => {
+      expect(getNumberUnit(5e20)).toEqual({ unit: UnitSymbol.QUADRILLION, unitThreshold: UnitThreshold.QUADRILLION });
+      expect(getNumberUnit(-5e20)).toEqual({ unit: UnitSymbol.QUADRILLION, unitThreshold: UnitThreshold.QUADRILLION });
+      expect(getNumberUnit('1000000000000000000.999')).toEqual({
+        unit: UnitSymbol.QUADRILLION,
+        unitThreshold: UnitThreshold.QUADRILLION
+      });
+      expect(getNumberUnit('-1000000000000000000')).toEqual({
+        unit: UnitSymbol.QUADRILLION,
+        unitThreshold: UnitThreshold.QUADRILLION
+      });
+    });
   });
 });

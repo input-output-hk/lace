@@ -64,7 +64,6 @@ button.addressBookBtn {
   display: flex;
   font-size: var(--bodyLarge);
   font-weight: 600;
-  justify-content: space-between;
   letter-spacing: -0.015em;
   line-height: size_unit(3);
   width: 100%;
@@ -78,18 +77,22 @@ button.addressBookBtn {
     align-items: center;
     display: flex;
     flex: 1;
-    min-width: 0;
     font-weight: 400;
-    padding-right: size_unit(6);
+    padding-right: size_unit(1.5);
     &:first-child {
       font-weight: 600;
+      flex:0;
     }
 
     p {
       margin: 0 !important;
     }
   }
+  .option {
+    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #c0c0c0));
+  }
 }
+
 
 .children {
   pointer-events: none;
@@ -114,6 +117,10 @@ button.addressBookBtn {
       font-weight: 600 !important;
     }
   }
+}
+
+.searchAddress {
+  padding-bottom: size_unit(1.25);
 }
 
 @media (max-width: $breakpoint-popup) {

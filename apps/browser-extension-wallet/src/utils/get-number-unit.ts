@@ -1,52 +1,49 @@
+/* eslint-disable no-magic-numbers */
 import BigNumber from 'bignumber.js';
-import { unitsMap } from './constants';
 
-interface IUnitRange {
-  gt: BigNumber;
-  lt: BigNumber;
+export enum UnitSymbol {
+  ZERO = '',
+  THOUSAND = 'K',
+  MILLION = 'M',
+  BILLION = 'B',
+  TRILLION = 'T',
+  QUADRILLION = 'Q'
 }
 
-type GetNumberMapKey = (
-  /**
-   * number of which the unit is wanted to obtain
-   */
-  value: BigNumber,
-  /**
-   * An iterable with a list of keys belonging to the unit map
-   */
-  keys: IterableIterator<string>,
-  /**
-   * a map with the units information
-   */
-  units?: Map<string, IUnitRange>,
-  /**
-   * a fallback key if the value is not in a given range
-   * this key should exist on units map
-   */
-  fallbackKey?: string
-) => { unit: string; unitThreshold: BigNumber };
+export enum UnitThreshold {
+  ZERO = 0,
+  THOUSAND = 1e3,
+  MILLION = 1e6,
+  BILLION = 1e9,
+  TRILLION = 1e12,
+  QUADRILLION = 1e15
+}
+
+// Sorted in descending order
+const thresholdsMap = new Map<UnitSymbol, UnitThreshold>([
+  [UnitSymbol.QUADRILLION, UnitThreshold.QUADRILLION],
+  [UnitSymbol.TRILLION, UnitThreshold.TRILLION],
+  [UnitSymbol.BILLION, UnitThreshold.BILLION],
+  [UnitSymbol.MILLION, UnitThreshold.MILLION],
+  [UnitSymbol.THOUSAND, UnitThreshold.THOUSAND],
+  [UnitSymbol.ZERO, UnitThreshold.ZERO]
+]);
 
 /**
  * Returns the number unit and its threshold based on the given value
  *
  * @example
- * const result = getNumberUnit(new BigNumber(2500), unitsMap.keys());
- * console.log(result);
- * // Output: { unit: 'K', unitThreshold: new BigNumber(1000) }
+ * const result = getNumberUnit(new BigNumber(25000));
+ * console.log(result); // { unit: 'K', unitThreshold: new BigNumber(1000) }
  */
-export const getNumberUnit: GetNumberMapKey = (value, keys, units = unitsMap, fallbackKey = 'B') => {
-  const resultKey = keys.next();
-
-  if (resultKey.done) {
-    const fallbackUnitRange = units.get(fallbackKey);
-    return { unit: fallbackKey, unitThreshold: fallbackUnitRange.gt };
+export const getNumberUnit = (
+  value: string | number | BigNumber
+): { unit: UnitSymbol; unitThreshold: UnitThreshold } => {
+  const valueBN = new BigNumber(value);
+  for (const [unit, threshold] of thresholdsMap.entries()) {
+    if (valueBN.abs().gte(threshold)) {
+      return { unit, unitThreshold: threshold };
+    }
   }
-
-  const unitRange = units.get(resultKey.value);
-
-  if (value.gte(unitRange.gt) && value.lt(unitRange.lt)) {
-    return { unit: resultKey.value, unitThreshold: unitRange.gt };
-  }
-
-  return getNumberUnit(value, keys, units, fallbackKey);
+  return { unit: UnitSymbol.ZERO, unitThreshold: UnitThreshold.ZERO };
 };

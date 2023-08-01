@@ -16,6 +16,7 @@ import extensionUtils from '../utils/utils';
 import TokensPageObject from '../pageobject/tokensPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { browser } from '@wdio/globals';
+import TopNavigationAssert from './topNavigationAssert';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -39,6 +40,7 @@ class DAppConnectorAssert {
   }
 
   async assertSeeTitleAndDappDetails(expectedTitleKey: string, expectedDappDetails: ExpectedDAppDetails) {
+    const currentDAppUrl = new URL(expectedDappDetails.url);
     const commonDappPageElements = new CommonDappPageElements();
     await commonDappPageElements.pageTitle.waitForDisplayed();
     await expect(await commonDappPageElements.pageTitle.getText()).to.equal(await t(expectedTitleKey));
@@ -46,7 +48,9 @@ class DAppConnectorAssert {
     await commonDappPageElements.dAppName.waitForDisplayed();
     await expect(await commonDappPageElements.dAppName.getText()).to.equal(expectedDappDetails.name);
     await commonDappPageElements.dAppUrl.waitForDisplayed();
-    await expect(await commonDappPageElements.dAppUrl.getText()).to.equal(expectedDappDetails.url);
+    await expect(await commonDappPageElements.dAppUrl.getText()).to.equal(
+      `${currentDAppUrl.protocol}//${currentDAppUrl.host}`
+    );
   }
 
   async assertSeeAuthorizeDAppPage(expectedDappDetails: ExpectedDAppDetails) {
@@ -63,6 +67,11 @@ class DAppConnectorAssert {
     await expect(await AuthorizeDAppPage.authorizeButton.getText()).to.equal(await t('dapp.connect.btn.accept'));
     await AuthorizeDAppPage.cancelButton.waitForDisplayed();
     await expect(await AuthorizeDAppPage.cancelButton.getText()).to.equal(await t('dapp.connect.btn.cancel'));
+  }
+
+  async assertSeeDAppThemeMode(mode: 'dark' | 'light') {
+    await expect(await $('html').getAttribute('data-theme')).to.equal(mode);
+    await TopNavigationAssert.assertBackgroundColor(mode);
   }
 
   async assertSeeAuthorizePagePermissions() {

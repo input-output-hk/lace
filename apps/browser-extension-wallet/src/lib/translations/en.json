@@ -251,7 +251,11 @@
     "deleteModal.buttons.cancel": "No",
     "reviewModal": {
       "title": "Review change to {{name}}'s handle",
-      "banner.description": "This handle may no longer belong to your contact {{name}}. Please, review to proceed.",
+      "banner.browserDescription": "This handle may no longer belong to your contact {{name}}. Please, review to proceed.",
+      "banner.popUpDescription": "This handle may no longer belong to your contact {{name}}. Please,",
+      "banner.confirmReview.link": " review ",
+      "banner.popUpDescriptionEnd": " to proceed.",
+      "banner.confirmReview.button": "Review",
       "confirmUpdate.button": "Accept changes",
       "cancelUpdate.button": "Delete contact",
       "previewsAddress.description": "Previews linked address",
@@ -391,7 +395,7 @@
     "walletSetup.mnemonicResetModal.cancel": "Cancel",
     "walletSetup.mnemonicResetModal.confirm": "OK",
     "walletSetup.confirmRestoreModal.header": "Multi-address wallet balance is now visible!",
-    "walletSetup.confirmRestoreModal.content": "<b>Lace is compatible with multi-address wallets created by other applications.</b> This means you can see and spend tokens that are not owned by the displayed address. Lace currently supports a one-time discovery of assets and addresses when you restore your wallet.",
+    "walletSetup.confirmRestoreModal.content": "<b>Lace is compatible with multi-address wallets created by other applications.</b> This means you can see and spend tokens that are not owned by the displayed address. Lace currently supports a one-time discovery of addresses when you restore your wallet.",
     "walletSetup.confirmRestoreModal.confirm": "OK",
     "walletSetup.confirmExperimentalHwDapp.header": "Limited support for Dapp connection",
     "walletSetup.confirmExperimentalHwDapp.content": "This current version does not support signing transactions through the Dapp connection feature with hardware wallets. Please stay tuned for upcoming releases and new features through @lace on Twitter.",
@@ -738,9 +742,8 @@
           "title": "Collateral",
           "description": "Add and remove collateral in order to interact with smart contracts on Cardano",
           "amountDescription": "Add collateral in order to interact with smart contracts on Cardano. The recommended collateral amount is 5 ₳.",
-          "amountSeparated": "The amount is separated from your account balance, you can choose to return it to your balance at any time.",
           "reclaimDescription": "Your collateral amount is 5 ₳.",
-          "reclaimBanner": "When removing the collateral amount, it is returned to the account balance, but disables interactions with smart contracts.",
+          "reclaimBanner": "When you remove the collateral amount, it is returned to your account balance and disables your interactions with smart contracts",
           "close": "Close",
           "confirm": "Confirm",
           "reclaimCollateral": "Reclaim collateral",
@@ -1070,7 +1073,7 @@
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
     "destinationAddressInput": {
-      "recipientAddress": "Recipient's address or handle"
+      "recipientAddress": "Recipient's address or $handle"
     },
     "editAddressForm": {
       "walletName": "Wallet name",

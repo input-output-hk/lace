@@ -123,6 +123,15 @@ class NftCreateFolderAssert {
     }
   }
 
+  async assertSeeGivenNameAlreadyExistsError(shouldBeDisplayed: boolean) {
+    await NftCreateFolderPage.folderNameInput.inputError.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      expect(await NftCreateFolderPage.folderNameInput.inputError.getText()).to.equal(
+        await t('browserView.nfts.folderDrawer.nameForm.givenNameAlreadyExist')
+      );
+    }
+  }
+
   async assertSeeYoullHaveToStartAgainModal(shouldBeDisplayed: boolean) {
     await YoullHaveToStartAgainModal.container.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {

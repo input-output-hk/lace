@@ -7,7 +7,7 @@ import { Wallet } from '@lace/cardano';
 
 import CardanoLogo from '../assets/icons/browser-view/cardano-logo.svg';
 import { AssetSortBy, IAssetDetails } from '@views/browser/features/assets/types';
-import { compactNumber, formatLocaleNumber, isNumeric } from '@src/utils/format-number';
+import { compactNumberWithUnit, formatLocaleNumber, isNumeric } from '@src/utils/format-number';
 import { addEllipsis, getRandomIcon } from '@lace/common';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 import isNumber from 'lodash/isNumber';
@@ -106,7 +106,7 @@ export const assetTransformer = (params: {
     ticker,
     price,
     variation,
-    balance: areBalancesVisible ? compactNumber(tokenBalance, decimals) : balancesPlaceholder,
+    balance: areBalancesVisible ? compactNumberWithUnit(tokenBalance, decimals) : balancesPlaceholder,
     fiatBalance: areBalancesVisible ? formattedFiatBalance : balancesPlaceholder,
     sortBy: {
       fiatBalance: fiatBalance?.toNumber(),

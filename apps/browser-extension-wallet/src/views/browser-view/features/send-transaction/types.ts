@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { CardanoTxOut, TxMinimumCoinQuantity } from '../../../../types';
 import { Wallet } from '@lace/cardano';
-import { Handle } from '@cardano-sdk/core';
+import { Handle, HandleResolution } from '@cardano-sdk/core';
 
 export enum Sections {
   FORM = 'form',
@@ -51,6 +51,11 @@ export interface AssetInfo {
 export type OutputRow = {
   address: string;
   handle?: string;
+  handleResolution?: HandleResolution;
+  handleStatus?: {
+    hasHandleOwnershipChanged?: boolean;
+    isVerified?: boolean;
+  };
   assets: Array<AssetInfo>;
 };
 
