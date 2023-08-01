@@ -49,11 +49,11 @@ export const cip30WalletProperties = {
 };
 
 export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface> = {
-  getId: RemoteApiPropertyType.MethodReturningPromise,
   clearId: RemoteApiPropertyType.MethodReturningPromise,
   makePersistent: RemoteApiPropertyType.MethodReturningPromise,
   makeTemporary: RemoteApiPropertyType.MethodReturningPromise,
   extendLifespan: RemoteApiPropertyType.MethodReturningPromise,
-  getHashId: RemoteApiPropertyType.MethodReturningPromise,
-  getIsPersistentId: RemoteApiPropertyType.MethodReturningPromise
+  getAliasProperties: RemoteApiPropertyType.MethodReturningPromise,
+  getRandomizedUserId: RemoteApiPropertyType.MethodReturningPromise,
+  getUserId: RemoteApiPropertyType.MethodReturningPromise
 };

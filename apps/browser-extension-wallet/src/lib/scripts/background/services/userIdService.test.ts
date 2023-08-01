@@ -1,11 +1,11 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable import/imports-first */
 /* eslint-disable prettier/prettier */
-const mockHashId =
+const mockWalletBasedId =
   '15d632f6b0ab82c72a194d634d8783ea0ef5419c8a8f638cb0c3fc49280e0a0285fc88fbfad04554779d19bec4ab30e5afee2f9ee736ba090c2213d98fe3a475';
 const mockBlake2b = jest.fn(() => ({
   update: () => ({
-    digest: () => mockHashId
+    digest: () => mockWalletBasedId
   })
 }));
 
@@ -32,13 +32,13 @@ describe('userIdService', () => {
       };
       const { getStorageMock } = generateStorageMocks(store);
       const userIdService = new UserIdService(getStorageMock);
-      expect(await userIdService.getId()).toEqual(store.userId);
+      expect(await userIdService.getRandomizedUserId()).toEqual(store.userId);
     });
 
     it('should generate a random user id if none was stored', async () => {
       const { getStorageMock } = generateStorageMocks({});
       const userIdService = new UserIdService(getStorageMock);
-      expect(Buffer.from(await userIdService.getId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
+      expect(Buffer.from(await userIdService.getRandomizedUserId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
     });
   });
 
@@ -47,7 +47,7 @@ describe('userIdService', () => {
       const { getStorageMock, setStorageMock } = generateStorageMocks({});
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
       await userIdService.makePersistent();
-      const temporaryUserId = await userIdService.getId();
+      const temporaryUserId = await userIdService.getRandomizedUserId();
       expect(setStorageMock).toHaveBeenCalledWith({
         usePersistentUserId: true,
         userId: temporaryUserId
@@ -72,12 +72,12 @@ describe('userIdService', () => {
         userId: undefined
       });
       // it should still retain the previously stored user id in memory
-      expect(await userIdService.getId()).toEqual(store.userId);
+      expect(await userIdService.getRandomizedUserId()).toEqual(store.userId);
       // simulate a session timeout
       jest.advanceTimersByTime(SESSION_LENGTH + 1);
       // assert new temporary user id being generated after session timeout
-      expect(await userIdService.getId()).not.toEqual(store.userId);
-      expect(Buffer.from(await userIdService.getId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
+      expect(await userIdService.getRandomizedUserId()).not.toEqual(store.userId);
+      expect(Buffer.from(await userIdService.getRandomizedUserId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
     });
   });
 
@@ -96,18 +96,18 @@ describe('userIdService', () => {
       // simulate an almost session timeout
       jest.advanceTimersByTime(SESSION_LENGTH - 1);
       // it should still retain the previously stored user id in memory
-      expect(await userIdService.getId()).toEqual(store.userId);
+      expect(await userIdService.getRandomizedUserId()).toEqual(store.userId);
 
       await userIdService.extendLifespan();
       // simulate an almost session timeout
       jest.advanceTimersByTime(SESSION_LENGTH - 1);
-      expect(await userIdService.getId()).toEqual(store.userId);
+      expect(await userIdService.getRandomizedUserId()).toEqual(store.userId);
 
       // simulate a session timeout
       jest.advanceTimersByTime(1);
       // assert new temporary user id being generated after session timeout
-      expect(await userIdService.getId()).not.toEqual(store.userId);
-      expect(Buffer.from(await userIdService.getId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
+      expect(await userIdService.getRandomizedUserId()).not.toEqual(store.userId);
+      expect(Buffer.from(await userIdService.getRandomizedUserId(), 'hex')).toHaveLength(USER_ID_BYTE_SIZE);
     });
   });
 
@@ -120,33 +120,34 @@ describe('userIdService', () => {
     });
   });
 
-  describe('getting hash ID', () => {
-    it('should generate hash ID if keyAgentsByChain is defined', async () => {
+  describe('getting wallet based user ID', () => {
+    it('should generate hash ID if keyAgentsByChain is defined and is opted in user', async () => {
       const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
-        keyAgentsByChain: mockKeyAgentsByChain
+        keyAgentsByChain: mockKeyAgentsByChain,
+        usePersistentUserId: true
       });
       const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
-      const hashId = await userIdService.getHashId('Preview');
-      expect(hashId).toEqual(mockHashId);
+      const walletBasedId = await userIdService.getUserId(1);
+      expect(walletBasedId).toEqual(mockWalletBasedId);
       expect(mockBlake2b).toHaveBeenCalledTimes(2);
     });
 
     it('should not generate hash ID twice - should retrieve hash from memory', async () => {
       mockBlake2b.mockClear();
       const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
-        keyAgentsByChain: mockKeyAgentsByChain
+        keyAgentsByChain: mockKeyAgentsByChain,
+        usePersistentUserId: true
       });
       const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
-      await userIdService.getHashId('Preview');
-      const hashId = await userIdService.getHashId('Preview');
-      expect(hashId).toEqual(mockHashId);
-      expect(mockBlake2b).toHaveBeenCalledTimes(2);
+      const walletBasedId = await userIdService.getUserId(1);
+      expect(walletBasedId).toEqual(mockWalletBasedId);
+      expect(mockBlake2b).not.toHaveBeenCalled();
     });
 
     it('should not generate hash ID if keyAgentsByChain is not defined', async () => {
       const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({});
       const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
-      expect(await userIdService.getHashId('Preview')).toBeUndefined();
+      expect(await userIdService.getRandomizedUserId()).toBeUndefined();
     });
   });
 });

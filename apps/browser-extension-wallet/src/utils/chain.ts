@@ -21,9 +21,5 @@ export const getBaseUrlForChain = (chainName: Wallet.ChainName): string => {
   return url;
 };
 
-export const CHAIN_NAME_BY_NETWORK_MAGIC_MAPPPER: Record<Wallet.Cardano.NetworkMagic, Wallet.ChainName> = {
-  [Wallet.Cardano.NetworkMagics.Mainnet]: 'Mainnet',
-  [Wallet.Cardano.NetworkMagics.Preprod]: 'Preprod',
-  [Wallet.Cardano.NetworkMagics.Testnet]: 'LegacyTestnet',
-  [Wallet.Cardano.NetworkMagics.Preview]: 'Preview'
-};
+export const getChainNameByNetworkMagic = (networkMagic: Wallet.Cardano.NetworkMagics): Wallet.ChainName =>
+  Object.entries(Wallet.Cardano.ChainIds).find(([, ids]) => ids.networkMagic === networkMagic)[0] as Wallet.ChainName;

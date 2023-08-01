@@ -5,7 +5,8 @@ import { runtime, Tabs, tabs, Windows, windows, storage as webStorage } from 'we
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
 import uniqueId from 'lodash/uniqueId';
-import blake2b from 'blake2b-no-wasm';
+
+const { blake2b } = Wallet.Crypto;
 
 type WindowPosition = {
   top: number;
@@ -168,7 +169,6 @@ export const getWalletName = (): string => {
 };
 
 export const hashExtendedAccountPublicKey = (extendedAccountPublicKey: string): string => {
-  const output = new Uint8Array(64);
   const input = Buffer.from(extendedAccountPublicKey);
-  return blake2b(output.length).update(input).digest('hex');
+  return blake2b(blake2b.BYTES_MIN).update(input).digest('hex');
 };

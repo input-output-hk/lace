@@ -15,10 +15,8 @@ describe('PostHogClient', () => {
   const publicPosthogHost = 'test';
   const chain = Wallet.Cardano.ChainIds.Preprod;
   const userId = 'userId';
-  const hashId = '15d632f6b0ab82c72a194d634d8783e';
   const mockUserIdService: UserIdService = {
-    ...userIdServiceMock,
-    getId: () => Promise.resolve(userId)
+    ...userIdServiceMock
   };
 
   afterEach(() => {
@@ -127,40 +125,5 @@ describe('PostHogClient', () => {
     const client = new PostHogClient(chain, mockUserIdService, ExtensionViews.Extended, publicPosthogHost);
     await client.sendAliasEvent();
     expect(posthog.alias).not.toHaveBeenCalled();
-  });
-
-  it('should send alias event if alias_id and distinct_id metadata are defined', async () => {
-    const mockGetHashId = jest.fn(() => Promise.resolve(hashId));
-    const mockGetIsPersistentId = jest.fn(() => Promise.resolve(true));
-    const client = new PostHogClient(
-      chain,
-      { ...mockUserIdService, getHashId: mockGetHashId, getIsPersistentId: mockGetIsPersistentId },
-      ExtensionViews.Extended,
-      publicPosthogHost
-    );
-    await client.sendAliasEvent();
-    expect(posthog.alias).toHaveBeenCalled();
-  });
-
-  it('should send event with public key hash as distinct_id if is opted in user', async () => {
-    const mockGetHashId = jest.fn(() => Promise.resolve(hashId));
-    const mockGetIsPersistentId = jest.fn(() => Promise.resolve(true));
-    const event = PostHogAction.OnboardingCreateClick;
-    const client = new PostHogClient(
-      chain,
-      { ...mockUserIdService, getHashId: mockGetHashId, getIsPersistentId: mockGetIsPersistentId },
-      ExtensionViews.Extended,
-      publicPosthogHost
-    );
-    await client.sendEvent(event);
-    expect(posthog.capture).toHaveBeenCalledWith(
-      event,
-      expect.objectContaining({
-        // eslint-disable-next-line camelcase
-        distinct_id: hashId,
-        // eslint-disable-next-line camelcase
-        alias_id: userId
-      })
-    );
   });
 });

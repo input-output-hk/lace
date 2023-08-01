@@ -11,6 +11,7 @@ import {
 import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
+import { getChainNameByNetworkMagic } from '@src/utils/chain';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -18,7 +19,7 @@ export const USER_ID_BYTE_SIZE = 8;
 
 export class UserIdService implements UserIdServiceInterface {
   private userId?: string;
-  private hashId?: string;
+  private walletBasedUserId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
 
@@ -29,30 +30,30 @@ export class UserIdService implements UserIdServiceInterface {
     private sessionLength: number = SESSION_LENGTH
   ) {}
 
-  async getIsPersistentId(): Promise<boolean> {
-    const { usePersistentUserId } = await this.getStorage();
-    return usePersistentUserId;
-  }
-
-  async getHashId(chainName: Wallet.ChainName): Promise<string> {
-    console.debug('[ANALYTICS] Getting key agents');
-    const keyAgentsByChain = (await this.getStorage())?.keyAgentsByChain;
+  private async getwalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {
+    const { keyAgentsByChain, usePersistentUserId } = await this.getStorage();
 
     if (!keyAgentsByChain) {
       console.debug('[ANALYTICS] Key agents not found - Wallet not created yet');
-      return this.hashId;
+      return this.walletBasedUserId;
     }
 
-    if (!this.hashId) {
-      console.debug('[ANALYTICS] Hash ID not found - generating new one');
-      const hash = hashExtendedAccountPublicKey(keyAgentsByChain[chainName].keyAgentData.extendedAccountPublicKey);
-      this.hashId = hashExtendedAccountPublicKey(hash);
+    if (!usePersistentUserId) {
+      this.walletBasedUserId = undefined;
+      return this.walletBasedUserId;
     }
-    console.debug(`[ANALYTICS] getHashId() called (current Hash ID: ${this.hashId})`);
-    return this.hashId;
+
+    if (!this.walletBasedUserId) {
+      const chainName = getChainNameByNetworkMagic(networkMagic);
+      const extendedAccountPublicKey = keyAgentsByChain[chainName].keyAgentData.extendedAccountPublicKey;
+      this.walletBasedUserId = this.generateWalletBasedUserId(extendedAccountPublicKey);
+    }
+
+    console.debug(`[ANALYTICS] getwalletBasedUserId() called (current Wallet Based ID: ${this.walletBasedUserId})`);
+    return this.walletBasedUserId;
   }
 
-  async getId(): Promise<string> {
+  async getRandomizedUserId(): Promise<string> {
     if (!this.userIdRestored) {
       console.debug('[ANALYTICS] Restoring user ID...');
       await this.restoreUserId();
@@ -68,10 +69,26 @@ export class UserIdService implements UserIdServiceInterface {
     return this.userId;
   }
 
+  async getUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string> {
+    const walletBasedId = await this.getwalletBasedUserId(networkMagic);
+
+    if (!walletBasedId) {
+      return await this.getRandomizedUserId();
+    }
+
+    return walletBasedId;
+  }
+
+  async getAliasProperties(networkMagic: Wallet.Cardano.NetworkMagic): Promise<{ alias: string; id: string }> {
+    const id = await this.getwalletBasedUserId(networkMagic);
+    const alias = await this.getRandomizedUserId();
+    return { alias, id };
+  }
+
   async clearId(): Promise<void> {
     console.debug('[ANALYTICS] clearId() called');
     this.userId = undefined;
-    this.hashId = undefined;
+    this.walletBasedUserId = undefined;
     this.clearSessionTimeout();
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
@@ -79,7 +96,7 @@ export class UserIdService implements UserIdServiceInterface {
   async makePersistent(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into persistent');
     this.clearSessionTimeout();
-    const userId = await this.getId();
+    const userId = await this.getRandomizedUserId();
     await this.setStorage({ usePersistentUserId: true, userId });
   }
 
@@ -122,6 +139,12 @@ export class UserIdService implements UserIdServiceInterface {
   private clearSessionTimeout(): void {
     clearTimeout(this.sessionTimeout);
     this.sessionTimeout = undefined;
+  }
+
+  private generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex) {
+    console.debug('[ANALYTICS] Wallet based ID not found - generating new one');
+    const hash = hashExtendedAccountPublicKey(extendedAccountPublicKey);
+    return hashExtendedAccountPublicKey(hash);
   }
 }
 

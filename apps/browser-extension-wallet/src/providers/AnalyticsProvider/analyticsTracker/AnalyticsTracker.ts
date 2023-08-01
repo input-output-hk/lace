@@ -31,8 +31,7 @@ export class AnalyticsTracker {
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();
-      // At this point, the wallet has been created, so, we are able to link the temporary ID with the hash ID
-      await this.#sendAliasEvent();
+      await this.sendAliasEvent();
     } else {
       await this.userIdService?.makeTemporary();
     }
@@ -42,7 +41,7 @@ export class AnalyticsTracker {
     await this.postHogClient?.sendPageNavigationEvent();
   }
 
-  async #sendAliasEvent(): Promise<void> {
+  async sendAliasEvent(): Promise<void> {
     await this.postHogClient?.sendAliasEvent();
   }
 
