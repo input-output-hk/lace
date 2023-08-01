@@ -34,6 +34,7 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
     And I click stake pool with name "Apex Cardano Pool"
     Then Drawer is displayed
     When I press keyboard Enter button
+    And I choose debug mode
     Then An "browserView.staking.details.switchingPoolsModal.title" text is displayed
     When I press keyboard Enter button
     Then An "browserView.staking.details.confirmation.title" text is displayed
