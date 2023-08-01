@@ -9,10 +9,14 @@ import (
 	"bufio"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
+
+	"github.com/creack/pty"
+	"github.com/acarl005/stripansi"
 )
 
 type ManagedChild struct {
@@ -22,6 +26,7 @@ type ManagedChild struct {
 	Revision    string
 	MkArgv      func() ([]string, error) // XXX: it’s a func to run `getFreeTCPPort()` at the very last moment
 	MkExtraEnv  func() []string
+	AllocatePTY bool
 	StatusCh    chan<- StatusAndUrl
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
 	LogMonitor  func(string)
@@ -228,7 +233,10 @@ func manageChildren(comm CommChannels_Manager) {
 			childDidExit := false
 			childPid := 0
 
-			go childProcess(child.ExePath, childArgv, child.MkExtraEnv(),
+			childFun := childProcess
+			if child.AllocatePTY { childFun = childProcessPTY }
+
+			go childFun(child.ExePath, childArgv, child.MkExtraEnv(),
 				child.LogModifier, outputLines, terminateCh, &childPid,
 				child.TerminateGracefullyByInheritedFd3,
 				child.ForceKillAfter)
@@ -368,11 +376,11 @@ func childProcess(
 		return
 	}
 	go func() {
+		defer wgOuts.Done()
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
 			outputLines <- logModifier(scanner.Text())
 		}
-		wgOuts.Done()
 	}()
 
 	stderr, err := cmd.StderrPipe()
@@ -381,11 +389,11 @@ func childProcess(
 		return
 	}
 	go func() {
+		defer wgOuts.Done()
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
 			outputLines <- "[stderr] " + logModifier(scanner.Text())
 		}
-		wgOuts.Done()
 	}()
 
 	if terminateGracefullyByInheritedFd3 {
@@ -412,20 +420,31 @@ func childProcess(
 		waitDone <- struct{}{}
 	}()
 
+	__internal__terminateGracefully(terminate, waitDone, cmd, gracefulExitTimeout, terminationPipeWriter)
+}
+
+// XXX: don’t use this function outside of ‘childProcess’ and ‘childProcessPTY’
+func __internal__terminateGracefully(
+	terminate <-chan struct{},
+	waitDone <-chan struct{},
+	cmd *exec.Cmd,
+	gracefulExitTimeout time.Duration,
+	terminationPipeWriter *os.File,
+) {
 	select {
 	case <-terminate:
-		if terminateGracefullyByInheritedFd3 {
+		if terminationPipeWriter != nil {
 			fmt.Printf("%s[%d]: closing shutdown IPC pipe (fd %v) of %s[%d]\n",
 				OurLogPrefix, os.Getpid(), terminationPipeWriter.Fd(),
-				filepath.Base(path), cmd.Process.Pid)
+				filepath.Base(cmd.Path), cmd.Process.Pid)
 			terminationPipeWriter.Close()
 		} else if runtime.GOOS == "windows" {
 			fmt.Printf("%s[%d]: sending CTRL_BREAK_EVENT to %s[%d]\n",
-				OurLogPrefix, os.Getpid(), filepath.Base(path), cmd.Process.Pid)
+				OurLogPrefix, os.Getpid(), filepath.Base(cmd.Path), cmd.Process.Pid)
 			windowsSendCtrlBreak(cmd.Process.Pid)
 		} else {
 			fmt.Printf("%s[%d]: sending SIGTERM to %s[%d]\n",
-				OurLogPrefix, os.Getpid(), filepath.Base(path), cmd.Process.Pid)
+				OurLogPrefix, os.Getpid(), filepath.Base(cmd.Path), cmd.Process.Pid)
 			cmd.Process.Signal(syscall.SIGTERM)
 		}
 
@@ -438,7 +457,7 @@ func childProcess(
 		case <-doForceKill:
 			fmt.Printf("%s[%d]: %s[%d] did not exit gracefully in %s, killing it forcefully...\n",
 				OurLogPrefix, os.Getpid(),
-				filepath.Base(path), cmd.Process.Pid, gracefulExitTimeout)
+				filepath.Base(cmd.Path), cmd.Process.Pid, gracefulExitTimeout)
 			// In a rare event that it hangs, we cannot afford a deadlock here:
 			go cmd.Process.Kill()
 			<-waitDone
@@ -446,4 +465,74 @@ func childProcess(
 		}
 	case <-waitDone:
 	}
+}
+
+// XXX: this is only temporary, until Mithril doesn’t give us reliable machine-readable output
+func childProcessPTY(
+	path string, argv []string, extraEnv []string,
+	logModifier func(string) string, // e.g. to drop redundant timestamps
+	outputLines chan<- string, terminate <-chan struct{}, pid *int,
+	terminateGracefullyByInheritedFd3 bool,
+	gracefulExitTimeout time.Duration,
+) {
+	defer close(outputLines)
+
+	if terminateGracefullyByInheritedFd3 {
+		outputLines <- "fatal: terminateGracefullyByInheritedFd3 not compatible with PTY (yet?)"
+		return
+	}
+
+	cmd := exec.Command(path, argv...)
+
+	setManagedChildSysProcAttr(cmd)
+
+	if len(extraEnv) > 0 {
+		cmd.Env = append(os.Environ(), extraEnv...)
+	}
+
+	ws := pty.Winsize{
+		Rows: 25,
+		Cols: 80,
+		X: 25 * 20,
+		Y: 80 * 30,
+	}
+
+	ptyFile, err := pty.StartWithSize(cmd, &ws)
+	if err != nil {
+		outputLines <- fmt.Sprintf("fatal: %s", err)
+		return
+	}
+	defer ptyFile.Close()
+	defer cmd.Wait()
+
+	waitDone := make(chan struct{})
+
+	if (pid != nil) {
+		*pid = cmd.Process.Pid
+	}
+
+	go func() {
+		defer func(){
+			waitDone <- struct{}{}
+		}()
+		buf := make([]byte, 1024)
+		for {
+			num, err := ptyFile.Read(buf)
+			if err != nil {	return }
+
+			line := string(buf[:num])
+			line = stripansi.Strip(line)
+
+			// XXX: it’s possible that 2+ TTY updates will be clumped together in a single ‘read’, so:
+			for _, line1 := range strings.Split(line, "\n") {
+				for _, line2 := range strings.Split(line1, "\r") {
+					if len(line2) > 0 {
+						outputLines <- logModifier(line2)
+					}
+				}
+			}
+		}
+	}()
+
+	__internal__terminateGracefully(terminate, waitDone, cmd, gracefulExitTimeout, nil)
 }

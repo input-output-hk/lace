@@ -49,6 +49,7 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 					fmt.Sprintf("%d", *shared.OgmiosPort),
 			}
 		},
+		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			backendUrl := fmt.Sprintf("http://127.0.0.1:%d",

@@ -31,6 +31,7 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
+		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			ogmiosUrl := fmt.Sprintf("http://127.0.0.1:%d", *shared.OgmiosPort)

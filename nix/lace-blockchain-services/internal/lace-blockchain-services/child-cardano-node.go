@@ -69,6 +69,7 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
+		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			tmout := 1 * time.Second

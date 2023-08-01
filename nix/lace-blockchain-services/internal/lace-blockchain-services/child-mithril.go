@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/sqweek/dialog"
@@ -93,6 +94,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 		MkExtraEnv: func() []string {
 			return extraEnv[shared.Network]
 		},
+		AllocatePTY: true,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			return HealthStatus {
@@ -107,7 +109,10 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			// TODO: parse statuses & progress
 
 		},
-		LogModifier: func(line string) string { return line },
+		LogModifier: func(line string) string {
+			line = strings.TrimSpace(line)
+			return line
+		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
 	}
@@ -140,10 +145,8 @@ func runCommandWithTimeout(
 
 	if ctx.Err() == context.DeadlineExceeded {
 		rerr = fmt.Errorf("timed out")
-		//return "", "", fmt.Errorf("timed out")
 	} else if err != nil {
 		rerr = fmt.Errorf("failed: %s", err)
-		//return "", "", fmt.Errorf("failed: %s", err)
 	}
 
 	return stdoutBuf.Bytes(), stderrBuf.Bytes(), rerr, cmd.Process.Pid
