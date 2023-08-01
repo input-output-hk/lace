@@ -41,6 +41,8 @@ func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusA
 				statusCh <- StatusAndUrl {
 					Status: "listening",
 					Progress: -1,
+					TaskSize: -1,
+					SecondsLeft: -1,
 					Url: ogmiosUrl,
 					OmitUrl: false,
 				}

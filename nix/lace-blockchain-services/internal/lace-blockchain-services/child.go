@@ -36,10 +36,12 @@ type ManagedChild struct {
 }
 
 type StatusAndUrl struct {
-	Status   string
-	Progress float64
-	Url      string
-	OmitUrl  bool
+	Status      string
+	Progress    float64
+	TaskSize    float64
+	SecondsLeft float64
+	Url         string
+	OmitUrl     bool
 }
 
 type HealthStatus struct {
@@ -131,6 +133,8 @@ func manageChildren(comm CommChannels_Manager) {
 			initialStatus := StatusAndUrl{
 				Status: "off",
 				Progress: -1,
+				TaskSize: -1,
+				SecondsLeft: -1,
 				Url: "",
 			}
 			statusCh <- initialStatus
@@ -149,9 +153,13 @@ func manageChildren(comm CommChannels_Manager) {
 					// lessen refreshing, too often causes glitching tray UI on Windows
 					if upd.Status != fullStatus.Status ||
 						upd.Progress != fullStatus.Progress ||
+						upd.TaskSize != fullStatus.TaskSize ||
+						upd.SecondsLeft != fullStatus.SecondsLeft ||
 						(!upd.OmitUrl && upd.Url != fullStatus.Url) {
 						fullStatus.Status = upd.Status
 						fullStatus.Progress = upd.Progress
+						fullStatus.TaskSize = upd.TaskSize
+						fullStatus.SecondsLeft = upd.SecondsLeft
 						if !upd.OmitUrl {
 							fullStatus.Url = upd.Url
 						}
@@ -178,6 +186,8 @@ func manageChildren(comm CommChannels_Manager) {
 				cardanoNodeStatusCh <- StatusAndUrl {
 					Status: textual,
 					Progress: syncProgress,
+					TaskSize: -1,
+					SecondsLeft: -1,
 					OmitUrl: true,
 				}
 			}
@@ -197,6 +207,8 @@ func manageChildren(comm CommChannels_Manager) {
 				child.StatusCh <- StatusAndUrl{
 					Status: "off",
 					Progress: -1,
+					TaskSize: -1,
+					SecondsLeft: -1,
 					Url: "",
 					OmitUrl: false,
 				}
@@ -223,11 +235,20 @@ func manageChildren(comm CommChannels_Manager) {
 				dependant.StatusCh <- StatusAndUrl{
 					Status: fmt.Sprintf("waiting for %s", child.ServiceName),
 					Progress: -1,
+					TaskSize: -1,
+					SecondsLeft: -1,
 					Url: "",
 					OmitUrl: true,
 				}
 			}
-			child.StatusCh <- StatusAndUrl { Status: "starting…", Progress: -1, Url: "", OmitUrl: true }
+			child.StatusCh <- StatusAndUrl {
+				Status: "starting…",
+				Progress: -1,
+				TaskSize: -1,
+				SecondsLeft: -1,
+				Url: "",
+				OmitUrl: true,
+			}
 			outputLines := make(chan string)
 			terminateCh := make(chan struct{}, 1)
 			childDidExit := false
@@ -245,6 +266,8 @@ func manageChildren(comm CommChannels_Manager) {
 					child.StatusCh <- StatusAndUrl {
 						Status: "terminating…",
 						Progress: -1,
+						TaskSize: -1,
+						SecondsLeft: -1,
 						Url: "",
 						OmitUrl: true,
 					}
@@ -265,6 +288,8 @@ func manageChildren(comm CommChannels_Manager) {
 				child.StatusCh <- StatusAndUrl{
 					Status: "off",
 					Progress: -1,
+					TaskSize: -1,
+					SecondsLeft: -1,
 					Url: "",
 					OmitUrl: false,
 				}

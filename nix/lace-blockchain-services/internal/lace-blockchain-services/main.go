@@ -131,6 +131,8 @@ func main() {
 			ServiceName: "lace-blockchain-services",
 			Status: "listening",
 			Progress: -1,
+			TaskSize: -1,
+			SecondsLeft: -1,
 			Url: fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort),
 			Version: constants.LaceBlockchainServicesVersion,
 			Revision: constants.LaceBlockchainServicesRevision,

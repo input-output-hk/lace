@@ -100,26 +100,34 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 				if (*shared.SyncProgress == 1.0) {
 					textual = "synced"
 				}
-				statusCh <- StatusAndUrl { Status: textual, Progress: pr }
+				statusCh <- StatusAndUrl { Status: textual, Progress: pr,
+					TaskSize: -1, SecondsLeft: -1 }
 			}
 
 			if ms := reValidatingChunk.FindStringSubmatch(line); len(ms) > 0 {
 				pr, _ := strconv.ParseFloat(ms[1], 64)
-				statusCh <- StatusAndUrl { Status: "validating chunks", Progress: pr/100 }
+				statusCh <- StatusAndUrl { Status: "validating chunks", Progress: pr/100,
+					TaskSize: -1, SecondsLeft: -1 }
 			} else if strings.Index(line, "Started opening Volatile DB") != -1 {
-				statusCh <- StatusAndUrl { Status: "opening volatile DB", Progress: -1 }
+				statusCh <- StatusAndUrl { Status: "opening volatile DB", Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
 			} else if strings.Index(line, "Started opening Ledger DB") != -1 {
-				statusCh <- StatusAndUrl { Status: "opening ledger DB", Progress: -1 }
+				statusCh <- StatusAndUrl { Status: "opening ledger DB", Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
 			} else if ms :=reReplayingLedger.FindStringSubmatch(line);len(ms)>0 {
 				pr, _ := strconv.ParseFloat(ms[1], 64)
-				statusCh <- StatusAndUrl { Status: "replaying ledger", Progress: pr/100 }
+				statusCh <- StatusAndUrl { Status: "replaying ledger", Progress: pr/100,
+					TaskSize: -1, SecondsLeft: -1 }
 			} else if strings.Index(line, "Opened lgr db") != -1 {
-				statusCh <- StatusAndUrl { Status: "replaying ledger", Progress: 1.0 }
+				statusCh <- StatusAndUrl { Status: "replaying ledger", Progress: 1.0,
+					TaskSize: -1, SecondsLeft: -1 }
 			} else if ms := rePushingLedger.FindStringSubmatch(line); len(ms)>0 {
 				pr, _ := strconv.ParseFloat(ms[1], 64)
-				statusCh <- StatusAndUrl { Status: "pushing ledger", Progress: pr/100 }
+				statusCh <- StatusAndUrl { Status: "pushing ledger", Progress: pr/100,
+					TaskSize: -1, SecondsLeft: -1 }
 			} else if strings.Index(line, "Initial chain selected") != -1 {
-				statusCh <- StatusAndUrl { Status: "syncing", Progress: -1 }
+				statusCh <- StatusAndUrl { Status: "syncing", Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
 			} else if ms := reSyncingInit.FindStringSubmatch(line); len(ms) > 0 {
 				reportSyncing(ms[1])
 			} else if ms := reSyncing.FindStringSubmatch(line); len(ms) > 0 {

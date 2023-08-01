@@ -5,9 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,6 +45,40 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 	serviceName := "mithril-client"
 	exePath := ourpaths.LibexecDir + sep + "mithril-client" + ourpaths.ExeSuffix
 	snapshotsDir := ourpaths.WorkDir + sep + "mithril-snapshots"
+
+	const SInitializing = "initializing"
+	const SCheckingDisk = "checking local disk info"
+	const SFetchingCert = "fetching cert info"
+	const SVerifyingCert = "verifying cert chain"
+	const SDownloading = "downloading"
+
+	currentStatus := SInitializing
+
+	// A mini-monster, we’ll be able to get rid of it once Mithril provides more machine-readable output:
+	reProgress := regexp.MustCompile(
+		`^.\s\[[0-9:]+\]\s+\[[#>-]+\]\s+([0-9]*\.[0-9]+)\s+([A-Za-z]*B)/([0-9]*\.[0-9]+)\s+([A-Za-z]*B)\s+\(([0-9]*\.[0-9]+)([A-Za-z]+)\)$`)
+
+	unitToBytes := func(unit string) int64 {
+		switch unit {
+		case "B": return 1
+		case "KiB": return 1024
+		case "MiB": return 1024*1024
+		case "GiB": return 1024*1024*1024
+		case "TiB": return 1024*1024*1024*1024
+		case "PiB": return 1024*1024*1024*1024*1024
+		default: return -1  // signal that something’s off
+		}
+	}
+
+	unitToSeconds := func(unit string) int64 {
+		switch unit {
+		case "s": return 1
+		case "m": return 60
+		case "h": return 60*60
+		case "d": return 60*60*24
+		default: return -1  // signal that something’s off
+		}
+	}
 
 	return ManagedChild{
 		ServiceName: serviceName,
@@ -105,9 +142,40 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			}
 		},
 		LogMonitor: func(line string) {
+			if strings.Index(line, "1/7 - Checking local disk info") != -1 {
+				currentStatus = SCheckingDisk
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
+			} else if strings.Index(line, "2/7 - Fetching the certificate's information") != -1 {
+				currentStatus = SFetchingCert
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
+			} else if strings.Index(line, "3/7 - Verifying the certificate chain") != -1 {
+				currentStatus = SVerifyingCert
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
+			} else if strings.Index(line, "4/7 - Downloading the snapshot") != -1 {
+				currentStatus = SDownloading
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
+			} else if currentStatus == SDownloading {
+				if ms := reProgress.FindStringSubmatch(line); len(ms) > 0 {
+					numDone, _ := strconv.ParseFloat(ms[1], 64)
+					unitDone := ms[2]
+					done := numDone * float64(unitToBytes(unitDone))
 
-			// TODO: parse statuses & progress
+					numTotal, _ := strconv.ParseFloat(ms[3], 64)
+					unitTotal := ms[4]
+					total := math.Round(numTotal * float64(unitToBytes(unitTotal)))
 
+					numTimeRemaining, _ := strconv.ParseFloat(ms[5], 64)
+					unitTimeRemaining := ms[6]
+					timeRemaining := numTimeRemaining * float64(unitToSeconds(unitTimeRemaining))
+
+					statusCh <- StatusAndUrl { Status: SDownloading, Progress: done/total,
+						TaskSize: total, SecondsLeft: timeRemaining }
+				}
+			}
 		},
 		LogModifier: func(line string) string {
 			line = strings.TrimSpace(line)
