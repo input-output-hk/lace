@@ -30,7 +30,7 @@ export class UserIdService implements UserIdServiceInterface {
     private sessionLength: number = SESSION_LENGTH
   ) {}
 
-  private async getwalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {
+  async getwalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {
     const { keyAgentsByChain, usePersistentUserId } = await this.getStorage();
 
     if (!keyAgentsByChain) {

@@ -16,7 +16,8 @@ describe('PostHogClient', () => {
   const chain = Wallet.Cardano.ChainIds.Preprod;
   const userId = 'userId';
   const mockUserIdService: UserIdService = {
-    ...userIdServiceMock
+    ...userIdServiceMock,
+    getUserId: jest.fn().mockReturnValue(userId)
   };
 
   afterEach(() => {
@@ -121,8 +122,27 @@ describe('PostHogClient', () => {
     );
   });
 
-  it('should not send alias event if one of alias_id or distinct_id metadata is not defined', async () => {
-    const client = new PostHogClient(chain, mockUserIdService, ExtensionViews.Extended, publicPosthogHost);
+  it('should send alias event if alias and id properties are defined', async () => {
+    const mockAliasProperties = { id: 'walletBasedId', alias: 'aliasId' };
+    const mockGetAliasProperties = jest.fn().mockReturnValue(mockAliasProperties);
+    const client = new PostHogClient(
+      chain,
+      { ...mockUserIdService, getAliasProperties: mockGetAliasProperties },
+      ExtensionViews.Extended,
+      publicPosthogHost
+    );
+    await client.sendAliasEvent();
+    expect(posthog.alias).toHaveBeenCalledWith(mockAliasProperties.alias, mockAliasProperties.id);
+  });
+
+  it('should not send alias event if alias or id properties are not defined', async () => {
+    const mockGetAliasProperties = jest.fn().mockReturnValue({});
+    const client = new PostHogClient(
+      chain,
+      { ...mockUserIdService, getAliasProperties: mockGetAliasProperties },
+      ExtensionViews.Extended,
+      publicPosthogHost
+    );
     await client.sendAliasEvent();
     expect(posthog.alias).not.toHaveBeenCalled();
   });

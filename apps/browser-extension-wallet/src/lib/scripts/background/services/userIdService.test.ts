@@ -3,17 +3,11 @@
 /* eslint-disable prettier/prettier */
 const mockWalletBasedId =
   '15d632f6b0ab82c72a194d634d8783ea0ef5419c8a8f638cb0c3fc49280e0a0285fc88fbfad04554779d19bec4ab30e5afee2f9ee736ba090c2213d98fe3a475';
-const mockBlake2b = jest.fn(() => ({
-  update: () => ({
-    digest: () => mockWalletBasedId
-  })
-}));
 
 import { BackgroundStorage } from '@lib/scripts/types';
 import { mockKeyAgentsByChain } from '@src/utils/mocks/test-helpers';
 import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from '.';
-
-jest.mock('blake2b-no-wasm', () => mockBlake2b);
+import * as utils from '../util';
 
 const generateStorageMocks = (
   store: Pick<BackgroundStorage, 'usePersistentUserId' | 'userId' | 'keyAgentsByChain'> = {}
@@ -121,33 +115,132 @@ describe('userIdService', () => {
   });
 
   describe('getting wallet based user ID', () => {
-    it('should generate hash ID if keyAgentsByChain is defined and is opted in user', async () => {
+    it('should run hashExtendedAccountPublicKey twice and generate wallet based user ID', async () => {
+      const mockHashExtendedAccountPublicKey = jest.spyOn(utils, 'hashExtendedAccountPublicKey');
+      mockHashExtendedAccountPublicKey.mockReturnValue(mockWalletBasedId);
       const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
         keyAgentsByChain: mockKeyAgentsByChain,
         usePersistentUserId: true
       });
       const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
-      const walletBasedId = await userIdService.getUserId(1);
+      const walletBasedId = await userIdService.getwalletBasedUserId(1);
       expect(walletBasedId).toEqual(mockWalletBasedId);
-      expect(mockBlake2b).toHaveBeenCalledTimes(2);
+      expect(mockHashExtendedAccountPublicKey).toHaveBeenCalledTimes(2);
     });
 
-    it('should not generate hash ID twice - should retrieve hash from memory', async () => {
-      mockBlake2b.mockClear();
+    it('should not run hashExtendedAccountPublicKey, should retrieve ID from memory', async () => {
+      const mockHashExtendedAccountPublicKey = jest.spyOn(utils, 'hashExtendedAccountPublicKey');
+      mockHashExtendedAccountPublicKey.mockReturnValue(mockWalletBasedId);
       const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
         keyAgentsByChain: mockKeyAgentsByChain,
         usePersistentUserId: true
       });
       const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
-      const walletBasedId = await userIdService.getUserId(1);
+
+      // call getwalletBasedUserId to generate the wallet based ID and set it on memory
+      await userIdService.getwalletBasedUserId(1);
+      // clear the previous call since it was only to generate the id
+      mockHashExtendedAccountPublicKey.mockClear();
+
+      // call getwalletBasedUserId to get wallet based ID from memory
+      const walletBasedId = await userIdService.getwalletBasedUserId(1);
       expect(walletBasedId).toEqual(mockWalletBasedId);
-      expect(mockBlake2b).not.toHaveBeenCalled();
+      expect(mockHashExtendedAccountPublicKey).not.toHaveBeenCalled();
     });
 
-    it('should not generate hash ID if keyAgentsByChain is not defined', async () => {
-      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({});
+    it('should not generate wallet based ID if keyAgentsByChain is not defined', async () => {
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks();
       const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
-      expect(await userIdService.getRandomizedUserId()).toBeUndefined();
+      const walletBasedId = await userIdService.getwalletBasedUserId(1);
+      expect(walletBasedId).toBeUndefined();
+    });
+
+    it('should not return wallet based ID if keyAgentsByChain is defined but usePersistentUserId is false', async () => {
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
+        usePersistentUserId: false,
+        keyAgentsByChain: mockKeyAgentsByChain
+      });
+      const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
+      const walletBasedId = await userIdService.getwalletBasedUserId(1);
+      expect(walletBasedId).toBeUndefined();
+    });
+  });
+  describe('getting user ID depending on wallet creation and opted in user', () => {
+    it('should return random ID if keyAgentsByChain is not defined', async () => {
+      const mockHashExtendedAccountPublicKey = jest.spyOn(utils, 'hashExtendedAccountPublicKey');
+      mockHashExtendedAccountPublicKey.mockReturnValue(mockWalletBasedId);
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks();
+      const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
+      const userId = await userIdService.getUserId(1);
+      expect(userId).toBeDefined();
+      expect(mockHashExtendedAccountPublicKey).not.toHaveBeenCalled();
+      expect(userId).not.toEqual(mockWalletBasedId);
+    });
+
+    it('should return random ID if keyAgentsByChain is defined but usePersistentUserId is false', async () => {
+      const mockHashExtendedAccountPublicKey = jest.spyOn(utils, 'hashExtendedAccountPublicKey');
+      mockHashExtendedAccountPublicKey.mockReturnValue(mockWalletBasedId);
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
+        usePersistentUserId: false,
+        keyAgentsByChain: mockKeyAgentsByChain
+      });
+      const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
+      const userId = await userIdService.getUserId(1);
+      expect(userId).toBeDefined();
+      expect(mockHashExtendedAccountPublicKey).not.toHaveBeenCalled();
+      expect(userId).not.toEqual(mockWalletBasedId);
+    });
+
+    it('should return wallet based ID if keyAgentsByChain is defined and usePersistentUserId is true', async () => {
+      const mockHashExtendedAccountPublicKey = jest.spyOn(utils, 'hashExtendedAccountPublicKey');
+      mockHashExtendedAccountPublicKey.mockReturnValue(mockWalletBasedId);
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
+        usePersistentUserId: true,
+        keyAgentsByChain: mockKeyAgentsByChain
+      });
+      const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
+      const userId = await userIdService.getUserId(1);
+      expect(userId).toBe(mockWalletBasedId);
+      expect(mockHashExtendedAccountPublicKey).toHaveBeenCalled();
+    });
+  });
+
+  describe('getting user alias and id', () => {
+    it('should return alias and id properties if keyAgentsByChain is defined and is persistent user', async () => {
+      const mockHashExtendedAccountPublicKey = jest.spyOn(utils, 'hashExtendedAccountPublicKey');
+      mockHashExtendedAccountPublicKey.mockReturnValue(mockWalletBasedId);
+
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
+        usePersistentUserId: true,
+        keyAgentsByChain: mockKeyAgentsByChain
+      });
+      const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
+      // call getRandomizedUserId to know the saved random ID in memory
+      const randomUserId = await userIdService.getRandomizedUserId();
+      const properties = await userIdService.getAliasProperties(1);
+      expect(properties).toEqual(
+        expect.objectContaining({
+          id: mockWalletBasedId,
+          alias: randomUserId
+        })
+      );
+    });
+
+    it('should not return id property if keyAgentsByChain is not defined', async () => {
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks();
+      const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
+      const properties = await userIdService.getAliasProperties(1);
+      expect(properties.id).toBeUndefined();
+    });
+
+    it('should not return id property if keyAgentsByChain is defined but is not persistent user', async () => {
+      const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({
+        usePersistentUserId: false,
+        keyAgentsByChain: mockKeyAgentsByChain
+      });
+      const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
+      const properties = await userIdService.getAliasProperties(1);
+      expect(properties.id).toBeUndefined();
     });
   });
 });
