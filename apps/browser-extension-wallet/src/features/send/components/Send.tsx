@@ -27,7 +27,8 @@ export const Send = (): React.ReactElement => {
   const [isContinueDialogVisible, setIsContinueDialogVisible] = useState(false);
   const toggleContinueDialog = () => setIsContinueDialogVisible(!isContinueDialogVisible);
   const {
-    currentSection: { currentSection: section }
+    currentSection: { currentSection: section },
+    setSection
   } = useSections();
   const backgroundServices = useBackgroundServiceAPIContext();
   const [multipleSelectionAvailable] = useMultipleSelection();
@@ -64,7 +65,15 @@ export const Send = (): React.ReactElement => {
             <HeaderTitle popup />
           </div>
         }
-        footer={shouldDisplayFooter ? <Footer isPopupView openContinueDialog={toggleContinueDialog} /> : undefined}
+        footer={
+          shouldDisplayFooter ? (
+            <Footer
+              isPopupView
+              openContinueDialog={toggleContinueDialog}
+              onHandleChangeConfirm={() => setSection({ currentSection: Sections.FORM })}
+            />
+          ) : undefined
+        }
         popupView
       >
         <SendTransaction isPopupView />

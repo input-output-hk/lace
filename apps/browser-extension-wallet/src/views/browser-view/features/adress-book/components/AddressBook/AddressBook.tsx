@@ -29,6 +29,7 @@ import {
 import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
 import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
 import { getAddressToSave } from '@src/utils/validators';
+import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
 const ELLIPSIS_LEFT_SIDE_LENGTH = 34;
 const ELLIPSIS_RIGHT_SIDE_LENGTH = 34;
@@ -162,24 +163,16 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
         ) : (
           <AddressBookEmpty />
         )}
-        <AddressChangeDetailDrawer
-          visible={isAddressDrawerOpen}
-          onCancelClick={() => {
-            setAddressToEdit({} as AddressBookSchema);
-            setIsAddressDrawerOpen(false);
-          }}
-          initialValues={addressToEdit}
-          expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress}
-          actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress}
-          onDelete={(id) => {
-            setAddressToEdit({} as AddressBookSchema);
-            deleteAddress(id, {
-              text: translate('browserView.addressBook.toast.deleteAddress'),
-              icon: DeleteIcon
-            });
-          }}
-          onConfirmClick={onAddressSave}
-        />
+        {isAdaHandleEnabled && (
+          <AddressChangeDetailDrawer
+            visible={isAddressDrawerOpen}
+            onCancelClick={() => {
+              setAddressToEdit({} as AddressBookSchema);
+              setIsAddressDrawerOpen(false);
+            }}
+            initialValues={addressToEdit}
+          />
+        )}
         <AddressDetailDrawer
           initialValues={addressToEdit}
           onCancelClick={() => {

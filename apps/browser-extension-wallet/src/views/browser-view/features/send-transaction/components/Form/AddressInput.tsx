@@ -1,4 +1,5 @@
 /* eslint-disable complexity */
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable unicorn/no-useless-undefined */
 import { Typography } from 'antd';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
@@ -62,7 +63,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const { setAddressToEdit } = useAddressBookStore();
   const [, setRowId] = useCurrentRow();
   const [handleVerificationState, setHandleVerificationState] = useState<HandleVerificationState | undefined>();
-
   const getExistingAddress = useCallback(
     (addr: string) => filteredAddresses?.find(({ walletAddress }) => walletAddress === addr),
     [filteredAddresses]
@@ -118,6 +118,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
             setHandleVerificationState(HandleVerificationState.INVALID);
           }
           if (error instanceof CustomConflictError) {
+            console.log('error::line127');
             setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
           }
 
@@ -208,9 +209,19 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     setSection(sectionsConfig[section]);
   };
 
+  const handleAddressReview = () => {
+    setAddressToEdit({
+      name: addressInputValue.name,
+      address: handle,
+      handleResolution: addressInputValue.handleResolution
+    });
+    setSection({ currentSection: Sections.ADDRESS_CHANGE, prevSection: Sections.FORM });
+  };
+
   useEffect(() => {
     const { tempAddress } = getTemporaryTxDataFromStorage();
     if (!tempAddress) return;
+    console.log('error::3');
     setAddressInputValue({ address: tempAddress });
     setAddressValue(row, tempAddress);
   }, [row, setAddressValue]);
@@ -257,6 +268,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           message={t('addressBook.reviewModal.banner.description', { name: addressInputValue.name })}
           withButton
           customIcon={<ExclamationCircleOutline />}
+          onButtonClick={handleAddressReview}
         />
       )}
     </span>

@@ -15,6 +15,7 @@ import { AssetPicker } from './AssetPicker';
 import { useKeyboardShortcut } from '@lace/common';
 import { useDrawer } from '@views/browser/stores';
 import { sectionsWithArrowIcon } from './SendTransactionDrawer';
+import { AddressChangeDetail } from '@src/features/address-book/components/AddressChangeDetail';
 
 interface SendTransactionProps {
   isPopupView?: boolean;
@@ -53,7 +54,8 @@ export const SendTransaction = ({
     [Sections.FAIL_TX]: <TransactionFail />,
     [Sections.ADDRESS_LIST]: <AddressList isPopupView={isPopupView} scrollableTargetId={scrollableTargetId} />,
     [Sections.ADDRESS_FORM]: <AddressForm isPopupView={isPopupView} />,
-    [Sections.ASSET_PICKER]: <AssetPicker isPopupView={isPopupView} />
+    [Sections.ASSET_PICKER]: <AssetPicker isPopupView={isPopupView} />,
+    [Sections.ADDRESS_CHANGE]: <AddressChangeDetail isPopupView={isPopupView} />
   };
 
   return <SendTransactionLayout isPopupView={isPopupView}>{sectionMap[section.currentSection]}</SendTransactionLayout>;

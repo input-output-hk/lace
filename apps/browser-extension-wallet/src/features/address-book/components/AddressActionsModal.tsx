@@ -4,6 +4,7 @@ import { Modal, ModalProps } from 'antd';
 import { Button } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import styles from './AddressActionsModal.module.scss';
+// import { useAddressChangeDetail } from '../hooks/useAddressChangeDetail';
 
 const modalWidth = 479;
 
@@ -27,6 +28,7 @@ export const AddressActionsModal = ({
   isPopup
 }: AddressActionsModalProps): React.ReactElement => {
   const { t: translate } = useTranslation();
+  // const { onHandleConfirm, onHandleCancel } = useAddressChangeDetail();
   const isDeleteAction = action === ACTIONS.DELETE;
 
   const descriptionTranslations = isPopup ? (
