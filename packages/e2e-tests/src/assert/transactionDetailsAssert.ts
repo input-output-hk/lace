@@ -30,9 +30,9 @@ class TransactionsDetailsAssert {
 
   async assertSeeTransactionDetails(expectedTransactionDetails: ExpectedTransactionDetails) {
     const transactionsDetails = new TransactionDetailsPage();
-    await $(transactionsDetails.transactionDetailsDescription().toJSLocator()).waitForClickable({ timeout: 15_000 });
+    await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
 
-    await expect(await webTester.getTextValueFromElement(transactionsDetails.transactionDetailsDescription())).contains(
+    await expect(await transactionsDetails.transactionDetailsDescription.getText()).contains(
       `${expectedTransactionDetails.transactionDescription}`
     );
     if (expectedTransactionDetails.hash) {
@@ -90,7 +90,7 @@ class TransactionsDetailsAssert {
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
-      await webTester.waitUntilSeeElement(transactionsDetails.transactionDetailsDescription(), 15_000);
+      await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       await transactionsDetails.transactionDetailsHash.waitForDisplayed();
       await webTester.seeWebElement(transactionsDetails.transactionDetailsStatus());
       await webTester.seeWebElement(transactionsDetails.transactionDetailsTimestamp());
@@ -98,7 +98,7 @@ class TransactionsDetailsAssert {
       await webTester.seeWebElement(transactionsDetails.transactionDetailsOutputsSection());
       await webTester.seeWebElement(transactionsDetails.transactionDetailsFeeADA());
       await webTester.seeWebElement(transactionsDetails.transactionDetailsFeeFiat());
-      const txType = (await transactionsDetails.getTransactionDetailDescription()) as string;
+      const txType = await transactionsDetails.transactionDetailsDescription.getText();
       if (txType.includes('Delegation')) {
         await webTester.seeWebElement(transactionsDetails.transactionDetailsStakepoolName());
         await webTester.seeWebElement(transactionsDetails.transactionDetailsStakepoolTicker());
@@ -181,7 +181,7 @@ class TransactionsDetailsAssert {
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       const transactionType = await TransactionsPage.transactionsTableItemType(i).getText();
       await TransactionsPage.clickOnTransactionRow(i);
-      await webTester.waitUntilSeeElement(transactionsDetails.transactionDetailsDescription(), 15_000);
+      await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       if (!(transactionType.includes('Delegation') || transactionType.includes('Self'))) {
         await webTester.seeWebElement(transactionsDetails.transactionDetailsSent());
         await webTester.seeWebElement(transactionsDetails.transactionDetailsToAddress());
@@ -200,8 +200,8 @@ class TransactionsDetailsAssert {
       // TODO Cover self transaction details with automation
       if ((await TransactionsPage.transactionsTableItemType(i).getText()) !== 'Self Transaction') {
         await TransactionsPage.clickOnTransactionRow(i);
-        await webTester.waitUntilSeeElement(transactionsDetails.transactionDetailsDescription(), 15_000);
-        const txType = (await transactionsDetails.getTransactionDetailDescription()) as string;
+        await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
+        const txType = await transactionsDetails.transactionDetailsDescription.getText();
         if (!txType.includes('Delegation')) {
           const tokensAmountSummary =
             (await transactionsDetails.getTransactionSentTokensWithoutDuplicates()).length + 1;
