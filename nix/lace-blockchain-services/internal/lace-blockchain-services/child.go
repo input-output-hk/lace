@@ -290,6 +290,9 @@ func manageChildren(comm CommChannels_Manager) {
 				if err != nil {
 					fmt.Printf("%s[%d]: AfterExit of %s[%d] returned an error: %v\n",
 						OurLogPrefix, os.Getpid(), child.ServiceName, childPid, err)
+				} else if child.ServiceName == "mithril-client" {
+					// don’t wait after a successful Mithril resync
+					omitSleep = true
 				}
 				child.StatusCh <- StatusAndUrl{
 					Status: "off",
