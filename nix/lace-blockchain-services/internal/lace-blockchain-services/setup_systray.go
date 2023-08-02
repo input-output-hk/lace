@@ -162,10 +162,10 @@ func setupTrayUI(
 		}
 	}()
 
-	mWebSocketUI := systray.AddMenuItem("WebSocket UI", "")
+	mDashboard := systray.AddMenuItem("Dashboard", "")
 	go func() {
-		for range mWebSocketUI.ClickedCh {
-			url := fmt.Sprintf("http://127.0.0.1:%d/websocket-ui/", appConfig.ApiPort)
+		for range mDashboard.ClickedCh {
+			url := fmt.Sprintf("http://127.0.0.1:%d/dashboard/", appConfig.ApiPort)
 			openWithDefaultApp(url)
 		}
 	}()

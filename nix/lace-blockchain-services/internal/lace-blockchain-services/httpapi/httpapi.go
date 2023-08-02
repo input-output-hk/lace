@@ -108,7 +108,7 @@ func handler(
 	} else if r.URL.Path == "/" && r.Method == http.MethodGet {
 		http.Redirect(w, r, "/swagger-ui/", http.StatusSeeOther)
 	} else if tryStatic("swagger-ui") {
-	} else if tryStatic("websocket-ui") {
+	} else if tryStatic("dashboard") {
 	} else if r.URL.Path == "/openapi.json" && r.Method == http.MethodGet {
 		resp, err := openApiJson(appConfig, info)
 		if err != nil { panic(err) }
