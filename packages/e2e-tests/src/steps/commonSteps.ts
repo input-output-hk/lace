@@ -29,6 +29,7 @@ import { browser } from '@wdio/globals';
 import faqPageAssert from '../assert/faqPageAssert';
 import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
+import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -205,8 +206,8 @@ Then(/^I close all remaining tabs except current one$/, async () => {
   await closeAllTabsExceptActiveOne();
 });
 
-Then(/^I switch to window with Lace$/, async () => {
-  await switchToWindowWithLace();
+Then(/^I switch to window with (Lace|DApp)$/, async (window: 'Lace' | 'DApp') => {
+  await (window === 'Lace' ? switchToWindowWithLace() : DAppConnectorPageObject.switchToTestDAppWindow());
 });
 
 When(/^I resize the window to a width of: ([^"]*) and a height of: ([^"]*)$/, async (width: number, height: number) => {

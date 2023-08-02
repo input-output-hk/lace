@@ -47,8 +47,9 @@ export class TransactionDetailsPage extends CommonDrawerElements {
   get transactionDetailsHash(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_HASH}`);
   }
-  transactionDetailsDescription(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_DESCRIPTION}`, 'xpath');
+
+  get transactionDetailsDescription(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_DESCRIPTION}`);
   }
 
   transactionDetailsAmountOfTokens(): WebElement {
@@ -237,10 +238,6 @@ export class TransactionDetailsPage extends CommonDrawerElements {
 
   async getTransactionSentTokensWithoutDuplicates(): Promise<unknown[]> {
     return await webTester.getTextValuesFromArrayElementWithoutDuplicates(await this.transactionSentTokens());
-  }
-
-  async getTransactionDetailDescription(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsDescription());
   }
 
   async getTransactionDetailDescriptionAmountOfAssets(): Promise<string | number> {
