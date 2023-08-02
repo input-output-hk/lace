@@ -7,6 +7,9 @@ import (
 /*
 #cgo linux pkg-config: gtk+-3.0
 
+#cgo darwin CFLAGS: -DDARWIN -x objective-c -fobjc-arc
+#cgo darwin LDFLAGS: -framework Cocoa -framework Webkit
+
 void lbs__mainthread__schedule();
 */
 import "C"
