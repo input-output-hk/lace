@@ -1,4 +1,4 @@
-@OnboardingCreateWallet @Testnet @Mainnet
+@OnboardingCreateWallet @Testnet @Mainnet @Pending
 Feature: Analytics - Posthog - Onboarding - Extended View
 
   @LW-7365
