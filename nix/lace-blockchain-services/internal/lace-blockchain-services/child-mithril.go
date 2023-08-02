@@ -45,12 +45,19 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 	serviceName := "mithril-client"
 	exePath := ourpaths.LibexecDir + sep + "mithril-client" + ourpaths.ExeSuffix
 	snapshotsDir := ourpaths.WorkDir + sep + "mithril-snapshots"
+	downloadDir := ""  // set later
 
 	const SInitializing = "initializing"
 	const SCheckingDisk = "checking local disk info"
 	const SFetchingCert = "fetching cert info"
 	const SVerifyingCert = "verifying cert chain"
 	const SDownloading = "downloading"
+	const SUnpacking = "unpacking"
+	const SDigest = "computing digest"
+	const SVerifyingSignature = "verifying signature"
+	const SGoodSignature = "good signature"
+	const SMovingDB = "moving DB"
+	const SFinished = "finished"
 
 	currentStatus := SInitializing
 
@@ -113,7 +120,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			snapshot, ok := snapshotRaw.(string)
 			if !ok { return nil, fmt.Errorf("‘digest’ in first snapshot is not a string") }
 
-			downloadDir := snapshotsDir + sep + snapshot
+			downloadDir = snapshotsDir + sep + shared.Network + sep + snapshot
 			err = os.MkdirAll(downloadDir, 0755)
 			if err != nil { return nil, err }
 
@@ -142,23 +149,34 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			}
 		},
 		LogMonitor: func(line string) {
+			// XXX: we use the early return pattern here, because you can’t have
+			// `if firstPredicate() && (a := mkA(); secondPredicate(a)) in Go for whatever reason
+
 			if strings.Index(line, "1/7 - Checking local disk info") != -1 {
 				currentStatus = SCheckingDisk
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1 }
-			} else if strings.Index(line, "2/7 - Fetching the certificate's information") != -1 {
+				return
+			}
+			if strings.Index(line, "2/7 - Fetching the certificate's information") != -1 {
 				currentStatus = SFetchingCert
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1 }
-			} else if strings.Index(line, "3/7 - Verifying the certificate chain") != -1 {
+				return
+			}
+			if strings.Index(line, "3/7 - Verifying the certificate chain") != -1 {
 				currentStatus = SVerifyingCert
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1 }
-			} else if strings.Index(line, "4/7 - Downloading the snapshot") != -1 {
+				return
+			}
+			if strings.Index(line, "4/7 - Downloading the snapshot") != -1 {
 				currentStatus = SDownloading
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1 }
-			} else if currentStatus == SDownloading {
+				return
+			}
+			if currentStatus == SDownloading {
 				if ms := reProgress.FindStringSubmatch(line); len(ms) > 0 {
 					numDone, _ := strconv.ParseFloat(ms[1], 64)
 					unitDone := ms[2]
@@ -174,7 +192,33 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 
 					statusCh <- StatusAndUrl { Status: SDownloading, Progress: done/total,
 						TaskSize: total, SecondsLeft: timeRemaining }
+					return // there would be no way to have `else if` here, hence early return
 				}
+			}
+			if strings.Index(line, "5/7 - Unpacking the snapshot") != -1 {
+				currentStatus = SUnpacking
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
+				return
+			}
+			if strings.Index(line, "6/7 - Computing the snapshot digest") != -1 {
+				currentStatus = SDigest
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
+				return
+			}
+			if strings.Index(line, "7/7 - Verifying the snapshot signature") != -1 {
+				currentStatus = SVerifyingSignature
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
+				return
+			}
+			if strings.Index(line, "Files in the directory '" + downloadDir + sep + "db" +
+				"' can be used to run a Cardano node") != -1 {
+				currentStatus = SGoodSignature
+				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+					TaskSize: -1, SecondsLeft: -1 }
+				return
 			}
 		},
 		LogModifier: func(line string) string {
@@ -183,6 +227,37 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
+		AfterExit: func() error {
+			if currentStatus != SGoodSignature {
+				return fmt.Errorf("cannot move DB as snapshot download was not successful")
+			}
+			currentStatus = SMovingDB
+			statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+				TaskSize: -1, SecondsLeft: -1 }
+
+			chainDir := ourpaths.WorkDir + sep + shared.Network + sep + "chain"
+			chainDirBackup := chainDir + "--bak--" + time.Now().UTC().Format("2006-01-02--15-04-05Z")
+
+			err := os.Rename(chainDir, chainDirBackup)
+			if err != nil { return err }
+
+			err = os.Rename(downloadDir + sep + "db", chainDir)
+			if err != nil { return err }
+
+			// TODO: do it:
+			err = os.RemoveAll(downloadDir)
+			if err != nil { return err }
+
+			// TODO: do it:
+			err = os.RemoveAll(chainDirBackup)
+			if err != nil { return err }
+
+			currentStatus = SFinished
+			statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
+				TaskSize: -1, SecondsLeft: -1 }
+
+			return nil
+		},
 	}
 }
 

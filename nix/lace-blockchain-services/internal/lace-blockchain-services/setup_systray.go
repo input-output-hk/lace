@@ -146,12 +146,12 @@ func setupTrayUI(
 
 	mMithrilStatus := systray.AddMenuItem("", "")
 	mMithrilStatus.Hide()
+	mMithrilStatusETA := mMithrilStatus.AddSubMenuItem("", "")
+	mMithrilStatusETA.Disable()
 	mMithrilStatusDledSize := mMithrilStatus.AddSubMenuItem("", "")
 	mMithrilStatusDledSize.Disable()
 	mMithrilStatusTotalSize := mMithrilStatus.AddSubMenuItem("", "")
 	mMithrilStatusTotalSize.Disable()
-	mMithrilStatusETA := mMithrilStatus.AddSubMenuItem("", "")
-	mMithrilStatusETA.Disable()
 	go func(){
 		for upd := range chMithrilStatus {
 			if upd.Status == "off" {
@@ -166,6 +166,10 @@ func setupTrayUI(
 			}
 			mMithrilStatus.SetTitle("mithril · " + formatted)
 
+			eta := "—"
+			if upd.SecondsLeft >= 0 { eta = "in " + secondsToHuman(upd.SecondsLeft) }
+			mMithrilStatusETA.SetTitle("ETA: " + eta)
+
 			downloaded := "—                 "  // extra spaces to accomodate future value in UI
 			if upd.Progress >= 0 && upd.TaskSize >= 0 {
 				downloaded = bytesToHuman(upd.Progress * upd.TaskSize)
@@ -175,10 +179,6 @@ func setupTrayUI(
 			total := "—"
 			if upd.TaskSize >= 0 { total = bytesToHuman(upd.TaskSize) }
 			mMithrilStatusTotalSize.SetTitle("Total: " + total)
-
-			eta := "—"
-			if upd.SecondsLeft >= 0 { eta = "in " + secondsToHuman(upd.SecondsLeft) }
-			mMithrilStatusETA.SetTitle("ETA: " + eta)
 		}
 	}()
 

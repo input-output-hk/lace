@@ -147,5 +147,6 @@ func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedC
 		},
 		TerminateGracefullyByInheritedFd3: true,
 		ForceKillAfter: 10 * time.Second,
+		AfterExit: func() error { return nil },
 	}
 }

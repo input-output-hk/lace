@@ -20,7 +20,7 @@ import (
 )
 
 type ManagedChild struct {
-	ServiceName   string
+	ServiceName string
 	ExePath     string
 	Version     string
 	Revision    string
@@ -33,6 +33,7 @@ type ManagedChild struct {
 	LogModifier func(string) string // e.g. to drop redundant timestamps
 	TerminateGracefullyByInheritedFd3 bool // <https://github.com/input-output-hk/cardano-node/issues/726>
 	ForceKillAfter time.Duration // graceful exit timeout, after which we SIGKILL the child
+	AfterExit   func() error
 }
 
 type StatusAndUrl struct {
@@ -285,6 +286,11 @@ func manageChildren(comm CommChannels_Manager) {
 				childDidExit = true
 				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
 					child.ServiceName, childPid)
+				err := child.AfterExit()
+				if err != nil {
+					fmt.Printf("%s[%d]: AfterExit of %s[%d] returned an error: %v\n",
+						OurLogPrefix, os.Getpid(), child.ServiceName, childPid, err)
+				}
 				child.StatusCh <- StatusAndUrl{
 					Status: "off",
 					Progress: -1,
