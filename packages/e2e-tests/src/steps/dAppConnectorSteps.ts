@@ -25,6 +25,17 @@ Then(/^I see DApp authorization window$/, async () => {
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
 });
 
+Then(/^I see DApp authorization window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+  await DAppConnectorAssert.assertSeeDAppThemeMode(mode);
+});
+
+Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeDAppThemeMode(mode);
+});
+
 Then(
   /^I see DApp connector "Confirm transaction" page with: "([^"]*)" and: "([^"]*)" assets$/,
   async (adaValue: string, assetValue: string) => {

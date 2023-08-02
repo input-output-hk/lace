@@ -274,12 +274,12 @@ export const NFTFolderDrawer = withNftsFoldersContext(
           actions={[
             {
               body: t('browserView.nfts.exitModal.cancel'),
-              dataTestId: 'create-foler-modal-cancel',
+              dataTestId: 'create-folder-modal-cancel',
               color: 'secondary',
               onClick: () => setIsExitModalVisible(false)
             },
             {
-              dataTestId: 'create-foler-modal-confirm',
+              dataTestId: 'create-folder-modal-confirm',
               onClick: onCloseDrawerConfirm,
               body: t('browserView.nfts.exitModal.confirm')
             }

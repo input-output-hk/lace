@@ -8,6 +8,13 @@ import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
 import AnalyticsPage from '../elements/onboarding/analyticsPage';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
+import Modal from '../elements/modal';
+import OnboardingDataCollectionPageAssert from '../assert/onboarding/onboardingDataCollectionPageAssert';
+import OnboardingWalletNamePageAssert from '../assert/onboarding/onboardingWalletNamePageAssert';
+import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
+import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
+const validPassword = 'N_8J@bne87A';
 
 class OnboardingPageObject {
   async openLegalPage() {
@@ -29,7 +36,6 @@ class OnboardingPageObject {
   }
 
   async goToMnemonicWriteDownPage(length?: '12' | '15' | '24') {
-    const validPassword = 'N_8J@bne87A';
     await this.openNameYourWalletPage();
     await this.fillWalletNameInput('ValidWalletName');
     await OnboardingWalletNamePage.nextButton.click();
@@ -204,6 +210,27 @@ class OnboardingPageObject {
       case '24':
         await RecoveryPhraseLengthPage.radioButton24wordsButton.click();
     }
+  }
+  async restoreWallet() {
+    const commonOnboardingElements = new CommonOnboardingElements();
+
+    await OnboardingMainPage.restoreWalletButton.click();
+    await Modal.confirmButton.waitForClickable();
+    await Modal.confirmButton.click();
+    await this.openAndAcceptTermsOfUsePage();
+    await OnboardingDataCollectionPageAssert.assertSeeDataCollectionPage();
+    await AnalyticsPage.nextButton.click();
+    await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
+    await this.fillWalletNameInput('ValidName');
+    await commonOnboardingElements.nextButton.click();
+    await this.fillPasswordPage(validPassword, validPassword);
+    await commonOnboardingElements.nextButton.click();
+    await commonOnboardingElements.nextButton.click();
+    await this.openMnemonicVerificationLastPage(getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? []);
+    await commonOnboardingElements.nextButton.click();
+    await OnboardingAllDonePage.nextButton.click();
+    await Modal.cancelButton.waitForClickable();
+    await Modal.cancelButton.click();
   }
 }
 

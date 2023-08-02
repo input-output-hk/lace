@@ -84,7 +84,7 @@ Feature: DAppConnector - Common
     And I click on "Cancel" button on "Forgot password?" modal
     Then I see DApp unlock page
 
-  @LW-7083 @Pending @Testnet @Mainnet
+  @LW-7083 @Testnet @Mainnet
   Scenario: "Forgot password" click and proceed on DApp wallet unlock page
     Given I lock my wallet
     When I open test DApp
@@ -96,3 +96,77 @@ Feature: DAppConnector - Common
     When I switch to tab with restore wallet process
     Then "Wallet password" page is displayed in "Forgot password" flow
 
+  @LW-7083 @Testnet @Mainnet
+  Scenario: "Forgot password" click and proceed on DApp wallet unlock page
+    Given I lock my wallet
+    When I open test DApp
+    Then I see DApp unlock page
+    When I click on "Forgot password?" button on unlock screen
+    Then I see "Forgot password?" modal
+    And I click on "Proceed" button on "Forgot password?" modal
+    Then I see DApp no wallet page
+    When I switch to tab with restore wallet process
+    Then "Wallet password" page is displayed in "Forgot password" flow
+
+  @LW-4060
+  Scenario Outline: DApp connector window displayed in <theme> mode
+    Given I click the menu button
+    And I set theme switcher to <theme> mode
+    When I open test DApp
+    Then I see DApp authorization window in <theme> mode
+    And I click "Authorize" button in DApp authorization window
+    And I click "Only once" button in DApp authorization modal
+    When I click "Send ADA" "Run" button in test DApp
+    Then I see DApp connector "Confirm transaction" page in <theme> mode
+    Examples:
+      | theme |
+      | light |
+      | dark  |
+
+  @LW-7743
+  Scenario: DApp connector window theme updated from light to dark while using DApp
+    Given I click the menu button
+    And I set theme switcher to light mode
+    When I open test DApp
+    Then I see DApp authorization window in light mode
+    And I click "Authorize" button in DApp authorization window
+    And I click "Only once" button in DApp authorization modal
+    And I switch to window with Lace
+    And I close all remaining tabs except current one
+    And I set theme switcher to dark mode
+    And I open test DApp
+    When I click "Send ADA" "Run" button in test DApp
+    Then I see DApp connector "Confirm transaction" page in dark mode
+
+  @LW-4071
+  Scenario: DApp remains authorised after choosing "Always" and removing & restoring a wallet
+    Given I open and authorize test DApp with "Always" setting
+    And I switch to window with Lace
+    And I close all remaining tabs except current one
+    And I remove wallet
+    And I restore a wallet
+    And Wallet is synced
+    And I switch network to: "Preprod" in extended mode
+    And Wallet is synced
+    And I open settings from header menu
+    When I click on "Authorized DApps" setting
+    Then I see test DApp on the Authorized DApps list
+    When I open test DApp
+    Then I don't see DApp window
+    And I de-authorize all DApps in extended mode
+
+  @LW-4070
+  Scenario: Authorize Dapp with 'Only once' and leaving/closing DApp
+    Given I open and authorize test DApp with "Only once" setting
+    And I switch to window with DApp
+    And I close all remaining tabs except current one
+    When I open test DApp
+    Then I don't see DApp window
+    And I navigate to home page on extended view
+    And I close all remaining tabs except current one
+    When I open test DApp
+    Then I see DApp authorization window
+    And I switch to window with Lace
+    And I close all remaining tabs except current one
+    When I open test DApp
+    Then I see DApp authorization window

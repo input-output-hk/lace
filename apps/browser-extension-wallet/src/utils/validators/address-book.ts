@@ -121,7 +121,7 @@ export const ensureHandleOwnerHasntChanged = async ({
     throw new CustomError(i18n.t('general.errors.incorrectHandle'), false);
   }
 
-  if (handle === 'pasta') {
+  if (!Cardano.util.addressesShareAnyKey(cardanoAddress, newHandleResolution.cardanoAddress)) {
     throw new CustomConflictError({
       message: `${i18n.t('general.errors.handleConflict', {
         receivedAddress: cardanoAddress,
@@ -130,24 +130,6 @@ export const ensureHandleOwnerHasntChanged = async ({
       expectedAddress: cardanoAddress,
       actualAddress: newHandleResolution.cardanoAddress
     });
-  }
-
-  if (cardanoAddress !== newHandleResolution.cardanoAddress) {
-    const stakeKeyFromAddress = Cardano.Address.fromString(cardanoAddress).asBase().getStakingCredential();
-    const stakeKeyFromHandles = Cardano.Address.fromString(newHandleResolution.cardanoAddress)
-      .asBase()
-      .getStakingCredential();
-
-    if (stakeKeyFromAddress.hash !== stakeKeyFromHandles.hash) {
-      throw new CustomConflictError({
-        message: `${i18n.t('general.errors.handleConflict', {
-          receivedAddress: cardanoAddress,
-          actualAddress: newHandleResolution.cardanoAddress
-        })}`,
-        expectedAddress: cardanoAddress,
-        actualAddress: newHandleResolution.cardanoAddress
-      });
-    }
   }
 
   return true;
@@ -171,11 +153,6 @@ export const validateMainnetAddress = (address: string): boolean =>
   address.startsWith('DdzFF') ||
   // address is a handle
   isHandle(address);
-
-// export const validateTestnetAddress = (address: string): boolean =>
-//   address.startsWith('addr_test') ||
-//   address.startsWith('$') ||
-//   (isAdaHandleEnabled && !validateMainnetAddress(address) && Wallet.Cardano.Address.isValidByron(address));
 
 export const validateTestnetAddress = (address: string): boolean =>
   address.startsWith('addr_test') ||

@@ -1,11 +1,7 @@
 import { SubNavigation } from '@lace/ui';
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-
-export enum Page {
-  overview = 'overview',
-  browsePools = 'browsePools',
-}
+import { Page, useStakePoolDetails } from '../store';
 
 type NavigationProps = {
   children: (activePage: Page) => ReactNode;
@@ -14,16 +10,18 @@ type NavigationProps = {
 const isValueAValidSubPage = (value: string): value is Page => Object.values<string>(Page).includes(value);
 
 export const Navigation = ({ children }: NavigationProps) => {
-  const startPage = Page.overview;
+  const { activePage, setActivePage } = useStakePoolDetails((store) => ({
+    activePage: store.activePage,
+    setActivePage: store.setActivePage,
+  }));
   const { t } = useTranslation();
-  const [activePage, setActivePage] = useState(startPage);
   const onValueChange = (value: string) => {
     if (isValueAValidSubPage(value)) setActivePage(value);
   };
 
   return (
     <>
-      <SubNavigation.Root aria-label={t('root.nav.title')} defaultValue={startPage} onValueChange={onValueChange}>
+      <SubNavigation.Root aria-label={t('root.nav.title')} value={activePage} onValueChange={onValueChange}>
         <SubNavigation.Item name={t('root.nav.overviewTitle')} value={Page.overview} data-testid="overview-tab" />
         <SubNavigation.Item name={t('root.nav.browsePoolsTitle')} value={Page.browsePools} data-testid="browse-tab" />
       </SubNavigation.Root>

@@ -1,7 +1,8 @@
+/* eslint-disable no-magic-numbers */
 import React, { useState, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import { AutoCompleteProps, Button } from 'antd';
-import { Search, SearchProps, Ellipsis } from '@lace/common';
+import { Search, SearchProps, addEllipsis } from '@lace/common';
 import { HandleResolution } from '@cardano-sdk/core';
 import { ReactComponent as BookIcon } from '../../assets/icons/book-icon.component.svg';
 import { ReactComponent as AddAddress } from '../../assets/icons/add.component.svg';
@@ -39,9 +40,9 @@ export type DestinationAddressInputProps = Omit<AutoCompleteProps, 'value'> & {
 
 export const getInputLabel = (name: string, address: string): React.ReactElement => (
   <div data-testid="search-result-row" className={styles.addressOption}>
-    <span data-testid="search-result-name">{name}</span>
+    <span data-testid="search-result-name">{addEllipsis(name, 4, 2)}</span>
     <span data-testid="search-result-address">
-      <Ellipsis className={styles.option} withTooltip={false} text={address} ellipsisInTheMiddle />
+      <p className={styles.option}>{addEllipsis(address, 10, 6)}</p>
     </span>
   </div>
 );

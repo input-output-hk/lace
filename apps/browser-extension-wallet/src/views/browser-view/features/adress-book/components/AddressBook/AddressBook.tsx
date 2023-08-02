@@ -82,14 +82,15 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_BROWSER
           });
           setAddressToEdit(address);
-          if (validatedAddressStatus[address.address]?.isValid === false) {
+          if (isAdaHandleEnabled && validatedAddressStatus[address.address]?.isValid === false) {
             setIsAddressDrawerOpen(true);
           } else {
             setIsDrawerOpen(true);
           }
         },
         shouldUseEllipsisBeferoAfter: true,
-        isAddressWarningVisible: validatedAddressStatus[item.address]?.isValid === false ?? false,
+        isAddressWarningVisible:
+          (isAdaHandleEnabled && validatedAddressStatus[item.address]?.isValid === false) ?? false,
         beforeEllipsis: ELLIPSIS_LEFT_SIDE_LENGTH,
         afterEllipsis: ELLIPSIS_RIGHT_SIDE_LENGTH
       })) || [],

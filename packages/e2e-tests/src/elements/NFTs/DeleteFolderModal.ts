@@ -1,7 +1,7 @@
 class DeleteFolderModal {
   private CONTAINER = '.ant-modal-content';
-  private TITLE = '[data-testid="create-foler-modal-title"]';
-  private DESCRIPTION = '[data-testid="create-foler-modal-description"]';
+  private TITLE = '[data-testid="create-folder-modal-title"]';
+  private DESCRIPTION = '[data-testid="create-folder-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="delete-folder-modal-cancel"]';
   private CONFIRM_BUTTON = '[data-testid="delete-folder-modal-confirm"]';
 

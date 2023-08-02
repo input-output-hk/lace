@@ -27,6 +27,7 @@ import { Sections, useSections } from '@src/views/browser-view/features/send-tra
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressBook = withAddressBookContext(() => {
   const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
@@ -62,7 +63,6 @@ export const AddressBook = withAddressBookContext(() => {
           icon: AddIcon
         });
   };
-
   const list: WalletAddressItemProps[] = useMemo(
     () =>
       addressList?.map((item: AddressBookSchema) => ({
@@ -76,14 +76,15 @@ export const AddressBook = withAddressBookContext(() => {
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_POPUP
           });
           setAddressToEdit(address);
-          if (validatedAddressStatus[address.address]?.isValid === false) {
+          if (isAdaHandleEnabled && validatedAddressStatus[address.address]?.isValid === false) {
             setIsAddressDrawerOpen(true);
           } else {
             setIsEditAddressVisible(true);
           }
         },
         isSmall: true,
-        isAddressWarningVisible: validatedAddressStatus[item.address]?.isValid === false ?? false
+        isAddressWarningVisible:
+          (isAdaHandleEnabled && validatedAddressStatus[item.address]?.isValid === false) ?? false
       })) || [],
     [addressList, analytics, setAddressToEdit, setIsEditAddressVisible, validatedAddressStatus]
   );
