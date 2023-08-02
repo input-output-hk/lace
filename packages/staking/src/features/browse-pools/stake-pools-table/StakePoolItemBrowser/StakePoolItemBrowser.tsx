@@ -103,7 +103,8 @@ export const StakePoolItemBrowser = ({
           label={stakePoolStateLabel}
           onClick={(event) => {
             event.stopPropagation();
-            includedInDraft ? removeFromDraft() : addToDraft();
+
+            draftPortfolioExists ? (includedInDraft ? removeFromDraft() : addToDraft()) : onClick(id);
           }}
         />
       </div>
