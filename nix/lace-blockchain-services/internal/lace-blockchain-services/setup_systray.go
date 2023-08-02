@@ -154,7 +154,11 @@ func setupTrayUI(
 	mMithrilStatusETA.Disable()
 	go func(){
 		for upd := range chMithrilStatus {
-			if upd.Status == "off" { mMithrilStatus.Hide() } else {	mMithrilStatus.Show() }
+			if upd.Status == "off" {
+				mainthread.Schedule(mMithrilStatus.Hide)
+			} else {
+				mainthread.Schedule(mMithrilStatus.Show)
+			}
 
 			formatted := upd.Status
 			if upd.Progress >= 0 && upd.Progress <= 1 {
