@@ -137,3 +137,36 @@ Feature: DAppConnector - Common
     And I open test DApp
     When I click "Send ADA" "Run" button in test DApp
     Then I see DApp connector "Confirm transaction" page in dark mode
+
+  @LW-4071
+  Scenario: DApp remains authorised after choosing "Always" and removing & restoring a wallet
+    Given I open and authorize test DApp with "Always" setting
+    And I switch to window with Lace
+    And I close all remaining tabs except current one
+    And I remove wallet
+    And I restore a wallet
+    And Wallet is synced
+    And I switch network to: "Preprod" in extended mode
+    And Wallet is synced
+    And I open settings from header menu
+    When I click on "Authorized DApps" setting
+    Then I see test DApp on the Authorized DApps list
+    When I open test DApp
+    Then I don't see DApp window
+    And I de-authorize all DApps in extended mode
+
+  @LW-4070
+  Scenario: Authorize Dapp with 'Only once' and leaving/closing DApp
+    Given I open and authorize test DApp with "Only once" setting
+    And I switch to window with DApp
+    And I close all remaining tabs except current one
+    When I open test DApp
+    Then I don't see DApp window
+    And I navigate to home page on extended view
+    And I close all remaining tabs except current one
+    When I open test DApp
+    Then I see DApp authorization window
+    And I switch to window with Lace
+    And I close all remaining tabs except current one
+    When I open test DApp
+    Then I see DApp authorization window

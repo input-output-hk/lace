@@ -10,7 +10,7 @@ in rec {
 
   prettyName = "Lace Blockchain Services";
 
-  laceVersion = (builtins.fromJSON (builtins.readFile ../../../package.json)).version;
+  laceVersion = (builtins.fromJSON (builtins.readFile ../../../apps/browser-extension-wallet/package.json)).version;
 
   cardanoWorldFlake = (flake-compat { src = inputs.cardano-world; }).defaultNix;
 
@@ -109,5 +109,80 @@ in rec {
     x86_64-darwin = cardanoNodeFlake.packages.x86_64-darwin.cardano-node;
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
+
+  lace-blockchain-services-exe-vendorHash = "sha256-kEFdxqSs3nY1a6maUSPkc30uENePhcmYkkV1Q0fF/Io=";
+
+  hardcodedVersions = pkgs.writeText "version.go" ''
+    package versions
+
+    const (
+      LaceBlockchainServicesVersion = ${__toJSON laceVersion}
+      LaceBlockchainServicesRevision = ${__toJSON (inputs.self.rev or "dirty")}
+      CardanoNodeVersion = ${__toJSON cardano-node.version}
+      CardanoNodeRevision = ${__toJSON inputs.cardano-node.sourceInfo.rev}
+      OgmiosVersion = ${__toJSON ogmios.version}
+      OgmiosRevision = ${__toJSON inputs.ogmios.rev}
+      ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
+      ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
+    )
+  '';
+
+  swagger-ui = let
+    name = "swagger-ui";
+    version = "5.2.0";
+    src = pkgs.fetchFromGitHub {
+      owner = "swagger-api"; repo = name;
+      rev = "v${version}";
+      hash = "sha256-gF2bUTr181MePC+FJN+BV2KQ7ZEW7sa4Mib7K0sgi4s=";
+    };
+  in pkgs.runCommand "${name}-${version}" {} ''
+    cp -r ${src}/dist $out
+    chmod -R +w $out
+    sed -r 's|url:.*,|url: window.location.origin + "/openapi.json",|' -i $out/swagger-initializer.js
+  '';
+
+  # OpenAPI linter
+  vacuum = pkgs.buildGoModule rec {
+    pname = "vacuum";
+    version = "0.2.6";
+    src = pkgs.fetchFromGitHub {
+      owner = "daveshanley"; repo = pname;
+      rev = "v${version}";
+      hash = "sha256-G0NzCqxu1rDrgnOrbDGuOv4Vq9lZJGeNyXzKRBvtf4o=";
+    };
+    vendorHash = "sha256-5aAnKf/pErRlugyk1/iJMaI4YtY/2Vs8GpB3y8tsjh4=";
+    doCheck = false;  # some segfault in OAS 2.0 tests…
+  };
+
+  openApiJson = pkgs.runCommand "openapi.json" {
+    buildInputs = [ pkgs.jq vacuum ];
+  } ''
+    vacuum lint --details ${./lace-blockchain-services/openapi.json}
+
+    jq --sort-keys\
+      --arg title ${lib.escapeShellArg "${prettyName} API"} \
+      '.info.title = $title' \
+      ${./lace-blockchain-services/openapi.json} >$out
+  '';
+
+  dashboard = pkgs.runCommand "dashboard" {
+    buildInputs = with pkgs; [ imagemagick ];
+  } ''
+    cp -r ${./dashboard} $out
+    chmod -R +w $out
+    convert -background none -size 32x32 ${./dashboard/favicon.svg} $out/favicon-32x32.png
+    convert -background none -size 16x16 ${./dashboard/favicon.svg} $out/favicon-16x16.png
+    convert $out/favicon-*.png $out/favicon.ico
+
+    mkdir -p $out/highlight.js
+    cp ${pkgs.fetchurl {
+      url = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js";
+      hash = "sha256-RJn/k21P1WKtylpcvlEtwZ64CULu6GGNr7zrxPeXS9s=";
+    }} $out/highlight.js/highlight.min.js
+    cp ${pkgs.fetchurl {
+      url = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css";
+      hash = "sha256-+94KwJIdhsNWxBUy5zGciHojvRuP8ABgyrRHJJ8Dx88=";
+    }} $out/highlight.js/default.min.css
+  '';
 
 }
