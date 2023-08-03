@@ -39,6 +39,12 @@ in rec {
       export GOPATH="$TMPDIR/go"
       rm -rf vendor
       cp -r --reflink=auto ${go-modules} vendor
+
+      chmod -R +w vendor
+      (
+        cd vendor/github.com/getlantern/systray
+        patch -p1 -i ${./getlantern-systray--windows-schedule-on-main-thread.patch}
+      )
     '';
     buildPhase = ''
       cp ${icon} tray-icon
