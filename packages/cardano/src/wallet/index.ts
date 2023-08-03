@@ -62,7 +62,8 @@ export {
   validateWalletPassword,
   switchKeyAgents,
   createCardanoWalletsByChain,
-  restoreWallet
+  restoreWallet,
+  createKeyAgent
 } from '@wallet/lib/cardano-wallet';
 
 export * from '@wallet/lib/hardware-wallet';

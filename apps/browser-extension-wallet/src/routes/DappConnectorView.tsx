@@ -61,6 +61,7 @@ export const DappConnectorView = (): React.ReactElement => {
   }, [setKeyAgentData, isWalletLocked, currentChain]);
 
   useEffect(() => {
+    // TODO: LW-7807 revise the sdk cip30 implementation
     const callback = (result: boolean) => {
       if (result) {
         redirectToSignSuccess();

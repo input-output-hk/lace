@@ -23,6 +23,7 @@ import * as KeyManagement from '../../../../../node_modules/@cardano-sdk/key-man
 import { WalletManagerActivateProps, WalletManagerUi } from '@cardano-sdk/web-extension';
 import { ChainName, WalletManagerProviderTypes } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
+import { createWalletUtil } from '@cardano-sdk/wallet';
 
 export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.SerializableKeyAgentData }>;
 
@@ -130,6 +131,7 @@ const createAsyncKeyAgentWithCallback = (
   signCallback?: (result: boolean) => void
 ): KeyManagement.AsyncKeyAgent => {
   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
+  // TODO: LW-7807 revise the sdk cip30 implementation
   const wrappedSign = (...args: Parameters<KeyManagement.KeyAgent['signTransaction']>) =>
     keyAgent
       .signTransaction(...args)
@@ -209,12 +211,17 @@ export const restoreWalletFromKeyAgent = async (
 
   const createWallet = async () => wallet;
   const { keyAgent } = await restoreWallet(keyAgentData, getPassword, createWallet);
+  // TODO: LW-7807 revise the sdk cip30 implementation
   const asyncKeyAgent = createAsyncKeyAgentWithCallback(keyAgent, callback);
 
   if (activateOnRestore) {
-    await activateWallet(walletManagerUi, keyAgent, name, {
-      type: WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER,
-      options: { chainName }
+    await walletManagerUi.activate({
+      keyAgent: asyncKeyAgent,
+      observableWalletName: name,
+      provider: {
+        type: WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER,
+        options: { chainName }
+      }
     });
   }
 
@@ -325,4 +332,21 @@ export const switchKeyAgents = async (
     }
   });
   return walletManagerUi.wallet;
+};
+
+export const createKeyAgent = (
+  walletManagerUi: WalletManagerUi,
+  keyAgentData: KeyManagement.SerializableKeyAgentData,
+  getPassword: () => Promise<Uint8Array>
+): Promise<KeyManagement.KeyAgent> => {
+  const walletUtil = createWalletUtil(walletManagerUi.wallet);
+  return restoreKeyAgent(
+    keyAgentData,
+    {
+      logger: console,
+      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
+      inputResolver: walletUtil
+    },
+    getPassword
+  );
 };

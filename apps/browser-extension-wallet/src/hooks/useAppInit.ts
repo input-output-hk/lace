@@ -7,8 +7,8 @@ import { useEffect } from 'react';
 import { runtime } from 'webextension-polyfill';
 
 export const useAppInit = (): void => {
-  const { setAddressesDiscoveryCompleted, setWalletManagerUi, walletManagerUi } = useWalletStore();
-  const { updateKeyAgentData } = useWalletManager();
+  const { setAddressesDiscoveryCompleted, setWalletManagerUi, walletManagerUi, setWalletInfo } = useWalletStore();
+  const { updateKeyAgent } = useWalletManager();
 
   useEffect(() => {
     const walletManager = new WalletManagerUi({ walletName: process.env.WALLET_NAME }, { logger: console, runtime });
@@ -22,15 +22,22 @@ export const useAppInit = (): void => {
       const currentKeyAgentData = getValueFromLocalStorage('keyAgentData');
       if (!currentKeyAgentData) return;
 
-      await updateKeyAgentData({
+      await updateKeyAgent({
         ...currentKeyAgentData,
         knownAddresses
       });
+
+      const { name } = getValueFromLocalStorage('wallet');
+      setWalletInfo({
+        name,
+        addresses: knownAddresses
+      });
+
       setAddressesDiscoveryCompleted(true);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [setAddressesDiscoveryCompleted, updateKeyAgentData, walletManagerUi?.wallet]);
+  }, [setAddressesDiscoveryCompleted, setWalletInfo, updateKeyAgent, walletManagerUi?.wallet]);
 };

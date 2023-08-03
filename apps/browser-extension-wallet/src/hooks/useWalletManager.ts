@@ -6,7 +6,7 @@ import { useCardanoWalletManagerContext } from '@providers/CardanoWalletManager'
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, NftFoldersSchema, addressBookSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { deleteFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
+import { deleteFromLocalStorage, getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
 import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 
@@ -52,12 +52,23 @@ export interface UseWalletManager {
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<void>;
   executeWithPassword: <T>(password: string, promiseFn: () => Promise<T>, cleanPassword?: boolean) => Promise<T>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
-  updateKeyAgentData: (newKeyAgentData: Wallet.KeyManagement.SerializableKeyAgentData) => Promise<void>;
+  updateKeyAgent: (newKeyAgentData: Wallet.KeyManagement.SerializableKeyAgentData) => Promise<void>;
+  loadUnlockedWallet: (keyAgentsByChain: Wallet.KeyAgentsByChain) => Promise<void>;
 }
 
 /** Connects a hardware wallet device */
 export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Promise<Wallet.DeviceConnection> =>
   await Wallet.connectDevice(model);
+
+const encryptKeyAgents = ({
+  keyAgentsByChain,
+  password
+}: {
+  keyAgentsByChain: Wallet.KeyAgentsByChain;
+  password: string;
+}) =>
+  // Encrypt key agents with password for lock/unlock feature
+  Wallet.KeyManagement.emip3encrypt(Buffer.from(JSON.stringify(keyAgentsByChain)), Buffer.from(password));
 
 export const useWalletManager = (): UseWalletManager => {
   const cardanoWalletManager = useCardanoWalletManagerContext();
@@ -171,6 +182,17 @@ export const useWalletManager = (): UseWalletManager => {
     [keyAgentData, cardanoWalletManager, walletManagerUi, getPassword, environmentName, setCardanoWallet]
   );
 
+  const loadUnlockedWallet = useCallback(
+    async (keyAgentsByChain: Wallet.KeyAgentsByChain) => {
+      const unlockedKeyAgentData = keyAgentsByChain[environmentName]?.keyAgentData;
+      // eslint-disable-next-line unicorn/no-null
+      saveValueInLocalStorage({ key: 'keyAgentData', value: unlockedKeyAgentData ?? null });
+      await backgroundService.setBackgroundStorage({ keyAgentsByChain });
+      setKeyAgentData(keyAgentData);
+    },
+    [backgroundService, environmentName, keyAgentData, setKeyAgentData]
+  );
+
   /**
    * Creates or restores a new wallet with the cardano-js-sdk
    * and saves it in browser storage with the data to lock/unlock it
@@ -182,10 +204,7 @@ export const useWalletManager = (): UseWalletManager => {
       );
 
       // Encrypt key agents with password for lock/unlock feature
-      const encryptedKeyAgents = await Wallet.KeyManagement.emip3encrypt(
-        Buffer.from(JSON.stringify(keyAgentsByChain)),
-        Buffer.from(password)
-      );
+      const encryptedKeyAgents = await encryptKeyAgents({ keyAgentsByChain, password });
 
       // Save in storage
       await storeMnemonicInBackgroundScript(mnemonic, password);
@@ -357,21 +376,37 @@ export const useWalletManager = (): UseWalletManager => {
     ]
   );
 
-  const updateKeyAgentData = useCallback(
+  const updateKeyAgent = useCallback(
     async (newKeyAgentData: Wallet.KeyManagement.SerializableKeyAgentData) => {
       const backgroundStorage = await backgroundService.getBackgroundStorage();
+      const { name } = getValueFromLocalStorage('wallet');
 
       if (!backgroundStorage) throw new Error("Couldn't access background storage");
       const { keyAgentsByChain } = backgroundStorage;
 
+      keyAgentsByChain[environmentName].keyAgentData = newKeyAgentData;
+      // TODO: updateWalletLock so after unlocking the discovery does not get triggered
+      // const encryptedKeyAgents = await encryptKeyAgents({ keyAgentsByChain, password });
+      const newKeyAgent = await Wallet.createKeyAgent(walletManagerUi, newKeyAgentData, getPassword);
+
+      await backgroundService.setBackgroundStorage({ keyAgentsByChain });
+      // TODO: updateWalletLock so after unlocking the discovery does not get triggered
+      // saveValueInLocalStorage({ key: 'lock', value: encryptedKeyAgents });
       saveValueInLocalStorage({
         key: 'keyAgentData',
         value: newKeyAgentData
       });
-      keyAgentsByChain[environmentName].keyAgentData = newKeyAgentData;
-      await backgroundService.setBackgroundStorage({ keyAgentsByChain });
+
+      // TODO: updateWalletLock so after unlocking the discovery does not get triggered
+      // setWalletLock(encryptedKeyAgents);
+      setCardanoWallet({
+        keyAgent: newKeyAgent,
+        wallet: walletManagerUi.wallet,
+        name
+      });
+      setKeyAgentData(newKeyAgentData);
     },
-    [backgroundService, environmentName]
+    [backgroundService, environmentName, getPassword, setCardanoWallet, setKeyAgentData, walletManagerUi]
   );
 
   return {
@@ -387,6 +422,7 @@ export const useWalletManager = (): UseWalletManager => {
     deleteWallet,
     executeWithPassword,
     switchNetwork,
-    updateKeyAgentData
+    updateKeyAgent,
+    loadUnlockedWallet
   };
 };

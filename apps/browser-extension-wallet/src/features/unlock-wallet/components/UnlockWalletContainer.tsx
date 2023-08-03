@@ -15,8 +15,8 @@ export interface UnlockWalletContainerProps {
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContainerProps): React.ReactElement => {
-  const { unlockWallet, lockWallet, deleteWallet } = useWalletManager();
-  const { environmentName, setKeyAgentData } = useWalletStore();
+  const { unlockWallet, lockWallet, deleteWallet, loadUnlockedWallet } = useWalletManager();
+  const { environmentName } = useWalletStore();
   const backgroundService = useBackgroundServiceAPIContext();
 
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
@@ -26,14 +26,9 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
 
   // Setting this will trigger the wallet loading in PopupView
   const loadWallet = useCallback(async () => {
-    if (unlocked) {
-      const keyAgentData = unlocked[environmentName]?.keyAgentData;
-      // eslint-disable-next-line unicorn/no-null
-      saveValueInLocalStorage({ key: 'keyAgentData', value: keyAgentData ?? null });
-      await backgroundService.setBackgroundStorage({ keyAgentsByChain: unlocked });
-      setKeyAgentData(keyAgentData);
-    }
-  }, [unlocked, backgroundService, environmentName, setKeyAgentData]);
+    if (!unlocked) return;
+    loadUnlockedWallet(unlocked);
+  }, [unlocked, loadUnlockedWallet]);
 
   const handlePasswordChange = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
