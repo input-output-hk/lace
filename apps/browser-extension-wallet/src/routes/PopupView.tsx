@@ -12,7 +12,7 @@ import { BrowserViewSections } from '@lib/scripts/types';
 import { useEnterKeyPress } from '@hooks/useEnterKeyPress';
 import { getValueFromLocalStorage } from '@src/utils/local-storage';
 import { MainLoader } from '@components/MainLoader';
-import { useWalletInfoSubscriber, useAppInit } from '@hooks';
+import { useAppInit } from '@hooks';
 import { ILocalStorage } from '@src/types';
 
 dayjs.extend(duration);
@@ -34,7 +34,6 @@ export const PopupView = (): React.ReactElement => {
 
   useAppInit();
   useEnterKeyPress();
-  useWalletInfoSubscriber();
 
   useEffect(() => {
     const load = async () => {

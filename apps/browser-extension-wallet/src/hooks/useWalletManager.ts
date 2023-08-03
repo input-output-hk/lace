@@ -385,19 +385,19 @@ export const useWalletManager = (): UseWalletManager => {
       const { keyAgentsByChain } = backgroundStorage;
 
       keyAgentsByChain[environmentName].keyAgentData = newKeyAgentData;
-      // TODO: updateWalletLock so after unlocking the discovery does not get triggered
+      // TODO: update walletLock so after the wallet unlock the discovery does not get triggered again
       // const encryptedKeyAgents = await encryptKeyAgents({ keyAgentsByChain, password });
       const newKeyAgent = await Wallet.createKeyAgent(walletManagerUi, newKeyAgentData, getPassword);
 
       await backgroundService.setBackgroundStorage({ keyAgentsByChain });
-      // TODO: updateWalletLock so after unlocking the discovery does not get triggered
+      // TODO: update walletLock so after the wallet unlock the discovery does not get triggered again
       // saveValueInLocalStorage({ key: 'lock', value: encryptedKeyAgents });
       saveValueInLocalStorage({
         key: 'keyAgentData',
         value: newKeyAgentData
       });
 
-      // TODO: updateWalletLock so after unlocking the discovery does not get triggered
+      // TODO: update walletLock so after the wallet unlock the discovery does not get triggered again
       // setWalletLock(encryptedKeyAgents);
       setCardanoWallet({
         keyAgent: newKeyAgent,

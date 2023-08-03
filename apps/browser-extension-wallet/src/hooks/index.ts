@@ -12,7 +12,6 @@ export * from './useTimeSpentOnPage';
 export * from './useCollateral';
 export * from './useNetwork';
 export * from './useEnterKeyPress';
-export * from './useWalletInfoSubscriber';
 export * from './useStakingRewards';
 export * from './useMaxAda';
 export * from './useSyncingTheFirstTime';

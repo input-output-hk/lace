@@ -24,7 +24,7 @@ import { useAppSettingsContext } from '@providers/AppSettings';
 import { config } from '@src/config';
 import { Portal } from '../features/wallet-setup/components/Portal';
 import { MainLoader } from '@components/MainLoader';
-import { useAppInit, useWalletInfoSubscriber } from '@hooks';
+import { useAppInit } from '@hooks';
 import { DappBetaModal } from '../features/dapp';
 
 export const defaultRoutes: RouteMap = [
@@ -103,7 +103,6 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
 
   useAppInit();
   useEnterKeyPress();
-  useWalletInfoSubscriber();
 
   // Register event listeners
   useEffect(() => {

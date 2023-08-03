@@ -29,7 +29,7 @@ export const useAppInit = (): void => {
 
       const { name } = getValueFromLocalStorage('wallet');
       setWalletInfo({
-        name,
+        name: name ?? 'Lace',
         addresses: knownAddresses
       });
 

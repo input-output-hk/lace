@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
-import { useRedirection, useWalletInfoSubscriber, useWalletManager, useAppInit } from '@src/hooks';
+import { useRedirection, useWalletManager, useAppInit } from '@src/hooks';
 import { dAppRoutePaths } from '@routes';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
 import { Route, Switch } from 'react-router-dom';
-import { MainLayout } from '../components/Layout/MainLayout';
+import { MainLayout } from '@components/Layout';
 import {
   Connect as DappConnect,
   SignTxFlowContainer,
@@ -44,7 +44,6 @@ export const DappConnectorView = (): React.ReactElement => {
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
 
   useAppInit();
-  useWalletInfoSubscriber();
 
   useEffect(() => {
     const load = async () => {
