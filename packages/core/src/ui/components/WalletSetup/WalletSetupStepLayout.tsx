@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
 import styles from './WalletSetupStepLayout.module.scss';
 import cn from 'classnames';
-import { Button } from '@lace/common';
-import { Tooltip, Timeline } from 'antd';
+import { Button, Timeline } from '@lace/common';
+import { Tooltip } from 'antd';
 import { urls } from '../../utils/constants';
 import { useTranslate } from '@ui/hooks/useTranslate';
 import i18n from '@ui/lib/i18n';
@@ -94,12 +94,9 @@ export const WalletSetupStepLayout = ({
   return (
     <div className={styles.walletSetupStepLayout} data-testid="wallet-setup-step-layout">
       <div className={styles.sideTimelineContainer}>
-        <Timeline className={styles.sideTimeline}>
+        <Timeline>
           {timelineSteps.map(({ name, key, active }) => (
-            <Timeline.Item
-              key={key}
-              dot={active ? <div className={styles.activeDot} /> : <div className={styles.inactiveDot} />}
-            >
+            <Timeline.Item key={key} active={active}>
               <div className={cn({ [styles.activeText]: currentTimelineStep === key })}>{name}</div>
             </Timeline.Item>
           ))}

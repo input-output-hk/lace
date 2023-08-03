@@ -23,7 +23,7 @@ export type WalletAddressItemProps = {
   beforeEllipsis?: number;
   afterEllipsis?: number;
   isSmall?: boolean;
-  shouldUseEllipsisBeforeAndAfter?: boolean;
+  shouldUseEllipsis?: boolean;
   isAddressWarningVisible?: boolean;
 };
 
@@ -40,7 +40,7 @@ export const WalletAddressItem = ({
   onClick,
   className,
   isSmall = false,
-  shouldUseEllipsisBeforeAndAfter,
+  shouldUseEllipsis,
   isAddressWarningVisible = false
 }: WalletAddressItemProps): React.ReactElement => {
   const { t } = useTranslate();
@@ -78,7 +78,7 @@ export const WalletAddressItem = ({
           textClassName={cn(styles.addressColor, styles.textField)}
           className={cn(styles.listItemBlock, styles.listItemAddress)}
           withTooltip={false}
-          {...(isSmall || shouldUseEllipsisBeforeAndAfter
+          {...(isSmall || shouldUseEllipsis
             ? {
                 charBeforeEllipsisAddress,
                 charAfterEllipsisAddress
