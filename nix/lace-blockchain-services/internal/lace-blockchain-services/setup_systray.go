@@ -93,8 +93,8 @@ func setupTrayUI(
 			case "cardano-node":
 				fixme_CardanoNodeStatus <- formatted
 			case "ogmios":
-				fixme_OgmiosStatus <- upd.Status
-				fixme_SetOgmiosDashboard <- formatted
+				fixme_OgmiosStatus <- formatted
+				fixme_SetOgmiosDashboard <- upd.Url
 			case "provider-server":
 				fixme_ProviderServerStatus <- formatted
 			}
