@@ -11,22 +11,30 @@ import (
 	"runtime"
 	"time"
 
+	t "lace.io/lace-blockchain-services/types"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
 type ManagedChild struct {
-	LogPrefix   string
-	PrettyName  string // used in auto-generated messages to StatusCh
+	ServiceName   string
 	ExePath     string
+	Version     string
+	Revision    string
 	MkArgv      func() []string // XXX: it’s a func to run `getFreeTCPPort()` at the very last moment
 	MkExtraEnv  func() []string
-	StatusCh    chan<- string
+	StatusCh    chan<- StatusAndUrl
 	HealthProbe func(HealthStatus) HealthStatus // the argument is the previous HealthStatus
 	LogMonitor  func(string)
 	LogModifier func(string) string // e.g. to drop redundant timestamps
-	AfterExit   func()
 	TerminateGracefullyByInheritedFd3 bool // <https://github.com/input-output-hk/cardano-node/issues/726>
 	ForceKillAfter time.Duration // graceful exit timeout, after which we SIGKILL the child
+}
+
+type StatusAndUrl struct {
+	Status   string
+	Progress float64
+	Url      string
+	OmitUrl  bool
 }
 
 type HealthStatus struct {
@@ -91,15 +99,72 @@ func manageChildren(comm CommChannels_Manager) {
 			cardanoServicesAvailable = false
 		}
 
-		childrenDefs := []ManagedChild{
-			childCardanoNode(shared, comm.CardanoNodeStatus),
-			childOgmios(shared, comm.OgmiosStatus, comm.SetOgmiosDashboard),
+		ogmiosSyncProgressCh := make(chan float64)
+		defer close(ogmiosSyncProgressCh)
+
+		usedChildren := []func(SharedState, chan<- StatusAndUrl)ManagedChild{
+			childCardanoNode,
+			childOgmios(ogmiosSyncProgressCh),
+		}
+		if cardanoServicesAvailable { usedChildren = append(usedChildren, childProviderServer) }
+
+		childrenDefs := []ManagedChild{}
+		for _, mkChild := range usedChildren {
+			statusCh := make(chan StatusAndUrl, 1)
+			initialStatus := StatusAndUrl{
+				Status: "off",
+				Progress: -1,
+				Url: "",
+			}
+			statusCh <- initialStatus
+			def := mkChild(shared, statusCh)
+			def.StatusCh = statusCh
+			go func(){
+				fullStatus := t.ServiceStatus {
+					ServiceName: def.ServiceName,
+					Status:      initialStatus.Status,
+					Progress:    -1,
+					Url:         initialStatus.Url,
+					Version:     def.Version,
+					Revision:    def.Revision,
+				}
+				for upd := range statusCh {
+					// lessen refreshing, too often causes glitching tray UI on Windows
+					if upd.Status != fullStatus.Status ||
+						upd.Progress != fullStatus.Progress ||
+						(!upd.OmitUrl && upd.Url != fullStatus.Url) {
+						fullStatus.Status = upd.Status
+						fullStatus.Progress = upd.Progress
+						if !upd.OmitUrl {
+							fullStatus.Url = upd.Url
+						}
+						comm.ServiceUpdate <- fullStatus
+					}
+				}
+			}()
+			childrenDefs = append(childrenDefs, def)
 		}
 
-		if cardanoServicesAvailable {
-			childrenDefs = append(childrenDefs,
-				childProviderServer(shared, comm.ProviderServerStatus, comm.SetBackendUrl))
-		}
+		// We want to fake an update to cardano-node’s ServiceStatus as soon as Ogmios returns progress:
+		go func(){
+			var cardanoNodeStatusCh chan<- StatusAndUrl
+			for _, child := range childrenDefs {
+				if child.ServiceName == "cardano-node" {
+					cardanoNodeStatusCh = child.StatusCh
+					break
+				}
+			}
+			for syncProgress := range ogmiosSyncProgressCh {
+				*shared.SyncProgress = syncProgress
+				textual := "syncing"
+				if syncProgress == 1.0 { textual = "synced" }
+				cardanoNodeStatusCh <- StatusAndUrl {
+					Status: textual,
+					Progress: syncProgress,
+					OmitUrl: true,
+				}
+			}
+		}()
 
 		var wgChildren sync.WaitGroup
 
@@ -112,7 +177,13 @@ func manageChildren(comm CommChannels_Manager) {
 			for _, child := range childrenDefs {
 				// Reset all statuses to "off" (not all children might’ve been started
 				// and they’re "waiting" now)
-				child.StatusCh <- "off"
+				child.StatusCh <- StatusAndUrl{
+					Status: "off",
+					Progress: -1,
+					Url: "",
+					OmitUrl: false,
+				}
+				close(child.StatusCh)
 			}
 			fmt.Printf("%s[%d]: session ended for network %s\n", OurLogPrefix, os.Getpid(), networkMemo)
 		}("" + network)
@@ -122,11 +193,16 @@ func manageChildren(comm CommChannels_Manager) {
 		for childIdx, childUnsafe := range childrenDefs {
 			child := childUnsafe // or else all interations will get the same ref (last child)
 			wgChildren.Add(1)
-			fmt.Printf("%s[%d]: starting %s...\n", OurLogPrefix, os.Getpid(), child.LogPrefix)
+			fmt.Printf("%s[%d]: starting %s...\n", OurLogPrefix, os.Getpid(), child.ServiceName)
 			for _, dependant := range childrenDefs[(childIdx+1):] {
-				dependant.StatusCh <- fmt.Sprintf("waiting for %s", child.PrettyName)
+				dependant.StatusCh <- StatusAndUrl{
+					Status: fmt.Sprintf("waiting for %s", child.ServiceName),
+					Progress: -1,
+					Url: "",
+					OmitUrl: true,
+				}
 			}
-			child.StatusCh <- "starting…"
+			child.StatusCh <- StatusAndUrl { Status: "starting…", Progress: -1, Url: "", OmitUrl: true }
 			outputLines := make(chan string)
 			terminateCh := make(chan struct{}, 1)
 			childDidExit := false
@@ -137,7 +213,12 @@ func manageChildren(comm CommChannels_Manager) {
 				child.ForceKillAfter)
 			defer func() {
 				if !childDidExit {
-					child.StatusCh <- "terminating…"
+					child.StatusCh <- StatusAndUrl {
+						Status: "terminating…",
+						Progress: -1,
+						Url: "",
+						OmitUrl: true,
+					}
 					terminateCh <- struct{}{}
 				}
 			}()
@@ -146,14 +227,18 @@ func manageChildren(comm CommChannels_Manager) {
 			// monitor output:
 			go func() {
 				for line := range outputLines {
-					fmt.Printf("%s[%d]: %s\n", child.LogPrefix, childPid, line)
+					fmt.Printf("%s[%d]: %s\n", child.ServiceName, childPid, line)
 					child.LogMonitor(line)
 				}
 				childDidExit = true
 				fmt.Printf("%s[%d]: process ended: %s[%d]\n", OurLogPrefix, os.Getpid(),
-					child.LogPrefix, childPid)
-				child.AfterExit()
-				child.StatusCh <- "off"
+					child.ServiceName, childPid)
+				child.StatusCh <- StatusAndUrl{
+					Status: "off",
+					Progress: -1,
+					Url: "",
+					OmitUrl: false,
+				}
 				wgChildren.Done()
 				anyChildExitedCh <- struct{}{}
 			}()
@@ -170,14 +255,14 @@ func manageChildren(comm CommChannels_Manager) {
 					next := child.HealthProbe(prev)
 					if next.DoRestart {
 						fmt.Printf("%s[%d]: health probe of %s[%d] requested restart\n",
-							OurLogPrefix, os.Getpid(), child.LogPrefix, childPid)
+							OurLogPrefix, os.Getpid(), child.ServiceName, childPid)
 						terminateCh <- struct{}{}
 						return
 					}
 					next.Initialized = prev.Initialized || next.Initialized // remember true
 					if !prev.Initialized && next.Initialized {
 						fmt.Printf("%s[%d]: health probe reported %s[%d] as initialized\n",
-							OurLogPrefix, os.Getpid(), child.LogPrefix, childPid)
+							OurLogPrefix, os.Getpid(), child.ServiceName, childPid)
 						initializedCh <- struct{}{} // continue launching the next process
 					}
 					time.Sleep(next.NextProbeIn)
