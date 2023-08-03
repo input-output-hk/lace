@@ -426,8 +426,11 @@ When(
         break;
       case 'remove':
         testContext.saveWithOverride('numberOfNftsInFolder', numberOfNftsInFolder - numberOfNftsWanted);
-        await NftSelectNftsPage.nfts[0].click({ button: 'right' });
-        await NftFolderContextMenu.clickRemoveNFTOption();
+        for (let i = 0; i < numberOfNftsWanted; i++) {
+          await NftSelectNftsPage.nfts[0].waitForClickable();
+          await NftSelectNftsPage.nfts[0].click({ button: 'right' });
+          await NftFolderContextMenu.clickRemoveNFTOption();
+        }
         break;
       default:
         throw new Error(`Unsupported action: ${action}`);
