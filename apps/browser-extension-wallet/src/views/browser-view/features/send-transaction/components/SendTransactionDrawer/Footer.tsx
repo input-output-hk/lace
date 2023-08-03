@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import styles from './Footer.module.scss';
+import EditIcon from '@assets/icons/edit.component.svg';
+import DeleteIcon from '@assets/icons/delete-icon.component.svg';
 
 import { Sections } from '../../types';
 import {
@@ -85,16 +87,12 @@ export const Footer = withAddressBookContext(
 
     const handleResolver = useHandleResolver();
     const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
-    const expectedAddress = useMemo(
-      () => validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? '',
-      [validatedAddressStatus, addressToEdit.address]
-    );
+
     const actualAddress = useMemo(
       () => validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? '',
       [validatedAddressStatus, addressToEdit.address]
     );
 
-    console.log('addr::', expectedAddress, actualAddress, validatedAddressStatus[addressToEdit.address]);
     const sendEvent = useCallback(
       (name: string, value?: number) =>
         analytics.sendEvent({
@@ -167,16 +165,15 @@ export const Footer = withAddressBookContext(
             : AddressBook.CONFIRM_DELETE_UPDATE_ADDRESS_BROWSER
         );
         deleteAddress(selectedId, {
-          text: t('browserView.addressBook.toast.deleteAddress')
-          // icon: DeleteIcon
+          text: t('browserView.addressBook.toast.deleteAddress'),
+          icon: DeleteIcon
         });
       } else {
-        console.log('expected::', selectedId, actualAddress);
         sendEvent(isPopupView ? AddressBook.CONFIRM_UPDATE_ADDRESS_POPUP : AddressBook.CONFIRM_UPDATE_ADDRESS_BROWSER);
         const addressToSave = await getAddressToSave({ address: addressToEdit, handleResolver });
         await updateAddress(selectedId, addressToSave, {
-          text: t('browserView.addressBook.toast.editAddress')
-          // icon: EditIcon
+          text: t('browserView.addressBook.toast.editAddress'),
+          icon: EditIcon
         });
       }
 

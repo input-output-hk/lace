@@ -241,12 +241,15 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
       handleResolution: addressInputValue.handleResolution
     });
     setSection({ currentSection: Sections.ADDRESS_CHANGE, prevSection: Sections.FORM });
+    setAddressValue(row, address, handle, {
+      hasHandleOwnershipChanged: false,
+      isVerified: false
+    });
   };
 
   useEffect(() => {
     const { tempAddress } = getTemporaryTxDataFromStorage();
     if (!tempAddress) return;
-    console.log('error::3');
     setAddressInputValue({ address: tempAddress });
     setAddressValue(row, tempAddress);
   }, [row, setAddressValue]);
