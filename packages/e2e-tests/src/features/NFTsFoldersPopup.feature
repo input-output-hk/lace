@@ -348,3 +348,40 @@ Feature: NFT - Folders - Popup view
     And I enter a folder name "Sample NFT folder3" into "Folder name" input
     Then I do not see "Given name already exists" error on "Name your folder" page
     And "Confirm" button is enabled on "Rename your folder" drawer
+
+  @LW-7179
+  Scenario Outline: Popup-view - NFT Folders - Folder thumbnail when there are <number_of_nfts_in_folder> in it
+    Given I navigate to NFTs popup page
+    When I create folder with name: "Sample NFT folder1" that contains <number_of_nfts_in_folder> NFTs
+    Then Folder "Sample NFT folder1" displays <number_of_nft_thumbnails> NFT thumbnails
+    And There is a NFTs counter showing <number_of_remaining_nfts> of remaining NFTs in folder "Sample NFT folder1"
+
+    Examples:
+      | number_of_nfts_in_folder | number_of_nft_thumbnails | number_of_remaining_nfts |
+      | 1                        | 1                        | 0                        |
+      | 2                        | 2                        | 0                        |
+      | 3                        | 3                        | 0                        |
+      | 4                        | 4                        | 0                        |
+      | 5                        | 3                        | 2                        |
+      | 9                        | 3                        | 6                        |
+
+  @LW-7180
+  Scenario Outline: Popup-view - NFT Folders - Folder thumbnail & counter updated when <action> NFT to <number_of_nfts_in_folder> NFTs
+    Given I navigate to NFTs popup page
+    And I create folder with name: "Sample NFT folder1" that contains <number_of_nfts_in_folder> NFTs
+    When I left click on the NFT folder with name "Sample NFT folder1"
+    When I <action> 1 NFT to or from the folder
+    Then I see a toast with text: "<toast_message>"
+    And I dismiss the drawer on popup page
+    Then Folder "Sample NFT folder1" displays <number_of_nft_thumbnails> NFT thumbnails
+    And There is a NFTs counter showing <number_of_remaining_nfts> of remaining NFTs in folder "Sample NFT folder1"
+    Examples:
+      | number_of_nfts_in_folder | action | toast_message        | number_of_nft_thumbnails | number_of_remaining_nfts |
+      | 1                        | add    | NFTs added to folder | 2                        | 0                        |
+      | 3                        | add    | NFTs added to folder | 4                        | 0                        |
+      | 4                        | add    | NFTs added to folder | 3                        | 2                        |
+      | 6                        | add    | NFTs added to folder | 3                        | 4                        |
+      | 1                        | remove | NFT removed          | 0                        | 0                        |
+      | 4                        | remove | NFT removed          | 3                        | 0                        |
+      | 5                        | remove | NFT removed          | 4                        | 0                        |
+      | 6                        | remove | NFT removed          | 3                        | 2                        |
