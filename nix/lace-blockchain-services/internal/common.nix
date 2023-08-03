@@ -110,7 +110,7 @@ in rec {
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
 
-  ourVendorHash = "sha256-kEFdxqSs3nY1a6maUSPkc30uENePhcmYkkV1Q0fF/Io=";
+  lace-blockchain-services-exe-vendorHash = "sha256-kEFdxqSs3nY1a6maUSPkc30uENePhcmYkkV1Q0fF/Io=";
 
   hardcodedVersions = pkgs.writeText "version.go" ''
     package versions

@@ -19,7 +19,7 @@ in rec {
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
     src = ./lace-blockchain-services;
-    vendorHash = common.ourVendorHash;
+    vendorHash = common.lace-blockchain-services-exe-vendorHash;
     nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
     buildInputs = with pkgs; [
       (libayatana-appindicator-gtk3.override {
