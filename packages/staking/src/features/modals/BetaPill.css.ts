@@ -3,9 +3,9 @@ import { theme } from '../theme';
 
 export const root = style({
   alignItems: 'center',
-  background: theme.colors.$laceGradient,
+  background: theme.colors.$multidelegationBetaModalPillBackground,
   borderRadius: theme.radius.$medium,
-  color: theme.colors.$primaryWhite,
+  color: theme.colors.$multidelegationBetaModalPillText,
   display: 'flex',
   fontFamily: theme.fontFamily.$nova,
   fontSize: theme.fontSizes.$12,
