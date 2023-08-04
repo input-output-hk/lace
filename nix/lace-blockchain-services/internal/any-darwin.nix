@@ -98,7 +98,7 @@ in rec {
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
     src = ./lace-blockchain-services;
-    vendorHash = "sha256-1slTIiIGxraIFdtKNeH4llXjrtSEaEQ7IIbOM3LL3N0=";
+    vendorHash = common.lace-blockchain-services-exe-vendorHash;
     nativeBuildInputs = with pkgs; [ imagemagick go-bindata ];
     buildInputs =
       (with pkgs; [ ])
@@ -109,7 +109,9 @@ in rec {
     preBuild = ''
       convert -background none -size 66x66 cardano-template.svg cardano.png
       cp cardano.png tray-icon
-      go-bindata -pkg main -o assets.go tray-icon
+      cp ${common.openApiJson} openapi.json
+      go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
+      mkdir -p versions && cp ${common.hardcodedVersions} versions/versions.go
     '';
   };
 
@@ -180,6 +182,8 @@ in rec {
 
     ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
     ln -s ${common.networkConfigs} "$app"/Resources/cardano-node-config
+    ln -s ${common.swagger-ui} "$app"/Resources/swagger-ui
+    ln -s ${common.dashboard} "$app"/Resources/dashboard
 
     ln -s ${icons} "$app"/Resources/iconset.icns
   '';
