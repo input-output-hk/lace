@@ -88,7 +88,7 @@ const TransactionStatusIcon = ({ status, type }: TransactionStatusIconProps) => 
     case TransactionStatus.SPENDABLE:
       return <TransactionTypeIcon type="rewards" />;
     case TransactionStatus.PENDING:
-      return <Icon component={PendingIcon} style={iconStyle} data-testid="pending-tx-icon" />;
+      return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
     case TransactionStatus.ERROR:
     default:
       return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
