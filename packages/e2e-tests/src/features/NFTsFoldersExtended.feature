@@ -390,17 +390,16 @@ Feature: NFT - Folders - Extended view
     And I create folder with name: "Sample NFT folder1" that contains <number_of_nfts_in_folder> NFTs
     When I left click on the NFT folder with name "Sample NFT folder1"
     When I <action> 1 NFT to or from the folder
-    Then I see a toast with text: "<toast_message>"
     And I dismiss the drawer on extended page
     Then Folder "Sample NFT folder1" displays <number_of_nft_thumbnails> NFT thumbnails
     And There is a NFTs counter showing <number_of_remaining_nfts> of remaining NFTs in folder "Sample NFT folder1"
     Examples:
-      | number_of_nfts_in_folder | action | toast_message        | number_of_nft_thumbnails | number_of_remaining_nfts |
-      | 1                        | add    | NFTs added to folder | 2                        | 0                        |
-      | 3                        | add    | NFTs added to folder | 4                        | 0                        |
-      | 4                        | add    | NFTs added to folder | 3                        | 2                        |
-      | 6                        | add    | NFTs added to folder | 3                        | 4                        |
-      | 1                        | remove | NFT removed          | 0                        | 0                        |
-      | 4                        | remove | NFT removed          | 3                        | 0                        |
-      | 5                        | remove | NFT removed          | 4                        | 0                        |
-      | 6                        | remove | NFT removed          | 3                        | 2                        |
+      | number_of_nfts_in_folder | action |  number_of_nft_thumbnails | number_of_remaining_nfts |
+      | 1                        | add    |  2                        | 0                        |
+      | 3                        | add    |  4                        | 0                        |
+      | 4                        | add    |  3                        | 2                        |
+      | 6                        | add    |  3                        | 4                        |
+      | 1                        | remove |  0                        | 0                        |
+      | 4                        | remove |  3                        | 0                        |
+      | 5                        | remove |  4                        | 0                        |
+      | 6                        | remove |  3                        | 2                        |

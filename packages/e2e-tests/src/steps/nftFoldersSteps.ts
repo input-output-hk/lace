@@ -250,17 +250,12 @@ Then(
   }
 );
 
-Then(/^I see a toast with text: "(NFTs added to folder|NFT removed)"$/, async (toastMessage: string) => {
-  switch (toastMessage) {
-    case 'NFTs added to folder':
-      await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.update'), true);
-      break;
-    case 'NFT removed':
-      await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.delete'), true);
-      break;
-    default:
-      throw new Error(`Unsupported toast message: ${toastMessage}`);
-  }
+Then(/^I see a toast with text: "NFTs added to folder"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.update'), true);
+});
+
+Then(/^I see a toast with text: "NFT removed"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.delete'), true);
 });
 
 Then(/^I dismiss the drawer on ([^"]*) page$/, async (mode: 'extended' | 'popup') => {
