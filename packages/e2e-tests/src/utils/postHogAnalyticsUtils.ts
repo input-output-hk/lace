@@ -1,16 +1,15 @@
 import { browser } from '@wdio/globals';
 
-const getEventNamesFromRequest = (request: any): Promise<string> => {
+const getRequestDataPayload = async (request: any): Promise<any> => {
   const requestPayloadBase64Data = decodeURIComponent(String(request.body)).replace('data=', '');
-  const decodedLatestRequestData = JSON.parse(Buffer.from(requestPayloadBase64Data, 'base64').toString('ascii'));
-  return decodedLatestRequestData.event;
+  return JSON.parse(Buffer.from(requestPayloadBase64Data, 'base64').toString('ascii'));
 };
 
 export const getAllEventsNames = async (): Promise<string[]> => {
   const filteredEventNames: string[] = [];
   const requests = await browser.getRequests({ includePending: true, orderBy: 'START' });
   for (const request of requests) {
-    const eventNames = await getEventNamesFromRequest(request);
+    const eventNames = (await getRequestDataPayload(request)).event;
     // $pageview is technical event which is not relevant
     if (eventNames !== '$pageview') {
       filteredEventNames.push(eventNames);
@@ -19,7 +18,12 @@ export const getAllEventsNames = async (): Promise<string[]> => {
   return filteredEventNames;
 };
 
-export const getLatestRequestEvents = async (numberOfLatestRequest = 1): Promise<string[]> => {
+export const getLatestEventsNames = async (numberOfLatestRequest = 1): Promise<string[]> => {
   const allEventNames = await getAllEventsNames();
   return allEventNames.slice(-numberOfLatestRequest);
+};
+
+export const getLatestEventPayload = async (): Promise<any> => {
+  const requests = await browser.getRequests({ includePending: true, orderBy: 'START' });
+  return getRequestDataPayload(requests.pop());
 };
