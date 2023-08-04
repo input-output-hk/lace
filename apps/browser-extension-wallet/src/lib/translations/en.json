@@ -514,7 +514,7 @@
       "stakePoolsTable.emptyMessage": "No results matching your search",
       "details": {
         "title": "Stake pool detail",
-        "titleSecond": "Manage delegation",
+        "titleSecond": "Manage staking",
         "unstakingIsNotYetAvailableFollowTheseStepsIfYouWishToChangeStakePool": "Unstaking is not yet available. Follow these steps if you wish to change stake pool",
         "clickOnAPoolFromTheListInTheMainPage": "Click on a pool from the list in the main page",
         "clickOnTheStakeToThisPoolButtonInTheDetailPage": "Click on the “Stake to this pool” button in the detail page",
