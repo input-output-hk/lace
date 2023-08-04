@@ -98,7 +98,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Install dependencies
         working-directory: ./packages/e2e-tests
-        run: yarn install --check-cache --frozen-lockfile --non-interactive --loglevel=error --ignore-scripts
+        run: yarn config set network-timeout 300000 && yarn install --check-cache --frozen-lockfile --non-interactive --loglevel=error --ignore-scripts
       - name: Start Chrome driver
         run: |
           if [ ${BROWSER} == "chrome" ]; then
