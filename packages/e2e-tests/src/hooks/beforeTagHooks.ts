@@ -111,3 +111,8 @@ Before(
   { tags: '@Staking-SwitchingPools-Extended-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSwitchPoolsE2E)
 );
+
+Before(
+  { tags: '@Multidelegation-SwitchingPools-Extended-E2E' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletMultidelegationSwitchPoolsE2E)
+);
