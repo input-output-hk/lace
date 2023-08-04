@@ -11,6 +11,7 @@ class TransactionsPage {
   private TRANSACTIONS_TABLE_ROW = '//div[@data-testid="asset-activity-item"]';
   private TRANSACTIONS_TABLE_ITEM_ICON = '[data-testid="asset-icon"]';
   private TRANSACTIONS_TABLE_ITEM_TYPE = '[data-testid="transaction-type"]';
+  private TRANSACTIONS_TABLE_ITEM_TX_PENDING = '[data-testid="pending-tx-icon"]';
   private TRANSACTIONS_TABLE_ITEM_TOKENS_AMOUNT = '[data-testid="total-amount"]';
   private TRANSACTIONS_TABLE_ITEM_FIAT_AMOUNT = '[data-testid="fiat-amount"]';
   private TRANSACTIONS_TABLE_ITEM_TIMESTAMP = '[data-testid="timestamp"]';
@@ -47,6 +48,10 @@ class TransactionsPage {
 
   transactionsTableItemType(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.TRANSACTIONS_TABLE_ROW)[index].$(this.TRANSACTIONS_TABLE_ITEM_TYPE);
+  }
+
+  transactionsTableItemTxPending(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.TRANSACTIONS_TABLE_ROW)[index].$(this.TRANSACTIONS_TABLE_ITEM_TX_PENDING);
   }
 
   transactionsTableItemTokensAmount(index: number): ChainablePromiseElement<WebdriverIO.Element> {

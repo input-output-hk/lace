@@ -93,6 +93,7 @@ class TransactionsPageAssert {
   async assertTableItemDetails(index: number, transactionType: string) {
     await this.waitRowsToLoad();
     expect(await TransactionsPage.transactionsTableItemType(index).getText()).to.be.equal(transactionType);
+    await TransactionsPage.transactionsTableItemTxPending(index).waitForDisplayed({ reverse: true, timeout: 60_000 });
   }
 
   async assertTxValueNotZero() {
