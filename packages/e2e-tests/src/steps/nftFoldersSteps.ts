@@ -19,6 +19,7 @@ import DeleteFolderModal from '../elements/NFTs/DeleteFolderModal';
 import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import NftAssert from '../assert/nftAssert';
 import testContext from '../utils/testContext';
+import MenuHeader from '../elements/menuHeader';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -403,7 +404,7 @@ When(
     await NftSelectNftsPage.selectNFTs(numberOfNftsInFolder);
     await NftSelectNftsPage.nextButton.waitForClickable();
     await NftSelectNftsPage.nextButton.click();
-    await NftsPage.createFolderButton.waitForClickable();
+    await MenuHeader.menuButton.waitForClickable();
     await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, true);
     testContext.save('numberOfNftsInFolder', numberOfNftsInFolder);
   }
