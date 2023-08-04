@@ -1,4 +1,4 @@
-/* eslint-disable complexity */
+/* eslint-disable complexity, sonarjs/cognitive-complexity */
 /* eslint-disable unicorn/no-useless-undefined */
 import { Typography } from 'antd';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
@@ -50,7 +50,6 @@ export enum HandleVerificationState {
 }
 const isHandleAddressBookEnabled = process.env.USE_HANDLE_SEND_UPDATE === 'true';
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
   const handleResolver = useHandleResolver();
@@ -102,7 +101,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           } else {
             setHandleVerificationState(HandleVerificationState.INVALID);
           }
-          setAddressValue(row, handles[0].cardanoAddress, addressInputValue.address, { isVerified: true });
+          const cardanoAddress = handles?.length > 0 ? handles[0].cardanoAddress : '';
+          setAddressValue(row, cardanoAddress, addressInputValue.address, { isVerified: true });
           return;
         }
 

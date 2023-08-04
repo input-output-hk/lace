@@ -42,7 +42,9 @@ in rec {
     '';
     buildPhase = ''
       cp ${icon} tray-icon
-      go-bindata -pkg main -o assets.go tray-icon
+      cp ${common.openApiJson} openapi.json
+      go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
+      mkdir -p versions && cp ${common.hardcodedVersions} versions/versions.go
       go build ${if noConsoleWindow then "-ldflags -H=windowsgui" else ""}
     '';
     installPhase = ''
@@ -165,6 +167,8 @@ in rec {
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
     cp -Lf ${sigbreak}/*.exe $out/libexec/
     cp -Lr ${common.networkConfigs} $out/cardano-node-config
+    cp -Lr ${common.swagger-ui} $out/swagger-ui
+    cp -Lr ${common.dashboard} $out/dashboard
     ${if !withJS then "" else ''
       cp -Lr ${cardano-js-sdk.ourPackage} $out/cardano-js-sdk
     ''}
