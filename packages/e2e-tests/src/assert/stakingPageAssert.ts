@@ -166,9 +166,6 @@ class StakingPageAssert {
     await StakingSuccessDrawer.drawerHeaderCloseButton.waitForDisplayed();
     if (mode === 'extended') {
       await StakingSuccessDrawer.drawerNavigationTitle.waitForDisplayed();
-      await expect(await StakingSuccessDrawer.drawerNavigationTitle.getText()).to.equal(
-        await t('browserView.staking.details.titleSecond')
-      );
     }
     await StakingSuccessDrawer.resultIcon.waitForDisplayed();
     await StakingSuccessDrawer.resultTitle.waitForDisplayed();

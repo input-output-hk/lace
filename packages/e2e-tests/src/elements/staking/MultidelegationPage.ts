@@ -71,7 +71,7 @@ class MultidelegationPage {
   async markPoolsForDelegation(poolsToStake: string) {
     const poolsToMark: string[] = [];
     poolsToStake.split(',').forEach((poolName) => {
-      poolsToMark.push(poolName.replace("'", '').trim());
+      poolsToMark.push(poolName.trim());
     });
     for (const poolName of poolsToMark) {
       await this.fillSearch(poolName);
