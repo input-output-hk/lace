@@ -12,7 +12,8 @@ import { useDelegationDetails, useWalletManager } from '@hooks';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useWalletStore } from '@src/stores';
@@ -82,6 +83,8 @@ export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): R
         ? AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_POPUP
         : AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_BROWSER
     });
+
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
   }, [analytics, popupView]);
 
   const handleVerifyPass = useCallback(async () => {

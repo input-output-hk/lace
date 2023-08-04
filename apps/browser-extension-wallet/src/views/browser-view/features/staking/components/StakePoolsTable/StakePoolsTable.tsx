@@ -14,7 +14,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Text } = Typography;
@@ -108,6 +109,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
               action: MatomoEventActions.CLICK_EVENT,
               name: AnalyticsEventNames.Staking.VIEW_STAKEPOOL_INFO_BROWSER
             });
+            analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
             setSelectedStakePool({ logo, ...pool });
             setIsDrawerVisible(true);
           },
