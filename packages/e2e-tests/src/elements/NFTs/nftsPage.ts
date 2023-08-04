@@ -10,6 +10,7 @@ class NftsPage {
   public NFT_NAME = '[data-testid="nft-item-name"]';
   protected FOLDER_CONTAINER = '[data-testid="folder-item"]';
   public NFT_ITEM_IMG_CONTAINER = '[data-testid="nft-item-img-container"]';
+  public REST_OF_NFTS = '[data-testid="rest-of-nfts"]';
 
   get title() {
     return SectionTitle.sectionTitle;

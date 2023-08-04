@@ -258,10 +258,6 @@ Then(/^I see a toast with text: "NFT removed"$/, async () => {
   await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.delete'), true);
 });
 
-Then(/^I dismiss the drawer on ([^"]*) page$/, async (mode: 'extended' | 'popup') => {
-  mode === 'popup' ? await NftsFolderPage.clickHeaderBackButton() : await NftsFolderPage.clickHeaderCloseButton();
-});
-
 Then(/^I select (\d+) NFTs$/, async (numberOfNFTs: number) => {
   await NftSelectNftsPage.selectNFTs(numberOfNFTs);
 });
@@ -418,7 +414,6 @@ When(
     switch (action) {
       case 'add':
         testContext.saveWithOverride('numberOfNftsInFolder', numberOfNftsInFolder + numberOfNftsWanted);
-        await NftFolderAssert.assertSeeAddNftButton();
         await NftsFolderPage.addNftButton.waitForClickable();
         await NftsFolderPage.addNftButton.click();
         await NftSelectNftsPage.selectNFTs(numberOfNftsWanted);

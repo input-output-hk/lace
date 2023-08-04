@@ -371,7 +371,7 @@ Feature: NFT - Folders - Popup view
     And I create folder with name: "Sample NFT folder1" that contains <number_of_nfts_in_folder> NFTs
     When I left click on the NFT folder with name "Sample NFT folder1"
     When I <action> 1 NFT to or from the folder
-    And I dismiss the drawer on popup page
+    And I close the drawer by clicking back button
     Then Folder "Sample NFT folder1" displays <number_of_nft_thumbnails> NFT thumbnails
     And There is a NFTs counter showing <number_of_remaining_nfts> of remaining NFTs in folder "Sample NFT folder1"
     Examples:

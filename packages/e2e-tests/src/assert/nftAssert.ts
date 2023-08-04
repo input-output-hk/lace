@@ -165,10 +165,13 @@ class NftAssert {
     const folderContainer = await NftsPage.getFolder(folderName);
 
     if (numberOfNFTsInFolder > 4) {
-      const numberOfDisplayedRemainingNFTs = Number(((await folderContainer.$('span').getText()) as string).slice(1));
+      const numberOfDisplayedRemainingNFTs = Number(
+        ((await folderContainer.$(NftsPage.REST_OF_NFTS).getText()) as string).slice(1)
+      );
+
       await expect(numberOfDisplayedRemainingNFTs).to.equal(expectedRemainingNumberOfNFTs);
     } else {
-      await folderContainer.$('span').waitForDisplayed({ reverse: true });
+      await folderContainer.$(NftsPage.REST_OF_NFTS).waitForDisplayed({ reverse: true });
     }
   }
 }
