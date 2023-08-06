@@ -24,7 +24,7 @@ export const ExtensionRoutes = (): React.ReactElement => (
       <Route exact path={walletRoutePaths.addressBook} component={AddressBook} />
       <Route exact path={walletRoutePaths.settings} component={Settings} />
       <Route exact path={walletRoutePaths.nfts} component={Nfts} />
-      <Route path="*" render={() => <Redirect to={walletRoutePaths.earn} />} />
+      <Route path="*" render={() => <Redirect to={walletRoutePaths.assets} />} />
     </Switch>
     {/* TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.*/}
     <StakingWarningModals popupView />

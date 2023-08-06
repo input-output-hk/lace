@@ -69,7 +69,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     <OutsideHandlesProvider
       {...{
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
-        e: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
+        expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,
         delegationDetails,
         delegationStoreSelectedStakePoolDetails: selectedStakePoolDetails,
