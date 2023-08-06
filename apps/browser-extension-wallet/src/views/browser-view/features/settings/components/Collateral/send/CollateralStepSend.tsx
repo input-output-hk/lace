@@ -56,7 +56,7 @@ export const CollateralStepSend = ({
           </Text>
           {hasEnoughAda && (
             <div className={styles.bannerContainer}>
-              <Banner withIcon message={t('browserView.settings.wallet.collateral.amountSeparated')} />
+              <Banner withIcon message={t('browserView.settings.wallet.collateral.reclaimBanner')} />
             </div>
           )}
           {isInMemory && hasEnoughAda && (
