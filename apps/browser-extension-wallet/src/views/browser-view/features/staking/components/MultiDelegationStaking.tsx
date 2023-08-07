@@ -5,11 +5,20 @@ import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener
 // https://github.com/import-js/eslint-plugin-import/issues/1810
 // eslint-disable-next-line import/no-unresolved
 import '@lace/staking/index.css';
-import { useBalances, useDelegationDetails, useFetchCoinPrice, useStakingRewards, useWalletManager } from '@hooks';
+import {
+  useBalances,
+  useDelegationDetails,
+  useFetchCoinPrice,
+  useLocalStorage,
+  useStakingRewards,
+  useWalletManager
+} from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
+
+const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
 
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
@@ -53,6 +62,10 @@ export const MultiDelegationStaking = (): JSX.Element => {
   }));
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
+  const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
+    MULTIDELEGATION_FIRST_VISIT_LS_KEY,
+    true
+  );
 
   return (
     <OutsideHandlesProvider
@@ -84,7 +97,9 @@ export const MultiDelegationStaking = (): JSX.Element => {
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
-        compactNumber: compactNumberWithUnit
+        compactNumber: compactNumberWithUnit,
+        multidelegationFirstVisit,
+        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false)
       }}
     >
       <Staking theme={theme.name} />
