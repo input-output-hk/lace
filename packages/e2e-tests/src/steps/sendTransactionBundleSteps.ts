@@ -8,6 +8,7 @@ import transactionAssetSelectionAssert from '../assert/transaction/transactionAs
 import extensionUtils from '../utils/utils';
 import { shelley, byron } from '../data/AddressData';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
+import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
@@ -132,3 +133,11 @@ Then(
     await transactionAssetSelectionAssert.assertAssetIsPresentInTokenList(assetName, shouldBeDisplayed === 'is');
   }
 );
+
+Then(/^I click "Close" button on send success drawer$/, async () => {
+  await simpleTxSideDrawerPageObject.clickCloseAllDoneDrawerButton();
+});
+
+Then(/^I click "View Transaction" button on send success drawer$/, async () => {
+  await simpleTxSideDrawerPageObject.clickViewTxButton();
+});
