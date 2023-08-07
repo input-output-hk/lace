@@ -5,7 +5,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Given Wallet is synced
     And I navigate to Staking extended page
 
-  @LW-temp @Testnet @Pending
+  @LW-7819 @Testnet @Pending
   Scenario Outline: Extended View - Multidelegation - Delegate to multiple pools E2E
     Given I click Overview tab
     Then I wait until delegation info card shows staking to "<pools_before>" pool(s)
