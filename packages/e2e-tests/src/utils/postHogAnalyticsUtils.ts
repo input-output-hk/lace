@@ -23,12 +23,6 @@ export const getLatestEventsNames = async (numberOfLatestRequest = 1): Promise<s
   return allEventNames.slice(-numberOfLatestRequest);
 };
 
-export const getLatestEventsNamesOrder = async (numberOfLatestRequest: string): Promise<string[]> => {
-  const allEventNames = await getAllEventsNames();
-  numberOfLatestRequest = numberOfLatestRequest.slice(0, -2);
-  return allEventNames.slice(-Number(numberOfLatestRequest));
-};
-
 export const getLatestEventPayload = async (): Promise<any> => {
   const requests = await browser.getRequests({ includePending: true, orderBy: 'START' });
   return getRequestDataPayload(requests.pop());

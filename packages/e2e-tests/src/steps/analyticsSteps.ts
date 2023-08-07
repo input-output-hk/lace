@@ -2,12 +2,7 @@ import { DataTable, When, Then } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
-import {
-  getAllEventsNames,
-  getLatestEventPayload,
-  getLatestEventsNames,
-  getLatestEventsNamesOrder
-} from '../utils/postHogAnalyticsUtils';
+import { getAllEventsNames, getLatestEventPayload, getLatestEventsNames } from '../utils/postHogAnalyticsUtils';
 
 When(/^I set up request interception for posthog analytics request\(s\)$/, async () => {
   await browser.pause(1000);
@@ -23,7 +18,6 @@ When(/^I validate latest analytics muliple events:$/, async (eventActionNames: D
     expect(actualEventNames).to.contains(expectedEventName);
   }
 });
-
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
   await browser.pause(1000);
   const actualEventName = await getLatestEventsNames();
@@ -34,13 +28,6 @@ When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numbe
   expect((await getAllEventsNames()).length).to.equal(Number(numberOfRequests));
   await browser.disableInterceptor();
 });
-
-When(/^I validate ([^"]*) latest analytics single event "([^"]*)"$/, async (order: string, eventActionName: string) => {
-  await browser.pause(1000);
-  const actualEventName = await getLatestEventsNamesOrder(order);
-  expect(actualEventName).to.contains(eventActionName);
-});
-
 Then(/^I validate that event has correct properties$/, async () => {
   await browser.pause(1000);
   const actualEventPayload = await getLatestEventPayload();

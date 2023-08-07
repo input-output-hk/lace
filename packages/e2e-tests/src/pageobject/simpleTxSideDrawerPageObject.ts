@@ -3,7 +3,6 @@ import PasswordInput from '../elements/passwordInput';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
-import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 
 class SimpleTxSideDrawerPageObject {
   fillTokenValue = async (value: string) => {
@@ -14,14 +13,6 @@ class SimpleTxSideDrawerPageObject {
     const commonDrawerElements = new CommonDrawerElements();
     await commonDrawerElements.drawerHeaderCloseButton.waitForClickable();
     await commonDrawerElements.drawerHeaderCloseButton.click();
-  };
-
-  clickCloseAllDoneDrawerButton = async () => {
-    await TransactionSubmittedPage.closeButton.click();
-  };
-
-  clickViewTxButton = async () => {
-    await TransactionSubmittedPage.viewTransactionButton.click();
   };
 
   clickBackDrawerButton = async () => {
