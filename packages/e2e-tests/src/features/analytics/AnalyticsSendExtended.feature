@@ -60,6 +60,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I validate latest analytics multiple events:
       | send \| transaction confirmation \| confirm \| click |
       | send \| all done \| view |
-    And I click "View Transaction" button on send success drawer
-    And I validate 2nd latest analytics single event "send | all done | view transaction | click"
+    And I click "View transaction" button on submitted transaction page
+    And I validate latest analytics multiple events:
+      | send \| all done \| view transaction \| click |
     And I validate that 6 analytics event(s) have been sent

@@ -137,7 +137,3 @@ Then(
 Then(/^I click "Close" button on send success drawer$/, async () => {
   await simpleTxSideDrawerPageObject.clickCloseAllDoneDrawerButton();
 });
-
-Then(/^I click "View Transaction" button on send success drawer$/, async () => {
-  await simpleTxSideDrawerPageObject.clickViewTxButton();
-});

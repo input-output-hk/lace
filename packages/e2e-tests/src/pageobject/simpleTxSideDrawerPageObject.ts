@@ -20,10 +20,6 @@ class SimpleTxSideDrawerPageObject {
     await TransactionSubmittedPage.closeButton.click();
   };
 
-  clickViewTxButton = async () => {
-    await TransactionSubmittedPage.viewTransactionButton.click();
-  };
-
   clickBackDrawerButton = async () => {
     const commonDrawerElements = new CommonDrawerElements();
     await commonDrawerElements.drawerHeaderBackButton.waitForClickable();
