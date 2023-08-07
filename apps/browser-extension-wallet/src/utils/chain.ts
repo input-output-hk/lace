@@ -20,6 +20,3 @@ export const getBaseUrlForChain = (chainName: Wallet.ChainName): string => {
   if (!AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
   return url;
 };
-
-export const getChainNameByNetworkMagic = (networkMagic: Wallet.Cardano.NetworkMagics): Wallet.ChainName =>
-  Object.entries(Wallet.Cardano.ChainIds).find(([, ids]) => ids.networkMagic === networkMagic)[0] as Wallet.ChainName;

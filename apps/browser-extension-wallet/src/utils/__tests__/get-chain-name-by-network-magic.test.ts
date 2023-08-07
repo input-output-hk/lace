@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { getChainNameByNetworkMagic } from '../chain';
+import { getChainNameByNetworkMagic } from '../get-chain-name-by-network-magic';
 
 describe('Testing getChainNameByNetworkMagic function', () => {
   test(`should return Mainnet as name for network magic ${Wallet.Cardano.NetworkMagics.Mainnet}`, () => {

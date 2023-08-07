@@ -9,5 +9,4 @@ export interface UserIdService {
   makePersistent(): Promise<void>;
   makeTemporary(): Promise<void>;
   extendLifespan(): Promise<void>;
-  getwalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined>;
 }
