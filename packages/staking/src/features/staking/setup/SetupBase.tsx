@@ -1,17 +1,16 @@
-import { LocalThemeProvider, ThemeColorScheme } from '@lace/ui';
+import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
 import { PropsWithChildren } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { initI18n } from '../../i18n';
 import '../reset.css';
-import { getThemeClassName } from '../../theme';
 import { StakingProps } from '../types';
 import { useI18n } from './useI18n';
 
 initI18n();
 
-export type GeneralProps = PropsWithChildren<StakingProps>;
+export type SetupBaseProps = PropsWithChildren<StakingProps>;
 
-export const General = ({ language, theme, children }: GeneralProps) => {
+export const SetupBase = ({ language, theme, children }: SetupBaseProps) => {
   const { i18n, loading } = useI18n(language);
 
   if (loading) {
@@ -22,9 +21,7 @@ export const General = ({ language, theme, children }: GeneralProps) => {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <LocalThemeProvider colorScheme={themeColorScheme} className={getThemeClassName(themeColorScheme)}>
-        {children}
-      </LocalThemeProvider>
+      <ThemeProvider colorScheme={themeColorScheme}>{children}</ThemeProvider>
     </I18nextProvider>
   );
 };

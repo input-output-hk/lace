@@ -5,7 +5,14 @@ import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener
 // https://github.com/import-js/eslint-plugin-import/issues/1810
 // eslint-disable-next-line import/no-unresolved
 import '@lace/staking/index.css';
-import { useBalances, useDelegationDetails, useFetchCoinPrice, useStakingRewards, useWalletManager } from '@hooks';
+import {
+  useBalances,
+  useDelegationDetails,
+  useFetchCoinPrice,
+  useLocalStorage,
+  useStakingRewards,
+  useWalletManager
+} from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -60,6 +67,11 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
   const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
+  const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
+  const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
+    MULTIDELEGATION_FIRST_VISIT_LS_KEY,
+    true
+  );
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -68,6 +80,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   return (
     <OutsideHandlesProvider
       {...{
+        multidelegationFirstVisit,
+        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,

@@ -4,11 +4,11 @@ import { initI18n } from '../../i18n';
 import '../reset.css';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../store';
-import { General, GeneralProps } from './General';
+import { SetupBase, SetupBaseProps } from './SetupBase';
 
 initI18n();
 
-type SetupProps = GeneralProps;
+type SetupProps = SetupBaseProps;
 
 export const Setup = ({ children, ...rest }: SetupProps) => {
   const { walletStoreInMemoryWallet, walletStoreWalletUICardanoCoin: cardanoCoin } = useOutsideHandles();
@@ -19,5 +19,5 @@ export const Setup = ({ children, ...rest }: SetupProps) => {
     setCurrentPortfolio({ cardanoCoin, rewardAccountInfo });
   }, [rewardAccountInfo, setCurrentPortfolio, cardanoCoin]);
 
-  return <General {...rest}>{children}</General>;
+  return <SetupBase {...rest}>{children}</SetupBase>;
 };

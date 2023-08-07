@@ -66,6 +66,11 @@ export const en: Translations = {
   'drawer.titleSecond': 'Manage staking',
   'general.button.close': 'Close',
   'general.button.confirm': 'Confirm',
+  'modals.beta.button': 'Got it',
+  'modals.beta.description':
+    'Lace allows you to stake to up to 5 pools, we are still ironing things out, make sure you know what you are doing if you would like to use multi-delegation.',
+  'modals.beta.pill': 'Beta',
+  'modals.beta.title': 'Multi-delegation',
   'modals.changingPreferences.buttons.cancel': 'Cancel',
   'modals.changingPreferences.buttons.confirm': 'Fine by me',
   'modals.changingPreferences.description':

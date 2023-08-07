@@ -125,4 +125,6 @@ export type OutsideHandlesContextValue = {
   walletStoreBlockchainProvider: IBlockchainProvider;
   currencyStoreFiatCurrency: CurrencyInfo;
   compactNumber: (value: number | string, decimal?: number) => string;
+  multidelegationFirstVisit: boolean;
+  triggerMultidelegationFirstVisit: () => void;
 };
