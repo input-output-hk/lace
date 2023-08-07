@@ -28,7 +28,7 @@ class MultidelegationPage {
     return $(this.BROWSE_POOLS_TAB);
   }
 
-  get delegationcardPoolsValue() {
+  get delegationCardPoolsValue() {
     return $(this.DELEGATIONCARD_POOLS_VALUE);
   }
 
@@ -63,9 +63,16 @@ class MultidelegationPage {
   }
 
   async clickOnTab(tab: string) {
-    await this.overviewTab.waitForClickable();
-    if (tab === 'Overview') await this.overviewTab.click();
-    if (tab === 'Browse pools') await this.browseTab.click();
+    switch (tab) {
+      case 'Overview':
+        await this.overviewTab.waitForClickable();
+        await this.overviewTab.click();
+        break;
+      case 'Browse pools':
+        await this.browseTab.waitForClickable();
+        await this.browseTab.click();
+        break;
+    }
   }
 
   async markPoolsForDelegation(poolsToStake: string) {
@@ -75,11 +82,11 @@ class MultidelegationPage {
     });
     for (const poolName of poolsToMark) {
       await this.fillSearch(poolName);
-      await MultidelegationPageAssert.assertSeeSearchResultsCount(1);
+      await MultidelegationPageAssert.assertSeeSearchResultsCountExact(1);
       await this.markStakePoolWithName(poolName);
       await this.stakingPageSearchInput.click();
       await clearInputFieldValue(await this.stakingPageSearchInput);
-      await MultidelegationPageAssert.assertSeeSearchResultsCount(6);
+      await MultidelegationPageAssert.assertSeeSearchResultsCountMinimum(6);
     }
   }
 
@@ -93,17 +100,13 @@ class MultidelegationPage {
 
   async markStakePoolWithName(poolName: string) {
     await this.hoverOverPoolWithName(poolName);
-    await this.markPoolForStaking();
+    await this.stakeButton.waitForClickable();
+    await this.stakeButton.click();
   }
 
   private async hoverOverPoolWithName(poolName: string) {
     const poolItem = await this.getPoolByName(poolName);
     await poolItem.moveTo();
-  }
-
-  private async markPoolForStaking() {
-    await this.stakeButton.waitForClickable();
-    await this.stakeButton.click();
   }
 
   async clickButtonOnSection(buttonName: string, section: string) {

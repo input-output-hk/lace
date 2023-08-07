@@ -24,9 +24,9 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I click Overview tab
     Then I wait until delegation info card shows staking to "<pools_after>" pool(s)
     Examples:
-      | pools_before | pools_after | pools_names                            | tx_type         |
-      | 1            | 2           | ADA Capital, 8BETA                     | Delegation      |
-      | 2            | 3           | ADA Capital, 8BETA, Boople             | Delegation      |
-      | 3            | 4           | ADA Capital, 8BETA, Boople, ADV        | Delegation      |
-      | 4            | 5           | ADA Capital, 8BETA, Boople, ADV, BAZAR | Delegation      |
-      | 5            | 1           | ADA Capital                            | De-Registration |
+      | pools_before | pools_after | pools_names                                        | tx_type         |
+      | 1            | 2           | ADA Capital, 8BETA                                 | Delegation      |
+      | 2            | 3           | ADA Capital, 8BETA, Boople Turtle Pool             | Delegation      |
+      | 3            | 4           | ADA Capital, 8BETA, Boople Turtle Pool, ADV        | Delegation      |
+      | 4            | 5           | ADA Capital, 8BETA, Boople Turtle Pool, ADV, BAZAR | Delegation      |
+      | 5            | 1           | ADA Capital                                        | De-Registration |
