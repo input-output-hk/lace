@@ -10,7 +10,7 @@ When(/^I set up request interception for posthog analytics request\(s\)$/, async
   await browser.excludeUrls([new RegExp('^(?!https://eu.posthog.com/e).*')]);
 });
 
-When(/^I validate latest analytics muliple events:$/, async (eventActionNames: DataTable) => {
+When(/^I validate latest analytics multiple events:$/, async (eventActionNames: DataTable) => {
   const expectedEventNames = dataTableAsStringArray(eventActionNames);
   await browser.pause(1000);
   for (const expectedEventName of expectedEventNames) {
@@ -18,6 +18,7 @@ When(/^I validate latest analytics muliple events:$/, async (eventActionNames: D
     expect(actualEventNames).to.contains(expectedEventName);
   }
 });
+
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
   await browser.pause(1000);
   const actualEventName = await getLatestEventsNames();
