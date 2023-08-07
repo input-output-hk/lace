@@ -14,9 +14,10 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I click "Confirm" button on "Transaction summary" page
     And I validate latest analytics single event "send | transaction summary | confirm | click"
     And I enter correct password and confirm the transaction
-    And I validate 2nd latest analytics single event "send | transaction confirmation | confirm | click"
     And The Transaction submitted screen is displayed in extended mode
-    And I validate latest analytics single event "send | all done | view"
+    And I validate latest analytics multiple events:
+      | send \| transaction confirmation \| confirm \| click |
+      | send \| all done \| view |
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "send | all done | x | click"
     And I validate that 6 analytics event(s) have been sent
@@ -34,9 +35,10 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I click "Confirm" button on "Transaction summary" page
     And I validate latest analytics single event "send | transaction summary | confirm | click"
     And I enter correct password and confirm the transaction
-    And I validate 2nd latest analytics single event "send | transaction confirmation | confirm | click"
     And The Transaction submitted screen is displayed in extended mode
-    And I validate latest analytics single event "send | all done | view"
+    And I validate latest analytics multiple events:
+      | send \| transaction confirmation \| confirm \| click |
+      | send \| all done \| view |
     When I click "Close" button on send success drawer
     Then I validate latest analytics single event "send | all done | close | click"
     And I validate that 6 analytics event(s) have been sent
@@ -54,9 +56,10 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I click "Confirm" button on "Transaction summary" page
     And I validate latest analytics single event "send | transaction summary | confirm | click"
     And I enter correct password and confirm the transaction
-    And I validate 2nd latest analytics single event "send | transaction confirmation | confirm | click"
     And The Transaction submitted screen is displayed in extended mode
-    And I validate latest analytics single event "send | all done | view"
+    And I validate latest analytics multiple events:
+      | send \| transaction confirmation \| confirm \| click |
+      | send \| all done \| view |
     And I click "View Transaction" button on send success drawer
     And I validate 2nd latest analytics single event "send | all done | view transaction | click"
     And I validate that 6 analytics event(s) have been sent
