@@ -3,13 +3,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"syscall"
+	"strings"
+	"time"
 
 	"lace.io/lace-blockchain-services/ourpaths"
+	"github.com/UserExistsError/conpty"
+	"github.com/acarl005/stripansi"
 )
 
 // XXX: Reading:
@@ -89,4 +94,102 @@ func inheritExtraFiles(cmd *exec.Cmd, extraFiles []*os.File) {
 
 	cmd.SysProcAttr.StartupInfoCbReserved2 = uint16(len(lpReserved2))
 	cmd.SysProcAttr.StartupInfoLpReserved2 = &lpReserved2[0]
+}
+
+// XXX: this is only temporary, until Mithril doesn’t give us reliable machine-readable output
+func childProcessPTYWindows(
+	path string, argv []string, extraEnv []string,
+	logModifier func(string) string, // e.g. to drop redundant timestamps
+	outputLines chan<- string, terminate <-chan struct{}, pid *int,
+	terminateGracefullyByInheritedFd3 bool,
+	gracefulExitTimeout time.Duration,
+) {
+	defer close(outputLines)
+
+	if terminateGracefullyByInheritedFd3 {
+		outputLines <- "fatal: terminateGracefullyByInheritedFd3 not compatible with PTY (yet?)"
+		return
+	}
+
+	cmdLine := syscall.EscapeArg(path)
+	for _, arg := range argv {
+		cmdLine += " "
+		cmdLine += syscall.EscapeArg(arg)
+	}
+
+	cptyEnv := conpty.ConPtyEnv(nil)
+	if len(extraEnv) > 0 {
+		envBlock, err := syscall.CreateEnvBlock(append(os.Environ(), extraEnv...))
+		if err != nil {
+			outputLines <- fmt.Sprintf("fatal: exec.CreateEnvBlock: %v", err)
+			return
+		}
+		cptyEnv = conpty.ConPtyEnv(envBlock)
+	}
+
+	cpty, err := conpty.Start(cmdLine, cptyEnv)
+	if err != nil {
+		outputLines <- fmt.Sprintf("fatal: %v", err)
+		return
+	}
+
+	process, err :=	os.FindProcess(int(cpty.GetPid()))
+	if err != nil {
+		// can’t happen
+		outputLines <- fmt.Sprintf("fatal: os.FindProcess: %v", err)
+		return
+	}
+
+	//defer cpty.Close()
+	//defer cpty.Wait(context.Background())
+
+	// XXX: cpty handles aren’t closed (they’re pipes) automatically when the command exits, so let’s do this:
+	go func(){
+		_, err := cpty.Wait(context.Background())
+		if err != nil {
+			outputLines <- fmt.Sprintf("fatal: error during cpty.Wait(): %v", err)
+		} else {
+			outputLines <- "info: cpty.Wait() returned without error"
+		}
+		cpty.Close()
+	}()
+
+	waitDone := make(chan struct{})
+
+	if (pid != nil) {
+		*pid = process.Pid
+	}
+
+	go func() {
+		defer func(){
+			waitDone <- struct{}{}
+		}()
+		buf := make([]byte, 1024)
+		for {
+			num, err := cpty.Read(buf)
+			if err != nil { return }
+
+			lines := string(buf[:num])
+			lines = stripansi.Strip(lines)
+			lines =	strings.ReplaceAll(lines, string(rune(0x07)), "")  // remove bells
+
+			// XXX: it’s possible that 2+ TTY updates will be clumped together in a single ‘read’, so:
+			for _, line := range strings.FieldsFunc(lines, func(c rune) bool {
+				return (c == '\n' || c == '\r' || c == rune(0x08))  // 0x08 for Windows
+			}) {
+				if len(line) > 0 {
+					outputLines <- logModifier(line)
+				}
+			}
+		}
+	}()
+
+	gracefulExitOverride := func() {
+		// Ctrl-C according to <https://devblogs.microsoft.com/commandline/windows-command-line-introducing-the-windows-pseudo-console-conpty/>
+		fmt.Printf("%s[%d]: writing Ctrl-C (0x03) to %s[%d]\n",
+			OurLogPrefix, os.Getpid(), filepath.Base(path), process.Pid)
+		cpty.Write([]byte{0x03})
+	}
+
+	__internal__terminateGracefully(terminate, waitDone, gracefulExitTimeout, nil, path, process, gracefulExitOverride)
 }

@@ -285,6 +285,8 @@ func runCommandWithTimeout(
 
 	cmd := exec.CommandContext(ctx, command, args...)
 
+	setManagedChildSysProcAttr(cmd)
+
 	// Against possible orphaned child processes during timeout, but so far Mithril doesn’t have them:
 	cmd.WaitDelay =	1 * time.Second
 

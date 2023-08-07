@@ -12,7 +12,10 @@ in rec {
   inherit (common) cardano-node ogmios;
 
   patchedGo = pkgs.go.overrideAttrs (drv: {
-    patches = (drv.patches or []) ++ [ ./go--windows-StartupInfoLpReserved2.patch ];
+    patches = (drv.patches or []) ++ [
+      ./go--windows-expose-CreateEnvBlock.patch
+      ./go--windows-StartupInfoLpReserved2.patch
+    ];
   });
 
   # XXX: we have to be a bit creative to cross-compile Go code for Windows:
@@ -44,6 +47,10 @@ in rec {
       (
         cd vendor/github.com/getlantern/systray
         patch -p1 -i ${./getlantern-systray--windows-schedule-on-main-thread.patch}
+      )
+      (
+        cd vendor/github.com/UserExistsError/conpty
+        patch -p1 -i ${./conpty--get-pid-add-env.patch}
       )
     '';
     buildPhase = ''
