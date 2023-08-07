@@ -125,6 +125,12 @@ type KeysStructure = {
         confirm: '';
       };
     };
+    beta: {
+      pill: '';
+      title: '';
+      description: '';
+      button: '';
+    };
   };
   overview: {
     delegationCard: {
