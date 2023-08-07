@@ -12,7 +12,7 @@ class MultidelegationPage {
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
   private STAKE_BUTTON = '[data-testid="stake-button"]';
-  private PORTFOLIO_BAR_BTN_NEXT = '[data-testid="portfolioBar-btn-next"]';
+  private PORTFOLIO_BAR_BTN_NEXT = '[data-testid="portfoliobar-btn-next"]';
   private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferencesNextButton"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
 
