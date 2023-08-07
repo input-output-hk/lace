@@ -72,6 +72,8 @@ class MultidelegationPage {
         await this.browseTab.waitForClickable();
         await this.browseTab.click();
         break;
+      default:
+        throw new Error(`Unsupported tab name: ${tab}`);
     }
   }
 
@@ -109,20 +111,22 @@ class MultidelegationPage {
     await poolItem.moveTo();
   }
 
-  async clickButtonOnSection(buttonName: string, section: string) {
+  async clickButtonOnSection(section: string) {
     switch (section) {
       case 'portfolio bar':
         await this.portfolioBarBtnNext.waitForClickable();
-        buttonName === 'Next' ? await this.portfolioBarBtnNext.click() : '';
+        await this.portfolioBarBtnNext.click();
         break;
       case 'manage staking':
         await this.manageStakingBtnNext.waitForClickable();
-        buttonName === 'Next' ? await this.manageStakingBtnNext.click() : '';
+        await this.manageStakingBtnNext.click();
         break;
       case 'confirmation':
         await this.confirmationBtnNext.waitForClickable();
         await this.confirmationBtnNext.click();
         break;
+      default:
+        throw new Error(`Unsupported section name: ${section}`);
     }
   }
 }

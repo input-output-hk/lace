@@ -17,9 +17,6 @@ Then(
   }
 );
 
-Then(
-  /^I click (Next) button on staking (portfolio bar|manage staking|confirmation)$/,
-  async (buttonName: string, section: string) => {
-    await MultidelegationPage.clickButtonOnSection(buttonName, section);
-  }
-);
+Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmation)$/, async (section: string) => {
+  await MultidelegationPage.clickButtonOnSection(section);
+});
