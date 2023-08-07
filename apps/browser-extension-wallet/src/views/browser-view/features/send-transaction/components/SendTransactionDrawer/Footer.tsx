@@ -23,7 +23,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork, useUpdateAddressStatus, useWalletManager } from '@hooks';
+import { useHandleResolver, useNetwork, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider/context';
 import {
   AnalyticsEventActions,
@@ -86,12 +86,6 @@ export const Footer = withAddressBookContext(
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
 
     const handleResolver = useHandleResolver();
-    const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
-
-    const actualAddress = useMemo(
-      () => validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? '',
-      [validatedAddressStatus, addressToEdit.address]
-    );
 
     const sendEvent = useCallback(
       (name: string, value?: number) =>
