@@ -148,8 +148,6 @@ func childProcessPTYWindows(
 		_, err := cpty.Wait(context.Background())
 		if err != nil {
 			outputLines <- fmt.Sprintf("fatal: error during cpty.Wait(): %v", err)
-		} else {
-			outputLines <- "info: cpty.Wait() returned without error"
 		}
 		cpty.Close()
 	}()
