@@ -2,23 +2,33 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
+	"bytes"
+	"strconv"
 
+	t "lace.io/lace-blockchain-services/types"
 	_ "lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
+	"lace.io/lace-blockchain-services/assets"
+	"lace.io/lace-blockchain-services/appconfig"
+	"lace.io/lace-blockchain-services/mainthread"
 
 	"github.com/getlantern/systray"
 	"github.com/atotto/clipboard"
+	"github.com/sqweek/dialog"
 )
 
 func setupTrayUI(
 	comm CommChannels_UI,
 	logFile string,
-	networks []string,
+	networks map[t.NetworkMagic]string,
+	appConfig appconfig.AppConfig,
 ) func() { return func() {
-	iconData, err := Asset("tray-icon")
+	iconData, err := assets.Asset("tray-icon")
 	if err != nil {
 	    panic(err)
 	}
@@ -26,12 +36,16 @@ func setupTrayUI(
 
 	mChooseNetwork := systray.AddMenuItem("Network", "")
 
-	appConfig := loadAppConfig()
-
 	mNetworks := make(map[string](*systray.MenuItem))
 	currentNetwork := ""
-	for _, network := range networks {
-		mNetworks[network] = mChooseNetwork.AddSubMenuItemCheckbox(network, "", false)
+	{
+		reverseNetworks := map[string]t.NetworkMagic{}
+		sortedNames := []string{}
+		for a, b := range networks { reverseNetworks[b] = a; sortedNames = append(sortedNames, b) }
+		sort.Strings(sortedNames)
+		for _, network := range sortedNames {
+			mNetworks[network] = mChooseNetwork.AddSubMenuItemCheckbox(network, "", false)
+		}
 	}
 	for _, network := range networks {
 		go func(network string) {
@@ -46,7 +60,7 @@ func setupTrayUI(
 					fmt.Printf("%s[%d]: switching network to: %s\n",
 						OurLogPrefix, os.Getpid(), network)
 					appConfig.LastNetwork = network
-					saveAppConfig(appConfig)
+					appconfig.Save(appConfig)
 					comm.NetworkSwitch <- network
 				}
 			}
@@ -55,40 +69,67 @@ func setupTrayUI(
 
 	if _, cfgNetExists := mNetworks[appConfig.LastNetwork]; !cfgNetExists {
 		appConfig.LastNetwork = networks[0]
-		saveAppConfig(appConfig)
+		appconfig.Save(appConfig)
 	}
 
 	mNetworks[appConfig.LastNetwork].ClickedCh <- struct{}{}
+
+	go func() {
+		for httpMagic := range comm.HttpSwitchesNetwork {
+			mNetworks[networks[httpMagic]].ClickedCh <- struct{}{}
+		}
+	}()
+
+	// FIXME: this has to be done smarter
+	chMithrilStatus := make(chan t.ServiceStatus)
+	fixme_CardanoNodeStatus := make(chan string)
+	fixme_OgmiosStatus := make(chan string)
+	fixme_SetOgmiosDashboard := make(chan string)
+	fixme_ProviderServerStatus := make(chan string)
+
+	go func(){
+		for upd := range comm.ServiceUpdate {
+			formatted := upd.Status
+			if upd.Progress >= 0 && upd.Progress <= 1 {
+				formatted += fmt.Sprintf(" · %0.2f%%", upd.Progress * 100)
+			} else if upd.Progress >= 0 {
+				formatted += fmt.Sprintf(" · %0.0f", upd.Progress)
+			}
+			switch upd.ServiceName {
+			case "cardano-node":
+				fixme_CardanoNodeStatus <- formatted
+			case "ogmios":
+				fixme_OgmiosStatus <- formatted
+				fixme_SetOgmiosDashboard <- upd.Url
+			case "provider-server":
+				fixme_ProviderServerStatus <- formatted
+			case "mithril-client":
+				chMithrilStatus <- upd
+			}
+		}
+	}()
 
 	//systray.AddMenuItemCheckbox("Run Full Backend (projector)", "", false)
 
 	mCopyUrl := systray.AddMenuItem("Copy Backend URL", "")
 	go func() {
-		url := ""
-		mCopyUrl.Disable()
-		for { select {
-		case <-mCopyUrl.ClickedCh:
+		for range mCopyUrl.ClickedCh {
+			url := fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort)
 			err := clipboard.WriteAll(url)
 			if err != nil {
 				fmt.Printf("%s[%d]: error: failed to copy '%s' to clipboard: %s\n",
 					OurLogPrefix, os.Getpid(), url, err)
 			}
-		case url = <-comm.SetBackendUrl:
-			if url == "" {
-				mCopyUrl.Disable()
-			} else {
-				mCopyUrl.Enable()
-			}
-		}}
+		}
 	}()
 
 	systray.AddSeparator()
 
 	// XXX: this weird type because we want order, and there are no tuples:
 	statuses := []map[string](<-chan string) {
-		{ "cardano-node":    comm.CardanoNodeStatus },
-		{ "Ogmios":          comm.OgmiosStatus },
-		{ "provider-server": comm.ProviderServerStatus },
+		{ "cardano-node":    fixme_CardanoNodeStatus },
+		{ "ogmios":          fixme_OgmiosStatus },
+		{ "provider-server": fixme_ProviderServerStatus },
 	}
 
 	for _, statusItem := range statuses {
@@ -96,16 +137,50 @@ func setupTrayUI(
 			menuItem := systray.AddMenuItem("", "")
 			menuItem.Disable()
 			go func(component string, statusCh <-chan string, menuItem *systray.MenuItem) {
-				prevStatus := "" // lessen refreshing, too often causes glitching on Windows
 				for newStatus := range statusCh {
-					if newStatus != prevStatus {
-						menuItem.SetTitle(component + " · " + newStatus)
-						prevStatus = newStatus
-					}
+					menuItem.SetTitle(component + " · " + newStatus)
 				}
 			}(component, statusCh, menuItem)
 		}
 	}
+
+	mMithrilStatus := systray.AddMenuItem("", "")
+	mMithrilStatus.Hide()
+	mMithrilStatusETA := mMithrilStatus.AddSubMenuItem("", "")
+	mMithrilStatusETA.Disable()
+	mMithrilStatusDledSize := mMithrilStatus.AddSubMenuItem("", "")
+	mMithrilStatusDledSize.Disable()
+	mMithrilStatusTotalSize := mMithrilStatus.AddSubMenuItem("", "")
+	mMithrilStatusTotalSize.Disable()
+	go func(){
+		for upd := range chMithrilStatus {
+			if upd.Status == "off" {
+				mainthread.Schedule(mMithrilStatus.Hide)
+			} else {
+				mainthread.Schedule(mMithrilStatus.Show)
+			}
+
+			formatted := upd.Status
+			if upd.Progress >= 0 && upd.Progress <= 1 {
+				formatted += fmt.Sprintf(" · %0.2f%%", upd.Progress * 100)
+			}
+			mMithrilStatus.SetTitle("mithril · " + formatted)
+
+			eta := "—"
+			if upd.SecondsLeft >= 0 { eta = "in " + secondsToHuman(upd.SecondsLeft) }
+			mMithrilStatusETA.SetTitle("ETA: " + eta)
+
+			downloaded := "—                 "  // extra spaces to accomodate future value in UI
+			if upd.Progress >= 0 && upd.TaskSize >= 0 {
+				downloaded = bytesToHuman(upd.Progress * upd.TaskSize)
+			}
+			mMithrilStatusDledSize.SetTitle("Downloaded: " + downloaded)
+
+			total := "—"
+			if upd.TaskSize >= 0 { total = bytesToHuman(upd.TaskSize) }
+			mMithrilStatusTotalSize.SetTitle("Total: " + total)
+		}
+	}()
 
 	systray.AddSeparator()
 
@@ -123,6 +198,24 @@ func setupTrayUI(
 		}
 	}()
 
+	systray.AddSeparator()
+
+	mSwaggerUI := systray.AddMenuItem("OpenAPI Specification v3.0", "")
+	go func() {
+		for range mSwaggerUI.ClickedCh {
+			url := fmt.Sprintf("http://127.0.0.1:%d/swagger-ui/", appConfig.ApiPort)
+			openWithDefaultApp(url)
+		}
+	}()
+
+	mDashboard := systray.AddMenuItem("Dashboard", "")
+	go func() {
+		for range mDashboard.ClickedCh {
+			url := fmt.Sprintf("http://127.0.0.1:%d/dashboard/", appConfig.ApiPort)
+			openWithDefaultApp(url)
+		}
+	}()
+
 	mOgmiosDashboard := systray.AddMenuItem("Ogmios Dashboard", "")
 	go func() {
 		url := ""
@@ -130,7 +223,7 @@ func setupTrayUI(
 		for { select {
 		case <-mOgmiosDashboard.ClickedCh:
 			openWithDefaultApp(url)
-		case url = <-comm.SetOgmiosDashboard:
+		case url = <-fixme_SetOgmiosDashboard:
 			if url == "" {
 				mOgmiosDashboard.Disable()
 			} else {
@@ -140,6 +233,34 @@ func setupTrayUI(
 	}()
 
 	systray.AddSeparator()
+
+	mResyncMithril := systray.AddMenuItem("Resync with Mithril", "")
+	go func() {
+		// Calculate these? How?
+		eta := map[string](string) {
+			"preview": "about 5 minutes",
+			"preprod": "about 5 minutes",
+			"mainnet": "about 2 hours",
+		}
+		_ = eta
+		for range mResyncMithril.ClickedCh {
+			fmt.Printf("%s[%d]: info: Mithril from goroutine %v\n",
+				OurLogPrefix, os.Getpid(), goid())
+
+			mainthread.Schedule(func() {
+				fmt.Printf("%s[%d]: info: Mithril from goroutine %v\n",
+					OurLogPrefix, os.Getpid(), goid())
+				ans := dialog.Message(
+					"Resync the entire blockchain from scratch with Mithril?\n\n" +
+					"This will delete your current cardano-node DB.\n\n" +
+					"Estimated time: %s.",
+					eta[currentNetwork]).Title("Resync with Mithril?").YesNo()
+				if ans {
+					comm.TriggerMithril <- struct{}{}
+				}
+			})
+		}
+	}()
 
 	mForceRestart := systray.AddMenuItem("Force Restart", "")
 	go func() {
@@ -198,4 +319,40 @@ func openWithDefaultApp(target string) error {
 	}
 
 	return err
+}
+
+func goid() int {
+	buf := make([]byte, 32)
+	n := runtime.Stack(buf, false)
+	buf = buf[:n]
+	buf, ok := bytes.CutPrefix(buf, []byte("goroutine "))
+	if !ok { return -1 }
+	i := bytes.IndexByte(buf, ' ')
+	if i < 0 { return -1 }
+	rv, err := strconv.Atoi(string(buf[:i]))
+	if err != nil { return -1 }
+	return rv
+}
+
+func bytesToHuman(bytes float64) string {
+	if bytes > 1024*1024*1024 { return fmt.Sprintf("%.2f GiB", bytes / (1024*1024*1024)) }
+	if bytes > 1024*1024      { return fmt.Sprintf("%.2f MiB", bytes / (1024*1024)) }
+	if bytes > 1024           { return fmt.Sprintf("%.2f KiB", bytes / (1024)) }
+	return fmt.Sprintf("%.0f B", bytes)
+}
+
+func secondsToHuman(seconds float64) string {
+	if seconds > 24*60*60 {
+		days := math.Floor(seconds / (24*60*60))
+		return fmt.Sprintf("%.0fd %s", days, secondsToHuman(seconds - days * (24*60*60)))
+	}
+	if seconds > 60*60 {
+		hours := math.Floor(seconds / (60*60))
+		return fmt.Sprintf("%.0fh %s", hours, secondsToHuman(seconds - hours * (60*60)))
+	}
+	if seconds > 60 {
+		minutes := math.Floor(seconds / (60))
+		return fmt.Sprintf("%.0fm %s", minutes, secondsToHuman(seconds - minutes * (60)))
+	}
+	return fmt.Sprintf("%.0fs", seconds)
 }

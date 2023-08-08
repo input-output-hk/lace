@@ -7,36 +7,45 @@ import (
 	"strconv"
 	"regexp"
 
+	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
-func childOgmios(shared SharedState, statusCh chan<- string, setOgmiosDashboard chan<- string) ManagedChild {
+func childOgmios(syncProgressCh chan<- float64) func(SharedState, chan<- StatusAndUrl) ManagedChild { return func(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
 	sep := string(filepath.Separator)
 
 	reSyncProgress := regexp.MustCompile(`"networkSynchronization"\s*:\s*(\d*\.\d+)`)
 
 	return ManagedChild{
-		LogPrefix: "ogmios",
-		PrettyName: "Ogmios",
+		ServiceName: "ogmios",
 		ExePath: ourpaths.LibexecDir + sep + "ogmios" + ourpaths.ExeSuffix,
-		MkArgv: func() []string {
+		Version: constants.OgmiosVersion,
+		Revision: constants.OgmiosRevision,
+		MkArgv: func() ([]string, error) {
 			*shared.OgmiosPort = getFreeTCPPort()
 			return []string{
 				"--host", "127.0.0.1",
 				"--port", fmt.Sprintf("%d", *shared.OgmiosPort),
 				"--node-config", shared.CardanoNodeConfigDir + sep + "config.json",
 				"--node-socket", shared.CardanoNodeSocket,
-			}
+			}, nil
 		},
 		MkExtraEnv: func() []string { return []string{} },
+		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			ogmiosUrl := fmt.Sprintf("http://127.0.0.1:%d", *shared.OgmiosPort)
 			err := probeHttp200(ogmiosUrl + "/health", 1 * time.Second)
 			nextProbeIn := 1 * time.Second
 			if (err == nil) {
-				statusCh <- "listening"
-				setOgmiosDashboard <- ogmiosUrl
+				statusCh <- StatusAndUrl {
+					Status: "listening",
+					Progress: -1,
+					TaskSize: -1,
+					SecondsLeft: -1,
+					Url: ogmiosUrl,
+					OmitUrl: false,
+				}
 				nextProbeIn = 60 * time.Second
 			}
 			return HealthStatus {
@@ -50,15 +59,13 @@ func childOgmios(shared SharedState, statusCh chan<- string, setOgmiosDashboard 
 			if ms := reSyncProgress.FindStringSubmatch(line); len(ms) > 0 {
 				num, err := strconv.ParseFloat(ms[1], 64)
 				if err == nil {
-					*shared.SyncProgress = num
+					syncProgressCh <- num
 				}
 			}
 		},
 		LogModifier: func(line string) string { return line },
-		AfterExit: func() {
-			setOgmiosDashboard <- ""
-		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
+		AfterExit: func() error { return nil },
 	}
-}
+}}

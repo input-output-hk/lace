@@ -5,10 +5,11 @@ import (
 	"path/filepath"
 	"time"
 
+	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
-func childProviderServer(shared SharedState, statusCh chan<- string, setBackendUrl chan<- string) ManagedChild {
+func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
 	sep := string(filepath.Separator)
 
 	tokenMetadataServerUrl := "https://tokens.cardano.org"
@@ -19,15 +20,16 @@ func childProviderServer(shared SharedState, statusCh chan<- string, setBackendU
 	var providerServerPort int
 
 	return ManagedChild{
-		LogPrefix: "provider-server",
-		PrettyName: "provider-server",
+		ServiceName: "provider-server",
 		ExePath: ourpaths.LibexecDir + sep + "node" + ourpaths.ExeSuffix,
-		MkArgv: func() []string {
+		Version: constants.ProviderServerVersion,
+		Revision: constants.ProviderServerRevision,
+		MkArgv: func() ([]string, error) {
 			return []string{
 				ourpaths.CardanoServicesDir + sep + "dist" + sep + "cjs" +
 					sep + "cli.js",
 				"start-provider-server",
-			}
+			}, nil
 		},
 		MkExtraEnv: func() []string {
 			providerServerPort = getFreeTCPPort()
@@ -47,6 +49,7 @@ func childProviderServer(shared SharedState, statusCh chan<- string, setBackendU
 					fmt.Sprintf("%d", *shared.OgmiosPort),
 			}
 		},
+		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			backendUrl := fmt.Sprintf("http://127.0.0.1:%d",
@@ -54,8 +57,14 @@ func childProviderServer(shared SharedState, statusCh chan<- string, setBackendU
 			err := probeHttp200(backendUrl + "/health", 1 * time.Second)
 			nextProbeIn := 1 * time.Second
 			if (err == nil) {
-				statusCh <- "listening"
-				setBackendUrl <- backendUrl
+				statusCh <- StatusAndUrl {
+					Status: "listening",
+					Progress: -1,
+					TaskSize: -1,
+					SecondsLeft: -1,
+					Url: backendUrl,
+					OmitUrl: false,
+				}
 				nextProbeIn = 60 * time.Second
 			}
 			return HealthStatus {
@@ -67,10 +76,8 @@ func childProviderServer(shared SharedState, statusCh chan<- string, setBackendU
 		},
 		LogMonitor: func(line string) {},
 		LogModifier: func(line string) string { return line },
-		AfterExit: func() {
-			setBackendUrl <- ""
-		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
+		AfterExit: func() error { return nil },
 	}
 }
