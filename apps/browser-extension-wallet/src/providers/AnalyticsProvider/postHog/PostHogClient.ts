@@ -55,7 +55,7 @@ export class PostHogClient {
       console.debug('[ANALYTICS] IDs were not found');
       return;
     }
-    console.debug('[ANALYTICS] Linking temporary ID with permanent user ID');
+    console.debug('[ANALYTICS] Linking randomized ID with wallet-based ID');
     posthog.alias(alias, id);
   }
 
