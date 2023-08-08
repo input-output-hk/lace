@@ -111,7 +111,7 @@ in rec {
       cp cardano.png tray-icon
       cp ${common.openApiJson} openapi.json
       go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
-      mkdir -p versions && cp ${common.hardcodedVersions} versions/versions.go
+      mkdir -p constants && cp ${common.constants} constants/constants.go
     '';
   };
 
@@ -179,6 +179,7 @@ in rec {
     ln -s ${cardano-node}/bin/cardano-node "$app"/MacOS/
     ln -s ${ogmios}/bin/ogmios "$app"/MacOS/
     ln -s ${cardano-js-sdk.nodejs}/bin/node "$app"/MacOS/
+    ln -s ${mithril-client}/bin/mithril-client "$app"/MacOS/
 
     ln -s ${cardano-js-sdk} "$app"/Resources/cardano-js-sdk
     ln -s ${common.networkConfigs} "$app"/Resources/cardano-node-config
@@ -524,6 +525,17 @@ in rec {
     # Make it downloadable from Hydra:
     mkdir -p $out/nix-support
     echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
+  '';
+
+  mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
+    mkdir -p $out/bin
+    cp ${common.mithril-bin}/${
+      if targetSystem == "aarch64-darwin"
+      then "bin/mithril-client"
+      else "mithril-client"
+    } $out/bin/
+    chmod +x $out/bin/mithril-client
+    $out/bin/mithril-client --version
   '';
 
 }
