@@ -4,17 +4,17 @@ import { AnalyticsEventActions, AnalyticsEventCategories } from '@providers/Anal
 
 type SendEventFn = (name: string, value?: number) => void;
 
-export const useSendEvent = (): SendEventFn => {
+export const useSendEvent = (action: AnalyticsEventActions, category: AnalyticsEventCategories): SendEventFn => {
   const analytics = useAnalyticsContext();
 
   return useCallback(
     (name: string, value?: number) =>
       analytics.sendEvent({
-        action: AnalyticsEventActions.CLICK_EVENT,
-        category: AnalyticsEventCategories.SEND_TRANSACTION,
+        action,
+        category,
         name,
         value
       }),
-    [analytics]
+    [analytics, action, category]
   );
 };

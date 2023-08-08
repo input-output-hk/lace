@@ -23,8 +23,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork, useWalletManager } from '@hooks';
-import { useAnalyticsContext } from '@providers/AnalyticsProvider/context';
+import { useHandleResolver, useNetwork, useSendEvent, useWalletManager } from '@hooks';
 import {
   AnalyticsEventActions,
   AnalyticsEventCategories,
@@ -77,26 +76,14 @@ export const Footer = withAddressBookContext(
     const [metadata] = useMetadata();
     const { onClose, onCloseSubmitedTransaction } = useHandleClose();
     const { executeWithPassword } = useWalletManager();
-    const analytics = useAnalyticsContext();
     const isOnline = useNetwork();
     const [selectedId, setSelectedId] = useState<number | null>();
     const [action, setAction] = useState<typeof ACTIONS.UPDATE | typeof ACTIONS.DELETE | null>();
     const { addressToEdit } = useAddressBookStore() as { addressToEdit: AddressBookSchema };
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
-
+    const sendEvent = useSendEvent(AnalyticsEventActions.CLICK_EVENT, AnalyticsEventCategories.SEND_TRANSACTION);
     const handleResolver = useHandleResolver();
-
-    const sendEvent = useCallback(
-      (name: string, value?: number) =>
-        analytics.sendEvent({
-          action: AnalyticsEventActions.CLICK_EVENT,
-          category: AnalyticsEventCategories.SEND_TRANSACTION,
-          name,
-          value
-        }),
-      [analytics]
-    );
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
