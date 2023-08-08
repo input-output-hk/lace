@@ -108,9 +108,9 @@ type ensureHandleOwnerHasntChangedArgs = {
 export const ensureHandleOwnerHasntChanged = async ({
   handleResolution,
   handleResolver
-}: ensureHandleOwnerHasntChangedArgs): Promise<boolean> => {
+}: ensureHandleOwnerHasntChangedArgs): Promise<void> => {
   if (Cardano.isAddress(handleResolution.handle)) {
-    return false;
+    return;
   }
 
   const { handle, cardanoAddress } = handleResolution;
@@ -131,8 +131,6 @@ export const ensureHandleOwnerHasntChanged = async ({
       actualAddress: newHandleResolution.cardanoAddress
     });
   }
-
-  return true;
 };
 
 // popup view specific validations

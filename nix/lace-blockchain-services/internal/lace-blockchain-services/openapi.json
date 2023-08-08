@@ -10,7 +10,11 @@
       "url": "http://127.0.0.1:12345"
     }
   ],
-  "tags": [{ "name": "default" }],
+  "tags": [
+    {
+      "name": "default"
+    }
+  ],
   "paths": {
     "/v1/info": {
       "get": {
