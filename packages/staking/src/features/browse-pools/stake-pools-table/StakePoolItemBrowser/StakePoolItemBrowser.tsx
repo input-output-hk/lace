@@ -105,6 +105,7 @@ export const StakePoolItemBrowser = ({
             event.stopPropagation();
             includedInDraft ? removeFromDraft() : addToDraft();
           }}
+          data-testid="stake-button"
         />
       </div>
     </div>
