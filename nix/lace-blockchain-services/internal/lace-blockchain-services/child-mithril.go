@@ -64,6 +64,9 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 
 	currentStatus := SInitializing
 
+	// For debouncing:
+	downloadProgressLastEmitted := time.Now()
+
 	explorerUrl := ""
 	for _, envVar := range extraEnv[shared.Network] {
 		varName := "AGGREGATOR_ENDPOINT="
@@ -266,6 +269,18 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			}
 			line = result.String()
 			line = strings.TrimSpace(line)
+
+			// Debounce the download progress bar, it’s way too frequent:
+			if currentStatus == SDownloading {
+				if ms := reProgress.FindStringSubmatch(line); len(ms) > 0 {
+					if time.Since(downloadProgressLastEmitted) >= 333 * time.Millisecond {
+						downloadProgressLastEmitted = time.Now()
+					} else {
+						line = ""
+					}
+				}
+			}
+
 			return line
 		},
 		TerminateGracefullyByInheritedFd3: false,
