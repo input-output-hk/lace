@@ -27,7 +27,6 @@ export const AddressChangeDetail = withAddressBookContext(
     const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
     const { addressToEdit } = useAddressBookStore();
 
-    console.log('addr2::', addressToEdit);
     const expectedAddress = useMemo(
       () => validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? '',
       [validatedAddressStatus, addressToEdit.address]
@@ -63,95 +62,90 @@ export const AddressChangeDetail = withAddressBookContext(
 
     return (
       <>
-        <>
-          <div className={styles.warningBanner}>
-            <Banner
-              withIcon
-              message={t('addressBook.reviewModal.banner.browserDescription', { name: addressToEdit.name })}
-            />
-          </div>
-          <div className={styles.addressContainer}>
-            <Timeline className={cn(styles.sideTimeline)}>
-              <Timeline.Item dot={<div className={styles.inactiveDot} />}>
-                <div className={cn(styles.addressDetailsContainer)}>
-                  <div className={cn(styles.addressDataDetails)}>
-                    <div className={cn(styles.activeText)}>
-                      {t('addressBook.reviewModal.previewsAddress.description')}
-                    </div>
-                    <Ellipsis
-                      text={expectedAddress}
-                      className={cn(styles.addressDetails)}
-                      withTooltip={false}
-                      {...(isPopupView
-                        ? {
-                            beforeEllipsis: defaultBeforeEllipsis,
-                            afterEllipsis: defaultAfterEllipsis
-                          }
-                        : { ellipsisInTheMiddle: true })}
-                    />
+        <div className={styles.warningBanner}>
+          <Banner
+            withIcon
+            message={t('addressBook.reviewModal.banner.browserDescription', { name: addressToEdit.name })}
+          />
+        </div>
+        <div className={styles.addressContainer}>
+          <Timeline className={cn(styles.sideTimeline)}>
+            <Timeline.Item dot={<div className={styles.inactiveDot} />}>
+              <div className={cn(styles.addressDetailsContainer)}>
+                <div className={cn(styles.addressDataDetails)}>
+                  <div className={cn(styles.activeText)}>
+                    {t('addressBook.reviewModal.previewsAddress.description')}
                   </div>
-                  <CopyToClipboard text={expectedAddress}>
-                    <div onMouseLeave={handleMouseLeaveExpectedAddress}>
-                      <div
-                        onClick={handleExpectedAddressOnClickCopy}
-                        className={styles.copyContainer}
-                        data-testid="transaction-hash-copy-container"
-                      >
-                        {expectedAddressHasBeenCopied ? (
-                          <Check className={styles.checkIcon} />
-                        ) : (
-                          <Copy className={styles.copyIcon} />
-                        )}
-                        <Text className={styles.copy} data-testid="transaction-hash-copy-text">
-                          {t(expectedAddressCopyText)}
-                        </Text>
-                      </div>
-                    </div>
-                  </CopyToClipboard>
+                  <Ellipsis
+                    text={expectedAddress}
+                    className={cn(styles.addressDetails)}
+                    withTooltip={false}
+                    {...(isPopupView
+                      ? {
+                          beforeEllipsis: defaultBeforeEllipsis,
+                          afterEllipsis: defaultAfterEllipsis
+                        }
+                      : { ellipsisInTheMiddle: true })}
+                  />
                 </div>
-              </Timeline.Item>
-              <Timeline.Item dot={<div className={styles.activeDot} />}>
-                <div className={cn(styles.addressDetailsContainer)}>
-                  <div className={cn(styles.addressDataDetails)}>
-                    <div className={cn(styles.activeText)}>
-                      {' '}
-                      {t('addressBook.reviewModal.actualAddress.description')}
+                <CopyToClipboard text={expectedAddress}>
+                  <div onMouseLeave={handleMouseLeaveExpectedAddress}>
+                    <div
+                      onClick={handleExpectedAddressOnClickCopy}
+                      className={styles.copyContainer}
+                      data-testid="transaction-hash-copy-container"
+                    >
+                      {expectedAddressHasBeenCopied ? (
+                        <Check className={styles.checkIcon} />
+                      ) : (
+                        <Copy className={styles.copyIcon} />
+                      )}
+                      <Text className={styles.copy} data-testid="transaction-hash-copy-text">
+                        {t(expectedAddressCopyText)}
+                      </Text>
                     </div>
-                    <Ellipsis
-                      text={actualAddress}
-                      className={cn(styles.addressDetails)}
-                      withTooltip={false}
-                      {...(isPopupView
-                        ? {
-                            beforeEllipsis: defaultBeforeEllipsis,
-                            afterEllipsis: defaultAfterEllipsis
-                          }
-                        : { ellipsisInTheMiddle: true })}
-                    />
                   </div>
-                  <CopyToClipboard text={actualAddress}>
-                    <div onMouseLeave={handleMouseLeaveActualAddress}>
-                      <div
-                        className={styles.copyContainer}
-                        onClick={handleActualAddressOnClickCopy}
-                        data-testid="transaction-hash-copy-container"
-                      >
-                        {actualAddressHasBeenCopied ? (
-                          <Check className={styles.checkIcon} />
-                        ) : (
-                          <Copy className={styles.copyIcon} />
-                        )}
-                        <Text className={styles.copy} data-testid="transaction-hash-copy-text">
-                          {t(actualAddressCopyText)}
-                        </Text>
-                      </div>
-                    </div>
-                  </CopyToClipboard>
+                </CopyToClipboard>
+              </div>
+            </Timeline.Item>
+            <Timeline.Item dot={<div className={styles.activeDot} />}>
+              <div className={cn(styles.addressDetailsContainer)}>
+                <div className={cn(styles.addressDataDetails)}>
+                  <div className={cn(styles.activeText)}> {t('addressBook.reviewModal.actualAddress.description')}</div>
+                  <Ellipsis
+                    text={actualAddress}
+                    className={cn(styles.addressDetails)}
+                    withTooltip={false}
+                    {...(isPopupView
+                      ? {
+                          beforeEllipsis: defaultBeforeEllipsis,
+                          afterEllipsis: defaultAfterEllipsis
+                        }
+                      : { ellipsisInTheMiddle: true })}
+                  />
                 </div>
-              </Timeline.Item>
-            </Timeline>
-          </div>
-        </>
+                <CopyToClipboard text={actualAddress}>
+                  <div onMouseLeave={handleMouseLeaveActualAddress}>
+                    <div
+                      className={styles.copyContainer}
+                      onClick={handleActualAddressOnClickCopy}
+                      data-testid="transaction-hash-copy-container"
+                    >
+                      {actualAddressHasBeenCopied ? (
+                        <Check className={styles.checkIcon} />
+                      ) : (
+                        <Copy className={styles.copyIcon} />
+                      )}
+                      <Text className={styles.copy} data-testid="transaction-hash-copy-text">
+                        {t(actualAddressCopyText)}
+                      </Text>
+                    </div>
+                  </div>
+                </CopyToClipboard>
+              </div>
+            </Timeline.Item>
+          </Timeline>
+        </div>
       </>
     );
   }

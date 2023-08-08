@@ -59,7 +59,6 @@ export const SendTransactionLayout = ({ children, isPopupView }: SendTransaction
         ...(![Sections.ADDRESS_LIST, Sections.ADDRESS_FORM, Sections.ASSET_PICKER].includes(currentSection) ||
         shouldAssetPickerDisplayFooter
           ? {
-              // eslint-disable-next-line @typescript-eslint/no-empty-function
               renderFooter: () => (
                 <Footer
                   key={currentSection}

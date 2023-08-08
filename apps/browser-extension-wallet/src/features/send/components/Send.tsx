@@ -66,13 +66,13 @@ export const Send = (): React.ReactElement => {
           </div>
         }
         footer={
-          shouldDisplayFooter ? (
+          shouldDisplayFooter && (
             <Footer
               isPopupView
               openContinueDialog={toggleContinueDialog}
               onHandleChangeConfirm={() => setSection({ currentSection: Sections.FORM })}
             />
-          ) : undefined
+          )
         }
         popupView
       >
