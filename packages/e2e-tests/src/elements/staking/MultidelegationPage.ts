@@ -8,13 +8,14 @@ class MultidelegationPage {
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
   private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
   private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
-  private SEARCH_INPUT = '.ant-select-selection-search input';
+  private SEARCH_INPUT = '[data-testid="search-input"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
   private STAKE_BUTTON = '[data-testid="stake-button"]';
   private PORTFOLIO_BAR_BTN_NEXT = '[data-testid="portfoliobar-btn-next"]';
-  private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferencesNextButton"]';
+  private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferences-next-button"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
+  private MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM = '[data-testid="multidelegation-beta-modal-button"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -60,6 +61,10 @@ class MultidelegationPage {
 
   get confirmationBtnNext() {
     return $(this.CONFIRMATION_BTN_NEXT);
+  }
+
+  get multidelegationBetaModalBtnConfirm() {
+    return $(this.MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM);
   }
 
   async clickOnTab(tab: string) {
@@ -128,6 +133,11 @@ class MultidelegationPage {
       default:
         throw new Error(`Unsupported section name: ${section}`);
     }
+  }
+
+  async confirmBetaModal() {
+    await this.multidelegationBetaModalBtnConfirm.waitForClickable();
+    await this.multidelegationBetaModalBtnConfirm.click();
   }
 }
 
