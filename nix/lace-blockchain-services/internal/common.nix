@@ -124,7 +124,7 @@ in rec {
       OgmiosRevision = ${__toJSON inputs.ogmios.rev}
       ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
       ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
-      MithrilClientRevision = ${__toJSON mithril-bin.version}
+      MithrilClientRevision = ${__toJSON inputs.mithril.sourceInfo.rev}
       MithrilClientVersion = ${__toJSON mithril-bin.version}
       MithrilGVKPreview = ${__toJSON mithrilGenesisVerificationKeys.preview}
       MithrilGVKPreprod = ${__toJSON mithrilGenesisVerificationKeys.preprod}
@@ -191,29 +191,14 @@ in rec {
   '';
 
   mithrilGenesisVerificationKeys = {
-    preview = builtins.readFile (pkgs.fetchurl {
-      url =
-        "https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration"
-        + "/pre-release-preview/genesis.vkey";
-        hash = "sha256-kNqbbOdx5lm34zhiBaM6TzIs+J0MsuANCkhwp43LiN8=";
-    });
-    preprod = builtins.readFile (pkgs.fetchurl {
-      url =
-        "https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration"
-        + "/release-preprod/genesis.vkey";
-        hash = "sha256-kNqbbOdx5lm34zhiBaM6TzIs+J0MsuANCkhwp43LiN8=";
-    });
-    mainnet = builtins.readFile (pkgs.fetchurl {
-      url =
-        "https://raw.githubusercontent.com/input-output-hk/mithril/main/mithril-infra/configuration"
-        + "/release-mainnet/genesis.vkey";
-        hash = "sha256-Fdav0t8HG3XTfn6EUTYphrOETShXUaOuwjwaKWkJZwY=";
-    });
+    preview = builtins.readFile (inputs.mithril + "/mithril-infra/configuration/pre-release-preview/genesis.vkey");
+    preprod = builtins.readFile (inputs.mithril + "/mithril-infra/configuration/release-preprod/genesis.vkey");
+    mainnet = builtins.readFile (inputs.mithril + "/mithril-infra/configuration/release-mainnet/genesis.vkey");
   };
 
   # FIXME: build from source (Linux, and Darwins are available in their flake.nix, but Windows not)
   mithril-bin = let
-    ver = "2329.0";
+    ver = (__fromJSON (__readFile (inputs.self + "/flake.lock"))).nodes.mithril.original.ref;
   in {
     x86_64-linux = pkgs.fetchzip {
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-linux-x64.tar.gz";
@@ -228,19 +213,7 @@ in rec {
       url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-macos-x64.tar.gz";
       hash = "sha256-u0S9ClTE38Uv5uyFO4dlS0P/O1cAjeUwl3zarhwk9no=";
     };
-    aarch64-darwin = (flake-compat {
-      src = let
-        raw = pkgs.fetchFromGitHub {
-          owner = "input-output-hk"; repo = "mithril";
-          rev = ver;
-          hash = "sha256-XBWz61dMzsZhX0dtbXm/5WfdYUZ7Z1hpq7vlw5d9mq0=";
-        };
-      in {
-        outPath = toString raw;
-        inherit (raw) rev lastModified lastModifiedDate;
-        shortRev = lib.substring 0 7 raw.rev;
-      };
-    }).defaultNix.packages.aarch64-darwin.mithril-client;
+    aarch64-darwin = inputs.mithril.packages.aarch64-darwin.mithril-client;
   }.${targetSystem} // { version = ver; };
 
 }
