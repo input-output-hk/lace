@@ -23,7 +23,6 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/load"
-	"github.com/sqweek/dialog"
 	"github.com/getlantern/systray"
 	"github.com/allan-simon/go-singleinstance"
 )
@@ -52,9 +51,7 @@ func main() {
 	lockFile := ourpaths.WorkDir + sep + "instance.lock"
 	lockFileFile, err := singleinstance.CreateLockFile(lockFile)
 	if err != nil {
-		ui.BringAppToForeground()
-		dialog.Message("Another instance of ‘%s’ is already running.\n\nCheck in the system tray area.",
-			OurLogPrefix).Title("Already running!").Error()
+		ui.HandleAppReopened()
 		os.Exit(1)
 	}
 	defer lockFileFile.Close() // or else, it will be GC’d (and unlocked!)
