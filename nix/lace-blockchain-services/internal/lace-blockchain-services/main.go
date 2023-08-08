@@ -138,7 +138,7 @@ func main() {
 			Revision: constants.LaceBlockchainServicesRevision,
 		}
 
-		initiateShutdownCh := make(chan struct{}, 1)
+		initiateShutdownCh := make(chan struct{}, 16)
 
 		return CommChannels_UI {
 			ServiceUpdate: serviceUpdateToUI,
@@ -196,6 +196,10 @@ func main() {
 	}()
 
 	systray.Run(setupTrayUI(commUI, logFile, networks, appConfig), func(){
+		// It’s possible that this callback is called from macOS “Quit” even from the Dock area
+		// (we’re briefly shown there while dialogs are displayed) – let’s (re)initiate a clean shutdown:
+		commUI.InitiateShutdownCh <- struct{}{}
+
 		wgManager.Wait()
 		fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 	})
