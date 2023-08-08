@@ -111,3 +111,10 @@ Before(
   { tags: '@Staking-SwitchingPools-Extended-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSwitchPoolsE2E)
 );
+
+Before(
+  { tags: '@AdaHandle-extended' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletAdaHandle)
+);
+
+Before({ tags: '@AdaHandle-popup' }, async () => await popupViewWalletInitialization(TestWalletName.WalletAdaHandle));
