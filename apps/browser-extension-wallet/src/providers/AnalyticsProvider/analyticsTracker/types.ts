@@ -104,6 +104,11 @@ export enum EnhancedAnalyticsOptInStatus {
   OptedOut = 'REJECTED'
 }
 
+export enum UserTrackingType {
+  Enhanced = 'enhanced',
+  Basic = 'basic'
+}
+
 export enum ExtensionViews {
   Extended = 'extended',
   Popup = 'popup'
@@ -132,10 +137,15 @@ export type PostHogActionsKeys =
   | 'DONE_GO_TO_WALLET';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
+export type PostHogProperty = string | boolean | Record<string, string | boolean>;
+export type PostHogProperties = Record<string, PostHogProperty>;
 export type PostHogMetadata = {
   distinct_id?: string;
   alias_id?: string;
   url: string;
   view: ExtensionViews;
   sent_at_local: string;
+  $set: {
+    user_tracking_type: string;
+  };
 };

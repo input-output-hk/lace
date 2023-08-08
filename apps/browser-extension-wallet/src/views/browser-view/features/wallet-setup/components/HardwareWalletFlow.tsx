@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 // / <reference types="w3c-web-hid" />
 /* eslint-disable max-statements */
 /* eslint-disable react/no-multi-comp */
@@ -26,7 +27,7 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 import { walletRoutePaths } from '@routes/wallet-paths';
-import { isTrezorHWSupported } from '../helpers';
+import { getLedgerSpecifications, getTrezorSpecifications, isTrezorHWSupported } from '../helpers';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import { SendOboardingAnalyticsEvent } from '../types';
@@ -36,7 +37,8 @@ const { WalletSetup: Events } = AnalyticsEventNames;
 const { CHAIN } = config();
 const {
   Cardano: { ChainIds },
-  AVAILABLE_WALLETS
+  AVAILABLE_WALLETS,
+  KeyManagement
 } = Wallet;
 const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 
@@ -199,6 +201,31 @@ export const HardwareWalletFlow = ({
 
   const handleFinishCreation = () => saveHardwareWallet(walletCreated, CHAIN);
 
+  const handleGoToMyWalletClick = async () => {
+    const HWSpecifications =
+      connectedDevice === KeyManagement.KeyAgentType.Trezor
+        ? await getTrezorSpecifications()
+        : await getLedgerSpecifications();
+    const posthogProperties = {
+      $set_once: {
+        initial_hardware_wallet_model: HWSpecifications.model,
+        initial_firmware_version: HWSpecifications.firmwareVersion,
+        initial_cardano_app_version: HWSpecifications?.cardanoAppVersion
+      }
+    };
+
+    await sendAnalytics(
+      Events.SETUP_FINISHED_NEXT,
+      postHogOnboardingActions.hw?.DONE_GO_TO_WALLET,
+      undefined,
+      posthogProperties
+    );
+    await handleFinishCreation();
+
+    // Workaround to enable staking with Ledger right after the onboarding LW-5564
+    window.location.reload();
+  };
+
   const onHardwareWalletDisconnect = useCallback((event: HIDConnectionEvent) => {
     if (event.device.opened) showHardwareWalletError('common');
   }, []);
@@ -277,12 +304,7 @@ export const HardwareWalletFlow = ({
     create: () => <WalletSetupCreationStep translations={walletSetupCreateStepTranslations} isHardwareWallet />,
     finish: () => (
       <WalletSetupFinalStep
-        onFinish={async () => {
-          await sendAnalytics(Events.SETUP_FINISHED_NEXT, postHogOnboardingActions.hw?.DONE_GO_TO_WALLET);
-          await handleFinishCreation();
-          // Workaround to enable staking with Ledger right after the onboarding LW-5564
-          window.location.reload();
-        }}
+        onFinish={handleGoToMyWalletClick}
         onRender={() => navigator.hid.removeEventListener('disconnect', onHardwareWalletDisconnect)}
         translations={walletSetupFinalStepTranslations}
         isHardwareWallet

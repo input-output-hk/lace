@@ -9,4 +9,5 @@ export interface UserIdService {
   makePersistent(): Promise<void>;
   makeTemporary(): Promise<void>;
   extendLifespan(): Promise<void>;
+  isPersistentUser(): Promise<boolean>;
 }

@@ -5,7 +5,8 @@ import {
   MatomoEventCategories,
   AnalyticsEventNames,
   PostHogAction,
-  postHogOnboardingActions
+  postHogOnboardingActions,
+  PostHogProperties
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { ILocalStorage } from '@src/types';
@@ -107,7 +108,8 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
     category: SetupAnalyticsCategories,
     eventName: string,
     value = 1,
-    postHogAction?: PostHogAction
+    postHogAction?: PostHogAction,
+    postHogProperties?: PostHogProperties
   ) => {
     await analytics.sendEventToMatomo({
       action: MatomoEventActions.CLICK_EVENT,
@@ -116,13 +118,13 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
       value
     });
     if (postHogAction) {
-      await analytics.sendEventToPostHog(postHogAction);
+      await analytics.sendEventToPostHog(postHogAction, postHogProperties);
     }
   };
 
   const getSendAnalyticsHandler: (eventCategory: SetupAnalyticsCategories) => SendOboardingAnalyticsEvent =
-    (eventCategory) => async (event, postHogAction, value) =>
-      await sendAnalytics(eventCategory, event, value, postHogAction);
+    (eventCategory) => async (event, postHogAction, value, postHogProperties) =>
+      await sendAnalytics(eventCategory, event, value, postHogAction, postHogProperties);
 
   const handleRestoreWallet = () => {
     setIsConfirmRestoreOpen(true);
