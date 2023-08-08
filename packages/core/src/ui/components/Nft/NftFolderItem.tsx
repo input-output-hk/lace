@@ -45,7 +45,7 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
       placement="top"
       title={`+${restOfNfts}`}
     >
-      <span>+{restOfNfts}</span>
+      <span data-testid="rest-of-nfts">+{restOfNfts}</span>
     </Tooltip>
   );
 

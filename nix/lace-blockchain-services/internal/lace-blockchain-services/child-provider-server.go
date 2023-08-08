@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"lace.io/lace-blockchain-services/versions"
+	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 )
 
@@ -22,14 +22,14 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 	return ManagedChild{
 		ServiceName: "provider-server",
 		ExePath: ourpaths.LibexecDir + sep + "node" + ourpaths.ExeSuffix,
-		Version: versions.ProviderServerVersion,
-		Revision: versions.ProviderServerRevision,
-		MkArgv: func() []string {
+		Version: constants.ProviderServerVersion,
+		Revision: constants.ProviderServerRevision,
+		MkArgv: func() ([]string, error) {
 			return []string{
 				ourpaths.CardanoServicesDir + sep + "dist" + sep + "cjs" +
 					sep + "cli.js",
 				"start-provider-server",
-			}
+			}, nil
 		},
 		MkExtraEnv: func() []string {
 			providerServerPort = getFreeTCPPort()
@@ -49,6 +49,7 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 					fmt.Sprintf("%d", *shared.OgmiosPort),
 			}
 		},
+		AllocatePTY: false,
 		StatusCh: statusCh,
 		HealthProbe: func(prev HealthStatus) HealthStatus {
 			backendUrl := fmt.Sprintf("http://127.0.0.1:%d",
@@ -59,6 +60,8 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 				statusCh <- StatusAndUrl {
 					Status: "listening",
 					Progress: -1,
+					TaskSize: -1,
+					SecondsLeft: -1,
 					Url: backendUrl,
 					OmitUrl: false,
 				}
@@ -75,5 +78,6 @@ func childProviderServer(shared SharedState, statusCh chan<- StatusAndUrl) Manag
 		LogModifier: func(line string) string { return line },
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
+		AfterExit: func() error { return nil },
 	}
 }
