@@ -10,7 +10,7 @@ export const StakePoolPreferencesFooter = () => {
     <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
       <Button.CallToAction
         label={'Next'}
-        data-testid={'preferencesNextButton'}
+        data-testid={'preferences-next-button'}
         onClick={() => setSection(sectionsConfig[Sections.CONFIRMATION])}
         w={'$fill'}
       />

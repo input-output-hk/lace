@@ -118,3 +118,8 @@ Before(
 );
 
 Before({ tags: '@AdaHandle-popup' }, async () => await popupViewWalletInitialization(TestWalletName.WalletAdaHandle));
+
+Before(
+  { tags: '@Multidelegation-SwitchingPools-Extended-E2E' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletMultidelegationSwitchPoolsE2E)
+);
