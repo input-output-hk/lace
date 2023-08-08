@@ -1,4 +1,4 @@
-package main
+package ui
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 	"strconv"
 
 	t "lace.io/lace-blockchain-services/types"
-	_ "lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
+	"lace.io/lace-blockchain-services/ourpaths" // has to be imported before clipboard.init()
 	"lace.io/lace-blockchain-services/assets"
 	"lace.io/lace-blockchain-services/appconfig"
 	"lace.io/lace-blockchain-services/mainthread"
@@ -22,8 +22,22 @@ import (
 	"github.com/sqweek/dialog"
 )
 
-func setupTrayUI(
-	comm CommChannels_UI,
+const (
+	OurLogPrefix = ourpaths.OurLogPrefix
+)
+
+type CommChannels struct {
+	ServiceUpdate        <-chan t.ServiceStatus
+	BlockRestartUI       <-chan bool
+	HttpSwitchesNetwork  <-chan t.NetworkMagic
+
+	NetworkSwitch        chan<- string
+	InitiateShutdownCh   chan<- struct{}
+	TriggerMithril       chan<- struct{}
+}
+
+func SetupTray(
+	comm CommChannels,
 	logFile string,
 	networks map[t.NetworkMagic]string,
 	appConfig appconfig.AppConfig,
@@ -264,6 +278,7 @@ func setupTrayUI(
 			mainthread.Schedule(func() {
 				fmt.Printf("%s[%d]: info: Mithril from goroutine %v\n",
 					OurLogPrefix, os.Getpid(), goid())
+				BringAppToForeground()
 				ans := dialog.Message(
 					"Resync the entire blockchain from scratch with Mithril?\n\n" +
 					"This will delete your current cardano-node DB.\n\n" +

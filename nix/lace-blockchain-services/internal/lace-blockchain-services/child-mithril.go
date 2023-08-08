@@ -21,6 +21,7 @@ import (
 	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/mainthread"
+	"lace.io/lace-blockchain-services/ui"
 )
 
 func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
@@ -121,6 +122,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 				fmt.Printf("%s[%d]: fetching snapshots failed: %v (stderr: %v) (stdout: %v)\n",
 					serviceName, pid, err, string(stdout), string(stderr))
 				mainthread.Schedule(func() {
+					ui.BringAppToForeground()
 					dialog.Message("Fetching Mithril snapshots failed: %v." +
 						"\n\nMore details in the log file.", err).
 						Title("Mithril error").Error()
