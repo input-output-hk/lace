@@ -176,7 +176,10 @@ func childProcessPTYWindows(
 				return (c == '\n' || c == '\r' || c == rune(0x08))  // 0x08 for Windows
 			}) {
 				if len(line) > 0 {
-					outputLines <- logModifier(line)
+					line = logModifier(line)
+					if len(line) > 0 {
+						outputLines <- logModifier(line)
+					}
 				}
 			}
 		}

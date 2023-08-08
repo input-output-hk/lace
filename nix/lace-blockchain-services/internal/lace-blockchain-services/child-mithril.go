@@ -77,7 +77,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 
 	// A mini-monster, we’ll be able to get rid of it once Mithril provides more machine-readable output:
 	reProgress := regexp.MustCompile(
-		`^.\s\[[0-9:]+\]\s+\[[#>-]+\]\s+([0-9]*\.[0-9]+)\s+([A-Za-z]*B)/([0-9]*\.[0-9]+)\s+([A-Za-z]*B)\s+\(([0-9]*\.[0-9]+)([A-Za-z]+)\)$`)
+		`^\[[0-9:]+\]\s+\[[#>-]+\]\s+([0-9]*\.[0-9]+)\s+([A-Za-z]*B)/([0-9]*\.[0-9]+)\s+([A-Za-z]*B)\s+\(([0-9]*\.[0-9]+)([A-Za-z]+)\)$`)
 
 	unitToBytes := func(unit string) int64 {
 		switch unit {
@@ -255,6 +255,16 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			}
 		},
 		LogModifier: func(line string) string {
+			// Remove the wigglers (⠙, ⠒, etc.):
+			brailleDotsLow := rune(0x2800)
+			brailleDotsHi := rune(0x28ff)
+			var result strings.Builder
+			for _, char := range line {
+				if char < brailleDotsLow || char > brailleDotsHi {
+					result.WriteRune(char)
+				}
+			}
+			line = result.String()
 			line = strings.TrimSpace(line)
 			return line
 		},
