@@ -262,6 +262,9 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 		ForceKillAfter: 5 * time.Second,
 		AfterExit: func() error {
 			if currentStatus != SGoodSignature {
+				// Since Mithril cannot resume interrupted downloads, let’s clear them on failures:
+				os.RemoveAll(downloadDir)
+
 				return fmt.Errorf("cannot move DB as snapshot download was not successful")
 			}
 			currentStatus = SMovingDB
