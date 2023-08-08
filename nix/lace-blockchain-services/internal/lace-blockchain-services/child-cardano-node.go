@@ -6,15 +6,17 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
+	"strconv"
 	"strings"
 	"regexp"
 
 	"lace.io/lace-blockchain-services/ourpaths"
+	"lace.io/lace-blockchain-services/versions"
 
 	"github.com/acarl005/stripansi"
 )
 
-func childCardanoNode(shared SharedState, statusCh chan<- string) ManagedChild {
+func childCardanoNode(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
 	sep := string(filepath.Separator)
 
 	hostname, _ := os.Hostname()
@@ -38,18 +40,21 @@ func childCardanoNode(shared SharedState, statusCh chan<- string) ManagedChild {
 	}
 
 	reValidatingChunk := regexp.MustCompile(
-		`^.*ChainDB:Info.*Validating chunk no. \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
+		`^.*ChainDB:Info.*Validating chunk no. \d+ out of \d+\. Progress: (\d*\.\d+)%$`)
 	reReplayingLedger := regexp.MustCompile(
-		`^.*ChainDB:Info.*Replayed block: slot \d+ out of \d+\. Progress: (\d*\.\d+%)$`)
+		`^.*ChainDB:Info.*Replayed block: slot \d+ out of \d+\. Progress: (\d*\.\d+)%$`)
 	rePushingLedger := regexp.MustCompile(
-		`^.*ChainDB:Info.*Pushing ledger state for block [0-9a-f]+ at slot \d+. Progress: (\d*\.\d+%)$`)
+		`^.*ChainDB:Info.*Pushing ledger state for block [0-9a-f]+ at slot \d+. Progress: (\d*\.\d+)%$`)
+	reSyncingInit := regexp.MustCompile(
+		`^.*ChainDB:Info.*Opened db with immutable tip at [0-9a-f]+ at slot \d+ and tip [0-9a-f]+ at slot (\d+)$`)
 	reSyncing := regexp.MustCompile(
 		`^.*ChainDB:Notice.*Chain extended, new tip: [0-9a-f]+ at slot (\d+)$`)
 
 	return ManagedChild{
-		LogPrefix: "cardano-node",
-		PrettyName: "cardano-node",
+		ServiceName: "cardano-node",
 		ExePath: ourpaths.LibexecDir + sep + "cardano-node" + ourpaths.ExeSuffix,
+		Version: versions.CardanoNodeVersion,
+		Revision: versions.CardanoNodeRevision,
 		MkArgv: func() []string {
 			return []string {
 				"run",
@@ -85,28 +90,39 @@ func childCardanoNode(shared SharedState, statusCh chan<- string) ManagedChild {
 			}
 		},
 		LogMonitor: func(line string) {
-			if ms := reValidatingChunk.FindStringSubmatch(line); len(ms) > 0 {
-				statusCh <- "validating chunks · " + ms[1]
-			} else if strings.Index(line, "Started opening Volatile DB") != -1 {
-				statusCh <- "opening volatile DB…"
-			} else if strings.Index(line, "Started opening Ledger DB") != -1 {
-				statusCh <- "opening ledger DB…"
-			} else if ms :=reReplayingLedger.FindStringSubmatch(line);len(ms)>0 {
-				statusCh <- "replaying ledger · " + ms[1]
-			} else if strings.Index(line, "Opened lgr db") != -1 {
-				statusCh <- "replaying ledger · 100.00%"
-			} else if ms := rePushingLedger.FindStringSubmatch(line); len(ms)>0 {
-				statusCh <- "pushing ledger · " + ms[1]
-			} else if ms := reSyncing.FindStringSubmatch(line); len(ms) > 0 {
-				sp := ms[1] // fallback
+			reportSyncing := func(slotNum string){
+				pr, _ := strconv.ParseFloat(slotNum, 64)  // fallback
 				if (*shared.SyncProgress >= 0) {
-					sp = fmt.Sprintf("%.2f%%", *shared.SyncProgress * 100.0)
+					pr = *shared.SyncProgress
 				}
 				textual := "syncing"
 				if (*shared.SyncProgress == 1.0) {
 					textual = "synced"
 				}
-				statusCh <- textual + " · " + sp
+				statusCh <- StatusAndUrl { Status: textual, Progress: pr }
+			}
+
+			if ms := reValidatingChunk.FindStringSubmatch(line); len(ms) > 0 {
+				pr, _ := strconv.ParseFloat(ms[1], 64)
+				statusCh <- StatusAndUrl { Status: "validating chunks", Progress: pr/100 }
+			} else if strings.Index(line, "Started opening Volatile DB") != -1 {
+				statusCh <- StatusAndUrl { Status: "opening volatile DB", Progress: -1 }
+			} else if strings.Index(line, "Started opening Ledger DB") != -1 {
+				statusCh <- StatusAndUrl { Status: "opening ledger DB", Progress: -1 }
+			} else if ms :=reReplayingLedger.FindStringSubmatch(line);len(ms)>0 {
+				pr, _ := strconv.ParseFloat(ms[1], 64)
+				statusCh <- StatusAndUrl { Status: "replaying ledger", Progress: pr/100 }
+			} else if strings.Index(line, "Opened lgr db") != -1 {
+				statusCh <- StatusAndUrl { Status: "replaying ledger", Progress: 1.0 }
+			} else if ms := rePushingLedger.FindStringSubmatch(line); len(ms)>0 {
+				pr, _ := strconv.ParseFloat(ms[1], 64)
+				statusCh <- StatusAndUrl { Status: "pushing ledger", Progress: pr/100 }
+			} else if strings.Index(line, "Initial chain selected") != -1 {
+				statusCh <- StatusAndUrl { Status: "syncing", Progress: -1 }
+			} else if ms := reSyncingInit.FindStringSubmatch(line); len(ms) > 0 {
+				reportSyncing(ms[1])
+			} else if ms := reSyncing.FindStringSubmatch(line); len(ms) > 0 {
+				reportSyncing(ms[1])
 			}
 		},
 		LogModifier: func(line string) string {
@@ -120,7 +136,6 @@ func childCardanoNode(shared SharedState, statusCh chan<- string) ManagedChild {
 			}
 			return line
 		},
-		AfterExit: func() {},
 		TerminateGracefullyByInheritedFd3: true,
 		ForceKillAfter: 10 * time.Second,
 	}
