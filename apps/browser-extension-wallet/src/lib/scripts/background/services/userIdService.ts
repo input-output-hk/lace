@@ -1,9 +1,10 @@
-import { exposeApi, RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { exposeApi } from '@cardano-sdk/web-extension';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/util';
 import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
+import { userIdServiceProperties } from '../config';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -95,15 +96,7 @@ export class UserIdService implements UserIdServiceInterface {
 
 const userIdService = new UserIdService();
 
-export const userIdServiceProperties: RemoteApiProperties<UserIdService> = {
-  getId: RemoteApiPropertyType.MethodReturningPromise,
-  clearId: RemoteApiPropertyType.MethodReturningPromise,
-  makePersistent: RemoteApiPropertyType.MethodReturningPromise,
-  makeTemporary: RemoteApiPropertyType.MethodReturningPromise,
-  extendLifespan: RemoteApiPropertyType.MethodReturningPromise
-};
-
-exposeApi<UserIdService>(
+exposeApi<UserIdServiceInterface>(
   {
     api$: of(userIdService),
     baseChannel: USER_ID_SERVICE_BASE_CHANNEL,
