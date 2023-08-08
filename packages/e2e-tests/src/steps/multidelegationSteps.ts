@@ -20,3 +20,6 @@ Then(
 Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmation)$/, async (section: string) => {
   await MultidelegationPage.clickButtonOnSection(section);
 });
+Given(/^I confirm multidelegation beta modal$/, async () => {
+  await MultidelegationPage.confirmBetaModal();
+});

@@ -4,6 +4,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
   Background:
     Given Wallet is synced
     And I navigate to Staking extended page
+    And I confirm multidelegation beta modal
 
   @LW-7819 @Testnet @Pending
   Scenario Outline: Extended View - Multidelegation - Delegate to multiple pools E2E

@@ -30,7 +30,6 @@ import faqPageAssert from '../assert/faqPageAssert';
 import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
-import multidelegationPage from '../elements/staking/MultidelegationPage';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -71,7 +70,6 @@ When(
   /^I (navigate to|am on) (Tokens|NFTs|Transactions|Staking|Dapp Store|Voting|Address Book|Settings) (extended|popup) page$/,
   async (_ignored: string, targetPage: string, mode: 'extended' | 'popup') => {
     await mainMenuPageObject.navigateToSection(targetPage, mode);
-    await multidelegationPage.confirmBetaModal();
   }
 );
 
