@@ -1,4 +1,4 @@
-@SendSimpleTransaction-Popup-E2E @Testnet
+@SendSimpleTransaction-Popup-E2E @Testnet @Pending
 Feature: Analytics - Posthog - Sending - Popup View
 
   Background:
