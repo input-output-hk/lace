@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Button } from '@lace/common';
+import { Wallet } from '@lace/cardano';
 import styles from '../Collateral.module.scss';
 import { useTranslation } from 'react-i18next';
 import { useWalletManager } from '@hooks';
@@ -7,10 +8,11 @@ import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { Sections } from '../types';
 import { SectionConfig } from '@src/views/browser-view/stores';
+
 interface CollateralFooterProps {
   onClose: () => void;
   onClaim: () => void;
-  isInMemory: boolean;
+  keyAgentType: string;
   setIsPasswordValid: (isPasswordValid: boolean) => void;
   popupView: boolean;
   password: string;
@@ -24,7 +26,7 @@ interface CollateralFooterProps {
 export const CollateralFooterSend = ({
   onClose,
   onClaim,
-  isInMemory,
+  keyAgentType,
   setIsPasswordValid,
   popupView,
   password,
@@ -37,6 +39,7 @@ export const CollateralFooterSend = ({
   const { t } = useTranslation();
   const { executeWithPassword } = useWalletManager();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
 
   const submitTx = async () => {
     await (isInMemory ? executeWithPassword(password, submitCollateralTx) : submitCollateralTx());
@@ -73,10 +76,10 @@ export const CollateralFooterSend = ({
       if (popupView) {
         return t('browserView.settings.wallet.collateral.continueInAdvancedView');
       }
-      return t('browserView.settings.wallet.collateral.confirmWithLedger');
+      return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: keyAgentType });
     }
     return t('browserView.settings.wallet.collateral.close');
-  }, [hasEnoughAda, isInMemory, popupView, t]);
+  }, [hasEnoughAda, isInMemory, keyAgentType, popupView, t]);
 
   // password is not required for hw flow
   const isPasswordMissing = isInMemory && !password;

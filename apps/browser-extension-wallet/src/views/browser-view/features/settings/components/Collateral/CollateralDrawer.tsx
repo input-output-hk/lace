@@ -36,7 +36,13 @@ export const CollateralDrawer = ({
     walletUI: { appMode }
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
-  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const { keyAgentType, isInMemory } = useMemo(() => {
+    const agentType = getKeyAgentType();
+    return {
+      keyAgentType: agentType,
+      isInMemory: getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory
+    };
+  }, [getKeyAgentType]);
   const [password, setPassword] = useState<string>();
   const clearPassword = () => setPassword('');
   const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
@@ -120,7 +126,7 @@ export const CollateralDrawer = ({
         setCurrentStep={setSection}
         onClose={onClose}
         onClaim={clearPassword}
-        isInMemory={isInMemory}
+        keyAgentType={keyAgentType}
         setIsPasswordValid={setIsPasswordValid}
         popupView={popupView}
         password={password}
