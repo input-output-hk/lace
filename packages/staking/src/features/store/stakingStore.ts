@@ -1,4 +1,4 @@
-import create from 'zustand';
+import { create } from 'zustand';
 import { Page, SectionConfig, Sections, StakePoolDetails, StakingError } from './types';
 
 export const sectionsConfig = {
