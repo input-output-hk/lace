@@ -136,6 +136,7 @@ Feature: LW: Tokens tab - extended view
   Scenario: Price fetch expired error is displayed
     Given ADA fiat price has been fetched
     And I enable network interception to fail request: "https://api.coingecko.com/api/v3/simple/price?ids=cardano*"
+    And I delay last fiat price fetch time in local storage by 500 seconds
     Then fiat prices expired fetch error is displayed
     And I disable network interception
     Then ADA fiat price has been fetched

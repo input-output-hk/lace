@@ -13,7 +13,11 @@ import localStorageManager from '../utils/localStorageManager';
 import networkManager from '../utils/networkManager';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
-import { cleanBrowserStorage, deleteFiatPriceFromBrowserStorage } from '../utils/browserStorage';
+import {
+  changeFiatPriceFetchedTimeInBrowserStorage,
+  cleanBrowserStorage,
+  deleteFiatPriceFromBrowserStorage
+} from '../utils/browserStorage';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
@@ -264,3 +268,10 @@ When(/^I reopen the page$/, async () => {
   await closeAllTabsExceptActiveOne();
   await browser.url(currentPageUrl);
 });
+
+Given(
+  /^I (delay|advance) last fiat price fetch time in local storage by (\d+) seconds$/,
+  async (action: 'delay' | 'advance', seconds: number) => {
+    await changeFiatPriceFetchedTimeInBrowserStorage(action, seconds);
+  }
+);
