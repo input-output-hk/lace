@@ -197,7 +197,7 @@ export const StakePoolSearch = ({
         onBlur={() => setShowRemove(false)}
         // eslint-disable-next-line unicorn/no-null
         notFoundContent={null}
-        dropdownClassName={styles.dropdown}
+        popupClassName={styles.dropdown}
         dropdownAlign={{ offset: [SELECT_DROPDOWN_OFFSET_X, SELECT_DROPDOWN_OFFSET_Y] }}
         getPopupContainer={() => document.querySelector('#stakepool-search-bar')}
         placement="bottomLeft"
