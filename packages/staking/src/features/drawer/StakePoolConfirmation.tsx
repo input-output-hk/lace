@@ -6,7 +6,7 @@ import { Banner, Button, Ellipsis, useObservable } from '@lace/common';
 import { RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
 import { Skeleton } from 'antd';
 import cn from 'classnames';
-import { Immutable } from 'immer';
+import { Immutable, castDraft } from 'immer';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +44,26 @@ const isInputSelectionError = (error: any): error is { failure: InputSelectionFa
   typeof error === 'object' &&
   Object.hasOwn(error, 'failure') &&
   Object.values(InputSelectionFailure).includes(error.failure);
+
+const calculateDeposit = ({
+  newPortfolio,
+  rewardAccounts,
+  protocolParameters,
+}: {
+  newPortfolio: DelegationPortfolioStakePool[];
+  rewardAccounts?: Wallet.Cardano.RewardAccountInfo[];
+  protocolParameters?: Wallet.Cardano.ProtocolParameters;
+}) => {
+  if (!protocolParameters?.stakeKeyDeposit || !rewardAccounts) return 0;
+
+  const registeredStakeKeysCount = rewardAccounts.filter((account) =>
+    [Wallet.Cardano.StakeKeyStatus.Registered, Wallet.Cardano.StakeKeyStatus.Registering].includes(account.keyStatus)
+  ).length;
+
+  return newPortfolio.length > registeredStakeKeysCount
+    ? (newPortfolio.length - registeredStakeKeysCount) * protocolParameters.stakeKeyDeposit
+    : 0;
+};
 
 const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
   <div>
@@ -152,7 +172,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
   } = useOutsideHandles();
-  const draftPortfolio = useDelegationPortfolioStore((store) => store.draftPortfolio);
+  const draftPortfolio = useDelegationPortfolioStore((store) => castDraft(store.draftPortfolio));
 
   useEffect(() => {
     (async () => {
@@ -185,12 +205,13 @@ export const StakePoolConfirmation = (): React.ReactElement => {
     setStakingError,
   ]);
 
-  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const deposit =
-    rewardAccounts && rewardAccounts[0]?.keyStatus !== Wallet.Cardano.StakeKeyStatus.Registered
-      ? protocolParameters?.stakeKeyDeposit
-      : undefined;
+  const deposit = calculateDeposit({
+    newPortfolio: draftPortfolio,
+    protocolParameters,
+    rewardAccounts,
+  });
 
   const ErrorMessages: Record<StakingError, string> = {
     [StakingError.UTXO_FULLY_DEPLETED]: t('drawer.confirmation.errors.utxoFullyDepleted'),
@@ -237,7 +258,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
             {t('drawer.confirmation.totalCost.title')}
           </h1>
           <div className={styles.txCostContainer} data-testid="summary-fee-container">
-            {deposit && (
+            {deposit > 0 && (
               <RowContainer>
                 {renderLabel({
                   dataTestId: 'sp-confirmation-staking-deposit',
