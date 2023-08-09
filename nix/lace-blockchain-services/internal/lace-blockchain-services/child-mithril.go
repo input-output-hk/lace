@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -60,6 +61,17 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 	const SFinished = "finished"
 
 	currentStatus := SInitializing
+
+	explorerUrl := ""
+	for _, envVar := range extraEnv[shared.Network] {
+		varName := "AGGREGATOR_ENDPOINT="
+		if strings.HasPrefix(envVar, varName) {
+			// Note: this should somehow point to the snapshot, but they don’t support that yet?
+			explorerUrl = "https://mithril.network/explorer?" +
+				url.QueryEscape(strings.Replace(envVar, varName, "aggregator=", 1))
+			break
+		}
+	}
 
 	// A mini-monster, we’ll be able to get rid of it once Mithril provides more machine-readable output:
 	reProgress := regexp.MustCompile(
@@ -155,25 +167,26 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			if strings.Index(line, "1/7 - Checking local disk info") != -1 {
 				currentStatus = SCheckingDisk
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1,
+				        Url: explorerUrl, OmitUrl: false }
 				return
 			}
 			if strings.Index(line, "2/7 - Fetching the certificate's information") != -1 {
 				currentStatus = SFetchingCert
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
 			if strings.Index(line, "3/7 - Verifying the certificate chain") != -1 {
 				currentStatus = SVerifyingCert
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
 			if strings.Index(line, "4/7 - Downloading the snapshot") != -1 {
 				currentStatus = SDownloading
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
 			if currentStatus == SDownloading {
@@ -191,33 +204,33 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 					timeRemaining := numTimeRemaining * float64(unitToSeconds(unitTimeRemaining))
 
 					statusCh <- StatusAndUrl { Status: SDownloading, Progress: done/total,
-						TaskSize: total, SecondsLeft: timeRemaining }
+						TaskSize: total, SecondsLeft: timeRemaining, OmitUrl: true }
 					return // there would be no way to have `else if` here, hence early return
 				}
 			}
 			if strings.Index(line, "5/7 - Unpacking the snapshot") != -1 {
 				currentStatus = SUnpacking
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
 			if strings.Index(line, "6/7 - Computing the snapshot digest") != -1 {
 				currentStatus = SDigest
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
 			if strings.Index(line, "7/7 - Verifying the snapshot signature") != -1 {
 				currentStatus = SVerifyingSignature
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
 			if strings.Index(line, "Files in the directory '" + downloadDir + sep + "db" +
 				"' can be used to run a Cardano node") != -1 {
 				currentStatus = SGoodSignature
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-					TaskSize: -1, SecondsLeft: -1 }
+					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
 		},
@@ -233,7 +246,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			}
 			currentStatus = SMovingDB
 			statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-				TaskSize: -1, SecondsLeft: -1 }
+				TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 
 			chainDir := ourpaths.WorkDir + sep + shared.Network + sep + "chain"
 			chainDirBackup := chainDir + "--bak--" + time.Now().UTC().Format("2006-01-02--15-04-05Z")
@@ -254,7 +267,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 
 			currentStatus = SFinished
 			statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
-				TaskSize: -1, SecondsLeft: -1 }
+				TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 
 			return nil
 		},

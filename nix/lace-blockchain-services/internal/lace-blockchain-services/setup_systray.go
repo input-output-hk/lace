@@ -152,8 +152,21 @@ func setupTrayUI(
 	mMithrilStatusDledSize.Disable()
 	mMithrilStatusTotalSize := mMithrilStatus.AddSubMenuItem("", "")
 	mMithrilStatusTotalSize.Disable()
+
+	mMithrilExplorer := mMithrilStatus.AddSubMenuItem("Mithril Explorer", "")
+	mithrilExplorerUrl := ""
+	go func() {
+		for range mMithrilExplorer.ClickedCh {
+			if mithrilExplorerUrl != "" {
+				openWithDefaultApp(mithrilExplorerUrl)
+			}
+		}
+	}()
+
 	go func(){
 		for upd := range chMithrilStatus {
+			mithrilExplorerUrl = upd.Url
+
 			if upd.Status == "off" {
 				mainthread.Schedule(mMithrilStatus.Hide)
 			} else {
