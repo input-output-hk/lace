@@ -41,4 +41,5 @@ export interface ILocalStorage {
   showDappBetaModal?: boolean;
   analyticsAccepted?: EnhancedAnalyticsOptInStatus;
   isForgotPasswordFlow?: boolean;
+  multidelegationFirstVisit?: boolean;
 }

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../browse-pools';
 import { StakePoolDetails } from '../drawer';
-import { ChangingPreferencesModal } from '../modals';
+import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
 import { Page, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
@@ -29,6 +29,8 @@ export const StakingView = () => {
     walletStoreWalletUICardanoCoin,
     walletStoreFetchNetworkInfo: fetchNetworkInfo,
     walletStoreBlockchainProvider: blockchainProvider,
+    multidelegationFirstVisit,
+    triggerMultidelegationFirstVisit,
   } = useOutsideHandles();
 
   useEffect(() => {
@@ -95,7 +97,7 @@ export const StakingView = () => {
   return (
     <>
       <Box mb={'$56'}>
-        <Text.Heading>{t('root.title')}</Text.Heading>
+        <Text.Heading data-testid="section-title">{t('root.title')}</Text.Heading>
       </Box>
       <Navigation>
         {(activePage) => (
@@ -114,6 +116,7 @@ export const StakingView = () => {
         onUnselect={unselectPool}
       />
       <ChangingPreferencesModal onConfirm={onChangingPreferencesConfirm} />
+      <MultidelegationBetaModal visible={multidelegationFirstVisit} onConfirm={triggerMultidelegationFirstVisit} />
     </>
   );
 };

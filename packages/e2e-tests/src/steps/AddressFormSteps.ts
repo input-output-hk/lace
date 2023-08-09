@@ -2,6 +2,7 @@ import { Then, When } from '@cucumber/cucumber';
 import AddressForm from '../elements/addressbook/AddressForm';
 import { browser } from '@wdio/globals';
 import { byron, getAddressByName, icarus, shelley } from '../data/AddressData';
+import { t } from '../utils/translationService';
 import AddressFormAssert from '../assert/addressBook/AddressFormAssert';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 
@@ -28,10 +29,14 @@ When(/^I fill address form with ""?([^"]*[^"])""? name$/, async (name: string) =
   await browser.pause(500); // Wait for input field value validation
 });
 
-When(/^I fill address form with ""?([^"]*[^"])""? address$/, async (address: string) => {
-  await AddressForm.enterAddress(address === 'empty' ? '' : address);
-  await browser.pause(500); // Wait for input field value validation
-});
+When(
+  /^I fill address form with ""?([^"]*[^"])""? (address|ADA handle)$/,
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  async (address: string, _addressOrADAHandle: string) => {
+    await AddressForm.enterAddress(address === 'empty' ? '' : address);
+    await browser.pause(500); // Wait for input field value validation
+  }
+);
 
 Then(
   /^Contact "([^"]*)" name error and "([^"]*)" address error are displayed$/,
@@ -75,4 +80,16 @@ When(/^I clear (address|name) field value in address form$/, async (field: 'addr
 
 When(/^I click outside address form to lose focus$/, async () => {
   await new CommonDrawerElements().drawerHeaderTitle.click();
+});
+
+Then(/^Red "X" icon is displayed next to ADA handle$/, async () => {
+  await AddressFormAssert.assertSeeIconForInvalidAdaHandle(true);
+});
+
+Then(/^Green tick icon is displayed next to ADA handle$/, async () => {
+  await AddressFormAssert.assertSeeIconForValidAdaHandle(true);
+});
+
+Then(/^"Handle not found" error is displayed$/, async () => {
+  await AddressFormAssert.assertSeeAddressError(true, await t('general.errors.incorrectHandle'));
 });

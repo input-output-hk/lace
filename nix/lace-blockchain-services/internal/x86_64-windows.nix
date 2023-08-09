@@ -44,7 +44,7 @@ in rec {
       cp ${icon} tray-icon
       cp ${common.openApiJson} openapi.json
       go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
-      mkdir -p versions && cp ${common.hardcodedVersions} versions/versions.go
+      mkdir -p constants && cp ${common.constants} constants/constants.go
       go build ${if noConsoleWindow then "-ldflags -H=windowsgui" else ""}
     '';
     installPhase = ''
@@ -162,6 +162,7 @@ in rec {
   mkPackage = { withJS }: pkgs.runCommand "lace-blockchain-services" {} ''
     mkdir -p $out/libexec
     cp -Lr ${lace-blockchain-services-exe-with-icon}/* $out/
+    cp -L ${mithril-client}/*.{exe,dll} $out/libexec
     cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/
     cp -L ${cardano-js-sdk.target.nodejs}/node.exe $out/libexec/
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
@@ -648,5 +649,11 @@ in rec {
       dontInstall = true;
     };
   };
+
+  mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
+    mkdir -p $out
+    cp ${common.mithril-bin}/mithril-client.exe $out/
+    cp ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/arm/vcruntime140.dll $out/
+  '';
 
 }

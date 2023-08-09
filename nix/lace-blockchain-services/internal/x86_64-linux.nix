@@ -37,7 +37,7 @@ in rec {
       cp cardano.png tray-icon
       cp ${common.openApiJson} openapi.json
       go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
-      mkdir -p versions && cp ${common.hardcodedVersions} versions/versions.go
+      mkdir -p constants && cp ${common.constants} constants/constants.go
     '';
   };
 
@@ -48,6 +48,7 @@ in rec {
     cp ${lace-blockchain-services-exe}/bin/* $out/bin/
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/
+    ln -s ${mithril-client}/bin/* $out/libexec/
     ln -s ${cardano-js-sdk.nodejs}/bin/node $out/libexec
     ln -s ${pkgs.xclip}/bin/xclip $out/libexec
 
@@ -135,6 +136,19 @@ in rec {
     ln -s "$openapi" ./openapi.json
     ( sleep 0.5 ; xdg-open http://127.0.0.1:${toString port}/swagger-ui/ ; ) &
     ${lib.getExe pkgs.python3} -m http.server ${toString port}
+  '';
+
+  mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
+    cp ${common.mithril-bin}/mithril-client ./
+
+    chmod +wx mithril-client
+    patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} \
+      --set-rpath ${with pkgs; lib.makeLibraryPath [ /* pkgs.stdenv.cc.cc */ openssl_1_1 ]} \
+      mithril-client
+
+    mkdir -p $out/bin
+    cp mithril-client $out/bin
+    $out/bin/mithril-client --version
   '';
 
 }
