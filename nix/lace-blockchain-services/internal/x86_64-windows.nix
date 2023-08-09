@@ -49,6 +49,11 @@ in rec {
         patch -p1 -i ${./getlantern-systray--windows-schedule-on-main-thread.patch}
       )
       (
+        # XXX: without this, in Task Manager, we change name to “Resync with Mithril?”, because of no main window:
+        cd vendor/github.com/sqweek/dialog
+        patch -p1 -i ${./sqweek-dialog--windows-title.patch}
+      )
+      (
         cd vendor/github.com/UserExistsError/conpty
         patch -p1 -i ${./conpty--get-pid-add-env.patch}
       )
