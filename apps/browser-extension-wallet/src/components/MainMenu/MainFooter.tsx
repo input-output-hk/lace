@@ -23,7 +23,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const includesCoin = /coin/i;
@@ -51,12 +52,16 @@ export const MainFooter = (): React.ReactElement => {
     currentHoveredItem === MenuItemList.TRANSACTIONS ? TransactionsIconHover : TransactionsIconDefault;
   const StakingIcon = currentHoveredItem === MenuItemList.STAKING ? StakingIconHover : StakingIconDefault;
 
-  const sendAnalytics = (category: MatomoEventCategories, name: string) => {
+  const sendAnalytics = (category: MatomoEventCategories, name: string, postHogAction?: PostHogAction) => {
     analytics.sendEventToMatomo({
       category,
       action: MatomoEventActions.CLICK_EVENT,
       name
     });
+
+    if (postHogAction) {
+      analytics.sendEventToPostHog(postHogAction);
+    }
   };
 
   const handleNavigation = (path: string) => {
@@ -65,13 +70,21 @@ export const MainFooter = (): React.ReactElement => {
         sendAnalytics(MatomoEventCategories.VIEW_TOKENS, AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_POPUP);
         break;
       case walletRoutePaths.earn:
-        sendAnalytics(MatomoEventCategories.STAKING, AnalyticsEventNames.Staking.VIEW_STAKING_POPUP);
+        sendAnalytics(
+          MatomoEventCategories.STAKING,
+          AnalyticsEventNames.Staking.VIEW_STAKING_POPUP,
+          PostHogAction.StakingClick
+        );
         break;
       case walletRoutePaths.activity:
         sendAnalytics(MatomoEventCategories.VIEW_TRANSACTIONS, AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_POPUP);
         break;
       case walletRoutePaths.nfts:
-        sendAnalytics(MatomoEventCategories.VIEW_NFT, AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_POPUP);
+        sendAnalytics(
+          MatomoEventCategories.VIEW_NFT,
+          AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_POPUP,
+          PostHogAction.NFTsClick
+        );
     }
     history.push(path);
   };

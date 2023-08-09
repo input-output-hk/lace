@@ -93,7 +93,10 @@ export enum PostHogAction {
   SendSomethingWentWrongView = 'send | something went wrong | view',
   SendSomethingWentWrongBackClick = 'send | something went wrong | back | click',
   SendSomethingWentWrongCancelClick = 'send | something went wrong | cancel | click',
-  SendSomethingWentWrongXClick = 'send | something went wrong | x | click'
+  SendSomethingWentWrongXClick = 'send | something went wrong | x | click',
+  // NFTs Flow
+  NFTsClick = 'nft | nfts | click',
+  NFTsImageClick = 'nft | nfts | nft image | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {

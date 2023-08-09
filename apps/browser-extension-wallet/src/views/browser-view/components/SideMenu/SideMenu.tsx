@@ -35,14 +35,16 @@ export const SideMenu = (): React.ReactElement => {
     return () => unregisterListener();
   }, [listen]);
 
-  const sendAnalytics = (category: MatomoEventCategories, name: string) => {
+  const sendAnalytics = (category: MatomoEventCategories, name: string, postHogAction?: PostHogAction) => {
     analytics.sendEventToMatomo({
       category,
       action: MatomoEventActions.CLICK_EVENT,
       name
     });
 
-    analytics.sendEventToPostHog(PostHogAction.StakingClick);
+    if (postHogAction) {
+      analytics.sendEventToPostHog(postHogAction);
+    }
   };
 
   const handleRedirection: MenuProps['onClick'] = (field) => {
@@ -51,7 +53,11 @@ export const SideMenu = (): React.ReactElement => {
         sendAnalytics(MatomoEventCategories.VIEW_TOKENS, AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_BROWSER);
         break;
       case routes.staking:
-        sendAnalytics(MatomoEventCategories.STAKING, AnalyticsEventNames.Staking.VIEW_STAKING_BROWSER);
+        sendAnalytics(
+          MatomoEventCategories.STAKING,
+          AnalyticsEventNames.Staking.VIEW_STAKING_BROWSER,
+          PostHogAction.StakingClick
+        );
         break;
       case routes.activity:
         sendAnalytics(
@@ -60,7 +66,11 @@ export const SideMenu = (): React.ReactElement => {
         );
         break;
       case routes.nfts:
-        sendAnalytics(MatomoEventCategories.VIEW_NFT, AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_BROWSER);
+        sendAnalytics(
+          MatomoEventCategories.VIEW_NFT,
+          AnalyticsEventNames.ViewNFTs.VIEW_NFT_LIST_BROWSER,
+          PostHogAction.NFTsClick
+        );
     }
     push(field.key);
   };

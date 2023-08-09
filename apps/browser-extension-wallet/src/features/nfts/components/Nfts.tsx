@@ -16,7 +16,8 @@ import { getTokenList } from '@src/utils/get-token-list';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import FolderIcon from '@assets/icons/new-folder-icon.component.svg';
 import { SectionTitle } from '@components/Layout/SectionTitle';
@@ -55,6 +56,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
         action: MatomoEventActions.CLICK_EVENT,
         name: AnalyticsEventNames.ViewNFTs.VIEW_NFT_DETAILS_POPUP
       });
+      analytics.sendEventToPostHog(PostHogAction.NFTsImageClick);
       redirectToNftDetail({ params: { id: nft.assetId.toString() } });
     },
     [analytics, redirectToNftDetail]
