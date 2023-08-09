@@ -56,7 +56,7 @@ export const Overview = () => {
 
   return (
     <>
-      <Box mb={'$40'}>
+      <Box mb="$40">
         <DelegationCard
           distribution={displayData.map(({ color, name = '-', weight }) => ({
             color,
@@ -66,15 +66,15 @@ export const Overview = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      <Flex justifyContent={'space-between'} mb={'$16'}>
+      <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
       </Flex>
       {displayData.map((item) => (
-        <Box key={item.id} mb={'$24'} data-testid="delegated-pool-item">
+        <Box key={item.id} mb="$24" data-testid="delegated-pool-item">
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}
-            cardanoCoinSymbol={'tADA'}
+            cardanoCoinSymbol="tADA"
             onStakePoolSelect={onStakePoolOpen}
           />
         </Box>

@@ -82,6 +82,10 @@ type KeysStructure = {
         };
       };
       stakeOnPoolButton: '';
+      selectForMultiStaking: '';
+      addStakingPool: '';
+      unselectPool: '';
+      manageDelegation: '';
       statistics: '';
       information: '';
       social: '';
@@ -114,6 +118,7 @@ type KeysStructure = {
       selectedStakePools: '';
       partOfBalance: '';
       pickMorePools: '';
+      nextButton: '';
     };
   };
   modals: {

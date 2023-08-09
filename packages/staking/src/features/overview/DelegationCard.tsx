@@ -5,7 +5,7 @@ import { TranslationKey } from '../i18n';
 import { useOutsideHandles } from '../outside-handles-provider';
 import * as styles from './DelegationCard.css';
 
-type Status = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';
+type DelegationStatus = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';
 
 type DelegationCardProps = {
   distribution: Array<{
@@ -13,11 +13,11 @@ type DelegationCardProps = {
     value: number;
     color: PieChartColor;
   }>;
-  status: Status;
+  status: DelegationStatus;
   showDistribution?: boolean;
 };
 
-const mapOfStatusToTranslationKey: Record<Status, TranslationKey> = {
+const statusLabelTranslationKeysByDelegationStatus: Record<DelegationStatus, TranslationKey> = {
   'multi-delegation': 'overview.delegationCard.statuses.multiDelegation',
   'over-staked': 'overview.delegationCard.statuses.overStaked',
   ready: 'overview.delegationCard.statuses.ready',
@@ -52,7 +52,7 @@ export const DelegationCard = ({ distribution, status, showDistribution = false 
   const infoData = makeInfoData({
     balance: compactNumber(balance),
     numberOfPools,
-    status: t(mapOfStatusToTranslationKey[status]),
+    status: t(statusLabelTranslationKeysByDelegationStatus[status]),
   });
 
   return (
@@ -63,16 +63,16 @@ export const DelegationCard = ({ distribution, status, showDistribution = false 
           {showDistribution && <Text.SubHeading className={styles.counter}>100%</Text.SubHeading>}
         </div>
         <div className={styles.info}>
-          <Grid columns={'$2'} rows={'$3'}>
+          <Grid columns="$2" rows="$3">
             {infoData.map(({ nameTranslationKey, value }) => (
               <Fragment key={nameTranslationKey}>
                 <Cell className={styles.infoLabel}>
-                  <Text.Body.Large weight={'$semibold'} data-testid={`${nameTranslationKey}-label`}>
+                  <Text.Body.Large weight="$semibold" data-testid={`${nameTranslationKey}-label`}>
                     {t(nameTranslationKey)}
                   </Text.Body.Large>
                 </Cell>
                 <Cell className={styles.infoValue}>
-                  <Text.Body.Large weight={'$bold'} data-testid={`${nameTranslationKey}-value`}>
+                  <Text.Body.Large weight="$bold" data-testid={`${nameTranslationKey}-value`}>
                     {value}
                   </Text.Body.Large>
                 </Cell>
