@@ -28,6 +28,7 @@ Feature: LW-411 Ext.PopUp - Collectibles/NFTs
   @LW-2511 @Mainnet
   Scenario: Popup-view - Send button click
     And I am on NFTs popup page
+    And I left click on the NFT with name "Ibilecoin" on NFTs page
     And I am on a NFT details on the popup view for NFT with name: "Ibilecoin"
     When I click "Send NFT" button on NFT details drawer
     Then the 'Send' screen is displayed in popup mode
