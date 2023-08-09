@@ -258,7 +258,7 @@
       "banner.confirmReview.button": "Review",
       "confirmUpdate.button": "Accept changes",
       "cancelUpdate.button": "Delete contact",
-      "previewsAddress.description": "Previews linked address",
+      "previousAddress.description": "Previous linked address",
       "actualAddress.description": "New linked address"
     },
     "updateModal.title": "Are you sure?",

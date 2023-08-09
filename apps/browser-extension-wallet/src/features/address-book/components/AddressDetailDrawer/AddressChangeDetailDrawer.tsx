@@ -195,7 +195,7 @@ export const AddressChangeDetailDrawer = ({
                 <div className={cn(styles.addressDetailsContainer)}>
                   <div className={cn(styles.addressDataDetails)}>
                     <div className={cn(styles.activeText)}>
-                      {t('addressBook.reviewModal.previewsAddress.description')}
+                      {t('addressBook.reviewModal.previousAddress.description')}
                     </div>
                     <Ellipsis
                       text={expectedAddress}
