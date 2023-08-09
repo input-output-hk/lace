@@ -78,7 +78,7 @@ export const StakePoolDetailsDrawer = ({
       removePassword();
     }
     if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemory) {
-      return setSection(sectionsConfig[Sections.DETAIL]);
+      return setSection(sectionsConfig[Sections.PREFERENCES]);
     }
     if (simpleSendConfig?.prevSection) {
       return setPrevSection();

@@ -1,5 +1,4 @@
-import { When } from '@wdio/cucumber-framework';
-import { Given, Then } from '@cucumber/cucumber';
+import { Given, Then, When } from '@wdio/cucumber-framework';
 import NftsPage from '../elements/NFTs/nftsPage';
 import nftCreateFolderAssert from '../assert/nftCreateFolderAssert';
 import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
@@ -9,6 +8,39 @@ import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
 import NftSelectNftsAssert from '../assert/nftSelectNftsAssert';
+import IndexedDB from '../fixture/indexedDB';
+import { NFTFolder } from '../data/NFTFolder';
+import NftFolderAssert from '../assert/NftFolderAssert';
+import NftFolderContextMenu from '../elements/NFTs/NftFolderContextMenu';
+import NftRenameFolderAsserts from '../assert/NftRenameFolderAsserts';
+import NftRenameFolderPage from '../elements/NFTs/NftRenameFolderPage';
+import { browser } from '@wdio/globals';
+import DeleteFolderModal from '../elements/NFTs/DeleteFolderModal';
+import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
+import NftAssert from '../assert/nftAssert';
+import testContext from '../utils/testContext';
+import MenuHeader from '../elements/menuHeader';
+
+Given(/^all NFT folders are removed$/, async () => {
+  await IndexedDB.clearNFTFolders();
+});
+
+Then(
+  /^the NFT folder with name "([^"]*)" and (1|2) NFT was created$/,
+  async (folderName: string, numberOfAssets: string) => {
+    const assets: string[] = [
+      '63f01fe6cd68ec6438c95a46cea4a6cd27efb791b5e8cc1fa92af3294c6163654e46542336' // LaceNFT assetId
+    ];
+
+    if (numberOfAssets === '2') {
+      assets.push('63f01fe6cd68ec6438c95a46cea4a6cd27efb791b5e8cc1fa92af3294962696c65636f696e3439'); // Ibilecoin
+    }
+
+    const nftFolder = new NFTFolder(folderName, assets);
+    await IndexedDB.insertNFTFolder(nftFolder);
+    await browser.pause(500);
+  }
+);
 
 Given(
   /^I (see|do not see) "Create folder" button on NFTs page in (popup|extended) mode$/,
@@ -59,6 +91,11 @@ When(/^I click "Next" button on "(Name your folder|Select NFTs)" page$/, async (
     : NftSelectNftsPage.nextButton.click());
 });
 
+When(/^I click "Add selected NFTs" button on "Select NFTs" page$/, async () => {
+  await NftSelectNftsPage.nextButton.waitForClickable();
+  await NftSelectNftsPage.nextButton.click();
+});
+
 Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
 });
@@ -78,6 +115,13 @@ When(/^I clear "Folder name" input$/, async () => {
 Then(/^I (see|don't see) "Folder name" input max length (\d+) error$/, async (shouldSee: string, maxLength: number) => {
   await nftCreateFolderAssert.assertSeeInputMaxLengthError(shouldSee === 'see', maxLength);
 });
+
+Then(
+  /^I (see|do not see) "Given name already exists" error on "Name your folder|Rename your folder" page$/,
+  async (shouldSee: 'see' | 'do not see') => {
+    await nftCreateFolderAssert.assertSeeGivenNameAlreadyExistsError(shouldSee === 'see');
+  }
+);
 
 Then(/^I (see|don't see) "You'll have to start again" modal$/, async (shouldSee: string) => {
   await nftCreateFolderAssert.assertSeeYoullHaveToStartAgainModal(shouldSee === 'see');
@@ -136,14 +180,38 @@ Then(/^NFT with name "([^"]*)" (is|is not) selected$/, async (nftName: string, s
 });
 
 Then(
-  /^I (see|do not see) folder with name "([^"]*)" on the NFTs list$/,
+  /^I (see|do not see) folder with name "([^"]*)" on the NFTs page$/,
   async (shouldSee: 'see' | 'do not see', folderName: string) => {
     await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, shouldSee === 'see');
   }
 );
 
-When(/^I click the NFT folder with name "([^"]*)"$/, async (folderName: string) => {
-  await (await NftsPage.getFolder(folderName)).click();
+When(/^I click "Add NFT" button within the NFT folder$/, async () => {
+  const addNFTButton = NftsFolderPage.addNftButton;
+  await addNFTButton.waitForClickable();
+  await addNFTButton.click();
+});
+
+Then(/^I can see "Add NFT" button active$/, async () => {
+  await NftFolderAssert.assertSeeAddNftButton();
+});
+
+When(
+  /^I (left|right) click on the NFT folder with name "([^"]*)"$/,
+  async (clickType: 'left' | 'right', folderName: string) => {
+    await (await NftsPage.getFolder(folderName)).click({ button: clickType });
+  }
+);
+
+When(
+  /^I (left|right) click on the NFT with name "([^"]*)" on the NFT folder page$/,
+  async (clickType: 'left' | 'right', nftName: string) => {
+    await (await NftsFolderPage.getNft(nftName)).click({ button: clickType });
+  }
+);
+
+When(/^I (left|right) click on the add NFT button on the NFT folder page$/, async (clickType: 'left' | 'right') => {
+  await (await NftsFolderPage.addNftButton).click({ button: clickType });
 });
 
 When(
@@ -160,8 +228,34 @@ Then(
   }
 );
 
-Then(/^I see a toast with text: "Folder created successfully"$/, async () => {
-  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.create'), true);
+Then(
+  /^I see a toast with text: "Folder (created|renamed|deleted) successfully"$/,
+  async (action: 'created' | 'deleted' | 'renamed') => {
+    let translationKey;
+    switch (action) {
+      case 'created':
+        translationKey = 'browserView.nfts.folderDrawer.toast.create';
+        break;
+      case 'deleted':
+        translationKey = 'browserView.nfts.deleteFolderSuccess';
+        break;
+      case 'renamed':
+        translationKey = 'browserView.nfts.renameFolderSuccess';
+        break;
+      default:
+        throw new Error(`Unsupported action name: ${action}`);
+    }
+
+    await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
+  }
+);
+
+Then(/^I see a toast with text: "NFTs added to folder"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.update'), true);
+});
+
+Then(/^I see a toast with text: "NFT removed"$/, async () => {
+  await ToastMessageAssert.assertSeeToastMessage(await t('browserView.nfts.folderDrawer.toast.delete'), true);
 });
 
 Then(/^I select (\d+) NFTs$/, async (numberOfNFTs: number) => {
@@ -183,4 +277,177 @@ Then(/^I (see|do not see) NFTs counter$/, async (shouldSee: string) => {
 When(/^I click "Clear" button next to NFTs counter$/, async () => {
   await NftSelectNftsPage.clearButton.waitForClickable();
   await NftSelectNftsPage.clearButton.click();
+});
+
+When(/^I enter "([^"]*)" into the search bar$/, async (searchPhrase: string) => {
+  await NftSelectNftsPage.enterSearchPhrase(searchPhrase);
+});
+
+Then(/^I see NFTs containing "([^"]*)" on the "Select NFTs" page$/, async (searchPhrase: string) => {
+  await NftSelectNftsAssert.assertSeeNFTsWithSearchPhrase(searchPhrase);
+});
+
+Then(/^I press "Clear" button in search bar$/, async () => {
+  await NftSelectNftsPage.clearSearchBarInput();
+});
+
+Then(
+  /^NFT folder context menu with "Rename" & "Delete" options (is|is not) displayed$/,
+  async (shouldBeDisplayed: 'is' | 'is not') => {
+    await NftFolderAssert.assertSeeNftFolderContextMenu(shouldBeDisplayed === 'is');
+  }
+);
+
+Then(/^NFT context menu with "Remove" option (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await NftFolderAssert.assertSeeNftContextMenu(shouldBeDisplayed === 'is');
+});
+
+When(/^I click outside the NFT folder context menu$/, async () => {
+  await ((await NftFolderContextMenu.overlay.isDisplayed())
+    ? NftFolderContextMenu.overlay.click()
+    : NftsPage.title.click());
+});
+
+When(/^I click "(Delete|Rename)" option in NFT folder context menu$/, async (option: 'Delete' | 'Rename') => {
+  switch (option) {
+    case 'Delete':
+      await NftFolderContextMenu.clickDeleteFolderOption();
+      break;
+    case 'Rename':
+      await NftFolderContextMenu.clickRenameFolderOption();
+      break;
+    default:
+      throw new Error(`Unsupported option name: ${option}`);
+  }
+});
+
+When(/^I click "Remove from folder" option in NFT context menu$/, async () => {
+  await NftFolderContextMenu.clickRemoveNFTOption();
+});
+
+Then(
+  /^I (see|do not see) "Rename your folder" drawer in (extended|popup) mode$/,
+  async (shouldSee: 'see' | 'do not see', mode: 'extended' | 'popup') => {
+    await NftRenameFolderAsserts.assertSeeRenameFolderDrawer(shouldSee === 'see', mode);
+  }
+);
+
+Then(
+  /^"Confirm" button is (enabled|disabled) on "Rename your folder" drawer$/,
+  async (state: 'enabled' | 'disabled') => {
+    await NftRenameFolderAsserts.assertSeeConfirmButtonEnabled(state === 'enabled');
+  }
+);
+
+Then(/^"Folder name" input is filled with "([^"]*)"$/, async (folderName: string) => {
+  await NftRenameFolderAsserts.assertSeeNameInputValue(folderName);
+});
+
+When(/^I click "(Cancel|Confirm)" button in "Rename your folder" drawer$/, async (button: 'Confirm' | 'Cancel') => {
+  switch (button) {
+    case 'Cancel':
+      await NftRenameFolderPage.clickCancelButton();
+      break;
+    case 'Confirm':
+      await NftRenameFolderPage.clickConfirmButton();
+      break;
+    default:
+      throw new Error(`Unsupported button name: ${button}`);
+  }
+});
+
+Then(/^I (see|do not see) delete folder modal$/, async (shouldSee: 'see' | 'do not see') => {
+  await NftFolderAssert.assertSeeDeleteFolderModal(shouldSee === 'see');
+});
+
+When(/^I click "(Cancel|Confirm)" button in delete folder modal$/, async (button: 'Confirm' | 'Cancel') => {
+  switch (button) {
+    case 'Cancel':
+      await DeleteFolderModal.clickCancelButton();
+      break;
+    case 'Confirm':
+      await DeleteFolderModal.clickConfirmButton();
+      break;
+    default:
+      throw new Error(`Unsupported button name: ${button}`);
+  }
+});
+
+When(/^I create folder with name: "([^"]*)" and first available NFT$/, async (folderName: string) => {
+  await NftsPage.createFolderButton.click();
+  await NftCreateFolderPage.setFolderNameInput(folderName);
+  await NftCreateFolderPage.nextButton.waitForClickable();
+  await NftCreateFolderPage.nextButton.click();
+  await NftSelectNftsPage.selectNFTs(1);
+  await NftSelectNftsPage.nextButton.waitForClickable();
+  await NftSelectNftsPage.nextButton.click();
+  await NftsPage.createFolderButton.waitForClickable();
+  await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, true);
+});
+
+When(
+  /^I create folder with name: "([^"]*)" that contains (\d+) NFTs$/,
+  async (folderName: string, numberOfNftsInFolder: number) => {
+    await NftsPage.createFolderButton.click();
+    await NftCreateFolderPage.setFolderNameInput(folderName);
+    await NftCreateFolderPage.nextButton.waitForClickable();
+    await NftCreateFolderPage.nextButton.click();
+    await NftSelectNftsPage.selectNFTs(numberOfNftsInFolder);
+    await NftSelectNftsPage.nextButton.waitForClickable();
+    await NftSelectNftsPage.nextButton.click();
+    await MenuHeader.menuButton.waitForClickable();
+    await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, true);
+    testContext.save('numberOfNftsInFolder', numberOfNftsInFolder);
+  }
+);
+
+When(/^I select (\d+) available NFTs$/, async (numberOfNftsWanted: number) => {
+  await NftSelectNftsPage.selectNFTs(numberOfNftsWanted);
+  await NftSelectNftsPage.nextButton.waitForClickable();
+  await NftSelectNftsPage.nextButton.click();
+});
+
+When(
+  /^I (add|remove) (\d+) NFT to or from the folder$/,
+  async (action: 'add' | 'remove', numberOfNftsWanted: number) => {
+    const numberOfNftsInFolder = testContext.load('numberOfNftsInFolder') as number;
+    switch (action) {
+      case 'add':
+        testContext.saveWithOverride('numberOfNftsInFolder', numberOfNftsInFolder + numberOfNftsWanted);
+        await NftsFolderPage.addNftButton.waitForClickable();
+        await NftsFolderPage.addNftButton.click();
+        await NftSelectNftsPage.selectNFTs(numberOfNftsWanted);
+        await NftSelectNftsPage.nextButton.waitForClickable();
+        await NftSelectNftsPage.nextButton.click();
+        break;
+      case 'remove':
+        testContext.saveWithOverride('numberOfNftsInFolder', numberOfNftsInFolder - numberOfNftsWanted);
+        for (let i = 0; i < numberOfNftsWanted; i++) {
+          await NftSelectNftsPage.nfts[0].waitForClickable();
+          await NftSelectNftsPage.nfts[0].click({ button: 'right' });
+          await NftFolderContextMenu.clickRemoveNFTOption();
+        }
+        break;
+      default:
+        throw new Error(`Unsupported action: ${action}`);
+    }
+  }
+);
+
+Then(
+  /^Folder "([^"]*)" displays (\d+) NFT thumbnails$/,
+  async (folderName: string, numberOfExpectedThumbnails: number) => {
+    await NftAssert.assertNumberOfExpectedThumbnails(folderName, numberOfExpectedThumbnails);
+  }
+);
+
+Then(
+  /^There is a NFTs counter showing (\d+) of remaining NFTs in folder "([^"]*)"$/,
+  async (expectedRemainingNumberOfNFTs: number, folderName: string) => {
+    await NftAssert.assertRemainingNumberOfNFTs(expectedRemainingNumberOfNFTs, folderName);
+  }
+);
+
+Then(/^I see folders on the NFTs page in the alphabetical order$/, async () => {
+  await NftAssert.assertSeeFoldersInAlphabeticalOrder();
 });

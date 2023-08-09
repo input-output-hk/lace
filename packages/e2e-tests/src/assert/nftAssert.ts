@@ -3,9 +3,13 @@ import { TestnetPatterns } from '../support/patterns';
 import NftsPage from '../elements/NFTs/nftsPage';
 import NftDetails from '../elements/NFTs/nftDetails';
 import { t } from '../utils/translationService';
-import { expect } from 'chai';
+import { expect, use } from 'chai';
 import { browser } from '@wdio/globals';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
+import chaiSorted from 'chai-sorted';
+import testContext from '../utils/testContext';
+
+use(chaiSorted);
 
 class NftAssert {
   async assertSeeTitleWithCounter() {
@@ -125,6 +129,49 @@ class NftAssert {
     await NftDetails.sendNFTButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
       await expect(await NftDetails.sendNFTButton.getText()).to.equal(await t('core.nftDetail.sendNFT'));
+    }
+  }
+
+  async assertSeeFoldersInAlphabeticalOrder() {
+    const folderNames = await NftsPage.folderContainers.map((folder) => folder.getText());
+    await expect(folderNames).to.be.ascending;
+  }
+
+  async assertNumberOfExpectedThumbnails(folderName: string, numberOfExpectedThumbnails: number) {
+    const numberOfNFTsInFolder = testContext.load('numberOfNftsInFolder') as number;
+    const folderContainer = await NftsPage.getFolder(folderName);
+    const totalDisplayedThumbnails = await folderContainer.$$(NftsPage.NFT_ITEM_IMG_CONTAINER).length;
+
+    switch (true) {
+      case numberOfNFTsInFolder < 4:
+      case numberOfNFTsInFolder > 0:
+        await expect(totalDisplayedThumbnails).to.equal(numberOfExpectedThumbnails);
+        break;
+      case numberOfNFTsInFolder >= 4:
+        await expect(totalDisplayedThumbnails).to.equal(3);
+        break;
+      case numberOfNFTsInFolder === 0:
+        await expect(totalDisplayedThumbnails).to.equal(0);
+        break;
+      default:
+        throw new Error(
+          `Displayed thumbnails: ${totalDisplayedThumbnails} does not match expected thumbnails: ${numberOfExpectedThumbnails}`
+        );
+    }
+  }
+
+  async assertRemainingNumberOfNFTs(expectedRemainingNumberOfNFTs: number, folderName: string) {
+    const numberOfNFTsInFolder = testContext.load('numberOfNftsInFolder') as number;
+    const folderContainer = await NftsPage.getFolder(folderName);
+
+    if (numberOfNFTsInFolder > 4) {
+      const numberOfDisplayedRemainingNFTs = Number(
+        ((await folderContainer.$(NftsPage.REST_OF_NFTS).getText()) as string).slice(1)
+      );
+
+      await expect(numberOfDisplayedRemainingNFTs).to.equal(expectedRemainingNumberOfNFTs);
+    } else {
+      await folderContainer.$(NftsPage.REST_OF_NFTS).waitForDisplayed({ reverse: true });
     }
   }
 }

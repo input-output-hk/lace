@@ -7,7 +7,7 @@ import { ToastProps } from '@lace/common';
 import { addressErrorMessage, nameErrorMessage } from '@lib/storage/helpers';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
-import { HandleProvider, HandleResolution } from '@cardano-sdk/core';
+import { Cardano, HandleProvider, HandleResolution } from '@cardano-sdk/core';
 import { isHandle } from '@lace/core';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
@@ -31,6 +31,31 @@ export const verifyHandle = async (
     };
   }
 };
+
+type customErrorProps = {
+  message: string;
+  expectedAddress: Cardano.PaymentAddress;
+  actualAddress: Cardano.PaymentAddress;
+};
+export class CustomConflictError extends Error {
+  expectedAddress: Cardano.PaymentAddress;
+  actualAddress: Cardano.PaymentAddress;
+
+  constructor({ message, expectedAddress, actualAddress }: customErrorProps) {
+    super(message);
+    this.expectedAddress = expectedAddress;
+    this.actualAddress = actualAddress;
+    Object.setPrototypeOf(this, CustomConflictError.prototype);
+  }
+}
+
+export class CustomError extends Error {
+  constructor(message: string, public readonly isValidHandle: boolean = true) {
+    super(message);
+    this.name = 'CustomError';
+    Object.setPrototypeOf(this, CustomError.prototype);
+  }
+}
 
 export const isValidAddress = (address: string): boolean => {
   let isValid;
@@ -75,6 +100,39 @@ export const validateWalletHandle = async ({ value, handleResolver }: validateWa
   return '';
 };
 
+type ensureHandleOwnerHasntChangedArgs = {
+  handleResolution: HandleResolution;
+  handleResolver: HandleProvider;
+};
+
+export const ensureHandleOwnerHasntChanged = async ({
+  handleResolution,
+  handleResolver
+}: ensureHandleOwnerHasntChangedArgs): Promise<void> => {
+  if (Cardano.isAddress(handleResolution.handle)) {
+    return;
+  }
+
+  const { handle, cardanoAddress } = handleResolution;
+  const response = await handleResolver.resolveHandles({ handles: [handle] });
+  const newHandleResolution = response[0];
+
+  if (!newHandleResolution) {
+    throw new CustomError(i18n.t('general.errors.incorrectHandle'), false);
+  }
+
+  if (!Cardano.util.addressesShareAnyKey(cardanoAddress, newHandleResolution.cardanoAddress)) {
+    throw new CustomConflictError({
+      message: `${i18n.t('general.errors.handleConflict', {
+        receivedAddress: cardanoAddress,
+        actualAddress: newHandleResolution.cardanoAddress
+      })}`,
+      expectedAddress: cardanoAddress,
+      actualAddress: newHandleResolution.cardanoAddress
+    });
+  }
+};
+
 // popup view specific validations
 export const validateAddressBookName = (value: string, translateFn: TFunction): ValidationResult =>
   value.length > MAX_ADDRESS_BOOK_NAME_LENGTH
@@ -90,10 +148,14 @@ export const validateMainnetAddress = (address: string): boolean =>
   // is Byron era mainnet Icarus-style address
   address.startsWith('Ae2') ||
   // is Byron era mainnet Daedalus-style address
-  address.startsWith('DdzFF');
+  address.startsWith('DdzFF') ||
+  // address is a handle
+  isHandle(address);
 
 export const validateTestnetAddress = (address: string): boolean =>
-  address.startsWith('addr_test') || (!validateMainnetAddress(address) && Wallet.Cardano.Address.isValidByron(address));
+  address.startsWith('addr_test') ||
+  isHandle(address) ||
+  (!validateMainnetAddress(address) && Wallet.Cardano.Address.isValidByron(address));
 
 export const validateAddrPerNetwork: Record<Wallet.Cardano.NetworkId, (address: string) => boolean> = {
   [Wallet.Cardano.NetworkId.Mainnet]: (address: string) => validateMainnetAddress(address),
@@ -134,13 +196,18 @@ export const hasAddressBookItem = (
   return [false, undefined];
 };
 
-export const getAddressToSave = async (
-  address: AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>,
-  handleResolver: HandleProvider
-): Promise<AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>> => {
+type addressToSaveArgs = {
+  address: AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>;
+  handleResolver: HandleProvider;
+};
+export const getAddressToSave = async ({
+  address,
+  handleResolver
+}: addressToSaveArgs): Promise<
+  AddressBookSchema | Omit<AddressBookSchema, 'id'> | Omit<AddressBookSchema, 'id' | 'network'>
+> => {
   if (isHandle(address.address)) {
     const result = await verifyHandle(address.address, handleResolver);
-
     if (result.valid) {
       return { ...address, handleResolution: result.handles[0] };
     }

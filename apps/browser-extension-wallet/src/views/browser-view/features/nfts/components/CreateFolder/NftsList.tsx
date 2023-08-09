@@ -58,8 +58,14 @@ export const NftsList = ({
       type: NftsItemsTypes.NFT,
       onClick: () => onSelectNft(nft),
       contextMenu: (
-        <div className={styles.contextMenu} onClick={() => onRemoveNft(nft?.assetId)}>
-          <div className={styles.contextMenuItem}>{t('browserView.nfts.folderDrawer.contextMenu.remove')}</div>
+        <div
+          className={styles.contextMenu}
+          data-testid="nft-folder-context-menu"
+          onClick={() => onRemoveNft(nft?.assetId)}
+        >
+          <div className={styles.contextMenuItem} data-testid="context-menu-item-remove">
+            {t('browserView.nfts.folderDrawer.contextMenu.remove')}
+          </div>
         </div>
       )
     }))

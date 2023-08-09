@@ -10,7 +10,15 @@ export const content = style({
 });
 
 export const chart = style({
+  position: 'relative',
   width: 148,
+});
+
+export const counter = style({
+  left: '50%',
+  position: 'absolute',
+  top: '50%',
+  transform: 'translate(-50%, -50%)',
 });
 
 export const info = style({

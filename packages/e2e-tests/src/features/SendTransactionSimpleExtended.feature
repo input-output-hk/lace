@@ -68,7 +68,8 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I open address book from header menu
     Then I see address row with name "WalletName" and address "Shelley" on the list in extended mode
 
-  @LW-2362 @Testnet
+  @LW-2362 @Testnet @Pending
+    # bug LW-7773
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
@@ -79,7 +80,8 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2362 @Mainnet
+  @LW-2362 @Mainnet @Pending
+    # bug LW-7773
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
@@ -90,7 +92,8 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2742 @Testnet @Mainnet
+  @LW-2742 @Testnet @Mainnet @Pending
+    # bug LW-7773
   Scenario: Extended-view - Send flow - Search contact
     Given I have several contacts whose start with the same characters
     And I navigate to Tokens extended page
@@ -98,7 +101,8 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I enter the first characters of the contacts
     Then a dropdown showing the first 5 matches is displayed
 
-  @LW-2743 @Testnet @Mainnet
+  @LW-2743 @Testnet @Mainnet @Pending
+    # bug LW-7773
   Scenario: Extended-view - Send flow - Select contact from dropdown
     Given I have several contacts whose start with the same characters
     And I navigate to Tokens extended page
@@ -107,7 +111,8 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And click on one of the contacts on the dropdown
     Then the selected contact is added in the bundle recipient's address
 
-  @LW-2363 @Testnet
+  @LW-2363 @Testnet @Pending
+    # bug LW-7773
   Scenario: Extended-view - Existing address can be selected from the address book and then removed
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
@@ -120,7 +125,8 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is disabled on "Send" page
 
-  @LW-2363 @Mainnet
+  @LW-2363 @Mainnet @Pending
+    # bug LW-7773
   Scenario: Extended-view - Existing address can be selected from the address book and then removed
     When I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page

@@ -90,7 +90,8 @@ Feature: LW: Tokens tab - popup view
     Examples:
       | action     | step               |
       | refreshing | I refresh the page |
-      | reopening  | I reopen the page  |
+    # LW-7706
+    # | reopening  | I reopen the page  |
 
   @Testnet @Mainnet @LW-7126
   Scenario: Popup View - Hide my balance - keep state after switching to extended view

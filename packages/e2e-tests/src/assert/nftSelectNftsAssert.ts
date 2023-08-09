@@ -18,6 +18,16 @@ class NftSelectNftsAssert {
     await NftSelectNftsPage.counter.waitForDisplayed();
     expect(await NftSelectNftsPage.counter.getText()).to.equal(String(counter));
   }
+
+  async assertSeeNFTsWithSearchPhrase(searchPhrase: string) {
+    const displayedNFTNames = await Promise.all(
+      await NftSelectNftsPage.nfts.map(async (nft) => (await nft.getText()).toLowerCase())
+    );
+    expect(
+      displayedNFTNames.every((name) => name.includes(searchPhrase.toLowerCase())),
+      `All displayed NFT names [${displayedNFTNames}] should contain phrase "${searchPhrase.toLowerCase()}"`
+    ).to.be.true;
+  }
 }
 
 export default new NftSelectNftsAssert();

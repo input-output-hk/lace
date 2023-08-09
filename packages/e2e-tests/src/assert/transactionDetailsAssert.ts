@@ -1,4 +1,4 @@
-import { TransactionsPage } from '../elements/transactionsPage';
+import TransactionsPage from '../elements/transactionsPage';
 import { TransactionDetailsPage } from '../elements/transactionDetails';
 import webTester from '../actor/webTester';
 import { expect } from 'chai';
@@ -22,9 +22,7 @@ type transactionData = {
 
 class TransactionsDetailsAssert {
   waitForTransactionsLoaded = async () => {
-    const transactionsPage = new TransactionsPage();
-
-    await browser.waitUntil(async () => (await transactionsPage.getRows()).length > 1, {
+    await browser.waitUntil(async () => (await TransactionsPage.rows).length > 1, {
       timeout: 10_000,
       timeoutMsg: 'failed while waiting for all transactions'
     });
@@ -32,9 +30,9 @@ class TransactionsDetailsAssert {
 
   async assertSeeTransactionDetails(expectedTransactionDetails: ExpectedTransactionDetails) {
     const transactionsDetails = new TransactionDetailsPage();
-    await webTester.waitUntilSeeElement(transactionsDetails.transactionDetailsDescription(), 15_000);
+    await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
 
-    await expect(await webTester.getTextValueFromElement(transactionsDetails.transactionDetailsDescription())).contains(
+    await expect(await transactionsDetails.transactionDetailsDescription.getText()).contains(
       `${expectedTransactionDetails.transactionDescription}`
     );
     if (expectedTransactionDetails.hash) {
@@ -86,14 +84,13 @@ class TransactionsDetailsAssert {
   }
 
   async assertSeeTransactionDetailsUnfolded(mode: 'extended' | 'popup') {
-    const transactionsPage = new TransactionsPage();
     await this.waitForTransactionsLoaded();
     const transactionsDetails = new TransactionDetailsPage();
-    const rowsNumber = (await transactionsPage.getRows()).length;
+    const rowsNumber = (await TransactionsPage.rows).length;
 
-    for (let i = 1; i <= rowsNumber && i < 10; i++) {
-      await webTester.clickElement(transactionsPage.transactionsTableRow(i));
-      await webTester.waitUntilSeeElement(transactionsDetails.transactionDetailsDescription(), 15_000);
+    for (let i = 0; i <= rowsNumber && i < 10; i++) {
+      await TransactionsPage.clickOnTransactionRow(i);
+      await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       await transactionsDetails.transactionDetailsHash.waitForDisplayed();
       await webTester.seeWebElement(transactionsDetails.transactionDetailsStatus());
       await webTester.seeWebElement(transactionsDetails.transactionDetailsTimestamp());
@@ -101,7 +98,7 @@ class TransactionsDetailsAssert {
       await webTester.seeWebElement(transactionsDetails.transactionDetailsOutputsSection());
       await webTester.seeWebElement(transactionsDetails.transactionDetailsFeeADA());
       await webTester.seeWebElement(transactionsDetails.transactionDetailsFeeFiat());
-      const txType = (await transactionsDetails.getTransactionDetailDescription()) as string;
+      const txType = await transactionsDetails.transactionDetailsDescription.getText();
       if (txType.includes('Delegation')) {
         await webTester.seeWebElement(transactionsDetails.transactionDetailsStakepoolName());
         await webTester.seeWebElement(transactionsDetails.transactionDetailsStakepoolTicker());
@@ -114,12 +111,11 @@ class TransactionsDetailsAssert {
 
   async assertSeeTransactionDetailsInputAndOutputs(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
-    const transactionsPage = new TransactionsPage();
     const transactionsDetails = new TransactionDetailsPage();
-    const rowsNumber = (await transactionsPage.getRows()).length;
+    const rowsNumber = (await TransactionsPage.rows).length;
 
-    for (let i = 1; i <= rowsNumber && i < 10; i++) {
-      await webTester.clickElement(transactionsPage.transactionsTableRow(i));
+    for (let i = 0; i <= rowsNumber && i < 10; i++) {
+      await TransactionsPage.clickOnTransactionRow(i);
       await webTester.clickElement(transactionsDetails.transactionDetailsInputsDropdown());
       await webTester.clickElement(transactionsDetails.transactionDetailsOutputsDropdown());
       await webTester.seeWebElement(transactionsDetails.transactionDetailsInputAddress());
@@ -139,12 +135,11 @@ class TransactionsDetailsAssert {
 
   async assertTxDetailValuesNotZero(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
-    const transactionsPage = new TransactionsPage();
     const transactionsDetails = new TransactionDetailsPage();
-    const rowsNumber = (await transactionsPage.getRows()).length;
+    const rowsNumber = (await TransactionsPage.rows).length;
 
-    for (let i = 1; i <= rowsNumber && i < 10; i++) {
-      await webTester.clickElement(transactionsPage.transactionsTableRow(i));
+    for (let i = 0; i <= rowsNumber && i < 10; i++) {
+      await TransactionsPage.clickOnTransactionRow(i);
       await webTester.clickElement(transactionsDetails.transactionDetailsInputsDropdown());
       await webTester.clickElement(transactionsDetails.transactionDetailsOutputsDropdown());
 
@@ -179,15 +174,14 @@ class TransactionsDetailsAssert {
   }
 
   async assertSeeTransactionDetailsSummary(mode: 'extended' | 'popup') {
-    const transactionsPage = new TransactionsPage();
     await this.waitForTransactionsLoaded();
     const transactionsDetails = new TransactionDetailsPage();
-    const rowsNumber = (await transactionsPage.getRows()).length;
+    const rowsNumber = (await TransactionsPage.rows).length;
 
-    for (let i = 1; i <= rowsNumber && i <= 10; i++) {
-      const transactionType = (await transactionsPage.getTransactionType(i)) as string;
-      await webTester.clickElement(transactionsPage.transactionsTableRow(i));
-      await webTester.waitUntilSeeElement(transactionsDetails.transactionDetailsDescription(), 15_000);
+    for (let i = 0; i <= rowsNumber && i < 10; i++) {
+      const transactionType = await TransactionsPage.transactionsTableItemType(i).getText();
+      await TransactionsPage.clickOnTransactionRow(i);
+      await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       if (!(transactionType.includes('Delegation') || transactionType.includes('Self'))) {
         await webTester.seeWebElement(transactionsDetails.transactionDetailsSent());
         await webTester.seeWebElement(transactionsDetails.transactionDetailsToAddress());
@@ -198,17 +192,16 @@ class TransactionsDetailsAssert {
   }
 
   async assertSeeTransactionDetailsSummaryAmounts(mode: 'extended' | 'popup') {
-    const transactionsPage = new TransactionsPage();
     await this.waitForTransactionsLoaded();
     const transactionsDetails = new TransactionDetailsPage();
-    const rowsNumber = (await transactionsPage.getRows()).length;
+    const rowsNumber = (await TransactionsPage.rows).length;
 
-    for (let i = 1; i <= rowsNumber && i <= 10; i++) {
+    for (let i = 0; i <= rowsNumber && i < 10; i++) {
       // TODO Cover self transaction details with automation
-      if ((await transactionsPage.getTransactionType(i)) !== 'Self Transaction') {
-        await webTester.clickElement(transactionsPage.transactionsTableRow(i));
-        await webTester.waitUntilSeeElement(transactionsDetails.transactionDetailsDescription(), 15_000);
-        const txType = (await transactionsDetails.getTransactionDetailDescription()) as string;
+      if ((await TransactionsPage.transactionsTableItemType(i).getText()) !== 'Self Transaction') {
+        await TransactionsPage.clickOnTransactionRow(i);
+        await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
+        const txType = await transactionsDetails.transactionDetailsDescription.getText();
         if (!txType.includes('Delegation')) {
           const tokensAmountSummary =
             (await transactionsDetails.getTransactionSentTokensWithoutDuplicates()).length + 1;

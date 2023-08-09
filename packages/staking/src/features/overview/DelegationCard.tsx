@@ -2,6 +2,7 @@ import { Card, Cell, Grid, PieChart, PieChartColor, Text } from '@lace/ui';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
+import { useOutsideHandles } from '../outside-handles-provider';
 import * as styles from './DelegationCard.css';
 
 type Status = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';
@@ -13,6 +14,7 @@ type DelegationCardProps = {
     color: PieChartColor;
   }>;
   status: Status;
+  showDistribution?: boolean;
 };
 
 const mapOfStatusToTranslationKey: Record<Status, TranslationKey> = {
@@ -24,7 +26,7 @@ const mapOfStatusToTranslationKey: Record<Status, TranslationKey> = {
 };
 
 type MakeInfoDataParams = {
-  balance: number;
+  balance: string;
   numberOfPools: number;
   status: string;
 };
@@ -38,31 +40,41 @@ const makeInfoData = ({
   value: MakeInfoDataParams[keyof MakeInfoDataParams];
 }> => [
   { nameTranslationKey: 'overview.delegationCard.label.status', value: status },
-  { nameTranslationKey: 'overview.delegationCard.label.balance', value: balance },
+  { nameTranslationKey: 'overview.delegationCard.label.balance', value: `${balance} ADA` },
   { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
 ];
 
-export const DelegationCard = ({ distribution, status }: DelegationCardProps) => {
+export const DelegationCard = ({ distribution, status, showDistribution = false }: DelegationCardProps) => {
   const { t } = useTranslation();
-  const balance = distribution.reduce((acc, { value }) => acc + value, 0);
+  const { balancesBalance, compactNumber } = useOutsideHandles();
+  const balance = balancesBalance.available.coinBalance;
   const numberOfPools = distribution.length;
-  const infoData = makeInfoData({ balance, numberOfPools, status: t(mapOfStatusToTranslationKey[status]) });
+  const infoData = makeInfoData({
+    balance: compactNumber(balance),
+    numberOfPools,
+    status: t(mapOfStatusToTranslationKey[status]),
+  });
 
   return (
     <Card.Greyed>
-      <div className={styles.content}>
-        <div className={styles.chart}>
+      <div className={styles.content} data-testid="delegation-info-card">
+        <div className={styles.chart} data-testid="delegation-chart">
           <PieChart data={distribution} colors={distribution.map((d) => d.color)} />
+          {showDistribution && <Text.SubHeading className={styles.counter}>100%</Text.SubHeading>}
         </div>
         <div className={styles.info}>
           <Grid columns={'$2'} rows={'$3'}>
             {infoData.map(({ nameTranslationKey, value }) => (
               <Fragment key={nameTranslationKey}>
                 <Cell className={styles.infoLabel}>
-                  <Text.Body.Large weight={'$semibold'}>{t(nameTranslationKey)}</Text.Body.Large>
+                  <Text.Body.Large weight={'$semibold'} data-testid={`${nameTranslationKey}-label`}>
+                    {t(nameTranslationKey)}
+                  </Text.Body.Large>
                 </Cell>
                 <Cell className={styles.infoValue}>
-                  <Text.Body.Large weight={'$bold'}>{value}</Text.Body.Large>
+                  <Text.Body.Large weight={'$bold'} data-testid={`${nameTranslationKey}-value`}>
+                    {value}
+                  </Text.Body.Large>
                 </Cell>
               </Fragment>
             ))}

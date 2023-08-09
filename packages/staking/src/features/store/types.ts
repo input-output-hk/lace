@@ -3,6 +3,7 @@ import { Immutable } from 'immer';
 
 export enum Sections {
   DETAIL = 'detail',
+  PREFERENCES = 'preferences',
   CONFIRMATION = 'confirmation',
   SIGN = 'sign',
   SUCCESS_TX = 'success_tx',
@@ -23,6 +24,8 @@ export interface SectionConfig {
 export interface StakePoolDetails {
   simpleSendConfig: SectionConfig;
   setSection: (section?: SectionConfig) => void;
+  activePage: Page;
+  setActivePage: (page: Page) => void;
   setPrevSection: () => void;
   resetStates: () => void;
   isDrawerVisible: boolean;
@@ -48,6 +51,10 @@ export type DelegationPortfolioState = Immutable<{
   draftPortfolio: DelegationPortfolioStakePool[];
 }>;
 
+export type DelegationPortfolioQueries = {
+  poolIncludedInDraft: (id: Wallet.Cardano.PoolIdHex) => boolean;
+};
+
 type DelegationPortfolioMutators = {
   setCurrentPortfolio: (params: {
     rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[];
@@ -59,6 +66,12 @@ type DelegationPortfolioMutators = {
   clearDraft: () => void;
 };
 
-export type DelegationPortfolioStore = DelegationPortfolioState & {
-  mutators: DelegationPortfolioMutators;
-};
+export type DelegationPortfolioStore = DelegationPortfolioState &
+  DelegationPortfolioQueries & {
+    mutators: DelegationPortfolioMutators;
+  };
+
+export enum Page {
+  overview = 'overview',
+  browsePools = 'browsePools',
+}

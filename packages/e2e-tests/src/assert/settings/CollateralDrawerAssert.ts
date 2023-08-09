@@ -16,7 +16,7 @@ class CollateralDrawerAssert {
         await t('browserView.settings.wallet.collateral.amountDescription')
       );
       expect(await CollateralDrawer.collateralBannerDescription.getText()).to.equal(
-        await t('browserView.settings.wallet.collateral.amountSeparated')
+        await t('browserView.settings.wallet.collateral.reclaimBanner')
       );
       expect(await CollateralDrawer.collateralButton.getText()).to.equal(
         await t('browserView.settings.wallet.collateral.confirm')

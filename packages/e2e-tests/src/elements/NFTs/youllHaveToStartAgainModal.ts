@@ -3,10 +3,10 @@ import { ChainablePromiseElement } from 'webdriverio';
 
 class YoullHaveToStartAgainModal {
   private CONTAINER = '.ant-modal-content';
-  private TITLE = '[data-testid="create-foler-modal-title"]';
-  private DESCRIPTION = '[data-testid="create-foler-modal-description"]';
-  private CANCEL_BUTTON = '[data-testid="create-foler-modal-cancel"]';
-  private AGREE_BUTTON = '[data-testid="create-foler-modal-confirm"]';
+  private TITLE = '[data-testid="create-folder-modal-title"]';
+  private DESCRIPTION = '[data-testid="create-folder-modal-description"]';
+  private CANCEL_BUTTON = '[data-testid="create-folder-modal-cancel"]';
+  private AGREE_BUTTON = '[data-testid="create-folder-modal-confirm"]';
 
   get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER);

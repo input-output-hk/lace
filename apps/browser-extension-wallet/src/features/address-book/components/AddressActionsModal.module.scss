@@ -11,6 +11,10 @@
     display: flex;
     flex-direction: column;
     padding: size_unit(5) !important;
+
+    @media (max-width: $breakpoint-popup) {
+      padding: size_unit(2.5) !important;
+    }
   }
 }
 
