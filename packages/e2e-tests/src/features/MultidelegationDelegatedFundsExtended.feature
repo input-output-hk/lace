@@ -29,6 +29,7 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
   @LW-4877
   Scenario: Extended View - Stake pool details - Enter and Escape buttons support
     Given I am on Staking extended page
+    And I click multidelegation beta banner "Got it" button
     When I click browse pools tab
     And I input "Apex" to the search bar
     And I click stake pool with name "Apex Cardano Pool"

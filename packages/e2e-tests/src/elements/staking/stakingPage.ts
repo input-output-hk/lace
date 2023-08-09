@@ -11,6 +11,7 @@ class StakingPage {
   private SEARCH_LOADER = '[data-testid="search-loader"]';
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
   private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
+  private GOT_IT_BUTTON = '[data-testid="multidelegation-beta-modal-button"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -47,9 +48,18 @@ class StakingPage {
     return $(this.BROWSE_POOLS_TAB);
   }
 
+  get gotItButton() {
+    return $(this.GOT_IT_BUTTON);
+  }
+
   async clickBrowsePoolsTab() {
     await this.browsePoolTab.waitForClickable();
     await this.browsePoolTab.click();
+  }
+
+  async clickGotItButton() {
+    await this.gotItButton.waitForClickable({ timeout: 5000 });
+    await this.gotItButton.click();
   }
 
   stakingPoolListColumnHeader(listHeader: string) {

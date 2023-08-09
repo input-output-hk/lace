@@ -165,6 +165,10 @@ Then(/^I click browse pools tab$/, async () => {
   await StakingPage.clickBrowsePoolsTab();
 });
 
+Then(/^I click multidelegation beta banner "Got it" button$/, async () => {
+  await StakingPage.clickGotItButton();
+});
+
 Then(
   /^there are (.*) results and "([^"]*)" and "([^"]*)" are populated if applicable$/,
   async (results: number, resultTitle: string, resultSubTitle: string) => {
