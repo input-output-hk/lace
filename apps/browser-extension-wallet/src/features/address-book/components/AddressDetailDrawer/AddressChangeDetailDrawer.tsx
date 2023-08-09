@@ -184,7 +184,10 @@ export const AddressChangeDetailDrawer = ({
       >
         <>
           <div className={styles.warningBanner}>
-            <Banner withIcon message={t('addressBook.reviewModal.banner.description', { name: initialValues.name })} />
+            <Banner
+              withIcon
+              message={t('addressBook.reviewModal.banner.browserDescription', { name: initialValues.name })}
+            />
           </div>
           <div className={styles.addressContainer}>
             <Timeline className={cn(styles.sideTimeline)}>
@@ -192,7 +195,7 @@ export const AddressChangeDetailDrawer = ({
                 <div className={cn(styles.addressDetailsContainer)}>
                   <div className={cn(styles.addressDataDetails)}>
                     <div className={cn(styles.activeText)}>
-                      {t('addressBook.reviewModal.previewsAddress.description')}
+                      {t('addressBook.reviewModal.previousAddress.description')}
                     </div>
                     <Ellipsis
                       text={expectedAddress}

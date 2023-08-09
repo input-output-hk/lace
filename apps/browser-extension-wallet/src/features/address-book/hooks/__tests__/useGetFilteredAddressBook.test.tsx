@@ -83,7 +83,7 @@ describe('Testing useGetFilteredAddressBook hook', () => {
     });
     expect(result.current.filteredAddresses).toHaveLength(1);
     expect(result.current.filteredAddresses).toStrictEqual([
-      { id: 1, walletAddress: 'addr_test1', walletName: 'test wallet' }
+      { id: 1, walletAddress: 'addr_test1', walletName: 'test wallet', walletHandleResolution: mockHandleResolution }
     ]);
 
     act(() => result.current.resetAddressList());
@@ -119,7 +119,7 @@ describe('Testing useGetFilteredAddressBook hook', () => {
     });
     expect(result.current.filteredAddresses).toHaveLength(1);
     expect(result.current.filteredAddresses).toStrictEqual([
-      { id: 3, walletAddress: 'addr_test3', walletName: 'Other wallet 2' }
+      { id: 3, walletAddress: 'addr_test3', walletName: 'Other wallet 2', walletHandleResolution: mockHandleResolution }
     ]);
   });
 });

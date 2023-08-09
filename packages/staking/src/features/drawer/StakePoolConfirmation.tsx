@@ -156,15 +156,12 @@ export const StakePoolConfirmation = (): React.ReactElement => {
 
   useEffect(() => {
     (async () => {
-      if (!openPool?.hexId || draftPortfolio.length === 0) return;
+      if (draftPortfolio.length === 0) return;
       // TODO: move below logic to zustand store
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
-        const pools =
-          draftPortfolio.length > 0
-            ? draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.weight }))
-            : [{ id: openPool.hexId, weight: 1 }];
+        const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.weight }));
         const tx = await txBuilder.delegatePortfolio({ pools }).build().inspect();
         setDelegationTxBuilder(txBuilder);
         setDelegationTxFee(tx.body.fee.toString());
@@ -178,7 +175,15 @@ export const StakePoolConfirmation = (): React.ReactElement => {
         setIsBuildingTx(false);
       }
     })();
-  }, [inMemoryWallet, openPool, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx, setStakingError]);
+  }, [
+    draftPortfolio,
+    inMemoryWallet,
+    openPool,
+    setDelegationTxBuilder,
+    setDelegationTxFee,
+    setIsBuildingTx,
+    setStakingError,
+  ]);
 
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);

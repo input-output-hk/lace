@@ -556,3 +556,7 @@ When(/^I click "Help and support" button during wallet setup$/, async () => {
 When(/^I click "here." link on "Keeping your wallet secure" page$/, async () => {
   await OnboardingMnemonicInfoPage.hereLink.click();
 });
+
+Given(/^I restore a wallet$/, async () => {
+  await OnboardingPageObject.restoreWallet();
+});

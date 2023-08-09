@@ -19,7 +19,7 @@ in rec {
   lace-blockchain-services-exe = pkgs.buildGoModule rec {
     name = "lace-blockchain-services";
     src = ./lace-blockchain-services;
-    vendorHash = "sha256-1slTIiIGxraIFdtKNeH4llXjrtSEaEQ7IIbOM3LL3N0=";
+    vendorHash = common.lace-blockchain-services-exe-vendorHash;
     nativeBuildInputs = with pkgs; [ pkgconfig imagemagick go-bindata ];
     buildInputs = with pkgs; [
       (libayatana-appindicator-gtk3.override {
@@ -35,7 +35,9 @@ in rec {
     preBuild = ''
       convert -background none -size 44x44 cardano.svg cardano.png
       cp cardano.png tray-icon
-      go-bindata -pkg main -o assets.go tray-icon
+      cp ${common.openApiJson} openapi.json
+      go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
+      mkdir -p constants && cp ${common.constants} constants/constants.go
     '';
   };
 
@@ -46,6 +48,7 @@ in rec {
     cp ${lace-blockchain-services-exe}/bin/* $out/bin/
     ln -s ${cardano-node}/bin/* $out/libexec/
     ln -s ${ogmios}/bin/* $out/libexec/
+    ln -s ${mithril-client}/bin/* $out/libexec/
     ln -s ${cardano-js-sdk.nodejs}/bin/node $out/libexec
     ln -s ${pkgs.xclip}/bin/xclip $out/libexec
 
@@ -53,6 +56,8 @@ in rec {
     ln -s ${cardano-js-sdk}/libexec/source $out/share/cardano-js-sdk
     ln -s ${pkgs.xkeyboard_config}/share/X11/xkb $out/share/xkb
     ln -s ${common.networkConfigs} $out/share/cardano-node-config
+    ln -s ${common.swagger-ui} $out/share/swagger-ui
+    ln -s ${common.dashboard} $out/share/dashboard
   '';
 
   # XXX: this has no dependency on /nix/store on the target machine
@@ -119,6 +124,31 @@ in rec {
     # Make it downloadable from Hydra:
     mkdir -p $out/nix-support
     echo "file binary-dist \"$target\"" >$out/nix-support/hydra-build-products
+  '';
+
+  swagger-ui-preview = let
+    port = 12345;
+  in pkgs.writeShellScriptBin "swagger-ui-preview" ''
+    set -euo pipefail
+    openapi=$(realpath -e nix/lace-blockchain-services/internal/lace-blockchain-services/openapi.json)
+    cd $(mktemp -d)
+    ln -s ${common.swagger-ui} ./swagger-ui
+    ln -s "$openapi" ./openapi.json
+    ( sleep 0.5 ; xdg-open http://127.0.0.1:${toString port}/swagger-ui/ ; ) &
+    ${lib.getExe pkgs.python3} -m http.server ${toString port}
+  '';
+
+  mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
+    cp ${common.mithril-bin}/mithril-client ./
+
+    chmod +wx mithril-client
+    patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} \
+      --set-rpath ${with pkgs; lib.makeLibraryPath [ /* pkgs.stdenv.cc.cc */ openssl_1_1 ]} \
+      mithril-client
+
+    mkdir -p $out/bin
+    cp mithril-client $out/bin
+    $out/bin/mithril-client --version
   '';
 
 }

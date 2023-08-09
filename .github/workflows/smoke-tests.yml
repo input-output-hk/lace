@@ -81,7 +81,7 @@ jobs:
         with:
           storageType: s3
           resultsGlob: './packages/e2e-tests/reports/allure/results'
-          bucket: lightwallet
+          bucket: lace-e2e-test-results
           prefix: 'linux/${BROWSER}/${RUN}'
           copyLatest: true
           ignoreMissingResults: true

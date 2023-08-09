@@ -10,9 +10,13 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
-	"sort"
+	"encoding/json"
 
+	t "lace.io/lace-blockchain-services/types"
+	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
+	"lace.io/lace-blockchain-services/appconfig"
+	"lace.io/lace-blockchain-services/httpapi"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -24,7 +28,7 @@ import (
 )
 
 const (
-	OurLogPrefix = "lace-blockchain-services"
+	OurLogPrefix = ourpaths.OurLogPrefix
 )
 
 func main() {
@@ -88,41 +92,71 @@ func main() {
 		}
 	}()
 
-	networks := readDirAsStrings(ourpaths.NetworkConfigDir)
-	sort.Strings(networks)
+	networks, err := readAvailableNetworks()
+	if err != nil { panic(err) }
 
-	commUI, commManager := func() (CommChannels_UI, CommChannels_Manager) {
-		ogmiosStatus := make(chan string, 1)
-		ogmiosStatus <- "off"
-		cardanoNodeStatus := make(chan string, 1)
-		cardanoNodeStatus <- "off"
-		providerServerStatus := make(chan string, 1)
-		providerServerStatus <- "off"
-		setBackendUrl := make(chan string)
-		setOgmiosDashboard := make(chan string)
+	appConfig := appconfig.Load()
+
+	commUI, commManager, commHttp := func() (CommChannels_UI, CommChannels_Manager, httpapi.CommChannels) {
 		blockRestartUI := make(chan bool)
 
-		networkSwitch := make(chan string)
+		serviceUpdateFromManager := make(chan t.ServiceStatus)
+		serviceUpdateToUI := make(chan t.ServiceStatus)
+		serviceUpdateToHttp := make(chan t.ServiceStatus)
+
+		networkFromUI := make(chan string)
+		networkFromHttp := make(chan t.NetworkMagic)
+		networkToHttp := make(chan t.NetworkMagic)
+		networkToManager := make(chan string)
+
+		triggerMithril := make(chan struct{})
+
+		go func(){
+			reverseNetworks := map[string]t.NetworkMagic{}
+			for a, b := range networks { reverseNetworks[b] = a }
+			for name := range networkFromUI {
+				networkToManager <- name
+				networkToHttp <- reverseNetworks[name]
+			}
+		}()
+
+		go func(){
+			for ss := range serviceUpdateFromManager {
+				serviceUpdateToUI <- ss
+				serviceUpdateToHttp <- ss
+			}
+		}()
+
+		serviceUpdateFromManager <- t.ServiceStatus {
+			ServiceName: "lace-blockchain-services",
+			Status: "listening",
+			Progress: -1,
+			TaskSize: -1,
+			SecondsLeft: -1,
+			Url: fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort),
+			Version: constants.LaceBlockchainServicesVersion,
+			Revision: constants.LaceBlockchainServicesRevision,
+		}
+
 		initiateShutdownCh := make(chan struct{}, 1)
 
 		return CommChannels_UI {
-			OgmiosStatus: ogmiosStatus,
-			CardanoNodeStatus: cardanoNodeStatus,
-			ProviderServerStatus: providerServerStatus,
-			SetBackendUrl: setBackendUrl,
-			SetOgmiosDashboard: setOgmiosDashboard,
+			ServiceUpdate: serviceUpdateToUI,
 			BlockRestartUI: blockRestartUI,
-			NetworkSwitch: networkSwitch,
+			HttpSwitchesNetwork: networkFromHttp,
+			NetworkSwitch: networkFromUI,
 			InitiateShutdownCh: initiateShutdownCh,
+			TriggerMithril: triggerMithril,
 		}, CommChannels_Manager {
-			OgmiosStatus: ogmiosStatus,
-			CardanoNodeStatus: cardanoNodeStatus,
-			ProviderServerStatus: providerServerStatus,
-			SetBackendUrl: setBackendUrl,
-			SetOgmiosDashboard: setOgmiosDashboard,
+			ServiceUpdate: serviceUpdateFromManager,
 			BlockRestartUI: blockRestartUI,
-			NetworkSwitch: networkSwitch,
+			NetworkSwitch: networkToManager,
 			InitiateShutdownCh: initiateShutdownCh,
+			TriggerMithril: triggerMithril,
+		}, httpapi.CommChannels {
+			SwitchNetwork: networkFromHttp,
+			SwitchedNetwork: networkToHttp,
+			ServiceUpdate: serviceUpdateToHttp,
 		}
 	}()
 
@@ -145,6 +179,13 @@ func main() {
 		}
 	}()
 
+	go func(){ for {
+		err := httpapi.Run(appConfig, commHttp, networks)
+		fmt.Fprintf(os.Stderr, "%s[%d]: HTTP server failed: %v\n",
+			OurLogPrefix, os.Getpid(), err)
+		time.Sleep(1 * time.Second)
+	}}()
+
 	// Both macOS and Windows require that UI happens on the main thread:
 	var wgManager sync.WaitGroup
 	wgManager.Add(1)
@@ -154,34 +195,29 @@ func main() {
 		manageChildren(commManager)
 	}()
 
-	systray.Run(setupTrayUI(commUI, logFile, networks), func(){
+	systray.Run(setupTrayUI(commUI, logFile, networks, appConfig), func(){
 		wgManager.Wait()
 		fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 	})
 }
 
 type CommChannels_UI struct {
-	OgmiosStatus         <-chan string
-	CardanoNodeStatus    <-chan string
-	ProviderServerStatus <-chan string
-	SetBackendUrl        <-chan string
-	SetOgmiosDashboard   <-chan string
+	ServiceUpdate        <-chan t.ServiceStatus
 	BlockRestartUI       <-chan bool
+	HttpSwitchesNetwork  <-chan t.NetworkMagic
 
 	NetworkSwitch        chan<- string
 	InitiateShutdownCh   chan<- struct{}
+	TriggerMithril       chan<- struct{}
 }
 
 type CommChannels_Manager struct {
-	OgmiosStatus         chan<- string
-	CardanoNodeStatus    chan<- string
-	ProviderServerStatus chan<- string
-	SetBackendUrl        chan<- string
-	SetOgmiosDashboard   chan<- string
+	ServiceUpdate        chan<- t.ServiceStatus
 	BlockRestartUI       chan<- bool
 
 	NetworkSwitch        <-chan string
 	InitiateShutdownCh   <-chan struct{}
+	TriggerMithril       <-chan struct{}
 }
 
 func logSystemHealth() {
@@ -205,11 +241,41 @@ func logSystemHealth() {
 		avgStat.Load1, avgStat.Load5, avgStat.Load15)
 }
 
-func readDirAsStrings(dirPath string) []string {
-	files, err := ioutil.ReadDir(ourpaths.NetworkConfigDir)
-	if err != nil {
-		panic(err)
+// A map from network magic to name
+func readAvailableNetworks() (map[t.NetworkMagic]string, error) {
+	rv := map[t.NetworkMagic]string{}
+	sep := string(filepath.Separator)
+	names, err := readDirAsStrings(ourpaths.NetworkConfigDir)
+	if err != nil { return nil, err }
+	for _, name := range names {
+		configFile := ourpaths.NetworkConfigDir + sep + name + sep + "config.json"
+
+		configBytes, err := ioutil.ReadFile(configFile)
+		var config map[string]interface{}
+		err = json.Unmarshal(configBytes, &config)
+		if err != nil { return nil, err }
+
+		byronFile := config["ByronGenesisFile"].(string)
+		if !filepath.IsAbs(byronFile) {
+			byronFile = filepath.Join(filepath.Dir(configFile), byronFile)
+		}
+
+		byronBytes, err := ioutil.ReadFile(byronFile)
+		var byron map[string]interface{}
+		err = json.Unmarshal(byronBytes, &byron)
+		if err != nil { return nil, err }
+
+		magic := t.NetworkMagic(int(
+			byron["protocolConsts"].(map[string]interface{})["protocolMagic"].(float64)))
+
+		rv[magic] = name
 	}
+	return rv, nil
+}
+
+func readDirAsStrings(dirPath string) ([]string, error) {
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil { return nil, err }
 	rv := []string{}
 	for _, file := range files {
 		name := file.Name()
@@ -218,5 +284,5 @@ func readDirAsStrings(dirPath string) []string {
 		}
 		rv = append(rv, name)
 	}
-	return rv
+	return rv, nil
 }
