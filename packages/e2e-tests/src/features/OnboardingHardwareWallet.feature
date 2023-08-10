@@ -75,3 +75,24 @@ Feature: Onboarding - Hardware wallet
     And I am on "Connect Hardware Wallet" page
     When I click "Back" button during wallet setup
     Then "Help us improve your experience" page is displayed
+
+  @LW-4993
+  Scenario Outline: Hardware wallet - <mode> theme applied to onboarding pages
+    Given I set <mode> theme mode in Local Storage
+    When "Get started" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I click "Connect" button on wallet setup page
+    And I click "OK" button on "Limited support for DApp" modal
+    When "Legal page" is displayed
+    Then I see current onboarding page in <mode> mode
+    And I accept "T&C" checkbox
+    And I click "Next" button during wallet setup
+    When "Help us improve your experience" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I click "Next" button during wallet setup
+    When "Connect Hardware Wallet" page is displayed
+    Then I see current onboarding page in <mode> mode
+    Examples:
+      | mode  |
+      | dark  |
+      | light |

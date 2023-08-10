@@ -16,7 +16,7 @@ class LocalStorageInitializer {
   }
 
   async initializeMode(mode: 'light' | 'dark'): Promise<void> {
-    await localStorageManager.setItem('mode', JSON.stringify(mode));
+    await localStorageManager.setItem('mode', mode);
   }
 
   async initializeAppSettings(): Promise<void> {

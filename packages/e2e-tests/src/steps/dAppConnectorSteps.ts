@@ -9,6 +9,7 @@ import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
 import AllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
 import TestDAppPage from '../elements/dappConnector/testDAppPage';
 import WalletUnlockScreenAssert from '../assert/walletUnlockScreenAssert';
+import CommonAssert from '../assert/commonAssert';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -28,12 +29,12 @@ Then(/^I see DApp authorization window$/, async () => {
 Then(/^I see DApp authorization window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
-  await DAppConnectorAssert.assertSeeDAppThemeMode(mode);
+  await CommonAssert.assertSeeThemeMode(mode);
 });
 
 Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeDAppThemeMode(mode);
+  await CommonAssert.assertSeeThemeMode(mode);
 });
 
 Then(
