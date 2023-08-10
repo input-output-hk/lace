@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 import React, { useState, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
 import { AutoCompleteProps, Button } from 'antd';
@@ -10,6 +9,11 @@ import { ReactComponent as AvailableAddress } from '../../assets/icons/close-ico
 import styles from './DestinationAddressInput.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+
+const charBeforeNameEllipsis = 9;
+
+const charBeforeAddressEllipsis = 10;
+const charAfterAddressEllipsis = 6;
 
 enum HandleVerificationState {
   VALID = 'valid',
@@ -40,9 +44,9 @@ export type DestinationAddressInputProps = Omit<AutoCompleteProps, 'value'> & {
 
 export const getInputLabel = (name: string, address: string): React.ReactElement => (
   <div data-testid="search-result-row" className={styles.addressOption}>
-    <span data-testid="search-result-name">{addEllipsis(name, 4, 2)}</span>
+    <span data-testid="search-result-name">{addEllipsis(name, charBeforeNameEllipsis, 0)}</span>
     <span data-testid="search-result-address">
-      <p className={styles.option}>{addEllipsis(address, 10, 6)}</p>
+      <p className={styles.option}>{addEllipsis(address, charBeforeAddressEllipsis, charAfterAddressEllipsis)}</p>
     </span>
   </div>
 );

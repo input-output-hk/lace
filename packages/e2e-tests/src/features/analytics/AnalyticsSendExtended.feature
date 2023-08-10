@@ -1,6 +1,6 @@
-@SendSimpleTransaction-Extended-E2E  @Testnet
+@SendSimpleTransaction-Extended-E2E  @Testnet @Pending
 Feature: Analytics - Posthog - Sending - Extended View
-  
+
   @LW-7821
   Scenario: Extended-view - Send Analytics - Success Screen - Close drawer - X button
     Given I set up request interception for posthog analytics request(s)

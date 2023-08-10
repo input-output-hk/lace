@@ -98,6 +98,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
         action: MatomoEventActions.CLICK_EVENT,
         name: AnalyticsEventNames.ViewNFTs.VIEW_NFT_DETAILS_BROWSER
       });
+      analytics.sendEventToPostHog(PostHogAction.NFTsImageClick);
     },
     [analytics]
   );

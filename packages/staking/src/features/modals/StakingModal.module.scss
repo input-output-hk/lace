@@ -23,6 +23,10 @@
   line-height: size_unit(4);
   padding-bottom: size_unit(3);
   text-align: center;
+
+  &--announcement {
+    padding-bottom: size_unit(2);
+  }
 }
 
 .content {
@@ -32,6 +36,12 @@
   line-height: size_unit(3);
   padding-bottom: size_unit(3);
   text-align: center;
+
+  &--announcement {
+    font-weight: 400;
+    text-align: justify;
+    padding-bottom: size_unit(6);
+  }
 }
 
 .footer {

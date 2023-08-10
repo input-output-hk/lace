@@ -24,11 +24,11 @@ describe('Testing WalletAddressList component', () => {
     scrollableTargetId: addressListContainerTestId,
     translations: {
       name: 'Name',
-      address: 'Address'
+      address: 'addr_tes...67p'
     }
   };
   test('should render a list of 10 complete addresses', async () => {
-    const { findByTestId, findAllByText } = render(
+    const { findByTestId } = render(
       <div
         data-testid={addressListContainerTestId}
         id={addressListContainerTestId}
@@ -39,7 +39,8 @@ describe('Testing WalletAddressList component', () => {
     );
     const list = await findByTestId(addressListTestId);
     const items = await within(list).findAllByTestId('address-list-item');
-    const addresses = await findAllByText('addr_tes...67p');
+    const addresses = await within(list).findAllByTestId('address-list-item-address');
+
     expect(items).toHaveLength(10);
     expect(addresses).toHaveLength(10);
   });

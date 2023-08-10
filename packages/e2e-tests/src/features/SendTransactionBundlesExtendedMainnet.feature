@@ -141,8 +141,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I click "Agree" button on "You'll have to start again" modal
     Then Drawer is not displayed
 
-  @LW-3560 @Pending
-  # bug: LW-4698
+  @LW-3560
   Scenario: Extended View - Validation of insufficient balance error
     When I save token: "Cardano" balance
     And I click "Send" button on page header

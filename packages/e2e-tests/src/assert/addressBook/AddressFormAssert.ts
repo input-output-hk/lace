@@ -31,6 +31,16 @@ class AddressFormAssert {
   assertSeeAddressInAddressInput = async (expectedAddress: string) => {
     expect(await AddressForm.addressInput.getValue()).to.equal(expectedAddress);
   };
+
+  async assertSeeIconForInvalidAdaHandle(shouldBeDisplayed: boolean) {
+    await AddressForm.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
+    await AddressForm.adaHandleIconInvalid.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
+
+  async assertSeeIconForValidAdaHandle(shouldBeDisplayed: boolean) {
+    await AddressForm.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
+    await AddressForm.adaHandleIconValid.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
 }
 
 export default new AddressFormAssert();
