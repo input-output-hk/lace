@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Timeline, Typography } from 'antd';
 import { Banner, Ellipsis, toast } from '@lace/common';
 import cn from 'classnames';
@@ -7,34 +7,25 @@ import { useTranslation } from 'react-i18next';
 import Copy from '@assets/icons/copy.component.svg';
 import Check from '@assets/icons/check-success.component.svg';
 import styles from './AddressChangeDetail.module.scss';
-import { useAddressBookStore } from '../store';
-import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
-import { AddressBookSchema } from '@lib/storage';
-import { useAddressBookContext, withAddressBookContext } from '../context';
+import { withAddressBookContext } from '../context';
 
 const { Text } = Typography;
 
 const defaultBeforeEllipsis = 27;
 const defaultAfterEllipsis = 7;
 
+type AddressChangeDetailProps = {
+  name: string;
+  expectedAddress: string;
+  actualAddress: string;
+  isPopupView?: boolean;
+};
+
 export const AddressChangeDetail = withAddressBookContext(
-  ({ isPopupView }: { isPopupView?: boolean }): React.ReactElement => {
+  ({ isPopupView, name, expectedAddress, actualAddress }: AddressChangeDetailProps): React.ReactElement => {
     const { t } = useTranslation();
     const [actualAddressHasBeenCopied, setActualAddressHasBeenCopied] = useState(false);
     const [expectedAddressHasBeenCopied, setExpectedAddressHasBeenCopied] = useState(false);
-    const handleResolver = useHandleResolver();
-    const { list: addressList } = useAddressBookContext();
-    const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
-    const { addressToEdit } = useAddressBookStore();
-
-    const expectedAddress = useMemo(
-      () => validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? '',
-      [validatedAddressStatus, addressToEdit.address]
-    );
-    const actualAddress = useMemo(
-      () => validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? '',
-      [validatedAddressStatus, addressToEdit.address]
-    );
 
     const handleExpectedAddressOnClickCopy = () => {
       toast.notify({
@@ -63,10 +54,7 @@ export const AddressChangeDetail = withAddressBookContext(
     return (
       <>
         <div className={styles.warningBanner}>
-          <Banner
-            withIcon
-            message={t('addressBook.reviewModal.banner.browserDescription', { name: addressToEdit.name })}
-          />
+          <Banner withIcon message={t('addressBook.reviewModal.banner.browserDescription', { name })} />
         </div>
         <div className={styles.addressContainer}>
           <Timeline className={cn(styles.sideTimeline)}>

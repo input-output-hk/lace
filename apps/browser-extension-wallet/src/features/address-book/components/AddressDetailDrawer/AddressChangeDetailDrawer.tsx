@@ -7,6 +7,7 @@ import styles from './AddressChangeDetailDrawer.module.scss';
 import { AddressChangeDetail } from '../AddressChangeDetail';
 import { Footer } from '@src/views/browser-view/features/send-transaction/components/SendTransactionDrawer';
 import { Sections, useSections } from '@src/views/browser-view/features/send-transaction';
+import { useValidateAddressStatus } from '@hooks/useValidateAddressStatus';
 
 type InitialValuesProps = {
   address?: string;
@@ -29,6 +30,7 @@ export const AddressChangeDetailDrawer = ({
 }: AddressChangeDetailDrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const { setSection } = useSections();
+  const { expectedAddress, actualAddress } = useValidateAddressStatus(initialValues.address);
 
   return (
     <>
@@ -48,7 +50,12 @@ export const AddressChangeDetailDrawer = ({
         footer={<Footer isPopupView={popupView} onHandleChangeConfirm={onCancelClick} />}
         popupView={popupView}
       >
-        <AddressChangeDetail isPopupView={popupView} />
+        <AddressChangeDetail
+          isPopupView={popupView}
+          name={initialValues.name}
+          expectedAddress={expectedAddress}
+          actualAddress={actualAddress}
+        />
       </Drawer>
     </>
   );
