@@ -27,3 +27,4 @@ export * from '@ui/components/TextBoxItem';
 export * from '@ui/components/Switch';
 export * from '@ui/components/Loader';
 export * from '@ui/components/Radio';
+export * from '@ui/components/Timeline';
