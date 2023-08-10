@@ -2,7 +2,7 @@ import React from 'react';
 import cn from 'classnames';
 import { Cardano } from '@cardano-sdk/core';
 import { Typography, Tooltip } from 'antd';
-import { Ellipsis } from '@lace/common';
+import { Ellipsis, addEllipsis } from '@lace/common';
 import { ReactComponent as MissingIcon } from '../../assets/icons/missing.component.svg';
 import styles from './WalletAddressItem.module.scss';
 import { useTranslate } from '@src/ui/hooks';
@@ -23,23 +23,24 @@ export type WalletAddressItemProps = {
   beforeEllipsis?: number;
   afterEllipsis?: number;
   isSmall?: boolean;
-  shouldUseEllipsisBeforeAndAfter?: boolean;
+  shouldUseEllipsis?: boolean;
   isAddressWarningVisible?: boolean;
 };
 
-const defaultBeforeEllipsis = 8;
-const defaultAfterEllipsis = 3;
+const charBeforeEllipsisAddress = 8;
+const charAfterEllipsisAddress = 3;
+
+const charBeforeEllipsisName = 12;
+const charAfterEllipsisName = 0;
 
 export const WalletAddressItem = ({
   id,
   name,
   address,
   onClick,
-  beforeEllipsis = defaultBeforeEllipsis,
-  afterEllipsis = defaultAfterEllipsis,
   className,
   isSmall = false,
-  shouldUseEllipsisBeforeAndAfter,
+  shouldUseEllipsis,
   isAddressWarningVisible = false
 }: WalletAddressItemProps): React.ReactElement => {
   const { t } = useTranslate();
@@ -60,7 +61,7 @@ export const WalletAddressItem = ({
           </div>
           <div data-testid="address-list-item-name" className={cn(styles.listItemName, { [styles.small]: isSmall })}>
             <Text className={styles.textField} ellipsis={{ tooltip: name }}>
-              {name}
+              {addEllipsis(name, charBeforeEllipsisName, charAfterEllipsisName)}
             </Text>
           </div>
         </div>
@@ -77,10 +78,10 @@ export const WalletAddressItem = ({
           textClassName={cn(styles.addressColor, styles.textField)}
           className={cn(styles.listItemBlock, styles.listItemAddress)}
           withTooltip={false}
-          {...(isSmall || shouldUseEllipsisBeforeAndAfter
+          {...(isSmall || shouldUseEllipsis
             ? {
-                beforeEllipsis,
-                afterEllipsis
+                charBeforeEllipsisAddress,
+                charAfterEllipsisAddress
               }
             : { ellipsisInTheMiddle: true })}
         />
