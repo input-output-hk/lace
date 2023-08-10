@@ -1,10 +1,6 @@
 import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
 import React, { useEffect } from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
-// Disabling import/no-unresolved as it is not aware of the "exports" entry
-// https://github.com/import-js/eslint-plugin-import/issues/1810
-// eslint-disable-next-line import/no-unresolved
-import '@lace/staking/index.css';
 import {
   useBalances,
   useDelegationDetails,
