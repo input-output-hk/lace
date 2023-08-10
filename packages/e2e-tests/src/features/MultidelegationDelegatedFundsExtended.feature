@@ -7,18 +7,23 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
   @LW-2642 @Smoke
   Scenario: Extended View - Staking  - Currently staking component
     When I navigate to Staking extended page
+    And I confirm multidelegation beta modal
     Then I see currently staking component for stake pool: "ADA Capital" in extended mode
 
   @LW-2643 @Smoke
   Scenario: Extended View - Staking - Details of currently staked pool
     And I navigate to Staking extended page
+    And I confirm multidelegation beta modal
     When I click pool name in currently staking component
     Then I see drawer with "ADA CAPITAL" stake pool details
 
-  @LW-2644
+  @LW-2644 @Pending
+    #No tooltip currently. perhaps will be implemented in future
   Scenario Outline: Extended View - Staking - Hover over currently staking element: <element_to_hover>
     And I navigate to Staking extended page
+    And I confirm multidelegation beta modal
     When I hover over <element_to_hover> in currently staking component
+    And I choose debug mode
     Then I see tooltip for currently staking component
     Examples:
       | element_to_hover |
@@ -50,5 +55,4 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
     Then An "browserView.transaction.send.enterWalletPasswordToConfirmTransaction" text is displayed
     When I press keyboard Escape button
     And I verify switching stake pools modal is not displayed
-    And I choose debug mode
 
