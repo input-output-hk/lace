@@ -110,7 +110,7 @@ in rec {
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
 
-  lace-blockchain-services-exe-vendorHash = "sha256-3Dy7M2lU2jbTozI81i/Pg/jgcuHLrU1wBWwlM9RFnz4=";
+  lace-blockchain-services-exe-vendorHash = "sha256-A1SGcW3+a5jTVMu2H2blEhnvlBD8S+zm61GriF47B0A=";
 
   constants = pkgs.writeText "constants.go" ''
     package constants

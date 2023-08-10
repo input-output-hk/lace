@@ -12,16 +12,16 @@
   display: flex;
   justify-content: space-between;
   flex-direction: row;
-  
+
   @media (max-width: $breakpoint-popup) {
     flex-direction: column;
   }
-  
+
   .addressDataDetails {
     display: flex;
     flex-direction: column;
   }
-  
+
   .addressDetails {
     color: var(--text-color-secondary);
     @include text-body-medium;
@@ -47,16 +47,16 @@
   margin-top: size_unit(1);
   border-radius: size_unit(1.5);
   cursor: pointer;
-  
+
   @media (max-width: $breakpoint-popup) {
     width: fit-content;
   }
-  
+
   span.copy {
     @include text-bodySmall-semi-bold;
     text-align: center;
     color: var(--text-color-secondary, #878e9e);
-    
+
     @media (max-width: $breakpoint-popup) {
       font-size: var(--bodyXS);
       line-height: size_unit(3);
@@ -70,7 +70,7 @@
   @include text-body-bold;
   letter-spacing: -0.015em;
   text-align: left;
-  
+
   @media (max-width: $breakpoint-popup) {
     font-size: var(--bodySmall);
   }
@@ -80,7 +80,7 @@
   .addressWrapper {
     flex-direction: column;
   }
-  
+
   .footer {
     gap: size_unit(1);
   }
@@ -91,25 +91,7 @@
   font-weight: $font-weight-bold !important;
 }
 
-.dot {
-  width: size_unit(1.5);
-  height: size_unit(1.5);
-  border-radius: 50%;
-}
-
-.activeDot {
-  @extend .dot;
-  border: 2px solid transparent;
-  background-image: var(--primary-gradient);
-}
-
-.inactiveDot {
-  @extend .dot;
-  border: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-}
-
-.warningBanner { 
+.warningBanner {
   margin-top: size_unit(2);
 }
 
@@ -117,36 +99,9 @@
   display: flex;
   flex-direction: column;
   gap: size_unit(2);
-  
+
   button {
     font-weight: $font-weight-bold !important;
-  }
-}
-
-.sideTimeline {
-  margin: size_unit(7) 0 size_unit(7) size_unit(7.75);
-  
-  :global {
-    .ant-timeline-item {
-      height: 130px;
-    }
-    
-    .ant-timeline-item-content {
-      @include text-bodySmall-medium;
-      color: var(--text-color-primary);
-      margin-left: 17px;
-    }
-    
-    .ant-timeline-item-head {
-      width: size_unit(2.5);
-      height: size_unit(2.5);
-      background: var(--bg-color-container);
-    }
-    
-    .ant-timeline-item-tail {
-      left: 0;
-      border-left: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-    }
   }
 }
 
