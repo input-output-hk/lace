@@ -26,25 +26,29 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
       | total staked     |
       | total rewards    |
 
-  @LW-4877
+  @LW-4877 @Pending
   Scenario: Extended View - Stake pool details - Enter and Escape buttons support
     Given I am on Staking extended page
-    And I click multidelegation beta banner "Got it" button
-    When I click browse pools tab
+    And I confirm multidelegation beta modal
+    And I click Browse pools tab
     And I input "Apex" to the search bar
     And I click stake pool with name "Apex Cardano Pool"
     Then Drawer is displayed
     When I press keyboard Enter button
-    Then An "modals.changingPreferences.title" text is displayed
+    And I verify switching stake pools modal is displayed
+    When I press keyboard Escape button
+    And I verify switching stake pools modal is not displayed
+    When I press keyboard Escape button
+    And I click stake pool with name "Apex Cardano Pool"
+    Then Drawer is displayed
     When I press keyboard Enter button
-    Then An "browserView.staking.details.confirmation.title" text is displayed
+    And I verify switching stake pools modal is displayed
+    When I press keyboard Enter button
+    And I click "Next" button on staking manage staking
+    Then An "staking.confirmation.title" text is displayed
     When I press keyboard Enter button
     Then An "browserView.transaction.send.enterWalletPasswordToConfirmTransaction" text is displayed
     When I press keyboard Escape button
-    Then An "browserView.staking.details.exitStakingModal.title" text is displayed
-    When I press keyboard Escape button
-    Then An "browserView.transaction.send.enterWalletPasswordToConfirmTransaction" text is displayed
-    When I press keyboard Escape button
-    When I press keyboard Enter button
-    Then Drawer is not displayed
+    And I verify switching stake pools modal is not displayed
+    And I choose debug mode
 

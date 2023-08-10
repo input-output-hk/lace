@@ -20,6 +20,7 @@ import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageOb
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
 import StakingExitModal from '../elements/staking/StakingExitModal';
+import MultidelegationPage from '../elements/staking/MultidelegationPage';
 
 Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
   await stakingPageAssert.assertSeeTitleWithCounter();
@@ -161,14 +162,6 @@ Then(/^I input "([^"]*)" to the search bar$/, async (term: string) => {
   await StakingPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
 
-Then(/^I click browse pools tab$/, async () => {
-  await StakingPage.clickBrowsePoolsTab();
-});
-
-Then(/^I click multidelegation beta banner "Got it" button$/, async () => {
-  await StakingPage.clickGotItButton();
-});
-
 Then(
   /^there are (.*) results and "([^"]*)" and "([^"]*)" are populated if applicable$/,
   async (results: number, resultTitle: string, resultSubTitle: string) => {
@@ -299,6 +292,21 @@ When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+When(
+  /^I verify switching stake pools modal is (displayed|not displayed)$/,
+  async (type: 'displayed' | 'not displayed') => {
+    let reverseStatus = false;
+    if (type === 'not displayed') {
+      reverseStatus = true;
+    }
+    await SwitchingStakePoolModal.title.waitForDisplayed({ timeout: 5000, reverse: reverseStatus });
+  }
+);
+
+When(/^I verify I am on the (Overview|Browse pools) tab$/, async (type: 'Overview' | 'Browse pools') => {
+  await MultidelegationPage.clickOnTab(type);
 });
 
 Then(
