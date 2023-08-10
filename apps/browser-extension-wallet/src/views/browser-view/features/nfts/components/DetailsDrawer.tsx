@@ -43,6 +43,7 @@ export const DetailsDrawer = ({
       navigation={
         selectedNft ? <DrawerNavigation title={t('core.nftDetail.title')} onCloseIconClick={onClose} /> : undefined
       }
+      dataTestId="nft-details-drawer"
       footer={
         <div>
           <Button className={styles.sendButton} onClick={onSend} id={buttonIds.nftDetailsBtnId}>
