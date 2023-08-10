@@ -274,61 +274,67 @@ describe('Testing CollateralDrawer component', () => {
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SEND });
   });
 
-  test('should switch to SEND for HW wallet when wallet is not syncing for the first time and unspendable are loaded when currrent section is RECLAIM but there are no collaterals', async () => {
-    mockUseSyncingTheFirstTime.mockReset();
-    mockUseSyncingTheFirstTime.mockReturnValue(false);
-    mockGetKeyAgentType.mockReset();
-    mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
-    mockUseSections.mockReset();
-    mockUseSections.mockReturnValue({
-      setSection,
-      currentSection: { currentSection: Sections.RECLAIM }
-    });
-    const { rerender } = render(
-      <CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />,
-      {
-        wrapper: getWrapper({
-          backgroundService
-        })
-      }
-    );
+  test.each([Wallet.KeyManagement.KeyAgentType.Ledger, Wallet.KeyManagement.KeyAgentType.Trezor])(
+    'should switch to SEND for %s HW wallet when wallet is not syncing for the first time and unspendable are loaded when currrent section is RECLAIM but there are no collaterals',
+    async (keyAgentType) => {
+      mockUseSyncingTheFirstTime.mockReset();
+      mockUseSyncingTheFirstTime.mockReturnValue(false);
+      mockGetKeyAgentType.mockReset();
+      mockGetKeyAgentType.mockReturnValue(keyAgentType);
+      mockUseSections.mockReset();
+      mockUseSections.mockReturnValue({
+        setSection,
+        currentSection: { currentSection: Sections.RECLAIM }
+      });
+      const { rerender } = render(
+        <CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />,
+        {
+          wrapper: getWrapper({
+            backgroundService
+          })
+        }
+      );
 
-    expect(setSection).toBeCalledTimes(2);
-    expect(setSection.mock.calls[0][0]).toEqual({ currentSection: Sections.RECLAIM });
-    expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SEND });
+      expect(setSection).toBeCalledTimes(2);
+      expect(setSection.mock.calls[0][0]).toEqual({ currentSection: Sections.RECLAIM });
+      expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SEND });
 
-    rerender(<CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} />);
+      rerender(<CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} />);
 
-    expect(setSection).toBeCalledTimes(2);
-  });
+      expect(setSection).toBeCalledTimes(2);
+    }
+  );
 
-  test('should switch to SUCCESS_TX for HW wallet when there is build tx', async () => {
-    mockGetKeyAgentType.mockReset();
-    mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
-    mockUseBuitTxState.mockReset();
-    mockUseBuitTxState.mockReturnValue({
-      clearBuiltTxData,
-      builtTxData: {
-        uiTx: { hash: txHash }
-      } as unknown as sendTx.BuiltTxData
-    });
-    const { rerender } = render(
-      <CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />,
-      {
-        wrapper: getWrapper({
-          backgroundService
-        })
-      }
-    );
+  test.each([Wallet.KeyManagement.KeyAgentType.Ledger, Wallet.KeyManagement.KeyAgentType.Trezor])(
+    'should switch to SUCCESS_TX for %s HW wallet when there is build tx',
+    async (keyAgentType) => {
+      mockGetKeyAgentType.mockReset();
+      mockGetKeyAgentType.mockReturnValue(keyAgentType);
+      mockUseBuitTxState.mockReset();
+      mockUseBuitTxState.mockReturnValue({
+        clearBuiltTxData,
+        builtTxData: {
+          uiTx: { hash: txHash }
+        } as unknown as sendTx.BuiltTxData
+      });
+      const { rerender } = render(
+        <CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />,
+        {
+          wrapper: getWrapper({
+            backgroundService
+          })
+        }
+      );
 
-    expect(setSection).toBeCalledTimes(2);
-    expect(setSection.mock.calls[0][0]).toEqual({ currentSection: Sections.RECLAIM });
-    expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SUCCESS_TX });
+      expect(setSection).toBeCalledTimes(2);
+      expect(setSection.mock.calls[0][0]).toEqual({ currentSection: Sections.RECLAIM });
+      expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SUCCESS_TX });
 
-    rerender(<CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} />);
+      rerender(<CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} />);
 
-    expect(setSection).toBeCalledTimes(2);
-  });
+      expect(setSection).toBeCalledTimes(2);
+    }
+  );
 
   test.todo('add in memory wallet flows');
 
@@ -376,129 +382,17 @@ describe('Testing CollateralDrawer component', () => {
     test.todo('add general elements tests for reclaim step');
   });
 
-  describe('testing hw flows', () => {
-    beforeEach(() => {
-      mockUseSections.mockReset();
-      mockUseSections.mockReturnValue({
-        setSection,
-        currentSection: { currentSection: Sections.SEND }
-      });
-      mockGetKeyAgentType.mockReset();
-      mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
-      mockUseBuitTxState.mockReset();
-      mockUseBuitTxState.mockReturnValue({
-        setBuiltTxData,
-        clearBuiltTxData,
-        builtTxData: {
-          uiTx: { hash: txHash }
-        } as unknown as sendTx.BuiltTxData
-      });
-    });
-
-    afterEach(() => {
-      jest.resetModules();
-      jest.resetAllMocks();
-      cleanup();
-    });
-
-    test('should handle confirm button disabled when isInitializing is true', async () => {
-      mockUseCollateral.mockReset();
-      mockUseCollateral.mockReturnValue({
-        ...useCollateral,
-        isInitializing: true,
-        isSubmitting: false
-      });
-
-      render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
-        wrapper: getWrapper({
-          backgroundService
-        })
-      });
-
-      const sendSection = screen.queryByTestId(testIds.collateralSend);
-      expect(sendSection).toBeInTheDocument();
-      const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
-      expect(screen.queryByTestId(testIds.collateralPassword)).toBeNull();
-      expect(sendConfirmBtn).toHaveTextContent('Confirm transaction with Ledger');
-      expect(sendConfirmBtn.closest('button')).toHaveAttribute('disabled');
-      expect(within(sendConfirmBtn).queryByTestId(testIds.btnLoaderContainer)).toBeInTheDocument();
-      act(() => {
-        fireEvent.click(sendConfirmBtn);
-      });
-
-      await waitFor(() => {
-        expect(submitCollateralTx).toBeCalledTimes(0);
-      });
-    });
-
-    test('should make confirm button disabled when isSubmitting is true', async () => {
-      mockUseCollateral.mockReset();
-      mockUseCollateral.mockReturnValue({
-        ...useCollateral,
-        isInitializing: false,
-        isSubmitting: true
-      });
-
-      render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
-        wrapper: getWrapper({
-          backgroundService
-        })
-      });
-
-      const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
-      expect(sendConfirmBtn.closest('button')).toHaveAttribute('disabled');
-      expect(within(sendConfirmBtn).queryByTestId(testIds.btnLoaderContainer)).toBeInTheDocument();
-      act(() => {
-        fireEvent.click(sendConfirmBtn);
-      });
-      await waitFor(() => {
-        expect(submitCollateralTx).toBeCalledTimes(0);
-      });
-    });
-
-    test('should submit collateral tx and redirect to SUCCESS_TX section', async () => {
-      mockUseCollateral.mockReset();
-      mockUseCollateral.mockReturnValue({
-        ...useCollateral,
-        isInitializing: false,
-        isSubmitting: false
-      });
-
-      mockUseCollateral.mockReset();
-      mockUseCollateral.mockReturnValue(useCollateral);
-
-      render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
-        wrapper: getWrapper({
-          backgroundService
-        })
-      });
-      const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
-      act(() => {
-        fireEvent.click(sendConfirmBtn);
-      });
-      await waitFor(() => {
-        expect(submitCollateralTx).toBeCalledTimes(1);
-        expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SUCCESS_TX });
-      });
-    });
-
-    describe('testing SUCCESS_TX section', () => {
-      const original = window.location;
-      beforeAll(() => {
-        Object.defineProperty(window, 'location', {
-          configurable: true,
-          value: { reload: jest.fn() }
-        });
-      });
-
+  describe.each([Wallet.KeyManagement.KeyAgentType.Ledger, Wallet.KeyManagement.KeyAgentType.Trezor])(
+    'testing hw flows for %s key agent',
+    (keyAgentType) => {
       beforeEach(() => {
-        mockGetKeyAgentType.mockReset();
-        mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
         mockUseSections.mockReset();
         mockUseSections.mockReturnValue({
           setSection,
-          currentSection: { currentSection: Sections.SUCCESS_TX }
+          currentSection: { currentSection: Sections.SEND }
         });
+        mockGetKeyAgentType.mockReset();
+        mockGetKeyAgentType.mockReturnValue(keyAgentType);
         mockUseBuitTxState.mockReset();
         mockUseBuitTxState.mockReturnValue({
           setBuiltTxData,
@@ -509,209 +403,324 @@ describe('Testing CollateralDrawer component', () => {
         });
       });
 
-      afterAll(() => {
-        Object.defineProperty(window, 'location', { configurable: true, value: original });
-      });
-
       afterEach(() => {
         jest.resetModules();
         jest.resetAllMocks();
         cleanup();
       });
-      test('should display SUCCESS_TX sections with proper hash', async () => {
-        render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
+
+      test('should handle confirm button disabled when isInitializing is true', async () => {
+        mockUseCollateral.mockReset();
+        mockUseCollateral.mockReturnValue({
+          ...useCollateral,
+          isInitializing: true,
+          isSubmitting: false
+        });
+
+        render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
           wrapper: getWrapper({
             backgroundService
           })
         });
 
-        const transactionSuccessContainer = screen.queryByTestId(testIds.transactionSuccessContainer);
-        expect(transactionSuccessContainer).toBeInTheDocument();
-        expect(within(transactionSuccessContainer).queryByTestId(testIds.transactionHash)).toHaveTextContent(txHash);
+        const sendSection = screen.queryByTestId(testIds.collateralSend);
+        expect(sendSection).toBeInTheDocument();
+        const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
+        expect(screen.queryByTestId(testIds.collateralPassword)).toBeNull();
+        expect(sendConfirmBtn).toHaveTextContent(`Confirm transaction with ${keyAgentType}`);
+        expect(sendConfirmBtn.closest('button')).toHaveAttribute('disabled');
+        expect(within(sendConfirmBtn).queryByTestId(testIds.btnLoaderContainer)).toBeInTheDocument();
+        act(() => {
+          fireEvent.click(sendConfirmBtn);
+        });
+
+        await waitFor(() => {
+          expect(submitCollateralTx).toBeCalledTimes(0);
+        });
       });
 
-      test('should handle cancel', async () => {
-        const redirectToSettingsMock = jest.fn();
-        mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
-        mockGetBackgroundStorage.mockReset();
-        const message = {
-          type: MessageTypes.OPEN_COLLATERAL_SETTINGS,
-          data: {
-            section: BrowserViewSections.COLLATERAL_SETTINGS
-          }
-        };
-        mockGetBackgroundStorage.mockReturnValue({ message });
-        const clearBackgroundStorageMock = jest.fn().mockImplementation(async () => await true);
+      test('should make confirm button disabled when isSubmitting is true', async () => {
+        mockUseCollateral.mockReset();
+        mockUseCollateral.mockReturnValue({
+          ...useCollateral,
+          isInitializing: false,
+          isSubmitting: true
+        });
 
-        render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
+        render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
           wrapper: getWrapper({
-            backgroundService: {
-              ...backgroundService,
-              clearBackgroundStorage: clearBackgroundStorageMock
+            backgroundService
+          })
+        });
+
+        const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
+        expect(sendConfirmBtn.closest('button')).toHaveAttribute('disabled');
+        expect(within(sendConfirmBtn).queryByTestId(testIds.btnLoaderContainer)).toBeInTheDocument();
+        act(() => {
+          fireEvent.click(sendConfirmBtn);
+        });
+        await waitFor(() => {
+          expect(submitCollateralTx).toBeCalledTimes(0);
+        });
+      });
+
+      test('should submit collateral tx and redirect to SUCCESS_TX section', async () => {
+        mockUseCollateral.mockReset();
+        mockUseCollateral.mockReturnValue({
+          ...useCollateral,
+          isInitializing: false,
+          isSubmitting: false
+        });
+
+        mockUseCollateral.mockReset();
+        mockUseCollateral.mockReturnValue(useCollateral);
+
+        render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
+          wrapper: getWrapper({
+            backgroundService
+          })
+        });
+        const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
+        act(() => {
+          fireEvent.click(sendConfirmBtn);
+        });
+        await waitFor(() => {
+          expect(submitCollateralTx).toBeCalledTimes(1);
+          expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SUCCESS_TX });
+        });
+      });
+
+      describe('testing SUCCESS_TX section', () => {
+        const original = window.location;
+        beforeAll(() => {
+          Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: { reload: jest.fn() }
+          });
+        });
+
+        beforeEach(() => {
+          mockGetKeyAgentType.mockReset();
+          mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
+          mockUseSections.mockReset();
+          mockUseSections.mockReturnValue({
+            setSection,
+            currentSection: { currentSection: Sections.SUCCESS_TX }
+          });
+          mockUseBuitTxState.mockReset();
+          mockUseBuitTxState.mockReturnValue({
+            setBuiltTxData,
+            clearBuiltTxData,
+            builtTxData: {
+              uiTx: { hash: txHash }
+            } as unknown as sendTx.BuiltTxData
+          });
+        });
+
+        afterAll(() => {
+          Object.defineProperty(window, 'location', { configurable: true, value: original });
+        });
+
+        afterEach(() => {
+          jest.resetModules();
+          jest.resetAllMocks();
+          cleanup();
+        });
+        test('should display SUCCESS_TX sections with proper hash', async () => {
+          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
+            wrapper: getWrapper({
+              backgroundService
+            })
+          });
+
+          const transactionSuccessContainer = screen.queryByTestId(testIds.transactionSuccessContainer);
+          expect(transactionSuccessContainer).toBeInTheDocument();
+          expect(within(transactionSuccessContainer).queryByTestId(testIds.transactionHash)).toHaveTextContent(txHash);
+        });
+
+        test('should handle cancel', async () => {
+          const redirectToSettingsMock = jest.fn();
+          mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
+          mockGetBackgroundStorage.mockReset();
+          const message = {
+            type: MessageTypes.OPEN_COLLATERAL_SETTINGS,
+            data: {
+              section: BrowserViewSections.COLLATERAL_SETTINGS
             }
-          })
+          };
+          mockGetBackgroundStorage.mockReturnValue({ message });
+          const clearBackgroundStorageMock = jest.fn().mockImplementation(async () => await true);
+
+          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
+            wrapper: getWrapper({
+              backgroundService: {
+                ...backgroundService,
+                clearBackgroundStorage: clearBackgroundStorageMock
+              }
+            })
+          });
+
+          const cancelBtn = screen.queryByTestId(testIds.collateralTxCancelBtn);
+          expect(cancelBtn).toBeInTheDocument();
+          expect(cancelBtn).toHaveTextContent('Close');
+          act(() => {
+            fireEvent.click(cancelBtn);
+          });
+
+          await waitFor(() => {
+            expect(clearBackgroundStorageMock).toBeCalledWith(['message']);
+            expect(mockUseRedirection).toBeCalledWith(walletRoutePaths.settings);
+            expect(window.location.reload).toHaveBeenCalled();
+            expect(redirectToSettingsMock.mock.invocationCallOrder[0]).toBeLessThan(
+              (window.location.reload as jest.Mock).mock.invocationCallOrder[0]
+            );
+          });
         });
 
-        const cancelBtn = screen.queryByTestId(testIds.collateralTxCancelBtn);
-        expect(cancelBtn).toBeInTheDocument();
-        expect(cancelBtn).toHaveTextContent('Close');
-        act(() => {
-          fireEvent.click(cancelBtn);
-        });
+        test('should handle confirm', async () => {
+          const redirectToSettingsMock = jest.fn();
+          mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
+          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
+            wrapper: getWrapper({
+              backgroundService
+            })
+          });
 
-        await waitFor(() => {
-          expect(clearBackgroundStorageMock).toBeCalledWith(['message']);
-          expect(mockUseRedirection).toBeCalledWith(walletRoutePaths.settings);
-          expect(window.location.reload).toHaveBeenCalled();
-          expect(redirectToSettingsMock.mock.invocationCallOrder[0]).toBeLessThan(
-            (window.location.reload as jest.Mock).mock.invocationCallOrder[0]
-          );
-        });
-      });
+          const confirmBtn = screen.queryByTestId(testIds.collateralTxNextBtn);
+          expect(confirmBtn).toBeInTheDocument();
+          expect(confirmBtn).toHaveTextContent('View transaction');
+          expect(mockUseRedirection).toBeCalledWith(walletRoutePaths.activity);
 
-      test('should handle confirm', async () => {
-        const redirectToSettingsMock = jest.fn();
-        mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
-        render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-          wrapper: getWrapper({
-            backgroundService
-          })
-        });
+          act(() => {
+            fireEvent.click(confirmBtn);
+          });
 
-        const confirmBtn = screen.queryByTestId(testIds.collateralTxNextBtn);
-        expect(confirmBtn).toBeInTheDocument();
-        expect(confirmBtn).toHaveTextContent('View transaction');
-        expect(mockUseRedirection).toBeCalledWith(walletRoutePaths.activity);
-
-        act(() => {
-          fireEvent.click(confirmBtn);
-        });
-
-        await waitFor(() => {
-          expect(window.location.reload).toHaveBeenCalled();
-          expect(redirectToSettingsMock).toBeCalledTimes(1);
-          expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.RECLAIM });
-          expect(setSection.mock.invocationCallOrder[0]).toBeLessThan(
-            (window.location.reload as jest.Mock).mock.invocationCallOrder[0]
-          );
-        });
-      });
-    });
-
-    describe('testing FAIL_TX section', () => {
-      const original = window.location;
-      beforeAll(() => {
-        Object.defineProperty(window, 'location', {
-          configurable: true,
-          value: { reload: jest.fn() }
-        });
-      });
-
-      beforeEach(() => {
-        mockGetKeyAgentType.mockReset();
-        mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
-        mockUseSections.mockReset();
-        mockUseSections.mockReturnValue({
-          setSection,
-          currentSection: { currentSection: Sections.FAIL_TX }
-        });
-        mockUseBuitTxState.mockReset();
-        mockUseBuitTxState.mockReturnValue({
-          setBuiltTxData,
-          clearBuiltTxData,
-          builtTxData: {
-            uiTx: { hash: txHash }
-          } as unknown as sendTx.BuiltTxData
+          await waitFor(() => {
+            expect(window.location.reload).toHaveBeenCalled();
+            expect(redirectToSettingsMock).toBeCalledTimes(1);
+            expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.RECLAIM });
+            expect(setSection.mock.invocationCallOrder[0]).toBeLessThan(
+              (window.location.reload as jest.Mock).mock.invocationCallOrder[0]
+            );
+          });
         });
       });
 
-      afterAll(() => {
-        Object.defineProperty(window, 'location', { configurable: true, value: original });
-      });
-
-      afterEach(() => {
-        jest.resetModules();
-        jest.resetAllMocks();
-        cleanup();
-      });
-      test('should display FAIL_tx section', async () => {
-        render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-          wrapper: getWrapper({
-            backgroundService
-          })
+      describe('testing FAIL_TX section', () => {
+        const original = window.location;
+        beforeAll(() => {
+          Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: { reload: jest.fn() }
+          });
         });
 
-        const failContainer = screen.queryByTestId(testIds.transactionFailContainer);
-        expect(failContainer).toBeInTheDocument();
-      });
+        beforeEach(() => {
+          mockGetKeyAgentType.mockReset();
+          mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
+          mockUseSections.mockReset();
+          mockUseSections.mockReturnValue({
+            setSection,
+            currentSection: { currentSection: Sections.FAIL_TX }
+          });
+          mockUseBuitTxState.mockReset();
+          mockUseBuitTxState.mockReturnValue({
+            setBuiltTxData,
+            clearBuiltTxData,
+            builtTxData: {
+              uiTx: { hash: txHash }
+            } as unknown as sendTx.BuiltTxData
+          });
+        });
 
-      test('should handle cancel', async () => {
-        mockUseRedirection.mockReset();
-        const redirectToActivitiesMock = jest.fn();
-        const redirectToSettingsMock = jest.fn();
-        mockUseRedirection.mockImplementationOnce(() => redirectToActivitiesMock);
-        mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
-        mockGetBackgroundStorage.mockReset();
-        const message = {
-          type: MessageTypes.OPEN_COLLATERAL_SETTINGS,
-          data: {
-            section: BrowserViewSections.COLLATERAL_SETTINGS
-          }
-        };
-        mockGetBackgroundStorage.mockReturnValue({ message });
-        const clearBackgroundStorageMock = jest.fn().mockImplementation(async () => await true);
+        afterAll(() => {
+          Object.defineProperty(window, 'location', { configurable: true, value: original });
+        });
 
-        render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-          wrapper: getWrapper({
-            backgroundService: {
-              ...backgroundService,
-              clearBackgroundStorage: clearBackgroundStorageMock
+        afterEach(() => {
+          jest.resetModules();
+          jest.resetAllMocks();
+          cleanup();
+        });
+        test('should display FAIL_tx section', async () => {
+          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
+            wrapper: getWrapper({
+              backgroundService
+            })
+          });
+
+          const failContainer = screen.queryByTestId(testIds.transactionFailContainer);
+          expect(failContainer).toBeInTheDocument();
+        });
+
+        test('should handle cancel', async () => {
+          mockUseRedirection.mockReset();
+          const redirectToActivitiesMock = jest.fn();
+          const redirectToSettingsMock = jest.fn();
+          mockUseRedirection.mockImplementationOnce(() => redirectToActivitiesMock);
+          mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
+          mockGetBackgroundStorage.mockReset();
+          const message = {
+            type: MessageTypes.OPEN_COLLATERAL_SETTINGS,
+            data: {
+              section: BrowserViewSections.COLLATERAL_SETTINGS
             }
-          })
+          };
+          mockGetBackgroundStorage.mockReturnValue({ message });
+          const clearBackgroundStorageMock = jest.fn().mockImplementation(async () => await true);
+
+          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
+            wrapper: getWrapper({
+              backgroundService: {
+                ...backgroundService,
+                clearBackgroundStorage: clearBackgroundStorageMock
+              }
+            })
+          });
+
+          const cancelBtn = screen.queryByTestId(testIds.collateralTxCancelBtn);
+          expect(cancelBtn).toBeInTheDocument();
+          expect(cancelBtn).toHaveTextContent('Cancel');
+          act(() => {
+            fireEvent.click(cancelBtn);
+          });
+
+          setSection.mockReset();
+          await waitFor(() => {
+            expect(clearBackgroundStorageMock).toBeCalledWith(['message']);
+            expect(window.location.reload).toHaveBeenCalled();
+            expect(setSection).not.toBeCalled();
+            expect(redirectToActivitiesMock).not.toBeCalled();
+            expect(redirectToSettingsMock.mock.invocationCallOrder[0]).toBeLessThan(
+              (window.location.reload as jest.Mock).mock.invocationCallOrder[0]
+            );
+          });
         });
 
-        const cancelBtn = screen.queryByTestId(testIds.collateralTxCancelBtn);
-        expect(cancelBtn).toBeInTheDocument();
-        expect(cancelBtn).toHaveTextContent('Cancel');
-        act(() => {
-          fireEvent.click(cancelBtn);
-        });
+        test('should handle back', async () => {
+          const redirectToSettingsMock = jest.fn();
+          mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
+          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
+            wrapper: getWrapper({
+              backgroundService
+            })
+          });
 
-        setSection.mockReset();
-        await waitFor(() => {
-          expect(clearBackgroundStorageMock).toBeCalledWith(['message']);
-          expect(window.location.reload).toHaveBeenCalled();
-          expect(setSection).not.toBeCalled();
-          expect(redirectToActivitiesMock).not.toBeCalled();
-          expect(redirectToSettingsMock.mock.invocationCallOrder[0]).toBeLessThan(
-            (window.location.reload as jest.Mock).mock.invocationCallOrder[0]
-          );
+          const confirmBtn = screen.queryByTestId(testIds.collateralTxNextBtn);
+          expect(confirmBtn).toBeInTheDocument();
+          expect(confirmBtn).toHaveTextContent('Back');
+
+          act(() => {
+            fireEvent.click(confirmBtn);
+          });
+
+          await waitFor(() => {
+            expect(window.location.reload).toHaveBeenCalled();
+            expect(redirectToSettingsMock).not.toHaveBeenCalled();
+            expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SEND });
+          });
         });
       });
-
-      test('should handle back', async () => {
-        const redirectToSettingsMock = jest.fn();
-        mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
-        render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-          wrapper: getWrapper({
-            backgroundService
-          })
-        });
-
-        const confirmBtn = screen.queryByTestId(testIds.collateralTxNextBtn);
-        expect(confirmBtn).toBeInTheDocument();
-        expect(confirmBtn).toHaveTextContent('Back');
-
-        act(() => {
-          fireEvent.click(confirmBtn);
-        });
-
-        await waitFor(() => {
-          expect(window.location.reload).toHaveBeenCalled();
-          expect(redirectToSettingsMock).not.toHaveBeenCalled();
-          expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SEND });
-        });
-      });
-    });
-  });
+    }
+  );
 });

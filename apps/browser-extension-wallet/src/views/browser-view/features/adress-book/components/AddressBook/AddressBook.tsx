@@ -88,7 +88,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             setIsDrawerOpen(true);
           }
         },
-        shouldUseEllipsisBeferoAfter: true,
+        shouldUseEllipsis: true,
         isAddressWarningVisible:
           (isAdaHandleEnabled && validatedAddressStatus[item.address]?.isValid === false) ?? false,
         beforeEllipsis: ELLIPSIS_LEFT_SIDE_LENGTH,

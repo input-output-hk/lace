@@ -1,4 +1,4 @@
-export { lightColorScheme, darkColorScheme } from './colors.data';
+export { lightColorScheme, darkColorScheme, laceGradient } from './colors.data';
 export { elevation } from './elevation.data';
 export { opacities } from './opacities.data';
 export { radius } from './radius.data';

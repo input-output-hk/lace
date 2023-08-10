@@ -6,18 +6,20 @@ import React from 'react';
 import { useStakePoolDetails } from '../store';
 import styles from './StakingModal.module.scss';
 
-type actionProps = {
+type StakingModalActionProps = {
   dataTestId: string;
   body?: React.ReactNode;
   color?: ButtonProps['color'];
+  disabled?: boolean;
   onClick: () => void;
 };
 
 export type StakingModalProps = {
   title: React.ReactNode;
   visible: boolean;
+  announcement?: boolean;
   description: React.ReactNode;
-  actions: actionProps[];
+  actions: StakingModalActionProps[];
   popupView?: boolean;
 };
 
@@ -25,6 +27,7 @@ const popupModalWidth = 312;
 const extendedModalWidth = 479;
 
 export const StakingModal = ({
+  announcement,
   title,
   description,
   visible,
@@ -51,15 +54,23 @@ export const StakingModal = ({
       visible={visible}
       width={popupView ? popupModalWidth : extendedModalWidth}
     >
-      <div data-testid="stake-modal-title" className={styles.header}>
+      <div
+        data-testid="stake-modal-title"
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        className={cn(styles.header, { [styles.headerAnnouncement!]: announcement })}
+      >
         {title}
       </div>
-      <div data-testid="stake-modal-description" className={styles.content}>
+      <div
+        data-testid="stake-modal-description"
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        className={cn(styles.content, { [styles.contentAnnouncement!]: announcement })}
+      >
         {description}
       </div>
       <div data-testid="stake-modal-actions" className={styles.footer}>
         {actions.map(
-          ({ dataTestId, body, ...action }: actionProps): React.ReactElement => (
+          ({ dataTestId, body, ...action }: StakingModalActionProps): React.ReactElement => (
             <Button key={dataTestId} data-testid={dataTestId} {...action} block>
               {body}
             </Button>
