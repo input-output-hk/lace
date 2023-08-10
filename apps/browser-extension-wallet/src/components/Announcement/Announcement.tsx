@@ -42,7 +42,7 @@ export const Announcement = ({ visible, onConfirm, version, reason }: Announceme
       closable={false}
       // eslint-disable-next-line unicorn/no-null
       footer={null}
-      visible={visible && !!releaseNotes}
+      open={visible && !!releaseNotes}
       width="100%"
       className={styles.modal}
     >

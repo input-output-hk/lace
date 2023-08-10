@@ -49,7 +49,7 @@ export const PassphraseSettingsDrawer = ({
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={onClose}
       title={
         <DrawerHeader popupView={popupView} title={t('browserView.settings.security.periodicVerification.title')} />

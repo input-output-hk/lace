@@ -277,7 +277,7 @@ export const AddressChangeDetailDrawer = ({
         action={action}
         onCancel={onHandleCancel}
         onConfirm={onHandleConfirm}
-        visible={!!selectedId}
+        open={!!selectedId}
         isPopup={popupView}
       />
     </>

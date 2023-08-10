@@ -52,7 +52,7 @@ export const DappList = withDappContext(
             onArrowIconClick={popupView ? onCancelClick : undefined}
           />
         }
-        visible={visible}
+        open={visible}
         popupView={popupView}
       >
         <>
@@ -99,7 +99,7 @@ export const DappList = withDappContext(
                         setDappToDelete(undefined);
                       });
                   }}
-                  visible={!!dappToDelete}
+                  open={!!dappToDelete}
                   isPopupView={popupView}
                 />
               </div>

@@ -175,7 +175,7 @@ export const AssetDetailsDrawer = ({
       className={styles.drawer}
       navigation={<DrawerNavigation title={t('browserView.assetDetails.title')} onCloseIconClick={setVisibility} />}
       footer={renderFooter(handleOpenSend, t('browserView.assets.send'), popupView)}
-      visible={isVisible}
+      open={isVisible}
       destroyOnClose
       onClose={setVisibility}
       popupView={popupView}

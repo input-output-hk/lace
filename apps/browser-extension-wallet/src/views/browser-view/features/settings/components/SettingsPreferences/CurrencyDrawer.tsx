@@ -41,7 +41,7 @@ export const CurrencyDrawer = ({ visible, onClose, popupView = false }: Currency
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={onClose}
       title={
         <DrawerHeader

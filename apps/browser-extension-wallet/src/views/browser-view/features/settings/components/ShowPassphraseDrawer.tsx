@@ -123,7 +123,7 @@ export const ShowPassphraseDrawer = ({
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={handleOnClose}
       title={
         <DrawerHeader popupView={popupView} title={t('browserView.settings.security.showPassphraseDrawer.title')} />

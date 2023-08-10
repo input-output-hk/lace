@@ -138,7 +138,7 @@ export const WalletSetupStepLayout = ({
           {onNext && (
             <span ref={nextButtonContainerRef}>
               <Tooltip
-                visible={!isNextEnabled && !!toolTipText}
+                open={!isNextEnabled && !!toolTipText}
                 title={!isNextEnabled && toolTipText}
                 getPopupContainer={() => nextButtonContainerRef.current}
                 autoAdjustOverflow={false}
