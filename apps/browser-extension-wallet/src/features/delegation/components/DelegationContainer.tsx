@@ -20,7 +20,8 @@ import { useTranslation } from 'react-i18next';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useObservable } from '@lace/common';
@@ -122,6 +123,7 @@ export const DelegationContainer = (): React.ReactElement => {
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.Staking.VIEW_STAKEPOOL_INFO_POPUP
     });
+    analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
   };
 
   return (
