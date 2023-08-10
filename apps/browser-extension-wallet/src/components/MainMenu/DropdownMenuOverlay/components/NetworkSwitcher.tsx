@@ -4,23 +4,23 @@ import cn from 'classnames';
 import { useWalletStore } from '@src/stores';
 import styles from '../DropdownMenuOverlay.module.scss';
 
-type NetworkChoiseProps = {
+type NetworkSwitcherProps = {
   onClick: () => void;
 };
 
-export const NetworkChoise = ({ onClick }: NetworkChoiseProps): React.ReactElement => {
+export const NetworkSwitcher = ({ onClick }: NetworkSwitcherProps): React.ReactElement => {
   const { t } = useTranslation();
   const { environmentName } = useWalletStore();
 
   return (
     <div
-      data-testid="header-menu-network-choice-container"
+      data-testid="header-menu-network-switcher-container"
       className={cn(styles.menuItem, styles.cta)}
       onClick={() => onClick()}
     >
-      <div className={styles.networkChoise}>
-        <span data-testid="header-menu-network-choice-label">{t('browserView.topNavigationBar.links.network')}</span>
-        <span data-testid="header-menu-network-choice-value" className={styles.value}>
+      <div className={styles.networkSwitcher}>
+        <span data-testid="header-menu-network-switcher-label">{t('browserView.topNavigationBar.links.network')}</span>
+        <span data-testid="header-menu-network-switcher-value" className={styles.value}>
           {environmentName}
         </span>
       </div>

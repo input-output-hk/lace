@@ -8,7 +8,7 @@ import {
   ThemeSwitcher,
   LockWallet,
   UserInfo,
-  NetworkChoise
+  NetworkSwitcher
 } from './components';
 import styles from './DropdownMenuOverlay.module.scss';
 import { NetworkInfo } from './components/NetworkInfo';
@@ -38,7 +38,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             <SettingsLink />
             <Separator />
             <ThemeSwitcher isPopup={isPopup} />
-            <NetworkChoise onClick={() => setCurrentSection(Sections.NetworkInfo)} />
+            <NetworkSwitcher onClick={() => setCurrentSection(Sections.NetworkInfo)} />
             {lockWalletButton && (
               <>
                 <Separator /> {lockWalletButton}

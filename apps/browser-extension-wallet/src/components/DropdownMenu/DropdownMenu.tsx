@@ -10,7 +10,7 @@ import { useWalletStore } from '@src/stores';
 import {
   AddressBookLink,
   LockWallet,
-  NetworkChoise,
+  NetworkSwitcher,
   NetworkInfo,
   SettingsLink,
   ThemeSwitcher,
@@ -30,7 +30,7 @@ export interface DropdownMenuProps {
 export const DropdownMenu = ({
   isPopup,
   lockWalletButton = <LockWallet />,
-  topSection = { key: 'user-info', label: <UserInfo /> }
+  topSection = <UserInfo />
 }: DropdownMenuProps): React.ReactElement => {
   const { walletInfo } = useWalletStore();
   const [open, setOpen] = useState(false);
@@ -40,14 +40,24 @@ export const DropdownMenu = ({
   const items: ItemType[] =
     currentSection === Sections.Main
       ? [
-          topSection,
-          { key: 'address-book', label: <AddressBookLink isPopup={isPopup} /> },
-          { key: 'settings', label: <SettingsLink /> },
-          { type: 'divider' },
-          { key: 'theme-switcher', label: <ThemeSwitcher isPopup={isPopup} /> },
-          { key: 'network', label: <NetworkChoise onClick={() => setCurrentSection(Sections.NetworkInfo)} /> },
-          { type: 'divider' },
-          lockWalletButton && { key: 'lock-wallet', label: lockWalletButton }
+          { key: 'user-info', label: topSection },
+          {
+            key: 'links',
+            className: menuStyles.links,
+            type: 'group',
+            children: [
+              { key: 'address-book', label: <AddressBookLink isPopup={isPopup} /> },
+              { key: 'settings', label: <SettingsLink /> },
+              { type: 'divider', className: menuStyles.separator },
+              { key: 'theme-switcher', label: <ThemeSwitcher isPopup={isPopup} /> },
+              {
+                key: 'network-switcher',
+                label: <NetworkSwitcher onClick={() => setCurrentSection(Sections.NetworkInfo)} />
+              },
+              lockWalletButton && { type: 'divider', className: menuStyles.separator },
+              lockWalletButton && { key: 'lock-wallet', label: lockWalletButton }
+            ]
+          }
         ]
       : [{ key: 'network-info', label: <NetworkInfo onBack={() => setCurrentSection(Sections.Main)} /> }];
 
@@ -55,7 +65,7 @@ export const DropdownMenu = ({
     <Dropdown
       destroyPopupOnHide
       onOpenChange={setOpen}
-      menu={{ items, className: menuStyles.menuOverlay }}
+      menu={{ items, rootClassName: menuStyles.menuOverlay }}
       placement="bottomRight"
       trigger={['click']}
     >
