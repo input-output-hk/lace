@@ -191,6 +191,18 @@
             "description": "Progress of the `status` – usually between 0.0 and 1.0",
             "example": 0.53778
           },
+          "taskSize": {
+            "type": "number",
+            "format": "double",
+            "description": "Size of the current task, e.g. with Mithril it’s the size of the blockchain",
+            "example": 2619930050.0
+          },
+          "secondsLeft": {
+            "type": "number",
+            "format": "double",
+            "description": "Estimated time remaining to completion in seconds",
+            "example": 244.3
+          },
           "version": {
             "type": "string",
             "description": "Version (release)",

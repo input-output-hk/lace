@@ -13,7 +13,7 @@ import (
 	"encoding/json"
 
 	t "lace.io/lace-blockchain-services/types"
-	"lace.io/lace-blockchain-services/versions"
+	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/appconfig"
 	"lace.io/lace-blockchain-services/httpapi"
@@ -109,6 +109,8 @@ func main() {
 		networkToHttp := make(chan t.NetworkMagic)
 		networkToManager := make(chan string)
 
+		triggerMithril := make(chan struct{})
+
 		go func(){
 			reverseNetworks := map[string]t.NetworkMagic{}
 			for a, b := range networks { reverseNetworks[b] = a }
@@ -129,9 +131,11 @@ func main() {
 			ServiceName: "lace-blockchain-services",
 			Status: "listening",
 			Progress: -1,
+			TaskSize: -1,
+			SecondsLeft: -1,
 			Url: fmt.Sprintf("http://127.0.0.1:%d", appConfig.ApiPort),
-			Version: versions.LaceBlockchainServicesVersion,
-			Revision: versions.LaceBlockchainServicesRevision,
+			Version: constants.LaceBlockchainServicesVersion,
+			Revision: constants.LaceBlockchainServicesRevision,
 		}
 
 		initiateShutdownCh := make(chan struct{}, 1)
@@ -142,11 +146,13 @@ func main() {
 			HttpSwitchesNetwork: networkFromHttp,
 			NetworkSwitch: networkFromUI,
 			InitiateShutdownCh: initiateShutdownCh,
+			TriggerMithril: triggerMithril,
 		}, CommChannels_Manager {
 			ServiceUpdate: serviceUpdateFromManager,
 			BlockRestartUI: blockRestartUI,
 			NetworkSwitch: networkToManager,
 			InitiateShutdownCh: initiateShutdownCh,
+			TriggerMithril: triggerMithril,
 		}, httpapi.CommChannels {
 			SwitchNetwork: networkFromHttp,
 			SwitchedNetwork: networkToHttp,
@@ -202,6 +208,7 @@ type CommChannels_UI struct {
 
 	NetworkSwitch        chan<- string
 	InitiateShutdownCh   chan<- struct{}
+	TriggerMithril       chan<- struct{}
 }
 
 type CommChannels_Manager struct {
@@ -210,6 +217,7 @@ type CommChannels_Manager struct {
 
 	NetworkSwitch        <-chan string
 	InitiateShutdownCh   <-chan struct{}
+	TriggerMithril       <-chan struct{}
 }
 
 func logSystemHealth() {

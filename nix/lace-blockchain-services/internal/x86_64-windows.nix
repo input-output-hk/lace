@@ -12,7 +12,10 @@ in rec {
   inherit (common) cardano-node ogmios;
 
   patchedGo = pkgs.go.overrideAttrs (drv: {
-    patches = (drv.patches or []) ++ [ ./go--windows-StartupInfoLpReserved2.patch ];
+    patches = (drv.patches or []) ++ [
+      ./go--windows-expose-CreateEnvBlock.patch
+      ./go--windows-StartupInfoLpReserved2.patch
+    ];
   });
 
   # XXX: we have to be a bit creative to cross-compile Go code for Windows:
@@ -39,12 +42,27 @@ in rec {
       export GOPATH="$TMPDIR/go"
       rm -rf vendor
       cp -r --reflink=auto ${go-modules} vendor
+
+      chmod -R +w vendor
+      (
+        cd vendor/github.com/getlantern/systray
+        patch -p1 -i ${./getlantern-systray--windows-schedule-on-main-thread.patch}
+      )
+      (
+        # XXX: without this, in Task Manager, we change name to “Resync with Mithril?”, because of no main window:
+        cd vendor/github.com/sqweek/dialog
+        patch -p1 -i ${./sqweek-dialog--windows-title.patch}
+      )
+      (
+        cd vendor/github.com/UserExistsError/conpty
+        patch -p1 -i ${./conpty--get-pid-add-env.patch}
+      )
     '';
     buildPhase = ''
       cp ${icon} tray-icon
       cp ${common.openApiJson} openapi.json
       go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
-      mkdir -p versions && cp ${common.hardcodedVersions} versions/versions.go
+      mkdir -p constants && cp ${common.constants} constants/constants.go
       go build ${if noConsoleWindow then "-ldflags -H=windowsgui" else ""}
     '';
     installPhase = ''
@@ -162,6 +180,7 @@ in rec {
   mkPackage = { withJS }: pkgs.runCommand "lace-blockchain-services" {} ''
     mkdir -p $out/libexec
     cp -Lr ${lace-blockchain-services-exe-with-icon}/* $out/
+    cp -L ${mithril-client}/*.{exe,dll} $out/libexec
     cp -L ${ogmios}/bin/*.{exe,dll} $out/libexec/
     cp -L ${cardano-js-sdk.target.nodejs}/node.exe $out/libexec/
     cp -Lf ${cardano-node}/bin/*.{exe,dll} $out/libexec/
@@ -648,5 +667,11 @@ in rec {
       dontInstall = true;
     };
   };
+
+  mithril-client = pkgs.runCommand "mithril-client-${common.mithril-bin.version}" {} ''
+    mkdir -p $out
+    cp ${common.mithril-bin}/mithril-client.exe $out/
+    cp ${cardano-js-sdk.msvc-installed}/VC/Tools/MSVC/*/bin/Hostx64/arm/vcruntime140.dll $out/
+  '';
 
 }

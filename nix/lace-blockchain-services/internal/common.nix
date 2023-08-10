@@ -110,10 +110,10 @@ in rec {
     aarch64-darwin = cardanoNodeFlake.packages.aarch64-darwin.cardano-node;
   }.${targetSystem};
 
-  lace-blockchain-services-exe-vendorHash = "sha256-kEFdxqSs3nY1a6maUSPkc30uENePhcmYkkV1Q0fF/Io=";
+  lace-blockchain-services-exe-vendorHash = "sha256-A1SGcW3+a5jTVMu2H2blEhnvlBD8S+zm61GriF47B0A=";
 
-  hardcodedVersions = pkgs.writeText "version.go" ''
-    package versions
+  constants = pkgs.writeText "constants.go" ''
+    package constants
 
     const (
       LaceBlockchainServicesVersion = ${__toJSON laceVersion}
@@ -124,6 +124,11 @@ in rec {
       OgmiosRevision = ${__toJSON inputs.ogmios.rev}
       ProviderServerVersion = ${__toJSON ((__fromJSON (__readFile (inputs.cardano-js-sdk + "/packages/cardano-services/package.json"))).version)}
       ProviderServerRevision = ${__toJSON inputs.cardano-js-sdk.sourceInfo.rev}
+      MithrilClientRevision = ${__toJSON inputs.mithril.sourceInfo.rev}
+      MithrilClientVersion = ${__toJSON mithril-bin.version}
+      MithrilGVKPreview = ${__toJSON mithrilGenesisVerificationKeys.preview}
+      MithrilGVKPreprod = ${__toJSON mithrilGenesisVerificationKeys.preprod}
+      MithrilGVKMainnet = ${__toJSON mithrilGenesisVerificationKeys.mainnet}
     )
   '';
 
@@ -184,5 +189,31 @@ in rec {
       hash = "sha256-+94KwJIdhsNWxBUy5zGciHojvRuP8ABgyrRHJJ8Dx88=";
     }} $out/highlight.js/default.min.css
   '';
+
+  mithrilGenesisVerificationKeys = {
+    preview = builtins.readFile (inputs.mithril + "/mithril-infra/configuration/pre-release-preview/genesis.vkey");
+    preprod = builtins.readFile (inputs.mithril + "/mithril-infra/configuration/release-preprod/genesis.vkey");
+    mainnet = builtins.readFile (inputs.mithril + "/mithril-infra/configuration/release-mainnet/genesis.vkey");
+  };
+
+  # FIXME: build from source (Linux, and Darwins are available in their flake.nix, but Windows not)
+  mithril-bin = let
+    ver = (__fromJSON (__readFile (inputs.self + "/flake.lock"))).nodes.mithril.original.ref;
+  in {
+    x86_64-linux = pkgs.fetchzip {
+      url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-linux-x64.tar.gz";
+      hash = "sha256-oyBhhSG/kvZge3tpZfheGHtD1ivY56+jYgSAH09rswE=";
+      stripRoot = false;
+    };
+    x86_64-windows = pkgs.fetchzip {
+      url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-windows-x64.tar.gz";
+      hash = "sha256-SWPk9zTlmRElOe3l7Ic+jeqo3VNST6wuXfiFogkcrA4=";
+    };
+    x86_64-darwin = pkgs.fetchzip {
+      url = "https://github.com/input-output-hk/mithril/releases/download/${ver}/mithril-${ver}-macos-x64.tar.gz";
+      hash = "sha256-u0S9ClTE38Uv5uyFO4dlS0P/O1cAjeUwl3zarhwk9no=";
+    };
+    aarch64-darwin = inputs.mithril.packages.aarch64-darwin.mithril-client;
+  }.${targetSystem} // { version = ver; };
 
 }

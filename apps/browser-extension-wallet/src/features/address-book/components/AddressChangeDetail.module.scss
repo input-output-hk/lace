@@ -29,6 +29,10 @@
   }
 }
 
+.sideTimeline {
+  margin: 0 !important;
+}
+
 .copyIcon {
   margin-right: size_unit(1);
   color: var(--text-color-secondary, #878e9e);
@@ -91,24 +95,6 @@
   font-weight: $font-weight-bold !important;
 }
 
-.dot {
-  width: size_unit(1.5);
-  height: size_unit(1.5);
-  border-radius: 50%;
-}
-
-.activeDot {
-  @extend .dot;
-  border: 2px solid transparent;
-  background-image: var(--primary-gradient);
-}
-
-.inactiveDot {
-  @extend .dot;
-  border: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-}
-
 .warningBanner { 
   margin-top: size_unit(2);
 }
@@ -120,32 +106,5 @@
   
   button {
     font-weight: $font-weight-bold !important;
-  }
-}
-
-.sideTimeline {
-  margin: size_unit(1);
-  
-  :global {
-    .ant-timeline-item {
-      height: 130px;
-    }
-    
-    .ant-timeline-item-content {
-      @include text-bodySmall-medium;
-      color: var(--text-color-primary);
-      margin-left: 17px;
-    }
-    
-    .ant-timeline-item-head {
-      width: size_unit(2.5);
-      height: size_unit(2.5);
-      background: var(--bg-color-container);
-    }
-    
-    .ant-timeline-item-tail {
-      left: 0;
-      border-left: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-    }
   }
 }

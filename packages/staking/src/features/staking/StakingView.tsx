@@ -97,7 +97,7 @@ export const StakingView = () => {
   return (
     <>
       <Box mb={'$56'}>
-        <Text.Heading>{t('root.title')}</Text.Heading>
+        <Text.Heading data-testid="section-title">{t('root.title')}</Text.Heading>
       </Box>
       <Navigation>
         {(activePage) => (

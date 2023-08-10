@@ -78,7 +78,6 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   }, [searchQuery, searchFilters, searchValue, sort]);
 
   useEffect(() => {
-    console.log('pageResults', pageResults);
     // Update stake pool list and new offset position
     setStakePools((prevPools: Wallet.StakePoolSearchResults['pageResults']) =>
       searchSkip === 0 ? pageResults : [...prevPools, ...pageResults]
