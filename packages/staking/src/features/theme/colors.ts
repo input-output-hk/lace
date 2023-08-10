@@ -5,6 +5,8 @@ export const colorsContract = {
   $delegationCardInfoValueColor: '',
   $multidelegationBetaModalPillBackground: '',
   $multidelegationBetaModalPillText: '',
+  $qrCodeBackground: '',
+  $qrCodeForeground: '',
 };
 
 export const lightThemeColors: typeof colorsContract = {
@@ -12,6 +14,8 @@ export const lightThemeColors: typeof colorsContract = {
   $delegationCardInfoValueColor: lightColorScheme.$primary_black,
   $multidelegationBetaModalPillBackground: laceGradient,
   $multidelegationBetaModalPillText: lightColorScheme.$primary_white,
+  $qrCodeBackground: lightColorScheme.$primary_white,
+  $qrCodeForeground: lightColorScheme.$primary_black,
 };
 
 export const darkThemeColors: typeof colorsContract = {
@@ -19,4 +23,6 @@ export const darkThemeColors: typeof colorsContract = {
   $delegationCardInfoValueColor: darkColorScheme.$primary_white,
   $multidelegationBetaModalPillBackground: laceGradient,
   $multidelegationBetaModalPillText: lightColorScheme.$primary_white,
+  $qrCodeBackground: lightColorScheme.$primary_black,
+  $qrCodeForeground: lightColorScheme.$primary_white,
 };

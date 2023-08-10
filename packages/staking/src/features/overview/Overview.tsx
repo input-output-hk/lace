@@ -2,6 +2,8 @@ import { Wallet } from '@lace/cardano';
 import { Box, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
+import { FundWalletBanner } from '../staking/FundWalletBanner';
+import { StakeFundsBanner } from '../staking/StakeFundsBanner';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { StakingInfoCard } from './staking-info-card';
@@ -17,6 +19,8 @@ export const Overview = () => {
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
     delegationDetails,
+    walletAddress,
+    noFunds,
   } = useOutsideHandles();
   const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
@@ -26,7 +30,17 @@ export const Overview = () => {
     setIsDrawerVisible(true);
   };
 
-  if (currentPortfolio.length === 0) return <Text.SubHeading>Start staking</Text.SubHeading>;
+  if (noFunds)
+    return (
+      <FundWalletBanner
+        title={t('overview.noFunds.title')}
+        subtitle={t('overview.noFunds.description')}
+        prompt={t('overview.noFunds.description')}
+        walletAddress={walletAddress}
+        shouldHaveVerticalContent
+      />
+    );
+  if (currentPortfolio.length === 0) return <StakeFundsBanner balance={balancesBalance?.total?.coinBalance} />;
 
   const weightsSum = currentPortfolio.reduce((sum, { weight }) => sum + weight, 0);
 

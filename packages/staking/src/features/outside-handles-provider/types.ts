@@ -124,4 +124,8 @@ export type OutsideHandlesContextValue = {
   compactNumber: (value: number | string, decimal?: number) => string;
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
+  walletAddress: string;
+  stakeRegistered: boolean;
+  coinBalance: number;
+  noFunds: boolean;
 };

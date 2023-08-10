@@ -162,6 +162,16 @@ type KeysStructure = {
       heading: '';
       manageButtonLabel: '';
     };
+    noFunds: {
+      title: '';
+      description: '';
+      button: '';
+    };
+    noStaking: {
+      title: '';
+      description: '';
+      balanceTitle: '';
+    };
   };
   root: {
     title: '';

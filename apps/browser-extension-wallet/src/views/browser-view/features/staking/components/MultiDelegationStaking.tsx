@@ -17,6 +17,9 @@ import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/dele
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
+import { useObservable } from '@lace/common';
+import { Wallet } from '@lace/cardano';
+import { walletBalanceTransformer } from '@src/api/transformers';
 
 const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
 
@@ -40,6 +43,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
   const { balance } = useBalances(priceResult?.cardano?.price);
   const stakingRewards = useStakingRewards();
   const {
+    walletInfo,
     getKeyAgentType,
     inMemoryWallet,
     walletUI: { cardanoCoin },
@@ -58,14 +62,22 @@ export const MultiDelegationStaking = (): JSX.Element => {
     fetchStakePools: state.fetchStakePools,
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
-    blockchainProvider: state.blockchainProvider
+    blockchainProvider: state.blockchainProvider,
+    walletInfo: state.walletInfo
   }));
   const { fiatCurrency } = useCurrencyStore();
+  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const { executeWithPassword } = useWalletManager();
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
+  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const walletAddress = walletInfo.addresses?.[0].address?.toString();
+  const isStakeRegistered = rewardAccounts && rewardAccounts[0].keyStatus === Wallet.Cardano.StakeKeyStatus.Registered;
+  const coinBalance = balance?.total?.coinBalance && Number(balance?.total?.coinBalance);
+  const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
 
   return (
     <OutsideHandlesProvider
@@ -99,7 +111,11 @@ export const MultiDelegationStaking = (): JSX.Element => {
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         multidelegationFirstVisit,
-        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false)
+        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        walletAddress,
+        stakeRegistered: isStakeRegistered,
+        coinBalance,
+        noFunds: hasNoFunds
       }}
     >
       <Staking theme={theme.name} />
