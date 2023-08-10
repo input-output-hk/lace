@@ -178,7 +178,7 @@ func childProcessPTYWindows(
 				if len(line) > 0 {
 					line = logModifier(line)
 					if len(line) > 0 {
-						outputLines <- logModifier(line)
+						outputLines <- line
 					}
 				}
 			}
