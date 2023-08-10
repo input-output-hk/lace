@@ -145,13 +145,9 @@ func setupTrayUI(
 	}
 
 	mMithrilStatus := systray.AddMenuItem("", "")
-	mMithrilStatus.Hide()
 	mMithrilStatusETA := mMithrilStatus.AddSubMenuItem("", "")
-	mMithrilStatusETA.Disable()
 	mMithrilStatusDledSize := mMithrilStatus.AddSubMenuItem("", "")
-	mMithrilStatusDledSize.Disable()
 	mMithrilStatusTotalSize := mMithrilStatus.AddSubMenuItem("", "")
-	mMithrilStatusTotalSize.Disable()
 
 	mMithrilExplorer := mMithrilStatus.AddSubMenuItem("Mithril Explorer", "")
 	mithrilExplorerUrl := ""
@@ -162,6 +158,11 @@ func setupTrayUI(
 			}
 		}
 	}()
+
+	mMithrilStatusETA.Disable()
+	mMithrilStatusDledSize.Disable()
+	mMithrilStatusTotalSize.Disable()
+	mMithrilStatus.Hide()
 
 	go func(){
 		for upd := range chMithrilStatus {
