@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { AnalyticsConsentStatus } from '../providers/AnalyticsProvider/analyticsTracker/types';
+import { EnhancedAnalyticsOptInStatus } from '../providers/AnalyticsProvider/analyticsTracker/types';
 
 export interface WalletStorage {
   name: string;
@@ -39,7 +39,7 @@ export interface ILocalStorage {
   mode?: 'light' | 'dark';
   hideBalance?: boolean;
   showDappBetaModal?: boolean;
-  analyticsAccepted?: AnalyticsConsentStatus;
+  analyticsAccepted?: EnhancedAnalyticsOptInStatus;
   isForgotPasswordFlow?: boolean;
   multidelegationFirstVisit?: boolean;
 }

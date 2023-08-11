@@ -18,9 +18,10 @@ import { DelegationLayout } from './DelegationLayout';
 import { TransitionAcknowledgmentDialog } from '@components/TransitionAcknowledgmentDialog';
 import { useTranslation } from 'react-i18next';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useObservable } from '@lace/common';
@@ -117,11 +118,12 @@ export const DelegationContainer = (): React.ReactElement => {
   }, [isDelegating, setStakeConfirmationVisible, openDelagationConfirmation, setIsDrawerVisible]);
 
   const sendAnalytics = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.STAKING,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.STAKING,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.Staking.VIEW_STAKEPOOL_INFO_POPUP
     });
+    analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
   };
 
   return (

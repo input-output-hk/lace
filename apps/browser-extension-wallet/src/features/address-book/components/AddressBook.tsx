@@ -14,8 +14,8 @@ import AddIcon from '../../../assets/icons/add.component.svg';
 import PlusIcon from '../../../assets/icons/plus-icon.svg';
 import EditIcon from '../../../assets/icons/edit.component.svg';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -43,9 +43,9 @@ export const AddressBook = withAddressBookContext(() => {
   };
 
   const onAddressSave = async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>): Promise<string> => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.ADDRESS_BOOK,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.ADDRESS_BOOK,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_POPUP
     });
 
@@ -68,9 +68,9 @@ export const AddressBook = withAddressBookContext(() => {
         address: item.address,
         name: item.name,
         onClick: (address: AddressBookSchema) => {
-          analytics.sendEvent({
-            category: AnalyticsEventCategories.ADDRESS_BOOK,
-            action: AnalyticsEventActions.CLICK_EVENT,
+          analytics.sendEventToMatomo({
+            category: MatomoEventCategories.ADDRESS_BOOK,
+            action: MatomoEventActions.CLICK_EVENT,
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_POPUP
           });
           setAddressToEdit(address);

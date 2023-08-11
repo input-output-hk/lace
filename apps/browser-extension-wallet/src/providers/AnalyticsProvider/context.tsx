@@ -1,15 +1,22 @@
-import React, { createContext, useContext, useMemo } from 'react';
-import { AnalyticsTracker } from './analyticsTracker';
-import { AnalyticsConsentStatus } from './analyticsTracker/types';
-import { ANALYTICS_ACCEPTANCE_LS_KEY } from './analyticsTracker/config';
-import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks/useLocalStorage';
+import { useWalletStore } from '@src/stores';
+import debounce from 'lodash/debounce';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import { AnalyticsTracker } from './analyticsTracker';
+import { EnhancedAnalyticsOptInStatus, ExtensionViews } from './analyticsTracker/types';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
+import shallow from 'zustand/shallow';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
   tracker?: AnalyticsTracker;
-  featureEnabled?: boolean;
+  /**
+   * feature toggle to turn off tracking completely (eg. for automated testing)
+   */
+  analyticsDisabled?: boolean;
 }
+
+const PAGE_VIEW_DEBOUNCE_DELAY = 100;
 
 type AnalyticsTrackerInstance = AnalyticsTracker;
 
@@ -25,15 +32,45 @@ export const useAnalyticsContext = (): AnalyticsTrackerInstance => {
 export const AnalyticsProvider = ({
   children,
   tracker,
-  featureEnabled = true
+  analyticsDisabled
 }: AnalyticsProviderProps): React.ReactElement => {
-  const { currentChain } = useWalletStore();
-  const [analyticsAccepted] = useLocalStorage(ANALYTICS_ACCEPTANCE_LS_KEY, AnalyticsConsentStatus.REJECTED);
+  const { currentChain, view } = useWalletStore(
+    (state) => ({ currentChain: state?.currentChain, view: state.walletUI.appMode }),
+    shallow
+  );
+  const [optedInForEnhancedAnalytics] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
+  );
 
   const analyticsTracker = useMemo(
-    () => tracker || new AnalyticsTracker(currentChain, featureEnabled, analyticsAccepted),
-    [tracker, currentChain, analyticsAccepted, featureEnabled]
+    () =>
+      tracker ||
+      new AnalyticsTracker(
+        { chain: currentChain, view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended },
+        analyticsDisabled
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [tracker, analyticsDisabled]
   );
+
+  useEffect(() => {
+    analyticsTracker.setOptedInForEnhancedAnalytics(optedInForEnhancedAnalytics);
+  }, [optedInForEnhancedAnalytics, analyticsTracker]);
+
+  useEffect(() => {
+    analyticsTracker.setChain(currentChain);
+  }, [currentChain, analyticsTracker]);
+
+  // Track page changes with PostHog in order to keep the user session alive
+  useEffect(() => {
+    const trackActivePageChange = debounce(() => analyticsTracker.sendPageNavigationEvent(), PAGE_VIEW_DEBOUNCE_DELAY);
+
+    window.addEventListener('popstate', trackActivePageChange);
+    return () => {
+      window.removeEventListener('popstate', trackActivePageChange);
+    };
+  }, [analyticsTracker]);
 
   return <AnalyticsContext.Provider value={analyticsTracker}>{children}</AnalyticsContext.Provider>;
 };

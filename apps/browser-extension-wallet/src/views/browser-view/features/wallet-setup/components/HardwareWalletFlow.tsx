@@ -19,12 +19,17 @@ import { PinExtension } from './PinExtension';
 import { ErrorDialog } from './ErrorDialog';
 import { StartOverDialog } from '@views/browser/features/wallet-setup/components/StartOverDialog';
 import { useTranslation } from 'react-i18next';
-import { AnalyticsConsentStatus, AnalyticsEventNames } from '@providers/AnalyticsProvider/analyticsTracker';
+import {
+  AnalyticsEventNames,
+  EnhancedAnalyticsOptInStatus,
+  postHogOnboardingActions
+} from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { isTrezorHWSupported } from '../helpers';
 import { useAnalyticsContext } from '@providers';
-import { ANALYTICS_ACCEPTANCE_LS_KEY } from '@providers/AnalyticsProvider/analyticsTracker/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
+import { SendOboardingAnalyticsEvent } from '../types';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -38,7 +43,7 @@ const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 export interface HardwareWalletFlowProps {
   onCancel: () => void;
   onAppReload: () => void;
-  sendAnalytics: (eventName: string, value?: number) => void;
+  sendAnalytics: SendOboardingAnalyticsEvent;
 }
 
 type HardwareWalletStep = 'legal' | 'analytics' | 'connect' | 'accounts' | 'register' | 'create' | 'finish';
@@ -57,7 +62,7 @@ export const HardwareWalletFlow = ({
   const history = useHistory();
   const location = useLocation();
   const { t } = useTranslation();
-  const [isAnalyticsAccepted, setSsAnalyticsAccepted] = useState(false);
+  const [isAnalyticsAccepted, setIsAnalyticsAccepted] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [hardwareWalletErrorCode, setHardwareWalletErrorCode] = useState<HWErrorCode>('common');
   const [isStartOverDialogVisible, setIsStartOverDialogVisible] = useState(false);
@@ -138,14 +143,22 @@ export const HardwareWalletFlow = ({
   );
 
   const [, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
-    ANALYTICS_ACCEPTANCE_LS_KEY,
-    AnalyticsConsentStatus.REJECTED
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
   );
 
   const handleAnalyticsChoice = (isAccepted: boolean) => {
-    setSsAnalyticsAccepted(isAccepted);
-    analytics.toogleCookies(isAccepted);
-    sendAnalytics(isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP);
+    setIsAnalyticsAccepted(isAccepted);
+    analytics.setOptedInForEnhancedAnalytics(
+      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+    );
+
+    const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;
+    const postHogAction = isAccepted
+      ? postHogOnboardingActions.hw?.ANALYTICS_AGREE_CLICK
+      : postHogOnboardingActions.hw?.ANALYTICS_SKIP_CLICK;
+
+    sendAnalytics(matomoEvent, postHogAction);
     navigateTo('connect');
   };
 
@@ -160,7 +173,7 @@ export const HardwareWalletFlow = ({
       });
       setWalletCreated(wallet);
       setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? AnalyticsConsentStatus.ACCEPTED : AnalyticsConsentStatus.REJECTED
+        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
       navigateTo('finish');
     } catch (error) {
@@ -202,7 +215,11 @@ export const HardwareWalletFlow = ({
       <WalletSetupLegalStep
         onBack={() => onCancel()}
         onNext={() => {
-          sendAnalytics(Events.LEGAL_STUFF_NEXT, calculateTimeSpentOnPage());
+          sendAnalytics(
+            Events.LEGAL_STUFF_NEXT,
+            postHogOnboardingActions.hw?.LACE_TERMS_OF_USE_NEXT_CLICK,
+            calculateTimeSpentOnPage()
+          );
           navigateTo('analytics');
         }}
         translations={walletSetupLegalStepTranslations}
@@ -225,6 +242,7 @@ export const HardwareWalletFlow = ({
         onConnect={handleConnect}
         onNext={() => {
           sendAnalytics(Events.SELECT_MODEL_NEXT);
+          analytics.sendEventToPostHog(postHogOnboardingActions.hw?.CONNECT_HW_NEXT_CLICK);
           navigateTo('accounts');
         }}
         isNextEnable={!!deviceConnection}
@@ -237,7 +255,7 @@ export const HardwareWalletFlow = ({
         accounts={TOTAL_ACCOUNTS}
         onBack={showStartOverDialog}
         onSubmit={(account: number) => {
-          sendAnalytics(Events.SELECT_ACCOUNT_NEXT);
+          sendAnalytics(Events.SELECT_ACCOUNT_NEXT, postHogOnboardingActions.hw?.SELECT_HW_ACCOUNT_NEXT_CLICK);
           setAccountIndex(account);
           navigateTo('register');
         }}
@@ -248,7 +266,7 @@ export const HardwareWalletFlow = ({
       <WalletSetupWalletNameStep
         onBack={showStartOverDialog}
         onNext={(name: string) => {
-          sendAnalytics(Events.WALLET_NAME_NEXT);
+          sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions.hw?.WALLET_NAME_NEXT_CLICK);
           handleCreateWallet(name);
           navigateTo('create');
         }}
@@ -260,7 +278,7 @@ export const HardwareWalletFlow = ({
     finish: () => (
       <WalletSetupFinalStep
         onFinish={async () => {
-          sendAnalytics(Events.SETUP_FINISHED_NEXT);
+          await sendAnalytics(Events.SETUP_FINISHED_NEXT, postHogOnboardingActions.hw?.DONE_GO_TO_WALLET);
           await handleFinishCreation();
           // Workaround to enable staking with Ledger right after the onboarding LW-5564
           window.location.reload();

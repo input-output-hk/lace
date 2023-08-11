@@ -241,22 +241,11 @@ Feature: General Settings - Extended Browser View
     And Analytics toggle is enabled: true
     Then clicking on "<element>" in extended mode, existence of matomo event with payload containing: "<action_name>" should be: true
     Examples:
-      | element      | action_name                            |
-      | Tokens       | view-tokens,click-event,cookie=1       |
-      | NFTs         | view-nft,click-event,cookie=1          |
-      | Transactions | view-transactions,click-event,cookie=1 |
-      | Staking      | staking,click-event,cookie=1           |
-
-  @LW-3059 @Mainnet @Testnet
-  Scenario Outline: Extended view - Settings - Analytics option enabled: <is_enabled> and events sent: <is_enabled>
-    When I open settings from header menu
-    And Analytics toggle is enabled: <toggle_enabled>
-    Then clicking on "Tokens" in extended mode, existence of matomo event with payload containing: "<action_name>" should be: <request_present>
-    Examples:
-      | toggle_enabled | request_present | action_name          |
-      | true           | true            | view-tokens,cookie=1 |
-      | false          | true            | view-tokens          |
-      | false          | false           | cookie=1             |
+      | element      | action_name                   |
+      | Tokens       | view-tokens,click-event       |
+      | NFTs         | view-nft,click-event          |
+      | Transactions | view-transactions,click-event |
+      | Staking      | staking,click-event           |
 
   @LW-3869 @Mainnet @Testnet
   Scenario: Extended view - Settings - Show passphrase displayed above Analytics under the Security section in the Settings page
