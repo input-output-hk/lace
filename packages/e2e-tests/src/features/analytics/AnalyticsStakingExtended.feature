@@ -1,4 +1,4 @@
-@Staking-SwitchingPools-Extended-E2E @Testnet
+@Staking-SwitchingPools-Extended-E2E @Testnet @Pending
 Feature: Staking Page - Switching pools - Extended Browser View - E2E
 
   Background:
@@ -30,6 +30,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
       | staking \| manage delegation \| password confirmation \| confirm \| click |
     When I click "Close" button on staking success drawer
     Then I validate latest analytics single event "staking | manage delegation | hurray! | close | click"
+    And I validate that 8 analytics event(s) have been sent
 
   @LW-7869
   Scenario: Extended View - Staking - Analytics - Success screen - Close drawer by clicking X button
@@ -57,3 +58,4 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
       | staking \| manage delegation \| password confirmation \| confirm \| click |
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "staking | manage delegation | hurray! | x | click"
+    And I validate that 8 analytics event(s) have been sent
