@@ -229,6 +229,20 @@ class TokensPageAssert {
       await this.assertTokenFiatBalancesIsMasked(i, shouldBeMasked);
     }
   }
+
+  async assertAdaBalanceEquals(balanceInAda: number) {
+    const adaBalance: number = await TokensPage.tokenBalance(0)
+      .getText()
+      .then((balance) => Number(balance.replace(',', '')));
+    expect(adaBalance).to.equal(Number(balanceInAda));
+  }
+
+  async assertSeeTMinWithBalance(balanceInAda: number) {
+    const adaBalance: number = await TokensPage.tokenBalance(1)
+      .getText()
+      .then((balance) => Number(balance.replace(',', '')));
+    expect(adaBalance).to.equal(Number(balanceInAda));
+  }
 }
 
 export default new TokensPageAssert();
