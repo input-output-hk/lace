@@ -19,7 +19,7 @@ export class MatomoClient {
 
   async getMetadata(): Promise<Metadata> {
     return {
-      _id: await this.userIdService.getId(),
+      _id: await this.userIdService.getRandomizedUserId(),
       url: this.getAnalyticsURL()
     };
   }

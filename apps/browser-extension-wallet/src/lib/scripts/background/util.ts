@@ -6,6 +6,8 @@ import { Wallet } from '@lace/cardano';
 import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
 import uniqueId from 'lodash/uniqueId';
 
+const { blake2b } = Wallet.Crypto;
+
 type WindowPosition = {
   top: number;
   left: number;
@@ -164,4 +166,9 @@ export const getWalletName = (): string => {
     throw new Error('No wallet name declared in .env');
   }
   return `${process.env.WALLET_NAME}`;
+};
+
+export const hashExtendedAccountPublicKey = (extendedAccountPublicKey: string): string => {
+  const input = Buffer.from(extendedAccountPublicKey);
+  return blake2b(blake2b.BYTES_MIN).update(input).digest('hex');
 };

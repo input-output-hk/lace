@@ -36,8 +36,7 @@ export class PostHogClient {
       disable_persistence: true,
       disable_cookie: true,
       persistence: 'memory',
-      property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time'],
-      ip: true
+      property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time']
     });
   }
 
@@ -47,6 +46,17 @@ export class PostHogClient {
     posthog.capture('$pageview', {
       ...(await this.getEventMetadata())
     });
+  }
+
+  async sendAliasEvent(): Promise<void> {
+    const { id, alias } = await this.userIdService.getAliasProperties(this.chain.networkMagic);
+    // If one of this does not exist, should not send the alias event
+    if (!alias || !id) {
+      console.debug('[ANALYTICS] IDs were not found');
+      return;
+    }
+    console.debug('[ANALYTICS] Linking randomized ID with wallet-based ID');
+    posthog.alias(alias, id);
   }
 
   async sendEvent(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
@@ -76,9 +86,9 @@ export class PostHogClient {
   protected async getEventMetadata(): Promise<PostHogMetadata> {
     return {
       url: window.location.href,
-      distinct_id: await this.userIdService.getId(),
       view: this.view,
-      sent_at_local: dayjs().format()
+      sent_at_local: dayjs().format(),
+      distinct_id: await this.userIdService.getUserId(this.chain.networkMagic)
     };
   }
 }

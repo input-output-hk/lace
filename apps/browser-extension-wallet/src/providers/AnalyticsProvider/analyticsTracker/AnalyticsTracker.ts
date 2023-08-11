@@ -31,6 +31,7 @@ export class AnalyticsTracker {
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();
+      await this.sendAliasEvent();
     } else {
       await this.userIdService?.makeTemporary();
     }
@@ -38,6 +39,10 @@ export class AnalyticsTracker {
 
   async sendPageNavigationEvent(): Promise<void> {
     await this.postHogClient?.sendPageNavigationEvent();
+  }
+
+  async sendAliasEvent(): Promise<void> {
+    await this.postHogClient?.sendAliasEvent();
   }
 
   async sendEventToMatomo(props: MatomoSendEventProps): Promise<void> {
