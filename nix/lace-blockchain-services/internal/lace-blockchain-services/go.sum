@@ -1,5 +1,7 @@
 github.com/TheTitanrain/w32 v0.0.0-20180517000239-4f5cfb03fabf h1:FPsprx82rdrX2jiKyS17BH6IrTmUBYqZa/CXT4uvb+I=
 github.com/TheTitanrain/w32 v0.0.0-20180517000239-4f5cfb03fabf/go.mod h1:peYoMncQljjNS6tZwI9WVyQB3qZS6u79/N3mBOcnd3I=
+github.com/UserExistsError/conpty v0.1.1 h1:cHDsU/XeoeDAQmVvCTV53SrXLG39YJ4++Pp3iAi1gXE=
+github.com/UserExistsError/conpty v0.1.1/go.mod h1:PDglKIkX3O/2xVk0MV9a6bCWxRmPVfxqZoTG/5sSd9I=
 github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d h1:licZJFw2RwpHMqeKTCYkitsPqHNxTmd4SNR5r94FGM8=
 github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d/go.mod h1:asat636LX7Bqt5lYEZ27JNDcqxfjdBQuJ/MM4CN/Lzo=
 github.com/allan-simon/go-singleinstance v0.0.0-20210120080615-d0997106ab37 h1:28uU3TtuvQ6KRndxg9TrC868jBWmSKgh0GTXkACCXmA=

@@ -58,6 +58,7 @@ export const NftDetail = (): React.ReactElement => {
       className={styles.drawer}
       visible
       navigation={<DrawerNavigation onArrowIconClick={() => redirectToNfts()} />}
+      dataTestId="nft-details-drawer"
       footer={
         <div className={styles.footer}>
           <Button id={buttonIds.nftDetailsBtnId} className={styles.sendBtn} onClick={handleOpenSend}>

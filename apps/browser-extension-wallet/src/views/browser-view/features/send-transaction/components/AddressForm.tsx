@@ -61,8 +61,8 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
         });
   };
 
-  const onConfirmClick = (address: AddressBookSchema) => {
-    onAddressSave(address);
+  const onConfirmClick = async (address: AddressBookSchema) => {
+    await onAddressSave(address);
   };
 
   const onCancelClick = () => {
