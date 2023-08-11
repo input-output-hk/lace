@@ -30,6 +30,10 @@ Given(/^I'm sending an NFT with name: "([^"]*)"$/, async (nftName: string) => {
   await nftsPageObject.progressWithSendUntilPasswordPage(nftName);
 });
 
+Given(/^I'm sending an NFT with name: "([^"]*)" with HD wallet$/, async (nftName: string) => {
+  await nftsPageObject.progressWithSendUntilPasswordPage(nftName, true);
+});
+
 Given(/^the NFT is pre-loaded as token to be sent with name: "([^"]*)"$/, async (nftName: string) => {
   await drawerSendExtendedAssert.assertSeeCoinSelectorWithTitle(nftName);
 });
