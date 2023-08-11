@@ -29,10 +29,13 @@ Then(
   /^the (Received|Sent) transaction is displayed with NFT name: "([^"]*)" in (extended|popup) mode$/,
   async (transactionType: 'Received' | 'Sent', nftName: string, mode: 'extended' | 'popup') => {
     await browser.pause(2000);
+    const adaAmount = nftName === 'DEV 2280' ? '1.15' : '1.17';
     const expectedTransactionRowAssetDetailsSent = {
       type: transactionType,
       tokensAmount:
-        mode === 'extended' ? `1.17 ${Asset.CARDANO.ticker}, 1 ${nftName}` : `1.17 ${Asset.CARDANO.ticker} , +1`,
+        mode === 'extended'
+          ? `${adaAmount} ${Asset.CARDANO.ticker}, 1 ${nftName}`
+          : `${adaAmount} ${Asset.CARDANO.ticker} , +1`,
       tokensCount: 1
     };
     await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
@@ -77,7 +80,7 @@ Given(
   async (mode: 'extended' | 'popup', nftName: string) => {
     const isNftDisplayed = await nftsPageObject.isNftDisplayed(nftName);
     if (!isNftDisplayed) {
-      const walletToLoad = await nftsPageObject.getNonActiveNftWalletName();
+      const walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await mainMenuPageObject.navigateToSection('NFTs', mode);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
@@ -102,6 +105,11 @@ Then(/^each NFT has name and image displayed$/, async () => {
 
 When(/^I open NFT receiving wallet$/, async () => {
   const walletToLoad = await nftsPageObject.getNonActiveNftWalletName();
+  await localStorageInitializer.reInitializeWallet(walletToLoad);
+});
+
+When(/^I open NFT receiving HD wallet$/, async () => {
+  const walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
 });
 
