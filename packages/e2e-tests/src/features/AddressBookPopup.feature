@@ -38,7 +38,7 @@ Feature: Address book - popup view
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page
     When I click "Cancel" button on "Edit address" drawer
-    Then I see address detail page in popup mode
+    Then I see address detail page in popup mode with details of "Shelley" address
 
   @LW-4566
   Scenario Outline: Popup-view - Address Book - Edit wallet name/address and display error message - name error: <name_error>, address error: <address_error>
@@ -80,13 +80,13 @@ Feature: Address book - popup view
     And I click address on the list with name "Shelley"
     And I click "Edit" button on address details page
     When I close the drawer by clicking back button
-    Then I see address detail page in popup mode
+    Then I see address detail page in popup mode with details of "Shelley" address
 
   @LW-4477
   Scenario: Popup-view - Address Book - Remove address
     Given I have 3 addresses in my address book in popup mode
     When I click address on the list with name "Byron"
-    And I see address detail page in popup mode
+    And I see address detail page in popup mode with details of "Byron" address
     And I click "Delete" button on address details page
     Then I see delete address modal
     When I click "Delete address" button on delete address modal
@@ -96,10 +96,10 @@ Feature: Address book - popup view
   Scenario: Popup-view - Address Book - Remove address and cancel
     Given I have 3 addresses in my address book in popup mode
     When I click address on the list with name "Byron"
-    And I see address detail page in popup mode
+    And I see address detail page in popup mode with details of "Byron" address
     And I click "Delete" button on address details page
     And I click "Cancel" button on delete address modal
-    Then I see address detail page in popup mode
+    Then I see address detail page in popup mode with details of "Byron" address
 
   @LW-4479 @Pending
   # BUG LW-7925

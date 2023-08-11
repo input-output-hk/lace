@@ -22,3 +22,36 @@ Feature: ADA handle - popup view
     Then Red "X" icon is displayed next to ADA handle
     And "Handle not found" error is displayed
     And "Save address" button is disabled on "Add new address" drawer
+
+  @LW-7336
+  Scenario: Popup view - Edit an ADA handle from the address book
+    Given I have 2 addresses with ADA handle in my address book in popup mode
+    And I click address on the list with name "Ada Handle 1"
+    And I see address detail page in popup mode with details of "Ada Handle 1" address
+    And I click "Edit" button on address details page
+    And I see "Edit address" drawer in popup mode with details of "Ada Handle 1" address
+    When I fill address form with "AH 1 edited" name and "$test_handle_3" address
+    Then Green tick icon is displayed next to ADA handle
+    And I click "Done" button on "Edit address" drawer
+    And I see a toast with message: "browserView.addressBook.toast.editAddress"
+    And I see address row with name "AH 1 edited" and address "$test_handle_3" on the list in popup mode
+
+  @LW-7338
+  Scenario: Popup view - Edit an ADA handle from the address book with an invalid handle
+    Given I have 2 addresses with ADA handle in my address book in popup mode
+    And I click address on the list with name "Ada Handle 1"
+    And I click "Edit" button on address details page
+    When I fill address form with "AH 1 edited" name and "$a3asd35" address
+    Then Red "X" icon is displayed next to ADA handle
+    And Contact "empty" name error and "Handle not found" address error are displayed
+    And "Done" button is disabled on "Edit address" drawer
+
+  @LW-7340
+  Scenario: Popup view - Edit an ADA handle from the address book with a duplicated handle
+    Given I have 2 addresses with ADA handle in my address book in popup mode
+    And I click address on the list with name "Ada Handle 1"
+    And I click "Edit" button on address details page
+    When I fill address form with "AH 1 edited" name and "$test_handle_2" address
+    Then Green tick icon is displayed next to ADA handle
+    And I click "Done" button on "Edit address" drawer
+    And I see a toast with message: "addressBook.errors.givenAddressAlreadyExist"
