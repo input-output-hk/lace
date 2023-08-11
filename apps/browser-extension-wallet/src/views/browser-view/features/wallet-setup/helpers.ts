@@ -20,8 +20,9 @@ export const getTrezorSpecifications = async (): Promise<HardwareWalletPersonaPr
   };
 };
 
-export const getLedgerSpecifications = async (): Promise<HardwareWalletPersonaProperties> => {
-  const deviceConnection = await LedgerKeyAgent.checkDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
+export const getLedgerSpecifications = async (
+  deviceConnection: LedgerKeyAgent['deviceConnection']
+): Promise<HardwareWalletPersonaProperties> => {
   const cardanoApp = await deviceConnection.getVersion();
   const firmware = await LedgerKeyAgent.getAppVersion(Wallet.KeyManagement.CommunicationType.Web, deviceConnection);
   return {

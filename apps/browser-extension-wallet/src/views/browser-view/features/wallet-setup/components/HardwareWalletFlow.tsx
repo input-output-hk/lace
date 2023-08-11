@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger/dist/esm';
 // / <reference types="w3c-web-hid" />
 /* eslint-disable max-statements */
 /* eslint-disable react/no-multi-comp */
@@ -205,7 +206,7 @@ export const HardwareWalletFlow = ({
     const HWSpecifications =
       connectedDevice === KeyManagement.KeyAgentType.Trezor
         ? await getTrezorSpecifications()
-        : await getLedgerSpecifications();
+        : await getLedgerSpecifications(deviceConnection as LedgerKeyAgent['deviceConnection']);
     const posthogProperties = {
       $set_once: {
         initial_hardware_wallet_model: HWSpecifications.model,
