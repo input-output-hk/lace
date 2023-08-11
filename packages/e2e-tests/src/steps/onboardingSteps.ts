@@ -34,6 +34,7 @@ import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import webTester from '../actor/webTester';
 import MainLoader from '../elements/MainLoader';
+import CommonAssert from '../assert/commonAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -385,8 +386,25 @@ Given(/^I fill passphrase fields using 15 words mnemonic on (8\/15|15\/15) page$
 });
 
 Then(/^I save the words$/, async () => {
-  mnemonicWordsForReference.length = 0;
   mnemonicWordsForReference.push(...(await OnboardingMnemonicPage.getMnemonicWordTexts()));
+});
+
+Then(/^I clear saved words$/, async () => {
+  mnemonicWordsForReference.length = 0;
+});
+
+Then(/^I fill saved words (8|16|24) of 24$/, async (pageNumber: string) => {
+  switch (pageNumber) {
+    case '8':
+      await OnboardingPageObject.fillMnemonicFields(mnemonicWordsForReference, 0);
+      break;
+    case '16':
+      await OnboardingPageObject.fillMnemonicFields(mnemonicWordsForReference, 8);
+      break;
+    case '24':
+      await OnboardingPageObject.fillMnemonicFields(mnemonicWordsForReference, 16);
+      break;
+  }
 });
 
 When(/^I fill mnemonic input with "([^"]*)"$/, async (value: string) => {
@@ -559,4 +577,8 @@ When(/^I click "here." link on "Keeping your wallet secure" page$/, async () => 
 
 Given(/^I restore a wallet$/, async () => {
   await OnboardingPageObject.restoreWallet();
+});
+
+Given(/^I see current onboarding page in (light|dark) mode$/, async (mode: 'light' | 'dark') => {
+  await CommonAssert.assertSeeThemeMode(mode);
 });
