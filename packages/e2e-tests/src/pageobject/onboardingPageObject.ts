@@ -71,6 +71,32 @@ class OnboardingPageObject {
     return mnemonicWords;
   }
 
+  async passMnemonicWriteDownPage(): Promise<string[]> {
+    const mnemonicWords: string[] = [];
+    mnemonicWords.push(...(await OnboardingMnemonicPage.getMnemonicWordTexts()));
+    await OnboardingMnemonicPage.nextButton.click();
+    return mnemonicWords;
+  }
+
+  async passMnemonicVerificationPage(mnemonicWords: string[], expectedWordsPage: number): Promise<void> {
+    switch (Number(expectedWordsPage)) {
+      case 8:
+        await this.fillMnemonicFields(mnemonicWords, 0);
+        await OnboardingMnemonicPage.nextButton.click();
+        break;
+      case 16:
+        await this.fillMnemonicFields(mnemonicWords, 8);
+        await OnboardingMnemonicPage.nextButton.click();
+        break;
+      case 24:
+        await this.fillMnemonicFields(mnemonicWords, 16);
+        await OnboardingMnemonicPage.nextButton.click();
+        break;
+      default:
+        break;
+    }
+  }
+
   async openMnemonicVerificationPage(expectedWordsPage: number): Promise<string[]> {
     const mnemonicWords: string[] = [...(await this.openMnemonicWriteDownPage(24))];
     await OnboardingMnemonicPage.nextButton.click();

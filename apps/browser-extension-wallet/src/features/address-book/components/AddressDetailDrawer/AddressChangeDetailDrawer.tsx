@@ -2,15 +2,15 @@
 import React, { useState } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
-import { Button, Banner, Drawer, DrawerNavigation, DrawerHeader, Ellipsis, toast } from '@lace/common';
+import { Button, Banner, Drawer, DrawerNavigation, DrawerHeader, Ellipsis, toast, Timeline } from '@lace/common';
 import styles from './AddressChangeDetailDrawer.module.scss';
-import { Timeline, Typography } from 'antd';
+import { Typography } from 'antd';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Copy from '@assets/icons/copy.component.svg';
 import Check from '@assets/icons/check-success.component.svg';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
@@ -81,9 +81,9 @@ export const AddressChangeDetailDrawer = ({
   const actualAddressCopyText = actualAddressHasBeenCopied ? 'general.button.copied' : 'general.button.copy';
 
   const sendAnalytics = (analyticsName: string) => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.ADDRESS_BOOK,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.ADDRESS_BOOK,
+      action: MatomoEventActions.CLICK_EVENT,
       name: analyticsName
     });
   };
@@ -190,8 +190,8 @@ export const AddressChangeDetailDrawer = ({
             />
           </div>
           <div className={styles.addressContainer}>
-            <Timeline className={cn(styles.sideTimeline)}>
-              <Timeline.Item dot={<div className={styles.inactiveDot} />}>
+            <Timeline>
+              <Timeline.Item active={false}>
                 <div className={cn(styles.addressDetailsContainer)}>
                   <div className={cn(styles.addressDataDetails)}>
                     <div className={cn(styles.activeText)}>
@@ -230,7 +230,7 @@ export const AddressChangeDetailDrawer = ({
                 </div>
               </Timeline.Item>
 
-              <Timeline.Item dot={<div className={styles.activeDot} />}>
+              <Timeline.Item active>
                 <div className={cn(styles.addressDetailsContainer)}>
                   <div className={cn(styles.addressDataDetails)}>
                     <div className={cn(styles.activeText)}>

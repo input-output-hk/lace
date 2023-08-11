@@ -403,3 +403,12 @@ Feature: NFT - Folders - Extended view
       | 4                        | remove |  3                        | 0                        |
       | 5                        | remove |  4                        | 0                        |
       | 6                        | remove |  3                        | 2                        |
+
+  @LW-7851
+  Scenario: Extended-view - NFT Folders - Click NFT in Folder
+    Given the NFT folder with name "Sample NFT folder" and 2 NFT was created
+    And I navigate to NFTs extended page
+    And I left click on the NFT folder with name "Sample NFT folder"
+    And I see "Sample NFT folder" NFT folder page in extended mode
+    When I click NFT with name "Ibilecoin"
+    Then I am on a NFT details on the extended view for NFT with name: "Ibilecoin"

@@ -9,6 +9,7 @@ export type DrawerProps = {
   navigation?: React.ReactNode;
   popupView?: boolean;
   scrollableContentClassName?: string;
+  dataTestId?: string;
 } & AntDrawerProps;
 
 const DRAWER_CONTENT_WIDTH = 664;
@@ -27,6 +28,7 @@ export const Drawer = ({
   width = DRAWER_WIDTH,
   keyboard = true,
   destroyOnClose = true,
+  dataTestId = 'custom-drawer',
   ...rest
 }: DrawerProps): React.ReactElement => {
   const scrollableContainerRef = useRef(null);
@@ -39,7 +41,7 @@ export const Drawer = ({
 
   return (
     <AntDrawer
-      data-testid="custom-drawer"
+      data-testid={dataTestId}
       className={cn(styles.customDrawer, {
         [styles.popupView]: popupView,
         [className]: className,

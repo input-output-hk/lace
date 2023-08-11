@@ -17,8 +17,8 @@ import Video from '@assets/icons/video.svg';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -76,9 +76,9 @@ export const ActivityLayout = (): ReactElement => {
   ];
 
   const sendAnalytics = useCallback(() => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_TRANSACTIONS,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_TRANSACTIONS,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_BROWSER
     });
   }, [analytics]);

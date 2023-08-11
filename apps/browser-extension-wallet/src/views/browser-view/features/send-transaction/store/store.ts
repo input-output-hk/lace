@@ -1,7 +1,15 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { cardanoCoin } from '@src/utils/constants';
 import create, { SetState, GetState } from 'zustand';
-import { OutputsMap, BuiltTxData, SpentBalances, OutputList, AssetInfo, FormOptions } from '../types';
+import {
+  OutputsMap,
+  BuiltTxData,
+  SpentBalances,
+  OutputList,
+  AssetInfo,
+  FormOptions,
+  SendFlowTriggerPoints
+} from '../types';
 import { Wallet } from '@lace/cardano';
 import { calculateSpentBalance, getOutputValues } from '../helpers';
 import { useCallback, useMemo } from 'react';
@@ -97,6 +105,9 @@ export interface Store {
   setIsRestaking: (param: boolean) => void;
   lastFocusedInput?: string;
   setLastFocusedInput: (param?: string) => void;
+  // Analytics specific properties
+  triggerPoint?: SendFlowTriggerPoints;
+  setTriggerPoint: (param: SendFlowTriggerPoints) => void;
 }
 
 // ====== state setters ======
@@ -310,7 +321,14 @@ const useStore = create<Store>((set, get) => ({
       }
     }),
   resetStates: () =>
-    set((state) => ({ ...state, ...initialState, currentRow: undefined, metadata: undefined, password: undefined })),
+    set((state) => ({
+      ...state,
+      ...initialState,
+      currentRow: undefined,
+      metadata: undefined,
+      password: undefined,
+      triggerPoint: undefined
+    })),
   setMetadataMsg: (msg) => set({ metadata: msg }),
   setSubmitingTxState: (params) =>
     set({
@@ -327,7 +345,8 @@ const useStore = create<Store>((set, get) => ({
     ),
   resetTokenList: () => set({ selectedTokenList: [], selectedNFTs: [] }),
   setIsRestaking: (isRestaking) => set({ isRestaking }),
-  setLastFocusedInput: (lastFocusedInput) => set({ lastFocusedInput }) // keep track of the last focused input element, this way we know where to display the error
+  setLastFocusedInput: (lastFocusedInput) => set({ lastFocusedInput }), // keep track of the last focused input element, this way we know where to display the error
+  setTriggerPoint: (triggerPoint) => set({ triggerPoint })
 }));
 
 // ====== selectors ======
@@ -541,5 +560,10 @@ export const useLastFocusedInput = (): {
     lastFocusedInput,
     setLastFocusedInput
   }));
+
+export const useAnalyticsSendFlowTriggerPoint = (): {
+  triggerPoint: Store['triggerPoint'];
+  setTriggerPoint: Store['setTriggerPoint'];
+} => useStore(({ triggerPoint, setTriggerPoint }) => ({ triggerPoint, setTriggerPoint }));
 
 export { useStore as sendTransactionStore };
