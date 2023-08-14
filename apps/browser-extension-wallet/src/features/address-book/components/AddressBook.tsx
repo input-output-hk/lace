@@ -155,6 +155,8 @@ export const AddressBook = withAddressBookContext(() => {
             setIsAddressDrawerOpen(false);
             setSection({ currentSection: Sections.FORM });
           }}
+          expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? ''}
+          actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? ''}
           initialValues={addressToEdit}
           popupView
         />

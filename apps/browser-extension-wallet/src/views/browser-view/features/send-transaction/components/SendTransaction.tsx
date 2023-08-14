@@ -16,9 +16,10 @@ import { useKeyboardShortcut } from '@lace/common';
 import { useDrawer } from '@views/browser/stores';
 import { sectionsWithArrowIcon } from './SendTransactionDrawer';
 import { AddressChangeDetail } from '@src/features/address-book/components/AddressChangeDetail';
-import { useValidateAddressStatus } from '@hooks/useValidateAddressStatus';
 import { useAddressBookStore } from '@src/features/address-book/store';
-import { withAddressBookContext } from '@src/features/address-book/context';
+import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
+import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
+import { AddressBookSchema } from '@lib/storage';
 
 interface SendTransactionProps {
   isPopupView?: boolean;
@@ -30,10 +31,13 @@ export const SendTransaction = withAddressBookContext(
   ({ isPopupView, scrollableTargetId, scrollableContainerRef }: SendTransactionProps): React.ReactElement => {
     const { currentSection: section, setPrevSection } = useSections();
     const [config, clearContent] = useDrawer();
+    const { list: addressList } = useAddressBookContext();
     const {
       addressToEdit: { name, address }
     } = useAddressBookStore();
-    const { expectedAddress, actualAddress } = useValidateAddressStatus(address);
+    const handleResolver = useHandleResolver();
+
+    const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
 
     useKeyboardShortcut(['Escape'], () => {
       if (sectionsWithArrowIcon.includes(section.currentSection)) {
@@ -63,8 +67,8 @@ export const SendTransaction = withAddressBookContext(
         <AddressChangeDetail
           name={name}
           isPopupView={isPopupView}
-          expectedAddress={expectedAddress}
-          actualAddress={actualAddress}
+          expectedAddress={validatedAddressStatus[address]?.error?.expectedAddress ?? ''}
+          actualAddress={validatedAddressStatus[address]?.error?.expectedAddress ?? ''}
         />
       )
     };
