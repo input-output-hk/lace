@@ -4245,10 +4245,10 @@
     ts-log "^2.2.4"
     type-fest "^2.19.0"
 
-"@cardano-sdk/wallet@0.18.5", "@cardano-sdk/wallet@~0.18.5":
-  version "0.18.5"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/wallet/-/wallet-0.18.5.tgz#3a5792b9342e88bfadb4cec9ebecaab608d757c3"
-  integrity sha512-ZmSg0wt315tjIZcwVPwbIs+xyJQxPf934IyFWpYngpH00lRTZgOb0C8CovSS8FzNn+1TWeGVWiITb6YoID1lHQ==
+"@cardano-sdk/wallet@0.18.6-patch.0", "@cardano-sdk/wallet@~0.18.6-patch.0":
+  version "0.18.6-patch.0"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/wallet/-/wallet-0.18.6-patch.0.tgz#ea53f22088732a2cdc30460572d654093d8f1247"
+  integrity sha512-AfvIor19kPf4AZuKLPqdd3Lvgg3I13v+zrYW4/CwJMFt8xwkLLRvr4C3mcKutdtkpU0Ry3BBYygctnHtZxv03g==
   dependencies:
     "@cardano-sdk/core" "~0.15.4"
     "@cardano-sdk/crypto" "~0.1.9"
@@ -4269,10 +4269,10 @@
     ts-custom-error "^3.2.0"
     ts-log "^2.2.3"
 
-"@cardano-sdk/web-extension@0.14.1":
-  version "0.14.1"
-  resolved "https://registry.yarnpkg.com/@cardano-sdk/web-extension/-/web-extension-0.14.1.tgz#838e5f5d7bf48fced9c565adec8ebc674d326fa7"
-  integrity sha512-wOxG0VryTQi2/ur0UQt/5HwNPU6YQ+tjgOBley0Ltz7ShxvJ7ZaGNLnJcX5Qymf7OrU5wA3yee/O8bwireL4Iw==
+"@cardano-sdk/web-extension@0.14.2-patch.0":
+  version "0.14.2-patch.0"
+  resolved "https://registry.yarnpkg.com/@cardano-sdk/web-extension/-/web-extension-0.14.2-patch.0.tgz#4b9d9162ed4a09364fbdadb46bfead68ede19769"
+  integrity sha512-5tJXOd9tE9edES0p7yHDG4mRzrle1YTmxg3pbRCeUwXJIfYUhMb5xIia+oiKcCo80ekRueC3s9ovysnxvurqYQ==
   dependencies:
     "@cardano-sdk/core" "~0.15.4"
     "@cardano-sdk/crypto" "~0.1.9"
@@ -4281,7 +4281,7 @@
     "@cardano-sdk/tx-construction" "~0.9.4"
     "@cardano-sdk/util" "~0.13.0"
     "@cardano-sdk/util-rxjs" "~0.5.5"
-    "@cardano-sdk/wallet" "~0.18.5"
+    "@cardano-sdk/wallet" "~0.18.6-patch.0"
     backoff-rxjs "^7.0.0"
     lodash "^4.17.21"
     rxjs "^7.4.0"
