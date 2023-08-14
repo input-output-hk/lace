@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { useDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
+const MAX_ITEMS_IN_DRAFT = 5;
+
 export interface StakePoolItemBrowserProps {
   id: string;
   hexId: Wallet.Cardano.PoolIdHex;
@@ -59,6 +61,7 @@ export const StakePoolItemBrowser = ({
   const draftPortfolioLength = useDelegationPortfolioStore((state) => state.draftPortfolio.length);
   const draftPortfolioExists = draftPortfolioLength > 0;
   const includedInDraft = useDelegationPortfolioStore((state) => state.poolIncludedInDraft(hexId));
+  const disableAddingToDraft = draftPortfolioLength === MAX_ITEMS_IN_DRAFT && !includedInDraft;
 
   const StakeButtonComponent = includedInDraft ? Button.Secondary : Button.CallToAction;
   const stakePoolStateLabel = includedInDraft
@@ -105,6 +108,7 @@ export const StakePoolItemBrowser = ({
             event.stopPropagation();
             includedInDraft ? removeFromDraft() : addToDraft();
           }}
+          disabled={disableAddingToDraft}
           data-testid="stake-button"
         />
       </div>
