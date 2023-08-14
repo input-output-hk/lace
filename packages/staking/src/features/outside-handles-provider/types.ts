@@ -89,6 +89,7 @@ export type OutsideHandlesContextValue = {
       priceVariationPercentage24h: number;
     };
   };
+  hasPendingDelegationTransaction?: boolean;
   openExternalLink: (href: string) => void;
   password: PasswordHook;
   submittingState: SubmittingState;

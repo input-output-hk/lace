@@ -1,9 +1,12 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Banner } from '@lace/common';
 import { Box, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
+import styles from './Overview.module.scss';
 import { StakingInfoCard } from './staking-info-card';
 
 export const Overview = () => {
@@ -16,6 +19,7 @@ export const Overview = () => {
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
     delegationDetails,
+    hasPendingDelegationTransaction,
   } = useOutsideHandles();
   const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
@@ -25,7 +29,20 @@ export const Overview = () => {
     setIsDrawerVisible(true);
   };
 
-  if (currentPortfolio.length === 0) return <Text.SubHeading>Start staking</Text.SubHeading>;
+  if (currentPortfolio.length === 0)
+    return (
+      <>
+        <Text.SubHeading>Start staking</Text.SubHeading>
+        {hasPendingDelegationTransaction && (
+          <Banner
+            withIcon
+            customIcon={<InfoCircleOutlined className={styles.infoIcon} />}
+            message={t('overview.banners.pendingFirstDelegation.title')}
+            description={t('overview.banners.pendingFirstDelegation.message')}
+          />
+        )}
+      </>
+    );
 
   const displayData = mapPortfolioToDisplayData({
     balance: balancesBalance,
@@ -49,6 +66,16 @@ export const Overview = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
+      {hasPendingDelegationTransaction && (
+        <Box mb={'$40'}>
+          <Banner
+            withIcon
+            customIcon={<InfoCircleOutlined className={styles.infoIcon} />}
+            message={t('overview.banners.pendingPoolMigration.title')}
+            description={t('overview.banners.pendingPoolMigration.message')}
+          />
+        </Box>
+      )}
       <Flex justifyContent={'space-between'} mb={'$16'}>
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
       </Flex>
