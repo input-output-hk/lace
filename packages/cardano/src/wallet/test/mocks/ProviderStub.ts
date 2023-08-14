@@ -3,7 +3,7 @@
 import { AssetId } from '@cardano-sdk/util-dev';
 import {
   Cardano,
-  EpochRewards,
+  Reward,
   ChainHistoryProvider,
   RewardsProvider,
   StakePoolProvider,
@@ -159,7 +159,7 @@ export const protocolParameters = {
   stakeKeyDeposit: 2_000_000
 };
 
-export const rewardsHistory: EpochRewards[] = [
+export const rewardsHistory: Reward[] = [
   {
     epoch: Cardano.EpochNo(currentEpoch.number - 3),
     rewards: BigInt(10_000)
