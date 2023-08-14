@@ -14,11 +14,9 @@ export const Setup = ({ children, ...rest }: SetupProps) => {
   const { walletStoreInMemoryWallet, walletStoreWalletUICardanoCoin: cardanoCoin } = useOutsideHandles();
   const { setCurrentPortfolio } = useDelegationPortfolioStore((s) => s.mutators);
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
-  console.log('DEBUG original', delegationDistribution);
 
   useEffect(() => {
     if (!delegationDistribution) return;
-    console.log('DEBUG values', [...delegationDistribution.values()]);
     setCurrentPortfolio({ cardanoCoin, delegationDistribution: [...delegationDistribution.values()] });
   }, [delegationDistribution, setCurrentPortfolio, cardanoCoin]);
 
