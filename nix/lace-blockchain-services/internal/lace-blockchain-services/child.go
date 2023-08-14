@@ -419,7 +419,10 @@ func childProcess(
 		defer wgOuts.Done()
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			outputLines <- logModifier(scanner.Text())
+			line := logModifier(scanner.Text())
+			if len(line) > 0 {
+				outputLines <- line
+			}
 		}
 	}()
 
@@ -432,7 +435,10 @@ func childProcess(
 		defer wgOuts.Done()
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			outputLines <- "[stderr] " + logModifier(scanner.Text())
+			line := logModifier(scanner.Text())
+			if len(line) > 0 {
+				outputLines <- "[stderr] " + line
+			}
 		}
 	}()
 
@@ -575,7 +581,10 @@ func childProcessPTY(
 				return (c == '\n' || c == '\r' || c == rune(0x08))  // 0x08 for Windows
 			}) {
 				if len(line) > 0 {
-					outputLines <- logModifier(line)
+					line = logModifier(line)
+					if len(line) > 0 {
+						outputLines <- line
+					}
 				}
 			}
 		}
