@@ -24,6 +24,7 @@ Feature: LW-423: NFTs - Extended view
   @LW-2499 @Smoke @Mainnet
   Scenario: Extended-view - Send button click
     And I am on NFTs extended page
+    And I left click on the NFT with name "Ibilecoin" on NFTs page
     And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
     When I click "Send NFT" button on NFT details drawer
     Then the 'Send' screen is displayed in extended mode
@@ -75,10 +76,12 @@ Feature: LW-423: NFTs - Extended view
   @LW-4746 @Mainnet
   Scenario: Extended-view - NFTs details - Enter and Escape buttons support
     Given I am on NFTs extended page
+    And I left click on the NFT with name "Ibilecoin" on NFTs page
     And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
     And "Send NFT" button is displayed on NFT details drawer
     When I press keyboard Escape button
     Then "Send NFT" button is not displayed on NFT details drawer
+    And I left click on the NFT with name "Ibilecoin" on NFTs page
     And I am on a NFT details on the extended view for NFT with name: "Ibilecoin"
     When I press keyboard Enter button
     Then send drawer is displayed with all its components in extended mode

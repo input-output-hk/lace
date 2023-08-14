@@ -24,9 +24,10 @@ import { ContinueInBrowserDialog } from '@components/ContinueInBrowserDialog';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import ExclamationMarkIcon from '@src/assets/icons/exclamation-circle-small.svg';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
@@ -227,13 +228,14 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { signAndSubmitTransaction } = useDelegationTransaction();
 
   const sendAnalytics = useCallback(() => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.STAKING,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.STAKING,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.Staking.STAKING_CONFIRMATION_POPUP
         : AnalyticsEventNames.Staking.STAKING_CONFIRMATION_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationStakePoolConfirmationNextClick);
   }, [analytics, popupView]);
 
   const handleConfirmation = useCallback(async () => {

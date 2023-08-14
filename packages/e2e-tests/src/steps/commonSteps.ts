@@ -243,3 +243,7 @@ When(/^I reopen the page$/, async () => {
   await closeAllTabsExceptActiveOne();
   await browser.url(currentPageUrl);
 });
+When(/^I set (light|dark) theme mode in Local Storage$/, async (mode: 'light' | 'dark') => {
+  await localStorageInitializer.initializeMode(mode);
+  await browser.refresh();
+});

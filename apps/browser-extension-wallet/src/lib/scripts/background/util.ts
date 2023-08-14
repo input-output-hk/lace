@@ -6,6 +6,8 @@ import { Wallet } from '@lace/cardano';
 import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
 import uniqueId from 'lodash/uniqueId';
 
+const { blake2b } = Wallet.Crypto;
+
 type WindowPosition = {
   top: number;
   left: number;
@@ -24,10 +26,8 @@ export const INITIAL_STORAGE = { MIGRATION_STATE: { state: 'not-loaded' } as Mig
  * Gets the background storage content
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getBackgroundStorage = async (): Promise<BackgroundStorage> => {
-  const { BACKGROUND_STORAGE } = await webStorage.local.get('BACKGROUND_STORAGE');
-  return BACKGROUND_STORAGE;
-};
+export const getBackgroundStorage = async (): Promise<BackgroundStorage> =>
+  (await webStorage.local.get('BACKGROUND_STORAGE'))?.BACKGROUND_STORAGE ?? {};
 
 export const getADAPriceFromBackgroundStorage = async (): Promise<BackgroundStorage['fiatPrices']> => {
   const backgroundStorage = await getBackgroundStorage();
@@ -166,4 +166,9 @@ export const getWalletName = (): string => {
     throw new Error('No wallet name declared in .env');
   }
   return `${process.env.WALLET_NAME}`;
+};
+
+export const hashExtendedAccountPublicKey = (extendedAccountPublicKey: string): string => {
+  const input = Buffer.from(extendedAccountPublicKey);
+  return blake2b(blake2b.BYTES_MIN).update(input).digest('hex');
 };

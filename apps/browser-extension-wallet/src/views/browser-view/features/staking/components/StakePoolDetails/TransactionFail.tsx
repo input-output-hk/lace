@@ -13,9 +13,10 @@ import { usePassword } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletManager } from '@hooks';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 
@@ -50,13 +51,14 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const analytics = useAnalyticsContext();
 
   const closeDrawer = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.STAKING,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.STAKING,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.Staking.STAKING_FAIL_POPUP
         : AnalyticsEventNames.Staking.STAKING_FAIL_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongCancelClick);
     setDelegationTxBuilder();
     setIsDrawerVisible(false);
     resetStates();
@@ -90,7 +92,10 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       </Button>
       {popupView ? (
         <Button
-          onClick={() => setSection(sectionsConfig[sectionsConfig.fail_tx.prevSection])}
+          onClick={() => {
+            analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongBackClick);
+            setSection(sectionsConfig[sectionsConfig.fail_tx.prevSection]);
+          }}
           color="primary"
           className={styles.btn}
           size="large"

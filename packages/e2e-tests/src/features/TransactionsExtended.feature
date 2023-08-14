@@ -28,7 +28,7 @@ Feature: Transactions - Extended view
   Scenario: Extended View - Infinite scroll
     When I navigate to Transactions extended page
     And Transactions section is displayed
-    And I scroll to the row: 10
+    And I scroll to the row: 8
     Then a skeleton is displayed at the bottom of the page
 
   @LW-2557 @Testnet

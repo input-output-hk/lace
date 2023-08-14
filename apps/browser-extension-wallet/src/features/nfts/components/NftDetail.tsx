@@ -12,8 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
 import { DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
@@ -43,9 +43,9 @@ export const NftDetail = (): React.ReactElement => {
   };
 
   const handleOpenSend = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_NFT,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_NFT,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewNFTs.SEND_NFT_POPUP
     });
     setSendInitialState(id, SEND_NFT_DEFAULT_AMOUNT);
@@ -58,6 +58,7 @@ export const NftDetail = (): React.ReactElement => {
       className={styles.drawer}
       visible
       navigation={<DrawerNavigation onArrowIconClick={() => redirectToNfts()} />}
+      dataTestId="nft-details-drawer"
       footer={
         <div className={styles.footer}>
           <Button id={buttonIds.nftDetailsBtnId} className={styles.sendBtn} onClick={handleOpenSend}>

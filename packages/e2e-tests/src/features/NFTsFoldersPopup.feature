@@ -384,3 +384,12 @@ Feature: NFT - Folders - Popup view
       | 4                        | remove |  3                        | 0                        |
       | 5                        | remove |  4                        | 0                        |
       | 6                        | remove |  3                        | 2                        |
+
+  @LW-7852
+  Scenario: Popup-view - NFT Folders - Click NFT in Folder
+    Given the NFT folder with name "Sample NFT folder" and 2 NFT was created
+    And I navigate to NFTs popup page
+    And I left click on the NFT folder with name "Sample NFT folder"
+    And I see "Sample NFT folder" NFT folder page in popup mode
+    When I click NFT with name "Ibilecoin"
+    Then I am on a NFT details on the popup view for NFT with name: "Ibilecoin"
