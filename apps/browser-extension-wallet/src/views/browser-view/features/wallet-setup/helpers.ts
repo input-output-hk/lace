@@ -13,7 +13,7 @@ type HardwareWalletPersonaProperties = {
 
 export const getTrezorSpecifications = async (): Promise<HardwareWalletPersonaProperties> => {
   const { model, major_version, minor_version, patch_version } =
-    await Wallet.KeyManagement.TrezorKeyAgent.checkDeviceConnection();
+    await Wallet.KeyManagement.TrezorKeyAgent.checkDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
   return {
     model: `${Wallet.KeyManagement.KeyAgentType.Trezor} model ${model}`,
     firmwareVersion: `${major_version}.${minor_version}.${patch_version}`
