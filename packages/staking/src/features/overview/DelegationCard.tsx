@@ -1,13 +1,16 @@
-import { Card, Cell, Grid, PieChart, PieChartColor, Text } from '@lace/ui';
+import { Card, PieChart, PieChartColor, Text } from '@lace/ui';
+import cn from 'classnames';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
-import { useOutsideHandles } from '../outside-handles-provider';
 import * as styles from './DelegationCard.css';
 
 type Status = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';
 
 type DelegationCardProps = {
+  arrangement?: 'vertical' | 'horizontal';
+  balance: string;
+  cardanoCoinSymbol: string;
   distribution: Array<{
     name: string;
     value: number;
@@ -25,60 +28,67 @@ const mapOfStatusToTranslationKey: Record<Status, TranslationKey> = {
   'under-staked': 'overview.delegationCard.statuses.underStaked',
 };
 
-type MakeInfoDataParams = {
-  balance: string;
-  numberOfPools: number;
-  status: string;
-};
-
-const makeInfoData = ({
+export const DelegationCard = ({
+  arrangement = 'horizontal',
   balance,
-  numberOfPools,
+  cardanoCoinSymbol,
+  distribution,
   status,
-}: MakeInfoDataParams): Array<{
-  nameTranslationKey: TranslationKey;
-  value: MakeInfoDataParams[keyof MakeInfoDataParams];
-}> => [
-  { nameTranslationKey: 'overview.delegationCard.label.status', value: status },
-  { nameTranslationKey: 'overview.delegationCard.label.balance', value: `${balance} ADA` },
-  { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
-];
-
-export const DelegationCard = ({ distribution, status, showDistribution = false }: DelegationCardProps) => {
+  showDistribution = false,
+}: DelegationCardProps) => {
   const { t } = useTranslation();
-  const { balancesBalance, compactNumber } = useOutsideHandles();
-  const balance = balancesBalance.available.coinBalance;
   const numberOfPools = distribution.length;
-  const infoData = makeInfoData({
-    balance: compactNumber(balance),
-    numberOfPools,
-    status: t(mapOfStatusToTranslationKey[status]),
-  });
+
+  const infoData: Array<{
+    nameTranslationKey: TranslationKey;
+    value: number | string;
+  }> = [
+    { nameTranslationKey: 'overview.delegationCard.label.status', value: t(mapOfStatusToTranslationKey[status]) },
+    { nameTranslationKey: 'overview.delegationCard.label.balance', value: `${balance} ${cardanoCoinSymbol}` },
+    { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
+  ];
 
   return (
     <Card.Greyed>
-      <div className={styles.content} data-testid="delegation-info-card">
+      <div
+        className={cn(styles.content, {
+          [styles.contentHorizontal]: arrangement === 'horizontal',
+          [styles.contentVertical]: arrangement === 'vertical',
+        })}
+        data-testid="delegation-info-card"
+      >
         <div className={styles.chart} data-testid="delegation-chart">
           <PieChart data={distribution} colors={distribution.map((d) => d.color)} />
           {showDistribution && <Text.SubHeading className={styles.counter}>100%</Text.SubHeading>}
         </div>
-        <div className={styles.info}>
-          <Grid columns={'$2'} rows={'$3'}>
+        <div
+          className={cn({
+            [styles.infoHorizontal]: arrangement === 'horizontal',
+            [styles.infoVertical]: arrangement === 'vertical',
+          })}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gap: 16,
+              gridTemplateColumns: 'minmax(max-content, 100%) minmax(max-content, 100%)',
+            }}
+          >
             {infoData.map(({ nameTranslationKey, value }) => (
               <Fragment key={nameTranslationKey}>
-                <Cell className={styles.infoLabel}>
+                <div className={styles.infoLabel}>
                   <Text.Body.Large weight={'$semibold'} data-testid={`${nameTranslationKey}-label`}>
                     {t(nameTranslationKey)}
                   </Text.Body.Large>
-                </Cell>
-                <Cell className={styles.infoValue}>
-                  <Text.Body.Large weight={'$bold'} data-testid={`${nameTranslationKey}-value`}>
+                </div>
+                <div className={styles.infoValue}>
+                  <Text.Body.Normal weight={'$bold'} data-testid={`${nameTranslationKey}-value`}>
                     {value}
-                  </Text.Body.Large>
-                </Cell>
+                  </Text.Body.Normal>
+                </div>
               </Fragment>
             ))}
-          </Grid>
+          </div>
         </div>
       </div>
     </Card.Greyed>

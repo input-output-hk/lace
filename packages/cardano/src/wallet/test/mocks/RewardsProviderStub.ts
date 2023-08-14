@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
-import { RewardsProvider, EpochRewards, Cardano } from '@cardano-sdk/core';
+import { RewardsProvider, Reward, Cardano } from '@cardano-sdk/core';
 
-const mockEpochRewards: EpochRewards[] = [
+const mockEpochRewards: Reward[] = [
   {
     epoch: Cardano.EpochNo(1),
     rewards: BigInt(100)
