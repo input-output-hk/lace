@@ -1,34 +1,62 @@
-import { AnalyticsConsentStatus, AnalyticsClient, sendEventProps } from './types';
+import { EnhancedAnalyticsOptInStatus, ExtensionViews, MatomoSendEventProps, PostHogAction } from './types';
 import { Wallet } from '@lace/cardano';
-import { NoopAnalyticsClient } from './noopAnalyticsClient';
-import { MatomoClient } from './MatomoClient';
+import { MatomoClient } from '../matomo';
+import { POSTHOG_ENABLED, PostHogClient } from '../postHog';
+import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
+import { UserIdService } from '@lib/scripts/types';
 
 export class AnalyticsTracker {
-  protected analyticsClient: AnalyticsClient;
+  protected matomoClient?: MatomoClient;
+  protected postHogClient?: PostHogClient;
+  protected userIdService?: UserIdService;
 
-  constructor(protected chain: Wallet.Cardano.ChainId, enabled: boolean, analyticsAccepted?: AnalyticsConsentStatus) {
-    this.analyticsClient = NoopAnalyticsClient;
+  constructor(
+    extensionParams: {
+      chain: Wallet.Cardano.ChainId;
+      view?: ExtensionViews;
+    },
+    analyticsDisabled = false,
+    isPostHogEnabled = POSTHOG_ENABLED
+  ) {
+    if (analyticsDisabled) return;
+    this.userIdService = getUserIdService();
+    this.matomoClient = new MatomoClient(extensionParams.chain, this.userIdService);
 
-    if (!enabled) {
-      this.disableTracking();
-    } else {
-      this.analyticsClient = new MatomoClient(this.chain, analyticsAccepted);
+    if (isPostHogEnabled) {
+      this.postHogClient = new PostHogClient(extensionParams.chain, this.userIdService, extensionParams?.view);
     }
   }
 
-  disableTracking(): void {
-    this.analyticsClient = NoopAnalyticsClient;
+  async setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): Promise<void> {
+    // eslint-disable-next-line unicorn/prefer-ternary
+    if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
+      await this.userIdService?.makePersistent();
+      await this.sendAliasEvent();
+    } else {
+      await this.userIdService?.makeTemporary();
+    }
   }
 
-  toogleCookies(isEnabled: boolean): void {
-    this.analyticsClient.toogleCookies(isEnabled);
+  async sendPageNavigationEvent(): Promise<void> {
+    await this.postHogClient?.sendPageNavigationEvent();
   }
 
-  sendPageNavigationEvent(path: string): void {
-    this.analyticsClient.sendPageNavigationEvent(path);
+  async sendAliasEvent(): Promise<void> {
+    await this.postHogClient?.sendAliasEvent();
   }
 
-  sendEvent(props: sendEventProps): void {
-    this.analyticsClient.sendEvent(props);
+  async sendEventToMatomo(props: MatomoSendEventProps): Promise<void> {
+    await this.matomoClient?.sendEvent(props);
+    await this.userIdService?.extendLifespan();
+  }
+
+  async sendEventToPostHog(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
+    await this.postHogClient?.sendEvent(action, properties);
+    await this.userIdService?.extendLifespan();
+  }
+
+  setChain(chain: Wallet.Cardano.ChainId): void {
+    this.matomoClient?.setChain(chain);
+    this.postHogClient?.setChain(chain);
   }
 }

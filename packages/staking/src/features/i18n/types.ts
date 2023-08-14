@@ -187,6 +187,13 @@ type KeysStructure = {
     clear: '';
     next: '';
   };
+  popup: {
+    expandBanner: {
+      button: '';
+      description: '';
+      title: '';
+    };
+  };
 };
 
 export type TranslationKey = ConstructTranslationKeyUnion<KeysStructure>;

@@ -12,7 +12,10 @@ in rec {
   inherit (common) cardano-node ogmios;
 
   patchedGo = pkgs.go.overrideAttrs (drv: {
-    patches = (drv.patches or []) ++ [ ./go--windows-StartupInfoLpReserved2.patch ];
+    patches = (drv.patches or []) ++ [
+      ./go--windows-expose-CreateEnvBlock.patch
+      ./go--windows-StartupInfoLpReserved2.patch
+    ];
   });
 
   # XXX: we have to be a bit creative to cross-compile Go code for Windows:
@@ -39,6 +42,21 @@ in rec {
       export GOPATH="$TMPDIR/go"
       rm -rf vendor
       cp -r --reflink=auto ${go-modules} vendor
+
+      chmod -R +w vendor
+      (
+        cd vendor/github.com/getlantern/systray
+        patch -p1 -i ${./getlantern-systray--windows-schedule-on-main-thread.patch}
+      )
+      (
+        # XXX: without this, in Task Manager, we change name to “Resync with Mithril?”, because of no main window:
+        cd vendor/github.com/sqweek/dialog
+        patch -p1 -i ${./sqweek-dialog--windows-title.patch}
+      )
+      (
+        cd vendor/github.com/UserExistsError/conpty
+        patch -p1 -i ${./conpty--get-pid-add-env.patch}
+      )
     '';
     buildPhase = ''
       cp ${icon} tray-icon

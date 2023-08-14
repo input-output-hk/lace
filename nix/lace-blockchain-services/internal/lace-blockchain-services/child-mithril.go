@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -20,6 +21,7 @@ import (
 	"lace.io/lace-blockchain-services/constants"
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/mainthread"
+	"lace.io/lace-blockchain-services/ui"
 )
 
 func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild {
@@ -47,6 +49,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 	exePath := ourpaths.LibexecDir + sep + "mithril-client" + ourpaths.ExeSuffix
 	snapshotsDir := ourpaths.WorkDir + sep + "mithril-snapshots"
 	downloadDir := ""  // set later
+	unpackDir := ""  // set later
 
 	const SInitializing = "initializing"
 	const SCheckingDisk = "checking local disk info"
@@ -62,6 +65,9 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 
 	currentStatus := SInitializing
 
+	// For debouncing:
+	downloadProgressLastEmitted := time.Now()
+
 	explorerUrl := ""
 	for _, envVar := range extraEnv[shared.Network] {
 		varName := "AGGREGATOR_ENDPOINT="
@@ -75,7 +81,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 
 	// A mini-monster, we’ll be able to get rid of it once Mithril provides more machine-readable output:
 	reProgress := regexp.MustCompile(
-		`^.\s\[[0-9:]+\]\s+\[[#>-]+\]\s+([0-9]*\.[0-9]+)\s+([A-Za-z]*B)/([0-9]*\.[0-9]+)\s+([A-Za-z]*B)\s+\(([0-9]*\.[0-9]+)([A-Za-z]+)\)$`)
+		`^\[[0-9:]+\]\s+\[[#>-]+\]\s+([0-9]*\.[0-9]+)\s+([A-Za-z]*B)/([0-9]*\.[0-9]+)\s+([A-Za-z]*B)\s+\(([0-9]*\.[0-9]+)([A-Za-z]+)\)$`)
 
 	unitToBytes := func(unit string) int64 {
 		switch unit {
@@ -116,6 +122,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 				fmt.Printf("%s[%d]: fetching snapshots failed: %v (stderr: %v) (stdout: %v)\n",
 					serviceName, pid, err, string(stdout), string(stderr))
 				mainthread.Schedule(func() {
+					ui.BringAppToForeground()
 					dialog.Message("Fetching Mithril snapshots failed: %v." +
 						"\n\nMore details in the log file.", err).
 						Title("Mithril error").Error()
@@ -135,6 +142,16 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			downloadDir = snapshotsDir + sep + shared.Network + sep + snapshot
 			err = os.MkdirAll(downloadDir, 0755)
 			if err != nil { return nil, err }
+
+			unpackDir = downloadDir + sep + "db"
+
+			// XXX: it’s possible that the unpack directory already exists from a previous run;
+			// XXX: then Mithril errors out, so let’s delete it:
+			if _, err := os.Stat(unpackDir); !os.IsNotExist(err) {
+				if err := os.RemoveAll(unpackDir); err != nil {
+					return nil, err
+				}
+			}
 
 			fmt.Printf("%s[%d]: will download snapshot %v to %v\n",
 				serviceName, pid, snapshot, downloadDir)
@@ -226,8 +243,16 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
 				return
 			}
-			if strings.Index(line, "Files in the directory '" + downloadDir + sep + "db" +
-				"' can be used to run a Cardano node") != -1 {
+
+			successMarker := "Files in the directory '" + unpackDir +
+				"' can be used to run a Cardano node"
+			if runtime.GOOS == "windows" {
+				// Windows breaks long lines, when running in PTY (conpty), so let’s
+				// temporarily check for another string, which won’t get broken:
+				successMarker = "If you are using Cardano Docker image, " +
+					"you can restore a Cardano Node with"
+			}
+			if strings.Index(line, successMarker) != -1 {
 				currentStatus = SGoodSignature
 				statusCh <- StatusAndUrl { Status: currentStatus, Progress: -1,
 					TaskSize: -1, SecondsLeft: -1, OmitUrl: true }
@@ -235,13 +260,38 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			}
 		},
 		LogModifier: func(line string) string {
+			// Remove the wigglers (⠙, ⠒, etc.):
+			brailleDotsLow := rune(0x2800)
+			brailleDotsHi := rune(0x28ff)
+			var result strings.Builder
+			for _, char := range line {
+				if char < brailleDotsLow || char > brailleDotsHi {
+					result.WriteRune(char)
+				}
+			}
+			line = result.String()
 			line = strings.TrimSpace(line)
+
+			// Debounce the download progress bar, it’s way too frequent:
+			if currentStatus == SDownloading {
+				if ms := reProgress.FindStringSubmatch(line); len(ms) > 0 {
+					if time.Since(downloadProgressLastEmitted) >= 333 * time.Millisecond {
+						downloadProgressLastEmitted = time.Now()
+					} else {
+						line = ""
+					}
+				}
+			}
+
 			return line
 		},
 		TerminateGracefullyByInheritedFd3: false,
 		ForceKillAfter: 5 * time.Second,
 		AfterExit: func() error {
 			if currentStatus != SGoodSignature {
+				// Since Mithril cannot resume interrupted downloads, let’s clear them on failures:
+				os.RemoveAll(downloadDir)
+
 				return fmt.Errorf("cannot move DB as snapshot download was not successful")
 			}
 			currentStatus = SMovingDB
@@ -254,7 +304,7 @@ func childMithril(shared SharedState, statusCh chan<- StatusAndUrl) ManagedChild
 			err := os.Rename(chainDir, chainDirBackup)
 			if err != nil { return err }
 
-			err = os.Rename(downloadDir + sep + "db", chainDir)
+			err = os.Rename(unpackDir, chainDir)
 			if err != nil { return err }
 
 			// TODO: do it:
@@ -284,6 +334,8 @@ func runCommandWithTimeout(
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, command, args...)
+
+	setManagedChildSysProcAttr(cmd)
 
 	// Against possible orphaned child processes during timeout, but so far Mithril doesn’t have them:
 	cmd.WaitDelay =	1 * time.Second

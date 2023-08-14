@@ -19,7 +19,11 @@ import {
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
 import { WarningModal } from '@src/views/browser-view/components/WarningModal';
-import { AnalyticsConsentStatus, AnalyticsEventNames } from '@providers/AnalyticsProvider/analyticsTracker';
+import {
+  AnalyticsEventNames,
+  EnhancedAnalyticsOptInStatus,
+  postHogOnboardingActions
+} from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 
 import { PinExtension } from './PinExtension';
@@ -29,8 +33,9 @@ import { passwordTranslationMap } from '../constants';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { ILocalStorage } from '@src/types';
 import { useAnalyticsContext } from '@providers';
-import { ANALYTICS_ACCEPTANCE_LS_KEY } from '@providers/AnalyticsProvider/analyticsTracker/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import * as process from 'process';
+import { SendOboardingAnalyticsEvent } from '../types';
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -57,7 +62,7 @@ const { WalletSetup: Events } = AnalyticsEventNames;
 export interface WalletSetupWizardProps {
   setupType: 'create' | 'restore' | 'forgot_password';
   onCancel: () => void;
-  sendAnalytics: (eventName: string, value?: number) => void;
+  sendAnalytics: SendOboardingAnalyticsEvent;
   initialStep?: WalletSetupSteps;
 }
 
@@ -75,7 +80,7 @@ export const WalletSetupWizard = ({
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
   const [walletInstance, setWalletInstance] = useState<CreateWalletData | undefined>();
-  const [isAnalyticsAccepted, setSsAnalyticsAccepted] = useState(false);
+  const [isAnalyticsAccepted, setIsAnalyticsAccepted] = useState(false);
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
   const [walletIsCreating, setWalletIsCreating] = useState(false);
@@ -217,22 +222,31 @@ export const WalletSetupWizard = ({
   };
 
   const [, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
-    ANALYTICS_ACCEPTANCE_LS_KEY,
-    AnalyticsConsentStatus.REJECTED
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
   );
 
   const handleAnalyticsChoice = (isAccepted: boolean) => {
-    setSsAnalyticsAccepted(isAccepted);
-    analytics.toogleCookies(isAccepted);
-    sendAnalytics(isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP);
+    setIsAnalyticsAccepted(isAccepted);
+    analytics.setOptedInForEnhancedAnalytics(
+      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+    );
+
+    const postHogAnalyticsAgreeAction = postHogOnboardingActions[setupType]?.ANALYTICS_AGREE_CLICK;
+    const postHogAnalyticcSkipAction = postHogOnboardingActions[setupType]?.ANALYTICS_SKIP_CLICK;
+
+    const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;
+    const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticcSkipAction;
+    sendAnalytics(matomoEvent, postHogAction);
     moveForward();
   };
 
   const goToMyWallet = useCallback(
     (wallet?: CreateWalletData) => {
       setWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
+      analytics.sendAliasEvent();
     },
-    [setWallet, walletInstance]
+    [setWallet, walletInstance, analytics]
   );
 
   const handleCompleteCreation = useCallback(async () => {
@@ -245,7 +259,7 @@ export const WalletSetupWizard = ({
       });
       setWalletInstance(wallet);
       setDoesUserAllowAnalytics(
-        isAnalyticsAccepted ? AnalyticsConsentStatus.ACCEPTED : AnalyticsConsentStatus.REJECTED
+        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
       if (setupType === 'forgot_password') {
         deleteFromLocalStorage('isForgotPasswordFlow');
@@ -296,15 +310,23 @@ export const WalletSetupWizard = ({
             /* eslint-disable no-magic-numbers */
             switch (step) {
               case 0:
-                sendAnalytics(Events.MNEMONICS_INPUT_0_NEXT);
+                sendAnalytics(
+                  Events.MNEMONICS_INPUT_0_NEXT,
+                  postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK
+                );
                 break;
               case 1:
-                sendAnalytics(Events.MNEMONICS_INPUT_1_NEXT);
+                sendAnalytics(
+                  Events.MNEMONICS_INPUT_1_NEXT,
+                  postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK
+                );
                 break;
               case 2:
-                sendAnalytics(Events.MNEMONICS_INPUT_2_NEXT);
+                sendAnalytics(
+                  Events.MNEMONICS_INPUT_2_NEXT,
+                  postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK
+                );
             }
-            /* eslint-enable no-magic-numbers */
           }}
           isSubmitEnabled={isMnemonicSubmitEnabled}
           translations={walletSetupMnemonicStepTranslations}
@@ -326,18 +348,36 @@ export const WalletSetupWizard = ({
           switch (step) {
             case 0:
               stage === 'input'
-                ? sendAnalytics(Events.MNEMONICS_INPUT_0_NEXT)
-                : sendAnalytics(Events.MNEMONICS_WRITEDOWN_0_NEXT);
+                ? sendAnalytics(
+                    Events.MNEMONICS_INPUT_0_NEXT,
+                    postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_01_NEXT_CLICK
+                  )
+                : sendAnalytics(
+                    Events.MNEMONICS_WRITEDOWN_0_NEXT,
+                    postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_01_NEXT_CLICK
+                  );
               break;
             case 1:
               stage === 'input'
-                ? sendAnalytics(Events.MNEMONICS_INPUT_1_NEXT)
-                : sendAnalytics(Events.MNEMONICS_WRITEDOWN_1_NEXT);
+                ? sendAnalytics(
+                    Events.MNEMONICS_INPUT_1_NEXT,
+                    postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_09_NEXT_CLICK
+                  )
+                : sendAnalytics(
+                    Events.MNEMONICS_WRITEDOWN_1_NEXT,
+                    postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_09_NEXT_CLICK
+                  );
               break;
             case 2:
               stage === 'input'
-                ? sendAnalytics(Events.MNEMONICS_INPUT_2_NEXT)
-                : sendAnalytics(Events.MNEMONICS_WRITEDOWN_2_NEXT);
+                ? sendAnalytics(
+                    Events.MNEMONICS_INPUT_2_NEXT,
+                    postHogOnboardingActions[setupType]?.ENTER_PASSPHRASE_17_NEXT_CLICK
+                  )
+                : sendAnalytics(
+                    Events.MNEMONICS_WRITEDOWN_2_NEXT,
+                    postHogOnboardingActions[setupType]?.WRITE_PASSPHRASE_17_NEXT_CLICK
+                  );
           }
           /* eslint-enable no-magic-numbers */
         }}
@@ -354,7 +394,11 @@ export const WalletSetupWizard = ({
         <WalletSetupLegalStep
           onBack={moveBack}
           onNext={() => {
-            sendAnalytics(Events.LEGAL_STUFF_NEXT, calculateTimeSpentOnPage());
+            sendAnalytics(
+              Events.LEGAL_STUFF_NEXT,
+              postHogOnboardingActions[setupType]?.LACE_TERMS_OF_USE_NEXT_CLICK,
+              calculateTimeSpentOnPage()
+            );
             moveForward();
           }}
           translations={walletSetupLegalStepTranslations}
@@ -371,7 +415,10 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.PreMnemonic && (
         <WalletSetupMnemonicIntroStep
           onBack={moveBack}
-          onNext={moveForward}
+          onNext={() => {
+            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.PASSPHRASE_INTRO_NEXT_CLICK);
+            moveForward();
+          }}
           translations={walletSetupMnemonicIntroStepTranslations}
         />
       )}
@@ -387,7 +434,7 @@ export const WalletSetupWizard = ({
         <WalletSetupRegisterStep
           onBack={moveBack}
           onNext={(result) => {
-            sendAnalytics(Events.WALLET_NAME_NEXT);
+            sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions[setupType]?.WALLET_NAME_NEXT_CLICK);
             setWalletName(result.walletName);
             moveForward();
           }}
@@ -399,7 +446,7 @@ export const WalletSetupWizard = ({
         <WalletSetupPasswordStep
           onBack={setupType !== 'forgot_password' ? moveBack : undefined}
           onNext={(result) => {
-            sendAnalytics(Events.WALLET_PASSWORD_NEXT);
+            sendAnalytics(Events.WALLET_PASSWORD_NEXT, postHogOnboardingActions[setupType]?.WALLET_PASSWORD_NEXT_CLICK);
             setPassword(result.password);
             setupType === 'create'
               ? skipTo(WalletSetupSteps.PreMnemonic)
@@ -416,6 +463,7 @@ export const WalletSetupWizard = ({
           onBack={moveBack}
           onNext={(result) => {
             setMnemonicLength(result.recoveryPhraseLength);
+            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK);
             moveForward();
           }}
           translations={walletSetupRecoveryPhraseLengthStepTranslations}
@@ -427,7 +475,7 @@ export const WalletSetupWizard = ({
       {currentStep === WalletSetupSteps.Finish && (
         <WalletSetupFinalStep
           onFinish={() => {
-            sendAnalytics(Events.SETUP_FINISHED_NEXT);
+            sendAnalytics(Events.SETUP_FINISHED_NEXT, postHogOnboardingActions[setupType]?.DONE_GO_TO_WALLET);
             goToMyWallet();
           }}
           translations={walletSetupFinalStepTranslations}

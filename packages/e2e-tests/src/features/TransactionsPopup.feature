@@ -23,7 +23,7 @@ Feature: Transactions - Popup view
   Scenario: Popup View - Infinite scroll
     When I navigate to Transactions popup page
     And Transactions section is displayed
-    And I scroll to the row: 10
+    And I scroll to the row: 8
     Then a skeleton is displayed at the bottom of the page
 
   @LW-2545 @Testnet

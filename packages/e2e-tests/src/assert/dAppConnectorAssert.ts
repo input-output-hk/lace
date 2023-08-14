@@ -16,7 +16,6 @@ import extensionUtils from '../utils/utils';
 import TokensPageObject from '../pageobject/tokensPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { browser } from '@wdio/globals';
-import TopNavigationAssert from './topNavigationAssert';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -72,11 +71,6 @@ class DAppConnectorAssert {
     await expect(await AuthorizeDAppPage.authorizeButton.getText()).to.equal(await t('dapp.connect.btn.accept'));
     await AuthorizeDAppPage.cancelButton.waitForDisplayed();
     await expect(await AuthorizeDAppPage.cancelButton.getText()).to.equal(await t('dapp.connect.btn.cancel'));
-  }
-
-  async assertSeeDAppThemeMode(mode: 'dark' | 'light') {
-    await expect(await $('html').getAttribute('data-theme')).to.equal(mode);
-    await TopNavigationAssert.assertBackgroundColor(mode);
   }
 
   async assertSeeAuthorizePagePermissions() {

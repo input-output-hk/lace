@@ -65,13 +65,16 @@ export interface IBlockchainProvider {
   rewardsProvider: Wallet.RewardsProvider;
 }
 
+export type StakingRewards = {
+  totalRewards: BigInt | number;
+  lastReward: BigInt | number;
+};
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
+  expandStakingView?: () => void;
   balancesBalance: Balance;
-  stakingRewards: {
-    totalRewards: BigInt | number;
-    lastReward: BigInt | number;
-  };
+  stakingRewards: StakingRewards;
   delegationDetails: Wallet.Cardano.StakePool;
   delegationStoreSelectedStakePoolDetails?: LegacySelectedStakePoolDetails;
   delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;

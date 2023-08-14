@@ -256,7 +256,13 @@ func manageChildren(comm CommChannels_Manager) {
 			childPid := 0
 
 			childFun := childProcess
-			if child.AllocatePTY { childFun = childProcessPTY }
+			if child.AllocatePTY {
+				if runtime.GOOS == "windows" {
+					childFun = childProcessPTYWindows
+				} else {
+					childFun = childProcessPTY
+				}
+			}
 
 			go childFun(child.ExePath, childArgv, child.MkExtraEnv(),
 				child.LogModifier, outputLines, terminateCh, &childPid,
@@ -413,7 +419,10 @@ func childProcess(
 		defer wgOuts.Done()
 		scanner := bufio.NewScanner(stdout)
 		for scanner.Scan() {
-			outputLines <- logModifier(scanner.Text())
+			line := logModifier(scanner.Text())
+			if len(line) > 0 {
+				outputLines <- line
+			}
 		}
 	}()
 
@@ -426,7 +435,10 @@ func childProcess(
 		defer wgOuts.Done()
 		scanner := bufio.NewScanner(stderr)
 		for scanner.Scan() {
-			outputLines <- "[stderr] " + logModifier(scanner.Text())
+			line := logModifier(scanner.Text())
+			if len(line) > 0 {
+				outputLines <- "[stderr] " + line
+			}
 		}
 	}()
 
@@ -454,32 +466,38 @@ func childProcess(
 		waitDone <- struct{}{}
 	}()
 
-	__internal__terminateGracefully(terminate, waitDone, cmd, gracefulExitTimeout, terminationPipeWriter)
+	__internal__terminateGracefully(terminate, waitDone, gracefulExitTimeout, terminationPipeWriter,
+		cmd.Path, cmd.Process, nil)
 }
 
 // XXX: don’t use this function outside of ‘childProcess’ and ‘childProcessPTY’
 func __internal__terminateGracefully(
 	terminate <-chan struct{},
 	waitDone <-chan struct{},
-	cmd *exec.Cmd,
 	gracefulExitTimeout time.Duration,
 	terminationPipeWriter *os.File,
+	// XXX: we used to just pass `cmd`, but that doesn’t work with Windows PTY, so:
+	cmd_Path string,
+	cmd_Process *os.Process,
+	gracefulExitOverride func(),
 ) {
 	select {
 	case <-terminate:
-		if terminationPipeWriter != nil {
+		if gracefulExitOverride != nil {
+			gracefulExitOverride()
+		} else if terminationPipeWriter != nil {
 			fmt.Printf("%s[%d]: closing shutdown IPC pipe (fd %v) of %s[%d]\n",
 				OurLogPrefix, os.Getpid(), terminationPipeWriter.Fd(),
-				filepath.Base(cmd.Path), cmd.Process.Pid)
+				filepath.Base(cmd_Path), cmd_Process.Pid)
 			terminationPipeWriter.Close()
 		} else if runtime.GOOS == "windows" {
 			fmt.Printf("%s[%d]: sending CTRL_BREAK_EVENT to %s[%d]\n",
-				OurLogPrefix, os.Getpid(), filepath.Base(cmd.Path), cmd.Process.Pid)
-			windowsSendCtrlBreak(cmd.Process.Pid)
+				OurLogPrefix, os.Getpid(), filepath.Base(cmd_Path), cmd_Process.Pid)
+			windowsSendCtrlBreak(cmd_Process.Pid)
 		} else {
 			fmt.Printf("%s[%d]: sending SIGTERM to %s[%d]\n",
-				OurLogPrefix, os.Getpid(), filepath.Base(cmd.Path), cmd.Process.Pid)
-			cmd.Process.Signal(syscall.SIGTERM)
+				OurLogPrefix, os.Getpid(), filepath.Base(cmd_Path), cmd_Process.Pid)
+			cmd_Process.Signal(syscall.SIGTERM)
 		}
 
 		doForceKill := make(chan struct{}, 1)
@@ -491,9 +509,9 @@ func __internal__terminateGracefully(
 		case <-doForceKill:
 			fmt.Printf("%s[%d]: %s[%d] did not exit gracefully in %s, killing it forcefully...\n",
 				OurLogPrefix, os.Getpid(),
-				filepath.Base(cmd.Path), cmd.Process.Pid, gracefulExitTimeout)
+				filepath.Base(cmd_Path), cmd_Process.Pid, gracefulExitTimeout)
 			// In a rare event that it hangs, we cannot afford a deadlock here:
-			go cmd.Process.Kill()
+			go cmd_Process.Kill()
 			<-waitDone
 		case <-waitDone:
 		}
@@ -554,19 +572,23 @@ func childProcessPTY(
 			num, err := ptyFile.Read(buf)
 			if err != nil {	return }
 
-			line := string(buf[:num])
-			line = stripansi.Strip(line)
+			lines := string(buf[:num])
+			lines = stripansi.Strip(lines)
+			lines = strings.ReplaceAll(lines, string(rune(0x07)), "")  // remove bells
 
 			// XXX: it’s possible that 2+ TTY updates will be clumped together in a single ‘read’, so:
-			for _, line1 := range strings.Split(line, "\n") {
-				for _, line2 := range strings.Split(line1, "\r") {
-					if len(line2) > 0 {
-						outputLines <- logModifier(line2)
+			for _, line := range strings.FieldsFunc(lines, func(c rune) bool {
+				return (c == '\n' || c == '\r' || c == rune(0x08))  // 0x08 for Windows
+			}) {
+				if len(line) > 0 {
+					line = logModifier(line)
+					if len(line) > 0 {
+						outputLines <- line
 					}
 				}
 			}
 		}
 	}()
 
-	__internal__terminateGracefully(terminate, waitDone, cmd, gracefulExitTimeout, nil)
+	__internal__terminateGracefully(terminate, waitDone, gracefulExitTimeout, nil, cmd.Path, cmd.Process, nil)
 }

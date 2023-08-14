@@ -1,20 +1,19 @@
-import { Wallet } from '@lace/cardano';
-import { Box, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor, Text } from '@lace/ui';
+import { Box, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { FundWalletBanner } from '../staking/FundWalletBanner';
 import { StakeFundsBanner } from '../staking/StakeFundsBanner';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
+import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
 import { StakingInfoCard } from './staking-info-card';
-
-const SATURATION_UPPER_BOUND = 100;
 
 export const Overview = () => {
   const { t } = useTranslation();
   const {
     walletStoreWalletUICardanoCoin,
     balancesBalance,
+    compactNumber,
     stakingRewards,
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
@@ -42,36 +41,20 @@ export const Overview = () => {
     );
   if (currentPortfolio.length === 0) return <StakeFundsBanner balance={balancesBalance?.total?.coinBalance} />;
 
-  const weightsSum = currentPortfolio.reduce((sum, { weight }) => sum + weight, 0);
-
-  const displayData = currentPortfolio.map((item, index) => ({
-    ...item,
-    ...item.displayData,
+  const displayData = mapPortfolioToDisplayData({
+    balance: balancesBalance,
     cardanoCoin: walletStoreWalletUICardanoCoin,
-    coinBalance: (() => {
-      const balance = balancesBalance?.total?.coinBalance ? Number(balancesBalance?.total?.coinBalance) : 0;
-      return balance * (item.weight / weightsSum);
-    })(),
-    color: PIE_CHART_DEFAULT_COLOR_SET[index] as PieChartColor,
-    fiat: fetchCoinPricePriceResult?.cardano?.price,
-    lastReward: Wallet.util.lovelacesToAdaString(stakingRewards.lastReward.toString()),
-    status: ((): 'retired' | 'saturated' | undefined => {
-      if (item.displayData.retired) return 'retired';
-      if (Number(item.displayData.saturation || 0) > SATURATION_UPPER_BOUND) return 'saturated';
-      // eslint-disable-next-line consistent-return, unicorn/no-useless-undefined
-      return undefined;
-    })(),
-    totalRewards: Wallet.util.lovelacesToAdaString(stakingRewards.totalRewards.toString()),
-  }));
-
-  if (displayData.length === 1) {
-    displayData.forEach((item) => (item.color = PieChartGradientColor.LaceLinearGradient));
-  }
+    cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
+    portfolio: currentPortfolio,
+    stakingRewards,
+  });
 
   return (
     <>
       <Box mb={'$40'}>
         <DelegationCard
+          balance={compactNumber(balancesBalance.available.coinBalance)}
+          cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
           distribution={displayData.map(({ color, name = '-', weight }) => ({
             color,
             name,

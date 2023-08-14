@@ -8,6 +8,8 @@ import { usePassword, useSubmitingState } from '@views/browser/features/send-tra
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useTranslation } from 'react-i18next';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
@@ -46,6 +48,7 @@ export const StakePoolDetailsDrawer = ({
   // );
   const { setDelegationTxBuilder } = useDelegationStore();
   const backgroundService = useBackgroundServiceAPIContext();
+  const analytics = useAnalyticsContext();
 
   const closeDrawer = useCallback(() => {
     if (showExitConfirmation?.(simpleSendConfig.currentSection)) {
@@ -60,6 +63,14 @@ export const StakePoolDetailsDrawer = ({
       setIsDrawerVisible(false);
     }
     setIsRestaking(false);
+
+    if (simpleSendConfig.currentSection === Sections.SUCCESS_TX) {
+      analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayXClick);
+    }
+
+    if (simpleSendConfig.currentSection === Sections.FAIL_TX) {
+      analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongXClick);
+    }
   }, [
     showExitConfirmation,
     simpleSendConfig.currentSection,
@@ -71,7 +82,8 @@ export const StakePoolDetailsDrawer = ({
     // isInMemory,
     // isSuccessSection,
     setIsDrawerVisible,
-    setIsRestaking
+    setIsRestaking,
+    analytics
   ]);
 
   const onArrowIconClick = useCallback(() => {

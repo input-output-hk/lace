@@ -53,7 +53,8 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2361 @Testnet @Mainnet
+  @LW-2361 @Testnet @Mainnet @Pending
+  # BUG LW-7925
   Scenario: Extended-view - Address can be saved from Send screen
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
@@ -69,7 +70,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then I see address row with name "WalletName" and address "Shelley" on the list in extended mode
 
   @LW-2362 @Testnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
@@ -81,7 +82,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then "Review transaction" button is enabled on "Send" page
 
   @LW-2362 @Mainnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
@@ -93,7 +94,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then "Review transaction" button is enabled on "Send" page
 
   @LW-2742 @Testnet @Mainnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Extended-view - Send flow - Search contact
     Given I have several contacts whose start with the same characters
     And I navigate to Tokens extended page
@@ -102,7 +103,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then a dropdown showing the first 5 matches is displayed
 
   @LW-2743 @Testnet @Mainnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Extended-view - Send flow - Select contact from dropdown
     Given I have several contacts whose start with the same characters
     And I navigate to Tokens extended page
@@ -112,7 +113,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then the selected contact is added in the bundle recipient's address
 
   @LW-2363 @Testnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Extended-view - Existing address can be selected from the address book and then removed
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
@@ -126,7 +127,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then "Review transaction" button is disabled on "Send" page
 
   @LW-2363 @Mainnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Extended-view - Existing address can be selected from the address book and then removed
     When I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page

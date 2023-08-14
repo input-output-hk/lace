@@ -8,6 +8,7 @@ import { Sections, sectionsConfig, useStakePoolDetails } from '../store';
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
+  popupView?: boolean;
   showCloseIcon?: boolean | ((section: Sections) => boolean);
   showBackIcon?: boolean | ((section: Sections) => boolean);
   showExitConfirmation?: (section: Sections) => boolean;
@@ -16,6 +17,7 @@ export interface StakePoolDetailsDrawerProps {
 export const StakePoolDetailsDrawer = ({
   children,
   footer,
+  popupView,
   showCloseIcon,
   showBackIcon,
   showExitConfirmation,
@@ -125,6 +127,7 @@ export const StakePoolDetailsDrawer = ({
         />
       }
       footer={footer}
+      popupView={popupView}
     >
       {isDrawerVisible && children}
     </Drawer>
