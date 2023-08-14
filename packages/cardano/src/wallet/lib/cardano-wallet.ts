@@ -31,9 +31,9 @@ export interface CardanoWallet {
   wallet: ObservableWallet;
   keyAgent: KeyManagement.KeyAgent;
   name: string;
+  asyncKeyAgent: KeyManagement.AsyncKeyAgent;
 }
 export type CardanoWalletByChain = CardanoWallet & { keyAgentsByChain: KeyAgentsByChain };
-export type CardanoWalletAsync = CardanoWallet & { asyncKeyAgent: KeyManagement.AsyncKeyAgent };
 
 export type CreateStores = (name: string) => storage.WalletStores;
 
@@ -77,7 +77,7 @@ export const createCardanoWalletsByChain = async (
   getPassword: () => Promise<Uint8Array>,
   activeChainId: Cardano.ChainId,
   createWallet: SetupWalletProps<ObservableWallet, KeyManagement.KeyAgent>['createWallet']
-): Promise<Omit<CardanoWalletByChain, 'name' | 'keyAgent'> & { keyAgent: KeyManagement.KeyAgent }> => {
+): Promise<Pick<CardanoWalletByChain, 'wallet' | 'keyAgent' | 'keyAgentsByChain'>> => {
   const keyAgentsByChain: KeyAgentsByChain = {} as KeyAgentsByChain;
   let activeChainName: ChainName;
 
@@ -173,8 +173,10 @@ export const createCardanoWallet = async (
     createWallet
   );
 
-  await activateWallet(walletManagerUi, keyAgent, name);
-  return { name, wallet, keyAgent, keyAgentsByChain };
+  const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
+  await walletManagerUi.activate({ keyAgent: asyncKeyAgent, observableWalletName: name });
+
+  return { asyncKeyAgent, name, wallet, keyAgent, keyAgentsByChain };
 };
 
 /**
@@ -206,7 +208,7 @@ export const restoreWalletFromKeyAgent = async (
   activateOnRestore = true,
   callback?: (result: boolean) => void
   // eslint-disable-next-line max-params
-): Promise<CardanoWalletAsync> => {
+): Promise<CardanoWallet> => {
   const { wallet } = walletManagerUi;
 
   const createWallet = async () => wallet;

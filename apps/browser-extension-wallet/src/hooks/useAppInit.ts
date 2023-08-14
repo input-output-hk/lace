@@ -7,8 +7,9 @@ import { useEffect } from 'react';
 import { runtime } from 'webextension-polyfill';
 
 export const useAppInit = (): void => {
-  const { setAddressesDiscoveryCompleted, setWalletManagerUi, walletManagerUi, setWalletInfo } = useWalletStore();
-  const { updateKeyAgent } = useWalletManager();
+  const { environmentName, setAddressesDiscoveryCompleted, setWalletInfo, setWalletManagerUi, walletManagerUi } =
+    useWalletStore();
+  const { updateAddresses } = useWalletManager();
 
   useEffect(() => {
     const walletManager = new WalletManagerUi({ walletName: process.env.WALLET_NAME }, { logger: console, runtime });
@@ -18,19 +19,18 @@ export const useAppInit = (): void => {
   useEffect(() => {
     if (!walletManagerUi?.wallet) return () => void 0;
 
-    const subscription = walletManagerUi.wallet.addresses$.subscribe(async (knownAddresses) => {
-      const currentKeyAgentData = getValueFromLocalStorage('keyAgentData');
-      if (!currentKeyAgentData) return;
+    const subscription = walletManagerUi?.wallet.addresses$.subscribe(async (addresses) => {
+      if (addresses.length === 0) return;
 
-      await updateKeyAgent({
-        ...currentKeyAgentData,
-        knownAddresses
+      await updateAddresses({
+        addresses,
+        currentChainName: environmentName
       });
 
       const { name } = getValueFromLocalStorage('wallet');
       setWalletInfo({
         name: name ?? 'Lace',
-        addresses: knownAddresses
+        addresses
       });
 
       setAddressesDiscoveryCompleted(true);
@@ -39,5 +39,5 @@ export const useAppInit = (): void => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setAddressesDiscoveryCompleted, setWalletInfo, updateKeyAgent, walletManagerUi?.wallet]);
+  }, [walletManagerUi?.wallet, environmentName, setAddressesDiscoveryCompleted, setWalletInfo, updateAddresses]);
 };

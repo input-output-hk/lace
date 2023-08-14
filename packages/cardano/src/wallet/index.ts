@@ -51,7 +51,6 @@ export * as Crypto from '@cardano-sdk/crypto';
 export {
   CardanoWallet,
   CardanoWalletByChain,
-  CardanoWalletAsync,
   CreateStores,
   KeyAgentsByChain,
   WalletProvidersDependencies,

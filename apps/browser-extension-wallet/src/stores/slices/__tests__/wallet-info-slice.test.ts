@@ -49,6 +49,7 @@ describe('Testing wallet info slice', () => {
 
     await act(async () => {
       const cardanoWallet = {
+        asyncKeyAgent: {} as any,
         wallet: mockPersonalWallet as any,
         stores: { mock: 'store ' } as any,
         keyAgent: {

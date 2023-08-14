@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import dayjs from 'dayjs';
+import isEqual from 'lodash/isEqual';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
 import { useCardanoWalletManagerContext } from '@providers/CardanoWalletManager';
@@ -52,7 +53,10 @@ export interface UseWalletManager {
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<void>;
   executeWithPassword: <T>(password: string, promiseFn: () => Promise<T>, cleanPassword?: boolean) => Promise<T>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
-  updateKeyAgent: (newKeyAgentData: Wallet.KeyManagement.SerializableKeyAgentData) => Promise<void>;
+  updateAddresses: (args: {
+    addresses: Wallet.KeyManagement.GroupedAddress[];
+    currentChainName: Wallet.ChainName;
+  }) => Promise<void>;
   loadUnlockedWallet: (keyAgentsByChain: Wallet.KeyAgentsByChain) => Promise<void>;
 }
 
@@ -82,7 +86,8 @@ export const useWalletManager = (): UseWalletManager => {
     setCurrentChain,
     setCardanoCoin,
     environmentName,
-    walletManagerUi
+    walletManagerUi,
+    cardanoWallet
   } = useWalletStore();
   const [settings, updateAppSettings] = useAppSettingsContext();
   const {
@@ -269,12 +274,12 @@ export const useWalletManager = (): UseWalletManager => {
    */
   const saveHardwareWallet = useCallback(
     async (wallet: Wallet.CardanoWalletByChain, chainName = CHAIN): Promise<void> => {
-      const { keyAgentsByChain, ...cardanoWallet } = wallet;
+      const { keyAgentsByChain, ...cardanoWalletData } = wallet;
 
       // Save in storage
       await backgroundService.setBackgroundStorage({ keyAgentsByChain });
-      saveValueInLocalStorage({ key: 'wallet', value: { name: cardanoWallet.name } });
-      saveValueInLocalStorage({ key: 'keyAgentData', value: cardanoWallet.keyAgent.serializableData });
+      saveValueInLocalStorage({ key: 'wallet', value: { name: cardanoWalletData.name } });
+      saveValueInLocalStorage({ key: 'keyAgentData', value: cardanoWalletData.keyAgent.serializableData });
 
       updateAppSettings({
         chainName,
@@ -285,8 +290,8 @@ export const useWalletManager = (): UseWalletManager => {
       // Set wallet states
       // eslint-disable-next-line unicorn/no-null
       setWalletLock(null); // Lock is not available for hardware wallets
-      setCardanoWallet(cardanoWallet);
-      setKeyAgentData(cardanoWallet.keyAgent.serializableData);
+      setCardanoWallet(cardanoWalletData);
+      setKeyAgentData(cardanoWalletData.keyAgent.serializableData);
       setCurrentChain(chainName);
     },
     [backgroundService, updateAppSettings, setWalletLock, setCardanoWallet, setKeyAgentData, setCurrentChain]
@@ -345,7 +350,7 @@ export const useWalletManager = (): UseWalletManager => {
       const { keyAgentData: newKeyAgent } = keyAgentsByChain[chainName];
       if (!newKeyAgent) throw new Error('Wallet data for chosen chain is empty');
 
-      const { asyncKeyAgent } = await Wallet.restoreWalletFromKeyAgent(
+      const { asyncKeyAgent, keyAgent, wallet } = await Wallet.restoreWalletFromKeyAgent(
         walletManagerUi,
         walletName,
         newKeyAgent,
@@ -360,53 +365,84 @@ export const useWalletManager = (): UseWalletManager => {
       saveValueInLocalStorage({ key: 'wallet', value: { name: walletName } });
       saveValueInLocalStorage({ key: 'keyAgentData', value: newKeyAgent });
 
+      setCardanoWallet({
+        asyncKeyAgent,
+        keyAgent,
+        name: walletName,
+        wallet
+      });
       setCurrentChain(chainName);
       setCardanoCoin(chainId);
       setKeyAgentData(newKeyAgent);
     },
     [
       backgroundService,
-      getPassword,
-      setCardanoCoin,
-      setCurrentChain,
-      settings,
-      updateAppSettings,
       walletManagerUi,
+      getPassword,
+      updateAppSettings,
+      settings,
+      setCardanoWallet,
+      setCurrentChain,
+      setCardanoCoin,
       setKeyAgentData
     ]
   );
 
-  const updateKeyAgent = useCallback(
-    async (newKeyAgentData: Wallet.KeyManagement.SerializableKeyAgentData) => {
+  const updateAddresses = useCallback<UseWalletManager['updateAddresses']>(
+    async ({ addresses, currentChainName }) => {
+      const currentChainId = Wallet.Cardano.ChainIds[currentChainName];
+      const currentKeyAgentData = getValueFromLocalStorage('keyAgentData');
+      const networkOfKeyAgentAsIntended = isEqual(currentKeyAgentData.chainId, currentChainId);
+      const networkOfAddressesEqualsNetworkOfKeyAgent = addresses.every(
+        (address) => address.networkId === currentKeyAgentData.chainId.networkId
+      );
+      const keyAgentInLocalStorageIsTheOneWeExpect =
+        networkOfKeyAgentAsIntended && networkOfAddressesEqualsNetworkOfKeyAgent;
+      const addressesUpToDate = isEqual(currentKeyAgentData.knownAddresses, addresses);
+
+      if (!keyAgentInLocalStorageIsTheOneWeExpect || addressesUpToDate) return;
+
+      let newKeyAgentData;
+      if (keyAgentInLocalStorageIsTheOneWeExpect) {
+        newKeyAgentData = {
+          ...currentKeyAgentData,
+          knownAddresses: addresses
+        };
+        saveValueInLocalStorage({
+          key: 'keyAgentData',
+          value: newKeyAgentData
+        });
+      }
+
       const backgroundStorage = await backgroundService.getBackgroundStorage();
       const { name } = getValueFromLocalStorage('wallet');
 
       if (!backgroundStorage) throw new Error("Couldn't access background storage");
       const { keyAgentsByChain } = backgroundStorage;
 
-      keyAgentsByChain[environmentName].keyAgentData = newKeyAgentData;
+      newKeyAgentData ??= {
+        ...keyAgentsByChain[currentChainName].keyAgentData,
+        knownAddresses: addresses
+      };
+
+      keyAgentsByChain[currentChainName].keyAgentData = newKeyAgentData;
+      await backgroundService.setBackgroundStorage({ keyAgentsByChain });
+
       // TODO: update walletLock so after the wallet unlock the discovery does not get triggered again
       // const encryptedKeyAgents = await encryptKeyAgents({ keyAgentsByChain, password });
-      const newKeyAgent = await Wallet.createKeyAgent(walletManagerUi, newKeyAgentData, getPassword);
-
-      await backgroundService.setBackgroundStorage({ keyAgentsByChain });
-      // TODO: update walletLock so after the wallet unlock the discovery does not get triggered again
       // saveValueInLocalStorage({ key: 'lock', value: encryptedKeyAgents });
-      saveValueInLocalStorage({
-        key: 'keyAgentData',
-        value: newKeyAgentData
-      });
-
-      // TODO: update walletLock so after the wallet unlock the discovery does not get triggered again
       // setWalletLock(encryptedKeyAgents);
+
+      const newKeyAgent = await Wallet.createKeyAgent(walletManagerUi, newKeyAgentData, getPassword);
       setCardanoWallet({
+        asyncKeyAgent: cardanoWallet?.asyncKeyAgent,
         keyAgent: newKeyAgent,
-        wallet: walletManagerUi.wallet,
-        name
+        name,
+        wallet: walletManagerUi.wallet
       });
       setKeyAgentData(newKeyAgentData);
     },
-    [backgroundService, environmentName, getPassword, setCardanoWallet, setKeyAgentData, walletManagerUi]
+    [backgroundService, cardanoWallet?.asyncKeyAgent, getPassword, setCardanoWallet, setKeyAgentData, walletManagerUi]
   );
 
   return {
@@ -422,7 +458,7 @@ export const useWalletManager = (): UseWalletManager => {
     deleteWallet,
     executeWithPassword,
     switchNetwork,
-    updateKeyAgent,
+    updateAddresses,
     loadUnlockedWallet
   };
 };
