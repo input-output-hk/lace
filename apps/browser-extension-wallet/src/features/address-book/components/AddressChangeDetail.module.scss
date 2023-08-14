@@ -80,31 +80,6 @@
   }
 }
 
-.popupView {
-  .addressWrapper {
-    flex-direction: column;
-  }
-  
-  .footer {
-    gap: size_unit(1);
-  }
-}
-
-.copyAddressButton {
-  width: 100%;
-  font-weight: $font-weight-bold !important;
-}
-
 .warningBanner { 
   margin-top: size_unit(2);
-}
-
-.footer {
-  display: flex;
-  flex-direction: column;
-  gap: size_unit(2);
-  
-  button {
-    font-weight: $font-weight-bold !important;
-  }
 }
