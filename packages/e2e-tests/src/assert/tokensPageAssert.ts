@@ -229,6 +229,14 @@ class TokensPageAssert {
       await this.assertTokenFiatBalancesIsMasked(i, shouldBeMasked);
     }
   }
+
+  async assertSeeCurrencySymbol(currencySymbol: 'ADA' | 'tADA') {
+    const currencySymbolList = await TokensPage.tokenTickerList.map(async (ticker) =>
+      String(((await ticker.getText()) as string).match(currencySymbol))
+    );
+    await expect(currencySymbolList).to.include(currencySymbol);
+    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  }
 }
 
 export default new TokensPageAssert();

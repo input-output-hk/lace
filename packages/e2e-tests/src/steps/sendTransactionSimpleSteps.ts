@@ -296,6 +296,11 @@ Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () =>
   await transactionExtendedPageObject.fillTokenValue(1);
 });
 
+Then(/^I've entered accepted values for all Mainnet fields of simple Tx$/, async () => {
+  await transactionExtendedPageObject.fillAddress(byron.getMainnetAddress());
+  await transactionExtendedPageObject.fillTokenValue(1);
+});
+
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
   await transactionExtendedPageObject.fillAddress(byron.getAddress());
   await transactionExtendedPageObject.fillTokenValue(1);
@@ -606,4 +611,16 @@ Then(
 
 Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
+});
+
+Then(/^I see (ADA|tADA) in transaction fee$/, async (currencySymbol: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeCurrencySymbol(currencySymbol);
+});
+
+Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (currencySymbol: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeCurrencySymbolOnReviewTransactionFee(currencySymbol);
+});
+
+Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (currencySymbol: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeCurrencySymbolOnReviewTransactionAmount(currencySymbol);
 });

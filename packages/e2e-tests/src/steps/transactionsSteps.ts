@@ -117,6 +117,10 @@ Then(
   }
 );
 
+Then(/^I see (ADA|tADA) in the list of transactions$/, async (currencySymbol: 'ADA' | 'tADA') => {
+  await transactionsPageAssert.assertSeeCurrencySymbol(currencySymbol);
+});
+
 Then(/^all the transactions have a value other than zero$/, async () => {
   await transactionsPageAssert.assertTxValueNotZero();
 });

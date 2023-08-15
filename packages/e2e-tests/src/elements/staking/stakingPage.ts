@@ -9,6 +9,8 @@ class StakingPage {
   private EMPTY_SEARCH_RESULTS_IMAGE = '[data-testid="stake-pool-table-empty-image"]';
   private EMPTY_SEARCH_RESULTS_MESSAGE = '[data-testid="stake-pool-table-empty-message"]';
   private SEARCH_LOADER = '[data-testid="search-loader"]';
+  private STAKE_POOL_LIST_COST = '[data-testid="stake-pool-list-cost"]';
+  private STATS_VALUE = '[data-testid="stats-value"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -28,6 +30,14 @@ class StakingPage {
 
   get searchInputPlaceholderInPopup() {
     return $(this.SEARCH_INPUT_PLACEHOLDER_IN_POPUP);
+  }
+
+  get stakePoolListCostList() {
+    return $$(this.STAKE_POOL_LIST_COST);
+  }
+
+  get statsValue() {
+    return $$(this.STATS_VALUE);
   }
 
   get emptySearchResultsImage() {

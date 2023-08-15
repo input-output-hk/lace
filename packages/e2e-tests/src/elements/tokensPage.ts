@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import SectionTitle from './sectionTitle';
 import { ChainablePromiseElement } from 'webdriverio';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class TokensPage {
   private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
@@ -21,6 +22,10 @@ class TokensPage {
 
   get sendButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEND_BUTTON_POPUP_MODE);
+  }
+
+  get tokenTickerList(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.TOKEN_TICKER);
   }
 
   get receiveButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {

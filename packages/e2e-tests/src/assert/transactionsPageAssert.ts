@@ -141,6 +141,15 @@ class TransactionsPageAssert {
     const currentRowsNumber = (await TransactionsPage.rows).length;
     await expect(currentRowsNumber).to.be.greaterThan(testContext.load('numberOfRows'));
   };
+
+  async assertSeeCurrencySymbol(currencySymbol: 'ADA' | 'tADA') {
+    await this.waitRowsToLoad();
+    const currencySymbolList = await TransactionsPage.totalAmountList.map(async (totalAmount) =>
+      String(((await totalAmount.getText()) as string).match(currencySymbol))
+    );
+    expect(currencySymbolList).to.include(currencySymbol);
+    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  }
 }
 
 export default new TransactionsPageAssert();

@@ -285,6 +285,22 @@ class StakingPageAssert {
       await t('browserView.staking.details.fail.btn.close')
     );
   };
+
+  async assertSeeCurrencySymbol(currencySymbol: 'ADA' | 'tADA') {
+    const currencySymbolList = await StakingPage.stakePoolListCostList.map(async (stakePoolListCost) =>
+      String(((await stakePoolListCost.getText()) as string).match(currencySymbol))
+    );
+    expect(currencySymbolList).to.include(currencySymbol);
+    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  }
+
+  async assertSeeCurrencySymbolIncurrenyStakedPool(currencySymbol: 'ADA' | 'tADA') {
+    const currencySymbolList = await StakingPage.statsValue.map(async (statsValue) =>
+      String(((await statsValue.getText()) as string).match(currencySymbol))
+    );
+    expect(currencySymbolList).to.include(currencySymbol);
+    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  }
 }
 
 export default new StakingPageAssert();

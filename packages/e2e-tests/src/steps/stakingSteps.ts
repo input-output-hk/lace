@@ -319,3 +319,11 @@ Then(
     await stakingConfirmationScreenAssert.assertSeeNextButtonEnabled(isButtonEnabled === 'enabled');
   }
 );
+
+Then(/^I see (ADA|tADA) in the cost column$/, async (currencySymbol: 'ADA' | 'tADA') => {
+  await stakingPageAssert.assertSeeCurrencySymbol(currencySymbol);
+});
+
+Then(/^I see (ADA|tADA) in current staked pool$/, async (currencySymbol: 'ADA' | 'tADA') => {
+  await stakingPageAssert.assertSeeCurrencySymbolIncurrenyStakedPool(currencySymbol);
+});

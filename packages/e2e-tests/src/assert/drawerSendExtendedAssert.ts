@@ -14,6 +14,7 @@ import { getAddressByName, validAddress, validAddress2 } from '../data/AddressDa
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import ModalAssert from './modalAssert';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
+import TransactionsPage from '../elements/transactionsPage';
 
 class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
@@ -306,6 +307,27 @@ class DrawerSendExtendedAssert {
     const text = await webTester.getTextValueFromElement(new AddressInput(index).container());
     await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
   };
+
+  async assertSeeCurrencySymbol(currencySymbol: 'ADA' | 'tADA') {
+    const currencySymbolList = (await TransactionsPage.transactionCostADA.getText()) as string;
+
+    expect(currencySymbolList).to.include(currencySymbol);
+    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  }
+
+  async assertSeeCurrencySymbolOnReviewTransactionFee(currencySymbol: 'ADA' | 'tADA') {
+    const currencySymbolList = (await TransactionsPage.transactionFee.getText()) as string;
+
+    expect(currencySymbolList).to.include(currencySymbol);
+    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  }
+
+  async assertSeeCurrencySymbolOnReviewTransactionAmount(currencySymbol: 'ADA' | 'tADA') {
+    const currencySymbolList = (await TransactionsPage.sendAmount.getText()) as string;
+
+    expect(currencySymbolList).to.include(currencySymbol);
+    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  }
 }
 
 export default new DrawerSendExtendedAssert();
