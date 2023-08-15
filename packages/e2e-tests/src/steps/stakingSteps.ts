@@ -26,6 +26,11 @@ Then(/^I see Staking title and counter with total number of pools displayed$/, a
   await stakingPageAssert.assertSeeTitleWithCounter();
 });
 
+Then(/^browse pools and overview tabs are clickable$/, async () => {
+  await MultidelegationPage.clickOnTab('Browse pools');
+  await MultidelegationPage.clickOnTab('Overview');
+});
+
 Then(/^I see Staking title displayed$/, async () => {
   await stakingPageAssert.assertSeeTitle();
 });

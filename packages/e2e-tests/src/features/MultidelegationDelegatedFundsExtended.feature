@@ -23,7 +23,6 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
     And I navigate to Staking extended page
     And I confirm multidelegation beta modal
     When I hover over <element_to_hover> in currently staking component
-    And I choose debug mode
     Then I see tooltip for currently staking component
     Examples:
       | element_to_hover |

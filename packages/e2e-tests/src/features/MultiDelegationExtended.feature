@@ -5,10 +5,11 @@ Feature: Staking Page - Extended Browser View
     Given Wallet is synced
 
   @LW-2424 @Testnet @Mainnet
-  Scenario: Extended View - Staking page is present with title and counter
+  Scenario: Extended View - Staking page is present with browse pools and overview tab
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
-    Then I see Staking title and counter with total number of pools displayed
+    And I see Staking title displayed
+    Then browse pools and overview tabs are clickable
 
   @LW-2425 @Testnet @Mainnet
   Scenario: Extended View - Network info component is present on the staking page with expected content
@@ -20,12 +21,14 @@ Feature: Staking Page - Extended Browser View
   Scenario: Extended View - Staking search control is displayed with appropriate content
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
+    And I click Browse pools tab
     Then I see the stake pool search control with appropriate content in extended mode
 
   @LW-2662 @Testnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
+    And I click Browse pools tab
     And I see the stake pool search control with appropriate content in extended mode
     And I input "<stake_pool_search_term>" to the search bar
     Then there are <number_of_results> results and "<stake_pool_title>" and "<stake_pool_subtitle>" are populated if applicable
@@ -44,17 +47,18 @@ Feature: Staking Page - Extended Browser View
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
+    And I click Browse pools tab
     And I see the stake pool search control with appropriate content in extended mode
     And I input "<stake_pool_search_term>" to the search bar
     Then there are <number_of_results> results and "<stake_pool_title>" and "<stake_pool_subtitle>" are populated if applicable
     Examples:
       | stake_pool_search_term | number_of_results | stake_pool_title | stake_pool_subtitle |
       | a Capital              | 1                 | ADA Capital      | ADACT               |
-      | a capital              | 1                 | ADA Capital      | ADACT               |
+      | bl                     | 3                 | BLADE Pool - bladepool.com | BLADE     |
       | NED#                   | 0                 |                  |                     |
-      | PANL                   | 1                 | PANL Stake Pool  | PANL                |
+      | win                    | 1                 | Wingriders - 1 [Preprod]   | WRP01     |
       | 123456                 | 0                 |                  |                     |
-      | DPo                    | 3                 | HKZDPool         | HKZD                |
+      | psi                    | 1                 | PSILOBYTE TN     | PSBT                |
       | £££                    | 0                 |                  |                     |
       | Amso                   | 0                 |                  |                     |
 
@@ -62,8 +66,8 @@ Feature: Staking Page - Extended Browser View
   Scenario: Extended View - Selecting stake pool from list opens drawer with appropriate details
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
+    And I click Browse pools tab
     And I see the stake pool search control with appropriate content in extended mode
-    And I click browse pools tab
     And I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
@@ -73,6 +77,7 @@ Feature: Staking Page - Extended Browser View
   Scenario: Extended View - Stake pool list default sorting by ROS
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
+    And I click Browse pools tab
     And I reveal all stake pools
     Then the results are in descending order according to "ros" column
 
@@ -80,14 +85,14 @@ Feature: Staking Page - Extended Browser View
     #BUG input-output.atlassian.net/browse/ADP-2344
   Scenario Outline: Extended View - Sort lists ascending - column: <column>
     When I navigate to Staking extended page
+    And I confirm multidelegation beta modal
+    And I click Browse pools tab
     And I click on the "<column>" column header
     And I reveal all stake pools
     Then the results are in ascending order according to "<column>" column
     Examples:
       | column     |
       | name       |
-      | ros        |
-      | cost       |
       | saturation |
 
   @LW-2706 @Pending @Testnet @Mainnet
@@ -101,14 +106,13 @@ Feature: Staking Page - Extended Browser View
     Examples:
       | column     |
       | name       |
-      | ros        |
-      | cost       |
       | saturation |
 
   @LW-2490 @Testnet @Mainnet
   Scenario: Extended View - Stake pool list item
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
+    And I click Browse pools tab
     Then Each stake pool list item contains:
       | stake pool logo          |
       | stake pool name + ticker |
@@ -120,12 +124,14 @@ Feature: Staking Page - Extended Browser View
   Scenario: Extended View - "About staking" widget
     Given I am on Staking extended page
     And I confirm multidelegation beta modal
+    And I click Browse pools tab
     Then I see "About staking" widget with all relevant items
 
   @LW-1705 @Testnet @Mainnet
   Scenario Outline: Extended-view - "About staking" widget item click - <subtitle>
     Given I am on Staking extended page
     And I confirm multidelegation beta modal
+    And I click Browse pools tab
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
     Examples:
@@ -139,7 +145,7 @@ Feature: Staking Page - Extended Browser View
   Scenario: Extended View - Staking - Close modal - Open stake pool
     Given I am on Staking extended page
     And I confirm multidelegation beta modal
-    And I click browse pools tab
+    And I click Browse pools tab
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
@@ -151,7 +157,7 @@ Feature: Staking Page - Extended Browser View
     #BUG https://input-output.atlassian.net/browse/LW-7563
   Scenario Outline: Extended View - Staking - Close modal - Staking confirmation step - <action>
     Given I am on Staking extended page
-    When I click browse pools tab
+    When I click Browse pools tab
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     And I click "Stake on this pool" button on stake pool details drawer
@@ -171,7 +177,7 @@ Feature: Staking Page - Extended Browser View
   Scenario: Extended View - Staking - Close modal - Password input
     Given I am on Staking extended page
     And I confirm multidelegation beta modal
-    When I click browse pools tab
+    When I click Browse pools tab
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     And I click "Stake on this pool" button on stake pool details drawer
