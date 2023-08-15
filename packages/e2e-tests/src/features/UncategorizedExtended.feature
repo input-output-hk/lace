@@ -1,5 +1,5 @@
-@General-extended
-Feature: LW: General - extended view
+@Uncategorized-extended
+Feature: LW: Uncategorized - extended view
 
   Background:
     Given Wallet is synced

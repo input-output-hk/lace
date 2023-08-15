@@ -1,5 +1,5 @@
-@General-popup
-Feature: LW: General - popup view
+@Uncategorized-popup
+Feature: LW: Uncategorized - popup view
 
   Background:
     Given Wallet is synced
