@@ -16,10 +16,10 @@ import {
   ThemeSwitcher,
   UserAvatar,
   UserInfo
-} from '../MainMenu/DropdownMenuOverlay/components';
-import { Sections } from '@components/MainMenu/DropdownMenuOverlay/types';
+} from '../MainMenu/UserMenu/components';
+import { Sections } from '@components/MainMenu/UserMenu/types';
 import { ItemType, MenuItemType } from 'antd/lib/menu/hooks/useItems';
-import menuStyles from '../MainMenu/DropdownMenuOverlay/DropdownMenuOverlay.module.scss';
+import menuStyles from '../MainMenu/UserMenu/components/UserMenu.module.scss';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -68,6 +68,7 @@ export const DropdownMenu = ({
       menu={{ items, rootClassName: menuStyles.menuOverlay }}
       placement="bottomRight"
       trigger={['click']}
+      open={open}
     >
       <Button
         variant="outlined"

@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import { useWalletStore } from '@src/stores';
 import { Tooltip as AntdTooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../components/UserMenu.module.scss';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { toast, addEllipsis } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';

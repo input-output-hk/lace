@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import styles from '../SettingsLayout.module.scss';
 import { useCurrencyStore } from '@providers';
-import { ThemeSwitch } from '@components/MainMenu/DropdownMenuOverlay/components';
+import { ThemeSwitch } from '@components/MainMenu/UserMenu/components';
 import { CurrencyDrawer } from './CurrencyDrawer';
 
 const { Title } = Typography;

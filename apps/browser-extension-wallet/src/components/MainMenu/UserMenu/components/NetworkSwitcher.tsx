@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import { useWalletStore } from '@src/stores';
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../../UserMenu/components/UserMenu.module.scss';
 
 type NetworkSwitcherProps = {
   onClick: () => void;

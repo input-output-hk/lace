@@ -1,5 +1,5 @@
-@import '../../../../../../packages/common/src/ui/styles/theme.scss';
-@import '../../../../../../packages/common/src/ui/styles/abstracts/typography';
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
 
 .menuOverlay {
   border-radius: size_unit(2) !important;
@@ -111,10 +111,11 @@
     }
   }
 }
+
 .separator {
   display: flex;
   height: 1.5px !important;
-  background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef));
+  background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef)) !important;
   width: auto;
   margin: size_unit(1.5) size_unit(2) !important;
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../../UserMenu/components/UserMenu.module.scss';
 
 interface Props {
   children: React.ReactNode;
