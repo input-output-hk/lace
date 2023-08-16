@@ -30,10 +30,12 @@ export const useDelegationPortfolioStore = create<DelegationPortfolioStore>((set
       if (!rewardAccountInfo || rewardAccountInfo.length === 0) return;
 
       const delegatees = rewardAccountInfo
+        .filter((r) => r.keyStatus === Wallet.Cardano.StakeKeyStatus.Registered)
         .map((r) => r.delegatee)
-        .filter((item): item is Wallet.Cardano.Delegatee => !!item);
+        .filter((item): item is Wallet.Cardano.Delegatee => !!item && !!item.nextNextEpoch);
+
       const stakePools = delegatees
-        .map(({ currentEpoch, nextEpoch, nextNextEpoch }) => nextNextEpoch || nextEpoch || currentEpoch)
+        .map(({ nextNextEpoch }) => nextNextEpoch)
         .filter((item): item is Wallet.Cardano.StakePool => !!item);
 
       const currentPortfolio = stakePools.map((stakePool) => ({
