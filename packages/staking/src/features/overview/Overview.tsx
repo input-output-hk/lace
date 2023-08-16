@@ -6,7 +6,7 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
-import styles from './Overview.module.scss';
+import * as styles from './Overview.css';
 import { StakingInfoCard } from './staking-info-card';
 
 export const Overview = () => {
@@ -32,14 +32,15 @@ export const Overview = () => {
   if (currentPortfolio.length === 0)
     return (
       <>
-        <Text.SubHeading>Start staking</Text.SubHeading>
-        {hasPendingDelegationTransaction && (
+        {hasPendingDelegationTransaction ? (
           <Banner
             withIcon
-            customIcon={<InfoCircleOutlined className={styles.infoIcon} />}
+            customIcon={<InfoCircleOutlined className={styles.bannerInfoIcon} />}
             message={t('overview.banners.pendingFirstDelegation.title')}
             description={t('overview.banners.pendingFirstDelegation.message')}
           />
+        ) : (
+          <Text.SubHeading>Start staking</Text.SubHeading>
         )}
       </>
     );
@@ -70,7 +71,7 @@ export const Overview = () => {
         <Box mb={'$40'}>
           <Banner
             withIcon
-            customIcon={<InfoCircleOutlined className={styles.infoIcon} />}
+            customIcon={<InfoCircleOutlined className={styles.bannerInfoIcon} />}
             message={t('overview.banners.pendingPoolMigration.title')}
             description={t('overview.banners.pendingPoolMigration.message')}
           />
