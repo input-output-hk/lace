@@ -289,19 +289,20 @@ class StakingPageAssert {
   async assertSeeTickerInCostColumn(expectedTicker: 'ADA' | 'tADA') {
     const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    let tickerList = await StakingPage.stakePoolListCostList.map(async (stakePoolListCost) =>
+    const tickerList = await StakingPage.stakePoolListCostList.map(async (stakePoolListCost) =>
       String(((await stakePoolListCost.getText()) as string).match(regex))
     );
-    if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim().slice(-3));
-
-    expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
+    this.assertTickerInList(expectedTicker, tickerList);
   }
 
   async assertSeeTickerInCurrentStakedPool(expectedTicker: 'ADA' | 'tADA') {
     const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    let tickerList = (await StakingPage.getStatsTickers()).map((ticker) => String(ticker.match(regex)));
+    const tickerList = (await StakingPage.getStatsTickers()).map((ticker) => String(ticker.match(regex)));
+    this.assertTickerInList(expectedTicker, tickerList);
+  }
 
+  assertTickerInList(expectedTicker: 'ADA' | 'tADA', tickerList: string[]) {
     if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim().slice(-3));
 
     expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
