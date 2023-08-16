@@ -321,13 +321,13 @@ class DrawerSendExtendedAssert {
     await this.assertSeeTicker(expectedTicker, await TransactionsPage.sendAmount);
   }
 
-  async assertSeeTicker(ticker: 'ADA' | 'tADA', elementToCheck: WebdriverIO.Element) {
-    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+  async assertSeeTicker(expectedTicker: 'ADA' | 'tADA', elementToCheck: WebdriverIO.Element) {
+    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
     let tickerDisplayed = (await elementToCheck.getText()) as string;
     tickerDisplayed = String(tickerDisplayed.match(regex));
 
-    if (ticker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
+    if (expectedTicker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
     expect(tickerDisplayed).to.equal(tickerDisplayed);
   }
 }
