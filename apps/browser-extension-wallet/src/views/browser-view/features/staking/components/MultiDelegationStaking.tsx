@@ -1,5 +1,5 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import flatMap from 'lodash/flatMap';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 import {
@@ -14,7 +14,8 @@ import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/dele
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
-import { DelegationTransactionTypes, FetchWalletActivitiesReturn } from '@src/stores/slices';
+import { DelegationTransactionTypes } from '@src/stores/slices';
+import { useWalletActivities } from '@hooks/useWalletActivities';
 
 const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
 
@@ -46,9 +47,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
     fetchStakePools,
     fetchNetworkInfo,
     networkInfo,
-    blockchainProvider,
-    getWalletActivitiesObservable,
-    walletActivities
+    blockchainProvider
   } = useWalletStore((state) => ({
     getKeyAgentType: state.getKeyAgentType,
     inMemoryWallet: state.inMemoryWallet,
@@ -59,17 +58,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
     blockchainProvider: state.blockchainProvider,
-    getWalletActivitiesObservable: state.getWalletActivitiesObservable,
-    walletActivities: state.walletActivities
+    getWalletActivitiesObservable: state.getWalletActivitiesObservable
   }));
-  const [walletActivitiesObservable, setWalletActivitiesObservable] = useState<FetchWalletActivitiesReturn>();
-  const { fiatCurrency } = useCurrencyStore();
-  const { executeWithPassword } = useWalletManager();
-  const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
-    MULTIDELEGATION_FIRST_VISIT_LS_KEY,
-    true
-  );
-
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
     const analytics = {
@@ -84,29 +74,13 @@ export const MultiDelegationStaking = (): JSX.Element => {
       name: 'AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_BROWSER'
     });
   }, []);
-
-  useEffect(() => {
-    if (!walletActivitiesObservable) return;
-    const subscription = walletActivitiesObservable?.subscribe();
-    // eslint-disable-next-line consistent-return
-    return () => subscription.unsubscribe();
-  }, [walletActivitiesObservable]);
-
-  const fetchWalletActivities = useCallback(async () => {
-    const result =
-      fiatCurrency &&
-      priceResult.cardano?.price &&
-      (await getWalletActivitiesObservable({
-        fiatCurrency,
-        cardanoFiatPrice: priceResult.cardano?.price,
-        sendAnalytics
-      }));
-    setWalletActivitiesObservable(result);
-  }, [fiatCurrency, getWalletActivitiesObservable, sendAnalytics, priceResult]);
-
-  useEffect(() => {
-    fetchWalletActivities();
-  }, [fetchWalletActivities]);
+  const { walletActivities } = useWalletActivities({ sendAnalytics });
+  const { fiatCurrency } = useCurrencyStore();
+  const { executeWithPassword } = useWalletManager();
+  const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
+    MULTIDELEGATION_FIRST_VISIT_LS_KEY,
+    true
+  );
 
   const hasPendingDelegationTransaction = flatMap(walletActivities, ({ items }) => items).some(
     ({ type, status }) => DelegationTransactionTypes.has(type) && status === 'sending'
