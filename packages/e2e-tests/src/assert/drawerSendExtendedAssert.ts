@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import webTester from '../actor/webTester';
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
@@ -308,30 +309,22 @@ class DrawerSendExtendedAssert {
     await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
   };
 
-  async assertSeeCurrencySymbol(ticker: 'ADA' | 'tADA') {
-    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
-
-    let tickerDisplayed = (await TransactionsPage.transactionCostADA.getText()) as string;
-    tickerDisplayed = String(tickerDisplayed.match(regex));
-
-    if (ticker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
-    expect(tickerDisplayed).to.equal(ticker);
+  async assertSeeTickerTransactionCostADA(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.transactionCostADA);
   }
 
-  async assertSeeCurrencySymbolOnReviewTransactionFee(ticker: 'ADA' | 'tADA') {
-    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
-
-    let tickerDisplayed = (await TransactionsPage.transactionFee.getText()) as string;
-    tickerDisplayed = String(tickerDisplayed.match(regex));
-
-    if (ticker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
-    expect(tickerDisplayed).to.equal(ticker);
+  async assertSeeTickerOnReviewTransactionFee(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.transactionFee);
   }
 
-  async assertSeeCurrencySymbolOnReviewTransactionAmount(ticker: 'ADA' | 'tADA') {
+  async assertSeeTickerOnReviewTransactionAmount(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.sendAmount);
+  }
+
+  async assertSeeTicker(ticker: 'ADA' | 'tADA', elementToCheck: WebdriverIO.Element) {
     const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    let tickerDisplayed = (await TransactionsPage.sendAmount.getText()) as string;
+    let tickerDisplayed = (await elementToCheck.getText()) as string;
     tickerDisplayed = String(tickerDisplayed.match(regex));
 
     if (ticker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);

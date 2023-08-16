@@ -286,25 +286,25 @@ class StakingPageAssert {
     );
   };
 
-  async assertSeeCurrencySymbol(ticker: 'ADA' | 'tADA') {
-    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+  async assertSeeTickerInCostColumn(expectedTicker: 'ADA' | 'tADA') {
+    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
     let tickerList = await StakingPage.stakePoolListCostList.map(async (stakePoolListCost) =>
       String(((await stakePoolListCost.getText()) as string).match(regex))
     );
-    if (ticker === 'ADA') tickerList = tickerList.map((x) => x.trim().slice(-3));
+    if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim().slice(-3));
 
-    expect(tickerList.every((x) => x === ticker)).to.be.true;
+    expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
   }
 
-  async assertSeeCurrencySymbolIncurrenyStakedPool(ticker: 'ADA' | 'tADA') {
-    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+  async assertSeeTickerInCurrentStakedPool(expectedTicker: 'ADA' | 'tADA') {
+    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    let tickerList = (await StakingPage.getStatsTickers()).map((tick) => String(tick.match(regex)));
+    let tickerList = (await StakingPage.getStatsTickers()).map((ticker) => String(ticker.match(regex)));
 
-    if (ticker === 'ADA') tickerList = tickerList.map((x) => x.trim().slice(-3));
+    if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim().slice(-3));
 
-    expect(tickerList.every((x) => x === ticker)).to.be.true;
+    expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
   }
 
   async waitRowsToLoad() {

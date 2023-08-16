@@ -51,8 +51,8 @@ class StakingPage {
     const statsNumber = await this.statsValues.length;
     const tickers = [];
     for (let i = 0; i < statsNumber; i++) {
-      if (statsText.has(String(await this.statsTitle[i].getText()))) {
-        tickers.push(String(await this.statsValues[i].getText()));
+      if (statsText.has(await this.statsTitle[i].getText())) {
+        tickers.push(await this.statsValues[i].getText());
       }
     }
     return tickers;

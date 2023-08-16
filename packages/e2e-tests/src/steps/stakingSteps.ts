@@ -320,12 +320,12 @@ Then(
   }
 );
 
-Then(/^I see (ADA|tADA) in the cost column$/, async (ticker: 'ADA' | 'tADA') => {
-  await stakingPageAssert.assertSeeCurrencySymbol(ticker);
+Then(/^I see (ADA|tADA) in the cost column$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await stakingPageAssert.assertSeeTickerInCostColumn(expectedTicker);
 });
 
-Then(/^I see (ADA|tADA) in current staked pool$/, async (ticker: 'ADA' | 'tADA') => {
-  await stakingPageAssert.assertSeeCurrencySymbolIncurrenyStakedPool(ticker);
+Then(/^I see (ADA|tADA) in current staked pool$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await stakingPageAssert.assertSeeTickerInCurrentStakedPool(expectedTicker);
 });
 
 Then(/^I wait for stake pool table item to be loaded$/, async () => {

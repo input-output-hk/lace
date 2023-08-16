@@ -296,17 +296,12 @@ Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () =>
   await transactionExtendedPageObject.fillTokenValue(1);
 });
 
-// Then(/^I've entered accepted values for all Mainnet fields of simple Tx$/, async () => {
-//   await transactionExtendedPageObject.fillAddress(byron.getMainnetAddress());
-//   await transactionExtendedPageObject.fillTokenValue(1);
-// });
-
 Then(
   /^I've entered accepted values for all (Preprod|Mainnet) fields of simple Tx$/,
   async (network: 'Preprod' | 'Mainnet') => {
     await (network === 'Mainnet'
-      ? transactionExtendedPageObject.fillAddress(byron.getMainnetAddress())
-      : transactionExtendedPageObject.fillAddress(shelley.getAddress()));
+      ? transactionExtendedPageObject.fillAddress(shelley.getMainnetAddress())
+      : transactionExtendedPageObject.fillAddress(shelley.getTestnetAddress()));
     await transactionExtendedPageObject.fillTokenValue(1);
   }
 );
@@ -623,14 +618,14 @@ Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => 
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
 });
 
-Then(/^I see (ADA|tADA) in transaction fee$/, async (ticker: 'ADA' | 'tADA') => {
-  await drawerSendExtendedAssert.assertSeeCurrencySymbol(ticker);
+Then(/^I see (ADA|tADA) in transaction fee$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerTransactionCostADA(expectedTicker);
 });
 
-Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (ticker: 'ADA' | 'tADA') => {
-  await drawerSendExtendedAssert.assertSeeCurrencySymbolOnReviewTransactionFee(ticker);
+Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerOnReviewTransactionFee(expectedTicker);
 });
 
-Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (ticker: 'ADA' | 'tADA') => {
-  await drawerSendExtendedAssert.assertSeeCurrencySymbolOnReviewTransactionAmount(ticker);
+Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerOnReviewTransactionAmount(expectedTicker);
 });
