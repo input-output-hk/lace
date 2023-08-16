@@ -2,20 +2,14 @@ import { useCurrencyStore } from '@providers';
 import { FetchWalletActivitiesReturn } from '@src/stores/slices';
 import { useCallback, useEffect, useState } from 'react';
 import { useFetchCoinPrice } from './useFetchCoinPrice';
-import { StateStatus, useWalletStore } from '@src/stores';
-import { AssetActivityListProps } from '@lace/core';
+import { WalletActivitiesSlice, useWalletStore } from '@src/stores';
 
 type UseWalletActivitiesProps = {
   sendAnalytics: () => void;
 };
+type WalletActivities = Omit<WalletActivitiesSlice, 'getWalletActivitiesObservable'>;
 
-export const useWalletActivities = ({
-  sendAnalytics
-}: UseWalletActivitiesProps): {
-  walletActivitiesStatus: StateStatus;
-  walletActivities: AssetActivityListProps[];
-  activitiesCount: number;
-} => {
+export const useWalletActivities = ({ sendAnalytics }: UseWalletActivitiesProps): WalletActivities => {
   const [walletActivitiesObservable, setWalletActivitiesObservable] = useState<FetchWalletActivitiesReturn>();
   const { fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
