@@ -63,7 +63,9 @@ export const SendTransactionLayout = ({ children, isPopupView }: SendTransaction
                 <Footer
                   key={currentSection}
                   isPopupView={isPopupView}
-                  onHandleChangeConfirm={() => setSection({ currentSection: Sections.FORM })}
+                  onHandleChangeConfirm={() =>
+                    setSection({ currentSection: Sections.FORM, nextSection: Sections.SUMMARY })
+                  }
                 />
               )
             }

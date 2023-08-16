@@ -70,7 +70,7 @@ export const Send = (): React.ReactElement => {
             <Footer
               isPopupView
               openContinueDialog={toggleContinueDialog}
-              onHandleChangeConfirm={() => setSection({ currentSection: Sections.FORM })}
+              onHandleChangeConfirm={() => setSection({ currentSection: Sections.FORM, nextSection: Sections.SUMMARY })}
             />
           )
         }
