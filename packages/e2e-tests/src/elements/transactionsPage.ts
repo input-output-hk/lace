@@ -15,8 +15,6 @@ class TransactionsPage {
   private TRANSACTIONS_TABLE_ITEM_FIAT_AMOUNT = '[data-testid="fiat-amount"]';
   private TRANSACTIONS_TABLE_ITEM_TIMESTAMP = '[data-testid="timestamp"]';
   private TRANSACTIONS_SKELETON = '[data-testid="infinite-scroll-skeleton"]';
-  // private TRANSACTIONS_COST_ADA =
-  // '.SendTransactionCost-module_descriptionContainer__1dSOU span.ant-typography:first-child';
   private TRANSACTIONS_COST_ADA = '[data-testid="send-transaction-costs-ada"]';
   private ASSET_INFO_AMOUNT = '[data-testid="asset-info-amount"]';
   private SUMMARY_FEE_CONTAINER = '[data-testid="summary-fee-container"]';
