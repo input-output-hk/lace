@@ -12,6 +12,7 @@ import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface }
 import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
 import { getChainNameByNetworkMagic } from '@src/utils/get-chain-name-by-network-magic';
+import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -30,8 +31,9 @@ export class UserIdService implements UserIdServiceInterface {
     private sessionLength: number = SESSION_LENGTH
   ) {}
 
-  async isPersistentUser(): Promise<boolean> {
-    return (await this.getStorage())?.usePersistentUserId;
+  async getUserTrackingType(): Promise<UserTrackingType> {
+    const { usePersistentUserId } = await this.getStorage();
+    return usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic;
   }
 
   private async getWalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {

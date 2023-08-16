@@ -2,13 +2,7 @@
 import posthog from 'posthog-js';
 import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
-import {
-  ExtensionViews,
-  PostHogAction,
-  PostHogMetadata,
-  PostHogProperties,
-  UserTrackingType
-} from '../analyticsTracker';
+import { ExtensionViews, PostHogAction, PostHogMetadata, PostHogProperties } from '../analyticsTracker';
 import {
   DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
@@ -90,13 +84,12 @@ export class PostHogClient {
   }
 
   protected async getEventMetadata(): Promise<PostHogMetadata> {
-    const isPersistentUser = await this.userIdService.isPersistentUser();
     return {
       url: window.location.href,
       view: this.view,
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
-      $set: { user_tracking_type: isPersistentUser ? UserTrackingType.Enhanced : UserTrackingType.Basic }
+      $set: { user_tracking_type: await this.userIdService.getUserTrackingType() }
     };
   }
 }
