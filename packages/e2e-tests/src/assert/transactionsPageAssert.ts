@@ -133,7 +133,7 @@ class TransactionsPageAssert {
       expectedTransactionRowAssetDetails.tokensAmount
     );
 
-    if (await isPopupMode()) {
+    if ((await isPopupMode()) && expectedTransactionRowAssetDetails.tokensCount > 1) {
       const tokensCountPart = await TransactionsPage.transactionsTableItemTokensAmount(rowIndex)
         .getText()
         .then((tokens) => tokens.split(',')[1].trim().split(' ')[0].toString().trim().replace('+', ''));

@@ -80,6 +80,19 @@ Given(
   async (mode: 'extended' | 'popup', nftName: string) => {
     const isNftDisplayed = await nftsPageObject.isNftDisplayed(nftName);
     if (!isNftDisplayed) {
+      const walletToLoad = await nftsPageObject.getNonActiveNftWalletName();
+      await localStorageInitializer.reInitializeWallet(walletToLoad);
+      await mainMenuPageObject.navigateToSection('NFTs', mode);
+      await topNavigationAssert.assertWalletIsInSyncedStatus();
+    }
+  }
+);
+
+Given(
+  /^I'm in (popup|extended) mode and select HD wallet that has NFT: "([^"]*)"$/,
+  async (mode: 'extended' | 'popup', nftName: string) => {
+    const isNftDisplayed = await nftsPageObject.isNftDisplayed(nftName);
+    if (!isNftDisplayed) {
       const walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await mainMenuPageObject.navigateToSection('NFTs', mode);

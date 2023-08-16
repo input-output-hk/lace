@@ -4,7 +4,7 @@ Feature: Send NFT - Extended Browser View - E2E
   Background:
     Given Wallet is synced
     And I am on NFTs extended page
-    And I'm in extended mode and select wallet that has NFT: "DEV 2280"
+    And I'm in extended mode and select HD wallet that has NFT: "DEV 2280"
 
   @LW-7551
   Scenario: Extended-view - Send NFT HD wallets E2E
