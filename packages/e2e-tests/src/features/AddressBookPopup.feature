@@ -17,7 +17,8 @@ Feature: Address book - popup view
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
     And address is saved to clipboard
 
-  @LW-4475
+  @LW-4475 @Pending
+  # BUG LW-7925
   Scenario Outline: Popup-view - Address Book - Edit address: <edited_address>
     Given I have 3 addresses in my address book in popup mode
     When I click address on the list with name "<edited_address>"
@@ -100,7 +101,8 @@ Feature: Address book - popup view
     And I click "Cancel" button on delete address modal
     Then I see address detail page in popup mode
 
-  @LW-4479
+  @LW-4479 @Pending
+  # BUG LW-7925
   Scenario Outline: Popup-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page

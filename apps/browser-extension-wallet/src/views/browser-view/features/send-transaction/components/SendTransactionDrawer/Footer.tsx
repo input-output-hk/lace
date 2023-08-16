@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable max-statements */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable complexity */
@@ -17,7 +18,8 @@ import {
   useSubmitingState,
   useTransactionProps,
   usePassword,
-  useMetadata
+  useMetadata,
+  useAnalyticsSendFlowTriggerPoint
 } from '../../store';
 import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
@@ -25,9 +27,10 @@ import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
 import { useHandleResolver, useNetwork, useSendEvent, useWalletManager } from '@hooks';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -37,6 +40,7 @@ import { useAddressBookStore } from '@src/features/address-book/store';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { AddressBookSchema } from '@lib/storage';
 import { getAddressToSave } from '@src/utils/validators';
+import { useAnalyticsContext } from '@providers';
 
 const { SendTransaction: Events, AddressBook } = AnalyticsEventNames;
 
@@ -67,6 +71,7 @@ export const Footer = withAddressBookContext(
     const confirmRef = useRef<HTMLButtonElement>();
     const triggerSubmit = () => confirmRef.current?.click();
     const { t } = useTranslation();
+    const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
     const { hasInvalidOutputs, outputMap } = useTransactionProps();
     const { builtTxData } = useBuiltTxState();
     const { setSection, currentSection } = useSections();
@@ -76,44 +81,61 @@ export const Footer = withAddressBookContext(
     const [metadata] = useMetadata();
     const { onClose, onCloseSubmitedTransaction } = useHandleClose();
     const { executeWithPassword } = useWalletManager();
+    const analytics = useAnalyticsContext();
     const isOnline = useNetwork();
     const [selectedId, setSelectedId] = useState<number | null>();
     const [action, setAction] = useState<typeof ACTIONS.UPDATE | typeof ACTIONS.DELETE | null>();
     const { addressToEdit } = useAddressBookStore() as { addressToEdit: AddressBookSchema };
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
-    const sendEvent = useSendEvent(AnalyticsEventActions.CLICK_EVENT, AnalyticsEventCategories.SEND_TRANSACTION);
+    const sendEvent = useSendEvent(MatomoEventActions.CLICK_EVENT, MatomoEventCategories.SEND_TRANSACTION);
     const handleResolver = useHandleResolver();
+
+    const sendEventToMatomo = useCallback(
+      (name: string, value?: number) =>
+        analytics.sendEventToMatomo({
+          action: MatomoEventActions.CLICK_EVENT,
+          category: MatomoEventCategories.SEND_TRANSACTION,
+          name,
+          value
+        }),
+      [analytics]
+    );
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
+    const sendEventToPostHog = (evtAction: PostHogAction) =>
+      analytics.sendEventToPostHog(evtAction, { trigger_point: triggerPoint });
+
     const sendAnalytics = useCallback(() => {
       switch (currentSection.currentSection) {
-        case Sections.FORM:
-          sendEvent(isPopupView ? Events.REVIEW_TX_DETAILS_POPUP : Events.REVIEW_TX_DETAILS_BROWSER);
+        case Sections.FORM: {
+          sendEventToMatomo(isPopupView ? Events.REVIEW_TX_DETAILS_POPUP : Events.REVIEW_TX_DETAILS_BROWSER);
+          sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
           break;
-        case Sections.SUMMARY:
-          sendEvent(isPopupView ? Events.CONFIRM_TX_DETAILS_POPUP : Events.CONFIRM_TX_DETAILS_BROWSER);
+        }
+        case Sections.SUMMARY: {
+          sendEventToMatomo(isPopupView ? Events.CONFIRM_TX_DETAILS_POPUP : Events.CONFIRM_TX_DETAILS_BROWSER);
+          sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick);
           break;
-        case Sections.CONFIRMATION:
-          sendEvent(isPopupView ? Events.INPUT_TX_PASSWORD_POPUP : Events.INPUT_TX_PASSWORD_BROWSER);
+        }
+        case Sections.CONFIRMATION: {
+          sendEventToMatomo(isPopupView ? Events.INPUT_TX_PASSWORD_POPUP : Events.INPUT_TX_PASSWORD_BROWSER);
+          sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick);
           break;
-        case Sections.SUCCESS_TX:
-          sendEvent(isPopupView ? Events.SUCCESS_VIEW_TX_POPUP : Events.SUCCESS_VIEW_TX_BROWSER);
+        }
+        case Sections.SUCCESS_TX: {
+          sendEventToMatomo(isPopupView ? Events.SUCCESS_VIEW_TX_POPUP : Events.SUCCESS_VIEW_TX_BROWSER);
+          sendEventToPostHog(PostHogAction.SendAllDoneViewTransactionClick);
           break;
-        case Sections.FAIL_TX:
-          sendEvent(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
-          break;
-        case Sections.ADDRESS_CHANGE:
-          action === ACTIONS.DELETE
-            ? sendEvent(isPopupView ? AddressBook.UPDATE_ADDRESS_POPUP : AddressBook.UPDATE_ADDRESS_BROWSER)
-            : sendEvent(
-                isPopupView
-                  ? AddressBook.DELETE_UPDATE_ADDRESS_PROMPT_POPUP
-                  : AddressBook.DELETE_UPDATE_ADDRESS_PROMPT_BROWSER
-              );
+        }
+        case Sections.FAIL_TX: {
+          sendEventToMatomo(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
+          sendEventToPostHog(PostHogAction.SendSomethingWentWrongBackClick);
+        }
       }
-    }, [currentSection.currentSection, isPopupView, sendEvent, action]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentSection.currentSection, isPopupView, sendEventToMatomo]);
 
     const handleReviewAddress = useCallback(
       (result: keyof typeof ACTIONS) => {
@@ -249,6 +271,16 @@ export const Footer = withAddressBookContext(
       handleReviewAddress
     ]);
 
+    const handleClose = () => {
+      if (currentSection.currentSection === Sections.SUCCESS_TX) {
+        sendEventToPostHog(PostHogAction.SendAllDoneCloseClick);
+      } else if (currentSection.currentSection === Sections.FAIL_TX) {
+        sendEventToPostHog(PostHogAction.SendSomethingWentWrongCancelClick);
+      }
+
+      onClose();
+    };
+
     const confirmDisable = useMemo(
       () => !builtTxData.tx || hasInvalidOutputs || metadata?.length > METADATA_MAX_LENGTH,
       [builtTxData.tx, hasInvalidOutputs, metadata]
@@ -330,7 +362,9 @@ export const Footer = withAddressBookContext(
             size="large"
             block
             onClick={
-              currentSection.currentSection === Sections.ADDRESS_CHANGE ? () => handleReviewAddress('DELETE') : onClose
+              currentSection.currentSection === Sections.ADDRESS_CHANGE
+                ? () => handleReviewAddress('DELETE')
+                : handleClose
             }
             data-testid="send-cancel-btn"
           >

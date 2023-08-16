@@ -15,7 +15,8 @@ Feature: Address book - extended view
     When I see address count: 3
     Then address list is displayed and each row consists of avatar, name and address
 
-  @LW-4464 @Smoke
+  @LW-4464 @Smoke @Pending
+  # BUG LW-7925
   Scenario: Extended-view - Address Book - Add new address "Shelley_manual"
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -26,7 +27,8 @@ Feature: Address book - extended view
     Then I see a toast with message: "browserView.addressBook.toast.addAddress"
     And I see address row with name "Shelley_manual" and address "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" on the list in extended mode
 
-  @LW-4464
+  @LW-4464 @Pending
+  # BUG LW-7925
   Scenario Outline: Extended-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -114,7 +116,8 @@ Feature: Address book - extended view
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
     And address is saved to clipboard
 
-  @LW-4470
+  @LW-4470 @Pending
+  # BUG LW-7925
   Scenario Outline: Extended-view - Address Book - Edit address: <edited_address>
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "<edited_address>"

@@ -13,9 +13,10 @@ import { useWalletStore } from '@src/stores';
 
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const SATURATION_UPPER_BOUND = 100;
@@ -212,13 +213,14 @@ export const StakePoolDetailFooter = ({
 
   const onStakeClick = useCallback(() => {
     if (canDelegate) {
-      analytics.sendEvent({
-        category: AnalyticsEventCategories.STAKING,
-        action: AnalyticsEventActions.CLICK_EVENT,
+      analytics.sendEventToMatomo({
+        category: MatomoEventCategories.STAKING,
+        action: MatomoEventActions.CLICK_EVENT,
         name: popupView
           ? AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_POPUP
           : AnalyticsEventNames.Staking.STAKE_ON_THIS_POOL_BROWSER
       });
+      analytics.sendEventToPostHog(PostHogAction.StakingStakePoolDetailStakeOnThisPoolClick);
       onStake();
     } else {
       setNoFundsVisible(true);

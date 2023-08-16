@@ -48,7 +48,8 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2395 @Testnet @Mainnet
+  @LW-2395 @Testnet @Mainnet @Pending
+  # BUG LW-7925
   Scenario: Popup-view - Address can be saved from Send screen
     When I click "Send" button on Tokens page in popup mode
     And I enter a valid "shelley" address in the bundle 1 recipient's address
@@ -64,7 +65,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then I see address row with name "WalletName" and address "Shelley" on the list in popup mode
 
   @LW-2740 @Testnet @Mainnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Popup-view - Send flow - Search contact
     Given I have several contacts whose start with the same characters
     When I click "Send" button on Tokens page in popup mode
@@ -72,7 +73,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then a dropdown showing the first 3 matches is displayed
 
   @LW-2741 @Testnet @Mainnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Popup-view - Send flow - Select contact from dropdown
     Given I have several contacts whose start with the same characters
     When I click "Send" button on Tokens page in popup mode
@@ -81,7 +82,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then the selected contact is added in the bundle recipient's address
 
   @LW-2396 @Testnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Popup-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in popup mode
     And I navigate to Tokens popup page
@@ -93,7 +94,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then "Review transaction" button is enabled on "Send" page
 
   @LW-2396 @Mainnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Popup-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in popup mode
     And I navigate to Tokens popup page
@@ -105,7 +106,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then "Review transaction" button is enabled on "Send" page
 
   @LW-2397 @Testnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Popup-view - Existing address can be selected from the address book and then removed
     And I have 3 addresses in my address book in popup mode
     And I navigate to Tokens popup page
@@ -119,7 +120,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then "Review transaction" button is disabled on "Send" page
 
   @LW-2397 @Mainnet @Pending
-    # bug LW-7773
+  # BUG LW-7925
   Scenario: Popup-view - Existing address can be selected from the address book and then removed
     And I have 3 addresses in my address book in popup mode
     And I navigate to Tokens popup page

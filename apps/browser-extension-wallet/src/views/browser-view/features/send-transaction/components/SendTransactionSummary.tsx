@@ -14,8 +14,8 @@ import { useAddressBookContext, withAddressBookContext } from '@src/features/add
 import { AddressListType } from '@views/browser/features/activity';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
@@ -151,16 +151,16 @@ export const SendTransactionSummary = withAddressBookContext(
           metadata={metadata}
           translations={outputSummaryListTranslation}
           onDepositTooltipHover={() =>
-            analytics.sendEvent({
-              action: AnalyticsEventActions.HOVER_EVENT,
-              category: AnalyticsEventCategories.SEND_TRANSACTION,
+            analytics.sendEventToMatomo({
+              action: MatomoEventActions.HOVER_EVENT,
+              category: MatomoEventCategories.SEND_TRANSACTION,
               name: AnalyticsEventNames.SendTransaction.SEE_TX_DEPOSIT_INFO
             })
           }
           onFeeTooltipHover={() =>
-            analytics.sendEvent({
-              action: AnalyticsEventActions.HOVER_EVENT,
-              category: AnalyticsEventCategories.SEND_TRANSACTION,
+            analytics.sendEventToMatomo({
+              action: MatomoEventActions.HOVER_EVENT,
+              category: MatomoEventCategories.SEND_TRANSACTION,
               name: AnalyticsEventNames.SendTransaction.SEE_TX_FEE_INFO
             })
           }

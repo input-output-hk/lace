@@ -15,9 +15,10 @@ import { useRedirection } from '@hooks/useRedirection';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
-  AnalyticsEventCategories,
-  AnalyticsEventActions,
-  AnalyticsEventNames
+  MatomoEventCategories,
+  MatomoEventActions,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
@@ -68,11 +69,12 @@ export const AssetsPortfolio = ({
   );
 
   const openSend = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.SEND_TRANSACTION,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.SEND_TRANSACTION,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.SendTransaction.SEND_TX_BUTTON_POPUP
     });
+    analytics.sendEventToPostHog(PostHogAction.SendClick);
     redirectToSend({ params: { id: '1' } });
   };
 

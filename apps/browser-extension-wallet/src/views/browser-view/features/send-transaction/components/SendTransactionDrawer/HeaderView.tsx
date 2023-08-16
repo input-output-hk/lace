@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable complexity */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable sonarjs/cognitive-complexity */
@@ -18,7 +19,8 @@ import {
   usePassword,
   useSubmitingState,
   useMultipleSelection,
-  useSelectedTokenList
+  useSelectedTokenList,
+  useAnalyticsSendFlowTriggerPoint
 } from '../../store';
 import { useCoinStateSelector, useAddressState } from '@src/views/browser-view/features/send-transaction';
 import { useDrawer } from '@src/views/browser-view/stores';
@@ -28,9 +30,10 @@ import { walletRoutePaths } from '@routes';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 import { useWalletStore } from '@src/stores';
@@ -135,12 +138,13 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const analytics = useAnalyticsContext();
   const [isMultipleSelectionAvailable, setMultipleSelection] = useMultipleSelection();
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
+  const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
   const sendAnalytics = useCallback(() => {
     if (section.currentSection === Sections.SUMMARY) {
-      analytics.sendEvent({
-        action: AnalyticsEventActions.CLICK_EVENT,
-        category: AnalyticsEventCategories.SEND_TRANSACTION,
+      analytics.sendEventToMatomo({
+        action: MatomoEventActions.CLICK_EVENT,
+        category: MatomoEventCategories.SEND_TRANSACTION,
         name: isPopupView ? Events.BACK_TX_DETAILS_POPUP : Events.BACK_TX_DETAILS_BROWSER
       });
     }
@@ -174,6 +178,15 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
     } else {
       setPrevSection();
     }
+  };
+
+  const onCrossIconClick = () => {
+    if (section.currentSection === Sections.SUCCESS_TX) {
+      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick, { trigger_point: triggerPoint });
+    } else if (section.currentSection === Sections.FAIL_TX) {
+      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick, { trigger_point: triggerPoint });
+    }
+    onClose();
   };
 
   const { uiOutputs } = useCoinStateSelector(FIRST_ROW);
@@ -223,7 +236,7 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
             }
           />
         ) : shouldRenderCross ? (
-          <NavigationButton icon="cross" onClick={onClose} />
+          <NavigationButton icon="cross" onClick={onCrossIconClick} />
         ) : undefined
       }
     />

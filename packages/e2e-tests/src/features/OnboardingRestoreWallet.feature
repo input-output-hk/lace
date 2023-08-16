@@ -429,3 +429,46 @@ Feature: Onboarding - Restore wallet
       | 12             |
       | 15             |
       | 24             |
+
+  @LW-4993
+  Scenario Outline: Restore Wallet - <mode> theme applied to onboarding pages
+    Given I set <mode> theme mode in Local Storage
+    When "Get started" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I click "Restore" button and confirm
+    When "Legal page" is displayed
+    Then I see current onboarding page in <mode> mode
+    And I accept "T&C" checkbox
+    And I click "Next" button during wallet setup
+    When "Help us improve your experience" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I click "Next" button during wallet setup
+    When "Name your wallet" page is displayed
+    Then I see current onboarding page in <mode> mode
+    When I enter wallet name: "someWallet"
+    And I click "Next" button during wallet setup
+    When "Wallet password" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Next" button during wallet setup
+    When "Recovery phrase length page" is displayed and 24 words checkbox is checked
+    Then I see current onboarding page in <mode> mode
+    And I click "Next" button during wallet setup
+    When "Mnemonic verification" page is displayed with words 8 of 24
+    Then I see current onboarding page in <mode> mode
+    And I fill passphrase fields using 24 words mnemonic on 8/24 page
+    And I click "Next" button during wallet setup
+    When "Mnemonic verification" page is displayed with words 16 of 24
+    Then I see current onboarding page in <mode> mode
+    And I fill passphrase fields using 24 words mnemonic on 16/24 page
+    And I click "Next" button during wallet setup
+    When "Mnemonic verification" page is displayed with words 24 of 24
+    Then I see current onboarding page in <mode> mode
+    And I fill passphrase fields using 24 words mnemonic on 24/24 page
+    And I click "Next" button during wallet setup
+    Then "All done" page is displayed
+    Then I see current onboarding page in <mode> mode
+    Examples:
+      | mode  |
+      | dark  |
+      | light |

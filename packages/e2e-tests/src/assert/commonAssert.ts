@@ -5,6 +5,7 @@ import { expect } from 'chai';
 import { getNumberOfOpenedTabs, switchToLastWindow } from '../utils/window';
 import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
+import TopNavigationAssert from './topNavigationAssert';
 
 class CommonAssert {
   async assertClipboardContains(text: string) {
@@ -60,6 +61,11 @@ class CommonAssert {
     const hasHorizontalScroll = pageWidth >= viewportWidth;
     await expect(hasHorizontalScroll).to.equal(shouldBeVisible);
   };
+
+  async assertSeeThemeMode(mode: 'dark' | 'light') {
+    await expect(await $('html').getAttribute('data-theme')).to.equal(mode);
+    await TopNavigationAssert.assertBackgroundColor(mode);
+  }
 }
 
 export default new CommonAssert();
