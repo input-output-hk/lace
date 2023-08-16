@@ -12,6 +12,7 @@ import { TransactionFail, TransactionFailFooter } from './TransactionFail';
 import { TransactionSuccess, TransactionSuccessFooter } from './TransactionSuccess';
 
 type stakePoolDetailsProps = StakePoolDetailFooterProps & {
+  popupView?: boolean;
   showBackIcon?: boolean | ((section: Sections) => boolean);
   showCloseIcon?: boolean | ((section: Sections) => boolean);
   showExitConfirmation?: (section: Sections) => boolean;
@@ -21,6 +22,7 @@ export const StakePoolDetails = ({
   onStakeOnThisPool,
   onUnselect,
   onSelect,
+  popupView,
   showCloseIcon,
   showBackIcon,
   showExitConfirmation,
@@ -41,20 +43,25 @@ export const StakePoolDetails = ({
 
   const sectionsMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
-      [Sections.DETAIL]: <StakePoolDetail />,
+      [Sections.DETAIL]: <StakePoolDetail popupView={popupView} />,
       [Sections.PREFERENCES]: <StakePoolPreferences />,
       [Sections.CONFIRMATION]: <StakePoolConfirmation />,
       [Sections.SIGN]: <SignConfirmation />,
       [Sections.SUCCESS_TX]: <TransactionSuccess />,
       [Sections.FAIL_TX]: <TransactionFail />,
     }),
-    []
+    [popupView]
   );
 
   const footersMap = useMemo(
     (): Record<Sections, React.ReactElement> => ({
       [Sections.DETAIL]: (
-        <StakePoolDetailFooter onSelect={onSelect} onStakeOnThisPool={onStakeOnThisPool} onUnselect={onUnselect} />
+        <StakePoolDetailFooter
+          onSelect={onSelect}
+          onStakeOnThisPool={onStakeOnThisPool}
+          onUnselect={onUnselect}
+          popupView={popupView}
+        />
       ),
       [Sections.PREFERENCES]: <StakePoolPreferencesFooter />,
       [Sections.CONFIRMATION]: <StakePoolConfirmationFooter />,
@@ -62,7 +69,7 @@ export const StakePoolDetails = ({
       [Sections.SUCCESS_TX]: <TransactionSuccessFooter />,
       [Sections.FAIL_TX]: <TransactionFailFooter />,
     }),
-    [onSelect, onStakeOnThisPool, onUnselect]
+    [onSelect, onStakeOnThisPool, onUnselect, popupView]
   );
 
   const selectionActionsAllowed = !draftFull || openPoolSelectedInDraft;
@@ -80,6 +87,7 @@ export const StakePoolDetails = ({
       showExitConfirmation={showExitConfirmation}
       showCloseIcon={showCloseIcon}
       showBackIcon={showBackIcon}
+      popupView={popupView}
       footer={footer}
     >
       {section}

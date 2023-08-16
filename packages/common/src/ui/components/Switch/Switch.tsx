@@ -8,9 +8,11 @@ export const Switch = ({
   unCheckedChildren,
   checked,
   className,
+  testId = 'switch',
   onChange
-}: SwitchProps): React.ReactElement => (
+}: SwitchProps & { testId?: string }): React.ReactElement => (
   <AntSwitch
+    data-testid={testId}
     checkedChildren={checkedChildren}
     unCheckedChildren={unCheckedChildren}
     checked={checked}

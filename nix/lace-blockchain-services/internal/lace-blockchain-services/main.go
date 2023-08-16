@@ -17,12 +17,12 @@ import (
 	"lace.io/lace-blockchain-services/ourpaths"
 	"lace.io/lace-blockchain-services/appconfig"
 	"lace.io/lace-blockchain-services/httpapi"
+	"lace.io/lace-blockchain-services/ui"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/load"
-	"github.com/sqweek/dialog"
 	"github.com/getlantern/systray"
 	"github.com/allan-simon/go-singleinstance"
 )
@@ -51,8 +51,7 @@ func main() {
 	lockFile := ourpaths.WorkDir + sep + "instance.lock"
 	lockFileFile, err := singleinstance.CreateLockFile(lockFile)
 	if err != nil {
-		dialog.Message("Another instance of ‘%s’ is already running.\n\nCheck in the system tray area.",
-			OurLogPrefix).Title("Already running!").Error()
+		ui.HandleAppReopened()
 		os.Exit(1)
 	}
 	defer lockFileFile.Close() // or else, it will be GC’d (and unlocked!)
@@ -97,7 +96,7 @@ func main() {
 
 	appConfig := appconfig.Load()
 
-	commUI, commManager, commHttp := func() (CommChannels_UI, CommChannels_Manager, httpapi.CommChannels) {
+	commUI, commManager, commHttp := func() (ui.CommChannels, CommChannels_Manager, httpapi.CommChannels) {
 		blockRestartUI := make(chan bool)
 
 		serviceUpdateFromManager := make(chan t.ServiceStatus)
@@ -138,9 +137,9 @@ func main() {
 			Revision: constants.LaceBlockchainServicesRevision,
 		}
 
-		initiateShutdownCh := make(chan struct{}, 1)
+		initiateShutdownCh := make(chan struct{}, 16)
 
-		return CommChannels_UI {
+		return ui.CommChannels {
 			ServiceUpdate: serviceUpdateToUI,
 			BlockRestartUI: blockRestartUI,
 			HttpSwitchesNetwork: networkFromHttp,
@@ -195,20 +194,14 @@ func main() {
 		manageChildren(commManager)
 	}()
 
-	systray.Run(setupTrayUI(commUI, logFile, networks, appConfig), func(){
+	systray.Run(ui.SetupTray(commUI, logFile, networks, appConfig), func(){
+		// It’s possible that this callback is called from macOS “Quit” even from the Dock area
+		// (we’re briefly shown there while dialogs are displayed) – let’s (re)initiate a clean shutdown:
+		commUI.InitiateShutdownCh <- struct{}{}
+
 		wgManager.Wait()
 		fmt.Printf("%s[%d]: all good, exiting\n", OurLogPrefix, os.Getpid())
 	})
-}
-
-type CommChannels_UI struct {
-	ServiceUpdate        <-chan t.ServiceStatus
-	BlockRestartUI       <-chan bool
-	HttpSwitchesNetwork  <-chan t.NetworkMagic
-
-	NetworkSwitch        chan<- string
-	InitiateShutdownCh   chan<- struct{}
-	TriggerMithril       chan<- struct{}
 }
 
 type CommChannels_Manager struct {

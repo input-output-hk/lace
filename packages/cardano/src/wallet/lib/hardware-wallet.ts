@@ -40,7 +40,7 @@ const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> =
       });
 
       // initializeTrezorTransport would still succeed even when device is not connected
-      await KeyManagement.TrezorKeyAgent.checkDeviceConnection();
+      await KeyManagement.TrezorKeyAgent.checkDeviceConnection(KeyManagement.CommunicationType.Web);
 
       return isTrezorInitialized;
     }
@@ -103,7 +103,8 @@ const createWithTrezorDeviceConnection = async (
   const publicKey =
     extendedAccountPublicKey ??
     (await KeyManagement.TrezorKeyAgent.getXpub({
-      accountIndex
+      accountIndex,
+      communicationType: KeyManagement.CommunicationType.Web
     }));
 
   return new KeyManagement.TrezorKeyAgent(

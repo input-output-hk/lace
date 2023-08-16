@@ -23,6 +23,13 @@ import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import '../../lib/scripts/keep-alive-ui';
 
+if (process.env.USE_MULTI_DELEGATION_STAKING === 'true') {
+  // Disabling import/no-unresolved as it is not aware of the "exports" entry
+  // https://github.com/import-js/eslint-plugin-import/issues/1810
+  // eslint-disable-next-line import/no-unresolved
+  require('@lace/staking/index.css');
+}
+
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
     <AppSettingsProvider>

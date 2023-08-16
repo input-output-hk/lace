@@ -12,9 +12,10 @@ import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import styles from './StakePoolsTable.modules.scss';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Text } = Typography;
@@ -103,11 +104,12 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           logo,
           ...stakePool,
           onClick: (): void => {
-            analytics.sendEvent({
-              category: AnalyticsEventCategories.STAKING,
-              action: AnalyticsEventActions.CLICK_EVENT,
+            analytics.sendEventToMatomo({
+              category: MatomoEventCategories.STAKING,
+              action: MatomoEventActions.CLICK_EVENT,
               name: AnalyticsEventNames.Staking.VIEW_STAKEPOOL_INFO_BROWSER
             });
+            analytics.sendEventToPostHog(PostHogAction.StakingStakePoolClick);
             setSelectedStakePool({ logo, ...pool });
             setIsDrawerVisible(true);
           },
