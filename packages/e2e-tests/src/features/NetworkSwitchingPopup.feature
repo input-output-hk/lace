@@ -1,4 +1,4 @@
-@Uncategorized-popup
+@NetworkSwitching-popup
 Feature: LW: Uncategorized - popup view
 
   Background:

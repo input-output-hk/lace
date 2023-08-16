@@ -78,7 +78,7 @@ Before(
 Before({ tags: '@Collateral-popup' }, async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral));
 
 Before(
-  { tags: '@Staking-DelegatedFunds-Popup or @Uncategorized-popup' },
+  { tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' },
   async () => await popupViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
 );
 
@@ -98,7 +98,7 @@ Before(
 );
 
 Before(
-  { tags: '@Staking-DelegatedFunds-Extended or @Uncategorized-extended' },
+  { tags: '@Staking-DelegatedFunds-Extended or @NetworkSwitching-extended' },
   async () => await extendedViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
 );
 

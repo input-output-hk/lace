@@ -1,4 +1,4 @@
-@Uncategorized-extended
+@NetworkSwitching-extended
 Feature: LW: Uncategorized - extended view
 
   Background:
