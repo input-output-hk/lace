@@ -296,10 +296,20 @@ Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () =>
   await transactionExtendedPageObject.fillTokenValue(1);
 });
 
-Then(/^I've entered accepted values for all Mainnet fields of simple Tx$/, async () => {
-  await transactionExtendedPageObject.fillAddress(byron.getMainnetAddress());
-  await transactionExtendedPageObject.fillTokenValue(1);
-});
+// Then(/^I've entered accepted values for all Mainnet fields of simple Tx$/, async () => {
+//   await transactionExtendedPageObject.fillAddress(byron.getMainnetAddress());
+//   await transactionExtendedPageObject.fillTokenValue(1);
+// });
+
+Then(
+  /^I've entered accepted values for all (Preprod|Mainnet) fields of simple Tx$/,
+  async (network: 'Preprod' | 'Mainnet') => {
+    await (network === 'Mainnet'
+      ? transactionExtendedPageObject.fillAddress(byron.getMainnetAddress())
+      : transactionExtendedPageObject.fillAddress(shelley.getAddress()));
+    await transactionExtendedPageObject.fillTokenValue(1);
+  }
+);
 
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
   await transactionExtendedPageObject.fillAddress(byron.getAddress());
@@ -613,14 +623,14 @@ Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => 
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
 });
 
-Then(/^I see (ADA|tADA) in transaction fee$/, async (currencySymbol: 'ADA' | 'tADA') => {
-  await drawerSendExtendedAssert.assertSeeCurrencySymbol(currencySymbol);
+Then(/^I see (ADA|tADA) in transaction fee$/, async (ticker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeCurrencySymbol(ticker);
 });
 
-Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (currencySymbol: 'ADA' | 'tADA') => {
-  await drawerSendExtendedAssert.assertSeeCurrencySymbolOnReviewTransactionFee(currencySymbol);
+Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (ticker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeCurrencySymbolOnReviewTransactionFee(ticker);
 });
 
-Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (currencySymbol: 'ADA' | 'tADA') => {
-  await drawerSendExtendedAssert.assertSeeCurrencySymbolOnReviewTransactionAmount(currencySymbol);
+Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (ticker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeCurrencySymbolOnReviewTransactionAmount(ticker);
 });

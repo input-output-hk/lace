@@ -142,13 +142,17 @@ class TransactionsPageAssert {
     await expect(currentRowsNumber).to.be.greaterThan(testContext.load('numberOfRows'));
   };
 
-  async assertSeeCurrencySymbol(currencySymbol: 'ADA' | 'tADA') {
+  async assertSeeCurrencySymbol(ticker: 'ADA' | 'tADA') {
     await this.waitRowsToLoad();
-    const currencySymbolList = await TransactionsPage.totalAmountList.map(async (totalAmount) =>
-      String(((await totalAmount.getText()) as string).match(currencySymbol))
+    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+
+    let tickerList = await TransactionsPage.totalAmountList.map(async (totalAmount) =>
+      String(((await totalAmount.getText()) as string).match(regex))
     );
-    expect(currencySymbolList).to.include(currencySymbol);
-    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+
+    if (ticker === 'ADA') tickerList = tickerList.map((x) => x.trim());
+
+    expect(tickerList.every((x) => x === ticker)).to.be.true;
   }
 }
 

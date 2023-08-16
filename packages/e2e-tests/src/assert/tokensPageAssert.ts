@@ -230,12 +230,11 @@ class TokensPageAssert {
     }
   }
 
-  async assertSeeCurrencySymbol(currencySymbol: 'ADA' | 'tADA') {
-    const currencySymbolList = await TokensPage.tokenTickerList.map(async (ticker) =>
-      String(((await ticker.getText()) as string).match(currencySymbol))
-    );
-    await expect(currencySymbolList).to.include(currencySymbol);
-    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  async assertSeeCurrencySymbol(ticker: 'ADA' | 'tADA') {
+    const tickers = await TokensPage.getTokenTickers();
+    const tickerDisplayed = tickers[await TokensPage.getTokenRowIndex('Cardano')];
+
+    expect(tickerDisplayed).to.equal(ticker);
   }
 }
 

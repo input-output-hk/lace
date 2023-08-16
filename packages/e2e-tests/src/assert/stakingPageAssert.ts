@@ -286,20 +286,32 @@ class StakingPageAssert {
     );
   };
 
-  async assertSeeCurrencySymbol(currencySymbol: 'ADA' | 'tADA') {
-    const currencySymbolList = await StakingPage.stakePoolListCostList.map(async (stakePoolListCost) =>
-      String(((await stakePoolListCost.getText()) as string).match(currencySymbol))
+  async assertSeeCurrencySymbol(ticker: 'ADA' | 'tADA') {
+    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+
+    let tickerList = await StakingPage.stakePoolListCostList.map(async (stakePoolListCost) =>
+      String(((await stakePoolListCost.getText()) as string).match(regex))
     );
-    expect(currencySymbolList).to.include(currencySymbol);
-    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+    if (ticker === 'ADA') tickerList = tickerList.map((x) => x.trim().slice(-3));
+
+    expect(tickerList.every((x) => x === ticker)).to.be.true;
   }
 
-  async assertSeeCurrencySymbolIncurrenyStakedPool(currencySymbol: 'ADA' | 'tADA') {
-    const currencySymbolList = await StakingPage.statsValue.map(async (statsValue) =>
-      String(((await statsValue.getText()) as string).match(currencySymbol))
-    );
-    expect(currencySymbolList).to.include(currencySymbol);
-    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+  async assertSeeCurrencySymbolIncurrenyStakedPool(ticker: 'ADA' | 'tADA') {
+    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+
+    let tickerList = (await StakingPage.getStatsTickers()).map((tick) => String(tick.match(regex)));
+
+    if (ticker === 'ADA') tickerList = tickerList.map((x) => x.trim().slice(-3));
+
+    expect(tickerList.every((x) => x === ticker)).to.be.true;
+  }
+
+  async waitRowsToLoad() {
+    await browser.waitUntil(async () => (await StakingPage.rows).length > 1, {
+      timeout: 10_000,
+      timeoutMsg: 'failed while waiting for all pools to load'
+    });
   }
 }
 

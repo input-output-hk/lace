@@ -308,25 +308,34 @@ class DrawerSendExtendedAssert {
     await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
   };
 
-  async assertSeeCurrencySymbol(currencySymbol: 'ADA' | 'tADA') {
-    const currencySymbolList = (await TransactionsPage.transactionCostADA.getText()) as string;
+  async assertSeeCurrencySymbol(ticker: 'ADA' | 'tADA') {
+    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    expect(currencySymbolList).to.include(currencySymbol);
-    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+    let tickerDisplayed = (await TransactionsPage.transactionCostADA.getText()) as string;
+    tickerDisplayed = String(tickerDisplayed.match(regex));
+
+    if (ticker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
+    expect(tickerDisplayed).to.equal(ticker);
   }
 
-  async assertSeeCurrencySymbolOnReviewTransactionFee(currencySymbol: 'ADA' | 'tADA') {
-    const currencySymbolList = (await TransactionsPage.transactionFee.getText()) as string;
+  async assertSeeCurrencySymbolOnReviewTransactionFee(ticker: 'ADA' | 'tADA') {
+    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    expect(currencySymbolList).to.include(currencySymbol);
-    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+    let tickerDisplayed = (await TransactionsPage.transactionFee.getText()) as string;
+    tickerDisplayed = String(tickerDisplayed.match(regex));
+
+    if (ticker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
+    expect(tickerDisplayed).to.equal(ticker);
   }
 
-  async assertSeeCurrencySymbolOnReviewTransactionAmount(currencySymbol: 'ADA' | 'tADA') {
-    const currencySymbolList = (await TransactionsPage.sendAmount.getText()) as string;
+  async assertSeeCurrencySymbolOnReviewTransactionAmount(ticker: 'ADA' | 'tADA') {
+    const regex = ticker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    expect(currencySymbolList).to.include(currencySymbol);
-    if (currencySymbol === 'ADA') await expect(currencySymbolList).does.not.include('tADA');
+    let tickerDisplayed = (await TransactionsPage.sendAmount.getText()) as string;
+    tickerDisplayed = String(tickerDisplayed.match(regex));
+
+    if (ticker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
+    expect(tickerDisplayed).to.equal(tickerDisplayed);
   }
 }
 
