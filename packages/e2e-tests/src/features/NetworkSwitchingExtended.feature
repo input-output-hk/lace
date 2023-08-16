@@ -1,5 +1,5 @@
 @NetworkSwitching-extended
-Feature: LW: Uncategorized - extended view
+Feature: LW: Network Switching - extended view
 
   Background:
     Given Wallet is synced

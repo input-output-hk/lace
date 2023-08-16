@@ -1,5 +1,5 @@
 @NetworkSwitching-popup
-Feature: LW: Uncategorized - popup view
+Feature: LW: Network Switching - popup view
 
   Background:
     Given Wallet is synced
