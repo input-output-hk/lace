@@ -117,6 +117,10 @@ Then(
   }
 );
 
+Then(/^I see (ADA|tADA) in the list of transactions$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await transactionsPageAssert.assertSeeTicker(expectedTicker);
+});
+
 Then(/^all the transactions have a value other than zero$/, async () => {
   await transactionsPageAssert.assertTxValueNotZero();
 });
