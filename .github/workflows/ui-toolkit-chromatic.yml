@@ -25,21 +25,17 @@ jobs:
           node-version-file: .nvmrc
           cache: 'yarn'
 
-      - name: 📝 Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
-
       - name: 📝 Cache
         uses: actions/cache@v3
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          path: ~/.yarn/berry/cache
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
 
       - name: 💽 Install dependencies
-        run: yarn --frozen-lockfile
+        run: yarn --immutable --inline-builds
 
       - name: 🧑‍🔬 Linter
         working-directory: ./packages/ui
