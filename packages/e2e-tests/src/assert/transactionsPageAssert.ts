@@ -141,6 +141,19 @@ class TransactionsPageAssert {
     const currentRowsNumber = (await TransactionsPage.rows).length;
     await expect(currentRowsNumber).to.be.greaterThan(testContext.load('numberOfRows'));
   };
+
+  async assertSeeTicker(expectedTicker: 'ADA' | 'tADA') {
+    await this.waitRowsToLoad();
+    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+
+    let tickerList = await TransactionsPage.totalAmountList.map(async (totalAmount) =>
+      String(((await totalAmount.getText()) as string).match(regex))
+    );
+
+    if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim());
+
+    expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
+  }
 }
 
 export default new TransactionsPageAssert();
