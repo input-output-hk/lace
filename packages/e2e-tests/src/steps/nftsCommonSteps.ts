@@ -29,14 +29,11 @@ Then(
   /^the (Received|Sent) transaction is displayed with NFT name: "([^"]*)" in (extended|popup) mode$/,
   async (transactionType: 'Received' | 'Sent', nftName: string, mode: 'extended' | 'popup') => {
     await browser.pause(2000);
-    const adaAmount = nftName === 'DEV 2280' ? '1.15' : '1.17';
     const expectedTransactionRowAssetDetailsSent = {
       type: transactionType,
       tokensAmount:
-        mode === 'extended'
-          ? `${adaAmount} ${Asset.CARDANO.ticker}, 1 ${nftName}`
-          : `${adaAmount} ${Asset.CARDANO.ticker} , +1`,
-      tokensCount: 1
+        mode === 'extended' ? `1.17 ${Asset.CARDANO.ticker}, 1 ${nftName}` : `1.17 ${Asset.CARDANO.ticker} , +1`,
+      tokensCount: 2
     };
     await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
   }
