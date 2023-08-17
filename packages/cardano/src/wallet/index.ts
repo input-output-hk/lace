@@ -45,7 +45,7 @@ export {
 
 export * as KeyManagement from '../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 
-export { HexBlob } from '@cardano-sdk/util';
+export { HexBlob, Percent } from '@cardano-sdk/util';
 export * as Crypto from '@cardano-sdk/crypto';
 
 export {

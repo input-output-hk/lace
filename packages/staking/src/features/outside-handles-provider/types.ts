@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
 
-export type LegacySelectedStakePoolDetails = {
+export type OpenSelectedStakePoolDetails = {
   delegators: number | string;
   description: string;
   hexId: string;
@@ -75,8 +75,7 @@ export type OutsideHandlesContextValue = {
   expandStakingView?: () => void;
   balancesBalance: Balance;
   stakingRewards: StakingRewards;
-  delegationDetails: Wallet.Cardano.StakePool;
-  delegationStoreSelectedStakePoolDetails?: LegacySelectedStakePoolDetails;
+  delegationStoreSelectedStakePoolDetails?: OpenSelectedStakePoolDetails;
   delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo?: string }) => void;
