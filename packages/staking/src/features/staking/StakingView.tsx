@@ -23,6 +23,7 @@ export const StakingView = () => {
     currentPortfolio: state.currentPortfolio,
     portfolioMutators: state.mutators,
   }));
+  const { clearDraft } = useDelegationPortfolioStore((state) => state.mutators);
   const {
     delegationStoreSelectedStakePoolDetails: openPoolDetails,
     delegationStoreSelectedStakePool: openPool,
@@ -31,6 +32,7 @@ export const StakingView = () => {
     walletStoreBlockchainProvider: blockchainProvider,
     multidelegationFirstVisit,
     triggerMultidelegationFirstVisit,
+    currentChain,
   } = useOutsideHandles();
 
   useEffect(() => {
@@ -93,6 +95,11 @@ export const StakingView = () => {
     }
     proceedWithSelections();
   }, [pendingSelection, proceedWithSelections, selectCurrentPool]);
+
+  useEffect(() => {
+    if (!currentChain) return;
+    clearDraft();
+  }, [currentChain]);
 
   return (
     <>
