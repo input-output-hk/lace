@@ -310,7 +310,6 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       />
       <AssetDetailsDrawer
         fiatCode={fiatCurrency.code}
-        fiatPrice={priceResult?.cardano?.price}
         openSendDrawer={onSendAssetClick}
         popupView={popupView}
         isBalanceDataFetchedCorrectly={fetchPriceStatus === 'fetched'}
