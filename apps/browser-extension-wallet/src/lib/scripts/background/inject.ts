@@ -1,5 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Cip30Wallet, injectGlobal, WalletApi, WalletProperties } from '@cardano-sdk/dapp-connector';
+import { Cardano } from '@cardano-sdk/core';
+import {
+  Cip30Wallet,
+  injectGlobal,
+  WalletProperties,
+  WalletApi,
+  Cbor,
+  Paginate,
+  Bytes,
+  GetCollateral
+} from '@cardano-sdk/dapp-connector';
 import { cip30, injectedRuntime, MessengerDependencies } from '@cardano-sdk/web-extension';
 import { consumeRemoteAuthenticatorApi, consumeRemoteWalletApi } from './api-consumers';
 
@@ -12,24 +22,27 @@ const initializeInjectedScript = (props: WalletProperties, { logger }: cip30.Ini
   const authenticator = consumeRemoteAuthenticatorApi(props, dependencies);
   const walletApi = consumeRemoteWalletApi(props, dependencies);
 
-  // Add experimental.getCollateral to CIP-30 API
-  const api = new Proxy<WalletApi & { extensions: any }>({} as WalletApi & { extensions: any }, {
-    // eslint-disable-next-line consistent-return
-    get(_, prop) {
-      const method = (walletApi as any)[prop];
-      if (typeof method === 'function') return method.bind(walletApi);
-      if (prop === 'experimental') {
-        return {
-          getCollateral: async () => {
-            const getCollateralFromWallet = walletApi.getCollateral.bind(walletApi);
-            return await getCollateralFromWallet();
-          }
-        };
-      }
-    }
-  });
+  // Wrap the proxy API object with a regular javascript object to avoid interop issues with some dApps.
+  const api: WalletApi & { experimental: { getCollateral: GetCollateral } } = {
+    getNetworkId: () => walletApi.getNetworkId(),
+    getUtxos: (amount?: Cbor, paginate?: Paginate) => walletApi.getUtxos(amount, paginate),
+    getBalance: () => walletApi.getBalance(),
+    getCollateral: (params?: { amount?: Cbor }) => walletApi.getCollateral(params),
+    getUsedAddresses: (paginate?: Paginate) => walletApi.getUsedAddresses(paginate),
+    getUnusedAddresses: () => walletApi.getUnusedAddresses(),
+    getChangeAddress: () => walletApi.getChangeAddress(),
+    getRewardAddresses: () => walletApi.getRewardAddresses(),
+    // Add experimental.getCollateral to CIP-30 API
+    experimental: {
+      getCollateral: (params?: { amount?: Cbor }) => walletApi.getCollateral(params)
+    },
+    signTx: (tx: Cbor, partialSign?: boolean) => walletApi.signTx(tx, partialSign),
+    signData: (addr: Cardano.PaymentAddress | Bytes, payload: Bytes) => walletApi.signData(addr, payload),
+    submitTx: (tx: Cbor) => walletApi.submitTx(tx)
+  };
 
   const wallet = new Cip30Wallet(props, { api, authenticator, logger });
+
   injectGlobal(window, wallet, logger);
 };
 
