@@ -203,6 +203,10 @@ Then(/^(closed|opened) eye icon is displayed on Tokens page$/, async (iconType: 
     : await tokensPageAssert.assertSeeOpenedEyeIcon();
 });
 
+When(/^I see (ADA|tADA) in the list of tokens$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await tokensPageAssert.assertSeeTicker(expectedTicker);
+});
+
 When(/^I click (closed|opened) eye icon on Tokens page$/, async (iconType: 'closed' | 'opened') => {
   iconType === 'closed' ? await TokensPage.closedEyeIcon.click() : await TokensPage.openedEyeIcon.click();
 });

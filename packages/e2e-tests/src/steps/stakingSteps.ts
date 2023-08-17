@@ -319,3 +319,15 @@ Then(
     await stakingConfirmationScreenAssert.assertSeeNextButtonEnabled(isButtonEnabled === 'enabled');
   }
 );
+
+Then(/^I see (ADA|tADA) in the cost column$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await stakingPageAssert.assertSeeTickerInCostColumn(expectedTicker);
+});
+
+Then(/^I see (ADA|tADA) in current staked pool$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await stakingPageAssert.assertSeeTickerInCurrentStakedPool(expectedTicker);
+});
+
+Then(/^I wait for stake pool table item to be loaded$/, async () => {
+  await stakingPageAssert.waitRowsToLoad();
+});

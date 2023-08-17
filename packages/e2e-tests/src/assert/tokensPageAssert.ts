@@ -243,6 +243,13 @@ class TokensPageAssert {
       .then((balance) => Number(balance.replace(',', '')));
     expect(adaBalance).to.equal(Number(balanceInAda));
   }
+
+  async assertSeeTicker(expectedTicker: 'ADA' | 'tADA') {
+    const tickers = await TokensPage.getTokenTickers();
+    const tickerDisplayed = tickers[await TokensPage.getTokenRowIndex('Cardano')];
+
+    expect(tickerDisplayed).to.equal(expectedTicker);
+  }
 }
 
 export default new TokensPageAssert();
