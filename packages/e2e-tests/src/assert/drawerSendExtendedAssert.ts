@@ -328,7 +328,7 @@ class DrawerSendExtendedAssert {
     tickerDisplayed = String(tickerDisplayed.match(regex));
 
     if (expectedTicker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
-    expect(tickerDisplayed).to.equal(tickerDisplayed);
+    expect(tickerDisplayed).to.equal(expectedTicker);
   }
 }
 
