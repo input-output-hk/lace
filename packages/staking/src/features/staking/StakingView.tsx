@@ -72,13 +72,14 @@ export const StakingView = () => {
     if (alreadyDelegating) {
       setPendingSelection(true);
     }
+    selectCurrentPool();
     initiateStaking();
     // TODO: LW-7668 implement no funds modal
     // if (canDelegate) {
     // } else {
     // setNoFundsVisible(true);
     // }
-  }, [alreadyDelegating, initiateStaking]);
+  }, [alreadyDelegating, selectCurrentPool, initiateStaking]);
 
   const unselectPool = useCallback(() => {
     if (!openPoolDetails) return;
