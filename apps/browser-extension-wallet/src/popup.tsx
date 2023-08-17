@@ -21,6 +21,7 @@ import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvide
 import { APP_MODE_POPUP } from './utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
+import { FeatureFlagsProvider } from '@providers/FeatureFlags/context';
 
 if (process.env.USE_MULTI_DELEGATION_STAKING === 'true') {
   // Disabling import/no-unresolved as it is not aware of the "exports" entry
@@ -43,7 +44,9 @@ const App = (): React.ReactElement => (
                       <ExternalLinkOpenerProvider>
                         <MigrationContainer appMode={APP_MODE_POPUP}>
                           <DataCheckContainer appMode={APP_MODE_POPUP}>
-                            <PopupView />
+                            <FeatureFlagsProvider>
+                              <PopupView />
+                            </FeatureFlagsProvider>
                           </DataCheckContainer>
                         </MigrationContainer>
                       </ExternalLinkOpenerProvider>

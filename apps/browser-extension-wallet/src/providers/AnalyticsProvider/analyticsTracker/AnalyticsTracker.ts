@@ -10,6 +10,7 @@ import { MatomoClient } from '../matomo';
 import { POSTHOG_ENABLED, PostHogClient } from '../postHog';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
+import { Subscription } from 'rxjs';
 
 export class AnalyticsTracker {
   protected matomoClient?: MatomoClient;
@@ -59,6 +60,10 @@ export class AnalyticsTracker {
   async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     await this.postHogClient?.sendEvent(action, properties);
     await this.userIdService?.extendLifespan();
+  }
+
+  getPostHogFeatureFlag(callback: (flags: Array<string>) => void): Subscription {
+    return this.postHogClient?.subscribeToRemoteFlags(callback);
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
