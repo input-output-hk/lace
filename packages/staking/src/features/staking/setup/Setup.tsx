@@ -1,37 +1,24 @@
 import { useObservable } from '@lace/common';
-import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
-import { PropsWithChildren, useEffect } from 'react';
-import { I18nextProvider } from 'react-i18next';
+import { useEffect } from 'react';
 import { initI18n } from '../../i18n';
 import '../reset.css';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../store';
-import { StakingProps } from '../types';
-import { useI18n } from './useI18n';
+import { SetupBase, SetupBaseProps } from './SetupBase';
 
 initI18n();
 
-type SetupProps = PropsWithChildren<StakingProps>;
+type SetupProps = SetupBaseProps;
 
-export const Setup = ({ language, theme, children }: SetupProps) => {
-  const { i18n, loading } = useI18n(language);
+export const Setup = ({ children, ...rest }: SetupProps) => {
   const { walletStoreInMemoryWallet, walletStoreWalletUICardanoCoin: cardanoCoin } = useOutsideHandles();
   const { setCurrentPortfolio } = useDelegationPortfolioStore((s) => s.mutators);
-  const rewardAccountInfo = useObservable(walletStoreInMemoryWallet.delegation.rewardAccounts$);
+  const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
 
   useEffect(() => {
-    setCurrentPortfolio({ cardanoCoin, rewardAccountInfo });
-  }, [rewardAccountInfo, setCurrentPortfolio, cardanoCoin]);
+    if (!delegationDistribution) return;
+    setCurrentPortfolio({ cardanoCoin, delegationDistribution: [...delegationDistribution.values()] });
+  }, [delegationDistribution, setCurrentPortfolio, cardanoCoin]);
 
-  if (loading) {
-    return <>Spinner</>;
-  }
-
-  const themeColorScheme = theme === 'light' ? ThemeColorScheme.Light : ThemeColorScheme.Dark;
-
-  return (
-    <I18nextProvider i18n={i18n}>
-      <ThemeProvider colorScheme={themeColorScheme}>{children}</ThemeProvider>
-    </I18nextProvider>
-  );
+  return <SetupBase {...rest}>{children}</SetupBase>;
 };

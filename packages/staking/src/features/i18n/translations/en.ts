@@ -3,7 +3,7 @@ import { Translations } from '../types';
 export const en: Translations = {
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
   'browsePools.stakePoolTableBrowser.emptyMessage': 'No results matching your search',
-  'browsePools.stakePoolTableBrowser.searchInputPlaceholder': 'Search by type, token name or ID',
+  'browsePools.stakePoolTableBrowser.searchInputPlaceholder': 'Search by pool name, ticker, or ID',
   'browsePools.stakePoolTableBrowser.stake': 'Stake',
   'browsePools.stakePoolTableBrowser.tableHeader.cost': 'Cost',
   'browsePools.stakePoolTableBrowser.tableHeader.poolName': 'Pool name',
@@ -100,6 +100,9 @@ export const en: Translations = {
   'overview.stakingInfoCard.totalStaked': 'Total staked',
   'overview.yourPoolsSection.heading': 'Your pools',
   'overview.yourPoolsSection.manageButtonLabel': 'Manage',
+  'popup.expandBanner.button': 'Expand view',
+  'popup.expandBanner.description': 'Get more information on the network and the pool in the browser experience',
+  'popup.expandBanner.title': 'There is more!',
   'portfolioBar.clear': 'Clear',
   'portfolioBar.maxPools': '(max {{maxPoolsCount}})',
   'portfolioBar.next': 'Next',

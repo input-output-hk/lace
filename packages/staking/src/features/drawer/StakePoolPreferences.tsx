@@ -1,5 +1,6 @@
 import { Button, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
+import { useOutsideHandles } from '../outside-handles-provider';
 import { DelegationCard } from '../overview/DelegationCard';
 import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
@@ -23,10 +24,17 @@ export const StakePoolPreferencesFooter = () => {
 // eslint-disable-next-line react/no-multi-comp
 export const StakePoolPreferences = () => {
   const { t } = useTranslation();
+  const {
+    balancesBalance,
+    walletStoreWalletUICardanoCoin: { symbol },
+    compactNumber,
+  } = useOutsideHandles();
   const draftPortfolio = useDelegationPortfolioStore((state) => state.draftPortfolio);
   return (
     <Flex flexDirection="column" gap="$32" alignItems="stretch">
       <DelegationCard
+        balance={compactNumber(balancesBalance.available.coinBalance)}
+        cardanoCoinSymbol={symbol}
         distribution={draftPortfolio.map(({ name, weight }, i) => ({
           color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
           name: name || '',

@@ -1,7 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
 
-export type LegacySelectedStakePoolDetails = {
+export type OpenSelectedStakePoolDetails = {
   delegators: number | string;
   description: string;
   hexId: string;
@@ -65,15 +65,17 @@ export interface IBlockchainProvider {
   rewardsProvider: Wallet.RewardsProvider;
 }
 
+export type StakingRewards = {
+  totalRewards: BigInt | number;
+  lastReward: BigInt | number;
+};
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
+  expandStakingView?: () => void;
   balancesBalance: Balance;
-  stakingRewards: {
-    totalRewards: BigInt | number;
-    lastReward: BigInt | number;
-  };
-  delegationDetails: Wallet.Cardano.StakePool;
-  delegationStoreSelectedStakePoolDetails?: LegacySelectedStakePoolDetails;
+  stakingRewards: StakingRewards;
+  delegationStoreSelectedStakePoolDetails?: OpenSelectedStakePoolDetails;
   delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
   delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo?: string }) => void;

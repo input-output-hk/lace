@@ -139,3 +139,7 @@ export type PostHogMetadata = {
   view: ExtensionViews;
   sent_at_local: string;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PostHogProperty = string | boolean | Record<string, any> | Array<Record<string, any>>;
+export type PostHogProperties = Record<string, PostHogProperty>;

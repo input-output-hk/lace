@@ -1,18 +1,7 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
 import React from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
-// Disabling import/no-unresolved as it is not aware of the "exports" entry
-// https://github.com/import-js/eslint-plugin-import/issues/1810
-// eslint-disable-next-line import/no-unresolved
-import '@lace/staking/index.css';
-import {
-  useBalances,
-  useDelegationDetails,
-  useFetchCoinPrice,
-  useLocalStorage,
-  useStakingRewards,
-  useWalletManager
-} from '@hooks';
+import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
@@ -23,7 +12,6 @@ const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
   const { setWalletPassword } = useBackgroundServiceAPIContext();
-  const delegationDetails = useDelegationDetails();
   const selectedStakePoolDetails = useDelegationStore(stakePoolDetailsSelector);
   const {
     delegationTxBuilder,
@@ -72,7 +60,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
       {...{
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         balancesBalance: balance,
-        delegationDetails,
         delegationStoreSelectedStakePoolDetails: selectedStakePoolDetails,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreDelegationTxBuilder: delegationTxBuilder,

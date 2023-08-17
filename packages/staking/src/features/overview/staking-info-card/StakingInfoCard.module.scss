@@ -84,6 +84,7 @@
     .row:first-of-type {
       flex-direction: column;
       .col:first-of-type {
+        margin-top: size_unit(1);
         padding: 0 size_unit(2);
       }
     }

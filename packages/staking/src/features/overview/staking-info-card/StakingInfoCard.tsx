@@ -34,7 +34,7 @@ type PoolStatus = 'retired' | 'saturated';
 
 export type StakingInfoCardProps = {
   className?: string;
-  coinBalance: number;
+  totalStaked: string;
   fiat?: number;
   fee?: string | number;
   id: string;
@@ -65,7 +65,7 @@ const labelTranslationKeysByPoolStatus: Record<PoolStatus, TranslationKey> = {
 // eslint-disable-next-line complexity
 export const StakingInfoCard = ({
   className,
-  coinBalance,
+  totalStaked,
   fiat,
   fee,
   id,
@@ -128,12 +128,12 @@ export const StakingInfoCard = ({
       </div>
       <div className={styles.row}>
         <div className={styles.col}>
-          {coinBalance && (
+          {totalStaked && (
             <Stats
               text={t('overview.stakingInfoCard.totalStaked')}
               value={
-                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: coinBalance.toString(), fiat })}`}>
-                  <span>{coinBalance}</span>
+                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: totalStaked.toString(), fiat })}`}>
+                  <span>{totalStaked}</span>
                   <span className={styles.suffix}>{cardanoCoinSymbol}</span>
                 </Tooltip>
               }
