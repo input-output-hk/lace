@@ -3,42 +3,41 @@ import { Wallet } from '@lace/cardano';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { beforeEach, expect, it } from 'vitest';
 import { useDelegationPortfolioStore } from './delegationPortfolio';
-import { DelegationPortfolioStakePool } from './types';
+import { CurrentPortfolioStakePool } from './types';
 
-// @ts-ignore
 const dummyPool1 = {
   id: Wallet.Cardano.PoolIdHex('39deffa1dfcfe192ea0efeb3e9bcd9878190627fb590ec81f390cd6d'),
   name: '8BOOL',
   ticker: '8BOOL',
   weight: 1,
-} as DelegationPortfolioStakePool;
-const dummyPool2: DelegationPortfolioStakePool = {
+} as CurrentPortfolioStakePool;
+const dummyPool2 = {
   id: Wallet.Cardano.PoolIdHex('39faf89aba3daab2bce656a9698b0a2c05e679c0fb360ee6e3b46acb'),
   name: '8BOOM',
   ticker: '8BOOM',
   weight: 1,
-} as DelegationPortfolioStakePool;
-const dummyPool3: DelegationPortfolioStakePool = {
+} as CurrentPortfolioStakePool;
+const dummyPool3 = {
   id: Wallet.Cardano.PoolIdHex('3867a09729a1f954762eea035a82e2d9d3a14f1fa791a022ef0da242'),
   name: 'ADA Capital',
   ticker: 'ADACT',
   weight: 1,
-} as DelegationPortfolioStakePool;
-const dummyPool4: DelegationPortfolioStakePool = {
+} as CurrentPortfolioStakePool;
+const dummyPool4 = {
   id: Wallet.Cardano.PoolIdHex('a0e79024226e4febf20214164d88dcd269c54819fc3b810ca5cc45a5'),
   name: 'Example Pool 4',
   weight: 1,
-} as DelegationPortfolioStakePool;
-const dummyPool5: DelegationPortfolioStakePool = {
+} as CurrentPortfolioStakePool;
+const dummyPool5 = {
   id: Wallet.Cardano.PoolIdHex('cde2511b7638ab734db8534daebb9a2243c4ef1694c82f85b8825be9'),
   name: 'Example Pool 5',
   weight: 1,
-} as DelegationPortfolioStakePool;
-const dummyPool6: DelegationPortfolioStakePool = {
+} as CurrentPortfolioStakePool;
+const dummyPool6 = {
   id: Wallet.Cardano.PoolIdHex('b546d6339727ae557830265c581381735a4f797591ff8f56e14082c6'),
   name: 'Example Pool 6',
   weight: 1,
-} as DelegationPortfolioStakePool;
+} as CurrentPortfolioStakePool;
 
 const dummyStakePool1 = {
   cost: BigInt(340_000_000),
@@ -50,7 +49,7 @@ const dummyStakePool1 = {
   },
   metrics: {},
   pledge: BigInt(1_000_000_000),
-};
+} as Wallet.Cardano.StakePool;
 const dummyStakePool2 = {
   cost: BigInt(340_000_000),
   hexId: dummyPool2.id,
@@ -61,7 +60,7 @@ const dummyStakePool2 = {
   },
   metrics: {},
   pledge: BigInt(7_000_000_000),
-};
+} as Wallet.Cardano.StakePool;
 const dummyStakePool3 = {
   cost: BigInt(340_000_000),
   hexId: dummyPool3.id,
@@ -72,7 +71,7 @@ const dummyStakePool3 = {
   },
   metrics: {},
   pledge: BigInt(1_659_000_000_000),
-};
+} as Wallet.Cardano.StakePool;
 
 describe('delegationPortfolioStore', () => {
   beforeEach(() => {
@@ -139,22 +138,25 @@ describe('delegationPortfolioStore', () => {
     act(() =>
       result.current.mutators.setCurrentPortfolio({
         cardanoCoin: { symbol: 'ADA' } as Wallet.CoinId,
-        rewardAccountInfo: [
+        delegationDistribution: [
           {
-            delegatee: {
-              currentEpoch: dummyStakePool1,
-            },
-          } as Wallet.Cardano.RewardAccountInfo,
+            percentage: Wallet.Percent(33.33),
+            pool: dummyStakePool1,
+            rewardAccounts: [],
+            stake: BigInt(1),
+          },
           {
-            delegatee: {
-              nextEpoch: dummyStakePool2,
-            },
-          } as Wallet.Cardano.RewardAccountInfo,
+            percentage: Wallet.Percent(33.33),
+            pool: dummyStakePool2,
+            rewardAccounts: [],
+            stake: BigInt(1),
+          },
           {
-            delegatee: {
-              nextNextEpoch: dummyStakePool3,
-            },
-          } as Wallet.Cardano.RewardAccountInfo,
+            percentage: Wallet.Percent(33.33),
+            pool: dummyStakePool3,
+            rewardAccounts: [],
+            stake: BigInt(1),
+          },
         ],
       })
     );
@@ -162,9 +164,18 @@ describe('delegationPortfolioStore', () => {
     expect(result.current.currentPortfolio.length).toEqual(expectedLength);
     expect(result.current.currentPortfolio).toEqual(
       expect.arrayContaining([
-        expect.objectContaining(dummyPool1),
-        expect.objectContaining(dummyPool2),
-        expect.objectContaining(dummyPool3),
+        expect.objectContaining({
+          ...dummyPool1,
+          weight: 33.33,
+        }),
+        expect.objectContaining({
+          ...dummyPool2,
+          weight: 33.33,
+        }),
+        expect.objectContaining({
+          ...dummyPool3,
+          weight: 33.33,
+        }),
       ])
     );
   });
