@@ -8,7 +8,7 @@ import { Variants, Section, page } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
-import { CallToAction } from './call-to-aciton-button';
+import { CallToAction } from './call-to-action-button';
 import { Primary } from './primary-button';
 import { Secondary } from './secondary-button';
 

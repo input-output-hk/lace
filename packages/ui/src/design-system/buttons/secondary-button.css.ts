@@ -6,7 +6,7 @@ export const borderGap = createVar();
 
 export const container = style([
   sx({
-    height: '$48',
+    height: '$40',
     background: '$buttons_secondary_container_bgColor',
     borderRadius: '$medium',
     px: '$24',
