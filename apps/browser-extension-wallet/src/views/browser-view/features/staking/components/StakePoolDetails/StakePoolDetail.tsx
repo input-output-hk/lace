@@ -83,6 +83,8 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     retired: t('cardano.stakePoolStatusLogo.retired')
   };
 
+  const isMultiDelegationEnabled = process.env.USE_MULTI_DELEGATION_STAKING === 'true';
+
   return (
     <>
       <div className={cn(styles.contentWrapper, { [styles.popupView]: popupView })}>
@@ -111,7 +113,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
               translations={metricsTranslations}
             />
           </div>
-          {isDelegatingToThisPool && (
+          {isDelegatingToThisPool && !isMultiDelegationEnabled && (
             <Banner
               className={styles.banner}
               withIcon

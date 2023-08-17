@@ -61,6 +61,8 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     saturated: t('drawer.details.status.saturated'),
   };
 
+  const isMultiDelegationEnabled = process.env.USE_MULTI_DELEGATION_STAKING === 'true';
+
   return (
     <>
       {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
@@ -92,7 +94,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               popupView={popupView}
             />
           </div>
-          {delegatingToThisPool && (
+          {delegatingToThisPool && !isMultiDelegationEnabled && (
             <Banner
               className={styles.banner}
               withIcon
