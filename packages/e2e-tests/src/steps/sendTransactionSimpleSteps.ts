@@ -296,6 +296,16 @@ Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () =>
   await transactionExtendedPageObject.fillTokenValue(1);
 });
 
+Then(
+  /^I've entered accepted values for all (Preprod|Mainnet) fields of simple Tx$/,
+  async (network: 'Preprod' | 'Mainnet') => {
+    await (network === 'Mainnet'
+      ? transactionExtendedPageObject.fillAddress(shelley.getMainnetAddress())
+      : transactionExtendedPageObject.fillAddress(shelley.getTestnetAddress()));
+    await transactionExtendedPageObject.fillTokenValue(1);
+  }
+);
+
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
   await transactionExtendedPageObject.fillAddress(byron.getAddress());
   await transactionExtendedPageObject.fillTokenValue(1);
@@ -606,4 +616,16 @@ Then(
 
 Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
+});
+
+Then(/^I see (ADA|tADA) in transaction fee$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerTransactionCostADA(expectedTicker);
+});
+
+Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerOnReviewTransactionFee(expectedTicker);
+});
+
+Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerOnReviewTransactionAmount(expectedTicker);
 });
