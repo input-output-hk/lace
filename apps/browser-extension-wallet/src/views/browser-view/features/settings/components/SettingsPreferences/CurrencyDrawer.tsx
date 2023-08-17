@@ -51,7 +51,7 @@ export const CurrencyDrawer = ({
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={onClose}
       title={
         <DrawerHeader

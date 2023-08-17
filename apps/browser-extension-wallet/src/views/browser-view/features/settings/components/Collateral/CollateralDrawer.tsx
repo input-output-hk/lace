@@ -160,7 +160,7 @@ export const CollateralDrawer = ({
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={handleClose}
       title={<DrawerHeader popupView={popupView} title={t('browserView.settings.wallet.collateral.title')} />}
       navigation={

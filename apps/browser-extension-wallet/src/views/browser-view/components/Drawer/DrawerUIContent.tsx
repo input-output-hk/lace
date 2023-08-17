@@ -43,7 +43,7 @@ export const DrawerUIContainer = ({ defaultContent }: { defaultContent?: DrawerC
   return (
     <Drawer
       className={config?.wrapperClassName}
-      visible={!isUndefined(config) || !isUndefined(defaultContent)}
+      open={!isUndefined(config) || !isUndefined(defaultContent)}
       destroyOnClose
       onClose={() => (config?.onClose ? config?.onClose() : clearContent())}
       footer={footer || undefined}

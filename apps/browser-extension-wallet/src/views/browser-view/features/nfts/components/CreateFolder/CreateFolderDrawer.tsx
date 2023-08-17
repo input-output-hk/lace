@@ -258,7 +258,7 @@ export const NFTFolderDrawer = withNftsFoldersContext(
       <>
         <Drawer
           keyboard={false}
-          visible={visible}
+          open={visible}
           onClose={onCloseDrawer}
           title={headerMap[currentSection]}
           navigation={
