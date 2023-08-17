@@ -4,6 +4,7 @@ import { t } from '../utils/translationService';
 import testContext from '../utils/testContext';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
+import { isPopupMode } from '../utils/pageUtils';
 
 export type ExpectedTransactionRowAssetDetails = {
   type: string;
@@ -135,6 +136,17 @@ class TransactionsPageAssert {
     expect(await TransactionsPage.transactionsTableItemTimestamp(rowIndex).getText()).to.match(
       TestnetPatterns.TIMESTAMP_REGEX
     );
+
+    if ((await isPopupMode()) && expectedTransactionRowAssetDetails.tokensCount > 1) {
+      const actualTokensCount = await TransactionsPage.transactionsTableItemTokensAmount(rowIndex)
+        .getText()
+        .then((val) => val.split('+')[1]);
+      const expectedTokensCount = expectedTransactionRowAssetDetails.tokensCount - 1;
+      expect(Number(actualTokensCount)).to.equal(
+        expectedTokensCount,
+        `Tokens count actual/expected: ${actualTokensCount}/${expectedTokensCount.toString()}`
+      );
+    }
   }
 
   assertSeeMoreTransactions = async () => {
