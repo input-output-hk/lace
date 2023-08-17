@@ -83,3 +83,10 @@ export type SendFlowAnalyticsProperties = {
   trigger_point: SendFlowTriggerPoints;
   // TODO: add rest of the porpeties (LW-7711)
 };
+
+export interface TokenAnalyticsProperties {
+  id: string;
+  name?: string;
+  ticker?: string;
+  amount: string;
+}
