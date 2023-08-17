@@ -240,10 +240,10 @@ class TokensPageAssert {
   }
 
   async expectedTokenBalance(tokenIndex: number, tokenBalance: number) {
-    const adaBalance: number = await TokensPage.tokenBalance(tokenIndex)
+    const balance: number = await TokensPage.tokenBalance(tokenIndex)
       .getText()
-      .then((balance) => Number(balance.replace(',', '')));
-    expect(adaBalance).to.equal(Number(tokenBalance));
+      .then((value) => Number(value.replace(',', '')));
+    expect(balance).to.equal(Number(tokenBalance));
   }
 
   async assertSeeTicker(expectedTicker: 'ADA' | 'tADA') {
