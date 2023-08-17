@@ -32,8 +32,6 @@ export const useAppInit = (): void => {
         name: name ?? 'Lace',
         addresses
       });
-
-      setAddressesDiscoveryCompleted(true);
     });
 
     return () => {

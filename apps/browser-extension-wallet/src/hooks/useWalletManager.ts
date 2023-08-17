@@ -88,7 +88,8 @@ export const useWalletManager = (): UseWalletManager => {
     setCardanoCoin,
     environmentName,
     walletManagerUi,
-    cardanoWallet
+    cardanoWallet,
+    setAddressesDiscoveryCompleted
   } = useWalletStore();
   const [settings, updateAppSettings] = useAppSettingsContext();
   const {
@@ -365,6 +366,7 @@ export const useWalletManager = (): UseWalletManager => {
 
       await Wallet.switchKeyAgents(walletManagerUi, walletName, asyncKeyAgent, chainName);
 
+      setAddressesDiscoveryCompleted(false);
       updateAppSettings({ ...settings, chainName });
       saveValueInLocalStorage({ key: 'wallet', value: { name: walletName } });
       saveValueInLocalStorage({ key: 'keyAgentData', value: newKeyAgent });
@@ -383,6 +385,7 @@ export const useWalletManager = (): UseWalletManager => {
       backgroundService,
       walletManagerUi,
       getPassword,
+      setAddressesDiscoveryCompleted,
       updateAppSettings,
       settings,
       setCardanoWallet,
@@ -404,7 +407,12 @@ export const useWalletManager = (): UseWalletManager => {
         networkOfKeyAgentAsIntended && networkOfAddressesEqualsNetworkOfKeyAgent;
       const addressesUpToDate = isEqual(currentKeyAgentData.knownAddresses, addresses);
 
-      if (!keyAgentInLocalStorageIsTheOneWeExpect || addressesUpToDate) return;
+      if (!keyAgentInLocalStorageIsTheOneWeExpect) return;
+
+      if (addressesUpToDate) {
+        setAddressesDiscoveryCompleted(true);
+        return;
+      }
 
       let newKeyAgentData;
       if (keyAgentInLocalStorageIsTheOneWeExpect) {
@@ -445,8 +453,17 @@ export const useWalletManager = (): UseWalletManager => {
         wallet: walletManagerUi.wallet
       });
       setKeyAgentData(newKeyAgentData);
+      setAddressesDiscoveryCompleted(true);
     },
-    [backgroundService, cardanoWallet?.asyncKeyAgent, getPassword, setCardanoWallet, setKeyAgentData, walletManagerUi]
+    [
+      backgroundService,
+      cardanoWallet?.asyncKeyAgent,
+      getPassword,
+      setAddressesDiscoveryCompleted,
+      setCardanoWallet,
+      setKeyAgentData,
+      walletManagerUi
+    ]
   );
 
   return {
