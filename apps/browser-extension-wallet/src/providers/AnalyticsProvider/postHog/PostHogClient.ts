@@ -2,7 +2,7 @@
 import posthog from 'posthog-js';
 import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
-import { ExtensionViews, PostHogAction, PostHogMetadata } from '../analyticsTracker';
+import { ExtensionViews, PostHogAction, PostHogMetadata, PostHogProperties } from '../analyticsTracker';
 import {
   DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
@@ -59,7 +59,7 @@ export class PostHogClient {
     posthog.alias(alias, id);
   }
 
-  async sendEvent(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
+  async sendEvent(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     const payload = {
       ...(await this.getEventMetadata()),
       ...properties

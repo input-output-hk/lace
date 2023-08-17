@@ -17,6 +17,7 @@ const setSection = jest.fn();
 const mockUseRedirection = jest.fn();
 const mockNotify = jest.fn();
 const mockUseAnalyticsSendFlowTriggerPoint = jest.fn();
+const mockUseOutputs = jest.fn();
 import * as React from 'react';
 import { screen, cleanup, fireEvent, render, within, waitFor } from '@testing-library/react';
 import { CollateralDrawer } from '../CollateralDrawer';
@@ -53,6 +54,7 @@ const txHash = 'e6eb1c8c806ae7f4d9fe148e9c23853607ffba692ef0a464688911ad3374a932
 
 const tokenPrices$ = new BehaviorSubject({});
 const adaPrices$ = new BehaviorSubject({});
+const assetInfo$ = new BehaviorSubject({});
 
 const backgroundService = {
   getBackgroundStorage: mockGetBackgroundStorage,
@@ -76,7 +78,8 @@ jest.mock('@src/views/browser-view/features/send-transaction', () => {
     __esModule: true,
     ...original,
     useBuiltTxState: mockUseBuitTxState,
-    useAnalyticsSendFlowTriggerPoint: mockUseAnalyticsSendFlowTriggerPoint
+    useAnalyticsSendFlowTriggerPoint: mockUseAnalyticsSendFlowTriggerPoint,
+    useOutputs: mockUseOutputs
   };
 });
 
@@ -159,11 +162,15 @@ describe('Testing CollateralDrawer component', () => {
       builtTxData: {} as unknown as sendTx.BuiltTxData
     });
     mockUseAnalyticsSendFlowTriggerPoint.mockReturnValue({ triggerPoint: '', setTriggerPoint: jest.fn() });
+    mockUseOutputs.mockReturnValue({ uiOutputs: {} });
     mockUseCollateral.mockReturnValue(useCollateral);
     mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
     mockUseWalletStore.mockImplementation(() => ({
       getKeyAgentType: mockGetKeyAgentType,
-      walletUI: {}
+      walletUI: {},
+      inMemoryWallet: {
+        assetInfo$
+      }
     }));
     mockUseSections.mockReturnValue({
       setSection,
