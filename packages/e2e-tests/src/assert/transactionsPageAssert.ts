@@ -142,10 +142,7 @@ class TransactionsPageAssert {
         .getText()
         .then((val) => val.split('+')[1]);
       const expectedTokensCount = expectedTransactionRowAssetDetails.tokensCount - 1;
-      expect(Number(actualTokensCount)).to.equal(
-        expectedTokensCount,
-        `Tokens count actual/expected: ${actualTokensCount}/${expectedTokensCount.toString()}`
-      );
+      expect(Number(actualTokensCount)).to.equal(expectedTokensCount);
     }
   }
 
