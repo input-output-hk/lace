@@ -1,2 +1,1 @@
-export * from './DelegationContainer';
-export * from './DelegationLayout';
+export { DelegationContainer } from './DelegationContainer';

@@ -2,6 +2,7 @@
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
 import { Banner, Ellipsis } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
+import cn from 'classnames';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +13,7 @@ import styles from './StakePoolDetail.module.scss';
 
 const SATURATION_UPPER_BOUND = 100;
 
-export const StakePoolDetail = (): React.ReactElement => {
+export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
   const {
     delegationDetails,
     delegationStoreSelectedStakePoolDetails: {
@@ -66,7 +67,8 @@ export const StakePoolDetail = (): React.ReactElement => {
 
   return (
     <>
-      <div className={styles.contentWrapper}>
+      {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+      <div className={cn(styles.contentWrapper, { [styles.popupView!]: popupView })}>
         <StakePoolNameBrowser
           {...{
             id,
@@ -80,13 +82,19 @@ export const StakePoolDetail = (): React.ReactElement => {
           translations={statusLogoTranslations}
         />
       </div>
-      <div className={styles.container} data-testid="stake-pool-details">
-        <div className={styles.contentWrapper}>
+      {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+      <div className={cn(styles.container, { [styles.popupView!]: popupView })} data-testid="stake-pool-details">
+        {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+        <div className={cn(styles.contentWrapper, { [styles.popupView!]: popupView })}>
           <div className={styles.row}>
             <div className={styles.title} data-testid="stake-pool-details-title">
               {t('drawer.details.statistics')}
             </div>
-            <StakePoolMetricsBrowser {...{ apy, delegators, saturation, stake }} translations={metricsTranslations} />
+            <StakePoolMetricsBrowser
+              {...{ apy, delegators, saturation, stake }}
+              translations={metricsTranslations}
+              popupView={popupView}
+            />
           </div>
           {isDelegatingToThisPool && (
             <Banner
@@ -171,6 +179,7 @@ export type StakePoolDetailFooterProps = {
   onSelect: () => void;
   onStakeOnThisPool: () => void;
   onUnselect: () => void;
+  popupView?: boolean;
 };
 
 type SelectorParams = Parameters<Parameters<typeof useDelegationPortfolioStore>[0]>[0];
@@ -250,6 +259,7 @@ export const StakePoolDetailFooter = ({
   onSelect,
   onStakeOnThisPool,
   onUnselect,
+  popupView,
 }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { setIsDrawerVisible } = useStakePoolDetails();
@@ -264,11 +274,12 @@ export const StakePoolDetailFooter = ({
 
   useEffect(() => {
     if (isInMemory) return;
+    if (popupView) return;
     const hasPersistedHwStakepool = !!localStorage.getItem('TEMP_POOLID');
     if (!hasPersistedHwStakepool) return;
     onStakeOnThisPool();
     localStorage.removeItem('TEMP_POOLID');
-  }, [isInMemory, onStakeOnThisPool]);
+  }, [isInMemory, onStakeOnThisPool, popupView]);
 
   const onSelectClick = useCallback(() => {
     setIsDrawerVisible(false);
