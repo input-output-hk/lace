@@ -1,5 +1,4 @@
 /* eslint-disable no-magic-numbers */
-import * as sdkUtils from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { beforeEach, expect, it } from 'vitest';
@@ -141,19 +140,19 @@ describe('delegationPortfolioStore', () => {
         cardanoCoin: { symbol: 'ADA' } as Wallet.CoinId,
         delegationDistribution: [
           {
-            percentage: sdkUtils.Percent(33.33),
+            percentage: Wallet.Percent(33.33),
             pool: dummyStakePool1,
             rewardAccounts: [],
             stake: BigInt(1),
           },
           {
-            percentage: sdkUtils.Percent(33.33),
+            percentage: Wallet.Percent(33.33),
             pool: dummyStakePool2,
             rewardAccounts: [],
             stake: BigInt(1),
           },
           {
-            percentage: sdkUtils.Percent(33.33),
+            percentage: Wallet.Percent(33.33),
             pool: dummyStakePool3,
             rewardAccounts: [],
             stake: BigInt(1),
@@ -165,9 +164,18 @@ describe('delegationPortfolioStore', () => {
     expect(result.current.currentPortfolio.length).toEqual(expectedLength);
     expect(result.current.currentPortfolio).toEqual(
       expect.arrayContaining([
-        expect.objectContaining(dummyPool1),
-        expect.objectContaining(dummyPool2),
-        expect.objectContaining(dummyPool3),
+        expect.objectContaining({
+          ...dummyPool1,
+          weight: 33.33,
+        }),
+        expect.objectContaining({
+          ...dummyPool2,
+          weight: 33.33,
+        }),
+        expect.objectContaining({
+          ...dummyPool3,
+          weight: 33.33,
+        }),
       ])
     );
   });
