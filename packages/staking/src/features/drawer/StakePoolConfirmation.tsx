@@ -60,9 +60,7 @@ const calculateDeposit = ({
     [Wallet.Cardano.StakeKeyStatus.Registered, Wallet.Cardano.StakeKeyStatus.Registering].includes(account.keyStatus)
   ).length;
 
-  return newPortfolio.length > registeredStakeKeysCount
-    ? (newPortfolio.length - registeredStakeKeysCount) * protocolParameters.stakeKeyDeposit
-    : 0;
+  return (newPortfolio.length - registeredStakeKeysCount) * protocolParameters.stakeKeyDeposit;
 };
 
 const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
