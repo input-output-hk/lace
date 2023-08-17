@@ -3,7 +3,7 @@ import { walletRoutePaths } from '@routes';
 import { Menu } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../../UserMenu/components/UserMenu.module.scss';
 import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,

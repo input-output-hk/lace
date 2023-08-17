@@ -3,7 +3,7 @@ import { useWalletManager } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { Menu } from 'antd';
 import { useTranslation } from 'react-i18next';
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../../UserMenu/components/UserMenu.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 

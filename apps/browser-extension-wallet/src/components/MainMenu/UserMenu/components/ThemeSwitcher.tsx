@@ -2,7 +2,7 @@
 import React from 'react';
 import { Switch } from '@lace/common';
 import { useTranslation } from 'react-i18next';
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../../UserMenu/components/UserMenu.module.scss';
 import { useTheme } from '@providers/ThemeProvider/context';
 import SunIcon from '../../../../assets/icons/sun.component.svg';
 import MoonIcon from '../../../../assets/icons/moon.component.svg';

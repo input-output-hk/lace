@@ -1,25 +1,43 @@
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import cn from 'classnames';
 import { Dropdown } from 'antd';
 import { Button } from '@lace/common';
-import { DropdownMenuOverlay } from '../MainMenu';
 
 import ChevronNormal from '../../assets/icons/chevron-down.component.svg';
 import ChevronSmall from '../../assets/icons/chevron-down-small.component.svg';
 import styles from './DropdownMenu.module.scss';
 import { useWalletStore } from '@src/stores';
-import { UserAvatar } from '../MainMenu/DropdownMenuOverlay/components';
+import {
+  AddressBookLink,
+  LockWallet,
+  NetworkSwitcher,
+  NetworkInfo,
+  SettingsLink,
+  ThemeSwitcher,
+  UserAvatar,
+  UserInfo
+} from '../MainMenu/UserMenu/components';
+import { Sections } from '@components/MainMenu/UserMenu/types';
+import { ItemType, MenuItemType } from 'antd/lib/menu/hooks/useItems';
+import menuStyles from '../MainMenu/UserMenu/components/UserMenu.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
+  lockWalletButton?: ReactNode;
+  topSection?: MenuItemType;
 }
 
-export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
+export const DropdownMenu = ({
+  isPopup,
+  lockWalletButton = <LockWallet />,
+  topSection = <UserInfo />
+}: DropdownMenuProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { walletInfo } = useWalletStore();
   const [open, setOpen] = useState(false);
+  const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
 
   const sendAnalyticsEvent = (event: PostHogAction) => {
@@ -36,10 +54,11 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
   return (
     <Dropdown
       destroyPopupOnHide
-      onVisibleChange={handleDropdownState}
       overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
+      onOpenChange={handleDropdownState}
       placement="bottomRight"
       trigger={['click']}
+      open={open}
     >
       <Button
         variant="outlined"
