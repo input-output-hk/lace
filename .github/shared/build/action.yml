@@ -21,9 +21,9 @@ runs:
         key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Install dependencies
       shell: bash
-      run: yarn install --frozen-lockfile --non-interactive --logevel=error
+      run: yarn install --immutable --inline-builds
     - name: Build dist version
       shell: bash
       env:
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
-      run: yarn browser build
+      run: yarn build
