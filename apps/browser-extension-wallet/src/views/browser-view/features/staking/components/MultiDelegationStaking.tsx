@@ -1,6 +1,5 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
 import React, { useCallback } from 'react';
-import flatMap from 'lodash/flatMap';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 import {
   useBalances,
@@ -14,7 +13,6 @@ import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/dele
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
-import { DelegationTransactionTypes } from '@src/stores/slices';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 
 const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
@@ -57,8 +55,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
     fetchStakePools: state.fetchStakePools,
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
-    blockchainProvider: state.blockchainProvider,
-    getWalletActivitiesObservable: state.getWalletActivitiesObservable
+    blockchainProvider: state.blockchainProvider
   }));
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
@@ -71,7 +68,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
     analytics.sendEvent({
       action: 'AnalyticsEventActions.CLICK_EVENT',
       category: 'AnalyticsEventCategories.STAKING',
-      name: 'AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_BROWSER'
+      name: 'AnalyticsEventNames.Staking.STAKING_MULTI_DELEGATION_BROWSER'
     });
   }, []);
   const { walletActivities } = useWalletActivities({ sendAnalytics });
@@ -80,10 +77,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
-  );
-
-  const hasPendingDelegationTransaction = flatMap(walletActivities, ({ items }) => items).some(
-    ({ type, status }) => DelegationTransactionTypes.has(type) && status === 'sending'
   );
 
   return (
@@ -100,7 +93,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
         delegationStoreDelegationTxFee: delegationTxFee,
         delegationStoreSelectedStakePool: selectedStakePool,
         fetchCoinPricePriceResult: priceResult,
-        hasPendingDelegationTransaction,
         openExternalLink,
         password,
         stakingRewards,
@@ -116,6 +108,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
         walletStoreFetchNetworkInfo: fetchNetworkInfo,
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
+        walletStoreWalletActivities: walletActivities,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         multidelegationFirstVisit,

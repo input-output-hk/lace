@@ -1,5 +1,6 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
+import { AssetActivityListProps } from '@lace/core';
 
 export type LegacySelectedStakePoolDetails = {
   delegators: number | string;
@@ -89,12 +90,12 @@ export type OutsideHandlesContextValue = {
       priceVariationPercentage24h: number;
     };
   };
-  hasPendingDelegationTransaction?: boolean;
   openExternalLink: (href: string) => void;
   password: PasswordHook;
   submittingState: SubmittingState;
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
+  walletStoreWalletActivities: AssetActivityListProps[];
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
   walletManagerExecuteWithPassword: <T>(
     password: string,

@@ -1,6 +1,8 @@
 import { Wallet } from '@lace/cardano';
 import { PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor } from '@lace/ui';
 import { Immutable } from 'immer';
+import flatMap from 'lodash/flatMap';
+import type { AssetActivityListProps, TransactionType } from '@lace/core';
 import { Balance, StakingRewards } from '../outside-handles-provider';
 import { DelegationPortfolioStakePool } from '../store';
 
@@ -49,3 +51,14 @@ export const mapPortfolioToDisplayData = ({
 
   return displayData;
 };
+
+const DelegationTransactionTypes: Set<TransactionType> = new Set([
+  'delegation',
+  'delegationRegistration',
+  'delegationDeregistration',
+]);
+
+export const hasPendingDelegationTransaction = (walletActivities: AssetActivityListProps[]) =>
+  flatMap(walletActivities, ({ items }) => items).some(
+    ({ type, status }) => type && DelegationTransactionTypes.has(type) && status === 'sending'
+  );

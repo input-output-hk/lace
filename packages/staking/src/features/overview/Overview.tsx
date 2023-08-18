@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
-import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
+import { hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import * as styles from './Overview.css';
 import { StakingInfoCard } from './staking-info-card';
 
@@ -19,7 +19,7 @@ export const Overview = () => {
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
     delegationDetails,
-    hasPendingDelegationTransaction,
+    walletStoreWalletActivities: walletActivities,
   } = useOutsideHandles();
   const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
@@ -28,11 +28,12 @@ export const Overview = () => {
     setSelectedStakePool(delegationDetails);
     setIsDrawerVisible(true);
   };
+  const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
 
   if (currentPortfolio.length === 0)
     return (
       <>
-        {hasPendingDelegationTransaction ? (
+        {pendingDelegationTransaction ? (
           <Banner
             withIcon
             customIcon={<InfoCircleOutlined className={styles.bannerInfoIcon} />}
@@ -67,7 +68,7 @@ export const Overview = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      {hasPendingDelegationTransaction && (
+      {pendingDelegationTransaction && (
         <Box mb={'$40'}>
           <Banner
             withIcon
