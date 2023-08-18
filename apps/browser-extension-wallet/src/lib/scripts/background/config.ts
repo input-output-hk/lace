@@ -56,5 +56,5 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   getAliasProperties: RemoteApiPropertyType.MethodReturningPromise,
   getRandomizedUserId: RemoteApiPropertyType.MethodReturningPromise,
   getUserId: RemoteApiPropertyType.MethodReturningPromise,
-  isPersistentUser: RemoteApiPropertyType.MethodReturningPromise
+  getUserTrackingType: RemoteApiPropertyType.MethodReturningPromise
 };

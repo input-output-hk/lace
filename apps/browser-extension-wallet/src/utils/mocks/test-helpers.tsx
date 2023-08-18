@@ -622,7 +622,7 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   getRandomizedUserId: jest.fn(),
   getUserId: jest.fn(),
   getAliasProperties: jest.fn(),
-  isPersistentUser: jest.fn()
+  getUserTrackingType: jest.fn()
 };
 
 export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {
