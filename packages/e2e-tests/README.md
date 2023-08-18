@@ -27,7 +27,7 @@ UI-mapped gherkin tests for the Lace browser extension
 
 - Build the extension (from the project root)
 
-  - `yarn browser build`
+  - `yarn build`
 
 - Run tests (from the `packages/e2e-tests` directory)
   - `yarn test:local:chrome`
@@ -35,9 +35,9 @@ UI-mapped gherkin tests for the Lace browser extension
 
 ## Selective gherkin scenario runs by tag matching
 
-- `./node_modules/.bin/wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag and @Testnet'`
-- `./node_modules/.bin/wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag or @otherTag and @Testnet'`
-- `./node_modules/.bin/wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag and not @Pending and @Testnet'`
+- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag and @Testnet'`
+- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag or @otherTag and @Testnet'`
+- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag and not @Pending and @Testnet'`
 
 ## Supported browsers
 
@@ -59,7 +59,7 @@ UI-mapped gherkin tests for the Lace browser extension
 
 ## Run single feature file with params
 
-- `CI=true ENV=preprod WALLET_1_PASSWORD='<password>' ./node_modules/.bin/wdio run wdio.conf.<browser>.ts --spec SendTransactionSimpleExtended.feature`
+- `CI=true ENV=preprod WALLET_1_PASSWORD='<password>' yarn wdio run wdio.conf.<browser>.ts --spec SendTransactionSimpleExtended.feature`
 
 ## Updating walletConfiguration.ts (for development)
 

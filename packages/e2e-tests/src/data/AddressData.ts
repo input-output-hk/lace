@@ -67,6 +67,9 @@ export const validAddress6 = new Address(
   'addr1q9qxfqcjz3uq4mevu7rnf5zefvk9gz8fnt7e2saq44qhcytj9hwek0yzxwfa3446amdf3f8sn070pp53p52pczfc0r4syd9k07'
 );
 
+export const adaHandle1 = new Address('Ada Handle 1', '$test_handle_1', '$test_handle_1');
+export const adaHandle2 = new Address('Ada Handle 2', '$test_handle_2', '$test_handle_2');
+
 export const testAddresses = new Map<string, Address>([
   ['Shelley', shelley],
   ['Byron', byron],
@@ -78,7 +81,9 @@ export const testAddresses = new Map<string, Address>([
   ['Valid address3', validAddress3],
   ['Valid address4', validAddress4],
   ['Valid address5', validAddress5],
-  ['Valid address6', validAddress6]
+  ['Valid address6', validAddress6],
+  ['Ada Handle 1', adaHandle1],
+  ['Ada Handle 2', adaHandle2]
 ]);
 
 export const getAddressByName = (addressName: string): string | undefined =>

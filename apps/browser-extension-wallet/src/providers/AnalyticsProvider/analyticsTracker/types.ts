@@ -137,8 +137,6 @@ export type PostHogActionsKeys =
   | 'DONE_GO_TO_WALLET';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
-export type PostHogProperty = string | boolean | Record<string, string | boolean>;
-export type PostHogProperties = Record<string, PostHogProperty>;
 export type PostHogMetadata = {
   distinct_id?: string;
   alias_id?: string;
@@ -149,3 +147,7 @@ export type PostHogMetadata = {
     user_tracking_type: string;
   };
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PostHogProperty = string | boolean | Record<string, any> | Array<Record<string, any>>;
+export type PostHogProperties = Record<string, PostHogProperty>;
