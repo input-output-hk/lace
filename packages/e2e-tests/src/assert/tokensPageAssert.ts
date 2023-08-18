@@ -240,7 +240,6 @@ class TokensPageAssert {
   }
 
   async assertTokenBalance(tokenIndex: number, tokenBalance: number) {
-    Number((await TokensPage.tokenBalance(tokenIndex).getText()).replace(',', ''));
     const balance = Number((await TokensPage.tokenBalance(tokenIndex).getText()).replace(',', ''));
     expect(balance).to.equal(Number(tokenBalance));
   }
