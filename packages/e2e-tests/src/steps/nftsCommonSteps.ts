@@ -73,27 +73,18 @@ Then(
 );
 
 Given(
-  /^I'm in (popup|extended) mode and select wallet that has NFT: "([^"]*)"$/,
-  async (mode: 'extended' | 'popup', nftName: string) => {
+  /^I use a (single|HD) wallet with "([^"]*)" NFT in (popup|extended) mode$/,
+  async (walletType: 'single' | 'HD', nftName: string, mode: 'extended' | 'popup') => {
     const isNftDisplayed = await nftsPageObject.isNftDisplayed(nftName);
     if (!isNftDisplayed) {
-      const walletToLoad = await nftsPageObject.getNonActiveNftWalletName();
+      const walletToLoad =
+        walletType === 'HD'
+          ? await nftsPageObject.getNonActiveNftHdWalletName()
+          : await nftsPageObject.getNonActiveNftWalletName();
       await localStorageInitializer.reInitializeWallet(walletToLoad);
-      await mainMenuPageObject.navigateToSection('NFTs', mode);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
-    }
-  }
-);
-
-Given(
-  /^I'm in (popup|extended) mode and select HD wallet that has NFT: "([^"]*)"$/,
-  async (mode: 'extended' | 'popup', nftName: string) => {
-    const isNftDisplayed = await nftsPageObject.isNftDisplayed(nftName);
-    if (!isNftDisplayed) {
-      const walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
-      await localStorageInitializer.reInitializeWallet(walletToLoad);
       await mainMenuPageObject.navigateToSection('NFTs', mode);
-      await topNavigationAssert.assertWalletIsInSyncedStatus();
+      expect(await nftsPageObject.isNftDisplayed(nftName));
     }
   }
 );

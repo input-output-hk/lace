@@ -230,19 +230,18 @@ class TokensPageAssert {
     }
   }
 
-  async expectedAdaBalance(balanceInAda: number) {
-    await this.expectedTokenBalance(0, balanceInAda);
+  async assertAdaBalance(balanceInAda: number) {
+    await this.assertTokenBalance(0, balanceInAda);
   }
 
-  async expectedTMinBalance(balance: number) {
+  async assertTMinBalance(balance: number) {
     const TMinIndex = await TokensPage.getTokenRowIndex('tMIN');
-    await this.expectedTokenBalance(TMinIndex, balance);
+    await this.assertTokenBalance(TMinIndex, balance);
   }
 
-  async expectedTokenBalance(tokenIndex: number, tokenBalance: number) {
-    const balance: number = await TokensPage.tokenBalance(tokenIndex)
-      .getText()
-      .then((value) => Number(value.replace(',', '')));
+  async assertTokenBalance(tokenIndex: number, tokenBalance: number) {
+    Number((await TokensPage.tokenBalance(tokenIndex).getText()).replace(',', ''));
+    const balance = Number((await TokensPage.tokenBalance(tokenIndex).getText()).replace(',', ''));
     expect(balance).to.equal(Number(tokenBalance));
   }
 

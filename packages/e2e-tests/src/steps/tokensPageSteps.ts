@@ -222,9 +222,9 @@ Then(
   }
 );
 Then(/^I see total wallet balance in ADA is "([^"]*)"$/, async (balanceInAda: number) => {
-  await tokensPageAssert.expectedAdaBalance(balanceInAda);
+  await tokensPageAssert.assertAdaBalance(balanceInAda);
 });
 
 Then(/^I see tMin token with the ADA balance of "([^"]*)"$/, async (balanceInAda: number) => {
-  await tokensPageAssert.expectedTMinBalance(balanceInAda);
+  await tokensPageAssert.assertTMinBalance(balanceInAda);
 });

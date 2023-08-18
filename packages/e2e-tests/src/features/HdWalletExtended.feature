@@ -9,13 +9,13 @@ Feature: ADA handle - extended view
     Then I see total wallet balance in ADA is "10019.03"
     And I see tMin token with the ADA balance of "21"
     When I navigate to NFTs extended page
-    And I see NFT with name: "DEV 3432" on the NFTs page
+    Then I see NFT with name: "DEV 3432" on the NFTs page
     And I see NFT with name: "$rinodino" on the NFTs page
 
   @LW-7552
   Scenario Outline: Transactions - HD wallet transactions displayed correctly
     When I navigate to Transactions extended page
-    And I can see transaction <txNumber> has type "<txType>" and value "<txValue>"
+    Then I can see transaction <txNumber> has type "<txType>" and value "<txValue>"
     Examples:
       | txNumber | txType           | txValue | Notes                             |
       | 1        | Sent             | 17.00   |                                   |

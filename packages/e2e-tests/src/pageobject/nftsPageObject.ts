@@ -42,6 +42,7 @@ class NftsPageObject {
   }
 
   async isNftDisplayed(nftName: string): Promise<boolean> {
+    await NftsPage.nftContainer.waitForDisplayed({ timeout: 15_000 });
     const nftItem = await NftsPage.getNftContainer(nftName);
     return nftItem !== undefined;
   }
