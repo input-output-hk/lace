@@ -26,8 +26,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "rollup -c rollup.config.js",
-    "cleanup": "shx rm -rf dist node_modules coverage .rollup.cache src/dist",
+    "build": "run -T rollup -c rollup.config.js",
+    "cleanup": "yarn exec rm -rf dist node_modules coverage .rollup.cache src/dist",
     "lint": "cd ../.. && yarn cardano:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
@@ -70,7 +70,6 @@
     "@dcspark/cardano-multiplatform-lib-browser": "^3.1.1",
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "rollup-plugin-polyfill-node": "^0.8.0",
-    "shx": "^0.3.2",
     "typescript": "^4.3.5"
   },
   "peerDependencies": {
