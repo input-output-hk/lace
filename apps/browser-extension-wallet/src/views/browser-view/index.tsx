@@ -22,6 +22,7 @@ import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import '../../lib/scripts/keep-alive-ui';
+import { FeatureFlagsProvider } from '@providers/FeatureFlags/context';
 
 if (process.env.USE_MULTI_DELEGATION_STAKING === 'true') {
   // Disabling import/no-unresolved as it is not aware of the "exports" entry
@@ -44,7 +45,9 @@ const App = (): React.ReactElement => (
                       <ExternalLinkOpenerProvider>
                         <MigrationContainer appMode={APP_MODE_BROWSER}>
                           <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                            <BrowserViewRoutes />
+                            <FeatureFlagsProvider>
+                              <BrowserViewRoutes />
+                            </FeatureFlagsProvider>
                           </DataCheckContainer>
                         </MigrationContainer>
                       </ExternalLinkOpenerProvider>

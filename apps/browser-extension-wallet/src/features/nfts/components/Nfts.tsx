@@ -28,11 +28,13 @@ import { RenameFolderType } from '@views/browser/features/nfts';
 import { NftFolderConfirmationModal } from '@views/browser/features/nfts/components/NftFolderConfirmationModal';
 import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
+import { useFeatureFlagsContext } from '@providers/FeatureFlags/context';
 
 export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   const redirectToNftDetail = useRedirection<{ params: { id: string } }>(walletRoutePaths.nftDetail);
   const [isCreateFolderDrawerOpen, setIsCreateFolderDrawerOpen] = useState(false);
   const { environmentName } = useWalletStore();
+  const { isFeatureEnabled } = useFeatureFlagsContext();
 
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
   const { walletInfo, inMemoryWallet } = useWalletStore();
@@ -142,7 +144,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
               sideText={`(${nfts.length})`}
               isPopup
             />
-            {nfts.length > 0 && process.env.USE_NFT_FOLDERS === 'true' && (
+            {nfts.length > 0 && isFeatureEnabled('NFT_FOLDERS') && (
               <Button
                 className={styles.newFolderBtn}
                 color="gradient"

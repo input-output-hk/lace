@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { Wallet } from '@lace/cardano';
+import { Flags } from '@providers/FeatureFlags/types';
 import { EnvironmentTypes } from '@stores';
 
 type CardanoServiceUrls = {
@@ -19,20 +20,7 @@ export type Config = {
   AVAILABLE_CHAINS: Wallet.ChainName[];
   CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
   SAVED_PRICE_DURATION: number;
-  FEATURE_FLAGS: {
-    PASSWORD_VERIFICATION: string;
-    DAPP_CONNECTOR: string;
-    TREZOR_HW: string;
-    TOKEN_PRICING: string;
-    DIFFERENT_MNEMONIC_LENGTHS: string;
-    NFT_FOLDERS: string;
-    MULTI_CURRENCY: string;
-    HIDE_MY_BALANCE: string;
-    MULTI_DELEGATION_STAKING: string;
-    ADA_HANDLE: string;
-    DATA_CHECK: string;
-    POSTHOG_ANALYTICS: string;
-  };
+  FEATURE_FLAGS: Record<Flags, string>;
 };
 
 // eslint-disable-next-line complexity
