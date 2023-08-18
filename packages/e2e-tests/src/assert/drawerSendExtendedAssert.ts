@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import webTester from '../actor/webTester';
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
@@ -14,6 +15,7 @@ import { getAddressByName, validAddress, validAddress2 } from '../data/AddressDa
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import ModalAssert from './modalAssert';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
+import TransactionsPage from '../elements/transactionsPage';
 
 class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
@@ -306,6 +308,28 @@ class DrawerSendExtendedAssert {
     const text = await webTester.getTextValueFromElement(new AddressInput(index).container());
     await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
   };
+
+  async assertSeeTickerTransactionCostADA(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.transactionCostADA);
+  }
+
+  async assertSeeTickerOnReviewTransactionFee(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.transactionFee);
+  }
+
+  async assertSeeTickerOnReviewTransactionAmount(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.sendAmount);
+  }
+
+  async assertSeeTicker(expectedTicker: 'ADA' | 'tADA', elementToCheck: WebdriverIO.Element) {
+    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+
+    let tickerDisplayed = (await elementToCheck.getText()) as string;
+    tickerDisplayed = String(tickerDisplayed.match(regex));
+
+    if (expectedTicker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
+    expect(tickerDisplayed).to.equal(expectedTicker);
+  }
 }
 
 export default new DrawerSendExtendedAssert();

@@ -1,4 +1,5 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
+import { Wallet } from '@lace/cardano';
 import { Banner } from '@lace/common';
 import { Box, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
@@ -18,14 +19,13 @@ export const Overview = () => {
     stakingRewards,
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
-    delegationDetails,
     walletStoreWalletActivities: walletActivities,
   } = useOutsideHandles();
   const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
 
-  const onStakePoolOpen = () => {
-    setSelectedStakePool(delegationDetails);
+  const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
+    setSelectedStakePool(stakePool);
     setIsDrawerVisible(true);
   };
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
@@ -47,7 +47,6 @@ export const Overview = () => {
     );
 
   const displayData = mapPortfolioToDisplayData({
-    balance: balancesBalance,
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
     portfolio: currentPortfolio,
@@ -87,7 +86,7 @@ export const Overview = () => {
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}
             cardanoCoinSymbol={'tADA'}
-            onStakePoolSelect={onStakePoolOpen}
+            onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
           />
         </Box>
       ))}

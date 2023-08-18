@@ -1,14 +1,7 @@
 import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
 import React, { useCallback, useEffect } from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
-import {
-  useBalances,
-  useDelegationDetails,
-  useFetchCoinPrice,
-  useLocalStorage,
-  useStakingRewards,
-  useWalletManager
-} from '@hooks';
+import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -24,7 +17,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { setWalletPassword, handleOpenBrowser } = useBackgroundServiceAPIContext();
-  const delegationDetails = useDelegationDetails();
   const selectedStakePoolDetails = useDelegationStore(stakePoolDetailsSelector);
   const {
     delegationTxBuilder,
@@ -97,7 +89,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,
-        delegationDetails,
         delegationStoreSelectedStakePoolDetails: selectedStakePoolDetails,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreDelegationTxBuilder: delegationTxBuilder,

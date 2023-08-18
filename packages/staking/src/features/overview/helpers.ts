@@ -1,38 +1,29 @@
 import { Wallet } from '@lace/cardano';
 import { PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor } from '@lace/ui';
-import { Immutable } from 'immer';
 import flatMap from 'lodash/flatMap';
+import type { StakingRewards } from '../outside-handles-provider';
 import type { AssetActivityListProps, TransactionType } from '@lace/core';
-import { Balance, StakingRewards } from '../outside-handles-provider';
-import { DelegationPortfolioStakePool } from '../store';
+import { CurrentPortfolioStakePool } from '../store';
 
 const SATURATION_UPPER_BOUND = 100;
 
 type MapPortfolioToDisplayDataParams = {
-  balance: Balance;
   cardanoCoin: Wallet.CoinId;
   cardanoPrice?: number;
-  portfolio: Immutable<DelegationPortfolioStakePool[]>;
+  portfolio: CurrentPortfolioStakePool[];
   stakingRewards: StakingRewards;
 };
 
 export const mapPortfolioToDisplayData = ({
-  balance,
   cardanoCoin,
   cardanoPrice,
   portfolio,
   stakingRewards,
 }: MapPortfolioToDisplayDataParams) => {
-  const weightsSum = portfolio.reduce((sum, { weight }) => sum + weight, 0);
-
   const displayData = portfolio.map((item, index) => ({
     ...item,
     ...item.displayData,
     cardanoCoin,
-    coinBalance: (() => {
-      const totalBalance = balance?.total?.coinBalance ? Number(balance?.total?.coinBalance) : 0;
-      return totalBalance * (item.weight / weightsSum);
-    })(),
     color: PIE_CHART_DEFAULT_COLOR_SET[index] as PieChartColor,
     fiat: cardanoPrice,
     lastReward: Wallet.util.lovelacesToAdaString(stakingRewards.lastReward.toString()),
@@ -43,6 +34,7 @@ export const mapPortfolioToDisplayData = ({
       return undefined;
     })(),
     totalRewards: Wallet.util.lovelacesToAdaString(stakingRewards.totalRewards.toString()),
+    totalStaked: Wallet.util.lovelacesToAdaString(item.value.toString()),
   }));
 
   if (displayData.length === 1) {

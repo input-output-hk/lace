@@ -1,3 +1,4 @@
+import { Wallet } from '@lace/cardano';
 import { Box, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { StakePoolDetails } from '../drawer';
@@ -17,20 +18,18 @@ export const OverviewPopup = () => {
     stakingRewards,
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
-    delegationDetails,
   } = useOutsideHandles();
   const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
 
-  const onStakePoolOpen = () => {
-    setSelectedStakePool(delegationDetails);
+  const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
+    setSelectedStakePool(stakePool);
     setIsDrawerVisible(true);
   };
 
   if (currentPortfolio.length === 0) return <Text.SubHeading>Start staking</Text.SubHeading>;
 
   const displayData = mapPortfolioToDisplayData({
-    balance: balancesBalance,
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
     portfolio: currentPortfolio,
@@ -63,7 +62,7 @@ export const OverviewPopup = () => {
               popupView
               markerColor={displayData.length > 1 ? item.color : undefined}
               cardanoCoinSymbol={'tADA'}
-              onStakePoolSelect={onStakePoolOpen}
+              onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
             />
           </Box>
         ))}
