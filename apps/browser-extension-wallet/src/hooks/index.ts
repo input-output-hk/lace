@@ -20,3 +20,4 @@ export * from './useGetHandles';
 export * from './useHandleResolver';
 export * from './useAssetInfo';
 export * from './useUpdateAddressStatus';
+export * from './useOnAddressSave';
