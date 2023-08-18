@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import posthog from 'posthog-js';
+import posthog, { PostHog } from 'posthog-js';
 import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
 import { ExtensionViews, PostHogAction, PostHogMetadata, PostHogProperties } from '../analyticsTracker';
@@ -10,16 +10,17 @@ import {
   PUBLIC_POSTHOG_HOST
 } from './config';
 import { UserIdService } from '@lib/scripts/types';
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { FeatureFlags } from '@providers/FeatureFlags/FeatureFlags';
 
-const FEATURE_FLAGS_POLLING_INTERVAL = 10_000;
+const USE_LOCAL_FLAGS = process.env.USE_LOCAL_FLAGS === 'true';
 
 /**
  * PostHog API reference:
  * https://posthog.com/docs/libraries/js
  */
 export class PostHogClient {
-  #enabledFlags: Subject<Array<string>>;
+  #featureFlagsInstance: FeatureFlags;
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
@@ -27,7 +28,6 @@ export class PostHogClient {
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
-    this.#enabledFlags = new Subject<Array<string>>();
     posthog.init(this.getApiToken(this.chain), {
       request_batching: false,
       api_host: this.publicPostHogHost,
@@ -41,16 +41,8 @@ export class PostHogClient {
       disable_cookie: true,
       persistence: 'memory',
       property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time'],
-      loaded: (posthogInstance) => {
-        let isResolved = false;
-        setInterval(() => {
-          posthogInstance.reloadFeatureFlags();
-        }, FEATURE_FLAGS_POLLING_INTERVAL);
-        posthogInstance.onFeatureFlags((flags) => {
-          this.#enabledFlags.next(flags);
-          if (!isResolved) posthogInstance.reloadFeatureFlags();
-          isResolved = true;
-        });
+      loaded: (posthogInstance: PostHog) => {
+        this.#featureFlagsInstance = new FeatureFlags(posthogInstance, USE_LOCAL_FLAGS);
       }
     });
   }
@@ -93,7 +85,7 @@ export class PostHogClient {
   }
 
   subscribeToRemoteFlags(callback: (params: Array<string>) => void): Subscription {
-    return this.#enabledFlags.subscribe(callback);
+    return this.#featureFlagsInstance.subscribeToRemoteFlags(callback);
   }
 
   protected getApiToken(chain: Wallet.Cardano.ChainId): string {

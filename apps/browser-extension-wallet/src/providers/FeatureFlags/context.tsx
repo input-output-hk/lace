@@ -8,7 +8,7 @@ interface FeatureFlagsProviderProps {
 
 type FeatureFlags = {
   enabledFeature: Array<string>;
-  flagsHavdBeenLoaded: boolean;
+  flagsHaveBeenLoaded: boolean;
   isFeatureEnabled: (param: 'assets' | 'nfts') => boolean;
 };
 
@@ -25,12 +25,12 @@ export const useFeatureFlagsContext = (): FeatureFlags => {
 export const FeatureFlagsProvider = ({ children }: FeatureFlagsProviderProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const [enabledFeature, setEnabledFeature] = useState<Array<string>>();
-  const [flagsHavdBeenLoaded, setFlagsHavdBeenLoaded] = useState(false);
+  const [flagsHaveBeenLoaded, setFlagsHaveBeenLoaded] = useState(false);
 
   useEffect(() => {
     const subscription = analytics.getPostHogFeatureFlag((flags) => {
       setEnabledFeature(flags);
-      setFlagsHavdBeenLoaded(true);
+      setFlagsHaveBeenLoaded(true);
     });
 
     return () => {
@@ -39,10 +39,10 @@ export const FeatureFlagsProvider = ({ children }: FeatureFlagsProviderProps): R
   }, [analytics]);
 
   const isFeatureEnabled: FeatureFlags['isFeatureEnabled'] = (flag) =>
-    flagsHavdBeenLoaded && enabledFeature.includes(flag);
+    flagsHaveBeenLoaded && enabledFeature.includes(flag);
 
   return (
-    <FeatureFlagsContext.Provider value={{ enabledFeature, flagsHavdBeenLoaded, isFeatureEnabled }}>
+    <FeatureFlagsContext.Provider value={{ enabledFeature, flagsHaveBeenLoaded, isFeatureEnabled }}>
       {children}
     </FeatureFlagsContext.Provider>
   );
