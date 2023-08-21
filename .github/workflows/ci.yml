@@ -40,7 +40,7 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
         run: |
           eval "set -x ; $(cat apps/browser-extension-wallet/.env.* | grep ^USE_ | sed -r 's/false/true/' | sort --unique | sed -r 's/^/export /' | tr '\n' ';') set +x"
-          yarn build
+          yarn browser build
       - name: Upload build
         uses: actions/upload-artifact@v3
         with:
