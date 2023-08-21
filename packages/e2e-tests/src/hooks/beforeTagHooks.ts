@@ -123,3 +123,13 @@ Before(
   { tags: '@Multidelegation-SwitchingPools-Extended-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletMultidelegationSwitchPoolsE2E)
 );
+
+Before(
+  { tags: '@HdWallet-extended' },
+  async () => await extendedViewWalletInitialization(TestWalletName.HdWalletReadOnly1)
+);
+
+Before(
+  { tags: '@SendNftHdWallet-Extended-E2E' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletSendNftHdWalletE2E)
+);
