@@ -24,7 +24,7 @@
     "packages/ui"
   ],
   "scripts": {
-    "base-command-for-build-scripts": "yarn workspaces foreach -ptvi --topological-dev --exclude lace ${APP_NAME:+--include \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+--exclude \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+--exclude \"@lace/browser-extension-wallet\"}",
+    "base-command-for-build-scripts": "wsrun --prefix -tram ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
     "browser": "APP_NAME=browser-extension-wallet yarn $0",
     "build": "yarn base-command-for-build-scripts run build",
     "build-all": "yarn workspaces foreach -ptv --topological-dev --exclude 'lace' run build",
@@ -205,7 +205,8 @@
     "webpack-cli": "4.7.2",
     "webpack-dev-server": "^4.9.3",
     "webpack-merge": "5.8.0",
-    "webpack-subresource-integrity": "^5.1.0"
+    "webpack-subresource-integrity": "^5.1.0",
+    "wsrun": "^5.2.4"
   },
   "packageManager": "yarn@3.6.0"
 }
