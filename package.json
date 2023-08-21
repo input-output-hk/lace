@@ -26,9 +26,8 @@
   "scripts": {
     "base-command-for-build-scripts": "wsrun --prefix -tram ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
     "browser": "APP_NAME=browser-extension-wallet yarn $0",
-    "build": "yarn base-command-for-build-scripts run build",
-    "build-all": "yarn workspaces foreach -ptv --topological-dev --exclude 'lace' run build",
-    "build-deps": "yarn workspaces foreach -ptvi --include '{@lace/common,@lace/core,@lace/cardano,@lace/ui,@lace/staking}' ${APP_NAME:+--exclude \"@lace/$APP_NAME\"} run build",
+    "build": "yarn base-command-for-build-scripts -c build",
+    "build-deps": "EXCLUDE_APP=true yarn build",
     "cardano:lint": "yarn eslint-cmd \"packages/cardano/**/*.{js,ts,tsx}\"",
     "chromatic": "ENV=development yarn build-storybook; chromatic --exit-zero-on-changes --project-token=e28776c940b9 -d storybook-static/",
     "cleanup": "yarn workspaces foreach run cleanup && yarn exec rm -rf node_modules storybook-static && rm -rf .cache/eslintcache",
