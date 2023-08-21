@@ -1,4 +1,10 @@
-import { EnhancedAnalyticsOptInStatus, ExtensionViews, MatomoSendEventProps, PostHogAction } from './types';
+import {
+  EnhancedAnalyticsOptInStatus,
+  ExtensionViews,
+  MatomoSendEventProps,
+  PostHogAction,
+  PostHogProperties
+} from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient } from '../matomo';
 import { POSTHOG_ENABLED, PostHogClient } from '../postHog';
@@ -50,7 +56,7 @@ export class AnalyticsTracker {
     await this.userIdService?.extendLifespan();
   }
 
-  async sendEventToPostHog(action: PostHogAction, properties: Record<string, string | boolean> = {}): Promise<void> {
+  async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     await this.postHogClient?.sendEvent(action, properties);
     await this.userIdService?.extendLifespan();
   }

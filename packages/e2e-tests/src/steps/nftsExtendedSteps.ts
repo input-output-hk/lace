@@ -26,8 +26,12 @@ Then(/^"Send NFT" button (is|is not) displayed on NFT details drawer$/, async (s
   await nftAssert.assertSeeSendNFTButton(shouldBeDisplayed === 'is');
 });
 
-Given(/^I'm sending an NFT with name: "([^"]*)"$/, async (nftName: string) => {
+Given(/^I'm sending the NFT with name: "([^"]*)"$/, async (nftName: string) => {
   await nftsPageObject.progressWithSendUntilPasswordPage(nftName);
+});
+
+Given(/^I'm sending the NFT with name: "([^"]*)" with HD wallet$/, async (nftName: string) => {
+  await nftsPageObject.progressWithSendUntilPasswordPage(nftName, true);
 });
 
 Given(/^the NFT is pre-loaded as token to be sent with name: "([^"]*)"$/, async (nftName: string) => {
