@@ -5,7 +5,7 @@ const mockIsAddress = jest.fn();
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Wallet } from '@lace/cardano';
-import { ValidationResult } from '../../../types';
+import { ValidationResult } from '@types';
 import * as addressBook from '../address-book';
 import i18n from 'i18next';
 import { Cardano, HandleProvider, Asset } from '@cardano-sdk/core';
