@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useMemo } from 'react';
 
-export const useIsMultiDelegationEnabled = (): boolean => {
+export const useMultiDelegationEnabled = (): boolean => {
   const { getKeyAgentType } = useWalletStore();
   const inMemoryWallet = useMemo(
     () => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
