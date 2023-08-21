@@ -68,7 +68,7 @@ export const SendTransaction = withAddressBookContext(
           name={name}
           isPopupView={isPopupView}
           expectedAddress={validatedAddressStatus[address]?.error?.expectedAddress ?? ''}
-          actualAddress={validatedAddressStatus[address]?.error?.expectedAddress ?? ''}
+          actualAddress={validatedAddressStatus[address]?.error?.actualAddress ?? ''}
         />
       )
     };
