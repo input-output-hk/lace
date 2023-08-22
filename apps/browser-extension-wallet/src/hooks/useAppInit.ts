@@ -7,8 +7,7 @@ import { useEffect } from 'react';
 import { runtime } from 'webextension-polyfill';
 
 export const useAppInit = (): void => {
-  const { environmentName, setAddressesDiscoveryCompleted, setWalletInfo, setWalletManagerUi, walletManagerUi } =
-    useWalletStore();
+  const { environmentName, setWalletInfo, setWalletManagerUi, walletManagerUi } = useWalletStore();
   const { updateAddresses } = useWalletManager();
 
   useEffect(() => {
@@ -37,5 +36,5 @@ export const useAppInit = (): void => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [walletManagerUi?.wallet, environmentName, setAddressesDiscoveryCompleted, setWalletInfo, updateAddresses]);
+  }, [walletManagerUi?.wallet, environmentName, setWalletInfo, updateAddresses]);
 };

@@ -58,7 +58,6 @@ export interface UseWalletManager {
     addresses: Wallet.KeyManagement.GroupedAddress[];
     currentChainName: Wallet.ChainName;
   }) => Promise<void>;
-  loadUnlockedWallet: (keyAgentsByChain: Wallet.KeyAgentsByChain) => Promise<void>;
 }
 
 /** Connects a hardware wallet device */
@@ -150,7 +149,8 @@ export const useWalletManager = (): UseWalletManager => {
 
     setKeyAgentData();
     setCardanoWallet();
-  }, [backgroundService, setKeyAgentData, setCardanoWallet, walletLock]);
+    setAddressesDiscoveryCompleted(false);
+  }, [walletLock, backgroundService, setKeyAgentData, setCardanoWallet, setAddressesDiscoveryCompleted]);
 
   /**
    * Recovers wallet info from encrypted lock using the wallet password
@@ -188,17 +188,6 @@ export const useWalletManager = (): UseWalletManager => {
       setCardanoWallet(wallet);
     },
     [keyAgentData, cardanoWalletManager, walletManagerUi, getPassword, environmentName, setCardanoWallet]
-  );
-
-  const loadUnlockedWallet = useCallback(
-    async (keyAgentsByChain: Wallet.KeyAgentsByChain) => {
-      const unlockedKeyAgentData = keyAgentsByChain[environmentName]?.keyAgentData;
-      // eslint-disable-next-line unicorn/no-null
-      saveValueInLocalStorage({ key: 'keyAgentData', value: unlockedKeyAgentData ?? null });
-      await backgroundService.setBackgroundStorage({ keyAgentsByChain });
-      setKeyAgentData(keyAgentData);
-    },
-    [backgroundService, environmentName, keyAgentData, setKeyAgentData]
   );
 
   /**
@@ -399,6 +388,8 @@ export const useWalletManager = (): UseWalletManager => {
     async ({ addresses, currentChainName }) => {
       const currentChainId = Wallet.Cardano.ChainIds[currentChainName];
       const currentKeyAgentData = getValueFromLocalStorage('keyAgentData');
+      if (!currentKeyAgentData) return;
+
       const networkOfKeyAgentAsIntended = isEqual(currentKeyAgentData.chainId, currentChainId);
       const networkOfAddressesEqualsNetworkOfKeyAgent = addresses.every(
         (address) => address.networkId === currentKeyAgentData.chainId.networkId
@@ -476,7 +467,6 @@ export const useWalletManager = (): UseWalletManager => {
     deleteWallet,
     executeWithPassword,
     switchNetwork,
-    updateAddresses,
-    loadUnlockedWallet
+    updateAddresses
   };
 };
