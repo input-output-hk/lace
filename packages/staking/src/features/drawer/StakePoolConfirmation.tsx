@@ -1,6 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import Icon from '@ant-design/icons';
 import { InputSelectionFailure } from '@cardano-sdk/input-selection';
+import { BigIntMath } from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
 import { Banner, Button, Ellipsis, useObservable } from '@lace/common';
 import { RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
@@ -131,14 +132,16 @@ export const StakePoolConfirmation = (): React.ReactElement => {
         const txBuilder = inMemoryWallet.createTxBuilder();
         const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.weight }));
         const tx = await txBuilder.delegatePortfolio({ pools }).build().inspect();
-        const { deposit: newDelegationTxDeposit } = Wallet.Cardano.util.computeImplicitCoin(
+        const { deposit: newDelegationTxDeposit, input } = Wallet.Cardano.util.computeImplicitCoin(
           protocolParameters,
           tx.body
         );
+        const newDelegationTxReclaim =
+          (input || BigInt(0)) - BigIntMath.sum((tx.body.withdrawals || []).map(({ quantity }) => quantity));
         setDelegationTxBuilder(txBuilder);
         setDelegationTxFee(tx.body.fee.toString());
         setStakingError();
-        setDelegationTxDeposit(Number(newDelegationTxDeposit) || 0);
+        setDelegationTxDeposit(Number(newDelegationTxDeposit) - Number(newDelegationTxReclaim));
       } catch (error) {
         // TODO: check for error instance after LW-6749
         if (isInputSelectionError(error)) {
