@@ -38,8 +38,8 @@ const App = (): React.ReactElement => (
           <StoreProvider appMode={APP_MODE_BROWSER}>
             <AxiosClientProvider>
               <CurrencyStoreProvider>
-                <AnalyticsProvider>
-                  <HashRouter>
+                <HashRouter>
+                  <AnalyticsProvider>
                     <ThemeProvider>
                       <ExternalLinkOpenerProvider>
                         <MigrationContainer appMode={APP_MODE_BROWSER}>
@@ -49,8 +49,8 @@ const App = (): React.ReactElement => (
                         </MigrationContainer>
                       </ExternalLinkOpenerProvider>
                     </ThemeProvider>
-                  </HashRouter>
-                </AnalyticsProvider>
+                  </AnalyticsProvider>
+                </HashRouter>
               </CurrencyStoreProvider>
             </AxiosClientProvider>
           </StoreProvider>

@@ -6,6 +6,8 @@ import { AnalyticsTracker } from './analyticsTracker';
 import { EnhancedAnalyticsOptInStatus, ExtensionViews } from './analyticsTracker/types';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
 import shallow from 'zustand/shallow';
+import { useHistory } from 'react-router-dom';
+import { walletRoutePaths } from '@routes';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -38,10 +40,11 @@ export const AnalyticsProvider = ({
     (state) => ({ currentChain: state?.currentChain, view: state.walletUI.appMode }),
     shallow
   );
-  const [optedInForEnhancedAnalytics] = useLocalStorage(
+  const [optedInForEnhancedAnalytics, { updateLocalStorage }] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
+  const { listen } = useHistory();
 
   const analyticsTracker = useMemo(
     () =>
@@ -55,9 +58,18 @@ export const AnalyticsProvider = ({
   );
 
   useEffect(() => {
+    const unregisterListener = listen((location) => {
+      if (walletRoutePaths.setup.home === location.pathname) {
+        updateLocalStorage(EnhancedAnalyticsOptInStatus.OptedOut);
+      }
+    });
+
+    return () => unregisterListener();
+  }, [listen, updateLocalStorage]);
+
+  useEffect(() => {
     analyticsTracker.setOptedInForEnhancedAnalytics(optedInForEnhancedAnalytics);
   }, [optedInForEnhancedAnalytics, analyticsTracker]);
-
   useEffect(() => {
     analyticsTracker.setChain(currentChain);
   }, [currentChain, analyticsTracker]);
