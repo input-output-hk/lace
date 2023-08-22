@@ -5,9 +5,69 @@ import { useEffect, useState } from 'react';
 
 type updateAddressStatusType = Record<string, { isValid: boolean; error?: CustomConflictError }>;
 
-const API_LIMIT = 5;
-const API_RATE_LIMIT = 1000;
+const API_LIMIT = 4;
+const API_RATE_LIMIT = 100;
 
+type taskType = () => Promise<unknown>;
+
+const createQueue = () => {
+  let tasks: Array<taskType> = [];
+  let isRunning = false;
+  let sent = 0;
+
+  const stop = () => {
+    sent = 0;
+    isRunning = false;
+    tasks = [];
+  };
+
+  const isEmpty = () => tasks.length === 0;
+
+  const dequeue = (): taskType | undefined => tasks.shift();
+
+  const execute = async () => {
+    if (!isEmpty()) {
+      const task = dequeue();
+
+      if (!task) {
+        return;
+      }
+
+      await task();
+      sent++;
+
+      if (isRunning && !isEmpty()) {
+        if (sent >= API_LIMIT) {
+          // Reset the sent count
+          sent = 0;
+          // eslint-disable-next-line promise/avoid-new
+          await new Promise((resolve) => setTimeout(resolve, API_RATE_LIMIT));
+        }
+        execute();
+      }
+
+      if (isEmpty()) {
+        stop();
+      }
+    }
+  };
+
+  const enqueue = async (item: taskType) => {
+    tasks.push(item);
+
+    if (!isRunning) {
+      isRunning = true;
+      execute();
+    }
+  };
+
+  return {
+    enqueue,
+    dequeue,
+    isEmpty,
+    stop
+  };
+};
 export const useUpdateAddressStatus = (
   addressList: AddressBookSchema[],
   handleResolver: HandleProvider
@@ -16,13 +76,15 @@ export const useUpdateAddressStatus = (
 
   useEffect(() => {
     const interval = 10_000;
+    const queue = createQueue();
 
     const updateAddressStatus = (address: string, status: { isValid: boolean; error?: CustomConflictError }) => {
-      setValidatedAddressStatus((currentValidatedAddressStatus) => ({
+      setValidatedAddressStatus((currentValidatedAddressStatus: updateAddressStatusType) => ({
         ...currentValidatedAddressStatus,
         [address]: status
       }));
     };
+
     const validateAddresses = async () => {
       if (!addressList) {
         return;
@@ -30,30 +92,33 @@ export const useUpdateAddressStatus = (
 
       const handleList = addressList.filter((item) => !Cardano.isAddress(item.address));
 
-      for (const [i, item] of handleList?.entries()) {
-        try {
-          await ensureHandleOwnerHasntChanged({
-            handleResolution: item.handleResolution,
-            handleResolver
-          });
-          updateAddressStatus(item.address, { isValid: true });
-        } catch (error) {
-          if (error instanceof CustomConflictError) {
-            updateAddressStatus(item.address, { isValid: false, error });
+      for (const item of handleList) {
+        queue.enqueue(async () => {
+          try {
+            await ensureHandleOwnerHasntChanged({
+              handleResolution: item.handleResolution,
+              handleResolver
+            });
+            updateAddressStatus(item.address, { isValid: true });
+          } catch (error) {
+            if (error instanceof CustomConflictError || error.message === 'Handle not found') {
+              updateAddressStatus(item.address, { isValid: false, error });
+            }
           }
-        }
-
-        if ((i + 1) % API_LIMIT === 0) {
-          // This pauses the execution of the for loop so we don't get rate limited.
-          // eslint-disable-next-line promise/avoid-new
-          await new Promise((resolve) => setTimeout(resolve, API_RATE_LIMIT));
-        }
+        });
       }
     };
-    validateAddresses();
-    const intervalId = setInterval(validateAddresses, interval);
 
-    return () => clearInterval(intervalId);
+    validateAddresses();
+    const intervalId = setInterval(() => {
+      queue.stop();
+      validateAddresses();
+    }, interval);
+
+    return () => {
+      queue.stop();
+      clearInterval(intervalId);
+    };
   }, [addressList, handleResolver]);
 
   return validatedAddressStatus;
