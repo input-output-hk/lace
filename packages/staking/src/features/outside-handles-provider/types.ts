@@ -126,4 +126,5 @@ export type OutsideHandlesContextValue = {
   compactNumber: (value: number | string, decimal?: number) => string;
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
+  currentChain: Wallet.Cardano.ChainId;
 };
