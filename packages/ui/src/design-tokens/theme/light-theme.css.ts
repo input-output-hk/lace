@@ -169,6 +169,9 @@ const colors: Colors = {
   $assets_table_market_price_trend_down_label_color:
     lightColorScheme.$secondary_data_pink,
 
+  $dialog_container_bgColor: lightColorScheme.$primary_white,
+  $dialog_description_color: lightColorScheme.$primary_dark_grey,
+
   $side_drawer_container_bgColor: lightColorScheme.$primary_white,
   $side_drawer_separator_bgColor: lightColorScheme.$primary_light_grey_plus,
   $side_drawer_head_title_color: lightColorScheme.$primary_black,

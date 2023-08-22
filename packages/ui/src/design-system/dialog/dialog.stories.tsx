@@ -1,0 +1,220 @@
+import React, { useState } from 'react';
+
+import { action } from '@storybook/addon-actions';
+import type { Meta } from '@storybook/react';
+
+import { Flex, Divider, Grid, Cell, Button } from '../';
+import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
+import { page, Variants, Section, usePortalContainer } from '../decorators';
+
+// Content component is embedded in `Dialog.Root` but we need this building block to present static dialog content in Storybook
+import { Content } from './dialog-content.component';
+import { DialogStorybookContextProvider } from './dialog-storybook-context-provider.component';
+
+import * as Dialog from './index';
+
+const { Root, ...subcomponents } = Dialog;
+
+export default {
+  title: 'Modals/Dialog',
+  component: Root,
+  subcomponents,
+  decorators: [page({ title: 'Dialog' })],
+  argTypes: {
+    open: {
+      table: {
+        disable: true,
+      },
+    },
+    portalContainer: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+} as Meta;
+
+export const Overview = (): JSX.Element => (
+  <DialogStorybookContextProvider>
+    <Grid columns="$1">
+      <Cell>
+        <Section title="Variants">
+          <Variants.Table headers={['1 button', '2 buttons']}>
+            <Variants.Row>
+              <Variants.Cell>
+                <Content>
+                  <Dialog.Title>Title</Dialog.Title>
+                  <Dialog.Description>
+                    Amet, malesuada aliquet tortor varius faucibus. Etiam
+                    natoque blandit nunc congue.
+                  </Dialog.Description>
+                  <Dialog.Actions>
+                    <Dialog.Action label="Label" onClick={action('1-button')} />
+                  </Dialog.Actions>
+                </Content>
+              </Variants.Cell>
+              <Variants.Cell>
+                <Content>
+                  <Dialog.Title>Title</Dialog.Title>
+                  <Dialog.Description>
+                    Amet, malesuada aliquet tortor varius faucibus. Etiam
+                    natoque blandit nunc congue.
+                  </Dialog.Description>
+                  <Dialog.Actions>
+                    <Dialog.Action
+                      cancel
+                      label="Label"
+                      onClick={action('2-buttons-1')}
+                    />
+                    <Dialog.Action
+                      label="Label"
+                      onClick={action('2-buttons-2')}
+                    />
+                  </Dialog.Actions>
+                </Content>
+              </Variants.Cell>
+            </Variants.Row>
+          </Variants.Table>
+          <Divider my="$64" />
+
+          <Section title="Main components">
+            <Variants.Table>
+              <Variants.Row>
+                <Variants.Cell>
+                  <Flex justifyContent="center">
+                    <Content>
+                      <Dialog.Title>Title</Dialog.Title>
+                      <Dialog.Description>
+                        Amet, malesuada aliquet tortor varius faucibus. Etiam
+                        natoque blandit nunc congue.
+                      </Dialog.Description>
+                      <Dialog.Actions>
+                        <Dialog.Action
+                          cancel
+                          label="Label"
+                          onClick={action('light-button-1')}
+                        />
+                        <Dialog.Action
+                          label="Label"
+                          onClick={action('light-button-2')}
+                        />
+                      </Dialog.Actions>
+                    </Content>
+                  </Flex>
+                </Variants.Cell>
+              </Variants.Row>
+            </Variants.Table>
+            <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+              <Variants.Table>
+                <Variants.Row>
+                  <Variants.Cell>
+                    <Flex justifyContent="center">
+                      <Content>
+                        <Dialog.Title>Title</Dialog.Title>
+                        <Dialog.Description>
+                          Amet, malesuada aliquet tortor varius faucibus. Etiam
+                          natoque blandit nunc congue.
+                        </Dialog.Description>
+                        <Dialog.Actions>
+                          <Dialog.Action
+                            cancel
+                            label="Label"
+                            onClick={action('dark-button-1')}
+                          />
+                          <Dialog.Action
+                            label="Label"
+                            onClick={action('dark-button-2')}
+                          />
+                        </Dialog.Actions>
+                      </Content>
+                    </Flex>
+                  </Variants.Cell>
+                </Variants.Row>
+              </Variants.Table>
+            </LocalThemeProvider>
+          </Section>
+        </Section>
+      </Cell>
+    </Grid>
+  </DialogStorybookContextProvider>
+);
+
+interface ConfigurableStoryProps {
+  dialogTitle: string;
+  dialogDescription: string;
+  actionPrimaryTitle: string;
+  actionSecondaryTitle?: string;
+}
+
+export const Controls = ({
+  dialogTitle,
+  dialogDescription,
+  actionPrimaryTitle,
+  actionSecondaryTitle,
+}: Readonly<ConfigurableStoryProps>): JSX.Element => {
+  // TODO is this necessary?
+  const container = usePortalContainer();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  return (
+    <div>
+      <Flex justifyContent="center" alignItems="center" h="$fill">
+        <Button.CallToAction
+          label="Open dialog"
+          onClick={(): void => {
+            setIsDialogOpen(true);
+          }}
+        />
+      </Flex>
+      <Dialog.Root open={isDialogOpen} portalContainer={container}>
+        <Dialog.Title>{dialogTitle}</Dialog.Title>
+        <Dialog.Description>{dialogDescription}</Dialog.Description>
+        <Dialog.Actions>
+          {actionSecondaryTitle !== undefined && (
+            <Dialog.Action
+              cancel
+              label={actionSecondaryTitle}
+              onClick={(): void => {
+                setIsDialogOpen(false);
+              }}
+            />
+          )}
+          <Dialog.Action
+            label={actionPrimaryTitle}
+            onClick={(): void => {
+              setIsDialogOpen(false);
+            }}
+          />
+        </Dialog.Actions>
+      </Dialog.Root>
+    </div>
+  );
+};
+
+Controls.argTypes = {
+  dialogTitle: {
+    defaultValue: 'Switching pool?',
+    control: {
+      type: 'text',
+    },
+  },
+  dialogDescription: {
+    defaultValue:
+      "That's totally fine! Just please note that you'll continue receiving rewards from your former pool for two epochs. After that, you'll start receiving rewards from your new pool.",
+    control: {
+      type: 'text',
+    },
+  },
+  actionPrimaryTitle: {
+    defaultValue: 'Fine by me',
+    control: {
+      type: 'text',
+    },
+  },
+  actionSecondaryTitle: {
+    defaultValue: 'Cancel',
+    control: {
+      type: 'text',
+    },
+  },
+};

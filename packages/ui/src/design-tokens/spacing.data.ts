@@ -1,3 +1,4 @@
+// TODO discuss: split spacing from "sizing" - spacing should refer to margin and padding
 export const spacing = {
   $0: '0px',
   $1: '1px',
@@ -21,12 +22,15 @@ export const spacing = {
   $64: '64px',
   $80: '80px',
   $96: '96px',
+  // TODO discuss: this spacing should be removed as it's not used by the designers (only for storybook)
   $112: '112px',
   $116: '116px',
   $120: '120px',
-  $342: '342px',
+  $dialog_width_popup: '120px',
+  $dialog_width_browser: '480px',
   $584: '584px',
   $fill: '100%',
   $auto: 'auto',
+  // TODO discuss: renaming to side_drawer_width, as dialog widths are different depending on dialog type
   $dialog: '664px',
 } as const;
