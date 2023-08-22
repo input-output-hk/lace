@@ -1077,7 +1077,7 @@
     },
     "editAddressForm": {
       "walletName": "Wallet name",
-      "address": "Address",
+      "address": "Recipient's address or $handle",
       "submissionError": "Address could not be submitted",
       "doneButton": "Done"
     },
@@ -1111,7 +1111,7 @@
     },
     "walletAddressList": {
       "name": "Name",
-      "address": "Address"
+      "address": "Recipient's address or $handle"
     },
     "walletBasicInfo": {
       "balance": "Balance"
