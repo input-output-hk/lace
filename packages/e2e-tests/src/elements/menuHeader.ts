@@ -6,7 +6,7 @@ export class MenuHeader {
   private AVATAR_ON_MENU = '[data-testid="header-menu"] [data-testid="user-avatar"]';
   private CHEVRON_DOWN = '[data-testid="chevron-down"]';
   private CHEVRON_UP = '[data-testid="chevron-up"]';
-  private CONTAINER = '//ul[@data-menu-list="true"]';
+  private CONTAINER = '.ant-dropdown-menu';
   private LOGO_SELECTOR = '//*[@data-testid="header-logo"]';
   private NETWORK_PILL = '[data-testid="network-pill"]';
   private OFFLINE_NETWORK_PILL = '[data-testid="network-offline-indicator"]';
