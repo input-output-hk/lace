@@ -60,7 +60,7 @@ export const txHistoryTransformer = ({
     cardanoCoin,
     status: Wallet.TransactionStatus.SUCCESS,
     direction: direction as TxDirections,
-    date: dayjs().isSame(time, 'day') ? 'Today' : formatDate(time, 'DD MMMM YYYY')
+    date: dayjs().isSame(time, 'day') ? 'Today' : formatDate({ date: time, format: 'DD MMMM YYYY', type: 'local' })
   });
 
   /*

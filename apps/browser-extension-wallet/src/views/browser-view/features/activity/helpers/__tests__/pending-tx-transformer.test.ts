@@ -109,7 +109,11 @@ describe('Testing tx transformers utils', () => {
           }
         ],
         assetsNumber: 2,
-        timestamp: formatTime(time, 'HH:mm:ss A')
+        timestamp: formatTime({
+          date: time,
+          format: 'HH:mm:ss A',
+          type: 'local'
+        })
       });
     });
   });
