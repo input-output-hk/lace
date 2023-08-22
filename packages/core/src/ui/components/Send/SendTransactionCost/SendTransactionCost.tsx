@@ -36,8 +36,12 @@ export const SendTransactionCost = ({
     </div>
 
     <div className={styles.descriptionContainer}>
-      <Text className={styles.ada}>{adaAmount}</Text>
-      <Text className={styles.fiat}>{fiatAmount}</Text>
+      <Text data-testid="send-transaction-costs-ada" className={styles.ada}>
+        {adaAmount}
+      </Text>
+      <Text data-testid="send-transaction-costs-fiat" className={styles.fiat}>
+        {fiatAmount}
+      </Text>
     </div>
   </div>
 );

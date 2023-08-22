@@ -13,11 +13,12 @@ type SetupProps = SetupBaseProps;
 export const Setup = ({ children, ...rest }: SetupProps) => {
   const { walletStoreInMemoryWallet, walletStoreWalletUICardanoCoin: cardanoCoin } = useOutsideHandles();
   const { setCurrentPortfolio } = useDelegationPortfolioStore((s) => s.mutators);
-  const rewardAccountInfo = useObservable(walletStoreInMemoryWallet.delegation.rewardAccounts$);
+  const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
 
   useEffect(() => {
-    setCurrentPortfolio({ cardanoCoin, rewardAccountInfo });
-  }, [rewardAccountInfo, setCurrentPortfolio, cardanoCoin]);
+    if (!delegationDistribution) return;
+    setCurrentPortfolio({ cardanoCoin, delegationDistribution: [...delegationDistribution.values()] });
+  }, [delegationDistribution, setCurrentPortfolio, cardanoCoin]);
 
   return <SetupBase {...rest}>{children}</SetupBase>;
 };

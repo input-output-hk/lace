@@ -22,20 +22,6 @@ jobs:
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'yarn'
-      - name: Node modules cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-      - name: Install dependencies
-        run: yarn install --check-cache --frozen-lockfile --non-interactive --loglevel=error
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:
@@ -56,7 +42,7 @@ jobs:
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-        run: ./node_modules/.bin/wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tagExpression="@Smoke and not @Pending"
+        run: yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tagExpression="@Smoke and not @Pending"
       - name: Create allure properties
         if: always()
         working-directory: ./packages/e2e-tests/reports/allure/results
