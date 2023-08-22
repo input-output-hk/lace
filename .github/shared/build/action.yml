@@ -21,7 +21,7 @@ runs:
         key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Install dependencies
       shell: bash
-      run: yarn install --frozen-lockfile --non-interactive --logevel=error
+      run: yarn install --immutable --immutable-cache --inline-builds --mode=skip-build
     - name: Build dist version
       shell: bash
       env:

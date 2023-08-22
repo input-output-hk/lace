@@ -1,5 +1,5 @@
+import { DelegatedStake } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
-import { Immutable } from 'immer';
 
 export enum Sections {
   DETAIL = 'detail',
@@ -42,14 +42,19 @@ export interface StakePoolDetails {
   setStakingError: (error?: StakingError) => void;
 }
 
-export type DelegationPortfolioStakePool = Wallet.Cardano.Cip17Pool & {
+export type DraftPortfolioStakePool = Wallet.Cardano.Cip17Pool & {
   displayData: Wallet.util.StakePool;
 };
 
-export type DelegationPortfolioState = Immutable<{
-  currentPortfolio: DelegationPortfolioStakePool[];
-  draftPortfolio: DelegationPortfolioStakePool[];
-}>;
+export type CurrentPortfolioStakePool = DraftPortfolioStakePool & {
+  stakePool: Wallet.Cardano.StakePool;
+  value: bigint;
+};
+
+export type DelegationPortfolioState = {
+  currentPortfolio: CurrentPortfolioStakePool[];
+  draftPortfolio: DraftPortfolioStakePool[];
+};
 
 export type DelegationPortfolioQueries = {
   poolIncludedInDraft: (id: Wallet.Cardano.PoolIdHex) => boolean;
@@ -57,12 +62,12 @@ export type DelegationPortfolioQueries = {
 
 type DelegationPortfolioMutators = {
   setCurrentPortfolio: (params: {
-    rewardAccountInfo?: Wallet.Cardano.RewardAccountInfo[];
+    delegationDistribution: DelegatedStake[];
     cardanoCoin: Wallet.CoinId;
   }) => Promise<void>;
-  addPoolToDraft: (pool: DelegationPortfolioStakePool) => void;
-  removePoolFromDraft: (params: Pick<DelegationPortfolioStakePool, 'id'>) => void;
-  updatePoolWeight: (params: Pick<DelegationPortfolioStakePool, 'id' | 'weight'>) => void;
+  addPoolToDraft: (pool: DraftPortfolioStakePool) => void;
+  removePoolFromDraft: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
+  updatePoolWeight: (params: Pick<DraftPortfolioStakePool, 'id' | 'weight'>) => void;
   clearDraft: () => void;
 };
 

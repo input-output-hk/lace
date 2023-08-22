@@ -33,7 +33,7 @@
   ],
   "scripts": {
     "build": "tsc && tsup",
-    "cleanup": "shx rm -rf dist node_modules && shx rm -rf ../../.cache/eslintcache",
+    "cleanup": "yarn exec rm -rf dist node_modules && yarn exec rm -rf ../../.cache/eslintcache",
     "dev": "ladle serve",
     "eslint:check": "eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '**/*.{cjs,mjs,js,ts,tsx}'",
     "eslint:fix": "yarn eslint:check --fix",
@@ -48,8 +48,6 @@
     "test:all": "yarn test:unit --coverage && yarn test:vr",
     "test:coverage": "yarn test --coverage",
     "test:unit": "vitest run",
-    "test:vr": "concurrently --kill-others --success first --names LADLE,VR \"yarn story:preview\" \"wait-on http://127.0.0.1:8080 && yarn lost-pixel\"",
-    "test:vr:update": "lost-pixel update",
     "watch": "tsup --watch"
   },
   "dependencies": {
@@ -60,7 +58,8 @@
     "immer": "^10.0.2",
     "lodash": "4.17.21",
     "react-copy-to-clipboard": "^5.1.0",
-    "react-i18next": "^12.3.1"
+    "react-i18next": "^12.3.1",
+    "zustand": "^4.4.1"
   },
   "devDependencies": {
     "@cardano-sdk/input-selection": "0.11.5",
@@ -83,7 +82,6 @@
     "esbuild-plugin-svgr": "^2.0.0",
     "esbuild-scss-modules-plugin": "^1.1.1",
     "happy-dom": "^9.18.3",
-    "lost-pixel": "^3.4.0",
     "normalize.css": "^8.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -94,13 +92,13 @@
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-svgr": "^3.2.0",
     "vitest": "^0.31.0",
-    "wait-on": "^7.0.1",
-    "zustand": "3.5.14"
+    "wait-on": "^7.0.1"
   },
   "peerDependencies": {
     "@cardano-sdk/input-selection": "0.11.4",
     "@cardano-sdk/tx-construction": "0.9.4",
     "@cardano-sdk/util": "0.13.0",
+    "@cardano-sdk/wallet": "0.18.5",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/core": "0.1.0",
@@ -109,7 +107,6 @@
     "bignumber.js": "^9.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-infinite-scroll-component": "^6.1.0",
-    "zustand": "3.5.14"
+    "react-infinite-scroll-component": "^6.1.0"
   }
 }

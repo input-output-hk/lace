@@ -1,14 +1,15 @@
+import { Wallet } from '@lace/cardano';
 import { Box, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { StakePoolDetails } from '../drawer';
 import { useOutsideHandles } from '../outside-handles-provider';
+import { FundWalletBanner } from '../staking/FundWalletBanner';
+import { StakeFundsBanner } from '../staking/StakeFundsBanner';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
 import { StakingInfoCard } from './staking-info-card';
-import { StakeFundsBanner } from '../staking/StakeFundsBanner';
-import { FundWalletBanner } from '../staking/FundWalletBanner';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -19,15 +20,14 @@ export const OverviewPopup = () => {
     stakingRewards,
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
-    delegationDetails,
     walletAddress,
     noFunds,
   } = useOutsideHandles();
   const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
 
-  const onStakePoolOpen = () => {
-    setSelectedStakePool(delegationDetails);
+  const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
+    setSelectedStakePool(stakePool);
     setIsDrawerVisible(true);
   };
 
@@ -53,7 +53,6 @@ export const OverviewPopup = () => {
     );
 
   const displayData = mapPortfolioToDisplayData({
-    balance: balancesBalance,
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
     portfolio: currentPortfolio,
@@ -86,7 +85,7 @@ export const OverviewPopup = () => {
               popupView
               markerColor={displayData.length > 1 ? item.color : undefined}
               cardanoCoinSymbol={'tADA'}
-              onStakePoolSelect={onStakePoolOpen}
+              onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
             />
           </Box>
         ))}
