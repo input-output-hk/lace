@@ -48,8 +48,6 @@
     "test:all": "yarn test:unit --coverage && yarn test:vr",
     "test:coverage": "yarn test --coverage",
     "test:unit": "vitest run",
-    "test:vr": "concurrently --kill-others --success first --names LADLE,VR \"yarn story:preview\" \"wait-on http://127.0.0.1:8080 && yarn lost-pixel\"",
-    "test:vr:update": "lost-pixel update",
     "watch": "tsup --watch"
   },
   "dependencies": {
@@ -83,7 +81,6 @@
     "esbuild-plugin-svgr": "^2.0.0",
     "esbuild-scss-modules-plugin": "^1.1.1",
     "happy-dom": "^9.18.3",
-    "lost-pixel": "^3.4.0",
     "normalize.css": "^8.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
