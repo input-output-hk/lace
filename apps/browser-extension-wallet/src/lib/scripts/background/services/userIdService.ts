@@ -23,6 +23,7 @@ export class UserIdService implements UserIdServiceInterface {
   private walletBasedUserId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
+  private userTrackingType?: UserTrackingType;
 
   constructor(
     private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
@@ -32,8 +33,7 @@ export class UserIdService implements UserIdServiceInterface {
   ) {}
 
   async getUserTrackingType(): Promise<UserTrackingType> {
-    const { usePersistentUserId } = await this.getStorage();
-    return usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic;
+    return this.userTrackingType;
   }
 
   private async getWalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {
@@ -103,12 +103,14 @@ export class UserIdService implements UserIdServiceInterface {
     this.clearSessionTimeout();
     const userId = await this.getRandomizedUserId();
     await this.setStorage({ usePersistentUserId: true, userId });
+    this.userTrackingType = UserTrackingType.Enhanced;
   }
 
   async makeTemporary(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into temporary');
     await this.setStorage({ usePersistentUserId: false, userId: undefined });
     this.setSessionTimeout();
+    this.userTrackingType = UserTrackingType.Basic;
   }
 
   async extendLifespan(): Promise<void> {
@@ -129,6 +131,7 @@ export class UserIdService implements UserIdServiceInterface {
     }
 
     this.userIdRestored = true;
+    this.userTrackingType = usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic;
   }
 
   private setSessionTimeout(): void {

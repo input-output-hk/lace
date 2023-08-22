@@ -29,7 +29,7 @@ import { walletRoutePaths } from '@routes/wallet-paths';
 import { getHWPersonProperties, isTrezorHWSupported } from '../helpers';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
-import { SendOboardingAnalyticsEvent } from '../types';
+import { SendOnboardingAnalyticsEvent } from '../types';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -43,7 +43,7 @@ const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 export interface HardwareWalletFlowProps {
   onCancel: () => void;
   onAppReload: () => void;
-  sendAnalytics: SendOboardingAnalyticsEvent;
+  sendAnalytics: SendOnboardingAnalyticsEvent;
 }
 
 type HardwareWalletStep = 'legal' | 'analytics' | 'connect' | 'accounts' | 'register' | 'create' | 'finish';
@@ -155,8 +155,8 @@ export const HardwareWalletFlow = ({
 
     const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;
     const postHogAction = isAccepted
-      ? postHogOnboardingActions.hw?.ANALYTICS_AGREE_CLICK
-      : postHogOnboardingActions.hw?.ANALYTICS_SKIP_CLICK;
+      ? postHogOnboardingActions.hw.ANALYTICS_AGREE_CLICK
+      : postHogOnboardingActions.hw.ANALYTICS_SKIP_CLICK;
 
     sendAnalytics(matomoEvent, postHogAction);
     navigateTo('connect');

@@ -2,7 +2,14 @@
 import posthog from 'posthog-js';
 import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
-import { ExtensionViews, PostHogAction, PostHogMetadata, PostHogProperties } from '../analyticsTracker';
+import {
+  ExtensionViews,
+  PostHogAction,
+  PostHogMetadata,
+  PostHogProperties,
+  PostHogSetMetadata,
+  UserTrackingType
+} from '../analyticsTracker';
 import {
   DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
@@ -16,6 +23,7 @@ import { UserIdService } from '@lib/scripts/types';
  * https://posthog.com/docs/libraries/js
  */
 export class PostHogClient {
+  private userTrackingType: UserTrackingType;
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
@@ -89,7 +97,20 @@ export class PostHogClient {
       view: this.view,
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
-      $set: { user_tracking_type: await this.userIdService.getUserTrackingType() }
+      ...(await this.getSetProperties())
     };
+  }
+
+  protected async getSetProperties(): Promise<PostHogSetMetadata | undefined> {
+    const currentUserTrackingType = await this.userIdService.getUserTrackingType();
+
+    if (!this.userTrackingType) {
+      this.userTrackingType = currentUserTrackingType;
+    }
+
+    if (currentUserTrackingType === this.userTrackingType) return;
+    this.userTrackingType = currentUserTrackingType;
+    // eslint-disable-next-line consistent-return
+    return { $set: { user_tracking_type: this.userTrackingType } };
   }
 }
