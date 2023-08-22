@@ -83,7 +83,11 @@ export const txTransformer = ({
     direction
   });
   const outputAmount = new BigNumber(coins.toString());
-  const timestamp = formatTime(time, 'HH:mm:ss A');
+  const timestamp = formatTime({
+    date: time,
+    format: 'HH:mm:ss A',
+    type: 'local'
+  });
 
   const assetsEntries = assets
     ? [...assets.entries()]
