@@ -25,18 +25,18 @@
     "README.md"
   ],
   "scripts": {
-    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.prod.js --progress & webpack --config webpack.app.prod.js --progress",
-    "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress & webpack --config webpack.app.dev.js --progress",
-    "cleanup": "shx rm -rf dist node_modules",
-    "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress --watch & webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
-    "lint": "cd ../.. && yarn extension:lint",
+    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.prod.js --progress & run -T webpack --config webpack.app.prod.js --progress",
+    "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress & run -T webpack --config webpack.app.dev.js --progress",
+    "cleanup": "yarn exec rm -rf dist node_modules",
+    "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
+    "lint": "run -T eslint-cmd \"./**/*.{js,ts,tsx}\"",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
-    "prettier": "prettier --write .",
-    "test": "jest --config test/jest.config.js",
-    "test:coverage": "yarn test --coverage",
-    "test:e2e": "shx echo \"No e2e tests on this app yet!\"",
-    "watch": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & webpack --config webpack.sw.dev.js --progress --watch & webpack --config webpack.app.dev.js --progress --watch"
+    "prettier": "run -T prettier --write .",
+    "test": "run -T jest --config test/jest.config.js",
+    "test:coverage": "run -T test --coverage",
+    "test:e2e": "yarn exec echo \"No e2e tests on this app yet!\"",
+    "watch": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack --config webpack.app.dev.js --progress --watch"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
@@ -73,6 +73,7 @@
     "intersection-observer-polyfill": "0.1.0",
     "lodash": "4.17.21",
     "matomo-tracker": "^2.2.4",
+    "node-abort-controller": "^3.1.1",
     "p-debounce": "^4.0.0",
     "pluralize": "^8.0.0",
     "posthog-js": "^1.68.4",

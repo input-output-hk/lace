@@ -15,6 +15,10 @@ class TransactionsPage {
   private TRANSACTIONS_TABLE_ITEM_FIAT_AMOUNT = '[data-testid="fiat-amount"]';
   private TRANSACTIONS_TABLE_ITEM_TIMESTAMP = '[data-testid="timestamp"]';
   private TRANSACTIONS_SKELETON = '[data-testid="infinite-scroll-skeleton"]';
+  private TRANSACTIONS_COST_ADA = '[data-testid="send-transaction-costs-ada"]';
+  private ASSET_INFO_AMOUNT = '[data-testid="asset-info-amount"]';
+  private SUMMARY_FEE_CONTAINER = '[data-testid="summary-fee-container"]';
+  private OUTPUT_SUMMARY_CONTAINER = '[data-testid="output-summary-container"]';
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return SectionTitle.sectionTitle;
@@ -24,8 +28,24 @@ class TransactionsPage {
     return SectionTitle.sectionCounter;
   }
 
+  get transactionCostADA(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTIONS_COST_ADA);
+  }
+
+  get transactionFee(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SUMMARY_FEE_CONTAINER).$(this.ASSET_INFO_AMOUNT);
+  }
+
+  get sendAmount(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.OUTPUT_SUMMARY_CONTAINER).$(this.ASSET_INFO_AMOUNT);
+  }
+
   get transactionsInfiniteScroll(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTIONS_SKELETON);
+  }
+
+  get totalAmountList(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.TRANSACTIONS_TABLE_ITEM_TOKENS_AMOUNT);
   }
 
   get rows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
@@ -81,7 +101,7 @@ class TransactionsPage {
     let rowIndex = 0;
     while (rowIndex < tokensCounterValue && (await this.rows).length < tokensCounterValue) {
       await this.scrollToTheRow(rowIndex);
-      rowIndex += 10;
+      rowIndex += 8;
       await browser.pause(1000);
     }
   }

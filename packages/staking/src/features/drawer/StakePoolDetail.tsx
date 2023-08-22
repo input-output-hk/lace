@@ -6,7 +6,7 @@ import cn from 'classnames';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LegacySelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
+import { OpenSelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
 import { MAX_POOLS_COUNT, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
@@ -14,8 +14,8 @@ import styles from './StakePoolDetail.module.scss';
 const SATURATION_UPPER_BOUND = 100;
 
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
+  const { t } = useTranslation();
   const {
-    delegationDetails,
     delegationStoreSelectedStakePoolDetails: {
       delegators,
       description,
@@ -30,15 +30,13 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       ticker,
       status,
       contact,
-    } = {} as LegacySelectedStakePoolDetails,
+    } = {} as OpenSelectedStakePoolDetails,
     openExternalLink,
-    walletStoreWalletUICardanoCoin,
   } = useOutsideHandles();
 
-  const currentDelegatedStakePool =
-    delegationDetails &&
-    Wallet.util.stakePoolTransformer({ cardanoCoin: walletStoreWalletUICardanoCoin, stakePool: delegationDetails });
-  const { t } = useTranslation();
+  const delegatingToThisPool = useDelegationPortfolioStore((store) =>
+    store.currentPortfolio.map((portfolioItem) => portfolioItem.id).includes(Wallet.Cardano.PoolIdHex(hexId))
+  );
 
   const socialNetworks = [
     { href: contact?.feed, type: SocialNetwork.RSS_FEED },
@@ -48,8 +46,6 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     { href: contact?.github, type: SocialNetwork.GITHUB },
     { href: contact?.twitter, type: SocialNetwork.TWITTER },
   ];
-
-  const isDelegatingToThisPool = currentDelegatedStakePool?.id === id;
 
   const metricsTranslations = {
     activeStake: t('drawer.details.metrics.activeStake'),
@@ -72,7 +68,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
         <StakePoolNameBrowser
           {...{
             id,
-            isDelegated: isDelegatingToThisPool,
+            isDelegated: delegatingToThisPool,
             isOversaturated: saturation !== undefined && Number(saturation) > SATURATION_UPPER_BOUND,
             logo,
             name,
@@ -96,7 +92,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               popupView={popupView}
             />
           </div>
-          {isDelegatingToThisPool && (
+          {delegatingToThisPool && (
             <Banner
               className={styles.banner}
               withIcon
@@ -185,7 +181,7 @@ export type StakePoolDetailFooterProps = {
 type SelectorParams = Parameters<Parameters<typeof useDelegationPortfolioStore>[0]>[0];
 
 const makeSelector =
-  (openPool?: LegacySelectedStakePoolDetails) =>
+  (openPool?: OpenSelectedStakePoolDetails) =>
   ({ currentPortfolio, draftPortfolio }: SelectorParams) => {
     const poolInCurrentPortfolio =
       !!openPool && currentPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));

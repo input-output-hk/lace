@@ -112,6 +112,12 @@ in rec {
       cp ${common.openApiJson} openapi.json
       go-bindata -pkg assets -o assets/assets.go tray-icon openapi.json
       mkdir -p constants && cp ${common.constants} constants/constants.go
+
+      chmod -R +w vendor
+      (
+        cd vendor/github.com/getlantern/systray
+        patch -p1 -i ${./getlantern-systray--darwin-handle-reopen.patch}
+      )
     '';
   };
 

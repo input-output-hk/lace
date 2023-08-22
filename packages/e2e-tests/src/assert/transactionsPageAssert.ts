@@ -4,6 +4,7 @@ import { t } from '../utils/translationService';
 import testContext from '../utils/testContext';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
+import { isPopupMode } from '../utils/pageUtils';
 
 export type ExpectedTransactionRowAssetDetails = {
   type: string;
@@ -135,12 +136,33 @@ class TransactionsPageAssert {
     expect(await TransactionsPage.transactionsTableItemTimestamp(rowIndex).getText()).to.match(
       TestnetPatterns.TIMESTAMP_REGEX
     );
+
+    if ((await isPopupMode()) && expectedTransactionRowAssetDetails.tokensCount > 1) {
+      const actualTokensCount = await TransactionsPage.transactionsTableItemTokensAmount(rowIndex)
+        .getText()
+        .then((val) => val.split('+')[1]);
+      const expectedTokensCount = expectedTransactionRowAssetDetails.tokensCount - 1;
+      expect(Number(actualTokensCount)).to.equal(expectedTokensCount);
+    }
   }
 
   assertSeeMoreTransactions = async () => {
     const currentRowsNumber = (await TransactionsPage.rows).length;
     await expect(currentRowsNumber).to.be.greaterThan(testContext.load('numberOfRows'));
   };
+
+  async assertSeeTicker(expectedTicker: 'ADA' | 'tADA') {
+    await this.waitRowsToLoad();
+    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+
+    let tickerList = await TransactionsPage.totalAmountList.map(async (totalAmount) =>
+      String(((await totalAmount.getText()) as string).match(regex))
+    );
+
+    if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim());
+
+    expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
+  }
 }
 
 export default new TransactionsPageAssert();

@@ -1,5 +1,6 @@
 import AddressForm from '../../elements/addressbook/AddressForm';
 import { expect } from 'chai';
+import { Address } from '../../data/Address';
 
 class AddressFormAssert {
   assertSeeAddressFormInputs = async () => {
@@ -7,11 +8,11 @@ class AddressFormAssert {
     await AddressForm.addressInput.waitForDisplayed();
   };
 
-  assertSeeAddressFormInputsPopulated = async () => {
+  assertSeeAddressFormInputsPopulated = async (expectedAddress: Address) => {
     await AddressForm.nameInput.waitForDisplayed();
-    expect(await AddressForm.nameInput.getValue()).to.match(/^(?!\\s*$).+/);
+    expect(await AddressForm.nameInput.getValue()).to.equal(expectedAddress.getName());
     await AddressForm.addressInput.waitForDisplayed();
-    expect(await AddressForm.addressInput.getValue()).to.match(/^(?!\s*$).+/);
+    expect(await AddressForm.addressInput.getValue()).to.equal(expectedAddress.getAddress());
   };
 
   assertSeeNameError = async (shouldBeDisplayed: boolean, expectedNameError?: string) => {
