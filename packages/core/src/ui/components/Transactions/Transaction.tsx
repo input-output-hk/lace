@@ -62,6 +62,10 @@ export interface TransactionProps {
    */
   deposit?: string;
   /**
+   * Transaction returned deposit
+   */
+  returnedDeposit?: string;
+  /**
    * Transaction metadata
    */
   metadata?: TransactionMetadataProps['metadata'];
@@ -102,6 +106,7 @@ export const Transaction = ({
   includedTime = '-',
   fee = '-',
   deposit,
+  returnedDeposit,
   addrInputs,
   addrOutputs,
   metadata,
@@ -269,6 +274,29 @@ export const Transaction = ({
             </div>
           </div>
         </div>
+
+        {deposit && (
+          <div className={styles.details} style={{ marginTop: '44px' }}>
+            <div className={styles.title}>{t('package.core.transactionDetailBrowser.deposit')}</div>
+            <div className={styles.detail}>
+              <div className={styles.amount}>
+                <span className={styles.ada}>{`${deposit} ${coinSymbol}`}</span>
+                <span className={styles.fiat}>{amountTransformer(deposit)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+        {returnedDeposit && (
+          <div className={styles.details} style={{ marginTop: '44px' }}>
+            <div className={styles.title}>{t('package.core.transactionDetailBrowser.returnedDeposit')}</div>
+            <div className={styles.detail}>
+              <div className={styles.amount}>
+                <span className={styles.ada}>{`${returnedDeposit} ${coinSymbol}`}</span>
+                <span className={styles.fiat}>{amountTransformer(returnedDeposit)}</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {addrInputs?.length > 0 && (
@@ -308,17 +336,6 @@ export const Transaction = ({
                 {Array.isArray(item.value) ? displayMetadataMsg(item.value) : item.value}
               </div>
             ))}
-          </div>
-        </div>
-      )}
-      {deposit && (
-        <div className={styles.details} style={{ marginTop: '44px' }}>
-          <div className={styles.title}>{t('package.core.transactionDetailBrowser.deposit')}</div>
-          <div className={styles.detail}>
-            <div className={styles.amount}>
-              <span className={styles.ada}>{`${deposit} ${coinSymbol}`}</span>
-              <span className={styles.fiat}>{amountTransformer(deposit)}</span>
-            </div>
           </div>
         </div>
       )}

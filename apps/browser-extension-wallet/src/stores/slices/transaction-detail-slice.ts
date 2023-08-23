@@ -103,6 +103,12 @@ const getTransactionDetail =
     const deposit = implicitCoin.deposit
       ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
       : undefined;
+    const returnedDeposit =
+      // since one tx can be split into two (delegation, de-registration) actions,
+      // ensure only the de-registration tx carries the returned deposit
+      implicitCoin.input && type === 'delegationDeregistration'
+        ? Wallet.util.lovelacesToAdaString(implicitCoin.input.toString())
+        : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
 
     let transaction: TransactionDetail['tx'] = {
@@ -110,6 +116,7 @@ const getTransactionDetail =
       totalOutput: totalOutputInAda,
       fee: feeInAda,
       deposit,
+      returnedDeposit,
       addrInputs: inputs,
       addrOutputs: outputs,
       metadata: txMetadata,
