@@ -1,6 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import Icon from '@ant-design/icons';
 import { InputSelectionFailure } from '@cardano-sdk/input-selection';
+import { BigIntMath } from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
 import { Banner, Button, Ellipsis, useObservable } from '@lace/common';
 import { RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
@@ -118,19 +119,29 @@ export const StakePoolConfirmation = (): React.ReactElement => {
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
   } = useOutsideHandles();
   const draftPortfolio = useDelegationPortfolioStore((store) => store.draftPortfolio);
+  const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
+  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
+  const loading = isNil(inMemoryWallet.protocolParameters$) || isNil(inMemoryWallet.delegation.rewardAccounts$);
 
   useEffect(() => {
     (async () => {
-      if (draftPortfolio.length === 0) return;
+      if (draftPortfolio.length === 0 || loading) return;
       // TODO: move below logic to zustand store
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
         const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.weight }));
         const tx = await txBuilder.delegatePortfolio({ pools }).build().inspect();
+        const { deposit: newDelegationTxDeposit, input } = Wallet.Cardano.util.computeImplicitCoin(
+          protocolParameters,
+          tx.body
+        );
+        const newDelegationTxReclaim =
+          (input || BigInt(0)) - BigIntMath.sum((tx.body.withdrawals || []).map(({ quantity }) => quantity));
         setDelegationTxBuilder(txBuilder);
         setDelegationTxFee(tx.body.fee.toString());
         setStakingError();
+        setDelegationTxDeposit(Number(newDelegationTxDeposit) - Number(newDelegationTxReclaim));
       } catch (error) {
         // TODO: check for error instance after LW-6749
         if (isInputSelectionError(error)) {
@@ -148,21 +159,15 @@ export const StakePoolConfirmation = (): React.ReactElement => {
     setDelegationTxFee,
     setIsBuildingTx,
     setStakingError,
+    setDelegationTxDeposit,
+    protocolParameters,
+    loading,
   ]);
-
-  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
-  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const deposit =
-    rewardAccounts && rewardAccounts[0]?.keyStatus !== Wallet.Cardano.StakeKeyStatus.Registered
-      ? protocolParameters?.stakeKeyDeposit
-      : undefined;
 
   const ErrorMessages: Record<StakingError, string> = {
     [StakingError.UTXO_FULLY_DEPLETED]: t('drawer.confirmation.errors.utxoFullyDepleted'),
     [StakingError.UTXO_BALANCE_INSUFFICIENT]: t('drawer.confirmation.errors.utxoBalanceInsufficient'),
   };
-
-  const loading = isNil(inMemoryWallet.protocolParameters$) || isNil(inMemoryWallet.delegation.rewardAccounts$);
 
   return (
     <>
@@ -191,7 +196,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
             {t('drawer.confirmation.totalCost.title')}
           </h1>
           <div className={styles.txCostContainer} data-testid="summary-fee-container">
-            {deposit && (
+            {delegationTxDeposit > 0 && (
               <RowContainer>
                 {renderLabel({
                   dataTestId: 'sp-confirmation-staking-deposit',
@@ -200,9 +205,9 @@ export const StakePoolConfirmation = (): React.ReactElement => {
                 })}
                 <div>
                   {renderAmountInfo(
-                    `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
+                    `${Wallet.util.lovelacesToAdaString(delegationTxDeposit.toString())} ${cardanoCoin.symbol}`,
                     `${Wallet.util.convertAdaToFiat({
-                      ada: Wallet.util.lovelacesToAdaString(deposit.toString()),
+                      ada: Wallet.util.lovelacesToAdaString(delegationTxDeposit.toString()),
                       fiat: priceResult?.cardano?.price || 0,
                     })} ${fiatCurrency?.symbol}`
                   )}

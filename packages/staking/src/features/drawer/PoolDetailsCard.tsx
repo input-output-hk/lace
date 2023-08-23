@@ -27,9 +27,9 @@ export const PoolDetailsCard = ({ name, poolId, draftPortfolioLength, color, del
 
   return (
     <Card.Outlined className={PoolCard}>
-      <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Flex alignItems={'center'} gap={'$32'}>
+      <Flex flexDirection="column" alignItems="stretch" gap="$16">
+        <Flex justifyContent="space-between" alignItems="center">
+          <Flex alignItems="center" gap="$32">
             <Box className={PoolIndicator} style={{ backgroundColor: color }} />
             <Text.SubHeading>{name}</Text.SubHeading>
           </Flex>
@@ -44,7 +44,7 @@ export const PoolDetailsCard = ({ name, poolId, draftPortfolioLength, color, del
           </Tooltip>
         </Flex>
         <Box className={PoolHr} />
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
+        <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
             {t('drawer.preferences.partOfBalance', { balance, draftPortfolioLength })}
           </Text.Body.Normal>
