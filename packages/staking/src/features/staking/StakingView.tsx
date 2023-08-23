@@ -96,12 +96,12 @@ export const StakingView = () => {
 
   return (
     <>
-      <Box mb={'$56'}>
+      <Box mb="$56">
         <Text.Heading data-testid="section-title">{t('root.title')}</Text.Heading>
       </Box>
       <Navigation>
         {(activePage) => (
-          <Box mt={'$40'}>
+          <Box mt="$40">
             {activePage === Page.overview && <Overview />}
             {activePage === Page.browsePools && <BrowsePools onStake={initiateStaking} />}
           </Box>
