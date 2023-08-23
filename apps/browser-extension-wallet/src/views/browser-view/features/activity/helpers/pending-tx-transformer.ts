@@ -72,7 +72,7 @@ export const txTransformer = ({
 }: TxTransformerInput): Omit<AssetActivityItemProps, 'onClick'> => {
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
   const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
-  const returnedDeposit = implicitCoin.input
+  const depositReclaim = implicitCoin.input
     ? Wallet.util.lovelacesToAdaString(implicitCoin.input.toString())
     : undefined;
   const { coins, assets } = inspectTxValues({
@@ -92,7 +92,7 @@ export const txTransformer = ({
   return {
     id: tx.id.toString(),
     deposit,
-    returnedDeposit,
+    depositReclaim,
     fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
     status,
     amount: getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),

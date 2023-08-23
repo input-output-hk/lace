@@ -13,7 +13,7 @@ import {
   filterOutputsByTxDirection,
   isTxWithAssets
 } from '@src/views/browser-view/features/activity/helpers';
-import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp } from '@lace/core';
+import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp, TransactionType } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
 import { assetTransformer } from '@src/utils/assets-transformers';
@@ -49,18 +49,31 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
 }
 
 export type FetchWalletActivitiesReturn = Observable<Promise<AssetActivityListProps[]>>;
-const DelagatioinTransactionTypes = new Set(['delegation', 'delegationRegistration', 'delegationDeregistration']);
+const DelegationTransactionTypes = ['delegation', 'delegationRegistration', 'delegationDeregistration'] as const;
 
-const getDelegationAmount = (activity: AssetActivityItemProps) => {
+type DelegationActivityItemProps = Omit<AssetActivityItemProps, 'type'> & {
+  type?: typeof DelegationTransactionTypes[number];
+};
+
+const isDelegationActivity = (activity: AssetActivityItemProps): activity is DelegationActivityItemProps =>
+  // [].includes and Set(...).has do not work for narrowed Arrays https://stackoverflow.com/questions/55906553/typescript-unexpected-error-when-using-includes-with-a-typed-array
+  // eslint-disable-next-line unicorn/prefer-includes
+  DelegationTransactionTypes.some((type) => type === activity.type);
+
+const getDelegationAmount = (activity: DelegationActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
-  return (
-    fee
-      .plus(activity.deposit || 0)
-      .minus(activity.returnedDeposit || 0)
-      // Currently, all values in activity screen are absolute
-      // Remove .abs() when this is changed
-      .abs()
-  );
+
+  // stake key registrations
+  if (activity.deposit) {
+    return fee.plus(activity.deposit);
+  }
+
+  // stake key de-registrations
+  if (activity.depositReclaim) {
+    return new BigNumber(activity.depositReclaim).minus(fee);
+  }
+
+  return fee;
 };
 
 const FIAT_PRICE_DECIMAL_PLACES = 2;
@@ -112,12 +125,7 @@ const getWalletActivitiesObservable = async ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
-        setTransactionDetail(
-          tx,
-          transformedTx.direction,
-          transformedTx.status || Wallet.TransactionStatus.SUCCESS,
-          transformedTx.type
-        );
+        setTransactionDetail(tx, transformedTx.direction, transformedTx.status, transformedTx.type);
       }
     });
 
@@ -267,7 +275,7 @@ const getWalletActivitiesObservable = async ({
         ...activityList,
         items: activityList.items.map((activity: AssetActivityItemProps) => ({
           ...activity,
-          ...(DelagatioinTransactionTypes.has(activity.type) && {
+          ...(isDelegationActivity(activity) && {
             amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,
             fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
           }),

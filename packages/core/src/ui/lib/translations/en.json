@@ -66,7 +66,7 @@
       "outputs": "Outputs",
       "transactionFee": "Transaction fee",
       "deposit": "Deposit",
-      "returnedDeposit": "Returned deposit",
+      "depositReclaim": "Returned deposit",
       "metadata": "Metadata",
       "transactionFeeInfo": "The amount you have been charged to process your transaction",
       "received": "Received",

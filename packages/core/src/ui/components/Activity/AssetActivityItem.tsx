@@ -29,7 +29,7 @@ export interface AssetActivityItemProps {
   id?: string;
   fee?: string;
   deposit?: string; // e.g. stake registrations
-  returnedDeposit?: string; // e.g. stake de-registrations
+  depositReclaim?: string; // e.g. stake de-registrations
   /**
    * Amount formated with symbol (e.g. 50 ADA)
    */

@@ -64,7 +64,7 @@ export interface TransactionProps {
   /**
    * Transaction returned deposit
    */
-  returnedDeposit?: string;
+  depositReclaim?: string;
   /**
    * Transaction metadata
    */
@@ -106,7 +106,7 @@ export const Transaction = ({
   includedTime = '-',
   fee = '-',
   deposit,
-  returnedDeposit,
+  depositReclaim,
   addrInputs,
   addrOutputs,
   metadata,
@@ -276,7 +276,7 @@ export const Transaction = ({
         </div>
 
         {deposit && (
-          <div className={styles.details} style={{ marginTop: '44px' }}>
+          <div className={styles.details}>
             <div className={styles.title}>{t('package.core.transactionDetailBrowser.deposit')}</div>
             <div className={styles.detail}>
               <div className={styles.amount}>
@@ -286,13 +286,13 @@ export const Transaction = ({
             </div>
           </div>
         )}
-        {returnedDeposit && (
-          <div className={styles.details} style={{ marginTop: '44px' }}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.returnedDeposit')}</div>
+        {depositReclaim && (
+          <div className={styles.details}>
+            <div className={styles.title}>{t('package.core.transactionDetailBrowser.depositReclaim')}</div>
             <div className={styles.detail}>
               <div className={styles.amount}>
-                <span className={styles.ada}>{`${returnedDeposit} ${coinSymbol}`}</span>
-                <span className={styles.fiat}>{amountTransformer(returnedDeposit)}</span>
+                <span className={styles.ada}>{`${depositReclaim} ${coinSymbol}`}</span>
+                <span className={styles.fiat}>{amountTransformer(depositReclaim)}</span>
               </div>
             </div>
           </div>

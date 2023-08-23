@@ -15,11 +15,11 @@ export const splitDelegationWithDeregistrationIntoTwoActions = (tx: TransformedT
     ...tx,
     type: 'delegation',
     // Deposit already shown in the delegationDeregistration
-    returnedDeposit: undefined
+    depositReclaim: undefined
   }
 ];
 
-// If a delegation transaction has also any returned deposit (deregistration certificates),
+// If a delegation transaction has also any reclaimed deposit (deregistration certificates),
 // we want to split it into two separate actions for clarity
 export const isDelegationWithDeregistrationTx = (tx: TransformedTx, type: ReturnType<typeof inspectTxType>): boolean =>
-  type === 'delegation' && !!tx.returnedDeposit;
+  type === 'delegation' && !!tx.depositReclaim;
