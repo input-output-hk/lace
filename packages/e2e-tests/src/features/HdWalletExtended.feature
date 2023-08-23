@@ -1,5 +1,5 @@
 @HdWallet-extended @Testnet
-Feature: ADA handle - extended view
+Feature: HD wallet - extended view
 
   Background:
     Given Lace is ready for test
