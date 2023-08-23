@@ -13,7 +13,7 @@ import {
   filterOutputsByTxDirection,
   isTxWithAssets
 } from '@src/views/browser-view/features/activity/helpers';
-import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp, TransactionType } from '@lace/core';
+import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
 import { assetTransformer } from '@src/utils/assets-transformers';
