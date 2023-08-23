@@ -28,10 +28,10 @@ export const AddressBookLink = ({ isPopup }: { isPopup: boolean }): React.ReactE
   };
 
   return (
-    <Link to={walletRoutePaths.addressBook} onClick={handleOnClicked}>
-      <Menu.Item data-testid="header-menu-address-book" className={styles.menuItem}>
-        <a>{t('browserView.sideMenu.links.addressBook')}</a>
-      </Menu.Item>
-    </Link>
+    <Menu.Item data-testid="header-menu-address-book" className={styles.menuItem}>
+      <Link to={walletRoutePaths.addressBook} onClick={handleOnClicked}>
+        {t('browserView.sideMenu.links.addressBook')}
+      </Link>
+    </Menu.Item>
   );
 };

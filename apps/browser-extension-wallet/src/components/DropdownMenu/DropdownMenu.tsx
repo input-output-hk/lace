@@ -20,8 +20,6 @@ import {
 import { Sections } from '@components/MainMenu/UserMenu/types';
 import { ItemType, MenuItemType } from 'antd/lib/menu/hooks/useItems';
 import menuStyles from '../MainMenu/UserMenu/components/UserMenu.module.scss';
-import { useAnalyticsContext } from '@providers';
-import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -34,28 +32,40 @@ export const DropdownMenu = ({
   lockWalletButton = <LockWallet />,
   topSection = <UserInfo />
 }: DropdownMenuProps): React.ReactElement => {
-  const analytics = useAnalyticsContext();
   const { walletInfo } = useWalletStore();
   const [open, setOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
 
-  const sendAnalyticsEvent = (event: PostHogAction) => {
-    analytics.sendEventToPostHog(event);
-  };
-
-  const handleDropdownState = (openDropdown: boolean) => {
-    setOpen(openDropdown);
-    if (openDropdown) {
-      sendAnalyticsEvent(PostHogAction.UserWalletProfileIconClick);
-    }
-  };
+  const items: ItemType[] =
+    currentSection === Sections.Main
+      ? [
+          { key: 'user-info', label: topSection },
+          {
+            key: 'links',
+            className: menuStyles.links,
+            type: 'group',
+            children: [
+              { key: 'address-book', label: <AddressBookLink isPopup={isPopup} /> },
+              { key: 'settings', label: <SettingsLink /> },
+              { type: 'divider', className: menuStyles.separator },
+              { key: 'theme-switcher', label: <ThemeSwitcher isPopup={isPopup} /> },
+              {
+                key: 'network-switcher',
+                label: <NetworkSwitcher onClick={() => setCurrentSection(Sections.NetworkInfo)} />
+              },
+              lockWalletButton && { type: 'divider', className: menuStyles.separator },
+              lockWalletButton && { key: 'lock-wallet', label: lockWalletButton }
+            ]
+          }
+        ]
+      : [{ key: 'network-info', label: <NetworkInfo onBack={() => setCurrentSection(Sections.Main)} /> }];
 
   return (
     <Dropdown
       destroyPopupOnHide
-      overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
-      onOpenChange={handleDropdownState}
+      onOpenChange={setOpen}
+      menu={{ items, rootClassName: menuStyles.menuOverlay }}
       placement="bottomRight"
       trigger={['click']}
       open={open}
