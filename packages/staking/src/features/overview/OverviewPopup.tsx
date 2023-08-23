@@ -38,11 +38,11 @@ export const OverviewPopup = () => {
 
   return (
     <>
-      <Box mb={'$32'}>
+      <Box mb="$32">
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
-          arrangement={'vertical'}
+          arrangement="vertical"
           distribution={displayData.map(({ color, name = '-', weight }) => ({
             color,
             name,
@@ -51,17 +51,17 @@ export const OverviewPopup = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      <Flex justifyContent={'space-between'} mb={'$16'}>
+      <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
       </Flex>
-      <Box mb={'$32'}>
+      <Box mb="$32">
         {displayData.map((item) => (
-          <Box key={item.id} mb={'$24'} data-testid="delegated-pool-item">
+          <Box key={item.id} mb="$24" data-testid="delegated-pool-item">
             <StakingInfoCard
               {...item}
               popupView
               markerColor={displayData.length > 1 ? item.color : undefined}
-              cardanoCoinSymbol={'tADA'}
+              cardanoCoinSymbol="tADA"
               onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
             />
           </Box>
