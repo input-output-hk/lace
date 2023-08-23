@@ -26,4 +26,4 @@ runs:
       shell: bash
       env:
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
-      run: yarn build
+      run: yarn browser build
