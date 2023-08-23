@@ -31,6 +31,7 @@ export const StakingView = () => {
     walletStoreBlockchainProvider: blockchainProvider,
     multidelegationFirstVisit,
     triggerMultidelegationFirstVisit,
+    currentChain,
   } = useOutsideHandles();
 
   useEffect(() => {
@@ -93,6 +94,11 @@ export const StakingView = () => {
     }
     proceedWithSelections();
   }, [pendingSelection, proceedWithSelections, selectCurrentPool]);
+
+  useEffect(() => {
+    if (!currentChain) return;
+    portfolioMutators.clearDraft();
+  }, [currentChain]);
 
   return (
     <>

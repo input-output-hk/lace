@@ -40,7 +40,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchStakePools,
     fetchNetworkInfo,
     networkInfo,
-    blockchainProvider
+    blockchainProvider,
+    currentChain
   } = useWalletStore((state) => ({
     getKeyAgentType: state.getKeyAgentType,
     inMemoryWallet: state.inMemoryWallet,
@@ -50,7 +51,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchStakePools: state.fetchStakePools,
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
-    blockchainProvider: state.blockchainProvider
+    blockchainProvider: state.blockchainProvider,
+    currentChain: state.currentChain
   }));
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
@@ -97,7 +99,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
-        compactNumber: compactNumberWithUnit
+        compactNumber: compactNumberWithUnit,
+        currentChain
       }}
     >
       <ContentLayout

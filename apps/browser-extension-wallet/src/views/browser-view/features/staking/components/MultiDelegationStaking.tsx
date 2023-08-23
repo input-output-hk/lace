@@ -36,7 +36,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
     fetchStakePools,
     fetchNetworkInfo,
     networkInfo,
-    blockchainProvider
+    blockchainProvider,
+    currentChain
   } = useWalletStore((state) => ({
     getKeyAgentType: state.getKeyAgentType,
     inMemoryWallet: state.inMemoryWallet,
@@ -46,7 +47,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
     fetchStakePools: state.fetchStakePools,
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
-    blockchainProvider: state.blockchainProvider
+    blockchainProvider: state.blockchainProvider,
+    currentChain: state.currentChain
   }));
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
@@ -86,7 +88,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         multidelegationFirstVisit,
-        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false)
+        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        currentChain
       }}
     >
       <Staking theme={theme.name} />
