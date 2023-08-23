@@ -28,45 +28,51 @@ describe('AnalyticsTracker', () => {
   describe('construction', () => {
     it('should setup both clients with the user id service', () => {
       // eslint-disable-next-line no-new
-      new AnalyticsTracker({ chain: preprodChain }, false, true);
+      new AnalyticsTracker({ extensionParams: { chain: preprodChain }, isPostHogEnabled: true });
       expect(getUserIdService).toHaveBeenCalledTimes(1);
       expect(MatomoClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock);
       expect(PostHogClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock, undefined);
     });
     it('should only setup matomo client if posthog is disabled', () => {
       // eslint-disable-next-line no-new
-      new AnalyticsTracker({ chain: preprodChain }, false, false);
+      new AnalyticsTracker({ extensionParams: { chain: preprodChain }, isPostHogEnabled: false });
       expect(getUserIdService).toHaveBeenCalledTimes(1);
       expect(MatomoClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock);
       expect(PostHogClient).not.toHaveBeenCalled();
     });
     it('should not setup anything if analytics are disabled', () => {
       // eslint-disable-next-line no-new
-      new AnalyticsTracker({ chain: preprodChain }, true);
+      new AnalyticsTracker({ extensionParams: { chain: preprodChain }, analyticsDisabled: true });
       expect(getUserIdService).not.toHaveBeenCalled();
       expect(MatomoClient).not.toHaveBeenCalled();
       expect(PostHogClient).not.toHaveBeenCalled();
     });
     it('should setup Post Hog client with view = popup', () => {
       // eslint-disable-next-line no-new
-      new AnalyticsTracker({ chain: preprodChain, view: ExtensionViews.Popup }, false, true);
+      new AnalyticsTracker({
+        extensionParams: { chain: preprodChain, view: ExtensionViews.Popup },
+        isPostHogEnabled: true
+      });
       expect(PostHogClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock, ExtensionViews.Popup);
     });
     it('should setup Post Hog client with view = extended', () => {
       // eslint-disable-next-line no-new
-      new AnalyticsTracker({ chain: preprodChain, view: ExtensionViews.Extended }, false, true);
+      new AnalyticsTracker({
+        extensionParams: { chain: preprodChain, view: ExtensionViews.Extended },
+        isPostHogEnabled: true
+      });
       expect(PostHogClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock, ExtensionViews.Extended);
     });
   });
 
   describe('setOptedInForEnhancedAnalytics', () => {
     it('should make the user id persistent if user opted-in', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ extensionParams: { chain: preprodChain } });
       await tracker.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
       expect(userIdServiceMock.makePersistent).toHaveBeenCalledTimes(1);
     });
     it('should make the user id temporary if user opted-out', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ extensionParams: { chain: preprodChain } });
       await tracker.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedOut);
       expect(userIdServiceMock.makeTemporary).toHaveBeenCalledTimes(1);
     });
@@ -74,7 +80,7 @@ describe('AnalyticsTracker', () => {
 
   describe('sendPageNavigationEvent', () => {
     it('should use the posthog client to send a page navigation event', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain }, false, true);
+      const tracker = new AnalyticsTracker({ extensionParams: { chain: preprodChain }, isPostHogEnabled: true });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendPageNavigationEvent();
       expect(mockedPostHogClient.sendPageNavigationEvent).toHaveBeenCalledTimes(1);
@@ -83,7 +89,7 @@ describe('AnalyticsTracker', () => {
 
   describe('sendEvent', () => {
     it('should use the matomo client to send an event', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ extensionParams: { chain: preprodChain } });
       const mockedMatomoClient = (MatomoClient as jest.Mock<MatomoClient>).mock.instances[0];
       const event = {
         category: MatomoEventCategories.WALLET_RESTORE,
@@ -99,7 +105,7 @@ describe('AnalyticsTracker', () => {
 
   describe('sendEventToPostHog', () => {
     it('should use the posthog client to send an event', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain }, false, true);
+      const tracker = new AnalyticsTracker({ extensionParams: { chain: preprodChain }, isPostHogEnabled: true });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       const event = PostHogAction.OnboardingCreateClick;
       await tracker.sendEventToPostHog(event);
@@ -111,7 +117,7 @@ describe('AnalyticsTracker', () => {
 
   describe('setChain', () => {
     it('should set the chain on both clients', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain }, false, true);
+      const tracker = new AnalyticsTracker({ extensionParams: { chain: preprodChain }, isPostHogEnabled: true });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       const mockedMatomoClient = (MatomoClient as jest.Mock<MatomoClient>).mock.instances[0];
       const previewChain = Wallet.Cardano.ChainIds.Preview;

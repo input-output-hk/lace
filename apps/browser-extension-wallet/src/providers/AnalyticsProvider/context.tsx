@@ -46,10 +46,13 @@ export const AnalyticsProvider = ({
   const analyticsTracker = useMemo(
     () =>
       tracker ||
-      new AnalyticsTracker(
-        { chain: currentChain, view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended },
+      new AnalyticsTracker({
+        extensionParams: {
+          chain: currentChain,
+          view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended
+        },
         analyticsDisabled
-      ),
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tracker, analyticsDisabled]
   );
