@@ -40,11 +40,11 @@ export const StakePoolPreferences = () => {
     draftPortfolio: state.draftPortfolio,
     portfolioMutators: state.mutators,
   }));
-  const { activePage, setActivePage, setIsDrawerVisible, setSection } = useStakePoolDetails((store) => ({
+  const { activePage, setActivePage, setIsDrawerVisible, resetStates } = useStakePoolDetails((store) => ({
     activePage: store.activePage,
+    resetStates: store.resetStates,
     setActivePage: store.setActivePage,
     setIsDrawerVisible: store.setIsDrawerVisible,
-    setSection: store.setSection,
   }));
 
   const displayData = draftPortfolio.map(({ name, weight, id }, i) => ({
@@ -61,7 +61,7 @@ export const StakePoolPreferences = () => {
     }
     portfolioMutators.moveFromManagingProcessToSelections();
     setIsDrawerVisible(false);
-    setSection();
+    resetStates();
   };
 
   return (
