@@ -134,7 +134,10 @@ const getWalletActivitiesObservable = async ({
     return finalizeTransaction(transformedTransaction);
   };
 
-  const pendingTransactionMapper = (tx: Wallet.TxInFlight, eraSummaries: EraSummary[]): AssetActivityItemProps => {
+  const pendingTransactionMapper = (
+    tx: Wallet.TxInFlight,
+    eraSummaries: EraSummary[]
+  ): AssetActivityItemProps | Array<AssetActivityItemProps> => {
     let time;
     try {
       const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
@@ -151,8 +154,9 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin,
       time
     });
-    return {
-      ...transformedTransaction,
+
+    const finalizeTransaction = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
+      ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
         const deserializedTx: Wallet.Cardano.Tx = TxCBOR.deserialize(tx.cbor);
@@ -160,10 +164,16 @@ const getWalletActivitiesObservable = async ({
           deserializedTx,
           TxDirections.Outgoing,
           Wallet.TransactionStatus.PENDING,
-          transformedTransaction.type
+          transformedTx.type
         );
       }
-    };
+    });
+
+    if (Array.isArray(transformedTransaction)) {
+      return transformedTransaction.map((tt) => finalizeTransaction(tt));
+    }
+
+    return finalizeTransaction(transformedTransaction);
   };
 
   const filterTransactionByAssetId = (tx: Wallet.Cardano.HydratedTx[]) =>
@@ -204,7 +214,7 @@ const getWalletActivitiesObservable = async ({
   const getPendingTransactions = (eraSummaries: EraSummary[]) =>
     pendingTransactions$.pipe(
       map((pendingTransactions: Wallet.TxInFlight[]) =>
-        pendingTransactions.map((tx) => pendingTransactionMapper(tx, eraSummaries))
+        flattenDeep(pendingTransactions.map((tx) => pendingTransactionMapper(tx, eraSummaries)))
       )
     );
 

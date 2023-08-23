@@ -5,6 +5,10 @@ import { CurrencyInfo, TxDirections } from '@types';
 import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
 import capitalize from 'lodash/capitalize';
 import { formatTime } from '@src/utils/format-date';
+import {
+  isDelegationWithDeregistrationTx,
+  splitDelegationWithDeregistrationIntoTwoActions
+} from './common-transformers';
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight;
@@ -108,7 +112,7 @@ export const pendingTxTransformer = ({
   protocolParameters,
   cardanoCoin,
   time
-}: TxTransformerInput): Omit<AssetActivityItemProps, 'onClick'> => {
+}: TxTransformerInput): Array<Omit<AssetActivityItemProps, 'onClick'>> | Omit<AssetActivityItemProps, 'onClick'> => {
   const type = inspectTxType({ walletAddresses, tx: tx as unknown as Wallet.Cardano.HydratedTx });
   const transformedTx = txTransformer({
     tx,
@@ -122,6 +126,11 @@ export const pendingTxTransformer = ({
     direction: TxDirections.Outgoing,
     date: capitalize(Wallet.TransactionStatus.PENDING)
   });
+
+  if (isDelegationWithDeregistrationTx(transformedTx, type)) {
+    return splitDelegationWithDeregistrationIntoTwoActions(transformedTx);
+  }
+
   return {
     ...transformedTx,
     type: type as TransactionType
