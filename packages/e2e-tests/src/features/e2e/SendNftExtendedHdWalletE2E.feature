@@ -1,5 +1,5 @@
 @SendNftHdWallet-Extended-E2E @Testnet
-Feature: Send NFT - Extended Browser View - E2E
+Feature: Send NFT HD wallets - Extended Browser View - E2E
 
   Background:
     Given Wallet is synced
