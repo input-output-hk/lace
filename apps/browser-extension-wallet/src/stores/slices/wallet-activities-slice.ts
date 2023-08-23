@@ -53,7 +53,14 @@ const DelagatioinTransactionTypes = new Set(['delegation', 'delegationRegistrati
 
 const getDelegationAmount = (activity: AssetActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
-  return activity?.deposit ? fee.plus(activity.deposit) : fee;
+  return (
+    fee
+      .plus(activity.deposit || 0)
+      .minus(activity.returnedDeposit || 0)
+      // Currently, all values in activity screen are absolute
+      // Remove .abs() when this is changed
+      .abs()
+  );
 };
 
 const FIAT_PRICE_DECIMAL_PLACES = 2;
@@ -101,6 +108,19 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin
     });
 
+    const finalizeTransaction = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
+      ...transformedTx,
+      onClick: () => {
+        if (sendAnalytics) sendAnalytics();
+        setTransactionDetail(
+          tx,
+          transformedTx.direction,
+          transformedTx.status || Wallet.TransactionStatus.SUCCESS,
+          transformedTx.type
+        );
+      }
+    });
+
     /*
     considering the current SDK logic for automatically withdraw rewards when building a transaction and such behavior has to be transparent for the user,
     we will remove the withdrawal from the transaction history as it is implemented today.
@@ -108,46 +128,10 @@ const getWalletActivitiesObservable = async ({
     To make this happen we need to create a new record Rewards and added to the transaction history
     */
     if (Array.isArray(transformedTransaction)) {
-      return [
-        {
-          ...transformedTransaction[0],
-          onClick: () => {
-            if (sendAnalytics) sendAnalytics();
-            setTransactionDetail(
-              tx,
-              transformedTransaction[0].direction,
-              Wallet.TransactionStatus.SUCCESS,
-              transformedTransaction[0].type
-            );
-          }
-        },
-        {
-          ...transformedTransaction[1],
-          onClick: () => {
-            if (sendAnalytics) sendAnalytics();
-            setTransactionDetail(
-              tx,
-              transformedTransaction[1].direction,
-              Wallet.TransactionStatus.SPENDABLE,
-              transformedTransaction[1].type
-            );
-          }
-        }
-      ];
+      return transformedTransaction.map((tt) => finalizeTransaction(tt));
     }
 
-    return {
-      ...transformedTransaction,
-      onClick: () => {
-        if (sendAnalytics) sendAnalytics();
-        setTransactionDetail(
-          tx,
-          transformedTransaction.direction,
-          Wallet.TransactionStatus.SUCCESS,
-          transformedTransaction.type
-        );
-      }
-    };
+    return finalizeTransaction(transformedTransaction);
   };
 
   const pendingTransactionMapper = (tx: Wallet.TxInFlight, eraSummaries: EraSummary[]): AssetActivityItemProps => {

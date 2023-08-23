@@ -28,7 +28,8 @@ const DEFAULT_DEBOUNCE = 200;
 export interface AssetActivityItemProps {
   id?: string;
   fee?: string;
-  deposit?: string;
+  deposit?: string; // e.g. stake registrations
+  returnedDeposit?: string; // e.g. stake de-registrations
   /**
    * Amount formated with symbol (e.g. 50 ADA)
    */
@@ -95,7 +96,7 @@ const TransactionStatusIcon = ({ status, type }: TransactionStatusIconProps) => 
   }
 };
 
-const transaltionTypes = {
+const translationTypes = {
   delegation: 'package.core.assetActivityItem.entry.name.delegation',
   delegationDeregistration: 'package.core.assetActivityItem.entry.name.delegationDeregistration',
   delegationRegistration: 'package.core.assetActivityItem.entry.name.delegationRegistration',
@@ -199,7 +200,7 @@ export const AssetActivityItem = ({
           <h6 data-testid="transaction-type" className={styles.title}>
             {isPendingTx && type !== 'self' && !DelegationTransactionTypes.has(type)
               ? t('package.core.assetActivityItem.entry.name.sending')
-              : t(transaltionTypes[type])}
+              : t(translationTypes[type])}
           </h6>
           {descriptionContent}
         </div>
