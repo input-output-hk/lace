@@ -13,14 +13,16 @@ import {
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 export const StakePoolPreferencesFooter = () => {
+  const { t } = useTranslation();
   const { setSection } = useStakePoolDetails();
+
   return (
-    <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
+    <Flex flexDirection="column" alignItems="stretch" gap="$16">
       <Button.CallToAction
-        label={'Next'}
-        data-testid={'preferences-next-button'}
+        label={t('drawer.preferences.nextButton')}
+        data-testid="preferences-next-button"
         onClick={() => setSection(sectionsConfig[Sections.CONFIRMATION])}
-        w={'$fill'}
+        w="$fill"
       />
     </Flex>
   );
@@ -63,15 +65,15 @@ export const StakePoolPreferences = () => {
   };
 
   return (
-    <Flex flexDirection={'column'} gap={'$32'} alignItems={'stretch'}>
+    <Flex flexDirection="column" gap="$32" alignItems="stretch">
       <DelegationCard
         balance={compactNumber(balancesBalance.available.coinBalance)}
         cardanoCoinSymbol={symbol}
         distribution={displayData}
-        status={'ready'}
+        status="ready"
         showDistribution
       />
-      <Flex justifyContent={'space-between'}>
+      <Flex justifyContent="space-between">
         <Text.Body.Large weight="$semibold">
           {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}
         </Text.Body.Large>
@@ -81,7 +83,7 @@ export const StakePoolPreferences = () => {
           disabled={addPoolButtonDisabled}
         />
       </Flex>
-      <Flex flexDirection={'column'} gap={'$16'} pb={'$32'} alignItems={'stretch'}>
+      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
         {displayData.map(({ name, id, color }) => (
           <PoolDetailsCard key={id} poolId={id} name={name} color={color} />
         ))}
