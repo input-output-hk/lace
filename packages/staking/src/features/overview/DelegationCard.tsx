@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
 import * as styles from './DelegationCard.css';
 
-type Status = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';
+type DelegationStatus = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';
 
 type DelegationCardProps = {
   arrangement?: 'vertical' | 'horizontal';
@@ -16,11 +16,11 @@ type DelegationCardProps = {
     value: number;
     color: PieChartColor;
   }>;
-  status: Status;
+  status: DelegationStatus;
   showDistribution?: boolean;
 };
 
-const mapOfStatusToTranslationKey: Record<Status, TranslationKey> = {
+const statusLabelTranslationKeysByDelegationStatus: Record<DelegationStatus, TranslationKey> = {
   'multi-delegation': 'overview.delegationCard.statuses.multiDelegation',
   'over-staked': 'overview.delegationCard.statuses.overStaked',
   ready: 'overview.delegationCard.statuses.ready',
@@ -43,7 +43,10 @@ export const DelegationCard = ({
     nameTranslationKey: TranslationKey;
     value: number | string;
   }> = [
-    { nameTranslationKey: 'overview.delegationCard.label.status', value: t(mapOfStatusToTranslationKey[status]) },
+    {
+      nameTranslationKey: 'overview.delegationCard.label.status',
+      value: t(statusLabelTranslationKeysByDelegationStatus[status]),
+    },
     { nameTranslationKey: 'overview.delegationCard.label.balance', value: `${balance} ${cardanoCoinSymbol}` },
     { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
   ];
@@ -77,12 +80,12 @@ export const DelegationCard = ({
             {infoData.map(({ nameTranslationKey, value }) => (
               <Fragment key={nameTranslationKey}>
                 <div className={styles.infoLabel}>
-                  <Text.Body.Large weight={'$semibold'} data-testid={`${nameTranslationKey}-label`}>
+                  <Text.Body.Large weight="$semibold" data-testid={`${nameTranslationKey}-label`}>
                     {t(nameTranslationKey)}
                   </Text.Body.Large>
                 </div>
                 <div className={styles.infoValue}>
-                  <Text.Body.Normal weight={'$bold'} data-testid={`${nameTranslationKey}-value`}>
+                  <Text.Body.Normal weight="$bold" data-testid={`${nameTranslationKey}-value`}>
                     {value}
                   </Text.Body.Normal>
                 </div>
