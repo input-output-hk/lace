@@ -1,8 +1,8 @@
 import { Wallet } from '@lace/cardano';
-import { Box, Flex, Text } from '@lace/ui';
+import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { PortfolioState, Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
 import { StakingInfoCard } from './staking-info-card';
@@ -17,11 +17,23 @@ export const Overview = () => {
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
   } = useOutsideHandles();
-  const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
-  const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
+  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
+    portfolioMutators: store.mutators,
+  }));
+  const { setIsDrawerVisible, setSection } = useStakePoolDetails((state) => ({
+    setIsDrawerVisible: state.setIsDrawerVisible,
+    setSection: state.setSection,
+  }));
 
   const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
     setSelectedStakePool(stakePool);
+    setIsDrawerVisible(true);
+  };
+
+  const onManageClick = () => {
+    portfolioMutators.beginProcess(PortfolioState.ManagingCurrentPortfolio);
+    setSection(sectionsConfig[Sections.PREFERENCES]);
     setIsDrawerVisible(true);
   };
 
@@ -33,6 +45,8 @@ export const Overview = () => {
     portfolio: currentPortfolio,
     stakingRewards,
   });
+
+  console.log('label', t('overview.yourPoolsSection.manageButtonLabel'));
 
   return (
     <>
@@ -50,6 +64,7 @@ export const Overview = () => {
       </Box>
       <Flex justifyContent={'space-between'} mb={'$16'}>
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
+        <ControlButton.Small onClick={onManageClick} label={t('overview.yourPoolsSection.manageButtonLabel')} />
       </Flex>
       {displayData.map((item) => (
         <Box key={item.id} mb={'$24'} data-testid="delegated-pool-item">

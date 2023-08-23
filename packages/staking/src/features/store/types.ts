@@ -51,13 +51,21 @@ export type CurrentPortfolioStakePool = DraftPortfolioStakePool & {
   value: bigint;
 };
 
+export enum PortfolioState {
+  Free = 'Free',
+  ConfirmingNewPortfolio = 'ConfirmingNewPortfolio',
+  ManagingCurrentPortfolio = 'ManagingCurrentPortfolio',
+}
+
 export type DelegationPortfolioState = {
+  state: PortfolioState;
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio: DraftPortfolioStakePool[];
+  selections: DraftPortfolioStakePool[];
 };
 
 export type DelegationPortfolioQueries = {
-  poolIncludedInDraft: (id: Wallet.Cardano.PoolIdHex) => boolean;
+  isPoolAlreadySelected: (id: Wallet.Cardano.PoolIdHex) => boolean;
 };
 
 type DelegationPortfolioMutators = {
@@ -65,16 +73,19 @@ type DelegationPortfolioMutators = {
     delegationDistribution: DelegatedStake[];
     cardanoCoin: Wallet.CoinId;
   }) => Promise<void>;
-  addPoolToDraft: (pool: DraftPortfolioStakePool) => void;
-  removePoolFromDraft: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
-  updatePoolWeight: (params: Pick<DraftPortfolioStakePool, 'id' | 'weight'>) => void;
-  clearDraft: () => void;
+  selectPool: (pool: DraftPortfolioStakePool) => void;
+  unselectPool: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
+  clearSelections: () => void;
+  beginProcess: (process: PortfolioState.ConfirmingNewPortfolio | PortfolioState.ManagingCurrentPortfolio) => void;
+  cancelProcess: () => void;
+  finalizeProcess: () => void;
+  moveFromManagingProcessToSelections: () => void;
 };
 
-export type DelegationPortfolioStore = DelegationPortfolioState &
-  DelegationPortfolioQueries & {
-    mutators: DelegationPortfolioMutators;
-  };
+export type DelegationPortfolioStore = DelegationPortfolioState & {
+  mutators: DelegationPortfolioMutators;
+  queries: DelegationPortfolioQueries;
+};
 
 export enum Page {
   overview = 'overview',

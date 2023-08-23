@@ -76,60 +76,50 @@ const dummyStakePool3 = {
 describe('delegationPortfolioStore', () => {
   beforeEach(() => {
     const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.clearDraft());
+    act(() => result.current.mutators.finalizeProcess());
   });
 
   it('initializes the portfolio preferences', () => {
     const { result } = renderHook(() => useDelegationPortfolioStore());
     expect(result.current.currentPortfolio).toEqual([]);
-    expect(result.current.draftPortfolio).toEqual([]);
+    expect(result.current.selections).toEqual([]);
   });
 
   it('adds pools to portfolio preserving the max allowed count', () => {
     const newLength = 5;
     const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
-    act(() => result.current.mutators.addPoolToDraft(dummyPool2));
-    act(() => result.current.mutators.addPoolToDraft(dummyPool3));
-    act(() => result.current.mutators.addPoolToDraft(dummyPool4));
-    act(() => result.current.mutators.addPoolToDraft(dummyPool5));
-    act(() => result.current.mutators.addPoolToDraft(dummyPool6));
-    expect(result.current.draftPortfolio.length).toEqual(newLength);
+    act(() => result.current.mutators.selectPool(dummyPool1));
+    act(() => result.current.mutators.selectPool(dummyPool2));
+    act(() => result.current.mutators.selectPool(dummyPool3));
+    act(() => result.current.mutators.selectPool(dummyPool4));
+    act(() => result.current.mutators.selectPool(dummyPool5));
+    act(() => result.current.mutators.selectPool(dummyPool6));
+    expect(result.current.selections.length).toEqual(newLength);
   });
 
   it('prevents adding a same pool twice', () => {
     const newLength = 1;
     const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
-    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
-    expect(result.current.draftPortfolio.length).toEqual(newLength);
+    act(() => result.current.mutators.selectPool(dummyPool1));
+    act(() => result.current.mutators.selectPool(dummyPool1));
+    expect(result.current.selections.length).toEqual(newLength);
   });
 
   it('removes pool from portfolio', () => {
     const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
-    act(() => result.current.mutators.addPoolToDraft(dummyPool2));
-    act(() => result.current.mutators.removePoolFromDraft({ id: dummyPool1.id }));
-    act(() => result.current.mutators.removePoolFromDraft({ id: dummyPool3.id }));
-    expect(result.current.draftPortfolio.length).toEqual(1);
-    expect(result.current.draftPortfolio[0]?.id).toEqual(dummyPool2.id);
+    act(() => result.current.mutators.selectPool(dummyPool1));
+    act(() => result.current.mutators.selectPool(dummyPool2));
+    act(() => result.current.mutators.unselectPool({ id: dummyPool1.id }));
+    act(() => result.current.mutators.unselectPool({ id: dummyPool3.id }));
+    expect(result.current.selections.length).toEqual(1);
+    expect(result.current.selections[0]?.id).toEqual(dummyPool2.id);
   });
 
-  it('updates the weight of specific pool', async () => {
-    const newWeight = 0.75;
+  it('clears the selections', () => {
     const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
-    act(() => result.current.mutators.addPoolToDraft(dummyPool2));
-    act(() => result.current.mutators.updatePoolWeight({ id: dummyPool1.id, weight: 0.75 }));
-    expect(result.current.draftPortfolio[0]?.weight).toEqual(newWeight);
-    expect(result.current.draftPortfolio[1]?.weight).toEqual(dummyPool2.weight);
-  });
-
-  it('clears the portfolio', () => {
-    const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.addPoolToDraft(dummyPool1));
-    act(() => result.current.mutators.clearDraft());
-    expect(result.current.draftPortfolio.length).toEqual(0);
+    act(() => result.current.mutators.selectPool(dummyPool1));
+    act(() => result.current.mutators.clearSelections());
+    expect(result.current.selections.length).toEqual(0);
   });
 
   it('sets the current portfolio', () => {
@@ -160,7 +150,7 @@ describe('delegationPortfolioStore', () => {
         ],
       })
     );
-    act(() => result.current.mutators.clearDraft());
+    act(() => result.current.mutators.finalizeProcess());
     expect(result.current.currentPortfolio.length).toEqual(expectedLength);
     expect(result.current.currentPortfolio).toEqual(
       expect.arrayContaining([

@@ -31,7 +31,7 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
-  const { addPoolToDraft, removePoolFromDraft } = useDelegationPortfolioStore((state) => state.mutators);
+  const { selectPool, unselectPool } = useDelegationPortfolioStore((state) => state.mutators);
 
   const { setIsDrawerVisible } = useStakePoolDetails();
 
@@ -101,14 +101,6 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
         return {
           logo,
           ...stakePool,
-          addToDraft: () =>
-            addPoolToDraft({
-              displayData: stakePool,
-              id: hexId,
-              name: stakePool.name,
-              ticker: stakePool.ticker,
-              weight: 1,
-            }),
           hexId,
           onClick: (): void => {
             setSelectedStakePool({ logo, ...pool });
@@ -119,10 +111,18 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
             setSelectedStakePool(pool);
             onStake(poolId);
           },
-          removeFromDraft: () => removePoolFromDraft({ id: hexId }),
+          select: () =>
+            selectPool({
+              displayData: stakePool,
+              id: hexId,
+              name: stakePool.name,
+              ticker: stakePool.ticker,
+              weight: 1,
+            }),
+          unselect: () => unselectPool({ id: hexId }),
         };
       }) || [],
-    [stakePools, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, onStake, removePoolFromDraft, addPoolToDraft]
+    [stakePools, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, onStake, unselectPool, selectPool]
   );
 
   return (
