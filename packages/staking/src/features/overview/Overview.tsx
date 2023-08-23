@@ -1,10 +1,13 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
+import { Banner } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { PortfolioState, Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
-import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
+import { hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
+import * as styles from './Overview.css';
 import { StakingInfoCard } from './staking-info-card';
 
 export const Overview = () => {
@@ -16,6 +19,7 @@ export const Overview = () => {
     stakingRewards,
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
+    walletStoreWalletActivities: walletActivities,
   } = useOutsideHandles();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
@@ -30,14 +34,13 @@ export const Overview = () => {
     setSelectedStakePool(stakePool);
     setIsDrawerVisible(true);
   };
+  const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
 
   const onManageClick = () => {
     portfolioMutators.beginProcess(PortfolioState.ManagingCurrentPortfolio);
     setSection(sectionsConfig[Sections.PREFERENCES]);
     setIsDrawerVisible(true);
   };
-
-  if (currentPortfolio.length === 0) return <Text.SubHeading>Start staking</Text.SubHeading>;
 
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
@@ -46,7 +49,21 @@ export const Overview = () => {
     stakingRewards,
   });
 
-  console.log('label', t('overview.yourPoolsSection.manageButtonLabel'));
+  if (currentPortfolio.length === 0)
+    return (
+      <>
+        {pendingDelegationTransaction ? (
+          <Banner
+            withIcon
+            customIcon={<InfoCircleOutlined className={styles.bannerInfoIcon} />}
+            message={t('overview.banners.pendingFirstDelegation.title')}
+            description={t('overview.banners.pendingFirstDelegation.message')}
+          />
+        ) : (
+          <Text.SubHeading>Start staking</Text.SubHeading>
+        )}
+      </>
+    );
 
   return (
     <>
@@ -62,6 +79,16 @@ export const Overview = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
+      {pendingDelegationTransaction && (
+        <Box mb="$40">
+          <Banner
+            withIcon
+            customIcon={<InfoCircleOutlined className={styles.bannerInfoIcon} />}
+            message={t('overview.banners.pendingPoolMigration.title')}
+            description={t('overview.banners.pendingPoolMigration.message')}
+          />
+        </Box>
+      )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
         <ControlButton.Small onClick={onManageClick} label={t('overview.yourPoolsSection.manageButtonLabel')} />

@@ -82,6 +82,12 @@ export const en: Translations = {
   'modals.changingPreferences.description':
     "That's totally fine! Just please note that you'll continue receiving rewards from your former pool(s) for two epochs. After that, you'll start to receiving rewards from your new pool(s).",
   'modals.changingPreferences.title': 'Changing staking preferences?',
+  'overview.banners.pendingFirstDelegation.message':
+    'You will see your staking portfolio here once the transaction has been validated',
+  'overview.banners.pendingFirstDelegation.title': 'Your staking transaction has been submitted',
+  'overview.banners.pendingPoolMigration.message':
+    'You will continue to receive rewards from your former stake pool(s) for two epochs',
+  'overview.banners.pendingPoolMigration.title': 'You are migrating stake pool(s)',
   'overview.delegationCard.label.balance': 'ADA Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',

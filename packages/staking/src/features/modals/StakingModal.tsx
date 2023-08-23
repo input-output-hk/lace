@@ -21,6 +21,7 @@ export type StakingModalProps = {
   description: React.ReactNode;
   actions: StakingModalActionProps[];
   popupView?: boolean;
+  focusTriggerAfterClose?: boolean;
 };
 
 const popupModalWidth = 312;
@@ -33,6 +34,7 @@ export const StakingModal = ({
   visible,
   actions,
   popupView,
+  focusTriggerAfterClose,
 }: StakingModalProps): React.ReactElement<StakingModalProps> => {
   const { setStakeConfirmationVisible, setExitStakingVisible, setNoFundsVisible } = useStakePoolDetails();
 
@@ -53,6 +55,7 @@ export const StakingModal = ({
       footer={null}
       visible={visible}
       width={popupView ? popupModalWidth : extendedModalWidth}
+      focusTriggerAfterClose={focusTriggerAfterClose ?? true}
     >
       <div
         data-testid="stake-modal-title"

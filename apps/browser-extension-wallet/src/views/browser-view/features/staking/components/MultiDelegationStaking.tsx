@@ -1,11 +1,12 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
+import { useWalletActivities } from '@hooks/useWalletActivities';
 
 const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
 
@@ -36,7 +37,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
     fetchStakePools,
     fetchNetworkInfo,
     networkInfo,
-    blockchainProvider
+    blockchainProvider,
+    currentChain
   } = useWalletStore((state) => ({
     getKeyAgentType: state.getKeyAgentType,
     inMemoryWallet: state.inMemoryWallet,
@@ -46,8 +48,24 @@ export const MultiDelegationStaking = (): JSX.Element => {
     fetchStakePools: state.fetchStakePools,
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
-    blockchainProvider: state.blockchainProvider
+    blockchainProvider: state.blockchainProvider,
+    currentChain: state.currentChain
   }));
+  const sendAnalytics = useCallback(() => {
+    // TODO implement analytics for the new flow
+    const analytics = {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      sendEvent: () => {}
+    };
+
+    // @ts-expect-error TODO implement analytics
+    analytics.sendEvent({
+      action: 'AnalyticsEventActions.CLICK_EVENT',
+      category: 'AnalyticsEventCategories.STAKING',
+      name: 'AnalyticsEventNames.Staking.STAKING_MULTI_DELEGATION_BROWSER'
+    });
+  }, []);
+  const { walletActivities } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
@@ -83,10 +101,12 @@ export const MultiDelegationStaking = (): JSX.Element => {
         walletStoreFetchNetworkInfo: fetchNetworkInfo,
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
+        walletStoreWalletActivities: walletActivities,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         multidelegationFirstVisit,
-        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false)
+        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        currentChain
       }}
     >
       <Staking theme={theme.name} />
