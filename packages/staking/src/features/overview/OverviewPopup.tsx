@@ -6,7 +6,7 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
-import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
+import { mapPortfolioToDisplayData } from './helpers';
 import { StakingInfoCard } from './staking-info-card';
 
 export const OverviewPopup = () => {
