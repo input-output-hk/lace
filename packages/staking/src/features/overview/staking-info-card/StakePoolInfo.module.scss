@@ -14,7 +14,7 @@
   height: size_unit(8);
   padding: size_unit(1);
   max-width: 100%;
-  margin-left: 16px;
+  margin-left: size_unit(2);
   &:hover {
     background: var(--light-mode-light-grey);
   }
