@@ -21,7 +21,8 @@ export const SendTransactionLayout = ({ children, isPopupView }: SendTransaction
   const [, setIsDrawerVisible] = useDrawer();
   const {
     currentSection: { currentSection },
-    resetSection
+    resetSection,
+    setSection
   } = useSections();
   const reset = useResetStore();
   const resetUi = useResetUiStore();
@@ -58,12 +59,19 @@ export const SendTransactionLayout = ({ children, isPopupView }: SendTransaction
         ...(![Sections.ADDRESS_LIST, Sections.ADDRESS_FORM, Sections.ASSET_PICKER].includes(currentSection) ||
         shouldAssetPickerDisplayFooter
           ? {
-              // eslint-disable-next-line @typescript-eslint/no-empty-function
-              renderFooter: () => <Footer key={currentSection} isPopupView={isPopupView} />
+              renderFooter: () => (
+                <Footer
+                  key={currentSection}
+                  isPopupView={isPopupView}
+                  onHandleChangeConfirm={() =>
+                    setSection({ currentSection: Sections.FORM, nextSection: Sections.SUMMARY })
+                  }
+                />
+              )
             }
           : {})
       }),
-    [setIsDrawerVisible, onClose, isPopupView, currentSection, shouldAssetPickerDisplayFooter]
+    [setIsDrawerVisible, onClose, isPopupView, currentSection, shouldAssetPickerDisplayFooter, setSection]
   );
 
   useEffect(() => changeOnCloseDrawer(), [changeOnCloseDrawer]);
