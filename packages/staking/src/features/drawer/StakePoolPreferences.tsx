@@ -59,7 +59,7 @@ export const StakePoolPreferences = () => {
     if (activePage !== Page.browsePools) {
       setActivePage(Page.browsePools);
     }
-    portfolioMutators.moveFromManagingProcessToSelections();
+    portfolioMutators.moveFromCurrentPortfolioManagementProcessToSelections();
     setIsDrawerVisible(false);
     resetStates();
   };

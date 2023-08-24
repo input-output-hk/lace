@@ -42,7 +42,7 @@ export const useDelegationPortfolioStore = create(
           }
           store.activeManagementProcess = PortfolioManagementProcess.None;
         }),
-      moveFromManagingProcessToSelections: () =>
+      moveFromCurrentPortfolioManagementProcessToSelections: () =>
         set((store) => {
           if (store.activeManagementProcess !== PortfolioManagementProcess.CurrentPortfolio) return;
           store.selections = store.draftPortfolio;

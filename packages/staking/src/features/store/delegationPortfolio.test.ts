@@ -238,6 +238,42 @@ describe('delegationPortfolioStore', () => {
       });
       expect(result.current.draftPortfolio).toEqual([]);
     });
+    it('re-sets the activeManagementProcess to none when moving to selections', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.moveFromCurrentPortfolioManagementProcessToSelections();
+      });
+      expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.None);
+    });
+    it('clears the draftPortfolio when moving to selections', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.moveFromCurrentPortfolioManagementProcessToSelections();
+      });
+      expect(result.current.draftPortfolio).toEqual([]);
+    });
+    it('copies the draftPortfolio items to the selections when moving to selections', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.moveFromCurrentPortfolioManagementProcessToSelections();
+      });
+      expect(result.current.selections).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            ...dummyPool1,
+            weight: 33.33,
+          }),
+          expect.objectContaining({
+            ...dummyPool2,
+            weight: 33.33,
+          }),
+          expect.objectContaining({
+            ...dummyPool3,
+            weight: 33.33,
+          }),
+        ])
+      );
+    });
   });
 
   describe('new portfolio management', () => {

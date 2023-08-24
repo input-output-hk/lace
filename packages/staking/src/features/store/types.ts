@@ -81,7 +81,7 @@ type DelegationPortfolioMutators = {
   ) => void;
   cancelManagementProcess: () => void;
   finalizeManagementProcess: () => void;
-  moveFromManagingProcessToSelections: () => void;
+  moveFromCurrentPortfolioManagementProcessToSelections: () => void;
 };
 
 export type DelegationPortfolioStore = DelegationPortfolioState & {
