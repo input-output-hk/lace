@@ -79,12 +79,13 @@ export const FundWalletBanner = ({
   const largeSizeScreenContent = shouldHaveVerticalContent ? (
     <div className={styles.verticalContent}>
       <LacePortalHorizontal className={styles.horizontalPortal} />
-      <div className={styles.title}>
-        <h1 data-testid="fund-wallet-banner-title">{title}</h1>
-      </div>
+
       <div className={styles.bottomContent}>
         <div className={styles.leftSide}>{qrCodeElement}</div>
         <div className={styles.rightSide}>
+          <div className={styles.title}>
+            <h1 data-testid="fund-wallet-banner-title">{title}</h1>
+          </div>
           {subtitle && (
             <div className={styles.title}>
               <h2 data-testid="fund-wallet-banner-subtitle">{subtitle}</h2>
