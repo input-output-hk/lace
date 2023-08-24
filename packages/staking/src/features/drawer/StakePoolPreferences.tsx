@@ -6,14 +6,16 @@ import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDeta
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 export const StakePoolPreferencesFooter = () => {
+  const { t } = useTranslation();
   const { setSection } = useStakePoolDetails();
+
   return (
-    <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
+    <Flex flexDirection="column" alignItems="stretch" gap="$16">
       <Button.CallToAction
-        label={'Next'}
-        data-testid={'preferences-next-button'}
+        label={t('drawer.preferences.nextButton')}
+        data-testid="preferences-next-button"
         onClick={() => setSection(sectionsConfig[Sections.CONFIRMATION])}
-        w={'$fill'}
+        w="$fill"
       />
     </Flex>
   );
@@ -29,7 +31,7 @@ export const StakePoolPreferences = () => {
   } = useOutsideHandles();
   const draftPortfolio = useDelegationPortfolioStore((state) => state.draftPortfolio);
   return (
-    <Flex flexDirection={'column'} gap={'$32'} alignItems={'stretch'}>
+    <Flex flexDirection="column" gap="$32" alignItems="stretch">
       <DelegationCard
         balance={compactNumber(balancesBalance.available.coinBalance)}
         cardanoCoinSymbol={symbol}
@@ -38,13 +40,13 @@ export const StakePoolPreferences = () => {
           name: name || '',
           value: weight,
         }))}
-        status={'ready'}
+        status="ready"
         showDistribution
       />
       <Text.Body.Large weight="$semibold">
         {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}
       </Text.Body.Large>
-      <Flex flexDirection={'column'} gap={'$16'} pb={'$32'} alignItems={'stretch'}>
+      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
         {draftPortfolio.map(({ name, id }, i) => (
           <PoolDetailsCard
             key={i}

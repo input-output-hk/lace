@@ -36,6 +36,7 @@ module.exports = {
       },
     ],
     'promise/avoid-new': 'off',
+    'react/jsx-curly-brace-presence': 2,
     'react/react-in-jsx-scope': 'off',
     'sort-imports': [
       'error',
