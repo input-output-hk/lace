@@ -11,7 +11,9 @@
     }
   ],
   "tags": [
-    { "name": "default" }
+    {
+      "name": "default"
+    }
   ],
   "paths": {
     "/v1/info": {
@@ -104,7 +106,7 @@
                         "type": "object",
                         "properties": {
                           "jsonrpc": { "type": "string", "example": "2.0" },
-                          "method":  { "type": "string", "example": "NetworkChange" },
+                          "method": { "type": "string", "example": "NetworkChange" },
                           "params": {
                             "type": "object",
                             "properties": {
@@ -121,15 +123,22 @@
                         "type": "object",
                         "properties": {
                           "jsonrpc": { "type": "string", "example": "2.0" },
-                          "method":  { "type": "string", "example": "Log" },
+                          "method": { "type": "string", "example": "Log" },
                           "params": {
                             "type": "object",
                             "properties": {
-                              "timestamp": { "type": "string", "format": "date-time", "example": "2023-07-27T09:12:34.022511785Z" },
+                              "timestamp": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2023-07-27T09:12:34.022511785Z"
+                              },
                               "serviceName": { "$ref": "#/components/schemas/ServiceName" },
                               "pid": { "type": "integer", "example": 10462 },
                               "stderr": { "type": "boolean", "example": false },
-                              "line": { "type": "string", "example": "[ChainDB:Notice:52] Chain extended, new tip: 35cc8694d0f1d34146c93ea48357fe364f8a5487462ee79f5bb5cef92a7f7b9e at slot 33780262" }
+                              "line": {
+                                "type": "string",
+                                "example": "[ChainDB:Notice:52] Chain extended, new tip: 35cc8694d0f1d34146c93ea48357fe364f8a5487462ee79f5bb5cef92a7f7b9e at slot 33780262"
+                              }
                             }
                           }
                         }
@@ -138,7 +147,7 @@
                         "type": "object",
                         "properties": {
                           "jsonrpc": { "type": "string", "example": "2.0" },
-                          "method":  { "type": "string", "example": "ServiceStatus" },
+                          "method": { "type": "string", "example": "ServiceStatus" },
                           "params": { "$ref": "#/components/schemas/ServiceStatus" }
                         }
                       }

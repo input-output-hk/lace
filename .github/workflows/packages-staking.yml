@@ -37,7 +37,7 @@ jobs:
             **/node_modules
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Install dependencies
-        run: yarn install --immutable --inline-builds --mode=skip-build
+        run: yarn install --immutable --inline-builds
       - name: Check for linter issues
         run: yarn workspace @lace/staking lint
       - name: Build dependencies of Staking Center
