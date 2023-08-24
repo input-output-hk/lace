@@ -94,7 +94,7 @@ export class PostHogClient {
       : DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
   }
 
-  protected getProjectID(): number {
+  protected getProjectId(): number {
     return PRODUCTION_TRACKING_MODE_ENABLED
       ? PRODUCTION_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP[this.chain.networkMagic]
       : DEV_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP[this.chain.networkMagic];
@@ -106,7 +106,7 @@ export class PostHogClient {
       view: this.view,
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
-      posthog_project_id: this.getProjectID(),
+      posthog_project_id: this.getProjectId(),
       ...(await this.getPersonProperties())
     };
   }
