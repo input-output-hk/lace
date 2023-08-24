@@ -4,7 +4,13 @@ import { Banner } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { PortfolioState, Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import {
+  PortfolioManagementProcess,
+  Sections,
+  sectionsConfig,
+  useDelegationPortfolioStore,
+  useStakePoolDetails,
+} from '../store';
 import { DelegationCard } from './DelegationCard';
 import { hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import * as styles from './Overview.css';
@@ -37,7 +43,7 @@ export const Overview = () => {
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
 
   const onManageClick = () => {
-    portfolioMutators.beginProcess(PortfolioState.ManagingCurrentPortfolio);
+    portfolioMutators.beginManagementProcess(PortfolioManagementProcess.CurrentPortfolio);
     setSection(sectionsConfig[Sections.PREFERENCES]);
     setIsDrawerVisible(true);
   };

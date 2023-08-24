@@ -51,21 +51,21 @@ export type CurrentPortfolioStakePool = DraftPortfolioStakePool & {
   value: bigint;
 };
 
-export enum PortfolioState {
-  Free = 'Free',
-  ConfirmingNewPortfolio = 'ConfirmingNewPortfolio',
-  ManagingCurrentPortfolio = 'ManagingCurrentPortfolio',
+export enum PortfolioManagementProcess {
+  None = 'None',
+  NewPortfolio = 'NewPortfolio',
+  CurrentPortfolio = 'CurrentPortfolio',
 }
 
 export type DelegationPortfolioState = {
-  state: PortfolioState;
+  activeManagementProcess: PortfolioManagementProcess;
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio: DraftPortfolioStakePool[];
   selections: DraftPortfolioStakePool[];
 };
 
 export type DelegationPortfolioQueries = {
-  isPoolAlreadySelected: (id: Wallet.Cardano.PoolIdHex) => boolean;
+  isPoolSelected: (hexId: Wallet.Cardano.PoolIdHex) => boolean;
 };
 
 type DelegationPortfolioMutators = {
@@ -76,9 +76,11 @@ type DelegationPortfolioMutators = {
   selectPool: (pool: DraftPortfolioStakePool) => void;
   unselectPool: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
   clearSelections: () => void;
-  beginProcess: (process: PortfolioState.ConfirmingNewPortfolio | PortfolioState.ManagingCurrentPortfolio) => void;
-  cancelProcess: () => void;
-  finalizeProcess: () => void;
+  beginManagementProcess: (
+    process: PortfolioManagementProcess.NewPortfolio | PortfolioManagementProcess.CurrentPortfolio
+  ) => void;
+  cancelManagementProcess: () => void;
+  finalizeManagementProcess: () => void;
   moveFromManagingProcessToSelections: () => void;
 };
 

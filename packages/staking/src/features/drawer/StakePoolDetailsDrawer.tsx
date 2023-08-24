@@ -60,7 +60,7 @@ export const StakePoolDetailsDrawer = ({
       // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
       // if (!isInMemory && isSuccessSection) window.location.reload();
       setIsDrawerVisible(false);
-      portfolioMutators.cancelProcess();
+      portfolioMutators.cancelManagementProcess();
     }
     setIsRestaking(false);
   }, [

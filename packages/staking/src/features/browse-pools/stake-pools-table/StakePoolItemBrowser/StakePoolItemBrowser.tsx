@@ -19,8 +19,8 @@ export interface StakePoolItemBrowserProps {
   cost?: number | string;
   logo: string;
   onClick: (id: string) => unknown;
-  select: () => void;
-  unselect: () => void;
+  onSelect: () => void;
+  onUnselect: () => void;
 }
 
 export const getSaturationLevel = (saturation: number): string => {
@@ -46,8 +46,8 @@ export const StakePoolItemBrowser = ({
   logo,
   apy,
   onClick,
-  select,
-  unselect,
+  onSelect,
+  onUnselect,
 }: StakePoolItemBrowserProps): React.ReactElement => {
   const { t } = useTranslation();
   let title = name;
@@ -56,9 +56,8 @@ export const StakePoolItemBrowser = ({
     title = ticker || '-';
     subTitle = <Ellipsis className={styles.id} text={id} beforeEllipsis={6} afterEllipsis={8} />;
   }
-  const selectionsCount = useDelegationPortfolioStore((state) => state.selections.length);
-  const selectionsNotEmpty = selectionsCount > 0;
-  const poolAlreadySelected = useDelegationPortfolioStore((state) => state.queries.isPoolAlreadySelected(hexId));
+  const selectionsNotEmpty = useDelegationPortfolioStore((state) => state.selections.length > 0);
+  const poolAlreadySelected = useDelegationPortfolioStore((state) => state.queries.isPoolSelected(hexId));
 
   const StakeButtonComponent = poolAlreadySelected ? Button.Secondary : Button.CallToAction;
   const stakePoolStateLabel = poolAlreadySelected
@@ -103,7 +102,7 @@ export const StakePoolItemBrowser = ({
           label={stakePoolStateLabel}
           onClick={(event) => {
             event.stopPropagation();
-            poolAlreadySelected ? unselect() : select();
+            poolAlreadySelected ? onUnselect() : onSelect();
           }}
           data-testid="stake-button"
         />

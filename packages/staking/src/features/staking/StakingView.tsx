@@ -7,7 +7,7 @@ import { StakePoolDetails } from '../drawer';
 import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
-import { Page, PortfolioState, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Page, PortfolioManagementProcess, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { Navigation } from './Navigation';
 
 const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
@@ -41,7 +41,7 @@ export const StakingView = () => {
   const alreadyDelegating = currentPortfolio.length > 0;
 
   const proceedWithSelections = useCallback(() => {
-    portfolioMutators.beginProcess(PortfolioState.ConfirmingNewPortfolio);
+    portfolioMutators.beginManagementProcess(PortfolioManagementProcess.NewPortfolio);
     setSection();
     setIsDrawerVisible(true);
   }, [portfolioMutators, setSection, setIsDrawerVisible]);

@@ -101,7 +101,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       cleanPasswordInput();
       sendAnalytics();
       setIsRestaking(currentPortfolio.length > 0);
-      portfolioMutators.finalizeProcess();
+      portfolioMutators.finalizeManagementProcess();
       setSection(sectionsConfig[Sections.SUCCESS_TX]);
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
     } catch (error) {

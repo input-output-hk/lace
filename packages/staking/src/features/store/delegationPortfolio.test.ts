@@ -3,7 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { beforeEach, expect, it } from 'vitest';
 import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from './delegationPortfolio';
-import { CurrentPortfolioStakePool, PortfolioState } from './types';
+import { CurrentPortfolioStakePool, PortfolioManagementProcess } from './types';
 
 const dummyPool1 = {
   id: Wallet.Cardano.PoolIdHex('39deffa1dfcfe192ea0efeb3e9bcd9878190627fb590ec81f390cd6d'),
@@ -199,12 +199,12 @@ describe('delegationPortfolioStore', () => {
           ],
         });
       });
-      act(() => result.current.mutators.beginProcess(PortfolioState.ManagingCurrentPortfolio));
+      act(() => result.current.mutators.beginManagementProcess(PortfolioManagementProcess.CurrentPortfolio));
     });
 
     it('sets the currentPortfolio as activeManagementProcess when started', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
-      expect(result.current.state).toEqual(PortfolioState.ManagingCurrentPortfolio);
+      expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.CurrentPortfolio);
     });
     it('copies the currentPortfolio items to the draftPortfolio when started', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
@@ -213,28 +213,28 @@ describe('delegationPortfolioStore', () => {
     it('re-sets the activeManagementProcess to none when canceled', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.cancelProcess();
+        result.current.mutators.cancelManagementProcess();
       });
-      expect(result.current.state).toEqual(PortfolioState.Free);
+      expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.None);
     });
     it('clears the draftPortfolio when canceled', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.cancelProcess();
+        result.current.mutators.cancelManagementProcess();
       });
       expect(result.current.draftPortfolio).toEqual([]);
     });
     it('re-sets the activeManagementProcess to none when finalized', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.finalizeProcess();
+        result.current.mutators.finalizeManagementProcess();
       });
-      expect(result.current.state).toEqual(PortfolioState.Free);
+      expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.None);
     });
     it('clears the draftPortfolio when finalized', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.finalizeProcess();
+        result.current.mutators.finalizeManagementProcess();
       });
       expect(result.current.draftPortfolio).toEqual([]);
     });
@@ -247,12 +247,12 @@ describe('delegationPortfolioStore', () => {
       act(() => result.current.mutators.selectPool(dummyPool3));
       act(() => result.current.mutators.selectPool(dummyPool4));
       act(() => result.current.mutators.selectPool(dummyPool5));
-      act(() => result.current.mutators.beginProcess(PortfolioState.ConfirmingNewPortfolio));
+      act(() => result.current.mutators.beginManagementProcess(PortfolioManagementProcess.NewPortfolio));
     });
 
     it('sets the newPortfolio as activeManagementProcess when started', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
-      expect(result.current.state).toEqual(PortfolioState.ConfirmingNewPortfolio);
+      expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.NewPortfolio);
     });
     it('copies the selections items to the draftPortfolio when started', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
@@ -261,35 +261,35 @@ describe('delegationPortfolioStore', () => {
     it('re-sets the activeManagementProcess to none when canceled', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.cancelProcess();
+        result.current.mutators.cancelManagementProcess();
       });
-      expect(result.current.state).toEqual(PortfolioState.Free);
+      expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.None);
     });
     it('clears the draftPortfolio when canceled', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.cancelProcess();
+        result.current.mutators.cancelManagementProcess();
       });
       expect(result.current.draftPortfolio).toEqual([]);
     });
     it('re-sets the activeManagementProcess to none when finalized', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.finalizeProcess();
+        result.current.mutators.finalizeManagementProcess();
       });
-      expect(result.current.state).toEqual(PortfolioState.Free);
+      expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.None);
     });
     it('clears the draftPortfolio when finalized', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.finalizeProcess();
+        result.current.mutators.finalizeManagementProcess();
       });
       expect(result.current.draftPortfolio).toEqual([]);
     });
     it('clears the selections when finalized', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
-        result.current.mutators.finalizeProcess();
+        result.current.mutators.finalizeManagementProcess();
       });
       expect(result.current.selections).toEqual([]);
     });

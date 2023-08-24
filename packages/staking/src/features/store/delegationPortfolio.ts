@@ -1,13 +1,13 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { DelegationPortfolioState, DelegationPortfolioStore, PortfolioState } from './types';
+import { DelegationPortfolioState, DelegationPortfolioStore, PortfolioManagementProcess } from './types';
 
 const defaultState: DelegationPortfolioState = {
+  activeManagementProcess: PortfolioManagementProcess.None,
   currentPortfolio: [],
   draftPortfolio: [],
   selections: [],
-  state: PortfolioState.Free,
 };
 
 export const MAX_POOLS_COUNT = 5;
@@ -16,38 +16,38 @@ export const useDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set, get) => ({
     ...defaultState,
     mutators: {
-      beginProcess: (process) =>
-        set((state) => {
-          if (state.state === process) return;
-          state.state = process;
-          state.draftPortfolio =
-            process === PortfolioState.ManagingCurrentPortfolio ? state.currentPortfolio : state.selections;
+      beginManagementProcess: (process) =>
+        set((store) => {
+          if (store.activeManagementProcess === process) return;
+          store.activeManagementProcess = process;
+          store.draftPortfolio =
+            process === PortfolioManagementProcess.CurrentPortfolio ? store.currentPortfolio : store.selections;
         }),
-      cancelProcess: () =>
-        set((state) => {
-          if (state.state === PortfolioState.Free) return;
-          state.draftPortfolio = [];
-          state.state = PortfolioState.Free;
+      cancelManagementProcess: () =>
+        set((store) => {
+          if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
+          store.draftPortfolio = [];
+          store.activeManagementProcess = PortfolioManagementProcess.None;
         }),
       clearSelections: () =>
         set((store) => {
           store.selections = [];
         }),
-      finalizeProcess: () =>
+      finalizeManagementProcess: () =>
         set((store) => {
-          if (store.state === PortfolioState.Free) return;
+          if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
           store.draftPortfolio = [];
-          if (store.state === PortfolioState.ConfirmingNewPortfolio) {
+          if (store.activeManagementProcess === PortfolioManagementProcess.NewPortfolio) {
             store.selections = [];
           }
-          store.state = PortfolioState.Free;
+          store.activeManagementProcess = PortfolioManagementProcess.None;
         }),
       moveFromManagingProcessToSelections: () =>
         set((store) => {
-          if (store.state !== PortfolioState.ManagingCurrentPortfolio) return;
+          if (store.activeManagementProcess !== PortfolioManagementProcess.CurrentPortfolio) return;
           store.selections = store.draftPortfolio;
           store.draftPortfolio = [];
-          store.state = PortfolioState.Free;
+          store.activeManagementProcess = PortfolioManagementProcess.None;
         }),
       selectPool: (poolData) =>
         set(({ selections }) => {
@@ -77,9 +77,9 @@ export const useDelegationPortfolioStore = create(
         }),
     },
     queries: {
-      isPoolAlreadySelected: (id) => {
+      isPoolSelected: (hexId) => {
         const { selections } = get();
-        return !!selections?.find((pool) => pool.id === id);
+        return !!selections?.find((pool) => pool.id === hexId);
       },
     },
   }))
