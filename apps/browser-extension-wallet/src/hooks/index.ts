@@ -21,3 +21,4 @@ export * from './useHandleResolver';
 export * from './useAssetInfo';
 export * from './useUpdateAddressStatus';
 export * from './useOnAddressSave';
+export * from './useSendEvent';

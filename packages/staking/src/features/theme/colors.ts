@@ -1,6 +1,7 @@
 import { darkColorScheme, laceGradient, lightColorScheme } from '@lace/ui';
 
 export const colorsContract = {
+  $bannerInfoIconColor: '',
   $delegationCardInfoLabelColor: '',
   $delegationCardInfoValueColor: '',
   $multidelegationBetaModalPillBackground: '',
@@ -8,6 +9,7 @@ export const colorsContract = {
 };
 
 export const lightThemeColors: typeof colorsContract = {
+  $bannerInfoIconColor: lightColorScheme.$primary_accent_purple,
   $delegationCardInfoLabelColor: lightColorScheme.$primary_dark_grey,
   $delegationCardInfoValueColor: lightColorScheme.$primary_black,
   $multidelegationBetaModalPillBackground: laceGradient,
@@ -15,6 +17,7 @@ export const lightThemeColors: typeof colorsContract = {
 };
 
 export const darkThemeColors: typeof colorsContract = {
+  $bannerInfoIconColor: lightColorScheme.$primary_accent_purple,
   $delegationCardInfoLabelColor: darkColorScheme.$primary_light_grey,
   $delegationCardInfoValueColor: darkColorScheme.$primary_white,
   $multidelegationBetaModalPillBackground: laceGradient,

@@ -126,7 +126,7 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   );
 
   return (
-    <Flex flexDirection={'column'} alignItems={'stretch'} data-testid="stake-pool-table">
+    <Flex flexDirection="column" alignItems="stretch" data-testid="stake-pool-table">
       <Search
         className={styles.search}
         withSearchIcon
@@ -135,7 +135,7 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
         data-testid="search-input"
         loading={fetchingPools}
       />
-      <Box mt={'$32'}>
+      <Box mt="$32">
         <StakePoolTableBrowser
           items={list}
           loadMoreData={loadMoreData}
