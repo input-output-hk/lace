@@ -32,7 +32,7 @@ export class UserIdService implements UserIdServiceInterface {
     private sessionLength: number = SESSION_LENGTH
   ) {}
 
-  async getUserTrackingType(): Promise<UserTrackingType> {
+  getUserTrackingType(): UserTrackingType {
     return this.userTrackingType;
   }
 

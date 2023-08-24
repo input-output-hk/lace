@@ -10,5 +10,5 @@ export interface UserIdService {
   makePersistent(): Promise<void>;
   makeTemporary(): Promise<void>;
   extendLifespan(): Promise<void>;
-  getUserTrackingType(): Promise<UserTrackingType>;
+  getUserTrackingType(): UserTrackingType;
 }

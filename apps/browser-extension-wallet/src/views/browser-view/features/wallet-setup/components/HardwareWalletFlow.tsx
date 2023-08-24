@@ -204,7 +204,7 @@ export const HardwareWalletFlow = ({
       const posthogProperties = await getHWPersonProperties(connectedDevice, deviceConnection);
       await sendAnalytics(
         Events.SETUP_FINISHED_NEXT,
-        postHogOnboardingActions.hw?.DONE_GO_TO_WALLET,
+        postHogOnboardingActions.hw.DONE_GO_TO_WALLET,
         undefined,
         posthogProperties
       );
@@ -235,7 +235,7 @@ export const HardwareWalletFlow = ({
         onNext={() => {
           sendAnalytics(
             Events.LEGAL_STUFF_NEXT,
-            postHogOnboardingActions.hw?.LACE_TERMS_OF_USE_NEXT_CLICK,
+            postHogOnboardingActions.hw.LACE_TERMS_OF_USE_NEXT_CLICK,
             calculateTimeSpentOnPage()
           );
           navigateTo('analytics');
@@ -260,7 +260,7 @@ export const HardwareWalletFlow = ({
         onConnect={handleConnect}
         onNext={() => {
           sendAnalytics(Events.SELECT_MODEL_NEXT);
-          analytics.sendEventToPostHog(postHogOnboardingActions.hw?.CONNECT_HW_NEXT_CLICK);
+          analytics.sendEventToPostHog(postHogOnboardingActions.hw.CONNECT_HW_NEXT_CLICK);
           navigateTo('accounts');
         }}
         isNextEnable={!!deviceConnection}
@@ -273,7 +273,7 @@ export const HardwareWalletFlow = ({
         accounts={TOTAL_ACCOUNTS}
         onBack={showStartOverDialog}
         onSubmit={(account: number) => {
-          sendAnalytics(Events.SELECT_ACCOUNT_NEXT, postHogOnboardingActions.hw?.SELECT_HW_ACCOUNT_NEXT_CLICK);
+          sendAnalytics(Events.SELECT_ACCOUNT_NEXT, postHogOnboardingActions.hw.SELECT_HW_ACCOUNT_NEXT_CLICK);
           setAccountIndex(account);
           navigateTo('register');
         }}
@@ -284,7 +284,7 @@ export const HardwareWalletFlow = ({
       <WalletSetupWalletNameStep
         onBack={showStartOverDialog}
         onNext={(name: string) => {
-          sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions.hw?.WALLET_NAME_NEXT_CLICK);
+          sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions.hw.WALLET_NAME_NEXT_CLICK);
           handleCreateWallet(name);
           navigateTo('create');
         }}

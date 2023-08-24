@@ -137,7 +137,7 @@ export type PostHogActionsKeys =
   | 'DONE_GO_TO_WALLET';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
-export type PostHogSetMetadata = {
+export type PostHogPersonProperties = {
   $set: {
     user_tracking_type: UserTrackingType;
   };
@@ -148,7 +148,7 @@ export type PostHogMetadata = {
   url: string;
   view: ExtensionViews;
   sent_at_local: string;
-} & PostHogSetMetadata;
+} & PostHogPersonProperties;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PostHogProperty = string | boolean | Record<string, any> | Array<Record<string, any>>;

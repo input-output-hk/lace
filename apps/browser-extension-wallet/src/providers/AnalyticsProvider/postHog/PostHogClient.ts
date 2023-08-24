@@ -7,7 +7,7 @@ import {
   PostHogAction,
   PostHogMetadata,
   PostHogProperties,
-  PostHogSetMetadata,
+  PostHogPersonProperties,
   UserTrackingType
 } from '../analyticsTracker';
 import {
@@ -97,11 +97,11 @@ export class PostHogClient {
       view: this.view,
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
-      ...(await this.getSetProperties())
+      ...(await this.getPersonProperties())
     };
   }
 
-  protected async getSetProperties(): Promise<PostHogSetMetadata | undefined> {
+  protected async getPersonProperties(): Promise<PostHogPersonProperties | undefined> {
     const currentUserTrackingType = await this.userIdService.getUserTrackingType();
 
     if (!this.userTrackingType) {
