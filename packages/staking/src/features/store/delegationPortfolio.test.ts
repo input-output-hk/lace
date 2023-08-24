@@ -1,9 +1,9 @@
-/* eslint-disable no-magic-numbers */
+/* eslint-disable no-magic-numbers, sonarjs/no-identical-functions */
 import { Wallet } from '@lace/cardano';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { beforeEach, expect, it } from 'vitest';
-import { useDelegationPortfolioStore } from './delegationPortfolio';
-import { CurrentPortfolioStakePool } from './types';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from './delegationPortfolio';
+import { CurrentPortfolioStakePool, PortfolioState } from './types';
 
 const dummyPool1 = {
   id: Wallet.Cardano.PoolIdHex('39deffa1dfcfe192ea0efeb3e9bcd9878190627fb590ec81f390cd6d'),
@@ -74,52 +74,54 @@ const dummyStakePool3 = {
 } as Wallet.Cardano.StakePool;
 
 describe('delegationPortfolioStore', () => {
-  beforeEach(() => {
-    const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.finalizeProcess());
-  });
+  describe('selections', () => {
+    beforeEach(() => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => result.current.mutators.clearSelections());
+    });
 
-  it('initializes the portfolio preferences', () => {
-    const { result } = renderHook(() => useDelegationPortfolioStore());
-    expect(result.current.currentPortfolio).toEqual([]);
-    expect(result.current.selections).toEqual([]);
-  });
+    it('initializes the portfolio preferences', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      expect(result.current.currentPortfolio).toEqual([]);
+      expect(result.current.selections).toEqual([]);
+    });
 
-  it('adds pools to portfolio preserving the max allowed count', () => {
-    const newLength = 5;
-    const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.selectPool(dummyPool1));
-    act(() => result.current.mutators.selectPool(dummyPool2));
-    act(() => result.current.mutators.selectPool(dummyPool3));
-    act(() => result.current.mutators.selectPool(dummyPool4));
-    act(() => result.current.mutators.selectPool(dummyPool5));
-    act(() => result.current.mutators.selectPool(dummyPool6));
-    expect(result.current.selections.length).toEqual(newLength);
-  });
+    it('allows for selecting pools preserving the max allowed count', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => result.current.mutators.selectPool(dummyPool1));
+      act(() => result.current.mutators.selectPool(dummyPool2));
+      act(() => result.current.mutators.selectPool(dummyPool3));
+      act(() => result.current.mutators.selectPool(dummyPool4));
+      act(() => result.current.mutators.selectPool(dummyPool5));
+      act(() => result.current.mutators.selectPool(dummyPool6));
+      expect(result.current.selections.length).toEqual(MAX_POOLS_COUNT);
+    });
 
-  it('prevents adding a same pool twice', () => {
-    const newLength = 1;
-    const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.selectPool(dummyPool1));
-    act(() => result.current.mutators.selectPool(dummyPool1));
-    expect(result.current.selections.length).toEqual(newLength);
-  });
+    it('prevents selecting a same pool twice', () => {
+      const newLength = 1;
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => result.current.mutators.selectPool(dummyPool1));
+      act(() => result.current.mutators.selectPool(dummyPool1));
+      expect(result.current.selections.length).toEqual(newLength);
+    });
 
-  it('removes pool from portfolio', () => {
-    const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.selectPool(dummyPool1));
-    act(() => result.current.mutators.selectPool(dummyPool2));
-    act(() => result.current.mutators.unselectPool({ id: dummyPool1.id }));
-    act(() => result.current.mutators.unselectPool({ id: dummyPool3.id }));
-    expect(result.current.selections.length).toEqual(1);
-    expect(result.current.selections[0]?.id).toEqual(dummyPool2.id);
-  });
+    it('allows to unselect pool', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => result.current.mutators.selectPool(dummyPool1));
+      act(() => result.current.mutators.selectPool(dummyPool2));
+      act(() => result.current.mutators.unselectPool({ id: dummyPool1.id }));
+      act(() => result.current.mutators.unselectPool({ id: dummyPool3.id }));
+      expect(result.current.selections.length).toEqual(1);
+      expect(result.current.selections[0]?.id).toEqual(dummyPool2.id);
+    });
 
-  it('clears the selections', () => {
-    const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() => result.current.mutators.selectPool(dummyPool1));
-    act(() => result.current.mutators.clearSelections());
-    expect(result.current.selections.length).toEqual(0);
+    it('clears the selections', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => result.current.mutators.selectPool(dummyPool1));
+      act(() => result.current.mutators.selectPool(dummyPool2));
+      act(() => result.current.mutators.clearSelections());
+      expect(result.current.selections.length).toEqual(0);
+    });
   });
 
   it('sets the current portfolio', () => {
@@ -150,7 +152,6 @@ describe('delegationPortfolioStore', () => {
         ],
       })
     );
-    act(() => result.current.mutators.finalizeProcess());
     expect(result.current.currentPortfolio.length).toEqual(expectedLength);
     expect(result.current.currentPortfolio).toEqual(
       expect.arrayContaining([
@@ -168,5 +169,129 @@ describe('delegationPortfolioStore', () => {
         }),
       ])
     );
+  });
+
+  describe('current portfolio management', () => {
+    beforeEach(() => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.setCurrentPortfolio({
+          cardanoCoin: { symbol: 'ADA' } as Wallet.CoinId,
+          delegationDistribution: [
+            {
+              percentage: Wallet.Percent(33.33),
+              pool: dummyStakePool1,
+              rewardAccounts: [],
+              stake: BigInt(1),
+            },
+            {
+              percentage: Wallet.Percent(33.33),
+              pool: dummyStakePool2,
+              rewardAccounts: [],
+              stake: BigInt(1),
+            },
+            {
+              percentage: Wallet.Percent(33.33),
+              pool: dummyStakePool3,
+              rewardAccounts: [],
+              stake: BigInt(1),
+            },
+          ],
+        });
+      });
+      act(() => result.current.mutators.beginProcess(PortfolioState.ManagingCurrentPortfolio));
+    });
+
+    it('sets the currentPortfolio as activeManagementProcess when started', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      expect(result.current.state).toEqual(PortfolioState.ManagingCurrentPortfolio);
+    });
+    it('copies the currentPortfolio items to the draftPortfolio when started', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      expect(result.current.draftPortfolio).toEqual(result.current.currentPortfolio);
+    });
+    it('re-sets the activeManagementProcess to none when canceled', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.cancelProcess();
+      });
+      expect(result.current.state).toEqual(PortfolioState.Free);
+    });
+    it('clears the draftPortfolio when canceled', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.cancelProcess();
+      });
+      expect(result.current.draftPortfolio).toEqual([]);
+    });
+    it('re-sets the activeManagementProcess to none when finalized', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.finalizeProcess();
+      });
+      expect(result.current.state).toEqual(PortfolioState.Free);
+    });
+    it('clears the draftPortfolio when finalized', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.finalizeProcess();
+      });
+      expect(result.current.draftPortfolio).toEqual([]);
+    });
+  });
+
+  describe('new portfolio management', () => {
+    beforeEach(() => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => result.current.mutators.selectPool(dummyPool2));
+      act(() => result.current.mutators.selectPool(dummyPool3));
+      act(() => result.current.mutators.selectPool(dummyPool4));
+      act(() => result.current.mutators.selectPool(dummyPool5));
+      act(() => result.current.mutators.beginProcess(PortfolioState.ConfirmingNewPortfolio));
+    });
+
+    it('sets the newPortfolio as activeManagementProcess when started', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      expect(result.current.state).toEqual(PortfolioState.ConfirmingNewPortfolio);
+    });
+    it('copies the selections items to the draftPortfolio when started', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      expect(result.current.draftPortfolio).toEqual(result.current.selections);
+    });
+    it('re-sets the activeManagementProcess to none when canceled', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.cancelProcess();
+      });
+      expect(result.current.state).toEqual(PortfolioState.Free);
+    });
+    it('clears the draftPortfolio when canceled', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.cancelProcess();
+      });
+      expect(result.current.draftPortfolio).toEqual([]);
+    });
+    it('re-sets the activeManagementProcess to none when finalized', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.finalizeProcess();
+      });
+      expect(result.current.state).toEqual(PortfolioState.Free);
+    });
+    it('clears the draftPortfolio when finalized', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.finalizeProcess();
+      });
+      expect(result.current.draftPortfolio).toEqual([]);
+    });
+    it('clears the selections when finalized', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.finalizeProcess();
+      });
+      expect(result.current.selections).toEqual([]);
+    });
   });
 });
