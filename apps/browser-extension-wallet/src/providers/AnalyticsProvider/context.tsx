@@ -47,10 +47,8 @@ export const AnalyticsProvider = ({
     () =>
       tracker ||
       new AnalyticsTracker({
-        extensionParams: {
-          chain: currentChain,
-          view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended
-        },
+        chain: currentChain,
+        view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended,
         analyticsDisabled
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

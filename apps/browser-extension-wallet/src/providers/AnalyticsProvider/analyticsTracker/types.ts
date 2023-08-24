@@ -104,6 +104,11 @@ export enum EnhancedAnalyticsOptInStatus {
   OptedOut = 'REJECTED'
 }
 
+export enum UserTrackingType {
+  Enhanced = 'enhanced',
+  Basic = 'basic'
+}
+
 export enum ExtensionViews {
   Extended = 'extended',
   Popup = 'popup'

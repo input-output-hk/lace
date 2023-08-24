@@ -231,7 +231,6 @@ export const WalletSetupWizard = ({
     analytics.setOptedInForEnhancedAnalytics(
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
-    analytics.setIsOptedInUser(isAccepted);
 
     const postHogAnalyticsAgreeAction = postHogOnboardingActions[setupType]?.ANALYTICS_AGREE_CLICK;
     const postHogAnalyticcSkipAction = postHogOnboardingActions[setupType]?.ANALYTICS_SKIP_CLICK;
