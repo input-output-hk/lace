@@ -114,6 +114,7 @@ export const StakePoolItemBrowser = ({
               }}
               disabled={disabledAddingToDraft}
               data-testid="stake-button"
+              size="small"
             />
           </div>
         </Tooltip>

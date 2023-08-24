@@ -75,6 +75,23 @@ const Buttons = (): JSX.Element => (
     </Variants.Row>
     <Variants.Row>
       <Variants.Cell>
+        <CallToAction label="Label" size="small" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <CallToAction label="Label" id="hover" size="small" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <CallToAction label="Label" id="pressed" size="small" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <CallToAction label="Label" disabled size="small" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <CallToAction label="Label" id="focused" size="small" />
+      </Variants.Cell>
+    </Variants.Row>
+    <Variants.Row>
+      <Variants.Cell>
         <Secondary label="Label" />
       </Variants.Cell>
       <Variants.Cell>
