@@ -13,12 +13,16 @@ export const MAX_POOLS_COUNT = 5;
 export const useDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set, get) => ({
     ...defaultState,
+    ableToAddMorePools: () => {
+      const { draftPortfolio } = get();
+      return draftPortfolio.length < MAX_POOLS_COUNT;
+    },
     mutators: {
       addPoolToDraft: (poolData) =>
         set(({ draftPortfolio }) => {
-          const draftFull = draftPortfolio.length === MAX_POOLS_COUNT;
+          const { ableToAddMorePools } = get();
           const alreadyInDraft = draftPortfolio.some(({ id }) => poolData.id === id);
-          if (draftFull || alreadyInDraft) return;
+          if (!ableToAddMorePools() || alreadyInDraft) return;
           draftPortfolio.push(poolData);
         }),
       clearDraft: () =>

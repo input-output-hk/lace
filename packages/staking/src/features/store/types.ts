@@ -58,6 +58,7 @@ export type DelegationPortfolioState = {
 
 export type DelegationPortfolioQueries = {
   poolIncludedInDraft: (id: Wallet.Cardano.PoolIdHex) => boolean;
+  ableToAddMorePools: () => boolean;
 };
 
 type DelegationPortfolioMutators = {
