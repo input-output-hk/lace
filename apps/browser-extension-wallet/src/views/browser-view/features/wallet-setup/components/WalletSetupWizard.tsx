@@ -244,8 +244,11 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     (wallet?: CreateWalletData) => {
       setWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
+      if (isAnalyticsAccepted) {
+        analytics.sendAliasEvent();
+      }
     },
-    [setWallet, walletInstance]
+    [analytics, isAnalyticsAccepted, setWallet, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {

@@ -37,7 +37,6 @@ export class AnalyticsTracker {
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();
-      await this.sendAliasEvent();
     } else {
       await this.userIdService?.makeTemporary();
     }
