@@ -3,12 +3,12 @@ import { Box, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { StakePoolDetails } from '../drawer';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { FundWalletBanner } from '../staking/FundWalletBanner';
-import { StakeFundsBanner } from '../staking/StakeFundsBanner';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
-import { mapPortfolioToDisplayData } from './mapPortfolioToDisplayData';
+import { FundWalletBanner } from './FundWalletBanner';
+import { mapPortfolioToDisplayData } from './helpers';
+import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './staking-info-card';
 
 export const OverviewPopup = () => {
@@ -21,10 +21,15 @@ export const OverviewPopup = () => {
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
     walletAddress,
-    noFunds,
+    rewardAccounts,
+    coinBalance,
   } = useOutsideHandles();
   const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
+
+  const stakeRegistered = rewardAccounts && rewardAccounts?.[0]?.keyStatus === Wallet.Cardano.StakeKeyStatus.Registered;
+  const balanceTotal = balancesBalance?.total?.coinBalance && Number(balancesBalance.total.coinBalance);
+  const noFunds = (balanceTotal < Number(coinBalance) && !stakeRegistered) || (coinBalance === 0 && stakeRegistered);
 
   const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
     setSelectedStakePool(stakePool);

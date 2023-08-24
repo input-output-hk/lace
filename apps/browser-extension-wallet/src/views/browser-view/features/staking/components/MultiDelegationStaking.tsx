@@ -1,5 +1,5 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
@@ -7,8 +7,8 @@ import { usePassword, useSubmitingState } from '@views/browser/features/send-tra
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
 import { useObservable } from '@lace/common';
-import { Wallet } from '@lace/cardano';
 import { walletBalanceTransformer } from '@src/api/transformers';
+import { useWalletActivities } from '@hooks/useWalletActivities';
 
 const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
 
@@ -40,7 +40,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
     fetchStakePools,
     fetchNetworkInfo,
     networkInfo,
-    blockchainProvider
+    blockchainProvider,
+    currentChain
   } = useWalletStore((state) => ({
     getKeyAgentType: state.getKeyAgentType,
     inMemoryWallet: state.inMemoryWallet,
@@ -51,8 +52,24 @@ export const MultiDelegationStaking = (): JSX.Element => {
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
     blockchainProvider: state.blockchainProvider,
-    walletInfo: state.walletInfo
+    walletInfo: state.walletInfo,
+    currentChain: state.currentChain
   }));
+  const sendAnalytics = useCallback(() => {
+    // TODO implement analytics for the new flow
+    const analytics = {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      sendEvent: () => {}
+    };
+
+    // @ts-expect-error TODO implement analytics
+    analytics.sendEvent({
+      action: 'AnalyticsEventActions.CLICK_EVENT',
+      category: 'AnalyticsEventCategories.STAKING',
+      name: 'AnalyticsEventNames.Staking.STAKING_MULTI_DELEGATION_BROWSER'
+    });
+  }, []);
+  const { walletActivities } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const { executeWithPassword } = useWalletManager();
@@ -60,12 +77,9 @@ export const MultiDelegationStaking = (): JSX.Element => {
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
-  const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
+  const { coinBalance } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
-  const isStakeRegistered = rewardAccounts && rewardAccounts[0].keyStatus === Wallet.Cardano.StakeKeyStatus.Registered;
-  const coinBalance = balance?.total?.coinBalance && Number(balance?.total?.coinBalance);
-  const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
 
   return (
     <OutsideHandlesProvider
@@ -95,14 +109,15 @@ export const MultiDelegationStaking = (): JSX.Element => {
         walletStoreFetchNetworkInfo: fetchNetworkInfo,
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
+        walletStoreWalletActivities: walletActivities,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         walletAddress,
-        stakeRegistered: isStakeRegistered,
-        coinBalance,
-        noFunds: hasNoFunds
+        rewardAccounts,
+        coinBalance: Number(coinBalance),
+        currentChain
       }}
     >
       <Staking theme={theme.name} />

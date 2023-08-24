@@ -62,9 +62,9 @@
     "zustand": "^4.4.1"
   },
   "devDependencies": {
-    "@cardano-sdk/input-selection": "0.11.5",
-    "@cardano-sdk/tx-construction": "0.10.0",
-    "@cardano-sdk/util": "0.13.1",
+    "@cardano-sdk/input-selection": "0.11.7",
+    "@cardano-sdk/tx-construction": "0.11.1",
+    "@cardano-sdk/util": "0.14.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/core": "0.1.0",
@@ -95,10 +95,10 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
-    "@cardano-sdk/input-selection": "0.11.4",
-    "@cardano-sdk/tx-construction": "0.9.4",
-    "@cardano-sdk/util": "0.13.0",
-    "@cardano-sdk/wallet": "0.18.5",
+    "@cardano-sdk/input-selection": "0.11.7",
+    "@cardano-sdk/tx-construction": "0.11.1",
+    "@cardano-sdk/util": "0.14.0",
+    "@cardano-sdk/wallet": "0.21.0",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/core": "0.1.0",

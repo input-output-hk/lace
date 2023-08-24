@@ -81,6 +81,12 @@ export const en: Translations = {
   'modals.changingPreferences.description':
     "That's totally fine! Just please note that you'll continue receiving rewards from your former pool(s) for two epochs. After that, you'll start to receiving rewards from your new pool(s).",
   'modals.changingPreferences.title': 'Changing staking preferences?',
+  'overview.banners.pendingFirstDelegation.message':
+    'You will see your staking portfolio here once the transaction has been validated',
+  'overview.banners.pendingFirstDelegation.title': 'Your staking transaction has been submitted',
+  'overview.banners.pendingPoolMigration.message':
+    'You will continue to receive rewards from your former stake pool(s) for two epochs',
+  'overview.banners.pendingPoolMigration.title': 'You are migrating stake pool(s)',
   'overview.delegationCard.label.balance': 'ADA Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',
@@ -94,6 +100,10 @@ export const en: Translations = {
   'overview.noFunds.title': 'Add funds to start your Web3 journey',
   'overview.noStaking.balanceTitle': 'Available balance',
   'overview.noStaking.description': 'Stake your funds on a pool to start receiving rewards.',
+  'overview.noStaking.followSteps': 'Follow these steps to start staking your funds',
+  'overview.noStaking.getStarted': 'Get started',
+  'overview.noStaking.searchForPool': 'Click the Browse Pools tab then search for your desired pool.',
+  'overview.noStaking.selectPools': 'You can select up to {{maxPools}} pools to delegate to.',
   'overview.noStaking.title': 'Start staking',
   'overview.stakingInfoCard.fee': 'Fee',
   'overview.stakingInfoCard.lastReward': 'Last reward',

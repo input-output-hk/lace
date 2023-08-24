@@ -34,6 +34,7 @@ import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 const ELLIPSIS_LEFT_SIDE_LENGTH = 34;
 const ELLIPSIS_RIGHT_SIDE_LENGTH = 34;
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { t: translate } = useTranslation();
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
@@ -172,16 +173,8 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
               setIsAddressDrawerOpen(false);
             }}
             initialValues={addressToEdit}
-            expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress}
-            actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress}
-            onDelete={(id) => {
-              setAddressToEdit({} as AddressBookSchema);
-              deleteAddress(id, {
-                text: translate('browserView.addressBook.toast.deleteAddress'),
-                icon: DeleteIcon
-              });
-            }}
-            onConfirmClick={onAddressSave}
+            expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? ''}
+            actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? ''}
           />
         )}
         <AddressDetailDrawer

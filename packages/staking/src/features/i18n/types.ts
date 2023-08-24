@@ -152,6 +152,16 @@ type KeysStructure = {
         underStaked: '';
       };
     };
+    banners: {
+      pendingFirstDelegation: {
+        title: '';
+        message: '';
+      };
+      pendingPoolMigration: {
+        title: '';
+        message: '';
+      };
+    };
     stakingInfoCard: {
       fee: '';
       margin: '';
@@ -176,6 +186,10 @@ type KeysStructure = {
       title: '';
       description: '';
       balanceTitle: '';
+      getStarted: '';
+      followSteps: '';
+      searchForPool: '';
+      selectPools: '';
     };
   };
   root: {

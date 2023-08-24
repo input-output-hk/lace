@@ -4,7 +4,7 @@ import { useTheme } from '@lace/ui';
 import React, { useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useTranslation } from 'react-i18next';
-import Copy from './copy.component.svg';
+import Copy from '../staking/copy.component.svg';
 import styles from './FundWalletBanner.module.scss';
 import LacePortalHorizontal from './lace-portal-horizontal.component.svg';
 import LacePortalPortal from './lace-portal-popup.component.svg';
