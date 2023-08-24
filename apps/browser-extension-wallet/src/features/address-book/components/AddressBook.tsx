@@ -23,6 +23,7 @@ import { AddressDetailsSteps } from './AddressDetailDrawer/types';
 import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
 import { getAddressToSave } from '@src/utils/validators';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
+import { Sections, useSections } from '@src/views/browser-view/features/send-transaction';
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
@@ -36,6 +37,7 @@ export const AddressBook = withAddressBookContext(() => {
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
   const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
+  const { setSection } = useSections();
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
@@ -151,17 +153,12 @@ export const AddressBook = withAddressBookContext(() => {
           onCancelClick={() => {
             setAddressToEdit({} as AddressBookSchema);
             setIsAddressDrawerOpen(false);
+            setSection({ currentSection: Sections.FORM });
           }}
-          initialValues={addressToEdit}
           expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? ''}
           actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? ''}
+          initialValues={addressToEdit}
           popupView
-          onDelete={(id) => onHandleDeleteContact(id)}
-          onConfirmClick={async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) => {
-            await onAddressSave(address);
-            setIsAddressDrawerOpen(false);
-            setAddressToEdit({} as AddressBookSchema);
-          }}
         />
       )}
       <AddressDetailDrawer
