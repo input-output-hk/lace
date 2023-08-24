@@ -86,7 +86,6 @@ export const AddressForm = withAddressBookContext(({ isPopupView }: AddressFormP
               onClose={setPrevSection}
             />
           }
-          validations={validations}
           translations={editAddressFormTranslations}
         />
       }

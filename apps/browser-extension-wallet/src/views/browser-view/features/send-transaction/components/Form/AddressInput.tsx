@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 /* eslint-disable complexity, sonarjs/cognitive-complexity */
 /* eslint-disable unicorn/no-useless-undefined */
 import { Typography } from 'antd';
@@ -25,7 +26,7 @@ import { Banner } from '@lace/common';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { getTemporaryTxDataFromStorage } from '../../helpers';
-import { HandleResolution } from '@cardano-sdk/core';
+import { Asset, HandleResolution } from '@cardano-sdk/core';
 import ExclamationCircleOutline from '@src/assets/icons/red-exclamation-circle.component.svg';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
@@ -73,6 +74,11 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
 
+  const isAddressInputInvalidHandle =
+    isAdaHandleEnabled &&
+    isHandle(addressInputValue.address.toString()) &&
+    !Asset.util.isValidHandle(addressInputValue.address.toString().slice(1));
+
   const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(addressInputValue.address.toString());
 
   const clearInput = useCallback(() => {
@@ -93,6 +99,9 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
+        if (isAddressInputInvalidHandle) {
+          setHandleVerificationState(HandleVerificationState.INVALID);
+        }
         if (!addressInputValue.handleResolution) {
           const { valid, handles } = await verifyHandle(addressInputValue.address, handleResolver);
 
@@ -133,7 +142,14 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           }
         }
       }, HANDLE_DEBOUNCE_TIME),
-    [addressInputValue.address, addressInputValue.handleResolution, handleResolver, row, setAddressValue]
+    [
+      addressInputValue.address,
+      addressInputValue.handleResolution,
+      handleResolver,
+      isAddressInputInvalidHandle,
+      row,
+      setAddressValue
+    ]
   );
 
   useEffect(() => {
@@ -178,7 +194,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
 
   const validationObject = useMemo(() => {
     const isNameValid = address && isWalletNameValid(address);
-    const isAddressValid = isWalletAddressValid(address);
+    const isAddressValid = !isHandle(address) && isWalletAddressValid(address);
     return {
       name: isNameValid,
       address: isAddressValid,
@@ -249,6 +265,14 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const getLinkMessage = isPopupView && t('addressBook.reviewModal.banner.confirmReview.link');
   const getMessagePartTwo = isPopupView && t('addressBook.reviewModal.banner.popUpDescriptionEnd');
 
+  const setInvalidMessage = isAddressInputInvalidHandle
+    ? 'general.errors.invalidHandle'
+    : 'general.errors.incorrectHandle';
+
+  const isStatusInvalid =
+    (isAddressInputValueHandle || isAddressInputInvalidHandle) &&
+    handleVerificationState === HandleVerificationState.INVALID;
+
   return (
     <span className={styles.container}>
       <DestinationAddressInput
@@ -272,9 +296,9 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           {t('general.errors.incorrectAddress')}
         </Text>
       )}
-      {isAddressInputValueHandle && handleVerificationState === HandleVerificationState.INVALID && (
+      {isStatusInvalid && (
         <Text className={styles.errorParagraph} data-testid="handle-input-error">
-          {t('general.errors.incorrectHandle')}
+          {t(`${setInvalidMessage}`)}
         </Text>
       )}
       {address && !validationObject.isValidAddressPerNetwork && (
