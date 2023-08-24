@@ -15,7 +15,9 @@ import {
 import { TxDirections } from '@types';
 import {
   isDelegationWithDeregistrationTx,
-  splitDelegationWithDeregistrationIntoTwoActions
+  isDelegationWithRegistrationTx,
+  splitDelegationWithDeregistrationIntoTwoActions,
+  splitDelegationWithRegistrationIntoTwoActions
 } from './common-transformers';
 
 interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
@@ -66,6 +68,10 @@ export const txHistoryTransformer = ({
     direction: direction as TxDirections,
     date: dayjs().isSame(time, 'day') ? 'Today' : formatDate(time, 'DD MMMM YYYY')
   });
+
+  if (isDelegationWithRegistrationTx(transformedTx, type)) {
+    return splitDelegationWithRegistrationIntoTwoActions(transformedTx);
+  }
 
   if (isDelegationWithDeregistrationTx(transformedTx, type)) {
     return splitDelegationWithDeregistrationIntoTwoActions(transformedTx);

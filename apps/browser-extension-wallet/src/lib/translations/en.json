@@ -44,6 +44,7 @@
       "transactionFeeInfo": "The amount you have been charged to process your transaction",
       "received": "Received",
       "delegation": "Delegation",
+      "registration": "Registration",
       "deregistration": "De-registration",
       "poolName": "Pool name",
       "poolTicker": "Pool ticker",

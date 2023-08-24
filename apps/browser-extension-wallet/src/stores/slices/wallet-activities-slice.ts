@@ -64,13 +64,11 @@ const isDelegationActivity = (activity: AssetActivityItemProps): activity is Del
 const getDelegationAmount = (activity: DelegationActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
 
-  // stake key registrations
-  if (activity.deposit) {
+  if (activity.type === 'delegationRegistration') {
     return fee.plus(activity.deposit);
   }
 
-  // stake key de-registrations
-  if (activity.depositReclaim) {
+  if (activity.type === 'delegationDeregistration') {
     return new BigNumber(activity.depositReclaim).minus(fee);
   }
 

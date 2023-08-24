@@ -7,7 +7,9 @@ import capitalize from 'lodash/capitalize';
 import { formatTime } from '@src/utils/format-date';
 import {
   isDelegationWithDeregistrationTx,
-  splitDelegationWithDeregistrationIntoTwoActions
+  isDelegationWithRegistrationTx,
+  splitDelegationWithDeregistrationIntoTwoActions,
+  splitDelegationWithRegistrationIntoTwoActions
 } from './common-transformers';
 
 export interface TxTransformerInput {
@@ -126,6 +128,10 @@ export const pendingTxTransformer = ({
     direction: TxDirections.Outgoing,
     date: capitalize(Wallet.TransactionStatus.PENDING)
   });
+
+  if (isDelegationWithRegistrationTx(transformedTx, type)) {
+    return splitDelegationWithRegistrationIntoTwoActions(transformedTx);
+  }
 
   if (isDelegationWithDeregistrationTx(transformedTx, type)) {
     return splitDelegationWithDeregistrationIntoTwoActions(transformedTx);
