@@ -11,7 +11,8 @@ export enum Sections {
   FAIL_TX = 'fail_tx',
   ADDRESS_LIST = 'address_list',
   ADDRESS_FORM = 'address_form',
-  ASSET_PICKER = 'asset_picker'
+  ASSET_PICKER = 'asset_picker',
+  ADDRESS_CHANGE = 'address_change'
 }
 
 export enum FormOptions {

@@ -32,7 +32,7 @@ const walletFactory: WalletFactory = {
     const providers = getProviders(chainName);
 
     return new PersonalWallet(
-      { name: props.observableWalletName, handlePolicyIds: [ADA_HANDLE_POLICY_ID] },
+      { name: props.observableWalletName },
       {
         keyAgent: dependencies.keyAgent,
         logger,
