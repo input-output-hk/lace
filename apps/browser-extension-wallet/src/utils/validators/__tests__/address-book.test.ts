@@ -5,7 +5,7 @@ const mockIsAddress = jest.fn();
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Wallet } from '@lace/cardano';
-import { ValidationResult } from '../../../types';
+import { ValidationResult } from '@types';
 import * as addressBook from '../address-book';
 import i18n from 'i18next';
 import { Cardano, HandleProvider, Asset } from '@cardano-sdk/core';
@@ -229,7 +229,11 @@ describe('Testing address book validator', () => {
   });
 
   describe('ensureHandleOwnerHasntChanged', () => {
-    const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
+    const mockHandleResolver = {
+      resolveHandles: jest.fn(),
+      healthCheck: jest.fn(),
+      getPolicyIds: jest.fn()
+    } as HandleProvider;
     const mockHandleResolution = {
       backgroundImage: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd'),
       cardanoAddress: Cardano.PaymentAddress(
@@ -290,7 +294,11 @@ describe('Testing address book validator', () => {
       profilePic: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd1')
     };
 
-    const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
+    const mockHandleResolver = {
+      resolveHandles: jest.fn(),
+      healthCheck: jest.fn(),
+      getPolicyIds: jest.fn()
+    } as HandleProvider;
 
     test('getAddressToSave returns the modified address with handleResolution if the address is a valid handle', async () => {
       const mockAddress = {

@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { useMultiDelegationEnabled } from '@hooks/useMultiDelegationEnabled';
+
 import React from 'react';
+import { MultiDelegationStakingPopup } from './MultiDelegationStakingPopup';
+import { DelegationContent } from './DelegationContent';
 
-// TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
-const Delegation =
-  process.env.USE_MULTI_DELEGATION_STAKING === 'true'
-    ? require('./MultiDelegationStakingPopup').MultiDelegationStakingPopup
-    : require('./DelegationContent').DelegationContent;
+export const DelegationContainer = (): React.ReactElement => {
+  // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
+  const multiDelegationEnabled = useMultiDelegationEnabled();
 
-export const DelegationContainer = () => <Delegation />;
+  return <>{multiDelegationEnabled ? <MultiDelegationStakingPopup /> : <DelegationContent />}</>;
+};

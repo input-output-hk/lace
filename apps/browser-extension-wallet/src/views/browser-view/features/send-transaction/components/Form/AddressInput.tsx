@@ -64,7 +64,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const { setAddressToEdit } = useAddressBookStore();
   const [, setRowId] = useCurrentRow();
   const [handleVerificationState, setHandleVerificationState] = useState<HandleVerificationState | undefined>();
-
   const getExistingAddress = useCallback(
     (addr: string) => filteredAddresses?.find(({ walletAddress }) => walletAddress === addr),
     [filteredAddresses]
@@ -211,6 +210,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 
   useEffect(() => {
+    // todo: debounce this
     const existingAddress = getExistingAddress(handle || address);
     if (existingAddress) {
       setAddressInputValue({
@@ -247,6 +247,19 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     }
     setRowId(row);
     setSection(sectionsConfig[section]);
+  };
+
+  const handleAddressReview = () => {
+    setAddressToEdit({
+      name: addressInputValue.name,
+      address: handle,
+      handleResolution: addressInputValue.handleResolution
+    });
+    setSection({ currentSection: Sections.ADDRESS_CHANGE, prevSection: Sections.FORM });
+    setAddressValue(row, address, handle, {
+      hasHandleOwnershipChanged: false,
+      isVerified: false
+    });
   };
 
   useEffect(() => {
@@ -291,6 +304,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         translations={destinationAddressInputTranslations}
         data-testid="address-input"
       />
+
       {!isAddressInputValueValid && !isAddressInputValueHandle && address && (
         <Text className={styles.errorParagraph} data-testid="address-input-error">
           {t('general.errors.incorrectAddress')}
@@ -311,12 +325,13 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
       {handleVerificationState && handleVerificationState === HandleVerificationState.CHANGED_OWNERSHIP && (
         <Banner
           withIcon
+          customIcon={<ExclamationCircleOutline />}
+          onButtonClick={handleAddressReview}
           popupView={isPopupView}
           message={t(bannerDescription, { name: addressInputValue.name })}
           messagePartTwo={isHandleAddressBookEnabled && getMessagePartTwo}
           buttonMessage={isHandleAddressBookEnabled && getButtonText}
           linkMessage={isHandleAddressBookEnabled && getLinkMessage}
-          customIcon={<ExclamationCircleOutline />}
         />
       )}
     </span>

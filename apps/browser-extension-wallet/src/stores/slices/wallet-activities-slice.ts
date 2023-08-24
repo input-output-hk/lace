@@ -13,7 +13,7 @@ import {
   filterOutputsByTxDirection,
   isTxWithAssets
 } from '@src/views/browser-view/features/activity/helpers';
-import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp } from '@lace/core';
+import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp, TransactionType } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
 import { assetTransformer } from '@src/utils/assets-transformers';
@@ -49,7 +49,11 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
 }
 
 export type FetchWalletActivitiesReturn = Observable<Promise<AssetActivityListProps[]>>;
-const DelagatioinTransactionTypes = new Set(['delegation', 'delegationRegistration', 'delegationDeregistration']);
+export const DelegationTransactionTypes: Set<TransactionType> = new Set([
+  'delegation',
+  'delegationRegistration',
+  'delegationDeregistration'
+]);
 
 const getDelegationAmount = (activity: AssetActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
@@ -273,7 +277,7 @@ const getWalletActivitiesObservable = async ({
         ...activityList,
         items: activityList.items.map((activity: AssetActivityItemProps) => ({
           ...activity,
-          ...(DelagatioinTransactionTypes.has(activity.type) && {
+          ...(DelegationTransactionTypes.has(activity.type) && {
             amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,
             fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
           }),
