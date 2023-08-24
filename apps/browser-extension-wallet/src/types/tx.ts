@@ -12,8 +12,8 @@ export type TxDirection = keyof typeof TxDirections;
 export interface TransactionDetail {
   tx: {
     hash: string;
-    includedDate?: string;
-    includedTime?: string;
+    includedUtcDate?: string;
+    includedUtcTime?: string;
     totalOutput?: string;
     fee?: string;
     depositReclaim?: string;
@@ -35,8 +35,8 @@ export interface TransactionDetail {
     confirmations?: string;
     size?: string;
     transactions?: string;
-    date?: string;
-    time?: string;
+    utcDate?: string;
+    utcTime?: string;
     nextBlock?: string;
     prevBlock?: string;
     createdBy?: string;

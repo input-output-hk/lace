@@ -435,13 +435,13 @@ export const formatBlockMock: TransactionDetail['blocks'] = {
   blockId: '717ca157f1e696a612af87109ba1f30cd4bb311ded5b504c78a6face463def95',
   confirmations: '17013',
   createdBy: 'pool1zuevzm3xlrhmwjw87ec38mzs02tlkwec9wxpgafcaykmwg7efhh',
-  date: '12/06/2021',
+  utcDate: '12/06/2021',
   epoch: '171',
   nextBlock: '3114965',
   prevBlock: '3114963',
   size: '4719',
   slot: '43905408',
-  time: '10:21:03 PM UTC',
+  utcTime: '10:21:03 PM UTC',
   transactions: '18'
 };
 
