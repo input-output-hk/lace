@@ -1,41 +1,27 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { ContentLayout } from '@src/components/Layout';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useWalletStore } from '@src/stores';
 import { useFetchCoinPrice, useRedirection } from '@hooks';
-import { useCurrencyStore } from '@providers/currency';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { GroupedAssetActivityList } from '@lace/core';
 import { TransactionDetail } from '@src/views/browser-view/features/activity';
 import styles from './Activity.module.scss';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
-import { FetchWalletActivitiesReturn } from '@src/stores/slices';
 import {
   MatomoEventActions,
   MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
+import { useWalletActivities } from '@hooks/useWalletActivities';
 
 export const Activity = (): React.ReactElement => {
   const { t } = useTranslation();
-  const [walletActivitiesObservable, setWalletActivitiesObservable] = useState<FetchWalletActivitiesReturn>();
   const { priceResult } = useFetchCoinPrice();
-  const {
-    walletInfo,
-    walletActivities,
-    getWalletActivitiesObservable,
-    transactionDetail,
-    resetTransactionState,
-    activitiesCount,
-    walletActivitiesStatus
-  } = useWalletStore();
-  const cardanoFiatPrice = priceResult?.cardano?.price;
-  const { fiatCurrency } = useCurrencyStore();
-  const isLoading = walletActivitiesStatus !== StateStatus.LOADED;
+  const { walletInfo, transactionDetail, resetTransactionState } = useWalletStore();
   const layoutTitle = `${t('browserView.activity.title')}`;
-  const layoutSideText = `(${activitiesCount})`;
   const redirectToAssets = useRedirection(walletRoutePaths.assets);
   const analytics = useAnalyticsContext();
 
@@ -46,30 +32,11 @@ export const Activity = (): React.ReactElement => {
       name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_POPUP
     });
   }, [analytics]);
+  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
 
-  const fetchWalletActivities = useCallback(async () => {
-    const result =
-      fiatCurrency &&
-      (await getWalletActivitiesObservable({
-        fiatCurrency,
-        cardanoFiatPrice,
-        sendAnalytics
-      }));
-    setWalletActivitiesObservable(result);
-  }, [fiatCurrency, cardanoFiatPrice, getWalletActivitiesObservable, sendAnalytics]);
-
-  useEffect(() => {
-    fetchWalletActivities();
-  }, [fetchWalletActivities]);
-
+  const layoutSideText = `(${activitiesCount})`;
+  const isLoading = walletActivitiesStatus !== StateStatus.LOADED;
   const hasActivities = walletActivities?.length > 0;
-
-  useEffect(() => {
-    const subscription = walletActivitiesObservable?.subscribe();
-    return () => {
-      if (subscription) subscription.unsubscribe();
-    };
-  }, [walletActivitiesObservable]);
 
   return (
     <ContentLayout title={layoutTitle} titleSideText={layoutSideText} isLoading={isLoading}>

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable sonarjs/cognitive-complexity */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import flatten from 'lodash/flatten';
 import classnames from 'classnames';
 import { AssetDetails, AssetDetailsProps } from './AssetDetails';
@@ -13,14 +13,14 @@ import { useRedirection } from '@hooks';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
-import { FetchWalletActivitiesReturn } from '@src/stores/slices';
-import { useAnalyticsContext, useCurrencyStore } from '@providers';
+import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
+import { useWalletActivities } from '@hooks/useWalletActivities';
 
 export const ASSET_DRAWER_BODY_ID = 'asset-drawer-body';
 
@@ -40,13 +40,10 @@ const renderFooter = (click: () => void, label: string, popupView?: boolean) => 
 
 const renderAssetDetails =
   (Component: React.ComponentType<AssetDetailsProps>) =>
-  ({ fiatPrice, popupView, fiatCode }: { fiatCode: string; fiatPrice?: number; popupView?: boolean }) => {
-    const [walletActivitiesObservable, setWalletActivitiesObservable] = useState<FetchWalletActivitiesReturn>();
+  ({ popupView, fiatCode }: { fiatCode: string; popupView?: boolean }) => {
     const redirectToTransactions = useRedirection(walletRoutePaths.activity);
-    const { getWalletActivitiesObservable, walletActivities, walletActivitiesStatus } = useWalletStore();
     const [asset, setAssetDetails] = useAssetDetailsStore();
     const backgroundServices = useBackgroundServiceAPIContext();
-    const { fiatCurrency } = useCurrencyStore();
     const analytics = useAnalyticsContext();
 
     const sendAnalytics = useCallback(() => {
@@ -58,29 +55,9 @@ const renderAssetDetails =
           : AnalyticsEventNames.ViewTokens.VIEW_TOKEN_TX_DETAILS_BROWSER
       });
     }, [analytics, popupView]);
-
-    const fetchWalletActivities = useCallback(async () => {
-      const result =
-        fiatCurrency &&
-        fiatPrice &&
-        (await getWalletActivitiesObservable({
-          fiatCurrency,
-          cardanoFiatPrice: fiatPrice,
-          sendAnalytics
-        }));
-      setWalletActivitiesObservable(result);
-    }, [fiatCurrency, getWalletActivitiesObservable, sendAnalytics, fiatPrice]);
-
-    useEffect(() => {
-      fetchWalletActivities();
-    }, [fetchWalletActivities]);
-
-    useEffect(() => {
-      const subscription = walletActivitiesObservable?.subscribe();
-      return () => {
-        if (subscription) subscription.unsubscribe();
-      };
-    }, [walletActivitiesObservable]);
+    const { walletActivities, walletActivitiesStatus } = useWalletActivities({
+      sendAnalytics
+    });
 
     const setVisibility = () => setAssetDetails();
 
@@ -144,7 +121,6 @@ type AssetDetailsDrawerProps = {
 
 export const AssetDetailsDrawer = ({
   fiatCode,
-  fiatPrice,
   openSendDrawer,
   popupView = false
 }: AssetDetailsDrawerProps): React.ReactElement => {
@@ -183,7 +159,7 @@ export const AssetDetailsDrawer = ({
     >
       <div className={classnames(styles.container, { [styles.popupContainer]: popupView })}>
         <AssetDrawerTitle logo={asset?.logo} title={asset?.name} code={asset?.ticker} />
-        <Details fiatCode={fiatCode} fiatPrice={fiatPrice} popupView={popupView} />
+        <Details fiatCode={fiatCode} popupView={popupView} />
       </div>
     </Drawer>
   );

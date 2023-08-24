@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Banner, Ellipsis } from '@lace/common';
+import { Ellipsis } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
@@ -92,20 +92,6 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               popupView={popupView}
             />
           </div>
-          {delegatingToThisPool && (
-            <Banner
-              className={styles.banner}
-              withIcon
-              message={t('drawer.details.switchingPoolBanner.title')}
-              description={
-                <ul className={styles.descriptionList}>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step1')}</li>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step2')}</li>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step3')}</li>
-                </ul>
-              }
-            />
-          )}
           <div className={styles.row} data-testid="stake-pool-details-information">
             <div
               className={styles.title}
@@ -205,7 +191,7 @@ type ButtonNames = 'addStakingPool' | 'manageDelegation' | 'stakeOnThisPool' | '
 const tmpNoop = () => {};
 const getSpecOverride = (specOrBool: Partial<ActionButtonSpec> | boolean) =>
   typeof specOrBool === 'boolean' ? {} : specOrBool;
-// TODO: translations for buttons labels
+
 const makeActionButtons = (
   t: TFunction,
   {
@@ -227,25 +213,25 @@ const makeActionButtons = (
       selectForMultiStaking && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-select-for-multi-staking-btn',
-        label: 'Select pool for multi-staking',
+        label: t('drawer.details.selectForMultiStaking'),
         ...getSpecOverride(selectForMultiStaking),
       },
       addStakingPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-add-staking-pool-btn',
-        label: 'Add staking pool',
+        label: t('drawer.details.addStakingPool'),
         ...getSpecOverride(addStakingPool),
       },
       unselectPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-unselect-pool-btn',
-        label: 'Unselect pool',
+        label: t('drawer.details.unselectPool'),
         ...getSpecOverride(unselectPool),
       },
       manageDelegation && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-manage-delegation-btn',
-        label: 'Manage delegation',
+        label: t('drawer.details.manageDelegation'),
         ...getSpecOverride(manageDelegation),
       },
     ] as (ActionButtonSpec | false)[]
@@ -316,17 +302,17 @@ export const StakePoolDetailFooter = ({
   const [callToActionButton, ...secondaryButtons] = actionButtons;
 
   return (
-    <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
+    <Flex flexDirection="column" alignItems="stretch" gap="$16">
       {callToActionButton && (
         <Button.CallToAction
           label={callToActionButton.label}
           data-testid={callToActionButton.dataTestId}
           onClick={callToActionButton.callback}
-          w={'$fill'}
+          w="$fill"
         />
       )}
       {secondaryButtons.map(({ callback, dataTestId, label }) => (
-        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w={'$fill'} />
+        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
       ))}
     </Flex>
   );

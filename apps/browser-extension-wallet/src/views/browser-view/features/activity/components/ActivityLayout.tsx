@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState, useCallback } from 'react';
+import React, { ReactElement, useEffect, useCallback } from 'react';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import { GroupedAssetActivityList } from '@lace/core';
@@ -6,11 +6,9 @@ import { useFetchCoinPrice } from '../../../../../hooks';
 import { StateStatus, useWalletStore } from '../../../../../stores';
 import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { TransactionDetail } from './TransactionDetail';
-import { useCurrencyStore } from '../../../../../providers/currency';
 import { useTranslation } from 'react-i18next';
 import { FundWalletBanner, EducationalList, SectionLayout, Layout } from '@src/views/browser-view/components';
 import { SectionTitle } from '@components/Layout/SectionTitle';
-import { FetchWalletActivitiesReturn } from '@src/stores/slices';
 import Book from '@assets/icons/book.svg';
 import LightBulb from '@assets/icons/light.svg';
 import Video from '@assets/icons/video.svg';
@@ -21,26 +19,22 @@ import {
   MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useWalletActivities } from '@hooks/useWalletActivities';
 
 export const ActivityLayout = (): ReactElement => {
   const { t } = useTranslation();
-  const [walletActivitiesObservable, setWalletActivitiesObservable] = useState<FetchWalletActivitiesReturn>();
   const { priceResult } = useFetchCoinPrice();
-  const {
-    inMemoryWallet,
-    walletInfo,
-    walletActivities,
-    getWalletActivitiesObservable,
-    transactionDetail,
-    resetTransactionState,
-    activitiesCount,
-    walletActivitiesStatus,
-    blockchainProvider
-  } = useWalletStore();
-  const cardanoFiatPrice = priceResult?.cardano?.price;
-  const { fiatCurrency } = useCurrencyStore();
-  const total = useObservable(inMemoryWallet.balance.utxo.total$);
+  const { inMemoryWallet, walletInfo, transactionDetail, resetTransactionState, blockchainProvider } = useWalletStore();
   const analytics = useAnalyticsContext();
+  const sendAnalytics = useCallback(() => {
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_TRANSACTIONS,
+      action: MatomoEventActions.CLICK_EVENT,
+      name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_BROWSER
+    });
+  }, [analytics]);
+  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
+  const total = useObservable(inMemoryWallet.balance.utxo.total$);
 
   const titles = {
     glossary: t('educationalBanners.title.glossary'),
@@ -75,41 +69,10 @@ export const ActivityLayout = (): ReactElement => {
     }
   ];
 
-  const sendAnalytics = useCallback(() => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.VIEW_TRANSACTIONS,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_BROWSER
-    });
-  }, [analytics]);
-
-  const fetchWalletActivities = useCallback(async () => {
-    const result =
-      fiatCurrency &&
-      cardanoFiatPrice &&
-      (await getWalletActivitiesObservable({
-        fiatCurrency,
-        cardanoFiatPrice,
-        sendAnalytics
-      }));
-    setWalletActivitiesObservable(result);
-  }, [fiatCurrency, cardanoFiatPrice, getWalletActivitiesObservable, sendAnalytics]);
-
-  useEffect(() => {
-    fetchWalletActivities();
-  }, [fetchWalletActivities]);
-
   // Reset current transaction details and close drawer if network (blockchainProvider) has changed
   useEffect(() => {
     resetTransactionState();
   }, [resetTransactionState, blockchainProvider]);
-
-  useEffect(() => {
-    if (!walletActivitiesObservable) return;
-    const subscription = walletActivitiesObservable?.subscribe();
-    // eslint-disable-next-line consistent-return
-    return () => subscription.unsubscribe();
-  }, [walletActivitiesObservable]);
   const isLoadingFirstTime = isNil(total);
 
   return (
