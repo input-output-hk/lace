@@ -2,6 +2,7 @@
 import { Wallet } from '@lace/cardano';
 import { Ellipsis } from '@lace/common';
 import { Button } from '@lace/ui';
+import { Tooltip } from 'antd';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
@@ -37,6 +38,7 @@ export const getSaturationLevel = (saturation: number): string => {
   return color;
 };
 
+/* eslint-disable complexity */
 export const StakePoolItemBrowser = ({
   id,
   hexId,
@@ -101,15 +103,22 @@ export const StakePoolItemBrowser = ({
         </p>
       </div>
       <div className={styles.actions}>
-        <StakeButtonComponent
-          label={stakePoolStateLabel}
-          onClick={(event) => {
-            event.stopPropagation();
-            includedInDraft ? removeFromDraft() : addToDraft();
-          }}
-          disabled={disableAddingToDraft}
-          data-testid="stake-button"
-        />
+        <Tooltip
+          title={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
+          trigger={disableAddingToDraft ? 'hover' : []}
+        >
+          <div>
+            <StakeButtonComponent
+              label={stakePoolStateLabel}
+              onClick={(event) => {
+                event.stopPropagation();
+                includedInDraft ? removeFromDraft() : addToDraft();
+              }}
+              disabled={disableAddingToDraft}
+              data-testid="stake-button"
+            />
+          </div>
+        </Tooltip>
       </div>
     </div>
   );
