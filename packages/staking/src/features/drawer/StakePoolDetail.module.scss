@@ -80,10 +80,6 @@
   }
 }
 
-.banner {
-  margin-top: size_unit(4);
-}
-
 .popupView {
   &.contentWrapper {
     .row {
@@ -112,24 +108,5 @@
     font-weight: 500;
     line-height: size_unit(2);
     word-break: break-all;
-  }
-  .banner {
-    margin-top: size_unit(4);
-  }
-}
-
-ul.descriptionList {
-  list-style-type: '- ';
-  text-align: left;
-  padding: size_unit(4) 0 0 8px;
-  color: var(--text-color-primary);
-  font-size: var(--body);
-  font-weight: 400;
-  line-height: size_unit(3);
-  text-align: left;
-  margin: 0;
-
-  @media (max-width: $breakpoint-popup) {
-    font-size: var(--bodySmall);
   }
 }
