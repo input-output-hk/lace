@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import classnames from 'classnames';
 import { AutoCompleteProps, Button } from 'antd';
 import { Search, SearchProps, addEllipsis } from '@lace/common';
 import { HandleResolution } from '@cardano-sdk/core';
@@ -115,7 +114,6 @@ export const DestinationAddressInput = ({
 
   return (
     <Search
-      className={classnames(className, styles.searchAddress)}
       value={value.address}
       label={translations.recipientAddress}
       onChange={onChange}

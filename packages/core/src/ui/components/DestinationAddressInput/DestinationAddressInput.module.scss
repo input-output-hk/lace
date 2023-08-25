@@ -98,14 +98,14 @@ button.addressBookBtn {
   pointer-events: none;
   position: absolute;
   top: 30px;
-  left: 22px;
   width: 100%;
   z-index: 1;
   background: var(--light-mode-light-grey, var(--dark-mode-dark-grey, #2f2f2f)) !important;
+  padding-left: size_unit(1.5);
   
   @media (max-width: $breakpoint-popup) {
     top: 8px;
-    left: 0;
+    padding-left: 0px;
   }
 }
 
@@ -117,10 +117,6 @@ button.addressBookBtn {
       font-weight: 600 !important;
     }
   }
-}
-
-.searchAddress {
-  padding-bottom: size_unit(1.25);
 }
 
 @media (max-width: $breakpoint-popup) {

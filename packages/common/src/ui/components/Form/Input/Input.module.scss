@@ -15,10 +15,9 @@
   color: var(--text-color-secondary, var(--dark-mode-light-grey)) !important;
   display: flex;
   height: size_unit(8) !important;
-  padding: 0 22px !important;
   position: relative;
   border: 2px solid transparent !important;
-  position: relative;
+
   &:hover {
     border: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-grey)) !important;
   }
@@ -60,7 +59,6 @@
   color: var(--text-color-secondary);
   font-size: var(--bodyLarge);
   font-weight: 500;
-  left: 0px;
   line-height: size_unit(3);
   position: absolute;
   pointer-events: none;
@@ -69,10 +67,10 @@
   transition: 0.2s ease all;
   z-index: 1;
   white-space: nowrap;
+
   &.filled {
     font-size: var(--bodyXS) !important;
     line-height: size_unit(2) !important;
-    transform: translateY(0) !important;
-    top: 10px;
+    padding-top: size_unit(1.25);
   }
 }

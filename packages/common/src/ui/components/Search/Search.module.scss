@@ -25,13 +25,8 @@ $button_size: 52px;
   gap: size_unit(2) !important;
   height: size_unit(8) !important;
   justify-content: space-between !important;
-  padding: 0 size_unit(0.75) 0 0 !important;
   border: 1.5px solid transparent !important;
-
-  @media (max-width: $breakpoint-popup) {
-    padding: 0 size_unit(0.75) 0 size_unit(2.5) !important;
-  }
-
+  
   :global {
     .ant-input-affix-wrapper-borderless {
       background-color: transparent !important;
@@ -112,6 +107,9 @@ $button_size: 52px;
 }
 
 @media (max-width: $breakpoint-popup) {
+  .content { 
+    padding-left: 0 !important;
+  }
   .inputSearch {
     font-size: var(--bodyLarge, 18px) !important;
 
@@ -201,6 +199,7 @@ button.clear {
   width: 100%;
   overflow-x: hidden;
   position: relative;
+  padding-left: size_unit(2);
 }
 
 .loaderContainer {
