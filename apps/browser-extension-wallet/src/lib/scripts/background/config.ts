@@ -55,5 +55,6 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   extendLifespan: RemoteApiPropertyType.MethodReturningPromise,
   getAliasProperties: RemoteApiPropertyType.MethodReturningPromise,
   getRandomizedUserId: RemoteApiPropertyType.MethodReturningPromise,
-  getUserId: RemoteApiPropertyType.MethodReturningPromise
+  getUserId: RemoteApiPropertyType.MethodReturningPromise,
+  getUserTrackingType: RemoteApiPropertyType.MethodReturningPromise
 };
