@@ -1,3 +1,8 @@
-import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction, PostHogProperties } from '@providers/AnalyticsProvider/analyticsTracker';
 
-export type SendOboardingAnalyticsEvent = (eventName: string, postHogAction?: PostHogAction, value?: number) => void;
+export type SendOnboardingAnalyticsEvent = (
+  eventName: string,
+  postHogAction?: PostHogAction,
+  value?: number,
+  postHogProperties?: PostHogProperties
+) => Promise<void>;
