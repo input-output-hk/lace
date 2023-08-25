@@ -53,6 +53,7 @@ export const StakePoolPreferences = () => {
             poolId={id}
             name={name || ''}
             draftPortfolioLength={draftPortfolio.length}
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             color={PIE_CHART_DEFAULT_COLOR_SET[i]!}
             deleteEnabled={draftPortfolio.length > 1}
           />

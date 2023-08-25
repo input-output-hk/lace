@@ -99,7 +99,7 @@ export const StakingView = () => {
   useEffect(() => {
     if (!currentChain) return;
     portfolioMutators.clearDraft();
-  }, [currentChain]);
+  }, [currentChain, portfolioMutators]);
 
   return (
     <>
