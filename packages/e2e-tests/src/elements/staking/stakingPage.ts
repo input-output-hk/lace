@@ -9,9 +9,12 @@ class StakingPage {
   private EMPTY_SEARCH_RESULTS_IMAGE = '[data-testid="stake-pool-table-empty-image"]';
   private EMPTY_SEARCH_RESULTS_MESSAGE = '[data-testid="stake-pool-table-empty-message"]';
   private SEARCH_LOADER = '[data-testid="search-loader"]';
-  private OVERVIEW_TAB = '[data-testid="overview-tab"]';
   private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
   private GOT_IT_BUTTON = '[data-testid="multidelegation-beta-modal-button"]';
+  private STAKE_POOL_LIST_COST = '[data-testid="stake-pool-list-cost"]';
+  private STATS_TITLE = '[data-testid="stats-title"]';
+  private STATS_VALUE = '[data-testid="stats-value"]';
+  private STAKE_POOL_TABLE_ROW = '[data-testid="stake-pool-table-item"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -25,12 +28,44 @@ class StakingPage {
     return $(this.SEARCH_ICON);
   }
 
+  get statsTitle() {
+    return $$(this.STATS_TITLE);
+  }
+
   get stakingPageSearchInput() {
     return $(this.SEARCH_INPUT);
   }
 
   get searchInputPlaceholderInPopup() {
     return $(this.SEARCH_INPUT_PLACEHOLDER_IN_POPUP);
+  }
+
+  get rows() {
+    return $$(this.STAKE_POOL_TABLE_ROW);
+  }
+
+  get statsValues() {
+    return $$(this.STATS_VALUE);
+  }
+
+  async getStatsTickers(): Promise<string[]> {
+    const statsText = new Set(['Fee', 'Total staked', 'Total rewards', 'Last reward']);
+    const statsNumber = await this.statsValues.length;
+    const tickers = [];
+    for (let i = 0; i < statsNumber; i++) {
+      if (statsText.has(await this.statsTitle[i].getText())) {
+        tickers.push(await this.statsValues[i].getText());
+      }
+    }
+    return tickers;
+  }
+
+  get stakePoolListCostList() {
+    return $$(this.STAKE_POOL_LIST_COST);
+  }
+
+  get statsValue() {
+    return $$(this.STATS_VALUE);
   }
 
   get emptySearchResultsImage() {

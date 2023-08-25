@@ -11,7 +11,8 @@ export enum Sections {
   FAIL_TX = 'fail_tx',
   ADDRESS_LIST = 'address_list',
   ADDRESS_FORM = 'address_form',
-  ASSET_PICKER = 'asset_picker'
+  ASSET_PICKER = 'asset_picker',
+  ADDRESS_CHANGE = 'address_change'
 }
 
 export enum FormOptions {
@@ -83,3 +84,10 @@ export type SendFlowAnalyticsProperties = {
   trigger_point: SendFlowTriggerPoints;
   // TODO: add rest of the porpeties (LW-7711)
 };
+
+export interface TokenAnalyticsProperties {
+  id: string;
+  name?: string;
+  ticker?: string;
+  amount: string;
+}

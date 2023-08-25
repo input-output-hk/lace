@@ -30,11 +30,11 @@ const formatNumericValue = (val: number | string, suffix: number | string): Reac
   </>
 );
 
-type Status = 'retired' | 'saturated';
+type PoolStatus = 'retired' | 'saturated';
 
 export type StakingInfoCardProps = {
   className?: string;
-  coinBalance: number;
+  totalStaked: string;
   fiat?: number;
   fee?: string | number;
   id: string;
@@ -49,15 +49,15 @@ export type StakingInfoCardProps = {
   popupView?: boolean;
   cardanoCoinSymbol: string;
   markerColor?: string;
-  status?: Status;
+  status?: PoolStatus;
 };
 
-const mapOfStatusToIcon: Record<Status, React.FC<React.SVGProps<SVGSVGElement>>> = {
+const iconsByPoolStatus: Record<PoolStatus, React.FC<React.SVGProps<SVGSVGElement>>> = {
   retired: MoonIcon,
   saturated: WarningIon,
 };
 
-const mapOfStatusToLabel: Record<Status, TranslationKey> = {
+const labelTranslationKeysByPoolStatus: Record<PoolStatus, TranslationKey> = {
   retired: 'overview.stakingInfoCard.poolRetired',
   saturated: 'overview.stakingInfoCard.poolSaturated',
 };
@@ -65,7 +65,7 @@ const mapOfStatusToLabel: Record<Status, TranslationKey> = {
 // eslint-disable-next-line complexity
 export const StakingInfoCard = ({
   className,
-  coinBalance,
+  totalStaked,
   fiat,
   fee,
   id,
@@ -90,7 +90,7 @@ export const StakingInfoCard = ({
       <div className={styles.row}>
         <div className={styles.col}>
           {markerColor && <div className={styles.marker} style={{ background: markerColor }} />}
-          <Flex justifyContent={'space-between'} alignItems={'center'} w={'$fill'}>
+          <Flex justifyContent="space-between" alignItems="center" w="$fill">
             <StakePoolInfo
               logo={logo ?? getRandomIcon({ id: id.toString(), size: 30 })}
               name={name}
@@ -99,8 +99,8 @@ export const StakingInfoCard = ({
               onClick={onStakePoolSelect}
             />
             {(status === 'retired' || status === 'saturated') && (
-              <Tooltip content={t(mapOfStatusToLabel[status])}>
-                <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={mapOfStatusToIcon[status]} />
+              <Tooltip content={t(labelTranslationKeysByPoolStatus[status])}>
+                <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={iconsByPoolStatus[status]} />
               </Tooltip>
             )}
           </Flex>
@@ -128,12 +128,12 @@ export const StakingInfoCard = ({
       </div>
       <div className={styles.row}>
         <div className={styles.col}>
-          {coinBalance && (
+          {totalStaked && (
             <Stats
               text={t('overview.stakingInfoCard.totalStaked')}
               value={
-                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: coinBalance.toString(), fiat })}`}>
-                  <span>{coinBalance}</span>
+                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: totalStaked.toString(), fiat })}`}>
+                  <span>{totalStaked}</span>
                   <span className={styles.suffix}>{cardanoCoinSymbol}</span>
                 </Tooltip>
               }

@@ -1,12 +1,12 @@
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Banner, Ellipsis } from '@lace/common';
+import { Ellipsis } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LegacySelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
+import { OpenSelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
 import { MAX_POOLS_COUNT, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
@@ -14,8 +14,8 @@ import styles from './StakePoolDetail.module.scss';
 const SATURATION_UPPER_BOUND = 100;
 
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
+  const { t } = useTranslation();
   const {
-    delegationDetails,
     delegationStoreSelectedStakePoolDetails: {
       delegators,
       description,
@@ -30,15 +30,13 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       ticker,
       status,
       contact,
-    } = {} as LegacySelectedStakePoolDetails,
+    } = {} as OpenSelectedStakePoolDetails,
     openExternalLink,
-    walletStoreWalletUICardanoCoin,
   } = useOutsideHandles();
 
-  const currentDelegatedStakePool =
-    delegationDetails &&
-    Wallet.util.stakePoolTransformer({ cardanoCoin: walletStoreWalletUICardanoCoin, stakePool: delegationDetails });
-  const { t } = useTranslation();
+  const delegatingToThisPool = useDelegationPortfolioStore((store) =>
+    store.currentPortfolio.map((portfolioItem) => portfolioItem.id).includes(Wallet.Cardano.PoolIdHex(hexId))
+  );
 
   const socialNetworks = [
     { href: contact?.feed, type: SocialNetwork.RSS_FEED },
@@ -48,8 +46,6 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     { href: contact?.github, type: SocialNetwork.GITHUB },
     { href: contact?.twitter, type: SocialNetwork.TWITTER },
   ];
-
-  const isDelegatingToThisPool = currentDelegatedStakePool?.id === id;
 
   const metricsTranslations = {
     activeStake: t('drawer.details.metrics.activeStake'),
@@ -72,7 +68,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
         <StakePoolNameBrowser
           {...{
             id,
-            isDelegated: isDelegatingToThisPool,
+            isDelegated: delegatingToThisPool,
             isOversaturated: saturation !== undefined && Number(saturation) > SATURATION_UPPER_BOUND,
             logo,
             name,
@@ -96,20 +92,6 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               popupView={popupView}
             />
           </div>
-          {isDelegatingToThisPool && (
-            <Banner
-              className={styles.banner}
-              withIcon
-              message={t('drawer.details.switchingPoolBanner.title')}
-              description={
-                <ul className={styles.descriptionList}>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step1')}</li>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step2')}</li>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step3')}</li>
-                </ul>
-              }
-            />
-          )}
           <div className={styles.row} data-testid="stake-pool-details-information">
             <div
               className={styles.title}
@@ -185,7 +167,7 @@ export type StakePoolDetailFooterProps = {
 type SelectorParams = Parameters<Parameters<typeof useDelegationPortfolioStore>[0]>[0];
 
 const makeSelector =
-  (openPool?: LegacySelectedStakePoolDetails) =>
+  (openPool?: OpenSelectedStakePoolDetails) =>
   ({ currentPortfolio, draftPortfolio }: SelectorParams) => {
     const poolInCurrentPortfolio =
       !!openPool && currentPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
@@ -209,7 +191,7 @@ type ButtonNames = 'addStakingPool' | 'manageDelegation' | 'stakeOnThisPool' | '
 const tmpNoop = () => {};
 const getSpecOverride = (specOrBool: Partial<ActionButtonSpec> | boolean) =>
   typeof specOrBool === 'boolean' ? {} : specOrBool;
-// TODO: translations for buttons labels
+
 const makeActionButtons = (
   t: TFunction,
   {
@@ -231,25 +213,25 @@ const makeActionButtons = (
       selectForMultiStaking && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-select-for-multi-staking-btn',
-        label: 'Select pool for multi-staking',
+        label: t('drawer.details.selectForMultiStaking'),
         ...getSpecOverride(selectForMultiStaking),
       },
       addStakingPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-add-staking-pool-btn',
-        label: 'Add staking pool',
+        label: t('drawer.details.addStakingPool'),
         ...getSpecOverride(addStakingPool),
       },
       unselectPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-unselect-pool-btn',
-        label: 'Unselect pool',
+        label: t('drawer.details.unselectPool'),
         ...getSpecOverride(unselectPool),
       },
       manageDelegation && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-manage-delegation-btn',
-        label: 'Manage delegation',
+        label: t('drawer.details.manageDelegation'),
         ...getSpecOverride(manageDelegation),
       },
     ] as (ActionButtonSpec | false)[]
@@ -320,17 +302,17 @@ export const StakePoolDetailFooter = ({
   const [callToActionButton, ...secondaryButtons] = actionButtons;
 
   return (
-    <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
+    <Flex flexDirection="column" alignItems="stretch" gap="$16">
       {callToActionButton && (
         <Button.CallToAction
           label={callToActionButton.label}
           data-testid={callToActionButton.dataTestId}
           onClick={callToActionButton.callback}
-          w={'$fill'}
+          w="$fill"
         />
       )}
       {secondaryButtons.map(({ callback, dataTestId, label }) => (
-        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w={'$fill'} />
+        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
       ))}
     </Flex>
   );

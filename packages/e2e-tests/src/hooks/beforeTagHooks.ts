@@ -78,7 +78,7 @@ Before(
 Before({ tags: '@Collateral-popup' }, async () => await popupViewWalletInitialization(TestWalletName.WalletCollateral));
 
 Before(
-  { tags: '@Staking-DelegatedFunds-Popup' },
+  { tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' },
   async () => await popupViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
 );
 
@@ -98,7 +98,7 @@ Before(
 );
 
 Before(
-  { tags: '@Staking-DelegatedFunds-Extended or @MultidelegationDelegatedFunds-Extended' },
+  { tags: '@Staking-DelegatedFunds-Extended or @MultidelegationDelegatedFunds-Extended or @NetworkSwitching-extended' },
   async () => await extendedViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
 );
 
@@ -122,4 +122,14 @@ Before({ tags: '@AdaHandle-popup' }, async () => await popupViewWalletInitializa
 Before(
   { tags: '@Multidelegation-SwitchingPools-Extended-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletMultidelegationSwitchPoolsE2E)
+);
+
+Before(
+  { tags: '@HdWallet-extended' },
+  async () => await extendedViewWalletInitialization(TestWalletName.HdWalletReadOnly1)
+);
+
+Before(
+  { tags: '@SendNftHdWallet-Extended-E2E' },
+  async () => await extendedViewWalletInitialization(TestWalletName.WalletSendNftHdWalletE2E)
 );
