@@ -73,14 +73,6 @@ type KeysStructure = {
         retiring: '';
         saturated: '';
       };
-      switchingPoolBanner: {
-        title: '';
-        description: {
-          step1: '';
-          step2: '';
-          step3: '';
-        };
-      };
       stakeOnPoolButton: '';
       selectForMultiStaking: '';
       addStakingPool: '';
