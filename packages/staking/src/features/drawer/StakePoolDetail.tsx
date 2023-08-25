@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Banner, Ellipsis } from '@lace/common';
+import { Ellipsis } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
@@ -92,20 +92,6 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               popupView={popupView}
             />
           </div>
-          {delegatingToThisPool && (
-            <Banner
-              className={styles.banner}
-              withIcon
-              message={t('drawer.details.switchingPoolBanner.title')}
-              description={
-                <ul className={styles.descriptionList}>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step1')}</li>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step2')}</li>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step3')}</li>
-                </ul>
-              }
-            />
-          )}
           <div className={styles.row} data-testid="stake-pool-details-information">
             <div
               className={styles.title}
