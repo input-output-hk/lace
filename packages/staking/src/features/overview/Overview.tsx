@@ -97,7 +97,11 @@ export const Overview = () => {
       )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
-        <ControlButton.Small onClick={onManageClick} label={t('overview.yourPoolsSection.manageButtonLabel')} />
+        <ControlButton.Small
+          disabled={pendingDelegationTransaction}
+          onClick={onManageClick}
+          label={t('overview.yourPoolsSection.manageButtonLabel')}
+        />
       </Flex>
       {displayData.map((item) => (
         <Box key={item.id} mb="$24" data-testid="delegated-pool-item">

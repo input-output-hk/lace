@@ -16,14 +16,14 @@ interface PoolDetailsCardProps {
 
 export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
-  const { draftPortfolioLength, unselectPool } = useDelegationPortfolioStore((state) => ({
+  const { draftPortfolioLength, portfolioMutators } = useDelegationPortfolioStore((state) => ({
     draftPortfolioLength: state.draftPortfolio.length,
-    unselectPool: state.mutators.unselectPool,
+    portfolioMutators: state.mutators,
   }));
   const { balancesBalance, compactNumber } = useOutsideHandles();
   const balance = compactNumber(balancesBalance.available.coinBalance);
   const handleRemovePoolFromPortfolio = () => {
-    unselectPool({ id: poolId });
+    portfolioMutators.removePoolInManagementProcess({ id: poolId });
   };
   const deleteEnabled = draftPortfolioLength > 1;
 

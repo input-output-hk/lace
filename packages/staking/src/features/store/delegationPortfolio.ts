@@ -23,9 +23,13 @@ export const useDelegationPortfolioStore = create(
           store.draftPortfolio =
             process === PortfolioManagementProcess.CurrentPortfolio ? store.currentPortfolio : store.selections;
         }),
-      cancelManagementProcess: () =>
+      // eslint-disable-next-line unicorn/no-object-as-default-parameter
+      cancelManagementProcess: ({ dumpDraftToSelections } = { dumpDraftToSelections: false }) =>
         set((store) => {
           if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
+          if (dumpDraftToSelections) {
+            store.selections = store.draftPortfolio;
+          }
           store.draftPortfolio = [];
           store.activeManagementProcess = PortfolioManagementProcess.None;
         }),
@@ -42,12 +46,13 @@ export const useDelegationPortfolioStore = create(
           }
           store.activeManagementProcess = PortfolioManagementProcess.None;
         }),
-      moveFromCurrentPortfolioManagementProcessToSelections: () =>
+      removePoolInManagementProcess: ({ id }) =>
         set((store) => {
-          if (store.activeManagementProcess !== PortfolioManagementProcess.CurrentPortfolio) return;
-          store.selections = store.draftPortfolio;
-          store.draftPortfolio = [];
-          store.activeManagementProcess = PortfolioManagementProcess.None;
+          if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
+          store.draftPortfolio = store.draftPortfolio.filter((pool) => pool.id !== id);
+          if (store.activeManagementProcess === PortfolioManagementProcess.NewPortfolio) {
+            store.selections = store.draftPortfolio;
+          }
         }),
       selectPool: (poolData) =>
         set(({ selections }) => {

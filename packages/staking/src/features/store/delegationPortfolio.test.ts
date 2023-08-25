@@ -74,16 +74,63 @@ const dummyStakePool3 = {
 } as Wallet.Cardano.StakePool;
 
 describe('delegationPortfolioStore', () => {
+  it('initializes the portfolio preferences', () => {
+    const { result } = renderHook(() => useDelegationPortfolioStore());
+    expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.None);
+    expect(result.current.currentPortfolio).toEqual([]);
+    expect(result.current.draftPortfolio).toEqual([]);
+    expect(result.current.selections).toEqual([]);
+  });
+
+  it('sets the current portfolio', () => {
+    const expectedLength = 3;
+    const { result } = renderHook(() => useDelegationPortfolioStore());
+    act(() =>
+      result.current.mutators.setCurrentPortfolio({
+        cardanoCoin: { symbol: 'ADA' } as Wallet.CoinId,
+        delegationDistribution: [
+          {
+            percentage: Wallet.Percent(33.33),
+            pool: dummyStakePool1,
+            rewardAccounts: [],
+            stake: BigInt(1),
+          },
+          {
+            percentage: Wallet.Percent(33.33),
+            pool: dummyStakePool2,
+            rewardAccounts: [],
+            stake: BigInt(1),
+          },
+          {
+            percentage: Wallet.Percent(33.33),
+            pool: dummyStakePool3,
+            rewardAccounts: [],
+            stake: BigInt(1),
+          },
+        ],
+      })
+    );
+    expect(result.current.currentPortfolio.length).toEqual(expectedLength);
+    expect(result.current.currentPortfolio).toEqual([
+      expect.objectContaining({
+        ...dummyPool1,
+        weight: 33.33,
+      }),
+      expect.objectContaining({
+        ...dummyPool2,
+        weight: 33.33,
+      }),
+      expect.objectContaining({
+        ...dummyPool3,
+        weight: 33.33,
+      }),
+    ]);
+  });
+
   describe('selections', () => {
     beforeEach(() => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => result.current.mutators.clearSelections());
-    });
-
-    it('initializes the portfolio preferences', () => {
-      const { result } = renderHook(() => useDelegationPortfolioStore());
-      expect(result.current.currentPortfolio).toEqual([]);
-      expect(result.current.selections).toEqual([]);
     });
 
     it('allows for selecting pools preserving the max allowed count', () => {
@@ -122,53 +169,6 @@ describe('delegationPortfolioStore', () => {
       act(() => result.current.mutators.clearSelections());
       expect(result.current.selections.length).toEqual(0);
     });
-  });
-
-  it('sets the current portfolio', () => {
-    const expectedLength = 3;
-    const { result } = renderHook(() => useDelegationPortfolioStore());
-    act(() =>
-      result.current.mutators.setCurrentPortfolio({
-        cardanoCoin: { symbol: 'ADA' } as Wallet.CoinId,
-        delegationDistribution: [
-          {
-            percentage: Wallet.Percent(33.33),
-            pool: dummyStakePool1,
-            rewardAccounts: [],
-            stake: BigInt(1),
-          },
-          {
-            percentage: Wallet.Percent(33.33),
-            pool: dummyStakePool2,
-            rewardAccounts: [],
-            stake: BigInt(1),
-          },
-          {
-            percentage: Wallet.Percent(33.33),
-            pool: dummyStakePool3,
-            rewardAccounts: [],
-            stake: BigInt(1),
-          },
-        ],
-      })
-    );
-    expect(result.current.currentPortfolio.length).toEqual(expectedLength);
-    expect(result.current.currentPortfolio).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          ...dummyPool1,
-          weight: 33.33,
-        }),
-        expect.objectContaining({
-          ...dummyPool2,
-          weight: 33.33,
-        }),
-        expect.objectContaining({
-          ...dummyPool3,
-          weight: 33.33,
-        }),
-      ])
-    );
   });
 
   describe('current portfolio management', () => {
@@ -224,6 +224,26 @@ describe('delegationPortfolioStore', () => {
       });
       expect(result.current.draftPortfolio).toEqual([]);
     });
+    it('dumps draftPortfolio to selections when canceled with dumpDraftToSelections flag', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => {
+        result.current.mutators.cancelManagementProcess({ dumpDraftToSelections: true });
+      });
+      expect(result.current.selections).toEqual([
+        expect.objectContaining({
+          ...dummyPool1,
+          weight: 33.33,
+        }),
+        expect.objectContaining({
+          ...dummyPool2,
+          weight: 33.33,
+        }),
+        expect.objectContaining({
+          ...dummyPool3,
+          weight: 33.33,
+        }),
+      ]);
+    });
     it('re-sets the activeManagementProcess to none when finalized', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => {
@@ -238,41 +258,19 @@ describe('delegationPortfolioStore', () => {
       });
       expect(result.current.draftPortfolio).toEqual([]);
     });
-    it('re-sets the activeManagementProcess to none when moving to selections', () => {
+    it('allows to remove pool from draftPortfolio', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
-      act(() => {
-        result.current.mutators.moveFromCurrentPortfolioManagementProcessToSelections();
-      });
-      expect(result.current.activeManagementProcess).toEqual(PortfolioManagementProcess.None);
-    });
-    it('clears the draftPortfolio when moving to selections', () => {
-      const { result } = renderHook(() => useDelegationPortfolioStore());
-      act(() => {
-        result.current.mutators.moveFromCurrentPortfolioManagementProcessToSelections();
-      });
-      expect(result.current.draftPortfolio).toEqual([]);
-    });
-    it('copies the draftPortfolio items to the selections when moving to selections', () => {
-      const { result } = renderHook(() => useDelegationPortfolioStore());
-      act(() => {
-        result.current.mutators.moveFromCurrentPortfolioManagementProcessToSelections();
-      });
-      expect(result.current.selections).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            ...dummyPool1,
-            weight: 33.33,
-          }),
-          expect.objectContaining({
-            ...dummyPool2,
-            weight: 33.33,
-          }),
-          expect.objectContaining({
-            ...dummyPool3,
-            weight: 33.33,
-          }),
-        ])
-      );
+      act(() => result.current.mutators.removePoolInManagementProcess({ id: dummyPool1.id }));
+      expect(result.current.draftPortfolio).toEqual([
+        expect.objectContaining({
+          ...dummyPool2,
+          weight: 33.33,
+        }),
+        expect.objectContaining({
+          ...dummyPool3,
+          weight: 33.33,
+        }),
+      ]);
     });
   });
 
@@ -328,6 +326,16 @@ describe('delegationPortfolioStore', () => {
         result.current.mutators.finalizeManagementProcess();
       });
       expect(result.current.selections).toEqual([]);
+    });
+    it('allows to remove pool from draftPortfolio', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => result.current.mutators.removePoolInManagementProcess({ id: dummyPool3.id }));
+      expect(result.current.draftPortfolio).toEqual([dummyPool2, dummyPool4, dummyPool5]);
+    });
+    it('removes pool from selections when removed pool in management process', () => {
+      const { result } = renderHook(() => useDelegationPortfolioStore());
+      act(() => result.current.mutators.removePoolInManagementProcess({ id: dummyPool1.id }));
+      expect(result.current.selections).toEqual([dummyPool2, dummyPool4, dummyPool5]);
     });
   });
 });

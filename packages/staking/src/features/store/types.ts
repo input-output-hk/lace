@@ -79,9 +79,9 @@ type DelegationPortfolioMutators = {
   beginManagementProcess: (
     process: PortfolioManagementProcess.NewPortfolio | PortfolioManagementProcess.CurrentPortfolio
   ) => void;
-  cancelManagementProcess: () => void;
+  cancelManagementProcess: (params?: { dumpDraftToSelections: boolean }) => void;
   finalizeManagementProcess: () => void;
-  moveFromCurrentPortfolioManagementProcessToSelections: () => void;
+  removePoolInManagementProcess: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
 };
 
 export type DelegationPortfolioStore = DelegationPortfolioState & {
