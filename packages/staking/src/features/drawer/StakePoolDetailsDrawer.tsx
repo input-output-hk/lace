@@ -55,11 +55,13 @@ export const StakePoolDetailsDrawer = ({
     } else {
       backgroundServiceAPIContextSetWalletPassword();
       delegationStoreSetDelegationTxBuilder();
-      resetStates();
-      removePassword();
-      // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
+      // TODO: Remove "setIsDrawerVisible" once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
       // if (!isInMemory && isSuccessSection) window.location.reload();
       setIsDrawerVisible(false);
+      // resetStates needs to be called after drawer invisible,
+      // i.e. it no longer renders children which use the just resetted state
+      resetStates();
+      removePassword();
       portfolioMutators.cancelManagementProcess();
     }
     setIsRestaking(false);

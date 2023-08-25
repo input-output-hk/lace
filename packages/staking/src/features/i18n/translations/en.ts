@@ -43,11 +43,6 @@ export const en: Translations = {
   'drawer.details.status.retired': 'This pool is retired. Re-delegate to an other pool to receive rewards',
   'drawer.details.status.retiring': 'This pool is retiring. Re-delegate to an other pool to avoid losing rewards',
   'drawer.details.status.saturated': 'This pool is too saturated. Stake on another pool to avoid losing rewards',
-  'drawer.details.switchingPoolBanner.description.step1': 'Click on a pool from the list in the main page',
-  'drawer.details.switchingPoolBanner.description.step2': 'Click on the “Stake to this pool” button in the detail page',
-  'drawer.details.switchingPoolBanner.description.step3': 'Follow the instructions in the staking flow',
-  'drawer.details.switchingPoolBanner.title':
-    'Unstaking is not yet available. Follow these steps if you wish to change stake pool',
   'drawer.details.unselectPool': 'Unselect pool',
   'drawer.failure.button.back': 'Back',
   'drawer.failure.button.close': 'Close',

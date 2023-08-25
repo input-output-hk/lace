@@ -10,9 +10,7 @@ import { AddressDetailDrawer, AddressChangeDetailDrawer } from '../components/Ad
 import { useAddressBookStore } from '../store';
 import styles from './AddressBook.modules.scss';
 import DeleteIcon from '../../../assets/icons/delete-icon.component.svg';
-import AddIcon from '../../../assets/icons/add.component.svg';
 import PlusIcon from '../../../assets/icons/plus-icon.svg';
-import EditIcon from '../../../assets/icons/edit.component.svg';
 import {
   MatomoEventActions,
   MatomoEventCategories,
@@ -20,23 +18,23 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { AddressDetailsSteps } from './AddressDetailDrawer/types';
-import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
-import { getAddressToSave } from '@src/utils/validators';
+import { useHandleResolver, useOnAddressSave, useUpdateAddressStatus } from '@hooks';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 import { Sections, useSections } from '@src/views/browser-view/features/send-transaction';
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressBook = withAddressBookContext(() => {
   const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
-  const { saveRecord: saveAddress, updateRecord: updateAddress, extendLimit, deleteRecord: deleteAddress } = utils;
+  const { extendLimit, deleteRecord: deleteAddress } = utils;
   const { setIsEditAddressVisible, isEditAddressVisible, setAddressToEdit, addressToEdit } = useAddressBookStore();
   const { t: translate } = useTranslation();
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
   const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
+
+  const { onSaveAddressActions } = useOnAddressSave();
   const { setSection } = useSections();
 
   const addressListTranslations = {
@@ -44,25 +42,9 @@ export const AddressBook = withAddressBookContext(() => {
     address: translate('core.walletAddressList.address')
   };
 
-  const onAddressSave = async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>): Promise<string> => {
-    analytics.sendEventToMatomo({
-      category: MatomoEventCategories.ADDRESS_BOOK,
-      action: MatomoEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_POPUP
-    });
+  const onAddressSave = (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) =>
+    onSaveAddressActions(address, addressToEdit);
 
-    const addressToSave = await getAddressToSave({ address, handleResolver });
-
-    return 'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, addressToSave, {
-          text: translate('browserView.addressBook.toast.editAddress'),
-          icon: EditIcon
-        })
-      : saveAddress(addressToSave, {
-          text: translate('browserView.addressBook.toast.addAddress'),
-          icon: AddIcon
-        });
-  };
   const list: WalletAddressItemProps[] = useMemo(
     () =>
       addressList?.map((item: AddressBookSchema) => ({
