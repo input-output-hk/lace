@@ -13,7 +13,7 @@ import {
   filterOutputsByTxDirection,
   isTxWithAssets
 } from '@src/views/browser-view/features/activity/helpers';
-import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp } from '@lace/core';
+import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp, TransactionType } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
 import { assetTransformer } from '@src/utils/assets-transformers';
@@ -49,17 +49,23 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
 }
 
 export type FetchWalletActivitiesReturn = Observable<Promise<AssetActivityListProps[]>>;
+export type DelegationTransactionType = Extract<
+  TransactionType,
+  'delegation' | 'delegationRegistration' | 'delegationDeregistration'
+>;
 
-const DelegationTransactionTypes = ['delegation', 'delegationRegistration', 'delegationDeregistration'] as const;
+const delegationTransactionTypes: ReadonlySet<DelegationTransactionType> = new Set([
+  'delegation',
+  'delegationRegistration',
+  'delegationDeregistration'
+]);
 
 type DelegationActivityItemProps = Omit<AssetActivityItemProps, 'type'> & {
-  type?: typeof DelegationTransactionTypes[number];
+  type: DelegationTransactionType;
 };
 
 const isDelegationActivity = (activity: AssetActivityItemProps): activity is DelegationActivityItemProps =>
-  // [].includes and Set(...).has do not work for narrowed Arrays https://stackoverflow.com/questions/55906553/typescript-unexpected-error-when-using-includes-with-a-typed-array
-  // eslint-disable-next-line unicorn/prefer-includes
-  DelegationTransactionTypes.some((type) => type === activity.type);
+  delegationTransactionTypes.has(activity.type as DelegationTransactionType);
 
 const getDelegationAmount = (activity: DelegationActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
