@@ -17,12 +17,7 @@ import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
-import {
-  setBackgroundStorage,
-  clearBackgroundStorage,
-  getBackgroundStorage,
-  getADAPriceFromBackgroundStorage
-} from '../util';
+import { setBackgroundStorage, clearBackgroundStorage, getBackgroundStorage } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 
 export const requestMessage$ = new Subject<Message>();
@@ -86,7 +81,7 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
 
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
 
-const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION } = config();
+const { ADA_PRICE_CHECK_INTERVAL } = config();
 const fetchTokenPrices = () => {
   // `base-policy-id=&base-tokenname=` for ADA as base token
   fetch('https://api.muesliswap.com/list?base-policy-id=&base-tokenname=')
@@ -138,23 +133,7 @@ const fetchAdaPrice = () => {
     })
     .catch(async (error) => {
       console.log('Error fetching coin prices:', error);
-      // If for some reason we couldn't fetch the ada price, get it from background store
-      const adaPrice = await getADAPriceFromBackgroundStorage();
-      if (!adaPrice) return coinPrices.adaPrices$.next({ prices: {}, status: 'error', timestamp: undefined });
-
-      const { prices, timestamp } = adaPrice;
-
-      const currentDate = Date.now();
-      const timePassedSinceLastSaved = currentDate - timestamp;
-      // eslint-disable-next-line no-magic-numbers
-      const timePassedInMinutes = Math.floor(timePassedSinceLastSaved / 60_000);
-      // We need this in case if the wallet is opened after a long period of time and the value is too old to be used
-      // in that case we omit the saved value
-      // we can set this period of time with an env variable, by default is 720 minutes
-      const shouldSetPriceValues = timePassedInMinutes < SAVED_PRICE_DURATION;
-      const nextPriceValues = shouldSetPriceValues ? prices : {};
-      const nextTimestamp = shouldSetPriceValues ? timestamp : undefined;
-      return coinPrices.adaPrices$.next({ prices: nextPriceValues, status: 'error', timestamp: nextTimestamp });
+      return coinPrices.adaPrices$.next({ prices: {}, status: 'error', timestamp: undefined });
     });
 };
 
