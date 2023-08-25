@@ -108,7 +108,7 @@ type KeysStructure = {
     };
     preferences: {
       selectedStakePools: '';
-      partOfBalance: '';
+      percentageOfBalance: '';
       pickMorePools: '';
       nextButton: '';
     };
