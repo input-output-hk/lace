@@ -35,6 +35,8 @@
     "core:lint": "yarn eslint-cmd \"packages/core/**/*.{js,ts,tsx}\"",
     "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore",
     "extension:lint": "yarn eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
+    "g:eslint": "cd $INIT_CWD && eslint",
+    "g:prettier": "cd $INIT_CWD && prettier",
     "postinstall": "husky install & ts-patch install -s",
     "lint": "yarn workspaces foreach -ptRv run lint && yarn markdown:lint",
     "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
