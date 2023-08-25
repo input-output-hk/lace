@@ -32,10 +32,12 @@ export const MultidelegationBetaModal = ({
       popupView={popupView}
       visible={visible}
       title={
-        <Flex alignItems="center">
-          {t('modals.beta.title')}
-          <BetaPill />
-        </Flex>
+        <>
+          <Flex alignItems="flex-start" mb="$8">
+            <BetaPill />
+          </Flex>
+          <Flex alignItems="center">{t('modals.beta.title')}</Flex>
+        </>
       }
       description={t('modals.beta.description')}
       actions={[
