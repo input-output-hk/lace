@@ -28,7 +28,10 @@ export const useDelegationPortfolioStore = create(
         set((store) => {
           if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
           if (dumpDraftToSelections) {
-            store.selections = store.draftPortfolio;
+            store.selections = store.draftPortfolio.map((pool) => ({
+              ...pool,
+              weight: 1,
+            }));
           }
           store.draftPortfolio = [];
           store.activeManagementProcess = PortfolioManagementProcess.None;
