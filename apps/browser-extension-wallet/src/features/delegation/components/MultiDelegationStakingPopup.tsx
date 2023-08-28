@@ -11,6 +11,8 @@ import styles from '@src/features/delegation/components/DelegationLayout.module.
 import { ContentLayout } from '@components/Layout';
 import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
+import { useObservable } from '@lace/common';
+import { walletBalanceTransformer } from '@src/api/transformers';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
@@ -42,6 +44,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchNetworkInfo,
     networkInfo,
     blockchainProvider,
+    walletInfo,
     currentChain
   } = useWalletStore((state) => ({
     getKeyAgentType: state.getKeyAgentType,
@@ -53,6 +56,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
     blockchainProvider: state.blockchainProvider,
+    walletInfo: state.walletInfo,
     currentChain: state.currentChain
   }));
   const sendAnalytics = useCallback(() => {
@@ -78,6 +82,10 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+  const { coinBalance } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
+  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const walletAddress = walletInfo.addresses?.[0].address?.toString();
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -117,6 +125,9 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         walletStoreWalletActivities: walletActivities,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
+        walletAddress,
+        rewardAccounts,
+        coinBalance: Number(coinBalance),
         currentChain
       }}
     >
