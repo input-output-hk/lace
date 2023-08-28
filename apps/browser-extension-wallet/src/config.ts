@@ -18,7 +18,6 @@ export type Config = {
   ADA_PRICE_CHECK_INTERVAL: number;
   AVAILABLE_CHAINS: Wallet.ChainName[];
   CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
-  SAVED_PRICE_DURATION: number;
 };
 
 // eslint-disable-next-line complexity
@@ -81,9 +80,6 @@ export const config = (): Config => {
       LegacyTestnet: `${process.env.CEXPLORER_URL_TESTNET}/tx`,
       Preprod: `${process.env.CEXPLORER_URL_PREPROD}/tx`,
       Preview: `${process.env.CEXPLORER_URL_PREVIEW}/tx`
-    },
-    SAVED_PRICE_DURATION: !Number.isNaN(Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES))
-      ? Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)
-      : 720
+    }
   };
 };
