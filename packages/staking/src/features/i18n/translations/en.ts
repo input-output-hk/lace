@@ -49,6 +49,7 @@ export const en: Translations = {
   'drawer.failure.button.retry': 'Retry',
   'drawer.failure.subTitle': 'The transaction was not successful. Please try again.',
   'drawer.failure.title': 'Oops! Something went wrong...',
+  'drawer.preferences.addPoolButton': 'Add stake pool',
   'drawer.preferences.nextButton': 'Next',
   'drawer.preferences.partOfBalance': '1/{{draftPortfolioLength}} of {{balance}} ADA',
   'drawer.preferences.pickMorePools': 'Please pick more stake pools.',
