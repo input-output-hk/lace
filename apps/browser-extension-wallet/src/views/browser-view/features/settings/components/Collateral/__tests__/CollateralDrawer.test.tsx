@@ -44,6 +44,7 @@ import { Sections } from '../types';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { act } from 'react-dom/test-utils';
 import { walletRoutePaths } from '@routes';
+import { mockAnalyticsTracker } from '@src/utils/mocks/test-helpers';
 
 class ResizeObserver {
   observe() {}
@@ -109,13 +110,6 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService'),
   getUserIdService: mockGetUserIdService
 }));
-
-const mockAnalyticsTracker = {
-  sendEventToMatomo: jest.fn(),
-  sendEventToPostHog: jest.fn(),
-  setOptedInForEnhancedAnalytics: jest.fn(),
-  setChain: jest.fn()
-};
 
 const testIds = {
   collateralSend: 'collateral-send',
