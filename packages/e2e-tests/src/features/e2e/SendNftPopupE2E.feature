@@ -4,11 +4,11 @@ Feature: Send NFT - Popup View - E2E
   Background:
     Given I am on NFTs popup page
     And Wallet is synced
-    And I'm in popup mode and select wallet that has NFT: "Ibilecoin"
+    And I use a single wallet with "Ibilecoin" NFT in popup mode
 
   @LW-2514
   Scenario: Popup-view - Send NFT E2E
-    And I'm sending an NFT with name: "Ibilecoin"
+    And I'm sending the NFT with name: "Ibilecoin"
     When I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed in popup mode
     When I close the drawer by clicking close button

@@ -22,20 +22,6 @@ jobs:
         run: ./decrypt_secret.sh
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'yarn'
-      - name: Node modules cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            **/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-      - name: Install dependencies
-        run: yarn install --check-cache --immutable
       - name: Build dist version of Lace
         uses: ./.github/shared/build
         with:

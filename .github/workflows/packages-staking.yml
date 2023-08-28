@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable --inline-builds
       - name: Check for linter issues
-        run: yarn workspace @lace/staking lint
+        run: yarn workspace @lace/staking lint:all
       - name: Build dependencies of Staking Center
         run: yarn staking build-deps
       - name: Run tests

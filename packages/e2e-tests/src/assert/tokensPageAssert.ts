@@ -230,6 +230,20 @@ class TokensPageAssert {
     }
   }
 
+  async assertAdaBalance(balanceInAda: number) {
+    await this.assertTokenBalance(0, balanceInAda);
+  }
+
+  async assertTMinBalance(balance: number) {
+    const TMinIndex = await TokensPage.getTokenRowIndex('tMIN');
+    await this.assertTokenBalance(TMinIndex, balance);
+  }
+
+  async assertTokenBalance(tokenIndex: number, tokenBalance: number) {
+    const balance = Number((await TokensPage.tokenBalance(tokenIndex).getText()).replace(',', ''));
+    expect(balance).to.equal(Number(tokenBalance));
+  }
+
   async assertSeeTicker(expectedTicker: 'ADA' | 'tADA') {
     const tickers = await TokensPage.getTokenTickers();
     const tickerDisplayed = tickers[await TokensPage.getTokenRowIndex('Cardano')];

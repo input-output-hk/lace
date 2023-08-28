@@ -48,6 +48,7 @@ export const ChangingPreferencesModal = ({ onConfirm, popupView }: StakingModals
         },
       ]}
       popupView={popupView}
+      focusTriggerAfterClose={false}
     />
   );
 };

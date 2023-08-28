@@ -7,7 +7,7 @@ import { StakePoolDetails } from '../drawer';
 import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
-import { Page, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Page, PortfolioManagementProcess, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { Navigation } from './Navigation';
 
 const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
@@ -31,6 +31,7 @@ export const StakingView = () => {
     walletStoreBlockchainProvider: blockchainProvider,
     multidelegationFirstVisit,
     triggerMultidelegationFirstVisit,
+    currentChain,
   } = useOutsideHandles();
 
   useEffect(() => {
@@ -40,9 +41,10 @@ export const StakingView = () => {
   const alreadyDelegating = currentPortfolio.length > 0;
 
   const proceedWithSelections = useCallback(() => {
+    portfolioMutators.beginManagementProcess(PortfolioManagementProcess.NewPortfolio);
     setSection();
     setIsDrawerVisible(true);
-  }, [setSection, setIsDrawerVisible]);
+  }, [portfolioMutators, setSection, setIsDrawerVisible]);
 
   const initiateStaking = useCallback(() => {
     if (alreadyDelegating) {
@@ -56,7 +58,7 @@ export const StakingView = () => {
   const selectCurrentPool = useCallback(() => {
     if (!openPoolDetails || !openPool) return;
     const { hexId, name, ticker } = openPoolDetails;
-    portfolioMutators.addPoolToDraft({
+    portfolioMutators.selectPool({
       displayData: Wallet.util.stakePoolTransformer({
         cardanoCoin: walletStoreWalletUICardanoCoin,
         stakePool: openPool,
@@ -72,17 +74,18 @@ export const StakingView = () => {
     if (alreadyDelegating) {
       setPendingSelection(true);
     }
+    selectCurrentPool();
     initiateStaking();
     // TODO: LW-7668 implement no funds modal
     // if (canDelegate) {
     // } else {
     // setNoFundsVisible(true);
     // }
-  }, [alreadyDelegating, initiateStaking]);
+  }, [alreadyDelegating, selectCurrentPool, initiateStaking]);
 
   const unselectPool = useCallback(() => {
     if (!openPoolDetails) return;
-    portfolioMutators.removePoolFromDraft({
+    portfolioMutators.unselectPool({
       id: Wallet.Cardano.PoolIdHex(openPoolDetails.hexId),
     });
   }, [openPoolDetails, portfolioMutators]);
@@ -94,14 +97,19 @@ export const StakingView = () => {
     proceedWithSelections();
   }, [pendingSelection, proceedWithSelections, selectCurrentPool]);
 
+  useEffect(() => {
+    if (!currentChain) return;
+    portfolioMutators.clearSelections();
+  }, [currentChain, portfolioMutators]);
+
   return (
     <>
-      <Box mb={'$56'}>
+      <Box mb="$56">
         <Text.Heading data-testid="section-title">{t('root.title')}</Text.Heading>
       </Box>
       <Navigation>
         {(activePage) => (
-          <Box mt={'$40'}>
+          <Box mt="$40">
             {activePage === Page.overview && <Overview />}
             {activePage === Page.browsePools && <BrowsePools onStake={initiateStaking} />}
           </Box>
