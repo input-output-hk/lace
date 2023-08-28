@@ -12,8 +12,11 @@ import {
   useStakePoolDetails,
 } from '../store';
 import { DelegationCard } from './DelegationCard';
+import { FundWalletBanner } from './FundWalletBanner';
+import { GetStartedSteps } from './GetStartedSteps';
 import { hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import * as styles from './Overview.css';
+import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './staking-info-card';
 
 export const Overview = () => {
@@ -25,7 +28,10 @@ export const Overview = () => {
     stakingRewards,
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
+    walletAddress,
     walletStoreWalletActivities: walletActivities,
+    rewardAccounts,
+    coinBalance,
   } = useOutsideHandles();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
@@ -35,6 +41,10 @@ export const Overview = () => {
     setIsDrawerVisible: state.setIsDrawerVisible,
     setSection: state.setSection,
   }));
+
+  const stakeRegistered = rewardAccounts && rewardAccounts?.[0]?.keyStatus === Wallet.Cardano.StakeKeyStatus.Registered;
+  const balanceTotal = balancesBalance?.total?.coinBalance && Number(balancesBalance.total.coinBalance);
+  const noFunds = (balanceTotal < Number(coinBalance) && !stakeRegistered) || (coinBalance === 0 && stakeRegistered);
 
   const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
     setSelectedStakePool(stakePool);
@@ -55,6 +65,16 @@ export const Overview = () => {
     stakingRewards,
   });
 
+  if (noFunds)
+    return (
+      <FundWalletBanner
+        title={t('overview.noFunds.title')}
+        subtitle={t('overview.noFunds.description')}
+        prompt={t('overview.noFunds.description')}
+        walletAddress={walletAddress}
+        shouldHaveVerticalContent
+      />
+    );
   if (currentPortfolio.length === 0)
     return (
       <>
@@ -66,7 +86,10 @@ export const Overview = () => {
             description={t('overview.banners.pendingFirstDelegation.message')}
           />
         ) : (
-          <Text.SubHeading>Start staking</Text.SubHeading>
+          <Flex flexDirection="column" gap="$32">
+            <StakeFundsBanner balance={balancesBalance?.total?.coinBalance} />
+            <GetStartedSteps />
+          </Flex>
         )}
       </>
     );

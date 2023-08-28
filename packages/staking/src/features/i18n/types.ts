@@ -170,6 +170,20 @@ type KeysStructure = {
       heading: '';
       manageButtonLabel: '';
     };
+    noFunds: {
+      title: '';
+      description: '';
+      button: '';
+    };
+    noStaking: {
+      title: '';
+      description: '';
+      balanceTitle: '';
+      getStarted: '';
+      followSteps: '';
+      searchForPool: '';
+      selectPools: '';
+    };
   };
   root: {
     title: '';
