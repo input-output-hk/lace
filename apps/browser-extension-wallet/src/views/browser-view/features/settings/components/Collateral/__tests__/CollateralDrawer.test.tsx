@@ -18,6 +18,7 @@ const mockUseRedirection = jest.fn();
 const mockNotify = jest.fn();
 const mockUseAnalyticsSendFlowTriggerPoint = jest.fn();
 const mockUseOutputs = jest.fn();
+const mockGetUserIdService = jest.fn();
 import * as React from 'react';
 import { screen, cleanup, fireEvent, render, within, waitFor } from '@testing-library/react';
 import { CollateralDrawer } from '../CollateralDrawer';
@@ -43,6 +44,7 @@ import { Sections } from '../types';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { act } from 'react-dom/test-utils';
 import { walletRoutePaths } from '@routes';
+import { mockAnalyticsTracker } from '@src/utils/mocks/test-helpers';
 
 class ResizeObserver {
   observe() {}
@@ -106,7 +108,7 @@ jest.mock('@lace/common', () => {
 
 jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService'),
-  getUserIdService: jest.fn()
+  getUserIdService: mockGetUserIdService
 }));
 
 const testIds = {
@@ -131,7 +133,7 @@ const getWrapper =
           <DatabaseProvider>
             <StoreProvider appMode={APP_MODE_BROWSER}>
               <I18nextProvider i18n={i18n}>
-                <AnalyticsProvider analyticsDisabled>
+                <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
                   <CurrencyStoreProvider>
                     <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
                   </CurrencyStoreProvider>

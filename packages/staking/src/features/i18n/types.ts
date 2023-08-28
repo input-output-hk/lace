@@ -28,6 +28,7 @@ type KeysStructure = {
       stake: '';
       unselect: '';
       addPool: '';
+      disabledTooltip: '';
     };
   };
   drawer: {
@@ -108,6 +109,7 @@ type KeysStructure = {
     };
     preferences: {
       selectedStakePools: '';
+      addPoolButton: '';
       percentageOfBalance: '';
       pickMorePools: '';
       nextButton: '';
@@ -168,6 +170,20 @@ type KeysStructure = {
     yourPoolsSection: {
       heading: '';
       manageButtonLabel: '';
+    };
+    noFunds: {
+      title: '';
+      description: '';
+      button: '';
+    };
+    noStaking: {
+      title: '';
+      description: '';
+      balanceTitle: '';
+      getStarted: '';
+      followSteps: '';
+      searchForPool: '';
+      selectPools: '';
     };
   };
   root: {

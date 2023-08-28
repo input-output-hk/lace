@@ -5,7 +5,8 @@ import {
   MatomoEventCategories,
   AnalyticsEventNames,
   PostHogAction,
-  postHogOnboardingActions
+  postHogOnboardingActions,
+  PostHogProperties
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { ILocalStorage } from '@src/types';
@@ -16,7 +17,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { HardwareWalletFlow } from './HardwareWalletFlow';
 import { Portal } from './Portal';
-import { SendOboardingAnalyticsEvent } from '../types';
+import { SendOnboardingAnalyticsEvent } from '../types';
 import styles from './WalletSetup.module.scss';
 import { WalletSetupWizard } from './WalletSetupWizard';
 
@@ -103,26 +104,27 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
     analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
   };
 
-  const sendAnalytics = async (
-    category: SetupAnalyticsCategories,
-    eventName: string,
-    value = 1,
-    postHogAction?: PostHogAction
-  ) => {
+  const sendAnalytics = async (args: {
+    category: SetupAnalyticsCategories;
+    eventName: string;
+    value?: number;
+    postHogAction?: PostHogAction;
+    postHogProperties?: PostHogProperties;
+  }) => {
     await analytics.sendEventToMatomo({
       action: MatomoEventActions.CLICK_EVENT,
-      category,
-      name: eventName,
-      value
+      category: args.category,
+      name: args.eventName,
+      value: args?.value || 1
     });
-    if (postHogAction) {
-      await analytics.sendEventToPostHog(postHogAction);
+    if (args?.postHogAction) {
+      await analytics.sendEventToPostHog(args.postHogAction, args?.postHogProperties);
     }
   };
 
-  const getSendAnalyticsHandler: (eventCategory: SetupAnalyticsCategories) => SendOboardingAnalyticsEvent =
-    (eventCategory) => async (event, postHogAction, value) =>
-      await sendAnalytics(eventCategory, event, value, postHogAction);
+  const getSendAnalyticsHandler: (eventCategory: SetupAnalyticsCategories) => SendOnboardingAnalyticsEvent =
+    (eventCategory) => async (event, postHogAction, value, postHogProperties) =>
+      await sendAnalytics({ category: eventCategory, eventName: event, value, postHogAction, postHogProperties });
 
   const handleRestoreWallet = () => {
     setIsConfirmRestoreOpen(true);
@@ -130,12 +132,11 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
   };
 
   const handleCreateNewWallet = () => {
-    sendAnalytics(
-      MatomoEventCategories.WALLET_CREATE,
-      Events.CREATE_WALLET_START,
-      undefined,
-      postHogOnboardingActions.create.SETUP_OPTION_CLICK
-    );
+    sendAnalytics({
+      category: MatomoEventCategories.WALLET_CREATE,
+      eventName: Events.CREATE_WALLET_START,
+      postHogAction: postHogOnboardingActions.create.SETUP_OPTION_CLICK
+    });
     history.push(walletRoutePaths.setup.create);
   };
 
@@ -146,12 +147,11 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
 
   const handleConfirmRestoreWarning = () => {
     setIsConfirmRestoreOpen(false);
-    sendAnalytics(
-      MatomoEventCategories.WALLET_RESTORE,
-      Events.RESTORE_WALLET_START,
-      undefined,
-      postHogOnboardingActions.restore?.RESTORE_MULTI_ADDR_OK_CLICK
-    );
+    sendAnalytics({
+      category: MatomoEventCategories.WALLET_RESTORE,
+      eventName: Events.RESTORE_WALLET_START,
+      postHogAction: postHogOnboardingActions.create.RESTORE_MULTI_ADDR_OK_CLICK
+    });
     history.push(walletRoutePaths.setup.restore);
   };
 
@@ -199,7 +199,10 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
               onCancel={() => setIsDappConnectorWarningOpen(false)}
               onConfirm={() => {
                 setIsDappConnectorWarningOpen(false);
-                sendAnalytics(MatomoEventCategories.HW_CONNECT, Events.CONNECT_HW_START);
+                sendAnalytics({
+                  category: MatomoEventCategories.HW_CONNECT,
+                  eventName: Events.CONNECT_HW_START
+                });
                 history.push(walletRoutePaths.setup.hardware);
               }}
             />

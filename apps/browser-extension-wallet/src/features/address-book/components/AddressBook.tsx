@@ -37,7 +37,6 @@ export const AddressBook = withAddressBookContext(() => {
   const { onSaveAddressActions } = useOnAddressSave();
   const { setSection } = useSections();
 
-
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
     address: translate('core.walletAddressList.address')

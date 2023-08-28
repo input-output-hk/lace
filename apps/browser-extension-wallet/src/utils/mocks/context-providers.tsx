@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
 import { HashRouter } from 'react-router-dom';
@@ -23,6 +24,7 @@ import { mockBlockchainProviders } from './blockchain-providers';
 import { SetState, GetState } from 'zustand';
 import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvider';
 import { IBlockchainProvider } from '@src/stores/slices/blockchain-provider-slice';
+import { mockAnalyticsTracker } from './test-helpers';
 
 interface ProvidersConfig {
   blockchainProviders?: Partial<IBlockchainProvider>;
@@ -76,7 +78,7 @@ export const buildMockProviders = async (
                 >
                   <CurrencyStoreProvider>
                     <AxiosClientProvider>
-                      <AnalyticsProvider analyticsDisabled>
+                      <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
                         <ExternalLinkOpenerProvider>
                           <HashRouter>{children}</HashRouter>
                         </ExternalLinkOpenerProvider>

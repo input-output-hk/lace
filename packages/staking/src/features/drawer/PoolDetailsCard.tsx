@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Cardano } from '@cardano-sdk/core';
 import { formatPercentages } from '@lace/common';
-import { Box, Card, ColorValueHex, ControlButton, Flex, Text } from '@lace/ui';
+import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Tooltip } from '../overview/staking-info-card/StatsTooltip';
@@ -12,19 +12,21 @@ import TrashIcon from './trash.svg';
 interface PoolDetailsCardProps {
   poolId: Cardano.Cip17Pool['id'];
   name: string;
-  draftPortfolioLength: number;
-  color: ColorValueHex;
-  deleteEnabled: boolean;
+  color: PieChartColor;
 }
 
-export const PoolDetailsCard = ({ name, poolId, draftPortfolioLength, color, deleteEnabled }: PoolDetailsCardProps) => {
+export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
-  const removePoolFromDraft = useDelegationPortfolioStore((state) => state.mutators.removePoolFromDraft);
+  const { draftPortfolioLength, portfolioMutators } = useDelegationPortfolioStore((state) => ({
+    draftPortfolioLength: state.draftPortfolio.length,
+    portfolioMutators: state.mutators,
+  }));
   const { balancesBalance, compactNumber } = useOutsideHandles();
   const balance = compactNumber(balancesBalance.available.coinBalance);
   const handleRemovePoolFromPortfolio = () => {
-    removePoolFromDraft({ id: poolId });
+    portfolioMutators.removePoolInManagementProcess({ id: poolId });
   };
+  const deleteEnabled = draftPortfolioLength > 1;
 
   return (
     <Card.Outlined className={PoolCard}>
