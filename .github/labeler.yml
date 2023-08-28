@@ -5,7 +5,7 @@ browser:
   - any: ['apps/browser-extension-wallet/**/*']
 # Staking
 staking:
-  - any: ['packages/staking/**/*']
+  - any: ['packages/staking/**/*', '.github/workflows/packages-staking.yml']
 # UI Toolkit
 ui-toolkit:
   - any: ['packages/ui/**/*']
