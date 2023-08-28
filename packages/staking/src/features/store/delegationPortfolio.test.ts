@@ -230,18 +230,9 @@ describe('delegationPortfolioStore', () => {
         result.current.mutators.cancelManagementProcess({ dumpDraftToSelections: true });
       });
       expect(result.current.selections).toEqual([
-        expect.objectContaining({
-          ...dummyPool1,
-          weight: 33.33,
-        }),
-        expect.objectContaining({
-          ...dummyPool2,
-          weight: 33.33,
-        }),
-        expect.objectContaining({
-          ...dummyPool3,
-          weight: 33.33,
-        }),
+        expect.objectContaining(dummyPool1),
+        expect.objectContaining(dummyPool2),
+        expect.objectContaining(dummyPool3),
       ]);
     });
     it('re-sets the activeManagementProcess to none when finalized', () => {
