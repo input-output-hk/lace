@@ -124,6 +124,18 @@ export const Transaction = ({
   const isSending = status === 'sending';
   const isSuccess = status === 'success';
 
+  const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
+    <div className={styles.details}>
+      <div className={styles.title}>{label}</div>
+      <div className={styles.detail}>
+        <div className={styles.amount}>
+          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>
+          <span className={styles.fiat}>{amountTransformer(value)}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <div className={styles.header}>{t('package.core.transactionDetailBrowser.header')}</div>
@@ -275,28 +287,13 @@ export const Transaction = ({
           </div>
         </div>
 
-        {deposit && (
-          <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.deposit')}</div>
-            <div className={styles.detail}>
-              <div className={styles.amount}>
-                <span className={styles.ada}>{`${deposit} ${coinSymbol}`}</span>
-                <span className={styles.fiat}>{amountTransformer(deposit)}</span>
-              </div>
-            </div>
-          </div>
-        )}
-        {depositReclaim && (
-          <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.depositReclaim')}</div>
-            <div className={styles.detail}>
-              <div className={styles.amount}>
-                <span className={styles.ada}>{`${depositReclaim} ${coinSymbol}`}</span>
-                <span className={styles.fiat}>{amountTransformer(depositReclaim)}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {deposit &&
+          renderDepositValueSection({ value: deposit, label: t('package.core.transactionDetailBrowser.deposit') })}
+        {depositReclaim &&
+          renderDepositValueSection({
+            value: depositReclaim,
+            label: t('package.core.transactionDetailBrowser.depositReclaim')
+          })}
       </div>
 
       {addrInputs?.length > 0 && (

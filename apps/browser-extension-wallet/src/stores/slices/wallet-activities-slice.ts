@@ -126,7 +126,7 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin
     });
 
-    const finalizeTransaction = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
+    const extendWithClickHandler = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
@@ -141,10 +141,10 @@ const getWalletActivitiesObservable = async ({
     To make this happen we need to create a new record Rewards and added to the transaction history
     */
     if (Array.isArray(transformedTransaction)) {
-      return transformedTransaction.map((tt) => finalizeTransaction(tt));
+      return transformedTransaction.map((tt) => extendWithClickHandler(tt));
     }
 
-    return finalizeTransaction(transformedTransaction);
+    return extendWithClickHandler(transformedTransaction);
   };
 
   const pendingTransactionMapper = (
@@ -168,7 +168,7 @@ const getWalletActivitiesObservable = async ({
       time
     });
 
-    const finalizeTransaction = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
+    const extendWithClickHandler = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
@@ -183,10 +183,10 @@ const getWalletActivitiesObservable = async ({
     });
 
     if (Array.isArray(transformedTransaction)) {
-      return transformedTransaction.map((tt) => finalizeTransaction(tt));
+      return transformedTransaction.map((tt) => extendWithClickHandler(tt));
     }
 
-    return finalizeTransaction(transformedTransaction);
+    return extendWithClickHandler(transformedTransaction);
   };
 
   const filterTransactionByAssetId = (tx: Wallet.Cardano.HydratedTx[]) =>
