@@ -89,10 +89,17 @@ type KeysStructure = {
       title: '';
       subTitle: '';
       cardanoName: '';
-      totalCost: {
+      transactionCost: {
+        title: '';
+      };
+      transactionReturn: {
+        title: '';
+      };
+      transactionTotal: {
         title: '';
       };
       theAmountYoullBeChargedForRegisteringYourStakeKey: '';
+      theAmountYoullBeAwardedForDeregisteringYourStakeKey: '';
       stakingDeposit: '';
       errors: {
         utxoFullyDepleted: '';

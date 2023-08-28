@@ -20,13 +20,17 @@ export const en: Translations = {
   'drawer.confirmation.errors.utxoFullyDepleted': 'UTxO Fully Depleted',
   'drawer.confirmation.stakingDeposit': 'Staking deposit',
   'drawer.confirmation.subTitle': 'Confirm the amount and the stake pool',
+  'drawer.confirmation.theAmountYoullBeAwardedForDeregisteringYourStakeKey':
+    "The amount you'll be awarded for de-registering your stake key.",
   'drawer.confirmation.theAmountYoullBeChargedForRegisteringYourStakeKey':
     "The amount you'll be charged for registering your stake key.",
   'drawer.confirmation.theAmountYoullBeChargedToProcessYourTransaction':
     "The amount you'll be charged to process your transaction",
   'drawer.confirmation.title': 'Confirmation',
-  'drawer.confirmation.totalCost.title': 'Transaction cost',
+  'drawer.confirmation.transactionCost.title': 'Transaction cost',
   'drawer.confirmation.transactionFee': 'Transaction fee',
+  'drawer.confirmation.transactionReturn.title': 'Transaction return',
+  'drawer.confirmation.transactionTotal.title': 'Total',
   'drawer.details.addStakingPool': 'Add staking pool',
   'drawer.details.information': 'Information',
   'drawer.details.manageDelegation': 'Manage delegation',

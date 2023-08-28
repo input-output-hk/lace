@@ -104,6 +104,67 @@ const StakePoolConfirmationBody = ({
   );
 };
 
+type StakePoolDepositReclaimDetailsProps = {
+  delegationTxDeposit: number;
+};
+
+const StakePoolDepositReclaimDetails = ({
+  delegationTxDeposit,
+}: StakePoolDepositReclaimDetailsProps): React.ReactElement => {
+  const { t } = useTranslation();
+  const {
+    walletStoreWalletUICardanoCoin: cardanoCoin,
+    delegationStoreDelegationTxFee: delegationTxFee = '0',
+    fetchCoinPricePriceResult: priceResult,
+    currencyStoreFiatCurrency: fiatCurrency,
+  } = useOutsideHandles();
+  const txDepositReclaim = Math.abs(delegationTxDeposit);
+  const totalTxEffect = BigInt(txDepositReclaim) - BigInt(delegationTxFee);
+
+  return (
+    <>
+      <h1 className={styles.txReturnTitle} data-testid="transaction-return-title">
+        {t('drawer.confirmation.transactionReturn.title')}
+      </h1>
+      <div className={styles.txReturnContainer} data-testid="summary-tx-return-container">
+        <RowContainer>
+          {renderLabel({
+            dataTestId: 'sp-confirmation-staking-reclaim-deposit',
+            label: t('drawer.confirmation.stakingDeposit'),
+            tooltipContent: t('drawer.confirmation.theAmountYoullBeAwardedForDeregisteringYourStakeKey'),
+          })}
+          <div>
+            {renderAmountInfo(
+              `${Wallet.util.lovelacesToAdaString(txDepositReclaim.toString())} ${cardanoCoin.symbol}`,
+              `${Wallet.util.convertAdaToFiat({
+                ada: Wallet.util.lovelacesToAdaString(txDepositReclaim.toString()),
+                fiat: priceResult?.cardano?.price || 0,
+              })} ${fiatCurrency?.symbol}`
+            )}
+          </div>
+        </RowContainer>
+      </div>
+      <div className={styles.divider} />
+      <div className={styles.totalCostContainer} data-testid="summary-total-cost-container">
+        <RowContainer>
+          <h2 className={styles.totalCostTitle} data-testid="transaction-total-title">
+            {t('drawer.confirmation.transactionTotal.title')}
+          </h2>
+          <div>
+            {renderAmountInfo(
+              `+ ${Wallet.util.lovelacesToAdaString(totalTxEffect.toString())} ${cardanoCoin.symbol}`,
+              `${Wallet.util.convertAdaToFiat({
+                ada: Wallet.util.lovelacesToAdaString(totalTxEffect.toString()),
+                fiat: priceResult?.cardano?.price || 0,
+              })} ${fiatCurrency?.symbol}`
+            )}
+          </div>
+        </RowContainer>
+      </div>
+    </>
+  );
+};
+
 export const StakePoolConfirmation = (): React.ReactElement => {
   const { t } = useTranslation();
   const { setIsBuildingTx, setStakingError, stakingError } = useStakePoolDetails();
@@ -192,8 +253,8 @@ export const StakePoolConfirmation = (): React.ReactElement => {
             cardanoCoin={cardanoCoin}
             fiatCurrency={fiatCurrency}
           />
-          <h1 className={styles.totalCostTitle} data-testid="transaction-cost-title">
-            {t('drawer.confirmation.totalCost.title')}
+          <h1 className={styles.txCostTitle} data-testid="transaction-cost-title">
+            {t('drawer.confirmation.transactionCost.title')}
           </h1>
           <div className={styles.txCostContainer} data-testid="summary-fee-container">
             {delegationTxDeposit > 0 && (
@@ -232,6 +293,8 @@ export const StakePoolConfirmation = (): React.ReactElement => {
               </div>
             </RowContainer>
           </div>
+
+          {delegationTxDeposit < 0 && <StakePoolDepositReclaimDetails {...{ delegationTxDeposit }} />}
         </Skeleton>
       </div>
     </>
