@@ -28,6 +28,7 @@ type KeysStructure = {
       stake: '';
       unselect: '';
       addPool: '';
+      disabledTooltip: '';
     };
   };
   drawer: {
@@ -108,6 +109,7 @@ type KeysStructure = {
     };
     preferences: {
       selectedStakePools: '';
+      addPoolButton: '';
       partOfBalance: '';
       pickMorePools: '';
       nextButton: '';

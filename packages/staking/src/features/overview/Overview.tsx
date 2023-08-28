@@ -1,10 +1,16 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
 import { Banner } from '@lace/common';
-import { Box, Flex, Text } from '@lace/ui';
+import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import {
+  PortfolioManagementProcess,
+  Sections,
+  sectionsConfig,
+  useDelegationPortfolioStore,
+  useStakePoolDetails,
+} from '../store';
 import { DelegationCard } from './DelegationCard';
 import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
@@ -27,8 +33,14 @@ export const Overview = () => {
     rewardAccounts,
     coinBalance,
   } = useOutsideHandles();
-  const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
-  const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
+  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
+    portfolioMutators: store.mutators,
+  }));
+  const { setIsDrawerVisible, setSection } = useStakePoolDetails((state) => ({
+    setIsDrawerVisible: state.setIsDrawerVisible,
+    setSection: state.setSection,
+  }));
 
   const stakeRegistered = rewardAccounts && rewardAccounts?.[0]?.keyStatus === Wallet.Cardano.StakeKeyStatus.Registered;
   const balanceTotal = balancesBalance?.total?.coinBalance && Number(balancesBalance.total.coinBalance);
@@ -39,6 +51,19 @@ export const Overview = () => {
     setIsDrawerVisible(true);
   };
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
+
+  const onManageClick = () => {
+    portfolioMutators.beginManagementProcess(PortfolioManagementProcess.CurrentPortfolio);
+    setSection(sectionsConfig[Sections.PREFERENCES]);
+    setIsDrawerVisible(true);
+  };
+
+  const displayData = mapPortfolioToDisplayData({
+    cardanoCoin: walletStoreWalletUICardanoCoin,
+    cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
+    portfolio: currentPortfolio,
+    stakingRewards,
+  });
 
   if (noFunds)
     return (
@@ -69,13 +94,6 @@ export const Overview = () => {
       </>
     );
 
-  const displayData = mapPortfolioToDisplayData({
-    cardanoCoin: walletStoreWalletUICardanoCoin,
-    cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
-    portfolio: currentPortfolio,
-    stakingRewards,
-  });
-
   return (
     <>
       <Box mb="$40">
@@ -102,6 +120,11 @@ export const Overview = () => {
       )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
+        <ControlButton.Small
+          disabled={pendingDelegationTransaction}
+          onClick={onManageClick}
+          label={t('overview.yourPoolsSection.manageButtonLabel')}
+        />
       </Flex>
       {displayData.map((item) => (
         <Box key={item.id} mb="$24" data-testid="delegated-pool-item">
