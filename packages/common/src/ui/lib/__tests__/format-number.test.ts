@@ -2,7 +2,7 @@
 import { formatPercentages } from '../format-number';
 
 describe('Number formatters', () => {
-  describe('getCapitalizedInitial', () => {
+  describe('formatPercentages', () => {
     test('scales decimal to percentage', () => {
       expect(formatPercentages(1)).toEqual('100.00');
     });
@@ -13,7 +13,7 @@ describe('Number formatters', () => {
       expect(formatPercentages(0.339, { decimalPlaces: 0, rounding: 'down' })).toEqual('33');
     });
     test('rounds percentages up', () => {
-      expect(formatPercentages(0.339, { decimalPlaces: 0, rounding: 'half_up' })).toEqual('34');
+      expect(formatPercentages(0.339, { decimalPlaces: 0, rounding: 'halfUp' })).toEqual('34');
     });
     test('formats percentages with many decimals', () => {
       expect(formatPercentages(0.339, { decimalPlaces: 6, rounding: 'down' })).toEqual('33.900000');

@@ -5,12 +5,14 @@ export const DEFAULT_DECIMALS = 2;
 
 type FormatPercentagesOptions = {
   decimalPlaces?: number;
-  rounding?: 'down' | 'half_up';
+  // rounding terminology inspired by bignumber.js
+  // https://mikemcl.github.io/bignumber.js/#constructor-properties
+  rounding?: 'down' | 'halfUp';
 };
 
 export const formatPercentages = (
   value: number | Percent,
-  { decimalPlaces = DEFAULT_DECIMALS, rounding = 'half_up' }: FormatPercentagesOptions = {}
+  { decimalPlaces = DEFAULT_DECIMALS, rounding = 'halfUp' }: FormatPercentagesOptions = {}
 ): string => {
   const unroundedValue = value.valueOf() * Math.pow(10, decimalPlaces) * 100;
   let roundedValue: number;
@@ -18,7 +20,7 @@ export const formatPercentages = (
     case 'down':
       roundedValue = Math.floor(unroundedValue);
       break;
-    case 'half_up':
+    case 'halfUp':
       roundedValue = Math.round(unroundedValue);
       break;
   }
