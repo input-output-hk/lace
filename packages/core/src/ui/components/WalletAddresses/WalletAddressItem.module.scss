@@ -8,7 +8,7 @@
 }
 
 .listItemContainer {
-  align-items: center;
+  align-content: center;
   background: transparent;
   border-radius: size_unit(2);
   box-sizing: border-box;
@@ -28,6 +28,7 @@
     height: size_unit(8);
     padding: 0 size_unit(2) 0 size_unit(1);
   }
+
 
   &:hover {
     background: var(--light-mode-light-grey, var(--dark-mode-mid-grey, #333333));
