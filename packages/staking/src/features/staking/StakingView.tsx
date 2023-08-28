@@ -7,7 +7,7 @@ import { StakePoolDetails } from '../drawer';
 import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
-import { Page, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Page, PortfolioManagementProcess, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { Navigation } from './Navigation';
 
 const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
@@ -41,9 +41,10 @@ export const StakingView = () => {
   const alreadyDelegating = currentPortfolio.length > 0;
 
   const proceedWithSelections = useCallback(() => {
+    portfolioMutators.beginManagementProcess(PortfolioManagementProcess.NewPortfolio);
     setSection();
     setIsDrawerVisible(true);
-  }, [setSection, setIsDrawerVisible]);
+  }, [portfolioMutators, setSection, setIsDrawerVisible]);
 
   const initiateStaking = useCallback(() => {
     if (alreadyDelegating) {
@@ -57,7 +58,7 @@ export const StakingView = () => {
   const selectCurrentPool = useCallback(() => {
     if (!openPoolDetails || !openPool) return;
     const { hexId, name, ticker } = openPoolDetails;
-    portfolioMutators.addPoolToDraft({
+    portfolioMutators.selectPool({
       displayData: Wallet.util.stakePoolTransformer({
         cardanoCoin: walletStoreWalletUICardanoCoin,
         stakePool: openPool,
@@ -84,7 +85,7 @@ export const StakingView = () => {
 
   const unselectPool = useCallback(() => {
     if (!openPoolDetails) return;
-    portfolioMutators.removePoolFromDraft({
+    portfolioMutators.unselectPool({
       id: Wallet.Cardano.PoolIdHex(openPoolDetails.hexId),
     });
   }, [openPoolDetails, portfolioMutators]);
@@ -98,7 +99,7 @@ export const StakingView = () => {
 
   useEffect(() => {
     if (!currentChain) return;
-    portfolioMutators.clearDraft();
+    portfolioMutators.clearSelections();
   }, [currentChain, portfolioMutators]);
 
   return (

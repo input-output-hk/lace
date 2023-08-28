@@ -57,6 +57,7 @@
     "i18next": "^22.5.1",
     "immer": "^10.0.2",
     "lodash": "4.17.21",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-i18next": "^12.3.1",
     "zustand": "^4.4.1"
   },

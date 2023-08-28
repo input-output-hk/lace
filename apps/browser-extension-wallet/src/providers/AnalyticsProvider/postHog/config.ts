@@ -15,3 +15,15 @@ export const PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP: Record<Wallet.Cardano.N
   [Wallet.Cardano.NetworkMagics.Preprod]: 'phc_5sVVmLJ5x6IuipMBZwjudVk5bQcfcBSMjgEOe5gTOh0',
   [Wallet.Cardano.NetworkMagics.Preview]: 'phc_p7GeKELpQtkValRMvzUXX38TPGhKQYItO7aBRYJfvhW'
 };
+
+export const DEV_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP: Record<Wallet.Cardano.NetworkMagic, number> = {
+  [Wallet.Cardano.NetworkMagics.Mainnet]: 6315,
+  [Wallet.Cardano.NetworkMagics.Preprod]: 6316,
+  [Wallet.Cardano.NetworkMagics.Preview]: 4874
+};
+
+export const PRODUCTION_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP: Record<Wallet.Cardano.NetworkMagic, number> = {
+  [Wallet.Cardano.NetworkMagics.Mainnet]: 6621,
+  [Wallet.Cardano.NetworkMagics.Preprod]: 6620,
+  [Wallet.Cardano.NetworkMagics.Preview]: 6619
+};

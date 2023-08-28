@@ -1,8 +1,8 @@
 import { Wallet } from '@lace/cardano';
 import { useEffect, useMemo } from 'react';
 import { StateStatus, useOutsideHandles } from '../outside-handles-provider';
-import { PortfolioBar } from '../staking/PortfolioBar';
 import { useStakePoolDetails } from '../store';
+import { PortfolioBar } from './PortfolioBar';
 import { StakePoolsTable } from './stake-pools-table';
 
 const LACE_APP_ID = 'lace-app';
