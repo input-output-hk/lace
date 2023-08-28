@@ -1,4 +1,4 @@
-import { Flex } from '@lace/ui';
+import { Box, Flex } from '@lace/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BetaPill } from './BetaPill';
@@ -33,10 +33,19 @@ export const MultidelegationBetaModal = ({
       visible={visible}
       title={
         <>
-          <Flex alignItems="flex-start" mb="$8">
-            <BetaPill />
+          {popupView && (
+            <Flex alignItems="flex-start" mb="$8">
+              <BetaPill />
+            </Flex>
+          )}
+          <Flex alignItems="center">
+            {t('modals.beta.title')}
+            {!popupView && (
+              <Box ml="$8">
+                <BetaPill />
+              </Box>
+            )}
           </Flex>
-          <Flex alignItems="center">{t('modals.beta.title')}</Flex>
         </>
       }
       description={t('modals.beta.description')}
