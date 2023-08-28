@@ -18,6 +18,7 @@ const mockUseRedirection = jest.fn();
 const mockNotify = jest.fn();
 const mockUseAnalyticsSendFlowTriggerPoint = jest.fn();
 const mockUseOutputs = jest.fn();
+const mockGetUserIdService = jest.fn();
 import * as React from 'react';
 import { screen, cleanup, fireEvent, render, within, waitFor } from '@testing-library/react';
 import { CollateralDrawer } from '../CollateralDrawer';
@@ -106,8 +107,15 @@ jest.mock('@lace/common', () => {
 
 jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService'),
-  getUserIdService: jest.fn()
+  getUserIdService: mockGetUserIdService
 }));
+
+const mockAnalyticsTracker = {
+  sendEventToMatomo: jest.fn(),
+  sendEventToPostHog: jest.fn(),
+  setOptedInForEnhancedAnalytics: jest.fn(),
+  setChain: jest.fn()
+};
 
 const testIds = {
   collateralSend: 'collateral-send',
@@ -131,7 +139,7 @@ const getWrapper =
           <DatabaseProvider>
             <StoreProvider appMode={APP_MODE_BROWSER}>
               <I18nextProvider i18n={i18n}>
-                <AnalyticsProvider analyticsDisabled>
+                <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
                   <CurrencyStoreProvider>
                     <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
                   </CurrencyStoreProvider>
