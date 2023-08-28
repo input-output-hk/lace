@@ -2,6 +2,7 @@ import { Translations } from '../types';
 
 export const en: Translations = {
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
+  'browsePools.stakePoolTableBrowser.disabledTooltip': 'Maximum number of pools selected',
   'browsePools.stakePoolTableBrowser.emptyMessage': 'No results matching your search',
   'browsePools.stakePoolTableBrowser.searchInputPlaceholder': 'Search by pool name, ticker, or ID',
   'browsePools.stakePoolTableBrowser.stake': 'Stake',

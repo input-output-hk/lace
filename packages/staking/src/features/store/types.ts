@@ -66,6 +66,7 @@ export type DelegationPortfolioState = {
 
 export type DelegationPortfolioQueries = {
   isPoolSelected: (hexId: Wallet.Cardano.PoolIdHex) => boolean;
+  selectionsFull: () => boolean;
 };
 
 type DelegationPortfolioMutators = {
