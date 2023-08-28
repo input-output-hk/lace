@@ -108,6 +108,7 @@ type KeysStructure = {
     };
     preferences: {
       selectedStakePools: '';
+      addPoolButton: '';
       partOfBalance: '';
       pickMorePools: '';
       nextButton: '';
@@ -168,6 +169,20 @@ type KeysStructure = {
     yourPoolsSection: {
       heading: '';
       manageButtonLabel: '';
+    };
+    noFunds: {
+      title: '';
+      description: '';
+      button: '';
+    };
+    noStaking: {
+      title: '';
+      description: '';
+      balanceTitle: '';
+      getStarted: '';
+      followSteps: '';
+      searchForPool: '';
+      selectPools: '';
     };
   };
   root: {
