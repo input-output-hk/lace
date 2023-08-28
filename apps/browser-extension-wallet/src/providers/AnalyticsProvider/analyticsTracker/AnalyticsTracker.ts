@@ -1,5 +1,6 @@
 import {
   EnhancedAnalyticsOptInStatus,
+  ExperimentName,
   ExtensionViews,
   MatomoSendEventProps,
   PostHogAction,
@@ -64,6 +65,10 @@ export class AnalyticsTracker {
 
   getPostHogFeatureFlag(callback: (flags: Array<string>) => void): Subscription {
     return this.postHogClient?.subscribeToRemoteFlags(callback);
+  }
+
+  getFeatureFlagVariant(key: ExperimentName): string {
+    return this.postHogClient.getFeatureFlagVariant(key);
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {

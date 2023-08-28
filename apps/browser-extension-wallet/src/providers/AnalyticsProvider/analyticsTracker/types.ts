@@ -154,3 +154,12 @@ export type PostHogMetadata = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PostHogProperty = string | boolean | Record<string, any> | Array<Record<string, any>>;
 export type PostHogProperties = Record<string, PostHogProperty>;
+
+export type ExperimentName = 'NftFolders';
+
+export type ExperimentConfig = {
+  variants: readonly string[];
+  defaultVariant: string;
+};
+
+export type ExperimentsConfig = Record<ExperimentName, ExperimentConfig>;

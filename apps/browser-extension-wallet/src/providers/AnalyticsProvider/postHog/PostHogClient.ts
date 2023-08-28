@@ -8,7 +8,9 @@ import {
   PostHogMetadata,
   PostHogProperties,
   PostHogPersonProperties,
-  UserTrackingType
+  UserTrackingType,
+  ExperimentName,
+  ExperimentsConfig
 } from '../analyticsTracker';
 import {
   DEV_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP,
@@ -19,17 +21,21 @@ import {
   PUBLIC_POSTHOG_HOST
 } from './config';
 import { UserIdService } from '@lib/scripts/types';
-import { Subscription } from 'rxjs';
-import { FeatureFlags } from '@providers/FeatureFlags/FeatureFlags';
+import { Subscription, Subject } from 'rxjs';
 
-const USE_LOCAL_FLAGS = process.env.USE_LOCAL_FLAGS === 'true';
+export const experiments: ExperimentsConfig = {
+  NftFolders: {
+    variants: ['control', 'test'],
+    defaultVariant: 'control'
+  }
+};
 
 /**
  * PostHog API reference:
  * https://posthog.com/docs/libraries/js
  */
 export class PostHogClient {
-  #featureFlagsInstance: FeatureFlags;
+  #enabledFlags: Subject<Array<string>>;
   #userTrackingType: UserTrackingType;
   constructor(
     private chain: Wallet.Cardano.ChainId,
@@ -38,6 +44,7 @@ export class PostHogClient {
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+    this.#enabledFlags = new Subject();
     posthog.init(this.getApiToken(this.chain), {
       request_batching: false,
       api_host: this.publicPostHogHost,
@@ -52,7 +59,9 @@ export class PostHogClient {
       persistence: 'memory',
       property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time'],
       loaded: (posthogInstance: PostHog) => {
-        this.#featureFlagsInstance = new FeatureFlags(posthogInstance, USE_LOCAL_FLAGS);
+        posthogInstance.onFeatureFlags((flags) => {
+          this.#enabledFlags.next(flags);
+        });
       }
     });
   }
@@ -96,7 +105,26 @@ export class PostHogClient {
   }
 
   subscribeToRemoteFlags(callback: (params: Array<string>) => void): Subscription {
-    return this.#featureFlagsInstance.subscribeToRemoteFlags(callback);
+    return this.#enabledFlags.subscribe(callback);
+  }
+
+  /**
+   * Should be used only with feature flags set by experiments, otherwise, getFeatureFlag will return a boolean
+   */
+  getFeatureFlagVariant(key: ExperimentName): string {
+    posthog.featureFlags.getFlagVariants;
+    return (
+      (posthog.getFeatureFlag(key, {
+        send_event: false
+      }) as string) || experiments[key].defaultVariant
+    );
+  }
+
+  /**
+   * For testing purpose, this allows us to override the flags with any value
+   */
+  overrideFeatureFlags(flags: boolean | string[] | Record<string, string | boolean>): void {
+    posthog.featureFlags.override(flags);
   }
 
   protected getApiToken(chain: Wallet.Cardano.ChainId): string {
