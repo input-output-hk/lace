@@ -148,6 +148,7 @@ export type PostHogMetadata = {
   url: string;
   view: ExtensionViews;
   sent_at_local: string;
+  posthog_project_id: number;
 } & PostHogPersonProperties;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
