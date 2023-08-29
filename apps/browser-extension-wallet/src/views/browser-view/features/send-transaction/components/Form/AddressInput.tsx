@@ -202,8 +202,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         address: existingAddress.walletAddress,
         handleResolution: existingAddress.walletHandleResolution || undefined
       });
-    } else {
-      setAddressInputValue({ address: handle || address });
     }
   }, [address, handle, getExistingAddress]);
 
