@@ -6,7 +6,9 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
+import { FundWalletBanner } from './FundWalletBanner';
 import { mapPortfolioToDisplayData } from './helpers';
+import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './staking-info-card';
 
 export const OverviewPopup = () => {
@@ -18,16 +20,42 @@ export const OverviewPopup = () => {
     stakingRewards,
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
+    walletAddress,
+    rewardAccounts,
+    coinBalance,
   } = useOutsideHandles();
   const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
+
+  const stakeRegistered = rewardAccounts && rewardAccounts?.[0]?.keyStatus === Wallet.Cardano.StakeKeyStatus.Registered;
+  const balanceTotal = balancesBalance?.total?.coinBalance && Number(balancesBalance.total.coinBalance);
+  const noFunds = (balanceTotal < Number(coinBalance) && !stakeRegistered) || (coinBalance === 0 && stakeRegistered);
 
   const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
     setSelectedStakePool(stakePool);
     setIsDrawerVisible(true);
   };
 
-  if (currentPortfolio.length === 0) return <Text.SubHeading>Start staking</Text.SubHeading>;
+  if (noFunds)
+    return (
+      <Flex flexDirection="column" gap="$32">
+        <FundWalletBanner
+          title={t('overview.noFunds.title')}
+          subtitle={t('overview.noFunds.description')}
+          prompt={t('overview.noFunds.description')}
+          walletAddress={walletAddress}
+          shouldHaveVerticalContent
+        />
+        <ExpandViewBanner />
+      </Flex>
+    );
+  if (currentPortfolio.length === 0)
+    return (
+      <Flex flexDirection="column" gap="$32">
+        <StakeFundsBanner balance={balancesBalance?.total?.coinBalance} popupView />
+        <ExpandViewBanner />
+      </Flex>
+    );
 
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
