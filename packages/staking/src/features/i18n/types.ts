@@ -28,6 +28,7 @@ type KeysStructure = {
       stake: '';
       unselect: '';
       addPool: '';
+      disabledTooltip: '';
     };
   };
   drawer: {
