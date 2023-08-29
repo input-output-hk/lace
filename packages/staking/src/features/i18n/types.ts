@@ -182,8 +182,10 @@ type KeysStructure = {
       balanceTitle: '';
       getStarted: '';
       followSteps: '';
-      searchForPool: '';
-      selectPools: '';
+      searchForPoolDescription: '';
+      searchForPoolTitle: '';
+      selectPoolsDescription: '';
+      selectPoolsTitle: '';
     };
   };
   root: {
