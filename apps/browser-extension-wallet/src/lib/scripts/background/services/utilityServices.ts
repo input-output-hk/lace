@@ -131,6 +131,13 @@ const fetchAdaPrice = () => {
   )
     .then(async (response) => {
       const { cardano: prices } = await response.json();
+      // save the last fetched ada price in background storage
+      await setBackgroundStorage({
+        fiatPrices: {
+          prices,
+          timestamp: Date.now()
+        }
+      });
       coinPrices.adaPrices$.next({
         prices,
         status: 'fetched'
