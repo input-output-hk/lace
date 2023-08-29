@@ -202,8 +202,16 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     setSelectedFolderId(undefined);
   }, []);
 
-  const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0 && isFeatureEnabled('NFT_FOLDERS');
+  const showCreateFolder =
+    nfts.length > 0 && nftsNotInFolders.length > 0 && isFeatureEnabled('NFTFolderButtonAlignment');
+  const getHeaderItemsAlignmentExperiment = () => {
+    const variant = analytics.getFeatureFlagVariant('NFTFolderButtonAlignment');
+    if (variant === 'left') {
+      return 'flex-start';
+    }
 
+    return 'space-between;';
+  };
   return (
     <>
       <Layout>
@@ -213,7 +221,10 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
           }
         >
           <Skeleton loading={isLoadingFirstTime}>
-            <div className={cn(styles.sectionTitle, { [styles.titleWithCreateNFTFolder]: showCreateFolder })}>
+            <div
+              className={cn(styles.sectionTitle, { [styles.titleWithCreateNFTFolder]: showCreateFolder })}
+              style={{ justifyContent: getHeaderItemsAlignmentExperiment() }}
+            >
               <SectionTitle
                 classname={styles.title}
                 title={t('browserView.nfts.pageTitle')}

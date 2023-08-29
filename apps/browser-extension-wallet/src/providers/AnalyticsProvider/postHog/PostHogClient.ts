@@ -27,6 +27,10 @@ export const experiments: ExperimentsConfig = {
   NftFolders: {
     variants: ['control', 'test'],
     defaultVariant: 'control'
+  },
+  NFTFolderButtonAlignment: {
+    variants: ['control', 'center'],
+    defaultVariant: 'control'
   }
 };
 
@@ -112,7 +116,6 @@ export class PostHogClient {
    * Should be used only with feature flags set by experiments, otherwise, getFeatureFlag will return a boolean
    */
   getFeatureFlagVariant(key: ExperimentName): string {
-    posthog.featureFlags.getFlagVariants;
     return (
       (posthog.getFeatureFlag(key, {
         send_event: false

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { Flags } from './types';
+
+import { ExperimentName } from '@providers/AnalyticsProvider/analyticsTracker';
 
 interface FeatureFlagsProviderProps {
   children: React.ReactNode;
@@ -10,7 +11,7 @@ interface FeatureFlagsProviderProps {
 type FeatureFlags = {
   enabledFeature: Array<string>;
   flagsHaveBeenLoaded: boolean;
-  isFeatureEnabled: (param: Flags) => boolean;
+  isFeatureEnabled: (param: ExperimentName) => boolean;
 };
 
 // eslint-disable-next-line unicorn/no-null

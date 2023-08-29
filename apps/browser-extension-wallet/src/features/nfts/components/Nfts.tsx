@@ -133,18 +133,27 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
     setSelectedFolderId(undefined);
   }, []);
 
+  const getHeaderItemsAlignmentExperiment = () => {
+    const variant = analytics.getFeatureFlagVariant('NFTFolderButtonAlignment');
+    if (variant === 'left') {
+      return 'flex-start';
+    }
+
+    return 'space-between;';
+  };
+
   return (
     <>
       <ContentLayout
         title={
-          <div className={styles.sectionTitle}>
+          <div className={styles.sectionTitle} style={{ justifyContent: getHeaderItemsAlignmentExperiment() }}>
             <SectionTitle
               classname={styles.title}
               title={t('browserView.nfts.pageTitle')}
               sideText={`(${nfts.length})`}
               isPopup
             />
-            {nfts.length > 0 && isFeatureEnabled('NFT_FOLDERS') && (
+            {nfts.length > 0 && isFeatureEnabled('NFTFolderButtonAlignment') && (
               <Button
                 className={styles.newFolderBtn}
                 color="gradient"

@@ -155,7 +155,7 @@ export type PostHogMetadata = {
 export type PostHogProperty = string | boolean | Record<string, any> | Array<Record<string, any>>;
 export type PostHogProperties = Record<string, PostHogProperty>;
 
-export type ExperimentName = 'NftFolders';
+export type ExperimentName = 'NftFolders' | 'NFTFolderButtonAlignment';
 
 export type ExperimentConfig = {
   variants: readonly string[];
