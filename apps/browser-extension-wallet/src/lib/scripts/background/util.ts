@@ -29,6 +29,11 @@ export const INITIAL_STORAGE = { MIGRATION_STATE: { state: 'not-loaded' } as Mig
 export const getBackgroundStorage = async (): Promise<BackgroundStorage> =>
   (await webStorage.local.get('BACKGROUND_STORAGE'))?.BACKGROUND_STORAGE ?? {};
 
+export const getADAPriceFromBackgroundStorage = async (): Promise<BackgroundStorage['fiatPrices']> => {
+  const backgroundStorage = await getBackgroundStorage();
+  return backgroundStorage?.fiatPrices;
+};
+
 /**
  * Deletes the specified `keys` from the background storage.
  *
