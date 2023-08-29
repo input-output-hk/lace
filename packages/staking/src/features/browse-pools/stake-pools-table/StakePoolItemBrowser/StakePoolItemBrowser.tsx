@@ -2,6 +2,7 @@
 import { Wallet } from '@lace/cardano';
 import { Ellipsis } from '@lace/common';
 import { Button } from '@lace/ui';
+import { Tooltip } from 'antd';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
@@ -37,6 +38,7 @@ export const getSaturationLevel = (saturation: number): string => {
   return color;
 };
 
+/* eslint-disable complexity */
 export const StakePoolItemBrowser = ({
   id,
   hexId,
@@ -58,6 +60,8 @@ export const StakePoolItemBrowser = ({
   }
   const selectionsNotEmpty = useDelegationPortfolioStore((state) => state.selections.length > 0);
   const poolAlreadySelected = useDelegationPortfolioStore((state) => state.queries.isPoolSelected(hexId));
+  const selectionsFull = useDelegationPortfolioStore((state) => state.queries.selectionsFull());
+  const disabledAddingToDraft = selectionsFull && !poolAlreadySelected;
 
   const StakeButtonComponent = poolAlreadySelected ? Button.Secondary : Button.CallToAction;
   const stakePoolStateLabel = poolAlreadySelected
@@ -98,14 +102,22 @@ export const StakePoolItemBrowser = ({
         </p>
       </div>
       <div className={styles.actions}>
-        <StakeButtonComponent
-          label={stakePoolStateLabel}
-          onClick={(event) => {
-            event.stopPropagation();
-            poolAlreadySelected ? onUnselect() : onSelect();
-          }}
-          data-testid="stake-button"
-        />
+        <Tooltip
+          title={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
+          trigger={disabledAddingToDraft ? 'hover' : []}
+        >
+          <div>
+            <StakeButtonComponent
+              label={stakePoolStateLabel}
+              onClick={(event) => {
+                event.stopPropagation();
+                poolAlreadySelected ? onUnselect() : onSelect();
+              }}
+              disabled={disabledAddingToDraft}
+              data-testid="stake-button"
+            />
+          </div>
+        </Tooltip>
       </div>
     </div>
   );

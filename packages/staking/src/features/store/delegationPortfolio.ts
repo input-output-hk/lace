@@ -59,9 +59,9 @@ export const useDelegationPortfolioStore = create(
         }),
       selectPool: (poolData) =>
         set(({ selections }) => {
-          const selectionsFull = selections.length === MAX_POOLS_COUNT;
+          const { selectionsFull } = get().queries;
           const alreadySelected = selections.some(({ id }) => poolData.id === id);
-          if (selectionsFull || alreadySelected) return;
+          if (selectionsFull() || alreadySelected) return;
           selections.push(poolData);
         }),
       setCurrentPortfolio: async ({ cardanoCoin, delegationDistribution }) => {
@@ -88,6 +88,10 @@ export const useDelegationPortfolioStore = create(
       isPoolSelected: (hexId) => {
         const { selections } = get();
         return !!selections?.find((pool) => pool.id === hexId);
+      },
+      selectionsFull: () => {
+        const { selections } = get();
+        return selections.length === MAX_POOLS_COUNT;
       },
     },
   }))

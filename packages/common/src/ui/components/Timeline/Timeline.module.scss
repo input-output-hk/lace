@@ -2,7 +2,7 @@
 @import "../../styles/abstracts/typography";
 
 .sideTimeline {
-  margin: size_unit(7) 0 size_unit(7) size_unit(7.75);
+  margin: size_unit(7) 0 size_unit(7) size_unit(7.75) !important;
 
   :global {
     .ant-timeline-item {
