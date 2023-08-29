@@ -62,6 +62,10 @@ export const SendTransactionLayout = withAddressBookContext(
 
     const shouldAssetPickerDisplayFooter = multipleSelectionAvailable && currentSection === Sections.ASSET_PICKER;
 
+    const clearInput = () => {
+      setAddressValue(row, '');
+    };
+
     const changeOnCloseDrawer = useCallback(
       () =>
         setIsDrawerVisible({
@@ -78,7 +82,7 @@ export const SendTransactionLayout = withAddressBookContext(
                     key={currentSection}
                     isPopupView={isPopupView}
                     onHandleChangeConfirm={(action) => {
-                      action === 'DELETE' && setAddressValue(row || FIRST_ROW, '');
+                      action === 'DELETE' && clearInput();
                       setSection({ currentSection: Sections.FORM, nextSection: Sections.SUMMARY });
                     }}
                   />
