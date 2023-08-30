@@ -5,13 +5,16 @@ browser:
   - any: ['apps/browser-extension-wallet/**/*']
 # Staking
 staking:
-  - any: ['packages/staking/**/*', '.github/workflows/packages-staking.yml']
+  - any: ['packages/staking/**/*']
+  - any: ['.github/workflows/packages-staking.yml']
+
 # UI Toolkit
 ui-toolkit:
   - any: ['packages/ui/**/*']
 # E2E
 e2e:
-  - any: ['features/**/*', 'packages/e2e-tests/**/*']
+  - any: ['features/**/*']
+  - any: ['packages/e2e-tests/**/*']
 # Docs
 documentation:
   - any: ['docs/**/*', '**/*.md']
