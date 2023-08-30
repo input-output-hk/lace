@@ -2,6 +2,7 @@ import { Translations } from '../types';
 
 export const en: Translations = {
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
+  'browsePools.stakePoolTableBrowser.disabledTooltip': 'Maximum number of pools selected',
   'browsePools.stakePoolTableBrowser.emptyMessage': 'No results matching your search',
   'browsePools.stakePoolTableBrowser.searchInputPlaceholder': 'Search by pool name, ticker, or ID',
   'browsePools.stakePoolTableBrowser.stake': 'Stake',
@@ -49,6 +50,7 @@ export const en: Translations = {
   'drawer.failure.button.retry': 'Retry',
   'drawer.failure.subTitle': 'The transaction was not successful. Please try again.',
   'drawer.failure.title': 'Oops! Something went wrong...',
+  'drawer.preferences.addPoolButton': 'Add stake pool',
   'drawer.preferences.nextButton': 'Next',
   'drawer.preferences.partOfBalance': '1/{{draftPortfolioLength}} of {{balance}} ADA',
   'drawer.preferences.pickMorePools': 'Please pick more stake pools.',

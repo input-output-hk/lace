@@ -30,10 +30,9 @@ export const StakePoolDetails = ({
   const { walletStoreInMemoryWallet, delegationStoreSelectedStakePoolDetails: openPool } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
   const { activePage, simpleSendConfig } = useStakePoolDetails();
-  const { draftFull, openPoolSelectedInDraft } = useDelegationPortfolioStore(({ draftPortfolio }) => ({
-    draftFull: draftPortfolio.length === MAX_POOLS_COUNT,
-    openPoolSelectedInDraft:
-      openPool && draftPortfolio.some((pool) => pool.id === Wallet.Cardano.PoolIdHex(openPool.hexId)),
+  const { selectionsFull, openPoolIsSelected } = useDelegationPortfolioStore(({ selections }) => ({
+    openPoolIsSelected: openPool && selections.some((pool) => pool.id === Wallet.Cardano.PoolIdHex(openPool.hexId)),
+    selectionsFull: selections.length === MAX_POOLS_COUNT,
   }));
   const delegationPending = inFlightTx
     ?.map(({ body: { certificates } }) =>
@@ -72,12 +71,10 @@ export const StakePoolDetails = ({
     [onSelect, onStakeOnThisPool, onUnselect, popupView]
   );
 
-  const selectionActionsAllowed = !draftFull || openPoolSelectedInDraft;
-  const currentlyOnPageWhereDrawerButtonsAllowed = activePage === Page.browsePools;
-  const drawerShowingDetails = simpleSendConfig.currentSection === Sections.DETAIL;
+  const selectionActionsAllowed = !selectionsFull || openPoolIsSelected;
+  const drawerNotOnDetails = simpleSendConfig.currentSection !== Sections.DETAIL;
   const footerVisible =
-    currentlyOnPageWhereDrawerButtonsAllowed &&
-    (!drawerShowingDetails || (!delegationPending && selectionActionsAllowed));
+    drawerNotOnDetails || (activePage === Page.browsePools && !delegationPending && selectionActionsAllowed);
 
   const section = useMemo(() => sectionsMap[simpleSendConfig.currentSection], [simpleSendConfig, sectionsMap]);
   const footer = footerVisible ? footersMap[simpleSendConfig.currentSection] : undefined;
