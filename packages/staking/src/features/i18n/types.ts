@@ -110,7 +110,7 @@ type KeysStructure = {
     preferences: {
       selectedStakePools: '';
       addPoolButton: '';
-      partOfBalance: '';
+      percentageOfBalance: '';
       pickMorePools: '';
       nextButton: '';
     };
