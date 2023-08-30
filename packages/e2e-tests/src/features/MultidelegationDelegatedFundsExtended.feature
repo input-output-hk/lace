@@ -31,6 +31,7 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
       | total rewards    |
 
   @LW-4877 @Pending
+    #LW-7688 - Shortcuts Pending
   Scenario: Extended View - Stake pool details - Enter and Escape buttons support
     Given I am on Staking extended page
     And I confirm multidelegation beta modal
