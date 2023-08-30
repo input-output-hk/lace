@@ -1,5 +1,5 @@
 import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
@@ -11,6 +11,9 @@ import styles from '@src/features/delegation/components/DelegationLayout.module.
 import { ContentLayout } from '@components/Layout';
 import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
+import { useObservable } from '@lace/common';
+import { walletBalanceTransformer } from '@src/api/transformers';
+import { useWalletActivities } from '@hooks/useWalletActivities';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -40,7 +43,9 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchStakePools,
     fetchNetworkInfo,
     networkInfo,
-    blockchainProvider
+    blockchainProvider,
+    walletInfo,
+    currentChain
   } = useWalletStore((state) => ({
     getKeyAgentType: state.getKeyAgentType,
     inMemoryWallet: state.inMemoryWallet,
@@ -50,8 +55,25 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchStakePools: state.fetchStakePools,
     networkInfo: state.networkInfo,
     fetchNetworkInfo: state.fetchNetworkInfo,
-    blockchainProvider: state.blockchainProvider
+    blockchainProvider: state.blockchainProvider,
+    walletInfo: state.walletInfo,
+    currentChain: state.currentChain
   }));
+  const sendAnalytics = useCallback(() => {
+    // TODO implement analytics for the new flow
+    const analytics = {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      sendEvent: () => {}
+    };
+
+    // @ts-expect-error TODO implement analytics
+    analytics.sendEvent({
+      action: 'AnalyticsEventActions.CLICK_EVENT',
+      category: 'AnalyticsEventCategories.STAKING',
+      name: 'AnalyticsEventNames.Staking.STAKING_MULTI_DELEGATION_POPUP'
+    });
+  }, []);
+  const { walletActivities } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
   const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
@@ -60,6 +82,10 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+  const { coinBalance } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
+  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const walletAddress = walletInfo.addresses?.[0].address?.toString();
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -96,8 +122,13 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         walletStoreFetchNetworkInfo: fetchNetworkInfo,
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
+        walletStoreWalletActivities: walletActivities,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
-        compactNumber: compactNumberWithUnit
+        compactNumber: compactNumberWithUnit,
+        walletAddress,
+        rewardAccounts,
+        coinBalance: Number(coinBalance),
+        currentChain
       }}
     >
       <ContentLayout

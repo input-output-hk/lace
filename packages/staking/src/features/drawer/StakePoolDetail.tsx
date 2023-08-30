@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Banner, Ellipsis } from '@lace/common';
+import { Ellipsis } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
@@ -92,20 +92,6 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               popupView={popupView}
             />
           </div>
-          {delegatingToThisPool && (
-            <Banner
-              className={styles.banner}
-              withIcon
-              message={t('drawer.details.switchingPoolBanner.title')}
-              description={
-                <ul className={styles.descriptionList}>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step1')}</li>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step2')}</li>
-                  <li>{t('drawer.details.switchingPoolBanner.description.step3')}</li>
-                </ul>
-              }
-            />
-          )}
           <div className={styles.row} data-testid="stake-pool-details-information">
             <div
               className={styles.title}
@@ -182,19 +168,18 @@ type SelectorParams = Parameters<Parameters<typeof useDelegationPortfolioStore>[
 
 const makeSelector =
   (openPool?: OpenSelectedStakePoolDetails) =>
-  ({ currentPortfolio, draftPortfolio }: SelectorParams) => {
+  ({ currentPortfolio, selections }: SelectorParams) => {
     const poolInCurrentPortfolio =
       !!openPool && currentPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
-    const poolSelectedForDraft =
-      !!openPool && draftPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
-    const draftFull = draftPortfolio.length === MAX_POOLS_COUNT;
+    const poolSelected = !!openPool && selections.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
+    const selectionsFull = selections.length === MAX_POOLS_COUNT;
 
     return {
-      ableToSelectForDraft: !poolSelectedForDraft && !draftFull,
+      ableToSelect: !poolSelected && !selectionsFull,
       ableToStakeOnlyOnThisPool: !poolInCurrentPortfolio || currentPortfolio.length > 1,
-      draftEmpty: draftPortfolio.length === 0,
       poolInCurrentPortfolio,
-      poolSelectedForDraft,
+      poolSelected,
+      selectionsEmpty: selections.length === 0,
     };
   };
 
@@ -205,7 +190,7 @@ type ButtonNames = 'addStakingPool' | 'manageDelegation' | 'stakeOnThisPool' | '
 const tmpNoop = () => {};
 const getSpecOverride = (specOrBool: Partial<ActionButtonSpec> | boolean) =>
   typeof specOrBool === 'boolean' ? {} : specOrBool;
-// TODO: translations for buttons labels
+
 const makeActionButtons = (
   t: TFunction,
   {
@@ -227,25 +212,25 @@ const makeActionButtons = (
       selectForMultiStaking && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-select-for-multi-staking-btn',
-        label: 'Select pool for multi-staking',
+        label: t('drawer.details.selectForMultiStaking'),
         ...getSpecOverride(selectForMultiStaking),
       },
       addStakingPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-add-staking-pool-btn',
-        label: 'Add staking pool',
+        label: t('drawer.details.addStakingPool'),
         ...getSpecOverride(addStakingPool),
       },
       unselectPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-unselect-pool-btn',
-        label: 'Unselect pool',
+        label: t('drawer.details.unselectPool'),
         ...getSpecOverride(unselectPool),
       },
       manageDelegation && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-manage-delegation-btn',
-        label: 'Manage delegation',
+        label: t('drawer.details.manageDelegation'),
         ...getSpecOverride(manageDelegation),
       },
     ] as (ActionButtonSpec | false)[]
@@ -260,7 +245,7 @@ export const StakePoolDetailFooter = ({
   const { t } = useTranslation();
   const { setIsDrawerVisible } = useStakePoolDetails();
   const { delegationStoreSelectedStakePoolDetails: openPoolDetails, walletStoreGetKeyAgentType } = useOutsideHandles();
-  const { ableToSelectForDraft, ableToStakeOnlyOnThisPool, draftEmpty, poolInCurrentPortfolio, poolSelectedForDraft } =
+  const { ableToSelect, ableToStakeOnlyOnThisPool, selectionsEmpty, poolInCurrentPortfolio, poolSelected } =
     useDelegationPortfolioStore(makeSelector(openPoolDetails));
 
   const isInMemory = useMemo(
@@ -290,23 +275,23 @@ export const StakePoolDetailFooter = ({
   const actionButtons = useMemo(
     () =>
       makeActionButtons(t, {
-        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onSelectClick },
+        addStakingPool: ableToSelect && !selectionsEmpty && { callback: onSelectClick },
         // TODO: disabling this button for now
         // eslint-disable-next-line sonarjs/no-redundant-boolean
         manageDelegation: false && poolInCurrentPortfolio,
-        selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelectClick },
-        stakeOnThisPool: draftEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
-        unselectPool: poolSelectedForDraft && { callback: onUnselectClick },
+        selectForMultiStaking: ableToSelect && selectionsEmpty && { callback: onSelectClick },
+        stakeOnThisPool: selectionsEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
+        unselectPool: poolSelected && { callback: onUnselectClick },
       }),
     [
       t,
-      ableToSelectForDraft,
-      draftEmpty,
+      ableToSelect,
+      selectionsEmpty,
       onSelectClick,
       poolInCurrentPortfolio,
       ableToStakeOnlyOnThisPool,
       onStakeOnThisPool,
-      poolSelectedForDraft,
+      poolSelected,
       onUnselectClick,
     ]
   );
@@ -316,17 +301,17 @@ export const StakePoolDetailFooter = ({
   const [callToActionButton, ...secondaryButtons] = actionButtons;
 
   return (
-    <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
+    <Flex flexDirection="column" alignItems="stretch" gap="$16">
       {callToActionButton && (
         <Button.CallToAction
           label={callToActionButton.label}
           data-testid={callToActionButton.dataTestId}
           onClick={callToActionButton.callback}
-          w={'$fill'}
+          w="$fill"
         />
       )}
       {secondaryButtons.map(({ callback, dataTestId, label }) => (
-        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w={'$fill'} />
+        <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
       ))}
     </Flex>
   );
