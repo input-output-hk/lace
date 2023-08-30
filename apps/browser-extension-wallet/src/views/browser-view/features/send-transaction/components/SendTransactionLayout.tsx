@@ -90,7 +90,7 @@ export const SendTransactionLayout = withAddressBookContext(
               }
             : {})
         }),
-      [setIsDrawerVisible, onClose, isPopupView, currentSection, shouldAssetPickerDisplayFooter, setSection]
+      [setIsDrawerVisible, onClose, isPopupView, currentSection, shouldAssetPickerDisplayFooter, setSection, clearInput]
     );
 
     useEffect(() => changeOnCloseDrawer(), [changeOnCloseDrawer]);
