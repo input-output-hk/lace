@@ -1,15 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Cardano } from '@cardano-sdk/core';
-import {
-  Cip30Wallet,
-  injectGlobal,
-  WalletProperties,
-  WalletApi,
-  Cbor,
-  Paginate,
-  Bytes,
-  GetCollateral
-} from '@cardano-sdk/dapp-connector';
+import { Cip30Wallet, injectGlobal, WalletProperties } from '@cardano-sdk/dapp-connector';
 import { cip30, injectedRuntime, MessengerDependencies } from '@cardano-sdk/web-extension';
 import { consumeRemoteAuthenticatorApi, consumeRemoteWalletApi } from './api-consumers';
 
@@ -22,26 +12,7 @@ const initializeInjectedScript = (props: WalletProperties, { logger }: cip30.Ini
   const authenticator = consumeRemoteAuthenticatorApi(props, dependencies);
   const walletApi = consumeRemoteWalletApi(props, dependencies);
 
-  // Wrap the proxy API object with a regular javascript object to avoid interop issues with some dApps.
-  const api: WalletApi & { experimental: { getCollateral: GetCollateral } } = {
-    getNetworkId: () => walletApi.getNetworkId(),
-    getUtxos: (amount?: Cbor, paginate?: Paginate) => walletApi.getUtxos(amount, paginate),
-    getBalance: () => walletApi.getBalance(),
-    getCollateral: (params?: { amount?: Cbor }) => walletApi.getCollateral(params),
-    getUsedAddresses: (paginate?: Paginate) => walletApi.getUsedAddresses(paginate),
-    getUnusedAddresses: () => walletApi.getUnusedAddresses(),
-    getChangeAddress: () => walletApi.getChangeAddress(),
-    getRewardAddresses: () => walletApi.getRewardAddresses(),
-    // Add experimental.getCollateral to CIP-30 API
-    experimental: {
-      getCollateral: (params?: { amount?: Cbor }) => walletApi.getCollateral(params)
-    },
-    signTx: (tx: Cbor, partialSign?: boolean) => walletApi.signTx(tx, partialSign),
-    signData: (addr: Cardano.PaymentAddress | Bytes, payload: Bytes) => walletApi.signData(addr, payload),
-    submitTx: (tx: Cbor) => walletApi.submitTx(tx)
-  };
-
-  const wallet = new Cip30Wallet(props, { api, authenticator, logger });
+  const wallet = new Cip30Wallet(props, { api: walletApi, authenticator, logger });
 
   injectGlobal(window, wallet, logger);
 };
