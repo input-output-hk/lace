@@ -9,8 +9,7 @@ import styles from './DestinationAddressInput.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
-const charBeforeNameEllipsis = 9;
-
+const charBeforeNameEllipsis = 6;
 const charBeforeAddressEllipsis = 10;
 const charAfterAddressEllipsis = 6;
 
@@ -55,7 +54,6 @@ export const DestinationAddressInput = ({
   onChange,
   options,
   onClick,
-  className,
   valid,
   empty,
   exists,
