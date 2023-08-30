@@ -66,7 +66,11 @@ export const EditAddressForm = ({
           <>
             <div className={styles.body}>
               <div>
-                <Form.Item name="name" rules={[{ validator: nameValidator }]} className={styles.inputWrapper}>
+                <Form.Item
+                  name="name"
+                  rules={[{ validator: nameValidator }]}
+                  className={cn(styles.inputWrapper, styles.nameWrapper)}
+                >
                   <Input
                     className={styles.input}
                     label={translations.walletName}
@@ -79,7 +83,7 @@ export const EditAddressForm = ({
                   rules={[{ validator: isAddressHandle && isAdaHandleEnabled ? handleValidator : addressValidator }]}
                 >
                   <Search
-                    className={cn(styles.input, styles.textArea)}
+                    className={cn(styles.textArea)}
                     invalid={!isAddressFieldValid}
                     label={translations.address}
                     dataTestId="address-form-address-input"
