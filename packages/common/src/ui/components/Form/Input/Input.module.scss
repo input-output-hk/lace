@@ -71,6 +71,8 @@
   &.filled {
     font-size: var(--bodyXS) !important;
     line-height: size_unit(2) !important;
-    padding-top: size_unit(1.25);
+    transform: translateY(0) !important;
+    top: 10px;
+
   }
 }

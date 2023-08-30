@@ -26,6 +26,8 @@ $button_size: 52px;
   height: size_unit(8) !important;
   justify-content: space-between !important;
   border: 1.5px solid transparent !important;
+  padding-bottom: 0px;
+  padding-right: 5px;
   
   :global {
     .ant-input-affix-wrapper-borderless {
@@ -108,7 +110,7 @@ $button_size: 52px;
 
 @media (max-width: $breakpoint-popup) {
   .content { 
-    padding-left: 0 !important;
+    padding-left: size_unit(2);
   }
   .inputSearch {
     font-size: var(--bodyLarge, 18px) !important;
