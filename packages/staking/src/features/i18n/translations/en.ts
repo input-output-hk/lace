@@ -52,7 +52,7 @@ export const en: Translations = {
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',
   'drawer.preferences.nextButton': 'Next',
-  'drawer.preferences.partOfBalance': '1/{{draftPortfolioLength}} of {{balance}} ADA',
+  'drawer.preferences.percentageOfBalance': '{{draftPortfolioPercentage}}% of {{balance}} ADA',
   'drawer.preferences.pickMorePools': 'Please pick more stake pools.',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.sign.confirmation.title': 'Staking confirmation',
