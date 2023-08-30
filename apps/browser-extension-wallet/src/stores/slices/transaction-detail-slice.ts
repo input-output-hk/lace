@@ -52,7 +52,7 @@ const getTransactionDetail =
   }: ZustandHandlers<
     TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice
   >): TransactionDetailSlice['getTransactionDetails'] =>
-  // eslint-disable-next-line max-statements
+  // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   async ({ coinPrices, fiatCurrency }) => {
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
@@ -100,9 +100,18 @@ const getTransactionDetail =
 
     // Transaction Costs
     const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
-    const deposit = implicitCoin.deposit
-      ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
-      : undefined;
+    const deposit =
+      // since one tx can be split into two (delegation, registration) actions,
+      // ensure only the registration tx carries the deposit
+      implicitCoin.deposit && type === 'delegationRegistration'
+        ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
+        : undefined;
+    const depositReclaim =
+      // since one tx can be split into two (delegation, de-registration) actions,
+      // ensure only the de-registration tx carries the reclaimed deposit
+      implicitCoin.input && type === 'delegationDeregistration'
+        ? Wallet.util.lovelacesToAdaString(implicitCoin.input.toString())
+        : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
 
     let transaction: TransactionDetail['tx'] = {
@@ -110,6 +119,7 @@ const getTransactionDetail =
       totalOutput: totalOutputInAda,
       fee: feeInAda,
       deposit,
+      depositReclaim,
       addrInputs: inputs,
       addrOutputs: outputs,
       metadata: txMetadata,

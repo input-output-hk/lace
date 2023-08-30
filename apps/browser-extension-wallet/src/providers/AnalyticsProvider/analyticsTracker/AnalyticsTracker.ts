@@ -22,6 +22,7 @@ export class AnalyticsTracker {
   protected matomoClient?: MatomoClient;
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
+  protected trackingTypeChangedFromSettings: boolean;
 
   constructor({
     chain,
@@ -42,7 +43,10 @@ export class AnalyticsTracker {
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();
-      await this.sendAliasEvent();
+      if (this.trackingTypeChangedFromSettings) {
+        this.sendAliasEvent();
+        this.trackingTypeChangedFromSettings = false;
+      }
     } else {
       await this.userIdService?.makeTemporary();
     }
@@ -77,6 +81,10 @@ export class AnalyticsTracker {
   setChain(chain: Wallet.Cardano.ChainId): void {
     this.matomoClient?.setChain(chain);
     this.postHogClient?.setChain(chain);
+  }
+
+  setTrackingTypeChangedFromSettings(): void {
+    this.trackingTypeChangedFromSettings = true;
   }
 
   private async shouldOmitSendEventToPostHog() {
