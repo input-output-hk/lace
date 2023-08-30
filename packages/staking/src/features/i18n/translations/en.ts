@@ -16,14 +16,12 @@ export const en: Translations = {
   'drawer.confirmation.button.continueInAdvancedView': 'Continue in Advanced View',
   'drawer.confirmation.button.signing': 'Signing in progress',
   'drawer.confirmation.cardanoName': 'Cardano',
+  'drawer.confirmation.chargedDepositAmountInfo': "The amount you'll be charged for registering your stake key.",
   'drawer.confirmation.errors.utxoBalanceInsufficient': 'Balance Insufficient',
   'drawer.confirmation.errors.utxoFullyDepleted': 'UTxO Fully Depleted',
+  'drawer.confirmation.reclaimDepositAmountInfo': "The amount you'll be awarded for de-registering your stake key.",
   'drawer.confirmation.stakingDeposit': 'Staking deposit',
   'drawer.confirmation.subTitle': 'Confirm the amount and the stake pool',
-  'drawer.confirmation.theAmountYoullBeAwardedForDeregisteringYourStakeKey':
-    "The amount you'll be awarded for de-registering your stake key.",
-  'drawer.confirmation.theAmountYoullBeChargedForRegisteringYourStakeKey':
-    "The amount you'll be charged for registering your stake key.",
   'drawer.confirmation.theAmountYoullBeChargedToProcessYourTransaction':
     "The amount you'll be charged to process your transaction",
   'drawer.confirmation.title': 'Confirmation',

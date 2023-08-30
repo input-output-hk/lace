@@ -145,7 +145,7 @@
   width: 100%;
 }
 
-.txCostContainer, .txReturnContainer {
+.txSummaryContainer {
   display: flex;
   flex-direction: column;
   gap: size_unit(3);
@@ -156,7 +156,7 @@
   }
 }
 
-.txCostTitle, .txReturnTitle {
+.txSummaryTitle {
   @include text-subHeading-bold;
   margin-top: size_unit(4);
   margin-bottom: size_unit(4);
@@ -172,10 +172,6 @@
 .totalCostTitle {
   @include text-subHeading-bold;
   color: var(--text-color-primary);
-
-  @media (max-width: $breakpoint-popup) {
-    @include text-bodyLarge-bold;
-  }
 }
 
 .totalCostContainer {

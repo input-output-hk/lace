@@ -108,6 +108,30 @@ type StakePoolDepositReclaimDetailsProps = {
   delegationTxDeposit: number;
 };
 
+const AmountInfo = ({
+  amount,
+  cardanoCoin,
+  fiatCurrency,
+  cardanoFiatPrice,
+  sign,
+}: {
+  amount: string;
+  cardanoCoin: Wallet.CoinId;
+  fiatCurrency: CurrencyInfo;
+  cardanoFiatPrice: number;
+  sign?: '+' | '-';
+}) => (
+  <div>
+    {renderAmountInfo(
+      [sign ? `${sign} ` : '', `${Wallet.util.lovelacesToAdaString(amount)} ${cardanoCoin.symbol}`].join(''),
+      `${Wallet.util.convertAdaToFiat({
+        ada: Wallet.util.lovelacesToAdaString(amount.toString()),
+        fiat: cardanoFiatPrice,
+      })} ${fiatCurrency?.symbol}`
+    )}
+  </div>
+);
+
 const StakePoolDepositReclaimDetails = ({
   delegationTxDeposit,
 }: StakePoolDepositReclaimDetailsProps): React.ReactElement => {
@@ -123,25 +147,24 @@ const StakePoolDepositReclaimDetails = ({
 
   return (
     <>
-      <h1 className={styles.txReturnTitle} data-testid="transaction-return-title">
+      <h1 className={styles.txSummaryTitle} data-testid="transaction-return-title">
         {t('drawer.confirmation.transactionReturn.title')}
       </h1>
-      <div className={styles.txReturnContainer} data-testid="summary-tx-return-container">
+      <div className={styles.txSummaryContainer} data-testid="summary-tx-return-container">
         <RowContainer>
           {renderLabel({
             dataTestId: 'sp-confirmation-staking-reclaim-deposit',
             label: t('drawer.confirmation.stakingDeposit'),
-            tooltipContent: t('drawer.confirmation.theAmountYoullBeAwardedForDeregisteringYourStakeKey'),
+            tooltipContent: t('drawer.confirmation.reclaimDepositAmountInfo'),
           })}
-          <div>
-            {renderAmountInfo(
-              `${Wallet.util.lovelacesToAdaString(txDepositReclaim.toString())} ${cardanoCoin.symbol}`,
-              `${Wallet.util.convertAdaToFiat({
-                ada: Wallet.util.lovelacesToAdaString(txDepositReclaim.toString()),
-                fiat: priceResult?.cardano?.price || 0,
-              })} ${fiatCurrency?.symbol}`
-            )}
-          </div>
+          <AmountInfo
+            {...{
+              amount: txDepositReclaim.toString(),
+              cardanoCoin,
+              cardanoFiatPrice: priceResult?.cardano?.price || 0,
+              fiatCurrency,
+            }}
+          />
         </RowContainer>
       </div>
       <div className={styles.divider} />
@@ -150,15 +173,15 @@ const StakePoolDepositReclaimDetails = ({
           <h2 className={styles.totalCostTitle} data-testid="transaction-total-title">
             {t('drawer.confirmation.transactionTotal.title')}
           </h2>
-          <div>
-            {renderAmountInfo(
-              `+ ${Wallet.util.lovelacesToAdaString(totalTxEffect.toString())} ${cardanoCoin.symbol}`,
-              `${Wallet.util.convertAdaToFiat({
-                ada: Wallet.util.lovelacesToAdaString(totalTxEffect.toString()),
-                fiat: priceResult?.cardano?.price || 0,
-              })} ${fiatCurrency?.symbol}`
-            )}
-          </div>
+          <AmountInfo
+            {...{
+              amount: totalTxEffect.toString(),
+              cardanoCoin,
+              cardanoFiatPrice: priceResult?.cardano?.price || 0,
+              fiatCurrency,
+              sign: '+',
+            }}
+          />
         </RowContainer>
       </div>
     </>
@@ -253,26 +276,25 @@ export const StakePoolConfirmation = (): React.ReactElement => {
             cardanoCoin={cardanoCoin}
             fiatCurrency={fiatCurrency}
           />
-          <h1 className={styles.txCostTitle} data-testid="transaction-cost-title">
+          <h1 className={styles.txSummaryTitle} data-testid="transaction-cost-title">
             {t('drawer.confirmation.transactionCost.title')}
           </h1>
-          <div className={styles.txCostContainer} data-testid="summary-fee-container">
+          <div className={styles.txSummaryContainer} data-testid="summary-fee-container">
             {delegationTxDeposit > 0 && (
               <RowContainer>
                 {renderLabel({
                   dataTestId: 'sp-confirmation-staking-deposit',
                   label: t('drawer.confirmation.stakingDeposit'),
-                  tooltipContent: t('drawer.confirmation.theAmountYoullBeChargedForRegisteringYourStakeKey'),
+                  tooltipContent: t('drawer.confirmation.chargedDepositAmountInfo'),
                 })}
-                <div>
-                  {renderAmountInfo(
-                    `${Wallet.util.lovelacesToAdaString(delegationTxDeposit.toString())} ${cardanoCoin.symbol}`,
-                    `${Wallet.util.convertAdaToFiat({
-                      ada: Wallet.util.lovelacesToAdaString(delegationTxDeposit.toString()),
-                      fiat: priceResult?.cardano?.price || 0,
-                    })} ${fiatCurrency?.symbol}`
-                  )}
-                </div>
+                <AmountInfo
+                  {...{
+                    amount: delegationTxDeposit.toString(),
+                    cardanoCoin,
+                    cardanoFiatPrice: priceResult?.cardano?.price || 0,
+                    fiatCurrency,
+                  }}
+                />
               </RowContainer>
             )}
 
@@ -282,15 +304,14 @@ export const StakePoolConfirmation = (): React.ReactElement => {
                 label: t('drawer.confirmation.transactionFee'),
                 tooltipContent: t('drawer.confirmation.theAmountYoullBeChargedToProcessYourTransaction'),
               })}
-              <div>
-                {renderAmountInfo(
-                  `${Wallet.util.lovelacesToAdaString(delegationTxFee)} ${cardanoCoin.symbol}`,
-                  `${Wallet.util.convertAdaToFiat({
-                    ada: Wallet.util.lovelacesToAdaString(delegationTxFee),
-                    fiat: priceResult?.cardano?.price || 0,
-                  })} ${fiatCurrency?.symbol}`
-                )}
-              </div>
+              <AmountInfo
+                {...{
+                  amount: delegationTxFee,
+                  cardanoCoin,
+                  cardanoFiatPrice: priceResult?.cardano?.price || 0,
+                  fiatCurrency,
+                }}
+              />
             </RowContainer>
           </div>
 

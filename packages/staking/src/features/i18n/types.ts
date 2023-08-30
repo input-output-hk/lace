@@ -98,8 +98,8 @@ type KeysStructure = {
       transactionTotal: {
         title: '';
       };
-      theAmountYoullBeChargedForRegisteringYourStakeKey: '';
-      theAmountYoullBeAwardedForDeregisteringYourStakeKey: '';
+      chargedDepositAmountInfo: '';
+      reclaimDepositAmountInfo: '';
       stakingDeposit: '';
       errors: {
         utxoFullyDepleted: '';
