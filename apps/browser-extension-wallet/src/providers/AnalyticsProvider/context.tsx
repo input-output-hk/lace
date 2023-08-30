@@ -56,8 +56,8 @@ export const AnalyticsProvider = ({
   );
 
   useEffect(() => {
-    analyticsTracker.setOptedInForEnhancedAnalytics(optedInForEnhancedAnalytics);
-  }, [optedInForEnhancedAnalytics, analyticsTracker]);
+    analyticsTracker.setOptedInForEnhancedAnalytics(optedInForEnhancedAnalytics, currentChain);
+  }, [optedInForEnhancedAnalytics, analyticsTracker, currentChain]);
 
   useEffect(() => {
     analyticsTracker.setChain(currentChain);

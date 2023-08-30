@@ -30,6 +30,7 @@ import { getHWPersonProperties, isTrezorHWSupported } from '../helpers';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import { SendOnboardingAnalyticsEvent } from '../types';
+import { useWalletStore } from '@src/stores';
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -74,6 +75,7 @@ export const HardwareWalletFlow = ({
   const { createHardwareWallet, connectHardwareWallet, saveHardwareWallet } = useWalletManager();
   const { calculateTimeSpentOnPage, updateEnteredAtTime } = useTimeSpentOnPage();
   const analytics = useAnalyticsContext();
+  const { currentChain } = useWalletStore();
 
   useEffect(() => {
     updateEnteredAtTime();
@@ -150,7 +152,8 @@ export const HardwareWalletFlow = ({
   const handleAnalyticsChoice = (isAccepted: boolean) => {
     setIsAnalyticsAccepted(isAccepted);
     analytics.setOptedInForEnhancedAnalytics(
-      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut,
+      currentChain
     );
 
     const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;

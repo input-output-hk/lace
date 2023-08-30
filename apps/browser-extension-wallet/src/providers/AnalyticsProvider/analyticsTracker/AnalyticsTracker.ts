@@ -40,7 +40,10 @@ export class AnalyticsTracker {
     }
   }
 
-  async setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): Promise<void> {
+  async setOptedInForEnhancedAnalytics(
+    status: EnhancedAnalyticsOptInStatus,
+    chain?: Wallet.Cardano.ChainId
+  ): Promise<void> {
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();
@@ -48,6 +51,8 @@ export class AnalyticsTracker {
     } else {
       await this.userIdService?.makeTemporary();
     }
+
+    await this.postHogClient.updatePostHogConfig(chain);
   }
 
   async sendPageNavigationEvent(): Promise<void> {

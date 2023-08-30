@@ -34,7 +34,6 @@ import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext }
 import { RenameFolderDrawer } from './RenameFolderDrawer';
 import { NftFolderConfirmationModal } from './NftFolderConfirmationModal';
 import { useAssetInfo } from '@hooks';
-import { useFeatureFlagsContext } from '@providers/FeatureFlags/context';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;
 
@@ -61,7 +60,6 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const [isCreateFolderDrawerOpen, setIsCreateFolderDrawerOpen] = useState(false);
   const [isRenameFolderDrawerOpen, setIsRenameFolderDrawerOpen] = useState(false);
   const [isDeleteFolderModalOpen, setIsDeleteFolderModalOpen] = useState(false);
-  const { isFeatureEnabled } = useFeatureFlagsContext();
 
   const onDeleteFolderConfirm = () => {
     setIsDeleteFolderModalOpen(false);
@@ -202,8 +200,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     setSelectedFolderId(undefined);
   }, []);
 
-  const showCreateFolder =
-    nfts.length > 0 && nftsNotInFolders.length > 0 && isFeatureEnabled('NFTFolderButtonAlignment');
+  const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0;
   const getHeaderItemsAlignmentExperiment = () => {
     const variant = analytics.getFeatureFlagVariant('NFTFolderButtonAlignment');
     if (variant === 'left') {
