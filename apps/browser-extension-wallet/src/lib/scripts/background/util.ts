@@ -125,10 +125,15 @@ const createWindow = (
 export const launchCip30Popup = async (url: string): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
   const tab = await createTab(`../dappConnector.html${url}`, false);
+  const bgStorage = await getBackgroundStorage();
+  const keyAgentTypeIsLedger = Object.values(bgStorage.keyAgentsByChain).some(
+    ({ keyAgentData }) => keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.Ledger
+  );
+  const popupType: Windows.CreateType = keyAgentTypeIsLedger ? 'normal' : 'popup';
   const newWindow = await createWindow(
     tab.id,
     calculatePopupWindowPositionAndSize(currentWindow, POPUP_WINDOW),
-    'popup',
+    popupType,
     true
   );
   newWindow.alwaysOnTop = true;

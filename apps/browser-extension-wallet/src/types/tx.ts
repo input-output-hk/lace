@@ -16,6 +16,7 @@ export interface TransactionDetail {
     includedTime?: string;
     totalOutput?: string;
     fee?: string;
+    depositReclaim?: string;
     deposit?: string;
     addrInputs?: TxOutputInput[];
     addrOutputs?: TxOutputInput[];

@@ -3,7 +3,7 @@ import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, sectionsConfig, useStakePoolDetails } from '../store';
+import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
@@ -32,6 +32,8 @@ export const StakePoolDetailsDrawer = ({
     resetStates,
   } = useStakePoolDetails();
 
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+
   const { t } = useTranslation();
 
   const {
@@ -53,25 +55,27 @@ export const StakePoolDetailsDrawer = ({
     } else {
       backgroundServiceAPIContextSetWalletPassword();
       delegationStoreSetDelegationTxBuilder();
-      resetStates();
-      removePassword();
-      // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
+      // TODO: Remove "setIsDrawerVisible" once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
       // if (!isInMemory && isSuccessSection) window.location.reload();
       setIsDrawerVisible(false);
+      // resetStates needs to be called after drawer invisible,
+      // i.e. it no longer renders children which use the just resetted state
+      resetStates();
+      removePassword();
+      portfolioMutators.cancelManagementProcess();
     }
     setIsRestaking(false);
   }, [
     showExitConfirmation,
     simpleSendConfig.currentSection,
+    setIsRestaking,
     setExitStakingVisible,
     backgroundServiceAPIContextSetWalletPassword,
     delegationStoreSetDelegationTxBuilder,
     resetStates,
     removePassword,
-    // isInMemory,
-    // isSuccessSection,
     setIsDrawerVisible,
-    setIsRestaking,
+    portfolioMutators,
   ]);
 
   const onArrowIconClick = useCallback(() => {

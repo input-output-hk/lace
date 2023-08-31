@@ -1,5 +1,6 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
+import { AssetActivityListProps } from '@lace/core';
 
 export type OpenSelectedStakePoolDetails = {
   delegators: number | string;
@@ -93,6 +94,7 @@ export type OutsideHandlesContextValue = {
   submittingState: SubmittingState;
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
+  walletStoreWalletActivities: AssetActivityListProps[];
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
   walletManagerExecuteWithPassword: <T>(
     password: string,
@@ -126,4 +128,8 @@ export type OutsideHandlesContextValue = {
   compactNumber: (value: number | string, decimal?: number) => string;
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
+  walletAddress: string;
+  coinBalance: number;
+  currentChain: Wallet.Cardano.ChainId;
+  rewardAccounts: Wallet.Cardano.RewardAccountInfo[];
 };

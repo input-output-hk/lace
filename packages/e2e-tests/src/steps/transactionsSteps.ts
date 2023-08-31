@@ -191,3 +191,16 @@ When(/^I add all available NFT types to bundle (\d+)$/, async (bundleIndex: numb
 Then(/^the 'Add asset' is (enabled|disabled) for bundle (\d)$/, async (state: string, bundleIndex: number) => {
   await transactionBundleAssert.assertAddAssetButtonIsEnabled(bundleIndex, state === 'enabled');
 });
+
+Then(
+  /^I can see transaction (\d) has type "([^"]*)" and value "([^"]*)"$/,
+  async (txIndex: number, txType: string, txAdaValue: string) => {
+    await transactionsPageAssert.assertTableItemDetails(txIndex - 1, txType);
+    const expectedTransactionDetails: ExpectedTransactionRowAssetDetails = {
+      type: txType,
+      tokensAmount: txAdaValue,
+      tokensCount: 0
+    };
+    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(txIndex - 1, expectedTransactionDetails);
+  }
+);
