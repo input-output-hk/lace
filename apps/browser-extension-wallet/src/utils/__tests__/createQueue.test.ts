@@ -22,7 +22,7 @@ describe('createQueue', () => {
     expect(queue.isEmpty()).toBe(true);
   });
 
-  it('should stop the queue', () => {
+  it('should drain the queue after stopping', () => {
     const mockTask = jest.fn();
     queue.enqueue(mockTask);
     queue.stop();
