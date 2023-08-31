@@ -17,6 +17,9 @@ describe('createQueue', () => {
     queue.enqueue(mockTask);
 
     expect(queue.isEmpty()).toBe(false);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(queue.isEmpty()).toBe(true);
   });
 
   it('should stop the queue', () => {
