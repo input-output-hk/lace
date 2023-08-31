@@ -51,10 +51,10 @@ export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) =
           <Text.Body.Normal weight="$semibold">
             {t('drawer.preferences.percentageOfBalance', {
               balance,
-              draftPortfolioPercentage: formatPercentages(1 / draftPortfolioLength, {
+              draftPortfolioPercentage: `~${formatPercentages(1 / draftPortfolioLength, {
                 decimalPlaces: 0,
                 rounding: 'down',
-              }),
+              })}`,
             })}
           </Text.Body.Normal>
         </Flex>
