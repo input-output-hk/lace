@@ -154,6 +154,7 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
       poolTicker={transactionInfo.tx?.poolTicker}
       poolId={transactionInfo.tx?.poolId}
       deposit={transactionInfo.tx.deposit}
+      depositReclaim={transactionInfo.tx.depositReclaim}
       metadata={transactionInfo.tx.metadata}
       amountTransformer={(ada: string) =>
         `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`
