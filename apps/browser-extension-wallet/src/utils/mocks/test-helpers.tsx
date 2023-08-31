@@ -441,7 +441,7 @@ export const formatBlockMock: TransactionDetail['blocks'] = {
   prevBlock: '3114963',
   size: '4719',
   slot: '43905408',
-  utcTime: '10:21:03 PM UTC',
+  utcTime: '22:21:03 UTC',
   transactions: '18'
 };
 
