@@ -20,6 +20,7 @@ export type ButtonProps = OmitClassName<'button'> & {
   label?: string;
   icon?: ReactNode;
   w?: Pick<Sx, 'w'>['w'];
+  size?: 'medium' | 'small';
 };
 
 export const SkeletonButton = ({
@@ -29,6 +30,7 @@ export const SkeletonButton = ({
   label,
   icon,
   w,
+  size = 'medium',
   ...props
 }: Readonly<ButtonProps>): JSX.Element => {
   return (
@@ -36,7 +38,16 @@ export const SkeletonButton = ({
       {...props}
       id={id}
       disabled={disabled}
-      className={classNames(sx({ w }), className.container)}
+      className={classNames(
+        sx({
+          w,
+          // TODO: rework into styleVariants, don't forget primaryButton's :before borderRadius
+          // https://vanilla-extract.style/documentation/api/style-variants/#stylevariants
+          height: size === 'small' ? '$40' : '$48',
+          borderRadius: size === 'small' ? '$small' : '$medium',
+        }),
+        className.container,
+      )}
     >
       <Flex alignItems="center" justifyContent="center">
         {icon !== undefined && (
