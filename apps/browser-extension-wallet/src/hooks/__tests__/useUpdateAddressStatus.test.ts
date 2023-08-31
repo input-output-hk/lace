@@ -24,7 +24,11 @@ describe('useUpdateAddressStatus', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-  const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
+  const mockHandleResolver = {
+    resolveHandles: jest.fn(),
+    healthCheck: jest.fn(),
+    getPolicyIds: jest.fn()
+  } as HandleProvider;
   const addressList = [
     { id: 1, name: 'one', address: 'address1', handleResolution: mockHandleResolution, network: 1 },
     { id: 2, name: 'two', address: 'address2', handleResolution: mockHandleResolution, network: 1 }
