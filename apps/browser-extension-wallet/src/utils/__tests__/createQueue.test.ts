@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable promise/avoid-new */
-import { createQueue, API_RATE_LIMIT } from '../createQueue';
+import { createQueue } from '../taskQueue';
 
 describe('createQueue', () => {
   let queue: { enqueue: any; isEmpty: any; dequeue: any; stop: any };
-
+  const batchTasks = 4;
+  const intervalBetweenBatch = 100;
   beforeEach(() => {
-    queue = createQueue();
+    queue = createQueue(batchTasks, intervalBetweenBatch);
   });
 
   it('should enqueue and dequeue tasks correctly', async () => {
@@ -50,7 +51,7 @@ describe('createQueue', () => {
     expect(mockTask5).not.toHaveBeenCalled();
     expect(mockTask6).not.toHaveBeenCalled();
 
-    await new Promise((resolve) => setTimeout(resolve, API_RATE_LIMIT));
+    await new Promise((resolve) => setTimeout(resolve, intervalBetweenBatch));
 
     expect(mockTask5).toHaveBeenCalled();
     expect(mockTask6).toHaveBeenCalled();
@@ -80,7 +81,7 @@ describe('createQueue', () => {
 
     queue.stop();
 
-    await new Promise((resolve) => setTimeout(resolve, API_RATE_LIMIT));
+    await new Promise((resolve) => setTimeout(resolve, intervalBetweenBatch));
 
     expect(mockTask5).not.toHaveBeenCalled();
     expect(mockTask6).not.toHaveBeenCalled();

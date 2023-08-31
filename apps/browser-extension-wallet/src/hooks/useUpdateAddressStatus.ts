@@ -2,7 +2,7 @@ import { HandleProvider, Cardano } from '@cardano-sdk/core';
 import { AddressBookSchema } from '@lib/storage';
 import { CustomConflictError, ensureHandleOwnerHasntChanged } from '@src/utils/validators';
 import { useEffect, useState } from 'react';
-import { createQueue } from '@src/utils/createQueue';
+import { createQueue } from '@src/utils/taskQueue';
 
 type updateAddressStatusType = Record<string, { isValid: boolean; error?: CustomConflictError }>;
 
@@ -13,8 +13,11 @@ export const useUpdateAddressStatus = (
   const [validatedAddressStatus, setValidatedAddressStatus] = useState<updateAddressStatusType>({});
 
   useEffect(() => {
-    const interval = 10_000;
-    const queue = createQueue();
+    const queueInterval = 10_000;
+    const batchTasks = 4;
+    const intervalBetweenBatch = 100;
+
+    const queue = createQueue(batchTasks, intervalBetweenBatch);
 
     const updateAddressStatus = (address: string, status: { isValid: boolean; error?: CustomConflictError }) => {
       setValidatedAddressStatus((currentValidatedAddressStatus: updateAddressStatusType) => ({
@@ -51,7 +54,7 @@ export const useUpdateAddressStatus = (
     const intervalId = setInterval(() => {
       queue.stop();
       validateAddresses();
-    }, interval);
+    }, queueInterval);
 
     return () => {
       queue.stop();

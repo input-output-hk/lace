@@ -1,16 +1,13 @@
-export const API_LIMIT = 4;
-export const API_RATE_LIMIT = 100;
-
 type taskType = () => Promise<unknown>;
 
-interface CreateQueue {
+interface TaskQueue {
   enqueue: (task: taskType) => void;
   dequeue: () => taskType;
   isEmpty: () => boolean;
   stop: () => void;
 }
 
-export const createQueue = (): CreateQueue => {
+export const createQueue = (batchTasks: number, intervalBetweenBatch: number): TaskQueue => {
   let tasks: Array<taskType> = [];
   let isRunning = false;
   let sent = 0;
@@ -37,11 +34,11 @@ export const createQueue = (): CreateQueue => {
       sent++;
 
       if (isRunning && !isEmpty()) {
-        if (sent >= API_LIMIT) {
+        if (sent >= batchTasks) {
           // Reset the sent count
           sent = 0;
           // eslint-disable-next-line promise/avoid-new
-          await new Promise((resolve) => setTimeout(resolve, API_RATE_LIMIT));
+          await new Promise((resolve) => setTimeout(resolve, intervalBetweenBatch));
         }
         execute();
       }
