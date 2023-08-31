@@ -112,7 +112,7 @@ describe('Testing tx transformers utils', () => {
         assetsNumber: 2,
         timestamp: formatTime({
           date: time,
-          format: 'HH:mm:ss A',
+          format: 'HH:mm:ss',
           type: 'local'
         })
       });

@@ -5,7 +5,7 @@ const fn = (date: any) => mockdayjsinner(date);
 fn.extend = jest.fn();
 /* eslint-disable no-magic-numbers */
 import '@testing-library/jest-dom';
-import { DEFAULT_DATE_FORMAT, formatDate, formatTime, DEFAULT_TIME_FORTMAT } from '../format-date';
+import { DEFAULT_DATE_FORMAT, formatDate, formatTime, DEFAULT_TIME_FORMAT } from '../format-date';
 
 jest.mock('dayjs', () => {
   const original = jest.requireActual('dayjs');
@@ -78,7 +78,7 @@ describe('Testing format-date functions', () => {
 
     expect(formatTime({ date, type: 'utc' })).toEqual(result);
     expect(mockdayjsinner).toBeCalledWith(date);
-    expect(formatMock).toBeCalledWith(DEFAULT_TIME_FORTMAT);
+    expect(formatMock).toBeCalledWith(DEFAULT_TIME_FORMAT);
 
     const format = 'format';
     expect(formatDate({ date, format, type: 'utc' })).toEqual(result);

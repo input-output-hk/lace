@@ -85,7 +85,7 @@ export const txTransformer = ({
   const outputAmount = new BigNumber(coins.toString());
   const timestamp = formatTime({
     date: time,
-    format: 'HH:mm:ss A',
+    format: 'HH:mm:ss',
     type: 'local'
   });
 
