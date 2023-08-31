@@ -12,7 +12,6 @@ type BrowsePoolsProps = {
 };
 
 export const BrowsePools = ({ onStake }: BrowsePoolsProps) => {
-  console.log('testtt');
   const { setIsDrawerVisible } = useStakePoolDetails();
 
   const {

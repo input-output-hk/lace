@@ -13,7 +13,6 @@ ui-toolkit:
   - any: ['packages/ui/**/*']
 # E2E
 e2e:
-  - any: ['features/**/*']
   - any: ['packages/e2e-tests/**/*']
 # Docs
 documentation:
