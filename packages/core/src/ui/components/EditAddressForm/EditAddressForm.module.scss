@@ -39,6 +39,12 @@ $drawer-width: 664px;
   }
 }
 
+.nameWrapper {
+  :global(.ant-input-affix-wrapper) {
+    padding-left: 22px;
+  }
+}
+
 .actionsWrapper {
   display: flex;
   flex-direction: column;
@@ -90,8 +96,8 @@ $drawer-width: 664px;
 
 .textArea:global(.ant-input-suffix) {
   width: 100%;
-    font-size: 18px;
-    flex-direction: row-reverse;
+  font-size: 18px;
+  flex-direction: row-reverse;
 }
 
 .footerContainer {
