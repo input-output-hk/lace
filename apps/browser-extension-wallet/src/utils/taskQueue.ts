@@ -1,6 +1,6 @@
 type taskType = () => Promise<unknown>;
 
-interface TaskQueue {
+export interface TaskQueue {
   enqueue: (task: taskType) => void;
   dequeue: () => taskType;
   isEmpty: () => boolean;

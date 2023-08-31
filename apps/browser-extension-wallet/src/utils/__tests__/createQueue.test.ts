@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable promise/avoid-new */
-import { createQueue } from '../taskQueue';
+import { createQueue, TaskQueue } from '../taskQueue';
 
 describe('createQueue', () => {
-  let queue: { enqueue: any; isEmpty: any; dequeue: any; stop: any };
+  let queue: TaskQueue;
   const batchTasks = 4;
   const intervalBetweenBatch = 100;
   beforeEach(() => {
