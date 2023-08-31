@@ -1,6 +1,5 @@
 /* eslint-disable no-magic-numbers */
 import { Wallet } from '@lace/cardano';
-import { Flags } from '@providers/FeatureFlags/types';
 import { EnvironmentTypes } from '@stores';
 
 type CardanoServiceUrls = {
@@ -20,7 +19,6 @@ export type Config = {
   AVAILABLE_CHAINS: Wallet.ChainName[];
   CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
   SAVED_PRICE_DURATION: number;
-  FEATURE_FLAGS: Record<Flags, string>;
 };
 
 // eslint-disable-next-line complexity
@@ -86,20 +84,6 @@ export const config = (): Config => {
     },
     SAVED_PRICE_DURATION: !Number.isNaN(Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES))
       ? Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)
-      : 720,
-    FEATURE_FLAGS: {
-      PASSWORD_VERIFICATION: process.env.USE_PASSWORD_VERIFICATION,
-      DAPP_CONNECTOR: process.env.USE_DAPP_CONNECTOR,
-      TREZOR_HW: process.env.USE_TREZOR_HW,
-      TOKEN_PRICING: process.env.USE_TOKEN_PRICING,
-      DIFFERENT_MNEMONIC_LENGTHS: process.env.USE_DIFFERENT_MNEMONIC_LENGTHS,
-      NFT_FOLDERS: process.env.USE_NFT_FOLDERS,
-      MULTI_CURRENCY: process.env.USE_MULTI_CURRENCY,
-      HIDE_MY_BALANCE: process.env.USE_HIDE_MY_BALANCE,
-      MULTI_DELEGATION_STAKING: process.env.USE_MULTI_DELEGATION_STAKING,
-      ADA_HANDLE: process.env.USE_ADA_HANDLE,
-      DATA_CHECK: process.env.USE_DATA_CHECK,
-      POSTHOG_ANALYTICS: process.env.USE_POSTHOG_ANALYTICS
-    }
+      : 720
   };
 };
