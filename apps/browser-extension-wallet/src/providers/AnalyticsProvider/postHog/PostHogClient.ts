@@ -102,7 +102,6 @@ export class PostHogClient {
 
   protected async getEventMetadata(): Promise<PostHogMetadata> {
     return {
-      url: window.location.href,
       view: this.view,
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
