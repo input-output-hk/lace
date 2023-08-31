@@ -31,7 +31,7 @@ export const useDelegationPortfolioStore = create(
           if (dumpDraftToSelections) {
             store.selections = store.draftPortfolio.map((pool) => ({
               ...pool,
-              weight: 1,
+              weight: 1 / store.selections.length,
             }));
           }
           store.draftPortfolio = [];
@@ -54,6 +54,9 @@ export const useDelegationPortfolioStore = create(
         set((store) => {
           if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
           store.draftPortfolio = store.draftPortfolio.filter((pool) => pool.id !== id);
+          store.draftPortfolio.forEach((pool) => {
+            pool.weight = 1 / store.draftPortfolio.length;
+          });
           if (store.activeManagementProcess === PortfolioManagementProcess.NewPortfolio) {
             store.selections = store.draftPortfolio;
           }
@@ -64,6 +67,9 @@ export const useDelegationPortfolioStore = create(
           const alreadySelected = selections.some(({ id }) => poolData.id === id);
           if (selectionsFull() || alreadySelected) return;
           selections.push(poolData);
+          selections.forEach((pool) => {
+            pool.weight = 1 / selections.length;
+          });
         }),
       setCurrentPortfolio: async ({ cardanoCoin, delegationDistribution, delegationRewardsHistory, currentEpoch }) => {
         const lastNonVolatileEpoch = currentEpoch.epochNo.valueOf() - LAST_STABLE_EPOCH;
@@ -94,8 +100,11 @@ export const useDelegationPortfolioStore = create(
         });
       },
       unselectPool: ({ id }) =>
-        set((store) => {
-          store.selections = store.selections.filter((pool) => pool.id !== id);
+        set(({ selections }) => {
+          selections = selections.filter((pool) => pool.id !== id);
+          selections.forEach((pool) => {
+            pool.weight = 1 / selections.length;
+          });
         }),
     },
     queries: {
