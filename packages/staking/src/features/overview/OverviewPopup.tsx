@@ -17,7 +17,6 @@ export const OverviewPopup = () => {
     walletStoreWalletUICardanoCoin,
     balancesBalance,
     compactNumber,
-    stakingRewards,
     fetchCoinPricePriceResult,
     delegationStoreSetSelectedStakePool: setSelectedStakePool,
     walletAddress,
@@ -61,7 +60,6 @@ export const OverviewPopup = () => {
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
     portfolio: currentPortfolio,
-    stakingRewards,
   });
 
   return (
