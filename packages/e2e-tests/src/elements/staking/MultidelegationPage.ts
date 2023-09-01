@@ -3,11 +3,19 @@ import SectionTitle from '../sectionTitle';
 import MultidelegationPageAssert from '../../assert/multidelegationPageAssert';
 import { browser } from '@wdio/globals';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
+import { t } from '../../utils/translationService';
+import { expect } from 'chai';
 
 class MultidelegationPage {
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
   private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
+  private DELEGATIONCARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
+  private DELEGATIONCARD_STATUS_VALUE = '[data-testid="overview.delegationCard.label.status-value"]';
+  private DELEGATIONCARD_BALANCE_LABEL = '[data-testid="overview.delegationCard.label.balance-label"]';
+  private DELEGATIONCARD_BALANCE_VALUE = '[data-testid="overview.delegationCard.label.balance-value"]';
+  private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
   private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
+  private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
   private SEARCH_INPUT = '[data-testid="search-input"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
@@ -29,8 +37,29 @@ class MultidelegationPage {
     return $(this.BROWSE_POOLS_TAB);
   }
 
+  get delegationCardStatusLabel() {
+    return $(this.DELEGATIONCARD_STATUS_LABEL);
+  }
+  get delegationCardStatusValue() {
+    return $(this.DELEGATIONCARD_STATUS_VALUE);
+  }
+
+  get delegationCardBalanceLabel() {
+    return $(this.DELEGATIONCARD_BALANCE_LABEL);
+  }
+  get delegationCardBalanceValue() {
+    return $(this.DELEGATIONCARD_BALANCE_VALUE);
+  }
+
+  get delegationCardPoolsLabel() {
+    return $(this.DELEGATIONCARD_POOLS_LABEL);
+  }
   get delegationCardPoolsValue() {
     return $(this.DELEGATIONCARD_POOLS_VALUE);
+  }
+
+  get delegationCardChartSlices() {
+    return $$(this.DELEGATIONCARD_CHART_PIE_SLICE);
   }
 
   get stakingPageSearchInput() {
@@ -138,6 +167,27 @@ class MultidelegationPage {
   async confirmBetaModal() {
     await this.multidelegationBetaModalBtnConfirm.waitForClickable();
     await this.multidelegationBetaModalBtnConfirm.click();
+  }
+
+  async delegationCardLooksCorrectly() {
+    expect(await this.delegationCardBalanceLabel.getText()).to.equal(
+      await t('overview.delegationCard.label.balance', 'staking')
+    );
+    const adaValue = Number((await this.delegationCardBalanceValue.getText()).split(' ')[0]);
+    expect(adaValue).to.be.greaterThan(0);
+    expect(await this.delegationCardPoolsLabel.getText()).to.equal(
+      await t('overview.delegationCard.label.pools', 'staking')
+    );
+    const poolsCount = Number(await this.delegationCardPoolsValue.getText());
+    expect(poolsCount).to.be.greaterThan(0);
+    expect(await this.delegationCardStatusLabel.getText()).to.equal(
+      await t('overview.delegationCard.label.status', 'staking')
+    );
+    const statusValue = await this.delegationCardStatusValue.getText();
+    poolsCount === 1
+      ? expect(statusValue).to.equal(await t('overview.delegationCard.statuses.simpleDelegation', 'staking'))
+      : expect(statusValue).to.equal(await t('overview.delegationCard.statuses.multiDelegation', 'staking'));
+    expect(await this.delegationCardChartSlices.length).to.equal(poolsCount);
   }
 }
 

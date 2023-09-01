@@ -1,6 +1,7 @@
 import MultidelegationPage from '../elements/staking/MultidelegationPage';
 import { browser } from '@wdio/globals';
 import { expect } from 'chai';
+import { t } from '../utils/translationService';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -22,6 +23,14 @@ class MultidelegationPageAssert {
       timeoutMsg: `Search result does not match minimum items count expected: ${items}`
     });
   };
+
+  assertSeeTitle = async () => {
+    expect(await MultidelegationPage.title.getText()).to.equal(await t('staking.sectionTitle'));
+  };
+
+  async assertSeeDelegationCardWithPoolsCount() {
+    await MultidelegationPage.delegationCardLooksCorrectly();
+  }
 }
 
 export default new MultidelegationPageAssert();
