@@ -1,4 +1,3 @@
-import { BigIntMath } from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -79,7 +78,7 @@ export const useDelegationPortfolioStore = create(
             displayData: {
               ...Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool }),
               lastReward: confirmedPoolRewards[confirmedPoolRewards.length - 1] || BigInt(0),
-              totalRewards: BigIntMath.sum(confirmedPoolRewards),
+              totalRewards: Wallet.BigIntMath.sum(confirmedPoolRewards),
             },
             id: stakePool.hexId,
             name: stakePool.metadata?.name,
