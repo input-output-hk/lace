@@ -1,3 +1,4 @@
+import { BigIntMath } from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -11,6 +12,7 @@ const defaultState: DelegationPortfolioState = {
 };
 
 export const MAX_POOLS_COUNT = 5;
+const LAST_STABLE_EPOCH = 2;
 
 export const useDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set, get) => ({
@@ -64,16 +66,29 @@ export const useDelegationPortfolioStore = create(
           if (selectionsFull() || alreadySelected) return;
           selections.push(poolData);
         }),
-      setCurrentPortfolio: async ({ cardanoCoin, delegationDistribution }) => {
-        const currentPortfolio = delegationDistribution.map(({ pool: stakePool, percentage, stake }) => ({
-          displayData: Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool }),
-          id: stakePool.hexId,
-          name: stakePool.metadata?.name,
-          stakePool,
-          ticker: stakePool.metadata?.ticker,
-          value: stake,
-          weight: percentage,
-        }));
+      setCurrentPortfolio: async ({ cardanoCoin, delegationDistribution, delegationRewardsHistory, currentEpoch }) => {
+        const lastNonVolatileEpoch = currentEpoch.epochNo.valueOf() - LAST_STABLE_EPOCH;
+        const confirmedRewardHistory = delegationRewardsHistory.all.filter(
+          ({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch
+        );
+        const currentPortfolio = delegationDistribution.map(({ pool: stakePool, percentage, stake }) => {
+          const confirmedPoolRewards = confirmedRewardHistory
+            .filter(({ poolId }) => poolId === stakePool.id)
+            .map(({ rewards }) => rewards);
+          return {
+            displayData: {
+              ...Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool }),
+              lastReward: confirmedPoolRewards[confirmedPoolRewards.length - 1] || BigInt(0),
+              totalRewards: BigIntMath.sum(confirmedPoolRewards),
+            },
+            id: stakePool.hexId,
+            name: stakePool.metadata?.name,
+            stakePool,
+            ticker: stakePool.metadata?.ticker,
+            value: stake,
+            weight: percentage,
+          };
+        });
 
         set((store) => {
           store.currentPortfolio = currentPortfolio;
