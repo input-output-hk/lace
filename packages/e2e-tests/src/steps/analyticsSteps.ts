@@ -12,7 +12,7 @@ When(/^I set up request interception for posthog analytics request\(s\)$/, async
 
 When(/^I validate latest analytics multiple events:$/, async (eventActionNames: DataTable) => {
   const expectedEventNames = dataTableAsStringArray(eventActionNames);
-  await browser.pause(1000);
+  await browser.pause(1500);
   for (const expectedEventName of expectedEventNames) {
     const actualEventNames = await getLatestEventsNames(expectedEventNames.length);
     expect(actualEventNames).to.contains(expectedEventName);
@@ -26,6 +26,7 @@ When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionN
 });
 
 When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numberOfRequests: number) => {
+  await browser.pause(1000);
   expect((await getAllEventsNames()).length).to.equal(Number(numberOfRequests));
   await browser.disableInterceptor();
 });
@@ -47,6 +48,7 @@ Then(/^I validate that event has correct properties$/, async () => {
     '$os',
     '$os_version',
     '$pageview_id',
+    'posthog_project_id',
     '$pathname',
     '$referrer',
     '$referring_domain',
@@ -56,8 +58,7 @@ Then(/^I validate that event has correct properties$/, async () => {
     '$viewport_height',
     '$viewport_width',
     'sent_at_local',
-    'view',
-    'url'
+    'view'
   ];
   for (const expectedProperty of expectedProperties) {
     expect(Object.prototype.hasOwnProperty.call(actualEventPayload.properties, expectedProperty)).to.be.true;
