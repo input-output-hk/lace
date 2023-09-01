@@ -76,17 +76,17 @@ class DAppConnectorAssert {
   async assertSeeAuthorizePagePermissions() {
     await AuthorizeDAppPage.permissionsTitle.waitForDisplayed();
     await expect(await AuthorizeDAppPage.permissionsTitle.getText()).to.equal(
-      `${await t('package.core.authorizeDapp.title', true)}:`
+      `${await t('package.core.authorizeDapp.title', 'core')}:`
     );
 
     await AuthorizeDAppPage.permissionsList.waitForDisplayed();
     const currentTexts = await AuthorizeDAppPage.permissionsListItems.map(async (option) => await option.getText());
 
     const expectedTexts = [
-      await t('package.core.authorizeDapp.seeNetwork', true),
-      await t('package.core.authorizeDapp.seeWalletUtxo', true),
-      await t('package.core.authorizeDapp.seeWalletBalance', true),
-      await t('package.core.authorizeDapp.seeWalletAddresses', true)
+      await t('package.core.authorizeDapp.seeNetwork', 'core'),
+      await t('package.core.authorizeDapp.seeWalletUtxo', 'core'),
+      await t('package.core.authorizeDapp.seeWalletBalance', 'core'),
+      await t('package.core.authorizeDapp.seeWalletAddresses', 'core')
     ];
 
     await expect(currentTexts).to.have.all.members(expectedTexts);
