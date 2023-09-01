@@ -208,6 +208,9 @@ export const HardwareWalletFlow = ({
         undefined,
         posthogProperties
       );
+      if (isAnalyticsAccepted) {
+        analytics.sendAliasEvent();
+      }
     } catch {
       console.error('We were not able to send the analytics event');
     } finally {
