@@ -2,7 +2,12 @@ import { DataTable, When, Then } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
-import { getAllEventsNames, getLatestEventPayload, getLatestEventsNames } from '../utils/postHogAnalyticsUtils';
+import {
+  getAllEventsNames,
+  getEventPayload,
+  getLatestEventPayload,
+  getLatestEventsNames
+} from '../utils/postHogAnalyticsUtils';
 
 When(/^I set up request interception for posthog analytics request\(s\)$/, async () => {
   await browser.pause(1000);
@@ -20,7 +25,7 @@ When(/^I validate latest analytics multiple events:$/, async (eventActionNames: 
 });
 
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
-  await browser.pause(1000);
+  await browser.pause(1300);
   const actualEventName = await getLatestEventsNames();
   expect(actualEventName).to.contains(eventActionName);
 });
@@ -30,6 +35,13 @@ When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numbe
   expect((await getAllEventsNames()).length).to.equal(Number(numberOfRequests));
   await browser.disableInterceptor();
 });
+
+When(/^I validate that alias event has assigned same user id "([^"]*)" in posthog$/, async (expectedUserID: string) => {
+  await browser.pause(1000);
+  const actualAssignedID = (await getEventPayload('$create_alias')).properties.distinct_id;
+  expect(actualAssignedID).to.equal(expectedUserID);
+});
+
 Then(/^I validate that event has correct properties$/, async () => {
   await browser.pause(1000);
   const actualEventPayload = await getLatestEventPayload();

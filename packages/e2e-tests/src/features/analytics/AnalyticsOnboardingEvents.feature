@@ -1,4 +1,4 @@
-@OnboardingCreateWallet @Testnet @Mainnet
+@OnboardingCreateWallet @Testnet
 Feature: Analytics - Posthog - Onboarding - Extended View
 
   @LW-8311
@@ -59,7 +59,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I validate that 12 analytics event(s) have been sent
 
   @LW-7363
-  Scenario: Analytics - Restore wallet events
+  Scenario: Analytics - Restore wallet events / check that alias event is assigning same id in posthog
     Given I set up request interception for posthog analytics request(s)
     When I click "Restore" button on wallet setup page
     When I click "OK" button on "Restoring a multi-address wallet?" modal
@@ -88,6 +88,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I validate latest analytics multiple events:
       | onboarding \| restore wallet \| all done \| go to my wallet \| click |
       | $create_alias                                                        |
+    And I validate that alias event has assigned same user id "baa84325a43e5db53c514045ce474263" in posthog
     And I validate that 9 analytics event(s) have been sent
 
   @LW-7364 @Pending
