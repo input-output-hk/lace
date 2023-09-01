@@ -8,8 +8,8 @@
   cursor: pointer;
   display: grid;
   grid-template-columns: 50% 25% 25%;
-  min-height: size_unit(8);
   width: 100%;
+  padding: size_unit(2);
   &:hover {
     display: flex;
     background: var(--light-mode-light-grey, var(--dark-mode-mid-grey));
@@ -72,7 +72,6 @@
     background-color: var(--bg-color-body, #ffffff);
     border: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-light-grey));
     height: size_unit(6);
-    margin-left: 4px;
     min-height: size_unit(6);
     min-width: size_unit(6);
     padding: size_unit(0.5);
