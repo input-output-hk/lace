@@ -8,10 +8,14 @@ import { SetupBase, SetupBaseProps } from './SetupBase';
 
 initI18n();
 
-type SetupProps = SetupBaseProps;
+type SetupProps = Omit<SetupBaseProps, 'loading'>;
 
 export const Setup = ({ children, ...rest }: SetupProps) => {
-  const { walletStoreInMemoryWallet, walletStoreWalletUICardanoCoin: cardanoCoin } = useOutsideHandles();
+  const {
+    balancesBalance,
+    walletStoreInMemoryWallet,
+    walletStoreWalletUICardanoCoin: cardanoCoin,
+  } = useOutsideHandles();
   const { setCurrentPortfolio } = useDelegationPortfolioStore((s) => s.mutators);
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
 
@@ -20,5 +24,9 @@ export const Setup = ({ children, ...rest }: SetupProps) => {
     setCurrentPortfolio({ cardanoCoin, delegationDistribution: [...delegationDistribution.values()] });
   }, [delegationDistribution, setCurrentPortfolio, cardanoCoin]);
 
-  return <SetupBase {...rest}>{children}</SetupBase>;
+  return (
+    <SetupBase {...rest} loading={!balancesBalance?.total?.coinBalance}>
+      {children}
+    </SetupBase>
+  );
 };

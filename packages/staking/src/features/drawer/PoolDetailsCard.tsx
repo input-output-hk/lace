@@ -22,7 +22,7 @@ export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) =
     portfolioMutators: state.mutators,
   }));
   const { balancesBalance, compactNumber } = useOutsideHandles();
-  const balance = compactNumber(balancesBalance.available.coinBalance);
+  const balance = compactNumber(balancesBalance?.available?.coinBalance || '0');
   const handleRemovePoolFromPortfolio = () => {
     portfolioMutators.removePoolInManagementProcess({ id: poolId });
   };

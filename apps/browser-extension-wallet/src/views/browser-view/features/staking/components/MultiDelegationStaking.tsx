@@ -6,8 +6,6 @@ import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/dele
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
-import { useObservable } from '@lace/common';
-import { walletBalanceTransformer } from '@src/api/transformers';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 
 const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
@@ -71,14 +69,11 @@ export const MultiDelegationStaking = (): JSX.Element => {
   }, []);
   const { walletActivities } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
-  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const { executeWithPassword } = useWalletManager();
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
-  const { coinBalance } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
-  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
 
   return (
@@ -115,8 +110,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         walletAddress,
-        rewardAccounts,
-        coinBalance: Number(coinBalance),
         currentChain
       }}
     >

@@ -60,7 +60,7 @@ const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
 );
 
 interface StakePoolConfirmationBodyProps {
-  balance: Balance;
+  balance?: Balance;
   cardanoCoin: Wallet.CoinId;
   fiatCurrency: CurrencyInfo;
   stakePools: DraftPortfolioStakePool[];
@@ -79,7 +79,7 @@ const StakePoolConfirmationBody = ({
       <div className={styles.item} data-testid="sp-confirmation-delegate-from-container">
         <ItemStatRenderer img={Cardano} text={t('drawer.confirmation.cardanoName')} subText={cardanoCoin.symbol} />
         <ItemStatRenderer
-          text={balance?.total?.coinBalance}
+          text={balance?.total?.coinBalance ?? '0'}
           subText={`${balance?.total?.fiatBalance ?? '-'} ${fiatCurrency?.code}`}
         />
       </div>
