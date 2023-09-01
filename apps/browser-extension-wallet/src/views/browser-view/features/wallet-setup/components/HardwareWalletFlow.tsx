@@ -208,13 +208,13 @@ export const HardwareWalletFlow = ({
         undefined,
         posthogProperties
       );
-      if (isAnalyticsAccepted) {
-        analytics.sendAliasEvent();
-      }
     } catch {
       console.error('We were not able to send the analytics event');
     } finally {
       await handleFinishCreation();
+      if (isAnalyticsAccepted) {
+        await analytics.sendAliasEvent();
+      }
       // Workaround to enable staking with Ledger right after the onboarding LW-5564
       window.location.reload();
     }
