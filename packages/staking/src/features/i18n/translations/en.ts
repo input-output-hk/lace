@@ -52,7 +52,7 @@ export const en: Translations = {
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',
   'drawer.preferences.nextButton': 'Next',
-  'drawer.preferences.partOfBalance': '1/{{draftPortfolioLength}} of {{balance}} ADA',
+  'drawer.preferences.percentageOfBalance': '{{draftPortfolioPercentage}}% of {{balance}} ADA',
   'drawer.preferences.pickMorePools': 'Please pick more stake pools.',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.sign.confirmation.title': 'Staking confirmation',
@@ -99,8 +99,12 @@ export const en: Translations = {
   'overview.noStaking.description': 'Stake your funds on up to {{maxPools}} pools to start receiving rewards.',
   'overview.noStaking.followSteps': 'Follow these steps to start staking your funds',
   'overview.noStaking.getStarted': 'Get started',
-  'overview.noStaking.searchForPool': 'Click the Browse Pools tab then search for your desired pool.',
-  'overview.noStaking.selectPools': 'You can select up to {{maxPools}} pools to delegate to.',
+  'overview.noStaking.searchForPoolDescription':
+    'Click the Stake Pools tab or click <Link>here</Link> then search for your desired pool.',
+  'overview.noStaking.searchForPoolTitle': 'Browse stake pools',
+  'overview.noStaking.selectPoolsDescription':
+    'You can select up to {{maxPools}} pools to delegate to. Click <Link>here</Link> to learn more.',
+  'overview.noStaking.selectPoolsTitle': 'Select one or more pools to stake to',
   'overview.noStaking.title': 'Start staking',
   'overview.stakingInfoCard.fee': 'Fee',
   'overview.stakingInfoCard.lastReward': 'Last reward',

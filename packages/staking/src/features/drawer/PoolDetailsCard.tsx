@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Cardano } from '@cardano-sdk/core';
+import { formatPercentages } from '@lace/common';
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -48,7 +49,13 @@ export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) =
         <Box className={PoolHr} />
         <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
-            {t('drawer.preferences.partOfBalance', { balance, draftPortfolioLength })}
+            {t('drawer.preferences.percentageOfBalance', {
+              balance,
+              draftPortfolioPercentage: formatPercentages(1 / draftPortfolioLength, {
+                decimalPlaces: 0,
+                rounding: 'down',
+              }),
+            })}
           </Text.Body.Normal>
         </Flex>
       </Flex>

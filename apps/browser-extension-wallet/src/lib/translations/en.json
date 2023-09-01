@@ -39,10 +39,13 @@
       "outputs": "Outputs",
       "transactionFee": "Transaction fee",
       "deposit": "Deposit",
+      "depositReclaim": "Returned deposit",
       "metadata": "Metadata",
       "transactionFeeInfo": "The amount you have been charged to process your transaction",
       "received": "Received",
       "delegation": "Delegation",
+      "registration": "Registration",
+      "deregistration": "De-registration",
       "poolName": "Pool name",
       "poolTicker": "Pool ticker",
       "poolId": "Pool ID",
@@ -86,7 +89,8 @@
       "incorrectHandle": "Handle not found",
       "wrongNetworkAddress": "This address belongs to a different network",
       "wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead.",
-      "handleConflict": "There is an address conflict. We expected {{receivedAddress}} but got {{actualAddress}}."
+      "handleConflict": "There is an address conflict. We expected {{receivedAddress}} but got {{actualAddress}}.",
+      "invalidHandle": "Invalid $handle"
     },
     "warnings": {
       "youHaveToStartAgain": "You'll have to start again",

@@ -8,7 +8,7 @@ import { Variants, Section, page } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
-import { CallToAction } from './call-to-aciton-button';
+import { CallToAction } from './call-to-action-button';
 import { Primary } from './primary-button';
 import { Secondary } from './secondary-button';
 
@@ -71,6 +71,23 @@ const Buttons = (): JSX.Element => (
       </Variants.Cell>
       <Variants.Cell>
         <CallToAction label="Label" id="focused" />
+      </Variants.Cell>
+    </Variants.Row>
+    <Variants.Row>
+      <Variants.Cell>
+        <CallToAction label="Label" size="small" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <CallToAction label="Label" id="hover" size="small" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <CallToAction label="Label" id="pressed" size="small" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <CallToAction label="Label" disabled size="small" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <CallToAction label="Label" id="focused" size="small" />
       </Variants.Cell>
     </Variants.Row>
     <Variants.Row>

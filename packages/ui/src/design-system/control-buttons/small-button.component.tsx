@@ -20,6 +20,7 @@ export const Small = (
         label: cx.label(),
         icon: cx.icon(),
       }}
+      size="small"
     />
   );
 };

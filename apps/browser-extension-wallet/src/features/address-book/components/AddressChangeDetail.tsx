@@ -57,7 +57,7 @@ export const AddressChangeDetail = withAddressBookContext(
           <Banner withIcon message={t('addressBook.reviewModal.banner.browserDescription', { name })} />
         </div>
         <div className={styles.addressContainer}>
-          <Timeline>
+          <Timeline className={styles.timeline}>
             <Timeline.Item active={false}>
               <div className={cn(styles.addressDetailsContainer)}>
                 <div className={cn(styles.addressDataDetails)}>

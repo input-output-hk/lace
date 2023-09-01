@@ -10,6 +10,8 @@ import { useTranslate } from '@src/ui/hooks';
 const getTypeLabel = (type: TransactionType, t: ReturnType<typeof useTranslate>['t']) => {
   if (type === 'rewards') return t('package.core.transactionDetailBrowser.rewards');
   if (type === 'delegation') return t('package.core.transactionDetailBrowser.delegation');
+  if (type === 'delegationRegistration') return t('package.core.transactionDetailBrowser.registration');
+  if (type === 'delegationDeregistration') return t('package.core.transactionDetailBrowser.deregistration');
   if (type === 'incoming') return t('package.core.transactionDetailBrowser.received');
   return t('package.core.transactionDetailBrowser.sent');
 };
