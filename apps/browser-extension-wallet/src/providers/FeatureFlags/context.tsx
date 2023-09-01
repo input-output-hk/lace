@@ -1,17 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 
-import { ExperimentName } from '@providers/AnalyticsProvider/analyticsTracker';
-
 interface FeatureFlagsProviderProps {
   children: React.ReactNode;
-  //   postHogClient: PostHogClient;
 }
 
 type FeatureFlags = {
-  enabledFeature: Array<string>;
   flagsHaveBeenLoaded: boolean;
-  isFeatureEnabled: (param: ExperimentName) => boolean;
 };
 
 // eslint-disable-next-line unicorn/no-null
@@ -26,13 +21,11 @@ export const useFeatureFlagsContext = (): FeatureFlags => {
 // eslint-disable-next-line arrow-body-style
 export const FeatureFlagsProvider = ({ children }: FeatureFlagsProviderProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
-  const [enabledFeature, setEnabledFeature] = useState<Array<string>>();
   const [flagsHaveBeenLoaded, setFlagsHaveBeenLoaded] = useState(false);
 
   useEffect(() => {
-    const subscription = analytics.getPostHogFeatureFlag((flags) => {
-      setEnabledFeature(flags);
-      setFlagsHaveBeenLoaded(true);
+    const subscription = analytics.subscribeToFlagsLoadingProcess((loaded) => {
+      setFlagsHaveBeenLoaded(loaded);
     });
 
     return () => {
@@ -40,12 +33,5 @@ export const FeatureFlagsProvider = ({ children }: FeatureFlagsProviderProps): R
     };
   }, [analytics]);
 
-  const isFeatureEnabled: FeatureFlags['isFeatureEnabled'] = (flag) =>
-    flagsHaveBeenLoaded && enabledFeature.includes(flag);
-
-  return (
-    <FeatureFlagsContext.Provider value={{ enabledFeature, flagsHaveBeenLoaded, isFeatureEnabled }}>
-      {children}
-    </FeatureFlagsContext.Provider>
-  );
+  return <FeatureFlagsContext.Provider value={{ flagsHaveBeenLoaded }}>{children}</FeatureFlagsContext.Provider>;
 };

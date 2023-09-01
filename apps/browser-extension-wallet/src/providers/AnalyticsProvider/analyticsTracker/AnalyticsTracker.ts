@@ -81,12 +81,12 @@ export class AnalyticsTracker {
     await this.userIdService?.extendLifespan();
   }
 
-  getPostHogFeatureFlag(callback: (flags: Array<string>) => void): Subscription {
-    return this.postHogClient?.subscribeToRemoteFlags(callback);
+  subscribeToFlagsLoadingProcess(callback: (param: boolean) => void): Subscription {
+    return this.postHogClient?.subscribeToFlagsLoadingProcess(callback);
   }
 
-  getFeatureFlagVariant(key: ExperimentName): string {
-    return this.postHogClient.getFeatureFlagVariant(key);
+  getFeatureFlagVariant<R extends string>(key: ExperimentName): R {
+    return this.postHogClient.getFeatureFlagVariant(key) as R;
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {

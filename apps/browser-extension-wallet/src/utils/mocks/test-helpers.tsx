@@ -638,7 +638,7 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   sendPageNavigationEvent: jest.fn(),
   setChain: jest.fn(),
   sendAliasEvent: jest.fn(),
-  subscribeToRemoteFlags: jest.fn(),
+  subscribeToFlagsLoadingProcess: jest.fn(),
   getFeatureFlagVariant: jest.fn(),
   overrideFeatureFlags: jest.fn(),
   updatePostHogConfig: jest.fn()
@@ -652,5 +652,5 @@ export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototyp
   setChain: jest.fn(),
   sendAliasEvent: jest.fn(),
   getFeatureFlagVariant: jest.fn(),
-  getPostHogFeatureFlag: jest.fn()
+  subscribeToFlagsLoadingProcess: jest.fn()
 };

@@ -29,7 +29,7 @@ export const experiments: ExperimentsConfig = {
     defaultVariant: 'control'
   },
   NFTFolderButtonAlignment: {
-    variants: ['control', 'center'],
+    variants: ['control', 'left'],
     defaultVariant: 'control'
   }
 };
@@ -39,7 +39,7 @@ export const experiments: ExperimentsConfig = {
  * https://posthog.com/docs/libraries/js
  */
 export class PostHogClient {
-  #enabledFlags: Subject<Array<string>>;
+  #hasFlagLoadingProcessFinished: Subject<boolean>;
   #userTrackingType: UserTrackingType;
   constructor(
     private chain: Wallet.Cardano.ChainId,
@@ -48,7 +48,7 @@ export class PostHogClient {
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
-    this.#enabledFlags = new Subject();
+    this.#hasFlagLoadingProcessFinished = new Subject();
 
     this.userIdService
       .getUserId(chain.networkMagic)
@@ -74,8 +74,10 @@ export class PostHogClient {
           },
           property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time'],
           loaded: (posthogInstance: PostHog) => {
-            posthogInstance.onFeatureFlags((flags) => {
-              this.#enabledFlags.next(flags);
+            posthogInstance.onFeatureFlags(() => {
+              // we emit the value after the flags were loaded
+              // if the flags were not loaded correctly, this will be handle by getFeatureFlagVariant
+              this.#hasFlagLoadingProcessFinished.next(true);
             });
           }
         });
@@ -122,8 +124,8 @@ export class PostHogClient {
     });
   }
 
-  subscribeToRemoteFlags(callback: (params: Array<string>) => void): Subscription {
-    return this.#enabledFlags.subscribe(callback);
+  subscribeToFlagsLoadingProcess(callback: (params: boolean) => void): Subscription {
+    return this.#hasFlagLoadingProcessFinished.subscribe(callback);
   }
 
   /**
@@ -132,8 +134,15 @@ export class PostHogClient {
   getFeatureFlagVariant(key: ExperimentName): string {
     const variant = posthog.getFeatureFlag(key, {
       send_event: false
-    }) as string;
-    return variant || experiments[key].defaultVariant;
+    });
+
+    // variant can be a boolean as well, so, we have to check for the type
+    // in both cases (boolean or undefined) we want to return the fallback variant
+    if (!variant || typeof variant === 'boolean') {
+      return experiments[key].defaultVariant;
+    }
+
+    return variant;
   }
 
   /**

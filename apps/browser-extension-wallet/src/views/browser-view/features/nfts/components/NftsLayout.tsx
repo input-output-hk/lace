@@ -26,7 +26,9 @@ import {
   MatomoEventActions,
   MatomoEventCategories,
   AnalyticsEventNames,
-  PostHogAction
+  PostHogAction,
+  NFTFolderButtonAlignmentVariants,
+  ExperimentName
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { DetailsDrawer } from './DetailsDrawer';
 import { NFTFolderDrawer } from './CreateFolder/CreateFolderDrawer';
@@ -34,6 +36,7 @@ import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext }
 import { RenameFolderDrawer } from './RenameFolderDrawer';
 import { NftFolderConfirmationModal } from './NftFolderConfirmationModal';
 import { useAssetInfo } from '@hooks';
+import { useFeatureFlagsContext } from '@providers/FeatureFlags/context';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;
 
@@ -55,6 +58,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const [, setDrawerConfig] = useDrawer();
   const setSendInitialState = useOutputInitialState();
+  const { flagsHaveBeenLoaded } = useFeatureFlagsContext();
 
   const [selectedNft, setSelectedNft] = useState<NFT>();
   const [isCreateFolderDrawerOpen, setIsCreateFolderDrawerOpen] = useState(false);
@@ -173,7 +177,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     }
   ];
 
-  const isLoadingFirstTime = isNil(total) || isNil(nftFolders);
+  const isLoadingFirstTime = isNil(total) || isNil(nftFolders) || !flagsHaveBeenLoaded;
 
   // Close nft details drawer if network (blockchainProvider) has changed
   useEffect(() => {
@@ -202,7 +206,9 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
 
   const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0;
   const getHeaderItemsAlignmentExperiment = () => {
-    const variant = analytics.getFeatureFlagVariant('NFTFolderButtonAlignment');
+    const variant = analytics.getFeatureFlagVariant<NFTFolderButtonAlignmentVariants[number]>(
+      ExperimentName.NFT_FOLDER_BUTTON_ALIGNMENT
+    );
     if (variant === 'left') {
       return 'flex-start';
     }

@@ -17,7 +17,9 @@ import {
   MatomoEventActions,
   MatomoEventCategories,
   AnalyticsEventNames,
-  PostHogAction
+  PostHogAction,
+  NFTFolderButtonAlignmentVariants,
+  ExperimentName
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import FolderIcon from '@assets/icons/new-folder-icon.component.svg';
 import { SectionTitle } from '@components/Layout/SectionTitle';
@@ -28,6 +30,7 @@ import { RenameFolderType } from '@views/browser/features/nfts';
 import { NftFolderConfirmationModal } from '@views/browser/features/nfts/components/NftFolderConfirmationModal';
 import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
+import { useFeatureFlagsContext } from '@providers/FeatureFlags/context';
 
 export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   const redirectToNftDetail = useRedirection<{ params: { id: string } }>(walletRoutePaths.nftDetail);
@@ -48,6 +51,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   const {
     utils: { deleteRecord }
   } = useNftsFoldersContext();
+  const { flagsHaveBeenLoaded } = useFeatureFlagsContext();
 
   const onSelectNft = useCallback(
     (nft) => {
@@ -117,7 +121,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   const nftsNotInFolders = nfts.filter(({ assetId }) => !usedNftsIds.includes(assetId));
   const items: NftListProps['items'] = [...folders, ...nftsNotInFolders];
 
-  const isLoadingFirstTime = isNil(assetsBalance) || isNil(nftFolders);
+  const isLoadingFirstTime = isNil(assetsBalance) || isNil(nftFolders) || !flagsHaveBeenLoaded;
 
   const onDeleteFolderConfirm = () => {
     setIsDeleteFolderModalOpen(false);
@@ -132,7 +136,9 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   }, []);
 
   const getHeaderItemsAlignmentExperiment = () => {
-    const variant = analytics.getFeatureFlagVariant('NFTFolderButtonAlignment');
+    const variant = analytics.getFeatureFlagVariant<NFTFolderButtonAlignmentVariants[number]>(
+      ExperimentName.NFT_FOLDER_BUTTON_ALIGNMENT
+    );
     if (variant === 'left') {
       return 'flex-start';
     }

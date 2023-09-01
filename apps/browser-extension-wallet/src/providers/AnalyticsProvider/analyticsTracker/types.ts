@@ -155,11 +155,29 @@ export type PostHogMetadata = {
 export type PostHogProperty = string | boolean | Record<string, any> | Array<Record<string, any>>;
 export type PostHogProperties = Record<string, PostHogProperty>;
 
-export type ExperimentName = 'NftFolders' | 'NFTFolderButtonAlignment';
+// export type ExperimentName = 'NftFolders' | 'NFTFolderButtonAlignment';
 
-export type ExperimentConfig = {
-  variants: readonly string[];
-  defaultVariant: string;
+// export type ExperimentConfig = {
+//   variants: readonly string[];
+//   defaultVariant: string;
+// };
+
+// export type ExperimentsConfig = Record<ExperimentName, ExperimentConfig>;
+
+export enum ExperimentName {
+  NFT_FOLDER = 'NftFolders',
+  NFT_FOLDER_BUTTON_ALIGNMENT = 'NFTFolderButtonAlignment'
+}
+
+export type NFTFolderVariants = readonly ['control', 'test'];
+export type NFTFolderButtonAlignmentVariants = ['control', 'left'];
+export type ExperimentsConfig = {
+  [ExperimentName.NFT_FOLDER]: {
+    variants: NFTFolderVariants;
+    defaultVariant: string;
+  };
+  [ExperimentName.NFT_FOLDER_BUTTON_ALIGNMENT]: {
+    variants: NFTFolderButtonAlignmentVariants;
+    defaultVariant: string;
+  };
 };
-
-export type ExperimentsConfig = Record<ExperimentName, ExperimentConfig>;
