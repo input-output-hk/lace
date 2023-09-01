@@ -62,6 +62,10 @@ export interface TransactionProps {
    */
   deposit?: string;
   /**
+   * Transaction returned deposit
+   */
+  depositReclaim?: string;
+  /**
    * Transaction metadata
    */
   metadata?: TransactionMetadataProps['metadata'];
@@ -102,6 +106,7 @@ export const Transaction = ({
   includedTime = '-',
   fee = '-',
   deposit,
+  depositReclaim,
   addrInputs,
   addrOutputs,
   metadata,
@@ -118,6 +123,18 @@ export const Transaction = ({
   const { t } = useTranslate();
   const isSending = status === 'sending';
   const isSuccess = status === 'success';
+
+  const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
+    <div className={styles.details}>
+      <div className={styles.title}>{label}</div>
+      <div className={styles.detail}>
+        <div className={styles.amount}>
+          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>
+          <span className={styles.fiat}>{amountTransformer(value)}</span>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div>
@@ -269,6 +286,14 @@ export const Transaction = ({
             </div>
           </div>
         </div>
+
+        {deposit &&
+          renderDepositValueSection({ value: deposit, label: t('package.core.transactionDetailBrowser.deposit') })}
+        {depositReclaim &&
+          renderDepositValueSection({
+            value: depositReclaim,
+            label: t('package.core.transactionDetailBrowser.depositReclaim')
+          })}
       </div>
 
       {addrInputs?.length > 0 && (
@@ -308,17 +333,6 @@ export const Transaction = ({
                 {Array.isArray(item.value) ? displayMetadataMsg(item.value) : item.value}
               </div>
             ))}
-          </div>
-        </div>
-      )}
-      {deposit && (
-        <div className={styles.details} style={{ marginTop: '44px' }}>
-          <div className={styles.title}>{t('package.core.transactionDetailBrowser.deposit')}</div>
-          <div className={styles.detail}>
-            <div className={styles.amount}>
-              <span className={styles.ada}>{`${deposit} ${coinSymbol}`}</span>
-              <span className={styles.fiat}>{amountTransformer(deposit)}</span>
-            </div>
           </div>
         </div>
       )}

@@ -49,15 +49,36 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
 }
 
 export type FetchWalletActivitiesReturn = Observable<Promise<AssetActivityListProps[]>>;
-export const DelegationTransactionTypes: Set<TransactionType> = new Set([
+export type DelegationTransactionType = Extract<
+  TransactionType,
+  'delegation' | 'delegationRegistration' | 'delegationDeregistration'
+>;
+
+const delegationTransactionTypes: ReadonlySet<DelegationTransactionType> = new Set([
   'delegation',
   'delegationRegistration',
   'delegationDeregistration'
 ]);
 
-const getDelegationAmount = (activity: AssetActivityItemProps) => {
+type DelegationActivityItemProps = Omit<AssetActivityItemProps, 'type'> & {
+  type: DelegationTransactionType;
+};
+
+const isDelegationActivity = (activity: AssetActivityItemProps): activity is DelegationActivityItemProps =>
+  delegationTransactionTypes.has(activity.type as DelegationTransactionType);
+
+const getDelegationAmount = (activity: DelegationActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
-  return activity?.deposit ? fee.plus(activity.deposit) : fee;
+
+  if (activity.type === 'delegationRegistration') {
+    return fee.plus(activity.deposit);
+  }
+
+  if (activity.type === 'delegationDeregistration') {
+    return new BigNumber(activity.depositReclaim).minus(fee);
+  }
+
+  return fee;
 };
 
 const FIAT_PRICE_DECIMAL_PLACES = 2;
@@ -105,6 +126,14 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin
     });
 
+    const extendWithClickHandler = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
+      ...transformedTx,
+      onClick: () => {
+        if (sendAnalytics) sendAnalytics();
+        setTransactionDetail(tx, transformedTx.direction, transformedTx.status, transformedTx.type);
+      }
+    });
+
     /*
     considering the current SDK logic for automatically withdraw rewards when building a transaction and such behavior has to be transparent for the user,
     we will remove the withdrawal from the transaction history as it is implemented today.
@@ -112,49 +141,16 @@ const getWalletActivitiesObservable = async ({
     To make this happen we need to create a new record Rewards and added to the transaction history
     */
     if (Array.isArray(transformedTransaction)) {
-      return [
-        {
-          ...transformedTransaction[0],
-          onClick: () => {
-            if (sendAnalytics) sendAnalytics();
-            setTransactionDetail(
-              tx,
-              transformedTransaction[0].direction,
-              Wallet.TransactionStatus.SUCCESS,
-              transformedTransaction[0].type
-            );
-          }
-        },
-        {
-          ...transformedTransaction[1],
-          onClick: () => {
-            if (sendAnalytics) sendAnalytics();
-            setTransactionDetail(
-              tx,
-              transformedTransaction[1].direction,
-              Wallet.TransactionStatus.SPENDABLE,
-              transformedTransaction[1].type
-            );
-          }
-        }
-      ];
+      return transformedTransaction.map((tt) => extendWithClickHandler(tt));
     }
 
-    return {
-      ...transformedTransaction,
-      onClick: () => {
-        if (sendAnalytics) sendAnalytics();
-        setTransactionDetail(
-          tx,
-          transformedTransaction.direction,
-          Wallet.TransactionStatus.SUCCESS,
-          transformedTransaction.type
-        );
-      }
-    };
+    return extendWithClickHandler(transformedTransaction);
   };
 
-  const pendingTransactionMapper = (tx: Wallet.TxInFlight, eraSummaries: EraSummary[]): AssetActivityItemProps => {
+  const pendingTransactionMapper = (
+    tx: Wallet.TxInFlight,
+    eraSummaries: EraSummary[]
+  ): AssetActivityItemProps | Array<AssetActivityItemProps> => {
     let time;
     try {
       const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
@@ -171,8 +167,9 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin,
       time
     });
-    return {
-      ...transformedTransaction,
+
+    const extendWithClickHandler = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
+      ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
         const deserializedTx: Wallet.Cardano.Tx = TxCBOR.deserialize(tx.cbor);
@@ -180,10 +177,16 @@ const getWalletActivitiesObservable = async ({
           deserializedTx,
           TxDirections.Outgoing,
           Wallet.TransactionStatus.PENDING,
-          transformedTransaction.type
+          transformedTx.type
         );
       }
-    };
+    });
+
+    if (Array.isArray(transformedTransaction)) {
+      return transformedTransaction.map((tt) => extendWithClickHandler(tt));
+    }
+
+    return extendWithClickHandler(transformedTransaction);
   };
 
   const filterTransactionByAssetId = (tx: Wallet.Cardano.HydratedTx[]) =>
@@ -224,7 +227,7 @@ const getWalletActivitiesObservable = async ({
   const getPendingTransactions = (eraSummaries: EraSummary[]) =>
     pendingTransactions$.pipe(
       map((pendingTransactions: Wallet.TxInFlight[]) =>
-        pendingTransactions.map((tx) => pendingTransactionMapper(tx, eraSummaries))
+        flattenDeep(pendingTransactions.map((tx) => pendingTransactionMapper(tx, eraSummaries)))
       )
     );
 
@@ -277,7 +280,7 @@ const getWalletActivitiesObservable = async ({
         ...activityList,
         items: activityList.items.map((activity: AssetActivityItemProps) => ({
           ...activity,
-          ...(DelegationTransactionTypes.has(activity.type) && {
+          ...(isDelegationActivity(activity) && {
             amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,
             fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
           }),

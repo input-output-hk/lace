@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import classnames from 'classnames';
 import { AutoCompleteProps, Button } from 'antd';
 import { Search, SearchProps, addEllipsis } from '@lace/common';
 import { HandleResolution } from '@cardano-sdk/core';
@@ -10,8 +9,7 @@ import styles from './DestinationAddressInput.module.scss';
 import { TranslationsFor } from '@ui/utils/types';
 import { CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 
-const charBeforeNameEllipsis = 9;
-
+const charBeforeNameEllipsis = 6;
 const charBeforeAddressEllipsis = 10;
 const charAfterAddressEllipsis = 6;
 
@@ -56,7 +54,6 @@ export const DestinationAddressInput = ({
   onChange,
   options,
   onClick,
-  className,
   valid,
   empty,
   exists,
@@ -115,7 +112,6 @@ export const DestinationAddressInput = ({
 
   return (
     <Search
-      className={classnames(className, styles.searchAddress)}
       value={value.address}
       label={translations.recipientAddress}
       onChange={onChange}

@@ -98,6 +98,7 @@ describe('Testing tx transformers utils', () => {
         status: 'sending',
         date: 'Sending',
         deposit: undefined,
+        depositReclaim: undefined,
         fee: '1.00',
         fiatAmount: '1.00 USD',
         id: '6804edf9712d2b619edb6ac86861fe93a730693183a262b165fcc1ba1bc99cad',

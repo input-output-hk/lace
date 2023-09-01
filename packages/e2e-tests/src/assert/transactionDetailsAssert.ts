@@ -182,7 +182,7 @@ class TransactionsDetailsAssert {
       const transactionType = await TransactionsPage.transactionsTableItemType(i).getText();
       await TransactionsPage.clickOnTransactionRow(i);
       await transactionsDetails.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
-      if (!(transactionType.includes('Delegation') || transactionType.includes('Self'))) {
+      if (!['Delegation', 'De-Registration', 'Self Transaction'].includes(transactionType)) {
         await webTester.seeWebElement(transactionsDetails.transactionDetailsSent());
         await webTester.seeWebElement(transactionsDetails.transactionDetailsToAddress());
       }
