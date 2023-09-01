@@ -8,7 +8,7 @@ import {
 } from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient, MATOMO_OPTED_OUT_EVENTS_DISABLED } from '../matomo';
-import { POSTHOG_ENABLED, POSTHOG_OPTED_OUT_EVENTS_DISABLED, PostHogClient } from '../postHog';
+import { POSTHOG_ENABLED, POSTHOG_OPTED_OUT_EVENTS_DISABLED, PostHogClient, POSTHOG_EXCLUDED_EVENTS } from '../postHog';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
 
@@ -17,21 +17,25 @@ interface AnalyticsTrackerArgs {
   view?: ExtensionViews;
   analyticsDisabled?: boolean;
   isPostHogEnabled?: boolean;
+  excludedEvents?: string;
 }
 export class AnalyticsTracker {
   protected matomoClient?: MatomoClient;
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
+  protected excludedEvents: string;
 
   constructor({
     chain,
     view = ExtensionViews.Extended,
     analyticsDisabled = false,
-    isPostHogEnabled = POSTHOG_ENABLED
+    isPostHogEnabled = POSTHOG_ENABLED,
+    excludedEvents = POSTHOG_EXCLUDED_EVENTS ?? ''
   }: AnalyticsTrackerArgs) {
     if (analyticsDisabled) return;
     this.userIdService = getUserIdService();
     this.matomoClient = new MatomoClient(chain, this.userIdService);
+    this.excludedEvents = excludedEvents;
 
     if (isPostHogEnabled) {
       this.postHogClient = new PostHogClient(chain, this.userIdService, view);
@@ -49,13 +53,13 @@ export class AnalyticsTracker {
   }
 
   async sendPageNavigationEvent(): Promise<void> {
-    const shouldOmitEvent = await this.shouldOmitSendEventToPostHog();
+    const shouldOmitEvent = await this.isTrackingDisabled();
     if (shouldOmitEvent) return;
     await this.postHogClient?.sendPageNavigationEvent();
   }
 
   async sendAliasEvent(): Promise<void> {
-    const shouldOmitEvent = await this.shouldOmitSendEventToPostHog();
+    const shouldOmitEvent = await this.isTrackingDisabled();
     if (shouldOmitEvent) return;
     await this.postHogClient?.sendAliasEvent();
   }
@@ -68,8 +72,9 @@ export class AnalyticsTracker {
   }
 
   async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
-    const shouldOmitEvent = await this.shouldOmitSendEventToPostHog();
-    if (shouldOmitEvent) return;
+    const isEventExcluded = this.isEventExcluded(action);
+    const isTrackingDisabled = await this.isTrackingDisabled();
+    if (isTrackingDisabled || isEventExcluded) return;
     await this.postHogClient?.sendEvent(action, properties);
     await this.userIdService?.extendLifespan();
   }
@@ -79,9 +84,13 @@ export class AnalyticsTracker {
     this.postHogClient?.setChain(chain);
   }
 
-  private async shouldOmitSendEventToPostHog() {
+  private async isTrackingDisabled() {
     const userTrackingType = await this.userIdService.getUserTrackingType();
     const isOptedOutUser = userTrackingType === UserTrackingType.Basic;
     return POSTHOG_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser;
+  }
+
+  private isEventExcluded(action: PostHogAction) {
+    return this.excludedEvents && this.excludedEvents.split(',').some((exclude: string) => action.startsWith(exclude));
   }
 }
