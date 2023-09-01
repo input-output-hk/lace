@@ -6,13 +6,12 @@ import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
 import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks';
-import { useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 
 const { Title } = Typography;
-
 interface SettingsSecurityProps {
   popupView?: boolean;
   defaultPassphraseVisible?: boolean;
@@ -37,13 +36,14 @@ export const SettingsSecurity = ({
     EnhancedAnalyticsOptInStatus.OptedOut
   );
   const backgroundService = useBackgroundServiceAPIContext();
-
+  const analytics = useAnalyticsContext();
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
 
   const handleAnalyticsChoice = (isOptedIn: boolean) => {
     setEnhancedAnalyticsOptInStatus(
       isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
+    analytics.setTrackingTypeChangedFromSettings();
   };
 
   const isMnemonicAvailable = useCallback(async () => {

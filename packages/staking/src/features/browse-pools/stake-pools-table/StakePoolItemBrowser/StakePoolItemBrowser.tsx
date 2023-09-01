@@ -63,7 +63,6 @@ export const StakePoolItemBrowser = ({
   const selectionsFull = useDelegationPortfolioStore((state) => state.queries.selectionsFull());
   const disabledAddingToDraft = selectionsFull && !poolAlreadySelected;
 
-  const StakeButtonComponent = poolAlreadySelected ? Button.Secondary : Button.CallToAction;
   const stakePoolStateLabel = poolAlreadySelected
     ? t('browsePools.stakePoolTableBrowser.unselect')
     : selectionsNotEmpty
@@ -107,7 +106,7 @@ export const StakePoolItemBrowser = ({
           trigger={disabledAddingToDraft ? 'hover' : []}
         >
           <div>
-            <StakeButtonComponent
+            <Button.CallToAction
               label={stakePoolStateLabel}
               onClick={(event) => {
                 event.stopPropagation();
@@ -115,6 +114,7 @@ export const StakePoolItemBrowser = ({
               }}
               disabled={disabledAddingToDraft}
               data-testid="stake-button"
+              size="small"
             />
           </div>
         </Tooltip>

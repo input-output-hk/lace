@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Banner } from '@lace/common';
 import dayjs from 'dayjs';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
-import QuestionMarkIcon from '../../../../assets/icons/purple-question-mark.svg';
+import QuestionMarkIcon from '../../../../assets/icons/purple-question-mark.component.svg';
 import { PortfolioBalanceValue, PortfolioBalanceValueProps } from './PortfolioBalanceValue/PortfolioBalanceValue';
 import { PortfolioBalanceLabel, PortfolioBalanceLabelProps } from './PortfolioBalanceLabel/PortfolioBalanceLabel';
 import styles from './PortfolioBalance.module.scss';
@@ -43,7 +43,7 @@ export const PortfolioBalance = ({
       {isPriceOutdatedBannerVisible ? (
         <div className={styles.warningBanner}>
           <Banner
-            customIcon={QuestionMarkIcon}
+            customIcon={<QuestionMarkIcon />}
             withIcon
             message={
               // if there is no lastPriceFetchedDate, we display a default message, if there is, we show the last price saved date too

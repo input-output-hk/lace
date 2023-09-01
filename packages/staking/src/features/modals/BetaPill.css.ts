@@ -12,6 +12,5 @@ export const root = style({
   fontWeight: theme.fontWeights.$semibold,
   height: theme.spacing.$20,
   justifyContent: 'center',
-  marginLeft: theme.spacing.$8,
   width: theme.spacing.$40,
 });

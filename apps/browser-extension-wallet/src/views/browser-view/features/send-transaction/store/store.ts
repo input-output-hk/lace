@@ -192,7 +192,6 @@ const stateHandlers = (get: GetState<Store>, set: SetState<Store>) => {
     set({ uiOutputs: updatedOutputs });
   };
 
-  // <<<<<<< HEAD
   const setAddressValue = (
     id: string,
     address: string,

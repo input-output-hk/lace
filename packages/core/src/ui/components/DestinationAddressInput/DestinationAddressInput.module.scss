@@ -67,6 +67,7 @@ button.addressBookBtn {
   letter-spacing: -0.015em;
   line-height: size_unit(3);
   width: 100%;
+  flex-direction: row;
 
   :global(.ant-select-item-option-selected:not(.ant-select-item-option-disabled)) {
     background-color: var(--color-white, var(--dark-mode-grey, #ffffff));
@@ -75,7 +76,6 @@ button.addressBookBtn {
 
   > span {
     align-items: center;
-    display: flex;
     flex: 1;
     font-weight: 400;
     padding-right: size_unit(1.5);
@@ -98,29 +98,15 @@ button.addressBookBtn {
   pointer-events: none;
   position: absolute;
   top: 30px;
-  left: 22px;
   width: 100%;
   z-index: 1;
   background: var(--light-mode-light-grey, var(--dark-mode-dark-grey, #2f2f2f)) !important;
+  padding-left: size_unit(1.5);
   
   @media (max-width: $breakpoint-popup) {
     top: 8px;
-    left: 0;
+    left: 0px;
   }
-}
-
-.addressOption {
-  color: var(--text-color-primary) !important;
-  font-weight: 600 !important;
-  > span {
-    &:first-child {
-      font-weight: 600 !important;
-    }
-  }
-}
-
-.searchAddress {
-  padding-bottom: size_unit(1.25);
 }
 
 @media (max-width: $breakpoint-popup) {
