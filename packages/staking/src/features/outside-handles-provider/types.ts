@@ -75,7 +75,6 @@ export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   expandStakingView?: () => void;
   balancesBalance: Balance;
-  stakingRewards: StakingRewards;
   delegationStoreSelectedStakePoolDetails?: OpenSelectedStakePoolDetails;
   delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
