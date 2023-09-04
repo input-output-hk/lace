@@ -47,11 +47,11 @@ export const StakePoolPreferences = () => {
     setIsDrawerVisible: store.setIsDrawerVisible,
   }));
 
-  const displayData = draftPortfolio.map(({ name, weight, id }, i) => ({
+  const displayData = draftPortfolio.map(({ name, id }, i) => ({
     color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
     id,
     name: name || '',
-    value: weight,
+    value: 1,
   }));
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
   const onAddPoolButtonClick = () => {
