@@ -123,8 +123,8 @@ const getTransactionDetail =
       addrInputs: inputs,
       addrOutputs: outputs,
       metadata: txMetadata,
-      includedDate: blocks?.date,
-      includedTime: blocks?.time
+      includedUtcDate: blocks?.utcDate,
+      includedUtcTime: blocks?.utcTime
     };
 
     // Delegation tx additional data (LW-3324)
