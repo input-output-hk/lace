@@ -45,18 +45,7 @@ export interface TransactionProps {
    * Transaction fee
    */
   fee?: string;
-  /**
-   * Delegated pool name
-   */
-  poolName?: string;
-  /**
-   * Delegated pool ticker
-   */
-  poolTicker?: string;
-  /**
-   * Delegated pool ticker
-   */
-  poolId?: string;
+  pools?: { name: string; ticker: string; id: string }[];
   /**
    * Transaction deposit
    */
@@ -113,9 +102,7 @@ export const Transaction = ({
   amountTransformer,
   txSummary = [],
   coinSymbol,
-  poolName,
-  poolTicker,
-  poolId,
+  pools,
   addressToNameMap,
   isPopupView,
   openExternalLink
@@ -162,30 +149,34 @@ export const Transaction = ({
         </div>
 
         <h1 className={styles.summary}>{t('package.core.transactionDetailBrowser.summary')}</h1>
-        {poolName && (
-          <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolName')}</div>
-            <div data-testid="tx-pool-name" className={styles.detail}>
-              {poolName}
-            </div>
+        {pools?.map((pool) => (
+          <div key={pool.id} className={styles.poolEntry}>
+            {pool.name && (
+              <div className={styles.details}>
+                <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolName')}</div>
+                <div data-testid="tx-pool-name" className={styles.detail}>
+                  {pool.name}
+                </div>
+              </div>
+            )}
+            {pool.ticker && (
+              <div className={styles.details}>
+                <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolTicker')}</div>
+                <div data-testid="tx-pool-ticker" className={styles.detail}>
+                  {pool.ticker}
+                </div>
+              </div>
+            )}
+            {pool.id && (
+              <div className={styles.details}>
+                <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolId')}</div>
+                <div data-testid="tx-pool-id" className={cn(styles.detail, styles.poolId)}>
+                  {pool.id}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-        {poolTicker && (
-          <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolTicker')}</div>
-            <div data-testid="tx-pool-ticker" className={styles.detail}>
-              {poolTicker}
-            </div>
-          </div>
-        )}
-        {poolId && (
-          <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolId')}</div>
-            <div data-testid="tx-pool-id" className={cn(styles.detail, styles.poolId)}>
-              {poolId}
-            </div>
-          </div>
-        )}
+        ))}
         {txSummary.map((summary, index) => (
           <div key={index.toString()} data-testid="tx-detail-bundle">
             <div className={styles.details}>

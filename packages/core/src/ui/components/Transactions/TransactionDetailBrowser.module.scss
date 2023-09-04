@@ -233,6 +233,11 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
   padding-bottom: size_unit(3);
 }
 
+.poolEntry {
+  border-bottom: $border-bottom;
+  margin-bottom: size_unit(2);
+}
+
 .addr,
 .detailTitle {
   font-size: var(--bodySmall, 14px) !important;
