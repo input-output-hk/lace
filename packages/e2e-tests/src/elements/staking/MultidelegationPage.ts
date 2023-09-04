@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 import SectionTitle from '../sectionTitle';
-import MultidelegationPageAssert from '../../assert/multidelegationPageAssert';
+import MultidelegationPageAssert from '../../assert/multidelegationStakingPageAssert';
 import { browser } from '@wdio/globals';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
 

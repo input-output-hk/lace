@@ -1,5 +1,6 @@
 import { Then, When } from '@cucumber/cucumber';
 import stakingPageAssert from '../assert/stakingPageAssert';
+import multidelegationStakePoolDetailsAssert from '../assert/multidelegationStakingPageAssert';
 import stakePoolDetailsAssert from '../assert/stakePoolDetailsAssert';
 import stakingExtendedPageObject from '../pageobject/stakingExtendedPageObject';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
@@ -133,6 +134,12 @@ Then(/^I see drawer with "([^"]*)" stake pool details$/, async (_stakePool: stri
   await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(adacapital, true);
 });
 
+// eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+Then(/^I see multidelegation drawer with "([^"]*)" stake pool details$/, async (_stakePool: string) => {
+  const adacapital = extensionUtils.isMainnet() ? StakePoolsData.adacapitalMainnet : StakePoolsData.adacapital;
+  await multidelegationStakePoolDetailsAssert.assertSeeMultiDelegationStakePoolDetailsPage(adacapital, true);
+});
+
 Then(/^I wait until current stake pool switch to "([^"]*)"$/, async (stakePoolName: string) => {
   const stakePool =
     stakePoolName === 'OtherStakePool'
@@ -149,6 +156,17 @@ Then(
         ? getStakePoolByName(testContext.load(stakePoolName))
         : getStakePoolByName(stakePoolName, extensionUtils.isMainnet() ? 'mainnet' : 'testnet');
     await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
+  }
+);
+
+Then(
+  /^I see multidelegation drawer with "([^"]*)" stake pool details and a button available for staking$/,
+  async (stakePoolName: string) => {
+    const stakePool =
+      stakePoolName === 'OtherStakePool'
+        ? getStakePoolByName(testContext.load(stakePoolName))
+        : getStakePoolByName(stakePoolName, extensionUtils.isMainnet() ? 'mainnet' : 'testnet');
+    await multidelegationStakePoolDetailsAssert.assertSeeMultiDelegationStakePoolDetailsPage(stakePool, false);
   }
 );
 
@@ -193,6 +211,11 @@ When(/^I click on the "(.*)" column header$/, async (listHeader: string) => {
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 Then(/^Each stake pool list item contains:$/, async (_ignored: string) => {
   await stakingPageAssert.assertSeeStakePoolRows();
+});
+
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+Then(/^Each multidelegation stake pool list item contains:$/, async (_ignored: string) => {
+  await multidelegationStakePoolDetailsAssert.assertMultiDelegationSeeStakePoolRows;
 });
 
 Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (metadata: 'with' | 'without') => {

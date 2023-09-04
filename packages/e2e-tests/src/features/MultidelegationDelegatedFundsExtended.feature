@@ -15,7 +15,7 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
     And I navigate to Staking extended page
     And I confirm multidelegation beta modal
     When I click pool name in currently staking component
-    Then I see drawer with "ADA CAPITAL" stake pool details
+    Then I see multidelegation drawer with "ADA CAPITAL" stake pool details
 
   @LW-2644 @Pending
     #No tooltip currently. perhaps will be implemented in future

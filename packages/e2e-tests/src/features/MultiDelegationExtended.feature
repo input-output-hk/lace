@@ -70,7 +70,7 @@ Feature: Staking Page - Extended Browser View
     And I see the stake pool search control with appropriate content in extended mode
     And I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
-    Then I see drawer with "ADA Capital" stake pool details and a button available for staking
+    Then I see multidelegation drawer with "ADA Capital" stake pool details and a button available for staking
 
   @LW-4024 @Pending @Testnet @Mainnet
     #BUG input-output.atlassian.net/browse/ADP-2344
@@ -113,11 +113,10 @@ Feature: Staking Page - Extended Browser View
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
     And I click Browse pools tab
-    Then Each stake pool list item contains:
+    Then Each multidelegation stake pool list item contains:
       | stake pool logo          |
       | stake pool name + ticker |
       | ROS value                |
-      | Cost (% + ADA)           |
       | Saturation               |
 
   @LW-1704 @Testnet @Mainnet
@@ -148,7 +147,7 @@ Feature: Staking Page - Extended Browser View
     And I click Browse pools tab
     When I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
-    Then I see drawer with "ADA Capital" stake pool details and a button available for staking
+    Then I see multidelegation drawer with "ADA Capital" stake pool details and a button available for staking
     When I close the drawer by clicking close button
     Then Staking exit modal is not displayed
     And Drawer is not displayed

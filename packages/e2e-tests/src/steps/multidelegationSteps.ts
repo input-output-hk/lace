@@ -1,5 +1,5 @@
 import { Given, Then } from '@cucumber/cucumber';
-import MultidelegationPageAssert from '../assert/multidelegationPageAssert';
+import MultidelegationPageAssert from '../assert/multidelegationStakingPageAssert';
 import MultidelegationPage from '../elements/staking/MultidelegationPage';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
