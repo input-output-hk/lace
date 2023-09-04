@@ -9,7 +9,7 @@ import { pendingTxTransformer, getFormattedAmount, getFormattedFiatAmount } from
 import { Wallet } from '@lace/cardano';
 import { cardanoCoin } from '@utils/constants';
 import { TxCBOR } from '@cardano-sdk/core';
-import { formatTime } from '@src/utils/format-date';
+import { DEFAULT_TIME_FORMAT, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
 
 jest.mock('@lace/cardano', () => {
@@ -112,7 +112,7 @@ describe('Testing tx transformers utils', () => {
         assetsNumber: 2,
         timestamp: formatTime({
           date: time,
-          format: 'HH:mm:ss',
+          format: DEFAULT_TIME_FORMAT,
           type: 'local'
         })
       });
