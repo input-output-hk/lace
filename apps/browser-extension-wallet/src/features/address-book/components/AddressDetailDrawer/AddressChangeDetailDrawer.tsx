@@ -49,7 +49,7 @@ export const AddressChangeDetailDrawer = ({
           />
         }
         afterOpenChange={(open) => setSection({ currentSection: open ? Sections.ADDRESS_CHANGE : Sections.FORM })}
-        footer={<Footer isPopupView={popupView} onHandleChangeConfirm={onCancelClick} />}
+        footer={<Footer isPopupView={popupView} onHandleChangeConfirm={() => onCancelClick()} />}
         popupView={popupView}
       >
         <AddressChangeDetail
