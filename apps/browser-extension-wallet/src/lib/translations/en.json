@@ -255,7 +255,7 @@
     "deleteModal.buttons.cancel": "No",
     "reviewModal": {
       "title": "Review change to {{name}}'s handle",
-      "banner.browserDescription": "This handle may no longer belongs to your contact {{name}}. Please, review to proceed.",
+      "banner.browserDescription": "This handle may no longer belong to your contact {{name}}. Please, review to proceed.",
       "banner.popUpDescription": "This handle may no longer belong to your contact {{name}}. Please,",
       "banner.confirmReview.link": " review ",
       "banner.popUpDescriptionEnd": " to proceed.",
