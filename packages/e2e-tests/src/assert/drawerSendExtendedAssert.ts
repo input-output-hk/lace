@@ -286,7 +286,7 @@ class DrawerSendExtendedAssert {
   }
 
   async assertReviewTransactionButtonIsEnabled(shouldBeEnabled: boolean) {
-    await new TransactionNewPage().reviewTransactionButton.waitForEnabled({ reverse: !shouldBeEnabled });
+    await new TransactionNewPage().reviewTransactionButton.waitForClickable({ reverse: !shouldBeEnabled });
   }
 
   async assertReviewTransactionButtonIsDisplayed(shouldBeDisplayed: boolean) {

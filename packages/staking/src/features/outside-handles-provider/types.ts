@@ -74,8 +74,7 @@ export type StakingRewards = {
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   expandStakingView?: () => void;
-  balancesBalance: Balance;
-  stakingRewards: StakingRewards;
+  balancesBalance?: Balance;
   delegationStoreSelectedStakePoolDetails?: OpenSelectedStakePoolDetails;
   delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
@@ -129,7 +128,5 @@ export type OutsideHandlesContextValue = {
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
   walletAddress: string;
-  coinBalance: number;
   currentChain: Wallet.Cardano.ChainId;
-  rewardAccounts: Wallet.Cardano.RewardAccountInfo[];
 };

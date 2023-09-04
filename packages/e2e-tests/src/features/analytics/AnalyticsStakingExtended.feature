@@ -1,11 +1,11 @@
-@Staking-SwitchingPools-Extended-E2E @Testnet @Pending
-Feature: Staking Page - Switching pools - Extended Browser View - E2E
+@Staking-SwitchingPools-Extended-E2E @Testnet
+Feature: Analytics - Posthog - Switching pools - Extended View
 
   Background:
     Given Wallet is synced
 
   @LW-7868
-  Scenario: Extended View - Staking - Analytics - Success screen - Close drawer
+  Scenario: Analytics - Extended View - Staking - Success screen - Close drawer
     Given I set up request interception for posthog analytics request(s)
     And I save token: "Cardano" balance
     When I navigate to Staking extended page
@@ -33,7 +33,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I validate that 8 analytics event(s) have been sent
 
   @LW-7869
-  Scenario: Extended View - Staking - Analytics - Success screen - Close drawer by clicking X button
+  Scenario: Analytics - Extended View - Staking - Success screen - Close drawer by clicking X button
     Given I set up request interception for posthog analytics request(s)
     And I save token: "Cardano" balance
     When I navigate to Staking extended page

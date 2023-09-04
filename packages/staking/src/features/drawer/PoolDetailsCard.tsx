@@ -22,7 +22,7 @@ export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) =
     portfolioMutators: state.mutators,
   }));
   const { balancesBalance, compactNumber } = useOutsideHandles();
-  const balance = compactNumber(balancesBalance.available.coinBalance);
+  const availableBalance = Number(balancesBalance?.available?.coinBalance || '0');
   const handleRemovePoolFromPortfolio = () => {
     portfolioMutators.removePoolInManagementProcess({ id: poolId });
   };
@@ -50,11 +50,11 @@ export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) =
         <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
             {t('drawer.preferences.percentageOfBalance', {
-              balance,
-              draftPortfolioPercentage: formatPercentages(1 / draftPortfolioLength, {
+              percentage: formatPercentages(1 / draftPortfolioLength, {
                 decimalPlaces: 0,
                 rounding: 'down',
               }),
+              value: compactNumber(availableBalance / draftPortfolioLength),
             })}
           </Text.Body.Normal>
         </Flex>

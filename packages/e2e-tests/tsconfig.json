@@ -16,6 +16,9 @@
     ],
     "lib": ["es2015", "dom"],
     "resolveJsonModule": true,
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "rootDir": "../../"
+  },
+  "files": ["../staking/src/features/i18n/translations/en.ts"],
+  "include": ["."]
 }

@@ -9,11 +9,17 @@ export enum TxDirections {
 
 export type TxDirection = keyof typeof TxDirections;
 
+export type TransactionPool = {
+  name: string;
+  ticker: string;
+  id: string;
+};
+
 export interface TransactionDetail {
   tx: {
     hash: string;
-    includedDate?: string;
-    includedTime?: string;
+    includedUtcDate?: string;
+    includedUtcTime?: string;
     totalOutput?: string;
     fee?: string;
     depositReclaim?: string;
@@ -21,9 +27,7 @@ export interface TransactionDetail {
     addrInputs?: TxOutputInput[];
     addrOutputs?: TxOutputInput[];
     metadata?: TransactionMetadataProps['metadata'];
-    poolName?: string;
-    poolTicker?: string;
-    poolId?: string;
+    pools?: TransactionPool[];
     rewards?: string;
   };
   blocks?: {
@@ -35,8 +39,8 @@ export interface TransactionDetail {
     confirmations?: string;
     size?: string;
     transactions?: string;
-    date?: string;
-    time?: string;
+    utcDate?: string;
+    utcTime?: string;
     nextBlock?: string;
     prevBlock?: string;
     createdBy?: string;
