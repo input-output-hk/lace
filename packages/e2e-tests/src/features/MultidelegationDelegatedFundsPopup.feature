@@ -1,7 +1,7 @@
 @Multidelegation-DelegatedFunds-Popup @Testnet
 Feature: Staking Page - Popup View
 
-  @LW-temp1
+  @LW-8330
   Scenario Outline: Popup View - Delegation card displays correct data
     Given I open wallet: "<walletName>" in: popup mode
     When I navigate to Staking popup page
