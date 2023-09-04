@@ -16,6 +16,7 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { getRewardsAmount } from '@src/views/browser-view/features/activity/helpers';
+import { MAX_POOLS_COUNT } from '@lace/staking';
 
 /**
  * validates if the transaction is confirmed
@@ -129,33 +130,35 @@ const getTransactionDetail =
 
     // Delegation tx additional data (LW-3324)
 
-    const delegationInfo = tx.body.certificates?.find(
+    const delegationInfo = tx.body.certificates?.filter(
       (certificate) => certificate.__typename === 'StakeDelegationCertificate'
-    ) as Wallet.Cardano.StakeDelegationCertificate;
+    ) as Wallet.Cardano.StakeDelegationCertificate[];
 
     if (type === 'delegation' && delegationInfo) {
       const filters: Wallet.QueryStakePoolsArgs = {
         filters: {
           identifier: {
             _condition: 'or',
-            values: [{ id: delegationInfo.poolId }]
+            values: delegationInfo.map((certificate) => ({ id: certificate.poolId }))
           }
         },
         pagination: {
           startAt: 0,
-          limit: 1
+          limit: MAX_POOLS_COUNT
         }
       };
       const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
 
-      if (!pools?.[0]) {
-        console.error(`Stake pool ${delegationInfo.poolId} was not found for delegation tx`);
+      if (pools.length === 0) {
+        console.error('Stake pool was not found for delegation tx');
       } else {
         transaction = {
           ...transaction,
-          poolName: pools?.[0].metadata?.name ?? '-',
-          poolTicker: pools?.[0].metadata?.ticker ?? '-',
-          poolId: pools?.[0].id.toString()
+          pools: pools.map((pool) => ({
+            name: pool.metadata.name || '-',
+            ticker: pool.metadata.ticker || '-',
+            id: pool.id.toString()
+          }))
         };
       }
     }

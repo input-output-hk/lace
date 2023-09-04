@@ -54,7 +54,8 @@
       "summary": "Summary",
       "from": "From",
       "to": "To",
-      "multipleAddresses": "Multiple addresses"
+      "multipleAddresses": "Multiple addresses",
+      "pools": "Pool(s)"
     }
   },
   "tab.main.title": "Tab extension",
