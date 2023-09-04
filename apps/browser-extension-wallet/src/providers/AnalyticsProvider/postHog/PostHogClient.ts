@@ -118,14 +118,16 @@ export class PostHogClient {
 
   protected async getPersonProperties(): Promise<PostHogPersonProperties | undefined> {
     const currentUserTrackingType = await this.userIdService.getUserTrackingType();
-
     if (!this.userTrackingType) {
       this.userTrackingType = currentUserTrackingType;
+      // set user_tracking_type in the first event
+      return { $set: { user_tracking_type: this.userTrackingType } };
     }
 
+    // eslint-disable-next-line consistent-return
     if (currentUserTrackingType === this.userTrackingType) return;
     this.userTrackingType = currentUserTrackingType;
-    // eslint-disable-next-line consistent-return
+    // update user_tracking_type if tracking type has changed
     return { $set: { user_tracking_type: this.userTrackingType } };
   }
 }

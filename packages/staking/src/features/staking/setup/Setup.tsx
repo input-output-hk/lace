@@ -18,11 +18,18 @@ export const Setup = ({ children, ...rest }: SetupProps) => {
   } = useOutsideHandles();
   const { setCurrentPortfolio } = useDelegationPortfolioStore((s) => s.mutators);
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
+  const currentEpoch = useObservable(walletStoreInMemoryWallet.currentEpoch$);
+  const delegationRewardsHistory = useObservable(walletStoreInMemoryWallet.delegation.rewardsHistory$);
 
   useEffect(() => {
-    if (!delegationDistribution) return;
-    setCurrentPortfolio({ cardanoCoin, delegationDistribution: [...delegationDistribution.values()] });
-  }, [delegationDistribution, setCurrentPortfolio, cardanoCoin]);
+    if (![delegationDistribution, delegationRewardsHistory, currentEpoch].every(Boolean)) return;
+    setCurrentPortfolio({
+      cardanoCoin,
+      currentEpoch,
+      delegationDistribution: [...delegationDistribution.values()],
+      delegationRewardsHistory,
+    });
+  }, [delegationDistribution, delegationRewardsHistory, currentEpoch, cardanoCoin, setCurrentPortfolio]);
 
   return (
     <SetupBase {...rest} loading={!balancesBalance?.total?.coinBalance}>

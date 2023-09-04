@@ -146,4 +146,58 @@ describe('PostHogClient', () => {
     await client.sendAliasEvent();
     expect(posthog.alias).not.toHaveBeenCalled();
   });
+
+  it('should return user_tracking_type enhanced', async () => {
+    const mockGetUserTrackingType = jest.fn().mockReturnValue('enhanced');
+    const event = PostHogAction.OnboardingCreateClick;
+    const client = new PostHogClient(
+      chain,
+      { ...mockUserIdService, getUserTrackingType: mockGetUserTrackingType },
+      ExtensionViews.Extended,
+      publicPosthogHost
+    );
+    await client.sendEvent(event);
+    expect(posthog.capture).toHaveBeenCalledWith(
+      event,
+      expect.objectContaining({
+        $set: {
+          // eslint-disable-next-line camelcase
+          user_tracking_type: 'enhanced'
+        }
+      })
+    );
+  });
+
+  it('should return user_tracking_type basic after calling twice', async () => {
+    const mockGetUserTrackingType = jest.fn().mockReturnValue('enhanced');
+    const event = PostHogAction.OnboardingCreateClick;
+    const client = new PostHogClient(
+      chain,
+      { ...mockUserIdService, getUserTrackingType: mockGetUserTrackingType },
+      ExtensionViews.Extended,
+      publicPosthogHost
+    );
+    await client.sendEvent(event);
+    expect(posthog.capture).toHaveBeenCalledWith(
+      event,
+      expect.objectContaining({
+        $set: {
+          // eslint-disable-next-line camelcase
+          user_tracking_type: 'enhanced'
+        }
+      })
+    );
+
+    mockGetUserTrackingType.mockReturnValue('basic');
+    await client.sendEvent(event);
+    expect(posthog.capture).toHaveBeenCalledWith(
+      event,
+      expect.objectContaining({
+        $set: {
+          // eslint-disable-next-line camelcase
+          user_tracking_type: 'basic'
+        }
+      })
+    );
+  });
 });

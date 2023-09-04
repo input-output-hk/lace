@@ -1,7 +1,7 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
 import React, { useCallback } from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
-import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
+import { useBalances, useFetchCoinPrice, useLocalStorage, useWalletManager } from '@hooks';
 import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
@@ -27,7 +27,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
   const submittingState = useSubmitingState();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
-  const stakingRewards = useStakingRewards();
   const {
     walletInfo,
     getKeyAgentType,
@@ -91,7 +90,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
         password,
-        stakingRewards,
         submittingState,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
