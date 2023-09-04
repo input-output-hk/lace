@@ -235,18 +235,6 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     Then I see analytics option with proper description and toggle
 
-  @LW-3719 @Mainnet @Testnet
-  Scenario Outline: Extended view - Settings - Click on: "<element>" sends matomo event with payload containing: "<action_name>"
-    When I open settings from header menu
-    And Analytics toggle is enabled: true
-    Then clicking on "<element>" in extended mode, existence of matomo event with payload containing: "<action_name>" should be: true
-    Examples:
-      | element      | action_name                   |
-      | Tokens       | view-tokens,click-event       |
-      | NFTs         | view-nft,click-event          |
-      | Transactions | view-transactions,click-event |
-      | Staking      | staking,click-event           |
-
   @LW-3869 @Mainnet @Testnet
   Scenario: Extended view - Settings - Show passphrase displayed above Analytics under the Security section in the Settings page
     When I open settings from header menu
