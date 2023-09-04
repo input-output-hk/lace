@@ -16,6 +16,7 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { getRewardsAmount } from '@src/views/browser-view/features/activity/helpers';
+import { MAX_POOLS_COUNT } from '@lace/staking';
 
 /**
  * validates if the transaction is confirmed
@@ -143,7 +144,7 @@ const getTransactionDetail =
         },
         pagination: {
           startAt: 0,
-          limit: 5
+          limit: MAX_POOLS_COUNT
         }
       };
       const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
