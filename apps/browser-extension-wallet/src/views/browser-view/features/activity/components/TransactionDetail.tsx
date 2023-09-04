@@ -145,14 +145,12 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
     <TransactionDetailBrowser
       hash={transactionInfo.tx.hash}
       status={currentTransactionStatus}
-      includedDate={transactionInfo.tx.includedDate}
-      includedTime={transactionInfo.tx.includedTime}
+      includedDate={transactionInfo.tx.includedUtcDate}
+      includedTime={transactionInfo.tx.includedUtcTime}
       addrInputs={transactionInfo.tx.addrInputs}
       addrOutputs={transactionInfo.tx.addrOutputs}
       fee={transactionInfo.tx.fee}
-      poolName={transactionInfo.tx?.poolName}
-      poolTicker={transactionInfo.tx?.poolTicker}
-      poolId={transactionInfo.tx?.poolId}
+      pools={transactionInfo.tx.pools}
       deposit={transactionInfo.tx.deposit}
       depositReclaim={transactionInfo.tx.depositReclaim}
       metadata={transactionInfo.tx.metadata}

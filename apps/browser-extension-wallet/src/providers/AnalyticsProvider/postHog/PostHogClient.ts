@@ -6,8 +6,8 @@ import {
   ExtensionViews,
   PostHogAction,
   PostHogMetadata,
-  PostHogProperties,
   PostHogPersonProperties,
+  PostHogProperties,
   UserTrackingType
 } from '../analyticsTracker';
 import {
@@ -46,7 +46,13 @@ export class PostHogClient {
       disable_persistence: true,
       disable_cookie: true,
       persistence: 'memory',
-      property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time']
+      property_blacklist: [
+        '$autocapture_disabled_server_side',
+        '$console_log_recording_enabled_server_side',
+        '$device_id',
+        '$session_recording_recorder_version_server_side',
+        '$time'
+      ]
     });
   }
 
@@ -102,7 +108,6 @@ export class PostHogClient {
 
   protected async getEventMetadata(): Promise<PostHogMetadata> {
     return {
-      url: window.location.href,
       view: this.view,
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
@@ -113,14 +118,16 @@ export class PostHogClient {
 
   protected async getPersonProperties(): Promise<PostHogPersonProperties | undefined> {
     const currentUserTrackingType = await this.userIdService.getUserTrackingType();
-
     if (!this.userTrackingType) {
       this.userTrackingType = currentUserTrackingType;
+      // set user_tracking_type in the first event
+      return { $set: { user_tracking_type: this.userTrackingType } };
     }
 
+    // eslint-disable-next-line consistent-return
     if (currentUserTrackingType === this.userTrackingType) return;
     this.userTrackingType = currentUserTrackingType;
-    // eslint-disable-next-line consistent-return
+    // update user_tracking_type if tracking type has changed
     return { $set: { user_tracking_type: this.userTrackingType } };
   }
 }

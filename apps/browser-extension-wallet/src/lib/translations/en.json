@@ -17,8 +17,8 @@
         "staking": "Staking",
         "name": {
           "delegation": "Delegation",
-          "delegationDeregistration": "De-Registration",
-          "delegationRegistration": "Registration",
+          "delegationDeregistration": "Stake Key De-Registration",
+          "delegationRegistration": "Stake Key Registration",
           "rewards": "Rewards",
           "incoming": "Received",
           "outgoing": "Sent",
@@ -44,8 +44,8 @@
       "transactionFeeInfo": "The amount you have been charged to process your transaction",
       "received": "Received",
       "delegation": "Delegation",
-      "registration": "Registration",
-      "deregistration": "De-registration",
+      "registration": "Stake Key Registration",
+      "deregistration": "Stake Key De-registration",
       "poolName": "Pool name",
       "poolTicker": "Pool ticker",
       "poolId": "Pool ID",
@@ -54,7 +54,8 @@
       "summary": "Summary",
       "from": "From",
       "to": "To",
-      "multipleAddresses": "Multiple addresses"
+      "multipleAddresses": "Multiple addresses",
+      "pools": "Pool(s)"
     }
   },
   "tab.main.title": "Tab extension",
@@ -532,7 +533,9 @@
         "confirmation.title": "Staking confirmation",
         "confirmation.subTitle": "Confirm the stake pool",
         "confirmation.cardanoName": "Cardano",
-        "confirmation.totalCost.title": "Transaction cost",
+        "confirmation.transactionCost.title": "Transaction cost",
+        "confirmation.transactionReturn.title": "Transaction return",
+        "confirmation.transactionTotal.title": "Total",
         "confirmation.button.confirm": "Next",
         "confirmation.button.signing": "Signing in progress",
         "confirmation.button.confirmWithDevice": "Confirm with {{hardwareWallet}}",
@@ -631,8 +634,8 @@
         "staking": "Staking",
         "name": {
           "delegation": "Delegation",
-          "delegationDeregistration": "De-Registration",
-          "delegationRegistration": "Registration",
+          "delegationDeregistration": "Stake Key De-Registration",
+          "delegationRegistration": "Stake Key Registration",
           "withdrawal": "Withdrawal",
           "incoming": "Received",
           "outgoing": "Sent",

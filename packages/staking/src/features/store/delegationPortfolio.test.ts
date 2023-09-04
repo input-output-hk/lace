@@ -72,6 +72,28 @@ const dummyStakePool3 = {
   metrics: {},
   pledge: BigInt(1_659_000_000_000),
 } as Wallet.Cardano.StakePool;
+const dummyCurrentEpoch: Wallet.EpochInfo = {
+  epochNo: Wallet.Cardano.EpochNo(102),
+  // @ts-expect-error mock if needed
+  firstSlot: {},
+  // @ts-expect-error mock if needed
+  lastSlot: {},
+};
+
+const dummyDelegationRewardsHistory: Wallet.RewardsHistory = {
+  all: [
+    { epoch: Wallet.Cardano.EpochNo(98), poolId: dummyStakePool1.id, rewards: BigInt(8889) },
+    { epoch: Wallet.Cardano.EpochNo(99), poolId: dummyStakePool1.id, rewards: BigInt(1111) },
+    { epoch: Wallet.Cardano.EpochNo(100), poolId: dummyStakePool2.id, rewards: BigInt(2222) },
+    { epoch: Wallet.Cardano.EpochNo(100), poolId: dummyStakePool3.id, rewards: BigInt(3333) },
+    { epoch: Wallet.Cardano.EpochNo(101), poolId: dummyStakePool1.id, rewards: BigInt(4444) },
+    { epoch: Wallet.Cardano.EpochNo(101), poolId: dummyStakePool2.id, rewards: BigInt(5555) },
+    { epoch: Wallet.Cardano.EpochNo(102), poolId: dummyStakePool1.id, rewards: BigInt(6666) },
+  ],
+  avgReward: null,
+  lastReward: null,
+  lifetimeRewards: BigInt(0),
+};
 
 describe('delegationPortfolioStore', () => {
   it('initializes the portfolio preferences', () => {
@@ -88,6 +110,7 @@ describe('delegationPortfolioStore', () => {
     act(() =>
       result.current.mutators.setCurrentPortfolio({
         cardanoCoin: { symbol: 'ADA' } as Wallet.CoinId,
+        currentEpoch: dummyCurrentEpoch,
         delegationDistribution: [
           {
             percentage: Wallet.Percent(33.33),
@@ -108,23 +131,11 @@ describe('delegationPortfolioStore', () => {
             stake: BigInt(1),
           },
         ],
+        delegationRewardsHistory: dummyDelegationRewardsHistory,
       })
     );
     expect(result.current.currentPortfolio.length).toEqual(expectedLength);
-    expect(result.current.currentPortfolio).toEqual([
-      expect.objectContaining({
-        ...dummyPool1,
-        weight: 33.33,
-      }),
-      expect.objectContaining({
-        ...dummyPool2,
-        weight: 33.33,
-      }),
-      expect.objectContaining({
-        ...dummyPool3,
-        weight: 33.33,
-      }),
-    ]);
+    expect(result.current.currentPortfolio).toMatchSnapshot();
   });
 
   describe('selections', () => {
@@ -177,6 +188,7 @@ describe('delegationPortfolioStore', () => {
       act(() => {
         result.current.mutators.setCurrentPortfolio({
           cardanoCoin: { symbol: 'ADA' } as Wallet.CoinId,
+          currentEpoch: dummyCurrentEpoch,
           delegationDistribution: [
             {
               percentage: Wallet.Percent(33.33),
@@ -197,6 +209,7 @@ describe('delegationPortfolioStore', () => {
               stake: BigInt(1),
             },
           ],
+          delegationRewardsHistory: dummyDelegationRewardsHistory,
         });
       });
       act(() => result.current.mutators.beginManagementProcess(PortfolioManagementProcess.CurrentPortfolio));
