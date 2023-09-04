@@ -108,7 +108,7 @@ describe('Testing address book validator', () => {
     });
     test('should return proper error in case it is not valid', () => {
       const spy = jest.spyOn(addressBook, 'isValidAddress').mockImplementation(() => false);
-      expect(addressBook.validateWalletAddress('asd')).toEqual('browserView.addressBook.form.incorrectCardanoAddress');
+      expect(addressBook.validateWalletAddress('asd')).toEqual('browserView.addressBook.form.invalidCardanoAddress');
       spy.mockRestore();
     });
     test('should return an empty string in case it is valid', () => {
