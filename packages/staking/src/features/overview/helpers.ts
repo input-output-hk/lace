@@ -1,7 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor } from '@lace/ui';
 import flatMap from 'lodash/flatMap';
-import type { StakingRewards } from '../outside-handles-provider';
 import type { AssetActivityListProps, TransactionType } from '@lace/core';
 import { CurrentPortfolioStakePool } from '../store';
 
@@ -11,14 +10,12 @@ type MapPortfolioToDisplayDataParams = {
   cardanoCoin: Wallet.CoinId;
   cardanoPrice?: number;
   portfolio: CurrentPortfolioStakePool[];
-  stakingRewards: StakingRewards;
 };
 
 export const mapPortfolioToDisplayData = ({
   cardanoCoin,
   cardanoPrice,
   portfolio,
-  stakingRewards,
 }: MapPortfolioToDisplayDataParams) => {
   const displayData = portfolio.map((item, index) => ({
     ...item,
@@ -26,14 +23,14 @@ export const mapPortfolioToDisplayData = ({
     cardanoCoin,
     color: PIE_CHART_DEFAULT_COLOR_SET[index] as PieChartColor,
     fiat: cardanoPrice,
-    lastReward: Wallet.util.lovelacesToAdaString(stakingRewards.lastReward.toString()),
+    lastReward: Wallet.util.lovelacesToAdaString(item.displayData.lastReward.toString()),
     status: ((): 'retired' | 'saturated' | undefined => {
       if (item.displayData.retired) return 'retired';
       if (Number(item.displayData.saturation || 0) > SATURATION_UPPER_BOUND) return 'saturated';
       // eslint-disable-next-line consistent-return, unicorn/no-useless-undefined
       return undefined;
     })(),
-    totalRewards: Wallet.util.lovelacesToAdaString(stakingRewards.totalRewards.toString()),
+    totalRewards: Wallet.util.lovelacesToAdaString(item.displayData.totalRewards.toString()),
     totalStaked: Wallet.util.lovelacesToAdaString(item.value.toString()),
   }));
 
