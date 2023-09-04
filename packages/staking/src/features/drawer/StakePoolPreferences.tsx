@@ -67,7 +67,7 @@ export const StakePoolPreferences = () => {
   return (
     <Flex flexDirection="column" gap="$32" alignItems="stretch">
       <DelegationCard
-        balance={compactNumber(balancesBalance.available.coinBalance)}
+        balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
         cardanoCoinSymbol={symbol}
         distribution={displayData}
         status="ready"
