@@ -11,8 +11,8 @@
         "staking": "Staking",
         "name": {
           "delegation": "Delegation",
-          "delegationDeregistration": "De-Registration",
-          "delegationRegistration": "Registration",
+          "delegationDeregistration": "Stake Key De-Registration",
+          "delegationRegistration": "Stake Key Registration",
           "rewards": "Rewards",
           "incoming": "Received",
           "outgoing": "Sent",
@@ -71,13 +71,15 @@
       "transactionFeeInfo": "The amount you have been charged to process your transaction",
       "received": "Received",
       "delegation": "Delegation",
-      "deregistration": "De-registration",
+      "registration": "Stake Key Registration",
+      "deregistration": "Stake Key De-Registration",
       "poolName": "Pool name",
       "poolTicker": "Pool ticker",
       "poolId": "Pool ID",
       "rewards": "Rewards",
       "rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
-      "copiedToClipboard": "Copied to clipboard"
+      "copiedToClipboard": "Copied to clipboard",
+      "pools": "Pool(s)"
     },
     "authorizeDapp": {
       "title": "Allow this site to",
