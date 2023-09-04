@@ -120,7 +120,7 @@ export const blockTransformer = (block: Wallet.BlockInfo): TransactionDetail['bl
   confirmations: block.confirmations.toString(),
   size: block.size.toString(),
   transactions: block.txCount.toString(),
-  utcDate: formatDate({ date: block.date, type: 'utc' }),
+  utcDate: formatDate({ date: block.date, format: 'MM/DD/YYYY', type: 'utc' }),
   utcTime: `${formatTime({ date: block.date, type: 'utc' })} UTC`,
   nextBlock: block.nextBlock ? String(block.header.blockNo.valueOf() + 1) : undefined,
   prevBlock: block.previousBlock ? String(block.header.blockNo.valueOf() - 1) : undefined,
