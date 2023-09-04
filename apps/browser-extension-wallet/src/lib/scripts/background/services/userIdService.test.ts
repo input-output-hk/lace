@@ -2,6 +2,7 @@ import { BackgroundStorage } from '@lib/scripts/types';
 import { mockKeyAgentsByChain } from '@src/utils/mocks/test-helpers';
 import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from '.';
 import * as utils from '../util';
+import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const mockWalletBasedId =
   '15d632f6b0ab82c72a194d634d8783ea0ef5419c8a8f638cb0c3fc49280e0a0285fc88fbfad04554779d19bec4ab30e5afee2f9ee736ba090c2213d98fe3a475';
@@ -102,12 +103,18 @@ describe('userIdService', () => {
     });
   });
 
-  describe('clearing the id', () => {
-    it('should should clear the correct props', () => {
+  describe('clearing the ID', () => {
+    it('should remove the ID from storage and switch back to basic tracking', async () => {
       const { getStorageMock, setStorageMock, clearStorageMock } = generateStorageMocks({});
       const userIdService = new UserIdService(getStorageMock, setStorageMock, clearStorageMock);
-      userIdService.clearId();
+      await userIdService.makePersistent();
+      const previousUserId = await userIdService.getUserId(1);
+      await userIdService.clearId();
+      const newUserId = await userIdService.getUserId(1);
+
+      expect(userIdService.getUserTrackingType()).toEqual(UserTrackingType.Basic);
       expect(clearStorageMock).toHaveBeenCalledWith(expect.arrayContaining(['userId', 'usePersistentUserId']));
+      expect(previousUserId).not.toEqual(newUserId);
     });
   });
 
