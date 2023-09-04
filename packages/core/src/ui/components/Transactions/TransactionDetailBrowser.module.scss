@@ -233,11 +233,6 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
   padding-bottom: size_unit(3);
 }
 
-.poolEntry {
-  border-bottom: $border-bottom;
-  margin-bottom: size_unit(2);
-}
-
 .addr,
 .detailTitle {
   font-size: var(--bodySmall, 14px) !important;
@@ -262,4 +257,32 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
 .description {
   @include text-body-medium;
   color: var(--text-color-primary);
+}
+
+.stakingInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: size_unit(2);
+
+  .poolsTitle {
+    @include text-body-semi-bold
+  }
+
+  .poolsList {
+    display: flex;
+    flex-direction: column;
+    gap: size_unit(2);
+    text-align: right;
+  }
+
+  .poolHeading {
+    display: flex;
+    justify-content: flex-end;
+    gap: size_unit(1)
+  }
+
+  .lightLabel {
+    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+  }
 }
