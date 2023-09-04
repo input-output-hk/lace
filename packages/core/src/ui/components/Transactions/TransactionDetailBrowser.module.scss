@@ -274,6 +274,7 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
     flex-direction: column;
     gap: size_unit(2);
     text-align: right;
+    overflow: hidden;
   }
 
   .poolHeading {

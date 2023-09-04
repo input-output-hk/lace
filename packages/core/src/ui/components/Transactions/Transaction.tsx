@@ -171,7 +171,7 @@ export const Transaction = ({
                   </div>
                   {pool.id && (
                     <div data-testid="tx-pool-id" className={cn(styles.detail, styles.poolId, styles.lightLabel)}>
-                      {pool.id}
+                      <Ellipsis text={pool.id} ellipsisInTheMiddle />
                     </div>
                   )}
                 </div>
