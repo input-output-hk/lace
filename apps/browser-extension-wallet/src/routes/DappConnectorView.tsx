@@ -13,7 +13,8 @@ import {
   SignDataFlowContainer,
   NoWallet,
   DappTransactionSuccess,
-  DappTransactionFail
+  DappTransactionFail,
+  DappCollateralContainer
 } from '../features/dapp';
 import { Loader } from '@lace/common';
 import styles from './DappConnectorView.module.scss';
@@ -108,6 +109,7 @@ export const DappConnectorView = (): React.ReactElement => {
           <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
           <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
           <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
+          <Route exact path={dAppRoutePaths.dappSetCollateral} component={DappCollateralContainer} />
         </Switch>
       </MainLayout>
     );

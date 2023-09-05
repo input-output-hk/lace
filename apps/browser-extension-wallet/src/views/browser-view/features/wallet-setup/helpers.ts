@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { Wallet } from '@lace/cardano';
-import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
+import * as HardwareLedger from '../../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 import { PostHogProperties } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
@@ -22,7 +22,7 @@ export const getTrezorSpecifications = async (): Promise<HardwareWalletPersonPro
 };
 
 export const getLedgerSpecifications = async (
-  deviceConnection: LedgerKeyAgent['deviceConnection']
+  deviceConnection: HardwareLedger.LedgerKeyAgent['deviceConnection']
 ): Promise<HardwareWalletPersonProperties> => {
   const cardanoApp = await deviceConnection.getVersion();
   return {
@@ -38,7 +38,7 @@ export const getHWPersonProperties = async (
   const HWSpecifications =
     connectedDevice === Wallet.KeyManagement.KeyAgentType.Trezor
       ? await getTrezorSpecifications()
-      : await getLedgerSpecifications(deviceConnection as LedgerKeyAgent['deviceConnection']);
+      : await getLedgerSpecifications(deviceConnection as HardwareLedger.LedgerKeyAgent['deviceConnection']);
   return {
     $set_once: {
       initial_hardware_wallet_model: HWSpecifications.model,
