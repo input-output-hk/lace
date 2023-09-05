@@ -9,14 +9,14 @@ Feature: Analytics - Posthog - Event properties
     And I am on NFTs extended page
     And I validate that event has correct properties
 
-  @LW-7703X
+  @LW-8349
   Scenario: Extended View - Analytics - Verify event properties - Send - Send button
     Given I set up request interception for posthog analytics request(s)
     When I click "Send" button on page header
     Then I validate that the event includes "trigger_point" property
     And I validate that the "send | send | click" event includes property "trigger_point" with value "send button" in posthog
 
-  @LW-7703Y
+  @LW-8350
   Scenario: Extended View - Analytics - Verify event properties - Send - Send NFT button
     Given I set up request interception for posthog analytics request(s)
     And I am on NFTs extended page
@@ -25,7 +25,7 @@ Feature: Analytics - Posthog - Event properties
     Then I validate that the event includes "trigger_point" property
     And I validate that the "send | send | click" event includes property "trigger_point" with value "nfts page" in posthog
 
-  @LW-7703Z
+  @LW-8351
   Scenario: Extended View - Analytics - Verify event properties - Send - Send token
     Given I set up request interception for posthog analytics request(s)
     And I click token with name: "Cardano"
