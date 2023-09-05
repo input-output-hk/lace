@@ -72,7 +72,7 @@ export const en: Translations = {
   'general.button.confirm': 'Confirm',
   'modals.beta.button': 'Got it',
   'modals.beta.description':
-    'Lace allows you to stake to up to 5 pools, we are still ironing things out, make sure you know what you are doing if you would like to use multi-delegation.',
+    'This feature allows you to stake to up to 5 pools. This is still in beta version, so some functionality might not be available.',
   'modals.beta.pill': 'Beta',
   'modals.beta.title': 'Multi-delegation',
   'modals.changingPreferences.buttons.cancel': 'Cancel',
