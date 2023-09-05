@@ -3,8 +3,6 @@ import SectionTitle from '../sectionTitle';
 import MultidelegationPageAssert from '../../assert/multidelegationPageAssert';
 import { browser } from '@wdio/globals';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
-import { t } from '../../utils/translationService';
-import { expect } from 'chai';
 import { ChainablePromiseElement } from 'webdriverio';
 
 class MultidelegationPage {
@@ -250,27 +248,6 @@ class MultidelegationPage {
   async confirmBetaModal() {
     await this.multidelegationBetaModalBtnConfirm.waitForClickable();
     await this.multidelegationBetaModalBtnConfirm.click();
-  }
-
-  async delegationCardLooksCorrectly() {
-    expect(await this.delegationCardBalanceLabel.getText()).to.equal(
-      await t('overview.delegationCard.label.balance', 'staking')
-    );
-    const adaValue = Number((await this.delegationCardBalanceValue.getText()).split(' ')[0]);
-    expect(adaValue).to.be.greaterThan(0);
-    expect(await this.delegationCardPoolsLabel.getText()).to.equal(
-      await t('overview.delegationCard.label.pools', 'staking')
-    );
-    const poolsCount = Number(await this.delegationCardPoolsValue.getText());
-    expect(poolsCount).to.be.greaterThan(0);
-    expect(await this.delegationCardStatusLabel.getText()).to.equal(
-      await t('overview.delegationCard.label.status', 'staking')
-    );
-    const statusValue = await this.delegationCardStatusValue.getText();
-    poolsCount === 1
-      ? expect(statusValue).to.equal(await t('overview.delegationCard.statuses.simpleDelegation', 'staking'))
-      : expect(statusValue).to.equal(await t('overview.delegationCard.statuses.multiDelegation', 'staking'));
-    expect(await this.delegationCardChartSlices.length).to.equal(poolsCount);
   }
 }
 
