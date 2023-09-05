@@ -461,6 +461,10 @@ export const WalletSetupWizard = ({
               onNext={(result) => {
                 setPassword(result.password);
                 setWalletName(result.walletName);
+                sendAnalytics(
+                  Events.WALLET_PASSWORD_NEXT,
+                  postHogOnboardingActions[setupType]?.WALLET_NAME_PASSWORD_NEXT_CLICK
+                );
                 setupType === 'create'
                   ? skipTo(WalletSetupSteps.PreMnemonic)
                   : useDifferentMnemonicLengths
