@@ -22,7 +22,7 @@ export const ChangingPreferencesModal = ({ onConfirm, popupView }: StakingModals
     <StakingModal
       visible={isStakeConfirmationVisible}
       title={t('modals.changingPreferences.title')}
-      translationKey={t('modals.changingPreferences.description')}
+      description={t('modals.changingPreferences.description')}
       actions={[
         {
           body: t('modals.changingPreferences.buttons.cancel'),
