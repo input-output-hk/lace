@@ -137,7 +137,10 @@ Then(/^I see drawer with "([^"]*)" stake pool details$/, async (_stakePool: stri
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
 Then(/^I see multidelegation drawer with "([^"]*)" stake pool details$/, async (_stakePool: string) => {
   const adacapital = extensionUtils.isMainnet() ? StakePoolsData.adacapitalMainnet : StakePoolsData.adacapital;
-  await multidelegationStakePoolDetailsAssert.assertSeeMultiDelegationStakePoolDetailsPage(adacapital, true);
+  await multidelegationStakePoolDetailsAssert.assertSeeMultiDelegationStakePoolDetailsPageAlreadyDelegating(
+    adacapital,
+    true
+  );
 });
 
 Then(/^I wait until current stake pool switch to "([^"]*)"$/, async (stakePoolName: string) => {
