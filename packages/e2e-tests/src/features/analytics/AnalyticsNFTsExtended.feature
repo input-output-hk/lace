@@ -1,4 +1,4 @@
-@NFTs-Extended @Testnet @Mainnet
+@NFTs-Extended @Analytics @Testnet @Mainnet
 Feature: Analytics - Posthog - NFTs - Extended view
 
   Background:

@@ -1,4 +1,4 @@
-@Staking-SwitchingPools-Extended-E2E @Testnet
+@Staking-SwitchingPools-Extended-E2E @Analytics @Testnet
 Feature: Analytics - Posthog - Switching pools - Extended View
 
   Background:
