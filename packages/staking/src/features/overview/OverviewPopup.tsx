@@ -31,7 +31,12 @@ export const OverviewPopup = () => {
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
-  if (!totalCoinBalance || !protocolParameters?.stakeKeyDeposit || !balancesBalance?.available?.coinBalance) {
+  if (
+    !totalCoinBalance ||
+    !protocolParameters?.stakeKeyDeposit ||
+    !balancesBalance?.available?.coinBalance ||
+    !rewardAccounts
+  ) {
     return <Skeleton loading />;
   }
 
