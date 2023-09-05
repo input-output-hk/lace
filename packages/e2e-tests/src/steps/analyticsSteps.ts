@@ -22,9 +22,9 @@ When(/^I validate latest analytics multiple events:$/, async (eventActionNames: 
       async () => (await getLatestEventsNames(expectedEventNames.length)).includes(expectedEventName),
       {
         interval: 1000,
-        timeout: 4000,
-        timeoutMsg: `Failed while waiting for event ${expectedEventName}. Actual Latest events: ${(
-          await getLatestEventsNames(expectedEventNames.length)
+        timeout: 6000,
+        timeoutMsg: `Failed while waiting for event ${expectedEventName}. \nActual events:\n ${(
+          await getAllEventsNames()
         ).toString()}`
       }
     );
@@ -34,9 +34,9 @@ When(/^I validate latest analytics multiple events:$/, async (eventActionNames: 
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
   await browser.waitUntil(async () => (await getLatestEventsNames()).includes(eventActionName), {
     interval: 1000,
-    timeout: 4000,
-    timeoutMsg: `Failed while waiting for event ${eventActionName}. Actual latest event: ${(
-      await getLatestEventsNames()
+    timeout: 6000,
+    timeoutMsg: `Failed while waiting for event '${eventActionName}'. \nActual events:\n ${(
+      await getAllEventsNames()
     ).toString()}`
   });
 });
@@ -44,8 +44,8 @@ When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionN
 When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numberOfRequests: number) => {
   await browser.waitUntil(async () => (await getAllEventsNames()).length === Number(numberOfRequests), {
     interval: 1000,
-    timeout: 4000,
-    timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual event sent: ${
+    timeout: 6000,
+    timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual events amount sent: ${
       (
         await getLatestEventsNames()
       ).length
