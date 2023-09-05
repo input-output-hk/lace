@@ -49,7 +49,6 @@ export enum HandleVerificationState {
   VERIFYING = 'verifying',
   CHANGED_OWNERSHIP = 'changedOwnership'
 }
-const isHandleAddressBookEnabled = process.env.USE_HANDLE_SEND_UPDATE === 'true';
 
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -270,7 +269,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   }, [row, setAddressValue]);
 
   const bannerDescription =
-    isPopupView && isHandleAddressBookEnabled
+    isPopupView && isAdaHandleEnabled
       ? 'addressBook.reviewModal.banner.popUpDescription'
       : 'addressBook.reviewModal.banner.browserDescription';
 
@@ -329,9 +328,9 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           onButtonClick={handleAddressReview}
           popupView={isPopupView}
           message={t(bannerDescription, { name: addressInputValue.name })}
-          messagePartTwo={isHandleAddressBookEnabled && getMessagePartTwo}
-          buttonMessage={isHandleAddressBookEnabled && getButtonText}
-          linkMessage={isHandleAddressBookEnabled && getLinkMessage}
+          messagePartTwo={isAdaHandleEnabled && getMessagePartTwo}
+          buttonMessage={isAdaHandleEnabled && getButtonText}
+          linkMessage={isAdaHandleEnabled && getLinkMessage}
         />
       )}
     </span>
