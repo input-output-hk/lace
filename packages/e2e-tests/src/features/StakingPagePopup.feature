@@ -1,4 +1,4 @@
-@Staking-Popup @Testnet @Mainnet
+@Staking-Popup @Testnet @Mainnet @Pending
 Feature: Staking Page - Popup View
 
   Background:
