@@ -57,6 +57,7 @@ class MultidelegationPage {
   get delegationCardStatusLabel() {
     return $(this.DELEGATIONCARD_STATUS_LABEL);
   }
+
   get delegationCardStatusValue() {
     return $(this.DELEGATIONCARD_STATUS_VALUE);
   }
@@ -64,6 +65,7 @@ class MultidelegationPage {
   get delegationCardBalanceLabel() {
     return $(this.DELEGATIONCARD_BALANCE_LABEL);
   }
+
   get delegationCardBalanceValue() {
     return $(this.DELEGATIONCARD_BALANCE_VALUE);
   }
@@ -71,6 +73,7 @@ class MultidelegationPage {
   get delegationCardPoolsLabel() {
     return $(this.DELEGATIONCARD_POOLS_LABEL);
   }
+
   get delegationCardPoolsValue() {
     return $(this.DELEGATIONCARD_POOLS_VALUE);
   }
