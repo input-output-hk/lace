@@ -27,14 +27,20 @@ export const Header = ({
       justifyContent="space-between"
     >
       {onBackClick !== undefined && (
-        <NavigationButtons.Back onClick={onBackClick} />
+        <Flex w="$40">
+          <NavigationButtons.Back onClick={onBackClick} />
+        </Flex>
       )}
-      <Typography.Body.Large weight="$bold" className={cx.text}>
-        {text}
-      </Typography.Body.Large>
-      <Close>
-        <NavigationButtons.Close onClick={onCloseClick} />
-      </Close>
+      <Flex justifyContent="center" w="$fill">
+        <Typography.Body.Large weight="$bold" className={cx.text}>
+          {text}
+        </Typography.Body.Large>
+      </Flex>
+      <Flex w="$40">
+        <Close>
+          <NavigationButtons.Close onClick={onCloseClick} />
+        </Close>
+      </Flex>
     </Flex>
     <Box mb="$32">
       <Separator />
