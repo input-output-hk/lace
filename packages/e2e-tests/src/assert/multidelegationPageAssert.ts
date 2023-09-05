@@ -29,19 +29,19 @@ class MultidelegationPageAssert {
     expect(await MultidelegationPage.title.getText()).to.equal(await t('staking.sectionTitle'));
   };
 
-  async assertSeeDelegationCardDetailsInfo() {
+  assertSeeDelegationCardDetailsInfo = async () => {
     await MultidelegationPage.delegationCardLooksCorrectly();
-  }
+  };
 
-  async assertSeeDelegatedPoolCardsPopup() {
+  assertSeeDelegatedPoolCardsPopup = async () => {
     const poolsCount = Number(await MultidelegationPage.delegationCardPoolsValue.getText());
     for (let i = 0; i < poolsCount; i++) {
       await this.assertSeeDelegatedPoolDetailsInfo(i);
       await this.assertSeeDelegatedPoolFundsInfo(i);
     }
-  }
+  };
 
-  async assertSeeDelegatedPoolDetailsInfo(index: number) {
+  assertSeeDelegatedPoolDetailsInfo = async (index: number) => {
     await MultidelegationPage.delegatedPoolLogo(index).waitForClickable();
     await MultidelegationPage.delegatedPoolName(index).waitForClickable();
     await MultidelegationPage.delegatedPoolTicker(index).waitForClickable();
@@ -63,9 +63,9 @@ class MultidelegationPageAssert {
     await expect(await MultidelegationPage.delegatedPoolMarginValue(index).getText()).to.match(
       TestnetPatterns.PERCENT_DOUBLE_REGEX
     );
-  }
+  };
 
-  async assertSeeDelegatedPoolFundsInfo(index: number) {
+  assertSeeDelegatedPoolFundsInfo = async (index: number) => {
     expect(await MultidelegationPage.delegatedPoolStakedTitle(index).getText()).to.equal(
       await t('overview.stakingInfoCard.totalStaked', 'staking')
     );
@@ -78,7 +78,7 @@ class MultidelegationPageAssert {
       'tADA'
     )[0];
     await expect(lastRewardsValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
-  }
+  };
 }
 
 export default new MultidelegationPageAssert();

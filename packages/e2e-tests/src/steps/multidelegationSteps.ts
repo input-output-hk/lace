@@ -32,6 +32,6 @@ Then(/^I see Delegation title displayed for multidelegation$/, async () => {
   await MultidelegationPageAssert.assertSeeTitle();
 });
 
-Then(/^I see Delegation pool cards are displayed for (popup|extended) view$/, async () => {
+Then(/^I see Delegation pool cards are displayed for popup view$/, async () => {
   await MultidelegationPageAssert.assertSeeDelegatedPoolCardsPopup();
 });
