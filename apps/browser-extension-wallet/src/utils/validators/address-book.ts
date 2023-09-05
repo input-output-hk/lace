@@ -81,7 +81,7 @@ export const validateWalletAddress = (address: string): string => {
   if (!address) return i18n.t('browserView.addressBook.form.addressMissing');
   if (hasWhiteSpace(address)) return i18n.t('browserView.addressBook.form.addressHasWhiteSpace');
   const isValid = isValidAddress(address);
-  return !isValid ? i18n.t('browserView.addressBook.form.incorrectCardanoAddress') : '';
+  return !isValid ? i18n.t('browserView.addressBook.form.invalidCardanoAddress') : '';
 };
 
 type validateWalletHandleArgs = {
