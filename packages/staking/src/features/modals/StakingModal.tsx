@@ -3,6 +3,7 @@ import { Button, ButtonProps } from '@lace/common';
 import { Modal } from 'antd';
 import cn from 'classnames';
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useStakePoolDetails } from '../store';
 import styles from './StakingModal.module.scss';
 
@@ -18,24 +19,27 @@ export type StakingModalProps = {
   title: React.ReactNode;
   visible: boolean;
   announcement?: boolean;
-  description: React.ReactNode;
+  translationKey: string;
+  linkHref?: string;
   actions: StakingModalActionProps[];
   popupView?: boolean;
   focusTriggerAfterClose?: boolean;
 };
 
 const popupModalWidth = 312;
-const extendedModalWidth = 479;
+const extendedModalWidth = 512;
 
 export const StakingModal = ({
   announcement,
   title,
-  description,
+  translationKey,
+  linkHref,
   visible,
   actions,
   popupView,
   focusTriggerAfterClose,
 }: StakingModalProps): React.ReactElement<StakingModalProps> => {
+  const { t } = useTranslation();
   const { setStakeConfirmationVisible, setExitStakingVisible, setNoFundsVisible } = useStakePoolDetails();
 
   const handleCancelModal = () => {
@@ -69,7 +73,13 @@ export const StakingModal = ({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         className={cn(styles.content, { [styles.contentAnnouncement!]: announcement })}
       >
-        {description}
+        <Trans
+          i18nKey={translationKey as never}
+          t={t}
+          components={{
+            Link: <a href={linkHref} rel="noreferrer noopener" target="_blank" />,
+          }}
+        />
       </div>
       <div data-testid="stake-modal-actions" className={styles.footer}>
         {actions.map(

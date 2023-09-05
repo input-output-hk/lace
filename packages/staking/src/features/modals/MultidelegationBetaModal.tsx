@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { BetaPill } from './BetaPill';
 import { StakingModal } from './StakingModal';
 
+const BLOG_POST_URL =
+  'https://www.lace.io/blog/stake-your-ada-across-multiple-pools-with-lace-s-new-multi-delegation-feature-beta';
+
 interface MultidelegationBetaModalProps {
   visible: boolean;
   onConfirm: () => void;
@@ -41,7 +44,8 @@ export const MultidelegationBetaModal = ({
           <BetaPill />
         </Flex>
       }
-      description={t('modals.beta.description')}
+      translationKey={t('modals.beta.description')}
+      linkHref={BLOG_POST_URL}
       actions={[
         {
           body: t('modals.beta.button'),
