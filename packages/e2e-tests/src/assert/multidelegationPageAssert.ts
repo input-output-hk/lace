@@ -28,7 +28,7 @@ class MultidelegationPageAssert {
     expect(await MultidelegationPage.title.getText()).to.equal(await t('staking.sectionTitle'));
   };
 
-  async assertSeeDelegationCardWithPoolsCount() {
+  assertSeeDelegationCardWithPoolsCount = async () => {
     expect(await MultidelegationPage.delegationCardBalanceLabel.getText()).to.equal(
       await t('overview.delegationCard.label.balance', 'staking')
     );
@@ -47,7 +47,7 @@ class MultidelegationPageAssert {
       ? expect(statusValue).to.equal(await t('overview.delegationCard.statuses.simpleDelegation', 'staking'))
       : expect(statusValue).to.equal(await t('overview.delegationCard.statuses.multiDelegation', 'staking'));
     expect(await MultidelegationPage.delegationCardChartSlices.length).to.equal(poolsCount);
-  }
+  };
 }
 
 export default new MultidelegationPageAssert();
