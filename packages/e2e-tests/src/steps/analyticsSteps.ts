@@ -42,19 +42,35 @@ When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionN
 });
 
 When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numberOfRequests: number) => {
-  await browser.pause(1500);
-  expect((await getAllEventsNames()).length).to.equal(Number(numberOfRequests));
+  await browser.waitUntil(async () => (await getAllEventsNames()).length === Number(numberOfRequests), {
+    interval: 1000,
+    timeout: 4000,
+    timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual event sent: ${
+      (
+        await getLatestEventsNames()
+      ).length
+    }`
+  });
   await browser.disableInterceptor();
 });
 
 When(/^I validate that alias event has assigned same user id "([^"]*)" in posthog$/, async (expectedUserID: string) => {
-  await browser.pause(1500);
-  const actualAssignedID = (await getEventPayload('$create_alias')).properties.distinct_id;
-  expect(actualAssignedID).to.equal(expectedUserID);
+  await browser.waitUntil(
+    async () => (await getEventPayload('$create_alias')).properties.distinct_id === expectedUserID,
+    {
+      interval: 1000,
+      timeout: 4000,
+      timeoutMsg: `Failed while waiting for event $create_alias contains property distinct id equal to ${expectedUserID}. Actual distinct id= ${
+        (
+          await getEventPayload('$create_alias')
+        ).properties.distinct_id
+      }`
+    }
+  );
 });
 
 Then(/^I validate that event has correct properties$/, async () => {
-  await browser.pause(1500);
+  await browser.pause(2000);
   const actualEventPayload = await getLatestEventPayload();
   const expectedProperties = [
     '$current_url',

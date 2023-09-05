@@ -1,4 +1,4 @@
-@Staking-SwitchingPools-Popup-E2E @Testnet @Pending
+@Staking-SwitchingPools-Popup-E2E @Analytics @Testnet @Pending
 Feature: Analytics - Posthog - Switching pools - Popup View
 
   Background:
