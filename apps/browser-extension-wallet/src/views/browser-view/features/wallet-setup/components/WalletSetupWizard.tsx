@@ -22,7 +22,8 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
-  postHogOnboardingActions
+  postHogOnboardingActions,
+  UserTrackingType
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
 
@@ -35,7 +36,7 @@ import { ILocalStorage } from '@src/types';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import * as process from 'process';
-import { SendOboardingAnalyticsEvent } from '../types';
+import { SendOnboardingAnalyticsEvent } from '../types';
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -62,7 +63,7 @@ const { WalletSetup: Events } = AnalyticsEventNames;
 export interface WalletSetupWizardProps {
   setupType: 'create' | 'restore' | 'forgot_password';
   onCancel: () => void;
-  sendAnalytics: SendOboardingAnalyticsEvent;
+  sendAnalytics: SendOnboardingAnalyticsEvent;
   initialStep?: WalletSetupSteps;
 }
 
@@ -237,15 +238,22 @@ export const WalletSetupWizard = ({
 
     const matomoEvent = isAccepted ? Events.ANALYTICS_AGREE : Events.ANALYTICS_SKIP;
     const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticcSkipAction;
-    sendAnalytics(matomoEvent, postHogAction);
+    const postHogProperties = {
+      // eslint-disable-next-line camelcase
+      $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
+    };
+    sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
     moveForward();
   };
 
   const goToMyWallet = useCallback(
     (wallet?: CreateWalletData) => {
       setWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
+      if (isAnalyticsAccepted) {
+        analytics.sendAliasEvent();
+      }
     },
-    [setWallet, walletInstance]
+    [analytics, isAnalyticsAccepted, setWallet, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {

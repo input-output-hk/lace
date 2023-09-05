@@ -1,6 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Cardano } from '@cardano-sdk/core';
-import { Box, Card, ColorValueHex, ControlButton, Flex, Text } from '@lace/ui';
+import { formatPercentages } from '@lace/common';
+import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Tooltip } from '../overview/staking-info-card/StatsTooltip';
@@ -11,25 +12,27 @@ import TrashIcon from './trash.svg';
 interface PoolDetailsCardProps {
   poolId: Cardano.Cip17Pool['id'];
   name: string;
-  draftPortfolioLength: number;
-  color: ColorValueHex;
-  deleteEnabled: boolean;
+  color: PieChartColor;
 }
 
-export const PoolDetailsCard = ({ name, poolId, draftPortfolioLength, color, deleteEnabled }: PoolDetailsCardProps) => {
+export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
-  const removePoolFromDraft = useDelegationPortfolioStore((state) => state.mutators.removePoolFromDraft);
+  const { draftPortfolioLength, portfolioMutators } = useDelegationPortfolioStore((state) => ({
+    draftPortfolioLength: state.draftPortfolio.length,
+    portfolioMutators: state.mutators,
+  }));
   const { balancesBalance, compactNumber } = useOutsideHandles();
-  const balance = compactNumber(balancesBalance.available.coinBalance);
+  const availableBalance = Number(balancesBalance?.available?.coinBalance || '0');
   const handleRemovePoolFromPortfolio = () => {
-    removePoolFromDraft({ id: poolId });
+    portfolioMutators.removePoolInManagementProcess({ id: poolId });
   };
+  const deleteEnabled = draftPortfolioLength > 1;
 
   return (
     <Card.Outlined className={PoolCard}>
-      <Flex flexDirection={'column'} alignItems={'stretch'} gap={'$16'}>
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
-          <Flex alignItems={'center'} gap={'$32'}>
+      <Flex flexDirection="column" alignItems="stretch" gap="$16">
+        <Flex justifyContent="space-between" alignItems="center">
+          <Flex alignItems="center" gap="$32">
             <Box className={PoolIndicator} style={{ backgroundColor: color }} />
             <Text.SubHeading>{name}</Text.SubHeading>
           </Flex>
@@ -44,9 +47,15 @@ export const PoolDetailsCard = ({ name, poolId, draftPortfolioLength, color, del
           </Tooltip>
         </Flex>
         <Box className={PoolHr} />
-        <Flex justifyContent={'space-between'} alignItems={'center'}>
+        <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
-            {t('drawer.preferences.partOfBalance', { balance, draftPortfolioLength })}
+            {t('drawer.preferences.percentageOfBalance', {
+              percentage: formatPercentages(1 / draftPortfolioLength, {
+                decimalPlaces: 0,
+                rounding: 'down',
+              }),
+              value: compactNumber(availableBalance / draftPortfolioLength),
+            })}
           </Text.Body.Normal>
         </Flex>
       </Flex>

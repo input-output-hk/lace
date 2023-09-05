@@ -1,7 +1,7 @@
 import { Button, Card, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
-import { MAX_POOLS_COUNT, selectDraftPoolsCount, useDelegationPortfolioStore } from '../store';
-import ArrowRight from './arrow-right.svg';
+import ArrowRight from '../staking/arrow-right.svg';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import * as styles from './PortfolioBar.css';
 
 type PortfolioBarParams = {
@@ -12,7 +12,7 @@ export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
   const { t } = useTranslation();
   const { portfolioMutators, selectedPoolsCount } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
-    selectedPoolsCount: selectDraftPoolsCount(store),
+    selectedPoolsCount: store.selections.length,
   }));
 
   if (selectedPoolsCount === 0) return null;
@@ -27,7 +27,7 @@ export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
       <Flex className={styles.buttons}>
         <Button.Secondary
           label={t('portfolioBar.clear')}
-          onClick={portfolioMutators.clearDraft}
+          onClick={portfolioMutators.clearSelections}
           data-testid="portfoliobar-btn-clear"
         />
         <Button.Primary

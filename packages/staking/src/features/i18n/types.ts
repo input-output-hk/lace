@@ -28,6 +28,7 @@ type KeysStructure = {
       stake: '';
       unselect: '';
       addPool: '';
+      disabledTooltip: '';
     };
   };
   drawer: {
@@ -73,15 +74,11 @@ type KeysStructure = {
         retiring: '';
         saturated: '';
       };
-      switchingPoolBanner: {
-        title: '';
-        description: {
-          step1: '';
-          step2: '';
-          step3: '';
-        };
-      };
       stakeOnPoolButton: '';
+      selectForMultiStaking: '';
+      addStakingPool: '';
+      unselectPool: '';
+      manageDelegation: '';
       statistics: '';
       information: '';
       social: '';
@@ -92,10 +89,17 @@ type KeysStructure = {
       title: '';
       subTitle: '';
       cardanoName: '';
-      totalCost: {
+      transactionCost: {
         title: '';
       };
-      theAmountYoullBeChargedForRegisteringYourStakeKey: '';
+      transactionReturn: {
+        title: '';
+      };
+      transactionTotal: {
+        title: '';
+      };
+      chargedDepositAmountInfo: '';
+      reclaimDepositAmountInfo: '';
       stakingDeposit: '';
       errors: {
         utxoFullyDepleted: '';
@@ -112,8 +116,10 @@ type KeysStructure = {
     };
     preferences: {
       selectedStakePools: '';
-      partOfBalance: '';
+      addPoolButton: '';
+      percentageOfBalance: '';
       pickMorePools: '';
+      nextButton: '';
     };
   };
   modals: {
@@ -147,6 +153,16 @@ type KeysStructure = {
         underStaked: '';
       };
     };
+    banners: {
+      pendingFirstDelegation: {
+        title: '';
+        message: '';
+      };
+      pendingPoolMigration: {
+        title: '';
+        message: '';
+      };
+    };
     stakingInfoCard: {
       fee: '';
       margin: '';
@@ -161,6 +177,22 @@ type KeysStructure = {
     yourPoolsSection: {
       heading: '';
       manageButtonLabel: '';
+    };
+    noFunds: {
+      title: '';
+      description: '';
+      button: '';
+    };
+    noStaking: {
+      title: '';
+      description: '';
+      balanceTitle: '';
+      getStarted: '';
+      followSteps: '';
+      searchForPoolDescription: '';
+      searchForPoolTitle: '';
+      selectPoolsDescription: '';
+      selectPoolsTitle: '';
     };
   };
   root: {

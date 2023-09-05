@@ -7,7 +7,13 @@ import { clearInputFieldValue } from '../../utils/inputFieldUtils';
 class MultidelegationPage {
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
   private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
+  private DELEGATIONCARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
+  private DELEGATIONCARD_STATUS_VALUE = '[data-testid="overview.delegationCard.label.status-value"]';
+  private DELEGATIONCARD_BALANCE_LABEL = '[data-testid="overview.delegationCard.label.balance-label"]';
+  private DELEGATIONCARD_BALANCE_VALUE = '[data-testid="overview.delegationCard.label.balance-value"]';
+  private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
   private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
+  private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
   private SEARCH_INPUT = '[data-testid="search-input"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
@@ -29,8 +35,32 @@ class MultidelegationPage {
     return $(this.BROWSE_POOLS_TAB);
   }
 
+  get delegationCardStatusLabel() {
+    return $(this.DELEGATIONCARD_STATUS_LABEL);
+  }
+
+  get delegationCardStatusValue() {
+    return $(this.DELEGATIONCARD_STATUS_VALUE);
+  }
+
+  get delegationCardBalanceLabel() {
+    return $(this.DELEGATIONCARD_BALANCE_LABEL);
+  }
+
+  get delegationCardBalanceValue() {
+    return $(this.DELEGATIONCARD_BALANCE_VALUE);
+  }
+
+  get delegationCardPoolsLabel() {
+    return $(this.DELEGATIONCARD_POOLS_LABEL);
+  }
+
   get delegationCardPoolsValue() {
     return $(this.DELEGATIONCARD_POOLS_VALUE);
+  }
+
+  get delegationCardChartSlices() {
+    return $$(this.DELEGATIONCARD_CHART_PIE_SLICE);
   }
 
   get stakingPageSearchInput() {

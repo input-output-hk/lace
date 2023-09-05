@@ -4,14 +4,20 @@ import utc from 'dayjs/plugin/utc';
 dayjs.extend(utc);
 
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
-export const DEFAULT_TIME_FORTMAT = 'HH:mm:ss';
+export const DEFAULT_TIME_FORMAT = 'HH:mm:ss';
 
-export const formatDate = (date: Date | string | number, format?: string): string =>
+type FormatDateTimeParams = {
+  date: Date | string | number;
+  format?: string;
+  type: 'utc' | 'local';
+};
+
+export const formatDate = ({ date, format, type }: FormatDateTimeParams): string =>
   dayjs(date)
-    .utc()
+    .utc(type === 'local')
     .format(format ?? DEFAULT_DATE_FORMAT);
 
-export const formatTime = (date: Date | string | number, format?: string): string =>
+export const formatTime = ({ date, format, type }: FormatDateTimeParams): string =>
   dayjs(date)
-    .utc()
-    .format(format ?? DEFAULT_TIME_FORTMAT);
+    .utc(type === 'local')
+    .format(format ?? DEFAULT_TIME_FORMAT);

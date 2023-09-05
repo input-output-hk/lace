@@ -47,34 +47,54 @@ export type DraftPortfolioStakePool = Wallet.Cardano.Cip17Pool & {
 };
 
 export type CurrentPortfolioStakePool = DraftPortfolioStakePool & {
+  displayData: Wallet.util.StakePool & {
+    lastReward: bigint;
+    totalRewards: bigint;
+  };
   stakePool: Wallet.Cardano.StakePool;
   value: bigint;
 };
 
+export enum PortfolioManagementProcess {
+  None = 'None',
+  NewPortfolio = 'NewPortfolio',
+  CurrentPortfolio = 'CurrentPortfolio',
+}
+
 export type DelegationPortfolioState = {
+  activeManagementProcess: PortfolioManagementProcess;
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio: DraftPortfolioStakePool[];
+  selections: DraftPortfolioStakePool[];
 };
 
 export type DelegationPortfolioQueries = {
-  poolIncludedInDraft: (id: Wallet.Cardano.PoolIdHex) => boolean;
+  isPoolSelected: (hexId: Wallet.Cardano.PoolIdHex) => boolean;
+  selectionsFull: () => boolean;
 };
 
 type DelegationPortfolioMutators = {
   setCurrentPortfolio: (params: {
     delegationDistribution: DelegatedStake[];
     cardanoCoin: Wallet.CoinId;
+    currentEpoch: Wallet.EpochInfo;
+    delegationRewardsHistory: Wallet.RewardsHistory;
   }) => Promise<void>;
-  addPoolToDraft: (pool: DraftPortfolioStakePool) => void;
-  removePoolFromDraft: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
-  updatePoolWeight: (params: Pick<DraftPortfolioStakePool, 'id' | 'weight'>) => void;
-  clearDraft: () => void;
+  selectPool: (pool: DraftPortfolioStakePool) => void;
+  unselectPool: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
+  clearSelections: () => void;
+  beginManagementProcess: (
+    process: PortfolioManagementProcess.NewPortfolio | PortfolioManagementProcess.CurrentPortfolio
+  ) => void;
+  cancelManagementProcess: (params?: { dumpDraftToSelections: boolean }) => void;
+  finalizeManagementProcess: () => void;
+  removePoolInManagementProcess: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
 };
 
-export type DelegationPortfolioStore = DelegationPortfolioState &
-  DelegationPortfolioQueries & {
-    mutators: DelegationPortfolioMutators;
-  };
+export type DelegationPortfolioStore = DelegationPortfolioState & {
+  mutators: DelegationPortfolioMutators;
+  queries: DelegationPortfolioQueries;
+};
 
 export enum Page {
   overview = 'overview',

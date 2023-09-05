@@ -12,6 +12,7 @@ import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface }
 import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
 import { getChainNameByNetworkMagic } from '@src/utils/get-chain-name-by-network-magic';
+import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -22,6 +23,7 @@ export class UserIdService implements UserIdServiceInterface {
   private walletBasedUserId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
+  private userTrackingType?: UserTrackingType;
 
   constructor(
     private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
@@ -29,6 +31,10 @@ export class UserIdService implements UserIdServiceInterface {
     private clearStorage: typeof clearBackgroundStorage = clearBackgroundStorage,
     private sessionLength: number = SESSION_LENGTH
   ) {}
+
+  getUserTrackingType(): UserTrackingType {
+    return this.userTrackingType;
+  }
 
   private async getWalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {
     const { keyAgentsByChain, usePersistentUserId } = await this.getStorage();
@@ -88,6 +94,7 @@ export class UserIdService implements UserIdServiceInterface {
     console.debug('[ANALYTICS] clearId() called');
     this.randomizedUserId = undefined;
     this.walletBasedUserId = undefined;
+    this.userTrackingType = UserTrackingType.Basic;
     this.clearSessionTimeout();
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
@@ -97,12 +104,14 @@ export class UserIdService implements UserIdServiceInterface {
     this.clearSessionTimeout();
     const userId = await this.getRandomizedUserId();
     await this.setStorage({ usePersistentUserId: true, userId });
+    this.userTrackingType = UserTrackingType.Enhanced;
   }
 
   async makeTemporary(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into temporary');
     await this.setStorage({ usePersistentUserId: false, userId: undefined });
     this.setSessionTimeout();
+    this.userTrackingType = UserTrackingType.Basic;
   }
 
   async extendLifespan(): Promise<void> {
@@ -123,6 +132,7 @@ export class UserIdService implements UserIdServiceInterface {
     }
 
     this.userIdRestored = true;
+    this.userTrackingType = usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic;
   }
 
   private setSessionTimeout(): void {

@@ -7,7 +7,7 @@ import { ToastProps } from '@lace/common';
 import { addressErrorMessage, nameErrorMessage } from '@lib/storage/helpers';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
-import { Cardano, HandleProvider, HandleResolution } from '@cardano-sdk/core';
+import { Cardano, HandleProvider, HandleResolution, Asset } from '@cardano-sdk/core';
 import { isHandle } from '@lace/core';
 
 const MAX_ADDRESS_BOOK_NAME_LENGTH = 20;
@@ -81,15 +81,19 @@ export const validateWalletAddress = (address: string): string => {
   if (!address) return i18n.t('browserView.addressBook.form.addressMissing');
   if (hasWhiteSpace(address)) return i18n.t('browserView.addressBook.form.addressHasWhiteSpace');
   const isValid = isValidAddress(address);
-  return !isValid ? i18n.t('browserView.addressBook.form.incorrectCardanoAddress') : '';
+  return !isValid ? i18n.t('browserView.addressBook.form.invalidCardanoAddress') : '';
 };
 
 type validateWalletHandleArgs = {
   value: string;
-  handleResolver: HandleProvider;
+  handleResolver?: HandleProvider;
 };
 
 export const validateWalletHandle = async ({ value, handleResolver }: validateWalletHandleArgs): Promise<string> => {
+  if (!Asset.util.isValidHandle(value.slice(1))) {
+    throw new Error(i18n.t('general.errors.invalidHandle'));
+  }
+
   const response = await verifyHandle(value, handleResolver);
   const handles = response.handles;
 
