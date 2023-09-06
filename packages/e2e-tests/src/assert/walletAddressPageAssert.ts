@@ -37,8 +37,9 @@ class WalletAddressPageAssert {
     await expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
   }
 
-  async getSrc(item) {
-    return await item.$('img').getAttribute('src');
+  // eslint-disable-next-line no-undef
+  async getSrc(item: WebdriverIO.Element) {
+    return item.$('img').getAttribute('src');
   }
   async assertSeeAdaHandle() {
     const displayedAdaHandleNames: string[] = [];

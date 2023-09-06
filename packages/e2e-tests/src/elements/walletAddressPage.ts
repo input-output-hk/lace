@@ -1,4 +1,5 @@
 import CommonDrawerElements from './CommonDrawerElements';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class WalletAddressPage extends CommonDrawerElements {
   private ADDRESS_CARD = '[data-testid="address-card"]';
@@ -17,7 +18,8 @@ class WalletAddressPage extends CommonDrawerElements {
     return $$(this.ADDRESS_CARD_HANDLE_NAME);
   }
 
-  get addressCardHandleImage() {
+  // eslint-disable-next-line no-undef
+  get addressCardHandleImage(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.ADDRESS_CARD_HANDLE_IMAGE);
   }
 
