@@ -6,9 +6,19 @@ class WalletAddressPage extends CommonDrawerElements {
   private WALLET_NAME = '[data-testid="address-card-name"]';
   private WALLET_ADDRESS = '[data-testid="address-card-address"]';
   private COPY_BUTTON = '[data-testid="copy-address-btn"]';
+  private ADDRESS_CARD_HANDLE_NAME = '[data-testid="address-card-handle-name"]';
+  private ADDRESS_CARD_HANDLE_IMAGE = '[data-testid="address-card-handle-image"]';
 
   get addressCard() {
     return $(this.ADDRESS_CARD);
+  }
+
+  get addressCardHandleName() {
+    return $$(this.ADDRESS_CARD_HANDLE_NAME);
+  }
+
+  get addressCardHandleImage() {
+    return $$(this.ADDRESS_CARD_HANDLE_IMAGE);
   }
 
   get qrCode() {
