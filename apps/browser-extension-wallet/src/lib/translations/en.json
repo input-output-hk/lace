@@ -17,8 +17,8 @@
         "staking": "Staking",
         "name": {
           "delegation": "Delegation",
-          "delegationDeregistration": "De-Registration",
-          "delegationRegistration": "Registration",
+          "delegationDeregistration": "Stake Key De-Registration",
+          "delegationRegistration": "Stake Key Registration",
           "rewards": "Rewards",
           "incoming": "Received",
           "outgoing": "Sent",
@@ -44,8 +44,8 @@
       "transactionFeeInfo": "The amount you have been charged to process your transaction",
       "received": "Received",
       "delegation": "Delegation",
-      "registration": "Registration",
-      "deregistration": "De-registration",
+      "registration": "Stake Key Registration",
+      "deregistration": "Stake Key De-registration",
       "poolName": "Pool name",
       "poolTicker": "Pool ticker",
       "poolId": "Pool ID",
@@ -54,7 +54,8 @@
       "summary": "Summary",
       "from": "From",
       "to": "To",
-      "multipleAddresses": "Multiple addresses"
+      "multipleAddresses": "Multiple addresses",
+      "pools": "Pool(s)"
     }
   },
   "tab.main.title": "Tab extension",
@@ -345,7 +346,15 @@
       "btn.close": "Got it",
       "btn.learnMore": "Learn more"
     },
-    "transactions.confirm.title": "Confirm transaction"
+    "transactions.confirm.title": "Confirm transaction",
+    "collateral.set.header": "Set Collateral",
+    "collateral.create.header": "Create Collateral",
+    "collateral.request": "{{dapp}} requires {{requestedAmount}} {{symbol}} collateral to proceed and {{lockableAmount}} {{symbol}} can be locked without any further transaction.",
+    "collateral.calculating": "Calculating Collateral",
+    "collateral.amountSeparated": "The amount is separated from your account balance, you can choose to return it to your balance at any time.",
+    "collateral.insufficientFunds.title": "Insufficient Funds",
+    "collateral.insufficientFunds.description": "Please add funds to your wallet to avoid and collateral issues",
+    "collateral.insufficientFunds.add": "Add funds"
   },
   "qrInfo": {
     "receive": "Receive",
@@ -457,7 +466,7 @@
     "addressBook.form.nameIsTooLong": "Max {{maxLength}} Characters",
     "addressBook.form.addressMissing": "Address field is required",
     "addressBook.form.addressHasWhiteSpace": "Address has unnecessary white space",
-    "addressBook.form.incorrectCardanoAddress": "Incorrect Cardano address",
+    "addressBook.form.invalidCardanoAddress": "Invalid Cardano address",
     "addressBook.form.addNewAddress": "Add new address",
     "addressBook.form.addNewSubtitle": "Save your favorite addresses to find them easily",
     "voting.pageTitle": "Voting",
@@ -633,8 +642,8 @@
         "staking": "Staking",
         "name": {
           "delegation": "Delegation",
-          "delegationDeregistration": "De-Registration",
-          "delegationRegistration": "Registration",
+          "delegationDeregistration": "Stake Key De-Registration",
+          "delegationRegistration": "Stake Key Registration",
           "withdrawal": "Withdrawal",
           "incoming": "Received",
           "outgoing": "Sent",
@@ -1083,7 +1092,7 @@
     },
     "editAddressForm": {
       "walletName": "Wallet name",
-      "address": "Address",
+      "address": "Recipient’s address or $handle",
       "submissionError": "Address could not be submitted",
       "doneButton": "Done"
     },
@@ -1117,7 +1126,7 @@
     },
     "walletAddressList": {
       "name": "Name",
-      "address": "Address"
+      "address": "Recipient’s address or $handle"
     },
     "walletBasicInfo": {
       "balance": "Balance"

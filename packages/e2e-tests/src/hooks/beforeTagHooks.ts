@@ -133,3 +133,8 @@ Before(
   { tags: '@SendNftHdWallet-Extended-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSendNftHdWalletE2E)
 );
+
+Before(
+  { tags: '@Multidelegation-DelegatedFunds-Popup' },
+  async () => await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle)
+);

@@ -73,9 +73,11 @@ export const Banner = ({
           {messagePartTwo && <Text className={styles.message}>{messagePartTwo}</Text>}
           {description && <div>{descriptionElement}</div>}
         </div>
-        <div className={cn(styles.buttonContainer)}>
-          {buttonMessage && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
-        </div>
+        {!!onButtonClick && (
+          <div className={cn(styles.buttonContainer)}>
+            {buttonMessage && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
+          </div>
+        )}
       </div>
     </div>
   );

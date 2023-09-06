@@ -3,11 +3,18 @@ import SectionTitle from '../sectionTitle';
 import MultidelegationPageAssert from '../../assert/multidelegationStakingPageAssert';
 import { browser } from '@wdio/globals';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
+import { ChainablePromiseElement } from 'webdriverio';
 
 class MultidelegationPage {
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
   private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
+  private DELEGATIONCARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
+  private DELEGATIONCARD_STATUS_VALUE = '[data-testid="overview.delegationCard.label.status-value"]';
+  private DELEGATIONCARD_BALANCE_LABEL = '[data-testid="overview.delegationCard.label.balance-label"]';
+  private DELEGATIONCARD_BALANCE_VALUE = '[data-testid="overview.delegationCard.label.balance-value"]';
+  private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
   private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
+  private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
   private SEARCH_INPUT = '[data-testid="search-input"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
@@ -16,6 +23,24 @@ class MultidelegationPage {
   private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferences-next-button"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
   private MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM = '[data-testid="multidelegation-beta-modal-button"]';
+  private DELEGATED_POOL_ITEM = '[data-testid="delegated-pool-item"]';
+  private DELEGATED_POOL_LOGO = '[data-testid="stake-pool-logo"]';
+  private DELEGATED_POOL_NAME = '[data-testid="stake-pool-name"]';
+  private DELEGATED_POOL_TICKER = '[data-testid="stake-pool-ticker"]';
+  private DELEGATED_POOL_ROS_TITLE = '[data-testid="stats-apy-container"] [data-testid="stats-title"]';
+  private DELEGATED_POOL_ROS_VALUE = '[data-testid="stats-apy-container"] [data-testid="stats-value"]';
+  private DELEGATED_POOL_FEE_TITLE = '[data-testid="stats-fee-container"] [data-testid="stats-title"]';
+  private DELEGATED_POOL_FEE_VALUE = '[data-testid="stats-fee-container"] [data-testid="stats-value"]';
+  private DELEGATED_POOL_MARGIN_TITLE = '[data-testid="stats-margin-container"] [data-testid="stats-title"]';
+  private DELEGATED_POOL_MARGIN_VALUE = '[data-testid="stats-margin-container"] [data-testid="stats-value"]';
+  private DELEGATED_POOL_STAKED_TITLE = '[data-testid="stats-total-staked-container"] [data-testid="stats-title"]';
+  private DELEGATED_POOL_STAKED_VALUE = '[data-testid="stats-total-staked-container"] [data-testid="stats-value"]';
+  private DELEGATED_POOL_TOTAL_REWARDS_TITLE =
+    '[data-testid="stats-total-rewards-container"] [data-testid="stats-title"]';
+  private DELEGATED_POOL_TOTAL_REWARDS_VALUE =
+    '[data-testid="stats-total-rewards-container"] [data-testid="stats-value"]';
+  private DELEGATED_POOL_LAST_REWARDS_TITLE = '[data-testid="stats-last-reward-container"] [data-testid="stats-title"]';
+  private DELEGATED_POOL_LAST_REWARDS_VALUE = '[data-testid="stats-last-reward-container"] [data-testid="stats-value"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -29,8 +54,32 @@ class MultidelegationPage {
     return $(this.BROWSE_POOLS_TAB);
   }
 
+  get delegationCardStatusLabel() {
+    return $(this.DELEGATIONCARD_STATUS_LABEL);
+  }
+
+  get delegationCardStatusValue() {
+    return $(this.DELEGATIONCARD_STATUS_VALUE);
+  }
+
+  get delegationCardBalanceLabel() {
+    return $(this.DELEGATIONCARD_BALANCE_LABEL);
+  }
+
+  get delegationCardBalanceValue() {
+    return $(this.DELEGATIONCARD_BALANCE_VALUE);
+  }
+
+  get delegationCardPoolsLabel() {
+    return $(this.DELEGATIONCARD_POOLS_LABEL);
+  }
+
   get delegationCardPoolsValue() {
     return $(this.DELEGATIONCARD_POOLS_VALUE);
+  }
+
+  get delegationCardChartSlices() {
+    return $$(this.DELEGATIONCARD_CHART_PIE_SLICE);
   }
 
   get stakingPageSearchInput() {
@@ -39,12 +88,6 @@ class MultidelegationPage {
 
   get poolsItems() {
     return $$(this.POOL_ITEM);
-  }
-
-  async getPoolByName(name: string) {
-    return (await this.poolsItems.find(
-      async (item) => (await item.$(this.POOL_NAME).getText()) === name
-    )) as WebdriverIO.Element;
   }
 
   get stakeButton() {
@@ -65,6 +108,72 @@ class MultidelegationPage {
 
   get multidelegationBetaModalBtnConfirm() {
     return $(this.MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM);
+  }
+
+  delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LOGO);
+  }
+
+  delegatedPoolName(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_NAME);
+  }
+
+  delegatedPoolTicker(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_TICKER);
+  }
+
+  delegatedPoolRosTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_ROS_TITLE);
+  }
+
+  delegatedPoolRosValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_ROS_VALUE);
+  }
+
+  delegatedPoolFeeTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_FEE_TITLE);
+  }
+
+  delegatedPoolFeeValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_FEE_VALUE);
+  }
+
+  delegatedPoolMarginTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_MARGIN_TITLE);
+  }
+
+  delegatedPoolMarginValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_MARGIN_VALUE);
+  }
+
+  delegatedPoolStakedTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_STAKED_TITLE);
+  }
+
+  delegatedPoolStakedValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_STAKED_VALUE);
+  }
+
+  delegatedPoolTotalRewardsTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_TOTAL_REWARDS_TITLE);
+  }
+
+  delegatedPoolTotalRewardsValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_TOTAL_REWARDS_VALUE);
+  }
+
+  delegatedPoolLastRewardsTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LAST_REWARDS_TITLE);
+  }
+
+  delegatedPoolLastRewardsValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LAST_REWARDS_VALUE);
+  }
+
+  async getPoolByName(name: string) {
+    return (await this.poolsItems.find(
+      async (item) => (await item.$(this.POOL_NAME).getText()) === name
+    )) as WebdriverIO.Element;
   }
 
   async clickOnTab(tab: string) {
@@ -136,8 +245,10 @@ class MultidelegationPage {
   }
 
   async confirmBetaModal() {
-    await this.multidelegationBetaModalBtnConfirm.waitForClickable();
-    await this.multidelegationBetaModalBtnConfirm.click();
+    if (await this.multidelegationBetaModalBtnConfirm.isDisplayed()) {
+      await this.multidelegationBetaModalBtnConfirm.waitForClickable();
+      await this.multidelegationBetaModalBtnConfirm.click();
+    }
   }
 }
 

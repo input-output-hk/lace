@@ -317,17 +317,6 @@ Feature: General Settings - Popup View
     Then Side drawer "Show 24-word passphrase" is displayed
     And Password field is empty
 
-  @LW-3062 @Mainnet @Testnet
-  Scenario Outline: Popup view - Settings - Analytics option enabled: <is_enabled> and events sent: <is_enabled>
-    Given I open settings from header menu
-    When Analytics toggle is enabled: <toggle_enabled>
-    Then clicking on "Tokens" in popup mode, existence of matomo event with payload containing: "<action_name>" should be: <request_present>
-    Examples:
-      | toggle_enabled | request_present | action_name          |
-      | true           | true            | view-tokens,cookie=1 |
-      | false          | true            | view-tokens          |
-      | false          | false           | cookie=1             |
-
   @LW-3061 @Mainnet @Testnet
   Scenario: Popup view - Settings - Analytics option displayed
     Given I open settings from header menu

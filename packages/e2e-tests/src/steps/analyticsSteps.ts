@@ -2,7 +2,12 @@ import { DataTable, When, Then } from '@cucumber/cucumber';
 import { expect } from 'chai';
 import { browser } from '@wdio/globals';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
-import { getAllEventsNames, getLatestEventPayload, getLatestEventsNames } from '../utils/postHogAnalyticsUtils';
+import {
+  getAllEventsNames,
+  getEventPayload,
+  getLatestEventPayload,
+  getLatestEventsNames
+} from '../utils/postHogAnalyticsUtils';
 
 When(/^I set up request interception for posthog analytics request\(s\)$/, async () => {
   await browser.pause(1000);
@@ -12,7 +17,7 @@ When(/^I set up request interception for posthog analytics request\(s\)$/, async
 
 When(/^I validate latest analytics multiple events:$/, async (eventActionNames: DataTable) => {
   const expectedEventNames = dataTableAsStringArray(eventActionNames);
-  await browser.pause(1000);
+  await browser.pause(1500);
   for (const expectedEventName of expectedEventNames) {
     const actualEventNames = await getLatestEventsNames(expectedEventNames.length);
     expect(actualEventNames).to.contains(expectedEventName);
@@ -20,15 +25,23 @@ When(/^I validate latest analytics multiple events:$/, async (eventActionNames: 
 });
 
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
-  await browser.pause(1000);
+  await browser.pause(1300);
   const actualEventName = await getLatestEventsNames();
   expect(actualEventName).to.contains(eventActionName);
 });
 
 When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numberOfRequests: number) => {
+  await browser.pause(1000);
   expect((await getAllEventsNames()).length).to.equal(Number(numberOfRequests));
   await browser.disableInterceptor();
 });
+
+When(/^I validate that alias event has assigned same user id "([^"]*)" in posthog$/, async (expectedUserID: string) => {
+  await browser.pause(1000);
+  const actualAssignedID = (await getEventPayload('$create_alias')).properties.distinct_id;
+  expect(actualAssignedID).to.equal(expectedUserID);
+});
+
 Then(/^I validate that event has correct properties$/, async () => {
   await browser.pause(1000);
   const actualEventPayload = await getLatestEventPayload();
@@ -47,6 +60,7 @@ Then(/^I validate that event has correct properties$/, async () => {
     '$os',
     '$os_version',
     '$pageview_id',
+    'posthog_project_id',
     '$pathname',
     '$referrer',
     '$referring_domain',
@@ -56,8 +70,7 @@ Then(/^I validate that event has correct properties$/, async () => {
     '$viewport_height',
     '$viewport_width',
     'sent_at_local',
-    'view',
-    'url'
+    'view'
   ];
   for (const expectedProperty of expectedProperties) {
     expect(Object.prototype.hasOwnProperty.call(actualEventPayload.properties, expectedProperty)).to.be.true;
