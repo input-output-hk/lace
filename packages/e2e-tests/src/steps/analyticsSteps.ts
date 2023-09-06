@@ -81,10 +81,7 @@ Then(/^I validate that event has correct properties$/, async () => {
 Then(/^I validate that the event includes "([^"]*)" property$/, async (property: string) => {
   await browser.pause(1000);
   const actualEventPayload = await getLatestEventPayload();
-  const expectedProperties = [property];
-  for (const expectedProperty of expectedProperties) {
-    expect(Object.prototype.hasOwnProperty.call(actualEventPayload.properties, expectedProperty)).to.be.true;
-  }
+  expect(Object.prototype.hasOwnProperty.call(actualEventPayload.properties, property)).to.be.true;
   expect(Object.prototype.hasOwnProperty.call(actualEventPayload, 'timestamp')).to.be.true;
 });
 
