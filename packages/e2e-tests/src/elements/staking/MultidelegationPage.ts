@@ -166,8 +166,10 @@ class MultidelegationPage {
   }
 
   async confirmBetaModal() {
-    await this.multidelegationBetaModalBtnConfirm.waitForClickable();
-    await this.multidelegationBetaModalBtnConfirm.click();
+    if (await this.multidelegationBetaModalBtnConfirm.isDisplayed()) {
+      await this.multidelegationBetaModalBtnConfirm.waitForClickable();
+      await this.multidelegationBetaModalBtnConfirm.click();
+    }
   }
 }
 
