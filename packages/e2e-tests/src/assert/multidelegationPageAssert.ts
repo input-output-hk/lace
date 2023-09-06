@@ -67,17 +67,17 @@ class MultidelegationPageAssert {
     );
     const rosValue = await MultidelegationPage.delegatedPoolRosValue(index).getText();
     if (rosValue !== '-') {
-      await expect(rosValue).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+      expect(rosValue).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
     }
     expect(await MultidelegationPage.delegatedPoolFeeTitle(index).getText()).to.equal(
       await t('overview.stakingInfoCard.fee', 'staking')
     );
     const feeValueNumber = (await MultidelegationPage.delegatedPoolFeeValue(index).getText()).split('tADA')[0];
-    await expect(feeValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+    expect(feeValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
     expect(await MultidelegationPage.delegatedPoolMarginTitle(index).getText()).to.equal(
       await t('overview.stakingInfoCard.margin', 'staking')
     );
-    await expect(await MultidelegationPage.delegatedPoolMarginValue(index).getText()).to.match(
+    expect(await MultidelegationPage.delegatedPoolMarginValue(index).getText()).to.match(
       TestnetPatterns.PERCENT_DOUBLE_REGEX
     );
   };
@@ -87,14 +87,14 @@ class MultidelegationPageAssert {
       await t('overview.stakingInfoCard.totalStaked', 'staking')
     );
     const stakedValueNumber = (await MultidelegationPage.delegatedPoolStakedValue(index).getText()).split('tADA')[0];
-    await expect(stakedValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+    expect(stakedValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
     expect(await MultidelegationPage.delegatedPoolLastRewardsTitle(index).getText()).to.equal(
       await t('overview.stakingInfoCard.lastReward', 'staking')
     );
     const lastRewardsValueNumber = (await MultidelegationPage.delegatedPoolLastRewardsValue(index).getText()).split(
       'tADA'
     )[0];
-    await expect(lastRewardsValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+    expect(lastRewardsValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
   };
 }
 

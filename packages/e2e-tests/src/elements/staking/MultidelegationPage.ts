@@ -110,10 +110,6 @@ class MultidelegationPage {
     return $(this.MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM);
   }
 
-  get delegatedPoolsItems() {
-    return $$(this.DELEGATED_POOL_ITEM);
-  }
-
   delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LOGO);
   }
