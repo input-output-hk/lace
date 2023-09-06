@@ -77,3 +77,19 @@ Then(/^I validate that event has correct properties$/, async () => {
   }
   expect(Object.prototype.hasOwnProperty.call(actualEventPayload, 'timestamp')).to.be.true;
 });
+
+Then(/^I validate that the event includes "([^"]*)" property$/, async (property: string) => {
+  await browser.pause(1000);
+  const actualEventPayload = await getLatestEventPayload();
+  expect(Object.prototype.hasOwnProperty.call(actualEventPayload.properties, property)).to.be.true;
+});
+
+Then(
+  /^I validate that the "([^"]*)" event includes property "([^"]*)" with value "([^"]*)" in posthog$/,
+  async (event: string, property: string, propertyValue: string) => {
+    await browser.pause(1000);
+    const actualPropertyValue = (await getEventPayload(event)).properties[property];
+    console.log(actualPropertyValue);
+    expect(actualPropertyValue).to.equal(propertyValue);
+  }
+);
