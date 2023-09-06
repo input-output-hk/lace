@@ -89,9 +89,9 @@ class StakingPageAssert {
   ) => {
     const stakingInfoComponent = new StakingInfoComponent();
 
-    // await expect(await webTester.getTextValueFromElement(stakingInfoComponent.title())).to.equal(
-    // await t('browserView.staking.stakingInfo.title')
-    // );
+    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.title())).to.equal(
+      await t('browserView.staking.stakingInfo.title')
+    );
 
     await webTester.seeWebElement(stakingInfoComponent.poolLogo());
     await expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolName())).to.equal(

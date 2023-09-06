@@ -8,7 +8,7 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
   Scenario: Extended View - Staking  - Currently staking component
     When I navigate to Staking extended page
     And I confirm multidelegation beta modal
-    Then I see currently staking component for stake pool: "ADA Capital" in extended mode
+    Then I see currently multi-delegation staking component for stake pool: "ADA Capital" in extended mode
 
   @LW-2643 @Smoke
   Scenario: Extended View - Staking - Details of currently staked pool

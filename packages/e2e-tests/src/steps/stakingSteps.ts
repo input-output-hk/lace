@@ -60,6 +60,19 @@ Then(
   }
 );
 
+// eslint-disable-next-line no-unused-vars
+Then(
+  /^I see currently multi-delegation staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
+  // eslint-disable-next-line no-unused-vars
+  async (stakePoolName: string, mode: 'extended' | 'popup') => {
+    const stakePool =
+      stakePoolName === 'OtherStakePool'
+        ? getStakePoolByName(testContext.load(stakePoolName))
+        : getStakePoolByName(stakePoolName);
+    await multidelegationStakePoolDetailsAssert.assertMultiDelegationSeeCurrentlyStakingComponent(stakePool, mode);
+  }
+);
+
 Then(
   /^I see currently staking component for stake pool: "([^"]*)" without metadata in (extended|popup) mode$/,
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
