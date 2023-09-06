@@ -22,6 +22,7 @@ import {
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
+import { SendFlowTriggerPoints } from '../../../send-transaction';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
 
@@ -74,7 +75,8 @@ export const AssetsPortfolio = ({
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.SendTransaction.SEND_TX_BUTTON_POPUP
     });
-    analytics.sendEventToPostHog(PostHogAction.SendClick);
+    // eslint-disable-next-line camelcase
+    analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.SEND_BUTTON });
     redirectToSend({ params: { id: '1' } });
   };
 
