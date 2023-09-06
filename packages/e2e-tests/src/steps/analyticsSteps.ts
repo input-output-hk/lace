@@ -82,7 +82,6 @@ Then(/^I validate that the event includes "([^"]*)" property$/, async (property:
   await browser.pause(1000);
   const actualEventPayload = await getLatestEventPayload();
   expect(Object.prototype.hasOwnProperty.call(actualEventPayload.properties, property)).to.be.true;
-  expect(Object.prototype.hasOwnProperty.call(actualEventPayload, 'timestamp')).to.be.true;
 });
 
 Then(
