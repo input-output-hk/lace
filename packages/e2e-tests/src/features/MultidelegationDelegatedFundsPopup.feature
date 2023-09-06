@@ -12,3 +12,14 @@ Feature: Staking Page - Popup View
     | walletName                     |
     | MultidelegationDelegatedSingle |
     | MultidelegationDelegatedMulti  |
+
+  @LW-8338
+  Scenario Outline: Popup View - Delegated pools cards are present
+    Given I open wallet: "<walletName>" in: popup mode
+    And I disable showing Multidelegation beta banner
+    When I navigate to Staking popup page
+    And I see Delegation pool cards are displayed for popup view
+    Examples:
+      | walletName                     |
+      | MultidelegationDelegatedSingle |
+      | MultidelegationDelegatedMulti  |
