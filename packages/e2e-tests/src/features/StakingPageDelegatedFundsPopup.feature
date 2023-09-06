@@ -1,4 +1,4 @@
-@Staking-DelegatedFunds-Popup @Testnet @Mainnet
+@Staking-DelegatedFunds-Popup @Testnet @Mainnet @Pending
 Feature: Staking Page - Funds already delegated - Popup View
 
   Background:

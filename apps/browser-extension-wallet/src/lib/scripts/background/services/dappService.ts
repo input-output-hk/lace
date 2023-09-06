@@ -49,6 +49,7 @@ export interface UserPromptService {
   allowOrigin(origin: Origin): Promise<'allow' | 'just-once' | 'deny'>;
   allowSignData(): Promise<boolean>;
   allowSignTx(): Promise<boolean>;
+  getCollateralRequest(): Promise<Wallet.Cardano.Utxo[]>;
 }
 
 export const userPromptService = consumeRemoteApi<UserPromptService>(
@@ -57,7 +58,8 @@ export const userPromptService = consumeRemoteApi<UserPromptService>(
     properties: {
       allowOrigin: RemoteApiPropertyType.MethodReturningPromise,
       allowSignData: RemoteApiPropertyType.MethodReturningPromise,
-      allowSignTx: RemoteApiPropertyType.MethodReturningPromise
+      allowSignTx: RemoteApiPropertyType.MethodReturningPromise,
+      getCollateralRequest: RemoteApiPropertyType.MethodReturningPromise
     }
   },
   { logger: console, runtime }

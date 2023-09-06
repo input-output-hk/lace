@@ -45,7 +45,12 @@ export const Overview = () => {
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
-  if (!totalCoinBalance || !protocolParameters?.stakeKeyDeposit || !balancesBalance?.available?.coinBalance) {
+  if (
+    !totalCoinBalance ||
+    !protocolParameters?.stakeKeyDeposit ||
+    !balancesBalance?.available?.coinBalance ||
+    !rewardAccounts
+  ) {
     return <Skeleton loading />;
   }
 

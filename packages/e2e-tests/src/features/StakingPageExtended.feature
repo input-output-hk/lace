@@ -1,4 +1,4 @@
-@Staking-NonDelegatedFunds-Extended
+@Staking-NonDelegatedFunds-Extended @Pending
 Feature: Staking Page - Extended Browser View
 
   Background:

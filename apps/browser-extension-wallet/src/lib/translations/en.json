@@ -346,7 +346,15 @@
       "btn.close": "Got it",
       "btn.learnMore": "Learn more"
     },
-    "transactions.confirm.title": "Confirm transaction"
+    "transactions.confirm.title": "Confirm transaction",
+    "collateral.set.header": "Set Collateral",
+    "collateral.create.header": "Create Collateral",
+    "collateral.request": "{{dapp}} requires {{requestedAmount}} {{symbol}} collateral to proceed and {{lockableAmount}} {{symbol}} can be locked without any further transaction.",
+    "collateral.calculating": "Calculating Collateral",
+    "collateral.amountSeparated": "The amount is separated from your account balance, you can choose to return it to your balance at any time.",
+    "collateral.insufficientFunds.title": "Insufficient Funds",
+    "collateral.insufficientFunds.description": "Please add funds to your wallet to avoid and collateral issues",
+    "collateral.insufficientFunds.add": "Add funds"
   },
   "qrInfo": {
     "receive": "Receive",
