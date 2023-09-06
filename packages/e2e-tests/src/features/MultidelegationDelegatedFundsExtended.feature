@@ -1,4 +1,4 @@
-@MultidelegationDelegatedFunds-Extended @Testnet @Mainnet @Pending
+@MultidelegationDelegatedFunds-Extended @Testnet @Mainnet
 Feature: Staking Page - Funds already delegated - Extended Browser View
 
   Background:

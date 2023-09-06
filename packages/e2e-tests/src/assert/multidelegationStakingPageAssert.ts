@@ -6,7 +6,7 @@ import { TestnetPatterns } from '../support/patterns';
 import { isPopupMode } from '../utils/pageUtils';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import webTester from '../actor/webTester';
-import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
+import { MultiDelegationStakingInfoComponent } from '../elements/staking/MultiDelegationStakingInfoComponent';
 
 class MultidelegationStakePoolDetailsAssert {
   async assertSeeMultiDelegationStakePoolDetailsPage(
@@ -98,65 +98,69 @@ class MultidelegationStakePoolDetailsAssert {
     mode: 'extended' | 'popup',
     noMetaDataPool = false
   ) => {
-    const stakingInfoComponent = new StakingInfoComponent();
+    const multiDelegationStakingInfoComponent = new MultiDelegationStakingInfoComponent();
 
-    await webTester.seeWebElement(stakingInfoComponent.poolLogo());
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolName())).to.equal(
+    await webTester.seeWebElement(multiDelegationStakingInfoComponent.poolLogo());
+    await expect(await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.poolName())).to.equal(
       expectedStakePool.name
     );
 
     await (noMetaDataPool
-      ? expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolTicker())).to.contain(
+      ? expect(await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.poolTicker())).to.contain(
           expectedStakePool.poolId.slice(0, 6)
         )
-      : expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolTicker())).to.equal(
+      : expect(await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.poolTicker())).to.equal(
           expectedStakePool.ticker
         ));
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsApy().title())).to.equal(
-      await t('browserView.staking.stakingInfo.stats.ros')
-    );
+    await expect(
+      await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsApy().title())
+    ).to.equal(await t('browserView.staking.stakingInfo.stats.ros'));
     // TODO BUG LW-5635
     // await expect((await webTester.getTextValueFromElement(stakingInfoComponent.statsApy().value())) as string).to.match(
     //   TestnetPatterns.PERCENT_DOUBLE_REGEX
     // );
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsFee().title())).to.equal(
-      await t('browserView.staking.stakingInfo.stats.Fee')
-    );
-    await expect((await webTester.getTextValueFromElement(stakingInfoComponent.statsFee().value())) as string).to.match(
-      TestnetPatterns.ADA_LITERAL_VALUE_REGEX
-    );
-
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsMargin().title())).to.equal(
-      await t('browserView.staking.stakingInfo.stats.Margin')
-    );
     await expect(
-      (await webTester.getTextValueFromElement(stakingInfoComponent.statsMargin().value())) as string
+      await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsFee().title())
+    ).to.equal(await t('browserView.staking.stakingInfo.stats.Fee'));
+    await expect(
+      (await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsFee().value())) as string
+    ).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+
+    await expect(
+      await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsMargin().title())
+    ).to.equal(await t('browserView.staking.stakingInfo.stats.Margin'));
+    await expect(
+      (await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsMargin().value())) as string
     ).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
 
     if (mode === 'extended') {
-      await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsTotalRewards().title())).to.equal(
-        await t('browserView.staking.stakingInfo.totalRewards.title')
-      );
+      await expect(
+        await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsTotalRewards().title())
+      ).to.equal(await t('browserView.staking.stakingInfo.totalRewards.title'));
 
       await expect(
-        (await webTester.getTextValueFromElement(stakingInfoComponent.statsTotalRewards().value())) as string
+        (await webTester.getTextValueFromElement(
+          multiDelegationStakingInfoComponent.statsTotalRewards().value()
+        )) as string
       ).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX_OR_0);
     }
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsTotalStaked().title())).to.equal(
-      await t('browserView.staking.stakingInfo.totalStaked.title')
-    );
     await expect(
-      (await webTester.getTextValueFromElement(stakingInfoComponent.statsTotalStaked().value())) as string
+      await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsTotalStaked().title())
+    ).to.equal(await t('browserView.staking.stakingInfo.totalStaked.title'));
+    await expect(
+      (await webTester.getTextValueFromElement(
+        multiDelegationStakingInfoComponent.statsTotalStaked().value()
+      )) as string
     ).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsLastReward().title())).to.equal(
-      await t('browserView.staking.stakingInfo.lastReward.title')
-    );
     await expect(
-      (await webTester.getTextValueFromElement(stakingInfoComponent.statsLastReward().value())) as string
+      await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsLastReward().title())
+    ).to.equal(await t('browserView.staking.stakingInfo.lastReward.title'));
+    await expect(
+      (await webTester.getTextValueFromElement(multiDelegationStakingInfoComponent.statsLastReward().value())) as string
     ).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
   };
 
