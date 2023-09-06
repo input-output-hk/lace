@@ -249,5 +249,5 @@ When(/^I set (light|dark) theme mode in Local Storage$/, async (mode: 'light' | 
 });
 
 Given(/^I disable showing Multidelegation beta banner$/, async () => {
-  await localStorageManager.setItem('multidelegationFirstVisit', 'false');
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
 });

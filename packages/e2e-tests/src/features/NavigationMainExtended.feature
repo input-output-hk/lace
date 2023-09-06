@@ -3,6 +3,7 @@ Feature: Main Navigation - Extended view
 
   Background:
     Given Lace is ready for test
+    And I disable showing Multidelegation beta banner
 
   @LW-2692 @Smoke
   Scenario: Extended view - Main navigation is displayed with all items
