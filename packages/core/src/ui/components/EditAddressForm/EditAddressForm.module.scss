@@ -138,7 +138,6 @@ $drawer-width: 664px;
 
 :global(.anticon) {
   font-size: size_unit(2.5);
-  margin-right: size_unit(1);
   
   &.valid {
     color: var(--text-color-green);
