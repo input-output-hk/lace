@@ -55,7 +55,7 @@ export const en: Translations = {
   'drawer.preferences.addPoolButton': 'Add stake pool',
   'drawer.preferences.nextButton': 'Next',
   'drawer.preferences.percentageOfBalance': '~{{value}} ADA (~{{percentage}}%)',
-  'drawer.preferences.pickMorePools': 'Please pick more stake pools.',
+  'drawer.preferences.pickMorePools': 'You need to stake at least to one pool.',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.sign.confirmation.title': 'Staking confirmation',
   'drawer.sign.enterWalletPasswordToConfirmTransaction': 'Enter your wallet password to confirm transaction',
