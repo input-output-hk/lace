@@ -51,7 +51,6 @@ Feature: Analytics - Posthog - Sending - Popup View
   @LW-7830
   Scenario: Analytics - Popup-view - Send - Success Screen - View transaction
     Given I set up request interception for posthog analytics request(s)
-    And I save token: "Cardano" balance
     And I click "Send" button on Tokens page in popup mode
     Then I validate latest analytics single event "send | send | click"
     And I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
