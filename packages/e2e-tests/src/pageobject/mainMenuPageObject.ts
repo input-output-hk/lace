@@ -1,7 +1,6 @@
 import MenuMainPopup from '../elements/menuMainPopup';
 import MenuMainExtended from '../elements/menuMainExtended';
 import menuHeaderPageObject from './menuHeaderPageObject';
-import MultidelegationPage from '../elements/staking/MultidelegationPage';
 
 class MainMenuPageObject {
   tokens = async (mode: 'extended' | 'popup') =>
@@ -26,7 +25,6 @@ class MainMenuPageObject {
         break;
       case 'Staking':
         await this.staking(mode);
-        await MultidelegationPage.confirmBetaModal();
         break;
       case 'Address Book':
         await menuHeaderPageObject.openAddressBook();
