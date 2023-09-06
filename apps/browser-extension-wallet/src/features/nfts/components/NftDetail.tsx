@@ -9,12 +9,13 @@ import { nftDetailSelector } from '@src/views/browser-view/features/nfts/selecto
 import { NftDetail as NftDetailView } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
-import { useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
+import { SendFlowTriggerPoints, useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
 import { DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { buttonIds } from '@hooks/useEnterKeyPress';
@@ -48,6 +49,8 @@ export const NftDetail = (): React.ReactElement => {
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewNFTs.SEND_NFT_POPUP
     });
+    // eslint-disable-next-line camelcase
+    analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.NFTS });
     setSendInitialState(id, SEND_NFT_DEFAULT_AMOUNT);
     redirectToSend({ params: { id } });
   };

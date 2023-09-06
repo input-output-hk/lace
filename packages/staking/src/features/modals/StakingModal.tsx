@@ -25,7 +25,7 @@ export type StakingModalProps = {
 };
 
 const popupModalWidth = 312;
-const extendedModalWidth = 479;
+const extendedModalWidth = 512;
 
 export const StakingModal = ({
   announcement,
