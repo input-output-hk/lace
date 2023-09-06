@@ -28,7 +28,8 @@ Feature: Empty states
 
   @LW-4449
   Scenario: Popup View - Staking empty state
-    When I navigate to Staking popup page
+    When I disable showing Multidelegation beta banner
+    And I navigate to Staking popup page
     Then I see empty state banner for Staking page in popup mode
     When I click "Copy" button on empty state banner
     Then I see a toast with message: "general.clipboard.copiedToClipboard"

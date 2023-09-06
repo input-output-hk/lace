@@ -32,6 +32,7 @@ Feature: Main Navigation - Popup View
   @LW-2610
   Scenario Outline: Extended view - Click Lace logo - <section>
     And Wallet is synced
+    And I disable showing Multidelegation beta banner
     And I navigate to <section> popup page
     And <validateIfSectionIsDisplayed>
     When I click on the logo icon
