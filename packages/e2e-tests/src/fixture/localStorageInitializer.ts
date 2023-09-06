@@ -60,6 +60,10 @@ class LocalStorageInitializer {
     await this.initializeWallet(walletName);
     await browser.refresh();
   };
+
+  disableShowingMultidelegationBetaBanner = async () => {
+    await localStorageManager.setItem('multidelegationFirstVisit', 'false');
+  };
 }
 
 export default new LocalStorageInitializer();
