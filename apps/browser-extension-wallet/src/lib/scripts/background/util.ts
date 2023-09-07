@@ -148,13 +148,22 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
     tabs.onUpdated.addListener(listener);
   });
 
-export const ensureUiIsOpenAndLoaded = async (url?: string): Promise<Tabs.Tab> => {
-  const bgStorage = await getBackgroundStorage();
-  const keyAgentTypeIsLedger = Object.values(bgStorage.keyAgentsByChain).some(
-    ({ keyAgentData }) => keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.Ledger
+const keyAgentIsHardwareWallet = (keyAgentsByChain?: Wallet.KeyAgentsByChain): boolean => {
+  if (!keyAgentsByChain) return false;
+  return Object.values(keyAgentsByChain).some(
+    ({ keyAgentData }) => keyAgentData.__typename !== Wallet.KeyManagement.KeyAgentType.InMemory
   );
-  const windowType: Windows.CreateType = keyAgentTypeIsLedger ? 'normal' : 'popup';
-  if (keyAgentTypeIsLedger) {
+};
+
+export const ensureUiIsOpenAndLoaded = async (url?: string, checkKeyAgent = true): Promise<Tabs.Tab> => {
+  const bgStorage = await getBackgroundStorage();
+
+  const keyAgentTypeIsHardwareWallet = checkKeyAgent
+    ? keyAgentIsHardwareWallet(bgStorage?.keyAgentsByChain)
+    : undefined;
+
+  const windowType: Windows.CreateType = keyAgentTypeIsHardwareWallet ? 'normal' : 'popup';
+  if (keyAgentTypeIsHardwareWallet) {
     const openTabs = await tabs.query({ title: 'Lace' });
     // Close all previously opened lace windows
     for (const tab of openTabs) {
