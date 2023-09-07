@@ -292,6 +292,8 @@ describe('Testing assets transformers', () => {
         variation: 'variationParser',
         balance: 'compactNumberBalance',
         fiatBalance: `formattedFiatBalance ${fiatCurrency.code}`,
+        fingerprint: 'fingerprint',
+        policyId: 'policyId',
         sortBy: {
           fiatBalance,
           metadataName: tokenMetadata?.name,
