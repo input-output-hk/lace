@@ -124,7 +124,7 @@ class NftCreateFolderAssert {
     const displayedAdaHandleImages = await new TokenSelectionPage().nftImages;
 
     for (const displayedAdaHandleImage of displayedAdaHandleImages) {
-      displayedAdaHandleImage.waitForDisplayed();
+      await displayedAdaHandleImage.waitForDisplayed();
     }
 
     const displayedAdaHandleImagesSrc: string[] = await new TokenSelectionPage().nftImages.map(

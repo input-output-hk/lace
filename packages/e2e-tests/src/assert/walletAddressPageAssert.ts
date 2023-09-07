@@ -43,9 +43,8 @@ class WalletAddressPageAssert {
   }
   async assertSeeAdaHandle() {
     const displayedAdaHandleNames: string[] = [];
-    let displayedAdaHandleImages: string[] = [];
     const displayedAdaHandleNamesElementArray = await WalletAddressPage.addressCardHandleName;
-    displayedAdaHandleImages = await WalletAddressPage.addressCardHandleImage.map(this.getSrc);
+    const displayedAdaHandleImages = await WalletAddressPage.addressCardHandleImage.map(this.getSrc);
 
     for (const displayedAdaHandleNamesElement of displayedAdaHandleNamesElementArray) {
       await displayedAdaHandleNamesElement.waitForDisplayed();
