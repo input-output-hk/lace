@@ -1,4 +1,4 @@
-@NFTs-Extended @Analytics @Testnet @Mainnet
+@NFTs-Extended @Testnet @Mainnet
 Feature: Analytics - Posthog - Event properties
 
   Given Wallet is synced
