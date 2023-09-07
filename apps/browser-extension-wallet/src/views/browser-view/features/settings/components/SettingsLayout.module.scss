@@ -8,6 +8,7 @@
   padding: size_unit(3) size_unit(4) size_unit(4) size_unit(4);
   border-radius: size_unit(2);
   gap: size_unit(3);
+  background: var(--bg-color-container);
   @media (max-width: $breakpoint-popup) {
     border: none;
     gap: size_unit(4);
