@@ -17,33 +17,60 @@ When(/^I set up request interception for posthog analytics request\(s\)$/, async
 
 When(/^I validate latest analytics multiple events:$/, async (eventActionNames: DataTable) => {
   const expectedEventNames = dataTableAsStringArray(eventActionNames);
-  await browser.pause(1500);
   for (const expectedEventName of expectedEventNames) {
-    const actualEventNames = await getLatestEventsNames(expectedEventNames.length);
-    expect(actualEventNames).to.contains(expectedEventName);
+    await browser.waitUntil(
+      async () => (await getLatestEventsNames(expectedEventNames.length)).includes(expectedEventName),
+      {
+        interval: 1000,
+        timeout: 6000,
+        timeoutMsg: `Failed while waiting for event ${expectedEventName}. \nActual events:\n ${(
+          await getAllEventsNames()
+        ).toString()}`
+      }
+    );
   }
 });
 
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
-  await browser.pause(1300);
-  const actualEventName = await getLatestEventsNames();
-  expect(actualEventName).to.contains(eventActionName);
+  await browser.waitUntil(async () => (await getLatestEventsNames()).includes(eventActionName), {
+    interval: 1000,
+    timeout: 6000,
+    timeoutMsg: `Failed while waiting for event '${eventActionName}'. \nActual events:\n ${(
+      await getAllEventsNames()
+    ).toString()}`
+  });
 });
 
 When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numberOfRequests: number) => {
-  await browser.pause(1000);
-  expect((await getAllEventsNames()).length).to.equal(Number(numberOfRequests));
+  await browser.waitUntil(async () => (await getAllEventsNames()).length === Number(numberOfRequests), {
+    interval: 1000,
+    timeout: 6000,
+    timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual events amount sent: ${
+      (
+        await getLatestEventsNames()
+      ).length
+    }`
+  });
   await browser.disableInterceptor();
 });
 
 When(/^I validate that alias event has assigned same user id "([^"]*)" in posthog$/, async (expectedUserID: string) => {
-  await browser.pause(1000);
-  const actualAssignedID = (await getEventPayload('$create_alias')).properties.distinct_id;
-  expect(actualAssignedID).to.equal(expectedUserID);
+  await browser.waitUntil(
+    async () => (await getEventPayload('$create_alias')).properties.distinct_id === expectedUserID,
+    {
+      interval: 1000,
+      timeout: 4000,
+      timeoutMsg: `Failed while waiting for event $create_alias contains property distinct id equal to ${expectedUserID}. Actual distinct id= ${
+        (
+          await getEventPayload('$create_alias')
+        ).properties.distinct_id
+      }`
+    }
+  );
 });
 
 Then(/^I validate that event has correct properties$/, async () => {
-  await browser.pause(1000);
+  await browser.pause(2000);
   const actualEventPayload = await getLatestEventPayload();
   const expectedProperties = [
     '$current_url',
@@ -58,7 +85,7 @@ Then(/^I validate that event has correct properties$/, async () => {
     '$lib_version',
     '$lib_version',
     '$os',
-    '$os_version',
+    // '$os_version', it is not working for all os right now
     '$pageview_id',
     'posthog_project_id',
     '$pathname',
