@@ -18,7 +18,7 @@ export const requestAccess: RequestAccess = async (origin: Origin) => {
   const launchingTab = await getLastActiveTab();
   const { logo, name } = await getDappInfoFromLastActiveTab();
   dappInfo$.next({ logo, name, url: origin });
-  await ensureUiIsOpenAndLoaded('#/dapp/connect');
+  await ensureUiIsOpenAndLoaded('#/dapp/connect', false);
   const isAllowed = await userPromptService.allowOrigin(origin);
   if (isAllowed === 'deny') return Promise.reject();
   if (isAllowed === 'allow') {
