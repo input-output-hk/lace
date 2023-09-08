@@ -203,14 +203,15 @@ Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignor
 When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
+    await browser.pause(500);
     await transactionExtendedPageObject.fillAddress(
       receivingAddress === 'CopiedAddress'
         ? String(await clipboard.read())
         : String(getTestWallet(receivingAddress).address),
       bundleIndex
     );
-    await browser.pause(1000);
     for (const entry of options.hashes()) {
+      await browser.pause(500);
       switch (entry.type) {
         case 'ADA':
           break;
