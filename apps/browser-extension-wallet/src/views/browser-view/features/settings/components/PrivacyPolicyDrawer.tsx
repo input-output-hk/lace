@@ -140,7 +140,7 @@ export const PrivacyPolicyDrawer = ({
           <li className={styles.settingsText}>
             To provide you with news, special offers and general information about other goods, services and events
             which IOG offers that are similar to those that you have already purchased or enquired about unless you have
-            opted not to receive such informationn
+            opted not to receive such information
           </li>
         </ul>
         <br />
@@ -159,7 +159,8 @@ export const PrivacyPolicyDrawer = ({
           the legal basis for collecting and using Personal Data described in this Privacy Policy depends on the
           Personal Data being collected and the specific context in which it is collected as described below:
         </Paragraph>
-
+        <br />
+        <br />
         <Paragraph>IOG may process your Personal Data because:</Paragraph>
 
         <ul>
@@ -190,6 +191,8 @@ export const PrivacyPolicyDrawer = ({
           Generally the legitimate interest pursued by IOG in relation to our use of your personal data is the efficient
           performance or management of our business relationship with you.
         </Paragraph>
+        <br />
+        <br />
         <Paragraph>
           In some cases, we may ask if you consent to the relevant use of your personal data. In such cases, the legal
           basis for IOG processing that data about you may (in addition or instead) be that you have consented (Article
@@ -234,7 +237,7 @@ export const PrivacyPolicyDrawer = ({
           IOG will take all steps reasonably necessary to ensure that your data is treated securely and in accordance
           with this Privacy Policy and no transfer of your Personal Data will take place to an organization or a country
           unless there are adequate controls in place including the security of your data and other personal
-          information. information.
+          information.
         </Paragraph>
         <br />
         <br />
@@ -259,7 +262,7 @@ export const PrivacyPolicyDrawer = ({
         <Paragraph>
           Insofar as we employ the services of service providers to implement or fulfill any tasks on our behalf the
           contractual relations will be regulated in writing according to the provisions of the European General Data
-          Protection Regulation (EU-GDPR) and the Federal Data Protection Act (new BDSG).”
+          Protection Regulation (EU-GDPR) and the Federal Data Protection Act (new BDSG).
         </Paragraph>
         <br />
         <br />
