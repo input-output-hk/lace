@@ -20,7 +20,7 @@ export const verifyHandle = async (
 ): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
   try {
     const resolvedHandles = await handleResolver.resolveHandles({ handles: [value.slice(1)] });
-    if (resolvedHandles.length === 0) {
+    if (resolvedHandles.length === 0 || resolvedHandles === null) {
       return { valid: false };
     }
     return { valid: true, handles: resolvedHandles };

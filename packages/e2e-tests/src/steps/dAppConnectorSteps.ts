@@ -10,6 +10,8 @@ import AllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
 import TestDAppPage from '../elements/dappConnector/testDAppPage';
 import WalletUnlockScreenAssert from '../assert/walletUnlockScreenAssert';
 import CommonAssert from '../assert/commonAssert';
+import extendedView from '../page/extendedView';
+import popupView from '../page/popupView';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -138,6 +140,7 @@ When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async
 
 Then(/^I de-authorize all DApps in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await DAppConnectorPageObject.deauthorizeAllDApps(mode);
+  mode === 'extended' ? await extendedView.visit() : await popupView.visit();
 });
 
 Then(/^I de-authorize test DApp in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {

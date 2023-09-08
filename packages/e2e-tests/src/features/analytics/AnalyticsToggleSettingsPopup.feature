@@ -1,4 +1,4 @@
-@Settings-Popup @Mainnet @Testnet
+@Settings-Popup @Analytics @Mainnet @Testnet
 Feature: Analytics - Settings Toggle - Popup View
 
   Background:

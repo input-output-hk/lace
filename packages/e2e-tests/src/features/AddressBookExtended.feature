@@ -56,8 +56,8 @@ Feature: Address book - extended view
     And "Save address" button is disabled on "Add new address" drawer
     Examples:
       | wallet_name               | address                                                                  | name_error                       | address_error                       |
-      | too_long_name_123456789   | addr_invalid                                                             | Max 20 Characters                | Incorrect Cardano address           |
-      | name_ok                   | addr_invalid                                                             | empty                            | Incorrect Cardano address           |
+      | too_long_name_123456789   | addr_invalid                                                             | Max 20 Characters                | Invalid Cardano address             |
+      | name_ok                   | addr_invalid                                                             | empty                            | Invalid Cardano address             |
       | too_long_name_123456789   | 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf    | Max 20 Characters                | empty                               |
       | "name followed by space " | "2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf " | Name has unnecessary white space | Address has unnecessary white space |
       | " name preceded by space" | " 2cWKMJemoBainaQxNUjUnKDr6mGgSERDRrvKAJzWejubdymYZv1uKedpSYkkehHnSwMCf" | Name has unnecessary white space | Address has unnecessary white space |
@@ -153,11 +153,11 @@ Feature: Address book - extended view
       | too_long_name_123456789   | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Max 20 Characters                | empty                               |
       | " name preceded by space" | addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja    | Name has unnecessary white space | empty                               |
 #      | valid wallet name         | empty                                                                                                           | empty                            | Address field is required           | # TODO: Uncomment when LW-7419 is fixed
-      | valid wallet name         | invalid_address                                                                                                 | empty                            | Incorrect Cardano address           |
+      | valid wallet name         | invalid_address                                                                                                 | empty                            | Invalid Cardano address             |
       | valid wallet name         | " addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" | empty                            | Address has unnecessary white space |
       | valid wallet name         | "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja " | empty                            | Address has unnecessary white space |
 #      | empty                     | empty                                                                                                           | Name field is required           | Address field is required           | # TODO: Uncomment when LW-7419 is fixed
-      | "name followed by space " | invalid_address                                                                                                 | Name has unnecessary white space | Incorrect Cardano address           |
+      | "name followed by space " | invalid_address                                                                                                 | Name has unnecessary white space | Invalid Cardano address             |
 
   @LW-4567
   Scenario Outline: Extended-view - Address Book - Edit address book entry - Uniqueness validation and toast display with text <toast_message>

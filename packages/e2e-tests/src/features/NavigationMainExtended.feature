@@ -3,6 +3,7 @@ Feature: Main Navigation - Extended view
 
   Background:
     Given Lace is ready for test
+    And I disable showing Multidelegation beta banner
 
   @LW-2692 @Smoke
   Scenario: Extended view - Main navigation is displayed with all items
@@ -28,7 +29,7 @@ Feature: Main Navigation - Extended view
   @LW-2696 @Smoke
   Scenario: Extended view - Main Navigation - Staking item click navigates to staking page
     When I navigate to Staking extended page
-    Then I see Staking title and counter with total number of pools displayed
+    Then I see Delegation title displayed for multidelegation
 
   @LW-2606
   Scenario Outline: Extended view - Click Lace logo - <section>
@@ -41,7 +42,7 @@ Feature: Main Navigation - Extended view
       | Tokens       | I see Tokens counter with total number of tokens displayed           |
       | NFTs         | I see NFTs counter with total number of NFTs displayed               |
       | Transactions | Transactions section is displayed                                    |
-      | Staking      | I see Staking title and counter with total number of pools displayed |
+      | Staking      | I see Delegation title displayed for multidelegation                 |
       | Settings     | I see settings page                                                  |
       | Address Book | I see address book title                                             |
 
