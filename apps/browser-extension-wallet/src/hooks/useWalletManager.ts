@@ -175,7 +175,7 @@ export const useWalletManager = (): UseWalletManager => {
       // Wallet info for current network
       if (!keyAgentData) return;
       const walletName = getWalletFromStorage()?.name;
-      if (!walletName) return;
+      if (!walletName || !walletManagerUi) return;
 
       const wallet = await cardanoWalletManager.restoreWallet(
         walletManagerUi,
@@ -333,6 +333,7 @@ export const useWalletManager = (): UseWalletManager => {
    */
   const switchNetwork = useCallback(
     async (chainName: Wallet.ChainName): Promise<void> => {
+      if (!walletManagerUi) return;
       const chainId = Wallet.Cardano.ChainIds[chainName];
       console.log('Switching chain to', chainName, AVAILABLE_CHAINS);
       if (!chainId || !AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
@@ -398,7 +399,6 @@ export const useWalletManager = (): UseWalletManager => {
       const keyAgentInLocalStorageIsTheOneWeExpect =
         networkOfKeyAgentAsIntended && networkOfAddressesEqualsNetworkOfKeyAgent;
       const addressesUpToDate = isEqual(currentKeyAgentData.knownAddresses, addresses);
-
       if (!keyAgentInLocalStorageIsTheOneWeExpect) return;
 
       if (addressesUpToDate) {
