@@ -1,4 +1,4 @@
-@Settings-Extended
+@Settings-Extended @Analytics
 Feature: Analytics - Settings Toggle - Extended View
 
   Background:

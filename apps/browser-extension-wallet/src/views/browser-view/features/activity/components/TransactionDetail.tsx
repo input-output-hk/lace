@@ -90,10 +90,13 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
   const [transactionInfo, setTransactionInfo] = useState<TransactionDetailType>();
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
-  const { CEXPLORER_BASE_URL } = config();
+  const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
   const openExternalLink = useExternalLinkOpener();
 
-  const explorerBaseUrl = useMemo(() => CEXPLORER_BASE_URL[environmentName], [CEXPLORER_BASE_URL, environmentName]);
+  const explorerBaseUrl = useMemo(
+    () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
+    [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
+  );
 
   const currentTransactionStatus = useMemo(
     () => getCurrentTransactionStatus(walletActivities, transactionDetail.tx.id) || transactionInfo?.status,

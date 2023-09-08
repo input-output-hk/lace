@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PortfolioBalance } from '@src/views/browser-view/components/PortfolioBalance';
 import styles from './AssetDetails.module.scss';
 import { AssetActivityList, AssetActivityItemProps } from '@lace/core';
-import { Button } from '@lace/common';
-import { StateStatus } from '@src/stores';
+import { Button, InlineInfoList } from '@lace/common';
+import { StateStatus, useWalletStore } from '@src/stores';
 import { Skeleton, Typography } from 'antd';
 import classnames from 'classnames';
-import ExpandIcon from '../../../../../../assets/icons/expand-gradient.component.svg';
+import { useExternalLinkOpener } from '@providers/ExternalLinkOpenerProvider';
+import { config } from '@src/config';
 
 const { Text } = Typography;
+const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
 
 export interface AssetDetailsProps {
   balance: string;
@@ -23,11 +25,15 @@ export interface AssetDetailsProps {
   onViewAllClick?: () => void;
   popupView?: boolean;
   isDrawerView?: boolean;
+  policyId?: string;
+  fingerprint?: string;
 }
 
 export const AssetDetails = ({
   balance,
   assetSymbol,
+  policyId,
+  fingerprint,
   fiatPrice,
   fiatCode,
   fiatPriceVariation,
@@ -39,15 +45,11 @@ export const AssetDetails = ({
   isDrawerView = false
 }: AssetDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const isTxListLoading = activityListStatus === StateStatus.IDLE || activityListStatus === StateStatus.LOADING;
+  const { environmentName } = useWalletStore();
+  const openExternalLink = useExternalLinkOpener();
 
-  const activityListTitle = popupView
-    ? { title: t('browserView.assetDetails.recentTransactions') }
-    : {
-        title: t('browserView.assetDetails.recentTransactions'),
-        onClick: onViewAllClick,
-        clickLabel: t('browserView.assetDetails.viewAll')
-      };
+  const explorerBaseUrl = useMemo(() => CEXPLORER_BASE_URL[environmentName], [environmentName]);
+  const isTxListLoading = activityListStatus === StateStatus.IDLE || activityListStatus === StateStatus.LOADING;
 
   return (
     <div className={classnames(styles.detailsContainer, popupView && styles.popupDetails)}>
@@ -74,38 +76,54 @@ export const AssetDetails = ({
       </div>
 
       <Skeleton loading={isTxListLoading}>
-        <div>
-          <div className={styles.listHeader}>
-            <Text className={styles.listTitle} data-testid="asset-activity-list-title">
-              {activityListTitle.title}
-            </Text>
-            {activityListTitle.clickLabel && (
+        <div className={styles.separator} />
+        <div className={styles.listHeader}>
+          <div className={styles.activityListWrapper}>
+            <div className={styles.activityListHeader}>
+              <Text className={styles.listTitle} data-testid="asset-activity-list-title">
+                {t('browserView.assetDetails.recentTransactions')}
+              </Text>
               <Button
                 variant="text"
                 color="primary"
                 className={styles.viewAll}
-                onClick={activityListTitle?.onClick}
+                onClick={onViewAllClick}
                 data-testid="view-all-button"
               >
-                {activityListTitle.clickLabel}
+                {t('browserView.assetDetails.viewAll')}
               </Button>
-            )}
+            </div>
+            <AssetActivityList items={activityList} isDrawerView={isDrawerView} />
           </div>
-          <AssetActivityList items={activityList} isDrawerView={isDrawerView} />
         </div>
       </Skeleton>
-      {popupView && (
-        <div className={styles.buttonContainer}>
-          <Button
-            className={styles.viewAllButton}
-            onClick={onViewAllClick}
-            data-testid="see-all-your-transactions-button"
-            color="gradient"
-          >
-            <ExpandIcon className={styles.viewAllIcon} />
-            {t('browserView.assetDetails.seeAllYourTransactions')}
-          </Button>
-        </div>
+      {fingerprint && policyId && (
+        <>
+          <div className={styles.separator} />
+          <div className={styles.listHeader}>
+            <div data-testid="token-information" className={styles.tokenInformationWrapper}>
+              <Text className={styles.listTitle} data-testid="token-information-title">
+                {t('browserView.assetDetails.tokenInformation')}
+              </Text>
+              <InlineInfoList
+                items={[
+                  {
+                    name: t('browserView.assetDetails.fingerprint'),
+                    value: fingerprint,
+                    showCopyIcon: true,
+                    onClick: () => openExternalLink(`${explorerBaseUrl}/${CEXPLORER_URL_PATHS.Asset}/${fingerprint}`)
+                  },
+                  {
+                    name: t('browserView.assetDetails.policyId'),
+                    value: policyId,
+                    showCopyIcon: true,
+                    onClick: () => openExternalLink(`${explorerBaseUrl}/${CEXPLORER_URL_PATHS.Policy}/${policyId}`)
+                  }
+                ]}
+              />
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
