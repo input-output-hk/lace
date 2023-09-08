@@ -1,7 +1,8 @@
 @NFTs-Extended @Analytics @Testnet @Mainnet
 Feature: Analytics - Posthog - Event properties
 
-  Given Wallet is synced
+  Background:
+    Given Wallet is synced
 
   @LW-7703
   Scenario: Analytics - Verify event properties
@@ -20,7 +21,7 @@ Feature: Analytics - Posthog - Event properties
   Scenario: Analytics -Extended View - Verify event properties - Send - Send NFT button
     Given I set up request interception for posthog analytics request(s)
     And I am on NFTs extended page
-    And I left click on the NFT with name "Ibilecoin_1" on NFTs page
+    And I left click on the NFT with name "Bison Coin" on NFTs page
     When I click "Send NFT" button on NFT details drawer
     Then I validate that the event includes "trigger_point" property
     And I validate that the "send | send | click" event includes property "trigger_point" with value "nfts page" in posthog
