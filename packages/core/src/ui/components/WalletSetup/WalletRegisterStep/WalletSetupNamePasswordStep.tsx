@@ -122,26 +122,24 @@ export const WalletSetupNamePasswordStep = ({
           autoFocus
         />
 
-        {score >= minimumPassLevelRequired && (
-          <div>
-            <Password
-              className={styles.input}
-              errorMessage={passwordConfirmationErrorMessage}
-              value={passwordConfirmation}
-              label={t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel')}
-              onChange={handlePasswordConfirmationChange}
-              data-testid="wallet-setup-password-step-confirm-password"
-            />
-            {!!passwordConfirmationErrorMessage && (
-              <p
-                className={cn(styles.label, { [styles.error]: shouldShowNameErrorMessage })}
-                data-testid="wallet-setup-register-password-conf-error"
-              >
-                {passwordConfirmationErrorMessage}
-              </p>
-            )}
-          </div>
-        )}
+        <div className={cn(styles.confirmPasswordContainer, { [styles.displayed]: score >= minimumPassLevelRequired })}>
+          <Password
+            className={styles.input}
+            errorMessage={passwordConfirmationErrorMessage}
+            value={passwordConfirmation}
+            label={t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel')}
+            onChange={handlePasswordConfirmationChange}
+            data-testid="wallet-setup-password-step-confirm-password"
+          />
+          {!!passwordConfirmationErrorMessage && (
+            <p
+              className={cn(styles.label, { [styles.error]: shouldShowNameErrorMessage })}
+              data-testid="wallet-setup-register-password-conf-error"
+            >
+              {passwordConfirmationErrorMessage}
+            </p>
+          )}
+        </div>
       </div>
     </WalletSetupStepLayout>
   );

@@ -1,12 +1,12 @@
 import { complexityLevels } from '@lace/common';
-import { validationErrorKeys } from './types';
+import { ValidationErrorKeys } from './types';
 
 export const minimumPassLevelRequired = 3;
 export const passwordLevelFeedback = 2;
 
 export const nameShouldHaveRightLengthRegex = /^.{1,20}$/;
 
-export const validateNameLength = (name: string): validationErrorKeys | '' =>
+export const validateNameLength = (name: string): ValidationErrorKeys | '' =>
   !nameShouldHaveRightLengthRegex.test(name) ? 'nameMaxLength' : '';
 
 export const WALLET_NAME_INPUT_MAX_LENGTH = 30;

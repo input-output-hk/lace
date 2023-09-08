@@ -90,11 +90,11 @@
     },
     "walletNameAndPasswordSetupStep": {
       "title": "Let's set up your new wallet",
-      "description": "Choose a name to identify your wallet and set up your password to log into your wallet and make transactions.",
+      "description": "Choose a name to identify your wallet and set up your password to unlock your wallet and make transactions.",
       "nameInputLabel": "Wallet name",
       "nameMaxLength": "Max. 20 characters",
       "passwordInputLabel": "Password",
-      "confirmPasswordInputLabel": "Confirms password",
+      "confirmPasswordInputLabel": "Confirm password",
       "nameRequiredMessage": "Wallet name is required",
       "noMatchPassword": "Oops! The passwords don't match.",
       "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger."
