@@ -134,6 +134,19 @@ const getTransactionDetail =
       (certificate) => certificate.__typename === 'StakeDelegationCertificate'
     ) as Wallet.Cardano.StakeDelegationCertificate[];
 
+    if (
+      type === 'delegationRegistration' ||
+      // Existence of any (new) delegationInfo means that this "de-registration"
+      // activity is accompanied by a "delegation" activity, which carries the fees.
+      // However, fees should be shown if de-registration activity is standalone.
+      (type === 'delegationDeregistration' && !!delegationInfo?.length)
+    ) {
+      transaction = {
+        ...transaction,
+        fee: undefined
+      };
+    }
+
     if (type === 'delegation' && delegationInfo) {
       const filters: Wallet.QueryStakePoolsArgs = {
         filters: {
