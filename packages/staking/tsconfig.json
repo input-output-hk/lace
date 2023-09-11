@@ -12,6 +12,11 @@
     "outDir": "dist",
     "module": "es2020",
     "target": "es2016",
-    "preserveConstEnums": true
-  }
+    "preserveConstEnums": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@assets/*": ["assets/*"]
+    }
+  },
+  "references": [{ "path": "../../packages/core/src" }, { "path": "../../packages/cardano/src" }]
 }

@@ -9,9 +9,10 @@ import { useDelegationPortfolioStore } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
-import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
+import { getCurrentStakingNotification, hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './staking-info-card';
+import { StakingNotificationBanner } from './StakingNotificationBanner';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -22,6 +23,8 @@ export const OverviewPopup = () => {
     fetchCoinPricePriceResult,
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
+    walletStoreWalletActivities: walletActivities,
+    expandStakingView,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -29,6 +32,7 @@ export const OverviewPopup = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
+  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -81,6 +85,14 @@ export const OverviewPopup = () => {
 
   return (
     <>
+      {stakingNotification === 'portfolioDrifted' && (
+        <Box mb="$32">
+          <StakingNotificationBanner
+            notification="portfolioDrifted"
+            onPortfolioDriftedNotificationClick={expandStakingView}
+          />
+        </Box>
+      )}
       <Box mb="$32">
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
