@@ -3,6 +3,7 @@ Feature: DAppConnector - Common
 
   Background:
     Given Wallet is synced
+    And I de-authorize all DApps in extended mode
 
   @LW-3760 @Testnet @Mainnet
   Scenario: Extended View - Limited wallet information when wallet is not connected
@@ -53,7 +54,6 @@ Feature: DAppConnector - Common
     And I open test DApp
     Then I see Lace wallet info in DApp when connected
     And I don't see DApp window
-    And I de-authorize all DApps in extended mode
 
   @LW-3807 @Testnet @Mainnet
   Scenario: "No wallet" modal displayed after trying to connect Dapp when there is no wallet
@@ -153,7 +153,6 @@ Feature: DAppConnector - Common
     Then I see test DApp on the Authorized DApps list
     When I open test DApp
     Then I don't see DApp window
-    And I de-authorize all DApps in extended mode
 
   @LW-4070
   Scenario: Authorize Dapp with 'Only once' and leaving/closing DApp

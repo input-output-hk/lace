@@ -28,7 +28,14 @@ $button_size: 52px;
   border: 1.5px solid transparent !important;
   padding-bottom: 0px;
   padding-right: 5px;
-  
+  margin-top: size_unit(3);
+  transition: none;
+
+
+  @media (max-width: $breakpoint-popup) {
+    padding: 0 size_unit(0.75) 0 size_unit(2.5) !important;
+  }
+
   :global {
     .ant-input-affix-wrapper-borderless {
       background-color: transparent !important;
@@ -43,7 +50,8 @@ $button_size: 52px;
       flex: 1;
       background-color: transparent !important;
       border: none !important;
-      
+      transition: none;
+
       &::placeholder {
         @include text-bodyLarge-semi-bold;
         color: var(--text-color-secondary) !important;
@@ -81,7 +89,9 @@ $button_size: 52px;
 
   .searchIcon {
     font-size: $font-size-bodyLarge !important;
-    width: 18px !important;
+    width: size_unit(3) !important;
+    height: size_unit(3) !important;
+    margin-left: size_unit(3);
   }
 }
 
@@ -207,6 +217,7 @@ button.clear {
 .loaderContainer {
   display: flex;
   z-index: 2;
+  margin-right: size_unit(2);
 }
 .loader {
   @include spin-animation();

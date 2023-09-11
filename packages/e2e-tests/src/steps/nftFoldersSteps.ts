@@ -100,6 +100,14 @@ Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
 });
 
+Then(/^I can see the handle listed on the "Select NFT" screen$/, async () => {
+  await nftCreateFolderAssert.verifySeeAllAdaHandles();
+});
+
+Then(/^the corresponding custom image is displayed$/, async () => {
+  await nftCreateFolderAssert.verifySeeAllAdaImages();
+});
+
 Then(/^No NFT is selected$/, async () => {
   await nftCreateFolderAssert.verifyNoneNftIsSelected();
 });
@@ -170,6 +178,7 @@ Then(/^I see no results for "Select NFTs" drawer$/, async () => {
 });
 
 Then(/^I click NFT with name "([^"]*)"$/, async (nftName: string) => {
+  await NftSelectNftsPage.waitForNft(nftName);
   const nft = await NftSelectNftsPage.getNftByName(nftName);
   await nft.waitForClickable();
   await nft.click();

@@ -17,7 +17,6 @@ class TokenDetailsPage extends CommonDrawerElements {
   private TRANSACTIONS_LIST_TITLE = '[data-testid="asset-activity-list-title"]';
   private TRANSACTION_ITEM = '[data-testid="asset-activity-item"]';
 
-  private SEE_ALL_TRANSACTIONS_BUTTON = '[data-testid="see-all-your-transactions-button"]';
   private VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
 
   get tokenLogo() {
@@ -66,10 +65,6 @@ class TokenDetailsPage extends CommonDrawerElements {
 
   get transactionsListTitle() {
     return $(this.TRANSACTIONS_LIST_TITLE);
-  }
-
-  get seeAllTransactionsButton() {
-    return $(this.SEE_ALL_TRANSACTIONS_BUTTON);
   }
 
   get viewAllButton() {

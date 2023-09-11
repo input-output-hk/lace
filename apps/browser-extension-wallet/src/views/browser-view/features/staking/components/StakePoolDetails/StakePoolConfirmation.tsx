@@ -149,7 +149,9 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
 
           {popupView && <div className={styles.divider} />}
 
-          <h1 className={styles.totalCostTitle}>{t('browserView.staking.details.confirmation.totalCost.title')}</h1>
+          <h1 className={styles.totalCostTitle}>
+            {t('browserView.staking.details.confirmation.transactionCost.title')}
+          </h1>
           <div className={styles.txCostContainer} data-testid="summary-fee-container">
             {deposit && (
               <RowContainer>
