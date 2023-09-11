@@ -72,6 +72,10 @@ const reject = (reason: ApiError, close = true) => {
   !!close && setTimeout(() => window.close(), 500);
 };
 
+window.addEventListener('beforeunload', () =>
+  reject(new ApiError(APIErrorCode.Refused, 'user declined to set collateral'))
+);
+
 export const DappCollateralContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const { inMemoryWallet } = useWalletStore();

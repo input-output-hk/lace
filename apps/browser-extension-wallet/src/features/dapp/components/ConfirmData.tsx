@@ -72,6 +72,8 @@ export const DappConfirmData = (): React.ReactElement => {
     setTimeout(() => window.close(), DAPP_TOAST_DURATION);
   }, []);
 
+  window.addEventListener('beforeunload', cancelTransaction);
+
   useEffect(() => {
     const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignDataData'>>(
       {
