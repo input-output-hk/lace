@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 import classNames from 'classnames';
 
@@ -23,45 +23,45 @@ export type ButtonProps = OmitClassName<'button'> & {
   size?: 'medium' | 'small';
 };
 
-export const SkeletonButton = ({
-  id,
-  disabled,
-  className,
-  label,
-  icon,
-  w,
-  size = 'medium',
-  ...props
-}: Readonly<ButtonProps>): JSX.Element => {
-  return (
-    <button
-      {...props}
-      id={id}
-      disabled={disabled}
-      className={classNames(
-        sx({
-          w,
-          // TODO: rework into styleVariants, don't forget primaryButton's :before borderRadius
-          // https://vanilla-extract.style/documentation/api/style-variants/#stylevariants
-          height: size === 'small' ? '$40' : '$48',
-          borderRadius: size === 'small' ? '$small' : '$medium',
-        }),
-        className.container,
-      )}
-    >
-      <Flex alignItems="center" justifyContent="center">
-        {icon !== undefined && (
-          <Flex
-            pr={label === undefined ? '$0' : '$8'}
-            className={className.icon}
-          >
-            {icon}
-          </Flex>
+// TODO forward refs in all parent components as they may become used by Radix
+export const SkeletonButton = forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { id, disabled, className, label, icon, w, size = 'medium', ...props },
+    forwardReference,
+  ) => {
+    return (
+      <button
+        {...props}
+        id={id}
+        disabled={disabled}
+        className={classNames(
+          sx({
+            w,
+            // TODO: rework into styleVariants, don't forget primaryButton's :before borderRadius
+            // https://vanilla-extract.style/documentation/api/style-variants/#stylevariants
+            height: size === 'small' ? '$40' : '$48',
+            borderRadius: size === 'small' ? '$small' : '$medium',
+          }),
+          className.container,
         )}
-        {label !== undefined && (
-          <Text.Button className={className.label}>{label}</Text.Button>
-        )}
-      </Flex>
-    </button>
-  );
-};
+        ref={forwardReference}
+      >
+        <Flex alignItems="center" justifyContent="center">
+          {icon !== undefined && (
+            <Flex
+              pr={label === undefined ? '$0' : '$8'}
+              className={className.icon}
+            >
+              {icon}
+            </Flex>
+          )}
+          {label !== undefined && (
+            <Text.Button className={className.label}>{label}</Text.Button>
+          )}
+        </Flex>
+      </button>
+    );
+  },
+);
+// eslint-disable-next-line functional/immutable-data
+SkeletonButton.displayName = 'SkeletonButton';
