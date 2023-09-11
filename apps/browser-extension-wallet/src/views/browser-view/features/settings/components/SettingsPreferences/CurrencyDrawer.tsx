@@ -30,7 +30,7 @@ export const CurrencyDrawer = ({ visible, onClose, popupView = false }: Currency
         icon: SwithIcon
       });
     } catch (error) {
-      console.log('Error updating currency', error);
+      console.error('Error updating currency', error);
       toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });
     }
     return event;

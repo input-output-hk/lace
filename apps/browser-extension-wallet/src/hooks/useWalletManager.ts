@@ -322,7 +322,7 @@ export const useWalletManager = (): UseWalletManager => {
   const switchNetwork = useCallback(
     async (chainName: Wallet.ChainName): Promise<void> => {
       const chainId = Wallet.Cardano.ChainIds[chainName];
-      console.log('Switching chain to', chainName, AVAILABLE_CHAINS);
+      console.info('Switching chain to', chainName, AVAILABLE_CHAINS);
       if (!chainId || !AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
 
       const backgroundStorage = await backgroundService.getBackgroundStorage();
