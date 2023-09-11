@@ -40,19 +40,19 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
     And I click stake pool with name "Apex Cardano Pool"
     Then Drawer is displayed
     When I press keyboard Enter button
-    And I verify switching stake pools modal is displayed
+    And I verify stake pools switching modal with all elements is displayed
     When I press keyboard Escape button
-    And I verify switching stake pools modal is not displayed
+    And I verify stake pools switching modal with all elements is not displayed
     When I press keyboard Escape button
     And I click stake pool with name "Apex Cardano Pool"
     Then Drawer is displayed
     When I press keyboard Enter button
-    And I verify switching stake pools modal is displayed
+    And I verify stake pools switching modal with all elements is displayed
     When I press keyboard Enter button
     And I click "Next" button on staking manage staking
     Then An "staking.confirmation.title" text is displayed
     When I press keyboard Enter button
     Then An "browserView.transaction.send.enterWalletPasswordToConfirmTransaction" text is displayed
     When I press keyboard Escape button
-    And I verify switching stake pools modal is not displayed
+    And I verify stake pools switching modal with all elements is not displayed
 

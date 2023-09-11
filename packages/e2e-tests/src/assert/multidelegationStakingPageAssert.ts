@@ -7,6 +7,7 @@ import { isPopupMode } from '../utils/pageUtils';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import webTester from '../actor/webTester';
 import { MultiDelegationStakingInfoComponent } from '../elements/staking/MultiDelegationStakingInfoComponent';
+import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 
 class MultidelegationStakePoolDetailsAssert {
   async assertSeeMultiDelegationStakePoolDetailsPage(
@@ -212,6 +213,13 @@ class MultidelegationStakePoolDetailsAssert {
     await expect((await StakePoolDetails.delegatorsValue.getText()) as string).to.match(
       TestnetPatterns.NUMBER_DOUBLE_REGEX
     );
+  }
+
+  async assertSwitchingStakePoolsModalCommonElements(status: string) {
+    await SwitchingStakePoolModal.title.waitForDisplayed({ timeout: 5000, reverse: status });
+    await SwitchingStakePoolModal.fineByMeButton.waitForDisplayed({ timeout: 5000, reverse: status });
+    await SwitchingStakePoolModal.cancelButton.waitForDisplayed({ timeout: 5000, reverse: status });
+    await SwitchingStakePoolModal.description.waitForDisplayed({ timeout: 5000, reverse: status });
   }
 
   async assertMultiDelegationSeeStakePoolDetailsCommonElementsAlreadyDelegating() {

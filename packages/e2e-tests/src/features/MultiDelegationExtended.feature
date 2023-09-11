@@ -188,3 +188,4 @@ Feature: Staking Page - Extended Browser View
     When I click "Cancel" button for staking "You'll have to start again" modal
     Then Staking exit modal is not displayed
     And Drawer is displayed
+

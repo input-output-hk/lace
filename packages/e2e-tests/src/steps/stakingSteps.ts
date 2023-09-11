@@ -60,7 +60,6 @@ Then(
   }
 );
 
-// eslint-disable-next-line no-unused-vars
 Then(
   /^I see currently multi-delegation staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
   // eslint-disable-next-line no-unused-vars
@@ -231,7 +230,7 @@ Then(/^Each stake pool list item contains:$/, async (_ignored: string) => {
 
 // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 Then(/^Each multidelegation stake pool list item contains:$/, async (_ignored: string) => {
-  await multidelegationStakePoolDetailsAssert.assertMultiDelegationSeeStakePoolRows;
+  await multidelegationStakePoolDetailsAssert.assertMultiDelegationSeeStakePoolRows();
 });
 
 Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (metadata: 'with' | 'without') => {
@@ -339,19 +338,11 @@ When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async
 });
 
 When(
-  /^I verify switching stake pools modal is (displayed|not displayed)$/,
-  async (type: 'displayed' | 'not displayed') => {
-    let reverseStatus = false;
-    if (type === 'not displayed') {
-      reverseStatus = true;
-    }
-    await SwitchingStakePoolModal.title.waitForDisplayed({ timeout: 5000, reverse: reverseStatus });
+  /^I verify stake pools switching modal with all elements (is|is not) displayed$/,
+  async (status: 'is' | 'is not') => {
+    await multidelegationStakePoolDetailsAssert.assertSwitchingStakePoolsModalCommonElements(status);
   }
 );
-
-When(/^I verify I am on the (Overview|Browse pools) tab$/, async (type: 'Overview' | 'Browse pools') => {
-  await MultidelegationPage.clickOnTab(type);
-});
 
 Then(
   /^I enter (correct|incorrect|newly created) wallet password and confirm staking$/,
