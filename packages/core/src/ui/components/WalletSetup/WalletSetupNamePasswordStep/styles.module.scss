@@ -1,0 +1,37 @@
+.walletPasswordAndNameContainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+  gap: 24px;
+}
+
+.paragraph {
+  font-size: var(--bodyXS);
+  font-weight: 400;
+  line-height: size_unit(2);
+  color: var(--text-color-secondary);
+  margin-left: 24px;
+}
+
+.error {
+  color: var(--data-pink);
+}
+
+.passwordConfirmationContainerHidden {
+  opacity: 0;
+}
+
+.passwordConfirmationContainerVissible {
+  opacity: 1;
+  transition: opacity 2s;
+}
+
+.walletNameInputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.paddingLeft {
+  padding-left: 24px !important;
+}

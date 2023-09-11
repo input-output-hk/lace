@@ -1,12 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import cn from 'classnames';
 import { WalletSetupStepLayout, WalletTimelineSteps } from '../WalletSetupStepLayout';
-import { Password, PasswordVerification, Input } from '@lace/common';
+import { PasswordVerification } from '@lace/common';
 import { passwordComplexity } from '@src/ui/utils/password-complexity';
 import { useTranslate } from '@src/ui/hooks';
 
 import { BarStates, WalletSetupNamePasswordSubmitParams } from './types';
-import styles from './WalletSetupNamePasswordStep.module.scss';
+import styles from './styles.module.scss';
 import {
   getComplexityBarStateList,
   MINIMUM_PASSWORD_LEVEL_REQUIRED,
@@ -14,6 +13,8 @@ import {
   validateNameLength,
   WALLET_NAME_INPUT_MAX_LENGTH
 } from './utils';
+import { WalletNameInput } from './WalletNameInput';
+import { WalletPasswordConfirmationInput } from './WalletPasswordConfirmationInput';
 
 export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
@@ -74,7 +75,7 @@ export const WalletSetupNamePasswordStep = ({
     setPasswordConfirmation(target.value);
   };
 
-  const handleNextBtnClick = () => {
+  const handleNextButtonClick = () => {
     onNext({ walletName, password });
   };
 
@@ -83,29 +84,19 @@ export const WalletSetupNamePasswordStep = ({
       title={t('package.core.walletNameAndPasswordSetupStep.title')}
       description={t('package.core.walletNameAndPasswordSetupStep.description')}
       onBack={onBack}
-      onNext={handleNextBtnClick}
+      onNext={handleNextButtonClick}
       isNextEnabled={isNextButtonEnabled()}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
     >
-      <div className={styles.walletSetupNamePasswordStep}>
-        <div>
-          <Input
-            dataTestId="wallet-setup-register-name-input"
-            value={walletName}
-            label={t('package.core.walletNameAndPasswordSetupStep.nameInputLabel')}
-            onChange={handleNameChange}
-            maxLength={WALLET_NAME_INPUT_MAX_LENGTH}
-            className={styles.paddingLeft}
-          />
-          {shouldShowNameErrorMessage && (
-            <p
-              className={cn(styles.label, { [styles.error]: shouldShowNameErrorMessage })}
-              data-testid="wallet-setup-register-name-error"
-            >
-              {walletNameErrorMessage}
-            </p>
-          )}
-        </div>
+      <div className={styles.walletPasswordAndNameContainer}>
+        <WalletNameInput
+          value={walletName}
+          label={t('package.core.walletNameAndPasswordSetupStep.nameInputLabel')}
+          onChange={handleNameChange}
+          maxLength={WALLET_NAME_INPUT_MAX_LENGTH}
+          shouldShowErrorMessage={shouldShowNameErrorMessage}
+          errorMessage={walletNameErrorMessage}
+        />
         <PasswordVerification
           className={styles.input}
           value={password}
@@ -121,29 +112,14 @@ export const WalletSetupNamePasswordStep = ({
           data-testid="wallet-password-verification-input"
           autoFocus
         />
-
-        <div
-          className={cn(styles.confirmPasswordContainer, {
-            [styles.displayed]: score >= MINIMUM_PASSWORD_LEVEL_REQUIRED
-          })}
-        >
-          <Password
-            className={styles.input}
-            errorMessage={passwordConfirmationErrorMessage}
-            value={passwordConfirmation}
-            label={t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel')}
-            onChange={handlePasswordConfirmationChange}
-            data-testid="wallet-setup-password-step-confirm-password"
-          />
-          {!!passwordConfirmationErrorMessage && (
-            <p
-              className={cn(styles.label, { [styles.error]: shouldShowNameErrorMessage })}
-              data-testid="wallet-setup-register-password-conf-error"
-            >
-              {passwordConfirmationErrorMessage}
-            </p>
-          )}
-        </div>
+        <WalletPasswordConfirmationInput
+          isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED}
+          value={passwordConfirmation}
+          onChange={handlePasswordConfirmationChange}
+          label={t('package.core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel')}
+          errorMessage={passwordConfirmationErrorMessage}
+          shouldShowErrorMessage={!!passwordConfirmationErrorMessage}
+        />
       </div>
     </WalletSetupStepLayout>
   );
