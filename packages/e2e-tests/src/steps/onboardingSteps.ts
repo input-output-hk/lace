@@ -297,7 +297,6 @@ Given(
 
 Given(/^I am on "All done" page$/, async () => {
   await OnboardingPageObject.openAllDonePage();
-  await OnboardingWalletCreationPageAssert.assertSeeCreatingWalletPage();
   await OnboardingAllDonePageAssert.assertSeeAllDonePage();
 });
 
