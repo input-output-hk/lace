@@ -4,9 +4,9 @@ import OnboardingCommonAssert from './onboardingCommonAssert';
 
 class OnboardingWalletCreationPageAssert extends OnboardingCommonAssert {
   async assertSeeCreatingWalletPage() {
+    await WalletCreationPage.walletLoader.waitForDisplayed();
     await this.assertSeeStepTitle(await t('core.walletSetupCreateStep.title'));
     await this.assertSeeStepSubtitle(await t('core.walletSetupCreateStep.description'));
-    await WalletCreationPage.walletLoader.waitForDisplayed();
   }
 
   async assertCreatingWalletDuration(duration: number) {

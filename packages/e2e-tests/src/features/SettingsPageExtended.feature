@@ -354,7 +354,7 @@ Feature: General Settings - Extended Browser View
     Then "Remove wallet" modal is not displayed
 
   @LW-5821 @Mainnet @Testnet
-  Scenario: Remove and Onboard new wallet - address has been changed defect - LW-5087
+  Scenario: Remove and Onboard new wallet - address has been changed
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
@@ -367,7 +367,7 @@ Feature: General Settings - Extended Browser View
     And I see a different wallet address than in my initial wallet
 
   @LW-5822 @Mainnet @Testnet
-  Scenario: Remove and Restore wallet - address has been changed - defect LW-5087
+  Scenario: Remove and Restore wallet - address has been changed
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
