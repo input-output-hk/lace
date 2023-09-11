@@ -62,16 +62,7 @@ export const label = style([
       [`${root}:focus-visible:not(${active}) &`]: {
         color: vars.colors.$sub_navigation_item_label_color_focused,
       },
-      [`${root}:focus-visible:not(:active) &`]: {
-        color: vars.colors.$sub_navigation_item_label_color_focused,
-      },
       [`${root}:focus-visible:is(${active}) &`]: {
-        color: vars.colors.$sub_navigation_item_label_color_pressed,
-      },
-      [`${root}:focus-visible:is(:active) &`]: {
-        color: vars.colors.$sub_navigation_item_label_color_pressed,
-      },
-      [`${root}:active &`]: {
         color: vars.colors.$sub_navigation_item_label_color_pressed,
       },
       [`${active} &`]: {
