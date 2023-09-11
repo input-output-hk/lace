@@ -22,6 +22,7 @@ export class TokenSelectionPage extends WebElement {
   private CLEAR_BUTTON = '[data-testid="clear-button"]';
   private SELECT_MULTIPLE_BUTTON = '[data-testid="select-multiple-button"]';
   private ADD_TO_TRANSACTION_BUTTON = '[data-testid="add-to-transaction-button"]';
+  private NFT_IMAGE = '[data-testid="nft-image"]';
 
   constructor() {
     super();
@@ -29,6 +30,10 @@ export class TokenSelectionPage extends WebElement {
 
   get tokensButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOKENS_BUTTON).parentElement().parentElement();
+  }
+
+  get nftImages() {
+    return this.assetSelectorContainer.$$(this.NFT_IMAGE);
   }
 
   tokenItem(): WebElement {

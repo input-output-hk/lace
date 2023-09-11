@@ -3,6 +3,7 @@ import { WalletConfig } from '../support/walletConfiguration';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import extensionUtils from '../utils/utils';
+import testContext from '../utils/testContext';
 
 class WalletAddressPageAssert {
   async assertSeeWalletAddressPage(mode: 'extended' | 'popup') {
@@ -34,6 +35,23 @@ class WalletAddressPageAssert {
     const address = String(extensionUtils.isMainnet() ? wallet.mainnetAddress : wallet.address);
     const expectedAddress = mode === 'extended' ? address : `${address.slice(0, 7)}...${address.slice(-8)}`;
     await expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
+  }
+
+  // eslint-disable-next-line no-undef
+  async getSrc(item: WebdriverIO.Element) {
+    return item.$('img').getAttribute('src');
+  }
+  async assertSeeAdaHandle() {
+    const displayedAdaHandleNames: string[] = [];
+    const displayedAdaHandleNamesElementArray = await WalletAddressPage.addressCardHandleName;
+    const displayedAdaHandleImages = await WalletAddressPage.addressCardHandleImage.map(this.getSrc);
+
+    for (const displayedAdaHandleNamesElement of displayedAdaHandleNamesElementArray) {
+      await displayedAdaHandleNamesElement.waitForDisplayed();
+      displayedAdaHandleNames.push(await displayedAdaHandleNamesElement.getText());
+    }
+    testContext.save('displayedAdaHandleNames', displayedAdaHandleNames);
+    testContext.save('displayedAdaHandleImages', displayedAdaHandleImages);
   }
 }
 
