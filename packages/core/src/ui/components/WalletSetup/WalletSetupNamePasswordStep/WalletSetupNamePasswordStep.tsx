@@ -9,8 +9,8 @@ import { BarStates, WalletSetupNamePasswordSubmitParams } from './types';
 import styles from './WalletSetupNamePasswordStep.module.scss';
 import {
   getComplexityBarStateList,
-  minimumPassLevelRequired,
-  passwordLevelFeedback,
+  MINIMUM_PASSWORD_LEVEL_REQUIRED,
+  PASSWORD_LEVEL_FEEDBACK,
   validateNameLength,
   WALLET_NAME_INPUT_MAX_LENGTH
 } from './utils';
@@ -49,15 +49,15 @@ export const WalletSetupNamePasswordStep = ({
     return walletName ? validationError : t('package.core.walletNameAndPasswordSetupStep.nameRequiredMessage');
   }, [t, walletName]);
 
-  const isNextBtnEnabled = () => {
+  const isNextButtonEnabled = () => {
+    const hasMinimumLevelRequired = score >= MINIMUM_PASSWORD_LEVEL_REQUIRED;
+    const isNotEmptyPassword = password.length > 0;
     const isValidPassword = Boolean(
-      passHasBeenValidated &&
-        !passwordConfirmationErrorMessage &&
-        score >= minimumPassLevelRequired &&
-        password.length > 0
+      passHasBeenValidated && !passwordConfirmationErrorMessage && hasMinimumLevelRequired && isNotEmptyPassword
     );
+    const isValidName = Boolean(!walletNameErrorMessage);
 
-    return Boolean(!walletNameErrorMessage) && isValidPassword;
+    return isValidName && isValidPassword;
   };
 
   const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,7 +84,7 @@ export const WalletSetupNamePasswordStep = ({
       description={t('package.core.walletNameAndPasswordSetupStep.description')}
       onBack={onBack}
       onNext={handleNextBtnClick}
-      isNextEnabled={isNextBtnEnabled()}
+      isNextEnabled={isNextButtonEnabled()}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
     >
       <div className={styles.walletSetupNamePasswordStep}>
@@ -113,16 +113,20 @@ export const WalletSetupNamePasswordStep = ({
           onChange={handlePasswordChange}
           level={score}
           feedbacks={
-            score === passwordLevelFeedback
-              ? [t('package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback')]
-              : undefined
+            score === PASSWORD_LEVEL_FEEDBACK && [
+              t('package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback')
+            ]
           }
           complexityBarList={complexityBarList}
-          data-testid="wallet-setup-password-step-password"
+          data-testid="wallet-password-verification-input"
           autoFocus
         />
 
-        <div className={cn(styles.confirmPasswordContainer, { [styles.displayed]: score >= minimumPassLevelRequired })}>
+        <div
+          className={cn(styles.confirmPasswordContainer, {
+            [styles.displayed]: score >= MINIMUM_PASSWORD_LEVEL_REQUIRED
+          })}
+        >
           <Password
             className={styles.input}
             errorMessage={passwordConfirmationErrorMessage}
