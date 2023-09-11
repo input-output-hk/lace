@@ -9,6 +9,17 @@ import {
   getLatestEventsNames
 } from '../utils/postHogAnalyticsUtils';
 
+export const validateEventProperty = async (event: string, property: string, propertyValue: string): Promise<void> => {
+  await browser.waitUntil(async () => (await getEventPayload(event)).properties[property] === propertyValue, {
+    interval: 1000,
+    timeout: 6000,
+    timeoutMsg: `Failed while waiting for event '${event}' contains property '${property}' equal to ${propertyValue}. Actual event property value = '${
+      (
+        await getEventPayload(event)
+      ).properties[property]
+    }'`
+  });
+};
 When(/^I set up request interception for posthog analytics request\(s\)$/, async () => {
   await browser.pause(1000);
   await browser.setupInterceptor();
@@ -55,18 +66,7 @@ When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numbe
 });
 
 When(/^I validate that alias event has assigned same user id "([^"]*)" in posthog$/, async (expectedUserID: string) => {
-  await browser.waitUntil(
-    async () => (await getEventPayload('$create_alias')).properties.distinct_id === expectedUserID,
-    {
-      interval: 1000,
-      timeout: 4000,
-      timeoutMsg: `Failed while waiting for event $create_alias contains property distinct id equal to ${expectedUserID}. Actual distinct id= ${
-        (
-          await getEventPayload('$create_alias')
-        ).properties.distinct_id
-      }`
-    }
-  );
+  await validateEventProperty('$create_alias', 'distinct_id', expectedUserID);
 });
 
 Then(/^I validate that event has correct properties$/, async () => {
@@ -106,17 +106,19 @@ Then(/^I validate that event has correct properties$/, async () => {
 });
 
 Then(/^I validate that the event includes "([^"]*)" property$/, async (property: string) => {
-  await browser.pause(1000);
-  const actualEventPayload = await getLatestEventPayload();
-  expect(Object.prototype.hasOwnProperty.call(actualEventPayload.properties, property)).to.be.true;
+  await browser.waitUntil(
+    async () => Object.prototype.hasOwnProperty.call((await getLatestEventPayload()).properties, property),
+    {
+      interval: 1000,
+      timeout: 6000,
+      timeoutMsg: `Failed while waiting for latest event contains property ${property}`
+    }
+  );
 });
 
 Then(
   /^I validate that the "([^"]*)" event includes property "([^"]*)" with value "([^"]*)" in posthog$/,
   async (event: string, property: string, propertyValue: string) => {
-    await browser.pause(1000);
-    const actualPropertyValue = (await getEventPayload(event)).properties[property];
-    console.log(actualPropertyValue);
-    expect(actualPropertyValue).to.equal(propertyValue);
+    await validateEventProperty(event, property, propertyValue);
   }
 );
