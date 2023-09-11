@@ -1,11 +1,14 @@
 /* eslint-disable react/no-multi-comp */
 import Icon from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
+import { getRandomIcon } from '@lace/common';
 import { List, ListProps } from 'antd';
 import cn from 'classnames';
 import isNumber from 'lodash/isNumber';
-import React from 'react';
+import React, { useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { useOutsideHandles } from '../../../outside-handles-provider';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../../../store';
 import { StakePoolItemBrowser, StakePoolItemBrowserProps } from '../StakePoolItemBrowser';
 import Arrow from './arrow.svg';
 import styles from './StakePoolTableBrowser.module.scss';
@@ -59,17 +62,66 @@ export const StakePoolTableBrowser = ({
   showSkeleton,
   ...props
 }: StakePoolTableBrowserProps): React.ReactElement => {
+  const poolsToFetch = useDelegationPortfolioStore((state) =>
+    state.selections.map(({ id }) => ({
+      // Had to cast it with fromKeyHash because search uses plain ID instead of hex.
+      id: Wallet.Cardano.PoolId.fromKeyHash(id as unknown as Wallet.Crypto.Ed25519KeyHashHex),
+    }))
+  );
+  const [selectedPools, setSelectedPools] = React.useState<Wallet.Cardano.StakePool[]>([]);
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+
   const headers: TableHeaders[] = [
     { label: translations.poolName, value: 'name' },
     { label: translations.apy, value: 'apy' },
     { label: translations.saturation, value: 'saturation' },
   ];
 
+  const { walletStoreBlockchainProvider: blockchainProvider, walletStoreWalletUICardanoCoin: cardanoCoin } =
+    useOutsideHandles();
+
   const onSortChange = (field: SortKey) => {
     const order =
       field === activeSort?.field ? ((activeSort?.order === 'asc' ? 'desc' : 'asc') as SortDirection) : 'asc';
     setActiveSort({ field, order });
   };
+
+  const selectedStakePools = selectedPools?.map((pool) => {
+    const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
+    const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
+    const hexId = Wallet.Cardano.PoolIdHex(stakePool.hexId);
+
+    return {
+      logo,
+      ...stakePool,
+      hexId,
+      onUnselect: () => portfolioMutators.unselectPool({ id: hexId }),
+    };
+  });
+
+  useEffect(() => {
+    if (poolsToFetch.length === 0) {
+      setSelectedPools([]);
+      return;
+    }
+    const selectedPoolsFilters: Wallet.QueryStakePoolsArgs = {
+      filters: {
+        identifier: {
+          _condition: 'or',
+          values: poolsToFetch,
+        },
+      },
+      pagination: {
+        limit: MAX_POOLS_COUNT,
+        startAt: 0,
+      },
+    };
+    const fetchSelectedPools = async () => {
+      const { pageResults } = await blockchainProvider.stakePoolProvider.queryStakePools(selectedPoolsFilters);
+      setSelectedPools(pageResults);
+    };
+    fetchSelectedPools();
+  }, [poolsToFetch.length]);
 
   return (
     <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
@@ -92,6 +144,12 @@ export const StakePoolTableBrowser = ({
           </div>
         ))}
       </div>
+      <div className={styles.selectedPools}>
+        {selectedStakePools?.map((pool) => (
+          <StakePoolItemBrowser key={pool.id} {...pool} />
+        ))}
+      </div>
+      {selectedStakePools?.length > 0 && <div className={styles.poolsSeparator} />}
       <div data-testid="stake-pool-list-scroll-wrapper" className={styles.wrapper}>
         {isNumber(total) && !total && emptyPlaceholder}
         <InfiniteScroll

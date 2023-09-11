@@ -19,9 +19,9 @@ export interface StakePoolItemBrowserProps {
   saturation?: number | string;
   cost?: number | string;
   logo: string;
-  onClick: (id: string) => unknown;
-  onSelect: () => void;
-  onUnselect: () => void;
+  onClick?: (id: string) => unknown;
+  onSelect?: () => void;
+  onUnselect?: () => void;
 }
 
 export const getSaturationLevel = (saturation: number): string => {
@@ -70,7 +70,7 @@ export const StakePoolItemBrowser = ({
     : t('browsePools.stakePoolTableBrowser.stake');
 
   return (
-    <div data-testid="stake-pool-table-item" className={styles.row} onClick={() => onClick(id)}>
+    <div data-testid="stake-pool-table-item" className={styles.row} onClick={() => onClick && onClick(id)}>
       <div className={styles.name}>
         <img
           data-testid="stake-pool-list-logo"
@@ -110,7 +110,7 @@ export const StakePoolItemBrowser = ({
               label={stakePoolStateLabel}
               onClick={(event) => {
                 event.stopPropagation();
-                poolAlreadySelected ? onUnselect() : onSelect();
+                poolAlreadySelected ? onUnselect && onUnselect() : onSelect && onSelect();
               }}
               disabled={disabledAddingToDraft}
               data-testid="stake-button"
