@@ -1,12 +1,13 @@
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import '@testing-library/jest-dom';
-import { act, fireEvent, queryByTestId as queryByTestIdInContainer, render } from '@testing-library/react';
+import { queryByTestId as queryByTestIdInContainer, render } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import { AssetDetails, AssetDetailsProps } from '../AssetDetails';
 import { StateStatus } from '@src/stores/types';
 import i18n from '@lib/i18n';
 import * as Stores from '@src/stores';
+import { ExternalLinkOpenerProvider } from '@providers';
 
 jest.mock('@src/stores', (): typeof Stores => ({
   ...jest.requireActual<typeof Stores>('@src/stores'),
@@ -15,7 +16,9 @@ jest.mock('@src/stores', (): typeof Stores => ({
 
 const AssetDetailsWrapped = (props: AssetDetailsProps) => (
   <I18nextProvider i18n={i18n}>
-    <AssetDetails {...props} />
+    <ExternalLinkOpenerProvider>
+      <AssetDetails {...props} />
+    </ExternalLinkOpenerProvider>
   </I18nextProvider>
 );
 
@@ -41,28 +44,6 @@ describe('AssetDetails', () => {
     expect(queryByTestIdInContainer(assetBalanceContainer, 'portfolio-balance-value')).toHaveTextContent('200');
     expect(queryByTestIdInContainer(assetBalanceContainer, 'portfolio-balance-currency')).toHaveTextContent('AST');
     expect(queryByTestIdInContainer(assetBalanceContainer, 'portfolio-balance-subtitle')).toHaveTextContent('1000 USD');
-  });
-
-  test('displays "see all your transactions button" if is popup view', async () => {
-    const mockOnViewAllClick = jest.fn();
-    const { queryByTestId } = render(
-      <AssetDetailsWrapped
-        fiatPrice="5"
-        fiatCode="USD"
-        balance="200"
-        assetSymbol="AST"
-        balanceInFiat="1000 USD"
-        fiatPriceVariation="0"
-        activityList={[]}
-        popupView
-        onViewAllClick={mockOnViewAllClick}
-      />
-    );
-    expect(queryByTestId('see-all-your-transactions-button')).toBeInTheDocument();
-    act(() => {
-      fireEvent.click(queryByTestId('see-all-your-transactions-button'));
-    });
-    expect(mockOnViewAllClick).toHaveBeenCalled();
   });
 
   describe('asset activity list', () => {

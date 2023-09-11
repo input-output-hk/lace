@@ -79,7 +79,7 @@ export const getLastActiveTab: () => Promise<Tabs.Tab> = async () =>
  */
 export const getDappInfoFromLastActiveTab: () => Promise<Wallet.DappInfo> = async () => {
   const lastActiveTab = await getLastActiveTab();
-  console.log('lastActiveTab.favIconUrl', lastActiveTab.favIconUrl);
+  if (!lastActiveTab) throw new Error('could not find DApp');
   return {
     logo: lastActiveTab.favIconUrl || getRandomIcon({ id: uniqueId(), size: 40 }),
     name: lastActiveTab.title || lastActiveTab.url.split('//')[1].trim(),
@@ -91,9 +91,7 @@ const calculatePopupWindowPositionAndSize = (
   window: Windows.Window,
   popup: WindowSize
 ): WindowSizeAndPositionProps => ({
-  // eslint-disable-next-line no-magic-numbers
   top: Math.floor(window.top + (window.height - POPUP_WINDOW.height) / 2),
-  // eslint-disable-next-line no-magic-numbers
   left: Math.floor(window.left + (window.width - POPUP_WINDOW.width) / 2),
   ...popup
 });
@@ -101,7 +99,8 @@ const calculatePopupWindowPositionAndSize = (
 const createTab = async (url: string, active = false) =>
   tabs.create({
     url: runtime.getURL(url),
-    active
+    active,
+    pinned: true
   });
 
 const createWindow = (
@@ -120,20 +119,16 @@ const createWindow = (
 /**
  * launchCip30Popup
  * @param url - Originating url of current dapp
+ * @param windowType 'normal' for hardware wallet interactions, 'popup' for everything else
  * @returns tab - Tab of currently launched dApp connector
  */
-export const launchCip30Popup = async (url: string): Promise<Tabs.Tab> => {
+export const launchCip30Popup = async (url: string, windowType: Windows.CreateType): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
   const tab = await createTab(`../dappConnector.html${url}`, false);
-  const bgStorage = await getBackgroundStorage();
-  const keyAgentTypeIsLedger = Object.values(bgStorage.keyAgentsByChain).some(
-    ({ keyAgentData }) => keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.Ledger
-  );
-  const popupType: Windows.CreateType = keyAgentTypeIsLedger ? 'normal' : 'popup';
   const newWindow = await createWindow(
     tab.id,
     calculatePopupWindowPositionAndSize(currentWindow, POPUP_WINDOW),
-    popupType,
+    windowType,
     true
   );
   newWindow.alwaysOnTop = true;
@@ -153,13 +148,30 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
     tabs.onUpdated.addListener(listener);
   });
 
-export const ensureUiIsOpenAndLoaded = async (url?: string): Promise<Tabs.Tab> => {
-  // Close all preeviously opened cip30 popups
-  const openTabs = await tabs.query({ windowType: 'popup' });
-  for (const tab of openTabs) {
-    windows.remove(tab.windowId);
+const keyAgentIsHardwareWallet = (keyAgentsByChain?: Wallet.KeyAgentsByChain): boolean => {
+  if (!keyAgentsByChain) return false;
+  return Object.values(keyAgentsByChain).some(
+    ({ keyAgentData }) => keyAgentData.__typename !== Wallet.KeyManagement.KeyAgentType.InMemory
+  );
+};
+
+export const ensureUiIsOpenAndLoaded = async (url?: string, checkKeyAgent = true): Promise<Tabs.Tab> => {
+  const bgStorage = await getBackgroundStorage();
+
+  const keyAgentTypeIsHardwareWallet = checkKeyAgent
+    ? keyAgentIsHardwareWallet(bgStorage?.keyAgentsByChain)
+    : undefined;
+
+  const windowType: Windows.CreateType = keyAgentTypeIsHardwareWallet ? 'normal' : 'popup';
+  if (keyAgentTypeIsHardwareWallet) {
+    const openTabs = await tabs.query({ title: 'Lace' });
+    // Close all previously opened lace windows
+    for (const tab of openTabs) {
+      tabs.remove(tab.id);
+    }
   }
-  const tab = await launchCip30Popup(url);
+
+  const tab = await launchCip30Popup(url, windowType);
   if (tab.status !== 'complete') {
     await waitForTabLoad(tab);
   }

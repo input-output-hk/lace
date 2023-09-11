@@ -27,3 +27,14 @@ export const getLatestEventPayload = async (): Promise<any> => {
   const requests = await browser.getRequests({ includePending: true, orderBy: 'START' });
   return getRequestDataPayload(requests.pop());
 };
+
+export const getEventPayload = async (expectedEventName: string): Promise<any> => {
+  const requests = await browser.getRequests({ includePending: true, orderBy: 'START' });
+  for (const request of requests) {
+    const payload = await getRequestDataPayload(request);
+    if (payload.event === expectedEventName) {
+      return payload;
+    }
+  }
+  throw new Error(`Event with name ${expectedEventName} not found`);
+};

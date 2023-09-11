@@ -47,6 +47,10 @@ export type DraftPortfolioStakePool = Wallet.Cardano.Cip17Pool & {
 };
 
 export type CurrentPortfolioStakePool = DraftPortfolioStakePool & {
+  displayData: Wallet.util.StakePool & {
+    lastReward: bigint;
+    totalRewards: bigint;
+  };
   stakePool: Wallet.Cardano.StakePool;
   value: bigint;
 };
@@ -73,6 +77,8 @@ type DelegationPortfolioMutators = {
   setCurrentPortfolio: (params: {
     delegationDistribution: DelegatedStake[];
     cardanoCoin: Wallet.CoinId;
+    currentEpoch: Wallet.EpochInfo;
+    delegationRewardsHistory: Wallet.RewardsHistory;
   }) => Promise<void>;
   selectPool: (pool: DraftPortfolioStakePool) => void;
   unselectPool: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;

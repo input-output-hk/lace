@@ -20,7 +20,7 @@ export const verifyHandle = async (
 ): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
   try {
     const resolvedHandles = await handleResolver.resolveHandles({ handles: [value.slice(1)] });
-    if (resolvedHandles.length === 0) {
+    if (resolvedHandles.length === 0 || resolvedHandles === null) {
       return { valid: false };
     }
     return { valid: true, handles: resolvedHandles };
@@ -81,7 +81,7 @@ export const validateWalletAddress = (address: string): string => {
   if (!address) return i18n.t('browserView.addressBook.form.addressMissing');
   if (hasWhiteSpace(address)) return i18n.t('browserView.addressBook.form.addressHasWhiteSpace');
   const isValid = isValidAddress(address);
-  return !isValid ? i18n.t('browserView.addressBook.form.incorrectCardanoAddress') : '';
+  return !isValid ? i18n.t('browserView.addressBook.form.invalidCardanoAddress') : '';
 };
 
 type validateWalletHandleArgs = {

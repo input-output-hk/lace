@@ -25,8 +25,12 @@ $button_size: 52px;
   gap: size_unit(2) !important;
   height: size_unit(8) !important;
   justify-content: space-between !important;
-  padding: 0 size_unit(0.75) 0 0 !important;
   border: 1.5px solid transparent !important;
+  padding-bottom: 0px;
+  padding-right: 5px;
+  margin-top: size_unit(3);
+  transition: none;
+
 
   @media (max-width: $breakpoint-popup) {
     padding: 0 size_unit(0.75) 0 size_unit(2.5) !important;
@@ -46,7 +50,8 @@ $button_size: 52px;
       flex: 1;
       background-color: transparent !important;
       border: none !important;
-      
+      transition: none;
+
       &::placeholder {
         @include text-bodyLarge-semi-bold;
         color: var(--text-color-secondary) !important;
@@ -84,7 +89,9 @@ $button_size: 52px;
 
   .searchIcon {
     font-size: $font-size-bodyLarge !important;
-    width: 18px !important;
+    width: size_unit(3) !important;
+    height: size_unit(3) !important;
+    margin-left: size_unit(3);
   }
 }
 
@@ -112,6 +119,9 @@ $button_size: 52px;
 }
 
 @media (max-width: $breakpoint-popup) {
+  .content { 
+    padding-left: size_unit(2);
+  }
   .inputSearch {
     font-size: var(--bodyLarge, 18px) !important;
 
@@ -199,13 +209,15 @@ button.clear {
 
 .content {
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
+  padding-left: size_unit(2);
 }
 
 .loaderContainer {
   display: flex;
   z-index: 2;
+  margin-right: size_unit(2);
 }
 .loader {
   @include spin-animation();

@@ -66,7 +66,6 @@ $main-gap: 49px;
   grid-template-areas:
     'nav side-panel'
     'nav main';
-  justify-content: center;
   margin-right: size_unit(4);
   grid-template-columns: $navigation-col-width-collapsed 1fr;
   grid-template-rows: $row-height 1fr;

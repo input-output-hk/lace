@@ -1,11 +1,11 @@
-@Staking-SwitchingPools-Popup-E2E @Testnet @Pending
-Feature: Staking Page - Switching pools - Popup View - E2E
+@Analytics-Staking-SwitchingPools-Popup-E2E @Analytics @Testnet @Pending
+Feature: Analytics - Posthog - Switching pools - Popup View
 
   Background:
     Given Wallet is synced
 
   @LW-7870
-  Scenario: Popup View - Staking - Analytics - Success screen - Close drawer
+  Scenario: Analytics - Popup View - Staking  - Success screen - Close drawer
     Given I set up request interception for posthog analytics request(s)
     And I save token: "Cardano" balance
     And I navigate to Staking popup page
@@ -33,7 +33,7 @@ Feature: Staking Page - Switching pools - Popup View - E2E
     And I validate that 8 analytics event(s) have been sent
 
   @LW-7871
-  Scenario: Popup View - Staking - Analytics - Success screen - Close drawer by clicking X button
+  Scenario: Analytics - Popup View - Staking - Success screen - Close drawer by clicking X button
     Given I set up request interception for posthog analytics request(s)
     And I save token: "Cardano" balance
     And I navigate to Staking popup page
@@ -59,4 +59,3 @@ Feature: Staking Page - Switching pools - Popup View - E2E
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "staking | manage delegation | hurray! | x | click"
     And I validate that 8 analytics event(s) have been sent
-    

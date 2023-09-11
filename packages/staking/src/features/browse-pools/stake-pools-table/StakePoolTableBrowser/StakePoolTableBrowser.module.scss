@@ -9,7 +9,7 @@
   :global(.ant-list-split) :local(.listItemWrapper) {
     border-bottom: none !important;
     padding: 0;
-    padding-bottom: size_unit(3);
+    padding-bottom: size_unit(1);
     &:last-child {
       padding-bottom: 0px;
     }

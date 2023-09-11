@@ -145,7 +145,6 @@ export type PostHogPersonProperties = {
 export type PostHogMetadata = {
   distinct_id?: string;
   alias_id?: string;
-  url: string;
   view: ExtensionViews;
   sent_at_local: string;
   posthog_project_id: number;

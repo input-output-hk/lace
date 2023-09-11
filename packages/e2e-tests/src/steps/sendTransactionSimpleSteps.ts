@@ -203,14 +203,15 @@ Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignor
 When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
+    await browser.pause(500);
     await transactionExtendedPageObject.fillAddress(
       receivingAddress === 'CopiedAddress'
         ? String(await clipboard.read())
         : String(getTestWallet(receivingAddress).address),
       bundleIndex
     );
-    await browser.pause(1000);
     for (const entry of options.hashes()) {
+      await browser.pause(500);
       switch (entry.type) {
         case 'ADA':
           break;
@@ -308,7 +309,7 @@ Then(
 
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
   await transactionExtendedPageObject.fillAddress(byron.getAddress());
-  await transactionExtendedPageObject.fillTokenValue(1);
+  await transactionExtendedPageObject.fillTokenValue(0.5);
 });
 
 Then(/^The Tx summary screen is displayed:$/, async (_ignored: string) => {
@@ -322,7 +323,7 @@ Then(/^The Tx summary screen is displayed:$/, async (_ignored: string) => {
 Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async (_ignored: string) => {
   const expectedTransactionSummaryData = {
     recipientAddress: byron.getAddress(),
-    valueToBeSent: [{ value: extensionUtils.isMainnet() ? '1.05' : '1.08', currency: Asset.CARDANO.ticker }]
+    valueToBeSent: [{ value: extensionUtils.isMainnet() ? '1.05' : '0.97', currency: Asset.CARDANO.ticker }]
   };
   await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
 });

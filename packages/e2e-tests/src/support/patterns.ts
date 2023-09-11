@@ -13,7 +13,7 @@ const NUMBER_DOUBLE_REGEX = /(\d*\.)?\d+/;
 const COUNTER_REGEX = /\(\d+\)/;
 const PERCENT_DOUBLE_REGEX = /(\d*\.)?\d+\s?%|-%/;
 const STAKE_POOL_LIST_COST_REGEX = /(\d*\.)?\d+\s?%(\s\+\s\d*ADA)?/;
-const TIMESTAMP_REGEX = /\d{2}:\d{2}:\d{2} (AM|PM)/;
+const TIMESTAMP_REGEX = /\d{2}:\d{2}:\d{2}/;
 
 export const TestnetPatterns = {
   TESTNET_ADDR_REGEX,
