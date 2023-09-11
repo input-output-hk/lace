@@ -170,6 +170,7 @@ Then(/^I see no results for "Select NFTs" drawer$/, async () => {
 });
 
 Then(/^I click NFT with name "([^"]*)"$/, async (nftName: string) => {
+  await NftSelectNftsPage.waitForNft(nftName);
   const nft = await NftSelectNftsPage.getNftByName(nftName);
   await nft.waitForClickable();
   await nft.click();
