@@ -54,10 +54,10 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
 
   const tableHeaderTranslations = {
-    apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros'),
+    apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
     cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost'),
     poolName: t('browsePools.stakePoolTableBrowser.tableHeader.poolName'),
-    saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation'),
+    saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
