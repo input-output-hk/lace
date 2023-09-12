@@ -47,10 +47,8 @@ Then(
   }
 );
 
-// eslint-disable-next-line no-unused-vars
 Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
-  // eslint-disable-next-line no-unused-vars
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
     const stakePool =
       stakePoolName === 'OtherStakePool'

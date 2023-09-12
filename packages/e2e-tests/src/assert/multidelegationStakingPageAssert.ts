@@ -10,18 +10,14 @@ import { MultiDelegationStakingInfoComponent } from '../elements/staking/MultiDe
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 
 class MultidelegationStakePoolDetailsAssert {
-  async assertSeeMultiDelegationStakePoolDetailsPage(
-    expectedStakedPool: StakePool,
-    staked: boolean,
-    noMetaDataPool = false
-  ) {
+  async assertSeeMultiDelegationStakePoolDetailsPage(expectedStakedPool: StakePool, noMetaDataPool = false) {
     (await isPopupMode())
       ? await StakePoolDetails.drawerHeaderBackButton.waitForClickable()
       : await StakePoolDetails.drawerHeaderCloseButton.waitForClickable();
 
     await this.assertMultiDelegationSeeStakePoolDetailsCommonElements();
 
-    await expect(await StakePoolDetails.poolName.getText()).to.equal(expectedStakedPool.name);
+    expect(await StakePoolDetails.poolName.getText()).to.equal(expectedStakedPool.name);
 
     if (noMetaDataPool) {
       await expect(await StakePoolDetails.poolTicker.getText()).to.contain(expectedStakedPool.poolId.slice(0, 6));
@@ -43,7 +39,6 @@ class MultidelegationStakePoolDetailsAssert {
     );
     await expect(await StakePoolDetails.poolId.getText()).to.equal(expectedStakedPool.poolId);
 
-    console.log(`button text is ${await StakePoolDetails.ownersTitle.getText()}`);
     await expect(await StakePoolDetails.ownersTitle.getText()).to.equal('Owners (1)');
 
     for (const owner of await StakePoolDetails.owners) {
@@ -54,7 +49,6 @@ class MultidelegationStakePoolDetailsAssert {
 
   async assertSeeMultiDelegationStakePoolDetailsPageAlreadyDelegating(
     expectedStakedPool: StakePool,
-    staked: boolean,
     noMetaDataPool = false
   ) {
     (await isPopupMode())
@@ -198,7 +192,7 @@ class MultidelegationStakePoolDetailsAssert {
       await t('cardano.stakePoolMetricsBrowser.activeStake')
     );
 
-    await expect(((await StakePoolDetails.activeStakeValue.getText()) as string).slice(0, -1)).to.match(
+    await expect((await StakePoolDetails.activeStakeValue.getText()).slice(0, -1)).to.match(
       TestnetPatterns.NUMBER_DOUBLE_REGEX
     );
     await expect(await StakePoolDetails.saturationTitle.getText()).to.equal(
