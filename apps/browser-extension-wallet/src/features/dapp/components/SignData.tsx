@@ -15,8 +15,6 @@ import { runtime } from 'webextension-polyfill';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
 
-const DAPP_TOAST_DURATION = 50;
-
 export const SignData = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
@@ -58,24 +56,6 @@ export const SignData = (): React.ReactElement => {
       setIsLoading(false);
     }
   }, [password, redirectToSignFailure, keyAgentData, redirectToSignSuccess]);
-
-  const cancelTransaction = useCallback((close = false) => {
-    exposeApi<Pick<UserPromptService, 'allowSignData'>>(
-      {
-        api$: of({
-          async allowSignData(): Promise<boolean> {
-            return Promise.reject();
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { allowSignData: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
-    close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
-  }, []);
-
-  window.addEventListener('beforeunload', cancelTransaction);
 
   const onConfirm = useCallback(
     () => executeWithPassword(password, handleVerifyPass, false),
