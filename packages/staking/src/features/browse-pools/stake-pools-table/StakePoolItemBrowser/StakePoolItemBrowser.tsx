@@ -19,9 +19,9 @@ export interface StakePoolItemBrowserProps {
   saturation?: number | string;
   cost?: number | string;
   logo: string;
-  onClick?: (id: string) => unknown;
-  onSelect?: () => void;
-  onUnselect?: () => void;
+  onClick: (id: string) => unknown;
+  onSelect: () => void;
+  onUnselect: () => void;
 }
 
 export const getSaturationLevel = (saturation: number): string => {
