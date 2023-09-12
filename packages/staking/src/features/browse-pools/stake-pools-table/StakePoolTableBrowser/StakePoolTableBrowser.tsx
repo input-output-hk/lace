@@ -85,7 +85,7 @@ export const StakePoolTableBrowser = ({
       ...pool,
       onUnselect: () => portfolioMutators.unselectPool({ id: pool.hexId }),
     }));
-  const otherStakePools = items.filter((item) => !selectedStakePools.some((pool) => pool.id === item.id));
+  const availableStakePools = items.filter((item) => !selectedStakePools.some((pool) => pool.id === item.id));
 
   return (
     <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
@@ -134,7 +134,7 @@ export const StakePoolTableBrowser = ({
               <List
                 className={className}
                 data-testid="stake-pool-list"
-                dataSource={otherStakePools}
+                dataSource={availableStakePools}
                 itemLayout="horizontal"
                 locale={{ emptyText }}
                 renderItem={(item: StakePoolItemBrowserProps) => (
