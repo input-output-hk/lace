@@ -1,6 +1,9 @@
+const mockGetFormattedAmount = jest.fn();
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-len */
 /* eslint-disable no-magic-numbers */
+/* eslint-disable import/imports-first */
 import * as txHistoryTransformers from '../tx-history-transformer';
 import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
@@ -10,6 +13,21 @@ import * as txInspection from '@src/utils/tx-inspection';
 import * as pendingTxTransformer from '../pending-tx-transformer';
 import { TxDirection } from '@src/types';
 import { AssetActivityItemProps } from '@lace/core';
+
+jest.mock('@lace/cardano', () => {
+  const actual = jest.requireActual<any>('@lace/cardano');
+  return {
+    __esModule: true,
+    ...actual,
+    Wallet: {
+      ...actual.Wallet,
+      util: {
+        ...actual.Wallet.util,
+        getFormattedAmount: mockGetFormattedAmount
+      }
+    }
+  };
+});
 
 dayjs.extend(utc);
 
@@ -65,6 +83,7 @@ describe('Testing txHistoryTransformer function', () => {
   const date = new Date(Date.UTC(2022, 1, 1, 10, 10));
 
   test('should return parsed incoming tx', async () => {
+    mockGetFormattedAmount.mockReturnValueOnce('20.00 ADA');
     const result: any = txHistoryTransformers.txHistoryTransformer({
       tx: txHistory,
       walletAddresses: [
@@ -91,6 +110,7 @@ describe('Testing txHistoryTransformer function', () => {
   });
 
   test('should return parsed outgoing tx', async () => {
+    mockGetFormattedAmount.mockReturnValueOnce('30.00 ADA');
     const result: any = txHistoryTransformers.txHistoryTransformer({
       tx: txHistory,
       walletAddresses: [
@@ -125,9 +145,7 @@ describe('Testing txHistoryTransformer function', () => {
       date: 'date',
       timestamp: 'timestamp'
     };
-    const getFormattedAmountSpy = jest
-      .spyOn(pendingTxTransformer, 'getFormattedAmount')
-      .mockReturnValueOnce(formattedAmount);
+    mockGetFormattedAmount.mockReturnValueOnce(formattedAmount);
     const getFormattedFiatAmountSpy = jest
       .spyOn(pendingTxTransformer, 'getFormattedFiatAmount')
       .mockReturnValueOnce(formattedFiatAmount);
@@ -203,7 +221,6 @@ describe('Testing txHistoryTransformer function', () => {
     txTransformerSpy.mockRestore();
     inspectTxTypeSpy.mockRestore();
     getTxDirectionSpy.mockRestore();
-    getFormattedAmountSpy.mockRestore();
     getFormattedFiatAmountSpy.mockRestore();
     getRewardsAmountSpy.mockRestore();
   });

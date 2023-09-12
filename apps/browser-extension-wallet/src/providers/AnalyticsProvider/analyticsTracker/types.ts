@@ -114,6 +114,11 @@ export enum ExtensionViews {
   Popup = 'popup'
 }
 
+export enum TxRecipientType {
+  AdaHandle = 'ADA Handle',
+  RegularAddress = 'regular address'
+}
+
 export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password';
 export type PostHogActionsKeys =
   | 'SETUP_OPTION_CLICK'

@@ -6,12 +6,7 @@ import { AssetActivityItemProps } from '@lace/core';
 import dayjs from 'dayjs';
 import { formatDate } from '@src/utils/format-date';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
-import {
-  getFormattedAmount,
-  getFormattedFiatAmount,
-  txTransformer,
-  TxTransformerInput
-} from './pending-tx-transformer';
+import { getFormattedFiatAmount, txTransformer, TxTransformerInput } from './pending-tx-transformer';
 import { TxDirections } from '@types';
 import {
   isDelegationWithDeregistrationTx,
@@ -96,7 +91,7 @@ export const txHistoryTransformer = ({
       {
         type: 'rewards',
         direction: 'Incoming',
-        amount: getFormattedAmount({ amount: rewardsAmount, cardanoCoin }),
+        amount: Wallet.util.getFormattedAmount({ amount: rewardsAmount, cardanoCoin }),
         fiatAmount: getFormattedFiatAmount({
           amount: new BigNumber(tx?.body?.withdrawals[0]?.quantity?.toString() || '0'),
           fiatCurrency,
