@@ -1,6 +1,10 @@
 @AdaHandle-extended @Testnet
 Feature: ADA handle - extended view
 
+  Background:
+    Given Wallet is synced
+    And all NFT folders are removed
+
   @LW-7331
   Scenario: Extended view - Add a valid ADA handle to the address book
     Given I am on Address Book extended page
@@ -55,3 +59,31 @@ Feature: ADA handle - extended view
     Then Green tick icon is displayed next to ADA handle
     And I click "Done" button on "Edit address" drawer
     And I see a toast with message: "addressBook.errors.givenAddressAlreadyExist"
+
+  @LW-7428
+  Scenario: Extended View - Validate custom image from a handle on the "Select NFT" (folder) screen
+      Given I navigate to NFTs extended page
+      And I click "Receive" button on page header
+      And I see handle listed on the "Receive" screen
+      And I close the drawer by clicking close button
+      And I navigate to NFTs extended page
+      And I click "Create folder" button on NFTs page
+      And I enter a folder name "Sample NFT folder" into "Folder name" input
+      And I click "Next" button on "Name your folder" page
+      Then I can see the handle listed on the "Select NFT" screen
+      And the corresponding custom image is displayed
+
+  @LW-7429
+  Scenario: Extended View - Validate custom image from a handle on the NFT folder
+    Given I navigate to NFTs extended page
+    And I click "Receive" button on page header
+    And I see handle listed on the "Receive" screen
+    And I close the drawer by clicking close button
+    And I navigate to NFTs extended page
+    And I create folder with name: "Ada Handle folder" that contains 4 NFTs
+    When I left click on the NFT folder with name "Ada Handle folder"
+    Then I see "Ada Handle folder" NFT folder page in extended mode
+    And I see NFT with name "$test_handle_1" on the NFT folder page
+    And I see NFT with name "$test_handle_2" on the NFT folder page
+    And I see NFT with name "$test_handle_3" on the NFT folder page
+    And I see NFT with name "$t_h_1" on the NFT folder page
