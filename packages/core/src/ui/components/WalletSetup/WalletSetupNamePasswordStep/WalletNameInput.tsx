@@ -29,6 +29,7 @@ export const WalletNameInput = ({
       onChange={onChange}
       maxLength={maxLength}
       className={styles.paddingLeft}
+      autoFocus
     />
     {shouldShowErrorMessage && (
       <p

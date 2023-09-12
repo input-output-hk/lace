@@ -9,7 +9,7 @@ import styles from './styles.module.scss';
 import {
   getComplexityBarStateList,
   MINIMUM_PASSWORD_LEVEL_REQUIRED,
-  PASSWORD_LEVEL_FEEDBACK,
+  passwordStrengthFeedbackMap,
   validateNameLength,
   WALLET_NAME_INPUT_MAX_LENGTH
 } from './utils';
@@ -103,14 +103,9 @@ export const WalletSetupNamePasswordStep = ({
           label={t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel')}
           onChange={handlePasswordChange}
           level={score}
-          feedbacks={
-            score === PASSWORD_LEVEL_FEEDBACK && [
-              t('package.core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback')
-            ]
-          }
+          feedbacks={passwordStrengthFeedbackMap[score] && [t(passwordStrengthFeedbackMap[score])]}
           complexityBarList={complexityBarList}
           data-testid="wallet-password-verification-input"
-          autoFocus
         />
         <WalletPasswordConfirmationInput
           isVisible={score >= MINIMUM_PASSWORD_LEVEL_REQUIRED}

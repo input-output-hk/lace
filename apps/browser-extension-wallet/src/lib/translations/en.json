@@ -66,7 +66,8 @@
       "confirmPasswordInputLabel": "Confirm password",
       "nameRequiredMessage": "Wallet name is required",
       "noMatchPassword": "Oops! The passwords don't match.",
-      "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger."
+      "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
     }
   },
   "tab.main.title": "Tab extension",
