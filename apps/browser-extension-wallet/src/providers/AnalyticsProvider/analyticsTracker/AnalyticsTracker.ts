@@ -8,12 +8,13 @@ import {
 } from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient, MATOMO_OPTED_OUT_EVENTS_DISABLED } from '../matomo';
-import { POSTHOG_ENABLED, POSTHOG_OPTED_OUT_EVENTS_DISABLED, PostHogClient, POSTHOG_EXCLUDED_EVENTS } from '../postHog';
+import { POSTHOG_OPTED_OUT_EVENTS_DISABLED, PostHogClient, POSTHOG_EXCLUDED_EVENTS } from '../postHog';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
 
 interface AnalyticsTrackerArgs {
   chain: Wallet.Cardano.ChainId;
+  postHogClient?: PostHogClient;
   view?: ExtensionViews;
   analyticsDisabled?: boolean;
   isPostHogEnabled?: boolean;
@@ -27,10 +28,9 @@ export class AnalyticsTracker {
   protected trackingTypeChangedFromSettings: boolean;
 
   constructor({
+    postHogClient,
     chain,
-    view = ExtensionViews.Extended,
     analyticsDisabled = false,
-    isPostHogEnabled = POSTHOG_ENABLED,
     excludedEvents = POSTHOG_EXCLUDED_EVENTS ?? ''
   }: AnalyticsTrackerArgs) {
     if (analyticsDisabled) return;
@@ -38,8 +38,8 @@ export class AnalyticsTracker {
     this.matomoClient = new MatomoClient(chain, this.userIdService);
     this.excludedEvents = excludedEvents;
 
-    if (isPostHogEnabled) {
-      this.postHogClient = new PostHogClient(chain, this.userIdService, view);
+    if (postHogClient) {
+      this.postHogClient = postHogClient;
     }
   }
 

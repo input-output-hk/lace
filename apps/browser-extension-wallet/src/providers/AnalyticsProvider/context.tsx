@@ -7,6 +7,7 @@ import { EnhancedAnalyticsOptInStatus, ExtensionViews } from './analyticsTracker
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
 import { POSTHOG_EXCLUDED_EVENTS } from './postHog';
 import shallow from 'zustand/shallow';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -43,11 +44,13 @@ export const AnalyticsProvider = ({
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut
   );
+  const postHogClient = usePostHogClientContext();
 
   const analyticsTracker = useMemo(
     () =>
       tracker ||
       new AnalyticsTracker({
+        postHogClient,
         chain: currentChain,
         view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended,
         analyticsDisabled,
