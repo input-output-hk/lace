@@ -29,7 +29,9 @@ module.exports = {
     'no-invalid-this': 0,
     'react/prop-types': 'off',
     'max-len': 'off', // prettier is already handling this automatically,
-    'no-console': 'off', // Fine to disable here, prod webpack config strips console logs
+    // note: prod webpack config strips console logs anyway, nevertheless
+    // we don't want the dev build to be spammed by needless logging
+    'no-console': ['error', { allow: ['warn', 'error', 'info', 'debug'] }],
     'lodash/import-scope': ['error', 'method']
   },
   overrides: [

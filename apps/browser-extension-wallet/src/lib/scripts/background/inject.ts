@@ -23,7 +23,7 @@ const cip30WalletProperties = {
   walletName: process.env.WALLET_NAME
 };
 if (process.env.USE_DAPP_CONNECTOR === 'true') {
-  console.log('injecting content script');
+  console.info('injecting content script');
   // Disable logging in production for performance & security measures
   initializeInjectedScript(cip30WalletProperties, { logger: console });
 }

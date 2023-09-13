@@ -73,7 +73,7 @@ export const applyMigrations = async (
     for (const migration of upgradeMigrationsToApply) {
       await pRetry(
         async (attemptNumber) => {
-          console.log(`Applying migration for version ${migration.version} (attempt: ${attemptNumber})`);
+          console.info(`Applying migration for version ${migration.version} (attempt: ${attemptNumber})`);
           const shouldSkip = await migration.shouldSkip?.();
           if (shouldSkip) return;
           const { prepare, assert, persist, rollback } = await migration.upgrade(password);
@@ -96,7 +96,7 @@ export const applyMigrations = async (
           minTimeout: 0,
           retries: MIGRATIONS_RETRIES,
           onFailedAttempt: (error) =>
-            console.log(
+            console.error(
               `Migration attempt ${error.attemptNumber} for ${migration.version} upgrade failed. There are ${error.retriesLeft} retries left.`
             )
         }
@@ -107,7 +107,7 @@ export const applyMigrations = async (
     // Reload app states with updated storage
     window.location.reload();
   } catch (error) {
-    console.log('Error applying migrations:', error);
+    console.error('Error applying migrations:', error);
     await storage.local.set({
       MIGRATION_STATE: { ...migrationState, state: 'error' } as MigrationState
     });

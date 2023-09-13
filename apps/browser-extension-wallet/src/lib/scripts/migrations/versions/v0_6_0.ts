@@ -120,7 +120,7 @@ export const v0_6_0: Migration = {
       prepare: async () => {
         // Save temporary storage. Revert and throw if something fails
         try {
-          console.log('Saving temporary migration for', MIGRATION_VERSION);
+          console.info('Saving temporary migration for', MIGRATION_VERSION);
           if (newAppSettings) setItemInLocalStorage('appSettings_tmp', newAppSettings);
           if (newWalletInfo) setItemInLocalStorage('wallet_tmp', newWalletInfo);
           if (newKeyAgentData) setItemInLocalStorage('keyAgentData_tmp', newKeyAgentData);
@@ -128,7 +128,7 @@ export const v0_6_0: Migration = {
           if (newKeyAgentsByChain)
             await setBackgroundStorage({ keyAgentsByChain_tmp: newKeyAgentsByChain } as unknown as BackgroundStorage);
         } catch (error) {
-          console.log(`Error saving temporary migrations for ${MIGRATION_VERSION}, deleting...`, error);
+          console.info(`Error saving temporary migrations for ${MIGRATION_VERSION}, deleting...`, error);
           removeItemFromLocalStorage('appSettings_tmp');
           removeItemFromLocalStorage('wallet_tmp');
           removeItemFromLocalStorage('keyAgentData_tmp');
@@ -138,7 +138,7 @@ export const v0_6_0: Migration = {
         }
       },
       assert: async (): Promise<boolean> => {
-        console.log('Checking migrated data for version', MIGRATION_VERSION);
+        console.info('Checking migrated data for version', MIGRATION_VERSION);
         // Temporary storage
         const tmpWalletInfo = getItemFromLocalStorage<any>('wallet_tmp');
         const tmpAppSettings = getItemFromLocalStorage<any>('appSettings_tmp');
@@ -203,7 +203,7 @@ export const v0_6_0: Migration = {
         return true;
       },
       persist: async () => {
-        console.log(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
+        console.info(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
         // Get temporary storage
         const tmpAppSettings = getItemFromLocalStorage('appSettings_tmp');
         const tmpWalletInfo = getItemFromLocalStorage('wallet_tmp');
@@ -227,7 +227,7 @@ export const v0_6_0: Migration = {
         await clearBackgroundStorage(['keyAgentsByChain_tmp' as BackgroundStorageKeys]);
       },
       rollback: async () => {
-        console.log(`Rollback migrated data for ${MIGRATION_VERSION} upgrade`);
+        console.info(`Rollback migrated data for ${MIGRATION_VERSION} upgrade`);
         // Restore actual storage to their original values
         if (oldAppSettings) setItemInLocalStorage('appSettings', oldAppSettings);
         if (oldWalletInfo) setItemInLocalStorage('wallet', oldWalletInfo);

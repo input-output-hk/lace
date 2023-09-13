@@ -79,7 +79,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
         setIsLoadingFirstTime(true);
         setMigrationState(value.MIGRATION_STATE as MigrationState);
       })
-      .catch((error) => console.log('Error fetching initial migration state:', error));
+      .catch((error) => console.error('Error fetching initial migration state:', error));
 
     // Observe changes to MIGRATION_STATE in storage
     const observeMigrationState = async (changes: Record<string, Storage.StorageChange>) => {

@@ -55,7 +55,7 @@ const collateralRequestResponse = (action: RejectResponse | ResolveResponse) => 
       }
     );
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -90,7 +90,7 @@ export const DappCollateralContainer = (): React.ReactElement => {
         collateralRequestResponse({ response: ReturnResponse.resolve, utxos });
         redirectToCreateSuccess();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         redirectToCreateFailure();
       }
     },
@@ -139,7 +139,7 @@ export const DappCollateralContainer = (): React.ReactElement => {
           setIsCalculatingCollateral(false);
         });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       redirectToCreateFailure();
     }
   }, []);

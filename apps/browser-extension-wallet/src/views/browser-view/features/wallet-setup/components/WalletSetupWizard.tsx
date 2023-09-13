@@ -275,8 +275,7 @@ export const WalletSetupWizard = ({
         moveForward();
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Error completing wallet creation', error);
+      console.error('Error completing wallet creation', error);
       throw new Error(error);
     }
   }, [
