@@ -3,7 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import * as userIdService from '@providers/AnalyticsProvider/getUserIdService';
 import { MatomoClient } from '@providers/AnalyticsProvider/matomo';
-import { PostHogClient } from '@providers/AnalyticsProvider/postHog';
+import { PostHogClient } from '@providers/PostHogClientProvider/client';
 import {
   MatomoEventActions,
   MatomoEventCategories,

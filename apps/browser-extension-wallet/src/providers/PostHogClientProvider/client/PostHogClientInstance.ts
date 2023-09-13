@@ -1,7 +1,8 @@
 import { Wallet } from '@lace/cardano';
-import { PostHogClient, POSTHOG_ENABLED } from '../AnalyticsProvider/postHog';
 import { ExtensionViews } from '@providers/AnalyticsProvider/analyticsTracker';
 import { BackgroundStorage, UserIdService } from '@lib/scripts/types';
+import { PostHogClient } from './PostHogClient';
+import { POSTHOG_ENABLED } from './config';
 
 export class PostHogClientInstance {
   protected postHogClientInstance: PostHogClient;

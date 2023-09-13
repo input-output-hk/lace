@@ -1,10 +1,10 @@
 import shallow from 'zustand/shallow';
 import React, { createContext, useContext, useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
-import { PostHogClient } from '../AnalyticsProvider/postHog';
+import { PostHogClient } from './client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { ExtensionViews } from '@providers/AnalyticsProvider/analyticsTracker';
-import { PostHogClientInstance } from './PostHogClientInstance';
+import { PostHogClientInstance } from './client/PostHogClientInstance';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 
 // do we move it to PostHogClientInstance?

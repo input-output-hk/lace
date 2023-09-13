@@ -5,9 +5,9 @@ import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { AnalyticsTracker } from './analyticsTracker';
 import { EnhancedAnalyticsOptInStatus, ExtensionViews } from './analyticsTracker/types';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
-import { POSTHOG_EXCLUDED_EVENTS } from './postHog';
 import shallow from 'zustand/shallow';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { POSTHOG_EXCLUDED_EVENTS } from '@providers/PostHogClientProvider/client';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;

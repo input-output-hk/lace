@@ -15,7 +15,7 @@ import { PriceResult } from '@hooks';
 import { Percent } from '@cardano-sdk/util';
 import { UserIdService } from '@lib/scripts/types';
 import { MatomoClient } from '@providers/AnalyticsProvider/matomo';
-import { PostHogClient } from '@providers/AnalyticsProvider/postHog';
+import { PostHogClient } from '@providers/PostHogClientProvider/client';
 import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const mockWalletInfoTestnet: WalletInfo = {

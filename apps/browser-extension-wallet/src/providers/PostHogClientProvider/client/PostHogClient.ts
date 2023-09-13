@@ -9,7 +9,7 @@ import {
   PostHogPersonProperties,
   PostHogProperties,
   UserTrackingType
-} from '../analyticsTracker';
+} from '@providers/AnalyticsProvider/analyticsTracker';
 import {
   DEV_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP,
   DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,

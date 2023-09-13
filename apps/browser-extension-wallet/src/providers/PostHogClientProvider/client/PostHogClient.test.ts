@@ -2,8 +2,8 @@ import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
 import { UserIdService } from '@lib/scripts/types';
 import { ExtensionViews, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/AnalyticsProvider/postHog/config';
-import { PostHogClient } from '@providers/AnalyticsProvider/postHog/PostHogClient';
+import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/PostHogClientProvider/client/config';
+import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
 

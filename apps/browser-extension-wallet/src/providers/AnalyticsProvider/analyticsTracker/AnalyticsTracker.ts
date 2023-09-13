@@ -8,7 +8,11 @@ import {
 } from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient, MATOMO_OPTED_OUT_EVENTS_DISABLED } from '../matomo';
-import { POSTHOG_OPTED_OUT_EVENTS_DISABLED, PostHogClient, POSTHOG_EXCLUDED_EVENTS } from '../postHog';
+import {
+  POSTHOG_OPTED_OUT_EVENTS_DISABLED,
+  PostHogClient,
+  POSTHOG_EXCLUDED_EVENTS
+} from '../../PostHogClientProvider/client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
 
