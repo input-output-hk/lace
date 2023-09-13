@@ -8,6 +8,7 @@ import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
+const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
 
 jest.mock('posthog-js');
 
@@ -26,7 +27,7 @@ describe('PostHogClient', () => {
 
   it('should initialize posthog on construction', () => {
     // eslint-disable-next-line no-new
-    new PostHogClient(chain, mockUserIdService, undefined, publicPosthogHost);
+    new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
     expect(posthog.init).toHaveBeenCalledWith(
       expect.stringContaining(DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]),
       expect.objectContaining({
@@ -37,7 +38,7 @@ describe('PostHogClient', () => {
   });
 
   it('should send page navigation events with distinct id and view = extended as default', async () => {
-    const client = new PostHogClient(chain, mockUserIdService, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
     await client.sendPageNavigationEvent();
     expect(posthog.capture).toHaveBeenCalledWith(
       '$pageview',
@@ -50,7 +51,7 @@ describe('PostHogClient', () => {
   });
 
   it('should send events with distinct id', async () => {
-    const client = new PostHogClient(chain, mockUserIdService, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
     const event = PostHogAction.OnboardingCreateClick;
     const extraProps = { some: 'prop', another: 'test' };
 
@@ -68,7 +69,7 @@ describe('PostHogClient', () => {
 
   it('should be possible to change the chain', () => {
     const previewChain = Wallet.Cardano.ChainIds.Preview;
-    const client = new PostHogClient(chain, mockUserIdService, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
     expect(posthog.set_config).not.toHaveBeenCalled();
     client.setChain(previewChain);
     expect(posthog.set_config).toHaveBeenCalledWith(
@@ -79,7 +80,13 @@ describe('PostHogClient', () => {
   });
 
   it('should send events with property view = popup', async () => {
-    const client = new PostHogClient(chain, mockUserIdService, ExtensionViews.Popup, publicPosthogHost);
+    const client = new PostHogClient(
+      chain,
+      mockUserIdService,
+      mockBackgroundStorageUtil,
+      ExtensionViews.Popup,
+      publicPosthogHost
+    );
     const event = PostHogAction.OnboardingCreateClick;
 
     await client.sendEvent(event);
@@ -93,7 +100,13 @@ describe('PostHogClient', () => {
   });
 
   it('should send events with property view = extended', async () => {
-    const client = new PostHogClient(chain, mockUserIdService, ExtensionViews.Extended, publicPosthogHost);
+    const client = new PostHogClient(
+      chain,
+      mockUserIdService,
+      mockBackgroundStorageUtil,
+      ExtensionViews.Extended,
+      publicPosthogHost
+    );
     const event = PostHogAction.OnboardingCreateClick;
 
     await client.sendEvent(event);
@@ -108,7 +121,13 @@ describe('PostHogClient', () => {
 
   it('should send events with property sent at local', async () => {
     jest.useFakeTimers().setSystemTime(mockSentDate);
-    const client = new PostHogClient(chain, mockUserIdService, ExtensionViews.Extended, publicPosthogHost);
+    const client = new PostHogClient(
+      chain,
+      mockUserIdService,
+      mockBackgroundStorageUtil,
+      ExtensionViews.Extended,
+      publicPosthogHost
+    );
     const event = PostHogAction.OnboardingCreateClick;
 
     await client.sendEvent(event);
@@ -128,6 +147,7 @@ describe('PostHogClient', () => {
     const client = new PostHogClient(
       chain,
       { ...mockUserIdService, getAliasProperties: mockGetAliasProperties },
+      mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
     );
@@ -140,6 +160,7 @@ describe('PostHogClient', () => {
     const client = new PostHogClient(
       chain,
       { ...mockUserIdService, getAliasProperties: mockGetAliasProperties },
+      mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
     );
@@ -153,6 +174,7 @@ describe('PostHogClient', () => {
     const client = new PostHogClient(
       chain,
       { ...mockUserIdService, getUserTrackingType: mockGetUserTrackingType },
+      mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
     );
@@ -174,6 +196,7 @@ describe('PostHogClient', () => {
     const client = new PostHogClient(
       chain,
       { ...mockUserIdService, getUserTrackingType: mockGetUserTrackingType },
+      mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
     );

@@ -5,6 +5,7 @@ import { PostHogClient } from '../AnalyticsProvider/postHog';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { ExtensionViews } from '@providers/AnalyticsProvider/analyticsTracker';
 import { PostHogClientInstance } from './PostHogClientInstance';
+import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 
 // do we move it to PostHogClientInstance?
 const userIdService = getUserIdService();
@@ -24,6 +25,7 @@ interface PostHogClientProps {
 }
 
 export const PostHogClientProvider = ({ children, postHogCustomClient }: PostHogClientProps): React.ReactElement => {
+  const { getBackgroundStorage, setBackgroundStorage } = useBackgroundServiceAPIContext();
   const { currentChain, view } = useWalletStore(
     (state) => ({ currentChain: state?.currentChain, view: state.walletUI.appMode }),
     shallow
@@ -35,11 +37,12 @@ export const PostHogClientProvider = ({ children, postHogCustomClient }: PostHog
       PostHogClientInstance.createInstance(
         currentChain,
         userIdService,
+        { getBackgroundStorage, setBackgroundStorage },
         view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended
       ),
     // we have two options here, we keep the memoization with PostHogClientInstance or
     // we remove currentChain and view from the depencency array to avoid redefine this every time these fields change and we call new PostHogClient() here
-    [currentChain, postHogCustomClient, view]
+    [currentChain, getBackgroundStorage, postHogCustomClient, setBackgroundStorage, view]
   );
 
   return <PostHogClientContext.Provider value={postHogClientInstance}>{children}</PostHogClientContext.Provider>;

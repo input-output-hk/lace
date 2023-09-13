@@ -637,7 +637,10 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   sendEvent: jest.fn(),
   sendPageNavigationEvent: jest.fn(),
   setChain: jest.fn(),
-  sendAliasEvent: jest.fn()
+  sendAliasEvent: jest.fn(),
+  subscribeToInitializationProcess: jest.fn(),
+  overrideFeatureFlags: jest.fn(),
+  getExperimentVariant: jest.fn()
 };
 
 export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {

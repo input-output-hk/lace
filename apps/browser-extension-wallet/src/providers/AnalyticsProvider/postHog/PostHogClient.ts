@@ -18,7 +18,10 @@ import {
   PRODUCTION_TRACKING_MODE_ENABLED,
   PUBLIC_POSTHOG_HOST
 } from './config';
-import { UserIdService } from '@lib/scripts/types';
+import { BackgroundStorage, UserIdService } from '@lib/scripts/types';
+import { experiments, fallbackConfiguration } from '@providers/ExperimentsProvider/config';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
+import { Subscription, Subject } from 'rxjs';
 
 /**
  * PostHog API reference:
@@ -26,34 +29,69 @@ import { UserIdService } from '@lib/scripts/types';
  */
 export class PostHogClient {
   private userTrackingType: UserTrackingType;
+  private hasPostHogInitialized$: Subject<boolean>;
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
+    private backgroundServiceUtils: {
+      getBackgroundStorage: () => Promise<BackgroundStorage>;
+      setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
+    },
     private view: ExtensionViews = ExtensionViews.Extended,
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+    this.hasPostHogInitialized$ = new Subject();
 
-    posthog.init(this.getApiToken(this.chain), {
-      request_batching: false,
-      api_host: this.publicPostHogHost,
-      autocapture: false,
-      disable_session_recording: true,
-      capture_pageview: false,
-      capture_pageleave: false,
-      disable_compression: true,
-      // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
-      disable_persistence: true,
-      disable_cookie: true,
-      persistence: 'memory',
-      property_blacklist: [
-        '$autocapture_disabled_server_side',
-        '$console_log_recording_enabled_server_side',
-        '$device_id',
-        '$session_recording_recorder_version_server_side',
-        '$time'
-      ]
-    });
+    this.userIdService
+      .getUserId(chain.networkMagic)
+      .then((id) => {
+        posthog.init(this.getApiToken(this.chain), {
+          request_batching: false,
+          api_host: this.publicPostHogHost,
+          autocapture: false,
+          disable_session_recording: true,
+          capture_pageview: false,
+          capture_pageleave: false,
+          disable_compression: true,
+          // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
+          disable_persistence: true,
+          disable_cookie: true,
+          persistence: 'memory',
+          bootstrap: {
+            distinctID: id,
+            isIdentifiedID: true
+          },
+          property_blacklist: [
+            '$autocapture_disabled_server_side',
+            '$console_log_recording_enabled_server_side',
+            '$device_id',
+            '$session_recording_recorder_version_server_side',
+            '$time'
+          ],
+          loaded: (posthogInstance) => {
+            posthogInstance.onFeatureFlags(async () => {
+              const postHogExperimentConfiguration = posthog.featureFlags.getFlagVariants();
+              const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
+              if (!backgroundStorage?.experimentsConfiguration && postHogExperimentConfiguration) {
+                // save current posthog config in background storage
+                await this.backgroundServiceUtils.setBackgroundStorage(postHogExperimentConfiguration);
+              }
+
+              // if we were not able to retrieve posthog experiment config, use local config
+              if (!postHogExperimentConfiguration) {
+                // override posthog experiment config with local
+                posthog.featureFlags.override(backgroundStorage?.experimentsConfiguration || fallbackConfiguration);
+              }
+
+              this.hasPostHogInitialized$.next(true);
+            });
+          }
+        });
+      })
+      .catch(() => {
+        // TODO: do something with the error if we couldn't get the ID
+      });
   }
 
   async sendPageNavigationEvent(): Promise<void> {
@@ -92,6 +130,28 @@ export class PostHogClient {
     posthog.set_config({
       token
     });
+  }
+
+  subscribeToInitializationProcess(callback: (params: boolean) => void): Subscription {
+    return this.hasPostHogInitialized$.subscribe(callback);
+  }
+
+  overrideFeatureFlags(flags: boolean | string[] | Record<string, string | boolean>): void {
+    posthog.featureFlags.override(flags);
+  }
+
+  getExperimentVariant(key: ExperimentName): string {
+    const variant = posthog.getFeatureFlag(key, {
+      send_event: false
+    });
+
+    // variant can be a boolean as well, so, we have to check for the type
+    // in both cases (boolean or undefined) we want to return the fallback variant
+    if (!variant || typeof variant === 'boolean') {
+      return experiments[key].defaultVariant;
+    }
+
+    return variant;
   }
 
   protected getApiToken(chain: Wallet.Cardano.ChainId): string {
