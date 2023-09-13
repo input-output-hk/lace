@@ -1,4 +1,4 @@
-@Multidelegation-DelegatedFunds-Popup @Testnet
+@Multidelegation-DelegatedFunds-Popup @Testnet @Mainnet
 Feature: Staking Page - Popup View
 
   @LW-8330
