@@ -20,6 +20,7 @@ import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import NftAssert from '../assert/nftAssert';
 import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
+import ToastMessage from '../elements/toastMessage';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -426,6 +427,8 @@ When(
         await NftsFolderPage.addNftButton.waitForClickable();
         await NftsFolderPage.addNftButton.click();
         await NftSelectNftsPage.selectNFTs(numberOfNftsWanted);
+        await ToastMessage.closeButton.waitForClickable();
+        await ToastMessage.closeButton.click();
         await NftSelectNftsPage.nextButton.waitForClickable();
         await NftSelectNftsPage.nextButton.click();
         break;

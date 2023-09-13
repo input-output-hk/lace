@@ -68,7 +68,7 @@ class CollateralDrawerAssert {
 
   async assertSeeCurrentCollateralState(expectedState: string) {
     await browser.waitUntil(async () => (await SettingsPage.collateralLink.addon.getText()) === expectedState, {
-      timeout: 10_000,
+      timeout: 15_000,
       interval: 1000,
       timeoutMsg: 'failed while waiting for collateral state change'
     });

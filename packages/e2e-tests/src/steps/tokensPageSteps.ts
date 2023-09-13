@@ -136,6 +136,7 @@ Then(
 );
 
 Then(/^I save token: "([^"]*)" balance$/, async (tokenName: string) => {
+  await tokensPageObject.waitUntilCardanoTokenLoaded();
   await tokensPageObject.saveTokenBalance(tokenName);
 });
 
