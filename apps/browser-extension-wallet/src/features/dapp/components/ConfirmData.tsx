@@ -18,6 +18,7 @@ import { Skeleton } from 'antd';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { useWalletStore } from '@stores';
+import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 
 const INDENT_SPACING = 2;
 const DAPP_TOAST_DURATION = 50;
@@ -104,19 +105,24 @@ export const DappConfirmData = (): React.ReactElement => {
   const signWithHardwareWallet = useCallback(async () => {
     setIsConfirmingTx(true);
     try {
-      exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-        {
-          api$: of({
-            async allowSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
-            }
-          }),
-          baseChannel: DAPP_CHANNELS.userPrompt,
-          properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-        },
-        { logger: console, runtime }
-      );
-      redirectToSignSuccess();
+      HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web)
+        .then(() => {
+          exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+            {
+              api$: of({
+                async allowSignTx(): Promise<boolean> {
+                  return Promise.resolve(true);
+                }
+              }),
+              baseChannel: DAPP_CHANNELS.userPrompt,
+              properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+            },
+            { logger: console, runtime }
+          );
+        })
+        .catch((error) => {
+          throw error;
+        });
     } catch {
       redirectToSignFailure();
     }

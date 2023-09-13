@@ -47,7 +47,7 @@ class TokenDetailsAssert {
     await TokenDetailsPage.tokenFiatBalance.waitForDisplayed();
   }
 
-  async assertSeeTokenTransactionsSection(mode: 'extended' | 'popup') {
+  async assertSeeTokenTransactionsSection() {
     await TokenDetailsPage.transactionsListTitle.waitForDisplayed();
     expect(await TokenDetailsPage.transactionsListTitle.getText()).to.equal(
       await t('browserView.assetDetails.recentTransactions')
@@ -55,19 +55,9 @@ class TokenDetailsAssert {
 
     const transactions = await TokenDetailsPage.transactionsListItems;
     expect(transactions.length).to.be.greaterThan(0);
-    if (mode === 'extended') {
-      expect(transactions.length).to.be.lessThanOrEqual(10);
-      await TokenDetailsPage.viewAllButton.waitForDisplayed();
-      await expect(await TokenDetailsPage.viewAllButton.getText()).to.equal(
-        await t('browserView.assetDetails.viewAll')
-      );
-    } else {
-      expect(transactions.length).to.be.lessThanOrEqual(3);
-      await TokenDetailsPage.seeAllTransactionsButton.waitForDisplayed();
-      await expect(await TokenDetailsPage.seeAllTransactionsButton.getText()).to.equal(
-        await t('browserView.assetDetails.seeAllYourTransactions')
-      );
-    }
+    expect(transactions.length).to.be.lessThanOrEqual(3);
+    await TokenDetailsPage.viewAllButton.waitForDisplayed();
+    await expect(await TokenDetailsPage.viewAllButton.getText()).to.equal(await t('browserView.assetDetails.viewAll'));
   }
 
   async assertSeeTokenDetailsPageForToken(tokenName: string, tokenTicker: string, mode: 'extended' | 'popup') {
@@ -75,7 +65,7 @@ class TokenDetailsAssert {
     await this.assertsSeeTokenDetailsTitle(tokenName, tokenTicker);
     await this.assertSeeTokenPriceSection(tokenName, mode);
     await this.assertSeeTokenBalanceSection(tokenTicker);
-    await this.assertSeeTokenTransactionsSection(mode);
+    await this.assertSeeTokenTransactionsSection();
   }
 }
 

@@ -61,7 +61,7 @@ const hasTempTxData = () => {
 
 interface FooterProps {
   onHandleChangeCancel?: () => void;
-  onHandleChangeConfirm?: () => void;
+  onHandleChangeConfirm?: (action?: string) => void;
   isPopupView?: boolean;
   openContinueDialog?: () => void;
 }
@@ -180,7 +180,7 @@ export const Footer = withAddressBookContext(
         });
       }
 
-      onHandleChangeConfirm();
+      onHandleChangeConfirm(action);
     };
 
     const keyAgentType = getKeyAgentType();

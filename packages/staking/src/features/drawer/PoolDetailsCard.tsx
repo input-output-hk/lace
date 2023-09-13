@@ -1,5 +1,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Cardano } from '@cardano-sdk/core';
+import { formatPercentages } from '@lace/common';
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -21,7 +22,7 @@ export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) =
     portfolioMutators: state.mutators,
   }));
   const { balancesBalance, compactNumber } = useOutsideHandles();
-  const balance = compactNumber(balancesBalance.available.coinBalance);
+  const availableBalance = Number(balancesBalance?.available?.coinBalance || '0');
   const handleRemovePoolFromPortfolio = () => {
     portfolioMutators.removePoolInManagementProcess({ id: poolId });
   };
@@ -48,7 +49,13 @@ export const PoolDetailsCard = ({ name, poolId, color }: PoolDetailsCardProps) =
         <Box className={PoolHr} />
         <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
-            {t('drawer.preferences.partOfBalance', { balance, draftPortfolioLength })}
+            {t('drawer.preferences.percentageOfBalance', {
+              percentage: formatPercentages(1 / draftPortfolioLength, {
+                decimalPlaces: 0,
+                rounding: 'down',
+              }),
+              value: compactNumber(availableBalance / draftPortfolioLength),
+            })}
           </Text.Body.Normal>
         </Flex>
       </Flex>

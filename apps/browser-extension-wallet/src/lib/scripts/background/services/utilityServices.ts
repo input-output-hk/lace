@@ -127,7 +127,7 @@ const fetchAdaPrice = () => {
   const vsCurrencies =
     (Object.keys(currenciesMap) as currencyCode[]).map((code) => code.toLowerCase()).join(',') || 'usd';
   fetch(
-    `https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=${vsCurrencies}&include_24hr_change=true`
+    `https://coingecko.live-mainnet.eks.lw.iog.io/api/v3/simple/price?ids=cardano&vs_currencies=${vsCurrencies}&include_24hr_change=true`
   )
     .then(async (response) => {
       const { cardano: prices } = await response.json();

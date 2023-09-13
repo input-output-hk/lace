@@ -9,7 +9,7 @@
   :global(.ant-list-split) :local(.listItemWrapper) {
     border-bottom: none !important;
     padding: 0;
-    padding-bottom: size_unit(3);
+    padding-bottom: size_unit(1);
     &:last-child {
       padding-bottom: 0px;
     }
@@ -83,3 +83,20 @@
     flex: 1;
   }
 }
+
+.iconWrapper {
+  cursor: pointer;
+  display: flex;
+
+  .icon {
+    color: var(--light-mode-mid-grey, var(--dark-mode-light-grey));
+    font-size: size_unit(2.5);
+    margin-left: size_unit(1);
+    margin-right: size_unit(0.5);
+    &:hover {
+      color: var(--light-mode-dark-grey, var(--text-color-primary));
+    }
+  }
+}
+
+
