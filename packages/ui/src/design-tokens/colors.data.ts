@@ -150,6 +150,11 @@ export const colors = {
   $toast_bar_label_color: '',
   $toast_bar_icon_container_bgColor: '',
   $toast_bar_icon_label_color: '',
+
+  $tooltip_container_bgColor: '',
+  $tooltip_title_dot_bgColor: '',
+  $tooltip_title_color: '',
+  $tooltip_label_color: '',
 };
 
 export type Colors = typeof colors;

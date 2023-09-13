@@ -1,6 +1,6 @@
 {
   "name": "@lace/browser-extension-wallet",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "A fully capable wallet packaged as browser extensions for Chrome, Firefox, and Edge",
   "homepage": "https://github.com/input-output-hk/lace/blob/master/apps/browser-extension-wallet/README.md",
   "bugs": {
@@ -29,7 +29,7 @@
     "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress & run -T webpack --config webpack.app.dev.js --progress",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
-    "lint": "run -T eslint-cmd \"./**/*.{js,ts,tsx}\"",
+    "lint": "cd ../.. && yarn extension:lint",
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
     "prettier": "run -T prettier --write .",

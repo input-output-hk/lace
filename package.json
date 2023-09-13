@@ -36,7 +36,7 @@
     "eslint-cmd": "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --ignore-path ./.eslintignore",
     "extension:lint": "yarn eslint-cmd \"apps/browser-extension-wallet/**/*.{js,ts,tsx}\"",
     "postinstall": "husky install & ts-patch install -s",
-    "lint": "yarn workspaces foreach -ptRv run lint && yarn markdown:lint",
+    "lint": "yarn workspaces foreach -ptv run lint && yarn markdown:lint",
     "markdown:lint": "markdownlint '{packages,apps}/**/*.md' -p .gitignore",
     "markdown:lint:fix": "yarn markdown:lint --fix",
     "staking": "APP_NAME=staking yarn $0",

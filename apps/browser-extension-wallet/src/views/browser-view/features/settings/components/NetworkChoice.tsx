@@ -44,7 +44,7 @@ export const NetworkChoice = (): React.ReactElement => {
         icon: SwithIcon
       });
     } catch (error) {
-      console.log('Error switching networks', error);
+      console.error('Error switching networks', error);
       toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });
     }
     return event;
