@@ -29,7 +29,7 @@ export const disabled = style([
 
 const labelContainerFocused = {
   borderRadius: vars.radius.$tiny,
-  boxShadow: `0 0 0 1px ${vars.colors.$sub_navigation_container_outlineColor}`,
+  boxShadow: `0 0 0 3px ${vars.colors.$sub_navigation_container_outlineColor}`,
 };
 
 export const labelContainer = style([
@@ -44,9 +44,8 @@ export const labelContainer = style([
   }),
   {
     selectors: {
-      [`${root}:focus:not(:active) &`]: labelContainerFocused,
-      [`${root}:focus:not(${active}) &`]: labelContainerFocused,
-      [`${root}:focus-visble:not(:active) &`]: labelContainerFocused,
+      [`${root}:focus-visible:not(${active}) &`]: labelContainerFocused,
+      [`${root}:focus-visible:not(:active) &`]: labelContainerFocused,
     },
   },
 ]);
@@ -60,17 +59,14 @@ export const label = style([
       [`${root}:hover &`]: {
         color: vars.colors.$sub_navigation_item_label_color_hover,
       },
-      [`${root}:active &`]: {
+      [`${root}:focus-visible:not(${active}) &`]: {
+        color: vars.colors.$sub_navigation_item_label_color_focused,
+      },
+      [`${root}:focus-visible:is(${active}) &`]: {
         color: vars.colors.$sub_navigation_item_label_color_pressed,
       },
       [`${active} &`]: {
         color: vars.colors.$sub_navigation_item_label_color_pressed,
-      },
-      [`${root}:focus &`]: {
-        color: vars.colors.$sub_navigation_item_label_color_focused,
-      },
-      [`${root}:focus-visble &`]: {
-        color: vars.colors.$sub_navigation_item_label_color_focused,
       },
     },
   },
