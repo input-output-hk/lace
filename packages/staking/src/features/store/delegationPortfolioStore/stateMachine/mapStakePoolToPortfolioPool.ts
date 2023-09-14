@@ -1,6 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { mapStakePoolToDisplayData } from '../mapStakePoolToDisplayData';
 import { AdaSymbol } from '../types';
+import { DraftPortfolioStakePool } from './types';
 
 export const mapStakePoolToPortfolioPool = ({
   cardanoCoinSymbol,
@@ -8,10 +9,9 @@ export const mapStakePoolToPortfolioPool = ({
 }: {
   cardanoCoinSymbol: AdaSymbol;
   stakePool: Wallet.Cardano.StakePool;
-}) => ({
+}): DraftPortfolioStakePool => ({
+  basedOnCurrentPortfolio: false,
   displayData: mapStakePoolToDisplayData({ cardanoCoinSymbol, stakePool }),
   id: stakePool.hexId,
-  name: stakePool.metadata?.name,
-  ticker: stakePool.metadata?.ticker,
-  weight: 1,
+  targetWeight: 1,
 });

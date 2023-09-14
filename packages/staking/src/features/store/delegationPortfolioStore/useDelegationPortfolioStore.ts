@@ -1,16 +1,10 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH, targetWeight } from './constants';
+import type { ExecuteCommand, Handler } from './stateMachine/types';
+import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH } from './constants';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
-import {
-  Command,
-  ExecuteCommand,
-  Flow,
-  Handler,
-  processExpandedViewCases,
-  processPopupViewCases,
-} from './stateMachine';
+import { Command, Flow, processExpandedViewCases, processPopupViewCases } from './stateMachine';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
@@ -100,11 +94,10 @@ export const useDelegationPortfolioStore = create(
               totalRewards: Wallet.BigIntMath.sum(confirmedPoolRewards),
             },
             id: stakePool.hexId,
-            name: stakePool.metadata?.name,
+            percentage,
             stakePool,
-            ticker: stakePool.metadata?.ticker,
+            targetWeight: 1,
             value: stake,
-            weight: Math.round(percentage * targetWeight),
           };
         });
 

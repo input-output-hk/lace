@@ -25,6 +25,7 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
     },
     "id": "39deffa1dfcfe192ea0efeb3e9bcd9878190627fb590ec81f390cd6d",
     "name": "8BOOL",
+    "percentage": 0.33,
     "stakePool": {
       "cost": 340000000n,
       "hexId": "39deffa1dfcfe192ea0efeb3e9bcd9878190627fb590ec81f390cd6d",
@@ -36,9 +37,9 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
       "metrics": {},
       "pledge": 1000000000n,
     },
+    "targetWeight": 1,
     "ticker": "8BOOL",
     "value": 1n,
-    "weight": 33,
   },
   {
     "displayData": {
@@ -63,6 +64,7 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
     },
     "id": "39faf89aba3daab2bce656a9698b0a2c05e679c0fb360ee6e3b46acb",
     "name": "8BOOM",
+    "percentage": 0.33,
     "stakePool": {
       "cost": 340000000n,
       "hexId": "39faf89aba3daab2bce656a9698b0a2c05e679c0fb360ee6e3b46acb",
@@ -74,9 +76,9 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
       "metrics": {},
       "pledge": 7000000000n,
     },
+    "targetWeight": 1,
     "ticker": "8BOOM",
     "value": 1n,
-    "weight": 33,
   },
   {
     "displayData": {
@@ -101,6 +103,7 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
     },
     "id": "3867a09729a1f954762eea035a82e2d9d3a14f1fa791a022ef0da242",
     "name": "ADA Capital",
+    "percentage": 0.33,
     "stakePool": {
       "cost": 340000000n,
       "hexId": "3867a09729a1f954762eea035a82e2d9d3a14f1fa791a022ef0da242",
@@ -112,9 +115,9 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
       "metrics": {},
       "pledge": 1659000000000n,
     },
+    "targetWeight": 1,
     "ticker": "ADACT",
     "value": 1n,
-    "weight": 33,
   },
 ]
 `;

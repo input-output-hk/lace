@@ -25,7 +25,21 @@ import {
 } from './commands';
 import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
 import { cases, handler } from './stateTreeUtilities';
-import { DrawerManagementStep, ExpandedViewFlow, Flow, Handler } from './types';
+import {
+  CurrentPortfolioStakePool,
+  DraftPortfolioStakePool,
+  DrawerManagementStep,
+  ExpandedViewFlow,
+  Flow,
+  Handler,
+} from './types';
+
+export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): DraftPortfolioStakePool[] =>
+  pools.map((cp) => ({
+    ...cp,
+    basedOnCurrentPortfolio: true,
+    currentPortfolioPercentage: cp.percentage,
+  }));
 
 export const processExpandedViewCases: Handler = (params) =>
   cases<ExpandedViewFlow>(
@@ -38,7 +52,7 @@ export const processExpandedViewCases: Handler = (params) =>
           ManagePortfolio: ({ state }) => {
             state.activeFlow = Flow.PortfolioManagement;
             state.activeDrawerStep = DrawerManagementStep.Preferences;
-            state.draftPortfolio = state.currentPortfolio;
+            state.draftPortfolio = currentPortfolioToDraft(state.currentPortfolio);
           },
           ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails>(({ state, command: { data } }) => {
             atomicStateMutators.showPoolDetails({ pool: data, state, targetFlow: Flow.CurrentPoolDetails });

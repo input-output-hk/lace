@@ -8,7 +8,7 @@ export const DelegationCardStory: Story = () => (
       arrangement="horizontal"
       balance="10000"
       cardanoCoinSymbol="ADA"
-      distribution={[{ color: PieChartGradientColor.LaceLinearGradient, name: 'A', weight: 1 }]}
+      distribution={[{ color: PieChartGradientColor.LaceLinearGradient, name: 'A', percentage: 1 }]}
       status="ready"
     />
     <hr />
@@ -16,7 +16,7 @@ export const DelegationCardStory: Story = () => (
       arrangement="vertical"
       balance="10000"
       cardanoCoinSymbol="ADA"
-      distribution={[{ color: PieChartGradientColor.LaceLinearGradient, name: 'A', weight: 1 }]}
+      distribution={[{ color: PieChartGradientColor.LaceLinearGradient, name: 'A', percentage: 1 }]}
       status="ready"
     />
   </>

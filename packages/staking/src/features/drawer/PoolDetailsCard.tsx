@@ -1,4 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
+import { formatPercentages } from '@lace/common';
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -9,16 +10,16 @@ import TrashIcon from './trash.svg';
 interface PoolDetailsCardProps {
   name: string;
   color: PieChartColor;
-  weight: number;
+  percentage: number;
   onRemove?: () => void;
 }
 
-export const PoolDetailsCard = ({ name, color, weight, onRemove }: PoolDetailsCardProps) => {
+export const PoolDetailsCard = ({ name, color, percentage, onRemove }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
   const { compactNumber, balancesBalance } = useOutsideHandles();
   const stakeValue = balancesBalance
     ? // eslint-disable-next-line no-magic-numbers
-      compactNumber((weight / 100) * Number(balancesBalance.available.coinBalance))
+      compactNumber(percentage * Number(balancesBalance.available.coinBalance))
     : '-';
 
   return (
@@ -39,7 +40,7 @@ export const PoolDetailsCard = ({ name, color, weight, onRemove }: PoolDetailsCa
         <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
             {t('drawer.preferences.stakeValue', {
-              stakePercentage: weight,
+              stakePercentage: formatPercentages(percentage, { decimalPlaces: 0, rounding: 'down' }),
               stakeValue,
             })}
           </Text.Body.Normal>

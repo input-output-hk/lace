@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { MAX_POOLS_COUNT, targetWeight } from '../constants';
+import { MAX_POOLS_COUNT } from '../constants';
 import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
 import {
   DraftPortfolioStakePool,
@@ -12,13 +12,15 @@ import {
 
 const missingDraftPortfolioErrorMessage = 'DelegationPortfolioState: Inconsistent state: missing draftPortfolio';
 
-const mapPoolWeights = (pools: DraftPortfolioStakePool[]) =>
-  pools.map<DraftPortfolioStakePool>((pool) => ({ ...pool, weight: Math.round(targetWeight / pools.length) }));
+const ejectDraftFromCurrentPortfolio = (
+  pools: DraftPortfolioStakePool[]
+): (DraftPortfolioStakePool & { basedOnCurrentPortfolio: false })[] =>
+  pools.map((pool) => ({ ...pool, basedOnCurrentPortfolio: false }));
 
 export const atomicStateMutators = {
   addPoolsFromPreferences: ({ state }: { state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
-    state.selectedPortfolio = mapPoolWeights(state.draftPortfolio);
+    state.selectedPortfolio = ejectDraftFromCurrentPortfolio(state.draftPortfolio);
     state.draftPortfolio = undefined;
     state.activeFlow = Flow.BrowsePools;
   },
@@ -34,16 +36,16 @@ export const atomicStateMutators = {
   removePoolFromPreferences: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
     if (state.draftPortfolio.length === 1) return;
-    state.draftPortfolio = mapPoolWeights(state.draftPortfolio.filter((pool) => pool.id !== id));
+    state.draftPortfolio = ejectDraftFromCurrentPortfolio(state.draftPortfolio.filter((pool) => pool.id !== id));
   },
   selectPool: ({ stakePool, state }: { stakePool: Wallet.Cardano.StakePool; state: State }) => {
     const selectionsFull = state.selectedPortfolio.length === MAX_POOLS_COUNT;
     const alreadySelected = state.selectedPortfolio.some(({ id }) => stakePool.hexId === id);
     if (selectionsFull || alreadySelected) return;
-    state.selectedPortfolio.push(
-      mapStakePoolToPortfolioPool({ cardanoCoinSymbol: state.cardanoCoinSymbol, stakePool })
-    );
-    state.selectedPortfolio = mapPoolWeights(state.selectedPortfolio);
+    state.selectedPortfolio = ejectDraftFromCurrentPortfolio([
+      ...state.selectedPortfolio,
+      mapStakePoolToPortfolioPool({ cardanoCoinSymbol: state.cardanoCoinSymbol, stakePool }),
+    ]);
   },
   showChangingPreferencesConfirmation: ({
     pendingSelectedPortfolio,
@@ -71,6 +73,6 @@ export const atomicStateMutators = {
     state.viewedStakePool = pool;
   },
   unselectPool: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
-    state.selectedPortfolio = mapPoolWeights(state.selectedPortfolio.filter((pool) => pool.id !== id));
+    state.selectedPortfolio = ejectDraftFromCurrentPortfolio(state.selectedPortfolio.filter((pool) => pool.id !== id));
   },
 };

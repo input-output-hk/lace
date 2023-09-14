@@ -100,7 +100,11 @@ export const Overview = () => {
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
-          distribution={displayData}
+          distribution={displayData.map(({ color, name = '-', percentage }) => ({
+            color,
+            name,
+            percentage,
+          }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
