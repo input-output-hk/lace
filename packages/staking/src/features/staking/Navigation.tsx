@@ -16,7 +16,6 @@ export const Navigation = ({ children }: NavigationProps) => {
   }));
   const { t } = useTranslation();
   const onValueChange = (value: string) => {
-    console.log(value);
     if (isValueAValidSubPage(value)) setActivePage(value);
   };
 
