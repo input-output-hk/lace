@@ -74,8 +74,9 @@ export const txTransformer = ({
 }: TxTransformerInput): Omit<AssetActivityItemProps, 'onClick'> => {
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
   const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
-  const depositReclaim = implicitCoin.input
-    ? Wallet.util.lovelacesToAdaString(implicitCoin.input.toString())
+  const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
+  const depositReclaim = depositReclaimValue
+    ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
     : undefined;
   const { coins, assets } = inspectTxValues({
     addresses: walletAddresses,
