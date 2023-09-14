@@ -79,6 +79,8 @@ export const walletStoreMock = async (
     walletManagerUi: { wallet, activate: jest.fn() } as unknown as WalletManagerUi,
     blockchainProvider: mockBlockchainProviders(),
     setBlockchainProvider: jest.fn(),
+    addressesDiscoveryCompleted: false,
+    setAddressesDiscoveryCompleted: jest.fn(),
     ...customStore
   };
 };

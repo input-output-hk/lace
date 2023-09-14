@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { CoinId } from '../types';
 
 const LOVELACE_VALUE = 1_000_000;
 const DEFAULT_DECIMALS = 2;
@@ -17,3 +18,8 @@ export const convertLovelaceToFiat = (
   fields: { lovelaces: string; fiat: number },
   decimalValues: number = DEFAULT_DECIMALS
 ): string => convertAdaToFiat({ ada: lovelacesToAdaString(fields.lovelaces), fiat: fields.fiat }, decimalValues);
+
+export const getFormattedAmount = ({ amount, cardanoCoin }: { amount: string; cardanoCoin: CoinId }): string => {
+  const adaStringAmount = lovelacesToAdaString(amount);
+  return `${adaStringAmount} ${cardanoCoin.symbol}`;
+};
