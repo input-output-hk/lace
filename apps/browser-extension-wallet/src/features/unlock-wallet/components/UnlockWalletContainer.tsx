@@ -33,7 +33,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
       await backgroundService.setBackgroundStorage({ keyAgentsByChain: unlocked });
       setKeyAgentData(keyAgentData);
     }
-  }, [unlocked, backgroundService, environmentName, setKeyAgentData]);
+  }, [backgroundService, environmentName, setKeyAgentData, unlocked]);
 
   const handlePasswordChange = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
