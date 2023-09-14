@@ -25,11 +25,6 @@ export interface TxTransformerInput {
   date?: string;
 }
 
-export const getFormattedAmount = ({ amount, cardanoCoin }: { amount: string; cardanoCoin: Wallet.CoinId }): string => {
-  const adaStringAmount = Wallet.util.lovelacesToAdaString(amount);
-  return `${adaStringAmount} ${cardanoCoin.symbol}`;
-};
-
 export const getFormattedFiatAmount = ({
   amount,
   fiatPrice,
@@ -100,7 +95,7 @@ export const txTransformer = ({
     depositReclaim,
     fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
     status,
-    amount: getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
+    amount: Wallet.util.getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
     fiatAmount: getFormattedFiatAmount({ amount: outputAmount, fiatCurrency, fiatPrice }),
     assets: assetsEntries,
     assetsNumber: (assets?.size ?? 0) + 1,

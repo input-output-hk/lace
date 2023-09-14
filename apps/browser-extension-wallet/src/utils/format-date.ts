@@ -12,12 +12,14 @@ type FormatDateTimeParams = {
   type: 'utc' | 'local';
 };
 
+const formatDateTime = ({ date, format, type }: FormatDateTimeParams): string => {
+  const dayJsDate = type === 'utc' ? dayjs(date).utc() : dayjs(date);
+
+  return dayJsDate.format(format ?? DEFAULT_DATE_FORMAT);
+};
+
 export const formatDate = ({ date, format, type }: FormatDateTimeParams): string =>
-  dayjs(date)
-    .utc(type === 'local')
-    .format(format ?? DEFAULT_DATE_FORMAT);
+  formatDateTime({ date, format: format ?? DEFAULT_DATE_FORMAT, type });
 
 export const formatTime = ({ date, format, type }: FormatDateTimeParams): string =>
-  dayjs(date)
-    .utc(type === 'local')
-    .format(format ?? DEFAULT_TIME_FORMAT);
+  formatDateTime({ date, format: format ?? DEFAULT_TIME_FORMAT, type });

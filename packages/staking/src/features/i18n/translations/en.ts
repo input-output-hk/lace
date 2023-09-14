@@ -8,8 +8,12 @@ export const en: Translations = {
   'browsePools.stakePoolTableBrowser.stake': 'Stake',
   'browsePools.stakePoolTableBrowser.tableHeader.cost': 'Cost',
   'browsePools.stakePoolTableBrowser.tableHeader.poolName': 'Pool name',
-  'browsePools.stakePoolTableBrowser.tableHeader.ros': 'ROS',
-  'browsePools.stakePoolTableBrowser.tableHeader.saturation': 'Saturation',
+  'browsePools.stakePoolTableBrowser.tableHeader.ros.title': 'ROS',
+  'browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip':
+    "Estimated 'Return On Stake' based on previous pool performance",
+  'browsePools.stakePoolTableBrowser.tableHeader.saturation.title': 'Saturation',
+  'browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip':
+    'Once a pool reaches the point of saturation, it will offer diminishing rewards',
   'browsePools.stakePoolTableBrowser.unselect': 'Unselect',
   'drawer.confirmation.button.confirm': 'Next',
   'drawer.confirmation.button.confirmWithDevice': 'Confirm with {{hardwareWallet}}',

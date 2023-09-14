@@ -33,7 +33,7 @@ const displayReleaseAnnouncements = async ({ reason }: Runtime.OnInstalledDetail
       [ABOUT_EXTENSION_KEY]: { version: currentVersion, acknowledged: false, reason: updateType } as ExtensionUpdateData
     });
 
-    console.log('extension got updated due to reason:', updateType);
+    console.info('extension got updated due to reason:', updateType);
   }
 };
 
@@ -43,7 +43,7 @@ if (!runtime.onInstalled.hasListener(displayReleaseAnnouncements))
 if (!runtime.onInstalled.hasListener(checkMigrationsOnUpdate)) runtime.onInstalled.addListener(checkMigrationsOnUpdate);
 
 const updateToVersionCallback = (details: Runtime.OnUpdateAvailableDetailsType) => {
-  console.log(`updating to version ${details.version}`);
+  console.info(`updating to version ${details.version}`);
   if (runtime.onUpdateAvailable.hasListener(updateToVersionCallback)) {
     runtime.onUpdateAvailable.removeListener(updateToVersionCallback);
   }

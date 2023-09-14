@@ -90,7 +90,7 @@ export const useCollateral = (): UseCollateralReturn => {
     } catch (error) {
       // redirect to tx fail screen in case of hw
       if (!isInMemory) {
-        console.log('submitCollateralTx fails with:', error?.message);
+        console.error('submitCollateralTx fails with:', error?.message);
         setBuiltTxData({
           uiTx: undefined,
           error: error.message
