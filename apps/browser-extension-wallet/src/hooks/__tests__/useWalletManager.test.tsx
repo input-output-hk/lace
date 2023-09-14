@@ -813,7 +813,7 @@ describe('Testing useWalletManager hook', () => {
 
     test('exits if walletManagerUi does not exist', async () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({}));
-      jest.spyOn(console, 'log');
+      jest.spyOn(console, 'info');
       const {
         result: {
           current: { switchNetwork }
@@ -822,11 +822,11 @@ describe('Testing useWalletManager hook', () => {
         wrapper: getWrapper({})
       });
       await switchNetwork('Mainnet');
-      expect(console.log).not.toHaveBeenCalled();
-      (console.log as unknown as SpyInstance).mockRestore();
+      expect(console.info).not.toHaveBeenCalled();
+      (console.info as unknown as SpyInstance).mockRestore();
     });
     test('puts a log in the console', async () => {
-      jest.spyOn(console, 'log');
+      jest.spyOn(console, 'info');
       const {
         result: {
           current: { switchNetwork }
@@ -838,8 +838,8 @@ describe('Testing useWalletManager hook', () => {
         await switchNetwork('incorrect' as any);
         // eslint-disable-next-line no-empty
       } catch {}
-      expect(console.log).toHaveBeenCalledWith('Switching chain to', 'incorrect', expect.any(Array));
-      (console.log as unknown as SpyInstance).mockRestore();
+      expect(console.info).toHaveBeenCalledWith('Switching chain to', 'incorrect', expect.any(Array));
+      (console.info as unknown as SpyInstance).mockRestore();
     });
     test('shoud throw in case the chain is not supported', async () => {
       const chainId = 'not supported chain id' as any;
