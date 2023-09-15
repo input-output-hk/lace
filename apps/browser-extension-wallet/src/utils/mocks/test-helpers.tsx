@@ -623,7 +623,8 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   getRandomizedUserId: jest.fn(),
   getUserId: jest.fn(),
   getAliasProperties: jest.fn(),
-  getUserTrackingType: jest.fn()
+  getUserTrackingType: jest.fn(),
+  userTrackingDetails$: jest.fn()
 };
 
 export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {
@@ -640,7 +641,8 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   sendAliasEvent: jest.fn(),
   subscribeToInitializationProcess: jest.fn(),
   overrideFeatureFlags: jest.fn(),
-  getExperimentVariant: jest.fn()
+  getExperimentVariant: jest.fn(),
+  subscribeToDistinctIdUpdate: jest.fn()
 };
 
 export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {

@@ -14,6 +14,7 @@ import {
   UserTrackingType
 } from '.';
 import { UserIdService } from '@lib/scripts/types';
+import { Subject } from 'rxjs';
 
 jest.mock('../matomo/MatomoClient');
 jest.mock('../postHog/PostHogClient');
@@ -178,6 +179,7 @@ describe('AnalyticsTracker', () => {
       spy = jest.spyOn(userIdService, 'getUserIdService');
       spy.mockReturnValue({
         ...userIdServiceMock,
+        userTrackingDetails$: new Subject(),
         getUserTrackingType: jest.fn().mockReturnValue(UserTrackingType.Basic)
       });
     });

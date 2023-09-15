@@ -94,6 +94,15 @@ export class PostHogClient {
       });
   }
 
+  subscribeToDistinctIdUpdate(): Subscription {
+    return this.userIdService.userTrackingDetails$.subscribe(async () => {
+      const id = await this.userIdService.getUserId(this.chain.networkId);
+      posthog.register({
+        distinct_id: id
+      });
+    });
+  }
+
   async sendPageNavigationEvent(): Promise<void> {
     console.debug('[ANALYTICS] Logging page navigation event to PostHog');
 

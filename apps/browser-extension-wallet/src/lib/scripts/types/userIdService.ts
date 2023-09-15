@@ -1,5 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { Subject } from 'rxjs';
 export const USER_ID_SERVICE_BASE_CHANNEL = 'user-id-actions';
 
 export interface UserIdService {
@@ -11,4 +12,5 @@ export interface UserIdService {
   makeTemporary(): Promise<void>;
   extendLifespan(): Promise<void>;
   getUserTrackingType(): UserTrackingType;
+  userTrackingDetails$: Subject<{ trackingType: UserTrackingType }>;
 }

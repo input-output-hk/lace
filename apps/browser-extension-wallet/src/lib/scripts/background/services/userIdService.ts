@@ -1,6 +1,6 @@
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 import {
   clearBackgroundStorage,
@@ -24,6 +24,7 @@ export class UserIdService implements UserIdServiceInterface {
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
   private userTrackingType?: UserTrackingType;
+  public userTrackingDetails$ = new Subject<{ trackingType: UserTrackingType }>();
 
   constructor(
     private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
@@ -95,6 +96,7 @@ export class UserIdService implements UserIdServiceInterface {
     this.randomizedUserId = undefined;
     this.walletBasedUserId = undefined;
     this.userTrackingType = UserTrackingType.Basic;
+    this.userTrackingDetails$.next({ trackingType: UserTrackingType.Basic });
     this.clearSessionTimeout();
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
@@ -105,6 +107,7 @@ export class UserIdService implements UserIdServiceInterface {
     const userId = await this.getRandomizedUserId();
     await this.setStorage({ usePersistentUserId: true, userId });
     this.userTrackingType = UserTrackingType.Enhanced;
+    this.userTrackingDetails$.next({ trackingType: UserTrackingType.Enhanced });
   }
 
   async makeTemporary(): Promise<void> {
@@ -112,6 +115,7 @@ export class UserIdService implements UserIdServiceInterface {
     await this.setStorage({ usePersistentUserId: false, userId: undefined });
     this.setSessionTimeout();
     this.userTrackingType = UserTrackingType.Basic;
+    this.userTrackingDetails$.next({ trackingType: UserTrackingType.Basic });
   }
 
   async extendLifespan(): Promise<void> {
@@ -133,6 +137,9 @@ export class UserIdService implements UserIdServiceInterface {
 
     this.userIdRestored = true;
     this.userTrackingType = usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic;
+    this.userTrackingDetails$.next({
+      trackingType: usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic
+    });
   }
 
   private setSessionTimeout(): void {

@@ -46,7 +46,16 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
         if (subscription) subscription.unsubscribe();
       };
     });
-  }, [postHogClient]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const subscription = postHogClient.subscribeToDistinctIdUpdate();
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <ExperimentsContext.Provider value={{ areExperimentsLoading, experimentVariantByKey }}>

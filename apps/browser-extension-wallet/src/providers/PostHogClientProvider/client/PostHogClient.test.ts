@@ -6,6 +6,7 @@ import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/PostHogClientPro
 import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
+import { Subject } from 'rxjs';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
 const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
@@ -18,6 +19,7 @@ describe('PostHogClient', () => {
   const userId = 'userId';
   const mockUserIdService: UserIdService = {
     ...userIdServiceMock,
+    userTrackingDetails$: new Subject(),
     getUserId: jest.fn().mockReturnValue(userId)
   };
 
