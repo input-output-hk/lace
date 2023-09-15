@@ -49,8 +49,9 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
       const recipientSources = await Promise.all(
         recipients.map(async (row) => {
           const addressIdentifier = row.handle || row.address;
-          const found = await getMatchedAddresses({ value: addressIdentifier });
-          return found?.length ? 'address book' : 'not on address book';
+          const bookRecords = await getMatchedAddresses({ value: addressIdentifier });
+          const exactMatch = bookRecords.find((item) => item.walletAddress === addressIdentifier);
+          return exactMatch ? 'address book' : 'not on address book';
         })
       );
       const recipientTypes = recipients.map((row) =>
