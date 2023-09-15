@@ -4,6 +4,7 @@ import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import extensionUtils from '../utils/utils';
 import testContext from '../utils/testContext';
+import { Asset } from '../data/Asset';
 
 class WalletAddressPageAssert {
   async assertSeeWalletAddressPage(mode: 'extended' | 'popup') {
@@ -41,10 +42,11 @@ class WalletAddressPageAssert {
   async getSrc(item: WebdriverIO.Element) {
     return item.$('img').getAttribute('src');
   }
-  async assertSeeAdaHandle() {
+
+  async assertSeeAdaHandleAddressCard() {
     const displayedAdaHandleNames: string[] = [];
-    const displayedAdaHandleNamesElementArray = await WalletAddressPage.addressCardHandleName;
-    const displayedAdaHandleImages = await WalletAddressPage.addressCardHandleImage.map(this.getSrc);
+    const displayedAdaHandleNamesElementArray = await WalletAddressPage.handleNames;
+    const displayedAdaHandleImages = await WalletAddressPage.handleImages.map(this.getSrc);
 
     for (const displayedAdaHandleNamesElement of displayedAdaHandleNamesElementArray) {
       await displayedAdaHandleNamesElement.waitForDisplayed();
@@ -52,6 +54,22 @@ class WalletAddressPageAssert {
     }
     testContext.save('displayedAdaHandleNames', displayedAdaHandleNames);
     testContext.save('displayedAdaHandleImages', displayedAdaHandleImages);
+  }
+
+  async assertSeeAdaHandleAddressCardWithName(handleName: string) {
+    const handleCard = await WalletAddressPage.getHandleAddressCard(handleName);
+    await handleCard.waitForDisplayed();
+    await handleCard.$(WalletAddressPage.HANDLE_IMAGE).waitForDisplayed();
+    await handleCard.$(WalletAddressPage.HANDLE_NAME).waitForDisplayed();
+    await handleCard.$(WalletAddressPage.HANDLE_SYMBOL).waitForDisplayed();
+  }
+
+  async assertSeeTheShortestHandleFirst() {
+    const names: string[] = testContext.load('displayedAdaHandleNames');
+    expect(names[0]).equals(Asset.ADA_HANDLE_1.name);
+    for (let i = 0; i < names.length - 1; i++) {
+      expect(names[i].length).to.be.lessThanOrEqual(names[i + 1].length);
+    }
   }
 }
 

@@ -32,7 +32,7 @@ Feature: Send Simple Transactions - Extended view - E2E
   @LW-4677
   Scenario: Extended-view - Self Transaction E2E
     And I click "Receive" button on page header
-    And I click "Copy" button on "Wallet Address" page
+    And I click "Copy" button on "Receive" page for default wallet address
     Then I see a toast with message: "core.infoWallet.addressCopied"
     And I close the drawer by clicking close button
     And I click "Send" button on page header
