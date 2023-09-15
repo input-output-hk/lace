@@ -17,10 +17,24 @@ import { UserIdService } from '@lib/scripts/types';
 import { Subject } from 'rxjs';
 
 jest.mock('../matomo/MatomoClient');
-jest.mock('../postHog/PostHogClient');
+jest.mock('@providers/PostHogClientProvider/client');
 jest.mock('../getUserIdService', () => ({
   getUserIdService: jest.fn().mockReturnValue(userIdServiceMock)
 }));
+
+const mockBackgroundServiceUtils = {
+  getBackgroundStorage: jest.fn(),
+  setBackgroundStorage: jest.fn()
+};
+
+const getPostHogClient = (view = ExtensionViews.Extended) =>
+  new PostHogClient(
+    Wallet.Cardano.ChainIds.Preprod,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    userIdServiceMock as any,
+    mockBackgroundServiceUtils,
+    view
+  );
 
 describe('AnalyticsTracker', () => {
   const preprodChain = Wallet.Cardano.ChainIds.Preprod;
@@ -32,10 +46,15 @@ describe('AnalyticsTracker', () => {
   describe('construction', () => {
     it('should setup both clients with the user id service', () => {
       // eslint-disable-next-line no-new
-      new AnalyticsTracker({ chain: preprodChain });
+      new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       expect(getUserIdService).toHaveBeenCalledTimes(1);
       expect(MatomoClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock);
-      expect(PostHogClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock, ExtensionViews.Extended);
+      expect(PostHogClient).toHaveBeenCalledWith(
+        preprodChain,
+        userIdServiceMock,
+        mockBackgroundServiceUtils,
+        ExtensionViews.Extended
+      );
     });
     it('should only setup matomo client if posthog is disabled', () => {
       // eslint-disable-next-line no-new
@@ -55,28 +74,40 @@ describe('AnalyticsTracker', () => {
       // eslint-disable-next-line no-new
       new AnalyticsTracker({
         chain: preprodChain,
-        view: ExtensionViews.Popup
+        view: ExtensionViews.Popup,
+        postHogClient: getPostHogClient(ExtensionViews.Popup)
       });
-      expect(PostHogClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock, ExtensionViews.Popup);
+      expect(PostHogClient).toHaveBeenCalledWith(
+        preprodChain,
+        userIdServiceMock,
+        mockBackgroundServiceUtils,
+        ExtensionViews.Popup
+      );
     });
     it('should setup Post Hog client with view = extended', () => {
       // eslint-disable-next-line no-new
       new AnalyticsTracker({
         chain: preprodChain,
-        view: ExtensionViews.Extended
+        view: ExtensionViews.Extended,
+        postHogClient: getPostHogClient()
       });
-      expect(PostHogClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock, ExtensionViews.Extended);
+      expect(PostHogClient).toHaveBeenCalledWith(
+        preprodChain,
+        userIdServiceMock,
+        mockBackgroundServiceUtils,
+        ExtensionViews.Extended
+      );
     });
   });
 
   describe('setOptedInForEnhancedAnalytics', () => {
     it('should make the user id persistent if user opted-in', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       await tracker.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
       expect(userIdServiceMock.makePersistent).toHaveBeenCalledTimes(1);
     });
     it('should make the user id temporary if user opted-out', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       await tracker.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedOut);
       expect(userIdServiceMock.makeTemporary).toHaveBeenCalledTimes(1);
     });
@@ -85,7 +116,8 @@ describe('AnalyticsTracker', () => {
   describe('sendPageNavigationEvent', () => {
     it('should use the posthog client to send a page navigation event', async () => {
       const tracker = new AnalyticsTracker({
-        chain: preprodChain
+        chain: preprodChain,
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendPageNavigationEvent();
@@ -95,7 +127,7 @@ describe('AnalyticsTracker', () => {
 
   describe('sendEvent', () => {
     it('should use the matomo client to send an event', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       const mockedMatomoClient = (MatomoClient as jest.Mock<MatomoClient>).mock.instances[0];
       const event = {
         category: MatomoEventCategories.WALLET_RESTORE,
@@ -112,7 +144,8 @@ describe('AnalyticsTracker', () => {
   describe('sendEventToPostHog', () => {
     it('should use the posthog client to send an event', async () => {
       const tracker = new AnalyticsTracker({
-        chain: preprodChain
+        chain: preprodChain,
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       const event = PostHogAction.OnboardingCreateClick;
@@ -128,7 +161,8 @@ describe('AnalyticsTracker', () => {
       const tracker = new AnalyticsTracker({
         chain: preprodChain,
         isPostHogEnabled: true,
-        excludedEvents: 'onboarding | new wallet'
+        excludedEvents: 'onboarding | new wallet',
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
@@ -140,7 +174,8 @@ describe('AnalyticsTracker', () => {
       const tracker = new AnalyticsTracker({
         chain: preprodChain,
         isPostHogEnabled: true,
-        excludedEvents: 'onboarding | new wallet'
+        excludedEvents: 'onboarding | new wallet',
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
@@ -151,7 +186,8 @@ describe('AnalyticsTracker', () => {
     it('should send all events', async () => {
       const tracker = new AnalyticsTracker({
         chain: preprodChain,
-        isPostHogEnabled: true
+        isPostHogEnabled: true,
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
@@ -162,7 +198,8 @@ describe('AnalyticsTracker', () => {
   describe('setChain', () => {
     it('should set the chain on both clients', async () => {
       const tracker = new AnalyticsTracker({
-        chain: preprodChain
+        chain: preprodChain,
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       const mockedMatomoClient = (MatomoClient as jest.Mock<MatomoClient>).mock.instances[0];
@@ -189,13 +226,13 @@ describe('AnalyticsTracker', () => {
     });
 
     it('should not call Post Hog sendPageNavigationEvent for opted out user', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendPageNavigationEvent();
       expect(mockedPostHogClient.sendPageNavigationEvent).not.toHaveBeenCalled();
     });
     it('should not call Post Hog sentEvent for opted out user', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       const event = PostHogAction.OnboardingCreateClick;
       await tracker.sendEventToPostHog(event);
@@ -203,13 +240,13 @@ describe('AnalyticsTracker', () => {
       expect(userIdServiceMock.extendLifespan).not.toHaveBeenCalled();
     });
     it('should not call Post Hog sendAliasEvent for opted out user', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendAliasEvent();
       expect(mockedPostHogClient.sendAliasEvent).not.toHaveBeenCalled();
     });
     it('should not call Matomo sentEvent for opted out user', async () => {
-      const tracker = new AnalyticsTracker({ chain: preprodChain });
+      const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       const mockedMatomoClient = (MatomoClient as jest.Mock<MatomoClient>).mock.instances[0];
       const event = {
         category: MatomoEventCategories.WALLET_RESTORE,

@@ -7,6 +7,7 @@ import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
 import { Subject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
 const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
@@ -20,16 +21,18 @@ describe('PostHogClient', () => {
   const mockUserIdService: UserIdService = {
     ...userIdServiceMock,
     userTrackingDetails$: new Subject(),
-    getUserId: jest.fn().mockReturnValue(userId)
+    getUserId: jest.fn().mockImplementation(() => Promise.resolve(userId))
   };
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should initialize posthog on construction', () => {
+  it('should initialize posthog on construction', async () => {
     // eslint-disable-next-line no-new
-    new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
+
+    await waitFor(() => expect(client).toBeDefined());
     expect(posthog.init).toHaveBeenCalledWith(
       expect.stringContaining(DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]),
       expect.objectContaining({
