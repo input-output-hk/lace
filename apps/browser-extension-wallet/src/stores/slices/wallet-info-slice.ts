@@ -16,6 +16,8 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   inMemoryWallet: undefined,
   cardanoWallet: undefined,
   walletManagerUi: undefined,
+  addressesDiscoveryCompleted: false,
+  setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted) => set({ addressesDiscoveryCompleted }),
   setCardanoWallet: (wallet?: Wallet.CardanoWallet) => set({ inMemoryWallet: wallet?.wallet, cardanoWallet: wallet }),
   setWalletManagerUi: (walletManagerUi: WalletManagerUi) => set({ walletManagerUi }),
   setCurrentChain: (chain: Wallet.ChainName) => {
