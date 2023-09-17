@@ -1,12 +1,42 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { DelegationPortfolioState, DelegationPortfolioStore, PortfolioManagementProcess } from './types';
+import { DelegationPortfolioState, DelegationPortfolioStore, PortfolioManagementProcess, Sections } from './types';
+
+// move to portfolio store
+export const drawerSectionsConfig = {
+  [Sections.DETAIL]: {
+    currentSection: Sections.DETAIL,
+  },
+  [Sections.PREFERENCES]: {
+    currentSection: Sections.PREFERENCES,
+    nextSection: Sections.CONFIRMATION,
+    prevSection: Sections.DETAIL,
+  },
+  [Sections.CONFIRMATION]: {
+    currentSection: Sections.CONFIRMATION,
+    nextSection: Sections.SIGN,
+    prevSection: Sections.PREFERENCES,
+  },
+  [Sections.SIGN]: {
+    currentSection: Sections.SIGN,
+    prevSection: Sections.CONFIRMATION,
+  },
+  [Sections.SUCCESS_TX]: {
+    currentSection: Sections.SUCCESS_TX,
+    prevSection: Sections.SIGN,
+  },
+  [Sections.FAIL_TX]: {
+    currentSection: Sections.FAIL_TX,
+    prevSection: Sections.SIGN,
+  },
+} as const;
 
 const defaultState: DelegationPortfolioState = {
   activeManagementProcess: PortfolioManagementProcess.None,
   currentPortfolio: [],
   draftPortfolio: [],
+  drawerVisible: false,
   selections: [],
 };
 
@@ -19,12 +49,17 @@ export const useDelegationPortfolioStore = create(
     mutators: {
       beginManagementProcess: (process) =>
         set((store) => {
-          if (store.activeManagementProcess === process) return;
+          if (store.activeManagementProcess !== PortfolioManagementProcess.None) return;
           store.activeManagementProcess = process;
-          store.draftPortfolio =
-            process === PortfolioManagementProcess.CurrentPortfolio ? store.currentPortfolio : store.selections;
+          if (process === PortfolioManagementProcess.CurrentPortfolio) {
+            store.draftPortfolio = store.currentPortfolio;
+          }
+          if (process === PortfolioManagementProcess.NewPortfolio) {
+            store.draftPortfolio = store.selections;
+          }
+          store.drawerVisible = true;
+          store.drawerSectionConfig = drawerSectionsConfig[Sections.PREFERENCES];
         }),
-      // eslint-disable-next-line unicorn/no-object-as-default-parameter
       cancelManagementProcess: ({ dumpDraftToSelections } = { dumpDraftToSelections: false }) =>
         set((store) => {
           if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
@@ -34,6 +69,8 @@ export const useDelegationPortfolioStore = create(
               weight: 1,
             }));
           }
+          store.drawerVisible = false;
+          store.drawerSectionConfig = undefined;
           store.draftPortfolio = [];
           store.activeManagementProcess = PortfolioManagementProcess.None;
         }),
@@ -41,15 +78,7 @@ export const useDelegationPortfolioStore = create(
         set((store) => {
           store.selections = [];
         }),
-      finalizeManagementProcess: () =>
-        set((store) => {
-          if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
-          store.draftPortfolio = [];
-          if (store.activeManagementProcess === PortfolioManagementProcess.NewPortfolio) {
-            store.selections = [];
-          }
-          store.activeManagementProcess = PortfolioManagementProcess.None;
-        }),
+      // tech dept
       removePoolInManagementProcess: ({ id }) =>
         set((store) => {
           if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
@@ -93,12 +122,69 @@ export const useDelegationPortfolioStore = create(
           store.currentPortfolio = currentPortfolio;
         });
       },
+      // eslint-disable-next-line sonarjs/cognitive-complexity
+      transition: (action) => {
+        const { activeManagementProcess, drawerVisible, drawerSectionConfig } = get();
+        if (activeManagementProcess === PortfolioManagementProcess.None) return;
+        if (!drawerVisible) {
+          console.error('INVALID MANAGEMENT STATE: expected drawer to be visible');
+          return;
+        }
+
+        const { currentSection, nextSection, prevSection } = drawerSectionConfig;
+
+        if (action === 'forceConfirmationHardwareWalletSkipToSuccess') {
+          if (currentSection !== Sections.CONFIRMATION) return;
+          set((store) => {
+            store.drawerSectionConfig = drawerSectionsConfig[Sections.SUCCESS_TX];
+          });
+          return;
+        }
+        if (action === 'forceConfirmationHardwareWalletSkipToFailure') {
+          if (currentSection !== Sections.CONFIRMATION) return;
+          set((store) => {
+            store.drawerSectionConfig = drawerSectionsConfig[Sections.FAIL_TX];
+          });
+          return;
+        }
+
+        const targetSection = action === 'next' ? nextSection : prevSection;
+
+        set((store) => {
+          if (action === 'next') {
+            if (!targetSection) {
+              store.drawerVisible = false;
+              store.drawerSectionConfig = undefined;
+              store.activeManagementProcess = PortfolioManagementProcess.None;
+              return;
+            }
+            if (targetSection === Sections.SUCCESS_TX) {
+              store.draftPortfolio = [];
+              if (store.activeManagementProcess === PortfolioManagementProcess.NewPortfolio) {
+                store.selections = [];
+              }
+            }
+          }
+          if (!targetSection) {
+            console.error(
+              `INVALID MANAGEMENT STATE: tried to move to not existing section (${action} of ${currentSection})`
+            );
+            return;
+          }
+          store.drawerSectionConfig = drawerSectionsConfig[targetSection];
+        });
+      },
       unselectPool: ({ id }) =>
         set((store) => {
           store.selections = store.selections.filter((pool) => pool.id !== id);
         }),
     },
     queries: {
+      // rework
+      isDrawerVisible: () => {
+        const { activeManagementProcess } = get();
+        return activeManagementProcess !== PortfolioManagementProcess.None;
+      },
       isPoolSelected: (hexId) => {
         const { selections } = get();
         return !!selections?.find((pool) => pool.id === hexId);

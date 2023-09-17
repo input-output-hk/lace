@@ -15,21 +15,18 @@ export enum StakingError {
   UTXO_BALANCE_INSUFFICIENT = 'UTXO_BALANCE_INSUFFICIENT',
 }
 
-export interface SectionConfig {
+export interface DrawerSectionConfig {
   currentSection: Sections;
   nextSection?: Sections;
   prevSection?: Sections;
 }
 
 export interface StakePoolDetails {
-  simpleSendConfig: SectionConfig;
-  setSection: (section?: SectionConfig) => void;
+  // setSection: (section?: DrawerSectionConfig) => void;
   activePage: Page;
   setActivePage: (page: Page) => void;
-  setPrevSection: () => void;
+  // setPrevSection: () => void;
   resetStates: () => void;
-  isDrawerVisible: boolean;
-  setIsDrawerVisible: (visibility: boolean) => void;
   isStakeConfirmationVisible: boolean;
   setStakeConfirmationVisible: (visibility: boolean) => void;
   isExitStakingVisible: boolean;
@@ -57,6 +54,7 @@ export type CurrentPortfolioStakePool = DraftPortfolioStakePool & {
 
 export enum PortfolioManagementProcess {
   None = 'None',
+  Details = 'Details', // re-consider
   NewPortfolio = 'NewPortfolio',
   CurrentPortfolio = 'CurrentPortfolio',
 }
@@ -66,11 +64,23 @@ export type DelegationPortfolioState = {
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio: DraftPortfolioStakePool[];
   selections: DraftPortfolioStakePool[];
-};
+} & (
+  | {
+      drawerVisible: true;
+      drawerSectionConfig: DrawerSectionConfig;
+    }
+  | {
+      drawerVisible: false;
+      // TODO: maybe use null
+      drawerSectionConfig?: never;
+    }
+);
 
 export type DelegationPortfolioQueries = {
   isPoolSelected: (hexId: Wallet.Cardano.PoolIdHex) => boolean;
   selectionsFull: () => boolean;
+  // rework
+  isDrawerVisible: () => boolean;
 };
 
 type DelegationPortfolioMutators = {
@@ -84,10 +94,19 @@ type DelegationPortfolioMutators = {
   unselectPool: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
   clearSelections: () => void;
   beginManagementProcess: (
-    process: PortfolioManagementProcess.NewPortfolio | PortfolioManagementProcess.CurrentPortfolio
+    process:
+      | PortfolioManagementProcess.NewPortfolio
+      | PortfolioManagementProcess.CurrentPortfolio
+      | PortfolioManagementProcess.Details
+  ) => void;
+  transition: (
+    action:
+      | 'previous'
+      | 'next'
+      | 'forceConfirmationHardwareWalletSkipToSuccess'
+      | 'forceConfirmationHardwareWalletSkipToFailure'
   ) => void;
   cancelManagementProcess: (params?: { dumpDraftToSelections: boolean }) => void;
-  finalizeManagementProcess: () => void;
   removePoolInManagementProcess: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
 };
 

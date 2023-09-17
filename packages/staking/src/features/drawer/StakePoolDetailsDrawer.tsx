@@ -3,7 +3,7 @@ import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Sections, drawerSectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
@@ -84,7 +84,7 @@ export const StakePoolDetailsDrawer = ({
       removePassword();
     }
     if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemory) {
-      return setSection(sectionsConfig[Sections.PREFERENCES]);
+      return setSection(drawerSectionsConfig[Sections.PREFERENCES]);
     }
     if (simpleSendConfig?.prevSection) {
       return setPrevSection();

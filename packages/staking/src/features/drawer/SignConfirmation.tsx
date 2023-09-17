@@ -4,7 +4,7 @@ import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Sections, drawerSectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import styles from './SignConfirmation.module.scss';
 
 interface SignConfirmationProps {
@@ -101,8 +101,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       cleanPasswordInput();
       sendAnalytics();
       setIsRestaking(currentPortfolio.length > 0);
-      portfolioMutators.finalizeManagementProcess();
-      setSection(sectionsConfig[Sections.SUCCESS_TX]);
+      portfolioMutators.transition('next');
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
     } catch (error) {
       // Error name is 'AuthenticationError' in dev build but 'W' in prod build
@@ -110,7 +109,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       if (error.message?.includes('Authentication failure')) {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
-        setSection(sectionsConfig[Sections.FAIL_TX]);
+        setSection(drawerSectionsConfig[Sections.FAIL_TX]);
         setSubmitingTxState({ isSubmitingTx: false });
       }
     }

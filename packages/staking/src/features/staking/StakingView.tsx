@@ -18,7 +18,7 @@ const stepsWithExitConfirmation = new Set<Sections>([]);
 export const StakingView = () => {
   const { t } = useTranslation();
   const [pendingSelection, setPendingSelection] = useState(false);
-  const { setIsDrawerVisible, setSection, setStakeConfirmationVisible } = useStakePoolDetails();
+  const { setStakeConfirmationVisible } = useStakePoolDetails();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((state) => ({
     currentPortfolio: state.currentPortfolio,
     portfolioMutators: state.mutators,
@@ -42,9 +42,7 @@ export const StakingView = () => {
 
   const proceedWithSelections = useCallback(() => {
     portfolioMutators.beginManagementProcess(PortfolioManagementProcess.NewPortfolio);
-    setSection();
-    setIsDrawerVisible(true);
-  }, [portfolioMutators, setSection, setIsDrawerVisible]);
+  }, [portfolioMutators]);
 
   const initiateStaking = useCallback(() => {
     if (alreadyDelegating) {
@@ -68,6 +66,7 @@ export const StakingView = () => {
       ticker,
       weight: 1,
     });
+    portfolioMutators.cancelManagementProcess();
   }, [openPool, openPoolDetails, portfolioMutators, walletStoreWalletUICardanoCoin]);
 
   const stakeJustOnCurrentPool = useCallback(() => {
@@ -75,13 +74,14 @@ export const StakingView = () => {
       setPendingSelection(true);
     }
     selectCurrentPool();
+    portfolioMutators.cancelManagementProcess();
     initiateStaking();
     // TODO: LW-7668 implement no funds modal
     // if (canDelegate) {
     // } else {
     // setNoFundsVisible(true);
     // }
-  }, [alreadyDelegating, selectCurrentPool, initiateStaking]);
+  }, [alreadyDelegating, selectCurrentPool, portfolioMutators, initiateStaking]);
 
   const unselectPool = useCallback(() => {
     if (!openPoolDetails) return;

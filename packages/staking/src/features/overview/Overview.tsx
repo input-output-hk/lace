@@ -8,7 +8,7 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import {
   PortfolioManagementProcess,
   Sections,
-  sectionsConfig,
+  drawerSectionsConfig,
   useDelegationPortfolioStore,
   useStakePoolDetails,
 } from '../store';
@@ -38,10 +38,6 @@ export const Overview = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const { setIsDrawerVisible, setSection } = useStakePoolDetails((state) => ({
-    setIsDrawerVisible: state.setIsDrawerVisible,
-    setSection: state.setSection,
-  }));
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
@@ -68,8 +64,6 @@ export const Overview = () => {
 
   const onManageClick = () => {
     portfolioMutators.beginManagementProcess(PortfolioManagementProcess.CurrentPortfolio);
-    setSection(sectionsConfig[Sections.PREFERENCES]);
-    setIsDrawerVisible(true);
   };
 
   const displayData = mapPortfolioToDisplayData({

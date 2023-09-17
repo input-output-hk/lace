@@ -2,26 +2,19 @@ import { Button, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { DelegationCard } from '../overview/DelegationCard';
-import {
-  MAX_POOLS_COUNT,
-  Page,
-  Sections,
-  sectionsConfig,
-  useDelegationPortfolioStore,
-  useStakePoolDetails,
-} from '../store';
+import { MAX_POOLS_COUNT, Page, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 export const StakePoolPreferencesFooter = () => {
   const { t } = useTranslation();
-  const { setSection } = useStakePoolDetails();
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
   return (
     <Flex flexDirection="column" alignItems="stretch" gap="$16">
       <Button.CallToAction
         label={t('drawer.preferences.nextButton')}
         data-testid="preferences-next-button"
-        onClick={() => setSection(sectionsConfig[Sections.CONFIRMATION])}
+        onClick={() => portfolioMutators.transition('next')}
         w="$fill"
       />
     </Flex>
@@ -40,11 +33,9 @@ export const StakePoolPreferences = () => {
     draftPortfolio: state.draftPortfolio,
     portfolioMutators: state.mutators,
   }));
-  const { activePage, setActivePage, setIsDrawerVisible, resetStates } = useStakePoolDetails((store) => ({
+  const { activePage, setActivePage } = useStakePoolDetails((store) => ({
     activePage: store.activePage,
-    resetStates: store.resetStates,
     setActivePage: store.setActivePage,
-    setIsDrawerVisible: store.setIsDrawerVisible,
   }));
 
   const displayData = draftPortfolio.map(({ name, id }, i) => ({
@@ -60,8 +51,6 @@ export const StakePoolPreferences = () => {
       setActivePage(Page.browsePools);
     }
     portfolioMutators.cancelManagementProcess({ dumpDraftToSelections: true });
-    setIsDrawerVisible(false);
-    resetStates();
   };
 
   return (

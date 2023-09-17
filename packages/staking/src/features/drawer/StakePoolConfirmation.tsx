@@ -15,7 +15,7 @@ import {
   DraftPortfolioStakePool,
   Sections,
   StakingError,
-  sectionsConfig,
+  drawerSectionsConfig,
   useDelegationPortfolioStore,
   useStakePoolDetails,
 } from '../store';
@@ -332,12 +332,13 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakePoolDetails();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
-  const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
+  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
+    portfolioMutators: store.mutators,
+  }));
 
   const keyAgentType = getKeyAgentType();
   const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
-
-  const { setSection } = useStakePoolDetails();
 
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
@@ -353,15 +354,15 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       try {
         await signAndSubmitTransaction();
         setIsRestaking(currentPortfolio.length > 0);
-        return setSection(sectionsConfig[Sections.SUCCESS_TX]);
+        return portfolioMutators.transition('forceConfirmationHardwareWalletSkipToSuccess');
       } catch {
-        return setSection(sectionsConfig[Sections.FAIL_TX]);
+        return portfolioMutators.transition('forceConfirmationHardwareWalletSkipToFailure');
       } finally {
         setIsConfirmingTx(false);
       }
     }
-    return setSection(sectionsConfig[Sections.SIGN]);
-  }, [isInMemory, setSection, signAndSubmitTransaction, setIsRestaking, currentPortfolio.length]);
+    portfolioMutators.transition('next');
+  }, [isInMemory, portfolioMutators, signAndSubmitTransaction, setIsRestaking, currentPortfolio.length]);
 
   const confirmLabel = useMemo(() => {
     if (!isInMemory) {

@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../../store';
+import {PortfolioManagementProcess, useDelegationPortfolioStore, useStakePoolDetails} from '../../store';
 import { StakePoolItemBrowserProps } from './StakePoolItemBrowser';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
@@ -105,7 +105,7 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
           hexId,
           onClick: (): void => {
             setSelectedStakePool({ logo, ...pool });
-            setIsDrawerVisible(true);
+            portfolioMutators.beginManagementProcess(PortfolioManagementProcess.Details);
           },
           onSelect: () =>
             portfolioMutators.selectPool({

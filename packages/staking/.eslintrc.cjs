@@ -48,5 +48,6 @@ module.exports = {
     'sort-keys/sort-keys-fix': ['error', 'asc', { natural: true }],
     'unicorn/no-null': 'off',
     'unicorn/prefer-query-selector': 'off',
+    'unicorn/no-object-as-default-parameter': 'off'
   },
 };
