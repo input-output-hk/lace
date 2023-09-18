@@ -7,17 +7,22 @@ name: packages/staking
 
 on:
   pull_request:
-    types: [synchronize, labeled]
+    types: [labeled, synchronize]
   push:
     branches:
-      - main
+      - 'main'
+      - 'release/**'
+  workflow_run:
+    workflows: [Label PRs]
+    types:
+      - completed
 
 jobs:
   build_staking:
     name: Build Staking Center
     runs-on: ubuntu-22.04
     container: mcr.microsoft.com/playwright:v1.32.2-jammy
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'staking') || contains(github.event.pull_request.labels.*.name, 'ui-toolkit')
+    if: github.ref_name == 'main' || startsWith(github.ref_name, 'release/') || contains(github.event.pull_request.labels.*.name, 'staking') || contains(github.event.pull_request.labels.*.name, 'ui-toolkit')
     steps:
       - name: Setup Build Essential
         run: apt-get update && apt-get install build-essential -y
