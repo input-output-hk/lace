@@ -62,16 +62,16 @@ Feature: ADA handle - extended view
 
   @LW-7428
   Scenario: Extended View - Validate custom image from a handle on the "Select NFT" (folder) screen
-      Given I navigate to NFTs extended page
-      And I click "Receive" button on page header
-      And I see handle listed on the "Receive" screen
-      And I close the drawer by clicking close button
-      And I navigate to NFTs extended page
-      And I click "Create folder" button on NFTs page
-      And I enter a folder name "Sample NFT folder" into "Folder name" input
-      And I click "Next" button on "Name your folder" page
-      Then I can see the handle listed on the "Select NFT" screen
-      And the corresponding custom image is displayed
+    Given I navigate to NFTs extended page
+    And I click "Receive" button on page header
+    And I see handle listed on the "Receive" screen
+    And I close the drawer by clicking close button
+    And I navigate to NFTs extended page
+    And I click "Create folder" button on NFTs page
+    And I enter a folder name "Sample NFT folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    Then I can see the handle listed on the "Select NFT" screen
+    And the corresponding custom image is displayed
 
   @LW-7429
   Scenario: Extended View - Validate custom image from a handle on the NFT folder
@@ -87,3 +87,35 @@ Feature: ADA handle - extended view
     And I see NFT with name "$test_handle_2" on the NFT folder page
     And I see NFT with name "$test_handle_3" on the NFT folder page
     And I see NFT with name "$t_h_1" on the NFT folder page
+
+  @LW-7140 @LW-7136
+  Scenario: Extended View - Ada handles displayed and sorted by handle length
+    When I click "Receive" button on page header
+    Then I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
+    And I see handle listed on the "Receive" screen
+    And I see address card for handle: "$cde"
+    And I see address card for handle: "$t_h_1"
+    And I see address card for handle: "$test_handle_1"
+    And I see address card for handle: "$test_handle_2"
+    And I see address card for handle: "$test_handle_3"
+    And The first ADA handle displayed on the list is the shortest
+
+  @LW-7138 @LW-8509
+  Scenario: Extended View - Copy address/ADA handle
+    And I click "Receive" button on page header
+    And I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
+    When I click "Copy" button on "Receive" page for default wallet address
+    Then I see a toast with text: "Address copied"
+    And Clipboard contains address of wallet: "WalletAdaHandle"
+    When I click "Copy" button on "Receive" page for handle: "$cde"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$cde"
+    When I click "Copy" button on "Receive" page for handle: "$t_h_1"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$t_h_1"
+    When I click "Copy" button on "Receive" page for handle: "$test_handle_1"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$test_handle_1"
+    When I click "Copy" button on "Receive" page for handle: "$test_handle_3"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$test_handle_3"
