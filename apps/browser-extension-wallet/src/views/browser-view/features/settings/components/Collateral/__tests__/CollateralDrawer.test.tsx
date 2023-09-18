@@ -45,7 +45,8 @@ import { Sections } from '../types';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { act } from 'react-dom/test-utils';
 import { walletRoutePaths } from '@routes';
-import { mockAnalyticsTracker } from '@src/utils/mocks/test-helpers';
+import { mockAnalyticsTracker, postHogClientMocks } from '@src/utils/mocks/test-helpers';
+import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 
 class ResizeObserver {
   observe() {}
@@ -135,11 +136,15 @@ const getWrapper =
           <DatabaseProvider>
             <StoreProvider appMode={APP_MODE_BROWSER}>
               <I18nextProvider i18n={i18n}>
-                <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                  <CurrencyStoreProvider>
-                    <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-                  </CurrencyStoreProvider>
-                </AnalyticsProvider>
+                <CurrencyStoreProvider>
+                  <BackgroundServiceAPIProvider value={backgroundService}>
+                    <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+                      <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                        {children}
+                      </AnalyticsProvider>
+                    </PostHogClientProvider>
+                  </BackgroundServiceAPIProvider>
+                </CurrencyStoreProvider>
               </I18nextProvider>
             </StoreProvider>
           </DatabaseProvider>

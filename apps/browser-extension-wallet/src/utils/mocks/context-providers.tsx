@@ -24,7 +24,8 @@ import { mockBlockchainProviders } from './blockchain-providers';
 import { SetState, GetState } from 'zustand';
 import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvider';
 import { IBlockchainProvider } from '@src/stores/slices/blockchain-provider-slice';
-import { mockAnalyticsTracker } from './test-helpers';
+import { mockAnalyticsTracker, postHogClientMocks } from './test-helpers';
+import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 
 interface ProvidersConfig {
   blockchainProviders?: Partial<IBlockchainProvider>;
@@ -78,11 +79,13 @@ export const buildMockProviders = async (
                 >
                   <CurrencyStoreProvider>
                     <AxiosClientProvider>
-                      <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                        <ExternalLinkOpenerProvider>
-                          <HashRouter>{children}</HashRouter>
-                        </ExternalLinkOpenerProvider>
-                      </AnalyticsProvider>
+                      <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+                        <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                          <ExternalLinkOpenerProvider>
+                            <HashRouter>{children}</HashRouter>
+                          </ExternalLinkOpenerProvider>
+                        </AnalyticsProvider>
+                      </PostHogClientProvider>
                     </AxiosClientProvider>
                   </CurrencyStoreProvider>
                 </MockWalletStore>
