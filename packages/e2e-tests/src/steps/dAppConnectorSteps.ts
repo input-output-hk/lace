@@ -131,10 +131,10 @@ Then(/^I see test DApp on the Authorized DApps list$/, async () => {
 
 When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async (mode: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.openTestDApp();
-
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow('Authorize');
+  await browser.pause(500);
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(mode);
 });
 
@@ -150,16 +150,28 @@ Then(/^I de-authorize test DApp in (extended|popup) mode$/, async (mode: 'extend
 Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runButton: 'Send ADA' | 'Send Token') => {
   await DAppConnectorPageObject.switchToTestDAppWindow();
   await browser.pause(1000);
-  switch (runButton) {
-    case 'Send ADA':
-      await TestDAppPage.sendAdaRunButton.click();
-      break;
-    case 'Send Token':
-      await TestDAppPage.sendTokenRunButton.click();
-      break;
-    default:
-      break;
-  }
+  const handlesBeforeClick = (await browser.getWindowHandles()).length;
+  await browser.waitUntil(
+    async () => {
+      switch (runButton) {
+        case 'Send ADA':
+          await TestDAppPage.sendAdaRunButton.click();
+          break;
+        case 'Send Token':
+          await TestDAppPage.sendTokenRunButton.click();
+          break;
+        default:
+          break;
+      }
+      await browser.pause(2000);
+      return (await browser.getWindowHandles()).length === handlesBeforeClick + 1;
+    },
+    {
+      interval: 3000,
+      timeout: 20_000,
+      timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
+    }
+  );
 });
 
 Then(/^I click "(Send ADA|Send Token)" button in test DApp$/, async (buttonId: 'Send ADA' | 'Send Token') => {

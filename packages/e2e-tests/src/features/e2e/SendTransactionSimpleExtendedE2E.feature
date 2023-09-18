@@ -24,6 +24,7 @@ Feature: Send Simple Transactions - Extended view - E2E
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "package.core.transactionDetailBrowser.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransactionE2E" address
     When I open wallet: "WalletReceiveSimpleTransactionE2E" in: extended mode
+    And Wallet is synced
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
