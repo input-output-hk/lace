@@ -49,6 +49,18 @@ enum DrawerPreferencesCommand {
 
 type Command = OverviewCommand | BrowsePoolsCommand | PoolDetailsCommand | DrawerPreferencesCommand;
 
+type DataOfCommand<C extends Command> = C extends OverviewCommand.ShowDetails
+  ? Wallet.Cardano.StakePool
+  : C extends BrowsePoolsCommand.ShowDetails
+  ? Wallet.Cardano.StakePool
+  : C extends BrowsePoolsCommand.Select
+  ? DraftPortfolioStakePool
+  : C extends PoolDetailsCommand.Select
+  ? DraftPortfolioStakePool
+  : C extends DrawerPreferencesCommand.UpdateWeight
+  ? { poolId: Wallet.Cardano.PoolIdHex; weight: number }
+  : undefined;
+
 type State = {
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio: DraftPortfolioStakePool[];
@@ -60,10 +72,7 @@ type State = {
 
 type DelegationPortfolioStore = State & {
   mutators: {
-    // WIP: trying to match command to its corresponding data/payload
-    // In order to have proper type safety we need to have a discriminated union here matching a command with its data type
-    command: ((type: OverviewCommand.ShowDetails, data: Wallet.Cardano.StakePool) => void) &
-      ((type: Command, data?: any) => void);
+    command: <C extends Command>(...params: DataOfCommand<C> extends undefined ? [C] : [C, DataOfCommand<C>]) => void;
     setCurrentPortfolio: (params: {
       delegationDistribution: DelegatedStake[];
       cardanoCoin: Wallet.CoinId;
@@ -75,7 +84,11 @@ type DelegationPortfolioStore = State & {
 
 // Handler type represents the function for particular state ([Mode.Overview]: Handler)
 // It is returned by both: cases and handler
-type Handler<D = any> = (params: { state: State; command: Command; data: D }) => void;
+type Handler<C extends Command = any> = (params: {
+  command: C;
+  data: DataOfCommand<C>;
+  store: DelegationPortfolioStore;
+}) => void;
 
 // Called recursively.
 // Cases function returns a handler which calls another handler from a nested cases function
@@ -89,7 +102,7 @@ type Handler<D = any> = (params: { state: State; command: Command; data: D }) =>
  * })
  */
 const cases =
-  <T extends string, D = any>(definition: Record<T, Handler<D>>, discriminator: T, parentName: string): Handler<D> =>
+  <T extends string>(definition: Record<T, Handler>, discriminator: T, parentName: string): Handler =>
   (params) => {
     const handler = definition[discriminator];
     if (!handler) {
@@ -102,29 +115,29 @@ const cases =
 // Just a wrapper for a simple handler function but narrowing down the data type
 // so we are able to hint TS that for a given command that is the type of passed data
 const handler =
-  <D = any>(handlerBody: Handler<D>): Handler<D> =>
+  <C extends Command>(handlerBody: Handler<C>): Handler<C> =>
   (params) =>
     handlerBody(params);
 
 const helpers = {
-  selectPool: ({ pool, state }: { pool: DraftPortfolioStakePool; state: State }) => {
-    const selectionsFull = state.selections.length === MAX_POOLS_COUNT;
-    const alreadySelected = state.selections.some(({ id }) => pool.id === id);
+  selectPool: ({ pool, store }: { pool: DraftPortfolioStakePool; store: DelegationPortfolioStore }) => {
+    const selectionsFull = store.selections.length === MAX_POOLS_COUNT;
+    const alreadySelected = store.selections.some(({ id }) => pool.id === id);
     if (selectionsFull || alreadySelected) return;
-    state.selections.push(pool);
+    store.selections.push(pool);
   },
   showPoolDetails: ({
     pool,
-    state,
+    store,
     targetMode,
   }: {
     pool: Wallet.Cardano.StakePool;
-    state: State;
+    store: DelegationPortfolioStore;
     targetMode: Mode;
   }) => {
-    state.mode = targetMode;
-    state.section = DrawerDefaultSection.DETAIL;
-    state.viewedStakePool = pool;
+    store.mode = targetMode;
+    store.section = DrawerDefaultSection.DETAIL;
+    store.viewedStakePool = pool;
   },
 };
 
@@ -133,16 +146,16 @@ const executeCommand: Handler = (params) =>
     {
       [Mode.Overview]: cases<OverviewCommand>(
         {
-          [OverviewCommand.ShowDetails]: handler<Wallet.Cardano.StakePool>(({ state, data }) => {
-            helpers.showPoolDetails({ pool: data, state, targetMode: Mode.CurrentPoolDetails });
+          [OverviewCommand.ShowDetails]: handler<OverviewCommand.ShowDetails>(({ store, data }) => {
+            helpers.showPoolDetails({ pool: data, store, targetMode: Mode.CurrentPoolDetails });
           }),
-          [OverviewCommand.Manage]: ({ state }) => {
-            state.mode = Mode.CurrentPortfolioManagement;
-            state.section = DrawerManagementSection.PREFERENCES;
-            state.draftPortfolio = state.currentPortfolio;
+          [OverviewCommand.Manage]: ({ store }) => {
+            store.mode = Mode.CurrentPortfolioManagement;
+            store.section = DrawerManagementSection.PREFERENCES;
+            store.draftPortfolio = store.currentPortfolio;
           },
-          [OverviewCommand.GoToBrowsePools]: ({ state }) => {
-            state.mode = Mode.BrowsePools;
+          [OverviewCommand.GoToBrowsePools]: ({ store }) => {
+            store.mode = Mode.BrowsePools;
           },
         },
         params.command as OverviewCommand,
@@ -150,11 +163,11 @@ const executeCommand: Handler = (params) =>
       ),
       [Mode.BrowsePools]: cases<BrowsePoolsCommand>(
         {
-          [BrowsePoolsCommand.ShowDetails]: handler<Wallet.Cardano.StakePool>(({ state, data }) => {
-            helpers.showPoolDetails({ pool: data, state, targetMode: Mode.PoolDetails });
+          [BrowsePoolsCommand.ShowDetails]: handler<BrowsePoolsCommand.ShowDetails>(({ store, data }) => {
+            helpers.showPoolDetails({ pool: data, store, targetMode: Mode.PoolDetails });
           }),
-          [BrowsePoolsCommand.Select]: handler<DraftPortfolioStakePool>(({ state, data }) => {
-            helpers.selectPool({ pool: data, state });
+          [BrowsePoolsCommand.Select]: handler<BrowsePoolsCommand.Select>(({ store, data }) => {
+            helpers.selectPool({ pool: data, store });
           }),
         },
         params.command as BrowsePoolsCommand,
@@ -163,8 +176,8 @@ const executeCommand: Handler = (params) =>
       [Mode.CurrentPoolDetails]: () => void 0,
       [Mode.PoolDetails]: cases<PoolDetailsCommand>(
         {
-          [PoolDetailsCommand.Select]: handler<DraftPortfolioStakePool>(({ state, data }) => {
-            helpers.selectPool({ pool: data, state });
+          [PoolDetailsCommand.Select]: handler<PoolDetailsCommand.Select>(({ store, data }) => {
+            helpers.selectPool({ pool: data, store });
           }),
         },
         params.command as PoolDetailsCommand,
@@ -174,9 +187,9 @@ const executeCommand: Handler = (params) =>
         {
           [DrawerManagementSection.PREFERENCES]: cases<DrawerPreferencesCommand>(
             {
-              [DrawerPreferencesCommand.UpdateWeight]: handler<{ poolId: Wallet.Cardano.PoolIdHex; weight: number }>(
-                ({ state, data: { poolId, weight } }) => {
-                  const pool = state.draftPortfolio.find(({ id }) => id === poolId);
+              [DrawerPreferencesCommand.UpdateWeight]: handler<DrawerPreferencesCommand.UpdateWeight>(
+                ({ store, data: { poolId, weight } }) => {
+                  const pool = store.draftPortfolio.find(({ id }) => id === poolId);
                   if (!pool) return;
                   pool.weight = weight;
                 }
@@ -190,12 +203,12 @@ const executeCommand: Handler = (params) =>
           [DrawerManagementSection.SUCCESS_TX]: () => void 0,
           [DrawerManagementSection.FAIL_TX]: () => void 0,
         },
-        params.state.section as DrawerManagementSection,
+        params.store.section as DrawerManagementSection,
         Mode.CurrentPortfolioManagement
       ),
       [Mode.NewPortfolioCreation]: () => void 0,
     },
-    params.state.mode,
+    params.store.mode,
     'root'
   )(params);
 
@@ -212,12 +225,8 @@ export const useDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set) => ({
     ...defaultState,
     mutators: {
-      command: (type, data) => {
-        // WIP: trying to match command to its corresponding data/payload
-        // if (type === OverviewCommand.ShowDetails) {
-        //   data.hexId;
-        // }
-        set((state) => executeCommand({ command: type, data, state }));
+      command: (...params) => {
+        set((store) => executeCommand({ command: params[0], data: params[1], store }));
       },
       setCurrentPortfolio: async () => {
         const currentPortfolioBasedOnArguments: CurrentPortfolioStakePool[] = [];
