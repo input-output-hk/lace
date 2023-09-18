@@ -4,7 +4,7 @@ import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import {Sections, drawerSectionsConfig, useStakePoolDetails, useDelegationPortfolioStore} from '../store';
+import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { ResultMessage } from './ResultMessage';
 import styles from './TransactionComplete.module.scss';
 
@@ -28,7 +28,7 @@ export const TransactionFail = ({ popupView }: TransactionFailProps): React.Reac
 export const TransactionFailFooter = ({ popupView }: TransactionFailProps): React.ReactElement => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { setIsDrawerVisible, resetStates } = useStakePoolDetails();
+  const { resetStates } = useStakePoolDetails();
   const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
   const {
     walletManagerExecuteWithPassword: executeWithPassword,
@@ -88,6 +88,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       >
         {t('drawer.failure.button.close')}
       </Button>
+      {/* TODO: remove popup from drawer */}
       {popupView ? (
         <Button
           onClick={() => portfolioMutators.transition('previous')}

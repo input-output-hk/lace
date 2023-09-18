@@ -99,16 +99,16 @@ type DelegationPortfolioMutators = {
       | PortfolioManagementProcess.CurrentPortfolio
       | PortfolioManagementProcess.Details
   ) => void;
-  transition: (
-    action:
-      | 'previous'
-      | 'next'
-      | 'forceConfirmationHardwareWalletSkipToSuccess'
-      | 'forceConfirmationHardwareWalletSkipToFailure'
-  ) => void;
+  transition: (action: TransitionAction) => void;
   cancelManagementProcess: (params?: { dumpDraftToSelections: boolean }) => void;
   removePoolInManagementProcess: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
 };
+
+export type TransitionAction = 'previous' | 'next' | SkipStep;
+export type SkipStep =
+  | 'forceConfirmationHardwareWalletSkipToSuccess'
+  | 'forceConfirmationHardwareWalletSkipToFailure'
+  | 'txConfirmationStepFailure';
 
 export type DelegationPortfolioStore = DelegationPortfolioState & {
   mutators: DelegationPortfolioMutators;

@@ -4,7 +4,7 @@ import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, drawerSectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import styles from './SignConfirmation.module.scss';
 
 interface SignConfirmationProps {
@@ -63,7 +63,6 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     portfolioMutators: store.mutators,
   }));
   const { t } = useTranslation();
-  const { setSection } = useStakePoolDetails();
 
   const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
 
@@ -109,7 +108,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       if (error.message?.includes('Authentication failure')) {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
-        setSection(drawerSectionsConfig[Sections.FAIL_TX]);
+        portfolioMutators.transition('txConfirmationStepFailure');
         setSubmitingTxState({ isSubmitingTx: false });
       }
     }
@@ -121,7 +120,6 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     setIsRestaking,
     currentPortfolio.length,
     portfolioMutators,
-    setSection,
   ]);
 
   return (

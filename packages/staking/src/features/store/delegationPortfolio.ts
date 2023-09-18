@@ -1,7 +1,14 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { DelegationPortfolioState, DelegationPortfolioStore, PortfolioManagementProcess, Sections } from './types';
+import {
+  DelegationPortfolioState,
+  DelegationPortfolioStore,
+  PortfolioManagementProcess,
+  Sections,
+  SkipStep,
+  TransitionAction,
+} from './types';
 
 // move to portfolio store
 export const drawerSectionsConfig = {
@@ -20,6 +27,7 @@ export const drawerSectionsConfig = {
   },
   [Sections.SIGN]: {
     currentSection: Sections.SIGN,
+    nextSection: Sections.SUCCESS_TX,
     prevSection: Sections.CONFIRMATION,
   },
   [Sections.SUCCESS_TX]: {
@@ -28,6 +36,7 @@ export const drawerSectionsConfig = {
   },
   [Sections.FAIL_TX]: {
     currentSection: Sections.FAIL_TX,
+    nextSection: Sections.SUCCESS_TX, // Only if re-try works
     prevSection: Sections.SIGN,
   },
 } as const;
@@ -39,6 +48,13 @@ const defaultState: DelegationPortfolioState = {
   drawerVisible: false,
   selections: [],
 };
+
+const isSkipStepAction = (action: TransitionAction): action is SkipStep =>
+  [
+    'forceConfirmationHardwareWalletSkipToFailure',
+    'forceConfirmationHardwareWalletSkipToSuccess',
+    'txConfirmationStepFailure',
+  ].includes(action);
 
 export const MAX_POOLS_COUNT = 5;
 const LAST_STABLE_EPOCH = 2;
@@ -69,6 +85,7 @@ export const useDelegationPortfolioStore = create(
               weight: 1,
             }));
           }
+          // extract, since duplicated with transition's code
           store.drawerVisible = false;
           store.drawerSectionConfig = undefined;
           store.draftPortfolio = [];
@@ -133,43 +150,44 @@ export const useDelegationPortfolioStore = create(
 
         const { currentSection, nextSection, prevSection } = drawerSectionConfig;
 
-        if (action === 'forceConfirmationHardwareWalletSkipToSuccess') {
-          if (currentSection !== Sections.CONFIRMATION) return;
-          set((store) => {
-            store.drawerSectionConfig = drawerSectionsConfig[Sections.SUCCESS_TX];
-          });
-          return;
-        }
-        if (action === 'forceConfirmationHardwareWalletSkipToFailure') {
-          if (currentSection !== Sections.CONFIRMATION) return;
-          set((store) => {
-            store.drawerSectionConfig = drawerSectionsConfig[Sections.FAIL_TX];
-          });
+        if (isSkipStepAction(action)) {
+          switch (action) {
+            case 'forceConfirmationHardwareWalletSkipToSuccess':
+              if (currentSection !== Sections.CONFIRMATION) break;
+              set((store) => {
+                store.drawerSectionConfig = drawerSectionsConfig[Sections.SUCCESS_TX];
+              });
+              break;
+            case 'forceConfirmationHardwareWalletSkipToFailure':
+              if (currentSection !== Sections.CONFIRMATION) break;
+              set((store) => {
+                store.drawerSectionConfig = drawerSectionsConfig[Sections.FAIL_TX];
+              });
+              break;
+            case 'txConfirmationStepFailure':
+              if (currentSection !== Sections.SIGN) break;
+              set((store) => {
+                store.drawerSectionConfig = drawerSectionsConfig[Sections.FAIL_TX];
+              });
+          }
           return;
         }
 
         const targetSection = action === 'next' ? nextSection : prevSection;
 
         set((store) => {
-          if (action === 'next') {
-            if (!targetSection) {
-              store.drawerVisible = false;
-              store.drawerSectionConfig = undefined;
-              store.activeManagementProcess = PortfolioManagementProcess.None;
-              return;
-            }
-            if (targetSection === Sections.SUCCESS_TX) {
-              store.draftPortfolio = [];
-              if (store.activeManagementProcess === PortfolioManagementProcess.NewPortfolio) {
-                store.selections = [];
-              }
-            }
-          }
           if (!targetSection) {
-            console.error(
-              `INVALID MANAGEMENT STATE: tried to move to not existing section (${action} of ${currentSection})`
-            );
+            store.drawerVisible = false;
+            store.drawerSectionConfig = undefined;
+            store.draftPortfolio = [];
+            store.activeManagementProcess = PortfolioManagementProcess.None;
             return;
+          }
+          if (action === 'next' && targetSection === Sections.SUCCESS_TX) {
+            store.draftPortfolio = [];
+            if (store.activeManagementProcess === PortfolioManagementProcess.NewPortfolio) {
+              store.selections = [];
+            }
           }
           store.drawerSectionConfig = drawerSectionsConfig[targetSection];
         });
