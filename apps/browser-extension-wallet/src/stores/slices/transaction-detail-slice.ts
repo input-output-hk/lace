@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { getRewardsAmount } from '@src/views/browser-view/features/activity/helpers';
 import { MAX_POOLS_COUNT } from '@lace/staking';
+import { TransactionType } from '@lace/core';
 
 /**
  * validates if the transaction is confirmed
@@ -42,6 +43,18 @@ const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
 
 const transactionMetadataTransformer = (metadata: Wallet.Cardano.TxMetadata): TransactionDetail['tx']['metadata'] =>
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
+
+const shouldIncludeFee = (
+  type: TransactionType,
+  delegationInfo: Wallet.Cardano.StakeDelegationCertificate[] | undefined
+) =>
+  !(
+    type === 'delegationRegistration' ||
+    // Existence of any (new) delegationInfo means that this "de-registration"
+    // activity is accompanied by a "delegation" activity, which carries the fees.
+    // However, fees should be shown if de-registration activity is standalone.
+    (type === 'delegationDeregistration' && !!delegationInfo?.length)
+  );
 
 /**
  * fetchs asset information
@@ -116,10 +129,16 @@ const getTransactionDetail =
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
 
+    // Delegation tx additional data (LW-3324)
+
+    const delegationInfo = tx.body.certificates?.filter(
+      (certificate) => certificate.__typename === 'StakeDelegationCertificate'
+    ) as Wallet.Cardano.StakeDelegationCertificate[];
+
     let transaction: TransactionDetail['tx'] = {
       hash: tx.id.toString(),
       totalOutput: totalOutputInAda,
-      fee: feeInAda,
+      fee: shouldIncludeFee(type, delegationInfo) ? feeInAda : undefined,
       deposit,
       depositReclaim,
       addrInputs: inputs,
@@ -128,25 +147,6 @@ const getTransactionDetail =
       includedUtcDate: blocks?.utcDate,
       includedUtcTime: blocks?.utcTime
     };
-
-    // Delegation tx additional data (LW-3324)
-
-    const delegationInfo = tx.body.certificates?.filter(
-      (certificate) => certificate.__typename === 'StakeDelegationCertificate'
-    ) as Wallet.Cardano.StakeDelegationCertificate[];
-
-    if (
-      type === 'delegationRegistration' ||
-      // Existence of any (new) delegationInfo means that this "de-registration"
-      // activity is accompanied by a "delegation" activity, which carries the fees.
-      // However, fees should be shown if de-registration activity is standalone.
-      (type === 'delegationDeregistration' && !!delegationInfo?.length)
-    ) {
-      transaction = {
-        ...transaction,
-        fee: undefined
-      };
-    }
 
     if (type === 'delegation' && delegationInfo) {
       const filters: Wallet.QueryStakePoolsArgs = {
