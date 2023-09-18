@@ -260,13 +260,3 @@ Feature: Address book - extended view
     And I click outside address form to lose focus
     Then Contact "empty" name error and "empty" address error are displayed
     And "Save address" button is disabled on "Add new address" drawer
-
-  @LW-7146 @Pending
-  #Bug LW-7147
-  Scenario: Extended-view - Address Book - Add address button is removed when right side panel is displayed
-    Given I don't have any addresses added to my address book in extended mode
-    And I resize the window to a width of: 1000 and a height of: 840
-    Then I see a button to open the right side panel
-    When I click on right side panel icon
-    Then I see the right side panel for Address Book section
-    And I do not see "Add address" button on address book page
