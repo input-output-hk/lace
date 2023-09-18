@@ -85,3 +85,36 @@ Feature: ADA handle - popup view
     And I see NFT with name "$test_handle_2" on the NFT folder page
     And I see NFT with name "$test_handle_3" on the NFT folder page
     And I see NFT with name "$t_h_1" on the NFT folder page
+
+
+  @LW-7135 @LW-7139
+  Scenario: Popup View - Ada handles displayed and sorted by handle length
+    When I click "Receive" button on Tokens page in popup mode
+    Then I see "Wallet Address" page in popup mode for wallet "WalletAdaHandle"
+    And I see handle listed on the "Receive" screen
+    And I see address card for handle: "$cde"
+    And I see address card for handle: "$t_h_1"
+    And I see address card for handle: "$test_handle_1"
+    And I see address card for handle: "$test_handle_2"
+    And I see address card for handle: "$test_handle_3"
+    And The first ADA handle displayed on the list is the shortest
+
+  @LW-7137 @LW-7070
+  Scenario: Popup View - Copy address/ADA handle
+    And I click "Receive" button on Tokens page in popup mode
+    And I see "Wallet Address" page in popup mode for wallet "WalletAdaHandle"
+    When I click "Copy" button on "Receive" page for default wallet address
+    Then I see a toast with text: "Address copied"
+    And Clipboard contains address of wallet: "WalletAdaHandle"
+    When I click "Copy" button on "Receive" page for handle: "$cde"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$cde"
+    When I click "Copy" button on "Receive" page for handle: "$t_h_1"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$t_h_1"
+    When I click "Copy" button on "Receive" page for handle: "$test_handle_1"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$test_handle_1"
+    When I click "Copy" button on "Receive" page for handle: "$test_handle_3"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$test_handle_3"

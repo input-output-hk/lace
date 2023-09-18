@@ -32,7 +32,7 @@ export const HandleAddressCard = ({ name, image, copiedMessage }: Readonly<Props
       <div className={styles.pillContainer}>
         <div className={styles.pill}>
           <div className={styles.symbol}>
-            <Image preview={false} src={symbol} />
+            <Image data-testid="address-card-handle-symbol" preview={false} src={symbol} />
           </div>
           <div className={styles.name} data-testid="address-card-handle-name">
             {name}
