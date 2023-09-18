@@ -6,8 +6,8 @@
   "scripts": {
     "build": "yarn exec echo 'No build required'",
     "test": "yarn exec echo 'User test:local'",
-    "test:local:chrome": "run -T wdio run wdio.conf.chrome.ts",
-    "test:local:edge": "run -T wdio run wdio.conf.edge.ts",
+    "test:local:chrome": "../../node_modules/.bin/wdio run wdio.conf.chrome.ts",
+    "test:local:edge": "../../node_modules/.bin/wdio run wdio.conf.edge.ts",
     "cleanup": "rm -rf node_modules logs reports screenshots",
     "test:coverage": "yarn exec echo 'disabled due to lack of a framebuffer. Please use test:local for local testing'",
     "lint": "run -T eslint -c .eslintrc.js .",
