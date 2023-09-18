@@ -30,12 +30,12 @@ describe('Testing format-date functions', () => {
 
     expect(formatDate({ date, type: 'utc' })).toEqual(result);
     expect(mockdayjsinner).toBeCalledWith(date);
-    expect(utcMock).toBeCalledWith(false);
+    expect(utcMock).toBeCalled();
     expect(formatMock).toBeCalledWith(DEFAULT_DATE_FORMAT);
 
     const format = 'format';
     expect(formatDate({ date, format, type: 'utc' })).toEqual(result);
-    expect(utcMock).toBeCalledWith(false);
+    expect(utcMock).toBeCalled();
     expect(formatMock).toBeCalledWith(format);
 
     mockdayjsinner.mockReset();
@@ -45,25 +45,20 @@ describe('Testing format-date functions', () => {
   test('should return formatted date (local)', async () => {
     const result = 'result';
 
-    const utcMock = jest.fn();
     const formatMock = jest.fn();
-    mockdayjsinner.mockReturnValue({ utc: utcMock });
-    utcMock.mockReturnValue({ format: formatMock });
+    mockdayjsinner.mockReturnValue({ format: formatMock });
     formatMock.mockReturnValue(result);
     const date = new Date();
 
     expect(formatDate({ date, type: 'local' })).toEqual(result);
     expect(mockdayjsinner).toBeCalledWith(date);
-    expect(utcMock).toBeCalledWith(true);
     expect(formatMock).toBeCalledWith(DEFAULT_DATE_FORMAT);
 
     const format = 'format';
     expect(formatDate({ date, format, type: 'local' })).toEqual(result);
-    expect(utcMock).toBeCalledWith(true);
     expect(formatMock).toBeCalledWith(format);
 
     mockdayjsinner.mockReset();
-    utcMock.mockReset();
     formatMock.mockReset();
   });
   test('should return formatted time (UTC)', async () => {
@@ -78,11 +73,13 @@ describe('Testing format-date functions', () => {
 
     expect(formatTime({ date, type: 'utc' })).toEqual(result);
     expect(mockdayjsinner).toBeCalledWith(date);
+    expect(utcMock).toBeCalled();
     expect(formatMock).toBeCalledWith(DEFAULT_TIME_FORMAT);
 
     const format = 'format';
     expect(formatDate({ date, format, type: 'utc' })).toEqual(result);
     expect(formatMock).toBeCalledWith(format);
+    expect(utcMock).toBeCalled();
 
     mockdayjsinner.mockReset();
     utcMock.mockReset();

@@ -117,7 +117,11 @@ export const FundWalletBanner = ({
   const boundingBox = useBoundingBox(container);
 
   return (
-    <div data-testid="fund-wallet-banner" ref={setContainer as any} className={styles.fundWalletBanner}>
+    <div
+      data-testid="fund-wallet-banner"
+      ref={setContainer as React.LegacyRef<HTMLDivElement>}
+      className={styles.fundWalletBanner}
+    >
       {boundingBox && boundingBox?.width > smallScreenSizeInPx ? (
         <>{largeSizeScreenContent}</>
       ) : (

@@ -107,11 +107,12 @@ const getTransactionDetail =
       implicitCoin.deposit && type === 'delegationRegistration'
         ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
         : undefined;
+    const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
     const depositReclaim =
       // since one tx can be split into two (delegation, de-registration) actions,
       // ensure only the de-registration tx carries the reclaimed deposit
-      implicitCoin.input && type === 'delegationDeregistration'
-        ? Wallet.util.lovelacesToAdaString(implicitCoin.input.toString())
+      depositReclaimValue && type === 'delegationDeregistration'
+        ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
 

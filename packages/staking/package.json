@@ -62,7 +62,7 @@
     "zustand": "^4.4.1"
   },
   "devDependencies": {
-    "@cardano-sdk/input-selection": "0.11.8",
+    "@cardano-sdk/input-selection": "0.11.9",
     "@cardano-sdk/tx-construction": "0.11.2",
     "@cardano-sdk/util": "0.14.0",
     "@lace/cardano": "^0.1.0",
@@ -95,7 +95,7 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
-    "@cardano-sdk/input-selection": "0.11.7",
+    "@cardano-sdk/input-selection": "0.11.9",
     "@cardano-sdk/tx-construction": "0.11.1",
     "@cardano-sdk/util": "0.14.0",
     "@cardano-sdk/wallet": "0.21.0",

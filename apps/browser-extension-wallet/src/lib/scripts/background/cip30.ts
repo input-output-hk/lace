@@ -45,7 +45,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
 
       return userPromptService.allowSignTx();
     } catch (error) {
-      console.log(error);
+      console.error(error);
       // eslint-disable-next-line unicorn/no-useless-undefined
       dappSignTxData$.next(undefined);
       return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign transaction'));
@@ -59,7 +59,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
 
       return userPromptService.allowSignData();
     } catch (error) {
-      console.log(error);
+      console.error(error);
       // eslint-disable-next-line unicorn/no-useless-undefined
       dappSignData$.next(undefined);
       return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign data'));

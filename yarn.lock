@@ -5413,13 +5413,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/core@npm:0.19.0, @cardano-sdk/core@npm:~0.19.0":
-  version: 0.19.0
-  resolution: "@cardano-sdk/core@npm:0.19.0"
+"@cardano-sdk/core@npm:0.19.1, @cardano-sdk/core@npm:~0.19.1":
+  version: 0.19.1
+  resolution: "@cardano-sdk/core@npm:0.19.1"
   dependencies:
     "@cardano-ogmios/client": 5.6.0
     "@cardano-ogmios/schema": 5.6.0
-    "@cardano-sdk/crypto": ~0.1.12
+    "@cardano-sdk/crypto": ~0.1.13
     "@cardano-sdk/util": ~0.14.0
     "@dcspark/cardano-multiplatform-lib-nodejs": ^3.1.1
     "@foxglove/crc": ^0.0.3
@@ -5434,7 +5434,7 @@ __metadata:
   peerDependenciesMeta:
     rxjs:
       optional: true
-  checksum: 92d7ceb3c2a070ede6985cf5bc9dbd48a7603d6bc260e4b78046bbabf468b392d182c0502ee2b68930dfd39573d3499c0085226c80109b09bd7720c667c30539
+  checksum: 55a00357fbb16513d5e8651b8008bf32a23a976a0228daa0bd905f48b5c0571eed76848ae3899ae2c97381fca25471231f5015387d21d3d32d848a9a4e5bbcba
   languageName: node
   linkType: hard
 
@@ -5462,7 +5462,61 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/crypto@npm:0.1.12, @cardano-sdk/crypto@npm:~0.1.12":
+"@cardano-sdk/core@npm:~0.19.0":
+  version: 0.19.0
+  resolution: "@cardano-sdk/core@npm:0.19.0"
+  dependencies:
+    "@cardano-ogmios/client": 5.6.0
+    "@cardano-ogmios/schema": 5.6.0
+    "@cardano-sdk/crypto": ~0.1.12
+    "@cardano-sdk/util": ~0.14.0
+    "@dcspark/cardano-multiplatform-lib-nodejs": ^3.1.1
+    "@foxglove/crc": ^0.0.3
+    "@scure/base": ^1.1.1
+    fraction.js: 4.0.1
+    ip-address: ^8.1.0
+    lodash: ^4.17.21
+    ts-custom-error: ^3.2.0
+    ts-log: ^2.2.4
+  peerDependencies:
+    rxjs: ^7.4.0
+  peerDependenciesMeta:
+    rxjs:
+      optional: true
+  checksum: 92d7ceb3c2a070ede6985cf5bc9dbd48a7603d6bc260e4b78046bbabf468b392d182c0502ee2b68930dfd39573d3499c0085226c80109b09bd7720c667c30539
+  languageName: node
+  linkType: hard
+
+"@cardano-sdk/crypto@npm:0.1.13, @cardano-sdk/crypto@npm:~0.1.13":
+  version: 0.1.13
+  resolution: "@cardano-sdk/crypto@npm:0.1.13"
+  dependencies:
+    "@cardano-sdk/util": ~0.14.0
+    blake2b: ^2.1.4
+    bn.js: ^5.2.1
+    i: ^0.3.7
+    libsodium-wrappers-sumo: ^0.7.5
+    lodash: ^4.17.21
+    npm: ^9.3.0
+    pbkdf2: ^3.1.2
+    ts-custom-error: ^3.2.0
+    ts-log: ^2.2.4
+  peerDependencies:
+    "@dcspark/cardano-multiplatform-lib-asmjs": ^3.1.1
+    "@dcspark/cardano-multiplatform-lib-browser": ^3.1.1
+    "@dcspark/cardano-multiplatform-lib-nodejs": ^3.1.1
+  peerDependenciesMeta:
+    "@dcspark/cardano-multiplatform-lib-asmjs":
+      optional: true
+    "@dcspark/cardano-multiplatform-lib-browser":
+      optional: true
+    "@dcspark/cardano-multiplatform-lib-nodejs":
+      optional: true
+  checksum: 771cbfd7fd30cf96227baa7eccc5e7fcd297d6c8d45824198e9f3646337a22bcfdca89f7c71478ec7abd67e61d2391827c83964a67366dffa3d56b99d21e34a2
+  languageName: node
+  linkType: hard
+
+"@cardano-sdk/crypto@npm:~0.1.12":
   version: 0.1.12
   resolution: "@cardano-sdk/crypto@npm:0.1.12"
   dependencies:
@@ -5506,6 +5560,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cardano-sdk/dapp-connector@npm:~0.9.16":
+  version: 0.9.16
+  resolution: "@cardano-sdk/dapp-connector@npm:0.9.16"
+  dependencies:
+    "@cardano-sdk/core": ~0.19.1
+    "@cardano-sdk/crypto": ~0.1.13
+    "@cardano-sdk/util": ~0.14.0
+    lodash: ^4.17.21
+    ts-custom-error: ^3.2.0
+    ts-log: ^2.2.4
+    webextension-polyfill: ^0.8.0
+  checksum: 16d6cf6b631091ed2a0c9076e4861e3b4fa0757d8523249004add6e796cbf8c8f779a4613e3b566b3004aed6c2ad55b8987dc2fefe2adc614f1a36be43f9cb83
+  languageName: node
+  linkType: hard
+
 "@cardano-sdk/hardware-ledger@npm:0.3.3, @cardano-sdk/hardware-ledger@npm:~0.3.3":
   version: 0.3.3
   resolution: "@cardano-sdk/hardware-ledger@npm:0.3.3"
@@ -5525,7 +5594,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/input-selection@npm:0.11.8, @cardano-sdk/input-selection@npm:~0.11.8":
+"@cardano-sdk/input-selection@npm:0.11.9":
+  version: 0.11.9
+  resolution: "@cardano-sdk/input-selection@npm:0.11.9"
+  dependencies:
+    "@cardano-sdk/core": ~0.19.1
+    "@cardano-sdk/key-management": ~0.10.3
+    "@cardano-sdk/util": ~0.14.0
+    bignumber.js: ^9.1.1
+    lodash: ^4.17.21
+    ts-custom-error: ^3.2.0
+  checksum: 80a538a3e8177544eec77cddd80ea7e92ea35349a61f5720ae9facfccaa37b2155a5c9a6a2c10854d906cc4e28a05ea0bccc2d850e41d78fc40fb73720381a7d
+  languageName: node
+  linkType: hard
+
+"@cardano-sdk/input-selection@npm:~0.11.8":
   version: 0.11.8
   resolution: "@cardano-sdk/input-selection@npm:0.11.8"
   dependencies:
@@ -5560,6 +5643,30 @@ __metadata:
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
   checksum: 969d03792d2865bace3dd2dedd8baf2df060ffb747eed49c438f1e0eda8b96acb0813f05af6f1db7fe175109acde5bc14706bb5023f6d8dd20e2d433d01f8569
+  languageName: node
+  linkType: hard
+
+"@cardano-sdk/key-management@npm:~0.10.3":
+  version: 0.10.3
+  resolution: "@cardano-sdk/key-management@npm:0.10.3"
+  dependencies:
+    "@cardano-foundation/ledgerjs-hw-app-cardano": ^6.0.0
+    "@cardano-sdk/core": ~0.19.1
+    "@cardano-sdk/crypto": ~0.1.13
+    "@cardano-sdk/dapp-connector": ~0.9.16
+    "@cardano-sdk/util": ~0.14.0
+    "@emurgo/cardano-message-signing-nodejs": ^1.0.1
+    "@trezor/connect": 9.0.11
+    "@trezor/connect-web": 9.0.11
+    bip39: ^3.0.4
+    chacha: ^2.1.0
+    get-random-values: ^2.0.0
+    lodash: ^4.17.21
+    pbkdf2: ^3.1.2
+    rxjs: ^7.4.0
+    ts-custom-error: ^3.2.0
+    ts-log: ^2.2.4
+  checksum: 4db4003d249be16fba0a5da5099250fd387386d7e89b1f4797314e8fe2375ec23f46ae87f877e27748d30f35467a7fc1802d7d4abe52ba6f89bb1f8e8a5f7fe2
   languageName: node
   linkType: hard
 
@@ -7152,6 +7259,44 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/core@npm:^1.4.1":
+  version: 1.4.1
+  resolution: "@floating-ui/core@npm:1.4.1"
+  dependencies:
+    "@floating-ui/utils": ^0.1.1
+  checksum: be4ab864fe17eeba5e205bd554c264b9a4895a57c573661bbf638357fa3108677fed7ba3269ec15b4da90e29274c9b626d5a15414e8d1fe691e210d02a03695c
+  languageName: node
+  linkType: hard
+
+"@floating-ui/dom@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "@floating-ui/dom@npm:1.5.1"
+  dependencies:
+    "@floating-ui/core": ^1.4.1
+    "@floating-ui/utils": ^0.1.1
+  checksum: ddb509030978536ba7b321cf8c764ae9d0142a3b1fefb7e6bc050a5de7e825e12131fa5089009edabf7c125fb274886da211a5220fe17a71d875a7a96eb1386c
+  languageName: node
+  linkType: hard
+
+"@floating-ui/react-dom@npm:^2.0.0":
+  version: 2.0.2
+  resolution: "@floating-ui/react-dom@npm:2.0.2"
+  dependencies:
+    "@floating-ui/dom": ^1.5.1
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 4797e1f7a19c1e531ed0d578ccdcbe58970743e5a480ba30424857fc953063f36d481f8c5d69248a8f1d521b739e94bf5e1ffb35506400dea3d914f166ed2f7f
+  languageName: node
+  linkType: hard
+
+"@floating-ui/utils@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@floating-ui/utils@npm:0.1.1"
+  checksum: 548acdda7902f45b0afbe34e2e7f4cbff0696b95bad8c039f80936519de24ef2ec20e79902825b7815294b37f51a7c52ee86288b0688869a57cc229a164d86b4
+  languageName: node
+  linkType: hard
+
 "@foxglove/crc@npm:^0.0.3":
   version: 0.0.3
   resolution: "@foxglove/crc@npm:0.0.3"
@@ -7812,9 +7957,9 @@ __metadata:
   dependencies:
     "@ant-design/icons": ^4.7.0
     "@cardano-sdk/cardano-services-client": 0.12.2
-    "@cardano-sdk/core": 0.19.0
+    "@cardano-sdk/core": 0.19.1
     "@cardano-sdk/dapp-connector": 0.9.15
-    "@cardano-sdk/input-selection": 0.11.8
+    "@cardano-sdk/input-selection": 0.11.9
     "@cardano-sdk/tx-construction": 0.11.2
     "@cardano-sdk/util": 0.14.0
     "@cardano-sdk/wallet": 0.21.1
@@ -7883,8 +8028,8 @@ __metadata:
   resolution: "@lace/cardano@workspace:packages/cardano"
   dependencies:
     "@cardano-sdk/cardano-services-client": 0.12.2
-    "@cardano-sdk/core": 0.19.0
-    "@cardano-sdk/crypto": 0.1.12
+    "@cardano-sdk/core": 0.19.1
+    "@cardano-sdk/crypto": 0.1.13
     "@cardano-sdk/hardware-ledger": 0.3.3
     "@cardano-sdk/key-management": 0.10.2
     "@cardano-sdk/util": 0.14.0
@@ -8009,7 +8154,7 @@ __metadata:
   resolution: "@lace/staking@workspace:packages/staking"
   dependencies:
     "@ant-design/icons": ^4.7.0
-    "@cardano-sdk/input-selection": 0.11.8
+    "@cardano-sdk/input-selection": 0.11.9
     "@cardano-sdk/tx-construction": 0.11.2
     "@cardano-sdk/util": 0.14.0
     "@lace/cardano": ^0.1.0
@@ -8049,7 +8194,7 @@ __metadata:
     wait-on: ^7.0.1
     zustand: ^4.4.1
   peerDependencies:
-    "@cardano-sdk/input-selection": 0.11.7
+    "@cardano-sdk/input-selection": 0.11.9
     "@cardano-sdk/tx-construction": 0.11.1
     "@cardano-sdk/util": 0.14.0
     "@cardano-sdk/wallet": 0.21.0
@@ -8078,6 +8223,7 @@ __metadata:
     "@radix-ui/react-switch": ^1.0.3
     "@radix-ui/react-tabs": ^1.0.3
     "@radix-ui/react-toast": ^1.0.3
+    "@radix-ui/react-tooltip": ^1.0.6
     "@rollup/plugin-commonjs": 20.0.0
     "@rollup/plugin-image": 2.1.1
     "@rollup/plugin-node-resolve": 13.0.4
@@ -8814,6 +8960,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-arrow@npm:1.0.3":
+  version: 1.0.3
+  resolution: "@radix-ui/react-arrow@npm:1.0.3"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/react-primitive": 1.0.3
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 8cca086f0dbb33360e3c0142adf72f99fc96352d7086d6c2356dbb2ea5944cfb720a87d526fc48087741c602cd8162ca02b0af5e6fdf5f56d20fddb44db8b4c3
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-avatar@npm:^1.0.2":
   version: 1.0.2
   resolution: "@radix-ui/react-avatar@npm:1.0.2"
@@ -9100,6 +9266,35 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 446a453d799cc790dd2a1583ff8328da88271bff64530b5a17c102fa7fb35eece3cf8985359d416f65e330cd81aa7b8fe984ea125fc4f4eaf4b3801d698e49fe
+  languageName: node
+  linkType: hard
+
+"@radix-ui/react-popper@npm:1.1.2":
+  version: 1.1.2
+  resolution: "@radix-ui/react-popper@npm:1.1.2"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@floating-ui/react-dom": ^2.0.0
+    "@radix-ui/react-arrow": 1.0.3
+    "@radix-ui/react-compose-refs": 1.0.1
+    "@radix-ui/react-context": 1.0.1
+    "@radix-ui/react-primitive": 1.0.3
+    "@radix-ui/react-use-callback-ref": 1.0.1
+    "@radix-ui/react-use-layout-effect": 1.0.1
+    "@radix-ui/react-use-rect": 1.0.1
+    "@radix-ui/react-use-size": 1.0.1
+    "@radix-ui/rect": 1.0.1
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 4929daa0d1cccada3cff50de0e00c0d186ffea97a5f28545c77fa85ff9bc5c105a54dddac400c2e2dcac631f0f7ea88e59f2e5ad0f80bb2cb7b62cc7cd30400f
   languageName: node
   linkType: hard
 
@@ -9395,6 +9590,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-tooltip@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "@radix-ui/react-tooltip@npm:1.0.6"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/primitive": 1.0.1
+    "@radix-ui/react-compose-refs": 1.0.1
+    "@radix-ui/react-context": 1.0.1
+    "@radix-ui/react-dismissable-layer": 1.0.4
+    "@radix-ui/react-id": 1.0.1
+    "@radix-ui/react-popper": 1.1.2
+    "@radix-ui/react-portal": 1.0.3
+    "@radix-ui/react-presence": 1.0.1
+    "@radix-ui/react-primitive": 1.0.3
+    "@radix-ui/react-slot": 1.0.2
+    "@radix-ui/react-use-controllable-state": 1.0.1
+    "@radix-ui/react-visually-hidden": 1.0.3
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+    react-dom: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 8220f103432e9ad9ff8a828ca890e14bf3323864a0bb145d1ef689cf446ab5ca0af18e5fed5da89db957065c504e79ec12fbe5e551d6e7b84b470fbd672c918d
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-use-callback-ref@npm:0.1.0":
   version: 0.1.0
   resolution: "@radix-ui/react-use-callback-ref@npm:0.1.0"
@@ -9539,6 +9765,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@radix-ui/react-use-rect@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@radix-ui/react-use-rect@npm:1.0.1"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+    "@radix-ui/rect": 1.0.1
+  peerDependencies:
+    "@types/react": "*"
+    react: ^16.8 || ^17.0 || ^18.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 433f07e61e04eb222349825bb05f3591fca131313a1d03709565d6226d8660bd1d0423635553f95ee4fcc25c8f2050972d848808d753c388e2a9ae191ebf17f3
+  languageName: node
+  linkType: hard
+
 "@radix-ui/react-use-size@npm:1.0.1":
   version: 1.0.1
   resolution: "@radix-ui/react-use-size@npm:1.0.1"
@@ -9572,6 +9814,15 @@ __metadata:
     "@types/react-dom":
       optional: true
   checksum: 2e9d0c8253f97e7d6ffb2e52a5cfd40ba719f813b39c3e2e42c496d54408abd09ef66b5aec4af9b8ab0553215e32452a5d0934597a49c51dd90dc39181ed0d57
+  languageName: node
+  linkType: hard
+
+"@radix-ui/rect@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@radix-ui/rect@npm:1.0.1"
+  dependencies:
+    "@babel/runtime": ^7.13.10
+  checksum: aeec13b234a946052512d05239067d2d63422f9ec70bf2fe7acfd6b9196693fc33fbaf43c2667c167f777d90a095c6604eb487e0bce79e230b6df0f6cacd6a55
   languageName: node
   linkType: hard
 

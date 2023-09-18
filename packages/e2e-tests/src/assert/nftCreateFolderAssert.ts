@@ -108,6 +108,32 @@ class NftCreateFolderAssert {
     expect(ownedNftNames).to.have.ordered.members(displayedNftNames);
   }
 
+  async verifySeeAllAdaHandles() {
+    const ownedAdaHandleNames: string[] = testContext.load('displayedAdaHandleNames');
+    const displayedNfts = await new TokenSelectionPage().nftContainers;
+
+    const displayedAdaHandleNames: string[] = [];
+    for (const nftContainer of displayedNfts) {
+      displayedAdaHandleNames.push(await nftContainer.getText());
+    }
+    expect(ownedAdaHandleNames).to.have.all.members(displayedAdaHandleNames);
+  }
+
+  async verifySeeAllAdaImages() {
+    const adaHandleImages: string[] = testContext.load('displayedAdaHandleImages');
+    const displayedAdaHandleImages = await new TokenSelectionPage().nftImages;
+
+    for (const displayedAdaHandleImage of displayedAdaHandleImages) {
+      await displayedAdaHandleImage.waitForDisplayed();
+    }
+
+    const displayedAdaHandleImagesSrc: string[] = await new TokenSelectionPage().nftImages.map(
+      async (item) => await item.getAttribute('src')
+    );
+
+    expect(displayedAdaHandleImagesSrc).to.have.all.members(adaHandleImages);
+  }
+
   async verifyNoneNftIsSelected() {
     await new TokenSelectionPage().nftItemSelectedCheckmark.waitForDisplayed({ reverse: true });
   }

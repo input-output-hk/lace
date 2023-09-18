@@ -5,7 +5,7 @@ let actualLovelacesToAdaString: any;
 /* eslint-disable import/imports-first */
 /* eslint-disable max-len */
 /* eslint-disable no-magic-numbers */
-import { pendingTxTransformer, getFormattedAmount, getFormattedFiatAmount } from '../pending-tx-transformer';
+import { pendingTxTransformer, getFormattedFiatAmount } from '../pending-tx-transformer';
 import { Wallet } from '@lace/cardano';
 import { cardanoCoin } from '@utils/constants';
 import { TxCBOR } from '@cardano-sdk/core';
@@ -116,17 +116,6 @@ describe('Testing tx transformers utils', () => {
           type: 'local'
         })
       });
-    });
-  });
-
-  describe('getFormattedAmount', () => {
-    test('shoud return properly formatted amount', () => {
-      const mockLovelacesToAdaStringResult = 'mockLovelacesToAdaString';
-      mockLovelacesToAdaString.mockReturnValue(mockLovelacesToAdaStringResult);
-
-      expect(getFormattedAmount({ amount: 'amount', cardanoCoin })).toEqual(
-        `${mockLovelacesToAdaStringResult} ${cardanoCoin.symbol}`
-      );
     });
   });
 

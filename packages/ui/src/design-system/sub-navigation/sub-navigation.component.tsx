@@ -27,6 +27,7 @@ export const SubNavigation = ({
     defaultValue={defaultValue}
     value={value}
     onValueChange={onValueChange}
+    activationMode="manual"
   >
     <Tabs.List {...props}>{children}</Tabs.List>
   </Tabs.Root>
