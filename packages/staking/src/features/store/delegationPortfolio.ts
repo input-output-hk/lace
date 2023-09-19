@@ -1,7 +1,12 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { DelegationPortfolioState, DelegationPortfolioStore, PortfolioManagementProcess } from './types';
+import {
+  DelegationPortfolioState,
+  DelegationPortfolioStore,
+  DraftPortfolioStakePool,
+  PortfolioManagementProcess,
+} from './types';
 
 const defaultState: DelegationPortfolioState = {
   activeManagementProcess: PortfolioManagementProcess.None,
@@ -12,6 +17,11 @@ const defaultState: DelegationPortfolioState = {
 
 export const MAX_POOLS_COUNT = 5;
 const LAST_STABLE_EPOCH = 2;
+// interchangeable with percentages
+const targetWeight = 100;
+
+const mapPoolWeights = (pools: DraftPortfolioStakePool[]) =>
+  pools.map<DraftPortfolioStakePool>((pool) => ({ ...pool, weight: Math.round(targetWeight / pools.length) }));
 
 export const useDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set, get) => ({
@@ -29,10 +39,7 @@ export const useDelegationPortfolioStore = create(
         set((store) => {
           if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
           if (dumpDraftToSelections) {
-            store.selections = store.draftPortfolio.map((pool) => ({
-              ...pool,
-              weight: 1 / store.selections.length,
-            }));
+            store.selections = mapPoolWeights(store.draftPortfolio);
           }
           store.draftPortfolio = [];
           store.activeManagementProcess = PortfolioManagementProcess.None;
@@ -53,23 +60,18 @@ export const useDelegationPortfolioStore = create(
       removePoolInManagementProcess: ({ id }) =>
         set((store) => {
           if (store.activeManagementProcess === PortfolioManagementProcess.None) return;
-          store.draftPortfolio = store.draftPortfolio.filter((pool) => pool.id !== id);
-          store.draftPortfolio.forEach((pool) => {
-            pool.weight = 1 / store.draftPortfolio.length;
-          });
+          store.draftPortfolio = mapPoolWeights(store.draftPortfolio.filter((pool) => pool.id !== id));
           if (store.activeManagementProcess === PortfolioManagementProcess.NewPortfolio) {
             store.selections = store.draftPortfolio;
           }
         }),
       selectPool: (poolData) =>
-        set(({ selections }) => {
+        set((store) => {
           const { selectionsFull } = get().queries;
-          const alreadySelected = selections.some(({ id }) => poolData.id === id);
+          const alreadySelected = store.selections.some(({ id }) => poolData.id === id);
           if (selectionsFull() || alreadySelected) return;
-          selections.push(poolData);
-          selections.forEach((pool) => {
-            pool.weight = 1 / selections.length;
-          });
+          store.selections.push(poolData);
+          store.selections = mapPoolWeights(store.selections);
         }),
       setCurrentPortfolio: async ({ cardanoCoin, delegationDistribution, delegationRewardsHistory, currentEpoch }) => {
         const lastNonVolatileEpoch = currentEpoch.epochNo.valueOf() - LAST_STABLE_EPOCH;
@@ -80,6 +82,7 @@ export const useDelegationPortfolioStore = create(
           const confirmedPoolRewards = confirmedRewardHistory
             .filter(({ poolId }) => poolId === stakePool.id)
             .map(({ rewards }) => rewards);
+
           return {
             displayData: {
               ...Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool }),
@@ -91,7 +94,7 @@ export const useDelegationPortfolioStore = create(
             stakePool,
             ticker: stakePool.metadata?.ticker,
             value: stake,
-            weight: percentage,
+            weight: Math.round(percentage * targetWeight),
           };
         });
 
@@ -100,11 +103,8 @@ export const useDelegationPortfolioStore = create(
         });
       },
       unselectPool: ({ id }) =>
-        set(({ selections }) => {
-          selections = selections.filter((pool) => pool.id !== id);
-          selections.forEach((pool) => {
-            pool.weight = 1 / selections.length;
-          });
+        set((store) => {
+          store.selections = mapPoolWeights(store.selections.filter((pool) => pool.id !== id));
         }),
     },
     queries: {

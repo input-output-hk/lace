@@ -1,5 +1,4 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { formatPercentages } from '@lace/common';
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -17,7 +16,10 @@ interface PoolDetailsCardProps {
 export const PoolDetailsCard = ({ name, color, weight, onRemove }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
   const { compactNumber, balancesBalance } = useOutsideHandles();
-  const stakeValue = balancesBalance ? compactNumber(weight * Number(balancesBalance.available.coinBalance)) : '-';
+  const stakeValue = balancesBalance
+    ? // eslint-disable-next-line no-magic-numbers
+      compactNumber((weight / 100) * Number(balancesBalance.available.coinBalance))
+    : '-';
 
   return (
     <Card.Outlined className={PoolCard}>
@@ -37,9 +39,7 @@ export const PoolDetailsCard = ({ name, color, weight, onRemove }: PoolDetailsCa
         <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
             {t('drawer.preferences.stakeValue', {
-              stakePercentage: formatPercentages(weight, {
-                decimalPlaces: 0,
-              }),
+              stakePercentage: weight,
               stakeValue,
             })}
           </Text.Body.Normal>
