@@ -1,5 +1,6 @@
 import { DelegatedStake } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
+import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { MAX_POOLS_COUNT } from './delegationPortfolio';
@@ -38,7 +39,7 @@ interface CommandObject {
 
 type CommandOverviewShowDetails = CommandObject & {
   type: 'CommandOverviewShowDetails';
-  data: Wallet.Cardano.StakePool;
+  data: StakePoolWithLogo;
 };
 
 type CommandOverviewManagePortfolio = CommandObject & {
@@ -56,7 +57,7 @@ type CommandBrowsePoolsSelectPool = CommandObject & {
 
 type CommandBrowsePoolsShowPoolDetails = CommandObject & {
   type: 'CommandBrowsePoolsShowPoolDetails';
-  data: Wallet.Cardano.StakePool;
+  data: StakePoolWithLogo;
 };
 
 type CommandPoolDetailsSelectPool = CommandObject & {
@@ -82,13 +83,15 @@ type DrawerPreferencesCommand = CommandDrawerPreferencesUpdatePoolWeight;
 
 type Command = OverviewCommand | BrowsePoolsCommand | PoolDetailsCommand | DrawerPreferencesCommand;
 
+type StakePoolWithLogo = Wallet.Cardano.StakePool & { logo?: string };
+
 type State = {
   activeDrawerStep?: DrawerStep;
   activeFlow: Flow;
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio: DraftPortfolioStakePool[];
   selectedPortfolio: DraftPortfolioStakePool[];
-  viewedStakePool?: Wallet.Cardano.StakePool;
+  viewedStakePool?: StakePoolWithLogo;
 };
 
 type ExecuteCommand = <C extends Command>(command: C) => void;
@@ -154,7 +157,7 @@ const helpers = {
     store,
     targetMode,
   }: {
-    pool: Wallet.Cardano.StakePool;
+    pool: StakePoolWithLogo;
     store: DelegationPortfolioStore;
     targetMode: Flow;
   }) => {
@@ -251,7 +254,7 @@ const defaultState: State = {
   viewedStakePool: undefined,
 };
 
-export const useDelegationPortfolioStore = create(
+export const useNewDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set) => ({
     ...defaultState,
     mutators: {
@@ -288,3 +291,72 @@ export const useDelegationPortfolioStore = create(
     },
   }))
 );
+
+export const isNewDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) =>
+  [Flow.CurrentPoolDetails, Flow.CurrentPortfolioManagement, Flow.NewPortfolioCreation, Flow.PoolDetails].includes(
+    activeFlow
+  );
+
+// mappers
+
+type StakePoolDetails = {
+  delegators?: number | string;
+  description: string;
+  hexId: string;
+  id: string;
+  logo?: string;
+  margin: number | string;
+  name: string;
+  owners: string[];
+  saturation?: number | string;
+  stake?: { number: string; unit?: string };
+  ticker: string;
+  apy?: number | string;
+  status: Wallet.Cardano.StakePool['status'];
+  fee: number | string;
+  contact: Wallet.Cardano.PoolContactData;
+};
+
+export const stakePoolDetailsSelector = ({
+  viewedStakePool,
+}: DelegationPortfolioStore): StakePoolDetails | undefined => {
+  if (!viewedStakePool) return undefined;
+
+  const {
+    id,
+    cost,
+    hexId,
+    metadata: { description = '', name = '', ticker = '', homepage, ext } = {},
+    metrics,
+    margin,
+    owners,
+    logo,
+    status,
+  } = viewedStakePool;
+  const calcMargin = margin ? `${formatPercentages(margin.numerator / margin.denominator)}` : '-';
+
+  // eslint-disable-next-line consistent-return
+  return {
+    apy: metrics?.apy && formatPercentages(metrics.apy),
+    contact: {
+      primary: homepage,
+      ...ext?.pool.contact,
+    },
+    // TODO: a lot of this is repeated in `stakePoolTransformer`. Have only one place to parse this info
+    delegators: metrics?.delegators || '-',
+    description,
+    fee: Wallet.util.lovelacesToAdaString(cost.toString()),
+    hexId: hexId.toString(),
+    id: id.toString(),
+    logo: logo ?? getRandomIcon({ id: id.toString(), size: 30 }),
+    margin: calcMargin,
+    name,
+    owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
+    saturation: metrics?.saturation && formatPercentages(metrics.saturation),
+    stake: metrics?.stake?.active
+      ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics.stake?.active?.toString()))
+      : { number: '-' },
+    status,
+    ticker,
+  };
+};

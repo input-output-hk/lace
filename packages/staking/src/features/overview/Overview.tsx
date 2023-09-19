@@ -1,5 +1,6 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Wallet } from '@lace/cardano';
+// import { Wallet } from '@lace/cardano';
+// import { stakePoolTransformer } from '@lace/cardano/dist/wallet/util';
 import { Banner, useObservable } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
@@ -12,6 +13,7 @@ import {
   useDelegationPortfolioStore,
   useStakePoolDetails,
 } from '../store';
+import { useNewDelegationPortfolioStore } from '../store/useDelegationPortfolioStore';
 import { DelegationCard } from './DelegationCard';
 import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
@@ -27,7 +29,7 @@ export const Overview = () => {
     balancesBalance,
     compactNumber,
     fetchCoinPricePriceResult,
-    delegationStoreSetSelectedStakePool: setSelectedStakePool,
+    // delegationStoreSetSelectedStakePool: setSelectedStakePool,
     walletAddress,
     walletStoreWalletActivities: walletActivities,
     walletStoreInMemoryWallet: inMemoryWallet,
@@ -37,11 +39,12 @@ export const Overview = () => {
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
-  }));
+  })); //
   const { setIsDrawerVisible, setSection } = useStakePoolDetails((state) => ({
     setIsDrawerVisible: state.setIsDrawerVisible,
     setSection: state.setSection,
   }));
+  const { mutators } = useNewDelegationPortfolioStore();
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
@@ -60,10 +63,10 @@ export const Overview = () => {
     totalCoinBalance,
   });
 
-  const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
-    setSelectedStakePool(stakePool);
-    setIsDrawerVisible(true);
-  };
+  // const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
+  //   setSelectedStakePool(stakePool);
+  //   setIsDrawerVisible(true);
+  // };
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
 
   const onManageClick = () => {
@@ -146,7 +149,12 @@ export const Overview = () => {
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}
             cardanoCoinSymbol="tADA"
-            onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
+            onStakePoolSelect={() =>
+              mutators.executeCommand({
+                data: item.stakePool,
+                type: 'CommandOverviewShowDetails',
+              })
+            }
           />
         </Box>
       ))}

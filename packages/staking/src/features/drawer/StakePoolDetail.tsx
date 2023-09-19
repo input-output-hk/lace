@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OpenSelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
 import { MAX_POOLS_COUNT, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { stakePoolDetailsSelector, useNewDelegationPortfolioStore } from '../store/useDelegationPortfolioStore';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
 
@@ -15,24 +16,22 @@ const SATURATION_UPPER_BOUND = 100;
 
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
+  const { openExternalLink } = useOutsideHandles();
   const {
-    delegationStoreSelectedStakePoolDetails: {
-      delegators,
-      description,
-      id,
-      hexId,
-      owners = [],
-      apy,
-      saturation,
-      stake,
-      logo,
-      name,
-      ticker,
-      status,
-      contact,
-    } = {} as OpenSelectedStakePoolDetails,
-    openExternalLink,
-  } = useOutsideHandles();
+    delegators,
+    description,
+    id,
+    hexId,
+    owners = [],
+    apy,
+    saturation,
+    stake,
+    logo,
+    name,
+    ticker,
+    status,
+    contact,
+  } = useNewDelegationPortfolioStore(stakePoolDetailsSelector) || ({} as OpenSelectedStakePoolDetails);
 
   const delegatingToThisPool = useDelegationPortfolioStore((store) =>
     store.currentPortfolio.map((portfolioItem) => portfolioItem.id).includes(Wallet.Cardano.PoolIdHex(hexId))
@@ -243,7 +242,7 @@ export const StakePoolDetailFooter = ({
   popupView,
 }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { setIsDrawerVisible } = useStakePoolDetails();
+  const { setIsDrawerVisible } = useStakePoolDetails(); //
   const { delegationStoreSelectedStakePoolDetails: openPoolDetails, walletStoreGetKeyAgentType } = useOutsideHandles();
   const { ableToSelect, ableToStakeOnlyOnThisPool, selectionsEmpty, poolInCurrentPortfolio, poolSelected } =
     useDelegationPortfolioStore(makeSelector(openPoolDetails));

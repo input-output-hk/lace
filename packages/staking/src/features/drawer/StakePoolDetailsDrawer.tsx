@@ -4,6 +4,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { isNewDrawerVisible, useNewDelegationPortfolioStore } from '../store/useDelegationPortfolioStore';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
@@ -24,13 +25,14 @@ export const StakePoolDetailsDrawer = ({
 }: StakePoolDetailsDrawerProps): React.ReactElement => {
   const {
     setExitStakingVisible,
-    isDrawerVisible,
+    isDrawerVisible: isOldDrawerVisible,
     setIsDrawerVisible,
     setSection,
     setPrevSection,
     simpleSendConfig,
     resetStates,
   } = useStakePoolDetails();
+  const isDrawerVisible = useNewDelegationPortfolioStore(isNewDrawerVisible);
 
   const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
@@ -112,7 +114,7 @@ export const StakePoolDetailsDrawer = ({
 
   return (
     <Drawer
-      visible={isDrawerVisible}
+      visible={isOldDrawerVisible || isDrawerVisible}
       destroyOnClose
       onClose={closeDrawer}
       navigation={
