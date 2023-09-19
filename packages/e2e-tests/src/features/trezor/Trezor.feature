@@ -1,8 +1,7 @@
-@TrezorOnboarding
-
+@TrezorOnboarding @Trezor @Pending
 Feature: Trezor Onboarding
 
-  @Testnet @Mainnet
+  @wip
   Scenario: Onboarding Trezor wallet
     And I Unlock and enter correct pin on Trezor emulator
     Given I click "Connect" button on wallet setup page

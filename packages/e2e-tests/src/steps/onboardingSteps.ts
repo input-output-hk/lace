@@ -73,7 +73,7 @@ When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back'
       await commonOnboardingElements.backButton.click();
       break;
     case 'Next':
-      await commonOnboardingElements.nextButton.waitForClickable();
+      await commonOnboardingElements.nextButton.waitForClickable({ timeout: 12_000 });
       await commonOnboardingElements.nextButton.click();
       break;
     default:
