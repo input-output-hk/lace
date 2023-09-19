@@ -28,38 +28,59 @@ enum DrawerManagementStep {
 
 type DrawerStep = DrawerDefaultStep | DrawerManagementStep;
 
-enum OverviewCommand {
-  ShowDetails = 'ShowDetails',
-  Manage = 'Manage',
-  GoToBrowsePools = 'GoToBrowsePools',
+interface CommandObject {
+  type: string;
+}
+interface CommandObject {
+  type: string;
+  data: unknown;
 }
 
-enum BrowsePoolsCommand {
-  Select = 'Select',
-  ShowDetails = 'ShowDetails',
-}
+type CommandOverviewShowDetails = CommandObject & {
+  type: 'CommandOverviewShowDetails';
+  data: Wallet.Cardano.StakePool;
+};
 
-enum PoolDetailsCommand {
-  Select = 'Select',
-}
+type CommandOverviewManagePortfolio = CommandObject & {
+  type: 'CommandOverviewManagePortfolio';
+};
 
-enum DrawerPreferencesCommand {
-  UpdateWeight = 'UpdateWeight',
-}
+type CommandOverviewGoToBrowsePools = CommandObject & {
+  type: 'CommandOverviewGoToBrowsePools';
+};
+
+type CommandBrowsePoolsSelectPool = CommandObject & {
+  type: 'CommandBrowsePoolsSelectPool';
+  data: DraftPortfolioStakePool;
+};
+
+type CommandBrowsePoolsShowPoolDetails = CommandObject & {
+  type: 'CommandBrowsePoolsShowPoolDetails';
+  data: Wallet.Cardano.StakePool;
+};
+
+type CommandPoolDetailsSelectPool = CommandObject & {
+  type: 'CommandPoolDetailsSelectPool';
+  data: DraftPortfolioStakePool;
+};
+
+type CommandDrawerPreferencesUpdatePoolWeight = CommandObject & {
+  type: 'CommandDrawerPreferencesUpdatePoolWeight';
+  data: {
+    poolId: Wallet.Cardano.PoolIdHex;
+    weight: number;
+  };
+};
+
+type OverviewCommand = CommandOverviewShowDetails | CommandOverviewManagePortfolio | CommandOverviewGoToBrowsePools;
+
+type BrowsePoolsCommand = CommandBrowsePoolsSelectPool | CommandBrowsePoolsShowPoolDetails;
+
+type PoolDetailsCommand = CommandPoolDetailsSelectPool;
+
+type DrawerPreferencesCommand = CommandDrawerPreferencesUpdatePoolWeight;
 
 type Command = OverviewCommand | BrowsePoolsCommand | PoolDetailsCommand | DrawerPreferencesCommand;
-
-type DataOfCommand<C extends Command> = C extends OverviewCommand.ShowDetails
-  ? Wallet.Cardano.StakePool
-  : C extends BrowsePoolsCommand.ShowDetails
-  ? Wallet.Cardano.StakePool
-  : C extends BrowsePoolsCommand.Select
-  ? DraftPortfolioStakePool
-  : C extends PoolDetailsCommand.Select
-  ? DraftPortfolioStakePool
-  : C extends DrawerPreferencesCommand.UpdateWeight
-  ? { poolId: Wallet.Cardano.PoolIdHex; weight: number }
-  : undefined;
 
 type State = {
   activeDrawerStep?: DrawerStep;
@@ -70,9 +91,7 @@ type State = {
   viewedStakePool?: Wallet.Cardano.StakePool;
 };
 
-type ExecuteCommand = <C extends Command>(
-  ...params: DataOfCommand<C> extends undefined ? [C] : [C, DataOfCommand<C>]
-) => void;
+type ExecuteCommand = <C extends Command>(command: C) => void;
 
 type DelegationPortfolioStore = State & {
   mutators: {
@@ -90,7 +109,6 @@ type DelegationPortfolioStore = State & {
 // It is returned by both: cases and handler
 type Handler<C extends Command = any> = (params: {
   command: C;
-  data: DataOfCommand<C>;
   executeCommand: ExecuteCommand;
   store: DelegationPortfolioStore;
 }) => void;
@@ -149,58 +167,65 @@ const helpers = {
 const processCommand: Handler = (params) =>
   cases<Flow>(
     {
-      [Flow.Overview]: cases<OverviewCommand>(
+      [Flow.Overview]: cases<OverviewCommand['type']>(
         {
-          [OverviewCommand.ShowDetails]: handler<OverviewCommand.ShowDetails>(({ store, data }) => {
-            helpers.showPoolDetails({ pool: data, store, targetMode: Flow.CurrentPoolDetails });
-          }),
-          [OverviewCommand.Manage]: ({ store }) => {
+          CommandOverviewGoToBrowsePools: ({ store }) => {
+            store.activeFlow = Flow.BrowsePools;
+          },
+          CommandOverviewManagePortfolio: ({ store }) => {
             store.activeFlow = Flow.CurrentPortfolioManagement;
             store.activeDrawerStep = DrawerManagementStep.Preferences;
             store.draftPortfolio = store.currentPortfolio;
           },
-          [OverviewCommand.GoToBrowsePools]: ({ store }) => {
-            store.activeFlow = Flow.BrowsePools;
-          },
+          CommandOverviewShowDetails: handler<CommandOverviewShowDetails>(({ store, command: { data } }) => {
+            helpers.showPoolDetails({ pool: data, store, targetMode: Flow.CurrentPoolDetails });
+          }),
         },
-        params.command as OverviewCommand,
+        params.command.type as OverviewCommand['type'],
         Flow.Overview
       ),
-      [Flow.BrowsePools]: cases<BrowsePoolsCommand>(
+      [Flow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
         {
-          [BrowsePoolsCommand.ShowDetails]: handler<BrowsePoolsCommand.ShowDetails>(({ store, data }) => {
-            helpers.showPoolDetails({ pool: data, store, targetMode: Flow.PoolDetails });
-          }),
-          [BrowsePoolsCommand.Select]: handler<BrowsePoolsCommand.Select>(({ store, data }) => {
+          CommandBrowsePoolsSelectPool: handler<CommandBrowsePoolsSelectPool>(({ store, command: { data } }) => {
             helpers.selectPool({ pool: data, store });
           }),
+          CommandBrowsePoolsShowPoolDetails: handler<CommandBrowsePoolsShowPoolDetails>(
+            ({ store, command: { data } }) => {
+              helpers.showPoolDetails({ pool: data, store, targetMode: Flow.PoolDetails });
+            }
+          ),
         },
-        params.command as BrowsePoolsCommand,
+        params.command.type as BrowsePoolsCommand['type'],
         Flow.BrowsePools
       ),
       [Flow.CurrentPoolDetails]: () => void 0,
-      [Flow.PoolDetails]: cases<PoolDetailsCommand>(
+      [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
-          [PoolDetailsCommand.Select]: handler<PoolDetailsCommand.Select>(({ store, data }) => {
+          CommandPoolDetailsSelectPool: handler<CommandPoolDetailsSelectPool>(({ store, command: { data } }) => {
             helpers.selectPool({ pool: data, store });
           }),
         },
-        params.command as PoolDetailsCommand,
+        params.command.type as PoolDetailsCommand['type'],
         Flow.PoolDetails
       ),
       [Flow.CurrentPortfolioManagement]: cases<DrawerManagementStep>(
         {
-          [DrawerManagementStep.Preferences]: cases<DrawerPreferencesCommand>(
+          [DrawerManagementStep.Preferences]: cases<DrawerPreferencesCommand['type']>(
             {
-              [DrawerPreferencesCommand.UpdateWeight]: handler<DrawerPreferencesCommand.UpdateWeight>(
-                ({ store, data: { poolId, weight } }) => {
+              CommandDrawerPreferencesUpdatePoolWeight: handler<CommandDrawerPreferencesUpdatePoolWeight>(
+                ({
+                  store,
+                  command: {
+                    data: { poolId, weight },
+                  },
+                }) => {
                   const pool = store.draftPortfolio.find(({ id }) => id === poolId);
                   if (!pool) return;
                   pool.weight = weight;
                 }
               ),
             },
-            params.command as DrawerPreferencesCommand,
+            params.command.type as DrawerPreferencesCommand['type'],
             DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: () => void 0,
@@ -230,28 +255,27 @@ export const useDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set) => ({
     ...defaultState,
     mutators: {
-      executeCommand: (...params) => {
+      executeCommand: (command) => {
         let numberOfRecursiveCalls = 0;
         const callsConsideredAnInfiniteLoop = 10;
-        let paramsStack: ([Command] | [Command, DataOfCommand<Command>])[] = [params];
+        let paramsStack: Command[] = [command];
 
         set((store) => {
-          const executeCommand: ExecuteCommand = (...childParams) => {
-            paramsStack = [...paramsStack, childParams];
+          const executeCommand: ExecuteCommand = (childCommand) => {
+            paramsStack = [...paramsStack, childCommand];
             numberOfRecursiveCalls += 1;
             if (numberOfRecursiveCalls > callsConsideredAnInfiniteLoop) {
               const error = new Error('DelegationPortfolioStore: Infinite loop detected');
               throw Object.assign(error, { paramsStack });
             }
             processCommand({
-              command: childParams[0],
-              data: childParams[1],
+              command: childCommand,
               executeCommand,
               store,
             });
           };
 
-          processCommand({ command: params[0], data: params[1], executeCommand, store });
+          processCommand({ command, executeCommand, store });
         });
       },
       setCurrentPortfolio: async () => {
