@@ -12,6 +12,7 @@ import WalletUnlockScreenAssert from '../assert/walletUnlockScreenAssert';
 import CommonAssert from '../assert/commonAssert';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
+import { Logger } from '../support/logger';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -150,8 +151,10 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
   await DAppConnectorPageObject.switchToTestDAppWindow();
   await browser.pause(1000);
   const handlesBeforeClick = (await browser.getWindowHandles()).length;
-  await browser.waitUntil(
-    async () => {
+
+  let retries = 5;
+  while (retries) {
+    try {
       switch (runButton) {
         case 'Send ADA':
           await TestDAppPage.sendAdaRunButton.click();
@@ -162,15 +165,20 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
         default:
           throw new Error(`Unsupported button name: ${runButton}`);
       }
-      await browser.pause(2000);
-      return (await browser.getWindowHandles()).length === handlesBeforeClick + 1;
-    },
-    {
-      interval: 3000,
-      timeout: 20_000,
-      timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
+      await browser.waitUntil(async () => (await browser.getWindowHandles()).length === handlesBeforeClick + 1, {
+        interval: 1000,
+        timeout: 4000,
+        timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
+      });
+      break;
+    } catch {
+      Logger.log('Failed to open modal. Retry will be executed');
+      retries--;
     }
-  );
+  }
+  if (retries === 0) {
+    throw new Error('Exceeded maximum retry attempts on Run button');
+  }
 });
 
 Then(/^I click "(Send ADA|Send Token)" button in test DApp$/, async (buttonId: 'Send ADA' | 'Send Token') => {
