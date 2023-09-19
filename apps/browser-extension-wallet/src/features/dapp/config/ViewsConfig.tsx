@@ -76,7 +76,7 @@ export const signDataViewsFlowState: IViewState<DAPP_VIEWS> = {
 
 export const sectionTitle: Record<string, string> = {
   [DAPP_VIEWS.CONNECT]: 'dapp.connect.header',
-  [DAPP_VIEWS.CONFIRM_TX]: 'dapp.confirm.header',
+  [DAPP_VIEWS.CONFIRM_TX]: 'dapp.confirm.header.confirmTx',
   [DAPP_VIEWS.TX_SIGN]: 'dapp.sign.header',
   [DAPP_VIEWS.TX_SIGN_SUCCESS]: 'dapp.sign.success.header',
   [DAPP_VIEWS.TX_SIGN_FAILURE]: 'dapp.sign.failure.header',

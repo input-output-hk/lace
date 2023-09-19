@@ -35,6 +35,24 @@
         "balance": "Balance"
       }
     },
+    "dapp": {
+      "insufficientFunds": "You do not have enough funds to complete the transaction",
+      "authorize": {
+        "title": "Allow this site to",
+        "seeNetwork": "See which network the wallet is connected to",
+        "seeWalletUtxo": "See your wallet UTXOs",
+        "seeWalletBalance": "See your wallet balance",
+        "seeWalletAddresses": "See your wallet different addresses, including reward accounts"
+      },
+      "governance": {
+        "metadata": "Metadata",
+        "url": "URL",
+        "hash": "Hash",
+        "drepId": "DRep ID",
+        "depositPaid": "Deposit paid",
+        "depositReturned": "Deposit returned"
+      }
+    },
     "walletSetupStep": {
       "next": "Next",
       "back": "Back",
@@ -80,13 +98,6 @@
       "rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
       "copiedToClipboard": "Copied to clipboard",
       "pools": "Pool(s)"
-    },
-    "authorizeDapp": {
-      "title": "Allow this site to",
-      "seeNetwork": "See which network the wallet is connected to",
-      "seeWalletUtxo": "See your wallet UTXOs",
-      "seeWalletBalance": "See your wallet balance",
-      "seeWalletAddresses": "See your wallet different addresses, including reward accounts"
     }
   }
 }

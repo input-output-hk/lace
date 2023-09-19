@@ -70,17 +70,17 @@ class DAppConnectorAssert {
   async assertSeeAuthorizePagePermissions() {
     await AuthorizeDAppPage.permissionsTitle.waitForDisplayed();
     await expect(await AuthorizeDAppPage.permissionsTitle.getText()).to.equal(
-      `${await t('package.core.authorizeDapp.title', 'core')}:`
+      `${await t('package.core.dapp.authorize.title', 'core')}:`
     );
 
     await AuthorizeDAppPage.permissionsList.waitForDisplayed();
     const currentTexts = await AuthorizeDAppPage.permissionsListItems.map(async (option) => await option.getText());
 
     const expectedTexts = [
-      await t('package.core.authorizeDapp.seeNetwork', 'core'),
-      await t('package.core.authorizeDapp.seeWalletUtxo', 'core'),
-      await t('package.core.authorizeDapp.seeWalletBalance', 'core'),
-      await t('package.core.authorizeDapp.seeWalletAddresses', 'core')
+      await t('package.core.dapp.authorize.seeNetwork', 'core'),
+      await t('package.core.dapp.authorize.seeWalletUtxo', 'core'),
+      await t('package.core.dapp.authorize.seeWalletBalance', 'core'),
+      await t('package.core.dapp.authorize.seeWalletAddresses', 'core')
     ];
 
     await expect(currentTexts).to.have.all.members(expectedTexts);
@@ -218,7 +218,7 @@ class DAppConnectorAssert {
     expectedTransactionData: ExpectedTransactionData
   ) {
     await this.assertSeeHeader();
-    await this.assertSeeTitleAndDappDetails('dapp.confirm.header', expectedDApp);
+    await this.assertSeeTitleAndDappDetails('dapp.confirm.header.confirmTx', expectedDApp);
     await ConfirmTransactionPage.transactionTypeTitle.waitForDisplayed();
     await expect(await ConfirmTransactionPage.transactionTypeTitle.getText()).to.equal(
       await t('dapp.confirm.details.header')

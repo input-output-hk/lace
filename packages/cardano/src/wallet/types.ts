@@ -43,6 +43,16 @@ export type Cip30SignTxAssetItem = {
   amount: string;
   ticker?: string;
 };
+
+export type Cip30GovernanceTransaction = {
+  governanceTx: {
+    metadata?: { url: string; hash: string };
+    deposit: string;
+    drepId: string;
+  };
+  type: 'DRepRegistration' | 'DRepRetirement';
+};
+
 export enum WalletManagerProviderTypes {
   CARDANO_SERVICES_PROVIDER = 'cardano-services-provider'
 }

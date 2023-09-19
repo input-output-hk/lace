@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
-import { DappTransaction } from '@lace/core';
+import { DappGovernance, DappTransaction } from '@lace/core';
 import { Layout } from './Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import { sectionTitle, DAPP_VIEWS } from '../config';
@@ -173,19 +173,26 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     [addressList]
   );
 
-  const txSummary: Wallet.Cip30SignTxSummary | undefined = useMemo(() => {
+  const txSummary: Wallet.Cip30SignTxSummary | Wallet.Cip30GovernanceTransaction | undefined = useMemo(() => {
     if (!tx) return;
+    let txType: 'Send' | 'Mint' | 'Burn' | 'DRepRegistration' | 'DRepRetirement';
+
     const inspector = createTxInspector({
       minted: assetsMintedInspector,
-      burned: assetsBurnedInspector
+      burned: assetsBurnedInspector,
+      // TODO: use an inspect and unmock
+      governance: () => ({ drepId: 'drep1234567890abcdef', __typename: 'DRepRegistration' })
     });
 
-    const { minted, burned } = inspector(tx as Wallet.Cardano.HydratedTx);
+    const { minted, burned, governance } = inspector(tx as Wallet.Cardano.HydratedTx);
     const isMintTransaction = minted.length > 0;
     const isBurnTransaction = burned.length > 0;
+    // TODO: properly identify type of tx depending on inspector
+    const isGovernanceTransaction = !!governance.drepId;
 
-    let txType: 'Send' | 'Mint' | 'Burn';
-    if (isMintTransaction) {
+    if (isGovernanceTransaction) {
+      txType = governance.__typename === 'DRepRegistration' ? 'DRepRegistration' : 'DRepRetirement';
+    } else if (isMintTransaction) {
       txType = 'Mint';
     } else if (isBurnTransaction) {
       txType = 'Burn';
@@ -193,40 +200,56 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       txType = 'Send';
     }
 
-    const externalOutputs = tx.body.outputs.filter((output) => {
-      if (txType === 'Send') {
-        return walletInfo.addresses.every((addr) => output.address !== addr.address);
-      }
-      return true;
-    });
-    let totalCoins = BigInt(0);
-
-    // eslint-disable-next-line unicorn/no-array-reduce
-    const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
-      // Don't show withdrawl tx's etc
-      if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
-      totalCoins += txOut.value.coins;
-      if (totalCoins >= availableBalance?.coins) {
-        setInsufficientFunds(true);
-      }
-
-      return [
-        ...acc,
-        {
-          coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
-          recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
-          ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
+    if (txType !== 'DRepRegistration' && txType !== 'DRepRetirement') {
+      const externalOutputs = tx.body.outputs.filter((output) => {
+        if (txType === 'Send') {
+          return walletInfo.addresses.every((addr) => output.address !== addr.address);
         }
-      ];
-    }, []);
+        return true;
+      });
+      let totalCoins = BigInt(0);
+
+      // eslint-disable-next-line unicorn/no-array-reduce
+      const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
+        // Don't show withdrawl tx's etc
+        if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
+        totalCoins += txOut.value.coins;
+        if (totalCoins >= availableBalance?.coins) {
+          setInsufficientFunds(true);
+        }
+
+        return [
+          ...acc,
+          {
+            coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
+            recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
+            ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
+          }
+        ];
+      }, []);
+
+      // eslint-disable-next-line consistent-return
+      return {
+        fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
+        outputs: txSummaryOutputs,
+        type: txType
+      };
+    }
 
     // eslint-disable-next-line consistent-return
     return {
-      fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-      outputs: txSummaryOutputs,
-      type: txType
+      type: txType,
+      // TODO: unmock
+      governanceTx: {
+        deposit: '0.35',
+        drepId: 'drep170ef53apap7dadzemkcd7lujlzk5hyzvzzjj7f3sx89ecn3ft6u',
+        metadata: {
+          hash: '9bba8233cdd086f0325daba465d568a88970d42536f9e71e92a80d5922ded885',
+          url: 'https://raw.githubusercontent.com/Ryun1/gov-metadata/main/governace-action/metadata.jsonldr1q99...uqvzlalu'
+        }
+      }
     };
-  }, [tx, availableBalance, walletInfo.addresses, createAssetList, addressToNameMap]);
+  }, [tx, walletInfo.addresses, availableBalance?.coins, addressToNameMap, createAssetList]);
 
   const translations = {
     transaction: t('core.dappTransaction.transaction'),
@@ -237,16 +260,31 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     adaFollowingNumericValue: t('general.adaFollowingNumericValue')
   };
 
+  const title = useMemo(() => {
+    if (txSummary?.type === 'DRepRegistration') return t('dapp.confirm.header.drepRegistration');
+    if (txSummary?.type === 'DRepRetirement') return t('dapp.confirm.header.drepRetirement');
+    return t(sectionTitle[DAPP_VIEWS.CONFIRM_TX]);
+  }, [t, txSummary]);
+
   return (
-    <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
+    <Layout pageClassname={styles.spaceBetween} title={title}>
       {tx && txSummary ? (
-        <DappTransaction
-          transaction={txSummary}
-          dappInfo={dappInfo}
-          errorMessage={errorMessage}
-          translations={translations}
-          hasInsufficientFunds={hasInsufficientFunds}
-        />
+        txSummary.type !== 'DRepRegistration' && txSummary.type !== 'DRepRetirement' ? (
+          <DappTransaction
+            transaction={txSummary as Wallet.Cip30SignTxSummary}
+            dappInfo={dappInfo}
+            errorMessage={errorMessage}
+            translations={translations}
+            hasInsufficientFunds={hasInsufficientFunds}
+          />
+        ) : (
+          <DappGovernance
+            dappInfo={dappInfo}
+            hasInsufficientFunds={hasInsufficientFunds}
+            errorMessage={errorMessage}
+            details={txSummary as Wallet.Cip30GovernanceTransaction}
+          />
+        )
       ) : (
         <Skeleton loading />
       )}

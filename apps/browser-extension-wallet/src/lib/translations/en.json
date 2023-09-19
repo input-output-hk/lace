@@ -56,6 +56,24 @@
       "to": "To",
       "multipleAddresses": "Multiple addresses",
       "pools": "Pool(s)"
+    },
+    "dapp": {
+      "insufficientFunds": "You do not have enough funds to complete the transaction",
+      "authorize": {
+        "title": "Allow this site to",
+        "seeNetwork": "See which network the wallet is connected to",
+        "seeWalletUtxo": "See your wallet UTXOs",
+        "seeWalletBalance": "See your wallet balance",
+        "seeWalletAddresses": "See your wallet different addresses, including reward accounts"
+      },
+      "governance": {
+        "metadata": "Metadata",
+        "url": "URL",
+        "hash": "Hash",
+        "drepId": "DRep ID",
+        "depositPaid": "Deposit paid",
+        "depositReturned": "Deposit returned"
+      }
     }
   },
   "tab.main.title": "Tab extension",
@@ -309,12 +327,16 @@
     "connect.modal.allowOnce": "Only once",
     "connect.modal.header": "DApp connection",
     "connect.modal.description": "You agree to whitelist this DApp to access your wallet.",
-    "confirm.header": "Confirm transaction",
+    "confirm.header": {
+      "confirmTx": "Confirm transaction",
+      "drepRegistration": "Confirm DRep registration",
+      "drepRetirement": "Confirm DRep retirement",
+      "confirmData": "Confirm Data",
+      "signData": "Sign Data"
+    },
     "confirm.details.header": "Transaction",
     "confirm.details.amount": "Amount",
     "confirm.details.recepient": "Recipient",
-    "confirm.header.confirmData": "Confirm Data",
-    "confirm.header.signData": "Sign Data",
     "confirm.btn.cancel": "Cancel",
     "confirm.btn.confirm": "Confirm",
     "confirm.details.fee": "Fee",
