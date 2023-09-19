@@ -134,7 +134,6 @@ When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow('Authorize');
-  await browser.pause(500);
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(mode);
 });
 
@@ -161,7 +160,7 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
           await TestDAppPage.sendTokenRunButton.click();
           break;
         default:
-          break;
+          throw new Error(`Unsupported button name: ${runButton}`);
       }
       await browser.pause(2000);
       return (await browser.getWindowHandles()).length === handlesBeforeClick + 1;
