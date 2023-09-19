@@ -10,15 +10,18 @@ import {
 } from '../utils/postHogAnalyticsUtils';
 
 export const validateEventProperty = async (event: string, property: string, propertyValue: string): Promise<void> => {
-  await browser.waitUntil(async () => (await getEventPayload(event)).properties[property] === propertyValue, {
-    interval: 1000,
-    timeout: 6000,
-    timeoutMsg: `Failed while waiting for event '${event}' contains property '${property}' equal to ${propertyValue}. Actual event property value = '${
-      (
-        await getEventPayload(event)
-      ).properties[property]
-    }'`
-  });
+  await browser.waitUntil(
+    async () => (await getEventPayload(event)).properties[property].toString() === propertyValue,
+    {
+      interval: 1000,
+      timeout: 6000,
+      timeoutMsg: `Failed while waiting for event '${event}' contains property '${property}' equal to ${propertyValue}. Actual event property value = '${
+        (
+          await getEventPayload(event)
+        ).properties[property]
+      }'`
+    }
+  );
 };
 When(/^I set up request interception for posthog analytics request\(s\)$/, async () => {
   await browser.pause(1000);
