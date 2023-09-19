@@ -64,6 +64,7 @@ export type DelegationPortfolioState = {
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio: DraftPortfolioStakePool[];
   selections: DraftPortfolioStakePool[];
+  isHwWallet: boolean;
 } & (
   | {
       drawerVisible: true;
@@ -104,12 +105,7 @@ type DelegationPortfolioMutators = {
   removePoolInManagementProcess: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
 };
 
-export type TransitionAction = 'previous' | 'next' | SkipStep;
-export type SkipStep =
-  | 'forceConfirmationHardwareWalletSkipToSuccess'
-  | 'forceConfirmationHardwareWalletSkipToFailure'
-  | 'txConfirmationStepFailure';
-
+export type TransitionAction = 'previous' | 'next' | 'error';
 export type DelegationPortfolioStore = DelegationPortfolioState & {
   mutators: DelegationPortfolioMutators;
   queries: DelegationPortfolioQueries;

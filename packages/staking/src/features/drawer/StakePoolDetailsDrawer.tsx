@@ -83,11 +83,9 @@ export const StakePoolDetailsDrawer = ({
       backgroundServiceAPIContextSetWalletPassword();
       removePassword();
     }
-    if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemory) {
-      return setSection(drawerSectionsConfig[Sections.PREFERENCES]);
-    }
+
     if (simpleSendConfig?.prevSection) {
-      return setPrevSection();
+      portfolioMutators.transition('previous');
     }
     return closeDrawer();
   }, [

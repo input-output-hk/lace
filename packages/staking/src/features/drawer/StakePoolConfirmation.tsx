@@ -11,14 +11,7 @@ import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Balance, CurrencyInfo, useOutsideHandles } from '../outside-handles-provider';
-import {
-  DraftPortfolioStakePool,
-  Sections,
-  StakingError,
-  drawerSectionsConfig,
-  useDelegationPortfolioStore,
-  useStakePoolDetails,
-} from '../store';
+import { DraftPortfolioStakePool, StakingError, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import ArrowDown from './arrow-down.svg';
 import Cardano from './cardano-blue.png';
 import ExclamationMarkIcon from './exclamation-circle-small.svg';
@@ -354,9 +347,9 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       try {
         await signAndSubmitTransaction();
         setIsRestaking(currentPortfolio.length > 0);
-        return portfolioMutators.transition('forceConfirmationHardwareWalletSkipToSuccess');
+        return portfolioMutators.transition('next');
       } catch {
-        return portfolioMutators.transition('forceConfirmationHardwareWalletSkipToFailure');
+        return portfolioMutators.transition('error');
       } finally {
         setIsConfirmingTx(false);
       }

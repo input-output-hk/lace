@@ -1,67 +1,68 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import {
-  DelegationPortfolioState,
-  DelegationPortfolioStore,
-  PortfolioManagementProcess,
-  Sections,
-  SkipStep,
-  TransitionAction,
-} from './types';
+import { useOutsideHandles } from '../outside-handles-provider';
+import { DelegationPortfolioState, DelegationPortfolioStore, PortfolioManagementProcess, Sections } from './types';
 
-// move to portfolio store
-export const drawerSectionsConfig = {
-  [Sections.DETAIL]: {
-    currentSection: Sections.DETAIL,
-  },
-  [Sections.PREFERENCES]: {
-    currentSection: Sections.PREFERENCES,
-    nextSection: Sections.CONFIRMATION,
-    prevSection: Sections.DETAIL,
-  },
-  [Sections.CONFIRMATION]: {
-    currentSection: Sections.CONFIRMATION,
-    nextSection: Sections.SIGN,
-    prevSection: Sections.PREFERENCES,
-  },
-  [Sections.SIGN]: {
-    currentSection: Sections.SIGN,
-    nextSection: Sections.SUCCESS_TX,
-    prevSection: Sections.CONFIRMATION,
-  },
-  [Sections.SUCCESS_TX]: {
-    currentSection: Sections.SUCCESS_TX,
-    prevSection: Sections.SIGN,
-  },
-  [Sections.FAIL_TX]: {
-    currentSection: Sections.FAIL_TX,
-    nextSection: Sections.SUCCESS_TX, // Only if re-try works
-    prevSection: Sections.SIGN,
-  },
-} as const;
+type SectionState = {
+  currentSection: Sections;
+  nextSection?: Sections;
+  prevSection?: Sections;
+  allowSkipToFail?: boolean; // TODO apply and verify
+};
+
+type SectionsConfig = Record<Sections, SectionState>;
+
+const drawerSectionsConfig = (isHwWallet: boolean): SectionsConfig =>
+  ({
+    [Sections.DETAIL]: {
+      currentSection: Sections.DETAIL,
+    },
+    [Sections.PREFERENCES]: {
+      currentSection: Sections.PREFERENCES,
+      nextSection: Sections.CONFIRMATION,
+      prevSection: Sections.DETAIL,
+    },
+    [Sections.CONFIRMATION]: {
+      currentSection: Sections.CONFIRMATION,
+      nextSection: isHwWallet ? Sections.SUCCESS_TX : Sections.SIGN,
+      prevSection: Sections.PREFERENCES,
+    },
+    [Sections.SIGN]: {
+      currentSection: Sections.SIGN,
+      nextSection: Sections.SUCCESS_TX,
+      prevSection: Sections.CONFIRMATION,
+    },
+    [Sections.SUCCESS_TX]: {
+      currentSection: Sections.SUCCESS_TX,
+      prevSection: isHwWallet ? Sections.CONFIRMATION : Sections.SIGN,
+    },
+    [Sections.FAIL_TX]: {
+      currentSection: Sections.FAIL_TX,
+      nextSection: Sections.SUCCESS_TX, // Only if re-try works
+      prevSection: Sections.SIGN,
+    },
+  } as const);
 
 const defaultState: DelegationPortfolioState = {
   activeManagementProcess: PortfolioManagementProcess.None,
   currentPortfolio: [],
   draftPortfolio: [],
   drawerVisible: false,
+  // TODO: set this with keyAgentType
+  isHwWallet: false,
   selections: [],
 };
-
-const isSkipStepAction = (action: TransitionAction): action is SkipStep =>
-  [
-    'forceConfirmationHardwareWalletSkipToFailure',
-    'forceConfirmationHardwareWalletSkipToSuccess',
-    'txConfirmationStepFailure',
-  ].includes(action);
 
 export const MAX_POOLS_COUNT = 5;
 const LAST_STABLE_EPOCH = 2;
 
 export const useDelegationPortfolioStore = create(
-  immer<DelegationPortfolioStore>((set, get) => ({
+  immer<DelegationPortfolioStore>((set, get) => {
+  const { walletStoreGetKeyAgentType: getKeyAgentType } = useOutsideHandles();
+  return {
     ...defaultState,
+    isHwWallet: getKeyAgentType() !== Wallet.KeyManagement.KeyAgentType.InMemory,
     mutators: {
       beginManagementProcess: (process) =>
         set((store) => {
@@ -74,7 +75,7 @@ export const useDelegationPortfolioStore = create(
             store.draftPortfolio = store.selections;
           }
           store.drawerVisible = true;
-          store.drawerSectionConfig = drawerSectionsConfig[Sections.PREFERENCES];
+          store.drawerSectionConfig = drawerSectionsConfig(store.isHwWallet)[Sections.PREFERENCES];
         }),
       cancelManagementProcess: ({ dumpDraftToSelections } = { dumpDraftToSelections: false }) =>
         set((store) => {
@@ -111,7 +112,12 @@ export const useDelegationPortfolioStore = create(
           if (selectionsFull() || alreadySelected) return;
           selections.push(poolData);
         }),
-      setCurrentPortfolio: async ({ cardanoCoin, delegationDistribution, delegationRewardsHistory, currentEpoch }) => {
+      setCurrentPortfolio: async ({
+        cardanoCoin,
+        delegationDistribution,
+        delegationRewardsHistory,
+        currentEpoch,
+      }) => {
         const lastNonVolatileEpoch = currentEpoch.epochNo.valueOf() - LAST_STABLE_EPOCH;
         const confirmedRewardHistory = delegationRewardsHistory.all.filter(
           ({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch
@@ -141,35 +147,19 @@ export const useDelegationPortfolioStore = create(
       },
       // eslint-disable-next-line sonarjs/cognitive-complexity
       transition: (action) => {
-        const { activeManagementProcess, drawerVisible, drawerSectionConfig } = get();
+        const { activeManagementProcess, drawerVisible, drawerSectionConfig, isHwWallet } = get();
         if (activeManagementProcess === PortfolioManagementProcess.None) return;
         if (!drawerVisible) {
           console.error('INVALID MANAGEMENT STATE: expected drawer to be visible');
           return;
         }
 
-        const { currentSection, nextSection, prevSection } = drawerSectionConfig;
+        const { nextSection, prevSection } = drawerSectionConfig;
 
-        if (isSkipStepAction(action)) {
-          switch (action) {
-            case 'forceConfirmationHardwareWalletSkipToSuccess':
-              if (currentSection !== Sections.CONFIRMATION) break;
-              set((store) => {
-                store.drawerSectionConfig = drawerSectionsConfig[Sections.SUCCESS_TX];
-              });
-              break;
-            case 'forceConfirmationHardwareWalletSkipToFailure':
-              if (currentSection !== Sections.CONFIRMATION) break;
-              set((store) => {
-                store.drawerSectionConfig = drawerSectionsConfig[Sections.FAIL_TX];
-              });
-              break;
-            case 'txConfirmationStepFailure':
-              if (currentSection !== Sections.SIGN) break;
-              set((store) => {
-                store.drawerSectionConfig = drawerSectionsConfig[Sections.FAIL_TX];
-              });
-          }
+        if (action === 'error') {
+          set((store) => {
+            store.drawerSectionConfig = drawerSectionsConfig(isHwWallet)[Sections.FAIL_TX];
+          });
           return;
         }
 
@@ -189,7 +179,7 @@ export const useDelegationPortfolioStore = create(
               store.selections = [];
             }
           }
-          store.drawerSectionConfig = drawerSectionsConfig[targetSection];
+          store.drawerSectionConfig = drawerSectionsConfig(isHwWallet)[targetSection];
         });
       },
       unselectPool: ({ id }) =>
@@ -212,5 +202,6 @@ export const useDelegationPortfolioStore = create(
         return selections.length === MAX_POOLS_COUNT;
       },
     },
-  }))
+  };
+})
 );
