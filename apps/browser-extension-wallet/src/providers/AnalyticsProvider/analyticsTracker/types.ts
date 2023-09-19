@@ -96,7 +96,20 @@ export enum PostHogAction {
   SendSomethingWentWrongXClick = 'send | something went wrong | x | click',
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
-  NFTsImageClick = 'nft | nfts | nft image | click'
+  NFTsImageClick = 'nft | nfts | nft image | click',
+  // Settings
+  SettingsHelpClick = 'settings | help | click',
+  SettingsHelpCreateSupportTicketClick = 'settings | help | create a support ticket | click',
+  SettingsHelpXClick = 'settings | help | x | click',
+  SettingsTermsAndConditionsClick = 'settings | terms and conditions | click',
+  SettingsTermsAndConditionsXClick = 'settings | terms and conditions | x | click',
+  SettingsPrivacyPolicyClick = 'settings | privacy policy | click',
+  SettingsPrivacyPolicyXClick = 'settings | privacy policy | x | click',
+  SettingsCookiePolicyClick = 'settings | cookie policy | click',
+  SettingsCookiePolicyXClick = 'settings | cookie policy | x | click',
+  SettingsRemoveWalletClick = 'settings | remove wallet | click',
+  SettingsHoldUpRemoveWalletClick = 'settings | hold up | remove wallet | click',
+  SettingsHoldUpBackClick = 'settings | hold up | back | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {

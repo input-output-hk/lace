@@ -4,6 +4,7 @@ import { Button, Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useExternalLinkOpener } from '@providers/ExternalLinkOpenerProvider';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Title, Text } = Typography;
 
@@ -11,15 +12,22 @@ interface GeneralSettingsDrawerProps {
   visible: boolean;
   onClose: () => void;
   popupView?: boolean;
+  sendPostHogEvent?: (event: PostHogAction) => Promise<void>;
 }
 
 export const SupportDrawer = ({
   visible,
   onClose,
-  popupView = false
+  popupView = false,
+  sendPostHogEvent
 }: GeneralSettingsDrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const openExternalLink = useExternalLinkOpener();
+
+  const onCreateSupportTicketClick = async () => {
+    await sendPostHogEvent(PostHogAction.SettingsHelpCreateSupportTicketClick);
+    openExternalLink(process.env.HELP_URL);
+  };
 
   return (
     <Drawer
@@ -51,7 +59,7 @@ export const SupportDrawer = ({
           color="primary"
           block
           data-testid="create-new-ticket-button"
-          onClick={() => openExternalLink(process.env.HELP_URL)}
+          onClick={onCreateSupportTicketClick}
         >
           {t('browserView.settings.help.support.createASupportTicket')}
         </Button>
