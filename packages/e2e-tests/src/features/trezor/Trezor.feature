@@ -16,11 +16,10 @@ Feature: Trezor Onboarding
     When I enter wallet name with size of: 10 characters
     When I click "Next" button during wallet setup
     And I switch to last window
-    And I click "Allow once for this session" on Trezor Connect page
+    And I reject analytics and click "Allow once for this session" on Trezor Connect page
     And I click "Export" on Trezor Connect page
     And I confirm exporting public key on Trezor emulator
     And I switch to window with Lace
     Then "All done" page is displayed
     When I click "Go to my wallet" button on "All done" page
-    And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
