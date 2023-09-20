@@ -196,26 +196,31 @@ describe('Testing CollateralDrawer component', () => {
       setSection: jest.fn(),
       currentSection: {}
     });
-    const { rerender } = render(<CollateralDrawer visible={false} unspendableLoaded={false} onClose={jest.fn()} />, {
-      wrapper: getWrapper({
-        backgroundService
-      })
-    });
+    const { rerender } = render(
+      <CollateralDrawer visible={false} unspendableLoaded={false} onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />,
+      {
+        wrapper: getWrapper({
+          backgroundService
+        })
+      }
+    );
 
     expect(clearBuiltTxData).toBeCalledTimes(0);
     expect(initializeCollateralTx).toBeCalledTimes(0);
 
-    rerender(<CollateralDrawer visible={false} unspendableLoaded={false} onClose={jest.fn()} />);
+    rerender(
+      <CollateralDrawer visible={false} unspendableLoaded={false} onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />
+    );
 
     expect(clearBuiltTxData).toBeCalledTimes(0);
     expect(initializeCollateralTx).toBeCalledTimes(0);
 
-    rerender(<CollateralDrawer visible unspendableLoaded={false} onClose={jest.fn()} />);
+    rerender(<CollateralDrawer visible unspendableLoaded={false} onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />);
 
     expect(clearBuiltTxData).toBeCalledTimes(1);
     expect(initializeCollateralTx).toBeCalledTimes(1);
 
-    rerender(<CollateralDrawer visible unspendableLoaded={false} onClose={jest.fn()} />);
+    rerender(<CollateralDrawer visible unspendableLoaded={false} onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />);
 
     expect(clearBuiltTxData).toBeCalledTimes(1);
     expect(initializeCollateralTx).toBeCalledTimes(1);
@@ -227,26 +232,32 @@ describe('Testing CollateralDrawer component', () => {
       setSection,
       currentSection: {}
     });
-    const { rerender } = render(<CollateralDrawer visible={false} unspendableLoaded={false} onClose={jest.fn()} />, {
-      wrapper: getWrapper({
-        backgroundService
-      })
-    });
+    const { rerender } = render(
+      <CollateralDrawer visible={false} unspendableLoaded={false} onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />,
+      {
+        wrapper: getWrapper({
+          backgroundService
+        })
+      }
+    );
 
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.RECLAIM });
     expect(initializeCollateralTx).toBeCalledTimes(0);
 
-    rerender(<CollateralDrawer visible unspendableLoaded={false} onClose={jest.fn()} />);
+    rerender(<CollateralDrawer visible unspendableLoaded={false} onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />);
 
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.RECLAIM });
   });
 
   test('should set RECLAIM as current step for in memory wallet', async () => {
-    render(<CollateralDrawer visible={false} unspendableLoaded={false} onClose={jest.fn()} />, {
-      wrapper: getWrapper({
-        backgroundService
-      })
-    });
+    render(
+      <CollateralDrawer visible={false} unspendableLoaded={false} onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />,
+      {
+        wrapper: getWrapper({
+          backgroundService
+        })
+      }
+    );
     expect(setSection).toBeCalledTimes(1);
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.RECLAIM });
   });
@@ -255,18 +266,21 @@ describe('Testing CollateralDrawer component', () => {
     mockUseSyncingTheFirstTime.mockReset();
     mockUseSyncingTheFirstTime.mockReturnValue(true);
     mockGetKeyAgentType.mockReset();
-    const { rerender } = render(<CollateralDrawer visible={false} unspendableLoaded onClose={jest.fn()} />, {
-      wrapper: getWrapper({
-        backgroundService
-      })
-    });
+    const { rerender } = render(
+      <CollateralDrawer visible={false} unspendableLoaded onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />,
+      {
+        wrapper: getWrapper({
+          backgroundService
+        })
+      }
+    );
 
     expect(setSection).toBeCalledTimes(1);
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.RECLAIM });
 
     mockUseSyncingTheFirstTime.mockReset();
     mockUseSyncingTheFirstTime.mockReturnValue(false);
-    rerender(<CollateralDrawer visible unspendableLoaded={false} onClose={jest.fn()} />);
+    rerender(<CollateralDrawer visible unspendableLoaded={false} onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />);
     expect(setSection).toBeCalledTimes(1);
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.RECLAIM });
   });
@@ -275,7 +289,13 @@ describe('Testing CollateralDrawer component', () => {
     mockUseSyncingTheFirstTime.mockReset();
     mockUseSyncingTheFirstTime.mockReturnValue(false);
     const { rerender } = render(
-      <CollateralDrawer hasCollateral visible={false} unspendableLoaded onClose={jest.fn()} />,
+      <CollateralDrawer
+        hasCollateral
+        visible={false}
+        unspendableLoaded
+        onClose={jest.fn()}
+        sendAnalyticsEvent={jest.fn()}
+      />,
       {
         wrapper: getWrapper({
           backgroundService
@@ -288,7 +308,15 @@ describe('Testing CollateralDrawer component', () => {
 
     mockUseSyncingTheFirstTime.mockReset();
     mockUseSyncingTheFirstTime.mockReturnValue(false);
-    rerender(<CollateralDrawer visible hasCollateral={false} unspendableLoaded onClose={jest.fn()} />);
+    rerender(
+      <CollateralDrawer
+        visible
+        hasCollateral={false}
+        unspendableLoaded
+        onClose={jest.fn()}
+        sendAnalyticsEvent={jest.fn()}
+      />
+    );
 
     expect(setSection).toBeCalledTimes(3);
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SEND });
@@ -307,7 +335,13 @@ describe('Testing CollateralDrawer component', () => {
         currentSection: { currentSection: Sections.RECLAIM }
       });
       const { rerender } = render(
-        <CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />,
+        <CollateralDrawer
+          hasCollateral={false}
+          visible
+          unspendableLoaded
+          onClose={jest.fn()}
+          sendAnalyticsEvent={jest.fn()}
+        />,
         {
           wrapper: getWrapper({
             backgroundService
@@ -319,7 +353,9 @@ describe('Testing CollateralDrawer component', () => {
       expect(setSection.mock.calls[0][0]).toEqual({ currentSection: Sections.RECLAIM });
       expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SEND });
 
-      rerender(<CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} />);
+      rerender(
+        <CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />
+      );
 
       expect(setSection).toBeCalledTimes(2);
     }
@@ -338,7 +374,13 @@ describe('Testing CollateralDrawer component', () => {
         } as unknown as sendTx.BuiltTxData
       });
       const { rerender } = render(
-        <CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />,
+        <CollateralDrawer
+          hasCollateral={false}
+          visible
+          unspendableLoaded
+          onClose={jest.fn()}
+          sendAnalyticsEvent={jest.fn()}
+        />,
         {
           wrapper: getWrapper({
             backgroundService
@@ -350,7 +392,9 @@ describe('Testing CollateralDrawer component', () => {
       expect(setSection.mock.calls[0][0]).toEqual({ currentSection: Sections.RECLAIM });
       expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SUCCESS_TX });
 
-      rerender(<CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} />);
+      rerender(
+        <CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />
+      );
 
       expect(setSection).toBeCalledTimes(2);
     }
@@ -379,11 +423,14 @@ describe('Testing CollateralDrawer component', () => {
         }
       }));
 
-      render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={onClose} />, {
-        wrapper: getWrapper({
-          backgroundService
-        })
-      });
+      render(
+        <CollateralDrawer hasCollateral visible unspendableLoaded onClose={onClose} sendAnalyticsEvent={jest.fn()} />,
+        {
+          wrapper: getWrapper({
+            backgroundService
+          })
+        }
+      );
 
       const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
       expect(sendConfirmBtn).toHaveTextContent('Reclaim collateral');
@@ -437,11 +484,20 @@ describe('Testing CollateralDrawer component', () => {
           isSubmitting: false
         });
 
-        render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
-          wrapper: getWrapper({
-            backgroundService
-          })
-        });
+        render(
+          <CollateralDrawer
+            hasCollateral={false}
+            visible
+            unspendableLoaded
+            onClose={jest.fn()}
+            sendAnalyticsEvent={jest.fn()}
+          />,
+          {
+            wrapper: getWrapper({
+              backgroundService
+            })
+          }
+        );
 
         const sendSection = screen.queryByTestId(testIds.collateralSend);
         expect(sendSection).toBeInTheDocument();
@@ -467,11 +523,20 @@ describe('Testing CollateralDrawer component', () => {
           isSubmitting: true
         });
 
-        render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
-          wrapper: getWrapper({
-            backgroundService
-          })
-        });
+        render(
+          <CollateralDrawer
+            hasCollateral={false}
+            visible
+            unspendableLoaded
+            onClose={jest.fn()}
+            sendAnalyticsEvent={jest.fn()}
+          />,
+          {
+            wrapper: getWrapper({
+              backgroundService
+            })
+          }
+        );
 
         const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
         expect(sendConfirmBtn.closest('button')).toHaveAttribute('disabled');
@@ -495,11 +560,20 @@ describe('Testing CollateralDrawer component', () => {
         mockUseCollateral.mockReset();
         mockUseCollateral.mockReturnValue(useCollateral);
 
-        render(<CollateralDrawer hasCollateral={false} visible unspendableLoaded onClose={jest.fn()} />, {
-          wrapper: getWrapper({
-            backgroundService
-          })
-        });
+        render(
+          <CollateralDrawer
+            hasCollateral={false}
+            visible
+            unspendableLoaded
+            onClose={jest.fn()}
+            sendAnalyticsEvent={jest.fn()}
+          />,
+          {
+            wrapper: getWrapper({
+              backgroundService
+            })
+          }
+        );
         const sendConfirmBtn = screen.queryByTestId(testIds.collateralConfirmBtn);
         act(() => {
           fireEvent.click(sendConfirmBtn);
@@ -547,11 +621,20 @@ describe('Testing CollateralDrawer component', () => {
           cleanup();
         });
         test('should display SUCCESS_TX sections with proper hash', async () => {
-          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-            wrapper: getWrapper({
-              backgroundService
-            })
-          });
+          render(
+            <CollateralDrawer
+              hasCollateral
+              visible
+              unspendableLoaded
+              onClose={jest.fn()}
+              sendAnalyticsEvent={jest.fn()}
+            />,
+            {
+              wrapper: getWrapper({
+                backgroundService
+              })
+            }
+          );
 
           const transactionSuccessContainer = screen.queryByTestId(testIds.transactionSuccessContainer);
           expect(transactionSuccessContainer).toBeInTheDocument();
@@ -571,14 +654,23 @@ describe('Testing CollateralDrawer component', () => {
           mockGetBackgroundStorage.mockReturnValue({ message });
           const clearBackgroundStorageMock = jest.fn().mockImplementation(async () => await true);
 
-          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-            wrapper: getWrapper({
-              backgroundService: {
-                ...backgroundService,
-                clearBackgroundStorage: clearBackgroundStorageMock
-              }
-            })
-          });
+          render(
+            <CollateralDrawer
+              hasCollateral
+              visible
+              unspendableLoaded
+              onClose={jest.fn()}
+              sendAnalyticsEvent={jest.fn()}
+            />,
+            {
+              wrapper: getWrapper({
+                backgroundService: {
+                  ...backgroundService,
+                  clearBackgroundStorage: clearBackgroundStorageMock
+                }
+              })
+            }
+          );
 
           const cancelBtn = screen.queryByTestId(testIds.collateralTxCancelBtn);
           expect(cancelBtn).toBeInTheDocument();
@@ -600,11 +692,20 @@ describe('Testing CollateralDrawer component', () => {
         test('should handle confirm', async () => {
           const redirectToSettingsMock = jest.fn();
           mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
-          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-            wrapper: getWrapper({
-              backgroundService
-            })
-          });
+          render(
+            <CollateralDrawer
+              hasCollateral
+              visible
+              unspendableLoaded
+              onClose={jest.fn()}
+              sendAnalyticsEvent={jest.fn()}
+            />,
+            {
+              wrapper: getWrapper({
+                backgroundService
+              })
+            }
+          );
 
           const confirmBtn = screen.queryByTestId(testIds.collateralTxNextBtn);
           expect(confirmBtn).toBeInTheDocument();
@@ -663,11 +764,20 @@ describe('Testing CollateralDrawer component', () => {
           cleanup();
         });
         test('should display FAIL_tx section', async () => {
-          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-            wrapper: getWrapper({
-              backgroundService
-            })
-          });
+          render(
+            <CollateralDrawer
+              hasCollateral
+              visible
+              unspendableLoaded
+              onClose={jest.fn()}
+              sendAnalyticsEvent={jest.fn()}
+            />,
+            {
+              wrapper: getWrapper({
+                backgroundService
+              })
+            }
+          );
 
           const failContainer = screen.queryByTestId(testIds.transactionFailContainer);
           expect(failContainer).toBeInTheDocument();
@@ -720,11 +830,20 @@ describe('Testing CollateralDrawer component', () => {
         test('should handle back', async () => {
           const redirectToSettingsMock = jest.fn();
           mockUseRedirection.mockImplementation(() => redirectToSettingsMock);
-          render(<CollateralDrawer hasCollateral visible unspendableLoaded onClose={jest.fn()} />, {
-            wrapper: getWrapper({
-              backgroundService
-            })
-          });
+          render(
+            <CollateralDrawer
+              hasCollateral
+              visible
+              unspendableLoaded
+              onClose={jest.fn()}
+              sendAnalyticsEvent={jest.fn()}
+            />,
+            {
+              wrapper: getWrapper({
+                backgroundService
+              })
+            }
+          );
 
           const confirmBtn = screen.queryByTestId(testIds.collateralTxNextBtn);
           expect(confirmBtn).toBeInTheDocument();
