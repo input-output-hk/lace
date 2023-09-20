@@ -6,7 +6,7 @@ import { immer } from 'zustand/middleware/immer';
 import { MAX_POOLS_COUNT } from './delegationPortfolio';
 import { CurrentPortfolioStakePool, DraftPortfolioStakePool } from './types';
 
-enum Flow {
+export enum Flow {
   Overview = 'Overview',
   BrowsePools = 'BrowsePools',
   CurrentPoolDetails = 'CurrentPoolDetails',
@@ -54,6 +54,10 @@ type CommandOverviewGoToBrowsePools = {
   type: 'CommandOverviewGoToBrowsePools';
 };
 
+type CommandBrowsePoolsGoToOverview = {
+  type: 'CommandBrowsePoolsGoToOverview';
+};
+
 type CommandBrowsePoolsSelectPool = {
   type: 'CommandBrowsePoolsSelectPool';
   data: DraftPortfolioStakePool;
@@ -71,7 +75,10 @@ type CommandPoolDetailsSelectPool = {
 
 type OverviewCommand = CommandOverviewShowDetails | CommandOverviewManagePortfolio | CommandOverviewGoToBrowsePools;
 
-type BrowsePoolsCommand = CommandBrowsePoolsSelectPool | CommandBrowsePoolsShowPoolDetails;
+type BrowsePoolsCommand =
+  | CommandBrowsePoolsSelectPool
+  | CommandBrowsePoolsShowPoolDetails
+  | CommandBrowsePoolsGoToOverview;
 
 type CurrentPoolDetailsCommand = CommandCommonCancelDrawer;
 
@@ -220,6 +227,9 @@ const processCommand: Handler = (params) =>
       ),
       [Flow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
         {
+          CommandBrowsePoolsGoToOverview: ({ store }) => {
+            store.activeFlow = Flow.Overview;
+          },
           CommandBrowsePoolsSelectPool: handler<CommandBrowsePoolsSelectPool>(({ store, command: { data } }) => {
             helpers.selectPool({ pool: data, store });
           }),
