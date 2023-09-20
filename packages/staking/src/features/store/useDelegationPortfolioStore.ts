@@ -63,6 +63,10 @@ type CommandBrowsePoolsSelectPool = {
   data: DraftPortfolioStakePool;
 };
 
+type CommandBrowsePoolsNewPortfolio = {
+  type: 'CommandBrowsePoolsNewPortfolio';
+};
+
 type CommandBrowsePoolsShowPoolDetails = {
   type: 'CommandBrowsePoolsShowPoolDetails';
   data: StakePoolWithLogo;
@@ -73,16 +77,22 @@ type CommandPoolDetailsSelectPool = {
   data: DraftPortfolioStakePool;
 };
 
+type CommandPoolDetailsUnselectPool = {
+  type: 'CommandPoolDetailsUnselectPool';
+  data: Wallet.Cardano.PoolIdHex;
+};
+
 type OverviewCommand = CommandOverviewShowDetails | CommandOverviewManagePortfolio | CommandOverviewGoToBrowsePools;
 
 type BrowsePoolsCommand =
   | CommandBrowsePoolsSelectPool
   | CommandBrowsePoolsShowPoolDetails
-  | CommandBrowsePoolsGoToOverview;
+  | CommandBrowsePoolsGoToOverview
+  | CommandBrowsePoolsNewPortfolio;
 
 type CurrentPoolDetailsCommand = CommandCommonCancelDrawer;
 
-type PoolDetailsCommand = CommandCommonCancelDrawer | CommandPoolDetailsSelectPool;
+type PoolDetailsCommand = CommandCommonCancelDrawer | CommandPoolDetailsSelectPool | CommandPoolDetailsUnselectPool;
 
 type CurrentPortfolioManagementStepPreferencesCommand =
   | CommandCommonCancelDrawer
@@ -190,6 +200,9 @@ const helpers = {
     store.activeDrawerStep = DrawerDefaultStep.PoolDetails;
     store.viewedStakePool = pool;
   },
+  unselectPool: ({ id, store }: { id: Wallet.Cardano.PoolIdHex; store: DelegationPortfolioStore }) => {
+    store.selectedPortfolio = store.selectedPortfolio.filter((pool) => pool.id !== id);
+  },
   updatePoolWeight: ({
     poolId,
     store,
@@ -230,6 +243,11 @@ const processCommand: Handler = (params) =>
           CommandBrowsePoolsGoToOverview: ({ store }) => {
             store.activeFlow = Flow.Overview;
           },
+          CommandBrowsePoolsNewPortfolio: ({ store }) => {
+            store.activeFlow = Flow.NewPortfolioCreation;
+            store.activeDrawerStep = DrawerManagementStep.Preferences;
+            store.draftPortfolio = store.selectedPortfolio;
+          },
           CommandBrowsePoolsSelectPool: handler<CommandBrowsePoolsSelectPool>(({ store, command: { data } }) => {
             helpers.selectPool({ pool: data, store });
           }),
@@ -242,16 +260,40 @@ const processCommand: Handler = (params) =>
         params.command.type as BrowsePoolsCommand['type'],
         Flow.BrowsePools
       ),
-      [Flow.CurrentPoolDetails]: () => void 0,
+      [Flow.CurrentPoolDetails]: cases<CurrentPoolDetailsCommand['type']>(
+        {
+          CommandCommonCancelDrawer: ({ store }) => {
+            helpers.cancelDrawer({ store, targetFlow: Flow.Overview });
+            store.viewedStakePool = undefined;
+          },
+        },
+        params.command.type as CurrentPoolDetailsCommand['type'],
+        Flow.CurrentPoolDetails
+      ),
       [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
           CommandCommonCancelDrawer: ({ store }) => {
             helpers.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
             store.viewedStakePool = undefined;
           },
-          CommandPoolDetailsSelectPool: handler<CommandPoolDetailsSelectPool>(({ store, command: { data } }) => {
-            helpers.selectPool({ pool: data, store });
-          }),
+          CommandPoolDetailsSelectPool: handler<CommandPoolDetailsSelectPool>(
+            ({ /* executeCommand,*/ store, command: { data } }) => {
+              helpers.selectPool({ pool: data, store });
+              // ALT SOLUTION TBD:
+              // executeCommand({ type: 'CommandCommonCancelDrawer' }})
+              helpers.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+              store.viewedStakePool = undefined;
+            }
+          ),
+          CommandPoolDetailsUnselectPool: handler<CommandPoolDetailsUnselectPool>(
+            ({ /* executeCommand,*/ store, command: { data } }) => {
+              helpers.unselectPool({ id: data, store });
+              // ALT SOLUTION TBD:
+              // executeCommand({ type: 'CommandCommonCancelDrawer' }})
+              helpers.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+              store.viewedStakePool = undefined;
+            }
+          ),
         },
         params.command.type as PoolDetailsCommand['type'],
         Flow.PoolDetails
@@ -369,14 +411,18 @@ export const useNewDelegationPortfolioStore = create(
   }))
 );
 
-export const isNewDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) =>
-  [Flow.CurrentPoolDetails, Flow.CurrentPortfolioManagement, Flow.NewPortfolioCreation, Flow.PoolDetails].includes(
-    activeFlow
-  );
+export const isNewDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) => {
+  return [
+    Flow.CurrentPoolDetails,
+    Flow.CurrentPortfolioManagement,
+    Flow.NewPortfolioCreation,
+    Flow.PoolDetails,
+  ].includes(activeFlow);
+};
 
 // mappers
 
-type StakePoolDetails = {
+export type NewStakePoolDetails = {
   delegators?: number | string;
   description: string;
   hexId: string;
@@ -386,17 +432,17 @@ type StakePoolDetails = {
   name: string;
   owners: string[];
   saturation?: number | string;
-  stake?: { number: string; unit?: string };
+  stake: { number: string; unit?: string };
   ticker: string;
   apy?: number | string;
   status: Wallet.Cardano.StakePool['status'];
-  fee: number | string;
+  fee: number | string; 
   contact: Wallet.Cardano.PoolContactData;
 };
 
 export const stakePoolDetailsSelector = ({
   viewedStakePool,
-}: DelegationPortfolioStore): StakePoolDetails | undefined => {
+}: DelegationPortfolioStore): NewStakePoolDetails | undefined => {
   if (!viewedStakePool) return undefined;
 
   const {
@@ -420,7 +466,7 @@ export const stakePoolDetailsSelector = ({
       ...ext?.pool.contact,
     },
     // TODO: a lot of this is repeated in `stakePoolTransformer`. Have only one place to parse this info
-    delegators: metrics?.delegators || '-',
+    delegators: metrics?.delegators,
     description,
     fee: Wallet.util.lovelacesToAdaString(cost.toString()),
     hexId: hexId.toString(),

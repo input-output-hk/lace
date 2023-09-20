@@ -7,7 +7,8 @@ import { StakePoolDetails } from '../drawer';
 import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
-import { Page, PortfolioManagementProcess, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Page, Sections, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { useNewDelegationPortfolioStore } from '../store/useDelegationPortfolioStore';
 import { Navigation } from './Navigation';
 
 const stepsWithBackBtn = new Set([Sections.CONFIRMATION, Sections.SIGN]);
@@ -18,7 +19,8 @@ const stepsWithExitConfirmation = new Set<Sections>([]);
 export const StakingView = () => {
   const { t } = useTranslation();
   const [pendingSelection, setPendingSelection] = useState(false);
-  const { setIsDrawerVisible, setSection, setStakeConfirmationVisible } = useStakePoolDetails();
+  const { mutators } = useNewDelegationPortfolioStore();
+  const { setStakeConfirmationVisible } = useStakePoolDetails();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((state) => ({
     currentPortfolio: state.currentPortfolio,
     portfolioMutators: state.mutators,
@@ -41,10 +43,13 @@ export const StakingView = () => {
   const alreadyDelegating = currentPortfolio.length > 0;
 
   const proceedWithSelections = useCallback(() => {
-    portfolioMutators.beginManagementProcess(PortfolioManagementProcess.NewPortfolio);
-    setSection();
-    setIsDrawerVisible(true);
-  }, [portfolioMutators, setSection, setIsDrawerVisible]);
+    mutators.executeCommand({
+      type: 'CommandBrowsePoolsNewPortfolio',
+    });
+    // portfolioMutators.beginManagementProcess(PortfolioManagementProcess.NewPortfolio);
+    // setSection();
+    // setIsDrawerVisible(true);
+  }, [mutators]);
 
   const initiateStaking = useCallback(() => {
     if (alreadyDelegating) {
@@ -70,11 +75,12 @@ export const StakingView = () => {
     });
   }, [openPool, openPoolDetails, portfolioMutators, walletStoreWalletUICardanoCoin]);
 
+  // TODO: move lower in component tree with pending selection in state machine
   const stakeJustOnCurrentPool = useCallback(() => {
     if (alreadyDelegating) {
       setPendingSelection(true);
     }
-    selectCurrentPool();
+    selectCurrentPool(); //
     initiateStaking();
     // TODO: LW-7668 implement no funds modal
     // if (canDelegate) {
@@ -82,13 +88,6 @@ export const StakingView = () => {
     // setNoFundsVisible(true);
     // }
   }, [alreadyDelegating, selectCurrentPool, initiateStaking]);
-
-  const unselectPool = useCallback(() => {
-    if (!openPoolDetails) return;
-    portfolioMutators.unselectPool({
-      id: Wallet.Cardano.PoolIdHex(openPoolDetails.hexId),
-    });
-  }, [openPoolDetails, portfolioMutators]);
 
   const onChangingPreferencesConfirm = useCallback(() => {
     if (pendingSelection) {
@@ -119,9 +118,7 @@ export const StakingView = () => {
         showCloseIcon
         showBackIcon={(section: Sections): boolean => stepsWithBackBtn.has(section)}
         showExitConfirmation={(section: Sections): boolean => stepsWithExitConfirmation.has(section)}
-        onSelect={selectCurrentPool}
         onStakeOnThisPool={stakeJustOnCurrentPool}
-        onUnselect={unselectPool}
       />
       <ChangingPreferencesModal onConfirm={onChangingPreferencesConfirm} />
       <MultidelegationBetaModal visible={multidelegationFirstVisit} onConfirm={triggerMultidelegationFirstVisit} />

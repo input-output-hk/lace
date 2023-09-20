@@ -3,7 +3,7 @@ import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { Sections, sectionsConfig, useStakePoolDetails } from '../store';
 import { isNewDrawerVisible, useNewDelegationPortfolioStore } from '../store/useDelegationPortfolioStore';
 
 export interface StakePoolDetailsDrawerProps {
@@ -26,11 +26,9 @@ export const StakePoolDetailsDrawer = ({
   const {
     setExitStakingVisible,
     isDrawerVisible: isOldDrawerVisible,
-    setIsDrawerVisible,
     setSection,
     setPrevSection,
     simpleSendConfig,
-    resetStates,
   } = useStakePoolDetails();
   const { drawerVisible, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
     drawerVisible: isNewDrawerVisible(store),
@@ -107,7 +105,7 @@ export const StakePoolDetailsDrawer = ({
 
   return (
     <Drawer
-      visible={isOldDrawerVisible || drawerVisible}
+      visible={drawerVisible}
       destroyOnClose
       onClose={closeDrawer}
       navigation={
@@ -128,7 +126,7 @@ export const StakePoolDetailsDrawer = ({
       footer={footer}
       popupView={popupView}
     >
-      {(isOldDrawerVisible || drawerVisible) && children}
+      {drawerVisible && children}
     </Drawer>
   );
 };

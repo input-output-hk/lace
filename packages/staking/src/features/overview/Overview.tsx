@@ -29,7 +29,6 @@ export const Overview = () => {
     balancesBalance,
     compactNumber,
     fetchCoinPricePriceResult,
-    // delegationStoreSetSelectedStakePool: setSelectedStakePool,
     walletAddress,
     walletStoreWalletActivities: walletActivities,
     walletStoreInMemoryWallet: inMemoryWallet,
@@ -62,11 +61,6 @@ export const Overview = () => {
     stakeKeyDeposit: protocolParameters.stakeKeyDeposit,
     totalCoinBalance,
   });
-
-  // const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
-  //   setSelectedStakePool(stakePool);
-  //   setIsDrawerVisible(true);
-  // };
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
 
   const onManageClick = () => {
@@ -148,13 +142,13 @@ export const Overview = () => {
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}
-            cardanoCoinSymbol="tADA"
-            onStakePoolSelect={() =>
+            cardanoCoinSymbol="tADA" // TODO
+            onStakePoolSelect={() => {
               mutators.executeCommand({
                 data: item.stakePool,
                 type: 'CommandOverviewShowDetails',
-              })
-            }
+              });
+            }}
           />
         </Box>
       ))}
