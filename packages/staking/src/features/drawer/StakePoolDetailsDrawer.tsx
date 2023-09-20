@@ -32,9 +32,10 @@ export const StakePoolDetailsDrawer = ({
     simpleSendConfig,
     resetStates,
   } = useStakePoolDetails();
-  const isDrawerVisible = useNewDelegationPortfolioStore(isNewDrawerVisible);
-
-  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+  const { drawerVisible, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+    drawerVisible: isNewDrawerVisible(store),
+    portfolioMutators: store.mutators,
+  }));
 
   const { t } = useTranslation();
 
@@ -57,14 +58,8 @@ export const StakePoolDetailsDrawer = ({
     } else {
       backgroundServiceAPIContextSetWalletPassword();
       delegationStoreSetDelegationTxBuilder();
-      // TODO: Remove "setIsDrawerVisible" once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
-      // if (!isInMemory && isSuccessSection) window.location.reload();
-      setIsDrawerVisible(false);
-      // resetStates needs to be called after drawer invisible,
-      // i.e. it no longer renders children which use the just resetted state
-      resetStates();
       removePassword();
-      portfolioMutators.cancelManagementProcess();
+      portfolioMutators.executeCommand({ type: 'CommandCommonCancelDrawer' });
     }
     setIsRestaking(false);
   }, [
@@ -74,9 +69,7 @@ export const StakePoolDetailsDrawer = ({
     setExitStakingVisible,
     backgroundServiceAPIContextSetWalletPassword,
     delegationStoreSetDelegationTxBuilder,
-    resetStates,
     removePassword,
-    setIsDrawerVisible,
     portfolioMutators,
   ]);
 
@@ -114,7 +107,7 @@ export const StakePoolDetailsDrawer = ({
 
   return (
     <Drawer
-      visible={isOldDrawerVisible || isDrawerVisible}
+      visible={isOldDrawerVisible || drawerVisible}
       destroyOnClose
       onClose={closeDrawer}
       navigation={
@@ -135,7 +128,7 @@ export const StakePoolDetailsDrawer = ({
       footer={footer}
       popupView={popupView}
     >
-      {isDrawerVisible && children}
+      {(isOldDrawerVisible || drawerVisible) && children}
     </Drawer>
   );
 };

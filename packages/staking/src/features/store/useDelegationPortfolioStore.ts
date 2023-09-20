@@ -29,59 +29,67 @@ enum DrawerManagementStep {
 
 type DrawerStep = DrawerDefaultStep | DrawerManagementStep;
 
-interface CommandObject {
-  type: string;
-}
-interface CommandObject {
-  type: string;
-  data: unknown;
-}
-
-type CommandOverviewShowDetails = CommandObject & {
-  type: 'CommandOverviewShowDetails';
-  data: StakePoolWithLogo;
+type CommandCommonCancelDrawer = {
+  type: 'CommandCommonCancelDrawer';
 };
 
-type CommandOverviewManagePortfolio = CommandObject & {
-  type: 'CommandOverviewManagePortfolio';
-};
-
-type CommandOverviewGoToBrowsePools = CommandObject & {
-  type: 'CommandOverviewGoToBrowsePools';
-};
-
-type CommandBrowsePoolsSelectPool = CommandObject & {
-  type: 'CommandBrowsePoolsSelectPool';
-  data: DraftPortfolioStakePool;
-};
-
-type CommandBrowsePoolsShowPoolDetails = CommandObject & {
-  type: 'CommandBrowsePoolsShowPoolDetails';
-  data: StakePoolWithLogo;
-};
-
-type CommandPoolDetailsSelectPool = CommandObject & {
-  type: 'CommandPoolDetailsSelectPool';
-  data: DraftPortfolioStakePool;
-};
-
-type CommandDrawerPreferencesUpdatePoolWeight = CommandObject & {
-  type: 'CommandDrawerPreferencesUpdatePoolWeight';
+type CommandCommonPreferencesStepUpdateWeight = {
+  type: 'CommandCommonPreferencesStepUpdateWeight';
   data: {
     poolId: Wallet.Cardano.PoolIdHex;
     weight: number;
   };
 };
 
+type CommandOverviewShowDetails = {
+  type: 'CommandOverviewShowDetails';
+  data: StakePoolWithLogo;
+};
+
+type CommandOverviewManagePortfolio = {
+  type: 'CommandOverviewManagePortfolio';
+};
+
+type CommandOverviewGoToBrowsePools = {
+  type: 'CommandOverviewGoToBrowsePools';
+};
+
+type CommandBrowsePoolsSelectPool = {
+  type: 'CommandBrowsePoolsSelectPool';
+  data: DraftPortfolioStakePool;
+};
+
+type CommandBrowsePoolsShowPoolDetails = {
+  type: 'CommandBrowsePoolsShowPoolDetails';
+  data: StakePoolWithLogo;
+};
+
+type CommandPoolDetailsSelectPool = {
+  type: 'CommandPoolDetailsSelectPool';
+  data: DraftPortfolioStakePool;
+};
+
 type OverviewCommand = CommandOverviewShowDetails | CommandOverviewManagePortfolio | CommandOverviewGoToBrowsePools;
 
 type BrowsePoolsCommand = CommandBrowsePoolsSelectPool | CommandBrowsePoolsShowPoolDetails;
 
-type PoolDetailsCommand = CommandPoolDetailsSelectPool;
+type CurrentPoolDetailsCommand = CommandCommonCancelDrawer;
 
-type DrawerPreferencesCommand = CommandDrawerPreferencesUpdatePoolWeight;
+type PoolDetailsCommand = CommandCommonCancelDrawer | CommandPoolDetailsSelectPool;
 
-type Command = OverviewCommand | BrowsePoolsCommand | PoolDetailsCommand | DrawerPreferencesCommand;
+type CurrentPortfolioManagementStepPreferencesCommand =
+  | CommandCommonCancelDrawer
+  | CommandCommonPreferencesStepUpdateWeight;
+
+type NewPortfolioCreationStepPreferencesCommand = CommandCommonCancelDrawer | CommandCommonPreferencesStepUpdateWeight;
+
+type Command =
+  | OverviewCommand
+  | BrowsePoolsCommand
+  | CurrentPoolDetailsCommand
+  | PoolDetailsCommand
+  | CurrentPortfolioManagementStepPreferencesCommand
+  | NewPortfolioCreationStepPreferencesCommand;
 
 type StakePoolWithLogo = Wallet.Cardano.StakePool & { logo?: string };
 
@@ -146,6 +154,16 @@ const handler =
     handlerBody(params);
 
 const helpers = {
+  cancelDrawer: ({
+    store,
+    targetFlow,
+  }: {
+    store: DelegationPortfolioStore;
+    targetFlow: Flow.Overview | Flow.BrowsePools;
+  }) => {
+    store.activeFlow = targetFlow;
+    store.activeDrawerStep = undefined;
+  },
   selectPool: ({ pool, store }: { pool: DraftPortfolioStakePool; store: DelegationPortfolioStore }) => {
     const selectionsFull = store.selectedPortfolio.length === MAX_POOLS_COUNT;
     const alreadySelected = store.selectedPortfolio.some(({ id }) => pool.id === id);
@@ -155,15 +173,28 @@ const helpers = {
   showPoolDetails: ({
     pool,
     store,
-    targetMode,
+    targetFlow,
   }: {
     pool: StakePoolWithLogo;
     store: DelegationPortfolioStore;
-    targetMode: Flow;
+    targetFlow: Flow.CurrentPoolDetails | Flow.PoolDetails;
   }) => {
-    store.activeFlow = targetMode;
+    store.activeFlow = targetFlow;
     store.activeDrawerStep = DrawerDefaultStep.PoolDetails;
     store.viewedStakePool = pool;
+  },
+  updatePoolWeight: ({
+    poolId,
+    store,
+    weight,
+  }: {
+    store: DelegationPortfolioStore;
+    poolId: Wallet.Cardano.PoolIdHex;
+    weight: number;
+  }) => {
+    const pool = store.draftPortfolio.find(({ id }) => id === poolId);
+    if (!pool) return;
+    pool.weight = weight;
   },
 };
 
@@ -181,7 +212,7 @@ const processCommand: Handler = (params) =>
             store.draftPortfolio = store.currentPortfolio;
           },
           CommandOverviewShowDetails: handler<CommandOverviewShowDetails>(({ store, command: { data } }) => {
-            helpers.showPoolDetails({ pool: data, store, targetMode: Flow.CurrentPoolDetails });
+            helpers.showPoolDetails({ pool: data, store, targetFlow: Flow.CurrentPoolDetails });
           }),
         },
         params.command.type as OverviewCommand['type'],
@@ -194,7 +225,7 @@ const processCommand: Handler = (params) =>
           }),
           CommandBrowsePoolsShowPoolDetails: handler<CommandBrowsePoolsShowPoolDetails>(
             ({ store, command: { data } }) => {
-              helpers.showPoolDetails({ pool: data, store, targetMode: Flow.PoolDetails });
+              helpers.showPoolDetails({ pool: data, store, targetFlow: Flow.PoolDetails });
             }
           ),
         },
@@ -204,6 +235,10 @@ const processCommand: Handler = (params) =>
       [Flow.CurrentPoolDetails]: () => void 0,
       [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
+          CommandCommonCancelDrawer: ({ store }) => {
+            helpers.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+            store.viewedStakePool = undefined;
+          },
           CommandPoolDetailsSelectPool: handler<CommandPoolDetailsSelectPool>(({ store, command: { data } }) => {
             helpers.selectPool({ pool: data, store });
           }),
@@ -213,22 +248,24 @@ const processCommand: Handler = (params) =>
       ),
       [Flow.CurrentPortfolioManagement]: cases<DrawerManagementStep>(
         {
-          [DrawerManagementStep.Preferences]: cases<DrawerPreferencesCommand['type']>(
+          [DrawerManagementStep.Preferences]: cases<CurrentPortfolioManagementStepPreferencesCommand['type']>(
             {
-              CommandDrawerPreferencesUpdatePoolWeight: handler<CommandDrawerPreferencesUpdatePoolWeight>(
+              CommandCommonCancelDrawer: ({ store }) => {
+                helpers.cancelDrawer({ store, targetFlow: Flow.Overview });
+                store.draftPortfolio = [];
+              },
+              CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
                 ({
                   store,
                   command: {
                     data: { poolId, weight },
                   },
                 }) => {
-                  const pool = store.draftPortfolio.find(({ id }) => id === poolId);
-                  if (!pool) return;
-                  pool.weight = weight;
+                  helpers.updatePoolWeight({ poolId, store, weight });
                 }
               ),
             },
-            params.command.type as DrawerPreferencesCommand['type'],
+            params.command.type as CurrentPortfolioManagementStepPreferencesCommand['type'],
             DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: () => void 0,
@@ -239,7 +276,37 @@ const processCommand: Handler = (params) =>
         params.store.activeDrawerStep as DrawerManagementStep,
         Flow.CurrentPortfolioManagement
       ),
-      [Flow.NewPortfolioCreation]: () => void 0,
+      [Flow.NewPortfolioCreation]: cases<DrawerManagementStep>(
+        {
+          [DrawerManagementStep.Preferences]: () =>
+            cases<NewPortfolioCreationStepPreferencesCommand['type']>(
+              {
+                CommandCommonCancelDrawer: ({ store }) => {
+                  helpers.cancelDrawer({ store, targetFlow: Flow.Overview });
+                  store.draftPortfolio = [];
+                },
+                CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
+                  ({
+                    store,
+                    command: {
+                      data: { poolId, weight },
+                    },
+                  }) => {
+                    helpers.updatePoolWeight({ poolId, store, weight });
+                  }
+                ),
+              },
+              params.command.type as NewPortfolioCreationStepPreferencesCommand['type'],
+              DrawerManagementStep.Preferences
+            ),
+          [DrawerManagementStep.Confirmation]: () => void 0,
+          [DrawerManagementStep.Sign]: () => void 0,
+          [DrawerManagementStep.Success]: () => void 0,
+          [DrawerManagementStep.Failure]: () => void 0,
+        },
+        params.store.activeDrawerStep as DrawerManagementStep,
+        Flow.NewPortfolioCreation
+      ),
     },
     params.store.activeFlow,
     'root'
