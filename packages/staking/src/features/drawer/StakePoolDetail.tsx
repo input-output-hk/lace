@@ -274,6 +274,8 @@ export const StakePoolDetailFooter = ({
           stakePool: viewedStakePool,
         }),
         id: Wallet.Cardano.PoolIdHex(viewedStakePool.hexId),
+        name: viewedStakePool.metadata?.name,
+        ticker: viewedStakePool.metadata?.ticker,
         weight: 1,
       },
       type: 'CommandPoolDetailsSelectPool',

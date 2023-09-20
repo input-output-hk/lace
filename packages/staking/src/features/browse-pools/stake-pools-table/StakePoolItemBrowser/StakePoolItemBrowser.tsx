@@ -136,6 +136,8 @@ export const StakePoolItemBrowser = ({
                             stakePool,
                           }),
                           id: hexId,
+                          name: stakePool.metadata?.name,
+                          ticker: stakePool.metadata?.ticker,
                           weight: 1,
                         },
                         type: 'CommandBrowsePoolsSelectPool',
