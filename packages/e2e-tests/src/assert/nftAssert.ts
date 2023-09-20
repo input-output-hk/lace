@@ -8,6 +8,8 @@ import { browser } from '@wdio/globals';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 import chaiSorted from 'chai-sorted';
 import testContext from '../utils/testContext';
+import { Asset } from '../data/Asset';
+import adaHandleAssert from './adaHandleAssert';
 
 use(chaiSorted);
 
@@ -173,6 +175,33 @@ class NftAssert {
     } else {
       await folderContainer.$(NftsPage.REST_OF_NFTS).waitForDisplayed({ reverse: true });
     }
+  }
+
+  async assertSeeCustomAdaHandleNft() {
+    const nftItem = await NftsPage.getNftContainer(Asset.ADA_HANDLE_3.name);
+    await this.assertNftDisplayed(true, nftItem);
+    await adaHandleAssert.assertSeeCustomImage(await nftItem.$(NftsPage.NFT_IMAGE));
+  }
+
+  async assertSeeCustomAdaHandleNftDetails(mode: 'extended' | 'popup') {
+    await this.assertSeeNftDetails(Asset.ADA_HANDLE_3.name, mode);
+    await adaHandleAssert.assertSeeCustomImage(await NftDetails.image);
+  }
+
+  async assertSeeCustomAdaHandleThumbnail(folderName: string) {
+    const folderContainer = await NftsPage.getFolder(folderName);
+    const thumbnails = await folderContainer.$$(NftsPage.NFT_ITEM_IMG_CONTAINER);
+    const srcValues: string[] = [];
+    for (const thumbnail of thumbnails) {
+      srcValues.push(await thumbnail.$('img').getAttribute('src'));
+    }
+    expect(srcValues).to.contain(adaHandleAssert.customHandleSrcValue);
+  }
+
+  async assertSeeCustomAdaHandleInCoinSelector() {
+    const tokenSelectionPage = new TokenSelectionPage();
+    const nftItem = await tokenSelectionPage.getNftContainer(Asset.ADA_HANDLE_3.name);
+    await adaHandleAssert.assertSeeCustomImage(await nftItem.$(tokenSelectionPage.NFT_IMAGE));
   }
 }
 

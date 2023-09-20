@@ -101,11 +101,11 @@ Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
 });
 
-Then(/^I can see the handle listed on the "Select NFT" screen$/, async () => {
+Then(/^I can see the handles listed on the "Select NFT" screen$/, async () => {
   await nftCreateFolderAssert.verifySeeAllAdaHandles();
 });
 
-Then(/^the corresponding custom image is displayed$/, async () => {
+Then(/^the corresponding custom images are displayed$/, async () => {
   await nftCreateFolderAssert.verifySeeAllAdaImages();
 });
 
@@ -463,3 +463,10 @@ Then(
 Then(/^I see folders on the NFTs page in the alphabetical order$/, async () => {
   await NftAssert.assertSeeFoldersInAlphabeticalOrder();
 });
+
+Then(
+  /^I see a thumbnail of ADA handle with custom image on the NFT folder with name: "([^"]*)"$/,
+  async (folderName: string) => {
+    await NftAssert.assertSeeCustomAdaHandleThumbnail(folderName);
+  }
+);

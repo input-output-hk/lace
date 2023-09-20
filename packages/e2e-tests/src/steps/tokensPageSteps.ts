@@ -1,7 +1,5 @@
 import { When, Then } from '@cucumber/cucumber';
 import tokensPageAssert from '../assert/tokensPageAssert';
-import walletAddressPageAssert from '../assert/walletAddressPageAssert';
-import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
 import testContext from '../utils/testContext';
@@ -10,7 +8,6 @@ import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';
-import walletAddressPage from '../elements/walletAddressPage';
 
 When(/^I see Tokens counter with total number of tokens displayed$/, async () => {
   await tokensPageAssert.assertSeeTitleWithCounter();
@@ -111,17 +108,6 @@ Then(
     }
   }
 );
-
-Then(/^I see "Wallet Address" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  await walletAddressPageAssert.assertSeeWalletAddressPage(mode);
-  await walletAddressPageAssert.assertSeeWalletNameAndAddress(getTestWallet(TestWalletName.TestAutomationWallet), mode);
-});
-
-When(/^I click "Copy" button on "Wallet Address" page$/, async () => {
-  await walletAddressPage.addressCard.scrollIntoView();
-  await walletAddressPage.addressCard.moveTo();
-  await walletAddressPage.copyButton.click();
-});
 
 When(/^I click token with name: "([^"]*)"$/, async (tokenName: string) => {
   await tokensPageObject.clickTokenWithName(tokenName);

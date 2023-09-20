@@ -94,6 +94,10 @@ When(
   }
 );
 
+When(/I enter "([^"]*)" in the bundle (\d) recipient's address/, async (value: string, inputIndex: number) => {
+  await transactionExtendedPageObject.fillAddress(value, inputIndex);
+});
+
 When(/I enter the first characters of the contacts/, async () => {
   await transactionExtendedPageObject.fillAddressWithFirstChars(validAddress2.getName(), 3);
 });
