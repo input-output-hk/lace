@@ -141,17 +141,6 @@ type Handler<C extends Command = any> = (params: {
   store: DelegationPortfolioStore;
 }) => void;
 
-// Called recursively.
-// Cases function returns a handler which calls another handler from a nested cases function
-/**
- * cases({
- *   [Mode.Overview]: cases({  // returns a handler called by upper cases
- *     [SomeNestedState]: cases({ // returns a handler called by upper cases
- *       [Command]: ({ state }) => { state modification }  // a handler function called by upper cases
- *     })
- *   })
- * })
- */
 const cases =
   <T extends string>(definition: Record<T, Handler>, discriminator: T, parentName: string): Handler =>
   (params) => {
@@ -163,14 +152,12 @@ const cases =
     handler(params);
   };
 
-// Just a wrapper for a simple handler function but narrowing down the data type
-// so we are able to hint TS that for a given command that is the type of passed data
 const handler =
   <C extends Command>(handlerBody: Handler<C>): Handler<C> =>
   (params) =>
     handlerBody(params);
 
-const helpers = {
+const atomicStateMutators = {
   cancelDrawer: ({
     store,
     targetFlow,
@@ -232,7 +219,7 @@ const processCommand: Handler = (params) =>
             store.draftPortfolio = store.currentPortfolio;
           },
           CommandOverviewShowDetails: handler<CommandOverviewShowDetails>(({ store, command: { data } }) => {
-            helpers.showPoolDetails({ pool: data, store, targetFlow: Flow.CurrentPoolDetails });
+            atomicStateMutators.showPoolDetails({ pool: data, store, targetFlow: Flow.CurrentPoolDetails });
           }),
         },
         params.command.type as OverviewCommand['type'],
@@ -249,11 +236,11 @@ const processCommand: Handler = (params) =>
             store.draftPortfolio = store.selectedPortfolio;
           },
           CommandBrowsePoolsSelectPool: handler<CommandBrowsePoolsSelectPool>(({ store, command: { data } }) => {
-            helpers.selectPool({ pool: data, store });
+            atomicStateMutators.selectPool({ pool: data, store });
           }),
           CommandBrowsePoolsShowPoolDetails: handler<CommandBrowsePoolsShowPoolDetails>(
             ({ store, command: { data } }) => {
-              helpers.showPoolDetails({ pool: data, store, targetFlow: Flow.PoolDetails });
+              atomicStateMutators.showPoolDetails({ pool: data, store, targetFlow: Flow.PoolDetails });
             }
           ),
         },
@@ -273,24 +260,24 @@ const processCommand: Handler = (params) =>
       [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
           CommandCommonCancelDrawer: ({ store }) => {
-            helpers.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+            atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
             store.viewedStakePool = undefined;
           },
           CommandPoolDetailsSelectPool: handler<CommandPoolDetailsSelectPool>(
             ({ /* executeCommand,*/ store, command: { data } }) => {
-              helpers.selectPool({ pool: data, store });
+              atomicStateMutators.selectPool({ pool: data, store });
               // ALT SOLUTION TBD:
               // executeCommand({ type: 'CommandCommonCancelDrawer' }})
-              helpers.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+              atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
               store.viewedStakePool = undefined;
             }
           ),
           CommandPoolDetailsUnselectPool: handler<CommandPoolDetailsUnselectPool>(
             ({ /* executeCommand,*/ store, command: { data } }) => {
-              helpers.unselectPool({ id: data, store });
+              atomicStateMutators.unselectPool({ id: data, store });
               // ALT SOLUTION TBD:
               // executeCommand({ type: 'CommandCommonCancelDrawer' }})
-              helpers.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+              atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
               store.viewedStakePool = undefined;
             }
           ),
@@ -303,7 +290,7 @@ const processCommand: Handler = (params) =>
           [DrawerManagementStep.Preferences]: cases<CurrentPortfolioManagementStepPreferencesCommand['type']>(
             {
               CommandCommonCancelDrawer: ({ store }) => {
-                helpers.cancelDrawer({ store, targetFlow: Flow.Overview });
+                atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                 store.draftPortfolio = [];
               },
               CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
@@ -313,7 +300,7 @@ const processCommand: Handler = (params) =>
                     data: { poolId, weight },
                   },
                 }) => {
-                  helpers.updatePoolWeight({ poolId, store, weight });
+                  atomicStateMutators.updatePoolWeight({ poolId, store, weight });
                 }
               ),
             },
@@ -334,7 +321,7 @@ const processCommand: Handler = (params) =>
             cases<NewPortfolioCreationStepPreferencesCommand['type']>(
               {
                 CommandCommonCancelDrawer: ({ store }) => {
-                  helpers.cancelDrawer({ store, targetFlow: Flow.Overview });
+                  atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                   store.draftPortfolio = [];
                 },
                 CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
@@ -344,7 +331,7 @@ const processCommand: Handler = (params) =>
                       data: { poolId, weight },
                     },
                   }) => {
-                    helpers.updatePoolWeight({ poolId, store, weight });
+                    atomicStateMutators.updatePoolWeight({ poolId, store, weight });
                   }
                 ),
               },
