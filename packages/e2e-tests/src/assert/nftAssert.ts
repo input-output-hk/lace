@@ -192,8 +192,8 @@ class NftAssert {
     const folderContainer = await NftsPage.getFolder(folderName);
     const thumbnails = await folderContainer.$$(NftsPage.NFT_ITEM_IMG_CONTAINER);
     const srcValues: string[] = [];
-    for (const tt of thumbnails) {
-      srcValues.push(await tt.$('img').getAttribute('src'));
+    for (const thumbnail of thumbnails) {
+      srcValues.push(await thumbnail.$('img').getAttribute('src'));
     }
     expect(srcValues).to.contain(adaHandleAssert.customHandleSrcValue);
   }

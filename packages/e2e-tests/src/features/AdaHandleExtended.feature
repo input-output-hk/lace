@@ -64,7 +64,7 @@ Feature: ADA handle - extended view
   Scenario: Extended View - Ada handles displayed and sorted by handle length
     When I click "Receive" button on page header
     Then I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
-    And I see handle listed on the "Receive" screen
+    And I see handles listed on the "Receive" screen
     And I see address card for handle: "$cde"
     And I see address card for handle: "$t_h_1"
     And I see address card for handle: "$test_handle_1"
