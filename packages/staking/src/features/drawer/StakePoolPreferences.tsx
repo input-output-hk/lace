@@ -1,3 +1,4 @@
+import { Wallet } from '@lace/cardano';
 import { Button, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -47,12 +48,15 @@ export const StakePoolPreferences = () => {
     setIsDrawerVisible: store.setIsDrawerVisible,
   }));
 
-  const displayData = draftPortfolio.map(({ name, id }, i) => ({
+  const displayData = draftPortfolio.map(({ name = '-', weight, id }, i) => ({
     color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
     id,
-    name: name || '',
-    value: 1,
+    name,
+    weight,
   }));
+  const createRemovePoolFromPortfolio = (poolId: Wallet.Cardano.PoolIdHex) => () => {
+    portfolioMutators.removePoolInManagementProcess({ id: poolId });
+  };
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
   const onAddPoolButtonClick = () => {
     if (addPoolButtonDisabled) return;
@@ -84,8 +88,14 @@ export const StakePoolPreferences = () => {
         />
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
-        {displayData.map(({ name, id, color }) => (
-          <PoolDetailsCard key={id} poolId={id} name={name} color={color} />
+        {displayData.map(({ name, id, color, weight }) => (
+          <PoolDetailsCard
+            key={id}
+            name={name}
+            color={color}
+            weight={weight}
+            onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
+          />
         ))}
       </Flex>
     </Flex>
