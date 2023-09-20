@@ -11,12 +11,9 @@ export const clickImageOnScreenshot = async (imageName: string): Promise<void> =
 
     const response = await fetch(`${baseUrl}/click/${imageName}`, requestOptions);
 
-    if (response.status === 200) {
-      const data = await response.text();
-      Logger.log(`Data received: ${data}`);
-    } else {
-      console.error('Error:', response.statusText);
-    }
+    response.status === 200
+      ? Logger.log(`Response: ${await response.text()}`)
+      : console.error('Error:', response.statusText);
   } catch (error) {
     throw new Error(`An error occurred: ${error}`);
   }
