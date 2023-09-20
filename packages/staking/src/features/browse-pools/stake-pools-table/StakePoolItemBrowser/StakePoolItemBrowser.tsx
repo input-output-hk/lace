@@ -7,7 +7,13 @@ import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDelegationPortfolioStore } from '../../../store';
+import { useOutsideHandles } from '../../../outside-handles-provider';
+import {
+  MAX_POOLS_COUNT,
+  isPoolSelectedSelector,
+  useDelegationPortfolioStore,
+  useNewDelegationPortfolioStore,
+} from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
 export interface StakePoolItemBrowserProps {
@@ -20,8 +26,7 @@ export interface StakePoolItemBrowserProps {
   cost?: number | string;
   logo: string;
   onClick: (id: string) => unknown;
-  onSelect: () => void;
-  onUnselect: () => void;
+  stakePool: Wallet.Cardano.StakePool;
 }
 
 export const getSaturationLevel = (saturation: number): string => {
@@ -48,8 +53,7 @@ export const StakePoolItemBrowser = ({
   logo,
   apy,
   onClick,
-  onSelect,
-  onUnselect,
+  stakePool,
 }: StakePoolItemBrowserProps): React.ReactElement => {
   const { t } = useTranslation();
   let title = name;
@@ -58,9 +62,18 @@ export const StakePoolItemBrowser = ({
     title = ticker || '-';
     subTitle = <Ellipsis className={styles.id} text={id} beforeEllipsis={6} afterEllipsis={8} />;
   }
-  const selectionsNotEmpty = useDelegationPortfolioStore((state) => state.selections.length > 0);
-  const poolAlreadySelected = useDelegationPortfolioStore((state) => state.queries.isPoolSelected(hexId));
-  const selectionsFull = useDelegationPortfolioStore((state) => state.queries.selectionsFull());
+
+  const { poolAlreadySelected, portfolioMutators, selectionsFull, selectionsNotEmpty } = useNewDelegationPortfolioStore(
+    (store) => ({
+      poolAlreadySelected: isPoolSelectedSelector(hexId)(store),
+      portfolioMutators: store.mutators,
+      selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
+      selectionsNotEmpty: store.selectedPortfolio.length > 0,
+    })
+  );
+
+  const { walletStoreWalletUICardanoCoin } = useOutsideHandles();
+
   const disabledAddingToDraft = selectionsFull && !poolAlreadySelected;
 
   const stakePoolStateLabel = poolAlreadySelected
@@ -110,7 +123,24 @@ export const StakePoolItemBrowser = ({
               label={stakePoolStateLabel}
               onClick={(event) => {
                 event.stopPropagation();
-                poolAlreadySelected ? onUnselect() : onSelect();
+                portfolioMutators.executeCommand(
+                  poolAlreadySelected
+                    ? {
+                        data: hexId,
+                        type: 'CommandBrowsePoolsUnselectPool',
+                      }
+                    : {
+                        data: {
+                          displayData: Wallet.util.stakePoolTransformer({
+                            cardanoCoin: walletStoreWalletUICardanoCoin,
+                            stakePool,
+                          }),
+                          id: hexId,
+                          weight: 1,
+                        },
+                        type: 'CommandBrowsePoolsSelectPool',
+                      }
+                );
               }}
               disabled={disabledAddingToDraft}
               data-testid="stake-button"

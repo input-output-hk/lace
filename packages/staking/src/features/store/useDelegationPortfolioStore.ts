@@ -63,8 +63,17 @@ type CommandBrowsePoolsSelectPool = {
   data: DraftPortfolioStakePool;
 };
 
-type CommandBrowsePoolsNewPortfolio = {
-  type: 'CommandBrowsePoolsNewPortfolio';
+type CommandBrowsePoolsUnselectPool = {
+  type: 'CommandBrowsePoolsUnselectPool';
+  data: Wallet.Cardano.PoolIdHex;
+};
+
+type CommandBrowsePoolsClearSelections = {
+  type: 'CommandBrowsePoolsClearSelections';
+};
+
+type CommandBrowsePoolsCreateNewPortfolio = {
+  type: 'CommandBrowsePoolsCreateNewPortfolio';
 };
 
 type CommandBrowsePoolsShowPoolDetails = {
@@ -86,9 +95,11 @@ type OverviewCommand = CommandOverviewShowDetails | CommandOverviewManagePortfol
 
 type BrowsePoolsCommand =
   | CommandBrowsePoolsSelectPool
+  | CommandBrowsePoolsUnselectPool
   | CommandBrowsePoolsShowPoolDetails
   | CommandBrowsePoolsGoToOverview
-  | CommandBrowsePoolsNewPortfolio;
+  | CommandBrowsePoolsClearSelections
+  | CommandBrowsePoolsCreateNewPortfolio;
 
 type CurrentPoolDetailsCommand = CommandCommonCancelDrawer;
 
@@ -227,13 +238,16 @@ const processCommand: Handler = (params) =>
       ),
       [Flow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
         {
-          CommandBrowsePoolsGoToOverview: ({ store }) => {
-            store.activeFlow = Flow.Overview;
+          CommandBrowsePoolsClearSelections: ({ store }) => {
+            store.selectedPortfolio = [];
           },
-          CommandBrowsePoolsNewPortfolio: ({ store }) => {
+          CommandBrowsePoolsCreateNewPortfolio: ({ store }) => {
             store.activeFlow = Flow.NewPortfolioCreation;
             store.activeDrawerStep = DrawerManagementStep.Preferences;
             store.draftPortfolio = store.selectedPortfolio;
+          },
+          CommandBrowsePoolsGoToOverview: ({ store }) => {
+            store.activeFlow = Flow.Overview;
           },
           CommandBrowsePoolsSelectPool: handler<CommandBrowsePoolsSelectPool>(({ store, command: { data } }) => {
             atomicStateMutators.selectPool({ pool: data, store });
@@ -243,6 +257,9 @@ const processCommand: Handler = (params) =>
               atomicStateMutators.showPoolDetails({ pool: data, store, targetFlow: Flow.PoolDetails });
             }
           ),
+          CommandBrowsePoolsUnselectPool: handler<CommandBrowsePoolsUnselectPool>(({ store, command: { data } }) => {
+            atomicStateMutators.unselectPool({ id: data, store });
+          }),
         },
         params.command.type as BrowsePoolsCommand['type'],
         Flow.BrowsePools
@@ -250,7 +267,7 @@ const processCommand: Handler = (params) =>
       [Flow.CurrentPoolDetails]: cases<CurrentPoolDetailsCommand['type']>(
         {
           CommandCommonCancelDrawer: ({ store }) => {
-            helpers.cancelDrawer({ store, targetFlow: Flow.Overview });
+            atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
             store.viewedStakePool = undefined;
           },
         },
@@ -398,14 +415,10 @@ export const useNewDelegationPortfolioStore = create(
   }))
 );
 
-export const isNewDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) => {
-  return [
-    Flow.CurrentPoolDetails,
-    Flow.CurrentPortfolioManagement,
-    Flow.NewPortfolioCreation,
-    Flow.PoolDetails,
-  ].includes(activeFlow);
-};
+export const isNewDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) =>
+  [Flow.CurrentPoolDetails, Flow.CurrentPortfolioManagement, Flow.NewPortfolioCreation, Flow.PoolDetails].includes(
+    activeFlow
+  );
 
 // mappers
 
@@ -423,7 +436,7 @@ export type NewStakePoolDetails = {
   ticker: string;
   apy?: number | string;
   status: Wallet.Cardano.StakePool['status'];
-  fee: number | string; 
+  fee: number | string;
   contact: Wallet.Cardano.PoolContactData;
 };
 
@@ -470,3 +483,6 @@ export const stakePoolDetailsSelector = ({
     ticker,
   };
 };
+
+export const isPoolSelectedSelector = (poolHexId: Wallet.Cardano.PoolIdHex) => (store: DelegationPortfolioStore) =>
+  !!store.selectedPortfolio?.find((pool) => pool.id === poolHexId);

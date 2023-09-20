@@ -1,7 +1,7 @@
 import { Button, Card, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from '../staking/arrow-right.svg';
-import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
+import { MAX_POOLS_COUNT, useNewDelegationPortfolioStore } from '../store';
 import * as styles from './PortfolioBar.css';
 
 type PortfolioBarParams = {
@@ -10,9 +10,9 @@ type PortfolioBarParams = {
 
 export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
   const { t } = useTranslation();
-  const { portfolioMutators, selectedPoolsCount } = useDelegationPortfolioStore((store) => ({
+  const { portfolioMutators, selectedPoolsCount } = useNewDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
-    selectedPoolsCount: store.selections.length,
+    selectedPoolsCount: store.selectedPortfolio.length,
   }));
 
   if (selectedPoolsCount === 0) return null;
@@ -33,7 +33,7 @@ export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
         <Button.Primary
           label={t('portfolioBar.next')}
           icon={<ArrowRight className={styles.nextIcon} />}
-          onClick={onStake}
+          onClick={() => portfolioMutators.executeCommand({ type: 'CommandBrowsePoolsCreateNewPortfolio' })}
           data-testid="portfoliobar-btn-next"
         />
       </Flex>

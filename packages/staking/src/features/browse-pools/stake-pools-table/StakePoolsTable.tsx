@@ -121,6 +121,7 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
             onStake(poolId);
           },
           onUnselect: () => portfolioMutators.unselectPool({ id: hexId }),
+          stakePool: pool,
         };
       }) || [],
     [stakePools, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, onStake, portfolioMutators]
