@@ -26,6 +26,7 @@ Feature: Send Transactions from Dapp - E2E
     And I click on a transaction: 1
     Then The Tx details are displayed as "package.core.transactionDetailBrowser.sent" for ADA with value: 3.00 and wallet: "WalletReceiveSimpleTransactionE2E" address
     When I open wallet: "WalletReceiveSimpleTransactionE2E" in: extended mode
+    And Wallet is synced
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "3.00 tADA" and tokens count 1
     And I click on a transaction: 1
@@ -54,6 +55,7 @@ Feature: Send Transactions from Dapp - E2E
     And I click on a transaction: 1
     Then The Tx details are displayed as "package.core.transactionDetailBrowser.sent" for ADA with value: "1.38" and LaceCoin2 with value: "2" and wallet: "WalletReceiveSimpleTransactionE2E" address
     When I open wallet: "WalletReceiveSimpleTransactionE2E" in: extended mode
+    And Wallet is synced
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "1.38 tADA" and tokens count 2
     And I click on a transaction: 1

@@ -32,7 +32,11 @@ export const closeAllTabsExceptActiveOne = async (): Promise<void> => {
 export const waitUntilExpectedNumberOfHandles = async (expectedNumberOfHandles: number): Promise<void> => {
   await browser.waitUntil(async () => (await browser.getWindowHandles()).length === expectedNumberOfHandles, {
     timeout: 6000,
-    timeoutMsg: `failed while waiting for ${expectedNumberOfHandles} window handles`
+    timeoutMsg: `failed while waiting for ${expectedNumberOfHandles} window handles. Actual number of handles ${
+      (
+        await browser.getWindowHandles()
+      ).length
+    }`
   });
 };
 
