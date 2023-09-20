@@ -5,7 +5,7 @@ import { PostHogClient } from './PostHogClient';
 import { POSTHOG_ENABLED } from './config';
 
 export class PostHogClientInstance {
-  protected postHogClientInstance: PostHogClient;
+  protected static postHogClientInstance: PostHogClient;
 
   static createInstance(
     chain: Wallet.Cardano.ChainId,
@@ -20,8 +20,8 @@ export class PostHogClientInstance {
     view?: ExtensionViews
   ): PostHogClient {
     // create post hog instance once. If post hog is disabled we just return an empty client
-    if (this.prototype.postHogClientInstance || !POSTHOG_ENABLED) return this.prototype.postHogClientInstance;
-    this.prototype.postHogClientInstance = new PostHogClient(
+    if (this.postHogClientInstance || !POSTHOG_ENABLED) return this.postHogClientInstance;
+    this.postHogClientInstance = new PostHogClient(
       chain,
       userIdService,
       {
@@ -30,6 +30,6 @@ export class PostHogClientInstance {
       },
       view
     );
-    return this.prototype.postHogClientInstance;
+    return this.postHogClientInstance;
   }
 }
