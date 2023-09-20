@@ -4,7 +4,6 @@ import { useWalletStore } from '@src/stores';
 import { PostHogClient } from './client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { ExtensionViews } from '@providers/AnalyticsProvider/analyticsTracker';
-import { PostHogClientInstance } from './client/PostHogClientInstance';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 
 // do we move it to PostHogClientInstance?
@@ -34,7 +33,7 @@ export const PostHogClientProvider = ({ children, postHogCustomClient }: PostHog
   const postHogClientInstance = useMemo(
     () =>
       postHogCustomClient ||
-      PostHogClientInstance.createInstance(
+      PostHogClient.createInstance(
         currentChain,
         userIdService,
         { getBackgroundStorage, setBackgroundStorage },

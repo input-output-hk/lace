@@ -16,7 +16,8 @@ import {
   PRODUCTION_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP,
   PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PRODUCTION_TRACKING_MODE_ENABLED,
-  PUBLIC_POSTHOG_HOST
+  PUBLIC_POSTHOG_HOST,
+  POSTHOG_ENABLED
 } from './config';
 import { BackgroundStorage, UserIdService } from '@lib/scripts/types';
 import { experiments, fallbackConfiguration } from '@providers/ExperimentsProvider/config';
@@ -28,6 +29,7 @@ import { Subscription, Subject } from 'rxjs';
  * https://posthog.com/docs/libraries/js
  */
 export class PostHogClient {
+  protected static postHogClientInstance: PostHogClient;
   private userTrackingType: UserTrackingType;
   private currentUserTrackingType?: UserTrackingType;
   private hasPostHogInitialized$: Subject<boolean>;
@@ -94,6 +96,32 @@ export class PostHogClient {
       .catch(() => {
         // TODO: do something with the error if we couldn't get the ID
       });
+  }
+
+  static createInstance(
+    chain: Wallet.Cardano.ChainId,
+    userIdService: UserIdService,
+    {
+      getBackgroundStorage,
+      setBackgroundStorage
+    }: {
+      getBackgroundStorage: () => Promise<BackgroundStorage>;
+      setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
+    },
+    view?: ExtensionViews
+  ): PostHogClient {
+    // create post hog instance once. If post hog is disabled we just return an empty client
+    if (this.postHogClientInstance || !POSTHOG_ENABLED) return this.postHogClientInstance;
+    this.postHogClientInstance = new PostHogClient(
+      chain,
+      userIdService,
+      {
+        getBackgroundStorage,
+        setBackgroundStorage
+      },
+      view
+    );
+    return this.postHogClientInstance;
   }
 
   subscribeToDistinctIdUpdate(): Subscription {
