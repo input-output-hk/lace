@@ -22,6 +22,7 @@ export const mapPortfolioToDisplayData = ({
     color: PIE_CHART_DEFAULT_COLOR_SET[index] as PieChartColor,
     fiat: cardanoPrice,
     lastReward: Wallet.util.lovelacesToAdaString(item.displayData.lastReward.toString()),
+    name: item.displayData.name || '-',
     status: ((): 'retired' | 'saturated' | undefined => {
       if (item.displayData.retired) return 'retired';
       if (Number(item.displayData.saturation || 0) > SATURATION_UPPER_BOUND) return 'saturated';

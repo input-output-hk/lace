@@ -155,6 +155,9 @@ export const colors = {
   $tooltip_title_dot_bgColor: '',
   $tooltip_title_color: '',
   $tooltip_label_color: '',
+
+  $message_title_color: '',
+  $message_description_color: '',
 };
 
 export type Colors = typeof colors;
