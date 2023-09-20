@@ -29,7 +29,9 @@ import { Subscription, Subject } from 'rxjs';
  */
 export class PostHogClient {
   private userTrackingType: UserTrackingType;
+  private currentUserTrackingType?: UserTrackingType;
   private hasPostHogInitialized$: Subject<boolean>;
+
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
@@ -95,7 +97,8 @@ export class PostHogClient {
   }
 
   subscribeToDistinctIdUpdate(): Subscription {
-    return this.userIdService.userTrackingDetails$.subscribe(async () => {
+    return this.userIdService.userTrackingType$.subscribe(async (trackingType) => {
+      this.currentUserTrackingType = trackingType;
       const id = await this.userIdService.getUserId(this.chain.networkId);
       posthog.register({
         distinct_id: id
@@ -186,16 +189,15 @@ export class PostHogClient {
   }
 
   protected async getPersonProperties(): Promise<PostHogPersonProperties | undefined> {
-    const currentUserTrackingType = await this.userIdService.getUserTrackingType();
     if (!this.userTrackingType) {
-      this.userTrackingType = currentUserTrackingType;
+      this.userTrackingType = this.currentUserTrackingType;
       // set user_tracking_type in the first event
       return { $set: { user_tracking_type: this.userTrackingType } };
     }
 
     // eslint-disable-next-line consistent-return
-    if (currentUserTrackingType === this.userTrackingType) return;
-    this.userTrackingType = currentUserTrackingType;
+    if (this.currentUserTrackingType === this.userTrackingType) return;
+    this.userTrackingType = this.currentUserTrackingType;
     // update user_tracking_type if tracking type has changed
     return { $set: { user_tracking_type: this.userTrackingType } };
   }

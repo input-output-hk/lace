@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
 import { UserIdService } from '@lib/scripts/types';
-import { ExtensionViews, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { ExtensionViews, PostHogAction, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/PostHogClientProvider/client/config';
 import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
@@ -11,6 +11,7 @@ import { waitFor } from '@testing-library/react';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
 const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
+const mockUserTrackingType$ = new Subject<UserTrackingType>();
 
 jest.mock('posthog-js');
 
@@ -20,7 +21,7 @@ describe('PostHogClient', () => {
   const userId = 'userId';
   const mockUserIdService: UserIdService = {
     ...userIdServiceMock,
-    userTrackingDetails$: new Subject(),
+    userTrackingType$: mockUserTrackingType$,
     getUserId: jest.fn().mockImplementation(() => Promise.resolve(userId))
   };
 
@@ -174,15 +175,16 @@ describe('PostHogClient', () => {
   });
 
   it('should return user_tracking_type enhanced', async () => {
-    const mockGetUserTrackingType = jest.fn().mockReturnValue('enhanced');
     const event = PostHogAction.OnboardingCreateClick;
     const client = new PostHogClient(
       chain,
-      { ...mockUserIdService, getUserTrackingType: mockGetUserTrackingType },
+      { ...mockUserIdService },
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
     );
+    const subcription = client.subscribeToDistinctIdUpdate();
+    mockUserIdService.userTrackingType$.next(UserTrackingType.Enhanced);
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,
@@ -193,18 +195,20 @@ describe('PostHogClient', () => {
         }
       })
     );
+    subcription.unsubscribe();
   });
 
   it('should return user_tracking_type basic after calling twice', async () => {
-    const mockGetUserTrackingType = jest.fn().mockReturnValue('enhanced');
     const event = PostHogAction.OnboardingCreateClick;
     const client = new PostHogClient(
       chain,
-      { ...mockUserIdService, getUserTrackingType: mockGetUserTrackingType },
+      { ...mockUserIdService },
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
     );
+    const subcription = client.subscribeToDistinctIdUpdate();
+    mockUserIdService.userTrackingType$.next(UserTrackingType.Enhanced);
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,
@@ -215,8 +219,7 @@ describe('PostHogClient', () => {
         }
       })
     );
-
-    mockGetUserTrackingType.mockReturnValue('basic');
+    mockUserIdService.userTrackingType$.next(UserTrackingType.Basic);
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,
@@ -227,5 +230,6 @@ describe('PostHogClient', () => {
         }
       })
     );
+    subcription.unsubscribe();
   });
 });

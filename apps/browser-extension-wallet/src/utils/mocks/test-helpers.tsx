@@ -10,7 +10,7 @@ import { DisplayedCoinDetail, IAssetInfo } from '../../features/send/types';
 import { APP_MODE_POPUP, cardanoCoin } from '../constants';
 import { fakeApiRequest } from './fake-api-request';
 // eslint-disable-next-line import/no-unresolved
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { PriceResult } from '@hooks';
 import { Percent } from '@cardano-sdk/util';
 import { UserIdService } from '@lib/scripts/types';
@@ -623,8 +623,7 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   getRandomizedUserId: jest.fn(),
   getUserId: jest.fn(),
   getAliasProperties: jest.fn(),
-  getUserTrackingType: jest.fn(),
-  userTrackingDetails$: jest.fn()
+  userTrackingType$: new Subject() as any
 };
 
 export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {

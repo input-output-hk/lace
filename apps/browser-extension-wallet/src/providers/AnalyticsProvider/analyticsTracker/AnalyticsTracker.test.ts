@@ -216,8 +216,7 @@ describe('AnalyticsTracker', () => {
       spy = jest.spyOn(userIdService, 'getUserIdService');
       spy.mockReturnValue({
         ...userIdServiceMock,
-        userTrackingDetails$: new Subject(),
-        getUserTrackingType: jest.fn().mockReturnValue(UserTrackingType.Basic)
+        userTrackingType$: new Subject()
       });
     });
 
@@ -227,12 +226,14 @@ describe('AnalyticsTracker', () => {
 
     it('should not call Post Hog sendPageNavigationEvent for opted out user', async () => {
       const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
+      spy.getMockImplementation()().userTrackingType$.next(UserTrackingType.Basic);
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendPageNavigationEvent();
       expect(mockedPostHogClient.sendPageNavigationEvent).not.toHaveBeenCalled();
     });
     it('should not call Post Hog sentEvent for opted out user', async () => {
       const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
+      spy.getMockImplementation()().userTrackingType$.next(UserTrackingType.Basic);
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       const event = PostHogAction.OnboardingCreateClick;
       await tracker.sendEventToPostHog(event);
@@ -241,12 +242,14 @@ describe('AnalyticsTracker', () => {
     });
     it('should not call Post Hog sendAliasEvent for opted out user', async () => {
       const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
+      spy.getMockImplementation()().userTrackingType$.next(UserTrackingType.Basic);
       const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
       await tracker.sendAliasEvent();
       expect(mockedPostHogClient.sendAliasEvent).not.toHaveBeenCalled();
     });
     it('should not call Matomo sentEvent for opted out user', async () => {
       const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
+      spy.getMockImplementation()().userTrackingType$.next(UserTrackingType.Basic);
       const mockedMatomoClient = (MatomoClient as jest.Mock<MatomoClient>).mock.instances[0];
       const event = {
         category: MatomoEventCategories.WALLET_RESTORE,
