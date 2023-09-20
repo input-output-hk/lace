@@ -242,6 +242,9 @@ const colors: Colors = {
   $tooltip_title_dot_bgColor: lightColorScheme.$primary_accent_purple,
   $tooltip_label_color: lightColorScheme.$primary_dark_grey,
   $tooltip_title_color: lightColorScheme.$primary_black,
+
+  $message_title_color: lightColorScheme.$primary_black,
+  $message_description_color: lightColorScheme.$primary_dark_grey,
 };
 
 export const elevation: Elevation = {
