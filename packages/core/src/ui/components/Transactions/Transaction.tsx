@@ -258,27 +258,30 @@ export const Transaction = ({
             <span>&nbsp;{includedTime}</span>
           </div>
         </div>
-        <div className={styles.details}>
-          <div className={styles.txFeeContainer}>
-            <div className={styles.txfee}>{t('package.core.transactionDetailBrowser.transactionFee')}</div>
-            <Tooltip title={t('package.core.transactionDetailBrowser.transactionFeeInfo')}>
-              {Info ? (
-                <Info style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} />
-              ) : (
-                <InfoCircleOutlined />
-              )}
-            </Tooltip>
-          </div>
 
-          <div data-testid="tx-fee" className={styles.detail}>
-            <div className={styles.amount}>
-              <span data-testid="tx-fee-ada" className={styles.ada}>{`${fee} ${coinSymbol}`}</span>
-              <span data-testid="tx-fee-fiat" className={styles.fiat}>
-                {amountTransformer(fee)}
-              </span>
+        {fee && fee !== '-' && (
+          <div className={styles.details}>
+            <div className={styles.txFeeContainer}>
+              <div className={styles.txfee}>{t('package.core.transactionDetailBrowser.transactionFee')}</div>
+              <Tooltip title={t('package.core.transactionDetailBrowser.transactionFeeInfo')}>
+                {Info ? (
+                  <Info style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} />
+                ) : (
+                  <InfoCircleOutlined />
+                )}
+              </Tooltip>
+            </div>
+
+            <div data-testid="tx-fee" className={styles.detail}>
+              <div className={styles.amount}>
+                <span data-testid="tx-fee-ada" className={styles.ada}>{`${fee} ${coinSymbol}`}</span>
+                <span data-testid="tx-fee-fiat" className={styles.fiat}>
+                  {amountTransformer(fee)}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {deposit &&
           renderDepositValueSection({ value: deposit, label: t('package.core.transactionDetailBrowser.deposit') })}
