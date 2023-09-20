@@ -1,9 +1,8 @@
 @TrezorOnboarding @Trezor @Pending
 Feature: Trezor Onboarding
 
-  @wip
   Scenario: Onboarding Trezor wallet
-    And I Unlock and enter correct pin on Trezor emulator
+    And I connect, unlock and enter correct pin on Trezor emulator
     Given I click "Connect" button on wallet setup page
     And I click "OK" button on "Limited support for DApp" modal
     And I am on "Lace terms of use" page and accept terms

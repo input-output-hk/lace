@@ -2,7 +2,8 @@ import { Given } from '@cucumber/cucumber';
 import { clickImageOnScreenshot } from '../utils/trezorEmulatorApiClient';
 import { browser } from '@wdio/globals';
 
-Given(/^I Unlock and enter correct pin on Trezor emulator$/, async () => {
+Given(/^I connect, unlock and enter correct pin on Trezor emulator$/, async () => {
+  await clickImageOnScreenshot('notConnectedTrezor.png');
   await clickImageOnScreenshot('tapToUnlock.png');
   await clickImageOnScreenshot('pin.png');
   await clickImageOnScreenshot('confirmPin.png');
