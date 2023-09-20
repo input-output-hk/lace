@@ -60,34 +60,6 @@ Feature: ADA handle - extended view
     And I click "Done" button on "Edit address" drawer
     And I see a toast with message: "addressBook.errors.givenAddressAlreadyExist"
 
-  @LW-7428
-  Scenario: Extended View - Validate custom image from a handle on the "Select NFT" (folder) screen
-    Given I navigate to NFTs extended page
-    And I click "Receive" button on page header
-    And I see handle listed on the "Receive" screen
-    And I close the drawer by clicking close button
-    And I navigate to NFTs extended page
-    And I click "Create folder" button on NFTs page
-    And I enter a folder name "Sample NFT folder" into "Folder name" input
-    And I click "Next" button on "Name your folder" page
-    Then I can see the handle listed on the "Select NFT" screen
-    And the corresponding custom image is displayed
-
-  @LW-7429
-  Scenario: Extended View - Validate custom image from a handle on the NFT folder
-    Given I navigate to NFTs extended page
-    And I click "Receive" button on page header
-    And I see handle listed on the "Receive" screen
-    And I close the drawer by clicking close button
-    And I navigate to NFTs extended page
-    And I create folder with name: "Ada Handle folder" that contains 4 NFTs
-    When I left click on the NFT folder with name "Ada Handle folder"
-    Then I see "Ada Handle folder" NFT folder page in extended mode
-    And I see NFT with name "$test_handle_1" on the NFT folder page
-    And I see NFT with name "$test_handle_2" on the NFT folder page
-    And I see NFT with name "$test_handle_3" on the NFT folder page
-    And I see NFT with name "$t_h_1" on the NFT folder page
-
   @LW-7140 @LW-7136
   Scenario: Extended View - Ada handles displayed and sorted by handle length
     When I click "Receive" button on page header
@@ -119,3 +91,54 @@ Feature: ADA handle - extended view
     When I click "Copy" button on "Receive" page for handle: "$test_handle_3"
     Then I see a toast with text: "Handle copied"
     And Clipboard contains text: "$test_handle_3"
+
+  @LW-7427 @LW-7426
+  Scenario: Extended View - Validate custom ADA handle image on the wallet address/NFTs/NFT details page
+    When I click "Receive" button on page header
+    Then I see ADA handle with custom image on the "Wallet Address" page
+    And I close the drawer by clicking close button
+    When I navigate to NFTs extended page
+    Then I see ADA handle NFT with custom image on the NFTs page
+    When I left click on the NFT with name "$test_handle_1" on NFTs page
+    Then I see ADA handle NFT details page with custom image in extended mode
+
+  @LW-7430
+  Scenario: Extended View - Validate custom ADA handle image on the send/coin selector page
+    When I click "Send" button on page header
+    And I click "Add token or NFT" button for bundle 1
+    And click on the NFTs button in the coin selector dropdown
+    Then NFT with name: "$test_handle_1" is displayed in coin selector
+    And I see ADA handle NFT with custom image on the Coin selector page
+    When I click on NFT with name: "$test_handle_1" in asset selector
+    Then the "$test_handle_1" asset is displayed in bundle 1
+
+  @LW-7429
+  Scenario: Extended View - Validate custom ADA handle image on the NFT folder thumbnail/page
+    Given I navigate to NFTs extended page
+    And I click "Receive" button on page header
+    And I see handles listed on the "Receive" screen
+    And I close the drawer by clicking close button
+    And I navigate to NFTs extended page
+    When I create folder with name: "Ada Handle folder" that contains 4 NFTs
+    Then I see a thumbnail of ADA handle with custom image on the NFT folder with name: "Ada Handle folder"
+    When I left click on the NFT folder with name "Ada Handle folder"
+    And I see "Ada Handle folder" NFT folder page in extended mode
+    And I see NFT with name "$test_handle_1" on the NFT folder page
+    And I see NFT with name "$test_handle_2" on the NFT folder page
+    And I see NFT with name "$test_handle_3" on the NFT folder page
+    And I see NFT with name "$t_h_1" on the NFT folder page
+    Then I see ADA handle NFT with custom image on the NFT folder page
+
+  @LW-7428
+  Scenario: Extended View - Validate custom ADA handle image on the "Select NFT" (folder) screen
+    Given I navigate to NFTs extended page
+    And I click "Receive" button on page header
+    And I see handles listed on the "Receive" screen
+    And I close the drawer by clicking close button
+    And I navigate to NFTs extended page
+    And I click "Create folder" button on NFTs page
+    And I enter a folder name "Sample NFT folder" into "Folder name" input
+    And I click "Next" button on "Name your folder" page
+    Then I can see the handles listed on the "Select NFT" screen
+    And I see ADA handle NFT with custom image on the Select NFT page
+    And the corresponding custom images are displayed
