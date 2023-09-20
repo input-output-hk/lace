@@ -1,5 +1,5 @@
 import { IViewsList } from '../../../types';
-import { ConfirmTransaction } from '../components/ConfirmTransaction';
+import { ConfirmTransaction } from '../components/confirm-transaction/ConfirmTransaction';
 import { SignTransaction } from '../components/SignTransaction';
 import { DappTransactionFail } from '../components/DappTransactionFail';
 import { IViewAction, IViewState } from '../../../providers';
