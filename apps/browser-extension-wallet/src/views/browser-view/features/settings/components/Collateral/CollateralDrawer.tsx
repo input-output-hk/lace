@@ -15,19 +15,22 @@ import { TransactionSuccess } from '@src/views/browser-view/features/send-transa
 import { TransactionFail } from '@src/views/browser-view/features/send-transaction/components/TransactionFail';
 import { useBuiltTxState } from '@src/views/browser-view/features/send-transaction';
 import { FooterHW } from './hardware-wallet/FooterHW';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 interface CollateralDrawerProps {
   visible: boolean;
   onClose: () => void;
   hasCollateral?: boolean;
   unspendableLoaded: boolean;
+  sendAnalyticsEvent?: (event: PostHogAction) => void;
 }
 
 export const CollateralDrawer = ({
   visible,
   onClose,
   hasCollateral,
-  unspendableLoaded
+  unspendableLoaded,
+  sendAnalyticsEvent
 }: CollateralDrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const { currentSection: section, setSection } = useSections();
@@ -53,11 +56,12 @@ export const CollateralDrawer = ({
   const readyToOperate = !isWalletSyncingForTheFirstTime && unspendableLoaded;
 
   const handleClose = useCallback(async () => {
+    sendAnalyticsEvent(PostHogAction.SettingsCollateralXClick);
     // TODO: Remove this workaround for Hardware Wallets alongside send flow and staking.
     if ([Sections.FAIL_TX, Sections.SUCCESS_TX].includes(section.currentSection) && !isInMemory)
       window.location.reload();
     else onClose();
-  }, [isInMemory, onClose, section.currentSection]);
+  }, [isInMemory, onClose, section.currentSection, sendAnalyticsEvent]);
 
   useEffect(() => {
     if (!visible) return;
@@ -93,6 +97,16 @@ export const CollateralDrawer = ({
     setSection({ currentSection: Sections.SUCCESS_TX });
   }, [builtTxData?.uiTx?.hash, isInMemory, setSection]);
 
+  const handleReclaimCollateral = () => {
+    onClose();
+    sendAnalyticsEvent(PostHogAction.SettingsCollateralReclaimCollateralClick);
+  };
+
+  const handleConfirmCollateral = () => {
+    onClose();
+    sendAnalyticsEvent(PostHogAction.SettingsCollateralConfirmClick);
+  };
+
   const sectionMap: Record<Sections, React.ReactElement> = {
     [Sections.RECLAIM]: <CollateralStepReclaim popupView={popupView} />,
     [Sections.SEND]: (
@@ -115,7 +129,7 @@ export const CollateralDrawer = ({
     [Sections.RECLAIM]: (
       <CollateralFooterReclaim
         setCurrentStep={setSection}
-        onClose={onClose}
+        onClose={handleReclaimCollateral}
         onClaim={clearPassword}
         isInitializing={isInitializing}
         isSubmitting={isSubmitting}
@@ -124,7 +138,7 @@ export const CollateralDrawer = ({
     [Sections.SEND]: (
       <CollateralFooterSend
         setCurrentStep={setSection}
-        onClose={onClose}
+        onClose={handleConfirmCollateral}
         onClaim={clearPassword}
         keyAgentType={keyAgentType}
         setIsPasswordValid={setIsPasswordValid}

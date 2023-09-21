@@ -14,6 +14,7 @@ export interface InfoWalletProps {
   translations: TranslationsFor<'copiedMessage' | 'copy'>;
   getQRCodeOptions?: () => React.ComponentProps<typeof QRCode>['options'];
   inlineCopy?: boolean;
+  onClick?: () => void;
 }
 
 export const InfoWallet = ({
@@ -21,14 +22,17 @@ export const InfoWallet = ({
   isPopupView,
   translations,
   getQRCodeOptions,
-  inlineCopy
+  inlineCopy,
+  onClick
 }: InfoWalletProps): React.ReactElement => {
-  const doToast = () =>
+  const doToast = () => {
     toast.notify({
       duration: TOAST_DEFAULT_DURATION,
       text: translations.copiedMessage,
       icon: CopyIcon
     });
+    onClick();
+  };
 
   return (
     <div className={styles.infoWalletContainer} data-testid="info-wallet">
