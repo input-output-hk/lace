@@ -6,7 +6,7 @@ import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
 import ToastMessage from '../elements/toastMessage';
 
-When(/^I see handle listed on the "Receive" screen$/, async () => {
+When(/^I see handles listed on the "Receive" screen$/, async () => {
   await walletAddressPageAssert.assertSeeAdaHandleAddressCard();
 });
 
@@ -51,4 +51,8 @@ Then(/^I see a toast with text: "(Handle|Address) copied"$/, async (action: stri
 
   await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
   await ToastMessage.closeButton.click();
+});
+
+Then(/^I see ADA handle with custom image on the "Wallet Address" page$/, async () => {
+  await walletAddressPageAssert.assertSeeAdaHandleCardWithCustomImage();
 });

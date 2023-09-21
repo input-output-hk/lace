@@ -109,7 +109,24 @@ export enum PostHogAction {
   SettingsCookiePolicyXClick = 'settings | cookie policy | x | click',
   SettingsRemoveWalletClick = 'settings | remove wallet | click',
   SettingsHoldUpRemoveWalletClick = 'settings | hold up | remove wallet | click',
-  SettingsHoldUpBackClick = 'settings | hold up | back | click'
+  SettingsHoldUpBackClick = 'settings | hold up | back | click',
+  SettingsNetworkClick = 'settings | network | click',
+  SettingsNetworkPreviewClick = 'settings | network | preview | click',
+  SettingsNetworkPreprodClick = 'settings | network | preprod | click',
+  SettingsNetworkMainnetClick = 'settings | network | mainnet | click',
+  SettingsNetworkXClick = 'settings | network | x | click',
+  SettingsAuthorizedDappsClick = 'settings | authorized dapps | click',
+  SettingsAuthorizedDappsTrashBinIconClick = 'settings | authorized dapps | trash bin icon | click',
+  SettingsAuthorizedDappsHoldUpDisconnectDappClick = 'settings | authorized dapps | hold up! | disconnect dapp | click',
+  SettingsAuthorizedDappsHoldUpBackClick = 'settings | authorized dapps | hold up! | back | click',
+  SettingsYourKeysClick = 'settings | your keys | click',
+  SettingsYourKeysShowPublicKeyClick = 'settings | your keys | show public key | click',
+  SettingsYourKeysShowPublicKeyCopyClick = 'settings | your keys | show public key | copy | click',
+  SettingsYourKeysShowPublicKeyXClick = 'settings | your keys | show public key | x | click',
+  SettingsCollateralClick = 'settings | collateral | click',
+  SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
+  SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
+  SettingsCollateralXClick = 'settings | collateral | x | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
