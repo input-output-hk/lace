@@ -109,6 +109,7 @@ const createWithTrezorDeviceConnection = async (
 
   return new KeyManagement.TrezorKeyAgent(
     {
+      __typename: KeyManagement.KeyAgentType.Trezor,
       accountIndex,
       chainId,
       extendedAccountPublicKey: publicKey,
