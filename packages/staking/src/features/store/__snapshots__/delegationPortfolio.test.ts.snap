@@ -38,7 +38,7 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
     },
     "ticker": "8BOOL",
     "value": 1n,
-    "weight": 33.33,
+    "weight": 33,
   },
   {
     "displayData": {
@@ -76,7 +76,7 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
     },
     "ticker": "8BOOM",
     "value": 1n,
-    "weight": 33.33,
+    "weight": 33,
   },
   {
     "displayData": {
@@ -114,7 +114,7 @@ exports[`delegationPortfolioStore > sets the current portfolio 1`] = `
     },
     "ticker": "ADACT",
     "value": 1n,
-    "weight": 33.33,
+    "weight": 33,
   },
 ]
 `;
