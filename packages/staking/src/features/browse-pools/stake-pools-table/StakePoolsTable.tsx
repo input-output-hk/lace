@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { useStakePoolDetails } from '../../store';
+import { useNewDelegationPortfolioStore } from '../../store';
 import { StakePoolItemBrowserProps } from './StakePoolItemBrowser';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
@@ -32,7 +32,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
 
-  const { setIsDrawerVisible } = useStakePoolDetails();
+  const portfolioMutators = useNewDelegationPortfolioStore((store) => store.mutators);
 
   const {
     walletStoreWalletUICardanoCoin: cardanoCoin,
@@ -60,11 +60,10 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
 
   useEffect(() => {
-    // Close pool details drawer & fetch pools on mount, network switching, searchValue change and sort change
-    setIsLoadingList(true);
-    setIsDrawerVisible(false);
+    // Reset states drawer & fetch pools on mount, network switching, searchValue change and sort change
+    portfolioMutators.forceAbortFlows();
     debouncedSearch({ searchString: searchValue, sort });
-  }, [blockchainProvider, searchValue, sort, debouncedSearch, setIsDrawerVisible]);
+  }, [blockchainProvider, searchValue, sort, debouncedSearch, portfolioMutators]);
 
   const loadMoreData = () => fetchStakePools({ searchString: searchValue, skip: skip + defaultFetchLimit, sort });
 

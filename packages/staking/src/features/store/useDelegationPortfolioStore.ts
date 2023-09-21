@@ -291,7 +291,7 @@ const targetWeight = 100;
 const mapPoolWeights = (pools: DraftPortfolioStakePool[]) =>
   pools.map<DraftPortfolioStakePool>((pool) => ({ ...pool, weight: Math.round(targetWeight / pools.length) }));
 
-const missingDraftPortfolioErrorMessage = 'Delegation Portfolio Store: Inconsistent state: missing draftPortfolio';
+const missingDraftPortfolioErrorMessage = 'DelegationPortfolioStore: Inconsistent state: missing draftPortfolio';
 
 const atomicStateMutators = {
   addPoolsFromPreferences: ({ store }: { store: DelegationPortfolioStore }) => {
