@@ -548,7 +548,6 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
               CommandCommonDrawerContinue: ({ store }) => {
-                store.draftPortfolio = undefined;
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
               CommandSignDrawerFailure: ({ store }) => {
@@ -562,6 +561,7 @@ const processCommand: Handler = (params) =>
             {
               CommandCommonCancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
+                store.draftPortfolio = undefined;
               },
             },
             params.command.type as CurrentPortfolioManagementStepSuccessCommand['type'],
@@ -577,7 +577,6 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Sign;
               },
               CommandCommonDrawerContinue: ({ store }) => {
-                store.draftPortfolio = undefined;
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
             },
@@ -665,8 +664,6 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
               CommandCommonDrawerContinue: ({ store }) => {
-                store.draftPortfolio = undefined;
-                store.selectedPortfolio = []; // NewPortfolio-specific
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
               CommandSignDrawerFailure: ({ store }) => {
@@ -680,6 +677,8 @@ const processCommand: Handler = (params) =>
             {
               CommandCommonCancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+                store.draftPortfolio = undefined;
+                store.selectedPortfolio = []; // NewPortfolio-specific
               },
             },
             params.command.type as NewPortfolioCreationStepsSuccessCommand['type'],
@@ -694,10 +693,7 @@ const processCommand: Handler = (params) =>
               CommandCommonDrawerBack: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Sign;
               },
-              // eslint-disable-next-line sonarjs/no-identical-functions
               CommandCommonDrawerContinue: ({ store }) => {
-                store.draftPortfolio = undefined;
-                store.selectedPortfolio = []; // NewPortfolio-specific
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
             },
