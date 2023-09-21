@@ -720,7 +720,7 @@ const defaultState: State = {
   viewedStakePool: undefined,
 };
 
-export const useNewDelegationPortfolioStore = create(
+export const useDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set, get) => ({
     ...defaultState,
     mutators: {
@@ -797,14 +797,12 @@ export const useNewDelegationPortfolioStore = create(
   }))
 );
 
-export const isNewDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) =>
+export const isDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) =>
   [Flow.CurrentPoolDetails, Flow.CurrentPortfolioManagement, Flow.NewPortfolioCreation, Flow.PoolDetails].includes(
     activeFlow
   );
 
-// mappers
-
-export type NewStakePoolDetails = {
+export type StakePoolDetails = {
   delegators?: number | string;
   description: string;
   hexId: string;
@@ -825,7 +823,7 @@ export type NewStakePoolDetails = {
 export const stakePoolDetailsSelector = ({
   cardanoCoinSymbol,
   viewedStakePool,
-}: DelegationPortfolioStore): NewStakePoolDetails | undefined => {
+}: DelegationPortfolioStore): StakePoolDetails | undefined => {
   if (!viewedStakePool) return undefined;
   // eslint-disable-next-line consistent-return
   return mapStakePoolToDisplayData({ cardanoCoinSymbol, stakePool: viewedStakePool });

@@ -5,7 +5,7 @@ import cn from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useNewDelegationPortfolioStore } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import { ResultMessage } from './ResultMessage';
 import styles from './TransactionComplete.module.scss';
 
@@ -39,7 +39,7 @@ export const TransactionSuccessFooter = ({ popupView }: TransactionSuccessProps)
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     sendEvent: () => {},
   };
-  const { portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
   }));
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);

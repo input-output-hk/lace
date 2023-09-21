@@ -10,9 +10,9 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import {
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,
-  NewStakePoolDetails,
+  StakePoolDetails,
   stakePoolDetailsSelector,
-  useNewDelegationPortfolioStore,
+  useDelegationPortfolioStore,
 } from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
@@ -39,13 +39,13 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       status,
       contact,
     },
-  } = useNewDelegationPortfolioStore((store) => ({
+  } = useDelegationPortfolioStore((store) => ({
     delegatingToThisPool:
       store.viewedStakePool?.hexId &&
       store.currentPortfolio
         .map((portfolioItem) => portfolioItem.id)
         .includes(Wallet.Cardano.PoolIdHex(store.viewedStakePool?.hexId)),
-    details: stakePoolDetailsSelector(store) || ({} as NewStakePoolDetails),
+    details: stakePoolDetailsSelector(store) || ({} as StakePoolDetails),
   }));
 
   const socialNetworks = [
@@ -172,7 +172,7 @@ export type StakePoolDetailFooterProps = {
 };
 
 const makeSelector =
-  (openPool?: NewStakePoolDetails) =>
+  (openPool?: StakePoolDetails) =>
   ({ currentPortfolio, selectedPortfolio }: DelegationPortfolioStore) => {
     const poolInCurrentPortfolio =
       !!openPool && currentPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
@@ -245,13 +245,13 @@ const makeActionButtons = (
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletStoreGetKeyAgentType } = useOutsideHandles();
-  const { openPoolDetails, portfolioMutators, viewedStakePool } = useNewDelegationPortfolioStore((store) => ({
+  const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),
     portfolioMutators: store.mutators,
     viewedStakePool: store.viewedStakePool,
   }));
   const { ableToSelect, ableToStakeOnlyOnThisPool, selectionsEmpty, poolInCurrentPortfolio, poolSelected } =
-    useNewDelegationPortfolioStore(makeSelector(openPoolDetails));
+    useDelegationPortfolioStore(makeSelector(openPoolDetails));
 
   const isInMemory = useMemo(
     () => walletStoreGetKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,

@@ -6,14 +6,14 @@ import { StakePoolDetails } from '../drawer';
 import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
-import { DrawerManagementStep, DrawerStep, Page, useNewDelegationPortfolioStore } from '../store';
+import { DrawerManagementStep, DrawerStep, Page, useDelegationPortfolioStore } from '../store';
 import { Navigation } from './Navigation';
 
 const stepsWithBackBtn = new Set<DrawerStep>([DrawerManagementStep.Confirmation, DrawerManagementStep.Sign]);
 
 export const StakingView = () => {
   const { t } = useTranslation();
-  const { portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
   }));
   const {

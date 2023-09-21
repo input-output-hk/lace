@@ -7,7 +7,7 @@ import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MAX_POOLS_COUNT, isPoolSelectedSelector, useNewDelegationPortfolioStore } from '../../../store';
+import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
 export interface StakePoolItemBrowserProps {
@@ -55,7 +55,7 @@ export const StakePoolItemBrowser = ({
     subTitle = <Ellipsis className={styles.id} text={id} beforeEllipsis={6} afterEllipsis={8} />;
   }
 
-  const { poolAlreadySelected, portfolioMutators, selectionsFull, selectionsNotEmpty } = useNewDelegationPortfolioStore(
+  const { poolAlreadySelected, portfolioMutators, selectionsFull, selectionsNotEmpty } = useDelegationPortfolioStore(
     (store) => ({
       poolAlreadySelected: isPoolSelectedSelector(hexId)(store),
       portfolioMutators: store.mutators,

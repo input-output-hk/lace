@@ -8,7 +8,7 @@ import {
   DrawerStep,
   Flow,
   MAX_POOLS_COUNT,
-  useNewDelegationPortfolioStore,
+  useDelegationPortfolioStore,
 } from '../store';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
@@ -33,16 +33,14 @@ export const StakePoolDetails = ({
 }: stakePoolDetailsProps): React.ReactElement => {
   const { walletStoreInMemoryWallet } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
-  const { activeDrawerStep, activeFlow, selectionsFull, openPoolIsSelected } = useNewDelegationPortfolioStore(
-    (store) => ({
-      activeDrawerStep: store.activeDrawerStep,
-      activeFlow: store.activeFlow,
-      openPoolIsSelected: store.selectedPortfolio.some(
-        (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
-      ),
-      selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
-    })
-  );
+  const { activeDrawerStep, activeFlow, selectionsFull, openPoolIsSelected } = useDelegationPortfolioStore((store) => ({
+    activeDrawerStep: store.activeDrawerStep,
+    activeFlow: store.activeFlow,
+    openPoolIsSelected: store.selectedPortfolio.some(
+      (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
+    ),
+    selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
+  }));
   const delegationPending = inFlightTx
     ?.map(({ body: { certificates } }) =>
       (certificates ?? []).filter((c) => c.__typename === Wallet.Cardano.CertificateType.StakeDelegation)

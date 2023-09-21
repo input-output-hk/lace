@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { initI18n } from '../../i18n';
 import '../reset.css';
 import { useOutsideHandles } from '../../outside-handles-provider';
-import { useNewDelegationPortfolioStore } from '../../store';
+import { useDelegationPortfolioStore } from '../../store';
 import { StakingProps } from '../types';
 import { SetupBase, SetupBaseProps } from './SetupBase';
 
@@ -13,7 +13,7 @@ type SetupProps = Omit<SetupBaseProps, 'loading'> & Pick<StakingProps, 'currentC
 
 export const Setup = ({ children, currentChain, ...rest }: SetupProps) => {
   const { balancesBalance, walletStoreInMemoryWallet } = useOutsideHandles();
-  const portfolioMutators = useNewDelegationPortfolioStore((s) => s.mutators);
+  const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
   const currentEpoch = useObservable(walletStoreInMemoryWallet.currentEpoch$);
   const delegationRewardsHistory = useObservable(walletStoreInMemoryWallet.delegation.rewardsHistory$);

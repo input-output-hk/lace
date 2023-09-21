@@ -1,7 +1,7 @@
 import { SubNavigation } from '@lace/ui';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flow, Page, useNewDelegationPortfolioStore } from '../store';
+import { Flow, Page, useDelegationPortfolioStore } from '../store';
 
 type NavigationProps = {
   children: (activePage: Page) => ReactNode;
@@ -10,7 +10,7 @@ type NavigationProps = {
 const isValueAValidSubPage = (value: string): value is Page => Object.values<string>(Page).includes(value);
 
 export const Navigation = ({ children }: NavigationProps) => {
-  const { activePage, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+  const { activePage, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     activePage: [Flow.Overview, Flow.CurrentPoolDetails, Flow.CurrentPortfolioManagement].includes(store.activeFlow)
       ? Page.overview
       : Page.browsePools,

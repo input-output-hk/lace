@@ -3,12 +3,12 @@ import { Button, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { DelegationCard } from '../overview/DelegationCard';
-import { MAX_POOLS_COUNT, useNewDelegationPortfolioStore } from '../store';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 export const StakePoolPreferencesFooter = () => {
   const { t } = useTranslation();
-  const portfolioMutators = useNewDelegationPortfolioStore((store) => store.mutators);
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
   return (
     <Flex flexDirection="column" alignItems="stretch" gap="$16">
@@ -34,7 +34,7 @@ export const StakePoolPreferences = () => {
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,
   } = useOutsideHandles();
-  const { draftPortfolio, portfolioMutators } = useNewDelegationPortfolioStore((state) => ({
+  const { draftPortfolio, portfolioMutators } = useDelegationPortfolioStore((state) => ({
     activeDrawerStep: state.activeDrawerStep,
     draftPortfolio: state.draftPortfolio || [],
     portfolioMutators: state.mutators,

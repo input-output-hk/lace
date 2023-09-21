@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { useNewDelegationPortfolioStore } from '../../store';
+import { useDelegationPortfolioStore } from '../../store';
 import { StakePoolItemBrowserProps } from './StakePoolItemBrowser';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
@@ -32,7 +32,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
 
-  const portfolioMutators = useNewDelegationPortfolioStore((store) => store.mutators);
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
   const {
     walletStoreWalletUICardanoCoin: cardanoCoin,

@@ -4,7 +4,7 @@ import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useNewDelegationPortfolioStore } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import styles from './SignConfirmation.module.scss';
 
 interface SignConfirmationProps {
@@ -58,7 +58,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     walletManagerExecuteWithPassword: executeWithPassword,
   } = useOutsideHandles();
-  const { currentPortfolio, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));

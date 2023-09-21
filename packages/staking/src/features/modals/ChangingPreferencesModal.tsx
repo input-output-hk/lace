@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flow, useNewDelegationPortfolioStore } from '../store';
+import { Flow, useDelegationPortfolioStore } from '../store';
 import { StakingModal } from './StakingModal';
 
 type StakingModalsProps = {
@@ -9,7 +9,7 @@ type StakingModalsProps = {
 
 export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { portfolioMutators, visible } = useNewDelegationPortfolioStore((store) => ({
+  const { portfolioMutators, visible } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
     visible: store.activeFlow === Flow.ChangingPreferencesConfirmation,
   }));

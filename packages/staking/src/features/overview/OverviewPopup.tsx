@@ -5,7 +5,7 @@ import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { StakePoolDetails } from '../drawer';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useNewDelegationPortfolioStore } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
@@ -25,7 +25,7 @@ export const OverviewPopup = () => {
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
-  const { currentPortfolio, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));

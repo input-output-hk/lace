@@ -10,7 +10,7 @@ import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Balance, CurrencyInfo, useOutsideHandles } from '../outside-handles-provider';
-import { DraftPortfolioStakePool, StakingError, useNewDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { DraftPortfolioStakePool, StakingError, useDelegationPortfolioStore, useStakingStore } from '../store';
 import ArrowDown from './arrow-down.svg';
 import Cardano from './cardano-blue.png';
 import ExclamationMarkIcon from './exclamation-circle-small.svg';
@@ -182,7 +182,7 @@ const StakePoolDepositReclaimDetails = ({
 
 export const StakePoolConfirmation = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { setIsBuildingTx, setStakingError, stakingError } = useStakePoolDetails();
+  const { setIsBuildingTx, setStakingError, stakingError } = useStakingStore();
   const {
     balancesBalance: balance,
     walletStoreInMemoryWallet: inMemoryWallet,
@@ -193,7 +193,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
   } = useOutsideHandles();
-  const { draftPortfolio } = useNewDelegationPortfolioStore((store) => ({
+  const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
     draftPortfolio: store.draftPortfolio || [],
   }));
   const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
@@ -319,9 +319,9 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     // submittingState: { setIsRestaking },
     // delegationStoreDelegationTxBuilder: delegationTxBuilder,
   } = useOutsideHandles();
-  const { isBuildingTx, stakingError } = useStakePoolDetails();
+  const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
-  const { /* currentPortfolio,*/ portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+  const { /* currentPortfolio,*/ portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));

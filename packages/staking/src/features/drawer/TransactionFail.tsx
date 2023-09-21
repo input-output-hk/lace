@@ -4,7 +4,7 @@ import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useNewDelegationPortfolioStore } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import { ResultMessage } from './ResultMessage';
 import styles from './TransactionComplete.module.scss';
 
@@ -40,7 +40,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     sendEvent: () => {},
   };
-  const { portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
   }));
 

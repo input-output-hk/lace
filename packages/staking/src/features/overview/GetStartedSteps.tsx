@@ -2,7 +2,7 @@
 import { Flex, Text } from '@lace/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { MAX_POOLS_COUNT, useNewDelegationPortfolioStore } from '../store';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import * as styles from './GetStartedSteps.css';
 
 type StepCircleProps = {
@@ -16,7 +16,7 @@ const StepCircle = ({ step }: StepCircleProps) => (
 
 export const GetStartedSteps = (): React.ReactElement => {
   const { t } = useTranslation();
-  const portfolioMutators = useNewDelegationPortfolioStore((store) => store.mutators);
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
   return (
     <Flex flexDirection="column" gap="$32">

@@ -1,12 +1,12 @@
 import { Button, Card, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from '../staking/arrow-right.svg';
-import { Flow, MAX_POOLS_COUNT, useNewDelegationPortfolioStore } from '../store';
+import { Flow, MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import * as styles from './PortfolioBar.css';
 
 export const PortfolioBar = () => {
   const { t } = useTranslation();
-  const { activeFlow, portfolioMutators, selectedPoolsCount } = useNewDelegationPortfolioStore((store) => ({
+  const { activeFlow, portfolioMutators, selectedPoolsCount } = useDelegationPortfolioStore((store) => ({
     activeFlow: store.activeFlow,
     portfolioMutators: store.mutators,
     selectedPoolsCount: store.selectedPortfolio.length,
