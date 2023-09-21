@@ -16,7 +16,7 @@ import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { Skeleton } from 'antd';
 import { TokenInfo } from '@src/utils/get-assets-information';
-import { useCancelTx, useCreateAssetList, useSignTxData, useSignWithHardwareWallet, useTxSummary } from './hooks';
+import { useCreateAssetList, useDisallowSignTx, useSignTxData, useSignWithHardwareWallet, useTxSummary } from './hooks';
 
 const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
   {
@@ -50,8 +50,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     () => keyAgentType !== Wallet.KeyManagement.KeyAgentType.InMemory,
     [keyAgentType]
   );
-  const cancelTransaction = useCancelTx();
-  const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet(cancelTransaction);
+  const disallowSignTx = useDisallowSignTx();
+  const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
   const createAssetList = useCreateAssetList({ outputs, assets, assetProvider });
   const { txSummary, hasInsufficientFunds } = useTxSummary({
     addressList,
@@ -101,7 +101,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
         <Button
           color="secondary"
           data-testid="dapp-transaction-cancel"
-          onClick={() => cancelTransaction(true)}
+          onClick={() => disallowSignTx(true)}
           className={styles.actionBtn}
         >
           {t('dapp.confirm.btn.cancel')}
