@@ -8107,7 +8107,6 @@ __metadata:
     "@wdio/cucumber-framework": 8.16.11
     "@wdio/devtools-service": 8.16.11
     "@wdio/local-runner": 8.16.11
-    "@wdio/selenium-standalone-service": 8.15.0
     "@wdio/spec-reporter": 8.16.9
     "@wdio/types": 8.16.7
     allure-commandline: 2.23.0
@@ -16159,22 +16158,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/config@npm:8.14.0":
-  version: 8.14.0
-  resolution: "@wdio/config@npm:8.14.0"
-  dependencies:
-    "@wdio/logger": 8.11.0
-    "@wdio/types": 8.14.0
-    "@wdio/utils": 8.14.0
-    decamelize: ^6.0.0
-    deepmerge-ts: ^5.0.0
-    glob: ^10.2.2
-    import-meta-resolve: ^3.0.0
-    read-pkg-up: ^10.0.0
-  checksum: 4d099c405977e5f6430ba0b6ad923771389a0644b54263db9a7157c908a1fdbfa791ed237b634cca6b8200f8e96591e4a0dd05d017e9d4537ff6b5b985ae134a
-  languageName: node
-  linkType: hard
-
 "@wdio/config@npm:8.16.11":
   version: 8.16.11
   resolution: "@wdio/config@npm:8.16.11"
@@ -16345,19 +16328,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/selenium-standalone-service@npm:8.15.0":
-  version: 8.15.0
-  resolution: "@wdio/selenium-standalone-service@npm:8.15.0"
-  dependencies:
-    "@types/node": ^20.1.0
-    "@wdio/config": 8.14.0
-    "@wdio/logger": 8.11.0
-    "@wdio/types": 8.14.0
-    selenium-standalone: ^9.0.5
-  checksum: a19d86db305707641958d5a1ad4604fc9cfb55a4712ba84fd4e66bcc8fad723b640916c5bdaeb3e998c8ea5e3416f47ca7079cd400292ed10d73ef0f827f465d
-  languageName: node
-  linkType: hard
-
 "@wdio/spec-reporter@npm:8.16.9":
   version: 8.16.9
   resolution: "@wdio/spec-reporter@npm:8.16.9"
@@ -16380,15 +16350,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/types@npm:8.14.0":
-  version: 8.14.0
-  resolution: "@wdio/types@npm:8.14.0"
-  dependencies:
-    "@types/node": ^20.1.0
-  checksum: 229eba13b47383e805668bcf4a5cb0e0165fc2b6704297911cbfc1df49d86c6f80ab75afb42456a6e9975dab27e66579d0360f503fcbfc24dc843e6f5310a3fe
-  languageName: node
-  linkType: hard
-
 "@wdio/types@npm:8.16.7":
   version: 8.16.7
   resolution: "@wdio/types@npm:8.16.7"
@@ -16407,17 +16368,6 @@ __metadata:
     import-meta-resolve: ^3.0.0
     p-iteration: ^1.1.8
   checksum: f5e4ffc5097b59bee6e913c6369a7c7e7e99700a7392ff400eddfffd82a2f2f70b148fff4d866bab39a530eac441f683921a38b2fff0d427b4b720b840ee6aa7
-  languageName: node
-  linkType: hard
-
-"@wdio/utils@npm:8.14.0":
-  version: 8.14.0
-  resolution: "@wdio/utils@npm:8.14.0"
-  dependencies:
-    "@wdio/logger": 8.11.0
-    "@wdio/types": 8.14.0
-    import-meta-resolve: ^3.0.0
-  checksum: 0f276e900095e0586c75e220fcee31cedf2ff7f9d3d7b6bfa88491bb6abad50f97dbaab825ad18cf68909aeb653701c609a13de8d978dd57d8c4e647f5134e18
   languageName: node
   linkType: hard
 
@@ -17225,7 +17175,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aggregate-error@npm:^3.0.0, aggregate-error@npm:^3.1.0":
+"aggregate-error@npm:^3.0.0":
   version: 3.1.0
   resolution: "aggregate-error@npm:3.1.0"
   dependencies:
@@ -25501,24 +25451,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"execa@npm:^3.3.0":
-  version: 3.4.0
-  resolution: "execa@npm:3.4.0"
-  dependencies:
-    cross-spawn: ^7.0.0
-    get-stream: ^5.0.0
-    human-signals: ^1.1.1
-    is-stream: ^2.0.0
-    merge-stream: ^2.0.0
-    npm-run-path: ^4.0.0
-    onetime: ^5.1.0
-    p-finally: ^2.0.0
-    signal-exit: ^3.0.2
-    strip-final-newline: ^2.0.0
-  checksum: 72832ff72f79f9082dc3567775cbb52f4682452f7d8015714d924e476a37c36a98183fd669317327ed2e7800ffe7ec2a7be4bfe704a2173ef22ae00109fe9123
-  languageName: node
-  linkType: hard
-
 "execa@npm:^5.0.0, execa@npm:^5.1.1":
   version: 5.1.1
   resolution: "execa@npm:5.1.1"
@@ -26258,7 +26190,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"find-process@npm:^1.4.4, find-process@npm:^1.4.7":
+"find-process@npm:^1.4.4":
   version: 1.4.7
   resolution: "find-process@npm:1.4.7"
   dependencies:
@@ -26333,21 +26265,6 @@ __metadata:
     locate-path: ^7.1.0
     path-exists: ^5.0.0
   checksum: 9a21b7f9244a420e54c6df95b4f6fc3941efd3c3e5476f8274eb452f6a85706e7a6a90de71353ee4f091fcb4593271a6f92810a324ec542650398f928783c280
-  languageName: node
-  linkType: hard
-
-"fkill@npm:^7.2.1":
-  version: 7.2.1
-  resolution: "fkill@npm:7.2.1"
-  dependencies:
-    aggregate-error: ^3.1.0
-    arrify: ^2.0.1
-    execa: ^5.0.0
-    pid-port: ^0.1.0
-    process-exists: ^4.0.0
-    ps-list: ^7.2.0
-    taskkill: ^3.1.0
-  checksum: c1d37b7ced56b91b03d37ad9e0cd9bcaed68fbf5503f584778f7816c82ccd17c7b73b6c2f0fe94cac85088ad0de67d47ce3536277e886512a9f94af107a419d2
   languageName: node
   linkType: hard
 
@@ -27061,7 +26978,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"get-stream@npm:^5.0.0, get-stream@npm:^5.1.0":
+"get-stream@npm:^5.1.0":
   version: 5.2.0
   resolution: "get-stream@npm:5.2.0"
   dependencies:
@@ -28652,13 +28569,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"human-signals@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "human-signals@npm:1.1.1"
-  checksum: d587647c9e8ec24e02821b6be7de5a0fc37f591f6c4e319b3054b43fd4c35a70a94c46fc74d8c1a43c47fde157d23acd7421f375e1c1365b09a16835b8300205
-  languageName: node
-  linkType: hard
-
 "human-signals@npm:^2.1.0":
   version: 2.1.0
   resolution: "human-signals@npm:2.1.0"
@@ -29821,13 +29731,6 @@ __metadata:
   version: 3.0.1
   resolution: "is-plain-object@npm:3.0.1"
   checksum: d13fe75db350d4ac669595cdfe0242ae87fcecddf2bca858d2dd443a6ed6eb1f69951fac8c2fa85b16106c6b0d7738fea86c2aca2ecee7fd61de15c1574f2cc5
-  languageName: node
-  linkType: hard
-
-"is-port-reachable@npm:^3.0.0":
-  version: 3.1.0
-  resolution: "is-port-reachable@npm:3.1.0"
-  checksum: ce0c872addfe1722a3f1ec6923b9b88b5a370041a10317e1bd76bd62c616feb52c8a6f473e35e7bcf208db22fb5f138433a3a1cd889d95a1f798dbc7a9dc63cf
   languageName: node
   linkType: hard
 
@@ -32702,13 +32605,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.mapvalues@npm:^4.6.0":
-  version: 4.6.0
-  resolution: "lodash.mapvalues@npm:4.6.0"
-  checksum: 0ff1b252fda318fc36e47c296984925e98fbb0fc5a2ecc4ef458f3c739a9476d47e40c95ac653e8314d132aa59c746d4276527b99d6e271940555c6e12d2babd
-  languageName: node
-  linkType: hard
-
 "lodash.memoize@npm:4.x, lodash.memoize@npm:^4.1.2":
   version: 4.1.2
   resolution: "lodash.memoize@npm:4.1.2"
@@ -34832,7 +34728,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mkdirp@npm:^2.1.3, mkdirp@npm:^2.1.5":
+"mkdirp@npm:^2.1.5":
   version: 2.1.6
   resolution: "mkdirp@npm:2.1.6"
   bin:
@@ -35644,7 +35540,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-run-path@npm:^4.0.0, npm-run-path@npm:^4.0.1":
+"npm-run-path@npm:^4.0.1":
   version: 4.0.1
   resolution: "npm-run-path@npm:4.0.1"
   dependencies:
@@ -36317,13 +36213,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-finally@npm:^2.0.0":
-  version: 2.0.1
-  resolution: "p-finally@npm:2.0.1"
-  checksum: 6306a2851c3b28f8b603624f395ae84dce76970498fed8aa6aae2d930595053746edf1e4ee0c4b78a97410d84aa4504d63179f5310d555511ecd226f53ed1e8e
-  languageName: node
-  linkType: hard
-
 "p-iteration@npm:^1.1.8":
   version: 1.1.8
   resolution: "p-iteration@npm:1.1.8"
@@ -36988,15 +36877,6 @@ __metadata:
   version: 2.3.1
   resolution: "picomatch@npm:2.3.1"
   checksum: 050c865ce81119c4822c45d3c84f1ced46f93a0126febae20737bd05ca20589c564d6e9226977df859ed5e03dc73f02584a2b0faad36e896936238238b0446cf
-  languageName: node
-  linkType: hard
-
-"pid-port@npm:^0.1.0":
-  version: 0.1.1
-  resolution: "pid-port@npm:0.1.1"
-  dependencies:
-    execa: ^5.0.0
-  checksum: 2648fb41c53beab86a2f0d2fda3337c3e84f65080815be828e98c3cb1d1fd41214f657a1eb80367c913f5f8de7bcfe6ee885cb4d78c8329d107aeb3bdba324fa
   languageName: node
   linkType: hard
 
@@ -38159,15 +38039,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"process-exists@npm:^4.0.0":
-  version: 4.1.0
-  resolution: "process-exists@npm:4.1.0"
-  dependencies:
-    ps-list: ^6.3.0
-  checksum: 51ae25cf48ad12f276ce34c749f1a30f7704d8f0d0a198e66094bbf5aa3db8f677eea61f15990330d1197c1c7fc87e82daac4a1c87d0d9982256f4cf300a20a7
-  languageName: node
-  linkType: hard
-
 "process-nextick-args@npm:~2.0.0":
   version: 2.0.1
   resolution: "process-nextick-args@npm:2.0.1"
@@ -38415,13 +38286,6 @@ __metadata:
   version: 1.0.1
   resolution: "prr@npm:1.0.1"
   checksum: 3bca2db0479fd38f8c4c9439139b0c42dcaadcc2fbb7bb8e0e6afaa1383457f1d19aea9e5f961d5b080f1cfc05bfa1fe9e45c97a1d3fd6d421950a73d3108381
-  languageName: node
-  linkType: hard
-
-"ps-list@npm:^6.3.0":
-  version: 6.3.0
-  resolution: "ps-list@npm:6.3.0"
-  checksum: 87cf437dec3b0eb6635a3a52d323fbf4a6eb4de3a7eb9d0ded0974afa7dc58d482c2ca84b30bc844eb6b13f62ed3bf2f54ef076feaa4734d896ff4f8efe9ad3e
   languageName: node
   linkType: hard
 
@@ -42052,33 +41916,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"selenium-standalone@npm:^9.0.5":
-  version: 9.1.2
-  resolution: "selenium-standalone@npm:9.1.2"
-  dependencies:
-    axios: ^0.27.2
-    commander: ^8.3.0
-    cross-spawn: ^7.0.3
-    debug: ^4.3.1
-    execa: ^5.1.1
-    find-process: ^1.4.7
-    fkill: ^7.2.1
-    got: ^11.8.2
-    is-port-reachable: ^3.0.0
-    lodash.mapvalues: ^4.6.0
-    lodash.merge: ^4.6.2
-    minimist: ^1.2.5
-    mkdirp: ^2.1.3
-    progress: 2.0.3
-    tar-stream: 3.1.6
-    which: ^2.0.2
-    yauzl: ^2.10.0
-  bin:
-    selenium-standalone: bin/selenium-standalone
-  checksum: a7b6f069d693887f00d451e439ebe57c869a06014853d28add20c280a55adb25c24e22be5ec72a25159b49dd5c6e6ca70ca3171e18045ca72259529854177e77
-  languageName: node
-  linkType: hard
-
 "selfsigned@npm:^2.0.1":
   version: 2.0.1
   resolution: "selfsigned@npm:2.0.1"
@@ -44346,17 +44183,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar-stream@npm:3.1.6, tar-stream@npm:^3.0.0, tar-stream@npm:^3.1.5":
-  version: 3.1.6
-  resolution: "tar-stream@npm:3.1.6"
-  dependencies:
-    b4a: ^1.6.4
-    fast-fifo: ^1.2.0
-    streamx: ^2.15.0
-  checksum: f3627f918581976e954ff03cb8d370551053796b82564f8c7ca8fac84c48e4d042026d0854fc222171a34ff9c682b72fae91be9c9b0a112d4c54f9e4f443e9c5
-  languageName: node
-  linkType: hard
-
 "tar-stream@npm:^2.0.0, tar-stream@npm:^2.1.4, tar-stream@npm:^2.2.0":
   version: 2.2.0
   resolution: "tar-stream@npm:2.2.0"
@@ -44367,6 +44193,17 @@ __metadata:
     inherits: ^2.0.3
     readable-stream: ^3.1.1
   checksum: 699831a8b97666ef50021c767f84924cfee21c142c2eb0e79c63254e140e6408d6d55a065a2992548e72b06de39237ef2b802b99e3ece93ca3904a37622a66f3
+  languageName: node
+  linkType: hard
+
+"tar-stream@npm:^3.0.0, tar-stream@npm:^3.1.5":
+  version: 3.1.6
+  resolution: "tar-stream@npm:3.1.6"
+  dependencies:
+    b4a: ^1.6.4
+    fast-fifo: ^1.2.0
+    streamx: ^2.15.0
+  checksum: f3627f918581976e954ff03cb8d370551053796b82564f8c7ca8fac84c48e4d042026d0854fc222171a34ff9c682b72fae91be9c9b0a112d4c54f9e4f443e9c5
   languageName: node
   linkType: hard
 
@@ -44381,16 +44218,6 @@ __metadata:
     mkdirp: ^1.0.3
     yallist: ^4.0.0
   checksum: a04c07bb9e2d8f46776517d4618f2406fb977a74d914ad98b264fc3db0fe8224da5bec11e5f8902c5b9bcb8ace22d95fbe3c7b36b8593b7dfc8391a25898f32f
-  languageName: node
-  linkType: hard
-
-"taskkill@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "taskkill@npm:3.1.0"
-  dependencies:
-    arrify: ^2.0.1
-    execa: ^3.3.0
-  checksum: c72391f0a976f9b98b7352895f7a9f013570a7bcad2b6713f5beae2ac3a36e62dd235a9b2bb66332860efe9b6c56ab30a8c8077745602487aea5f2dec015b725
   languageName: node
   linkType: hard
 
