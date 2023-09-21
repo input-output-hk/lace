@@ -43,6 +43,7 @@ class DAppConnectorPageObject {
   }
 
   async clickButtonInDAppAuthorizationModal(button: 'Always' | 'Only once') {
+    await browser.pause(500);
     await AuthorizeDappModal.alwaysButton.waitForDisplayed();
     button === 'Always' ? await AuthorizeDappModal.alwaysButton.click() : await AuthorizeDappModal.onceButton.click();
   }

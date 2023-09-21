@@ -60,28 +60,83 @@ Feature: ADA handle - popup view
     And I click "Done" button on "Edit address" drawer
     And I see a toast with message: "addressBook.errors.givenAddressAlreadyExist"
 
+  @LW-7135 @LW-7139
+  Scenario: Popup View - Ada handles displayed and sorted by handle length
+    When I click "Receive" button on Tokens page in popup mode
+    Then I see "Wallet Address" page in popup mode for wallet "WalletAdaHandle"
+    And I see handles listed on the "Receive" screen
+    And I see address card for handle: "$cde"
+    And I see address card for handle: "$t_h_1"
+    And I see address card for handle: "$test_handle_1"
+    And I see address card for handle: "$test_handle_2"
+    And I see address card for handle: "$test_handle_3"
+    And The first ADA handle displayed on the list is the shortest
+
+  @LW-7137 @LW-7070
+  Scenario: Popup View - Copy address/ADA handle
+    And I click "Receive" button on Tokens page in popup mode
+    And I see "Wallet Address" page in popup mode for wallet "WalletAdaHandle"
+    When I click "Copy" button on "Receive" page for default wallet address
+    Then I see a toast with text: "Address copied"
+    And Clipboard contains address of wallet: "WalletAdaHandle"
+    When I click "Copy" button on "Receive" page for handle: "$cde"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$cde"
+    When I click "Copy" button on "Receive" page for handle: "$t_h_1"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$t_h_1"
+    When I click "Copy" button on "Receive" page for handle: "$test_handle_1"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$test_handle_1"
+    When I click "Copy" button on "Receive" page for handle: "$test_handle_3"
+    Then I see a toast with text: "Handle copied"
+    And Clipboard contains text: "$test_handle_3"
+
+  @LW-7435 @LW-7436
+  Scenario: Popup View - Validate custom ADA handle image on the wallet address/NFTs/NFT details page
+    And I click "Receive" button on Tokens page in popup mode
+    Then I see ADA handle with custom image on the "Wallet Address" page
+    And I close the drawer by clicking close button
+    When I navigate to NFTs popup page
+    Then I see ADA handle NFT with custom image on the NFTs page
+    When I left click on the NFT with name "$test_handle_1" on NFTs page
+    Then I see ADA handle NFT details page with custom image in popup mode
+
+  @LW-7432
+  Scenario: Popup View - Validate custom ADA handle image on the send/coin selector page
+    When I click "Send" button on Tokens page in popup mode
+    And I click "Add token or NFT" button for bundle 1
+    And click on the NFTs button in the coin selector dropdown
+    Then NFT with name: "$test_handle_1" is displayed in coin selector
+    And I see ADA handle NFT with custom image on the Coin selector page
+    When I click on NFT with name: "$test_handle_1" in asset selector
+    Then the "$test_hand..." asset is displayed in bundle 1
+
+  @LW-7434
+  Scenario: Popup View - Validate custom ADA handle image on the NFT folder thumbnail/page
+    Given I click "Receive" button on Tokens page in popup mode
+    And I see handles listed on the "Receive" screen
+    And I close the drawer by clicking close button
+    And I navigate to NFTs popup page
+    When I create folder with name: "Ada Handle folder" that contains 4 NFTs
+    Then I see a thumbnail of ADA handle with custom image on the NFT folder with name: "Ada Handle folder"
+    When I left click on the NFT folder with name "Ada Handle folder"
+    And I see "Ada Handle folder" NFT folder page in popup mode
+    And I see NFT with name "$test_handle_1" on the NFT folder page
+    And I see NFT with name "$test_handle_2" on the NFT folder page
+    And I see NFT with name "$test_handle_3" on the NFT folder page
+    And I see NFT with name "$t_h_1" on the NFT folder page
+    Then I see ADA handle NFT with custom image on the NFT folder page
+
   @LW-7433
   Scenario: Popup View - Validate custom image from a handle on the "Select NFT" (folder) screen
     Given I click "Receive" button on Tokens page in popup mode
-    And I see handle listed on the "Receive" screen
+    And I see handles listed on the "Receive" screen
     And I close the drawer by clicking close button
     And I navigate to NFTs popup page
     And I click "Create folder" button on NFTs page
     And I enter a folder name "Ada Handle folder" into "Folder name" input
     When I click "Next" button on "Name your folder" page
-    Then I can see the handle listed on the "Select NFT" screen
-    And the corresponding custom image is displayed
-
-  @LW-7434
-  Scenario: Popup View - Validate custom image from a handle on the NFT folder
-    Given I click "Receive" button on Tokens page in popup mode
-    And I see handle listed on the "Receive" screen
-    And I close the drawer by clicking close button
-    And I navigate to NFTs popup page
-    And I create folder with name: "Ada Handle folder" that contains 4 NFTs
-    When I left click on the NFT folder with name "Ada Handle folder"
-    Then I see "Ada Handle folder" NFT folder page in popup mode
-    And I see NFT with name "$test_handle_1" on the NFT folder page
-    And I see NFT with name "$test_handle_2" on the NFT folder page
-    And I see NFT with name "$test_handle_3" on the NFT folder page
-    And I see NFT with name "$t_h_1" on the NFT folder page
+    Then I can see the handles listed on the "Select NFT" screen
+    And I see ADA handle NFT with custom image on the Select NFT page
+    And the corresponding custom images are displayed

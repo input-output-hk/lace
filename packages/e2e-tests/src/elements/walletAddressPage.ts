@@ -1,5 +1,5 @@
+/* eslint-disable no-undef */
 import CommonDrawerElements from './CommonDrawerElements';
-import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class WalletAddressPage extends CommonDrawerElements {
   private ADDRESS_CARD = '[data-testid="address-card"]';
@@ -7,20 +7,24 @@ class WalletAddressPage extends CommonDrawerElements {
   private WALLET_NAME = '[data-testid="address-card-name"]';
   private WALLET_ADDRESS = '[data-testid="address-card-address"]';
   private COPY_BUTTON = '[data-testid="copy-address-btn"]';
-  private ADDRESS_CARD_HANDLE_NAME = '[data-testid="address-card-handle-name"]';
-  private ADDRESS_CARD_HANDLE_IMAGE = '[data-testid="address-card-handle-image"]';
+  public HANDLE_NAME = '[data-testid="address-card-handle-name"]';
+  public HANDLE_IMAGE = '[data-testid="address-card-handle-image"]';
+  public HANDLE_SYMBOL = '[data-testid="address-card-handle-symbol"]';
 
   get addressCard() {
     return $(this.ADDRESS_CARD);
   }
 
-  get addressCardHandleName() {
-    return $$(this.ADDRESS_CARD_HANDLE_NAME);
+  get handleNames() {
+    return $$(this.HANDLE_NAME);
   }
 
-  // eslint-disable-next-line no-undef
-  get addressCardHandleImage(): ChainablePromiseArray<WebdriverIO.ElementArray> {
-    return $$(this.ADDRESS_CARD_HANDLE_IMAGE);
+  get handleImages() {
+    return $$(this.HANDLE_IMAGE);
+  }
+
+  get addressCards() {
+    return $$(this.ADDRESS_CARD);
   }
 
   get qrCode() {
@@ -37,6 +41,19 @@ class WalletAddressPage extends CommonDrawerElements {
 
   get copyButton() {
     return $(this.COPY_BUTTON);
+  }
+
+  async getHandleAddressCard(handleName: string): Promise<WebdriverIO.Element> {
+    return (await this.addressCards.find(
+      async (item) => (await item.$(this.HANDLE_NAME).getText()) === handleName
+    )) as WebdriverIO.Element;
+  }
+
+  async clickCopyButtonForHandle(handleName: string) {
+    const addressCard = await this.getHandleAddressCard(handleName);
+    await addressCard.scrollIntoView();
+    await addressCard.moveTo();
+    await addressCard.$(this.COPY_BUTTON).click();
   }
 }
 

@@ -28,7 +28,7 @@ Feature: LW: Tokens tab - extended view
   @LW-2335 @Testnet @Mainnet
   Scenario: Receive button click
     When I click "Receive" button on page header
-    Then I see "Wallet Address" page in extended mode
+    Then I see "Wallet Address" page in extended mode for wallet "TestAutomationWallet"
 
   @LW-2336 @Testnet @Mainnet
   Scenario: Send button click
