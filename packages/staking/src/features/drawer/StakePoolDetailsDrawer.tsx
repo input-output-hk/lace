@@ -82,6 +82,14 @@ export const StakePoolDetailsDrawer = ({
     }
   });
 
+  const createArrowIconCallback = () => {
+    if (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon) {
+      return popupView ? closeDrawer : onGoBack;
+    }
+    // eslint-disable-next-line consistent-return, unicorn/no-useless-undefined
+    return undefined;
+  };
+
   return (
     <Drawer
       visible={drawerVisible}
@@ -90,11 +98,8 @@ export const StakePoolDetailsDrawer = ({
       navigation={
         <DrawerNavigation
           title={DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : t('drawer.titleSecond')}
-          onArrowIconClick={
-            (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon)
-              ? onGoBack
-              : undefined
-          }
+          // If undefined is passed to onArrowIconClick, arrow component will not be rendered
+          onArrowIconClick={createArrowIconCallback()}
           onCloseIconClick={
             (activeDrawerStep && typeof showCloseIcon === 'function' ? showCloseIcon(activeDrawerStep) : showCloseIcon)
               ? closeDrawer

@@ -5,7 +5,7 @@ import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { StakePoolDetails } from '../drawer';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useNewDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { useNewDelegationPortfolioStore } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
@@ -20,14 +20,15 @@ export const OverviewPopup = () => {
     balancesBalance,
     compactNumber,
     fetchCoinPricePriceResult,
-    delegationStoreSetSelectedStakePool: setSelectedStakePool,
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
-  const currentPortfolio = useNewDelegationPortfolioStore((store) => store.currentPortfolio);
-  const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
+  const { currentPortfolio, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
+    portfolioMutators: store.mutators,
+  }));
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -47,8 +48,7 @@ export const OverviewPopup = () => {
   });
 
   const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
-    setSelectedStakePool(stakePool);
-    setIsDrawerVisible(true);
+    portfolioMutators.executeCommand({ data: stakePool, type: 'CommandOverviewShowDetails' });
   };
 
   if (noFunds)
