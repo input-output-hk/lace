@@ -91,7 +91,7 @@ type DelegationPortfolioMutators = {
   removePoolInManagementProcess: (params: Pick<DraftPortfolioStakePool, 'id'>) => void;
 };
 
-export type DelegationPortfolioStore = DelegationPortfolioState & {
+export type OldDelegationPortfolioStore = DelegationPortfolioState & {
   mutators: DelegationPortfolioMutators;
   queries: DelegationPortfolioQueries;
 };
@@ -100,3 +100,5 @@ export enum Page {
   overview = 'overview',
   browsePools = 'browsePools',
 }
+
+export type AdaSymbol = 'ADA' | 'tADA';

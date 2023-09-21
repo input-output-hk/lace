@@ -1,18 +1,22 @@
-import { Wallet } from '@lace/cardano';
 import { Drawer, DrawerNavigation, useKeyboardShortcut } from '@lace/common';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, sectionsConfig, useStakePoolDetails } from '../store';
-import { isNewDrawerVisible, useNewDelegationPortfolioStore } from '../store/useDelegationPortfolioStore';
+import {
+  DrawerDefaultStep,
+  DrawerStep,
+  isNewDrawerVisible,
+  useNewDelegationPortfolioStore,
+  useStakePoolDetails,
+} from '../store';
 
 export interface StakePoolDetailsDrawerProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   popupView?: boolean;
-  showCloseIcon?: boolean | ((section: Sections) => boolean);
-  showBackIcon?: boolean | ((section: Sections) => boolean);
-  showExitConfirmation?: (section: Sections) => boolean;
+  showBackIcon?: boolean | ((step: DrawerStep) => boolean);
+  showCloseIcon?: boolean | ((step: DrawerStep) => boolean);
+  showExitConfirmation?: (step: DrawerStep) => boolean;
 }
 
 export const StakePoolDetailsDrawer = ({
@@ -23,14 +27,9 @@ export const StakePoolDetailsDrawer = ({
   showBackIcon,
   showExitConfirmation,
 }: StakePoolDetailsDrawerProps): React.ReactElement => {
-  const {
-    setExitStakingVisible,
-    isDrawerVisible: isOldDrawerVisible,
-    setSection,
-    setPrevSection,
-    simpleSendConfig,
-  } = useStakePoolDetails();
-  const { drawerVisible, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+  const { setExitStakingVisible } = useStakePoolDetails();
+  const { activeDrawerStep, drawerVisible, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+    activeDrawerStep: store.activeDrawerStep,
     drawerVisible: isNewDrawerVisible(store),
     portfolioMutators: store.mutators,
   }));
@@ -40,18 +39,12 @@ export const StakePoolDetailsDrawer = ({
   const {
     backgroundServiceAPIContextSetWalletPassword,
     delegationStoreSetDelegationTxBuilder,
-    walletStoreGetKeyAgentType,
     password: { password, removePassword },
     submittingState: { setIsRestaking },
   } = useOutsideHandles();
 
-  const isInMemory = useMemo(
-    () => walletStoreGetKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
-    [walletStoreGetKeyAgentType]
-  );
-
   const closeDrawer = useCallback(() => {
-    if (showExitConfirmation?.(simpleSendConfig.currentSection)) {
+    if (activeDrawerStep && showExitConfirmation?.(activeDrawerStep)) {
       setExitStakingVisible(true);
     } else {
       backgroundServiceAPIContextSetWalletPassword();
@@ -61,8 +54,8 @@ export const StakePoolDetailsDrawer = ({
     }
     setIsRestaking(false);
   }, [
+    activeDrawerStep,
     showExitConfirmation,
-    simpleSendConfig.currentSection,
     setIsRestaking,
     setExitStakingVisible,
     backgroundServiceAPIContextSetWalletPassword,
@@ -76,27 +69,13 @@ export const StakePoolDetailsDrawer = ({
       backgroundServiceAPIContextSetWalletPassword();
       removePassword();
     }
-    if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemory) {
-      return setSection(sectionsConfig[Sections.PREFERENCES]);
-    }
-    if (simpleSendConfig?.prevSection) {
-      return setPrevSection();
-    }
-    return closeDrawer();
-  }, [
-    closeDrawer,
-    isInMemory,
-    password,
-    removePassword,
-    setPrevSection,
-    setSection,
-    simpleSendConfig.currentSection,
-    simpleSendConfig?.prevSection,
-    backgroundServiceAPIContextSetWalletPassword,
-  ]);
+    portfolioMutators.executeCommand({
+      type: 'CommandCommonDrawerBack',
+    });
+  }, [password, portfolioMutators, backgroundServiceAPIContextSetWalletPassword, removePassword]);
 
   useKeyboardShortcut(['Escape'], () => {
-    if (typeof showBackIcon === 'function' ? showBackIcon(simpleSendConfig.currentSection) : showBackIcon) {
+    if (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon) {
       onArrowIconClick();
     } else {
       closeDrawer();
@@ -110,14 +89,14 @@ export const StakePoolDetailsDrawer = ({
       onClose={closeDrawer}
       navigation={
         <DrawerNavigation
-          title={Sections.DETAIL === simpleSendConfig.currentSection ? t('drawer.title') : t('drawer.titleSecond')}
+          title={DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : t('drawer.titleSecond')}
           onArrowIconClick={
-            (typeof showBackIcon === 'function' ? showBackIcon(simpleSendConfig.currentSection) : showBackIcon)
+            (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon)
               ? onArrowIconClick
               : undefined
           }
           onCloseIconClick={
-            (typeof showCloseIcon === 'function' ? showCloseIcon(simpleSendConfig.currentSection) : showCloseIcon)
+            (activeDrawerStep && typeof showCloseIcon === 'function' ? showCloseIcon(activeDrawerStep) : showCloseIcon)
               ? closeDrawer
               : undefined
           }

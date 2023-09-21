@@ -5,7 +5,7 @@ import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { StakePoolDetails } from '../drawer';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { useNewDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
@@ -26,7 +26,7 @@ export const OverviewPopup = () => {
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
-  const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
+  const currentPortfolio = useNewDelegationPortfolioStore((store) => store.currentPortfolio);
   const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
@@ -107,14 +107,7 @@ export const OverviewPopup = () => {
         ))}
       </Box>
       <ExpandViewBanner />
-      <StakePoolDetails
-        showBackIcon
-        showExitConfirmation={() => false}
-        onStakeOnThisPool={() => void 0}
-        onSelect={() => void 0}
-        onUnselect={() => void 0}
-        popupView
-      />
+      <StakePoolDetails showBackIcon showExitConfirmation={() => false} popupView />
     </>
   );
 };

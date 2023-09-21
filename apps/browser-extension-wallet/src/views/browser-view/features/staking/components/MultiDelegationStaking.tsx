@@ -111,7 +111,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
         currentChain
       }}
     >
-      <Staking theme={theme.name} />
+      <Staking currentChain={currentChain} theme={theme.name} />
     </OutsideHandlesProvider>
   );
 };

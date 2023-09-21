@@ -3,8 +3,8 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import {
   DelegationPortfolioState,
-  DelegationPortfolioStore,
   DraftPortfolioStakePool,
+  OldDelegationPortfolioStore,
   PortfolioManagementProcess,
 } from './types';
 
@@ -15,7 +15,7 @@ const defaultState: DelegationPortfolioState = {
   selections: [],
 };
 
-export const MAX_POOLS_COUNT = 5;
+const MAX_POOLS_COUNT = 5;
 const LAST_STABLE_EPOCH = 2;
 // interchangeable with percentages
 const targetWeight = 100;
@@ -24,7 +24,7 @@ const mapPoolWeights = (pools: DraftPortfolioStakePool[]) =>
   pools.map<DraftPortfolioStakePool>((pool) => ({ ...pool, weight: Math.round(targetWeight / pools.length) }));
 
 export const useDelegationPortfolioStore = create(
-  immer<DelegationPortfolioStore>((set, get) => ({
+  immer<OldDelegationPortfolioStore>((set, get) => ({
     ...defaultState,
     mutators: {
       beginManagementProcess: (process) =>

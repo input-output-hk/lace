@@ -2,8 +2,7 @@
 import { Flex, Text } from '@lace/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Page, useStakePoolDetails } from '../store';
-import { MAX_POOLS_COUNT } from '../store/delegationPortfolio';
+import { MAX_POOLS_COUNT, Page, useStakePoolDetails } from '../store';
 import * as styles from './GetStartedSteps.css';
 
 type StepCircleProps = {

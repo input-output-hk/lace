@@ -1,19 +1,10 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-// import { Wallet } from '@lace/cardano';
-// import { stakePoolTransformer } from '@lace/cardano/dist/wallet/util';
 import { Banner, useObservable } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import {
-  PortfolioManagementProcess,
-  Sections,
-  sectionsConfig,
-  useDelegationPortfolioStore,
-  useStakePoolDetails,
-} from '../store';
-import { useNewDelegationPortfolioStore } from '../store/useDelegationPortfolioStore';
+import { useNewDelegationPortfolioStore } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
@@ -35,16 +26,10 @@ export const Overview = () => {
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
-  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
+  const { currentPortfolio, portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
-  })); //
-  const { setIsDrawerVisible, setSection } = useStakePoolDetails((state) => ({
-    setIsDrawerVisible: state.setIsDrawerVisible,
-    setSection: state.setSection,
   }));
-  const { mutators } = useNewDelegationPortfolioStore();
-
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
   if (
@@ -64,9 +49,9 @@ export const Overview = () => {
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
 
   const onManageClick = () => {
-    portfolioMutators.beginManagementProcess(PortfolioManagementProcess.CurrentPortfolio);
-    setSection(sectionsConfig[Sections.PREFERENCES]);
-    setIsDrawerVisible(true);
+    portfolioMutators.executeCommand({
+      type: 'CommandOverviewManagePortfolio',
+    });
   };
 
   const displayData = mapPortfolioToDisplayData({
@@ -140,7 +125,7 @@ export const Overview = () => {
             markerColor={displayData.length > 1 ? item.color : undefined}
             cardanoCoinSymbol="tADA" // TODO
             onStakePoolSelect={() => {
-              mutators.executeCommand({
+              portfolioMutators.executeCommand({
                 data: item.stakePool,
                 type: 'CommandOverviewShowDetails',
               });

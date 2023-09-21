@@ -7,13 +7,7 @@ import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../../../outside-handles-provider';
-import {
-  MAX_POOLS_COUNT,
-  isPoolSelectedSelector,
-  useDelegationPortfolioStore,
-  useNewDelegationPortfolioStore,
-} from '../../../store';
+import { MAX_POOLS_COUNT, isPoolSelectedSelector, useNewDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
 export interface StakePoolItemBrowserProps {
@@ -25,7 +19,6 @@ export interface StakePoolItemBrowserProps {
   saturation?: number | string;
   cost?: number | string;
   logo: string;
-  onClick: (id: string) => unknown;
   stakePool: Wallet.Cardano.StakePool;
 }
 
@@ -52,7 +45,6 @@ export const StakePoolItemBrowser = ({
   saturation,
   logo,
   apy,
-  onClick,
   stakePool,
 }: StakePoolItemBrowserProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -72,8 +64,6 @@ export const StakePoolItemBrowser = ({
     })
   );
 
-  const { walletStoreWalletUICardanoCoin } = useOutsideHandles();
-
   const disabledAddingToDraft = selectionsFull && !poolAlreadySelected;
 
   const stakePoolStateLabel = poolAlreadySelected
@@ -83,7 +73,11 @@ export const StakePoolItemBrowser = ({
     : t('browsePools.stakePoolTableBrowser.stake');
 
   return (
-    <div data-testid="stake-pool-table-item" className={styles.row} onClick={() => onClick(id)}>
+    <div
+      data-testid="stake-pool-table-item"
+      className={styles.row}
+      onClick={() => portfolioMutators.executeCommand({ data: stakePool, type: 'CommandBrowsePoolsShowPoolDetails' })}
+    >
       <div className={styles.name}>
         <img
           data-testid="stake-pool-list-logo"
@@ -130,16 +124,7 @@ export const StakePoolItemBrowser = ({
                         type: 'CommandBrowsePoolsUnselectPool',
                       }
                     : {
-                        data: {
-                          displayData: Wallet.util.stakePoolTransformer({
-                            cardanoCoin: walletStoreWalletUICardanoCoin,
-                            stakePool,
-                          }),
-                          id: hexId,
-                          name: stakePool.metadata?.name,
-                          ticker: stakePool.metadata?.ticker,
-                          weight: 1,
-                        },
+                        data: stakePool,
                         type: 'CommandBrowsePoolsSelectPool',
                       }
                 );

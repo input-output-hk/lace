@@ -1,14 +1,15 @@
 import { Wallet } from '@lace/cardano';
 import { lovelacesToAdaString } from '@lace/cardano/src/wallet/util';
 import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
+import { AdaSymbol } from './types';
 
 // TODO: try to remove data existense checks. in most cases that data is present according to StakePool type
 // eslint-disable-next-line complexity
 export const mapStakePoolToDisplayData = ({
-  cardanoCoin,
+  cardanoCoinSymbol,
   stakePool,
 }: {
-  cardanoCoin: Wallet.CoinId;
+  cardanoCoinSymbol: AdaSymbol;
   stakePool: Wallet.Cardano.StakePool;
 }) => {
   const margin = formatPercentages(stakePool.margin.numerator / stakePool.margin.denominator);
@@ -20,7 +21,7 @@ export const mapStakePoolToDisplayData = ({
       primary: stakePool.metadata?.homepage,
       ...stakePool.metadata?.ext?.pool.contact,
     },
-    cost: `${margin || '-'}% + ${fee}${cardanoCoin.symbol}`,
+    cost: `${margin || '-'}% + ${fee}${cardanoCoinSymbol}`,
     delegators: stakePool.metrics?.delegators || '-',
     description: stakePool.metadata?.description || '-',
     fee,
@@ -32,7 +33,7 @@ export const mapStakePoolToDisplayData = ({
     margin,
     name: stakePool.metadata?.name || '-',
     owners: stakePool.owners ? stakePool.owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
-    pledge: stakePool.pledge ? `${lovelacesToAdaString(stakePool.pledge.toString())}${cardanoCoin.symbol}` : '-',
+    pledge: stakePool.pledge ? `${lovelacesToAdaString(stakePool.pledge.toString())}${cardanoCoinSymbol}` : '-',
     retired: stakePool.status === Wallet.Cardano.StakePoolStatus.Retired,
     saturation: stakePool.metrics?.saturation && formatPercentages(stakePool.metrics.saturation),
     size: `${stakePool.metrics?.size.live ?? '-'} %`,

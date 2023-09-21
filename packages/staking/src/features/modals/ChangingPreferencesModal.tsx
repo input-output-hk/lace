@@ -1,16 +1,18 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useStakePoolDetails } from '../store';
+import { Flow, useNewDelegationPortfolioStore } from '../store';
 import { StakingModal } from './StakingModal';
 
 type StakingModalsProps = {
   popupView?: boolean;
-  onConfirm: () => void;
 };
 
-export const ChangingPreferencesModal = ({ onConfirm, popupView }: StakingModalsProps): React.ReactElement => {
+export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { setStakeConfirmationVisible, isStakeConfirmationVisible } = useStakePoolDetails();
+  const { portfolioMutators, visible } = useNewDelegationPortfolioStore((store) => ({
+    portfolioMutators: store.mutators,
+    visible: store.activeFlow === Flow.ChangingPreferencesConfirmation,
+  }));
 
   // TODO implement analytics for the new flow
   const analytics = {
@@ -20,7 +22,7 @@ export const ChangingPreferencesModal = ({ onConfirm, popupView }: StakingModals
 
   return (
     <StakingModal
-      visible={isStakeConfirmationVisible}
+      visible={visible}
       title={t('modals.changingPreferences.title')}
       description={t('modals.changingPreferences.description')}
       actions={[
@@ -28,7 +30,7 @@ export const ChangingPreferencesModal = ({ onConfirm, popupView }: StakingModals
           body: t('modals.changingPreferences.buttons.cancel'),
           color: 'secondary',
           dataTestId: 'switch-pools-modal-cancel',
-          onClick: () => setStakeConfirmationVisible(false),
+          onClick: () => portfolioMutators.executeCommand({ type: 'CommandChangingPreferencesConfirmationDiscard' }),
         },
         {
           body: t('modals.changingPreferences.buttons.confirm'),
@@ -42,8 +44,7 @@ export const ChangingPreferencesModal = ({ onConfirm, popupView }: StakingModals
                 ? 'AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_POPUP'
                 : 'AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_BROWSER',
             });
-            setStakeConfirmationVisible(false);
-            onConfirm();
+            portfolioMutators.executeCommand({ type: 'CommandChangingPreferencesConfirmationConfirm' });
           },
         },
       ]}

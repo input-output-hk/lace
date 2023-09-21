@@ -4,11 +4,7 @@ import ArrowRight from '../staking/arrow-right.svg';
 import { MAX_POOLS_COUNT, useNewDelegationPortfolioStore } from '../store';
 import * as styles from './PortfolioBar.css';
 
-type PortfolioBarParams = {
-  onStake: () => void;
-};
-
-export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
+export const PortfolioBar = () => {
   const { t } = useTranslation();
   const { portfolioMutators, selectedPoolsCount } = useNewDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
@@ -27,7 +23,7 @@ export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
       <Flex className={styles.buttons}>
         <Button.Secondary
           label={t('portfolioBar.clear')}
-          onClick={portfolioMutators.clearSelections}
+          onClick={() => portfolioMutators.executeCommand({ type: 'CommandBrowsePoolsClearSelections' })}
           data-testid="portfoliobar-btn-clear"
         />
         <Button.Primary

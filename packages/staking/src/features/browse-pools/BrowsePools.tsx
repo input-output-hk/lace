@@ -7,11 +7,7 @@ import { StakePoolsTable } from './stake-pools-table';
 
 const LACE_APP_ID = 'lace-app';
 
-type BrowsePoolsProps = {
-  onStake: () => void;
-};
-
-export const BrowsePools = ({ onStake }: BrowsePoolsProps) => {
+export const BrowsePools = () => {
   const { setIsDrawerVisible } = useStakePoolDetails();
 
   const {
@@ -55,8 +51,8 @@ export const BrowsePools = ({ onStake }: BrowsePoolsProps) => {
 
   return (
     <>
-      <PortfolioBar onStake={onStake} />
-      <StakePoolsTable scrollableTargetId={LACE_APP_ID} onStake={onStake} />
+      <PortfolioBar />
+      <StakePoolsTable scrollableTargetId={LACE_APP_ID} />
     </>
   );
 };
