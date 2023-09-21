@@ -88,7 +88,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       })
         .then((result) => setAssetsInfo(result))
         .catch((error) => {
-          console.log(error);
+          console.error(error);
         });
     }
   }, [assetIds, assetProvider, assets]);
@@ -131,7 +131,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           throw error;
         });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
       cancelTransaction(false);
       redirectToSignFailure();
     }
@@ -146,7 +146,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       })
       .catch((error) => {
         setErrorMessage(error);
-        console.log(error);
+        console.error(error);
       });
   }, []);
 

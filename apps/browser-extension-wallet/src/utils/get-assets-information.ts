@@ -33,7 +33,7 @@ export const getAssetsInformation = async (
         fetchedAssets.push(...fetched);
       } catch (error) {
         // If an error occurs fetching from the provider then just skip this chunk
-        console.log('Error fetching assets info', { error: error.message });
+        console.error('Error fetching assets info', { error: error.message });
       }
     }
     assetsInformation.push(...fetchedAssets);

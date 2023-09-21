@@ -49,7 +49,7 @@ export const AddressFormBrowserView = ({
       form.resetFields();
       if (onClose) onClose();
     } catch (error) {
-      console.log('Error while submitting new address', error);
+      console.error('Error while submitting new address', error);
     }
   };
   const Plus = PlusIcon ? <PlusIcon className={styles.icon} /> : <PlusCircleOutlined />;

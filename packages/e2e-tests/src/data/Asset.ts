@@ -11,6 +11,11 @@ export class Asset {
   public static readonly HAPPY_COIN = new Asset('HappyCoin', 'HAPP');
   public static readonly SUNDAE = new Asset('SUNDAE', 'SUNDAE');
   public static readonly HOSKY_TOKEN = new Asset('HOSKY Token', 'HOSKY');
+  public static readonly ADA_HANDLE_1 = new Asset('$cde', '$cde');
+  public static readonly ADA_HANDLE_2 = new Asset('$t_h_1', '$t_h_1');
+  public static readonly ADA_HANDLE_3 = new Asset('$test_handle_1', '$test_handle_1');
+  public static readonly ADA_HANDLE_4 = new Asset('$test_handle_2', '$test_handle_2');
+  public static readonly ADA_HANDLE_5 = new Asset('$test_handle_3', '$test_handle_3');
 
   // eslint-disable-next-line no-unused-vars
   private constructor(public readonly name: string, public readonly ticker: string) {

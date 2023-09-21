@@ -126,6 +126,42 @@ describe('AnalyticsTracker', () => {
     });
   });
 
+  describe('excluded events', () => {
+    it('should ommit sending onboarding | new wallet events', async () => {
+      const tracker = new AnalyticsTracker({
+        chain: preprodChain,
+        isPostHogEnabled: true,
+        excludedEvents: 'onboarding | new wallet'
+      });
+      const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateClick);
+      expect(mockedPostHogClient.sendEvent).not.toHaveBeenCalled();
+    });
+
+    it('should ommit sending excluded events', async () => {
+      const tracker = new AnalyticsTracker({
+        chain: preprodChain,
+        isPostHogEnabled: true,
+        excludedEvents: 'onboarding | new wallet'
+      });
+      const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingRestoreDoneGoToWallet);
+      expect(mockedPostHogClient.sendEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('should send all events', async () => {
+      const tracker = new AnalyticsTracker({
+        chain: preprodChain,
+        isPostHogEnabled: true
+      });
+      const mockedPostHogClient = (PostHogClient as jest.Mock<PostHogClient>).mock.instances[0];
+      await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
+      expect(mockedPostHogClient.sendEvent).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('setChain', () => {
     it('should set the chain on both clients', async () => {
       const tracker = new AnalyticsTracker({

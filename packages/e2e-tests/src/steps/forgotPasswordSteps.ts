@@ -43,7 +43,7 @@ Then(/^I switch to tab with restore wallet process$/, async () => {
       result = await browser.switchWindow(/setup\/restore/);
       pageFound = typeof result === 'string';
     } catch {
-      console.log('Page not found. Retrying in 1s ...');
+      console.error('Page not found. Retrying in 1s ...');
       await browser.pause(1000);
     }
     retries--;

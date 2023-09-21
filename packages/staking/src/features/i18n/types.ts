@@ -20,9 +20,15 @@ type KeysStructure = {
       searchInputPlaceholder: '';
       tableHeader: {
         poolName: '';
-        ros: '';
+        ros: {
+          title: '';
+          tooltip: '';
+        };
         cost: '';
-        saturation: '';
+        saturation: {
+          title: '';
+          tooltip: '';
+        };
       };
       emptyMessage: '';
       stake: '';
@@ -117,7 +123,7 @@ type KeysStructure = {
     preferences: {
       selectedStakePools: '';
       addPoolButton: '';
-      percentageOfBalance: '';
+      stakeValue: '';
       pickMorePools: '';
       nextButton: '';
     };

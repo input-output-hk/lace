@@ -5,13 +5,17 @@ Feature: Analytics - Posthog - Sending - Extended View
     Given Wallet is synced
 
   @LW-7821
-  Scenario: Analytics - Extended-view - Send - Success Screen - Close drawer - X button
+  Scenario: Analytics - Extended-view - Send - Success Screen - Close drawer - X button - Check `recipient_source` property
     Given I set up request interception for posthog analytics request(s)
+    And I have 2 addresses with ADA handle in my address book in extended mode
     And I click "Send" button on page header
     Then I validate latest analytics single event "send | send | click"
     When I fill bundle 1 with "WalletReceiveSimpleTransactionE2E" address with following assets:
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
+    When I click "Add bundle" button on "Send" page
+    And I enter "$test_handle_1" in the bundle 2 recipient's address
+    And I enter a value of: 1 to the "tADA" asset in bundle 2
     And I click "Review transaction" button on "Send" page
     Then I validate latest analytics single event "send | transaction data | review transaction | click"
     And I click "Confirm" button on "Transaction summary" page
@@ -21,6 +25,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I validate latest analytics multiple events:
       | send \| transaction confirmation \| confirm \| click |
       | send \| all done \| view                             |
+    And I validate that the "send | all done | view" event includes property "recipient_source" with value "not on address book,address book" in posthog
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "send | all done | x | click"
     And I validate that 6 analytics event(s) have been sent

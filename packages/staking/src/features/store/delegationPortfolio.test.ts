@@ -113,19 +113,19 @@ describe('delegationPortfolioStore', () => {
         currentEpoch: dummyCurrentEpoch,
         delegationDistribution: [
           {
-            percentage: Wallet.Percent(33.33),
+            percentage: Wallet.Percent(0.33),
             pool: dummyStakePool1,
             rewardAccounts: [],
             stake: BigInt(1),
           },
           {
-            percentage: Wallet.Percent(33.33),
+            percentage: Wallet.Percent(0.33),
             pool: dummyStakePool2,
             rewardAccounts: [],
             stake: BigInt(1),
           },
           {
-            percentage: Wallet.Percent(33.33),
+            percentage: Wallet.Percent(0.33),
             pool: dummyStakePool3,
             rewardAccounts: [],
             stake: BigInt(1),
@@ -243,9 +243,9 @@ describe('delegationPortfolioStore', () => {
         result.current.mutators.cancelManagementProcess({ dumpDraftToSelections: true });
       });
       expect(result.current.selections).toEqual([
-        expect.objectContaining(dummyPool1),
-        expect.objectContaining(dummyPool2),
-        expect.objectContaining(dummyPool3),
+        expect.objectContaining({ ...dummyPool1, weight: 33 }),
+        expect.objectContaining({ ...dummyPool2, weight: 33 }),
+        expect.objectContaining({ ...dummyPool3, weight: 33 }),
       ]);
     });
     it('re-sets the activeManagementProcess to none when finalized', () => {
@@ -268,11 +268,11 @@ describe('delegationPortfolioStore', () => {
       expect(result.current.draftPortfolio).toEqual([
         expect.objectContaining({
           ...dummyPool2,
-          weight: 33.33,
+          weight: 50,
         }),
         expect.objectContaining({
           ...dummyPool3,
-          weight: 33.33,
+          weight: 50,
         }),
       ]);
     });
@@ -334,12 +334,20 @@ describe('delegationPortfolioStore', () => {
     it('allows to remove pool from draftPortfolio', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => result.current.mutators.removePoolInManagementProcess({ id: dummyPool3.id }));
-      expect(result.current.draftPortfolio).toEqual([dummyPool2, dummyPool4, dummyPool5]);
+      expect(result.current.draftPortfolio).toEqual([
+        { ...dummyPool2, weight: 33 },
+        { ...dummyPool4, weight: 33 },
+        { ...dummyPool5, weight: 33 },
+      ]);
     });
     it('removes pool from selections when removed pool in management process', () => {
       const { result } = renderHook(() => useDelegationPortfolioStore());
       act(() => result.current.mutators.removePoolInManagementProcess({ id: dummyPool1.id }));
-      expect(result.current.selections).toEqual([dummyPool2, dummyPool4, dummyPool5]);
+      expect(result.current.selections).toEqual([
+        { ...dummyPool2, weight: 33 },
+        { ...dummyPool4, weight: 33 },
+        { ...dummyPool5, weight: 33 },
+      ]);
     });
   });
 });
