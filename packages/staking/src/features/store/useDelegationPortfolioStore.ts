@@ -45,6 +45,10 @@ type CommandCommonDrawerBack = {
   type: 'CommandCommonDrawerBack';
 };
 
+type CommandCommonDrawerContinue = {
+  type: 'CommandCommonDrawerContinue';
+};
+
 type CommandCommonPreferencesStepUpdateWeight = {
   type: 'CommandCommonPreferencesStepUpdateWeight';
   data: {
@@ -135,15 +139,19 @@ type PoolDetailsCommand =
 
 type CurrentPortfolioManagementStepPreferencesCommand =
   | CommandCommonCancelDrawer
+  | CommandCommonDrawerContinue
   | CommandCommonPreferencesStepUpdateWeight;
 
-type CurrentPortfolioManagementStepConfirmationCommand = CommandCommonDrawerBack;
+type CurrentPortfolioManagementStepConfirmationCommand = CommandCommonDrawerBack | CommandCommonDrawerContinue;
 
 type ChangingPreferencesConfirmationCommand =
   | CommandChangingPreferencesConfirmationDiscard
   | CommandChangingPreferencesConfirmationConfirm;
 
-type NewPortfolioCreationStepPreferencesCommand = CommandCommonCancelDrawer | CommandCommonPreferencesStepUpdateWeight;
+type NewPortfolioCreationStepPreferencesCommand =
+  | CommandCommonCancelDrawer
+  | CommandCommonDrawerContinue
+  | CommandCommonPreferencesStepUpdateWeight;
 
 type Command =
   | OverviewCommand
@@ -412,6 +420,9 @@ const processCommand: Handler = (params) =>
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                 store.draftPortfolio = [];
               },
+              CommandCommonDrawerContinue: ({ store }) => {
+                store.activeDrawerStep = DrawerManagementStep.Confirmation;
+              },
               CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
                 ({
                   store,
@@ -430,6 +441,9 @@ const processCommand: Handler = (params) =>
             {
               CommandCommonDrawerBack: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Preferences;
+              },
+              CommandCommonDrawerContinue: ({ store }) => {
+                store.activeDrawerStep = DrawerManagementStep.Sign;
               },
             },
             params.command.type as CurrentPortfolioManagementStepConfirmationCommand['type'],
@@ -467,6 +481,9 @@ const processCommand: Handler = (params) =>
               CommandCommonCancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
                 store.draftPortfolio = [];
+              },
+              CommandCommonDrawerContinue: ({ store }) => {
+                store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
               CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
                 ({

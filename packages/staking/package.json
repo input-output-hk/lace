@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "build": "tsc && tsup",
+    "build:dev": "tsc & tsup",
     "cleanup": "yarn exec rm -rf dist node_modules && yarn exec rm -rf ../../.cache/eslintcache",
     "dev": "ladle serve",
     "eslint:check": "yarn run -T eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '**/*.{cjs,mjs,js,ts,tsx}'",
