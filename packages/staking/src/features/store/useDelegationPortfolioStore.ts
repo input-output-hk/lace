@@ -1,6 +1,5 @@
 import { DelegatedStake } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
-import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
@@ -165,7 +164,6 @@ type State = {
   pendingSelectedPortfolio?: DraftPortfolioStakePool[];
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio: DraftPortfolioStakePool[];
-  keyAgentType?: Wallet.KeyManagement.KeyAgentType;
   selectedPortfolio: DraftPortfolioStakePool[];
   viewedStakePool?: StakePoolWithLogo;
 };
@@ -444,6 +442,9 @@ const processCommand: Handler = (params) =>
         params.store.activeDrawerStep as DrawerManagementStep,
         Flow.CurrentPortfolioManagement
       ),
+      // TODO: reconsider this approach. Maybe it would be better to have just a boolean state for opening the modal
+      //  instead of having a separate flow. It might feel more like a part of new portfolio creation step rather
+      //  a separate flow.
       [Flow.ChangingPreferencesConfirmation]: cases<ChangingPreferencesConfirmationCommand['type']>(
         {
           CommandChangingPreferencesConfirmationConfirm: ({ store }) => {
@@ -501,7 +502,6 @@ const defaultState: State = {
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
   draftPortfolio: [],
-  keyAgentType: undefined,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
   viewedStakePool: undefined,
@@ -544,6 +544,7 @@ export const useNewDelegationPortfolioStore = create(
           store.activeFlow = viewingOverviewPage ? Flow.Overview : Flow.BrowsePools;
           store.activeDrawerStep = undefined;
           store.selectedPortfolio = [];
+          store.pendingSelectedPortfolio = undefined;
           store.viewedStakePool = undefined;
         }),
       setCardanoCoinSymbol: (currentChain) =>
@@ -608,47 +609,12 @@ export type NewStakePoolDetails = {
 };
 
 export const stakePoolDetailsSelector = ({
+  cardanoCoinSymbol,
   viewedStakePool,
 }: DelegationPortfolioStore): NewStakePoolDetails | undefined => {
   if (!viewedStakePool) return undefined;
-
-  const {
-    id,
-    cost,
-    hexId,
-    metadata: { description = '', name = '', ticker = '', homepage, ext } = {},
-    metrics,
-    margin,
-    owners,
-    logo,
-    status,
-  } = viewedStakePool;
-  const calcMargin = margin ? `${formatPercentages(margin.numerator / margin.denominator)}` : '-';
-
   // eslint-disable-next-line consistent-return
-  return {
-    apy: metrics?.apy && formatPercentages(metrics.apy),
-    contact: {
-      primary: homepage,
-      ...ext?.pool.contact,
-    },
-    // TODO: a lot of this is repeated in `stakePoolTransformer`. Have only one place to parse this info
-    delegators: metrics?.delegators,
-    description,
-    fee: Wallet.util.lovelacesToAdaString(cost.toString()),
-    hexId: hexId.toString(),
-    id: id.toString(),
-    logo: logo ?? getRandomIcon({ id: id.toString(), size: 30 }),
-    margin: calcMargin,
-    name,
-    owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
-    saturation: metrics?.saturation && formatPercentages(metrics.saturation),
-    stake: metrics?.stake?.active
-      ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics.stake?.active?.toString()))
-      : { number: '-' },
-    status,
-    ticker,
-  };
+  return mapStakePoolToDisplayData({ cardanoCoinSymbol, stakePool: viewedStakePool });
 };
 
 export const isPoolSelectedSelector = (poolHexId: Wallet.Cardano.PoolIdHex) => (store: DelegationPortfolioStore) =>

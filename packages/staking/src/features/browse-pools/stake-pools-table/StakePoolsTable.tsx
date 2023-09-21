@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { Search, getRandomIcon } from '@lace/common';
 import { Box, Flex } from '@lace/ui';
 import debounce from 'lodash/debounce';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { useStakePoolDetails } from '../../store';

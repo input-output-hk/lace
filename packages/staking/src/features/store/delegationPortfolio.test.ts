@@ -2,7 +2,7 @@
 import { Wallet } from '@lace/cardano';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { beforeEach, expect, it } from 'vitest';
-import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from './delegationPortfolio';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from './';
 import { CurrentPortfolioStakePool, PortfolioManagementProcess } from './types';
 
 const dummyPool1 = {

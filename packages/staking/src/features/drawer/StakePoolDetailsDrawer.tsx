@@ -64,7 +64,7 @@ export const StakePoolDetailsDrawer = ({
     portfolioMutators,
   ]);
 
-  const onArrowIconClick = useCallback(() => {
+  const onGoBack = useCallback(() => {
     if (password) {
       backgroundServiceAPIContextSetWalletPassword();
       removePassword();
@@ -76,7 +76,7 @@ export const StakePoolDetailsDrawer = ({
 
   useKeyboardShortcut(['Escape'], () => {
     if (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon) {
-      onArrowIconClick();
+      onGoBack();
     } else {
       closeDrawer();
     }
@@ -92,7 +92,7 @@ export const StakePoolDetailsDrawer = ({
           title={DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : t('drawer.titleSecond')}
           onArrowIconClick={
             (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon)
-              ? onArrowIconClick
+              ? onGoBack
               : undefined
           }
           onCloseIconClick={

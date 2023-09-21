@@ -8170,7 +8170,7 @@ __metadata:
     "@vanilla-extract/vite-plugin": ^3.8.2
     "@vitest/coverage-c8": ^0.31.0
     antd: ^4.17.3
-    bignumber.js: ^9.0.1
+    bignumber.js: 9.0.1
     classnames: ^2.3.2
     concurrently: ^8.0.1
     esbuild-plugin-svgr: ^2.0.0
@@ -8203,7 +8203,7 @@ __metadata:
     "@lace/core": 0.1.0
     "@lace/ui": ^0.1.0
     antd: ^4.17.3
-    bignumber.js: ^9.0.1
+    bignumber.js: 9.0.1
     react: 17.0.2
     react-dom: 17.0.2
     react-infinite-scroll-component: ^6.1.0
@@ -18759,7 +18759,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:^9.0.1, bignumber.js@npm:^9.1.1":
+"bignumber.js@npm:^9.1.1":
   version: 9.1.1
   resolution: "bignumber.js@npm:9.1.1"
   checksum: ad243b7e2f9120b112d670bb3d674128f0bd2ca1745b0a6c9df0433bd2c0252c43e6315d944c2ac07b4c639e7496b425e46842773cf89c6a2dcd4f31e5c4b11e

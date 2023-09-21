@@ -31,17 +31,15 @@ export const StakePoolDetails = ({
   showBackIcon,
   showExitConfirmation,
 }: stakePoolDetailsProps): React.ReactElement => {
-  const { walletStoreInMemoryWallet, delegationStoreSelectedStakePoolDetails: openPool } = useOutsideHandles();
+  const { walletStoreInMemoryWallet } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
   const { activeDrawerStep, activeFlow, selectionsFull, openPoolIsSelected } = useNewDelegationPortfolioStore(
     (store) => ({
       activeDrawerStep: store.activeDrawerStep,
       activeFlow: store.activeFlow,
-      openPoolIsSelected:
-        openPool &&
-        store.selectedPortfolio.some(
-          (pool) => store.viewedStakePool && pool.id === Wallet.Cardano.PoolIdHex(store.viewedStakePool.hexId)
-        ),
+      openPoolIsSelected: store.selectedPortfolio.some(
+        (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
+      ),
       selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
     })
   );

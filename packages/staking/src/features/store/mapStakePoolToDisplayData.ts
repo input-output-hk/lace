@@ -1,5 +1,4 @@
 import { Wallet } from '@lace/cardano';
-import { lovelacesToAdaString } from '@lace/cardano/src/wallet/util';
 import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
 import { AdaSymbol } from './types';
 
@@ -33,7 +32,7 @@ export const mapStakePoolToDisplayData = ({
     margin,
     name: stakePool.metadata?.name || '-',
     owners: stakePool.owners ? stakePool.owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
-    pledge: stakePool.pledge ? `${lovelacesToAdaString(stakePool.pledge.toString())}${cardanoCoinSymbol}` : '-',
+    pledge: stakePool.pledge ? `${Wallet.util.lovelacesToAdaString(stakePool.pledge.toString())}${cardanoCoinSymbol}` : '-',
     retired: stakePool.status === Wallet.Cardano.StakePoolStatus.Retired,
     saturation: stakePool.metrics?.saturation && formatPercentages(stakePool.metrics.saturation),
     size: `${stakePool.metrics?.size.live ?? '-'} %`,
