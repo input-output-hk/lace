@@ -34,9 +34,9 @@ export const StakePoolPreferences = () => {
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,
   } = useOutsideHandles();
-  const { draftPortfolio } = useNewDelegationPortfolioStore((state) => ({
+  const { draftPortfolio, portfolioMutators } = useNewDelegationPortfolioStore((state) => ({
     activeDrawerStep: state.activeDrawerStep,
-    draftPortfolio: state.draftPortfolio,
+    draftPortfolio: state.draftPortfolio || [],
     portfolioMutators: state.mutators,
   }));
 
@@ -47,19 +47,16 @@ export const StakePoolPreferences = () => {
     weight,
   }));
   const createRemovePoolFromPortfolio = (poolId: Wallet.Cardano.PoolIdHex) => () => {
-    console.log(poolId);
-    // portfolioMutators.removePoolInManagementProcess({ id: poolId });
+    portfolioMutators.executeCommand({
+      data: poolId,
+      type: 'CommandCommonPreferencesStepRemoveStakePool',
+    });
   };
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
   const onAddPoolButtonClick = () => {
-    if (addPoolButtonDisabled) return;
-    console.log('asd');
-    // if (activeDrawerStep === Flow.CurrentPortfolioManagement) {
-    //   setActivePage(Page.browsePools);
-    // }
-    // portfolioMutators.cancelManagementProcess({ dumpDraftToSelections: true });
-    // setIsDrawerVisible(false);
-    // resetStates();
+    portfolioMutators.executeCommand({
+      type: 'CommandCommonPreferencesStepAddStakePools',
+    });
   };
 
   return (

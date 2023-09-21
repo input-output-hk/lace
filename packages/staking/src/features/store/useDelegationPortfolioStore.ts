@@ -57,6 +57,15 @@ type CommandCommonPreferencesStepUpdateWeight = {
   };
 };
 
+type CommandCommonPreferencesStepAddStakePools = {
+  type: 'CommandCommonPreferencesStepAddStakePools';
+};
+
+type CommandCommonPreferencesStepRemoveStakePool = {
+  type: 'CommandCommonPreferencesStepRemoveStakePool';
+  data: Wallet.Cardano.PoolIdHex;
+};
+
 type CommandOverviewShowDetails = {
   type: 'CommandOverviewShowDetails';
   data: StakePoolWithLogo;
@@ -140,6 +149,8 @@ type PoolDetailsCommand =
 type CurrentPortfolioManagementStepPreferencesCommand =
   | CommandCommonCancelDrawer
   | CommandCommonDrawerContinue
+  | CommandCommonPreferencesStepAddStakePools
+  | CommandCommonPreferencesStepRemoveStakePool
   | CommandCommonPreferencesStepUpdateWeight;
 
 type CurrentPortfolioManagementStepConfirmationCommand = CommandCommonDrawerBack | CommandCommonDrawerContinue;
@@ -151,6 +162,8 @@ type ChangingPreferencesConfirmationCommand =
 type NewPortfolioCreationStepPreferencesCommand =
   | CommandCommonCancelDrawer
   | CommandCommonDrawerContinue
+  | CommandCommonPreferencesStepAddStakePools
+  | CommandCommonPreferencesStepRemoveStakePool
   | CommandCommonPreferencesStepUpdateWeight;
 
 type Command =
@@ -171,7 +184,7 @@ type State = {
   cardanoCoinSymbol: AdaSymbol;
   pendingSelectedPortfolio?: DraftPortfolioStakePool[];
   currentPortfolio: CurrentPortfolioStakePool[];
-  draftPortfolio: DraftPortfolioStakePool[];
+  draftPortfolio?: DraftPortfolioStakePool[];
   selectedPortfolio: DraftPortfolioStakePool[];
   viewedStakePool?: StakePoolWithLogo;
 };
@@ -229,7 +242,18 @@ const mapStakePoolToPortfolioPool = ({
   weight: 1,
 });
 
+const targetWeight = 100;
+const mapPoolWeights = (pools: DraftPortfolioStakePool[]) =>
+  pools.map<DraftPortfolioStakePool>((pool) => ({ ...pool, weight: Math.round(targetWeight / pools.length) }));
+
 const atomicStateMutators = {
+  addPoolsFromPreferences: ({ store }: { store: DelegationPortfolioStore }) => {
+    if (!store.draftPortfolio)
+      throw new Error('Delegation Portfolio Store: Inconsistent state: lack of draftPortfolio');
+    store.selectedPortfolio = mapPoolWeights(store.draftPortfolio);
+    store.draftPortfolio = undefined;
+    store.activeFlow = Flow.BrowsePools;
+  },
   beginNewPortfolioCreation: ({
     selections,
     store,
@@ -251,6 +275,12 @@ const atomicStateMutators = {
     store.activeFlow = targetFlow;
     store.activeDrawerStep = undefined;
   },
+  removePoolFromPreferences: ({ id, store }: { id: Wallet.Cardano.PoolIdHex; store: DelegationPortfolioStore }) => {
+    if (!store.draftPortfolio)
+      throw new Error('Delegation Portfolio Store: Inconsistent state: lack of draftPortfolio');
+    if (store.draftPortfolio.length === 1) return;
+    store.draftPortfolio = mapPoolWeights(store.draftPortfolio.filter((pool) => pool.id !== id));
+  },
   selectPool: ({ stakePool, store }: { stakePool: Wallet.Cardano.StakePool; store: DelegationPortfolioStore }) => {
     const selectionsFull = store.selectedPortfolio.length === MAX_POOLS_COUNT;
     const alreadySelected = store.selectedPortfolio.some(({ id }) => stakePool.hexId === id);
@@ -258,6 +288,7 @@ const atomicStateMutators = {
     store.selectedPortfolio.push(
       mapStakePoolToPortfolioPool({ cardanoCoinSymbol: store.cardanoCoinSymbol, stakePool })
     );
+    store.selectedPortfolio = mapPoolWeights(store.selectedPortfolio);
   },
   showChangingPreferencesConfirmation: ({
     pendingSelectedPortfolio,
@@ -285,7 +316,7 @@ const atomicStateMutators = {
     store.viewedStakePool = pool;
   },
   unselectPool: ({ id, store }: { id: Wallet.Cardano.PoolIdHex; store: DelegationPortfolioStore }) => {
-    store.selectedPortfolio = store.selectedPortfolio.filter((pool) => pool.id !== id);
+    store.selectedPortfolio = mapPoolWeights(store.selectedPortfolio.filter((pool) => pool.id !== id));
   },
   updatePoolWeight: ({
     poolId,
@@ -296,6 +327,8 @@ const atomicStateMutators = {
     poolId: Wallet.Cardano.PoolIdHex;
     weight: number;
   }) => {
+    if (!store.draftPortfolio)
+      throw new Error('Delegation Portfolio Store: Inconsistent state: lack of draftPortfolio');
     const pool = store.draftPortfolio.find(({ id }) => id === poolId);
     if (!pool) return;
     pool.weight = weight;
@@ -418,11 +451,19 @@ const processCommand: Handler = (params) =>
             {
               CommandCommonCancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
-                store.draftPortfolio = [];
+                store.draftPortfolio = undefined;
               },
               CommandCommonDrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
+              CommandCommonPreferencesStepAddStakePools: ({ store }) => {
+                atomicStateMutators.addPoolsFromPreferences({ store });
+              },
+              CommandCommonPreferencesStepRemoveStakePool: handler<CommandCommonPreferencesStepRemoveStakePool>(
+                ({ store, command: { data } }) => {
+                  atomicStateMutators.removePoolFromPreferences({ id: data, store });
+                }
+              ),
               CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
                 ({
                   store,
@@ -480,11 +521,19 @@ const processCommand: Handler = (params) =>
             {
               CommandCommonCancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
-                store.draftPortfolio = [];
+                store.draftPortfolio = undefined;
               },
               CommandCommonDrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
+              CommandCommonPreferencesStepAddStakePools: ({ store }) => {
+                atomicStateMutators.addPoolsFromPreferences({ store });
+              },
+              CommandCommonPreferencesStepRemoveStakePool: handler<CommandCommonPreferencesStepRemoveStakePool>(
+                ({ store, command: { data } }) => {
+                  atomicStateMutators.removePoolFromPreferences({ id: data, store });
+                }
+              ),
               CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
                 ({
                   store,
@@ -517,7 +566,7 @@ const defaultState: State = {
   activeFlow: Flow.Overview,
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
-  draftPortfolio: [],
+  draftPortfolio: undefined,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
   viewedStakePool: undefined,
@@ -576,6 +625,7 @@ export const useNewDelegationPortfolioStore = create(
           const confirmedPoolRewards = confirmedRewardHistory
             .filter(({ poolId }) => poolId === stakePool.id)
             .map(({ rewards }) => rewards);
+
           return {
             displayData: {
               ...mapStakePoolToDisplayData({ cardanoCoinSymbol: get().cardanoCoinSymbol, stakePool }),
@@ -587,7 +637,7 @@ export const useNewDelegationPortfolioStore = create(
             stakePool,
             ticker: stakePool.metadata?.ticker,
             value: stake,
-            weight: percentage,
+            weight: Math.round(percentage * targetWeight),
           };
         });
 
