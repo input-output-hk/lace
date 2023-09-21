@@ -96,7 +96,20 @@ export enum PostHogAction {
   SendSomethingWentWrongXClick = 'send | something went wrong | x | click',
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
-  NFTsImageClick = 'nft | nfts | nft image | click'
+  NFTsImageClick = 'nft | nfts | nft image | click',
+  // Address book
+  AddressBookAddAddressClick = 'address book | add address | click',
+  AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
+  AddressBookAddNewAddressCancelClick = 'address book | add new address | cancel | click',
+  AddressBookAddressRecordClick = 'address book | address record | click',
+  AddressBookAddressRecordCopyClick = 'address book | address record | copy | click',
+  AddressBookAddressRecordEditClick = 'address book | address record | edit | click',
+  AddressBookAddressRecordDeleteClick = 'address book | address record | delete | click',
+  AddressBookAddressRecordDeleteHoldUpDeleteAddressClick = 'address book | address record | delete | hold up! | delete address | click',
+  AddressBookAddressRecordDeleteHoldUpCancelClick = 'address book | address record | delete | hold up! | cancel | click',
+  AddressBookAddressRecordEditAddressDoneClick = 'address book | address record | edit address | done | click',
+  AddressBookAddressRecordEditAddressCancelClick = 'address book | address record | edit address | cancel | click',
+  AddressBookAddressRecordEditAddressXClick = 'address book | address record | edit address | x | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
