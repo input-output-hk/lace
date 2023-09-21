@@ -1,7 +1,12 @@
 import { SubNavigation } from '@lace/ui';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flow, Page, useDelegationPortfolioStore } from '../store';
+import { Flow, useDelegationPortfolioStore } from '../store';
+
+export enum Page {
+  overview = 'overview',
+  browsePools = 'browsePools',
+}
 
 type NavigationProps = {
   children: (activePage: Page) => ReactNode;

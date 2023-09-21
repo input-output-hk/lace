@@ -6,8 +6,8 @@ import { StakePoolDetails } from '../drawer';
 import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
-import { DrawerManagementStep, DrawerStep, Page, useDelegationPortfolioStore } from '../store';
-import { Navigation } from './Navigation';
+import { DrawerManagementStep, DrawerStep, useDelegationPortfolioStore } from '../store';
+import { Navigation, Page } from './Navigation';
 
 const stepsWithBackBtn = new Set<DrawerStep>([DrawerManagementStep.Confirmation, DrawerManagementStep.Sign]);
 

@@ -3,7 +3,6 @@ import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
-import { AdaSymbol, CurrentPortfolioStakePool, DraftPortfolioStakePool } from './types';
 
 export const MAX_POOLS_COUNT = 5;
 const LAST_STABLE_EPOCH = 2;
@@ -12,6 +11,21 @@ export const CARDANO_COIN_SYMBOL: Record<Wallet.Cardano.NetworkId, AdaSymbol> = 
   [Wallet.Cardano.NetworkId.Mainnet]: 'ADA',
   [Wallet.Cardano.NetworkId.Testnet]: 'tADA',
 };
+
+export type DraftPortfolioStakePool = Wallet.Cardano.Cip17Pool & {
+  displayData: Wallet.util.StakePool;
+};
+
+export type CurrentPortfolioStakePool = DraftPortfolioStakePool & {
+  displayData: Wallet.util.StakePool & {
+    lastReward: bigint;
+    totalRewards: bigint;
+  };
+  stakePool: Wallet.Cardano.StakePool;
+  value: bigint;
+};
+
+export type AdaSymbol = 'ADA' | 'tADA';
 
 export enum Flow {
   Overview = 'Overview',
