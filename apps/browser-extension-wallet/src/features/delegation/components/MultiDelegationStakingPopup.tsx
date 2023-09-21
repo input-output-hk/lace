@@ -18,14 +18,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { theme } = useTheme();
   const { setWalletPassword, handleOpenBrowser } = useBackgroundServiceAPIContext();
   const selectedStakePoolDetails = useDelegationStore(stakePoolDetailsSelector);
-  const {
-    delegationTxBuilder,
-    setDelegationTxBuilder,
-    delegationTxFee,
-    setDelegationTxFee,
-    setSelectedStakePool,
-    selectedStakePool
-  } = useDelegationStore();
+  const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee, selectedStakePool } =
+    useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const password = usePassword();
   const submittingState = useSubmitingState();
@@ -97,7 +91,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         delegationStoreSelectedStakePoolDetails: selectedStakePoolDetails,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreDelegationTxBuilder: delegationTxBuilder,
-        delegationStoreSetSelectedStakePool: setSelectedStakePool,
         delegationStoreSetDelegationTxFee: setDelegationTxFee,
         delegationStoreDelegationTxFee: delegationTxFee,
         delegationStoreSelectedStakePool: selectedStakePool,
