@@ -24,13 +24,13 @@ export const PortfolioBar = () => {
       <Flex className={styles.buttons}>
         <Button.Secondary
           label={t('portfolioBar.clear')}
-          onClick={() => portfolioMutators.executeCommand({ type: 'CommandBrowsePoolsClearSelections' })}
+          onClick={() => portfolioMutators.executeCommand({ type: 'ClearSelections' })}
           data-testid="portfoliobar-btn-clear"
         />
         <Button.Primary
           label={t('portfolioBar.next')}
           icon={<ArrowRight className={styles.nextIcon} />}
-          onClick={() => portfolioMutators.executeCommand({ type: 'CommandBrowsePoolsCreateNewPortfolio' })}
+          onClick={() => portfolioMutators.executeCommand({ type: 'CreateNewPortfolio' })}
           data-testid="portfoliobar-btn-next"
         />
       </Flex>

@@ -30,7 +30,7 @@ export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): Rea
           body: t('modals.changingPreferences.buttons.cancel'),
           color: 'secondary',
           dataTestId: 'switch-pools-modal-cancel',
-          onClick: () => portfolioMutators.executeCommand({ type: 'CommandChangingPreferencesConfirmationDiscard' }),
+          onClick: () => portfolioMutators.executeCommand({ type: 'DiscardChangingPreferences' }),
         },
         {
           body: t('modals.changingPreferences.buttons.confirm'),
@@ -44,7 +44,7 @@ export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): Rea
                 ? 'AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_POPUP'
                 : 'AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_BROWSER',
             });
-            portfolioMutators.executeCommand({ type: 'CommandChangingPreferencesConfirmationConfirm' });
+            portfolioMutators.executeCommand({ type: 'ConfirmChangingPreferences' });
           },
         },
       ]}

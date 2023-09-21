@@ -76,7 +76,7 @@ export const StakePoolItemBrowser = ({
     <div
       data-testid="stake-pool-table-item"
       className={styles.row}
-      onClick={() => portfolioMutators.executeCommand({ data: stakePool, type: 'CommandBrowsePoolsShowPoolDetails' })}
+      onClick={() => portfolioMutators.executeCommand({ data: stakePool, type: 'ShowPoolDetailsFromList' })}
     >
       <div className={styles.name}>
         <img
@@ -121,11 +121,11 @@ export const StakePoolItemBrowser = ({
                   poolAlreadySelected
                     ? {
                         data: hexId,
-                        type: 'CommandBrowsePoolsUnselectPool',
+                        type: 'UnselectPoolFromList',
                       }
                     : {
                         data: stakePool,
-                        type: 'CommandBrowsePoolsSelectPool',
+                        type: 'SelectPoolFromList',
                       }
                 );
               }}

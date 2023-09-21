@@ -351,7 +351,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     //     setIsConfirmingTx(false);
     //   }
     // }
-    portfolioMutators.executeCommand({ type: 'CommandCommonDrawerContinue' });
+    portfolioMutators.executeCommand({ type: 'DrawerContinue' });
   }, [portfolioMutators]);
 
   const confirmLabel = useMemo(() => {

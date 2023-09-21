@@ -100,7 +100,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       cleanPasswordInput();
       sendAnalytics();
       setIsRestaking(currentPortfolio.length > 0);
-      portfolioMutators.executeCommand({ type: 'CommandCommonDrawerContinue' });
+      portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
     } catch (error) {
       // Error name is 'AuthenticationError' in dev build but 'W' in prod build
@@ -108,7 +108,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       if (error.message?.includes('Authentication failure')) {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
-        portfolioMutators.executeCommand({ type: 'CommandSignDrawerFailure' });
+        portfolioMutators.executeCommand({ type: 'DrawerFailure' });
         setSubmitingTxState({ isSubmitingTx: false });
       }
     }

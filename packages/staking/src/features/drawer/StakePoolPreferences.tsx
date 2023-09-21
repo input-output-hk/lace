@@ -17,7 +17,7 @@ export const StakePoolPreferencesFooter = () => {
         data-testid="preferences-next-button"
         onClick={() =>
           portfolioMutators.executeCommand({
-            type: 'CommandCommonDrawerContinue',
+            type: 'DrawerContinue',
           })
         }
         w="$fill"
@@ -49,13 +49,13 @@ export const StakePoolPreferences = () => {
   const createRemovePoolFromPortfolio = (poolId: Wallet.Cardano.PoolIdHex) => () => {
     portfolioMutators.executeCommand({
       data: poolId,
-      type: 'CommandCommonPreferencesStepRemoveStakePool',
+      type: 'RemoveStakePool',
     });
   };
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
   const onAddPoolButtonClick = () => {
     portfolioMutators.executeCommand({
-      type: 'CommandCommonPreferencesStepAddStakePools',
+      type: 'AddStakePools',
     });
   };
 

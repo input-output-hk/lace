@@ -51,172 +51,128 @@ export enum DrawerManagementStep {
 
 export type DrawerStep = DrawerDefaultStep | DrawerManagementStep;
 
-type CommandCommonCancelDrawer = {
-  type: 'CommandCommonCancelDrawer';
+type CancelDrawer = {
+  type: 'CancelDrawer';
 };
 
-type CommandCommonDrawerBack = {
-  type: 'CommandCommonDrawerBack';
+type DrawerBack = {
+  type: 'DrawerBack';
 };
 
-type CommandCommonDrawerContinue = {
-  type: 'CommandCommonDrawerContinue';
+type DrawerContinue = {
+  type: 'DrawerContinue';
 };
 
-type CommandCommonPreferencesStepUpdateWeight = {
-  type: 'CommandCommonPreferencesStepUpdateWeight';
-  data: {
-    poolId: Wallet.Cardano.PoolIdHex;
-    weight: number;
-  };
+type AddStakePools = {
+  type: 'AddStakePools';
 };
 
-type CommandCommonPreferencesStepAddStakePools = {
-  type: 'CommandCommonPreferencesStepAddStakePools';
-};
-
-type CommandCommonPreferencesStepRemoveStakePool = {
-  type: 'CommandCommonPreferencesStepRemoveStakePool';
+type RemoveStakePool = {
+  type: 'RemoveStakePool';
   data: Wallet.Cardano.PoolIdHex;
 };
 
-type CommandOverviewShowDetails = {
-  type: 'CommandOverviewShowDetails';
+type ShowDelegatedPoolDetails = {
+  type: 'ShowDelegatedPoolDetails';
   data: StakePoolWithLogo;
 };
 
-type CommandOverviewManagePortfolio = {
-  type: 'CommandOverviewManagePortfolio';
+type ManagePortfolio = {
+  type: 'ManagePortfolio';
 };
 
-type CommandOverviewGoToBrowsePools = {
-  type: 'CommandOverviewGoToBrowsePools';
+type GoToBrowsePools = {
+  type: 'GoToBrowsePools';
 };
 
-type CommandBrowsePoolsGoToOverview = {
-  type: 'CommandBrowsePoolsGoToOverview';
+type GoToOverview = {
+  type: 'GoToOverview';
 };
 
-type CommandBrowsePoolsSelectPool = {
-  type: 'CommandBrowsePoolsSelectPool';
+type SelectPoolFromList = {
+  type: 'SelectPoolFromList';
   data: Wallet.Cardano.StakePool;
 };
 
-type CommandBrowsePoolsUnselectPool = {
-  type: 'CommandBrowsePoolsUnselectPool';
+type UnselectPoolFromList = {
+  type: 'UnselectPoolFromList';
   data: Wallet.Cardano.PoolIdHex;
 };
 
-type CommandBrowsePoolsClearSelections = {
-  type: 'CommandBrowsePoolsClearSelections';
+type ClearSelections = {
+  type: 'ClearSelections';
 };
 
-type CommandBrowsePoolsCreateNewPortfolio = {
-  type: 'CommandBrowsePoolsCreateNewPortfolio';
+type CreateNewPortfolio = {
+  type: 'CreateNewPortfolio';
 };
 
-type CommandBrowsePoolsShowPoolDetails = {
-  type: 'CommandBrowsePoolsShowPoolDetails';
+type ShowPoolDetailsFromList = {
+  type: 'ShowPoolDetailsFromList';
   data: StakePoolWithLogo;
 };
 
-type CommandPoolDetailsSelectPool = {
-  type: 'CommandPoolDetailsSelectPool';
+type SelectPoolFromDetails = {
+  type: 'SelectPoolFromDetails';
   data: Wallet.Cardano.StakePool;
 };
 
-type CommandPoolDetailsUnselectPool = {
-  type: 'CommandPoolDetailsUnselectPool';
+type UnselectPoolFromDetails = {
+  type: 'UnselectPoolFromDetails';
   data: Wallet.Cardano.PoolIdHex;
 };
 
-type CommandPoolDetailsBeginSingleStaking = {
-  type: 'CommandPoolDetailsBeginSingleStaking';
+type BeginSingleStaking = {
+  type: 'BeginSingleStaking';
 };
 
-type CommandChangingPreferencesConfirmationConfirm = {
-  type: 'CommandChangingPreferencesConfirmationConfirm';
+type ConfirmChangingPreferences = {
+  type: 'ConfirmChangingPreferences';
 };
 
-type CommandChangingPreferencesConfirmationDiscard = {
-  type: 'CommandChangingPreferencesConfirmationDiscard';
+type DiscardChangingPreferences = {
+  type: 'DiscardChangingPreferences';
 };
 
-type CommandSignDrawerFailure = {
-  type: 'CommandSignDrawerFailure';
+type DrawerFailure = {
+  type: 'DrawerFailure';
 };
 
-type OverviewCommand = CommandOverviewShowDetails | CommandOverviewManagePortfolio | CommandOverviewGoToBrowsePools;
+type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools;
 
 type BrowsePoolsCommand =
-  | CommandBrowsePoolsSelectPool
-  | CommandBrowsePoolsUnselectPool
-  | CommandBrowsePoolsShowPoolDetails
-  | CommandBrowsePoolsGoToOverview
-  | CommandBrowsePoolsClearSelections
-  | CommandBrowsePoolsCreateNewPortfolio;
+  | SelectPoolFromList
+  | UnselectPoolFromList
+  | ShowPoolDetailsFromList
+  | GoToOverview
+  | ClearSelections
+  | CreateNewPortfolio;
 
-type CurrentPoolDetailsCommand = CommandCommonCancelDrawer;
+type CurrentPoolDetailsCommand = CancelDrawer;
 
-type PoolDetailsCommand =
-  | CommandCommonCancelDrawer
-  | CommandPoolDetailsSelectPool
-  | CommandPoolDetailsUnselectPool
-  | CommandPoolDetailsBeginSingleStaking;
+type PoolDetailsCommand = CancelDrawer | SelectPoolFromDetails | UnselectPoolFromDetails | BeginSingleStaking;
 
-type CurrentPortfolioManagementStepPreferencesCommand =
-  | CommandCommonCancelDrawer
-  | CommandCommonDrawerContinue
-  | CommandCommonPreferencesStepAddStakePools
-  | CommandCommonPreferencesStepRemoveStakePool
-  | CommandCommonPreferencesStepUpdateWeight;
+type CurrentPortfolioManagementStepPreferencesCommand = CancelDrawer | DrawerContinue | AddStakePools | RemoveStakePool;
 
-type CurrentPortfolioManagementStepConfirmationCommand =
-  | CommandCommonCancelDrawer
-  | CommandCommonDrawerContinue
-  | CommandCommonDrawerBack;
+type CurrentPortfolioManagementStepConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
-type CurrentPortfolioManagementStepSignCommand =
-  | CommandCommonCancelDrawer
-  | CommandCommonDrawerContinue
-  | CommandSignDrawerFailure
-  | CommandCommonDrawerBack;
+type CurrentPortfolioManagementStepSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-type CurrentPortfolioManagementStepFailureCommand =
-  | CommandCommonCancelDrawer
-  | CommandCommonDrawerContinue
-  | CommandCommonDrawerBack;
+type CurrentPortfolioManagementStepFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
-type CurrentPortfolioManagementStepSuccessCommand = CommandCommonCancelDrawer;
+type CurrentPortfolioManagementStepSuccessCommand = CancelDrawer;
 
-type ChangingPreferencesConfirmationCommand =
-  | CommandChangingPreferencesConfirmationDiscard
-  | CommandChangingPreferencesConfirmationConfirm;
+type ChangingPreferencesConfirmationCommand = DiscardChangingPreferences | ConfirmChangingPreferences;
 
-type NewPortfolioCreationStepPreferencesCommand =
-  | CommandCommonCancelDrawer
-  | CommandCommonDrawerContinue
-  | CommandCommonPreferencesStepAddStakePools
-  | CommandCommonPreferencesStepRemoveStakePool
-  | CommandCommonPreferencesStepUpdateWeight;
+type NewPortfolioCreationStepPreferencesCommand = CancelDrawer | DrawerContinue | AddStakePools | RemoveStakePool;
 
-type NewPortfolioCreationStepsConfirmationCommand =
-  | CommandCommonCancelDrawer
-  | CommandCommonDrawerContinue
-  | CommandCommonDrawerBack;
+type NewPortfolioCreationStepsConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
-type NewPortfolioCreationStepsSignCommand =
-  | CommandCommonCancelDrawer
-  | CommandCommonDrawerContinue
-  | CommandSignDrawerFailure
-  | CommandCommonDrawerBack;
+type NewPortfolioCreationStepsSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-type NewPortfolioCreationStepsFailureCommand =
-  | CommandCommonCancelDrawer
-  | CommandCommonDrawerContinue
-  | CommandCommonDrawerBack;
+type NewPortfolioCreationStepsFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
-type NewPortfolioCreationStepsSuccessCommand = CommandCommonCancelDrawer;
+type NewPortfolioCreationStepsSuccessCommand = CancelDrawer;
 
 type Command =
   | OverviewCommand
@@ -377,20 +333,6 @@ const atomicStateMutators = {
   unselectPool: ({ id, store }: { id: Wallet.Cardano.PoolIdHex; store: DelegationPortfolioStore }) => {
     store.selectedPortfolio = mapPoolWeights(store.selectedPortfolio.filter((pool) => pool.id !== id));
   },
-  updatePoolWeight: ({
-    poolId,
-    store,
-    weight,
-  }: {
-    store: DelegationPortfolioStore;
-    poolId: Wallet.Cardano.PoolIdHex;
-    weight: number;
-  }) => {
-    if (!store.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
-    const pool = store.draftPortfolio.find(({ id }) => id === poolId);
-    if (!pool) return;
-    pool.weight = weight;
-  },
 };
 
 const processCommand: Handler = (params) =>
@@ -398,15 +340,15 @@ const processCommand: Handler = (params) =>
     {
       [Flow.Overview]: cases<OverviewCommand['type']>(
         {
-          CommandOverviewGoToBrowsePools: ({ store }) => {
+          GoToBrowsePools: ({ store }) => {
             store.activeFlow = Flow.BrowsePools;
           },
-          CommandOverviewManagePortfolio: ({ store }) => {
+          ManagePortfolio: ({ store }) => {
             store.activeFlow = Flow.CurrentPortfolioManagement;
             store.activeDrawerStep = DrawerManagementStep.Preferences;
             store.draftPortfolio = store.currentPortfolio;
           },
-          CommandOverviewShowDetails: handler<CommandOverviewShowDetails>(({ store, command: { data } }) => {
+          ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails>(({ store, command: { data } }) => {
             atomicStateMutators.showPoolDetails({ pool: data, store, targetFlow: Flow.CurrentPoolDetails });
           }),
         },
@@ -415,10 +357,10 @@ const processCommand: Handler = (params) =>
       ),
       [Flow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
         {
-          CommandBrowsePoolsClearSelections: ({ store }) => {
+          ClearSelections: ({ store }) => {
             store.selectedPortfolio = [];
           },
-          CommandBrowsePoolsCreateNewPortfolio: ({ store }) => {
+          CreateNewPortfolio: ({ store }) => {
             if (store.currentPortfolio.length > 0) {
               atomicStateMutators.showChangingPreferencesConfirmation({
                 pendingSelectedPortfolio: store.selectedPortfolio,
@@ -428,21 +370,19 @@ const processCommand: Handler = (params) =>
               atomicStateMutators.beginNewPortfolioCreation({ selections: store.selectedPortfolio, store });
             }
           },
-          CommandBrowsePoolsGoToOverview: ({ store }) => {
+          GoToOverview: ({ store }) => {
             store.activeFlow = Flow.Overview;
           },
-          CommandBrowsePoolsSelectPool: handler<CommandBrowsePoolsSelectPool>(({ store, command: { data } }) => {
+          SelectPoolFromList: handler<SelectPoolFromList>(({ store, command: { data } }) => {
             atomicStateMutators.selectPool({
               stakePool: data,
               store,
             });
           }),
-          CommandBrowsePoolsShowPoolDetails: handler<CommandBrowsePoolsShowPoolDetails>(
-            ({ store, command: { data } }) => {
-              atomicStateMutators.showPoolDetails({ pool: data, store, targetFlow: Flow.PoolDetails });
-            }
-          ),
-          CommandBrowsePoolsUnselectPool: handler<CommandBrowsePoolsUnselectPool>(({ store, command: { data } }) => {
+          ShowPoolDetailsFromList: handler<ShowPoolDetailsFromList>(({ store, command: { data } }) => {
+            atomicStateMutators.showPoolDetails({ pool: data, store, targetFlow: Flow.PoolDetails });
+          }),
+          UnselectPoolFromList: handler<UnselectPoolFromList>(({ store, command: { data } }) => {
             atomicStateMutators.unselectPool({ id: data, store });
           }),
         },
@@ -451,7 +391,7 @@ const processCommand: Handler = (params) =>
       ),
       [Flow.CurrentPoolDetails]: cases<CurrentPoolDetailsCommand['type']>(
         {
-          CommandCommonCancelDrawer: ({ store }) => {
+          CancelDrawer: ({ store }) => {
             atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
             store.viewedStakePool = undefined;
           },
@@ -461,11 +401,7 @@ const processCommand: Handler = (params) =>
       ),
       [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
-          CommandCommonCancelDrawer: ({ store }) => {
-            atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
-            store.viewedStakePool = undefined;
-          },
-          CommandPoolDetailsBeginSingleStaking: ({ store }) => {
+          BeginSingleStaking: ({ store }) => {
             if (!store.viewedStakePool) return;
             const portfolioPool = mapStakePoolToPortfolioPool({
               cardanoCoinSymbol: store.cardanoCoinSymbol,
@@ -481,20 +417,22 @@ const processCommand: Handler = (params) =>
               atomicStateMutators.beginNewPortfolioCreation({ selections: [portfolioPool], store });
             }
           },
-          CommandPoolDetailsSelectPool: handler<CommandPoolDetailsSelectPool>(
-            ({ /* executeCommand,*/ store, command: { data } }) => {
-              atomicStateMutators.selectPool({ stakePool: data, store });
-              // ALT SOLUTION TBD:
-              // executeCommand({ type: 'CommandCommonCancelDrawer' }})
-              atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
-              store.viewedStakePool = undefined;
-            }
-          ),
-          CommandPoolDetailsUnselectPool: handler<CommandPoolDetailsUnselectPool>(
+          CancelDrawer: ({ store }) => {
+            atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+            store.viewedStakePool = undefined;
+          },
+          SelectPoolFromDetails: handler<SelectPoolFromDetails>(({ /* executeCommand,*/ store, command: { data } }) => {
+            atomicStateMutators.selectPool({ stakePool: data, store });
+            // ALT SOLUTION TBD:
+            // executeCommand({ type: 'CancelDrawer' }})
+            atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+            store.viewedStakePool = undefined;
+          }),
+          UnselectPoolFromDetails: handler<UnselectPoolFromDetails>(
             ({ /* executeCommand,*/ store, command: { data } }) => {
               atomicStateMutators.unselectPool({ id: data, store });
               // ALT SOLUTION TBD:
-              // executeCommand({ type: 'CommandCommonCancelDrawer' }})
+              // executeCommand({ type: 'CancelDrawer' }})
               atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
               store.viewedStakePool = undefined;
             }
@@ -507,45 +445,33 @@ const processCommand: Handler = (params) =>
         {
           [DrawerManagementStep.Preferences]: cases<CurrentPortfolioManagementStepPreferencesCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              AddStakePools: ({ store }) => {
+                atomicStateMutators.addPoolsFromPreferences({ store });
+              },
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                 store.draftPortfolio = undefined;
               },
-              CommandCommonDrawerContinue: ({ store }) => {
+              DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
-              CommandCommonPreferencesStepAddStakePools: ({ store }) => {
-                atomicStateMutators.addPoolsFromPreferences({ store });
-              },
-              CommandCommonPreferencesStepRemoveStakePool: handler<CommandCommonPreferencesStepRemoveStakePool>(
-                ({ store, command: { data } }) => {
-                  atomicStateMutators.removePoolFromPreferences({ id: data, store });
-                }
-              ),
-              CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
-                ({
-                  store,
-                  command: {
-                    data: { poolId, weight },
-                  },
-                }) => {
-                  atomicStateMutators.updatePoolWeight({ poolId, store, weight });
-                }
-              ),
+              RemoveStakePool: handler<RemoveStakePool>(({ store, command: { data } }) => {
+                atomicStateMutators.removePoolFromPreferences({ id: data, store });
+              }),
             },
             params.command.type as CurrentPortfolioManagementStepPreferencesCommand['type'],
             DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: cases<CurrentPortfolioManagementStepConfirmationCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                 store.draftPortfolio = undefined;
               },
-              CommandCommonDrawerBack: ({ store }) => {
+              DrawerBack: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Preferences;
               },
-              CommandCommonDrawerContinue: ({ store }) => {
+              DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Sign;
               },
             },
@@ -554,17 +480,17 @@ const processCommand: Handler = (params) =>
           ),
           [DrawerManagementStep.Sign]: cases<CurrentPortfolioManagementStepSignCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                 store.draftPortfolio = undefined;
               },
-              CommandCommonDrawerBack: ({ store }) => {
+              DrawerBack: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
-              CommandCommonDrawerContinue: ({ store }) => {
+              DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
-              CommandSignDrawerFailure: ({ store }) => {
+              DrawerFailure: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Failure;
               },
             },
@@ -573,7 +499,7 @@ const processCommand: Handler = (params) =>
           ),
           [DrawerManagementStep.Success]: cases<CurrentPortfolioManagementStepSuccessCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                 store.draftPortfolio = undefined;
               },
@@ -583,14 +509,14 @@ const processCommand: Handler = (params) =>
           ),
           [DrawerManagementStep.Failure]: cases<CurrentPortfolioManagementStepFailureCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                 store.draftPortfolio = undefined;
               },
-              CommandCommonDrawerBack: ({ store }) => {
+              DrawerBack: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Sign;
               },
-              CommandCommonDrawerContinue: ({ store }) => {
+              DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
             },
@@ -606,12 +532,12 @@ const processCommand: Handler = (params) =>
       //  a separate flow.
       [Flow.ChangingPreferencesConfirmation]: cases<ChangingPreferencesConfirmationCommand['type']>(
         {
-          CommandChangingPreferencesConfirmationConfirm: ({ store }) => {
+          ConfirmChangingPreferences: ({ store }) => {
             if (!store.pendingSelectedPortfolio) return;
             atomicStateMutators.beginNewPortfolioCreation({ selections: store.pendingSelectedPortfolio, store });
             store.pendingSelectedPortfolio = undefined;
           },
-          CommandChangingPreferencesConfirmationDiscard: ({ store }) => {
+          DiscardChangingPreferences: ({ store }) => {
             store.activeFlow = Flow.BrowsePools;
             store.pendingSelectedPortfolio = undefined;
           },
@@ -623,45 +549,33 @@ const processCommand: Handler = (params) =>
         {
           [DrawerManagementStep.Preferences]: cases<NewPortfolioCreationStepPreferencesCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              AddStakePools: ({ store }) => {
+                atomicStateMutators.addPoolsFromPreferences({ store });
+              },
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
                 store.draftPortfolio = undefined;
               },
-              CommandCommonDrawerContinue: ({ store }) => {
+              DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
-              CommandCommonPreferencesStepAddStakePools: ({ store }) => {
-                atomicStateMutators.addPoolsFromPreferences({ store });
-              },
-              CommandCommonPreferencesStepRemoveStakePool: handler<CommandCommonPreferencesStepRemoveStakePool>(
-                ({ store, command: { data } }) => {
-                  atomicStateMutators.removePoolFromPreferences({ id: data, store });
-                }
-              ),
-              CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
-                ({
-                  store,
-                  command: {
-                    data: { poolId, weight },
-                  },
-                }) => {
-                  atomicStateMutators.updatePoolWeight({ poolId, store, weight });
-                }
-              ),
+              RemoveStakePool: handler<RemoveStakePool>(({ store, command: { data } }) => {
+                atomicStateMutators.removePoolFromPreferences({ id: data, store });
+              }),
             },
             params.command.type as NewPortfolioCreationStepPreferencesCommand['type'],
             DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: cases<NewPortfolioCreationStepsConfirmationCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
                 store.draftPortfolio = undefined;
               },
-              CommandCommonDrawerBack: ({ store }) => {
+              DrawerBack: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Preferences;
               },
-              CommandCommonDrawerContinue: ({ store }) => {
+              DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Sign;
               },
             },
@@ -670,17 +584,17 @@ const processCommand: Handler = (params) =>
           ),
           [DrawerManagementStep.Sign]: cases<NewPortfolioCreationStepsSignCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
                 store.draftPortfolio = undefined;
               },
-              CommandCommonDrawerBack: ({ store }) => {
+              DrawerBack: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Confirmation;
               },
-              CommandCommonDrawerContinue: ({ store }) => {
+              DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
-              CommandSignDrawerFailure: ({ store }) => {
+              DrawerFailure: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Failure;
               },
             },
@@ -689,7 +603,7 @@ const processCommand: Handler = (params) =>
           ),
           [DrawerManagementStep.Success]: cases<NewPortfolioCreationStepsSuccessCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
                 store.draftPortfolio = undefined;
                 store.selectedPortfolio = []; // NewPortfolio-specific
@@ -700,14 +614,14 @@ const processCommand: Handler = (params) =>
           ),
           [DrawerManagementStep.Failure]: cases<NewPortfolioCreationStepsFailureCommand['type']>(
             {
-              CommandCommonCancelDrawer: ({ store }) => {
+              CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
                 store.draftPortfolio = undefined;
               },
-              CommandCommonDrawerBack: ({ store }) => {
+              DrawerBack: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Sign;
               },
-              CommandCommonDrawerContinue: ({ store }) => {
+              DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
             },

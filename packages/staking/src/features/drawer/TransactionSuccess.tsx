@@ -54,7 +54,7 @@ export const TransactionSuccessFooter = ({ popupView }: TransactionSuccessProps)
         : 'AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER',
     });
     setDelegationTxBuilder();
-    portfolioMutators.executeCommand({ type: 'CommandCommonCancelDrawer' });
+    portfolioMutators.executeCommand({ type: 'CancelDrawer' });
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
     if (!isInMemory) window.location.reload();
   };

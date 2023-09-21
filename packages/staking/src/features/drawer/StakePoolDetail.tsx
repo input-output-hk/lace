@@ -259,7 +259,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   );
 
   const onStakeOnThisPool = useCallback(() => {
-    portfolioMutators.executeCommand({ type: 'CommandPoolDetailsBeginSingleStaking' });
+    portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
   }, [portfolioMutators]);
 
   useEffect(() => {
@@ -275,7 +275,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
     if (!viewedStakePool) return;
     portfolioMutators.executeCommand({
       data: viewedStakePool,
-      type: 'CommandPoolDetailsSelectPool',
+      type: 'SelectPoolFromDetails',
     });
   }, [viewedStakePool, portfolioMutators]);
 
@@ -283,7 +283,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
     if (!viewedStakePool) return;
     portfolioMutators.executeCommand({
       data: Wallet.Cardano.PoolIdHex(viewedStakePool.hexId),
-      type: 'CommandPoolDetailsUnselectPool',
+      type: 'UnselectPoolFromDetails',
     });
   }, [viewedStakePool, portfolioMutators]);
 

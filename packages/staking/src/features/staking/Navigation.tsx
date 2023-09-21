@@ -25,7 +25,7 @@ export const Navigation = ({ children }: NavigationProps) => {
   const onValueChange = (value: string) => {
     if (!isValueAValidSubPage(value)) return;
     portfolioMutators.executeCommand({
-      type: value === Page.overview ? 'CommandBrowsePoolsGoToOverview' : 'CommandOverviewGoToBrowsePools',
+      type: value === Page.overview ? 'GoToOverview' : 'GoToBrowsePools',
     });
   };
 

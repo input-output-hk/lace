@@ -48,7 +48,7 @@ export const OverviewPopup = () => {
   });
 
   const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
-    portfolioMutators.executeCommand({ data: stakePool, type: 'CommandOverviewShowDetails' });
+    portfolioMutators.executeCommand({ data: stakePool, type: 'ShowDelegatedPoolDetails' });
   };
 
   if (noFunds)

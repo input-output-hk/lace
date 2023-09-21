@@ -54,7 +54,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
         : 'AnalyticsEventNames.Staking.STAKING_FAIL_BROWSER',
     });
     setDelegationTxBuilder();
-    portfolioMutators.executeCommand({ type: 'CommandCommonCancelDrawer' });
+    portfolioMutators.executeCommand({ type: 'CancelDrawer' });
   };
 
   // TODO unify
@@ -69,7 +69,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     try {
       await signAndSubmitTransaction();
       setIsLoading(false);
-      portfolioMutators.executeCommand({ type: 'CommandCommonDrawerContinue' });
+      portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       removePassword();
     } catch (error) {
       console.error('failed to sign or submit tx due to:', error);
@@ -90,7 +90,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       </Button>
       {popupView ? (
         <Button
-          onClick={() => portfolioMutators.executeCommand({ type: 'CommandCommonDrawerBack' })}
+          onClick={() => portfolioMutators.executeCommand({ type: 'DrawerBack' })}
           color="primary"
           className={styles.btn}
           size="large"

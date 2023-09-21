@@ -44,7 +44,7 @@ export const StakePoolDetailsDrawer = ({
       backgroundServiceAPIContextSetWalletPassword();
       delegationStoreSetDelegationTxBuilder();
       removePassword();
-      portfolioMutators.executeCommand({ type: 'CommandCommonCancelDrawer' });
+      portfolioMutators.executeCommand({ type: 'CancelDrawer' });
     }
     setIsRestaking(false);
   }, [
@@ -64,7 +64,7 @@ export const StakePoolDetailsDrawer = ({
       removePassword();
     }
     portfolioMutators.executeCommand({
-      type: 'CommandCommonDrawerBack',
+      type: 'DrawerBack',
     });
   }, [password, portfolioMutators, backgroundServiceAPIContextSetWalletPassword, removePassword]);
 

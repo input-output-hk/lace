@@ -36,9 +36,7 @@ export const GetStartedSteps = (): React.ReactElement => {
                 i18nKey="overview.noStaking.searchForPoolDescription"
                 t={t}
                 components={{
-                  Link: (
-                    <a onClick={() => portfolioMutators.executeCommand({ type: 'CommandOverviewGoToBrowsePools' })} />
-                  ),
+                  Link: <a onClick={() => portfolioMutators.executeCommand({ type: 'GoToBrowsePools' })} />,
                 }}
               />
             </Text.Body.Normal>

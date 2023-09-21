@@ -50,7 +50,7 @@ export const Overview = () => {
 
   const onManageClick = () => {
     portfolioMutators.executeCommand({
-      type: 'CommandOverviewManagePortfolio',
+      type: 'ManagePortfolio',
     });
   };
 
@@ -127,7 +127,7 @@ export const Overview = () => {
             onStakePoolSelect={() => {
               portfolioMutators.executeCommand({
                 data: item.stakePool,
-                type: 'CommandOverviewShowDetails',
+                type: 'ShowDelegatedPoolDetails',
               });
             }}
           />
