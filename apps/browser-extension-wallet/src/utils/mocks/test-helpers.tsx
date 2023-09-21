@@ -193,15 +193,8 @@ export const mockAvailableBalance: Balance = {
 };
 
 export const mockAssetMetadata: Wallet.Asset.AssetInfo = {
-  mintOrBurnCount: 0,
   assetId: Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
   fingerprint: Wallet.Cardano.AssetFingerprint('asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w'),
-  history: [
-    {
-      quantity: BigInt('1000'),
-      transactionId: Wallet.Cardano.TransactionId('6804edf9712d2b619edb6ac86861fe93a730693183a262b165fcc1ba1bc99cad')
-    }
-  ],
   name: Wallet.Cardano.AssetName('54534c41'),
   policyId: Wallet.Cardano.PolicyId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82'),
   quantity: BigInt('1000'),
@@ -327,7 +320,6 @@ export const TransactionBuildMock: CardanoTxBuild = {
 };
 
 export const mockAsset: Wallet.Asset.AssetInfo = {
-  mintOrBurnCount: 0,
   assetId: Wallet.Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'),
   fingerprint: Wallet.Cardano.AssetFingerprint('asset1cvmyrfrc7lpht2hcjwr9lulzyyjv27uxh3kcz0'),
   name: Wallet.Cardano.AssetName('54657374636f696e'),
@@ -342,17 +334,10 @@ export const mockAsset: Wallet.Asset.AssetInfo = {
     name: 'Testcoin',
     ticker: 'TEST',
     url: 'https://developers.cardano.org/'
-  },
-  history: [
-    {
-      quantity: BigInt('100042'),
-      transactionId: Wallet.Cardano.TransactionId('abfda1ba36b9ee541516fda311319f7bdb3e3928776c2982d2f027f3e8fa54c7')
-    }
-  ]
+  }
 };
 
 export const mockNft: Wallet.Asset.AssetInfo = {
-  mintOrBurnCount: 2,
   assetId: Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'),
   fingerprint: Wallet.Cardano.AssetFingerprint('asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w'),
   name: Wallet.Cardano.AssetName('54534c41'),
@@ -368,12 +353,6 @@ export const mockNft: Wallet.Asset.AssetInfo = {
     ticker: 'NFT',
     url: 'https://nft.mock.xyz/'
   },
-  history: [
-    {
-      quantity: BigInt('1'),
-      transactionId: Wallet.Cardano.TransactionId('abfda1ba36b9ee541516fda311319f7bdb3e3928776c2982d2f027f3e8fa54c7')
-    }
-  ],
   nftMetadata: {
     image: Wallet.Asset.Uri('ipfs://asd.io'),
     name: 'NFT #123456',
