@@ -462,27 +462,26 @@ const processCommand: Handler = (params) =>
       ),
       [Flow.NewPortfolioCreation]: cases<DrawerManagementStep>(
         {
-          [DrawerManagementStep.Preferences]: () =>
-            cases<NewPortfolioCreationStepPreferencesCommand['type']>(
-              {
-                CommandCommonCancelDrawer: ({ store }) => {
-                  atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
-                  store.draftPortfolio = [];
-                },
-                CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
-                  ({
-                    store,
-                    command: {
-                      data: { poolId, weight },
-                    },
-                  }) => {
-                    atomicStateMutators.updatePoolWeight({ poolId, store, weight });
-                  }
-                ),
+          [DrawerManagementStep.Preferences]: cases<NewPortfolioCreationStepPreferencesCommand['type']>(
+            {
+              CommandCommonCancelDrawer: ({ store }) => {
+                atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+                store.draftPortfolio = [];
               },
-              params.command.type as NewPortfolioCreationStepPreferencesCommand['type'],
-              DrawerManagementStep.Preferences
-            ),
+              CommandCommonPreferencesStepUpdateWeight: handler<CommandCommonPreferencesStepUpdateWeight>(
+                ({
+                  store,
+                  command: {
+                    data: { poolId, weight },
+                  },
+                }) => {
+                  atomicStateMutators.updatePoolWeight({ poolId, store, weight });
+                }
+              ),
+            },
+            params.command.type as NewPortfolioCreationStepPreferencesCommand['type'],
+            DrawerManagementStep.Preferences
+          ),
           [DrawerManagementStep.Confirmation]: () => void 0,
           [DrawerManagementStep.Sign]: () => void 0,
           [DrawerManagementStep.Success]: () => void 0,
