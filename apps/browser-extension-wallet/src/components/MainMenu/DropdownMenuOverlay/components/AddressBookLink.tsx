@@ -8,7 +8,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const AddressBookLink = ({ isPopup }: { isPopup: boolean }): React.ReactElement => {
@@ -23,6 +24,7 @@ export const AddressBookLink = ({ isPopup }: { isPopup: boolean }): React.ReactE
         ? AnalyticsEventNames.AddressBook.VIEW_ADDRESSES_POPUP
         : AnalyticsEventNames.AddressBook.VIEW_ADDRESSES_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.UserWalletProfileAddressBookClick);
   };
 
   return (
