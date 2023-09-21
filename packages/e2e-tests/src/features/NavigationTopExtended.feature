@@ -91,7 +91,8 @@ Feature: Top Navigation - Extended view
     When I click on then network sub-menu back button
     Then the dropdown menu is visible
 
-  @LW-6073 @Testnet @Mainnet
+  @LW-6073 @Testnet @Mainnet @Pending
+  # Bug https://input-output.atlassian.net/browse/LW-8530
   Scenario: Extended View - Toast displayed after switching network to Preview and menu not closed after switching
     When I click the menu button
     And I click on the network option
@@ -99,7 +100,8 @@ Feature: Top Navigation - Extended view
     Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
     And I see network sub-menu
 
-  @LW-6074 @Testnet @Mainnet
+  @LW-6074 @Testnet @Mainnet @Pending
+  # Bug https://input-output.atlassian.net/browse/LW-8530
   Scenario: Extended View - Network switched after choosing Preview network
     Given I click the menu button
     And I see current network in user menu

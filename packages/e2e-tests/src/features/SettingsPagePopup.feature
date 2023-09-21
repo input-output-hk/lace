@@ -117,7 +117,8 @@ Feature: General Settings - Popup View
     Then I don't see network id next to Lace logo for: "Mainnet"
     And I see "Mainnet" specific tokens in popup mode
 
-  @LW-5260 @Testnet
+  @LW-5260 @Testnet @Pending
+  # Bug https://input-output.atlassian.net/browse/LW-8530
   Scenario: Popup View - Settings - Network name updated in settings, logo, localStorage after network switching
     Given I am on Settings popup page
     And I see current network: "Preprod" name in network setting
@@ -128,7 +129,8 @@ Feature: General Settings - Popup View
     And I see network id: "Preview" next to Lace logo
     And Local storage appSettings contains info about network: "Preview"
 
-  @LW-5260 @Mainnet
+  @LW-5260 @Mainnet @Pending
+  # Bug https://input-output.atlassian.net/browse/LW-8530
   Scenario: Popup View - Settings - Network name updated in settings, logo, localStorage after network switching
     Given I am on Settings popup page
     And I see current network: "Mainnet" name in network setting
