@@ -152,7 +152,7 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
     if (selectedTokenList.length > 0) {
       isTokenBundleSizeExceedingLimit(selectedTokenList, inMemoryWallet)
         .then((res) => setExceededLimit(res))
-        .catch((error) => console.log(error));
+        .catch((error) => console.error(error));
     }
   }, [selectedTokenList, inMemoryWallet]);
 

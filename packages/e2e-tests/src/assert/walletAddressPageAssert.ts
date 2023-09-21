@@ -4,6 +4,8 @@ import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import extensionUtils from '../utils/utils';
 import testContext from '../utils/testContext';
+import { Asset } from '../data/Asset';
+import adaHandleAssert from './adaHandleAssert';
 
 class WalletAddressPageAssert {
   async assertSeeWalletAddressPage(mode: 'extended' | 'popup') {
@@ -37,21 +39,53 @@ class WalletAddressPageAssert {
     await expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
   }
 
-  // eslint-disable-next-line no-undef
-  async getSrc(item: WebdriverIO.Element) {
-    return item.$('img').getAttribute('src');
-  }
-  async assertSeeAdaHandle() {
-    const displayedAdaHandleNames: string[] = [];
-    const displayedAdaHandleNamesElementArray = await WalletAddressPage.addressCardHandleName;
-    const displayedAdaHandleImages = await WalletAddressPage.addressCardHandleImage.map(this.getSrc);
+  async assertSeeAdaHandleAddressCard() {
+    const handleNames: string[] = [];
+    const handleImageSrcs: string[] = [];
+    const handleNameElements = await WalletAddressPage.handleNames;
 
-    for (const displayedAdaHandleNamesElement of displayedAdaHandleNamesElementArray) {
-      await displayedAdaHandleNamesElement.waitForDisplayed();
-      displayedAdaHandleNames.push(await displayedAdaHandleNamesElement.getText());
+    // to fully load all handle cards
+    await handleNameElements[handleNameElements.length - 1].scrollIntoView();
+    await adaHandleAssert.assertSeeCustomImage(
+      await (await WalletAddressPage.getHandleAddressCard(Asset.ADA_HANDLE_3.name))
+        .$(WalletAddressPage.HANDLE_IMAGE)
+        .$('img')
+    );
+
+    const handleImageElements = await WalletAddressPage.handleImages;
+
+    for (const name of handleNameElements) {
+      handleNames.push(await name.getText());
     }
-    testContext.save('displayedAdaHandleNames', displayedAdaHandleNames);
-    testContext.save('displayedAdaHandleImages', displayedAdaHandleImages);
+
+    for (const image of handleImageElements) {
+      handleImageSrcs.push(await image.$('img').getAttribute('src'));
+    }
+
+    testContext.save('displayedAdaHandleNames', handleNames);
+    testContext.save('displayedAdaHandleImages', handleImageSrcs);
+  }
+
+  async assertSeeAdaHandleAddressCardWithName(handleName: string) {
+    const handleCard = await WalletAddressPage.getHandleAddressCard(handleName);
+    await handleCard.waitForDisplayed();
+    await handleCard.$(WalletAddressPage.HANDLE_IMAGE).waitForDisplayed();
+    await handleCard.$(WalletAddressPage.HANDLE_NAME).waitForDisplayed();
+    await handleCard.$(WalletAddressPage.HANDLE_SYMBOL).waitForDisplayed();
+  }
+
+  async assertSeeTheShortestHandleFirst() {
+    const names: string[] = testContext.load('displayedAdaHandleNames');
+    expect(names[0]).equals(Asset.ADA_HANDLE_1.name);
+    for (let i = 0; i < names.length - 1; i++) {
+      expect(names[i].length).to.be.lessThanOrEqual(names[i + 1].length);
+    }
+  }
+
+  async assertSeeAdaHandleCardWithCustomImage() {
+    await this.assertSeeAdaHandleAddressCardWithName(Asset.ADA_HANDLE_3.name);
+    const handleCard = await WalletAddressPage.getHandleAddressCard(Asset.ADA_HANDLE_3.name);
+    await adaHandleAssert.assertSeeCustomImage(await handleCard.$(WalletAddressPage.HANDLE_IMAGE).$('img'));
   }
 }
 

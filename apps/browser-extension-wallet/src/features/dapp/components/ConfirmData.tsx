@@ -98,7 +98,7 @@ export const DappConfirmData = (): React.ReactElement => {
         setFormattedData(jsonStructureOrHexString);
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   }, []);
 

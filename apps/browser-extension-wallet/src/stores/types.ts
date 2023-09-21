@@ -96,6 +96,8 @@ export interface WalletInfoSlice {
   inMemoryWallet: Wallet.ObservableWallet | undefined;
   cardanoWallet: Wallet.CardanoWallet | undefined;
   walletManagerUi: WalletManagerUi | undefined;
+  addressesDiscoveryCompleted: boolean;
+  setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted: boolean) => void;
   setCardanoWallet: (wallet?: Wallet.CardanoWallet) => void;
   setWalletManagerUi: (walletManager: WalletManagerUi) => void;
   currentChain?: Wallet.Cardano.ChainId;

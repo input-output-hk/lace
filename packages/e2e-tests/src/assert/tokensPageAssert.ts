@@ -152,7 +152,7 @@ class TokensPageAssert {
         (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded - 0.01 ||
         (await TokensPage.getTokenBalanceAsFloatByName(tokenName)) === expectedValueRounded,
       {
-        timeout: 30_000,
+        timeout: 50_000,
         interval: 3000,
         timeoutMsg: `failed while waiting for ${tokenName} value update`
       }

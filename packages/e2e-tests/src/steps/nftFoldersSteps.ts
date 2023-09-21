@@ -20,6 +20,7 @@ import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import NftAssert from '../assert/nftAssert';
 import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
+import ToastMessage from '../elements/toastMessage';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -100,11 +101,11 @@ Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
 });
 
-Then(/^I can see the handle listed on the "Select NFT" screen$/, async () => {
+Then(/^I can see the handles listed on the "Select NFT" screen$/, async () => {
   await nftCreateFolderAssert.verifySeeAllAdaHandles();
 });
 
-Then(/^the corresponding custom image is displayed$/, async () => {
+Then(/^the corresponding custom images are displayed$/, async () => {
   await nftCreateFolderAssert.verifySeeAllAdaImages();
 });
 
@@ -426,6 +427,8 @@ When(
         await NftsFolderPage.addNftButton.waitForClickable();
         await NftsFolderPage.addNftButton.click();
         await NftSelectNftsPage.selectNFTs(numberOfNftsWanted);
+        await ToastMessage.closeButton.waitForClickable();
+        await ToastMessage.closeButton.click();
         await NftSelectNftsPage.nextButton.waitForClickable();
         await NftSelectNftsPage.nextButton.click();
         break;
@@ -460,3 +463,10 @@ Then(
 Then(/^I see folders on the NFTs page in the alphabetical order$/, async () => {
   await NftAssert.assertSeeFoldersInAlphabeticalOrder();
 });
+
+Then(
+  /^I see a thumbnail of ADA handle with custom image on the NFT folder with name: "([^"]*)"$/,
+  async (folderName: string) => {
+    await NftAssert.assertSeeCustomAdaHandleThumbnail(folderName);
+  }
+);

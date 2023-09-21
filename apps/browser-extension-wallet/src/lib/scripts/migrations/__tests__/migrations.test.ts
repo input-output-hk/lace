@@ -136,6 +136,7 @@ describe('migrations', () => {
       test('and skip migrations that should be skipped', async () => {
         const withSkipMigrations = [...mockMigrations];
         withSkipMigrations[2].shouldSkip = jest.fn().mockResolvedValue(true);
+        // eslint-disable-next-line no-console
         console.log(withSkipMigrations[2]);
         await applyMigrations({ state: 'not-applied', from: '0.5.0', to: '3.1.5' }, undefined, withSkipMigrations);
         const shouldApply = mockMigrations.filter((_, index) => index !== 2);

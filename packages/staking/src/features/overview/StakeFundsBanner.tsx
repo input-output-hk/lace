@@ -16,7 +16,7 @@ export const StakeFundsBanner = ({ balance, popupView }: props): React.ReactElem
   const { walletStoreWalletUICardanoCoin } = useOutsideHandles();
   const { t } = useTranslation();
   return (
-    <div className={cn(styles.container, { [styles.popupView as any]: popupView })}>
+    <div className={cn(styles.container, { [styles.popupView as string]: popupView })}>
       {popupView ? <BgImgPopup className={styles.bg} /> : <BgImg className={styles.bg} />}
       <div className={styles.content}>
         <div className={styles.title}>{t('overview.noStaking.title')}</div>

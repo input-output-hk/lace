@@ -19,6 +19,7 @@ const mockNotify = jest.fn();
 const mockUseAnalyticsSendFlowTriggerPoint = jest.fn();
 const mockUseOutputs = jest.fn();
 const mockGetUserIdService = jest.fn();
+const mockUseMetadata = jest.fn();
 import * as React from 'react';
 import { screen, cleanup, fireEvent, render, within, waitFor } from '@testing-library/react';
 import { CollateralDrawer } from '../CollateralDrawer';
@@ -81,7 +82,8 @@ jest.mock('@src/views/browser-view/features/send-transaction', () => {
     ...original,
     useBuiltTxState: mockUseBuitTxState,
     useAnalyticsSendFlowTriggerPoint: mockUseAnalyticsSendFlowTriggerPoint,
-    useOutputs: mockUseOutputs
+    useOutputs: mockUseOutputs,
+    useMetadata: mockUseMetadata
   };
 });
 
@@ -178,6 +180,7 @@ describe('Testing CollateralDrawer component', () => {
       setSection,
       currentSection: {}
     });
+    mockUseMetadata.mockReturnValue([]);
   });
 
   afterEach(() => {

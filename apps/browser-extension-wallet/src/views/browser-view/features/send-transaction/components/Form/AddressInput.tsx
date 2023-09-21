@@ -59,7 +59,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
 
   const { setSection } = useSections();
   const { address, handle, handleStatus, setAddressValue } = useAddressState(row);
-  const { filteredAddresses, getAddressBookByNameOrAddress } = useGetFilteredAddressBook();
+  const { filteredAddresses, filterAddressesByNameOrAddress } = useGetFilteredAddressBook();
   const { setAddressToEdit } = useAddressBookStore();
   const [, setRowId] = useCurrentRow();
   const [handleVerificationState, setHandleVerificationState] = useState<HandleVerificationState | undefined>();
@@ -187,8 +187,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   ]);
 
   useEffect(() => {
-    getAddressBookByNameOrAddress({ value: handle || address || '' });
-  }, [address, getAddressBookByNameOrAddress, handle]);
+    filterAddressesByNameOrAddress({ value: handle || address || '' });
+  }, [address, filterAddressesByNameOrAddress, handle]);
 
   const validationObject = useMemo(() => {
     const isNameValid = address && isWalletNameValid(address);

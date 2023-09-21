@@ -12,6 +12,7 @@ class NftSelectNftsPage extends CommonDrawerElements {
   private EMPTY_STATE_MESSAGE = '[data-testid="asset-list-empty-state-message"]';
   private NFT_CONTAINER = '[data-testid="nft-item"]';
   private NFT_NAME = '[data-testid="nft-item-name"]';
+  public NFT_IMAGE = '[data-testid="nft-image"]';
   public NFT_ITEM_SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
 
   get counter() {
