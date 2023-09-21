@@ -33,6 +33,9 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
   const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+  const currentPortfolioStakePools = useDelegationPortfolioStore((store) =>
+    store.currentPortfolio.map(({ stakePool }) => stakePool)
+  );
 
   const { setIsDrawerVisible } = useStakePoolDetails();
 
@@ -92,9 +95,17 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
     setSearchValue(searchString);
   };
 
+  const combinedUnique = useMemo(() => {
+    const combinedStakePools = [...stakePools, ...currentPortfolioStakePools];
+    const combinedUniqueIds = [...new Set(combinedStakePools.map((pool) => pool.id))];
+    return combinedUniqueIds.map((id) =>
+      combinedStakePools.find((pool) => pool.id === id)
+    ) as Wallet.Cardano.StakePool[];
+  }, [stakePools, currentPortfolioStakePools]);
+
   const list = useMemo(
     () =>
-      stakePools?.map((pool: Wallet.Cardano.StakePool) => {
+      combinedUnique.map((pool) => {
         const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
         const hexId = Wallet.Cardano.PoolIdHex(stakePool.hexId);
@@ -123,7 +134,7 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
           onUnselect: () => portfolioMutators.unselectPool({ id: hexId }),
         };
       }) || [],
-    [stakePools, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, portfolioMutators, onStake]
+    [combinedUnique, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, portfolioMutators, onStake]
   );
 
   return (
