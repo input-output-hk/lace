@@ -128,6 +128,10 @@ type CommandChangingPreferencesConfirmationDiscard = {
   type: 'CommandChangingPreferencesConfirmationDiscard';
 };
 
+type CommandSignDrawerFailure = {
+  type: 'CommandSignDrawerFailure';
+};
+
 type OverviewCommand = CommandOverviewShowDetails | CommandOverviewManagePortfolio | CommandOverviewGoToBrowsePools;
 
 type BrowsePoolsCommand =
@@ -166,6 +170,24 @@ type NewPortfolioCreationStepPreferencesCommand =
   | CommandCommonPreferencesStepRemoveStakePool
   | CommandCommonPreferencesStepUpdateWeight;
 
+type NewPortfolioCreationStepsConfirmationCommand =
+  | CommandCommonCancelDrawer
+  | CommandCommonDrawerContinue
+  | CommandCommonDrawerBack;
+
+type NewPortfolioCreationStepsSignCommand =
+  | CommandCommonCancelDrawer
+  | CommandCommonDrawerContinue
+  | CommandSignDrawerFailure
+  | CommandCommonDrawerBack;
+
+type NewPortfolioCreationStepsFailureCommand =
+  | CommandCommonCancelDrawer
+  | CommandCommonDrawerContinue
+  | CommandCommonDrawerBack;
+
+type NewPortfolioSuccessCommand = CommandCommonCancelDrawer;
+
 type Command =
   | OverviewCommand
   | BrowsePoolsCommand
@@ -174,7 +196,11 @@ type Command =
   | CurrentPortfolioManagementStepPreferencesCommand
   | CurrentPortfolioManagementStepConfirmationCommand
   | ChangingPreferencesConfirmationCommand
-  | NewPortfolioCreationStepPreferencesCommand;
+  | NewPortfolioCreationStepPreferencesCommand
+  | NewPortfolioCreationStepsSignCommand
+  | NewPortfolioCreationStepsFailureCommand
+  | NewPortfolioSuccessCommand
+  | NewPortfolioCreationStepsConfirmationCommand;
 
 type StakePoolWithLogo = Wallet.Cardano.StakePool & { logo?: string };
 
@@ -548,10 +574,71 @@ const processCommand: Handler = (params) =>
             params.command.type as NewPortfolioCreationStepPreferencesCommand['type'],
             DrawerManagementStep.Preferences
           ),
-          [DrawerManagementStep.Confirmation]: () => void 0,
-          [DrawerManagementStep.Sign]: () => void 0,
-          [DrawerManagementStep.Success]: () => void 0,
-          [DrawerManagementStep.Failure]: () => void 0,
+          [DrawerManagementStep.Confirmation]: cases<NewPortfolioCreationStepsConfirmationCommand['type']>(
+            {
+              CommandCommonCancelDrawer: ({ store }) => {
+                atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+                store.draftPortfolio = undefined;
+              },
+              CommandCommonDrawerBack: ({ store }) => {
+                store.activeDrawerStep = DrawerManagementStep.Preferences;
+              },
+              CommandCommonDrawerContinue: ({ store }) => {
+                store.activeDrawerStep = DrawerManagementStep.Sign;
+              },
+            },
+            params.command.type as NewPortfolioCreationStepsConfirmationCommand['type'],
+            DrawerManagementStep.Confirmation
+          ),
+          [DrawerManagementStep.Sign]: cases<NewPortfolioCreationStepsSignCommand['type']>(
+            {
+              CommandCommonCancelDrawer: ({ store }) => {
+                atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+                store.draftPortfolio = undefined;
+              },
+              CommandCommonDrawerBack: ({ store }) => {
+                store.activeDrawerStep = DrawerManagementStep.Confirmation;
+              },
+              CommandCommonDrawerContinue: ({ store }) => {
+                store.draftPortfolio = undefined;
+                store.selectedPortfolio = []; // NewPortfolio-specific
+                store.activeDrawerStep = DrawerManagementStep.Success;
+              },
+              CommandSignDrawerFailure: ({ store }) => {
+                store.activeDrawerStep = DrawerManagementStep.Failure;
+              },
+            },
+            params.command.type as NewPortfolioCreationStepsSignCommand['type'],
+            DrawerManagementStep.Sign
+          ),
+          [DrawerManagementStep.Success]: cases<NewPortfolioSuccessCommand['type']>(
+            {
+              CommandCommonCancelDrawer: ({ store }) => {
+                atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+              },
+            },
+            params.command.type as NewPortfolioSuccessCommand['type'],
+            DrawerManagementStep.Success
+          ),
+          [DrawerManagementStep.Failure]: cases<NewPortfolioCreationStepsFailureCommand['type']>(
+            {
+              CommandCommonCancelDrawer: ({ store }) => {
+                atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
+                store.draftPortfolio = undefined;
+              },
+              CommandCommonDrawerBack: ({ store }) => {
+                store.activeDrawerStep = DrawerManagementStep.Sign;
+              },
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CommandCommonDrawerContinue: ({ store }) => {
+                store.draftPortfolio = undefined;
+                store.selectedPortfolio = []; // NewPortfolio-specific
+                store.activeDrawerStep = DrawerManagementStep.Success;
+              },
+            },
+            params.command.type as NewPortfolioCreationStepsFailureCommand['type'],
+            DrawerManagementStep.Failure
+          ),
         },
         params.store.activeDrawerStep as DrawerManagementStep,
         Flow.NewPortfolioCreation

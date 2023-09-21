@@ -10,14 +10,7 @@ import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Balance, CurrencyInfo, useOutsideHandles } from '../outside-handles-provider';
-import {
-  DraftPortfolioStakePool,
-  Sections,
-  StakingError,
-  sectionsConfig,
-  useDelegationPortfolioStore,
-  useStakePoolDetails,
-} from '../store';
+import { DraftPortfolioStakePool, StakingError, useNewDelegationPortfolioStore, useStakePoolDetails } from '../store';
 import ArrowDown from './arrow-down.svg';
 import Cardano from './cardano-blue.png';
 import ExclamationMarkIcon from './exclamation-circle-small.svg';
@@ -200,7 +193,9 @@ export const StakePoolConfirmation = (): React.ReactElement => {
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
   } = useOutsideHandles();
-  const draftPortfolio = useDelegationPortfolioStore((store) => store.draftPortfolio);
+  const { draftPortfolio } = useNewDelegationPortfolioStore((store) => ({
+    draftPortfolio: store.draftPortfolio || [],
+  }));
   const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const loading = isNil(inMemoryWallet.protocolParameters$) || isNil(inMemoryWallet.delegation.rewardAccounts$);
@@ -319,43 +314,45 @@ export const StakePoolConfirmation = (): React.ReactElement => {
 export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    walletStoreInMemoryWallet: inMemoryWallet,
+    // walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreGetKeyAgentType: getKeyAgentType,
-    submittingState: { setIsRestaking },
-    delegationStoreDelegationTxBuilder: delegationTxBuilder,
+    // submittingState: { setIsRestaking },
+    // delegationStoreDelegationTxBuilder: delegationTxBuilder,
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakePoolDetails();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
-  const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
+  const { /* currentPortfolio,*/ portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
+    portfolioMutators: store.mutators,
+  }));
 
   const keyAgentType = getKeyAgentType();
   const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
 
-  const { setSection } = useStakePoolDetails();
-
   // TODO unify
-  const signAndSubmitTransaction = useCallback(async () => {
-    if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
-    const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx.tx);
-  }, [delegationTxBuilder, inMemoryWallet]);
+  // const signAndSubmitTransaction = useCallback(async () => {
+  //   if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
+  //   const signedTx = await delegationTxBuilder.build().sign();
+  //   await inMemoryWallet.submitTx(signedTx.tx);
+  // }, [delegationTxBuilder, inMemoryWallet]);
 
   const handleConfirmation = useCallback(async () => {
     setIsConfirmingTx(false);
-    if (!isInMemory) {
-      setIsConfirmingTx(true);
-      try {
-        await signAndSubmitTransaction();
-        setIsRestaking(currentPortfolio.length > 0);
-        return setSection(sectionsConfig[Sections.SUCCESS_TX]);
-      } catch {
-        return setSection(sectionsConfig[Sections.FAIL_TX]);
-      } finally {
-        setIsConfirmingTx(false);
-      }
-    }
-    return setSection(sectionsConfig[Sections.SIGN]);
-  }, [isInMemory, setSection, signAndSubmitTransaction, setIsRestaking, currentPortfolio.length]);
+    // HW-WALLET (FIX LATER):
+    // if (!isInMemory) {
+    //   setIsConfirmingTx(true);
+    //   try {
+    //     await signAndSubmitTransaction();
+    //     setIsRestaking(currentPortfolio.length > 0);
+    //     return setSection(sectionsConfig[Sections.SUCCESS_TX]);
+    //   } catch {
+    //     return setSection(sectionsConfig[Sections.FAIL_TX]);
+    //   } finally {
+    //     setIsConfirmingTx(false);
+    //   }
+    // }
+    portfolioMutators.executeCommand({ type: 'CommandCommonDrawerContinue' });
+  }, [portfolioMutators]);
 
   const confirmLabel = useMemo(() => {
     if (!isInMemory) {

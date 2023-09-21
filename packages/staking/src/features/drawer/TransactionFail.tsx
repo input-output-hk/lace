@@ -4,7 +4,7 @@ import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, sectionsConfig, useStakePoolDetails } from '../store';
+import { useNewDelegationPortfolioStore } from '../store';
 import { ResultMessage } from './ResultMessage';
 import styles from './TransactionComplete.module.scss';
 
@@ -28,7 +28,6 @@ export const TransactionFail = ({ popupView }: TransactionFailProps): React.Reac
 export const TransactionFailFooter = ({ popupView }: TransactionFailProps): React.ReactElement => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { setIsDrawerVisible, resetStates, setSection } = useStakePoolDetails();
   const {
     walletManagerExecuteWithPassword: executeWithPassword,
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
@@ -41,6 +40,9 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     sendEvent: () => {},
   };
+  const { portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+    portfolioMutators: store.mutators,
+  }));
 
   const closeDrawer = () => {
     // @ts-ignore
@@ -52,8 +54,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
         : 'AnalyticsEventNames.Staking.STAKING_FAIL_BROWSER',
     });
     setDelegationTxBuilder();
-    setIsDrawerVisible(false);
-    resetStates();
+    portfolioMutators.executeCommand({ type: 'CommandCommonCancelDrawer' });
   };
 
   // TODO unify
@@ -68,7 +69,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     try {
       await signAndSubmitTransaction();
       setIsLoading(false);
-      setSection(sectionsConfig[Sections.SUCCESS_TX]);
+      portfolioMutators.executeCommand({ type: 'CommandCommonDrawerContinue' });
       removePassword();
     } catch (error) {
       console.error('failed to sign or submit tx due to:', error);
@@ -89,7 +90,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       </Button>
       {popupView ? (
         <Button
-          onClick={() => setSection(sectionsConfig[sectionsConfig[Sections.FAIL_TX].prevSection])}
+          onClick={() => portfolioMutators.executeCommand({ type: 'CommandCommonDrawerBack' })}
           color="primary"
           className={styles.btn}
           size="large"

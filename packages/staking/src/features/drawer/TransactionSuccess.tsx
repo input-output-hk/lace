@@ -5,7 +5,7 @@ import cn from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useStakePoolDetails } from '../store';
+import { useNewDelegationPortfolioStore } from '../store';
 import { ResultMessage } from './ResultMessage';
 import styles from './TransactionComplete.module.scss';
 
@@ -34,12 +34,14 @@ export const TransactionSuccessFooter = ({ popupView }: TransactionSuccessProps)
   const { t } = useTranslation();
   const { delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder, walletStoreGetKeyAgentType: getKeyAgentType } =
     useOutsideHandles();
-  const { setIsDrawerVisible, resetStates } = useStakePoolDetails();
   // TODO implement analytics for the new flow
   const analytics = {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     sendEvent: () => {},
   };
+  const { portfolioMutators } = useNewDelegationPortfolioStore((store) => ({
+    portfolioMutators: store.mutators,
+  }));
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const closeDrawer = () => {
@@ -52,8 +54,7 @@ export const TransactionSuccessFooter = ({ popupView }: TransactionSuccessProps)
         : 'AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER',
     });
     setDelegationTxBuilder();
-    setIsDrawerVisible(false);
-    resetStates();
+    portfolioMutators.executeCommand({ type: 'CommandCommonCancelDrawer' });
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
     if (!isInMemory) window.location.reload();
   };
