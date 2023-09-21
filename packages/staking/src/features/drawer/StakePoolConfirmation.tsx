@@ -196,7 +196,6 @@ export const StakePoolConfirmation = (): React.ReactElement => {
     walletStoreWalletUICardanoCoin: cardanoCoin,
     fetchCoinPricePriceResult: priceResult,
     delegationStoreDelegationTxFee: delegationTxFee = '0',
-    delegationStoreSelectedStakePool: openPool,
     currencyStoreFiatCurrency: fiatCurrency,
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
@@ -234,7 +233,6 @@ export const StakePoolConfirmation = (): React.ReactElement => {
   }, [
     draftPortfolio,
     inMemoryWallet,
-    openPool,
     setDelegationTxBuilder,
     setDelegationTxFee,
     setIsBuildingTx,
