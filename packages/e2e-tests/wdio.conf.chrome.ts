@@ -3,16 +3,12 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
-const drivers = {
-  // used only for local runs!
-  chrome: { version: '110.0.5481.77' }
-};
-
 const chromeConfig: WebdriverIO.Config = {
   capabilities: [
     {
       maxInstances: 1,
       browserName: 'chrome',
+      browserVersion: 'stable',
       'goog:chromeOptions': {
         args: [
           '--no-sandbox',
@@ -39,19 +35,7 @@ const chromeConfig: WebdriverIO.Config = {
   services: ['devtools', 'intercept']
 };
 
-if (!process.env.CI) {
-  chromeConfig.services = [
-    [
-      'selenium-standalone',
-      {
-        installArgs: { drivers },
-        args: { drivers }
-      }
-    ],
-    'devtools',
-    'intercept'
-  ];
-} else {
+if (process.env.CI) {
   fetch('http://127.0.0.1:4444/wd/hub').catch(() => {
     throw new Error("chromedriver doesn't seem to be running, please start it first");
   });
