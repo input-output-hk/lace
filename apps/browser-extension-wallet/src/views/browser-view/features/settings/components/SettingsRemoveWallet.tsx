@@ -10,6 +10,8 @@ import { useWalletManager } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { BrowserViewSections } from '@lib/scripts/types';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Title, Text } = Typography;
 
@@ -22,10 +24,18 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
   const isHardwareWalletKeyAgent = !isInMemory;
   const backgroundServices = useBackgroundServiceAPIContext();
+  const analytics = useAnalyticsContext();
 
-  const toggleRemoveWalletAlert = () => setIsRemoveWalletAlertVisible(!isRemoveWalletAlertVisible);
+  const toggleRemoveWalletAlert = () => {
+    setIsRemoveWalletAlertVisible(!isRemoveWalletAlertVisible);
+
+    analytics.sendEventToPostHog(
+      isRemoveWalletAlertVisible ? PostHogAction.SettingsHoldUpBackClick : PostHogAction.SettingsRemoveWalletClick
+    );
+  };
 
   const removeWallet = async () => {
+    analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick);
     await deleteWallet();
     if (popupView) await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME });
     // TODO: Remove this workaround when on SDK side we're able to restore wallet 2 times without reloading.

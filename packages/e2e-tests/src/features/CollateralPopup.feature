@@ -26,8 +26,8 @@ Feature: Collateral - popup view
     When I click on "Collateral" setting
     And I fill correct password and confirm collateral
     Then I see collateral as: "Active" in settings
-    When I navigate to Transactions popup page
-    Then I can see transaction 1 with type "Self Transaction"
+    And I navigate to Transactions popup page
+    And I can see transaction 1 with type "Self Transaction"
     When I switch network to: "Preview" in popup mode
     And Wallet is synced
     When I am on Settings popup page

@@ -96,7 +96,37 @@ export enum PostHogAction {
   SendSomethingWentWrongXClick = 'send | something went wrong | x | click',
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
-  NFTsImageClick = 'nft | nfts | nft image | click'
+  NFTsImageClick = 'nft | nfts | nft image | click',
+  // Settings
+  SettingsHelpClick = 'settings | help | click',
+  SettingsHelpCreateSupportTicketClick = 'settings | help | create a support ticket | click',
+  SettingsHelpXClick = 'settings | help | x | click',
+  SettingsTermsAndConditionsClick = 'settings | terms and conditions | click',
+  SettingsTermsAndConditionsXClick = 'settings | terms and conditions | x | click',
+  SettingsPrivacyPolicyClick = 'settings | privacy policy | click',
+  SettingsPrivacyPolicyXClick = 'settings | privacy policy | x | click',
+  SettingsCookiePolicyClick = 'settings | cookie policy | click',
+  SettingsCookiePolicyXClick = 'settings | cookie policy | x | click',
+  SettingsRemoveWalletClick = 'settings | remove wallet | click',
+  SettingsHoldUpRemoveWalletClick = 'settings | hold up | remove wallet | click',
+  SettingsHoldUpBackClick = 'settings | hold up | back | click',
+  SettingsNetworkClick = 'settings | network | click',
+  SettingsNetworkPreviewClick = 'settings | network | preview | click',
+  SettingsNetworkPreprodClick = 'settings | network | preprod | click',
+  SettingsNetworkMainnetClick = 'settings | network | mainnet | click',
+  SettingsNetworkXClick = 'settings | network | x | click',
+  SettingsAuthorizedDappsClick = 'settings | authorized dapps | click',
+  SettingsAuthorizedDappsTrashBinIconClick = 'settings | authorized dapps | trash bin icon | click',
+  SettingsAuthorizedDappsHoldUpDisconnectDappClick = 'settings | authorized dapps | hold up! | disconnect dapp | click',
+  SettingsAuthorizedDappsHoldUpBackClick = 'settings | authorized dapps | hold up! | back | click',
+  SettingsYourKeysClick = 'settings | your keys | click',
+  SettingsYourKeysShowPublicKeyClick = 'settings | your keys | show public key | click',
+  SettingsYourKeysShowPublicKeyCopyClick = 'settings | your keys | show public key | copy | click',
+  SettingsYourKeysShowPublicKeyXClick = 'settings | your keys | show public key | x | click',
+  SettingsCollateralClick = 'settings | collateral | click',
+  SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
+  SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
+  SettingsCollateralXClick = 'settings | collateral | x | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
