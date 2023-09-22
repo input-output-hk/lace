@@ -4,6 +4,15 @@ inputs:
   LACE_EXTENSION_KEY:
     description: 'Public extended manifest key'
     required: true
+  CARDANO_SERVICES_URL_MAINNET:
+    description: 'Cardano Services Mainnet URL'
+    required: false
+  CARDANO_SERVICES_URL_PREPROD:
+    description: 'Cardano Services Preprod URL'
+    required: false
+  CARDANO_SERVICES_URL_PREVIEW:
+    description: 'Cardano Services Preview URL'
+    required: false
 runs:
   using: 'composite'
   steps:
@@ -26,4 +35,7 @@ runs:
       shell: bash
       env:
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
+        CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVICES_URL_MAINNET }}
+        CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
+        CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVICES_URL_PREVIEW }}
       run: yarn browser build
