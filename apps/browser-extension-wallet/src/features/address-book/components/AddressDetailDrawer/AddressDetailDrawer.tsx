@@ -266,7 +266,7 @@ export const AddressDetailDrawer = ({
               ? AnalyticsEventNames.AddressBook.CANCEL_DELETE_ADDRESS_POPUP
               : AnalyticsEventNames.AddressBook.CANCEL_DELETE_ADDRESS_BROWSER
           );
-          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordDeleteHoldUpCancelClick);
+          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordHoldUpCancelClick);
           // eslint-disable-next-line unicorn/no-null
           setSelectedId(null);
         }}
@@ -276,7 +276,7 @@ export const AddressDetailDrawer = ({
               ? AnalyticsEventNames.AddressBook.CONFIRM_DELETE_ADDRESS_POPUP
               : AnalyticsEventNames.AddressBook.CONFIRM_DELETE_ADDRESS_BROWSER
           );
-          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordDeleteHoldUpDeleteAddressClick);
+          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordHoldUpDeleteAddressClick);
           onDelete(selectedId);
           // eslint-disable-next-line unicorn/no-null
           setSelectedId(null);
