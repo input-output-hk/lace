@@ -131,7 +131,13 @@ export enum PostHogAction {
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
   ReceiveCopyADAHandleIconClick = 'receive | receive | copy ADA handle icon | click',
-  ReceiveYourWalletAddressXClick = 'receive | Your wallet address | x | click'
+  ReceiveYourWalletAddressXClick = 'receive | Your wallet address | x | click',
+  // Dapp Connector
+  DappConnectorAuthorizeDappAuthorizeClick = 'dapp connector | authorize dapp | authorize | click',
+  DappConnectorAuthorizeDappCancelClick = 'dapp connector | authorize dapp | cancel | click',
+  DappConnectorAuthorizeDappDappConnectorBetaClick = 'dapp connector | authorize dapp | dapp connector beta | click',
+  DappConnectorAuthorizeDappConnectionAlwaysClick = 'dapp connector | authorize dapp | dapp connection | always | click',
+  DappConnectorAuthorizeDappConnectionOnlyOnceClick = 'dapp connector | authorize dapp | dapp connection | only once | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
