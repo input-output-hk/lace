@@ -11,7 +11,7 @@ export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): Rea
   const { t } = useTranslation();
   const { portfolioMutators, visible } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
-    visible: store.activeFlow === Flow.ChangingPreferencesConfirmation,
+    visible: store.activeFlow === Flow.ChangingPreferences,
   }));
 
   // TODO implement analytics for the new flow

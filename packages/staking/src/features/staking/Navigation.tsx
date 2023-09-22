@@ -16,7 +16,7 @@ const isValueAValidSubPage = (value: string): value is Page => Object.values<str
 
 export const Navigation = ({ children }: NavigationProps) => {
   const { activePage, portfolioMutators } = useDelegationPortfolioStore((store) => ({
-    activePage: [Flow.Overview, Flow.CurrentPoolDetails, Flow.CurrentPortfolioManagement].includes(store.activeFlow)
+    activePage: [Flow.Overview, Flow.CurrentPoolDetails, Flow.PortfolioManagement].includes(store.activeFlow)
       ? Page.overview
       : Page.browsePools,
     portfolioMutators: store.mutators,

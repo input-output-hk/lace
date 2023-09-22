@@ -32,9 +32,9 @@ export enum Flow {
   BrowsePools = 'BrowsePools',
   CurrentPoolDetails = 'CurrentPoolDetails',
   PoolDetails = 'PoolDetails',
-  CurrentPortfolioManagement = 'CurrentPortfolioManagement',
-  ChangingPreferencesConfirmation = 'ChangingPreferencesConfirmation',
-  NewPortfolioCreation = 'NewPortfolioCreation',
+  PortfolioManagement = 'PortfolioManagement',
+  ChangingPreferences = 'ChangingPreferences',
+  NewPortfolio = 'NewPortfolio',
 }
 
 export enum DrawerDefaultStep {
@@ -152,44 +152,44 @@ type CurrentPoolDetailsCommand = CancelDrawer;
 
 type PoolDetailsCommand = CancelDrawer | SelectPoolFromDetails | UnselectPoolFromDetails | BeginSingleStaking;
 
-type CurrentPortfolioManagementStepPreferencesCommand = CancelDrawer | DrawerContinue | AddStakePools | RemoveStakePool;
+type PortfolioManagementPreferencesCommand = CancelDrawer | DrawerContinue | AddStakePools | RemoveStakePool;
 
-type CurrentPortfolioManagementStepConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
+type PortfolioManagementConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
-type CurrentPortfolioManagementStepSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
+type PortfolioManagementSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-type CurrentPortfolioManagementStepFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
+type PortfolioManagementFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
-type CurrentPortfolioManagementStepSuccessCommand = CancelDrawer;
+type PortfolioManagementSuccessCommand = CancelDrawer;
 
-type ChangingPreferencesConfirmationCommand = DiscardChangingPreferences | ConfirmChangingPreferences;
+type ChangingPreferencesCommand = DiscardChangingPreferences | ConfirmChangingPreferences;
 
-type NewPortfolioCreationStepPreferencesCommand = CancelDrawer | DrawerContinue | AddStakePools | RemoveStakePool;
+type NewPortfolioPreferencesCommand = CancelDrawer | DrawerContinue | AddStakePools | RemoveStakePool;
 
-type NewPortfolioCreationStepsConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
+type NewPortfolioConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
-type NewPortfolioCreationStepsSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
+type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-type NewPortfolioCreationStepsFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
+type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
-type NewPortfolioCreationStepsSuccessCommand = CancelDrawer;
+type NewPortfolioSuccessCommand = CancelDrawer;
 
 type Command =
   | OverviewCommand
   | BrowsePoolsCommand
   | CurrentPoolDetailsCommand
   | PoolDetailsCommand
-  | CurrentPortfolioManagementStepPreferencesCommand
-  | CurrentPortfolioManagementStepConfirmationCommand
-  | CurrentPortfolioManagementStepSignCommand
-  | CurrentPortfolioManagementStepFailureCommand
-  | CurrentPortfolioManagementStepSuccessCommand
-  | ChangingPreferencesConfirmationCommand
-  | NewPortfolioCreationStepPreferencesCommand
-  | NewPortfolioCreationStepsConfirmationCommand
-  | NewPortfolioCreationStepsSignCommand
-  | NewPortfolioCreationStepsFailureCommand
-  | NewPortfolioCreationStepsSuccessCommand;
+  | PortfolioManagementPreferencesCommand
+  | PortfolioManagementConfirmationCommand
+  | PortfolioManagementSignCommand
+  | PortfolioManagementFailureCommand
+  | PortfolioManagementSuccessCommand
+  | ChangingPreferencesCommand
+  | NewPortfolioPreferencesCommand
+  | NewPortfolioConfirmationCommand
+  | NewPortfolioSignCommand
+  | NewPortfolioFailureCommand
+  | NewPortfolioSuccessCommand;
 
 type StakePoolWithLogo = Wallet.Cardano.StakePool & { logo?: string };
 
@@ -277,7 +277,7 @@ const atomicStateMutators = {
     selections: DraftPortfolioStakePool[];
     store: DelegationPortfolioStore;
   }) => {
-    store.activeFlow = Flow.NewPortfolioCreation;
+    store.activeFlow = Flow.NewPortfolio;
     store.activeDrawerStep = DrawerManagementStep.Preferences;
     store.draftPortfolio = selections;
   },
@@ -312,7 +312,7 @@ const atomicStateMutators = {
     pendingSelectedPortfolio: DraftPortfolioStakePool[];
     store: DelegationPortfolioStore;
   }) => {
-    store.activeFlow = Flow.ChangingPreferencesConfirmation;
+    store.activeFlow = Flow.ChangingPreferences;
     store.pendingSelectedPortfolio = pendingSelectedPortfolio;
     store.activeDrawerStep = undefined;
     store.viewedStakePool = undefined;
@@ -344,7 +344,7 @@ const processCommand: Handler = (params) =>
             store.activeFlow = Flow.BrowsePools;
           },
           ManagePortfolio: ({ store }) => {
-            store.activeFlow = Flow.CurrentPortfolioManagement;
+            store.activeFlow = Flow.PortfolioManagement;
             store.activeDrawerStep = DrawerManagementStep.Preferences;
             store.draftPortfolio = store.currentPortfolio;
           },
@@ -441,9 +441,9 @@ const processCommand: Handler = (params) =>
         params.command.type as PoolDetailsCommand['type'],
         Flow.PoolDetails
       ),
-      [Flow.CurrentPortfolioManagement]: cases<DrawerManagementStep>(
+      [Flow.PortfolioManagement]: cases<DrawerManagementStep>(
         {
-          [DrawerManagementStep.Preferences]: cases<CurrentPortfolioManagementStepPreferencesCommand['type']>(
+          [DrawerManagementStep.Preferences]: cases<PortfolioManagementPreferencesCommand['type']>(
             {
               AddStakePools: ({ store }) => {
                 atomicStateMutators.addPoolsFromPreferences({ store });
@@ -459,10 +459,10 @@ const processCommand: Handler = (params) =>
                 atomicStateMutators.removePoolFromPreferences({ id: data, store });
               }),
             },
-            params.command.type as CurrentPortfolioManagementStepPreferencesCommand['type'],
+            params.command.type as PortfolioManagementPreferencesCommand['type'],
             DrawerManagementStep.Preferences
           ),
-          [DrawerManagementStep.Confirmation]: cases<CurrentPortfolioManagementStepConfirmationCommand['type']>(
+          [DrawerManagementStep.Confirmation]: cases<PortfolioManagementConfirmationCommand['type']>(
             {
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
@@ -475,10 +475,10 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Sign;
               },
             },
-            params.command.type as CurrentPortfolioManagementStepConfirmationCommand['type'],
+            params.command.type as PortfolioManagementConfirmationCommand['type'],
             DrawerManagementStep.Confirmation
           ),
-          [DrawerManagementStep.Sign]: cases<CurrentPortfolioManagementStepSignCommand['type']>(
+          [DrawerManagementStep.Sign]: cases<PortfolioManagementSignCommand['type']>(
             {
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
@@ -494,20 +494,20 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Failure;
               },
             },
-            params.command.type as CurrentPortfolioManagementStepSignCommand['type'],
+            params.command.type as PortfolioManagementSignCommand['type'],
             DrawerManagementStep.Sign
           ),
-          [DrawerManagementStep.Success]: cases<CurrentPortfolioManagementStepSuccessCommand['type']>(
+          [DrawerManagementStep.Success]: cases<PortfolioManagementSuccessCommand['type']>(
             {
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
                 store.draftPortfolio = undefined;
               },
             },
-            params.command.type as CurrentPortfolioManagementStepSuccessCommand['type'],
+            params.command.type as PortfolioManagementSuccessCommand['type'],
             DrawerManagementStep.Success
           ),
-          [DrawerManagementStep.Failure]: cases<CurrentPortfolioManagementStepFailureCommand['type']>(
+          [DrawerManagementStep.Failure]: cases<PortfolioManagementFailureCommand['type']>(
             {
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
@@ -520,17 +520,17 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
             },
-            params.command.type as CurrentPortfolioManagementStepFailureCommand['type'],
+            params.command.type as PortfolioManagementFailureCommand['type'],
             DrawerManagementStep.Failure
           ),
         },
         params.store.activeDrawerStep as DrawerManagementStep,
-        Flow.CurrentPortfolioManagement
+        Flow.PortfolioManagement
       ),
       // TODO: reconsider this approach. Maybe it would be better to have just a boolean state for opening the modal
       //  instead of having a separate flow. It might feel more like a part of new portfolio creation step rather
       //  a separate flow.
-      [Flow.ChangingPreferencesConfirmation]: cases<ChangingPreferencesConfirmationCommand['type']>(
+      [Flow.ChangingPreferences]: cases<ChangingPreferencesCommand['type']>(
         {
           ConfirmChangingPreferences: ({ store }) => {
             if (!store.pendingSelectedPortfolio) return;
@@ -542,12 +542,12 @@ const processCommand: Handler = (params) =>
             store.pendingSelectedPortfolio = undefined;
           },
         },
-        params.command.type as ChangingPreferencesConfirmationCommand['type'],
-        Flow.ChangingPreferencesConfirmation
+        params.command.type as ChangingPreferencesCommand['type'],
+        Flow.ChangingPreferences
       ),
-      [Flow.NewPortfolioCreation]: cases<DrawerManagementStep>(
+      [Flow.NewPortfolio]: cases<DrawerManagementStep>(
         {
-          [DrawerManagementStep.Preferences]: cases<NewPortfolioCreationStepPreferencesCommand['type']>(
+          [DrawerManagementStep.Preferences]: cases<NewPortfolioPreferencesCommand['type']>(
             {
               AddStakePools: ({ store }) => {
                 atomicStateMutators.addPoolsFromPreferences({ store });
@@ -563,10 +563,10 @@ const processCommand: Handler = (params) =>
                 atomicStateMutators.removePoolFromPreferences({ id: data, store });
               }),
             },
-            params.command.type as NewPortfolioCreationStepPreferencesCommand['type'],
+            params.command.type as NewPortfolioPreferencesCommand['type'],
             DrawerManagementStep.Preferences
           ),
-          [DrawerManagementStep.Confirmation]: cases<NewPortfolioCreationStepsConfirmationCommand['type']>(
+          [DrawerManagementStep.Confirmation]: cases<NewPortfolioConfirmationCommand['type']>(
             {
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
@@ -579,10 +579,10 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Sign;
               },
             },
-            params.command.type as NewPortfolioCreationStepsConfirmationCommand['type'],
+            params.command.type as NewPortfolioConfirmationCommand['type'],
             DrawerManagementStep.Confirmation
           ),
-          [DrawerManagementStep.Sign]: cases<NewPortfolioCreationStepsSignCommand['type']>(
+          [DrawerManagementStep.Sign]: cases<NewPortfolioSignCommand['type']>(
             {
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
@@ -598,10 +598,10 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Failure;
               },
             },
-            params.command.type as NewPortfolioCreationStepsSignCommand['type'],
+            params.command.type as NewPortfolioSignCommand['type'],
             DrawerManagementStep.Sign
           ),
-          [DrawerManagementStep.Success]: cases<NewPortfolioCreationStepsSuccessCommand['type']>(
+          [DrawerManagementStep.Success]: cases<NewPortfolioSuccessCommand['type']>(
             {
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
@@ -609,10 +609,10 @@ const processCommand: Handler = (params) =>
                 store.selectedPortfolio = []; // NewPortfolio-specific
               },
             },
-            params.command.type as NewPortfolioCreationStepsSuccessCommand['type'],
+            params.command.type as NewPortfolioSuccessCommand['type'],
             DrawerManagementStep.Success
           ),
-          [DrawerManagementStep.Failure]: cases<NewPortfolioCreationStepsFailureCommand['type']>(
+          [DrawerManagementStep.Failure]: cases<NewPortfolioFailureCommand['type']>(
             {
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
@@ -625,12 +625,12 @@ const processCommand: Handler = (params) =>
                 store.activeDrawerStep = DrawerManagementStep.Success;
               },
             },
-            params.command.type as NewPortfolioCreationStepsFailureCommand['type'],
+            params.command.type as NewPortfolioFailureCommand['type'],
             DrawerManagementStep.Failure
           ),
         },
         params.store.activeDrawerStep as DrawerManagementStep,
-        Flow.NewPortfolioCreation
+        Flow.NewPortfolio
       ),
     },
     params.store.activeFlow,
@@ -677,11 +677,9 @@ export const useDelegationPortfolioStore = create(
       },
       forceAbortFlows: () =>
         set((store) => {
-          const viewingOverviewPage = [
-            Flow.Overview,
-            Flow.CurrentPoolDetails,
-            Flow.CurrentPortfolioManagement,
-          ].includes(store.activeFlow);
+          const viewingOverviewPage = [Flow.Overview, Flow.CurrentPoolDetails, Flow.PortfolioManagement].includes(
+            store.activeFlow
+          );
           store.activeFlow = viewingOverviewPage ? Flow.Overview : Flow.BrowsePools;
           store.activeDrawerStep = undefined;
           store.selectedPortfolio = [];
@@ -726,9 +724,7 @@ export const useDelegationPortfolioStore = create(
 );
 
 export const isDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) =>
-  [Flow.CurrentPoolDetails, Flow.CurrentPortfolioManagement, Flow.NewPortfolioCreation, Flow.PoolDetails].includes(
-    activeFlow
-  );
+  [Flow.CurrentPoolDetails, Flow.PortfolioManagement, Flow.NewPortfolio, Flow.PoolDetails].includes(activeFlow);
 
 export type StakePoolDetails = {
   delegators?: number | string;
