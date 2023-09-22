@@ -3,6 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
+import { AdaSymbol } from './types';
 
 export const MAX_POOLS_COUNT = 5;
 const LAST_STABLE_EPOCH = 2;
@@ -25,8 +26,6 @@ export type CurrentPortfolioStakePool = DraftPortfolioStakePool & {
   value: bigint;
 };
 
-export type AdaSymbol = 'ADA' | 'tADA';
-
 export enum Flow {
   Overview = 'Overview',
   BrowsePools = 'BrowsePools',
@@ -36,6 +35,10 @@ export enum Flow {
   ChangingPreferences = 'ChangingPreferences',
   NewPortfolio = 'NewPortfolio',
 }
+
+type ExpandedViewFlow = Flow;
+
+type PopupViewFLow = Flow.Overview | Flow.CurrentPoolDetails;
 
 export enum DrawerDefaultStep {
   PoolDetails = 'PoolDetails',
@@ -191,6 +194,10 @@ type Command =
   | NewPortfolioFailureCommand
   | NewPortfolioSuccessCommand;
 
+type PopupOverviewCommand = ShowDelegatedPoolDetails;
+
+type PopupCurrentPoolDetailsCommand = CancelDrawer;
+
 type StakePoolWithLogo = Wallet.Cardano.StakePool & { logo?: string };
 
 type State = {
@@ -201,6 +208,7 @@ type State = {
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio?: DraftPortfolioStakePool[];
   selectedPortfolio: DraftPortfolioStakePool[];
+  view?: 'popup' | 'expanded';
   viewedStakePool?: StakePoolWithLogo;
 };
 
@@ -216,6 +224,7 @@ export type DelegationPortfolioStore = State & {
       currentEpoch: Wallet.EpochInfo;
       delegationRewardsHistory: Wallet.RewardsHistory;
     }) => Promise<void>;
+    setView: (view: 'popup' | 'expanded') => void;
   };
 };
 
@@ -335,8 +344,35 @@ const atomicStateMutators = {
   },
 };
 
-const processCommand: Handler = (params) =>
-  cases<Flow>(
+const processPopupViewCases: Handler = (params) =>
+  cases<PopupViewFLow>(
+    {
+      [Flow.Overview]: cases<PopupOverviewCommand['type']>(
+        {
+          ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails>(({ store, command: { data } }) => {
+            atomicStateMutators.showPoolDetails({ pool: data, store, targetFlow: Flow.CurrentPoolDetails });
+          }),
+        },
+        params.command.type,
+        'root'
+      ),
+      [Flow.CurrentPoolDetails]: cases<PopupCurrentPoolDetailsCommand['type']>(
+        {
+          CancelDrawer: ({ store }) => {
+            atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.Overview });
+            store.viewedStakePool = undefined;
+          },
+        },
+        params.command.type,
+        'root'
+      ),
+    },
+    params.store.activeFlow as PopupViewFLow,
+    'root'
+  )(params);
+
+const processExpandedViewCases: Handler = (params) =>
+  cases<ExpandedViewFlow>(
     {
       [Flow.Overview]: cases<OverviewCommand['type']>(
         {
@@ -645,6 +681,7 @@ const defaultState: State = {
   draftPortfolio: undefined,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
+  view: undefined,
   viewedStakePool: undefined,
 };
 
@@ -657,7 +694,21 @@ export const useDelegationPortfolioStore = create(
         const callsConsideredAnInfiniteLoop = 10;
         let paramsStack: Command[] = [command];
 
+        const { view } = get();
+        // eslint-disable-next-line unicorn/consistent-function-scoping
+        let processCommand: Handler = () => {
+          throw new Error('DelegationPortfolioStore: view not set');
+        };
+        if (view === 'popup') {
+          processCommand = processPopupViewCases;
+        }
+        if (view === 'expanded') {
+          processCommand = processExpandedViewCases;
+        }
+
         set((store) => {
+          // TODO: decide whether to throw this function away
+          //  as we may not want to execute command from inside the SM
           const executeCommand: ExecuteCommand = (childCommand) => {
             paramsStack = [...paramsStack, childCommand];
             numberOfRecursiveCalls += 1;
@@ -665,6 +716,7 @@ export const useDelegationPortfolioStore = create(
               const error = new Error('DelegationPortfolioStore: Infinite loop detected');
               throw Object.assign(error, { paramsStack });
             }
+            // eslint-disable-next-line sonarjs/no-extra-arguments
             processCommand({
               command: childCommand,
               executeCommand,
@@ -672,6 +724,7 @@ export const useDelegationPortfolioStore = create(
             });
           };
 
+          // eslint-disable-next-line sonarjs/no-extra-arguments
           processCommand({ command, executeCommand, store });
         });
       },
@@ -719,6 +772,10 @@ export const useDelegationPortfolioStore = create(
           store.currentPortfolio = currentPortfolio;
         });
       },
+      setView: (view) =>
+        set((store) => {
+          store.view = view;
+        }),
     },
   }))
 );

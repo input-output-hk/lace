@@ -9,9 +9,12 @@ import { SetupBase, SetupBaseProps } from './SetupBase';
 
 initI18n();
 
-type SetupProps = Omit<SetupBaseProps, 'loading'> & Pick<StakingProps, 'currentChain'>;
+type SetupProps = Omit<SetupBaseProps, 'loading'> &
+  Pick<StakingProps, 'currentChain'> & {
+    view: 'popup' | 'expanded';
+  };
 
-export const Setup = ({ children, currentChain, ...rest }: SetupProps) => {
+export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => {
   const { balancesBalance, walletStoreInMemoryWallet } = useOutsideHandles();
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
@@ -26,7 +29,8 @@ export const Setup = ({ children, currentChain, ...rest }: SetupProps) => {
       delegationDistribution: [...delegationDistribution.values()],
       delegationRewardsHistory,
     });
-  }, [delegationDistribution, delegationRewardsHistory, currentEpoch, portfolioMutators, currentChain]);
+    portfolioMutators.setView(view);
+  }, [delegationDistribution, delegationRewardsHistory, currentEpoch, portfolioMutators, currentChain, view]);
 
   return (
     <SetupBase {...rest} loading={!balancesBalance?.total?.coinBalance}>
