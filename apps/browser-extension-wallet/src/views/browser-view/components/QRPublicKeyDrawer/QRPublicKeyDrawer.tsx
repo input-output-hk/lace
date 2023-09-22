@@ -5,6 +5,7 @@ import { useWalletStore } from '../../../../stores';
 import { useTranslation } from 'react-i18next';
 import styles from './QRPublicKeyDrawer.module.scss';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
@@ -12,7 +13,13 @@ const useWalletInformation = () =>
     publicKey: state?.keyAgentData?.extendedAccountPublicKey
   }));
 
-export const QRPublicKeyDrawer = ({ isPopup }: { isPopup?: boolean }): React.ReactElement => {
+export const QRPublicKeyDrawer = ({
+  isPopup,
+  sendAnalyticsEvent
+}: {
+  isPopup?: boolean;
+  sendAnalyticsEvent?: (event: PostHogAction) => void;
+}): React.ReactElement => {
   const { name, publicKey } = useWalletInformation();
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -25,6 +32,7 @@ export const QRPublicKeyDrawer = ({ isPopup }: { isPopup?: boolean }): React.Rea
   return (
     <div className={styles.container}>
       <InfoWallet
+        onClick={() => sendAnalyticsEvent(PostHogAction.SettingsYourKeysShowPublicKeyCopyClick)}
         // eslint-disable-next-line no-magic-numbers
         getQRCodeOptions={() => getQRCodeOptions(theme, isPopup && 168)}
         isPopupView={isPopup}
