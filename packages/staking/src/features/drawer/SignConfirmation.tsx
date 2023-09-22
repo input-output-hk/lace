@@ -108,6 +108,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       if (error.message?.includes('Authentication failure')) {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
+        cleanPasswordInput();
         portfolioMutators.executeCommand({ type: 'DrawerFailure' });
         setSubmitingTxState({ isSubmitingTx: false });
       }
