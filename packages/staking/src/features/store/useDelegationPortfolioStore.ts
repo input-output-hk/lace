@@ -173,7 +173,7 @@ type NewPortfolioConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBac
 
 type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
+type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue;
 
 type NewPortfolioSuccessCommand = CancelDrawer;
 
@@ -653,9 +653,6 @@ const processExpandedViewCases: Handler = (params) =>
               CancelDrawer: ({ store }) => {
                 atomicStateMutators.cancelDrawer({ store, targetFlow: Flow.BrowsePools });
                 store.draftPortfolio = undefined;
-              },
-              DrawerBack: ({ store }) => {
-                store.activeDrawerStep = DrawerManagementStep.Sign;
               },
               DrawerContinue: ({ store }) => {
                 store.activeDrawerStep = DrawerManagementStep.Success;
