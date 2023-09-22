@@ -44,7 +44,7 @@ export const processExpandedViewCases: Handler = (params) =>
             atomicStateMutators.showPoolDetails({ pool: data, state, targetFlow: Flow.CurrentPoolDetails });
           }),
         },
-        params.command.type as OverviewCommand['type'],
+        params.command.type,
         Flow.Overview
       ),
       [Flow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
@@ -78,7 +78,7 @@ export const processExpandedViewCases: Handler = (params) =>
             atomicStateMutators.unselectPool({ id: data, state });
           }),
         },
-        params.command.type as BrowsePoolsCommand['type'],
+        params.command.type,
         Flow.BrowsePools
       ),
       [Flow.CurrentPoolDetails]: cases<CurrentPoolDetailsCommand['type']>(
@@ -88,7 +88,7 @@ export const processExpandedViewCases: Handler = (params) =>
             state.viewedStakePool = undefined;
           },
         },
-        params.command.type as CurrentPoolDetailsCommand['type'],
+        params.command.type,
         Flow.CurrentPoolDetails
       ),
       [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
@@ -130,7 +130,7 @@ export const processExpandedViewCases: Handler = (params) =>
             }
           ),
         },
-        params.command.type as PoolDetailsCommand['type'],
+        params.command.type,
         Flow.PoolDetails
       ),
       [Flow.PortfolioManagement]: cases<DrawerManagementStep>(
@@ -151,7 +151,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 atomicStateMutators.removePoolFromPreferences({ id: data, state });
               }),
             },
-            params.command.type as PortfolioManagementPreferencesCommand['type'],
+            params.command.type,
             DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: cases<PortfolioManagementConfirmationCommand['type']>(
@@ -167,7 +167,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 state.activeDrawerStep = DrawerManagementStep.Sign;
               },
             },
-            params.command.type as PortfolioManagementConfirmationCommand['type'],
+            params.command.type,
             DrawerManagementStep.Confirmation
           ),
           [DrawerManagementStep.Sign]: cases<PortfolioManagementSignCommand['type']>(
@@ -186,7 +186,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 state.activeDrawerStep = DrawerManagementStep.Failure;
               },
             },
-            params.command.type as PortfolioManagementSignCommand['type'],
+            params.command.type,
             DrawerManagementStep.Sign
           ),
           [DrawerManagementStep.Success]: cases<PortfolioManagementSuccessCommand['type']>(
@@ -196,7 +196,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 state.draftPortfolio = undefined;
               },
             },
-            params.command.type as PortfolioManagementSuccessCommand['type'],
+            params.command.type,
             DrawerManagementStep.Success
           ),
           [DrawerManagementStep.Failure]: cases<PortfolioManagementFailureCommand['type']>(
@@ -212,7 +212,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 state.activeDrawerStep = DrawerManagementStep.Success;
               },
             },
-            params.command.type as PortfolioManagementFailureCommand['type'],
+            params.command.type,
             DrawerManagementStep.Failure
           ),
         },
@@ -234,7 +234,7 @@ export const processExpandedViewCases: Handler = (params) =>
             state.pendingSelectedPortfolio = undefined;
           },
         },
-        params.command.type as ChangingPreferencesCommand['type'],
+        params.command.type,
         Flow.ChangingPreferences
       ),
       [Flow.NewPortfolio]: cases<DrawerManagementStep>(
@@ -255,7 +255,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 atomicStateMutators.removePoolFromPreferences({ id: data, state });
               }),
             },
-            params.command.type as NewPortfolioPreferencesCommand['type'],
+            params.command.type,
             DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: cases<NewPortfolioConfirmationCommand['type']>(
@@ -271,7 +271,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 state.activeDrawerStep = DrawerManagementStep.Sign;
               },
             },
-            params.command.type as NewPortfolioConfirmationCommand['type'],
+            params.command.type,
             DrawerManagementStep.Confirmation
           ),
           [DrawerManagementStep.Sign]: cases<NewPortfolioSignCommand['type']>(
@@ -290,7 +290,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 state.activeDrawerStep = DrawerManagementStep.Failure;
               },
             },
-            params.command.type as NewPortfolioSignCommand['type'],
+            params.command.type,
             DrawerManagementStep.Sign
           ),
           [DrawerManagementStep.Success]: cases<NewPortfolioSuccessCommand['type']>(
@@ -301,7 +301,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 state.selectedPortfolio = []; // NewPortfolio-specific
               },
             },
-            params.command.type as NewPortfolioSuccessCommand['type'],
+            params.command.type,
             DrawerManagementStep.Success
           ),
           [DrawerManagementStep.Failure]: cases<NewPortfolioFailureCommand['type']>(
@@ -314,7 +314,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 state.activeDrawerStep = DrawerManagementStep.Success;
               },
             },
-            params.command.type as NewPortfolioFailureCommand['type'],
+            params.command.type,
             DrawerManagementStep.Failure
           ),
         },
