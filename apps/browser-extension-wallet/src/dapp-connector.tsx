@@ -14,6 +14,7 @@ import {
 } from '@providers';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from '@providers/ThemeProvider';
+import { UIThemeProvider } from '@providers/UIThemeProvider';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { APP_MODE_POPUP } from './utils/constants';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
@@ -32,7 +33,9 @@ const App = (): React.ReactElement => (
                     <ExperimentsProvider>
                       <AnalyticsProvider>
                         <ThemeProvider>
-                          <DappConnectorView />
+                          <UIThemeProvider>
+                            <DappConnectorView />
+                          </UIThemeProvider>
                         </ThemeProvider>
                       </AnalyticsProvider>
                     </ExperimentsProvider>
