@@ -354,7 +354,7 @@ const processPopupViewCases: Handler = (params) =>
           }),
         },
         params.command.type,
-        'root'
+        Flow.Overview
       ),
       [Flow.CurrentPoolDetails]: cases<PopupCurrentPoolDetailsCommand['type']>(
         {
@@ -364,7 +364,7 @@ const processPopupViewCases: Handler = (params) =>
           },
         },
         params.command.type,
-        'root'
+        Flow.CurrentPoolDetails
       ),
     },
     params.store.activeFlow as PopupViewFLow,
