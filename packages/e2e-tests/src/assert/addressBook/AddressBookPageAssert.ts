@@ -22,9 +22,9 @@ class AddressBookPageAssert {
   };
 
   assertAddressBookIsEmpty = async () => {
-    expect(Number(await AddressBookPage.getCounterValue())).to.equal(0);
     await AddressBookPage.emptyStateImage.waitForDisplayed();
     await AddressBookPage.emptyStateTitle.waitForDisplayed();
+    expect(Number(await AddressBookPage.getCounterValue())).to.equal(0);
     expect(await AddressBookPage.emptyStateTitle.getText()).to.equal(
       await t('browserView.addressBook.emptyState.title')
     );
