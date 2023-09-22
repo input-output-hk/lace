@@ -126,7 +126,12 @@ export enum PostHogAction {
   SettingsCollateralClick = 'settings | collateral | click',
   SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
   SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
-  SettingsCollateralXClick = 'settings | collateral | x | click'
+  SettingsCollateralXClick = 'settings | collateral | x | click',
+  // Recieve section
+  ReceiveClick = 'receive | receive | click',
+  ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
+  ReceiveCopyADAHandleIconClick = 'receive | receive | copy ADA handle icon | click',
+  ReceiveYourWalletAddressXClick = 'receive | Your wallet address | x | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
