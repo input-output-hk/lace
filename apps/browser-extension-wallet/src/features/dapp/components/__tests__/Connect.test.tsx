@@ -21,6 +21,11 @@ jest.mock('@src/stores', () => ({
   useWalletStore: mockUseWalletStore
 }));
 
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useAnalyticsContext: jest.fn().mockReturnValue({ sendEventToPostHog: jest.fn() })
+}));
+
 jest.mock('@cardano-sdk/web-extension', () => ({
   ...jest.requireActual<any>('@cardano-sdk/web-extension'),
   consumeRemoteApi: () => ({
