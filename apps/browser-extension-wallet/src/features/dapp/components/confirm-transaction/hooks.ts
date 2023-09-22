@@ -1,7 +1,6 @@
 import { AssetProvider } from '@cardano-sdk/core';
 import { useRedirection } from '@hooks';
 import { Wallet } from '@lace/cardano';
-import { DappDataService } from '@lib/scripts/types';
 import { dAppRoutePaths } from '@routes';
 import { CardanoTxOut, WalletInfo } from '@src/types';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
@@ -9,6 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as HardwareLedger from '@cardano-sdk/hardware-ledger';
 import { allowSignTx, disallowSignTx, getTransactionAssetsId, getTxType } from './utils';
 import { AddressListType } from '@src/views/browser-view/features/activity';
+import { GetSignTxData, SignTxData } from './types';
 
 export const useCreateAssetList = ({
   assets,
@@ -53,10 +53,6 @@ export const useCreateAssetList = ({
     [assets, assetsInfo]
   );
 };
-
-type GetSignTxData = DappDataService['getSignTxData'];
-type SignTxData = { dappInfo: Wallet.DappInfo; tx: Wallet.Cardano.Tx };
-
 export const useSignTxData = (getSignTxData: GetSignTxData): { signTxData?: SignTxData; errorMessage?: string } => {
   const [signTxData, setSignTxData] = useState<{ dappInfo: Wallet.DappInfo; tx: Wallet.Cardano.Tx }>();
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
