@@ -85,7 +85,7 @@ export const useSignWithHardwareWallet = (): {
 } => {
   const allow = useAllowSignTx();
   const disallow = useDisallowSignTx();
-  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
+  const redirectToSignFailure = useRedirection<Record<string, never>>(dAppRoutePaths.dappTxSignFailure);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const signWithHardwareWallet = async () => {
     setIsConfirmingTx(true);
@@ -95,7 +95,7 @@ export const useSignWithHardwareWallet = (): {
     } catch (error) {
       console.error('error', error);
       disallow(false);
-      redirectToSignFailure();
+      redirectToSignFailure({});
     }
   };
 
