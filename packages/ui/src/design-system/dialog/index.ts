@@ -1,10 +1,9 @@
-export { Root } from './root.component';
+export { Root } from './dialog-root.component';
 export { Title } from './dialog-title.component';
 export { Description } from './dialog-description.component';
 export { Actions } from './dialog-actions.component';
 export { Action } from './dialog-action.component';
-export type { DialogRootProps } from './root.component';
-export type { DialogContentProps } from './dialog-content.component';
+export type { DialogRootProps } from './dialog-root.component';
 export type { DialogTitleProps } from './dialog-title.component';
 export type { DialogDescriptionProps } from './dialog-description.component';
 export type { DialogActionsProps } from './dialog-actions.component';

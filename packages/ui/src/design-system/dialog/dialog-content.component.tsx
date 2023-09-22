@@ -5,14 +5,17 @@ import classNames from 'classnames';
 
 import * as cx from './dialog-content.css';
 
-export interface DialogContentProps {
+import type { AlertDialogContentProps } from '@radix-ui/react-alert-dialog';
+
+export interface DialogContentProps extends AlertDialogContentProps {
   children: ReactNode;
   className?: string;
 }
 
 export const Content = forwardRef<HTMLDivElement, DialogContentProps>(
-  ({ children, className }, forwardReference) => (
+  ({ children, className, ...rest }, forwardReference) => (
     <div
+      {...rest}
       className={classNames(cx.dialogContent, className)}
       ref={forwardReference}
     >

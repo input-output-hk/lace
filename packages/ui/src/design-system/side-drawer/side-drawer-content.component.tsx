@@ -7,6 +7,7 @@ import { ContentCard } from './side-drawer-content-card.component';
 import * as cx from './side-drawer-content.css';
 import { Overlay } from './side-drawer-overlay.component';
 
+// TODO refactor: pass z-indices config on app level: https://vanilla-extract.style/documentation/packages/dynamic/
 type Props = Dialog.DialogPortalProps &
   Omit<Dialog.DialogContentProps, 'className'> & { zIndex?: number };
 

@@ -5,7 +5,7 @@ import type { Meta } from '@storybook/react';
 
 import { Flex, Divider, Grid, Cell, Button } from '../';
 import { LocalThemeProvider, ThemeColorScheme } from '../../design-tokens';
-import { page, Variants, Section, usePortalContainer } from '../decorators';
+import { page, Variants, Section } from '../decorators';
 
 // Content component is embedded in `Dialog.Root` but we need this building block to present static dialog content in Storybook
 import { Content } from './dialog-content.component';
@@ -13,14 +13,18 @@ import { DialogStorybookContextProvider } from './dialog-storybook-context-provi
 
 import * as Dialog from './index';
 
-const { Root, ...subcomponents } = Dialog;
-
 export default {
   title: 'Modals/Dialog',
-  component: Root,
-  subcomponents,
+  component: Dialog.Root,
   decorators: [page({ title: 'Dialog' })],
   argTypes: {
+    zIndex: {
+      control: {
+        type: 'number',
+        defaultValue: 1,
+        step: 2,
+      },
+    },
     open: {
       table: {
         disable: true,
@@ -144,6 +148,7 @@ interface ConfigurableStoryProps {
   dialogDescription: string;
   actionPrimaryTitle: string;
   actionSecondaryTitle?: string;
+  zIndex: number;
 }
 
 export const Controls = ({
@@ -151,9 +156,8 @@ export const Controls = ({
   dialogDescription,
   actionPrimaryTitle,
   actionSecondaryTitle,
+  zIndex,
 }: Readonly<ConfigurableStoryProps>): JSX.Element => {
-  // TODO is this necessary?
-  const container = usePortalContainer();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
@@ -166,7 +170,7 @@ export const Controls = ({
           }}
         />
       </Flex>
-      <Dialog.Root open={isDialogOpen} portalContainer={container}>
+      <Dialog.Root open={isDialogOpen} zIndex={zIndex}>
         <Dialog.Title>{dialogTitle}</Dialog.Title>
         <Dialog.Description>{dialogDescription}</Dialog.Description>
         <Dialog.Actions>

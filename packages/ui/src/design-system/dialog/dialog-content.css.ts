@@ -8,8 +8,8 @@ export const dialogContent = style([
     backgroundColor: '$dialog_container_bgColor',
     gap: '$24',
     width: {
-      popupScreen: '$dialog_width_popup',
-      smallScreen: '$dialog_width_browser',
+      popupScreen: '$312',
+      smallScreen: '$480',
     },
   }),
   {
