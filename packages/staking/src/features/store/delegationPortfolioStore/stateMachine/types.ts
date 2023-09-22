@@ -45,7 +45,7 @@ export enum DrawerManagementStep {
 
 export type DrawerStep = DrawerDefaultStep | DrawerManagementStep;
 
-export type DelegationPortfolioState = {
+export type State = {
   activeDrawerStep?: DrawerStep;
   activeFlow: Flow;
   cardanoCoinSymbol: AdaSymbol;
@@ -53,7 +53,6 @@ export type DelegationPortfolioState = {
   currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio?: DraftPortfolioStakePool[];
   selectedPortfolio: DraftPortfolioStakePool[];
-  view?: 'popup' | 'expanded';
   viewedStakePool?: StakePoolWithLogo;
 };
 
@@ -62,5 +61,5 @@ export type ExecuteCommand = <C extends Command>(command: C) => void;
 export type Handler<C extends Command = any> = (params: {
   command: C;
   executeCommand: ExecuteCommand;
-  state: DelegationPortfolioState;
+  state: State;
 }) => void;

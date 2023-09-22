@@ -1,8 +1,12 @@
 import { DelegatedStake } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
-import { DelegationPortfolioState, ExecuteCommand } from './stateMachine';
+import { ExecuteCommand, State } from './stateMachine';
 
 export type AdaSymbol = 'ADA' | 'tADA';
+
+export type DelegationPortfolioState = State & {
+  view?: 'popup' | 'expanded';
+};
 
 export type DelegationPortfolioStore = DelegationPortfolioState & {
   mutators: {

@@ -5,14 +5,13 @@ import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH, targetWeight } from './constant
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
 import {
   Command,
-  DelegationPortfolioState,
   ExecuteCommand,
   Flow,
   Handler,
   processExpandedViewCases,
   processPopupViewCases,
 } from './stateMachine';
-import { DelegationPortfolioStore } from './types';
+import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
   activeDrawerStep: undefined,

@@ -4,7 +4,7 @@ export type { Command } from './commands';
 export { Flow, DrawerDefaultStep, DrawerManagementStep } from './types';
 export type {
   CurrentPortfolioStakePool,
-  DelegationPortfolioState,
+  State,
   DraftPortfolioStakePool,
   DrawerStep,
   ExecuteCommand,
