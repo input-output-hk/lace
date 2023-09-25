@@ -8,8 +8,7 @@ import {
   CurrencyInfo
 } from '../types';
 import { Wallet } from '@lace/cardano';
-import { addEllipsis } from '@lace/common';
-import { getNumberWithUnit } from '../utils/format-number';
+import { addEllipsis, getNumberWithUnit } from '@lace/common';
 import { TxOutputInput, CoinItemProps } from '@lace/core';
 import { formatDate, formatTime } from '../utils/format-date';
 import { TokenInfo } from '@src/utils/get-assets-information';

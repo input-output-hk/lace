@@ -1,0 +1,11 @@
+import { Wallet } from '@lace/cardano';
+import { AdaSymbol } from './types';
+
+export const targetWeight = 100;
+export const MAX_POOLS_COUNT = 5;
+export const LAST_STABLE_EPOCH = 2;
+
+export const CARDANO_COIN_SYMBOL: Record<Wallet.Cardano.NetworkId, AdaSymbol> = {
+  [Wallet.Cardano.NetworkId.Mainnet]: 'ADA',
+  [Wallet.Cardano.NetworkId.Testnet]: 'tADA',
+};
