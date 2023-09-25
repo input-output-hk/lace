@@ -21,7 +21,7 @@ Feature: Collateral - popup view
     Then I see collateral as: "Inactive" in settings
 
   @LW-5528 @Pending
-  # Bug https://input-output.atlassian.net/browse/LW-8530
+  # Bug LW-8530
   Scenario: Popup View - Settings -  Collateral - state of collateral is separated and saved during network switching
     And I am on Settings popup page
     When I click on "Collateral" setting
