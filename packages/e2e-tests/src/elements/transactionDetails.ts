@@ -1,10 +1,9 @@
 /* eslint-disable no-undef */
 import webTester from '../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from './webElement';
 import { ChainablePromiseElement } from 'webdriverio';
 import CommonDrawerElements from './CommonDrawerElements';
 
-export class TransactionDetailsPage extends CommonDrawerElements {
+class TransactionDetailsPage extends CommonDrawerElements {
   protected CONTAINER = '//div[@class="ant-drawer-content"]';
   private TRANSACTION_DETAILS_SKELETON = '.ant-drawer-body .ant-skeleton';
   private TRANSACTION_DETAILS_DESCRIPTION = '//div[@data-testid="tx-description"]';
@@ -52,8 +51,8 @@ export class TransactionDetailsPage extends CommonDrawerElements {
     return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_DESCRIPTION}`);
   }
 
-  transactionDetailsAmountOfTokens(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS}`, 'xpath');
+  get transactionDetailsAmountOfTokens(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS);
   }
 
   async transactionSentTokensForBundle(index = 1): Promise<WebdriverIO.ElementArray> {
@@ -64,172 +63,96 @@ export class TransactionDetailsPage extends CommonDrawerElements {
     return $$(`${this.CONTAINER}${this.TRANSACTION_DETAILS_SENT_TOKEN}`);
   }
 
-  transactionDetailsSentAda(index = 1): WebElement {
-    return Factory.fromSelector(
-      `(${this.CONTAINER}${this.TRANSACTION_DETAILS_BUNDLE})[${index}]${this.TRANSACTION_DETAILS_SENT_ADA}`,
-      'xpath'
-    );
+  transactionDetailsSentAda(index = 1): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_BUNDLE})[${index}]${this.TRANSACTION_DETAILS_SENT_ADA}`);
   }
 
-  transactionDetailsSentFiat(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_SENT_FIAT}`, 'xpath');
+  get transactionDetailsSentFiat(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_SENT_FIAT);
   }
 
-  transactionDetailsToAddress(index = 1): WebElement {
-    return Factory.fromSelector(
-      `(${this.CONTAINER}${this.TRANSACTION_DETAILS_BUNDLE})[${index}]${this.TRANSACTION_DETAILS_TO_ADDRESS}`,
-      'xpath'
-    );
+  transactionDetailsToAddress(index = 1): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_BUNDLE})[${index}]${this.TRANSACTION_DETAILS_TO_ADDRESS}`);
   }
 
-  transactionDetailsStatus(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_STATUS}`, 'xpath');
+  get transactionDetailsStatus(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_STATUS);
   }
 
-  transactionDetailsTimestamp(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_TIMESTAMP}`, 'xpath');
+  get transactionDetailsTimestamp(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_TIMESTAMP);
   }
 
-  transactionDetailsFeeADA(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_FEE_ADA}`, 'xpath');
+  get transactionDetailsFeeADA(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_FEE_ADA);
   }
 
-  transactionDetailsOutputsSection(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_OUTPUTS_SECTION}`, 'xpath');
+  get transactionDetailsOutputsSection(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION);
   }
 
-  transactionDetailsInputsSection(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_INPUTS_SECTION}`, 'xpath');
+  get transactionDetailsInputsSection(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION);
   }
 
-  transactionDetailsFeeFiat(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_FEE_FIAT}`, 'xpath');
+  get transactionDetailsFeeFiat(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_FEE_FIAT);
   }
 
-  transactionDetailsInputsDropdown(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_INPUTS_SECTION}${this.TRANSACTION_DETAILS_DROPDOWN}`,
-      'xpath'
-    );
+  get transactionDetailsInputsDropdown(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_DROPDOWN);
   }
 
-  transactionDetailsOutputsDropdown(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_OUTPUTS_SECTION}${this.TRANSACTION_DETAILS_DROPDOWN}`,
-      'xpath'
-    );
+  get transactionDetailsOutputsDropdown(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_DROPDOWN);
   }
 
-  transactionDetailsInputAddress(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_INPUTS_SECTION}${this.TRANSACTION_DETAILS_ADDRESS}`,
-      'xpath'
-    );
+  get transactionDetailsInputAddress(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADDRESS);
   }
 
-  transactionDetailsOutputAddress(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_OUTPUTS_SECTION}${this.TRANSACTION_DETAILS_ADDRESS}`,
-      'xpath'
-    );
+  get transactionDetailsOutputAddress(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADDRESS);
   }
 
-  transactionDetailsInputAdaAmount(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_INPUTS_SECTION}${this.TRANSACTION_DETAILS_ADA_AMOUNT}`,
-      'xpath'
-    );
+  get transactionDetailsInputAdaAmount(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADA_AMOUNT);
   }
 
-  transactionDetailsOutputAdaAmount(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_OUTPUTS_SECTION}${this.TRANSACTION_DETAILS_ADA_AMOUNT}`,
-      'xpath'
-    );
+  get transactionDetailsOutputAdaAmount(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADA_AMOUNT);
   }
 
-  transactionDetailsInputFiatAmount(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_INPUTS_SECTION}${this.TRANSACTION_DETAILS_FIAT_AMOUNT}`,
-      'xpath'
-    );
+  get transactionDetailsInputFiatAmount(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_FIAT_AMOUNT);
   }
 
-  transactionDetailsOutputFiatAmount(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_OUTPUTS_SECTION}${this.TRANSACTION_DETAILS_FIAT_AMOUNT}`,
-      'xpath'
-    );
+  get transactionDetailsOutputFiatAmount(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_FIAT_AMOUNT);
   }
 
-  transactionDetailsInputTokens(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_INPUTS_SECTION}${this.TRANSACTION_DETAILS_TOKEN}`,
-      'xpath'
-    );
+  get transactionDetailsInputTokens(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_TOKEN);
   }
 
-  transactionDetailsOutputTokens(): WebElement {
-    return Factory.fromSelector(
-      `${this.CONTAINER}${this.TRANSACTION_DETAILS_OUTPUTS_SECTION}${this.TRANSACTION_DETAILS_TOKEN}`,
-      'xpath'
-    );
+  get transactionDetailsOutputTokens(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_TOKEN);
   }
 
   get transactionDetailsMetadata(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_METADATA);
   }
 
-  transactionDetailsSent(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_SENT}`, 'xpath');
+  get transactionDetailsSent(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_SENT);
   }
 
-  transactionDetailsStakepoolName(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_POOL_NAME}`, 'xpath');
+  get transactionDetailsStakepoolName(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_POOL_NAME);
   }
 
-  transactionDetailsStakepoolTicker(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TRANSACTION_DETAILS_POOL_TICKER}`, 'xpath');
-  }
-
-  async getTransactionDetailInputAdaAmount(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsInputAdaAmount());
-  }
-
-  async getTransactionDetailInputFiatAmount(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsInputFiatAmount());
-  }
-
-  async getTransactionDetailOutputAdaAmount(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsOutputAdaAmount());
-  }
-
-  async getTransactionDetailOutputFiatAmount(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsOutputFiatAmount());
-  }
-
-  async getTransactionDetailInputTokenAmount(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsInputTokens());
-  }
-
-  async getTransactionDetailOutputTokenAmount(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsOutputTokens());
-  }
-
-  async getTransactionDetailFeeADAAmount(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsFeeADA());
-  }
-
-  async getTransactionDetailFeeFiatAmount(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsFeeFiat());
-  }
-
-  async getTransactionDetailInputAddress(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsInputAddress());
-  }
-
-  async getTransactionDetailOutputAddress(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsOutputAddress());
+  get transactionDetailsStakepoolTicker(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_POOL_TICKER);
   }
 
   async getTransactionSentTokensForBundle(index = 1): Promise<string[]> {
@@ -240,11 +163,9 @@ export class TransactionDetailsPage extends CommonDrawerElements {
     return await webTester.getTextValuesFromArrayElementWithoutDuplicates(await this.transactionSentTokens());
   }
 
-  async getTransactionDetailDescriptionAmountOfAssets(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.transactionDetailsAmountOfTokens());
-  }
-
   async closeTransactionDetails(mode: 'extended' | 'popup'): Promise<void> {
     mode === 'popup' ? await this.clickHeaderBackButton() : await this.clickHeaderCloseButton();
   }
 }
+
+export default new TransactionDetailsPage();
