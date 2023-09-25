@@ -1,4 +1,4 @@
-import type { CurrentPortfolioStakePool } from '../../store/types';
+import { CurrentPortfolioStakePool } from 'features/store';
 import type { StakingNotificationType } from '../types';
 import type { AssetActivityListProps } from '@lace/core';
 import { hasPendingDelegationTransaction, isPortfolioDrifted } from '.';

@@ -1,4 +1,4 @@
-import type { CurrentPortfolioStakePool } from '../../store/types';
+import { CurrentPortfolioStakePool } from 'features/store';
 import { getPortfolioTotalPercentageDrift } from './getPortfolioTotalPercentageDrift';
 
 const PORTFOLIO_DRIFT_PERCENTAGE_THRESHOLD = 15;
