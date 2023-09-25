@@ -67,6 +67,8 @@ export interface TransactionProps {
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
   openExternalLink?: () => void;
+  sendAnalyticsInputs?: () => void;
+  sendAnalyticsOutputs?: () => void;
 }
 
 const TOAST_DEFAULT_DURATION = 3;
@@ -105,7 +107,9 @@ export const Transaction = ({
   pools,
   addressToNameMap,
   isPopupView,
-  openExternalLink
+  openExternalLink,
+  sendAnalyticsInputs,
+  sendAnalyticsOutputs
 }: TransactionProps): React.ReactElement => {
   const { t } = useTranslate();
   const isSending = status === 'sending';
@@ -304,6 +308,7 @@ export const Transaction = ({
           }}
           coinSymbol={coinSymbol}
           withSeparatorLine
+          sendAnalytics={sendAnalyticsInputs}
         />
       )}
       {addrOutputs?.length > 0 && (
@@ -317,6 +322,7 @@ export const Transaction = ({
             sent: t('package.core.transactionDetailBrowser.sent')
           }}
           coinSymbol={coinSymbol}
+          sendAnalytics={sendAnalyticsOutputs}
         />
       )}
       {metadata?.length > 0 && (

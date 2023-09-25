@@ -97,6 +97,9 @@ export enum PostHogAction {
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
   NFTsImageClick = 'nft | nfts | nft image | click',
+  NFTsCreateFolderClick = 'nft | nfts | create folder | click',
+  NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
+  NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
   // Address book
   AddressBookAddAddressClick = 'address book | add address | click',
   AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
@@ -151,7 +154,21 @@ export enum PostHogAction {
   UserWalletProfileNetworkPreviewClick = 'user/wallet profile | network | preview | click',
   UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
   UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
-  UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click'
+  UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
+  // Lace Logo
+  WalletLaceClick = 'wallet | lace | click',
+  // Tokens
+  TokenTokensClick = 'token | tokens | click',
+  TokenTokensTokenRowClick = 'token | tokens | token row | click',
+  TokenTokenDetailViewAllClick = 'token | token detail | view all | click',
+  TokenTokenDetailXClick = 'token | token detail | x | click',
+  // Activities
+  ActivityActivityClick = 'activity | activity | click',
+  ActivityActivityActivityRowClick = 'activity | activity | activity row | click',
+  ActivityActivityDetailTransactionHashClick = 'activity | activity detail | transaction hash | click',
+  ActivityActivityDetailInputsClick = 'activity | activity detail | inputs | click',
+  ActivityActivityDetailOutputsClick = 'activity | activity detail | outputs | click',
+  ActivityActivityDetailXClick = 'activity | activity detail | x | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {

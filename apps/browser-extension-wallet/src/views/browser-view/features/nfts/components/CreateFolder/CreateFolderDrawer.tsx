@@ -15,6 +15,8 @@ import { NameForm } from './NameForm';
 import { NftsList } from './NftsList';
 import styles from './CreateFolderDrawer.module.scss';
 import { NftFolderConfirmationModal } from '../NftFolderConfirmationModal';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 interface GeneralSettingsDrawerProps {
   visible: boolean;
@@ -39,6 +41,7 @@ export const NFTFolderDrawer = withNftsFoldersContext(
     onSelectNft
   }: GeneralSettingsDrawerProps): React.ReactElement => {
     const { t } = useTranslation();
+    const analytics = useAnalyticsContext();
     const [name, setName] = useState('');
     const [selectedTokenIds, setSelectedTokenIds] = useState<Array<string>>([]);
     const MAIN_SECTION = selectedFolder ? Sections.FOLDER : Sections.FORM;
@@ -222,7 +225,10 @@ export const NFTFolderDrawer = withNftsFoldersContext(
           size="large"
           block
           disabled={!isCreateFormValid}
-          onClick={goToAssetsSelection}
+          onClick={() => {
+            analytics.sendEventToPostHog(PostHogAction.NFTCreateFolderNameYourFolderNextClick);
+            goToAssetsSelection();
+          }}
           data-testid={'create-folder-drawer-form-cta'}
         >
           {t('browserView.nfts.folderDrawer.cta.create')}
@@ -233,7 +239,14 @@ export const NFTFolderDrawer = withNftsFoldersContext(
           size="large"
           block
           disabled={!isCreateFormValid}
-          onClick={selectedFolder ? addToFolder : createFolder}
+          onClick={() => {
+            if (selectedFolder) {
+              addToFolder();
+              return;
+            }
+            analytics.sendEventToPostHog(PostHogAction.NFTCreateFolderSelectNftsNextClick);
+            createFolder();
+          }}
           data-testid={'create-folder-drawer-asset-picker-cta'}
         >
           {t(`browserView.nfts.folderDrawer.cta.${selectedFolder ? 'update' : 'create'}`)}
