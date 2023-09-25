@@ -44,8 +44,8 @@ class AddressBookPageAssert {
       await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_NAME).waitForDisplayed();
       await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).waitForDisplayed();
       const actualAddress = await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).getText();
-      const expectedAddress1stPart = mode === 'extended' ? `${address.slice(0, 22)}` : `${address.slice(0, 8)}`;
-      const expectedAddress2ndPart = mode === 'extended' ? `${address.slice(-23)}` : `${address.slice(-3)}`;
+      const expectedAddress1stPart = `${address.slice(0, 5)}`;
+      const expectedAddress2ndPart = mode === 'extended' ? `${address.slice(-5)}` : `${address.slice(-3)}`;
       expect(
         actualAddress.startsWith(expectedAddress1stPart),
         `ACTUAL DISPLAYED ADDRESS: ${actualAddress}\nEXPECTED 1ST PART OF ADDRESS: ${expectedAddress1stPart}`
@@ -55,7 +55,7 @@ class AddressBookPageAssert {
         `ACTUAL DISPLAYED ADDRESS: ${actualAddress}\nEXPECTED 2ND PART OF ADDRESS: ${expectedAddress2ndPart}`
       ).to.be.true;
     } else {
-      expect(await addressRow).to.be.undefined;
+      expect(addressRow).to.be.undefined;
     }
   };
 

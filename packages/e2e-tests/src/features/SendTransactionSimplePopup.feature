@@ -48,8 +48,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2395 @Testnet @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2395 @Testnet @Mainnet
   Scenario: Popup-view - Address can be saved from Send screen
     When I click "Send" button on Tokens page in popup mode
     And I enter a valid "shelley" address in the bundle 1 recipient's address
@@ -81,53 +80,49 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And click on one of the contacts on the dropdown
     Then the selected contact is added in the bundle recipient's address
 
-  @LW-2396 @Testnet @Pending
-  # BUG LW-7925
+  @LW-2396 @Testnet
   Scenario: Popup-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in popup mode
     And I navigate to Tokens popup page
     And I click "Send" button on Tokens page in popup mode
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then recipients address input contains address "qfwr6ja" and name "Shelley"
+    Then recipients address input contains address "fwr6ja" and name "Shelley"
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2396 @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2396 @Mainnet
   Scenario: Popup-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in popup mode
     And I navigate to Tokens popup page
     And I click "Send" button on Tokens page in popup mode
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then recipients address input contains address "q2c767z" and name "Shelley"
+    Then recipients address input contains address "2c767z" and name "Shelley"
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2397 @Testnet @Pending
-  # BUG LW-7925
+  @LW-2397 @Testnet
   Scenario: Popup-view - Existing address can be selected from the address book and then removed
     And I have 3 addresses in my address book in popup mode
     And I navigate to Tokens popup page
     And I click "Send" button on Tokens page in popup mode
     And click "Add address" button  in address bar
     When I click address on the list with name "Byron"
-    And recipients address input contains address "oNj7Dzp" and name "Byron"
+    And recipients address input contains address "Nj7Dzp" and name "Byron"
     And click "Remove address" button  in address bar
     Then recipients address input  is empty
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is disabled on "Send" page
 
-  @LW-2397 @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2397 @Mainnet
   Scenario: Popup-view - Existing address can be selected from the address book and then removed
     And I have 3 addresses in my address book in popup mode
     And I navigate to Tokens popup page
     And I click "Send" button on Tokens page in popup mode
     And click "Add address" button  in address bar
     When I click address on the list with name "Byron"
-    And recipients address input contains address "FiPvM4" and name "Byron"
+    And recipients address input contains address "iPvM4" and name "Byron"
     And click "Remove address" button  in address bar
     Then recipients address input  is empty
     When I enter a value of: 1 to the "ADA" asset in bundle 1
@@ -697,3 +692,25 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I click "Confirm" button on "Transaction summary" page
     When I enter correct password and confirm the transaction
     Then The Transaction error screen is displayed in popup mode
+
+  @LW-7826 @Testnet @Pending
+  # Bug: https://input-output.atlassian.net/browse/LW-8579
+  Scenario: Popup view - Validate if contact name that has up to 12 characters is not truncated
+    Given address book contains address with name that has 12 characters
+    When I navigate to Tokens popup page
+    And I click "Send" button on Tokens page in popup mode
+    And I enter "abcdefghijkl" in the bundle 1 recipient's address
+    Then first result in address dropdown has name "abcdefghijkl"
+    When I click on one of the contacts on the dropdown
+    Then recipients address input contains address entry with name "abcdefghijkl"
+
+  @LW-7827 @Testnet @Pending
+  # Bug: https://input-output.atlassian.net/browse/LW-8579
+  Scenario: Popup view - Validate if contact name that has >12 characters is truncated
+    Given address book contains address with name that has more than 12 characters
+    When I navigate to Tokens popup page
+    And I click "Send" button on Tokens page in popup mode
+    And I enter "abcdefghijklm" in the bundle 1 recipient's address
+    Then first result in address dropdown has name "abcdefghi..."
+    When I click on one of the contacts on the dropdown
+    Then recipients address input contains address entry with name "abcdefghi..."
