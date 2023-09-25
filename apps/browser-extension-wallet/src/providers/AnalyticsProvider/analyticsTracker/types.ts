@@ -97,6 +97,19 @@ export enum PostHogAction {
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
   NFTsImageClick = 'nft | nfts | nft image | click',
+  // Address book
+  AddressBookAddAddressClick = 'address book | add address | click',
+  AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
+  AddressBookAddNewAddressCancelClick = 'address book | add new address | cancel | click',
+  AddressBookAddressRecordClick = 'address book | address record | click',
+  AddressBookAddressRecordCopyClick = 'address book | address record | copy | click',
+  AddressBookAddressRecordEditClick = 'address book | address record | edit | click',
+  AddressBookAddressRecordDeleteClick = 'address book | address record | delete | click',
+  AddressBookAddressRecordHoldUpDeleteAddressClick = 'address book | address record | hold up! | delete address | click',
+  AddressBookAddressRecordHoldUpCancelClick = 'address book | address record | hold up! | cancel | click',
+  AddressBookAddressRecordEditAddressDoneClick = 'address book | address record | edit address | done | click',
+  AddressBookAddressRecordEditAddressCancelClick = 'address book | address record | edit address | cancel | click',
+  AddressBookAddressRecordEditAddressXClick = 'address book | address record | edit address | x | click',
   // Settings
   SettingsHelpClick = 'settings | help | click',
   SettingsHelpCreateSupportTicketClick = 'settings | help | create a support ticket | click',

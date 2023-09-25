@@ -22,7 +22,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
 import { useHandleResolver, useOnAddressSave, useUpdateAddressStatus } from '@hooks';
@@ -80,6 +81,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             action: MatomoEventActions.CLICK_EVENT,
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_BROWSER
           });
+          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordClick);
           setAddressToEdit(address);
           if (isAdaHandleEnabled && validatedAddressStatus[address.address]?.isValid === false) {
             setIsAddressDrawerOpen(true);
@@ -104,6 +106,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
 
   const handleAddAddressClick = () => {
     setIsDrawerOpen(true);
+    analytics.sendEventToPostHog(PostHogAction.AddressBookAddAddressClick);
   };
 
   if (!isNumber(addressCount)) return <span />;
