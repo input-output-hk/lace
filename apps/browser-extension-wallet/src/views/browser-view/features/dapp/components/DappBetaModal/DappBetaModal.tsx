@@ -1,12 +1,10 @@
-import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
-import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useExternalLinkOpener } from '@providers';
 import { getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
 import { WarningModal } from '@src/views/browser-view/components';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const DappBetaModal = (): React.ReactElement => {
-  const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const openExternalLink = useExternalLinkOpener();
@@ -24,7 +22,6 @@ export const DappBetaModal = (): React.ReactElement => {
   const onLearnMore = () => {
     const showDappBetaModal = getValueFromLocalStorage('showDappBetaModal', true);
     if (showDappBetaModal) openExternalLink(process.env.FAQ_URL);
-    analytics.sendEventToPostHog(PostHogAction.DappConnectorAuthorizeDappDappConnectorBetaClick);
     onClose();
   };
 
