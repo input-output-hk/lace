@@ -40,7 +40,7 @@ export const PoolDetailsCard = ({ name, color, percentage, onRemove }: PoolDetai
         <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
             {t('drawer.preferences.stakeValue', {
-              stakePercentage: formatPercentages(percentage, { decimalPlaces: 0, rounding: 'down' }),
+              stakePercentage: formatPercentages(percentage, { decimalPlaces: 0, rounding: 'halfUp' }),
               stakeValue,
             })}
           </Text.Body.Normal>
