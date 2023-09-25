@@ -28,7 +28,6 @@
     align-items: center;
     display: flex;
     gap: size_unit(3);
-    padding-right: size_unit(4);
     &:last-child {
       justify-content: flex-end;
       padding-right: 0;
