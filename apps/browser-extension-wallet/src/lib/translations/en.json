@@ -1105,6 +1105,15 @@
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
+    "drepRegistration": {
+      "title": "Confirm DRep registration",
+      "metadata": "Metadata",
+      "url": "URL",
+      "hash": "Hash",
+      "drepId": "Drep ID",
+      "depositPaid": "Deposit Paid",
+      "insufficientFunds": "You do not have enough funds to complete the transaction"
+    },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"
     },
