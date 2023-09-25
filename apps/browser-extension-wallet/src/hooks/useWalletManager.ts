@@ -88,7 +88,6 @@ export const useWalletManager = (): UseWalletManager => {
     setCardanoCoin,
     environmentName,
     walletManagerUi,
-    cardanoWallet,
     setAddressesDiscoveryCompleted
   } = useWalletStore();
   const [settings, updateAppSettings] = useAppSettingsContext();
@@ -436,7 +435,7 @@ export const useWalletManager = (): UseWalletManager => {
 
       const newKeyAgent = await Wallet.createKeyAgent(walletManagerUi, newKeyAgentData, getPassword);
       setCardanoWallet({
-        asyncKeyAgent: cardanoWallet?.asyncKeyAgent,
+        asyncKeyAgent: Wallet.KeyManagement.util.createAsyncKeyAgent(newKeyAgent),
         keyAgent: newKeyAgent,
         name,
         wallet: walletManagerUi.wallet
@@ -444,15 +443,7 @@ export const useWalletManager = (): UseWalletManager => {
       setKeyAgentData(newKeyAgentData);
       setAddressesDiscoveryCompleted(true);
     },
-    [
-      backgroundService,
-      cardanoWallet?.asyncKeyAgent,
-      getPassword,
-      setAddressesDiscoveryCompleted,
-      setCardanoWallet,
-      setKeyAgentData,
-      walletManagerUi
-    ]
+    [backgroundService, getPassword, setAddressesDiscoveryCompleted, setCardanoWallet, setKeyAgentData, walletManagerUi]
   );
 
   return {

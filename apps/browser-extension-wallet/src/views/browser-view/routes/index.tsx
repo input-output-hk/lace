@@ -184,9 +184,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet && addressesDiscoveryCompleted) {
+  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet) {
     return (
       <>
+        {!addressesDiscoveryCompleted && <MainLoader overlay />}
         <Switch>
           {routesMap.map((route) => (
             <Route key={route.path} path={route.path} component={route.component} />

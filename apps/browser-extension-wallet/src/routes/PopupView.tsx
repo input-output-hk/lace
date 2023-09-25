@@ -3,7 +3,6 @@ import { ExtensionRoutes } from './ExtensionRoutes';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
-import { lockWalletSelector } from '@src/features/unlock-wallet/selectors';
 import { useWalletManager } from '@src/hooks/useWalletManager';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -25,33 +24,40 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const PopupView = (): React.ReactElement => {
-  const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
-  const { inMemoryWallet, keyAgentData, currentChain, walletInfo, setKeyAgentData, addressesDiscoveryCompleted } =
-    useWalletStore();
-  const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
+  const {
+    inMemoryWallet,
+    keyAgentData,
+    currentChain,
+    walletInfo,
+    setKeyAgentData,
+    addressesDiscoveryCompleted,
+    isWalletLocked,
+    walletLock
+  } = useWalletStore();
   const { loadWallet } = useWalletManager();
+  const [{ lastMnemonicVerification, mnemonicVerificationFrequency, chainName }] = useAppSettingsContext();
   const backgroundServices = useBackgroundServiceAPIContext();
 
   useAppInit();
   useEnterKeyPress();
 
   useEffect(() => {
-    const load = async () => {
-      // try to get key agent data from local storage if exist and initialize state
-      // if no key agent and the wallet is not locked open setup flow
-      const keyAgentFromStorage = getValueFromLocalStorage('keyAgentData');
-      // all the related data is cleared for the forgot password flow as well, so do not react in this case
-      const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>(
-        'isForgotPasswordFlow'
-      );
-      if (!keyAgentFromStorage && !isWalletLocked() && !isForgotPasswordFlow) {
-        await backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
-      } else {
-        setKeyAgentData(keyAgentFromStorage);
-      }
-    };
-    load();
-  }, [isWalletLocked, backgroundServices, currentChain, setKeyAgentData]);
+    // try to get key agent data from local storage if exist and initialize state
+    // if no key agent and the wallet is not locked open setup flow
+    const keyAgentFromStorage = getValueFromLocalStorage('keyAgentData');
+    // all the related data is cleared for the forgot password flow as well, so do not react in this case
+    const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>(
+      'isForgotPasswordFlow'
+    );
+    if (!keyAgentFromStorage && !isWalletLocked() && !isForgotPasswordFlow) {
+      backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
+    } else {
+      setKeyAgentData(keyAgentFromStorage);
+    }
+    // TODO: Revise network switching with address discovery and refactor to make the process easier to maintain
+    // chainName is not being used but it's needed here for this to work like the browser view when switching networks
+    // (see useEffect in browser-view routes index)
+  }, [isWalletLocked, backgroundServices, currentChain, chainName, setKeyAgentData]);
 
   useEffect(() => {
     loadWallet();
@@ -70,8 +76,13 @@ export const PopupView = (): React.ReactElement => {
   }
 
   // Wallet loaded
-  if (keyAgentData && walletInfo && inMemoryWallet && addressesDiscoveryCompleted) {
-    return <ExtensionRoutes />;
+  if (keyAgentData && walletInfo && inMemoryWallet) {
+    return (
+      <>
+        {!addressesDiscoveryCompleted && <MainLoader overlay />}
+        <ExtensionRoutes />
+      </>
+    );
   }
 
   return <MainLoader />;
