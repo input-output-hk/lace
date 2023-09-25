@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Text, TransactionSummary } from '@lace/ui';
+import { Box, Cell, Grid, TransactionSummary, Flex } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../DappInfo';
 import { InsufficientFundsWarning } from '../InsufficientFundsWarning';
 import { ErrorPane } from '@lace/common';
@@ -32,12 +32,7 @@ export const ConfirmDRepRegistration = ({
   translations,
   metadata
 }: Props): JSX.Element => (
-  <Box
-    h="$fill"
-    style={{
-      maxWidth: '360px'
-    }}
-  >
+  <Flex h="$fill" flexDirection="column">
     <Box mb={'$28'} mt={'$32'}>
       <DappInfo {...dappInfo} />
     </Box>
@@ -51,15 +46,22 @@ export const ConfirmDRepRegistration = ({
         <ErrorPane error={errorMessage} />
       </Box>
     )}
-    <Box mb={'$24'}>
-      <TransactionSummary.Metadata label={translations.metadata} text="" />
-    </Box>
-    <TransactionSummary.Address label={translations.labels.url} address={metadata.url} />
-    <Box mb={'$24'} />
-    <TransactionSummary.Address label={translations.labels.hash} address={metadata.hash} />
-    <Box mb={'$24'} />
-    <TransactionSummary.Address label={translations.labels.drepId} address={metadata.drepId} />
-    <Box mb={'$24'} />
-    <TransactionSummary.Address label={translations.labels.depositPaid} address={metadata.depositPaid} />
-  </Box>
+    <Grid columns="$1" gutters="$0">
+      <Cell>
+        <TransactionSummary.Metadata label={translations.metadata} text="" />
+      </Cell>
+      <Cell>
+        <TransactionSummary.Address label={translations.labels.url} address={metadata.url} />
+      </Cell>
+      <Cell>
+        <TransactionSummary.Address label={translations.labels.hash} address={metadata.hash} />
+      </Cell>
+      <Cell>
+        <TransactionSummary.Address label={translations.labels.drepId} address={metadata.drepId} />
+      </Cell>
+      <Cell>
+        <TransactionSummary.Address label={translations.labels.depositPaid} address={metadata.depositPaid} />
+      </Cell>
+    </Grid>
+  </Flex>
 );
