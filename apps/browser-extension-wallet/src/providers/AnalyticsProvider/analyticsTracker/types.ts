@@ -126,7 +126,19 @@ export enum PostHogAction {
   SettingsCollateralClick = 'settings | collateral | click',
   SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
   SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
-  SettingsCollateralXClick = 'settings | collateral | x | click'
+  SettingsCollateralXClick = 'settings | collateral | x | click',
+  // User
+  UserWalletProfileIconClick = 'user/wallet profile | profile icon | click',
+  UserWalletProfileWalletAddressClick = 'user/wallet profile | wallet address | click',
+  UserWalletProfileAddressBookClick = 'user/wallet profile | address book | click',
+  UserWalletProfileSettingsClick = 'user/wallet profile | settings | click',
+  UserWalletProfileLightModeClick = 'user/wallet profile | light mode | click',
+  UserWalletProfileDarkModeClick = 'user/wallet profile | dark mode | click',
+  UserWalletProfileNetworkClick = 'user/wallet profile | network | click',
+  UserWalletProfileNetworkPreviewClick = 'user/wallet profile | network | preview | click',
+  UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
+  UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
+  UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
