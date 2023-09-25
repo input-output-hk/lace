@@ -52,9 +52,7 @@ export const ConfirmDRepRegistration = ({
       </Box>
     )}
     <Box mb={'$24'}>
-      <Text.Body.Large data-testid="section-title" weight="$bold">
-        {translations.metadata}
-      </Text.Body.Large>
+      <TransactionSummary.Metadata label={translations.metadata} text="" />
     </Box>
     <TransactionSummary.Address label={translations.labels.url} address={metadata.url} />
     <Box mb={'$24'} />
