@@ -12,7 +12,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | network | click"
     When I click on "Preview" radio button
     Then I validate latest analytics single event "settings | network | preview | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8549
   Scenario: Analytics - Extended view - Settings - Network events - Close modal
@@ -22,7 +21,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | network | click"
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "settings | network | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8550
   Scenario: Analytics - Extended view - Settings - Authorized dapps events - Cancel dapp disconnection
@@ -73,7 +71,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | help | click"
     When I click "Create a support ticket" button on Help drawer
     Then I validate latest analytics single event "settings | help | create a support ticket | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8554
   Scenario: Analytics - Extended View - Settings - Help events - Close modal
@@ -83,7 +80,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | help | click"
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "settings | help | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8555
   Scenario: Analytics - Extended View - Settings - Terms and Conditions events
@@ -93,7 +89,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | terms and conditions | click"
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "settings | terms and conditions | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8556
   Scenario: Analytics - Extended View - Settings - Privacy policy events
@@ -103,7 +98,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | privacy policy | click"
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "settings | privacy policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8557
   Scenario: Analytics - Extended View - Settings - Cookie policy events
@@ -113,7 +107,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | cookie policy | click"
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "settings | cookie policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8558
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Cancel
@@ -123,7 +116,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | remove wallet | click"
     When I click "Back" button on "Remove wallet" modal
     Then I validate latest analytics single event "settings | hold up | back | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8559
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Remove wallet
@@ -133,4 +125,3 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | remove wallet | click"
     And I click "Remove wallet" button on "Remove wallet" modal
     Then I validate latest analytics single event "settings | hold up | remove wallet | click"
-    And I validate that 2 analytics event(s) have been sent

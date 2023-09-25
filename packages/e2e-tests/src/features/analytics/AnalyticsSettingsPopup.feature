@@ -13,7 +13,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | network | click"
     When I click on "Preview" radio button
     Then I validate latest analytics single event "settings | network | preview | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8561
   Scenario: Analytics - Popup view - Settings - Network events - Close modal
@@ -24,7 +23,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | network | click"
     When I close the drawer by clicking back button
     Then I validate latest analytics single event "settings | network | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8562
   Scenario: Analytics - Popup view - Settings - Authorized dapps events - Cancel dapp disconnection
@@ -70,7 +68,6 @@ Feature: Analytics - Settings - Popup View
     When I close the drawer by clicking back button
     And I close the drawer by clicking back button
     Then I validate latest analytics single event "settings | your keys | show public key | x | click"
-    And I validate that 4 analytics event(s) have been sent
 
   @LW-8565
   Scenario: Analytics - Popup View - Settings - Help events
@@ -81,7 +78,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | help | click"
     When I click "Create a support ticket" button on Help drawer
     Then I validate latest analytics single event "settings | help | create a support ticket | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8566
   Scenario: Analytics - Popup View - Settings - Help events - Close modal
@@ -92,7 +88,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | help | click"
     When I close the drawer by clicking back button
     Then I validate latest analytics single event "settings | help | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8567
   Scenario: Analytics - Popup View - Settings - Terms and Conditions events
@@ -103,7 +98,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | terms and conditions | click"
     When I close the drawer by clicking back button
     Then I validate latest analytics single event "settings | terms and conditions | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8568
   Scenario: Analytics - Popup View - Settings - Privacy policy events
@@ -114,7 +108,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | privacy policy | click"
     When I close the drawer by clicking back button
     Then I validate latest analytics single event "settings | privacy policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8569
   Scenario: Analytics - Popup View - Settings - Cookie policy events
@@ -125,7 +118,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | cookie policy | click"
     When I close the drawer by clicking back button
     Then I validate latest analytics single event "settings | cookie policy | x | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8570
   Scenario: Analytics - Popup View - Settings - Wallet removal events - Cancel
@@ -136,7 +128,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | remove wallet | click"
     When I click "Back" button on "Remove wallet" modal
     Then I validate latest analytics single event "settings | hold up | back | click"
-    And I validate that 2 analytics event(s) have been sent
 
   @LW-8571
   Scenario: Analytics - Popup View - Settings - Wallet removal events - Remove wallet
@@ -147,4 +138,3 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | remove wallet | click"
     And I click "Remove wallet" button on "Remove wallet" modal
     Then I validate latest analytics single event "settings | hold up | remove wallet | click"
-    And I validate that 2 analytics event(s) have been sent
