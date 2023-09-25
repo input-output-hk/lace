@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 export const DappBetaModal = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
-  const [isModalVisible, setIsModalVisible] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const openExternalLink = useExternalLinkOpener();
 
   useEffect(() => {
