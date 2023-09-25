@@ -7,6 +7,8 @@ import { useTheme } from '@providers/ThemeProvider/context';
 import SunIcon from '../../../../assets/icons/sun.component.svg';
 import MoonIcon from '../../../../assets/icons/moon.component.svg';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const modeTranslate: Record<string, string> = {
   light: 'browserView.sideMenu.mode.light',
@@ -20,6 +22,7 @@ interface Props {
 export const ThemeSwitch = ({ isPopup }: Props): React.ReactElement => {
   const { theme, setTheme } = useTheme();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const analytics = useAnalyticsContext();
 
   const handleCurrentTheme = () => {
     const pickedTheme = theme.name === 'light' ? 'dark' : 'light';
@@ -28,6 +31,11 @@ export const ThemeSwitch = ({ isPopup }: Props): React.ReactElement => {
     if (isPopup) {
       backgroundServices.handleChangeTheme({ theme: pickedTheme });
     }
+    analytics.sendEventToPostHog(
+      pickedTheme === 'light'
+        ? PostHogAction.UserWalletProfileLightModeClick
+        : PostHogAction.UserWalletProfileDarkModeClick
+    );
   };
 
   return (

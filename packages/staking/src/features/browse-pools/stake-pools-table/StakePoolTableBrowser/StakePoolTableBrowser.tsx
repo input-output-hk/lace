@@ -64,7 +64,7 @@ export const StakePoolTableBrowser = ({
   ...props
 }: StakePoolTableBrowserProps): React.ReactElement => {
   const portfolioPools = useDelegationPortfolioStore((state) =>
-    state.selections.map(({ id }) => ({
+    state.selectedPortfolio.map(({ id }) => ({
       // Had to cast it with fromKeyHash because search uses plain ID instead of hex.
       id: Wallet.Cardano.PoolId.fromKeyHash(id as unknown as Wallet.Crypto.Ed25519KeyHashHex),
     }))
@@ -95,7 +95,7 @@ export const StakePoolTableBrowser = ({
     .filter((item) => portfolioPools.find((pool) => pool.id.toString() === item.id))
     .map((pool) => ({
       ...pool,
-      onUnselect: () => portfolioMutators.unselectPool({ id: pool.hexId }),
+      onUnselect: () => portfolioMutators.executeCommand({ data: pool.hexId, type: 'UnselectPoolFromList' }),
     }));
   const availableStakePools = items.filter((item) => !selectedStakePools.some((pool) => pool.id === item.id));
 

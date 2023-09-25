@@ -9,13 +9,38 @@ import SwithIcon from '@src/assets/icons/switch.component.svg';
 import ErrorIcon from '@src/assets/icons/address-error-icon.component.svg';
 import { config } from '@src/config';
 import { useWalletManager } from '@hooks';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { AVAILABLE_CHAINS } = config();
 
-export const NetworkChoice = (): React.ReactElement => {
+type networkEventSettings =
+  | PostHogAction.SettingsNetworkPreviewClick
+  | PostHogAction.SettingsNetworkPreprodClick
+  | PostHogAction.SettingsNetworkMainnetClick;
+
+type networkEventUserWalletProfile =
+  | PostHogAction.UserWalletProfileNetworkPreviewClick
+  | PostHogAction.UserWalletProfileNetworkPreprodClick
+  | PostHogAction.UserWalletProfileNetworkMainnetClick;
+
+const settingsEventByNetworkName: Partial<Record<Wallet.ChainName, networkEventSettings>> = {
+  Mainnet: PostHogAction.SettingsNetworkMainnetClick,
+  Preprod: PostHogAction.SettingsNetworkPreprodClick,
+  Preview: PostHogAction.SettingsNetworkPreviewClick
+};
+
+const walletProfileEventByNetworkName: Partial<Record<Wallet.ChainName, networkEventUserWalletProfile>> = {
+  Mainnet: PostHogAction.UserWalletProfileNetworkMainnetClick,
+  Preprod: PostHogAction.UserWalletProfileNetworkPreprodClick,
+  Preview: PostHogAction.UserWalletProfileNetworkPreviewClick
+};
+
+export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-profile' }): React.ReactElement => {
   const { t } = useTranslation();
   const { environmentName } = useWalletStore();
   const { switchNetwork } = useWalletManager();
+  const analytics = useAnalyticsContext();
 
   const getNetworkName = useCallback(
     (chainName: Wallet.ChainName) => {
@@ -43,6 +68,8 @@ export const NetworkChoice = (): React.ReactElement => {
         withProgressBar: true,
         icon: SwithIcon
       });
+      const eventByNetworkName = section === 'settings' ? settingsEventByNetworkName : walletProfileEventByNetworkName;
+      await analytics.sendEventToPostHog(eventByNetworkName[event.target.value as Wallet.ChainName]);
     } catch (error) {
       console.error('Error switching networks', error);
       toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });
