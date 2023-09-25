@@ -19,4 +19,8 @@ export class Address {
   getAddress(): string {
     return extensionUtils.isMainnet() ? this.addressMainnet : this.addressTestnet;
   }
+
+  setName(name: string): void {
+    this.name = name;
+  }
 }

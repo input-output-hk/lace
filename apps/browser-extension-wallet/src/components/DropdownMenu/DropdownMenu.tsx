@@ -9,21 +9,35 @@ import ChevronSmall from '../../assets/icons/chevron-down-small.component.svg';
 import styles from './DropdownMenu.module.scss';
 import { useWalletStore } from '@src/stores';
 import { UserAvatar } from '../MainMenu/DropdownMenuOverlay/components';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
 }
 
 export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
+  const analytics = useAnalyticsContext();
   const { walletInfo } = useWalletStore();
   const [open, setOpen] = useState(false);
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
 
+  const sendAnalyticsEvent = (event: PostHogAction) => {
+    analytics.sendEventToPostHog(event);
+  };
+
+  const handleDropdownState = (openDropdown: boolean) => {
+    setOpen(openDropdown);
+    if (openDropdown) {
+      sendAnalyticsEvent(PostHogAction.UserWalletProfileIconClick);
+    }
+  };
+
   return (
     <Dropdown
       destroyPopupOnHide
-      onVisibleChange={setOpen}
-      overlay={<DropdownMenuOverlay isPopup={isPopup} />}
+      onVisibleChange={handleDropdownState}
+      overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
       placement="bottomRight"
       trigger={['click']}
     >
