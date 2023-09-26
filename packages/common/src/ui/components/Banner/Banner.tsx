@@ -12,7 +12,7 @@ const { Text } = Typography;
 const shouldBeDisplayedAsText = (message: React.ReactNode) =>
   typeof message === 'string' || typeof message === 'number';
 
-export interface BannerProps {
+export type BannerProps = {
   withIcon?: boolean;
   customIcon?: React.ReactElement;
   message: string | React.ReactElement;
@@ -24,9 +24,11 @@ export interface BannerProps {
   popupView?: boolean;
   description?: React.ReactNode;
   onLinkClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
-  onButtonClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
-  onBannerClick?: (event?: React.MouseEvent<HTMLDivElement>) => unknown;
-}
+} & (
+  | { onButtonClick?: undefined; onBannerClick?: undefined }
+  | { onButtonClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown; onBannerClick?: undefined }
+  | { onBannerClick?: (event?: React.MouseEvent<HTMLDivElement>) => unknown; onButtonClick?: undefined }
+);
 
 export const Banner = ({
   message,
@@ -86,7 +88,7 @@ export const Banner = ({
             {buttonMessage && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
           </div>
         )}
-        {!!onBannerClick && !onButtonClick && (
+        {!!onBannerClick && (
           <div className={cn(styles.chevronRightIconContainer)}>
             <ChevronRight />
           </div>
