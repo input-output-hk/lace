@@ -1,7 +1,7 @@
-import BellIcon from '@assets/icons/bell-icon.component.svg';
 import { Banner } from '@lace/common';
 import InfoIcon from '@lace/core/src/ui/assets/icons/info-icon.component.svg';
 import { useTranslation } from 'react-i18next';
+import BellIcon from '../../../assets/icons/bell-icon.component.svg';
 import * as styles from './StakingNotificationBanner.css';
 import { StakingNotificationType } from './types';
 
