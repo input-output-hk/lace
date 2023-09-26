@@ -1,10 +1,16 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import type { ExecuteCommand, Handler } from './stateMachine/types';
 import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH } from './constants';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
-import { Command, Flow, processExpandedViewCases, processPopupViewCases } from './stateMachine';
+import {
+  Command,
+  ExecuteCommand,
+  Flow,
+  Handler,
+  processExpandedViewCases,
+  processPopupViewCases,
+} from './stateMachine';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
