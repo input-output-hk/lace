@@ -43,17 +43,15 @@ class TransactionsDetailsAssert {
     if (expectedTransactionDetails.transactionData) {
       for (let i = 0; i < expectedTransactionDetails.transactionData.length; i++) {
         if (expectedTransactionDetails.transactionData[i].assets) {
-          const actualAssets = await TransactionDetailsPage.getTransactionSentTokensForBundle(i + 1);
+          const actualAssets = await TransactionDetailsPage.getTransactionSentTokensForBundle(i);
           expect(actualAssets.toString()).to.equal(String(expectedTransactionDetails.transactionData[i].assets));
         }
-        expect(await TransactionDetailsPage.transactionDetailsSentAda(i + 1).getText()).to.equal(
+        expect(await TransactionDetailsPage.transactionDetailsSentAda(i).getText()).to.equal(
           expectedTransactionDetails.transactionData[i].ada
         );
 
         const expectedAddress = expectedTransactionDetails.transactionData[i].address;
-        const actualAddressSplit = (await TransactionDetailsPage.transactionDetailsToAddress(i + 1).getText()).split(
-          '...'
-        );
+        const actualAddressSplit = (await TransactionDetailsPage.transactionDetailsToAddress(i).getText()).split('...');
         if (actualAddressSplit.length === 1) {
           expect(expectedAddress).to.equal(actualAddressSplit[0]);
         } else {
@@ -110,8 +108,8 @@ class TransactionsDetailsAssert {
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
-      await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputsDropdown.waitForDisplayed();
+      await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
+      await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
       await TransactionDetailsPage.transactionDetailsInputAddress.waitForDisplayed();
       await TransactionDetailsPage.transactionDetailsInputAdaAmount.waitForDisplayed();
       await TransactionDetailsPage.transactionDetailsInputFiatAmount.waitForDisplayed();
@@ -133,8 +131,8 @@ class TransactionsDetailsAssert {
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
-      await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputsDropdown.waitForDisplayed();
+      await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
+      await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
 
       const txDetailsInputADAValueString = await TransactionDetailsPage.transactionDetailsInputAdaAmount.getText();
       const txDetailsInputADAValue = Number(txDetailsInputADAValueString.split(' ', 1));
@@ -179,7 +177,7 @@ class TransactionsDetailsAssert {
         )
       ) {
         await TransactionDetailsPage.transactionDetailsSent.waitForDisplayed();
-        await TransactionDetailsPage.transactionDetailsToAddress(1).waitForDisplayed();
+        await TransactionDetailsPage.transactionDetailsToAddress(0).waitForDisplayed();
       }
 
       await TransactionDetailsPage.closeTransactionDetails(mode);

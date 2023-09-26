@@ -1,78 +1,74 @@
 /* eslint-disable no-undef */
-import webTester from '../actor/webTester';
 import { ChainablePromiseElement } from 'webdriverio';
 import CommonDrawerElements from './CommonDrawerElements';
 
 class TransactionDetailsPage extends CommonDrawerElements {
-  protected CONTAINER = '//div[@class="ant-drawer-content"]';
+  protected CONTAINER = '[data-testid="custom-drawer"]';
   private TRANSACTION_DETAILS_SKELETON = '.ant-drawer-body .ant-skeleton';
-  private TRANSACTION_DETAILS_DESCRIPTION = '//div[@data-testid="tx-description"]';
+  private TRANSACTION_DETAILS_DESCRIPTION = '[data-testid="tx-description"]';
   private TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS = '//div[@data-testid="tx-description"]//div[2]';
-  private TRANSACTION_DETAILS_BUNDLE = '//div[@data-testid="tx-detail-bundle"]';
-  private TRANSACTION_DETAILS_HASH = '//div[@data-testid="tx-hash-detail"]';
-  private TRANSACTION_DETAILS_SENT = '//div[@data-testid="tx-sent-detail"]';
-  private TRANSACTION_DETAILS_SENT_TOKEN = '//span[@data-testid="tx-sent-detail-token"]';
-  private TRANSACTION_DETAILS_SENT_ADA = '//span[@data-testid="tx-sent-detail-ada"]';
-  private TRANSACTION_DETAILS_SENT_FIAT = '//span[@data-testid="tx-sent-detail-fiat"]';
-  private TRANSACTION_DETAILS_TO_ADDRESS = '//div[@data-testid="tx-to-detail"]';
-  private TRANSACTION_DETAILS_STATUS = '//div[@data-testid="tx-status"]';
-  private TRANSACTION_DETAILS_TIMESTAMP = '//div[@data-testid="tx-timestamp"]';
-  private TRANSACTION_DETAILS_FEE_ADA = '//span[@data-testid="tx-fee-ada"]';
-  private TRANSACTION_DETAILS_FEE_FIAT = '//span[@data-testid="tx-fee-fiat"]';
-  private TRANSACTION_DETAILS_INPUTS_SECTION = '//div[@data-testid="tx-inputs"]';
-  private TRANSACTION_DETAILS_OUTPUTS_SECTION = '//div[@data-testid="tx-outputs"]';
-  private TRANSACTION_DETAILS_DROPDOWN = '//button[@data-testid="tx-addr-list_toggle"]';
+  private TRANSACTION_DETAILS_BUNDLE = '[data-testid="tx-detail-bundle"]';
+  private TRANSACTION_DETAILS_HASH = '[data-testid="tx-hash-detail"]';
+  private TRANSACTION_DETAILS_SENT = '[data-testid="tx-sent-detail"]';
+  private TRANSACTION_DETAILS_SENT_TOKEN = '[data-testid="tx-sent-detail-token"]';
+  private TRANSACTION_DETAILS_SENT_ADA = '[data-testid="tx-sent-detail-ada"]';
+  private TRANSACTION_DETAILS_SENT_FIAT = '[data-testid="tx-sent-detail-fiat"]';
+  private TRANSACTION_DETAILS_TO_ADDRESS = '[data-testid="tx-to-detail"]';
+  private TRANSACTION_DETAILS_STATUS = '[data-testid="tx-status"]';
+  private TRANSACTION_DETAILS_TIMESTAMP = '[data-testid="tx-timestamp"]';
+  private TRANSACTION_DETAILS_FEE_ADA = '[data-testid="tx-fee-ada"]';
+  private TRANSACTION_DETAILS_FEE_FIAT = '[data-testid="tx-fee-fiat"]';
+  private TRANSACTION_DETAILS_INPUTS_SECTION = '[data-testid="tx-inputs"]';
+  private TRANSACTION_DETAILS_OUTPUTS_SECTION = '[data-testid="tx-outputs"]';
+  private TRANSACTION_DETAILS_DROPDOWN = '[data-testid="tx-addr-list_toggle"]';
 
-  private TRANSACTION_DETAILS_ADDRESS = '//div[@data-testid="tx-address"]';
-  private TRANSACTION_DETAILS_ADA_AMOUNT = '//span[@data-testid="tx-ada-amount"]';
-  private TRANSACTION_DETAILS_FIAT_AMOUNT = '//span[@data-testid="tx-fiat-amount"]';
-  private TRANSACTION_DETAILS_TOKEN = '//div[@data-testid="tx-asset"]';
-  private TRANSACTION_DETAILS_METADATA = '//div[@data-testid="tx-metadata"]';
+  private TRANSACTION_DETAILS_ADDRESS = '[data-testid="tx-address"]';
+  private TRANSACTION_DETAILS_ADA_AMOUNT = '[data-testid="tx-ada-amount"]';
+  private TRANSACTION_DETAILS_FIAT_AMOUNT = '[data-testid="tx-fiat-amount"]';
+  private TRANSACTION_DETAILS_TOKEN = '[data-testid="tx-asset"]';
+  private TRANSACTION_DETAILS_METADATA = '[data-testid="tx-metadata"]';
 
-  private TRANSACTION_DETAILS_POOL_NAME = '//div[@data-testid="tx-pool-name"]';
-  private TRANSACTION_DETAILS_POOL_TICKER = '//div[@data-testid="tx-pool-ticker"]';
-  private TRANSACTION_STAKE_POOL_ID = '//div[@data-testid="tx-pool-id"]';
-  constructor() {
-    super();
-  }
+  private TRANSACTION_DETAILS_POOL_NAME = '[data-testid="tx-pool-name"]';
+  private TRANSACTION_DETAILS_POOL_TICKER = '[data-testid="tx-pool-ticker"]';
+  private TRANSACTION_STAKE_POOL_ID = '[data-testid="tx-pool-id"]';
 
   get transactionDetailsSkeleton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DETAILS_SKELETON);
   }
 
   get transactionDetailsStakePoolId(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.TRANSACTION_STAKE_POOL_ID}`);
+    return $(this.CONTAINER).$(this.TRANSACTION_STAKE_POOL_ID);
   }
   get transactionDetailsHash(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_HASH}`);
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_HASH);
   }
 
   get transactionDetailsDescription(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_DESCRIPTION}`);
+    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_DESCRIPTION);
   }
 
   get transactionDetailsAmountOfTokens(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS);
   }
 
-  async transactionSentTokensForBundle(index = 1): Promise<WebdriverIO.ElementArray> {
-    return $$(`(${this.CONTAINER}${this.TRANSACTION_DETAILS_BUNDLE})[${index}]${this.TRANSACTION_DETAILS_SENT_TOKEN}`);
+  async transactionSentTokensForBundle(index = 0): Promise<WebdriverIO.ElementArray> {
+    return $(this.CONTAINER).$$(this.TRANSACTION_DETAILS_BUNDLE)[index].$$(this.TRANSACTION_DETAILS_SENT_TOKEN);
   }
 
   async transactionSentTokens(): Promise<WebdriverIO.ElementArray> {
-    return $$(`${this.CONTAINER}${this.TRANSACTION_DETAILS_SENT_TOKEN}`);
+    return $(this.CONTAINER).$$(this.TRANSACTION_DETAILS_SENT_TOKEN);
   }
 
-  transactionDetailsSentAda(index = 1): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_BUNDLE})[${index}]${this.TRANSACTION_DETAILS_SENT_ADA}`);
+  transactionDetailsSentAda(index = 0): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$$(this.TRANSACTION_DETAILS_BUNDLE)[index].$(this.TRANSACTION_DETAILS_SENT_ADA);
   }
 
   get transactionDetailsSentFiat(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_SENT_FIAT);
   }
 
-  transactionDetailsToAddress(index = 1): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.TRANSACTION_DETAILS_BUNDLE})[${index}]${this.TRANSACTION_DETAILS_TO_ADDRESS}`);
+  transactionDetailsToAddress(index = 0): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$$(this.TRANSACTION_DETAILS_BUNDLE)[index].$(this.TRANSACTION_DETAILS_TO_ADDRESS);
   }
 
   get transactionDetailsStatus(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -155,12 +151,15 @@ class TransactionDetailsPage extends CommonDrawerElements {
     return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_POOL_TICKER);
   }
 
-  async getTransactionSentTokensForBundle(index = 1): Promise<string[]> {
-    return await webTester.getTextValuesFromArrayElement(await this.transactionSentTokensForBundle(index));
+  async getTransactionSentTokensForBundle(index = 0): Promise<string[]> {
+    const array = await this.transactionSentTokensForBundle(index);
+    return Promise.all(array.map(async (element) => await element.getText()));
   }
 
   async getTransactionSentTokensWithoutDuplicates(): Promise<unknown[]> {
-    return await webTester.getTextValuesFromArrayElementWithoutDuplicates(await this.transactionSentTokens());
+    const array = await this.transactionSentTokens();
+    const arr = Promise.all(array.map(async (element) => (await element.getText()).split(' ').pop()));
+    return [...new Set(await arr)];
   }
 
   async closeTransactionDetails(mode: 'extended' | 'popup'): Promise<void> {
