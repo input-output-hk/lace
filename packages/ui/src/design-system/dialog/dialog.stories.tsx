@@ -17,25 +17,6 @@ export default {
   title: 'Modals/Dialog',
   component: Dialog.Root,
   decorators: [page({ title: 'Dialog' })],
-  argTypes: {
-    zIndex: {
-      control: {
-        type: 'number',
-        defaultValue: 1,
-        step: 2,
-      },
-    },
-    open: {
-      table: {
-        disable: true,
-      },
-    },
-    portalContainer: {
-      table: {
-        disable: true,
-      },
-    },
-  },
 } as Meta;
 
 export const Overview = (): JSX.Element => (
@@ -196,6 +177,22 @@ export const Controls = ({
 };
 
 Controls.argTypes = {
+  open: {
+    table: {
+      disable: true,
+    },
+  },
+  portalContainer: {
+    table: {
+      disable: true,
+    },
+  },
+  zIndex: {
+    defaultValue: 0,
+    control: {
+      type: 'number',
+    },
+  },
   dialogTitle: {
     defaultValue: 'Switching pool?',
     control: {
