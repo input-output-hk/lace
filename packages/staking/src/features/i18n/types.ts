@@ -125,7 +125,8 @@ type KeysStructure = {
       addPoolButton: '';
       stakeValue: '';
       pickMorePools: '';
-      nextButton: '';
+      confirmButton: '';
+      rebalanceButton: '';
     };
   };
   modals: {

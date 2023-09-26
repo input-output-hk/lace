@@ -1,6 +1,8 @@
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
+import { isPortfolioDrifted } from 'features/overview/helpers';
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import {
   DrawerDefaultStep,
@@ -31,21 +33,28 @@ export const StakePoolDetails = ({
   showBackIcon,
   showExitConfirmation,
 }: stakePoolDetailsProps): React.ReactElement => {
+  const { t } = useTranslation();
   const { walletStoreInMemoryWallet } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
-  const { activeDrawerStep, activeFlow, selectionsFull, openPoolIsSelected } = useDelegationPortfolioStore((store) => ({
-    activeDrawerStep: store.activeDrawerStep,
-    activeFlow: store.activeFlow,
-    openPoolIsSelected: store.selectedPortfolio.some(
-      (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
-    ),
-    selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
-  }));
+  const { activeDrawerStep, activeFlow, currentPortfolio, draftPortfolio, selectionsFull, openPoolIsSelected } =
+    useDelegationPortfolioStore((store) => ({
+      activeDrawerStep: store.activeDrawerStep,
+      activeFlow: store.activeFlow,
+      currentPortfolio: store.currentPortfolio,
+      draftPortfolio: store.draftPortfolio || [],
+      openPoolIsSelected: store.selectedPortfolio.some(
+        (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
+      ),
+      selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
+    }));
   const delegationPending = inFlightTx
     ?.map(({ body: { certificates } }) =>
       (certificates ?? []).filter((c) => c.__typename === Wallet.Cardano.CertificateType.StakeDelegation)
     )
     .some((certificates) => certificates?.length > 0);
+  const portfolioModified = draftPortfolio.some(({ basedOnCurrentPortfolio }) => !basedOnCurrentPortfolio);
+  const portfolioDrifted = isPortfolioDrifted(currentPortfolio);
+  const selectionActionsAllowed = !selectionsFull || openPoolIsSelected;
 
   const contentsMap = useMemo(
     (): Record<DrawerStep, React.ReactElement> => ({
@@ -60,24 +69,32 @@ export const StakePoolDetails = ({
   );
 
   const footersMap = useMemo(
-    (): Record<DrawerStep, React.ReactElement> => ({
-      [DrawerDefaultStep.PoolDetails]: <StakePoolDetailFooter popupView={popupView} />,
-      [DrawerManagementStep.Preferences]: <StakePoolPreferencesFooter />,
+    (): Record<DrawerStep, React.ReactElement | null> => ({
+      [DrawerDefaultStep.PoolDetails]: (() => {
+        if (activeFlow !== Flow.PoolDetails || delegationPending || !selectionActionsAllowed) {
+          return null;
+        }
+        return <StakePoolDetailFooter popupView={popupView} />;
+      })(),
+      [DrawerManagementStep.Preferences]: (() => {
+        if (!portfolioModified && !portfolioDrifted) {
+          return null;
+        }
+        if (!portfolioModified && portfolioDrifted) {
+          return <StakePoolPreferencesFooter buttonTitle={t('drawer.preferences.rebalanceButton')} />;
+        }
+        return <StakePoolPreferencesFooter buttonTitle={t('drawer.preferences.confirmButton')} />;
+      })(),
       [DrawerManagementStep.Confirmation]: <StakePoolConfirmationFooter />,
       [DrawerManagementStep.Sign]: <SignConfirmationFooter />,
       [DrawerManagementStep.Success]: <TransactionSuccessFooter />,
       [DrawerManagementStep.Failure]: <TransactionFailFooter />,
     }),
-    [popupView]
+    [activeFlow, delegationPending, selectionActionsAllowed, popupView, portfolioModified, portfolioDrifted, t]
   );
 
-  const selectionActionsAllowed = !selectionsFull || openPoolIsSelected;
-  const drawerNotOnDetails = activeDrawerStep !== DrawerDefaultStep.PoolDetails;
-  const footerVisible =
-    drawerNotOnDetails || (activeFlow === Flow.PoolDetails && !delegationPending && selectionActionsAllowed);
-
   const section = useMemo(() => activeDrawerStep && contentsMap[activeDrawerStep], [activeDrawerStep, contentsMap]);
-  const footer = footerVisible && activeDrawerStep ? footersMap[activeDrawerStep] : undefined;
+  const footer = activeDrawerStep ? footersMap[activeDrawerStep] : null;
 
   return (
     <StakePoolDetailsDrawer
