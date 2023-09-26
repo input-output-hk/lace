@@ -7,6 +7,12 @@ import i18n from '../../../../lib/i18n';
 import { UnlockWallet, UnlockWalletProps } from '../UnlockWallet';
 import { MemoryRouter } from 'react-router-dom';
 
+jest.mock('@providers', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers'),
+  useAnalyticsContext: jest.fn().mockReturnValue({ sendEventToPostHog: jest.fn() })
+}));
+
 class ResizeObserver {
   observe() {}
   unobserve() {}
