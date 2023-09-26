@@ -126,7 +126,14 @@ export const ShowPassphraseDrawer = ({
       visible={visible}
       onClose={handleOnClose}
       title={
-        <DrawerHeader popupView={popupView} title={t('browserView.settings.security.showPassphraseDrawer.title')} />
+        <DrawerHeader
+          popupView={popupView}
+          title={
+            isPassphraseVisible
+              ? t('browserView.settings.security.showPassphraseDrawer.YourRecoveryPhrase')
+              : t('browserView.settings.security.showPassphraseDrawer.title')
+          }
+        />
       }
       navigation={
         <DrawerNavigation

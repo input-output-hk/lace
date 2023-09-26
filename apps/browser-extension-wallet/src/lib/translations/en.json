@@ -840,11 +840,12 @@
           "success": "Edited successfully!"
         },
         "showPassphraseDrawer": {
-          "title": "Show 24-word recovery phrase",
+          "title": "Enter your password",
+          "YourRecoveryPhrase": "Your recovery phrase (keep it secret!)",
           "description": "This is the recovery phrase associated with your wallet. Use it to recover or import your wallet.",
           "warning": "This is sensitive information, make sure nobody is looking at your screen.",
-          "hidePassphrase": "Hide passphrase",
-          "showPassphrase": "Show passphrase"
+          "hidePassphrase": "Hide recovery phrase",
+          "showPassphrase": "Show recovery phrase"
         }
       },
       "legal": {
