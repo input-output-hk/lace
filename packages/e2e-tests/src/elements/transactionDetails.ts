@@ -4,9 +4,11 @@ import CommonDrawerElements from './CommonDrawerElements';
 
 class TransactionDetailsPage extends CommonDrawerElements {
   protected CONTAINER = '[data-testid="custom-drawer"]';
+  private TRANSACTION_DETAILS = '[data-testid="transaction-detail"]';
   private TRANSACTION_DETAILS_SKELETON = '.ant-drawer-body .ant-skeleton';
+  private TRANSACTION_DETAILS_HEADER = '[data-testid="tx-header"]';
   private TRANSACTION_DETAILS_DESCRIPTION = '[data-testid="tx-description"]';
-  private TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS = '//div[@data-testid="tx-description"]//div[2]';
+  private TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS = '[data-testid="tx-description-details"]';
   private TRANSACTION_DETAILS_BUNDLE = '[data-testid="tx-detail-bundle"]';
   private TRANSACTION_DETAILS_HASH = '[data-testid="tx-hash-detail"]';
   private TRANSACTION_DETAILS_SENT = '[data-testid="tx-sent-detail"]';
@@ -36,119 +38,127 @@ class TransactionDetailsPage extends CommonDrawerElements {
     return $(this.TRANSACTION_DETAILS_SKELETON);
   }
 
+  get transactionHeader(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DETAILS_HEADER);
+  }
+
+  get transactionDetails(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DETAILS);
+  }
+
   get transactionDetailsStakePoolId(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_STAKE_POOL_ID);
+    return $(this.TRANSACTION_STAKE_POOL_ID);
   }
   get transactionDetailsHash(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_HASH);
+    return $(this.TRANSACTION_DETAILS_HASH);
   }
 
   get transactionDetailsDescription(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_DESCRIPTION);
+    return $(this.TRANSACTION_DETAILS_DESCRIPTION);
   }
 
   get transactionDetailsAmountOfTokens(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS);
+    return $(this.TRANSACTION_DETAILS_DESCRIPTION_AMOUNT_OF_TOKENS);
   }
 
   async transactionSentTokensForBundle(index = 0): Promise<WebdriverIO.ElementArray> {
-    return $(this.CONTAINER).$$(this.TRANSACTION_DETAILS_BUNDLE)[index].$$(this.TRANSACTION_DETAILS_SENT_TOKEN);
+    return $$(this.TRANSACTION_DETAILS_BUNDLE)[index].$$(this.TRANSACTION_DETAILS_SENT_TOKEN);
   }
 
   async transactionSentTokens(): Promise<WebdriverIO.ElementArray> {
-    return $(this.CONTAINER).$$(this.TRANSACTION_DETAILS_SENT_TOKEN);
+    return $$(this.TRANSACTION_DETAILS_SENT_TOKEN);
   }
 
   transactionDetailsSentAda(index = 0): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$$(this.TRANSACTION_DETAILS_BUNDLE)[index].$(this.TRANSACTION_DETAILS_SENT_ADA);
+    return $$(this.TRANSACTION_DETAILS_BUNDLE)[index].$(this.TRANSACTION_DETAILS_SENT_ADA);
   }
 
   get transactionDetailsSentFiat(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_SENT_FIAT);
+    return $(this.TRANSACTION_DETAILS_SENT_FIAT);
   }
 
   transactionDetailsToAddress(index = 0): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$$(this.TRANSACTION_DETAILS_BUNDLE)[index].$(this.TRANSACTION_DETAILS_TO_ADDRESS);
+    return $$(this.TRANSACTION_DETAILS_BUNDLE)[index].$(this.TRANSACTION_DETAILS_TO_ADDRESS);
   }
 
   get transactionDetailsStatus(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_STATUS);
+    return $(this.TRANSACTION_DETAILS_STATUS);
   }
 
   get transactionDetailsTimestamp(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_TIMESTAMP);
+    return $(this.TRANSACTION_DETAILS_TIMESTAMP);
   }
 
   get transactionDetailsFeeADA(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_FEE_ADA);
+    return $(this.TRANSACTION_DETAILS_FEE_ADA);
   }
 
   get transactionDetailsOutputsSection(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION);
+    return $(this.TRANSACTION_DETAILS_OUTPUTS_SECTION);
   }
 
   get transactionDetailsInputsSection(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION);
+    return $(this.TRANSACTION_DETAILS_INPUTS_SECTION);
   }
 
   get transactionDetailsFeeFiat(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_FEE_FIAT);
+    return $(this.TRANSACTION_DETAILS_FEE_FIAT);
   }
 
   get transactionDetailsInputsDropdown(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_DROPDOWN);
+    return $(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_DROPDOWN);
   }
 
   get transactionDetailsOutputsDropdown(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_DROPDOWN);
+    return $(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_DROPDOWN);
   }
 
   get transactionDetailsInputAddress(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADDRESS);
+    return $(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADDRESS);
   }
 
   get transactionDetailsOutputAddress(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADDRESS);
+    return $(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADDRESS);
   }
 
   get transactionDetailsInputAdaAmount(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADA_AMOUNT);
+    return $(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADA_AMOUNT);
   }
 
   get transactionDetailsOutputAdaAmount(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADA_AMOUNT);
+    return $(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_ADA_AMOUNT);
   }
 
   get transactionDetailsInputFiatAmount(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_FIAT_AMOUNT);
+    return $(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_FIAT_AMOUNT);
   }
 
   get transactionDetailsOutputFiatAmount(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_FIAT_AMOUNT);
+    return $(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_FIAT_AMOUNT);
   }
 
   get transactionDetailsInputTokens(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_TOKEN);
+    return $(this.TRANSACTION_DETAILS_INPUTS_SECTION).$(this.TRANSACTION_DETAILS_TOKEN);
   }
 
   get transactionDetailsOutputTokens(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_TOKEN);
+    return $(this.TRANSACTION_DETAILS_OUTPUTS_SECTION).$(this.TRANSACTION_DETAILS_TOKEN);
   }
 
   get transactionDetailsMetadata(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_METADATA);
+    return $(this.TRANSACTION_DETAILS_METADATA);
   }
 
   get transactionDetailsSent(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_SENT);
+    return $(this.TRANSACTION_DETAILS_SENT);
   }
 
   get transactionDetailsStakepoolName(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_POOL_NAME);
+    return $(this.TRANSACTION_DETAILS_POOL_NAME);
   }
 
   get transactionDetailsStakepoolTicker(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.CONTAINER).$(this.TRANSACTION_DETAILS_POOL_TICKER);
+    return $(this.TRANSACTION_DETAILS_POOL_TICKER);
   }
 
   async getTransactionSentTokensForBundle(index = 0): Promise<string[]> {

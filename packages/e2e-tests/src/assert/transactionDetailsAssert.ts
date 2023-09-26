@@ -3,6 +3,7 @@ import TransactionDetailsPage from '../elements/transactionDetails';
 import { expect } from 'chai';
 import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
+import { t } from '../utils/translationService';
 
 export type ExpectedTransactionDetails = {
   transactionDescription: string;
@@ -27,6 +28,16 @@ class TransactionsDetailsAssert {
       timeoutMsg: 'failed while waiting for all transactions'
     });
   };
+
+  async assertSeeTransactionDetailsDrawer(shouldBeDisplayed: boolean) {
+    await TransactionDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(
+        await t('package.core.transactionDetailBrowser.header')
+      );
+    }
+  }
 
   async assertSeeTransactionDetails(expectedTransactionDetails: ExpectedTransactionDetails) {
     await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });

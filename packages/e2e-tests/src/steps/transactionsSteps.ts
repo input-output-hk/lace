@@ -201,3 +201,7 @@ Then(
     await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(txIndex - 1, expectedTransactionDetails);
   }
 );
+
+Then(/^Transaction details drawer (is|is not) displayed$/, async (state: 'is' | 'is not') => {
+  await transactionDetailsAssert.assertSeeTransactionDetailsDrawer(state === 'is');
+});

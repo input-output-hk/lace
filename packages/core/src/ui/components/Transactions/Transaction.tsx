@@ -125,7 +125,9 @@ export const Transaction = ({
 
   return (
     <div>
-      <div className={styles.header}>{t('package.core.transactionDetailBrowser.header')}</div>
+      <div className={styles.header} data-testid="tx-header">
+        {t('package.core.transactionDetailBrowser.header')}
+      </div>
       <div className={styles.block}>
         <div data-testid="tx-hash" className={styles.hashContainer}>
           <div className={cn(styles.title, styles.labelWidth)}>
