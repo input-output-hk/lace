@@ -8,6 +8,7 @@ type DraftPortfolioStakePoolBase = {
   id: Wallet.Cardano.Cip17Pool['id'];
   targetWeight: Wallet.Cardano.Cip17Pool['weight'];
   displayData: Wallet.util.StakePool;
+  stakePool: Wallet.Cardano.StakePool;
 };
 
 export type DraftPortfolioStakePool = DraftPortfolioStakePoolBase &
@@ -23,7 +24,6 @@ export type CurrentPortfolioStakePool = DraftPortfolioStakePoolBase & {
     lastReward: bigint;
     totalRewards: bigint;
   };
-  stakePool: Wallet.Cardano.StakePool;
   value: bigint;
   percentage: Wallet.Percent;
 };

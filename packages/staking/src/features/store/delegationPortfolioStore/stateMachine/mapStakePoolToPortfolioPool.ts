@@ -13,5 +13,6 @@ export const mapStakePoolToPortfolioPool = ({
   basedOnCurrentPortfolio: false,
   displayData: mapStakePoolToDisplayData({ cardanoCoinSymbol, stakePool }),
   id: stakePool.hexId,
+  stakePool,
   targetWeight: 1,
 });
