@@ -21,17 +21,26 @@ export const SendReceiveBox = (): React.ReactElement => {
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const { t } = useTranslation();
 
-  const openReceive = () =>
+  const handleReceiveCloseIconClick = () => {
+    const onClose = config?.onClose || (() => setDrawerConfig());
+    onClose();
+    analytics.sendEventToPostHog(PostHogAction.ReceiveYourWalletAddressXClick);
+  };
+
+  const openReceive = () => {
     setDrawerConfig({
       content: DrawerContent.RECEIVE_TRANSACTION,
       renderTitle: () => <DrawerHeader title={t('qrInfo.title')} subtitle={t('qrInfo.scanQRCodeToConnectWallet')} />,
       renderHeader: () => (
         <DrawerNavigation
           title={<div>{t('core.sendReceive.receive')}</div>}
-          onCloseIconClick={config?.onClose || (() => setDrawerConfig())}
+          onCloseIconClick={handleReceiveCloseIconClick}
         />
       )
     });
+    analytics.sendEventToPostHog(PostHogAction.ReceiveClick);
+  };
+
   const openSend = () => {
     analytics.sendEventToMatomo({
       category: MatomoEventCategories.SEND_TRANSACTION,
