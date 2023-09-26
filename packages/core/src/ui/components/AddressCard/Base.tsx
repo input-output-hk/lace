@@ -10,15 +10,17 @@ interface Props {
   children: ReactNode;
   copiedMessage: string;
   copyText: string;
+  onCopyClick?: () => void;
 }
 
-export const Base = ({ copyText, children, copiedMessage }: Readonly<Props>): JSX.Element => {
+export const Base = ({ copyText, children, copiedMessage, onCopyClick }: Readonly<Props>): JSX.Element => {
   const doToast = (): void => {
     toast.notify({
       duration: TOAST_DEFAULT_DURATION,
       text: copiedMessage,
       icon: CopyIcon
     });
+    onCopyClick();
   };
 
   return (
