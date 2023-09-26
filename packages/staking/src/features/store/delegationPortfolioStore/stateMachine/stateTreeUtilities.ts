@@ -1,18 +1,20 @@
 import { Command } from './commands';
-import { Handler } from './types';
+import { Handler, State } from './types';
 
 export const cases =
-  <T extends string>(definition: Record<T, Handler>, discriminator: T, parentName: string): Handler =>
+  <D extends string>(definition: Record<D, Handler>, discriminator: D, parentName: string): Handler =>
   (params) => {
     const handler = definition[discriminator];
     if (!handler) {
       console.error(`Invalid discriminator ${discriminator} in ${parentName} handlers`);
-      return;
+      return params.state;
     }
-    handler(params);
+    return handler(params);
   };
 
 export const handler =
-  <C extends Command>(handlerBody: Handler<C>): Handler<C> =>
+  <C extends Command, CurrentState extends State, TargetState extends State>(
+    handlerBody: Handler<C, CurrentState, TargetState>
+  ): Handler<C, CurrentState, TargetState> =>
   (params) =>
     handlerBody(params);

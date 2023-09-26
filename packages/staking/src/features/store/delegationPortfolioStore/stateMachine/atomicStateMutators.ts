@@ -18,59 +18,66 @@ const mapPoolWeights = (pools: DraftPortfolioStakePool[]) =>
 export const atomicStateMutators = {
   addPoolsFromPreferences: ({ state }: { state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
-    state.selectedPortfolio = mapPoolWeights(state.draftPortfolio);
-    state.draftPortfolio = undefined;
-    state.activeFlow = Flow.BrowsePools;
+    return {
+      activeDrawerStep: undefined,
+      activeFlow: Flow.BrowsePools,
+      draftPortfolio: undefined,
+      selectedPortfolio: mapPoolWeights(state.draftPortfolio),
+    } as const;
   },
-  beginNewPortfolioCreation: ({ selections, state }: { selections: DraftPortfolioStakePool[]; state: State }) => {
-    state.activeFlow = Flow.NewPortfolio;
-    state.activeDrawerStep = DrawerManagementStep.Preferences;
-    state.draftPortfolio = selections;
-  },
-  cancelDrawer: ({ state, targetFlow }: { state: State; targetFlow: Flow.Overview | Flow.BrowsePools }) => {
-    state.activeFlow = targetFlow;
-    state.activeDrawerStep = undefined;
-  },
+  beginNewPortfolioCreation: ({ selections }: { selections: DraftPortfolioStakePool[] }) =>
+    ({
+      activeDrawerStep: DrawerManagementStep.Preferences,
+      activeFlow: Flow.NewPortfolio,
+      draftPortfolio: selections,
+    } as const),
+  cancelDrawer: <F extends Flow.Overview | Flow.BrowsePools>({ targetFlow }: { state: State; targetFlow: F }) => ({
+    activeDrawerStep: undefined,
+    activeFlow: targetFlow,
+  }),
   removePoolFromPreferences: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
-    if (state.draftPortfolio.length === 1) return;
-    state.draftPortfolio = mapPoolWeights(state.draftPortfolio.filter((pool) => pool.id !== id));
+    if (state.draftPortfolio.length === 1) return {};
+    return {
+      draftPortfolio: mapPoolWeights(state.draftPortfolio.filter((pool) => pool.id !== id)),
+    } as const;
   },
   selectPool: ({ stakePool, state }: { stakePool: Wallet.Cardano.StakePool; state: State }) => {
     const selectionsFull = state.selectedPortfolio.length === MAX_POOLS_COUNT;
     const alreadySelected = state.selectedPortfolio.some(({ id }) => stakePool.hexId === id);
-    if (selectionsFull || alreadySelected) return;
-    state.selectedPortfolio.push(
-      mapStakePoolToPortfolioPool({ cardanoCoinSymbol: state.cardanoCoinSymbol, stakePool })
-    );
-    state.selectedPortfolio = mapPoolWeights(state.selectedPortfolio);
+    if (selectionsFull || alreadySelected) return {};
+    return {
+      selectedPortfolio: mapPoolWeights([
+        ...state.selectedPortfolio,
+        mapStakePoolToPortfolioPool({ cardanoCoinSymbol: state.cardanoCoinSymbol, stakePool }),
+      ]),
+    } as const;
   },
   showChangingPreferencesConfirmation: ({
     pendingSelectedPortfolio,
-    state,
   }: {
     pendingSelectedPortfolio: DraftPortfolioStakePool[];
-    state: State;
-  }) => {
-    state.activeFlow = Flow.ChangingPreferences;
-    state.pendingSelectedPortfolio = pendingSelectedPortfolio;
-    state.activeDrawerStep = undefined;
-    state.viewedStakePool = undefined;
-  },
-  showPoolDetails: ({
+  }) =>
+    ({
+      activeDrawerStep: undefined,
+      activeFlow: Flow.ChangingPreferences,
+      pendingSelectedPortfolio,
+      viewedStakePool: undefined,
+    } as const),
+  showPoolDetails: <F extends Flow.CurrentPoolDetails | Flow.PoolDetails>({
     pool,
-    state,
     targetFlow,
   }: {
     pool: StakePoolWithLogo;
-    state: State;
-    targetFlow: Flow.CurrentPoolDetails | Flow.PoolDetails;
-  }) => {
-    state.activeFlow = targetFlow;
-    state.activeDrawerStep = DrawerDefaultStep.PoolDetails;
-    state.viewedStakePool = pool;
-  },
-  unselectPool: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
-    state.selectedPortfolio = mapPoolWeights(state.selectedPortfolio.filter((pool) => pool.id !== id));
-  },
+    targetFlow: F;
+  }) =>
+    ({
+      activeDrawerStep: DrawerDefaultStep.PoolDetails,
+      activeFlow: targetFlow,
+      viewedStakePool: pool,
+    } as const),
+  unselectPool: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) =>
+    ({
+      selectedPortfolio: mapPoolWeights(state.selectedPortfolio.filter((pool) => pool.id !== id)),
+    } as const),
 };
