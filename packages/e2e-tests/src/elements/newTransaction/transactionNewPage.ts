@@ -162,7 +162,7 @@ export class TransactionNewPage extends WebElement {
 
   async getPartialContactAddress(index: number): Promise<string | number> {
     const fullAddress = await webTester.getTextValueFromElement(this.addressBookSearchResultRowAddress(index));
-    return String(fullAddress).slice(-7);
+    return String(fullAddress).slice(-6);
   }
 
   async getBundleDescription(): Promise<string | number> {

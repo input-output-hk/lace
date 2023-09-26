@@ -19,11 +19,11 @@ export const spacing = {
   $48: '48px',
   $52: '52px',
   $56: '56px',
+  $60: '60px',
   $64: '64px',
   $80: '80px',
   $84: '84px',
   $96: '96px',
-  // TODO discuss: this spacing should be removed as it's not used by the designers (only for storybook)
   $112: '112px',
   $116: '116px',
   $120: '120px',
@@ -33,10 +33,10 @@ export const spacing = {
   $312: '312px',
   $336: '336px',
   $342: '342px',
+  $380: '380px',
   $480: '480px',
   $584: '584px',
   $fill: '100%',
   $auto: 'auto',
-  // TODO discuss: renaming to side_drawer_width, as dialog widths are different depending on dialog type
   $dialog: '664px',
 } as const;

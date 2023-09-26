@@ -7,7 +7,7 @@ import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDelegationPortfolioStore } from '../../../store';
+import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
 export interface StakePoolItemBrowserProps {
@@ -19,9 +19,7 @@ export interface StakePoolItemBrowserProps {
   saturation?: number | string;
   cost?: number | string;
   logo: string;
-  onClick: (id: string) => unknown;
-  onSelect: () => void;
-  onUnselect: () => void;
+  stakePool: Wallet.Cardano.StakePool;
 }
 
 export const getSaturationLevel = (saturation: number): string => {
@@ -47,9 +45,7 @@ export const StakePoolItemBrowser = ({
   saturation,
   logo,
   apy,
-  onClick,
-  onSelect,
-  onUnselect,
+  stakePool,
 }: StakePoolItemBrowserProps): React.ReactElement => {
   const { t } = useTranslation();
   let title = name;
@@ -58,9 +54,16 @@ export const StakePoolItemBrowser = ({
     title = ticker || '-';
     subTitle = <Ellipsis className={styles.id} text={id} beforeEllipsis={6} afterEllipsis={8} />;
   }
-  const selectionsNotEmpty = useDelegationPortfolioStore((state) => state.selections.length > 0);
-  const poolAlreadySelected = useDelegationPortfolioStore((state) => state.queries.isPoolSelected(hexId));
-  const selectionsFull = useDelegationPortfolioStore((state) => state.queries.selectionsFull());
+
+  const { poolAlreadySelected, portfolioMutators, selectionsFull, selectionsNotEmpty } = useDelegationPortfolioStore(
+    (store) => ({
+      poolAlreadySelected: isPoolSelectedSelector(hexId)(store),
+      portfolioMutators: store.mutators,
+      selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
+      selectionsNotEmpty: store.selectedPortfolio.length > 0,
+    })
+  );
+
   const disabledAddingToDraft = selectionsFull && !poolAlreadySelected;
 
   const stakePoolStateLabel = poolAlreadySelected
@@ -70,7 +73,11 @@ export const StakePoolItemBrowser = ({
     : t('browsePools.stakePoolTableBrowser.stake');
 
   return (
-    <div data-testid="stake-pool-table-item" className={styles.row} onClick={() => onClick(id)}>
+    <div
+      data-testid="stake-pool-table-item"
+      className={styles.row}
+      onClick={() => portfolioMutators.executeCommand({ data: stakePool, type: 'ShowPoolDetailsFromList' })}
+    >
       <div className={styles.name}>
         <img
           data-testid="stake-pool-list-logo"
@@ -110,7 +117,17 @@ export const StakePoolItemBrowser = ({
               label={stakePoolStateLabel}
               onClick={(event) => {
                 event.stopPropagation();
-                poolAlreadySelected ? onUnselect() : onSelect();
+                portfolioMutators.executeCommand(
+                  poolAlreadySelected
+                    ? {
+                        data: hexId,
+                        type: 'UnselectPoolFromList',
+                      }
+                    : {
+                        data: stakePool,
+                        type: 'SelectPoolFromList',
+                      }
+                );
               }}
               disabled={disabledAddingToDraft}
               data-testid="stake-button"

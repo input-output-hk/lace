@@ -23,7 +23,6 @@ export type ButtonProps = OmitClassName<'button'> & {
   size?: 'medium' | 'small';
 };
 
-// TODO forward refs in all parent components as they may become used by Radix
 export const SkeletonButton = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     { id, disabled, className, label, icon, w, size = 'medium', ...props },

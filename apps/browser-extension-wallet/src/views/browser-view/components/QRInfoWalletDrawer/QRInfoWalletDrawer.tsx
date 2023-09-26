@@ -9,6 +9,8 @@ import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { useKeyboardShortcut } from '@lace/common';
 import { useGetHandles } from '@hooks/useGetHandles';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
@@ -17,6 +19,7 @@ const useWalletInformation = () =>
   }));
 
 export const QRInfoWalletDrawer = (): React.ReactElement => {
+  const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { name, address } = useWalletInformation();
@@ -25,6 +28,14 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
 
   useKeyboardShortcut(['Escape'], () => closeDrawer());
 
+  const handleCopyAdaHandle = () => {
+    analytics.sendEventToPostHog(PostHogAction.ReceiveCopyADAHandleIconClick);
+  };
+
+  const handleCopyAddress = () => {
+    analytics.sendEventToPostHog(PostHogAction.ReceiveCopyAddressIconClick);
+  };
+
   return (
     <div className={styles.infoContainer}>
       <AddressCard
@@ -32,6 +43,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
         address={address?.toString()}
         getQRCodeOptions={useCallback(() => getQRCodeOptions(theme, ADDRESS_CARD_QR_CODE_SIZE), [theme])}
         copiedMessage={t('core.infoWallet.addressCopied')}
+        onCopyClick={handleCopyAddress}
       />
       {handles?.map(({ nftMetadata, image }) => (
         <HandleAddressCard
@@ -39,6 +51,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
           name={nftMetadata.name}
           image={getAssetImageUrl(image || nftMetadata.image)}
           copiedMessage={t('core.infoWallet.handleCopied')}
+          onCopyClick={handleCopyAdaHandle}
         />
       ))}
     </div>

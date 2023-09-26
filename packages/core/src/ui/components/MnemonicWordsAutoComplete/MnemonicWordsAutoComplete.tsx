@@ -14,6 +14,7 @@ export interface MnemonicWordsAutoCompleteProps {
   idx?: number;
   value: string;
   onChange: (words: string) => void;
+  onDropdownVisibleChange?: (open: boolean) => void;
   wordList?: Array<string>;
   max?: number;
   focus?: boolean;
@@ -24,6 +25,7 @@ export const MnemonicWordsAutoComplete = ({
   value,
   wordList = [],
   onChange,
+  onDropdownVisibleChange,
   max = DEFAULT_INPUT_MAX_LENGTH,
   focus = false
 }: MnemonicWordsAutoCompleteProps): React.ReactElement => {
@@ -110,6 +112,7 @@ export const MnemonicWordsAutoComplete = ({
         dropdownMatchSelectWidth={containerRef?.current?.offsetWidth}
         onBlur={resetState}
         onFocus={getOptions}
+        onDropdownVisibleChange={onDropdownVisibleChange}
       >
         <div className={styles.autocompleteContent} data-testid={`mnemonic-word-input-${idx}`}>
           <Input
