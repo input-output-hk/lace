@@ -73,3 +73,8 @@ export const getTxType = (tx: Wallet.Cardano.Tx): 'Send' | 'Mint' | 'Burn' => {
 
   return 'Send';
 };
+
+export const isDRepRegistration = (tx: Wallet.Cardano.Tx | undefined): boolean =>
+  tx?.body.certificates.some(
+    ({ __typename }) => __typename === Wallet.Cardano.CertificateType.RegisterDelegateRepresentative
+  );

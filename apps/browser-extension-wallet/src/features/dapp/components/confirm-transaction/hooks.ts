@@ -101,18 +101,15 @@ export const useSignWithHardwareWallet = (): {
 export const useTxSummary = ({
   tx,
   addressList,
-  availableBalance,
   walletInfo,
   createAssetList
 }: {
   addressList: AddressListType[];
-  availableBalance: Wallet.Cardano.Value;
   walletInfo: WalletInfo;
   tx: Wallet.Cardano.Tx;
   createAssetList: (txAssets: Wallet.Cardano.TokenMap) => Wallet.Cip30SignTxAssetItem[];
-}): { txSummary?: Wallet.Cip30SignTxSummary; hasInsufficientFunds: boolean } => {
-  const [hasInsufficientFunds, setInsufficientFunds] = useState(false);
-  const txSummary = useMemo((): Wallet.Cip30SignTxSummary | undefined => {
+}): Wallet.Cip30SignTxSummary | undefined =>
+  useMemo((): Wallet.Cip30SignTxSummary | undefined => {
     if (!tx) return undefined;
     const txType = getTxType(tx);
 
@@ -126,16 +123,11 @@ export const useTxSummary = ({
       }
       return true;
     });
-    let totalCoins = BigInt(0);
 
     // eslint-disable-next-line unicorn/no-array-reduce
     const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
       // Don't show withdrawl tx's etc
       if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
-      totalCoins += txOut.value.coins;
-      if (totalCoins >= availableBalance?.coins) {
-        setInsufficientFunds(true);
-      }
 
       return [
         ...acc,
@@ -153,7 +145,4 @@ export const useTxSummary = ({
       outputs: txSummaryOutputs,
       type: txType
     };
-  }, [tx, availableBalance, walletInfo.addresses, createAssetList, addressList]);
-
-  return { txSummary, hasInsufficientFunds };
-};
+  }, [tx, walletInfo.addresses, createAssetList, addressList]);

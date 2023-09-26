@@ -1111,8 +1111,7 @@
       "url": "URL",
       "hash": "Hash",
       "drepId": "Drep ID",
-      "depositPaid": "Deposit Paid",
-      "insufficientFunds": "You do not have enough funds to complete the transaction"
+      "depositPaid": "Deposit Paid"
     },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"
