@@ -1,6 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor } from '@lace/ui';
-import { CurrentPortfolioStakePool } from 'features/store';
+import type { CurrentPortfolioStakePool } from '../../store';
 
 const SATURATION_UPPER_BOUND = 100;
 

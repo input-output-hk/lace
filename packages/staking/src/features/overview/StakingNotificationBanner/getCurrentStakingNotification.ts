@@ -1,7 +1,7 @@
 import type { CurrentPortfolioStakePool } from '../../store';
-import type { StakingNotificationType } from '../types';
+import type { StakingNotificationType } from './types';
 import type { AssetActivityListProps } from '@lace/core';
-import { hasPendingDelegationTransaction, isPortfolioDrifted } from '.';
+import { hasPendingDelegationTransaction, isPortfolioDrifted } from '../helpers';
 
 type GetCurrentStakingNotificationParams = {
   walletActivities: AssetActivityListProps[];
