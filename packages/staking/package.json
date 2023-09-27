@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "build": "tsc && tsup",
+    "build:dev": "tsc & tsup",
     "cleanup": "yarn exec rm -rf dist node_modules && yarn exec rm -rf ../../.cache/eslintcache",
     "dev": "ladle serve",
     "eslint:check": "yarn run -T eslint --cache --cache-location ../../.cache/eslintcache --cache-strategy metadata --ignore-path '../../.eslintignore' '**/*.{cjs,mjs,js,ts,tsx}'",
@@ -62,7 +63,7 @@
     "zustand": "^4.4.1"
   },
   "devDependencies": {
-    "@cardano-sdk/input-selection": "0.11.8",
+    "@cardano-sdk/input-selection": "0.11.9",
     "@cardano-sdk/tx-construction": "0.11.2",
     "@cardano-sdk/util": "0.14.0",
     "@lace/cardano": "^0.1.0",
@@ -77,7 +78,7 @@
     "@vanilla-extract/vite-plugin": "^3.8.2",
     "@vitest/coverage-c8": "^0.31.0",
     "antd": "^4.17.3",
-    "bignumber.js": "^9.0.1",
+    "bignumber.js": "9.0.1",
     "concurrently": "^8.0.1",
     "esbuild-plugin-svgr": "^2.0.0",
     "esbuild-scss-modules-plugin": "^1.1.1",
@@ -95,7 +96,7 @@
     "wait-on": "^7.0.1"
   },
   "peerDependencies": {
-    "@cardano-sdk/input-selection": "0.11.7",
+    "@cardano-sdk/input-selection": "0.11.9",
     "@cardano-sdk/tx-construction": "0.11.1",
     "@cardano-sdk/util": "0.14.0",
     "@cardano-sdk/wallet": "0.21.0",
@@ -104,7 +105,7 @@
     "@lace/core": "0.1.0",
     "@lace/ui": "^0.1.0",
     "antd": "^4.17.3",
-    "bignumber.js": "^9.0.1",
+    "bignumber.js": "9.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-infinite-scroll-component": "^6.1.0"

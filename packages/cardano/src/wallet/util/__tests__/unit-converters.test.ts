@@ -3,7 +3,8 @@ import {
   lovelacesToAdaString,
   convertLovelaceToFiat,
   convertAdaToFiat,
-  adaToLovelacesString
+  adaToLovelacesString,
+  getFormattedAmount
 } from '../unit-converters';
 
 describe('Testing lovelacesToAdaString function', () => {
@@ -50,5 +51,18 @@ describe('Testing convertAdaToFiat function', () => {
       const adaValue = adaToLovelacesString('20.035');
       expect(adaValue).toEqual('20035000');
     });
+  });
+});
+
+describe('Testing getFormattedAmount function', () => {
+  test('should format amount and concatenate currency symbol', async () => {
+    const cardanoCoin = {
+      id: 'id',
+      symbol: 'symbol',
+      name: 'name',
+      decimals: 2
+    };
+    const result = getFormattedAmount({ amount: '2000000', cardanoCoin });
+    expect(result).toBe('2.00 symbol');
   });
 });

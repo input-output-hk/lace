@@ -21,6 +21,8 @@ import { Wallet } from '@lace/cardano';
 
 import { Tooltip } from 'antd';
 import { useWalletStore } from '@src/stores';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -99,6 +101,7 @@ const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getDappInfo'>>(
 );
 
 export const Connect = (): React.ReactElement => {
+  const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const [isModalVisible, setModalVisible] = useState(false);
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
@@ -114,9 +117,29 @@ export const Connect = (): React.ReactElement => {
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   }, []);
+
+  const handleAuthorizeClick = () => {
+    setModalVisible(true);
+    analytics.sendEventToPostHog(PostHogAction.DappConnectorAuthorizeDappAuthorizeClick);
+  };
+
+  const handleCancelClick = async () => {
+    await analytics.sendEventToPostHog(PostHogAction.DappConnectorAuthorizeDappCancelClick);
+    authorize('deny', dappInfo.url);
+  };
+
+  const handleAllowAlwaysClick = async () => {
+    await analytics.sendEventToPostHog(PostHogAction.DappConnectorAuthorizeDappConnectionAlwaysClick);
+    authorize('allow', dappInfo.url);
+  };
+
+  const handleAllowOnceClick = async () => {
+    await analytics.sendEventToPostHog(PostHogAction.DappConnectorAuthorizeDappConnectionOnlyOnceClick);
+    authorize('just-once', dappInfo.url);
+  };
 
   const showNonSSLBanner = !isSSLEncrypted && environmentName === 'Mainnet';
   return (
@@ -129,18 +152,14 @@ export const Connect = (): React.ReactElement => {
         <AuthorizeDapp dappInfo={dappInfo} warningBanner={showNonSSLBanner ? <NonSSLBanner /> : <WarningBanner />} />
       </div>
       <div className={styles.footer}>
-        <Button
-          className={styles.footerBtn}
-          data-testid="connect-authorize-button"
-          onClick={() => setModalVisible(true)}
-        >
+        <Button className={styles.footerBtn} data-testid="connect-authorize-button" onClick={handleAuthorizeClick}>
           {t('dapp.connect.btn.accept')}
         </Button>
         <Button
           className={styles.footerBtn}
           data-testid="connect-cancel-button"
           color="secondary"
-          onClick={() => authorize('deny', dappInfo.url)}
+          onClick={handleCancelClick}
         >
           {t('dapp.connect.btn.cancel')}
         </Button>
@@ -163,15 +182,10 @@ export const Connect = (): React.ReactElement => {
             {t('dapp.connect.modal.description')}
           </div>
           <div className={styles.modalActions}>
-            <Button block data-testid="connect-modal-accept-always" onClick={() => authorize('allow', dappInfo.url)}>
+            <Button block data-testid="connect-modal-accept-always" onClick={handleAllowAlwaysClick}>
               {t('dapp.connect.modal.allowAlways')}
             </Button>
-            <Button
-              block
-              data-testid="connect-modal-accept-once"
-              onClick={() => authorize('just-once', dappInfo.url)}
-              color="secondary"
-            >
+            <Button block data-testid="connect-modal-accept-once" onClick={handleAllowOnceClick} color="secondary">
               {t('dapp.connect.modal.allowOnce')}
             </Button>
           </div>

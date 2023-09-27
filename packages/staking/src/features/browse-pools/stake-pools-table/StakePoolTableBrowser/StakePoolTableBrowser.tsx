@@ -1,13 +1,16 @@
 /* eslint-disable react/no-multi-comp */
 import Icon from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
-import { List, ListProps } from 'antd';
+import { List, ListProps, Tooltip } from 'antd';
 import cn from 'classnames';
 import isNumber from 'lodash/isNumber';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { useDelegationPortfolioStore } from '../../../store';
 import { StakePoolItemBrowser, StakePoolItemBrowserProps } from '../StakePoolItemBrowser';
 import Arrow from './arrow.svg';
+import InfoIcon from './info-icon.component.svg';
 import styles from './StakePoolTableBrowser.module.scss';
 
 type TranslationsFor<T extends string> = Record<T, string>;
@@ -36,6 +39,7 @@ export type StakePoolTableBrowserProps = {
 interface TableHeaders {
   label: string;
   value: SortKey;
+  tooltipText?: string;
 }
 
 const PoolSkeleton = () => (
@@ -59,10 +63,26 @@ export const StakePoolTableBrowser = ({
   showSkeleton,
   ...props
 }: StakePoolTableBrowserProps): React.ReactElement => {
+  const portfolioPools = useDelegationPortfolioStore((state) =>
+    state.selectedPortfolio.map(({ id }) => ({
+      // Had to cast it with fromKeyHash because search uses plain ID instead of hex.
+      id: Wallet.Cardano.PoolId.fromKeyHash(id as unknown as Wallet.Crypto.Ed25519KeyHashHex),
+    }))
+  );
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+  const { t } = useTranslation();
   const headers: TableHeaders[] = [
     { label: translations.poolName, value: 'name' },
-    { label: translations.apy, value: 'apy' },
-    { label: translations.saturation, value: 'saturation' },
+    {
+      label: translations.apy,
+      tooltipText: t('browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip'),
+      value: 'apy',
+    },
+    {
+      label: translations.saturation,
+      tooltipText: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip'),
+      value: 'saturation',
+    },
   ];
 
   const onSortChange = (field: SortKey) => {
@@ -71,13 +91,28 @@ export const StakePoolTableBrowser = ({
     setActiveSort({ field, order });
   };
 
+  const selectedStakePools = items
+    .filter((item) => portfolioPools.find((pool) => pool.id.toString() === item.id))
+    .map((pool) => ({
+      ...pool,
+      onUnselect: () => portfolioMutators.executeCommand({ data: pool.hexId, type: 'UnselectPoolFromList' }),
+    }));
+  const availableStakePools = items.filter((item) => !selectedStakePools.some((pool) => pool.id === item.id));
+
   return (
     <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
       <div data-testid="stake-pool-list-header" className={styles.header}>
-        {headers.map(({ label, value }) => (
+        {headers.map(({ label, value, tooltipText }) => (
           <div key={value} onClick={() => onSortChange(value)} data-testid={`stake-pool-list-header-${value}`}>
             <p>
               <span>{label}</span>
+              {tooltipText && (
+                <Tooltip placement="topLeft" title={tooltipText}>
+                  <span className={styles.iconWrapper} data-testid={`browse-pools-${value}-column-info`}>
+                    <InfoIcon className={styles.icon} />
+                  </span>
+                </Tooltip>
+              )}
               <Icon
                 component={Arrow}
                 className={cn(
@@ -92,6 +127,16 @@ export const StakePoolTableBrowser = ({
           </div>
         ))}
       </div>
+      {selectedStakePools?.length > 0 && (
+        <>
+          <div className={styles.selectedPools}>
+            {selectedStakePools.map((pool) => (
+              <StakePoolItemBrowser key={pool.id} {...pool} />
+            ))}
+          </div>
+          <div className={styles.poolsSeparator} />
+        </>
+      )}
       <div data-testid="stake-pool-list-scroll-wrapper" className={styles.wrapper}>
         {isNumber(total) && !total && emptyPlaceholder}
         <InfiniteScroll
@@ -108,7 +153,7 @@ export const StakePoolTableBrowser = ({
               <List
                 className={className}
                 data-testid="stake-pool-list"
-                dataSource={items}
+                dataSource={availableStakePools}
                 itemLayout="horizontal"
                 locale={{ emptyText }}
                 renderItem={(item: StakePoolItemBrowserProps) => (

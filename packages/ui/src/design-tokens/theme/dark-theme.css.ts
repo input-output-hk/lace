@@ -218,6 +218,24 @@ const colors: Colors = {
   $toast_bar_label_color: darkColorScheme.$primary_white,
   $toast_bar_icon_container_bgColor: darkColorScheme.$primary_grey,
   $toast_bar_icon_label_color: darkColorScheme.$primary_light_grey_plus,
+
+  $tooltip_container_bgColor: darkColorScheme.$primary_mid_grey,
+  $tooltip_title_dot_bgColor: darkColorScheme.$primary_accent_purple,
+  $tooltip_label_color: darkColorScheme.$primary_light_grey,
+  $tooltip_title_color: darkColorScheme.$primary_white,
+
+  $message_title_color: darkColorScheme.$primary_white,
+  $message_description_color: darkColorScheme.$primary_light_grey,
+
+  $input_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $input_container_hover_outline_color: darkColorScheme.$primary_grey,
+  $input_container_focused_outline_color:
+    darkColorScheme.$secondary_hover_purple,
+  $input_value_color: darkColorScheme.$primary_white,
+  $input_button_bgColor: darkColorScheme.$primary_grey,
+  $input_button_icon_color: darkColorScheme.$primary_light_grey,
+  $input_label_color: darkColorScheme.$primary_light_grey,
+  $input_error_message_color: darkColorScheme.$secondary_data_pink,
 };
 
 const elevation: Elevation = {

@@ -106,8 +106,7 @@ export class NetworkManager {
             const approximateTimestamp = new Date().toString();
             const combinedFailedRequestInfo = `URL:\n${request.response.url}\n\nRESPONSE CODE:\n${request.response.status}\n\nAPPROXIMATE TIME:\n${approximateTimestamp}\n\nRESPONSE BODY:\n${responseBody}\n\nREQUEST PAYLOAD:\n${requestPayload}`;
             allure.addAttachment('Failed request', combinedFailedRequestInfo, 'text/plain');
-            console.log('Failed request');
-            console.log(combinedFailedRequestInfo);
+            console.error('Failed request', combinedFailedRequestInfo);
           }
         });
       });

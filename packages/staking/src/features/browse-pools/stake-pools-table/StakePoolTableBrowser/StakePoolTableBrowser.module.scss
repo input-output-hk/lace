@@ -45,6 +45,15 @@
       }
     }
   }
+  .selectedPools {
+    display: flex;
+    flex-direction: column;
+    gap: size_unit(1);
+  }
+  .poolsSeparator {
+    border-bottom: 1px solid var(--light-mode-light-grey-plus-56, var(--dark-mode-dark-grey));
+    margin: size_unit(3) 0;
+  }
 }
 
 .triangle {
@@ -83,3 +92,20 @@
     flex: 1;
   }
 }
+
+.iconWrapper {
+  cursor: pointer;
+  display: flex;
+
+  .icon {
+    color: var(--light-mode-mid-grey, var(--dark-mode-light-grey));
+    font-size: size_unit(2.5);
+    margin-left: size_unit(1);
+    margin-right: size_unit(0.5);
+    &:hover {
+      color: var(--light-mode-dark-grey, var(--text-color-primary));
+    }
+  }
+}
+
+

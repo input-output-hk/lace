@@ -26,7 +26,7 @@ export const Announcement = ({ visible, onConfirm, version, reason }: Announceme
       try {
         notes = await fetchNotes(version);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
     setReleaseNotes(notes);

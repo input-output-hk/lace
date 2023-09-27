@@ -2,8 +2,7 @@
 import { Flex, Text } from '@lace/ui';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Page, useStakePoolDetails } from '../store';
-import { MAX_POOLS_COUNT } from '../store/delegationPortfolio';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import * as styles from './GetStartedSteps.css';
 
 type StepCircleProps = {
@@ -17,9 +16,7 @@ const StepCircle = ({ step }: StepCircleProps) => (
 
 export const GetStartedSteps = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { setActivePage } = useStakePoolDetails((store) => ({
-    setActivePage: store.setActivePage,
-  }));
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
   return (
     <Flex flexDirection="column" gap="$32">
@@ -39,7 +36,7 @@ export const GetStartedSteps = (): React.ReactElement => {
                 i18nKey="overview.noStaking.searchForPoolDescription"
                 t={t}
                 components={{
-                  Link: <a onClick={() => setActivePage(Page.browsePools)} />,
+                  Link: <a onClick={() => portfolioMutators.executeCommand({ type: 'GoToBrowsePools' })} />,
                 }}
               />
             </Text.Body.Normal>

@@ -94,6 +94,10 @@ When(
   }
 );
 
+When(/I enter "([^"]*)" in the bundle (\d) recipient's address/, async (value: string, inputIndex: number) => {
+  await transactionExtendedPageObject.fillAddress(value, inputIndex);
+});
+
 When(/I enter the first characters of the contacts/, async () => {
   await transactionExtendedPageObject.fillAddressWithFirstChars(validAddress2.getName(), 3);
 });
@@ -352,6 +356,11 @@ Then(/^I verify transaction costs amount is around ([^"]*) ADA$/, async (expecte
 Then(/^a dropdown showing the first ([^"]*) matches is displayed$/, async (noOfMatches: string) => {
   await drawerSendExtendedAssert.assertAmountOfResultsDisplayed(Number.parseInt(noOfMatches));
   await drawerSendExtendedAssert.assertResultsMatchContacts();
+});
+
+Then(/^first result in address dropdown has name "([^"]*)"$/, async (expectedName: string) => {
+  await drawerSendExtendedAssert.assertAmountOfResultsDisplayed(1);
+  await drawerSendExtendedAssert.assertFirstResultNameEquals(expectedName);
 });
 
 Then(/^the selected contact is added in the bundle recipient's address$/, async () => {
@@ -614,6 +623,10 @@ Then(
     await drawerSendExtendedAssert.assertSeeAddressWithNameInRecipientsAddressInput(lastCharsOfAddress, addressName);
   }
 );
+
+Then(/^recipients address input contains address entry with name "([^"]*)"$/, async (addressName: string) => {
+  await drawerSendExtendedAssert.assertSeeAddressNameInRecipientsAddressInput(addressName);
+});
 
 Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
