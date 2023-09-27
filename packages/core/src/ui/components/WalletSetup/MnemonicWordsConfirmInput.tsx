@@ -6,6 +6,7 @@ export interface MnemonicWordsConfirmInputProps {
   firstWordNumber: number;
   words: string[];
   onChange: (words: string[]) => void;
+  onDropdownVisibleChange?: (open: boolean) => void;
   suggestionList?: Array<string>;
   focus?: boolean;
 }
@@ -14,6 +15,7 @@ export const MnemonicWordsConfirmInput = ({
   firstWordNumber,
   words,
   onChange,
+  onDropdownVisibleChange,
   suggestionList
 }: MnemonicWordsConfirmInputProps): React.ReactElement => (
   <div className={styles.mnemonicWordsConfirm}>
@@ -25,6 +27,7 @@ export const MnemonicWordsConfirmInput = ({
           newWords[index] = value;
           onChange(newWords);
         }}
+        onDropdownVisibleChange={onDropdownVisibleChange}
         idx={index + firstWordNumber}
         key={index}
         wordList={suggestionList}

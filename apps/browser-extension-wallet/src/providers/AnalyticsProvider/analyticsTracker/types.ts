@@ -97,6 +97,19 @@ export enum PostHogAction {
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
   NFTsImageClick = 'nft | nfts | nft image | click',
+  // Address book
+  AddressBookAddAddressClick = 'address book | add address | click',
+  AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
+  AddressBookAddNewAddressCancelClick = 'address book | add new address | cancel | click',
+  AddressBookAddressRecordClick = 'address book | address record | click',
+  AddressBookAddressRecordCopyClick = 'address book | address record | copy | click',
+  AddressBookAddressRecordEditClick = 'address book | address record | edit | click',
+  AddressBookAddressRecordDeleteClick = 'address book | address record | delete | click',
+  AddressBookAddressRecordHoldUpDeleteAddressClick = 'address book | address record | hold up! | delete address | click',
+  AddressBookAddressRecordHoldUpCancelClick = 'address book | address record | hold up! | cancel | click',
+  AddressBookAddressRecordEditAddressDoneClick = 'address book | address record | edit address | done | click',
+  AddressBookAddressRecordEditAddressCancelClick = 'address book | address record | edit address | cancel | click',
+  AddressBookAddressRecordEditAddressXClick = 'address book | address record | edit address | x | click',
   // Settings
   SettingsHelpClick = 'settings | help | click',
   SettingsHelpCreateSupportTicketClick = 'settings | help | create a support ticket | click',
@@ -126,7 +139,30 @@ export enum PostHogAction {
   SettingsCollateralClick = 'settings | collateral | click',
   SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
   SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
-  SettingsCollateralXClick = 'settings | collateral | x | click'
+  SettingsCollateralXClick = 'settings | collateral | x | click',
+  // Recieve section
+  ReceiveClick = 'receive | receive | click',
+  ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
+  ReceiveCopyADAHandleIconClick = 'receive | receive | copy ADA handle icon | click',
+  ReceiveYourWalletAddressXClick = 'receive | Your wallet address | x | click',
+  // Dapp Connector
+  DappConnectorAuthorizeDappAuthorizeClick = 'dapp connector | authorize dapp | authorize | click',
+  DappConnectorAuthorizeDappCancelClick = 'dapp connector | authorize dapp | cancel | click',
+  DappConnectorAuthorizeDappDappConnectorBetaClick = 'dapp connector | authorize dapp | dapp connector beta | click',
+  DappConnectorAuthorizeDappConnectionAlwaysClick = 'dapp connector | authorize dapp | dapp connection | always | click',
+  DappConnectorAuthorizeDappConnectionOnlyOnceClick = 'dapp connector | authorize dapp | dapp connection | only once | click',
+  // User
+  UserWalletProfileIconClick = 'user/wallet profile | profile icon | click',
+  UserWalletProfileWalletAddressClick = 'user/wallet profile | wallet address | click',
+  UserWalletProfileAddressBookClick = 'user/wallet profile | address book | click',
+  UserWalletProfileSettingsClick = 'user/wallet profile | settings | click',
+  UserWalletProfileLightModeClick = 'user/wallet profile | light mode | click',
+  UserWalletProfileDarkModeClick = 'user/wallet profile | dark mode | click',
+  UserWalletProfileNetworkClick = 'user/wallet profile | network | click',
+  UserWalletProfileNetworkPreviewClick = 'user/wallet profile | network | preview | click',
+  UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
+  UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
+  UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {

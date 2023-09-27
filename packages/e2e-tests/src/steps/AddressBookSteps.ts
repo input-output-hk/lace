@@ -18,7 +18,8 @@ import {
   getAddressByName,
   getAddressDetailsByName,
   icarus,
-  shelley
+  shelley,
+  validAddress
 } from '../data/AddressData';
 import indexedDB from '../fixture/indexedDB';
 import popupView from '../page/popupView';
@@ -68,6 +69,20 @@ Given(
     }
   }
 );
+
+Given(/^address book contains address with name that has 12 characters$/, async () => {
+  const addressEntry = validAddress;
+  addressEntry.setName('abcdefghijkl');
+  await indexedDB.clearAddressBook();
+  await indexedDB.insertAddress(addressEntry);
+});
+
+Given(/^address book contains address with name that has more than 12 characters$/, async () => {
+  const addressEntry = validAddress;
+  addressEntry.setName('abcdefghijklm');
+  await indexedDB.clearAddressBook();
+  await indexedDB.insertAddress(addressEntry);
+});
 
 Given(/^I open address book in (popup|extended) mode$/, async (mode: 'popup' | 'extended') => {
   if (mode === 'popup') {
