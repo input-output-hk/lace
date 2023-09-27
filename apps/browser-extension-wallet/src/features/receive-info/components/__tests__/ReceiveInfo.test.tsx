@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import * as React from 'react';
 import { I18nextProvider } from 'react-i18next';
@@ -7,6 +8,11 @@ import '@testing-library/jest-dom';
 import i18n from '../../../../lib/i18n';
 import { mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
 import { ThemeProvider } from '@providers/ThemeProvider';
+
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useAnalyticsContext: jest.fn().mockReturnValue({ sendEventToPostHog: jest.fn() })
+}));
 
 class ResizeObserver {
   observe() {}
