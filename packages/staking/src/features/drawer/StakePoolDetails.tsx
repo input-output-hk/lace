@@ -78,10 +78,7 @@ export const StakePoolDetails = ({
         if (!portfolioModified && !portfolioDrifted) {
           return null;
         }
-        if (!portfolioModified && portfolioDrifted) {
-          return <StakePoolPreferencesFooter buttonTitle={t('drawer.preferences.rebalanceButton')} />;
-        }
-        return <StakePoolPreferencesFooter buttonTitle={t('drawer.preferences.confirmButton')} />;
+        return <StakePoolPreferencesFooter buttonTitle={!portfolioModified && portfolioDrifted ? t('drawer.preferences.rebalanceButton') : t('drawer.preferences.confirmButton')} />;
       })(),
       [DrawerManagementStep.Confirmation]: <StakePoolConfirmationFooter />,
       [DrawerManagementStep.Sign]: <SignConfirmationFooter />,
