@@ -69,10 +69,10 @@ export const StakePoolDetails = ({
   const footersMap = useMemo(
     (): Record<DrawerStep, React.ReactElement | null> => ({
       [DrawerDefaultStep.PoolDetails]: (() => {
-        if (activeFlow !== Flow.PoolDetails || delegationPending || !selectionActionsAllowed) {
-          return null;
+        if (activeFlow === Flow.CurrentPoolDetails || (activeFlow === Flow.PoolDetails && !delegationPending && selectionActionsAllowed) {
+          return <StakePoolDetailFooter popupView={popupView} />;
         }
-        return <StakePoolDetailFooter popupView={popupView} />;
+        return null;
       })(),
       [DrawerManagementStep.Preferences]: (() => {
         if (!portfolioModified && !portfolioDrifted) {
