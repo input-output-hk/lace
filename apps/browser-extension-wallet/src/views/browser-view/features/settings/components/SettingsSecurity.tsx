@@ -8,7 +8,7 @@ import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks';
 import { useAnalyticsContext, useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
-import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 
 const { Title } = Typography;
@@ -59,6 +59,16 @@ export const SettingsSecurity = ({
     setHideShowPassphraseSetting(false);
   }, [backgroundService, walletLock]);
 
+  const handleCloseShowPassphraseDrawer = () => {
+    setIsShowPassphraseDrawerOpen(false);
+    analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseYourRecoveryPhraseXClick);
+  };
+
+  const handleOpenShowPassphraseDrawer = () => {
+    setIsShowPassphraseDrawerOpen(true);
+    analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseClick);
+  };
+
   useEffect(() => {
     isMnemonicAvailable();
   }, [isMnemonicAvailable]);
@@ -72,10 +82,11 @@ export const SettingsSecurity = ({
       />
       <ShowPassphraseDrawer
         visible={isShowPassphraseDrawerOpen}
-        onClose={() => setIsShowPassphraseDrawerOpen(false)}
+        onClose={handleCloseShowPassphraseDrawer}
         popupView={popupView}
         defaultPassphraseVisible={defaultPassphraseVisible}
         defaultMnemonic={defaultMnemonic}
+        sendAnalyticsEvent={(event: PostHogAction) => analytics.sendEventToPostHog(event)}
       />
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="security-settings-heading">
@@ -84,7 +95,7 @@ export const SettingsSecurity = ({
         {!hideShowPassphraseSetting && (
           <>
             <SettingsLink
-              onClick={() => setIsShowPassphraseDrawerOpen(true)}
+              onClick={handleOpenShowPassphraseDrawer}
               description={t('browserView.settings.security.showPassphrase.description')}
               data-testid="settings-show-recovery-phrase-link"
             >

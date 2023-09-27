@@ -49,9 +49,14 @@ export class AnalyticsTracker {
       await this.userIdService?.makePersistent();
       if (this.trackingTypeChangedFromSettings) {
         this.sendAliasEvent();
+        this.sendEventToPostHog(PostHogAction.SettingsAnalyticsAgreeClick);
         this.trackingTypeChangedFromSettings = false;
       }
     } else {
+      if (this.trackingTypeChangedFromSettings) {
+        await this.sendEventToPostHog(PostHogAction.SettingsAnalyticsSkipClick);
+        this.trackingTypeChangedFromSettings = false;
+      }
       await this.userIdService?.makeTemporary();
     }
   }

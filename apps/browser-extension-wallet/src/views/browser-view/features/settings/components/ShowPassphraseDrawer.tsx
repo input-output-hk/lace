@@ -17,6 +17,7 @@ import { Typography } from 'antd';
 import { MnemonicWordsWritedown } from '@lace/core';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useWalletManager } from '@hooks';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Text } = Typography;
 
@@ -32,6 +33,7 @@ interface GeneralSettingsDrawerProps {
   popupView?: boolean;
   defaultPassphraseVisible?: boolean;
   defaultMnemonic?: string[];
+  sendAnalyticsEvent?: (event: PostHogAction) => void;
 }
 
 type ProcessingStateType = {
@@ -44,7 +46,8 @@ export const ShowPassphraseDrawer = ({
   onClose,
   popupView = false,
   defaultPassphraseVisible = false,
-  defaultMnemonic = []
+  defaultMnemonic = [],
+  sendAnalyticsEvent
 }: GeneralSettingsDrawerProps): ReactElement => {
   const { t } = useTranslation();
   const [blurWords, setBlurWords] = useState<boolean>(false);
@@ -62,7 +65,12 @@ export const ShowPassphraseDrawer = ({
   const isConfirmButtonDisabled = isPassphraseVisible ? false : !password || isProcessing;
 
   const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
-  const toggleBlurWords = () => setBlurWords(!blurWords);
+  const toggleBlurWords = () => {
+    setBlurWords(!blurWords);
+    if (!blurWords) {
+      sendAnalyticsEvent(PostHogAction.SettingsShowRecoveryPhraseYourRecoveryPhraseHidePassphraseClick);
+    }
+  };
   const removePassword = () => setPassword('');
 
   const getPassphrase = useCallback(
@@ -85,12 +93,13 @@ export const ShowPassphraseDrawer = ({
       setIsPassphraseVisible(true);
       setProcessingState({ isPasswordValid: true, isProcessing: false });
       removePassword();
+      sendAnalyticsEvent(PostHogAction.SettingsShowRecoveryPhraseEnterYourPasswordShowRecoveryPhraseClick);
     } catch {
       removePassword();
       setIsPassphraseVisible(false);
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, setProcessingState, validatePassword, password, getPassphrase, setIsPassphraseVisible]);
+  }, [isProcessing, validatePassword, password, getPassphrase, sendAnalyticsEvent]);
 
   const handleShowPassphrase = async () => {
     if (isPassphraseVisible) {
