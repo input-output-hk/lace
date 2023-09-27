@@ -5,15 +5,28 @@ import * as styles from './DelegationRatioSlider.css';
 import SliderMinusIcon from './slider-minus.svg';
 import SliderPlusIcon from './slider-plus.svg';
 
+export type DelegationRatioSlider = Omit<Slider.SliderProps, 'value' | 'onValueChange' | 'defaultValue'> & {
+  value?: number;
+  defaultValue?: number;
+  onValueChange?: (value: number) => void;
+};
+
 export const DelegationRatioSlider = React.forwardRef(
-  (props: Slider.SliderProps, forwardedRef: React.ForwardedRef<HTMLInputElement>) => {
-    const value = props.value || props.defaultValue || [0];
-    const handlePlusClick = () => props.onValueChange && props.onValueChange(value.map((v) => v + 1));
-    const handleMinusClick = () => props.onValueChange && props.onValueChange(value.map((v) => v - 1));
+  (props: DelegationRatioSlider, forwardedRef: React.ForwardedRef<HTMLInputElement>) => {
+    const value = props.value || props.defaultValue || 0;
+    const handlePlusClick = () => props.onValueChange && props.onValueChange(value + 1);
+    const handleMinusClick = () => props.onValueChange && props.onValueChange(value - 1);
     return (
       <div className={styles.SliderContainer}>
         <IconButton.Primary icon={<SliderMinusIcon />} onClick={handleMinusClick} />
-        <Slider.Root className={styles.SliderRoot} {...props} ref={forwardedRef}>
+        <Slider.Root
+          className={styles.SliderRoot}
+          {...props}
+          onValueChange={(newValue) => (props.onValueChange ? props.onValueChange(newValue[0] || 0) : undefined)}
+          value={[value]}
+          defaultValue={props.defaultValue ? [props.defaultValue] : undefined}
+          ref={forwardedRef}
+        >
           <Slider.Track className={styles.SliderTrack}>
             <Slider.Range className={styles.SliderRange} />
           </Slider.Track>
