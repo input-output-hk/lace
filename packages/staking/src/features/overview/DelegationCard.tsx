@@ -1,31 +1,39 @@
-import { Card, PieChart, PieChartColor, Text } from '@lace/ui';
+import { Card, PIE_CHART_DEFAULT_COLOR_SET, PieChart, PieChartColor, Text } from '@lace/ui';
 import cn from 'classnames';
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
+import { PERCENTAGE_SCALE_MAX } from '../store/delegationPortfolioStore/constants';
 import * as styles from './DelegationCard.css';
 
-type DelegationStatus = 'multi-delegation' | 'over-staked' | 'ready' | 'simple-delegation' | 'under-staked';
+export type DelegationStatus =
+  | 'multi-delegation'
+  | 'over-allocated'
+  | 'simple-delegation'
+  | 'under-allocated'
+  | 'no-selection';
+
+type Distribution = Array<{
+  name: string;
+  percentage: number;
+  color: PieChartColor;
+}>;
 
 type DelegationCardProps = {
   arrangement?: 'vertical' | 'horizontal';
   balance: string;
   cardanoCoinSymbol: string;
-  distribution: Array<{
-    name: string;
-    percentage: number;
-    color: PieChartColor;
-  }>;
+  distribution: Distribution;
   status: DelegationStatus;
   showDistribution?: boolean;
 };
 
 const statusLabelTranslationKeysByDelegationStatus: Record<DelegationStatus, TranslationKey> = {
   'multi-delegation': 'overview.delegationCard.statuses.multiDelegation',
-  'over-staked': 'overview.delegationCard.statuses.overStaked',
-  ready: 'overview.delegationCard.statuses.ready',
+  'no-selection': 'overview.delegationCard.statuses.noSelection',
+  'over-allocated': 'overview.delegationCard.statuses.overAllocated',
   'simple-delegation': 'overview.delegationCard.statuses.simpleDelegation',
-  'under-staked': 'overview.delegationCard.statuses.underStaked',
+  'under-allocated': 'overview.delegationCard.statuses.underAllocated',
 };
 
 export const DelegationCard = ({
@@ -51,6 +59,30 @@ export const DelegationCard = ({
     { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
   ];
 
+  const GREY_COLOR: PieChartColor = '#C0C0C0';
+  const totalPercentage = useMemo(() => distribution.reduce((acc, cur) => acc + cur.percentage, 0), [distribution]);
+  const emptyPieElementVisible = totalPercentage !== PERCENTAGE_SCALE_MAX;
+
+  const colorSet = useMemo<PieChartColor[]>(
+    () =>
+      emptyPieElementVisible
+        ? [...PIE_CHART_DEFAULT_COLOR_SET.slice(0, distribution.length), GREY_COLOR]
+        : PIE_CHART_DEFAULT_COLOR_SET,
+    [distribution.length, emptyPieElementVisible]
+  );
+
+  const data = useMemo<Distribution>(() => {
+    if (!emptyPieElementVisible) return distribution;
+    return [
+      ...distribution,
+      {
+        color: GREY_COLOR,
+        name: 'Unallocated',
+        percentage: PERCENTAGE_SCALE_MAX - totalPercentage,
+      },
+    ];
+  }, [distribution, emptyPieElementVisible, totalPercentage]);
+
   return (
     <Card.Greyed>
       <div
@@ -61,8 +93,8 @@ export const DelegationCard = ({
         data-testid="delegation-info-card"
       >
         <div className={styles.chart} data-testid="delegation-chart">
-          <PieChart data={distribution} nameKey="name" valueKey="percentage" />
-          {showDistribution && <Text.SubHeading className={styles.counter}>100%</Text.SubHeading>}
+          <PieChart data={data} nameKey="name" valueKey="percentage" colors={colorSet} />
+          {showDistribution && <Text.SubHeading className={styles.counter}>{totalPercentage}%</Text.SubHeading>}
         </div>
         <div
           className={cn({

@@ -4,29 +4,32 @@ import { Command } from './commands';
 
 export type StakePoolWithLogo = Wallet.Cardano.StakePool & { logo?: string };
 
-type DraftPortfolioStakePoolBase = {
+type PortfolioStakePoolBase = {
   id: Wallet.Cardano.Cip17Pool['id'];
-  targetWeight: Wallet.Cardano.Cip17Pool['weight'];
   displayData: Wallet.util.StakePool;
   stakePool: Wallet.Cardano.StakePool;
 };
 
-export type DraftPortfolioStakePool = DraftPortfolioStakePoolBase &
-  (
-    | {
-        basedOnCurrentPortfolio: false;
-      }
-    | { basedOnCurrentPortfolio: true; currentPortfolioPercentage: Wallet.Percent }
+type CurrentPortfolioSpecificProps = {
+  savedIntegerPercentage: number; // todo: type for integers
+  onChainPercentage: number;
+};
+
+export type DraftPortfolioStakePool = PortfolioStakePoolBase & {
+  sliderIntegerPercentage: number; // todo: type for integers
+} & (
+    | { basedOnCurrentPortfolio: false } // TODO: re-consider moving to top-level
+    | ({ basedOnCurrentPortfolio: true } & CurrentPortfolioSpecificProps)
   );
 
-export type CurrentPortfolioStakePool = DraftPortfolioStakePoolBase & {
-  displayData: Wallet.util.StakePool & {
-    lastReward: bigint;
-    totalRewards: bigint;
+export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
+  CurrentPortfolioSpecificProps & {
+    displayData: Wallet.util.StakePool & {
+      lastReward: bigint;
+      totalRewards: bigint;
+    };
+    value: bigint;
   };
-  value: bigint;
-  percentage: Wallet.Percent;
-};
 
 export enum Flow {
   Overview = 'Overview',
