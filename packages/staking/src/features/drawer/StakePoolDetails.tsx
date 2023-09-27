@@ -36,15 +36,15 @@ export const StakePoolDetails = ({
   const { t } = useTranslation();
   const { walletStoreInMemoryWallet } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
-  const { activeDrawerStep, activeFlow, currentPortfolio, draftPortfolio, selectionsFull, openPoolIsSelected } =
+  const { activeDrawerStep, activeFlow, portfolioDrifted, portfolioModified, selectionsFull, openPoolIsSelected } =
     useDelegationPortfolioStore((store) => ({
       activeDrawerStep: store.activeDrawerStep,
       activeFlow: store.activeFlow,
-      currentPortfolio: store.currentPortfolio,
-      draftPortfolio: store.draftPortfolio || [],
       openPoolIsSelected: store.selectedPortfolio.some(
         (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
       ),
+      portfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
+      portfolioModified: (store.draftPortfolio || []).some(({ basedOnCurrentPortfolio }) => !basedOnCurrentPortfolio),
       selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
     }));
   const delegationPending = inFlightTx
@@ -52,8 +52,6 @@ export const StakePoolDetails = ({
       (certificates ?? []).filter((c) => c.__typename === Wallet.Cardano.CertificateType.StakeDelegation)
     )
     .some((certificates) => certificates?.length > 0);
-  const portfolioModified = draftPortfolio.some(({ basedOnCurrentPortfolio }) => !basedOnCurrentPortfolio);
-  const portfolioDrifted = isPortfolioDrifted(currentPortfolio);
   const selectionActionsAllowed = !selectionsFull || openPoolIsSelected;
 
   const contentsMap = useMemo(
