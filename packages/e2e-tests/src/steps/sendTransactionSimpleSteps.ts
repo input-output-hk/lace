@@ -358,6 +358,11 @@ Then(/^a dropdown showing the first ([^"]*) matches is displayed$/, async (noOfM
   await drawerSendExtendedAssert.assertResultsMatchContacts();
 });
 
+Then(/^first result in address dropdown has name "([^"]*)"$/, async (expectedName: string) => {
+  await drawerSendExtendedAssert.assertAmountOfResultsDisplayed(1);
+  await drawerSendExtendedAssert.assertFirstResultNameEquals(expectedName);
+});
+
 Then(/^the selected contact is added in the bundle recipient's address$/, async () => {
   await drawerSendExtendedAssert.assertAddedContactMatches();
 });
@@ -618,6 +623,10 @@ Then(
     await drawerSendExtendedAssert.assertSeeAddressWithNameInRecipientsAddressInput(lastCharsOfAddress, addressName);
   }
 );
+
+Then(/^recipients address input contains address entry with name "([^"]*)"$/, async (addressName: string) => {
+  await drawerSendExtendedAssert.assertSeeAddressNameInRecipientsAddressInput(addressName);
+});
 
 Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);

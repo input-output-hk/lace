@@ -37,7 +37,7 @@ export const NetworkChoiceDrawer = ({
       <div className={popupView ? styles.popupContainer : undefined}>
         <Text className={styles.drawerDescription}>{t('browserView.settings.wallet.network.drawerDescription')}</Text>
         <div className={styles.radios}>
-          <NetworkChoice />
+          <NetworkChoice section="settings" />
         </div>
       </div>
     </Drawer>

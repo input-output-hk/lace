@@ -7,6 +7,8 @@ import { useTheme } from '@providers/ThemeProvider';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { HandleInfo } from '@cardano-sdk/wallet';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface ReceiveInfoProps {
   name: string;
@@ -16,9 +18,21 @@ export interface ReceiveInfoProps {
 }
 
 export const ReceiveInfo = ({ name, address, handles, goBack }: ReceiveInfoProps): React.ReactElement => {
+  const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const handleOnClose = () => goBack();
+  const handleOnClose = () => {
+    goBack();
+    analytics.sendEventToPostHog(PostHogAction.ReceiveYourWalletAddressXClick);
+  };
+
+  const handleCopyAdaHandle = () => {
+    analytics.sendEventToPostHog(PostHogAction.ReceiveCopyADAHandleIconClick);
+  };
+
+  const handleCopyAddress = () => {
+    analytics.sendEventToPostHog(PostHogAction.ReceiveCopyAddressIconClick);
+  };
 
   return (
     <Drawer
@@ -35,6 +49,7 @@ export const ReceiveInfo = ({ name, address, handles, goBack }: ReceiveInfoProps
           address={address?.toString()}
           getQRCodeOptions={useCallback(() => getQRCodeOptions(theme, ADDRESS_CARD_QR_CODE_SIZE_POPUP), [theme])}
           copiedMessage={t('core.infoWallet.addressCopied')}
+          onCopyClick={handleCopyAddress}
         />
         {handles?.map(({ nftMetadata, image }) => (
           <HandleAddressCard
@@ -42,6 +57,7 @@ export const ReceiveInfo = ({ name, address, handles, goBack }: ReceiveInfoProps
             name={nftMetadata.name}
             image={getAssetImageUrl(image || nftMetadata.image)}
             copiedMessage={t('core.infoWallet.handleCopied')}
+            onCopyClick={handleCopyAdaHandle}
           />
         ))}
       </div>

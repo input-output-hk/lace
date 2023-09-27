@@ -9,6 +9,8 @@ import { toast, addEllipsis } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles } from '@hooks';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -28,11 +30,17 @@ interface UserInfoProps {
 export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo } = useWalletStore();
+  const analytics = useAnalyticsContext();
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const walletName = addEllipsis(walletInfo.name.toString(), WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
   const handleName = handle?.nftMetadata?.name;
+
+  const handleOnAddressCopy = () => {
+    toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') });
+    analytics.sendEventToPostHog(PostHogAction.UserWalletProfileWalletAddressClick);
+  };
 
   return (
     <Menu.ItemGroup className={classnames(styles.menuItem, styles.borderBottom)} data-testid="header-menu-user-info">
@@ -47,12 +55,7 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
               </span>
             }
           >
-            <div
-              className={styles.userInfo}
-              onClick={() =>
-                toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') })
-              }
-            >
+            <div className={styles.userInfo} onClick={handleOnAddressCopy}>
               {avatarVisible && <UserAvatar walletName={walletName} />}
               <div className={styles.userMeta} data-testid="header-menu-user-details">
                 <p className={styles.walletName} data-testid="header-menu-wallet-name">

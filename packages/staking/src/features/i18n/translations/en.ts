@@ -90,6 +90,9 @@ export const en: Translations = {
   'overview.banners.pendingPoolMigration.message':
     'You will continue to receive rewards from your former stake pool(s) for two epochs',
   'overview.banners.pendingPoolMigration.title': 'You are migrating stake pool(s)',
+  'overview.banners.portfolioDrifted.message':
+    'Make sure to rebalance your staking ratios if you want to match your preferences',
+  'overview.banners.portfolioDrifted.title': 'Your current delegation portfolio has shifted',
   'overview.delegationCard.label.balance': 'ADA Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',

@@ -1,7 +1,12 @@
 import { SubNavigation } from '@lace/ui';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Page, useStakePoolDetails } from '../store';
+import { Flow, useDelegationPortfolioStore } from '../store';
+
+export enum Page {
+  overview = 'overview',
+  browsePools = 'browsePools',
+}
 
 type NavigationProps = {
   children: (activePage: Page) => ReactNode;
@@ -10,13 +15,18 @@ type NavigationProps = {
 const isValueAValidSubPage = (value: string): value is Page => Object.values<string>(Page).includes(value);
 
 export const Navigation = ({ children }: NavigationProps) => {
-  const { activePage, setActivePage } = useStakePoolDetails((store) => ({
-    activePage: store.activePage,
-    setActivePage: store.setActivePage,
+  const { activePage, portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    activePage: [Flow.Overview, Flow.CurrentPoolDetails, Flow.PortfolioManagement].includes(store.activeFlow)
+      ? Page.overview
+      : Page.browsePools,
+    portfolioMutators: store.mutators,
   }));
   const { t } = useTranslation();
   const onValueChange = (value: string) => {
-    if (isValueAValidSubPage(value)) setActivePage(value);
+    if (!isValueAValidSubPage(value)) return;
+    portfolioMutators.executeCommand({
+      type: value === Page.overview ? 'GoToOverview' : 'GoToBrowsePools',
+    });
   };
 
   return (

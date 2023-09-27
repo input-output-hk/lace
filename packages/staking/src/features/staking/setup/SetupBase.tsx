@@ -8,7 +8,7 @@ import { useI18n } from './useI18n';
 
 initI18n();
 
-export type SetupBaseProps = PropsWithChildren<StakingProps> & {
+export type SetupBaseProps = Omit<PropsWithChildren<StakingProps>, 'currentChain'> & {
   loading?: boolean;
 };
 

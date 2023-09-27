@@ -1,28 +1,26 @@
+/* eslint-disable unicorn/consistent-destructuring */
 import { Wallet } from '@lace/cardano';
 import { Button, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { DelegationCard } from '../overview/DelegationCard';
-import {
-  MAX_POOLS_COUNT,
-  Page,
-  Sections,
-  sectionsConfig,
-  useDelegationPortfolioStore,
-  useStakePoolDetails,
-} from '../store';
+import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 export const StakePoolPreferencesFooter = () => {
   const { t } = useTranslation();
-  const { setSection } = useStakePoolDetails();
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
   return (
     <Flex flexDirection="column" alignItems="stretch" gap="$16">
       <Button.CallToAction
         label={t('drawer.preferences.nextButton')}
         data-testid="preferences-next-button"
-        onClick={() => setSection(sectionsConfig[Sections.CONFIRMATION])}
+        onClick={() =>
+          portfolioMutators.executeCommand({
+            type: 'DrawerContinue',
+          })
+        }
         w="$fill"
       />
     </Flex>
@@ -38,34 +36,38 @@ export const StakePoolPreferences = () => {
     compactNumber,
   } = useOutsideHandles();
   const { draftPortfolio, portfolioMutators } = useDelegationPortfolioStore((state) => ({
-    draftPortfolio: state.draftPortfolio,
+    activeDrawerStep: state.activeDrawerStep,
+    draftPortfolio: state.draftPortfolio || [],
     portfolioMutators: state.mutators,
   }));
-  const { activePage, setActivePage, setIsDrawerVisible, resetStates } = useStakePoolDetails((store) => ({
-    activePage: store.activePage,
-    resetStates: store.resetStates,
-    setActivePage: store.setActivePage,
-    setIsDrawerVisible: store.setIsDrawerVisible,
-  }));
 
-  const displayData = draftPortfolio.map(({ name = '-', weight, id }, i) => ({
-    color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
-    id,
-    name,
-    weight,
-  }));
+  const targetWeightsSum = draftPortfolio.map(({ targetWeight }) => targetWeight).reduce((a, b) => a + b, 0);
+  const displayData = draftPortfolio.map((draftPool, i) => {
+    const {
+      displayData: { name },
+      id,
+      targetWeight,
+    } = draftPool;
+    return {
+      color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
+      id,
+      name: name || '-',
+      percentage: draftPool.basedOnCurrentPortfolio
+        ? draftPool.currentPortfolioPercentage
+        : targetWeight / targetWeightsSum,
+    };
+  });
   const createRemovePoolFromPortfolio = (poolId: Wallet.Cardano.PoolIdHex) => () => {
-    portfolioMutators.removePoolInManagementProcess({ id: poolId });
+    portfolioMutators.executeCommand({
+      data: poolId,
+      type: 'RemoveStakePool',
+    });
   };
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
   const onAddPoolButtonClick = () => {
-    if (addPoolButtonDisabled) return;
-    if (activePage !== Page.browsePools) {
-      setActivePage(Page.browsePools);
-    }
-    portfolioMutators.cancelManagementProcess({ dumpDraftToSelections: true });
-    setIsDrawerVisible(false);
-    resetStates();
+    portfolioMutators.executeCommand({
+      type: 'AddStakePools',
+    });
   };
 
   return (
@@ -88,12 +90,12 @@ export const StakePoolPreferences = () => {
         />
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
-        {displayData.map(({ name, id, color, weight }) => (
+        {displayData.map(({ name, id, color, percentage }) => (
           <PoolDetailsCard
             key={id}
             name={name}
             color={color}
-            weight={weight}
+            percentage={percentage}
             onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
           />
         ))}

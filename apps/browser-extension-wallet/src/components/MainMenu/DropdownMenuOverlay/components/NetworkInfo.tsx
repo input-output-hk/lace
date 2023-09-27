@@ -25,7 +25,7 @@ export const NetworkInfo = ({ onBack }: NetworkChoiseProps): React.ReactElement 
         </div>
       </div>
       <div className={styles.content} data-testid="user-dropdown-network-choice">
-        <NetworkChoice />
+        <NetworkChoice section="wallet-profile" />
       </div>
     </div>
   );

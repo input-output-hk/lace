@@ -45,6 +45,15 @@
       }
     }
   }
+  .selectedPools {
+    display: flex;
+    flex-direction: column;
+    gap: size_unit(1);
+  }
+  .poolsSeparator {
+    border-bottom: 1px solid var(--light-mode-light-grey-plus-56, var(--dark-mode-dark-grey));
+    margin: size_unit(3) 0;
+  }
 }
 
 .triangle {

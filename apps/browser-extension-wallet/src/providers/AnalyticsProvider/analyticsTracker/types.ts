@@ -53,6 +53,7 @@ export enum PostHogAction {
   OnboardingRestoreEnterPassphrase01NextClick = 'onboarding | restore wallet | enter passphrase #01 | next | click',
   OnboardingRestoreEnterPassphrase09NextClick = 'onboarding | restore wallet | enter passphrase #09 | next | click',
   OnboardingRestoreEnterPassphrase17NextClick = 'onboarding | restore wallet | enter passphrase #17 | next | click',
+  OnboardingRestoreWalletNamePasswordNextClick = 'onboarding | restore wallet | wallet name & password | next | click',
   // Create new wallet
   OnboardingCreateDoneGoToWallet = 'onboarding | new wallet | all done | go to my wallet | click',
   OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
@@ -68,6 +69,7 @@ export enum PostHogAction {
   OnboardingCreateEnterPassphrase01NextClick = 'onboarding | new wallet | enter passphrase #01 | next | click',
   OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
   OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
+  OnboardingCreateWalletNamePasswordNextClick = 'onboarding | new wallet | wallet name & password | next | click',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',
@@ -96,7 +98,73 @@ export enum PostHogAction {
   SendSomethingWentWrongXClick = 'send | something went wrong | x | click',
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
-  NFTsImageClick = 'nft | nfts | nft image | click'
+  NFTsImageClick = 'nft | nfts | nft image | click',
+  // Address book
+  AddressBookAddAddressClick = 'address book | add address | click',
+  AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
+  AddressBookAddNewAddressCancelClick = 'address book | add new address | cancel | click',
+  AddressBookAddressRecordClick = 'address book | address record | click',
+  AddressBookAddressRecordCopyClick = 'address book | address record | copy | click',
+  AddressBookAddressRecordEditClick = 'address book | address record | edit | click',
+  AddressBookAddressRecordDeleteClick = 'address book | address record | delete | click',
+  AddressBookAddressRecordHoldUpDeleteAddressClick = 'address book | address record | hold up! | delete address | click',
+  AddressBookAddressRecordHoldUpCancelClick = 'address book | address record | hold up! | cancel | click',
+  AddressBookAddressRecordEditAddressDoneClick = 'address book | address record | edit address | done | click',
+  AddressBookAddressRecordEditAddressCancelClick = 'address book | address record | edit address | cancel | click',
+  AddressBookAddressRecordEditAddressXClick = 'address book | address record | edit address | x | click',
+  // Settings
+  SettingsHelpClick = 'settings | help | click',
+  SettingsHelpCreateSupportTicketClick = 'settings | help | create a support ticket | click',
+  SettingsHelpXClick = 'settings | help | x | click',
+  SettingsTermsAndConditionsClick = 'settings | terms and conditions | click',
+  SettingsTermsAndConditionsXClick = 'settings | terms and conditions | x | click',
+  SettingsPrivacyPolicyClick = 'settings | privacy policy | click',
+  SettingsPrivacyPolicyXClick = 'settings | privacy policy | x | click',
+  SettingsCookiePolicyClick = 'settings | cookie policy | click',
+  SettingsCookiePolicyXClick = 'settings | cookie policy | x | click',
+  SettingsRemoveWalletClick = 'settings | remove wallet | click',
+  SettingsHoldUpRemoveWalletClick = 'settings | hold up | remove wallet | click',
+  SettingsHoldUpBackClick = 'settings | hold up | back | click',
+  SettingsNetworkClick = 'settings | network | click',
+  SettingsNetworkPreviewClick = 'settings | network | preview | click',
+  SettingsNetworkPreprodClick = 'settings | network | preprod | click',
+  SettingsNetworkMainnetClick = 'settings | network | mainnet | click',
+  SettingsNetworkXClick = 'settings | network | x | click',
+  SettingsAuthorizedDappsClick = 'settings | authorized dapps | click',
+  SettingsAuthorizedDappsTrashBinIconClick = 'settings | authorized dapps | trash bin icon | click',
+  SettingsAuthorizedDappsHoldUpDisconnectDappClick = 'settings | authorized dapps | hold up! | disconnect dapp | click',
+  SettingsAuthorizedDappsHoldUpBackClick = 'settings | authorized dapps | hold up! | back | click',
+  SettingsYourKeysClick = 'settings | your keys | click',
+  SettingsYourKeysShowPublicKeyClick = 'settings | your keys | show public key | click',
+  SettingsYourKeysShowPublicKeyCopyClick = 'settings | your keys | show public key | copy | click',
+  SettingsYourKeysShowPublicKeyXClick = 'settings | your keys | show public key | x | click',
+  SettingsCollateralClick = 'settings | collateral | click',
+  SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
+  SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
+  SettingsCollateralXClick = 'settings | collateral | x | click',
+  // Recieve section
+  ReceiveClick = 'receive | receive | click',
+  ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
+  ReceiveCopyADAHandleIconClick = 'receive | receive | copy ADA handle icon | click',
+  ReceiveYourWalletAddressXClick = 'receive | Your wallet address | x | click',
+  // Dapp Connector
+  DappConnectorAuthorizeDappAuthorizeClick = 'dapp connector | authorize dapp | authorize | click',
+  DappConnectorAuthorizeDappCancelClick = 'dapp connector | authorize dapp | cancel | click',
+  DappConnectorAuthorizeDappDappConnectorBetaClick = 'dapp connector | authorize dapp | dapp connector beta | click',
+  DappConnectorAuthorizeDappConnectionAlwaysClick = 'dapp connector | authorize dapp | dapp connection | always | click',
+  DappConnectorAuthorizeDappConnectionOnlyOnceClick = 'dapp connector | authorize dapp | dapp connection | only once | click',
+  // User
+  UserWalletProfileIconClick = 'user/wallet profile | profile icon | click',
+  UserWalletProfileWalletAddressClick = 'user/wallet profile | wallet address | click',
+  UserWalletProfileAddressBookClick = 'user/wallet profile | address book | click',
+  UserWalletProfileSettingsClick = 'user/wallet profile | settings | click',
+  UserWalletProfileLightModeClick = 'user/wallet profile | light mode | click',
+  UserWalletProfileDarkModeClick = 'user/wallet profile | dark mode | click',
+  UserWalletProfileNetworkClick = 'user/wallet profile | network | click',
+  UserWalletProfileNetworkPreviewClick = 'user/wallet profile | network | preview | click',
+  UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
+  UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
+  UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
@@ -139,7 +207,8 @@ export type PostHogActionsKeys =
   | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK'
   | 'CONNECT_HW_NEXT_CLICK'
   | 'SELECT_HW_ACCOUNT_NEXT_CLICK'
-  | 'DONE_GO_TO_WALLET';
+  | 'DONE_GO_TO_WALLET'
+  | 'WALLET_NAME_PASSWORD_NEXT_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogPersonProperties = {
