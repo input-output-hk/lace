@@ -13,7 +13,7 @@ type DelegationCardProps = {
   cardanoCoinSymbol: string;
   distribution: Array<{
     name: string;
-    weight: number;
+    percentage: number;
     color: PieChartColor;
   }>;
   status: DelegationStatus;
@@ -61,7 +61,7 @@ export const DelegationCard = ({
         data-testid="delegation-info-card"
       >
         <div className={styles.chart} data-testid="delegation-chart">
-          <PieChart data={distribution} nameKey="name" valueKey="weight" />
+          <PieChart data={distribution} nameKey="name" valueKey="percentage" />
           {showDistribution && <Text.SubHeading className={styles.counter}>100%</Text.SubHeading>}
         </div>
         <div

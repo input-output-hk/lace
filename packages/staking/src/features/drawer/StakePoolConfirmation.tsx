@@ -84,8 +84,8 @@ const StakePoolConfirmationBody = ({
         >
           <ItemStatRenderer
             img={stakePool.displayData.logo}
-            text={stakePool.name || '-'}
-            subText={<span>{stakePool.ticker}</span>}
+            text={stakePool.displayData.name || '-'}
+            subText={<span>{stakePool.displayData.ticker}</span>}
           />
           <div className={styles.itemData}>
             <Ellipsis beforeEllipsis={10} afterEllipsis={8} text={stakePool.id} ellipsisInTheMiddle />
@@ -207,7 +207,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
-        const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.weight }));
+        const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.targetWeight }));
         const tx = await txBuilder.delegatePortfolio({ pools }).build().inspect();
         const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
         const newDelegationTxDeposit = implicitCoin.deposit;
