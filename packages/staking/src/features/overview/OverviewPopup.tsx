@@ -9,10 +9,10 @@ import { useDelegationPortfolioStore } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
-import { getCurrentStakingNotification, hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
+import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './staking-info-card';
-import { StakingNotificationBanner } from './StakingNotificationBanner';
+import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();

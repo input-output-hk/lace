@@ -7,15 +7,10 @@ import { useDelegationPortfolioStore } from '../store';
 import { DelegationCard } from './DelegationCard';
 import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
-import {
-  getCurrentStakingNotification,
-  hasMinimumFundsToDelegate,
-  hasPendingDelegationTransaction,
-  mapPortfolioToDisplayData,
-} from './helpers';
+import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './staking-info-card';
-import { StakingNotificationBanner } from './StakingNotificationBanner';
+import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const Overview = () => {
   const { t } = useTranslation();
