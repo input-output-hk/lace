@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRegistration } from '@lace/core';
 import { SignTxData } from './types';
+import { getDRepCertificate } from './utils';
 
 interface Props {
   signTxData: SignTxData;
@@ -10,16 +11,16 @@ interface Props {
 
 export const ConfirmDRepRegistrationContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
-  const tx = signTxData?.tx;
+  const certificate = getDRepCertificate(signTxData.tx);
 
   return (
     <ConfirmDRepRegistration
       dappInfo={signTxData.dappInfo}
       metadata={{
-        depositPaid: 'depositPaid',
-        drepId: 'drepId',
-        hash: 'hash',
-        url: 'url'
+        depositPaid: certificate.deposit.toString(),
+        drepId: certificate.dRepCredential.hash,
+        hash: certificate.anchor.dataHash,
+        url: certificate.anchor.url
       }}
       translations={{
         metadata: t('core.drepRegistration.metadata'),
