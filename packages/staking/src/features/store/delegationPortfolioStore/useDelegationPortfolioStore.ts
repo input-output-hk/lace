@@ -11,6 +11,7 @@ import {
   processExpandedViewCases,
   processPopupViewCases,
 } from './stateMachine';
+import { roundPercentages } from './stateMachine/roundPercentages';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
@@ -88,6 +89,18 @@ export const useDelegationPortfolioStore = create(
         const confirmedRewardHistory = delegationRewardsHistory.all.filter(
           ({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch
         );
+
+        // TMP: replace by real data from memory/cip
+        const savedPercentages = roundPercentages(
+          // eslint-disable-next-line no-magic-numbers
+          delegationDistribution.map((item) => ({ ...item, percentage: item.percentage * 100 })),
+          'percentage'
+          // eslint-disable-next-line unicorn/no-array-reduce
+        ).reduce((acc, item) => {
+          acc[item.pool.hexId] = item.percentage;
+          return acc;
+        }, {} as Record<Wallet.Cardano.PoolIdHex, number>);
+
         const currentPortfolio = delegationDistribution.map(({ pool: stakePool, percentage, stake }) => {
           const confirmedPoolRewards = confirmedRewardHistory
             .filter(({ poolId }) => poolId === stakePool.id)
@@ -100,9 +113,11 @@ export const useDelegationPortfolioStore = create(
               totalRewards: Wallet.BigIntMath.sum(confirmedPoolRewards),
             },
             id: stakePool.hexId,
-            percentage,
+            // eslint-disable-next-line no-magic-numbers
+            onChainPercentage: percentage * 100,
+            savedIntegerPercentage: savedPercentages[stakePool.hexId] || 0,
+            sliderIntegerPercentage: savedPercentages[stakePool.hexId],
             stakePool,
-            targetWeight: 1,
             value: stake,
           };
         });

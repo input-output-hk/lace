@@ -4,6 +4,7 @@ import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Tooltip } from '../overview/staking-info-card/StatsTooltip';
+import { PERCENTAGE_SCALE_MAX } from '../store';
 import { PoolCard, PoolHr, PoolIndicator } from './StakePoolPreferences.css';
 import TrashIcon from './trash.svg';
 
@@ -19,7 +20,7 @@ export const PoolDetailsCard = ({ name, color, percentage, onRemove }: PoolDetai
   const { compactNumber, balancesBalance } = useOutsideHandles();
   const stakeValue = balancesBalance
     ? // eslint-disable-next-line no-magic-numbers
-      compactNumber(percentage * Number(balancesBalance.available.coinBalance))
+      compactNumber((percentage * Number(balancesBalance.available.coinBalance)) / PERCENTAGE_SCALE_MAX)
     : '-';
 
   return (
@@ -40,7 +41,10 @@ export const PoolDetailsCard = ({ name, color, percentage, onRemove }: PoolDetai
         <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
             {t('drawer.preferences.stakeValue', {
-              stakePercentage: formatPercentages(percentage, { decimalPlaces: 0, rounding: 'halfUp' }),
+              stakePercentage: formatPercentages(percentage / PERCENTAGE_SCALE_MAX, {
+                decimalPlaces: 0,
+                rounding: 'halfUp',
+              }),
               stakeValue,
             })}
           </Text.Body.Normal>

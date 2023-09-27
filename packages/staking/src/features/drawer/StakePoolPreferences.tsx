@@ -3,8 +3,8 @@ import { Wallet } from '@lace/cardano';
 import { Button, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { DelegationCard } from '../overview/DelegationCard';
-import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
+import { DelegationCard, DelegationStatus } from '../overview';
+import { DelegationPortfolioStore, MAX_POOLS_COUNT, PERCENTAGE_SCALE_MAX, useDelegationPortfolioStore } from '../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 export const StakePoolPreferencesFooter = () => {
@@ -27,6 +27,23 @@ export const StakePoolPreferencesFooter = () => {
   );
 };
 
+const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore): DelegationStatus => {
+  if (!draftPortfolio || draftPortfolio.length === 0) return 'no-selection';
+
+  const percentageSum = draftPortfolio?.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0);
+  if (percentageSum > PERCENTAGE_SCALE_MAX) return 'over-allocated';
+  if (percentageSum < PERCENTAGE_SCALE_MAX) return 'under-allocated';
+
+  if (draftPortfolio.length === 1) {
+    return 'simple-delegation';
+  }
+  if (draftPortfolio.length > 1) {
+    return 'multi-delegation';
+  }
+
+  throw new Error('Unexpected delegation status');
+};
+
 // eslint-disable-next-line react/no-multi-comp
 export const StakePoolPreferences = () => {
   const { t } = useTranslation();
@@ -35,26 +52,24 @@ export const StakePoolPreferences = () => {
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,
   } = useOutsideHandles();
-  const { draftPortfolio, portfolioMutators } = useDelegationPortfolioStore((state) => ({
+  const { draftPortfolio, portfolioMutators, delegationStatus } = useDelegationPortfolioStore((state) => ({
     activeDrawerStep: state.activeDrawerStep,
+    delegationStatus: getDraftDelegationStatus(state),
     draftPortfolio: state.draftPortfolio || [],
     portfolioMutators: state.mutators,
   }));
 
-  const targetWeightsSum = draftPortfolio.map(({ targetWeight }) => targetWeight).reduce((a, b) => a + b, 0);
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
       displayData: { name },
       id,
-      targetWeight,
+      sliderIntegerPercentage,
     } = draftPool;
     return {
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
-      percentage: draftPool.basedOnCurrentPortfolio
-        ? draftPool.currentPortfolioPercentage
-        : targetWeight / targetWeightsSum,
+      percentage: sliderIntegerPercentage,
     };
   });
   const createRemovePoolFromPortfolio = (poolId: Wallet.Cardano.PoolIdHex) => () => {
@@ -76,7 +91,7 @@ export const StakePoolPreferences = () => {
         balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
         cardanoCoinSymbol={symbol}
         distribution={displayData}
-        status="ready"
+        status={delegationStatus}
         showDistribution
       />
       <Flex justifyContent="space-between">

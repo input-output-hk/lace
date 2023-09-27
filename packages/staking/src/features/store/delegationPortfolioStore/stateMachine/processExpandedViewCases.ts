@@ -1,3 +1,4 @@
+import { PERCENTAGE_SCALE_MAX } from '../constants';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
   BrowsePoolsCommand,
@@ -22,6 +23,7 @@ import {
   ShowPoolDetailsFromList,
   UnselectPoolFromDetails,
   UnselectPoolFromList,
+  UpdateStakePercentage,
 } from './commands';
 import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
 import { cases, handler } from './stateTreeUtilities';
@@ -38,7 +40,7 @@ export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): Dra
   pools.map((cp) => ({
     ...cp,
     basedOnCurrentPortfolio: true,
-    currentPortfolioPercentage: cp.percentage,
+    sliderIntegerPercentage: cp.savedIntegerPercentage,
   }));
 
 export const processExpandedViewCases: Handler = (params) =>
@@ -111,6 +113,7 @@ export const processExpandedViewCases: Handler = (params) =>
             if (!state.viewedStakePool) return;
             const portfolioPool = mapStakePoolToPortfolioPool({
               cardanoCoinSymbol: state.cardanoCoinSymbol,
+              sliderIntegerPercentage: PERCENTAGE_SCALE_MAX,
               stakePool: state.viewedStakePool,
             });
 
@@ -163,6 +166,12 @@ export const processExpandedViewCases: Handler = (params) =>
               },
               RemoveStakePool: handler<RemoveStakePool>(({ state, command: { data } }) => {
                 atomicStateMutators.removePoolFromPreferences({ id: data, state });
+              }),
+              UpdateStakePercentage: handler<UpdateStakePercentage>(({ state, command: { data } }) => {
+                atomicStateMutators.updateStakePercentage({
+                  ...data,
+                  state,
+                });
               }),
             },
             params.command.type,
@@ -268,6 +277,13 @@ export const processExpandedViewCases: Handler = (params) =>
               RemoveStakePool: handler<RemoveStakePool>(({ state, command: { data } }) => {
                 atomicStateMutators.removePoolFromPreferences({ id: data, state });
               }),
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              UpdateStakePercentage: handler<UpdateStakePercentage>(({ state, command: { data } }) => {
+                atomicStateMutators.updateStakePercentage({
+                  ...data,
+                  state,
+                });
+              }),
             },
             params.command.type,
             DrawerManagementStep.Preferences
@@ -323,6 +339,9 @@ export const processExpandedViewCases: Handler = (params) =>
               CancelDrawer: ({ state }) => {
                 atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
                 state.draftPortfolio = undefined;
+              },
+              DrawerBack: ({ state }) => {
+                state.activeDrawerStep = DrawerManagementStep.Sign;
               },
               DrawerContinue: ({ state }) => {
                 state.activeDrawerStep = DrawerManagementStep.Success;

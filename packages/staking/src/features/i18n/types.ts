@@ -153,10 +153,10 @@ type KeysStructure = {
       };
       statuses: {
         multiDelegation: '';
-        overStaked: '';
-        ready: '';
+        overAllocated: '';
+        noSelection: '';
         simpleDelegation: '';
-        underStaked: '';
+        underAllocated: '';
       };
     };
     banners: {
