@@ -6,7 +6,7 @@ import type { CurrentPortfolioStakePool } from '../../store';
 
 const PORTFOLIO_DRIFT_PERCENTAGE_THRESHOLD = 15;
 
-export const getPortfolioTotalPercentageDrift = (portfolio: CurrentPortfolioStakePool[]): number => {
+const getPortfolioTotalPercentageDrift = (portfolio: CurrentPortfolioStakePool[]): number => {
   const totalValue = Wallet.BigIntMath.sum(portfolio.map(({ value }) => value));
   const totalWeight = sum(portfolio.map(({ targetWeight }) => targetWeight));
 
