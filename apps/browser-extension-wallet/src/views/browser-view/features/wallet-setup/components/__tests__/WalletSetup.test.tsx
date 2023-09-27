@@ -39,6 +39,14 @@ jest.mock('react-router-dom', () => ({
   useRouteMatch: jest.fn().mockReturnValue({ path: '/setup' })
 }));
 
+jest.mock('@providers/ExperimentsProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/ExperimentsProvider'),
+  useExperimentsContext: jest
+    .fn()
+    .mockReturnValue({ experimentVariantByKey: jest.fn(), overrideExperimentVariant: jest.fn() })
+}));
+
 jest.mock('@providers/PostHogClientProvider', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...jest.requireActual<any>('@providers/PostHogClientProvider'),
