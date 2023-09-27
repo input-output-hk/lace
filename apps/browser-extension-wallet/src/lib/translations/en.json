@@ -56,6 +56,18 @@
       "to": "To",
       "multipleAddresses": "Multiple addresses",
       "pools": "Pool(s)"
+    },
+    "walletNameAndPasswordSetupStep": {
+      "title": "Let's set up your new wallet",
+      "description": "Choose a name to identify your wallet and set up your password to unlock your wallet and make transactions.",
+      "nameInputLabel": "Wallet name",
+      "nameMaxLength": "Max. 20 characters",
+      "passwordInputLabel": "Password",
+      "confirmPasswordInputLabel": "Confirm password",
+      "nameRequiredMessage": "Wallet name is required",
+      "noMatchPassword": "Oops! The passwords don't match.",
+      "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
     }
   },
   "tab.main.title": "Tab extension",
@@ -840,11 +852,12 @@
           "success": "Edited successfully!"
         },
         "showPassphraseDrawer": {
-          "title": "Show 24-word recovery phrase",
+          "title": "Enter your password",
+          "YourRecoveryPhrase": "Your recovery phrase (keep it secret!)",
           "description": "This is the recovery phrase associated with your wallet. Use it to recover or import your wallet.",
           "warning": "This is sensitive information, make sure nobody is looking at your screen.",
-          "hidePassphrase": "Hide passphrase",
-          "showPassphrase": "Show passphrase"
+          "hidePassphrase": "Hide recovery phrase",
+          "showPassphrase": "Show recovery phrase"
         }
       },
       "legal": {
