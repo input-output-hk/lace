@@ -3,6 +3,8 @@ import React from 'react';
 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
+import { Backdrop } from '../backdrop';
+
 import { Content } from './dialog-content.component';
 import * as cx from './dialog-root.css';
 
@@ -35,7 +37,9 @@ export const Root = ({
 }: Readonly<DialogRootProps>): JSX.Element => (
   <AlertDialog.Root open={open}>
     <AlertDialog.Portal container={portalContainer}>
-      <AlertDialog.Overlay className={cx.dialogOverlay} style={{ zIndex }} />
+      <AlertDialog.Overlay asChild>
+        <Backdrop zIndex={zIndex} />
+      </AlertDialog.Overlay>
       <AlertDialog.Content
         asChild
         onEscapeKeyDown={(): void => {
