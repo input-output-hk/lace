@@ -17,3 +17,4 @@ export * from './wallet-steps.common';
 export * from './wallet-steps';
 export * from './WalletSetupPasswordStep';
 export * from './MnemonicWordsWritedown';
+export * from './WalletSetupNamePasswordStep';

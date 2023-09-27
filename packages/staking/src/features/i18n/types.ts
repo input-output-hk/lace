@@ -168,6 +168,10 @@ type KeysStructure = {
         title: '';
         message: '';
       };
+      portfolioDrifted: {
+        title: '';
+        message: '';
+      };
     };
     stakingInfoCard: {
       fee: '';
