@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import React from 'react';
 
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
@@ -9,6 +9,12 @@ import * as cx from './dialog-root.css';
 export interface DialogRootProps {
   children: ReactNode;
   open: boolean;
+  setOpen: (open: boolean) => void;
+  /**
+   * The ref to the HTMLElement which will be focused after Dialog was closed.
+   * It is good practice to use the "trigger" element e.g. button that opens Dialog.
+   */
+  onCloseAutoFocusRef?: RefObject<HTMLElement>;
   /**
    * The HTMLElement which will be a Portal, the mounting point for the Dialog.
    * @default document.body
@@ -21,6 +27,8 @@ export interface DialogRootProps {
 
 export const Root = ({
   open,
+  setOpen,
+  onCloseAutoFocusRef,
   children,
   portalContainer,
   zIndex,
@@ -28,7 +36,18 @@ export const Root = ({
   <AlertDialog.Root open={open}>
     <AlertDialog.Portal container={portalContainer}>
       <AlertDialog.Overlay className={cx.dialogOverlay} style={{ zIndex }} />
-      <AlertDialog.Content asChild>
+      <AlertDialog.Content
+        asChild
+        onEscapeKeyDown={(): void => {
+          setOpen(false);
+        }}
+        onCloseAutoFocus={
+          onCloseAutoFocusRef &&
+          ((): void => {
+            onCloseAutoFocusRef.current?.focus();
+          })
+        }
+      >
         <Content
           className={cx.dialogContent}
           style={{ zIndex: zIndex === undefined ? undefined : zIndex + 1 }}

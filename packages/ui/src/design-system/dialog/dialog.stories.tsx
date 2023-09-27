@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { action } from '@storybook/addon-actions';
 import type { Meta } from '@storybook/react';
@@ -140,6 +140,7 @@ export const Controls = ({
   zIndex,
 }: Readonly<ConfigurableStoryProps>): JSX.Element => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const dialogTriggerReference = useRef<HTMLButtonElement>(null);
 
   return (
     <div>
@@ -149,9 +150,15 @@ export const Controls = ({
           onClick={(): void => {
             setIsDialogOpen(true);
           }}
+          ref={dialogTriggerReference}
         />
       </Flex>
-      <Dialog.Root open={isDialogOpen} zIndex={zIndex}>
+      <Dialog.Root
+        open={isDialogOpen}
+        setOpen={setIsDialogOpen}
+        zIndex={zIndex}
+        onCloseAutoFocusRef={dialogTriggerReference}
+      >
         <Dialog.Title>{dialogTitle}</Dialog.Title>
         <Dialog.Description>{dialogDescription}</Dialog.Description>
         <Dialog.Actions>
@@ -183,6 +190,11 @@ Controls.argTypes = {
     },
   },
   portalContainer: {
+    table: {
+      disable: true,
+    },
+  },
+  onCloseAutoFocusRef: {
     table: {
       disable: true,
     },
