@@ -6,19 +6,13 @@ export enum ExperimentsConfigStatus {
 }
 
 export enum ExperimentName {
-  NFT_FOLDER = 'NftFolders',
-  NFT_FOLDER_BUTTON_ALIGNMENT = 'NFTFolderButtonAlignment'
+  COMBINED_PASSWORD_NAME_COMPONENT = 'combined-setup-name-password'
 }
 
-export type NFTFolderVariants = readonly ['control', 'test'];
-export type NFTFolderButtonAlignmentVariants = ['control', 'left'];
+export type CombinedSetupNamePasswordVariants = readonly ['control', 'name-password-component'];
 export type ExperimentsConfig = {
-  [ExperimentName.NFT_FOLDER]: {
-    variants: NFTFolderVariants;
-    defaultVariant: string;
-  };
-  [ExperimentName.NFT_FOLDER_BUTTON_ALIGNMENT]: {
-    variants: NFTFolderButtonAlignmentVariants;
+  [ExperimentName.COMBINED_PASSWORD_NAME_COMPONENT]: {
+    variants: CombinedSetupNamePasswordVariants;
     defaultVariant: string;
   };
 };

@@ -38,6 +38,8 @@ import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import * as process from 'process';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
+import { useExperimentsContext } from '@providers/ExperimentsProvider';
+import { CombinedSetupNamePasswordVariants, ExperimentName } from '@providers/ExperimentsProvider/types';
 
 const isCombinedPasswordNameStepEnabled = process.env.USE_COMBINED_PASSWORD_NAME_STEP_COMPONENT === 'true';
 const walletSetupWizardForABTest = {
@@ -99,6 +101,7 @@ export const WalletSetupWizard = ({
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
+  const { experimentVariantByKey, overrideExperimentVariant } = useExperimentsContext();
 
   const { createWallet, setWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -257,6 +260,9 @@ export const WalletSetupWizard = ({
       // eslint-disable-next-line camelcase
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
+    overrideExperimentVariant({
+      [ExperimentName.COMBINED_PASSWORD_NAME_COMPONENT]: isAccepted ? 'name-password-component' : 'control'
+    });
     sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
     moveForward();
   };
@@ -479,7 +485,9 @@ export const WalletSetupWizard = ({
         </Suspense>
       )}
 
-      {isCombinedPasswordNameStepEnabled ? (
+      {experimentVariantByKey<CombinedSetupNamePasswordVariants[number]>(
+        ExperimentName.COMBINED_PASSWORD_NAME_COMPONENT
+      ) === 'name-password-component' ? (
         <>
           {currentStep === WalletSetupSteps.Register && (
             <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />

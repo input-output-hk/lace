@@ -5,6 +5,7 @@ import { ExperimentName, ExperimentsConfigStatus } from './types';
 type ExperimentsContext = {
   areExperimentsLoading: boolean;
   experimentVariantByKey: <R extends string>(key: ExperimentName) => R;
+  overrideExperimentVariant: (flags: Record<string, string | boolean>) => void;
 };
 
 // eslint-disable-next-line unicorn/no-null
@@ -36,16 +37,20 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
     [postHogClient]
   );
 
+  const overrideExperimentVariant = (flags: Record<string, string | boolean>) => {
+    postHogClient.overrideFeatureFlags(flags);
+  };
+
   useEffect(() => {
     const subscription = postHogClient?.subscribeToInitializationProcess((loaded) => {
       if (loaded) {
         setExperimentsConfigStatus(ExperimentsConfigStatus.LOADED);
       }
-
-      return () => {
-        if (subscription) subscription.unsubscribe();
-      };
     });
+
+    return () => {
+      if (subscription) subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -58,7 +63,7 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
   }, []);
 
   return (
-    <ExperimentsContext.Provider value={{ areExperimentsLoading, experimentVariantByKey }}>
+    <ExperimentsContext.Provider value={{ areExperimentsLoading, experimentVariantByKey, overrideExperimentVariant }}>
       {children}
     </ExperimentsContext.Provider>
   );
