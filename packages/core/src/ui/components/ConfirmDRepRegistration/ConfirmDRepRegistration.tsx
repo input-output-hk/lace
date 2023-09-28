@@ -32,7 +32,7 @@ export const ConfirmDRepRegistration = ({ dappInfo, errorMessage, translations, 
         <ErrorPane error={errorMessage} />
       </Box>
     )}
-    <Grid columns="$1" gutters="$0">
+    <Grid columns="$1" gutters="$20">
       <Cell>
         <TransactionSummary.Metadata label={translations.metadata} text="" />
       </Cell>
