@@ -47,3 +47,8 @@ export const infoValue = style({
   color: theme.colors.$delegationCardInfoValueColor,
   textAlign: 'right',
 });
+
+export const warningValue = style({
+  color: theme.colors.$delegationCardWarningValueColor,
+  textAlign: 'right',
+});
