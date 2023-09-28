@@ -50,8 +50,10 @@ export const DelegationCard = ({
   const infoData: Array<{
     nameTranslationKey: TranslationKey;
     value: number | string;
+    isWarning?: boolean;
   }> = [
     {
+      isWarning: status === 'over-allocated' || status === 'under-allocated',
       nameTranslationKey: 'overview.delegationCard.label.status',
       value: t(statusLabelTranslationKeysByDelegationStatus[status]),
     },
@@ -124,14 +126,14 @@ export const DelegationCard = ({
               gridTemplateColumns: 'minmax(max-content, 100%) minmax(max-content, 100%)',
             }}
           >
-            {infoData.map(({ nameTranslationKey, value }) => (
+            {infoData.map(({ nameTranslationKey, value, isWarning }) => (
               <Fragment key={nameTranslationKey}>
                 <div className={styles.infoLabel}>
                   <Text.Body.Large weight="$semibold" data-testid={`${nameTranslationKey}-label`}>
                     {t(nameTranslationKey)}
                   </Text.Body.Large>
                 </div>
-                <div className={styles.infoValue}>
+                <div className={isWarning ? styles.warningValue : styles.infoValue}>
                   <Text.Body.Normal weight="$bold" data-testid={`${nameTranslationKey}-value`}>
                     {value}
                   </Text.Body.Normal>
