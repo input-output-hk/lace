@@ -110,7 +110,6 @@ export const useTxSummary = ({
   createAssetList: (txAssets: Wallet.Cardano.TokenMap) => Wallet.Cip30SignTxAssetItem[];
 }): Wallet.Cip30SignTxSummary | undefined =>
   useMemo((): Wallet.Cip30SignTxSummary | undefined => {
-    if (!tx) return undefined;
     const txType = getTxType(tx);
 
     const addressToNameMap = new Map<string, string>(
@@ -139,10 +138,9 @@ export const useTxSummary = ({
       ];
     }, []);
 
-    // eslint-disable-next-line consistent-return
     return {
       fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
       outputs: txSummaryOutputs,
-      type: txType
+      type: txType.toString() as 'Send' | 'Mint' | 'Burn'
     };
   }, [tx, walletInfo.addresses, createAssetList, addressList]);
