@@ -5,7 +5,7 @@ import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
 import { useTranslation } from 'react-i18next';
 // import { PERCENTAGE_SCALE_MAX } from '../../store';
 import * as styles from './PoolDetailsCard.css';
-// import TrashIcon from './trash.svg';
+import TrashIcon from './trash.svg';
 
 interface PoolDetailsCardProps {
   color: PieChartColor;
@@ -28,8 +28,6 @@ export const PoolDetailsCard = ({
 }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
 
-  console.log(onExpandButtonClick);
-
   return (
     <Card.Outlined>
       <Flex justifyContent="space-between" alignItems="center" my="$24" mx="$32">
@@ -37,7 +35,7 @@ export const PoolDetailsCard = ({
           <Box className={styles.PoolIndicator} style={{ backgroundColor: color }} />
           <Text.SubHeading>{name}</Text.SubHeading>
         </Flex>
-        <ControlButton.Icon icon={expanded ? <ChevronUpIcon /> : <ChevronDownIcon />} onClick={onRemove} />
+        <ControlButton.Icon icon={expanded ? <ChevronUpIcon /> : <ChevronDownIcon />} onClick={onExpandButtonClick} />
       </Flex>
       {expanded && (
         <>
@@ -57,6 +55,14 @@ export const PoolDetailsCard = ({
                 stakeValue,
               })}
             </Text.Body.Normal>
+          </Flex>
+          <Flex gap="$28" p="$32" pt="$20">
+            <ControlButton.Outlined
+              label="Remove pool from portfolio"
+              icon={<TrashIcon />}
+              w="$fill"
+              onClick={onRemove}
+            />
           </Flex>
         </>
       )}
