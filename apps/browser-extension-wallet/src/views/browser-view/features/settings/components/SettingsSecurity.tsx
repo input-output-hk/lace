@@ -39,11 +39,19 @@ export const SettingsSecurity = ({
   const analytics = useAnalyticsContext();
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
 
-  const handleAnalyticsChoice = (isOptedIn: boolean) => {
-    setEnhancedAnalyticsOptInStatus(
-      isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-    );
-    analytics.setTrackingTypeChangedFromSettings();
+  const handleAnalyticsChoice = async (isOptedIn: boolean) => {
+    const status = isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
+
+    if (isOptedIn) {
+      await analytics.setOptedInForEnhancedAnalytics(status);
+      await analytics.sendEventToPostHog(PostHogAction.SettingsAnalyticsAgreeClick);
+      await analytics.sendAliasEvent();
+    } else {
+      await analytics.sendEventToPostHog(PostHogAction.SettingsAnalyticsSkipClick);
+      await analytics.setOptedInForEnhancedAnalytics(status);
+    }
+
+    setEnhancedAnalyticsOptInStatus(status);
   };
 
   const isMnemonicAvailable = useCallback(async () => {

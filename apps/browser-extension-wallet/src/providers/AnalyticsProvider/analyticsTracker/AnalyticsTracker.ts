@@ -24,7 +24,6 @@ export class AnalyticsTracker {
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
   protected excludedEvents: string;
-  protected trackingTypeChangedFromSettings: boolean;
 
   constructor({
     chain,
@@ -47,16 +46,7 @@ export class AnalyticsTracker {
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();
-      if (this.trackingTypeChangedFromSettings) {
-        this.sendAliasEvent();
-        this.sendEventToPostHog(PostHogAction.SettingsAnalyticsAgreeClick);
-        this.trackingTypeChangedFromSettings = false;
-      }
     } else {
-      if (this.trackingTypeChangedFromSettings) {
-        await this.sendEventToPostHog(PostHogAction.SettingsAnalyticsSkipClick);
-        this.trackingTypeChangedFromSettings = false;
-      }
       await this.userIdService?.makeTemporary();
     }
   }
@@ -91,10 +81,6 @@ export class AnalyticsTracker {
   setChain(chain: Wallet.Cardano.ChainId): void {
     this.matomoClient?.setChain(chain);
     this.postHogClient?.setChain(chain);
-  }
-
-  setTrackingTypeChangedFromSettings(): void {
-    this.trackingTypeChangedFromSettings = true;
   }
 
   private async shouldOmitSendEventToPostHog() {
