@@ -12,6 +12,7 @@ import {
   MAX_POOLS_COUNT,
   useDelegationPortfolioStore,
 } from '../store';
+import { isDraftPortfolioValid } from '../store/delegationPortfolioStore/selectors';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter, StakePoolDetailFooterProps } from './StakePoolDetail';
@@ -36,17 +37,28 @@ export const StakePoolDetails = ({
   const { t } = useTranslation();
   const { walletStoreInMemoryWallet } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
-  const { activeDrawerStep, activeFlow, portfolioDrifted, portfolioModified, selectionsFull, openPoolIsSelected } =
-    useDelegationPortfolioStore((store) => ({
-      activeDrawerStep: store.activeDrawerStep,
-      activeFlow: store.activeFlow,
-      openPoolIsSelected: store.selectedPortfolio.some(
-        (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
-      ),
-      portfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
-      portfolioModified: (store.draftPortfolio || []).some(({ basedOnCurrentPortfolio }) => !basedOnCurrentPortfolio),
-      selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
-    }));
+  const {
+    activeDrawerStep,
+    activeFlow,
+    currentPortfolioDrifted,
+    currentPortfolioDraftModified,
+    selectionsFull,
+    openPoolIsSelected,
+    draftPortfolioValid,
+  } = useDelegationPortfolioStore((store) => ({
+    activeDrawerStep: store.activeDrawerStep,
+    activeFlow: store.activeFlow,
+    currentPortfolioDraftModified:
+      store.draftPortfolio?.some(
+        (pool) => pool.basedOnCurrentPortfolio && pool.sliderIntegerPercentage !== pool.savedIntegerPercentage
+      ) || false,
+    currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
+    draftPortfolioValid: isDraftPortfolioValid(store),
+    openPoolIsSelected: store.selectedPortfolio.some(
+      (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
+    ),
+    selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
+  }));
   const delegationPending = inFlightTx
     ?.map(({ body: { certificates } }) =>
       (certificates ?? []).filter((c) => c.__typename === Wallet.Cardano.CertificateType.StakeDelegation)
@@ -75,16 +87,17 @@ export const StakePoolDetails = ({
         return null;
       })(),
       [DrawerManagementStep.Preferences]: (() => {
-        if (!portfolioModified && !portfolioDrifted) {
+        if (activeFlow === Flow.PortfolioManagement && !currentPortfolioDraftModified && !currentPortfolioDrifted) {
           return null;
         }
         return (
           <StakePoolPreferencesFooter
             buttonTitle={
-              !portfolioModified && portfolioDrifted
+              activeFlow === Flow.PortfolioManagement && !currentPortfolioDraftModified && currentPortfolioDrifted
                 ? t('drawer.preferences.rebalanceButton')
                 : t('drawer.preferences.confirmButton')
             }
+            disabled={!draftPortfolioValid}
           />
         );
       })(),
@@ -93,7 +106,16 @@ export const StakePoolDetails = ({
       [DrawerManagementStep.Success]: <TransactionSuccessFooter />,
       [DrawerManagementStep.Failure]: <TransactionFailFooter />,
     }),
-    [activeFlow, delegationPending, selectionActionsAllowed, popupView, portfolioModified, portfolioDrifted, t]
+    [
+      activeFlow,
+      delegationPending,
+      selectionActionsAllowed,
+      popupView,
+      currentPortfolioDraftModified,
+      currentPortfolioDrifted,
+      t,
+      draftPortfolioValid,
+    ]
   );
 
   const section = useMemo(() => activeDrawerStep && contentsMap[activeDrawerStep], [activeDrawerStep, contentsMap]);

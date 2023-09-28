@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
-import { isPortfolioDrifted } from '../../overview/helpers';
+import { PERCENTAGE_SCALE_MAX } from './constants';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
-import { DrawerManagementStep, Flow } from './stateMachine';
+import { Flow } from './stateMachine';
 import { DelegationPortfolioStore, StakePoolDetails } from './types';
 
 export const isDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) =>
@@ -19,11 +19,8 @@ export const stakePoolDetailsSelector = ({
 export const isPoolSelectedSelector = (poolHexId: Wallet.Cardano.PoolIdHex) => (store: DelegationPortfolioStore) =>
   !!store.selectedPortfolio?.find((pool) => pool.id === poolHexId);
 
-export const shouldRebalancePortfolio = (store: DelegationPortfolioStore): boolean =>
-  store.activeFlow === Flow.Overview &&
-  store.activeDrawerStep === DrawerManagementStep.Preferences &&
-  isPortfolioDrifted(store.currentPortfolio) &&
-  // check if sliders unchanged
-  !!store.draftPortfolio?.every(
-    (pool) => pool.basedOnCurrentPortfolio && pool.sliderIntegerPercentage === pool.savedIntegerPercentage
-  );
+export const isDraftPortfolioValid = (store: DelegationPortfolioStore): boolean =>
+  !!store.draftPortfolio &&
+  store.draftPortfolio.length > 0 &&
+  store.draftPortfolio.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0) === PERCENTAGE_SCALE_MAX &&
+  store.draftPortfolio.every((pool) => pool.sliderIntegerPercentage > 0);
