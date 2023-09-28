@@ -9,7 +9,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
-import { StakingInfoCard } from './staking-info-card';
+import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const Overview = () => {

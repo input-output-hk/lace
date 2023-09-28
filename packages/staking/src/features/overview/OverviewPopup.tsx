@@ -11,7 +11,7 @@ import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
-import { StakingInfoCard } from './staking-info-card';
+import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const OverviewPopup = () => {
