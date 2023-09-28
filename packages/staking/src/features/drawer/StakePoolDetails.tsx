@@ -5,14 +5,15 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import {
+  DelegationPortfolioStore,
   DrawerDefaultStep,
   DrawerManagementStep,
   DrawerStep,
   Flow,
   MAX_POOLS_COUNT,
+  PERCENTAGE_SCALE_MAX,
   useDelegationPortfolioStore,
 } from '../store';
-import { isDraftPortfolioValid } from '../store/delegationPortfolioStore/selectors';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter, StakePoolDetailFooterProps } from './StakePoolDetail';
@@ -26,6 +27,21 @@ type stakePoolDetailsProps = StakePoolDetailFooterProps & {
   showBackIcon?: boolean | ((step: DrawerStep) => boolean);
   showCloseIcon?: boolean | ((step: DrawerStep) => boolean);
   showExitConfirmation?: (step: DrawerStep) => boolean;
+};
+
+type DraftPortfolioInvalidReason = 'invalid-allocation' | 'slider-zero';
+type DraftPortfolioValidity = { valid: true } | { valid: false; reason: DraftPortfolioInvalidReason };
+
+const getDraftPortfolioValidity = (store: DelegationPortfolioStore): DraftPortfolioValidity => {
+  if (!store.draftPortfolio || store.draftPortfolio.length === 0) return { valid: true }; // throw new Error('Draft portfolio is not defined');
+  const percentageSum = store.draftPortfolio.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0);
+  if (percentageSum !== PERCENTAGE_SCALE_MAX) {
+    return { reason: 'invalid-allocation', valid: false };
+  }
+  if (store.draftPortfolio.some((pool) => pool.sliderIntegerPercentage === 0)) {
+    return { reason: 'slider-zero', valid: false };
+  }
+  return { valid: true };
 };
 
 export const StakePoolDetails = ({
@@ -44,7 +60,7 @@ export const StakePoolDetails = ({
     currentPortfolioDraftModified,
     selectionsFull,
     openPoolIsSelected,
-    draftPortfolioValid,
+    draftPortfolioValidity,
   } = useDelegationPortfolioStore((store) => ({
     activeDrawerStep: store.activeDrawerStep,
     activeFlow: store.activeFlow,
@@ -53,7 +69,7 @@ export const StakePoolDetails = ({
         (pool) => pool.basedOnCurrentPortfolio && pool.sliderIntegerPercentage !== pool.savedIntegerPercentage
       ) || false,
     currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
-    draftPortfolioValid: isDraftPortfolioValid(store),
+    draftPortfolioValidity: getDraftPortfolioValidity(store),
     openPoolIsSelected: store.selectedPortfolio.some(
       (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
     ),
@@ -90,6 +106,10 @@ export const StakePoolDetails = ({
         if (activeFlow === Flow.PortfolioManagement && !currentPortfolioDraftModified && !currentPortfolioDrifted) {
           return null;
         }
+        const tooltipTranslationMap: Record<DraftPortfolioInvalidReason, string> = {
+          'invalid-allocation': t('drawer.preferences.ctaButtonTooltip.invalidAllocation'),
+          'slider-zero': t('drawer.preferences.ctaButtonTooltip.zeroPercentageSliderError'),
+        };
         return (
           <StakePoolPreferencesFooter
             buttonTitle={
@@ -97,7 +117,8 @@ export const StakePoolDetails = ({
                 ? t('drawer.preferences.rebalanceButton')
                 : t('drawer.preferences.confirmButton')
             }
-            disabled={!draftPortfolioValid}
+            disabled={!draftPortfolioValidity.valid}
+            tooltip={draftPortfolioValidity.valid ? undefined : tooltipTranslationMap[draftPortfolioValidity.reason]}
           />
         );
       })(),
@@ -114,7 +135,7 @@ export const StakePoolDetails = ({
       currentPortfolioDraftModified,
       currentPortfolioDrifted,
       t,
-      draftPortfolioValid,
+      draftPortfolioValidity,
     ]
   );
 

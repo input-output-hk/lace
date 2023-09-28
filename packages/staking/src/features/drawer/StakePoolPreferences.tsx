@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import { Wallet } from '@lace/cardano';
 import { Button, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
+import { Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { DelegationCard, DelegationStatus } from '../overview';
@@ -10,24 +11,31 @@ import { PoolDetailsCard } from './PoolDetailsCard';
 type StakePoolPreferencesFooterProps = {
   buttonTitle: string;
   disabled?: boolean;
+  tooltip?: string;
 };
 
-export const StakePoolPreferencesFooter = ({ buttonTitle, disabled = false }: StakePoolPreferencesFooterProps) => {
+export const StakePoolPreferencesFooter = ({
+  buttonTitle,
+  disabled = false,
+  tooltip,
+}: StakePoolPreferencesFooterProps) => {
   const portfolioMutators = useDelegationPortfolioStore((state) => state.mutators);
   return (
-    <Flex flexDirection="column" alignItems="stretch" gap="$16">
-      <Button.CallToAction
-        label={buttonTitle}
-        data-testid="preferences-next-button"
-        onClick={() =>
-          portfolioMutators.executeCommand({
-            type: 'DrawerContinue',
-          })
-        }
-        w="$fill"
-        disabled={disabled}
-      />
-    </Flex>
+    <Tooltip title={tooltip}>
+      <Flex flexDirection="column" alignItems="stretch" gap="$16">
+        <Button.CallToAction
+          label={buttonTitle}
+          data-testid="preferences-next-button"
+          onClick={() =>
+            portfolioMutators.executeCommand({
+              type: 'DrawerContinue',
+            })
+          }
+          w="$fill"
+          disabled={disabled}
+        />
+      </Flex>
+    </Tooltip>
   );
 };
 

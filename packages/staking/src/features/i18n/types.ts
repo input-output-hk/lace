@@ -127,6 +127,10 @@ type KeysStructure = {
       pickMorePools: '';
       confirmButton: '';
       rebalanceButton: '';
+      ctaButtonTooltip: {
+        zeroPercentageSliderError: '';
+        invalidAllocation: '';
+      };
     };
   };
   modals: {
