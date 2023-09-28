@@ -62,9 +62,11 @@ export const en: Translations = {
   'drawer.preferences.ctaButtonTooltip.zeroPercentageSliderError':
     'Every portfolio pool requires more than 0% allocation',
   'drawer.preferences.pickMorePools': 'You need to stake at least to one pool.',
+  'drawer.preferences.poolDetails.actualRatio': 'Actual ratio',
+  'drawer.preferences.poolDetails.actualStake': 'Actual stake',
+  'drawer.preferences.poolDetails.savedRatio': 'Saved ratio',
   'drawer.preferences.rebalanceButton': 'Rebalance staking',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
-  'drawer.preferences.stakeValue': '~{{stakeValue}} ADA (~{{stakePercentage}}%)',
   'drawer.sign.confirmation.title': 'Staking confirmation',
   'drawer.sign.enterWalletPasswordToConfirmTransaction': 'Enter your wallet password to confirm transaction',
   'drawer.sign.error.invalidPassword': 'Wrong password',

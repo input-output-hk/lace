@@ -123,13 +123,17 @@ type KeysStructure = {
     preferences: {
       selectedStakePools: '';
       addPoolButton: '';
-      stakeValue: '';
       pickMorePools: '';
       confirmButton: '';
       rebalanceButton: '';
       ctaButtonTooltip: {
         zeroPercentageSliderError: '';
         invalidAllocation: '';
+      };
+      poolDetails: {
+        savedRatio: '';
+        actualRatio: '';
+        actualStake: '';
       };
     };
   };

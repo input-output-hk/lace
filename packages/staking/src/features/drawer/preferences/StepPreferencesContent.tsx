@@ -36,12 +36,14 @@ export const StepPreferencesContent = () => {
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,
   } = useOutsideHandles();
-  const { draftPortfolio, portfolioMutators, delegationStatus } = useDelegationPortfolioStore((state) => ({
-    activeDrawerStep: state.activeDrawerStep,
-    delegationStatus: getDraftDelegationStatus(state),
-    draftPortfolio: state.draftPortfolio || [],
-    portfolioMutators: state.mutators,
-  }));
+  const { draftPortfolio, portfolioMutators, delegationStatus, cardanoCoinSymbol } = useDelegationPortfolioStore(
+    (state) => ({
+      cardanoCoinSymbol: state.cardanoCoinSymbol,
+      delegationStatus: getDraftDelegationStatus(state),
+      draftPortfolio: state.draftPortfolio || [],
+      portfolioMutators: state.mutators,
+    })
+  );
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
@@ -51,6 +53,7 @@ export const StepPreferencesContent = () => {
     } = draftPool;
 
     return {
+      cardanoCoinSymbol,
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
@@ -110,6 +113,7 @@ export const StepPreferencesContent = () => {
               savedRatio={savedIntegerPercentage}
               targetRatio={sliderIntegerPercentage}
               stakeValue={stakeValue}
+              cardanoCoinSymbol={cardanoCoinSymbol}
               expanded
               onExpandButtonClick={() => void 0}
               onPercentageChange={(value) => {

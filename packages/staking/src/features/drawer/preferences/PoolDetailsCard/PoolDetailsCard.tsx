@@ -1,4 +1,3 @@
-import { formatPercentages } from '@lace/common';
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import ChevronDownIcon from '@lace/ui/dist/assets/icons/chevron-down.component.svg';
 import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
@@ -26,6 +25,7 @@ interface PoolDetailsCardProps {
   savedRatio?: number;
   targetRatio: number;
   stakeValue: string;
+  cardanoCoinSymbol: string;
 }
 
 export const PoolDetailsCard = ({
@@ -39,6 +39,7 @@ export const PoolDetailsCard = ({
   savedRatio,
   stakeValue,
   targetRatio,
+  cardanoCoinSymbol,
 }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
   const [localValue, setLocalValue] = useState(targetRatio);
@@ -64,7 +65,7 @@ export const PoolDetailsCard = ({
             <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
               <Box>
                 <Text.Body.Large weight="$medium" className={styles.valueLabel}>
-                  Saved ratio
+                  {t('drawer.preferences.poolDetails.savedRatio')}
                 </Text.Body.Large>
                 {/* TODO tooltips & styles */}
                 <InfoIcon className={styles.valueInfoIcon} />
@@ -76,7 +77,7 @@ export const PoolDetailsCard = ({
             <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
               <Box>
                 <Text.Body.Large weight="$medium" className={styles.valueLabel}>
-                  Actual ratio
+                  {t('drawer.preferences.poolDetails.actualRatio')}
                 </Text.Body.Large>
                 {/* TODO tooltips & styles */}
                 <InfoIcon className={styles.valueInfoIcon} />
@@ -88,25 +89,15 @@ export const PoolDetailsCard = ({
             <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
               <Box>
                 <Text.Body.Large weight="$medium" className={styles.valueLabel}>
-                  Actual stake
+                  {t('drawer.preferences.poolDetails.actualStake')}
                 </Text.Body.Large>
                 {/* TODO tooltips & styles */}
                 <InfoIcon className={styles.valueInfoIcon} />
               </Box>
-              <Text.Body.Large weight="$semibold">{stakeValue}</Text.Body.Large>
+              <Text.Body.Large weight="$semibold">
+                {stakeValue} <Text.Body.Small weight="$medium">{cardanoCoinSymbol}</Text.Body.Small>
+              </Text.Body.Large>
             </Flex>
-          </Flex>
-          <Flex justifyContent="space-between" alignItems="center">
-            <Text.Body.Normal weight="$semibold" className={styles.valueLabel}>
-              {t('drawer.preferences.stakeValue', {
-                // eslint-disable-next-line no-magic-numbers
-                stakePercentage: formatPercentages(targetRatio / PERCENTAGE_SCALE_MAX, {
-                  decimalPlaces: 0,
-                  rounding: 'halfUp',
-                }),
-                stakeValue,
-              })}
-            </Text.Body.Normal>
           </Flex>
           <Flex gap="$28" p="$32" pt="$20" flexDirection="column" alignItems="center">
             <Flex justifyContent="space-between" alignItems="center" w="$fill">
