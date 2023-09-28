@@ -12,6 +12,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './staking-info-card';
+import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -22,6 +23,8 @@ export const OverviewPopup = () => {
     fetchCoinPricePriceResult,
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
+    walletStoreWalletActivities: walletActivities,
+    expandStakingView,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -29,6 +32,7 @@ export const OverviewPopup = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
+  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -81,12 +85,24 @@ export const OverviewPopup = () => {
 
   return (
     <>
+      {stakingNotification === 'portfolioDrifted' && (
+        <Box mb="$32">
+          <StakingNotificationBanner
+            notification="portfolioDrifted"
+            onPortfolioDriftedNotificationClick={expandStakingView}
+          />
+        </Box>
+      )}
       <Box mb="$32">
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
           arrangement="vertical"
-          distribution={displayData}
+          distribution={displayData.map(({ color, name = '-', percentage }) => ({
+            color,
+            name,
+            percentage,
+          }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>

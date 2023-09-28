@@ -101,6 +101,9 @@ export const colors = {
   $assets_table_market_price_trend_up_label_color: '',
   $assets_table_market_price_trend_down_label_color: '',
 
+  $dialog_container_bgColor: '',
+  $dialog_description_color: '',
+
   $side_drawer_container_bgColor: '',
   $side_drawer_separator_bgColor: '',
   $side_drawer_head_title_color: '',
@@ -158,6 +161,15 @@ export const colors = {
 
   $message_title_color: '',
   $message_description_color: '',
+
+  $input_container_bgColor: '',
+  $input_container_hover_outline_color: '',
+  $input_container_focused_outline_color: '',
+  $input_value_color: '',
+  $input_button_bgColor: '',
+  $input_button_icon_color: '',
+  $input_label_color: '',
+  $input_error_message_color: '',
 };
 
 export type Colors = typeof colors;
@@ -180,6 +192,7 @@ export const lightColorScheme = {
   $primary_light_grey: '#F9F9F9',
   $primary_light_grey_0_56: 'rgba(249, 249, 249, 0.56)',
   $primary_white: '#FFFFFF',
+  $secondary_hover_purple: '#D7CBF8',
   $secondary_lace_pink: '#FF92DE',
   $secondary_data_pink: '#FF5470',
   $secondary_hover_data_pink: '#E84D66',
@@ -205,6 +218,7 @@ export const darkColorScheme = {
   $primary_mid_black: '#252525',
   $primary_bg_black: '#1E1E1E',
   $primary_black: '#000000',
+  $secondary_hover_purple: '#3B2F5D',
   $secondary_lace_pink: '#FF92DE',
   $secondary_data_pink: '#FF5470',
   $secondary_hover_data_pink: '#E84D66',

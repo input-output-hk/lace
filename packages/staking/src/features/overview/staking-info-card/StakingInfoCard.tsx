@@ -23,9 +23,13 @@ export const formatLocaleNumber = (value: string, decimalPlaces: number = DEFAUL
     groupSize: 3,
   });
 
-const formatNumericValue = (val: number | string, suffix: number | string): React.ReactElement => (
+const formatNumericValue = (
+  val: number | string,
+  suffix: number | string,
+  decimalPlaces: number = DEFAULT_DECIMALS
+): React.ReactElement => (
   <>
-    {val ? formatLocaleNumber(String(val)) : '-'}
+    {val ? formatLocaleNumber(String(val), decimalPlaces) : '-'}
     {val !== undefined && <span className={styles.suffix}>{suffix}</span>}
   </>
 );
@@ -108,19 +112,19 @@ export const StakingInfoCard = ({
         <div className={cn(styles.col, styles.justifyContentSpaceAround)}>
           <Stats
             text={t('overview.stakingInfoCard.ros')}
-            value={apy && formatNumericValue(apy, '%')}
+            value={apy && formatNumericValue(apy, '%', 1)}
             popupView
             dataTestid="stats-apy"
           />
           <Stats
             text={t('overview.stakingInfoCard.fee')}
-            value={fee && formatNumericValue(fee, cardanoCoinSymbol)}
+            value={fee && formatNumericValue(fee, cardanoCoinSymbol, 0)}
             popupView
             dataTestid="stats-fee"
           />
           <Stats
             text={t('overview.stakingInfoCard.margin')}
-            value={formatNumericValue(margin, '%')}
+            value={formatNumericValue(margin, '%', 1)}
             popupView
             dataTestid="stats-margin"
           />

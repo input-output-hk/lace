@@ -1,6 +1,7 @@
 import { darkColorScheme, laceGradient, lightColorScheme } from '@lace/ui';
 
 export const colorsContract = {
+  $bannerBellIconColor: '',
   $bannerInfoIconColor: '',
   $delegationCardInfoLabelColor: '',
   $delegationCardInfoValueColor: '',
@@ -12,9 +13,14 @@ export const colorsContract = {
   $multidelegationBetaModalPillText: '',
   $qrCodeBackground: '',
   $qrCodeForeground: '',
+  $sliderFillPrimary: '',
+  $sliderFillSecondary: '',
+  $sliderKnobFill: '',
+  $sliderRailFill: '',
 };
 
 export const lightThemeColors: typeof colorsContract = {
+  $bannerBellIconColor: lightColorScheme.$primary_accent_purple,
   $bannerInfoIconColor: lightColorScheme.$primary_accent_purple,
   $delegationCardInfoLabelColor: lightColorScheme.$primary_dark_grey,
   $delegationCardInfoValueColor: lightColorScheme.$primary_black,
@@ -26,9 +32,14 @@ export const lightThemeColors: typeof colorsContract = {
   $multidelegationBetaModalPillText: lightColorScheme.$primary_white,
   $qrCodeBackground: lightColorScheme.$primary_white,
   $qrCodeForeground: lightColorScheme.$primary_black,
+  $sliderFillPrimary: lightColorScheme.$primary_accent_purple,
+  $sliderFillSecondary: lightColorScheme.$primary_dark_grey,
+  $sliderKnobFill: lightColorScheme.$primary_white,
+  $sliderRailFill: lightColorScheme.$primary_light_grey_plus,
 };
 
 export const darkThemeColors: typeof colorsContract = {
+  $bannerBellIconColor: lightColorScheme.$primary_accent_purple,
   $bannerInfoIconColor: lightColorScheme.$primary_accent_purple,
   $delegationCardInfoLabelColor: darkColorScheme.$primary_light_grey,
   $delegationCardInfoValueColor: darkColorScheme.$primary_white,
@@ -40,4 +51,8 @@ export const darkThemeColors: typeof colorsContract = {
   $multidelegationBetaModalPillText: lightColorScheme.$primary_white,
   $qrCodeBackground: lightColorScheme.$primary_black,
   $qrCodeForeground: lightColorScheme.$primary_white,
+  $sliderFillPrimary: darkColorScheme.$primary_accent_purple,
+  $sliderFillSecondary: darkColorScheme.$primary_light_grey,
+  $sliderKnobFill: lightColorScheme.$primary_black,
+  $sliderRailFill: darkColorScheme.$primary_dark_grey_plus,
 };

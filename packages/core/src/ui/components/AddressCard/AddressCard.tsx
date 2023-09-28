@@ -9,6 +9,7 @@ export type Props = {
   name: string;
   isPopupView?: boolean;
   getQRCodeOptions?: () => QRCodeProps['options'];
+  onCopyClick?: () => void;
 };
 
 export const ADDRESS_CARD_QR_CODE_SIZE = 130;
@@ -21,9 +22,10 @@ export const AddressCard = ({
   copiedMessage,
   name,
   isPopupView,
-  getQRCodeOptions
+  getQRCodeOptions,
+  onCopyClick
 }: Readonly<Props>): JSX.Element => (
-  <Base copiedMessage={copiedMessage} copyText={address}>
+  <Base copiedMessage={copiedMessage} copyText={address} onCopyClick={onCopyClick}>
     <div className={styles.qrCodeContainer} data-testid="address-card-qr-code-container">
       <QRCode data={address} options={useMemo(() => getQRCodeOptions?.(), [getQRCodeOptions])} />
     </div>

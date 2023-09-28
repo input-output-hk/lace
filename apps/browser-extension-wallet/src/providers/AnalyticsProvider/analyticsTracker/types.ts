@@ -53,6 +53,7 @@ export enum PostHogAction {
   OnboardingRestoreEnterPassphrase01NextClick = 'onboarding | restore wallet | enter passphrase #01 | next | click',
   OnboardingRestoreEnterPassphrase09NextClick = 'onboarding | restore wallet | enter passphrase #09 | next | click',
   OnboardingRestoreEnterPassphrase17NextClick = 'onboarding | restore wallet | enter passphrase #17 | next | click',
+  OnboardingRestoreWalletNamePasswordNextClick = 'onboarding | restore wallet | wallet name & password | next | click',
   // Create new wallet
   OnboardingCreateDoneGoToWallet = 'onboarding | new wallet | all done | go to my wallet | click',
   OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
@@ -68,6 +69,7 @@ export enum PostHogAction {
   OnboardingCreateEnterPassphrase01NextClick = 'onboarding | new wallet | enter passphrase #01 | next | click',
   OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
   OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
+  OnboardingCreateWalletNamePasswordNextClick = 'onboarding | new wallet | wallet name & password | next | click',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',
@@ -140,6 +142,17 @@ export enum PostHogAction {
   SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
   SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
   SettingsCollateralXClick = 'settings | collateral | x | click',
+  // Recieve section
+  ReceiveClick = 'receive | receive | click',
+  ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
+  ReceiveCopyADAHandleIconClick = 'receive | receive | copy ADA handle icon | click',
+  ReceiveYourWalletAddressXClick = 'receive | Your wallet address | x | click',
+  // Dapp Connector
+  DappConnectorAuthorizeDappAuthorizeClick = 'dapp connector | authorize dapp | authorize | click',
+  DappConnectorAuthorizeDappCancelClick = 'dapp connector | authorize dapp | cancel | click',
+  DappConnectorAuthorizeDappDappConnectorBetaClick = 'dapp connector | authorize dapp | dapp connector beta | click',
+  DappConnectorAuthorizeDappConnectionAlwaysClick = 'dapp connector | authorize dapp | dapp connection | always | click',
+  DappConnectorAuthorizeDappConnectionOnlyOnceClick = 'dapp connector | authorize dapp | dapp connection | only once | click',
   // User
   UserWalletProfileIconClick = 'user/wallet profile | profile icon | click',
   UserWalletProfileWalletAddressClick = 'user/wallet profile | wallet address | click',
@@ -204,7 +217,8 @@ export type PostHogActionsKeys =
   | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK'
   | 'CONNECT_HW_NEXT_CLICK'
   | 'SELECT_HW_ACCOUNT_NEXT_CLICK'
-  | 'DONE_GO_TO_WALLET';
+  | 'DONE_GO_TO_WALLET'
+  | 'WALLET_NAME_PASSWORD_NEXT_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogPersonProperties = {
