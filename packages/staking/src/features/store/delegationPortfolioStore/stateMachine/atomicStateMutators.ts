@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { MAX_POOLS_COUNT, PERCENTAGE_SCALE_MAX } from '../constants';
 import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
-import { roundPercentages } from './roundPercentages';
+import { normalizePercentages } from './normalizePercentages';
 import {
   DraftPortfolioStakePool,
   DrawerDefaultStep,
@@ -33,12 +33,12 @@ export const atomicStateMutators = {
       ({ sliderIntegerPercentage }) => sliderIntegerPercentage === 0
     );
     if (allPoolsHaveZeroPercentages) {
-      const percentageValue = PERCENTAGE_SCALE_MAX / selections.length;
+      const percentageValue = PERCENTAGE_SCALE_MAX / selections.length; // may be float
       state.draftPortfolio = selections.map((pool) => ({
         ...pool,
         sliderIntegerPercentage: percentageValue,
       }));
-      state.draftPortfolio = roundPercentages(state.draftPortfolio, 'sliderIntegerPercentage');
+      state.draftPortfolio = normalizePercentages(state.draftPortfolio, 'sliderIntegerPercentage');
     } else {
       state.draftPortfolio = selections;
     }
