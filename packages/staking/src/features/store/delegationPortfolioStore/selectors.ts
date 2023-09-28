@@ -1,5 +1,4 @@
 import { Wallet } from '@lace/cardano';
-import { PERCENTAGE_SCALE_MAX } from './constants';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
 import { Flow } from './stateMachine';
 import { DelegationPortfolioStore, StakePoolDetails } from './types';
@@ -18,9 +17,3 @@ export const stakePoolDetailsSelector = ({
 
 export const isPoolSelectedSelector = (poolHexId: Wallet.Cardano.PoolIdHex) => (store: DelegationPortfolioStore) =>
   !!store.selectedPortfolio?.find((pool) => pool.id === poolHexId);
-
-export const isDraftPortfolioValid = (store: DelegationPortfolioStore): boolean =>
-  !!store.draftPortfolio &&
-  store.draftPortfolio.length > 0 &&
-  store.draftPortfolio.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0) === PERCENTAGE_SCALE_MAX &&
-  store.draftPortfolio.every((pool) => pool.sliderIntegerPercentage > 0);
