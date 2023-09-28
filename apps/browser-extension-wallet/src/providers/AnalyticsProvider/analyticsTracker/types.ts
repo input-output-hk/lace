@@ -170,7 +170,7 @@ export enum PostHogAction {
   UnlockWalletWelcomeBackForgotPasswordClick = 'unlock wallet | welcome back! | forgot password? | click',
   UnlockWalletForgotPasswordProceedClick = 'unlock wallet | forgot password? | proceed | click',
   UnlockWalletForgotPasswordCancelClick = 'unlock wallet | forgot password? | cancel | click',
-  UnlockWalletForgotPasswordNextClick = 'unlock wallet | forgot password? | next | click',
+  UnlockWalletForgotPasswordNextClick = 'unlock wallet | forgot password? | set up your password | next | click',
   UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick = 'unlock wallet | forgot password? | recovery phrase length | next | click',
   UnlockWalletForgotPasswordEnterPassphrase01NextClick = 'unlock wallet | forgot password? | enter passphrase #01 | next | click',
   UnlockWalletForgotPasswordEnterPassphrase09NextClick = 'unlock wallet | forgot password? | enter passphrase #09 | next | click',
