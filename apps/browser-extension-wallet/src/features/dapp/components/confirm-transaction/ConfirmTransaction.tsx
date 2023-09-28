@@ -35,7 +35,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const isUsingHardwareWallet = keyAgentType !== Wallet.KeyManagement.KeyAgentType.InMemory;
   const disallowSignTx = useDisallowSignTx();
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
-  const txType = !signTxData ? getTxType(signTxData.tx) : undefined;
+  const txType = signTxData ? getTxType(signTxData.tx) : undefined;
   const title = txType ? t(getTitleKey(txType)) : '';
 
   return (
