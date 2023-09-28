@@ -58,7 +58,6 @@ export const en: Translations = {
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',
   'drawer.preferences.nextButton': 'Next',
-  'drawer.preferences.pickMorePools': 'You need to stake at least to one pool.',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.preferences.stakeValue': '~{{stakeValue}} ADA (~{{stakePercentage}}%)',
   'drawer.sign.confirmation.title': 'Staking confirmation',

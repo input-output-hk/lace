@@ -11,6 +11,7 @@ export const colorsContract = {
   $getStartedStepNumberColor: '',
   $multidelegationBetaModalPillBackground: '',
   $multidelegationBetaModalPillText: '',
+  $preferencesPoolCardBorderColor: '',
   $qrCodeBackground: '',
   $qrCodeForeground: '',
   $sliderFillPrimary: '',
@@ -30,6 +31,7 @@ export const lightThemeColors: typeof colorsContract = {
   $getStartedStepNumberColor: laceGradient,
   $multidelegationBetaModalPillBackground: laceGradient,
   $multidelegationBetaModalPillText: lightColorScheme.$primary_white,
+  $preferencesPoolCardBorderColor: lightColorScheme.$primary_light_grey_plus,
   $qrCodeBackground: lightColorScheme.$primary_white,
   $qrCodeForeground: lightColorScheme.$primary_black,
   $sliderFillPrimary: lightColorScheme.$primary_accent_purple,
@@ -39,7 +41,9 @@ export const lightThemeColors: typeof colorsContract = {
 };
 
 export const darkThemeColors: typeof colorsContract = {
+  // TODO: use darkColorScheme instead
   $bannerBellIconColor: lightColorScheme.$primary_accent_purple,
+  // TODO: use darkColorScheme instead
   $bannerInfoIconColor: lightColorScheme.$primary_accent_purple,
   $delegationCardInfoLabelColor: darkColorScheme.$primary_light_grey,
   $delegationCardInfoValueColor: darkColorScheme.$primary_white,
@@ -48,8 +52,12 @@ export const darkThemeColors: typeof colorsContract = {
   $getStartedStepFillColor: darkColorScheme.$primary_mid_black,
   $getStartedStepNumberColor: laceGradient,
   $multidelegationBetaModalPillBackground: laceGradient,
+  // TODO: use darkColorScheme instead
   $multidelegationBetaModalPillText: lightColorScheme.$primary_white,
+  $preferencesPoolCardBorderColor: darkColorScheme.$primary_mid_black,
+  // TODO: use darkColorScheme instead
   $qrCodeBackground: lightColorScheme.$primary_black,
+  // TODO: use darkColorScheme instead
   $qrCodeForeground: lightColorScheme.$primary_white,
   $sliderFillPrimary: darkColorScheme.$primary_accent_purple,
   $sliderFillSecondary: darkColorScheme.$primary_light_grey,

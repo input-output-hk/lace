@@ -124,7 +124,6 @@ type KeysStructure = {
       selectedStakePools: '';
       addPoolButton: '';
       stakeValue: '';
-      pickMorePools: '';
       nextButton: '';
     };
   };

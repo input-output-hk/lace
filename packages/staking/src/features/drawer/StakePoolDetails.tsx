@@ -10,11 +10,11 @@ import {
   MAX_POOLS_COUNT,
   useDelegationPortfolioStore,
 } from '../store';
+import { StepPreferencesContent, StepPreferencesFooter } from './preferences';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter, StakePoolDetailFooterProps } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
-import { StakePoolPreferences, StakePoolPreferencesFooter } from './StakePoolPreferences';
 import { TransactionFail, TransactionFailFooter } from './TransactionFail';
 import { TransactionSuccess, TransactionSuccessFooter } from './TransactionSuccess';
 
@@ -50,7 +50,7 @@ export const StakePoolDetails = ({
   const contentsMap = useMemo(
     (): Record<DrawerStep, React.ReactElement> => ({
       [DrawerDefaultStep.PoolDetails]: <StakePoolDetail popupView={popupView} />,
-      [DrawerManagementStep.Preferences]: <StakePoolPreferences />,
+      [DrawerManagementStep.Preferences]: <StepPreferencesContent />,
       [DrawerManagementStep.Confirmation]: <StakePoolConfirmation />,
       [DrawerManagementStep.Sign]: <SignConfirmation />,
       [DrawerManagementStep.Success]: <TransactionSuccess />,
@@ -62,7 +62,7 @@ export const StakePoolDetails = ({
   const footersMap = useMemo(
     (): Record<DrawerStep, React.ReactElement> => ({
       [DrawerDefaultStep.PoolDetails]: <StakePoolDetailFooter popupView={popupView} />,
-      [DrawerManagementStep.Preferences]: <StakePoolPreferencesFooter />,
+      [DrawerManagementStep.Preferences]: <StepPreferencesFooter />,
       [DrawerManagementStep.Confirmation]: <StakePoolConfirmationFooter />,
       [DrawerManagementStep.Sign]: <SignConfirmationFooter />,
       [DrawerManagementStep.Success]: <TransactionSuccessFooter />,

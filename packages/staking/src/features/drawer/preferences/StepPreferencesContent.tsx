@@ -1,31 +1,16 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import { Wallet } from '@lace/cardano';
-import { Button, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
+import { ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../outside-handles-provider';
-import { DelegationCard, DelegationStatus } from '../overview';
-import { DelegationPortfolioStore, MAX_POOLS_COUNT, PERCENTAGE_SCALE_MAX, useDelegationPortfolioStore } from '../store';
+import { DelegationCard, DelegationStatus } from '../../delegation-card';
+import { useOutsideHandles } from '../../outside-handles-provider';
+import {
+  DelegationPortfolioStore,
+  MAX_POOLS_COUNT,
+  PERCENTAGE_SCALE_MAX,
+  useDelegationPortfolioStore,
+} from '../../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
-
-export const StakePoolPreferencesFooter = () => {
-  const { t } = useTranslation();
-  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
-
-  return (
-    <Flex flexDirection="column" alignItems="stretch" gap="$16">
-      <Button.CallToAction
-        label={t('drawer.preferences.nextButton')}
-        data-testid="preferences-next-button"
-        onClick={() =>
-          portfolioMutators.executeCommand({
-            type: 'DrawerContinue',
-          })
-        }
-        w="$fill"
-      />
-    </Flex>
-  );
-};
 
 const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore): DelegationStatus => {
   if (!draftPortfolio || draftPortfolio.length === 0) return 'no-selection';
@@ -44,8 +29,7 @@ const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore):
   throw new Error('Unexpected delegation status');
 };
 
-// eslint-disable-next-line react/no-multi-comp
-export const StakePoolPreferences = () => {
+export const StepPreferencesContent = () => {
   const { t } = useTranslation();
   const {
     balancesBalance,
@@ -65,11 +49,17 @@ export const StakePoolPreferences = () => {
       id,
       sliderIntegerPercentage,
     } = draftPool;
+
     return {
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
       percentage: sliderIntegerPercentage,
+      stakeValue: balancesBalance
+        ? compactNumber(
+            (sliderIntegerPercentage / PERCENTAGE_SCALE_MAX) * Number(balancesBalance.available.coinBalance)
+          )
+        : '-',
     };
   });
   const createRemovePoolFromPortfolio = (poolId: Wallet.Cardano.PoolIdHex) => () => {
@@ -105,13 +95,16 @@ export const StakePoolPreferences = () => {
         />
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
-        {displayData.map(({ name, id, color, percentage }) => (
+        {displayData.map(({ color, id, name, percentage, stakeValue }) => (
           <PoolDetailsCard
             key={id}
-            name={name}
             color={color}
-            percentage={percentage}
+            name={name}
             onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
+            percentage={percentage}
+            stakeValue={stakeValue}
+            expanded
+            onExpandButtonClick={() => void 0}
           />
         ))}
       </Flex>
