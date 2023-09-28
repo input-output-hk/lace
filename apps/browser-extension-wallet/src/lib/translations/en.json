@@ -1113,6 +1113,12 @@
       "drepId": "Drep ID",
       "depositPaid": "Deposit Paid"
     },
+    "drepRetirement": {
+      "title": "Confirm DRep retirement",
+      "metadata": "Metadata",
+      "drepId": "Drep ID",
+      "depositReturned": "Deposit returned"
+    },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"
     },

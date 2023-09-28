@@ -2,7 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRegistration } from '@lace/core';
 import { SignTxData } from './types';
-import { getDRepCertificate } from './utils';
+import { dRepRegistrationInspector } from './utils';
+import { Wallet } from '@lace/cardano';
 
 interface Props {
   signTxData: SignTxData;
@@ -11,13 +12,13 @@ interface Props {
 
 export const ConfirmDRepRegistrationContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
-  const certificate = getDRepCertificate(signTxData.tx);
+  const certificate = dRepRegistrationInspector(signTxData.tx);
 
   return (
     <ConfirmDRepRegistration
       dappInfo={signTxData.dappInfo}
       metadata={{
-        depositPaid: certificate.deposit.toString(),
+        depositPaid: Wallet.util.lovelacesToAdaString(certificate.deposit.toString()),
         drepId: certificate.dRepCredential.hash,
         hash: certificate.anchor.dataHash,
         url: certificate.anchor.url

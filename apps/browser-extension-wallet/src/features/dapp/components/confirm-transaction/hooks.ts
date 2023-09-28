@@ -6,7 +6,7 @@ import { CardanoTxOut, WalletInfo } from '@src/types';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as HardwareLedger from '@cardano-sdk/hardware-ledger';
-import { allowSignTx, disallowSignTx, getTransactionAssetsId, getTxType } from './utils';
+import { TxType, allowSignTx, disallowSignTx, getTransactionAssetsId, getTxType } from './utils';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { GetSignTxData, SignTxData } from './types';
 
@@ -118,7 +118,7 @@ export const useTxSummary = ({
     );
 
     const externalOutputs = tx.body.outputs.filter((output) => {
-      if (txType === 'Send') {
+      if (txType === TxType.Send) {
         return walletInfo.addresses.every((addr) => output.address !== addr.address);
       }
       return true;

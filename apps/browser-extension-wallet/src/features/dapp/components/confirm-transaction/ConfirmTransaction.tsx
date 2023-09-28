@@ -3,7 +3,6 @@ import { Button } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
-import { sectionTitle, DAPP_VIEWS } from '../../config';
 import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
@@ -12,10 +11,8 @@ import { consumeRemoteApi, RemoteApiPropertyType } from '@cardano-sdk/web-extens
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { Skeleton } from 'antd';
-import { ConfirmDRepRegistrationContainer } from './ConfirmDRepRegistrationContainer';
-import { DappTransactionContainer } from './DappTransactionContainer';
-import { isDRepRegistration } from './utils';
+import { getTitleKey, getTxType } from './utils';
+import { ConfirmTransactionContent } from './ConfirmTransactionContent';
 
 const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
   {
@@ -38,17 +35,12 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const isUsingHardwareWallet = keyAgentType !== Wallet.KeyManagement.KeyAgentType.InMemory;
   const disallowSignTx = useDisallowSignTx();
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
-  const isLoading = !signTxData;
+  const txType = !signTxData ? getTxType(signTxData.tx) : undefined;
+  const title = txType ? t(getTitleKey(txType)) : '';
 
   return (
-    <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
-      {isLoading && <Skeleton loading />}
-      {!isLoading &&
-        (isDRepRegistration(signTxData.tx) ? (
-          <ConfirmDRepRegistrationContainer signTxData={signTxData} errorMessage={errorMessage} />
-        ) : (
-          <DappTransactionContainer signTxData={signTxData} errorMessage={errorMessage} />
-        ))}
+    <Layout pageClassname={styles.spaceBetween} title={title}>
+      <ConfirmTransactionContent txType={txType} signTxData={signTxData} errorMessage={errorMessage} />
       <div className={styles.actions}>
         <Button
           onClick={async () => {

@@ -6,8 +6,29 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
+import { sectionTitle, DAPP_VIEWS } from '../../config';
 
 const DAPP_TOAST_DURATION = 50;
+
+export enum TxType {
+  Send = 'Send',
+  Mint = 'Mint',
+  Burn = 'Burn',
+  DRepRegistration = 'DRepRegistration',
+  DRepRetirement = 'DRepRetirement'
+}
+
+export const getTitleKey = (txType: TxType): string => {
+  if (txType === TxType.DRepRegistration) {
+    return 'core.drepRegistration.title';
+  }
+
+  if (txType === TxType.DRepRetirement) {
+    return 'core.drepRetirement.title';
+  }
+
+  return sectionTitle[DAPP_VIEWS.CONFIRM_TX];
+};
 
 export const disallowSignTx = (close = false): void => {
   exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
@@ -53,36 +74,56 @@ export const getTransactionAssetsId = (outputs: CardanoTxOut[]): Wallet.Cardano.
   return assetIds;
 };
 
-export const getTxType = (tx: Wallet.Cardano.Tx): 'Send' | 'Mint' | 'Burn' => {
-  const inspector = createTxInspector({
-    minted: assetsMintedInspector,
-    burned: assetsBurnedInspector
-  });
-
-  const { minted, burned } = inspector(tx as Wallet.Cardano.HydratedTx);
-  const isMintTransaction = minted.length > 0;
-  const isBurnTransaction = burned.length > 0;
-
-  if (isMintTransaction) {
-    return 'Mint';
-  }
-
-  if (isBurnTransaction) {
-    return 'Burn';
-  }
-
-  return 'Send';
-};
-
 const isDRepRegistrationCertificate = (type: Wallet.Cardano.CertificateType) =>
   type === Wallet.Cardano.CertificateType.RegisterDelegateRepresentative;
 
-export const getDRepCertificate = (
+const isDRepRetirementCertificate = (type: Wallet.Cardano.CertificateType) =>
+  type === Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative;
+
+export const dRepRegistrationInspector = (
   tx: Wallet.Cardano.Tx
 ): Wallet.Cardano.RegisterDelegateRepresentativeCertificate | undefined =>
   tx?.body.certificates.find(({ __typename }) => isDRepRegistrationCertificate(__typename)) as
     | Wallet.Cardano.RegisterDelegateRepresentativeCertificate
     | undefined;
 
+export const dRepRetirementInspector = (
+  tx: Wallet.Cardano.Tx
+): Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate | undefined =>
+  tx?.body.certificates.find(({ __typename }) => isDRepRetirementCertificate(__typename)) as
+    | Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate
+    | undefined;
+
 export const isDRepRegistration = (tx: Wallet.Cardano.Tx | undefined): boolean =>
   tx?.body.certificates.some(({ __typename }) => isDRepRegistrationCertificate(__typename));
+
+export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
+  const inspector = createTxInspector({
+    minted: assetsMintedInspector,
+    burned: assetsBurnedInspector,
+    dRepRegistration: dRepRegistrationInspector,
+    dRepRetirement: dRepRetirementInspector
+  });
+
+  const { minted, burned, dRepRegistration, dRepRetirement } = inspector(tx as Wallet.Cardano.HydratedTx);
+  const isMintTransaction = minted.length > 0;
+  const isBurnTransaction = burned.length > 0;
+
+  if (isMintTransaction) {
+    return TxType.Mint;
+  }
+
+  if (isBurnTransaction) {
+    return TxType.Burn;
+  }
+
+  if (dRepRegistration) {
+    return TxType.DRepRegistration;
+  }
+
+  if (dRepRetirement) {
+    return TxType.DRepRetirement;
+  }
+
+  return TxType.Send;
+};
