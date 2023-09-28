@@ -55,6 +55,8 @@ export const StepPreferencesContent = () => {
       id,
       name: name || '-',
       percentage: sliderIntegerPercentage,
+      // TODO
+      savedPercentage: sliderIntegerPercentage,
       stakeValue: balancesBalance
         ? compactNumber(
             (sliderIntegerPercentage / PERCENTAGE_SCALE_MAX) * Number(balancesBalance.available.coinBalance)
@@ -95,13 +97,14 @@ export const StepPreferencesContent = () => {
         />
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
-        {displayData.map(({ color, id, name, percentage, stakeValue }) => (
+        {displayData.map(({ color, id, name, percentage, stakeValue, savedPercentage }) => (
           <PoolDetailsCard
             key={id}
             color={color}
             name={name}
             onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
-            targetRatio={percentage}
+            actualRatio={percentage}
+            savedRatio={savedPercentage}
             stakeValue={stakeValue}
             expanded
             onExpandButtonClick={() => void 0}

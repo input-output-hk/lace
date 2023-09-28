@@ -3,9 +3,11 @@ import cn from 'classnames';
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
-import { PERCENTAGE_SCALE_MAX } from '../store/delegationPortfolioStore/constants';
+// import { PERCENTAGE_SCALE_MAX } from '../store';
 import * as styles from './DelegationCard.css';
 
+// TODO
+const PERCENTAGE_SCALE_MAX = 100;
 export type DelegationStatus =
   | 'multi-delegation'
   | 'over-allocated'

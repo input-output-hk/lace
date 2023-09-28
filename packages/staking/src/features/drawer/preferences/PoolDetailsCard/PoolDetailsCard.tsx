@@ -5,11 +5,14 @@ import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
 import denounce from 'lodash/debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import InfoIcon from '../../../../assets/icons/info-icon.svg';
 // import { PERCENTAGE_SCALE_MAX } from '../../store';
-import { DelegationRatioSlider } from './delegation-ratio-slider';
+import { DelegationRatioSlider } from '../DelegationRatioSlider';
 import * as styles from './PoolDetailsCard.css';
 import TrashIcon from './trash.svg';
 
+// TODO
+const PERCENTAGE_SCALE_MAX = 100;
 type PercentagesChangeHandler = (value: number) => void;
 
 interface PoolDetailsCardProps {
@@ -19,7 +22,8 @@ interface PoolDetailsCardProps {
   onExpandButtonClick: () => void;
   onPercentageChange: PercentagesChangeHandler;
   onRemove?: () => void;
-  targetRatio: number;
+  actualRatio: number;
+  savedRatio?: number;
   stakeValue: string;
 }
 
@@ -30,11 +34,12 @@ export const PoolDetailsCard = ({
   onExpandButtonClick,
   onPercentageChange,
   onRemove,
-  targetRatio,
+  actualRatio,
+  savedRatio,
   stakeValue,
 }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
-  const [localValue, setLocalValue] = useState(targetRatio);
+  const [localValue, setLocalValue] = useState(actualRatio);
 
   // eslint-disable-next-line no-magic-numbers,react-hooks/exhaustive-deps
   const onSliderChange = useCallback<PercentagesChangeHandler>(denounce(onPercentageChange, 300), [onPercentageChange]);
@@ -46,23 +51,51 @@ export const PoolDetailsCard = ({
     <Card.Outlined>
       <Flex justifyContent="space-between" alignItems="center" my="$24" mx="$32">
         <Flex alignItems="center" gap="$24">
-          <Box className={styles.PoolIndicator} style={{ backgroundColor: color }} />
+          <Box className={styles.poolIndicator} style={{ backgroundColor: color }} />
           <Text.SubHeading>{name}</Text.SubHeading>
         </Flex>
         <ControlButton.Icon icon={expanded ? <ChevronUpIcon /> : <ChevronDownIcon />} onClick={onExpandButtonClick} />
       </Flex>
       {expanded && (
         <>
-          <Flex className={styles.valuesBox}>
-            <div>a</div>
-            <div>b</div>
-            <div>c</div>
+          <Flex className={styles.valuesRow}>
+            <Flex pl="$32" pr="$32" flexDirection="column">
+              <Box>
+                <Text.Body.Large weight="$medium" className={styles.valueLabel}>
+                  Saved ratio
+                </Text.Body.Large>
+                <InfoIcon className={styles.valueInfoIcon} />
+              </Box>
+              <Text.Body.Large weight="$semibold">
+                {savedRatio || '-'} {savedRatio && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
+              </Text.Body.Large>
+            </Flex>
+            <Flex pl="$32" pr="$32" flexDirection="column">
+              <Box>
+                <Text.Body.Large weight="$medium" className={styles.valueLabel}>
+                  Actual ratio
+                </Text.Body.Large>
+                <InfoIcon className={styles.valueInfoIcon} />
+              </Box>
+              <Text.Body.Large weight="$semibold">
+                {actualRatio} <Text.Body.Small weight="$medium">%</Text.Body.Small>
+              </Text.Body.Large>
+            </Flex>
+            <Flex pl="$32" pr="$32" flexDirection="column">
+              <Box>
+                <Text.Body.Large weight="$medium" className={styles.valueLabel}>
+                  Actual stake
+                </Text.Body.Large>
+                <InfoIcon className={styles.valueInfoIcon} />
+              </Box>
+              <Text.Body.Large weight="$semibold">{stakeValue}</Text.Body.Large>
+            </Flex>
           </Flex>
           <Flex justifyContent="space-between" alignItems="center">
-            <Text.Body.Normal weight="$semibold">
+            <Text.Body.Normal weight="$semibold" className={styles.valueLabel}>
               {t('drawer.preferences.stakeValue', {
                 // eslint-disable-next-line no-magic-numbers
-                stakePercentage: formatPercentages(targetRatio / 100, {
+                stakePercentage: formatPercentages(actualRatio / PERCENTAGE_SCALE_MAX, {
                   decimalPlaces: 0,
                   rounding: 'halfUp',
                 }),
