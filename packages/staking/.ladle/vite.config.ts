@@ -21,6 +21,7 @@ export const ladleViteConfig = {
       failOnError: false,
     }),
     svgr({
+      exportAsDefault: true,
       svgrOptions: {
         icon: true,
       },

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 import classNames from 'classnames';
 
@@ -7,9 +7,10 @@ import { SkeletonButton } from './skeleton-button';
 
 import type { ButtonProps } from './skeleton-button';
 
-export const Secondary = (
-  props: Readonly<Omit<ButtonProps, 'className'>>,
-): JSX.Element => {
+export const Secondary = forwardRef<
+  HTMLButtonElement,
+  Omit<ButtonProps, 'className'>
+>((props, forwardReference) => {
   return (
     <SkeletonButton
       {...props}
@@ -17,6 +18,9 @@ export const Secondary = (
         container: classNames(cx.container, cx.button),
         label: cx.label,
       }}
+      ref={forwardReference}
     />
   );
-};
+});
+// eslint-disable-next-line functional/immutable-data
+Secondary.displayName = 'Secondary';
