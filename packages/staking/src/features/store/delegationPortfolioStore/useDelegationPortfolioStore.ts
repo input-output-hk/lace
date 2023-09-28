@@ -11,7 +11,7 @@ import {
   processExpandedViewCases,
   processPopupViewCases,
 } from './stateMachine';
-import { roundPercentages } from './stateMachine/roundPercentages';
+import { normalizePercentages } from './stateMachine/normalizePercentages';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
@@ -91,7 +91,7 @@ export const useDelegationPortfolioStore = create(
         );
 
         // TMP: replace by real data from memory/cip
-        const savedPercentages = roundPercentages(
+        const savedPercentages = normalizePercentages(
           // eslint-disable-next-line no-magic-numbers
           delegationDistribution.map((item) => ({ ...item, percentage: item.percentage * 100 })),
           'percentage'
