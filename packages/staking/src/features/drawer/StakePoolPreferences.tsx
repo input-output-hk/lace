@@ -9,9 +9,10 @@ import { PoolDetailsCard } from './PoolDetailsCard';
 
 type StakePoolPreferencesFooterProps = {
   buttonTitle: string;
+  disabled?: boolean;
 };
 
-export const StakePoolPreferencesFooter = ({ buttonTitle }: StakePoolPreferencesFooterProps) => {
+export const StakePoolPreferencesFooter = ({ buttonTitle, disabled = false }: StakePoolPreferencesFooterProps) => {
   const portfolioMutators = useDelegationPortfolioStore((state) => state.mutators);
   return (
     <Flex flexDirection="column" alignItems="stretch" gap="$16">
@@ -24,6 +25,7 @@ export const StakePoolPreferencesFooter = ({ buttonTitle }: StakePoolPreferences
           })
         }
         w="$fill"
+        disabled={disabled}
       />
     </Flex>
   );
