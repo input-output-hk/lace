@@ -50,7 +50,7 @@ export const PoolDetailsCard = ({
   }, [onSliderChange, localValue]);
 
   return (
-    <Card.Outlined>
+    <Card.Outlined className={styles.root}>
       <Flex justifyContent="space-between" alignItems="center" my="$24" mx="$32">
         <Flex alignItems="center" gap="$24">
           <Box className={styles.poolIndicator} style={{ backgroundColor: color }} />
@@ -61,33 +61,36 @@ export const PoolDetailsCard = ({
       {expanded && (
         <>
           <Flex className={styles.valuesRow}>
-            <Flex pl="$32" pr="$32" flexDirection="column">
+            <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
               <Box>
                 <Text.Body.Large weight="$medium" className={styles.valueLabel}>
                   Saved ratio
                 </Text.Body.Large>
+                {/* TODO tooltips & styles */}
                 <InfoIcon className={styles.valueInfoIcon} />
               </Box>
               <Text.Body.Large weight="$semibold">
                 {savedRatio || '-'} {savedRatio && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
               </Text.Body.Large>
             </Flex>
-            <Flex pl="$32" pr="$32" flexDirection="column">
+            <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
               <Box>
                 <Text.Body.Large weight="$medium" className={styles.valueLabel}>
                   Actual ratio
                 </Text.Body.Large>
+                {/* TODO tooltips & styles */}
                 <InfoIcon className={styles.valueInfoIcon} />
               </Box>
               <Text.Body.Large weight="$semibold">
                 {actualRatio || '-'} {actualRatio && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
               </Text.Body.Large>
             </Flex>
-            <Flex pl="$32" pr="$32" flexDirection="column">
+            <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
               <Box>
                 <Text.Body.Large weight="$medium" className={styles.valueLabel}>
                   Actual stake
                 </Text.Body.Large>
+                {/* TODO tooltips & styles */}
                 <InfoIcon className={styles.valueInfoIcon} />
               </Box>
               <Text.Body.Large weight="$semibold">{stakeValue}</Text.Body.Large>

@@ -1,3 +1,4 @@
+import { Flex } from '@lace/ui';
 import { Story, StoryDefault } from '@ladle/react';
 import { useState } from 'react';
 import { PoolDetailsCard } from './';
@@ -7,7 +8,7 @@ export const PoolDetailsCardStory: Story = () => {
   const [card2Expanded, setCard2Expanded] = useState(false);
 
   return (
-    <>
+    <Flex gap="$24" flexDirection="column" alignItems="stretch">
       <PoolDetailsCard
         color="#475"
         name="Pool Name"
@@ -28,7 +29,7 @@ export const PoolDetailsCardStory: Story = () => {
         onPercentageChange={(nextValue) => console.info('changed 2:', nextValue)}
         expanded={card2Expanded}
       />
-    </>
+    </Flex>
   );
 };
 
