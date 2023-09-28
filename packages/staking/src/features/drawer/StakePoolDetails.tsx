@@ -69,7 +69,10 @@ export const StakePoolDetails = ({
   const footersMap = useMemo(
     (): Record<DrawerStep, React.ReactElement | null> => ({
       [DrawerDefaultStep.PoolDetails]: (() => {
-        if (activeFlow === Flow.CurrentPoolDetails || (activeFlow === Flow.PoolDetails && !delegationPending && selectionActionsAllowed) {
+        if (
+          activeFlow === Flow.CurrentPoolDetails ||
+          (activeFlow === Flow.PoolDetails && !delegationPending && selectionActionsAllowed)
+        ) {
           return <StakePoolDetailFooter popupView={popupView} />;
         }
         return null;
@@ -78,7 +81,15 @@ export const StakePoolDetails = ({
         if (!portfolioModified && !portfolioDrifted) {
           return null;
         }
-        return <StakePoolPreferencesFooter buttonTitle={!portfolioModified && portfolioDrifted ? t('drawer.preferences.rebalanceButton') : t('drawer.preferences.confirmButton')} />;
+        return (
+          <StakePoolPreferencesFooter
+            buttonTitle={
+              !portfolioModified && portfolioDrifted
+                ? t('drawer.preferences.rebalanceButton')
+                : t('drawer.preferences.confirmButton')
+            }
+          />
+        );
       })(),
       [DrawerManagementStep.Confirmation]: <StakePoolConfirmationFooter />,
       [DrawerManagementStep.Sign]: <SignConfirmationFooter />,
