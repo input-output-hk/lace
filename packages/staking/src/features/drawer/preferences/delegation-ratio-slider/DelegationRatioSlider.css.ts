@@ -1,5 +1,5 @@
 import { style, sx } from '@lace/ui';
-import { theme } from '../theme';
+import { theme } from '../../../theme';
 
 export const SliderContainer = sx({
   alignItems: 'center',

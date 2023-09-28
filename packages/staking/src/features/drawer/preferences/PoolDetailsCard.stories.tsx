@@ -9,7 +9,8 @@ export const PoolDetailsCardStory: Story = () => (
       percentage={10}
       onRemove={() => void 0}
       stakeValue="0"
-      onExpandButtonClick={() => {}}
+      onExpandButtonClick={() => void 0}
+      onPercentageChange={(nextValue) => console.info('changed', nextValue)}
       expanded
     />
     <PoolDetailsCard
@@ -18,7 +19,8 @@ export const PoolDetailsCardStory: Story = () => (
       percentage={10}
       onRemove={() => void 0}
       stakeValue="0"
-      onExpandButtonClick={() => {}}
+      onExpandButtonClick={() => void 0}
+      onPercentageChange={() => void 0}
       expanded={false}
     />
   </>
