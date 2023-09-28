@@ -19,7 +19,7 @@ interface PoolDetailsCardProps {
   onExpandButtonClick: () => void;
   onPercentageChange: PercentagesChangeHandler;
   onRemove?: () => void;
-  percentage: number;
+  targetRatio: number;
   stakeValue: string;
 }
 
@@ -30,11 +30,11 @@ export const PoolDetailsCard = ({
   onExpandButtonClick,
   onPercentageChange,
   onRemove,
-  percentage,
+  targetRatio,
   stakeValue,
 }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
-  const [localValue, setLocalValue] = useState(percentage);
+  const [localValue, setLocalValue] = useState(targetRatio);
 
   // eslint-disable-next-line no-magic-numbers,react-hooks/exhaustive-deps
   const onSliderChange = useCallback<PercentagesChangeHandler>(denounce(onPercentageChange, 300), [onPercentageChange]);
@@ -62,7 +62,7 @@ export const PoolDetailsCard = ({
             <Text.Body.Normal weight="$semibold">
               {t('drawer.preferences.stakeValue', {
                 // eslint-disable-next-line no-magic-numbers
-                stakePercentage: formatPercentages(percentage / 100, {
+                stakePercentage: formatPercentages(targetRatio / 100, {
                   decimalPlaces: 0,
                   rounding: 'halfUp',
                 }),
@@ -72,7 +72,7 @@ export const PoolDetailsCard = ({
           </Flex>
           <Flex gap="$28" p="$32" pt="$20" flexDirection="column" alignItems="center">
             <Flex justifyContent="space-between" alignItems="center" w="$fill">
-              <Text.Body.Large>Edit saved ration</Text.Body.Large>
+              <Text.Body.Large>Edit saved ratio</Text.Body.Large>
               <Flex alignItems="center" gap="$12">
                 <Text.Body.Large>Ratio</Text.Body.Large>
                 <input type="number" max={100} min={localValue === 0 ? 0 : 1} value={localValue} />

@@ -6,7 +6,7 @@ export const PoolDetailsCardStory: Story = () => (
     <PoolDetailsCard
       color="#475"
       name="Pool Name"
-      percentage={10}
+      targetRatio={10}
       onRemove={() => void 0}
       stakeValue="0"
       onExpandButtonClick={() => void 0}
@@ -16,7 +16,7 @@ export const PoolDetailsCardStory: Story = () => (
     <PoolDetailsCard
       color="#475"
       name="Pool Name"
-      percentage={10}
+      targetRatio={10}
       onRemove={() => void 0}
       stakeValue="0"
       onExpandButtonClick={() => void 0}

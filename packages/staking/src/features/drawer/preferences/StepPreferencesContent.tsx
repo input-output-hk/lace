@@ -101,10 +101,18 @@ export const StepPreferencesContent = () => {
             color={color}
             name={name}
             onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
-            percentage={percentage}
+            targetRatio={percentage}
             stakeValue={stakeValue}
             expanded
             onExpandButtonClick={() => void 0}
+            onPercentageChange={(value) => {
+              console.info(value);
+              // TODO: infinite loop :( need to fix useEffect in PoolDetailsCard
+              // portfolioMutators.executeCommand({
+              //   data: { id, newSliderPercentage: value },
+              //   type: 'UpdateStakePercentage',
+              // })
+            }}
           />
         ))}
       </Flex>
