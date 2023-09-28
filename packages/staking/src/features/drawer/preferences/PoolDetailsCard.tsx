@@ -3,7 +3,7 @@ import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import ChevronDownIcon from '@lace/ui/dist/assets/icons/chevron-down.component.svg';
 import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
 import { useTranslation } from 'react-i18next';
-import { PERCENTAGE_SCALE_MAX } from '../../store';
+// import { PERCENTAGE_SCALE_MAX } from '../../store';
 import * as styles from './PoolDetailsCard.css';
 // import TrashIcon from './trash.svg';
 
@@ -49,7 +49,8 @@ export const PoolDetailsCard = ({
           <Flex justifyContent="space-between" alignItems="center">
             <Text.Body.Normal weight="$semibold">
               {t('drawer.preferences.stakeValue', {
-                stakePercentage: formatPercentages(percentage / PERCENTAGE_SCALE_MAX, {
+                // eslint-disable-next-line no-magic-numbers
+                stakePercentage: formatPercentages(percentage / 100, {
                   decimalPlaces: 0,
                   rounding: 'halfUp',
                 }),
