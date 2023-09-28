@@ -54,9 +54,11 @@ export const StepPreferencesContent = () => {
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
+      onChainPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.onChainPercentage : undefined,
       percentage: sliderIntegerPercentage,
+      savedIntegerPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.savedIntegerPercentage : undefined,
       // TODO
-      savedPercentage: sliderIntegerPercentage,
+      sliderIntegerPercentage,
       stakeValue: balancesBalance
         ? compactNumber(
             (sliderIntegerPercentage / PERCENTAGE_SCALE_MAX) * Number(balancesBalance.available.coinBalance)
@@ -97,27 +99,30 @@ export const StepPreferencesContent = () => {
         />
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
-        {displayData.map(({ color, id, name, percentage, stakeValue, savedPercentage }) => (
-          <PoolDetailsCard
-            key={id}
-            color={color}
-            name={name}
-            onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
-            actualRatio={percentage}
-            savedRatio={savedPercentage}
-            stakeValue={stakeValue}
-            expanded
-            onExpandButtonClick={() => void 0}
-            onPercentageChange={(value) => {
-              console.info(value);
-              // TODO: infinite loop :( need to fix useEffect in PoolDetailsCard
-              // portfolioMutators.executeCommand({
-              //   data: { id, newSliderPercentage: value },
-              //   type: 'UpdateStakePercentage',
-              // })
-            }}
-          />
-        ))}
+        {displayData.map(
+          ({ color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage }) => (
+            <PoolDetailsCard
+              key={id}
+              color={color}
+              name={name}
+              onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
+              actualRatio={onChainPercentage}
+              savedRatio={savedIntegerPercentage}
+              targetRatio={sliderIntegerPercentage}
+              stakeValue={stakeValue}
+              expanded
+              onExpandButtonClick={() => void 0}
+              onPercentageChange={(value) => {
+                console.info(value);
+                // TODO: infinite loop :( need to fix useEffect in PoolDetailsCard
+                // portfolioMutators.executeCommand({
+                //   data: { id, newSliderPercentage: value },
+                //   type: 'UpdateStakePercentage',
+                // })
+              }}
+            />
+          )
+        )}
       </Flex>
     </Flex>
   );

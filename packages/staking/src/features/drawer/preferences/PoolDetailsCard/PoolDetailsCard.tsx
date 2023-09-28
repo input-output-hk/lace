@@ -22,8 +22,9 @@ interface PoolDetailsCardProps {
   onExpandButtonClick: () => void;
   onPercentageChange: PercentagesChangeHandler;
   onRemove?: () => void;
-  actualRatio: number;
+  actualRatio?: number;
   savedRatio?: number;
+  targetRatio: number;
   stakeValue: string;
 }
 
@@ -37,9 +38,10 @@ export const PoolDetailsCard = ({
   actualRatio,
   savedRatio,
   stakeValue,
+  targetRatio,
 }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
-  const [localValue, setLocalValue] = useState(actualRatio);
+  const [localValue, setLocalValue] = useState(targetRatio);
 
   // eslint-disable-next-line no-magic-numbers,react-hooks/exhaustive-deps
   const onSliderChange = useCallback<PercentagesChangeHandler>(denounce(onPercentageChange, 300), [onPercentageChange]);
@@ -78,7 +80,7 @@ export const PoolDetailsCard = ({
                 <InfoIcon className={styles.valueInfoIcon} />
               </Box>
               <Text.Body.Large weight="$semibold">
-                {actualRatio} <Text.Body.Small weight="$medium">%</Text.Body.Small>
+                {actualRatio || '-'} {actualRatio && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
               </Text.Body.Large>
             </Flex>
             <Flex pl="$32" pr="$32" flexDirection="column">
@@ -95,7 +97,7 @@ export const PoolDetailsCard = ({
             <Text.Body.Normal weight="$semibold" className={styles.valueLabel}>
               {t('drawer.preferences.stakeValue', {
                 // eslint-disable-next-line no-magic-numbers
-                stakePercentage: formatPercentages(actualRatio / PERCENTAGE_SCALE_MAX, {
+                stakePercentage: formatPercentages(targetRatio / PERCENTAGE_SCALE_MAX, {
                   decimalPlaces: 0,
                   rounding: 'halfUp',
                 }),
@@ -108,13 +110,13 @@ export const PoolDetailsCard = ({
               <Text.Body.Large>Edit saved ratio</Text.Body.Large>
               <Flex alignItems="center" gap="$12">
                 <Text.Body.Large>Ratio</Text.Body.Large>
-                <input type="number" max={100} min={localValue === 0 ? 0 : 1} value={localValue} />
+                <input type="number" max={PERCENTAGE_SCALE_MAX} min={localValue === 0 ? 0 : 1} value={localValue} />
                 <Text.Body.Large>%</Text.Body.Large>
               </Flex>
             </Flex>
             <DelegationRatioSlider
               step={1}
-              max={100}
+              max={PERCENTAGE_SCALE_MAX}
               min={localValue === 0 ? 0 : 1}
               value={localValue}
               onValueChange={setLocalValue}

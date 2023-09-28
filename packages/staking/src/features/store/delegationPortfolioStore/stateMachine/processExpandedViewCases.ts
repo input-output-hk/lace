@@ -168,6 +168,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 atomicStateMutators.removePoolFromPreferences({ id: data, state });
               }),
               UpdateStakePercentage: handler<UpdateStakePercentage>(({ state, command: { data } }) => {
+                console.log('DEBUG UPDATE', data);
                 atomicStateMutators.updateStakePercentage({
                   ...data,
                   state,
@@ -279,6 +280,7 @@ export const processExpandedViewCases: Handler = (params) =>
               }),
               // eslint-disable-next-line sonarjs/no-identical-functions
               UpdateStakePercentage: handler<UpdateStakePercentage>(({ state, command: { data } }) => {
+                console.log('DEBUG WRING UPDATE', data);
                 atomicStateMutators.updateStakePercentage({
                   ...data,
                   state,
