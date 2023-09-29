@@ -105,8 +105,10 @@ export const atomicStateMutators = {
     state: State;
   }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
-    state.draftPortfolio = state.draftPortfolio.map((pool) =>
-      pool.id === id ? { ...pool, sliderIntegerPercentage: newSliderPercentage } : pool
+    state.draftPortfolio = ejectDraftFromCurrentPortfolio(
+      state.draftPortfolio.map((pool) =>
+        pool.id === id ? { ...pool, sliderIntegerPercentage: newSliderPercentage } : pool
+      )
     );
   },
 };
