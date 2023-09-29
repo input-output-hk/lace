@@ -4,7 +4,7 @@ import { ExperimentName, ExperimentsConfigStatus } from './types';
 
 type ExperimentsContext = {
   areExperimentsLoading: boolean;
-  experimentVariantByKey: <R extends string>(key: ExperimentName) => R;
+  getExperimentVariant: <R extends string>(key: ExperimentName) => R;
   overrideExperimentVariant: (flags: Record<string, string | boolean>) => void;
 };
 
@@ -32,12 +32,12 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
     [experimentsConfigStatus]
   );
 
-  const experimentVariantByKey = useCallback(
+  const getExperimentVariant = useCallback(
     <R extends string>(key: ExperimentName): R => postHogClient.getExperimentVariant(key) as R,
     [postHogClient]
   );
 
-  const overrideExperimentVariant = (flags: Record<string, string | boolean>) => {
+  const overrideExperimentVariant = (flags: Record<ExperimentName, string | boolean>) => {
     postHogClient.overrideFeatureFlags(flags);
   };
 
@@ -51,19 +51,17 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
     return () => {
       if (subscription) subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [postHogClient]);
 
   useEffect(() => {
     const subscription = postHogClient.subscribeToDistinctIdUpdate();
     return () => {
       if (subscription) subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [postHogClient]);
 
   return (
-    <ExperimentsContext.Provider value={{ areExperimentsLoading, experimentVariantByKey, overrideExperimentVariant }}>
+    <ExperimentsContext.Provider value={{ areExperimentsLoading, getExperimentVariant, overrideExperimentVariant }}>
       {children}
     </ExperimentsContext.Provider>
   );

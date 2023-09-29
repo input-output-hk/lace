@@ -101,7 +101,7 @@ export const WalletSetupWizard = ({
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const { experimentVariantByKey, overrideExperimentVariant } = useExperimentsContext();
+  const { getExperimentVariant, overrideExperimentVariant } = useExperimentsContext();
 
   const { createWallet, setWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -261,7 +261,7 @@ export const WalletSetupWizard = ({
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
     overrideExperimentVariant({
-      [ExperimentName.COMBINED_PASSWORD_NAME_COMPONENT]: isAccepted ? 'name-password-component' : 'control'
+      [ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN]: isAccepted ? 'test' : 'control'
     });
     sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
     moveForward();
@@ -485,9 +485,9 @@ export const WalletSetupWizard = ({
         </Suspense>
       )}
 
-      {experimentVariantByKey<CombinedSetupNamePasswordVariants[number]>(
-        ExperimentName.COMBINED_PASSWORD_NAME_COMPONENT
-      ) === 'name-password-component' ? (
+      {getExperimentVariant<CombinedSetupNamePasswordVariants[number]>(
+        ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN
+      ) === 'test' ? (
         <>
           {currentStep === WalletSetupSteps.Register && (
             <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />

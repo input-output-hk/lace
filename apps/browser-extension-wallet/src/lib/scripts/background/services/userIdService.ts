@@ -1,6 +1,6 @@
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { of, Subject } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 import {
   clearBackgroundStorage,
@@ -23,7 +23,7 @@ export class UserIdService implements UserIdServiceInterface {
   private walletBasedUserId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
-  public userTrackingType$ = new Subject<UserTrackingType>();
+  public userTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
 
   constructor(
     private getStorage: typeof getBackgroundStorage = getBackgroundStorage,

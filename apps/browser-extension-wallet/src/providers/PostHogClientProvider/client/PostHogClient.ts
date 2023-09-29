@@ -19,10 +19,10 @@ import {
   PUBLIC_POSTHOG_HOST,
   POSTHOG_ENABLED
 } from './config';
-import { BackgroundStorage, UserIdService } from '@lib/scripts/types';
+import { BackgroundService, UserIdService } from '@lib/scripts/types';
 import { experiments, fallbackConfiguration } from '@providers/ExperimentsProvider/config';
 import { ExperimentName } from '@providers/ExperimentsProvider/types';
-import { Subscription, Subject } from 'rxjs';
+import { Subscription, BehaviorSubject } from 'rxjs';
 
 /**
  * PostHog API reference:
@@ -32,20 +32,17 @@ export class PostHogClient {
   protected static postHogClientInstance: PostHogClient;
   private userTrackingType: UserTrackingType;
   private currentUserTrackingType?: UserTrackingType;
-  private hasPostHogInitialized$: Subject<boolean>;
+  private hasPostHogInitialized$: BehaviorSubject<boolean>;
 
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
-    private backgroundServiceUtils: {
-      getBackgroundStorage: () => Promise<BackgroundStorage>;
-      setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
-    },
+    private backgroundServiceUtils: Partial<BackgroundService>,
     private view: ExtensionViews = ExtensionViews.Extended,
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
-    this.hasPostHogInitialized$ = new Subject();
+    this.hasPostHogInitialized$ = new BehaviorSubject(false);
 
     this.userIdService
       .getUserId(chain.networkMagic)
@@ -98,19 +95,12 @@ export class PostHogClient {
       });
   }
 
-  static createInstance(
+  static getInstance(
     chain: Wallet.Cardano.ChainId,
     userIdService: UserIdService,
-    {
-      getBackgroundStorage,
-      setBackgroundStorage
-    }: {
-      getBackgroundStorage: () => Promise<BackgroundStorage>;
-      setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
-    },
+    { getBackgroundStorage, setBackgroundStorage }: Partial<BackgroundService>,
     view?: ExtensionViews
   ): PostHogClient {
-    // create post hog instance once. If post hog is disabled we just return an empty client
     if (this.postHogClientInstance || !POSTHOG_ENABLED) return this.postHogClientInstance;
     this.postHogClientInstance = new PostHogClient(
       chain,

@@ -6,7 +6,6 @@ import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService'
 import { ExtensionViews } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 
-// do we move it to PostHogClientInstance?
 const userIdService = getUserIdService();
 
 // eslint-disable-next-line unicorn/no-null
@@ -33,7 +32,7 @@ export const PostHogClientProvider = ({ children, postHogCustomClient }: PostHog
   const postHogClientInstance = useMemo(
     () =>
       postHogCustomClient ||
-      PostHogClient.createInstance(
+      PostHogClient.getInstance(
         currentChain,
         userIdService,
         { getBackgroundStorage, setBackgroundStorage },

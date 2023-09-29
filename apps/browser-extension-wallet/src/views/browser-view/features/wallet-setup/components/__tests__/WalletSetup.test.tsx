@@ -44,7 +44,7 @@ jest.mock('@providers/ExperimentsProvider', () => ({
   ...jest.requireActual<any>('@providers/ExperimentsProvider'),
   useExperimentsContext: jest
     .fn()
-    .mockReturnValue({ experimentVariantByKey: jest.fn(), overrideExperimentVariant: jest.fn() })
+    .mockReturnValue({ getExperimentVariant: jest.fn(), overrideExperimentVariant: jest.fn() })
 }));
 
 jest.mock('@providers/PostHogClientProvider', () => ({

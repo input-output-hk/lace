@@ -57,7 +57,7 @@ export const AnalyticsProvider = ({
         excludedEvents: POSTHOG_EXCLUDED_EVENTS
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tracker, analyticsDisabled]
+    [tracker, analyticsDisabled, postHogClient]
   );
 
   useEffect(() => {

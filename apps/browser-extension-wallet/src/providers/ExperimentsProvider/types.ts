@@ -6,12 +6,12 @@ export enum ExperimentsConfigStatus {
 }
 
 export enum ExperimentName {
-  COMBINED_PASSWORD_NAME_COMPONENT = 'combined-setup-name-password'
+  COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN = 'combined-setup-name-password'
 }
 
-export type CombinedSetupNamePasswordVariants = readonly ['control', 'name-password-component'];
+export type CombinedSetupNamePasswordVariants = readonly ['control', 'test'];
 export type ExperimentsConfig = {
-  [ExperimentName.COMBINED_PASSWORD_NAME_COMPONENT]: {
+  [ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN]: {
     variants: CombinedSetupNamePasswordVariants;
     defaultVariant: string;
   };
