@@ -230,15 +230,11 @@ const colors: Colors = {
   $message_title_color: darkColorScheme.$primary_white,
   $message_description_color: darkColorScheme.$primary_light_grey,
 
-  $input_container_bgColor: darkColorScheme.$primary_dark_grey,
-  $input_container_hover_outline_color: darkColorScheme.$primary_grey,
-  $input_container_focused_outline_color:
-    darkColorScheme.$secondary_hover_purple,
-  $input_value_color: darkColorScheme.$primary_white,
-  $input_button_bgColor: darkColorScheme.$primary_grey,
-  $input_button_icon_color: darkColorScheme.$primary_light_grey,
-  $input_label_color: darkColorScheme.$primary_light_grey,
-  $input_error_message_color: darkColorScheme.$secondary_data_pink,
+  $text_primary: darkColorScheme.$primary_white,
+  $text_secondary: darkColorScheme.$primary_light_grey,
+
+  $metadata_label_color: darkColorScheme.$primary_white,
+  $metadata_secondary_label_color: darkColorScheme.$primary_light_grey,
 };
 
 const elevation: Elevation = {
