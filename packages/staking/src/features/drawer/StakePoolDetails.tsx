@@ -14,6 +14,7 @@ import {
   PERCENTAGE_SCALE_MAX,
   useDelegationPortfolioStore,
 } from '../store';
+import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../store/delegationPortfolioStore/constants';
 import { StepPreferencesContent, StepPreferencesFooter } from './preferences';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
@@ -64,10 +65,7 @@ export const StakePoolDetails = ({
   } = useDelegationPortfolioStore((store) => ({
     activeDrawerStep: store.activeDrawerStep,
     activeFlow: store.activeFlow,
-    currentPortfolioDraftModified:
-      store.draftPortfolio?.some(
-        (pool) => pool.basedOnCurrentPortfolio && pool.sliderIntegerPercentage !== pool.savedIntegerPercentage
-      ) || false,
+    currentPortfolioDraftModified: store.draftPortfolio?.some((pool) => !pool.basedOnCurrentPortfolio) || false,
     currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
     draftPortfolioValidity: getDraftPortfolioValidity(store),
     openPoolIsSelected: store.selectedPortfolio.some(
@@ -113,7 +111,10 @@ export const StakePoolDetails = ({
         return (
           <StepPreferencesFooter
             buttonTitle={
-              activeFlow === Flow.PortfolioManagement && !currentPortfolioDraftModified && currentPortfolioDrifted
+              !TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED &&
+              activeFlow === Flow.PortfolioManagement &&
+              !currentPortfolioDraftModified &&
+              currentPortfolioDrifted
                 ? t('drawer.preferences.rebalanceButton')
                 : t('drawer.preferences.confirmButton')
             }
