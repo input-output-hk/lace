@@ -32,6 +32,9 @@ type stakePoolDetailsProps = StakePoolDetailFooterProps & {
 type DraftPortfolioInvalidReason = 'invalid-allocation' | 'slider-zero';
 type DraftPortfolioValidity = { valid: true } | { valid: false; reason: DraftPortfolioInvalidReason };
 
+// tmp hotfix before release: disabling "rebalance" until portfolio persistence is implemented
+const TMP_PERSISTENCE_HOTFIX_DISABLE_REBALANCE = true;
+
 const getDraftPortfolioValidity = (store: DelegationPortfolioStore): DraftPortfolioValidity => {
   if (!store.draftPortfolio || store.draftPortfolio.length === 0) return { valid: true }; // throw new Error('Draft portfolio is not defined');
   const percentageSum = store.draftPortfolio.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0);
@@ -113,7 +116,10 @@ export const StakePoolDetails = ({
         return (
           <StepPreferencesFooter
             buttonTitle={
-              activeFlow === Flow.PortfolioManagement && !currentPortfolioDraftModified && currentPortfolioDrifted
+              !TMP_PERSISTENCE_HOTFIX_DISABLE_REBALANCE &&
+              activeFlow === Flow.PortfolioManagement &&
+              !currentPortfolioDraftModified &&
+              currentPortfolioDrifted
                 ? t('drawer.preferences.rebalanceButton')
                 : t('drawer.preferences.confirmButton')
             }
