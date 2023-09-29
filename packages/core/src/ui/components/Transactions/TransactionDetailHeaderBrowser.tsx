@@ -24,6 +24,8 @@ export const TransactionDetailHeaderBrowser = ({
       )}
     </div>
 
-    <div className={styles.assets}>{description}</div>
+    <div className={styles.assets} data-testid="tx-description-details">
+      {description}
+    </div>
   </div>
 );

@@ -1,7 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { AdaSymbol } from './types';
 
-export const targetWeight = 100;
 export const MAX_POOLS_COUNT = 5;
 export const LAST_STABLE_EPOCH = 2;
 
