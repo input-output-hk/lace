@@ -1,11 +1,14 @@
 import { style, sx } from '@lace/ui';
 import { theme } from '../../../theme';
 
-export const SliderContainer = sx({
-  alignItems: 'center',
-  display: 'flex',
-  gap: '$4',
-});
+export const SliderContainer = style([
+  sx({
+    alignItems: 'center',
+    display: 'flex',
+    gap: '$4',
+  }),
+  { width: '100%' },
+]);
 
 export const SliderRoot = style([
   sx({
@@ -14,10 +17,10 @@ export const SliderRoot = style([
   {
     alignItems: 'center',
     display: 'flex',
+    flex: 1,
     position: 'relative',
     touchAction: 'none',
     userSelect: 'none',
-    width: '454px',
   },
 ]);
 
