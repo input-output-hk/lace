@@ -38,8 +38,6 @@ export const PostHogClientProvider = ({ children, postHogCustomClient }: PostHog
         { getBackgroundStorage, setBackgroundStorage },
         view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended
       ),
-    // we have two options here, we keep the memoization with PostHogClientInstance or
-    // we remove currentChain and view from the depencency array to avoid redefine this every time these fields change and we call new PostHogClient() here
     [currentChain, getBackgroundStorage, postHogCustomClient, setBackgroundStorage, view]
   );
 

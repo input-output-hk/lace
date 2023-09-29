@@ -37,7 +37,7 @@ export class PostHogClient {
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
-    private backgroundServiceUtils: Partial<BackgroundService>,
+    private backgroundServiceUtils: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>,
     private view: ExtensionViews = ExtensionViews.Extended,
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
@@ -100,7 +100,10 @@ export class PostHogClient {
   static getInstance(
     chain: Wallet.Cardano.ChainId,
     userIdService: UserIdService,
-    { getBackgroundStorage, setBackgroundStorage }: Partial<BackgroundService>,
+    {
+      getBackgroundStorage,
+      setBackgroundStorage
+    }: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>,
     view?: ExtensionViews
   ): PostHogClient {
     if (this.postHogClientInstance || !POSTHOG_ENABLED) return this.postHogClientInstance;
