@@ -1,6 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
 import { isPortfolioDrifted } from 'features/overview/helpers';
+import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from 'features/store/delegationPortfolioStore/constants';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -31,9 +32,6 @@ type stakePoolDetailsProps = StakePoolDetailFooterProps & {
 
 type DraftPortfolioInvalidReason = 'invalid-allocation' | 'slider-zero';
 type DraftPortfolioValidity = { valid: true } | { valid: false; reason: DraftPortfolioInvalidReason };
-
-// tmp hotfix before release: disabling "rebalance" until portfolio persistence is implemented
-const TMP_PERSISTENCE_HOTFIX_DISABLE_REBALANCE = true;
 
 const getDraftPortfolioValidity = (store: DelegationPortfolioStore): DraftPortfolioValidity => {
   if (!store.draftPortfolio || store.draftPortfolio.length === 0) return { valid: true }; // throw new Error('Draft portfolio is not defined');
@@ -113,7 +111,7 @@ export const StakePoolDetails = ({
         return (
           <StepPreferencesFooter
             buttonTitle={
-              !TMP_PERSISTENCE_HOTFIX_DISABLE_REBALANCE &&
+              !TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED &&
               activeFlow === Flow.PortfolioManagement &&
               !currentPortfolioDraftModified &&
               currentPortfolioDrifted
