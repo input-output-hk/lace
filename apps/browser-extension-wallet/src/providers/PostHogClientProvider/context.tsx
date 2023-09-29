@@ -1,5 +1,5 @@
 import shallow from 'zustand/shallow';
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
 import { PostHogClient } from './client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
@@ -42,6 +42,8 @@ export const PostHogClientProvider = ({ children, postHogCustomClient }: PostHog
     // we remove currentChain and view from the depencency array to avoid redefine this every time these fields change and we call new PostHogClient() here
     [currentChain, getBackgroundStorage, postHogCustomClient, setBackgroundStorage, view]
   );
+
+  useEffect(() => () => postHogClientInstance.shutdown(), [postHogClientInstance]);
 
   return <PostHogClientContext.Provider value={postHogClientInstance}>{children}</PostHogClientContext.Provider>;
 };

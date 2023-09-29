@@ -6,12 +6,12 @@ import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/PostHogClientPro
 import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
 const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
-const mockUserTrackingType$ = new Subject<UserTrackingType>();
+const mockUserTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
 
 jest.mock('posthog-js');
 
@@ -178,12 +178,11 @@ describe('PostHogClient', () => {
     const event = PostHogAction.OnboardingCreateClick;
     const client = new PostHogClient(
       chain,
-      { ...mockUserIdService },
+      mockUserIdService,
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
     );
-    const subcription = client.subscribeToDistinctIdUpdate();
     mockUserIdService.userTrackingType$.next(UserTrackingType.Enhanced);
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
@@ -195,20 +194,20 @@ describe('PostHogClient', () => {
         }
       })
     );
-    subcription.unsubscribe();
+    client.shutdown();
   });
 
   it('should return user_tracking_type basic after calling twice', async () => {
     const event = PostHogAction.OnboardingCreateClick;
+    const tracking = new BehaviorSubject(UserTrackingType.Enhanced);
     const client = new PostHogClient(
       chain,
-      { ...mockUserIdService },
+      { ...mockUserIdService, userTrackingType$: tracking },
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
       publicPosthogHost
     );
-    const subcription = client.subscribeToDistinctIdUpdate();
-    mockUserIdService.userTrackingType$.next(UserTrackingType.Enhanced);
+
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,
@@ -219,7 +218,7 @@ describe('PostHogClient', () => {
         }
       })
     );
-    mockUserIdService.userTrackingType$.next(UserTrackingType.Basic);
+    tracking.next(UserTrackingType.Basic);
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,
@@ -230,6 +229,6 @@ describe('PostHogClient', () => {
         }
       })
     );
-    subcription.unsubscribe();
+    client.shutdown();
   });
 });

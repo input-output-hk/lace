@@ -53,13 +53,6 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
     };
   }, [postHogClient]);
 
-  useEffect(() => {
-    const subscription = postHogClient.subscribeToDistinctIdUpdate();
-    return () => {
-      if (subscription) subscription.unsubscribe();
-    };
-  }, [postHogClient]);
-
   return (
     <ExperimentsContext.Provider value={{ areExperimentsLoading, getExperimentVariant, overrideExperimentVariant }}>
       {children}

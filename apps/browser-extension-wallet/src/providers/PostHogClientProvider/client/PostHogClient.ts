@@ -93,6 +93,8 @@ export class PostHogClient {
       .catch(() => {
         // TODO: do something with the error if we couldn't get the ID
       });
+
+    this.subscribeToDistinctIdUpdate();
   }
 
   static getInstance(
@@ -114,8 +116,12 @@ export class PostHogClient {
     return this.postHogClientInstance;
   }
 
-  subscribeToDistinctIdUpdate(): Subscription {
-    return this.userIdService.userTrackingType$.subscribe(async (trackingType) => {
+  shutdown(): void {
+    this.userIdService.userTrackingType$.unsubscribe();
+  }
+
+  subscribeToDistinctIdUpdate(): void {
+    this.userIdService.userTrackingType$.subscribe(async (trackingType) => {
       this.currentUserTrackingType = trackingType;
       const id = await this.userIdService.getUserId(this.chain.networkId);
       posthog.register({

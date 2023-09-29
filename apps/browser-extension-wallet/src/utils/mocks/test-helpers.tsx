@@ -641,7 +641,8 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   subscribeToInitializationProcess: jest.fn(),
   overrideFeatureFlags: jest.fn(),
   getExperimentVariant: jest.fn(),
-  subscribeToDistinctIdUpdate: jest.fn()
+  subscribeToDistinctIdUpdate: jest.fn(),
+  shutdown: jest.fn()
 };
 
 export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {
