@@ -1,4 +1,4 @@
-import { Card, PIE_CHART_DEFAULT_COLOR_SET, PieChart, PieChartColor, Text } from '@lace/ui';
+import { Card, PIE_CHART_DEFAULT_COLOR_SET, PieChart, PieChartColor, PieChartGradientColor, Text } from '@lace/ui';
 import cn from 'classnames';
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -52,8 +52,10 @@ export const DelegationCard = ({
   const infoData: Array<{
     nameTranslationKey: TranslationKey;
     value: number | string;
+    isWarning?: boolean;
   }> = [
     {
+      isWarning: status === 'over-allocated' || status === 'under-allocated',
       nameTranslationKey: 'overview.delegationCard.label.status',
       value: t(statusLabelTranslationKeysByDelegationStatus[status]),
     },
@@ -61,29 +63,44 @@ export const DelegationCard = ({
     { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
   ];
 
-  const GREY_COLOR: PieChartColor = '#C0C0C0';
   const totalPercentage = useMemo(() => distribution.reduce((acc, cur) => acc + cur.percentage, 0), [distribution]);
-  const emptyPieElementVisible = totalPercentage !== PERCENTAGE_SCALE_MAX;
-
-  const colorSet = useMemo<PieChartColor[]>(
-    () =>
-      emptyPieElementVisible
-        ? [...PIE_CHART_DEFAULT_COLOR_SET.slice(0, distribution.length), GREY_COLOR]
-        : PIE_CHART_DEFAULT_COLOR_SET,
-    [distribution.length, emptyPieElementVisible]
-  );
-
-  const data = useMemo<Distribution>(() => {
-    if (!emptyPieElementVisible) return distribution;
-    return [
-      ...distribution,
-      {
-        color: GREY_COLOR,
-        name: 'Unallocated',
-        percentage: PERCENTAGE_SCALE_MAX - totalPercentage,
-      },
-    ];
-  }, [distribution, emptyPieElementVisible, totalPercentage]);
+  const { data, colorSet = PIE_CHART_DEFAULT_COLOR_SET } = useMemo((): {
+    colorSet?: PieChartColor[];
+    data: Distribution;
+  } => {
+    const GREY_COLOR: PieChartColor = '#C0C0C0';
+    const RED_COLOR: PieChartColor = '#FF5470';
+    if (totalPercentage > PERCENTAGE_SCALE_MAX) {
+      // Merge slices into one red over-allocated slice
+      return {
+        colorSet: [RED_COLOR],
+        data: [{ color: RED_COLOR, name: 'Over-allocated', percentage: totalPercentage }],
+      };
+    }
+    if (totalPercentage < PERCENTAGE_SCALE_MAX) {
+      // Add grey unallocated slice
+      return {
+        colorSet: [...PIE_CHART_DEFAULT_COLOR_SET.slice(0, distribution.length), GREY_COLOR],
+        data: [
+          ...distribution,
+          {
+            color: GREY_COLOR,
+            name: 'Unallocated',
+            percentage: PERCENTAGE_SCALE_MAX - totalPercentage,
+          },
+        ],
+      };
+    }
+    if (distribution.length === 1) {
+      return {
+        colorSet: [PieChartGradientColor.LaceLinearGradient],
+        data: distribution.map((item) => ({ ...item, color: PieChartGradientColor.LaceLinearGradient })),
+      };
+    }
+    return {
+      data: distribution,
+    };
+  }, [distribution, totalPercentage]);
 
   return (
     <Card.Greyed>
@@ -111,14 +128,14 @@ export const DelegationCard = ({
               gridTemplateColumns: 'minmax(max-content, 100%) minmax(max-content, 100%)',
             }}
           >
-            {infoData.map(({ nameTranslationKey, value }) => (
+            {infoData.map(({ nameTranslationKey, value, isWarning }) => (
               <Fragment key={nameTranslationKey}>
                 <div className={styles.infoLabel}>
                   <Text.Body.Large weight="$semibold" data-testid={`${nameTranslationKey}-label`}>
                     {t(nameTranslationKey)}
                   </Text.Body.Large>
                 </div>
-                <div className={styles.infoValue}>
+                <div className={isWarning ? styles.warningValue : styles.infoValue}>
                   <Text.Body.Normal weight="$bold" data-testid={`${nameTranslationKey}-value`}>
                     {value}
                   </Text.Body.Normal>

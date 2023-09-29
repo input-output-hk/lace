@@ -1,23 +1,30 @@
 import { Button, Flex } from '@lace/ui';
-import { useTranslation } from 'react-i18next';
+import { Tooltip } from 'antd';
 import { useDelegationPortfolioStore } from '../../store';
 
-export const StepPreferencesFooter = () => {
-  const { t } = useTranslation();
-  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+type StepPreferencesFooterProps = {
+  buttonTitle: string;
+  disabled?: boolean;
+  tooltip?: string;
+};
 
+export const StepPreferencesFooter = ({ buttonTitle, disabled = false, tooltip }: StepPreferencesFooterProps) => {
+  const portfolioMutators = useDelegationPortfolioStore((state) => state.mutators);
   return (
-    <Flex flexDirection="column" alignItems="stretch" gap="$16">
-      <Button.CallToAction
-        label={t('drawer.preferences.nextButton')}
-        data-testid="preferences-next-button"
-        onClick={() =>
-          portfolioMutators.executeCommand({
-            type: 'DrawerContinue',
-          })
-        }
-        w="$fill"
-      />
-    </Flex>
+    <Tooltip title={tooltip}>
+      <Flex flexDirection="column" alignItems="stretch" gap="$16">
+        <Button.CallToAction
+          label={buttonTitle}
+          data-testid="preferences-next-button"
+          onClick={() =>
+            portfolioMutators.executeCommand({
+              type: 'DrawerContinue',
+            })
+          }
+          w="$fill"
+          disabled={disabled}
+        />
+      </Flex>
+    </Tooltip>
   );
 };

@@ -57,7 +57,12 @@ export const en: Translations = {
   'drawer.failure.subTitle': 'The transaction was not successful. Please try again.',
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',
-  'drawer.preferences.nextButton': 'Next',
+  'drawer.preferences.confirmButton': 'Confirm',
+  'drawer.preferences.ctaButtonTooltip.invalidAllocation': 'You need to have a 100% allocation in order to proceed',
+  'drawer.preferences.ctaButtonTooltip.zeroPercentageSliderError':
+    'Every portfolio pool requires more than 0% allocation',
+  'drawer.preferences.pickMorePools': 'You need to stake at least to one pool.',
+  'drawer.preferences.rebalanceButton': 'Rebalance staking',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.preferences.stakeValue': '~{{stakeValue}} ADA (~{{stakePercentage}}%)',
   'drawer.sign.confirmation.title': 'Staking confirmation',

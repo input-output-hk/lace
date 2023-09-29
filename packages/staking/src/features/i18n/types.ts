@@ -124,7 +124,13 @@ type KeysStructure = {
       selectedStakePools: '';
       addPoolButton: '';
       stakeValue: '';
-      nextButton: '';
+      pickMorePools: '';
+      confirmButton: '';
+      rebalanceButton: '';
+      ctaButtonTooltip: {
+        zeroPercentageSliderError: '';
+        invalidAllocation: '';
+      };
     };
   };
   modals: {
