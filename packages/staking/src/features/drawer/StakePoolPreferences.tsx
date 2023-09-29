@@ -7,14 +7,16 @@ import { DelegationCard } from '../overview/DelegationCard';
 import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
 
-export const StakePoolPreferencesFooter = () => {
-  const { t } = useTranslation();
-  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+type StakePoolPreferencesFooterProps = {
+  buttonTitle: string;
+};
 
+export const StakePoolPreferencesFooter = ({ buttonTitle }: StakePoolPreferencesFooterProps) => {
+  const portfolioMutators = useDelegationPortfolioStore((state) => state.mutators);
   return (
     <Flex flexDirection="column" alignItems="stretch" gap="$16">
       <Button.CallToAction
-        label={t('drawer.preferences.nextButton')}
+        label={buttonTitle}
         data-testid="preferences-next-button"
         onClick={() =>
           portfolioMutators.executeCommand({
