@@ -10,6 +10,10 @@ import StakePoolDetails from '../elements/multidelegation/StakePoolDetailsDrawer
 import ChangingStakingPreferencesModal from '../elements/multidelegation/ChangingStakingPreferencesModal';
 import ManageStakingDrawer from '../elements/multidelegation/ManageStakingDrawer';
 import StakingConfirmationDrawer from '../elements/multidelegation/StakingConfirmationDrawer';
+import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
+import StakingPasswordDrawer from '../elements/multidelegation/StakingPasswordDrawer';
+import StakingSuccessDrawerAssert from '../assert/multidelegation/StakingSuccessDrawerAssert';
+import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDrawer';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
@@ -17,6 +21,11 @@ Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | '
 
 Then(/^I wait until delegation info card shows staking to "(\d+)" pool\(s\)$/, async (poolsCount: number) => {
   await MultidelegationPageAssert.assertSeeStakingOnPoolsCounter(poolsCount);
+});
+
+When(/^I wait until "([^"]*)" pool is on "Your pools" list$/, async (poolName: string) => {
+  poolName = poolName === 'OtherStakePool' ? testContext.load('currentStakePoolName') : poolName;
+  await MultidelegationPageAssert.assertSeeStakingPoolOnYourPoolsList(poolName);
 });
 
 Then(
@@ -29,6 +38,7 @@ Then(
 Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmation)$/, async (section: string) => {
   await MultidelegationPage.clickButtonOnSection(section);
 });
+
 Given(/^I confirm multidelegation beta modal$/, async () => {
   await MultidelegationPage.confirmBetaModal();
 });
@@ -113,4 +123,35 @@ When(/^I click on "Next" button on staking preferences drawer$/, async () => {
 When(/^I click on "Next" button on staking confirmation drawer$/, async () => {
   await StakingConfirmationDrawer.nextButton.waitForClickable();
   await StakingConfirmationDrawer.nextButton.click();
+});
+
+When(
+  /^I enter (correct|incorrect|newly created) wallet password and confirm staking$/,
+  async (type: 'correct' | 'incorrect' | 'newly created') => {
+    let password;
+    switch (type) {
+      case 'newly created':
+        password = String((testContext.load('newCreatedWallet') as WalletConfig).password);
+        break;
+      case 'incorrect':
+        password = 'somePassword';
+        break;
+      case 'correct':
+      default:
+        password = String(getTestWallet(TestWalletName.TestAutomationWallet).password);
+    }
+    await StakingPasswordDrawer.fillPassword(password);
+    await StakingPasswordDrawer.confirmStaking();
+  }
+);
+
+Then(
+  /^(Initial|Switching) staking success drawer is displayed in (extended|popup) mode$/,
+  async (process: 'Initial' | 'Switching', mode: 'extended' | 'popup') => {
+    await StakingSuccessDrawerAssert.assertStakingSuccessDrawer(process, mode);
+  }
+);
+
+Then(/^I click "Close" button on staking success drawer$/, async () => {
+  await StakingSuccessDrawer.clickCloseButton();
 });

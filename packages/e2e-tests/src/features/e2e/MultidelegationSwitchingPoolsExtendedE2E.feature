@@ -17,7 +17,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
     And I enter correct wallet password and confirm staking
-    Then Switching Delegation success screen is displayed in extended mode
+    Then Switching staking success drawer is displayed in extended mode
     When I click "Close" button on staking success drawer
     And I navigate to Transactions extended page
     Then I can see transaction 1 with type "<tx_type>"
@@ -32,8 +32,8 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
       | 4            | 5           | ADA Capital, 8BETA, Boople Turtle Pool, ADV, BAZAR | Delegation                |
       | 5            | 1           | ADA Capital                                        | Stake Key De-Registration |
 
-  @LW-8434 @Testnet @Pending
-  Scenario: Extended View - Multidelegation - Switching pool E2E
+  @LW-8434 @Testnet
+  Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool with metadata
     And I save identifiers of stake pools currently in use
     And I click Browse pools tab
     And I input "OtherStakePool" into stake pool search bar
@@ -43,3 +43,10 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Then I click "Fine by me" button on "Changing staking preferences?" modal
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
+    And I enter correct wallet password and confirm staking
+    Then Switching staking success drawer is displayed in extended mode
+    When I click "Close" button on staking success drawer
+    And I click Overview tab
+    And I wait until "OtherStakePool" pool is on "Your pools" list
+    And I navigate to Transactions extended page
+    Then I can see transaction 1 with type "Delegation"

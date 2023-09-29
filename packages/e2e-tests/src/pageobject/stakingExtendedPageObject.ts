@@ -3,7 +3,6 @@ import StakingPage from '../elements/staking/stakingPage';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import testContext from '../utils/testContext';
 import StakePoolDetails from '../elements/staking/stakePoolDetails';
-import StakingPasswordDrawer from '../elements/staking/StakingPasswordDrawer';
 
 class StakingExtendedPageObject {
   async clickStakePoolListHeader(listHeader: string) {
@@ -56,11 +55,6 @@ class StakingExtendedPageObject {
     const poolID = (await StakePoolDetails.poolId.getText()) as string;
     testContext.save('poolID', poolID);
   };
-
-  async confirmStaking() {
-    await StakingPasswordDrawer.confirmButton.waitForClickable();
-    await StakingPasswordDrawer.confirmButton.click();
-  }
 }
 
 export default new StakingExtendedPageObject();

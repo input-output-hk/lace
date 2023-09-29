@@ -96,6 +96,24 @@ class MultidelegationPageAssert {
     )[0];
     expect(lastRewardsValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
   };
+
+  assertSeeStakingPoolOnYourPoolsList = async (poolName: string) => {
+    await browser.waitUntil(
+      async () => {
+        const delegatedPoolsCount = await MultidelegationPage.delegatedPoolItems.length;
+        const delegatedPoolsNames = [];
+        for (let index = 0; index < delegatedPoolsCount; index++) {
+          delegatedPoolsNames.push(await MultidelegationPage.delegatedPoolName(index).getText());
+        }
+        return delegatedPoolsNames.includes(poolName);
+      },
+      {
+        timeout: 180_000,
+        interval: 2000,
+        timeoutMsg: `failed while waiting for stake pool: ${poolName}`
+      }
+    );
+  };
 }
 
 export default new MultidelegationPageAssert();

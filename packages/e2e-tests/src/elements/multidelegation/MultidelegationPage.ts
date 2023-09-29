@@ -88,6 +88,10 @@ class MultidelegationPage {
     return $$(this.DELEGATIONCARD_CHART_PIE_SLICE);
   }
 
+  get delegatedPoolItems() {
+    return $$(this.DELEGATED_POOL_ITEM);
+  }
+
   get stakingPageSearchInput() {
     return $(this.SEARCH_INPUT);
   }
