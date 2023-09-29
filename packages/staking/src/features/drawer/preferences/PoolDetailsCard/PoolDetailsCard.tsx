@@ -5,6 +5,7 @@ import denounce from 'lodash/debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InfoIcon from '../../../../assets/icons/info-icon.svg';
+import { Tooltip } from '../../../overview/StakingInfoCard/StatsTooltip';
 // import { PERCENTAGE_SCALE_MAX } from '../../store';
 import { DelegationRatioSlider } from '../DelegationRatioSlider';
 import * as styles from './PoolDetailsCard.css';
@@ -115,12 +116,17 @@ export const PoolDetailsCard = ({
               value={localValue}
               onValueChange={setLocalValue}
             />
-            <ControlButton.Outlined
-              label="Remove pool from portfolio"
-              icon={<TrashIcon />}
-              w="$fill"
-              onClick={onRemove}
-            />
+            <Tooltip content={onRemove ? undefined : t('drawer.preferences.pickMorePools')}>
+              <div>
+                <ControlButton.Outlined
+                  label="Remove pool from portfolio"
+                  icon={<TrashIcon />}
+                  w="$fill"
+                  onClick={onRemove}
+                  disabled={!onRemove}
+                />
+              </div>
+            </Tooltip>
           </Flex>
         </>
       )}
