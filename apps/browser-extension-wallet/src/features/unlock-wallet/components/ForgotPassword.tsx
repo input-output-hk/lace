@@ -4,6 +4,8 @@ import { Modal, Typography } from 'antd';
 import { Button } from '@lace/common';
 import { HW_POPUPS_WIDTH } from '@src/utils/constants';
 import styles from './ForgotPassword.module.scss';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Title, Text } = Typography;
 
@@ -12,12 +14,23 @@ export interface UnlockWalletProps {
 }
 
 export const ForgotPassword = ({ onForgotPasswordClick }: UnlockWalletProps): React.ReactElement => {
+  const analytics = useAnalyticsContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { t } = useTranslation();
 
+  const handleCancelClick = () => {
+    setIsModalVisible(false);
+    analytics.sendEventToPostHog(PostHogAction.UnlockWalletForgotPasswordCancelClick);
+  };
+
+  const handleForgotPasswordClick = () => {
+    setIsModalVisible(true);
+    analytics.sendEventToPostHog(PostHogAction.UnlockWalletWelcomeBackForgotPasswordClick);
+  };
+
   return (
     <>
-      <div className={styles.linkButton} onClick={() => setIsModalVisible(true)} data-testid="forgot-password-link">
+      <div className={styles.linkButton} onClick={handleForgotPasswordClick} data-testid="forgot-password-link">
         {t('unlock.forgotPassword')}
       </div>
       <Modal
@@ -47,7 +60,7 @@ export const ForgotPassword = ({ onForgotPasswordClick }: UnlockWalletProps): Re
           </Button>
           <Button
             className={styles.button}
-            onClick={() => setIsModalVisible(false)}
+            onClick={handleCancelClick}
             color="secondary"
             data-testid="forgot-password-cancel-button"
           >

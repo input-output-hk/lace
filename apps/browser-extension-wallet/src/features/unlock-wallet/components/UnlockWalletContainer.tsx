@@ -8,6 +8,8 @@ import { Wallet } from '@src/../../../packages/cardano/dist';
 import { saveValueInLocalStorage } from '@src/utils/local-storage';
 import { useKeyboardShortcut } from '@lace/common';
 import { BrowserViewSections } from '@lib/scripts/types';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface UnlockWalletContainerProps {
   validateMnemonic?: boolean;
@@ -15,6 +17,7 @@ export interface UnlockWalletContainerProps {
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContainerProps): React.ReactElement => {
+  const analytics = useAnalyticsContext();
   const { unlockWallet, lockWallet, deleteWallet } = useWalletManager();
   const { environmentName, setKeyAgentData } = useWalletStore();
   const backgroundService = useBackgroundServiceAPIContext();
@@ -61,6 +64,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
     try {
       const decrypted = await unlockWallet(password);
       setIsValidPassword(true);
+      analytics.sendEventToPostHog(PostHogAction.UnlockWalletWelcomeBackUnlockClick);
       if (decrypted) setUnlocked(decrypted);
     } catch {
       setIsValidPassword(false);
@@ -69,6 +73,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   };
 
   const onForgotPasswordClick = async (): Promise<void> => {
+    await analytics.sendEventToPostHog(PostHogAction.UnlockWalletForgotPasswordProceedClick);
     saveValueInLocalStorage({ key: 'isForgotPasswordFlow', value: true });
     await deleteWallet(true);
     await backgroundService.handleOpenBrowser({ section: BrowserViewSections.FORGOT_PASSWORD });
