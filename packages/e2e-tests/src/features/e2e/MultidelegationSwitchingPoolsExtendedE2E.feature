@@ -13,9 +13,9 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I click Browse pools tab
     And I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
     And I click "Next" button on staking portfolio bar
-    And I click "Fine by me" button on "Switching pool?" modal
-    And I click "Next" button on staking manage staking
-    And I click "Next" button on staking confirmation
+    And I click "Fine by me" button on "Changing staking preferences?" modal
+    And I click on "Next" button on staking preferences drawer
+    And I click on "Next" button on staking confirmation drawer
     And I enter correct wallet password and confirm staking
     Then Switching Delegation success screen is displayed in extended mode
     When I click "Close" button on staking success drawer
@@ -31,3 +31,15 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
       | 3            | 4           | ADA Capital, 8BETA, Boople Turtle Pool, ADV        | Delegation                |
       | 4            | 5           | ADA Capital, 8BETA, Boople Turtle Pool, ADV, BAZAR | Delegation                |
       | 5            | 1           | ADA Capital                                        | Stake Key De-Registration |
+
+  @LW-8434 @Testnet @Pending
+  Scenario: Extended View - Multidelegation - Switching pool E2E
+    And I save identifiers of stake pools currently in use
+    And I click Browse pools tab
+    And I input "OtherStakePool" into stake pool search bar
+    And I click on the stake pool with name "OtherStakePool"
+    Then I see stake pool details drawer for "OtherStakePool" stake pool
+    When I click on "Stake all on this pool" button on stake pool details drawer
+    Then I click "Fine by me" button on "Changing staking preferences?" modal
+    And I click on "Next" button on staking preferences drawer
+    And I click on "Next" button on staking confirmation drawer

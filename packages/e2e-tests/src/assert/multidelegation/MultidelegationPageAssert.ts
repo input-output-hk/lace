@@ -1,8 +1,8 @@
-import MultidelegationPage from '../elements/staking/MultidelegationPage';
+import MultidelegationPage from '../../elements/multidelegation/MultidelegationPage';
 import { browser } from '@wdio/globals';
 import { expect } from 'chai';
-import { t } from '../utils/translationService';
-import { TestnetPatterns } from '../support/patterns';
+import { t } from '../../utils/translationService';
+import { TestnetPatterns } from '../../support/patterns';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
