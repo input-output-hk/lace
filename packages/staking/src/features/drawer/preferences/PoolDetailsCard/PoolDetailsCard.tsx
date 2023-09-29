@@ -56,7 +56,8 @@ export const PoolDetailsCard = ({
       return;
     }
     onSliderChange(localValue);
-  }, [onSliderChange, localValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localValue]);
 
   return (
     <Card.Outlined className={styles.root}>

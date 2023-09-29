@@ -118,11 +118,10 @@ export const StepPreferencesContent = () => {
               onExpandButtonClick={() => void 0}
               onPercentageChange={(value) => {
                 console.info(value);
-                // TODO: infinite loop :( need to fix useEffect in PoolDetailsCard
-                // portfolioMutators.executeCommand({
-                //   data: { id, newSliderPercentage: value },
-                //   type: 'UpdateStakePercentage',
-                // })
+                portfolioMutators.executeCommand({
+                  data: { id, newSliderPercentage: value },
+                  type: 'UpdateStakePercentage',
+                });
               }}
             />
           )
