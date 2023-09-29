@@ -1,13 +1,13 @@
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import ChevronDownIcon from '@lace/ui/dist/assets/icons/chevron-down.component.svg';
 import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
-import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from 'features/store/delegationPortfolioStore/constants';
 import denounce from 'lodash/debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InfoIcon from '../../../../assets/icons/info-icon.svg';
 import { Tooltip } from '../../../overview/StakingInfoCard/StatsTooltip';
 // import { PERCENTAGE_SCALE_MAX } from '../../store';
+import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../../../store/delegationPortfolioStore/constants';
 import { DelegationRatioSlider } from '../DelegationRatioSlider';
 import * as styles from './PoolDetailsCard.css';
 import TrashIcon from './trash.svg';
@@ -66,7 +66,7 @@ export const PoolDetailsCard = ({
       </Flex>
       {expanded && (
         <>
-          {TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED && (
+          {!TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED && (
             <Flex className={styles.valuesRow}>
               <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
                 <Box>

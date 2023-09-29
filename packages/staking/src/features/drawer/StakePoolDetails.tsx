@@ -1,7 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
 import { isPortfolioDrifted } from 'features/overview/helpers';
-import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from 'features/store/delegationPortfolioStore/constants';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -15,6 +14,7 @@ import {
   PERCENTAGE_SCALE_MAX,
   useDelegationPortfolioStore,
 } from '../store';
+import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../store/delegationPortfolioStore/constants';
 import { StepPreferencesContent, StepPreferencesFooter } from './preferences';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';

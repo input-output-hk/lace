@@ -1,10 +1,10 @@
 /* eslint-disable no-magic-numbers */
 import { Wallet } from '@lace/cardano';
 import BigNumber from 'bignumber.js';
-import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from 'features/store/delegationPortfolioStore/constants';
 import sum from 'lodash/sum';
 import type { CurrentPortfolioStakePool } from '../../store';
 import { PERCENTAGE_SCALE_MAX } from '../../store';
+import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../../store/delegationPortfolioStore/constants';
 
 const PORTFOLIO_DRIFT_PERCENTAGE_THRESHOLD = 15;
 
