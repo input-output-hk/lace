@@ -6,6 +6,7 @@ import AuthorizeDAppModal from '../elements/dappConnector/authorizeDAppModal';
 import ExampleDAppPage from '../elements/dappConnector/testDAppPage';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
 import CommonDappPageElements from '../elements/dappConnector/commonDappPageElements';
+import CollateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
 import DAppTransactionAllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
 import { Logger } from '../support/logger';
@@ -65,6 +66,37 @@ class DAppConnectorAssert {
     await expect(await AuthorizeDAppPage.authorizeButton.getText()).to.equal(await t('dapp.connect.btn.accept'));
     await AuthorizeDAppPage.cancelButton.waitForDisplayed();
     await expect(await AuthorizeDAppPage.cancelButton.getText()).to.equal(await t('dapp.connect.btn.cancel'));
+  }
+
+  async assertSeeCollateralDAppPage(expectedDappDetails: ExpectedDAppDetails) {
+    await this.assertSeeHeader();
+    await this.assertSeeTitleAndDappDetails('dapp.collateral.set.header', expectedDappDetails);
+
+    await CollateralDAppPage.modalDescription.waitForDisplayed();
+    const currentDAppUrl = new URL(expectedDappDetails.url);
+
+    await expect(await CollateralDAppPage.modalDescription.getText()).to.equal(
+      (await t('dapp.collateral.request'))
+        .replace('{{symbol}}', 'tADA')
+        .replace('{{symbol}}', 'tADA')
+        .replace('{{dapp}}', `${currentDAppUrl.protocol}//${currentDAppUrl.host}`)
+        .replace('{{requestedAmount}}', '5.00')
+        .replace('{{lockableAmount}}', '9.83')
+    );
+
+    await CollateralDAppPage.banner.container.waitForDisplayed();
+    await CollateralDAppPage.banner.icon.waitForDisplayed();
+    await CollateralDAppPage.banner.description.waitForDisplayed();
+    await expect(await CollateralDAppPage.banner.description.getText()).to.equal(
+      await t('dapp.collateral.amountSeparated')
+    );
+
+    await CollateralDAppPage.acceptButton.waitForDisplayed();
+    await expect(await CollateralDAppPage.acceptButton.getText()).to.equal(
+      await t('browserView.settings.wallet.collateral.confirm')
+    );
+    await CollateralDAppPage.cancelButton.waitForDisplayed();
+    await expect(await CollateralDAppPage.cancelButton.getText()).to.equal(await t('general.button.cancel'));
   }
 
   async assertSeeAuthorizePagePermissions() {

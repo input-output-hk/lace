@@ -4,6 +4,7 @@ Feature: DAppConnector - Common
   Background:
     Given Wallet is synced
     And I de-authorize all DApps in extended mode
+    And I reclaim collateral (if active) in extended mode
 
   @LW-3760 @Testnet @Mainnet
   Scenario: Extended View - Limited wallet information when wallet is not connected
@@ -31,11 +32,12 @@ Feature: DAppConnector - Common
 
   @LW-4062 @LW-3753 @Testnet @Mainnet
   Scenario: Authorize app functions as expected when the user chooses 'Only once'
-    Given I save token: "Cardano" balance
+    Given I am on Tokens extended page
+    And I save token: "Cardano" balance
     When I open test DApp
     And I see DApp authorization window
     And I click "Authorize" button in DApp authorization window
-    And I click "Only once" button in DApp authorization modal
+    And I click "Only once" button in DApp authorization window
     Then I see Lace wallet info in DApp when connected
     And I switch to window with Lace
     And I close all remaining tabs except current one
@@ -47,7 +49,7 @@ Feature: DAppConnector - Common
     When I open test DApp
     And I see DApp authorization window
     And I click "Authorize" button in DApp authorization window
-    And I click "Always" button in DApp authorization modal
+    And I click "Always" button in DApp authorization window
     And I switch to window with Lace
     And I save token: "Cardano" balance
     And I close all remaining tabs except current one
@@ -115,7 +117,12 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I see DApp authorization window in <theme> mode
     And I click "Authorize" button in DApp authorization window
-    And I click "Only once" button in DApp authorization modal
+    And I click "Only once" button in DApp authorization window
+    When I click "Set Collateral" "Run" button in test DApp
+    Then I see DApp collateral window in <theme> mode
+    When I click "Confirm" button in DApp collateral window
+    Then I see DApp connector "All done" page in <theme> mode
+    And I click "Close" button on DApp "All done" page
     When I click "Send ADA" "Run" button in test DApp
     Then I see DApp connector "Confirm transaction" page in <theme> mode
     Examples:
@@ -130,11 +137,16 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I see DApp authorization window in light mode
     And I click "Authorize" button in DApp authorization window
-    And I click "Only once" button in DApp authorization modal
+    And I click "Only once" button in DApp authorization window
     And I switch to window with Lace
     And I close all remaining tabs except current one
     And I set theme switcher to dark mode
-    And I open test DApp
+    And I open and authorize test DApp with "Only once" setting
+    When I click "Set Collateral" "Run" button in test DApp
+    Then I see DApp collateral window in dark mode
+    And I click "Confirm" button in DApp collateral window
+    Then I see DApp connector "All done" page in dark mode
+    And I click "Close" button on DApp "All done" page
     When I click "Send ADA" "Run" button in test DApp
     Then I see DApp connector "Confirm transaction" page in dark mode
 
@@ -169,3 +181,33 @@ Feature: DAppConnector - Common
     And I close all remaining tabs except current one
     When I open test DApp
     Then I see DApp authorization window
+
+    @LW-8403
+    Scenario: Automatically trigger collateral setup - happy path
+      Given I am on Settings extended page
+      And I see collateral as: "Inactive" in settings
+      And I click on "Collateral" setting
+      And all elements of Inactive collateral drawer are displayed
+      And I open and authorize test DApp with "Only once" setting
+      When I click "Set Collateral" "Run" button in test DApp
+      Then I see DApp collateral window
+      When I click "Confirm" button in DApp collateral window
+      And I see DApp connector "All done" page
+      And I click "Close" button on DApp "All done" page
+      And I don't see DApp window
+      And I switch to window with Lace
+      Then all elements of Active collateral drawer are displayed
+      When I click "Reclaim collateral" button on collateral drawer
+      And I switch to window with DApp
+      And I click "Set Collateral" "Run" button in test DApp
+      Then I see DApp collateral window
+
+  @LW-8404
+  Scenario: Automatically trigger collateral setup - click cancel on Collateral modal
+    Given I open and authorize test DApp with "Only once" setting
+    And I click "Set Collateral" "Run" button in test DApp
+    And I see DApp collateral window
+    When I click "Cancel" button in DApp collateral window
+    Then I don't see DApp window
+    And I click "Set Collateral" "Run" button in test DApp
+    And I see DApp collateral window
