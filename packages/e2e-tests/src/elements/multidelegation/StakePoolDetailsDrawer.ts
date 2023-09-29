@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 import CommonDrawerElements from '../CommonDrawerElements';
+import testContext from '../../utils/testContext';
 
 class StakePoolDetailsDrawer extends CommonDrawerElements {
   private CONTAINER = '[data-testid="stake-pool-details"]';
@@ -127,6 +128,15 @@ class StakePoolDetailsDrawer extends CommonDrawerElements {
 
   get tooltip(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOOLTIP);
+  }
+
+  async saveStakePoolDetails() {
+    const poolName = await this.poolName.getText();
+    testContext.save('poolName', poolName);
+    const poolTicker = await this.poolTicker.getText();
+    testContext.save('poolTicker', poolTicker);
+    const poolID = await this.poolId.getText();
+    testContext.save('poolID', poolID);
   }
 }
 

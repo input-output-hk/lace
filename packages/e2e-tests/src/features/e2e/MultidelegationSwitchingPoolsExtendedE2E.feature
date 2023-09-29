@@ -39,7 +39,8 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I input "OtherStakePool" into stake pool search bar
     And I click on the stake pool with name "OtherStakePool"
     Then I see stake pool details drawer for "OtherStakePool" stake pool
-    When I click on "Stake all on this pool" button on stake pool details drawer
+    When I save stake pool details
+    And I click on "Stake all on this pool" button on stake pool details drawer
     Then I click "Fine by me" button on "Changing staking preferences?" modal
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
@@ -50,3 +51,5 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I wait until "OtherStakePool" pool is on "Your pools" list
     And I navigate to Transactions extended page
     Then I can see transaction 1 with type "Delegation"
+    When I click on a transaction: 1
+    Then the transaction details are displayed for staking with metadata

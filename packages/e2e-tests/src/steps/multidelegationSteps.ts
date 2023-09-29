@@ -6,7 +6,7 @@ import testContext from '../utils/testContext';
 import { getStakePoolByName } from '../data/expectedStakePoolsData';
 import extensionUtils from '../utils/utils';
 import stakePoolDetailsAssert from '../assert/multidelegation/StakePoolDetailsAssert';
-import StakePoolDetails from '../elements/multidelegation/StakePoolDetailsDrawer';
+import StakePoolDetailsDrawer from '../elements/multidelegation/StakePoolDetailsDrawer';
 import ChangingStakingPreferencesModal from '../elements/multidelegation/ChangingStakingPreferencesModal';
 import ManageStakingDrawer from '../elements/multidelegation/ManageStakingDrawer';
 import StakingConfirmationDrawer from '../elements/multidelegation/StakingConfirmationDrawer';
@@ -14,6 +14,7 @@ import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletCo
 import StakingPasswordDrawer from '../elements/multidelegation/StakingPasswordDrawer';
 import StakingSuccessDrawerAssert from '../assert/multidelegation/StakingSuccessDrawerAssert';
 import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDrawer';
+import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
@@ -84,12 +85,12 @@ When(
   async (button: 'Stake all on this pool' | 'Select pool for multi-staking') => {
     switch (button) {
       case 'Select pool for multi-staking':
-        await StakePoolDetails.selectPoolForMultiStakingButton.waitForClickable();
-        await StakePoolDetails.selectPoolForMultiStakingButton.click();
+        await StakePoolDetailsDrawer.selectPoolForMultiStakingButton.waitForClickable();
+        await StakePoolDetailsDrawer.selectPoolForMultiStakingButton.click();
         break;
       case 'Stake all on this pool':
-        await StakePoolDetails.stakeAllOnThisPoolButton.waitForClickable();
-        await StakePoolDetails.stakeAllOnThisPoolButton.click();
+        await StakePoolDetailsDrawer.stakeAllOnThisPoolButton.waitForClickable();
+        await StakePoolDetailsDrawer.stakeAllOnThisPoolButton.click();
         break;
       default:
         throw new Error(`Unsupported button name: ${button}`);
@@ -154,4 +155,30 @@ Then(
 
 Then(/^I click "Close" button on staking success drawer$/, async () => {
   await StakingSuccessDrawer.clickCloseButton();
+});
+
+Then(
+  /^the transaction details are displayed for staking (with|without) metadata$/,
+  async (metadata: 'with' | 'without') => {
+    const expectedTransactionDetails =
+      metadata === 'with'
+        ? {
+            transactionDescription: 'Delegation\n1 token',
+            status: 'Success',
+            poolName: testContext.load('poolName') as string,
+            poolTicker: testContext.load('poolTicker') as string,
+            poolID: testContext.load('poolID') as string
+          }
+        : {
+            transactionDescription: 'Delegation\n1 token',
+            status: 'Success',
+            poolID: testContext.load('poolID') as string
+          };
+
+    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+  }
+);
+
+When(/^I save stake pool details$/, async () => {
+  await StakePoolDetailsDrawer.saveStakePoolDetails();
 });
