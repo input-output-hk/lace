@@ -116,7 +116,7 @@ export const OverviewPopup = () => {
               {...item}
               popupView
               markerColor={displayData.length > 1 ? item.color : undefined}
-              cardanoCoinSymbol="tADA"
+              cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
               onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
             />
           </Box>

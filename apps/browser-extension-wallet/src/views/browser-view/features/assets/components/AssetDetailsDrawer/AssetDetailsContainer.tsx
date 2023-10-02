@@ -9,7 +9,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletStore } from '@src/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
@@ -53,6 +54,7 @@ export const AssetDetailsContainer = ({
   }, []);
 
   const handleOpenTransaction = async () => {
+    analytics.sendEventToPostHog(PostHogAction.TokenTokenDetailViewAllClick);
     if (popupView) {
       await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.TRANSACTION });
     } else {

@@ -18,7 +18,8 @@ import { useWalletStore } from '@stores';
 import { TransactionDetail as TransactionDetailType } from '@src/types';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { APP_MODE_POPUP } from '@src/utils/constants';
-import { useCurrencyStore, useExternalLinkOpener } from '@providers';
+import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const MAX_SUMMARY_ADDRESSES = 5;
 
@@ -92,6 +93,7 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
   const { list: addressList } = useAddressBookContext();
   const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
   const openExternalLink = useExternalLinkOpener();
+  const analytics = useAnalyticsContext();
 
   const explorerBaseUrl = useMemo(
     () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
@@ -140,6 +142,7 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
   };
 
   const handleOpenExternalLink = () => {
+    analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailTransactionHashClick);
     const externalLink = `${explorerBaseUrl}/${transactionInfo.tx.hash}`;
     externalLink && currentTransactionStatus === 'success' && openExternalLink(externalLink);
   };
@@ -168,6 +171,8 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
       type={transactionInfo?.type}
       isPopupView={isPopupView}
       openExternalLink={handleOpenExternalLink}
+      sendAnalyticsInputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailInputsClick)}
+      sendAnalyticsOutputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailOutputsClick)}
     />
   );
 });

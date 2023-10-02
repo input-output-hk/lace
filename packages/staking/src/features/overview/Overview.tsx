@@ -124,7 +124,7 @@ export const Overview = () => {
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}
-            cardanoCoinSymbol="tADA" // TODO
+            cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
             onStakePoolSelect={() => {
               portfolioMutators.executeCommand({
                 data: item.stakePool,
