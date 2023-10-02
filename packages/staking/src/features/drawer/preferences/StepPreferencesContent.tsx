@@ -85,7 +85,7 @@ export const StepPreferencesContent = () => {
 
   return (
     <Flex flexDirection="column" gap="$32" alignItems="stretch">
-      <Box className={styles.delegationCard}>
+      <Box className={styles.delegationCardWrapper}>
         <DelegationCard
           balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
           cardanoCoinSymbol={symbol}

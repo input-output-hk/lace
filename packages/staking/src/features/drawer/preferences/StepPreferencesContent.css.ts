@@ -1,7 +1,7 @@
 import { style } from '@lace/ui';
 import { theme } from '../../theme';
 
-export const delegationCard = style({
+export const delegationCardWrapper = style({
   '@media': {
     '(min-height: 668px)': {
       backgroundColor: theme.colors.$drawerBackgroundColor,
