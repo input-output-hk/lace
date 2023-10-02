@@ -29,9 +29,9 @@ export const SettingsHelp = ({ popupView = false }: SettingsHelpProps): React.Re
     await analytics.sendEventToPostHog(event);
   };
 
-  const handleFaqClick = () => {
+  const handleFaqClick = async () => {
+    await analytics.sendEventToPostHog(PostHogAction.SettingsFaqsClick);
     openExternalLink(process.env.FAQ_URL);
-    analytics.sendEventToPostHog(PostHogAction.SettingsFaqsClick);
   };
 
   return (
