@@ -23,9 +23,9 @@ interface PoolDetailsCardProps {
   onExpandButtonClick: () => void;
   onPercentageChange: PercentagesChangeHandler;
   onRemove?: () => void;
-  actualRatio?: number;
-  savedRatio?: number;
-  targetRatio: number;
+  actualPercentage?: number;
+  savedPercentage?: number;
+  targetPercentage: number;
   stakeValue: string;
   cardanoCoinSymbol: string;
 }
@@ -38,24 +38,28 @@ export const PoolDetailsCard = ({
   onExpandButtonClick,
   onPercentageChange,
   onRemove,
-  actualRatio,
-  savedRatio,
+  actualPercentage,
+  savedPercentage,
   stakeValue,
-  targetRatio,
+  targetPercentage,
   cardanoCoinSymbol,
 }: PoolDetailsCardProps) => {
-  const effectInitialized = useRef(false);
+  const firstRender = useRef(true);
   const { t } = useTranslation();
-  const [localValue, setLocalValue] = useState(targetRatio);
+  const [percentage, setPercentage] = useState(targetPercentage);
+  const onPercentageChangeRef = useRef(onPercentageChange);
 
   useEffect(() => {
-    if (!effectInitialized.current) {
-      effectInitialized.current = true;
+    onPercentageChangeRef.current = onPercentageChange;
+  }, [onPercentageChange]);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
       return;
     }
-    onPercentageChange(localValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localValue]);
+    onPercentageChangeRef.current(percentage);
+  }, [percentage, onPercentageChangeRef]);
 
   return (
     <Card.Outlined className={styles.root}>
@@ -87,7 +91,7 @@ export const PoolDetailsCard = ({
                   <InfoIcon className={styles.valueInfoIcon} />
                 </Box>
                 <Text.Body.Large weight="$semibold">
-                  {savedRatio || '-'} {savedRatio && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
+                  {savedPercentage || '-'} {savedPercentage && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
                 </Text.Body.Large>
               </Flex>
               <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
@@ -99,7 +103,7 @@ export const PoolDetailsCard = ({
                   <InfoIcon className={styles.valueInfoIcon} />
                 </Box>
                 <Text.Body.Large weight="$semibold">
-                  {actualRatio || '-'} {actualRatio && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
+                  {actualPercentage || '-'} {actualPercentage && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
                 </Text.Body.Large>
               </Flex>
               <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
@@ -132,16 +136,16 @@ export const PoolDetailsCard = ({
               )}
               <Flex alignItems="center" gap="$12">
                 <Text.Body.Large>Ratio</Text.Body.Large>
-                <RatioInput onUpdate={setLocalValue} value={localValue} />
+                <RatioInput onUpdate={setPercentage} value={percentage} />
                 <Text.Body.Large>%</Text.Body.Large>
               </Flex>
             </Flex>
             <DelegationRatioSlider
               step={1}
               max={PERCENTAGE_SCALE_MAX}
-              min={localValue === 0 ? 0 : 1}
-              value={localValue}
-              onValueChange={setLocalValue}
+              min={percentage === 0 ? 0 : 1}
+              value={percentage}
+              onValueChange={setPercentage}
             />
             <Tooltip content={onRemove ? undefined : t('drawer.preferences.pickMorePools')}>
               <div>
