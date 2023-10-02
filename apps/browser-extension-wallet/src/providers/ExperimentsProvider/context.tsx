@@ -5,7 +5,6 @@ import { ExperimentName, ExperimentsConfigStatus } from './types';
 type ExperimentsContext = {
   areExperimentsLoading: boolean;
   getExperimentVariant: <R extends string>(key: ExperimentName) => R;
-  overrideExperimentVariant: (flags: Record<string, string | boolean>) => void;
 };
 
 // eslint-disable-next-line unicorn/no-null
@@ -33,13 +32,10 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
   );
 
   const getExperimentVariant = useCallback(
-    <R extends string>(key: ExperimentName): R => postHogClient.getExperimentVariant(key) as R,
-    [postHogClient]
+    <R extends string>(key: ExperimentName): R =>
+      !areExperimentsLoading && (postHogClient.getExperimentVariant(key) as R),
+    [areExperimentsLoading, postHogClient]
   );
-
-  const overrideExperimentVariant = (flags: Record<ExperimentName, string | boolean>) => {
-    postHogClient.overrideFeatureFlags(flags);
-  };
 
   useEffect(() => {
     const subscription = postHogClient?.subscribeToInitializationProcess((loaded) => {
@@ -54,7 +50,7 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
   }, [postHogClient]);
 
   return (
-    <ExperimentsContext.Provider value={{ areExperimentsLoading, getExperimentVariant, overrideExperimentVariant }}>
+    <ExperimentsContext.Provider value={{ areExperimentsLoading, getExperimentVariant }}>
       {children}
     </ExperimentsContext.Provider>
   );

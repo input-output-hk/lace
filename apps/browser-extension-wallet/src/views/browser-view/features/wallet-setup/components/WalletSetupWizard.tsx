@@ -101,7 +101,7 @@ export const WalletSetupWizard = ({
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const { getExperimentVariant, overrideExperimentVariant } = useExperimentsContext();
+  const { getExperimentVariant } = useExperimentsContext();
 
   const { createWallet, setWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -260,9 +260,6 @@ export const WalletSetupWizard = ({
       // eslint-disable-next-line camelcase
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
-    overrideExperimentVariant({
-      [ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN]: isAccepted ? 'test' : 'control'
-    });
     sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
     moveForward();
   };
