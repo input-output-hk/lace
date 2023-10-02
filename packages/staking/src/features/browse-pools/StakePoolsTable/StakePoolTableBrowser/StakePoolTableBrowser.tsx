@@ -7,10 +7,10 @@ import isNumber from 'lodash/isNumber';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import InfoIcon from '../../../../assets/icons/info-icon.svg';
 import { useDelegationPortfolioStore } from '../../../store';
 import { StakePoolItemBrowser, StakePoolItemBrowserProps } from '../StakePoolItemBrowser';
 import Arrow from './arrow.svg';
-import InfoIcon from './info-icon.component.svg';
 import styles from './StakePoolTableBrowser.module.scss';
 
 type TranslationsFor<T extends string> = Record<T, string>;
