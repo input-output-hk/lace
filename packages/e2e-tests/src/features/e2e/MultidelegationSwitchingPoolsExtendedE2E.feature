@@ -32,7 +32,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
       | 4            | 5           | ADA Capital, 8BETA, Boople Turtle Pool, ADV, BAZAR | Delegation                |
       | 5            | 1           | ADA Capital                                        | Stake Key De-Registration |
 
-  @LW-8434 @Testnet @test
+  @LW-8434 @Testnet
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool with metadata
     And I save identifiers of stake pools currently in use
     And I click Browse pools tab
