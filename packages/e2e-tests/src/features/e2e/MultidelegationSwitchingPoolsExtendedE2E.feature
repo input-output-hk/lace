@@ -32,7 +32,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
       | 4            | 5           | ADA Capital, 8BETA, Boople Turtle Pool, ADV, BAZAR | Delegation                |
       | 5            | 1           | ADA Capital                                        | Stake Key De-Registration |
 
-  @LW-8434 @Testnet
+  @LW-8434 @Testnet @test
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool with metadata
     And I save identifiers of stake pools currently in use
     And I click Browse pools tab
@@ -53,3 +53,25 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Then I can see transaction 1 with type "Delegation"
     When I click on a transaction: 1
     Then the transaction details are displayed for staking with metadata
+
+  @LW-8435 @Testnet
+  Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool without metadata
+    And I save identifiers of stake pools currently in use
+    And I click Browse pools tab
+    And I input "OtherNoMetadataStakePool" into stake pool search bar
+    And I click on the stake pool with name "-"
+    Then I see stake pool details drawer for stake pool without metadata
+    When I save stake pool details
+    And I click on "Stake all on this pool" button on stake pool details drawer
+    Then I click "Fine by me" button on "Changing staking preferences?" modal
+    And I click on "Next" button on staking preferences drawer
+    And I click on "Next" button on staking confirmation drawer
+    And I enter correct wallet password and confirm staking
+    Then Switching staking success drawer is displayed in extended mode
+    When I click "Close" button on staking success drawer
+    And I click Overview tab
+    And I wait until "-" pool is on "Your pools" list
+    And I navigate to Transactions extended page
+    Then I can see transaction 1 with type "Delegation"
+    When I click on a transaction: 1
+#    Then the transaction details are displayed for staking without metadata # Bug LW-8672

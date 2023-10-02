@@ -3,7 +3,7 @@ import MultidelegationPageAssert from '../assert/multidelegation/Multidelegation
 import MultidelegationPage from '../elements/multidelegation/MultidelegationPage';
 import { parseSearchTerm } from '../utils/multiDelegationUtils';
 import testContext from '../utils/testContext';
-import { getStakePoolByName } from '../data/expectedStakePoolsData';
+import { getStakePoolById, getStakePoolByName } from '../data/expectedStakePoolsData';
 import extensionUtils from '../utils/utils';
 import stakePoolDetailsAssert from '../assert/multidelegation/StakePoolDetailsAssert';
 import StakePoolDetailsDrawer from '../elements/multidelegation/StakePoolDetailsDrawer';
@@ -64,7 +64,6 @@ When(/^I input "([^"]*)" into stake pool search bar$/, async (term: string) => {
   const searchTerm = await parseSearchTerm(term);
   await MultidelegationPage.fillSearch(searchTerm);
   await MultidelegationPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
-  testContext.save('currentStakePoolName', searchTerm);
 });
 
 When(/^I click on the stake pool with name "([^"]*)"$/, async (poolName: string) => {
@@ -78,6 +77,11 @@ Then(/^I see stake pool details drawer for "([^"]*)" stake pool$/, async (stakeP
       ? getStakePoolByName(testContext.load('currentStakePoolName'))
       : getStakePoolByName(stakePoolName, extensionUtils.isMainnet() ? 'mainnet' : 'testnet');
   await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
+});
+
+Then(/^I see stake pool details drawer for stake pool without metadata$/, async () => {
+  const stakePool = getStakePoolById(testContext.load('currentStakePoolId'));
+  await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false, true);
 });
 
 When(

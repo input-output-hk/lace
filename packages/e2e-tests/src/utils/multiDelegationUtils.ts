@@ -1,31 +1,37 @@
 import testContext from './testContext';
-import { StakePoolsData } from '../data/expectedStakePoolsData';
+import { StakePool, StakePoolsData } from '../data/expectedStakePoolsData';
+
+const stakePoolsWithMetadata = [StakePoolsData.adacapital, StakePoolsData.canadaStakes];
+const stakePoolsWithoutMetadata = [StakePoolsData.noMetadataPool1, StakePoolsData.noMetadataPool2];
 
 const isStakePoolInUse = async (stakePoolID: string): Promise<boolean> => {
   const stakePoolIDsInUse = (await testContext.load('stakePoolsInUse')) as unknown[];
   return stakePoolIDsInUse.includes(stakePoolID);
 };
 
+const getPoolIdOrName = async (stakePools: StakePool[], field: 'id' | 'name') => {
+  let result;
+  for (const pool of stakePools) {
+    if (!(await isStakePoolInUse(pool.poolId))) {
+      result = field === 'id' ? pool.poolId : pool.name;
+      testContext.save(field === 'id' ? 'currentStakePoolId' : 'currentStakePoolName', result);
+      break;
+    }
+  }
+  if (!result) {
+    throw new Error('All stake pools defined in test data are in use!');
+  }
+  return result;
+};
+
 export const parseSearchTerm = async (term: string): Promise<string> => {
-  let parsedSearchTerm;
+  let parsedSearchTerm = '';
   switch (term) {
     case 'OtherStakePool':
-      if (await isStakePoolInUse(StakePoolsData.adacapital.poolId)) {
-        parsedSearchTerm = StakePoolsData.canadaStakes.name;
-      } else if (await isStakePoolInUse(StakePoolsData.canadaStakes.poolId)) {
-        parsedSearchTerm = StakePoolsData.adacapital.name;
-      } else {
-        throw new Error('All stake pools with metadata defined in test data are in use!');
-      }
+      parsedSearchTerm = (await getPoolIdOrName(stakePoolsWithMetadata, 'name')) as unknown as string;
       break;
     case 'OtherNoMetadataStakePool':
-      if (await isStakePoolInUse(StakePoolsData.noMetadataPool1.poolId)) {
-        parsedSearchTerm = StakePoolsData.noMetadataPool2.name;
-      } else if (await isStakePoolInUse(StakePoolsData.noMetadataPool2.poolId)) {
-        parsedSearchTerm = StakePoolsData.noMetadataPool1.name;
-      } else {
-        throw new Error('All stake pools without metadata defined in test data are in use!');
-      }
+      parsedSearchTerm = (await getPoolIdOrName(stakePoolsWithoutMetadata, 'id')) as unknown as string;
       break;
     default:
       parsedSearchTerm = term;

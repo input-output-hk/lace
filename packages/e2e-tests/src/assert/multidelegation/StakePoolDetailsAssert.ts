@@ -14,13 +14,13 @@ class StakePoolDetailsAssert {
     await this.assertSeeStakePoolDetailsCommonElements();
 
     expect(await StakePoolDetails.poolName.getText()).to.equal(expectedStakedPool.name);
+    expect(await StakePoolDetails.poolTicker.getText()).to.equal(expectedStakedPool.ticker);
+    expect(await StakePoolDetails.informationDescription.getText()).to.equal(expectedStakedPool.information);
 
     if (noMetaDataPool) {
-      expect(await StakePoolDetails.poolTicker.getText()).to.contain(expectedStakedPool.poolId.slice(0, 6));
+      await StakePoolDetails.socialLinksTitle.waitForDisplayed({ reverse: true });
+      await StakePoolDetails.socialWebsiteIcon.waitForDisplayed({ reverse: true });
     } else {
-      expect(await StakePoolDetails.poolTicker.getText()).to.equal(expectedStakedPool.ticker);
-
-      expect(await StakePoolDetails.informationDescription.getText()).to.equal(expectedStakedPool.information);
       expect(await StakePoolDetails.socialLinksTitle.getText()).to.equal(await t('drawer.details.social', 'staking'));
       await StakePoolDetails.socialWebsiteIcon.waitForDisplayed();
     }
