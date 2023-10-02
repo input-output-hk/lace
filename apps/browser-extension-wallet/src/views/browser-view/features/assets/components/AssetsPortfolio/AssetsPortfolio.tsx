@@ -69,6 +69,11 @@ export const AssetsPortfolio = ({
     [isBalanceLoading, portfolioTotalBalance]
   );
 
+  const handleRedirectToReceive = () => {
+    analytics.sendEventToPostHog(PostHogAction.ReceiveClick);
+    redirectToReceive();
+  };
+
   const openSend = () => {
     analytics.sendEventToMatomo({
       category: MatomoEventCategories.SEND_TRANSACTION,
@@ -113,7 +118,7 @@ export const AssetsPortfolio = ({
       {isPopupView && totalAssets > 0 && (
         <SendReceive
           leftButtonOnClick={openSend}
-          rightButtonOnClick={redirectToReceive}
+          rightButtonOnClick={handleRedirectToReceive}
           isReversed
           popupView
           sharedClass={styles.testPopupClass}

@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/consistent-destructuring */
 import { Wallet } from '@lace/cardano';
 import { Button, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
@@ -6,14 +7,16 @@ import { DelegationCard } from '../overview/DelegationCard';
 import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
 
-export const StakePoolPreferencesFooter = () => {
-  const { t } = useTranslation();
-  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+type StakePoolPreferencesFooterProps = {
+  buttonTitle: string;
+};
 
+export const StakePoolPreferencesFooter = ({ buttonTitle }: StakePoolPreferencesFooterProps) => {
+  const portfolioMutators = useDelegationPortfolioStore((state) => state.mutators);
   return (
     <Flex flexDirection="column" alignItems="stretch" gap="$16">
       <Button.CallToAction
-        label={t('drawer.preferences.nextButton')}
+        label={buttonTitle}
         data-testid="preferences-next-button"
         onClick={() =>
           portfolioMutators.executeCommand({
@@ -40,12 +43,22 @@ export const StakePoolPreferences = () => {
     portfolioMutators: state.mutators,
   }));
 
-  const displayData = draftPortfolio.map(({ name = '-', weight, id }, i) => ({
-    color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
-    id,
-    name,
-    weight,
-  }));
+  const targetWeightsSum = draftPortfolio.map(({ targetWeight }) => targetWeight).reduce((a, b) => a + b, 0);
+  const displayData = draftPortfolio.map((draftPool, i) => {
+    const {
+      displayData: { name },
+      id,
+      targetWeight,
+    } = draftPool;
+    return {
+      color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
+      id,
+      name: name || '-',
+      percentage: draftPool.basedOnCurrentPortfolio
+        ? draftPool.currentPortfolioPercentage
+        : targetWeight / targetWeightsSum,
+    };
+  });
   const createRemovePoolFromPortfolio = (poolId: Wallet.Cardano.PoolIdHex) => () => {
     portfolioMutators.executeCommand({
       data: poolId,
@@ -79,12 +92,12 @@ export const StakePoolPreferences = () => {
         />
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
-        {displayData.map(({ name, id, color, weight }) => (
+        {displayData.map(({ name, id, color, percentage }) => (
           <PoolDetailsCard
             key={id}
             name={name}
             color={color}
-            weight={weight}
+            percentage={percentage}
             onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
           />
         ))}

@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { StakePoolItemBrowserProps } from './StakePoolItemBrowser';
+import { useDelegationPortfolioStore } from '../../store';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import { StakePoolSortOptions, StakePoolTableBrowser } from './StakePoolTableBrowser';
@@ -30,7 +30,9 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
-
+  const currentPortfolioStakePools = useDelegationPortfolioStore((store) =>
+    store.currentPortfolio.map(({ stakePool }) => stakePool)
+  );
   const {
     walletStoreWalletUICardanoCoin: cardanoCoin,
     currentChain,
@@ -85,9 +87,17 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     setSearchValue(searchString);
   };
 
+  const combinedUnique = useMemo(() => {
+    const combinedStakePools = [...stakePools, ...currentPortfolioStakePools];
+    const combinedUniqueIds = [...new Set(combinedStakePools.map((pool) => pool.id))];
+    return combinedUniqueIds.map((id) =>
+      combinedStakePools.find((pool) => pool.id === id)
+    ) as Wallet.Cardano.StakePool[];
+  }, [stakePools, currentPortfolioStakePools]);
+
   const list = useMemo(
     () =>
-      stakePools?.map<StakePoolItemBrowserProps>((pool: Wallet.Cardano.StakePool) => {
+      combinedUnique.map((pool) => {
         const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
 
@@ -98,7 +108,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
           stakePool: pool,
         };
       }) || [],
-    [stakePools, cardanoCoin]
+    [combinedUnique, cardanoCoin]
   );
 
   return (

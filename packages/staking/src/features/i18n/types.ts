@@ -125,7 +125,8 @@ type KeysStructure = {
       addPoolButton: '';
       stakeValue: '';
       pickMorePools: '';
-      nextButton: '';
+      confirmButton: '';
+      rebalanceButton: '';
     };
   };
   modals: {
@@ -165,6 +166,10 @@ type KeysStructure = {
         message: '';
       };
       pendingPoolMigration: {
+        title: '';
+        message: '';
+      };
+      portfolioDrifted: {
         title: '';
         message: '';
       };

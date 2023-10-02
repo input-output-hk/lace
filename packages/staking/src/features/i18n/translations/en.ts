@@ -57,8 +57,9 @@ export const en: Translations = {
   'drawer.failure.subTitle': 'The transaction was not successful. Please try again.',
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',
-  'drawer.preferences.nextButton': 'Next',
+  'drawer.preferences.confirmButton': 'Confirm',
   'drawer.preferences.pickMorePools': 'You need to stake at least to one pool.',
+  'drawer.preferences.rebalanceButton': 'Rebalance staking',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.preferences.stakeValue': '~{{stakeValue}} ADA (~{{stakePercentage}}%)',
   'drawer.sign.confirmation.title': 'Staking confirmation',
@@ -90,6 +91,9 @@ export const en: Translations = {
   'overview.banners.pendingPoolMigration.message':
     'You will continue to receive rewards from your former stake pool(s) for two epochs',
   'overview.banners.pendingPoolMigration.title': 'You are migrating stake pool(s)',
+  'overview.banners.portfolioDrifted.message':
+    'Make sure to rebalance your staking ratios if you want to match your preferences',
+  'overview.banners.portfolioDrifted.title': 'Your current delegation portfolio has shifted',
   'overview.delegationCard.label.balance': 'ADA Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',

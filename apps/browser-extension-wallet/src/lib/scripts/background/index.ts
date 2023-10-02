@@ -3,3 +3,4 @@ import './onError';
 import './onUpdate';
 import './services';
 import './keep-alive-sw';
+import './onUninstall';
