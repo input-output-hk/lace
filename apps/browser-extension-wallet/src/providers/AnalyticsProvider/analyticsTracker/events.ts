@@ -63,6 +63,14 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     SELECT_HW_ACCOUNT_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
     SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick,
     DONE_GO_TO_WALLET: PostHogAction.OnboardingHWDoneGoToWallet
+  },
+  // eslint-disable-next-line camelcase
+  forgot_password: {
+    WALLET_PASSWORD_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordNextClick,
+    RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick,
+    ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase01NextClick,
+    ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase09NextClick,
+    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase17NextClick
   }
 };
 
