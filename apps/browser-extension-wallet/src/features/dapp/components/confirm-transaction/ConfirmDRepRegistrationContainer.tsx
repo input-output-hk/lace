@@ -20,8 +20,8 @@ export const ConfirmDRepRegistrationContainer = ({ signTxData, errorMessage }: P
       metadata={{
         depositPaid: Wallet.util.lovelacesToAdaString(certificate.deposit.toString()),
         drepId: certificate.dRepCredential.hash,
-        hash: certificate.anchor.dataHash,
-        url: certificate.anchor.url
+        hash: certificate.anchor?.dataHash,
+        url: certificate.anchor?.url
       }}
       translations={{
         metadata: t('core.drepRegistration.metadata'),
