@@ -1,4 +1,4 @@
-import { PERCENTAGE_SCALE_MAX, TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../constants';
+import { PERCENTAGE_SCALE_MAX } from '../constants';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
   BrowsePoolsCommand,
@@ -26,7 +26,6 @@ import {
   UpdateStakePercentage,
 } from './commands';
 import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
-import { normalizePercentages } from './normalizePercentages';
 import { cases, handler } from './stateTreeUtilities';
 import {
   CurrentPortfolioStakePool,
@@ -38,20 +37,11 @@ import {
 } from './types';
 
 export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): DraftPortfolioStakePool[] =>
-  TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED
-    ? normalizePercentages(
-        pools.map((cp) => ({
-          ...cp,
-          basedOnCurrentPortfolio: true,
-          sliderIntegerPercentage: cp.onChainPercentage,
-        })),
-        'sliderIntegerPercentage'
-      )
-    : pools.map((cp) => ({
-        ...cp,
-        basedOnCurrentPortfolio: true,
-        sliderIntegerPercentage: cp.savedIntegerPercentage,
-      }));
+  pools.map((cp) => ({
+    ...cp,
+    basedOnCurrentPortfolio: true,
+    sliderIntegerPercentage: cp.savedIntegerPercentage,
+  }));
 
 export const processExpandedViewCases: Handler = (params) =>
   cases<ExpandedViewFlow>(
