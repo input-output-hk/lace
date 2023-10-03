@@ -8,7 +8,7 @@ import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks';
 import { useAnalyticsContext, useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
-import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 
 const { Title } = Typography;
@@ -39,11 +39,19 @@ export const SettingsSecurity = ({
   const analytics = useAnalyticsContext();
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
 
-  const handleAnalyticsChoice = (isOptedIn: boolean) => {
-    setEnhancedAnalyticsOptInStatus(
-      isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-    );
-    analytics.setTrackingTypeChangedFromSettings();
+  const handleAnalyticsChoice = async (isOptedIn: boolean) => {
+    const status = isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
+
+    if (isOptedIn) {
+      await analytics.setOptedInForEnhancedAnalytics(status);
+      await analytics.sendEventToPostHog(PostHogAction.SettingsAnalyticsAgreeClick);
+      await analytics.sendAliasEvent();
+    } else {
+      await analytics.sendEventToPostHog(PostHogAction.SettingsAnalyticsSkipClick);
+      await analytics.setOptedInForEnhancedAnalytics(status);
+    }
+
+    setEnhancedAnalyticsOptInStatus(status);
   };
 
   const isMnemonicAvailable = useCallback(async () => {
@@ -59,6 +67,16 @@ export const SettingsSecurity = ({
     setHideShowPassphraseSetting(false);
   }, [backgroundService, walletLock]);
 
+  const handleCloseShowPassphraseDrawer = () => {
+    setIsShowPassphraseDrawerOpen(false);
+    analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseYourRecoveryPhraseXClick);
+  };
+
+  const handleOpenShowPassphraseDrawer = () => {
+    setIsShowPassphraseDrawerOpen(true);
+    analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseClick);
+  };
+
   useEffect(() => {
     isMnemonicAvailable();
   }, [isMnemonicAvailable]);
@@ -72,10 +90,11 @@ export const SettingsSecurity = ({
       />
       <ShowPassphraseDrawer
         visible={isShowPassphraseDrawerOpen}
-        onClose={() => setIsShowPassphraseDrawerOpen(false)}
+        onClose={handleCloseShowPassphraseDrawer}
         popupView={popupView}
         defaultPassphraseVisible={defaultPassphraseVisible}
         defaultMnemonic={defaultMnemonic}
+        sendAnalyticsEvent={(event: PostHogAction) => analytics.sendEventToPostHog(event)}
       />
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="security-settings-heading">
@@ -84,7 +103,7 @@ export const SettingsSecurity = ({
         {!hideShowPassphraseSetting && (
           <>
             <SettingsLink
-              onClick={() => setIsShowPassphraseDrawerOpen(true)}
+              onClick={handleOpenShowPassphraseDrawer}
               description={t('browserView.settings.security.showPassphrase.description')}
               data-testid="settings-show-recovery-phrase-link"
             >
