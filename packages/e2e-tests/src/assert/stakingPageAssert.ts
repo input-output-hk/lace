@@ -1,5 +1,4 @@
 import StakingPage from '../elements/staking/stakingPage';
-import NetworkComponent from '../elements/staking/networkComponent';
 import { TestnetPatterns } from '../support/patterns';
 import webTester from '../actor/webTester';
 import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
@@ -25,33 +24,6 @@ class StakingPageAssert {
 
   assertSeeTitle = async () => {
     await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
-  };
-
-  assertNetworkContainerExistsWithContent = async () => {
-    await NetworkComponent.networkContainer.waitForDisplayed();
-    await NetworkComponent.networkTitle.waitForDisplayed();
-    await expect(await NetworkComponent.networkTitle.getText()).to.equal(await t('cardano.networkInfo.title'));
-    await NetworkComponent.currentEpochLabel.waitForDisplayed();
-    await expect(await NetworkComponent.currentEpochLabel.getText()).to.equal(
-      await t('cardano.networkInfo.currentEpoch')
-    );
-    await NetworkComponent.currentEpochDetail.waitForDisplayed();
-    await expect(await NetworkComponent.currentEpochDetail.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
-    await NetworkComponent.epochEndLabel.waitForDisplayed();
-    await expect(await NetworkComponent.epochEndLabel.getText()).to.equal(await t('cardano.networkInfo.epochEnd'));
-    await NetworkComponent.epochEndDetail.waitForDisplayed();
-    await NetworkComponent.totalPoolsLabel.waitForDisplayed();
-    await expect(await NetworkComponent.totalPoolsLabel.getText()).to.equal(await t('cardano.networkInfo.totalPools'));
-    await NetworkComponent.totalPoolsDetail.waitForDisplayed();
-    await expect(await NetworkComponent.totalPoolsDetail.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
-    await NetworkComponent.percentageStakedLabel.waitForDisplayed();
-    await expect(await NetworkComponent.percentageStakedLabel.getText()).to.equal(
-      await t('cardano.networkInfo.percentageStaked')
-    );
-    await NetworkComponent.percentageStakedDetail.waitForDisplayed();
-    await expect(await NetworkComponent.percentageStakedDetail.getText()).to.match(
-      TestnetPatterns.PERCENT_DOUBLE_REGEX
-    );
   };
 
   assertSeeSearchComponent = async (mode: 'extended' | 'popup') => {
