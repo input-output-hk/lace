@@ -53,6 +53,7 @@ export enum PostHogAction {
   OnboardingRestoreEnterPassphrase01NextClick = 'onboarding | restore wallet | enter passphrase #01 | next | click',
   OnboardingRestoreEnterPassphrase09NextClick = 'onboarding | restore wallet | enter passphrase #09 | next | click',
   OnboardingRestoreEnterPassphrase17NextClick = 'onboarding | restore wallet | enter passphrase #17 | next | click',
+  OnboardingRestoreWalletNamePasswordNextClick = 'onboarding | restore wallet | wallet name & password | next | click',
   // Create new wallet
   OnboardingCreateDoneGoToWallet = 'onboarding | new wallet | all done | go to my wallet | click',
   OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
@@ -68,6 +69,7 @@ export enum PostHogAction {
   OnboardingCreateEnterPassphrase01NextClick = 'onboarding | new wallet | enter passphrase #01 | next | click',
   OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
   OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
+  OnboardingCreateWalletNamePasswordNextClick = 'onboarding | new wallet | wallet name & password | next | click',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',
@@ -97,6 +99,9 @@ export enum PostHogAction {
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
   NFTsImageClick = 'nft | nfts | nft image | click',
+  NFTsCreateFolderClick = 'nft | nfts | create folder | click',
+  NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
+  NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
   // Address book
   AddressBookAddAddressClick = 'address book | add address | click',
   AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
@@ -140,6 +145,17 @@ export enum PostHogAction {
   SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
   SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
   SettingsCollateralXClick = 'settings | collateral | x | click',
+  // Recieve section
+  ReceiveClick = 'receive | receive | click',
+  ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
+  ReceiveCopyADAHandleIconClick = 'receive | receive | copy ADA handle icon | click',
+  ReceiveYourWalletAddressXClick = 'receive | Your wallet address | x | click',
+  // Dapp Connector
+  DappConnectorAuthorizeDappAuthorizeClick = 'dapp connector | authorize dapp | authorize | click',
+  DappConnectorAuthorizeDappCancelClick = 'dapp connector | authorize dapp | cancel | click',
+  DappConnectorAuthorizeDappDappConnectorBetaClick = 'dapp connector | authorize dapp | dapp connector beta | click',
+  DappConnectorAuthorizeDappConnectionAlwaysClick = 'dapp connector | authorize dapp | dapp connection | always | click',
+  DappConnectorAuthorizeDappConnectionOnlyOnceClick = 'dapp connector | authorize dapp | dapp connection | only once | click',
   // User
   UserWalletProfileIconClick = 'user/wallet profile | profile icon | click',
   UserWalletProfileWalletAddressClick = 'user/wallet profile | wallet address | click',
@@ -151,7 +167,31 @@ export enum PostHogAction {
   UserWalletProfileNetworkPreviewClick = 'user/wallet profile | network | preview | click',
   UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
   UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
-  UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click'
+  UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
+  // Lace Logo
+  WalletLaceClick = 'wallet | lace | click',
+  // Tokens
+  TokenTokensClick = 'token | tokens | click',
+  TokenTokensTokenRowClick = 'token | tokens | token row | click',
+  TokenTokenDetailViewAllClick = 'token | token detail | view all | click',
+  TokenTokenDetailXClick = 'token | token detail | x | click',
+  // Activities
+  ActivityActivityClick = 'activity | activity | click',
+  ActivityActivityActivityRowClick = 'activity | activity | activity row | click',
+  ActivityActivityDetailTransactionHashClick = 'activity | activity detail | transaction hash | click',
+  ActivityActivityDetailInputsClick = 'activity | activity detail | inputs | click',
+  ActivityActivityDetailOutputsClick = 'activity | activity detail | outputs | click',
+  ActivityActivityDetailXClick = 'activity | activity detail | x | click',
+  // Unlock Wallet
+  UnlockWalletWelcomeBackUnlockClick = 'unlock wallet | welcome back! | unlock | click',
+  UnlockWalletWelcomeBackForgotPasswordClick = 'unlock wallet | welcome back! | forgot password? | click',
+  UnlockWalletForgotPasswordProceedClick = 'unlock wallet | forgot password? | proceed | click',
+  UnlockWalletForgotPasswordCancelClick = 'unlock wallet | forgot password? | cancel | click',
+  UnlockWalletForgotPasswordNextClick = 'unlock wallet | forgot password? | set up your password | next | click',
+  UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick = 'unlock wallet | forgot password? | recovery phrase length | next | click',
+  UnlockWalletForgotPasswordEnterPassphrase01NextClick = 'unlock wallet | forgot password? | enter passphrase #01 | next | click',
+  UnlockWalletForgotPasswordEnterPassphrase09NextClick = 'unlock wallet | forgot password? | enter passphrase #09 | next | click',
+  UnlockWalletForgotPasswordEnterPassphrase17NextClick = 'unlock wallet | forgot password? | enter passphrase #17 | next | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
@@ -194,7 +234,8 @@ export type PostHogActionsKeys =
   | 'RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK'
   | 'CONNECT_HW_NEXT_CLICK'
   | 'SELECT_HW_ACCOUNT_NEXT_CLICK'
-  | 'DONE_GO_TO_WALLET';
+  | 'DONE_GO_TO_WALLET'
+  | 'WALLET_NAME_PASSWORD_NEXT_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogPersonProperties = {

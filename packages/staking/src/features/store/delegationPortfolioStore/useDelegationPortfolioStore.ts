@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH, targetWeight } from './constants';
+import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH } from './constants';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
 import {
   Command,
@@ -11,6 +11,7 @@ import {
   processExpandedViewCases,
   processPopupViewCases,
 } from './stateMachine';
+import { normalizePercentages } from './stateMachine/normalizePercentages';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
@@ -88,6 +89,18 @@ export const useDelegationPortfolioStore = create(
         const confirmedRewardHistory = delegationRewardsHistory.all.filter(
           ({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch
         );
+
+        // TMP: replace by real data from memory/cip
+        const savedPercentages = normalizePercentages(
+          // eslint-disable-next-line no-magic-numbers
+          delegationDistribution.map((item) => ({ ...item, percentage: item.percentage * 100 })),
+          'percentage'
+          // eslint-disable-next-line unicorn/no-array-reduce
+        ).reduce((acc, item) => {
+          acc[item.pool.hexId] = item.percentage;
+          return acc;
+        }, {} as Record<Wallet.Cardano.PoolIdHex, number>);
+
         const currentPortfolio = delegationDistribution.map(({ pool: stakePool, percentage, stake }) => {
           const confirmedPoolRewards = confirmedRewardHistory
             .filter(({ poolId }) => poolId === stakePool.id)
@@ -100,11 +113,12 @@ export const useDelegationPortfolioStore = create(
               totalRewards: Wallet.BigIntMath.sum(confirmedPoolRewards),
             },
             id: stakePool.hexId,
-            name: stakePool.metadata?.name,
+            // eslint-disable-next-line no-magic-numbers
+            onChainPercentage: percentage * 100,
+            savedIntegerPercentage: savedPercentages[stakePool.hexId] || 0,
+            sliderIntegerPercentage: savedPercentages[stakePool.hexId],
             stakePool,
-            ticker: stakePool.metadata?.ticker,
             value: stake,
-            weight: Math.round(percentage * targetWeight),
           };
         });
 

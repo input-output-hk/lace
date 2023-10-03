@@ -5,7 +5,13 @@ import { StoreProvider } from '@stores';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
 import { CurrencyStoreProvider } from '@providers/currency';
-import { DatabaseProvider, AxiosClientProvider, AppSettingsProvider, CardanoWalletManagerProvider } from '@providers';
+import {
+  DatabaseProvider,
+  AxiosClientProvider,
+  AppSettingsProvider,
+  CardanoWalletManagerProvider,
+  AnalyticsProvider
+} from '@providers';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from '@providers/ThemeProvider';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
@@ -20,9 +26,11 @@ const App = (): React.ReactElement => (
             <AxiosClientProvider>
               <CurrencyStoreProvider>
                 <HashRouter>
-                  <ThemeProvider>
-                    <DappConnectorView />
-                  </ThemeProvider>
+                  <AnalyticsProvider>
+                    <ThemeProvider>
+                      <DappConnectorView />
+                    </ThemeProvider>
+                  </AnalyticsProvider>
                 </HashRouter>
               </CurrencyStoreProvider>
             </AxiosClientProvider>

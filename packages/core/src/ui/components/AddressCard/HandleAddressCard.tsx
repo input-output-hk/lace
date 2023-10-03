@@ -10,9 +10,10 @@ export type Props = {
   name: string;
   image: string;
   copiedMessage: string;
+  onCopyClick?: () => void;
 };
 
-export const HandleAddressCard = ({ name, image, copiedMessage }: Readonly<Props>): JSX.Element => {
+export const HandleAddressCard = ({ name, image, copiedMessage, onCopyClick }: Readonly<Props>): JSX.Element => {
   const [imageResponse, handleLoad] = useFetchImage({ url: image, fallback: placeholder });
   const isLoading = imageResponse?.status === IMAGE_FETCH_STATUS.LOADING;
 
@@ -21,7 +22,7 @@ export const HandleAddressCard = ({ name, image, copiedMessage }: Readonly<Props
   }, [handleLoad]);
 
   return (
-    <Base copiedMessage={copiedMessage} copyText={name}>
+    <Base copiedMessage={copiedMessage} copyText={name} onCopyClick={onCopyClick}>
       <div className={styles.imageContainer}>
         {isLoading ? (
           <Spin />

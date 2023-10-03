@@ -6,3 +6,9 @@ export type SendOnboardingAnalyticsEvent = (
   value?: number,
   postHogProperties?: PostHogProperties
 ) => Promise<void>;
+
+export enum SetupType {
+  CREATE = 'create',
+  RESTORE = 'restore',
+  FORGOT_PASSWORD = 'forgot_password'
+}

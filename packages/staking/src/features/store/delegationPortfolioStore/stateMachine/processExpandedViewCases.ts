@@ -1,3 +1,4 @@
+import { PERCENTAGE_SCALE_MAX, TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../constants';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
   BrowsePoolsCommand,
@@ -22,10 +23,35 @@ import {
   ShowPoolDetailsFromList,
   UnselectPoolFromDetails,
   UnselectPoolFromList,
+  UpdateStakePercentage,
 } from './commands';
 import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
+import { normalizePercentages } from './normalizePercentages';
 import { cases, handler } from './stateTreeUtilities';
-import { DrawerManagementStep, ExpandedViewFlow, Flow, Handler } from './types';
+import {
+  CurrentPortfolioStakePool,
+  DraftPortfolioStakePool,
+  DrawerManagementStep,
+  ExpandedViewFlow,
+  Flow,
+  Handler,
+} from './types';
+
+export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): DraftPortfolioStakePool[] =>
+  TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED
+    ? normalizePercentages(
+        pools.map((cp) => ({
+          ...cp,
+          basedOnCurrentPortfolio: true,
+          sliderIntegerPercentage: cp.onChainPercentage,
+        })),
+        'sliderIntegerPercentage'
+      )
+    : pools.map((cp) => ({
+        ...cp,
+        basedOnCurrentPortfolio: true,
+        sliderIntegerPercentage: cp.savedIntegerPercentage,
+      }));
 
 export const processExpandedViewCases: Handler = (params) =>
   cases<ExpandedViewFlow>(
@@ -38,7 +64,7 @@ export const processExpandedViewCases: Handler = (params) =>
           ManagePortfolio: ({ state }) => {
             state.activeFlow = Flow.PortfolioManagement;
             state.activeDrawerStep = DrawerManagementStep.Preferences;
-            state.draftPortfolio = state.currentPortfolio;
+            state.draftPortfolio = currentPortfolioToDraft(state.currentPortfolio);
           },
           ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails>(({ state, command: { data } }) => {
             atomicStateMutators.showPoolDetails({ pool: data, state, targetFlow: Flow.CurrentPoolDetails });
@@ -97,6 +123,7 @@ export const processExpandedViewCases: Handler = (params) =>
             if (!state.viewedStakePool) return;
             const portfolioPool = mapStakePoolToPortfolioPool({
               cardanoCoinSymbol: state.cardanoCoinSymbol,
+              sliderIntegerPercentage: PERCENTAGE_SCALE_MAX,
               stakePool: state.viewedStakePool,
             });
 
@@ -149,6 +176,12 @@ export const processExpandedViewCases: Handler = (params) =>
               },
               RemoveStakePool: handler<RemoveStakePool>(({ state, command: { data } }) => {
                 atomicStateMutators.removePoolFromPreferences({ id: data, state });
+              }),
+              UpdateStakePercentage: handler<UpdateStakePercentage>(({ state, command: { data } }) => {
+                atomicStateMutators.updateStakePercentage({
+                  ...data,
+                  state,
+                });
               }),
             },
             params.command.type,
@@ -254,6 +287,12 @@ export const processExpandedViewCases: Handler = (params) =>
               RemoveStakePool: handler<RemoveStakePool>(({ state, command: { data } }) => {
                 atomicStateMutators.removePoolFromPreferences({ id: data, state });
               }),
+              UpdateStakePercentage: handler<UpdateStakePercentage>(({ state, command: { data } }) =>
+                atomicStateMutators.updateStakePercentage({
+                  ...data,
+                  state,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Preferences
@@ -309,6 +348,9 @@ export const processExpandedViewCases: Handler = (params) =>
               CancelDrawer: ({ state }) => {
                 atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
                 state.draftPortfolio = undefined;
+              },
+              DrawerBack: ({ state }) => {
+                state.activeDrawerStep = DrawerManagementStep.Sign;
               },
               DrawerContinue: ({ state }) => {
                 state.activeDrawerStep = DrawerManagementStep.Success;

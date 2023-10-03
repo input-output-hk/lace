@@ -126,17 +126,6 @@ export default new (class WebTester {
     return await this.getTextValue(element.toJSLocator());
   }
 
-  // eslint-disable-next-line no-undef
-  async getTextValuesFromArrayElement(array: WebdriverIO.ElementArray): Promise<string[]> {
-    return Promise.all(array.map(async (element) => await element.getText()));
-  }
-
-  // eslint-disable-next-line no-undef
-  async getTextValuesFromArrayElementWithoutDuplicates(array: WebdriverIO.ElementArray): Promise<unknown[]> {
-    const arr = Promise.all(array.map(async (element) => (await element.getText()).split(' ').pop()));
-    return [...new Set(await arr)];
-  }
-
   async getTextValue(selector: string): Promise<string | number> {
     Logger.log(`Get text value for selector ${selector}`);
     const sel = await $(selector);
