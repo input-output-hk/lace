@@ -1,8 +1,8 @@
-import MultidelegationPage from '../elements/staking/MultidelegationPage';
+import MultidelegationPage from '../../elements/multidelegation/MultidelegationPage';
 import { browser } from '@wdio/globals';
 import { expect } from 'chai';
-import { t } from '../utils/translationService';
-import { TestnetPatterns } from '../support/patterns';
+import { t } from '../../utils/translationService';
+import { TestnetPatterns } from '../../support/patterns';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -95,6 +95,24 @@ class MultidelegationPageAssert {
       'tADA'
     )[0];
     expect(lastRewardsValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+  };
+
+  assertSeeStakingPoolOnYourPoolsList = async (poolName: string) => {
+    await browser.waitUntil(
+      async () => {
+        const delegatedPoolsCount = await MultidelegationPage.delegatedPoolItems.length;
+        const delegatedPoolsNames = [];
+        for (let index = 0; index < delegatedPoolsCount; index++) {
+          delegatedPoolsNames.push(await MultidelegationPage.delegatedPoolName(index).getText());
+        }
+        return delegatedPoolsNames.includes(poolName);
+      },
+      {
+        timeout: 180_000,
+        interval: 2000,
+        timeoutMsg: `failed while waiting for stake pool: ${poolName}`
+      }
+    );
   };
 }
 
