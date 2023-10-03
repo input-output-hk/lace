@@ -1,3 +1,4 @@
+// TODO discuss: split spacing from "sizing" - spacing should refer to margin and padding
 export const spacing = {
   $0: '0px',
   $1: '1px',
@@ -29,9 +30,11 @@ export const spacing = {
   $148: '148px',
   $214: '214px',
   $294: '294px',
+  $312: '312px',
   $336: '336px',
   $342: '342px',
   $380: '380px',
+  $480: '480px',
   $584: '584px',
   $fill: '100%',
   $auto: 'auto',

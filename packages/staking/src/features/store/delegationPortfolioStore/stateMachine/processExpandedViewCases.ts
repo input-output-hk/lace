@@ -1,3 +1,4 @@
+import { PERCENTAGE_SCALE_MAX, TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../constants';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
   AddStakePools,
@@ -35,10 +36,14 @@ import {
   ShowPoolDetailsFromList,
   UnselectPoolFromDetails,
   UnselectPoolFromList,
+  UpdateStakePercentage,
 } from './commands';
 import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
+import { normalizePercentages } from './normalizePercentages';
 import { cases, handler } from './stateTreeUtilities';
 import {
+  CurrentPortfolioStakePool,
+  DraftPortfolioStakePool,
   DrawerManagementStep,
   ExpandedViewFlow,
   Flow,
@@ -51,6 +56,22 @@ import {
   StatePoolDetails,
   StatePortfolioManagement,
 } from './types';
+
+export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): DraftPortfolioStakePool[] =>
+  TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED
+    ? normalizePercentages(
+        pools.map((cp) => ({
+          ...cp,
+          basedOnCurrentPortfolio: true,
+          sliderIntegerPercentage: cp.onChainPercentage,
+        })),
+        'sliderIntegerPercentage'
+      )
+    : pools.map((cp) => ({
+        ...cp,
+        basedOnCurrentPortfolio: true,
+        sliderIntegerPercentage: cp.savedIntegerPercentage,
+      }));
 
 export const processExpandedViewCases: Handler = (params) =>
   cases<ExpandedViewFlow>(
@@ -65,7 +86,7 @@ export const processExpandedViewCases: Handler = (params) =>
             ...state,
             activeDrawerStep: DrawerManagementStep.Preferences,
             activeFlow: Flow.PortfolioManagement,
-            draftPortfolio: state.currentPortfolio,
+            draftPortfolio: currentPortfolioToDraft(state.currentPortfolio),
           })),
           ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails, StateOverview, StateCurrentPoolDetails>(
             ({ state, command: { data } }) => ({
@@ -153,6 +174,7 @@ export const processExpandedViewCases: Handler = (params) =>
 
             const portfolioPool = mapStakePoolToPortfolioPool({
               cardanoCoinSymbol: state.cardanoCoinSymbol,
+              sliderIntegerPercentage: PERCENTAGE_SCALE_MAX,
               stakePool: state.viewedStakePool,
             });
 
@@ -219,6 +241,15 @@ export const processExpandedViewCases: Handler = (params) =>
                 ({ state, command: { data } }) => ({
                   ...state,
                   ...atomicStateMutators.removePoolFromPreferences({ id: data, state }),
+                })
+              ),
+              UpdateStakePercentage: handler<UpdateStakePercentage, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state, command: { data } }) => ({
+                  ...state,
+                  ...atomicStateMutators.updateStakePercentage({
+                    ...data,
+                    state,
+                  }),
                 })
               ),
             },
@@ -366,6 +397,16 @@ export const processExpandedViewCases: Handler = (params) =>
                   ...atomicStateMutators.removePoolFromPreferences({ id: data, state }),
                 })
               ),
+              UpdateStakePercentage: handler<UpdateStakePercentage, StateNewPortfolio, StateNewPortfolio>(
+                // eslint-disable-next-line sonarjs/no-identical-functions
+                ({ state, command: { data } }) => ({
+                  ...state,
+                  ...atomicStateMutators.updateStakePercentage({
+                    ...data,
+                    state,
+                  }),
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Preferences
@@ -439,6 +480,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
                 draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Sign,
               })),
               DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state }) => ({

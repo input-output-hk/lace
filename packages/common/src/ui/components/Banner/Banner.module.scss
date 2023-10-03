@@ -31,8 +31,22 @@
     @include popupViewContainer;
   }
 
+  &.clickable {
+    cursor: pointer;
+  }
+
   @media (max-width: $breakpoint-popup) {
     @include popupViewContainer;
+  }
+
+  .chevronRightIconContainer {
+    align-self: center;
+    display: flex;
+
+    svg {
+      height: 16px;
+      width: 16px;
+    }
   }
 
   .iconContainer {
@@ -57,7 +71,7 @@
     @media (max-width: $breakpoint-popup) {
       @include popupViewIconContainer;
     }
-    
+
     &.withDescription {
       margin-top: size_unit(1);
     }
@@ -65,11 +79,11 @@
 
   .contentContainer {
     display: flex;
-    width: 100%; 
+    width: 100%;
     justify-content: space-between;
   }
 
-  .buttonContainer { 
+  .buttonContainer {
     height: 60%;
     padding-left: size_unit(1.25);
   }
