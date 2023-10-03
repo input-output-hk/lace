@@ -5,6 +5,10 @@ import * as styles from './DelegationRatioSlider.css';
 import SliderMinusIcon from './slider-minus.svg';
 import SliderPlusIcon from './slider-plus.svg';
 
+const MAX_VALUE = 100;
+
+const inRange = (value: number) => value >= 1 && value <= MAX_VALUE;
+
 export type DelegationRatioSlider = Omit<Slider.SliderProps, 'value' | 'onValueChange' | 'defaultValue'> & {
   value?: number;
   defaultValue?: number;
@@ -14,8 +18,8 @@ export type DelegationRatioSlider = Omit<Slider.SliderProps, 'value' | 'onValueC
 export const DelegationRatioSlider = React.forwardRef(
   (props: DelegationRatioSlider, forwardedRef: React.ForwardedRef<HTMLInputElement>) => {
     const value = props.value || props.defaultValue || 0;
-    const handlePlusClick = () => props.onValueChange && props.onValueChange(value + 1);
-    const handleMinusClick = () => props.onValueChange && props.onValueChange(value - 1);
+    const handlePlusClick = () => props.onValueChange && inRange(value + 1) && props.onValueChange(value + 1);
+    const handleMinusClick = () => props.onValueChange && inRange(value - 1) && props.onValueChange(value - 1);
     return (
       <div className={styles.SliderContainer}>
         <IconButton.Primary icon={<SliderMinusIcon />} onClick={handleMinusClick} />

@@ -1,6 +1,7 @@
 import { Wallet } from '@lace/cardano';
-import { MAX_POOLS_COUNT } from '../constants';
+import { MAX_POOLS_COUNT, PERCENTAGE_SCALE_MAX } from '../constants';
 import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
+import { normalizePercentages } from './normalizePercentages';
 import {
   DraftPortfolioStakePool,
   DrawerDefaultStep,
@@ -25,9 +26,22 @@ export const atomicStateMutators = {
     state.activeFlow = Flow.BrowsePools;
   },
   beginNewPortfolioCreation: ({ selections, state }: { selections: DraftPortfolioStakePool[]; state: State }) => {
+    // RESPONSIBLITY: If all new pools have 0 percentages (just added pools), rebalance equally
     state.activeFlow = Flow.NewPortfolio;
     state.activeDrawerStep = DrawerManagementStep.Preferences;
-    state.draftPortfolio = selections;
+    const allPoolsHaveZeroPercentages = selections.every(
+      ({ sliderIntegerPercentage }) => sliderIntegerPercentage === 0
+    );
+    if (allPoolsHaveZeroPercentages) {
+      const percentageValue = PERCENTAGE_SCALE_MAX / selections.length; // may be float
+      state.draftPortfolio = selections.map((pool) => ({
+        ...pool,
+        sliderIntegerPercentage: percentageValue,
+      }));
+      state.draftPortfolio = normalizePercentages(state.draftPortfolio, 'sliderIntegerPercentage');
+    } else {
+      state.draftPortfolio = selections;
+    }
   },
   cancelDrawer: ({ state, targetFlow }: { state: State; targetFlow: Flow.Overview | Flow.BrowsePools }) => {
     state.activeFlow = targetFlow;
@@ -43,8 +57,14 @@ export const atomicStateMutators = {
     const alreadySelected = state.selectedPortfolio.some(({ id }) => stakePool.hexId === id);
     if (selectionsFull || alreadySelected) return;
     state.selectedPortfolio = ejectDraftFromCurrentPortfolio([
+      {
+        ...mapStakePoolToPortfolioPool({
+          cardanoCoinSymbol: state.cardanoCoinSymbol,
+          sliderIntegerPercentage: 0,
+          stakePool,
+        }),
+      },
       ...state.selectedPortfolio,
-      mapStakePoolToPortfolioPool({ cardanoCoinSymbol: state.cardanoCoinSymbol, stakePool }),
     ]);
   },
   showChangingPreferencesConfirmation: ({
@@ -74,5 +94,21 @@ export const atomicStateMutators = {
   },
   unselectPool: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
     state.selectedPortfolio = ejectDraftFromCurrentPortfolio(state.selectedPortfolio.filter((pool) => pool.id !== id));
+  },
+  updateStakePercentage: ({
+    id,
+    newSliderPercentage,
+    state,
+  }: {
+    id: Wallet.Cardano.PoolIdHex;
+    newSliderPercentage: number;
+    state: State;
+  }) => {
+    if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
+    state.draftPortfolio = ejectDraftFromCurrentPortfolio(
+      state.draftPortfolio.map((pool) =>
+        pool.id === id ? { ...pool, sliderIntegerPercentage: newSliderPercentage } : pool
+      )
+    );
   },
 };

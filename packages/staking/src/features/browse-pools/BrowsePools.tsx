@@ -1,5 +1,5 @@
 import { PortfolioBar } from './PortfolioBar';
-import { StakePoolsTable } from './stake-pools-table';
+import { StakePoolsTable } from './StakePoolsTable';
 
 const LACE_APP_ID = 'lace-app';
 
