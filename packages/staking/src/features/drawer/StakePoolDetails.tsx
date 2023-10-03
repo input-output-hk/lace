@@ -64,7 +64,11 @@ export const StakePoolDetails = ({
   } = useDelegationPortfolioStore((store) => ({
     activeDrawerStep: store.activeDrawerStep,
     activeFlow: store.activeFlow,
-    currentPortfolioDraftModified: store.draftPortfolio?.some((pool) => !pool.basedOnCurrentPortfolio) || false,
+    currentPortfolioDraftModified:
+      store.draftPortfolio?.some(
+        ({ sliderIntegerPercentage, savedIntegerPercentage }) =>
+          !!savedIntegerPercentage && sliderIntegerPercentage !== savedIntegerPercentage
+      ) || false,
     currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
     draftPortfolioValidity: getDraftPortfolioValidity(store),
     openPoolIsSelected: store.selectedPortfolio.some(

@@ -12,7 +12,6 @@ export const mapStakePoolToPortfolioPool = ({
   stakePool: Wallet.Cardano.StakePool;
   sliderIntegerPercentage: number;
 }): DraftPortfolioStakePool => ({
-  basedOnCurrentPortfolio: false,
   displayData: mapStakePoolToDisplayData({ cardanoCoinSymbol, stakePool }),
   id: stakePool.hexId,
   sliderIntegerPercentage,
