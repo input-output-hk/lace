@@ -1,4 +1,5 @@
 import { Given, Then, When } from '@cucumber/cucumber';
+import MultiDelegationBetaModal from '../elements/multidelegation/MultiDelegationBetaModal';
 import MultidelegationPageAssert from '../assert/multidelegation/MultidelegationPageAssert';
 import MultidelegationPage from '../elements/multidelegation/MultidelegationPage';
 import { parseSearchTerm } from '../utils/multiDelegationUtils';
@@ -18,6 +19,10 @@ import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
+});
+
+When(/^I close Multi-delegation beta modal$/, async () => {
+  await MultiDelegationBetaModal.clickGoItButton();
 });
 
 Then(/^I wait until delegation info card shows staking to "(\d+)" pool\(s\)$/, async (poolsCount: number) => {
