@@ -1,7 +1,7 @@
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import ChevronDownIcon from '@lace/ui/dist/assets/icons/chevron-down.component.svg';
 import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InfoIcon from '../../../../assets/icons/info-icon.svg';
 import { Tooltip } from '../../../overview/StakingInfoCard/StatsTooltip';
@@ -44,22 +44,13 @@ export const PoolDetailsCard = ({
   targetPercentage,
   cardanoCoinSymbol,
 }: PoolDetailsCardProps) => {
-  const firstRender = useRef(true);
   const { t } = useTranslation();
-  const [percentage, setPercentage] = useState(targetPercentage);
-  const onPercentageChangeRef = useRef(onPercentageChange);
+  const [localValue, setLocalValue] = useState(targetPercentage);
 
-  useEffect(() => {
-    onPercentageChangeRef.current = onPercentageChange;
-  }, [onPercentageChange]);
-
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
-    onPercentageChangeRef.current(percentage);
-  }, [percentage, onPercentageChangeRef]);
+  const updatePercentage = (value: number) => {
+    setLocalValue(value);
+    onPercentageChange(value);
+  };
 
   return (
     <Card.Outlined className={styles.root}>
@@ -136,16 +127,16 @@ export const PoolDetailsCard = ({
               )}
               <Flex alignItems="center" gap="$12">
                 <Text.Body.Large>Ratio</Text.Body.Large>
-                <RatioInput onUpdate={setPercentage} value={percentage} />
+                <RatioInput onUpdate={updatePercentage} value={localValue} />
                 <Text.Body.Large>%</Text.Body.Large>
               </Flex>
             </Flex>
             <DelegationRatioSlider
               step={1}
               max={PERCENTAGE_SCALE_MAX}
-              min={percentage === 0 ? 0 : 1}
-              value={percentage}
-              onValueChange={setPercentage}
+              min={localValue === 0 ? 0 : 1}
+              value={localValue}
+              onValueChange={updatePercentage}
             />
             <Tooltip content={onRemove ? undefined : t('drawer.preferences.pickMorePools')}>
               <div>
