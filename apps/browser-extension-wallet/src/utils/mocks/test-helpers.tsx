@@ -651,6 +651,5 @@ export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototyp
   setOptedInForEnhancedAnalytics: jest.fn(),
   sendPageNavigationEvent: jest.fn(),
   setChain: jest.fn(),
-  sendAliasEvent: jest.fn(),
-  setTrackingTypeChangedFromSettings: jest.fn()
+  sendAliasEvent: jest.fn()
 };

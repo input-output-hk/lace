@@ -99,6 +99,9 @@ export enum PostHogAction {
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
   NFTsImageClick = 'nft | nfts | nft image | click',
+  NFTsCreateFolderClick = 'nft | nfts | create folder | click',
+  NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
+  NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
   // Address book
   AddressBookAddAddressClick = 'address book | add address | click',
   AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
@@ -142,6 +145,18 @@ export enum PostHogAction {
   SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
   SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
   SettingsCollateralXClick = 'settings | collateral | x | click',
+  SettingsCurrencyClick = 'settings | currency | click',
+  SettingsCurrencySelectCurrencyClick = 'settings | currency | select currency | click',
+  SettingsCurrencyXClick = 'settings | currency | x | click',
+  SettingsThemeLightModeClick = 'settings | theme | light mode | click',
+  SettingsThemeDarkModeClick = 'settings | theme | dark mode | click',
+  SettingsShowRecoveryPhraseClick = 'settings | show recovery phrase | click',
+  SettingsShowRecoveryPhraseEnterYourPasswordShowRecoveryPhraseClick = 'settings | show recovery phrase | enter your password | show recovery phrase | click',
+  SettingsShowRecoveryPhraseYourRecoveryPhraseHidePassphraseClick = 'settings | show recovery phrase | Your recovery phrase (keep it secret!) | hide passphrase | click',
+  SettingsShowRecoveryPhraseYourRecoveryPhraseXClick = 'settings | show recovery phrase | Your recovery phrase (keep it secret!) | x | click',
+  SettingsAnalyticsAgreeClick = 'settings | analytics | agree | click',
+  SettingsAnalyticsSkipClick = 'settings | analytics | skip | click',
+  SettingsFaqsClick = 'settings | faqs | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
@@ -165,6 +180,20 @@ export enum PostHogAction {
   UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
   UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
   UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
+  // Lace Logo
+  WalletLaceClick = 'wallet | lace | click',
+  // Tokens
+  TokenTokensClick = 'token | tokens | click',
+  TokenTokensTokenRowClick = 'token | tokens | token row | click',
+  TokenTokenDetailViewAllClick = 'token | token detail | view all | click',
+  TokenTokenDetailXClick = 'token | token detail | x | click',
+  // Activities
+  ActivityActivityClick = 'activity | activity | click',
+  ActivityActivityActivityRowClick = 'activity | activity | activity row | click',
+  ActivityActivityDetailTransactionHashClick = 'activity | activity detail | transaction hash | click',
+  ActivityActivityDetailInputsClick = 'activity | activity detail | inputs | click',
+  ActivityActivityDetailOutputsClick = 'activity | activity detail | outputs | click',
+  ActivityActivityDetailXClick = 'activity | activity detail | x | click',
   // Unlock Wallet
   UnlockWalletWelcomeBackUnlockClick = 'unlock wallet | welcome back! | unlock | click',
   UnlockWalletWelcomeBackForgotPasswordClick = 'unlock wallet | welcome back! | forgot password? | click',

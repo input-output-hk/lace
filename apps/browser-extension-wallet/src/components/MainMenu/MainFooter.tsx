@@ -67,7 +67,11 @@ export const MainFooter = (): React.ReactElement => {
   const handleNavigation = (path: string) => {
     switch (path) {
       case walletRoutePaths.assets:
-        sendAnalytics(MatomoEventCategories.VIEW_TOKENS, AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_POPUP);
+        sendAnalytics(
+          MatomoEventCategories.VIEW_TOKENS,
+          AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_POPUP,
+          PostHogAction.TokenTokensClick
+        );
         break;
       case walletRoutePaths.earn:
         sendAnalytics(
@@ -77,7 +81,11 @@ export const MainFooter = (): React.ReactElement => {
         );
         break;
       case walletRoutePaths.activity:
-        sendAnalytics(MatomoEventCategories.VIEW_TRANSACTIONS, AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_POPUP);
+        sendAnalytics(
+          MatomoEventCategories.VIEW_TRANSACTIONS,
+          AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_POPUP,
+          PostHogAction.ActivityActivityClick
+        );
         break;
       case walletRoutePaths.nfts:
         sendAnalytics(

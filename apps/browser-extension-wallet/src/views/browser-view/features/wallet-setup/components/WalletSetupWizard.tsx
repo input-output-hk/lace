@@ -286,6 +286,9 @@ export const WalletSetupWizard = ({
       setDoesUserAllowAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
+      await analytics.setOptedInForEnhancedAnalytics(
+        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+      );
       if (setupType === SetupType.FORGOT_PASSWORD) {
         deleteFromLocalStorage('isForgotPasswordFlow');
         goToMyWallet(wallet);
@@ -298,14 +301,15 @@ export const WalletSetupWizard = ({
     }
   }, [
     createWallet,
-    mnemonic,
-    moveForward,
-    password,
     walletName,
-    goToMyWallet,
-    isAnalyticsAccepted,
+    mnemonic,
+    password,
     setDoesUserAllowAnalytics,
-    setupType
+    isAnalyticsAccepted,
+    analytics,
+    setupType,
+    goToMyWallet,
+    moveForward
   ]);
 
   const createFlowPasswordNextStep = () => {

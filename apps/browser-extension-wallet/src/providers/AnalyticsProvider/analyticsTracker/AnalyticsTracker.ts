@@ -29,7 +29,6 @@ export class AnalyticsTracker {
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
   protected excludedEvents: string;
-  protected trackingTypeChangedFromSettings: boolean;
   protected userTrackingType?: UserTrackingType;
 
   constructor({
@@ -56,10 +55,6 @@ export class AnalyticsTracker {
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();
-      if (this.trackingTypeChangedFromSettings) {
-        this.sendAliasEvent();
-        this.trackingTypeChangedFromSettings = false;
-      }
     } else {
       await this.userIdService?.makeTemporary();
     }
@@ -97,11 +92,7 @@ export class AnalyticsTracker {
     this.postHogClient?.setChain(chain);
   }
 
-  setTrackingTypeChangedFromSettings(): void {
-    this.trackingTypeChangedFromSettings = true;
-  }
-
-  private shouldOmitSendEventToPostHog() {
+  private async shouldOmitSendEventToPostHog() {
     const isOptedOutUser = this.userTrackingType === UserTrackingType.Basic;
     return POSTHOG_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser;
   }
