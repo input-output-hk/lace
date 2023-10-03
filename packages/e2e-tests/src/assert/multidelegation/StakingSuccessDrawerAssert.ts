@@ -3,14 +3,12 @@ import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 
 class StakingSuccessDrawerAssert {
-  assertStakingSuccessDrawer = async (process: 'Initial' | 'Switching', mode: 'extended' | 'popup') => {
+  assertStakingSuccessDrawer = async (process: 'Initial' | 'Switching') => {
     await StakingSuccessDrawer.drawerHeaderCloseButton.waitForDisplayed();
-    if (mode === 'extended') {
-      await StakingSuccessDrawer.drawerNavigationTitle.waitForDisplayed();
-      expect(await StakingSuccessDrawer.drawerNavigationTitle.getText()).to.equal(
-        await t('drawer.titleSecond', 'staking')
-      );
-    }
+    await StakingSuccessDrawer.drawerNavigationTitle.waitForDisplayed();
+    expect(await StakingSuccessDrawer.drawerNavigationTitle.getText()).to.equal(
+      await t('drawer.titleSecond', 'staking')
+    );
     await StakingSuccessDrawer.resultIcon.waitForDisplayed();
     await StakingSuccessDrawer.resultTitle.waitForDisplayed();
     expect(await StakingSuccessDrawer.resultTitle.getText()).to.equal(

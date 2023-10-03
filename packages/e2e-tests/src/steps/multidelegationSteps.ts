@@ -150,12 +150,9 @@ When(
   }
 );
 
-Then(
-  /^(Initial|Switching) staking success drawer is displayed in (extended|popup) mode$/,
-  async (process: 'Initial' | 'Switching', mode: 'extended' | 'popup') => {
-    await StakingSuccessDrawerAssert.assertStakingSuccessDrawer(process, mode);
-  }
-);
+Then(/^(Initial|Switching) staking success drawer is displayed$/, async (process: 'Initial' | 'Switching') => {
+  await StakingSuccessDrawerAssert.assertStakingSuccessDrawer(process);
+});
 
 Then(/^I click "Close" button on staking success drawer$/, async () => {
   await StakingSuccessDrawer.clickCloseButton();

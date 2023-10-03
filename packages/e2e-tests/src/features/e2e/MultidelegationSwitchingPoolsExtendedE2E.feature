@@ -17,7 +17,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
     And I enter correct wallet password and confirm staking
-    Then Switching staking success drawer is displayed in extended mode
+    Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
     And I navigate to Transactions extended page
     Then I can see transaction 1 with type "<tx_type>"
@@ -45,7 +45,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
     And I enter correct wallet password and confirm staking
-    Then Switching staking success drawer is displayed in extended mode
+    Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
     And I click Overview tab
     And I wait until "OtherStakePool" pool is on "Your pools" list
@@ -67,7 +67,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
     And I enter correct wallet password and confirm staking
-    Then Switching staking success drawer is displayed in extended mode
+    Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
     And I click Overview tab
     And I wait until "-" pool is on "Your pools" list
