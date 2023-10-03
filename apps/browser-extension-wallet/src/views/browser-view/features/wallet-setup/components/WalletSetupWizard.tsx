@@ -101,7 +101,7 @@ export const WalletSetupWizard = ({
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const { getExperimentVariant, overrideExperimentVariant } = useExperimentsContext();
+  const { getExperimentVariant } = useExperimentsContext();
 
   const { createWallet, setWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -261,9 +261,6 @@ export const WalletSetupWizard = ({
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
     sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
-    if (!isAccepted) {
-      overrideExperimentVariant({ [ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN]: 'control' });
-    }
     moveForward();
   };
 
@@ -442,6 +439,13 @@ export const WalletSetupWizard = ({
     );
   };
 
+  const shouldDisplayExperiment = () =>
+    isAnalyticsAccepted
+      ? getExperimentVariant<CombinedSetupNamePasswordVariants[number]>(
+          ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN
+        ) === 'test'
+      : false;
+
   return (
     <WalletSetupLayout prompt={currentStep === WalletSetupSteps.Finish ? <PinExtension /> : undefined}>
       {currentStep === WalletSetupSteps.Legal && (
@@ -485,9 +489,7 @@ export const WalletSetupWizard = ({
         </Suspense>
       )}
 
-      {getExperimentVariant<CombinedSetupNamePasswordVariants[number]>(
-        ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN
-      ) === 'test' ? (
+      {shouldDisplayExperiment() ? (
         <>
           {currentStep === WalletSetupSteps.Register && (
             <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />
