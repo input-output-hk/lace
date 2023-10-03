@@ -101,7 +101,7 @@ export const WalletSetupWizard = ({
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
-  const { getExperimentVariant } = useExperimentsContext();
+  const { getExperimentVariant, overrideExperimentVariant } = useExperimentsContext();
 
   const { createWallet, setWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -261,6 +261,9 @@ export const WalletSetupWizard = ({
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
     sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
+    if (!isAccepted) {
+      overrideExperimentVariant({ [ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN]: 'control' });
+    }
     moveForward();
   };
 

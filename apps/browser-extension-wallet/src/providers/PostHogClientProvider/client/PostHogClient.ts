@@ -69,25 +69,7 @@ export class PostHogClient {
             '$device_id',
             '$session_recording_recorder_version_server_side',
             '$time'
-          ],
-          loaded: (posthogInstance) => {
-            posthogInstance.onFeatureFlags(async () => {
-              const postHogExperimentConfiguration = posthog.featureFlags.getFlagVariants();
-              const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
-              if (!backgroundStorage?.experimentsConfiguration && postHogExperimentConfiguration) {
-                // save current posthog config in background storage
-                await this.backgroundServiceUtils.setBackgroundStorage(postHogExperimentConfiguration);
-              }
-
-              // if we were not able to retrieve posthog experiment config, use local config
-              if (!postHogExperimentConfiguration) {
-                // override posthog experiment config with local
-                posthog.featureFlags.override(backgroundStorage?.experimentsConfiguration || fallbackConfiguration);
-              }
-
-              this.hasPostHogInitialized$.next(true);
-            });
-          }
+          ]
         });
       })
       .catch(() => {
@@ -130,6 +112,10 @@ export class PostHogClient {
       posthog.register({
         distinct_id: id
       });
+
+      if (trackingType === UserTrackingType.Enhanced && !this.hasPostHogInitialized$.value) {
+        this.loadExperiments();
+      }
     });
   }
 
@@ -191,6 +177,25 @@ export class PostHogClient {
     }
 
     return variant;
+  }
+
+  protected loadExperiments(): void {
+    posthog.onFeatureFlags(async () => {
+      const postHogExperimentConfiguration = posthog.featureFlags.getFlagVariants();
+      const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
+      if (!backgroundStorage?.experimentsConfiguration && postHogExperimentConfiguration) {
+        // save current posthog config in background storage
+        await this.backgroundServiceUtils.setBackgroundStorage(postHogExperimentConfiguration);
+      }
+
+      // if we were not able to retrieve posthog experiment config, use local config
+      if (!postHogExperimentConfiguration) {
+        // override posthog experiment config with local
+        posthog.featureFlags.override(backgroundStorage?.experimentsConfiguration || fallbackConfiguration);
+      }
+
+      this.hasPostHogInitialized$.next(true);
+    });
   }
 
   protected getApiToken(chain: Wallet.Cardano.ChainId): string {
