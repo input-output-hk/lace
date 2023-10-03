@@ -92,7 +92,7 @@ export class AnalyticsTracker {
     this.postHogClient?.setChain(chain);
   }
 
-  private async shouldOmitSendEventToPostHog() {
+  private shouldOmitSendEventToPostHog() {
     const isOptedOutUser = this.userTrackingType === UserTrackingType.Basic;
     return POSTHOG_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser;
   }
