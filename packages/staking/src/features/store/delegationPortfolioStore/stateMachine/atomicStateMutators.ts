@@ -50,7 +50,7 @@ export const atomicStateMutators = {
       activeDrawerStep: DrawerManagementStep.Preferences,
       activeFlow: Flow.NewPortfolio,
       draftPortfolio: targetDraftPortfolio,
-    } as const
+    } as const;
   },
   cancelDrawer: <F extends Flow.Overview | Flow.BrowsePools>({ targetFlow }: { state: State; targetFlow: F }) => ({
     activeDrawerStep: undefined,
