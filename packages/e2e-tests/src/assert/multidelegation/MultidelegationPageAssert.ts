@@ -3,7 +3,7 @@ import { browser } from '@wdio/globals';
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 import { TestnetPatterns } from '../../support/patterns';
-import NetworkComponent from '../../elements/staking/networkComponent';
+import NetworkComponent from '../../elements/multidelegation/NetworkInfoComponent';
 import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListItem';
 
 class MultidelegationPageAssert {
