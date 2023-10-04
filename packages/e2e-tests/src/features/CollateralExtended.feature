@@ -3,6 +3,7 @@ Feature: Collateral - extended view
 
   Background:
     Given Wallet is synced
+    And I reclaim collateral (if active) in extended mode
 
   @LW-5520
   Scenario: Extended View - Settings - Add/Reclaim Collateral
