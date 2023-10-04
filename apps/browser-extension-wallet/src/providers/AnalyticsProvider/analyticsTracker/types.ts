@@ -203,12 +203,19 @@ export enum PostHogAction {
   UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick = 'unlock wallet | forgot password? | recovery phrase length | next | click',
   UnlockWalletForgotPasswordEnterPassphrase01NextClick = 'unlock wallet | forgot password? | enter passphrase #01 | next | click',
   UnlockWalletForgotPasswordEnterPassphrase09NextClick = 'unlock wallet | forgot password? | enter passphrase #09 | next | click',
-  UnlockWalletForgotPasswordEnterPassphrase17NextClick = 'unlock wallet | forgot password? | enter passphrase #17 | next | click'
+  UnlockWalletForgotPasswordEnterPassphrase17NextClick = 'unlock wallet | forgot password? | enter passphrase #17 | next | click',
+  // Wallet
+  WalletSessionStartPageview = 'wallet | session start | pageview'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
   OptedIn = 'ACCEPTED',
   OptedOut = 'REJECTED'
+}
+
+export enum UserSessionEventType {
+  SessionStarted = 'SESSION_STARTED',
+  LifeExtended = 'LIFE_EXTENDED'
 }
 
 export enum UserTrackingType {

@@ -79,7 +79,7 @@ describe('Testing Analytics Agreement step', () => {
 
     await waitFor(() => expect(matomoClientMocks.sendEvent).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(postHogClientMocks.sendEvent).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(userIdServiceMock.extendLifespan).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(userIdServiceMock.sessionCreateOrExtend).toHaveBeenCalledTimes(2));
   });
 
   test('should call makePersistent when clicking agree', async () => {

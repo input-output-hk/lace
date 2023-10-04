@@ -138,7 +138,7 @@ describe('AnalyticsTracker', () => {
       await tracker.sendEventToMatomo(event);
       expect(mockedMatomoClient.sendEvent).toHaveBeenCalledTimes(1);
       expect(mockedMatomoClient.sendEvent).toHaveBeenCalledWith(event);
-      expect(userIdServiceMock.extendLifespan).toHaveBeenCalledTimes(1);
+      expect(userIdServiceMock.sessionCreateOrExtend).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -153,7 +153,7 @@ describe('AnalyticsTracker', () => {
       await tracker.sendEventToPostHog(event);
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledWith(event, {});
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledTimes(1);
-      expect(userIdServiceMock.extendLifespan).toHaveBeenCalledTimes(1);
+      expect(userIdServiceMock.sessionCreateOrExtend).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -239,7 +239,7 @@ describe('AnalyticsTracker', () => {
       const event = PostHogAction.OnboardingCreateClick;
       await tracker.sendEventToPostHog(event);
       expect(mockedPostHogClient.sendEvent).not.toHaveBeenCalled();
-      expect(userIdServiceMock.extendLifespan).not.toHaveBeenCalled();
+      expect(userIdServiceMock.sessionCreateOrExtend).toHaveBeenCalledTimes(1);
     });
     it('should not call Post Hog sendAliasEvent for opted out user', async () => {
       const tracker = new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });

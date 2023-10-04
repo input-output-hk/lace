@@ -12,7 +12,7 @@ import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface }
 import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
 import { getChainNameByNetworkMagic } from '@src/utils/get-chain-name-by-network-magic';
-import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { UserSessionEventType, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -23,6 +23,7 @@ export class UserIdService implements UserIdServiceInterface {
   private walletBasedUserId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
+  private userTrackingType = UserTrackingType.Basic;
   public userTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
 
   constructor(
@@ -88,35 +89,32 @@ export class UserIdService implements UserIdServiceInterface {
 
   async clearId(): Promise<void> {
     console.debug('[ANALYTICS] clearId() called');
-    this.randomizedUserId = undefined;
     this.walletBasedUserId = undefined;
-    this.userTrackingType$.next(UserTrackingType.Basic);
+    this.setUserTrackingType(UserTrackingType.Basic);
     this.clearSessionTimeout();
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
 
+  private setUserTrackingType = (userTrackingType: UserTrackingType) => {
+    this.userTrackingType = userTrackingType;
+    this.userTrackingType$.next(userTrackingType);
+  };
+
   async makePersistent(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into persistent');
     this.clearSessionTimeout();
+    this.setUserTrackingType(UserTrackingType.Enhanced);
+    this.sessionCreateOrExtend();
     const userId = await this.getRandomizedUserId();
     await this.setStorage({ usePersistentUserId: true, userId });
-    this.userTrackingType$.next(UserTrackingType.Enhanced);
   }
 
   async makeTemporary(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into temporary');
     await this.setStorage({ usePersistentUserId: false, userId: undefined });
-    this.setSessionTimeout();
-    this.userTrackingType$.next(UserTrackingType.Basic);
-  }
-
-  async extendLifespan(): Promise<void> {
-    if (!this.sessionTimeout) {
-      return;
-    }
-    console.debug('[ANALYTICS] Extending temporary ID lifespan');
     this.clearSessionTimeout();
-    this.setSessionTimeout();
+    this.sessionCreateOrExtend();
+    this.setUserTrackingType(UserTrackingType.Basic);
   }
 
   private async restoreUserId(): Promise<void> {
@@ -128,22 +126,32 @@ export class UserIdService implements UserIdServiceInterface {
     }
 
     this.userIdRestored = true;
-    this.userTrackingType$.next(usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic);
+    this.setUserTrackingType(usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic);
   }
 
-  private setSessionTimeout(): void {
-    if (this.sessionTimeout) {
-      return;
-    }
+  async sessionCreateOrExtend(): Promise<UserSessionEventType> {
+    const hasValidSession = !!this.sessionTimeout;
+    console.debug('[ANALYTICS] sessionCreateOrExtend, hasValidSession=', hasValidSession);
+    clearTimeout(this.sessionTimeout);
+
     this.sessionTimeout = setTimeout(() => {
-      this.randomizedUserId = undefined;
-      console.debug('[ANALYTICS] Session timed out');
+      this.clearSessionTimeout();
+      // eslint-disable-next-line no-magic-numbers
     }, this.sessionLength);
+
+    if (!hasValidSession) {
+      return UserSessionEventType.SessionStarted;
+    }
+    return UserSessionEventType.LifeExtended;
   }
 
   private clearSessionTimeout(): void {
     clearTimeout(this.sessionTimeout);
     this.sessionTimeout = undefined;
+    if (this.userTrackingType === UserTrackingType.Basic) {
+      this.randomizedUserId = undefined;
+    }
+    console.debug('[ANALYTICS] Session timed out');
   }
 
   private generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex) {

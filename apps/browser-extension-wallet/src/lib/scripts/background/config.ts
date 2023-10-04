@@ -52,9 +52,9 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   clearId: RemoteApiPropertyType.MethodReturningPromise,
   makePersistent: RemoteApiPropertyType.MethodReturningPromise,
   makeTemporary: RemoteApiPropertyType.MethodReturningPromise,
-  extendLifespan: RemoteApiPropertyType.MethodReturningPromise,
   getAliasProperties: RemoteApiPropertyType.MethodReturningPromise,
   getRandomizedUserId: RemoteApiPropertyType.MethodReturningPromise,
   getUserId: RemoteApiPropertyType.MethodReturningPromise,
-  userTrackingType$: RemoteApiPropertyType.HotObservable
+  userTrackingType$: RemoteApiPropertyType.HotObservable,
+  sessionCreateOrExtend: RemoteApiPropertyType.MethodReturningPromise
 };

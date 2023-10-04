@@ -616,14 +616,14 @@ export const mockPrices: PriceResult = {
 };
 
 export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
-  extendLifespan: jest.fn(),
   makeTemporary: jest.fn(),
   makePersistent: jest.fn(),
   clearId: jest.fn(),
   getRandomizedUserId: jest.fn(),
   getUserId: jest.fn(),
   getAliasProperties: jest.fn(),
-  userTrackingType$: new Subject() as any
+  userTrackingType$: new Subject() as any,
+  sessionCreateOrExtend: jest.fn()
 };
 
 export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {
