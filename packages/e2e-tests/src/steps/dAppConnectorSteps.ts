@@ -170,45 +170,45 @@ Then(/^I de-authorize test DApp in (extended|popup) mode$/, async (mode: 'extend
   await DAppConnectorPageObject.deauthorizeDApp(DAppConnectorPageObject.TEST_DAPP_NAME, mode);
 });
 
-Then(
-  /^I click "(Send ADA|Send Token|Set Collateral)" "Run" button in test DApp$/,
-  async (runButton: 'Send ADA' | 'Send Token' | 'Set Collateral') => {
-    await DAppConnectorPageObject.switchToTestDAppWindow();
-    await browser.pause(1000);
-    const handlesBeforeClick = (await browser.getWindowHandles()).length;
+When(/^I click "Set Collateral" button in test DApp$/, async () => {
+  await DAppConnectorPageObject.switchToTestDAppWindow();
+  await browser.pause(1000);
+  await TestDAppPage.setCollateralButton.click();
+});
 
-    let retries = 5;
-    while (retries) {
-      try {
-        switch (runButton) {
-          case 'Send ADA':
-            await TestDAppPage.sendAdaRunButton.click();
-            break;
-          case 'Send Token':
-            await TestDAppPage.sendTokenRunButton.click();
-            break;
-          case 'Set Collateral':
-            await TestDAppPage.setCollateralButton.click();
-            break;
-          default:
-            throw new Error(`Unsupported button name: ${runButton}`);
-        }
-        await browser.waitUntil(async () => (await browser.getWindowHandles()).length === handlesBeforeClick + 1, {
-          interval: 1000,
-          timeout: 4000,
-          timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
-        });
-        break;
-      } catch {
-        Logger.log('Failed to open modal. Retry will be executed');
-        retries--;
+Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runButton: 'Send ADA' | 'Send Token') => {
+  await DAppConnectorPageObject.switchToTestDAppWindow();
+  await browser.pause(1000);
+  const handlesBeforeClick = (await browser.getWindowHandles()).length;
+
+  let retries = 5;
+  while (retries) {
+    try {
+      switch (runButton) {
+        case 'Send ADA':
+          await TestDAppPage.sendAdaRunButton.click();
+          break;
+        case 'Send Token':
+          await TestDAppPage.sendTokenRunButton.click();
+          break;
+        default:
+          throw new Error(`Unsupported button name: ${runButton}`);
       }
-    }
-    if (retries === 0) {
-      throw new Error('Exceeded maximum retry attempts on Run button');
+      await browser.waitUntil(async () => (await browser.getWindowHandles()).length === handlesBeforeClick + 1, {
+        interval: 1000,
+        timeout: 4000,
+        timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
+      });
+      break;
+    } catch {
+      Logger.log('Failed to open modal. Retry will be executed');
+      retries--;
     }
   }
-);
+  if (retries === 0) {
+    throw new Error('Exceeded maximum retry attempts on Run button');
+  }
+});
 
 Then(/^I click "(Send ADA|Send Token)" button in test DApp$/, async (buttonId: 'Send ADA' | 'Send Token') => {
   await DAppConnectorPageObject.switchToTestDAppWindow();
