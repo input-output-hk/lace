@@ -65,6 +65,7 @@ export const DelegationCard = ({
 
   const totalPercentage = useMemo(() => {
     const percentageSum = distribution.reduce((acc, cur) => acc + cur.percentage, 0);
+    // TODO: remove after LW-8683 implemented
     // Round to avoid floating point errors in case of on-chain (float) percentages being passed to this component
     return Math.round(percentageSum);
   }, [distribution]);
