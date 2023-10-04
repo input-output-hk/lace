@@ -138,6 +138,14 @@ class MultidelegationPageAssert {
     await NetworkComponent.percentageStakedDetail.waitForDisplayed();
     expect(await NetworkComponent.percentageStakedDetail.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
   };
+
+  assertSeeSearchComponent = async () => {
+    await MultidelegationPage.searchIcon.waitForDisplayed();
+    await MultidelegationPage.stakingPageSearchInput.waitForDisplayed();
+    expect(await MultidelegationPage.stakingPageSearchInput.getAttribute('placeholder')).to.equal(
+      await t('browsePools.stakePoolTableBrowser.searchInputPlaceholder', 'staking')
+    );
+  };
 }
 
 export default new MultidelegationPageAssert();

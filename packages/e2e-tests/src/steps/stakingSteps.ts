@@ -27,13 +27,6 @@ Then(/^I see Staking title displayed$/, async () => {
 });
 
 Then(
-  /^I see the stake pool search control with appropriate content in (extended|popup) mode$/,
-  async (mode: 'extended' | 'popup') => {
-    await stakingPageAssert.assertSeeSearchComponent(mode);
-  }
-);
-
-Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
     const stakePool =
