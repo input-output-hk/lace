@@ -102,6 +102,7 @@ export const WalletSetupWizard = ({
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
   const { getExperimentVariant } = useExperimentsContext();
+  const [shouldDisplayTestVariantForExperiment, setShouldDisplayTestVariantForExperiment] = useState<boolean>();
 
   const { createWallet, setWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -443,12 +444,19 @@ export const WalletSetupWizard = ({
     );
   };
 
-  const shouldDisplayExperiment = () =>
-    isAnalyticsAccepted
-      ? getExperimentVariant<CombinedSetupNamePasswordVariants[number]>(
+  const shouldDisplayExperiment = useCallback(async () => {
+    const experimentValue = isAnalyticsAccepted
+      ? (await getExperimentVariant<CombinedSetupNamePasswordVariants[number]>(
           ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN
-        ) === 'test'
+        )) === 'test'
       : false;
+
+    setShouldDisplayTestVariantForExperiment(experimentValue);
+  }, [getExperimentVariant, isAnalyticsAccepted]);
+
+  useEffect(() => {
+    shouldDisplayExperiment();
+  }, [shouldDisplayExperiment]);
 
   return (
     <WalletSetupLayout prompt={currentStep === WalletSetupSteps.Finish ? <PinExtension /> : undefined}>
@@ -493,7 +501,7 @@ export const WalletSetupWizard = ({
         </Suspense>
       )}
 
-      {shouldDisplayExperiment() ? (
+      {shouldDisplayTestVariantForExperiment ? (
         <>
           {currentStep === WalletSetupSteps.Register && (
             <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />

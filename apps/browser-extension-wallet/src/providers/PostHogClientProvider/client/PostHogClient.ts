@@ -165,15 +165,19 @@ export class PostHogClient {
     posthog.featureFlags.override(flags);
   }
 
-  getExperimentVariant(key: ExperimentName): string {
-    const variant = posthog.getFeatureFlag(key, {
+  async getExperimentVariant(key: ExperimentName): Promise<string> {
+    const variant = posthog?.getFeatureFlag(key, {
       send_event: false
     });
-
-    // variant can be a boolean as well, so, we have to check for the type
-    // in both cases (boolean or undefined) we want to return the fallback variant
-    if (!variant || typeof variant === 'boolean') {
+    // if we get a type of boolean means that the experiment is not running, so we return the fallback variant
+    if (typeof variant === 'boolean') {
       return experiments[key].defaultVariant;
+    }
+
+    // if the variant does not exist, we need to check for out cache
+    if (!variant) {
+      const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
+      return (backgroundStorage?.experimentsConfiguration[key] as string) || experiments[key].defaultVariant;
     }
 
     return variant;
@@ -185,7 +189,9 @@ export class PostHogClient {
       const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
       if (!backgroundStorage?.experimentsConfiguration && postHogExperimentConfiguration) {
         // save current posthog config in background storage
-        await this.backgroundServiceUtils.setBackgroundStorage(postHogExperimentConfiguration);
+        await this.backgroundServiceUtils.setBackgroundStorage({
+          experimentsConfiguration: postHogExperimentConfiguration
+        });
       }
 
       // if we were not able to retrieve posthog experiment config, use local config
@@ -193,9 +199,8 @@ export class PostHogClient {
         // override posthog experiment config with local
         posthog.featureFlags.override(backgroundStorage?.experimentsConfiguration || fallbackConfiguration);
       }
-
-      this.hasPostHogInitialized$.next(true);
     });
+    this.hasPostHogInitialized$.next(true);
   }
 
   protected getApiToken(chain: Wallet.Cardano.ChainId): string {

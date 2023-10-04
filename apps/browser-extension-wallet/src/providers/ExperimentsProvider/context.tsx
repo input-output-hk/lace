@@ -4,7 +4,7 @@ import { ExperimentName, ExperimentsConfigStatus } from './types';
 
 type ExperimentsContext = {
   areExperimentsLoading: boolean;
-  getExperimentVariant: <R extends string>(key: ExperimentName) => R;
+  getExperimentVariant: <R extends string>(key: ExperimentName) => Promise<R>;
   overrideExperimentVariant: (flags: Record<ExperimentName, string | boolean>) => void;
 };
 
@@ -33,8 +33,8 @@ export const ExperimentsProvider = ({ children }: ExperimentsProviderProps): Rea
   );
 
   const getExperimentVariant = useCallback(
-    <R extends string>(key: ExperimentName): R =>
-      !areExperimentsLoading && (postHogClient.getExperimentVariant(key) as R),
+    async <R extends string>(key: ExperimentName): Promise<R> =>
+      !areExperimentsLoading && ((await postHogClient.getExperimentVariant(key)) as R),
     [areExperimentsLoading, postHogClient]
   );
 
