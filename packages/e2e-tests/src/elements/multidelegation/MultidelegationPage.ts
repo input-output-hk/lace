@@ -1,9 +1,13 @@
 /* eslint-disable no-undef */
 import SectionTitle from '../sectionTitle';
-import MultidelegationPageAssert from '../../assert/multidelegationPageAssert';
+import MultidelegationPageAssert from '../../assert/multidelegation/MultidelegationPageAssert';
 import { browser } from '@wdio/globals';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
 import { ChainablePromiseElement } from 'webdriverio';
+import StakePoolDetails from '../staking/stakePoolDetails';
+import testContext from '../../utils/testContext';
+import { isPopupMode } from '../../utils/pageUtils';
+import CommonDrawerElements from '../CommonDrawerElements';
 
 class MultidelegationPage {
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
@@ -16,6 +20,7 @@ class MultidelegationPage {
   private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
   private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
   private SEARCH_INPUT = '[data-testid="search-input"]';
+  private SEARCH_LOADER = '[data-testid="search-loader"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
   private STAKE_BUTTON = '[data-testid="stake-button"]';
@@ -41,6 +46,7 @@ class MultidelegationPage {
     '[data-testid="stats-total-rewards-container"] [data-testid="stats-value"]';
   private DELEGATED_POOL_LAST_REWARDS_TITLE = '[data-testid="stats-last-reward-container"] [data-testid="stats-title"]';
   private DELEGATED_POOL_LAST_REWARDS_VALUE = '[data-testid="stats-last-reward-container"] [data-testid="stats-value"]';
+  private STAKING_POOL_INFO = '[data-testid="staking-pool-info"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -82,8 +88,16 @@ class MultidelegationPage {
     return $$(this.DELEGATIONCARD_CHART_PIE_SLICE);
   }
 
+  get delegatedPoolItems() {
+    return $$(this.DELEGATED_POOL_ITEM);
+  }
+
   get stakingPageSearchInput() {
     return $(this.SEARCH_INPUT);
+  }
+
+  get searchLoader() {
+    return $(this.SEARCH_LOADER);
   }
 
   get poolsItems() {
@@ -108,6 +122,10 @@ class MultidelegationPage {
 
   get multidelegationBetaModalBtnConfirm() {
     return $(this.MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM);
+  }
+
+  get stakingPoolInfoItems() {
+    return $$(this.STAKING_POOL_INFO);
   }
 
   delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
@@ -249,6 +267,27 @@ class MultidelegationPage {
       await this.multidelegationBetaModalBtnConfirm.waitForClickable();
       await this.multidelegationBetaModalBtnConfirm.click();
     }
+  }
+
+  async saveIDsOfStakePoolsInUse() {
+    const poolIDsToBeSaved = [];
+    const stakingPoolInfoItems = await this.stakingPoolInfoItems;
+    for (const stakingPoolInfoItem of stakingPoolInfoItems) {
+      await stakingPoolInfoItem.click();
+      await StakePoolDetails.poolId.waitForDisplayed();
+      const poolId = await StakePoolDetails.poolId.getText();
+      poolIDsToBeSaved.push(poolId);
+      (await isPopupMode())
+        ? await new CommonDrawerElements().clickHeaderBackButton()
+        : await new CommonDrawerElements().clickHeaderCloseButton();
+    }
+
+    testContext.save('stakePoolsInUse', poolIDsToBeSaved);
+  }
+
+  async clickOnStakePoolWithName(poolName: string) {
+    const poolItem = await this.getPoolByName(poolName);
+    await poolItem.click();
   }
 }
 
