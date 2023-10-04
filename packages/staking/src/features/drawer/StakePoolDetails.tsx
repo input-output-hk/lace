@@ -57,23 +57,24 @@ export const StakePoolDetails = ({
     activeDrawerStep,
     activeFlow,
     currentPortfolioDrifted,
-    currentPortfolioDraftModified,
+    portfolioDraftMatchesCurrentPortfolio,
     selectionsFull,
     openPoolIsSelected,
     draftPortfolioValidity,
   } = useDelegationPortfolioStore((store) => ({
     activeDrawerStep: store.activeDrawerStep,
     activeFlow: store.activeFlow,
-    currentPortfolioDraftModified:
-      store.draftPortfolio?.some(
-        ({ sliderIntegerPercentage, savedIntegerPercentage }) =>
-          !!savedIntegerPercentage && sliderIntegerPercentage !== savedIntegerPercentage
-      ) || false,
     currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
     draftPortfolioValidity: getDraftPortfolioValidity(store),
     openPoolIsSelected: store.selectedPortfolio.some(
       (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
     ),
+    portfolioDraftMatchesCurrentPortfolio:
+      store.draftPortfolio?.length === store.currentPortfolio?.length &&
+      (store.draftPortfolio || []).every(
+        ({ sliderIntegerPercentage, savedIntegerPercentage }) =>
+          !!savedIntegerPercentage && sliderIntegerPercentage === savedIntegerPercentage
+      ),
     selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
   }));
   const delegationPending = inFlightTx
@@ -104,7 +105,11 @@ export const StakePoolDetails = ({
         return null;
       })(),
       [DrawerManagementStep.Preferences]: (() => {
-        if (activeFlow === Flow.PortfolioManagement && !currentPortfolioDraftModified && !currentPortfolioDrifted) {
+        if (
+          activeFlow === Flow.PortfolioManagement &&
+          portfolioDraftMatchesCurrentPortfolio &&
+          !currentPortfolioDrifted
+        ) {
           return null;
         }
         const tooltipTranslationMap: Record<DraftPortfolioInvalidReason, string> = {
@@ -114,7 +119,9 @@ export const StakePoolDetails = ({
         return (
           <StepPreferencesFooter
             buttonTitle={
-              activeFlow === Flow.PortfolioManagement && !currentPortfolioDraftModified && currentPortfolioDrifted
+              activeFlow === Flow.PortfolioManagement &&
+              portfolioDraftMatchesCurrentPortfolio &&
+              currentPortfolioDrifted
                 ? t('drawer.preferences.rebalanceButton')
                 : t('drawer.preferences.confirmButton')
             }
@@ -133,7 +140,7 @@ export const StakePoolDetails = ({
       delegationPending,
       selectionActionsAllowed,
       popupView,
-      currentPortfolioDraftModified,
+      portfolioDraftMatchesCurrentPortfolio,
       currentPortfolioDrifted,
       t,
       draftPortfolioValidity,
