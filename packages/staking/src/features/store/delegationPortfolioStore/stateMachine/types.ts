@@ -17,10 +17,7 @@ type CurrentPortfolioSpecificProps = {
 
 export type DraftPortfolioStakePool = PortfolioStakePoolBase & {
   sliderIntegerPercentage: number; // todo: type for integers
-} & (
-    | { basedOnCurrentPortfolio: false } // TODO: re-consider moving to top-level
-    | ({ basedOnCurrentPortfolio: true } & CurrentPortfolioSpecificProps)
-  );
+} & Partial<CurrentPortfolioSpecificProps>;
 
 export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
   CurrentPortfolioSpecificProps & {

@@ -25,7 +25,7 @@ import {
   UnselectPoolFromList,
   UpdateStakePercentage,
 } from './commands';
-import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
+import { initializeDraftPortfolioPool } from './initializeDraftPortfolioPool';
 import { cases, handler } from './stateTreeUtilities';
 import {
   CurrentPortfolioStakePool,
@@ -39,7 +39,6 @@ import {
 export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): DraftPortfolioStakePool[] =>
   pools.map((cp) => ({
     ...cp,
-    basedOnCurrentPortfolio: true,
     sliderIntegerPercentage: cp.savedIntegerPercentage,
   }));
 
@@ -110,14 +109,16 @@ export const processExpandedViewCases: Handler = (params) =>
       [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
           BeginSingleStaking: ({ state }) => {
-            if (!state.viewedStakePool) return;
-            const portfolioPool = mapStakePoolToPortfolioPool({
-              cardanoCoinSymbol: state.cardanoCoinSymbol,
-              sliderIntegerPercentage: PERCENTAGE_SCALE_MAX,
-              stakePool: state.viewedStakePool,
+            const { viewedStakePool, currentPortfolio } = state;
+            if (!viewedStakePool) return;
+            const portfolioPool = initializeDraftPortfolioPool({
+              // initialize the slider to MAX for single-pool staking
+              initialPercentage: PERCENTAGE_SCALE_MAX,
+              stakePool: viewedStakePool,
+              state,
             });
 
-            if (state.currentPortfolio.length > 0) {
+            if (currentPortfolio.length > 0) {
               atomicStateMutators.showChangingPreferencesConfirmation({
                 pendingSelectedPortfolio: [portfolioPool],
                 state,

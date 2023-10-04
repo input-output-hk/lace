@@ -57,10 +57,9 @@ export const StepPreferencesContent = () => {
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
-      onChainPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.onChainPercentage : undefined,
+      onChainPercentage: draftPool?.onChainPercentage,
       percentage: sliderIntegerPercentage,
-      savedIntegerPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.savedIntegerPercentage : undefined,
-      // TODO
+      savedIntegerPercentage: draftPool?.savedIntegerPercentage,
       sliderIntegerPercentage,
       stakeValue: balancesBalance
         ? compactNumber(
