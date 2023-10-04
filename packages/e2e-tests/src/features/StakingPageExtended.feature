@@ -9,11 +9,6 @@ Feature: Staking Page - Extended Browser View
     When I navigate to Staking extended page
     Then I see Staking title and counter with total number of pools displayed
 
-  @LW-2425 @Testnet @Mainnet
-  Scenario: Extended View - Network info component is present on the staking page with expected content
-    When I navigate to Staking extended page
-    Then I see the Network Info component with the expected content
-
   @LW-2486 @Testnet @Mainnet
   Scenario: Extended View - Staking search control is displayed with appropriate content
     When I navigate to Staking extended page
@@ -106,23 +101,6 @@ Feature: Staking Page - Extended Browser View
       | ROS value                |
       | Cost (% + ADA)           |
       | Saturation               |
-
-  @LW-1704 @Testnet @Mainnet
-  Scenario: Extended View - "About staking" widget
-    Given I am on Staking extended page
-    Then I see "About staking" widget with all relevant items
-
-  @LW-1705 @Testnet @Mainnet
-  Scenario Outline: Extended-view - "About staking" widget item click - <subtitle>
-    Given I am on Staking extended page
-    When I click on a widget item with subtitle: "<subtitle>"
-    Then I see a "<type>" article with title "<subtitle>"
-    Examples:
-      | type     | subtitle                          |
-      | FAQ      | What are staking & delegation?    |
-      | FAQ      | Which stake pool should I choose? |
-      | Glossary | What is an active stake?          |
-      | Video    | Staking made easy with Lace       |
 
   @LW-4559 @Testnet @Mainnet
   Scenario: Extended View - Staking - Close modal - Open stake pool

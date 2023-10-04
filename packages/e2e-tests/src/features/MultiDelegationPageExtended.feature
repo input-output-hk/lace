@@ -19,3 +19,9 @@ Feature: Staking Page - Extended View
       | FAQ      | Which stake pool should I choose? |
       | Glossary | What is an active stake?          |
       | Video    | Staking made easy with Lace       |
+
+  @LW-8469 @Testnet @Mainnet
+  Scenario: Extended View - Network info component is present with expected content
+    Given I disable showing Multidelegation beta banner
+    When I navigate to Staking extended page
+    Then I see the Network Info component with the expected content
