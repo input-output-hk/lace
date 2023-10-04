@@ -18,7 +18,7 @@ type SetupProps = Omit<SetupBaseProps, 'loading'> &
     view: 'popup' | 'expanded';
   };
 
-// hotfix: percentages from the cardano-js-sdk because for some
+// hotfix: percentages from the cardano-js-sdk due to some
 // not yet understood reason may not always add up to 100
 // hence we are patching them here.
 // Once LW-8703 is done, this patch can be removed
