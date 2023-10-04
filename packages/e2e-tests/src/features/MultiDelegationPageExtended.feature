@@ -19,3 +19,12 @@ Feature: Staking Page - Extended View
       | FAQ      | Which stake pool should I choose? |
       | Glossary | What is an active stake?          |
       | Video    | Staking made easy with Lace       |
+
+  @LW-8445 @Testnet
+  Scenario: Extended View - Selecting stakepool from list opens drawer with appropriate details
+    Given I disable showing Multidelegation beta banner
+    And I am on Staking extended page
+    And I click Browse pools tab
+    And I input "ADA Capital" into stake pool search bar
+    And I click on the stake pool with name "ADA Capital"
+    Then I see drawer with "ADA Capital" stake pool details and a button available for staking
