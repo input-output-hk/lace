@@ -99,6 +99,18 @@
       "noMatchPassword": "Oops! The passwords don't match.",
       "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
       "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
+    },
+    "dappTransaction": {
+      "asset": "Asset",
+      "burn": "Burn",
+      "fee": "Transaction Fee",
+      "insufficientFunds": "You do not have enough funds to complete the transaction",
+      "mint": "Mint",
+      "quantity": "Quantity",
+      "recipient": "Recipient",
+      "send": "Send",
+      "sending": "Sending",
+      "transaction": "Transaction"
     }
   }
 }

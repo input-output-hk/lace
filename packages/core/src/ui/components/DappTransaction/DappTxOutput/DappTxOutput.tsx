@@ -1,0 +1,43 @@
+import React from 'react';
+import { Ellipsis } from '@lace/common';
+import { DappTxAssetProps } from '../DappTxAsset/DappTxAsset';
+import styles from './DappTxOutput.module.scss';
+import { useTranslate } from '@src/ui/hooks';
+
+export interface DappTxOutputProps {
+  coins: string;
+  recipient: string;
+  assets?: DappTxAssetProps[];
+}
+
+export const DappTxOutput = ({ recipient, coins, assets }: DappTxOutputProps): React.ReactElement => {
+  const { t } = useTranslate();
+  return (
+    <div className={styles.body}>
+      <div className={styles.detail}>
+        <div data-testid="dapp-transaction-amount-title" className={styles.title}>
+          {t('package.core.dappTransaction.sending')}
+        </div>
+        <div className={styles.value}>
+          <div data-testid="dapp-transaction-amount-value" className={styles.bold}>
+            {coins.toString()} ADA
+          </div>
+          {assets &&
+            assets.map((asset) => (
+              <div data-testid="dapp-transaction-asset" className={styles.bold} key={asset.name.toString()}>
+                {asset.amount} {asset.ticker || asset.name}
+              </div>
+            ))}
+        </div>
+      </div>
+      <div className={styles.detail}>
+        <div data-testid="dapp-transaction-recipient-title" className={styles.title}>
+          {t('package.core.dappTransaction.recipient')}
+        </div>
+        <div data-testid="dapp-transaction-recipient-address" className={styles.value}>
+          <Ellipsis className={styles.rightAligned} text={recipient} ellipsisInTheMiddle />
+        </div>
+      </div>
+    </div>
+  );
+};
