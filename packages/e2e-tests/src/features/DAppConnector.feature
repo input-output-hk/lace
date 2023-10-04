@@ -222,3 +222,29 @@ Feature: DAppConnector - Common
     And I open and authorize test DApp with "Only once" setting
     When I click "Set Collateral" button in test DApp
     Then I don't see DApp window
+
+  @LW-8410
+  Scenario: Automatically trigger collateral setup - network change
+    Given I am on Settings extended page
+    And I see collateral as: "Inactive" in settings
+    And I click on "Collateral" setting
+    And all elements of Inactive collateral drawer are displayed
+    And I open and authorize test DApp with "Only once" setting
+    And I click "Set Collateral" button in test DApp
+    And I see DApp collateral window
+    And I click "Confirm" button in DApp collateral window
+    And I see DApp connector "All done" page
+    And I click "Close" button on DApp "All done" page
+    And I don't see DApp window
+    And I switch to window with Lace
+    And I close all remaining tabs except current one
+    And all elements of Active collateral drawer are displayed
+    And I close the drawer by clicking close button
+    And I switch network to: "Preview" in extended mode
+    And Wallet is synced
+    And I am on Settings extended page
+    And I click on "Collateral" setting
+    And all elements of Inactive collateral drawer are displayed
+    And I open and authorize test DApp with "Only once" setting
+    When I click "Set Collateral" button in test DApp
+    Then I see DApp collateral window
