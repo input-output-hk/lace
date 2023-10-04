@@ -28,7 +28,6 @@
     align-items: center;
     display: flex;
     gap: size_unit(3);
-    padding-right: size_unit(4);
     &:last-child {
       justify-content: flex-end;
       padding-right: 0;
@@ -93,6 +92,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      padding-right: size_unit(2);
+
+      @media (max-width: 1024px) {
+        max-width: 160px;
+      }
     }
     p {
       display: block;
