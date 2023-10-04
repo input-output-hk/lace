@@ -51,6 +51,7 @@ Feature: DAppConnector - Common
     And I click "Authorize" button in DApp authorization window
     And I click "Always" button in DApp authorization window
     And I switch to window with Lace
+    And I am on Tokens extended page
     And I save token: "Cardano" balance
     And I close all remaining tabs except current one
     And I open test DApp

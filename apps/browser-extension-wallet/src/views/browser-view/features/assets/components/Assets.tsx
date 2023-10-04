@@ -170,6 +170,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const paginatedAssetList = useMemo(() => fullAssetList?.slice(0, listItemsAmount), [fullAssetList, listItemsAmount]);
 
   const onAssetRowClick = (id: string) => {
+    analytics.sendEventToPostHog(PostHogAction.TokenTokensTokenRowClick);
     analytics.sendEventToMatomo({
       category: MatomoEventCategories.VIEW_TOKENS,
       action: MatomoEventActions.CLICK_EVENT,

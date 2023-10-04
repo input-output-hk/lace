@@ -2,14 +2,14 @@ import { useObservable } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { DelegationCard } from '../delegation-card';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
-import { DelegationCard } from './DelegationCard';
 import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
-import { StakingInfoCard } from './staking-info-card';
+import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const Overview = () => {
@@ -95,10 +95,10 @@ export const Overview = () => {
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
-          distribution={displayData.map(({ color, name = '-', percentage }) => ({
+          distribution={displayData.map(({ color, name = '-', onChainPercentage }) => ({
             color,
             name,
-            percentage,
+            percentage: onChainPercentage,
           }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
@@ -124,7 +124,7 @@ export const Overview = () => {
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}
-            cardanoCoinSymbol="tADA" // TODO
+            cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
             onStakePoolSelect={() => {
               portfolioMutators.executeCommand({
                 data: item.stakePool,

@@ -86,10 +86,8 @@ export const StakePoolItemBrowser = ({
           className={cn([styles.image, poolAlreadySelected && styles.imageSelected])}
         />
         <div>
-          <div>
-            <h6 data-testid="stake-pool-list-name">{title}</h6>
-            <p data-testid="stake-pool-list-ticker">{subTitle}</p>
-          </div>
+          <h6 data-testid="stake-pool-list-name">{title}</h6>
+          <p data-testid="stake-pool-list-ticker">{subTitle}</p>
         </div>
       </div>
       <div className={styles.apy}>
