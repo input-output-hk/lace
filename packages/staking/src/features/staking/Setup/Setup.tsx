@@ -23,7 +23,7 @@ type SetupProps = Omit<SetupBaseProps, 'loading'> &
 // hence we are patching them here.
 // Once LW-8703 is done, this patch can be removed
 const patchDelegationDistributionPercentages = (delegationDistribution: DelegatedStake[]): DelegatedStake[] => {
-  const totalPortfolioStake = BigIntMath.sum(delegationDistribution.map(({ stake: s }) => s));
+  const totalPortfolioStake = BigIntMath.sum(delegationDistribution.map(({ stake }) => stake));
 
   return delegationDistribution.map((delegation) => ({
     ...delegation,
