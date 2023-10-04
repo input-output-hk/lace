@@ -105,11 +105,10 @@ export const StakePoolDetails = ({
         return null;
       })(),
       [DrawerManagementStep.Preferences]: (() => {
-        if (
-          activeFlow === Flow.PortfolioManagement &&
-          portfolioDraftMatchesCurrentPortfolio &&
-          !currentPortfolioDrifted
-        ) {
+        const currentPortfolioManagementUntouched =
+          activeFlow === Flow.PortfolioManagement && portfolioDraftMatchesCurrentPortfolio;
+
+        if (currentPortfolioManagementUntouched && !currentPortfolioDrifted) {
           return null;
         }
         const tooltipTranslationMap: Record<DraftPortfolioInvalidReason, string> = {
@@ -119,9 +118,7 @@ export const StakePoolDetails = ({
         return (
           <StepPreferencesFooter
             buttonTitle={
-              activeFlow === Flow.PortfolioManagement &&
-              portfolioDraftMatchesCurrentPortfolio &&
-              currentPortfolioDrifted
+              currentPortfolioManagementUntouched && currentPortfolioDrifted
                 ? t('drawer.preferences.rebalanceButton')
                 : t('drawer.preferences.confirmButton')
             }
