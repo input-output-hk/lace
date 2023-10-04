@@ -120,6 +120,7 @@
       "mainnet": "Mainnet",
       "preprod": "Preprod",
       "preview": "Preview",
+      "sanchonet": "Sanchonet",
       "legacyTestnet": "Legacy Testnet",
       "custom": "Custom",
       "offline": "Offline",

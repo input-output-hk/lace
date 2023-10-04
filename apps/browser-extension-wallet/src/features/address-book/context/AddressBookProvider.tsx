@@ -19,7 +19,8 @@ export const cardanoNetworkMap = {
   Mainnet: Wallet.Cardano.NetworkMagics.Mainnet,
   Preprod: Wallet.Cardano.NetworkMagics.Preprod,
   Preview: Wallet.Cardano.NetworkMagics.Preview,
-  LegacyTestnet: Wallet.Cardano.NetworkMagics.Testnet
+  LegacyTestnet: Wallet.Cardano.NetworkMagics.Testnet,
+  Sanchonet: Wallet.Cardano.NetworkMagics.Sanchonet
 };
 
 const handleRecordValidation = (list: AddressBookSchema[], record: AddressRecordParams) => {
