@@ -18,11 +18,11 @@ type SetupProps = Omit<SetupBaseProps, 'loading'> &
     view: 'popup' | 'expanded';
   };
 
-// hotfix: percentage from the cardano-js-sdk because for some
-// not yet understood reason it may not always add up to 100
+// hotfix: percentages from the cardano-js-sdk because for some
+// not yet understood reason may not always add up to 100
 // hence we are patching them here.
 // Once LW-8703 is done, this patch can be removed
-const patchDelegationDistributionPercentages = (delegationDistribution: DelegatedStake[]): DelegatedStake[] => {
+const patchPercentages = (delegationDistribution: DelegatedStake[]): DelegatedStake[] => {
   const totalPortfolioStake = BigIntMath.sum(delegationDistribution.map(({ stake }) => stake));
 
   return delegationDistribution.map((delegation) => ({
@@ -45,7 +45,7 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     portfolioMutators.setCardanoCoinSymbol(currentChain);
     portfolioMutators.setCurrentPortfolio({
       currentEpoch,
-      delegationDistribution: patchDelegationDistributionPercentages([...delegationDistribution.values()]),
+      delegationDistribution: patchPercentages([...delegationDistribution.values()]),
       delegationRewardsHistory,
     });
     portfolioMutators.setView(view);
