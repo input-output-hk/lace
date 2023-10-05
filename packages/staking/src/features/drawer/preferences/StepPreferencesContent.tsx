@@ -10,12 +10,13 @@ import {
   PERCENTAGE_SCALE_MAX,
   useDelegationPortfolioStore,
 } from '../../store';
+import { sumPercentagesLossless } from '../../store/delegationPortfolioStore/stateMachine/sumPercentagesLossless';
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore): DelegationStatus => {
   if (!draftPortfolio || draftPortfolio.length === 0) return 'no-selection';
 
-  const percentageSum = draftPortfolio?.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0);
+  const percentageSum = sumPercentagesLossless({ items: draftPortfolio || [], key: 'sliderIntegerPercentage' });
   if (percentageSum > PERCENTAGE_SCALE_MAX) return 'over-allocated';
   if (percentageSum < PERCENTAGE_SCALE_MAX) return 'under-allocated';
 

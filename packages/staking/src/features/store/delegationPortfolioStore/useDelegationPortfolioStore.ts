@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH } from './constants';
+import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH, PERCENTAGE_SCALE_MAX } from './constants';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
 import {
   Command,
@@ -12,6 +12,7 @@ import {
   processPopupViewCases,
 } from './stateMachine';
 import { normalizePercentages } from './stateMachine/normalizePercentages';
+import { sumPercentagesLossless } from './stateMachine/sumPercentagesLossless';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
@@ -25,6 +26,27 @@ const defaultState: DelegationPortfolioState = {
   view: undefined,
   viewedStakePool: undefined,
 };
+
+// If percentages add up to 100, normalize them. Otherwise, round them to N decimal places
+const adjustOnchainPercentages = <K extends string, T extends { [key in K]: number }>({
+  items,
+  key,
+  decimals = 0,
+}: {
+  items: T[];
+  key: K;
+  decimals?: number;
+}) =>
+  sumPercentagesLossless({ items, key }) === PERCENTAGE_SCALE_MAX
+    ? normalizePercentages({
+        decimals,
+        items,
+        key,
+      })
+    : items.map((item) => ({
+        ...item,
+        [key]: Number(item[key].toFixed(decimals)),
+      }));
 
 export const useDelegationPortfolioStore = create(
   immer<DelegationPortfolioStore>((set, get) => ({
@@ -91,15 +113,19 @@ export const useDelegationPortfolioStore = create(
         );
 
         // TMP: replace by real data from memory/cip
-        const savedPercentages = normalizePercentages(
-          // eslint-disable-next-line no-magic-numbers
-          delegationDistribution.map((item) => ({ ...item, percentage: item.percentage * 100 })),
-          'percentage'
+        const savedPercentages = adjustOnchainPercentages({
+          decimals: 0,
+          items: delegationDistribution.map((item) => ({
+            ...item,
+            percentage: item.percentage * PERCENTAGE_SCALE_MAX,
+          })),
+          key: 'percentage',
+        })
           // eslint-disable-next-line unicorn/no-array-reduce
-        ).reduce((acc, item) => {
-          acc[item.pool.hexId] = item.percentage;
-          return acc;
-        }, {} as Record<Wallet.Cardano.PoolIdHex, number>);
+          .reduce((acc, item) => {
+            acc[item.pool.hexId] = item.percentage;
+            return acc;
+          }, {} as Record<Wallet.Cardano.PoolIdHex, number>);
 
         const currentPortfolio = delegationDistribution.map(({ pool: stakePool, percentage, stake }) => {
           const confirmedPoolRewards = confirmedRewardHistory
@@ -113,8 +139,7 @@ export const useDelegationPortfolioStore = create(
               totalRewards: Wallet.BigIntMath.sum(confirmedPoolRewards),
             },
             id: stakePool.hexId,
-            // eslint-disable-next-line no-magic-numbers
-            onChainPercentage: percentage * 100,
+            onChainPercentage: percentage * PERCENTAGE_SCALE_MAX,
             savedIntegerPercentage: savedPercentages[stakePool.hexId] || 0,
             sliderIntegerPercentage: savedPercentages[stakePool.hexId],
             stakePool,
@@ -123,7 +148,11 @@ export const useDelegationPortfolioStore = create(
         });
 
         set((state) => {
-          state.currentPortfolio = currentPortfolio;
+          state.currentPortfolio = adjustOnchainPercentages({
+            decimals: 2,
+            items: currentPortfolio,
+            key: 'onChainPercentage',
+          });
         });
       },
       setView: (view) =>

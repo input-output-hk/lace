@@ -33,7 +33,7 @@ export const atomicStateMutators = {
         ...pool,
         sliderIntegerPercentage: percentageValue,
       }));
-      state.draftPortfolio = normalizePercentages(state.draftPortfolio, 'sliderIntegerPercentage');
+      state.draftPortfolio = normalizePercentages({ items: state.draftPortfolio, key: 'sliderIntegerPercentage' });
     } else {
       state.draftPortfolio = selections;
     }

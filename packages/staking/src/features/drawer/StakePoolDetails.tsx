@@ -14,6 +14,7 @@ import {
   PERCENTAGE_SCALE_MAX,
   useDelegationPortfolioStore,
 } from '../store';
+import { sumPercentagesLossless } from '../store/delegationPortfolioStore/stateMachine/sumPercentagesLossless';
 import { StepPreferencesContent, StepPreferencesFooter } from './preferences';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
@@ -34,7 +35,7 @@ type DraftPortfolioValidity = { valid: true } | { valid: false; reason: DraftPor
 
 const getDraftPortfolioValidity = (store: DelegationPortfolioStore): DraftPortfolioValidity => {
   if (!store.draftPortfolio || store.draftPortfolio.length === 0) return { valid: true }; // throw new Error('Draft portfolio is not defined');
-  const percentageSum = store.draftPortfolio.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0);
+  const percentageSum = sumPercentagesLossless({ items: store.draftPortfolio, key: 'sliderIntegerPercentage' });
   if (percentageSum !== PERCENTAGE_SCALE_MAX) {
     return { reason: 'invalid-allocation', valid: false };
   }
