@@ -233,7 +233,7 @@ const getWalletActivitiesObservable = async ({
 
   /**
    * 1. Listens for time settings
-   * 2. Passes it to hisorical transactions and pending transactions lists
+   * 2. Passes it to historical transactions and pending transactions lists
    * 3. Emits both lists combined and sets current state for Zustand
    */
   return combineLatest([eraSummaries$, pendingTransactions$, historicalTransactions$]).pipe(

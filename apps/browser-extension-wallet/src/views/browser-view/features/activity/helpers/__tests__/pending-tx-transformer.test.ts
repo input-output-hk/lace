@@ -5,12 +5,13 @@ let actualLovelacesToAdaString: any;
 /* eslint-disable import/imports-first */
 /* eslint-disable max-len */
 /* eslint-disable no-magic-numbers */
-import { pendingTxTransformer, getFormattedFiatAmount } from '../pending-tx-transformer';
+import { pendingTxTransformer } from '../pending-tx-transformer';
 import { Wallet } from '@lace/cardano';
 import { cardanoCoin } from '@utils/constants';
 import { TxCBOR } from '@cardano-sdk/core';
 import { DEFAULT_TIME_FORMAT, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
+import { getFormattedFiatAmount } from '../common-tx-transformer';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');

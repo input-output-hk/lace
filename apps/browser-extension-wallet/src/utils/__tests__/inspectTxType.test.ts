@@ -33,7 +33,6 @@ describe('testing tx-inspection utils', () => {
       expect(getTxDirection({ type: 'incoming' })).toEqual(TxDirections.Incoming);
       expect(getTxDirection({ type: 'rewards' })).toEqual(TxDirections.Outgoing);
       expect(getTxDirection({ type: 'outgoing' })).toEqual(TxDirections.Outgoing);
-      expect(getTxDirection({ type: 'self-rewards' })).toEqual(TxDirections.Self);
       expect(getTxDirection({ type: 'self' })).toEqual(TxDirections.Self);
     });
   });
@@ -258,7 +257,7 @@ describe('testing tx-inspection utils', () => {
         ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
-      expect(result).toBe('self-rewards');
+      expect(result).toBe('self');
     });
 
     test('is self', () => {
