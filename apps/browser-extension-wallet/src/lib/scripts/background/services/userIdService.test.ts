@@ -90,7 +90,7 @@ describe('userIdService', () => {
       // it should still retain the previously stored user id in memory
       expect(await userIdService.getRandomizedUserId()).toEqual(store.userId);
 
-      await userIdService.sessionCreateOrExtend();
+      await userIdService.extendLifespan();
       // simulate an almost session timeout
       jest.advanceTimersByTime(SESSION_LENGTH - 1);
       expect(await userIdService.getRandomizedUserId()).toEqual(store.userId);

@@ -4,7 +4,6 @@ import {
   MatomoSendEventProps,
   PostHogAction,
   PostHogProperties,
-  UserSessionEventType,
   UserTrackingType
 } from './types';
 import { Wallet } from '@lace/cardano';
@@ -24,6 +23,7 @@ interface AnalyticsTrackerArgs {
   analyticsDisabled?: boolean;
   isPostHogEnabled?: boolean;
   excludedEvents?: string;
+  checkForNewSessions?: boolean;
 }
 export class AnalyticsTracker {
   protected matomoClient?: MatomoClient;
@@ -31,17 +31,20 @@ export class AnalyticsTracker {
   protected userIdService?: UserIdService;
   protected excludedEvents: string;
   protected userTrackingType?: UserTrackingType;
+  private checkForNewSessions: boolean;
 
   constructor({
     postHogClient,
     chain,
     analyticsDisabled = false,
-    excludedEvents = POSTHOG_EXCLUDED_EVENTS ?? ''
+    excludedEvents = POSTHOG_EXCLUDED_EVENTS ?? '',
+    checkForNewSessions = true
   }: AnalyticsTrackerArgs) {
     if (analyticsDisabled) return;
     this.userIdService = getUserIdService();
     this.matomoClient = new MatomoClient(chain, this.userIdService);
     this.excludedEvents = excludedEvents;
+    this.checkForNewSessions = checkForNewSessions;
 
     if (postHogClient) {
       this.postHogClient = postHogClient;
@@ -62,13 +65,13 @@ export class AnalyticsTracker {
   }
 
   private async checkNewSessionStarted(): Promise<void> {
-    console.debug('[ANALYTICS] checkSessionStarted()');
-    const sessionEventType = await this.userIdService.sessionCreateOrExtend();
-    if (sessionEventType !== UserSessionEventType.SessionStarted) {
+    if (!this.checkForNewSessions) {
       return;
     }
-    console.debug('[ANALYTICS] Logging New Session Started to PostHog');
-    await this.postHogClient?.sendEvent(PostHogAction.WalletSessionStartPageview);
+
+    if (!this.userIdService.hasActiveSession()) {
+      await this.postHogClient?.sendEvent(PostHogAction.WalletSessionStartPageView);
+    }
   }
 
   async sendPageNavigationEvent(): Promise<void> {
@@ -88,15 +91,17 @@ export class AnalyticsTracker {
   async sendEventToMatomo(props: MatomoSendEventProps): Promise<void> {
     const isOptedOutUser = this.userTrackingType === UserTrackingType.Basic;
     if (MATOMO_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser) return;
-    await this.checkNewSessionStarted();
     await this.matomoClient?.sendEvent(props);
+    await this.userIdService?.extendLifespan();
   }
 
   async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     const isEventExcluded = this.isEventExcluded(action);
     const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
     if (shouldOmitEvent || isEventExcluded) return;
+    await this.checkNewSessionStarted();
     await this.postHogClient?.sendEvent(action, properties);
+    await this.userIdService?.extendLifespan();
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {

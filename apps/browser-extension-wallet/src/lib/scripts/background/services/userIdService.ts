@@ -12,7 +12,7 @@ import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface }
 import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
 import { getChainNameByNetworkMagic } from '@src/utils/get-chain-name-by-network-magic';
-import { UserSessionEventType, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -23,7 +23,6 @@ export class UserIdService implements UserIdServiceInterface {
   private walletBasedUserId?: string;
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
-  private userTrackingType = UserTrackingType.Basic;
   public userTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
 
   constructor(
@@ -89,32 +88,36 @@ export class UserIdService implements UserIdServiceInterface {
 
   async clearId(): Promise<void> {
     console.debug('[ANALYTICS] clearId() called');
+    this.randomizedUserId = undefined;
     this.walletBasedUserId = undefined;
-    this.setUserTrackingType(UserTrackingType.Basic);
+    this.userTrackingType$.next(UserTrackingType.Basic);
     this.clearSessionTimeout();
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
 
-  private setUserTrackingType = (userTrackingType: UserTrackingType) => {
-    this.userTrackingType = userTrackingType;
-    this.userTrackingType$.next(userTrackingType);
-  };
-
   async makePersistent(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into persistent');
     this.clearSessionTimeout();
-    this.setUserTrackingType(UserTrackingType.Enhanced);
-    this.sessionCreateOrExtend();
+    this.setSessionTimeout();
     const userId = await this.getRandomizedUserId();
     await this.setStorage({ usePersistentUserId: true, userId });
+    this.userTrackingType$.next(UserTrackingType.Enhanced);
   }
 
   async makeTemporary(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into temporary');
     await this.setStorage({ usePersistentUserId: false, userId: undefined });
+    this.setSessionTimeout();
+    this.userTrackingType$.next(UserTrackingType.Basic);
+  }
+
+  async extendLifespan(): Promise<void> {
+    if (!this.sessionTimeout) {
+      return;
+    }
+    console.debug('[ANALYTICS] Extending temporary ID lifespan');
     this.clearSessionTimeout();
-    this.sessionCreateOrExtend();
-    this.setUserTrackingType(UserTrackingType.Basic);
+    this.setSessionTimeout();
   }
 
   private async restoreUserId(): Promise<void> {
@@ -126,32 +129,22 @@ export class UserIdService implements UserIdServiceInterface {
     }
 
     this.userIdRestored = true;
-    this.setUserTrackingType(usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic);
+    this.userTrackingType$.next(usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic);
   }
 
-  async sessionCreateOrExtend(): Promise<UserSessionEventType> {
-    const hasValidSession = !!this.sessionTimeout;
-    console.debug('[ANALYTICS] sessionCreateOrExtend, hasValidSession=', hasValidSession);
-    clearTimeout(this.sessionTimeout);
-
-    this.sessionTimeout = setTimeout(() => {
-      this.clearSessionTimeout();
-      // eslint-disable-next-line no-magic-numbers
-    }, this.sessionLength);
-
-    if (!hasValidSession) {
-      return UserSessionEventType.SessionStarted;
+  private setSessionTimeout(): void {
+    if (this.sessionTimeout) {
+      return;
     }
-    return UserSessionEventType.LifeExtended;
+    this.sessionTimeout = setTimeout(() => {
+      this.randomizedUserId = undefined;
+      console.debug('[ANALYTICS] Session timed out');
+    }, this.sessionLength);
   }
 
   private clearSessionTimeout(): void {
     clearTimeout(this.sessionTimeout);
     this.sessionTimeout = undefined;
-    if (this.userTrackingType === UserTrackingType.Basic) {
-      this.randomizedUserId = undefined;
-    }
-    console.debug('[ANALYTICS] Session timed out');
   }
 
   private generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex) {
@@ -159,6 +152,10 @@ export class UserIdService implements UserIdServiceInterface {
     // by requirement, we want to hash the extended account public key twice
     const hash = hashExtendedAccountPublicKey(extendedAccountPublicKey);
     return hashExtendedAccountPublicKey(hash);
+  }
+
+  hasActiveSession(): boolean {
+    return !!this.sessionTimeout;
   }
 }
 

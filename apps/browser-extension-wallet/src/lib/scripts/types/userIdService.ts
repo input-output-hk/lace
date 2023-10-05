@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { UserSessionEventType, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { BehaviorSubject } from 'rxjs';
 export const USER_ID_SERVICE_BASE_CHANNEL = 'user-id-actions';
 
@@ -10,6 +10,7 @@ export interface UserIdService {
   clearId(): Promise<void>;
   makePersistent(): Promise<void>;
   makeTemporary(): Promise<void>;
+  extendLifespan(): Promise<void>;
   userTrackingType$: BehaviorSubject<UserTrackingType>;
-  sessionCreateOrExtend: () => Promise<UserSessionEventType>;
+  hasActiveSession(): boolean;
 }
