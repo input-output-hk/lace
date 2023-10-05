@@ -188,3 +188,7 @@ Then(
 When(/^I save stake pool details$/, async () => {
   await StakePoolDetailsDrawer.saveStakePoolDetails();
 });
+
+Then(/^I see the Network Info component with the expected content$/, async () => {
+  await MultidelegationPageAssert.assertNetworkContainerExistsWithContent();
+});
