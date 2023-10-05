@@ -24,6 +24,7 @@ export class UserIdService implements UserIdServiceInterface {
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
   public userTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
+  private lastStartSessionEventSent = false;
 
   constructor(
     private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
@@ -136,6 +137,7 @@ export class UserIdService implements UserIdServiceInterface {
     if (this.sessionTimeout) {
       return;
     }
+    this.lastStartSessionEventSent = false;
     this.sessionTimeout = setTimeout(() => {
       this.randomizedUserId = undefined;
       console.debug('[ANALYTICS] Session timed out');
@@ -145,6 +147,7 @@ export class UserIdService implements UserIdServiceInterface {
   private clearSessionTimeout(): void {
     clearTimeout(this.sessionTimeout);
     this.sessionTimeout = undefined;
+    this.lastStartSessionEventSent = true;
   }
 
   private generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex) {
@@ -154,8 +157,11 @@ export class UserIdService implements UserIdServiceInterface {
     return hashExtendedAccountPublicKey(hash);
   }
 
-  hasActiveSession(): boolean {
-    return !!this.sessionTimeout;
+  async getLastStartSessionEventSent(): Promise<boolean> {
+    const isActiveSession = !!this.sessionTimeout;
+    const eventSent = !this.lastStartSessionEventSent && isActiveSession;
+    this.lastStartSessionEventSent = true;
+    return eventSent;
   }
 }
 

@@ -69,7 +69,8 @@ export class AnalyticsTracker {
       return;
     }
 
-    if (!this.userIdService.hasActiveSession()) {
+    const eventSent = await this.userIdService.getLastStartSessionEventSent();
+    if (!eventSent) {
       await this.postHogClient?.sendEvent(PostHogAction.WalletSessionStartPageView);
     }
   }
