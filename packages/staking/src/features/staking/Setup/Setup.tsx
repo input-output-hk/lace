@@ -1,8 +1,4 @@
-import { BigIntMath } from '@cardano-sdk/util';
-import { DelegatedStake } from '@cardano-sdk/wallet';
-import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
-import BigNumber from 'bignumber.js';
 import { useEffect } from 'react';
 import { initI18n } from '../../i18n';
 import '../reset.css';
@@ -18,21 +14,6 @@ type SetupProps = Omit<SetupBaseProps, 'loading'> &
     view: 'popup' | 'expanded';
   };
 
-// hotfix: percentages from the cardano-js-sdk due to some
-// not yet understood reason may not always add up to 100
-// hence we are patching them here.
-// Once LW-8703 is done, this patch can be removed
-const patchPercentages = (delegationDistribution: DelegatedStake[]): DelegatedStake[] => {
-  const totalPortfolioStake = BigIntMath.sum(delegationDistribution.map(({ stake }) => stake));
-
-  return delegationDistribution.map((delegation) => ({
-    ...delegation,
-    percentage: new BigNumber(delegation.stake.toString())
-      .div(totalPortfolioStake.toString())
-      .toNumber() as Wallet.Percent,
-  }));
-};
-
 export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => {
   const { balancesBalance, walletStoreInMemoryWallet } = useOutsideHandles();
   const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
@@ -45,7 +26,7 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     portfolioMutators.setCardanoCoinSymbol(currentChain);
     portfolioMutators.setCurrentPortfolio({
       currentEpoch,
-      delegationDistribution: patchPercentages([...delegationDistribution.values()]),
+      delegationDistribution: [...delegationDistribution.values()],
       delegationRewardsHistory,
     });
     portfolioMutators.setView(view);
