@@ -246,9 +246,9 @@ export const WalletSetupWizard = ({
     EnhancedAnalyticsOptInStatus.OptedOut
   );
 
-  const handleAnalyticsChoice = (isAccepted: boolean) => {
+  const handleAnalyticsChoice = async (isAccepted: boolean) => {
     setIsAnalyticsAccepted(isAccepted);
-    analytics.setOptedInForEnhancedAnalytics(
+    await analytics.setOptedInForEnhancedAnalytics(
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
 
@@ -261,7 +261,7 @@ export const WalletSetupWizard = ({
       // eslint-disable-next-line camelcase
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
-    sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
+    await sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
     moveForward();
   };
 
