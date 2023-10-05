@@ -83,19 +83,16 @@ const isDRepRetirementCertificate = (type: Wallet.Cardano.CertificateType) =>
 export const dRepRegistrationInspector = (
   tx: Wallet.Cardano.Tx
 ): Wallet.Cardano.RegisterDelegateRepresentativeCertificate | undefined =>
-  tx?.body.certificates.find(({ __typename }) => isDRepRegistrationCertificate(__typename)) as
+  tx?.body?.certificates?.find(({ __typename }) => isDRepRegistrationCertificate(__typename)) as
     | Wallet.Cardano.RegisterDelegateRepresentativeCertificate
     | undefined;
 
 export const dRepRetirementInspector = (
   tx: Wallet.Cardano.Tx
 ): Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate | undefined =>
-  tx?.body.certificates.find(({ __typename }) => isDRepRetirementCertificate(__typename)) as
+  tx?.body?.certificates?.find(({ __typename }) => isDRepRetirementCertificate(__typename)) as
     | Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate
     | undefined;
-
-export const isDRepRegistration = (tx: Wallet.Cardano.Tx | undefined): boolean =>
-  tx?.body.certificates.some(({ __typename }) => isDRepRegistrationCertificate(__typename));
 
 export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
   const inspector = createTxInspector({
