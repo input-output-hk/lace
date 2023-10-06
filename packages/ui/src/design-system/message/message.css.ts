@@ -19,6 +19,7 @@ export const icon = sx({
 export const title = style([
   sx({
     color: '$message_title_color',
+    mt: '$8',
   }),
   {
     textAlign: 'center',

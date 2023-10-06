@@ -1,4 +1,4 @@
-import { globalStyle, sx, vars, style } from '../../design-tokens';
+import { globalStyle, vars, style } from '../../design-tokens';
 
 export const container = style({
   background: vars.colors.$input_container_bgColor,
@@ -36,6 +36,7 @@ export const input = style({
 
 export const largeDots = style({
   fontFamily: vars.fontFamily.$verdana,
+  fontSize: '17.8px',
   paddingTop: '15px',
 });
 

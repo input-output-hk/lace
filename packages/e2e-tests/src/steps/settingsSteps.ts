@@ -26,6 +26,9 @@ import CollateralDrawer from '../elements/settings/CollateralDrawer';
 import HelpDrawer from '../elements/settings/HelpDrawer';
 import ModalAssert from '../assert/modalAssert';
 import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
+import SettingsPage from '../elements/settings/SettingsPage';
+import extendedView from '../page/extendedView';
+import popupView from '../page/popupView';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
@@ -287,4 +290,13 @@ When(/^I fill (correct|incorrect) password and confirm collateral$/, async (type
 When(/^I click "Reclaim collateral" button on collateral drawer$/, async () => {
   await CollateralDrawer.collateralButton.waitForClickable();
   await CollateralDrawer.collateralButton.click();
+});
+
+When(/^I reclaim collateral \(if active\) in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
+  if ((await SettingsPage.collateralLink.addon.getText()) === 'Active') {
+    await settingsExtendedPageObject.clickSettingsItem('Collateral');
+    await CollateralDrawer.collateralButton.waitForClickable();
+    await CollateralDrawer.collateralButton.click();
+  }
 });

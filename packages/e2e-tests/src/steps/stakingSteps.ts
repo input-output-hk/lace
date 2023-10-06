@@ -26,10 +26,6 @@ Then(/^I see Staking title displayed$/, async () => {
   await stakingPageAssert.assertSeeTitle();
 });
 
-Then(/^I see the Network Info component with the expected content$/, async () => {
-  await stakingPageAssert.assertNetworkContainerExistsWithContent();
-});
-
 Then(
   /^I see the stake pool search control with appropriate content in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
