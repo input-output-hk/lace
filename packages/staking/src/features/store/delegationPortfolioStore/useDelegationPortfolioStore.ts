@@ -27,8 +27,9 @@ const defaultState: DelegationPortfolioState = {
   viewedStakePool: undefined,
 };
 
-// If percentages add up to 100, normalize them. Otherwise, round them to N decimal places
-const adjustOnchainPercentages = <K extends string, T extends { [key in K]: number }>({
+// If percentages add up to 100, normalize them. Otherwise, round them to N decimal places.
+// The latter occurs when there are funds on non-delegated addresses.
+const sanitizeOnchainPercentages = <K extends string, T extends { [key in K]: number }>({
   items,
   key,
   decimals = 0,
@@ -113,7 +114,7 @@ export const useDelegationPortfolioStore = create(
         );
 
         // TMP: replace by real data from memory/cip
-        const savedPercentages = adjustOnchainPercentages({
+        const savedPercentages = sanitizeOnchainPercentages({
           decimals: 0,
           items: delegationDistribution.map((item) => ({
             ...item,
@@ -148,7 +149,7 @@ export const useDelegationPortfolioStore = create(
         });
 
         set((state) => {
-          state.currentPortfolio = adjustOnchainPercentages({
+          state.currentPortfolio = sanitizeOnchainPercentages({
             decimals: 2,
             items: currentPortfolio,
             key: 'onChainPercentage',

@@ -11,4 +11,8 @@ describe('Testing sumPercentagesLossless function', () => {
       );
     });
   }
+
+  test('Test JS edge-case #1', () => {
+    expect(sumPercentagesLossless({ items: [{ value: 1.380_000_000_45 }], key })).toEqual(1.380_000_000_5);
+  });
 });

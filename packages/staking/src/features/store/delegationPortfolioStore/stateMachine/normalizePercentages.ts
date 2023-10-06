@@ -1,13 +1,20 @@
 import { PERCENTAGE_SCALE_MAX } from '../constants';
 import { sumPercentagesLossless } from './sumPercentagesLossless';
 
-// Rounds values of properties of an input array of objects, while keeping the sum of the numbers equal to 100 (PERCENTAGE_SCALE_MAX)
-// Requires input array to sum to 100 +- epsilon
-// Works at arbitrary decimal precision
-// Examples: normalizePercentages({items: [{val: 33.33},{val: 33.33},{val: 33.33}], key: 'val', decimals: 0})
-//                            =>          [{val: 34},   {val: 33},   {val: 33}   ]
-//           normalizePercentages({items: [{val: 33.333},{val: 33.333},{val: 33.333}], key: 'val', decimals: 2})
-//                            =>          [{val: 33.34}, {val: 33.33}, {val: 33.33} ]
+/**
+ * Rounds values of properties of an input array of objects, while keeping the sum of the numbers equal to 100 (PERCENTAGE_SCALE_MAX)
+ * Requires input array to sum to 100 +- epsilon
+ * Works at arbitrary decimal precision
+ * Examples:
+ * ```
+ *           normalizePercentages({items: [{val: 33.33},{val: 33.33},{val: 33.33}], key: 'val', decimals: 0})
+ *                            =>          [{val: 34},   {val: 33},   {val: 33}   ]
+ * ```
+ * ```
+ *           normalizePercentages({items: [{val: 33.333},{val: 33.333},{val: 33.333}], key: 'val', decimals: 2})
+ *                            =>          [{val: 33.34}, {val: 33.33}, {val: 33.33} ]
+ * ```
+ */
 export const normalizePercentages = <K extends string, T extends { [key in K]: number }>({
   items,
   key,
