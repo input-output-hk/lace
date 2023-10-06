@@ -29,7 +29,7 @@ class DrawerSendExtendedAssert {
     await expect(await webTester.getTextValueFromElement(addressInput.label())).to.equal(
       await t('core.destinationAddressInput.recipientAddress')
     );
-    await webTester.seeWebElement(addressInput.ctaButton());
+    await addressInput.ctaButton.waitForDisplayed();
     await coinConfigureAssert.assertSeeCoinConfigure();
     await assetInputAssert.assertSeeAssetInput();
     await webTester.seeWebElement(assetInput.assetAddButton());
@@ -344,7 +344,6 @@ class DrawerSendExtendedAssert {
 
   async assertSeeIconForInvalidAdaHandle(shouldBeDisplayed: boolean) {
     const addressInput = new AddressInput();
-    await addressInput.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
     await addressInput.invalidAdaHandleIcon.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 
@@ -354,6 +353,16 @@ class DrawerSendExtendedAssert {
     if (shouldBeDisplayed) {
       expect(await addressInput.adaHandleError.getText()).to.equal(await t('general.errors.incorrectHandle'));
     }
+  }
+
+  async assertSeeSearchLoader(shouldBeDisplayed: boolean) {
+    const addressInput = new AddressInput();
+    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
+
+  async assertAddressBookButtonEnabled(bundleIndex: number, shouldBeEnabled: boolean) {
+    const addressInput = new AddressInput(bundleIndex);
+    await addressInput.ctaButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }
 }
 

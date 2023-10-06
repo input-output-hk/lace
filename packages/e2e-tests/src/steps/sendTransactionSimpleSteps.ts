@@ -651,3 +651,14 @@ Then(/^Red exclamation icon is displayed next to ADA handle$/, async () => {
 Then(/^"Handle not found" error is displayed under address input in "Send" drawer$/, async () => {
   await drawerSendExtendedAssert.assertSeeAdaHandleError(true);
 });
+
+Then(/^search loader is displayed inside address input field$/, async () => {
+  await drawerSendExtendedAssert.assertSeeSearchLoader(true);
+});
+
+Then(
+  /^"Add address" button is (enabled|disabled) in the bundle (\d) recipient's address input$/,
+  async (state: 'enabled' | 'disabled', inputIndex: number) => {
+    await drawerSendExtendedAssert.assertAddressBookButtonEnabled(inputIndex, state === 'enabled');
+  }
+);
