@@ -7,8 +7,11 @@ export class AddressInput extends WebElement {
   protected CONTAINER = '//div[@data-testid="address-input"]';
   private SEARCH_INPUT = '//input[@data-testid="search-input"]';
   private SEARCH_LABEL = '//div[@data-testid="input-label"]';
+  private SEARCH_LOADER = '[data-testid="search-loader"]';
   private CTA_BUTTON = '//button[@data-testid="address-book-btn"]';
   private ADDRESS_INPUT_NAME = '[data-testid="search-result-name"]';
+  private ADA_HANDLE_ICON_INVALID = '[data-icon="exclamation-circle"]';
+  private ADA_HANDLE_INPUT_ERROR = '[data-testid="handle-input-error"]';
 
   constructor(index?: number) {
     super();
@@ -34,6 +37,18 @@ export class AddressInput extends WebElement {
 
   name(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER).$(this.ADDRESS_INPUT_NAME);
+  }
+
+  get searchLoader(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SEARCH_LOADER);
+  }
+
+  get invalidAdaHandleIcon(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER).$(this.ADA_HANDLE_ICON_INVALID);
+  }
+
+  get adaHandleError(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ADA_HANDLE_INPUT_ERROR);
   }
 
   toJSLocator(): string {

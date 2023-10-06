@@ -24,7 +24,7 @@ Feature: ADA handle - popup view
     When I fill address form with "ADA handle" name
     And I fill address form with "$fake_handle" ADA handle
     Then Red "X" icon is displayed next to ADA handle
-    And "Handle not found" error is displayed
+    And "Handle not found" error is displayed in address book form
     And "Save address" button is disabled on "Add new address" drawer
 
   @LW-7336
@@ -140,3 +140,16 @@ Feature: ADA handle - popup view
     Then I can see the handles listed on the "Select NFT" screen
     And I see ADA handle NFT with custom image on the Select NFT page
     And the corresponding custom images are displayed
+
+  @LW-5023
+  Scenario: Popup View - Send flow - Enter ADA handle and confirm validated
+    When I click "Send" button on Tokens page in popup mode
+    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    Then Green tick icon is displayed next to ADA handle
+
+  @LW-5024
+  Scenario: Popup View - Send flow - Enter ADA handle and confirm invalid
+    When I click "Send" button on Tokens page in popup mode
+    And I enter "$fake_handle" in the bundle 1 recipient's address
+    Then Red exclamation icon is displayed next to ADA handle
+    And "Handle not found" error is displayed under address input in "Send" drawer

@@ -643,3 +643,11 @@ Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (expect
 Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (expectedTicker: 'ADA' | 'tADA') => {
   await drawerSendExtendedAssert.assertSeeTickerOnReviewTransactionAmount(expectedTicker);
 });
+
+Then(/^Red exclamation icon is displayed next to ADA handle$/, async () => {
+  await drawerSendExtendedAssert.assertSeeIconForInvalidAdaHandle(true);
+});
+
+Then(/^"Handle not found" error is displayed under address input in "Send" drawer$/, async () => {
+  await drawerSendExtendedAssert.assertSeeAdaHandleError(true);
+});

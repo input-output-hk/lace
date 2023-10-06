@@ -341,6 +341,20 @@ class DrawerSendExtendedAssert {
     if (expectedTicker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
     expect(tickerDisplayed).to.equal(expectedTicker);
   }
+
+  async assertSeeIconForInvalidAdaHandle(shouldBeDisplayed: boolean) {
+    const addressInput = new AddressInput();
+    await addressInput.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
+    await addressInput.invalidAdaHandleIcon.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
+
+  async assertSeeAdaHandleError(shouldBeDisplayed: boolean) {
+    const addressInput = new AddressInput();
+    await addressInput.adaHandleError.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      expect(await addressInput.adaHandleError.getText()).to.equal(await t('general.errors.incorrectHandle'));
+    }
+  }
 }
 
 export default new DrawerSendExtendedAssert();
