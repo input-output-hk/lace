@@ -7,10 +7,13 @@ import { PERCENTAGE_SCALE_MAX } from '../constants';
 export const normalizePercentages = <K extends string, T extends { [key in K]: number }>(items: T[], key: K) => {
   const currentSum = items.reduce((acc, item) => acc + item[key], 0);
   const epsilon = 0.1;
-  if (Math.abs(currentSum - PERCENTAGE_SCALE_MAX) > epsilon)
-    throw new Error(`Percentages must sum to ${PERCENTAGE_SCALE_MAX}`);
 
   const itemsWithRoundedNumbers: T[] = items.map((item) => ({ ...item, [key]: Math.round(item[key]) }));
+  if (Math.abs(currentSum - PERCENTAGE_SCALE_MAX) > epsilon) {
+    console.error(`Percentages must add up to ${PERCENTAGE_SCALE_MAX}, instead they add up to ${currentSum}`);
+    // fall back to naive rounding
+    return itemsWithRoundedNumbers;
+  }
 
   // Calculate the adjustment needed to make the sum exactly equal to 100 (PERCENTAGE_SCALE_MAX)
   const adjustment = PERCENTAGE_SCALE_MAX - itemsWithRoundedNumbers.reduce((acc, item) => acc + item[key], 0);

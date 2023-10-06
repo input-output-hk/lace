@@ -45,10 +45,6 @@ Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmati
   await MultidelegationPage.clickButtonOnSection(section);
 });
 
-Given(/^I confirm multidelegation beta modal$/, async () => {
-  await MultidelegationPage.confirmBetaModal();
-});
-
 Then(/^I see Delegation card displaying correct data$/, async () => {
   await MultidelegationPageAssert.assertSeeDelegationCardDetailsInfo();
 });
@@ -191,4 +187,8 @@ When(/^I save stake pool details$/, async () => {
 
 Then(/^I see the Network Info component with the expected content$/, async () => {
   await MultidelegationPageAssert.assertNetworkContainerExistsWithContent();
+});
+
+Then(/^I see the stake pool search control with appropriate content$/, async () => {
+  await MultidelegationPageAssert.assertSeeSearchComponent();
 });

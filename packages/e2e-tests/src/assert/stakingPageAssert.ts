@@ -26,22 +26,6 @@ class StakingPageAssert {
     await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
   };
 
-  assertSeeSearchComponent = async (mode: 'extended' | 'popup') => {
-    await StakingPage.stakingPageSearchIcon.waitForDisplayed();
-    await StakingPage.stakingPageSearchInput.waitForDisplayed();
-    await (mode === 'extended'
-      ? expect(await StakingPage.stakingPageSearchInput.getAttribute('placeholder')).to.equal(
-          await t('browserView.staking.stakePoolsTable.searchPlaceholder')
-        )
-      : expect(await StakingPage.searchInputPlaceholderInPopup.getText()).to.equal(
-          await t('cardano.stakePoolSearch.searchPlaceholder')
-        ));
-  };
-
-  assertSeePopupSearch = async () => {
-    await webTester.waitUntilSeeElementContainingText(await t('cardano.stakePoolSearch.searchPlaceholder'), 20_000);
-  };
-
   assertStakePoolSwitched = async (stakePoolName: string) => {
     const stakingInfoComponent = new StakingInfoComponent();
     await browser.waitUntil(

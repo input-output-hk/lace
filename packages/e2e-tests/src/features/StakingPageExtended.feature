@@ -9,15 +9,10 @@ Feature: Staking Page - Extended Browser View
     When I navigate to Staking extended page
     Then I see Staking title and counter with total number of pools displayed
 
-  @LW-2486 @Testnet @Mainnet
-  Scenario: Extended View - Staking search control is displayed with appropriate content
-    When I navigate to Staking extended page
-    Then I see the stake pool search control with appropriate content in extended mode
-
   @LW-2662 @Testnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
-    And I see the stake pool search control with appropriate content in extended mode
+    And I see the stake pool search control with appropriate content
     And I input "<stake_pool_search_term>" to the search bar
     Then there are <number_of_results> results and "<stake_pool_title>" and "<stake_pool_subtitle>" are populated if applicable
     Examples:
@@ -34,7 +29,7 @@ Feature: Staking Page - Extended Browser View
   @LW-2662 @Mainnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
     When I navigate to Staking extended page
-    And I see the stake pool search control with appropriate content in extended mode
+    And I see the stake pool search control with appropriate content
     And I input "<stake_pool_search_term>" to the search bar
     Then there are <number_of_results> results and "<stake_pool_title>" and "<stake_pool_subtitle>" are populated if applicable
     Examples:
@@ -51,7 +46,7 @@ Feature: Staking Page - Extended Browser View
   @LW-2663 @Testnet @Mainnet
   Scenario: Extended View - Selecting stake pool from list opens drawer with appropriate details
     When I navigate to Staking extended page
-    And I see the stake pool search control with appropriate content in extended mode
+    And I see the stake pool search control with appropriate content
     And I input "Capital" to the search bar
     And I click stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
