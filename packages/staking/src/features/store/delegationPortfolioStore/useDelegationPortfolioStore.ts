@@ -12,7 +12,7 @@ import {
   processPopupViewCases,
 } from './stateMachine';
 import { normalizePercentages } from './stateMachine/normalizePercentages';
-import { sumPercentagesLossless } from './stateMachine/sumPercentagesLossless';
+import { sumPercentagesSanitized } from './stateMachine/sumPercentagesSanitized';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
@@ -38,7 +38,7 @@ const sanitizeOnchainPercentages = <K extends string, T extends { [key in K]: nu
   key: K;
   decimals?: number;
 }) =>
-  sumPercentagesLossless({ items, key }) === PERCENTAGE_SCALE_MAX
+  sumPercentagesSanitized({ items, key }) === PERCENTAGE_SCALE_MAX
     ? normalizePercentages({
         decimals,
         items,

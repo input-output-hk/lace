@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 
 // Sums numbers in an array of objects, avoids JS-precision issues
 // Intended for summing mainly onchain (float) percentages, without which there would be precision errors
-export const sumPercentagesLossless = <K extends string, T extends { [key in K]: number }>({
+export const sumPercentagesSanitized = <K extends string, T extends { [key in K]: number }>({
   items,
   key,
   // eslint-disable-next-line no-magic-numbers

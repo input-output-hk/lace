@@ -10,3 +10,4 @@ export type {
   ExecuteCommand,
   Handler,
 } from './types';
+export { sumPercentagesSanitized } from './sumPercentagesSanitized';

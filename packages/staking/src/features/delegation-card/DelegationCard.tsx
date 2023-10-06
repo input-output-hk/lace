@@ -3,8 +3,7 @@ import cn from 'classnames';
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
-import { PERCENTAGE_SCALE_MAX } from '../store';
-import { sumPercentagesLossless } from '../store/delegationPortfolioStore/stateMachine/sumPercentagesLossless';
+import { PERCENTAGE_SCALE_MAX, sumPercentagesSanitized } from '../store/delegationPortfolioStore';
 import * as styles from './DelegationCard.css';
 
 export type DelegationStatus =
@@ -63,7 +62,7 @@ export const DelegationCard = ({
   ];
 
   const totalPercentage = useMemo(
-    () => sumPercentagesLossless({ items: distribution || [], key: 'percentage' }),
+    () => sumPercentagesSanitized({ items: distribution || [], key: 'percentage' }),
     [distribution]
   );
   const { data, colorSet = PIE_CHART_DEFAULT_COLOR_SET } = useMemo((): {

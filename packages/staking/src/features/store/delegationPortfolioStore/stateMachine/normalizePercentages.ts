@@ -1,5 +1,5 @@
 import { PERCENTAGE_SCALE_MAX } from '../constants';
-import { sumPercentagesLossless } from './sumPercentagesLossless';
+import { sumPercentagesSanitized } from './sumPercentagesSanitized';
 
 /**
  * Rounds values of properties of an input array of objects, while keeping the sum of the numbers equal to 100 (PERCENTAGE_SCALE_MAX)
@@ -24,7 +24,7 @@ export const normalizePercentages = <K extends string, T extends { [key in K]: n
   key: K;
   decimals?: number;
 }) => {
-  const currentSum = sumPercentagesLossless({ items, key });
+  const currentSum = sumPercentagesSanitized({ items, key });
   const epsilon = 0.1;
   if (Math.abs(currentSum - PERCENTAGE_SCALE_MAX) > epsilon)
     throw new Error(`Percentages must sum to ${PERCENTAGE_SCALE_MAX}`);
