@@ -1,6 +1,13 @@
 @Staking-NonDelegatedFunds-Extended @Testnet @Mainnet
 Feature: Staking Page - Extended View
 
+  @LW-8449 @Testnet @Mainnet
+  Scenario: Extended View - Staking search control is displayed with appropriate content
+    Given I disable showing Multidelegation beta banner
+    When I navigate to Staking extended page
+    And I click Browse pools tab
+    Then I see the stake pool search control with appropriate content
+
   @LW-8466 @Testnet @Mainnet
   Scenario: Extended View - "About staking" widget
     Given I am on Staking extended page
