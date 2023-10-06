@@ -1,6 +1,8 @@
 /* eslint-disable functional/prefer-immutable-types */
-import React from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React, { isValidElement, useMemo, useState } from 'react';
 
+import isFunction from 'lodash/isFunction';
 import {
   Cell,
   Pie,
@@ -15,20 +17,58 @@ import {
 } from './pie-chart.data';
 
 import type { ColorValueHex } from '../../types';
-import type { CellProps, TooltipProps } from 'recharts';
+import type { CellProps } from 'recharts';
 import type { PickByValue } from 'utility-types';
 
 type PieChartDataProps = Partial<{
   overrides: CellProps;
 }>;
 export type PieChartColor = ColorValueHex | PieChartGradientColor;
+
+export interface TooltipContentRendererProps<T> {
+  active?: boolean;
+  name?: string;
+  payload?: T;
+}
+export type TooltipContentRenderer<T> = (
+  props: TooltipContentRendererProps<T>,
+) => ReactNode;
+type TooltipContent<T> = ReactElement | TooltipContentRenderer<T>;
+
+interface RechartTooltipContentRendererProps<T> {
+  name?: string;
+  active?: boolean;
+  payload?: { name?: string; payload?: T }[];
+}
+
+type RechartTooltipContentRenderer<T> = (
+  props: RechartTooltipContentRendererProps<T>,
+) => ReactNode;
+
+// Recharts passes to the renderer for some reason the payload as
+// a list which is a bit cumbersome because in practice we care just about the
+// first element and the adapter below removes this inconvenience
+const transformTooltipContentRenderer =
+  <T extends object>(
+    tooltipContentRenderer: TooltipContentRenderer<T>,
+  ): RechartTooltipContentRenderer<T> =>
+  ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: { name?: string; payload?: T }[];
+  }) =>
+    tooltipContentRenderer({ active, ...payload?.[0] });
+
 interface PieChartBaseProps<T extends object> {
   animate?: boolean;
   colors?: PieChartColor[];
   data: (PieChartDataProps & T)[];
   direction?: 'clockwise' | 'counterclockwise';
-  tooltip?: TooltipProps<number, string>['content'];
+  tooltip?: TooltipContent<T>;
 }
+
 interface PieChartCustomKeyProps<T extends object>
   extends PieChartBaseProps<T> {
   nameKey: keyof PickByValue<T, string>;
@@ -63,6 +103,8 @@ const formatPieColor = (color: PieChartColor): string =>
  * @param tooltip component accepted by Recharts Tooltip `content` prop
  * @param valueKey object key of a `data` item that will be used as value (displayed in the tooltip)
  */
+
+// eslint-disable-next-line react/no-multi-comp
 export const PieChart = <T extends object | { name: string; value: number }>({
   animate = true,
   colors = PIE_CHART_DEFAULT_COLOR_SET,
@@ -73,17 +115,45 @@ export const PieChart = <T extends object | { name: string; value: number }>({
   valueKey = 'value',
 }: PieChartProps<T>): JSX.Element => {
   const data = inputData.slice(0, colors.length);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  const tooltipContent = useMemo(() => {
+    if (!tooltip || isValidElement(tooltip)) {
+      return tooltip;
+    }
+
+    if (isFunction(tooltip)) {
+      return transformTooltipContentRenderer(tooltip);
+    }
+  }, [tooltip]);
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>): void => {
+    if (event.target instanceof SVGSVGElement) {
+      const { x, y } = event.target.getBoundingClientRect();
+      setTooltipPosition({ x: event.clientX - x, y: event.clientY - y });
+    }
+  };
 
   return (
     <ResponsiveContainer aspect={1}>
-      <RechartsPieChart>
+      <RechartsPieChart
+        onMouseMove={(_, event): void => {
+          handleMouseMove(event as React.MouseEvent<HTMLDivElement>);
+        }}
+      >
         <defs>
           <linearGradient id={PieChartGradientColor.LaceLinearGradient}>
             <stop offset="-18%" stopColor="#FDC300" />
             <stop offset="120%" stopColor="#FF92E1" />
           </linearGradient>
         </defs>
-        {Boolean(tooltip) && <Tooltip content={tooltip} />}
+        {tooltipContent && (
+          <Tooltip
+            wrapperStyle={{ zIndex: 1 }}
+            content={tooltipContent}
+            position={tooltipPosition}
+          />
+        )}
         <Pie
           data={data}
           dataKey={valueKey}
