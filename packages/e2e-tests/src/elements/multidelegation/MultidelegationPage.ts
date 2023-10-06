@@ -1,9 +1,13 @@
 /* eslint-disable no-undef */
 import SectionTitle from '../sectionTitle';
-import MultidelegationPageAssert from '../../assert/multidelegationPageAssert';
+import MultidelegationPageAssert from '../../assert/multidelegation/MultidelegationPageAssert';
 import { browser } from '@wdio/globals';
 import { clearInputFieldValue } from '../../utils/inputFieldUtils';
 import { ChainablePromiseElement } from 'webdriverio';
+import StakePoolDetails from '../staking/stakePoolDetails';
+import testContext from '../../utils/testContext';
+import { isPopupMode } from '../../utils/pageUtils';
+import CommonDrawerElements from '../CommonDrawerElements';
 
 class MultidelegationPage {
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
@@ -15,14 +19,15 @@ class MultidelegationPage {
   private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
   private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
   private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
-  private SEARCH_INPUT = '[data-testid="search-input"]';
+  private SEARCH_INPUT = 'input[data-testid="search-input"]';
+  private SEARCH_ICON = '[data-testid="search-icon"]';
+  private SEARCH_LOADER = '[data-testid="search-loader"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
   private STAKE_BUTTON = '[data-testid="stake-button"]';
   private PORTFOLIO_BAR_BTN_NEXT = '[data-testid="portfoliobar-btn-next"]';
   private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferences-next-button"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
-  private MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM = '[data-testid="multidelegation-beta-modal-button"]';
   private DELEGATED_POOL_ITEM = '[data-testid="delegated-pool-item"]';
   private DELEGATED_POOL_LOGO = '[data-testid="stake-pool-logo"]';
   private DELEGATED_POOL_NAME = '[data-testid="stake-pool-name"]';
@@ -41,6 +46,7 @@ class MultidelegationPage {
     '[data-testid="stats-total-rewards-container"] [data-testid="stats-value"]';
   private DELEGATED_POOL_LAST_REWARDS_TITLE = '[data-testid="stats-last-reward-container"] [data-testid="stats-title"]';
   private DELEGATED_POOL_LAST_REWARDS_VALUE = '[data-testid="stats-last-reward-container"] [data-testid="stats-value"]';
+  private STAKING_POOL_INFO = '[data-testid="staking-pool-info"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -82,8 +88,20 @@ class MultidelegationPage {
     return $$(this.DELEGATIONCARD_CHART_PIE_SLICE);
   }
 
+  get delegatedPoolItems() {
+    return $$(this.DELEGATED_POOL_ITEM);
+  }
+
   get stakingPageSearchInput() {
     return $(this.SEARCH_INPUT);
+  }
+
+  get searchIcon() {
+    return $(this.SEARCH_ICON);
+  }
+
+  get searchLoader() {
+    return $(this.SEARCH_LOADER);
   }
 
   get poolsItems() {
@@ -106,8 +124,8 @@ class MultidelegationPage {
     return $(this.CONFIRMATION_BTN_NEXT);
   }
 
-  get multidelegationBetaModalBtnConfirm() {
-    return $(this.MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM);
+  get stakingPoolInfoItems() {
+    return $$(this.STAKING_POOL_INFO);
   }
 
   delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
@@ -244,11 +262,25 @@ class MultidelegationPage {
     }
   }
 
-  async confirmBetaModal() {
-    if (await this.multidelegationBetaModalBtnConfirm.isDisplayed()) {
-      await this.multidelegationBetaModalBtnConfirm.waitForClickable();
-      await this.multidelegationBetaModalBtnConfirm.click();
+  async saveIDsOfStakePoolsInUse() {
+    const poolIDsToBeSaved = [];
+    const stakingPoolInfoItems = await this.stakingPoolInfoItems;
+    for (const stakingPoolInfoItem of stakingPoolInfoItems) {
+      await stakingPoolInfoItem.click();
+      await StakePoolDetails.poolId.waitForDisplayed();
+      const poolId = await StakePoolDetails.poolId.getText();
+      poolIDsToBeSaved.push(poolId);
+      (await isPopupMode())
+        ? await new CommonDrawerElements().clickHeaderBackButton()
+        : await new CommonDrawerElements().clickHeaderCloseButton();
     }
+
+    testContext.save('stakePoolsInUse', poolIDsToBeSaved);
+  }
+
+  async clickOnStakePoolWithName(poolName: string) {
+    const poolItem = await this.getPoolByName(poolName);
+    await poolItem.click();
   }
 }
 

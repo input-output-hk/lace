@@ -50,7 +50,11 @@ export const SideMenu = (): React.ReactElement => {
   const handleRedirection: MenuProps['onClick'] = (field) => {
     switch (field.key) {
       case routes.assets:
-        sendAnalytics(MatomoEventCategories.VIEW_TOKENS, AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_BROWSER);
+        sendAnalytics(
+          MatomoEventCategories.VIEW_TOKENS,
+          AnalyticsEventNames.ViewTokens.VIEW_TOKEN_LIST_BROWSER,
+          PostHogAction.TokenTokensClick
+        );
         break;
       case routes.staking:
         sendAnalytics(
@@ -62,7 +66,8 @@ export const SideMenu = (): React.ReactElement => {
       case routes.activity:
         sendAnalytics(
           MatomoEventCategories.VIEW_TRANSACTIONS,
-          AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_BROWSER
+          AnalyticsEventNames.ViewTransactions.VIEW_TX_LIST_BROWSER,
+          PostHogAction.ActivityActivityClick
         );
         break;
       case routes.nfts:

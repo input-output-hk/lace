@@ -32,6 +32,14 @@
     padding: 0 size_unit(4);
     border-left: none;
   }
+
+  @media (max-width: calc($breakpoint-minimum + 100px)) {
+    padding: 0 size_unit(2);
+
+    &:first-child {
+      padding: 0 size_unit(2);
+    }
+  }
 }
 
 .marker {

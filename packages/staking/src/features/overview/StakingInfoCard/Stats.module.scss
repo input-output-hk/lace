@@ -3,6 +3,7 @@
 .stat {
   display: flex;
   flex-direction: column;
+  white-space: nowrap;
 
   .title {
     color: var(--text-color-secondary);

@@ -9,11 +9,6 @@ Feature: Staking Page - Popup View
     When I navigate to Staking popup page
     Then I see Staking title and counter with total number of pools displayed
 
-  @LW-2488
-  Scenario: Popup View - Staking search control is displayed with appropriate content
-    When I navigate to Staking popup page
-    Then I see the stake pool search control with appropriate content in popup mode
-
   @LW-2722
   Scenario: Popup View - Selecting stake pool from list opens drawer with appropriate details
     When I navigate to Staking popup page
