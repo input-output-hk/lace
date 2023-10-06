@@ -175,6 +175,9 @@ export const HardwareWalletFlow = ({
       setDoesUserAllowAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
+      await analytics.setOptedInForEnhancedAnalytics(
+        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+      );
       navigateTo('finish');
     } catch (error) {
       console.error('ERROR creating hardware wallet', { error });

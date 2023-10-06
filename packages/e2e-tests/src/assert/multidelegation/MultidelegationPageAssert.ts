@@ -1,8 +1,9 @@
-import MultidelegationPage from '../elements/staking/MultidelegationPage';
+import MultidelegationPage from '../../elements/multidelegation/MultidelegationPage';
 import { browser } from '@wdio/globals';
 import { expect } from 'chai';
-import { t } from '../utils/translationService';
-import { TestnetPatterns } from '../support/patterns';
+import { t } from '../../utils/translationService';
+import { TestnetPatterns } from '../../support/patterns';
+import NetworkComponent from '../../elements/staking/networkComponent';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -95,6 +96,47 @@ class MultidelegationPageAssert {
       'tADA'
     )[0];
     expect(lastRewardsValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+  };
+
+  assertSeeStakingPoolOnYourPoolsList = async (poolName: string) => {
+    await browser.waitUntil(
+      async () => {
+        const delegatedPoolsCount = await MultidelegationPage.delegatedPoolItems.length;
+        const delegatedPoolsNames = [];
+        for (let index = 0; index < delegatedPoolsCount; index++) {
+          delegatedPoolsNames.push(await MultidelegationPage.delegatedPoolName(index).getText());
+        }
+        return delegatedPoolsNames.includes(poolName);
+      },
+      {
+        timeout: 180_000,
+        interval: 2000,
+        timeoutMsg: `failed while waiting for stake pool: ${poolName}`
+      }
+    );
+  };
+
+  assertNetworkContainerExistsWithContent = async () => {
+    await NetworkComponent.networkContainer.waitForDisplayed();
+    await NetworkComponent.networkTitle.waitForDisplayed();
+    expect(await NetworkComponent.networkTitle.getText()).to.equal(await t('cardano.networkInfo.title'));
+    await NetworkComponent.currentEpochLabel.waitForDisplayed();
+    expect(await NetworkComponent.currentEpochLabel.getText()).to.equal(await t('cardano.networkInfo.currentEpoch'));
+    await NetworkComponent.currentEpochDetail.waitForDisplayed();
+    expect(await NetworkComponent.currentEpochDetail.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    await NetworkComponent.epochEndLabel.waitForDisplayed();
+    expect(await NetworkComponent.epochEndLabel.getText()).to.equal(await t('cardano.networkInfo.epochEnd'));
+    await NetworkComponent.epochEndDetail.waitForDisplayed();
+    await NetworkComponent.totalPoolsLabel.waitForDisplayed();
+    expect(await NetworkComponent.totalPoolsLabel.getText()).to.equal(await t('cardano.networkInfo.totalPools'));
+    await NetworkComponent.totalPoolsDetail.waitForDisplayed();
+    expect(await NetworkComponent.totalPoolsDetail.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    await NetworkComponent.percentageStakedLabel.waitForDisplayed();
+    expect(await NetworkComponent.percentageStakedLabel.getText()).to.equal(
+      await t('cardano.networkInfo.percentageStaked')
+    );
+    await NetworkComponent.percentageStakedDetail.waitForDisplayed();
+    expect(await NetworkComponent.percentageStakedDetail.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
   };
 }
 
