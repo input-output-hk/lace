@@ -19,7 +19,8 @@ class MultidelegationPage {
   private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
   private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
   private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
-  private SEARCH_INPUT = '[data-testid="search-input"]';
+  private SEARCH_INPUT = 'input[data-testid="search-input"]';
+  private SEARCH_ICON = '[data-testid="search-icon"]';
   private SEARCH_LOADER = '[data-testid="search-loader"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
@@ -27,7 +28,6 @@ class MultidelegationPage {
   private PORTFOLIO_BAR_BTN_NEXT = '[data-testid="portfoliobar-btn-next"]';
   private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferences-next-button"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
-  private MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM = '[data-testid="multidelegation-beta-modal-button"]';
   private DELEGATED_POOL_ITEM = '[data-testid="delegated-pool-item"]';
   private DELEGATED_POOL_LOGO = '[data-testid="stake-pool-logo"]';
   private DELEGATED_POOL_NAME = '[data-testid="stake-pool-name"]';
@@ -96,6 +96,10 @@ class MultidelegationPage {
     return $(this.SEARCH_INPUT);
   }
 
+  get searchIcon() {
+    return $(this.SEARCH_ICON);
+  }
+
   get searchLoader() {
     return $(this.SEARCH_LOADER);
   }
@@ -118,10 +122,6 @@ class MultidelegationPage {
 
   get confirmationBtnNext() {
     return $(this.CONFIRMATION_BTN_NEXT);
-  }
-
-  get multidelegationBetaModalBtnConfirm() {
-    return $(this.MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM);
   }
 
   get stakingPoolInfoItems() {
@@ -259,13 +259,6 @@ class MultidelegationPage {
         break;
       default:
         throw new Error(`Unsupported section name: ${section}`);
-    }
-  }
-
-  async confirmBetaModal() {
-    if (await this.multidelegationBetaModalBtnConfirm.isDisplayed()) {
-      await this.multidelegationBetaModalBtnConfirm.waitForClickable();
-      await this.multidelegationBetaModalBtnConfirm.click();
     }
   }
 
