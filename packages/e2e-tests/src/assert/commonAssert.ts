@@ -2,10 +2,11 @@ import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
 import webTester from '../actor/webTester';
 import { expect } from 'chai';
-import { getNumberOfOpenedTabs, switchToLastWindow } from '../utils/window';
+import { getNumberOfOpenedTabs, switchToLastWindow, waitUntilExpectedNumberOfHandles } from '../utils/window';
 import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
 import TopNavigationAssert from './topNavigationAssert';
+import { getTestWallet } from '../support/walletConfiguration';
 
 class CommonAssert {
   async assertClipboardContains(text: string) {
@@ -23,6 +24,7 @@ class CommonAssert {
   }
 
   async assertSeeTabWithUrl(urlPart: string) {
+    await waitUntilExpectedNumberOfHandles(2);
     await browser.switchWindow(urlPart);
     expect(await browser.getUrl()).to.contain(urlPart);
   }
@@ -65,6 +67,11 @@ class CommonAssert {
   async assertSeeThemeMode(mode: 'dark' | 'light') {
     await expect(await $('html').getAttribute('data-theme')).to.equal(mode);
     await TopNavigationAssert.assertBackgroundColor(mode);
+  }
+
+  async assertClipboardContainsAddressOfWallet(walletName: string) {
+    const expectedWalletAddress = getTestWallet(walletName).address as string;
+    await this.assertClipboardContains(expectedWalletAddress);
   }
 }
 

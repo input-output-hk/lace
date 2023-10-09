@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import CommonDrawerElements from './CommonDrawerElements';
 
 class WalletAddressPage extends CommonDrawerElements {
@@ -6,9 +7,24 @@ class WalletAddressPage extends CommonDrawerElements {
   private WALLET_NAME = '[data-testid="address-card-name"]';
   private WALLET_ADDRESS = '[data-testid="address-card-address"]';
   private COPY_BUTTON = '[data-testid="copy-address-btn"]';
+  public HANDLE_NAME = '[data-testid="address-card-handle-name"]';
+  public HANDLE_IMAGE = '[data-testid="address-card-handle-image"]';
+  public HANDLE_SYMBOL = '[data-testid="address-card-handle-symbol"]';
 
   get addressCard() {
     return $(this.ADDRESS_CARD);
+  }
+
+  get handleNames() {
+    return $$(this.HANDLE_NAME);
+  }
+
+  get handleImages() {
+    return $$(this.HANDLE_IMAGE);
+  }
+
+  get addressCards() {
+    return $$(this.ADDRESS_CARD);
   }
 
   get qrCode() {
@@ -25,6 +41,19 @@ class WalletAddressPage extends CommonDrawerElements {
 
   get copyButton() {
     return $(this.COPY_BUTTON);
+  }
+
+  async getHandleAddressCard(handleName: string): Promise<WebdriverIO.Element> {
+    return (await this.addressCards.find(
+      async (item) => (await item.$(this.HANDLE_NAME).getText()) === handleName
+    )) as WebdriverIO.Element;
+  }
+
+  async clickCopyButtonForHandle(handleName: string) {
+    const addressCard = await this.getHandleAddressCard(handleName);
+    await addressCard.scrollIntoView();
+    await addressCard.moveTo();
+    await addressCard.$(this.COPY_BUTTON).click();
   }
 }
 

@@ -27,11 +27,12 @@ Feature: Main Navigation - Popup View
   @LW-2691
   Scenario: Popup View - Main Navigation - Staking item click navigates to staking page
     When I navigate to Staking popup page
-    Then I see Staking title and counter with total number of pools displayed
+    Then I see Delegation title displayed for multidelegation
 
   @LW-2610
   Scenario Outline: Extended view - Click Lace logo - <section>
     And Wallet is synced
+    And I disable showing Multidelegation beta banner
     And I navigate to <section> popup page
     And <validateIfSectionIsDisplayed>
     When I click on the logo icon
@@ -41,7 +42,7 @@ Feature: Main Navigation - Popup View
       | Tokens       | I see Tokens counter with total number of tokens displayed |
       | NFTs         | I see NFTs counter with total number of NFTs displayed     |
       | Transactions | Transactions section is displayed                          |
-      | Staking      | I see Staking title displayed                              |
+      | Staking      | I see Delegation title displayed for multidelegation       |
       | Settings     | I see settings page                                        |
       | Address Book | I see address book title                                   |
 

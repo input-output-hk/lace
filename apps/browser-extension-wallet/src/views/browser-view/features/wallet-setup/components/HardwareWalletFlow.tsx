@@ -177,7 +177,7 @@ export const HardwareWalletFlow = ({
       );
       navigateTo('finish');
     } catch (error) {
-      console.log('ERROR creating hardware wallet', { error });
+      console.error('ERROR creating hardware wallet', { error });
       showHardwareWalletError('common');
     }
   };
@@ -188,7 +188,7 @@ export const HardwareWalletFlow = ({
       setDeviceConnection(connection);
       setConnectedDevice(model);
     } catch (error) {
-      console.log('ERROR connecting hardware wallet', error);
+      console.error('ERROR connecting hardware wallet', error);
       if (error.innerError?.innerError?.message === 'The device is already open.') {
         setDeviceConnection(deviceConnection);
       } else {
@@ -212,6 +212,9 @@ export const HardwareWalletFlow = ({
       console.error('We were not able to send the analytics event');
     } finally {
       await handleFinishCreation();
+      if (isAnalyticsAccepted) {
+        await analytics.sendAliasEvent();
+      }
       // Workaround to enable staking with Ledger right after the onboarding LW-5564
       window.location.reload();
     }

@@ -3,7 +3,7 @@ import { Button, ButtonProps } from '@lace/common';
 import { Modal } from 'antd';
 import cn from 'classnames';
 import React from 'react';
-import { useStakePoolDetails } from '../store';
+import { useStakingStore } from '../store';
 import styles from './StakingModal.module.scss';
 
 type StakingModalActionProps = {
@@ -25,7 +25,7 @@ export type StakingModalProps = {
 };
 
 const popupModalWidth = 312;
-const extendedModalWidth = 479;
+const extendedModalWidth = 512;
 
 export const StakingModal = ({
   announcement,
@@ -36,7 +36,7 @@ export const StakingModal = ({
   popupView,
   focusTriggerAfterClose,
 }: StakingModalProps): React.ReactElement<StakingModalProps> => {
-  const { setStakeConfirmationVisible, setExitStakingVisible, setNoFundsVisible } = useStakePoolDetails();
+  const { setStakeConfirmationVisible, setExitStakingVisible, setNoFundsVisible } = useStakingStore();
 
   const handleCancelModal = () => {
     setStakeConfirmationVisible(false);

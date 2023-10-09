@@ -5,6 +5,12 @@ import { CurrencyInfo, TxDirections } from '@types';
 import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
 import capitalize from 'lodash/capitalize';
 import { formatTime } from '@src/utils/format-date';
+import {
+  isDelegationWithDeregistrationTx,
+  isDelegationWithRegistrationTx,
+  splitDelegationWithDeregistrationIntoTwoActions,
+  splitDelegationWithRegistrationIntoTwoActions
+} from './common-transformers';
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight;
@@ -18,11 +24,6 @@ export interface TxTransformerInput {
   status?: Wallet.TransactionStatus;
   date?: string;
 }
-
-export const getFormattedAmount = ({ amount, cardanoCoin }: { amount: string; cardanoCoin: Wallet.CoinId }): string => {
-  const adaStringAmount = Wallet.util.lovelacesToAdaString(amount);
-  return `${adaStringAmount} ${cardanoCoin.symbol}`;
-};
 
 export const getFormattedFiatAmount = ({
   amount,
@@ -68,13 +69,20 @@ export const txTransformer = ({
 }: TxTransformerInput): Omit<AssetActivityItemProps, 'onClick'> => {
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
   const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
+  const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
+  const depositReclaim = depositReclaimValue
+    ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
+    : undefined;
   const { coins, assets } = inspectTxValues({
     addresses: walletAddresses,
     tx: tx as unknown as Wallet.Cardano.HydratedTx,
     direction
   });
   const outputAmount = new BigNumber(coins.toString());
-  const timestamp = formatTime(time, 'HH:mm:ss A');
+  const timestamp = formatTime({
+    date: time,
+    type: 'local'
+  });
 
   const assetsEntries = assets
     ? [...assets.entries()]
@@ -85,9 +93,10 @@ export const txTransformer = ({
   return {
     id: tx.id.toString(),
     deposit,
+    depositReclaim,
     fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
     status,
-    amount: getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
+    amount: Wallet.util.getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
     fiatAmount: getFormattedFiatAmount({ amount: outputAmount, fiatCurrency, fiatPrice }),
     assets: assetsEntries,
     assetsNumber: (assets?.size ?? 0) + 1,
@@ -104,7 +113,7 @@ export const pendingTxTransformer = ({
   protocolParameters,
   cardanoCoin,
   time
-}: TxTransformerInput): Omit<AssetActivityItemProps, 'onClick'> => {
+}: TxTransformerInput): Array<Omit<AssetActivityItemProps, 'onClick'>> | Omit<AssetActivityItemProps, 'onClick'> => {
   const type = inspectTxType({ walletAddresses, tx: tx as unknown as Wallet.Cardano.HydratedTx });
   const transformedTx = txTransformer({
     tx,
@@ -118,6 +127,15 @@ export const pendingTxTransformer = ({
     direction: TxDirections.Outgoing,
     date: capitalize(Wallet.TransactionStatus.PENDING)
   });
+
+  if (isDelegationWithRegistrationTx(transformedTx, type)) {
+    return splitDelegationWithRegistrationIntoTwoActions(transformedTx);
+  }
+
+  if (isDelegationWithDeregistrationTx(transformedTx, type)) {
+    return splitDelegationWithDeregistrationIntoTwoActions(transformedTx);
+  }
+
   return {
     ...transformedTx,
     type: type as TransactionType

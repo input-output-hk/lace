@@ -2,24 +2,6 @@ import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
 import { AssetActivityListProps } from '@lace/core';
 
-export type OpenSelectedStakePoolDetails = {
-  delegators: number | string;
-  description: string;
-  hexId: string;
-  id: string;
-  logo?: string;
-  margin: number | string;
-  name: string;
-  owners: string[];
-  saturation: number | string;
-  stake: { number: string; unit?: string };
-  ticker: string;
-  apy: number | string;
-  status: Wallet.Cardano.StakePool['status'];
-  fee: number | string;
-  contact: Wallet.Cardano.PoolContactData;
-};
-
 type WalletBalance = {
   coinBalance: string;
   fiatBalance: string | undefined;
@@ -74,12 +56,8 @@ export type StakingRewards = {
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   expandStakingView?: () => void;
-  balancesBalance: Balance;
-  stakingRewards: StakingRewards;
-  delegationStoreSelectedStakePoolDetails?: OpenSelectedStakePoolDetails;
-  delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
+  balancesBalance?: Balance;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
-  delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo?: string }) => void;
   delegationStoreSetDelegationTxFee: (fee?: string) => void;
   delegationStoreDelegationTxFee?: string;
   delegationStoreDelegationTxBuilder?: TxBuilder;
@@ -129,7 +107,5 @@ export type OutsideHandlesContextValue = {
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
   walletAddress: string;
-  coinBalance: number;
   currentChain: Wallet.Cardano.ChainId;
-  rewardAccounts: Wallet.Cardano.RewardAccountInfo[];
 };

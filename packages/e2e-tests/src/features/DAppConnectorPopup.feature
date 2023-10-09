@@ -3,6 +3,7 @@ Feature: DAppConnector - Popup view
 
   Background:
     Given Wallet is synced
+    And I de-authorize all DApps in popup mode
 
   @LW-6685 @Testnet @Mainnet
   Scenario: Popup view - Authorized DApps section - empty state
@@ -17,7 +18,6 @@ Feature: DAppConnector - Popup view
     And I open settings from header menu
     When I click on "Authorized DApps" setting
     Then I see test DApp on the Authorized DApps list
-    And I de-authorize all DApps in popup mode
 
   @LW-6687 @Testnet @Mainnet
   Scenario: Popup View - Authorized DApp is not displayed in Lace Authorized DApps section after clicking "Once"
@@ -41,7 +41,6 @@ Feature: DAppConnector - Popup view
     Then I see test DApp on the Authorized DApps list
     When I open test DApp
     Then I don't see DApp window
-    And I de-authorize all DApps in extended mode
 
   @LW-6882 @Testnet @Mainnet
   Scenario: Popup view - Remove authorized DApp, DApp requires authorization

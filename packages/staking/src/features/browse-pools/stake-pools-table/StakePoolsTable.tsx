@@ -1,17 +1,16 @@
-import { StakePoolItemBrowserProps, Wallet } from '@lace/cardano';
+import { Wallet } from '@lace/cardano';
 import { Search, getRandomIcon } from '@lace/common';
 import { Box, Flex } from '@lace/ui';
 import debounce from 'lodash/debounce';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../../store';
+import { StakePoolItemBrowserProps } from './StakePoolItemBrowser';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import { StakePoolSortOptions, StakePoolTableBrowser } from './StakePoolTableBrowser';
 
 type StakePoolsTableProps = {
-  onStake: (id: StakePoolItemBrowserProps['id']) => void;
   scrollableTargetId: string;
 };
 
@@ -23,7 +22,7 @@ const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
 const searchDebounce = 300;
 const defaultFetchLimit = 10;
 
-export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTableProps) => {
+export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(true);
@@ -31,14 +30,10 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
-  const { addPoolToDraft, removePoolFromDraft } = useDelegationPortfolioStore((state) => state.mutators);
-
-  const { setIsDrawerVisible } = useStakePoolDetails();
 
   const {
     walletStoreWalletUICardanoCoin: cardanoCoin,
-    walletStoreBlockchainProvider: blockchainProvider,
-    delegationStoreSetSelectedStakePool: setSelectedStakePool,
+    currentChain,
     walletStoreStakePoolSearchResults: {
       pageResults,
       totalResultCount,
@@ -53,20 +48,19 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
 
   const tableHeaderTranslations = {
-    apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros'),
+    apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
     cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost'),
     poolName: t('browsePools.stakePoolTableBrowser.tableHeader.poolName'),
-    saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation'),
+    saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
 
   useEffect(() => {
-    // Close pool details drawer & fetch pools on mount, network switching, searchValue change and sort change
+    // Fetch pools on mount, network switching, searchValue change and sort change
     setIsLoadingList(true);
-    setIsDrawerVisible(false);
     debouncedSearch({ searchString: searchValue, sort });
-  }, [blockchainProvider, searchValue, sort, debouncedSearch, setIsDrawerVisible]);
+  }, [currentChain, searchValue, sort, debouncedSearch]);
 
   const loadMoreData = () => fetchStakePools({ searchString: searchValue, skip: skip + defaultFetchLimit, sort });
 
@@ -93,36 +87,18 @@ export const StakePoolsTable = ({ onStake, scrollableTargetId }: StakePoolsTable
 
   const list = useMemo(
     () =>
-      stakePools?.map((pool: Wallet.Cardano.StakePool) => {
+      stakePools?.map<StakePoolItemBrowserProps>((pool: Wallet.Cardano.StakePool) => {
         const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
-        const hexId = Wallet.Cardano.PoolIdHex(stakePool.hexId);
 
         return {
           logo,
           ...stakePool,
-          addToDraft: () =>
-            addPoolToDraft({
-              displayData: stakePool,
-              id: hexId,
-              name: stakePool.name,
-              ticker: stakePool.ticker,
-              weight: 1,
-            }),
-          hexId,
-          onClick: (): void => {
-            setSelectedStakePool({ logo, ...pool });
-            setIsDrawerVisible(true);
-          },
-          onStake: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, poolId: string) => {
-            e.stopPropagation();
-            setSelectedStakePool(pool);
-            onStake(poolId);
-          },
-          removeFromDraft: () => removePoolFromDraft({ id: hexId }),
+          hexId: pool.hexId,
+          stakePool: pool,
         };
       }) || [],
-    [stakePools, cardanoCoin, setSelectedStakePool, setIsDrawerVisible, onStake, removePoolFromDraft, addPoolToDraft]
+    [stakePools, cardanoCoin]
   );
 
   return (

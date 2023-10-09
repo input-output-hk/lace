@@ -12,7 +12,7 @@ class SimpleTxSideDrawerPageObject {
 
   clickCloseDrawerButton = async () => {
     const commonDrawerElements = new CommonDrawerElements();
-    await commonDrawerElements.drawerHeaderCloseButton.waitForClickable();
+    await commonDrawerElements.drawerHeaderCloseButton.waitForClickable({ timeout: 15_000 });
     await commonDrawerElements.drawerHeaderCloseButton.click();
   };
 
@@ -22,7 +22,7 @@ class SimpleTxSideDrawerPageObject {
 
   clickBackDrawerButton = async () => {
     const commonDrawerElements = new CommonDrawerElements();
-    await commonDrawerElements.drawerHeaderBackButton.waitForClickable();
+    await commonDrawerElements.drawerHeaderBackButton.waitForClickable({ timeout: 15_000 });
     await commonDrawerElements.drawerHeaderBackButton.click();
   };
 

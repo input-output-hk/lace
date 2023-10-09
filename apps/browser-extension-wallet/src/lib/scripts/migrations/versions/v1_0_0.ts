@@ -27,7 +27,7 @@ export const v_1_0_0: Migration = {
       prepare: () => {
         // Save temporary storage. Revert if something fails
         try {
-          console.log('Saving temporary migration for', MIGRATION_VERSION);
+          console.info('Saving temporary migration for', MIGRATION_VERSION);
 
           if (oldKeyAgentData && !mainnetKeyAgentData) {
             // If there is an active key agent data, it means that we have an unlocked wallet, regardless of lock
@@ -48,7 +48,7 @@ export const v_1_0_0: Migration = {
           // In these cases we don't need to do anything,
           //   if it's locked changing the appSettings should be enough for the wallet to be restored in mainnet on unlock
         } catch (error) {
-          console.log(`Error saving temporary migrations for ${MIGRATION_VERSION}, deleting...`, error);
+          console.info(`Error saving temporary migrations for ${MIGRATION_VERSION}, deleting...`, error);
           removeItemFromLocalStorage('keyAgentData_tmp');
           removeItemFromLocalStorage('appSettings_tmp');
           throw error;
@@ -67,7 +67,7 @@ export const v_1_0_0: Migration = {
         return true;
       },
       persist: () => {
-        console.log(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
+        console.info(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
         // Get temporary storage
         const tmpAppSettings = getItemFromLocalStorage('appSettings_tmp');
         const tmpKeyAgentData = getItemFromLocalStorage('keyAgentData_tmp');
@@ -79,7 +79,7 @@ export const v_1_0_0: Migration = {
         removeItemFromLocalStorage('keyAgentData_tmp');
       },
       rollback: () => {
-        console.log(`Rollback migrated data for ${MIGRATION_VERSION} upgrade`);
+        console.info(`Rollback migrated data for ${MIGRATION_VERSION} upgrade`);
         // Restore actual storage to their original values
         if (oldAppSettings) setItemInLocalStorage('appSettings', oldAppSettings);
         if (oldKeyAgentData) setItemInLocalStorage('keyAgentData', oldKeyAgentData);

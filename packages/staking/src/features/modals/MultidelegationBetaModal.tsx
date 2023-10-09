@@ -1,8 +1,11 @@
 import { Flex } from '@lace/ui';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { BetaPill } from './BetaPill';
 import { StakingModal } from './StakingModal';
+
+const BLOG_POST_URL =
+  'https://www.lace.io/blog/stake-your-ada-across-multiple-pools-with-lace-s-new-multi-delegation-feature-beta';
 
 interface MultidelegationBetaModalProps {
   visible: boolean;
@@ -32,12 +35,24 @@ export const MultidelegationBetaModal = ({
       popupView={popupView}
       visible={visible}
       title={
-        <Flex alignItems="center">
+        <Flex
+          alignItems={popupView ? 'flex-start' : 'center'}
+          flexDirection={popupView ? 'column-reverse' : 'row'}
+          gap="$8"
+        >
           {t('modals.beta.title')}
           <BetaPill />
         </Flex>
       }
-      description={t('modals.beta.description')}
+      description={
+        <Trans
+          i18nKey="modals.beta.description"
+          t={t}
+          components={{
+            Link: <a href={BLOG_POST_URL} rel="noreferrer noopener" target="_blank" />,
+          }}
+        />
+      }
       actions={[
         {
           body: t('modals.beta.button'),

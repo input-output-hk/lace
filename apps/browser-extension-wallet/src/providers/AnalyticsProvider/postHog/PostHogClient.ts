@@ -6,12 +6,14 @@ import {
   ExtensionViews,
   PostHogAction,
   PostHogMetadata,
-  PostHogProperties,
   PostHogPersonProperties,
+  PostHogProperties,
   UserTrackingType
 } from '../analyticsTracker';
 import {
+  DEV_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP,
   DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
+  PRODUCTION_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP,
   PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PRODUCTION_TRACKING_MODE_ENABLED,
   PUBLIC_POSTHOG_HOST
@@ -44,7 +46,13 @@ export class PostHogClient {
       disable_persistence: true,
       disable_cookie: true,
       persistence: 'memory',
-      property_blacklist: ['$autocapture_disabled_server_side', '$device_id', '$time']
+      property_blacklist: [
+        '$autocapture_disabled_server_side',
+        '$console_log_recording_enabled_server_side',
+        '$device_id',
+        '$session_recording_recorder_version_server_side',
+        '$time'
+      ]
     });
   }
 
@@ -79,6 +87,7 @@ export class PostHogClient {
 
   setChain(chain: Wallet.Cardano.ChainId): void {
     const token = this.getApiToken(chain);
+    this.chain = chain;
     console.debug('[ANALYTICS] Changing PostHog API token', token);
     posthog.set_config({
       token
@@ -91,26 +100,34 @@ export class PostHogClient {
       : DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic];
   }
 
+  protected getProjectId(): number {
+    return PRODUCTION_TRACKING_MODE_ENABLED
+      ? PRODUCTION_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP[this.chain.networkMagic]
+      : DEV_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP[this.chain.networkMagic];
+  }
+
   protected async getEventMetadata(): Promise<PostHogMetadata> {
     return {
-      url: window.location.href,
       view: this.view,
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
+      posthog_project_id: this.getProjectId(),
       ...(await this.getPersonProperties())
     };
   }
 
   protected async getPersonProperties(): Promise<PostHogPersonProperties | undefined> {
     const currentUserTrackingType = await this.userIdService.getUserTrackingType();
-
     if (!this.userTrackingType) {
       this.userTrackingType = currentUserTrackingType;
+      // set user_tracking_type in the first event
+      return { $set: { user_tracking_type: this.userTrackingType } };
     }
 
+    // eslint-disable-next-line consistent-return
     if (currentUserTrackingType === this.userTrackingType) return;
     this.userTrackingType = currentUserTrackingType;
-    // eslint-disable-next-line consistent-return
+    // update user_tracking_type if tracking type has changed
     return { $set: { user_tracking_type: this.userTrackingType } };
   }
 }

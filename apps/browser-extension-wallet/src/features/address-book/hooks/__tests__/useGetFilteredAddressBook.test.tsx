@@ -76,10 +76,10 @@ describe('Testing useGetFilteredAddressBook hook', () => {
     const { result } = renderHook(() => useGetFilteredAddressBook(), {
       wrapper: makeDbContextWrapper(db)
     });
-    expect(result.current.getAddressBookByNameOrAddress).toBeDefined();
+    expect(result.current.filterAddressesByNameOrAddress).toBeDefined();
 
     await act(async () => {
-      await result.current.getAddressBookByNameOrAddress({ value: 't' });
+      await result.current.filterAddressesByNameOrAddress({ value: 't' });
     });
     expect(result.current.filteredAddresses).toHaveLength(1);
     expect(result.current.filteredAddresses).toStrictEqual([
@@ -95,15 +95,15 @@ describe('Testing useGetFilteredAddressBook hook', () => {
     const { result } = renderHook(() => useGetFilteredAddressBook(), {
       wrapper: makeDbContextWrapper(db)
     });
-    expect(result.current.getAddressBookByNameOrAddress).toBeDefined();
+    expect(result.current.filterAddressesByNameOrAddress).toBeDefined();
 
     await act(async () => {
-      await result.current.getAddressBookByNameOrAddress({ value: 'oth' });
+      await result.current.filterAddressesByNameOrAddress({ value: 'oth' });
     });
     expect(result.current.filteredAddresses).toHaveLength(2);
 
     await act(async () => {
-      await result.current.getAddressBookByNameOrAddress({ value: 'oth', limit: 1 });
+      await result.current.filterAddressesByNameOrAddress({ value: 'oth', limit: 1 });
     });
     expect(result.current.filteredAddresses).toHaveLength(1);
   });
@@ -112,10 +112,10 @@ describe('Testing useGetFilteredAddressBook hook', () => {
     const { result } = renderHook(() => useGetFilteredAddressBook(), {
       wrapper: makeDbContextWrapper(db)
     });
-    expect(result.current.getAddressBookByNameOrAddress).toBeDefined();
+    expect(result.current.filterAddressesByNameOrAddress).toBeDefined();
 
     await act(async () => {
-      await result.current.getAddressBookByNameOrAddress({ value: 'addr_test3' });
+      await result.current.filterAddressesByNameOrAddress({ value: 'addr_test3' });
     });
     expect(result.current.filteredAddresses).toHaveLength(1);
     expect(result.current.filteredAddresses).toStrictEqual([

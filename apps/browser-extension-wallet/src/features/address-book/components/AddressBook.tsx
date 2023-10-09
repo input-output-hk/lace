@@ -14,7 +14,8 @@ import PlusIcon from '../../../assets/icons/plus-icon.svg';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { AddressDetailsSteps } from './AddressDetailDrawer/types';
@@ -37,7 +38,6 @@ export const AddressBook = withAddressBookContext(() => {
   const { onSaveAddressActions } = useOnAddressSave();
   const { setSection } = useSections();
 
-
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
     address: translate('core.walletAddressList.address')
@@ -58,6 +58,7 @@ export const AddressBook = withAddressBookContext(() => {
             action: MatomoEventActions.CLICK_EVENT,
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_POPUP
           });
+          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordClick);
           setAddressToEdit(address);
           if (isAdaHandleEnabled && validatedAddressStatus[address.address]?.isValid === false) {
             setIsAddressDrawerOpen(true);
@@ -75,6 +76,11 @@ export const AddressBook = withAddressBookContext(() => {
   const loadMoreData = useCallback(() => {
     extendLimit();
   }, [extendLimit]);
+
+  const handleAddAddressClick = () => {
+    setIsEditAddressVisible(true);
+    analytics.sendEventToPostHog(PostHogAction.AddressBookAddAddressClick);
+  };
 
   const addressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
     ? AddressDetailsSteps.DETAILS
@@ -104,7 +110,7 @@ export const AddressBook = withAddressBookContext(() => {
         id={scrollableTargetId}
       >
         <div className={styles.btnContainer}>
-          <Button data-testid="add-address-button" color="gradient" block onClick={() => setIsEditAddressVisible(true)}>
+          <Button data-testid="add-address-button" color="gradient" block onClick={handleAddAddressClick}>
             <img src={PlusIcon} alt="plus-icon" />
             {translate('addressBook.empty.addNewAddress')}
           </Button>

@@ -12,16 +12,19 @@ const mockUseAddressBookContext = jest.fn(() => ({
 const mockUseHandleResolver = jest.fn(() => jest.fn());
 
 const mockSendEventToMatomo = jest.fn();
+const mockSendEventToPostHog = jest.fn();
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@lib/i18n';
 import { useOnAddressSave } from '../useOnAddressSave';
 import React from 'react';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 jest.mock('@providers/AnalyticsProvider', () => ({
   useAnalyticsContext: () => ({
-    sendEventToMatomo: mockSendEventToMatomo
+    sendEventToMatomo: mockSendEventToMatomo,
+    sendEventToPostHog: mockSendEventToPostHog
   })
 }));
 jest.mock('@src/features/address-book/context', () => ({
@@ -62,6 +65,8 @@ describe('useOnAddressSave hook', () => {
       action: 'click-event',
       name: 'add-address-browser'
     });
+
+    expect(mockSendEventToPostHog).toHaveBeenCalledWith(PostHogAction.AddressBookAddressRecordEditAddressDoneClick);
 
     expect(mockUpdateRecord).toHaveBeenCalledWith(addressToEdit.id, addressToSave, {
       text: 'Edited successfully',

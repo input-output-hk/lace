@@ -20,14 +20,21 @@ type KeysStructure = {
       searchInputPlaceholder: '';
       tableHeader: {
         poolName: '';
-        ros: '';
+        ros: {
+          title: '';
+          tooltip: '';
+        };
         cost: '';
-        saturation: '';
+        saturation: {
+          title: '';
+          tooltip: '';
+        };
       };
       emptyMessage: '';
       stake: '';
       unselect: '';
       addPool: '';
+      disabledTooltip: '';
     };
   };
   drawer: {
@@ -88,10 +95,17 @@ type KeysStructure = {
       title: '';
       subTitle: '';
       cardanoName: '';
-      totalCost: {
+      transactionCost: {
         title: '';
       };
-      theAmountYoullBeChargedForRegisteringYourStakeKey: '';
+      transactionReturn: {
+        title: '';
+      };
+      transactionTotal: {
+        title: '';
+      };
+      chargedDepositAmountInfo: '';
+      reclaimDepositAmountInfo: '';
       stakingDeposit: '';
       errors: {
         utxoFullyDepleted: '';
@@ -108,7 +122,8 @@ type KeysStructure = {
     };
     preferences: {
       selectedStakePools: '';
-      partOfBalance: '';
+      addPoolButton: '';
+      stakeValue: '';
       pickMorePools: '';
       nextButton: '';
     };
@@ -180,8 +195,10 @@ type KeysStructure = {
       balanceTitle: '';
       getStarted: '';
       followSteps: '';
-      searchForPool: '';
-      selectPools: '';
+      searchForPoolDescription: '';
+      searchForPoolTitle: '';
+      selectPoolsDescription: '';
+      selectPoolsTitle: '';
     };
   };
   root: {

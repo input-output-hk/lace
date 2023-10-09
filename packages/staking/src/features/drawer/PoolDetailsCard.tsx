@@ -1,29 +1,25 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { Cardano } from '@cardano-sdk/core';
-import { Box, Card, ColorValueHex, ControlButton, Flex, Text } from '@lace/ui';
+import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Tooltip } from '../overview/staking-info-card/StatsTooltip';
-import { useDelegationPortfolioStore } from '../store';
 import { PoolCard, PoolHr, PoolIndicator } from './StakePoolPreferences.css';
 import TrashIcon from './trash.svg';
 
 interface PoolDetailsCardProps {
-  poolId: Cardano.Cip17Pool['id'];
   name: string;
-  draftPortfolioLength: number;
-  color: ColorValueHex;
-  deleteEnabled: boolean;
+  color: PieChartColor;
+  weight: number;
+  onRemove?: () => void;
 }
 
-export const PoolDetailsCard = ({ name, poolId, draftPortfolioLength, color, deleteEnabled }: PoolDetailsCardProps) => {
+export const PoolDetailsCard = ({ name, color, weight, onRemove }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
-  const removePoolFromDraft = useDelegationPortfolioStore((state) => state.mutators.removePoolFromDraft);
-  const { balancesBalance, compactNumber } = useOutsideHandles();
-  const balance = compactNumber(balancesBalance.available.coinBalance);
-  const handleRemovePoolFromPortfolio = () => {
-    removePoolFromDraft({ id: poolId });
-  };
+  const { compactNumber, balancesBalance } = useOutsideHandles();
+  const stakeValue = balancesBalance
+    ? // eslint-disable-next-line no-magic-numbers
+      compactNumber((weight / 100) * Number(balancesBalance.available.coinBalance))
+    : '-';
 
   return (
     <Card.Outlined className={PoolCard}>
@@ -33,20 +29,19 @@ export const PoolDetailsCard = ({ name, poolId, draftPortfolioLength, color, del
             <Box className={PoolIndicator} style={{ backgroundColor: color }} />
             <Text.SubHeading>{name}</Text.SubHeading>
           </Flex>
-          <Tooltip content={deleteEnabled ? undefined : t('drawer.preferences.pickMorePools')}>
+          <Tooltip content={onRemove ? undefined : t('drawer.preferences.pickMorePools')}>
             <div>
-              <ControlButton.Icon
-                icon={<TrashIcon />}
-                onClick={handleRemovePoolFromPortfolio}
-                disabled={!deleteEnabled}
-              />
+              <ControlButton.Icon icon={<TrashIcon />} onClick={onRemove} disabled={!onRemove} />
             </div>
           </Tooltip>
         </Flex>
         <Box className={PoolHr} />
         <Flex justifyContent="space-between" alignItems="center">
           <Text.Body.Normal weight="$semibold">
-            {t('drawer.preferences.partOfBalance', { balance, draftPortfolioLength })}
+            {t('drawer.preferences.stakeValue', {
+              stakePercentage: weight,
+              stakeValue,
+            })}
           </Text.Body.Normal>
         </Flex>
       </Flex>

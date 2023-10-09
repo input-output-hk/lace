@@ -249,8 +249,11 @@ export const WalletSetupWizard = ({
   const goToMyWallet = useCallback(
     (wallet?: CreateWalletData) => {
       setWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
+      if (isAnalyticsAccepted) {
+        analytics.sendAliasEvent();
+      }
     },
-    [setWallet, walletInstance]
+    [analytics, isAnalyticsAccepted, setWallet, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {
@@ -272,8 +275,7 @@ export const WalletSetupWizard = ({
         moveForward();
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log('Error completing wallet creation', error);
+      console.error('Error completing wallet creation', error);
       throw new Error(error);
     }
   }, [

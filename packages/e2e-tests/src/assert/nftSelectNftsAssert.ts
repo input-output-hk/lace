@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 import { t } from '../utils/translationService';
+import { Asset } from '../data/Asset';
+import adaHandleAssert from './adaHandleAssert';
 
 class NftSelectNftsAssert {
   async assertSeeClearButton(shouldSee: boolean) {
@@ -27,6 +29,11 @@ class NftSelectNftsAssert {
       displayedNFTNames.every((name) => name.includes(searchPhrase.toLowerCase())),
       `All displayed NFT names [${displayedNFTNames}] should contain phrase "${searchPhrase.toLowerCase()}"`
     ).to.be.true;
+  }
+
+  async assertSeeNftItemWithCustomImg() {
+    const nft = await NftSelectNftsPage.getNftByName(Asset.ADA_HANDLE_3.name);
+    await adaHandleAssert.assertSeeCustomImage(await nft.$(NftSelectNftsPage.NFT_IMAGE));
   }
 }
 

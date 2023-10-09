@@ -6,3 +6,4 @@ export * from './NoWallet';
 export * from './ConfirmData';
 export * from './BetaPill';
 export * from './SignDataFlowContainer';
+export * from './collateral';

@@ -243,7 +243,20 @@ When(/^I reopen the page$/, async () => {
   await closeAllTabsExceptActiveOne();
   await browser.url(currentPageUrl);
 });
+
 When(/^I set (light|dark) theme mode in Local Storage$/, async (mode: 'light' | 'dark') => {
   await localStorageInitializer.initializeMode(mode);
   await browser.refresh();
+});
+
+Given(/^I disable showing Multidelegation beta banner$/, async () => {
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+});
+
+Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: string) => {
+  await commonAssert.assertClipboardContainsAddressOfWallet(walletName);
+});
+
+Then(/^Clipboard contains text: "([^"]*)"$/, async (expectedString: string) => {
+  await commonAssert.assertClipboardContains(expectedString);
 });

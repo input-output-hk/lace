@@ -11,6 +11,7 @@ import DeleteIcon from '../../../../../../assets/icons/delete-icon.component.svg
 import { useDappContext, withDappContext } from '@src/features/dapp/context';
 import { Wallet } from '@lace/cardano';
 import { localDappService } from './localDappService';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Text } = Typography;
 
@@ -20,10 +21,11 @@ export type DappListProps = {
   onCancelClick: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
   visible: boolean;
   popupView?: boolean;
+  sendAnalyticsEvent: (event: PostHogAction) => void;
 };
 
 export const DappList = withDappContext(
-  ({ onCancelClick, visible, popupView = false }: DappListProps): React.ReactElement => {
+  ({ onCancelClick, visible, popupView = false, sendAnalyticsEvent }: DappListProps): React.ReactElement => {
     const { t } = useTranslation();
     const connectedDapps = useDappContext();
     const [dappToDelete, setDappToDelete] = useState<Wallet.DappInfo>();
@@ -32,12 +34,21 @@ export const DappList = withDappContext(
         connectedDapps?.map((dapp: Wallet.DappInfo) => ({
           ...dapp,
           url: dapp.url.replace(/^https?:\/\/(www.)?/, ''),
-          onDelete: () => setDappToDelete(dapp)
+          onDelete: () => {
+            setDappToDelete(dapp);
+            sendAnalyticsEvent(PostHogAction.SettingsAuthorizedDappsTrashBinIconClick);
+          }
         })) || [],
-      [setDappToDelete, connectedDapps]
+      [connectedDapps, sendAnalyticsEvent]
     );
 
     const hasConnectedDapps = connectedDapps?.length > 0;
+
+    const handleCancelDeleteDapp = () => {
+      // eslint-disable-next-line unicorn/no-null
+      setDappToDelete(null);
+      sendAnalyticsEvent(PostHogAction.SettingsAuthorizedDappsHoldUpBackClick);
+    };
 
     return (
       <Drawer
@@ -71,8 +82,7 @@ export const DappList = withDappContext(
                   />
                 </div>
                 <DeleteDappModal
-                  // eslint-disable-next-line unicorn/no-null
-                  onCancel={() => setDappToDelete(null)}
+                  onCancel={handleCancelDeleteDapp}
                   onConfirm={() => {
                     localDappService
                       .removeAuthorizedDapp(dappToDelete.url)
@@ -83,6 +93,7 @@ export const DappList = withDappContext(
                             duration: TOAST_DEFAULT_DURATION,
                             icon: DeleteIcon
                           });
+                          sendAnalyticsEvent(PostHogAction.SettingsAuthorizedDappsHoldUpDisconnectDappClick);
                         } else {
                           throw new Error(t('dapp.list.removedFailure'));
                         }

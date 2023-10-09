@@ -23,3 +23,15 @@ Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmati
 Given(/^I confirm multidelegation beta modal$/, async () => {
   await MultidelegationPage.confirmBetaModal();
 });
+
+Then(/^I see Delegation card displaying correct data$/, async () => {
+  await MultidelegationPageAssert.assertSeeDelegationCardDetailsInfo();
+});
+
+Then(/^I see Delegation title displayed for multidelegation$/, async () => {
+  await MultidelegationPageAssert.assertSeeTitle();
+});
+
+Then(/^I see Delegation pool cards are displayed for popup view$/, async () => {
+  await MultidelegationPageAssert.assertSeeDelegatedPoolCardsPopup();
+});

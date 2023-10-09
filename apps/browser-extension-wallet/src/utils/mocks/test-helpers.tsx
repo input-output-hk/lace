@@ -16,6 +16,7 @@ import { Percent } from '@cardano-sdk/util';
 import { UserIdService } from '@lib/scripts/types';
 import { MatomoClient } from '@providers/AnalyticsProvider/matomo';
 import { PostHogClient } from '@providers/AnalyticsProvider/postHog';
+import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const mockWalletInfoTestnet: WalletInfo = {
   name: 'testnet wallet',
@@ -434,13 +435,13 @@ export const formatBlockMock: TransactionDetail['blocks'] = {
   blockId: '717ca157f1e696a612af87109ba1f30cd4bb311ded5b504c78a6face463def95',
   confirmations: '17013',
   createdBy: 'pool1zuevzm3xlrhmwjw87ec38mzs02tlkwec9wxpgafcaykmwg7efhh',
-  date: '12/06/2021',
+  utcDate: '12/06/2021',
   epoch: '171',
   nextBlock: '3114965',
   prevBlock: '3114963',
   size: '4719',
   slot: '43905408',
-  time: '10:21:03 PM UTC',
+  utcTime: '22:21:03 UTC',
   transactions: '18'
 };
 
@@ -637,4 +638,14 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   sendPageNavigationEvent: jest.fn(),
   setChain: jest.fn(),
   sendAliasEvent: jest.fn()
+};
+
+export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {
+  sendEventToMatomo: jest.fn(),
+  sendEventToPostHog: jest.fn(),
+  setOptedInForEnhancedAnalytics: jest.fn(),
+  sendPageNavigationEvent: jest.fn(),
+  setChain: jest.fn(),
+  sendAliasEvent: jest.fn(),
+  setTrackingTypeChangedFromSettings: jest.fn()
 };

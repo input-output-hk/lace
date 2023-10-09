@@ -22,6 +22,8 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
 import { CardanoTxOut } from '@src/types';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
+import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
+
 const DAPP_TOAST_DURATION = 50;
 
 const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
@@ -86,12 +88,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       })
         .then((result) => setAssetsInfo(result))
         .catch((error) => {
-          console.log(error);
+          console.error(error);
         });
     }
   }, [assetIds, assetProvider, assets]);
 
-  const cancelTransaction = useCallback(() => {
+  const cancelTransaction = useCallback((close = false) => {
     exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
       {
         api$: of({
@@ -104,29 +106,36 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       },
       { logger: console, runtime }
     );
-    setTimeout(() => window.close(), DAPP_TOAST_DURATION);
+    close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
   }, []);
 
-  const signWithHardwareWallet = useCallback(async () => {
+  const signWithHardwareWallet = async () => {
     setIsConfirmingTx(true);
     try {
-      exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-        {
-          api$: of({
-            async allowSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
-            }
-          }),
-          baseChannel: DAPP_CHANNELS.userPrompt,
-          properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-        },
-        { logger: console, runtime }
-      );
+      HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web)
+        .then(() => {
+          exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+            {
+              api$: of({
+                async allowSignTx(): Promise<boolean> {
+                  return Promise.resolve(true);
+                }
+              }),
+              baseChannel: DAPP_CHANNELS.userPrompt,
+              properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+            },
+            { logger: console, runtime }
+          );
+        })
+        .catch((error) => {
+          throw error;
+        });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
+      cancelTransaction(false);
       redirectToSignFailure();
     }
-  }, [setIsConfirmingTx, redirectToSignFailure]);
+  };
 
   useEffect(() => {
     dappDataApi
@@ -137,7 +146,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       })
       .catch((error) => {
         setErrorMessage(error);
-        console.log(error);
+        console.error(error);
       });
   }, []);
 
@@ -244,7 +253,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       <div className={styles.actions}>
         <Button
           onClick={async () => {
-            isUsingHardwareWallet ? await signWithHardwareWallet() : setNextView();
+            isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
           }}
           disabled={!!errorMessage || hasInsufficientFunds}
           loading={isUsingHardwareWallet && isConfirmingTx}

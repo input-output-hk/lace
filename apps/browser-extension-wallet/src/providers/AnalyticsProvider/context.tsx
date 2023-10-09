@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { AnalyticsTracker } from './analyticsTracker';
 import { EnhancedAnalyticsOptInStatus, ExtensionViews } from './analyticsTracker/types';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
+import { POSTHOG_EXCLUDED_EVENTS } from './postHog';
 import shallow from 'zustand/shallow';
 
 interface AnalyticsProviderProps {
@@ -46,10 +47,12 @@ export const AnalyticsProvider = ({
   const analyticsTracker = useMemo(
     () =>
       tracker ||
-      new AnalyticsTracker(
-        { chain: currentChain, view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended },
-        analyticsDisabled
-      ),
+      new AnalyticsTracker({
+        chain: currentChain,
+        view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended,
+        analyticsDisabled,
+        excludedEvents: POSTHOG_EXCLUDED_EVENTS
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tracker, analyticsDisabled]
   );

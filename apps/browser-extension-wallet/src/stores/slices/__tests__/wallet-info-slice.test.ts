@@ -49,12 +49,13 @@ describe('Testing wallet info slice', () => {
 
     await act(async () => {
       const cardanoWallet = {
+        asyncKeyAgent: {} as any,
         wallet: mockPersonalWallet as any,
         stores: { mock: 'store ' } as any,
         keyAgent: {
           serializableData: mockKeyAgentDataTestnet,
           unsubscribe: jest.fn()
-        },
+        } as unknown as Wallet.KeyManagement.KeyAgent,
         name: 'any'
       };
       result.current.setCardanoWallet(cardanoWallet);

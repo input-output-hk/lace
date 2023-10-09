@@ -16,6 +16,8 @@ import { TransactionBundle } from '../elements/newTransaction/transactionBundle'
 import ModalAssert from './modalAssert';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import TransactionsPage from '../elements/transactionsPage';
+import { browser } from '@wdio/globals';
+import { truncateAddressEntryName } from '../utils/addressBookUtils';
 
 class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
@@ -130,20 +132,25 @@ class DrawerSendExtendedAssert {
   async assertResultsMatchContacts() {
     const transactionNewPage = new TransactionNewPage();
     // Verify 1st address
-    await expect(await transactionNewPage.getContactName(1)).to.equal(validAddress.getName());
+    expect(await transactionNewPage.getContactName(1)).to.equal(truncateAddressEntryName(validAddress.getName()));
     const partOfActualAddress1 = String(await transactionNewPage.getPartialContactAddress(1));
-    await expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress1);
+    expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress1);
     // Verify 2nd address
-    await expect(await transactionNewPage.getContactName(2)).to.equal(validAddress2.getName());
+    expect(await transactionNewPage.getContactName(2)).to.equal(truncateAddressEntryName(validAddress2.getName()));
     const partOfActualAddress2 = String(await transactionNewPage.getPartialContactAddress(2));
-    await expect(getAddressByName(validAddress2.getName())).contains(partOfActualAddress2);
+    expect(getAddressByName(validAddress2.getName())).contains(partOfActualAddress2);
+  }
+
+  async assertFirstResultNameEquals(expectedName: string) {
+    const transactionNewPage = new TransactionNewPage();
+    expect(await transactionNewPage.getContactName(1)).to.equal(expectedName);
   }
 
   async assertAddedContactMatches() {
     const transactionNewPage = new TransactionNewPage();
-    await expect(await transactionNewPage.getContactName(1)).to.equal(validAddress.getName());
+    expect(await transactionNewPage.getContactName(1)).to.equal(truncateAddressEntryName(validAddress.getName()));
     const partOfActualAddress = String(await transactionNewPage.getPartialContactAddress(1));
-    await expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress);
+    expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress);
   }
 
   async assertSeeMetadataCounter(shouldSee: boolean) {
@@ -286,7 +293,7 @@ class DrawerSendExtendedAssert {
   }
 
   async assertReviewTransactionButtonIsEnabled(shouldBeEnabled: boolean) {
-    await new TransactionNewPage().reviewTransactionButton.waitForEnabled({ reverse: !shouldBeEnabled });
+    await new TransactionNewPage().reviewTransactionButton.waitForClickable({ reverse: !shouldBeEnabled });
   }
 
   async assertReviewTransactionButtonIsDisplayed(shouldBeDisplayed: boolean) {
@@ -301,7 +308,11 @@ class DrawerSendExtendedAssert {
   assertSeeAddressWithNameInRecipientsAddressInput = async (address: string, name: string) => {
     await webTester.waitUntilSeeElementContainingText(name);
     const text = await webTester.getTextValueFromElement(new AddressInput().container());
-    await expect(text).contains(address);
+    expect(text).contains(address);
+  };
+
+  assertSeeAddressNameInRecipientsAddressInput = async (expectedName: string) => {
+    expect(await new AddressInput().name().getText()).to.equal(expectedName);
   };
 
   assertSeeEmptyRecipientsAddressInput = async (index?: number) => {

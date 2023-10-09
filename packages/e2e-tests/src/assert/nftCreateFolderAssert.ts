@@ -10,6 +10,7 @@ import testContext from '../utils/testContext';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
 import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
+import adaHandleAssert from './adaHandleAssert';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -108,6 +109,30 @@ class NftCreateFolderAssert {
     expect(ownedNftNames).to.have.ordered.members(displayedNftNames);
   }
 
+  async verifySeeAllAdaHandles() {
+    const ownedAdaHandleNames: string[] = testContext.load('displayedAdaHandleNames');
+    const displayedNfts = await new TokenSelectionPage().nftContainers;
+
+    const displayedAdaHandleNames: string[] = [];
+    for (const nftContainer of displayedNfts) {
+      displayedAdaHandleNames.push(await nftContainer.getText());
+    }
+    expect(ownedAdaHandleNames).to.have.all.members(displayedAdaHandleNames);
+  }
+
+  async verifySeeAllAdaImages() {
+    const adaHandleImages: string[] = testContext.load('displayedAdaHandleImages');
+    const displayedAdaHandleImages = await new TokenSelectionPage().nftImages;
+    const displayedAdaHandleImagesSrc: string[] = [];
+
+    for (const displayedAdaHandleImage of displayedAdaHandleImages) {
+      await displayedAdaHandleImage.waitForDisplayed();
+      displayedAdaHandleImagesSrc.push(await displayedAdaHandleImage.getAttribute('src'));
+    }
+
+    expect(displayedAdaHandleImagesSrc).to.have.all.members(adaHandleImages);
+  }
+
   async verifyNoneNftIsSelected() {
     await new TokenSelectionPage().nftItemSelectedCheckmark.waitForDisplayed({ reverse: true });
   }
@@ -195,6 +220,12 @@ class NftCreateFolderAssert {
     } else {
       expect(nft).to.be.undefined;
     }
+  }
+
+  async assertSeeNftItemWithCustomImg() {
+    const nft = await NftsFolderPage.getNft(Asset.ADA_HANDLE_3.name);
+    await this.verifyNftItemOnFolderPage(nft);
+    await adaHandleAssert.assertSeeCustomImage(await nft.$(NftsFolderPage.NFT_IMAGE));
   }
 
   async assertSeeFolderPage(folderName: string, mode: 'extended' | 'popup') {

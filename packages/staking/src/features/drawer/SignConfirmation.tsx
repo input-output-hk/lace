@@ -4,7 +4,7 @@ import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import styles from './SignConfirmation.module.scss';
 
 interface SignConfirmationProps {
@@ -63,7 +63,6 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     portfolioMutators: store.mutators,
   }));
   const { t } = useTranslation();
-  const { setSection } = useStakePoolDetails();
 
   const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
 
@@ -101,8 +100,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       cleanPasswordInput();
       sendAnalytics();
       setIsRestaking(currentPortfolio.length > 0);
-      portfolioMutators.clearDraft();
-      setSection(sectionsConfig[Sections.SUCCESS_TX]);
+      portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
     } catch (error) {
       // Error name is 'AuthenticationError' in dev build but 'W' in prod build
@@ -110,7 +108,8 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       if (error.message?.includes('Authentication failure')) {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
-        setSection(sectionsConfig[Sections.FAIL_TX]);
+        cleanPasswordInput();
+        portfolioMutators.executeCommand({ type: 'DrawerFailure' });
         setSubmitingTxState({ isSubmitingTx: false });
       }
     }
@@ -122,7 +121,6 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     setIsRestaking,
     currentPortfolio.length,
     portfolioMutators,
-    setSection,
   ]);
 
   return (

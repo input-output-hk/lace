@@ -6,8 +6,14 @@ import cn from 'classnames';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { OpenSelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
-import { MAX_POOLS_COUNT, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { useOutsideHandles } from '../outside-handles-provider';
+import {
+  DelegationPortfolioStore,
+  MAX_POOLS_COUNT,
+  StakePoolDetails,
+  stakePoolDetailsSelector,
+  useDelegationPortfolioStore,
+} from '../store';
 import { SocialNetwork, SocialNetworkIcon } from './SocialNetworks';
 import styles from './StakePoolDetail.module.scss';
 
@@ -15,8 +21,10 @@ const SATURATION_UPPER_BOUND = 100;
 
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
+  const { openExternalLink } = useOutsideHandles();
   const {
-    delegationStoreSelectedStakePoolDetails: {
+    delegatingToThisPool,
+    details: {
       delegators,
       description,
       id,
@@ -30,13 +38,15 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       ticker,
       status,
       contact,
-    } = {} as OpenSelectedStakePoolDetails,
-    openExternalLink,
-  } = useOutsideHandles();
-
-  const delegatingToThisPool = useDelegationPortfolioStore((store) =>
-    store.currentPortfolio.map((portfolioItem) => portfolioItem.id).includes(Wallet.Cardano.PoolIdHex(hexId))
-  );
+    },
+  } = useDelegationPortfolioStore((store) => ({
+    delegatingToThisPool:
+      store.viewedStakePool?.hexId &&
+      store.currentPortfolio
+        .map((portfolioItem) => portfolioItem.id)
+        .includes(Wallet.Cardano.PoolIdHex(store.viewedStakePool?.hexId)),
+    details: stakePoolDetailsSelector(store) || ({} as StakePoolDetails),
+  }));
 
   const socialNetworks = [
     { href: contact?.feed, type: SocialNetwork.RSS_FEED },
@@ -87,7 +97,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               {t('drawer.details.statistics')}
             </div>
             <StakePoolMetricsBrowser
-              {...{ apy, delegators, saturation, stake }}
+              {...{ apy: apy || '-', delegators: delegators || '-', saturation: saturation || '-', stake }}
               translations={metricsTranslations}
               popupView={popupView}
             />
@@ -158,29 +168,24 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
 };
 
 export type StakePoolDetailFooterProps = {
-  onSelect: () => void;
-  onStakeOnThisPool: () => void;
-  onUnselect: () => void;
   popupView?: boolean;
 };
 
-type SelectorParams = Parameters<Parameters<typeof useDelegationPortfolioStore>[0]>[0];
-
 const makeSelector =
-  (openPool?: OpenSelectedStakePoolDetails) =>
-  ({ currentPortfolio, draftPortfolio }: SelectorParams) => {
+  (openPool?: StakePoolDetails) =>
+  ({ currentPortfolio, selectedPortfolio }: DelegationPortfolioStore) => {
     const poolInCurrentPortfolio =
       !!openPool && currentPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
-    const poolSelectedForDraft =
-      !!openPool && draftPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
-    const draftFull = draftPortfolio.length === MAX_POOLS_COUNT;
+    const poolSelected =
+      !!openPool && selectedPortfolio.some(({ id }) => id === Wallet.Cardano.PoolIdHex(openPool.hexId));
+    const selectionsFull = selectedPortfolio.length === MAX_POOLS_COUNT;
 
     return {
-      ableToSelectForDraft: !poolSelectedForDraft && !draftFull,
+      ableToSelect: !poolSelected && !selectionsFull,
       ableToStakeOnlyOnThisPool: !poolInCurrentPortfolio || currentPortfolio.length > 1,
-      draftEmpty: draftPortfolio.length === 0,
       poolInCurrentPortfolio,
-      poolSelectedForDraft,
+      poolSelected,
+      selectionsEmpty: selectedPortfolio.length === 0,
     };
   };
 
@@ -237,22 +242,25 @@ const makeActionButtons = (
     ] as (ActionButtonSpec | false)[]
   ).filter(Boolean) as ActionButtonSpec[];
 
-export const StakePoolDetailFooter = ({
-  onSelect,
-  onStakeOnThisPool,
-  onUnselect,
-  popupView,
-}: StakePoolDetailFooterProps): React.ReactElement => {
+export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { setIsDrawerVisible } = useStakePoolDetails();
-  const { delegationStoreSelectedStakePoolDetails: openPoolDetails, walletStoreGetKeyAgentType } = useOutsideHandles();
-  const { ableToSelectForDraft, ableToStakeOnlyOnThisPool, draftEmpty, poolInCurrentPortfolio, poolSelectedForDraft } =
+  const { walletStoreGetKeyAgentType } = useOutsideHandles();
+  const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
+    openPoolDetails: stakePoolDetailsSelector(store),
+    portfolioMutators: store.mutators,
+    viewedStakePool: store.viewedStakePool,
+  }));
+  const { ableToSelect, ableToStakeOnlyOnThisPool, selectionsEmpty, poolInCurrentPortfolio, poolSelected } =
     useDelegationPortfolioStore(makeSelector(openPoolDetails));
 
   const isInMemory = useMemo(
     () => walletStoreGetKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
     [walletStoreGetKeyAgentType]
   );
+
+  const onStakeOnThisPool = useCallback(() => {
+    portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
+  }, [portfolioMutators]);
 
   useEffect(() => {
     if (isInMemory) return;
@@ -264,35 +272,41 @@ export const StakePoolDetailFooter = ({
   }, [isInMemory, onStakeOnThisPool, popupView]);
 
   const onSelectClick = useCallback(() => {
-    setIsDrawerVisible(false);
-    onSelect();
-  }, [onSelect, setIsDrawerVisible]);
+    if (!viewedStakePool) return;
+    portfolioMutators.executeCommand({
+      data: viewedStakePool,
+      type: 'SelectPoolFromDetails',
+    });
+  }, [viewedStakePool, portfolioMutators]);
 
   const onUnselectClick = useCallback(() => {
-    setIsDrawerVisible(false);
-    onUnselect();
-  }, [onUnselect, setIsDrawerVisible]);
+    if (!viewedStakePool) return;
+    portfolioMutators.executeCommand({
+      data: Wallet.Cardano.PoolIdHex(viewedStakePool.hexId),
+      type: 'UnselectPoolFromDetails',
+    });
+  }, [viewedStakePool, portfolioMutators]);
 
   const actionButtons = useMemo(
     () =>
       makeActionButtons(t, {
-        addStakingPool: ableToSelectForDraft && !draftEmpty && { callback: onSelectClick },
+        addStakingPool: ableToSelect && !selectionsEmpty && { callback: onSelectClick },
         // TODO: disabling this button for now
         // eslint-disable-next-line sonarjs/no-redundant-boolean
         manageDelegation: false && poolInCurrentPortfolio,
-        selectForMultiStaking: ableToSelectForDraft && draftEmpty && { callback: onSelectClick },
-        stakeOnThisPool: draftEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
-        unselectPool: poolSelectedForDraft && { callback: onUnselectClick },
+        selectForMultiStaking: ableToSelect && selectionsEmpty && { callback: onSelectClick },
+        stakeOnThisPool: selectionsEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
+        unselectPool: poolSelected && { callback: onUnselectClick },
       }),
     [
       t,
-      ableToSelectForDraft,
-      draftEmpty,
+      ableToSelect,
+      selectionsEmpty,
       onSelectClick,
       poolInCurrentPortfolio,
       ableToStakeOnlyOnThisPool,
       onStakeOnThisPool,
-      poolSelectedForDraft,
+      poolSelected,
       onUnselectClick,
     ]
   );

@@ -1,7 +1,6 @@
 /* eslint-disable no-magic-numbers */
-import '@testing-library/jest-dom';
 import BigNumber from 'bignumber.js';
-import { getNumberUnit, UnitSymbol, UnitThreshold } from '../get-number-unit';
+import { UnitSymbol, UnitThreshold, getNumberUnit } from '../get-number-unit';
 
 describe('get-number-unit', () => {
   describe('returns no unit and 0 as threshold', () => {

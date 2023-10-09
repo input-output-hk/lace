@@ -2,11 +2,12 @@
 import { Wallet } from '@lace/cardano';
 import { Ellipsis } from '@lace/common';
 import { Button } from '@lace/ui';
+import { Tooltip } from 'antd';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDelegationPortfolioStore } from '../../../store';
+import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
 export interface StakePoolItemBrowserProps {
@@ -18,9 +19,7 @@ export interface StakePoolItemBrowserProps {
   saturation?: number | string;
   cost?: number | string;
   logo: string;
-  onClick: (id: string) => unknown;
-  addToDraft: () => void;
-  removeFromDraft: () => void;
+  stakePool: Wallet.Cardano.StakePool;
 }
 
 export const getSaturationLevel = (saturation: number): string => {
@@ -37,6 +36,7 @@ export const getSaturationLevel = (saturation: number): string => {
   return color;
 };
 
+/* eslint-disable complexity */
 export const StakePoolItemBrowser = ({
   id,
   hexId,
@@ -45,9 +45,7 @@ export const StakePoolItemBrowser = ({
   saturation,
   logo,
   apy,
-  onClick,
-  addToDraft,
-  removeFromDraft,
+  stakePool,
 }: StakePoolItemBrowserProps): React.ReactElement => {
   const { t } = useTranslation();
   let title = name;
@@ -56,25 +54,36 @@ export const StakePoolItemBrowser = ({
     title = ticker || '-';
     subTitle = <Ellipsis className={styles.id} text={id} beforeEllipsis={6} afterEllipsis={8} />;
   }
-  const draftPortfolioLength = useDelegationPortfolioStore((state) => state.draftPortfolio.length);
-  const draftPortfolioExists = draftPortfolioLength > 0;
-  const includedInDraft = useDelegationPortfolioStore((state) => state.poolIncludedInDraft(hexId));
 
-  const StakeButtonComponent = includedInDraft ? Button.Secondary : Button.CallToAction;
-  const stakePoolStateLabel = includedInDraft
+  const { poolAlreadySelected, portfolioMutators, selectionsFull, selectionsNotEmpty } = useDelegationPortfolioStore(
+    (store) => ({
+      poolAlreadySelected: isPoolSelectedSelector(hexId)(store),
+      portfolioMutators: store.mutators,
+      selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
+      selectionsNotEmpty: store.selectedPortfolio.length > 0,
+    })
+  );
+
+  const disabledAddingToDraft = selectionsFull && !poolAlreadySelected;
+
+  const stakePoolStateLabel = poolAlreadySelected
     ? t('browsePools.stakePoolTableBrowser.unselect')
-    : draftPortfolioExists
+    : selectionsNotEmpty
     ? t('browsePools.stakePoolTableBrowser.addPool')
     : t('browsePools.stakePoolTableBrowser.stake');
 
   return (
-    <div data-testid="stake-pool-table-item" className={styles.row} onClick={() => onClick(id)}>
+    <div
+      data-testid="stake-pool-table-item"
+      className={styles.row}
+      onClick={() => portfolioMutators.executeCommand({ data: stakePool, type: 'ShowPoolDetailsFromList' })}
+    >
       <div className={styles.name}>
         <img
           data-testid="stake-pool-list-logo"
           src={logo}
           alt=""
-          className={cn([styles.image, includedInDraft && styles.imageSelected])}
+          className={cn([styles.image, poolAlreadySelected && styles.imageSelected])}
         />
         <div>
           <div>
@@ -99,14 +108,33 @@ export const StakePoolItemBrowser = ({
         </p>
       </div>
       <div className={styles.actions}>
-        <StakeButtonComponent
-          label={stakePoolStateLabel}
-          onClick={(event) => {
-            event.stopPropagation();
-            includedInDraft ? removeFromDraft() : addToDraft();
-          }}
-          data-testid="stake-button"
-        />
+        <Tooltip
+          title={t('browsePools.stakePoolTableBrowser.disabledTooltip')}
+          trigger={disabledAddingToDraft ? 'hover' : []}
+        >
+          <div>
+            <Button.CallToAction
+              label={stakePoolStateLabel}
+              onClick={(event) => {
+                event.stopPropagation();
+                portfolioMutators.executeCommand(
+                  poolAlreadySelected
+                    ? {
+                        data: hexId,
+                        type: 'UnselectPoolFromList',
+                      }
+                    : {
+                        data: stakePool,
+                        type: 'SelectPoolFromList',
+                      }
+                );
+              }}
+              disabled={disabledAddingToDraft}
+              data-testid="stake-button"
+              size="small"
+            />
+          </div>
+        </Tooltip>
       </div>
     </div>
   );

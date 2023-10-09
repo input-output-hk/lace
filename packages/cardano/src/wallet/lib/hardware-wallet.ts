@@ -3,7 +3,7 @@ import { Cardano, CML } from '@cardano-sdk/core';
 import { ObservableWallet, setupWallet, SetupWalletProps } from '@cardano-sdk/wallet';
 import * as KeyManagement from '../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 import { ChainName, DeviceConnection, CreateHardwareWalletArgs, HardwareWallets } from '../types';
-import { activateWallet, CardanoWalletByChain, KeyAgentsByChain } from './cardano-wallet';
+import { CardanoWalletByChain, KeyAgentsByChain } from './cardano-wallet';
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import * as Crypto from '@cardano-sdk/crypto';
 import * as HardwareLedger from '../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
@@ -129,7 +129,7 @@ export const createHardwareWalletsByChain = async (
   activeChainId: Cardano.ChainId,
   createWallet: SetupWalletProps<ObservableWallet, KeyManagement.KeyAgent>['createWallet'],
   connectedDevice: HardwareWallets
-): Promise<Omit<CardanoWalletByChain, 'name' | 'keyAgent'> & { keyAgent: KeyManagement.KeyAgent }> => {
+): Promise<Pick<CardanoWalletByChain, 'wallet' | 'keyAgent' | 'keyAgentsByChain'>> => {
   const keyAgentsByChain: KeyAgentsByChain = {} as KeyAgentsByChain;
   let activeChainName: ChainName;
 
@@ -233,6 +233,8 @@ export const createHardwareWallet = async (
     connectedDevice
   );
 
-  await activateWallet(walletManagerUi, keyAgent, name);
-  return { name, wallet, keyAgent, keyAgentsByChain };
+  const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
+  await walletManagerUi.activate({ keyAgent: asyncKeyAgent, observableWalletName: name });
+
+  return { asyncKeyAgent, name, wallet, keyAgent, keyAgentsByChain };
 };
