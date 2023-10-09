@@ -14,6 +14,7 @@ import extensionUtils from '../utils/utils';
 import { shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
+import AddressForm from '../elements/addressbook/AddressForm';
 
 export default new (class NewTransactionExtendedPageObject {
   fillAddress = async (address: string, index?: number) => {
@@ -126,7 +127,8 @@ export default new (class NewTransactionExtendedPageObject {
   };
 
   clickAddAddressButton = async (index?: number) => {
-    await webTester.clickElement(new TransactionNewPage().addressInput(index).ctaButton());
+    await AddressForm.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
+    await new TransactionNewPage().addressInput(index).ctaButton.click();
   };
 
   clickAddAssetButtonMulti = async (bundleIndex: number) => {
