@@ -1,5 +1,7 @@
 /* eslint-disable unicorn/no-null */
-import { Cardano, CML } from '@cardano-sdk/core';
+import { Cardano } from '@cardano-sdk/core';
+// Using nodejs CML version to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
+import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
 import { ObservableWallet, setupWallet, SetupWalletProps } from '@cardano-sdk/wallet';
 import * as KeyManagement from '../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 import { ChainName, DeviceConnection, CreateHardwareWalletArgs, HardwareWallets } from '../types';

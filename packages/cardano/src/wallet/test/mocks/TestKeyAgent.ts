@@ -1,6 +1,8 @@
-import { Cardano, CML } from '@cardano-sdk/core';
+import { Cardano } from '@cardano-sdk/core';
 import * as KeyManagement from '../../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 import * as Crypto from '@cardano-sdk/crypto';
+import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
+
 interface TestKeyAgentProps {
   password?: string;
   mnemonicWords?: string[];
