@@ -78,8 +78,7 @@ describe('Testing Analytics Agreement step', () => {
     fireEvent.click(nextAnalyticsAccept);
 
     await waitFor(() => expect(matomoClientMocks.sendEvent).toHaveBeenCalledTimes(1));
-    // one event for start session and one for the actual event
-    await waitFor(() => expect(postHogClientMocks.sendEvent).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(postHogClientMocks.sendEvent).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(userIdServiceMock.extendLifespan).toHaveBeenCalledTimes(2));
   });
 

@@ -157,7 +157,7 @@ describe('AnalyticsTracker', () => {
     });
   });
 
-  describe('sendEventToPostHog', () => {
+  describe('posthog sendSessionStartEvent', () => {
     it('should send start session event', async () => {
       const tracker = new AnalyticsTracker({
         chain: preprodChain,
@@ -166,7 +166,7 @@ describe('AnalyticsTracker', () => {
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
       const event = PostHogAction.OnboardingCreateClick;
       await tracker.sendEventToPostHog(event);
-      expect(mockedPostHogClient.sendSessionStartEvent).toHaveBeenCalledWith(PostHogAction.WalletSessionStartPageview);
+      expect(mockedPostHogClient.sendSessionStartEvent).toHaveBeenCalled();
       // eslint-disable-next-line no-magic-numbers
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledWith(event, {});
     });
