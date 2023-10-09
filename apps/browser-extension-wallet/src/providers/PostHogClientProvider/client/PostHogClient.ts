@@ -119,6 +119,13 @@ export class PostHogClient {
     });
   }
 
+  async sendSessionStartEvent(): Promise<void> {
+    console.debug('[ANALYTICS] Logging Session Start Event');
+    posthog.capture(String(PostHogAction.WalletSessionStartPageview), {
+      ...(await this.getEventMetadata())
+    });
+  }
+
   async sendPageNavigationEvent(): Promise<void> {
     console.debug('[ANALYTICS] Logging page navigation event to PostHog');
 

@@ -12,5 +12,5 @@ export interface UserIdService {
   makeTemporary(): Promise<void>;
   extendLifespan(): Promise<void>;
   userTrackingType$: BehaviorSubject<UserTrackingType>;
-  getLastStartSessionEventSent(): Promise<boolean>;
+  getIsNewSessionStarted(): Promise<boolean>;
 }

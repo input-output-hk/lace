@@ -23,7 +23,6 @@ interface AnalyticsTrackerArgs {
   analyticsDisabled?: boolean;
   isPostHogEnabled?: boolean;
   excludedEvents?: string;
-  checkForNewSessions?: boolean;
 }
 export class AnalyticsTracker {
   protected matomoClient?: MatomoClient;
@@ -31,20 +30,17 @@ export class AnalyticsTracker {
   protected userIdService?: UserIdService;
   protected excludedEvents: string;
   protected userTrackingType?: UserTrackingType;
-  private checkForNewSessions: boolean;
 
   constructor({
     postHogClient,
     chain,
     analyticsDisabled = false,
-    excludedEvents = POSTHOG_EXCLUDED_EVENTS ?? '',
-    checkForNewSessions = true
+    excludedEvents = POSTHOG_EXCLUDED_EVENTS ?? ''
   }: AnalyticsTrackerArgs) {
     if (analyticsDisabled) return;
     this.userIdService = getUserIdService();
     this.matomoClient = new MatomoClient(chain, this.userIdService);
     this.excludedEvents = excludedEvents;
-    this.checkForNewSessions = checkForNewSessions;
 
     if (postHogClient) {
       this.postHogClient = postHogClient;
@@ -65,13 +61,9 @@ export class AnalyticsTracker {
   }
 
   private async checkNewSessionStarted(): Promise<void> {
-    if (!this.checkForNewSessions) {
-      return;
-    }
-
-    const eventSent = await this.userIdService.getLastStartSessionEventSent();
-    if (!eventSent) {
-      await this.postHogClient?.sendEvent(PostHogAction.WalletSessionStartPageView);
+    const isNewSession = await this.userIdService.getIsNewSessionStarted();
+    if (isNewSession) {
+      await this.postHogClient?.sendSessionStartEvent();
     }
   }
 

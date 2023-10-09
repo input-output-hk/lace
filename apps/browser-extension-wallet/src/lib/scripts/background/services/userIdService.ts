@@ -96,6 +96,7 @@ export class UserIdService implements UserIdServiceInterface {
     this.walletBasedUserId = undefined;
     this.userTrackingType$.next(UserTrackingType.Basic);
     this.clearSessionTimeout();
+    this.lastStartSessionEventSent = false;
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
 
@@ -143,9 +144,9 @@ export class UserIdService implements UserIdServiceInterface {
     if (this.sessionTimeout) {
       return;
     }
-    this.lastStartSessionEventSent = false;
     this.sessionTimeout = setTimeout(() => {
       this.randomizedUserId = undefined;
+      this.lastStartSessionEventSent = false;
       console.debug('[ANALYTICS] Session timed out');
     }, this.sessionLength);
   }
@@ -153,7 +154,6 @@ export class UserIdService implements UserIdServiceInterface {
   private clearSessionTimeout(): void {
     clearTimeout(this.sessionTimeout);
     this.sessionTimeout = undefined;
-    this.lastStartSessionEventSent = true;
   }
 
   private generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex) {
@@ -163,11 +163,11 @@ export class UserIdService implements UserIdServiceInterface {
     return hashExtendedAccountPublicKey(hash);
   }
 
-  async getLastStartSessionEventSent(): Promise<boolean> {
+  async getIsNewSessionStarted(): Promise<boolean> {
     const isActiveSession = !!this.sessionTimeout;
-    const eventSent = !this.lastStartSessionEventSent && isActiveSession;
+    const isNewSession = !this.lastStartSessionEventSent && isActiveSession;
     this.lastStartSessionEventSent = true;
-    return eventSent;
+    return isNewSession;
   }
 }
 

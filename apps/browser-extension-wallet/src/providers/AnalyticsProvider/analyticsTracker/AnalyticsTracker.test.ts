@@ -146,8 +146,7 @@ describe('AnalyticsTracker', () => {
     it('should use the posthog client to send an event', async () => {
       const tracker = new AnalyticsTracker({
         chain: preprodChain,
-        postHogClient: getPostHogClient(),
-        checkForNewSessions: false
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
       const event = PostHogAction.OnboardingCreateClick;
@@ -167,9 +166,9 @@ describe('AnalyticsTracker', () => {
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
       const event = PostHogAction.OnboardingCreateClick;
       await tracker.sendEventToPostHog(event);
-      expect(mockedPostHogClient.sendEvent).toHaveBeenNthCalledWith(1, PostHogAction.WalletSessionStartPageView);
+      expect(mockedPostHogClient.sendSessionStartEvent).toHaveBeenCalledWith(PostHogAction.WalletSessionStartPageview);
       // eslint-disable-next-line no-magic-numbers
-      expect(mockedPostHogClient.sendEvent).toHaveBeenNthCalledWith(2, event, {});
+      expect(mockedPostHogClient.sendEvent).toHaveBeenCalledWith(event, {});
     });
   });
 
@@ -192,8 +191,7 @@ describe('AnalyticsTracker', () => {
         chain: preprodChain,
         isPostHogEnabled: true,
         excludedEvents: 'onboarding | new wallet',
-        postHogClient: getPostHogClient(),
-        checkForNewSessions: false
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
       await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);
@@ -205,8 +203,7 @@ describe('AnalyticsTracker', () => {
       const tracker = new AnalyticsTracker({
         chain: preprodChain,
         isPostHogEnabled: true,
-        postHogClient: getPostHogClient(),
-        checkForNewSessions: false
+        postHogClient: getPostHogClient()
       });
       const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
       await tracker.sendEventToPostHog(PostHogAction.OnboardingCreateAnalyticsAgreeClick);

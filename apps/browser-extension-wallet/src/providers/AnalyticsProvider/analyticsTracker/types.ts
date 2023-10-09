@@ -180,9 +180,9 @@ export enum PostHogAction {
   UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
   UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
   UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
-  // Lace Logo
+  // Wallet
   WalletLaceClick = 'wallet | lace | click',
-  WalletSessionStartPageView = 'wallet | session start | Pageview',
+  WalletSessionStartPageview = 'wallet | session start | pageview',
   // Tokens
   TokenTokensClick = 'token | tokens | click',
   TokenTokensTokenRowClick = 'token | tokens | token row | click',
@@ -204,9 +204,7 @@ export enum PostHogAction {
   UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick = 'unlock wallet | forgot password? | recovery phrase length | next | click',
   UnlockWalletForgotPasswordEnterPassphrase01NextClick = 'unlock wallet | forgot password? | enter passphrase #01 | next | click',
   UnlockWalletForgotPasswordEnterPassphrase09NextClick = 'unlock wallet | forgot password? | enter passphrase #09 | next | click',
-  UnlockWalletForgotPasswordEnterPassphrase17NextClick = 'unlock wallet | forgot password? | enter passphrase #17 | next | click',
-  // Wallet
-  WalletSessionStartPageview = 'wallet | session start | pageview'
+  UnlockWalletForgotPasswordEnterPassphrase17NextClick = 'unlock wallet | forgot password? | enter passphrase #17 | next | click'
 }
 
 export enum EnhancedAnalyticsOptInStatus {
