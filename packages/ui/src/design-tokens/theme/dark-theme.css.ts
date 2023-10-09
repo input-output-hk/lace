@@ -111,8 +111,7 @@ const colors: Colors = {
     darkColorScheme.$primary_light_grey,
   $bundle_input_error_label_color: darkColorScheme.$secondary_data_pink,
 
-  $sub_navigation_container_borderColor:
-    lightColorScheme.$primary_light_grey_plus,
+  $sub_navigation_container_borderColor: darkColorScheme.$primary_mid_grey,
 
   $sub_navigation_item_label_color: lightColorScheme.$primary_grey,
   $sub_navigation_container_outlineColor:

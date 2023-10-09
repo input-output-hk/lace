@@ -91,7 +91,7 @@ export const StakePoolItemBrowser = ({
         </div>
       </div>
       <div className={styles.apy}>
-        <p data-testid="stake-pool-list-apy">{apy ?? '-'}%</p>
+        <p data-testid="stake-pool-list-apy">{apy ? `${apy}%` : '-'}</p>
       </div>
       <div className={styles.saturation}>
         <p data-testid="stake-pool-list-saturation">
