@@ -49,8 +49,11 @@ export class UserIdService implements UserIdServiceInterface {
       const chainName = getChainNameByNetworkMagic(networkMagic);
       const extendedAccountPublicKey = keyAgentsByChain[chainName].keyAgentData.extendedAccountPublicKey;
       this.walletBasedUserId = this.generateWalletBasedUserId(extendedAccountPublicKey);
-    }
 
+      if (this.userTrackingType$.value !== UserTrackingType.Enhanced) {
+        this.userTrackingType$.next(UserTrackingType.Enhanced);
+      }
+    }
     console.debug(`[ANALYTICS] getwalletBasedUserId() called (current Wallet Based ID: ${this.walletBasedUserId})`);
     // eslint-disable-next-line consistent-return
     return this.walletBasedUserId;
@@ -130,7 +133,10 @@ export class UserIdService implements UserIdServiceInterface {
     }
 
     this.userIdRestored = true;
-    this.userTrackingType$.next(usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic);
+    const trackingType = usePersistentUserId ? UserTrackingType.Enhanced : UserTrackingType.Basic;
+    if (trackingType !== this.userTrackingType$.value) {
+      this.userTrackingType$.next(trackingType);
+    }
   }
 
   private setSessionTimeout(): void {
