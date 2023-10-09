@@ -15,5 +15,13 @@ export const initializeBrowserStorage = async (wallet: WalletConfig): Promise<vo
     Logger.log(`Failed to set keyAgentsByChain in browser storage due to: ${error}`);
   }
 
+  try {
+    await setBackgroundStorage({
+      usePersistentUserId: JSON.parse(String(wallet?.backgroundStorage?.usePersistentUserId))
+    });
+  } catch (error) {
+    Logger.log(`Failed to set usePersistentUserId in browser storage due to: ${error}`);
+  }
+
   await setMigrationState();
 };
