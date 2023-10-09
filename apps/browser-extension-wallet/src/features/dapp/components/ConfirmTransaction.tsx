@@ -109,6 +109,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
   }, []);
 
+  window.addEventListener('beforeunload', cancelTransaction);
+
   const signWithHardwareWallet = async () => {
     setIsConfirmingTx(true);
     try {
