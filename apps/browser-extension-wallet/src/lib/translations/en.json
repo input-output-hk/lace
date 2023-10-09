@@ -610,7 +610,8 @@
       "notDetectedError": {
         "title": "Failed to detect device",
         "description": "Please make sure your device is unlocked and the Cardano app is open.",
-        "agree": "Agree"
+        "agree": "Agree",
+        "trezorDescription": "Please make sure your device is unlocked."
       },
       "startOver": {
         "title": "Are you sure you want to start again?",
