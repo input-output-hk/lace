@@ -10,9 +10,9 @@ import {
   Handler,
   processExpandedViewCases,
   processPopupViewCases,
+  sumPercentagesSanitized,
 } from './stateMachine';
 import { normalizePercentages } from './stateMachine/normalizePercentages';
-import { sumPercentagesSanitized } from './stateMachine/sumPercentagesSanitized';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {

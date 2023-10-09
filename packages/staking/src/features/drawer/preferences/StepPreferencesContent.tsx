@@ -8,9 +8,9 @@ import {
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
+  sumPercentagesSanitized,
   useDelegationPortfolioStore,
 } from '../../store';
-import { sumPercentagesSanitized } from '../../store/delegationPortfolioStore';
 import { PoolDetailsCard } from './PoolDetailsCard';
 
 const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore): DelegationStatus => {

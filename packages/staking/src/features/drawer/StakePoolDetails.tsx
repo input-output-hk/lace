@@ -12,9 +12,9 @@ import {
   Flow,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
+  sumPercentagesSanitized,
   useDelegationPortfolioStore,
 } from '../store';
-import { sumPercentagesSanitized } from '../store/delegationPortfolioStore';
 import { StepPreferencesContent, StepPreferencesFooter } from './preferences';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
 import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
