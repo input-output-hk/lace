@@ -17,7 +17,7 @@ export type TransactionPool = {
 
 export interface TransactionDetail {
   tx: {
-    hash: string;
+    hash?: string;
     includedUtcDate?: string;
     includedUtcTime?: string;
     totalOutput?: string;

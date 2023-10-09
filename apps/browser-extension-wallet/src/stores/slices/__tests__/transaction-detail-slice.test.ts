@@ -42,7 +42,7 @@ describe('Testing createStoreHook slice', () => {
     const { result, waitForValueToChange } = renderHook(() => useTransactionsStore());
 
     act(() => {
-      result.current.setTransactionDetail(transactionMock.tx, transactionMock.direction);
+      result.current.setTransactionDetail({ tx: transactionMock.tx, direction: transactionMock.direction });
     });
     waitForValueToChange(() => result.current.transactionDetail);
     expect(result.current.transactionDetail).toBeDefined();

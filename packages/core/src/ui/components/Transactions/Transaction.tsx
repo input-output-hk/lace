@@ -17,7 +17,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
 
 export interface TransactionProps {
-  hash: string;
+  hash?: string;
   name: string;
   status?: TransactionStatus;
   /**

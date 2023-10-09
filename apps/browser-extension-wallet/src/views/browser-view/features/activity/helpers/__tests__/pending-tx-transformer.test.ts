@@ -80,7 +80,7 @@ describe('Testing tx transformers utils', () => {
     };
     test('should return parsed pending tx', async () => {
       mockLovelacesToAdaString.mockImplementation(actualLovelacesToAdaString);
-      const time = new Date();
+      const date = new Date();
       const result = pendingTxTransformer({
         tx: { ...pendingTx, cbor: TxCBOR.serialize(pendingTx) },
         walletAddresses: [
@@ -98,13 +98,12 @@ describe('Testing tx transformers utils', () => {
         fiatPrice: 1,
         protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
         cardanoCoin,
-        time
+        date
       });
       expect(result).toStrictEqual([
         {
           type: 'outgoing',
           status: 'sending',
-          date: 'Sending',
           deposit: undefined,
           depositReclaim: undefined,
           direction: 'Outgoing',
@@ -119,8 +118,9 @@ describe('Testing tx transformers utils', () => {
             }
           ],
           assetsNumber: 2,
-          timestamp: formatTime({
-            date: time,
+          formattedDate: 'Sending',
+          formattedTimestamp: formatTime({
+            date,
             format: DEFAULT_TIME_FORMAT,
             type: 'local'
           })

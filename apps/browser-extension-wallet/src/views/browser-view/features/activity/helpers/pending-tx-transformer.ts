@@ -1,7 +1,6 @@
 import { TxTransformerInput, txTransformer } from './common-tx-transformer';
 import { Wallet } from '@lace/cardano';
 import type { TransformedTx } from './types';
-import capitalize from 'lodash/capitalize';
 import { TxDirections } from '@types';
 
 interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
@@ -15,7 +14,7 @@ export const pendingTxTransformer = ({
   fiatPrice,
   protocolParameters,
   cardanoCoin,
-  time
+  date
 }: TxHistoryTransformerInput): TransformedTx[] =>
   txTransformer({
     tx,
@@ -24,8 +23,7 @@ export const pendingTxTransformer = ({
     fiatPrice,
     protocolParameters,
     cardanoCoin,
-    time,
+    date,
     status: Wallet.TransactionStatus.PENDING,
-    direction: TxDirections.Outgoing,
-    date: capitalize(Wallet.TransactionStatus.PENDING)
+    direction: TxDirections.Outgoing
   });

@@ -16,7 +16,8 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { MAX_POOLS_COUNT } from '@lace/staking';
-import { TransactionType } from '@lace/core';
+import type { TransactionType } from '@lace/core';
+import { formatDate, formatTime } from '@src/utils/format-date';
 
 /**
  * validates if the transaction is confirmed
@@ -70,9 +71,23 @@ const getTransactionDetail =
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
       inMemoryWallet: wallet,
-      transactionDetail: { tx, status, direction, type },
+      transactionDetail: { tx, epochRewards, status, direction, type },
       walletInfo
     } = get();
+
+    if (type === 'rewards') {
+      return {
+        tx: {
+          includedUtcDate: formatDate({ date: epochRewards.time, format: 'MM/DD/YYYY', type: 'utc' }),
+          includedUtcTime: `${formatTime({ date: epochRewards.time, type: 'utc' })} UTC`,
+          rewards: Wallet.util.lovelacesToAdaString(
+            Wallet.BigIntMath.sum(epochRewards.rewards?.map(({ rewards }) => rewards) || []).toString()
+          )
+        },
+        status,
+        type
+      };
+    }
 
     const walletAssets = await firstValueFrom(wallet.assetInfo$);
     const protocolParameters = await firstValueFrom(wallet.protocolParameters$);
@@ -190,6 +205,7 @@ export const transactionDetailSlice: SliceCreator<
   transactionDetail: undefined,
   fetchingTransactionInfo: true,
   getTransactionDetails: getTransactionDetail({ set, get }),
-  setTransactionDetail: (tx, direction, status, type) => set({ transactionDetail: { tx, direction, status, type } }),
+  setTransactionDetail: ({ tx, epochRewards, direction, status, type }) =>
+    set({ transactionDetail: { tx, epochRewards, direction, status, type } }),
   resetTransactionState: () => set({ transactionDetail: undefined, fetchingTransactionInfo: false })
 });

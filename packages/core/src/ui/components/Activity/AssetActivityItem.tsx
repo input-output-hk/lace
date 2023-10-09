@@ -35,6 +35,10 @@ export interface AssetActivityItemProps {
    */
   amount: string;
   /**
+   * Date of the activity
+   */
+  date: Date;
+  /**
    * Amount in Fiat currency (e.g. 125$)
    */
   fiatAmount: string;
@@ -58,7 +62,8 @@ export interface AssetActivityItemProps {
    * Number of assets (default: 1)
    */
   assetsNumber?: number;
-  date?: string;
+  formattedDate: string;
+  formattedTimestamp: string;
   /**
    * Direction: 'Incoming' | 'Outgoing' | 'Self'
    * TODO: Create a separate package for common types across apps/packages
@@ -68,7 +73,6 @@ export interface AssetActivityItemProps {
    * assets details
    */
   assets?: ActivityAssetProp[];
-  timestamp?: string;
 }
 
 const DelegationTransactionTypes = new Set(['delegation', 'delegationRegistration', 'delegationDeregistration']);
@@ -116,7 +120,7 @@ export const AssetActivityItem = ({
   type,
   assetsNumber = 1,
   assets,
-  timestamp
+  formattedTimestamp
 }: AssetActivityItemProps): React.ReactElement => {
   const { t } = useTranslate();
   const ref = useRef<HTMLHeadingElement>(null);
@@ -178,9 +182,9 @@ export const AssetActivityItem = ({
       {pluralize('package.core.assetActivityItem.entry.token', assetsNumber, true)}
     </p>
   );
-  const descriptionContent = timestamp ? (
+  const descriptionContent = formattedTimestamp ? (
     <p data-testid="timestamp" className={styles.description}>
-      {timestamp}
+      {formattedTimestamp}
     </p>
   ) : (
     assetAmountContent

@@ -70,7 +70,7 @@ export const getTransactionData = ({
 const getCurrentTransactionStatus = (
   activities: AssetActivityListProps[],
   txId: Wallet.Cardano.TransactionId
-): TransactionStatus => {
+): TransactionStatus | undefined => {
   const todayActivity = activities.find((activity) => activity.title === 'Today');
   const transaction = todayActivity?.items.find((item) => item.id === String(txId));
   return transaction?.status;
@@ -101,8 +101,11 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
   );
 
   const currentTransactionStatus = useMemo(
-    () => getCurrentTransactionStatus(walletActivities, transactionDetail.tx.id) || transactionInfo?.status,
-    [transactionDetail.tx.id, transactionInfo?.status, walletActivities]
+    () =>
+      transactionDetail.tx?.id
+        ? getCurrentTransactionStatus(walletActivities, transactionDetail.tx.id) ?? transactionInfo?.status
+        : transactionInfo?.status,
+    [transactionDetail.tx?.id, transactionInfo?.status, walletActivities]
   );
 
   const fetchTransactionInfo = useCallback(async () => {

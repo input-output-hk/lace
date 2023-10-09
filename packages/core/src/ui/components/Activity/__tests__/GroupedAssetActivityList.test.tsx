@@ -9,6 +9,9 @@ const activityItem: AssetActivityItemProps = {
   type: 'outgoing',
   amount: '100 ADA',
   fiatAmount: '300 $',
+  formattedDate: 'FormattedDate',
+  formattedTimestamp: 'FormattedTimestamp',
+  date: new Date('2021-01-01'),
   assetsNumber: 1,
   assets: [{ id: '1', val: '1' }]
 };

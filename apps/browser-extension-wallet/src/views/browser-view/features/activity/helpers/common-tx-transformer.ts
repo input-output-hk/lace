@@ -2,8 +2,11 @@ import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
 import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
-import { formatTime } from '@src/utils/format-date';
+import { formatDate, formatTime } from '@src/utils/format-date';
 import type { TransformedTx } from './types';
+import { TransactionStatus } from '@lace/core';
+import capitalize from 'lodash/capitalize';
+import dayjs from 'dayjs';
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -12,10 +15,9 @@ export interface TxTransformerInput {
   fiatPrice?: number;
   protocolParameters: Wallet.ProtocolParameters;
   cardanoCoin: Wallet.CoinId;
-  time: Date;
+  date: Date;
   direction?: TxDirections;
   status?: Wallet.TransactionStatus;
-  date?: string;
 }
 
 export const getFormattedFiatAmount = ({
@@ -93,7 +95,6 @@ export const txTransformer = ({
   fiatPrice,
   protocolParameters,
   cardanoCoin,
-  time,
   date,
   direction,
   status
@@ -110,8 +111,11 @@ export const txTransformer = ({
     direction
   });
   const outputAmount = new BigNumber(coins.toString());
-  const timestamp = formatTime({
-    date: time,
+  const formattedDate = dayjs().isSame(date, 'day')
+    ? 'Today'
+    : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });
+  const formattedTimestamp = formatTime({
+    date,
     type: 'local'
   });
 
@@ -132,7 +136,8 @@ export const txTransformer = ({
     assets: assetsEntries,
     assetsNumber: (assets?.size ?? 0) + 1,
     date,
-    timestamp
+    formattedDate: status === TransactionStatus.PENDING ? capitalize(Wallet.TransactionStatus.PENDING) : formattedDate,
+    formattedTimestamp
   };
 
   // Note that TxInFlight at type level does not expose its inputs with address,

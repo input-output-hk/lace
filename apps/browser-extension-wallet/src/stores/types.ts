@@ -16,6 +16,8 @@ import { FetchWalletActivitiesProps, FetchWalletActivitiesReturn, IBlockchainPro
 import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
+import { Reward } from '@cardano-sdk/core';
+import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
 
 export enum StateStatus {
   IDLE = 'idle',
@@ -122,18 +124,28 @@ export interface UISlice {
 
 export interface TransactionDetailSlice {
   transactionDetail?: {
+    type: TransactionType;
+    status: Wallet.TransactionStatus;
     direction: TxDirection;
-    tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
+    tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
+    epochRewards?: { spendableEpoch: EpochNo; time: Date; rewards: Reward[] };
+  } & (
+    | {
+        type: 'rewards';
+        epochRewards: NonNullable<unknown>;
+      }
+    | {
+        tx: NonNullable<unknown>;
+      }
+  );
+  fetchingTransactionInfo: boolean;
+  setTransactionDetail: (params: {
+    tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
+    epochRewards?: { spendableEpoch: EpochNo; time: Date; rewards: Reward[] };
+    direction: TxDirection;
     status?: Wallet.TransactionStatus;
     type?: TransactionType;
-  };
-  fetchingTransactionInfo: boolean;
-  setTransactionDetail: (
-    tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx,
-    direction: TxDirection,
-    status?: Wallet.TransactionStatus,
-    type?: TransactionType
-  ) => void;
+  }) => void;
   getTransactionDetails: (params: {
     coinPrices: PriceResult;
     fiatCurrency: CurrencyInfo;

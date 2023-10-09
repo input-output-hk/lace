@@ -6,14 +6,21 @@ import groupBy from 'lodash/groupBy';
 import { mergeMap, combineLatest, tap, Observable, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Wallet } from '@lace/cardano';
-import { EraSummary, TxCBOR } from '@cardano-sdk/core';
+import { EraSummary, Reward, TxCBOR, epochSlotsCalc } from '@cardano-sdk/core';
 import {
   pendingTxTransformer,
   txHistoryTransformer,
   filterOutputsByTxDirection,
-  isTxWithAssets
+  isTxWithAssets,
+  TransformedTx
 } from '@src/views/browser-view/features/activity/helpers';
-import { AssetActivityItemProps, AssetActivityListProps, ActivityAssetProp, TransactionType } from '@lace/core';
+import {
+  AssetActivityItemProps,
+  AssetActivityListProps,
+  ActivityAssetProp,
+  TransactionType,
+  TransactionStatus
+} from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
 import { assetTransformer } from '@src/utils/assets-transformers';
@@ -28,6 +35,8 @@ import {
   SliceCreator
 } from '../types';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
+import { rewardHistoryTransformer } from '@src/views/browser-view/features/activity/helpers/reward-history-transformer';
+import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
 
 export interface FetchWalletActivitiesProps {
   fiatCurrency: CurrencyInfo;
@@ -102,7 +111,13 @@ const getWalletActivitiesObservable = async ({
     assetDetails,
     blockchainProvider: { assetProvider }
   } = get();
-  const { transactions, eraSummaries$, protocolParameters$, assetInfo$ } = inMemoryWallet;
+  const {
+    transactions,
+    eraSummaries$,
+    protocolParameters$,
+    assetInfo$,
+    delegation: { rewardsHistory$ }
+  } = inMemoryWallet;
   const protocolParameters = await firstValueFrom(protocolParameters$);
   const walletAssets = await firstValueFrom(assetInfo$);
   const historicalTransactions$ = transactions.history$;
@@ -113,50 +128,45 @@ const getWalletActivitiesObservable = async ({
   const historicTransactionMapper = (
     tx: Wallet.Cardano.HydratedTx,
     eraSummaries: EraSummary[]
-  ): AssetActivityItemProps | Array<AssetActivityItemProps> => {
+  ): Array<AssetActivityItemProps> => {
     const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
-    const time = slotTimeCalc(tx.blockHeader.slot);
+    const date = slotTimeCalc(tx.blockHeader.slot);
     const transformedTransaction = txHistoryTransformer({
       tx,
       walletAddresses: addresses,
       fiatCurrency,
       fiatPrice: cardanoFiatPrice,
-      time,
+      date,
       protocolParameters,
       cardanoCoin
     });
 
-    const extendWithClickHandler = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
+    const extendWithClickHandler = (transformedTx: TransformedTx) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
-        setTransactionDetail(tx, transformedTx.direction, transformedTx.status, transformedTx.type);
+        setTransactionDetail({
+          tx,
+          direction: transformedTx.direction,
+          status: transformedTx.status,
+          type: transformedTx.type
+        });
       }
     });
 
-    /*
-    considering the current SDK logic for automatically withdraw rewards when building a transaction and such behavior has to be transparent for the user,
-    we will remove the withdrawal from the transaction history as it is implemented today.
-    Instead, we will show rewards in the transaction history whenever the user receives them.
-    To make this happen we need to create a new record Rewards and added to the transaction history
-    */
-    if (Array.isArray(transformedTransaction)) {
-      return transformedTransaction.map((tt) => extendWithClickHandler(tt));
-    }
-
-    return extendWithClickHandler(transformedTransaction);
+    return transformedTransaction.map((tt) => extendWithClickHandler(tt));
   };
 
   const pendingTransactionMapper = (
     tx: Wallet.TxInFlight,
     eraSummaries: EraSummary[]
-  ): AssetActivityItemProps | Array<AssetActivityItemProps> => {
-    let time;
+  ): Array<AssetActivityItemProps> => {
+    let date;
     try {
       const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
-      time = slotTimeCalc(tx.submittedAt);
+      date = slotTimeCalc(tx.submittedAt);
     } catch {
-      time = new Date();
+      date = new Date();
     }
     const transformedTransaction = pendingTxTransformer({
       tx,
@@ -165,28 +175,60 @@ const getWalletActivitiesObservable = async ({
       fiatCurrency,
       protocolParameters,
       cardanoCoin,
-      time
+      date
     });
 
-    const extendWithClickHandler = (transformedTx: Omit<AssetActivityItemProps, 'onClick'>) => ({
+    const extendWithClickHandler = (transformedTx: TransformedTx) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
         const deserializedTx: Wallet.Cardano.Tx = TxCBOR.deserialize(tx.cbor);
-        setTransactionDetail(
-          deserializedTx,
-          TxDirections.Outgoing,
-          Wallet.TransactionStatus.PENDING,
-          transformedTx.type
-        );
+        setTransactionDetail({
+          tx: deserializedTx,
+          direction: TxDirections.Outgoing,
+          status: Wallet.TransactionStatus.PENDING,
+          type: transformedTx.type
+        });
       }
     });
 
-    if (Array.isArray(transformedTransaction)) {
-      return transformedTransaction.map((tt) => extendWithClickHandler(tt));
-    }
+    return transformedTransaction.map((tt) => extendWithClickHandler(tt));
+  };
 
-    return extendWithClickHandler(transformedTransaction);
+  const epochRewardsMapper = (
+    earnedEpoch: EpochNo,
+    rewards: Reward[],
+    eraSummaries: EraSummary[]
+  ): AssetActivityItemProps => {
+    const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
+    const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as EpochNo;
+    const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
+    const rewardSpendableDate = slotTimeCalc(epochSlotsCalc(spendableEpoch, eraSummaries).firstSlot);
+
+    const transformedEpochRewards = rewardHistoryTransformer({
+      rewards,
+      fiatCurrency,
+      fiatPrice: cardanoFiatPrice,
+      cardanoCoin,
+      date: rewardSpendableDate
+    });
+
+    return {
+      ...transformedEpochRewards,
+      onClick: () => {
+        if (sendAnalytics) sendAnalytics();
+        setTransactionDetail({
+          direction: transformedEpochRewards.direction,
+          status: transformedEpochRewards.status,
+          type: transformedEpochRewards.type,
+          epochRewards: {
+            rewards,
+            spendableEpoch,
+            time: rewardSpendableDate
+          }
+        });
+      }
+    };
   };
 
   const filterTransactionByAssetId = (tx: Wallet.Cardano.HydratedTx[]) =>
@@ -200,7 +242,7 @@ const getWalletActivitiesObservable = async ({
     });
 
   /**
-   * Sorts and sanitizes historical transactions data
+   * Sanitizes historical transactions data
    */
   const getHistoricalTransactions = (eraSummaries: EraSummary[]) =>
     historicalTransactions$.pipe(
@@ -209,12 +251,6 @@ const getWalletActivitiesObservable = async ({
         !assetDetails || assetDetails?.id === cardanoCoin.id
           ? allTransactions
           : filterTransactionByAssetId(allTransactions)
-      ),
-      map((allTransactions: Wallet.Cardano.HydratedTx[]) =>
-        allTransactions.sort(
-          (firstTransaction, secondTransaction) =>
-            secondTransaction.blockHeader.slot.valueOf() - firstTransaction.blockHeader.slot.valueOf()
-        )
       ),
       map((allTransactions: Wallet.Cardano.HydratedTx[]) =>
         flattenDeep(allTransactions.map((tx) => historicTransactionMapper(tx, eraSummaries)))
@@ -232,15 +268,31 @@ const getWalletActivitiesObservable = async ({
     );
 
   /**
-   * 1. Listens for time settings
-   * 2. Passes it to historical transactions and pending transactions lists
-   * 3. Emits both lists combined and sets current state for Zustand
+   * Sanitizes historical rewards data
    */
-  return combineLatest([eraSummaries$, pendingTransactions$, historicalTransactions$]).pipe(
+  const getRewardsHistory = (eraSummaries: EraSummary[]) =>
+    rewardsHistory$.pipe(
+      map((allRewards: Wallet.RewardsHistory) =>
+        Object.entries(groupBy(allRewards.all, ({ epoch }) => epoch.toString())).map(([epoch, rewards]) =>
+          epochRewardsMapper(Number(epoch) as EpochNo, rewards, eraSummaries)
+        )
+      )
+    );
+
+  /**
+   * 1. Listens for time settings
+   * 2. Passes it to historical transactions, pending transactions and rewards history lists
+   * 3. Emits the lists combined and sets current state for Zustand
+   */
+  return combineLatest([eraSummaries$, pendingTransactions$, historicalTransactions$, rewardsHistory$]).pipe(
     mergeMap(([eraSummaries]) =>
-      combineLatest([getHistoricalTransactions(eraSummaries), getPendingTransactions(eraSummaries)])
+      combineLatest([
+        getHistoricalTransactions(eraSummaries),
+        getPendingTransactions(eraSummaries),
+        getRewardsHistory(eraSummaries)
+      ])
     ),
-    map(async ([historicalTransactions, pendingTransactions]) => {
+    map(async ([historicalTransactions, pendingTransactions, rewards]) => {
       const confirmedTxs = await historicalTransactions;
       const pendingTxs = await pendingTransactions;
       /* After the transaction is confirmed is not being removed from pendingTransactions$, so we have to remove it manually from pending list
@@ -249,9 +301,18 @@ const getWalletActivitiesObservable = async ({
       const filteredPendingTxs = pendingTxs.filter((pending) =>
         confirmedTxs.some((confirmed) => confirmed?.id !== pending?.id)
       );
-      return [...filteredPendingTxs, ...confirmedTxs];
+      return [...filteredPendingTxs, ...confirmedTxs, ...rewards];
     }),
-    map(async (allTransactions: Promise<AssetActivityItemProps[]>) => groupBy(await allTransactions, 'date')),
+    map(async (allTransactions: Promise<AssetActivityItemProps[]>) =>
+      (await allTransactions).sort((firstTx, secondTx) => {
+        // ensure pending txs are always first
+        if (firstTx.status === TransactionStatus.PENDING && secondTx.status !== TransactionStatus.PENDING) return 1;
+        if (secondTx.status === TransactionStatus.PENDING && firstTx.status !== TransactionStatus.PENDING) return -1;
+        // otherwise sort by date
+        return secondTx.date.getTime() - firstTx.date.getTime();
+      })
+    ),
+    map(async (allTransactions: Promise<AssetActivityItemProps[]>) => groupBy(await allTransactions, 'formattedDate')),
     map(async (lists) =>
       Object.entries(await lists).map(([listName, transactionsList]) => ({
         title: listName,

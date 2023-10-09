@@ -1,6 +1,4 @@
 import { Wallet } from '@lace/cardano';
-import dayjs from 'dayjs';
-import { formatDate } from '@src/utils/format-date';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
 import { txTransformer, TxTransformerInput } from './common-tx-transformer';
 import type { TransformedTx } from './types';
@@ -14,7 +12,7 @@ export const txHistoryTransformer = ({
   walletAddresses,
   fiatCurrency,
   fiatPrice,
-  time,
+  date,
   protocolParameters,
   cardanoCoin
 }: TxHistoryTransformerInput): TransformedTx[] => {
@@ -26,11 +24,10 @@ export const txHistoryTransformer = ({
     walletAddresses,
     fiatCurrency,
     fiatPrice,
-    time,
+    date,
     protocolParameters,
     cardanoCoin,
     status: Wallet.TransactionStatus.SUCCESS,
-    direction,
-    date: dayjs().isSame(time, 'day') ? 'Today' : formatDate({ date: time, format: 'DD MMMM YYYY', type: 'local' })
+    direction
   });
 };
