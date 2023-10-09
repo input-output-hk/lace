@@ -24,7 +24,7 @@ Feature: ADA handle - popup view
     When I fill address form with "ADA handle" name
     And I fill address form with "$fake_handle" ADA handle
     Then Red "X" icon is displayed next to ADA handle
-    And "Handle not found" error is displayed
+    And "Handle not found" error is displayed in address book form
     And "Save address" button is disabled on "Add new address" drawer
 
   @LW-7336
@@ -140,3 +140,40 @@ Feature: ADA handle - popup view
     Then I can see the handles listed on the "Select NFT" screen
     And I see ADA handle NFT with custom image on the Select NFT page
     And the corresponding custom images are displayed
+
+  @LW-5023 @LW-5029 @LW-5033
+  Scenario: Popup View - Send flow - Enter ADA handle and confirm validated
+    When I click "Send" button on Tokens page in popup mode
+    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    Then search loader is displayed inside address input field
+    And Green tick icon is displayed next to ADA handle
+    And "Add address" button is enabled in the bundle 1 recipient's address input
+
+  @LW-5024 @LW-5031
+  Scenario: Popup View - Send flow - Enter ADA handle and confirm invalid
+    When I click "Send" button on Tokens page in popup mode
+    And I enter "$fake_handle" in the bundle 1 recipient's address
+    Then search loader is displayed inside address input field
+    And Red exclamation icon is displayed next to ADA handle
+    And "Handle not found" error is displayed under address input in "Send" drawer
+    And "Add address" button is disabled in the bundle 1 recipient's address input
+
+  @LW-8747
+  Scenario: Popup View - Send flow - Add address - Valid ADA handle
+    When I click "Send" button on Tokens page in popup mode
+    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    And click "Add address" button 1 in address bar
+    And I fill address form with "test handle" name
+    Then Green tick icon is displayed next to ADA handle
+    And "Save address" button is enabled on "Add new address" drawer
+
+  @LW-8749
+  Scenario: Popup View - Send flow - Add address - Invalid ADA handle
+    When I click "Send" button on Tokens page in popup mode
+    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    And click "Add address" button 1 in address bar
+    And I fill address form with "test handle" name
+    And I fill address form with "$fake_handle" ADA handle
+    Then Red "X" icon is displayed next to ADA handle
+    And "Handle not found" error is displayed in address book form
+    And "Save address" button is disabled on "Add new address" drawer

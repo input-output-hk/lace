@@ -13,6 +13,7 @@ import CommonAssert from '../assert/commonAssert';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import { Logger } from '../support/logger';
+import collateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -29,9 +30,26 @@ Then(/^I see DApp authorization window$/, async () => {
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
 });
 
+Then(/^I see DApp collateral window$/, async () => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeCollateralDAppPage(testDAppDetails);
+});
+
 Then(/^I see DApp authorization window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+  await CommonAssert.assertSeeThemeMode(mode);
+});
+
+Then(/^I see DApp collateral window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeCollateralDAppPage(testDAppDetails);
+  await CommonAssert.assertSeeThemeMode(mode);
+});
+
+Then(/^I see DApp connector "All done" page in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeAllDonePage();
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
@@ -84,7 +102,7 @@ Then(/^I see DApp unlock page$/, async () => {
   await WalletUnlockScreenAssert.assertSeeWalletUnlockScreen();
 });
 
-Then(/^I see DApp removal confirmation modal$/, async () => {
+Then(/^I see DApp removal confirmation window$/, async () => {
   await DAppConnectorAssert.assertSeeDAppRemovalConfirmationModal();
 });
 
@@ -92,8 +110,13 @@ Then(/^I click "(Authorize|Cancel)" button in DApp authorization window$/, async
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow(button);
 });
 
-Then(/^I click "(Always|Only once)" button in DApp authorization modal$/, async (button: 'Always' | 'Only once') => {
+Then(/^I click "(Always|Only once)" button in DApp authorization window$/, async (button: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(button);
+});
+
+Then(/^I click "(Confirm|Cancel)" button in DApp collateral window/, async (button: 'Confirm' | 'Cancel') => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await (button === 'Confirm' ? collateralDAppPage.clickAcceptButton() : collateralDAppPage.clickCancelButton());
 });
 
 When(/^I click "Create or restore a wallet" button in DApp no wallet modal$/, async () => {
@@ -145,6 +168,12 @@ Then(/^I de-authorize all DApps in (extended|popup) mode$/, async (mode: 'extend
 
 Then(/^I de-authorize test DApp in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await DAppConnectorPageObject.deauthorizeDApp(DAppConnectorPageObject.TEST_DAPP_NAME, mode);
+});
+
+When(/^I click "Set Collateral" button in test DApp$/, async () => {
+  await DAppConnectorPageObject.switchToTestDAppWindow();
+  await browser.pause(1000);
+  await TestDAppPage.setCollateralButton.click();
 });
 
 Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runButton: 'Send ADA' | 'Send Token') => {

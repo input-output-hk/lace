@@ -16,6 +16,10 @@ export const inputButton = style([
     ':disabled': {
       cursor: 'default',
     },
+
+    ':focus-visible': {
+      outline: `3px solid ${vars.colors.$input_container_focused_outline_color}`,
+    },
   },
 ]);
 
