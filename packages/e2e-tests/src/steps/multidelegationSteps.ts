@@ -192,3 +192,19 @@ Then(/^I see the Network Info component with the expected content$/, async () =>
 Then(/^I see the stake pool search control with appropriate content$/, async () => {
   await MultidelegationPageAssert.assertSeeSearchComponent();
 });
+
+Then(
+  /^there are (\d+) stake pools returned for "([^"]*)" search term$/,
+  async (resultsCount: number, searchTerm: string) => {
+    await MultidelegationPageAssert.assertSeeSearchResults(resultsCount, searchTerm);
+  }
+);
+
+Then(
+  /^\(if applicable\) first stake pool search result has "([^"]*)" name and "([^"]*)" ticker$/,
+  async (expectedName: string, expectedTicker: string) => {
+    if ((await MultidelegationPage.poolsItems.length) > 0) {
+      await MultidelegationPageAssert.assertSeeFirstSearchResultWithNameAndTicker(expectedName, expectedTicker);
+    }
+  }
+);
