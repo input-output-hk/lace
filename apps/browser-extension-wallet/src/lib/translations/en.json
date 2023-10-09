@@ -226,7 +226,9 @@
     "sendMultipleOutputsAtTheSameTime": "Send multiple outputs at the same time and add metadata. This means you can send multiple assets to different addresses in one transaction",
     "theAmountYoullBeChargedToProcessYourTransaction": "The amount you'll be charged to process your transaction",
     "connectYourLedger": "Connect your Ledger device directly to your computer. Unlock the device and open the Cardano app. Then click confirm.",
-    "toSendAnNFTOrNativeToken": "To send an NFT or a native token, a small amount of ADA has to be sent with it to facilitate the operation"
+    "connectYourTrezor": "Just connect your device to your computer. Unlock the device and click 'confirm' to continue",
+    "toSendAnNFTOrNativeToken": "To send an NFT or a native token, a small amount of ADA has to be sent with it to facilitate the operation",
+    "trezorDoesNotDupportDecimals": "Trezor does not support decimals for Cardano tokens, so your device's software may show incorrect amounts (3 token units as 3,000,000, for example) when sending these tokens."
   },
   "staking": {
     "sectionTitle": "Staking",
@@ -608,7 +610,8 @@
       "notDetectedError": {
         "title": "Failed to detect device",
         "description": "Please make sure your device is unlocked and the Cardano app is open.",
-        "agree": "Agree"
+        "agree": "Agree",
+        "trezorDescription": "Please make sure your device is unlocked."
       },
       "startOver": {
         "title": "Are you sure you want to start again?",

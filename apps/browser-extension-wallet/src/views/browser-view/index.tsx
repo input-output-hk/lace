@@ -26,6 +26,8 @@ import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import '../../lib/scripts/keep-alive-ui';
+import { PostHogClientProvider } from '@providers/PostHogClientProvider';
+import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -36,17 +38,21 @@ const App = (): React.ReactElement => (
             <AxiosClientProvider>
               <CurrencyStoreProvider>
                 <HashRouter>
-                  <AnalyticsProvider>
-                    <ThemeProvider>
-                      <ExternalLinkOpenerProvider>
-                        <MigrationContainer appMode={APP_MODE_BROWSER}>
-                          <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                            <BrowserViewRoutes />
-                          </DataCheckContainer>
-                        </MigrationContainer>
-                      </ExternalLinkOpenerProvider>
-                    </ThemeProvider>
-                  </AnalyticsProvider>
+                  <PostHogClientProvider>
+                    <ExperimentsProvider>
+                      <AnalyticsProvider>
+                        <ThemeProvider>
+                          <ExternalLinkOpenerProvider>
+                            <MigrationContainer appMode={APP_MODE_BROWSER}>
+                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                <BrowserViewRoutes />
+                              </DataCheckContainer>
+                            </MigrationContainer>
+                          </ExternalLinkOpenerProvider>
+                        </ThemeProvider>
+                      </AnalyticsProvider>
+                    </ExperimentsProvider>
+                  </PostHogClientProvider>
                 </HashRouter>
               </CurrencyStoreProvider>
             </AxiosClientProvider>

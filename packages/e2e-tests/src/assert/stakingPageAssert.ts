@@ -26,22 +26,6 @@ class StakingPageAssert {
     await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
   };
 
-  assertSeeSearchComponent = async (mode: 'extended' | 'popup') => {
-    await StakingPage.stakingPageSearchIcon.waitForDisplayed();
-    await StakingPage.stakingPageSearchInput.waitForDisplayed();
-    await (mode === 'extended'
-      ? expect(await StakingPage.stakingPageSearchInput.getAttribute('placeholder')).to.equal(
-          await t('browserView.staking.stakePoolsTable.searchPlaceholder')
-        )
-      : expect(await StakingPage.searchInputPlaceholderInPopup.getText()).to.equal(
-          await t('cardano.stakePoolSearch.searchPlaceholder')
-        ));
-  };
-
-  assertSeePopupSearch = async () => {
-    await webTester.waitUntilSeeElementContainingText(await t('cardano.stakePoolSearch.searchPlaceholder'), 20_000);
-  };
-
   assertStakePoolSwitched = async (stakePoolName: string) => {
     const stakingInfoComponent = new StakingInfoComponent();
     await browser.waitUntil(
@@ -159,32 +143,6 @@ class StakingPageAssert {
 
     await StakingSuccessDrawer.closeButton.waitForDisplayed();
     await expect(await StakingSuccessDrawer.closeButton.getText()).to.equal(await t('general.button.close'));
-  };
-
-  assertCheckResults = async (title: string, subTitle: string, results: number) => {
-    const stakePoolListItem = new StakePoolListItem();
-    const rowsNumber = (await stakePoolListItem.getRows()).length;
-    const resultsNum = Number(results);
-    if (resultsNum === 0) {
-      await expect(rowsNumber).to.equal(resultsNum);
-      await StakingPage.emptySearchResultsImage.waitForDisplayed();
-      await StakingPage.emptySearchResultsMessage.waitForDisplayed();
-      await expect(await StakingPage.emptySearchResultsMessage.getText()).to.equal(
-        await t('browserView.staking.stakePoolsTable.emptyMessage')
-      );
-    } else {
-      await webTester.seeWebElement(stakePoolListItem.logoWithIndex(1));
-      await expect(await stakePoolListItem.getNameWithIndex(1)).to.equal(title);
-      await expect(await stakePoolListItem.getTickerWithIndex(1)).to.equal(subTitle);
-      if (resultsNum > 1) {
-        for (let i = 2; i < resultsNum; i++) {
-          await webTester.seeWebElement(stakePoolListItem.logoWithIndex(i));
-          await webTester.seeWebElement(stakePoolListItem.nameWithIndex(i));
-          await webTester.seeWebElement(stakePoolListItem.tickerWithIndex(i));
-        }
-      }
-      await expect(rowsNumber).to.equal(resultsNum);
-    }
   };
 
   assertSeeSingleSearchResult = async () => {

@@ -9,23 +9,25 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     Then send drawer is displayed with all its components in extended mode
 
-  @LW-2355 @Testnet @Mainnet
+  @LW-2355 @LW-5034 @Testnet @Mainnet
   Scenario Outline: Extended-view - Enter valid <wallet> type address, no error displayed
     When I click "Send" button on page header
     And I enter a valid "<wallet>" address in the bundle 1 recipient's address
     Then "Incorrect address" error is not displayed under address input field
+    And "Add address" button is enabled in the bundle 1 recipient's address input
     Examples:
       | wallet  |
       | byron   |
       | shelley |
       | icarus  |
 
-  @LW-2356 @Testnet @Mainnet
+  @LW-2356 @LW-5036 @Testnet @Mainnet
   Scenario: Extended-view - Enter Incorrect address - Wrong checksum - Error displayed & Review button is disabled
     When I click "Send" button on page header
     And I enter an address  that matches the amount of characters but does not match with the checksum
     Then "Incorrect address" error is displayed under address input field
     And "Review transaction" button is disabled on "Send" page
+    And "Add address" button is disabled in the bundle 1 recipient's address input
 
   @LW-2357 @Testnet @Mainnet
   Scenario: Extended-view - Enter Incorrect address - Wrong amount of characters - Error displayed & Review button is disabled

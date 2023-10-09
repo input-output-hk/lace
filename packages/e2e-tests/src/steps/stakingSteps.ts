@@ -27,13 +27,6 @@ Then(/^I see Staking title displayed$/, async () => {
 });
 
 Then(
-  /^I see the stake pool search control with appropriate content in (extended|popup) mode$/,
-  async (mode: 'extended' | 'popup') => {
-    await stakingPageAssert.assertSeeSearchComponent(mode);
-  }
-);
-
-Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
     const stakePool =
@@ -147,13 +140,6 @@ Then(/^I input "([^"]*)" to the search bar$/, async (term: string) => {
     : StakingPageObject.fillSearch(term));
   await StakingPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
-
-Then(
-  /^there are (.*) results and "([^"]*)" and "([^"]*)" are populated if applicable$/,
-  async (results: number, resultTitle: string, resultSubTitle: string) => {
-    await stakingPageAssert.assertCheckResults(resultTitle, resultSubTitle, results);
-  }
-);
 
 When(/^I click stake pool with name "([^"]*)"$/, async (poolName: string) => {
   poolName === 'OtherStakePool'

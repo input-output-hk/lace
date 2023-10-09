@@ -3,7 +3,8 @@ import { browser } from '@wdio/globals';
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 import { TestnetPatterns } from '../../support/patterns';
-import NetworkComponent from '../../elements/staking/networkComponent';
+import NetworkComponent from '../../elements/multidelegation/NetworkInfoComponent';
+import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListItem';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -137,6 +138,50 @@ class MultidelegationPageAssert {
     );
     await NetworkComponent.percentageStakedDetail.waitForDisplayed();
     expect(await NetworkComponent.percentageStakedDetail.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  };
+
+  assertSeeSearchComponent = async () => {
+    await MultidelegationPage.searchIcon.waitForDisplayed();
+    await MultidelegationPage.stakingPageSearchInput.waitForDisplayed();
+    expect(await MultidelegationPage.stakingPageSearchInput.getAttribute('placeholder')).to.equal(
+      await t('browsePools.stakePoolTableBrowser.searchInputPlaceholder', 'staking')
+    );
+  };
+
+  assertSeeSearchResults = async (expectedResultsCount: number, searchTerm: string) => {
+    const rowsNumber = (await MultidelegationPage.poolsItems).length;
+    expect(rowsNumber).to.equal(expectedResultsCount);
+    await MultidelegationPage.emptySearchResultsImage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
+    await MultidelegationPage.emptySearchResultsMessage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
+    if (expectedResultsCount === 0) {
+      expect(await MultidelegationPage.emptySearchResultsMessage.getText()).to.equal(
+        await t('browsePools.stakePoolTableBrowser.emptyMessage', 'staking')
+      );
+    } else {
+      for (let index = 0; index < expectedResultsCount; index++) {
+        const stakePoolListItem = new StakePoolListItem(index);
+        await stakePoolListItem.logo.waitForDisplayed();
+        await stakePoolListItem.name.waitForDisplayed();
+        await stakePoolListItem.ticker.waitForDisplayed();
+        await stakePoolListItem.ros.waitForDisplayed();
+        await stakePoolListItem.saturation.waitForDisplayed();
+
+        const name = (await stakePoolListItem.name.getText()).toLowerCase();
+        const ticker = (await stakePoolListItem.ticker.getText()).toLowerCase();
+        expect(
+          name.includes(searchTerm.toLowerCase()) || ticker.includes(searchTerm.toLowerCase()),
+          `Stake pool name and ticker does not contain "${searchTerm}"`
+        ).to.be.true;
+      }
+    }
+  };
+
+  assertSeeFirstSearchResultWithNameAndTicker = async (expectedName: string, expectedTicker: string) => {
+    const firstStakePool = new StakePoolListItem(0);
+    await firstStakePool.name.waitForDisplayed();
+    expect(await firstStakePool.name.getText()).to.equal(expectedName);
+    await firstStakePool.ticker.waitForDisplayed();
+    expect(await firstStakePool.ticker.getText()).to.equal(expectedTicker);
   };
 }
 

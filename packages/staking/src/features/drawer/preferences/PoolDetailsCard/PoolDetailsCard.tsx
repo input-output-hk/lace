@@ -1,7 +1,7 @@
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import ChevronDownIcon from '@lace/ui/dist/assets/icons/chevron-down.component.svg';
 import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InfoIcon from '../../../../assets/icons/info-icon.svg';
 import { Tooltip } from '../../../overview/StakingInfoCard/StatsTooltip';
@@ -23,9 +23,9 @@ interface PoolDetailsCardProps {
   onExpandButtonClick: () => void;
   onPercentageChange: PercentagesChangeHandler;
   onRemove?: () => void;
-  actualRatio?: number;
-  savedRatio?: number;
-  targetRatio: number;
+  actualPercentage?: number;
+  savedPercentage?: number;
+  targetPercentage: number;
   stakeValue: string;
   cardanoCoinSymbol: string;
 }
@@ -38,24 +38,19 @@ export const PoolDetailsCard = ({
   onExpandButtonClick,
   onPercentageChange,
   onRemove,
-  actualRatio,
-  savedRatio,
+  actualPercentage,
+  savedPercentage,
   stakeValue,
-  targetRatio,
+  targetPercentage,
   cardanoCoinSymbol,
 }: PoolDetailsCardProps) => {
-  const effectInitialized = useRef(false);
   const { t } = useTranslation();
-  const [localValue, setLocalValue] = useState(targetRatio);
+  const [localValue, setLocalValue] = useState(targetPercentage);
 
-  useEffect(() => {
-    if (!effectInitialized.current) {
-      effectInitialized.current = true;
-      return;
-    }
-    onPercentageChange(localValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localValue]);
+  const updatePercentage = (value: number) => {
+    setLocalValue(value);
+    onPercentageChange(value);
+  };
 
   return (
     <Card.Outlined className={styles.root}>
@@ -87,7 +82,7 @@ export const PoolDetailsCard = ({
                   <InfoIcon className={styles.valueInfoIcon} />
                 </Box>
                 <Text.Body.Large weight="$semibold">
-                  {savedRatio || '-'} {savedRatio && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
+                  {savedPercentage || '-'} {savedPercentage && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
                 </Text.Body.Large>
               </Flex>
               <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
@@ -99,7 +94,7 @@ export const PoolDetailsCard = ({
                   <InfoIcon className={styles.valueInfoIcon} />
                 </Box>
                 <Text.Body.Large weight="$semibold">
-                  {actualRatio || '-'} {actualRatio && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
+                  {actualPercentage || '-'} {actualPercentage && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
                 </Text.Body.Large>
               </Flex>
               <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>
@@ -132,7 +127,7 @@ export const PoolDetailsCard = ({
               )}
               <Flex alignItems="center" gap="$12">
                 <Text.Body.Large>Ratio</Text.Body.Large>
-                <RatioInput onUpdate={setLocalValue} value={localValue} />
+                <RatioInput onUpdate={updatePercentage} value={localValue} />
                 <Text.Body.Large>%</Text.Body.Large>
               </Flex>
             </Flex>
@@ -141,7 +136,7 @@ export const PoolDetailsCard = ({
               max={PERCENTAGE_SCALE_MAX}
               min={localValue === 0 ? 0 : 1}
               value={localValue}
-              onValueChange={setLocalValue}
+              onValueChange={updatePercentage}
             />
             <Tooltip content={onRemove ? undefined : t('drawer.preferences.pickMorePools')}>
               <div>
