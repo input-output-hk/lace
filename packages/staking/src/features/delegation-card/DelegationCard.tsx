@@ -63,7 +63,13 @@ export const DelegationCard = ({
     { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
   ];
 
-  const totalPercentage = useMemo(() => distribution.reduce((acc, cur) => acc + cur.percentage, 0), [distribution]);
+  const totalPercentage = useMemo(() => {
+    const percentageSum = distribution.reduce((acc, cur) => acc + cur.percentage, 0);
+    // TODO: remove after LW-8683 implemented
+    // Round to avoid floating point errors in case of on-chain (float) percentages being passed to this component
+    return Math.round(percentageSum);
+  }, [distribution]);
+
   const { data, colorSet = PIE_CHART_DEFAULT_COLOR_SET } = useMemo((): {
     colorSet?: PieChartColor[];
     data: Distribution;

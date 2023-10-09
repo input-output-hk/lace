@@ -1,4 +1,4 @@
-class NetworkComponent {
+class NetworkInfoComponent {
   private NETWORK_CONTAINER = '[data-testid="network-header-container"]';
   private NETWORK_HEADER_TITLE = '[data-testid="network-header-title"]';
   private CURRENT_EPOCH_LABEL = '[data-testid="network-current-epoch-label"]';
@@ -51,4 +51,4 @@ class NetworkComponent {
   }
 }
 
-export default new NetworkComponent();
+export default new NetworkInfoComponent();
