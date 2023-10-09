@@ -20,8 +20,8 @@ Feature: DAppConnector - Low Funds
   Scenario: Automatically trigger collateral setup - Insufficient funds modal - cancel click
     Given I switch network to: "Mainnet" in extended mode
     And I open and authorize test DApp with "Only once" setting
-    And I click "Set Collateral" button in test DApp
-    And I see DApp insufficient funds window
+    When I click "Set Collateral" button in test DApp
+    Then I see DApp insufficient funds window
     When I click "Cancel" button in DApp insufficient funds window
     And I switch to window with DApp
     Then I don't see DApp window

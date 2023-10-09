@@ -106,13 +106,13 @@ class DAppConnectorAssert {
     await this.assertSeeHeader();
 
     await InsufficientFundsDAppPage.pageTitle.waitForDisplayed();
-    await expect(await InsufficientFundsDAppPage.pageTitle.getText()).to.equal(
+    expect(await InsufficientFundsDAppPage.pageTitle.getText()).to.equal(
       await t('dapp.collateral.insufficientFunds.title')
     );
 
     await InsufficientFundsDAppPage.image.waitForDisplayed();
     await InsufficientFundsDAppPage.description.waitForDisplayed();
-    await expect(await InsufficientFundsDAppPage.description.getText()).to.equal(
+    expect(await InsufficientFundsDAppPage.description.getText()).to.equal(
       await t('dapp.collateral.insufficientFunds.description')
     );
 
