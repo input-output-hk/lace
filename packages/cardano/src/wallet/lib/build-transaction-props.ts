@@ -1,9 +1,10 @@
-import { Cardano, Handle } from '@cardano-sdk/core';
+import { Cardano, Handle, HandleResolution } from '@cardano-sdk/core';
 import { Assets } from '@cardano-sdk/wallet';
 import { InitializeTxProps } from '@cardano-sdk/tx-construction';
 import isEmpty from 'lodash/isEmpty';
 import { assetBalanceToBigInt } from '../util/asset-balance';
 import { getAuxiliaryData } from './get-auxiliary-data';
+import { Wallet } from '@src/index';
 
 type CardanoOutput = {
   address?: Cardano.TxOut['address'];
@@ -37,7 +38,7 @@ export const buildTransactionProps = (props: {
   metadata?: string;
   assetsInfo?: Assets;
 }): InitializeTxProps => {
-  const txSet = new Set<Cardano.TxOut & { handle?: Handle }>();
+  const txSet = new Set<Cardano.TxOut & { handleResolution?: HandleResolution }>();
   for (const output of props.outputsMap.values()) {
     // filter outputs that are missing fields
     if (output?.address && output?.value?.coins) {
@@ -47,7 +48,12 @@ export const buildTransactionProps = (props: {
           coins: BigInt(output.value.coins),
           ...(output?.value?.assets && { assets: convertAssetsToBigInt(output.value.assets, props.assetsInfo) })
         },
-        handle: output.handle?.startsWith('$') ? output.handle.slice(1) : output.handle
+        handleResolution: {
+          handle: output.handle?.startsWith('$') ? output.handle.slice(1) : output.handle,
+          cardanoAddress: output.address,
+          hasDatum: !!output.datum,
+          policyId: Wallet.Cardano.PolicyId('f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a')
+        }
       });
     }
   }

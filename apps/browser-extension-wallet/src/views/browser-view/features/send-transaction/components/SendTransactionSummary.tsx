@@ -139,7 +139,7 @@ export const SendTransactionSummary = withAddressBookContext(
     const rows = [...(outputs?.values() ?? [])].map((item) => ({
       list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
       recipientAddress: item.address.toString(),
-      recipientName: addressToNameMap?.get(item.address.toString()) || item.handle
+      recipientName: item.handleResolution.handle || addressToNameMap?.get(item.address.toString())
     }));
 
     // Where do we get the deposit field? LW-1363
