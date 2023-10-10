@@ -12,6 +12,7 @@ import {
   Flow,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
+  sumPercentagesSanitized,
   useDelegationPortfolioStore,
 } from '../store';
 import { StepPreferencesContent, StepPreferencesFooter } from './preferences';
@@ -34,7 +35,7 @@ type DraftPortfolioValidity = { valid: true } | { valid: false; reason: DraftPor
 
 const getDraftPortfolioValidity = (store: DelegationPortfolioStore): DraftPortfolioValidity => {
   if (!store.draftPortfolio || store.draftPortfolio.length === 0) return { valid: true }; // throw new Error('Draft portfolio is not defined');
-  const percentageSum = store.draftPortfolio.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0);
+  const percentageSum = sumPercentagesSanitized({ items: store.draftPortfolio, key: 'sliderIntegerPercentage' });
   if (percentageSum !== PERCENTAGE_SCALE_MAX) {
     return { reason: 'invalid-allocation', valid: false };
   }

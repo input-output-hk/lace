@@ -8,6 +8,7 @@ import {
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
+  sumPercentagesSanitized,
   useDelegationPortfolioStore,
 } from '../../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
@@ -15,7 +16,7 @@ import { PoolDetailsCard } from './PoolDetailsCard';
 const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore): DelegationStatus => {
   if (!draftPortfolio || draftPortfolio.length === 0) return 'no-selection';
 
-  const percentageSum = draftPortfolio?.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0);
+  const percentageSum = sumPercentagesSanitized({ items: draftPortfolio || [], key: 'sliderIntegerPercentage' });
   if (percentageSum > PERCENTAGE_SCALE_MAX) return 'over-allocated';
   if (percentageSum < PERCENTAGE_SCALE_MAX) return 'under-allocated';
 
