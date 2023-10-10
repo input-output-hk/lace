@@ -15,6 +15,7 @@ import { StoreProvider } from '@src/stores';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { DrawerUIContainer } from '@src/views/browser-view/components/Drawer';
 import { BehaviorSubject } from 'rxjs';
+import { postHogClientMocks } from '@src/utils/mocks/test-helpers';
 
 jest.mock('../../../store', () => ({
   ...jest.requireActual<any>('../../../store'),
@@ -29,6 +30,12 @@ const inMemoryWallet = {
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
   useWalletStore: mockUseWalletStore
+}));
+
+jest.mock('@providers/PostHogClientProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/PostHogClientProvider'),
+  usePostHogClientContext: () => postHogClientMocks
 }));
 
 describe('Testing StakingModal component', () => {

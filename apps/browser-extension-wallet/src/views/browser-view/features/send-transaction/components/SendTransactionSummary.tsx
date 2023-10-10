@@ -19,7 +19,8 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
-import { useObservable } from '@lace/common';
+import { useObservable, Banner } from '@lace/common';
+import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
 
 const { Text } = Typography;
 
@@ -113,6 +114,8 @@ export const SendTransactionSummary = withAddressBookContext(
       () => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
       [getKeyAgentType]
     );
+    const isTrezor = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.Trezor, [getKeyAgentType]);
+
     const { list: addressList } = useAddressBookContext();
     const analytics = useAnalyticsContext();
     const { fiatCurrency } = useCurrencyStore();
@@ -165,7 +168,19 @@ export const SendTransactionSummary = withAddressBookContext(
             })
           }
         />
-        {!isInMemory && !isPopupView && <Text className={styles.connectLedgerText}>{t('send.connectYourLedger')}</Text>}
+        {!isInMemory && !isPopupView && (
+          <Text className={styles.connectLedgerText}>
+            {isTrezor ? t('send.connectYourTrezor') : t('send.connectYourLedger')}
+          </Text>
+        )}
+        {isTrezor && (
+          <Banner
+            className={styles.banner}
+            message={t('send.trezorDoesNotDupportDecimals')}
+            withIcon
+            customIcon={<ExclamationIcon style={{ height: '72px' }} />}
+          />
+        )}
       </>
     );
   }
