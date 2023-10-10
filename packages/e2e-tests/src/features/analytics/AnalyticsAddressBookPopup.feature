@@ -13,6 +13,7 @@ Feature: Analytics - Posthog - Address book - Popup view
     When I fill address form with "Shelley_manual" name and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
     And I click "Save address" button on "Add new address" drawer
     Then I validate latest analytics single event "address book | add new address | save address | click"
+    And I validate that 2 analytics event(s) have been sent
 
   @LW-8679
   Scenario: Analytics - Popup-view - Address Book - Add new address and Cancel
@@ -22,6 +23,7 @@ Feature: Analytics - Posthog - Address book - Popup view
     Then I validate latest analytics single event "address book | add address | click"
     And I click "Cancel" button on "Add new address" drawer
     Then I validate latest analytics single event "address book | add new address | cancel | click"
+    And I validate that 2 analytics event(s) have been sent
 
   @LW-8680
   Scenario: Analytics - Popup-view - Address Book - Edit, Cancel edition, Cancel deletion and delete
@@ -49,3 +51,4 @@ Feature: Analytics - Posthog - Address book - Popup view
     Then I validate latest analytics single event "address book | address record | delete | click"
     When I click "Delete address" button on delete address modal
     Then I validate latest analytics single event "address book | address record | hold up! | delete address | click"
+    And I validate that 11 analytics event(s) have been sent

@@ -17,6 +17,7 @@ Feature: Transactions - Extended view
     Then I validate latest analytics single event "activity | activity detail | outputs | click"
     When I close the drawer by clicking close button
     Then I validate latest analytics single event "activity | activity detail | x | click"
+    And I validate that 5 analytics event(s) have been sent
 
   @LW-8712
   Scenario: Analytics - Popup View - Transactions tab - Details - Click hash
@@ -25,4 +26,5 @@ Feature: Transactions - Extended view
     When I click on a transaction: 1
     And I click on a transaction hash
     Then I validate latest analytics single event "activity | activity detail | transaction hash | click"
+    And I validate that 3 analytics event(s) have been sent
     

@@ -14,7 +14,8 @@ Feature: Analytics - Top Navigation - Popup view
     Then I validate latest analytics single event "user/wallet profile | wallet address | click"
     When I click on the Address Book option
     Then I validate latest analytics single event "user/wallet profile | address book | click"
-    When I click on the settings option
+    When I click the menu button
+    And I click on the settings option
     Then I validate latest analytics single event "user/wallet profile | settings | click"
     When I click the menu button
     And I set theme switcher to dark mode
@@ -23,6 +24,7 @@ Feature: Analytics - Top Navigation - Popup view
     Then I validate latest analytics single event "user/wallet profile | light mode | click"
     When I click on the network option
     Then I validate latest analytics single event "user/wallet profile | network | click"
+    And I validate that 10 analytics event(s) have been sent
 
   @LW-8755
   Scenario: Analytics - Popup view - Lace menu - User/wallet profile events - Lock wallet
@@ -30,3 +32,4 @@ Feature: Analytics - Top Navigation - Popup view
     When I click the menu button
     And I click on the Lock Wallet option
     Then I validate latest analytics single event "user/wallet profile | lock wallet | click"
+    And I validate that 2 analytics event(s) have been sent

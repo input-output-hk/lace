@@ -10,4 +10,6 @@ Feature: Analytics - Main Navigation - Extended view
     And I navigate to Tokens extended page
     When I click on the logo icon
     Then I validate latest analytics single event "wallet | lace | click"
+    And I validate that 2 analytics event(s) have been sent
+    
     

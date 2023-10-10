@@ -14,6 +14,7 @@ Feature: Analytics -  Tokens tab - extended view
     Then I validate latest analytics single event "token | tokens | token row | click"
     When I click on "View all" button on token details drawer
     Then I validate latest analytics single event "token | token detail | view all | click"
+    And I validate that 3 analytics event(s) have been sent
 
   @LW-8706
   Scenario: Analytics - Extended view - Tokens - Close drawer
@@ -23,3 +24,4 @@ Feature: Analytics -  Tokens tab - extended view
     When I click token with name: "Cardano"
     And I close the drawer by clicking close button
     Then I validate latest analytics single event "token | token detail | x | click"
+    And I validate that 3 analytics event(s) have been sent
