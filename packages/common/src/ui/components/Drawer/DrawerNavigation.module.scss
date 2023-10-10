@@ -13,6 +13,7 @@
   :global(.ant-btn-icon-only) {
     height: size_unit(5);
     width: size_unit(5);
+    z-index: 1;
   }
   @media (max-width: $breakpoint-popup) {
     border-bottom: none;
@@ -32,7 +33,6 @@
   position: absolute;
   top: 0;
   width: 100%;
-  z-index: -1;
   @media (max-width: $breakpoint-popup) {
     display: none;
   }
