@@ -109,9 +109,9 @@ export const StepPreferencesContent = () => {
               color={color}
               name={name}
               onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
-              actualRatio={onChainPercentage}
-              savedRatio={savedIntegerPercentage}
-              targetRatio={sliderIntegerPercentage}
+              actualPercentage={onChainPercentage}
+              savedPercentage={savedIntegerPercentage}
+              targetPercentage={sliderIntegerPercentage}
               stakeValue={stakeValue}
               cardanoCoinSymbol={cardanoCoinSymbol}
               expanded

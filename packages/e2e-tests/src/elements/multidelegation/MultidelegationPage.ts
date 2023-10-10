@@ -22,6 +22,8 @@ class MultidelegationPage {
   private SEARCH_INPUT = 'input[data-testid="search-input"]';
   private SEARCH_ICON = '[data-testid="search-icon"]';
   private SEARCH_LOADER = '[data-testid="search-loader"]';
+  private EMPTY_SEARCH_RESULTS_IMAGE = '[data-testid="stake-pool-table-empty-image"]';
+  private EMPTY_SEARCH_RESULTS_MESSAGE = '[data-testid="stake-pool-table-empty-message"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
   private STAKE_BUTTON = '[data-testid="stake-button"]';
@@ -102,6 +104,14 @@ class MultidelegationPage {
 
   get searchLoader() {
     return $(this.SEARCH_LOADER);
+  }
+
+  get emptySearchResultsImage() {
+    return $(this.EMPTY_SEARCH_RESULTS_IMAGE);
+  }
+
+  get emptySearchResultsMessage() {
+    return $(this.EMPTY_SEARCH_RESULTS_MESSAGE);
   }
 
   get poolsItems() {
