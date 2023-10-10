@@ -30,6 +30,10 @@ class TokensPageObject {
   async clickOnCoinGeckoCreditsLink() {
     await TokensPage.coinGeckoLink.click();
   }
+
+  async clickOnViewAllButton() {
+    await TokensPage.ViewAllButton.click();
+  }
 }
 
 export default new TokensPageObject();

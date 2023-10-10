@@ -14,6 +14,7 @@ import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import { Logger } from '../support/logger';
 import collateralDAppPage from '../elements/dappConnector/collateralDAppPage';
+import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -33,6 +34,11 @@ Then(/^I see DApp authorization window$/, async () => {
 Then(/^I see DApp collateral window$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeCollateralDAppPage(testDAppDetails);
+});
+
+Then(/^I see DApp insufficient funds window$/, async () => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeInsufficientFundsDAppPage();
 });
 
 Then(/^I see DApp authorization window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
@@ -118,6 +124,16 @@ Then(/^I click "(Confirm|Cancel)" button in DApp collateral window/, async (butt
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await (button === 'Confirm' ? collateralDAppPage.clickAcceptButton() : collateralDAppPage.clickCancelButton());
 });
+
+Then(
+  /^I click "(Add funds|Cancel)" button in DApp insufficient funds window/,
+  async (button: 'Add funds' | 'Cancel') => {
+    await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+    await (button === 'Add funds'
+      ? InsufficientFundsDAppPage.clickAddFundsButton()
+      : InsufficientFundsDAppPage.clickCancelButton());
+  }
+);
 
 When(/^I click "Create or restore a wallet" button in DApp no wallet modal$/, async () => {
   await DAppConnectorPageObject.clickCreateRestoreButtonInDAppNoWalletModal();

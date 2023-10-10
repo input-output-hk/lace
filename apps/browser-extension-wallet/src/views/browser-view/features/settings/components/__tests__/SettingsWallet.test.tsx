@@ -111,6 +111,12 @@ jest.mock('@cardano-sdk/web-extension', () => ({
   consumeRemoteApi: jest.fn()
 }));
 
+jest.mock('@providers/PostHogClientProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/PostHogClientProvider'),
+  usePostHogClientContext: jest.fn()
+}));
+
 const testIds = {
   settingsCard: 'settings-card',
   settingLink: 'settings-wallet-collateral-link',
