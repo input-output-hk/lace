@@ -36,7 +36,7 @@ class StakePoolDetailsAssert {
     } else {
       await StakePoolDetails.stakeButton.waitForDisplayed();
       await expect(await StakePoolDetails.stakeButton.getText()).to.equal(
-        await t('drawer.details.stakeOnPoolButton', 'staking')
+        await t('browserView.staking.details.stakeButtonText')
       );
     }
 
