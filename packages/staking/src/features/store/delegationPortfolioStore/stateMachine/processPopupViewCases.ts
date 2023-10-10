@@ -1,26 +1,35 @@
 import { atomicStateMutators } from './atomicStateMutators';
-import { PopupCurrentPoolDetailsCommand, PopupOverviewCommand, ShowDelegatedPoolDetails } from './commands';
+import {
+  CancelDrawer,
+  PopupCurrentPoolDetailsCommand,
+  PopupOverviewCommand,
+  ShowDelegatedPoolDetails,
+} from './commands';
 import { cases, handler } from './stateTreeUtilities';
-import { Flow, Handler, PopupViewFLow } from './types';
+import { Flow, Handler, PopupViewFLow, StateCurrentPoolDetails, StateOverview } from './types';
 
 export const processPopupViewCases: Handler = (params) =>
   cases<PopupViewFLow>(
     {
       [Flow.Overview]: cases<PopupOverviewCommand['type']>(
         {
-          ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails>(({ state, command: { data } }) => {
-            atomicStateMutators.showPoolDetails({ pool: data, state, targetFlow: Flow.CurrentPoolDetails });
-          }),
+          ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails, StateOverview, StateCurrentPoolDetails>(
+            ({ command: { data }, state }) => ({
+              ...state,
+              ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: Flow.CurrentPoolDetails }),
+            })
+          ),
         },
         params.command.type,
         Flow.Overview
       ),
       [Flow.CurrentPoolDetails]: cases<PopupCurrentPoolDetailsCommand['type']>(
         {
-          CancelDrawer: ({ state }) => {
-            atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview });
-            state.viewedStakePool = undefined;
-          },
+          CancelDrawer: handler<CancelDrawer, StateCurrentPoolDetails, StateOverview>(({ state }) => ({
+            ...state,
+            ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+            viewedStakePool: undefined,
+          })),
         },
         params.command.type,
         Flow.CurrentPoolDetails

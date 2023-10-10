@@ -81,7 +81,7 @@ export const useDelegationPortfolioStore = create(
               throw Object.assign(error, { paramsStack });
             }
             // eslint-disable-next-line sonarjs/no-extra-arguments
-            processCommand({
+            return processCommand({
               command: childCommand,
               executeCommand,
               state,
@@ -89,7 +89,7 @@ export const useDelegationPortfolioStore = create(
           };
 
           // eslint-disable-next-line sonarjs/no-extra-arguments
-          processCommand({ command, executeCommand, state });
+          return processCommand({ command, executeCommand, state });
         });
       },
       forceAbortFlows: () =>

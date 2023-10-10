@@ -17,6 +17,7 @@ import extensionUtils from '../utils/utils';
 import TokensPageObject from '../pageobject/tokensPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { browser } from '@wdio/globals';
+import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -99,6 +100,28 @@ class DAppConnectorAssert {
     );
     await CollateralDAppPage.cancelButton.waitForDisplayed();
     expect(await CollateralDAppPage.cancelButton.getText()).to.equal(await t('general.button.cancel'));
+  }
+
+  async assertSeeInsufficientFundsDAppPage() {
+    await this.assertSeeHeader();
+
+    await InsufficientFundsDAppPage.pageTitle.waitForDisplayed();
+    expect(await InsufficientFundsDAppPage.pageTitle.getText()).to.equal(
+      await t('dapp.collateral.insufficientFunds.title')
+    );
+
+    await InsufficientFundsDAppPage.image.waitForDisplayed();
+    await InsufficientFundsDAppPage.description.waitForDisplayed();
+    expect(await InsufficientFundsDAppPage.description.getText()).to.equal(
+      await t('dapp.collateral.insufficientFunds.description')
+    );
+
+    await InsufficientFundsDAppPage.addFundsButton.waitForDisplayed();
+    expect(await InsufficientFundsDAppPage.addFundsButton.getText()).to.equal(
+      await t('dapp.collateral.insufficientFunds.add')
+    );
+    await InsufficientFundsDAppPage.cancelButton.waitForDisplayed();
+    expect(await InsufficientFundsDAppPage.cancelButton.getText()).to.equal(await t('general.button.cancel'));
   }
 
   async assertSeeAuthorizePagePermissions() {

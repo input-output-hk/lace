@@ -10,3 +10,4 @@ process.env.USE_HIDE_MY_BALANCE = 'true';
 process.env.USE_POSTHOG_ANALYTICS = 'true';
 process.env.USE_POSTHOG_ANALYTICS_FOR_OPTED_OUT = 'false';
 process.env.USE_MATOMO_ANALYTICS_FOR_OPTED_OUT = 'false';
+process.env.PUBLIC_POSTHOG_HOST = 'https://eu.posthog.com';

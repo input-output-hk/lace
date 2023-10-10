@@ -141,13 +141,6 @@ Then(/^I input "([^"]*)" to the search bar$/, async (term: string) => {
   await StakingPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
 
-Then(
-  /^there are (.*) results and "([^"]*)" and "([^"]*)" are populated if applicable$/,
-  async (results: number, resultTitle: string, resultSubTitle: string) => {
-    await stakingPageAssert.assertCheckResults(resultTitle, resultSubTitle, results);
-  }
-);
-
 When(/^I click stake pool with name "([^"]*)"$/, async (poolName: string) => {
   poolName === 'OtherStakePool'
     ? await StakingPageObject.clickStakePoolWithName(testContext.load(poolName))

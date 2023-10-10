@@ -19,6 +19,7 @@ class TokensPage {
   private SEND_BUTTON_POPUP_MODE = 'main [data-testid="send-button"]';
   private CLOSED_EYE_ICON = '[data-testid="closed-eye-icon"]';
   private OPENED_EYE_ICON = '[data-testid="opened-eye-icon"]';
+  private VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
 
   get sendButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEND_BUTTON_POPUP_MODE);
@@ -50,6 +51,10 @@ class TokensPage {
 
   get totalBalanceCurrency(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BALANCE_CURRENCY);
+  }
+
+  get ViewAllButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.VIEW_ALL_BUTTON);
   }
 
   tokensAvatar(index: number): ChainablePromiseElement<WebdriverIO.Element> {
