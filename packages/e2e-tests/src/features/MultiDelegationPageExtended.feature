@@ -1,6 +1,9 @@
 @Staking-NonDelegatedFunds-Extended @Testnet @Mainnet
 Feature: Staking Page - Extended View
 
+  Background:
+    Given Lace is ready for test
+
   @LW-8449 @Testnet @Mainnet
   Scenario: Extended View - Staking search control is displayed with appropriate content
     Given I disable showing Multidelegation beta banner
@@ -78,7 +81,7 @@ Feature: Staking Page - Extended View
     And I click Browse pools tab
     And I input "ADA Capital" into stake pool search bar
     And I click on the stake pool with name "ADA Capital"
-    Then I see drawer with "ADA Capital" stake pool details and a button available for staking
+    Then I see drawer with "ADA Capital" stake pool details and a buttons for staking
 
   @LW-8438 @Testnet
   Scenario: Extended View - Staking - Stakepool details modal - Close modal
@@ -87,7 +90,5 @@ Feature: Staking Page - Extended View
     And I click Browse pools tab
     And I input "ADA Capital" into stake pool search bar
     And I click on the stake pool with name "ADA Capital"
-    Then I see drawer with "ADA Capital" stake pool details and a button available for staking
     When I close the drawer by clicking close button
-    Then Staking exit modal is not displayed
-    And Drawer is not displayed
+    Then Stake pool details drawer is not opened

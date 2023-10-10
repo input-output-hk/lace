@@ -208,3 +208,15 @@ Then(
     }
   }
 );
+
+Then(/^I see drawer with "([^"]*)" stake pool details and a buttons for staking$/, async (stakePoolName: string) => {
+  const stakePool =
+    stakePoolName === 'OtherStakePool'
+      ? getStakePoolByName(testContext.load(stakePoolName))
+      : getStakePoolByName(stakePoolName, extensionUtils.isMainnet() ? 'mainnet' : 'testnet');
+  await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
+});
+
+Then(/^Stake pool details drawer is not opened$/, async () => {
+  await stakePoolDetailsAssert.assertStakePoolDetailsModalIsNotOpened();
+});
