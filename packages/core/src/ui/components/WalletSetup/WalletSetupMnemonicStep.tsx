@@ -47,6 +47,8 @@ export const WalletSetupMnemonicStep = ({
   const [mnemonicStage, setMnemonicStage] = useState<MnemonicStage>('writedown');
   const [mnemonicConfirm, setMnemonicWordsConfirm] = useState(initialMnemonicWordsConfirm);
 
+  const [isWriting, setIsWriting] = useState(false);
+
   // reset the state on mnemonic change
   useEffect(() => {
     setMnemonicStep(0);
@@ -141,10 +143,11 @@ export const WalletSetupMnemonicStep = ({
 
                 setMnemonicWordsConfirm(newMnemonicWordsConfirm);
               }}
+              onDropdownVisibleChange={(open) => setIsWriting(open)}
               firstWordNumber={firstWordNumber}
               suggestionList={suggestionList}
             />
-            {mnemonicStep === mnemonicSteps - 1 && !isNextEnabled && !hasEmptyString(mnemonicConfirm) && (
+            {!isNextEnabled && !hasEmptyString(currentStepWords) && !isWriting && (
               <div className={styles.errorMessage}>
                 <span data-testid="passphrase-error">{translations.passphraseError}</span>
               </div>

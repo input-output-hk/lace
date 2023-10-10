@@ -28,6 +28,7 @@ class DAppConnectorPageObject {
 
   async waitAndSwitchToDAppConnectorWindow(expectedNumberOfHandles: number) {
     await waitUntilExpectedNumberOfHandles(expectedNumberOfHandles);
+    await browser.pause(1000);
     await browser.switchWindow(this.DAPP_CONNECTOR_WINDOW_HANDLE);
   }
 

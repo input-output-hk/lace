@@ -146,7 +146,10 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
               <Button
                 className={styles.newFolderBtn}
                 color="gradient"
-                onClick={() => setIsCreateFolderDrawerOpen(true)}
+                onClick={() => {
+                  setIsCreateFolderDrawerOpen(true);
+                  analytics.sendEventToPostHog(PostHogAction.NFTsCreateFolderClick);
+                }}
                 data-testid="create-folder-button"
               >
                 <FolderIcon className={styles.newFolderIcon} />

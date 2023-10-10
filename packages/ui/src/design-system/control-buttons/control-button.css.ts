@@ -15,6 +15,7 @@ export const container = recipe({
     border: vars.borders.$button_default,
     borderRadius: vars.radius.$medium,
     outline: 'none',
+    cursor: 'pointer',
     vars: {
       borderGap: vars.spacing.$2,
     },

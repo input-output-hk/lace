@@ -56,6 +56,18 @@
       "to": "To",
       "multipleAddresses": "Multiple addresses",
       "pools": "Pool(s)"
+    },
+    "walletNameAndPasswordSetupStep": {
+      "title": "Let's set up your new wallet",
+      "description": "Choose a name to identify your wallet and set up your password to unlock your wallet and make transactions.",
+      "nameInputLabel": "Wallet name",
+      "nameMaxLength": "Max. 20 characters",
+      "passwordInputLabel": "Password",
+      "confirmPasswordInputLabel": "Confirm password",
+      "nameRequiredMessage": "Wallet name is required",
+      "noMatchPassword": "Oops! The passwords don't match.",
+      "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
     }
   },
   "tab.main.title": "Tab extension",
@@ -214,7 +226,9 @@
     "sendMultipleOutputsAtTheSameTime": "Send multiple outputs at the same time and add metadata. This means you can send multiple assets to different addresses in one transaction",
     "theAmountYoullBeChargedToProcessYourTransaction": "The amount you'll be charged to process your transaction",
     "connectYourLedger": "Connect your Ledger device directly to your computer. Unlock the device and open the Cardano app. Then click confirm.",
-    "toSendAnNFTOrNativeToken": "To send an NFT or a native token, a small amount of ADA has to be sent with it to facilitate the operation"
+    "connectYourTrezor": "Just connect your device to your computer. Unlock the device and click 'confirm' to continue",
+    "toSendAnNFTOrNativeToken": "To send an NFT or a native token, a small amount of ADA has to be sent with it to facilitate the operation",
+    "trezorDoesNotDupportDecimals": "Trezor does not support decimals for Cardano tokens, so your device's software may show incorrect amounts (3 token units as 3,000,000, for example) when sending these tokens."
   },
   "staking": {
     "sectionTitle": "Staking",
@@ -596,7 +610,8 @@
       "notDetectedError": {
         "title": "Failed to detect device",
         "description": "Please make sure your device is unlocked and the Cardano app is open.",
-        "agree": "Agree"
+        "agree": "Agree",
+        "trezorDescription": "Please make sure your device is unlocked."
       },
       "startOver": {
         "title": "Are you sure you want to start again?",
@@ -840,11 +855,12 @@
           "success": "Edited successfully!"
         },
         "showPassphraseDrawer": {
-          "title": "Show 24-word recovery phrase",
+          "title": "Enter your password",
+          "YourRecoveryPhrase": "Your recovery phrase (keep it secret!)",
           "description": "This is the recovery phrase associated with your wallet. Use it to recover or import your wallet.",
           "warning": "This is sensitive information, make sure nobody is looking at your screen.",
-          "hidePassphrase": "Hide passphrase",
-          "showPassphrase": "Show passphrase"
+          "hidePassphrase": "Hide recovery phrase",
+          "showPassphrase": "Show recovery phrase"
         }
       },
       "legal": {
