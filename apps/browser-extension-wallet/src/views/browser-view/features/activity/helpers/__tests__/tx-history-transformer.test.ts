@@ -194,6 +194,7 @@ describe('Testing txHistoryTransformer function', () => {
       direction,
       date: '01 February 2022'
     });
+    expect(result.length).toBe(1);
     expect(result[0].status).toBe('success');
     expect(result[0].type).toBe('outgoing');
 
