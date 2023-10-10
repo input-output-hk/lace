@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import { Wallet } from '@lace/cardano';
-import { ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
+import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard, DelegationStatus } from '../../delegation-card';
 import { useOutsideHandles } from '../../outside-handles-provider';
@@ -11,6 +11,7 @@ import {
   useDelegationPortfolioStore,
 } from '../../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
+import * as styles from './StepPreferencesContent.css';
 
 const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore): DelegationStatus => {
   if (!draftPortfolio || draftPortfolio.length === 0) return 'no-selection';
@@ -84,13 +85,15 @@ export const StepPreferencesContent = () => {
 
   return (
     <Flex flexDirection="column" gap="$32" alignItems="stretch">
-      <DelegationCard
-        balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
-        cardanoCoinSymbol={symbol}
-        distribution={displayData}
-        status={delegationStatus}
-        showDistribution
-      />
+      <Box className={styles.delegationCardWrapper}>
+        <DelegationCard
+          balance={compactNumber(balancesBalance?.available?.coinBalance || '0')}
+          cardanoCoinSymbol={symbol}
+          distribution={displayData}
+          status={delegationStatus}
+          showDistribution
+        />
+      </Box>
       <Flex justifyContent="space-between">
         <Text.Body.Large weight="$semibold">
           {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}
