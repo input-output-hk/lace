@@ -79,3 +79,15 @@ Feature: Staking Page - Extended View
     And I input "ADA Capital" into stake pool search bar
     And I click on the stake pool with name "ADA Capital"
     Then I see drawer with "ADA Capital" stake pool details and a button available for staking
+
+  @LW-8438 @Testnet
+  Scenario: Extended View - Selecting stakepool from list opens drawer with appropriate details
+    Given I disable showing Multidelegation beta banner
+    And I am on Staking extended page
+    And I click Browse pools tab
+    And I input "ADA Capital" into stake pool search bar
+    And I click on the stake pool with name "ADA Capital"
+    Then I see drawer with "ADA Capital" stake pool details and a button available for staking
+    When I close the drawer by clicking close button
+    Then Staking exit modal is not displayed
+    And Drawer is not displayed
