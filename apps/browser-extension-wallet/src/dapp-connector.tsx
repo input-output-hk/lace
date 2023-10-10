@@ -16,6 +16,8 @@ import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from '@providers/ThemeProvider';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { APP_MODE_POPUP } from './utils/constants';
+import { PostHogClientProvider } from '@providers/PostHogClientProvider';
+import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -26,11 +28,15 @@ const App = (): React.ReactElement => (
             <AxiosClientProvider>
               <CurrencyStoreProvider>
                 <HashRouter>
-                  <AnalyticsProvider>
-                    <ThemeProvider>
-                      <DappConnectorView />
-                    </ThemeProvider>
-                  </AnalyticsProvider>
+                  <PostHogClientProvider>
+                    <ExperimentsProvider>
+                      <AnalyticsProvider>
+                        <ThemeProvider>
+                          <DappConnectorView />
+                        </ThemeProvider>
+                      </AnalyticsProvider>
+                    </ExperimentsProvider>
+                  </PostHogClientProvider>
                 </HashRouter>
               </CurrencyStoreProvider>
             </AxiosClientProvider>
