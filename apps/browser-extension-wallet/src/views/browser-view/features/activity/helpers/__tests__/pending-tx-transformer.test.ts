@@ -31,13 +31,21 @@ jest.mock('@lace/cardano', () => {
 
 describe('Testing tx transformers utils', () => {
   describe('Testing pendingTxTransformer function', () => {
+    const sendingAddress = Wallet.Cardano.PaymentAddress(
+      'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
+    );
     const pendingTx: Wallet.Cardano.Tx = {
       id: Wallet.Cardano.TransactionId('6804edf9712d2b619edb6ac86861fe93a730693183a262b165fcc1ba1bc99cad'),
       body: {
         inputs: [
           {
             txId: Wallet.Cardano.TransactionId('4123d70f66414cc921f6ffc29a899aafc7137a99a0fd453d6b200863ef5702d6'),
-            index: 1
+            index: 1,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore "address" property is actually present at runtime and it's crucial for the current transformer
+            // logic to work propely and "know" whether inputs belong to the wallet or not
+            // see LW-8767 ticket that is requesting the SDK type to be fixed
+            address: sendingAddress
           }
         ],
         outputs: [
@@ -77,9 +85,7 @@ describe('Testing tx transformers utils', () => {
         tx: { ...pendingTx, cbor: TxCBOR.serialize(pendingTx) },
         walletAddresses: [
           {
-            address: Wallet.Cardano.PaymentAddress(
-              'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
-            ),
+            address: sendingAddress,
             rewardAccount: Wallet.Cardano.RewardAccount(
               'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
             )
@@ -94,29 +100,32 @@ describe('Testing tx transformers utils', () => {
         cardanoCoin,
         time
       });
-      expect(result).toStrictEqual({
-        type: 'incoming',
-        status: 'sending',
-        date: 'Sending',
-        deposit: undefined,
-        depositReclaim: undefined,
-        fee: '1.00',
-        fiatAmount: '1.00 USD',
-        id: '6804edf9712d2b619edb6ac86861fe93a730693183a262b165fcc1ba1bc99cad',
-        amount: '1.00 ADA',
-        assets: [
-          {
-            id: '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
-            val: '100'
-          }
-        ],
-        assetsNumber: 2,
-        timestamp: formatTime({
-          date: time,
-          format: DEFAULT_TIME_FORMAT,
-          type: 'local'
-        })
-      });
+      expect(result).toStrictEqual([
+        {
+          type: 'outgoing',
+          status: 'sending',
+          date: 'Sending',
+          deposit: undefined,
+          depositReclaim: undefined,
+          direction: 'Outgoing',
+          fee: '1.00',
+          fiatAmount: '1.00 USD',
+          id: '6804edf9712d2b619edb6ac86861fe93a730693183a262b165fcc1ba1bc99cad',
+          amount: '1.00 ADA',
+          assets: [
+            {
+              id: '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
+              val: '100'
+            }
+          ],
+          assetsNumber: 2,
+          timestamp: formatTime({
+            date: time,
+            format: DEFAULT_TIME_FORMAT,
+            type: 'local'
+          })
+        }
+      ]);
     });
   });
 

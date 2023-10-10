@@ -31,7 +31,6 @@ export const TransactionDetailBrowser = ({
   includedTime,
   amountTransformer,
   coinSymbol,
-  rewards,
   type,
   isPopupView,
   ...props

@@ -205,27 +205,7 @@ describe('testing tx-inspection utils', () => {
         ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
-      expect(result).toBe('rewards');
-    });
-
-    test('is incoming rewards', () => {
-      const withdrawalTX = buildMockTx({
-        withdrawals: [
-          {
-            stakeAddress: REWARD_ACCOUNT,
-            quantity: BigInt(2_000_000)
-          }
-        ]
-      });
-
-      const result = inspectTxType({
-        tx: withdrawalTX,
-        walletAddresses: [
-          { address: ADDRESS_2, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
-      });
-
-      expect(result).toBe('rewards');
+      expect(result).toBe('outgoing');
     });
 
     test('is self rewards', () => {
