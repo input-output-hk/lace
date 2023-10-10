@@ -101,7 +101,7 @@ export const txTransformer = ({
   // note that TxInfliht at type level does not expose the inputs with address
   // which would prevent `inspectTxType` from determining whether tx is incoming or outgoing
   // however at runtime the property is present (ATM) thanks to which the call below works
-  // ticket open with SDK team to fix the type of Input in TxInFlight to contain address
+  // ticket LW-8767 open with SDK team to fix the type of Input in TxInFlight to contain address
   const type = inspectTxType({ walletAddresses, tx: tx as unknown as Wallet.Cardano.HydratedTx });
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
   const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
