@@ -6135,9 +6135,9 @@ __metadata:
   linkType: hard
 
 "@dcspark/cardano-multiplatform-lib-nodejs@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "@dcspark/cardano-multiplatform-lib-nodejs@npm:3.1.1"
-  checksum: e408d338fe199a29f0901364b77d284cc9455c0adc9041aadd8932b068a929040fda823a07eb80e5ca0df1396f148295cea3ea089de75339649141b23bdc00e3
+  version: 3.1.2
+  resolution: "@dcspark/cardano-multiplatform-lib-nodejs@npm:3.1.2"
+  checksum: b9afbe180758b8b564b2413b052d03f5225884d2425c23a33c8a65275c0a22de80f5a3e9ddda52a8e6a18072f7f898b5575aab70295e5216c3d3ae5e4c2daab0
   languageName: node
   linkType: hard
 

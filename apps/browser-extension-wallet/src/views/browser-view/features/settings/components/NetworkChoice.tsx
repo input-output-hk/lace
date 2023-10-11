@@ -17,23 +17,27 @@ const { AVAILABLE_CHAINS } = config();
 type networkEventSettings =
   | PostHogAction.SettingsNetworkPreviewClick
   | PostHogAction.SettingsNetworkPreprodClick
-  | PostHogAction.SettingsNetworkMainnetClick;
+  | PostHogAction.SettingsNetworkMainnetClick
+  | PostHogAction.SettingsNetworkSanchonetClick;
 
 type networkEventUserWalletProfile =
   | PostHogAction.UserWalletProfileNetworkPreviewClick
   | PostHogAction.UserWalletProfileNetworkPreprodClick
-  | PostHogAction.UserWalletProfileNetworkMainnetClick;
+  | PostHogAction.UserWalletProfileNetworkMainnetClick
+  | PostHogAction.UserWalletProfileNetworkSanchonetClick;
 
-const settingsEventByNetworkName: Partial<Record<Wallet.ChainName, networkEventSettings>> = {
+const settingsEventByNetworkName: Record<Wallet.ChainName, networkEventSettings> = {
   Mainnet: PostHogAction.SettingsNetworkMainnetClick,
   Preprod: PostHogAction.SettingsNetworkPreprodClick,
-  Preview: PostHogAction.SettingsNetworkPreviewClick
+  Preview: PostHogAction.SettingsNetworkPreviewClick,
+  Sanchonet: PostHogAction.SettingsNetworkSanchonetClick
 };
 
-const walletProfileEventByNetworkName: Partial<Record<Wallet.ChainName, networkEventUserWalletProfile>> = {
+const walletProfileEventByNetworkName: Record<Wallet.ChainName, networkEventUserWalletProfile> = {
   Mainnet: PostHogAction.UserWalletProfileNetworkMainnetClick,
   Preprod: PostHogAction.UserWalletProfileNetworkPreprodClick,
-  Preview: PostHogAction.UserWalletProfileNetworkPreviewClick
+  Preview: PostHogAction.UserWalletProfileNetworkPreviewClick,
+  Sanchonet: PostHogAction.UserWalletProfileNetworkSanchonetClick
 };
 
 export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-profile' }): React.ReactElement => {
@@ -51,6 +55,8 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
           return t('general.networks.preprod');
         case 'Preview':
           return t('general.networks.preview');
+        case 'Sanchonet':
+          return t('general.networks.sanchonet');
         default:
           return '';
       }
