@@ -13,6 +13,7 @@ import {
   sumPercentagesSanitized,
   useDelegationPortfolioStore,
 } from '../../store';
+import { NoPoolsSelected } from './NoPoolsSelected';
 import { PoolDetailsCard } from './PoolDetailsCard';
 import * as styles from './StepPreferencesContent.css';
 
@@ -117,6 +118,11 @@ export const StepPreferencesContent = () => {
         />
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" data-testid="selected-pools-container">
+        {displayData.length === 0 && (
+          <Box pt="$20">
+            <NoPoolsSelected onBrowsePoolsButtonClick={onAddPoolButtonClick} />
+          </Box>
+        )}
         {displayData.map(
           (
             { color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage },
@@ -126,7 +132,7 @@ export const StepPreferencesContent = () => {
               key={id}
               color={color}
               name={name}
-              onRemove={draftPortfolio.length > 1 ? createRemovePoolFromPortfolio(id) : undefined}
+              onRemove={createRemovePoolFromPortfolio(id)}
               actualPercentage={onChainPercentage}
               savedPercentage={savedIntegerPercentage}
               targetPercentage={sliderIntegerPercentage}
