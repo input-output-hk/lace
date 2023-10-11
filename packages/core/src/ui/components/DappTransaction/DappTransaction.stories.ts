@@ -26,7 +26,6 @@ const data: ComponentProps<typeof DappTransaction> = {
     amount: 'Amount',
     adaFollowingNumericValue: 'ADA',
     fee: 'Fee',
-    insufficientFunds: 'You do not have enough funds to complete the transaction',
     transaction: 'Transaction'
   },
   transaction: {
@@ -39,8 +38,7 @@ const data: ComponentProps<typeof DappTransaction> = {
       }
     ],
     type: 'Mint'
-  },
-  hasInsufficientFunds: false
+  }
 };
 
 export const Overview: Story = {
@@ -51,8 +49,7 @@ export const Overview: Story = {
 
 export const WithInsufficientFunds: Story = {
   args: {
-    ...data,
-    hasInsufficientFunds: true
+    ...data
   }
 };
 

@@ -51,7 +51,6 @@ export const DappTransactionContainer = withAddressBookContext(
           amount: t('core.dappTransaction.amount'),
           recipient: t('core.dappTransaction.recipient'),
           fee: t('core.dappTransaction.fee'),
-          insufficientFunds: t('core.dappTransaction.insufficientFunds'),
           adaFollowingNumericValue: t('general.adaFollowingNumericValue')
         }}
       />
