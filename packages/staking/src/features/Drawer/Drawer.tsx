@@ -45,7 +45,7 @@ const getDraftPortfolioValidity = (store: DelegationPortfolioStore): DraftPortfo
   return { valid: true };
 };
 
-export const StakePoolDetails = ({
+export const Drawer = ({
   popupView,
   showCloseIcon,
   showBackIcon,
