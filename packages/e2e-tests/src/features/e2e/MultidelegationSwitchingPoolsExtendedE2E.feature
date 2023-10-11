@@ -6,7 +6,8 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I disable showing Multidelegation beta banner
     And I navigate to Staking extended page
 
-  @LW-7819 @Testnet
+  @LW-7819 @Testnet @Pending
+#    bug LW-8777
   Scenario Outline: Extended View - Multidelegation - Delegate to multiple pools E2E
     When I click Overview tab
     And I wait until delegation info card shows staking to "<pools_before>" pool(s)
