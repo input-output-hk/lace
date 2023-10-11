@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { DelegationCard, DelegationStatus } from '../../delegation-card';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import {
+  DelegationFlow,
   DelegationPortfolioStore,
-  Flow,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
   sumPercentagesSanitized,
@@ -39,9 +39,9 @@ export const StepPreferencesContent = () => {
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,
   } = useOutsideHandles();
-  const { draftPortfolio, activeFlow, portfolioMutators, delegationStatus, cardanoCoinSymbol } =
+  const { draftPortfolio, activeDelegationFlow, portfolioMutators, delegationStatus, cardanoCoinSymbol } =
     useDelegationPortfolioStore((state) => ({
-      activeFlow: state.activeFlow,
+      activeDelegationFlow: state.activeDelegationFlow,
       cardanoCoinSymbol: state.cardanoCoinSymbol,
       delegationStatus: getDraftDelegationStatus(state),
       draftPortfolio: state.draftPortfolio || [],
@@ -121,7 +121,7 @@ export const StepPreferencesContent = () => {
               targetPercentage={sliderIntegerPercentage}
               stakeValue={stakeValue}
               cardanoCoinSymbol={cardanoCoinSymbol}
-              defaultExpand={activeFlow === Flow.PortfolioManagement ? idx === 0 : true}
+              defaultExpand={activeDelegationFlow === DelegationFlow.PortfolioManagement ? idx === 0 : true}
               onPercentageChange={(value) => {
                 portfolioMutators.executeCommand({
                   data: { id, newSliderPercentage: value },

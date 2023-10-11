@@ -5,8 +5,8 @@ import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH, PERCENTAGE_SCALE_MAX } from './
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
 import {
   Command,
+  DelegationFlow,
   ExecuteCommand,
-  Flow,
   Handler,
   processExpandedViewCases,
   processPopupViewCases,
@@ -16,8 +16,8 @@ import { normalizePercentages } from './stateMachine/normalizePercentages';
 import { DelegationPortfolioState, DelegationPortfolioStore } from './types';
 
 const defaultState: DelegationPortfolioState = {
+  activeDelegationFlow: DelegationFlow.Overview,
   activeDrawerStep: undefined,
-  activeFlow: Flow.Overview,
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
   draftPortfolio: undefined,
@@ -94,10 +94,12 @@ export const useDelegationPortfolioStore = create(
       },
       forceAbortFlows: () =>
         set((state) => {
-          const viewingOverviewPage = [Flow.Overview, Flow.CurrentPoolDetails, Flow.PortfolioManagement].includes(
-            state.activeFlow
-          );
-          state.activeFlow = viewingOverviewPage ? Flow.Overview : Flow.BrowsePools;
+          const viewingOverviewPage = [
+            DelegationFlow.Overview,
+            DelegationFlow.CurrentPoolDetails,
+            DelegationFlow.PortfolioManagement,
+          ].includes(state.activeDelegationFlow);
+          state.activeDelegationFlow = viewingOverviewPage ? DelegationFlow.Overview : DelegationFlow.BrowsePools;
           state.activeDrawerStep = undefined;
           state.selectedPortfolio = [];
           state.pendingSelectedPortfolio = undefined;

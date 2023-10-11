@@ -1,18 +1,22 @@
 import { Button, Card, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from '../staking/arrow-right.svg';
-import { Flow, MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
+import { DelegationFlow, MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import * as styles from './PortfolioBar.css';
 
 export const PortfolioBar = () => {
   const { t } = useTranslation();
-  const { activeFlow, portfolioMutators, selectedPoolsCount } = useDelegationPortfolioStore((store) => ({
-    activeFlow: store.activeFlow,
+  const { activeDelegationFlow, portfolioMutators, selectedPoolsCount } = useDelegationPortfolioStore((store) => ({
+    activeDelegationFlow: store.activeDelegationFlow,
     portfolioMutators: store.mutators,
     selectedPoolsCount: store.selectedPortfolio.length,
   }));
 
-  if (![Flow.BrowsePools, Flow.PoolDetails].includes(activeFlow) || selectedPoolsCount === 0) return null;
+  if (
+    ![DelegationFlow.BrowsePools, DelegationFlow.PoolDetails].includes(activeDelegationFlow) ||
+    selectedPoolsCount === 0
+  )
+    return null;
 
   return (
     <Card.Elevated className={styles.barContainer}>
