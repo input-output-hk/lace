@@ -259,6 +259,12 @@ const colors: Colors = {
   $input_button_icon_color: lightColorScheme.$primary_dark_grey,
   $input_label_color: lightColorScheme.$primary_dark_grey,
   $input_error_message_color: lightColorScheme.$secondary_data_pink,
+
+  $text_primary: lightColorScheme.$primary_black,
+  $text_secondary: lightColorScheme.$primary_dark_grey,
+
+  $metadata_label_color: lightColorScheme.$primary_black,
+  $metadata_secondary_label_color: lightColorScheme.$primary_dark_grey,
 };
 
 export const elevation: Elevation = {

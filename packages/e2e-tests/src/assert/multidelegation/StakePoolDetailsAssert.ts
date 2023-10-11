@@ -79,6 +79,10 @@ class StakePoolDetailsAssert {
     );
     expect(await StakePoolDetails.delegatorsValue.getText()).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
   }
+
+  async assertStakePoolDetailsDrawerIsNotOpened() {
+    await StakePoolDetails.container.waitForDisplayed({ reverse: true });
+  }
 }
 
 export default new StakePoolDetailsAssert();
