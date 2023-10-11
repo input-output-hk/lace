@@ -15,7 +15,7 @@ type PercentagesChangeHandler = (value: number) => void;
 
 interface PoolDetailsCardProps {
   color: PieChartColor;
-  defaultExpand: boolean;
+  defaultExpand?: boolean;
   name: string;
   onPercentageChange: PercentagesChangeHandler;
   onRemove?: () => void;
