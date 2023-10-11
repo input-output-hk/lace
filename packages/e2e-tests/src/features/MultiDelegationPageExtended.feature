@@ -74,6 +74,19 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     Then I see the Network Info component with the expected content
 
+  @LW-8637 @Testnet @Mainnet
+  Scenario: Extended View - Staking password screen details
+    Given I disable showing Multidelegation beta banner
+    When I navigate to Staking extended page
+    And I click Overview tab
+    And I click Browse pools tab
+    And I input "ADA Capital" into stake pool search bar
+    And I click on the stake pool with name "ADA Capital"
+    And I click on "Stake all on this pool" button on stake pool details drawer
+    And I click on "Next" button on staking preferences drawer
+    And I click on "Next" button on staking confirmation drawer
+    Then staking password drawer is displayed
+
   @LW-8445 @Testnet
   Scenario: Extended View - Selecting stakepool from list opens drawer with appropriate details
     Given I disable showing Multidelegation beta banner
