@@ -17,8 +17,8 @@
         "staking": "Staking",
         "name": {
           "delegation": "Delegation",
-          "delegationDeregistration": "De-Registration",
-          "delegationRegistration": "Registration",
+          "delegationDeregistration": "Stake Key De-Registration",
+          "delegationRegistration": "Stake Key Registration",
           "rewards": "Rewards",
           "incoming": "Received",
           "outgoing": "Sent",
@@ -39,10 +39,13 @@
       "outputs": "Outputs",
       "transactionFee": "Transaction fee",
       "deposit": "Deposit",
+      "depositReclaim": "Returned deposit",
       "metadata": "Metadata",
       "transactionFeeInfo": "The amount you have been charged to process your transaction",
       "received": "Received",
       "delegation": "Delegation",
+      "registration": "Stake Key Registration",
+      "deregistration": "Stake Key De-registration",
       "poolName": "Pool name",
       "poolTicker": "Pool ticker",
       "poolId": "Pool ID",
@@ -51,7 +54,20 @@
       "summary": "Summary",
       "from": "From",
       "to": "To",
-      "multipleAddresses": "Multiple addresses"
+      "multipleAddresses": "Multiple addresses",
+      "pools": "Pool(s)"
+    },
+    "walletNameAndPasswordSetupStep": {
+      "title": "Let's set up your new wallet",
+      "description": "Choose a name to identify your wallet and set up your password to unlock your wallet and make transactions.",
+      "nameInputLabel": "Wallet name",
+      "nameMaxLength": "Max. 20 characters",
+      "passwordInputLabel": "Password",
+      "confirmPasswordInputLabel": "Confirm password",
+      "nameRequiredMessage": "Wallet name is required",
+      "noMatchPassword": "Oops! The passwords don't match.",
+      "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
     }
   },
   "tab.main.title": "Tab extension",
@@ -86,7 +102,8 @@
       "incorrectHandle": "Handle not found",
       "wrongNetworkAddress": "This address belongs to a different network",
       "wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead.",
-      "handleConflict": "There is an address conflict. We expected {{receivedAddress}} but got {{actualAddress}}."
+      "handleConflict": "There is an address conflict. We expected {{receivedAddress}} but got {{actualAddress}}.",
+      "invalidHandle": "Invalid $handle"
     },
     "warnings": {
       "youHaveToStartAgain": "You'll have to start again",
@@ -209,7 +226,9 @@
     "sendMultipleOutputsAtTheSameTime": "Send multiple outputs at the same time and add metadata. This means you can send multiple assets to different addresses in one transaction",
     "theAmountYoullBeChargedToProcessYourTransaction": "The amount you'll be charged to process your transaction",
     "connectYourLedger": "Connect your Ledger device directly to your computer. Unlock the device and open the Cardano app. Then click confirm.",
-    "toSendAnNFTOrNativeToken": "To send an NFT or a native token, a small amount of ADA has to be sent with it to facilitate the operation"
+    "connectYourTrezor": "Just connect your device to your computer. Unlock the device and click 'confirm' to continue",
+    "toSendAnNFTOrNativeToken": "To send an NFT or a native token, a small amount of ADA has to be sent with it to facilitate the operation",
+    "trezorDoesNotDupportDecimals": "Trezor does not support decimals for Cardano tokens, so your device's software may show incorrect amounts (3 token units as 3,000,000, for example) when sending these tokens."
   },
   "staking": {
     "sectionTitle": "Staking",
@@ -341,7 +360,15 @@
       "btn.close": "Got it",
       "btn.learnMore": "Learn more"
     },
-    "transactions.confirm.title": "Confirm transaction"
+    "transactions.confirm.title": "Confirm transaction",
+    "collateral.set.header": "Set Collateral",
+    "collateral.create.header": "Create Collateral",
+    "collateral.request": "{{dapp}} requires {{requestedAmount}} {{symbol}} collateral to proceed and {{lockableAmount}} {{symbol}} can be locked without any further transaction.",
+    "collateral.calculating": "Calculating Collateral",
+    "collateral.amountSeparated": "The amount is separated from your account balance, you can choose to return it to your balance at any time.",
+    "collateral.insufficientFunds.title": "Insufficient Funds",
+    "collateral.insufficientFunds.description": "Please add funds to your wallet to avoid and collateral issues",
+    "collateral.insufficientFunds.add": "Add funds"
   },
   "qrInfo": {
     "receive": "Receive",
@@ -371,8 +398,10 @@
     "assetDetails.assetPrice": "Token price",
     "assetDetails.assetBalance": "Token balance",
     "assetDetails.recentTransactions": "Recent transactions",
-    "assetDetails.seeAllYourTransactions": "See all your transactions",
     "assetDetails.viewAll": "View all",
+    "assetDetails.tokenInformation": "Token Information",
+    "assetDetails.fingerprint": "Fingerprint",
+    "assetDetails.policyId": "Policy ID",
     "sideMenu.links.tokens": "Tokens",
     "sideMenu.links.nfts": "NFTs",
     "sideMenu.links.activity": "Activity",
@@ -453,7 +482,7 @@
     "addressBook.form.nameIsTooLong": "Max {{maxLength}} Characters",
     "addressBook.form.addressMissing": "Address field is required",
     "addressBook.form.addressHasWhiteSpace": "Address has unnecessary white space",
-    "addressBook.form.incorrectCardanoAddress": "Incorrect Cardano address",
+    "addressBook.form.invalidCardanoAddress": "Invalid Cardano address",
     "addressBook.form.addNewAddress": "Add new address",
     "addressBook.form.addNewSubtitle": "Save your favorite addresses to find them easily",
     "voting.pageTitle": "Voting",
@@ -510,7 +539,7 @@
         "subtitle": "Have a look at the Glossary"
       },
       "stakePoolsTable.title": "Stake pools",
-      "stakePoolsTable.searchPlaceholder": "Search by type, token name or ID",
+      "stakePoolsTable.searchPlaceholder": "Search by pool name, ticker, or ID",
       "stakePoolsTable.emptyMessage": "No results matching your search",
       "details": {
         "title": "Stake pool detail",
@@ -528,7 +557,9 @@
         "confirmation.title": "Staking confirmation",
         "confirmation.subTitle": "Confirm the stake pool",
         "confirmation.cardanoName": "Cardano",
-        "confirmation.totalCost.title": "Transaction cost",
+        "confirmation.transactionCost.title": "Transaction cost",
+        "confirmation.transactionReturn.title": "Transaction return",
+        "confirmation.transactionTotal.title": "Total",
         "confirmation.button.confirm": "Next",
         "confirmation.button.signing": "Signing in progress",
         "confirmation.button.confirmWithDevice": "Confirm with {{hardwareWallet}}",
@@ -579,7 +610,8 @@
       "notDetectedError": {
         "title": "Failed to detect device",
         "description": "Please make sure your device is unlocked and the Cardano app is open.",
-        "agree": "Agree"
+        "agree": "Agree",
+        "trezorDescription": "Please make sure your device is unlocked."
       },
       "startOver": {
         "title": "Are you sure you want to start again?",
@@ -627,8 +659,8 @@
         "staking": "Staking",
         "name": {
           "delegation": "Delegation",
-          "delegationDeregistration": "De-Registration",
-          "delegationRegistration": "Registration",
+          "delegationDeregistration": "Stake Key De-Registration",
+          "delegationRegistration": "Stake Key Registration",
           "withdrawal": "Withdrawal",
           "incoming": "Received",
           "outgoing": "Sent",
@@ -748,7 +780,7 @@
           "confirm": "Confirm",
           "reclaimCollateral": "Reclaim collateral",
           "continueInAdvancedView": "Continue in Advanced View",
-          "confirmWithLedger": "Confirm transaction with Ledger",
+          "confirmWithDevice": "Confirm transaction with {{ hardwareWallet }}",
           "notEnoughAda": "You don't have enough ADA to proceed with the transaction.",
           "active": "Active",
           "inactive": "Inactive",
@@ -823,11 +855,12 @@
           "success": "Edited successfully!"
         },
         "showPassphraseDrawer": {
-          "title": "Show 24-word recovery phrase",
+          "title": "Enter your password",
+          "YourRecoveryPhrase": "Your recovery phrase (keep it secret!)",
           "description": "This is the recovery phrase associated with your wallet. Use it to recover or import your wallet.",
           "warning": "This is sensitive information, make sure nobody is looking at your screen.",
-          "hidePassphrase": "Hide passphrase",
-          "showPassphrase": "Show passphrase"
+          "hidePassphrase": "Hide recovery phrase",
+          "showPassphrase": "Show recovery phrase"
         }
       },
       "legal": {
@@ -1077,7 +1110,7 @@
     },
     "editAddressForm": {
       "walletName": "Wallet name",
-      "address": "Address",
+      "address": "Recipient’s address or $handle",
       "submissionError": "Address could not be submitted",
       "doneButton": "Done"
     },
@@ -1111,7 +1144,7 @@
     },
     "walletAddressList": {
       "name": "Name",
-      "address": "Address"
+      "address": "Recipient’s address or $handle"
     },
     "walletBasicInfo": {
       "balance": "Balance"

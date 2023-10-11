@@ -18,7 +18,8 @@ import { useWalletStore } from '@stores';
 import { TransactionDetail as TransactionDetailType } from '@src/types';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { APP_MODE_POPUP } from '@src/utils/constants';
-import { useCurrencyStore, useExternalLinkOpener } from '@providers';
+import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const MAX_SUMMARY_ADDRESSES = 5;
 
@@ -90,10 +91,14 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
   const [transactionInfo, setTransactionInfo] = useState<TransactionDetailType>();
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
-  const { CEXPLORER_BASE_URL } = config();
+  const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
   const openExternalLink = useExternalLinkOpener();
+  const analytics = useAnalyticsContext();
 
-  const explorerBaseUrl = useMemo(() => CEXPLORER_BASE_URL[environmentName], [CEXPLORER_BASE_URL, environmentName]);
+  const explorerBaseUrl = useMemo(
+    () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
+    [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
+  );
 
   const currentTransactionStatus = useMemo(
     () => getCurrentTransactionStatus(walletActivities, transactionDetail.tx.id) || transactionInfo?.status,
@@ -137,6 +142,7 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
   };
 
   const handleOpenExternalLink = () => {
+    analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailTransactionHashClick);
     const externalLink = `${explorerBaseUrl}/${transactionInfo.tx.hash}`;
     externalLink && currentTransactionStatus === 'success' && openExternalLink(externalLink);
   };
@@ -145,15 +151,14 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
     <TransactionDetailBrowser
       hash={transactionInfo.tx.hash}
       status={currentTransactionStatus}
-      includedDate={transactionInfo.tx.includedDate}
-      includedTime={transactionInfo.tx.includedTime}
+      includedDate={transactionInfo.tx.includedUtcDate}
+      includedTime={transactionInfo.tx.includedUtcTime}
       addrInputs={transactionInfo.tx.addrInputs}
       addrOutputs={transactionInfo.tx.addrOutputs}
       fee={transactionInfo.tx.fee}
-      poolName={transactionInfo.tx?.poolName}
-      poolTicker={transactionInfo.tx?.poolTicker}
-      poolId={transactionInfo.tx?.poolId}
+      pools={transactionInfo.tx.pools}
       deposit={transactionInfo.tx.deposit}
+      depositReclaim={transactionInfo.tx.depositReclaim}
       metadata={transactionInfo.tx.metadata}
       amountTransformer={(ada: string) =>
         `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`
@@ -166,6 +171,8 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
       type={transactionInfo?.type}
       isPopupView={isPopupView}
       openExternalLink={handleOpenExternalLink}
+      sendAnalyticsInputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailInputsClick)}
+      sendAnalyticsOutputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailOutputsClick)}
     />
   );
 });

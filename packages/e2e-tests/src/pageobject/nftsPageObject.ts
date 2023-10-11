@@ -23,11 +23,13 @@ class NftsPageObject {
     await nftNameElement.click();
   }
 
-  async progressWithSendUntilPasswordPage(nftName: string): Promise<any> {
+  async progressWithSendUntilPasswordPage(nftName: string, hdWallet = false): Promise<any> {
     await this.clickNftItemOnNftsPage(nftName);
     await NftDetails.sendNFTButton.waitForClickable();
     await NftDetails.sendNFTButton.click();
-    const receiverWallet = getTestWallet(await this.getNonActiveNftWalletName());
+    const receiverWallet = hdWallet
+      ? getTestWallet(await this.getNonActiveNftHdWalletName())
+      : getTestWallet(await this.getNonActiveNftWalletName());
     const receiverAddress = extensionUtils.isMainnet()
       ? String(receiverWallet.mainnetAddress)
       : String(receiverWallet.address);
@@ -40,6 +42,7 @@ class NftsPageObject {
   }
 
   async isNftDisplayed(nftName: string): Promise<boolean> {
+    await NftsPage.nftContainer.waitForDisplayed({ timeout: 15_000 });
     const nftItem = await NftsPage.getNftContainer(nftName);
     return nftItem !== undefined;
   }
@@ -48,6 +51,12 @@ class NftsPageObject {
     return testContext.load('activeWallet') === TestWalletName.WalletReceiveNftE2E
       ? TestWalletName.WalletSendNftE2E
       : TestWalletName.WalletReceiveNftE2E;
+  }
+
+  async getNonActiveNftHdWalletName(): Promise<string> {
+    return testContext.load('activeWallet') === TestWalletName.WalletReceiveNftHdWalletE2E
+      ? TestWalletName.WalletSendNftHdWalletE2E
+      : TestWalletName.WalletReceiveNftHdWalletE2E;
   }
 
   async saveNfts(): Promise<any> {

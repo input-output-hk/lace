@@ -6,13 +6,12 @@ import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
 import { useWalletStore } from '@src/stores';
 import { useLocalStorage } from '@src/hooks';
-import { useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
-import { AnalyticsConsentStatus } from '@providers/AnalyticsProvider/analyticsTracker';
-import { ANALYTICS_ACCEPTANCE_LS_KEY } from '@providers/AnalyticsProvider/analyticsTracker/config';
+import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 
 const { Title } = Typography;
-
 interface SettingsSecurityProps {
   popupView?: boolean;
   defaultPassphraseVisible?: boolean;
@@ -32,16 +31,27 @@ export const SettingsSecurity = ({
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
-  const [analyticsAccepted, { updateLocalStorage: setIsTrackingEnabled }] = useLocalStorage(
-    ANALYTICS_ACCEPTANCE_LS_KEY,
-    AnalyticsConsentStatus.REJECTED
+  const [analyticsAccepted, { updateLocalStorage: setEnhancedAnalyticsOptInStatus }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.OptedOut
   );
   const backgroundService = useBackgroundServiceAPIContext();
-
+  const analytics = useAnalyticsContext();
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
 
-  const handleAnalyticsChoise = (isAccepted: boolean) => {
-    setIsTrackingEnabled(isAccepted ? AnalyticsConsentStatus.ACCEPTED : AnalyticsConsentStatus.REJECTED);
+  const handleAnalyticsChoice = async (isOptedIn: boolean) => {
+    const status = isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
+
+    if (isOptedIn) {
+      await analytics.setOptedInForEnhancedAnalytics(status);
+      await analytics.sendEventToPostHog(PostHogAction.SettingsAnalyticsAgreeClick);
+      await analytics.sendAliasEvent();
+    } else {
+      await analytics.sendEventToPostHog(PostHogAction.SettingsAnalyticsSkipClick);
+      await analytics.setOptedInForEnhancedAnalytics(status);
+    }
+
+    setEnhancedAnalyticsOptInStatus(status);
   };
 
   const isMnemonicAvailable = useCallback(async () => {
@@ -57,6 +67,16 @@ export const SettingsSecurity = ({
     setHideShowPassphraseSetting(false);
   }, [backgroundService, walletLock]);
 
+  const handleCloseShowPassphraseDrawer = () => {
+    setIsShowPassphraseDrawerOpen(false);
+    analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseYourRecoveryPhraseXClick);
+  };
+
+  const handleOpenShowPassphraseDrawer = () => {
+    setIsShowPassphraseDrawerOpen(true);
+    analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseClick);
+  };
+
   useEffect(() => {
     isMnemonicAvailable();
   }, [isMnemonicAvailable]);
@@ -70,10 +90,11 @@ export const SettingsSecurity = ({
       />
       <ShowPassphraseDrawer
         visible={isShowPassphraseDrawerOpen}
-        onClose={() => setIsShowPassphraseDrawerOpen(false)}
+        onClose={handleCloseShowPassphraseDrawer}
         popupView={popupView}
         defaultPassphraseVisible={defaultPassphraseVisible}
         defaultMnemonic={defaultMnemonic}
+        sendAnalyticsEvent={(event: PostHogAction) => analytics.sendEventToPostHog(event)}
       />
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="security-settings-heading">
@@ -82,7 +103,7 @@ export const SettingsSecurity = ({
         {!hideShowPassphraseSetting && (
           <>
             <SettingsLink
-              onClick={() => setIsShowPassphraseDrawerOpen(true)}
+              onClick={handleOpenShowPassphraseDrawer}
               description={t('browserView.settings.security.showPassphrase.description')}
               data-testid="settings-show-recovery-phrase-link"
             >
@@ -105,8 +126,9 @@ export const SettingsSecurity = ({
           description={t('browserView.settings.security.analytics.description')}
           addon={
             <Switch
-              checked={analyticsAccepted === AnalyticsConsentStatus.ACCEPTED}
-              onChange={handleAnalyticsChoise}
+              testId="settings-analytics-switch"
+              checked={analyticsAccepted === EnhancedAnalyticsOptInStatus.OptedIn}
+              onChange={handleAnalyticsChoice}
               className={styles.analyticsSwitch}
             />
           }

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import webTester from '../actor/webTester';
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
@@ -14,6 +15,9 @@ import { getAddressByName, validAddress, validAddress2 } from '../data/AddressDa
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import ModalAssert from './modalAssert';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
+import TransactionsPage from '../elements/transactionsPage';
+import { browser } from '@wdio/globals';
+import { truncateAddressEntryName } from '../utils/addressBookUtils';
 
 class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
@@ -25,7 +29,7 @@ class DrawerSendExtendedAssert {
     await expect(await webTester.getTextValueFromElement(addressInput.label())).to.equal(
       await t('core.destinationAddressInput.recipientAddress')
     );
-    await webTester.seeWebElement(addressInput.ctaButton());
+    await addressInput.ctaButton.waitForDisplayed();
     await coinConfigureAssert.assertSeeCoinConfigure();
     await assetInputAssert.assertSeeAssetInput();
     await webTester.seeWebElement(assetInput.assetAddButton());
@@ -128,20 +132,25 @@ class DrawerSendExtendedAssert {
   async assertResultsMatchContacts() {
     const transactionNewPage = new TransactionNewPage();
     // Verify 1st address
-    await expect(await transactionNewPage.getContactName(1)).to.equal(validAddress.getName());
+    expect(await transactionNewPage.getContactName(1)).to.equal(truncateAddressEntryName(validAddress.getName()));
     const partOfActualAddress1 = String(await transactionNewPage.getPartialContactAddress(1));
-    await expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress1);
+    expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress1);
     // Verify 2nd address
-    await expect(await transactionNewPage.getContactName(2)).to.equal(validAddress2.getName());
+    expect(await transactionNewPage.getContactName(2)).to.equal(truncateAddressEntryName(validAddress2.getName()));
     const partOfActualAddress2 = String(await transactionNewPage.getPartialContactAddress(2));
-    await expect(getAddressByName(validAddress2.getName())).contains(partOfActualAddress2);
+    expect(getAddressByName(validAddress2.getName())).contains(partOfActualAddress2);
+  }
+
+  async assertFirstResultNameEquals(expectedName: string) {
+    const transactionNewPage = new TransactionNewPage();
+    expect(await transactionNewPage.getContactName(1)).to.equal(expectedName);
   }
 
   async assertAddedContactMatches() {
     const transactionNewPage = new TransactionNewPage();
-    await expect(await transactionNewPage.getContactName(1)).to.equal(validAddress.getName());
+    expect(await transactionNewPage.getContactName(1)).to.equal(truncateAddressEntryName(validAddress.getName()));
     const partOfActualAddress = String(await transactionNewPage.getPartialContactAddress(1));
-    await expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress);
+    expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress);
   }
 
   async assertSeeMetadataCounter(shouldSee: boolean) {
@@ -284,7 +293,7 @@ class DrawerSendExtendedAssert {
   }
 
   async assertReviewTransactionButtonIsEnabled(shouldBeEnabled: boolean) {
-    await new TransactionNewPage().reviewTransactionButton.waitForEnabled({ reverse: !shouldBeEnabled });
+    await new TransactionNewPage().reviewTransactionButton.waitForClickable({ reverse: !shouldBeEnabled });
   }
 
   async assertReviewTransactionButtonIsDisplayed(shouldBeDisplayed: boolean) {
@@ -299,13 +308,62 @@ class DrawerSendExtendedAssert {
   assertSeeAddressWithNameInRecipientsAddressInput = async (address: string, name: string) => {
     await webTester.waitUntilSeeElementContainingText(name);
     const text = await webTester.getTextValueFromElement(new AddressInput().container());
-    await expect(text).contains(address);
+    expect(text).contains(address);
+  };
+
+  assertSeeAddressNameInRecipientsAddressInput = async (expectedName: string) => {
+    expect(await new AddressInput().name().getText()).to.equal(expectedName);
   };
 
   assertSeeEmptyRecipientsAddressInput = async (index?: number) => {
     const text = await webTester.getTextValueFromElement(new AddressInput(index).container());
     await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
   };
+
+  async assertSeeTickerTransactionCostADA(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.transactionCostADA);
+  }
+
+  async assertSeeTickerOnReviewTransactionFee(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.transactionFee);
+  }
+
+  async assertSeeTickerOnReviewTransactionAmount(expectedTicker: 'ADA' | 'tADA') {
+    await this.assertSeeTicker(expectedTicker, await TransactionsPage.sendAmount);
+  }
+
+  async assertSeeTicker(expectedTicker: 'ADA' | 'tADA', elementToCheck: WebdriverIO.Element) {
+    const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
+
+    let tickerDisplayed = (await elementToCheck.getText()) as string;
+    tickerDisplayed = String(tickerDisplayed.match(regex));
+
+    if (expectedTicker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
+    expect(tickerDisplayed).to.equal(expectedTicker);
+  }
+
+  async assertSeeIconForInvalidAdaHandle(shouldBeDisplayed: boolean) {
+    const addressInput = new AddressInput();
+    await addressInput.invalidAdaHandleIcon.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
+
+  async assertSeeAdaHandleError(shouldBeDisplayed: boolean) {
+    const addressInput = new AddressInput();
+    await addressInput.adaHandleError.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      expect(await addressInput.adaHandleError.getText()).to.equal(await t('general.errors.incorrectHandle'));
+    }
+  }
+
+  async assertSeeSearchLoader(shouldBeDisplayed: boolean) {
+    const addressInput = new AddressInput();
+    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
+
+  async assertAddressBookButtonEnabled(bundleIndex: number, shouldBeEnabled: boolean) {
+    const addressInput = new AddressInput(bundleIndex);
+    await addressInput.ctaButton.waitForEnabled({ reverse: !shouldBeEnabled });
+  }
 }
 
 export default new DrawerSendExtendedAssert();

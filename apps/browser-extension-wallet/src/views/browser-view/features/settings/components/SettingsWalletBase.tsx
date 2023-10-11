@@ -11,9 +11,10 @@ import { AboutDrawer } from './AboutDrawer';
 import { config } from '@src/config';
 import { COLLATERAL_AMOUNT_LOVELACES, useRedirection } from '@hooks';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
-import { useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { useSearchParams, useObservable } from '@lace/common';
 import { walletRoutePaths } from '@routes/wallet-paths';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Title } = Typography;
 
@@ -62,6 +63,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
 
   const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
   const backgroundServices = useBackgroundServiceAPIContext();
+  const analytics = useAnalyticsContext();
 
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
   const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true';
@@ -81,12 +83,41 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
     openCollateralDrawer();
   }, [backgroundServices, openDrawer]);
 
+  const handleOpenDrawer = (drawer: SettingsDrawer, postHogEvent: PostHogAction) => {
+    openDrawer(drawer);
+    analytics.sendEventToPostHog(postHogEvent);
+  };
+
+  const handleCloseDrawer = (postHogEvent: PostHogAction) => {
+    closeDrawer();
+    analytics.sendEventToPostHog(postHogEvent);
+  };
+
+  const handleOpenNetworkChoiceDrawer = () =>
+    handleOpenDrawer(SettingsDrawer.networkChoice, PostHogAction.SettingsNetworkClick);
+
+  const handleOpenDappListDrawer = () =>
+    handleOpenDrawer(SettingsDrawer.dappList, PostHogAction.SettingsAuthorizedDappsClick);
+
+  const handleOpenCollateralDrawer = () =>
+    handleOpenDrawer(SettingsDrawer.collateral, PostHogAction.SettingsCollateralClick);
+
+  const handleOpenGeneralSettingsDrawer = () =>
+    handleOpenDrawer(SettingsDrawer.general, PostHogAction.SettingsYourKeysClick);
+
+  const handleCloseNetworkChoiceDrawer = () => handleCloseDrawer(PostHogAction.SettingsNetworkXClick);
+
+  const handleCloseGeneralSettingsDrawer = () => handleCloseDrawer(PostHogAction.SettingsYourKeysShowPublicKeyXClick);
+
+  const handleSendAnalyticsEvent = (postHogEvent: PostHogAction) => analytics.sendEventToPostHog(postHogEvent);
+
   return (
     <>
       <GeneralSettingsDrawer
         visible={activeDrawer === SettingsDrawer.general}
-        onClose={closeDrawer}
+        onClose={handleCloseGeneralSettingsDrawer}
         popupView={popupView}
+        sendAnalyticsEvent={handleSendAnalyticsEvent}
       />
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
@@ -108,11 +139,11 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           <>
             <NetworkChoiceDrawer
               visible={activeDrawer === SettingsDrawer.networkChoice}
-              onClose={closeDrawer}
+              onClose={handleCloseNetworkChoiceDrawer}
               popupView={popupView}
             />
             <SettingsLink
-              onClick={() => openDrawer(SettingsDrawer.networkChoice)}
+              onClick={handleOpenNetworkChoiceDrawer}
               description={t('browserView.settings.wallet.network.description')}
               addon={environmentName}
               data-testid="settings-wallet-network-link"
@@ -127,9 +158,10 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
               visible={activeDrawer === SettingsDrawer.dappList}
               onCancelClick={closeDrawer}
               popupView={popupView}
+              sendAnalyticsEvent={handleSendAnalyticsEvent}
             />
             <SettingsLink
-              onClick={() => openDrawer(SettingsDrawer.dappList)}
+              onClick={handleOpenDappListDrawer}
               description={t('browserView.settings.wallet.authorizedDApps.description')}
               data-testid="settings-wallet-authorized-dapps-link"
             >
@@ -138,7 +170,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           </>
         )}
         <SettingsLink
-          onClick={() => openDrawer(SettingsDrawer.general)}
+          onClick={handleOpenGeneralSettingsDrawer}
           description={t('browserView.settings.wallet.general.description')}
           data-testid="settings-wallet-general-link"
         >
@@ -146,7 +178,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         </SettingsLink>
         {renderLocalNodeSlot && renderLocalNodeSlot({ activeDrawer, closeDrawer, openDrawer })}
         <SettingsLink
-          onClick={() => openDrawer(SettingsDrawer.collateral)}
+          onClick={handleOpenCollateralDrawer}
           description={t('browserView.settings.wallet.collateral.description')}
           data-testid="settings-wallet-collateral-link"
           addon={
@@ -162,6 +194,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           onClose={closeDrawer}
           hasCollateral={hasCollateral}
           unspendableLoaded={unspendable?.coins !== undefined}
+          sendAnalyticsEvent={handleSendAnalyticsEvent}
         />
       </SettingsCard>
     </>

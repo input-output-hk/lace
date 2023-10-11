@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
-import { useRedirection, useWalletInfoSubscriber, useWalletManager } from '@src/hooks';
+import { useRedirection, useWalletManager, useAppInit } from '@src/hooks';
 import { dAppRoutePaths } from '@routes';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
 import { Route, Switch } from 'react-router-dom';
-import { MainLayout } from '../components/Layout/MainLayout';
+import { MainLayout } from '@components/Layout';
 import {
   Connect as DappConnect,
   SignTxFlowContainer,
   SignDataFlowContainer,
   NoWallet,
   DappTransactionSuccess,
-  DappTransactionFail
+  DappTransactionFail,
+  DappCollateralContainer
 } from '../features/dapp';
 import { Loader } from '@lace/common';
 import styles from './DappConnectorView.module.scss';
-import { WalletManagerUi } from '@cardano-sdk/web-extension';
-import { runtime } from 'webextension-polyfill';
 import { getValueFromLocalStorage } from '@src/utils/local-storage';
 import { lockWalletSelector } from '@src/features/unlock-wallet/selectors';
 import { useAppSettingsContext } from '@providers';
@@ -36,7 +35,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const DappConnectorView = (): React.ReactElement => {
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
-  const { inMemoryWallet, keyAgentData, currentChain, setWalletManagerUi, walletInfo, setKeyAgentData } =
+  const { inMemoryWallet, keyAgentData, currentChain, walletInfo, setKeyAgentData, addressesDiscoveryCompleted } =
     useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
   const [hasNoAvailableWallet, setHasNoAvailableWallet] = useState(false);
@@ -45,12 +44,7 @@ export const DappConnectorView = (): React.ReactElement => {
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
 
-  useWalletInfoSubscriber();
-
-  useEffect(() => {
-    const walletManager = new WalletManagerUi({ walletName: process.env.WALLET_NAME }, { logger: console, runtime });
-    setWalletManagerUi(walletManager);
-  }, [setWalletManagerUi]);
+  useAppInit();
 
   useEffect(() => {
     const load = async () => {
@@ -67,6 +61,7 @@ export const DappConnectorView = (): React.ReactElement => {
   }, [setKeyAgentData, isWalletLocked, currentChain]);
 
   useEffect(() => {
+    // TODO: LW-7807 revise the sdk cip30 implementation
     const callback = (result: boolean) => {
       if (result) {
         redirectToSignSuccess();
@@ -98,7 +93,7 @@ export const DappConnectorView = (): React.ReactElement => {
     return <UnlockWalletContainer />;
   }
 
-  if (keyAgentData && walletInfo && inMemoryWallet) {
+  if (keyAgentData && walletInfo && inMemoryWallet && addressesDiscoveryCompleted) {
     return (
       <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
         <Switch>
@@ -108,6 +103,7 @@ export const DappConnectorView = (): React.ReactElement => {
           <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
           <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
           <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
+          <Route exact path={dAppRoutePaths.dappSetCollateral} component={DappCollateralContainer} />
         </Switch>
       </MainLayout>
     );

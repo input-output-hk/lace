@@ -16,7 +16,7 @@ class LocalStorageInitializer {
   }
 
   async initializeMode(mode: 'light' | 'dark'): Promise<void> {
-    await localStorageManager.setItem('mode', JSON.stringify(mode));
+    await localStorageManager.setItem('mode', mode);
   }
 
   async initializeAppSettings(): Promise<void> {
@@ -59,6 +59,10 @@ class LocalStorageInitializer {
     await localStorageManager.cleanLocalStorage();
     await this.initializeWallet(walletName);
     await browser.refresh();
+  };
+
+  disableShowingMultidelegationBetaBanner = async () => {
+    await localStorageManager.setItem('multidelegationFirstVisit', 'false');
   };
 }
 

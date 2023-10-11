@@ -32,4 +32,5 @@ export const letterSpacings = {
 
 export const fontFamily = {
   $nova: 'proxima-nova, sans-serif',
+  $verdana: 'Verdana, sans-serif',
 } as const;

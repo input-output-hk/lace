@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 /* eslint-disable complexity, sonarjs/cognitive-complexity */
 /* eslint-disable unicorn/no-useless-undefined */
 import { Typography } from 'antd';
@@ -25,7 +26,7 @@ import { Banner } from '@lace/common';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { getTemporaryTxDataFromStorage } from '../../helpers';
-import { HandleResolution } from '@cardano-sdk/core';
+import { Asset, HandleResolution } from '@cardano-sdk/core';
 import ExclamationCircleOutline from '@src/assets/icons/red-exclamation-circle.component.svg';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
@@ -48,7 +49,6 @@ export enum HandleVerificationState {
   VERIFYING = 'verifying',
   CHANGED_OWNERSHIP = 'changedOwnership'
 }
-const isHandleAddressBookEnabled = process.env.USE_HANDLE_SEND_UPDATE === 'true';
 
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -59,11 +59,10 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
 
   const { setSection } = useSections();
   const { address, handle, handleStatus, setAddressValue } = useAddressState(row);
-  const { filteredAddresses, getAddressBookByNameOrAddress } = useGetFilteredAddressBook();
+  const { filteredAddresses, filterAddressesByNameOrAddress } = useGetFilteredAddressBook();
   const { setAddressToEdit } = useAddressBookStore();
   const [, setRowId] = useCurrentRow();
   const [handleVerificationState, setHandleVerificationState] = useState<HandleVerificationState | undefined>();
-
   const getExistingAddress = useCallback(
     (addr: string) => filteredAddresses?.find(({ walletAddress }) => walletAddress === addr),
     [filteredAddresses]
@@ -72,6 +71,11 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const destinationAddressInputTranslations = {
     recipientAddress: t('core.destinationAddressInput.recipientAddress')
   };
+
+  const isAddressInputInvalidHandle =
+    isAdaHandleEnabled &&
+    isHandle(addressInputValue.address.toString()) &&
+    !Asset.util.isValidHandle(addressInputValue.address.toString().slice(1));
 
   const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(addressInputValue.address.toString());
 
@@ -93,6 +97,9 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
+        if (isAddressInputInvalidHandle) {
+          setHandleVerificationState(HandleVerificationState.INVALID);
+        }
         if (!addressInputValue.handleResolution) {
           const { valid, handles } = await verifyHandle(addressInputValue.address, handleResolver);
 
@@ -133,7 +140,14 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
           }
         }
       }, HANDLE_DEBOUNCE_TIME),
-    [addressInputValue.address, addressInputValue.handleResolution, handleResolver, row, setAddressValue]
+    [
+      addressInputValue.address,
+      addressInputValue.handleResolution,
+      handleResolver,
+      isAddressInputInvalidHandle,
+      row,
+      setAddressValue
+    ]
   );
 
   useEffect(() => {
@@ -173,12 +187,12 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   ]);
 
   useEffect(() => {
-    getAddressBookByNameOrAddress({ value: handle || address || '' });
-  }, [address, getAddressBookByNameOrAddress, handle]);
+    filterAddressesByNameOrAddress({ value: handle || address || '' });
+  }, [address, filterAddressesByNameOrAddress, handle]);
 
   const validationObject = useMemo(() => {
     const isNameValid = address && isWalletNameValid(address);
-    const isAddressValid = isWalletAddressValid(address);
+    const isAddressValid = !isHandle(address) && isWalletAddressValid(address);
     return {
       name: isNameValid,
       address: isAddressValid,
@@ -195,6 +209,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const isAddressInputValueValid = validationObject.name || validationObject.address;
 
   useEffect(() => {
+    // todo: debounce this
     const existingAddress = getExistingAddress(handle || address);
     if (existingAddress) {
       setAddressInputValue({
@@ -233,6 +248,19 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     setSection(sectionsConfig[section]);
   };
 
+  const handleAddressReview = () => {
+    setAddressToEdit({
+      name: addressInputValue.name,
+      address: handle,
+      handleResolution: addressInputValue.handleResolution
+    });
+    setSection({ currentSection: Sections.ADDRESS_CHANGE, prevSection: Sections.FORM });
+    setAddressValue(row, address, handle, {
+      hasHandleOwnershipChanged: false,
+      isVerified: false
+    });
+  };
+
   useEffect(() => {
     const { tempAddress } = getTemporaryTxDataFromStorage();
     if (!tempAddress) return;
@@ -241,13 +269,21 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   }, [row, setAddressValue]);
 
   const bannerDescription =
-    isPopupView && isHandleAddressBookEnabled
+    isPopupView && isAdaHandleEnabled
       ? 'addressBook.reviewModal.banner.popUpDescription'
       : 'addressBook.reviewModal.banner.browserDescription';
 
   const getButtonText = !isPopupView && t('addressBook.reviewModal.banner.confirmReview.button');
   const getLinkMessage = isPopupView && t('addressBook.reviewModal.banner.confirmReview.link');
   const getMessagePartTwo = isPopupView && t('addressBook.reviewModal.banner.popUpDescriptionEnd');
+
+  const setInvalidMessage = isAddressInputInvalidHandle
+    ? 'general.errors.invalidHandle'
+    : 'general.errors.incorrectHandle';
+
+  const isStatusInvalid =
+    (isAddressInputValueHandle || isAddressInputInvalidHandle) &&
+    handleVerificationState === HandleVerificationState.INVALID;
 
   return (
     <span className={styles.container}>
@@ -267,14 +303,15 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
         translations={destinationAddressInputTranslations}
         data-testid="address-input"
       />
+
       {!isAddressInputValueValid && !isAddressInputValueHandle && address && (
         <Text className={styles.errorParagraph} data-testid="address-input-error">
           {t('general.errors.incorrectAddress')}
         </Text>
       )}
-      {isAddressInputValueHandle && handleVerificationState === HandleVerificationState.INVALID && (
+      {isStatusInvalid && (
         <Text className={styles.errorParagraph} data-testid="handle-input-error">
-          {t('general.errors.incorrectHandle')}
+          {t(`${setInvalidMessage}`)}
         </Text>
       )}
       {address && !validationObject.isValidAddressPerNetwork && (
@@ -287,12 +324,13 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
       {handleVerificationState && handleVerificationState === HandleVerificationState.CHANGED_OWNERSHIP && (
         <Banner
           withIcon
+          customIcon={<ExclamationCircleOutline />}
+          onButtonClick={handleAddressReview}
           popupView={isPopupView}
           message={t(bannerDescription, { name: addressInputValue.name })}
-          messagePartTwo={isHandleAddressBookEnabled && getMessagePartTwo}
-          buttonMessage={isHandleAddressBookEnabled && getButtonText}
-          linkMessage={isHandleAddressBookEnabled && getLinkMessage}
-          customIcon={<ExclamationCircleOutline />}
+          messagePartTwo={isAdaHandleEnabled && getMessagePartTwo}
+          buttonMessage={isAdaHandleEnabled && getButtonText}
+          linkMessage={isAdaHandleEnabled && getLinkMessage}
         />
       )}
     </span>

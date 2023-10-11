@@ -45,22 +45,15 @@ export interface TransactionProps {
    * Transaction fee
    */
   fee?: string;
-  /**
-   * Delegated pool name
-   */
-  poolName?: string;
-  /**
-   * Delegated pool ticker
-   */
-  poolTicker?: string;
-  /**
-   * Delegated pool ticker
-   */
-  poolId?: string;
+  pools?: { name: string; ticker: string; id: string }[];
   /**
    * Transaction deposit
    */
   deposit?: string;
+  /**
+   * Transaction returned deposit
+   */
+  depositReclaim?: string;
   /**
    * Transaction metadata
    */
@@ -74,6 +67,8 @@ export interface TransactionProps {
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
   openExternalLink?: () => void;
+  sendAnalyticsInputs?: () => void;
+  sendAnalyticsOutputs?: () => void;
 }
 
 const TOAST_DEFAULT_DURATION = 3;
@@ -102,26 +97,41 @@ export const Transaction = ({
   includedTime = '-',
   fee = '-',
   deposit,
+  depositReclaim,
   addrInputs,
   addrOutputs,
   metadata,
   amountTransformer,
   txSummary = [],
   coinSymbol,
-  poolName,
-  poolTicker,
-  poolId,
+  pools,
   addressToNameMap,
   isPopupView,
-  openExternalLink
+  openExternalLink,
+  sendAnalyticsInputs,
+  sendAnalyticsOutputs
 }: TransactionProps): React.ReactElement => {
   const { t } = useTranslate();
   const isSending = status === 'sending';
   const isSuccess = status === 'success';
 
+  const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
+    <div className={styles.details}>
+      <div className={styles.title}>{label}</div>
+      <div className={styles.detail}>
+        <div className={styles.amount}>
+          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>
+          <span className={styles.fiat}>{amountTransformer(value)}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div>
-      <div className={styles.header}>{t('package.core.transactionDetailBrowser.header')}</div>
+      <div className={styles.header} data-testid="tx-header">
+        {t('package.core.transactionDetailBrowser.header')}
+      </div>
       <div className={styles.block}>
         <div data-testid="tx-hash" className={styles.hashContainer}>
           <div className={cn(styles.title, styles.labelWidth)}>
@@ -145,27 +155,33 @@ export const Transaction = ({
         </div>
 
         <h1 className={styles.summary}>{t('package.core.transactionDetailBrowser.summary')}</h1>
-        {poolName && (
-          <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolName')}</div>
-            <div data-testid="tx-pool-name" className={styles.detail}>
-              {poolName}
+        {pools?.length > 0 && (
+          <div className={styles.stakingInfo}>
+            <div className={cn(styles.title, styles.poolsTitle)}>
+              {t('package.core.transactionDetailBrowser.pools')}
             </div>
-          </div>
-        )}
-        {poolTicker && (
-          <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolTicker')}</div>
-            <div data-testid="tx-pool-ticker" className={styles.detail}>
-              {poolTicker}
-            </div>
-          </div>
-        )}
-        {poolId && (
-          <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.poolId')}</div>
-            <div data-testid="tx-pool-id" className={cn(styles.detail, styles.poolId)}>
-              {poolId}
+            <div className={styles.poolsList}>
+              {pools?.map((pool) => (
+                <div key={pool.id} className={styles.poolEntry}>
+                  <div className={styles.poolHeading}>
+                    {pool.name && (
+                      <div data-testid="tx-pool-name" className={styles.detail}>
+                        {pool.name}
+                      </div>
+                    )}
+                    {pool.ticker && (
+                      <div data-testid="tx-pool-ticker" className={cn(styles.detail, styles.lightLabel)}>
+                        ({pool.ticker})
+                      </div>
+                    )}
+                  </div>
+                  {pool.id && (
+                    <div data-testid="tx-pool-id" className={cn(styles.detail, styles.poolId, styles.lightLabel)}>
+                      <Ellipsis text={pool.id} ellipsisInTheMiddle />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -248,27 +264,38 @@ export const Transaction = ({
             <span>&nbsp;{includedTime}</span>
           </div>
         </div>
-        <div className={styles.details}>
-          <div className={styles.txFeeContainer}>
-            <div className={styles.txfee}>{t('package.core.transactionDetailBrowser.transactionFee')}</div>
-            <Tooltip title={t('package.core.transactionDetailBrowser.transactionFeeInfo')}>
-              {Info ? (
-                <Info style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} />
-              ) : (
-                <InfoCircleOutlined />
-              )}
-            </Tooltip>
-          </div>
 
-          <div data-testid="tx-fee" className={styles.detail}>
-            <div className={styles.amount}>
-              <span data-testid="tx-fee-ada" className={styles.ada}>{`${fee} ${coinSymbol}`}</span>
-              <span data-testid="tx-fee-fiat" className={styles.fiat}>
-                {amountTransformer(fee)}
-              </span>
+        {fee && fee !== '-' && (
+          <div className={styles.details}>
+            <div className={styles.txFeeContainer}>
+              <div className={styles.txfee}>{t('package.core.transactionDetailBrowser.transactionFee')}</div>
+              <Tooltip title={t('package.core.transactionDetailBrowser.transactionFeeInfo')}>
+                {Info ? (
+                  <Info style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} />
+                ) : (
+                  <InfoCircleOutlined />
+                )}
+              </Tooltip>
+            </div>
+
+            <div data-testid="tx-fee" className={styles.detail}>
+              <div className={styles.amount}>
+                <span data-testid="tx-fee-ada" className={styles.ada}>{`${fee} ${coinSymbol}`}</span>
+                <span data-testid="tx-fee-fiat" className={styles.fiat}>
+                  {amountTransformer(fee)}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {deposit &&
+          renderDepositValueSection({ value: deposit, label: t('package.core.transactionDetailBrowser.deposit') })}
+        {depositReclaim &&
+          renderDepositValueSection({
+            value: depositReclaim,
+            label: t('package.core.transactionDetailBrowser.depositReclaim')
+          })}
       </div>
 
       {addrInputs?.length > 0 && (
@@ -283,6 +310,7 @@ export const Transaction = ({
           }}
           coinSymbol={coinSymbol}
           withSeparatorLine
+          sendAnalytics={sendAnalyticsInputs}
         />
       )}
       {addrOutputs?.length > 0 && (
@@ -296,6 +324,7 @@ export const Transaction = ({
             sent: t('package.core.transactionDetailBrowser.sent')
           }}
           coinSymbol={coinSymbol}
+          sendAnalytics={sendAnalyticsOutputs}
         />
       )}
       {metadata?.length > 0 && (
@@ -308,17 +337,6 @@ export const Transaction = ({
                 {Array.isArray(item.value) ? displayMetadataMsg(item.value) : item.value}
               </div>
             ))}
-          </div>
-        </div>
-      )}
-      {deposit && (
-        <div className={styles.details} style={{ marginTop: '44px' }}>
-          <div className={styles.title}>{t('package.core.transactionDetailBrowser.deposit')}</div>
-          <div className={styles.detail}>
-            <div className={styles.amount}>
-              <span className={styles.ada}>{`${deposit} ${coinSymbol}`}</span>
-              <span className={styles.fiat}>{amountTransformer(deposit)}</span>
-            </div>
           </div>
         </div>
       )}

@@ -9,12 +9,13 @@ import { nftDetailSelector } from '@src/views/browser-view/features/nfts/selecto
 import { NftDetail as NftDetailView } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
-import { useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
+import { SendFlowTriggerPoints, useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
 import { DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { buttonIds } from '@hooks/useEnterKeyPress';
@@ -43,11 +44,13 @@ export const NftDetail = (): React.ReactElement => {
   };
 
   const handleOpenSend = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_NFT,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_NFT,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewNFTs.SEND_NFT_POPUP
     });
+    // eslint-disable-next-line camelcase
+    analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.NFTS });
     setSendInitialState(id, SEND_NFT_DEFAULT_AMOUNT);
     redirectToSend({ params: { id } });
   };
@@ -58,6 +61,7 @@ export const NftDetail = (): React.ReactElement => {
       className={styles.drawer}
       visible
       navigation={<DrawerNavigation onArrowIconClick={() => redirectToNfts()} />}
+      dataTestId="nft-details-drawer"
       footer={
         <div className={styles.footer}>
           <Button id={buttonIds.nftDetailsBtnId} className={styles.sendBtn} onClick={handleOpenSend}>

@@ -11,11 +11,24 @@ import EditAddressDrawer from '../elements/addressbook/EditAddressDrawer';
 import EditAddressDrawerAssert from '../assert/addressBook/EditAddressDrawerAssert';
 import testContext from '../utils/testContext';
 import commonAssert from '../assert/commonAssert';
-import { byron, getAddressByName, icarus, shelley } from '../data/AddressData';
+import {
+  adaHandle1,
+  adaHandle2,
+  byron,
+  getAddressByName,
+  getAddressDetailsByName,
+  icarus,
+  shelley,
+  validAddress
+} from '../data/AddressData';
 import indexedDB from '../fixture/indexedDB';
 import popupView from '../page/popupView';
 import extendedView from '../page/extendedView';
 import { browser } from '@wdio/globals';
+import { Address } from '../data/Address';
+import AddressForm from '../elements/addressbook/AddressForm';
+import ToastMessageAssert from '../assert/toastMessageAssert';
+import { t } from '../utils/translationService';
 
 Given(
   /^I don't have any addresses added to my address book in (popup|extended) mode$/,
@@ -39,6 +52,36 @@ Given(/^I have 3 addresses in my address book in (popup|extended) mode$/, async 
   } else {
     await extendedView.visitAddressBook();
   }
+});
+
+Given(
+  /^I have 2 addresses with ADA handle in my address book in (popup|extended) mode$/,
+  async (mode: 'popup' | 'extended') => {
+    await indexedDB.clearAddressBook();
+    await indexedDB.insertAddress(adaHandle1);
+    await indexedDB.insertAddress(adaHandle2);
+    await browser.pause(500);
+    if (mode === 'popup') {
+      await popupView.visitAddressBook();
+      await AddressBookPageAssert.assertSeeAddressBookTitle();
+    } else {
+      await extendedView.visitAddressBook();
+    }
+  }
+);
+
+Given(/^address book contains address with name that has 12 characters$/, async () => {
+  const addressEntry = validAddress;
+  addressEntry.setName('abcdefghijkl');
+  await indexedDB.clearAddressBook();
+  await indexedDB.insertAddress(addressEntry);
+});
+
+Given(/^address book contains address with name that has more than 12 characters$/, async () => {
+  const addressEntry = validAddress;
+  addressEntry.setName('abcdefghijklm');
+  await indexedDB.clearAddressBook();
+  await indexedDB.insertAddress(addressEntry);
 });
 
 Given(/^I open address book in (popup|extended) mode$/, async (mode: 'popup' | 'extended') => {
@@ -92,9 +135,10 @@ Then(/^I see empty address book$/, async () => {
 });
 
 Then(
-  /^I (see|do not see) address detail page in (extended|popup) mode$/,
-  async (shouldSee: 'see' | 'do not see', mode: 'extended' | 'popup') => {
-    await AddressDetailsAssert.assertSeeAddressDetailsPage(shouldSee === 'see', mode);
+  /^I (see|do not see) address detail page in (extended|popup) mode with details of "([^"]*)" address$/,
+  async (shouldSee: 'see' | 'do not see', mode: 'extended' | 'popup', addressName: string) => {
+    const addressDetails = getAddressDetailsByName(addressName) as Address;
+    await AddressDetailsAssert.assertSeeAddressDetailsPage(shouldSee === 'see', mode, addressDetails);
   }
 );
 
@@ -171,9 +215,13 @@ When(
   }
 );
 
-Then(/^I see "Edit address" drawer in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  await EditAddressDrawerAssert.assertSeeEditAddressDrawer(mode);
-});
+Then(
+  /^I see "Edit address" drawer in (extended|popup) mode with details of "([^"]*)" address$/,
+  async (mode: 'extended' | 'popup', addressName: string) => {
+    const addressDetails = getAddressDetailsByName(addressName) as Address;
+    await EditAddressDrawerAssert.assertSeeEditAddressDrawer(mode, addressDetails);
+  }
+);
 
 When(/^I click "(Cancel|Done)" button on "Edit address" drawer$/, async (button: 'Cancel' | 'Done') => {
   switch (button) {
@@ -196,3 +244,46 @@ Then(/^address is saved to clipboard$/, async () => {
   const expectedWalletAddress = testContext.load('address') as string;
   await commonAssert.assertClipboardContains(expectedWalletAddress);
 });
+
+Then(
+  /^I add new address: "([^"]*)" with name: "([^"]*)" in (extended|popup) mode$/,
+  async (address: string, name: string, mode: 'extended' | 'popup') => {
+    if (mode === 'popup') {
+      await popupView.visitAddressBook();
+      await AddressBookPageAssert.assertSeeAddressBookTitle();
+    } else {
+      await extendedView.visitAddressBook();
+    }
+    await AddressBookPage.clickAddAddressButton();
+    await AddressForm.enterName(name === 'empty' ? '' : name);
+    await AddressForm.enterAddress(address === 'empty' ? '' : address);
+    await browser.pause(500); // Wait for input field value validation
+    await AddNewAddressDrawer.clickOnSaveAddressButton();
+  }
+);
+
+Then(
+  /^I verify that address: "([^"]*)" with name: "([^"]*)" has been added in (extended|popup) mode$/,
+  async (address: string, name: string, mode: 'extended' | 'popup') => {
+    await ToastMessageAssert.assertSeeToastMessage(await t('browserView.addressBook.toast.addAddress'), true);
+    await AddressBookPageAssert.assertSeeAddressOnTheList(name, address, true, mode);
+  }
+);
+
+Then(
+  /^I delete address with name: "([^"]*)" in (extended|popup) mode$/,
+  async (name: string, mode: 'extended' | 'popup') => {
+    if (mode === 'popup') {
+      await popupView.visitAddressBook();
+      await AddressBookPageAssert.assertSeeAddressBookTitle();
+    } else {
+      await extendedView.visitAddressBook();
+    }
+    const selectedRow = await AddressBookPage.getAddressRowByName(name);
+    await selectedRow.click();
+    await AddressDetails.deleteButton.waitForClickable();
+    await AddressDetails.deleteButton.click();
+    await DeleteAddressModal.deleteAddressButton.waitForClickable();
+    await DeleteAddressModal.deleteAddressButton.click();
+  }
+);

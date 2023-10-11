@@ -14,9 +14,10 @@ import Copy from '@src/assets/icons/copy.component.svg';
 import Icon from '@ant-design/icons';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useHandleResolver } from '@hooks/useHandleResolver';
 import { Form } from 'antd';
@@ -98,16 +99,25 @@ export const AddressDetailDrawer = ({
 
   const handleOnCancelClick = () => {
     if (currentStepConfig.currentSection === AddressDetailsSteps.CREATE) {
+      analytics.sendEventToPostHog(PostHogAction.AddressBookAddNewAddressCancelClick);
       onCancelClick();
     } else {
+      analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordEditAddressCancelClick);
       setCurrentStepConfig(stepsConfiguration[AddressDetailsSteps.DETAILS]);
     }
   };
 
+  const handleOnCloseIconClick = () => {
+    if (currentStepConfig.currentSection === AddressDetailsSteps.EDIT) {
+      analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordEditAddressXClick);
+    }
+    onCancelClick();
+  };
+
   const sendAnalytics = (name: string) => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.ADDRESS_BOOK,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.ADDRESS_BOOK,
+      action: MatomoEventActions.CLICK_EVENT,
       name
     });
   };
@@ -133,7 +143,7 @@ export const AddressDetailDrawer = ({
         navigation={
           <DrawerNavigation
             title={t('browserView.addressBook.title')}
-            onCloseIconClick={!popupView ? onCancelClick : undefined}
+            onCloseIconClick={!popupView ? handleOnCloseIconClick : undefined}
             onArrowIconClick={showArrowIcon ? onArrowIconClick : undefined}
           />
         }
@@ -158,6 +168,7 @@ export const AddressDetailDrawer = ({
                         ? AnalyticsEventNames.AddressBook.EDIT_ADDRESS_POPUP
                         : AnalyticsEventNames.AddressBook.EDIT_ADDRESS_BROWSER
                     );
+                    analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordEditClick);
                     setCurrentStepConfig(stepsConfiguration[currentStepConfig.nextSection]);
                   }}
                   size="large"
@@ -173,6 +184,7 @@ export const AddressDetailDrawer = ({
                         ? AnalyticsEventNames.AddressBook.DELETE_ADDRESS_PROMPT_POPUP
                         : AnalyticsEventNames.AddressBook.DELETE_ADDRESS_PROMPT_BROWSER
                     );
+                    analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordDeleteClick);
                     setSelectedId(initialValues.id);
                   }}
                   color="secondary"
@@ -216,6 +228,7 @@ export const AddressDetailDrawer = ({
                             text: t('general.clipboard.copiedToClipboard'),
                             withProgressBar: true
                           });
+                          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordCopyClick);
                         }}
                         color="secondary"
                         className={cn({ [styles.copyAddressButton]: popupView })}
@@ -253,6 +266,7 @@ export const AddressDetailDrawer = ({
               ? AnalyticsEventNames.AddressBook.CANCEL_DELETE_ADDRESS_POPUP
               : AnalyticsEventNames.AddressBook.CANCEL_DELETE_ADDRESS_BROWSER
           );
+          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordHoldUpCancelClick);
           // eslint-disable-next-line unicorn/no-null
           setSelectedId(null);
         }}
@@ -262,6 +276,7 @@ export const AddressDetailDrawer = ({
               ? AnalyticsEventNames.AddressBook.CONFIRM_DELETE_ADDRESS_POPUP
               : AnalyticsEventNames.AddressBook.CONFIRM_DELETE_ADDRESS_BROWSER
           );
+          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordHoldUpDeleteAddressClick);
           onDelete(selectedId);
           // eslint-disable-next-line unicorn/no-null
           setSelectedId(null);

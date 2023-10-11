@@ -1,7 +1,5 @@
 import { When, Then } from '@cucumber/cucumber';
 import tokensPageAssert from '../assert/tokensPageAssert';
-import walletAddressPageAssert from '../assert/walletAddressPageAssert';
-import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import tokensPageObject from '../pageobject/tokensPageObject';
 import tokenDetailsAssert from '../assert/tokenDetailsAssert';
 import testContext from '../utils/testContext';
@@ -10,7 +8,6 @@ import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';
-import walletAddressPage from '../elements/walletAddressPage';
 
 When(/^I see Tokens counter with total number of tokens displayed$/, async () => {
   await tokensPageAssert.assertSeeTitleWithCounter();
@@ -112,17 +109,6 @@ Then(
   }
 );
 
-Then(/^I see "Wallet Address" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  await walletAddressPageAssert.assertSeeWalletAddressPage(mode);
-  await walletAddressPageAssert.assertSeeWalletNameAndAddress(getTestWallet(TestWalletName.TestAutomationWallet), mode);
-});
-
-When(/^I click "Copy" button on "Wallet Address" page$/, async () => {
-  await walletAddressPage.addressCard.scrollIntoView();
-  await walletAddressPage.addressCard.moveTo();
-  await walletAddressPage.copyButton.click();
-});
-
 When(/^I click token with name: "([^"]*)"$/, async (tokenName: string) => {
   await tokensPageObject.clickTokenWithName(tokenName);
 });
@@ -136,6 +122,7 @@ Then(
 );
 
 Then(/^I save token: "([^"]*)" balance$/, async (tokenName: string) => {
+  await tokensPageObject.waitUntilCardanoTokenLoaded();
   await tokensPageObject.saveTokenBalance(tokenName);
 });
 
@@ -203,8 +190,16 @@ Then(/^(closed|opened) eye icon is displayed on Tokens page$/, async (iconType: 
     : await tokensPageAssert.assertSeeOpenedEyeIcon();
 });
 
+When(/^I see (ADA|tADA) in the list of tokens$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await tokensPageAssert.assertSeeTicker(expectedTicker);
+});
+
 When(/^I click (closed|opened) eye icon on Tokens page$/, async (iconType: 'closed' | 'opened') => {
   iconType === 'closed' ? await TokensPage.closedEyeIcon.click() : await TokensPage.openedEyeIcon.click();
+});
+
+When(/^I click on "View all" button on token details drawer$/, async () => {
+  tokensPageObject.clickOnViewAllButton();
 });
 
 Then(/^total wallet balance is masked with asterisks$/, async () => {
@@ -217,6 +212,13 @@ Then(
     await tokensPageAssert.assertAllBalancesAreMasked(shouldBeMasked === 'masked with asterisks');
   }
 );
+Then(/^I see total wallet balance in ADA is "([^"]*)"$/, async (balanceInAda: number) => {
+  await tokensPageAssert.assertAdaBalance(balanceInAda);
+});
+
+Then(/^I see tMin token with the ADA balance of "([^"]*)"$/, async (balanceInAda: number) => {
+  await tokensPageAssert.assertTMinBalance(balanceInAda);
+});
 
 Then(/^fiat prices expired fetch error is displayed$/, async () => {
   await tokensPageAssert.seePriceFetchExpiredErrorMessage();

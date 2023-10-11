@@ -16,6 +16,8 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { getRewardsAmount } from '@src/views/browser-view/features/activity/helpers';
+import { MAX_POOLS_COUNT } from '@lace/staking';
+import { TransactionType } from '@lace/core';
 
 /**
  * validates if the transaction is confirmed
@@ -42,6 +44,18 @@ const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
 const transactionMetadataTransformer = (metadata: Wallet.Cardano.TxMetadata): TransactionDetail['tx']['metadata'] =>
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
 
+const shouldIncludeFee = (
+  type: TransactionType,
+  delegationInfo: Wallet.Cardano.StakeDelegationCertificate[] | undefined
+) =>
+  !(
+    type === 'delegationRegistration' ||
+    // Existence of any (new) delegationInfo means that this "de-registration"
+    // activity is accompanied by a "delegation" activity, which carries the fees.
+    // However, fees should be shown if de-registration activity is standalone.
+    (type === 'delegationDeregistration' && !!delegationInfo?.length)
+  );
+
 /**
  * fetchs asset information
  */
@@ -52,7 +66,7 @@ const getTransactionDetail =
   }: ZustandHandlers<
     TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice
   >): TransactionDetailSlice['getTransactionDetails'] =>
-  // eslint-disable-next-line max-statements
+  // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   async ({ coinPrices, fiatCurrency }) => {
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
@@ -100,52 +114,65 @@ const getTransactionDetail =
 
     // Transaction Costs
     const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
-    const deposit = implicitCoin.deposit
-      ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
-      : undefined;
+    const deposit =
+      // since one tx can be split into two (delegation, registration) actions,
+      // ensure only the registration tx carries the deposit
+      implicitCoin.deposit && type === 'delegationRegistration'
+        ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString())
+        : undefined;
+    const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
+    const depositReclaim =
+      // since one tx can be split into two (delegation, de-registration) actions,
+      // ensure only the de-registration tx carries the reclaimed deposit
+      depositReclaimValue && type === 'delegationDeregistration'
+        ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
+        : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
+
+    // Delegation tx additional data (LW-3324)
+
+    const delegationInfo = tx.body.certificates?.filter(
+      (certificate) => certificate.__typename === 'StakeDelegationCertificate'
+    ) as Wallet.Cardano.StakeDelegationCertificate[];
 
     let transaction: TransactionDetail['tx'] = {
       hash: tx.id.toString(),
       totalOutput: totalOutputInAda,
-      fee: feeInAda,
+      fee: shouldIncludeFee(type, delegationInfo) ? feeInAda : undefined,
       deposit,
+      depositReclaim,
       addrInputs: inputs,
       addrOutputs: outputs,
       metadata: txMetadata,
-      includedDate: blocks?.date,
-      includedTime: blocks?.time
+      includedUtcDate: blocks?.utcDate,
+      includedUtcTime: blocks?.utcTime
     };
-
-    // Delegation tx additional data (LW-3324)
-
-    const delegationInfo = tx.body.certificates?.find(
-      (certificate) => certificate.__typename === 'StakeDelegationCertificate'
-    ) as Wallet.Cardano.StakeDelegationCertificate;
 
     if (type === 'delegation' && delegationInfo) {
       const filters: Wallet.QueryStakePoolsArgs = {
         filters: {
           identifier: {
             _condition: 'or',
-            values: [{ id: delegationInfo.poolId }]
+            values: delegationInfo.map((certificate) => ({ id: certificate.poolId }))
           }
         },
         pagination: {
           startAt: 0,
-          limit: 1
+          limit: MAX_POOLS_COUNT
         }
       };
       const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
 
-      if (!pools?.[0]) {
-        console.error(`Stake pool ${delegationInfo.poolId} was not found for delegation tx`);
+      if (pools.length === 0) {
+        console.error('Stake pool was not found for delegation tx');
       } else {
         transaction = {
           ...transaction,
-          poolName: pools?.[0].metadata?.name ?? '-',
-          poolTicker: pools?.[0].metadata?.ticker ?? '-',
-          poolId: pools?.[0].id.toString()
+          pools: pools.map((pool) => ({
+            name: pool.metadata.name || '-',
+            ticker: pool.metadata.ticker || '-',
+            id: pool.id.toString()
+          }))
         };
       }
     }

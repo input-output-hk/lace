@@ -4,10 +4,10 @@ import 'antd/dist/antd.css';
 import 'normalize.css';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@lace/browser-extension-wallet/src/styles/index.scss';
-import { Setup } from '../src/features/staking/setup';
+import { SetupBase } from '../src/features/staking/Setup/SetupBase';
 
 export const Provider: GlobalProvider = ({ children, globalState }) => (
   <div id={'lace-app'}>
-    <Setup theme={globalState.theme === ThemeState.Light ? 'light' : 'dark'}>{children}</Setup>
+    <SetupBase theme={globalState.theme === ThemeState.Light ? 'light' : 'dark'}>{children}</SetupBase>
   </div>
 );

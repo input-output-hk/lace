@@ -1,7 +1,6 @@
 /* eslint-disable no-magic-numbers */
-import { DEFAULT_DECIMALS } from '@lace/common';
+import { DEFAULT_DECIMALS, getNumberUnit, UnitThreshold } from '@lace/common';
 import BigNumber from 'bignumber.js';
-import { getNumberUnit, UnitThreshold } from './get-number-unit';
 
 type FormattedValueChange = {
   // new value formatted by formatNumberForDisplay
@@ -128,21 +127,6 @@ export const handleFormattedValueChange = (
     // Reposition cursor depending on changes to newFormattedValue after formatNumberForDisplay
     characterOffset: formattedValue.length - newFormattedValue.length
   };
-};
-
-/**
- * Formats a numeric string to have a maximum of two decimal places and returns its corresponding unit.
- *
- * @param number The number string to be formatted and to get its unit
- * @returns An object with the formatted number and its corresponding unit
- */
-export const getNumberWithUnit = (number: string): { number: string; unit?: string } => {
-  const bigNumber = new BigNumber(number);
-  if (bigNumber.isNaN()) return { number };
-
-  const { unit, unitThreshold } = getNumberUnit(bigNumber);
-  const threshold = unitThreshold === UnitThreshold.ZERO ? 1 : unitThreshold;
-  return { number: bigNumber.div(threshold).decimalPlaces(2).toString(), unit };
 };
 
 /**

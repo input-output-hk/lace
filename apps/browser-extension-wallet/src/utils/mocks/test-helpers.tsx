@@ -10,9 +10,13 @@ import { DisplayedCoinDetail, IAssetInfo } from '../../features/send/types';
 import { APP_MODE_POPUP, cardanoCoin } from '../constants';
 import { fakeApiRequest } from './fake-api-request';
 // eslint-disable-next-line import/no-unresolved
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { PriceResult } from '@hooks';
 import { Percent } from '@cardano-sdk/util';
+import { UserIdService } from '@lib/scripts/types';
+import { MatomoClient } from '@providers/AnalyticsProvider/matomo';
+import { PostHogClient } from '@providers/PostHogClientProvider/client';
+import { AnalyticsTracker } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const mockWalletInfoTestnet: WalletInfo = {
   name: 'testnet wallet',
@@ -431,13 +435,13 @@ export const formatBlockMock: TransactionDetail['blocks'] = {
   blockId: '717ca157f1e696a612af87109ba1f30cd4bb311ded5b504c78a6face463def95',
   confirmations: '17013',
   createdBy: 'pool1zuevzm3xlrhmwjw87ec38mzs02tlkwec9wxpgafcaykmwg7efhh',
-  date: '12/06/2021',
+  utcDate: '12/06/2021',
   epoch: '171',
   nextBlock: '3114965',
   prevBlock: '3114963',
   size: '4719',
   slot: '43905408',
-  time: '10:21:03 PM UTC',
+  utcTime: '22:21:03 UTC',
   transactions: '18'
 };
 
@@ -609,4 +613,43 @@ export const mockPrices: PriceResult = {
     priceVariationPercentage24h: 1.293
   },
   tokens: new Map()
+};
+
+export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
+  extendLifespan: jest.fn(),
+  makeTemporary: jest.fn(),
+  makePersistent: jest.fn(),
+  clearId: jest.fn(),
+  getRandomizedUserId: jest.fn(),
+  getUserId: jest.fn(),
+  getAliasProperties: jest.fn(),
+  userTrackingType$: new Subject() as any
+};
+
+export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {
+  sendPageNavigationEvent: jest.fn(),
+  sendEvent: jest.fn(),
+  setChain: jest.fn(),
+  getMetadata: jest.fn()
+};
+
+export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, jest.Mock> = {
+  sendEvent: jest.fn(),
+  sendPageNavigationEvent: jest.fn(),
+  setChain: jest.fn(),
+  sendAliasEvent: jest.fn(),
+  subscribeToInitializationProcess: jest.fn(),
+  overrideFeatureFlags: jest.fn(),
+  getExperimentVariant: jest.fn(),
+  subscribeToDistinctIdUpdate: jest.fn(),
+  shutdown: jest.fn()
+};
+
+export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {
+  sendEventToMatomo: jest.fn(),
+  sendEventToPostHog: jest.fn(),
+  setOptedInForEnhancedAnalytics: jest.fn(),
+  sendPageNavigationEvent: jest.fn(),
+  setChain: jest.fn(),
+  sendAliasEvent: jest.fn()
 };

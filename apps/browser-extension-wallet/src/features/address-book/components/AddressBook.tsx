@@ -10,57 +10,42 @@ import { AddressDetailDrawer, AddressChangeDetailDrawer } from '../components/Ad
 import { useAddressBookStore } from '../store';
 import styles from './AddressBook.modules.scss';
 import DeleteIcon from '../../../assets/icons/delete-icon.component.svg';
-import AddIcon from '../../../assets/icons/add.component.svg';
 import PlusIcon from '../../../assets/icons/plus-icon.svg';
-import EditIcon from '../../../assets/icons/edit.component.svg';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { AddressDetailsSteps } from './AddressDetailDrawer/types';
-import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
-import { getAddressToSave } from '@src/utils/validators';
+import { useHandleResolver, useOnAddressSave, useUpdateAddressStatus } from '@hooks';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
+import { Sections, useSections } from '@src/views/browser-view/features/send-transaction';
 
 const scrollableTargetId = 'popupAddressBookContainerId';
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressBook = withAddressBookContext(() => {
   const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
-  const { saveRecord: saveAddress, updateRecord: updateAddress, extendLimit, deleteRecord: deleteAddress } = utils;
+  const { extendLimit, deleteRecord: deleteAddress } = utils;
   const { setIsEditAddressVisible, isEditAddressVisible, setAddressToEdit, addressToEdit } = useAddressBookStore();
   const { t: translate } = useTranslation();
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
   const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
 
+  const { onSaveAddressActions } = useOnAddressSave();
+  const { setSection } = useSections();
+
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
     address: translate('core.walletAddressList.address')
   };
 
-  const onAddressSave = async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>): Promise<string> => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.ADDRESS_BOOK,
-      action: AnalyticsEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_POPUP
-    });
+  const onAddressSave = (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) =>
+    onSaveAddressActions(address, addressToEdit);
 
-    const addressToSave = await getAddressToSave({ address, handleResolver });
-
-    return 'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, addressToSave, {
-          text: translate('browserView.addressBook.toast.editAddress'),
-          icon: EditIcon
-        })
-      : saveAddress(addressToSave, {
-          text: translate('browserView.addressBook.toast.addAddress'),
-          icon: AddIcon
-        });
-  };
   const list: WalletAddressItemProps[] = useMemo(
     () =>
       addressList?.map((item: AddressBookSchema) => ({
@@ -68,11 +53,12 @@ export const AddressBook = withAddressBookContext(() => {
         address: item.address,
         name: item.name,
         onClick: (address: AddressBookSchema) => {
-          analytics.sendEvent({
-            category: AnalyticsEventCategories.ADDRESS_BOOK,
-            action: AnalyticsEventActions.CLICK_EVENT,
+          analytics.sendEventToMatomo({
+            category: MatomoEventCategories.ADDRESS_BOOK,
+            action: MatomoEventActions.CLICK_EVENT,
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_POPUP
           });
+          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordClick);
           setAddressToEdit(address);
           if (isAdaHandleEnabled && validatedAddressStatus[address.address]?.isValid === false) {
             setIsAddressDrawerOpen(true);
@@ -90,6 +76,11 @@ export const AddressBook = withAddressBookContext(() => {
   const loadMoreData = useCallback(() => {
     extendLimit();
   }, [extendLimit]);
+
+  const handleAddAddressClick = () => {
+    setIsEditAddressVisible(true);
+    analytics.sendEventToPostHog(PostHogAction.AddressBookAddAddressClick);
+  };
 
   const addressDrawerInitialStep = (addressToEdit as AddressBookSchema)?.id
     ? AddressDetailsSteps.DETAILS
@@ -119,7 +110,7 @@ export const AddressBook = withAddressBookContext(() => {
         id={scrollableTargetId}
       >
         <div className={styles.btnContainer}>
-          <Button data-testid="add-address-button" color="gradient" block onClick={() => setIsEditAddressVisible(true)}>
+          <Button data-testid="add-address-button" color="gradient" block onClick={handleAddAddressClick}>
             <img src={PlusIcon} alt="plus-icon" />
             {translate('addressBook.empty.addNewAddress')}
           </Button>
@@ -151,17 +142,12 @@ export const AddressBook = withAddressBookContext(() => {
           onCancelClick={() => {
             setAddressToEdit({} as AddressBookSchema);
             setIsAddressDrawerOpen(false);
+            setSection({ currentSection: Sections.FORM });
           }}
-          initialValues={addressToEdit}
           expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? ''}
           actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? ''}
+          initialValues={addressToEdit}
           popupView
-          onDelete={(id) => onHandleDeleteContact(id)}
-          onConfirmClick={async (address: AddressBookSchema | Omit<AddressBookSchema, 'id'>) => {
-            await onAddressSave(address);
-            setIsAddressDrawerOpen(false);
-            setAddressToEdit({} as AddressBookSchema);
-          }}
         />
       )}
       <AddressDetailDrawer

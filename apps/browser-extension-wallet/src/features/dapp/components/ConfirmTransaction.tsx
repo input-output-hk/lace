@@ -22,6 +22,8 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
 import { CardanoTxOut } from '@src/types';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
+import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
+
 const DAPP_TOAST_DURATION = 50;
 
 const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
@@ -48,10 +50,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   } = useWalletStore();
   const { list: addressList } = useAddressBookContext();
 
-  const [hasInsufficientFunds, setInsufficientFunds] = useState(false);
   const [tx, setTx] = useState<Wallet.Cardano.Tx>();
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
-  const availableBalance = useObservable(inMemoryWallet.balance.utxo.available$);
   const [errorMessage, setErrorMessage] = useState<string>();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
@@ -86,12 +86,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       })
         .then((result) => setAssetsInfo(result))
         .catch((error) => {
-          console.log(error);
+          console.error(error);
         });
     }
   }, [assetIds, assetProvider, assets]);
 
-  const cancelTransaction = useCallback(() => {
+  const cancelTransaction = useCallback((close = false) => {
     exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
       {
         api$: of({
@@ -104,29 +104,38 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       },
       { logger: console, runtime }
     );
-    setTimeout(() => window.close(), DAPP_TOAST_DURATION);
+    close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
   }, []);
 
-  const signWithHardwareWallet = useCallback(async () => {
+  window.addEventListener('beforeunload', cancelTransaction);
+
+  const signWithHardwareWallet = async () => {
     setIsConfirmingTx(true);
     try {
-      exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
-        {
-          api$: of({
-            async allowSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
-            }
-          }),
-          baseChannel: DAPP_CHANNELS.userPrompt,
-          properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
-        },
-        { logger: console, runtime }
-      );
+      HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web)
+        .then(() => {
+          exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+            {
+              api$: of({
+                async allowSignTx(): Promise<boolean> {
+                  return Promise.resolve(true);
+                }
+              }),
+              baseChannel: DAPP_CHANNELS.userPrompt,
+              properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+            },
+            { logger: console, runtime }
+          );
+        })
+        .catch((error) => {
+          throw error;
+        });
     } catch (error) {
-      console.log('error', error);
+      console.error('error', error);
+      cancelTransaction(false);
       redirectToSignFailure();
     }
-  }, [setIsConfirmingTx, redirectToSignFailure]);
+  };
 
   useEffect(() => {
     dappDataApi
@@ -137,7 +146,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       })
       .catch((error) => {
         setErrorMessage(error);
-        console.log(error);
+        console.error(error);
       });
   }, []);
 
@@ -190,16 +199,11 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       }
       return true;
     });
-    let totalCoins = BigInt(0);
 
     // eslint-disable-next-line unicorn/no-array-reduce
     const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
       // Don't show withdrawl tx's etc
       if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
-      totalCoins += txOut.value.coins;
-      if (totalCoins >= availableBalance?.coins) {
-        setInsufficientFunds(true);
-      }
 
       return [
         ...acc,
@@ -217,14 +221,13 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       outputs: txSummaryOutputs,
       type: txType
     };
-  }, [tx, availableBalance, walletInfo.addresses, createAssetList, addressToNameMap]);
+  }, [tx, walletInfo.addresses, createAssetList, addressToNameMap]);
 
   const translations = {
     transaction: t('core.dappTransaction.transaction'),
     amount: t('core.dappTransaction.amount'),
     recipient: t('core.dappTransaction.recipient'),
     fee: t('core.dappTransaction.fee'),
-    insufficientFunds: t('core.dappTransaction.insufficientFunds'),
     adaFollowingNumericValue: t('general.adaFollowingNumericValue')
   };
 
@@ -236,7 +239,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           dappInfo={dappInfo}
           errorMessage={errorMessage}
           translations={translations}
-          hasInsufficientFunds={hasInsufficientFunds}
         />
       ) : (
         <Skeleton loading />
@@ -244,9 +246,9 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       <div className={styles.actions}>
         <Button
           onClick={async () => {
-            isUsingHardwareWallet ? await signWithHardwareWallet() : setNextView();
+            isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
           }}
-          disabled={!!errorMessage || hasInsufficientFunds}
+          disabled={!!errorMessage}
           loading={isUsingHardwareWallet && isConfirmingTx}
           data-testid="dapp-transaction-confirm"
           className={styles.actionBtn}

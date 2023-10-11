@@ -28,7 +28,7 @@ Feature: LW: Tokens tab - popup view
   @LW-2347 @Testnet @Mainnet
   Scenario: Receive button click
     When I click "Receive" button on Tokens page in popup mode
-    Then I see "Wallet Address" page in popup mode
+    Then I see "Wallet Address" page in popup mode for wallet "TestAutomationWallet"
 
   @LW-2348 @Testnet @Mainnet
   Scenario: Send button click

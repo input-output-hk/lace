@@ -14,9 +14,10 @@ import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
 import { getTokenList } from '@src/utils/get-token-list';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import FolderIcon from '@assets/icons/new-folder-icon.component.svg';
 import { SectionTitle } from '@components/Layout/SectionTitle';
@@ -50,11 +51,12 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
 
   const onSelectNft = useCallback(
     (nft) => {
-      analytics.sendEvent({
-        category: AnalyticsEventCategories.VIEW_NFT,
-        action: AnalyticsEventActions.CLICK_EVENT,
+      analytics.sendEventToMatomo({
+        category: MatomoEventCategories.VIEW_NFT,
+        action: MatomoEventActions.CLICK_EVENT,
         name: AnalyticsEventNames.ViewNFTs.VIEW_NFT_DETAILS_POPUP
       });
+      analytics.sendEventToPostHog(PostHogAction.NFTsImageClick);
       redirectToNftDetail({ params: { id: nft.assetId.toString() } });
     },
     [analytics, redirectToNftDetail]
@@ -144,7 +146,10 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
               <Button
                 className={styles.newFolderBtn}
                 color="gradient"
-                onClick={() => setIsCreateFolderDrawerOpen(true)}
+                onClick={() => {
+                  setIsCreateFolderDrawerOpen(true);
+                  analytics.sendEventToPostHog(PostHogAction.NFTsCreateFolderClick);
+                }}
                 data-testid="create-folder-button"
               >
                 <FolderIcon className={styles.newFolderIcon} />

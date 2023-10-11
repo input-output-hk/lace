@@ -20,14 +20,21 @@ type KeysStructure = {
       searchInputPlaceholder: '';
       tableHeader: {
         poolName: '';
-        ros: '';
+        ros: {
+          title: '';
+          tooltip: '';
+        };
         cost: '';
-        saturation: '';
+        saturation: {
+          title: '';
+          tooltip: '';
+        };
       };
       emptyMessage: '';
       stake: '';
       unselect: '';
       addPool: '';
+      disabledTooltip: '';
     };
   };
   drawer: {
@@ -73,15 +80,11 @@ type KeysStructure = {
         retiring: '';
         saturated: '';
       };
-      switchingPoolBanner: {
-        title: '';
-        description: {
-          step1: '';
-          step2: '';
-          step3: '';
-        };
-      };
       stakeOnPoolButton: '';
+      selectForMultiStaking: '';
+      addStakingPool: '';
+      unselectPool: '';
+      manageDelegation: '';
       statistics: '';
       information: '';
       social: '';
@@ -92,10 +95,17 @@ type KeysStructure = {
       title: '';
       subTitle: '';
       cardanoName: '';
-      totalCost: {
+      transactionCost: {
         title: '';
       };
-      theAmountYoullBeChargedForRegisteringYourStakeKey: '';
+      transactionReturn: {
+        title: '';
+      };
+      transactionTotal: {
+        title: '';
+      };
+      chargedDepositAmountInfo: '';
+      reclaimDepositAmountInfo: '';
       stakingDeposit: '';
       errors: {
         utxoFullyDepleted: '';
@@ -112,8 +122,19 @@ type KeysStructure = {
     };
     preferences: {
       selectedStakePools: '';
-      partOfBalance: '';
+      addPoolButton: '';
       pickMorePools: '';
+      confirmButton: '';
+      rebalanceButton: '';
+      ctaButtonTooltip: {
+        zeroPercentageSliderError: '';
+        invalidAllocation: '';
+      };
+      poolDetails: {
+        savedRatio: '';
+        actualRatio: '';
+        actualStake: '';
+      };
     };
   };
   modals: {
@@ -141,10 +162,24 @@ type KeysStructure = {
       };
       statuses: {
         multiDelegation: '';
-        overStaked: '';
-        ready: '';
+        overAllocated: '';
+        noSelection: '';
         simpleDelegation: '';
-        underStaked: '';
+        underAllocated: '';
+      };
+    };
+    banners: {
+      pendingFirstDelegation: {
+        title: '';
+        message: '';
+      };
+      pendingPoolMigration: {
+        title: '';
+        message: '';
+      };
+      portfolioDrifted: {
+        title: '';
+        message: '';
       };
     };
     stakingInfoCard: {
@@ -162,6 +197,22 @@ type KeysStructure = {
       heading: '';
       manageButtonLabel: '';
     };
+    noFunds: {
+      title: '';
+      description: '';
+      button: '';
+    };
+    noStaking: {
+      title: '';
+      description: '';
+      balanceTitle: '';
+      getStarted: '';
+      followSteps: '';
+      searchForPoolDescription: '';
+      searchForPoolTitle: '';
+      selectPoolsDescription: '';
+      selectPoolsTitle: '';
+    };
   };
   root: {
     title: '';
@@ -176,6 +227,13 @@ type KeysStructure = {
     maxPools: '';
     clear: '';
     next: '';
+  };
+  popup: {
+    expandBanner: {
+      button: '';
+      description: '';
+      title: '';
+    };
   };
 };
 

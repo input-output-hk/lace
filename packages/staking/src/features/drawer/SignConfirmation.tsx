@@ -1,10 +1,10 @@
 /* eslint-disable react/no-multi-comp */
-import { Button, Password, inputProps, useObservable } from '@lace/common';
+import { Button, Password, inputProps } from '@lace/common';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Sections, sectionsConfig, useDelegationPortfolioStore, useStakePoolDetails } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import styles from './SignConfirmation.module.scss';
 
 interface SignConfirmationProps {
@@ -56,17 +56,13 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     password: { password, removePassword },
     submittingState: { setSubmitingTxState, isSubmitingTx, setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
-    delegationDetails,
     walletManagerExecuteWithPassword: executeWithPassword,
   } = useOutsideHandles();
-  const { draftPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
-    draftPortfolio: store.draftPortfolio,
+  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
   const { t } = useTranslation();
-  const { setSection } = useStakePoolDetails();
-  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const isDelegating = !!(rewardAccounts && (delegationDetails || draftPortfolio.length > 0));
 
   const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
 
@@ -103,9 +99,8 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       await signAndSubmitTransaction();
       cleanPasswordInput();
       sendAnalytics();
-      setIsRestaking(isDelegating);
-      portfolioMutators.clearDraft();
-      setSection(sectionsConfig[Sections.SUCCESS_TX]);
+      setIsRestaking(currentPortfolio.length > 0);
+      portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
     } catch (error) {
       // Error name is 'AuthenticationError' in dev build but 'W' in prod build
@@ -113,7 +108,8 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
       if (error.message?.includes('Authentication failure')) {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
-        setSection(sectionsConfig[Sections.FAIL_TX]);
+        cleanPasswordInput();
+        portfolioMutators.executeCommand({ type: 'DrawerFailure' });
         setSubmitingTxState({ isSubmitingTx: false });
       }
     }
@@ -123,9 +119,8 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     cleanPasswordInput,
     sendAnalytics,
     setIsRestaking,
-    isDelegating,
+    currentPortfolio.length,
     portfolioMutators,
-    setSection,
   ]);
 
   return (

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { NftItemProps, NftList, NftListProps, NftFolderItemProps, NftsItemsTypes } from '@lace/core';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
-import { useOutputInitialState } from '../../send-transaction';
+import { useOutputInitialState, useAnalyticsSendFlowTriggerPoint, SendFlowTriggerPoints } from '../../send-transaction';
 import { Button, useObservable } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import { Skeleton } from 'antd';
@@ -23,9 +23,10 @@ import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { getTokenList, NFT } from '@src/utils/get-token-list';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { DetailsDrawer } from './DetailsDrawer';
 import { NFTFolderDrawer } from './CreateFolder/CreateFolderDrawer';
@@ -51,7 +52,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     utils: { deleteRecord }
   } = useNftsFoldersContext();
   const { fiatCurrency } = useCurrencyStore();
-
+  const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const [, setDrawerConfig] = useDrawer();
   const setSendInitialState = useOutputInitialState();
 
@@ -92,11 +93,12 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   const onSelectNft = useCallback(
     (nft) => {
       setSelectedNft(nft);
-      analytics.sendEvent({
-        category: AnalyticsEventCategories.VIEW_NFT,
-        action: AnalyticsEventActions.CLICK_EVENT,
+      analytics.sendEventToMatomo({
+        category: MatomoEventCategories.VIEW_NFT,
+        action: MatomoEventActions.CLICK_EVENT,
         name: AnalyticsEventNames.ViewNFTs.VIEW_NFT_DETAILS_BROWSER
       });
+      analytics.sendEventToPostHog(PostHogAction.NFTsImageClick);
     },
     [analytics]
   );
@@ -179,14 +181,18 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, [blockchainProvider]);
 
   const onSendAsset = useCallback(() => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_NFT,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_NFT,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewNFTs.SEND_NFT_BROWSER
     });
+    // eslint-disable-next-line camelcase
+    analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.NFTS });
     closeNftDetails();
     setSendInitialState(selectedNft?.assetId.toString());
     setDrawerConfig({ content: DrawerContent.SEND_TRANSACTION });
+    setTriggerPoint(SendFlowTriggerPoints.NFTS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setDrawerConfig, analytics, selectedNft?.assetId, setSendInitialState]);
 
   const onCloseFolderDrawer = useCallback(() => {
@@ -215,7 +221,10 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                 <Button
                   className={styles.newFolderBtn}
                   color="gradient"
-                  onClick={() => setIsCreateFolderDrawerOpen(true)}
+                  onClick={() => {
+                    setIsCreateFolderDrawerOpen(true);
+                    analytics.sendEventToPostHog(PostHogAction.NFTsCreateFolderClick);
+                  }}
                   data-testid="create-folder-button"
                 >
                   <FolderIcon className={styles.newFolderIcon} />

@@ -5,11 +5,11 @@ let actualLovelacesToAdaString: any;
 /* eslint-disable import/imports-first */
 /* eslint-disable max-len */
 /* eslint-disable no-magic-numbers */
-import { pendingTxTransformer, getFormattedAmount, getFormattedFiatAmount } from '../pending-tx-transformer';
+import { pendingTxTransformer, getFormattedFiatAmount } from '../pending-tx-transformer';
 import { Wallet } from '@lace/cardano';
 import { cardanoCoin } from '@utils/constants';
 import { TxCBOR } from '@cardano-sdk/core';
-import { formatTime } from '@src/utils/format-date';
+import { DEFAULT_TIME_FORMAT, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
 
 jest.mock('@lace/cardano', () => {
@@ -98,6 +98,7 @@ describe('Testing tx transformers utils', () => {
         status: 'sending',
         date: 'Sending',
         deposit: undefined,
+        depositReclaim: undefined,
         fee: '1.00',
         fiatAmount: '1.00 USD',
         id: '6804edf9712d2b619edb6ac86861fe93a730693183a262b165fcc1ba1bc99cad',
@@ -109,19 +110,12 @@ describe('Testing tx transformers utils', () => {
           }
         ],
         assetsNumber: 2,
-        timestamp: formatTime(time, 'HH:mm:ss A')
+        timestamp: formatTime({
+          date: time,
+          format: DEFAULT_TIME_FORMAT,
+          type: 'local'
+        })
       });
-    });
-  });
-
-  describe('getFormattedAmount', () => {
-    test('shoud return properly formatted amount', () => {
-      const mockLovelacesToAdaStringResult = 'mockLovelacesToAdaString';
-      mockLovelacesToAdaString.mockReturnValue(mockLovelacesToAdaStringResult);
-
-      expect(getFormattedAmount({ amount: 'amount', cardanoCoin })).toEqual(
-        `${mockLovelacesToAdaStringResult} ${cardanoCoin.symbol}`
-      );
     });
   });
 

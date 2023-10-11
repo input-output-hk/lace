@@ -5,7 +5,7 @@ const mockIsAddress = jest.fn();
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Wallet } from '@lace/cardano';
-import { ValidationResult } from '../../../types';
+import { ValidationResult } from '@types';
 import * as addressBook from '../address-book';
 import i18n from 'i18next';
 import { Cardano, HandleProvider, Asset } from '@cardano-sdk/core';
@@ -108,7 +108,7 @@ describe('Testing address book validator', () => {
     });
     test('should return proper error in case it is not valid', () => {
       const spy = jest.spyOn(addressBook, 'isValidAddress').mockImplementation(() => false);
-      expect(addressBook.validateWalletAddress('asd')).toEqual('browserView.addressBook.form.incorrectCardanoAddress');
+      expect(addressBook.validateWalletAddress('asd')).toEqual('browserView.addressBook.form.invalidCardanoAddress');
       spy.mockRestore();
     });
     test('should return an empty string in case it is valid', () => {
@@ -127,7 +127,7 @@ describe('Testing address book validator', () => {
       expect(addressBook.isValidAddress('asd')).toEqual(false);
     });
     test('should return false in case it throws', () => {
-      const logSpy = jest.spyOn(console, 'log');
+      const logSpy = jest.spyOn(console, 'error');
 
       mockIsAddress.mockImplementation(() => {
         throw new Error('error');
@@ -229,7 +229,11 @@ describe('Testing address book validator', () => {
   });
 
   describe('ensureHandleOwnerHasntChanged', () => {
-    const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
+    const mockHandleResolver = {
+      resolveHandles: jest.fn(),
+      healthCheck: jest.fn(),
+      getPolicyIds: jest.fn()
+    } as HandleProvider;
     const mockHandleResolution = {
       backgroundImage: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd'),
       cardanoAddress: Cardano.PaymentAddress(
@@ -290,7 +294,11 @@ describe('Testing address book validator', () => {
       profilePic: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd1')
     };
 
-    const mockHandleResolver = { resolveHandles: jest.fn(), healthCheck: jest.fn() } as HandleProvider;
+    const mockHandleResolver = {
+      resolveHandles: jest.fn(),
+      healthCheck: jest.fn(),
+      getPolicyIds: jest.fn()
+    } as HandleProvider;
 
     test('getAddressToSave returns the modified address with handleResolution if the address is a valid handle', async () => {
       const mockAddress = {

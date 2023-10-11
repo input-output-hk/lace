@@ -6,19 +6,11 @@ import { Banner, Button, Ellipsis, useObservable } from '@lace/common';
 import { RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
 import { Skeleton } from 'antd';
 import cn from 'classnames';
-import { Immutable } from 'immer';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Balance, CurrencyInfo, LegacySelectedStakePoolDetails, useOutsideHandles } from '../outside-handles-provider';
-import {
-  DelegationPortfolioStakePool,
-  Sections,
-  StakingError,
-  sectionsConfig,
-  useDelegationPortfolioStore,
-  useStakePoolDetails,
-} from '../store';
+import { Balance, CurrencyInfo, useOutsideHandles } from '../outside-handles-provider';
+import { DraftPortfolioStakePool, StakingError, useDelegationPortfolioStore, useStakingStore } from '../store';
 import ArrowDown from './arrow-down.svg';
 import Cardano from './cardano-blue.png';
 import ExclamationMarkIcon from './exclamation-circle-small.svg';
@@ -60,51 +52,18 @@ const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
 );
 
 interface StakePoolConfirmationBodyProps {
-  balance: Balance;
+  balance?: Balance;
   cardanoCoin: Wallet.CoinId;
   fiatCurrency: CurrencyInfo;
-}
-interface SingleStakePoolConfirmationBodyProps extends StakePoolConfirmationBodyProps {
-  stakePool: LegacySelectedStakePoolDetails;
-}
-interface MultipleStakePoolConfirmationBodyProps extends StakePoolConfirmationBodyProps {
-  stakePools: Immutable<DelegationPortfolioStakePool[]>;
+  stakePools: DraftPortfolioStakePool[];
 }
 
-const SingleStakePoolConfirmationBody = ({
-  balance,
-  cardanoCoin,
-  fiatCurrency,
-  stakePool,
-}: SingleStakePoolConfirmationBodyProps) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className={styles.body}>
-      <div className={styles.item} data-testid="sp-confirmation-delegate-from-container">
-        <ItemStatRenderer img={Cardano} text={t('drawer.confirmation.cardanoName')} subText={cardanoCoin.symbol} />
-        <ItemStatRenderer
-          text={balance?.total?.coinBalance}
-          subText={`${balance?.total?.fiatBalance ?? '-'} ${fiatCurrency?.code}`}
-        />
-      </div>
-      <Icon style={{ color: '#702BED', fontSize: '24px', margin: '12px 0px' }} component={ArrowDown} />
-      <div className={styles.item} data-testid="sp-confirmation-delegate-to-container">
-        <ItemStatRenderer img={stakePool.logo} text={stakePool.name || '-'} subText={<span>{stakePool.ticker}</span>} />
-        <div className={styles.itemData}>
-          <Ellipsis beforeEllipsis={10} afterEllipsis={8} text={stakePool.id} ellipsisInTheMiddle />;
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const MultipleStakePoolConfirmationBody = ({
+const StakePoolConfirmationBody = ({
   balance,
   cardanoCoin,
   fiatCurrency,
   stakePools,
-}: MultipleStakePoolConfirmationBodyProps) => {
+}: StakePoolConfirmationBodyProps) => {
   const { t } = useTranslation();
 
   return (
@@ -112,7 +71,7 @@ const MultipleStakePoolConfirmationBody = ({
       <div className={styles.item} data-testid="sp-confirmation-delegate-from-container">
         <ItemStatRenderer img={Cardano} text={t('drawer.confirmation.cardanoName')} subText={cardanoCoin.symbol} />
         <ItemStatRenderer
-          text={balance?.total?.coinBalance}
+          text={balance?.total?.coinBalance ?? '0'}
           subText={`${balance?.total?.fiatBalance ?? '-'} ${fiatCurrency?.code}`}
         />
       </div>
@@ -125,8 +84,8 @@ const MultipleStakePoolConfirmationBody = ({
         >
           <ItemStatRenderer
             img={stakePool.displayData.logo}
-            text={stakePool.name || '-'}
-            subText={<span>{stakePool.ticker}</span>}
+            text={stakePool.displayData.name || '-'}
+            subText={<span>{stakePool.displayData.ticker}</span>}
           />
           <div className={styles.itemData}>
             <Ellipsis beforeEllipsis={10} afterEllipsis={8} text={stakePool.id} ellipsisInTheMiddle />
@@ -137,35 +96,126 @@ const MultipleStakePoolConfirmationBody = ({
   );
 };
 
+type StakePoolDepositReclaimDetailsProps = {
+  delegationTxDeposit: number;
+};
+
+const AmountInfo = ({
+  amount,
+  cardanoCoin,
+  fiatCurrency,
+  cardanoFiatPrice,
+  sign,
+}: {
+  amount: string;
+  cardanoCoin: Wallet.CoinId;
+  fiatCurrency: CurrencyInfo;
+  cardanoFiatPrice: number;
+  sign?: '+' | '-';
+}) => (
+  <div>
+    {renderAmountInfo(
+      [sign ? `${sign} ` : '', `${Wallet.util.lovelacesToAdaString(amount)} ${cardanoCoin.symbol}`].join(''),
+      `${Wallet.util.convertAdaToFiat({
+        ada: Wallet.util.lovelacesToAdaString(amount.toString()),
+        fiat: cardanoFiatPrice,
+      })} ${fiatCurrency?.symbol}`
+    )}
+  </div>
+);
+
+const StakePoolDepositReclaimDetails = ({
+  delegationTxDeposit,
+}: StakePoolDepositReclaimDetailsProps): React.ReactElement => {
+  const { t } = useTranslation();
+  const {
+    walletStoreWalletUICardanoCoin: cardanoCoin,
+    delegationStoreDelegationTxFee: delegationTxFee = '0',
+    fetchCoinPricePriceResult: priceResult,
+    currencyStoreFiatCurrency: fiatCurrency,
+  } = useOutsideHandles();
+  const txDepositReclaim = Math.abs(delegationTxDeposit);
+  const totalTxEffect = BigInt(txDepositReclaim) - BigInt(delegationTxFee);
+
+  return (
+    <>
+      <h1 className={styles.txSummaryTitle} data-testid="transaction-return-title">
+        {t('drawer.confirmation.transactionReturn.title')}
+      </h1>
+      <div className={styles.txSummaryContainer} data-testid="summary-tx-return-container">
+        <RowContainer>
+          {renderLabel({
+            dataTestId: 'sp-confirmation-staking-reclaim-deposit',
+            label: t('drawer.confirmation.stakingDeposit'),
+            tooltipContent: t('drawer.confirmation.reclaimDepositAmountInfo'),
+          })}
+          <AmountInfo
+            {...{
+              amount: txDepositReclaim.toString(),
+              cardanoCoin,
+              cardanoFiatPrice: priceResult?.cardano?.price || 0,
+              fiatCurrency,
+            }}
+          />
+        </RowContainer>
+      </div>
+      <div className={styles.divider} />
+      <div className={styles.totalCostContainer} data-testid="summary-total-cost-container">
+        <RowContainer>
+          <h2 className={styles.totalCostTitle} data-testid="transaction-total-title">
+            {t('drawer.confirmation.transactionTotal.title')}
+          </h2>
+          <AmountInfo
+            {...{
+              amount: totalTxEffect.toString(),
+              cardanoCoin,
+              cardanoFiatPrice: priceResult?.cardano?.price || 0,
+              fiatCurrency,
+              sign: '+',
+            }}
+          />
+        </RowContainer>
+      </div>
+    </>
+  );
+};
+
 export const StakePoolConfirmation = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { setIsBuildingTx, setStakingError, stakingError } = useStakePoolDetails();
+  const { setIsBuildingTx, setStakingError, stakingError } = useStakingStore();
   const {
     balancesBalance: balance,
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletUICardanoCoin: cardanoCoin,
     fetchCoinPricePriceResult: priceResult,
     delegationStoreDelegationTxFee: delegationTxFee = '0',
-    delegationStoreSelectedStakePoolDetails: selectedStakePool,
-    delegationStoreSelectedStakePool: openPool,
     currencyStoreFiatCurrency: fiatCurrency,
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
     delegationStoreSetDelegationTxFee: setDelegationTxFee,
   } = useOutsideHandles();
-  const draftPortfolio = useDelegationPortfolioStore((store) => store.draftPortfolio);
+  const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
+    draftPortfolio: store.draftPortfolio || [],
+  }));
+  const [delegationTxDeposit, setDelegationTxDeposit] = useState(0);
+  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
+  const loading = isNil(inMemoryWallet.protocolParameters$) || isNil(inMemoryWallet.delegation.rewardAccounts$);
 
   useEffect(() => {
     (async () => {
-      if (draftPortfolio.length === 0) return;
+      if (draftPortfolio.length === 0 || loading) return;
       // TODO: move below logic to zustand store
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
-        const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.weight }));
+        const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.sliderIntegerPercentage }));
         const tx = await txBuilder.delegatePortfolio({ pools }).build().inspect();
+        const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
+        const newDelegationTxDeposit = implicitCoin.deposit;
+        const newDelegationTxReclaim = Wallet.util.calculateDepositReclaim(implicitCoin) || BigInt(0);
         setDelegationTxBuilder(txBuilder);
         setDelegationTxFee(tx.body.fee.toString());
         setStakingError();
+        setDelegationTxDeposit(Number(newDelegationTxDeposit) - Number(newDelegationTxReclaim));
       } catch (error) {
         // TODO: check for error instance after LW-6749
         if (isInputSelectionError(error)) {
@@ -178,26 +228,19 @@ export const StakePoolConfirmation = (): React.ReactElement => {
   }, [
     draftPortfolio,
     inMemoryWallet,
-    openPool,
     setDelegationTxBuilder,
     setDelegationTxFee,
     setIsBuildingTx,
     setStakingError,
+    setDelegationTxDeposit,
+    protocolParameters,
+    loading,
   ]);
-
-  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
-  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const deposit =
-    rewardAccounts && rewardAccounts[0]?.keyStatus !== Wallet.Cardano.StakeKeyStatus.Registered
-      ? protocolParameters?.stakeKeyDeposit
-      : undefined;
 
   const ErrorMessages: Record<StakingError, string> = {
     [StakingError.UTXO_FULLY_DEPLETED]: t('drawer.confirmation.errors.utxoFullyDepleted'),
     [StakingError.UTXO_BALANCE_INSUFFICIENT]: t('drawer.confirmation.errors.utxoBalanceInsufficient'),
   };
-
-  const loading = isNil(inMemoryWallet.protocolParameters$) || isNil(inMemoryWallet.delegation.rewardAccounts$);
 
   return (
     <>
@@ -216,43 +259,31 @@ export const StakePoolConfirmation = (): React.ReactElement => {
       )}
       <div className={styles.container} data-testid="sp-confirmation-container">
         <Skeleton loading={loading}>
-          {draftPortfolio.length > 0 ? (
-            <MultipleStakePoolConfirmationBody
-              stakePools={draftPortfolio}
-              balance={balance}
-              cardanoCoin={cardanoCoin}
-              fiatCurrency={fiatCurrency}
-            />
-          ) : (
-            !!selectedStakePool && (
-              <SingleStakePoolConfirmationBody
-                stakePool={selectedStakePool}
-                balance={balance}
-                cardanoCoin={cardanoCoin}
-                fiatCurrency={fiatCurrency}
-              />
-            )
-          )}
-          <h1 className={styles.totalCostTitle} data-testid="transaction-cost-title">
-            {t('drawer.confirmation.totalCost.title')}
+          <StakePoolConfirmationBody
+            stakePools={draftPortfolio}
+            balance={balance}
+            cardanoCoin={cardanoCoin}
+            fiatCurrency={fiatCurrency}
+          />
+          <h1 className={styles.txSummaryTitle} data-testid="transaction-cost-title">
+            {t('drawer.confirmation.transactionCost.title')}
           </h1>
-          <div className={styles.txCostContainer} data-testid="summary-fee-container">
-            {deposit && (
+          <div className={styles.txSummaryContainer} data-testid="summary-fee-container">
+            {delegationTxDeposit > 0 && (
               <RowContainer>
                 {renderLabel({
                   dataTestId: 'sp-confirmation-staking-deposit',
                   label: t('drawer.confirmation.stakingDeposit'),
-                  tooltipContent: t('drawer.confirmation.theAmountYoullBeChargedForRegisteringYourStakeKey'),
+                  tooltipContent: t('drawer.confirmation.chargedDepositAmountInfo'),
                 })}
-                <div>
-                  {renderAmountInfo(
-                    `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
-                    `${Wallet.util.convertAdaToFiat({
-                      ada: Wallet.util.lovelacesToAdaString(deposit.toString()),
-                      fiat: priceResult?.cardano?.price || 0,
-                    })} ${fiatCurrency?.symbol}`
-                  )}
-                </div>
+                <AmountInfo
+                  {...{
+                    amount: delegationTxDeposit.toString(),
+                    cardanoCoin,
+                    cardanoFiatPrice: priceResult?.cardano?.price || 0,
+                    fiatCurrency,
+                  }}
+                />
               </RowContainer>
             )}
 
@@ -262,17 +293,18 @@ export const StakePoolConfirmation = (): React.ReactElement => {
                 label: t('drawer.confirmation.transactionFee'),
                 tooltipContent: t('drawer.confirmation.theAmountYoullBeChargedToProcessYourTransaction'),
               })}
-              <div>
-                {renderAmountInfo(
-                  `${Wallet.util.lovelacesToAdaString(delegationTxFee)} ${cardanoCoin.symbol}`,
-                  `${Wallet.util.convertAdaToFiat({
-                    ada: Wallet.util.lovelacesToAdaString(delegationTxFee),
-                    fiat: priceResult?.cardano?.price || 0,
-                  })} ${fiatCurrency?.symbol}`
-                )}
-              </div>
+              <AmountInfo
+                {...{
+                  amount: delegationTxFee,
+                  cardanoCoin,
+                  cardanoFiatPrice: priceResult?.cardano?.price || 0,
+                  fiatCurrency,
+                }}
+              />
             </RowContainer>
           </div>
+
+          {delegationTxDeposit < 0 && <StakePoolDepositReclaimDetails {...{ delegationTxDeposit }} />}
         </Skeleton>
       </div>
     </>
@@ -282,47 +314,45 @@ export const StakePoolConfirmation = (): React.ReactElement => {
 export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    walletStoreInMemoryWallet: inMemoryWallet,
+    // walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreGetKeyAgentType: getKeyAgentType,
-    submittingState: { setIsRestaking },
-    delegationStoreDelegationTxBuilder: delegationTxBuilder,
-    delegationDetails,
+    // submittingState: { setIsRestaking },
+    // delegationStoreDelegationTxBuilder: delegationTxBuilder,
   } = useOutsideHandles();
-  const { isBuildingTx, stakingError } = useStakePoolDetails();
+  const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
-  const draftPortfolio = useDelegationPortfolioStore((store) => store.draftPortfolio);
-
-  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const { /* currentPortfolio,*/ portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
+    portfolioMutators: store.mutators,
+  }));
 
   const keyAgentType = getKeyAgentType();
   const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
 
-  const { setSection } = useStakePoolDetails();
-
   // TODO unify
-  const signAndSubmitTransaction = useCallback(async () => {
-    if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
-    const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx.tx);
-  }, [delegationTxBuilder, inMemoryWallet]);
+  // const signAndSubmitTransaction = useCallback(async () => {
+  //   if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
+  //   const signedTx = await delegationTxBuilder.build().sign();
+  //   await inMemoryWallet.submitTx(signedTx.tx);
+  // }, [delegationTxBuilder, inMemoryWallet]);
 
   const handleConfirmation = useCallback(async () => {
     setIsConfirmingTx(false);
-    if (!isInMemory) {
-      setIsConfirmingTx(true);
-      try {
-        await signAndSubmitTransaction();
-        const isDelegating = !!(rewardAccounts && (delegationDetails || draftPortfolio.length > 0));
-        setIsRestaking(isDelegating);
-        return setSection(sectionsConfig[Sections.SUCCESS_TX]);
-      } catch {
-        return setSection(sectionsConfig[Sections.FAIL_TX]);
-      } finally {
-        setIsConfirmingTx(false);
-      }
-    }
-    return setSection(sectionsConfig[Sections.SIGN]);
-  }, [isInMemory, setSection, signAndSubmitTransaction, setIsRestaking, rewardAccounts, delegationDetails]);
+    // HW-WALLET (FIX LATER):
+    // if (!isInMemory) {
+    //   setIsConfirmingTx(true);
+    //   try {
+    //     await signAndSubmitTransaction();
+    //     setIsRestaking(currentPortfolio.length > 0);
+    //     return setSection(sectionsConfig[Sections.SUCCESS_TX]);
+    //   } catch {
+    //     return setSection(sectionsConfig[Sections.FAIL_TX]);
+    //   } finally {
+    //     setIsConfirmingTx(false);
+    //   }
+    // }
+    portfolioMutators.executeCommand({ type: 'DrawerContinue' });
+  }, [portfolioMutators]);
 
   const confirmLabel = useMemo(() => {
     if (!isInMemory) {

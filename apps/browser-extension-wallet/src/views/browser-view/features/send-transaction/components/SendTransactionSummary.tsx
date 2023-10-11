@@ -14,12 +14,13 @@ import { useAddressBookContext, withAddressBookContext } from '@src/features/add
 import { AddressListType } from '@views/browser/features/activity';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
+  MatomoEventActions,
+  MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
-import { useObservable } from '@lace/common';
+import { useObservable, Banner } from '@lace/common';
+import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
 
 const { Text } = Typography;
 
@@ -113,6 +114,8 @@ export const SendTransactionSummary = withAddressBookContext(
       () => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
       [getKeyAgentType]
     );
+    const isTrezor = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.Trezor, [getKeyAgentType]);
+
     const { list: addressList } = useAddressBookContext();
     const analytics = useAnalyticsContext();
     const { fiatCurrency } = useCurrencyStore();
@@ -151,21 +154,33 @@ export const SendTransactionSummary = withAddressBookContext(
           metadata={metadata}
           translations={outputSummaryListTranslation}
           onDepositTooltipHover={() =>
-            analytics.sendEvent({
-              action: AnalyticsEventActions.HOVER_EVENT,
-              category: AnalyticsEventCategories.SEND_TRANSACTION,
+            analytics.sendEventToMatomo({
+              action: MatomoEventActions.HOVER_EVENT,
+              category: MatomoEventCategories.SEND_TRANSACTION,
               name: AnalyticsEventNames.SendTransaction.SEE_TX_DEPOSIT_INFO
             })
           }
           onFeeTooltipHover={() =>
-            analytics.sendEvent({
-              action: AnalyticsEventActions.HOVER_EVENT,
-              category: AnalyticsEventCategories.SEND_TRANSACTION,
+            analytics.sendEventToMatomo({
+              action: MatomoEventActions.HOVER_EVENT,
+              category: MatomoEventCategories.SEND_TRANSACTION,
               name: AnalyticsEventNames.SendTransaction.SEE_TX_FEE_INFO
             })
           }
         />
-        {!isInMemory && !isPopupView && <Text className={styles.connectLedgerText}>{t('send.connectYourLedger')}</Text>}
+        {!isInMemory && !isPopupView && (
+          <Text className={styles.connectLedgerText}>
+            {isTrezor ? t('send.connectYourTrezor') : t('send.connectYourLedger')}
+          </Text>
+        )}
+        {isTrezor && (
+          <Banner
+            className={styles.banner}
+            message={t('send.trezorDoesNotDupportDecimals')}
+            withIcon
+            customIcon={<ExclamationIcon style={{ height: '72px' }} />}
+          />
+        )}
       </>
     );
   }

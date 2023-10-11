@@ -8,6 +8,7 @@ import transactionAssetSelectionAssert from '../assert/transaction/transactionAs
 import extensionUtils from '../utils/utils';
 import { shelley, byron } from '../data/AddressData';
 import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
+import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
@@ -36,7 +37,7 @@ When(/^I set multiple outputs for advanced transaction with less than minimum va
 Then(/^The Tx summary screen for 2 bundles is displayed for Byron with minimum value$/, async () => {
   const bundle1 = {
     recipientAddress: byron.getAddress(),
-    valueToBeSent: [{ value: '1.08', currency: Asset.CARDANO.ticker }]
+    valueToBeSent: [{ value: '1.00', currency: Asset.CARDANO.ticker }]
   };
   const bundle2 = {
     recipientAddress: byron.getAddress(),
@@ -132,3 +133,7 @@ Then(
     await transactionAssetSelectionAssert.assertAssetIsPresentInTokenList(assetName, shouldBeDisplayed === 'is');
   }
 );
+
+Then(/^I click "Close" button on send success drawer$/, async () => {
+  await simpleTxSideDrawerPageObject.clickCloseAllDoneDrawerButton();
+});

@@ -98,7 +98,7 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
       - name: Install dependencies
         working-directory: ./packages/e2e-tests
-        run: yarn config set network-timeout 300000 && yarn install --check-cache --frozen-lockfile --non-interactive --loglevel=error --ignore-scripts
+        run: yarn config set httpTimeout 300000 && yarn install --check-cache --immutable
       - name: Start Chrome driver
         run: |
           if [ ${BROWSER} == "chrome" ]; then
@@ -126,8 +126,8 @@ jobs:
           else
             TAGS_TO_RUN="--cucumberOpts.tagExpression='${{ env.TAGS }}'";
           fi
-          ./node_modules/.bin/wdio run wdio.conf.${BROWSER}.ts $TAGS_TO_RUN
-          runCommand="./node_modules/.bin/wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
+          yarn wdio run wdio.conf.${BROWSER}.ts $TAGS_TO_RUN
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"
           eval "$runCommand";
       - name: Create allure properties
         if: always()

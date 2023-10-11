@@ -29,7 +29,8 @@ Feature: Empty states
 
   @LW-4446
   Scenario: Extended View - Staking empty state
-    When I navigate to Staking extended page
+    When I disable showing Multidelegation beta banner
+    And I navigate to Staking extended page
     Then I see empty state banner for Staking page in extended mode
     When I click "Copy" button on empty state banner
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
@@ -61,3 +62,10 @@ Feature: Empty states
   @LW-6874
   Scenario: Extended view - Hide my balance - no eye icon for wallet with no funds
     Then Eye icon is not displayed on Tokens page
+
+  @LW-8409
+  Scenario: Automatically trigger collateral setup - No funds - no modal
+    Given I open and authorize test DApp with "Only once" setting
+    When I click "Set Collateral" button in test DApp
+    Then I don't see DApp window
+

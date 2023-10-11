@@ -15,12 +15,18 @@ import { APP_MODE_POPUP } from '@src/utils/constants';
 import { ContentLayout } from '@components/Layout';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventCategories,
-  AnalyticsEventActions,
-  AnalyticsEventNames
+  MatomoEventCategories,
+  MatomoEventActions,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isNFT } from '@src/utils/is-nft';
-import { useCoinStateSelector } from '../../send-transaction';
+import {
+  SendFlowAnalyticsProperties,
+  useCoinStateSelector,
+  useAnalyticsSendFlowTriggerPoint,
+  SendFlowTriggerPoints
+} from '../../send-transaction';
 import { getTotalWalletBalance, sortAssets } from '../utils';
 import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
 import { AssetDetailsDrawer } from './AssetDetailsDrawer/AssetDetailsDrawer';
@@ -55,6 +61,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const popupView = appMode === APP_MODE_POPUP;
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
   const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
+  const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
   const [isTransactionDetailsOpen, setIsTransactionDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
@@ -163,9 +170,10 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const paginatedAssetList = useMemo(() => fullAssetList?.slice(0, listItemsAmount), [fullAssetList, listItemsAmount]);
 
   const onAssetRowClick = (id: string) => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_TOKENS,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToPostHog(PostHogAction.TokenTokensTokenRowClick);
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_TOKENS,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_POPUP
         : AnalyticsEventNames.ViewTokens.VIEW_TOKEN_DETAILS_BROWSER
@@ -212,15 +220,19 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   );
 
   const onSendAssetClick = (id: string) => {
+    // eslint-disable-next-line camelcase
+    const postHogProperties: SendFlowAnalyticsProperties = { trigger_point: SendFlowTriggerPoints.TOKENS };
     setPickedCoin(SEND_COIN_OUTPUT_ID, { prev: cardanoCoin.id, next: id });
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.VIEW_TOKENS,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    setTriggerPoint(SendFlowTriggerPoints.TOKENS);
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.VIEW_TOKENS,
+      action: MatomoEventActions.CLICK_EVENT,
       name: popupView
         ? AnalyticsEventNames.ViewTokens.SEND_TOKEN_POPUP
         : AnalyticsEventNames.ViewTokens.SEND_TOKEN_BROWSER
     });
 
+    analytics.sendEventToPostHog(PostHogAction.SendClick, postHogProperties);
     if (popupView) {
       redirectToSend({ params: { id } });
     } else {
@@ -299,7 +311,6 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       />
       <AssetDetailsDrawer
         fiatCode={fiatCurrency.code}
-        fiatPrice={priceResult?.cardano?.price}
         openSendDrawer={onSendAssetClick}
         popupView={popupView}
         isBalanceDataFetchedCorrectly={fetchPriceStatus === 'fetched'}

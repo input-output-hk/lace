@@ -2,6 +2,7 @@ import React from 'react';
 import { Typography } from 'antd';
 import cn from 'classnames';
 import { ReactComponent as DefaultIcon } from '../../assets/icons/banner-icon.component.svg';
+import { ReactComponent as ChevronRight } from '../../assets/icons/chevron-right.component.svg';
 import styles from './Banner.module.scss';
 import { Button } from '../Button';
 import { Link } from 'react-router-dom';
@@ -11,7 +12,7 @@ const { Text } = Typography;
 const shouldBeDisplayedAsText = (message: React.ReactNode) =>
   typeof message === 'string' || typeof message === 'number';
 
-export interface BannerProps {
+export type BannerProps = {
   withIcon?: boolean;
   customIcon?: React.ReactElement;
   message: string | React.ReactElement;
@@ -23,8 +24,11 @@ export interface BannerProps {
   popupView?: boolean;
   description?: React.ReactNode;
   onLinkClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
-  onButtonClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown;
-}
+} & (
+  | { onButtonClick?: undefined; onBannerClick?: undefined }
+  | { onButtonClick?: (event?: React.MouseEvent<HTMLButtonElement>) => unknown; onBannerClick?: undefined }
+  | { onBannerClick?: (event?: React.MouseEvent<HTMLDivElement>) => unknown; onButtonClick?: undefined }
+);
 
 export const Banner = ({
   message,
@@ -34,6 +38,7 @@ export const Banner = ({
   className,
   descriptionClassName,
   popupView,
+  onBannerClick,
   onButtonClick,
   linkMessage,
   messagePartTwo,
@@ -46,8 +51,13 @@ export const Banner = ({
   );
   return (
     <div
-      className={cn(styles.bannerContainer, { [className]: className, [styles.popupView]: popupView })}
+      className={cn(styles.bannerContainer, {
+        [className]: className,
+        [styles.popupView]: popupView,
+        [styles.clickable]: !!onBannerClick
+      })}
       data-testid="banner-container"
+      onClick={onBannerClick}
     >
       {withIcon && (
         <div
@@ -73,9 +83,16 @@ export const Banner = ({
           {messagePartTwo && <Text className={styles.message}>{messagePartTwo}</Text>}
           {description && <div>{descriptionElement}</div>}
         </div>
-        <div className={cn(styles.buttonContainer)}>
-          {buttonMessage && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
-        </div>
+        {!!onButtonClick && (
+          <div className={cn(styles.buttonContainer)}>
+            {buttonMessage && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
+          </div>
+        )}
+        {!!onBannerClick && (
+          <div className={cn(styles.chevronRightIconContainer)}>
+            <ChevronRight />
+          </div>
+        )}
       </div>
     </div>
   );

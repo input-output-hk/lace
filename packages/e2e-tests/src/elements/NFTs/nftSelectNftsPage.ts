@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import CommonDrawerElements from '../CommonDrawerElements';
 import SearchInput from '../searchInput';
+import { browser } from '@wdio/globals';
 
 class NftSelectNftsPage extends CommonDrawerElements {
   private COUNTER = '[data-testid="assets-counter"]';
@@ -11,6 +12,7 @@ class NftSelectNftsPage extends CommonDrawerElements {
   private EMPTY_STATE_MESSAGE = '[data-testid="asset-list-empty-state-message"]';
   private NFT_CONTAINER = '[data-testid="nft-item"]';
   private NFT_NAME = '[data-testid="nft-item-name"]';
+  public NFT_IMAGE = '[data-testid="nft-image"]';
   public NFT_ITEM_SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
 
   get counter() {
@@ -54,6 +56,13 @@ class NftSelectNftsPage extends CommonDrawerElements {
     return (await this.nfts.find(
       async (nft) => (await nft.$(this.NFT_NAME).getText()) === nftName
     )) as WebdriverIO.Element;
+  }
+
+  async waitForNft(nftName: string) {
+    await browser.waitUntil(async () => (await this.getNftByName(nftName)) !== undefined, {
+      timeout: 3000,
+      timeoutMsg: `failed while waiting for nft: ${nftName}`
+    });
   }
 
   async selectNFTs(numberOfNFTs: number) {

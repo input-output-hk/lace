@@ -14,36 +14,36 @@ import {
 import { AddressBookEmpty } from '../AddressBookEmpty';
 import styles from './AddressBook.module.scss';
 import DeleteIcon from '@assets/icons/delete-icon.component.svg';
-import AddIcon from '@assets/icons/add.component.svg';
-import EditIcon from '@assets/icons/edit.component.svg';
 import PlusIcon from '@assets/icons/plus.component.svg';
 import Book from '@assets/icons/book.svg';
 import { PageTitle } from '@components/Layout';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { AddressDetailsSteps } from '@src/features/address-book/components/AddressDetailDrawer/types';
-import { useHandleResolver, useUpdateAddressStatus } from '@hooks';
-import { getAddressToSave } from '@src/utils/validators';
+import { useHandleResolver, useOnAddressSave, useUpdateAddressStatus } from '@hooks';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
 
 const ELLIPSIS_LEFT_SIDE_LENGTH = 34;
 const ELLIPSIS_RIGHT_SIDE_LENGTH = 34;
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const AddressBook = withAddressBookContext((): React.ReactElement => {
   const { t: translate } = useTranslation();
   const { addressToEdit, setAddressToEdit } = useAddressBookStore();
   const { list: addressList, count: addressCount, utils } = useAddressBookContext();
-  const { extendLimit, saveRecord: saveAddress, updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
+  const { extendLimit, deleteRecord: deleteAddress } = utils;
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState<boolean>(false);
   const analytics = useAnalyticsContext();
   const handleResolver = useHandleResolver();
   const validatedAddressStatus = useUpdateAddressStatus(addressList as AddressBookSchema[], handleResolver);
+  const { onSaveAddressActions } = useOnAddressSave();
 
   const addressListTranslations = {
     name: translate('core.walletAddressList.name'),
@@ -76,11 +76,12 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
         address: item.address,
         name: item.name,
         onClick: (address: AddressBookSchema) => {
-          analytics.sendEvent({
-            category: AnalyticsEventCategories.ADDRESS_BOOK,
-            action: AnalyticsEventActions.CLICK_EVENT,
+          analytics.sendEventToMatomo({
+            category: MatomoEventCategories.ADDRESS_BOOK,
+            action: MatomoEventActions.CLICK_EVENT,
             name: AnalyticsEventNames.AddressBook.VIEW_ADDRESS_DETAILS_BROWSER
           });
+          analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordClick);
           setAddressToEdit(address);
           if (isAdaHandleEnabled && validatedAddressStatus[address.address]?.isValid === false) {
             setIsAddressDrawerOpen(true);
@@ -88,7 +89,7 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
             setIsDrawerOpen(true);
           }
         },
-        shouldUseEllipsisBeferoAfter: true,
+        shouldUseEllipsis: true,
         isAddressWarningVisible:
           (isAdaHandleEnabled && validatedAddressStatus[item.address]?.isValid === false) ?? false,
         beforeEllipsis: ELLIPSIS_LEFT_SIDE_LENGTH,
@@ -101,28 +102,11 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
     extendLimit();
   }, [extendLimit]);
 
-  const onAddressSave = async (address: AddressBookSchema): Promise<string> => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.ADDRESS_BOOK,
-      action: AnalyticsEventActions.CLICK_EVENT,
-      name: AnalyticsEventNames.AddressBook.ADD_ADDRESS_BROWSER
-    });
-
-    const addressToSave = await getAddressToSave({ address, handleResolver });
-
-    return 'id' in addressToEdit
-      ? updateAddress(addressToEdit.id, addressToSave, {
-          text: translate('browserView.addressBook.toast.editAddress'),
-          icon: EditIcon
-        })
-      : saveAddress(addressToSave, {
-          text: translate('browserView.addressBook.toast.addAddress'),
-          icon: AddIcon
-        });
-  };
+  const onAddressSave = (address: AddressBookSchema) => onSaveAddressActions(address, addressToEdit);
 
   const handleAddAddressClick = () => {
     setIsDrawerOpen(true);
+    analytics.sendEventToPostHog(PostHogAction.AddressBookAddAddressClick);
   };
 
   if (!isNumber(addressCount)) return <span />;
@@ -172,16 +156,8 @@ export const AddressBook = withAddressBookContext((): React.ReactElement => {
               setIsAddressDrawerOpen(false);
             }}
             initialValues={addressToEdit}
-            expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress}
-            actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress}
-            onDelete={(id) => {
-              setAddressToEdit({} as AddressBookSchema);
-              deleteAddress(id, {
-                text: translate('browserView.addressBook.toast.deleteAddress'),
-                icon: DeleteIcon
-              });
-            }}
-            onConfirmClick={onAddressSave}
+            expectedAddress={validatedAddressStatus[addressToEdit.address]?.error?.expectedAddress ?? ''}
+            actualAddress={validatedAddressStatus[addressToEdit.address]?.error?.actualAddress ?? ''}
           />
         )}
         <AddressDetailDrawer

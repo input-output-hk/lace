@@ -1,5 +1,5 @@
 const mockUseFetchCoinPrice = jest.fn().mockReturnValue({ priceResult: { cardano: { price: 2 }, tokens: new Map() } });
-const mockUseAnalyticsContext = jest.fn().mockReturnValue({ sendEvent: jest.fn });
+const mockUseAnalyticsContext = jest.fn().mockReturnValue({ sendEventToMatomo: jest.fn });
 const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: 'usd', symbol: '$' } });
 const mockUseRedirection = jest.fn().mockReturnValue([jest.fn]);
 const mockUseWalletStore = jest.fn().mockReturnValue({

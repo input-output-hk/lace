@@ -21,3 +21,7 @@ export * as FlowCard from './flow-card';
 export * as IconButton from './icon-buttons';
 export * as TransactionSummary from './transaction-summary';
 export { ToastBar } from './toast-bar';
+export { Tooltip } from './tooltip';
+export { Message } from './message';
+export { PasswordBox } from './password-box';
+export { Metadata } from './metadata';

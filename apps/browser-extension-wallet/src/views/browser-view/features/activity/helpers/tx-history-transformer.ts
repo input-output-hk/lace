@@ -6,13 +6,14 @@ import { AssetActivityItemProps } from '@lace/core';
 import dayjs from 'dayjs';
 import { formatDate } from '@src/utils/format-date';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
-import {
-  getFormattedAmount,
-  getFormattedFiatAmount,
-  txTransformer,
-  TxTransformerInput
-} from './pending-tx-transformer';
+import { getFormattedFiatAmount, txTransformer, TxTransformerInput } from './pending-tx-transformer';
 import { TxDirections } from '@types';
+import {
+  isDelegationWithDeregistrationTx,
+  isDelegationWithRegistrationTx,
+  splitDelegationWithDeregistrationIntoTwoActions,
+  splitDelegationWithRegistrationIntoTwoActions
+} from './common-transformers';
 
 interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
   tx: Wallet.Cardano.HydratedTx;
@@ -60,13 +61,22 @@ export const txHistoryTransformer = ({
     cardanoCoin,
     status: Wallet.TransactionStatus.SUCCESS,
     direction: direction as TxDirections,
-    date: dayjs().isSame(time, 'day') ? 'Today' : formatDate(time, 'DD MMMM YYYY')
+    date: dayjs().isSame(time, 'day') ? 'Today' : formatDate({ date: time, format: 'DD MMMM YYYY', type: 'local' })
   });
+
+  if (isDelegationWithRegistrationTx(transformedTx, type)) {
+    return splitDelegationWithRegistrationIntoTwoActions(transformedTx);
+  }
+
+  if (isDelegationWithDeregistrationTx(transformedTx, type)) {
+    return splitDelegationWithDeregistrationIntoTwoActions(transformedTx);
+  }
 
   /*
     whenever the wallet have withdrawn rewards, we will need need to create a new record Rewards and add it to the transaction history list
     given this, we will keep the original send transaction type and we will add this new Rewards record
     */
+  //  TODO: extract to common-transformers, apply in pending-tx-transformer
   if (type === 'rewards' || type === 'self-rewards') {
     const rewardsAmount = getRewardsAmount(
       tx?.body?.withdrawals,
@@ -81,7 +91,7 @@ export const txHistoryTransformer = ({
       {
         type: 'rewards',
         direction: 'Incoming',
-        amount: getFormattedAmount({ amount: rewardsAmount, cardanoCoin }),
+        amount: Wallet.util.getFormattedAmount({ amount: rewardsAmount, cardanoCoin }),
         fiatAmount: getFormattedFiatAmount({
           amount: new BigNumber(tx?.body?.withdrawals[0]?.quantity?.toString() || '0'),
           fiatCurrency,

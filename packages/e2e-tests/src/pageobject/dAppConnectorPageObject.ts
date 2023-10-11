@@ -28,6 +28,7 @@ class DAppConnectorPageObject {
 
   async waitAndSwitchToDAppConnectorWindow(expectedNumberOfHandles: number) {
     await waitUntilExpectedNumberOfHandles(expectedNumberOfHandles);
+    await browser.pause(1000);
     await browser.switchWindow(this.DAPP_CONNECTOR_WINDOW_HANDLE);
   }
 
@@ -43,6 +44,7 @@ class DAppConnectorPageObject {
   }
 
   async clickButtonInDAppAuthorizationModal(button: 'Always' | 'Only once') {
+    await browser.pause(500);
     await AuthorizeDappModal.alwaysButton.waitForDisplayed();
     button === 'Always' ? await AuthorizeDappModal.alwaysButton.click() : await AuthorizeDappModal.onceButton.click();
   }

@@ -28,7 +28,7 @@ Feature: Transactions - Extended view
   Scenario: Extended View - Infinite scroll
     When I navigate to Transactions extended page
     And Transactions section is displayed
-    And I scroll to the row: 10
+    And I scroll to the row: 8
     Then a skeleton is displayed at the bottom of the page
 
   @LW-2557 @Testnet
@@ -101,9 +101,9 @@ Feature: Transactions - Extended view
   Scenario: Extended View - Transactions details - Escape button support
     Given I am on Transactions extended page
     When I click on a transaction: 1
-    Then An "package.core.transactionDetailBrowser.header" text is displayed
+    Then Transaction details drawer is displayed
     When I press keyboard Escape button
-    Then No "package.core.transactionDetailBrowser.header" text is displayed
+    Then Transaction details drawer is not displayed
 
   @LW-5892 @Testnet @Mainnet
   Scenario: Extended View - transaction details - Hash contains correct cexplorer link

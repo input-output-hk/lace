@@ -3,6 +3,7 @@ Feature: DAppConnector - Extended view
 
   Background:
     Given Wallet is synced
+    And I de-authorize all DApps in extended mode
 
   @LW-6688 @Testnet @Mainnet
   Scenario: Extended view - Authorized DApps section - empty state
@@ -17,7 +18,6 @@ Feature: DAppConnector - Extended view
     And I open settings from header menu
     When I click on "Authorized DApps" setting
     Then I see test DApp on the Authorized DApps list
-    And I de-authorize all DApps in extended mode
 
   @LW-6690 @Testnet @Mainnet
   Scenario: Extended View - Authorized DApp is not displayed in Lace Authorized DApps section after clicking "Once"
@@ -36,12 +36,11 @@ Feature: DAppConnector - Extended view
     And I click on "Authorized DApps" setting
     And I see test DApp on the Authorized DApps list
     When I de-authorize test DApp in extended mode
-    Then I see DApp removal confirmation modal
+    Then I see DApp removal confirmation window
     When I click "Back" button in DApp removal confirmation modal
     Then I see test DApp on the Authorized DApps list
     When I open test DApp
     Then I don't see DApp window
-    And I de-authorize all DApps in extended mode
 
   @LW-6880 @Testnet @Mainnet
   Scenario: Extended view - Remove authorized DApp, DApp requires authorization
@@ -52,7 +51,7 @@ Feature: DAppConnector - Extended view
     And I click on "Authorized DApps" setting
     And I see test DApp on the Authorized DApps list
     When I de-authorize test DApp in extended mode
-    Then I see DApp removal confirmation modal
+    Then I see DApp removal confirmation window
     When I click "Disconnect DApp" button in DApp removal confirmation modal
     Then I see "Authorized DApps" section empty state in extended mode
     When I open test DApp

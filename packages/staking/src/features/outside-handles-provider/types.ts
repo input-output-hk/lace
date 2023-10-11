@@ -1,23 +1,6 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
-
-export type LegacySelectedStakePoolDetails = {
-  delegators: number | string;
-  description: string;
-  hexId: string;
-  id: string;
-  logo?: string;
-  margin: number | string;
-  name: string;
-  owners: string[];
-  saturation: number | string;
-  stake: { number: string; unit?: string };
-  ticker: string;
-  apy: number | string;
-  status: Wallet.Cardano.StakePool['status'];
-  fee: number | string;
-  contact: Wallet.Cardano.PoolContactData;
-};
+import { AssetActivityListProps } from '@lace/core';
 
 type WalletBalance = {
   coinBalance: string;
@@ -65,18 +48,16 @@ export interface IBlockchainProvider {
   rewardsProvider: Wallet.RewardsProvider;
 }
 
+export type StakingRewards = {
+  totalRewards: BigInt | number;
+  lastReward: BigInt | number;
+};
+
 export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
-  balancesBalance: Balance;
-  stakingRewards: {
-    totalRewards: BigInt | number;
-    lastReward: BigInt | number;
-  };
-  delegationDetails: Wallet.Cardano.StakePool;
-  delegationStoreSelectedStakePoolDetails?: LegacySelectedStakePoolDetails;
-  delegationStoreSelectedStakePool?: Wallet.Cardano.StakePool;
+  expandStakingView?: () => void;
+  balancesBalance?: Balance;
   delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
-  delegationStoreSetSelectedStakePool: (pool: Wallet.Cardano.StakePool & { logo?: string }) => void;
   delegationStoreSetDelegationTxFee: (fee?: string) => void;
   delegationStoreDelegationTxFee?: string;
   delegationStoreDelegationTxBuilder?: TxBuilder;
@@ -91,6 +72,7 @@ export type OutsideHandlesContextValue = {
   submittingState: SubmittingState;
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
+  walletStoreWalletActivities: AssetActivityListProps[];
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
   walletManagerExecuteWithPassword: <T>(
     password: string,
@@ -124,4 +106,6 @@ export type OutsideHandlesContextValue = {
   compactNumber: (value: number | string, decimal?: number) => string;
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
+  walletAddress: string;
+  currentChain: Wallet.Cardano.ChainId;
 };

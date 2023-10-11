@@ -81,7 +81,7 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
       path = walletRoutePaths.setup.restore;
       break;
   }
-  await tabs.create({ url: `app.html#${path}` }).catch((error) => console.log(error));
+  await tabs.create({ url: `app.html#${path}` }).catch((error) => console.error(error));
 };
 
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
@@ -118,7 +118,7 @@ const fetchTokenPrices = () => {
       coinPrices.tokenPrices$.next({ tokens: tokenPrices, status: 'fetched' });
     })
     .catch((error) => {
-      console.log('Error fetching coin prices:', error);
+      console.error('Error fetching coin prices:', error);
       coinPrices.tokenPrices$.next({ ...coinPrices.tokenPrices$.value, status: 'error' });
     });
 };
@@ -127,7 +127,7 @@ const fetchAdaPrice = () => {
   const vsCurrencies =
     (Object.keys(currenciesMap) as currencyCode[]).map((code) => code.toLowerCase()).join(',') || 'usd';
   fetch(
-    `https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=${vsCurrencies}&include_24hr_change=true`
+    `https://coingecko.live-mainnet.eks.lw.iog.io/api/v3/simple/price?ids=cardano&vs_currencies=${vsCurrencies}&include_24hr_change=true`
   )
     .then(async (response) => {
       const { cardano: prices } = await response.json();
@@ -144,7 +144,7 @@ const fetchAdaPrice = () => {
       });
     })
     .catch(async (error) => {
-      console.log('Error fetching coin prices:', error);
+      console.error('Error fetching coin prices:', error);
       // If for some reason we couldn't fetch the ada price, get it from background store
       const adaPrice = await getADAPriceFromBackgroundStorage();
       if (!adaPrice) return coinPrices.adaPrices$.next({ prices: {}, status: 'error', timestamp: undefined });

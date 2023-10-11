@@ -3,6 +3,7 @@ import SectionTitle from './sectionTitle';
 import { ChainablePromiseElement } from 'webdriverio';
 import { browser } from '@wdio/globals';
 import TokensPageAssert from '../assert/tokensPageAssert';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class TokensPage {
   private BALANCE_LABEL = '[data-testid="portfolio-balance-label"]';
@@ -23,9 +24,14 @@ class TokensPage {
   private CLOSED_EYE_ICON = '[data-testid="closed-eye-icon"]';
   private OPENED_EYE_ICON = '[data-testid="opened-eye-icon"]';
   private PRICE_FETCH_ERROR_DESCRIPTION = '[data-testid="banner-description"]';
+  private VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
 
   get sendButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEND_BUTTON_POPUP_MODE);
+  }
+
+  get tokenTickerList(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.TOKEN_TICKER);
   }
 
   get receiveButtonPopupMode(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -50,6 +56,10 @@ class TokensPage {
 
   get totalBalanceCurrency(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BALANCE_CURRENCY);
+  }
+
+  get ViewAllButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.VIEW_ALL_BUTTON);
   }
 
   tokensAvatar(index: number): ChainablePromiseElement<WebdriverIO.Element> {

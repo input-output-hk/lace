@@ -8,6 +8,12 @@ type CardanoServiceUrls = {
   Preview: string;
 };
 
+type CExplorerUrlPaths = {
+  Tx: string;
+  Asset: string;
+  Policy: string;
+};
+
 export type Config = {
   TOAST_DURATION: number;
   CHAIN: Wallet.ChainName;
@@ -18,6 +24,7 @@ export type Config = {
   ADA_PRICE_CHECK_INTERVAL: number;
   AVAILABLE_CHAINS: Wallet.ChainName[];
   CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
+  CEXPLORER_URL_PATHS: CExplorerUrlPaths;
   SAVED_PRICE_DURATION: number;
 };
 
@@ -77,10 +84,15 @@ export const config = (): Config => {
       Preview: process.env.CARDANO_SERVICES_URL_PREVIEW
     },
     CEXPLORER_BASE_URL: {
-      Mainnet: `${process.env.CEXPLORER_URL_MAINNET}/tx`,
-      LegacyTestnet: `${process.env.CEXPLORER_URL_TESTNET}/tx`,
-      Preprod: `${process.env.CEXPLORER_URL_PREPROD}/tx`,
-      Preview: `${process.env.CEXPLORER_URL_PREVIEW}/tx`
+      Mainnet: `${process.env.CEXPLORER_URL_MAINNET}`,
+      LegacyTestnet: `${process.env.CEXPLORER_URL_TESTNET}`,
+      Preprod: `${process.env.CEXPLORER_URL_PREPROD}`,
+      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`
+    },
+    CEXPLORER_URL_PATHS: {
+      Tx: 'tx',
+      Asset: 'asset',
+      Policy: 'policy'
     },
     SAVED_PRICE_DURATION: !Number.isNaN(Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES))
       ? Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)

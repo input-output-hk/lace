@@ -20,6 +20,7 @@ import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import NftAssert from '../assert/nftAssert';
 import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
+import ToastMessage from '../elements/toastMessage';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -100,6 +101,14 @@ Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
   await nftCreateFolderAssert.verifySeeAllOwnedNfts();
 });
 
+Then(/^I can see the handles listed on the "Select NFT" screen$/, async () => {
+  await nftCreateFolderAssert.verifySeeAllAdaHandles();
+});
+
+Then(/^the corresponding custom images are displayed$/, async () => {
+  await nftCreateFolderAssert.verifySeeAllAdaImages();
+});
+
 Then(/^No NFT is selected$/, async () => {
   await nftCreateFolderAssert.verifyNoneNftIsSelected();
 });
@@ -170,6 +179,7 @@ Then(/^I see no results for "Select NFTs" drawer$/, async () => {
 });
 
 Then(/^I click NFT with name "([^"]*)"$/, async (nftName: string) => {
+  await NftSelectNftsPage.waitForNft(nftName);
   const nft = await NftSelectNftsPage.getNftByName(nftName);
   await nft.waitForClickable();
   await nft.click();
@@ -417,6 +427,8 @@ When(
         await NftsFolderPage.addNftButton.waitForClickable();
         await NftsFolderPage.addNftButton.click();
         await NftSelectNftsPage.selectNFTs(numberOfNftsWanted);
+        await ToastMessage.closeButton.waitForClickable();
+        await ToastMessage.closeButton.click();
         await NftSelectNftsPage.nextButton.waitForClickable();
         await NftSelectNftsPage.nextButton.click();
         break;
@@ -451,3 +463,10 @@ Then(
 Then(/^I see folders on the NFTs page in the alphabetical order$/, async () => {
   await NftAssert.assertSeeFoldersInAlphabeticalOrder();
 });
+
+Then(
+  /^I see a thumbnail of ADA handle with custom image on the NFT folder with name: "([^"]*)"$/,
+  async (folderName: string) => {
+    await NftAssert.assertSeeCustomAdaHandleThumbnail(folderName);
+  }
+);

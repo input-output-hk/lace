@@ -14,8 +14,11 @@
       "@wdio/devtools-service",
       "wdio-intercept-service"
     ],
-    "lib": ["es2015", "dom"],
+    "lib": ["es2021", "dom"],
     "resolveJsonModule": true,
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "rootDir": "../../"
+  },
+  "files": ["../staking/src/features/i18n/translations/en.ts"],
+  "include": ["."]
 }

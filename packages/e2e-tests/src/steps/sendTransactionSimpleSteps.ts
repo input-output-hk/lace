@@ -94,6 +94,10 @@ When(
   }
 );
 
+When(/I enter "([^"]*)" in the bundle (\d) recipient's address/, async (value: string, inputIndex: number) => {
+  await transactionExtendedPageObject.fillAddress(value, inputIndex);
+});
+
 When(/I enter the first characters of the contacts/, async () => {
   await transactionExtendedPageObject.fillAddressWithFirstChars(validAddress2.getName(), 3);
 });
@@ -203,14 +207,15 @@ Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignor
 When(
   /^I fill bundle (\d+) with "([^"]*)" address with following assets:$/,
   async (bundleIndex, receivingAddress, options) => {
+    await browser.pause(500);
     await transactionExtendedPageObject.fillAddress(
       receivingAddress === 'CopiedAddress'
         ? String(await clipboard.read())
         : String(getTestWallet(receivingAddress).address),
       bundleIndex
     );
-    await browser.pause(1000);
     for (const entry of options.hashes()) {
+      await browser.pause(500);
       switch (entry.type) {
         case 'ADA':
           break;
@@ -296,9 +301,19 @@ Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () =>
   await transactionExtendedPageObject.fillTokenValue(1);
 });
 
+Then(
+  /^I've entered accepted values for all (Preprod|Mainnet) fields of simple Tx$/,
+  async (network: 'Preprod' | 'Mainnet') => {
+    await (network === 'Mainnet'
+      ? transactionExtendedPageObject.fillAddress(shelley.getMainnetAddress())
+      : transactionExtendedPageObject.fillAddress(shelley.getTestnetAddress()));
+    await transactionExtendedPageObject.fillTokenValue(1);
+  }
+);
+
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
   await transactionExtendedPageObject.fillAddress(byron.getAddress());
-  await transactionExtendedPageObject.fillTokenValue(1);
+  await transactionExtendedPageObject.fillTokenValue(0.5);
 });
 
 Then(/^The Tx summary screen is displayed:$/, async (_ignored: string) => {
@@ -312,7 +327,7 @@ Then(/^The Tx summary screen is displayed:$/, async (_ignored: string) => {
 Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async (_ignored: string) => {
   const expectedTransactionSummaryData = {
     recipientAddress: byron.getAddress(),
-    valueToBeSent: [{ value: extensionUtils.isMainnet() ? '1.05' : '1.08', currency: Asset.CARDANO.ticker }]
+    valueToBeSent: [{ value: extensionUtils.isMainnet() ? '1.05' : '0.97', currency: Asset.CARDANO.ticker }]
   };
   await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
 });
@@ -341,6 +356,11 @@ Then(/^I verify transaction costs amount is around ([^"]*) ADA$/, async (expecte
 Then(/^a dropdown showing the first ([^"]*) matches is displayed$/, async (noOfMatches: string) => {
   await drawerSendExtendedAssert.assertAmountOfResultsDisplayed(Number.parseInt(noOfMatches));
   await drawerSendExtendedAssert.assertResultsMatchContacts();
+});
+
+Then(/^first result in address dropdown has name "([^"]*)"$/, async (expectedName: string) => {
+  await drawerSendExtendedAssert.assertAmountOfResultsDisplayed(1);
+  await drawerSendExtendedAssert.assertFirstResultNameEquals(expectedName);
 });
 
 Then(/^the selected contact is added in the bundle recipient's address$/, async () => {
@@ -604,6 +624,41 @@ Then(
   }
 );
 
+Then(/^recipients address input contains address entry with name "([^"]*)"$/, async (addressName: string) => {
+  await drawerSendExtendedAssert.assertSeeAddressNameInRecipientsAddressInput(addressName);
+});
+
 Then(/^recipients address input (\d*) is empty$/, async (inputIndex: number) => {
   await drawerSendExtendedAssert.assertSeeEmptyRecipientsAddressInput(inputIndex);
 });
+
+Then(/^I see (ADA|tADA) in transaction fee$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerTransactionCostADA(expectedTicker);
+});
+
+Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerOnReviewTransactionFee(expectedTicker);
+});
+
+Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (expectedTicker: 'ADA' | 'tADA') => {
+  await drawerSendExtendedAssert.assertSeeTickerOnReviewTransactionAmount(expectedTicker);
+});
+
+Then(/^Red exclamation icon is displayed next to ADA handle$/, async () => {
+  await drawerSendExtendedAssert.assertSeeIconForInvalidAdaHandle(true);
+});
+
+Then(/^"Handle not found" error is displayed under address input in "Send" drawer$/, async () => {
+  await drawerSendExtendedAssert.assertSeeAdaHandleError(true);
+});
+
+Then(/^search loader is displayed inside address input field$/, async () => {
+  await drawerSendExtendedAssert.assertSeeSearchLoader(true);
+});
+
+Then(
+  /^"Add address" button is (enabled|disabled) in the bundle (\d) recipient's address input$/,
+  async (state: 'enabled' | 'disabled', inputIndex: number) => {
+    await drawerSendExtendedAssert.assertAddressBookButtonEnabled(inputIndex, state === 'enabled');
+  }
+);

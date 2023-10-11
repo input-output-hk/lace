@@ -5,6 +5,10 @@
   flex-direction: column;
   height: 100%;
   gap: size_unit(2);
+
+  .loaderText {
+    color: var(--text-color-primary);
+  }
 }
 
 .loader {

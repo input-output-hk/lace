@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable complexity */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable sonarjs/cognitive-complexity */
@@ -18,7 +19,8 @@ import {
   usePassword,
   useSubmitingState,
   useMultipleSelection,
-  useSelectedTokenList
+  useSelectedTokenList,
+  useAnalyticsSendFlowTriggerPoint
 } from '../../store';
 import { useCoinStateSelector, useAddressState } from '@src/views/browser-view/features/send-transaction';
 import { useDrawer } from '@src/views/browser-view/stores';
@@ -28,9 +30,10 @@ import { walletRoutePaths } from '@routes';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useAnalyticsContext } from '@providers';
 import {
-  AnalyticsEventActions,
-  AnalyticsEventCategories,
-  AnalyticsEventNames
+  MatomoEventActions,
+  MatomoEventCategories,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 import { useWalletStore } from '@src/stores';
@@ -38,6 +41,7 @@ import { APP_MODE_POPUP } from '@src/utils/constants';
 import { SelectTokenButton } from '@components/AssetSelectionButton/SelectTokensButton';
 import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
+import { useAddressBookStore } from '@src/features/address-book/store';
 
 const { SendTransaction: Events } = AnalyticsEventNames;
 
@@ -56,8 +60,8 @@ export const useHandleClose = (): {
   const { hasOutput } = useTransactionProps();
   const [, setIsDrawerVisible] = useDrawer();
   const { currentSection: section, resetSection } = useSections();
-  const reditectToTransactions = useRedirection(walletRoutePaths.activity);
-  const reditectToOverview = useRedirection(walletRoutePaths.assets);
+  const redirectToTransactions = useRedirection(walletRoutePaths.activity);
+  const redirectToOverview = useRedirection(walletRoutePaths.assets);
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const resetStates = useCallback(() => {
@@ -73,20 +77,20 @@ export const useHandleClose = (): {
 
   const redirect = useCallback(() => {
     resetStates();
-    reditectToOverview();
-  }, [resetStates, reditectToOverview]);
+    redirectToOverview();
+  }, [resetStates, redirectToOverview]);
 
   const onCloseSubmitedTransaction = useCallback(() => {
     if (isPopup) {
       resetStates();
-      reditectToTransactions();
+      redirectToTransactions();
     } else {
       closeDrawer();
-      reditectToTransactions();
+      redirectToTransactions();
     }
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to sign tx multiple times without reloading).
     if (!isInMemory) window.location.reload();
-  }, [closeDrawer, isInMemory, isPopup, reditectToTransactions, resetStates]);
+  }, [closeDrawer, isInMemory, isPopup, redirectToTransactions, resetStates]);
 
   const onCloseWhileCreating = useCallback(() => {
     if (hasOutput) {
@@ -134,12 +138,13 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const analytics = useAnalyticsContext();
   const [isMultipleSelectionAvailable, setMultipleSelection] = useMultipleSelection();
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
+  const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
   const sendAnalytics = useCallback(() => {
     if (section.currentSection === Sections.SUMMARY) {
-      analytics.sendEvent({
-        action: AnalyticsEventActions.CLICK_EVENT,
-        category: AnalyticsEventCategories.SEND_TRANSACTION,
+      analytics.sendEventToMatomo({
+        action: MatomoEventActions.CLICK_EVENT,
+        category: MatomoEventCategories.SEND_TRANSACTION,
         name: isPopupView ? Events.BACK_TX_DETAILS_POPUP : Events.BACK_TX_DETAILS_BROWSER
       });
     }
@@ -173,6 +178,15 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
     } else {
       setPrevSection();
     }
+  };
+
+  const onCrossIconClick = () => {
+    if (section.currentSection === Sections.SUCCESS_TX) {
+      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick, { trigger_point: triggerPoint });
+    } else if (section.currentSection === Sections.FAIL_TX) {
+      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick, { trigger_point: triggerPoint });
+    }
+    onClose();
   };
 
   const { uiOutputs } = useCoinStateSelector(FIRST_ROW);
@@ -222,28 +236,33 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
             }
           />
         ) : shouldRenderCross ? (
-          <NavigationButton icon="cross" onClick={onClose} />
+          <NavigationButton icon="cross" onClick={onCrossIconClick} />
         ) : undefined
       }
     />
   );
 };
 
-export const headerText: Record<Sections, { title: string; subtitle?: string }> = {
-  [Sections.FORM]: { title: 'browserView.transaction.send.drawer.newTransaction' },
-  [Sections.SUMMARY]: {
-    title: 'browserView.transaction.send.drawer.transactionSummary',
-    subtitle: 'browserView.transaction.send.drawer.breakdownOfYourTransactionCost'
-  },
-  [Sections.CONFIRMATION]: {
-    title: 'browserView.transaction.send.confirmationTitle',
-    subtitle: 'browserView.transaction.send.signTransactionWithPassword'
-  },
-  [Sections.SUCCESS_TX]: { title: '' },
-  [Sections.FAIL_TX]: { title: '' },
-  [Sections.ADDRESS_LIST]: { title: 'browserView.transaction.send.drawer.addressBook' },
-  [Sections.ADDRESS_FORM]: { title: 'browserView.transaction.send.drawer.addressForm' },
-  [Sections.ASSET_PICKER]: { title: 'core.coinInputSelection.assetSelection' }
+export const useGetHeaderText = (): Record<Sections, { title: string; subtitle?: string; name?: string }> => {
+  const { addressToEdit } = useAddressBookStore();
+
+  return {
+    [Sections.FORM]: { title: 'browserView.transaction.send.drawer.newTransaction' },
+    [Sections.SUMMARY]: {
+      title: 'browserView.transaction.send.drawer.transactionSummary',
+      subtitle: 'browserView.transaction.send.drawer.breakdownOfYourTransactionCost'
+    },
+    [Sections.CONFIRMATION]: {
+      title: 'browserView.transaction.send.confirmationTitle',
+      subtitle: 'browserView.transaction.send.signTransactionWithPassword'
+    },
+    [Sections.SUCCESS_TX]: { title: '' },
+    [Sections.FAIL_TX]: { title: '' },
+    [Sections.ADDRESS_LIST]: { title: 'browserView.transaction.send.drawer.addressBook' },
+    [Sections.ADDRESS_FORM]: { title: 'browserView.transaction.send.drawer.addressForm' },
+    [Sections.ASSET_PICKER]: { title: 'core.coinInputSelection.assetSelection' },
+    [Sections.ADDRESS_CHANGE]: { title: 'addressBook.reviewModal.title', name: addressToEdit.name }
+  };
 };
 
 export const HeaderTitle = ({
@@ -257,9 +276,11 @@ export const HeaderTitle = ({
   const { currentSection: section } = useSections();
   const [isMultipleSelectionAvailable, setMultipleSelection] = useMultipleSelection();
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
-
+  const headerText = useGetHeaderText();
   const shouldDisplayTitle = ![Sections.FORM, Sections.FAIL_TX].includes(section.currentSection);
-  const title = shouldDisplayTitle ? t(headerText[section.currentSection].title) : undefined;
+  const title = shouldDisplayTitle
+    ? t(headerText[section.currentSection].title, { name: headerText[section.currentSection].name })
+    : undefined;
   const subtitle = headerText[section.currentSection]?.subtitle
     ? t(headerText[section.currentSection].subtitle)
     : undefined;

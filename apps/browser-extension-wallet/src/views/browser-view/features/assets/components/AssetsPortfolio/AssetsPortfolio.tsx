@@ -15,12 +15,14 @@ import { useRedirection } from '@hooks/useRedirection';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
-  AnalyticsEventCategories,
-  AnalyticsEventActions,
-  AnalyticsEventNames
+  MatomoEventCategories,
+  MatomoEventActions,
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
 import BigNumber from 'bignumber.js';
+import { SendFlowTriggerPoints } from '../../../send-transaction';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
 
@@ -67,12 +69,19 @@ export const AssetsPortfolio = ({
     [isBalanceLoading, portfolioTotalBalance]
   );
 
+  const handleRedirectToReceive = () => {
+    analytics.sendEventToPostHog(PostHogAction.ReceiveClick);
+    redirectToReceive();
+  };
+
   const openSend = () => {
-    analytics.sendEvent({
-      category: AnalyticsEventCategories.SEND_TRANSACTION,
-      action: AnalyticsEventActions.CLICK_EVENT,
+    analytics.sendEventToMatomo({
+      category: MatomoEventCategories.SEND_TRANSACTION,
+      action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.SendTransaction.SEND_TX_BUTTON_POPUP
     });
+    // eslint-disable-next-line camelcase
+    analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.SEND_BUTTON });
     redirectToSend({ params: { id: '1' } });
   };
 
@@ -109,7 +118,7 @@ export const AssetsPortfolio = ({
       {isPopupView && totalAssets > 0 && (
         <SendReceive
           leftButtonOnClick={openSend}
-          rightButtonOnClick={redirectToReceive}
+          rightButtonOnClick={handleRedirectToReceive}
           isReversed
           popupView
           sharedClass={styles.testPopupClass}

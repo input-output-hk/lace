@@ -1,7 +1,7 @@
 {
   "package.core": {
     "addressBook": {
-      "addressHandleTooltip": "The address linked to this handle has changed, click to update or delete."
+      "addressHandleTooltip": "The linked address to this handle has changed, click to update or delete."
     },
     "assetActivityItem": {
       "entry": {
@@ -11,8 +11,8 @@
         "staking": "Staking",
         "name": {
           "delegation": "Delegation",
-          "delegationDeregistration": "De-Registration",
-          "delegationRegistration": "Registration",
+          "delegationDeregistration": "Stake Key De-Registration",
+          "delegationRegistration": "Stake Key Registration",
           "rewards": "Rewards",
           "incoming": "Received",
           "outgoing": "Sent",
@@ -66,16 +66,20 @@
       "outputs": "Outputs",
       "transactionFee": "Transaction fee",
       "deposit": "Deposit",
+      "depositReclaim": "Returned deposit",
       "metadata": "Metadata",
       "transactionFeeInfo": "The amount you have been charged to process your transaction",
       "received": "Received",
       "delegation": "Delegation",
+      "registration": "Stake Key Registration",
+      "deregistration": "Stake Key De-Registration",
       "poolName": "Pool name",
       "poolTicker": "Pool ticker",
       "poolId": "Pool ID",
       "rewards": "Rewards",
       "rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
-      "copiedToClipboard": "Copied to clipboard"
+      "copiedToClipboard": "Copied to clipboard",
+      "pools": "Pool(s)"
     },
     "authorizeDapp": {
       "title": "Allow this site to",
@@ -83,6 +87,18 @@
       "seeWalletUtxo": "See your wallet UTXOs",
       "seeWalletBalance": "See your wallet balance",
       "seeWalletAddresses": "See your wallet different addresses, including reward accounts"
+    },
+    "walletNameAndPasswordSetupStep": {
+      "title": "Let's set up your new wallet",
+      "description": "Choose a name to identify your wallet and set up your password to unlock your wallet and make transactions.",
+      "nameInputLabel": "Wallet name",
+      "nameMaxLength": "Max. 20 characters",
+      "passwordInputLabel": "Password",
+      "confirmPasswordInputLabel": "Confirm password",
+      "nameRequiredMessage": "Wallet name is required",
+      "noMatchPassword": "Oops! The passwords don't match.",
+      "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
+      "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
     }
   }
 }

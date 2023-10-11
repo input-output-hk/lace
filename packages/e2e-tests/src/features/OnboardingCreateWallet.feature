@@ -156,6 +156,7 @@ Feature: Onboarding - Create wallet
     Then "Mnemonic writedown" page is displayed with words 8 of 24
     And I save the words
     And Words 1 - 8 are the same
+    And I clear saved words
 
   @LW-2438
   Scenario: Create Wallet - Mnemonic writedown - back button to start over and new words
@@ -168,6 +169,7 @@ Feature: Onboarding - Create wallet
     Then "Mnemonic writedown" page is displayed with words 8 of 24
     And I save the words
     And Words 1 - 8 are not the same
+    And I clear saved words
 
   @LW-2439
   Scenario: Create Wallet - Mnemonic verification page displayed
@@ -340,3 +342,59 @@ Feature: Onboarding - Create wallet
       | Cookie policy    |
       | Privacy policy   |
       | Terms of service |
+
+  @LW-4993
+  Scenario Outline: Create Wallet - <mode> theme applied to onboarding pages
+    Given I set <mode> theme mode in Local Storage
+    When "Get started" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I click "Create" button on wallet setup page
+    When "Legal page" is displayed
+    Then I see current onboarding page in <mode> mode
+    And I accept "T&C" checkbox
+    And I click "Next" button during wallet setup
+    When "Help us improve your experience" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I click "Next" button during wallet setup
+    When "Name your wallet" page is displayed
+    Then I see current onboarding page in <mode> mode
+    When I enter wallet name: "someWallet"
+    And I click "Next" button during wallet setup
+    When "Wallet password" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I enter password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Next" button during wallet setup
+    When "Mnemonic info" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I click "Next" button during wallet setup
+    Then "Mnemonic writedown" page is displayed with words 8 of 24
+    Then I see current onboarding page in <mode> mode
+    And I save the words
+    And I click "Next" button during wallet setup
+    Then "Mnemonic writedown" page is displayed with words 16 of 24
+    Then I see current onboarding page in <mode> mode
+    And I save the words
+    And I click "Next" button during wallet setup
+    Then "Mnemonic writedown" page is displayed with words 24 of 24
+    Then I see current onboarding page in <mode> mode
+    And I save the words
+    And I click "Next" button during wallet setup
+    When "Mnemonic verification" page is displayed with words 8 of 24
+    Then I see current onboarding page in <mode> mode
+    And I fill saved words 8 of 24
+    And I click "Next" button during wallet setup
+    When "Mnemonic verification" page is displayed with words 16 of 24
+    Then I see current onboarding page in <mode> mode
+    And I fill saved words 16 of 24
+    And I click "Next" button during wallet setup
+    When "Mnemonic verification" page is displayed with words 24 of 24
+    Then I see current onboarding page in <mode> mode
+    And I fill saved words 24 of 24
+    And I click "Next" button during wallet setup
+    Then "All done" page is displayed
+    Then I see current onboarding page in <mode> mode
+    And I clear saved words
+    Examples:
+      | mode  |
+      | dark  |
+      | light |

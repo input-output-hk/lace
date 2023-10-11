@@ -15,6 +15,7 @@ export const container = recipe({
     border: vars.borders.$button_default,
     borderRadius: vars.radius.$medium,
     outline: 'none',
+    cursor: 'pointer',
     vars: {
       borderGap: vars.spacing.$2,
     },
@@ -82,18 +83,16 @@ export const container = recipe({
     },
     paddingScheme: {
       [Scheme.Outlined]: {
-        height: vars.spacing.$48,
         minWidth: vars.spacing.$116,
         paddingLeft: vars.spacing.$24,
         paddingRight: vars.spacing.$24,
       },
       [Scheme.Icon]: {
-        height: vars.spacing.$48,
         paddingLeft: vars.spacing.$16,
         paddingRight: vars.spacing.$16,
       },
       [Scheme.Small]: {
-        height: vars.spacing.$40,
+        minWidth: vars.spacing.$116,
         paddingLeft: vars.spacing.$24,
         paddingRight: vars.spacing.$24,
       },

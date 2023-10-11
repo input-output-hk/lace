@@ -6,6 +6,7 @@ import AuthorizeDAppModal from '../elements/dappConnector/authorizeDAppModal';
 import ExampleDAppPage from '../elements/dappConnector/testDAppPage';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
 import CommonDappPageElements from '../elements/dappConnector/commonDappPageElements';
+import CollateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
 import DAppTransactionAllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
 import { Logger } from '../support/logger';
@@ -16,7 +17,7 @@ import extensionUtils from '../utils/utils';
 import TokensPageObject from '../pageobject/tokensPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { browser } from '@wdio/globals';
-import TopNavigationAssert from './topNavigationAssert';
+import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -39,11 +40,7 @@ class DAppConnectorAssert {
     await expect(await commonDappPageElements.betaPill.getText()).to.equal(await t('core.dapp.beta'));
   }
 
-  async assertSeeTitleAndDappDetails(
-    expectedTitleKey: string,
-    expectedDappDetails: ExpectedDAppDetails,
-    shouldIncludeFullDAppUrl: boolean
-  ) {
+  async assertSeeTitleAndDappDetails(expectedTitleKey: string, expectedDappDetails: ExpectedDAppDetails) {
     const currentDAppUrl = new URL(expectedDappDetails.url);
     const commonDappPageElements = new CommonDappPageElements();
     await commonDappPageElements.pageTitle.waitForDisplayed();
@@ -52,15 +49,13 @@ class DAppConnectorAssert {
     await commonDappPageElements.dAppName.waitForDisplayed();
     await expect(await commonDappPageElements.dAppName.getText()).to.equal(expectedDappDetails.name);
     await commonDappPageElements.dAppUrl.waitForDisplayed();
-    const expectedUrl = shouldIncludeFullDAppUrl
-      ? currentDAppUrl.href
-      : `${currentDAppUrl.protocol}//${currentDAppUrl.host}`;
+    const expectedUrl = `${currentDAppUrl.protocol}//${currentDAppUrl.host}`;
     await expect(await commonDappPageElements.dAppUrl.getText()).to.equal(expectedUrl);
   }
 
   async assertSeeAuthorizeDAppPage(expectedDappDetails: ExpectedDAppDetails) {
     await this.assertSeeHeader();
-    await this.assertSeeTitleAndDappDetails('dapp.connect.header', expectedDappDetails, false);
+    await this.assertSeeTitleAndDappDetails('dapp.connect.header', expectedDappDetails);
 
     await AuthorizeDAppPage.banner.container.waitForDisplayed();
     await AuthorizeDAppPage.banner.icon.waitForDisplayed();
@@ -74,25 +69,75 @@ class DAppConnectorAssert {
     await expect(await AuthorizeDAppPage.cancelButton.getText()).to.equal(await t('dapp.connect.btn.cancel'));
   }
 
-  async assertSeeDAppThemeMode(mode: 'dark' | 'light') {
-    await expect(await $('html').getAttribute('data-theme')).to.equal(mode);
-    await TopNavigationAssert.assertBackgroundColor(mode);
+  async assertSeeCollateralDAppPage(expectedDappDetails: ExpectedDAppDetails) {
+    await this.assertSeeHeader();
+    await this.assertSeeTitleAndDappDetails('dapp.collateral.set.header', expectedDappDetails);
+
+    await CollateralDAppPage.modalDescription.waitForDisplayed();
+    const currentDAppUrl = new URL(expectedDappDetails.url);
+
+    const valuePlaceholder = 'valuePlaceholder';
+    const currentModalText = (await CollateralDAppPage.modalDescription.getText()).replaceAll(
+      /(\d+(?:\.\d*)?|\.\d+)/g,
+      valuePlaceholder
+    );
+    const expectedModalText = (await t('dapp.collateral.request'))
+      .replaceAll('{{symbol}}', 'tADA')
+      .replace('{{dapp}}', `${currentDAppUrl.protocol}//${currentDAppUrl.host}`)
+      .replace('{{requestedAmount}}', valuePlaceholder)
+      .replace('{{lockableAmount}}', valuePlaceholder);
+
+    expect(currentModalText).to.equal(expectedModalText);
+
+    await CollateralDAppPage.banner.container.waitForDisplayed();
+    await CollateralDAppPage.banner.icon.waitForDisplayed();
+    await CollateralDAppPage.banner.description.waitForDisplayed();
+    expect(await CollateralDAppPage.banner.description.getText()).to.equal(await t('dapp.collateral.amountSeparated'));
+
+    await CollateralDAppPage.acceptButton.waitForDisplayed();
+    expect(await CollateralDAppPage.acceptButton.getText()).to.equal(
+      await t('browserView.settings.wallet.collateral.confirm')
+    );
+    await CollateralDAppPage.cancelButton.waitForDisplayed();
+    expect(await CollateralDAppPage.cancelButton.getText()).to.equal(await t('general.button.cancel'));
+  }
+
+  async assertSeeInsufficientFundsDAppPage() {
+    await this.assertSeeHeader();
+
+    await InsufficientFundsDAppPage.pageTitle.waitForDisplayed();
+    expect(await InsufficientFundsDAppPage.pageTitle.getText()).to.equal(
+      await t('dapp.collateral.insufficientFunds.title')
+    );
+
+    await InsufficientFundsDAppPage.image.waitForDisplayed();
+    await InsufficientFundsDAppPage.description.waitForDisplayed();
+    expect(await InsufficientFundsDAppPage.description.getText()).to.equal(
+      await t('dapp.collateral.insufficientFunds.description')
+    );
+
+    await InsufficientFundsDAppPage.addFundsButton.waitForDisplayed();
+    expect(await InsufficientFundsDAppPage.addFundsButton.getText()).to.equal(
+      await t('dapp.collateral.insufficientFunds.add')
+    );
+    await InsufficientFundsDAppPage.cancelButton.waitForDisplayed();
+    expect(await InsufficientFundsDAppPage.cancelButton.getText()).to.equal(await t('general.button.cancel'));
   }
 
   async assertSeeAuthorizePagePermissions() {
     await AuthorizeDAppPage.permissionsTitle.waitForDisplayed();
     await expect(await AuthorizeDAppPage.permissionsTitle.getText()).to.equal(
-      `${await t('package.core.authorizeDapp.title', true)}:`
+      `${await t('package.core.authorizeDapp.title', 'core')}:`
     );
 
     await AuthorizeDAppPage.permissionsList.waitForDisplayed();
     const currentTexts = await AuthorizeDAppPage.permissionsListItems.map(async (option) => await option.getText());
 
     const expectedTexts = [
-      await t('package.core.authorizeDapp.seeNetwork', true),
-      await t('package.core.authorizeDapp.seeWalletUtxo', true),
-      await t('package.core.authorizeDapp.seeWalletBalance', true),
-      await t('package.core.authorizeDapp.seeWalletAddresses', true)
+      await t('package.core.authorizeDapp.seeNetwork', 'core'),
+      await t('package.core.authorizeDapp.seeWalletUtxo', 'core'),
+      await t('package.core.authorizeDapp.seeWalletBalance', 'core'),
+      await t('package.core.authorizeDapp.seeWalletAddresses', 'core')
     ];
 
     await expect(currentTexts).to.have.all.members(expectedTexts);
@@ -156,14 +201,18 @@ class DAppConnectorAssert {
     await expect(await ExampleDAppPage.walletUsedAddress.getText()).to.be.empty;
   }
 
-  async assertWalletFoundAndConnectedInTestDApp() {
-    await expect(await ExampleDAppPage.walletItem.getAttribute('value')).to.equal('lace');
-    await expect(await ExampleDAppPage.walletFound.getText()).to.equal('true');
-
+  async waitUntilBalanceNotEmpty() {
     await browser.waitUntil(async () => (await ExampleDAppPage.walletUsedAddress.getText()) !== '', {
       timeout: 3000,
       timeoutMsg: 'failed while waiting for DApp connection data'
     });
+  }
+
+  async assertWalletFoundAndConnectedInTestDApp() {
+    await expect(await ExampleDAppPage.walletItem.getAttribute('value')).to.equal('lace');
+    await expect(await ExampleDAppPage.walletFound.getText()).to.equal('true');
+
+    await this.waitUntilBalanceNotEmpty();
 
     await expect(await ExampleDAppPage.walletApiVersion.getText()).to.equal('0.1.0');
     await expect(await ExampleDAppPage.walletName.getText()).to.equal('lace');
@@ -230,7 +279,7 @@ class DAppConnectorAssert {
     expectedTransactionData: ExpectedTransactionData
   ) {
     await this.assertSeeHeader();
-    await this.assertSeeTitleAndDappDetails('dapp.confirm.header', expectedDApp, true);
+    await this.assertSeeTitleAndDappDetails('dapp.confirm.header', expectedDApp);
     await ConfirmTransactionPage.transactionTypeTitle.waitForDisplayed();
     await expect(await ConfirmTransactionPage.transactionTypeTitle.getText()).to.equal(
       await t('dapp.confirm.details.header')

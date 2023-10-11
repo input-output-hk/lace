@@ -8,6 +8,8 @@
 /* eslint-disable unicorn/consistent-function-scoping */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable import/imports-first */
+import SpyInstance = jest.SpyInstance;
+
 const mockEmip3decrypt = jest.fn();
 const mockEmip3encrypt = jest.fn();
 const mockConnectDevice = jest.fn();
@@ -67,6 +69,16 @@ jest.mock('@lace/cardano', () => {
   };
 });
 
+jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
+  const actual = jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService');
+  return {
+    getUserIdService: () => ({
+      ...actual,
+      clearId: jest.fn()
+    })
+  };
+});
+
 const getWrapper =
   ({
     backgroundService,
@@ -102,7 +114,8 @@ describe('Testing useWalletManager hook', () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         walletLock: undefined,
         setKeyAgentData,
-        setCardanoWallet
+        setCardanoWallet,
+        setAddressesDiscoveryCompleted: () => {}
       }));
       jest.spyOn(localStorage, 'deleteFromLocalStorage').mockImplementation(deleteFromLocalStorage);
 
@@ -132,7 +145,8 @@ describe('Testing useWalletManager hook', () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         walletLock: {},
         setKeyAgentData,
-        setCardanoWallet
+        setCardanoWallet,
+        setAddressesDiscoveryCompleted: () => {}
       }));
       jest.spyOn(localStorage, 'deleteFromLocalStorage').mockImplementation(deleteFromLocalStorage);
 
@@ -152,6 +166,31 @@ describe('Testing useWalletManager hook', () => {
       expect(deleteFromLocalStorage).toBeCalledWith('keyAgentData');
       expect(setCardanoWallet).toBeCalledWith();
       expect(setKeyAgentData).toBeCalledWith();
+    });
+    test('sets the discovery completeness flag', async () => {
+      const setAddressesDiscoveryCompleted = jest.fn();
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        walletLock: {},
+        setKeyAgentData: () => {},
+        setCardanoWallet: () => {},
+        setAddressesDiscoveryCompleted
+      }));
+
+      const {
+        result: {
+          current: { lockWallet }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({
+          backgroundService: {
+            clearBackgroundStorage: () => {}
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
+      });
+
+      await lockWallet();
+
+      expect(setAddressesDiscoveryCompleted).toBeCalledWith(false);
     });
   });
 
@@ -765,6 +804,43 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('switchNetwork', () => {
+    beforeEach(() => {
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        walletManagerUi: 'walletManagerUi',
+        setAddressesDiscoveryCompleted: () => {}
+      }));
+    });
+
+    test('exits if walletManagerUi does not exist', async () => {
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({}));
+      jest.spyOn(console, 'info');
+      const {
+        result: {
+          current: { switchNetwork }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({})
+      });
+      await switchNetwork('Mainnet');
+      expect(console.info).not.toHaveBeenCalled();
+      (console.info as unknown as SpyInstance).mockRestore();
+    });
+    test('puts a log in the console', async () => {
+      jest.spyOn(console, 'info');
+      const {
+        result: {
+          current: { switchNetwork }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({})
+      });
+      try {
+        await switchNetwork('incorrect' as any);
+        // eslint-disable-next-line no-empty
+      } catch {}
+      expect(console.info).toHaveBeenCalledWith('Switching chain to', 'incorrect', expect.any(Array));
+      (console.info as unknown as SpyInstance).mockRestore();
+    });
     test('shoud throw in case the chain is not supported', async () => {
       const chainId = 'not supported chain id' as any;
       const {
@@ -868,7 +944,9 @@ describe('Testing useWalletManager hook', () => {
         walletManagerUi,
         setCardanoCoin,
         setKeyAgentData,
-        setCurrentChain
+        setCurrentChain,
+        setCardanoWallet: () => {},
+        setAddressesDiscoveryCompleted: () => {}
       }));
 
       jest.spyOn(getWallet, 'getWalletFromStorage').mockReturnValue({ name: walletName });
@@ -924,6 +1002,83 @@ describe('Testing useWalletManager hook', () => {
       expect(setCurrentChain).toBeCalledWith(chainName);
       expect(setCardanoCoin).toBeCalledWith({ networkId: 0, networkMagic: 1 });
       expect(setKeyAgentData).toBeCalledWith(keyAgentsByChain.Preprod.keyAgentData);
+    });
+    test('sets the cardano wallet data', async () => {
+      const setCardanoWallet = jest.fn();
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        walletManagerUi: 'walletManagerUi',
+        setCardanoCoin: () => {},
+        setKeyAgentData: () => {},
+        setCurrentChain: () => {},
+        setAddressesDiscoveryCompleted: () => {},
+        setCardanoWallet
+      }));
+      const getBackgroundStorage = jest.fn().mockReturnValue({
+        keyAgentsByChain: { Preprod: { keyAgentData: 'keyAgentData' } as any }
+      });
+      jest.spyOn(getWallet, 'getWalletFromStorage').mockReturnValue({ name: 'walletName' });
+      mockRestoreWalletFromKeyAgent.mockImplementation(() => ({
+        asyncKeyAgent: 'asyncKeyAgent',
+        keyAgent: 'keyAgent',
+        wallet: 'wallet'
+      }));
+
+      const {
+        result: {
+          current: { switchNetwork }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({
+          backgroundService: {
+            getBackgroundStorage
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
+      });
+
+      await switchNetwork('Preprod');
+
+      expect(setCardanoWallet).toBeCalledWith({
+        asyncKeyAgent: 'asyncKeyAgent',
+        keyAgent: 'keyAgent',
+        name: 'walletName',
+        wallet: 'wallet'
+      });
+    });
+    test('sets the discovery completeness flag', async () => {
+      const setAddressesDiscoveryCompleted = jest.fn();
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        walletManagerUi: 'walletManagerUi',
+        setCardanoCoin: () => {},
+        setKeyAgentData: () => {},
+        setCurrentChain: () => {},
+        setCardanoWallet: () => {},
+        setAddressesDiscoveryCompleted
+      }));
+      const getBackgroundStorage = jest.fn().mockReturnValue({
+        keyAgentsByChain: { Preprod: { keyAgentData: 'keyAgentData' } as any }
+      });
+      jest.spyOn(getWallet, 'getWalletFromStorage').mockReturnValue({ name: 'walletName' });
+      mockRestoreWalletFromKeyAgent.mockImplementation(async () => ({
+        asyncKeyAgent: 'asyncKeyAgent',
+        keyAgent: 'keyAgent',
+        wallet: 'wallet'
+      }));
+
+      const {
+        result: {
+          current: { switchNetwork }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({
+          backgroundService: {
+            getBackgroundStorage
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
+      });
+
+      await switchNetwork('Preprod');
+
+      expect(setAddressesDiscoveryCompleted).toBeCalledWith(false);
     });
   });
 });

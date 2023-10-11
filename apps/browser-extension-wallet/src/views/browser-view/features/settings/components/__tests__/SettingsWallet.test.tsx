@@ -18,6 +18,7 @@ import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { Wallet } from '@lace/cardano';
 import i18n from '@lib/i18n';
 import {
+  AnalyticsProvider,
   AppSettingsProvider,
   BackgroundServiceAPIProvider,
   BackgroundServiceAPIProviderProps,
@@ -34,6 +35,7 @@ import * as hooks from '@hooks';
 import * as common from '@lace/common';
 import { walletRoutePaths } from '@routes';
 import { SettingsDrawer } from '../SettingsWalletBase';
+import { mockAnalyticsTracker } from '@src/utils/mocks/test-helpers';
 
 const OLD_ENV = process.env;
 
@@ -109,6 +111,12 @@ jest.mock('@cardano-sdk/web-extension', () => ({
   consumeRemoteApi: jest.fn()
 }));
 
+jest.mock('@providers/PostHogClientProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/PostHogClientProvider'),
+  usePostHogClientContext: jest.fn()
+}));
+
 const testIds = {
   settingsCard: 'settings-card',
   settingLink: 'settings-wallet-collateral-link',
@@ -125,9 +133,11 @@ const getWrapper =
           <DatabaseProvider>
             <StoreProvider appMode={APP_MODE_BROWSER}>
               <I18nextProvider i18n={i18n}>
-                <CurrencyStoreProvider>
-                  <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-                </CurrencyStoreProvider>
+                <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                  <CurrencyStoreProvider>
+                    <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+                  </CurrencyStoreProvider>
+                </AnalyticsProvider>
               </I18nextProvider>
             </StoreProvider>
           </DatabaseProvider>

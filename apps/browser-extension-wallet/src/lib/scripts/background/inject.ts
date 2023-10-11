@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Cip30Wallet, injectGlobal, WalletApi, WalletProperties } from '@cardano-sdk/dapp-connector';
+import { Cip30Wallet, injectGlobal, WalletProperties } from '@cardano-sdk/dapp-connector';
 import { cip30, injectedRuntime, MessengerDependencies } from '@cardano-sdk/web-extension';
 import { consumeRemoteAuthenticatorApi, consumeRemoteWalletApi } from './api-consumers';
 
@@ -12,24 +12,8 @@ const initializeInjectedScript = (props: WalletProperties, { logger }: cip30.Ini
   const authenticator = consumeRemoteAuthenticatorApi(props, dependencies);
   const walletApi = consumeRemoteWalletApi(props, dependencies);
 
-  // Add experimental.getCollateral to CIP-30 API
-  const api = new Proxy<WalletApi & { extensions: any }>({} as WalletApi & { extensions: any }, {
-    // eslint-disable-next-line consistent-return
-    get(_, prop) {
-      const method = (walletApi as any)[prop];
-      if (typeof method === 'function') return method.bind(walletApi);
-      if (prop === 'experimental') {
-        return {
-          getCollateral: async () => {
-            const getCollateralFromWallet = walletApi.getCollateral.bind(walletApi);
-            return await getCollateralFromWallet();
-          }
-        };
-      }
-    }
-  });
+  const wallet = new Cip30Wallet(props, { api: walletApi, authenticator, logger });
 
-  const wallet = new Cip30Wallet(props, { api, authenticator, logger });
   injectGlobal(window, wallet, logger);
 };
 
@@ -39,7 +23,7 @@ const cip30WalletProperties = {
   walletName: process.env.WALLET_NAME
 };
 if (process.env.USE_DAPP_CONNECTOR === 'true') {
-  console.log('injecting content script');
+  console.info('injecting content script');
   // Disable logging in production for performance & security measures
   initializeInjectedScript(cip30WalletProperties, { logger: console });
 }

@@ -1,81 +1,136 @@
-import { Wallet } from '@lace/cardano';
-import { Box, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor, Text } from '@lace/ui';
+import { useObservable } from '@lace/common';
+import { Box, ControlButton, Flex, Text } from '@lace/ui';
+import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { DelegationCard } from '../delegation-card';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
-import { DelegationCard } from './DelegationCard';
-import { StakingInfoCard } from './staking-info-card';
-
-const SATURATION_UPPER_BOUND = 100;
+import { useDelegationPortfolioStore } from '../store';
+import { FundWalletBanner } from './FundWalletBanner';
+import { GetStartedSteps } from './GetStartedSteps';
+import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
+import { StakeFundsBanner } from './StakeFundsBanner';
+import { StakingInfoCard } from './StakingInfoCard';
+import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const Overview = () => {
   const { t } = useTranslation();
   const {
     walletStoreWalletUICardanoCoin,
     balancesBalance,
-    stakingRewards,
+    compactNumber,
     fetchCoinPricePriceResult,
-    delegationStoreSetSelectedStakePool: setSelectedStakePool,
-    delegationDetails,
+    walletAddress,
+    walletStoreWalletActivities: walletActivities,
+    walletStoreInMemoryWallet: inMemoryWallet,
   } = useOutsideHandles();
-  const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
-  const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
+  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
+  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
+    portfolioMutators: store.mutators,
+  }));
+  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
 
-  const onStakePoolOpen = () => {
-    setSelectedStakePool(delegationDetails);
-    setIsDrawerVisible(true);
+  const totalCoinBalance = balancesBalance?.total?.coinBalance;
+
+  if (
+    !totalCoinBalance ||
+    !protocolParameters?.stakeKeyDeposit ||
+    !balancesBalance?.available?.coinBalance ||
+    !rewardAccounts
+  ) {
+    return <Skeleton loading />;
+  }
+
+  const noFunds = !hasMinimumFundsToDelegate({
+    rewardAccounts,
+    stakeKeyDeposit: protocolParameters.stakeKeyDeposit,
+    totalCoinBalance,
+  });
+  const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
+
+  const onManageClick = () => {
+    portfolioMutators.executeCommand({
+      type: 'ManagePortfolio',
+    });
   };
 
-  if (currentPortfolio.length === 0) return <Text.SubHeading>Start staking</Text.SubHeading>;
-
-  const weightsSum = currentPortfolio.reduce((sum, { weight }) => sum + weight, 0);
-
-  const displayData = currentPortfolio.map((item, index) => ({
-    ...item,
-    ...item.displayData,
+  const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
-    coinBalance: (() => {
-      const balance = balancesBalance?.total?.coinBalance ? Number(balancesBalance?.total?.coinBalance) : 0;
-      return balance * (item.weight / weightsSum);
-    })(),
-    color: PIE_CHART_DEFAULT_COLOR_SET[index] as PieChartColor,
-    fiat: fetchCoinPricePriceResult?.cardano?.price,
-    lastReward: Wallet.util.lovelacesToAdaString(stakingRewards.lastReward.toString()),
-    status: ((): 'retired' | 'saturated' | undefined => {
-      if (item.displayData.retired) return 'retired';
-      if (Number(item.displayData.saturation || 0) > SATURATION_UPPER_BOUND) return 'saturated';
-      // eslint-disable-next-line consistent-return, unicorn/no-useless-undefined
-      return undefined;
-    })(),
-    totalRewards: Wallet.util.lovelacesToAdaString(stakingRewards.totalRewards.toString()),
-  }));
+    cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
+    portfolio: currentPortfolio,
+  });
 
-  if (displayData.length === 1) {
-    displayData.forEach((item) => (item.color = PieChartGradientColor.LaceLinearGradient));
-  }
+  if (noFunds)
+    return (
+      <FundWalletBanner
+        title={t('overview.noFunds.title')}
+        subtitle={t('overview.noFunds.description')}
+        prompt={t('overview.noFunds.description')}
+        walletAddress={walletAddress}
+        shouldHaveVerticalContent
+      />
+    );
+
+  if (currentPortfolio.length === 0)
+    return (
+      <>
+        {stakingNotification ? (
+          <StakingNotificationBanner
+            notification={stakingNotification}
+            onPortfolioDriftedNotificationClick={onManageClick}
+          />
+        ) : (
+          <Flex flexDirection="column" gap="$32">
+            <StakeFundsBanner balance={totalCoinBalance} />
+            <GetStartedSteps />
+          </Flex>
+        )}
+      </>
+    );
 
   return (
     <>
-      <Box mb={'$40'}>
+      <Box mb="$40">
         <DelegationCard
-          distribution={displayData.map(({ color, name = '-', weight }) => ({
+          balance={compactNumber(balancesBalance.available.coinBalance)}
+          cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
+          distribution={displayData.map(({ color, name = '-', onChainPercentage }) => ({
             color,
             name,
-            value: weight,
+            percentage: onChainPercentage,
           }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      <Flex justifyContent={'space-between'} mb={'$16'}>
+      {stakingNotification && (
+        <Box mb="$40">
+          <StakingNotificationBanner
+            notification={stakingNotification}
+            onPortfolioDriftedNotificationClick={onManageClick}
+          />
+        </Box>
+      )}
+      <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
+        <ControlButton.Small
+          disabled={pendingDelegationTransaction}
+          onClick={onManageClick}
+          label={t('overview.yourPoolsSection.manageButtonLabel')}
+        />
       </Flex>
       {displayData.map((item) => (
-        <Box key={item.id} mb={'$24'} data-testid="delegated-pool-item">
+        <Box key={item.id} mb="$24" data-testid="delegated-pool-item">
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}
-            cardanoCoinSymbol={'tADA'}
-            onStakePoolSelect={onStakePoolOpen}
+            cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
+            onStakePoolSelect={() => {
+              portfolioMutators.executeCommand({
+                data: item.stakePool,
+                type: 'ShowDelegatedPoolDetails',
+              });
+            }}
           />
         </Box>
       ))}

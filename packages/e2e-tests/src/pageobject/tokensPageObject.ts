@@ -14,7 +14,7 @@ class TokensPageObject {
 
   async waitUntilCardanoTokenLoaded() {
     const selector = 'p=Cardano';
-    await $(selector).waitForDisplayed({ timeout: 30_000 });
+    await $(selector).waitForClickable({ timeout: 30_000 });
   }
 
   async saveTokenBalance(tokenName: string) {
@@ -29,6 +29,10 @@ class TokensPageObject {
 
   async clickOnCoinGeckoCreditsLink() {
     await TokensPage.coinGeckoLink.click();
+  }
+
+  async clickOnViewAllButton() {
+    await TokensPage.ViewAllButton.click();
   }
 }
 
