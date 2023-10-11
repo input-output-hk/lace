@@ -175,6 +175,8 @@ When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow('Authorize');
   await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(mode);
+  await DAppConnectorPageObject.switchToTestDAppWindow();
+  await DAppConnectorAssert.waitUntilBalanceNotEmpty();
 });
 
 Then(/^I de-authorize all DApps in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
