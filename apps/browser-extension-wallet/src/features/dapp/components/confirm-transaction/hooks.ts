@@ -144,3 +144,12 @@ export const useTxSummary = ({
       type: txType.toString() as 'Send' | 'Mint' | 'Burn'
     };
   }, [tx, walletInfo.addresses, createAssetList, addressList]);
+
+export const useOnBeforeUnload = (callBack: () => void): void => {
+  useEffect(() => {
+    window.addEventListener('beforeunload', callBack);
+    return () => {
+      window.removeEventListener('beforeunload', callBack);
+    };
+  }, [callBack]);
+};

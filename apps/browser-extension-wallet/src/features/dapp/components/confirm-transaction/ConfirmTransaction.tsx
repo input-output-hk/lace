@@ -6,7 +6,7 @@ import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './ConfirmTransaction.module.scss';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
-import { useDisallowSignTx, useSignWithHardwareWallet, useSignTxData } from './hooks';
+import { useDisallowSignTx, useSignWithHardwareWallet, useSignTxData, useOnBeforeUnload } from './hooks';
 import { consumeRemoteApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@src/utils/constants';
@@ -37,6 +37,8 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
   const txType = signTxData ? getTxType(signTxData.tx) : undefined;
   const title = txType ? t(getTitleKey(txType)) : '';
+
+  useOnBeforeUnload(disallowSignTx);
 
   return (
     <Layout pageClassname={styles.spaceBetween} title={title}>
