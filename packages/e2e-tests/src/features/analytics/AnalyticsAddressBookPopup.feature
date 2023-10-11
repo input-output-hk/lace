@@ -39,6 +39,7 @@ Feature: Analytics - Posthog - Address book - Popup view
     And I click "Done" button on "Edit address" drawer
     Then I validate latest analytics single event "address book | address record | edit address | done | click"
     When I click address on the list with name "Byron_edited"
+    Then I validate latest analytics single event "address book | address record | click"
     And I click "Edit" button on address details page
     Then I validate latest analytics single event "address book | address record | edit | click"
     And I click "Cancel" button on "Add new address" drawer

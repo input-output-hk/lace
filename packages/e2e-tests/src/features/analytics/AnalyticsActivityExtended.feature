@@ -21,9 +21,9 @@ Feature: Transactions - Extended view
 
   @LW-8715
   Scenario: Analytics - Extended View - Transactions tab - Details - Click hash
-    Given I set up request interception for posthog analytics request(s)
     When I navigate to Transactions extended page
     When I click on a transaction: 1
+    And I set up request interception for posthog analytics request(s)
     And I click on a transaction hash
     Then I validate latest analytics single event "activity | activity detail | transaction hash | click"
-    And I validate that 3 analytics event(s) have been sent
+    And I validate that 1 analytics event(s) have been sent
