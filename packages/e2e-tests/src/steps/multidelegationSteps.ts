@@ -212,3 +212,7 @@ Then(
 Then(/^staking password drawer is displayed$/, async () => {
   await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
 });
+
+Then(/^Stake pool details drawer is not opened$/, async () => {
+  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsNotOpened();
+});
