@@ -15,9 +15,8 @@ type PercentagesChangeHandler = (value: number) => void;
 
 interface PoolDetailsCardProps {
   color: PieChartColor;
-  expanded: boolean;
+  defaultExpand: boolean;
   name: string;
-  onExpandButtonClick: () => void;
   onPercentageChange: PercentagesChangeHandler;
   onRemove?: () => void;
   actualPercentage?: number;
@@ -29,9 +28,8 @@ interface PoolDetailsCardProps {
 
 export const PoolDetailsCard = ({
   color,
-  expanded,
+  defaultExpand = false,
   name,
-  onExpandButtonClick,
   onPercentageChange,
   onRemove,
   actualPercentage,
@@ -42,6 +40,7 @@ export const PoolDetailsCard = ({
 }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
   const [localValue, setLocalValue] = useState(targetPercentage);
+  const [expand, setExpand] = useState(defaultExpand);
 
   const updatePercentage = (value: number) => {
     setLocalValue(value);
@@ -55,9 +54,12 @@ export const PoolDetailsCard = ({
           <Box className={styles.poolIndicator} style={{ backgroundColor: color }} />
           <Text.SubHeading>{name}</Text.SubHeading>
         </Flex>
-        <ControlButton.Icon icon={expanded ? <ChevronUpIcon /> : <ChevronDownIcon />} onClick={onExpandButtonClick} />
+        <ControlButton.Icon
+          icon={expand ? <ChevronUpIcon /> : <ChevronDownIcon />}
+          onClick={() => setExpand((prevExpand) => !prevExpand)}
+        />
       </Flex>
-      {expanded && (
+      {expand && (
         <>
           <PoolDetailsCardData
             cardanoCoinSymbol={cardanoCoinSymbol}

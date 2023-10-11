@@ -20,7 +20,7 @@ export const PoolDetailsCardStory: Story = () => {
         targetPercentage={30}
         onExpandButtonClick={() => setCard1Expanded((expanded) => !expanded)}
         onPercentageChange={(nextValue) => console.info('changed 1:', nextValue)}
-        expanded={card1Expanded}
+        defaultExpand={card1Expanded}
       />
       <PoolDetailsCard
         color="#475"
@@ -32,7 +32,7 @@ export const PoolDetailsCardStory: Story = () => {
         cardanoCoinSymbol="ADA"
         onExpandButtonClick={() => setCard2Expanded((expanded) => !expanded)}
         onPercentageChange={(nextValue) => console.info('changed 2:', nextValue)}
-        expanded={card2Expanded}
+        defaultExpand={card2Expanded}
       />
     </Flex>
   );
