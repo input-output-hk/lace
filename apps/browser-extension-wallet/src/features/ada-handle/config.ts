@@ -7,5 +7,6 @@ export const HANDLE_SERVER_URLS: Record<Cardano.NetworkMagics, string> = {
   [Cardano.NetworkMagics.Mainnet]: 'https://api.handle.me',
   [Cardano.NetworkMagics.Preprod]: 'https://preprod.api.handle.me',
   [Cardano.NetworkMagics.Preview]: 'https://preview.api.handle.me',
-  [Cardano.NetworkMagics.Testnet]: ''
+  // TODO: update once there's a valid sanchonet version available
+  [Cardano.NetworkMagics.Sanchonet]: 'https://sanchonet.api.handle.me'
 };

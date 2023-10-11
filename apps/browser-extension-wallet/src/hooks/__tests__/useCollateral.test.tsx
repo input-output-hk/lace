@@ -33,6 +33,7 @@ const signedTx = {
   cbor: '' as TxCBOR,
   tx: { id: 'txId' } as Cardano.Tx,
   context: {
+    handleResolutions: [],
     handles: [] as HandleResolution[]
   }
 } as SignedTx;
