@@ -16,6 +16,7 @@ import StakingPasswordDrawer from '../elements/multidelegation/StakingPasswordDr
 import StakingSuccessDrawerAssert from '../assert/multidelegation/StakingSuccessDrawerAssert';
 import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDrawer';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
+import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
@@ -208,3 +209,10 @@ Then(
     }
   }
 );
+Then(/^staking password drawer is displayed$/, async () => {
+  await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
+});
+
+Then(/^Stake pool details drawer is not opened$/, async () => {
+  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsNotOpened();
+});
