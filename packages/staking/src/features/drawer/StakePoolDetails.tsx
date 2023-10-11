@@ -54,35 +54,43 @@ export const StakePoolDetails = ({
   const { t } = useTranslation();
   const { walletStoreInMemoryWallet } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
+
   const {
     activeDrawerStep,
     activeFlow,
     currentPortfolioDrifted,
-    portfolioDraftMatchesCurrentPortfolio,
-    selectionsFull,
-    openPoolIsSelected,
     draftPortfolioValidity,
-  } = useDelegationPortfolioStore((store) => ({
-    activeDrawerStep: store.activeDrawerStep,
-    activeFlow: store.activeFlow,
-    currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
-    draftPortfolioValidity: getDraftPortfolioValidity(store),
-    openPoolIsSelected: store.selectedPortfolio.some(
-      (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
-    ),
-    portfolioDraftMatchesCurrentPortfolio:
-      store.draftPortfolio?.length === store.currentPortfolio?.length &&
-      (store.draftPortfolio || []).every(
+    openPoolIsSelected,
+    samePoolsInDraftAndCurrentPortfolio,
+    selectionsFull,
+    slidersMatchSavedPercentages,
+  } = useDelegationPortfolioStore((store) => {
+    const currentPortfolioPoolHexIds = (store.currentPortfolio || []).map(({ id }) => id);
+    return {
+      activeDrawerStep: store.activeDrawerStep,
+      activeFlow: store.activeFlow,
+      currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
+      draftPortfolioValidity: getDraftPortfolioValidity(store),
+      openPoolIsSelected: store.selectedPortfolio.some(
+        (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
+      ),
+      samePoolsInDraftAndCurrentPortfolio:
+        store.draftPortfolio?.length === currentPortfolioPoolHexIds.length &&
+        store.draftPortfolio?.every(({ id }) => currentPortfolioPoolHexIds.includes(id)),
+      selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
+      slidersMatchSavedPercentages: (store.draftPortfolio || []).every(
         ({ sliderIntegerPercentage, savedIntegerPercentage }) =>
           !!savedIntegerPercentage && sliderIntegerPercentage === savedIntegerPercentage
       ),
-    selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
-  }));
+    };
+  });
+
   const delegationPending = inFlightTx
     ?.map(({ body: { certificates } }) =>
       (certificates ?? []).filter((c) => c.__typename === Wallet.Cardano.CertificateType.StakeDelegation)
     )
     .some((certificates) => certificates?.length > 0);
+
   const selectionActionsAllowed = !selectionsFull || openPoolIsSelected;
 
   const contentsMap = useMemo(
@@ -107,7 +115,9 @@ export const StakePoolDetails = ({
       })(),
       [DrawerManagementStep.Preferences]: (() => {
         const currentPortfolioManagementUntouched =
-          activeFlow === Flow.PortfolioManagement && portfolioDraftMatchesCurrentPortfolio;
+          activeFlow === Flow.PortfolioManagement &&
+          samePoolsInDraftAndCurrentPortfolio &&
+          slidersMatchSavedPercentages;
 
         if (currentPortfolioManagementUntouched && !currentPortfolioDrifted) {
           return null;
@@ -138,7 +148,8 @@ export const StakePoolDetails = ({
       delegationPending,
       selectionActionsAllowed,
       popupView,
-      portfolioDraftMatchesCurrentPortfolio,
+      samePoolsInDraftAndCurrentPortfolio,
+      slidersMatchSavedPercentages,
       currentPortfolioDrifted,
       t,
       draftPortfolioValidity,
