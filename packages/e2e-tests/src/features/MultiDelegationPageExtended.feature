@@ -81,7 +81,7 @@ Feature: Staking Page - Extended View
     And I click Browse pools tab
     And I input "ADA Capital" into stake pool search bar
     And I click on the stake pool with name "ADA Capital"
-    Then I see drawer with "ADA Capital" stake pool details and a buttons for staking
+    Then I see stake pool details drawer for "ADA Capital" stake pool
 
   @LW-8438 @Testnet
   Scenario: Extended View - Staking - Stakepool details modal - Close modal
