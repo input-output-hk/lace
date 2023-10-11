@@ -84,7 +84,7 @@ Feature: Staking Page - Extended View
     Then I see stake pool details drawer for "ADA Capital" stake pool
 
   @LW-8438 @Testnet
-  Scenario: Extended View - Staking - Stakepool details modal - Close modal
+  Scenario: Extended View - Staking - Stakepool details drawer - Close drawer
     Given I disable showing Multidelegation beta banner
     And I am on Staking extended page
     And I click Browse pools tab
