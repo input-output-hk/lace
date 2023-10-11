@@ -2,7 +2,7 @@ import { Box, Text } from '@lace/ui';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../browse-pools';
-import { Drawer } from '../drawer';
+import { Drawer } from '../Drawer';
 import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
