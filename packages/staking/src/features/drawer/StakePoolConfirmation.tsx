@@ -16,9 +16,9 @@ import Cardano from './cardano-blue.png';
 import ExclamationMarkIcon from './exclamation-circle-small.svg';
 import styles from './StakePoolConfirmation.module.scss';
 
-type statRendererProps = {
+type StatRendererProps = {
   img?: string;
-  text: string;
+  text: React.ReactNode;
   subText: React.ReactNode;
 };
 
@@ -37,7 +37,7 @@ const isInputSelectionError = (error: any): error is { failure: InputSelectionFa
   Object.hasOwn(error, 'failure') &&
   Object.values(InputSelectionFailure).includes(error.failure);
 
-const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
+const ItemStatRenderer = ({ img, text, subText }: StatRendererProps) => (
   <div>
     {img && <img data-testid="sp-confirmation-item-logo" src={img} alt="confirmation item" />}
     <div className={styles.itemData}>
@@ -57,6 +57,20 @@ interface StakePoolConfirmationBodyProps {
   fiatCurrency: CurrencyInfo;
   stakePools: DraftPortfolioStakePool[];
 }
+
+const EllipsizedPoolName = ({ stakePool }: { stakePool: DraftPortfolioStakePool }) => {
+  const maxRenderedLength = 15;
+  const name = stakePool.displayData.name || '-';
+
+  return (
+    <Ellipsis
+      beforeEllipsis={maxRenderedLength}
+      withTooltip={name.length > maxRenderedLength}
+      afterEllipsis={0}
+      text={name}
+    />
+  );
+};
 
 const StakePoolConfirmationBody = ({
   balance,
@@ -84,7 +98,7 @@ const StakePoolConfirmationBody = ({
         >
           <ItemStatRenderer
             img={stakePool.displayData.logo}
-            text={stakePool.displayData.name || '-'}
+            text={<EllipsizedPoolName {...{ stakePool }} />}
             subText={<span>{stakePool.displayData.ticker}</span>}
           />
           <div className={styles.itemData}>
