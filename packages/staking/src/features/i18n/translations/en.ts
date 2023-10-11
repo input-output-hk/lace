@@ -134,6 +134,7 @@ export const en: Translations = {
   'drawer.sign.enterWalletPasswordToConfirmTransaction': 'Enter your wallet password to confirm transaction',
   'drawer.sign.error.invalidPassword': 'Wrong password',
   'drawer.sign.passwordPlaceholder': 'Password',
+  'drawer.success.modification.title': 'Hurray! Your modification has been submitted',
   'drawer.success.subTitle': "You'll start receiving your staking rewards after two epochs.",
   'drawer.success.switchedPools.subTitle':
     "You'll start receiving your staking rewards from the new pool after two epochs. Until then you'll continue receiving rewards from the previous one.",
