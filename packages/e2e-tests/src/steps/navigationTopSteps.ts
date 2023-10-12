@@ -99,6 +99,14 @@ When(/^I click on the settings option$/, async () => {
   await menuHeaderPageObject.clickSettingsOption();
 });
 
+When(/^I click on the Lock Wallet option$/, async () => {
+  await menuHeaderPageObject.clickLockWalletOption();
+});
+
+When(/^I click on the Address Book option$/, async () => {
+  await menuHeaderPageObject.clickAddressBookOption();
+});
+
 When(/^I click on then network sub-menu back button$/, async () => {
   await menuHeaderNetwork.backButton.click();
 });

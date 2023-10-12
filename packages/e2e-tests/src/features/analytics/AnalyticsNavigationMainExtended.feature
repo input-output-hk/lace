@@ -6,8 +6,10 @@ Feature: Analytics - Main Navigation - Extended view
 
   @LW-8710
   Scenario: Analytics - Extended view - Click Lace logo
-    Given I set up request interception for posthog analytics request(s)
-    And I navigate to Tokens extended page
+    Given I navigate to Tokens extended page
+    And I set up request interception for posthog analytics request(s)
     When I click on the logo icon
     Then I validate latest analytics single event "wallet | lace | click"
+    And I validate that 1 analytics event(s) have been sent
+    
     

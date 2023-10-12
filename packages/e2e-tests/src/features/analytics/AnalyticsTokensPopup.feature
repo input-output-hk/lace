@@ -14,3 +14,4 @@ Feature: Analytics -  Tokens tab - Popup view
     Then I validate latest analytics single event "token | tokens | token row | click"
     When I click on "View all" button on token details drawer
     Then I validate latest analytics single event "token | token detail | view all | click"
+    And I validate that 3 analytics event(s) have been sent
