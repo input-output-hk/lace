@@ -125,3 +125,46 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | remove wallet | click"
     And I click "Remove wallet" button on "Remove wallet" modal
     Then I validate latest analytics single event "settings | hold up | remove wallet | click"
+
+  @LW-8787
+  Scenario: Analytics - Extended View - Settings - Recovery phrase
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "Show recovery phrase" setting
+    Then I validate latest analytics single event "settings | show recovery phrase | click"
+    When I fill correct password
+    When I click on "Show passphrase" button
+    Then I validate latest analytics single event "settings | show recovery phrase | enter your password | show recovery phrase | click"
+    When I click on "Hide passphrase" button
+    Then I validate latest analytics single event "settings | show recovery phrase | Your recovery phrase (keep it secret!) | hide passphrase | click"
+    When I close the drawer by clicking close button
+    Then I validate latest analytics single event "settings | show recovery phrase | Your recovery phrase (keep it secret!) | x | click"
+    Then I validate that 4 analytics event(s) have been sent
+
+  @LW-8788
+  Scenario: Analytics - Extended View - Settings - FAQ
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "FAQs" setting
+    Then I validate latest analytics single event "settings | faqs | click"
+    Then I validate that 1 analytics event(s) have been sent
+
+  @LW-8789
+  Scenario: Analytics - Extended View - Settings - Analytics
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And Analytics toggle is enabled: true
+    And Analytics toggle is enabled: false
+    Then I validate latest analytics single event "settings | analytics | skip | click"
+    Then I validate that 1 analytics event(s) have been sent
+
+  @LW-8790
+  Scenario: Analytics - Extended View - Settings - Theme switch
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I set theme switch in settings to dark mode
+    Then I validate latest analytics single event "settings | theme | dark mode | click"
+    And I set theme switch in settings to light mode
+    Then I validate latest analytics single event "settings | theme | light mode | click"
+    Then I validate that 2 analytics event(s) have been sent
+    
