@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRegistration } from '@lace/core';
 import { SignTxData } from './types';
-import { dRepRegistrationInspector } from './utils';
+import { dRepRegistrationInspector, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 
 interface Props {
@@ -19,7 +19,7 @@ export const ConfirmDRepRegistrationContainer = ({ signTxData, errorMessage }: P
       dappInfo={signTxData.dappInfo}
       metadata={{
         depositPaid: Wallet.util.lovelacesToAdaString(certificate.deposit.toString()),
-        drepId: certificate.dRepCredential.hash,
+        drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash),
         hash: certificate.anchor?.dataHash,
         url: certificate.anchor?.url
       }}

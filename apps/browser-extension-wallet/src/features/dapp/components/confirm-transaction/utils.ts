@@ -124,3 +124,6 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
 
   return TxType.Send;
 };
+
+export const drepIDasBech32FromHash = (value: Wallet.Crypto.Hash28ByteBase16) =>
+  Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(value)));
