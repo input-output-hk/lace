@@ -490,6 +490,9 @@ export const WalletSetupWizard = ({
             moveForward();
           }}
           translations={walletSetupMnemonicIntroStepTranslations}
+          onClickVideo={() =>
+            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.PASSPHRASE_INTRO_PLAY_VIDEO_CLICK)
+          }
         />
       )}
       {currentStep === WalletSetupSteps.Mnemonic && (
