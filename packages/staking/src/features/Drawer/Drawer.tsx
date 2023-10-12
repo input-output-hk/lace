@@ -5,11 +5,11 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import {
+  DelegationFlow,
   DelegationPortfolioStore,
   DrawerDefaultStep,
   DrawerManagementStep,
   DrawerStep,
-  Flow,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
   sumPercentagesSanitized,
@@ -56,8 +56,8 @@ export const Drawer = ({
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
 
   const {
+    activeDelegationFlow,
     activeDrawerStep,
-    activeFlow,
     currentPortfolioDrifted,
     draftPortfolioValidity,
     openPoolIsSelected,
@@ -67,8 +67,8 @@ export const Drawer = ({
   } = useDelegationPortfolioStore((store) => {
     const currentPortfolioPoolHexIds = (store.currentPortfolio || []).map(({ id }) => id);
     return {
+      activeDelegationFlow: store.activeDelegationFlow,
       activeDrawerStep: store.activeDrawerStep,
-      activeFlow: store.activeFlow,
       currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
       draftPortfolioValidity: getDraftPortfolioValidity(store),
       openPoolIsSelected: store.selectedPortfolio.some(
@@ -108,14 +108,16 @@ export const Drawer = ({
   const footersMap = useMemo(
     (): Record<DrawerStep, React.ReactElement | null> => ({
       [DrawerDefaultStep.PoolDetails]: (() => {
-        if (activeFlow === Flow.PoolDetails && !delegationPending && selectionActionsAllowed) {
+        if (activeDelegationFlow === DelegationFlow.PoolDetails && !delegationPending && selectionActionsAllowed) {
           return <StakePoolDetailFooter popupView={popupView} />;
         }
         return null;
       })(),
       [DrawerManagementStep.Preferences]: (() => {
         const currentPortfolioManagementUntouched =
-          activeFlow === Flow.PortfolioManagement && poolsInDraftMatchCurrentPortfolio && slidersMatchSavedPercentages;
+          activeDelegationFlow === DelegationFlow.PortfolioManagement &&
+          poolsInDraftMatchCurrentPortfolio &&
+          slidersMatchSavedPercentages;
 
         if (currentPortfolioManagementUntouched && !currentPortfolioDrifted) {
           return null;
@@ -142,7 +144,7 @@ export const Drawer = ({
       [DrawerManagementStep.Failure]: <TransactionFailFooter />,
     }),
     [
-      activeFlow,
+      activeDelegationFlow,
       delegationPending,
       selectionActionsAllowed,
       popupView,

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DelegationCard, DelegationStatus } from '../../delegation-card';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import {
+  DelegationFlow,
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
@@ -38,14 +39,14 @@ export const StepPreferencesContent = () => {
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,
   } = useOutsideHandles();
-  const { draftPortfolio, portfolioMutators, delegationStatus, cardanoCoinSymbol } = useDelegationPortfolioStore(
-    (state) => ({
+  const { draftPortfolio, activeDelegationFlow, portfolioMutators, delegationStatus, cardanoCoinSymbol } =
+    useDelegationPortfolioStore((state) => ({
+      activeDelegationFlow: state.activeDelegationFlow,
       cardanoCoinSymbol: state.cardanoCoinSymbol,
       delegationStatus: getDraftDelegationStatus(state),
       draftPortfolio: state.draftPortfolio || [],
       portfolioMutators: state.mutators,
-    })
-  );
+    }));
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
@@ -106,7 +107,10 @@ export const StepPreferencesContent = () => {
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
         {displayData.map(
-          ({ color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage }) => (
+          (
+            { color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage },
+            idx
+          ) => (
             <PoolDetailsCard
               key={id}
               color={color}
@@ -117,10 +121,8 @@ export const StepPreferencesContent = () => {
               targetPercentage={sliderIntegerPercentage}
               stakeValue={stakeValue}
               cardanoCoinSymbol={cardanoCoinSymbol}
-              expanded
-              onExpandButtonClick={() => void 0}
+              defaultExpand={activeDelegationFlow === DelegationFlow.PortfolioManagement ? idx === 0 : true}
               onPercentageChange={(value) => {
-                console.info(value);
                 portfolioMutators.executeCommand({
                   data: { id, newSliderPercentage: value },
                   type: 'UpdateStakePercentage',

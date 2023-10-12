@@ -28,7 +28,7 @@ export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
     value: bigint;
   };
 
-export enum Flow {
+export enum DelegationFlow {
   Overview = 'Overview',
   BrowsePools = 'BrowsePools',
   CurrentPoolDetails = 'CurrentPoolDetails',
@@ -38,9 +38,9 @@ export enum Flow {
   NewPortfolio = 'NewPortfolio',
 }
 
-export type ExpandedViewFlow = Flow;
+export type ExpandedViewDelegationFlow = DelegationFlow;
 
-export type PopupViewFLow = Flow.Overview | Flow.CurrentPoolDetails;
+export type PopupViewDelegationFlow = DelegationFlow.Overview | DelegationFlow.CurrentPoolDetails;
 
 export enum DrawerDefaultStep {
   PoolDetails = 'PoolDetails',
@@ -57,7 +57,7 @@ export enum DrawerManagementStep {
 export type DrawerStep = DrawerDefaultStep | DrawerManagementStep;
 
 type BaseState = {
-  activeFlow: Flow;
+  activeDelegationFlow: DelegationFlow;
   activeDrawerStep?: DrawerStep;
 };
 
@@ -78,7 +78,7 @@ type StateMachineSpecificState = BaseState & SupportingData;
 type MakeState<S extends StateMachineSpecificState> = CrossStateData & StateMachineSpecificState & S;
 
 export type StateOverview = MakeState<{
-  activeFlow: Flow.Overview;
+  activeDelegationFlow: DelegationFlow.Overview;
   activeDrawerStep: undefined;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
@@ -87,7 +87,7 @@ export type StateOverview = MakeState<{
 
 export type StateCurrentPoolDetails = MakeState<{
   activeDrawerStep: DrawerDefaultStep.PoolDetails;
-  activeFlow: Flow.CurrentPoolDetails;
+  activeDelegationFlow: DelegationFlow.CurrentPoolDetails;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: StakePoolWithLogo;
@@ -95,14 +95,14 @@ export type StateCurrentPoolDetails = MakeState<{
 
 export type StatePortfolioManagement = MakeState<{
   activeDrawerStep: DrawerManagementStep;
-  activeFlow: Flow.PortfolioManagement;
+  activeDelegationFlow: DelegationFlow.PortfolioManagement;
   draftPortfolio: DraftPortfolioStakePool[];
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
 }>;
 
 export type StateBrowsePools = MakeState<{
-  activeFlow: Flow.BrowsePools;
+  activeDelegationFlow: DelegationFlow.BrowsePools;
   activeDrawerStep: undefined;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
@@ -111,7 +111,7 @@ export type StateBrowsePools = MakeState<{
 
 export type StatePoolDetails = MakeState<{
   activeDrawerStep: DrawerDefaultStep.PoolDetails;
-  activeFlow: Flow.PoolDetails;
+  activeDelegationFlow: DelegationFlow.PoolDetails;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: StakePoolWithLogo;
@@ -119,7 +119,7 @@ export type StatePoolDetails = MakeState<{
 
 export type StateNewPortfolio = MakeState<{
   activeDrawerStep: DrawerManagementStep;
-  activeFlow: Flow.NewPortfolio;
+  activeDelegationFlow: DelegationFlow.NewPortfolio;
   draftPortfolio: DraftPortfolioStakePool[];
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
@@ -127,7 +127,7 @@ export type StateNewPortfolio = MakeState<{
 
 export type StateChangingPreferences = MakeState<{
   activeDrawerStep: undefined;
-  activeFlow: Flow.ChangingPreferences;
+  activeDelegationFlow: DelegationFlow.ChangingPreferences;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: DraftPortfolioStakePool[];
   viewedStakePool: undefined;

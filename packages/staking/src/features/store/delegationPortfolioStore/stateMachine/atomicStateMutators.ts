@@ -3,10 +3,10 @@ import { MAX_POOLS_COUNT, PERCENTAGE_SCALE_MAX } from '../constants';
 import { initializeDraftPortfolioPool } from './initializeDraftPortfolioPool';
 import { normalizePercentages } from './normalizePercentages';
 import {
+  DelegationFlow,
   DraftPortfolioStakePool,
   DrawerDefaultStep,
   DrawerManagementStep,
-  Flow,
   StakePoolWithLogo,
   State,
 } from './types';
@@ -17,8 +17,8 @@ export const atomicStateMutators = {
   addPoolsFromPreferences: ({ state }: { state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
     return {
+      activeDelegationFlow: DelegationFlow.BrowsePools,
       activeDrawerStep: undefined,
-      activeFlow: Flow.BrowsePools,
       draftPortfolio: undefined,
       selectedPortfolio: state.draftPortfolio,
     } as const;
@@ -42,14 +42,19 @@ export const atomicStateMutators = {
     }
 
     return {
+      activeDelegationFlow: DelegationFlow.NewPortfolio,
       activeDrawerStep: DrawerManagementStep.Preferences,
-      activeFlow: Flow.NewPortfolio,
       draftPortfolio: targetDraftPortfolio,
     } as const;
   },
-  cancelDrawer: <F extends Flow.Overview | Flow.BrowsePools>({ targetFlow }: { state: State; targetFlow: F }) => ({
+  cancelDrawer: <F extends DelegationFlow.Overview | DelegationFlow.BrowsePools>({
+    targetFlow,
+  }: {
+    state: State;
+    targetFlow: F;
+  }) => ({
+    activeDelegationFlow: targetFlow,
     activeDrawerStep: undefined,
-    activeFlow: targetFlow,
   }),
   removePoolFromPreferences: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
@@ -75,12 +80,12 @@ export const atomicStateMutators = {
     pendingSelectedPortfolio: DraftPortfolioStakePool[];
   }) =>
     ({
+      activeDelegationFlow: DelegationFlow.ChangingPreferences,
       activeDrawerStep: undefined,
-      activeFlow: Flow.ChangingPreferences,
       pendingSelectedPortfolio,
       viewedStakePool: undefined,
     } as const),
-  showPoolDetails: <F extends Flow.CurrentPoolDetails | Flow.PoolDetails>({
+  showPoolDetails: <F extends DelegationFlow.CurrentPoolDetails | DelegationFlow.PoolDetails>({
     pool,
     targetFlow,
   }: {
@@ -88,8 +93,8 @@ export const atomicStateMutators = {
     targetFlow: F;
   }) =>
     ({
+      activeDelegationFlow: targetFlow,
       activeDrawerStep: DrawerDefaultStep.PoolDetails,
-      activeFlow: targetFlow,
       viewedStakePool: pool,
     } as const),
   unselectPool: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) =>
