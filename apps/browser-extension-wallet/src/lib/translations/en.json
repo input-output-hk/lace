@@ -1124,7 +1124,7 @@
     "drepRetirement": {
       "title": "Confirm DRep retirement",
       "metadata": "Metadata",
-      "drepId": "Drep ID",
+      "drepId": "DRep ID",
       "depositReturned": "Deposit returned"
     },
     "destinationAddressInput": {
