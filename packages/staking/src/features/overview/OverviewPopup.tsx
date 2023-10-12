@@ -4,7 +4,6 @@ import { Box, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../delegation-card';
-import { StakePoolDetails } from '../drawer';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
@@ -123,7 +122,6 @@ export const OverviewPopup = () => {
         ))}
       </Box>
       <ExpandViewBanner />
-      <StakePoolDetails showBackIcon showExitConfirmation={() => false} popupView />
     </>
   );
 };

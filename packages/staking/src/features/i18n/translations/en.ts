@@ -57,7 +57,7 @@ export const en: Translations = {
   'drawer.failure.subTitle': 'The transaction was not successful. Please try again.',
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',
-  'drawer.preferences.confirmButton': 'Confirm',
+  'drawer.preferences.confirmButton': 'Confirm new portfolio',
   'drawer.preferences.ctaButtonTooltip.invalidAllocation': 'You need to have a 100% allocation in order to proceed',
   'drawer.preferences.ctaButtonTooltip.zeroPercentageSliderError':
     'Every portfolio pool requires more than 0% allocation',
@@ -71,7 +71,7 @@ export const en: Translations = {
   'drawer.preferences.poolDetails.savedRatio': 'Saved ratio',
   'drawer.preferences.poolDetails.savedRatioTooltip':
     'The ratio previously saved for this pool. Note: This may not reflect the current on-chain state due to potential stake drift.',
-  'drawer.preferences.rebalanceButton': 'Rebalance staking',
+  'drawer.preferences.rebalanceButton': 'Rebalance portfolio',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.sign.confirmation.title': 'Staking confirmation',
   'drawer.sign.enterWalletPasswordToConfirmTransaction': 'Enter your wallet password to confirm transaction',
