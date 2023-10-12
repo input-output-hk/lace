@@ -18,7 +18,7 @@ export const WalletSetupMnemonicIntroStep = ({
   videoSrc,
   translations
 }: WalletSetupMnemonicIntroStepProps): React.ReactElement => {
-  const [shouldDisplayThumbnail, setShouldDisplayThumbnail] = useState(true);
+  const [overlayVisible, setOverlayVisible] = useState(true);
   const videoRef = useRef<HTMLIFrameElement>();
 
   return (
@@ -33,12 +33,12 @@ export const WalletSetupMnemonicIntroStep = ({
       <div
         className={styles.videoContainer}
         onClick={() => {
-          setShouldDisplayThumbnail(false);
+          setOverlayVisible(false);
           videoRef.current.src += '&autoplay=1';
           onClickVideo();
         }}
       >
-        {shouldDisplayThumbnail && <div className={styles.overlay} />}
+        {overlayVisible && <div className={styles.overlay} />}
         <iframe
           ref={videoRef}
           className={styles.video}
