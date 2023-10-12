@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flow, useDelegationPortfolioStore } from '../store';
+import { DelegationFlow, useDelegationPortfolioStore } from '../store';
 import { StakingModal } from './StakingModal';
 
 type StakingModalsProps = {
@@ -11,7 +11,7 @@ export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): Rea
   const { t } = useTranslation();
   const { portfolioMutators, visible } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
-    visible: store.activeFlow === Flow.ChangingPreferences,
+    visible: store.activeDelegationFlow === DelegationFlow.ChangingPreferences,
   }));
 
   // TODO implement analytics for the new flow

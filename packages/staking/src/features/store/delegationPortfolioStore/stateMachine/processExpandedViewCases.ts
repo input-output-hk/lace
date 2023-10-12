@@ -42,10 +42,10 @@ import { initializeDraftPortfolioPool } from './initializeDraftPortfolioPool';
 import { cases, handler } from './stateTreeUtilities';
 import {
   CurrentPortfolioStakePool,
+  DelegationFlow,
   DraftPortfolioStakePool,
   DrawerManagementStep,
-  ExpandedViewFlow,
-  Flow,
+  ExpandedViewDelegationFlow,
   Handler,
   StateBrowsePools,
   StateChangingPreferences,
@@ -63,31 +63,31 @@ export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): Dra
   }));
 
 export const processExpandedViewCases: Handler = (params) =>
-  cases<ExpandedViewFlow>(
+  cases<ExpandedViewDelegationFlow>(
     {
-      [Flow.Overview]: cases<OverviewCommand['type']>(
+      [DelegationFlow.Overview]: cases<OverviewCommand['type']>(
         {
           GoToBrowsePools: handler<GoToBrowsePools, StateOverview, StateBrowsePools>(({ state }) => ({
             ...state,
-            activeFlow: Flow.BrowsePools,
+            activeDelegationFlow: DelegationFlow.BrowsePools,
           })),
           ManagePortfolio: handler<ManagePortfolio, StateOverview, StatePortfolioManagement>(({ state }) => ({
             ...state,
+            activeDelegationFlow: DelegationFlow.PortfolioManagement,
             activeDrawerStep: DrawerManagementStep.Preferences,
-            activeFlow: Flow.PortfolioManagement,
             draftPortfolio: currentPortfolioToDraft(state.currentPortfolio),
           })),
           ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails, StateOverview, StateCurrentPoolDetails>(
             ({ state, command: { data } }) => ({
               ...state,
-              ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: Flow.CurrentPoolDetails }),
+              ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: DelegationFlow.CurrentPoolDetails }),
             })
           ),
         },
         params.command.type,
-        Flow.Overview
+        DelegationFlow.Overview
       ),
-      [Flow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
+      [DelegationFlow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
         {
           ClearSelections: handler<ClearSelections, StateBrowsePools, StateBrowsePools>(({ state }) => ({
             ...state,
@@ -113,8 +113,8 @@ export const processExpandedViewCases: Handler = (params) =>
           }),
           GoToOverview: handler<GoToOverview, StateBrowsePools, StateOverview>(({ state }) => ({
             ...state,
+            activeDelegationFlow: DelegationFlow.Overview,
             activeDrawerStep: undefined,
-            activeFlow: Flow.Overview,
           })),
           SelectPoolFromList: handler<SelectPoolFromList, StateBrowsePools, StateBrowsePools>(
             ({ state, command: { data } }) => ({
@@ -128,7 +128,7 @@ export const processExpandedViewCases: Handler = (params) =>
           ShowPoolDetailsFromList: handler<ShowPoolDetailsFromList, StateBrowsePools, StatePoolDetails>(
             ({ state, command: { data } }) => ({
               ...state,
-              ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: Flow.PoolDetails }),
+              ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: DelegationFlow.PoolDetails }),
             })
           ),
           UnselectPoolFromList: handler<UnselectPoolFromList, StateBrowsePools, StateBrowsePools>(
@@ -139,20 +139,20 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
         },
         params.command.type,
-        Flow.BrowsePools
+        DelegationFlow.BrowsePools
       ),
-      [Flow.CurrentPoolDetails]: cases<CurrentPoolDetailsCommand['type']>(
+      [DelegationFlow.CurrentPoolDetails]: cases<CurrentPoolDetailsCommand['type']>(
         {
           CancelDrawer: handler<CancelDrawer, StateCurrentPoolDetails, StateOverview>(({ state }) => ({
             ...state,
-            ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+            ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
             viewedStakePool: undefined,
           })),
         },
         params.command.type,
-        Flow.CurrentPoolDetails
+        DelegationFlow.CurrentPoolDetails
       ),
-      [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
+      [DelegationFlow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
           BeginSingleStaking: handler<
             BeginSingleStaking,
@@ -184,14 +184,14 @@ export const processExpandedViewCases: Handler = (params) =>
           }),
           CancelDrawer: handler<CancelDrawer, StatePoolDetails, StateBrowsePools>(({ state }) => ({
             ...state,
-            ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+            ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
             viewedStakePool: undefined,
           })),
           SelectPoolFromDetails: handler<SelectPoolFromDetails, StatePoolDetails, StateBrowsePools>(
             ({ state, command: { data } }) => ({
               ...state,
               ...atomicStateMutators.selectPool({ stakePool: data, state }),
-              ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+              ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
               viewedStakePool: undefined,
             })
           ),
@@ -199,15 +199,15 @@ export const processExpandedViewCases: Handler = (params) =>
             ({ state, command: { data } }) => ({
               ...state,
               ...atomicStateMutators.unselectPool({ id: data, state }),
-              ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+              ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
               viewedStakePool: undefined,
             })
           ),
         },
         params.command.type,
-        Flow.PoolDetails
+        DelegationFlow.PoolDetails
       ),
-      [Flow.PortfolioManagement]: cases<DrawerManagementStep>(
+      [DelegationFlow.PortfolioManagement]: cases<DrawerManagementStep>(
         {
           [DrawerManagementStep.Preferences]: cases<PortfolioManagementPreferencesCommand['type']>(
             {
@@ -217,7 +217,7 @@ export const processExpandedViewCases: Handler = (params) =>
               })),
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
               })),
               DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
@@ -250,7 +250,7 @@ export const processExpandedViewCases: Handler = (params) =>
               // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
               })),
               DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
@@ -272,7 +272,7 @@ export const processExpandedViewCases: Handler = (params) =>
               // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
               })),
               DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
@@ -300,7 +300,7 @@ export const processExpandedViewCases: Handler = (params) =>
               // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
               })),
             },
@@ -312,7 +312,7 @@ export const processExpandedViewCases: Handler = (params) =>
               // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
               })),
               DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
@@ -331,12 +331,12 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
         },
         params.state.activeDrawerStep as DrawerManagementStep,
-        Flow.PortfolioManagement
+        DelegationFlow.PortfolioManagement
       ),
       // TODO: reconsider this approach. Maybe it would be better to have just a boolean state for opening the modal
       //  instead of having a separate flow. It might feel more like a part of new portfolio creation step rather
       //  a separate flow.
-      [Flow.ChangingPreferences]: cases<ChangingPreferencesCommand['type']>(
+      [DelegationFlow.ChangingPreferences]: cases<ChangingPreferencesCommand['type']>(
         {
           ConfirmChangingPreferences: handler<
             ConfirmChangingPreferences,
@@ -353,15 +353,15 @@ export const processExpandedViewCases: Handler = (params) =>
           DiscardChangingPreferences: handler<DiscardChangingPreferences, StateChangingPreferences, StateBrowsePools>(
             ({ state }) => ({
               ...state,
-              activeFlow: Flow.BrowsePools,
+              activeDelegationFlow: DelegationFlow.BrowsePools,
               pendingSelectedPortfolio: undefined,
             })
           ),
         },
         params.command.type,
-        Flow.ChangingPreferences
+        DelegationFlow.ChangingPreferences
       ),
-      [Flow.NewPortfolio]: cases<DrawerManagementStep>(
+      [DelegationFlow.NewPortfolio]: cases<DrawerManagementStep>(
         {
           [DrawerManagementStep.Preferences]: cases<NewPortfolioPreferencesCommand['type']>(
             {
@@ -371,7 +371,7 @@ export const processExpandedViewCases: Handler = (params) =>
               })),
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
               })),
               DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
@@ -405,7 +405,7 @@ export const processExpandedViewCases: Handler = (params) =>
               // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
@@ -427,7 +427,7 @@ export const processExpandedViewCases: Handler = (params) =>
               // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
@@ -454,7 +454,7 @@ export const processExpandedViewCases: Handler = (params) =>
             {
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
                 selectedPortfolio: [],
               })),
@@ -467,7 +467,7 @@ export const processExpandedViewCases: Handler = (params) =>
               // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
-                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
@@ -486,9 +486,9 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
         },
         params.state.activeDrawerStep as DrawerManagementStep,
-        Flow.NewPortfolio
+        DelegationFlow.NewPortfolio
       ),
     },
-    params.state.activeFlow,
+    params.state.activeDelegationFlow,
     'root'
   )(params);

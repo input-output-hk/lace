@@ -5,11 +5,11 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import {
+  DelegationFlow,
   DelegationPortfolioStore,
   DrawerDefaultStep,
   DrawerManagementStep,
   DrawerStep,
-  Flow,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
   sumPercentagesSanitized,
@@ -56,15 +56,15 @@ export const StakePoolDetails = ({
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
   const {
     activeDrawerStep,
-    activeFlow,
+    activeDelegationFlow,
     currentPortfolioDrifted,
     portfolioDraftMatchesCurrentPortfolio,
     selectionsFull,
     openPoolIsSelected,
     draftPortfolioValidity,
   } = useDelegationPortfolioStore((store) => ({
+    activeDelegationFlow: store.activeDelegationFlow,
     activeDrawerStep: store.activeDrawerStep,
-    activeFlow: store.activeFlow,
     currentPortfolioDrifted: isPortfolioDrifted(store.currentPortfolio),
     draftPortfolioValidity: getDraftPortfolioValidity(store),
     openPoolIsSelected: store.selectedPortfolio.some(
@@ -100,14 +100,14 @@ export const StakePoolDetails = ({
   const footersMap = useMemo(
     (): Record<DrawerStep, React.ReactElement | null> => ({
       [DrawerDefaultStep.PoolDetails]: (() => {
-        if (activeFlow === Flow.PoolDetails && !delegationPending && selectionActionsAllowed) {
+        if (activeDelegationFlow === DelegationFlow.PoolDetails && !delegationPending && selectionActionsAllowed) {
           return <StakePoolDetailFooter popupView={popupView} />;
         }
         return null;
       })(),
       [DrawerManagementStep.Preferences]: (() => {
         const currentPortfolioManagementUntouched =
-          activeFlow === Flow.PortfolioManagement && portfolioDraftMatchesCurrentPortfolio;
+          activeDelegationFlow === DelegationFlow.PortfolioManagement && portfolioDraftMatchesCurrentPortfolio;
 
         if (currentPortfolioManagementUntouched && !currentPortfolioDrifted) {
           return null;
@@ -134,7 +134,7 @@ export const StakePoolDetails = ({
       [DrawerManagementStep.Failure]: <TransactionFailFooter />,
     }),
     [
-      activeFlow,
+      activeDelegationFlow,
       delegationPending,
       selectionActionsAllowed,
       popupView,

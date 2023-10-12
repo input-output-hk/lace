@@ -132,8 +132,11 @@ type KeysStructure = {
       };
       poolDetails: {
         savedRatio: '';
+        savedRatioTooltip: '';
         actualRatio: '';
+        actualRatioTooltip: '';
         actualStake: '';
+        actualStakeTooltip: '';
       };
     };
   };

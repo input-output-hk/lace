@@ -63,8 +63,14 @@ export const en: Translations = {
     'Every portfolio pool requires more than 0% allocation',
   'drawer.preferences.pickMorePools': 'You need to stake at least to one pool.',
   'drawer.preferences.poolDetails.actualRatio': 'Actual ratio',
+  'drawer.preferences.poolDetails.actualRatioTooltip':
+    'The current ratio of your stake in this pool as verified by the on-chain state.',
   'drawer.preferences.poolDetails.actualStake': 'Actual stake',
+  'drawer.preferences.poolDetails.actualStakeTooltip':
+    'The amount of ADA currently staked in this pool as verified by the on-chain state.',
   'drawer.preferences.poolDetails.savedRatio': 'Saved ratio',
+  'drawer.preferences.poolDetails.savedRatioTooltip':
+    'The ratio previously saved for this pool. Note: This may not reflect the current on-chain state due to potential stake drift.',
   'drawer.preferences.rebalanceButton': 'Rebalance staking',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.sign.confirmation.title': 'Staking confirmation',
