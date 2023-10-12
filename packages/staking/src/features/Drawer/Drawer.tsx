@@ -61,7 +61,7 @@ export const Drawer = ({
     currentPortfolioDrifted,
     draftPortfolioValidity,
     openPoolIsSelected,
-    samePoolsInDraftAndCurrentPortfolio,
+    poolsInDraftMatchCurrentPortfolio,
     selectionsFull,
     slidersMatchSavedPercentages,
   } = useDelegationPortfolioStore((store) => {
@@ -74,7 +74,7 @@ export const Drawer = ({
       openPoolIsSelected: store.selectedPortfolio.some(
         (pool) => store.viewedStakePool && pool.id === store.viewedStakePool.hexId
       ),
-      samePoolsInDraftAndCurrentPortfolio:
+      poolsInDraftMatchCurrentPortfolio:
         store.draftPortfolio?.length === currentPortfolioPoolHexIds.length &&
         store.draftPortfolio?.every(({ id }) => currentPortfolioPoolHexIds.includes(id)),
       selectionsFull: store.selectedPortfolio.length === MAX_POOLS_COUNT,
@@ -115,9 +115,7 @@ export const Drawer = ({
       })(),
       [DrawerManagementStep.Preferences]: (() => {
         const currentPortfolioManagementUntouched =
-          activeFlow === Flow.PortfolioManagement &&
-          samePoolsInDraftAndCurrentPortfolio &&
-          slidersMatchSavedPercentages;
+          activeFlow === Flow.PortfolioManagement && poolsInDraftMatchCurrentPortfolio && slidersMatchSavedPercentages;
 
         if (currentPortfolioManagementUntouched && !currentPortfolioDrifted) {
           return null;
@@ -148,7 +146,7 @@ export const Drawer = ({
       delegationPending,
       selectionActionsAllowed,
       popupView,
-      samePoolsInDraftAndCurrentPortfolio,
+      poolsInDraftMatchCurrentPortfolio,
       slidersMatchSavedPercentages,
       currentPortfolioDrifted,
       t,
