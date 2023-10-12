@@ -36,12 +36,16 @@ export const ConfirmDRepRegistration = ({ dappInfo, errorMessage, translations, 
       <Cell>
         <TransactionSummary.Metadata label={translations.metadata} text="" />
       </Cell>
-      <Cell>
-        <TransactionSummary.Address label={translations.labels.url} address={metadata.url} />
-      </Cell>
-      <Cell>
-        <TransactionSummary.Address label={translations.labels.hash} address={metadata.hash} />
-      </Cell>
+      {metadata.url && (
+        <Cell>
+          <TransactionSummary.Address label={translations.labels.url} address={metadata.url} />
+        </Cell>
+      )}
+      {metadata.hash && (
+        <Cell>
+          <TransactionSummary.Address label={translations.labels.hash} address={metadata.hash} />
+        </Cell>
+      )}
       <Cell>
         <TransactionSummary.Address label={translations.labels.drepId} address={metadata.drepId} />
       </Cell>
