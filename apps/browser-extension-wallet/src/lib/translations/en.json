@@ -1111,7 +1111,7 @@
       "url": "URL",
       "hash": "Hash",
       "drepId": "Drep ID",
-      "depositPaid": "Deposit Paid"
+      "depositPaid": "Deposit paid"
     },
     "drepRetirement": {
       "title": "Confirm DRep retirement",

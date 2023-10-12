@@ -4,6 +4,7 @@ import { ConfirmDRepRetirement } from '@lace/core';
 import { SignTxData } from './types';
 import { dRepRetirementInspector, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
+import { useWalletStore } from '@src/stores';
 
 interface Props {
   signTxData: SignTxData;
@@ -13,12 +14,19 @@ interface Props {
 export const ConfirmDRepRetirementContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const certificate = dRepRetirementInspector(signTxData.tx);
+  const {
+    walletUI: { cardanoCoin }
+  } = useWalletStore();
+
+  const depositPaidWithCardanoSymbol = `${Wallet.util.lovelacesToAdaString(certificate.deposit.toString())} ${
+    cardanoCoin.symbol
+  }`;
 
   return (
     <ConfirmDRepRetirement
       dappInfo={signTxData.dappInfo}
       metadata={{
-        depositReturned: Wallet.util.lovelacesToAdaString(certificate.deposit.toString()),
+        depositReturned: depositPaidWithCardanoSymbol,
         drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash)
       }}
       translations={{
