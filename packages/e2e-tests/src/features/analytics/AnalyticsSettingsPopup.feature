@@ -148,3 +148,49 @@ Feature: Analytics - Settings - Popup View
     And I click "Remove wallet" button on "Remove wallet" modal
     Then I validate latest analytics single event "settings | hold up | remove wallet | click"
     And I validate that 2 analytics event(s) have been sent
+
+  @LW-8783
+  Scenario: Analytics - Popup View - Settings - Recovery phrase
+    Given I am on Tokens popup page
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "Show recovery phrase" setting
+    Then I validate latest analytics single event "settings | show recovery phrase | click"
+    When I fill correct password
+    When I click on "Show passphrase" button
+    Then I validate latest analytics single event "settings | show recovery phrase | enter your password | show recovery phrase | click"
+    When I click on "Hide passphrase" button
+    Then I validate latest analytics single event "settings | show recovery phrase | Your recovery phrase (keep it secret!) | hide passphrase | click"
+    When I close the drawer by clicking back button
+    Then I validate latest analytics single event "settings | show recovery phrase | Your recovery phrase (keep it secret!) | x | click"
+    Then I validate that 4 analytics event(s) have been sent
+
+  @LW-8784
+  Scenario: Analytics - Popup View - Settings - FAQ
+    Given I am on Tokens popup page
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "FAQs" setting
+    Then I validate latest analytics single event "settings | faqs | click"
+    Then I validate that 1 analytics event(s) have been sent
+
+  @LW-8785
+  Scenario: Analytics - Popup View - Settings - Analytics
+    Given I am on Tokens popup page
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And Analytics toggle is enabled: true
+    And Analytics toggle is enabled: false
+    Then I validate latest analytics single event "settings | analytics | skip | click"
+    Then I validate that 1 analytics event(s) have been sent
+
+  @LW-8786
+  Scenario: Analytics - Popup View - Settings - Theme switch
+    Given I am on Tokens popup page
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I set theme switch in settings to dark mode
+    Then I validate latest analytics single event "settings | theme | dark mode | click"
+    And I set theme switch in settings to light mode
+    Then I validate latest analytics single event "settings | theme | light mode | click"
+    Then I validate that 2 analytics event(s) have been sent
