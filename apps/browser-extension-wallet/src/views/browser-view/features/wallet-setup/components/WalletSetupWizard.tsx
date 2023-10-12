@@ -493,6 +493,7 @@ export const WalletSetupWizard = ({
           onClickVideo={() =>
             analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.PASSPHRASE_INTRO_PLAY_VIDEO_CLICK)
           }
+          videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
         />
       )}
       {currentStep === WalletSetupSteps.Mnemonic && (

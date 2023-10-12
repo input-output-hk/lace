@@ -7,6 +7,7 @@ export interface WalletSetupMnemonicIntroStepProps {
   onBack: () => void;
   onNext: () => void;
   onClickVideo?: () => void;
+  videoSrc?: string;
   translations: TranslationsFor<'title' | 'description' | 'linkText'>;
 }
 
@@ -14,6 +15,7 @@ export const WalletSetupMnemonicIntroStep = ({
   onBack,
   onNext,
   onClickVideo,
+  videoSrc,
   translations
 }: WalletSetupMnemonicIntroStepProps): React.ReactElement => {
   const [shouldDisplayThumbnail, setShouldDisplayThumbnail] = useState(true);
@@ -40,7 +42,7 @@ export const WalletSetupMnemonicIntroStep = ({
         <iframe
           ref={videoRef}
           className={styles.video}
-          src="https://www.youtube-nocookie.com/embed/hOFVXo969rk?si=0a-hNDVME6eTboIX"
+          src={videoSrc}
           title="YouTube video player"
           allow="accelerometer; fullscreen; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         />
