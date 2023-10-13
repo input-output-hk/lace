@@ -38,6 +38,7 @@ import TransactionSubmittedPage from '../elements/newTransaction/transactionSubm
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
+import { AddressInput } from '../elements/addressInput';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -96,6 +97,7 @@ When(
 
 When(/I enter "([^"]*)" in the bundle (\d) recipient's address/, async (value: string, inputIndex: number) => {
   await transactionExtendedPageObject.fillAddress(value, inputIndex);
+  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
 });
 
 When(/I enter the first characters of the contacts/, async () => {
