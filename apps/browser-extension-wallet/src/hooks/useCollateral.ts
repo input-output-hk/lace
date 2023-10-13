@@ -96,8 +96,8 @@ export const useCollateral = (): UseCollateralReturn => {
           error: error.message
         });
         setTxBuilder(undefined);
-        throw error;
       }
+      throw error;
     } finally {
       setIsSubmitting(false);
     }

@@ -36,18 +36,21 @@ export const Navigation = ({ children }: NavigationProps) => {
         value={activePage}
         onValueChange={onValueChange}
         tabIndex={-1}
+        style={{ display: 'flex', gap: '20px' }}
       >
         <SubNavigation.Item
           name={t('root.nav.overviewTitle')}
           value={Page.overview}
           data-testid="overview-tab"
           tabIndex={0}
+          highlightWidth="half"
         />
         <SubNavigation.Item
           name={t('root.nav.browsePoolsTitle')}
           value={Page.browsePools}
           data-testid="browse-tab"
           tabIndex={0}
+          highlightWidth="half"
         />
       </SubNavigation.Root>
       {children(activePage)}

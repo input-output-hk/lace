@@ -300,3 +300,7 @@ When(/^I reclaim collateral \(if active\) in (extended|popup) mode$/, async (mod
     await CollateralDrawer.collateralButton.click();
   }
 });
+
+When(/^I set theme switch in settings to (light|dark) mode$/, async (mode: 'light' | 'dark') => {
+  await settingsExtendedPageObject.setExtensionTheme(mode);
+});
