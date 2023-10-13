@@ -23,8 +23,6 @@ import { WalletManagerActivateProps, WalletManagerUi } from '@cardano-sdk/web-ex
 import { ChainName, WalletManagerProviderTypes } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
 import { createWalletUtil } from '@cardano-sdk/wallet';
-// Using nodejs to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
-import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
 
 export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.SerializableKeyAgentData }>;
 
@@ -95,7 +93,7 @@ export const createCardanoWalletsByChain = async (
         ),
       createWallet,
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
+      bip32Ed25519: new Crypto.SodiumBip32Ed25519()
     });
 
     return { keyAgent, ...rest };
@@ -192,7 +190,7 @@ export const restoreWallet = async (
     createKeyAgent: async (dependencies) => await restoreKeyAgent(keyAgentData, dependencies, getPassword),
     createWallet,
     logger: console,
-    bip32Ed25519: new Crypto.CmlBip32Ed25519(CML)
+    bip32Ed25519: new Crypto.SodiumBip32Ed25519()
   });
   return { keyAgent, wallet };
 };
@@ -259,7 +257,7 @@ export const validateWalletPassword = async (
     // Not needed for this
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
+      bip32Ed25519: new Crypto.SodiumBip32Ed25519(),
       inputResolver: { resolveInput: () => null }
     },
     getPassword
@@ -286,7 +284,7 @@ export const validateWalletMnemonic = async (
     // Not needed for this
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
+      bip32Ed25519: new Crypto.SodiumBip32Ed25519(),
       inputResolver: { resolveInput: () => null }
     },
     getPassword
@@ -302,7 +300,7 @@ export const validateWalletMnemonic = async (
     // Not needed for this
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
+      bip32Ed25519: new Crypto.SodiumBip32Ed25519(),
       inputResolver: { resolveInput: () => null }
     }
   );
@@ -347,7 +345,7 @@ export const createKeyAgent = (
     keyAgentData,
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
+      bip32Ed25519: new Crypto.SodiumBip32Ed25519(),
       inputResolver: walletUtil
     },
     getPassword

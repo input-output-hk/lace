@@ -67,7 +67,8 @@
     "webextension-polyfill": "0.8.0"
   },
   "devDependencies": {
-    "@cardano-sdk/util-dev": "0.15.1",
+    "@cardano-sdk/util-dev": "0.17.2",
+    "@dcspark/cardano-multiplatform-lib-browser": "^3.1.1",
     "@dcspark/cardano-multiplatform-lib-nodejs": "^3.1.1",
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "rollup-plugin-polyfill-node": "^0.8.0",

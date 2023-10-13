@@ -15,7 +15,7 @@ import { BehaviorSubject } from 'rxjs';
 import { cleanup, renderHook } from '@testing-library/react-hooks';
 import { AppSettingsProvider } from '@providers';
 import { StoreProvider } from '@src/stores';
-import { COLLATERAL_ADA_AMOUNT, COLLATERAL_AMOUNT_LOVELACES, useCollateral } from '../useCollateral';
+import { COLLATERAL_ADA_AMOUNT, COLLATERAL_AMOUNT_LOVELACES, useCollateral } from '@hooks';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '@lib/i18n';
@@ -33,7 +33,8 @@ const signedTx = {
   cbor: '' as TxCBOR,
   tx: { id: 'txId' } as Cardano.Tx,
   context: {
-    handles: [] as HandleResolution[]
+    handles: [] as HandleResolution[],
+    handleResolutions: [] as HandleResolution[]
   }
 } as SignedTx;
 const utxo = [{ txId: signedTx.tx.id }, { value: { coins: COLLATERAL_AMOUNT_LOVELACES } }];

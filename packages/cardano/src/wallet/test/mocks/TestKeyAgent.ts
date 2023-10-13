@@ -1,7 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
 import * as KeyManagement from '../../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 import * as Crypto from '@cardano-sdk/crypto';
-import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
 
 interface TestKeyAgentProps {
   password?: string;
@@ -23,7 +22,7 @@ export const testKeyAgent = ({
     // eslint-disable-next-line unicorn/no-null
     {
       logger: console,
-      bip32Ed25519: new Crypto.CmlBip32Ed25519(CML),
+      bip32Ed25519: new Crypto.SodiumBip32Ed25519(),
       // eslint-disable-next-line unicorn/no-null
       inputResolver: { resolveInput: jest.fn().mockResolvedValue(null) }
     }

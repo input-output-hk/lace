@@ -120,7 +120,6 @@
       "mainnet": "Mainnet",
       "preprod": "Preprod",
       "preview": "Preview",
-      "legacyTestnet": "Legacy Testnet",
       "custom": "Custom",
       "offline": "Offline",
       "error": "Your internet connection is not working. You can still navigate the wallet based on the latest connection you had.",
