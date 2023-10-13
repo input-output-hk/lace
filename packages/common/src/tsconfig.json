@@ -2,10 +2,10 @@
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist/",
-    "rootDir": "./",
-    "baseUrl": "../src",
+    "rootDir": ".",
+    "baseUrl": ".",
     "paths": {
-      "@src/*": ["*"],
+      "@src/*": ["/*"],
       "@ui/*": ["ui/*"]
     },
     "declarationDir": "./",
