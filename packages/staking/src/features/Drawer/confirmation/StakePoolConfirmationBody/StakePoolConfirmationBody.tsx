@@ -2,6 +2,7 @@
 import Icon from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
 import { Ellipsis } from '@lace/common';
+import { Flex, Text } from '@lace/ui';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Balance, CurrencyInfo } from '../../../outside-handles-provider';
@@ -87,7 +88,11 @@ export const StakePoolConfirmationBody = ({
           </div>
         ))
       ) : (
-        <div className={styles.noPools}>{t('drawer.confirmation.noPools')}</div>
+        <Flex justifyContent="center">
+          <Text.Body.Large className={styles.noPoolsText} weight="$semibold">
+            {t('drawer.confirmation.noPools')}
+          </Text.Body.Large>
+        </Flex>
       )}
     </div>
   );

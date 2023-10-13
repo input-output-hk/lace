@@ -12,9 +12,5 @@ export const icon = style({
 });
 
 export const text = style({
-  color: theme.colors.$greyText,
-});
-
-export const button = style({
-  marginTop: theme.spacing.$40,
+  color: theme.colors.$preferencesDrawerNoPoolsTextColor,
 });
