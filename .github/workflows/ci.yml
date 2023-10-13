@@ -26,7 +26,7 @@ jobs:
         run: yarn lint
       - name: Run unit tests, generate test coverage report
         env:
-          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
+          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet,Sanchonet'
           DEFAULT_CHAIN: 'Preprod'
         run: yarn test:coverage --maxWorkers=2
       - name: Upload build

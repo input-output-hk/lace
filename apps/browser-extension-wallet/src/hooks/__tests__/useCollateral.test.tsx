@@ -33,8 +33,8 @@ const signedTx = {
   cbor: '' as TxCBOR,
   tx: { id: 'txId' } as Cardano.Tx,
   context: {
-    handles: [] as HandleResolution[],
-    handleResolutions: [] as HandleResolution[]
+    handleResolutions: [] as HandleResolution[],
+    handles: [] as HandleResolution[]
   }
 } as SignedTx;
 const utxo = [{ txId: signedTx.tx.id }, { value: { coins: COLLATERAL_AMOUNT_LOVELACES } }];

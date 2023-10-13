@@ -132,6 +132,7 @@ export enum PostHogAction {
   SettingsNetworkPreviewClick = 'settings | network | preview | click',
   SettingsNetworkPreprodClick = 'settings | network | preprod | click',
   SettingsNetworkMainnetClick = 'settings | network | mainnet | click',
+  SettingsNetworkSanchonetClick = 'settings | network | sanchonet | click',
   SettingsNetworkXClick = 'settings | network | x | click',
   SettingsAuthorizedDappsClick = 'settings | authorized dapps | click',
   SettingsAuthorizedDappsTrashBinIconClick = 'settings | authorized dapps | trash bin icon | click',
@@ -180,6 +181,7 @@ export enum PostHogAction {
   UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
   UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
   UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
+  UserWalletProfileNetworkSanchonetClick = 'user/wallet profile | network | sanchonet | click',
   // Lace Logo
   WalletLaceClick = 'wallet | lace | click',
   // Tokens
