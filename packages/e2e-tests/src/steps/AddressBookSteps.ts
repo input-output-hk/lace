@@ -29,6 +29,14 @@ import { Address } from '../data/Address';
 import AddressForm from '../elements/addressbook/AddressForm';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
+import ReviewAddressDrawerAssert from '../assert/addressBook/ReviewAddressDrawerAssert';
+import nftsPageObject from '../pageobject/nftsPageObject';
+import { getTestWallet } from '../support/walletConfiguration';
+import ReviewAddressDrawer from '../elements/addressbook/ReviewAddressDrawer';
+import Modal from '../elements/modal';
+import mainMenuPageObject from '../pageobject/mainMenuPageObject';
+
+const addressAddedToastTranslationKey = 'browserView.addressBook.toast.addAddress';
 
 Given(
   /^I don't have any addresses added to my address book in (popup|extended) mode$/,
@@ -118,7 +126,19 @@ Then(
   }
 );
 
-Then(/^address list is displayed and each row consists of avatar, name and address/, async () => {
+Then(/^I see warning for address row with name "([^"]*)"$/, async (address: string) => {
+  await AddressBookPageAssert.assertSeeHandleWarningForAddress(address);
+});
+
+Then(/^I hover over the warning icon for "([^"]*)" handle/, async (handle: string) => {
+  await AddressBookPage.hoverOverWarningIcon(handle);
+});
+
+Then(/^I see handle warning tooltip$/, async () => {
+  await AddressBookPageAssert.assertSeeHandleWarningTooltip();
+});
+
+Then(/^address list is displayed and each row consists of avatar, name and address$/, async () => {
   await AddressBookPageAssert.assertSeeEachAddressRow();
 });
 
@@ -265,7 +285,7 @@ Then(
 Then(
   /^I verify that address: "([^"]*)" with name: "([^"]*)" has been added in (extended|popup) mode$/,
   async (address: string, name: string, mode: 'extended' | 'popup') => {
-    await ToastMessageAssert.assertSeeToastMessage(await t('browserView.addressBook.toast.addAddress'), true);
+    await ToastMessageAssert.assertSeeToastMessage(await t(addressAddedToastTranslationKey), true);
     await AddressBookPageAssert.assertSeeAddressOnTheList(name, address, true, mode);
   }
 );
@@ -285,5 +305,80 @@ Then(
     await AddressDetails.deleteButton.click();
     await DeleteAddressModal.deleteAddressButton.waitForClickable();
     await DeleteAddressModal.deleteAddressButton.click();
+  }
+);
+
+Then(
+  /^I see review handle drawer in (extended|popup) mode for handle: "([^"]*)"$/,
+  async (mode: 'extended' | 'popup', handleName: string) => {
+    const previousAddress = String(getTestWallet(testContext.load('activeWallet')).address);
+    const newAddress = String(getTestWallet(await nftsPageObject.getNonActiveNftWalletName()).address);
+    await ReviewAddressDrawerAssert.assertSeeReviewAddressDrawer(mode, handleName, previousAddress, newAddress);
+  }
+);
+
+When(/^I click "(Accept|Delete)" button on review handle drawer$/, async (button: 'Accept' | 'Delete') => {
+  switch (button) {
+    case 'Accept':
+      await ReviewAddressDrawer.clickAcceptButton();
+      break;
+    case 'Delete':
+      await ReviewAddressDrawer.clickDeleteButton();
+      break;
+    default:
+      throw new Error(`Unsupported button name: ${button}`);
+  }
+});
+
+Then(/^I (see|don't see) "Are you sure" review address modal$/, async (shouldSee: string) => {
+  await ReviewAddressDrawerAssert.assertSeeAreYouSureReviewModal(shouldSee === 'see');
+});
+
+When(
+  /^I click "(Proceed|Cancel)" button on "Are you sure" review address modal$/,
+  async (button: 'Proceed' | 'Cancel') => {
+    switch (button) {
+      case 'Proceed':
+        await Modal.clickConfirmButton();
+        break;
+      case 'Cancel':
+        await Modal.clickCancelButton();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
+  }
+);
+
+Then(
+  /^I see a toast with text: "(Edited successfully|Address added)"$/,
+  async (action: 'Edited successfully' | 'Address added') => {
+    let translationKey;
+    switch (action) {
+      case 'Edited successfully':
+        translationKey = 'browserView.addressBook.toast.editAddress';
+        break;
+      case 'Address added':
+        translationKey = addressAddedToastTranslationKey;
+        break;
+      default:
+        throw new Error(`Unsupported action name: ${action}`);
+    }
+
+    await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
+  }
+);
+
+Then(
+  /^I add address with name: "([^"]*)" and address: "([^"]*)" to address book in (extended|popup) mode$/,
+  async (name: string, address: string, mode: 'extended' | 'popup') => {
+    await mainMenuPageObject.navigateToSection('Address Book', mode);
+    await AddressBookPage.clickAddAddressButton();
+    await AddressForm.enterName(name === 'empty' ? '' : name);
+    await browser.pause(500); // Wait for input field value validation
+    await AddressForm.enterAddress(address === 'empty' ? '' : address);
+    await browser.pause(500); // Wait for input field value validation
+    await AddNewAddressDrawer.clickOnSaveAddressButton();
+    await ToastMessageAssert.assertSeeToastMessage(await t(addressAddedToastTranslationKey), true);
   }
 );

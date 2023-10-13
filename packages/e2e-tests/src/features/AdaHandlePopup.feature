@@ -14,7 +14,7 @@ Feature: ADA handle - popup view
     Then Green tick icon is displayed next to ADA handle
     And "Save address" button is enabled on "Add new address" drawer
     When I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    Then I see a toast with message: "Address added"
     And I see address row with name "test_handle_1" and address "$test_handle_1" on the list in popup mode
 
   @LW-7334

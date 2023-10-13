@@ -88,7 +88,7 @@ Before(
 );
 
 Before(
-  { tags: '@SendNft-Extended-E2E' },
+  { tags: '@SendNft-Extended-E2E or @AdaHandleSend' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSendNftE2E)
 );
 
