@@ -49,6 +49,9 @@ class MultidelegationPage {
   private DELEGATED_POOL_LAST_REWARDS_TITLE = '[data-testid="stats-last-reward-container"] [data-testid="stats-title"]';
   private DELEGATED_POOL_LAST_REWARDS_VALUE = '[data-testid="stats-last-reward-container"] [data-testid="stats-value"]';
   private STAKING_POOL_INFO = '[data-testid="staking-pool-info"]';
+  private ROS_COLUMN_INFO = '[data-testid="browse-pools-apy-column-info"]';
+  private SATURATION_COLUMN_INFO = '[data-testid="browse-pools-saturation-column-info"]';
+  private TOOLTIP = 'div.ant-tooltip-inner';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -136,6 +139,18 @@ class MultidelegationPage {
 
   get stakingPoolInfoItems() {
     return $$(this.STAKING_POOL_INFO);
+  }
+
+  get rosColumnInfo() {
+    return $(this.ROS_COLUMN_INFO);
+  }
+
+  get saturationColumnInfo() {
+    return $(this.SATURATION_COLUMN_INFO);
+  }
+
+  get tooltip() {
+    return $(this.TOOLTIP);
   }
 
   delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
@@ -291,6 +306,19 @@ class MultidelegationPage {
   async clickOnStakePoolWithName(poolName: string) {
     const poolItem = await this.getPoolByName(poolName);
     await poolItem.click();
+  }
+
+  async hoverOverColumnWithName(columnName: 'ROS' | 'Saturation') {
+    switch (columnName) {
+      case 'ROS':
+        await this.rosColumnInfo.moveTo();
+        break;
+      case 'Saturation':
+        await this.saturationColumnInfo.moveTo();
+        break;
+      default:
+        throw new Error(`Unsupported column name: ${columnName}`);
+    }
   }
 }
 

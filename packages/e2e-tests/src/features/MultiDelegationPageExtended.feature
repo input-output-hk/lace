@@ -1,4 +1,4 @@
-@Staking-NonDelegatedFunds-Extended @Testnet @Mainnet
+@Staking-NonDelegatedFunds-Extended
 Feature: Staking Page - Extended View
 
   Background:
@@ -73,6 +73,18 @@ Feature: Staking Page - Extended View
     Given I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     Then I see the Network Info component with the expected content
+
+  @LW-8499 @Testnet @Mainnet
+  Scenario Outline: Extended View - Staking - Show tooltip for column names in browse pools section
+    Given I disable showing Multidelegation beta banner
+    When I navigate to Staking extended page
+    And I click Browse pools tab
+    When I hover over "<column_name>" column name in stake pool list
+    Then tooltip for "<column_name>" column is displayed
+    Examples:
+      | column_name |
+      | ROS         |
+      | Saturation  |
 
   @LW-8637 @Testnet @Mainnet
   Scenario: Extended View - Staking password screen details

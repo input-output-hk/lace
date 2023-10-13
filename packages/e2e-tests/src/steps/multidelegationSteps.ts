@@ -211,6 +211,15 @@ Then(
     }
   }
 );
+
+When(/^I hover over "(ROS|Saturation)" column name in stake pool list$/, async (columnName: 'ROS' | 'Saturation') => {
+  await MultidelegationPage.hoverOverColumnWithName(columnName);
+});
+
+Then(/^tooltip for "(ROS|Saturation)" column is displayed$/, async (columnName: 'ROS' | 'Saturation') => {
+  await MultidelegationPageAssert.assertSeeTooltipForColumn(columnName);
+});
+
 Then(/^staking password drawer is displayed$/, async () => {
   await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
 });
