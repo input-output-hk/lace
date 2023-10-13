@@ -1,4 +1,4 @@
-@Staking-NonDelegatedFunds-Extended @Testnet @Mainnet
+@Staking-NonDelegatedFunds-Extended
 Feature: Staking Page - Extended View
 
   Background:
