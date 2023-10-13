@@ -15,9 +15,9 @@ import {
   useDelegationPortfolioStore,
 } from '../store';
 import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../store/delegationPortfolioStore/constants';
+import { StakePoolConfirmationContent, StakePoolConfirmationFooter } from './confirmation';
 import { StepPreferencesContent, StepPreferencesFooter } from './preferences';
 import { SignConfirmation, SignConfirmationFooter } from './SignConfirmation';
-import { StakePoolConfirmation, StakePoolConfirmationFooter } from './StakePoolConfirmation';
 import { StakePoolDetail, StakePoolDetailFooter, StakePoolDetailFooterProps } from './StakePoolDetail';
 import { StakePoolDetailsDrawer } from './StakePoolDetailsDrawer';
 import { TransactionFail, TransactionFailFooter } from './TransactionFail';
@@ -84,7 +84,7 @@ export const StakePoolDetails = ({
     (): Record<DrawerStep, React.ReactElement> => ({
       [DrawerDefaultStep.PoolDetails]: <StakePoolDetail popupView={popupView} />,
       [DrawerManagementStep.Preferences]: <StepPreferencesContent />,
-      [DrawerManagementStep.Confirmation]: <StakePoolConfirmation />,
+      [DrawerManagementStep.Confirmation]: <StakePoolConfirmationContent />,
       [DrawerManagementStep.Sign]: <SignConfirmation />,
       [DrawerManagementStep.Success]: <TransactionSuccess />,
       [DrawerManagementStep.Failure]: <TransactionFail />,
