@@ -97,7 +97,6 @@ When(
 
 When(/I enter "([^"]*)" in the bundle (\d) recipient's address/, async (value: string, inputIndex: number) => {
   await transactionExtendedPageObject.fillAddress(value, inputIndex);
-  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
 });
 
 When(/I enter the first characters of the contacts/, async () => {
@@ -203,6 +202,7 @@ Then(/^the balance of token is displayed in coin selector$/, async () => {
 });
 
 Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignored: string, inputIndex: number) => {
+  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
   await transactionExtendedPageObject.clickAddAddressButton(inputIndex);
 });
 
