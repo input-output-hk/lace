@@ -16,7 +16,7 @@ export const NetworkSwitcher = ({ onClick }: NetworkSwitcherProps): React.ReactE
     <div
       data-testid="header-menu-network-switcher-container"
       className={cn(styles.menuItem, styles.cta)}
-      onClick={() => onClick()}
+      onClick={onClick}
     >
       <div className={styles.networkSwitcher}>
         <span data-testid="header-menu-network-switcher-label">{t('browserView.topNavigationBar.links.network')}</span>

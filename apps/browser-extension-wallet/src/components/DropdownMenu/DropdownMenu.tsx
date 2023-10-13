@@ -20,6 +20,8 @@ import {
 import { Sections } from '@components/MainMenu/UserMenu/types';
 import { ItemType, MenuItemType } from 'antd/lib/menu/hooks/useItems';
 import menuStyles from '../MainMenu/UserMenu/components/UserMenu.module.scss';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useAnalyticsContext } from '@providers';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -35,6 +37,8 @@ export const DropdownMenu = ({
   const { walletInfo } = useWalletStore();
   const [open, setOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
+  const analytics = useAnalyticsContext();
+
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
 
   const items: ItemType[] =
@@ -61,10 +65,17 @@ export const DropdownMenu = ({
         ]
       : [{ key: 'network-info', label: <NetworkInfo onBack={() => setCurrentSection(Sections.Main)} /> }];
 
+  const handleDropdownState = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) {
+      analytics.sendEventToPostHog(PostHogAction.UserWalletProfileIconClick);
+    }
+  };
+
   return (
     <Dropdown
       destroyPopupOnHide
-      onOpenChange={setOpen}
+      onOpenChange={handleDropdownState}
       menu={{ items, rootClassName: menuStyles.menuOverlay }}
       placement="bottomRight"
       trigger={['click']}
