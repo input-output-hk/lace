@@ -224,7 +224,7 @@ const getWalletActivitiesObservable = async ({
           epochRewards: {
             rewards,
             spendableEpoch,
-            time: rewardSpendableDate
+            spendableDate: rewardSpendableDate
           }
         });
       }
@@ -273,9 +273,9 @@ const getWalletActivitiesObservable = async ({
   const getRewardsHistory = (eraSummaries: EraSummary[]) =>
     rewardsHistory$.pipe(
       map((allRewards: Wallet.RewardsHistory) =>
-        Object.entries(groupBy(allRewards.all, ({ epoch }) => epoch.toString())).map(([epoch, rewards]) =>
-          epochRewardsMapper(Number(epoch) as EpochNo, rewards, eraSummaries)
-        )
+        Object.entries(groupBy(allRewards.all, ({ epoch }) => epoch.toString()))
+          .map(([epoch, rewards]) => epochRewardsMapper(Number(epoch) as EpochNo, rewards, eraSummaries))
+          .filter((reward) => reward.date.getTime() < Date.now())
       )
     );
 

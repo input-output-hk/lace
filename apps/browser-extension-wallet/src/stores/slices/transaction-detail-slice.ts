@@ -56,8 +56,26 @@ const shouldIncludeFee = (
     (type === 'delegationDeregistration' && !!delegationInfo?.length)
   );
 
+const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
+  const filters: Wallet.QueryStakePoolsArgs = {
+    filters: {
+      identifier: {
+        _condition: 'or',
+        values: poolIds.map((poolId) => ({ id: poolId }))
+      }
+    },
+    pagination: {
+      startAt: 0,
+      limit: MAX_POOLS_COUNT
+    }
+  };
+  const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
+
+  return pools;
+};
+
 /**
- * fetchs asset information
+ * fetches asset information
  */
 const getTransactionDetail =
   ({
@@ -76,13 +94,34 @@ const getTransactionDetail =
     } = get();
 
     if (type === 'rewards') {
+      const poolInfos = await getPoolInfos(
+        epochRewards.rewards.map(({ poolId }) => poolId),
+        stakePoolProvider
+      );
+
       return {
         tx: {
-          includedUtcDate: formatDate({ date: epochRewards.time, format: 'MM/DD/YYYY', type: 'utc' }),
-          includedUtcTime: `${formatTime({ date: epochRewards.time, type: 'utc' })} UTC`,
-          rewards: Wallet.util.lovelacesToAdaString(
-            Wallet.BigIntMath.sum(epochRewards.rewards?.map(({ rewards }) => rewards) || []).toString()
-          )
+          includedUtcDate: formatDate({ date: epochRewards.spendableDate, format: 'MM/DD/YYYY', type: 'utc' }),
+          includedUtcTime: `${formatTime({ date: epochRewards.spendableDate, type: 'utc' })} UTC`,
+          rewards: {
+            totalAmount: Wallet.util.lovelacesToAdaString(
+              Wallet.BigIntMath.sum(epochRewards.rewards?.map(({ rewards }) => rewards) || []).toString()
+            ),
+            spendableEpoch: epochRewards.spendableEpoch,
+            rewards: epochRewards.rewards.map((r) => {
+              const poolInfo = poolInfos.find((p) => p.id === r.poolId);
+              return {
+                amount: Wallet.util.lovelacesToAdaString(r.rewards.toString()),
+                pool: r.poolId
+                  ? {
+                      id: r.poolId,
+                      name: poolInfo?.metadata?.name || '-',
+                      ticker: poolInfo?.metadata?.ticker || '-'
+                    }
+                  : undefined
+              };
+            })
+          }
         },
         status,
         type
@@ -163,19 +202,10 @@ const getTransactionDetail =
     };
 
     if (type === 'delegation' && delegationInfo) {
-      const filters: Wallet.QueryStakePoolsArgs = {
-        filters: {
-          identifier: {
-            _condition: 'or',
-            values: delegationInfo.map((certificate) => ({ id: certificate.poolId }))
-          }
-        },
-        pagination: {
-          startAt: 0,
-          limit: MAX_POOLS_COUNT
-        }
-      };
-      const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
+      const pools = await getPoolInfos(
+        delegationInfo.map(({ poolId }) => poolId),
+        stakePoolProvider
+      );
 
       if (pools.length === 0) {
         console.error('Stake pool was not found for delegation tx');

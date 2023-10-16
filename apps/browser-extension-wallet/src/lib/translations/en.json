@@ -55,7 +55,8 @@
       "from": "From",
       "to": "To",
       "multipleAddresses": "Multiple addresses",
-      "pools": "Pool(s)"
+      "pools": "Pool(s)",
+      "epoch": "Epoch"
     },
     "walletNameAndPasswordSetupStep": {
       "title": "Let's set up your new wallet",

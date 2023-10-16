@@ -79,7 +79,8 @@
       "rewards": "Rewards",
       "rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
       "copiedToClipboard": "Copied to clipboard",
-      "pools": "Pool(s)"
+      "pools": "Pool(s)",
+      "epoch": "Epoch"
     },
     "authorizeDapp": {
       "title": "Allow this site to",

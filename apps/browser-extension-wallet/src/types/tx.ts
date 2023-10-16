@@ -1,5 +1,6 @@
 import { TransactionMetadataProps, TxOutputInput, TransactionType } from '@lace/core';
 import { Wallet } from '@lace/cardano';
+import { RewardsInfo } from '@lace/core/dist/ui/components/Transactions/RewardsInfo';
 
 export enum TxDirections {
   Outgoing = 'Outgoing',
@@ -28,7 +29,7 @@ export interface TransactionDetail {
     addrOutputs?: TxOutputInput[];
     metadata?: TransactionMetadataProps['metadata'];
     pools?: TransactionPool[];
-    rewards?: string;
+    rewards?: RewardsInfo;
   };
   blocks?: {
     isPopup?: boolean;

@@ -128,7 +128,7 @@ export interface TransactionDetailSlice {
     status: Wallet.TransactionStatus;
     direction: TxDirection;
     tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
-    epochRewards?: { spendableEpoch: EpochNo; time: Date; rewards: Reward[] };
+    epochRewards?: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
   } & (
     | {
         type: 'rewards';
@@ -141,7 +141,7 @@ export interface TransactionDetailSlice {
   fetchingTransactionInfo: boolean;
   setTransactionDetail: (params: {
     tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
-    epochRewards?: { spendableEpoch: EpochNo; time: Date; rewards: Reward[] };
+    epochRewards?: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
     direction: TxDirection;
     status?: Wallet.TransactionStatus;
     type?: TransactionType;
