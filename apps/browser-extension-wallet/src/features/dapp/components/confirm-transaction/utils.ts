@@ -8,6 +8,8 @@ import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
 import { sectionTitle, DAPP_VIEWS } from '../../config';
 
+const { CertificateType } = Wallet.Cardano;
+
 const DAPP_TOAST_DURATION = 50;
 
 export enum TxType {
@@ -15,7 +17,8 @@ export enum TxType {
   Mint = 'Mint',
   Burn = 'Burn',
   DRepRegistration = 'DRepRegistration',
-  DRepRetirement = 'DRepRetirement'
+  DRepRetirement = 'DRepRetirement',
+  VoteDelegation = 'VoteDelegation'
 }
 
 export const getTitleKey = (txType: TxType): string => {
@@ -25,6 +28,10 @@ export const getTitleKey = (txType: TxType): string => {
 
   if (txType === TxType.DRepRetirement) {
     return 'core.drepRetirement.title';
+  }
+
+  if (txType === TxType.VoteDelegation) {
+    return 'core.voteDelegation.title';
   }
 
   return sectionTitle[DAPP_VIEWS.CONFIRM_TX];
@@ -84,10 +91,13 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
     minted: assetsMintedInspector,
     burned: assetsBurnedInspector,
     dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
-    dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative)
+    dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative),
+    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation)
   });
 
-  const { minted, burned, dRepRegistration, dRepRetirement } = inspector(tx as Wallet.Cardano.HydratedTx);
+  const { minted, burned, dRepRegistration, dRepRetirement, voteDelegation } = inspector(
+    tx as Wallet.Cardano.HydratedTx
+  );
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
 
@@ -105,6 +115,10 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
 
   if (dRepRetirement) {
     return TxType.DRepRetirement;
+  }
+
+  if (voteDelegation) {
+    return TxType.VoteDelegation;
   }
 
   return TxType.Send;
