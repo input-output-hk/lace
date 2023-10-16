@@ -14,12 +14,14 @@ type Props = OmitClassName<'span'> & {
   name: string;
   value: string;
   disabled?: boolean;
+  highlightWidth?: 'full' | 'half';
 };
 
 export const Item = ({
   name,
   value,
   disabled,
+  highlightWidth = 'full',
   ...props
 }: Readonly<Props>): JSX.Element => (
   <Tabs.Trigger
@@ -32,6 +34,10 @@ export const Item = ({
     <Box className={cx.labelContainer}>
       <Text.Button className={cx.label}>{name}</Text.Button>
     </Box>
-    <Box className={cx.highlight} />
+    <Box
+      className={classNames(cx.highlight, {
+        [cx.halfHighlight]: highlightWidth === 'half',
+      })}
+    />
   </Tabs.Trigger>
 );

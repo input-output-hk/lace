@@ -56,13 +56,12 @@ export const CollateralFooterSend = ({
         return await backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.COLLATERAL_SETTINGS });
       await submitTx();
       if (isInMemory) onClose();
-    } catch (error) {
+    } catch {
       if (!isInMemory) {
         setCurrentStep({ currentSection: Sections.FAIL_TX });
       } else {
         setIsPasswordValid(false);
       }
-      console.error(error);
     }
 
     return true;

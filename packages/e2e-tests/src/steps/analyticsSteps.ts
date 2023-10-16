@@ -61,9 +61,10 @@ When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numbe
     timeout: 6000,
     timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual events amount sent: ${
       (
-        await getLatestEventsNames()
+        await getAllEventsNames()
       ).length
-    }`
+    }\n
+    Actual events:\n ${(await getAllEventsNames()).toString()}`
   });
   await browser.disableInterceptor();
 });

@@ -38,6 +38,7 @@ import TransactionSubmittedPage from '../elements/newTransaction/transactionSubm
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
+import { AddressInput } from '../elements/addressInput';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -201,6 +202,7 @@ Then(/^the balance of token is displayed in coin selector$/, async () => {
 });
 
 Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignored: string, inputIndex: number) => {
+  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
   await transactionExtendedPageObject.clickAddAddressButton(inputIndex);
 });
 

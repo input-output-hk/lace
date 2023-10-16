@@ -201,14 +201,18 @@ class DAppConnectorAssert {
     await expect(await ExampleDAppPage.walletUsedAddress.getText()).to.be.empty;
   }
 
-  async assertWalletFoundAndConnectedInTestDApp() {
-    await expect(await ExampleDAppPage.walletItem.getAttribute('value')).to.equal('lace');
-    await expect(await ExampleDAppPage.walletFound.getText()).to.equal('true');
-
+  async waitUntilBalanceNotEmpty() {
     await browser.waitUntil(async () => (await ExampleDAppPage.walletUsedAddress.getText()) !== '', {
       timeout: 3000,
       timeoutMsg: 'failed while waiting for DApp connection data'
     });
+  }
+
+  async assertWalletFoundAndConnectedInTestDApp() {
+    await expect(await ExampleDAppPage.walletItem.getAttribute('value')).to.equal('lace');
+    await expect(await ExampleDAppPage.walletFound.getText()).to.equal('true');
+
+    await this.waitUntilBalanceNotEmpty();
 
     await expect(await ExampleDAppPage.walletApiVersion.getText()).to.equal('0.1.0');
     await expect(await ExampleDAppPage.walletName.getText()).to.equal('lace');

@@ -16,6 +16,7 @@ import StakingPasswordDrawer from '../elements/multidelegation/StakingPasswordDr
 import StakingSuccessDrawerAssert from '../assert/multidelegation/StakingSuccessDrawerAssert';
 import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDrawer';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
+import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
@@ -208,3 +209,19 @@ Then(
     }
   }
 );
+
+When(/^I hover over "(ROS|Saturation)" column name in stake pool list$/, async (columnName: 'ROS' | 'Saturation') => {
+  await MultidelegationPage.hoverOverColumnWithName(columnName);
+});
+
+Then(/^tooltip for "(ROS|Saturation)" column is displayed$/, async (columnName: 'ROS' | 'Saturation') => {
+  await MultidelegationPageAssert.assertSeeTooltipForColumn(columnName);
+});
+
+Then(/^staking password drawer is displayed$/, async () => {
+  await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
+});
+
+Then(/^Stake pool details drawer is not opened$/, async () => {
+  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsNotOpened();
+});

@@ -14,12 +14,14 @@ Feature: Analytics -  Tokens tab - extended view
     Then I validate latest analytics single event "token | tokens | token row | click"
     When I click on "View all" button on token details drawer
     Then I validate latest analytics single event "token | token detail | view all | click"
+    And I validate that 3 analytics event(s) have been sent
 
   @LW-8706
   Scenario: Analytics - Extended view - Tokens - Close drawer
     Given I am on NFTs extended page
-    And I set up request interception for posthog analytics request(s)
     When I navigate to Tokens extended page
     When I click token with name: "Cardano"
+    And I set up request interception for posthog analytics request(s)
     And I close the drawer by clicking close button
     Then I validate latest analytics single event "token | token detail | x | click"
+    And I validate that 1 analytics event(s) have been sent

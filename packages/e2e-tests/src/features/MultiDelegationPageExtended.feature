@@ -1,5 +1,8 @@
-@Staking-NonDelegatedFunds-Extended @Testnet @Mainnet
+@Staking-NonDelegatedFunds-Extended
 Feature: Staking Page - Extended View
+
+  Background:
+    Given Lace is ready for test
 
   @LW-8449 @Testnet @Mainnet
   Scenario: Extended View - Staking search control is displayed with appropriate content
@@ -70,3 +73,47 @@ Feature: Staking Page - Extended View
     Given I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     Then I see the Network Info component with the expected content
+
+  @LW-8499 @Testnet @Mainnet
+  Scenario Outline: Extended View - Staking - Show tooltip for column names in browse pools section
+    Given I disable showing Multidelegation beta banner
+    When I navigate to Staking extended page
+    And I click Browse pools tab
+    When I hover over "<column_name>" column name in stake pool list
+    Then tooltip for "<column_name>" column is displayed
+    Examples:
+      | column_name |
+      | ROS         |
+      | Saturation  |
+
+  @LW-8637 @Testnet @Mainnet
+  Scenario: Extended View - Staking password screen details
+    Given I disable showing Multidelegation beta banner
+    When I navigate to Staking extended page
+    And I click Overview tab
+    And I click Browse pools tab
+    And I input "ADA Capital" into stake pool search bar
+    And I click on the stake pool with name "ADA Capital"
+    And I click on "Stake all on this pool" button on stake pool details drawer
+    And I click on "Next" button on staking preferences drawer
+    And I click on "Next" button on staking confirmation drawer
+    Then staking password drawer is displayed
+
+  @LW-8445 @Testnet
+  Scenario: Extended View - Selecting stakepool from list opens drawer with appropriate details
+    Given I disable showing Multidelegation beta banner
+    And I am on Staking extended page
+    And I click Browse pools tab
+    And I input "ADA Capital" into stake pool search bar
+    And I click on the stake pool with name "ADA Capital"
+    Then I see stake pool details drawer for "ADA Capital" stake pool
+
+  @LW-8438 @Testnet
+  Scenario: Extended View - Staking - Stakepool details drawer - Close drawer
+    Given I disable showing Multidelegation beta banner
+    And I am on Staking extended page
+    And I click Browse pools tab
+    And I input "ADA Capital" into stake pool search bar
+    And I click on the stake pool with name "ADA Capital"
+    When I close the drawer by clicking close button
+    Then Stake pool details drawer is not opened
