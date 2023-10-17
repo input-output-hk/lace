@@ -146,7 +146,7 @@ export interface ActivityDetailSlice {
     status?: Wallet.TransactionStatus;
     type?: TransactionType;
   }) => void;
-  getActivityDetails: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;
+  getActivityDetail: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;
   resetActivityState: () => void;
 }
 

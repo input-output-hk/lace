@@ -32,7 +32,7 @@ describe('Testing createStoreHook slice', () => {
 
     expect(result.current.activityDetail).not.toBeDefined();
     expect(result.current.fetchingActivityInfo).toBeDefined();
-    expect(result.current.getActivityDetails).toBeDefined();
+    expect(result.current.getActivityDetail).toBeDefined();
     expect(result.current.resetActivityState).toBeDefined();
     expect(result.current.setActivityDetail).toBeDefined();
   });

@@ -35,7 +35,7 @@ export const walletStoreMock = async (
     fetchStakePools: jest.fn(),
     getWalletActivitiesObservable: jest.fn(),
     fetchingActivityInfo: false,
-    getActivityDetails: jest.fn(),
+    getActivityDetail: jest.fn(),
     inMemoryWallet: wallet as Wallet.ObservableWallet,
     getKeyAgentType: jest.fn(() => Wallet.KeyManagement.KeyAgentType.InMemory),
     // TODO: mock [LW-5454]

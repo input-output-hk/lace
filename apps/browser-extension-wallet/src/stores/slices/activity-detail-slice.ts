@@ -71,13 +71,13 @@ const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider:
 /**
  * fetches asset information
  */
-const getActivityDetail =
+const buildGetActivityDetail =
   ({
     set,
     get
   }: ZustandHandlers<
     ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice
-  >): ActivityDetailSlice['getActivityDetails'] =>
+  >): ActivityDetailSlice['getActivityDetail'] =>
   // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   async ({ coinPrices, fiatCurrency }) => {
     const {
@@ -228,7 +228,7 @@ export const activityDetailSlice: SliceCreator<
 > = ({ set, get }) => ({
   activityDetail: undefined,
   fetchingActivityInfo: true,
-  getActivityDetails: getActivityDetail({ set, get }),
+  getActivityDetail: buildGetActivityDetail({ set, get }),
   setActivityDetail: ({ tx, epochRewards, direction, status, type }) =>
     set({ activityDetail: { tx, epochRewards, direction, status, type } }),
   resetActivityState: () => set({ activityDetail: undefined, fetchingActivityInfo: false })

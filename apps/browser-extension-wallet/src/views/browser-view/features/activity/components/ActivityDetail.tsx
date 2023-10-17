@@ -87,7 +87,7 @@ export const ActivityDetail = withAddressBookContext<ActivityDetailProps>(({ pri
     environmentName
   } = useWalletStore();
   const isPopupView = appMode === APP_MODE_POPUP;
-  const { getActivityDetails, activityDetail, fetchingActivityInfo, walletActivities } = useWalletStore();
+  const { getActivityDetail, activityDetail, fetchingActivityInfo, walletActivities } = useWalletStore();
   const [activityInfo, setActivityInfo] = useState<ActivityDetailType>();
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
@@ -109,9 +109,9 @@ export const ActivityDetail = withAddressBookContext<ActivityDetailProps>(({ pri
   );
 
   const fetchActivityInfo = useCallback(async () => {
-    const result = await getActivityDetails({ coinPrices: price, fiatCurrency });
+    const result = await getActivityDetail({ coinPrices: price, fiatCurrency });
     setActivityInfo(result);
-  }, [getActivityDetails, setActivityInfo, price, fiatCurrency]);
+  }, [getActivityDetail, setActivityInfo, price, fiatCurrency]);
 
   useEffect(() => {
     fetchActivityInfo();
