@@ -60,7 +60,7 @@ Then(
     const typeTranslationKey =
       type === 'sent' ? 'package.core.transactionDetailBrowser.sent' : 'package.core.transactionDetailBrowser.received';
 
-    const expectedTransactionDetails = {
+    const expectedActivityDetails = {
       transactionDescription: `${await t(typeTranslationKey)}\n(2)`,
       hash: String(testContext.load('txHashValue')),
       sentAssets: [`1 ${nftName}`],
@@ -68,7 +68,7 @@ Then(
       recipientAddress: getTestWallet(walletName).address,
       status: 'Success'
     };
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 

@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 
 const transactionDate = '2021/09/10';
 
-describe('Testing TransactionDetailsBrowser component', () => {
+describe('Testing ActivityDetailsBrowser component', () => {
   const addrListProps: TransactionDetailBrowserProps = {
     isPopupView: false,
     hash: '5e58ad7aa10667c05c3ffdb9ae65fe22c77e5145db823715217b775b4344839f',

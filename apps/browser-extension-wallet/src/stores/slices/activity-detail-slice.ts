@@ -1,14 +1,8 @@
 /* eslint-disable complexity */
 /* eslint-disable unicorn/no-array-reduce */
 import isEmpty from 'lodash/isEmpty';
-import {
-  TransactionDetailSlice,
-  ZustandHandlers,
-  BlockchainProviderSlice,
-  WalletInfoSlice,
-  SliceCreator
-} from '../types';
-import { CardanoTxOut, Transaction, TransactionDetail } from '../../types';
+import { ActivityDetailSlice, ZustandHandlers, BlockchainProviderSlice, WalletInfoSlice, SliceCreator } from '../types';
+import { CardanoTxOut, Transaction, ActivityDetail } from '../../types';
 import { blockTransformer, inputOutputTransformer } from '../../api/transformers';
 import { Wallet } from '@lace/cardano';
 import { getTransactionTotalOutput } from '../../utils/get-transaction-total-output';
@@ -41,7 +35,7 @@ const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
   return assetIds;
 };
 
-const transactionMetadataTransformer = (metadata: Wallet.Cardano.TxMetadata): TransactionDetail['tx']['metadata'] =>
+const transactionMetadataTransformer = (metadata: Wallet.Cardano.TxMetadata): ActivityDetail['tx']['metadata'] =>
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
 
 const shouldIncludeFee = (
@@ -77,19 +71,19 @@ const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider:
 /**
  * fetches asset information
  */
-const getTransactionDetail =
+const getActivityDetail =
   ({
     set,
     get
   }: ZustandHandlers<
-    TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice
-  >): TransactionDetailSlice['getTransactionDetails'] =>
+    ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice
+  >): ActivityDetailSlice['getActivityDetails'] =>
   // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   async ({ coinPrices, fiatCurrency }) => {
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
       inMemoryWallet: wallet,
-      transactionDetail: { tx, epochRewards, status, direction, type },
+      activityDetail: { tx, epochRewards, status, direction, type },
       walletInfo
     } = get();
 
@@ -130,7 +124,7 @@ const getTransactionDetail =
 
     const walletAssets = await firstValueFrom(wallet.assetInfo$);
     const protocolParameters = await firstValueFrom(wallet.protocolParameters$);
-    set({ fetchingTransactionInfo: true });
+    set({ fetchingActivityInfo: true });
 
     // Assets
     const assetIds = getTransactionAssetsId(tx.body.outputs);
@@ -188,7 +182,7 @@ const getTransactionDetail =
       (certificate) => certificate.__typename === 'StakeDelegationCertificate'
     ) as Wallet.Cardano.StakeDelegationCertificate[];
 
-    let transaction: TransactionDetail['tx'] = {
+    let transaction: ActivityDetail['tx'] = {
       hash: tx.id.toString(),
       totalOutput: totalOutputInAda,
       fee: shouldIncludeFee(type, delegationInfo) ? feeInAda : undefined,
@@ -221,21 +215,21 @@ const getTransactionDetail =
       }
     }
 
-    set({ fetchingTransactionInfo: false });
+    set({ fetchingActivityInfo: false });
     return { tx: transaction, blocks, status, assetAmount, type };
   };
 
 /**
  * has all transactions search related actions and states
  */
-export const transactionDetailSlice: SliceCreator<
-  TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice,
-  TransactionDetailSlice
+export const activityDetailSlice: SliceCreator<
+  ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice,
+  ActivityDetailSlice
 > = ({ set, get }) => ({
-  transactionDetail: undefined,
-  fetchingTransactionInfo: true,
-  getTransactionDetails: getTransactionDetail({ set, get }),
-  setTransactionDetail: ({ tx, epochRewards, direction, status, type }) =>
-    set({ transactionDetail: { tx, epochRewards, direction, status, type } }),
-  resetTransactionState: () => set({ transactionDetail: undefined, fetchingTransactionInfo: false })
+  activityDetail: undefined,
+  fetchingActivityInfo: true,
+  getActivityDetails: getActivityDetail({ set, get }),
+  setActivityDetail: ({ tx, epochRewards, direction, status, type }) =>
+    set({ activityDetail: { tx, epochRewards, direction, status, type } }),
+  resetActivityState: () => set({ activityDetail: undefined, fetchingActivityInfo: false })
 });

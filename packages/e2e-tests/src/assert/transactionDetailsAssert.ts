@@ -1,11 +1,11 @@
 import TransactionsPage from '../elements/transactionsPage';
-import TransactionDetailsPage from '../elements/transactionDetails';
+import ActivityDetailsPage from '../elements/transactionDetails';
 import { expect } from 'chai';
 import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
 import { t } from '../utils/translationService';
 
-export type ExpectedTransactionDetails = {
+export type ExpectedActivityDetails = {
   transactionDescription: string;
   hash?: string;
   transactionData?: transactionData[];
@@ -29,40 +29,38 @@ class TransactionsDetailsAssert {
     });
   };
 
-  async assertSeeTransactionDetailsDrawer(shouldBeDisplayed: boolean) {
-    await TransactionDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
-    await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  async assertSeeActivityDetailsDrawer(shouldBeDisplayed: boolean) {
+    await ActivityDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await ActivityDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(
+      expect(await ActivityDetailsPage.transactionHeader.getText()).to.equal(
         await t('package.core.transactionDetailBrowser.header')
       );
     }
   }
 
-  async assertSeeTransactionDetails(expectedTransactionDetails: ExpectedTransactionDetails) {
-    await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
+  async assertSeeActivityDetails(expectedActivityDetails: ExpectedActivityDetails) {
+    await ActivityDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
 
-    expect(await TransactionDetailsPage.transactionDetailsDescription.getText()).contains(
-      `${expectedTransactionDetails.transactionDescription}`
+    expect(await ActivityDetailsPage.transactionDetailsDescription.getText()).contains(
+      `${expectedActivityDetails.transactionDescription}`
     );
-    if (expectedTransactionDetails.hash) {
-      expect(await TransactionDetailsPage.transactionDetailsHash.getText()).to.equal(
-        String(expectedTransactionDetails.hash)
-      );
+    if (expectedActivityDetails.hash) {
+      expect(await ActivityDetailsPage.transactionDetailsHash.getText()).to.equal(String(expectedActivityDetails.hash));
     }
-    expect(await TransactionDetailsPage.transactionDetailsStatus.getText()).to.equal(expectedTransactionDetails.status);
-    if (expectedTransactionDetails.transactionData) {
-      for (let i = 0; i < expectedTransactionDetails.transactionData.length; i++) {
-        if (expectedTransactionDetails.transactionData[i].assets) {
-          const actualAssets = await TransactionDetailsPage.getTransactionSentTokensForBundle(i);
-          expect(actualAssets.toString()).to.equal(String(expectedTransactionDetails.transactionData[i].assets));
+    expect(await ActivityDetailsPage.transactionDetailsStatus.getText()).to.equal(expectedActivityDetails.status);
+    if (expectedActivityDetails.transactionData) {
+      for (let i = 0; i < expectedActivityDetails.transactionData.length; i++) {
+        if (expectedActivityDetails.transactionData[i].assets) {
+          const actualAssets = await ActivityDetailsPage.getTransactionSentTokensForBundle(i);
+          expect(actualAssets.toString()).to.equal(String(expectedActivityDetails.transactionData[i].assets));
         }
-        expect(await TransactionDetailsPage.transactionDetailsSentAda(i).getText()).to.equal(
-          expectedTransactionDetails.transactionData[i].ada
+        expect(await ActivityDetailsPage.transactionDetailsSentAda(i).getText()).to.equal(
+          expectedActivityDetails.transactionData[i].ada
         );
 
-        const expectedAddress = expectedTransactionDetails.transactionData[i].address;
-        const actualAddressSplit = (await TransactionDetailsPage.transactionDetailsToAddress(i).getText()).split('...');
+        const expectedAddress = expectedActivityDetails.transactionData[i].address;
+        const actualAddressSplit = (await ActivityDetailsPage.transactionDetailsToAddress(i).getText()).split('...');
         if (actualAddressSplit.length === 1) {
           expect(expectedAddress).to.equal(actualAddressSplit[0]);
         } else {
@@ -71,68 +69,68 @@ class TransactionsDetailsAssert {
         }
       }
     }
-    if (expectedTransactionDetails.poolName) {
-      expect(await TransactionDetailsPage.transactionDetailsStakepoolName.getText()).to.equal(
-        expectedTransactionDetails.poolName
+    if (expectedActivityDetails.poolName) {
+      expect(await ActivityDetailsPage.transactionDetailsStakepoolName.getText()).to.equal(
+        expectedActivityDetails.poolName
       );
     }
-    if (expectedTransactionDetails.poolTicker) {
-      expect(await TransactionDetailsPage.transactionDetailsStakepoolTicker.getText()).to.equal(
-        `(${expectedTransactionDetails.poolTicker})`
+    if (expectedActivityDetails.poolTicker) {
+      expect(await ActivityDetailsPage.transactionDetailsStakepoolTicker.getText()).to.equal(
+        `(${expectedActivityDetails.poolTicker})`
       );
     }
-    if (expectedTransactionDetails.poolID) {
-      expect(await TransactionDetailsPage.transactionDetailsStakePoolId.getText()).to.equal(
-        expectedTransactionDetails.poolID
+    if (expectedActivityDetails.poolID) {
+      expect(await ActivityDetailsPage.transactionDetailsStakePoolId.getText()).to.equal(
+        expectedActivityDetails.poolID
       );
     }
   }
 
-  async assertSeeTransactionDetailsUnfolded(mode: 'extended' | 'popup') {
+  async assertSeeActivityDetailsUnfolded(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
-      await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
-      await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsStatus.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsTimestamp.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsInputsSection.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputsSection.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
-      const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
+      await ActivityDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
+      await ActivityDetailsPage.transactionDetailsHash.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsStatus.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsTimestamp.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsInputsSection.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsOutputsSection.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
+      const txType = await ActivityDetailsPage.transactionDetailsDescription.getText();
       if (txType.includes('Delegation')) {
-        await TransactionDetailsPage.transactionDetailsStakepoolName.waitForDisplayed();
-        await TransactionDetailsPage.transactionDetailsStakepoolTicker.waitForDisplayed();
-        await TransactionDetailsPage.transactionDetailsStakePoolId.waitForDisplayed();
+        await ActivityDetailsPage.transactionDetailsStakepoolName.waitForDisplayed();
+        await ActivityDetailsPage.transactionDetailsStakepoolTicker.waitForDisplayed();
+        await ActivityDetailsPage.transactionDetailsStakePoolId.waitForDisplayed();
       }
 
-      await TransactionDetailsPage.closeTransactionDetails(mode);
+      await ActivityDetailsPage.closeActivityDetails(mode);
     }
   }
 
-  async assertSeeTransactionDetailsInputAndOutputs(mode: 'extended' | 'popup') {
+  async assertSeeActivityDetailsInputAndOutputs(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
-      await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
-      await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
-      await TransactionDetailsPage.transactionDetailsInputAddress.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsInputAdaAmount.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsInputFiatAmount.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsInputsDropdown.click();
+      await ActivityDetailsPage.transactionDetailsOutputsDropdown.click();
+      await ActivityDetailsPage.transactionDetailsInputAddress.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsInputAdaAmount.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsInputFiatAmount.waitForDisplayed();
       // TODO refactor steps below
       //  some transactions (ADA only) don't have this field
-      // await TransactionDetailsPage.transactionDetailsInputTokens.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputAddress.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputAdaAmount.waitForDisplayed();
-      await TransactionDetailsPage.transactionDetailsOutputFiatAmount.waitForDisplayed();
-      // await TransactionDetailsPage.transactionDetailsOutputTokens.waitForDisplayed();
+      // await ActivityDetailsPage.transactionDetailsInputTokens.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsOutputAddress.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsOutputAdaAmount.waitForDisplayed();
+      await ActivityDetailsPage.transactionDetailsOutputFiatAmount.waitForDisplayed();
+      // await ActivityDetailsPage.transactionDetailsOutputTokens.waitForDisplayed();
 
-      await TransactionDetailsPage.closeTransactionDetails(mode);
+      await ActivityDetailsPage.closeActivityDetails(mode);
     }
   }
 
@@ -142,25 +140,25 @@ class TransactionsDetailsAssert {
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
-      await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
-      await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
+      await ActivityDetailsPage.transactionDetailsInputsDropdown.click();
+      await ActivityDetailsPage.transactionDetailsOutputsDropdown.click();
 
-      const txDetailsInputADAValueString = await TransactionDetailsPage.transactionDetailsInputAdaAmount.getText();
+      const txDetailsInputADAValueString = await ActivityDetailsPage.transactionDetailsInputAdaAmount.getText();
       const txDetailsInputADAValue = Number(txDetailsInputADAValueString.split(' ', 1));
 
-      const txDetailsInputFiatValueString = await TransactionDetailsPage.transactionDetailsInputFiatAmount.getText();
+      const txDetailsInputFiatValueString = await ActivityDetailsPage.transactionDetailsInputFiatAmount.getText();
       const txDetailsInputFiatValue = Number(txDetailsInputFiatValueString.slice(1).split(' ', 1));
 
-      const txDetailsOutputADAValueString = await TransactionDetailsPage.transactionDetailsOutputAdaAmount.getText();
+      const txDetailsOutputADAValueString = await ActivityDetailsPage.transactionDetailsOutputAdaAmount.getText();
       const txDetailsOutputADAValue = Number(txDetailsOutputADAValueString.split(' ', 1));
 
-      const txDetailsOutputFiatValueString = await TransactionDetailsPage.transactionDetailsOutputFiatAmount.getText();
+      const txDetailsOutputFiatValueString = await ActivityDetailsPage.transactionDetailsOutputFiatAmount.getText();
       const txDetailsOutputFiatValue = Number(txDetailsOutputFiatValueString.slice(1).split(' ', 1));
 
-      const txDetailsFeeADAValueString = await TransactionDetailsPage.transactionDetailsFeeADA.getText();
+      const txDetailsFeeADAValueString = await ActivityDetailsPage.transactionDetailsFeeADA.getText();
       const txDetailsFeeADAValue = Number(txDetailsFeeADAValueString.split(' ', 1));
 
-      const txDetailsFeeFiatValueString = await TransactionDetailsPage.transactionDetailsFeeFiat.getText();
+      const txDetailsFeeFiatValueString = await ActivityDetailsPage.transactionDetailsFeeFiat.getText();
       const txDetailsFeeFiatValue = Number(txDetailsFeeFiatValueString.slice(1).split(' ', 1));
 
       expect(txDetailsInputADAValue).to.be.greaterThan(0);
@@ -170,32 +168,32 @@ class TransactionsDetailsAssert {
       expect(txDetailsFeeADAValue).to.be.greaterThan(0);
       expect(txDetailsFeeFiatValue).to.be.greaterThan(0);
 
-      await TransactionDetailsPage.closeTransactionDetails(mode);
+      await ActivityDetailsPage.closeActivityDetails(mode);
     }
   }
 
-  async assertSeeTransactionDetailsSummary(mode: 'extended' | 'popup') {
+  async assertSeeActivityDetailsSummary(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       const transactionType = await TransactionsPage.transactionsTableItemType(i).getText();
       await TransactionsPage.clickOnTransactionRow(i);
-      await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
+      await ActivityDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       if (
         !['Delegation', 'Stake Key De-Registration', 'Stake Key Registration', 'Self Transaction'].includes(
           transactionType
         )
       ) {
-        await TransactionDetailsPage.transactionDetailsSent.waitForDisplayed();
-        await TransactionDetailsPage.transactionDetailsToAddress(0).waitForDisplayed();
+        await ActivityDetailsPage.transactionDetailsSent.waitForDisplayed();
+        await ActivityDetailsPage.transactionDetailsToAddress(0).waitForDisplayed();
       }
 
-      await TransactionDetailsPage.closeTransactionDetails(mode);
+      await ActivityDetailsPage.closeActivityDetails(mode);
     }
   }
 
-  async assertSeeTransactionDetailsSummaryAmounts(mode: 'extended' | 'popup') {
+  async assertSeeActivityDetailsSummaryAmounts(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
 
@@ -203,23 +201,23 @@ class TransactionsDetailsAssert {
       // TODO Cover self transaction details with automation
       if ((await TransactionsPage.transactionsTableItemType(i).getText()) !== 'Self Transaction') {
         await TransactionsPage.clickOnTransactionRow(i);
-        await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
-        const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
+        await ActivityDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
+        const txType = await ActivityDetailsPage.transactionDetailsDescription.getText();
         if (!txType.includes('Delegation')) {
           const tokensAmountSummary =
-            (await TransactionDetailsPage.getTransactionSentTokensWithoutDuplicates()).length + 1;
-          let tokensDescriptionAmount = await TransactionDetailsPage.transactionDetailsAmountOfTokens.getText();
+            (await ActivityDetailsPage.getTransactionSentTokensWithoutDuplicates()).length + 1;
+          let tokensDescriptionAmount = await ActivityDetailsPage.transactionDetailsAmountOfTokens.getText();
           tokensDescriptionAmount = tokensDescriptionAmount.replace('(', '').replace(')', '');
           expect(tokensAmountSummary).to.equal(Number(tokensDescriptionAmount));
         }
 
-        await TransactionDetailsPage.closeTransactionDetails(mode);
+        await ActivityDetailsPage.closeActivityDetails(mode);
       }
     }
   }
 
   async assertTxMetadata() {
-    const currentMetadata = await TransactionDetailsPage.transactionDetailsMetadata.getText();
+    const currentMetadata = await ActivityDetailsPage.transactionDetailsMetadata.getText();
     expect(currentMetadata).to.equal(testContext.load('metadata'));
   }
 }

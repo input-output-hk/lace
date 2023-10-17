@@ -29,7 +29,7 @@ import {
   StateStatus,
   WalletInfoSlice,
   AssetDetailsSlice,
-  TransactionDetailSlice,
+  ActivityDetailSlice,
   UISlice,
   BlockchainProviderSlice,
   SliceCreator
@@ -49,7 +49,7 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
   get: GetState<
     WalletInfoSlice &
       WalletActivitiesSlice &
-      TransactionDetailSlice &
+      ActivityDetailSlice &
       AssetDetailsSlice &
       UISlice &
       BlockchainProviderSlice
@@ -107,7 +107,7 @@ const getWalletActivitiesObservable = async ({
     walletInfo,
     walletUI: { cardanoCoin },
     inMemoryWallet,
-    setTransactionDetail,
+    setActivityDetail,
     assetDetails,
     blockchainProvider: { assetProvider }
   } = get();
@@ -145,7 +145,7 @@ const getWalletActivitiesObservable = async ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
-        setTransactionDetail({
+        setActivityDetail({
           tx,
           direction: transformedTx.direction,
           status: transformedTx.status,
@@ -183,7 +183,7 @@ const getWalletActivitiesObservable = async ({
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
         const deserializedTx: Wallet.Cardano.Tx = TxCBOR.deserialize(tx.cbor);
-        setTransactionDetail({
+        setActivityDetail({
           tx: deserializedTx,
           direction: TxDirections.Outgoing,
           status: Wallet.TransactionStatus.PENDING,
@@ -217,7 +217,7 @@ const getWalletActivitiesObservable = async ({
       ...transformedEpochRewards,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
-        setTransactionDetail({
+        setActivityDetail({
           direction: transformedEpochRewards.direction,
           status: transformedEpochRewards.status,
           type: transformedEpochRewards.type,
@@ -389,12 +389,7 @@ const getWalletActivitiesObservable = async ({
  * has all wallet activities related actions and states
  */
 export const walletActivitiesSlice: SliceCreator<
-  WalletInfoSlice &
-    WalletActivitiesSlice &
-    TransactionDetailSlice &
-    AssetDetailsSlice &
-    UISlice &
-    BlockchainProviderSlice,
+  WalletInfoSlice & WalletActivitiesSlice & ActivityDetailSlice & AssetDetailsSlice & UISlice & BlockchainProviderSlice,
   WalletActivitiesSlice
 > = ({ set, get }) => ({
   getWalletActivitiesObservable: ({

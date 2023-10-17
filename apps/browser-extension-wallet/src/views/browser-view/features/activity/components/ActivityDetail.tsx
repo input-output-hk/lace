@@ -15,7 +15,7 @@ import {
 } from '@lace/core';
 import { PriceResult } from '@hooks';
 import { useWalletStore } from '@stores';
-import { TransactionDetail as TransactionDetailType } from '@src/types';
+import { ActivityDetail as ActivityDetailType } from '@src/types';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
@@ -44,7 +44,7 @@ export const getTransactionData = ({
     return [];
   }
 
-  // For incomming type of tx the sender addresses will be all addresses available in transactionInfo?.tx.addrInputs list (except the current one)
+  // For incomming type of tx the sender addresses will be all addresses available in activityInfo?.tx.addrInputs list (except the current one)
   if (isIncomingTransaction) {
     const outputData = addrOutputs.filter((input) => walletAddresses.includes(input.addr));
     const addrs = uniq(
@@ -58,7 +58,7 @@ export const getTransactionData = ({
     }));
   }
 
-  // For outgoing/sent type of tx the receiver addresses will be all addresses available in transactionInfo?.tx.addrOutputs list (except the current one)
+  // For outgoing/sent type of tx the receiver addresses will be all addresses available in activityInfo?.tx.addrOutputs list (except the current one)
   return addrOutputs
     .filter((output) => !walletAddresses.includes(output.addr))
     .map((output) => ({
@@ -76,19 +76,19 @@ const getCurrentTransactionStatus = (
   return transaction?.status;
 };
 
-interface TransactionDetailProps {
+interface ActivityDetailProps {
   price: PriceResult;
 }
 
-export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(({ price }): ReactElement => {
+export const ActivityDetail = withAddressBookContext<ActivityDetailProps>(({ price }): ReactElement => {
   const {
     walletInfo,
     walletUI: { cardanoCoin, appMode },
     environmentName
   } = useWalletStore();
   const isPopupView = appMode === APP_MODE_POPUP;
-  const { getTransactionDetails, transactionDetail, fetchingTransactionInfo, walletActivities } = useWalletStore();
-  const [transactionInfo, setTransactionInfo] = useState<TransactionDetailType>();
+  const { getActivityDetails, activityDetail, fetchingActivityInfo, walletActivities } = useWalletStore();
+  const [activityInfo, setActivityInfo] = useState<ActivityDetailType>();
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
   const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
@@ -102,19 +102,19 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
 
   const currentTransactionStatus = useMemo(
     () =>
-      transactionDetail.tx?.id
-        ? getCurrentTransactionStatus(walletActivities, transactionDetail.tx.id) ?? transactionInfo?.status
-        : transactionInfo?.status,
-    [transactionDetail.tx?.id, transactionInfo?.status, walletActivities]
+      activityDetail.tx?.id
+        ? getCurrentTransactionStatus(walletActivities, activityDetail.tx.id) ?? activityInfo?.status
+        : activityInfo?.status,
+    [activityDetail.tx?.id, activityInfo?.status, walletActivities]
   );
 
-  const fetchTransactionInfo = useCallback(async () => {
-    const result = await getTransactionDetails({ coinPrices: price, fiatCurrency });
-    setTransactionInfo(result);
-  }, [getTransactionDetails, setTransactionInfo, price, fiatCurrency]);
+  const fetchActivityInfo = useCallback(async () => {
+    const result = await getActivityDetails({ coinPrices: price, fiatCurrency });
+    setActivityInfo(result);
+  }, [getActivityDetails, setActivityInfo, price, fiatCurrency]);
 
   useEffect(() => {
-    fetchTransactionInfo();
+    fetchActivityInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -123,8 +123,8 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
     [addressList]
   );
 
-  const isIncomingTransaction = transactionDetail.direction === 'Incoming';
-  const { addrOutputs, addrInputs } = transactionInfo?.tx || {};
+  const isIncomingTransaction = activityDetail.direction === 'Incoming';
+  const { addrOutputs, addrInputs } = activityInfo?.tx || {};
   const txSummary = useMemo(
     () =>
       getTransactionData({
@@ -136,33 +136,33 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
     [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.addresses]
   );
 
-  if (fetchingTransactionInfo || !transactionInfo) return <Skeleton data-testid="transaction-details-skeleton" />;
+  if (fetchingActivityInfo || !activityInfo) return <Skeleton data-testid="transaction-details-skeleton" />;
 
   const getHeaderDescription = () => {
-    if (transactionInfo.type === 'rewards') return '';
-    if (transactionInfo.type === 'delegation') return '1 token';
-    return ` (${transactionInfo?.assetAmount})`;
+    if (activityInfo.type === 'rewards') return '';
+    if (activityInfo.type === 'delegation') return '1 token';
+    return ` (${activityInfo?.assetAmount})`;
   };
 
   const handleOpenExternalLink = () => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailTransactionHashClick);
-    const externalLink = `${explorerBaseUrl}/${transactionInfo.tx.hash}`;
+    const externalLink = `${explorerBaseUrl}/${activityInfo.tx.hash}`;
     externalLink && currentTransactionStatus === 'success' && openExternalLink(externalLink);
   };
 
   return (
     <TransactionDetailBrowser
-      hash={transactionInfo.tx.hash}
+      hash={activityInfo.tx.hash}
       status={currentTransactionStatus}
-      includedDate={transactionInfo.tx.includedUtcDate}
-      includedTime={transactionInfo.tx.includedUtcTime}
-      addrInputs={transactionInfo.tx.addrInputs}
-      addrOutputs={transactionInfo.tx.addrOutputs}
-      fee={transactionInfo.tx.fee}
-      pools={transactionInfo.tx.pools}
-      deposit={transactionInfo.tx.deposit}
-      depositReclaim={transactionInfo.tx.depositReclaim}
-      metadata={transactionInfo.tx.metadata}
+      includedDate={activityInfo.tx.includedUtcDate}
+      includedTime={activityInfo.tx.includedUtcTime}
+      addrInputs={activityInfo.tx.addrInputs}
+      addrOutputs={activityInfo.tx.addrOutputs}
+      fee={activityInfo.tx.fee}
+      pools={activityInfo.tx.pools}
+      deposit={activityInfo.tx.deposit}
+      depositReclaim={activityInfo.tx.depositReclaim}
+      metadata={activityInfo.tx.metadata}
       amountTransformer={(ada: string) =>
         `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`
       }
@@ -170,8 +170,8 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
       txSummary={txSummary}
       addressToNameMap={addressToNameMap}
       coinSymbol={cardanoCoin.symbol}
-      rewards={transactionInfo.tx?.rewards}
-      type={transactionInfo?.type}
+      rewards={activityInfo.tx?.rewards}
+      type={activityInfo?.type}
       isPopupView={isPopupView}
       openExternalLink={handleOpenExternalLink}
       sendAnalyticsInputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailInputsClick)}

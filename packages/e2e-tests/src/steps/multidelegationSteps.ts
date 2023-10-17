@@ -163,7 +163,7 @@ Then(/^I click "Close" button on staking success drawer$/, async () => {
 Then(
   /^the transaction details are displayed for staking (with|without) metadata$/,
   async (metadata: 'with' | 'without') => {
-    const expectedTransactionDetails =
+    const expectedActivityDetails =
       metadata === 'with'
         ? {
             transactionDescription: 'Delegation\n1 token',
@@ -178,7 +178,7 @@ Then(
             poolID: testContext.load('poolID') as string
           };
 
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 

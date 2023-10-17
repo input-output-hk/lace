@@ -7,7 +7,7 @@ import {
   WalletInfo,
   WalletLocked,
   TxDirection,
-  TransactionDetail,
+  ActivityDetail,
   WalletUI,
   NetworkConnectionStates,
   CurrencyInfo
@@ -122,8 +122,8 @@ export interface UISlice {
   setBalancesVisibility: (visible: boolean) => void;
 }
 
-export interface TransactionDetailSlice {
-  transactionDetail?: {
+export interface ActivityDetailSlice {
+  activityDetail?: {
     type: TransactionType;
     status: Wallet.TransactionStatus;
     direction: TxDirection;
@@ -138,19 +138,16 @@ export interface TransactionDetailSlice {
         tx: NonNullable<unknown>;
       }
   );
-  fetchingTransactionInfo: boolean;
-  setTransactionDetail: (params: {
+  fetchingActivityInfo: boolean;
+  setActivityDetail: (params: {
     tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
     epochRewards?: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
     direction: TxDirection;
     status?: Wallet.TransactionStatus;
     type?: TransactionType;
   }) => void;
-  getTransactionDetails: (params: {
-    coinPrices: PriceResult;
-    fiatCurrency: CurrencyInfo;
-  }) => Promise<TransactionDetail>;
-  resetTransactionState: () => void;
+  getActivityDetails: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;
+  resetActivityState: () => void;
 }
 
 export interface AssetDetailsSlice {
@@ -171,7 +168,7 @@ export type WalletStore = WalletActivitiesSlice &
   StakePoolSearchSlice &
   LockSlice &
   WalletInfoSlice &
-  TransactionDetailSlice &
+  ActivityDetailSlice &
   AssetDetailsSlice &
   UISlice &
   BlockchainProviderSlice;
