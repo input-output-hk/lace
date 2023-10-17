@@ -6,7 +6,7 @@ import flatMap from 'lodash/flatMap';
 import { Skeleton } from 'antd';
 import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
-import { AssetActivityListProps, ActivityDetailBrowser, TransactionStatus, TxOutputInput, TxSummary } from '@lace/core';
+import { AssetActivityListProps, ActivityDetailBrowser, ActivityStatus, TxOutputInput, TxSummary } from '@lace/core';
 import { PriceResult } from '@hooks';
 import { useWalletStore } from '@stores';
 import { ActivityDetail as ActivityDetailType } from '@src/types';
@@ -64,7 +64,7 @@ export const getTransactionData = ({
 const getCurrentTransactionStatus = (
   activities: AssetActivityListProps[],
   txId: Wallet.Cardano.TransactionId
-): TransactionStatus | undefined => {
+): ActivityStatus | undefined => {
   const todayActivity = activities.find((activity) => activity.title === 'Today');
   const transaction = todayActivity?.items.find((item) => item.id === String(txId));
   return transaction?.status;

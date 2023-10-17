@@ -1,5 +1,4 @@
-import { TransactionMetadataProps, TxOutputInput, ActivityType } from '@lace/core';
-import { Wallet } from '@lace/cardano';
+import { TransactionMetadataProps, TxOutputInput, ActivityType, ActivityStatus } from '@lace/core';
 import { RewardsInfo } from '@lace/core/dist/ui/components/Transactions/RewardsInfo';
 
 export enum TxDirections {
@@ -46,7 +45,7 @@ export interface ActivityDetail {
     prevBlock?: string;
     createdBy?: string;
   };
-  status?: Wallet.TransactionStatus;
+  status?: ActivityStatus;
   assetAmount?: number;
   type?: ActivityType;
 }

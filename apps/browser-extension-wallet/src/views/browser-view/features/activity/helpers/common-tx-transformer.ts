@@ -4,9 +4,10 @@ import { CurrencyInfo, TxDirections } from '@types';
 import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import type { TransformedTx } from './types';
-import { TransactionStatus } from '@lace/core';
+import { ActivityStatus } from '@lace/core';
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
+import { assertUnreachable } from '@src/utils/assert-unreachable';
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -73,6 +74,21 @@ const splitDelegationTx = (tx: TransformedTx): TransformedTx[] => {
   return [];
 };
 
+// eslint-disable-next-line consistent-return
+const transformTransactionStatus = (status: Wallet.TransactionStatus): ActivityStatus => {
+  switch (status) {
+    case Wallet.TransactionStatus.PENDING:
+      return ActivityStatus.PENDING;
+    case Wallet.TransactionStatus.ERROR:
+      return ActivityStatus.ERROR;
+    case Wallet.TransactionStatus.SUCCESS:
+      return ActivityStatus.SUCCESS;
+    case Wallet.TransactionStatus.SPENDABLE:
+      return ActivityStatus.SPENDABLE;
+    default:
+      assertUnreachable(status);
+  }
+};
 /**
   Simplifies the transaction object to be used in the activity list
 
@@ -130,13 +146,14 @@ export const txTransformer = ({
     deposit,
     depositReclaim,
     fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-    status,
+    status: transformTransactionStatus(status),
     amount: Wallet.util.getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
     fiatAmount: getFormattedFiatAmount({ amount: outputAmount, fiatCurrency, fiatPrice }),
     assets: assetsEntries,
     assetsNumber: (assets?.size ?? 0) + 1,
     date,
-    formattedDate: status === TransactionStatus.PENDING ? capitalize(Wallet.TransactionStatus.PENDING) : formattedDate,
+    formattedDate:
+      status === Wallet.TransactionStatus.PENDING ? capitalize(Wallet.TransactionStatus.PENDING) : formattedDate,
     formattedTimestamp
   };
 

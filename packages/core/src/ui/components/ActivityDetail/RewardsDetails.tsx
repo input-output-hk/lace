@@ -2,13 +2,13 @@ import React from 'react';
 import cn from 'classnames';
 import styles from './ActivityDetailBrowser.module.scss';
 import { useTranslate } from '@src/ui/hooks';
-import { TransactionStatus } from '../Activity/AssetActivityItem';
+import { ActivityStatus } from '../Activity/AssetActivityItem';
 import type { RewardsInfo } from './RewardsInfo';
 import { Ellipsis } from '@lace/common';
 
-export interface RewardDetailsProps {
+export interface RewardsDetailsProps {
   name: string;
-  status?: TransactionStatus;
+  status?: ActivityStatus;
   includedDate?: string;
   includedTime?: string;
   amountTransformer: (amount: string) => string;
@@ -16,7 +16,7 @@ export interface RewardDetailsProps {
   rewards?: RewardsInfo;
 }
 
-export const RewardDetails = ({
+export const RewardsDetails = ({
   name,
   status,
   includedDate = '-',
@@ -24,7 +24,7 @@ export const RewardDetails = ({
   amountTransformer,
   coinSymbol,
   rewards
-}: RewardDetailsProps): React.ReactElement => {
+}: RewardsDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
   const poolRewards = rewards?.rewards.filter((reward) => !!reward.pool);
 

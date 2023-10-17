@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './ActivityDetailBrowser.module.scss';
 import { ActivityDetailHeaderBrowser } from './ActivityDetailHeaderBrowser';
-import { TransactionStatus } from '../Activity/AssetActivityItem';
-import { RewardDetails, RewardDetailsProps } from './RewardDetails';
+import { ActivityStatus } from '../Activity/AssetActivityItem';
+import { RewardsDetails, RewardsDetailsProps } from './RewardsDetails';
 import { TransactionDetails, TransactionDetailsProps } from './TransactionDetails';
 import { ActivityType } from './ActivityType';
 import { useTranslate } from '@src/ui/hooks';
@@ -16,7 +16,7 @@ const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t'
   return t('package.core.transactionDetailBrowser.sent');
 };
 
-export type ActivityDetailBrowserProps = Omit<RewardDetailsProps, 'name'> &
+export type ActivityDetailBrowserProps = Omit<RewardsDetailsProps, 'name'> &
   Omit<TransactionDetailsProps, 'name'> & {
     headerDescription?: string;
     type?: ActivityType;
@@ -39,7 +39,7 @@ export const ActivityDetailBrowser = ({
   const { t } = useTranslate();
 
   const name =
-    status === TransactionStatus.PENDING ? t('package.core.transactionDetailBrowser.sending') : getTypeLabel(type, t);
+    status === ActivityStatus.PENDING ? t('package.core.transactionDetailBrowser.sending') : getTypeLabel(type, t);
   const tooltipContent = type === 'rewards' ? t('package.core.transactionDetailBrowser.rewardsDescription') : undefined;
 
   const transactionProps: TransactionDetailsProps = {
@@ -53,7 +53,7 @@ export const ActivityDetailBrowser = ({
     isPopupView
   };
 
-  const rewardProps: RewardDetailsProps = {
+  const rewardsProps: RewardsDetailsProps = {
     name,
     status,
     includedDate,
@@ -66,8 +66,8 @@ export const ActivityDetailBrowser = ({
   return (
     <div data-testid="transaction-detail" className={styles.content}>
       <ActivityDetailHeaderBrowser tooltipContent={tooltipContent} name={name} description={headerDescription} />
-      {status === TransactionStatus.SPENDABLE ? (
-        <RewardDetails {...rewardProps} />
+      {status === ActivityStatus.SPENDABLE ? (
+        <RewardsDetails {...rewardsProps} />
       ) : (
         <TransactionDetails {...transactionProps} />
       )}

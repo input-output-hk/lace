@@ -6,7 +6,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import styles from './ActivityDetailBrowser.module.scss';
 import { TransactionDetailAsset, TxOutputInput, TransactionMetadataProps, TxSummary } from './TransactionDetailAsset';
-import { TransactionStatus } from '../Activity';
+import { ActivityStatus } from '../Activity';
 import { Ellipsis, toast } from '@lace/common';
 import { ReactComponent as Info } from '../../assets/icons/info-icon.component.svg';
 import { TransactionInputOutput } from './TransactionInputOutput';
@@ -20,7 +20,7 @@ const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => v
 export interface TransactionDetailsProps {
   hash?: string;
   name: string;
-  status?: TransactionStatus;
+  status?: ActivityStatus;
   /**
    * Transaction generation date
    */

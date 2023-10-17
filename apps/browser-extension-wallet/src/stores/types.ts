@@ -1,6 +1,6 @@
 import { SetState, State, GetState, StoreApi } from 'zustand';
 import { Wallet, StakePoolSortOptions } from '@lace/cardano';
-import { AssetActivityListProps, ActivityType } from '@lace/core';
+import { AssetActivityListProps, ActivityType, ActivityStatus } from '@lace/core';
 import { PriceResult } from '../hooks';
 import {
   NetworkInformation,
@@ -125,7 +125,7 @@ export interface UISlice {
 export interface ActivityDetailSlice {
   activityDetail?: {
     type: ActivityType;
-    status: Wallet.TransactionStatus;
+    status: ActivityStatus;
     direction: TxDirection;
     tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
     epochRewards?: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
@@ -143,7 +143,7 @@ export interface ActivityDetailSlice {
     tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
     epochRewards?: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
     direction: TxDirection;
-    status?: Wallet.TransactionStatus;
+    status?: ActivityStatus;
     type?: ActivityType;
   }) => void;
   getActivityDetail: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;

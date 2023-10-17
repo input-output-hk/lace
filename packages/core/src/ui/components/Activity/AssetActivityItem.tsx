@@ -16,7 +16,7 @@ import { useTranslate } from '@src/ui/hooks';
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
 
-export enum TransactionStatus {
+export enum ActivityStatus {
   SUCCESS = 'success',
   PENDING = 'sending',
   ERROR = 'error',
@@ -49,7 +49,7 @@ export interface AssetActivityItemProps {
   /**
    * Activity status: `sending` | `success` | 'error
    */
-  status?: TransactionStatus;
+  status?: ActivityStatus;
   /**
    * Activity or asset custom icon
    */
@@ -78,23 +78,23 @@ export interface AssetActivityItemProps {
 const DelegationTransactionTypes = new Set(['delegation', 'delegationRegistration', 'delegationDeregistration']);
 const DELEGATION_ASSET_NUMBER = 1;
 
-interface TransactionStatusIconProps {
+interface ActivityStatusIconProps {
   status: string;
   type: ActivityType;
 }
 
 const offsetMargin = 10;
 
-const TransactionStatusIcon = ({ status, type }: TransactionStatusIconProps) => {
+const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
   const iconStyle = { fontSize: txIconSize() };
   switch (status) {
-    case TransactionStatus.SUCCESS:
+    case ActivityStatus.SUCCESS:
       return <ActivityTypeIcon type={type} />;
-    case TransactionStatus.SPENDABLE:
+    case ActivityStatus.SPENDABLE:
       return <ActivityTypeIcon type="rewards" />;
-    case TransactionStatus.PENDING:
+    case ActivityStatus.PENDING:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
-    case TransactionStatus.ERROR:
+    case ActivityStatus.ERROR:
     default:
       return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
   }
@@ -170,7 +170,7 @@ export const AssetActivityItem = ({
     };
   }, [debouncedSetText]);
 
-  const isPendingTx = status === TransactionStatus.PENDING;
+  const isPendingTx = status === ActivityStatus.PENDING;
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent = DelegationTransactionTypes.has(type) ? (
@@ -197,7 +197,7 @@ export const AssetActivityItem = ({
           {customIcon ? (
             <Image src={customIcon} className={styles.icon} preview={false} alt="asset image" />
           ) : (
-            <TransactionStatusIcon status={status} type={type} />
+            <ActivityStatusIcon status={status} type={type} />
           )}
         </div>
         <div data-testid="asset-info" className={styles.info}>

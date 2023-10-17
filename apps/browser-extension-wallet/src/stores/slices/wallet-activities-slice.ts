@@ -19,7 +19,7 @@ import {
   AssetActivityListProps,
   ActivityAssetProp,
   ActivityType,
-  TransactionStatus
+  ActivityStatus
 } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
@@ -186,7 +186,7 @@ const getWalletActivitiesObservable = async ({
         setActivityDetail({
           tx: deserializedTx,
           direction: TxDirections.Outgoing,
-          status: Wallet.TransactionStatus.PENDING,
+          status: ActivityStatus.PENDING,
           type: transformedTx.type
         });
       }
@@ -306,8 +306,8 @@ const getWalletActivitiesObservable = async ({
     map(async (allTransactions: Promise<AssetActivityItemProps[]>) =>
       (await allTransactions).sort((firstTx, secondTx) => {
         // ensure pending txs are always first
-        if (firstTx.status === TransactionStatus.PENDING && secondTx.status !== TransactionStatus.PENDING) return 1;
-        if (secondTx.status === TransactionStatus.PENDING && firstTx.status !== TransactionStatus.PENDING) return -1;
+        if (firstTx.status === ActivityStatus.PENDING && secondTx.status !== ActivityStatus.PENDING) return 1;
+        if (secondTx.status === ActivityStatus.PENDING && firstTx.status !== ActivityStatus.PENDING) return -1;
         // otherwise sort by date
         return secondTx.date.getTime() - firstTx.date.getTime();
       })
