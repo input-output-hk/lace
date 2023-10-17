@@ -7,6 +7,7 @@ import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { PostHogAction, useOutsideHandles } from '../../../outside-handles-provider';
 import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 
@@ -48,6 +49,7 @@ export const StakePoolItemBrowser = ({
   stakePool,
 }: StakePoolItemBrowserProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   let title = name;
   let subTitle: string | React.ReactElement = ticker || '-';
   if (!name) {
@@ -76,7 +78,10 @@ export const StakePoolItemBrowser = ({
     <div
       data-testid="stake-pool-table-item"
       className={styles.row}
-      onClick={() => portfolioMutators.executeCommand({ data: stakePool, type: 'ShowPoolDetailsFromList' })}
+      onClick={() => {
+        portfolioMutators.executeCommand({ data: stakePool, type: 'ShowPoolDetailsFromList' });
+        analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailClick);
+      }}
     >
       <div className={styles.name}>
         <img
@@ -126,6 +131,15 @@ export const StakePoolItemBrowser = ({
                         type: 'SelectPoolFromList',
                       }
                 );
+                if (poolAlreadySelected) {
+                  analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsUnselectClick);
+                } else {
+                  analytics.sendEventToPostHog(
+                    selectionsNotEmpty
+                      ? PostHogAction.StakingBrowsePoolsAddPoolClick
+                      : PostHogAction.StakingBrowsePoolsStakeClick
+                  );
+                }
               }}
               disabled={disabledAddingToDraft}
               data-testid="stake-button"

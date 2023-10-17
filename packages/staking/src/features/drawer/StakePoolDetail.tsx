@@ -6,7 +6,7 @@ import cn from 'classnames';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../outside-handles-provider';
+import { PostHogAction, useOutsideHandles } from '../outside-handles-provider';
 import {
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,
@@ -244,6 +244,7 @@ const makeActionButtons = (
 
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   const { walletStoreGetKeyAgentType } = useOutsideHandles();
   const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),
@@ -260,7 +261,8 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
 
   const onStakeOnThisPool = useCallback(() => {
     portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
-  }, [portfolioMutators]);
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick);
+  }, [analytics, portfolioMutators]);
 
   useEffect(() => {
     if (isInMemory) return;
@@ -277,7 +279,8 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
       data: viewedStakePool,
       type: 'SelectPoolFromDetails',
     });
-  }, [viewedStakePool, portfolioMutators]);
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailAddStakingPoolClick);
+  }, [viewedStakePool, portfolioMutators, analytics]);
 
   const onUnselectClick = useCallback(() => {
     if (!viewedStakePool) return;
@@ -285,6 +288,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
       data: Wallet.Cardano.PoolIdHex(viewedStakePool.hexId),
       type: 'UnselectPoolFromDetails',
     });
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailUnselectPoolClick);
   }, [viewedStakePool, portfolioMutators]);
 
   const actionButtons = useMemo(

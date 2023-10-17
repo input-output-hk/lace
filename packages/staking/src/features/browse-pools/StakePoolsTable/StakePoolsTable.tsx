@@ -4,7 +4,7 @@ import { Box, Flex } from '@lace/ui';
 import debounce from 'lodash/debounce';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
+import { PostHogAction, StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../store';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
@@ -45,6 +45,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     },
     walletStoreStakePoolSearchResultsStatus,
     walletStoreFetchStakePools: fetchStakePools,
+    analytics,
   } = useOutsideHandles();
 
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
@@ -118,6 +119,9 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
         withSearchIcon
         inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}
         onChange={onSearch}
+        onInputFocus={() => {
+          analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSearchClick);
+        }}
         data-testid="search-input"
         loading={fetchingPools}
       />

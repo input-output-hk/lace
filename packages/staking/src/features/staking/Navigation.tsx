@@ -1,6 +1,7 @@
 import { SubNavigation } from '@lace/ui';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PostHogAction, useOutsideHandles } from '../outside-handles-provider';
 import { Flow, useDelegationPortfolioStore } from '../store';
 
 export enum Page {
@@ -15,6 +16,7 @@ type NavigationProps = {
 const isValueAValidSubPage = (value: string): value is Page => Object.values<string>(Page).includes(value);
 
 export const Navigation = ({ children }: NavigationProps) => {
+  const { analytics } = useOutsideHandles();
   const { activePage, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     activePage: [Flow.Overview, Flow.CurrentPoolDetails, Flow.PortfolioManagement].includes(store.activeFlow)
       ? Page.overview
@@ -24,9 +26,13 @@ export const Navigation = ({ children }: NavigationProps) => {
   const { t } = useTranslation();
   const onValueChange = (value: string) => {
     if (!isValueAValidSubPage(value)) return;
+    const goesToOverview = value === Page.overview;
     portfolioMutators.executeCommand({
-      type: value === Page.overview ? 'GoToOverview' : 'GoToBrowsePools',
+      type: goesToOverview ? 'GoToOverview' : 'GoToBrowsePools',
     });
+    analytics.sendEventToPostHog(
+      goesToOverview ? PostHogAction.StakingOverviewClick : PostHogAction.StakingBrowsePoolsClick
+    );
   };
 
   return (
