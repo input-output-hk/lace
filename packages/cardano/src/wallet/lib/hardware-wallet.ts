@@ -7,7 +7,7 @@ import { CardanoWalletByChain, KeyAgentsByChain } from '@src/wallet';
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import * as Crypto from '@cardano-sdk/crypto';
 import * as HardwareLedger from '../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
-import { TrezorKeyAgent } from '@cardano-sdk/hardware-trezor';
+import * as HardwareTrezor from '../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
 import { TrezorConfig } from '@cardano-sdk/key-management';
 // Using nodejs CML version to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
 import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
@@ -38,13 +38,13 @@ const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> =
     await HardwareLedger.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
   ...(AVAILABLE_WALLETS.includes(KeyManagement.KeyAgentType.Trezor) && {
     [KeyManagement.KeyAgentType.Trezor]: async () => {
-      const isTrezorInitialized = await TrezorKeyAgent.initializeTrezorTransport({
+      const isTrezorInitialized = await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
         manifest,
         communicationType: DEFAULT_COMMUNICATION_TYPE
       });
 
       // initializeTrezorTransport would still succeed even when device is not connected
-      await TrezorKeyAgent.checkDeviceConnection(KeyManagement.CommunicationType.Web);
+      await HardwareTrezor.TrezorKeyAgent.checkDeviceConnection(KeyManagement.CommunicationType.Web);
 
       return isTrezorInitialized;
     }
@@ -101,17 +101,17 @@ const createWithTrezorDeviceConnection = async (
     extendedAccountPublicKey: Crypto.Bip32PublicKeyHex;
     trezorConfig: TrezorConfig;
   },
-  dependencies: Parameters<typeof TrezorKeyAgent['createWithDevice']>[1]
+  dependencies: Parameters<typeof HardwareTrezor.TrezorKeyAgent['createWithDevice']>[1]
 ) => {
   // Throws an authentication error if called after the first key agent creation
   const publicKey =
     extendedAccountPublicKey ??
-    (await TrezorKeyAgent.getXpub({
+    (await HardwareTrezor.TrezorKeyAgent.getXpub({
       accountIndex,
       communicationType: KeyManagement.CommunicationType.Web
     }));
 
-  return new TrezorKeyAgent(
+  return new HardwareTrezor.TrezorKeyAgent(
     {
       accountIndex,
       chainId,
@@ -149,7 +149,7 @@ export const createHardwareWalletsByChain = async (
           dependencies
         );
       }
-      return await TrezorKeyAgent.createWithDevice(
+      return await HardwareTrezor.TrezorKeyAgent.createWithDevice(
         {
           accountIndex,
           trezorConfig: TREZOR_CONFIG,
