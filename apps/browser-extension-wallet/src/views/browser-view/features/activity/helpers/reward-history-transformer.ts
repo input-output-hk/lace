@@ -1,6 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { getFormattedFiatAmount } from './common-tx-transformer';
-import type { TransformedTx } from './types';
+import type { TransformedActivity } from './types';
 import dayjs from 'dayjs';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
@@ -22,7 +22,7 @@ export const rewardHistoryTransformer = ({
   fiatPrice,
   date,
   cardanoCoin
-}: RewardHistoryTransformerInput): TransformedTx => {
+}: RewardHistoryTransformerInput): TransformedActivity => {
   const formattedTimestamp = formatTime({
     date,
     type: 'local'

@@ -12,7 +12,7 @@ import {
   txHistoryTransformer,
   filterOutputsByTxDirection,
   isTxWithAssets,
-  TransformedTx
+  TransformedActivity
 } from '@src/views/browser-view/features/activity/helpers';
 import {
   AssetActivityItemProps,
@@ -141,7 +141,7 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin
     });
 
-    const extendWithClickHandler = (transformedTx: TransformedTx) => ({
+    const extendWithClickHandler = (transformedTx: TransformedActivity) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
@@ -178,7 +178,7 @@ const getWalletActivitiesObservable = async ({
       date
     });
 
-    const extendWithClickHandler = (transformedTx: TransformedTx) => ({
+    const extendWithClickHandler = (transformedTx: TransformedActivity) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();

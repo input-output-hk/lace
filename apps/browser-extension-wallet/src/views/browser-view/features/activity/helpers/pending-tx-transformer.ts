@@ -1,6 +1,6 @@
 import { TxTransformerInput, txTransformer } from './common-tx-transformer';
 import { Wallet } from '@lace/cardano';
-import type { TransformedTx } from './types';
+import type { TransformedActivity } from './types';
 import { TxDirections } from '@types';
 
 interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
@@ -15,7 +15,7 @@ export const pendingTxTransformer = ({
   protocolParameters,
   cardanoCoin,
   date
-}: TxHistoryTransformerInput): TransformedTx[] =>
+}: TxHistoryTransformerInput): TransformedActivity[] =>
   txTransformer({
     tx,
     walletAddresses,
