@@ -1,13 +1,13 @@
 import React from 'react';
-import styles from './TransactionDetailBrowser.module.scss';
-import { TransactionDetailHeaderBrowser } from './TransactionDetailHeaderBrowser';
+import styles from './ActivityDetailBrowser.module.scss';
+import { ActivityDetailHeaderBrowser } from './ActivityDetailHeaderBrowser';
 import { TransactionStatus } from '../Activity/AssetActivityItem';
 import { RewardDetails, RewardDetailsProps } from './RewardDetails';
-import { Transaction, TransactionProps } from './Transaction';
-import { TransactionType } from './TransactionType';
+import { TransactionDetails, TransactionDetailsProps } from './TransactionDetails';
+import { ActivityType } from './ActivityType';
 import { useTranslate } from '@src/ui/hooks';
 
-const getTypeLabel = (type: TransactionType, t: ReturnType<typeof useTranslate>['t']) => {
+const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t']) => {
   if (type === 'rewards') return t('package.core.transactionDetailBrowser.rewards');
   if (type === 'delegation') return t('package.core.transactionDetailBrowser.delegation');
   if (type === 'delegationRegistration') return t('package.core.transactionDetailBrowser.registration');
@@ -16,15 +16,15 @@ const getTypeLabel = (type: TransactionType, t: ReturnType<typeof useTranslate>[
   return t('package.core.transactionDetailBrowser.sent');
 };
 
-export type TransactionDetailBrowserProps = Omit<RewardDetailsProps, 'name'> &
-  Omit<TransactionProps, 'name'> & {
+export type ActivityDetailBrowserProps = Omit<RewardDetailsProps, 'name'> &
+  Omit<TransactionDetailsProps, 'name'> & {
     headerDescription?: string;
-    type?: TransactionType;
+    type?: ActivityType;
     addressToNameMap: Map<string, string>;
     isPopupView?: boolean;
   };
 
-export const TransactionDetailBrowser = ({
+export const ActivityDetailBrowser = ({
   status,
   headerDescription,
   includedDate,
@@ -35,14 +35,14 @@ export const TransactionDetailBrowser = ({
   isPopupView,
   rewards,
   ...props
-}: TransactionDetailBrowserProps): React.ReactElement => {
+}: ActivityDetailBrowserProps): React.ReactElement => {
   const { t } = useTranslate();
 
   const name =
     status === TransactionStatus.PENDING ? t('package.core.transactionDetailBrowser.sending') : getTypeLabel(type, t);
   const tooltipContent = type === 'rewards' ? t('package.core.transactionDetailBrowser.rewardsDescription') : undefined;
 
-  const transactionProps: TransactionProps = {
+  const transactionProps: TransactionDetailsProps = {
     ...props,
     includedDate,
     includedTime,
@@ -65,11 +65,11 @@ export const TransactionDetailBrowser = ({
 
   return (
     <div data-testid="transaction-detail" className={styles.content}>
-      <TransactionDetailHeaderBrowser tooltipContent={tooltipContent} name={name} description={headerDescription} />
+      <ActivityDetailHeaderBrowser tooltipContent={tooltipContent} name={name} description={headerDescription} />
       {status === TransactionStatus.SPENDABLE ? (
         <RewardDetails {...rewardProps} />
       ) : (
-        <Transaction {...transactionProps} />
+        <TransactionDetails {...transactionProps} />
       )}
     </div>
   );

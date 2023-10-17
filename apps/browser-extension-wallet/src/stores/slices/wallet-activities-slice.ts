@@ -18,7 +18,7 @@ import {
   AssetActivityItemProps,
   AssetActivityListProps,
   ActivityAssetProp,
-  TransactionType,
+  ActivityType,
   TransactionStatus
 } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
@@ -59,7 +59,7 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
 
 export type FetchWalletActivitiesReturn = Observable<Promise<AssetActivityListProps[]>>;
 export type DelegationTransactionType = Extract<
-  TransactionType,
+  ActivityType,
   'delegation' | 'delegationRegistration' | 'delegationDeregistration'
 >;
 

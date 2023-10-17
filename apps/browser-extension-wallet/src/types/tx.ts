@@ -1,4 +1,4 @@
-import { TransactionMetadataProps, TxOutputInput, TransactionType } from '@lace/core';
+import { TransactionMetadataProps, TxOutputInput, ActivityType } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import { RewardsInfo } from '@lace/core/dist/ui/components/Transactions/RewardsInfo';
 
@@ -48,5 +48,5 @@ export interface ActivityDetail {
   };
   status?: Wallet.TransactionStatus;
   assetAmount?: number;
-  type?: TransactionType;
+  type?: ActivityType;
 }

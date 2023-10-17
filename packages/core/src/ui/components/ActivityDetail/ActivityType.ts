@@ -1,4 +1,4 @@
-export type TransactionType =
+export type ActivityType =
   | 'outgoing'
   | 'incoming'
   | 'delegation'

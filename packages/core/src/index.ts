@@ -2,7 +2,7 @@ export * from '@ui/hooks';
 export * from '@ui/lib';
 export * from '@ui/utils';
 
-export * from '@ui/components/Transactions';
+export * from '@src/ui/components/ActivityDetail';
 export * from '@ui/components/WalletAvatar';
 export * from '@ui/components/WalletBasicInfo';
 export * from '@ui/components/WalletAddresses';

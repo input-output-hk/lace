@@ -10,7 +10,7 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { MAX_POOLS_COUNT } from '@lace/staking';
-import type { TransactionType } from '@lace/core';
+import type { ActivityType } from '@lace/core';
 import { formatDate, formatTime } from '@src/utils/format-date';
 
 /**
@@ -39,7 +39,7 @@ const transactionMetadataTransformer = (metadata: Wallet.Cardano.TxMetadata): Ac
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
 
 const shouldIncludeFee = (
-  type: TransactionType,
+  type: ActivityType,
   delegationInfo: Wallet.Cardano.StakeDelegationCertificate[] | undefined
 ) =>
   !(

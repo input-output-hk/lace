@@ -4,7 +4,7 @@ import React from 'react';
 import cn from 'classnames';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
-import styles from './TransactionDetailBrowser.module.scss';
+import styles from './ActivityDetailBrowser.module.scss';
 import { TransactionDetailAsset, TxOutputInput, TransactionMetadataProps, TxSummary } from './TransactionDetailAsset';
 import { TransactionStatus } from '../Activity';
 import { Ellipsis, toast } from '@lace/common';
@@ -17,7 +17,7 @@ import type { RewardsInfo } from './RewardsInfo';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
 
-export interface TransactionProps {
+export interface TransactionDetailsProps {
   hash?: string;
   name: string;
   status?: TransactionStatus;
@@ -90,7 +90,7 @@ const CopiableHash = ({ hash, copiedText }: { hash: string; copiedText: string }
 );
 
 // eslint-disable-next-line react/no-multi-comp,complexity
-export const Transaction = ({
+export const TransactionDetails = ({
   hash,
   name,
   status,
@@ -111,7 +111,7 @@ export const Transaction = ({
   openExternalLink,
   sendAnalyticsInputs,
   sendAnalyticsOutputs
-}: TransactionProps): React.ReactElement => {
+}: TransactionDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
   const isSending = status === 'sending';
   const isSuccess = status === 'success';

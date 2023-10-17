@@ -6,13 +6,7 @@ import flatMap from 'lodash/flatMap';
 import { Skeleton } from 'antd';
 import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
-import {
-  AssetActivityListProps,
-  TransactionDetailBrowser,
-  TransactionStatus,
-  TxOutputInput,
-  TxSummary
-} from '@lace/core';
+import { AssetActivityListProps, ActivityDetailBrowser, TransactionStatus, TxOutputInput, TxSummary } from '@lace/core';
 import { PriceResult } from '@hooks';
 import { useWalletStore } from '@stores';
 import { ActivityDetail as ActivityDetailType } from '@src/types';
@@ -151,7 +145,7 @@ export const ActivityDetail = withAddressBookContext<ActivityDetailProps>(({ pri
   };
 
   return (
-    <TransactionDetailBrowser
+    <ActivityDetailBrowser
       hash={activityInfo.tx.hash}
       status={currentTransactionStatus}
       includedDate={activityInfo.tx.includedUtcDate}

@@ -4,8 +4,8 @@ import debounce from 'lodash/debounce';
 import { Image, Tooltip } from 'antd';
 import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
-import { TransactionType } from '@ui/components/Transactions/TransactionType';
-import { TransactionTypeIcon } from '@ui/components/Transactions/TransactionTypeIcon';
+import { ActivityType } from '@src/ui/components/ActivityDetail/ActivityType';
+import { ActivityTypeIcon } from '@src/ui/components/ActivityDetail/ActivityTypeIcon';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
 import styles from './AssetActivityItem.module.scss';
@@ -57,7 +57,7 @@ export interface AssetActivityItemProps {
   /**
    * Activity type
    */
-  type?: TransactionType;
+  type?: ActivityType;
   /**
    * Number of assets (default: 1)
    */
@@ -80,7 +80,7 @@ const DELEGATION_ASSET_NUMBER = 1;
 
 interface TransactionStatusIconProps {
   status: string;
-  type: TransactionType;
+  type: ActivityType;
 }
 
 const offsetMargin = 10;
@@ -89,9 +89,9 @@ const TransactionStatusIcon = ({ status, type }: TransactionStatusIconProps) => 
   const iconStyle = { fontSize: txIconSize() };
   switch (status) {
     case TransactionStatus.SUCCESS:
-      return <TransactionTypeIcon type={type} />;
+      return <ActivityTypeIcon type={type} />;
     case TransactionStatus.SPENDABLE:
-      return <TransactionTypeIcon type="rewards" />;
+      return <ActivityTypeIcon type="rewards" />;
     case TransactionStatus.PENDING:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
     case TransactionStatus.ERROR:

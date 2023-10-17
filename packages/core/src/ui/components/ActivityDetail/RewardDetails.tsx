@@ -1,6 +1,6 @@
 import React from 'react';
 import cn from 'classnames';
-import styles from './TransactionDetailBrowser.module.scss';
+import styles from './ActivityDetailBrowser.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 import { TransactionStatus } from '../Activity/AssetActivityItem';
 import type { RewardsInfo } from './RewardsInfo';

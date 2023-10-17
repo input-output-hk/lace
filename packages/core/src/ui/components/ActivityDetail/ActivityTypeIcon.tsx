@@ -1,5 +1,5 @@
 import React from 'react';
-import { TransactionType } from './TransactionType';
+import { ActivityType } from './ActivityType';
 import { ReactComponent as OutgoingIcon } from '../../assets/icons/outgoing.component.svg';
 import { ReactComponent as IncomingIcon } from '../../assets/icons/incoming.component.svg';
 import { ReactComponent as SelfIcon } from '../../assets/icons/self-transaction.component.svg';
@@ -10,11 +10,11 @@ import { ReactComponent as RewardsIcon } from '../../assets/icons/rewards.compon
 import Icon, { QuestionOutlined } from '@ant-design/icons';
 import { txIconSize } from '@src/ui/utils/icon-size';
 
-export interface TransactionTypeIconProps {
-  type: TransactionType;
+export interface ActivityTypeIconProps {
+  type: ActivityType;
 }
 
-const transactionTypeIcon: Record<TransactionType, React.FC<React.SVGProps<SVGSVGElement>>> = {
+const transactionTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGElement>>> = {
   outgoing: OutgoingIcon,
   incoming: IncomingIcon,
   self: SelfIcon,
@@ -24,7 +24,7 @@ const transactionTypeIcon: Record<TransactionType, React.FC<React.SVGProps<SVGSV
   rewards: RewardsIcon
 };
 
-export const TransactionTypeIcon = ({ type }: TransactionTypeIconProps): React.ReactElement => {
+export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactElement => {
   const icon = type && transactionTypeIcon[type];
   const iconStyle = { fontSize: txIconSize() };
 
