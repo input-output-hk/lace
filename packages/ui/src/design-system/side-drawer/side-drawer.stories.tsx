@@ -2,7 +2,7 @@ import type { ElementType, ReactNode } from 'react';
 import React from 'react';
 
 import { expect } from '@storybook/jest';
-import type { ComponentStory, Meta } from '@storybook/react';
+import type { ComponentStory, Meta, StoryContext } from '@storybook/react';
 import { within, userEvent, waitFor, screen } from '@storybook/testing-library';
 import MediaQuery from 'react-responsive';
 
@@ -42,7 +42,7 @@ export default {
     Content,
     Trigger,
     Close,
-  },
+  } as unknown as Meta['subcomponents'],
   decorators: [page({ title: 'Side drawer', subtitle })],
   argTypes: {
     onBackClick: { action: true },
@@ -446,7 +446,9 @@ export const Interactions: Interactions = ({
   );
 };
 
-Interactions.play = async ({ canvasElement }): Promise<void> => {
+Interactions.play = async ({
+  canvasElement,
+}: Readonly<StoryContext<Props>>): Promise<void> => {
   const canvas = within(canvasElement);
 
   expect(screen.queryByTestId(`side-drawer-content`)).not.toBeInTheDocument();

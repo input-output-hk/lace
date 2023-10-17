@@ -174,6 +174,7 @@ module.exports = {
         '.eslintrc.js',
         'rollup.config.js',
         '.storybook/*.js',
+        '.storybook/*.ts',
       ],
       rules: {
         'unicorn/prefer-module': ['off'],

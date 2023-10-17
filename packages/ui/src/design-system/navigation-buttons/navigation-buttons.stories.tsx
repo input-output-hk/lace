@@ -2,7 +2,7 @@ import type { ElementType } from 'react';
 import React from 'react';
 
 import { expect } from '@storybook/jest';
-import type { ComponentStory, Meta } from '@storybook/react';
+import type { ComponentStory, Meta, StoryContext } from '@storybook/react';
 import { userEvent, waitFor, within } from '@storybook/testing-library';
 
 import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
@@ -134,7 +134,10 @@ export const Interactions: Interactions = ({
   );
 };
 
-Interactions.play = async ({ canvasElement, args }): Promise<void> => {
+Interactions.play = async ({
+  canvasElement,
+  args,
+}: Readonly<StoryContext<Props>>): Promise<void> => {
   const canvas = within(canvasElement);
 
   await sleep();

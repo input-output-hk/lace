@@ -19,7 +19,7 @@ const subtitle = `Reusable button component for use in a variety of controls con
 export default {
   title: 'Buttons/Icon button',
   component: Primary,
-  subcomponents: { Secondary, Caret },
+  subcomponents: { Secondary, Caret } as unknown as Meta['subcomponents'],
   decorators: [page({ title: 'Icon button and caret', subtitle })],
   argTypes: {
     onClick: { action: true },

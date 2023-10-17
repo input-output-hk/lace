@@ -27,7 +27,7 @@ const mockDataSet = (amount: number): { name: string; value: number }[] =>
 const meta: Meta<typeof PieChart> = {
   title: 'Elements/PieChart',
   component: PieChart,
-  decorators: [page({ title: 'PieChart' })],
+  decorators: [page({ title: 'PieChart' })] as Meta['decorators'],
   argTypes: {
     nameKey: {
       table: {

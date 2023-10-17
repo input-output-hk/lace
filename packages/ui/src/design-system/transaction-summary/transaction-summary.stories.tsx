@@ -18,7 +18,12 @@ const subtitle = `Control that displays data items in rows.`;
 
 export default {
   title: 'List & tables/Transaction summary',
-  subcomponents: { Address, Amount, Metadata, Other },
+  subcomponents: {
+    Address,
+    Amount,
+    Metadata,
+    Other,
+  } as unknown as Meta['subcomponents'],
   decorators: [page({ title: 'Transaction summary', subtitle })],
 } as Meta;
 

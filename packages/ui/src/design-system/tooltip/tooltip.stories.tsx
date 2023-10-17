@@ -27,7 +27,7 @@ export default {
   component: Tooltip,
   subcomponents: {
     RichTooltip,
-  },
+  } as unknown as Meta['subcomponents'],
   decorators: [page({ title: 'Tooltip', subtitle })],
 } as Meta;
 

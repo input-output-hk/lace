@@ -21,7 +21,7 @@ export default {
   subcomponents: {
     Image,
     Initials,
-  },
+  } as unknown as Meta['subcomponents'],
   decorators: [page({ title: 'Profile picture', subtitle })],
 } as Meta;
 
