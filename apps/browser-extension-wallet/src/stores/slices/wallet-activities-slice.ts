@@ -107,7 +107,8 @@ const getWalletActivitiesObservable = async ({
     walletInfo,
     walletUI: { cardanoCoin },
     inMemoryWallet,
-    setActivityDetail,
+    setTransactionActivityDetail,
+    setRewardsActivityDetail,
     assetDetails,
     blockchainProvider: { assetProvider }
   } = get();
@@ -141,11 +142,13 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin
     });
 
-    const extendWithClickHandler = (transformedTx: TransformedActivity) => ({
+    const extendWithClickHandler = (
+      transformedTx: TransformedActivity & { type: Exclude<ActivityType, 'rewards'> }
+    ) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
-        setActivityDetail({
+        setTransactionActivityDetail({
           tx,
           direction: transformedTx.direction,
           status: transformedTx.status,
@@ -178,12 +181,14 @@ const getWalletActivitiesObservable = async ({
       date
     });
 
-    const extendWithClickHandler = (transformedTx: TransformedActivity) => ({
+    const extendWithClickHandler = (
+      transformedTx: TransformedActivity & { type: Exclude<ActivityType, 'rewards'> }
+    ) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
         const deserializedTx: Wallet.Cardano.Tx = TxCBOR.deserialize(tx.cbor);
-        setActivityDetail({
+        setTransactionActivityDetail({
           tx: deserializedTx,
           direction: TxDirections.Outgoing,
           status: ActivityStatus.PENDING,
@@ -217,7 +222,7 @@ const getWalletActivitiesObservable = async ({
       ...transformedEpochRewards,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
-        setActivityDetail({
+        setRewardsActivityDetail({
           direction: transformedEpochRewards.direction,
           status: transformedEpochRewards.status,
           type: transformedEpochRewards.type,

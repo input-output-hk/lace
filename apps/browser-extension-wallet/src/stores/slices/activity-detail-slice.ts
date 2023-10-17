@@ -229,7 +229,9 @@ export const activityDetailSlice: SliceCreator<
   activityDetail: undefined,
   fetchingActivityInfo: true,
   getActivityDetail: buildGetActivityDetail({ set, get }),
-  setActivityDetail: ({ tx, epochRewards, direction, status, type }) =>
-    set({ activityDetail: { tx, epochRewards, direction, status, type } }),
+  setTransactionActivityDetail: ({ tx, direction, status, type }) =>
+    set({ activityDetail: { tx, direction, status, type } }),
+  setRewardsActivityDetail: ({ epochRewards, direction, status, type }) =>
+    set({ activityDetail: { epochRewards, direction, status, type } }),
   resetActivityState: () => set({ activityDetail: undefined, fetchingActivityInfo: false })
 });

@@ -127,24 +127,30 @@ export interface ActivityDetailSlice {
     type: ActivityType;
     status: ActivityStatus;
     direction: TxDirection;
-    tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
-    epochRewards?: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
   } & (
     | {
-        type: 'rewards';
-        epochRewards: NonNullable<unknown>;
+        type: Extract<ActivityType, 'rewards'>;
+        epochRewards: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+        tx?: never;
       }
     | {
-        tx: NonNullable<unknown>;
+        type: Exclude<ActivityType, 'rewards'>;
+        tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
+        epochRewards?: never;
       }
   );
   fetchingActivityInfo: boolean;
-  setActivityDetail: (params: {
-    tx?: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
-    epochRewards?: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+  setTransactionActivityDetail: (params: {
+    tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
     direction: TxDirection;
-    status?: ActivityStatus;
-    type?: ActivityType;
+    status: ActivityStatus;
+    type: Exclude<ActivityType, 'rewards'>;
+  }) => void;
+  setRewardsActivityDetail: (params: {
+    epochRewards: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+    direction: TxDirection;
+    status: ActivityStatus;
+    type: Extract<ActivityType, 'rewards'>;
   }) => void;
   getActivityDetail: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;
   resetActivityState: () => void;

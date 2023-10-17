@@ -4,7 +4,7 @@ import { CurrencyInfo, TxDirections } from '@types';
 import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import type { TransformedActivity } from './types';
-import { ActivityStatus } from '@lace/core';
+import { ActivityStatus, ActivityType } from '@lace/core';
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import { assertUnreachable } from '@src/utils/assert-unreachable';
@@ -36,7 +36,9 @@ export const getFormattedFiatAmount = ({
   return fiatAmount ? `${fiatAmount} ${fiatCurrency.code}` : '-';
 };
 
-const splitDelegationTx = (tx: TransformedActivity): TransformedActivity[] => {
+const splitDelegationTx = (
+  tx: TransformedActivity
+): (TransformedActivity & { type: Exclude<ActivityType, 'rewards'> })[] => {
   if (tx.deposit) {
     return [
       {
@@ -114,7 +116,7 @@ export const txTransformer = ({
   date,
   direction,
   status
-}: TxTransformerInput): TransformedActivity[] => {
+}: TxTransformerInput): (TransformedActivity & { type: Exclude<ActivityType, 'rewards'> })[] => {
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
   const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
   const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);

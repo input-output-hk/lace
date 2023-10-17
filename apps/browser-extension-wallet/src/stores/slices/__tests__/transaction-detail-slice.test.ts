@@ -6,6 +6,7 @@ import { activityDetailSlice } from '../activity-detail-slice';
 import '@testing-library/jest-dom';
 import create, { GetState, SetState } from 'zustand';
 import { mockBlockchainProviders } from '@src/utils/mocks/blockchain-providers';
+import { ActivityStatus } from '@lace/core';
 
 const mockActivityDetailSlice = (
   set: SetState<ActivityDetailSlice>,
@@ -34,7 +35,8 @@ describe('Testing createStoreHook slice', () => {
     expect(result.current.fetchingActivityInfo).toBeDefined();
     expect(result.current.getActivityDetail).toBeDefined();
     expect(result.current.resetActivityState).toBeDefined();
-    expect(result.current.setActivityDetail).toBeDefined();
+    expect(result.current.setTransactionActivityDetail).toBeDefined();
+    expect(result.current.setRewardsActivityDetail).toBeDefined();
   });
 
   test('should set transaction detail', () => {
@@ -42,7 +44,12 @@ describe('Testing createStoreHook slice', () => {
     const { result, waitForValueToChange } = renderHook(() => useTransactionsStore());
 
     act(() => {
-      result.current.setActivityDetail({ tx: transactionMock.tx, direction: transactionMock.direction });
+      result.current.setTransactionActivityDetail({
+        type: 'incoming',
+        status: ActivityStatus.SUCCESS,
+        tx: transactionMock.tx,
+        direction: transactionMock.direction
+      });
     });
     waitForValueToChange(() => result.current.activityDetail);
     expect(result.current.activityDetail).toBeDefined();
