@@ -15,7 +15,6 @@ import { getTransactionTotalOutput } from '../../utils/get-transaction-total-out
 import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
-import { getRewardsAmount } from '@src/views/browser-view/features/activity/helpers';
 import { MAX_POOLS_COUNT } from '@lace/staking';
 import { TransactionType } from '@lace/core';
 
@@ -169,29 +168,12 @@ const getTransactionDetail =
         transaction = {
           ...transaction,
           pools: pools.map((pool) => ({
-            name: pool.metadata.name || '-',
-            ticker: pool.metadata.ticker || '-',
+            name: pool.metadata?.name || '-',
+            ticker: pool.metadata?.ticker || '-',
             id: pool.id.toString()
           }))
         };
       }
-    }
-
-    /*
-      as we need to divide the transaction that withdrawn rewards in to two records,
-      now we have a type rewards.
-      When the record is of type rewards we will need to calculate the amount of rewards withdrawn
-      and then adds this property rewards to the transaction information
-    */
-    if (type === 'rewards') {
-      const rewards = getRewardsAmount(
-        tx?.body?.withdrawals,
-        walletInfo.addresses.map((addr) => addr.rewardAccount)
-      );
-      transaction = {
-        ...transaction,
-        rewards: Wallet.util.lovelacesToAdaString(rewards)
-      };
     }
 
     set({ fetchingTransactionInfo: false });
