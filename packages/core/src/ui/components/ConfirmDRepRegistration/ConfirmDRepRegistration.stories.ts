@@ -8,8 +8,7 @@ const meta: Meta<typeof ConfirmDRepRegistration> = {
   component: ConfirmDRepRegistration,
   parameters: {
     layout: 'centered'
-  },
-  tags: ['autodocs']
+  }
 };
 
 export default meta;

@@ -8,8 +8,7 @@ const meta: Meta<typeof ConfirmDRepRetirement> = {
   component: ConfirmDRepRetirement,
   parameters: {
     layout: 'centered'
-  },
-  tags: ['autodocs']
+  }
 };
 
 export default meta;
