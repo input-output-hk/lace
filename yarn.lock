@@ -9543,7 +9543,6 @@ __metadata:
     "@storybook/addon-interactions": ^6.5.16
     "@storybook/addon-links": ^6.5.16
     "@storybook/builder-webpack5": 6.5.16
-    "@storybook/core-events": ^6.5.16
     "@storybook/jest": ^0.0.10
     "@storybook/manager-webpack5": 6.5.16
     "@storybook/react": ^6.5.16
