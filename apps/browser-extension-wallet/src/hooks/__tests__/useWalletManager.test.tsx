@@ -431,7 +431,7 @@ describe('Testing useWalletManager hook', () => {
         wallet,
         name: 'name'
       } as any;
-      const chainName = 'Preprod';
+      const chainName = 'Preview';
       const mnemonicVerificationFrequency = 'mnemonicVerificationFrequency';
 
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
@@ -621,7 +621,7 @@ describe('Testing useWalletManager hook', () => {
         keyAgentsByChain,
         ...cardanoWallet
       } as any;
-      const chainName = 'Preprod';
+      const chainName = 'Preview';
 
       const saveValueInLocalStorage = jest.fn();
       jest.spyOn(localStorage, 'saveValueInLocalStorage').mockImplementation(saveValueInLocalStorage);
@@ -843,6 +843,18 @@ describe('Testing useWalletManager hook', () => {
     });
     test('shoud throw in case the chain is not supported', async () => {
       const chainId = 'not supported chain id' as any;
+      const {
+        result: {
+          current: { switchNetwork }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({})
+      });
+      expect(switchNetwork).toBeDefined();
+      await expect(switchNetwork(chainId)).rejects.toThrow(new Error('Chain not supported'));
+    });
+    test('shoud throw in case the chain is not available', async () => {
+      const chainId = 'Sanchonet' as any;
       const {
         result: {
           current: { switchNetwork }
