@@ -265,6 +265,9 @@ const colors: Colors = {
 
   $metadata_label_color: lightColorScheme.$primary_black,
   $metadata_secondary_label_color: lightColorScheme.$primary_dark_grey,
+
+  $text_link_label_color: lightColorScheme.$secondary_data_blue,
+  $text_link_label_color_visited: lightColorScheme.$primary_hover_purple,
 };
 
 export const elevation: Elevation = {
