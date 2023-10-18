@@ -47,7 +47,7 @@ export const inspectTxType = ({
 }: {
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
-}): Exclude<ActivityType, 'rewards'> => {
+}): TransactionActivityType => {
   const { paymentAddresses, rewardAccounts } = walletAddresses.reduce(
     (acc, curr) => ({
       paymentAddresses: [...acc.paymentAddresses, curr.address],

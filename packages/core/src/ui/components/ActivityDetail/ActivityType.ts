@@ -1,8 +1,11 @@
-export type ActivityType =
+export type TransactionActivityType =
   | 'outgoing'
   | 'incoming'
   | 'delegation'
   | 'delegationRegistration'
   | 'delegationDeregistration'
-  | 'rewards'
   | 'self';
+
+export type RewardsActivityType = 'rewards';
+
+export type ActivityType = TransactionActivityType | RewardsActivityType;

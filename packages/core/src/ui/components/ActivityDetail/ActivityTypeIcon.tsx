@@ -14,7 +14,7 @@ export interface ActivityTypeIconProps {
   type: ActivityType;
 }
 
-const transactionTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGElement>>> = {
+const activityTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGElement>>> = {
   outgoing: OutgoingIcon,
   incoming: IncomingIcon,
   self: SelfIcon,
@@ -25,7 +25,7 @@ const transactionTypeIcon: Record<ActivityType, React.FC<React.SVGProps<SVGSVGEl
 };
 
 export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactElement => {
-  const icon = type && transactionTypeIcon[type];
+  const icon = type && activityTypeIcon[type];
   const iconStyle = { fontSize: txIconSize() };
 
   return icon ? <Icon style={iconStyle} component={icon} /> : <QuestionOutlined style={iconStyle} />;

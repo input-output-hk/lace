@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import uniq from 'lodash/uniq';
@@ -6,10 +5,19 @@ import flatMap from 'lodash/flatMap';
 import { Skeleton } from 'antd';
 import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
-import { AssetActivityListProps, ActivityDetailBrowser, ActivityStatus, TxOutputInput, TxSummary } from '@lace/core';
+import {
+  AssetActivityListProps,
+  ActivityStatus,
+  TxOutputInput,
+  TxSummary,
+  ActivityType,
+  useTranslate,
+  RewardsDetails,
+  TransactionDetails
+} from '@lace/core';
 import { PriceResult } from '@hooks';
 import { useWalletStore } from '@stores';
-import { ActivityDetail as ActivityDetailType } from '@src/types';
+import { ActivityDetail as ActivityDetailType, TransactionActivityDetail, TxDirection } from '@src/types';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
@@ -74,32 +82,122 @@ interface ActivityDetailProps {
   price: PriceResult;
 }
 
-export const ActivityDetail = withAddressBookContext<ActivityDetailProps>(({ price }): ReactElement => {
+const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t']) => {
+  if (type === 'rewards') return t('package.core.transactionDetailBrowser.rewards');
+  if (type === 'delegation') return t('package.core.transactionDetailBrowser.delegation');
+  if (type === 'delegationRegistration') return t('package.core.transactionDetailBrowser.registration');
+  if (type === 'delegationDeregistration') return t('package.core.transactionDetailBrowser.deregistration');
+  if (type === 'incoming') return t('package.core.transactionDetailBrowser.received');
+  return t('package.core.transactionDetailBrowser.sent');
+};
+
+type _TransactionDetailsProps = {
+  name: string;
+  activityInfo: TransactionActivityDetail;
+  direction: TxDirection;
+  status: ActivityStatus;
+  amountTransformer: (amount: string) => string;
+};
+const _TransactionDetails = withAddressBookContext<_TransactionDetailsProps>(
+  ({ name, activityInfo, direction, status, amountTransformer }: _TransactionDetailsProps): ReactElement => {
+    const analytics = useAnalyticsContext();
+    const {
+      walletInfo,
+      environmentName,
+      walletUI: { cardanoCoin, appMode }
+    } = useWalletStore();
+    const isPopupView = appMode === APP_MODE_POPUP;
+    const openExternalLink = useExternalLinkOpener();
+    const { list: addressList } = useAddressBookContext();
+
+    const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
+    const explorerBaseUrl = useMemo(
+      () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
+      [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
+    );
+    const getHeaderDescription = () => {
+      if (activityInfo.type === 'delegation') return '1 token';
+      return ` (${activityInfo?.assetAmount})`;
+    };
+    const isIncomingTransaction = direction === 'Incoming';
+    const {
+      addrOutputs,
+      addrInputs,
+      hash,
+      includedUtcDate,
+      includedUtcTime,
+      fee,
+      pools,
+      deposit,
+      depositReclaim,
+      metadata
+    } = activityInfo.activity;
+    const txSummary = useMemo(
+      () =>
+        getTransactionData({
+          addrOutputs,
+          addrInputs,
+          walletAddresses: walletInfo.addresses.map((addr) => addr.address.toString()),
+          isIncomingTransaction
+        }),
+      [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.addresses]
+    );
+
+    const handleOpenExternalLink = () => {
+      analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailTransactionHashClick);
+      const externalLink = `${explorerBaseUrl}/${hash}`;
+      externalLink && status === 'success' && openExternalLink(externalLink);
+    };
+
+    const addressToNameMap = useMemo(
+      () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
+      [addressList]
+    );
+
+    return (
+      // eslint-disable-next-line react/jsx-pascal-case
+      <TransactionDetails
+        name={name}
+        hash={hash}
+        status={status}
+        includedDate={includedUtcDate}
+        includedTime={includedUtcTime}
+        addrInputs={addrInputs}
+        addrOutputs={addrOutputs}
+        fee={fee}
+        pools={pools}
+        deposit={deposit}
+        depositReclaim={depositReclaim}
+        metadata={metadata}
+        amountTransformer={amountTransformer}
+        headerDescription={getHeaderDescription() || cardanoCoin.symbol}
+        txSummary={txSummary}
+        addressToNameMap={addressToNameMap}
+        coinSymbol={cardanoCoin.symbol}
+        isPopupView={isPopupView}
+        openExternalLink={handleOpenExternalLink}
+        sendAnalyticsInputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailInputsClick)}
+        sendAnalyticsOutputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailOutputsClick)}
+      />
+    );
+  }
+);
+
+export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => {
   const {
-    walletInfo,
-    walletUI: { cardanoCoin, appMode },
-    environmentName
+    walletUI: { cardanoCoin }
   } = useWalletStore();
-  const isPopupView = appMode === APP_MODE_POPUP;
+  const { t } = useTranslate();
   const { getActivityDetail, activityDetail, fetchingActivityInfo, walletActivities } = useWalletStore();
   const [activityInfo, setActivityInfo] = useState<ActivityDetailType>();
   const { fiatCurrency } = useCurrencyStore();
-  const { list: addressList } = useAddressBookContext();
-  const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
-  const openExternalLink = useExternalLinkOpener();
-  const analytics = useAnalyticsContext();
-
-  const explorerBaseUrl = useMemo(
-    () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
-    [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
-  );
 
   const currentTransactionStatus = useMemo(
     () =>
-      activityDetail.tx?.id
-        ? getCurrentTransactionStatus(walletActivities, activityDetail.tx.id) ?? activityInfo?.status
+      activityDetail.type !== 'rewards'
+        ? getCurrentTransactionStatus(walletActivities, activityDetail.activity.id) ?? activityInfo?.status
         : activityInfo?.status,
-    [activityDetail.tx?.id, activityInfo?.status, walletActivities]
+    [activityDetail.activity, activityDetail.type, activityInfo?.status, walletActivities]
   );
 
   const fetchActivityInfo = useCallback(async () => {
@@ -112,64 +210,37 @@ export const ActivityDetail = withAddressBookContext<ActivityDetailProps>(({ pri
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const addressToNameMap = useMemo(
-    () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
-    [addressList]
-  );
-
-  const isIncomingTransaction = activityDetail.direction === 'Incoming';
-  const { addrOutputs, addrInputs } = activityInfo?.tx || {};
-  const txSummary = useMemo(
-    () =>
-      getTransactionData({
-        addrOutputs,
-        addrInputs,
-        walletAddresses: walletInfo.addresses.map((addr) => addr.address.toString()),
-        isIncomingTransaction
-      }),
-    [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.addresses]
-  );
-
   if (fetchingActivityInfo || !activityInfo) return <Skeleton data-testid="transaction-details-skeleton" />;
 
-  const getHeaderDescription = () => {
-    if (activityInfo.type === 'rewards') return '';
-    if (activityInfo.type === 'delegation') return '1 token';
-    return ` (${activityInfo?.assetAmount})`;
-  };
+  const name =
+    activityInfo.status === ActivityStatus.PENDING
+      ? t('package.core.transactionDetailBrowser.sending')
+      : getTypeLabel(activityInfo.type, t);
 
-  const handleOpenExternalLink = () => {
-    analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailTransactionHashClick);
-    const externalLink = `${explorerBaseUrl}/${activityInfo.tx.hash}`;
-    externalLink && currentTransactionStatus === 'success' && openExternalLink(externalLink);
-  };
+  const amountTransformer = (ada: string) =>
+    `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`;
 
   return (
-    <ActivityDetailBrowser
-      hash={activityInfo.tx.hash}
-      status={currentTransactionStatus}
-      includedDate={activityInfo.tx.includedUtcDate}
-      includedTime={activityInfo.tx.includedUtcTime}
-      addrInputs={activityInfo.tx.addrInputs}
-      addrOutputs={activityInfo.tx.addrOutputs}
-      fee={activityInfo.tx.fee}
-      pools={activityInfo.tx.pools}
-      deposit={activityInfo.tx.deposit}
-      depositReclaim={activityInfo.tx.depositReclaim}
-      metadata={activityInfo.tx.metadata}
-      amountTransformer={(ada: string) =>
-        `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`
-      }
-      headerDescription={getHeaderDescription() || cardanoCoin.symbol}
-      txSummary={txSummary}
-      addressToNameMap={addressToNameMap}
-      coinSymbol={cardanoCoin.symbol}
-      rewards={activityInfo.tx?.rewards}
-      type={activityInfo?.type}
-      isPopupView={isPopupView}
-      openExternalLink={handleOpenExternalLink}
-      sendAnalyticsInputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailInputsClick)}
-      sendAnalyticsOutputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailOutputsClick)}
-    />
+    <>
+      {activityInfo.type === 'rewards' ? (
+        <RewardsDetails
+          name={name}
+          status={activityInfo.status}
+          includedDate={activityInfo.activity.includedUtcDate}
+          amountTransformer={amountTransformer}
+          coinSymbol={cardanoCoin.symbol}
+          rewards={activityInfo.activity.rewards}
+        />
+      ) : (
+        // eslint-disable-next-line react/jsx-pascal-case
+        <_TransactionDetails
+          name={name}
+          activityInfo={activityInfo}
+          direction={activityDetail.direction}
+          status={currentTransactionStatus}
+          amountTransformer={amountTransformer}
+        />
+      )}
+    </>
   );
-});
+};

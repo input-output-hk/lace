@@ -47,7 +47,7 @@ describe('Testing createStoreHook slice', () => {
       result.current.setTransactionActivityDetail({
         type: 'incoming',
         status: ActivityStatus.SUCCESS,
-        tx: transactionMock.tx,
+        activity: transactionMock.tx,
         direction: transactionMock.direction
       });
     });

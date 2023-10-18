@@ -18,8 +18,8 @@ import {
   AssetActivityItemProps,
   AssetActivityListProps,
   ActivityAssetProp,
-  ActivityType,
-  ActivityStatus
+  ActivityStatus,
+  TransactionActivityType
 } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
@@ -59,7 +59,7 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
 
 export type FetchWalletActivitiesReturn = Observable<Promise<AssetActivityListProps[]>>;
 export type DelegationTransactionType = Extract<
-  ActivityType,
+  TransactionActivityType,
   'delegation' | 'delegationRegistration' | 'delegationDeregistration'
 >;
 
@@ -142,14 +142,12 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin
     });
 
-    const extendWithClickHandler = (
-      transformedTx: TransformedActivity & { type: Exclude<ActivityType, 'rewards'> }
-    ) => ({
+    const extendWithClickHandler = (transformedTx: TransformedActivity & { type: TransactionActivityType }) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
         setTransactionActivityDetail({
-          tx,
+          activity: tx,
           direction: transformedTx.direction,
           status: transformedTx.status,
           type: transformedTx.type
@@ -181,15 +179,13 @@ const getWalletActivitiesObservable = async ({
       date
     });
 
-    const extendWithClickHandler = (
-      transformedTx: TransformedActivity & { type: Exclude<ActivityType, 'rewards'> }
-    ) => ({
+    const extendWithClickHandler = (transformedTx: TransformedActivity & { type: TransactionActivityType }) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
         const deserializedTx: Wallet.Cardano.Tx = TxCBOR.deserialize(tx.cbor);
         setTransactionActivityDetail({
-          tx: deserializedTx,
+          activity: deserializedTx,
           direction: TxDirections.Outgoing,
           status: ActivityStatus.PENDING,
           type: transformedTx.type
@@ -223,10 +219,7 @@ const getWalletActivitiesObservable = async ({
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
         setRewardsActivityDetail({
-          direction: transformedEpochRewards.direction,
-          status: transformedEpochRewards.status,
-          type: transformedEpochRewards.type,
-          epochRewards: {
+          activity: {
             rewards,
             spendableEpoch,
             spendableDate: rewardSpendableDate

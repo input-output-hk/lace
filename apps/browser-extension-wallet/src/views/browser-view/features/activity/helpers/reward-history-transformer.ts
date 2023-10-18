@@ -6,7 +6,7 @@ import { formatDate, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
 import type { CurrencyInfo } from '@src/types';
 import type { Reward } from '@cardano-sdk/core';
-import { ActivityStatus, ActivityType } from '@lace/core';
+import { ActivityStatus, RewardsActivityType } from '@lace/core';
 
 interface RewardHistoryTransformerInput {
   rewards: Reward[]; // TODO this supposes rewards grouped by epoch which is a bit fragile
@@ -22,7 +22,7 @@ export const rewardHistoryTransformer = ({
   fiatPrice,
   date,
   cardanoCoin
-}: RewardHistoryTransformerInput): TransformedActivity & { type: Extract<ActivityType, 'rewards'> } => {
+}: RewardHistoryTransformerInput): TransformedActivity & { type: RewardsActivityType } => {
   const formattedTimestamp = formatTime({
     date,
     type: 'local'

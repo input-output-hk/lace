@@ -1,4 +1,5 @@
-export * from './ActivityDetailBrowser';
+export * from './TransactionDetails';
+export * from './RewardsDetails';
 export * from './ActivityType';
 export * from './ActivityTypeIcon';
 export * from './TransactionDetailAsset';

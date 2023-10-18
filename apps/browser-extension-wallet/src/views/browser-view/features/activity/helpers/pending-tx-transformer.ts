@@ -16,7 +16,7 @@ export const pendingTxTransformer = ({
   protocolParameters,
   cardanoCoin,
   date
-}: TxHistoryTransformerInput): (TransformedActivity & { type: Exclude<ActivityType, 'rewards'> })[] =>
+}: TxHistoryTransformerInput): (TransformedActivity & { type: TransactionActivityType })[] =>
   txTransformer({
     tx,
     walletAddresses,

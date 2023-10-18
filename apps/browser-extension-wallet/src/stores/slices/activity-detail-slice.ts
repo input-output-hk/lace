@@ -2,7 +2,7 @@
 /* eslint-disable unicorn/no-array-reduce */
 import isEmpty from 'lodash/isEmpty';
 import { ActivityDetailSlice, ZustandHandlers, BlockchainProviderSlice, WalletInfoSlice, SliceCreator } from '../types';
-import { CardanoTxOut, Transaction, ActivityDetail } from '../../types';
+import { CardanoTxOut, Transaction, ActivityDetail, TransactionActivityDetail } from '../../types';
 import { blockTransformer, inputOutputTransformer } from '../../api/transformers';
 import { Wallet } from '@lace/cardano';
 import { getTransactionTotalOutput } from '../../utils/get-transaction-total-output';
@@ -10,7 +10,7 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { MAX_POOLS_COUNT } from '@lace/staking';
-import type { ActivityType } from '@lace/core';
+import { ActivityStatus, ActivityType } from '@lace/core';
 import { formatDate, formatTime } from '@src/utils/format-date';
 
 /**
@@ -35,7 +35,9 @@ const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
   return assetIds;
 };
 
-const transactionMetadataTransformer = (metadata: Wallet.Cardano.TxMetadata): ActivityDetail['tx']['metadata'] =>
+const transactionMetadataTransformer = (
+  metadata: Wallet.Cardano.TxMetadata
+): TransactionActivityDetail['activity']['metadata'] =>
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
 
 const shouldIncludeFee = (
@@ -83,26 +85,27 @@ const buildGetActivityDetail =
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
       inMemoryWallet: wallet,
-      activityDetail: { tx, epochRewards, status, direction, type },
+      activityDetail,
       walletInfo
     } = get();
 
-    if (type === 'rewards') {
+    if (activityDetail.type === 'rewards') {
+      const { activity, status, type } = activityDetail;
       const poolInfos = await getPoolInfos(
-        epochRewards.rewards.map(({ poolId }) => poolId),
+        activity.rewards.map(({ poolId }) => poolId),
         stakePoolProvider
       );
 
       return {
-        tx: {
-          includedUtcDate: formatDate({ date: epochRewards.spendableDate, format: 'MM/DD/YYYY', type: 'utc' }),
-          includedUtcTime: `${formatTime({ date: epochRewards.spendableDate, type: 'utc' })} UTC`,
+        activity: {
+          includedUtcDate: formatDate({ date: activity.spendableDate, format: 'MM/DD/YYYY', type: 'utc' }),
+          includedUtcTime: `${formatTime({ date: activity.spendableDate, type: 'utc' })} UTC`,
           rewards: {
             totalAmount: Wallet.util.lovelacesToAdaString(
-              Wallet.BigIntMath.sum(epochRewards.rewards?.map(({ rewards }) => rewards) || []).toString()
+              Wallet.BigIntMath.sum(activity.rewards?.map(({ rewards }) => rewards) || []).toString()
             ),
-            spendableEpoch: epochRewards.spendableEpoch,
-            rewards: epochRewards.rewards.map((r) => {
+            spendableEpoch: activity.spendableEpoch,
+            rewards: activity.rewards.map((r) => {
               const poolInfo = poolInfos.find((p) => p.id === r.poolId);
               return {
                 amount: Wallet.util.lovelacesToAdaString(r.rewards.toString()),
@@ -122,6 +125,7 @@ const buildGetActivityDetail =
       };
     }
 
+    const { activity: tx, status, type, direction } = activityDetail;
     const walletAssets = await firstValueFrom(wallet.assetInfo$);
     const protocolParameters = await firstValueFrom(wallet.protocolParameters$);
     set({ fetchingActivityInfo: true });
@@ -182,7 +186,7 @@ const buildGetActivityDetail =
       (certificate) => certificate.__typename === 'StakeDelegationCertificate'
     ) as Wallet.Cardano.StakeDelegationCertificate[];
 
-    let transaction: ActivityDetail['tx'] = {
+    let transaction: ActivityDetail['activity'] = {
       hash: tx.id.toString(),
       totalOutput: totalOutputInAda,
       fee: shouldIncludeFee(type, delegationInfo) ? feeInAda : undefined,
@@ -216,7 +220,7 @@ const buildGetActivityDetail =
     }
 
     set({ fetchingActivityInfo: false });
-    return { tx: transaction, blocks, status, assetAmount, type };
+    return { activity: transaction, blocks, status, assetAmount, type };
   };
 
 /**
@@ -229,9 +233,9 @@ export const activityDetailSlice: SliceCreator<
   activityDetail: undefined,
   fetchingActivityInfo: true,
   getActivityDetail: buildGetActivityDetail({ set, get }),
-  setTransactionActivityDetail: ({ tx, direction, status, type }) =>
-    set({ activityDetail: { tx, direction, status, type } }),
-  setRewardsActivityDetail: ({ epochRewards, direction, status, type }) =>
-    set({ activityDetail: { epochRewards, direction, status, type } }),
+  setTransactionActivityDetail: ({ activity, direction, status, type }) =>
+    set({ activityDetail: { activity, direction, status, type } }),
+  setRewardsActivityDetail: ({ activity }) =>
+    set({ activityDetail: { activity, status: ActivityStatus.SPENDABLE, type: 'rewards' } }),
   resetActivityState: () => set({ activityDetail: undefined, fetchingActivityInfo: false })
 });
