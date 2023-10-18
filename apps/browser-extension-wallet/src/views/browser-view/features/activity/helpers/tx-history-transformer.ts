@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
 import { txTransformer, TxTransformerInput } from './common-tx-transformer';
 import type { TransformedActivity } from './types';
-import { TransactionActivityType } from '@lace/core';
+import type { TransactionActivityType } from '@lace/core';
 
 interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
   tx: Wallet.Cardano.HydratedTx;

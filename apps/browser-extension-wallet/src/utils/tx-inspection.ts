@@ -9,7 +9,7 @@ import {
   totalAddressOutputsValueInspector
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
-import { ActivityType } from '@lace/core';
+import { ActivityType, TransactionActivityType } from '@lace/core';
 import { TxDirection, TxDirections } from '@src/types';
 
 const hasWalletStakeAddress = (
