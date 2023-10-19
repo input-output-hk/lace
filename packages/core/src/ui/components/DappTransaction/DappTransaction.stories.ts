@@ -8,8 +8,7 @@ const meta: Meta<typeof DappTransaction> = {
   component: DappTransaction,
   parameters: {
     layout: 'centered'
-  },
-  tags: ['autodocs']
+  }
 };
 
 export default meta;
