@@ -162,6 +162,15 @@ export const colors = {
   $message_title_color: '',
   $message_description_color: '',
 
+  $input_container_bgColor: '',
+  $input_container_hover_outline_color: '',
+  $input_container_focused_outline_color: '',
+  $input_value_color: '',
+  $input_button_bgColor: '',
+  $input_button_icon_color: '',
+  $input_label_color: '',
+  $input_error_message_color: '',
+
   $text_primary: '',
   $text_secondary: '',
 
