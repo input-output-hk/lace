@@ -247,6 +247,7 @@ const colors: Colors = {
 
   $text_link_label_color: darkColorScheme.$secondary_data_blue,
   $text_link_label_color_visited: darkColorScheme.$primary_accent_purple,
+  $text_link_label_color_disabled: lightColorScheme.$primary_grey,
 };
 
 const elevation: Elevation = {
