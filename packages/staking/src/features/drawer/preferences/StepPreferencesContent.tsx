@@ -122,7 +122,6 @@ export const StepPreferencesContent = () => {
               expanded
               onExpandButtonClick={() => void 0}
               onPercentageChange={(value) => {
-                console.info(value);
                 portfolioMutators.executeCommand({
                   data: { id, newSliderPercentage: value },
                   type: 'UpdateStakePercentage',
