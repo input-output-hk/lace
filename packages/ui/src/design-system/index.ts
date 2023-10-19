@@ -23,5 +23,5 @@ export * as TransactionSummary from './transaction-summary';
 export { ToastBar } from './toast-bar';
 export { Tooltip } from './tooltip';
 export { Message } from './message';
-export { Metadata } from './metadata';
+export { Metadata, MetadataLink } from './metadata';
 export { TextLink } from './text-link';
