@@ -91,15 +91,15 @@ const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t'
   return t('package.core.transactionDetailBrowser.sent');
 };
 
-type _TransactionDetailsProps = {
+type TransactionDetailsProxyProps = {
   name: string;
   activityInfo: TransactionActivityDetail;
   direction: TxDirection;
   status: ActivityStatus;
   amountTransformer: (amount: string) => string;
 };
-const _TransactionDetails = withAddressBookContext<_TransactionDetailsProps>(
-  ({ name, activityInfo, direction, status, amountTransformer }: _TransactionDetailsProps): ReactElement => {
+const TransactionDetailsProxy = withAddressBookContext<TransactionDetailsProxyProps>(
+  ({ name, activityInfo, direction, status, amountTransformer }: TransactionDetailsProxyProps): ReactElement => {
     const analytics = useAnalyticsContext();
     const {
       walletInfo,
@@ -232,8 +232,7 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
           rewards={activityInfo.activity.rewards}
         />
       ) : (
-        // eslint-disable-next-line react/jsx-pascal-case
-        <_TransactionDetails
+        <TransactionDetailsProxy
           name={name}
           activityInfo={activityInfo}
           direction={activityDetail.direction}
