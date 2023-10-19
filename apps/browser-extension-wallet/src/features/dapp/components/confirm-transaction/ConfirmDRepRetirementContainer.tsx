@@ -5,6 +5,7 @@ import { SignTxData } from './types';
 import { dRepRetirementInspector, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
+import { useIsOwnPubDRepKey } from './hooks';
 
 interface Props {
   signTxData: SignTxData;
@@ -15,12 +16,20 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, errorMessage }: Pro
   const { t } = useTranslation();
   const certificate = dRepRetirementInspector(signTxData.tx);
   const {
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    inMemoryWallet,
+    currentChain
   } = useWalletStore();
 
   const depositPaidWithCardanoSymbol = `${Wallet.util.lovelacesToAdaString(certificate.deposit.toString())} ${
     cardanoCoin.symbol
   }`;
+
+  const isOwnRetirment = useIsOwnPubDRepKey(
+    inMemoryWallet.getPubDRepKey,
+    currentChain,
+    certificate.dRepCredential.hash
+  );
 
   return (
     <ConfirmDRepRetirement
@@ -36,7 +45,11 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, errorMessage }: Pro
           drepId: t('core.drepRetirement.drepId')
         }
       }}
-      errorMessage={errorMessage}
+      errorMessage={
+        errorMessage || isOwnRetirment
+          ? 'This is your DRep retirement.'
+          : "The presented DRepID does not match your wallet's DRepID."
+      }
     />
   );
 };

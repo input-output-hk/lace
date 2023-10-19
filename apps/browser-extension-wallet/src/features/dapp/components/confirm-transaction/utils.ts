@@ -127,3 +127,21 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
 
 export const drepIDasBech32FromHash = (value: Wallet.Crypto.Hash28ByteBase16) =>
   Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(value)));
+
+export const buildDRepIDFromDRepKey = (
+  dRepKey: Wallet.Crypto.Ed25519PublicKeyHex,
+  networkId: Wallet.Cardano.NetworkId = Wallet.Cardano.NetworkId.Testnet
+): Wallet.Cardano.DRepID => {
+  const dRepKeyBytes = Buffer.from(dRepKey, 'hex');
+  // eslint-disable-next-line no-magic-numbers
+  const dRepIdHex = Wallet.Crypto.blake2b(28).update(dRepKeyBytes).digest('hex');
+  const paymentAddress = Wallet.Cardano.EnterpriseAddress.packParts({
+    networkId,
+    paymentPart: {
+      hash: Wallet.Crypto.Hash28ByteBase16(dRepIdHex),
+      type: Wallet.Cardano.CredentialType.KeyHash
+    },
+    type: Wallet.Cardano.AddressType.EnterpriseKey
+  });
+  return Wallet.HexBlob.toTypedBech32<Wallet.Cardano.DRepID>('drep', Wallet.HexBlob.fromBytes(paymentAddress));
+};
