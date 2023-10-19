@@ -6,15 +6,7 @@ import { CardanoTxOut, WalletInfo } from '@src/types';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as HardwareLedger from '@cardano-sdk/hardware-ledger';
-import {
-  TxType,
-  allowSignTx,
-  buildDRepIDFromDRepKey,
-  disallowSignTx,
-  drepIDasBech32FromHash,
-  getTransactionAssetsId,
-  getTxType
-} from './utils';
+import { TxType, allowSignTx, pubDRepKeyToHash, disallowSignTx, getTransactionAssetsId, getTxType } from './utils';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { GetSignTxData, SignTxData } from './types';
 
@@ -163,20 +155,21 @@ export const useOnBeforeUnload = (callBack: () => void): void => {
 };
 
 export const useIsOwnPubDRepKey = (
-  getPubDRepKey: () => Promise<Wallet.Crypto.Ed25519PublicKeyHex>,
-  currentChain: Wallet.Cardano.ChainId,
+  getOwnPubDRepKey: () => Promise<Wallet.Crypto.Ed25519PublicKeyHex>,
   drepHash: Wallet.Crypto.Hash28ByteBase16
 ): boolean => {
   const [isOwnDRepKey, setIsOwnDRepKey] = useState<boolean>();
 
   useEffect(() => {
     const get = async () => {
-      const ownDrepKey = await getPubDRepKey();
-      setIsOwnDRepKey(drepIDasBech32FromHash(drepHash) === buildDRepIDFromDRepKey(ownDrepKey, currentChain.networkId));
+      const ownPubDRepKey = await getOwnPubDRepKey();
+      const ownDRepKeyHash = await pubDRepKeyToHash(ownPubDRepKey);
+
+      setIsOwnDRepKey(drepHash === ownDRepKeyHash);
     };
 
     get();
-  }, [getPubDRepKey, drepHash, currentChain]);
+  }, [getOwnPubDRepKey, drepHash]);
 
   return isOwnDRepKey;
 };
