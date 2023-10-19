@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { Box, Cell, Grid, Flex, Metadata, Text, Divider, sx } from '@lace/ui';
+import { Box, Cell, Grid, Flex, Metadata, MetadataLink, Text, Divider, sx } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../DappInfo';
 import { ErrorPane } from '@lace/common';
 
@@ -12,6 +12,7 @@ type VotingProcedure = {
     actionId: {
       index: number;
       txHash: string;
+      txHashUrl: string;
     };
     votingProcedure: {
       vote: string;
@@ -62,54 +63,60 @@ export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }:
         </Box>
       )}
       {data.map(({ voter, votes }, idx) => (
-        <Grid columns="$1" gutters="$16" key={voter.dRepId}>
-          <Cell>
-            <Text.Body.Large className={textCss} weight="$bold">
-              {indexCounter(translations.vote, idx, data.length)}
-            </Text.Body.Large>
-          </Cell>
-          <Cell>
-            <Metadata label={translations.voterType} text={voter.type} />
-          </Cell>
-          <Cell>
-            <Metadata label={translations.dRepId} text={voter.dRepId} />
-          </Cell>
-          <Cell>
-            <Divider my={'$16'} />
-          </Cell>
-          {votes.map(({ actionId, votingProcedure }) => (
-            <Fragment key={votingProcedure.anchor.hash}>
-              <Cell>
-                <Text.Body.Normal className={textCss} weight="$bold">
-                  {indexCounter(translations.procedureTitle, idx, votes.length)}
-                </Text.Body.Normal>
-              </Cell>
-              <Cell>
-                <Metadata label={translations.vote} text={votingProcedure.vote} />
-              </Cell>
-              <Cell>
-                <Metadata label={translations.anchor.url} text={votingProcedure.anchor.url} />
-              </Cell>
-              <Cell>
-                <Metadata label={translations.anchor.hash} text={votingProcedure.anchor.hash} />
-              </Cell>
-              <Cell>
-                <Divider my={'$16'} />
-              </Cell>
-              <Cell>
-                <Text.Body.Normal className={textCss} weight="$bold">
-                  {indexCounter(translations.actionIdTitle, idx, votes.length)}
-                </Text.Body.Normal>
-              </Cell>
-              <Cell>
-                <Metadata label={translations.actionId.txHash} text={actionId.txHash} />
-              </Cell>
-              <Cell>
-                <Metadata label={translations.actionId.index} text={actionId.index.toString()} />
-              </Cell>
-            </Fragment>
-          ))}
-        </Grid>
+        <Box key={voter.dRepId} mt={idx > 0 ? '$40' : '$0'}>
+          <Grid columns="$1" gutters="$16">
+            <Cell>
+              <Text.Body.Large className={textCss} weight="$bold">
+                {indexCounter(translations.vote, idx, data.length)}
+              </Text.Body.Large>
+            </Cell>
+            <Cell>
+              <Metadata label={translations.voterType} text={voter.type} />
+            </Cell>
+            <Cell>
+              <Metadata label={translations.dRepId} text={voter.dRepId} />
+            </Cell>
+            <Cell>
+              <Divider my={'$16'} />
+            </Cell>
+            {votes.map(({ actionId, votingProcedure }) => (
+              <Fragment key={votingProcedure.anchor.hash}>
+                <Cell>
+                  <Text.Body.Normal className={textCss} weight="$bold">
+                    {indexCounter(translations.procedureTitle, idx, votes.length)}
+                  </Text.Body.Normal>
+                </Cell>
+                <Cell>
+                  <Metadata label={translations.vote} text={votingProcedure.vote} />
+                </Cell>
+                <Cell>
+                  <MetadataLink
+                    label={translations.anchor.url}
+                    text={votingProcedure.anchor.url}
+                    url={votingProcedure.anchor.url}
+                  />
+                </Cell>
+                <Cell>
+                  <Metadata label={translations.anchor.hash} text={votingProcedure.anchor.hash} />
+                </Cell>
+                <Cell>
+                  <Divider my={'$16'} />
+                </Cell>
+                <Cell>
+                  <Text.Body.Normal className={textCss} weight="$bold">
+                    {indexCounter(translations.actionIdTitle, idx, votes.length)}
+                  </Text.Body.Normal>
+                </Cell>
+                <Cell>
+                  <MetadataLink label={translations.actionId.txHash} text={actionId.txHash} url={actionId.txHashUrl} />
+                </Cell>
+                <Cell>
+                  <Metadata label={translations.actionId.index} text={actionId.index.toString()} />
+                </Cell>
+              </Fragment>
+            ))}
+          </Grid>
+        </Box>
       ))}
     </Flex>
   );
