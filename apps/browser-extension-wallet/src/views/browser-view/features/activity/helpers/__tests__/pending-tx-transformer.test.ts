@@ -118,6 +118,7 @@ describe('Testing tx transformers utils', () => {
             }
           ],
           assetsNumber: 2,
+          date,
           formattedDate: 'Sending',
           formattedTimestamp: formatTime({
             date,

@@ -109,7 +109,10 @@ export const mockInMemoryWallet = {
       slot: 1
     }
   }),
-  assetInfo$: of([])
+  assetInfo$: of([]),
+  delegation: {
+    rewardsHistory$: of([])
+  }
 } as unknown as Wallet.ObservableWallet;
 
 export const mockWalletUI = {
