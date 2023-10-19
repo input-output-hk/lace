@@ -126,6 +126,7 @@ type KeysStructure = {
       pickMorePools: '';
       confirmButton: '';
       rebalanceButton: '';
+      removePoolButton: '';
       ctaButtonTooltip: {
         zeroPercentageSliderError: '';
         invalidAllocation: '';

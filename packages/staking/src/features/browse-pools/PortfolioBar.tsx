@@ -1,4 +1,5 @@
 import { Button, Card, Flex, Text } from '@lace/ui';
+import { PostHogAction, useOutsideHandles } from 'features/outside-handles-provider';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from '../staking/arrow-right.svg';
 import { Flow, MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
@@ -11,6 +12,7 @@ export const PortfolioBar = () => {
     portfolioMutators: store.mutators,
     selectedPoolsCount: store.selectedPortfolio.length,
   }));
+  const { analytics } = useOutsideHandles();
 
   if (![Flow.BrowsePools, Flow.PoolDetails].includes(activeFlow) || selectedPoolsCount === 0) return null;
 
@@ -24,13 +26,19 @@ export const PortfolioBar = () => {
       <Flex className={styles.buttons}>
         <Button.Secondary
           label={t('portfolioBar.clear')}
-          onClick={() => portfolioMutators.executeCommand({ type: 'ClearSelections' })}
+          onClick={() => {
+            portfolioMutators.executeCommand({ type: 'ClearSelections' });
+            analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsClearClick);
+          }}
           data-testid="portfoliobar-btn-clear"
         />
         <Button.Primary
           label={t('portfolioBar.next')}
           icon={<ArrowRight className={styles.nextIcon} />}
-          onClick={() => portfolioMutators.executeCommand({ type: 'CreateNewPortfolio' })}
+          onClick={() => {
+            portfolioMutators.executeCommand({ type: 'CreateNewPortfolio' });
+            analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsNextClick);
+          }}
           data-testid="portfoliobar-btn-next"
         />
       </Flex>

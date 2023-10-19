@@ -5,12 +5,13 @@ import * as styles from './RatioInput.css';
 
 type RatioInputProps = {
   onUpdate: (value: number) => void;
+  onClick?: () => void;
   value: number;
 };
 
 const isInputANumber = (value: string) => /^\d{0,3}$/.test(value);
 
-export const RatioInput = ({ onUpdate, value }: RatioInputProps) => {
+export const RatioInput = ({ onUpdate, onClick, value }: RatioInputProps) => {
   const [localValue, setLocalValue] = useState(String(value));
   const lastValueOfValue = useRef(value);
 
@@ -48,6 +49,7 @@ export const RatioInput = ({ onUpdate, value }: RatioInputProps) => {
         className={styles.input}
         max={PERCENTAGE_SCALE_MAX}
         value={localValue}
+        onClick={onClick}
         onChange={handleChange}
         onKeyDown={handleKeyPress}
         onBlur={validateAndUpdate}

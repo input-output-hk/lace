@@ -3,7 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard, DelegationStatus } from '../../delegation-card';
-import { useOutsideHandles } from '../../outside-handles-provider';
+import { PostHogAction, useOutsideHandles } from '../../outside-handles-provider';
 import {
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,
@@ -32,6 +32,7 @@ const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore):
 
 export const StepPreferencesContent = () => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   const {
     balancesBalance,
     walletStoreWalletUICardanoCoin: { symbol },
@@ -78,6 +79,7 @@ export const StepPreferencesContent = () => {
   };
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
   const onAddPoolButtonClick = () => {
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsManageDelegationAddStakePoolClick);
     portfolioMutators.executeCommand({
       type: 'AddStakePools',
     });

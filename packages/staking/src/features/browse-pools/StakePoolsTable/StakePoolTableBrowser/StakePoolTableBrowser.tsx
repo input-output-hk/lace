@@ -90,8 +90,6 @@ export const StakePoolTableBrowser = ({
   const onSortChange = (field: SortKey) => {
     const order =
       field === activeSort?.field ? ((activeSort?.order === 'asc' ? 'desc' : 'asc') as SortDirection) : 'asc';
-    setActiveSort({ field, order });
-
     if (field === 'name') {
       analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsPoolNameClick);
     } else if (field === 'apy') {
@@ -99,6 +97,8 @@ export const StakePoolTableBrowser = ({
     } else {
       analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSaturationClick);
     }
+
+    setActiveSort({ field, order });
   };
 
   const selectedStakePools = items

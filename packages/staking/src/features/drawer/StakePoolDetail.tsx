@@ -260,8 +260,8 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   );
 
   const onStakeOnThisPool = useCallback(() => {
-    portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick);
+    portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
   }, [analytics, portfolioMutators]);
 
   useEffect(() => {
@@ -275,21 +275,21 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
 
   const onSelectClick = useCallback(() => {
     if (!viewedStakePool) return;
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailAddStakingPoolClick);
     portfolioMutators.executeCommand({
       data: viewedStakePool,
       type: 'SelectPoolFromDetails',
     });
-    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailAddStakingPoolClick);
   }, [viewedStakePool, portfolioMutators, analytics]);
 
   const onUnselectClick = useCallback(() => {
     if (!viewedStakePool) return;
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailUnselectPoolClick);
     portfolioMutators.executeCommand({
       data: Wallet.Cardano.PoolIdHex(viewedStakePool.hexId),
       type: 'UnselectPoolFromDetails',
     });
-    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailUnselectPoolClick);
-  }, [viewedStakePool, portfolioMutators]);
+  }, [viewedStakePool, analytics, portfolioMutators]);
 
   const actionButtons = useMemo(
     () =>

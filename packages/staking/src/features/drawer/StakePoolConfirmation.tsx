@@ -9,7 +9,7 @@ import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Balance, CurrencyInfo, useOutsideHandles } from '../outside-handles-provider';
+import { Balance, CurrencyInfo, PostHogAction, useOutsideHandles } from '../outside-handles-provider';
 import { DraftPortfolioStakePool, StakingError, useDelegationPortfolioStore, useStakingStore } from '../store';
 import ArrowDown from './arrow-down.svg';
 import Cardano from './cardano-blue.png';
@@ -313,6 +313,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
 
 export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   const {
     // walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreGetKeyAgentType: getKeyAgentType,
@@ -351,8 +352,9 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     //     setIsConfirmingTx(false);
     //   }
     // }
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationConfirmationNextClick);
     portfolioMutators.executeCommand({ type: 'DrawerContinue' });
-  }, [portfolioMutators]);
+  }, [analytics, portfolioMutators]);
 
   const confirmLabel = useMemo(() => {
     if (!isInMemory) {

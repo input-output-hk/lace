@@ -1,6 +1,7 @@
 import { Box, Card, ControlButton, Flex, PieChartColor, Text } from '@lace/ui';
 import ChevronDownIcon from '@lace/ui/dist/assets/icons/chevron-down.component.svg';
 import ChevronUpIcon from '@lace/ui/dist/assets/icons/chevron-up.component.svg';
+import { PostHogAction, useOutsideHandles } from 'features/outside-handles-provider';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import InfoIcon from '../../../../assets/icons/info-icon.svg';
@@ -46,6 +47,7 @@ export const PoolDetailsCard = ({
 }: PoolDetailsCardProps) => {
   const { t } = useTranslation();
   const [localValue, setLocalValue] = useState(targetPercentage);
+  const { analytics } = useOutsideHandles();
 
   const updatePercentage = (value: number) => {
     setLocalValue(value);
@@ -127,7 +129,15 @@ export const PoolDetailsCard = ({
               )}
               <Flex alignItems="center" gap="$12">
                 <Text.Body.Large>Ratio</Text.Body.Large>
-                <RatioInput onUpdate={updatePercentage} value={localValue} />
+                <RatioInput
+                  onUpdate={updatePercentage}
+                  value={localValue}
+                  onClick={() => {
+                    analytics.sendEventToPostHog(
+                      PostHogAction.StakingManageDelegationDelegationRatioSliderRatioNumberClick
+                    );
+                  }}
+                />
                 <Text.Body.Large>%</Text.Body.Large>
               </Flex>
             </Flex>
@@ -141,10 +151,16 @@ export const PoolDetailsCard = ({
             <Tooltip content={onRemove ? undefined : t('drawer.preferences.pickMorePools')}>
               <div>
                 <ControlButton.Outlined
-                  label="Remove pool from portfolio"
+                  label={t('drawer.preferences.removePoolButton')}
                   icon={<TrashIcon />}
                   w="$fill"
-                  onClick={onRemove}
+                  onClick={() => {
+                    if (!onRemove) return;
+                    analytics.sendEventToPostHog(
+                      PostHogAction.StakingBrowsePoolsManageDelegationRemovePoolFromPortfolioClick
+                    );
+                    onRemove();
+                  }}
                   disabled={!onRemove}
                 />
               </div>

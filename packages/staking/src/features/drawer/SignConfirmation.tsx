@@ -3,7 +3,7 @@ import { Button, Password, inputProps } from '@lace/common';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useOutsideHandles } from '../outside-handles-provider';
+import { PostHogAction, useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import styles from './SignConfirmation.module.scss';
 
@@ -50,7 +50,7 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
   );
 };
 
-export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): ReactElement => {
+export const SignConfirmationFooter = (): ReactElement => {
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
     password: { password, removePassword },
@@ -62,6 +62,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
+  const { analytics } = useOutsideHandles();
   const { t } = useTranslation();
 
   const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
@@ -77,28 +78,12 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     await inMemoryWallet.submitTx(signedTx.tx);
   }, [delegationTxBuilder, inMemoryWallet]);
 
-  const sendAnalytics = useCallback(() => {
-    // TODO implement analytics for the new flow
-    const analytics = {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      sendEvent: () => {},
-    };
-    // @ts-ignore
-    analytics.sendEvent({
-      action: 'AnalyticsEventActions.CLICK_EVENT',
-      category: 'AnalyticsEventCategories.STAKING',
-      name: popupView
-        ? 'AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_POPUP'
-        : 'AnalyticsEventNames.Staking.STAKING_SIGN_CONFIRMATION_BROWSER',
-    });
-  }, [popupView]);
-
   const handleVerifyPass = useCallback(async () => {
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
     setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
     try {
       await signAndSubmitTransaction();
       cleanPasswordInput();
-      sendAnalytics();
       setIsRestaking(currentPortfolio.length > 0);
       portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
@@ -117,7 +102,7 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
     setSubmitingTxState,
     signAndSubmitTransaction,
     cleanPasswordInput,
-    sendAnalytics,
+    analytics,
     setIsRestaking,
     currentPortfolio.length,
     portfolioMutators,
