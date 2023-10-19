@@ -61,6 +61,7 @@
     "package.json": "sort-package-json"
   },
   "resolutions": {
+    "@cardano-sdk/hardware-trezor": "0.2.1",
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.f9c48c0.0",
     "ansi-regex": "^5.0.1",
     "async": "^3.2.2",
