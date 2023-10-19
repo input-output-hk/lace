@@ -95,7 +95,7 @@ export enum PostHogAction {
   StakingManageDelegationDelegationRatioSliderRatioNumberClick = 'staking | manage delegation | delegation ratio slider | ratio number | click',
 }
 
-// TODO discuss how we want to use AnalyticsTracker and it's types in the future.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type PostHogProperty = string | boolean | Record<string, any> | Array<Record<string, any>>;
 export type PostHogProperties = Record<string, PostHogProperty>;
 export type AnalyticsTracker = {

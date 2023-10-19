@@ -26,13 +26,12 @@ export const Navigation = ({ children }: NavigationProps) => {
   const { t } = useTranslation();
   const onValueChange = (value: string) => {
     if (!isValueAValidSubPage(value)) return;
-    const goesToOverview = value === Page.overview;
-    portfolioMutators.executeCommand({
-      type: goesToOverview ? 'GoToOverview' : 'GoToBrowsePools',
-    });
     analytics.sendEventToPostHog(
-      goesToOverview ? PostHogAction.StakingOverviewClick : PostHogAction.StakingBrowsePoolsClick
+      value === Page.overview ? PostHogAction.StakingOverviewClick : PostHogAction.StakingBrowsePoolsClick
     );
+    portfolioMutators.executeCommand({
+      type: value === Page.overview ? 'GoToOverview' : 'GoToBrowsePools',
+    });
   };
 
   return (
