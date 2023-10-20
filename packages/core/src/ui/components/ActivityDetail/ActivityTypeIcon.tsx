@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityType } from './activityType';
+import type { ActivityType } from './activityType';
 import { ReactComponent as OutgoingIcon } from '../../assets/icons/outgoing.component.svg';
 import { ReactComponent as IncomingIcon } from '../../assets/icons/incoming.component.svg';
 import { ReactComponent as SelfIcon } from '../../assets/icons/self-transaction.component.svg';

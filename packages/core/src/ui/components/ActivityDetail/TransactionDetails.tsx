@@ -5,7 +5,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import styles from './TransactionDetails.module.scss';
 import { TransactionDetailAsset, TxOutputInput, TransactionMetadataProps, TxSummary } from './TransactionDetailAsset';
-import { ActivityStatus } from '../Activity';
+import type { ActivityStatus } from '../Activity';
 import { Ellipsis, toast } from '@lace/common';
 import { ReactComponent as Info } from '../../assets/icons/info-icon.component.svg';
 import { TransactionInputOutput } from './TransactionInputOutput';
