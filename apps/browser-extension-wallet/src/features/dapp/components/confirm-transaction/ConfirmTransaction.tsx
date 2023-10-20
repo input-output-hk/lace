@@ -41,50 +41,8 @@ export const ConfirmTransaction = (): React.ReactElement => {
   useOnBeforeUnload(disallowSignTx);
 
   return (
-<<<<<<< Updated upstream
     <Layout pageClassname={styles.spaceBetween} title={title}>
       <ConfirmTransactionContent txType={txType} signTxData={signTxData} errorMessage={errorMessage} />
-=======
-    <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
-      {isLoading && <Skeleton loading />}
-      {!isLoading &&
-        (isDRepRegistration ? (
-          <ConfirmDRepRegistration
-            dappInfo={signTxData.dappInfo}
-            metadata={{
-              depositPaid: 'depositPaid',
-              drepId: 'drepId',
-              hash: 'hash',
-              url: 'url'
-            }}
-            translations={{
-              metadata: t('core.drepRegistration.metadata'),
-              labels: {
-                depositPaid: t('core.drepRegistration.depositPaid'),
-                drepId: t('core.drepRegistration.drepId'),
-                hash: t('core.drepRegistration.hash'),
-                url: t('core.drepRegistration.url')
-              }
-            }}
-            errorMessage={errorMessage}
-          />
-        ) : (
-          <DappTransaction
-            transaction={txSummary}
-            dappInfo={signTxData?.dappInfo}
-            errorMessage={errorMessage}
-            hasInsufficientFunds={hasInsufficientFunds}
-            translations={{
-              transaction: t('core.dappTransaction.transaction'),
-              amount: t('core.dappTransaction.amount'),
-              recipient: t('core.dappTransaction.recipient'),
-              fee: t('core.dappTransaction.fee'),
-              insufficientFunds: t('core.dappTransaction.insufficientFunds'),
-              adaFollowingNumericValue: t('general.adaFollowingNumericValue')
-            }}
-          />
-        ))}
->>>>>>> Stashed changes
       <div className={styles.actions}>
         <Button
           onClick={async () => {
