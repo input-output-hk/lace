@@ -7,13 +7,27 @@ import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker'
 const mockWalletBasedId =
   '15d632f6b0ab82c72a194d634d8783ea0ef5419c8a8f638cb0c3fc49280e0a0285fc88fbfad04554779d19bec4ab30e5afee2f9ee736ba090c2213d98fe3a475';
 
+const mockedStorage = { state: {} };
 const generateStorageMocks = (
-  store: Pick<BackgroundStorage, 'usePersistentUserId' | 'userId' | 'keyAgentsByChain'> = {}
-) => ({
-  getStorageMock: jest.fn(() => Promise.resolve(store)),
-  setStorageMock: jest.fn(),
-  clearStorageMock: jest.fn()
-});
+  state: Pick<BackgroundStorage, 'usePersistentUserId' | 'userId' | 'keyAgentsByChain'> = {}
+) => {
+  mockedStorage.state = { ...state };
+  return {
+    getStorageMock: jest.fn(() => Promise.resolve(mockedStorage.state)),
+    // setStorageMock: jest.fn(),
+    setStorageMock: jest.fn((newState) => {
+      mockedStorage.state = {
+        ...mockedStorage.state,
+        ...newState
+      };
+      return Promise.resolve();
+    }),
+    clearStorageMock: jest.fn(() => {
+      mockedStorage.state = {};
+      return Promise.resolve();
+    })
+  };
+};
 
 describe('userIdService', () => {
   describe('restoring persistent user id', () => {
@@ -55,15 +69,16 @@ describe('userIdService', () => {
         userId: 'test'
       };
       const { getStorageMock, setStorageMock } = generateStorageMocks(store);
-
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
+      await userIdService.getRandomizedUserId();
       await userIdService.makeTemporary();
-
       expect(setStorageMock).toHaveBeenCalledWith({
         usePersistentUserId: false,
         userId: undefined
       });
+      console.debug('!!!TEST mockedStorage=', mockedStorage);
       // it should still retain the previously stored user id in memory
+      console.debug('!!!TEST calling getRandomizedUserId');
       expect(await userIdService.getRandomizedUserId()).toEqual(store.userId);
       // simulate a session timeout
       jest.advanceTimersByTime(SESSION_LENGTH + 1);
@@ -83,6 +98,7 @@ describe('userIdService', () => {
       const { getStorageMock, setStorageMock } = generateStorageMocks(store);
 
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
+      await userIdService.getRandomizedUserId();
       await userIdService.makeTemporary();
 
       // simulate an almost session timeout

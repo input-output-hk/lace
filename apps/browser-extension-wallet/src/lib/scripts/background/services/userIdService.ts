@@ -117,9 +117,6 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   async extendLifespan(): Promise<void> {
-    if (!this.sessionTimeout) {
-      return;
-    }
     console.debug('[ANALYTICS] Extending temporary ID lifespan');
     this.clearSessionTimeout();
     this.setSessionTimeout();
@@ -145,9 +142,10 @@ export class UserIdService implements UserIdServiceInterface {
       return;
     }
     this.sessionTimeout = setTimeout(() => {
-      this.randomizedUserId = undefined;
+      if (this.userTrackingType$.value === UserTrackingType.Basic) {
+        this.randomizedUserId = undefined;
+      }
       this.lastStartSessionEventSent = false;
-      console.debug('[ANALYTICS] Session timed out');
     }, this.sessionLength);
   }
 
@@ -164,10 +162,9 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   async getIsNewSessionStarted(): Promise<boolean> {
-    const isActiveSession = !!this.sessionTimeout;
-    const isNewSession = !this.lastStartSessionEventSent && isActiveSession;
+    const shouldSendNewSessionEvent = !this.lastStartSessionEventSent;
     this.lastStartSessionEventSent = true;
-    return isNewSession;
+    return shouldSendNewSessionEvent;
   }
 }
 
