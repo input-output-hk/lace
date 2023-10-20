@@ -15,7 +15,7 @@ export interface RewardsDetailsProps {
   includedTime?: string;
   amountTransformer: (amount: string) => string;
   coinSymbol: string;
-  rewards?: RewardsInfo;
+  rewards: RewardsInfo;
 }
 
 export const RewardsDetails = ({
@@ -29,7 +29,7 @@ export const RewardsDetails = ({
   rewards
 }: RewardsDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
-  const poolRewards = rewards?.rewards.filter((reward) => !!reward.pool);
+  const poolRewards = rewards.rewards.filter((reward) => !!reward.pool);
   const tooltipContent = t('package.core.transactionDetailBrowser.rewardsDescription');
 
   return (
@@ -62,7 +62,7 @@ export const RewardsDetails = ({
                 {t('package.core.transactionDetailBrowser.pools')}
               </div>
               <div className={styles.poolsList}>
-                {poolRewards?.map(({ pool, amount }) => (
+                {poolRewards.map(({ pool, amount }) => (
                   <div key={pool.id} className={styles.poolEntry}>
                     <div className={styles.poolHeading}>
                       {pool.name && (
