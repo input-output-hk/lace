@@ -3,9 +3,9 @@ import cn from 'classnames';
 import styles from './TransactionDetails.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 import { ActivityStatus } from '../Activity/AssetActivityItem';
-import type { RewardsInfo } from './RewardsInfo';
+import type { RewardsInfo } from './rewardsInfo';
 import { Ellipsis } from '@lace/common';
-import { ActivityDetailHeaderBrowser } from './ActivityDetailHeaderBrowser';
+import { ActivityDetailHeader } from './ActivityDetailHeader';
 
 export interface RewardsDetailsProps {
   name: string;
@@ -34,7 +34,7 @@ export const RewardsDetails = ({
 
   return (
     <div data-testid="transaction-detail" className={styles.content}>
-      <ActivityDetailHeaderBrowser tooltipContent={tooltipContent} name={name} description={headerDescription} />
+      <ActivityDetailHeader tooltipContent={tooltipContent} name={name} description={headerDescription} />
       <div>
         <div className={styles.header}>{t('package.core.transactionDetailBrowser.header')}</div>
         <h1 className={styles.summary}>{t('package.core.transactionDetailBrowser.summary')}</h1>

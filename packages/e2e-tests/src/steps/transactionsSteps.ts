@@ -5,7 +5,7 @@ import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import testContext from '../utils/testContext';
-import ActivityDetailsPage from '../elements/transactionDetails';
+import TransactionDetailsPage from '../elements/transactionDetails';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import TransactionsPage from '../elements/transactionsPage';
 
@@ -53,12 +53,12 @@ When(/^I click on a transaction: (\d)$/, async (rowNumber: number) => {
 });
 
 When(/^I click on a transaction hash and save hash information$/, async () => {
-  testContext.save('txHashValue', await ActivityDetailsPage.transactionDetailsHash.getText());
-  await ActivityDetailsPage.transactionDetailsHash.click();
+  testContext.save('txHashValue', await TransactionDetailsPage.transactionDetailsHash.getText());
+  await TransactionDetailsPage.transactionDetailsHash.click();
 });
 
 When(/^I click on a transaction hash$/, async () => {
-  await ActivityDetailsPage.transactionDetailsHash.click();
+  await TransactionDetailsPage.transactionDetailsHash.click();
 });
 
 Then(/^I see cexplorer url with correct transaction hash$/, async () => {
@@ -74,12 +74,12 @@ When(
       let actualValue;
       let expectedValue;
       await TransactionsPage.clickOnTransactionRow(i);
-      await ActivityDetailsPage.transactionDetailsSkeleton.waitForDisplayed({ timeout: 30_000, reverse: true });
+      await TransactionDetailsPage.transactionDetailsSkeleton.waitForDisplayed({ timeout: 30_000, reverse: true });
       if (valueForCheck === 'hash') {
-        actualValue = await ActivityDetailsPage.transactionDetailsHash.getText();
+        actualValue = await TransactionDetailsPage.transactionDetailsHash.getText();
         expectedValue = String(testContext.load('txHashValue'));
       } else {
-        actualValue = await ActivityDetailsPage.transactionDetailsStakePoolId.getText();
+        actualValue = await TransactionDetailsPage.transactionDetailsStakePoolId.getText();
         expectedValue = String(testContext.load('poolID'));
       }
       if (actualValue !== expectedValue) {
@@ -108,11 +108,11 @@ When(/^I click on a transaction and click on both dropdowns$/, async () => {
 });
 
 When(/^I click on inputs dropdowns$/, async () => {
-  ActivityDetailsPage.clickInputsDropdown();
+  TransactionDetailsPage.clickInputsDropdown();
 });
 
 When(/^I click on outputs dropdowns$/, async () => {
-  ActivityDetailsPage.clickOutputsDropdown();
+  TransactionDetailsPage.clickOutputsDropdown();
 });
 
 Then(

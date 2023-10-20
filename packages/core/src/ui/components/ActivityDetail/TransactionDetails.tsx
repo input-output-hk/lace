@@ -12,8 +12,8 @@ import { ReactComponent as Info } from '../../assets/icons/info-icon.component.s
 import { TransactionInputOutput } from './TransactionInputOutput';
 import { useTranslate } from '@src/ui/hooks';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import type { RewardsInfo } from './RewardsInfo';
-import { ActivityDetailHeaderBrowser } from './ActivityDetailHeaderBrowser';
+import type { RewardsInfo } from './rewardsInfo';
+import { ActivityDetailHeader } from './ActivityDetailHeader';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -132,7 +132,7 @@ export const TransactionDetails = ({
 
   return (
     <div data-testid="transaction-detail" className={styles.content}>
-      <ActivityDetailHeaderBrowser name={name} description={headerDescription} />
+      <ActivityDetailHeader name={name} description={headerDescription} />
       <div>
         <div className={styles.header} data-testid="tx-header">
           {t('package.core.transactionDetailBrowser.header')}
