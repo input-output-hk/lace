@@ -16,7 +16,7 @@ type VotingProcedure = {
     };
     votingProcedure: {
       vote: string;
-      anchor: {
+      anchor?: {
         url: string;
         hash: string;
       };
@@ -89,16 +89,20 @@ export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }:
                 <Cell>
                   <Metadata label={translations.vote} text={votingProcedure.vote} />
                 </Cell>
-                <Cell>
-                  <MetadataLink
-                    label={translations.anchor.url}
-                    text={votingProcedure.anchor.url}
-                    url={votingProcedure.anchor.url}
-                  />
-                </Cell>
-                <Cell>
-                  <Metadata label={translations.anchor.hash} text={votingProcedure.anchor.hash} />
-                </Cell>
+                {votingProcedure.anchor && (
+                  <>
+                    <Cell>
+                      <MetadataLink
+                        label={translations.anchor.url}
+                        text={votingProcedure.anchor.url}
+                        url={votingProcedure.anchor.url}
+                      />
+                    </Cell>
+                    <Cell>
+                      <Metadata label={translations.anchor.hash} text={votingProcedure.anchor.hash} />
+                    </Cell>
+                  </>
+                )}
                 <Cell>
                   <Divider my={'$16'} />
                 </Cell>
