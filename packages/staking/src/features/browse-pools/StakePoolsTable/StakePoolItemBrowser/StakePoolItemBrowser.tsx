@@ -134,11 +134,7 @@ export const StakePoolItemBrowser = ({
                 if (poolAlreadySelected) {
                   analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsUnselectClick);
                 } else {
-                  analytics.sendEventToPostHog(
-                    selectionsNotEmpty
-                      ? PostHogAction.StakingBrowsePoolsAddPoolClick
-                      : PostHogAction.StakingBrowsePoolsStakeClick
-                  );
+                  analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakeClick);
                 }
               }}
               disabled={disabledAddingToDraft}

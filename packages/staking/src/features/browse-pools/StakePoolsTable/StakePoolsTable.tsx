@@ -85,6 +85,10 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
 
   const onSearch = (searchString: string) => {
     setIsSearching(true);
+    const startedTyping = searchValue === '' && searchString !== '';
+    if (startedTyping) {
+      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSearchClick);
+    }
     setSearchValue(searchString);
   };
 
@@ -119,9 +123,6 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
         withSearchIcon
         inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}
         onChange={onSearch}
-        onInputFocus={() => {
-          analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSearchClick);
-        }}
         data-testid="search-input"
         loading={fetchingPools}
       />

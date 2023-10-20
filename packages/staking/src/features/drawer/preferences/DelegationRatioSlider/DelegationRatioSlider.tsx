@@ -39,7 +39,7 @@ export const DelegationRatioSlider = React.forwardRef(
           defaultValue={props.defaultValue ? [props.defaultValue] : undefined}
           ref={forwardedRef}
           onValueCommit={() => {
-            analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationDelegationRatioSliderVolumPinDrag);
+            analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationDelegationRatioSliderVolumePinDrag);
           }}
         >
           <Slider.Track className={styles.SliderTrack}>

@@ -352,7 +352,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     //     setIsConfirmingTx(false);
     //   }
     // }
-    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationConfirmationNextClick);
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationStakePoolConfirmationNextClick);
     portfolioMutators.executeCommand({ type: 'DrawerContinue' });
   }, [analytics, portfolioMutators]);
 
