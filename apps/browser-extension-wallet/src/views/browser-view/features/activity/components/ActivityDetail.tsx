@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import uniq from 'lodash/uniq';
 import flatMap from 'lodash/flatMap';
