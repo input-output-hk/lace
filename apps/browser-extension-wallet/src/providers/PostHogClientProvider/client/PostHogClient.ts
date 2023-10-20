@@ -42,12 +42,14 @@ export class PostHogClient {
     private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
   ) {
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+    const token = this.getApiToken(this.chain);
+    if (!token) throw new Error('posthog token has not been provided');
     this.hasPostHogInitialized$ = new BehaviorSubject(false);
 
     this.userIdService
       .getUserId(chain.networkMagic)
       .then((id) => {
-        posthog.init(this.getApiToken(this.chain), {
+        posthog.init(token, {
           request_batching: false,
           api_host: this.publicPostHogHost,
           autocapture: false,

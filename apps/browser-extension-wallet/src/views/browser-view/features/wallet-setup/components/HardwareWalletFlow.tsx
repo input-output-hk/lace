@@ -16,7 +16,7 @@ import { Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { Wallet } from '@lace/cardano';
 import { WalletSetupLayout } from '@src/views/browser-view/components/Layout';
 import { PinExtension } from './PinExtension';
-import { ErrorDialog } from './ErrorDialog';
+import { ErrorDialog, HWErrorCode } from './ErrorDialog';
 import { StartOverDialog } from '@views/browser/features/wallet-setup/components/StartOverDialog';
 import { useTranslation } from 'react-i18next';
 import {
@@ -36,7 +36,8 @@ const { WalletSetup: Events } = AnalyticsEventNames;
 const { CHAIN } = config();
 const {
   Cardano: { ChainIds },
-  AVAILABLE_WALLETS
+  AVAILABLE_WALLETS,
+  KeyManagement
 } = Wallet;
 const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 
@@ -51,8 +52,6 @@ type HardwareWalletStep = 'legal' | 'analytics' | 'connect' | 'accounts' | 'regi
 const TOTAL_ACCOUNTS = 50;
 
 const route = (path: string) => `${walletRoutePaths.setup.hardware}/${path}`;
-
-type HWErrorCode = 'common' | 'notDetected';
 
 export const HardwareWalletFlow = ({
   onCancel,
@@ -195,7 +194,9 @@ export const HardwareWalletFlow = ({
       if (error.innerError?.innerError?.message === 'The device is already open.') {
         setDeviceConnection(deviceConnection);
       } else {
-        showHardwareWalletError('notDetected');
+        showHardwareWalletError(
+          model === KeyManagement.KeyAgentType.Trezor ? 'notDetectedTrezor' : 'notDetectedLedger'
+        );
       }
     }
   };

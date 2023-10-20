@@ -19,15 +19,17 @@ class MultidelegationPage {
   private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
   private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
   private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
-  private SEARCH_INPUT = '[data-testid="search-input"]';
+  private SEARCH_INPUT = 'input[data-testid="search-input"]';
+  private SEARCH_ICON = '[data-testid="search-icon"]';
   private SEARCH_LOADER = '[data-testid="search-loader"]';
+  private EMPTY_SEARCH_RESULTS_IMAGE = '[data-testid="stake-pool-table-empty-image"]';
+  private EMPTY_SEARCH_RESULTS_MESSAGE = '[data-testid="stake-pool-table-empty-message"]';
   private POOL_ITEM = '[data-testid="stake-pool-table-item"]';
   private POOL_NAME = '[data-testid="stake-pool-list-name"]';
   private STAKE_BUTTON = '[data-testid="stake-button"]';
   private PORTFOLIO_BAR_BTN_NEXT = '[data-testid="portfoliobar-btn-next"]';
   private MANAGE_STAKING_BTN_NEXT = '[data-testid="preferences-next-button"]';
   private CONFIRMATION_BTN_NEXT = '[data-testid="stake-pool-confirmation-btn"]';
-  private MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM = '[data-testid="multidelegation-beta-modal-button"]';
   private DELEGATED_POOL_ITEM = '[data-testid="delegated-pool-item"]';
   private DELEGATED_POOL_LOGO = '[data-testid="stake-pool-logo"]';
   private DELEGATED_POOL_NAME = '[data-testid="stake-pool-name"]';
@@ -47,6 +49,9 @@ class MultidelegationPage {
   private DELEGATED_POOL_LAST_REWARDS_TITLE = '[data-testid="stats-last-reward-container"] [data-testid="stats-title"]';
   private DELEGATED_POOL_LAST_REWARDS_VALUE = '[data-testid="stats-last-reward-container"] [data-testid="stats-value"]';
   private STAKING_POOL_INFO = '[data-testid="staking-pool-info"]';
+  private ROS_COLUMN_INFO = '[data-testid="browse-pools-apy-column-info"]';
+  private SATURATION_COLUMN_INFO = '[data-testid="browse-pools-saturation-column-info"]';
+  private TOOLTIP = 'div.ant-tooltip-inner';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -96,8 +101,20 @@ class MultidelegationPage {
     return $(this.SEARCH_INPUT);
   }
 
+  get searchIcon() {
+    return $(this.SEARCH_ICON);
+  }
+
   get searchLoader() {
     return $(this.SEARCH_LOADER);
+  }
+
+  get emptySearchResultsImage() {
+    return $(this.EMPTY_SEARCH_RESULTS_IMAGE);
+  }
+
+  get emptySearchResultsMessage() {
+    return $(this.EMPTY_SEARCH_RESULTS_MESSAGE);
   }
 
   get poolsItems() {
@@ -120,12 +137,20 @@ class MultidelegationPage {
     return $(this.CONFIRMATION_BTN_NEXT);
   }
 
-  get multidelegationBetaModalBtnConfirm() {
-    return $(this.MULTIDELEGATION_BETA_MODAL_BTN_CONFIRM);
-  }
-
   get stakingPoolInfoItems() {
     return $$(this.STAKING_POOL_INFO);
+  }
+
+  get rosColumnInfo() {
+    return $(this.ROS_COLUMN_INFO);
+  }
+
+  get saturationColumnInfo() {
+    return $(this.SATURATION_COLUMN_INFO);
+  }
+
+  get tooltip() {
+    return $(this.TOOLTIP);
   }
 
   delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
@@ -262,13 +287,6 @@ class MultidelegationPage {
     }
   }
 
-  async confirmBetaModal() {
-    if (await this.multidelegationBetaModalBtnConfirm.isDisplayed()) {
-      await this.multidelegationBetaModalBtnConfirm.waitForClickable();
-      await this.multidelegationBetaModalBtnConfirm.click();
-    }
-  }
-
   async saveIDsOfStakePoolsInUse() {
     const poolIDsToBeSaved = [];
     const stakingPoolInfoItems = await this.stakingPoolInfoItems;
@@ -288,6 +306,19 @@ class MultidelegationPage {
   async clickOnStakePoolWithName(poolName: string) {
     const poolItem = await this.getPoolByName(poolName);
     await poolItem.click();
+  }
+
+  async hoverOverColumnWithName(columnName: 'ROS' | 'Saturation') {
+    switch (columnName) {
+      case 'ROS':
+        await this.rosColumnInfo.moveTo();
+        break;
+      case 'Saturation':
+        await this.saturationColumnInfo.moveTo();
+        break;
+      default:
+        throw new Error(`Unsupported column name: ${columnName}`);
+    }
   }
 }
 

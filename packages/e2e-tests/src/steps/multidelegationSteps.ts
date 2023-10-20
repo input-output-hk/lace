@@ -16,6 +16,7 @@ import StakingPasswordDrawer from '../elements/multidelegation/StakingPasswordDr
 import StakingSuccessDrawerAssert from '../assert/multidelegation/StakingSuccessDrawerAssert';
 import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDrawer';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
+import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
@@ -43,10 +44,6 @@ Then(
 
 Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmation)$/, async (section: string) => {
   await MultidelegationPage.clickButtonOnSection(section);
-});
-
-Given(/^I confirm multidelegation beta modal$/, async () => {
-  await MultidelegationPage.confirmBetaModal();
 });
 
 Then(/^I see Delegation card displaying correct data$/, async () => {
@@ -187,4 +184,44 @@ Then(
 
 When(/^I save stake pool details$/, async () => {
   await StakePoolDetailsDrawer.saveStakePoolDetails();
+});
+
+Then(/^I see the Network Info component with the expected content$/, async () => {
+  await MultidelegationPageAssert.assertNetworkContainerExistsWithContent();
+});
+
+Then(/^I see the stake pool search control with appropriate content$/, async () => {
+  await MultidelegationPageAssert.assertSeeSearchComponent();
+});
+
+Then(
+  /^there are (\d+) stake pools returned for "([^"]*)" search term$/,
+  async (resultsCount: number, searchTerm: string) => {
+    await MultidelegationPageAssert.assertSeeSearchResults(resultsCount, searchTerm);
+  }
+);
+
+Then(
+  /^\(if applicable\) first stake pool search result has "([^"]*)" name and "([^"]*)" ticker$/,
+  async (expectedName: string, expectedTicker: string) => {
+    if ((await MultidelegationPage.poolsItems.length) > 0) {
+      await MultidelegationPageAssert.assertSeeFirstSearchResultWithNameAndTicker(expectedName, expectedTicker);
+    }
+  }
+);
+
+When(/^I hover over "(ROS|Saturation)" column name in stake pool list$/, async (columnName: 'ROS' | 'Saturation') => {
+  await MultidelegationPage.hoverOverColumnWithName(columnName);
+});
+
+Then(/^tooltip for "(ROS|Saturation)" column is displayed$/, async (columnName: 'ROS' | 'Saturation') => {
+  await MultidelegationPageAssert.assertSeeTooltipForColumn(columnName);
+});
+
+Then(/^staking password drawer is displayed$/, async () => {
+  await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
+});
+
+Then(/^Stake pool details drawer is not opened$/, async () => {
+  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsNotOpened();
 });

@@ -38,6 +38,7 @@ import TransactionSubmittedPage from '../elements/newTransaction/transactionSubm
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
+import { AddressInput } from '../elements/addressInput';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -201,6 +202,7 @@ Then(/^the balance of token is displayed in coin selector$/, async () => {
 });
 
 Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignored: string, inputIndex: number) => {
+  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
   await transactionExtendedPageObject.clickAddAddressButton(inputIndex);
 });
 
@@ -643,3 +645,22 @@ Then(/^I see (ADA|tADA) in "Review transaction" transaction fee$/, async (expect
 Then(/^I see (ADA|tADA) in "Review transaction" transaction amount$/, async (expectedTicker: 'ADA' | 'tADA') => {
   await drawerSendExtendedAssert.assertSeeTickerOnReviewTransactionAmount(expectedTicker);
 });
+
+Then(/^Red exclamation icon is displayed next to ADA handle$/, async () => {
+  await drawerSendExtendedAssert.assertSeeIconForInvalidAdaHandle(true);
+});
+
+Then(/^"Handle not found" error is displayed under address input in "Send" drawer$/, async () => {
+  await drawerSendExtendedAssert.assertSeeAdaHandleError(true);
+});
+
+Then(/^search loader is displayed inside address input field$/, async () => {
+  await drawerSendExtendedAssert.assertSeeSearchLoader(true);
+});
+
+Then(
+  /^"Add address" button is (enabled|disabled) in the bundle (\d) recipient's address input$/,
+  async (state: 'enabled' | 'disabled', inputIndex: number) => {
+    await drawerSendExtendedAssert.assertAddressBookButtonEnabled(inputIndex, state === 'enabled');
+  }
+);

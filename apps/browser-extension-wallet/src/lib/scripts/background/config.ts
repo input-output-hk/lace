@@ -24,18 +24,9 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
 
 export const getProviders = (chainName: Wallet.ChainName): Wallet.WalletProvidersDependencies => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
-
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
-    httpProviders: {
-      assetProvider: `${baseCardanoServicesUrl}/asset`,
-      chainHistoryProvider: `${baseCardanoServicesUrl}/chain-history`,
-      networkInfoProvider: `${baseCardanoServicesUrl}/network-info`,
-      rewardsProvider: `${baseCardanoServicesUrl}/rewards`,
-      stakePoolProvider: `${baseCardanoServicesUrl}/stake-pool`,
-      txSubmitProvider: `${baseCardanoServicesUrl}/tx-submit`,
-      utxoProvider: `${baseCardanoServicesUrl}/utxo`
-    }
+    baseUrl: baseCardanoServicesUrl
   });
 };
 export const ownOrigin = globalThis.location.origin;

@@ -1,9 +1,22 @@
 import { PERCENTAGE_SCALE_MAX, TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../constants';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
+  AddStakePools,
+  BeginSingleStaking,
   BrowsePoolsCommand,
+  CancelDrawer,
   ChangingPreferencesCommand,
+  ClearSelections,
+  ConfirmChangingPreferences,
+  CreateNewPortfolio,
   CurrentPoolDetailsCommand,
+  DiscardChangingPreferences,
+  DrawerBack,
+  DrawerContinue,
+  DrawerFailure,
+  GoToBrowsePools,
+  GoToOverview,
+  ManagePortfolio,
   NewPortfolioConfirmationCommand,
   NewPortfolioFailureCommand,
   NewPortfolioPreferencesCommand,
@@ -35,6 +48,13 @@ import {
   ExpandedViewFlow,
   Flow,
   Handler,
+  StateBrowsePools,
+  StateChangingPreferences,
+  StateCurrentPoolDetails,
+  StateNewPortfolio,
+  StateOverview,
+  StatePoolDetails,
+  StatePortfolioManagement,
 } from './types';
 
 export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): DraftPortfolioStakePool[] =>
@@ -58,69 +78,100 @@ export const processExpandedViewCases: Handler = (params) =>
     {
       [Flow.Overview]: cases<OverviewCommand['type']>(
         {
-          GoToBrowsePools: ({ state }) => {
-            state.activeFlow = Flow.BrowsePools;
-          },
-          ManagePortfolio: ({ state }) => {
-            state.activeFlow = Flow.PortfolioManagement;
-            state.activeDrawerStep = DrawerManagementStep.Preferences;
-            state.draftPortfolio = currentPortfolioToDraft(state.currentPortfolio);
-          },
-          ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails>(({ state, command: { data } }) => {
-            atomicStateMutators.showPoolDetails({ pool: data, state, targetFlow: Flow.CurrentPoolDetails });
-          }),
+          GoToBrowsePools: handler<GoToBrowsePools, StateOverview, StateBrowsePools>(({ state }) => ({
+            ...state,
+            activeFlow: Flow.BrowsePools,
+          })),
+          ManagePortfolio: handler<ManagePortfolio, StateOverview, StatePortfolioManagement>(({ state }) => ({
+            ...state,
+            activeDrawerStep: DrawerManagementStep.Preferences,
+            activeFlow: Flow.PortfolioManagement,
+            draftPortfolio: currentPortfolioToDraft(state.currentPortfolio),
+          })),
+          ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails, StateOverview, StateCurrentPoolDetails>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: Flow.CurrentPoolDetails }),
+            })
+          ),
         },
         params.command.type,
         Flow.Overview
       ),
       [Flow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
         {
-          ClearSelections: ({ state }) => {
-            state.selectedPortfolio = [];
-          },
-          CreateNewPortfolio: ({ state }) => {
+          ClearSelections: handler<ClearSelections, StateBrowsePools, StateBrowsePools>(({ state }) => ({
+            ...state,
+            selectedPortfolio: [],
+          })),
+          CreateNewPortfolio: handler<
+            CreateNewPortfolio,
+            StateBrowsePools,
+            StateChangingPreferences | StateNewPortfolio
+          >(({ state }) => {
             if (state.currentPortfolio.length > 0) {
-              atomicStateMutators.showChangingPreferencesConfirmation({
-                pendingSelectedPortfolio: state.selectedPortfolio,
-                state,
-              });
-            } else {
-              atomicStateMutators.beginNewPortfolioCreation({ selections: state.selectedPortfolio, state });
+              return {
+                ...state,
+                ...atomicStateMutators.showChangingPreferencesConfirmation({
+                  pendingSelectedPortfolio: state.selectedPortfolio,
+                }),
+              };
             }
-          },
-          GoToOverview: ({ state }) => {
-            state.activeFlow = Flow.Overview;
-          },
-          SelectPoolFromList: handler<SelectPoolFromList>(({ state, command: { data } }) => {
-            atomicStateMutators.selectPool({
-              stakePool: data,
-              state,
-            });
+            return {
+              ...state,
+              ...atomicStateMutators.beginNewPortfolioCreation({ selections: state.selectedPortfolio }),
+            };
           }),
-          ShowPoolDetailsFromList: handler<ShowPoolDetailsFromList>(({ state, command: { data } }) => {
-            atomicStateMutators.showPoolDetails({ pool: data, state, targetFlow: Flow.PoolDetails });
-          }),
-          UnselectPoolFromList: handler<UnselectPoolFromList>(({ state, command: { data } }) => {
-            atomicStateMutators.unselectPool({ id: data, state });
-          }),
+          GoToOverview: handler<GoToOverview, StateBrowsePools, StateOverview>(({ state }) => ({
+            ...state,
+            activeDrawerStep: undefined,
+            activeFlow: Flow.Overview,
+          })),
+          SelectPoolFromList: handler<SelectPoolFromList, StateBrowsePools, StateBrowsePools>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              ...atomicStateMutators.selectPool({
+                stakePool: data,
+                state,
+              }),
+            })
+          ),
+          ShowPoolDetailsFromList: handler<ShowPoolDetailsFromList, StateBrowsePools, StatePoolDetails>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: Flow.PoolDetails }),
+            })
+          ),
+          UnselectPoolFromList: handler<UnselectPoolFromList, StateBrowsePools, StateBrowsePools>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              ...atomicStateMutators.unselectPool({ id: data, state }),
+            })
+          ),
         },
         params.command.type,
         Flow.BrowsePools
       ),
       [Flow.CurrentPoolDetails]: cases<CurrentPoolDetailsCommand['type']>(
         {
-          CancelDrawer: ({ state }) => {
-            atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview });
-            state.viewedStakePool = undefined;
-          },
+          CancelDrawer: handler<CancelDrawer, StateCurrentPoolDetails, StateOverview>(({ state }) => ({
+            ...state,
+            ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+            viewedStakePool: undefined,
+          })),
         },
         params.command.type,
         Flow.CurrentPoolDetails
       ),
       [Flow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
-          BeginSingleStaking: ({ state }) => {
-            if (!state.viewedStakePool) return;
+          BeginSingleStaking: handler<
+            BeginSingleStaking,
+            StatePoolDetails,
+            StatePoolDetails | StateChangingPreferences | StateNewPortfolio
+          >(({ state }) => {
+            if (!state.viewedStakePool) return state;
+
             const portfolioPool = mapStakePoolToPortfolioPool({
               cardanoCoinSymbol: state.cardanoCoinSymbol,
               sliderIntegerPercentage: PERCENTAGE_SCALE_MAX,
@@ -128,33 +179,40 @@ export const processExpandedViewCases: Handler = (params) =>
             });
 
             if (state.currentPortfolio.length > 0) {
-              atomicStateMutators.showChangingPreferencesConfirmation({
-                pendingSelectedPortfolio: [portfolioPool],
-                state,
-              });
-            } else {
-              atomicStateMutators.beginNewPortfolioCreation({ selections: [portfolioPool], state });
+              return {
+                ...state,
+                ...atomicStateMutators.showChangingPreferencesConfirmation({
+                  pendingSelectedPortfolio: [portfolioPool],
+                }),
+              };
             }
-          },
-          CancelDrawer: ({ state }) => {
-            atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
-            state.viewedStakePool = undefined;
-          },
-          SelectPoolFromDetails: handler<SelectPoolFromDetails>(({ /* executeCommand,*/ state, command: { data } }) => {
-            atomicStateMutators.selectPool({ stakePool: data, state });
-            // ALT SOLUTION TBD:
-            // executeCommand({ type: 'CancelDrawer' }})
-            atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
-            state.viewedStakePool = undefined;
+
+            return {
+              ...state,
+              ...atomicStateMutators.beginNewPortfolioCreation({ selections: [portfolioPool] }),
+              viewedStakePool: undefined,
+            };
           }),
-          UnselectPoolFromDetails: handler<UnselectPoolFromDetails>(
-            ({ /* executeCommand,*/ state, command: { data } }) => {
-              atomicStateMutators.unselectPool({ id: data, state });
-              // ALT SOLUTION TBD:
-              // executeCommand({ type: 'CancelDrawer' }})
-              atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
-              state.viewedStakePool = undefined;
-            }
+          CancelDrawer: handler<CancelDrawer, StatePoolDetails, StateBrowsePools>(({ state }) => ({
+            ...state,
+            ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+            viewedStakePool: undefined,
+          })),
+          SelectPoolFromDetails: handler<SelectPoolFromDetails, StatePoolDetails, StateBrowsePools>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              ...atomicStateMutators.selectPool({ stakePool: data, state }),
+              ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+              viewedStakePool: undefined,
+            })
+          ),
+          UnselectPoolFromDetails: handler<UnselectPoolFromDetails, StatePoolDetails, StateBrowsePools>(
+            ({ state, command: { data } }) => ({
+              ...state,
+              ...atomicStateMutators.unselectPool({ id: data, state }),
+              ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+              viewedStakePool: undefined,
+            })
           ),
         },
         params.command.type,
@@ -164,86 +222,120 @@ export const processExpandedViewCases: Handler = (params) =>
         {
           [DrawerManagementStep.Preferences]: cases<PortfolioManagementPreferencesCommand['type']>(
             {
-              AddStakePools: ({ state }) => {
-                atomicStateMutators.addPoolsFromPreferences({ state });
-              },
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview });
-                state.draftPortfolio = undefined;
-              },
-              DrawerContinue: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Confirmation;
-              },
-              RemoveStakePool: handler<RemoveStakePool>(({ state, command: { data } }) => {
-                atomicStateMutators.removePoolFromPreferences({ id: data, state });
-              }),
-              UpdateStakePercentage: handler<UpdateStakePercentage>(({ state, command: { data } }) => {
-                atomicStateMutators.updateStakePercentage({
-                  ...data,
-                  state,
-                });
-              }),
+              AddStakePools: handler<AddStakePools, StatePortfolioManagement, StateBrowsePools>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.addPoolsFromPreferences({ state }),
+              })),
+              CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                draftPortfolio: undefined,
+              })),
+              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Confirmation,
+                })
+              ),
+              RemoveStakePool: handler<RemoveStakePool, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state, command: { data } }) => ({
+                  ...state,
+                  ...atomicStateMutators.removePoolFromPreferences({ id: data, state }),
+                })
+              ),
+              UpdateStakePercentage: handler<UpdateStakePercentage, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state, command: { data } }) => ({
+                  ...state,
+                  ...atomicStateMutators.updateStakePercentage({
+                    ...data,
+                    state,
+                  }),
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: cases<PortfolioManagementConfirmationCommand['type']>(
             {
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview });
-                state.draftPortfolio = undefined;
-              },
-              DrawerBack: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Preferences;
-              },
-              DrawerContinue: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Sign;
-              },
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Preferences,
+              })),
+              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Sign,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Confirmation
           ),
           [DrawerManagementStep.Sign]: cases<PortfolioManagementSignCommand['type']>(
             {
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview });
-                state.draftPortfolio = undefined;
-              },
-              DrawerBack: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Confirmation;
-              },
-              DrawerContinue: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Success;
-              },
-              DrawerFailure: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Failure;
-              },
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Confirmation,
+              })),
+              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Success,
+                })
+              ),
+              DrawerFailure: handler<DrawerFailure, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Failure,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Sign
           ),
           [DrawerManagementStep.Success]: cases<PortfolioManagementSuccessCommand['type']>(
             {
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview });
-                state.draftPortfolio = undefined;
-              },
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                draftPortfolio: undefined,
+              })),
             },
             params.command.type,
             DrawerManagementStep.Success
           ),
           [DrawerManagementStep.Failure]: cases<PortfolioManagementFailureCommand['type']>(
             {
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview });
-                state.draftPortfolio = undefined;
-              },
-              DrawerBack: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Sign;
-              },
-              DrawerContinue: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Success;
-              },
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.Overview }),
+                draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Sign,
+              })),
+              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Success,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Failure
@@ -257,15 +349,25 @@ export const processExpandedViewCases: Handler = (params) =>
       //  a separate flow.
       [Flow.ChangingPreferences]: cases<ChangingPreferencesCommand['type']>(
         {
-          ConfirmChangingPreferences: ({ state }) => {
-            if (!state.pendingSelectedPortfolio) return;
-            atomicStateMutators.beginNewPortfolioCreation({ selections: state.pendingSelectedPortfolio, state });
-            state.pendingSelectedPortfolio = undefined;
-          },
-          DiscardChangingPreferences: ({ state }) => {
-            state.activeFlow = Flow.BrowsePools;
-            state.pendingSelectedPortfolio = undefined;
-          },
+          ConfirmChangingPreferences: handler<
+            ConfirmChangingPreferences,
+            StateChangingPreferences,
+            StateNewPortfolio | StateChangingPreferences
+          >(({ state }) => {
+            if (!state.pendingSelectedPortfolio) return state;
+            return {
+              ...state,
+              ...atomicStateMutators.beginNewPortfolioCreation({ selections: state.pendingSelectedPortfolio }),
+              pendingSelectedPortfolio: undefined,
+            };
+          }),
+          DiscardChangingPreferences: handler<DiscardChangingPreferences, StateChangingPreferences, StateBrowsePools>(
+            ({ state }) => ({
+              ...state,
+              activeFlow: Flow.BrowsePools,
+              pendingSelectedPortfolio: undefined,
+            })
+          ),
         },
         params.command.type,
         Flow.ChangingPreferences
@@ -274,23 +376,35 @@ export const processExpandedViewCases: Handler = (params) =>
         {
           [DrawerManagementStep.Preferences]: cases<NewPortfolioPreferencesCommand['type']>(
             {
-              AddStakePools: ({ state }) => {
-                atomicStateMutators.addPoolsFromPreferences({ state });
-              },
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
-                state.draftPortfolio = undefined;
-              },
-              DrawerContinue: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Confirmation;
-              },
-              RemoveStakePool: handler<RemoveStakePool>(({ state, command: { data } }) => {
-                atomicStateMutators.removePoolFromPreferences({ id: data, state });
-              }),
-              UpdateStakePercentage: handler<UpdateStakePercentage>(({ state, command: { data } }) =>
-                atomicStateMutators.updateStakePercentage({
-                  ...data,
-                  state,
+              AddStakePools: handler<AddStakePools, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.addPoolsFromPreferences({ state }),
+              })),
+              CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                draftPortfolio: undefined,
+              })),
+              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Confirmation,
+                })
+              ),
+              RemoveStakePool: handler<RemoveStakePool, StateNewPortfolio, StateNewPortfolio>(
+                ({ state, command: { data } }) => ({
+                  ...state,
+                  ...atomicStateMutators.removePoolFromPreferences({ id: data, state }),
+                })
+              ),
+              UpdateStakePercentage: handler<UpdateStakePercentage, StateNewPortfolio, StateNewPortfolio>(
+                // eslint-disable-next-line sonarjs/no-identical-functions
+                ({ state, command: { data } }) => ({
+                  ...state,
+                  ...atomicStateMutators.updateStakePercentage({
+                    ...data,
+                    state,
+                  }),
                 })
               ),
             },
@@ -299,62 +413,84 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Confirmation]: cases<NewPortfolioConfirmationCommand['type']>(
             {
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
-                state.draftPortfolio = undefined;
-              },
-              DrawerBack: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Preferences;
-              },
-              DrawerContinue: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Sign;
-              },
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Preferences,
+              })),
+              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Sign,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Confirmation
           ),
           [DrawerManagementStep.Sign]: cases<NewPortfolioSignCommand['type']>(
             {
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
-                state.draftPortfolio = undefined;
-              },
-              DrawerBack: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Confirmation;
-              },
-              DrawerContinue: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Success;
-              },
-              DrawerFailure: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Failure;
-              },
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Confirmation,
+              })),
+              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Success,
+                })
+              ),
+              DrawerFailure: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Failure,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Sign
           ),
           [DrawerManagementStep.Success]: cases<NewPortfolioSuccessCommand['type']>(
             {
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
-                state.draftPortfolio = undefined;
-                state.selectedPortfolio = []; // NewPortfolio-specific
-              },
+              CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                draftPortfolio: undefined,
+                selectedPortfolio: [],
+              })),
             },
             params.command.type,
             DrawerManagementStep.Success
           ),
           [DrawerManagementStep.Failure]: cases<NewPortfolioFailureCommand['type']>(
             {
-              CancelDrawer: ({ state }) => {
-                atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools });
-                state.draftPortfolio = undefined;
-              },
-              DrawerBack: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Sign;
-              },
-              DrawerContinue: ({ state }) => {
-                state.activeDrawerStep = DrawerManagementStep.Success;
-              },
+              // eslint-disable-next-line sonarjs/no-identical-functions
+              CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
+                ...state,
+                ...atomicStateMutators.cancelDrawer({ state, targetFlow: Flow.BrowsePools }),
+                draftPortfolio: undefined,
+              })),
+              DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Sign,
+              })),
+              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Success,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Failure

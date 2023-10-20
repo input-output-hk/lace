@@ -3,6 +3,8 @@ import { browser } from '@wdio/globals';
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 import { TestnetPatterns } from '../../support/patterns';
+import NetworkComponent from '../../elements/multidelegation/NetworkInfoComponent';
+import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListItem';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -113,6 +115,92 @@ class MultidelegationPageAssert {
         timeoutMsg: `failed while waiting for stake pool: ${poolName}`
       }
     );
+  };
+
+  assertNetworkContainerExistsWithContent = async () => {
+    await NetworkComponent.networkContainer.waitForDisplayed();
+    await NetworkComponent.networkTitle.waitForDisplayed();
+    expect(await NetworkComponent.networkTitle.getText()).to.equal(await t('cardano.networkInfo.title'));
+    await NetworkComponent.currentEpochLabel.waitForDisplayed();
+    expect(await NetworkComponent.currentEpochLabel.getText()).to.equal(await t('cardano.networkInfo.currentEpoch'));
+    await NetworkComponent.currentEpochDetail.waitForDisplayed();
+    expect(await NetworkComponent.currentEpochDetail.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    await NetworkComponent.epochEndLabel.waitForDisplayed();
+    expect(await NetworkComponent.epochEndLabel.getText()).to.equal(await t('cardano.networkInfo.epochEnd'));
+    await NetworkComponent.epochEndDetail.waitForDisplayed();
+    await NetworkComponent.totalPoolsLabel.waitForDisplayed();
+    expect(await NetworkComponent.totalPoolsLabel.getText()).to.equal(await t('cardano.networkInfo.totalPools'));
+    await NetworkComponent.totalPoolsDetail.waitForDisplayed();
+    expect(await NetworkComponent.totalPoolsDetail.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    await NetworkComponent.percentageStakedLabel.waitForDisplayed();
+    expect(await NetworkComponent.percentageStakedLabel.getText()).to.equal(
+      await t('cardano.networkInfo.percentageStaked')
+    );
+    await NetworkComponent.percentageStakedDetail.waitForDisplayed();
+    expect(await NetworkComponent.percentageStakedDetail.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  };
+
+  assertSeeSearchComponent = async () => {
+    await MultidelegationPage.searchIcon.waitForDisplayed();
+    await MultidelegationPage.stakingPageSearchInput.waitForDisplayed();
+    expect(await MultidelegationPage.stakingPageSearchInput.getAttribute('placeholder')).to.equal(
+      await t('browsePools.stakePoolTableBrowser.searchInputPlaceholder', 'staking')
+    );
+  };
+
+  assertSeeSearchResults = async (expectedResultsCount: number, searchTerm: string) => {
+    const rowsNumber = (await MultidelegationPage.poolsItems).length;
+    expect(rowsNumber).to.equal(expectedResultsCount);
+    await MultidelegationPage.emptySearchResultsImage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
+    await MultidelegationPage.emptySearchResultsMessage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
+    if (expectedResultsCount === 0) {
+      expect(await MultidelegationPage.emptySearchResultsMessage.getText()).to.equal(
+        await t('browsePools.stakePoolTableBrowser.emptyMessage', 'staking')
+      );
+    } else {
+      for (let index = 0; index < expectedResultsCount; index++) {
+        const stakePoolListItem = new StakePoolListItem(index);
+        await stakePoolListItem.logo.waitForDisplayed();
+        await stakePoolListItem.name.waitForDisplayed();
+        await stakePoolListItem.ticker.waitForDisplayed();
+        await stakePoolListItem.ros.waitForDisplayed();
+        await stakePoolListItem.saturation.waitForDisplayed();
+
+        const name = (await stakePoolListItem.name.getText()).toLowerCase();
+        const ticker = (await stakePoolListItem.ticker.getText()).toLowerCase();
+        expect(
+          name.includes(searchTerm.toLowerCase()) || ticker.includes(searchTerm.toLowerCase()),
+          `Stake pool name and ticker does not contain "${searchTerm}"`
+        ).to.be.true;
+      }
+    }
+  };
+
+  assertSeeFirstSearchResultWithNameAndTicker = async (expectedName: string, expectedTicker: string) => {
+    const firstStakePool = new StakePoolListItem(0);
+    await firstStakePool.name.waitForDisplayed();
+    expect(await firstStakePool.name.getText()).to.equal(expectedName);
+    await firstStakePool.ticker.waitForDisplayed();
+    expect(await firstStakePool.ticker.getText()).to.equal(expectedTicker);
+  };
+
+  assertSeeTooltipForColumn = async (columnName: string) => {
+    switch (columnName) {
+      case 'ROS':
+        await MultidelegationPage.tooltip.waitForDisplayed();
+        expect(await MultidelegationPage.tooltip.getText()).to.equal(
+          await t('browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip', 'staking')
+        );
+        break;
+      case 'Saturation':
+        await MultidelegationPage.tooltip.waitForDisplayed();
+        expect(await MultidelegationPage.tooltip.getText()).to.equal(
+          await t('browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip', 'staking')
+        );
+        break;
+      default:
+        throw new Error(`Unsupported column name: ${columnName}`);
+    }
   };
 }
 
