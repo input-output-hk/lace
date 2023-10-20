@@ -3,7 +3,6 @@ import React, { ReactElement, useCallback, useEffect, useMemo, useState } from '
 import uniq from 'lodash/uniq';
 import flatMap from 'lodash/flatMap';
 import { Skeleton } from 'antd';
-import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
 import {
   AssetActivityListProps,
@@ -12,16 +11,13 @@ import {
   TxSummary,
   ActivityType,
   useTranslate,
-  RewardsDetails,
-  TransactionDetails
+  RewardsDetails
 } from '@lace/core';
 import { PriceResult } from '@hooks';
 import { useWalletStore } from '@stores';
-import { ActivityDetail as ActivityDetailType, TransactionActivityDetail, TxDirection } from '@src/types';
-import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
-import { APP_MODE_POPUP } from '@src/utils/constants';
-import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
-import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { ActivityDetail as ActivityDetailType } from '@src/types';
+import { useCurrencyStore } from '@providers';
+import { TransactionDetailsProxy } from './TransactionDetailsProxy';
 
 const MAX_SUMMARY_ADDRESSES = 5;
 
@@ -90,98 +86,6 @@ const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t'
   if (type === 'incoming') return t('package.core.activityDetails.received');
   return t('package.core.activityDetails.sent');
 };
-
-type TransactionDetailsProxyProps = {
-  name: string;
-  activityInfo: TransactionActivityDetail;
-  direction: TxDirection;
-  status: ActivityStatus;
-  amountTransformer: (amount: string) => string;
-};
-const TransactionDetailsProxy = withAddressBookContext(
-  ({ name, activityInfo, direction, status, amountTransformer }: TransactionDetailsProxyProps): ReactElement => {
-    const analytics = useAnalyticsContext();
-    const {
-      walletInfo,
-      environmentName,
-      walletUI: { cardanoCoin, appMode }
-    } = useWalletStore();
-    const isPopupView = appMode === APP_MODE_POPUP;
-    const openExternalLink = useExternalLinkOpener();
-    const { list: addressList } = useAddressBookContext();
-
-    const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
-    const explorerBaseUrl = useMemo(
-      () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
-      [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
-    );
-    const getHeaderDescription = () => {
-      if (activityInfo.type === 'delegation') return '1 token';
-      return ` (${activityInfo?.assetAmount})`;
-    };
-    const isIncomingTransaction = direction === 'Incoming';
-    const {
-      addrOutputs,
-      addrInputs,
-      hash,
-      includedUtcDate,
-      includedUtcTime,
-      fee,
-      pools,
-      deposit,
-      depositReclaim,
-      metadata
-    } = activityInfo.activity;
-    const txSummary = useMemo(
-      () =>
-        getTransactionData({
-          addrOutputs,
-          addrInputs,
-          walletAddresses: walletInfo.addresses.map((addr) => addr.address.toString()),
-          isIncomingTransaction
-        }),
-      [isIncomingTransaction, addrOutputs, addrInputs, walletInfo.addresses]
-    );
-
-    const handleOpenExternalLink = () => {
-      analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailTransactionHashClick);
-      const externalLink = `${explorerBaseUrl}/${hash}`;
-      externalLink && status === 'success' && openExternalLink(externalLink);
-    };
-
-    const addressToNameMap = useMemo(
-      () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),
-      [addressList]
-    );
-
-    return (
-      // eslint-disable-next-line react/jsx-pascal-case
-      <TransactionDetails
-        name={name}
-        hash={hash}
-        status={status}
-        includedDate={includedUtcDate}
-        includedTime={includedUtcTime}
-        addrInputs={addrInputs}
-        addrOutputs={addrOutputs}
-        fee={fee}
-        pools={pools}
-        deposit={deposit}
-        depositReclaim={depositReclaim}
-        metadata={metadata}
-        amountTransformer={amountTransformer}
-        headerDescription={getHeaderDescription() || cardanoCoin.symbol}
-        txSummary={txSummary}
-        addressToNameMap={addressToNameMap}
-        coinSymbol={cardanoCoin.symbol}
-        isPopupView={isPopupView}
-        openExternalLink={handleOpenExternalLink}
-        sendAnalyticsInputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailInputsClick)}
-        sendAnalyticsOutputs={() => analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailOutputsClick)}
-      />
-    );
-  }
-);
 
 export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => {
   const {
