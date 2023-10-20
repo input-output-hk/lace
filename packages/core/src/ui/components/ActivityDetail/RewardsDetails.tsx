@@ -3,9 +3,19 @@ import cn from 'classnames';
 import styles from './TransactionDetails.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 import { ActivityStatus } from '../Activity/AssetActivityItem';
-import type { RewardsInfo } from './rewardsInfo';
 import { Ellipsis } from '@lace/common';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
+
+type RewardItem = {
+  pool?: { name: string; ticker: string; id: string };
+  amount: string;
+};
+
+export type RewardsInfo = {
+  totalAmount: string;
+  spendableEpoch: number;
+  rewards: RewardItem[];
+};
 
 export interface RewardsDetailsProps {
   name: string;

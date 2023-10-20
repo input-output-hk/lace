@@ -1,5 +1,4 @@
 import React from 'react';
-import type { ActivityType } from './activityType';
 import { ReactComponent as OutgoingIcon } from '../../assets/icons/outgoing.component.svg';
 import { ReactComponent as IncomingIcon } from '../../assets/icons/incoming.component.svg';
 import { ReactComponent as SelfIcon } from '../../assets/icons/self-transaction.component.svg';
@@ -9,6 +8,18 @@ import { ReactComponent as DeregistrationIcon } from '../../assets/icons/deregis
 import { ReactComponent as RewardsIcon } from '../../assets/icons/rewards.component.svg';
 import Icon, { QuestionOutlined } from '@ant-design/icons';
 import { txIconSize } from '@src/ui/utils/icon-size';
+
+export type TransactionActivityType =
+  | 'outgoing'
+  | 'incoming'
+  | 'delegation'
+  | 'delegationRegistration'
+  | 'delegationDeregistration'
+  | 'self';
+
+export type RewardsActivityType = 'rewards';
+
+export type ActivityType = TransactionActivityType | RewardsActivityType;
 
 export interface ActivityTypeIconProps {
   type: ActivityType;

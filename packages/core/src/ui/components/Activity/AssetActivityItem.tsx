@@ -10,7 +10,7 @@ import styles from './AssetActivityItem.module.scss';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
 import { useTranslate } from '@src/ui/hooks';
-import { ActivityTypeIcon, ActivityType } from '@src/ui/components/ActivityDetail';
+import { ActivityTypeIcon, ActivityType } from '../ActivityDetail';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
