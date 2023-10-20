@@ -37,7 +37,6 @@ import {
 } from '../types';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { rewardHistoryTransformer } from '@src/views/browser-view/features/activity/helpers/reward-history-transformer';
-import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
 
 export interface FetchWalletActivitiesProps {
   fiatCurrency: CurrencyInfo;
@@ -202,12 +201,12 @@ const getWalletActivitiesObservable = async ({
   };
 
   const epochRewardsMapper = (
-    earnedEpoch: EpochNo,
+    earnedEpoch: Wallet.Cardano.EpochNo,
     rewards: Reward[],
     eraSummaries: EraSummary[]
   ): ExtendedActivityProps => {
     const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
-    const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as EpochNo;
+    const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as Wallet.Cardano.EpochNo;
     const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
     const rewardSpendableDate = slotTimeCalc(epochSlotsCalc(spendableEpoch, eraSummaries).firstSlot);
 
@@ -277,7 +276,7 @@ const getWalletActivitiesObservable = async ({
     rewardsHistory$.pipe(
       map((allRewards: Wallet.RewardsHistory) =>
         Object.entries(groupBy(allRewards.all, ({ epoch }) => epoch.toString()))
-          .map(([epoch, rewards]) => epochRewardsMapper(Number(epoch) as EpochNo, rewards, eraSummaries))
+          .map(([epoch, rewards]) => epochRewardsMapper(Number(epoch) as Wallet.Cardano.EpochNo, rewards, eraSummaries))
           .filter((reward) => reward.date.getTime() < Date.now())
       )
     );
