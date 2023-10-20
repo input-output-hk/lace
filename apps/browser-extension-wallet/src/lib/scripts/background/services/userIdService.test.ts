@@ -76,9 +76,7 @@ describe('userIdService', () => {
         usePersistentUserId: false,
         userId: undefined
       });
-      console.debug('!!!TEST mockedStorage=', mockedStorage);
       // it should still retain the previously stored user id in memory
-      console.debug('!!!TEST calling getRandomizedUserId');
       expect(await userIdService.getRandomizedUserId()).toEqual(store.userId);
       // simulate a session timeout
       jest.advanceTimersByTime(SESSION_LENGTH + 1);
