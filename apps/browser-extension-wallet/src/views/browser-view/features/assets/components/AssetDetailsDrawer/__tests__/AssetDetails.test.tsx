@@ -60,15 +60,11 @@ describe('AssetDetails', () => {
             {
               amount: '100',
               fiatAmount: '450',
-              date: new Date('2021-01-01'),
-              formattedDate: 'Date',
               formattedTimestamp: 'Timestamp'
             },
             {
               amount: '200',
               fiatAmount: '400',
-              date: new Date('2021-01-01'),
-              formattedDate: 'Date',
               formattedTimestamp: 'Timestamp'
             }
           ]}
@@ -90,15 +86,11 @@ describe('AssetDetails', () => {
             {
               amount: '100',
               fiatAmount: '450',
-              date: new Date('2021-01-01'),
-              formattedDate: 'Date',
               formattedTimestamp: 'Timestamp'
             },
             {
               amount: '200',
               fiatAmount: '400',
-              date: new Date('2021-01-01'),
-              formattedDate: 'Date',
               formattedTimestamp: 'Timestamp'
             }
           ]}
@@ -121,15 +113,11 @@ describe('AssetDetails', () => {
             {
               amount: '100',
               fiatAmount: '450',
-              date: new Date('2021-01-01'),
-              formattedDate: 'Date',
               formattedTimestamp: 'Timestamp'
             },
             {
               amount: '200',
               fiatAmount: '400',
-              date: new Date('2021-01-01'),
-              formattedDate: 'Date',
               formattedTimestamp: 'Timestamp'
             }
           ]}

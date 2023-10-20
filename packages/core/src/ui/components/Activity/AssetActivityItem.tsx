@@ -4,8 +4,8 @@ import debounce from 'lodash/debounce';
 import { Image, Tooltip } from 'antd';
 import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
-import { ActivityType } from '@src/ui/components/ActivityDetail/ActivityType';
-import { ActivityTypeIcon } from '@src/ui/components/ActivityDetail/ActivityTypeIcon';
+import { ActivityType } from '@ui/components/ActivityDetail/activityType';
+import { ActivityTypeIcon } from '@ui/components/ActivityDetail/ActivityTypeIcon';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
 import styles from './AssetActivityItem.module.scss';
@@ -27,17 +27,10 @@ const DEFAULT_DEBOUNCE = 200;
 
 export interface AssetActivityItemProps {
   id?: string;
-  fee?: string;
-  deposit?: string; // e.g. stake registrations
-  depositReclaim?: string; // e.g. stake de-registrations
   /**
    * Amount formated with symbol (e.g. 50 ADA)
    */
   amount: string;
-  /**
-   * Date of the activity
-   */
-  date: Date;
   /**
    * Amount in Fiat currency (e.g. 125$)
    */
@@ -62,13 +55,7 @@ export interface AssetActivityItemProps {
    * Number of assets (default: 1)
    */
   assetsNumber?: number;
-  formattedDate: string;
   formattedTimestamp: string;
-  /**
-   * Direction: 'Incoming' | 'Outgoing' | 'Self'
-   * TODO: Create a separate package for common types across apps/packages
-   */
-  direction?: 'Incoming' | 'Outgoing' | 'Self';
   /**
    * assets details
    */

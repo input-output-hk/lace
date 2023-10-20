@@ -1,8 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
 import { txTransformer, TxTransformerInput } from './common-tx-transformer';
-import type { TransformedActivity } from './types';
-import type { TransactionActivityType } from '@lace/core';
+import type { TransformedTransactionActivity } from './types';
 
 interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
   tx: Wallet.Cardano.HydratedTx;
@@ -16,7 +15,7 @@ export const txHistoryTransformer = ({
   date,
   protocolParameters,
   cardanoCoin
-}: TxHistoryTransformerInput): (TransformedActivity & { type: TransactionActivityType })[] => {
+}: TxHistoryTransformerInput): TransformedTransactionActivity[] => {
   const type = inspectTxType({ walletAddresses, tx });
   const direction = getTxDirection({ type });
 

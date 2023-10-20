@@ -1,12 +1,12 @@
 import { Wallet } from '@lace/cardano';
 import { getFormattedFiatAmount } from './common-tx-transformer';
-import type { TransformedActivity } from './types';
+import type { TransformedRewardsActivity } from './types';
 import dayjs from 'dayjs';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
 import type { CurrencyInfo } from '@src/types';
 import type { Reward } from '@cardano-sdk/core';
-import { ActivityStatus, RewardsActivityType } from '@lace/core';
+import { ActivityStatus } from '@lace/core';
 
 interface RewardHistoryTransformerInput {
   rewards: Reward[]; // TODO this supposes rewards grouped by epoch which is a bit fragile
@@ -22,7 +22,7 @@ export const rewardHistoryTransformer = ({
   fiatPrice,
   date,
   cardanoCoin
-}: RewardHistoryTransformerInput): TransformedActivity & { type: RewardsActivityType } => {
+}: RewardHistoryTransformerInput): TransformedRewardsActivity => {
   const formattedTimestamp = formatTime({
     date,
     type: 'local'

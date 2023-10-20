@@ -12,13 +12,14 @@ import {
   txHistoryTransformer,
   filterOutputsByTxDirection,
   isTxWithAssets,
-  TransformedActivity
+  TransformedActivity,
+  TransformedTransactionActivity
 } from '@src/views/browser-view/features/activity/helpers';
 import {
-  AssetActivityItemProps,
-  AssetActivityListProps,
   ActivityAssetProp,
   ActivityStatus,
+  AssetActivityItemProps,
+  AssetActivityListProps,
   TransactionActivityType
 } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
@@ -57,7 +58,11 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
   set: SetState<WalletActivitiesSlice>;
 }
 
-export type FetchWalletActivitiesReturn = Observable<Promise<AssetActivityListProps[]>>;
+type ExtendedActivityProps = TransformedActivity & AssetActivityItemProps;
+type MappedActivityListProps = Omit<AssetActivityListProps, 'items'> & {
+  items: ExtendedActivityProps[];
+};
+export type FetchWalletActivitiesReturn = Observable<Promise<MappedActivityListProps[]>>;
 export type DelegationTransactionType = Extract<
   TransactionActivityType,
   'delegation' | 'delegationRegistration' | 'delegationDeregistration'
@@ -69,11 +74,11 @@ const delegationTransactionTypes: ReadonlySet<DelegationTransactionType> = new S
   'delegationDeregistration'
 ]);
 
-type DelegationActivityItemProps = Omit<AssetActivityItemProps, 'type'> & {
+type DelegationActivityItemProps = Omit<ExtendedActivityProps, 'type'> & {
   type: DelegationTransactionType;
 };
 
-const isDelegationActivity = (activity: AssetActivityItemProps): activity is DelegationActivityItemProps =>
+const isDelegationActivity = (activity: ExtendedActivityProps): activity is DelegationActivityItemProps =>
   delegationTransactionTypes.has(activity.type as DelegationTransactionType);
 
 const getDelegationAmount = (activity: DelegationActivityItemProps) => {
@@ -129,7 +134,7 @@ const getWalletActivitiesObservable = async ({
   const historicTransactionMapper = (
     tx: Wallet.Cardano.HydratedTx,
     eraSummaries: EraSummary[]
-  ): Array<AssetActivityItemProps> => {
+  ): Array<ExtendedActivityProps> => {
     const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
     const date = slotTimeCalc(tx.blockHeader.slot);
     const transformedTransaction = txHistoryTransformer({
@@ -142,7 +147,7 @@ const getWalletActivitiesObservable = async ({
       cardanoCoin
     });
 
-    const extendWithClickHandler = (transformedTx: TransformedActivity & { type: TransactionActivityType }) => ({
+    const extendWithClickHandler = (transformedTx: TransformedTransactionActivity) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
@@ -161,7 +166,7 @@ const getWalletActivitiesObservable = async ({
   const pendingTransactionMapper = (
     tx: Wallet.TxInFlight,
     eraSummaries: EraSummary[]
-  ): Array<AssetActivityItemProps> => {
+  ): Array<ExtendedActivityProps> => {
     let date;
     try {
       const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
@@ -179,7 +184,7 @@ const getWalletActivitiesObservable = async ({
       date
     });
 
-    const extendWithClickHandler = (transformedTx: TransformedActivity & { type: TransactionActivityType }) => ({
+    const extendWithClickHandler = (transformedTx: TransformedTransactionActivity) => ({
       ...transformedTx,
       onClick: () => {
         if (sendAnalytics) sendAnalytics();
@@ -200,7 +205,7 @@ const getWalletActivitiesObservable = async ({
     earnedEpoch: EpochNo,
     rewards: Reward[],
     eraSummaries: EraSummary[]
-  ): AssetActivityItemProps => {
+  ): ExtendedActivityProps => {
     const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
     const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as EpochNo;
     const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
@@ -301,7 +306,7 @@ const getWalletActivitiesObservable = async ({
       );
       return [...filteredPendingTxs, ...confirmedTxs, ...rewards];
     }),
-    map(async (allTransactions: Promise<AssetActivityItemProps[]>) =>
+    map(async (allTransactions) =>
       (await allTransactions).sort((firstTx, secondTx) => {
         // ensure pending txs are always first
         if (firstTx.status === ActivityStatus.PENDING && secondTx.status !== ActivityStatus.PENDING) return 1;
@@ -310,14 +315,15 @@ const getWalletActivitiesObservable = async ({
         return secondTx.date.getTime() - firstTx.date.getTime();
       })
     ),
-    map(async (allTransactions: Promise<AssetActivityItemProps[]>) => groupBy(await allTransactions, 'formattedDate')),
-    map(async (lists) =>
-      Object.entries(await lists).map(([listName, transactionsList]) => ({
-        title: listName,
-        items: transactionsList
-      }))
+    map(async (allTransactions) => groupBy(await allTransactions, 'formattedDate')),
+    map(
+      async (lists): Promise<MappedActivityListProps[]> =>
+        Object.entries(await lists).map(([listName, transactionsList]) => ({
+          title: listName,
+          items: transactionsList
+        }))
     ),
-    tap(async (allActivities: Promise<AssetActivityListProps[]>) => {
+    tap(async (allActivities) => {
       const activities = await allActivities;
       const flattenedActivities = flattenDeep(activities.map(({ items }: AssetActivityListProps) => items));
       const allAssetsIds = uniq(
@@ -335,9 +341,9 @@ const getWalletActivitiesObservable = async ({
         }
       });
 
-      const walletActivities = activities.map((activityList: AssetActivityListProps) => ({
+      const walletActivities = activities.map((activityList) => ({
         ...activityList,
-        items: activityList.items.map((activity: AssetActivityItemProps) => ({
+        items: activityList.items.map((activity) => ({
           ...activity,
           ...(isDelegationActivity(activity) && {
             amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,

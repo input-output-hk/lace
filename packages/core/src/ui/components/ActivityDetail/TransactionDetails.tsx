@@ -12,7 +12,6 @@ import { ReactComponent as Info } from '../../assets/icons/info-icon.component.s
 import { TransactionInputOutput } from './TransactionInputOutput';
 import { useTranslate } from '@src/ui/hooks';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import type { RewardsInfo } from './rewardsInfo';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,7 +64,6 @@ export interface TransactionDetailsProps {
   txSummary?: TxSummary[];
   coinSymbol: string;
   tooltipContent?: string;
-  rewards?: RewardsInfo;
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
   openExternalLink?: () => void;

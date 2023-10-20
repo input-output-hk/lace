@@ -105,7 +105,7 @@ export const RewardsDetails = ({
           </div>
           <div className={styles.details}>
             <div className={styles.title}>{t('package.core.transactionDetailBrowser.epoch')}</div>
-            {<div data-testid="tx-rewards-epoch" className={styles.detail}>{`${rewards.spendableEpoch}`}</div>}
+            <div data-testid="tx-rewards-epoch" className={styles.detail}>{`${rewards.spendableEpoch}`}</div>
           </div>
           <div data-testid="tx-date" className={cn(styles.details, styles.timestampContainer)}>
             <div className={cn(styles.title, styles.timestamp)}>

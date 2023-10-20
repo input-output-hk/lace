@@ -9,12 +9,9 @@ const assetsAmountTestId = 'asset-amount';
 describe('Testing AssetActivityItem component', () => {
   const props: AssetActivityItemProps = {
     id: '1',
-    fee: '3,40',
     type: 'outgoing',
     amount: '100',
     fiatAmount: '300 $',
-    date: new Date('2021-01-01'),
-    formattedDate: 'Date',
     formattedTimestamp: 'Timestamp',
     status: ActivityStatus.ERROR,
     onClick: jest.fn(),
