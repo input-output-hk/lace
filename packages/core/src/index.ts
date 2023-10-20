@@ -2,13 +2,13 @@ export * from '@ui/hooks';
 export * from '@ui/lib';
 export * from '@ui/utils';
 
-export * from '@src/ui/components/ActivityDetail';
+export * from '@ui/components/ActivityDetail';
 export * from '@ui/components/WalletAvatar';
 export * from '@ui/components/WalletBasicInfo';
 export * from '@ui/components/WalletAddresses';
 export * from '@ui/components/WalletUsedAddresses';
 export * from '@ui/components/AddressFormBrowserView';
-export * from '@src/ui/components/EditAddressForm';
+export * from '@ui/components/EditAddressForm';
 export * from '@ui/components/Activity';
 export * from '@ui/components/Nft';
 export * from '@ui/components/Token';

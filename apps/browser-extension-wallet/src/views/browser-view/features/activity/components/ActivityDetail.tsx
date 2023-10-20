@@ -98,7 +98,7 @@ type TransactionDetailsProxyProps = {
   status: ActivityStatus;
   amountTransformer: (amount: string) => string;
 };
-const TransactionDetailsProxy = withAddressBookContext<TransactionDetailsProxyProps>(
+const TransactionDetailsProxy = withAddressBookContext(
   ({ name, activityInfo, direction, status, amountTransformer }: TransactionDetailsProxyProps): ReactElement => {
     const analytics = useAnalyticsContext();
     const {

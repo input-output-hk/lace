@@ -1,5 +1,4 @@
 /* eslint-disable no-magic-numbers */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import cn from 'classnames';
 import { InfoCircleOutlined } from '@ant-design/icons';
@@ -160,9 +159,7 @@ export const TransactionDetails = ({
           <h1 className={styles.summary}>{t('package.core.activityDetails.summary')}</h1>
           {pools?.length > 0 && (
             <div className={styles.stakingInfo}>
-              <div className={cn(styles.title, styles.poolsTitle)}>
-                {t('package.core.activityDetails.pools')}
-              </div>
+              <div className={cn(styles.title, styles.poolsTitle)}>{t('package.core.activityDetails.pools')}</div>
               <div className={styles.poolsList}>
                 {pools?.map((pool) => (
                   <div key={pool.id} className={styles.poolEntry}>
@@ -262,9 +259,7 @@ export const TransactionDetails = ({
             )}
           </div>
           <div data-testid="tx-date" className={cn(styles.details, styles.timestampContainer)}>
-            <div className={cn(styles.title, styles.timestamp)}>
-              {t('package.core.activityDetails.timestamp')}
-            </div>
+            <div className={cn(styles.title, styles.timestamp)}>{t('package.core.activityDetails.timestamp')}</div>
             <div data-testid="tx-timestamp" className={styles.detail}>
               <span>{includedDate}</span>
               <span>&nbsp;{includedTime}</span>
@@ -295,8 +290,7 @@ export const TransactionDetails = ({
             </div>
           )}
 
-          {deposit &&
-            renderDepositValueSection({ value: deposit, label: t('package.core.activityDetails.deposit') })}
+          {deposit && renderDepositValueSection({ value: deposit, label: t('package.core.activityDetails.deposit') })}
           {depositReclaim &&
             renderDepositValueSection({
               value: depositReclaim,
