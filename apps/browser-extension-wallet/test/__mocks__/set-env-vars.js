@@ -12,3 +12,6 @@ process.env.USE_POSTHOG_ANALYTICS_FOR_OPTED_OUT = 'false';
 process.env.USE_MATOMO_ANALYTICS_FOR_OPTED_OUT = 'false';
 process.env.PUBLIC_POSTHOG_HOST = 'https://eu.posthog.com';
 process.env.POSTHOG_DEV_TOKEN_PREPROD = 'test-token';
+// TODO: update this with valid sanchonet urls
+process.env.CARDANO_SERVICES_URL_SANCHONET = 'https://backend.live-preprod.eks.lw.iog.io';
+process.env.ADA_HANDLE_URL_SANCHONET = 'https://preprod.api.handle.me';
