@@ -45,6 +45,7 @@ export const label = style([
         textDecoration: 'underline',
       },
     },
+    wordBreak: 'break-all',
   },
 ]);
 
