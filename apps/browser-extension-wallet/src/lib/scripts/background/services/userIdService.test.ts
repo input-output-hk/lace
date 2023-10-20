@@ -70,6 +70,7 @@ describe('userIdService', () => {
       };
       const { getStorageMock, setStorageMock } = generateStorageMocks(store);
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
+      // TODO: find better way to initialize userIdService
       await userIdService.getRandomizedUserId();
       await userIdService.makeTemporary();
       expect(setStorageMock).toHaveBeenCalledWith({

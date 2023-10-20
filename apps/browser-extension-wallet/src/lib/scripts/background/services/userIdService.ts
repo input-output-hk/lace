@@ -60,6 +60,7 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   async getRandomizedUserId(): Promise<string> {
+    // TODO: make this method private when Motamo is not longer in use
     if (!this.userIdRestored) {
       console.debug('[ANALYTICS] Restoring user ID...');
       await this.restoreUserId();
