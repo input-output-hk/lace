@@ -7,7 +7,6 @@ import type { TransformedActivity, TransformedTransactionActivity } from './type
 import { ActivityStatus } from '@lace/core';
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
-import { assertUnreachable } from '@src/utils/assert-unreachable';
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -74,20 +73,14 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
   return [];
 };
 
-// eslint-disable-next-line consistent-return
 const transformTransactionStatus = (status: Wallet.TransactionStatus): ActivityStatus => {
-  switch (status) {
-    case Wallet.TransactionStatus.PENDING:
-      return ActivityStatus.PENDING;
-    case Wallet.TransactionStatus.ERROR:
-      return ActivityStatus.ERROR;
-    case Wallet.TransactionStatus.SUCCESS:
-      return ActivityStatus.SUCCESS;
-    case Wallet.TransactionStatus.SPENDABLE:
-      return ActivityStatus.SPENDABLE;
-    default:
-      assertUnreachable(status);
-  }
+  const statuses = {
+    [Wallet.TransactionStatus.PENDING]: ActivityStatus.PENDING,
+    [Wallet.TransactionStatus.ERROR]: ActivityStatus.ERROR,
+    [Wallet.TransactionStatus.SUCCESS]: ActivityStatus.SUCCESS,
+    [Wallet.TransactionStatus.SPENDABLE]: ActivityStatus.SPENDABLE
+  };
+  return statuses[status];
 };
 /**
   Simplifies the transaction object to be used in the activity list
