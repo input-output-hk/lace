@@ -54,7 +54,7 @@
       "usedAllAssets": "All gone! You've already selected everything",
       "noMatchingResult": "No results matching your search"
     },
-    "transactionDetailBrowser": {
+    "activityDetails": {
       "address": "Address",
       "sent": "Sent",
       "sending": "Sending",

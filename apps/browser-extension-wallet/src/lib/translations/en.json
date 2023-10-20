@@ -27,7 +27,7 @@
         }
       }
     },
-    "transactionDetailBrowser": {
+    "activityDetails": {
       "address": "Address",
       "sent": "Sent",
       "sending": "Sending",

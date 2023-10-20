@@ -34,7 +34,7 @@ class TransactionsDetailsAssert {
     await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
       expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(
-        await t('package.core.transactionDetailBrowser.header')
+        await t('package.core.activityDetails.header')
       );
     }
   }

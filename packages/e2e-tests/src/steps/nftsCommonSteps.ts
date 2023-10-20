@@ -58,7 +58,7 @@ Then(
   /^The Tx details are displayed as (sent|received) for NFT with name: "([^"]*)" and wallet: "([^"]*)" address$/,
   async (type: string, nftName: string, walletName: string) => {
     const typeTranslationKey =
-      type === 'sent' ? 'package.core.transactionDetailBrowser.sent' : 'package.core.transactionDetailBrowser.received';
+      type === 'sent' ? 'package.core.activityDetails.sent' : 'package.core.activityDetails.received';
 
     const expectedActivityDetails = {
       transactionDescription: `${await t(typeTranslationKey)}\n(2)`,

@@ -133,12 +133,12 @@ export const TransactionDetails = ({
       <ActivityDetailHeader name={name} description={headerDescription} />
       <div>
         <div className={styles.header} data-testid="tx-header">
-          {t('package.core.transactionDetailBrowser.header')}
+          {t('package.core.activityDetails.header')}
         </div>
         <div className={styles.block}>
           <div data-testid="tx-hash" className={styles.hashContainer}>
             <div className={cn(styles.title, styles.labelWidth)}>
-              <div className={styles.hashLabel}>{t('package.core.transactionDetailBrowser.transactionHash')}</div>
+              <div className={styles.hashLabel}>{t('package.core.activityDetails.transactionHash')}</div>
             </div>
             <div
               data-testid="tx-hash-detail"
@@ -149,7 +149,7 @@ export const TransactionDetails = ({
             >
               <div>
                 {isSending ? (
-                  <CopiableHash hash={hash} copiedText={t('package.core.transactionDetailBrowser.copiedToClipboard')} />
+                  <CopiableHash hash={hash} copiedText={t('package.core.activityDetails.copiedToClipboard')} />
                 ) : (
                   hash
                 )}
@@ -157,11 +157,11 @@ export const TransactionDetails = ({
             </div>
           </div>
 
-          <h1 className={styles.summary}>{t('package.core.transactionDetailBrowser.summary')}</h1>
+          <h1 className={styles.summary}>{t('package.core.activityDetails.summary')}</h1>
           {pools?.length > 0 && (
             <div className={styles.stakingInfo}>
               <div className={cn(styles.title, styles.poolsTitle)}>
-                {t('package.core.transactionDetailBrowser.pools')}
+                {t('package.core.activityDetails.pools')}
               </div>
               <div className={styles.poolsList}>
                 {pools?.map((pool) => (
@@ -218,7 +218,7 @@ export const TransactionDetails = ({
               </div>
               <div className={styles.details}>
                 <div className={styles.title}>
-                  {t(`package.core.transactionDetailBrowser.${name.toLowerCase() === 'sent' ? 'to' : 'from'}`)}
+                  {t(`package.core.activityDetails.${name.toLowerCase() === 'sent' ? 'to' : 'from'}`)}
                 </div>
                 <div>
                   {summary.addr.length > 1 && (
@@ -226,7 +226,7 @@ export const TransactionDetails = ({
                       data-testid="tx-to-detail-multiple-addresses"
                       className={cn(styles.detail, styles.detailTitle)}
                     >
-                      {t('package.core.transactionDetailBrowser.multipleAddresses')}
+                      {t('package.core.activityDetails.multipleAddresses')}
                     </div>
                   )}
                   {(summary.addr as string[]).map((addr) => {
@@ -254,7 +254,7 @@ export const TransactionDetails = ({
             </div>
           ))}
           <div className={styles.details}>
-            <div className={styles.title}>{t('package.core.transactionDetailBrowser.status')}</div>
+            <div className={styles.title}>{t('package.core.activityDetails.status')}</div>
             {status && (
               <div data-testid="tx-status" className={styles.detail}>{`${status.charAt(0).toUpperCase()}${status.slice(
                 1
@@ -263,7 +263,7 @@ export const TransactionDetails = ({
           </div>
           <div data-testid="tx-date" className={cn(styles.details, styles.timestampContainer)}>
             <div className={cn(styles.title, styles.timestamp)}>
-              {t('package.core.transactionDetailBrowser.timestamp')}
+              {t('package.core.activityDetails.timestamp')}
             </div>
             <div data-testid="tx-timestamp" className={styles.detail}>
               <span>{includedDate}</span>
@@ -274,8 +274,8 @@ export const TransactionDetails = ({
           {fee && fee !== '-' && (
             <div className={styles.details}>
               <div className={styles.txFeeContainer}>
-                <div className={styles.txfee}>{t('package.core.transactionDetailBrowser.transactionFee')}</div>
-                <Tooltip title={t('package.core.transactionDetailBrowser.transactionFeeInfo')}>
+                <div className={styles.txfee}>{t('package.core.activityDetails.transactionFee')}</div>
+                <Tooltip title={t('package.core.activityDetails.transactionFeeInfo')}>
                   {Info ? (
                     <Info style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} />
                   ) : (
@@ -296,23 +296,23 @@ export const TransactionDetails = ({
           )}
 
           {deposit &&
-            renderDepositValueSection({ value: deposit, label: t('package.core.transactionDetailBrowser.deposit') })}
+            renderDepositValueSection({ value: deposit, label: t('package.core.activityDetails.deposit') })}
           {depositReclaim &&
             renderDepositValueSection({
               value: depositReclaim,
-              label: t('package.core.transactionDetailBrowser.depositReclaim')
+              label: t('package.core.activityDetails.depositReclaim')
             })}
         </div>
 
         {addrInputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}
-            title={t('package.core.transactionDetailBrowser.inputs')}
+            title={t('package.core.activityDetails.inputs')}
             testId="tx-inputs"
             list={addrInputs}
             translations={{
-              address: t('package.core.transactionDetailBrowser.address'),
-              sent: t('package.core.transactionDetailBrowser.sent')
+              address: t('package.core.activityDetails.address'),
+              sent: t('package.core.activityDetails.sent')
             }}
             coinSymbol={coinSymbol}
             withSeparatorLine
@@ -322,12 +322,12 @@ export const TransactionDetails = ({
         {addrOutputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}
-            title={t('package.core.transactionDetailBrowser.outputs')}
+            title={t('package.core.activityDetails.outputs')}
             testId="tx-outputs"
             list={addrOutputs}
             translations={{
-              address: t('package.core.transactionDetailBrowser.address'),
-              sent: t('package.core.transactionDetailBrowser.sent')
+              address: t('package.core.activityDetails.address'),
+              sent: t('package.core.activityDetails.sent')
             }}
             coinSymbol={coinSymbol}
             sendAnalytics={sendAnalyticsOutputs}
@@ -335,7 +335,7 @@ export const TransactionDetails = ({
         )}
         {metadata?.length > 0 && (
           <div className={styles.metadataContainer}>
-            <div className={styles.metadataLabel}>{t('package.core.transactionDetailBrowser.metadata')}</div>
+            <div className={styles.metadataLabel}>{t('package.core.activityDetails.metadata')}</div>
             <div className={styles.detail} data-testid="tx-metadata">
               {metadata?.map((item) => (
                 <div key={item.key} className={styles.detail} data-testid={`tx-metadata-row-${item.key}`}>

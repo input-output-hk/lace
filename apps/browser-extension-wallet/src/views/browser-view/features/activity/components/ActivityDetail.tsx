@@ -83,12 +83,12 @@ interface ActivityDetailProps {
 }
 
 const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t']) => {
-  if (type === 'rewards') return t('package.core.transactionDetailBrowser.rewards');
-  if (type === 'delegation') return t('package.core.transactionDetailBrowser.delegation');
-  if (type === 'delegationRegistration') return t('package.core.transactionDetailBrowser.registration');
-  if (type === 'delegationDeregistration') return t('package.core.transactionDetailBrowser.deregistration');
-  if (type === 'incoming') return t('package.core.transactionDetailBrowser.received');
-  return t('package.core.transactionDetailBrowser.sent');
+  if (type === 'rewards') return t('package.core.activityDetails.rewards');
+  if (type === 'delegation') return t('package.core.activityDetails.delegation');
+  if (type === 'delegationRegistration') return t('package.core.activityDetails.registration');
+  if (type === 'delegationDeregistration') return t('package.core.activityDetails.deregistration');
+  if (type === 'incoming') return t('package.core.activityDetails.received');
+  return t('package.core.activityDetails.sent');
 };
 
 type TransactionDetailsProxyProps = {
@@ -214,7 +214,7 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
 
   const name =
     activityInfo.status === ActivityStatus.PENDING
-      ? t('package.core.transactionDetailBrowser.sending')
+      ? t('package.core.activityDetails.sending')
       : getTypeLabel(activityInfo.type, t);
 
   const amountTransformer = (ada: string) =>
