@@ -1106,6 +1106,7 @@
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
     "votingProcedures": {
+      "title": "Confirm Vote",
       "voterType": "Voter type",
       "procedureTitle": "Procedure",
       "actionIdTitle": "Action ID",

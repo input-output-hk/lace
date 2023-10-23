@@ -28,6 +28,10 @@ export const getTitleKey = (txType: TxType): string => {
     return 'core.drepRetirement.title';
   }
 
+  if (txType === TxType.VotingProcedures) {
+    return 'core.votingProcedures.title';
+  }
+
   return sectionTitle[DAPP_VIEWS.CONFIRM_TX];
 };
 
