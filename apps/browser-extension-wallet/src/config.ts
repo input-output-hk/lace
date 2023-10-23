@@ -38,12 +38,7 @@ const envChecks = (chosenChain: Wallet.ChainName): void => {
     throw new Error('env vars not complete');
   }
 
-  if (
-    !process.env.CEXPLORER_URL_MAINNET ||
-    !process.env.CEXPLORER_URL_PREVIEW ||
-    !process.env.CEXPLORER_URL_PREPROD ||
-    !process.env.CEXPLORER_URL_TESTNET
-  ) {
+  if (!process.env.CEXPLORER_URL_MAINNET || !process.env.CEXPLORER_URL_PREVIEW || !process.env.CEXPLORER_URL_PREPROD) {
     throw new Error('explorer vars not complete');
   }
 
@@ -85,9 +80,9 @@ export const config = (): Config => {
     },
     CEXPLORER_BASE_URL: {
       Mainnet: `${process.env.CEXPLORER_URL_MAINNET}`,
-      LegacyTestnet: `${process.env.CEXPLORER_URL_TESTNET}`,
       Preprod: `${process.env.CEXPLORER_URL_PREPROD}`,
-      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`
+      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`,
+      Sanchonet: `${process.env.CEXPLORER_URL_SANCHONET}`
     },
     CEXPLORER_URL_PATHS: {
       Tx: 'tx',

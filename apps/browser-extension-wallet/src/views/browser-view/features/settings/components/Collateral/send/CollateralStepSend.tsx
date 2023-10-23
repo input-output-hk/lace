@@ -36,7 +36,7 @@ export const CollateralStepSend = ({
   hasEnoughAda
 }: CollateralStepSendProps): JSX.Element => {
   const { t } = useTranslation();
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => {
+  const handlePasswordChange: inputProps['onChange'] = ({ target: { value } }) => {
     setIsPasswordValid(true);
     return setPassword(value);
   };
@@ -63,7 +63,7 @@ export const CollateralStepSend = ({
             <div data-testid="collateral-password" className={styles.passwordContainerCollateral}>
               <Spin spinning={false}>
                 <Password
-                  onChange={handleChange}
+                  onChange={handlePasswordChange}
                   value={password}
                   error={isPasswordValid === false}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}

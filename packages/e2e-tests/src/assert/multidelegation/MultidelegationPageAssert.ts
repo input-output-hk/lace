@@ -183,6 +183,25 @@ class MultidelegationPageAssert {
     await firstStakePool.ticker.waitForDisplayed();
     expect(await firstStakePool.ticker.getText()).to.equal(expectedTicker);
   };
+
+  assertSeeTooltipForColumn = async (columnName: string) => {
+    switch (columnName) {
+      case 'ROS':
+        await MultidelegationPage.tooltip.waitForDisplayed();
+        expect(await MultidelegationPage.tooltip.getText()).to.equal(
+          await t('browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip', 'staking')
+        );
+        break;
+      case 'Saturation':
+        await MultidelegationPage.tooltip.waitForDisplayed();
+        expect(await MultidelegationPage.tooltip.getText()).to.equal(
+          await t('browsePools.stakePoolTableBrowser.tableHeader.saturation.tooltip', 'staking')
+        );
+        break;
+      default:
+        throw new Error(`Unsupported column name: ${columnName}`);
+    }
+  };
 }
 
 export default new MultidelegationPageAssert();
