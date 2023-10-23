@@ -33,6 +33,18 @@ export class UserIdService implements UserIdServiceInterface {
     private sessionLength: number = SESSION_LENGTH
   ) {}
 
+  async init(): Promise<void> {
+    if (!this.userIdRestored) {
+      console.debug('[ANALYTICS] Restoring user ID...');
+      await this.restoreUserId();
+    }
+
+    if (!this.randomizedUserId) {
+      console.debug('[ANALYTICS] User ID not found - generating new one');
+      this.randomizedUserId = randomBytes(USER_ID_BYTE_SIZE).toString('hex');
+    }
+  }
+
   private async getWalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {
     const { keyAgentsByChain, usePersistentUserId } = await this.getStorage();
 
@@ -59,17 +71,9 @@ export class UserIdService implements UserIdServiceInterface {
     return this.walletBasedUserId;
   }
 
+  // TODO: make this method private when Motamo is not longer in use
   async getRandomizedUserId(): Promise<string> {
-    // TODO: make this method private when Motamo is not longer in use
-    if (!this.userIdRestored) {
-      console.debug('[ANALYTICS] Restoring user ID...');
-      await this.restoreUserId();
-    }
-
-    if (!this.randomizedUserId) {
-      console.debug('[ANALYTICS] User ID not found - generating new one');
-      this.randomizedUserId = randomBytes(USER_ID_BYTE_SIZE).toString('hex');
-    }
+    await this.init();
 
     console.debug(`[ANALYTICS] getId() called (current ID: ${this.randomizedUserId})`);
     return this.randomizedUserId;

@@ -65,8 +65,7 @@ export class AnalyticsTracker {
       console.debug('[ANALYTICS] no posthog client');
       return;
     }
-    const isNewSession = await this.userIdService.getIsNewSessionStarted();
-    if (isNewSession) {
+    if (await this.userIdService.getIsNewSessionStarted()) {
       await this.postHogClient?.sendSessionStartEvent();
     }
   }
