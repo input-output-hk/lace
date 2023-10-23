@@ -1,6 +1,7 @@
 import { Wallet } from '@lace/cardano';
-import { useObservable } from '@lace/common';
+import { Banner, useObservable } from '@lace/common';
 import { Box, Flex, Text } from '@lace/ui';
+import ExclamationIcon from '@lace/ui/dist/assets/icons/warning-icon-triangle.component.svg';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../delegation-card';
@@ -9,7 +10,7 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
-import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
+import { hasMinimumFundsToDelegate, hasSaturatedOrRetiredPools, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
@@ -33,6 +34,7 @@ export const OverviewPopup = () => {
     portfolioMutators: store.mutators,
   }));
   const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
+  const isPoolRetiredOrSaturated = hasSaturatedOrRetiredPools(currentPortfolio);
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -90,6 +92,17 @@ export const OverviewPopup = () => {
           <StakingNotificationBanner
             notification="portfolioDrifted"
             onPortfolioDriftedNotificationClick={expandStakingView}
+          />
+        </Box>
+      )}
+      {isPoolRetiredOrSaturated && (
+        <Box mb="$40">
+          <Banner
+            popupView
+            withIcon
+            customIcon={<ExclamationIcon />}
+            message={t('overview.banners.saturatedOrRetiredPool.title')}
+            description={t('overview.banners.saturatedOrRetiredPool.message')}
           />
         </Box>
       )}
