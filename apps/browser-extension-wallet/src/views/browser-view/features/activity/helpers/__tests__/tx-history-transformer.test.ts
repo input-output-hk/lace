@@ -4,15 +4,14 @@ const mockGetFormattedAmount = jest.fn();
 /* eslint-disable max-len */
 /* eslint-disable no-magic-numbers */
 /* eslint-disable import/imports-first */
+import * as txTransformers from '../common-tx-transformer';
 import * as txHistoryTransformers from '../tx-history-transformer';
 import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { cardanoCoin } from '@src/utils/constants';
 import * as txInspection from '@src/utils/tx-inspection';
-import * as pendingTxTransformer from '../pending-tx-transformer';
-import { TxDirection } from '@src/types';
-import { AssetActivityItemProps } from '@lace/core';
+import type { TxDirections } from '@src/types';
 
 jest.mock('@lace/cardano', () => {
   const actual = jest.requireActual<any>('@lace/cardano');
@@ -73,7 +72,12 @@ describe('Testing txHistoryTransformer function', () => {
         invalidBefore: Wallet.Cardano.Slot(1),
         invalidHereafter: Wallet.Cardano.Slot(2)
       },
-      withdrawals: [{ quantity: BigInt(2) } as Wallet.Cardano.Withdrawal]
+      withdrawals: [
+        {
+          quantity: BigInt(2),
+          stakeAddress: Wallet.Cardano.RewardAccount('stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx')
+        } as Wallet.Cardano.Withdrawal
+      ]
     },
     witness: {
       signatures: new Map()
@@ -105,8 +109,8 @@ describe('Testing txHistoryTransformer function', () => {
       protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
       cardanoCoin
     });
-    expect(result.status).toBe('success');
-    expect(result.amount).toBe('20.00 ADA');
+    expect(result[0].status).toBe('success');
+    expect(result[0].amount).toBe('20.00 ADA');
   });
 
   test('should return parsed outgoing tx', async () => {
@@ -132,31 +136,21 @@ describe('Testing txHistoryTransformer function', () => {
       protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
       cardanoCoin
     });
-    expect(result.status).toBe('success');
-    expect(result.amount).toBe('30.00 ADA');
+    expect(result[0].status).toBe('success');
+    expect(result[0].amount).toBe('30.00 ADA');
   });
 
-  test('should return tx of reward type', async () => {
+  test('should return outgoing tx with withdrawal only as outgoing tx', async () => {
     const direction = 'tx-direction';
-    const rewardsAmount = '10';
     const formattedAmount = 'getFormattedAmount';
     const formattedFiatAmount = 'getFormattedFiatAmount';
-    const transformedTx = {
-      date: 'date',
-      timestamp: 'timestamp'
-    };
     mockGetFormattedAmount.mockReturnValueOnce(formattedAmount);
     const getFormattedFiatAmountSpy = jest
-      .spyOn(pendingTxTransformer, 'getFormattedFiatAmount')
+      .spyOn(txTransformers, 'getFormattedFiatAmount')
       .mockReturnValueOnce(formattedFiatAmount);
-    const txTransformerSpy = jest
-      .spyOn(pendingTxTransformer, 'txTransformer')
-      .mockReturnValueOnce(transformedTx as unknown as Omit<AssetActivityItemProps, 'onClick'>);
-    const inspectTxTypeSpy = jest.spyOn(txInspection, 'inspectTxType').mockReturnValueOnce('self-rewards');
-    const getTxDirectionSpy = jest.spyOn(txInspection, 'getTxDirection').mockReturnValueOnce(direction as TxDirection);
-    const getRewardsAmountSpy = jest
-      .spyOn(txHistoryTransformers, 'getRewardsAmount')
-      .mockReturnValueOnce(rewardsAmount);
+    const txTransformerSpy = jest.spyOn(txTransformers, 'txTransformer');
+    const inspectTxTypeSpy = jest.spyOn(txInspection, 'inspectTxType');
+    const getTxDirectionSpy = jest.spyOn(txInspection, 'getTxDirection').mockReturnValueOnce(direction as TxDirections);
 
     const props = {
       tx: txHistory,
@@ -186,12 +180,8 @@ describe('Testing txHistoryTransformer function', () => {
       tx: props.tx
     });
     expect(getTxDirectionSpy).toBeCalledWith({
-      type: 'self-rewards'
+      type: 'outgoing'
     });
-    expect(getRewardsAmountSpy).toBeCalledWith(
-      props.tx?.body?.withdrawals,
-      props.walletAddresses.map((addr) => addr.rewardAccount)
-    );
     expect(txTransformerSpy).toBeCalledWith({
       tx: props.tx,
       walletAddresses: props.walletAddresses,
@@ -204,24 +194,13 @@ describe('Testing txHistoryTransformer function', () => {
       direction,
       date: '01 February 2022'
     });
-    expect(result).toEqual([
-      { ...transformedTx, type: 'self' },
-      {
-        type: 'rewards',
-        direction: 'Incoming',
-        amount: formattedAmount,
-        fiatAmount: formattedFiatAmount,
-        status: Wallet.TransactionStatus.SPENDABLE,
-        date: transformedTx.date,
-        assets: [],
-        timestamp: transformedTx.timestamp
-      }
-    ]);
+    expect(result.length).toBe(1);
+    expect(result[0].status).toBe('success');
+    expect(result[0].type).toBe('outgoing');
 
     txTransformerSpy.mockRestore();
     inspectTxTypeSpy.mockRestore();
     getTxDirectionSpy.mockRestore();
     getFormattedFiatAmountSpy.mockRestore();
-    getRewardsAmountSpy.mockRestore();
   });
 });

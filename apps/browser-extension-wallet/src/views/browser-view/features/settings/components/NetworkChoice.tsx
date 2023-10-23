@@ -51,8 +51,6 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
           return t('general.networks.preprod');
         case 'Preview':
           return t('general.networks.preview');
-        case 'LegacyTestnet':
-          return t('general.networks.legacyTestnet');
         default:
           return '';
       }

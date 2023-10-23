@@ -146,7 +146,7 @@ Feature: ADA handle - extended view
   @LW-5025 @LW-5028 @LW-5030
   Scenario: Extended View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on page header
-    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    And I enter "$test_handle_3" in the bundle 1 recipient's address
     Then search loader is displayed inside address input field
     And Green tick icon is displayed next to ADA handle
     And "Add address" button is enabled in the bundle 1 recipient's address input
@@ -163,7 +163,7 @@ Feature: ADA handle - extended view
   @LW-8746
   Scenario: Extended View - Send flow - Add address - Valid ADA handle
     When I click "Send" button on page header
-    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    And I enter "$test_handle_3" in the bundle 1 recipient's address
     And click "Add address" button 1 in address bar
     And I fill address form with "test handle" name
     Then Green tick icon is displayed next to ADA handle
@@ -172,7 +172,7 @@ Feature: ADA handle - extended view
   @LW-8748
   Scenario: Extended View - Send flow - Add address - Invalid ADA handle
     When I click "Send" button on page header
-    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    And I enter "$test_handle_3" in the bundle 1 recipient's address
     And click "Add address" button 1 in address bar
     And I fill address form with "test handle" name
     And I fill address form with "$fake_handle" ADA handle
