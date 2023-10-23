@@ -14,8 +14,6 @@ export interface StakingStore {
   setNoFundsVisible: (visibility: boolean) => void;
   isBuildingTx: boolean;
   setIsBuildingTx: (visibility: boolean) => void;
-  stakingError?: StakingError;
-  setStakingError: (error?: StakingError) => void;
 }
 
 export const useStakingStore = create<StakingStore>((set) => ({
@@ -27,6 +25,4 @@ export const useStakingStore = create<StakingStore>((set) => ({
   setIsBuildingTx: (visibility: boolean) => set({ isBuildingTx: visibility }),
   setNoFundsVisible: (visibility: boolean) => set({ isNoFundsVisible: visibility }),
   setStakeConfirmationVisible: (visibility: boolean) => set({ isStakeConfirmationVisible: visibility }),
-  setStakingError: (error: StakingError | undefined) => set({ stakingError: error }),
-  stakingError: undefined,
 }));

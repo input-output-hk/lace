@@ -32,9 +32,7 @@ export const StakePoolDetailsDrawer = ({
 
   const {
     backgroundServiceAPIContextSetWalletPassword,
-    delegationStoreSetDelegationTxBuilder,
     password: { password, removePassword },
-    submittingState: { setIsRestaking },
   } = useOutsideHandles();
 
   const closeDrawer = useCallback(() => {
@@ -42,18 +40,15 @@ export const StakePoolDetailsDrawer = ({
       setExitStakingVisible(true);
     } else {
       backgroundServiceAPIContextSetWalletPassword();
-      delegationStoreSetDelegationTxBuilder();
+      // delegationStoreSetDelegationTxBuilder(); // reset tx state
       removePassword();
       portfolioMutators.executeCommand({ type: 'CancelDrawer' });
     }
-    setIsRestaking(false);
   }, [
     activeDrawerStep,
     showExitConfirmation,
-    setIsRestaking,
     setExitStakingVisible,
     backgroundServiceAPIContextSetWalletPassword,
-    delegationStoreSetDelegationTxBuilder,
     removePassword,
     portfolioMutators,
   ]);

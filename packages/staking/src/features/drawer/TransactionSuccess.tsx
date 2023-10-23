@@ -15,9 +15,9 @@ type TransactionSuccessProps = {
 
 export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): React.ReactElement => {
   const { t } = useTranslation();
-  const {
-    submittingState: { isRestaking },
-  } = useOutsideHandles();
+  const { isRestaking } = useDelegationPortfolioStore((store) => ({
+    isRestaking: store.transaction?.isRestaking,
+  }));
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -32,8 +32,7 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
 
 export const TransactionSuccessFooter = ({ popupView }: TransactionSuccessProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder, walletStoreGetKeyAgentType: getKeyAgentType } =
-    useOutsideHandles();
+  const { walletStoreGetKeyAgentType: getKeyAgentType } = useOutsideHandles();
   // TODO implement analytics for the new flow
   const analytics = {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -53,7 +52,7 @@ export const TransactionSuccessFooter = ({ popupView }: TransactionSuccessProps)
         ? 'AnalyticsEventNames.Staking.STAKING_SUCCESS_POPUP'
         : 'AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER',
     });
-    setDelegationTxBuilder();
+    // setDelegationTxBuilder(); // TODO: reset tx state
     portfolioMutators.executeCommand({ type: 'CancelDrawer' });
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
     if (!isInMemory) window.location.reload();

@@ -1,9 +1,11 @@
 import { PERCENTAGE_SCALE_MAX, TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../constants';
+import { asyncEffects } from './asyncEffects';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
   AddStakePools,
   BeginSingleStaking,
   BrowsePoolsCommand,
+  BuildTx,
   CancelDrawer,
   ChangingPreferencesCommand,
   ClearSelections,
@@ -20,6 +22,8 @@ import {
   NewPortfolioConfirmationCommand,
   NewPortfolioFailureCommand,
   NewPortfolioPreferencesCommand,
+  NewPortfolioSetTransactionData,
+  NewPortfolioSetTxResultData,
   NewPortfolioSignCommand,
   NewPortfolioSuccessCommand,
   OverviewCommand,
@@ -34,6 +38,7 @@ import {
   SelectPoolFromList,
   ShowDelegatedPoolDetails,
   ShowPoolDetailsFromList,
+  SignSubmitTx,
   UnselectPoolFromDetails,
   UnselectPoolFromList,
   UpdateStakePercentage,
@@ -413,6 +418,13 @@ export const processExpandedViewCases: Handler = (params) =>
           ),
           [DrawerManagementStep.Confirmation]: cases<NewPortfolioConfirmationCommand['type']>(
             {
+              BuildTx: handler<BuildTx, StateNewPortfolio, StateNewPortfolio>(({ state, executeCommand }) => {
+                asyncEffects.buildTransaction({
+                  commandCallback: (data) => executeCommand({ data, type: 'NewPortfolioSetTransactionData' }),
+                  state,
+                });
+                return state; // TODO?: add isBuiltingTx: true
+              }),
               // eslint-disable-next-line sonarjs/no-identical-functions
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
@@ -423,12 +435,18 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Preferences,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Sign,
-                })
-              ),
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Sign,
+              })),
+              NewPortfolioSetTransactionData: handler<
+                NewPortfolioSetTransactionData,
+                StateNewPortfolio,
+                StateNewPortfolio
+              >(({ state, command: { data } }) => ({
+                ...state,
+                transaction: data,
+              })),
             },
             params.command.type,
             DrawerManagementStep.Confirmation
@@ -445,18 +463,28 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Confirmation,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
+              NewPortfolioSetTxResultData: handler<NewPortfolioSetTxResultData, StateNewPortfolio, StateNewPortfolio>(
+                ({
+                  state,
+                  command: {
+                    data: { activeDrawerStep, passwordInvalid },
+                  },
+                }) => ({
                   ...state,
-                  activeDrawerStep: DrawerManagementStep.Success,
+                  ...(activeDrawerStep ? { activeDrawerStep } : {}),
+                  transaction: {
+                    ...state.transaction,
+                    passwordInvalid,
+                  },
                 })
               ),
-              DrawerFailure: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Failure,
-                })
-              ),
+              SignSubmitTx: handler<SignSubmitTx, StateNewPortfolio, StateNewPortfolio>(({ state, executeCommand }) => {
+                asyncEffects.signSubmitTransaction({
+                  commandCallback: (data) => executeCommand({ data, type: 'NewPortfolioSetTxResultData' }),
+                  state,
+                });
+                return state; // TODO?: add isSignSubmittingTx: true
+              }),
             },
             params.command.type,
             DrawerManagementStep.Sign

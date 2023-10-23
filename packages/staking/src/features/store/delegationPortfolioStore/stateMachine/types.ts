@@ -1,5 +1,7 @@
+import { TxBuilder, TxInspection } from '@cardano-sdk/tx-construction';
 import { ObservableWallet } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
+import { StakingError } from '../../stakingStore';
 import { AdaSymbol } from '../types';
 import { Command } from './commands';
 
@@ -65,10 +67,24 @@ type BaseState = {
   activeDrawerStep?: DrawerStep;
 };
 
+export type DelegationTx = {
+  builder?: TxBuilder;
+  inspection?: TxInspection;
+  isRestaking?: boolean;
+  error?: StakingError;
+  passwordInvalid?: boolean;
+};
+
+export type SubmitTransactionResultState = {
+  passwordInvalid: boolean;
+  activeDrawerStep?: DrawerManagementStep;
+};
+
 export type SupportingData = {
   pendingSelectedPortfolio?: DraftPortfolioStakePool[];
   draftPortfolio?: DraftPortfolioStakePool[];
   viewedStakePool?: StakePoolWithLogo;
+  transaction?: DelegationTx;
 };
 
 export type CrossStateData = {
@@ -88,6 +104,7 @@ export type StateOverview = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  transaction: undefined;
 }>;
 
 export type StateCurrentPoolDetails = MakeState<{
@@ -96,6 +113,7 @@ export type StateCurrentPoolDetails = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: StakePoolWithLogo;
+  transaction: undefined;
 }>;
 
 export type StatePortfolioManagement = MakeState<{
@@ -104,6 +122,7 @@ export type StatePortfolioManagement = MakeState<{
   draftPortfolio: DraftPortfolioStakePool[];
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  transaction?: DelegationTx;
 }>;
 
 export type StateBrowsePools = MakeState<{
@@ -112,6 +131,7 @@ export type StateBrowsePools = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  transaction: undefined;
 }>;
 
 export type StatePoolDetails = MakeState<{
@@ -120,6 +140,7 @@ export type StatePoolDetails = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: StakePoolWithLogo;
+  transaction: undefined;
 }>;
 
 export type StateNewPortfolio = MakeState<{
@@ -128,6 +149,7 @@ export type StateNewPortfolio = MakeState<{
   draftPortfolio: DraftPortfolioStakePool[];
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  transaction?: DelegationTx; // how to make it available only in some step?
 }>;
 
 export type StateChangingPreferences = MakeState<{
@@ -136,6 +158,7 @@ export type StateChangingPreferences = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: DraftPortfolioStakePool[];
   viewedStakePool: undefined;
+  transaction: undefined;
 }>;
 
 export type State =

@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { create } from 'zustand';
+import { StoreApi, UseBoundStore, create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { CARDANO_COIN_SYMBOL, LAST_STABLE_EPOCH } from './constants';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
@@ -23,11 +23,16 @@ const defaultState: DelegationPortfolioState = {
   inMemoryWallet: undefined,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
+  transaction: undefined,
   view: undefined,
   viewedStakePool: undefined,
 };
 
-export const useDelegationPortfolioStore = create(
+// TODO: remove, but currently throws error that inferred type definition is too long
+type Tmp = UseBoundStore<StoreApi<DelegationPortfolioStore>>;
+
+// @ts-ignore
+export const useDelegationPortfolioStore: Tmp = create(
   immer<DelegationPortfolioStore>((set, get) => ({
     ...defaultState,
     mutators: {
@@ -48,27 +53,24 @@ export const useDelegationPortfolioStore = create(
           processCommand = processExpandedViewCases;
         }
 
-        set((state) => {
-          // TODO: decide whether to throw this function away
-          //  as we may not want to execute command from inside the SM
-          const executeCommand: ExecuteCommand = (childCommand) => {
-            paramsStack = [...paramsStack, childCommand];
-            numberOfRecursiveCalls += 1;
-            if (numberOfRecursiveCalls > callsConsideredAnInfiniteLoop) {
-              const error = new Error('DelegationPortfolioStore: Infinite loop detected');
-              throw Object.assign(error, { paramsStack });
-            }
-            // eslint-disable-next-line sonarjs/no-extra-arguments
-            return processCommand({
-              command: childCommand,
-              executeCommand,
-              state,
-            });
-          };
+        const executeCommand: ExecuteCommand = (childCommand) => {
+          paramsStack = [...paramsStack, childCommand];
+          numberOfRecursiveCalls += 1;
+          if (numberOfRecursiveCalls > callsConsideredAnInfiniteLoop) {
+            const error = new Error('DelegationPortfolioStore: Infinite loop detected');
+            throw Object.assign(error, { paramsStack });
+          }
+          const state = get(); // necessary to request new state on every recursion call (otherwise crashes)
+          // eslint-disable-next-line sonarjs/no-extra-arguments, sonarjs/no-use-of-empty-return-value
+          const newState = processCommand({
+            command: childCommand,
+            executeCommand,
+            state,
+          });
+          set(newState);
+        };
 
-          // eslint-disable-next-line sonarjs/no-extra-arguments
-          return processCommand({ command, executeCommand, state });
-        });
+        executeCommand(command);
       },
       forceAbortFlows: () =>
         set((state) => {

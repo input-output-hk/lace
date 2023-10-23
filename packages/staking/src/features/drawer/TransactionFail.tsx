@@ -1,7 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import { Button } from '@lace/common';
 import cn from 'classnames';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
@@ -30,10 +30,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
     walletManagerExecuteWithPassword: executeWithPassword,
-    delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
-    delegationStoreDelegationTxBuilder: delegationTxBuilder,
     password: { password, removePassword },
-    walletStoreInMemoryWallet: inMemoryWallet,
   } = useOutsideHandles();
   // TODO implement analytics for the new flow
   const analytics = {
@@ -53,21 +50,15 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
         ? 'AnalyticsEventNames.Staking.STAKING_FAIL_POPUP'
         : 'AnalyticsEventNames.Staking.STAKING_FAIL_BROWSER',
     });
-    setDelegationTxBuilder();
+    // setDelegationTxBuilder(); // TODO: reset tx state
     portfolioMutators.executeCommand({ type: 'CancelDrawer' });
   };
 
-  // TODO unify
-  const signAndSubmitTransaction = useCallback(async () => {
-    if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
-    const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx.tx);
-  }, [delegationTxBuilder, inMemoryWallet]);
-
+  // TODO: handle loading, password removal
   const onSubmit = async () => {
     setIsLoading(true);
     try {
-      await signAndSubmitTransaction();
+      portfolioMutators.executeCommand({ type: 'SignSubmitTx' });
       setIsLoading(false);
       portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       removePassword();

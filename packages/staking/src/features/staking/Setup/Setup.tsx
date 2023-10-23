@@ -1,4 +1,5 @@
 import { useObservable } from '@lace/common';
+import isNil from 'lodash/isNil';
 import { useEffect } from 'react';
 import { initI18n } from '../../i18n';
 import '../reset.css';
@@ -20,9 +21,14 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
   const currentEpoch = useObservable(walletStoreInMemoryWallet.currentEpoch$);
   const delegationRewardsHistory = useObservable(walletStoreInMemoryWallet.delegation.rewardsHistory$);
+  const loading =
+    isNil(walletStoreInMemoryWallet.protocolParameters$) || isNil(walletStoreInMemoryWallet.delegation.rewardAccounts$);
 
   useEffect(() => {
-    if (![delegationDistribution, delegationRewardsHistory, currentEpoch].every(Boolean)) return;
+    // TODO: handle more elegantly, this is a hack to make sure the tx builder is initialized
+    if (loading || !walletStoreInMemoryWallet.createTxBuilder) return;
+    if (![delegationDistribution, delegationRewardsHistory, currentEpoch, walletStoreInMemoryWallet].every(Boolean))
+      return;
     portfolioMutators.setCardanoCoinSymbol(currentChain);
     portfolioMutators.setInMemoryWallet(walletStoreInMemoryWallet);
     portfolioMutators.setCurrentPortfolio({
@@ -39,6 +45,7 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     currentChain,
     view,
     walletStoreInMemoryWallet,
+    loading,
   ]);
 
   return (

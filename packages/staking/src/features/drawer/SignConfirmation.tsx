@@ -1,7 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import { Button, Password, inputProps } from '@lace/common';
 import cn from 'classnames';
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
@@ -15,8 +15,10 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
   const { t } = useTranslation();
   const {
     password: { password, setPassword },
-    submittingState: { isPasswordValid },
   } = useOutsideHandles();
+  const { passwordInvalid } = useDelegationPortfolioStore((store) => ({
+    passwordInvalid: store.transaction?.passwordInvalid,
+  }));
 
   const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
 
@@ -39,7 +41,7 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
             onChange={handleChange}
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             value={password!}
-            error={isPasswordValid === false}
+            error={passwordInvalid === true}
             errorMessage={t('drawer.sign.error.invalidPassword')}
             label={t('drawer.sign.passwordPlaceholder')}
             autoFocus
@@ -52,30 +54,21 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
 
 export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): ReactElement => {
   const {
-    walletStoreInMemoryWallet: inMemoryWallet,
     password: { password, removePassword },
-    submittingState: { setSubmitingTxState, isSubmitingTx, setIsRestaking },
-    delegationStoreDelegationTxBuilder: delegationTxBuilder,
     walletManagerExecuteWithPassword: executeWithPassword,
   } = useOutsideHandles();
-  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
-    currentPortfolio: store.currentPortfolio,
+  const { portfolioMutators, passwordInvalid } = useDelegationPortfolioStore((store) => ({
+    passwordInvalid: store.transaction?.passwordInvalid,
     portfolioMutators: store.mutators,
   }));
   const { t } = useTranslation();
 
-  const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
+  const [isSubmittingTx, setIsSubmittingTx] = useState(false);
+  const isSubmitDisabled = useMemo(() => isSubmittingTx || !password, [isSubmittingTx, password]);
 
   const cleanPasswordInput = useCallback(() => {
     removePassword();
   }, [removePassword]);
-
-  // TODO unify
-  const signAndSubmitTransaction = useCallback(async () => {
-    if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
-    const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx.tx);
-  }, [delegationTxBuilder, inMemoryWallet]);
 
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
@@ -94,43 +87,26 @@ export const SignConfirmationFooter = ({ popupView }: SignConfirmationProps): Re
   }, [popupView]);
 
   const handleVerifyPass = useCallback(async () => {
-    setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
-    try {
-      await signAndSubmitTransaction();
+    setIsSubmittingTx(true); // TODO: move to store, doesnt work
+    portfolioMutators.executeCommand({ type: 'SignSubmitTx' });
+    sendAnalytics();
+    setIsSubmittingTx(false); // TODO: move to store, doesnt work
+  }, [sendAnalytics, portfolioMutators]);
+
+  useEffect(() => {
+    if (isSubmittingTx && passwordInvalid === false) {
       cleanPasswordInput();
-      sendAnalytics();
-      setIsRestaking(currentPortfolio.length > 0);
-      portfolioMutators.executeCommand({ type: 'DrawerContinue' });
-      setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
-    } catch (error) {
-      // Error name is 'AuthenticationError' in dev build but 'W' in prod build
-      // @ts-ignore TODO
-      if (error.message?.includes('Authentication failure')) {
-        setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
-      } else {
-        cleanPasswordInput();
-        portfolioMutators.executeCommand({ type: 'DrawerFailure' });
-        setSubmitingTxState({ isSubmitingTx: false });
-      }
     }
-  }, [
-    setSubmitingTxState,
-    signAndSubmitTransaction,
-    cleanPasswordInput,
-    sendAnalytics,
-    setIsRestaking,
-    currentPortfolio.length,
-    portfolioMutators,
-  ]);
+  }, [isSubmittingTx, passwordInvalid, cleanPasswordInput]);
 
   return (
     <div className={styles.footer}>
       <Button
         data-testid="stake-sign-confirmation-btn"
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        onClick={() => executeWithPassword(password!, handleVerifyPass)}
+        onClick={() => executeWithPassword(password!, handleVerifyPass)} // move to machine
         disabled={isSubmitDisabled}
-        loading={isSubmitingTx}
+        loading={isSubmittingTx}
         className={styles.confirmBtn}
         size="large"
       >

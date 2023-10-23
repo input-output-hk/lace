@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { StakePoolWithLogo } from './types';
+import { DelegationTx, StakePoolWithLogo, SubmitTransactionResultState } from './types';
 
 export type CancelDrawer = {
   type: 'CancelDrawer';
@@ -96,6 +96,24 @@ export type DrawerFailure = {
   type: 'DrawerFailure';
 };
 
+export type BuildTx = {
+  type: 'BuildTx';
+};
+
+export type NewPortfolioSetTransactionData = {
+  type: 'NewPortfolioSetTransactionData';
+  data: DelegationTx;
+};
+
+export type SignSubmitTx = {
+  type: 'SignSubmitTx';
+};
+
+export type NewPortfolioSetTxResultData = {
+  type: 'NewPortfolioSetTxResultData';
+  data: SubmitTransactionResultState;
+};
+
 export type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools;
 
 export type BrowsePoolsCommand =
@@ -134,9 +152,14 @@ export type NewPortfolioPreferencesCommand =
   | RemoveStakePool
   | UpdateStakePercentage;
 
-export type NewPortfolioConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type NewPortfolioConfirmationCommand =
+  | CancelDrawer
+  | DrawerContinue
+  | DrawerBack
+  | BuildTx
+  | NewPortfolioSetTransactionData;
 
-export type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
+export type NewPortfolioSignCommand = CancelDrawer | SignSubmitTx | NewPortfolioSetTxResultData | DrawerBack;
 
 export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
 

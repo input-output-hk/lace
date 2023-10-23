@@ -26,6 +26,7 @@ export const atomicStateMutators = {
       activeFlow: Flow.BrowsePools,
       draftPortfolio: undefined,
       selectedPortfolio: ejectDraftFromCurrentPortfolio(state.draftPortfolio),
+      transaction: undefined, // move elsewhere
     } as const;
   },
   beginNewPortfolioCreation: ({ selections }: { selections: DraftPortfolioStakePool[] }) => {
@@ -55,6 +56,7 @@ export const atomicStateMutators = {
   cancelDrawer: <F extends Flow.Overview | Flow.BrowsePools>({ targetFlow }: { state: State; targetFlow: F }) => ({
     activeDrawerStep: undefined,
     activeFlow: targetFlow,
+    transaction: undefined, // move elsewhere
   }),
   removePoolFromPreferences: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
