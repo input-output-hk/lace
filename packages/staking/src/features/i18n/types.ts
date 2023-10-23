@@ -181,6 +181,10 @@ type KeysStructure = {
         title: '';
         message: '';
       };
+      saturatedOrRetiredPool: {
+        title: '';
+        message: '';
+      };
     };
     stakingInfoCard: {
       fee: '';
@@ -190,6 +194,7 @@ type KeysStructure = {
       totalRewards: '';
       totalStaked: '';
       poolRetired: '';
+      poolRetiring: '';
       poolSaturated: '';
       tooltipFiatLabel: '';
     };
