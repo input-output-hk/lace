@@ -1,5 +1,6 @@
+import { PostHogAction } from '@lace/common';
 import { Button, Card, Flex, Text } from '@lace/ui';
-import { PostHogAction, useOutsideHandles } from 'features/outside-handles-provider';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from '../staking/arrow-right.svg';
 import { Flow, MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';

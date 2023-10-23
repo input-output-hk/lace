@@ -1,10 +1,10 @@
 /* eslint-disable react/no-multi-comp */
 import { Wallet } from '@lace/cardano';
-import { Button } from '@lace/common';
+import { Button, PostHogAction } from '@lace/common';
 import cn from 'classnames';
 import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PostHogAction, useOutsideHandles } from '../outside-handles-provider';
+import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { ResultMessage } from './ResultMessage';
 import styles from './TransactionComplete.module.scss';
@@ -22,8 +22,7 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
 
   useEffect(() => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayView);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [analytics]);
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

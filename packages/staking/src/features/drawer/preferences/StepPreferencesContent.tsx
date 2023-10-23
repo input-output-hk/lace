@@ -1,9 +1,10 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import { Wallet } from '@lace/cardano';
+import { PostHogAction } from '@lace/common';
 import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard, DelegationStatus } from '../../delegation-card';
-import { PostHogAction, useOutsideHandles } from '../../outside-handles-provider';
+import { useOutsideHandles } from '../../outside-handles-provider';
 import {
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,

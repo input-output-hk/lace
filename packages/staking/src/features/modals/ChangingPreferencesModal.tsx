@@ -1,4 +1,5 @@
-import { PostHogAction, useOutsideHandles } from 'features/outside-handles-provider';
+import { PostHogAction } from '@lace/common';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flow, useDelegationPortfolioStore } from '../store';

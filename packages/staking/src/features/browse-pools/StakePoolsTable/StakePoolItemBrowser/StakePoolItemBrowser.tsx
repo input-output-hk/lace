@@ -1,13 +1,13 @@
 /* eslint-disable no-magic-numbers */
 import { Wallet } from '@lace/cardano';
-import { Ellipsis } from '@lace/common';
+import { Ellipsis, PostHogAction } from '@lace/common';
 import { Button } from '@lace/ui';
 import { Tooltip } from 'antd';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PostHogAction, useOutsideHandles } from '../../../outside-handles-provider';
+import { useOutsideHandles } from '../../../outside-handles-provider';
 import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } from '../../../store';
 import styles from './StakePoolItemBrowser.module.scss';
 

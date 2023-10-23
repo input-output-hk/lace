@@ -1,7 +1,8 @@
+import { PostHogAction } from '@lace/common';
 import { SubNavigation } from '@lace/ui';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PostHogAction, useOutsideHandles } from '../outside-handles-provider';
+import { useOutsideHandles } from '../outside-handles-provider';
 import { Flow, useDelegationPortfolioStore } from '../store';
 
 export enum Page {

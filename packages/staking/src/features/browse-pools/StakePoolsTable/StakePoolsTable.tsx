@@ -1,10 +1,10 @@
 import { Wallet } from '@lace/cardano';
-import { Search, getRandomIcon } from '@lace/common';
+import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box, Flex } from '@lace/ui';
 import debounce from 'lodash/debounce';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PostHogAction, StateStatus, useOutsideHandles } from '../../outside-handles-provider';
+import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../store';
 import styles from './StakePoolsTable.module.scss';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';

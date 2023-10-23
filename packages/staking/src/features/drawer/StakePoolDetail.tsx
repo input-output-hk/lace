@@ -1,12 +1,12 @@
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Ellipsis } from '@lace/common';
+import { Ellipsis, PostHogAction } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PostHogAction, useOutsideHandles } from '../outside-handles-provider';
+import { useOutsideHandles } from '../outside-handles-provider';
 import {
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,

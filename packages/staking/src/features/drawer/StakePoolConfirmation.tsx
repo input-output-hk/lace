@@ -2,14 +2,14 @@
 import Icon from '@ant-design/icons';
 import { InputSelectionFailure } from '@cardano-sdk/input-selection';
 import { Wallet } from '@lace/cardano';
-import { Banner, Button, Ellipsis, useObservable } from '@lace/common';
+import { Banner, Button, Ellipsis, PostHogAction, useObservable } from '@lace/common';
 import { RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
 import { Skeleton } from 'antd';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Balance, CurrencyInfo, PostHogAction, useOutsideHandles } from '../outside-handles-provider';
+import { Balance, CurrencyInfo, useOutsideHandles } from '../outside-handles-provider';
 import { DraftPortfolioStakePool, StakingError, useDelegationPortfolioStore, useStakingStore } from '../store';
 import ArrowDown from './arrow-down.svg';
 import Cardano from './cardano-blue.png';

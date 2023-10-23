@@ -1,9 +1,9 @@
 /* eslint-disable react/no-multi-comp */
-import { Button, Password, inputProps } from '@lace/common';
+import { Button, Password, PostHogAction, inputProps } from '@lace/common';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PostHogAction, useOutsideHandles } from '../outside-handles-provider';
+import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import styles from './SignConfirmation.module.scss';
 
