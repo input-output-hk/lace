@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { Box, Cell, Grid, Flex, Metadata, MetadataLink, Text, Divider, sx } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../DappInfo';
-import { ErrorPane } from '@lace/common';
+import { ErrorPane, Ellipsis } from '@lace/common';
 
 type VotingProcedure = {
   voter: {
@@ -80,7 +80,7 @@ export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }:
               <Divider my={'$16'} />
             </Cell>
             {votes.map(({ actionId, votingProcedure }) => (
-              <Fragment key={votingProcedure.anchor.hash}>
+              <Fragment key={`${actionId.txHash}${actionId.index}`}>
                 <Cell>
                   <Text.Body.Normal className={textCss} weight="$bold">
                     {indexCounter(translations.procedureTitle, idx, votes.length)}
