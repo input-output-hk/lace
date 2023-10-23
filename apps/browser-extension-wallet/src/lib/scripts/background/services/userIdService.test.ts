@@ -70,7 +70,7 @@ describe('userIdService', () => {
       };
       const { getStorageMock, setStorageMock } = generateStorageMocks(store);
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
-      userIdService.init();
+      await userIdService.init();
       await userIdService.makeTemporary();
       expect(setStorageMock).toHaveBeenCalledWith({
         usePersistentUserId: false,
@@ -96,7 +96,7 @@ describe('userIdService', () => {
       const { getStorageMock, setStorageMock } = generateStorageMocks(store);
 
       const userIdService = new UserIdService(getStorageMock, setStorageMock);
-      userIdService.init();
+      await userIdService.init();
       await userIdService.makeTemporary();
 
       // simulate an almost session timeout

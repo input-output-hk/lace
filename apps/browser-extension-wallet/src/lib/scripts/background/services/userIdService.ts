@@ -24,7 +24,7 @@ export class UserIdService implements UserIdServiceInterface {
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
   public userTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
-  private lastStartSessionEventSent = false;
+  private hasNewSessionStarted = false;
 
   constructor(
     private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
@@ -101,7 +101,7 @@ export class UserIdService implements UserIdServiceInterface {
     this.walletBasedUserId = undefined;
     this.userTrackingType$.next(UserTrackingType.Basic);
     this.clearSessionTimeout();
-    this.lastStartSessionEventSent = false;
+    this.hasNewSessionStarted = false;
     await this.clearStorage(['userId', 'usePersistentUserId']);
   }
 
@@ -150,7 +150,7 @@ export class UserIdService implements UserIdServiceInterface {
       if (this.userTrackingType$.value === UserTrackingType.Basic) {
         this.randomizedUserId = undefined;
       }
-      this.lastStartSessionEventSent = false;
+      this.hasNewSessionStarted = false;
     }, this.sessionLength);
   }
 
@@ -166,9 +166,9 @@ export class UserIdService implements UserIdServiceInterface {
     return hashExtendedAccountPublicKey(hash);
   }
 
-  async getIsNewSessionStarted(): Promise<boolean> {
-    const shouldSendNewSessionEvent = !this.lastStartSessionEventSent;
-    this.lastStartSessionEventSent = true;
+  async isNewSession(): Promise<boolean> {
+    const shouldSendNewSessionEvent = !this.hasNewSessionStarted;
+    this.hasNewSessionStarted = true;
     return shouldSendNewSessionEvent;
   }
 }
