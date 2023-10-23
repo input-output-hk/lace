@@ -167,7 +167,6 @@ describe('AnalyticsTracker', () => {
       const event = PostHogAction.OnboardingCreateClick;
       await tracker.sendEventToPostHog(event);
       expect(mockedPostHogClient.sendSessionStartEvent).toHaveBeenCalled();
-      // eslint-disable-next-line no-magic-numbers
       expect(mockedPostHogClient.sendEvent).toHaveBeenCalledWith(event, {});
     });
   });
