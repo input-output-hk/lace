@@ -2,8 +2,7 @@ import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
 import React, { useCallback, useEffect } from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
-import { useDelegationStore } from '@src/features/delegation/stores';
-import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
+import { usePassword } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
 import { SectionTitle } from '@components/Layout/SectionTitle';
@@ -17,10 +16,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { setWalletPassword, handleOpenBrowser } = useBackgroundServiceAPIContext();
-  const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const password = usePassword();
-  const submittingState = useSubmitingState();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
   const stakingRewards = useStakingRewards();
@@ -86,15 +83,10 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,
-        delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
-        delegationStoreDelegationTxBuilder: delegationTxBuilder,
-        delegationStoreSetDelegationTxFee: setDelegationTxFee,
-        delegationStoreDelegationTxFee: delegationTxFee,
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
         password,
         stakingRewards,
-        submittingState,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,

@@ -2,8 +2,7 @@ import { OutsideHandlesProvider, Staking } from '@lace/staking';
 import React, { useCallback } from 'react';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useWalletManager } from '@hooks';
-import { useDelegationStore } from '@src/features/delegation/stores';
-import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
+import { usePassword } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
 import { useWalletActivities } from '@hooks/useWalletActivities';
@@ -13,10 +12,8 @@ const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
   const { setWalletPassword } = useBackgroundServiceAPIContext();
-  const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const password = usePassword();
-  const submittingState = useSubmitingState();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
   const {
@@ -72,14 +69,9 @@ export const MultiDelegationStaking = (): JSX.Element => {
       {...{
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         balancesBalance: balance,
-        delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
-        delegationStoreDelegationTxBuilder: delegationTxBuilder,
-        delegationStoreSetDelegationTxFee: setDelegationTxFee,
-        delegationStoreDelegationTxFee: delegationTxFee,
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
         password,
-        submittingState,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,

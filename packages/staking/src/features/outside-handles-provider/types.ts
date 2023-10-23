@@ -1,4 +1,3 @@
-import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
 import { AssetActivityListProps } from '@lace/core';
 
@@ -15,14 +14,6 @@ export type Balance = {
 export interface CurrencyInfo {
   code: string;
   symbol: string;
-}
-
-export interface SubmittingState {
-  isRestaking: boolean;
-  setIsRestaking: (param: boolean) => void;
-  setSubmitingTxState: (args: { isSubmitingTx?: boolean; isPasswordValid?: boolean }) => void;
-  isSubmitingTx?: boolean;
-  isPasswordValid?: boolean;
 }
 
 export interface PasswordHook {
@@ -57,10 +48,6 @@ export type OutsideHandlesContextValue = {
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   expandStakingView?: () => void;
   balancesBalance?: Balance;
-  delegationStoreSetDelegationTxBuilder: (txBuilder?: TxBuilder) => void;
-  delegationStoreSetDelegationTxFee: (fee?: string) => void;
-  delegationStoreDelegationTxFee?: string;
-  delegationStoreDelegationTxBuilder?: TxBuilder;
   fetchCoinPricePriceResult: {
     cardano: {
       price: number;
@@ -69,7 +56,6 @@ export type OutsideHandlesContextValue = {
   };
   openExternalLink: (href: string) => void;
   password: PasswordHook;
-  submittingState: SubmittingState;
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletActivities: AssetActivityListProps[];

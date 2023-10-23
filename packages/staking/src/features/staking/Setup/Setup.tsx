@@ -24,13 +24,22 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
   useEffect(() => {
     if (![delegationDistribution, delegationRewardsHistory, currentEpoch].every(Boolean)) return;
     portfolioMutators.setCardanoCoinSymbol(currentChain);
+    portfolioMutators.setInMemoryWallet(walletStoreInMemoryWallet);
     portfolioMutators.setCurrentPortfolio({
       currentEpoch,
       delegationDistribution: [...delegationDistribution.values()],
       delegationRewardsHistory,
     });
     portfolioMutators.setView(view);
-  }, [delegationDistribution, delegationRewardsHistory, currentEpoch, portfolioMutators, currentChain, view]);
+  }, [
+    delegationDistribution,
+    delegationRewardsHistory,
+    currentEpoch,
+    portfolioMutators,
+    currentChain,
+    view,
+    walletStoreInMemoryWallet,
+  ]);
 
   return (
     <SetupBase {...rest} loading={!balancesBalance?.total?.coinBalance}>

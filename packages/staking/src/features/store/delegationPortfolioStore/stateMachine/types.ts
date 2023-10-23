@@ -1,3 +1,4 @@
+import { ObservableWallet } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
 import { AdaSymbol } from '../types';
 import { Command } from './commands';
@@ -74,6 +75,7 @@ export type CrossStateData = {
   cardanoCoinSymbol: AdaSymbol;
   currentPortfolio: CurrentPortfolioStakePool[];
   selectedPortfolio: DraftPortfolioStakePool[];
+  inMemoryWallet?: ObservableWallet;
 };
 
 type StateMachineSpecificState = BaseState & SupportingData;

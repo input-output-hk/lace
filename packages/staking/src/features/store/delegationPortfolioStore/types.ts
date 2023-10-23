@@ -1,4 +1,4 @@
-import { DelegatedStake } from '@cardano-sdk/wallet';
+import { DelegatedStake, ObservableWallet } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
 import { ExecuteCommand, State } from './stateMachine';
 
@@ -18,6 +18,7 @@ export type DelegationPortfolioStore = DelegationPortfolioState & {
       currentEpoch: Wallet.EpochInfo;
       delegationRewardsHistory: Wallet.RewardsHistory;
     }) => Promise<void>;
+    setInMemoryWallet: (wallet: ObservableWallet) => void;
     setView: (view: 'popup' | 'expanded') => void;
   };
 };

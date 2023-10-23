@@ -20,6 +20,7 @@ const defaultState: DelegationPortfolioState = {
   cardanoCoinSymbol: 'ADA',
   currentPortfolio: [],
   draftPortfolio: undefined,
+  inMemoryWallet: undefined,
   pendingSelectedPortfolio: undefined,
   selectedPortfolio: [],
   view: undefined,
@@ -126,6 +127,10 @@ export const useDelegationPortfolioStore = create(
           state.currentPortfolio = currentPortfolio;
         });
       },
+      setInMemoryWallet: (inMemoryWallet) =>
+        set((state) => {
+          state.inMemoryWallet = inMemoryWallet;
+        }),
       setView: (view) =>
         set((state) => {
           state.view = view;
