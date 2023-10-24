@@ -143,7 +143,15 @@ export const getOwnRetirementMessageKey = (isOwnRetirement: boolean | undefined)
   return isOwnRetirement ? 'core.drepRetirement.isOwnRetirement' : 'core.drepRetirement.isNotOwnRetirement';
 };
 
+const isDRepRegistrationCertificate = (type: Wallet.Cardano.CertificateType) =>
+  type === Wallet.Cardano.CertificateType.RegisterDelegateRepresentative;
+
+export const getDRepCertificate = (
+  tx: Wallet.Cardano.Tx
+): Wallet.Cardano.RegisterDelegateRepresentativeCertificate | undefined =>
+  tx?.body.certificates.find(({ __typename }) => isDRepRegistrationCertificate(__typename)) as
+    | Wallet.Cardano.RegisterDelegateRepresentativeCertificate
+    | undefined;
+
 export const isDRepRegistration = (tx: Wallet.Cardano.Tx | undefined): boolean =>
-  tx?.body.certificates.some(
-    ({ __typename }) => __typename === Wallet.Cardano.CertificateType.RegisterDelegateRepresentative
-  );
+  tx?.body.certificates.some(({ __typename }) => isDRepRegistrationCertificate(__typename));
