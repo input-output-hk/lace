@@ -1121,12 +1121,6 @@
       "isOwnRetirement": "This is your DRep retirement.",
       "isNotOwnRetirement": "The presented DRepID does not match your wallet's DRepID."
     },
-    "drepRetirement": {
-      "title": "Confirm DRep retirement",
-      "metadata": "Metadata",
-      "drepId": "DRep ID",
-      "depositReturned": "Deposit returned"
-    },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"
     },
