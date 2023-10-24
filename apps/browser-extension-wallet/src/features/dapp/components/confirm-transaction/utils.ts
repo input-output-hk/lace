@@ -8,6 +8,8 @@ import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
 import { sectionTitle, DAPP_VIEWS } from '../../config';
 
+const { CertificateType } = Wallet.Cardano;
+
 const DAPP_TOAST_DURATION = 50;
 
 export enum TxType {
@@ -16,6 +18,7 @@ export enum TxType {
   Burn = 'Burn',
   DRepRegistration = 'DRepRegistration',
   DRepRetirement = 'DRepRetirement',
+  VoteDelegation = 'VoteDelegation',
   VotingProcedures = 'VotingProcedures'
 }
 
@@ -26,6 +29,10 @@ export const getTitleKey = (txType: TxType): string => {
 
   if (txType === TxType.DRepRetirement) {
     return 'core.drepRetirement.title';
+  }
+
+  if (txType === TxType.VoteDelegation) {
+    return 'core.voteDelegation.title';
   }
 
   if (txType === TxType.VotingProcedures) {
@@ -79,25 +86,10 @@ export const getTransactionAssetsId = (outputs: CardanoTxOut[]): Wallet.Cardano.
   return assetIds;
 };
 
-const isDRepRegistrationCertificate = (type: Wallet.Cardano.CertificateType) =>
-  type === Wallet.Cardano.CertificateType.RegisterDelegateRepresentative;
-
-const isDRepRetirementCertificate = (type: Wallet.Cardano.CertificateType) =>
-  type === Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative;
-
-export const dRepRegistrationInspector = (
-  tx: Wallet.Cardano.Tx
-): Wallet.Cardano.RegisterDelegateRepresentativeCertificate | undefined =>
-  tx?.body?.certificates?.find(({ __typename }) => isDRepRegistrationCertificate(__typename)) as
-    | Wallet.Cardano.RegisterDelegateRepresentativeCertificate
-    | undefined;
-
-export const dRepRetirementInspector = (
-  tx: Wallet.Cardano.Tx
-): Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate | undefined =>
-  tx?.body?.certificates?.find(({ __typename }) => isDRepRetirementCertificate(__typename)) as
-    | Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate
-    | undefined;
+export const certificateInspectorFactory =
+  <T extends Wallet.Cardano.Certificate>(type: Wallet.Cardano.CertificateType) =>
+  (tx: Wallet.Cardano.Tx): T | undefined =>
+    tx?.body?.certificates?.find((certificate) => certificate.__typename === type) as T | undefined;
 
 export const votingProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano.VotingProcedures | undefined =>
   tx?.body?.votingProcedures;
@@ -106,12 +98,13 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
     burned: assetsBurnedInspector,
-    dRepRegistration: dRepRegistrationInspector,
-    dRepRetirement: dRepRetirementInspector,
-    votingProcedures: votingProceduresInspector
+    votingProcedures: votingProceduresInspector,
+    dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
+    dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative),
+    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation)
   });
 
-  const { minted, burned, dRepRegistration, dRepRetirement, votingProcedures } = inspector(
+  const { minted, burned, dRepRegistration, dRepRetirement, voteDelegation, votingProcedures } = inspector(
     tx as Wallet.Cardano.HydratedTx
   );
   const isMintTransaction = minted.length > 0;
@@ -135,6 +128,10 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
 
   if (dRepRetirement) {
     return TxType.DRepRetirement;
+  }
+
+  if (voteDelegation) {
+    return TxType.VoteDelegation;
   }
 
   return TxType.Send;

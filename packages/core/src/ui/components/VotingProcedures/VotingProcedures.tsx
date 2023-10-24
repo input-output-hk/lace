@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { Box, Cell, Grid, Flex, Metadata, MetadataLink, Text, Divider, sx } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../DappInfo';
-import { ErrorPane, Ellipsis } from '@lace/common';
+import { ErrorPane } from '@lace/common';
 
 type VotingProcedure = {
   voter: {
