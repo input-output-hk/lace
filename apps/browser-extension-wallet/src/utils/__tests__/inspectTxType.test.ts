@@ -33,7 +33,6 @@ describe('testing tx-inspection utils', () => {
       expect(getTxDirection({ type: 'incoming' })).toEqual(TxDirections.Incoming);
       expect(getTxDirection({ type: 'rewards' })).toEqual(TxDirections.Outgoing);
       expect(getTxDirection({ type: 'outgoing' })).toEqual(TxDirections.Outgoing);
-      expect(getTxDirection({ type: 'self-rewards' })).toEqual(TxDirections.Self);
       expect(getTxDirection({ type: 'self' })).toEqual(TxDirections.Self);
     });
   });
@@ -206,27 +205,7 @@ describe('testing tx-inspection utils', () => {
         ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
-      expect(result).toBe('rewards');
-    });
-
-    test('is incoming rewards', () => {
-      const withdrawalTX = buildMockTx({
-        withdrawals: [
-          {
-            stakeAddress: REWARD_ACCOUNT,
-            quantity: BigInt(2_000_000)
-          }
-        ]
-      });
-
-      const result = inspectTxType({
-        tx: withdrawalTX,
-        walletAddresses: [
-          { address: ADDRESS_2, rewardAccount: REWARD_ACCOUNT }
-        ] as Wallet.KeyManagement.GroupedAddress[]
-      });
-
-      expect(result).toBe('rewards');
+      expect(result).toBe('outgoing');
     });
 
     test('is self rewards', () => {
@@ -258,7 +237,7 @@ describe('testing tx-inspection utils', () => {
         ] as Wallet.KeyManagement.GroupedAddress[]
       });
 
-      expect(result).toBe('self-rewards');
+      expect(result).toBe('self');
     });
 
     test('is self', () => {

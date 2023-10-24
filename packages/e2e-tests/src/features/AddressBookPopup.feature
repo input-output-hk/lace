@@ -110,7 +110,7 @@ Feature: Address book - popup view
     And "Save address" button is disabled on "Add new address" drawer
     When I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    Then I see a toast with message: "Address added"
     And I see address row with name "<wallet_name>" and address "<wallet_address>" on the list in popup mode
     Examples:
       | wallet_name          | wallet_address |
