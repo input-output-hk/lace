@@ -1113,6 +1113,22 @@
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
+    "drepRegistration": {
+      "title": "Confirm DRep Registration",
+      "metadata": "Metadata",
+      "url": "URL",
+      "hash": "Hash",
+      "drepId": "Drep ID",
+      "depositPaid": "Deposit paid"
+    },
+    "drepRetirement": {
+      "title": "Confirm DRep Retirement",
+      "metadata": "Metadata",
+      "drepId": "Drep ID",
+      "depositReturned": "Deposit returned",
+      "isOwnRetirement": "This is your DRep retirement.",
+      "isNotOwnRetirement": "The presented DRepID does not match your wallet's DRepID."
+    },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"
     },

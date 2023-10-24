@@ -1,5 +1,5 @@
-@import '../../../../../../packages/common/src/ui/styles/theme.scss';
-@import '../../../../src/styles/rules/flex.scss';
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../src/styles/rules/flex.scss';
 
 .actions {
   display: flex;
@@ -20,7 +20,7 @@
   gap: size_unit(1);
   padding: size_unit(2) size_unit(3) size_unit(2) size_unit(3);
   border-top: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  margin: 0 size_unit(-3) size_unit(-2) size_unit(-3);
+  margin: size_unit(4) size_unit(-3) size_unit(-2) size_unit(-3);
   position: sticky;
   bottom: 0;
   .actionBtn {
