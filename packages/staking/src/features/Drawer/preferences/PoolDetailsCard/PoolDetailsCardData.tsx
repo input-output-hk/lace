@@ -6,7 +6,7 @@ import * as styles from './PoolDetailsCardData.css';
 
 interface PoolDetailsCardProps {
   actualPercentage?: number;
-  savedPercentage?: number;
+  savedPercentage?: number | null;
   stakeValue: string;
   cardanoCoinSymbol: string;
 }
