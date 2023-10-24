@@ -32,8 +32,8 @@ export const RewardsDetails = ({
   name,
   headerDescription,
   status,
-  includedDate = '-',
-  includedTime = '-',
+  includedDate,
+  includedTime,
   amountTransformer,
   coinSymbol,
   rewards
