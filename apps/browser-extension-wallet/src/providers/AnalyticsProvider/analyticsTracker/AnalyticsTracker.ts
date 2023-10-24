@@ -66,7 +66,7 @@ export class AnalyticsTracker {
       return;
     }
     if (await this.userIdService.isNewSession()) {
-      await this.postHogClient?.sendSessionStartEvent();
+      await this.postHogClient.sendSessionStartEvent();
     }
   }
 

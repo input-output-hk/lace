@@ -167,9 +167,9 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   async isNewSession(): Promise<boolean> {
-    const shouldSendNewSessionEvent = !this.hasNewSessionStarted;
+    const isNewSession = !this.hasNewSessionStarted;
     this.hasNewSessionStarted = true;
-    return shouldSendNewSessionEvent;
+    return isNewSession;
   }
 }
 
