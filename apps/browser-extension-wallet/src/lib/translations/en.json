@@ -1145,6 +1145,14 @@
       "isOwnRetirement": "This is your DRep retirement.",
       "isNotOwnRetirement": "The presented DRepID does not match your wallet's DRepID."
     },
+    "voteDelegation": {
+      "title": "Confirm vote delegation",
+      "metadata": "Metadata",
+      "drepId": "Drep ID",
+      "alwaysAbstain": "Abstain",
+      "alwaysNoConfidence": "No Confidence",
+      "option": "Yes"
+    },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"
     },
