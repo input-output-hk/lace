@@ -142,3 +142,8 @@ export const getOwnRetirementMessageKey = (isOwnRetirement: boolean | undefined)
   }
   return isOwnRetirement ? 'core.drepRetirement.isOwnRetirement' : 'core.drepRetirement.isNotOwnRetirement';
 };
+
+export const isDRepRegistration = (tx: Wallet.Cardano.Tx | undefined): boolean =>
+  tx?.body.certificates.some(
+    ({ __typename }) => __typename === Wallet.Cardano.CertificateType.RegisterDelegateRepresentative
+  );
