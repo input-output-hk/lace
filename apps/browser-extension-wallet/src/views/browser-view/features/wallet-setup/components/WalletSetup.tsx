@@ -20,6 +20,8 @@ import { Portal } from './Portal';
 import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import styles from './WalletSetup.module.scss';
 import { WalletSetupWizard } from './WalletSetupWizard';
+import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
+const userIdService = getUserIdService();
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -80,6 +82,14 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
       document.removeEventListener('keydown', handleEnterKeyPress);
     };
   }, []);
+
+  const clearUserIdService = useCallback(async () => {
+    await userIdService.resetToDefaultValues();
+  }, []);
+  // reset values in user ID service if the background storage and local storage are manually removed
+  useEffect(() => {
+    clearUserIdService();
+  }, [clearUserIdService]);
 
   const clearWallet = useCallback(() => {
     deleteFromLocalStorage('wallet');

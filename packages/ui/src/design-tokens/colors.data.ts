@@ -176,6 +176,10 @@ export const colors = {
 
   $metadata_label_color: '',
   $metadata_secondary_label_color: '',
+
+  $text_link_label_color: '',
+  $text_link_label_color_visited: '',
+  $text_link_label_color_disabled: '',
 };
 
 export type Colors = typeof colors;

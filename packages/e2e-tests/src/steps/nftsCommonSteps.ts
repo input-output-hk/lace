@@ -26,13 +26,19 @@ When(/^I click on NFT with name: "([^"]*)" in asset selector$/, async (nftName: 
 });
 
 Then(
-  /^the (Received|Sent) transaction is displayed with NFT name: "([^"]*)" in (extended|popup) mode$/,
-  async (transactionType: 'Received' | 'Sent', nftName: string, mode: 'extended' | 'popup') => {
+  /^the (Received|Sent) transaction is displayed with (NFT|handle) name: "([^"]*)" in (extended|popup) mode$/,
+  async (
+    transactionType: 'Received' | 'Sent',
+    typeOfAsset: 'NFT' | 'handle',
+    name: string,
+    mode: 'extended' | 'popup'
+  ) => {
     await browser.pause(2000);
+    const fee = typeOfAsset === 'NFT' ? '1.17' : '1.19';
     const expectedTransactionRowAssetDetailsSent = {
       type: transactionType,
       tokensAmount:
-        mode === 'extended' ? `1.17 ${Asset.CARDANO.ticker}, 1 ${nftName}` : `1.17 ${Asset.CARDANO.ticker} , +1`,
+        mode === 'extended' ? `${fee} ${Asset.CARDANO.ticker}, 1 ${name}` : `${fee} ${Asset.CARDANO.ticker} , +1`,
       tokensCount: 2
     };
     await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
