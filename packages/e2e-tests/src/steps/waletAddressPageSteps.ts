@@ -62,7 +62,7 @@ Then(/^I see a toast with text: "(Handle|Address) copied"$/, async (action: stri
   }
 
   await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
-  await ToastMessage.closeButton.click();
+  await ToastMessage.clickCloseButton();
 });
 
 Then(/^I see ADA handle with custom image on the "Wallet Address" page$/, async () => {
