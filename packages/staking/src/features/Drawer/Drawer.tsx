@@ -1,9 +1,9 @@
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
-import { isPortfolioDrifted } from 'features/overview/helpers';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
+import { isPortfolioDrifted } from '../portfolio-drift';
 import {
   DelegationFlow,
   DelegationPortfolioStore,

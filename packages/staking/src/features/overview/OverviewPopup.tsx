@@ -23,7 +23,6 @@ export const OverviewPopup = () => {
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletActivities: walletActivities,
-    expandStakingView,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -86,10 +85,7 @@ export const OverviewPopup = () => {
     <>
       {stakingNotification === 'portfolioDrifted' && (
         <Box mb="$32">
-          <StakingNotificationBanner
-            notification="portfolioDrifted"
-            onPortfolioDriftedNotificationClick={expandStakingView}
-          />
+          <StakingNotificationBanner notification="portfolioDrifted" />
         </Box>
       )}
       <Box mb="$32">

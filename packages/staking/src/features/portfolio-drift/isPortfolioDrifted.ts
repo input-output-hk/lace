@@ -2,8 +2,8 @@
 import { Wallet } from '@lace/cardano';
 import BigNumber from 'bignumber.js';
 import sum from 'lodash/sum';
-import type { CurrentPortfolioStakePool } from '../../store';
-import { PERCENTAGE_SCALE_MAX } from '../../store';
+import type { CurrentPortfolioStakePool } from '../store';
+import { PERCENTAGE_SCALE_MAX, sumPercentagesSanitized } from '../store';
 
 const PORTFOLIO_DRIFT_PERCENTAGE_THRESHOLD = 15;
 
@@ -22,6 +22,13 @@ const getPortfolioTotalPercentageDrift = (portfolio: CurrentPortfolioStakePool[]
 
 // TODO: move this file to store. It gets imported also outside the overview feature so the store seems better place.
 export const isPortfolioDrifted = (currentPortfolio: CurrentPortfolioStakePool[]) => {
+  const savedPercentageMissing = currentPortfolio.some(({ savedIntegerPercentage }) => !savedIntegerPercentage);
+  const onChainPercentageSum = sumPercentagesSanitized({
+    items: currentPortfolio,
+    key: 'onChainPercentage',
+  });
+  if (onChainPercentageSum !== PERCENTAGE_SCALE_MAX) return true;
+  if (savedPercentageMissing) return false;
   const drift = getPortfolioTotalPercentageDrift(currentPortfolio);
   return drift >= PORTFOLIO_DRIFT_PERCENTAGE_THRESHOLD;
 };
