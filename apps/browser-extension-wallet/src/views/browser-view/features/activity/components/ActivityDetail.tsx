@@ -130,6 +130,7 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
           name={name}
           status={activityInfo.status}
           includedDate={activityInfo.activity.includedUtcDate}
+          includedTime={activityInfo.activity.includedUtcTime}
           amountTransformer={amountTransformer}
           coinSymbol={cardanoCoin.symbol}
           rewards={activityInfo.activity.rewards}

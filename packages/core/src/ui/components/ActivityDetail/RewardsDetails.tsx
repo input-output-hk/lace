@@ -21,8 +21,8 @@ export interface RewardsDetailsProps {
   name: string;
   headerDescription?: string;
   status?: ActivityStatus;
-  includedDate?: string;
-  includedTime?: string;
+  includedDate: string;
+  includedTime: string;
   amountTransformer: (amount: string) => string;
   coinSymbol: string;
   rewards: RewardsInfo;
