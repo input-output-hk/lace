@@ -128,7 +128,8 @@ export const PieChart = <T extends object | { name: string; value: number }>({
   }, [tooltip]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>): void => {
-    if (event.target instanceof SVGSVGElement) {
+    const clientWidth = window.innerWidth;
+    if (event.target instanceof SVGSVGElement && clientWidth > 360) {
       const { x, y } = event.target.getBoundingClientRect();
       setTooltipPosition({ x: event.clientX - x, y: event.clientY - y });
     }
