@@ -48,6 +48,7 @@ export const label = style([
         color: vars.colors.$text_link_label_color_disabled,
       },
     },
+    wordBreak: 'break-all',
   },
 ]);
 
