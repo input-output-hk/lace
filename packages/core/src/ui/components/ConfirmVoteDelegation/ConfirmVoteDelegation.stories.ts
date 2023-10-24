@@ -8,8 +8,7 @@ const meta: Meta<typeof ConfirmVoteDelegation> = {
   component: ConfirmVoteDelegation,
   parameters: {
     layout: 'centered'
-  },
-  tags: ['autodocs']
+  }
 };
 
 export default meta;
