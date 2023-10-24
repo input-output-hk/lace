@@ -1105,6 +1105,22 @@
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
+    "votingProcedures": {
+      "title": "Confirm Vote",
+      "voterType": "Voter type",
+      "procedureTitle": "Procedure",
+      "actionIdTitle": "Action ID",
+      "vote": "Vote",
+      "actionId": {
+        "index": "Index",
+        "txHash": "TX Hash"
+      },
+      "anchor": {
+        "hash": "Anchor Hash",
+        "url": "Anchor URL"
+      },
+      "dRepId": "DRep ID"
+    },
     "drepRegistration": {
       "title": "Confirm DRep Registration",
       "metadata": "Metadata",

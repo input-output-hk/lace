@@ -6,6 +6,7 @@ import { TxType } from './utils';
 import { SignTxData } from './types';
 import { ConfirmDRepRetirementContainer } from './ConfirmDRepRetirementContainer';
 import { ConfirmVoteDelegationContainer } from './ConfirmVoteDelegationContainer';
+import { VotingProceduresContainer } from './VotingProceduresContainer';
 
 interface Props {
   txType?: TxType;
@@ -25,6 +26,9 @@ export const ConfirmTransactionContent = ({ txType, signTxData, errorMessage }: 
   }
   if (txType === TxType.VoteDelegation) {
     return <ConfirmVoteDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === TxType.VotingProcedures) {
+    return <VotingProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
 
   return <DappTransactionContainer signTxData={signTxData} errorMessage={errorMessage} />;

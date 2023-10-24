@@ -170,6 +170,15 @@ export const colors = {
   $input_button_icon_color: '',
   $input_label_color: '',
   $input_error_message_color: '',
+
+  $text_primary: '',
+  $text_secondary: '',
+
+  $metadata_label_color: '',
+  $metadata_secondary_label_color: '',
+
+  $text_link_label_color: '',
+  $text_link_label_color_visited: '',
 };
 
 export type Colors = typeof colors;

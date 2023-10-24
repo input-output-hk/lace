@@ -4,7 +4,7 @@ import 'normalize.css';
 import './theme.scss';
 import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
 
-const preview = {
+export const preview = {
   parameters: {
     actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
@@ -13,14 +13,15 @@ const preview = {
         date: /Date$/
       }
     }
-  },
-  decorators: [
-    (Story) => (
+  }
+};
+
+export const decorators = [
+  (Story) => {
+    return (
       <ThemeProvider colorScheme={ThemeColorScheme.Light}>
         <Story />
       </ThemeProvider>
-    )
-  ]
-};
-
-export default preview;
+    );
+  }
+];
