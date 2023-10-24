@@ -24,8 +24,10 @@
   "dependencies": {
     "@types/chai": "4.3.6",
     "@types/chai-sorted": "0.2.1",
+    "@types/chai-string": "1.4.3",
     "chai": "4.3.8",
-    "chai-sorted": "0.2.0"
+    "chai-sorted": "0.2.0",
+    "chai-string": "1.5.0"
   },
   "devDependencies": {
     "@rpii/wdio-report-events": "8.0.2",

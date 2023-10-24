@@ -13,6 +13,7 @@ import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
 import { getChainNameByNetworkMagic } from '@src/utils/get-chain-name-by-network-magic';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
+import isUndefined from 'lodash/isUndefined';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -93,6 +94,14 @@ export class UserIdService implements UserIdServiceInterface {
     const id = await this.getWalletBasedUserId(networkMagic);
     const alias = await this.getRandomizedUserId();
     return { alias, id };
+  }
+
+  async resetToDefaultValues(): Promise<void> {
+    const { usePersistentUserId, userId } = await this.getStorage();
+    if (isUndefined(usePersistentUserId) && isUndefined(userId)) {
+      await this.clearId();
+      this.userIdRestored = false;
+    }
   }
 
   async clearId(): Promise<void> {

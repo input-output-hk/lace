@@ -11,6 +11,7 @@ export interface UserIdService {
   makePersistent(): Promise<void>;
   makeTemporary(): Promise<void>;
   extendLifespan(): Promise<void>;
+  resetToDefaultValues(): Promise<void>;
   userTrackingType$: BehaviorSubject<UserTrackingType>;
   isNewSession(): Promise<boolean>;
 }
