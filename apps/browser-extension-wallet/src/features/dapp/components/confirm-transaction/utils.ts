@@ -74,32 +74,17 @@ export const getTransactionAssetsId = (outputs: CardanoTxOut[]): Wallet.Cardano.
   return assetIds;
 };
 
-const isDRepRegistrationCertificate = (type: Wallet.Cardano.CertificateType) =>
-  type === Wallet.Cardano.CertificateType.RegisterDelegateRepresentative;
-
-const isDRepRetirementCertificate = (type: Wallet.Cardano.CertificateType) =>
-  type === Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative;
-
-export const dRepRegistrationInspector = (
-  tx: Wallet.Cardano.Tx
-): Wallet.Cardano.RegisterDelegateRepresentativeCertificate | undefined =>
-  tx?.body?.certificates?.find(({ __typename }) => isDRepRegistrationCertificate(__typename)) as
-    | Wallet.Cardano.RegisterDelegateRepresentativeCertificate
-    | undefined;
-
-export const dRepRetirementInspector = (
-  tx: Wallet.Cardano.Tx
-): Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate | undefined =>
-  tx?.body?.certificates?.find(({ __typename }) => isDRepRetirementCertificate(__typename)) as
-    | Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate
-    | undefined;
+export const certificateInspectorFactory =
+  <T extends Wallet.Cardano.Certificate>(type: Wallet.Cardano.CertificateType) =>
+  (tx: Wallet.Cardano.Tx): T | undefined =>
+    tx?.body?.certificates?.find((certificate) => certificate.__typename === type) as T | undefined;
 
 export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
     burned: assetsBurnedInspector,
-    dRepRegistration: dRepRegistrationInspector,
-    dRepRetirement: dRepRetirementInspector
+    dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
+    dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative)
   });
 
   const { minted, burned, dRepRegistration, dRepRetirement } = inspector(tx as Wallet.Cardano.HydratedTx);

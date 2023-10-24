@@ -2,9 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRegistration } from '@lace/core';
 import { SignTxData } from './types';
-import { dRepRegistrationInspector, drepIDasBech32FromHash } from './utils';
+import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
+
+const { CertificateType } = Wallet.Cardano;
 
 interface Props {
   signTxData: SignTxData;
@@ -13,11 +15,12 @@ interface Props {
 
 export const ConfirmDRepRegistrationContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
-  const certificate = dRepRegistrationInspector(signTxData.tx);
   const {
     walletUI: { cardanoCoin }
   } = useWalletStore();
-
+  const certificate = certificateInspectorFactory<Wallet.Cardano.RegisterDelegateRepresentativeCertificate>(
+    CertificateType.RegisterDelegateRepresentative
+  )(signTxData.tx);
   const depositPaidWithCardanoSymbol = `${Wallet.util.lovelacesToAdaString(certificate.deposit.toString())} ${
     cardanoCoin.symbol
   }`;
