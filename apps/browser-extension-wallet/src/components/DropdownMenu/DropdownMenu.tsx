@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from 'react';
 import cn from 'classnames';
-import { Dropdown } from 'antd';
+import { Dropdown, MenuProps } from 'antd';
 import { Button } from '@lace/common';
 
 import ChevronNormal from '../../assets/icons/chevron-down.component.svg';
@@ -72,11 +72,13 @@ export const DropdownMenu = ({
     }
   };
 
+  const handleMenuItemClick: MenuProps['onClick'] = ({ key }) => !key.includes('switcher') && setOpen(false);
+
   return (
     <Dropdown
       destroyPopupOnHide
       onOpenChange={handleDropdownState}
-      menu={{ items, rootClassName: menuStyles.menuOverlay }}
+      menu={{ items, rootClassName: menuStyles.menuOverlay, onClick: handleMenuItemClick }}
       placement="bottomRight"
       trigger={['click']}
       open={open}
