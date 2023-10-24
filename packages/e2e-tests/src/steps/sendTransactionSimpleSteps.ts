@@ -38,6 +38,7 @@ import TransactionSubmittedPage from '../elements/newTransaction/transactionSubm
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
+import { AddressInput } from '../elements/addressInput';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -201,6 +202,7 @@ Then(/^the balance of token is displayed in coin selector$/, async () => {
 });
 
 Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignored: string, inputIndex: number) => {
+  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
   await transactionExtendedPageObject.clickAddAddressButton(inputIndex);
 });
 
@@ -430,12 +432,10 @@ Then(/a popup asking if you're sure you'd like to close it is displayed$/, async
 Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, async (button: 'Agree' | 'Cancel') => {
   switch (button) {
     case 'Agree':
-      await Modal.confirmButton.waitForClickable();
-      await Modal.confirmButton.click();
+      await Modal.clickConfirmButton();
       break;
     case 'Cancel':
-      await Modal.cancelButton.waitForClickable();
-      await Modal.cancelButton.click();
+      await Modal.clickCancelButton();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
@@ -662,3 +662,11 @@ Then(
     await drawerSendExtendedAssert.assertAddressBookButtonEnabled(inputIndex, state === 'enabled');
   }
 );
+
+Then(/^I see review handle banner for handle: "([^"]*)"$/, async (handleName: string) => {
+  await drawerSendExtendedAssert.assertSeeReviewAddressBanner(handleName);
+});
+
+When(/^I click "Review" button in review handle banner$/, async () => {
+  await new TransactionNewPage().banner.button.click();
+});

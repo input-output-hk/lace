@@ -70,6 +70,7 @@ export enum PostHogAction {
   OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
   OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
   OnboardingCreateWalletNamePasswordNextClick = 'onboarding | new wallet | wallet name & password | next | click',
+  OnboardingCreatePassphraseIntroPlayVideoClick = 'onboarding | new wallet | passphrase intro | play video | click',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',
@@ -247,7 +248,8 @@ export type PostHogActionsKeys =
   | 'CONNECT_HW_NEXT_CLICK'
   | 'SELECT_HW_ACCOUNT_NEXT_CLICK'
   | 'DONE_GO_TO_WALLET'
-  | 'WALLET_NAME_PASSWORD_NEXT_CLICK';
+  | 'WALLET_NAME_PASSWORD_NEXT_CLICK'
+  | 'PASSPHRASE_INTRO_PLAY_VIDEO_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogPersonProperties = {

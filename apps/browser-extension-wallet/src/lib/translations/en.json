@@ -1202,8 +1202,8 @@
     },
     "walletSetupMnemonicIntroStep": {
       "title": "Keeping your wallet secure",
-      "description": "Your 24-word secret passphrase is like a master key to your Lace wallet. We'll show it to you over the next 3 screens. Keep it safe – if you lose your password, it's the only way to access your wallet and funds. Read more about it",
-      "link": "here."
+      "description": "Consider your recovery phrase as the master key to your wallet, and the only way to access your funds.",
+      "link": "Read More."
     },
     "walletSetupMnemonicVerificationStep": {
       "enterPassphrase": "Enter your secret passphrase"

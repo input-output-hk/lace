@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './TransactionDetailBrowser.module.scss';
 import { TransactionDetailHeaderBrowser } from './TransactionDetailHeaderBrowser';
 import { TransactionStatus } from '../Activity/AssetActivityItem';
-import { RewardDetails, RewardDetailsProps } from './RewardDetails';
+import { RewardDetailsProps } from './RewardDetails';
 import { Transaction, TransactionProps } from './Transaction';
 import { TransactionType } from './TransactionType';
 import { useTranslate } from '@src/ui/hooks';
@@ -31,7 +31,6 @@ export const TransactionDetailBrowser = ({
   includedTime,
   amountTransformer,
   coinSymbol,
-  rewards,
   type,
   isPopupView,
   ...props
@@ -53,6 +52,8 @@ export const TransactionDetailBrowser = ({
     isPopupView
   };
 
+  // temporarily unused as part of (LW-8315), rewards to be reintroduced with LW-8751
+  /*
   const rewardProps: RewardDetailsProps = {
     name,
     status,
@@ -62,12 +63,15 @@ export const TransactionDetailBrowser = ({
     coinSymbol,
     rewards
   };
+  */
 
   return (
     <div data-testid="transaction-detail" className={styles.content}>
       <TransactionDetailHeaderBrowser tooltipContent={tooltipContent} name={name} description={headerDescription} />
       {status === TransactionStatus.SPENDABLE ? (
-        <RewardDetails {...rewardProps} />
+        // temporarily unused as part of (LW-8315), rewards to be reintroduced with LW-8751
+        // <RewardDetails {...rewardProps} />
+        <></>
       ) : (
         <Transaction {...transactionProps} />
       )}
