@@ -8,15 +8,16 @@ export const DelegationTooltip = ({
   active,
   name,
   payload,
-}: Readonly<TooltipContentRendererProps<DistributionItem>>): ReactElement | null => {
+}: Readonly<TooltipContentRendererProps<DistributionItem & { fill?: string }>>): ReactElement | null => {
   const { t } = useTranslation();
   if (active && payload) {
-    const { apy, saturation } = payload;
+    const { apy, saturation, fill } = payload;
 
     return (
       <Box className={styles.tooltip}>
         <RichContentInner
           title={name || ''}
+          dotColor={fill}
           description={
             <Box w="$148">
               <Flex justifyContent="space-between">

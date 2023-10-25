@@ -104,7 +104,6 @@ const formatPieColor = (color: PieChartColor): string =>
  * @param valueKey object key of a `data` item that will be used as value (displayed in the tooltip)
  */
 
-// eslint-disable-next-line react/no-multi-comp
 export const PieChart = <T extends object | { name: string; value: number }>({
   animate = true,
   colors = PIE_CHART_DEFAULT_COLOR_SET,
