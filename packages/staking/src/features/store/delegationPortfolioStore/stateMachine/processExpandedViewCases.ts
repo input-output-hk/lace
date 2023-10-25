@@ -39,6 +39,7 @@ import {
   UpdateStakePercentage,
 } from './commands';
 import { initializeDraftPortfolioPool } from './initializeDraftPortfolioPool';
+import { sanitizePercentages } from './sanitizePercentages';
 import { cases, handler } from './stateTreeUtilities';
 import {
   CurrentPortfolioStakePool,
@@ -57,10 +58,14 @@ import {
 } from './types';
 
 export const currentPortfolioToDraft = (pools: CurrentPortfolioStakePool[]): DraftPortfolioStakePool[] =>
-  pools.map((cp) => ({
-    ...cp,
-    sliderIntegerPercentage: cp.savedIntegerPercentage,
-  }));
+  sanitizePercentages({
+    decimals: 0,
+    items: pools.map((cp) => ({
+      ...cp,
+      sliderIntegerPercentage: cp.savedIntegerPercentage || cp.onChainPercentage,
+    })),
+    key: 'sliderIntegerPercentage',
+  });
 
 export const processExpandedViewCases: Handler = (params) =>
   cases<ExpandedViewDelegationFlow>(
