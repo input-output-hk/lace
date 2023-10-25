@@ -18,6 +18,7 @@ export enum TxType {
   Burn = 'Burn',
   DRepRegistration = 'DRepRegistration',
   DRepRetirement = 'DRepRetirement',
+  DRepUpdate = 'DRepUpdate',
   VoteDelegation = 'VoteDelegation',
   VotingProcedures = 'VotingProcedures'
 }
@@ -29,6 +30,10 @@ export const getTitleKey = (txType: TxType): string => {
 
   if (txType === TxType.DRepRetirement) {
     return 'core.drepRetirement.title';
+  }
+
+  if (txType === TxType.DRepUpdate) {
+    return 'core.drepUpdate.title';
   }
 
   if (txType === TxType.VoteDelegation) {
@@ -101,10 +106,11 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
     votingProcedures: votingProceduresInspector,
     dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
     dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative),
+    dRepUpdate: certificateInspectorFactory(CertificateType.UpdateDelegateRepresentative),
     voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation)
   });
 
-  const { minted, burned, dRepRegistration, dRepRetirement, voteDelegation, votingProcedures } = inspector(
+  const { minted, burned, dRepRegistration, dRepRetirement, dRepUpdate, voteDelegation, votingProcedures } = inspector(
     tx as Wallet.Cardano.HydratedTx
   );
   const isMintTransaction = minted.length > 0;
@@ -132,6 +138,10 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
 
   if (voteDelegation) {
     return TxType.VoteDelegation;
+  }
+
+  if (dRepUpdate) {
+    return TxType.DRepUpdate;
   }
 
   return TxType.Send;

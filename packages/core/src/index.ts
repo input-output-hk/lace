@@ -30,5 +30,6 @@ export * from '@ui/components/MnemonicWordsAutoComplete';
 export * from '@ui/components/AddressCard';
 export * from '@ui/components/ConfirmDRepRegistration';
 export * from '@ui/components/ConfirmDRepRetirement';
+export * from '@ui/components/ConfirmDRepUpdate';
 export * from '@ui/components/ConfirmVoteDelegation';
 export * from '@ui/components/VotingProcedures';
