@@ -35,6 +35,7 @@ export interface BuiltTxData {
     hash: Wallet.Cardano.TransactionId;
     outputs: Set<Wallet.Cardano.TxOut & { handleResolution?: HandleResolution }>;
     fee: Wallet.Cardano.Lovelace;
+    handleResolutions?: HandleResolution[];
   };
   error?: string;
   reachedMaxAmountList?: (string | Wallet.Cardano.AssetId)[];

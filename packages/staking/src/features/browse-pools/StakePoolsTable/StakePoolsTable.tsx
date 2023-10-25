@@ -1,6 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { Search, getRandomIcon } from '@lace/common';
-import { Box, Flex } from '@lace/ui';
+import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -112,9 +112,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   );
 
   return (
-    <Flex flexDirection="column" alignItems="stretch" data-testid="stake-pool-table">
+    <Box className={styles.stakePoolsTable} data-testid="stake-pool-table">
       <Search
-        className={styles.search}
         withSearchIcon
         inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}
         onChange={onSearch}
@@ -138,6 +137,6 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
           setActiveSort={setSort}
         />
       </Box>
-    </Flex>
+    </Box>
   );
 };
