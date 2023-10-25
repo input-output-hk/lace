@@ -399,18 +399,18 @@ Feature: Onboarding - Create wallet
       | dark  |
       | light |
 
-    @LW-8500 @Pending
-    # Bug: LW-8890
-    Scenario: Create Wallet - Mnemonic verification - incorrect word
-      Given I click "Create" button on wallet setup page
-      And I am on "Mnemonic verification" page with words 8 of 24
-      When I fill passphrase fields using 24 words mnemonic on 8/24 page
-      And I change one random field
-      Then I see incorrect passphrase error displayed
-      And "Next" button is disabled during onboarding process
-      When I restore previously changed mnemonic word
-      Then I do not see incorrect passphrase error displayed
-      And "Next" button is enabled during onboarding process
+  @LW-8500 @Pending
+  # Bug: LW-8890
+  Scenario: Create Wallet - Mnemonic verification - incorrect word
+    Given I click "Create" button on wallet setup page
+    And I am on "Mnemonic verification" page with words 8 of 24
+    When I fill passphrase fields using 24 words mnemonic on 8/24 page
+    And I change one random field
+    Then I see incorrect passphrase error displayed
+    And "Next" button is disabled during onboarding process
+    When I restore previously changed mnemonic word
+    Then I do not see incorrect passphrase error displayed
+    And "Next" button is enabled during onboarding process
 
   @LW-8501
   Scenario: Create Wallet - Mnemonic verification - incorrect word order
