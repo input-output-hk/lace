@@ -13,6 +13,9 @@ inputs:
   CARDANO_SERVICES_URL_PREVIEW:
     description: 'Cardano Services Preview URL'
     required: false
+  CARDANO_SERVICES_URL_SANCHONET:
+    description: 'Cardano Services Sanchonet URL'
+    required: false
   POSTHOG_PRODUCTION_TOKEN_MAINNET:
     description: 'Post hog production mainnet token'
     required: false
@@ -54,6 +57,7 @@ runs:
         CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVICES_URL_MAINNET }}
         CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
         CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVICES_URL_PREVIEW }}
+        CARDANO_SERVICES_URL_SANCHONET: ${{ inputs.CARDANO_SERVICES_URL_SANCHONET }}
         POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_MAINNET }}
         POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREPROD }}
         POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
