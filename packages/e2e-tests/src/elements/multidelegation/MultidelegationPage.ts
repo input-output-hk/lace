@@ -268,7 +268,7 @@ class MultidelegationPage {
     await poolItem.moveTo();
   }
 
-  async clickButtonOnSection(section: string) {
+  async clickNextButtonOnDrawerSection(section: string) {
     switch (section) {
       case 'portfolio bar':
         await this.portfolioBarBtnNext.waitForClickable();

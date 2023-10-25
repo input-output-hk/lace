@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 
 class StakingSuccessDrawerAssert {
-  assertStakingSuccessDrawer = async (process: 'Initial' | 'Switching') => {
+  assertSeeStakingSuccessDrawer = async (process: 'Initial' | 'Switching') => {
     await StakingSuccessDrawer.drawerHeaderCloseButton.waitForDisplayed();
     await StakingSuccessDrawer.drawerNavigationTitle.waitForDisplayed();
     expect(await StakingSuccessDrawer.drawerNavigationTitle.getText()).to.equal(

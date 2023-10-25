@@ -138,3 +138,8 @@ Before(
   { tags: '@Multidelegation-DelegatedFunds-Popup' },
   async () => await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle)
 );
+
+Before(
+  { tags: '@Multidelegation-DelegatedFunds-Extended' },
+  async () => await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle)
+);
