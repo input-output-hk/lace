@@ -17,6 +17,8 @@ import StakingSuccessDrawerAssert from '../assert/multidelegation/StakingSuccess
 import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDrawer';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
+import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
+import StakingManageDrawerAssert from '../assert/multidelegation/StakingManageDrawerAssert';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
@@ -43,7 +45,7 @@ Then(
 );
 
 Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmation)$/, async (section: string) => {
-  await MultidelegationPage.clickButtonOnSection(section);
+  await MultidelegationPage.clickNextButtonOnDrawerSection(section);
 });
 
 Then(/^I see Delegation card displaying correct data$/, async () => {
@@ -153,7 +155,7 @@ When(
 );
 
 Then(/^(Initial|Switching) staking success drawer is displayed$/, async (process: 'Initial' | 'Switching') => {
-  await StakingSuccessDrawerAssert.assertStakingSuccessDrawer(process);
+  await StakingSuccessDrawerAssert.assertSeeStakingSuccessDrawer(process);
 });
 
 Then(/^I click "Close" button on staking success drawer$/, async () => {
@@ -224,4 +226,31 @@ Then(/^staking password drawer is displayed$/, async () => {
 
 Then(/^Stake pool details drawer is not opened$/, async () => {
   await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsNotOpened();
+});
+
+When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
+  const password = String(getTestWallet(TestWalletName.TestAutomationWallet).password);
+  const manageStaking = 'manage staking';
+
+  switch (delegationStep) {
+    case 'success':
+      await MultidelegationPage.clickNextButtonOnDrawerSection(manageStaking);
+      await MultidelegationPage.clickNextButtonOnDrawerSection('confirmation');
+      await StakingPasswordDrawer.fillPassword(password);
+      await StakingPasswordDrawer.confirmStaking();
+      await StakingSuccessDrawerAssert.assertSeeStakingSuccessDrawer('Switching');
+      break;
+    case 'password':
+      await MultidelegationPage.clickNextButtonOnDrawerSection(manageStaking);
+      await MultidelegationPage.clickNextButtonOnDrawerSection('confirmation');
+      await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
+      break;
+    case 'confirmation':
+      await MultidelegationPage.clickNextButtonOnDrawerSection(manageStaking);
+      await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
+      break;
+    case 'manage':
+      await StakingManageDrawerAssert.assertSeeStakingManageDrawer();
+      break;
+  }
 });
