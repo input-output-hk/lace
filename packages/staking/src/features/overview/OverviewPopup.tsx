@@ -3,7 +3,7 @@ import { useObservable } from '@lace/common';
 import { Box, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DelegationCard } from '../delegation-card';
+import { DelegationCard } from '../DelegationCard';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
