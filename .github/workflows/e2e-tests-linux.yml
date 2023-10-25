@@ -50,9 +50,6 @@ jobs:
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-          CARDANO_SERVICES_URL_MAINNET: ${{ secrets.CARDANO_SERVICES_DEV_URL_MAINNET }}
-          CARDANO_SERVICES_URL_PREPROD: ${{ secrets.CARDANO_SERVICES_DEV_URL_PREPROD }}
-          CARDANO_SERVICES_URL_PREVIEW: ${{ secrets.CARDANO_SERVICES_DEV_URL_PREVIEW }}
       - name: Start XVFB
         run: |
           Xvfb :99 &
