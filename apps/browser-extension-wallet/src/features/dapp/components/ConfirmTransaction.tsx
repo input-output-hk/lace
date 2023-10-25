@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +25,8 @@ import { CardanoTxOut } from '@src/types';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
 import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 
+import { createWalletUtil } from '@cardano-sdk/wallet';
+
 const DAPP_TOAST_DURATION = 50;
 
 const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
@@ -46,9 +49,11 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     walletInfo,
     inMemoryWallet,
     getKeyAgentType,
-    blockchainProvider: { assetProvider }
+    blockchainProvider: { assetProvider },
+    walletManagerUi
   } = useWalletStore();
   const { list: addressList } = useAddressBookContext();
+  const addresses = useObservable(inMemoryWallet.addresses$);
 
   const [tx, setTx] = useState<Wallet.Cardano.Tx>();
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
@@ -62,6 +67,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   );
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | null>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
+
+  const walletUtil = createWalletUtil(walletManagerUi.wallet);
 
   const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
     const assetIds: Wallet.Cardano.AssetId[] = [];
@@ -141,6 +148,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     dappDataApi
       .getSignTxData()
       .then(({ dappInfo: backgroundDappInfo, tx: backgroundTx }) => {
+        // eslint-disable-next-line no-console
+        console.log('backgroundtx::::::::::', backgroundTx, backgroundDappInfo);
         setDappInfo(backgroundDappInfo);
         setTx(backgroundTx);
       })
@@ -173,6 +182,28 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     [addressList]
   );
 
+  const test = async () => {
+    console.log('Observable addresses:', addresses);
+    const externalInputs = tx.body.inputs;
+    for (const [i, externalInput] of externalInputs.entries()) {
+      try {
+        const resIn = await walletUtil.resolveInput(externalInput);
+        console.log('Resolved input:', i, resIn);
+        // Use `resIn` here
+      } catch (error) {
+        // Handle any errors that occurred during the asynchronous operation
+        console.error(error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!tx) {
+      return;
+    }
+    test();
+  }, [tx]);
+
   const txSummary: Wallet.Cip30SignTxSummary | undefined = useMemo(() => {
     if (!tx) return;
     const inspector = createTxInspector({
@@ -200,10 +231,13 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       return true;
     });
 
+    console.log('External outputs:', externalOutputs);
+    console.log('Wallet addresses: >>>>>>>', walletInfo.addresses);
+
     // eslint-disable-next-line unicorn/no-array-reduce
     const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
       // Don't show withdrawl tx's etc
-      if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
+      if (txOut.address === walletInfo.addresses[0].address) return acc;
 
       return [
         ...acc,
@@ -221,7 +255,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       outputs: txSummaryOutputs,
       type: txType
     };
-  }, [tx, walletInfo.addresses, createAssetList, addressToNameMap]);
+  }, [tx, walletInfo, addressToNameMap, createAssetList]);
 
   const translations = {
     transaction: t('core.dappTransaction.transaction'),
