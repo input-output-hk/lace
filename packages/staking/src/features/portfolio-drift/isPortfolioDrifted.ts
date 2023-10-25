@@ -22,10 +22,10 @@ const getPortfolioTotalPercentageDrift = (
   );
 };
 
-const isSavedPercentagePresent = (
+const isPortfolioHavingSavedPercentages = (
   currentPortfolio: CurrentPortfolioStakePool[]
 ): currentPortfolio is (CurrentPortfolioStakePool & { savedIntegerPercentage: number })[] =>
-  currentPortfolio.some(({ savedIntegerPercentage }) => !savedIntegerPercentage);
+  currentPortfolio.every(({ savedIntegerPercentage }) => savedIntegerPercentage);
 
 // TODO: move this file to store. It gets imported also outside the overview feature so the store seems better place.
 export const isPortfolioDrifted = (currentPortfolio: CurrentPortfolioStakePool[]) => {
@@ -34,7 +34,7 @@ export const isPortfolioDrifted = (currentPortfolio: CurrentPortfolioStakePool[]
     key: 'onChainPercentage',
   });
   if (onChainPercentageSum !== PERCENTAGE_SCALE_MAX) return true;
-  if (!isSavedPercentagePresent(currentPortfolio)) return false;
+  if (!isPortfolioHavingSavedPercentages(currentPortfolio)) return false;
   const drift = getPortfolioTotalPercentageDrift(currentPortfolio);
   return drift >= PORTFOLIO_DRIFT_PERCENTAGE_THRESHOLD;
 };
