@@ -1,4 +1,4 @@
-import { Drawer } from '../drawer';
+import { Drawer } from '../Drawer';
 import { MultidelegationBetaModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { OverviewPopup } from '../overview';
