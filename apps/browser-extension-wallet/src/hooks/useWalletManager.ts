@@ -7,7 +7,12 @@ import { useCardanoWalletManagerContext } from '@providers/CardanoWalletManager'
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { deleteFromLocalStorage, getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
+import {
+  deleteFromLocalStorage,
+  getValueFromLocalStorage,
+  clearLocalStorage,
+  saveValueInLocalStorage
+} from '@src/utils/local-storage';
 import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
@@ -145,7 +150,7 @@ export const useWalletManager = (): UseWalletManager => {
   const lockWallet = useCallback(async (): Promise<void> => {
     if (!walletLock) return;
     // Deletes key agent data from storage and clears states
-    await backgroundService.clearBackgroundStorage(['keyAgentsByChain']);
+    await backgroundService.clearBackgroundStorage({ keys: ['keyAgentsByChain'] });
     deleteFromLocalStorage('keyAgentData');
 
     setKeyAgentData();
@@ -296,35 +301,30 @@ export const useWalletManager = (): UseWalletManager => {
   const deleteWallet = useCallback(
     async (isForgotPasswordFlow = false): Promise<void> => {
       await Wallet.shutdownWallet(walletManagerUi);
-      deleteFromLocalStorage('appSettings');
-      deleteFromLocalStorage('showDappBetaModal');
-      deleteFromLocalStorage('lastStaking');
-      deleteFromLocalStorage('userInfo');
-      deleteFromLocalStorage('keyAgentData');
-      await backgroundService.clearBackgroundStorage(['message', 'mnemonic', 'keyAgentsByChain']);
       setKeyAgentData();
       resetWalletLock();
       setCardanoWallet();
-      setCurrentChain(CHAIN);
 
+      await backgroundService.clearBackgroundStorage({ except: ['fiatPrices', 'userId', 'usePersistentUserId'] });
+      clearLocalStorage({ except: isForgotPasswordFlow ? ['wallet', ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY] : [] });
       if (!isForgotPasswordFlow) {
-        deleteFromLocalStorage('wallet');
-        deleteFromLocalStorage(ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY);
         await userIdService.clearId();
         clearAddressBook();
         clearNftsFolders();
       }
+
+      setCurrentChain(CHAIN);
     },
     [
       walletManagerUi,
-      backgroundService,
-      userIdService,
-      clearAddressBook,
-      clearNftsFolders,
       setKeyAgentData,
       resetWalletLock,
       setCardanoWallet,
-      setCurrentChain
+      backgroundService,
+      setCurrentChain,
+      userIdService,
+      clearAddressBook,
+      clearNftsFolders
     ]
   );
 

@@ -685,7 +685,7 @@ describe('Testing CollateralDrawer component', () => {
           });
 
           await waitFor(() => {
-            expect(clearBackgroundStorageMock).toBeCalledWith(['message']);
+            expect(clearBackgroundStorageMock).toBeCalledWith({ keys: ['message'] });
             expect(mockUseRedirection).toBeCalledWith(walletRoutePaths.settings);
             expect(window.location.reload).toHaveBeenCalled();
             expect(redirectToSettingsMock.mock.invocationCallOrder[0]).toBeLessThan(
@@ -822,7 +822,7 @@ describe('Testing CollateralDrawer component', () => {
 
           setSection.mockReset();
           await waitFor(() => {
-            expect(clearBackgroundStorageMock).toBeCalledWith(['message']);
+            expect(clearBackgroundStorageMock).toBeCalledWith({ keys: ['message'] });
             expect(window.location.reload).toHaveBeenCalled();
             expect(setSection).not.toBeCalled();
             expect(redirectToActivitiesMock).not.toBeCalled();
