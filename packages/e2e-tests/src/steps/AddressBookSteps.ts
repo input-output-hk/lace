@@ -85,6 +85,10 @@ Given(/^address book contains address with name that has 12 characters$/, async 
   await indexedDB.insertAddress(addressEntry);
 });
 
+Given(/^Address book is empty$/, async () => {
+  await indexedDB.clearAddressBook();
+});
+
 Given(/^address book contains address with name that has more than 12 characters$/, async () => {
   const addressEntry = validAddress;
   addressEntry.setName('abcdefghijklm');
