@@ -56,12 +56,11 @@ export const clearBackgroundStorage = async (options?: ClearBackgroundStorageOpt
     return;
   }
   const backgroundStorage = await getBackgroundStorage();
-
   for (const key in backgroundStorage) {
     if (options.keys && options.keys.includes(key as BackgroundStorageKeys)) {
       delete backgroundStorage[key as BackgroundStorageKeys];
     }
-    if (options.except && options.keys.includes(key as BackgroundStorageKeys)) {
+    if (options.except && options.except.includes(key as BackgroundStorageKeys)) {
       delete backgroundStorage[key as BackgroundStorageKeys];
     }
   }

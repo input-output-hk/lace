@@ -104,6 +104,8 @@ export interface WalletInfoSlice {
   setCurrentChain: (chain: Wallet.ChainName) => void;
   environmentName?: EnvironmentTypes;
   getKeyAgentType: () => string;
+  deletingWallet?: boolean;
+  setDeletingWallet: (deletingWallet: boolean) => void;
 }
 
 export interface LockSlice {

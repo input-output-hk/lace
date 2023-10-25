@@ -81,6 +81,7 @@ export const walletStoreMock = async (
     setBlockchainProvider: jest.fn(),
     addressesDiscoveryCompleted: false,
     setAddressesDiscoveryCompleted: jest.fn(),
+    setDeletingWallet: jest.fn(),
     ...customStore
   };
 };
