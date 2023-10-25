@@ -24,6 +24,11 @@ class ToastMessage {
   get progressBar() {
     return $(this.PROGRESS_BAR);
   }
+
+  async clickCloseButton() {
+    await this.closeButton.waitForClickable();
+    await this.closeButton.click();
+  }
 }
 
 export default new ToastMessage();
