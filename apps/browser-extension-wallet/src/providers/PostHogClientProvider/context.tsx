@@ -5,6 +5,7 @@ import { PostHogClient } from './client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { ExtensionViews } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
+import { runtime } from 'webextension-polyfill';
 
 const userIdService = getUserIdService();
 
@@ -28,16 +29,18 @@ export const PostHogClientProvider = ({ children, postHogCustomClient }: PostHog
     (state) => ({ currentChain: state?.currentChain, view: state.walletUI.appMode }),
     shallow
   );
+  const laceVersion = runtime?.getManifest?.().version;
 
   const postHogClientInstance = useMemo(
     () =>
       postHogCustomClient ||
-      PostHogClient.getInstance(
-        currentChain,
+      PostHogClient.getInstance({
+        chain: currentChain,
         userIdService,
-        { getBackgroundStorage, setBackgroundStorage },
-        view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended
-      ),
+        backgroundServiceUtils: { getBackgroundStorage, setBackgroundStorage },
+        view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended,
+        laceVersion
+      }),
     [currentChain, getBackgroundStorage, postHogCustomClient, setBackgroundStorage, view]
   );
 

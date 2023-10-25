@@ -28,19 +28,44 @@ import { Subscription, BehaviorSubject } from 'rxjs';
  * PostHog API reference:
  * https://posthog.com/docs/libraries/js
  */
+
+export interface PostHogInstance {
+  chain: Wallet.Cardano.ChainId;
+  userIdService: UserIdService;
+  backgroundServiceUtils: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>;
+  laceVersion?: string;
+  view?: ExtensionViews;
+  publicPostHogHost?: string;
+}
+
 export class PostHogClient {
   protected static postHogClientInstance: PostHogClient;
   private userTrackingType: UserTrackingType;
   private currentUserTrackingType?: UserTrackingType;
   private hasPostHogInitialized$: BehaviorSubject<boolean>;
 
-  constructor(
-    private chain: Wallet.Cardano.ChainId,
-    private userIdService: UserIdService,
-    private backgroundServiceUtils: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>,
-    private view: ExtensionViews = ExtensionViews.Extended,
-    private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
-  ) {
+  private chain: Wallet.Cardano.ChainId;
+  private userIdService: UserIdService;
+  private backgroundServiceUtils: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>;
+  private view: ExtensionViews = ExtensionViews.Extended;
+  private publicPostHogHost: string = PUBLIC_POSTHOG_HOST;
+  private laceVersion: string;
+
+  constructor({
+    chain,
+    userIdService,
+    backgroundServiceUtils,
+    laceVersion = '',
+    view = ExtensionViews.Extended,
+    publicPostHogHost = PUBLIC_POSTHOG_HOST
+  }: PostHogInstance) {
+    this.chain = chain;
+    this.userIdService = userIdService;
+    this.backgroundServiceUtils = backgroundServiceUtils;
+    this.view = view;
+    this.publicPostHogHost = publicPostHogHost;
+    this.laceVersion = laceVersion;
+
     if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
     const token = this.getApiToken(this.chain);
     if (!token) throw new Error('posthog token has not been provided');
@@ -81,25 +106,9 @@ export class PostHogClient {
     this.subscribeToDistinctIdUpdate();
   }
 
-  static getInstance(
-    chain: Wallet.Cardano.ChainId,
-    userIdService: UserIdService,
-    {
-      getBackgroundStorage,
-      setBackgroundStorage
-    }: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>,
-    view?: ExtensionViews
-  ): PostHogClient {
+  static getInstance(params: PostHogInstance): PostHogClient {
     if (this.postHogClientInstance || !POSTHOG_ENABLED) return this.postHogClientInstance;
-    this.postHogClientInstance = new PostHogClient(
-      chain,
-      userIdService,
-      {
-        getBackgroundStorage,
-        setBackgroundStorage
-      },
-      view
-    );
+    this.postHogClientInstance = new PostHogClient(params);
     return this.postHogClientInstance;
   }
 
@@ -223,6 +232,7 @@ export class PostHogClient {
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
       posthog_project_id: this.getProjectId(),
+      lace_version: this.laceVersion,
       ...(await this.getPersonProperties())
     };
   }
