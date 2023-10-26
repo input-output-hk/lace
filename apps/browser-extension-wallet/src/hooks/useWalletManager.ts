@@ -306,8 +306,11 @@ export const useWalletManager = (): UseWalletManager => {
       setCardanoWallet();
 
       await backgroundService.clearBackgroundStorage({ except: ['fiatPrices', 'userId', 'usePersistentUserId'] });
-      clearLocalStorage({ except: isForgotPasswordFlow ? ['wallet', ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY] : [] });
-      if (!isForgotPasswordFlow) {
+
+      if (isForgotPasswordFlow) {
+        clearLocalStorage({ except: ['wallet', ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY] });
+      } else {
+        clearLocalStorage();
         await userIdService.clearId();
         clearAddressBook();
         clearNftsFolders();
