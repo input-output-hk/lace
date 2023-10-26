@@ -66,7 +66,8 @@ export const StepPreferencesContent = () => {
       onChainPercentage: draftPool?.onChainPercentage,
       percentage: sliderIntegerPercentage,
       saturation: saturation ? String(saturation) : undefined,
-      savedIntegerPercentage: draftPool?.savedIntegerPercentage || undefined,
+      savedIntegerPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.savedIntegerPercentage : undefined,
+      // TODO
       sliderIntegerPercentage,
       stakeValue: balancesBalance
         ? compactNumber(
