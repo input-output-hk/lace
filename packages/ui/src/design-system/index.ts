@@ -25,3 +25,4 @@ export { Tooltip } from './tooltip';
 export { Message } from './message';
 export { PasswordBox } from './password-box';
 export { Metadata } from './metadata';
+export { TextLink } from './text-link';

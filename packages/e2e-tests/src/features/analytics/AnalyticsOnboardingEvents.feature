@@ -51,7 +51,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I validate latest analytics multiple events:
       | onboarding \| restore wallet \| all done \| go to my wallet \| click |
       | $create_alias                                                        |
-    And I validate that alias event has assigned same user id "baa84325a43e5db53c514045ce474263" in posthog
+    And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
     And I validate that 9 analytics event(s) have been sent
 
   @LW-7365
