@@ -24,4 +24,5 @@ export { ToastBar } from './toast-bar';
 export { Tooltip } from './tooltip';
 export { Message } from './message';
 export { Metadata, MetadataLink } from './metadata';
+export { PasswordBox } from './password-box';
 export { TextLink } from './text-link';

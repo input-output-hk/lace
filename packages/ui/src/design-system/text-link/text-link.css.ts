@@ -44,6 +44,9 @@ export const label = style([
       [`${button}:hover &`]: {
         textDecoration: 'underline',
       },
+      [`${button}[aria-disabled="true"] &`]: {
+        color: vars.colors.$text_link_label_color_disabled,
+      },
     },
     wordBreak: 'break-all',
   },

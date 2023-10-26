@@ -24,7 +24,6 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
 
 export const getProviders = (chainName: Wallet.ChainName): Wallet.WalletProvidersDependencies => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
-
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
     baseUrl: baseCardanoServicesUrl
@@ -48,5 +47,6 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   getAliasProperties: RemoteApiPropertyType.MethodReturningPromise,
   getRandomizedUserId: RemoteApiPropertyType.MethodReturningPromise,
   getUserId: RemoteApiPropertyType.MethodReturningPromise,
-  userTrackingType$: RemoteApiPropertyType.HotObservable
+  userTrackingType$: RemoteApiPropertyType.HotObservable,
+  resetToDefaultValues: RemoteApiPropertyType.MethodReturningPromise
 };

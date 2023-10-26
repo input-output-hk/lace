@@ -364,6 +364,20 @@ class DrawerSendExtendedAssert {
     const addressInput = new AddressInput(bundleIndex);
     await addressInput.ctaButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }
+
+  async assertSeeReviewAddressBanner(handle: string) {
+    const transactionNewPage = new TransactionNewPage();
+    await transactionNewPage.banner.container.waitForDisplayed();
+    await transactionNewPage.banner.icon.waitForDisplayed();
+    await transactionNewPage.banner.description.waitForDisplayed();
+    expect(await transactionNewPage.banner.description.getText()).to.contain(
+      (await t('addressBook.reviewModal.banner.browserDescription')).replace('{{name}}', handle)
+    );
+    await transactionNewPage.banner.button.waitForDisplayed();
+    expect(await transactionNewPage.banner.button.getText()).to.equal(
+      (await t('addressBook.reviewModal.banner.confirmReview.button')).replace('{{name}}', handle)
+    );
+  }
 }
 
 export default new DrawerSendExtendedAssert();

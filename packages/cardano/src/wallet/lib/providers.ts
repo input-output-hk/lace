@@ -4,7 +4,6 @@ import {
   AssetProvider,
   ChainHistoryProvider,
   NetworkInfoProvider,
-  Provider,
   RewardsProvider,
   StakePoolProvider,
   TxSubmitProvider,
@@ -12,7 +11,6 @@ import {
 } from '@cardano-sdk/core';
 
 import {
-  CreateHttpProviderConfig,
   assetInfoHttpProvider,
   chainHistoryHttpProvider,
   networkInfoHttpProvider,
@@ -38,7 +36,7 @@ export interface ProvidersConfig {
 }
 
 export const createProviders = ({ axiosAdapter, baseUrl }: ProvidersConfig): WalletProvidersDependencies => {
-  const httpProviderConfig: CreateHttpProviderConfig<Provider> = {
+  const httpProviderConfig = {
     baseUrl,
     logger: console,
     adapter: axiosAdapter

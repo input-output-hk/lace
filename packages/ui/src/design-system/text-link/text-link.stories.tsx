@@ -37,27 +37,27 @@ const Buttons = (): JSX.Element => (
     </Variants.Row>
     <Variants.Row>
       <Variants.Cell>
-        <a href="#" id="visited">
+        <a href="#" id="visited" style={{ textDecoration: 'none' }}>
           <TextLink label="Label" />
         </a>
       </Variants.Cell>
       <Variants.Cell>
-        <a href="#" id="visited">
+        <a href="#" id="visited" style={{ textDecoration: 'none' }}>
           <TextLink label="Label" id="hover" />
         </a>
       </Variants.Cell>
       <Variants.Cell>
-        <a href="#" id="visited">
+        <a href="#" id="visited" style={{ textDecoration: 'none' }}>
           <TextLink label="Label" id="pressed" />
         </a>
       </Variants.Cell>
       <Variants.Cell>
-        <a href="#" id="visited">
+        <a href="#" id="visited" style={{ textDecoration: 'none' }}>
           <TextLink label="Label" disabled />
         </a>
       </Variants.Cell>
       <Variants.Cell>
-        <a href="#" id="visited">
+        <a href="#" id="visited" style={{ textDecoration: 'none' }}>
           <TextLink label="Label" id="focused" />
         </a>
       </Variants.Cell>

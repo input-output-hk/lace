@@ -69,15 +69,19 @@
   &.up {
     transform: rotate(180deg);
   }
+
+  svg {
+    width: 9px;
+    height: 18px;
+  }
 }
 
 .skeleton {
   display: flex;
   align-items: center;
   gap: size_unit(3);
-  padding: 0 size_unit(3) 0 size_unit(1);
   min-height: 64px;
-  padding-top: size_unit(3);
+  padding: size_unit(3) size_unit(3) 0 size_unit(1);
 
   .skeletonAvatar {
     background: var(--light-mode-light-grey-plus-56, var(--dark-mode-dark-grey));

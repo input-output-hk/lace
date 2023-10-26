@@ -99,6 +99,13 @@ describe('Connect Component: ', () => {
       });
       rerender(<WrappedConnectComponent />);
       await waitFor(assert);
+
+      mockUseWalletStore.mockReturnValueOnce({
+        environmentName: 'Sanchonet'
+      });
+
+      rerender(<WrappedConnectComponent />);
+      await waitFor(assert);
     });
 
     test('should render default warning modal for any other than Mainnet env and https protocol', async () => {
@@ -117,6 +124,13 @@ describe('Connect Component: ', () => {
       mockUseWalletStore.mockReturnValueOnce({
         environmentName: 'Preview'
       });
+      rerender(<WrappedConnectComponent />);
+      await waitFor(assert);
+
+      mockUseWalletStore.mockReturnValueOnce({
+        environmentName: 'Sanchonet'
+      });
+
       rerender(<WrappedConnectComponent />);
       await waitFor(assert);
     });

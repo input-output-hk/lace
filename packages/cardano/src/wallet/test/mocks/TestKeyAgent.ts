@@ -1,8 +1,8 @@
 import { Cardano } from '@cardano-sdk/core';
 import * as KeyManagement from '../../../../../../node_modules/@cardano-sdk/key-management/dist/cjs';
 import * as Crypto from '@cardano-sdk/crypto';
+// Using nodejs to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
 import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
-
 interface TestKeyAgentProps {
   password?: string;
   mnemonicWords?: string[];

@@ -853,6 +853,18 @@ describe('Testing useWalletManager hook', () => {
       expect(switchNetwork).toBeDefined();
       await expect(switchNetwork(chainId)).rejects.toThrow(new Error('Chain not supported'));
     });
+    test('should throw in case the chain is not available', async () => {
+      const chainId = 'Sanchonet' as any;
+      const {
+        result: {
+          current: { switchNetwork }
+        }
+      } = renderHook(() => useWalletManager(), {
+        wrapper: getWrapper({})
+      });
+      expect(switchNetwork).toBeDefined();
+      await expect(switchNetwork(chainId)).rejects.toThrow(new Error('Chain not supported'));
+    });
     test('shoud throw in case the wallet data for chosen chain not found', async () => {
       const chainId = 'Preprod' as any;
       const keyAgentsByChain = {};

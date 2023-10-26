@@ -23,7 +23,7 @@ describe('Testing getBaseUrlForChain function', () => {
   });
   test('should return proper url for chainName or throw', async () => {
     process.env.USE_DEV_ENDPOINTS = 'true';
-    const AVAILABLE_CHAINS = ['Mainnet', 'Preprod', 'Preview', 'Sanchonet'] as unknown as Wallet.ChainName[];
+    const AVAILABLE_CHAINS = ['Mainnet', 'Preprod', 'Preview'] as unknown as Wallet.ChainName[];
     jest.spyOn(config, 'config').mockReturnValue({ CARDANO_SERVICES_URLS, AVAILABLE_CHAINS } as config.Config);
 
     expect(getBaseUrlForChain('Mainnet')).toBe(CARDANO_SERVICES_URLS.Mainnet);
