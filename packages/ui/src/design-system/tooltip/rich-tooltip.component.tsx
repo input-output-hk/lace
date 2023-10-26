@@ -1,16 +1,20 @@
+import type { PropsWithChildren, ReactNode } from 'react';
 import React from 'react';
-import type { ReactNode } from 'react';
 
-import { Root } from './rich-tooltip-root.component';
+import { Trigger } from '@radix-ui/react-tooltip';
+
+import { RichTooltipRoot } from './rich-tooltip-root.component';
 import { Provider } from './tooltip-provider.component';
-import { Trigger } from './tooltip-trigger.component';
 
-import type { Props as TooltipProps } from './tooltip.component';
+import type { Props as RootProps } from './rich-tooltip-root.component';
 
-type Props = Omit<TooltipProps, 'label'> & {
-  title: string;
-  description: ReactNode;
-};
+export type Props = PropsWithChildren<
+  RootProps & {
+    delayDuration?: number;
+    skipDelayDuration?: number;
+    children: ReactNode;
+  }
+>;
 
 export const RichTooltip = ({
   delayDuration = 0,
@@ -19,10 +23,15 @@ export const RichTooltip = ({
   description,
   children,
   ...props
-}: Readonly<Props>): JSX.Element => (
-  <Provider skipDelayDuration={skipDelayDuration} delayDuration={delayDuration}>
-    <Root title={title} description={description} {...props}>
-      <Trigger>{children}</Trigger>
-    </Root>
-  </Provider>
-);
+}: Readonly<Props>): JSX.Element => {
+  return (
+    <Provider
+      skipDelayDuration={skipDelayDuration}
+      delayDuration={delayDuration}
+    >
+      <RichTooltipRoot title={title} description={description} {...props}>
+        <Trigger asChild>{children}</Trigger>
+      </RichTooltipRoot>
+    </Provider>
+  );
+};
