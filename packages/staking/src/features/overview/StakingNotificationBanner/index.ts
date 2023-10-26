@@ -1,3 +1,3 @@
-export * from './StakingNotificationBanner';
-export * from './getCurrentStakingNotification';
+export * from './StakingNotificationBanners';
+export * from './getCurrentStakingNotifications';
 export * from './types';

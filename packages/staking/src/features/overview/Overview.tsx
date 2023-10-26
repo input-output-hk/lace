@@ -10,7 +10,7 @@ import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanner';
 
 export const Overview = () => {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ export const Overview = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
+  const stakingNotification = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
@@ -76,10 +76,7 @@ export const Overview = () => {
     return (
       <>
         {stakingNotification ? (
-          <StakingNotificationBanner
-            notification={stakingNotification}
-            onPortfolioDriftedNotificationClick={onManageClick}
-          />
+          <StakingNotificationBanners notifications={stakingNotification} onClickableBannerClick={onManageClick} />
         ) : (
           <Flex flexDirection="column" gap="$32">
             <StakeFundsBanner balance={totalCoinBalance} />
@@ -107,10 +104,7 @@ export const Overview = () => {
       </Box>
       {stakingNotification && (
         <Box mb="$40">
-          <StakingNotificationBanner
-            notification={stakingNotification}
-            onPortfolioDriftedNotificationClick={onManageClick}
-          />
+          <StakingNotificationBanners notifications={stakingNotification} onClickableBannerClick={onManageClick} />
         </Box>
       )}
       <Flex justifyContent="space-between" mb="$16">
