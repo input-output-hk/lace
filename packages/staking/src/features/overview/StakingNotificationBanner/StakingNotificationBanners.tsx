@@ -6,17 +6,17 @@ import InfoIcon from '../../../assets/icons/info-icon.svg';
 import * as styles from './StakingNotificationBanner.css';
 import { StakingNotificationType } from './types';
 
-type StakingNotificationBannerProps = {
+type StakingNotificationBannersProps = {
   popupView?: boolean;
   notifications: StakingNotificationType[];
-  onBannerClick?: () => void;
+  onClickableBannerClick?: () => void;
 };
 
 export const StakingNotificationBanners = ({
   popupView,
   notifications,
-  onBannerClick,
-}: StakingNotificationBannerProps) => {
+  onClickableBannerClick,
+}: StakingNotificationBannersProps) => {
   const { t } = useTranslation();
 
   const notificationComponents = {
@@ -45,7 +45,7 @@ export const StakingNotificationBanners = ({
         customIcon={<ExclamationIcon />}
         message={t('overview.banners.saturatedOrRetiredPool.title')}
         description={t('overview.banners.saturatedOrRetiredPool.message')}
-        onBannerClick={onBannerClick}
+        onBannerClick={onClickableBannerClick}
       />
     ),
     portfolioDrifted: (
@@ -55,7 +55,7 @@ export const StakingNotificationBanners = ({
         customIcon={<BellIcon className={styles.bannerInfoIcon} />}
         message={t('overview.banners.portfolioDrifted.title')}
         description={t('overview.banners.portfolioDrifted.message')}
-        onBannerClick={onBannerClick}
+        onBannerClick={onClickableBannerClick}
       />
     ),
   };

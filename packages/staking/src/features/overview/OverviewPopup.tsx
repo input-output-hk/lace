@@ -87,12 +87,15 @@ export const OverviewPopup = () => {
     <>
       {stakingNotifications.includes('portfolioDrifted') && (
         <Box mb="$32">
-          <StakingNotificationBanners notifications={['portfolioDrifted']} onBannerClick={expandStakingView} />
+          <StakingNotificationBanners notifications={['portfolioDrifted']} onClickableBannerClick={expandStakingView} />
         </Box>
       )}
       {stakingNotifications.includes('poolRetiredOrSaturated') && (
         <Box mb="$32">
-          <StakingNotificationBanners notifications={['poolRetiredOrSaturated']} onBannerClick={expandStakingView} />
+          <StakingNotificationBanners
+            notifications={['poolRetiredOrSaturated']}
+            onClickableBannerClick={expandStakingView}
+          />
         </Box>
       )}
       <Box mb="$32">

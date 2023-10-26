@@ -76,7 +76,7 @@ export const Overview = () => {
     return (
       <>
         {stakingNotification ? (
-          <StakingNotificationBanners notifications={stakingNotification} onBannerClick={onManageClick} />
+          <StakingNotificationBanners notifications={stakingNotification} onClickableBannerClick={onManageClick} />
         ) : (
           <Flex flexDirection="column" gap="$32">
             <StakeFundsBanner balance={totalCoinBalance} />
@@ -102,7 +102,7 @@ export const Overview = () => {
       </Box>
       {stakingNotification && (
         <Box mb="$40">
-          <StakingNotificationBanners notifications={stakingNotification} onBannerClick={onManageClick} />
+          <StakingNotificationBanners notifications={stakingNotification} onClickableBannerClick={onManageClick} />
         </Box>
       )}
       <Flex justifyContent="space-between" mb="$16">
