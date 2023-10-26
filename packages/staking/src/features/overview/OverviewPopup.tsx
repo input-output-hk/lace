@@ -1,7 +1,6 @@
 import { Wallet } from '@lace/cardano';
-import { Banner, useObservable } from '@lace/common';
+import { useObservable } from '@lace/common';
 import { Box, Flex, Text } from '@lace/ui';
-import ExclamationIcon from '@lace/ui/dist/assets/icons/warning-icon-triangle.component.svg';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../delegation-card';
@@ -10,10 +9,10 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
-import { hasMinimumFundsToDelegate, hasSaturatedOrRetiredPools, mapPortfolioToDisplayData } from './helpers';
+import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanner';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -33,8 +32,7 @@ export const OverviewPopup = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
-  const isPoolRetiredOrSaturated = hasSaturatedOrRetiredPools(currentPortfolio);
+  const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -87,23 +85,14 @@ export const OverviewPopup = () => {
 
   return (
     <>
-      {stakingNotification === 'portfolioDrifted' && (
+      {stakingNotifications.includes('portfolioDrifted') && (
         <Box mb="$32">
-          <StakingNotificationBanner
-            notification="portfolioDrifted"
-            onPortfolioDriftedNotificationClick={expandStakingView}
-          />
+          <StakingNotificationBanners notifications={['portfolioDrifted']} onBannerClick={expandStakingView} />
         </Box>
       )}
-      {isPoolRetiredOrSaturated && (
-        <Box mb="$40">
-          <Banner
-            popupView
-            withIcon
-            customIcon={<ExclamationIcon />}
-            message={t('overview.banners.saturatedOrRetiredPool.title')}
-            description={t('overview.banners.saturatedOrRetiredPool.message')}
-          />
+      {stakingNotifications.includes('poolRetiredOrSaturated') && (
+        <Box mb="$32">
+          <StakingNotificationBanners notifications={['poolRetiredOrSaturated']} onBannerClick={expandStakingView} />
         </Box>
       )}
       <Box mb="$32">
