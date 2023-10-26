@@ -39,7 +39,7 @@ export const NftFolderConfirmationModal = ({
     onCancel={onCancel}
     // eslint-disable-next-line unicorn/no-null
     footer={null}
-    visible={visible}
+    open={visible}
     width={popupView ? popupModalWidth : extendedModalWidth}
   >
     <div data-testid="create-folder-modal-title" className={styles.header}>

@@ -37,7 +37,7 @@ export const DetailsDrawer = ({
 
   return (
     <Drawer
-      visible={!!selectedNft}
+      open={!!selectedNft}
       onClose={onClose}
       title={assetInfo ? <DrawerHeader title={nftNameSelector(assetInfo, environmentName)} /> : undefined}
       navigation={

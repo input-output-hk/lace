@@ -87,7 +87,7 @@ export const ActivityLayout = (): ReactElement => {
           sideText={activitiesCount ? `(${activitiesCount})` : ''}
         />
         <Drawer
-          visible={!!transactionDetail}
+          open={!!transactionDetail}
           onClose={resetTransactionState}
           navigation={
             <DrawerNavigation

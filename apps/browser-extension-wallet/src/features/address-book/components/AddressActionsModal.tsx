@@ -23,7 +23,7 @@ export const AddressActionsModal = ({
   action,
   onCancel,
   onConfirm,
-  visible,
+  open,
   isPopup
 }: AddressActionsModalProps): React.ReactElement => {
   const { t: translate } = useTranslation();
@@ -46,7 +46,7 @@ export const AddressActionsModal = ({
       // eslint-disable-next-line unicorn/no-null
       footer={null}
       closable={false}
-      visible={visible}
+      open={open}
       width={isPopup ? 'calc(100% - 50px)' : modalWidth}
       zIndex={1000}
     >

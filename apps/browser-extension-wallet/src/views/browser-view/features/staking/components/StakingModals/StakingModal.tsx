@@ -47,7 +47,7 @@ export const StakingModal = ({
       onCancel={handleCancelModal}
       // eslint-disable-next-line unicorn/no-null
       footer={null}
-      visible={visible}
+      open={visible}
       width={popupView ? popupModalWidth : extendedModalWidth}
     >
       <div data-testid="stake-modal-title" className={styles.header}>

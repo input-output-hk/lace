@@ -31,7 +31,7 @@ export const SupportDrawer = ({
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={onClose}
       title={<DrawerHeader popupView={popupView} title={t('browserView.settings.help.support.help')} />}
       navigation={

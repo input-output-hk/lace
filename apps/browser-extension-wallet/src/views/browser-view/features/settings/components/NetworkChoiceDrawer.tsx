@@ -22,7 +22,7 @@ export const NetworkChoiceDrawer = ({
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={onClose}
       title={<DrawerHeader popupView={popupView} title={t('browserView.settings.wallet.network.title')} />}
       navigation={

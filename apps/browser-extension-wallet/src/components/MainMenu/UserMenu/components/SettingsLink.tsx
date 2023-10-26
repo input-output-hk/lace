@@ -3,7 +3,7 @@ import { walletRoutePaths } from '@routes';
 import { Menu } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../../UserMenu/components/UserMenu.module.scss';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 
@@ -16,10 +16,10 @@ export const SettingsLink = (): React.ReactElement => {
   };
 
   return (
-    <Link to={walletRoutePaths.settings} onClick={handleOnLinkClick}>
-      <Menu.Item data-testid="header-menu-settings" className={styles.menuItem}>
-        <a>{t('browserView.topNavigationBar.links.settings')}</a>
-      </Menu.Item>
-    </Link>
+    <Menu.Item className={styles.menuItem} data-testid="header-menu-settings">
+      <Link to={walletRoutePaths.settings} onClick={handleOnLinkClick}>
+        {t('browserView.topNavigationBar.links.settings')}
+      </Link>
+    </Menu.Item>
   );
 };

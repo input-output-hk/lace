@@ -1,9 +1,9 @@
 import React from 'react';
 import classnames from 'classnames';
 import { useWalletStore } from '@src/stores';
-import { Menu, Tooltip as AntdTooltip } from 'antd';
+import { Tooltip as AntdTooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../components/UserMenu.module.scss';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { toast, addEllipsis } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
@@ -43,7 +43,7 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
   };
 
   return (
-    <Menu.ItemGroup className={classnames(styles.menuItem, styles.borderBottom)} data-testid="header-menu-user-info">
+    <div className={classnames(styles.menuItem, styles.borderBottom)} data-testid="header-menu-user-info">
       <div className={styles.userInfoWrapper}>
         <CopyToClipboard text={handleName || walletAddress}>
           <AntdTooltip
@@ -72,6 +72,6 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
           <WalletStatusContainer />
         </div>
       </div>
-    </Menu.ItemGroup>
+    </div>
   );
 };

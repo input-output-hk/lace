@@ -16,7 +16,7 @@ export type deleteDappModalProps = {
 export const DeleteDappModal = ({
   onCancel,
   onConfirm,
-  visible,
+  open,
   isPopupView
 }: deleteDappModalProps): React.ReactElement => {
   const { t: translate } = useTranslation();
@@ -27,7 +27,7 @@ export const DeleteDappModal = ({
       closable={false}
       // eslint-disable-next-line unicorn/no-null
       footer={null}
-      visible={visible}
+      open={open}
       width={isPopupView ? modalPopupWidth : modalBrowserWidth}
     >
       <div data-testid="delete-dapp-modal-title" className={styles.header}>

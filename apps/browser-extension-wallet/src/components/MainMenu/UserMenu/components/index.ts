@@ -6,5 +6,5 @@ export * from './ThemeSwitcher';
 export * from './LockWallet';
 export * from './UserInfo';
 export * from './UserAvatar';
-export * from './NetworkChoise';
+export * from './NetworkSwitcher';
 export * from './NetworkInfo';

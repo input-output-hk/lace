@@ -41,7 +41,7 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
   const restOfNftsContent = (
     <Tooltip
       className={styles.restOfNftsNumber}
-      visible={!shouldShowCompactNumber ? false : undefined}
+      open={!shouldShowCompactNumber ? false : undefined}
       placement="top"
       title={`+${restOfNfts}`}
     >

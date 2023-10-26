@@ -198,7 +198,7 @@ export const VotingLayout = (): React.ReactElement => {
         />
         <Drawer
           onClose={handleCloseRegistrationRequest}
-          visible={isRegisteringWallet}
+          open={isRegisteringWallet}
           title={<DrawerHeader title={translate('browserView.voting.catalystRegistrationFlow.title')} />}
           navigation={<DrawerNavigation onCloseIconClick={handleCloseRegistrationRequest} />}
         >

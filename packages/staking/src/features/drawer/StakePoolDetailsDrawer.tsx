@@ -86,7 +86,7 @@ export const StakePoolDetailsDrawer = ({
 
   return (
     <Drawer
-      visible={drawerVisible}
+      open={drawerVisible}
       destroyOnClose
       onClose={closeDrawer}
       navigation={

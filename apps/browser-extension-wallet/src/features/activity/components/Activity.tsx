@@ -43,7 +43,7 @@ export const Activity = (): React.ReactElement => {
   return (
     <ContentLayout title={layoutTitle} titleSideText={layoutSideText} isLoading={isLoading}>
       <Drawer
-        visible={!!transactionDetail}
+        open={!!transactionDetail}
         onClose={resetTransactionState}
         navigation={
           <DrawerNavigation

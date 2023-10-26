@@ -78,7 +78,7 @@ export const RenameFolderDrawer = withNftsFoldersContext(
     return (
       <>
         <Drawer
-          visible={visible}
+          open={visible}
           onClose={onCloseDrawer}
           popupView={isPopupView}
           title={<DrawerHeader popupView={isPopupView} title={t('browserView.nfts.renameYourFolder')} />}

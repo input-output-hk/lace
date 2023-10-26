@@ -25,8 +25,8 @@ export const AssetTransactionDetails = ({
 
   return (
     <Drawer
-      afterVisibleChange={afterVisibleChange}
-      visible={isVisible}
+      afterOpenChange={afterVisibleChange}
+      open={isVisible}
       onClose={onClose}
       navigation={<DrawerNavigation onCloseIconClick={onClose} onArrowIconClick={onBack} />}
       popupView={appMode === APP_MODE_POPUP}

@@ -13,7 +13,7 @@ export const AboutDrawer = ({ visible, onClose, popupView }: AboutDrawerProps): 
   const { t } = useTranslation();
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={onClose}
       title={<DrawerHeader popupView={popupView} />}
       navigation={

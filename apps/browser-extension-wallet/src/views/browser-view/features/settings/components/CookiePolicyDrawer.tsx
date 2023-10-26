@@ -46,7 +46,7 @@ export const CookiePolicyDrawer = ({
 
   return (
     <Drawer
-      visible={visible}
+      open={visible}
       onClose={onClose}
       title={<DrawerHeader popupView={popupView} title={t('browserView.settings.legal.cookiePolicy.title')} />}
       navigation={

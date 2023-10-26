@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 import React from 'react';
 import cn from 'classnames';
-import styles from '../DropdownMenuOverlay.module.scss';
+import styles from '../../UserMenu/components/UserMenu.module.scss';
 import { Image } from 'antd';
 import { useGetHandles } from '@hooks';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';

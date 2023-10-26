@@ -59,7 +59,7 @@ export const Search = ({
       dropdownAlign={{
         offset: [AUTO_COMPLETE_DROPDOWN_OFFSET_X, AUTO_COMPLETE_DROPDOWN_OFFSET_Y]
       }}
-      dropdownClassName={styles.dropdown}
+      popupClassName={styles.dropdown}
       data-testid={dataTestId || 'search'}
       disabled={disabled}
       options={isFocus ? options : []}

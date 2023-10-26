@@ -48,7 +48,7 @@ export const GeneralSettingsDrawer = ({
   return (
     <>
       <Drawer
-        visible={visible}
+        open={visible}
         onClose={handleClose}
         title={
           <DrawerHeader
