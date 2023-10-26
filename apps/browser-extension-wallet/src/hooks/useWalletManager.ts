@@ -17,6 +17,7 @@ import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
+import { ILocalStorage } from '@src/types';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 
@@ -305,18 +306,32 @@ export const useWalletManager = (): UseWalletManager => {
       resetWalletLock();
       setCardanoWallet();
 
-      await backgroundService.clearBackgroundStorage({ except: ['fiatPrices', 'userId', 'usePersistentUserId'] });
+      await backgroundService.clearBackgroundStorage({
+        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration']
+      });
 
-      if (isForgotPasswordFlow) {
-        clearLocalStorage({ except: ['wallet', ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY] });
-      } else {
-        clearLocalStorage();
-        await userIdService.clearId();
-        clearAddressBook();
-        clearNftsFolders();
-      }
+      const commonLocalStorageKeysToKeep: (keyof ILocalStorage)[] = [
+        'currency',
+        'mode',
+        'hideBalance',
+        'multidelegationFirstVisit',
+        'analyticsAccepted'
+      ];
 
       setCurrentChain(CHAIN);
+
+      if (isForgotPasswordFlow) {
+        const additionalKeysToKeep: (keyof ILocalStorage)[] = ['wallet', ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY];
+        clearLocalStorage({
+          except: [...commonLocalStorageKeysToKeep, ...additionalKeysToKeep]
+        });
+        return;
+      }
+
+      clearLocalStorage({ except: commonLocalStorageKeysToKeep });
+      await userIdService.clearId();
+      clearAddressBook();
+      clearNftsFolders();
     },
     [
       walletManagerUi,
