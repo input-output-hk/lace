@@ -11,6 +11,7 @@
       "expect-webdriverio",
       "chai",
       "@types/chai-sorted",
+      "@types/chai-string",
       "@wdio/devtools-service",
       "wdio-intercept-service"
     ],

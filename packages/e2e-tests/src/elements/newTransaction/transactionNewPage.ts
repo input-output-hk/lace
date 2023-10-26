@@ -6,6 +6,7 @@ import { AddressInput } from '../addressInput';
 import { TransactionBundle } from './transactionBundle';
 import { Asset } from '../../data/Asset';
 import { ChainablePromiseElement } from 'webdriverio';
+import Banner from '../banner';
 
 export class TransactionNewPage extends WebElement {
   private CONTAINER = '//div[@class="ant-drawer-body"]';
@@ -30,6 +31,10 @@ export class TransactionNewPage extends WebElement {
 
   constructor() {
     super();
+  }
+
+  get banner(): typeof Banner {
+    return Banner;
   }
 
   coinConfigure(index?: number): CoinConfigure {

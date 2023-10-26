@@ -96,16 +96,17 @@ export const StepPreferencesContent = () => {
         />
       </Box>
       <Flex justifyContent="space-between">
-        <Text.Body.Large weight="$semibold">
+        <Text.Body.Large weight="$semibold" data-testid="manage-delegation-selected-pools-label">
           {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}
         </Text.Body.Large>
         <ControlButton.Small
           label={t('drawer.preferences.addPoolButton')}
           onClick={onAddPoolButtonClick}
           disabled={addPoolButtonDisabled}
+          data-testid="manage-delegation-add-pools-btn"
         />
       </Flex>
-      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
+      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" data-testid="selected-pools-container">
         {displayData.map(
           (
             { color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage },

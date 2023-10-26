@@ -88,7 +88,7 @@ export const en: Translations = {
   'general.button.confirm': 'Confirm',
   'modals.beta.button': 'Got it',
   'modals.beta.description':
-    'This feature allows you to stake to up to 5 pools. This is still in beta version, so some functionality might not be available. Read more about multi-delegation in our <Link>dedicated blog.</Link>',
+    'This feature allows you to stake to up to {{maxPools}} pools. This is still in beta version, so some functionality might not be available. Read more about multi-delegation in our <Link>dedicated blog.</Link>',
   'modals.beta.pill': 'Beta',
   'modals.beta.title': 'Multi-delegation',
   'modals.changingPreferences.buttons.cancel': 'Cancel',
