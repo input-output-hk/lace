@@ -11,3 +11,5 @@ export type {
   Handler,
 } from './types';
 export { sumPercentagesSanitized } from './sumPercentagesSanitized';
+export { normalizePercentages } from './normalizePercentages';
+export { sanitizePercentages } from './sanitizePercentages';

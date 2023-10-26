@@ -11,7 +11,7 @@ type PortfolioStakePoolBase = {
 };
 
 type CurrentPortfolioSpecificProps = {
-  savedIntegerPercentage: number; // todo: type for integers
+  savedIntegerPercentage: number | null; // todo: type for integers
   onChainPercentage: number;
 };
 

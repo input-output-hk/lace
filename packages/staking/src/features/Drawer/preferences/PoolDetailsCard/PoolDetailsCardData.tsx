@@ -6,7 +6,7 @@ import * as styles from './PoolDetailsCardData.css';
 
 interface PoolDetailsCardProps {
   actualPercentage?: number;
-  savedPercentage?: number;
+  savedPercentage?: number | null;
   stakeValue: string;
   cardanoCoinSymbol: string;
 }
@@ -31,7 +31,7 @@ export const PoolDetailsCardData = ({
           </Tooltip>
         </Flex>
         <Text.Body.Large weight="$semibold">
-          {savedPercentage || '-'} {savedPercentage && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
+          {savedPercentage || '-'} {!!savedPercentage && <Text.Body.Small weight="$medium">%</Text.Body.Small>}
         </Text.Body.Large>
       </Flex>
       <Flex pl="$32" pr="$32" flexDirection="column" className={styles.valueBox}>

@@ -20,7 +20,7 @@ interface PoolDetailsCardProps {
   onPercentageChange: PercentagesChangeHandler;
   onRemove?: () => void;
   actualPercentage?: number;
-  savedPercentage?: number;
+  savedPercentage?: number | null;
   targetPercentage: number;
   stakeValue: string;
   cardanoCoinSymbol: string;
