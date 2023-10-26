@@ -155,6 +155,9 @@ type KeysStructure = {
       title: '';
       description: '';
       button: '';
+      portfolioPersistence: {
+        description: '';
+      };
     };
     poolsManagement: {
       title: '';
