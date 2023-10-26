@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import React from 'react';
 
 import type { Meta } from '@storybook/react';
@@ -7,6 +8,7 @@ import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Cell, Grid } from '../grid';
+import { Content, ContentInner } from '../tooltip';
 
 import { PieChart } from './pie-chart.component';
 import {
@@ -43,6 +45,12 @@ const meta: Meta<typeof PieChart> = {
 };
 
 export default meta;
+
+const CustomTooltip = (): ReactElement => (
+  <Content>
+    <ContentInner label="This is an example tooltip" />
+  </Content>
+);
 
 export const Overview = (): JSX.Element => (
   <Grid columns="$1">
@@ -231,12 +239,13 @@ export const Overview = (): JSX.Element => (
 
 type ConfigurableStoryProps = Pick<
   PieChartProps<{ name: string; value: number }>,
-  'colors' | 'data' | 'direction' | 'tooltip'
->;
+  'colors' | 'data' | 'direction'
+> & { tooltip: boolean };
 
 export const Controls = ({
   colors,
   data,
+  tooltip,
   ...props
 }: Readonly<ConfigurableStoryProps>): JSX.Element => (
   <Grid columns="$5">
@@ -245,6 +254,7 @@ export const Controls = ({
         animate={isNotInChromatic}
         colors={colors}
         data={data}
+        tooltip={tooltip ? CustomTooltip : undefined}
         {...props}
       />
     </Cell>

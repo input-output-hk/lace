@@ -3,8 +3,9 @@ import cn from 'classnames';
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
-// import { PERCENTAGE_SCALE_MAX } from '../store';
 import * as styles from './DelegationCard.css';
+import { DelegationTooltip } from './DelegationTooltip';
+import { DistributionItem } from './types';
 
 // TODO
 const PERCENTAGE_SCALE_MAX = 100;
@@ -15,17 +16,11 @@ export type DelegationStatus =
   | 'under-allocated'
   | 'no-selection';
 
-type Distribution = Array<{
-  name: string;
-  percentage: number;
-  color: PieChartColor;
-}>;
-
 type DelegationCardProps = {
   arrangement?: 'vertical' | 'horizontal';
   balance: string;
   cardanoCoinSymbol: string;
-  distribution: Distribution;
+  distribution: DistributionItem[];
   status: DelegationStatus;
   showDistribution?: boolean;
 };
@@ -72,7 +67,7 @@ export const DelegationCard = ({
 
   const { data, colorSet = PIE_CHART_DEFAULT_COLOR_SET } = useMemo((): {
     colorSet?: PieChartColor[];
-    data: Distribution;
+    data: DistributionItem[];
   } => {
     const GREY_COLOR: PieChartColor = '#C0C0C0';
     const RED_COLOR: PieChartColor = '#FF5470';
@@ -118,7 +113,7 @@ export const DelegationCard = ({
         data-testid="delegation-info-card"
       >
         <div className={styles.chart} data-testid="delegation-chart">
-          <PieChart data={data} nameKey="name" valueKey="percentage" colors={colorSet} />
+          <PieChart data={data} nameKey="name" valueKey="percentage" colors={colorSet} tooltip={DelegationTooltip} />
           {showDistribution && <Text.SubHeading className={styles.counter}>{totalPercentage}%</Text.SubHeading>}
         </div>
         <div

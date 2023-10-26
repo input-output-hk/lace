@@ -50,18 +50,20 @@ export const StepPreferencesContent = () => {
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
-      displayData: { name },
+      displayData: { name, apy, saturation },
       id,
       sliderIntegerPercentage,
     } = draftPool;
 
     return {
+      apy: apy ? String(apy) : undefined,
       cardanoCoinSymbol,
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
       onChainPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.onChainPercentage : undefined,
       percentage: sliderIntegerPercentage,
+      saturation: saturation ? String(saturation) : undefined,
       savedIntegerPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.savedIntegerPercentage : undefined,
       // TODO
       sliderIntegerPercentage,
