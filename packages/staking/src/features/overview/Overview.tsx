@@ -61,7 +61,7 @@ export const Overview = () => {
     portfolio: currentPortfolio,
   });
 
-  if (noFunds)
+  if (noFunds) {
     return (
       <FundWalletBanner
         title={t('overview.noFunds.title')}
@@ -71,8 +71,9 @@ export const Overview = () => {
         shouldHaveVerticalContent
       />
     );
+  }
 
-  if (currentPortfolio.length === 0)
+  if (currentPortfolio.length === 0) {
     return (
       <>
         {stakingNotification ? (
@@ -85,6 +86,7 @@ export const Overview = () => {
         )}
       </>
     );
+  }
 
   return (
     <>

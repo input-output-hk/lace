@@ -3,11 +3,8 @@ import cn from 'classnames';
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
-import { sumPercentagesSanitized } from '../store/delegationPortfolioStore/stateMachine/sumPercentagesSanitized';
+import { PERCENTAGE_SCALE_MAX, sumPercentagesSanitized } from '../store';
 import * as styles from './DelegationCard.css';
-// import { PERCENTAGE_SCALE_MAX } from '../store';
-// re-declared due to ladle crash if importing from ../store
-const PERCENTAGE_SCALE_MAX = 100;
 
 export type DelegationStatus =
   | 'multi-delegation'

@@ -53,7 +53,7 @@ export const OverviewPopup = () => {
     portfolioMutators.executeCommand({ data: stakePool, type: 'ShowDelegatedPoolDetails' });
   };
 
-  if (noFunds)
+  if (noFunds) {
     return (
       <Flex flexDirection="column" gap="$32">
         <FundWalletBanner
@@ -66,14 +66,16 @@ export const OverviewPopup = () => {
         <ExpandViewBanner />
       </Flex>
     );
+  }
 
-  if (currentPortfolio.length === 0)
+  if (currentPortfolio.length === 0) {
     return (
       <Flex flexDirection="column" gap="$32">
         <StakeFundsBanner balance={totalCoinBalance} popupView />
         <ExpandViewBanner />
       </Flex>
     );
+  }
 
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,

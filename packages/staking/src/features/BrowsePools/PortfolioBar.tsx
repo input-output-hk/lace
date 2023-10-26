@@ -15,8 +15,9 @@ export const PortfolioBar = () => {
   if (
     ![DelegationFlow.BrowsePools, DelegationFlow.PoolDetails].includes(activeDelegationFlow) ||
     selectedPoolsCount === 0
-  )
+  ) {
     return null;
+  }
 
   return (
     <Card.Elevated className={styles.barContainer}>

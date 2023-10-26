@@ -144,8 +144,12 @@ export type State =
 
 export type ExecuteCommand = <C extends Command>(command: C) => void;
 
+// TODO improve the types
 export type Handler<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   C extends Command = any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CurrentState extends State = any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TargetState extends State = any
 > = (params: { command: C; executeCommand: ExecuteCommand; state: CurrentState }) => TargetState;

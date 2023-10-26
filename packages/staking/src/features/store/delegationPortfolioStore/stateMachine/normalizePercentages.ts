@@ -26,8 +26,9 @@ export const normalizePercentages = <K extends string, T extends { [key in K]: n
 }) => {
   const currentSum = sumPercentagesSanitized({ items, key });
   const epsilon = 0.1;
-  if (Math.abs(currentSum - PERCENTAGE_SCALE_MAX) > epsilon)
+  if (Math.abs(currentSum - PERCENTAGE_SCALE_MAX) > epsilon) {
     throw new Error(`Percentages must sum to ${PERCENTAGE_SCALE_MAX}`);
+  }
 
   // Scale up the numbers to round them at the `decimals` decimal place
   // eslint-disable-next-line no-magic-numbers
