@@ -312,10 +312,12 @@ export const useWalletManager = (): UseWalletManager => {
 
       const commonLocalStorageKeysToKeep: (keyof ILocalStorage)[] = [
         'currency',
+        'lock',
         'mode',
         'hideBalance',
-        'multidelegationFirstVisit',
-        'analyticsAccepted'
+        'analyticsAccepted',
+        'isForgotPasswordFlow',
+        'multidelegationFirstVisit'
       ];
 
       setCurrentChain(CHAIN);
