@@ -9425,6 +9425,7 @@ __metadata:
     axios-cache-adapter: 2.7.3
     classnames: ^2.3.1
     debounce-promise: ^3.1.2
+    decamelize-keys: ^2.0.1
     i18next: 20.4.0
     jest-mock-extended: 3.0.4
     lodash: 4.17.21
@@ -9435,6 +9436,7 @@ __metadata:
     react-infinite-scroll-component: ^6.1.0
     sass: ^1.68.0
     storybook: ^7.4.3
+    titleize: ^4.0.0
     typescript: ^4.3.5
     zxcvbn: ^4.4.2
   peerDependencies:
@@ -24924,6 +24926,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"decamelize-keys@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "decamelize-keys@npm:2.0.1"
+  dependencies:
+    decamelize: ^6.0.0
+    map-obj: ^4.3.0
+    quick-lru: ^6.1.1
+    type-fest: ^3.1.0
+  checksum: 633f4599047892a87188f7767b6f78ca75a0eadfdd5362b81ab6a3fed3e73ed0db54a5285b6a43482a63896002b28f7add4fdef2228de9873f93a79ab7b4693e
+  languageName: node
+  linkType: hard
+
 "decamelize@npm:^1.1.0, decamelize@npm:^1.1.2, decamelize@npm:^1.2.0":
   version: 1.2.0
   resolution: "decamelize@npm:1.2.0"
@@ -35744,6 +35758,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"map-obj@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "map-obj@npm:4.3.0"
+  checksum: fbc554934d1a27a1910e842bc87b177b1a556609dd803747c85ece420692380827c6ae94a95cce4407c054fa0964be3bf8226f7f2cb2e9eeee432c7c1985684e
+  languageName: node
+  linkType: hard
+
 "map-or-similar@npm:^1.5.0":
   version: 1.5.0
   resolution: "map-or-similar@npm:1.5.0"
@@ -41295,6 +41316,13 @@ __metadata:
   version: 5.1.1
   resolution: "quick-lru@npm:5.1.1"
   checksum: a516faa25574be7947969883e6068dbe4aa19e8ef8e8e0fd96cddd6d36485e9106d85c0041a27153286b0770b381328f4072aa40d3b18a19f5f7d2b78b94b5ed
+  languageName: node
+  linkType: hard
+
+"quick-lru@npm:^6.1.1":
+  version: 6.1.2
+  resolution: "quick-lru@npm:6.1.2"
+  checksum: 0491a24dcd39b8a325e9d3ae719fad7690a1da7a0dbfa8f16613663dc7d262d08b565005ce16a04497ed4700f1f477b8e06cd46e10a7a112a481a18d056c38f7
   languageName: node
   linkType: hard
 
@@ -47518,6 +47546,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"titleize@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "titleize@npm:4.0.0"
+  checksum: 4415b5422818cce13d6eb3037a53922c1aa79cbaefdfc26ecd862c8d9d526a5046a52963c5f6034fb866daae13004b2fbac546c5a1e25d5904d1452518e56959
+  languageName: node
+  linkType: hard
+
 "tmp@npm:^0.0.33":
   version: 0.0.33
   resolution: "tmp@npm:0.0.33"
@@ -48184,7 +48219,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^3.8.0":
+"type-fest@npm:^3.1.0, type-fest@npm:^3.8.0":
   version: 3.13.1
   resolution: "type-fest@npm:3.13.1"
   checksum: c06b0901d54391dc46de3802375f5579868949d71f93b425ce564e19a428a0d411ae8d8cb0e300d330071d86152c3ea86e744c3f2860a42a79585b6ec2fdae8e
