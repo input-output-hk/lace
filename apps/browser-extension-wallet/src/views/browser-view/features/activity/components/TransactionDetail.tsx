@@ -168,6 +168,9 @@ export const TransactionDetail = withAddressBookContext<TransactionDetailProps>(
       type={transactionInfo?.type}
       isPopupView={isPopupView}
       openExternalLink={handleOpenExternalLink}
+      proposalProcedures={transactionInfo.tx.proposalProcedures}
+      votingProcedures={transactionInfo.tx.votingProcedures}
+      certificates={transactionInfo.tx.certificates}
     />
   );
 });

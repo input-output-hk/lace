@@ -72,6 +72,12 @@ export interface AssetActivityItemProps {
 }
 
 const DelegationTransactionTypes = new Set(['delegation', 'delegationRegistration', 'delegationDeregistration']);
+
+export type DelegationTransactionType = Extract<
+  TransactionType,
+  'delegation' | 'delegationRegistration' | 'delegationDeregistration'
+>;
+
 const DELEGATION_ASSET_NUMBER = 1;
 
 interface TransactionStatusIconProps {
@@ -96,14 +102,26 @@ const TransactionStatusIcon = ({ status, type }: TransactionStatusIconProps) => 
   }
 };
 
-const translationTypes = {
+const translationTypes: Record<TransactionType, string> = {
   delegation: 'package.core.assetActivityItem.entry.name.delegation',
   delegationDeregistration: 'package.core.assetActivityItem.entry.name.delegationDeregistration',
   delegationRegistration: 'package.core.assetActivityItem.entry.name.delegationRegistration',
   rewards: 'package.core.assetActivityItem.entry.name.rewards',
   incoming: 'package.core.assetActivityItem.entry.name.incoming',
   outgoing: 'package.core.assetActivityItem.entry.name.outgoing',
-  self: 'package.core.assetActivityItem.entry.name.self'
+  self: 'package.core.assetActivityItem.entry.name.self',
+  drepRegistration: 'package.core.assetActivityItem.entry.name.drepRegistration',
+  drepRetirement: 'package.core.assetActivityItem.entry.name.drepRetirement',
+  drepUpdate: 'package.core.assetActivityItem.entry.name.drepUpdate',
+  vote: 'package.core.assetActivityItem.entry.name.vote',
+  submitProposal: 'package.core.assetActivityItem.entry.name.submitProposal',
+  stakeVoteDelegation: 'package.core.assetActivityItem.entry.name.stakeVoteDelegation',
+  stakeRegistrationDelegation: 'package.core.assetActivityItem.entry.name.stakeRegistrationDelegation',
+  stakeVoteRegistrationDelegation: 'package.core.assetActivityItem.entry.name.stakeVoteRegistrationDelegation',
+  voteDelegation: 'package.core.assetActivityItem.entry.name.voteDelegation',
+  voteRegistrationDelegation: 'package.core.assetActivityItem.entry.name.voteRegistrationDelegation',
+  resignComitteeCold: 'package.core.assetActivityItem.entry.name.resignComitteeCold',
+  authCommitteeHot: 'package.core.assetActivityItem.entry.name.authCommitteeHot'
 };
 
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.

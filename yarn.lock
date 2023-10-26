@@ -5390,17 +5390,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/cardano-services-client@npm:0.14.1":
-  version: 0.14.1
-  resolution: "@cardano-sdk/cardano-services-client@npm:0.14.1"
+"@cardano-sdk/cardano-services-client@npm:0.14.2":
+  version: 0.14.2
+  resolution: "@cardano-sdk/cardano-services-client@npm:0.14.2"
   dependencies:
-    "@cardano-sdk/core": ~0.20.1
+    "@cardano-sdk/core": ~0.21.0
     "@cardano-sdk/util": ~0.14.2
     axios: ^0.27.2
     class-validator: ^0.14.0
     json-bigint: ~1.0.0
     ts-log: ^2.2.4
-  checksum: dfc87b2c3a9627ce5946c2af4816faa56ce79a6ede7611ac09764abb501fb39fefa3eddabe6f820188a2b00398bca64e983ecc658ee5d4e4f720b9a07e3aa4b8
+  checksum: 88f62b51bea9514e708ae1f4ee58572781831b3708e2e7e624eb019edff9cf7cdce40707b7f7804090b982ee59d58c8354b19111da4635da8d808fb69c2740ad
   languageName: node
   linkType: hard
 
@@ -5427,6 +5427,31 @@ __metadata:
     rxjs:
       optional: true
   checksum: 6e13397d8f6638b1050564f7bf0f7ce8fc8c9ed75abe6c22c8c60048584a874fb92bc3398b2ca23f46d93e9c9f0a4eebbb65fd644c8aa8944c3ea997b05b2059
+  languageName: node
+  linkType: hard
+
+"@cardano-sdk/core@npm:~0.21.0":
+  version: 0.21.0
+  resolution: "@cardano-sdk/core@npm:0.21.0"
+  dependencies:
+    "@cardano-ogmios/client": 5.6.0
+    "@cardano-ogmios/schema": 5.6.0
+    "@cardano-sdk/crypto": ~0.1.15
+    "@cardano-sdk/util": ~0.14.2
+    "@foxglove/crc": ^0.0.3
+    "@scure/base": ^1.1.1
+    fraction.js: 4.0.1
+    ip-address: ^8.1.0
+    lodash: ^4.17.21
+    ts-custom-error: ^3.2.0
+    ts-log: ^2.2.4
+    web-encoding: ^1.1.5
+  peerDependencies:
+    rxjs: ^7.4.0
+  peerDependenciesMeta:
+    rxjs:
+      optional: true
+  checksum: 5228b248d511158e3aa02fc6468ee66906194e1aa38d53abc78800d7d6914e0d3d0af47e086786fb6e1e4d5115f94b23ab16d88019f62559cee98b17e4985ef7
   languageName: node
   linkType: hard
 
@@ -7805,7 +7830,7 @@ __metadata:
   resolution: "@lace/browser-extension-wallet@workspace:apps/browser-extension-wallet"
   dependencies:
     "@ant-design/icons": ^4.7.0
-    "@cardano-sdk/cardano-services-client": 0.14.1
+    "@cardano-sdk/cardano-services-client": 0.14.2
     "@cardano-sdk/core": 0.20.1
     "@cardano-sdk/dapp-connector": 0.11.0
     "@cardano-sdk/input-selection": 0.12.1
@@ -7876,7 +7901,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lace/cardano@workspace:packages/cardano"
   dependencies:
-    "@cardano-sdk/cardano-services-client": 0.14.1
+    "@cardano-sdk/cardano-services-client": 0.14.2
     "@cardano-sdk/core": 0.20.1
     "@cardano-sdk/crypto": 0.1.15
     "@cardano-sdk/hardware-ledger": 0.4.1

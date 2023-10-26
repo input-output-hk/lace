@@ -6,7 +6,8 @@ import {
   ZustandHandlers,
   BlockchainProviderSlice,
   WalletInfoSlice,
-  SliceCreator
+  SliceCreator,
+  UISlice
 } from '../types';
 import { CardanoTxOut, Transaction, TransactionDetail } from '../../types';
 import { blockTransformer, inputOutputTransformer } from '../../api/transformers';
@@ -18,6 +19,11 @@ import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { getRewardsAmount } from '@src/views/browser-view/features/activity/helpers';
 import { MAX_POOLS_COUNT } from '@lace/staking';
 import { TransactionType } from '@lace/core';
+import {
+  certificateTransformer,
+  governanceProposalsTransformer,
+  votingProceduresTransformer
+} from '@src/views/browser-view/features/activity/helpers/common-transformers';
 
 /**
  * validates if the transaction is confirmed
@@ -64,13 +70,14 @@ const getTransactionDetail =
     set,
     get
   }: ZustandHandlers<
-    TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice
+    TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice & UISlice
   >): TransactionDetailSlice['getTransactionDetails'] =>
   // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   async ({ coinPrices, fiatCurrency }) => {
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
       inMemoryWallet: wallet,
+      walletUI: { cardanoCoin },
       transactionDetail: { tx, status, direction, type },
       walletInfo
     } = get();
@@ -145,7 +152,10 @@ const getTransactionDetail =
       addrOutputs: outputs,
       metadata: txMetadata,
       includedUtcDate: blocks?.utcDate,
-      includedUtcTime: blocks?.utcTime
+      includedUtcTime: blocks?.utcTime,
+      votingProcedures: votingProceduresTransformer(tx.body.votingProcedures),
+      proposalProcedures: governanceProposalsTransformer(cardanoCoin, tx.body.proposalProcedures),
+      certificates: certificateTransformer(cardanoCoin, tx.body.certificates)
     };
 
     if (type === 'delegation' && delegationInfo) {
@@ -202,7 +212,7 @@ const getTransactionDetail =
  * has all transactions search related actions and states
  */
 export const transactionDetailSlice: SliceCreator<
-  TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice,
+  TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice & UISlice,
   TransactionDetailSlice
 > = ({ set, get }) => ({
   transactionDetail: undefined,

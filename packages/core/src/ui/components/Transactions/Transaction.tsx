@@ -12,6 +12,8 @@ import { ReactComponent as Info } from '../../assets/icons/info-icon.component.s
 import { TransactionInputOutput } from './TransactionInputOutput';
 import { useTranslate } from '@src/ui/hooks';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import { TxDetails } from './TransactionType';
+import { TxDetailList } from './TxDetailsList';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -67,6 +69,9 @@ export interface TransactionProps {
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
   openExternalLink?: () => void;
+  votingProcedures?: TxDetails[];
+  proposalProcedures?: TxDetails[];
+  certificates?: TxDetails[];
 }
 
 const TOAST_DEFAULT_DURATION = 3;
@@ -105,7 +110,10 @@ export const Transaction = ({
   pools,
   addressToNameMap,
   isPopupView,
-  openExternalLink
+  openExternalLink,
+  proposalProcedures,
+  votingProcedures,
+  certificates
 }: TransactionProps): React.ReactElement => {
   const { t } = useTranslate();
   const isSending = status === 'sending';
@@ -181,6 +189,33 @@ export const Transaction = ({
             </div>
           </div>
         )}
+        {/* votingProcedures &&
+          votingProcedures.map((votingProcedure, idx) => (
+            <>
+              {votingProcedures.length > 1 && <>Vote {idx + 1}</>}
+              <div className={styles.details}>
+                <div className={styles.title}>Voter Type</div>
+                <div className={styles.detail}>{votingProcedure.voter.__typename}</div>
+              </div>
+              <div className={styles.details}>
+                <div className={styles.title}>Credential Type</div>
+                <div className={styles.detail}>
+                  {Wallet.Cardano.CredentialType[votingProcedure.voter.credential.type]}
+                </div>
+              </div>
+              <div className={styles.details}>
+                <div className={styles.title}>Votes</div>
+                <div className={styles.detail}>
+                  {votingProcedure.votes.map((vote) => (
+                    <>
+                      <br />
+                      {Wallet.Cardano.Vote[vote.votingProcedure.vote]}
+                    </>
+                  ))}
+                </div>
+              </div>
+            </>
+                  ))*/}
         {txSummary.map((summary, index) => (
           <div key={index.toString()} data-testid="tx-detail-bundle">
             <div className={styles.details}>
@@ -293,7 +328,30 @@ export const Transaction = ({
             label: t('package.core.transactionDetailBrowser.depositReclaim')
           })}
       </div>
-
+      {votingProcedures?.length > 0 && (
+        <TxDetailList
+          testId="voting-procedures"
+          title={'Voting Procedures'}
+          lists={votingProcedures}
+          withSeparatorLine
+        />
+      )}
+      {proposalProcedures?.length > 0 && (
+        <TxDetailList
+          testId="proposal-procedures"
+          title={'Proposal Procedures'}
+          lists={proposalProcedures}
+          withSeparatorLine
+        />
+      )}
+      {certificates?.length > 0 && (
+        <TxDetailList
+          title={t('package.core.transactionDetailBrowser.certificates')}
+          testId="certificates"
+          lists={certificates}
+          withSeparatorLine
+        />
+      )}
       {addrInputs?.length > 0 && (
         <TransactionInputOutput
           amountTransformer={amountTransformer}

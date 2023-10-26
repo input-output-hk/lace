@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { renderHook, act } from '@testing-library/react-hooks';
-import { BlockchainProviderSlice, TransactionDetailSlice, WalletInfoSlice } from '../../types';
+import { BlockchainProviderSlice, TransactionDetailSlice, UISlice, WalletInfoSlice } from '../../types';
 import { transactionMock } from '../../../utils/mocks/test-helpers';
 import { transactionDetailSlice } from '../transaction-detail-slice';
 import '@testing-library/jest-dom';
@@ -9,12 +9,13 @@ import { mockBlockchainProviders } from '@src/utils/mocks/blockchain-providers';
 
 const mockTransactionDetailSlice = (
   set: SetState<TransactionDetailSlice>,
-  get: GetState<BlockchainProviderSlice & TransactionDetailSlice & WalletInfoSlice>
+  get: GetState<BlockchainProviderSlice & TransactionDetailSlice & WalletInfoSlice & UISlice>
 ): TransactionDetailSlice => {
   get = () =>
     ({ blockchainProvider: mockBlockchainProviders() } as BlockchainProviderSlice &
       TransactionDetailSlice &
-      WalletInfoSlice);
+      WalletInfoSlice &
+      UISlice);
   return transactionDetailSlice({ set, get });
 };
 

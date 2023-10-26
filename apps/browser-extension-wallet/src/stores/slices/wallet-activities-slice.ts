@@ -51,13 +51,14 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
 export type FetchWalletActivitiesReturn = Observable<Promise<AssetActivityListProps[]>>;
 export type DelegationTransactionType = Extract<
   TransactionType,
-  'delegation' | 'delegationRegistration' | 'delegationDeregistration'
+  'delegation' | 'delegationRegistration' | 'delegationDeregistration' | 'stakeRegistrationDelegation'
 >;
 
 const delegationTransactionTypes: ReadonlySet<DelegationTransactionType> = new Set([
   'delegation',
   'delegationRegistration',
-  'delegationDeregistration'
+  'delegationDeregistration',
+  'stakeRegistrationDelegation'
 ]);
 
 type DelegationActivityItemProps = Omit<AssetActivityItemProps, 'type'> & {

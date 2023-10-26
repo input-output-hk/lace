@@ -2,9 +2,11 @@
 import '@testing-library/jest-dom';
 import { inspectTxType, getTxDirection } from '../tx-inspection';
 import { buildMockTx } from '../mocks/tx';
+import { mockConwayCertificates } from '../mocks/certificates';
 import { Wallet } from '@lace/cardano';
 import { TxDirections } from '@src/types';
 import { StakeDelegationCertificate } from '@cardano-sdk/core/dist/cjs/Cardano';
+import { TransactionType } from '@lace/core';
 
 const ADDRESS_1 = Wallet.Cardano.PaymentAddress(
   'addr_test1qq585l3hyxgj3nas2v3xymd23vvartfhceme6gv98aaeg9muzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q2g7k3g'
@@ -37,7 +39,7 @@ describe('testing tx-inspection utils', () => {
       expect(getTxDirection({ type: 'self' })).toEqual(TxDirections.Self);
     });
   });
-  describe('Testing inspectTxType function', () => {
+  describe.only('Testing inspectTxType function', () => {
     test('should return incoming', () => {
       const incomingTX = buildMockTx({
         inputs: [
@@ -305,6 +307,152 @@ describe('testing tx-inspection utils', () => {
       });
 
       expect(result).toBe('incoming');
+    });
+
+    describe.only('conway era transaction types', () => {
+      describe('certificates', () => {
+        const conwayCertificates: { cert: Wallet.Cardano.Certificate; expectedReturn: TransactionType }[] = [];
+
+        for (const [certificateType, certificate] of Object.entries(mockConwayCertificates)) {
+          conwayCertificates.push({ cert: certificate, expectedReturn: certificateType as TransactionType });
+        }
+
+        it.each(conwayCertificates)(
+          "should return '$expectedReturn' if a certificate of type $cert.__typename exists in the transaction body",
+          ({ cert, expectedReturn }) => {
+            const mockTx = buildMockTx({
+              certificates: [cert],
+              inputs: [
+                {
+                  address: ADDRESS_1,
+                  ...DEAFULT_TX_INPUT_INFO
+                }
+              ],
+              outputs: [
+                {
+                  address: ADDRESS_2,
+                  ...DEFAULT_OUTPUT_VALUE
+                },
+                {
+                  address: ADDRESS_1,
+                  ...DEFAULT_OUTPUT_VALUE
+                }
+              ]
+            });
+            const result = inspectTxType({
+              tx: mockTx,
+              walletAddresses: [
+                { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+              ] as Wallet.KeyManagement.GroupedAddress[]
+            });
+            expect(result).toEqual(expectedReturn);
+          }
+        );
+      });
+
+      describe('governance actions', () => {
+        it('should return "vote" if votingProcedures are present', () => {
+          const mockTx = buildMockTx({
+            inputs: [
+              {
+                address: ADDRESS_1,
+                ...DEAFULT_TX_INPUT_INFO
+              }
+            ],
+            outputs: [
+              {
+                address: ADDRESS_2,
+                ...DEFAULT_OUTPUT_VALUE
+              },
+              {
+                address: ADDRESS_1,
+                ...DEFAULT_OUTPUT_VALUE
+              }
+            ]
+          });
+          const result = inspectTxType({
+            tx: {
+              ...mockTx,
+              body: {
+                ...mockTx.body,
+                votingProcedures: [
+                  {
+                    voter: {
+                      __typename: Wallet.Cardano.VoterType.dRepKeyHash,
+                      credential: {
+                        hash: Wallet.Crypto.Hash28ByteBase16(
+                          'c780b43ca9577ea3f28f1fbd39a4d13c3ad9df6987051f5167815974'
+                        ),
+                        type: Wallet.Cardano.CredentialType.KeyHash
+                      }
+                    },
+                    votes: [
+                      {
+                        actionId: {
+                          actionIndex: 1,
+                          id: Wallet.Cardano.TransactionId('1')
+                        },
+                        votingProcedure: {
+                          vote: 1,
+                          // eslint-disable-next-line unicorn/no-null
+                          anchor: null
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            walletAddresses: [
+              { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+            ] as Wallet.KeyManagement.GroupedAddress[]
+          });
+
+          expect(result).toEqual('vote');
+        });
+
+        it('should return "submitProposal" if proposalProcedures are present', () => {
+          const mockTx = buildMockTx({
+            inputs: [
+              {
+                address: ADDRESS_1,
+                ...DEAFULT_TX_INPUT_INFO
+              }
+            ],
+            outputs: [
+              {
+                address: ADDRESS_2,
+                ...DEFAULT_OUTPUT_VALUE
+              },
+              {
+                address: ADDRESS_1,
+                ...DEFAULT_OUTPUT_VALUE
+              }
+            ]
+          });
+          const result = inspectTxType({
+            tx: {
+              ...mockTx,
+              body: {
+                ...mockTx.body,
+                proposalProcedures: [
+                  {
+                    rewardAccount: REWARD_ACCOUNT,
+                    // eslint-disable-next-line unicorn/no-null
+                    anchor: null,
+                    governanceAction: {} as Wallet.Cardano.GovernanceAction,
+                    deposit: BigInt(1)
+                  }
+                ]
+              }
+            },
+            walletAddresses: [
+              { address: ADDRESS_1, rewardAccount: REWARD_ACCOUNT }
+            ] as Wallet.KeyManagement.GroupedAddress[]
+          });
+          expect(result).toEqual('submitProposal');
+        });
+      });
     });
   });
 });
