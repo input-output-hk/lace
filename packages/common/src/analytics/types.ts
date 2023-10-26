@@ -62,6 +62,8 @@ export enum PostHogAction {
   StakingOverviewBrowseStakePoolsHereClick = 'staking | overview | browse stake pools | here | click',
   StakingOverviewSelectOneOrMorePoolsToStakeToHereClick = 'staking | overview | select one or more pools to stake to | here | click',
   StakingBrowsePoolsClick = 'staking | browse pools | click',
+  // StakingBrowsePoolsSearchClick is actually supposed to track start of typing
+  // into the search field but we don't have any more appropriate action name than "click" for that
   StakingBrowsePoolsSearchClick = 'staking | browse pools | search | click',
   StakingBrowsePoolsPoolNameClick = 'staking | browse pools | pool name | click',
   StakingBrowsePoolsRosClick = 'staking | browse pools | ros | click',
