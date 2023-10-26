@@ -17,6 +17,7 @@ import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
 import { ADA_HANDLE_POLICY_ID, HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano } from '@cardano-sdk/core';
+import { getAddressesDiscovererInstance } from '@lib/scripts/background/addresses-discoverer';
 
 const logger = console;
 
@@ -42,7 +43,8 @@ const walletFactory: WalletFactory = {
           serverUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
           adapter: axiosFetchAdapter,
           policyId: ADA_HANDLE_POLICY_ID
-        })
+        }),
+        addressDiscovery: getAddressesDiscovererInstance({ chainName })
       }
     );
   }
