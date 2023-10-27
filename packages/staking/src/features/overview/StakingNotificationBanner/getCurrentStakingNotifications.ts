@@ -13,21 +13,13 @@ export const getCurrentStakingNotifications = ({
   currentPortfolio,
 }: GetCurrentStakingNotificationParams): StakingNotificationType[] => {
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
-  const notifications: StakingNotificationType[] = [];
 
   if (pendingDelegationTransaction) {
-    currentPortfolio.length === 0
-      ? notifications.push('pendingFirstDelegation')
-      : notifications.push('pendingPoolMigration');
+    return currentPortfolio.length === 0 ? ['pendingFirstDelegation'] : ['pendingPoolMigration'];
   }
 
-  if (isPortfolioDrifted(currentPortfolio)) {
-    notifications.push('portfolioDrifted');
-  }
-
-  if (hasSaturatedOrRetiredPools(currentPortfolio)) {
-    notifications.push('poolRetiredOrSaturated');
-  }
-
-  return notifications;
+  return [
+    isPortfolioDrifted(currentPortfolio) ? 'portfolioDrifted' : undefined,
+    hasSaturatedOrRetiredPools(currentPortfolio) ? 'poolRetiredOrSaturated' : undefined,
+  ].filter(Boolean) as StakingNotificationType[];
 };

@@ -1,4 +1,5 @@
 import { Banner } from '@lace/common';
+import { Box } from '@lace/ui';
 import ExclamationIcon from '@lace/ui/dist/assets/icons/warning-icon-triangle.component.svg';
 import { useTranslation } from 'react-i18next';
 import BellIcon from '../../../assets/icons/bell-icon.component.svg';
@@ -52,7 +53,7 @@ export const StakingNotificationBanners = ({
       <Banner
         popupView={popupView}
         withIcon
-        customIcon={<BellIcon className={styles.bannerInfoIcon} />}
+        customIcon={<BellIcon className={styles.bannerBellIcon} />}
         message={t('overview.banners.portfolioDrifted.title')}
         description={t('overview.banners.portfolioDrifted.message')}
         onBannerClick={onClickableBannerClick}
@@ -63,7 +64,9 @@ export const StakingNotificationBanners = ({
   return (
     <>
       {notifications.map((notification, index) => (
-        <div key={index}>{notificationComponents[notification]}</div>
+        <Box key={index} className={styles.bannerContainer}>
+          {notificationComponents[notification]}
+        </Box>
       ))}
     </>
   );

@@ -85,18 +85,10 @@ export const OverviewPopup = () => {
 
   return (
     <>
-      {stakingNotifications.includes('portfolioDrifted') && (
-        <Box mb="$32">
-          <StakingNotificationBanners notifications={['portfolioDrifted']} onClickableBannerClick={expandStakingView} />
-        </Box>
-      )}
-      {stakingNotifications.includes('poolRetiredOrSaturated') && (
-        <Box mb="$32">
-          <StakingNotificationBanners
-            notifications={['poolRetiredOrSaturated']}
-            onClickableBannerClick={expandStakingView}
-          />
-        </Box>
+      {stakingNotifications.length > 0 && (
+        <Flex mb="$32" flexDirection="column">
+          <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={expandStakingView} />
+        </Flex>
       )}
       <Box mb="$32">
         <DelegationCard

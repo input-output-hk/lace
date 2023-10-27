@@ -75,7 +75,8 @@ export const Overview = () => {
   if (currentPortfolio.length === 0)
     return (
       <>
-        {stakingNotifications.length > 0 ? (
+        {/* defensive check - no other notification than pendingFirstDelegation should be possible here at the moment of writing this comment */}
+        {stakingNotifications.includes('pendingFirstDelegation') ? (
           <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={onManageClick} />
         ) : (
           <Flex flexDirection="column" gap="$32">
@@ -100,10 +101,10 @@ export const Overview = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      {stakingNotifications && (
-        <Box mb="$40">
+      {stakingNotifications.length > 0 && (
+        <Flex mb="$40" flexDirection="column">
           <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={onManageClick} />
-        </Box>
+        </Flex>
       )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
