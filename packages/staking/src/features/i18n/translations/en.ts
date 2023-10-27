@@ -82,7 +82,7 @@ export const en: Translations = {
   'general.button.confirm': 'Confirm',
   'modals.beta.button': 'Got it',
   'modals.beta.description':
-    'This feature allows you to stake to up to 5 pools. This is still in beta version, so some functionality might not be available. Read more about multi-delegation in our <Link>dedicated blog.</Link>',
+    'This feature allows you to stake to up to {{maxPools}} pools. This is still in beta version, so some functionality might not be available. Read more about multi-delegation in our <Link>dedicated blog.</Link>',
   'modals.beta.pill': 'Beta',
   'modals.beta.title': 'Multi-delegation',
   'modals.changingPreferences.buttons.cancel': 'Cancel',
@@ -90,6 +90,13 @@ export const en: Translations = {
   'modals.changingPreferences.description':
     "That's totally fine! Just please note that you'll continue receiving rewards from your former pool(s) for two epochs. After that, you'll start to receiving rewards from your new pool(s).",
   'modals.changingPreferences.title': 'Changing staking preferences?',
+  'modals.poolsManagement.buttons.cancel': 'Cancel',
+  'modals.poolsManagement.buttons.confirm': 'Fine by me',
+  'modals.poolsManagement.description.adjustment':
+    "Reducing pool numbers needs a stake key de-registration, triggering the return of the initial ADA deposit and possibly losing any undistributed rewards. When changing pools, you'll get rewards from the former pool for two epochs, then start receiving them from the new pool.",
+  'modals.poolsManagement.description.reduction':
+    'Reducing your pool count requires stake key de-registration, which returns the initial ADA deposit and may cause the loss of undistributed rewards in the calculation epoch phase.',
+  'modals.poolsManagement.title': 'Switching Pool?',
   'overview.banners.pendingFirstDelegation.message':
     'You will see your staking portfolio here once the transaction has been validated',
   'overview.banners.pendingFirstDelegation.title': 'Your staking transaction has been submitted',
@@ -99,6 +106,8 @@ export const en: Translations = {
   'overview.banners.portfolioDrifted.message':
     'Make sure to rebalance your staking ratios if you want to match your preferences',
   'overview.banners.portfolioDrifted.title': 'Your current delegation portfolio has shifted',
+  'overview.banners.saturatedOrRetiredPool.message': 'Please make sure to choose other pool(s) to avoid losing rewards',
+  'overview.banners.saturatedOrRetiredPool.title': 'One or several of your pools are too saturated / retired',
   'overview.delegationCard.label.balance': 'ADA Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',
@@ -125,6 +134,7 @@ export const en: Translations = {
   'overview.stakingInfoCard.lastReward': 'Last reward',
   'overview.stakingInfoCard.margin': 'Margin',
   'overview.stakingInfoCard.poolRetired': 'Pool retired',
+  'overview.stakingInfoCard.poolRetiring': 'Pool retiring',
   'overview.stakingInfoCard.poolSaturated': 'Pool over-saturated',
   'overview.stakingInfoCard.ros': 'ROS',
   'overview.stakingInfoCard.tooltipFiatLabel': 'USD Value',

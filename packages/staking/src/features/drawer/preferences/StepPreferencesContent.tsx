@@ -48,18 +48,20 @@ export const StepPreferencesContent = () => {
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
-      displayData: { name },
+      displayData: { name, apy, saturation },
       id,
       sliderIntegerPercentage,
     } = draftPool;
 
     return {
+      apy: apy ? String(apy) : undefined,
       cardanoCoinSymbol,
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
       onChainPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.onChainPercentage : undefined,
       percentage: sliderIntegerPercentage,
+      saturation: saturation ? String(saturation) : undefined,
       savedIntegerPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.savedIntegerPercentage : undefined,
       // TODO
       sliderIntegerPercentage,
@@ -95,16 +97,17 @@ export const StepPreferencesContent = () => {
         />
       </Box>
       <Flex justifyContent="space-between">
-        <Text.Body.Large weight="$semibold">
+        <Text.Body.Large weight="$semibold" data-testid="manage-delegation-selected-pools-label">
           {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}
         </Text.Body.Large>
         <ControlButton.Small
           label={t('drawer.preferences.addPoolButton')}
           onClick={onAddPoolButtonClick}
           disabled={addPoolButtonDisabled}
+          data-testid="manage-delegation-add-pools-btn"
         />
       </Flex>
-      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
+      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" data-testid="selected-pools-container">
         {displayData.map(
           ({ color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage }) => (
             <PoolDetailsCard

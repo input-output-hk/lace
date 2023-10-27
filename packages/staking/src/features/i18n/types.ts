@@ -152,6 +152,17 @@ type KeysStructure = {
       description: '';
       button: '';
     };
+    poolsManagement: {
+      title: '';
+      buttons: {
+        cancel: '';
+        confirm: '';
+      };
+      description: {
+        reduction: '';
+        adjustment: '';
+      };
+    };
   };
   overview: {
     delegationCard: {
@@ -181,6 +192,10 @@ type KeysStructure = {
         title: '';
         message: '';
       };
+      saturatedOrRetiredPool: {
+        title: '';
+        message: '';
+      };
     };
     stakingInfoCard: {
       fee: '';
@@ -190,6 +205,7 @@ type KeysStructure = {
       totalRewards: '';
       totalStaked: '';
       poolRetired: '';
+      poolRetiring: '';
       poolSaturated: '';
       tooltipFiatLabel: '';
     };
