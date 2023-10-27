@@ -4,15 +4,15 @@ import { getRandomIcon } from '@lace/common';
 import { Flex } from '@lace/ui';
 import BigNumber from 'bignumber.js';
 import cn from 'classnames';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import MoonIcon from '../../../assets/icons/moon.component.svg';
-import WarningIcon from '../../../assets/icons/warning.component.svg';
 import { TranslationKey } from '../../i18n';
+import MoonIcon from './moon.component.svg';
 import { StakePoolInfo } from './StakePoolInfo';
 import styles from './StakingInfoCard.module.scss';
 import { Stats } from './Stats';
 import { Tooltip } from './StatsTooltip';
+import WarningIon from './warning.component.svg';
 
 const DEFAULT_DECIMALS = 2;
 
@@ -34,7 +34,7 @@ const formatNumericValue = (
   </>
 );
 
-export type PoolStatus = 'retired' | 'saturated' | 'retiring';
+type PoolStatus = 'retired' | 'saturated';
 
 export type StakingInfoCardProps = {
   className?: string;
@@ -56,15 +56,13 @@ export type StakingInfoCardProps = {
   status?: PoolStatus;
 };
 
-const iconsByPoolStatus: Record<PoolStatus, ReactNode> = {
-  retired: <Icon style={{ color: '#FF8E3C', fontSize: '24px' }} component={MoonIcon} />,
-  retiring: <Icon style={{ color: '#FDC300', fontSize: '24px' }} component={MoonIcon} />,
-  saturated: <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={WarningIcon} />,
+const iconsByPoolStatus: Record<PoolStatus, React.FC<React.SVGProps<SVGSVGElement>>> = {
+  retired: MoonIcon,
+  saturated: WarningIon,
 };
 
 const labelTranslationKeysByPoolStatus: Record<PoolStatus, TranslationKey> = {
   retired: 'overview.stakingInfoCard.poolRetired',
-  retiring: 'overview.stakingInfoCard.poolRetiring',
   saturated: 'overview.stakingInfoCard.poolSaturated',
 };
 
@@ -104,8 +102,10 @@ export const StakingInfoCard = ({
               id={id}
               onClick={onStakePoolSelect}
             />
-            {(status === 'retired' || status === 'saturated' || status === 'retiring') && (
-              <Tooltip content={t(labelTranslationKeysByPoolStatus[status])}>{iconsByPoolStatus[status]}</Tooltip>
+            {(status === 'retired' || status === 'saturated') && (
+              <Tooltip content={t(labelTranslationKeysByPoolStatus[status])}>
+                <Icon style={{ color: '#FF5470', fontSize: '24px' }} component={iconsByPoolStatus[status]} />
+              </Tooltip>
             )}
           </Flex>
         </div>
