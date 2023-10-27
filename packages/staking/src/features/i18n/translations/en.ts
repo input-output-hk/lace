@@ -96,6 +96,13 @@ export const en: Translations = {
   'modals.changingPreferences.description':
     "That's totally fine! Just please note that you'll continue receiving rewards from your former pool(s) for two epochs. After that, you'll start to receiving rewards from your new pool(s).",
   'modals.changingPreferences.title': 'Changing staking preferences?',
+  'modals.poolsManagement.buttons.cancel': 'Cancel',
+  'modals.poolsManagement.buttons.confirm': 'Fine by me',
+  'modals.poolsManagement.description.adjustment':
+    "Reducing pool numbers needs a stake key de-registration, triggering the return of the initial ADA deposit and possibly losing any undistributed rewards. When changing pools, you'll get rewards from the former pool for two epochs, then start receiving them from the new pool.",
+  'modals.poolsManagement.description.reduction':
+    'Reducing your pool count requires stake key de-registration, which returns the initial ADA deposit and may cause the loss of undistributed rewards in the calculation epoch phase.',
+  'modals.poolsManagement.title': 'Switching Pool?',
   'overview.banners.pendingFirstDelegation.message':
     'You will see your staking portfolio here once the transaction has been validated',
   'overview.banners.pendingFirstDelegation.title': 'Your staking transaction has been submitted',

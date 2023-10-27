@@ -155,6 +155,17 @@ type KeysStructure = {
       description: '';
       button: '';
     };
+    poolsManagement: {
+      title: '';
+      buttons: {
+        cancel: '';
+        confirm: '';
+      };
+      description: {
+        reduction: '';
+        adjustment: '';
+      };
+    };
   };
   overview: {
     delegationCard: {

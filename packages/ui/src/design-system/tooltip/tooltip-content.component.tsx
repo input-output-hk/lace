@@ -1,22 +1,21 @@
-import type { ReactNode } from 'react';
-import React, { forwardRef } from 'react';
+import React from 'react';
 
-import cn from 'classnames';
+import * as Typography from '../typography';
 
 import * as cx from './tooltip-content.css';
 
 export interface TooltipContentProps {
-  children: ReactNode;
-  className?: string;
+  label: string;
 }
 
-export const Content = forwardRef<HTMLDivElement, TooltipContentProps>(
-  ({ children, className }, forwardedReference) => (
-    <div ref={forwardedReference} className={cn(cx.tooltipContent, className)}>
-      {children}
+export const TooltipContent = ({
+  label,
+}: Readonly<TooltipContentProps>): JSX.Element => {
+  return (
+    <div className={cx.tooltipContent}>
+      <Typography.Body.Normal weight="$semibold" className={cx.label}>
+        {label}
+      </Typography.Body.Normal>
     </div>
-  ),
-);
-
-// eslint-disable-next-line functional/immutable-data
-Content.displayName = 'TooltipContent';
+  );
+};

@@ -9,6 +9,7 @@ import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PoolsManagementModal, PoolsManagementModalType } from '../modals';
 import { Balance, CurrencyInfo, useOutsideHandles } from '../outside-handles-provider';
 import { DraftPortfolioStakePool, StakingError, useDelegationPortfolioStore, useStakingStore } from '../store';
 import ArrowDown from './arrow-down.svg';
@@ -50,6 +51,11 @@ const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
     </div>
   </div>
 );
+
+const validateIsPoolsChanged = (currentPortfolioIds: string[], draftPortfolioIds: string[]) => {
+  const samePools = currentPortfolioIds.filter((id) => draftPortfolioIds.includes(id));
+  return samePools.length !== draftPortfolioIds.length;
+};
 
 interface StakePoolConfirmationBodyProps {
   balance?: Balance;
@@ -321,10 +327,13 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
-  const { /* currentPortfolio,*/ portfolioMutators } = useDelegationPortfolioStore((store) => ({
+  const { currentPortfolio, portfolioMutators, draftPortfolio } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
+    draftPortfolio: store.draftPortfolio,
     portfolioMutators: store.mutators,
   }));
+  const [openPoolsManagementConfirmationModal, setOpenPoolsManagementConfirmationModal] =
+    useState<PoolsManagementModalType | null>(null);
 
   const keyAgentType = getKeyAgentType();
   const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
@@ -338,6 +347,19 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
 
   const handleConfirmation = useCallback(async () => {
     setIsConfirmingTx(false);
+
+    const isPoolsReduced = draftPortfolio && currentPortfolio.length > draftPortfolio?.length;
+
+    const currentPortfolioIds = currentPortfolio.map((pool) => pool.id);
+    const draftPortfolioIds = draftPortfolio?.map((pool) => pool.id) || [];
+
+    const isPoolsChanged = validateIsPoolsChanged(currentPortfolioIds, draftPortfolioIds);
+
+    if (isPoolsReduced && isPoolsChanged)
+      return setOpenPoolsManagementConfirmationModal(PoolsManagementModalType.ADJUSTMENT);
+
+    if (isPoolsReduced) return setOpenPoolsManagementConfirmationModal(PoolsManagementModalType.REDUCTION);
+
     // HW-WALLET (FIX LATER):
     // if (!isInMemory) {
     //   setIsConfirmingTx(true);
@@ -351,8 +373,8 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     //     setIsConfirmingTx(false);
     //   }
     // }
-    portfolioMutators.executeCommand({ type: 'DrawerContinue' });
-  }, [portfolioMutators]);
+    return portfolioMutators.executeCommand({ type: 'DrawerContinue' });
+  }, [currentPortfolio, draftPortfolio, portfolioMutators]);
 
   const confirmLabel = useMemo(() => {
     if (!isInMemory) {
@@ -365,17 +387,25 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   }, [isConfirmingTx, isInMemory, keyAgentType, popupView, t]);
 
   return (
-    <div className={styles.actions}>
-      <Button
-        data-testid="stake-pool-confirmation-btn"
-        disabled={isBuildingTx || !!stakingError}
-        loading={isConfirmingTx || isBuildingTx}
-        onClick={handleConfirmation}
-        className={styles.confirmBtn}
-        size="large"
-      >
-        {confirmLabel}
-      </Button>
-    </div>
+    <>
+      <div className={styles.actions}>
+        <Button
+          data-testid="stake-pool-confirmation-btn"
+          disabled={isBuildingTx || !!stakingError}
+          loading={isConfirmingTx || isBuildingTx}
+          onClick={handleConfirmation}
+          className={styles.confirmBtn}
+          size="large"
+        >
+          {confirmLabel}
+        </Button>
+      </div>
+      <PoolsManagementModal
+        type={openPoolsManagementConfirmationModal}
+        visible={!!openPoolsManagementConfirmationModal}
+        onConfirm={() => portfolioMutators.executeCommand({ type: 'DrawerContinue' })}
+        onCancel={() => setOpenPoolsManagementConfirmationModal(null)}
+      />
+    </>
   );
 };

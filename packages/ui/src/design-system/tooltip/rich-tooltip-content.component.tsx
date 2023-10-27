@@ -5,21 +5,27 @@ import { Box } from '../box';
 import { Flex } from '../flex';
 import * as Typography from '../typography';
 
-import * as cx from './rich-tooltip-content-inner.css';
+import * as cx from './rich-tooltip-content.css';
+import * as cx2 from './tooltip-content.css';
 
-export interface RichContentInnerProps {
+export interface RichTooltipContentProps {
   title: string;
   description: ReactNode;
+  dotColor?: string;
 }
 
-export const RichContentInner = ({
+export const RichTooltipContent = ({
   title,
   description,
-}: Readonly<RichContentInnerProps>): JSX.Element => {
+  dotColor,
+}: Readonly<RichTooltipContentProps>): JSX.Element => {
+  const customDotStyle =
+    dotColor == undefined ? {} : { backgroundColor: dotColor };
+
   return (
-    <Flex gap="$8">
+    <Flex gap="$8" className={cx2.tooltipContent}>
       <Flex mt="$8">
-        <Box className={cx.dot} />
+        <Box className={cx.dot} style={customDotStyle} />
       </Flex>
       <Flex flexDirection="column" gap="$4">
         <Typography.Body.Normal weight="$bold" className={cx.title}>

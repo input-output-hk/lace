@@ -5,10 +5,12 @@ class TransactionPasswordPage {
   private DRAWER_HEADER_SUBTITLE = '[data-testid="drawer-header-subtitle"]';
   private CANCEL_BUTTON = '[data-testid="send-cancel-btn"]';
   private NEXT_BUTTON = '[data-testid="send-next-btn"]';
+  private BUTTON_LOADER = '[data-testid="btn-loader-container"]';
 
   get headerTitle() {
     return $(this.DRAWER_HEADER_TITLE);
   }
+
   get headerSubtitle() {
     return $(this.DRAWER_HEADER_SUBTITLE);
   }
@@ -27,6 +29,10 @@ class TransactionPasswordPage {
 
   get nextButton() {
     return $(this.NEXT_BUTTON);
+  }
+
+  get buttonLoader() {
+    return $(this.BUTTON_LOADER);
   }
 }
 

@@ -3,8 +3,7 @@ import React from 'react';
 
 import * as Tooltip from '@radix-ui/react-tooltip';
 
-import { ContentInner } from './tooltip-content-inner.component';
-import { Content } from './tooltip-content.component';
+import { TooltipContent } from './tooltip-content.component';
 
 export type Props = PropsWithChildren<
   typeof Tooltip.Root & {
@@ -17,9 +16,9 @@ export const Root = ({ label, children }: Readonly<Props>): JSX.Element => {
     <Tooltip.Root>
       {children}
       <Tooltip.Portal>
-        <Content>
-          <ContentInner label={label} />
-        </Content>
+        <Tooltip.Content>
+          <TooltipContent label={label} />
+        </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>
   );
