@@ -29,7 +29,7 @@ export const Overview = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotification = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
+  const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
@@ -75,8 +75,8 @@ export const Overview = () => {
   if (currentPortfolio.length === 0)
     return (
       <>
-        {stakingNotification ? (
-          <StakingNotificationBanners notifications={stakingNotification} onClickableBannerClick={onManageClick} />
+        {stakingNotifications.length > 0 ? (
+          <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={onManageClick} />
         ) : (
           <Flex flexDirection="column" gap="$32">
             <StakeFundsBanner balance={totalCoinBalance} />
@@ -102,9 +102,9 @@ export const Overview = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      {stakingNotification && (
+      {stakingNotifications && (
         <Box mb="$40">
-          <StakingNotificationBanners notifications={stakingNotification} onClickableBannerClick={onManageClick} />
+          <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={onManageClick} />
         </Box>
       )}
       <Flex justifyContent="space-between" mb="$16">
