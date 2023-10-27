@@ -106,8 +106,6 @@ export const en: Translations = {
   'overview.banners.portfolioDrifted.message':
     'Make sure to rebalance your staking ratios if you want to match your preferences',
   'overview.banners.portfolioDrifted.title': 'Your current delegation portfolio has shifted',
-  'overview.banners.saturatedOrRetiredPool.message': 'Please make sure to choose other pool(s) to avoid losing rewards',
-  'overview.banners.saturatedOrRetiredPool.title': 'One or several of your pools are too saturated / retired',
   'overview.delegationCard.label.balance': 'ADA Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',
@@ -134,7 +132,6 @@ export const en: Translations = {
   'overview.stakingInfoCard.lastReward': 'Last reward',
   'overview.stakingInfoCard.margin': 'Margin',
   'overview.stakingInfoCard.poolRetired': 'Pool retired',
-  'overview.stakingInfoCard.poolRetiring': 'Pool retiring',
   'overview.stakingInfoCard.poolSaturated': 'Pool over-saturated',
   'overview.stakingInfoCard.ros': 'ROS',
   'overview.stakingInfoCard.tooltipFiatLabel': 'USD Value',

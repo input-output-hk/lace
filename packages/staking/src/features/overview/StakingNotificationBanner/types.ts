@@ -1,5 +1,1 @@
-export type StakingNotificationType =
-  | 'pendingFirstDelegation'
-  | 'pendingPoolMigration'
-  | 'portfolioDrifted'
-  | 'poolRetiredOrSaturated';
+export type StakingNotificationType = 'pendingFirstDelegation' | 'pendingPoolMigration' | 'portfolioDrifted';
