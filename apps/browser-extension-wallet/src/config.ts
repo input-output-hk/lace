@@ -22,6 +22,7 @@ export type Config = {
   WALLET_INTERVAL: number;
   CARDANO_SERVICES_URLS: CardanoServiceUrls;
   ADA_PRICE_CHECK_INTERVAL: number;
+  TOKEN_PRICE_CHECK_INTERVAL: number;
   AVAILABLE_CHAINS: Wallet.ChainName[];
   CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
   CEXPLORER_URL_PATHS: CExplorerUrlPaths;
@@ -78,6 +79,9 @@ export const config = (): Config => {
     ADA_PRICE_CHECK_INTERVAL: !Number.isNaN(Number(process.env.ADA_PRICE_POLLING_IN_SEC))
       ? Number(process.env.ADA_PRICE_POLLING_IN_SEC) * 1000
       : 30 * 1000,
+    TOKEN_PRICE_CHECK_INTERVAL: !Number.isNaN(Number(process.env.TOKEN_PRICE_POLLING_IN_SEC))
+      ? Number(process.env.TOKEN_PRICE_POLLING_IN_SEC) * 1000
+      : 300 * 1000,
     CARDANO_SERVICES_URLS: {
       Mainnet: process.env.CARDANO_SERVICES_URL_MAINNET,
       Preprod: process.env.CARDANO_SERVICES_URL_PREPROD,
