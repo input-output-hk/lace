@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cell, Metadata, Text, sx } from '@lace/ui';
+import { Cell, Metadata, MetadataLink, Text, sx } from '@lace/ui';
 import * as Types from './ProcedureTypes';
 
 interface Props {
@@ -25,12 +25,16 @@ export const Procedure = ({ data, translations }: Props): JSX.Element => {
       <Cell>
         <Metadata label={translations.deposit} text={data.deposit} />
       </Cell>
-      <Cell>
-        <Metadata label={translations.anchor.url} text={data.anchor?.url} />
-      </Cell>
-      <Cell>
-        <Metadata label={translations.anchor.hash} text={data.anchor?.hash} />
-      </Cell>
+      {data.anchor && (
+        <>
+          <Cell>
+            <MetadataLink label={translations.anchor.url} text={data.anchor.url} url={data.anchor.url} />
+          </Cell>
+          <Cell>
+            <Metadata label={translations.anchor.hash} text={data.anchor.hash} />
+          </Cell>
+        </>
+      )}
     </>
   );
 };
