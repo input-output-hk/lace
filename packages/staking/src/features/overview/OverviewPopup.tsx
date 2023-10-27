@@ -12,7 +12,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanner';
+import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -32,7 +32,7 @@ export const OverviewPopup = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
+  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -85,16 +85,11 @@ export const OverviewPopup = () => {
 
   return (
     <>
-      {stakingNotifications.includes('portfolioDrifted') && (
+      {stakingNotification === 'portfolioDrifted' && (
         <Box mb="$32">
-          <StakingNotificationBanners notifications={['portfolioDrifted']} onClickableBannerClick={expandStakingView} />
-        </Box>
-      )}
-      {stakingNotifications.includes('poolRetiredOrSaturated') && (
-        <Box mb="$32">
-          <StakingNotificationBanners
-            notifications={['poolRetiredOrSaturated']}
-            onClickableBannerClick={expandStakingView}
+          <StakingNotificationBanner
+            notification="portfolioDrifted"
+            onPortfolioDriftedNotificationClick={expandStakingView}
           />
         </Box>
       )}
