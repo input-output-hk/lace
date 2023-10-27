@@ -3,7 +3,7 @@ import { Shutdown } from '@cardano-sdk/util';
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import { useWalletManager } from '@hooks';
 import { Wallet } from '@lace/cardano';
-import { consumeAddressesDiscoverer, exposeKeyAgent } from '@lib/communication';
+import { AddressesDiscoveryStatus, consumeAddressesDiscoverer, exposeKeyAgent } from '@lib/communication';
 import { useWalletStore } from '@stores';
 import { getValueFromLocalStorage } from '@utils/local-storage';
 import { useCallback, useEffect } from 'react';
@@ -17,23 +17,17 @@ let shutdownExposedKeyAgent: Shutdown['shutdown'];
 // @ts-ignore
 window.addressesDiscoverer = addressesDiscoverer;
 
-type UseAddressesListenerCallbackParams = {
-  addresses?: Wallet.KeyManagement.GroupedAddress[] | null;
-  error?: Error;
-};
-
-type UseAddressesListenerCallback = (params: UseAddressesListenerCallbackParams) => Promise<void>;
-
-const useAddressesListener = (callback: UseAddressesListenerCallback) => {
+const useAddressesListener = (
+  callback: (addresses: Wallet.KeyManagement.GroupedAddress[]) => void | Promise<void>,
+  wallet?: Wallet.ObservableWallet
+) => {
   useEffect(() => {
-    const subscription = addressesDiscoverer.addresses$.subscribe({
-      error: (error) => callback({ error }),
-      next: (addresses) => callback({ addresses })
-    });
+    if (!wallet) return () => void 0;
+    const subscription = wallet.addresses$.subscribe(callback);
     return () => {
       subscription.unsubscribe();
     };
-  }, [callback]);
+  }, [wallet, callback]);
 };
 
 export const useAppInit = (): void => {
@@ -55,9 +49,30 @@ export const useAppInit = (): void => {
     })();
   }, [cardanoWallet?.asyncKeyAgent, getPassword, walletManagerUi]);
 
+  useEffect(() => {
+    addressesDiscoverer.status$.subscribe((status) => {
+      if (status === AddressesDiscoveryStatus.InProgress) {
+        console.info('DEBUG Overlay');
+        // show overlay
+      }
+      if (status === AddressesDiscoveryStatus.Error) {
+        // hide overlay
+        // show error toast
+        console.info('DEBUG Error toast');
+      }
+      if (status === AddressesDiscoveryStatus.Idle) {
+        console.info('DEBUG Success toast');
+        // hide overlay
+        // if (prevStatus === AddressesDiscoveryStatus.InProgress) {
+        //   show success toast
+        // }
+      }
+    });
+  }, []);
+
   useAddressesListener(
     useCallback(
-      async ({ addresses }) => {
+      async (addresses) => {
         if (!addresses) return;
         const { name } = getValueFromLocalStorage('wallet');
         setWalletInfo({
@@ -66,34 +81,21 @@ export const useAppInit = (): void => {
         });
       },
       [setWalletInfo]
-    )
+    ),
+    walletManagerUi?.wallet
   );
 
   useAddressesListener(
     useCallback(
-      async ({ addresses, error }) => {
-        console.info('DEBUG Result', addresses, error);
-        if (error) {
-          // hide overlay
-          // show error toast
-          console.info('DEBUG Error toast');
-          return;
-        }
-        if (addresses === null) {
-          console.info('DEBUG Overlay');
-          // show overlay
-          return;
-        }
+      async (addresses) => {
         if (addresses.length === 0) return;
-        console.info('DEBUG Success toast', addresses);
-        // hide overlay
-        // show success toast
         await updateAddresses({
           addresses,
           currentChainName: environmentName
         });
       },
       [environmentName, updateAddresses]
-    )
+    ),
+    walletManagerUi?.wallet
   );
 };

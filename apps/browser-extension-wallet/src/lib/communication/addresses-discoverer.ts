@@ -4,14 +4,21 @@ import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk
 import { Subject, of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
-export type AddressesDiscovererDependencies = {
+type AddressesDiscovererSetupDependencies = {
   chainName: Wallet.ChainName;
+  keyAgentChannelName: string;
 };
 
+export enum AddressesDiscoveryStatus {
+  Idle = 'Idle',
+  InProgress = 'InProgress',
+  Error = 'Error'
+}
+
 export type AddressesDiscoverer = {
-  addresses$: Subject<Wallet.KeyManagement.GroupedAddress[] | null>;
-  discover: (dependencies: AddressesDiscovererDependencies) => Promise<Wallet.KeyManagement.GroupedAddress[]>;
-  setup: (keyAgentChannelName: string) => void;
+  status$: Subject<AddressesDiscoveryStatus>;
+  discover: () => Promise<Wallet.KeyManagement.GroupedAddress[]>;
+  setup: (dependencies: AddressesDiscovererSetupDependencies) => void;
 };
 
 export type AddressesDiscovererExposed = Omit<AddressesDiscoverer, 'setup'> & {
@@ -21,7 +28,7 @@ export type AddressesDiscovererExposed = Omit<AddressesDiscoverer, 'setup'> & {
 const commonConfig = {
   baseChannel: 'addresses-discoverer',
   properties: {
-    addresses$: RemoteApiPropertyType.HotObservable,
+    status$: RemoteApiPropertyType.HotObservable,
     discover: RemoteApiPropertyType.MethodReturningPromise,
     setup: RemoteApiPropertyType.MethodReturningPromise
   }

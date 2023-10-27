@@ -4,52 +4,50 @@ import { Wallet } from '@lace/cardano';
 import {
   AddressesDiscoverer,
   AddressesDiscovererDependencies,
+  AddressesDiscoveryStatus,
   consumeKeyAgent,
   exposeAddressesDiscoverer
 } from '@lib/communication';
 import { getProviders } from '@lib/scripts/background/config';
 import { Subject } from 'rxjs';
 
-let currentChain: Wallet.ChainName;
-let addressesDiscovererInstance: AddressDiscovery;
-let asyncKeyAgent: Wallet.KeyManagement.AsyncKeyAgent;
-
-const addresses$ = new Subject<Wallet.KeyManagement.GroupedAddress[] | null>();
+let discovererInstance: AddressDiscovery;
+let chainNameOfDiscovererInstance: Wallet.ChainName;
+let currentChainName: Wallet.ChainName;
+let currentAsyncKeyAgent: Wallet.KeyManagement.AsyncKeyAgent;
+const status$ = new Subject<AddressesDiscoveryStatus>();
+status$.next(AddressesDiscoveryStatus.Idle);
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const getAddressesDiscovererInstance = ({ chainName }: AddressesDiscovererDependencies) => {
-  if (addressesDiscovererInstance && currentChain === chainName) return addressesDiscovererInstance;
+export const getDiscovererInstance = ({ chainName }: AddressesDiscovererDependencies) => {
+  if (discovererInstance && chainNameOfDiscovererInstance === chainName) return discovererInstance;
 
   const { chainHistoryProvider } = getProviders(chainName);
   const hdSequentialDiscovery = new HDSequentialDiscovery(chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH);
 
-  addressesDiscovererInstance = {
-    discover: async (passedAsyncKeyAgent) => {
-      const subscription = passedAsyncKeyAgent.knownAddresses$.subscribe((addresses) => addresses$.next(addresses));
+  discovererInstance = {
+    discover: async (asyncKeyAgent) => {
+      status$.next(AddressesDiscoveryStatus.InProgress);
       try {
-        throw new Error('Test');
-        return await hdSequentialDiscovery.discover(passedAsyncKeyAgent);
+        const addresses = await hdSequentialDiscovery.discover(asyncKeyAgent);
+        status$.next(AddressesDiscoveryStatus.Idle);
+        return addresses;
       } catch (error) {
-        addresses$.error(error);
+        status$.next(AddressesDiscoveryStatus.Error);
         throw error;
-      } finally {
-        subscription.unsubscribe();
       }
     }
   };
 
-  return addressesDiscovererInstance;
+  return discovererInstance;
 };
 
 const addressesDiscoverer: AddressesDiscoverer = {
-  addresses$,
-  discover: async ({ chainName }) => getAddressesDiscovererInstance({ chainName }).discover(asyncKeyAgent),
-  setup: (walletId) => {
-    asyncKeyAgent = consumeKeyAgent(walletId);
-    const subscription = asyncKeyAgent.knownAddresses$.subscribe((addresses) => {
-      addresses$.next(addresses);
-      subscription.unsubscribe();
-    });
+  status$,
+  discover: async () => getDiscovererInstance({ chainName: currentChainName }).discover(currentAsyncKeyAgent),
+  setup: ({ chainName, keyAgentChannelName }) => {
+    currentChainName = chainName;
+    currentAsyncKeyAgent = consumeKeyAgent(keyAgentChannelName);
   }
 };
 
