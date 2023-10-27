@@ -86,10 +86,10 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
 
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
 
-const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION } = config();
+const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION, TOKEN_PRICE_CHECK_INTERVAL } = config();
 const fetchTokenPrices = () => {
   // `base-policy-id=&base-tokenname=` for ADA as base token
-  fetch('https://api.muesliswap.com/list?base-policy-id=&base-tokenname=')
+  fetch('https://muesliswap.live-mainnet.eks.lw.iog.io/list?base-policy-id=&base-tokenname=')
     .then(async (response) => {
       const tokens: TokenAPIResponse[] = await response.json();
       const tokenPrices: TokenPrices = new Map();
@@ -169,7 +169,7 @@ fetchAdaPrice();
 setInterval(fetchAdaPrice, ADA_PRICE_CHECK_INTERVAL);
 if (process.env.USE_TOKEN_PRICING === 'true') {
   fetchTokenPrices();
-  setInterval(fetchTokenPrices, ADA_PRICE_CHECK_INTERVAL);
+  setInterval(fetchTokenPrices, TOKEN_PRICE_CHECK_INTERVAL);
 }
 
 exposeApi<BackgroundService>(
