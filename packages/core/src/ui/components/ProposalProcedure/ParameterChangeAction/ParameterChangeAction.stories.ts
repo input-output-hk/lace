@@ -108,11 +108,6 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
       rewardAccount: 'Reward account',
       title: 'Procedure'
     },
-    actionIdTitle: 'Action ID',
-    anchor: {
-      hash: 'Anchor Hash',
-      url: 'Anchor URL'
-    },
     networkGroup: {
       title: 'Network group',
       tooltip: {
