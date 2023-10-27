@@ -4,7 +4,7 @@ import { HardForkInitiationAction } from './HardForkInitiationAction';
 import { ComponentProps } from 'react';
 
 const meta: Meta<typeof HardForkInitiationAction> = {
-  title: 'HardForkInitiationAction',
+  title: 'ProposalProcedure/HardForkInitiationAction',
   component: HardForkInitiationAction,
   parameters: {
     layout: 'centered'

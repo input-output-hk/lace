@@ -4,7 +4,7 @@ import { TreasuryWithdrawalsAction } from './TreasuryWithdrawalsAction';
 import { ComponentProps } from 'react';
 
 const meta: Meta<typeof TreasuryWithdrawalsAction> = {
-  title: 'TreasuryWithdrawalsAction',
+  title: 'ProposalProcedure/TreasuryWithdrawalsAction',
   component: TreasuryWithdrawalsAction,
   parameters: {
     layout: 'centered'

@@ -4,7 +4,7 @@ import { ParameterChangeAction } from './ParameterChangeAction';
 import { ComponentProps } from 'react';
 
 const meta: Meta<typeof ParameterChangeAction> = {
-  title: 'ParameterChangeAction',
+  title: 'ProposalProcedure/ParameterChangeAction',
   component: ParameterChangeAction,
   parameters: {
     layout: 'centered'

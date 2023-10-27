@@ -4,7 +4,7 @@ import { NewConstitutionAction } from './NewConstitutionAction';
 import { ComponentProps } from 'react';
 
 const meta: Meta<typeof NewConstitutionAction> = {
-  title: 'NewConstitutionAction',
+  title: 'ProposalProcedure/NewConstitutionAction',
   component: NewConstitutionAction,
   parameters: {
     layout: 'centered'

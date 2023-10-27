@@ -4,7 +4,7 @@ import { NoConfidenceAction } from './NoConfidenceAction';
 import { ComponentProps } from 'react';
 
 const meta: Meta<typeof NoConfidenceAction> = {
-  title: 'NoConfidenceAction',
+  title: 'ProposalProcedure/NoConfidenceAction',
   component: NoConfidenceAction,
   parameters: {
     layout: 'centered'
