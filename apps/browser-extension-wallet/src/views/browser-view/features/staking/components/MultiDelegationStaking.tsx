@@ -66,7 +66,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
       name: 'AnalyticsEventNames.Staking.STAKING_MULTI_DELEGATION_BROWSER'
     });
   }, []);
-  const { walletActivities } = useWalletActivities({ sendAnalytics });
+  const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
@@ -106,6 +106,7 @@ export const MultiDelegationStaking = (): JSX.Element => {
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
         walletStoreWalletActivities: walletActivities,
+        walletStoreWalletActivitiesStatus: walletActivitiesStatus,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         multidelegationFirstVisit,
