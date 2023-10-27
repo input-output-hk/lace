@@ -7899,7 +7899,7 @@ __metadata:
     node-abort-controller: ^3.1.1
     p-debounce: ^4.0.0
     pluralize: ^8.0.0
-    posthog-js: ^1.68.4
+    posthog-js: ^1.87.2
     process: ^0.11.10
     react: 17.0.2
     react-dom: 17.0.2
@@ -37785,12 +37785,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"posthog-js@npm:^1.68.4":
-  version: 1.68.4
-  resolution: "posthog-js@npm:1.68.4"
+"posthog-js@npm:^1.87.2":
+  version: 1.87.2
+  resolution: "posthog-js@npm:1.87.2"
   dependencies:
     fflate: ^0.4.1
-  checksum: 9efd470a0794459c088d935c55f0b5030964970cd019770517a34979ab72096d808372a2ef5ba455ddd477ae251631fab2627ba9c69aad5593dd4e6f66004da4
+  checksum: 360ebaf8bbaaa9fc2db91910483a269938d71a998a1f91ca9564f0b5bc13d901ed775c6b6b9fc8233b57765b3e358e75876b4b17ebdef65470aa4b9390ae7370
   languageName: node
   linkType: hard
 

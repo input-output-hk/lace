@@ -76,7 +76,7 @@
     "node-abort-controller": "^3.1.1",
     "p-debounce": "^4.0.0",
     "pluralize": "^8.0.0",
-    "posthog-js": "^1.68.4",
+    "posthog-js": "^1.87.2",
     "process": "^0.11.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
