@@ -56,6 +56,7 @@ export enum PostHogAction {
   StakingAboutStakingFaqClick = 'staking | about staking | faq | click',
   StakingMultiDelegationDedicatedBlogClick = 'staking | multi-delegation | dedicated blog | click',
   StakingMultiDelegationGotItClick = 'staking | multi-delegation | got it | click',
+  StakingActivityClick = 'staking | activity | click',
   StakingOverviewClick = 'staking | overview | click',
   StakingOverviewCopyAddressClick = 'staking | overview | copy address | click',
   StakingOverviewManageClick = 'staking | overview | manage | click',

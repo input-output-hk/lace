@@ -31,6 +31,7 @@ export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
 export enum DelegationFlow {
   Overview = 'Overview',
   BrowsePools = 'BrowsePools',
+  Activity = 'Activity',
   CurrentPoolDetails = 'CurrentPoolDetails',
   PoolDetails = 'PoolDetails',
   PortfolioManagement = 'PortfolioManagement',
@@ -85,6 +86,11 @@ export type StateOverview = MakeState<{
   viewedStakePool: undefined;
 }>;
 
+export type StateActivity = MakeState<{
+  activeDelegationFlow: DelegationFlow.Activity;
+  activeDrawerStep: undefined;
+}>;
+
 export type StateCurrentPoolDetails = MakeState<{
   activeDrawerStep: DrawerDefaultStep.PoolDetails;
   activeDelegationFlow: DelegationFlow.CurrentPoolDetails;
@@ -134,6 +140,7 @@ export type StateChangingPreferences = MakeState<{
 }>;
 
 export type State =
+  | StateActivity
   | StateOverview
   | StateCurrentPoolDetails
   | StatePortfolioManagement

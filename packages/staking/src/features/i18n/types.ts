@@ -241,6 +241,7 @@ type KeysStructure = {
   root: {
     title: '';
     nav: {
+      activityTitle: '';
       browsePoolsTitle: '';
       title: '';
       overviewTitle: '';

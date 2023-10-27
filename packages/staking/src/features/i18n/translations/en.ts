@@ -159,6 +159,7 @@ export const en: Translations = {
   'portfolioBar.maxPools': '(max {{maxPoolsCount}})',
   'portfolioBar.next': 'Next',
   'portfolioBar.selectedPools': '{{selectedPoolsCount}} pools selected',
+  'root.nav.activityTitle': 'Activity',
   'root.nav.browsePoolsTitle': 'Browse pools',
   'root.nav.overviewTitle': 'Overview',
   'root.nav.title': 'Staking Navigation',
