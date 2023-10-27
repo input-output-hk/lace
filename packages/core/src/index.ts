@@ -32,4 +32,8 @@ export * from '@ui/components/ConfirmDRepRegistration';
 export * from '@ui/components/ConfirmDRepRetirement';
 export * from '@ui/components/ConfirmDRepUpdate';
 export * from '@ui/components/ConfirmVoteDelegation';
+export * from '@ui/components/ConfirmStakeVoteDelegation';
+export * from '@ui/components/ConfirmStakeRegistrationDelegation';
+export * from '@ui/components/ConfirmStakeVoteRegistrationDelegation';
+export * from '@ui/components/ConfirmVoteRegistrationDelegation';
 export * from '@ui/components/VotingProcedures';

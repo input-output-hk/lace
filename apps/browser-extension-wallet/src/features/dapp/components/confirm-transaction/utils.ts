@@ -20,7 +20,11 @@ export enum TxType {
   DRepRetirement = 'DRepRetirement',
   DRepUpdate = 'DRepUpdate',
   VoteDelegation = 'VoteDelegation',
-  VotingProcedures = 'VotingProcedures'
+  StakeVoteDelegation = 'StakeVoteDelegation',
+  VotingProcedures = 'VotingProcedures',
+  VoteRegistrationDelegation = 'VoteRegistrationDelegation',
+  StakeRegistrationDelegation = 'StakeRegistrationDelegation',
+  StakeVoteDelegationRegistration = 'StakeVoteDelegationRegistration'
 }
 
 export const getTitleKey = (txType: TxType): string => {
@@ -38,6 +42,22 @@ export const getTitleKey = (txType: TxType): string => {
 
   if (txType === TxType.VoteDelegation) {
     return 'core.voteDelegation.title';
+  }
+
+  if (txType === TxType.VoteRegistrationDelegation) {
+    return 'core.voteRegistrationDelegation.title';
+  }
+
+  if (txType === TxType.StakeVoteDelegation) {
+    return 'core.stakeVoteDelegation.title';
+  }
+
+  if (txType === TxType.StakeRegistrationDelegation) {
+    return 'core.stakeRegistrationDelegation.title';
+  }
+
+  if (txType === TxType.StakeVoteDelegationRegistration) {
+    return 'core.stakeVoteDelegationRegistration.title';
   }
 
   if (txType === TxType.VotingProcedures) {
@@ -99,6 +119,7 @@ export const certificateInspectorFactory =
 export const votingProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano.VotingProcedures | undefined =>
   tx?.body?.votingProcedures;
 
+// eslint-disable-next-line complexity
 export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
@@ -107,12 +128,26 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
     dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
     dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative),
     dRepUpdate: certificateInspectorFactory(CertificateType.UpdateDelegateRepresentative),
-    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation)
+    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation),
+    voteRegistrationDelegation: certificateInspectorFactory(CertificateType.VoteRegistrationDelegation),
+    stakeVoteDelegation: certificateInspectorFactory(CertificateType.StakeVoteDelegation),
+    stakeRegistrationDelegation: certificateInspectorFactory(CertificateType.StakeRegistrationDelegation),
+    stakeVoteDelegationRegistration: certificateInspectorFactory(CertificateType.StakeVoteRegistrationDelegation)
   });
 
-  const { minted, burned, dRepRegistration, dRepRetirement, dRepUpdate, voteDelegation, votingProcedures } = inspector(
-    tx as Wallet.Cardano.HydratedTx
-  );
+  const {
+    minted,
+    burned,
+    votingProcedures,
+    dRepRegistration,
+    dRepRetirement,
+    dRepUpdate,
+    voteDelegation,
+    stakeVoteDelegation,
+    voteRegistrationDelegation,
+    stakeRegistrationDelegation,
+    stakeVoteDelegationRegistration
+  } = inspector(tx as Wallet.Cardano.HydratedTx);
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
 
@@ -136,12 +171,28 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
     return TxType.DRepRetirement;
   }
 
+  if (dRepUpdate) {
+    return TxType.DRepUpdate;
+  }
+
   if (voteDelegation) {
     return TxType.VoteDelegation;
   }
 
-  if (dRepUpdate) {
-    return TxType.DRepUpdate;
+  if (stakeVoteDelegation) {
+    return TxType.StakeVoteDelegation;
+  }
+
+  if (voteRegistrationDelegation) {
+    return TxType.VoteRegistrationDelegation;
+  }
+
+  if (stakeRegistrationDelegation) {
+    return TxType.StakeRegistrationDelegation;
+  }
+
+  if (stakeVoteDelegationRegistration) {
+    return TxType.StakeVoteDelegationRegistration;
   }
 
   return TxType.Send;

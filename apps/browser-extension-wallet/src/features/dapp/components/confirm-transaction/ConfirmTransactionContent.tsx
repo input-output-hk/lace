@@ -8,6 +8,9 @@ import { ConfirmDRepRetirementContainer } from './ConfirmDRepRetirementContainer
 import { ConfirmVoteDelegationContainer } from './ConfirmVoteDelegationContainer';
 import { VotingProceduresContainer } from './VotingProceduresContainer';
 import { ConfirmDRepUpdateContainer } from './ConfirmDRepUpdateContainer';
+import { ConfirmVoteRegistrationDelegationContainer } from './ConfirmVoteRegistrationDelegationContainer';
+import { ConfirmStakeRegistrationDelegationContainer } from './ConfirmStakeRegistrationDelegationContainer';
+import { ConfirmStakeVoteRegistrationDelegationContainer } from './ConfirmStakeVoteRegistrationDelegationContainer';
 
 interface Props {
   txType?: TxType;
@@ -33,6 +36,15 @@ export const ConfirmTransactionContent = ({ txType, signTxData, errorMessage }: 
   }
   if (txType === TxType.VotingProcedures) {
     return <VotingProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === TxType.VoteRegistrationDelegation) {
+    return <ConfirmVoteRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === TxType.StakeRegistrationDelegation) {
+    return <ConfirmStakeRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === TxType.StakeVoteDelegationRegistration) {
+    return <ConfirmStakeVoteRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
 
   return <DappTransactionContainer signTxData={signTxData} errorMessage={errorMessage} />;
