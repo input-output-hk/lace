@@ -11,6 +11,8 @@ export interface StakePoolDetailsDrawerProps {
   showBackIcon?: boolean | ((step: DrawerStep) => boolean);
   showCloseIcon?: boolean | ((step: DrawerStep) => boolean);
   showExitConfirmation?: (step: DrawerStep) => boolean;
+  onCloseIconClick?: () => void;
+  onBackButtonClick?: () => void;
 }
 
 export const StakePoolDetailsDrawer = ({
@@ -20,6 +22,8 @@ export const StakePoolDetailsDrawer = ({
   showCloseIcon,
   showBackIcon,
   showExitConfirmation,
+  onCloseIconClick,
+  onBackButtonClick,
 }: StakePoolDetailsDrawerProps): React.ReactElement => {
   const { setExitStakingVisible } = useStakingStore();
   const { activeDrawerStep, drawerVisible, portfolioMutators } = useDelegationPortfolioStore((store) => ({
@@ -93,12 +97,18 @@ export const StakePoolDetailsDrawer = ({
         <DrawerNavigation
           title={DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : t('drawer.titleSecond')}
           // If undefined is passed to onArrowIconClick, arrow component will not be rendered
-          onArrowIconClick={createArrowIconCallback()}
-          onCloseIconClick={
-            (activeDrawerStep && typeof showCloseIcon === 'function' ? showCloseIcon(activeDrawerStep) : showCloseIcon)
-              ? closeDrawer
-              : undefined
-          }
+          onArrowIconClick={() => {
+            onBackButtonClick?.();
+            createArrowIconCallback();
+          }}
+          onCloseIconClick={() => {
+            if (
+              activeDrawerStep && typeof showCloseIcon === 'function' ? showCloseIcon(activeDrawerStep) : showCloseIcon
+            ) {
+              onCloseIconClick?.();
+              closeDrawer();
+            }
+          }}
         />
       }
       footer={footer}

@@ -4,19 +4,18 @@ import debounce from 'lodash/debounce';
 import { Image, Tooltip } from 'antd';
 import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
-import { TransactionType } from '@ui/components/Transactions/TransactionType';
-import { TransactionTypeIcon } from '@ui/components/Transactions/TransactionTypeIcon';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
 import styles from './AssetActivityItem.module.scss';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
 import { useTranslate } from '@src/ui/hooks';
+import { ActivityTypeIcon, ActivityType } from '../ActivityDetail';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
 
-export enum TransactionStatus {
+export enum ActivityStatus {
   SUCCESS = 'success',
   PENDING = 'sending',
   ERROR = 'error',
@@ -27,9 +26,6 @@ const DEFAULT_DEBOUNCE = 200;
 
 export interface AssetActivityItemProps {
   id?: string;
-  fee?: string;
-  deposit?: string; // e.g. stake registrations
-  depositReclaim?: string; // e.g. stake de-registrations
   /**
    * Amount formated with symbol (e.g. 50 ADA)
    */
@@ -45,7 +41,7 @@ export interface AssetActivityItemProps {
   /**
    * Activity status: `sending` | `success` | 'error
    */
-  status?: TransactionStatus;
+  status?: ActivityStatus;
   /**
    * Activity or asset custom icon
    */
@@ -53,44 +49,38 @@ export interface AssetActivityItemProps {
   /**
    * Activity type
    */
-  type?: TransactionType;
+  type?: ActivityType;
   /**
    * Number of assets (default: 1)
    */
   assetsNumber?: number;
-  date?: string;
-  /**
-   * Direction: 'Incoming' | 'Outgoing' | 'Self'
-   * TODO: Create a separate package for common types across apps/packages
-   */
-  direction?: 'Incoming' | 'Outgoing' | 'Self';
+  formattedTimestamp: string;
   /**
    * assets details
    */
   assets?: ActivityAssetProp[];
-  timestamp?: string;
 }
 
 const DelegationTransactionTypes = new Set(['delegation', 'delegationRegistration', 'delegationDeregistration']);
 const DELEGATION_ASSET_NUMBER = 1;
 
-interface TransactionStatusIconProps {
+interface ActivityStatusIconProps {
   status: string;
-  type: TransactionType;
+  type: ActivityType;
 }
 
 const offsetMargin = 10;
 
-const TransactionStatusIcon = ({ status, type }: TransactionStatusIconProps) => {
+const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
   const iconStyle = { fontSize: txIconSize() };
   switch (status) {
-    case TransactionStatus.SUCCESS:
-      return <TransactionTypeIcon type={type} />;
-    case TransactionStatus.SPENDABLE:
-      return <TransactionTypeIcon type="rewards" />;
-    case TransactionStatus.PENDING:
+    case ActivityStatus.SUCCESS:
+      return <ActivityTypeIcon type={type} />;
+    case ActivityStatus.SPENDABLE:
+      return <ActivityTypeIcon type="rewards" />;
+    case ActivityStatus.PENDING:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
-    case TransactionStatus.ERROR:
+    case ActivityStatus.ERROR:
     default:
       return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
   }
@@ -116,7 +106,7 @@ export const AssetActivityItem = ({
   type,
   assetsNumber = 1,
   assets,
-  timestamp
+  formattedTimestamp
 }: AssetActivityItemProps): React.ReactElement => {
   const { t } = useTranslate();
   const ref = useRef<HTMLHeadingElement>(null);
@@ -166,7 +156,7 @@ export const AssetActivityItem = ({
     };
   }, [debouncedSetText]);
 
-  const isPendingTx = status === TransactionStatus.PENDING;
+  const isPendingTx = status === ActivityStatus.PENDING;
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent = DelegationTransactionTypes.has(type) ? (
@@ -178,9 +168,9 @@ export const AssetActivityItem = ({
       {pluralize('package.core.assetActivityItem.entry.token', assetsNumber, true)}
     </p>
   );
-  const descriptionContent = timestamp ? (
+  const descriptionContent = formattedTimestamp ? (
     <p data-testid="timestamp" className={styles.description}>
-      {timestamp}
+      {formattedTimestamp}
     </p>
   ) : (
     assetAmountContent
@@ -193,7 +183,7 @@ export const AssetActivityItem = ({
           {customIcon ? (
             <Image src={customIcon} className={styles.icon} preview={false} alt="asset image" />
           ) : (
-            <TransactionStatusIcon status={status} type={type} />
+            <ActivityStatusIcon status={status} type={type} />
           )}
         </div>
         <div data-testid="asset-info" className={styles.info}>

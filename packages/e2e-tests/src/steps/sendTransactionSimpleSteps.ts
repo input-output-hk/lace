@@ -23,7 +23,7 @@ import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert, { ExpectedTransactionDetails } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import nftsPageObject from '../pageobject/nftsPageObject';
 import transactionsPageObject from '../pageobject/transactionsPageObject';
@@ -38,6 +38,7 @@ import TransactionSubmittedPage from '../elements/newTransaction/transactionSubm
 import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
+import { AddressInput } from '../elements/addressInput';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -201,6 +202,7 @@ Then(/^the balance of token is displayed in coin selector$/, async () => {
 });
 
 Then(/^click "(Add|Remove) address" button (\d*) in address bar$/, async (_ignored: string, inputIndex: number) => {
+  await new AddressInput(inputIndex).searchLoader.waitForDisplayed({ reverse: true });
   await transactionExtendedPageObject.clickAddAddressButton(inputIndex);
 });
 
@@ -374,7 +376,7 @@ When(/^I save fee value$/, async () => {
 Then(
   /^The Tx details are displayed as "([^"]*)" for ADA with value: ([^"]*) and wallet: "([^"]*)" address$/,
   async (type: string, adaValue: string, walletName: string) => {
-    const expectedTransactionDetails: ExpectedTransactionDetails = {
+    const expectedActivityDetails: ExpectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
@@ -382,14 +384,14 @@ Then(
       ],
       status: 'Success'
     };
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 
 Then(
   /^The Tx details are displayed as "([^"]*)" for ADA with value: "([^"]*)" and LaceCoin2 with value: "([^"]*)" and wallet: "([^"]*)" address$/,
   async (type: string, adaValue: string, laceCoin2Value: string, walletName: string) => {
-    const expectedTransactionDetails: ExpectedTransactionDetails = {
+    const expectedActivityDetails: ExpectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(2)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
@@ -401,7 +403,7 @@ Then(
       ],
       status: 'Success'
     };
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 
@@ -413,13 +415,13 @@ Then(
       entry.address = getTestWallet(entry.address).address;
       entry.assets = entry.assets.split(',');
     }
-    const expectedTransactionDetails = {
+    const expectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(${numberOfTokens})`,
       hash: String(testContext.load('txHashValue')),
       transactionData: txData,
       status: 'Success'
     };
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 
@@ -430,12 +432,10 @@ Then(/a popup asking if you're sure you'd like to close it is displayed$/, async
 Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, async (button: 'Agree' | 'Cancel') => {
   switch (button) {
     case 'Agree':
-      await Modal.confirmButton.waitForClickable();
-      await Modal.confirmButton.click();
+      await Modal.clickConfirmButton();
       break;
     case 'Cancel':
-      await Modal.cancelButton.waitForClickable();
-      await Modal.cancelButton.click();
+      await Modal.clickCancelButton();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
@@ -662,3 +662,11 @@ Then(
     await drawerSendExtendedAssert.assertAddressBookButtonEnabled(inputIndex, state === 'enabled');
   }
 );
+
+Then(/^I see review handle banner for handle: "([^"]*)"$/, async (handleName: string) => {
+  await drawerSendExtendedAssert.assertSeeReviewAddressBanner(handleName);
+});
+
+When(/^I click "Review" button in review handle banner$/, async () => {
+  await new TransactionNewPage().banner.button.click();
+});

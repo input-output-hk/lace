@@ -1,7 +1,7 @@
-import { AssetActivityListProps, TransactionType } from '@lace/core';
 import flatMap from 'lodash/flatMap';
+import type { ActivityType, AssetActivityListProps } from '@lace/core';
 
-const DelegationTransactionTypes: Set<TransactionType> = new Set([
+const DelegationTransactionTypes: Set<ActivityType> = new Set([
   'delegation',
   'delegationRegistration',
   'delegationDeregistration',

@@ -1,5 +1,5 @@
 @Tokens-extended @Testnet @Mainnet
-Feature: Analytics -  Tokens tab - extended view
+Feature: Analytics - Tokens tab - extended view
 
   Background:
     Given Wallet is synced
@@ -24,4 +24,12 @@ Feature: Analytics -  Tokens tab - extended view
     And I set up request interception for posthog analytics request(s)
     And I close the drawer by clicking close button
     Then I validate latest analytics single event "token | token detail | x | click"
+    And I validate that 1 analytics event(s) have been sent
+
+  @LW-8710
+  Scenario: Analytics - Extended view - Click Lace logo
+    Given I navigate to Tokens extended page
+    And I set up request interception for posthog analytics request(s)
+    When I click on the logo icon
+    Then I validate latest analytics single event "wallet | lace | click"
     And I validate that 1 analytics event(s) have been sent

@@ -1,9 +1,10 @@
 import type { PropsWithChildren, ReactNode } from 'react';
 import React from 'react';
 
+import { Trigger } from '@radix-ui/react-tooltip';
+
 import { Provider } from './tooltip-provider.component';
 import { Root } from './tooltip-root.component';
-import { Trigger } from './tooltip-trigger.component';
 
 import type { Props as RootProps } from './tooltip-root.component';
 
@@ -28,7 +29,7 @@ export const Tooltip = ({
       delayDuration={delayDuration}
     >
       <Root label={label} {...props}>
-        <Trigger>{children}</Trigger>
+        <Trigger asChild>{children}</Trigger>
       </Root>
     </Provider>
   );

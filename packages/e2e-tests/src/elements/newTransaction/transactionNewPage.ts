@@ -6,6 +6,7 @@ import { AddressInput } from '../addressInput';
 import { TransactionBundle } from './transactionBundle';
 import { Asset } from '../../data/Asset';
 import { ChainablePromiseElement } from 'webdriverio';
+import Banner from '../banner';
 
 export class TransactionNewPage extends WebElement {
   private CONTAINER = '//div[@class="ant-drawer-body"]';
@@ -30,6 +31,10 @@ export class TransactionNewPage extends WebElement {
 
   constructor() {
     super();
+  }
+
+  get banner(): typeof Banner {
+    return Banner;
   }
 
   coinConfigure(index?: number): CoinConfigure {
@@ -68,8 +73,8 @@ export class TransactionNewPage extends WebElement {
     return Factory.fromSelector(`(${this.CONTAINER}${this.ATTRIBUTES_VALUE_ADA})[2]`, 'xpath');
   }
 
-  attributeValueFiat(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.ATTRIBUTES_VALUE_FIAT}`, 'xpath');
+  get attributeValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.ATTRIBUTES_VALUE_FIAT}`);
   }
 
   attributeAdaAllocationValueFiat(): WebElement {
@@ -141,7 +146,7 @@ export class TransactionNewPage extends WebElement {
   }
 
   async getValueFiat(): Promise<number> {
-    const stringValue = (await webTester.getTextValueFromElement(this.attributeValueFiat())) as string;
+    const stringValue = await this.attributeValueFiat.getText();
     const stringValueTrimmed = stringValue.replace('$', '').replace(' USD', '');
     return Number(stringValueTrimmed);
   }

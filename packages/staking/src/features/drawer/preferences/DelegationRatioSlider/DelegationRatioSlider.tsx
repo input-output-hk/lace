@@ -1,5 +1,7 @@
+import { PostHogAction } from '@lace/common';
 import { IconButton } from '@lace/ui';
 import * as Slider from '@radix-ui/react-slider';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import React from 'react';
 import * as styles from './DelegationRatioSlider.css';
 import SliderMinusIcon from './slider-minus.svg';
@@ -17,9 +19,16 @@ export type DelegationRatioSlider = Omit<Slider.SliderProps, 'value' | 'onValueC
 
 export const DelegationRatioSlider = React.forwardRef(
   (props: DelegationRatioSlider, forwardedRef: React.ForwardedRef<HTMLInputElement>) => {
+    const { analytics } = useOutsideHandles();
     const value = props.value || props.defaultValue || 0;
-    const handlePlusClick = () => props.onValueChange && inRange(value + 1) && props.onValueChange(value + 1);
-    const handleMinusClick = () => props.onValueChange && inRange(value - 1) && props.onValueChange(value - 1);
+    const handlePlusClick = () => {
+      analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationDelegationRatioSliderPlusClick);
+      props.onValueChange && inRange(value + 1) && props.onValueChange(value + 1);
+    };
+    const handleMinusClick = () => {
+      analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationDelegationRatioSliderMinusClick);
+      props.onValueChange && inRange(value - 1) && props.onValueChange(value - 1);
+    };
     return (
       <div className={styles.SliderContainer}>
         <IconButton.Primary icon={<SliderMinusIcon />} onClick={handleMinusClick} />
@@ -30,6 +39,9 @@ export const DelegationRatioSlider = React.forwardRef(
           value={[value]}
           defaultValue={props.defaultValue ? [props.defaultValue] : undefined}
           ref={forwardedRef}
+          onValueCommit={() => {
+            analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationDelegationRatioSliderVolumePinDrag);
+          }}
         >
           <Slider.Track className={styles.SliderTrack}>
             <Slider.Range className={styles.SliderRange} />

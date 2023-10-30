@@ -82,7 +82,10 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   return (
     <div className={styles.footerFail}>
       <Button
-        onClick={() => closeDrawer()}
+        onClick={() => {
+          analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongCancelClick);
+          closeDrawer();
+        }}
         color="secondary"
         className={styles.btn}
         size="large"

@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import { Wallet } from '@lace/cardano';
+import { PostHogAction } from '@lace/common';
 import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard, DelegationStatus } from '../../delegation-card';
@@ -32,6 +33,7 @@ const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore):
 
 export const StepPreferencesContent = () => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   const {
     balancesBalance,
     walletStoreWalletUICardanoCoin: { symbol },
@@ -48,18 +50,20 @@ export const StepPreferencesContent = () => {
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
-      displayData: { name },
+      displayData: { name, apy, saturation },
       id,
       sliderIntegerPercentage,
     } = draftPool;
 
     return {
+      apy: apy ? String(apy) : undefined,
       cardanoCoinSymbol,
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
       onChainPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.onChainPercentage : undefined,
       percentage: sliderIntegerPercentage,
+      saturation: saturation ? String(saturation) : undefined,
       savedIntegerPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.savedIntegerPercentage : undefined,
       // TODO
       sliderIntegerPercentage,
@@ -78,6 +82,7 @@ export const StepPreferencesContent = () => {
   };
   const addPoolButtonDisabled = draftPortfolio.length === MAX_POOLS_COUNT;
   const onAddPoolButtonClick = () => {
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsManageDelegationAddStakePoolClick);
     portfolioMutators.executeCommand({
       type: 'AddStakePools',
     });
@@ -95,16 +100,17 @@ export const StepPreferencesContent = () => {
         />
       </Box>
       <Flex justifyContent="space-between">
-        <Text.Body.Large weight="$semibold">
+        <Text.Body.Large weight="$semibold" data-testid="manage-delegation-selected-pools-label">
           {t('drawer.preferences.selectedStakePools', { count: draftPortfolio.length })}
         </Text.Body.Large>
         <ControlButton.Small
           label={t('drawer.preferences.addPoolButton')}
           onClick={onAddPoolButtonClick}
           disabled={addPoolButtonDisabled}
+          data-testid="manage-delegation-add-pools-btn"
         />
       </Flex>
-      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch">
+      <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" data-testid="selected-pools-container">
         {displayData.map(
           ({ color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage }) => (
             <PoolDetailsCard
@@ -120,7 +126,6 @@ export const StepPreferencesContent = () => {
               expanded
               onExpandButtonClick={() => void 0}
               onPercentageChange={(value) => {
-                console.info(value);
                 portfolioMutators.executeCommand({
                   data: { id, newSliderPercentage: value },
                   type: 'UpdateStakePercentage',
