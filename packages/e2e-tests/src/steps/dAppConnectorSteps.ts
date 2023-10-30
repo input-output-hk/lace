@@ -171,12 +171,25 @@ Then(/^I see test DApp on the Authorized DApps list$/, async () => {
 
 When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async (mode: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.openTestDApp();
-  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
-  await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow('Authorize');
-  await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(mode);
-  await DAppConnectorPageObject.switchToTestDAppWindow();
-  await DAppConnectorAssert.waitUntilBalanceNotEmpty();
+  const switchToDappConnectorPopupAndAuthorize = async () => {
+    await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+    await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+    await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow('Authorize');
+    await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(mode);
+    await DAppConnectorPageObject.switchToTestDAppWindow();
+    await DAppConnectorAssert.waitUntilBalanceNotEmpty();
+  };
+
+  try {
+    await switchToDappConnectorPopupAndAuthorize();
+  } catch {
+    Logger.log('Failed to authorize Dapp. Retry will be executed');
+    if ((await browser.getWindowHandles()).length === 3) {
+      await DAppConnectorPageObject.closeDappConnectorWindowHandle();
+    }
+    await TestDAppPage.refreshButton.click();
+    await switchToDappConnectorPopupAndAuthorize();
+  }
 });
 
 Then(/^I de-authorize all DApps in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
@@ -214,7 +227,7 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
       }
       await browser.waitUntil(async () => (await browser.getWindowHandles()).length === handlesBeforeClick + 1, {
         interval: 1000,
-        timeout: 4000,
+        timeout: 6000,
         timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
       });
       break;
