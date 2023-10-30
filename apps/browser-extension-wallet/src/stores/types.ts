@@ -16,6 +16,7 @@ import { FetchWalletActivitiesProps, FetchWalletActivitiesReturn, IBlockchainPro
 import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
+import { AddressesDiscoveryStatus } from '@lib/communication';
 
 export enum StateStatus {
   IDLE = 'idle',
@@ -96,8 +97,10 @@ export interface WalletInfoSlice {
   inMemoryWallet: Wallet.ObservableWallet | undefined;
   cardanoWallet: Wallet.CardanoWallet | undefined;
   walletManagerUi: WalletManagerUi | undefined;
-  addressesDiscoveryCompleted: boolean;
+  initialHdDiscoveryCompleted: boolean;
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted: boolean) => void;
+  hdDiscoveryStatus: AddressesDiscoveryStatus | null;
+  setHdDiscoveryStatus: (AddressesDiscoveryStatus: AddressesDiscoveryStatus) => void;
   setCardanoWallet: (wallet?: Wallet.CardanoWallet) => void;
   setWalletManagerUi: (walletManager: WalletManagerUi) => void;
   currentChain?: Wallet.Cardano.ChainId;

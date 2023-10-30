@@ -22,3 +22,4 @@ export * from './useUpdateAddressStatus';
 export * from './useOnAddressSave';
 export * from './useSendEvent';
 export * from './useAppInit';
+export * from './useAddressesDiscoverer';

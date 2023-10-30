@@ -11,7 +11,6 @@ import { StakingWarningModals } from '@views/browser/features/staking/components
 import { AddressBook } from '../features/address-book';
 import { Settings } from '../features/settings';
 import { NftDetail, Nfts } from '@src/features/nfts';
-import { HdDiscoveryModal } from '@views/browser/components/HdDiscoveryModal';
 
 export const ExtensionRoutes = (): React.ReactElement => (
   <MainLayout>
@@ -27,7 +26,6 @@ export const ExtensionRoutes = (): React.ReactElement => (
       <Route exact path={walletRoutePaths.nfts} component={Nfts} />
       <Route path="*" render={() => <Redirect to={walletRoutePaths.assets} />} />
     </Switch>
-    <HdDiscoveryModal visible />
     {/* TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.*/}
     <StakingWarningModals popupView />
   </MainLayout>
