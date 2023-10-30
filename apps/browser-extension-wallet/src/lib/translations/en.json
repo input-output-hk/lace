@@ -1296,5 +1296,8 @@
       "usedAddresses.addressCopied": "Address copied",
       "showUsedAddresses": "Show used addresses"
     }
+  },
+  "hdDiscovery": {
+    "modal.title": "Your wallet is syncing, this might take a few minutes"
   }
 }

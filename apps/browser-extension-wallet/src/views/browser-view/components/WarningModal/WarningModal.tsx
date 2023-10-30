@@ -10,11 +10,12 @@ interface WarningModalProps {
   visible: boolean;
   isPopupView?: boolean;
   onCancel?: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   cancelLabel?: React.ReactNode;
   confirmLabel?: React.ReactNode;
   confirmCustomClassName?: string;
   withCancel?: boolean;
+  withConfirm?: boolean;
 }
 
 const modalWidth = 480;
@@ -30,7 +31,8 @@ export const WarningModal = ({
   confirmLabel,
   confirmCustomClassName,
   isPopupView,
-  withCancel = true
+  withCancel = true,
+  withConfirm = true
 }: WarningModalProps): React.ReactElement => {
   const { t: translate } = useTranslation();
 
@@ -60,9 +62,16 @@ export const WarningModal = ({
             {cancelLabel ?? translate('general.button.cancel')}
           </Button>
         )}
-        <Button className={confirmCustomClassName} data-testid="delete-address-modal-confirm" block onClick={onConfirm}>
-          {confirmLabel ?? translate('general.button.agree')}
-        </Button>
+        {withConfirm && (
+          <Button
+            className={confirmCustomClassName}
+            data-testid="delete-address-modal-confirm"
+            block
+            onClick={onConfirm}
+          >
+            {confirmLabel ?? translate('general.button.agree')}
+          </Button>
+        )}
       </div>
     </Modal>
   );
