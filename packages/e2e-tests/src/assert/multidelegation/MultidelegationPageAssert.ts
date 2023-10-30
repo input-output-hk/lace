@@ -31,6 +31,13 @@ class MultidelegationPageAssert {
     expect(await MultidelegationPage.title.getText()).to.equal(await t('staking.sectionTitle'));
   };
 
+  assertSeeTabs = async () => {
+    await MultidelegationPage.overviewTab.waitForDisplayed();
+    expect(await MultidelegationPage.overviewTab.getText()).to.equal(await t('root.nav.overviewTitle', 'staking'));
+    await MultidelegationPage.browseTab.waitForDisplayed();
+    expect(await MultidelegationPage.browseTab.getText()).to.equal(await t('root.nav.browsePoolsTitle', 'staking'));
+  };
+
   assertSeeDelegationCardDetailsInfo = async () => {
     expect(await MultidelegationPage.delegationCardBalanceLabel.getText()).to.equal(
       await t('overview.delegationCard.label.balance', 'staking')

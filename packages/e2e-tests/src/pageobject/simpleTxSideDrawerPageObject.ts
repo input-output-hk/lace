@@ -34,6 +34,7 @@ class SimpleTxSideDrawerPageObject {
     await TransactionPasswordPage.passwordInput.setValue(password);
     await TransactionPasswordPage.nextButton.waitForClickable();
     await TransactionPasswordPage.nextButton.click();
+    await TransactionPasswordPage.buttonLoader.waitForDisplayed({ timeout: 20_000, reverse: true });
   }
 }
 

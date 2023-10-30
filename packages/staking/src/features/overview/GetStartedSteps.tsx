@@ -21,8 +21,8 @@ export const GetStartedSteps = (): React.ReactElement => {
   return (
     <Flex flexDirection="column" gap="$32">
       <Flex flexDirection="column" gap="$8">
-        <Text.Heading>{t('overview.noStaking.getStarted')}</Text.Heading>
-        <Text.Body.Normal weight="$semibold" className={styles.stepDescription}>
+        <Text.Heading data-testid="get-started-title">{t('overview.noStaking.getStarted')}</Text.Heading>
+        <Text.Body.Normal weight="$semibold" className={styles.stepDescription} data-testid="get-started-description">
           {t('overview.noStaking.followSteps')}
         </Text.Body.Normal>
       </Flex>
@@ -30,13 +30,24 @@ export const GetStartedSteps = (): React.ReactElement => {
         <Flex flexDirection="row" gap="$24">
           <StepCircle step={1} />
           <Flex flexDirection="column" gap="$4">
-            <Text.Body.Large weight="$bold">{t('overview.noStaking.searchForPoolTitle')}</Text.Body.Large>
-            <Text.Body.Normal weight="$semibold" className={styles.stepDescription}>
+            <Text.Body.Large weight="$bold" data-testid="get-started-step1-title">
+              {t('overview.noStaking.searchForPoolTitle')}
+            </Text.Body.Large>
+            <Text.Body.Normal
+              weight="$semibold"
+              className={styles.stepDescription}
+              data-testid="get-started-step1-description"
+            >
               <Trans
                 i18nKey="overview.noStaking.searchForPoolDescription"
                 t={t}
                 components={{
-                  Link: <a onClick={() => portfolioMutators.executeCommand({ type: 'GoToBrowsePools' })} />,
+                  Link: (
+                    <a
+                      onClick={() => portfolioMutators.executeCommand({ type: 'GoToBrowsePools' })}
+                      data-testid="get-started-step1-link"
+                    />
+                  ),
                 }}
               />
             </Text.Body.Normal>
@@ -45,13 +56,25 @@ export const GetStartedSteps = (): React.ReactElement => {
         <Flex flexDirection="row" gap="$24">
           <StepCircle step={2} />
           <Flex flexDirection="column" gap="$4">
-            <Text.Body.Large weight="$bold">{t('overview.noStaking.selectPoolsTitle')}</Text.Body.Large>
-            <Text.Body.Normal weight="$semibold" className={styles.stepDescription}>
+            <Text.Body.Large weight="$bold" data-testid="get-started-step2-title">
+              {t('overview.noStaking.selectPoolsTitle')}
+            </Text.Body.Large>
+            <Text.Body.Normal
+              weight="$semibold"
+              className={styles.stepDescription}
+              data-testid="get-started-step2-description"
+            >
               <Trans
                 i18nKey="overview.noStaking.selectPoolsDescription"
                 t={t}
                 components={{
-                  Link: <a target="_blank" href={`${process.env.FAQ_URL}?question=what-are-staking-and-delegation`} />,
+                  Link: (
+                    <a
+                      target="_blank"
+                      href={`${process.env.FAQ_URL}?question=what-are-staking-and-delegation`}
+                      data-testid="get-started-step2-link"
+                    />
+                  ),
                 }}
                 values={{ maxPools: MAX_POOLS_COUNT }}
               />

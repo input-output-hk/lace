@@ -1,21 +1,23 @@
-/* eslint-disable no-undef */
-import { ChainablePromiseElement } from 'webdriverio';
-
 class Banner {
   private CONTAINER = '[data-testid="banner-container"]';
   private ICON = '[data-testid="banner-icon"]';
   private DESCRIPTION = '[data-testid="banner-description"]';
+  private BUTTON = '[data-testid="banner-button"]';
 
-  get container(): ChainablePromiseElement<WebdriverIO.Element> {
+  get container() {
     return $(this.CONTAINER);
   }
 
-  get icon(): ChainablePromiseElement<WebdriverIO.Element> {
+  get icon() {
     return $(this.ICON);
   }
 
-  get description(): ChainablePromiseElement<WebdriverIO.Element> {
+  get description() {
     return $(this.DESCRIPTION);
+  }
+
+  get button() {
+    return $(this.BUTTON);
   }
 
   async getContainerText(): Promise<string> {
