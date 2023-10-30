@@ -14,8 +14,4 @@ describe('Testing getChainNameByNetworkMagic function', () => {
     const networkName = getChainNameByNetworkMagic(Wallet.Cardano.NetworkMagics.Preview);
     expect(networkName).toBe('Preview');
   });
-  test(`should return LegacyTestnet as name for network magic ${Wallet.Cardano.NetworkMagics.Testnet}`, () => {
-    const networkName = getChainNameByNetworkMagic(Wallet.Cardano.NetworkMagics.Testnet);
-    expect(networkName).toBe('LegacyTestnet');
-  });
 });

@@ -37,10 +37,10 @@ export const InsufficientFunds = (): React.ReactElement => {
         </Text>
       </div>
       <div className={connectStyles.footer}>
-        <Button block onClick={rejectAndOpenFunds}>
+        <Button block onClick={rejectAndOpenFunds} data-testid="collateral-button-add-funds">
           {t('dapp.collateral.insufficientFunds.add')}
         </Button>
-        <Button block color="secondary" onClick={close}>
+        <Button block color="secondary" onClick={close} data-testid="collateral-button-cancel">
           {t('general.button.cancel')}
         </Button>
       </div>

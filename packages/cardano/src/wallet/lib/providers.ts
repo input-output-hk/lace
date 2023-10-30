@@ -38,7 +38,7 @@ export interface ProvidersConfig {
 }
 
 export const createProviders = ({ axiosAdapter, baseUrl }: ProvidersConfig): WalletProvidersDependencies => {
-  const httpProviderConfig: CreateHttpProviderConfig<Provider> = {
+  const httpProviderConfig = {
     baseUrl,
     logger: console,
     adapter: axiosAdapter

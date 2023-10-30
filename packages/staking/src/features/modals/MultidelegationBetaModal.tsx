@@ -1,6 +1,7 @@
 import { Flex } from '@lace/ui';
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { MAX_POOLS_COUNT } from '../store';
 import { BetaPill } from './BetaPill';
 import { StakingModal } from './StakingModal';
 
@@ -48,6 +49,7 @@ export const MultidelegationBetaModal = ({
         <Trans
           i18nKey="modals.beta.description"
           t={t}
+          values={{ maxPools: MAX_POOLS_COUNT }}
           components={{
             Link: <a href={BLOG_POST_URL} rel="noreferrer noopener" target="_blank" />,
           }}

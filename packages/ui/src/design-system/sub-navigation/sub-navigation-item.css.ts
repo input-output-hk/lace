@@ -92,3 +92,8 @@ export const highlight = style([
     },
   },
 ]);
+
+export const halfHighlight = sx({
+  width: '$56',
+  margin: '$auto',
+});

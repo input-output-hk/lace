@@ -88,7 +88,7 @@ Before(
 );
 
 Before(
-  { tags: '@SendNft-Extended-E2E' },
+  { tags: '@SendNft-Extended-E2E or @AdaHandleSend' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSendNftE2E)
 );
 
@@ -98,7 +98,7 @@ Before(
 );
 
 Before(
-  { tags: '@Staking-DelegatedFunds-Extended or @NetworkSwitching-extended' },
+  { tags: '@Staking-DelegatedFunds-Extended or @NetworkSwitching-extended or @DAppConnectorLowFunds' },
   async () => await extendedViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
 );
 
@@ -137,4 +137,9 @@ Before(
 Before(
   { tags: '@Multidelegation-DelegatedFunds-Popup' },
   async () => await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle)
+);
+
+Before(
+  { tags: '@Multidelegation-DelegatedFunds-Extended' },
+  async () => await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle)
 );

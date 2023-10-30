@@ -207,7 +207,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
       try {
         setIsBuildingTx(true);
         const txBuilder = inMemoryWallet.createTxBuilder();
-        const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.targetWeight }));
+        const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.sliderIntegerPercentage }));
         const tx = await txBuilder.delegatePortfolio({ pools }).build().inspect();
         const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
         const newDelegationTxDeposit = implicitCoin.deposit;

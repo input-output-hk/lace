@@ -198,6 +198,10 @@ When(/^I click (closed|opened) eye icon on Tokens page$/, async (iconType: 'clos
   iconType === 'closed' ? await TokensPage.closedEyeIcon.click() : await TokensPage.openedEyeIcon.click();
 });
 
+When(/^I click on "View all" button on token details drawer$/, async () => {
+  tokensPageObject.clickOnViewAllButton();
+});
+
 Then(/^total wallet balance is masked with asterisks$/, async () => {
   await tokensPageAssert.assertTotalWalletBalanceIsMasked();
 });

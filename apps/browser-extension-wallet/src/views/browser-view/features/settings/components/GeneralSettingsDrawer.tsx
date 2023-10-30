@@ -36,7 +36,6 @@ export const GeneralSettingsDrawer = ({
   const handleClose = () => {
     onClose();
     setIsPublicKeyQRVisible(false);
-    sendAnalyticsEvent(PostHogAction.SettingsYourKeysShowPublicKeyXClick);
   };
 
   useKeyboardShortcut(['Escape'], () => visible && handleGoBackDrawer());

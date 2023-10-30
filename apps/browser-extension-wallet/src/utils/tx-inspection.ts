@@ -20,7 +20,7 @@ const hasWalletStakeAddress = (
 ) => withdrawals.some((item) => item.stakeAddress === stakeAddress);
 
 interface TxTypeProps {
-  type: TransactionType | 'self-rewards';
+  type: TransactionType;
 }
 
 const conwayEraCertificatesTypes = new Set([
@@ -36,7 +36,7 @@ const conwayEraCertificatesTypes = new Set([
   CertificateType.StakeVoteDelegation
 ]);
 
-export const getTxDirection = ({ type }: TxTypeProps): TxDirection => {
+export const getTxDirection = ({ type }: TxTypeProps): TxDirections => {
   switch (type) {
     case 'incoming':
       return TxDirections.Incoming;
@@ -44,9 +44,8 @@ export const getTxDirection = ({ type }: TxTypeProps): TxDirection => {
       return TxDirections.Outgoing;
     case 'outgoing':
     case 'vote':
+    case 'submitProposal':
       return TxDirections.Outgoing;
-    case 'self-rewards':
-      return TxDirections.Self;
     case 'self':
       return TxDirections.Self;
   }
@@ -59,7 +58,9 @@ const selfTxInspector = (addresses: Wallet.Cardano.PaymentAddress[]) => (tx: Wal
   return !notOwnOutputs;
 };
 
-const governanceCertificateInspection = (certificates: Wallet.Cardano.Certificate[]): TransactionType => {
+const governanceCertificateInspection = (
+  certificates: Wallet.Cardano.Certificate[]
+): Exclude<TransactionType, 'rewards'> => {
   const signedCertificateTypenames: Wallet.Cardano.CertificateType[] = certificates.reduce(
     (acc, cert) => [...acc, cert.__typename],
     []
@@ -118,7 +119,7 @@ export const inspectTxType = ({
 }: {
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
-}): TransactionType | 'self-rewards' => {
+}): Exclude<TransactionType, 'rewards'> => {
   const { paymentAddresses, rewardAccounts } = getWalletAccounts(walletAddresses);
 
   const inspectionProperties = createTxInspector({
@@ -133,7 +134,7 @@ export const inspectTxType = ({
     selfTransaction: selfTxInspector(paymentAddresses)
   })(tx);
 
-  if (txIncludesConwayCertificates(tx.body.certificates)) {
+  if (txIncludesConwayCertificates(tx.body.certificates || [])) {
     return governanceCertificateInspection(tx.body.certificates);
   }
 
@@ -144,7 +145,7 @@ export const inspectTxType = ({
   );
 
   // TODO: refactor when more than one type can be accounted for
-  if (inspectionProperties.sent.inputs.length > 0) {
+  if (inspectionProperties.sent.inputs.length > 0 || withRewardsWithdrawal) {
     switch (true) {
       case !!inspectionProperties.delegation[0]?.poolId:
         return 'delegation';
@@ -152,10 +153,6 @@ export const inspectTxType = ({
         return 'delegationRegistration';
       case inspectionProperties.stakeKeyDeregistration.length > 0:
         return 'delegationDeregistration';
-      case withRewardsWithdrawal && inspectionProperties.selfTransaction:
-        return 'self-rewards';
-      case withRewardsWithdrawal:
-        return 'rewards';
       case tx.body.votingProcedures?.length > 0: // Voting procedures take priority over proposals
         return 'vote';
       case tx.body.proposalProcedures?.length > 0:
@@ -167,7 +164,6 @@ export const inspectTxType = ({
     }
   }
 
-  if (withRewardsWithdrawal) return 'rewards';
   return 'incoming';
 };
 

@@ -4,23 +4,25 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
   Background:
     Given Wallet is synced
 
-  @LW-2389 @Testnet @Mainnet
+  @LW-2389 @LW-5035 @Testnet @Mainnet
   Scenario Outline: Popup-view - Enter valid <wallet> type address, no error displayed
     When I click "Send" button on Tokens page in popup mode
     And I enter a valid "<wallet>" address in the bundle 1 recipient's address
     Then "Incorrect address" error is not displayed under address input field
+    And "Add address" button is enabled in the bundle 1 recipient's address input
     Examples:
       | wallet  |
       | byron   |
       | shelley |
       | icarus  |
 
-  @LW-2390 @Testnet @Mainnet
+  @LW-2390 @LW-5037 @Testnet @Mainnet
   Scenario: Popup-view - Enter Incorrect address - Wrong checksum - Error displayed & Review button is disabled
     When I click "Send" button on Tokens page in popup mode
     And I enter an address  that matches the amount of characters but does not match with the checksum
     Then "Incorrect address" error is displayed under address input field
     And "Review transaction" button is disabled on "Send" page
+    And "Add address" button is disabled in the bundle 1 recipient's address input
 
   @LW-2391 @Testnet @Mainnet
   Scenario: Popup-view - Enter Incorrect address - Wrong amount of characters - Error displayed & Review button is disabled
@@ -57,7 +59,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then address form is filled with "shelley" address
     When I fill address form with "WalletName" name
     And I click "Save" button on "Add address" drawer in send flow
-    And I see a toast with message: "browserView.addressBook.toast.addAddress"
+    And I see a toast with message: "Address added"
     And I close the drawer by clicking back button
     And I click "Agree" button on "You'll have to start again" modal
     And I open address book from header menu

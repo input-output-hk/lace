@@ -9,7 +9,7 @@ const mockConsumeRemoteApi = jest.fn().mockReturnValue({
 const mockCreateTxInspector = jest.fn().mockReturnValue(() => ({ minted: [] as any, burned: [] as any }));
 import * as React from 'react';
 import { cleanup, render, waitFor } from '@testing-library/react';
-import { ConfirmTransaction } from '../ConfirmTransaction';
+import { ConfirmTransaction } from '../confirm-transaction/ConfirmTransaction';
 import '@testing-library/jest-dom';
 import { I18nextProvider } from 'react-i18next';
 import { StoreProvider } from '@src/stores';

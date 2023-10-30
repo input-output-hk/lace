@@ -29,6 +29,7 @@ export interface BackgroundStorage {
   fiatPrices?: { prices: ADAPrices; timestamp: number };
   userId?: string;
   usePersistentUserId?: boolean;
+  experimentsConfiguration?: Record<string, string | boolean>;
 }
 
 export type BackgroundStorageKeys = keyof BackgroundStorage;

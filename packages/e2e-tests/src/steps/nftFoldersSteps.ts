@@ -88,13 +88,12 @@ Then(
 
 When(/^I click "Next" button on "(Name your folder|Select NFTs)" page$/, async (targetPage: string) => {
   await (targetPage === 'Name your folder'
-    ? NftCreateFolderPage.nextButton.click()
-    : NftSelectNftsPage.nextButton.click());
+    ? NftCreateFolderPage.clickNextButton()
+    : NftSelectNftsPage.clickNextButton());
 });
 
 When(/^I click "Add selected NFTs" button on "Select NFTs" page$/, async () => {
-  await NftSelectNftsPage.nextButton.waitForClickable();
-  await NftSelectNftsPage.nextButton.click();
+  await NftSelectNftsPage.clickNextButton();
 });
 
 Then(/^"Select NFTs" page is showing all NFTs that I have$/, async () => {
@@ -166,8 +165,7 @@ When(/^I navigate to "Select NFTs" page in (extended|popup) mode$/, async (mode:
   await NftsPage.createFolderButton.waitForClickable();
   await NftsPage.createFolderButton.click();
   await NftCreateFolderPage.setFolderNameInput('Sample NFT folder');
-  await NftCreateFolderPage.nextButton.waitForClickable();
-  await NftCreateFolderPage.nextButton.click();
+  await NftCreateFolderPage.clickNextButton();
 });
 
 When(/^I enter "([^"]*)" into the search bar on "Select NFTs" drawer$/, async (searchPhrase: string) => {
@@ -386,11 +384,9 @@ When(/^I click "(Cancel|Confirm)" button in delete folder modal$/, async (button
 When(/^I create folder with name: "([^"]*)" and first available NFT$/, async (folderName: string) => {
   await NftsPage.createFolderButton.click();
   await NftCreateFolderPage.setFolderNameInput(folderName);
-  await NftCreateFolderPage.nextButton.waitForClickable();
-  await NftCreateFolderPage.nextButton.click();
+  await NftCreateFolderPage.clickNextButton();
   await NftSelectNftsPage.selectNFTs(1);
-  await NftSelectNftsPage.nextButton.waitForClickable();
-  await NftSelectNftsPage.nextButton.click();
+  await NftSelectNftsPage.clickNextButton();
   await NftsPage.createFolderButton.waitForClickable();
   await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, true);
 });
@@ -400,11 +396,9 @@ When(
   async (folderName: string, numberOfNftsInFolder: number) => {
     await NftsPage.createFolderButton.click();
     await NftCreateFolderPage.setFolderNameInput(folderName);
-    await NftCreateFolderPage.nextButton.waitForClickable();
-    await NftCreateFolderPage.nextButton.click();
+    await NftCreateFolderPage.clickNextButton();
     await NftSelectNftsPage.selectNFTs(numberOfNftsInFolder);
-    await NftSelectNftsPage.nextButton.waitForClickable();
-    await NftSelectNftsPage.nextButton.click();
+    await NftSelectNftsPage.clickNextButton();
     await MenuHeader.menuButton.waitForClickable();
     await nftCreateFolderAssert.assertSeeFolderOnNftsList(folderName, true);
     testContext.save('numberOfNftsInFolder', numberOfNftsInFolder);
@@ -413,8 +407,7 @@ When(
 
 When(/^I select (\d+) available NFTs$/, async (numberOfNftsWanted: number) => {
   await NftSelectNftsPage.selectNFTs(numberOfNftsWanted);
-  await NftSelectNftsPage.nextButton.waitForClickable();
-  await NftSelectNftsPage.nextButton.click();
+  await NftSelectNftsPage.clickNextButton();
 });
 
 When(
@@ -424,13 +417,10 @@ When(
     switch (action) {
       case 'add':
         testContext.saveWithOverride('numberOfNftsInFolder', numberOfNftsInFolder + numberOfNftsWanted);
-        await NftsFolderPage.addNftButton.waitForClickable();
-        await NftsFolderPage.addNftButton.click();
+        await NftsFolderPage.clickAddNftButton();
         await NftSelectNftsPage.selectNFTs(numberOfNftsWanted);
-        await ToastMessage.closeButton.waitForClickable();
-        await ToastMessage.closeButton.click();
-        await NftSelectNftsPage.nextButton.waitForClickable();
-        await NftSelectNftsPage.nextButton.click();
+        await ToastMessage.clickCloseButton();
+        await NftSelectNftsPage.clickNextButton();
         break;
       case 'remove':
         testContext.saveWithOverride('numberOfNftsInFolder', numberOfNftsInFolder - numberOfNftsWanted);

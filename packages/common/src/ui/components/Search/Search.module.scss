@@ -33,7 +33,7 @@ $button_size: 52px;
 
 
   @media (max-width: $breakpoint-popup) {
-    padding: 0 size_unit(0.75) 0 size_unit(2.5) !important;
+    padding: 0 size_unit(0.75) 0 size_unit(0.75) !important;
   }
 
   :global {

@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { ASSET_DRAWER_BODY_ID, AssetDetailsContainer } from './AssetDetailsContainer';
 import { useWalletStore } from '@src/stores';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const renderFooter = (click: () => void, label: string, popupView?: boolean) => (
   <div className={classnames(styles.footerContainer, { [styles.footerContainerPopup]: popupView })}>
@@ -32,6 +34,7 @@ export const AssetDetailsDrawer = ({
 }: AssetDetailsDrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const { blockchainProvider, assetDetails, setAssetDetails } = useWalletStore();
+  const analytics = useAnalyticsContext();
 
   const isVisible = !!assetDetails;
 
@@ -54,7 +57,15 @@ export const AssetDetailsDrawer = ({
   return (
     <Drawer
       className={styles.drawer}
-      navigation={<DrawerNavigation title={t('browserView.assetDetails.title')} onCloseIconClick={setVisibility} />}
+      navigation={
+        <DrawerNavigation
+          title={t('browserView.assetDetails.title')}
+          onCloseIconClick={() => {
+            analytics.sendEventToPostHog(PostHogAction.TokenTokenDetailXClick);
+            setVisibility();
+          }}
+        />
+      }
       footer={renderFooter(handleOpenSend, t('browserView.assets.send'), popupView)}
       open={isVisible}
       destroyOnClose

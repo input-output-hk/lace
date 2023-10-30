@@ -31,6 +31,16 @@ class Modal {
   buttonWithText(value: string): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER).$(`//button/span[text() = '${value}']`);
   }
+
+  async clickCancelButton() {
+    await this.cancelButton.waitForClickable();
+    await this.cancelButton.click();
+  }
+
+  async clickConfirmButton() {
+    await this.confirmButton.waitForClickable();
+    await this.confirmButton.click();
+  }
 }
 
 export default new Modal();

@@ -3,15 +3,15 @@ import { useObservable } from '@lace/common';
 import { Box, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { DelegationCard } from '../delegation-card';
 import { StakePoolDetails } from '../drawer';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
-import { DelegationCard } from './DelegationCard';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
-import { StakingInfoCard } from './staking-info-card';
+import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const OverviewPopup = () => {
@@ -98,10 +98,10 @@ export const OverviewPopup = () => {
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
           arrangement="vertical"
-          distribution={displayData.map(({ color, name = '-', percentage }) => ({
+          distribution={displayData.map(({ color, name = '-', onChainPercentage }) => ({
             color,
             name,
-            percentage,
+            percentage: onChainPercentage,
           }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
@@ -116,7 +116,7 @@ export const OverviewPopup = () => {
               {...item}
               popupView
               markerColor={displayData.length > 1 ? item.color : undefined}
-              cardanoCoinSymbol="tADA"
+              cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
               onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
             />
           </Box>

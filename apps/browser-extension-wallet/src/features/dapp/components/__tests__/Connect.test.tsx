@@ -101,8 +101,9 @@ describe('Connect Component: ', () => {
       await waitFor(assert);
 
       mockUseWalletStore.mockReturnValueOnce({
-        environmentName: 'LegacyTestnet'
+        environmentName: 'Sanchonet'
       });
+
       rerender(<WrappedConnectComponent />);
       await waitFor(assert);
     });
@@ -127,8 +128,9 @@ describe('Connect Component: ', () => {
       await waitFor(assert);
 
       mockUseWalletStore.mockReturnValueOnce({
-        environmentName: 'LegacyTestnet'
+        environmentName: 'Sanchonet'
       });
+
       rerender(<WrappedConnectComponent />);
       await waitFor(assert);
     });

@@ -76,6 +76,11 @@ class NftSelectNftsPage extends CommonDrawerElements {
     await this.searchInput.clearButton.waitForClickable();
     await this.searchInput.clearButton.click();
   }
+
+  async clickNextButton() {
+    await this.nextButton.waitForClickable();
+    await this.nextButton.click();
+  }
 }
 
 export default new NftSelectNftsPage();

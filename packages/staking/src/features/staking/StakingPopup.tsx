@@ -1,4 +1,4 @@
-import { Setup } from './setup';
+import { Setup } from './Setup';
 import { StakingPopupView } from './StakingPopupView';
 import { StakingProps } from './types';
 

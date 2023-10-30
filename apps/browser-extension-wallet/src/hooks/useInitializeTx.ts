@@ -84,7 +84,8 @@ export const useInitializeTx = (
           uiTx: {
             fee: inspection.inputSelection.fee,
             hash: inspection.hash,
-            outputs: inspection.inputSelection.outputs
+            outputs: inspection.inputSelection.outputs,
+            handleResolutions: inspection.handleResolutions
           },
           tx,
           totalMinimumCoins,

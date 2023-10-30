@@ -4,29 +4,32 @@ import { Command } from './commands';
 
 export type StakePoolWithLogo = Wallet.Cardano.StakePool & { logo?: string };
 
-type DraftPortfolioStakePoolBase = {
+type PortfolioStakePoolBase = {
   id: Wallet.Cardano.Cip17Pool['id'];
-  targetWeight: Wallet.Cardano.Cip17Pool['weight'];
   displayData: Wallet.util.StakePool;
   stakePool: Wallet.Cardano.StakePool;
 };
 
-export type DraftPortfolioStakePool = DraftPortfolioStakePoolBase &
-  (
-    | {
-        basedOnCurrentPortfolio: false;
-      }
-    | { basedOnCurrentPortfolio: true; currentPortfolioPercentage: Wallet.Percent }
+type CurrentPortfolioSpecificProps = {
+  savedIntegerPercentage: number; // todo: type for integers
+  onChainPercentage: number;
+};
+
+export type DraftPortfolioStakePool = PortfolioStakePoolBase & {
+  sliderIntegerPercentage: number; // todo: type for integers
+} & (
+    | { basedOnCurrentPortfolio: false } // TODO: re-consider moving to top-level
+    | ({ basedOnCurrentPortfolio: true } & CurrentPortfolioSpecificProps)
   );
 
-export type CurrentPortfolioStakePool = DraftPortfolioStakePoolBase & {
-  displayData: Wallet.util.StakePool & {
-    lastReward: bigint;
-    totalRewards: bigint;
+export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
+  CurrentPortfolioSpecificProps & {
+    displayData: Wallet.util.StakePool & {
+      lastReward: bigint;
+      totalRewards: bigint;
+    };
+    value: bigint;
   };
-  value: bigint;
-  percentage: Wallet.Percent;
-};
 
 export enum Flow {
   Overview = 'Overview',
@@ -56,21 +59,96 @@ export enum DrawerManagementStep {
 
 export type DrawerStep = DrawerDefaultStep | DrawerManagementStep;
 
-export type State = {
-  activeDrawerStep?: DrawerStep;
+type BaseState = {
   activeFlow: Flow;
-  cardanoCoinSymbol: AdaSymbol;
+  activeDrawerStep?: DrawerStep;
+};
+
+export type SupportingData = {
   pendingSelectedPortfolio?: DraftPortfolioStakePool[];
-  currentPortfolio: CurrentPortfolioStakePool[];
   draftPortfolio?: DraftPortfolioStakePool[];
-  selectedPortfolio: DraftPortfolioStakePool[];
   viewedStakePool?: StakePoolWithLogo;
 };
 
+export type CrossStateData = {
+  cardanoCoinSymbol: AdaSymbol;
+  currentPortfolio: CurrentPortfolioStakePool[];
+  selectedPortfolio: DraftPortfolioStakePool[];
+};
+
+type StateMachineSpecificState = BaseState & SupportingData;
+
+type MakeState<S extends StateMachineSpecificState> = CrossStateData & StateMachineSpecificState & S;
+
+export type StateOverview = MakeState<{
+  activeFlow: Flow.Overview;
+  activeDrawerStep: undefined;
+  draftPortfolio: undefined;
+  pendingSelectedPortfolio: undefined;
+  viewedStakePool: undefined;
+}>;
+
+export type StateCurrentPoolDetails = MakeState<{
+  activeDrawerStep: DrawerDefaultStep.PoolDetails;
+  activeFlow: Flow.CurrentPoolDetails;
+  draftPortfolio: undefined;
+  pendingSelectedPortfolio: undefined;
+  viewedStakePool: StakePoolWithLogo;
+}>;
+
+export type StatePortfolioManagement = MakeState<{
+  activeDrawerStep: DrawerManagementStep;
+  activeFlow: Flow.PortfolioManagement;
+  draftPortfolio: DraftPortfolioStakePool[];
+  pendingSelectedPortfolio: undefined;
+  viewedStakePool: undefined;
+}>;
+
+export type StateBrowsePools = MakeState<{
+  activeFlow: Flow.BrowsePools;
+  activeDrawerStep: undefined;
+  draftPortfolio: undefined;
+  pendingSelectedPortfolio: undefined;
+  viewedStakePool: undefined;
+}>;
+
+export type StatePoolDetails = MakeState<{
+  activeDrawerStep: DrawerDefaultStep.PoolDetails;
+  activeFlow: Flow.PoolDetails;
+  draftPortfolio: undefined;
+  pendingSelectedPortfolio: undefined;
+  viewedStakePool: StakePoolWithLogo;
+}>;
+
+export type StateNewPortfolio = MakeState<{
+  activeDrawerStep: DrawerManagementStep;
+  activeFlow: Flow.NewPortfolio;
+  draftPortfolio: DraftPortfolioStakePool[];
+  pendingSelectedPortfolio: undefined;
+  viewedStakePool: undefined;
+}>;
+
+export type StateChangingPreferences = MakeState<{
+  activeDrawerStep: undefined;
+  activeFlow: Flow.ChangingPreferences;
+  draftPortfolio: undefined;
+  pendingSelectedPortfolio: DraftPortfolioStakePool[];
+  viewedStakePool: undefined;
+}>;
+
+export type State =
+  | StateOverview
+  | StateCurrentPoolDetails
+  | StatePortfolioManagement
+  | StateBrowsePools
+  | StatePoolDetails
+  | StateNewPortfolio
+  | StateChangingPreferences;
+
 export type ExecuteCommand = <C extends Command>(command: C) => void;
 
-export type Handler<C extends Command = any> = (params: {
-  command: C;
-  executeCommand: ExecuteCommand;
-  state: State;
-}) => void;
+export type Handler<
+  C extends Command = any,
+  CurrentState extends State = any,
+  TargetState extends State = any
+> = (params: { command: C; executeCommand: ExecuteCommand; state: CurrentState }) => TargetState;

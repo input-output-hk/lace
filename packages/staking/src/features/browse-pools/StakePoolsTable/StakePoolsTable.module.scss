@@ -1,0 +1,10 @@
+@import '../../../../../common/src/ui/styles/theme.scss';
+@import '../../../../../common/src/ui/styles/abstracts/typography';
+
+.stakePoolsTable {
+  @media screen and (min-width: $breakpoint-popup) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

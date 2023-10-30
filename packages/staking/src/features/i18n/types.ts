@@ -123,10 +123,18 @@ type KeysStructure = {
     preferences: {
       selectedStakePools: '';
       addPoolButton: '';
-      stakeValue: '';
       pickMorePools: '';
       confirmButton: '';
       rebalanceButton: '';
+      ctaButtonTooltip: {
+        zeroPercentageSliderError: '';
+        invalidAllocation: '';
+      };
+      poolDetails: {
+        savedRatio: '';
+        actualRatio: '';
+        actualStake: '';
+      };
     };
   };
   modals: {
@@ -154,10 +162,10 @@ type KeysStructure = {
       };
       statuses: {
         multiDelegation: '';
-        overStaked: '';
-        ready: '';
+        overAllocated: '';
+        noSelection: '';
         simpleDelegation: '';
-        underStaked: '';
+        underAllocated: '';
       };
     };
     banners: {

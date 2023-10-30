@@ -10,11 +10,14 @@ import { ExpandButton } from '@components/ExpandButton';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { NetworkPill } from '@components/NetworkPill';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const MainHeader = (): React.ReactElement => {
   const { t } = useTranslation();
   const backgroundServices = useBackgroundServiceAPIContext();
   const location = useLocation();
+  const analytics = useAnalyticsContext();
 
   const locationBrowserSection = {
     [walletRoutePaths.assets]: BrowserViewSections.HOME,
@@ -28,7 +31,12 @@ export const MainHeader = (): React.ReactElement => {
   return (
     <div className={styles.header} data-testid="header-container">
       <div className={styles.content}>
-        <Link className={styles.linkLogo} to={walletRoutePaths.assets} data-testid="header-logo">
+        <Link
+          className={styles.linkLogo}
+          to={walletRoutePaths.assets}
+          data-testid="header-logo"
+          onClick={() => analytics.sendEventToPostHog(PostHogAction.WalletLaceClick)}
+        >
           <LaceLogoMark className={styles.logo} />
           <NetworkPill />
         </Link>

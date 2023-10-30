@@ -17,9 +17,9 @@ class OnboardingWalletNamePageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeWalletNamePage() {
+    await this.assertSeeWalletNameInput();
     await this.assertSeeStepTitle(await t('core.walletSetupRegisterStep.title'));
     await this.assertSeeStepSubtitle(await t('core.walletSetupRegisterStep.description'));
-    await this.assertSeeWalletNameInput();
 
     await this.assertSeeBackButton();
     await this.assertSeeNextButton();

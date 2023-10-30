@@ -3,6 +3,7 @@ Feature: Collateral - popup view
 
   Background:
     Given Wallet is synced
+    And I reclaim collateral (if active) in popup mode
 
   @LW-5523
   Scenario: Popup View - Settings -  Add/Reclaim Collateral

@@ -34,16 +34,16 @@ const canadaStakes: StakePool = {
 
 const noMetadataPool1: StakePool = {
   name: '-',
-  ticker: '',
-  information: '',
+  ticker: '-',
+  information: '-',
   poolId: 'pool1z7kuc2r7jgfmvuw0fazqzs8phcgfl64kmdmcsq7z440v578ekw8',
   owners: ['stake_test1urja3qejr8u0gdl5lpq9mcqzqjgdl9duyqy850wd4w3flgqv7mcrs']
 };
 
 const noMetadataPool2: StakePool = {
   name: '-',
-  ticker: '',
-  information: '',
+  ticker: '-',
+  information: '-',
   poolId: 'pool1z063uemr7k9zzg95ymz0gfqnfv5k58et8xrnk6ynfyqdgjjw0e7',
   owners: ['stake_test1ur97646x6f523xx9k89d6tt0c2td3pfvczw903zu2qa8syqal0s9h']
 };

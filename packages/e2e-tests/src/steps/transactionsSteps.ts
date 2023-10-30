@@ -107,6 +107,14 @@ When(/^I click on a transaction and click on both dropdowns$/, async () => {
   //  DO NOTHING - COVERED IN NEXT STEP TO CHECK ALL TRANSACTIONS
 });
 
+When(/^I click on inputs dropdowns$/, async () => {
+  TransactionDetailsPage.clickInputsDropdown();
+});
+
+When(/^I click on outputs dropdowns$/, async () => {
+  TransactionDetailsPage.clickOutputsDropdown();
+});
+
 Then(
   /^all inputs and outputs of the transactions are displayed in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {

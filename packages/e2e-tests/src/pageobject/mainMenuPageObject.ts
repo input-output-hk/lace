@@ -32,6 +32,8 @@ class MainMenuPageObject {
       case 'Settings':
         await menuHeaderPageObject.openSettings();
         break;
+      default:
+        throw new Error(`Unsupported targetPage: ${targetPage}`);
     }
   }
 }

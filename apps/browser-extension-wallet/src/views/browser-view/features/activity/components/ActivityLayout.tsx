@@ -17,7 +17,8 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 
@@ -32,6 +33,7 @@ export const ActivityLayout = (): ReactElement => {
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
   const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
   const total = useObservable(inMemoryWallet.balance.utxo.total$);
@@ -88,7 +90,13 @@ export const ActivityLayout = (): ReactElement => {
           visible={!!transactionDetail}
           onClose={resetTransactionState}
           navigation={
-            <DrawerNavigation title={t('transactions.detail.title')} onCloseIconClick={resetTransactionState} />
+            <DrawerNavigation
+              title={t('transactions.detail.title')}
+              onCloseIconClick={() => {
+                analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailXClick);
+                resetTransactionState();
+              }}
+            />
           }
         >
           {transactionDetail && priceResult && <TransactionDetail price={priceResult} />}

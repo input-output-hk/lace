@@ -77,16 +77,6 @@ export const v0_6_0: Migration = {
 
         // Generate keyAgentsDataByChain and save it in background storage
         newKeyAgentsByChain = {
-          LegacyTestnet:
-            keyAgentStoredChainName === 'LegacyTestnet'
-              ? { keyAgentData: newKeyAgentData }
-              : {
-                  keyAgentData: {
-                    ...newKeyAgentData,
-                    chainId: Wallet.Cardano.ChainIds.LegacyTestnet,
-                    knownAddresses: []
-                  }
-                },
           Preprod:
             keyAgentStoredChainName === 'Preprod'
               ? { keyAgentData: newKeyAgentData }
@@ -98,6 +88,12 @@ export const v0_6_0: Migration = {
               ? { keyAgentData: newKeyAgentData }
               : {
                   keyAgentData: { ...newKeyAgentData, chainId: Wallet.Cardano.ChainIds.Preview, knownAddresses: [] }
+                },
+          Sanchonet:
+            keyAgentStoredChainName === 'Sanchonet'
+              ? { keyAgentData: newKeyAgentData }
+              : {
+                  keyAgentData: { ...newKeyAgentData, chainId: Wallet.Cardano.ChainIds.Sanchonet, knownAddresses: [] }
                 },
           Mainnet:
             keyAgentStoredChainName === 'Mainnet'

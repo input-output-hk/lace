@@ -120,6 +120,13 @@ class SettingsExtendedPageObject {
     await this.clickOnRemoveWallet();
     await Modal.confirmButton.click();
   };
+
+  setExtensionTheme = async (mode: 'light' | 'dark') => {
+    if (mode !== ((await SettingsPage.themeSwitch.getAttribute('aria-checked')) === 'true' ? 'light' : 'dark')) {
+      await SettingsPage.themeSwitch.waitForClickable();
+      await SettingsPage.themeSwitch.click();
+    }
+  };
 }
 
 export default new SettingsExtendedPageObject();

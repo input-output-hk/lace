@@ -85,7 +85,12 @@ export const Banner = ({
         </div>
         {!!onButtonClick && (
           <div className={cn(styles.buttonContainer)}>
-            {buttonMessage && <Button onClick={onButtonClick}> {buttonMessage} </Button>}
+            {buttonMessage && (
+              <Button data-testid="banner-button" onClick={onButtonClick}>
+                {' '}
+                {buttonMessage}{' '}
+              </Button>
+            )}
           </div>
         )}
         {!!onBannerClick && (

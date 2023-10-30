@@ -220,12 +220,12 @@ Feature: Onboarding - Create wallet
       | 24        |
 
   @LW-3213
-  Scenario Outline: Create Wallet - Mnemonic verification - clear one fields - next disabled - <init_page>
+  Scenario Outline: Create Wallet - Mnemonic verification - clear one of fields - next disabled - <init_page>
     Given I click "Create" button on wallet setup page
     And I am on "Mnemonic verification" page with words <init_page> of 24
     When I fill passphrase fields using 24 words mnemonic on <init_page>/24 page
     Then "Next" button is enabled during onboarding process
-    And I change one random field
+    And I clear one random field
     Then "Next" button is disabled during onboarding process
     Examples:
       | init_page |
@@ -398,3 +398,27 @@ Feature: Onboarding - Create wallet
       | mode  |
       | dark  |
       | light |
+
+  @LW-8500 @Pending
+  # Bug: LW-8890
+  Scenario: Create Wallet - Mnemonic verification - incorrect word
+    Given I click "Create" button on wallet setup page
+    And I am on "Mnemonic verification" page with words 8 of 24
+    When I fill passphrase fields using 24 words mnemonic on 8/24 page
+    And I change one random field
+    Then I see incorrect passphrase error displayed
+    And "Next" button is disabled during onboarding process
+    When I restore previously changed mnemonic word
+    Then I do not see incorrect passphrase error displayed
+    And "Next" button is enabled during onboarding process
+
+  @LW-8501
+  Scenario: Create Wallet - Mnemonic verification - incorrect word order
+    Given I click "Create" button on wallet setup page
+    And I am on "Mnemonic verification" page with words 8 of 24
+    And I fill passphrase fields using 24 words mnemonic in incorrect order on 8/24 page
+    Then I see incorrect passphrase error displayed
+    And "Next" button is disabled during onboarding process
+    When I fill passphrase fields using 24 words mnemonic on 8/24 page
+    Then I do not see incorrect passphrase error displayed
+    And "Next" button is enabled during onboarding process

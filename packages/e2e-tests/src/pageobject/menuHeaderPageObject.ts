@@ -48,6 +48,14 @@ class MenuHeaderPageObject {
     await MenuHeader.menuSettingsButton.click();
   }
 
+  async clickAddressBookOption() {
+    await MenuHeader.menuAddressBookButton.click();
+  }
+
+  async clickLockWalletOption() {
+    await MenuHeader.menuLockButton.click();
+  }
+
   async setExtensionTheme(mode: 'light' | 'dark') {
     if (mode !== ((await MenuHeader.menuThemeSwitcher.getAttribute('aria-checked')) === 'true' ? 'light' : 'dark')) {
       await MenuHeader.menuThemeSwitcher.waitForClickable();

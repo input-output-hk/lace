@@ -59,6 +59,18 @@ class AddressBookPageAssert {
     }
   };
 
+  assertSeeHandleWarningForAddress = async (address: string) => {
+    const addressRow = await AddressBookPage.getAddressRowByName(address);
+    await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_WARNING_ICON).waitForDisplayed();
+  };
+
+  assertSeeHandleWarningTooltip = async () => {
+    await AddressBookPage.warningTooltip.waitForDisplayed();
+    expect(await AddressBookPage.warningTooltip.getText()).to.equal(
+      await t('package.core.addressBook.addressHandleTooltip', 'core')
+    );
+  };
+
   assertSeeEachAddressRow = async () => {
     const rows = await AddressBookPage.getAddressListRows();
     for (const row of rows) {

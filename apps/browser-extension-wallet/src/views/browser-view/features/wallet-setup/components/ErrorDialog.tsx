@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
-type ErrorCode = 'common' | 'notDetected';
+export type HWErrorCode = 'common' | 'notDetectedLedger' | 'notDetectedTrezor';
 
 interface ErrorDialogProps {
   visible: boolean;
   onRetry: () => void;
-  errorCode: ErrorCode;
+  errorCode: HWErrorCode;
 }
 
 export const ErrorDialog = ({ visible, onRetry, errorCode = 'common' }: ErrorDialogProps): React.ReactElement => {
@@ -23,9 +23,14 @@ export const ErrorDialog = ({ visible, onRetry, errorCode = 'common' }: ErrorDia
       description: t('browserView.onboarding.commonError.description'),
       confirm: t('browserView.onboarding.commonError.ok')
     },
-    notDetected: {
+    notDetectedLedger: {
       title: t('browserView.onboarding.notDetectedError.title'),
       description: t('browserView.onboarding.notDetectedError.description'),
+      confirm: t('browserView.onboarding.notDetectedError.agree')
+    },
+    notDetectedTrezor: {
+      title: t('browserView.onboarding.notDetectedError.title'),
+      description: t('browserView.onboarding.notDetectedError.trezorDescription'),
       confirm: t('browserView.onboarding.notDetectedError.agree')
     }
   };

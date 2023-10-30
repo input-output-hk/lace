@@ -10,6 +10,8 @@ import laceLogo from '@assets/branding/lace-logo.svg';
 import laceLogoDarkMode from '@assets/branding/lace-logo-dark-mode.svg';
 import LaceLogoMark from '@assets/branding/lace-logo-mark.component.svg';
 import styles from './LeftSidePanel.module.scss';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export interface VerticalNavigationBarProps {
   theme: string;
@@ -22,10 +24,14 @@ const logoExtended: Record<string, string> = {
 
 export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.ReactElement => {
   const history = useHistory();
+  const analytics = useAnalyticsContext();
   const isNarrowWindow = useIsSmallerScreenWidthThan(BREAKPOINT_XSMALL);
   const [shouldLogoHaveNoShadow, setShouldLogoHaveNoShadow] = useState(false);
 
-  const handleLogoRedirection = () => history.push(walletRoutePaths.assets);
+  const handleLogoRedirection = () => {
+    history.push(walletRoutePaths.assets);
+    analytics.sendEventToPostHog(PostHogAction.WalletLaceClick);
+  };
   const handleLogoMouseEnter = () => setShouldLogoHaveNoShadow(true);
   const handleLogoMouseLeave = () => setShouldLogoHaveNoShadow(false);
 

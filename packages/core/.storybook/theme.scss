@@ -1,0 +1,36 @@
+@import '../../common/src/ui/styles/abstracts/mixins';
+@import '../../common/src/ui/styles/themes/dark';
+@import '../../common/src/ui/styles/themes/light';
+
+@mixin dark-theme {
+  /*
+    in case the theme provider is not being used, this media query allows us to use the theme set on the user system
+    */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      @include theme-custom-properties($dark-theme);
+    }
+  }
+
+  html[data-theme='dark'] {
+    @include theme-custom-properties($dark-theme);
+  }
+}
+
+@mixin light-theme {
+  /*
+    in case the theme provider is not being used, this media query allows us to use the theme set on the user system
+    */
+  @media (prefers-color-scheme: light) {
+    :root {
+      @include theme-custom-properties($light-theme);
+    }
+  }
+
+  html[data-theme='light'] {
+    @include theme-custom-properties($light-theme);
+  }
+}
+
+@include dark-theme;
+@include light-theme;

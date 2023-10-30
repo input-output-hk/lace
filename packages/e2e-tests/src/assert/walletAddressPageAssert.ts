@@ -66,12 +66,17 @@ class WalletAddressPageAssert {
     testContext.save('displayedAdaHandleImages', handleImageSrcs);
   }
 
-  async assertSeeAdaHandleAddressCardWithName(handleName: string) {
+  async assertSeeAdaHandleAddressCardWithName(handleName: string, shouldSee: boolean) {
+    await WalletAddressPage.addressCard.waitForClickable();
     const handleCard = await WalletAddressPage.getHandleAddressCard(handleName);
-    await handleCard.waitForDisplayed();
-    await handleCard.$(WalletAddressPage.HANDLE_IMAGE).waitForDisplayed();
-    await handleCard.$(WalletAddressPage.HANDLE_NAME).waitForDisplayed();
-    await handleCard.$(WalletAddressPage.HANDLE_SYMBOL).waitForDisplayed();
+    if (shouldSee) {
+      await handleCard.waitForDisplayed();
+      await handleCard.$(WalletAddressPage.HANDLE_IMAGE).waitForDisplayed();
+      await handleCard.$(WalletAddressPage.HANDLE_NAME).waitForDisplayed();
+      await handleCard.$(WalletAddressPage.HANDLE_SYMBOL).waitForDisplayed();
+    } else {
+      expect(handleCard).to.be.undefined;
+    }
   }
 
   async assertSeeTheShortestHandleFirst() {
@@ -83,7 +88,7 @@ class WalletAddressPageAssert {
   }
 
   async assertSeeAdaHandleCardWithCustomImage() {
-    await this.assertSeeAdaHandleAddressCardWithName(Asset.ADA_HANDLE_3.name);
+    await this.assertSeeAdaHandleAddressCardWithName(Asset.ADA_HANDLE_3.name, true);
     const handleCard = await WalletAddressPage.getHandleAddressCard(Asset.ADA_HANDLE_3.name);
     await adaHandleAssert.assertSeeCustomImage(await handleCard.$(WalletAddressPage.HANDLE_IMAGE).$('img'));
   }

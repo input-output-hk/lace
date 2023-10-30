@@ -78,7 +78,7 @@ class TransactionsDetailsAssert {
     }
     if (expectedTransactionDetails.poolTicker) {
       expect(await TransactionDetailsPage.transactionDetailsStakepoolTicker.getText()).to.equal(
-        expectedTransactionDetails.poolTicker
+        `(${expectedTransactionDetails.poolTicker})`
       );
     }
     if (expectedTransactionDetails.poolID) {

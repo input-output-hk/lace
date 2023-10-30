@@ -175,6 +175,14 @@ class TransactionDetailsPage extends CommonDrawerElements {
   async closeTransactionDetails(mode: 'extended' | 'popup'): Promise<void> {
     mode === 'popup' ? await this.clickHeaderBackButton() : await this.clickHeaderCloseButton();
   }
+
+  async clickInputsDropdown(): Promise<void> {
+    await this.transactionDetailsInputsDropdown.click();
+  }
+
+  async clickOutputsDropdown(): Promise<void> {
+    await this.transactionDetailsOutputsDropdown.click();
+  }
 }
 
 export default new TransactionDetailsPage();

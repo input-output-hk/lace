@@ -29,6 +29,11 @@ export const SettingsHelp = ({ popupView = false }: SettingsHelpProps): React.Re
     await analytics.sendEventToPostHog(event);
   };
 
+  const handleFaqClick = async () => {
+    await analytics.sendEventToPostHog(PostHogAction.SettingsFaqsClick);
+    openExternalLink(process.env.FAQ_URL);
+  };
+
   return (
     <>
       <SupportDrawer
@@ -43,7 +48,7 @@ export const SettingsHelp = ({ popupView = false }: SettingsHelpProps): React.Re
         </Title>
         <SettingsLink
           description={t('browserView.settings.help.faqs.description')}
-          onClick={() => openExternalLink(process.env.FAQ_URL)}
+          onClick={handleFaqClick}
           data-testid="settings-support-faqs-link"
         >
           {t('browserView.settings.help.faqs.title')}

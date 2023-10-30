@@ -17,6 +17,14 @@ export type AddStakePools = {
   type: 'AddStakePools';
 };
 
+export type UpdateStakePercentage = {
+  type: 'UpdateStakePercentage';
+  data: {
+    id: Wallet.Cardano.PoolIdHex;
+    newSliderPercentage: number;
+  };
+};
+
 export type RemoveStakePool = {
   type: 'RemoveStakePool';
   data: Wallet.Cardano.PoolIdHex;
@@ -102,7 +110,12 @@ export type CurrentPoolDetailsCommand = CancelDrawer;
 
 export type PoolDetailsCommand = CancelDrawer | SelectPoolFromDetails | UnselectPoolFromDetails | BeginSingleStaking;
 
-export type PortfolioManagementPreferencesCommand = CancelDrawer | DrawerContinue | AddStakePools | RemoveStakePool;
+export type PortfolioManagementPreferencesCommand =
+  | CancelDrawer
+  | DrawerContinue
+  | AddStakePools
+  | RemoveStakePool
+  | UpdateStakePercentage;
 
 export type PortfolioManagementConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
@@ -114,13 +127,18 @@ export type PortfolioManagementSuccessCommand = CancelDrawer;
 
 export type ChangingPreferencesCommand = DiscardChangingPreferences | ConfirmChangingPreferences;
 
-export type NewPortfolioPreferencesCommand = CancelDrawer | DrawerContinue | AddStakePools | RemoveStakePool;
+export type NewPortfolioPreferencesCommand =
+  | CancelDrawer
+  | DrawerContinue
+  | AddStakePools
+  | RemoveStakePool
+  | UpdateStakePercentage;
 
 export type NewPortfolioConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
 export type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue;
+export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
 
 export type NewPortfolioSuccessCommand = CancelDrawer;
 

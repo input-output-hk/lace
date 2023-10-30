@@ -12,7 +12,8 @@ import { walletRoutePaths } from '@routes';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useWalletActivities } from '@hooks/useWalletActivities';
@@ -31,6 +32,7 @@ export const Activity = (): React.ReactElement => {
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_POPUP
     });
+    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
   const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
 
@@ -47,6 +49,7 @@ export const Activity = (): React.ReactElement => {
           <DrawerNavigation
             onArrowIconClick={resetTransactionState}
             onCloseIconClick={() => {
+              analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailXClick);
               resetTransactionState();
               redirectToAssets();
             }}

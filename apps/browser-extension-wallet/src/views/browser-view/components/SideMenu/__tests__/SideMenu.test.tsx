@@ -7,7 +7,7 @@ import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { SideMenu } from '../SideMenu';
 import { AnalyticsProvider } from '@providers';
-import { mockKeyAgentDataTestnet, mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
+import { mockKeyAgentDataTestnet, mockWalletInfoTestnet, postHogClientMocks } from '@src/utils/mocks/test-helpers';
 
 jest.mock('../../../../../stores', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +17,12 @@ jest.mock('../../../../../stores', () => ({
     walletInfo: mockWalletInfoTestnet,
     keyAgentData: mockKeyAgentDataTestnet
   })
+}));
+
+jest.mock('@providers/PostHogClientProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/PostHogClientProvider'),
+  usePostHogClientContext: () => postHogClientMocks
 }));
 
 describe('Testing SideMenu component', () => {

@@ -11,7 +11,7 @@ class OnboardingMnemonicInfoPageAssert extends OnboardingCommonAssert {
     )}`;
     await this.assertSeeStepSubtitle(expectedStepSubtitle);
     await this.assertSeeMnemonicInfoPageContentLink();
-    await MnemonicInfoPage.mnemonicImage.waitForDisplayed();
+    await MnemonicInfoPage.mnemonicVideoFrame.waitForDisplayed();
     await this.assertSeeBackButton();
     await this.assertSeeNextButton();
     await this.assertSeeLegalLinks();

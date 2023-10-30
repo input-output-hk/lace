@@ -46,3 +46,28 @@
   margin-top: size_unit(2) !important;
   color: var(--color-pink, #ff5470);
 }
+
+.videoContainer {
+  position: relative;
+  height: 272px;
+  border-radius: 16px;
+  border: 1px solid #efefef;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  border: none;
+}
+
+.overlay {
+  z-index: 1;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}

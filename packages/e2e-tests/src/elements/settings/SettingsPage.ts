@@ -19,6 +19,7 @@ class SettingsPage {
   private readonly DAPPS_LINK_TEST_ID = 'settings-wallet-authorized-dapps-link';
   private readonly YOUR_KEYS_LINK_TEST_ID = 'settings-wallet-general-link';
   private readonly COLLATERAL_LINK_TEST_ID = 'settings-wallet-collateral-link';
+  private readonly THEME_SWITCH_TEST_ID = '[data-testid="switch"]';
   private readonly SHOW_RECOVERY_PHRASE_LINK_TEST_ID = 'settings-show-recovery-phrase-link';
   private readonly PASSPHRASE_VERIFICATION_LINK_TEST_ID = 'settings-passphrase-verification-link';
   private readonly ANALYTICS_LINK_TEST_ID = 'settings-analytics-section';
@@ -119,6 +120,10 @@ class SettingsPage {
 
   get analyticsSwitch() {
     return $(this.ANALYTICS_SWITCH_XPATH);
+  }
+
+  get themeSwitch() {
+    return $(this.THEME_SWITCH_TEST_ID);
   }
 
   securitySettingsElements(): ChainablePromiseArray<ElementArray> {

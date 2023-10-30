@@ -44,9 +44,12 @@ class WalletAddressPage extends CommonDrawerElements {
   }
 
   async getHandleAddressCard(handleName: string): Promise<WebdriverIO.Element> {
-    return (await this.addressCards.find(
-      async (item) => (await item.$(this.HANDLE_NAME).getText()) === handleName
-    )) as WebdriverIO.Element;
+    if ((await this.handleNames.length) > 0) {
+      return (await this.addressCards.find(
+        async (item) => (await item.$(this.HANDLE_NAME).getText()) === handleName
+      )) as WebdriverIO.Element;
+    }
+    return undefined as unknown as WebdriverIO.Element;
   }
 
   async clickCopyButtonForHandle(handleName: string) {

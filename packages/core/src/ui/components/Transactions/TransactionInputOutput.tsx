@@ -30,6 +30,7 @@ export interface TransactionInputOutputProps {
   translations: TranslationsFor<'address' | 'sent'>;
   coinSymbol: string;
   withSeparatorLine?: boolean;
+  sendAnalytics?: () => void;
 }
 
 export const TransactionInputOutput = ({
@@ -40,7 +41,8 @@ export const TransactionInputOutput = ({
   tooltipContent,
   translations,
   coinSymbol,
-  withSeparatorLine
+  withSeparatorLine,
+  sendAnalytics
 }: TransactionInputOutputProps): React.ReactElement => {
   const [isVisible, setIsVisible] = useState<boolean>();
 
@@ -62,7 +64,10 @@ export const TransactionInputOutput = ({
         <Button
           variant="outlined"
           color="secondary"
-          onClick={() => setIsVisible((visible) => !visible)}
+          onClick={() => {
+            !isVisible && sendAnalytics && sendAnalytics();
+            setIsVisible((visible) => !visible);
+          }}
           data-testid={'tx-addr-list_toggle'}
           icon={Icon}
           className={styles.arrowBtn}

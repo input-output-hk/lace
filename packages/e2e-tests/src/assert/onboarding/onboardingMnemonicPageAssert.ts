@@ -7,11 +7,11 @@ import { browser } from '@wdio/globals';
 
 class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
   async assertSeeMnemonicWords(expectedNumber: number) {
-    await expect(await OnboardingMnemonicPage.mnemonicWords.length).to.equal(expectedNumber);
+    expect(await OnboardingMnemonicPage.mnemonicWords.length).to.equal(expectedNumber);
   }
 
   async assertSeeMnemonicInputs(expectedNumber: number) {
-    await expect(await OnboardingMnemonicPage.mnemonicInputs.length).to.equal(expectedNumber);
+    expect(await OnboardingMnemonicPage.mnemonicInputs.length).to.equal(expectedNumber);
   }
 
   async assertSeeMnemonicInputWithDisabledAutocomplete() {
@@ -33,17 +33,17 @@ class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
   async assertSeeMnemonicAutocompleteOptions(expectedOptions: string[]) {
     await OnboardingMnemonicPage.mnemonicAutocompleteDropdown.waitForDisplayed();
     const actualOptions = await OnboardingMnemonicPage.getMnemonicAutocompleteOptionsValues();
-    await expect(actualOptions).to.deep.equal(expectedOptions);
+    expect(actualOptions).to.deep.equal(expectedOptions);
   }
 
   async assertNotSeeMnemonicAutocompleteOptions() {
-    await OnboardingMnemonicPage.mnemonicAutocompleteDropdown.waitForDisplayed({ timeout: 1000 });
+    await OnboardingMnemonicPage.mnemonicAutocompleteDropdown.waitForDisplayed({ reverse: true, timeout: 1000 });
   }
 
   async assertSeeFooterValue(expectedFirstValue: number, expectedSecondValue = 24) {
     const expectedString = `${expectedFirstValue} / ${expectedSecondValue}`;
     await OnboardingMnemonicPage.stepInfoText.waitForDisplayed();
-    await expect(await OnboardingMnemonicPage.stepInfoText.getText()).to.equal(expectedString);
+    expect(await OnboardingMnemonicPage.stepInfoText.getText()).to.equal(expectedString);
   }
 
   async assertMnemonicWordsAreTheSame(
@@ -51,14 +51,14 @@ class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
     mnemonicWordsReference: string[],
     shouldBeEqual: boolean
   ) {
-    await (shouldBeEqual
+    shouldBeEqual
       ? expect(mnemonicWords).to.deep.equal(mnemonicWordsReference)
-      : expect(mnemonicWords).to.not.deep.equal(mnemonicWordsReference));
+      : expect(mnemonicWords).to.not.deep.equal(mnemonicWordsReference);
   }
 
   async assertSeeFindOutMoreLink(): Promise<void> {
     await OnboardingMnemonicPage.findOutMoreLink.waitForDisplayed();
-    await expect(await OnboardingMnemonicPage.findOutMoreLink.getText()).to.equal(
+    expect(await OnboardingMnemonicPage.findOutMoreLink.getText()).to.equal(
       await t('core.walletSetupMnemonicStep.passphraseInfo3')
     );
     const expectedHref = 'https://www.lace.io/faq?question=what-happens-if-i-lose-my-recovery-phrase';
@@ -113,10 +113,12 @@ class OnboardingMnemonicPageAssert extends OnboardingCommonAssert {
     await this.assertSeeHelpAndSupportButton();
   }
 
-  async assertSeeMnemonicError() {
-    await OnboardingMnemonicPage.errorMessage.waitForDisplayed();
-    const actualErrorText = await OnboardingMnemonicPage.errorMessage.getText();
-    expect(actualErrorText).to.equal(await t('core.walletSetupMnemonicStep.passphraseError'));
+  async assertSeeMnemonicError(shouldBeDisplayed: boolean) {
+    await OnboardingMnemonicPage.errorMessage.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      const actualErrorText = await OnboardingMnemonicPage.errorMessage.getText();
+      expect(actualErrorText).to.equal(await t('core.walletSetupMnemonicStep.passphraseError'));
+    }
   }
 }
 

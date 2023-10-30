@@ -8,6 +8,7 @@ import ErrorIcon from '@src/assets/icons/address-error-icon.component.svg';
 import styles from '../SettingsLayout.module.scss';
 import { useCurrencyStore } from '@providers';
 import { CARDANO_COIN_SYMBOL } from '@src/utils/constants';
+import { currencyCode } from '@providers/currency/constants';
 
 const { Text } = Typography;
 
@@ -15,9 +16,15 @@ interface CurrencyDrawerProps {
   visible: boolean;
   onClose: () => void;
   popupView?: boolean;
+  sendCurrencyChangeEvent?: (currency: currencyCode) => void;
 }
 
-export const CurrencyDrawer = ({ visible, onClose, popupView = false }: CurrencyDrawerProps): React.ReactElement => {
+export const CurrencyDrawer = ({
+  visible,
+  onClose,
+  popupView = false,
+  sendCurrencyChangeEvent
+}: CurrencyDrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const { fiatCurrency, supportedCurrencies, setFiatCurrency } = useCurrencyStore();
 
@@ -29,6 +36,9 @@ export const CurrencyDrawer = ({ visible, onClose, popupView = false }: Currency
         withProgressBar: true,
         icon: SwithIcon
       });
+      if (sendCurrencyChangeEvent) {
+        sendCurrencyChangeEvent(event.target.value);
+      }
     } catch (error) {
       console.error('Error updating currency', error);
       toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });

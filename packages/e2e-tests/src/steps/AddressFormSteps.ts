@@ -90,6 +90,6 @@ Then(/^Green tick icon is displayed next to ADA handle$/, async () => {
   await AddressFormAssert.assertSeeIconForValidAdaHandle(true);
 });
 
-Then(/^"Handle not found" error is displayed$/, async () => {
+Then(/^"Handle not found" error is displayed in address book form$/, async () => {
   await AddressFormAssert.assertSeeAddressError(true, await t('general.errors.incorrectHandle'));
 });

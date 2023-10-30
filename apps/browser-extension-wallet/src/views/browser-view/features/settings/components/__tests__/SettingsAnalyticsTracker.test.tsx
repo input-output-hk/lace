@@ -13,6 +13,7 @@ import {
 } from '@providers';
 import i18n from '@lib/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 
 jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService'),
@@ -24,8 +25,8 @@ jest.mock('@providers/AnalyticsProvider/matomo/MatomoClient', () => ({
   MatomoClient: jest.fn().mockReturnValue(matomoClientMocks)
 }));
 
-jest.mock('@providers/AnalyticsProvider/postHog/PostHogClient', () => ({
-  ...jest.requireActual<any>('@providers/AnalyticsProvider/postHog/PostHogClient'),
+jest.mock('@providers/PostHogClientProvider/client', () => ({
+  ...jest.requireActual<any>('@providers/PostHogClientProvider/client'),
   PostHogClient: jest.fn().mockReturnValue(postHogClientMocks)
 }));
 
@@ -49,13 +50,15 @@ const backgroundService = {
 
 const SettingsSecurityComponentTest = () => (
   <BackgroundServiceAPIProvider value={backgroundService}>
-    <AppSettingsProvider>
-      <I18nextProvider i18n={i18n}>
-        <AnalyticsProvider>
-          <SettingsSecurity />
-        </AnalyticsProvider>
-      </I18nextProvider>
-    </AppSettingsProvider>
+    <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+      <AppSettingsProvider>
+        <I18nextProvider i18n={i18n}>
+          <AnalyticsProvider>
+            <SettingsSecurity />
+          </AnalyticsProvider>
+        </I18nextProvider>
+      </AppSettingsProvider>
+    </PostHogClientProvider>
   </BackgroundServiceAPIProvider>
 );
 

@@ -70,6 +70,7 @@ export enum PostHogAction {
   OnboardingCreateEnterPassphrase09NextClick = 'onboarding | new wallet | enter passphrase #09 | next | click',
   OnboardingCreateEnterPassphrase17NextClick = 'onboarding | new wallet | enter passphrase #17 | next | click',
   OnboardingCreateWalletNamePasswordNextClick = 'onboarding | new wallet | wallet name & password | next | click',
+  OnboardingCreatePassphraseIntroPlayVideoClick = 'onboarding | new wallet | passphrase intro | play video | click',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',
@@ -99,6 +100,9 @@ export enum PostHogAction {
   // NFTs Flow
   NFTsClick = 'nft | nfts | click',
   NFTsImageClick = 'nft | nfts | nft image | click',
+  NFTsCreateFolderClick = 'nft | nfts | create folder | click',
+  NFTCreateFolderNameYourFolderNextClick = 'nft | create folder | name your folder | next | click',
+  NFTCreateFolderSelectNftsNextClick = 'nft | create folder | select nfts | next | click',
   // Address book
   AddressBookAddAddressClick = 'address book | add address | click',
   AddressBookAddNewAddressSaveAddressClick = 'address book | add new address | save address | click',
@@ -129,6 +133,7 @@ export enum PostHogAction {
   SettingsNetworkPreviewClick = 'settings | network | preview | click',
   SettingsNetworkPreprodClick = 'settings | network | preprod | click',
   SettingsNetworkMainnetClick = 'settings | network | mainnet | click',
+  SettingsNetworkSanchonetClick = 'settings | network | sanchonet | click',
   SettingsNetworkXClick = 'settings | network | x | click',
   SettingsAuthorizedDappsClick = 'settings | authorized dapps | click',
   SettingsAuthorizedDappsTrashBinIconClick = 'settings | authorized dapps | trash bin icon | click',
@@ -142,6 +147,18 @@ export enum PostHogAction {
   SettingsCollateralConfirmClick = 'settings | collateral | confirm | click',
   SettingsCollateralReclaimCollateralClick = 'settings | collateral | reclaim collateral | click',
   SettingsCollateralXClick = 'settings | collateral | x | click',
+  SettingsCurrencyClick = 'settings | currency | click',
+  SettingsCurrencySelectCurrencyClick = 'settings | currency | select currency | click',
+  SettingsCurrencyXClick = 'settings | currency | x | click',
+  SettingsThemeLightModeClick = 'settings | theme | light mode | click',
+  SettingsThemeDarkModeClick = 'settings | theme | dark mode | click',
+  SettingsShowRecoveryPhraseClick = 'settings | show recovery phrase | click',
+  SettingsShowRecoveryPhraseEnterYourPasswordShowRecoveryPhraseClick = 'settings | show recovery phrase | enter your password | show recovery phrase | click',
+  SettingsShowRecoveryPhraseYourRecoveryPhraseHidePassphraseClick = 'settings | show recovery phrase | Your recovery phrase (keep it secret!) | hide passphrase | click',
+  SettingsShowRecoveryPhraseYourRecoveryPhraseXClick = 'settings | show recovery phrase | Your recovery phrase (keep it secret!) | x | click',
+  SettingsAnalyticsAgreeClick = 'settings | analytics | agree | click',
+  SettingsAnalyticsSkipClick = 'settings | analytics | skip | click',
+  SettingsFaqsClick = 'settings | faqs | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
@@ -164,7 +181,22 @@ export enum PostHogAction {
   UserWalletProfileNetworkPreviewClick = 'user/wallet profile | network | preview | click',
   UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
   UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
+  UserWalletProfileNetworkSanchonetClick = 'user/wallet profile | network | sanchonet | click',
   UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
+  // Lace Logo
+  WalletLaceClick = 'wallet | lace | click',
+  // Tokens
+  TokenTokensClick = 'token | tokens | click',
+  TokenTokensTokenRowClick = 'token | tokens | token row | click',
+  TokenTokenDetailViewAllClick = 'token | token detail | view all | click',
+  TokenTokenDetailXClick = 'token | token detail | x | click',
+  // Activities
+  ActivityActivityClick = 'activity | activity | click',
+  ActivityActivityActivityRowClick = 'activity | activity | activity row | click',
+  ActivityActivityDetailTransactionHashClick = 'activity | activity detail | transaction hash | click',
+  ActivityActivityDetailInputsClick = 'activity | activity detail | inputs | click',
+  ActivityActivityDetailOutputsClick = 'activity | activity detail | outputs | click',
+  ActivityActivityDetailXClick = 'activity | activity detail | x | click',
   // Unlock Wallet
   UnlockWalletWelcomeBackUnlockClick = 'unlock wallet | welcome back! | unlock | click',
   UnlockWalletWelcomeBackForgotPasswordClick = 'unlock wallet | welcome back! | forgot password? | click',
@@ -218,7 +250,8 @@ export type PostHogActionsKeys =
   | 'CONNECT_HW_NEXT_CLICK'
   | 'SELECT_HW_ACCOUNT_NEXT_CLICK'
   | 'DONE_GO_TO_WALLET'
-  | 'WALLET_NAME_PASSWORD_NEXT_CLICK';
+  | 'WALLET_NAME_PASSWORD_NEXT_CLICK'
+  | 'PASSPHRASE_INTRO_PLAY_VIDEO_CLICK';
 export type PostHogOnboardingActionsValueType = Partial<Record<PostHogActionsKeys, PostHogAction>>;
 export type PostHogOnboardingActionsType = Partial<Record<OnboardingFlows, PostHogOnboardingActionsValueType>>;
 export type PostHogPersonProperties = {

@@ -12,6 +12,8 @@ class AddressBookPage {
   public ADDRESS_LIST_ITEM_AVATAR = '[data-testid="address-list-item-avatar"]';
   public ADDRESS_LIST_ITEM_NAME = '[data-testid="address-list-item-name"]';
   public ADDRESS_LIST_ITEM_ADDRESS = '[data-testid="address-list-item-address"]';
+  public ADDRESS_LIST_ITEM_WARNING_ICON = '[data-testid="address-list-item-warning"]';
+  private WARNING_TOOLTIP = 'div.ant-tooltip-inner';
 
   get pageTitle() {
     return $(this.TITLE);
@@ -41,6 +43,10 @@ class AddressBookPage {
     return $(this.ADDRESS_LIST);
   }
 
+  get warningTooltip() {
+    return $(this.WARNING_TOOLTIP);
+  }
+
   getAddressListRows() {
     return this.addressList.$$(this.ADDRESS_LIST_ITEM);
   }
@@ -63,6 +69,11 @@ class AddressBookPage {
     return (await this.getAddressListRows().find(
       async (row) => (await row.$(this.ADDRESS_LIST_ITEM_NAME).getText()) === name
     )) as WebdriverIO.Element;
+  }
+
+  async hoverOverWarningIcon(address: string) {
+    const addressRow = await this.getAddressRowByName(address);
+    await addressRow.$(this.ADDRESS_LIST_ITEM_WARNING_ICON).moveTo();
   }
 }
 

@@ -36,7 +36,7 @@ Feature: DAppConnector - Popup view
     And I click on "Authorized DApps" setting
     And I see test DApp on the Authorized DApps list
     When I de-authorize test DApp in popup mode
-    Then I see DApp removal confirmation modal
+    Then I see DApp removal confirmation window
     When I click "Back" button in DApp removal confirmation modal
     Then I see test DApp on the Authorized DApps list
     When I open test DApp
@@ -51,7 +51,7 @@ Feature: DAppConnector - Popup view
     And I click on "Authorized DApps" setting
     And I see test DApp on the Authorized DApps list
     When I de-authorize test DApp in popup mode
-    Then I see DApp removal confirmation modal
+    Then I see DApp removal confirmation window
     When I click "Disconnect DApp" button in DApp removal confirmation modal
     Then I see "Authorized DApps" section empty state in popup mode
     When I open test DApp

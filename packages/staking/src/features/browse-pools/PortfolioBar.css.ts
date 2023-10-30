@@ -1,4 +1,6 @@
 import { style, sx } from '@lace/ui';
+import { theme } from '../theme';
+const minimumScreenSize = '668px';
 
 export const barContainer = style([
   sx({
@@ -8,6 +10,11 @@ export const barContainer = style([
     right: '$24',
   }),
   {
+    '@media': {
+      [`screen and (max-width: ${minimumScreenSize})`]: {
+        minWidth: theme.spacing.$420,
+      },
+    },
     alignItems: 'center',
     display: 'flex',
     justifyContent: 'space-between',

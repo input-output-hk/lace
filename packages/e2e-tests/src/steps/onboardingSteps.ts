@@ -35,6 +35,7 @@ import testContext from '../utils/testContext';
 import webTester from '../actor/webTester';
 import MainLoader from '../elements/MainLoader';
 import CommonAssert from '../assert/commonAssert';
+import { shuffle } from '../utils/arrayUtils';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -371,6 +372,24 @@ Given(
   }
 );
 
+Given(
+  /^I fill passphrase fields using 24 words mnemonic in incorrect order on (8\/24|16\/24|24\/24) page$/,
+  async (pageNumber: string) => {
+    const shuffledWords = shuffle([...mnemonicWords]);
+    switch (pageNumber) {
+      case '8/24':
+        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 0);
+        break;
+      case '16/24':
+        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 8);
+        break;
+      case '24/24':
+        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 16);
+        break;
+    }
+  }
+);
+
 Given(/^I fill passphrase fields using 12 words mnemonic on (8\/12|12\/12) page$/, async (pageNumber: string) => {
   switch (pageNumber) {
     case '8/12':
@@ -416,7 +435,7 @@ Then(/^I fill saved words (8|16|24) of 24$/, async (pageNumber: string) => {
 });
 
 When(/^I fill mnemonic input with "([^"]*)"$/, async (value: string) => {
-  await OnboardingPageObject.fillMnemonicInput(value);
+  await OnboardingPageObject.fillMnemonicInput(value, 0, false);
 });
 
 When(/^I click on mnemonic input$/, async () => {
@@ -461,6 +480,10 @@ Then(/^I hover over "Next" button$/, async () => {
 
 Then(/^I change one random field$/, async () => {
   await OnboardingPageObject.changeRandomMnemonicField();
+});
+
+Then(/^I clear one random field$/, async () => {
+  await OnboardingPageObject.clearRandomMnemonicField();
 });
 
 Then(/^"Mnemonic info" page is displayed$/, async () => {
@@ -539,8 +562,8 @@ When(
   }
 );
 
-Then(/^I see incorrect passphrase error displayed$/, async () => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicError();
+Then(/^I (do not see|see) incorrect passphrase error displayed$/, async (shouldBeDisplayed: 'do not see' | 'see') => {
+  await OnboardingMnemonicPageAssert.assertSeeMnemonicError(shouldBeDisplayed === 'see');
 });
 
 Then(
@@ -589,4 +612,8 @@ Given(/^I restore a wallet$/, async () => {
 
 Given(/^I see current onboarding page in (light|dark) mode$/, async (mode: 'light' | 'dark') => {
   await CommonAssert.assertSeeThemeMode(mode);
+});
+
+When(/^I restore previously changed mnemonic word$/, async () => {
+  await OnboardingPageObject.restorePreviousMnemonicWord();
 });

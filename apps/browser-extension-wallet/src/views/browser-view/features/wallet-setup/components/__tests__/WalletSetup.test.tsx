@@ -23,11 +23,6 @@ jest.mock('@providers/AnalyticsProvider/matomo/MatomoClient', () => ({
   MatomoClient: jest.fn().mockReturnValue(matomoClientMocks)
 }));
 
-jest.mock('@providers/AnalyticsProvider/postHog/PostHogClient', () => ({
-  ...jest.requireActual<any>('@providers/AnalyticsProvider/postHog/PostHogClient'),
-  PostHogClient: jest.fn().mockReturnValue(postHogClientMocks)
-}));
-
 jest.mock('@providers/AnalyticsProvider/getUserIdService', () => ({
   ...jest.requireActual<any>('@providers/AnalyticsProvider/getUserIdService'),
   getUserIdService: jest.fn().mockReturnValue(userIdServiceMock)
@@ -42,6 +37,20 @@ jest.mock('react-router-dom', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...jest.requireActual<any>('react-router-dom'),
   useRouteMatch: jest.fn().mockReturnValue({ path: '/setup' })
+}));
+
+jest.mock('@providers/ExperimentsProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/ExperimentsProvider'),
+  useExperimentsContext: jest
+    .fn()
+    .mockReturnValue({ getExperimentVariant: jest.fn(), overrideExperimentVariant: jest.fn() })
+}));
+
+jest.mock('@providers/PostHogClientProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/PostHogClientProvider'),
+  usePostHogClientContext: () => postHogClientMocks
 }));
 
 const SetupContainerTest = () => (
