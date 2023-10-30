@@ -2,7 +2,7 @@
 import Icon from '@ant-design/icons';
 import { InputSelectionFailure } from '@cardano-sdk/input-selection';
 import { Wallet } from '@lace/cardano';
-import { Banner, Button, Ellipsis, useObservable } from '@lace/common';
+import { Banner, Button, Ellipsis, PostHogAction, useObservable } from '@lace/common';
 import { RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
 import { Skeleton } from 'antd';
 import cn from 'classnames';
@@ -319,6 +319,7 @@ export const StakePoolConfirmation = (): React.ReactElement => {
 
 export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   const {
     // walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreGetKeyAgentType: getKeyAgentType,
@@ -346,6 +347,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   // }, [delegationTxBuilder, inMemoryWallet]);
 
   const handleConfirmation = useCallback(async () => {
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationStakePoolConfirmationNextClick);
     setIsConfirmingTx(false);
 
     const isPoolsReduced = draftPortfolio && currentPortfolio.length > draftPortfolio?.length;
@@ -374,7 +376,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     //   }
     // }
     return portfolioMutators.executeCommand({ type: 'DrawerContinue' });
-  }, [currentPortfolio, draftPortfolio, portfolioMutators]);
+  }, [analytics, currentPortfolio, draftPortfolio, portfolioMutators]);
 
   const confirmLabel = useMemo(() => {
     if (!isInMemory) {

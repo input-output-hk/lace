@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { getTransactionData } from '../TransactionDetail';
+import { getTransactionData } from '../ActivityDetail';
 import {
   incomingTransactionOutput,
   missingDataTransactionOutput,

@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { Search, getRandomIcon } from '@lace/common';
+import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
 import { useEffect, useMemo, useState } from 'react';
@@ -45,6 +45,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     },
     walletStoreStakePoolSearchResultsStatus,
     walletStoreFetchStakePools: fetchStakePools,
+    analytics,
   } = useOutsideHandles();
 
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
@@ -84,6 +85,10 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
 
   const onSearch = (searchString: string) => {
     setIsSearching(true);
+    const startedTyping = searchValue === '' && searchString !== '';
+    if (startedTyping) {
+      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSearchClick);
+    }
     setSearchValue(searchString);
   };
 

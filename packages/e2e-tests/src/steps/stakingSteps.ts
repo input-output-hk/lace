@@ -142,7 +142,7 @@ Then(/^Each stake pool list item contains:$/, async (_ignored: string) => {
 });
 
 Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (metadata: 'with' | 'without') => {
-  const expectedTransactionDetails =
+  const expectedActivityDetails =
     metadata === 'with'
       ? {
           transactionDescription: 'Delegation\n1 token',
@@ -157,7 +157,7 @@ Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async
           poolID: testContext.load('poolID') as string
         };
 
-  await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+  await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
 });
 
 Then(

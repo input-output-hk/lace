@@ -99,7 +99,7 @@ Then(
   /^a side drawer is displayed showing the following information in (extended|popup) mode$/,
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   async (mode: 'extended' | 'popup', _item: DataTable) => {
-    await transactionDetailsAssert.assertSeeTransactionDetailsUnfolded(mode);
+    await transactionDetailsAssert.assertSeeActivityDetailsUnfolded(mode);
   }
 );
 
@@ -118,7 +118,7 @@ When(/^I click on outputs dropdowns$/, async () => {
 Then(
   /^all inputs and outputs of the transactions are displayed in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
-    await transactionDetailsAssert.assertSeeTransactionDetailsInputAndOutputs(mode);
+    await transactionDetailsAssert.assertSeeActivityDetailsInputAndOutputs(mode);
   }
 );
 
@@ -137,7 +137,7 @@ Then(/none of the input and output values is zero in (extended|popup) mode$/, as
 Then(
   /the amounts sent or received are displayed below the Tx hash in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
-    await transactionDetailsAssert.assertSeeTransactionDetailsSummary(mode);
+    await transactionDetailsAssert.assertSeeActivityDetailsSummary(mode);
   }
 );
 
@@ -148,7 +148,7 @@ Then(/the Sender or Receiver is displayed$/, async () => {
 Then(
   /the amounts summary shows as many rows as assets sent or received minus 1 -ADA- in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
-    await transactionDetailsAssert.assertSeeTransactionDetailsSummaryAmounts(mode);
+    await transactionDetailsAssert.assertSeeActivityDetailsSummaryAmounts(mode);
   }
 );
 
@@ -201,15 +201,15 @@ Then(
   /^I can see transaction (\d) has type "([^"]*)" and value "([^"]*)"$/,
   async (txIndex: number, txType: string, txAdaValue: string) => {
     await transactionsPageAssert.assertTableItemDetails(txIndex - 1, txType);
-    const expectedTransactionDetails: ExpectedTransactionRowAssetDetails = {
+    const expectedActivityDetails: ExpectedTransactionRowAssetDetails = {
       type: txType,
       tokensAmount: txAdaValue,
       tokensCount: 0
     };
-    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(txIndex - 1, expectedTransactionDetails);
+    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(txIndex - 1, expectedActivityDetails);
   }
 );
 
 Then(/^Transaction details drawer (is|is not) displayed$/, async (state: 'is' | 'is not') => {
-  await transactionDetailsAssert.assertSeeTransactionDetailsDrawer(state === 'is');
+  await transactionDetailsAssert.assertSeeActivityDetailsDrawer(state === 'is');
 });

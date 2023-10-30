@@ -126,6 +126,7 @@ type KeysStructure = {
       pickMorePools: '';
       confirmButton: '';
       rebalanceButton: '';
+      removePoolButton: '';
       ctaButtonTooltip: {
         zeroPercentageSliderError: '';
         invalidAllocation: '';
@@ -192,10 +193,6 @@ type KeysStructure = {
         title: '';
         message: '';
       };
-      saturatedOrRetiredPool: {
-        title: '';
-        message: '';
-      };
     };
     stakingInfoCard: {
       fee: '';
@@ -205,7 +202,6 @@ type KeysStructure = {
       totalRewards: '';
       totalStaked: '';
       poolRetired: '';
-      poolRetiring: '';
       poolSaturated: '';
       tooltipFiatLabel: '';
     };

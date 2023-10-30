@@ -57,8 +57,16 @@ describe('AssetDetails', () => {
           balanceInFiat="1000 USD"
           fiatPriceVariation="0"
           activityList={[
-            { amount: '100', fiatAmount: '450' },
-            { amount: '200', fiatAmount: '400' }
+            {
+              amount: '100',
+              fiatAmount: '450',
+              formattedTimestamp: 'Timestamp'
+            },
+            {
+              amount: '200',
+              fiatAmount: '400',
+              formattedTimestamp: 'Timestamp'
+            }
           ]}
         />
       );
@@ -75,8 +83,16 @@ describe('AssetDetails', () => {
           balanceInFiat="1000 USD"
           fiatPriceVariation="0"
           activityList={[
-            { amount: '100', fiatAmount: '450' },
-            { amount: '200', fiatAmount: '400' }
+            {
+              amount: '100',
+              fiatAmount: '450',
+              formattedTimestamp: 'Timestamp'
+            },
+            {
+              amount: '200',
+              fiatAmount: '400',
+              formattedTimestamp: 'Timestamp'
+            }
           ]}
           activityListStatus={StateStatus.LOADING}
         />
@@ -94,8 +110,16 @@ describe('AssetDetails', () => {
           balanceInFiat="1000 USD"
           fiatPriceVariation="0"
           activityList={[
-            { amount: '100', fiatAmount: '450' },
-            { amount: '200', fiatAmount: '400' }
+            {
+              amount: '100',
+              fiatAmount: '450',
+              formattedTimestamp: 'Timestamp'
+            },
+            {
+              amount: '200',
+              fiatAmount: '400',
+              formattedTimestamp: 'Timestamp'
+            }
           ]}
           activityListStatus={StateStatus.IDLE}
         />
