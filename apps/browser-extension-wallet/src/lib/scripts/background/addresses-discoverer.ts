@@ -3,7 +3,6 @@ import { AddressDiscovery, DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery } fr
 import { Wallet } from '@lace/cardano';
 import {
   AddressesDiscoverer,
-  AddressesDiscovererDependencies,
   AddressesDiscoveryStatus,
   consumeKeyAgent,
   exposeAddressesDiscoverer
@@ -19,7 +18,7 @@ const status$ = new Subject<AddressesDiscoveryStatus>();
 status$.next(AddressesDiscoveryStatus.Idle);
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const getDiscovererInstance = ({ chainName }: AddressesDiscovererDependencies) => {
+export const getDiscovererInstance = ({ chainName }: { chainName: Wallet.ChainName }) => {
   if (discovererInstance && chainNameOfDiscovererInstance === chainName) return discovererInstance;
 
   const { chainHistoryProvider } = getProviders(chainName);

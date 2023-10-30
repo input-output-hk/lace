@@ -45,9 +45,9 @@ export const useAppInit = (): void => {
       shutdownExposedKeyAgent?.();
       const { channelName, shutdown } = await exposeKeyAgent(cardanoWallet?.asyncKeyAgent);
       shutdownExposedKeyAgent = shutdown;
-      await addressesDiscoverer.setup(channelName);
+      await addressesDiscoverer.setup({ chainName: environmentName, keyAgentChannelName: channelName });
     })();
-  }, [cardanoWallet?.asyncKeyAgent, getPassword, walletManagerUi]);
+  }, [cardanoWallet?.asyncKeyAgent, environmentName, getPassword, walletManagerUi]);
 
   useEffect(() => {
     addressesDiscoverer.status$.subscribe((status) => {

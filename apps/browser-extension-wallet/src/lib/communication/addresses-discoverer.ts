@@ -22,7 +22,7 @@ export type AddressesDiscoverer = {
 };
 
 export type AddressesDiscovererExposed = Omit<AddressesDiscoverer, 'setup'> & {
-  setup: (keyAgentChannelName: string) => Promise<void>;
+  setup: (dependencies: AddressesDiscovererSetupDependencies) => Promise<void>;
 };
 
 const commonConfig = {
