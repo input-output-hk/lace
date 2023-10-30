@@ -3,10 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { EnvironmentTypes } from '@stores';
 
 type CardanoServiceUrls = {
-  Mainnet: string;
-  Preprod: string;
-  Preview: string;
-  Sanchonet: string;
+  [key in Wallet.ChainName]: string;
 };
 
 type CExplorerUrlPaths = {
@@ -34,18 +31,12 @@ const envChecks = (chosenChain: Wallet.ChainName): void => {
   if (
     !process.env.CARDANO_SERVICES_URL_MAINNET ||
     !process.env.CARDANO_SERVICES_URL_PREPROD ||
-    !process.env.CARDANO_SERVICES_URL_PREVIEW ||
-    !process.env.CARDANO_SERVICES_URL_SANCHONET
+    !process.env.CARDANO_SERVICES_URL_PREVIEW
   ) {
     throw new Error('env vars not complete');
   }
 
-  if (
-    !process.env.CEXPLORER_URL_MAINNET ||
-    !process.env.CEXPLORER_URL_PREVIEW ||
-    !process.env.CEXPLORER_URL_PREPROD ||
-    !process.env.CEXPLORER_URL_SANCHONET
-  ) {
+  if (!process.env.CEXPLORER_URL_MAINNET || !process.env.CEXPLORER_URL_PREVIEW || !process.env.CEXPLORER_URL_PREPROD) {
     throw new Error('explorer vars not complete');
   }
 
@@ -83,14 +74,12 @@ export const config = (): Config => {
     CARDANO_SERVICES_URLS: {
       Mainnet: process.env.CARDANO_SERVICES_URL_MAINNET,
       Preprod: process.env.CARDANO_SERVICES_URL_PREPROD,
-      Preview: process.env.CARDANO_SERVICES_URL_PREVIEW,
-      Sanchonet: process.env.CARDANO_SERVICES_URL_SANCHONET
+      Preview: process.env.CARDANO_SERVICES_URL_PREVIEW
     },
     CEXPLORER_BASE_URL: {
       Mainnet: `${process.env.CEXPLORER_URL_MAINNET}`,
       Preprod: `${process.env.CEXPLORER_URL_PREPROD}`,
-      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`,
-      Sanchonet: `${process.env.CEXPLORER_URL_SANCHONET}`
+      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`
     },
     CEXPLORER_URL_PATHS: {
       Tx: 'tx',

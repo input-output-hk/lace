@@ -39,7 +39,14 @@ const walletFactory: WalletFactory = {
         ...providers,
         stores: dependencies.stores,
         handleProvider: new KoraLabsHandleProvider({
-          serverUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+          serverUrl:
+            HANDLE_SERVER_URLS[
+              // TODO: remove exclude to support sanchonet
+              Cardano.ChainIds[chainName].networkMagic as Exclude<
+                Cardano.NetworkMagics,
+                Cardano.NetworkMagics.Sanchonet
+              >
+            ],
           adapter: axiosFetchAdapter,
           policyId: ADA_HANDLE_POLICY_ID
         })

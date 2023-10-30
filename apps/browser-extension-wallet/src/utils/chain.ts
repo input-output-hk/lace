@@ -14,9 +14,6 @@ export const getBaseUrlForChain = (chainName: Wallet.ChainName): string => {
     case 'Preview':
       url = CARDANO_SERVICES_URLS.Preview;
       break;
-    case 'Sanchonet':
-      url = CARDANO_SERVICES_URLS.Sanchonet;
-      break;
     default:
       throw new Error('Incorrect chain supplied');
   }

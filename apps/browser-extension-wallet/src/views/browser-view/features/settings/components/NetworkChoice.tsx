@@ -17,27 +17,23 @@ const { AVAILABLE_CHAINS } = config();
 type networkEventSettings =
   | PostHogAction.SettingsNetworkPreviewClick
   | PostHogAction.SettingsNetworkPreprodClick
-  | PostHogAction.SettingsNetworkMainnetClick
-  | PostHogAction.SettingsNetworkSanchonetClick;
+  | PostHogAction.SettingsNetworkMainnetClick;
 
 type networkEventUserWalletProfile =
   | PostHogAction.UserWalletProfileNetworkPreviewClick
   | PostHogAction.UserWalletProfileNetworkPreprodClick
-  | PostHogAction.UserWalletProfileNetworkMainnetClick
-  | PostHogAction.UserWalletProfileNetworkSanchonetClick;
+  | PostHogAction.UserWalletProfileNetworkMainnetClick;
 
 const settingsEventByNetworkName: Partial<Record<Wallet.ChainName, networkEventSettings>> = {
   Mainnet: PostHogAction.SettingsNetworkMainnetClick,
   Preprod: PostHogAction.SettingsNetworkPreprodClick,
-  Preview: PostHogAction.SettingsNetworkPreviewClick,
-  Sanchonet: PostHogAction.SettingsNetworkSanchonetClick
+  Preview: PostHogAction.SettingsNetworkPreviewClick
 };
 
 const walletProfileEventByNetworkName: Partial<Record<Wallet.ChainName, networkEventUserWalletProfile>> = {
   Mainnet: PostHogAction.UserWalletProfileNetworkMainnetClick,
   Preprod: PostHogAction.UserWalletProfileNetworkPreprodClick,
-  Preview: PostHogAction.UserWalletProfileNetworkPreviewClick,
-  Sanchonet: PostHogAction.UserWalletProfileNetworkSanchonetClick
+  Preview: PostHogAction.UserWalletProfileNetworkPreviewClick
 };
 
 export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-profile' }): React.ReactElement => {
@@ -55,8 +51,6 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
           return t('general.networks.preprod');
         case 'Preview':
           return t('general.networks.preview');
-        case 'Sanchonet':
-          return t('general.networks.sanchonet');
         default:
           return '';
       }

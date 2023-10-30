@@ -15,11 +15,10 @@ interface AddressBookProviderProps {
 
 export type AddressRecordParams = Pick<AddressBookSchema, 'address' | 'name' | 'handleResolution'>;
 
-export const cardanoNetworkMap = {
+export const cardanoNetworkMap: { [key in Wallet.ChainName]: Wallet.Cardano.NetworkMagics } = {
   Mainnet: Wallet.Cardano.NetworkMagics.Mainnet,
   Preprod: Wallet.Cardano.NetworkMagics.Preprod,
-  Preview: Wallet.Cardano.NetworkMagics.Preview,
-  Sanchonet: Wallet.Cardano.NetworkMagics.Sanchonet
+  Preview: Wallet.Cardano.NetworkMagics.Preview
 };
 
 const handleRecordValidation = (list: AddressBookSchema[], record: AddressRecordParams) => {
