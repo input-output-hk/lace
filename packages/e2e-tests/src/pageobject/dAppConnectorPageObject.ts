@@ -11,6 +11,7 @@ import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 import testContext from '../utils/testContext';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
 import NoWalletModal from '../elements/dappConnector/noWalletModal';
+import DAppConnectorAssert, { ExpectedDAppDetails } from '../assert/dAppConnectorAssert';
 
 class DAppConnectorPageObject {
   TEST_DAPP_URL = this.getTestDAppUrl();
@@ -96,6 +97,15 @@ class DAppConnectorPageObject {
     let feeValue = await ConfirmTransactionPage.transactionAmountFee.getText();
     feeValue = feeValue.replace(' ADA', '').replace('Fee: ', '');
     await testContext.save('feeValueDAppTx', feeValue);
+  }
+
+  async switchToDappConnectorPopupAndAuthorize(testDAppDetails: ExpectedDAppDetails, mode: 'Always' | 'Only once') {
+    await this.waitAndSwitchToDAppConnectorWindow(3);
+    await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+    await this.clickButtonInDAppAuthorizationWindow('Authorize');
+    await this.clickButtonInDAppAuthorizationModal(mode);
+    await this.switchToTestDAppWindow();
+    await DAppConnectorAssert.waitUntilBalanceNotEmpty();
   }
 }
 

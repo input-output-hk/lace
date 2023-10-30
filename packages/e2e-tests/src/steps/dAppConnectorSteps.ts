@@ -171,24 +171,15 @@ Then(/^I see test DApp on the Authorized DApps list$/, async () => {
 
 When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async (mode: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.openTestDApp();
-  const switchToDappConnectorPopupAndAuthorize = async () => {
-    await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-    await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
-    await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow('Authorize');
-    await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(mode);
-    await DAppConnectorPageObject.switchToTestDAppWindow();
-    await DAppConnectorAssert.waitUntilBalanceNotEmpty();
-  };
-
   try {
-    await switchToDappConnectorPopupAndAuthorize();
+    await DAppConnectorPageObject.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
   } catch {
     Logger.log('Failed to authorize Dapp. Retry will be executed');
     if ((await browser.getWindowHandles()).length === 3) {
       await DAppConnectorPageObject.closeDappConnectorWindowHandle();
     }
     await TestDAppPage.refreshButton.click();
-    await switchToDappConnectorPopupAndAuthorize();
+    await DAppConnectorPageObject.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
   }
 });
 
