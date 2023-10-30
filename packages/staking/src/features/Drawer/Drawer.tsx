@@ -58,7 +58,6 @@ export const Drawer = ({
   const {
     activeDelegationFlow,
     activeDrawerStep,
-    activeFlow,
     currentPortfolioDrifted,
     draftPortfolioValidity,
     openPoolIsSelected,
@@ -168,7 +167,7 @@ export const Drawer = ({
       popupView={popupView}
       footer={footer}
       onCloseIconClick={() => {
-        if (activeFlow === DelegationFlow.PortfolioManagement) {
+        if (activeDelegationFlow === DelegationFlow.PortfolioManagement) {
           if (activeDrawerStep === DrawerManagementStep.Success) {
             analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayXClick);
           }
@@ -178,7 +177,10 @@ export const Drawer = ({
         }
       }}
       onBackButtonClick={() => {
-        if (activeFlow === DelegationFlow.PortfolioManagement && activeDrawerStep === DrawerManagementStep.Failure) {
+        if (
+          activeDelegationFlow === DelegationFlow.PortfolioManagement &&
+          activeDrawerStep === DrawerManagementStep.Failure
+        ) {
           analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongBackClick);
         }
       }}
