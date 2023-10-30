@@ -26,7 +26,7 @@ Feature: Empty states
     When I click "Copy" button on empty state banner
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
 
-  @LW-4449
+  @LW-8470
   Scenario: Popup View - Staking empty state
     When I disable showing Multidelegation beta banner
     And I navigate to Staking popup page

@@ -2,18 +2,18 @@
 import * as React from 'react';
 import { render, within, fireEvent, queryByTestId } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AssetActivityItem, AssetActivityItemProps, TransactionStatus } from '../AssetActivityItem';
+import { AssetActivityItem, AssetActivityItemProps, ActivityStatus } from '../AssetActivityItem';
 
 const assetsAmountTestId = 'asset-amount';
 
 describe('Testing AssetActivityItem component', () => {
   const props: AssetActivityItemProps = {
     id: '1',
-    fee: '3,40',
     type: 'outgoing',
     amount: '100',
     fiatAmount: '300 $',
-    status: TransactionStatus.ERROR,
+    formattedTimestamp: 'Timestamp',
+    status: ActivityStatus.ERROR,
     onClick: jest.fn(),
     assetsNumber: 1,
     assets: [{ id: '1', val: '1', info: { ticker: 'testTicker' } }]
@@ -75,7 +75,7 @@ describe('Testing AssetActivityItem component', () => {
   });
 
   test('should hide status when successful transaction', async () => {
-    const { findByTestId } = render(<AssetActivityItem {...props} status={TransactionStatus.SUCCESS} />);
+    const { findByTestId } = render(<AssetActivityItem {...props} status={ActivityStatus.SUCCESS} />);
     const activityItem = await findByTestId(assetActivityItemId);
     expect(queryByTestId(activityItem, 'activity-status')).not.toBeInTheDocument();
   });

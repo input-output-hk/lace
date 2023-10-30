@@ -22,9 +22,9 @@ class AddressBookPageAssert {
   };
 
   assertAddressBookIsEmpty = async () => {
-    expect(Number(await AddressBookPage.getCounterValue())).to.equal(0);
     await AddressBookPage.emptyStateImage.waitForDisplayed();
     await AddressBookPage.emptyStateTitle.waitForDisplayed();
+    expect(Number(await AddressBookPage.getCounterValue())).to.equal(0);
     expect(await AddressBookPage.emptyStateTitle.getText()).to.equal(
       await t('browserView.addressBook.emptyState.title')
     );
@@ -44,8 +44,8 @@ class AddressBookPageAssert {
       await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_NAME).waitForDisplayed();
       await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).waitForDisplayed();
       const actualAddress = await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_ADDRESS).getText();
-      const expectedAddress1stPart = mode === 'extended' ? `${address.slice(0, 22)}` : `${address.slice(0, 8)}`;
-      const expectedAddress2ndPart = mode === 'extended' ? `${address.slice(-23)}` : `${address.slice(-3)}`;
+      const expectedAddress1stPart = `${address.slice(0, 5)}`;
+      const expectedAddress2ndPart = mode === 'extended' ? `${address.slice(-5)}` : `${address.slice(-3)}`;
       expect(
         actualAddress.startsWith(expectedAddress1stPart),
         `ACTUAL DISPLAYED ADDRESS: ${actualAddress}\nEXPECTED 1ST PART OF ADDRESS: ${expectedAddress1stPart}`
@@ -55,8 +55,20 @@ class AddressBookPageAssert {
         `ACTUAL DISPLAYED ADDRESS: ${actualAddress}\nEXPECTED 2ND PART OF ADDRESS: ${expectedAddress2ndPart}`
       ).to.be.true;
     } else {
-      expect(await addressRow).to.be.undefined;
+      expect(addressRow).to.be.undefined;
     }
+  };
+
+  assertSeeHandleWarningForAddress = async (address: string) => {
+    const addressRow = await AddressBookPage.getAddressRowByName(address);
+    await addressRow.$(AddressBookPage.ADDRESS_LIST_ITEM_WARNING_ICON).waitForDisplayed();
+  };
+
+  assertSeeHandleWarningTooltip = async () => {
+    await AddressBookPage.warningTooltip.waitForDisplayed();
+    expect(await AddressBookPage.warningTooltip.getText()).to.equal(
+      await t('package.core.addressBook.addressHandleTooltip', 'core')
+    );
   };
 
   assertSeeEachAddressRow = async () => {

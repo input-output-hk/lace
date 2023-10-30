@@ -1,21 +1,21 @@
+import { PostHogAction } from '@lace/common';
 import { Button, Card, Flex, Text } from '@lace/ui';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useTranslation } from 'react-i18next';
 import ArrowRight from '../staking/arrow-right.svg';
-import { MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
+import { Flow, MAX_POOLS_COUNT, useDelegationPortfolioStore } from '../store';
 import * as styles from './PortfolioBar.css';
 
-type PortfolioBarParams = {
-  onStake: () => void;
-};
-
-export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
+export const PortfolioBar = () => {
   const { t } = useTranslation();
-  const { portfolioMutators, selectedPoolsCount } = useDelegationPortfolioStore((store) => ({
+  const { activeFlow, portfolioMutators, selectedPoolsCount } = useDelegationPortfolioStore((store) => ({
+    activeFlow: store.activeFlow,
     portfolioMutators: store.mutators,
-    selectedPoolsCount: store.selections.length,
+    selectedPoolsCount: store.selectedPortfolio.length,
   }));
+  const { analytics } = useOutsideHandles();
 
-  if (selectedPoolsCount === 0) return null;
+  if (![Flow.BrowsePools, Flow.PoolDetails].includes(activeFlow) || selectedPoolsCount === 0) return null;
 
   return (
     <Card.Elevated className={styles.barContainer}>
@@ -27,13 +27,19 @@ export const PortfolioBar = ({ onStake }: PortfolioBarParams) => {
       <Flex className={styles.buttons}>
         <Button.Secondary
           label={t('portfolioBar.clear')}
-          onClick={portfolioMutators.clearSelections}
+          onClick={() => {
+            portfolioMutators.executeCommand({ type: 'ClearSelections' });
+            analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsClearClick);
+          }}
           data-testid="portfoliobar-btn-clear"
         />
         <Button.Primary
           label={t('portfolioBar.next')}
           icon={<ArrowRight className={styles.nextIcon} />}
-          onClick={onStake}
+          onClick={() => {
+            portfolioMutators.executeCommand({ type: 'CreateNewPortfolio' });
+            analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsNextClick);
+          }}
           data-testid="portfoliobar-btn-next"
         />
       </Flex>

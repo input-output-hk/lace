@@ -169,6 +169,9 @@ const colors: Colors = {
   $assets_table_market_price_trend_down_label_color:
     lightColorScheme.$secondary_data_pink,
 
+  $dialog_container_bgColor: lightColorScheme.$primary_white,
+  $dialog_description_color: lightColorScheme.$primary_dark_grey,
+
   $side_drawer_container_bgColor: lightColorScheme.$primary_white,
   $side_drawer_separator_bgColor: lightColorScheme.$primary_light_grey_plus,
   $side_drawer_head_title_color: lightColorScheme.$primary_black,
@@ -245,6 +248,27 @@ const colors: Colors = {
 
   $message_title_color: lightColorScheme.$primary_black,
   $message_description_color: lightColorScheme.$primary_dark_grey,
+
+  $input_container_bgColor: lightColorScheme.$primary_light_grey,
+  $input_container_hover_outline_color:
+    lightColorScheme.$primary_light_grey_plus,
+  $input_container_focused_outline_color:
+    lightColorScheme.$secondary_hover_purple,
+  $input_value_color: lightColorScheme.$primary_black,
+  $input_button_bgColor: lightColorScheme.$primary_white,
+  $input_button_icon_color: lightColorScheme.$primary_dark_grey,
+  $input_label_color: lightColorScheme.$primary_dark_grey,
+  $input_error_message_color: lightColorScheme.$secondary_data_pink,
+
+  $text_primary: lightColorScheme.$primary_black,
+  $text_secondary: lightColorScheme.$primary_dark_grey,
+
+  $metadata_label_color: lightColorScheme.$primary_black,
+  $metadata_secondary_label_color: lightColorScheme.$primary_dark_grey,
+
+  $text_link_label_color: lightColorScheme.$secondary_data_blue,
+  $text_link_label_color_visited: lightColorScheme.$primary_hover_purple,
+  $text_link_label_color_disabled: lightColorScheme.$primary_grey,
 };
 
 export const elevation: Elevation = {

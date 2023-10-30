@@ -3,6 +3,8 @@ import { SettingsCard, SettingsLink, TermsDrawer, PrivacyPolicyDrawer, CookiePol
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Title } = Typography;
 
@@ -11,13 +13,32 @@ interface SettingsLegalProps {
 }
 
 export const SettingsLegal = ({ popupView = false }: SettingsLegalProps): React.ReactElement => {
+  const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const [isTermsDrawerOpen, setIsTermsDrawerOpen] = useState(false);
-  const toggleTermsDrawer = () => setIsTermsDrawerOpen(!isTermsDrawerOpen);
   const [isPrivacyPolicyDrawerOpen, setIsPrivacyPolicyDrawerOpen] = useState(false);
-  const togglePrivacyPolicyDrawer = () => setIsPrivacyPolicyDrawerOpen(!isPrivacyPolicyDrawerOpen);
   const [isCookiePolicyDrawerOpen, setIsCookiePolicyDrawerOpen] = useState(false);
-  const toggleCookiePolicyDrawer = () => setIsCookiePolicyDrawerOpen(!isCookiePolicyDrawerOpen);
+
+  const toggleTermsDrawer = () => {
+    setIsTermsDrawerOpen(!isTermsDrawerOpen);
+    analytics.sendEventToPostHog(
+      isTermsDrawerOpen ? PostHogAction.SettingsTermsAndConditionsXClick : PostHogAction.SettingsTermsAndConditionsClick
+    );
+  };
+
+  const togglePrivacyPolicyDrawer = () => {
+    setIsPrivacyPolicyDrawerOpen(!isPrivacyPolicyDrawerOpen);
+    analytics.sendEventToPostHog(
+      isPrivacyPolicyDrawerOpen ? PostHogAction.SettingsPrivacyPolicyXClick : PostHogAction.SettingsPrivacyPolicyClick
+    );
+  };
+
+  const toggleCookiePolicyDrawer = () => {
+    setIsCookiePolicyDrawerOpen(!isCookiePolicyDrawerOpen);
+    analytics.sendEventToPostHog(
+      isCookiePolicyDrawerOpen ? PostHogAction.SettingsCookiePolicyXClick : PostHogAction.SettingsCookiePolicyClick
+    );
+  };
 
   return (
     <>

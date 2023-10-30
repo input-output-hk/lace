@@ -5,7 +5,7 @@ import { GroupedAssetActivityList } from '@lace/core';
 import { useFetchCoinPrice } from '../../../../../hooks';
 import { StateStatus, useWalletStore } from '../../../../../stores';
 import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
-import { TransactionDetail } from './TransactionDetail';
+import { ActivityDetail } from './ActivityDetail';
 import { useTranslation } from 'react-i18next';
 import { FundWalletBanner, EducationalList, SectionLayout, Layout } from '@src/views/browser-view/components';
 import { SectionTitle } from '@components/Layout/SectionTitle';
@@ -17,14 +17,15 @@ import { useAnalyticsContext } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 
 export const ActivityLayout = (): ReactElement => {
   const { t } = useTranslation();
   const { priceResult } = useFetchCoinPrice();
-  const { inMemoryWallet, walletInfo, transactionDetail, resetTransactionState, blockchainProvider } = useWalletStore();
+  const { inMemoryWallet, walletInfo, activityDetail, resetActivityState, blockchainProvider } = useWalletStore();
   const analytics = useAnalyticsContext();
   const sendAnalytics = useCallback(() => {
     analytics.sendEventToMatomo({
@@ -32,6 +33,7 @@ export const ActivityLayout = (): ReactElement => {
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_BROWSER
     });
+    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
   const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
   const total = useObservable(inMemoryWallet.balance.utxo.total$);
@@ -71,8 +73,8 @@ export const ActivityLayout = (): ReactElement => {
 
   // Reset current transaction details and close drawer if network (blockchainProvider) has changed
   useEffect(() => {
-    resetTransactionState();
-  }, [resetTransactionState, blockchainProvider]);
+    resetActivityState();
+  }, [resetActivityState, blockchainProvider]);
   const isLoadingFirstTime = isNil(total);
 
   return (
@@ -85,13 +87,19 @@ export const ActivityLayout = (): ReactElement => {
           sideText={activitiesCount ? `(${activitiesCount})` : ''}
         />
         <Drawer
-          visible={!!transactionDetail}
-          onClose={resetTransactionState}
+          visible={!!activityDetail}
+          onClose={resetActivityState}
           navigation={
-            <DrawerNavigation title={t('transactions.detail.title')} onCloseIconClick={resetTransactionState} />
+            <DrawerNavigation
+              title={t('transactions.detail.title')}
+              onCloseIconClick={() => {
+                analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailXClick);
+                resetActivityState();
+              }}
+            />
           }
         >
-          {transactionDetail && priceResult && <TransactionDetail price={priceResult} />}
+          {activityDetail && priceResult && <ActivityDetail price={priceResult} />}
         </Drawer>
         <Skeleton loading={isLoadingFirstTime || walletActivitiesStatus !== StateStatus.LOADED}>
           {walletActivities?.length > 0 ? (

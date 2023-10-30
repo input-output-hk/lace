@@ -5,6 +5,7 @@ import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { QRPublicKeyDrawer } from '@src/views/browser-view/components/QRPublicKeyDrawer';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const { Text } = Typography;
 
@@ -12,12 +13,14 @@ interface GeneralSettingsDrawerProps {
   visible: boolean;
   onClose: () => void;
   popupView?: boolean;
+  sendAnalyticsEvent?: (event: PostHogAction) => void;
 }
 
 export const GeneralSettingsDrawer = ({
   visible,
   onClose,
-  popupView
+  popupView,
+  sendAnalyticsEvent
 }: GeneralSettingsDrawerProps): React.ReactElement => {
   const [isPublicKeyQRVisible, setIsPublicKeyQRVisible] = useState(false);
   const { t } = useTranslation();
@@ -36,6 +39,11 @@ export const GeneralSettingsDrawer = ({
   };
 
   useKeyboardShortcut(['Escape'], () => visible && handleGoBackDrawer());
+
+  const handleShowPubKeyButtonClick = () => {
+    setIsPublicKeyQRVisible(true);
+    sendAnalyticsEvent(PostHogAction.SettingsYourKeysShowPublicKeyClick);
+  };
 
   return (
     <>
@@ -60,7 +68,7 @@ export const GeneralSettingsDrawer = ({
       >
         <div className={popupView ? styles.popupContainer : undefined}>
           {isPublicKeyQRVisible ? (
-            <QRPublicKeyDrawer isPopup={popupView} />
+            <QRPublicKeyDrawer isPopup={popupView} sendAnalyticsEvent={sendAnalyticsEvent} />
           ) : (
             <SettingsCard>
               <Text className={styles.drawerDescription}>
@@ -72,7 +80,7 @@ export const GeneralSettingsDrawer = ({
                 block
                 data-testid="show-public-key-button"
                 className={styles.drawerButton}
-                onClick={() => setIsPublicKeyQRVisible(true)}
+                onClick={handleShowPubKeyButtonClick}
               >
                 {t('browserView.settings.wallet.general.showPubKeyAction')}
               </Button>

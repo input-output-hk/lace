@@ -24,7 +24,7 @@ Feature: Address book - extended view
     And "Save address" button is disabled on "Add new address" drawer
     When I fill address form with "Shelley_manual" name and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    Then I see a toast with message: "Address added"
     And I see address row with name "Shelley_manual" and address "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" on the list in extended mode
 
   @LW-4464 @Pending
@@ -36,7 +36,7 @@ Feature: Address book - extended view
     And "Save address" button is disabled on "Add new address" drawer
     When I fill address form with "<wallet_name>" name and "<address>" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    Then I see a toast with message: "Address added"
     And I see address row with name "<wallet_name>" and address "<address>" on the list in extended mode
     Examples:
       | wallet_name          | address                                                                                                            |
@@ -261,12 +261,42 @@ Feature: Address book - extended view
     Then Contact "empty" name error and "empty" address error are displayed
     And "Save address" button is disabled on "Add new address" drawer
 
-  @LW-7146 @Pending
-  #Bug LW-7147
-  Scenario: Extended-view - Address Book - Add address button is removed when right side panel is displayed
+  @LW-7043 @Pending
+  # BUG LW-7925
+  Scenario Outline: Extended-view - Address Book - Add the same contact to the address book for two different networks
     Given I don't have any addresses added to my address book in extended mode
-    And I resize the window to a width of: 1000 and a height of: 840
-    Then I see a button to open the right side panel
-    When I click on right side panel icon
-    Then I see the right side panel for Address Book section
-    And I do not see "Add address" button on address book page
+    When I add new address: "<address>" with name: "<wallet_name>" in extended mode
+    Then I verify that address: "<address>" with name: "<wallet_name>" has been added in extended mode
+    And I switch network to: "Preview" in extended mode
+    When I add new address: "<address>" with name: "<wallet_name>" in extended mode
+    Then I verify that address: "<address>" with name: "<wallet_name>" has been added in extended mode
+    And I switch network to: "Mainnet" in extended mode
+    When I add new address: "<address>" with name: "<wallet_name>" in extended mode
+    Then I verify that address: "<address>" with name: "<wallet_name>" has been added in extended mode
+    Examples:
+      | wallet_name   | address                                                                                                      |
+      | example_name1 | addr_test1qzngq82mhkzqttqvdk8yl4twk4ea70ja2e7j92x9vqwatds4dm4z5j48w9mjpag2htut4g6pzfxm7x958m3wxjwc8t6q8k6txr |
+
+  @LW-7042 @Pending
+  # BUG LW-7925
+  Scenario Outline: Extended-view - Address Book - Delete an address that is on more than one network
+    Given I don't have any addresses added to my address book in extended mode
+    And I add new address: "<address>" with name: "<wallet_name>" in extended mode
+    And I switch network to: "Preview" in extended mode
+    And I add new address: "<address>" with name: "<wallet_name>" in extended mode
+    And I switch network to: "Mainnet" in extended mode
+    And I add new address: "<address>" with name: "<wallet_name>" in extended mode
+    And I switch network to: "Preprod" in extended mode
+    And I delete address with name: "<wallet_name>" in extended mode
+    Then I see empty address book
+    And I switch network to: "Preview" in extended mode
+    And I open address book in extended mode
+    Then I see address row with name "<wallet_name>" and address "<address>" on the list in extended mode
+    And I delete address with name: "<wallet_name>" in extended mode
+    And I see empty address book
+    And I switch network to: "Mainnet" in extended mode
+    And I open address book in extended mode
+    Then I see address row with name "<wallet_name>" and address "<address>" on the list in extended mode
+    Examples:
+      | wallet_name   | address                                                                                                      |
+      | example_name2 | addr_test1qzcx0kfmglh9hg5wa7kxzt3c3e8psnm0pus38qth0wgmmljcexj60ge60d8h7nyz9ez0mzgxznr5kr6rfsemdqp74p0q9rw57j |

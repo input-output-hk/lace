@@ -7,6 +7,24 @@ import { useTheme } from '@providers/ThemeProvider/context';
 import SunIcon from '../../../../assets/icons/sun.component.svg';
 import MoonIcon from '../../../../assets/icons/moon.component.svg';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
+import { themes, useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+
+type ThemeAnalyticsEvents<T> = Record<themes, T>;
+
+const settingsThemeEvent: ThemeAnalyticsEvents<
+  PostHogAction.SettingsThemeDarkModeClick | PostHogAction.SettingsThemeLightModeClick
+> = {
+  dark: PostHogAction.SettingsThemeDarkModeClick,
+  light: PostHogAction.SettingsThemeLightModeClick
+};
+
+const userWalletProfileThemeEvent: ThemeAnalyticsEvents<
+  PostHogAction.UserWalletProfileDarkModeClick | PostHogAction.UserWalletProfileLightModeClick
+> = {
+  dark: PostHogAction.UserWalletProfileDarkModeClick,
+  light: PostHogAction.UserWalletProfileLightModeClick
+};
 
 const modeTranslate: Record<string, string> = {
   light: 'browserView.sideMenu.mode.light',
@@ -15,11 +33,13 @@ const modeTranslate: Record<string, string> = {
 
 interface Props {
   isPopup?: boolean;
+  section?: 'settings' | 'user_profile';
 }
 
-export const ThemeSwitch = ({ isPopup }: Props): React.ReactElement => {
+export const ThemeSwitch = ({ isPopup, section = 'user_profile' }: Props): React.ReactElement => {
   const { theme, setTheme } = useTheme();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const analytics = useAnalyticsContext();
 
   const handleCurrentTheme = () => {
     const pickedTheme = theme.name === 'light' ? 'dark' : 'light';
@@ -28,6 +48,8 @@ export const ThemeSwitch = ({ isPopup }: Props): React.ReactElement => {
     if (isPopup) {
       backgroundServices.handleChangeTheme({ theme: pickedTheme });
     }
+    const posthogEvent = section === 'settings' ? settingsThemeEvent : userWalletProfileThemeEvent;
+    analytics.sendEventToPostHog(posthogEvent[pickedTheme]);
   };
 
   return (

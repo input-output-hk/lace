@@ -5,14 +5,15 @@ import { StateStatus, useWalletStore } from '@src/stores';
 import { useFetchCoinPrice, useRedirection } from '@hooks';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { GroupedAssetActivityList } from '@lace/core';
-import { TransactionDetail } from '@src/views/browser-view/features/activity';
+import { ActivityDetail } from '@src/views/browser-view/features/activity';
 import styles from './Activity.module.scss';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
 import {
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames
+  AnalyticsEventNames,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useWalletActivities } from '@hooks/useWalletActivities';
@@ -20,7 +21,7 @@ import { useWalletActivities } from '@hooks/useWalletActivities';
 export const Activity = (): React.ReactElement => {
   const { t } = useTranslation();
   const { priceResult } = useFetchCoinPrice();
-  const { walletInfo, transactionDetail, resetTransactionState } = useWalletStore();
+  const { walletInfo, activityDetail, resetActivityState } = useWalletStore();
   const layoutTitle = `${t('browserView.activity.title')}`;
   const redirectToAssets = useRedirection(walletRoutePaths.assets);
   const analytics = useAnalyticsContext();
@@ -31,6 +32,7 @@ export const Activity = (): React.ReactElement => {
       action: MatomoEventActions.CLICK_EVENT,
       name: AnalyticsEventNames.ViewTransactions.VIEW_TX_DETAILS_POPUP
     });
+    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
   const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
 
@@ -41,20 +43,21 @@ export const Activity = (): React.ReactElement => {
   return (
     <ContentLayout title={layoutTitle} titleSideText={layoutSideText} isLoading={isLoading}>
       <Drawer
-        visible={!!transactionDetail}
-        onClose={resetTransactionState}
+        visible={!!activityDetail}
+        onClose={resetActivityState}
         navigation={
           <DrawerNavigation
-            onArrowIconClick={resetTransactionState}
+            onArrowIconClick={resetActivityState}
             onCloseIconClick={() => {
-              resetTransactionState();
+              analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailXClick);
+              resetActivityState();
               redirectToAssets();
             }}
           />
         }
         popupView
       >
-        {transactionDetail && priceResult && <TransactionDetail price={priceResult} />}
+        {activityDetail && priceResult && <ActivityDetail price={priceResult} />}
       </Drawer>
       <div className={styles.activitiesContainer}>
         {hasActivities ? (

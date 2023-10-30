@@ -5,7 +5,7 @@ import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import testContext from '../utils/testContext';
-import { TransactionDetailsPage } from '../elements/transactionDetails';
+import TransactionDetailsPage from '../elements/transactionDetails';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import TransactionsPage from '../elements/transactionsPage';
 
@@ -53,14 +53,12 @@ When(/^I click on a transaction: (\d)$/, async (rowNumber: number) => {
 });
 
 When(/^I click on a transaction hash and save hash information$/, async () => {
-  const transactionsDetails = new TransactionDetailsPage();
-  await testContext.save('txHashValue', await transactionsDetails.transactionDetailsHash.getText());
-  await transactionsDetails.transactionDetailsHash.click();
+  testContext.save('txHashValue', await TransactionDetailsPage.transactionDetailsHash.getText());
+  await TransactionDetailsPage.transactionDetailsHash.click();
 });
 
 When(/^I click on a transaction hash$/, async () => {
-  const transactionsDetails = new TransactionDetailsPage();
-  await transactionsDetails.transactionDetailsHash.click();
+  await TransactionDetailsPage.transactionDetailsHash.click();
 });
 
 Then(/^I see cexplorer url with correct transaction hash$/, async () => {
@@ -71,18 +69,17 @@ Then(/^I see cexplorer url with correct transaction hash$/, async () => {
 When(
   /^I click and open recent transactions details until find transaction with correct (hash|poolID)$/,
   async (valueForCheck: string) => {
-    const transactionsDetails = new TransactionDetailsPage();
     await transactionsPageAssert.waitRowsToLoad();
     for (let i = 0; i < 10; i++) {
       let actualValue;
       let expectedValue;
       await TransactionsPage.clickOnTransactionRow(i);
-      await transactionsDetails.transactionDetailsSkeleton.waitForDisplayed({ timeout: 30_000, reverse: true });
+      await TransactionDetailsPage.transactionDetailsSkeleton.waitForDisplayed({ timeout: 30_000, reverse: true });
       if (valueForCheck === 'hash') {
-        actualValue = await transactionsDetails.transactionDetailsHash.getText();
+        actualValue = await TransactionDetailsPage.transactionDetailsHash.getText();
         expectedValue = String(testContext.load('txHashValue'));
       } else {
-        actualValue = await transactionsDetails.transactionDetailsStakePoolId.getText();
+        actualValue = await TransactionDetailsPage.transactionDetailsStakePoolId.getText();
         expectedValue = String(testContext.load('poolID'));
       }
       if (actualValue !== expectedValue) {
@@ -102,7 +99,7 @@ Then(
   /^a side drawer is displayed showing the following information in (extended|popup) mode$/,
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   async (mode: 'extended' | 'popup', _item: DataTable) => {
-    await transactionDetailsAssert.assertSeeTransactionDetailsUnfolded(mode);
+    await transactionDetailsAssert.assertSeeActivityDetailsUnfolded(mode);
   }
 );
 
@@ -110,10 +107,18 @@ When(/^I click on a transaction and click on both dropdowns$/, async () => {
   //  DO NOTHING - COVERED IN NEXT STEP TO CHECK ALL TRANSACTIONS
 });
 
+When(/^I click on inputs dropdowns$/, async () => {
+  TransactionDetailsPage.clickInputsDropdown();
+});
+
+When(/^I click on outputs dropdowns$/, async () => {
+  TransactionDetailsPage.clickOutputsDropdown();
+});
+
 Then(
   /^all inputs and outputs of the transactions are displayed in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
-    await transactionDetailsAssert.assertSeeTransactionDetailsInputAndOutputs(mode);
+    await transactionDetailsAssert.assertSeeActivityDetailsInputAndOutputs(mode);
   }
 );
 
@@ -132,7 +137,7 @@ Then(/none of the input and output values is zero in (extended|popup) mode$/, as
 Then(
   /the amounts sent or received are displayed below the Tx hash in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
-    await transactionDetailsAssert.assertSeeTransactionDetailsSummary(mode);
+    await transactionDetailsAssert.assertSeeActivityDetailsSummary(mode);
   }
 );
 
@@ -143,7 +148,7 @@ Then(/the Sender or Receiver is displayed$/, async () => {
 Then(
   /the amounts summary shows as many rows as assets sent or received minus 1 -ADA- in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
-    await transactionDetailsAssert.assertSeeTransactionDetailsSummaryAmounts(mode);
+    await transactionDetailsAssert.assertSeeActivityDetailsSummaryAmounts(mode);
   }
 );
 
@@ -196,11 +201,15 @@ Then(
   /^I can see transaction (\d) has type "([^"]*)" and value "([^"]*)"$/,
   async (txIndex: number, txType: string, txAdaValue: string) => {
     await transactionsPageAssert.assertTableItemDetails(txIndex - 1, txType);
-    const expectedTransactionDetails: ExpectedTransactionRowAssetDetails = {
+    const expectedActivityDetails: ExpectedTransactionRowAssetDetails = {
       type: txType,
       tokensAmount: txAdaValue,
       tokensCount: 0
     };
-    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(txIndex - 1, expectedTransactionDetails);
+    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(txIndex - 1, expectedActivityDetails);
   }
 );
+
+Then(/^Transaction details drawer (is|is not) displayed$/, async (state: 'is' | 'is not') => {
+  await transactionDetailsAssert.assertSeeActivityDetailsDrawer(state === 'is');
+});

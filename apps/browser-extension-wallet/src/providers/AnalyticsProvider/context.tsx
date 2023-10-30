@@ -1,12 +1,11 @@
-import { useLocalStorage } from '@src/hooks/useLocalStorage';
 import { useWalletStore } from '@src/stores';
 import debounce from 'lodash/debounce';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { AnalyticsTracker } from './analyticsTracker';
-import { EnhancedAnalyticsOptInStatus, ExtensionViews } from './analyticsTracker/types';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from './matomo/config';
-import { POSTHOG_EXCLUDED_EVENTS } from './postHog';
+import { ExtensionViews } from './analyticsTracker/types';
 import shallow from 'zustand/shallow';
+import { POSTHOG_EXCLUDED_EVENTS } from '@providers/PostHogClientProvider/client';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -39,27 +38,21 @@ export const AnalyticsProvider = ({
     (state) => ({ currentChain: state?.currentChain, view: state.walletUI.appMode }),
     shallow
   );
-  const [optedInForEnhancedAnalytics] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.OptedOut
-  );
+  const postHogClient = usePostHogClientContext();
 
   const analyticsTracker = useMemo(
     () =>
       tracker ||
       new AnalyticsTracker({
+        postHogClient,
         chain: currentChain,
         view: view === 'popup' ? ExtensionViews.Popup : ExtensionViews.Extended,
         analyticsDisabled,
         excludedEvents: POSTHOG_EXCLUDED_EVENTS
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tracker, analyticsDisabled]
+    [tracker, analyticsDisabled, postHogClient]
   );
-
-  useEffect(() => {
-    analyticsTracker.setOptedInForEnhancedAnalytics(optedInForEnhancedAnalytics);
-  }, [optedInForEnhancedAnalytics, analyticsTracker]);
 
   useEffect(() => {
     analyticsTracker.setChain(currentChain);

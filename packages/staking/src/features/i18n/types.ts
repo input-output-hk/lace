@@ -123,9 +123,19 @@ type KeysStructure = {
     preferences: {
       selectedStakePools: '';
       addPoolButton: '';
-      stakeValue: '';
       pickMorePools: '';
-      nextButton: '';
+      confirmButton: '';
+      rebalanceButton: '';
+      removePoolButton: '';
+      ctaButtonTooltip: {
+        zeroPercentageSliderError: '';
+        invalidAllocation: '';
+      };
+      poolDetails: {
+        savedRatio: '';
+        actualRatio: '';
+        actualStake: '';
+      };
     };
   };
   modals: {
@@ -143,6 +153,17 @@ type KeysStructure = {
       description: '';
       button: '';
     };
+    poolsManagement: {
+      title: '';
+      buttons: {
+        cancel: '';
+        confirm: '';
+      };
+      description: {
+        reduction: '';
+        adjustment: '';
+      };
+    };
   };
   overview: {
     delegationCard: {
@@ -153,10 +174,10 @@ type KeysStructure = {
       };
       statuses: {
         multiDelegation: '';
-        overStaked: '';
-        ready: '';
+        overAllocated: '';
+        noSelection: '';
         simpleDelegation: '';
-        underStaked: '';
+        underAllocated: '';
       };
     };
     banners: {
@@ -165,6 +186,10 @@ type KeysStructure = {
         message: '';
       };
       pendingPoolMigration: {
+        title: '';
+        message: '';
+      };
+      portfolioDrifted: {
         title: '';
         message: '';
       };

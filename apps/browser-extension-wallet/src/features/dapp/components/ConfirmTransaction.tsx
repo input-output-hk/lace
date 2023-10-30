@@ -50,10 +50,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   } = useWalletStore();
   const { list: addressList } = useAddressBookContext();
 
-  const [hasInsufficientFunds, setInsufficientFunds] = useState(false);
   const [tx, setTx] = useState<Wallet.Cardano.Tx>();
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
-  const availableBalance = useObservable(inMemoryWallet.balance.utxo.available$);
   const [errorMessage, setErrorMessage] = useState<string>();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
@@ -108,6 +106,8 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     );
     close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
   }, []);
+
+  window.addEventListener('beforeunload', cancelTransaction);
 
   const signWithHardwareWallet = async () => {
     setIsConfirmingTx(true);
@@ -199,16 +199,11 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       }
       return true;
     });
-    let totalCoins = BigInt(0);
 
     // eslint-disable-next-line unicorn/no-array-reduce
     const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
       // Don't show withdrawl tx's etc
       if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
-      totalCoins += txOut.value.coins;
-      if (totalCoins >= availableBalance?.coins) {
-        setInsufficientFunds(true);
-      }
 
       return [
         ...acc,
@@ -226,14 +221,13 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       outputs: txSummaryOutputs,
       type: txType
     };
-  }, [tx, availableBalance, walletInfo.addresses, createAssetList, addressToNameMap]);
+  }, [tx, walletInfo.addresses, createAssetList, addressToNameMap]);
 
   const translations = {
     transaction: t('core.dappTransaction.transaction'),
     amount: t('core.dappTransaction.amount'),
     recipient: t('core.dappTransaction.recipient'),
     fee: t('core.dappTransaction.fee'),
-    insufficientFunds: t('core.dappTransaction.insufficientFunds'),
     adaFollowingNumericValue: t('general.adaFollowingNumericValue')
   };
 
@@ -245,7 +239,6 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           dappInfo={dappInfo}
           errorMessage={errorMessage}
           translations={translations}
-          hasInsufficientFunds={hasInsufficientFunds}
         />
       ) : (
         <Skeleton loading />
@@ -255,7 +248,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
           onClick={async () => {
             isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
           }}
-          disabled={!!errorMessage || hasInsufficientFunds}
+          disabled={!!errorMessage}
           loading={isUsingHardwareWallet && isConfirmingTx}
           data-testid="dapp-transaction-confirm"
           className={styles.actionBtn}

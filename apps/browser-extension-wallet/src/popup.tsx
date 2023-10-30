@@ -25,6 +25,8 @@ import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvide
 import { APP_MODE_POPUP } from './utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
+import { PostHogClientProvider } from '@providers/PostHogClientProvider';
+import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -35,17 +37,21 @@ const App = (): React.ReactElement => (
             <AxiosClientProvider>
               <CurrencyStoreProvider>
                 <HashRouter>
-                  <AnalyticsProvider>
-                    <ThemeProvider>
-                      <ExternalLinkOpenerProvider>
-                        <MigrationContainer appMode={APP_MODE_POPUP}>
-                          <DataCheckContainer appMode={APP_MODE_POPUP}>
-                            <PopupView />
-                          </DataCheckContainer>
-                        </MigrationContainer>
-                      </ExternalLinkOpenerProvider>
-                    </ThemeProvider>
-                  </AnalyticsProvider>
+                  <PostHogClientProvider>
+                    <ExperimentsProvider>
+                      <AnalyticsProvider>
+                        <ThemeProvider>
+                          <ExternalLinkOpenerProvider>
+                            <MigrationContainer appMode={APP_MODE_POPUP}>
+                              <DataCheckContainer appMode={APP_MODE_POPUP}>
+                                <PopupView />
+                              </DataCheckContainer>
+                            </MigrationContainer>
+                          </ExternalLinkOpenerProvider>
+                        </ThemeProvider>
+                      </AnalyticsProvider>
+                    </ExperimentsProvider>
+                  </PostHogClientProvider>
                 </HashRouter>
               </CurrencyStoreProvider>
             </AxiosClientProvider>

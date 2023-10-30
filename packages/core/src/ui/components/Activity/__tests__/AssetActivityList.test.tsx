@@ -3,7 +3,7 @@ import * as React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssetActivityList, AssetActivityListProps } from '../AssetActivityList';
-import { TransactionStatus } from '../AssetActivityItem';
+import { ActivityStatus } from '../AssetActivityItem';
 
 const activityTranslations = {
   asset: 'asset',
@@ -25,10 +25,12 @@ describe('Testing AssetActivityList component', () => {
       type: 'outgoing',
       name: 'Sent',
       description: 'ADA',
-      date: '19:47',
+      date: new Date('2021-01-01'),
+      formattedDate: 'Date',
+      formattedTimestamp: '19:47',
       amount: '100 ADA',
       fiatAmount: '300 $',
-      status: TransactionStatus.ERROR,
+      status: ActivityStatus.ERROR,
       assets: [{ id: '1', val: '1' }],
       translations: activityTranslations
     }))

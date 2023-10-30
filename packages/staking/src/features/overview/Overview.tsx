@@ -1,24 +1,16 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Wallet } from '@lace/cardano';
-import { Banner, useObservable } from '@lace/common';
+import { useObservable } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { DelegationCard } from '../delegation-card';
 import { useOutsideHandles } from '../outside-handles-provider';
-import {
-  PortfolioManagementProcess,
-  Sections,
-  sectionsConfig,
-  useDelegationPortfolioStore,
-  useStakePoolDetails,
-} from '../store';
-import { DelegationCard } from './DelegationCard';
+import { useDelegationPortfolioStore } from '../store';
 import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
-import * as styles from './Overview.css';
 import { StakeFundsBanner } from './StakeFundsBanner';
-import { StakingInfoCard } from './staking-info-card';
+import { StakingInfoCard } from './StakingInfoCard';
+import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const Overview = () => {
   const { t } = useTranslation();
@@ -27,7 +19,6 @@ export const Overview = () => {
     balancesBalance,
     compactNumber,
     fetchCoinPricePriceResult,
-    delegationStoreSetSelectedStakePool: setSelectedStakePool,
     walletAddress,
     walletStoreWalletActivities: walletActivities,
     walletStoreInMemoryWallet: inMemoryWallet,
@@ -38,10 +29,7 @@ export const Overview = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const { setIsDrawerVisible, setSection } = useStakePoolDetails((state) => ({
-    setIsDrawerVisible: state.setIsDrawerVisible,
-    setSection: state.setSection,
-  }));
+  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
@@ -59,17 +47,12 @@ export const Overview = () => {
     stakeKeyDeposit: protocolParameters.stakeKeyDeposit,
     totalCoinBalance,
   });
-
-  const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
-    setSelectedStakePool(stakePool);
-    setIsDrawerVisible(true);
-  };
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
 
   const onManageClick = () => {
-    portfolioMutators.beginManagementProcess(PortfolioManagementProcess.CurrentPortfolio);
-    setSection(sectionsConfig[Sections.PREFERENCES]);
-    setIsDrawerVisible(true);
+    portfolioMutators.executeCommand({
+      type: 'ManagePortfolio',
+    });
   };
 
   const displayData = mapPortfolioToDisplayData({
@@ -92,12 +75,10 @@ export const Overview = () => {
   if (currentPortfolio.length === 0)
     return (
       <>
-        {pendingDelegationTransaction ? (
-          <Banner
-            withIcon
-            customIcon={<InfoCircleOutlined className={styles.bannerInfoIcon} />}
-            message={t('overview.banners.pendingFirstDelegation.title')}
-            description={t('overview.banners.pendingFirstDelegation.message')}
+        {stakingNotification ? (
+          <StakingNotificationBanner
+            notification={stakingNotification}
+            onPortfolioDriftedNotificationClick={onManageClick}
           />
         ) : (
           <Flex flexDirection="column" gap="$32">
@@ -114,17 +95,21 @@ export const Overview = () => {
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
-          distribution={displayData}
+          distribution={displayData.map(({ color, name = '-', onChainPercentage, apy, saturation }) => ({
+            apy: apy ? String(apy) : undefined,
+            color,
+            name,
+            percentage: onChainPercentage,
+            saturation: saturation ? String(saturation) : undefined,
+          }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      {pendingDelegationTransaction && (
+      {stakingNotification && (
         <Box mb="$40">
-          <Banner
-            withIcon
-            customIcon={<InfoCircleOutlined className={styles.bannerInfoIcon} />}
-            message={t('overview.banners.pendingPoolMigration.title')}
-            description={t('overview.banners.pendingPoolMigration.message')}
+          <StakingNotificationBanner
+            notification={stakingNotification}
+            onPortfolioDriftedNotificationClick={onManageClick}
           />
         </Box>
       )}
@@ -141,8 +126,13 @@ export const Overview = () => {
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}
-            cardanoCoinSymbol="tADA"
-            onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
+            cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
+            onStakePoolSelect={() => {
+              portfolioMutators.executeCommand({
+                data: item.stakePool,
+                type: 'ShowDelegatedPoolDetails',
+              });
+            }}
           />
         </Box>
       ))}

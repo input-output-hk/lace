@@ -1,26 +1,25 @@
+import { PostHogAction } from '@lace/common';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useStakePoolDetails } from '../store';
+import { Flow, useDelegationPortfolioStore } from '../store';
 import { StakingModal } from './StakingModal';
 
 type StakingModalsProps = {
   popupView?: boolean;
-  onConfirm: () => void;
 };
 
-export const ChangingPreferencesModal = ({ onConfirm, popupView }: StakingModalsProps): React.ReactElement => {
+export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { setStakeConfirmationVisible, isStakeConfirmationVisible } = useStakePoolDetails();
-
-  // TODO implement analytics for the new flow
-  const analytics = {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    sendEvent: () => {},
-  };
+  const { portfolioMutators, visible } = useDelegationPortfolioStore((store) => ({
+    portfolioMutators: store.mutators,
+    visible: store.activeFlow === Flow.ChangingPreferences,
+  }));
+  const { analytics } = useOutsideHandles();
 
   return (
     <StakingModal
-      visible={isStakeConfirmationVisible}
+      visible={visible}
       title={t('modals.changingPreferences.title')}
       description={t('modals.changingPreferences.description')}
       actions={[
@@ -28,22 +27,17 @@ export const ChangingPreferencesModal = ({ onConfirm, popupView }: StakingModals
           body: t('modals.changingPreferences.buttons.cancel'),
           color: 'secondary',
           dataTestId: 'switch-pools-modal-cancel',
-          onClick: () => setStakeConfirmationVisible(false),
+          onClick: () => {
+            analytics.sendEventToPostHog(PostHogAction.StakingChangingStakingPreferencesCancelClick);
+            portfolioMutators.executeCommand({ type: 'DiscardChangingPreferences' });
+          },
         },
         {
           body: t('modals.changingPreferences.buttons.confirm'),
           dataTestId: 'switch-pools-modal-confirm',
           onClick: () => {
-            // @ts-ignore
-            analytics.sendEvent({
-              action: 'AnalyticsEventActions.CLICK_EVENT',
-              category: 'AnalyticsEventCategories.STAKING',
-              name: popupView
-                ? 'AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_POPUP'
-                : 'AnalyticsEventNames.Staking.CONFIRM_SWITCH_POOL_BROWSER',
-            });
-            setStakeConfirmationVisible(false);
-            onConfirm();
+            analytics.sendEventToPostHog(PostHogAction.StakingChangingStakingPreferencesFineByMeClick);
+            portfolioMutators.executeCommand({ type: 'ConfirmChangingPreferences' });
           },
         },
       ]}

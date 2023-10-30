@@ -30,7 +30,7 @@ import {
 import { getTotalWalletBalance, sortAssets } from '../utils';
 import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
 import { AssetDetailsDrawer } from './AssetDetailsDrawer/AssetDetailsDrawer';
-import { AssetTransactionDetails } from './AssetTransactionDetails/AssetTransactionDetails';
+import { AssetActivityDetails } from './AssetActivityDetails/AssetActivityDetails';
 import { AssetEducationalList } from './AssetEducationalList/AssetEducationalList';
 
 const LIST_CHUNK_SIZE = 12;
@@ -53,8 +53,8 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     walletUI: { cardanoCoin, appMode, areBalancesVisible, getHiddenBalancePlaceholder },
     setAssetDetails,
     assetDetails,
-    transactionDetail,
-    resetTransactionState,
+    activityDetail,
+    resetActivityState,
     blockchainProvider,
     environmentName
   } = useWalletStore();
@@ -63,7 +63,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
-  const [isTransactionDetailsOpen, setIsTransactionDetailsOpen] = useState(false);
+  const [isActivityDetailsOpen, setIsActivityDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
   const [listItemsAmount, setListItemsAmount] = useState(LIST_CHUNK_SIZE);
   const [selectedAssetId, setSelectedAssetId] = useState<string | undefined>();
@@ -170,6 +170,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const paginatedAssetList = useMemo(() => fullAssetList?.slice(0, listItemsAmount), [fullAssetList, listItemsAmount]);
 
   const onAssetRowClick = (id: string) => {
+    analytics.sendEventToPostHog(PostHogAction.TokenTokensTokenRowClick);
     analytics.sendEventToMatomo({
       category: MatomoEventCategories.VIEW_TOKENS,
       action: MatomoEventActions.CLICK_EVENT,
@@ -201,21 +202,21 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     ]
   );
 
-  const closeTransactionDetailsDrawer = () => setIsTransactionDetailsOpen(false);
-  const onTransactionDetailsBack = useCallback(() => {
-    resetTransactionState();
-    closeTransactionDetailsDrawer();
+  const closeActivityDetailsDrawer = () => setIsActivityDetailsOpen(false);
+  const onActivityDetailsBack = useCallback(() => {
+    resetActivityState();
+    closeActivityDetailsDrawer();
     setAssetDetails(fullAssetList.find((item) => item.id === selectedAssetId));
-  }, [selectedAssetId, fullAssetList, resetTransactionState, setAssetDetails]);
+  }, [selectedAssetId, fullAssetList, resetActivityState, setAssetDetails]);
 
-  const onTransactionDetailsVisibleChange = useCallback(
+  const onActivityDetailsVisibleChange = useCallback(
     (visible: boolean) => {
       // Clear transaction details from state after drawer is closed
-      if (!visible && transactionDetail) {
-        resetTransactionState();
+      if (!visible && activityDetail) {
+        resetActivityState();
       }
     },
-    [transactionDetail, resetTransactionState]
+    [activityDetail, resetActivityState]
   );
 
   const onSendAssetClick = (id: string) => {
@@ -241,14 +242,14 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   };
 
   useEffect(() => {
-    if (transactionDetail) {
+    if (activityDetail) {
       setAssetDetails();
     }
 
-    if (!assetDetails && transactionDetail) {
-      setIsTransactionDetailsOpen(true);
+    if (!assetDetails && activityDetail) {
+      setIsActivityDetailsOpen(true);
     }
-  }, [assetDetails, transactionDetail, setAssetDetails]);
+  }, [assetDetails, activityDetail, setAssetDetails]);
 
   // TODO: move this to store once LW-1494 is done
   useEffect(() => {
@@ -284,7 +285,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
 
   useEffect(() => {
     // Close asset tx details drawer if network (blockchainProvider) has changed
-    closeTransactionDetailsDrawer();
+    closeActivityDetailsDrawer();
   }, [blockchainProvider]);
 
   const assetsPortfolio = (
@@ -301,12 +302,12 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   );
   const drawers = (
     <>
-      <AssetTransactionDetails
-        afterVisibleChange={onTransactionDetailsVisibleChange}
+      <AssetActivityDetails
+        afterVisibleChange={onActivityDetailsVisibleChange}
         appMode={appMode}
-        isVisible={isTransactionDetailsOpen}
-        onClose={closeTransactionDetailsDrawer}
-        onBack={onTransactionDetailsBack}
+        isVisible={isActivityDetailsOpen}
+        onClose={closeActivityDetailsDrawer}
+        onBack={onActivityDetailsBack}
       />
       <AssetDetailsDrawer
         fiatCode={fiatCurrency.code}

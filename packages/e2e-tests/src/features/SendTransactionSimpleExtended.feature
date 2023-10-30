@@ -9,23 +9,25 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click "Send" button on page header
     Then send drawer is displayed with all its components in extended mode
 
-  @LW-2355 @Testnet @Mainnet
+  @LW-2355 @LW-5034 @Testnet @Mainnet
   Scenario Outline: Extended-view - Enter valid <wallet> type address, no error displayed
     When I click "Send" button on page header
     And I enter a valid "<wallet>" address in the bundle 1 recipient's address
     Then "Incorrect address" error is not displayed under address input field
+    And "Add address" button is enabled in the bundle 1 recipient's address input
     Examples:
       | wallet  |
       | byron   |
       | shelley |
       | icarus  |
 
-  @LW-2356 @Testnet @Mainnet
+  @LW-2356 @LW-5036 @Testnet @Mainnet
   Scenario: Extended-view - Enter Incorrect address - Wrong checksum - Error displayed & Review button is disabled
     When I click "Send" button on page header
     And I enter an address  that matches the amount of characters but does not match with the checksum
     Then "Incorrect address" error is displayed under address input field
     And "Review transaction" button is disabled on "Send" page
+    And "Add address" button is disabled in the bundle 1 recipient's address input
 
   @LW-2357 @Testnet @Mainnet
   Scenario: Extended-view - Enter Incorrect address - Wrong amount of characters - Error displayed & Review button is disabled
@@ -53,8 +55,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2361 @Testnet @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2361 @Testnet @Mainnet
   Scenario: Extended-view - Address can be saved from Send screen
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
@@ -63,33 +64,31 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     Then address form is filled with "shelley" address
     When I fill address form with "WalletName" name
     And I click "Save" button on "Add address" drawer in send flow
-    And I see a toast with message: "browserView.addressBook.toast.addAddress"
+    And I see a toast with text: "Address added"
     And I close the drawer by clicking close button
     And I click "Agree" button on "You'll have to start again" modal
     And I open address book from header menu
     Then I see address row with name "WalletName" and address "Shelley" on the list in extended mode
 
-  @LW-2362 @Testnet @Pending
-  # BUG LW-7925
+  @LW-2362 @Testnet
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then recipients address input contains address "qfwr6ja" and name "Shelley"
+    Then recipients address input contains address "fwr6ja" and name "Shelley"
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2362 @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2362 @Mainnet
   Scenario: Extended-view - Existing address can be selected from the address book and used for transaction
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Shelley"
-    Then recipients address input contains address "q2c767z" and name "Shelley"
+    Then recipients address input contains address "2c767z" and name "Shelley"
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
@@ -112,29 +111,27 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And click on one of the contacts on the dropdown
     Then the selected contact is added in the bundle recipient's address
 
-  @LW-2363 @Testnet @Pending
-  # BUG LW-7925
+  @LW-2363 @Testnet
   Scenario: Extended-view - Existing address can be selected from the address book and then removed
     And I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     When I click address on the list with name "Byron"
-    Then recipients address input contains address "7oNj7Dzp" and name "Byron"
+    Then recipients address input contains address "Nj7Dzp" and name "Byron"
     And click "Remove address" button  in address bar
     Then recipients address input  is empty
     When I enter a value of: 1 to the "tADA" asset in bundle 1
     Then "Review transaction" button is disabled on "Send" page
 
-  @LW-2363 @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2363 @Mainnet
   Scenario: Extended-view - Existing address can be selected from the address book and then removed
     When I have 3 addresses in my address book in extended mode
     And I navigate to Tokens extended page
     And I click "Send" button on page header
     And click "Add address" button  in address bar
     And I click address on the list with name "Byron"
-    Then recipients address input contains address "kNFiPvM4" and name "Byron"
+    Then recipients address input contains address "FiPvM4" and name "Byron"
     And click "Remove address" button  in address bar
     And recipients address input  is empty
     And I enter a value of: 1 to the "ADA" asset in bundle 1
@@ -626,3 +623,23 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I click "Confirm" button on "Transaction summary" page
     When I enter correct password and confirm the transaction
     Then The Transaction error screen is displayed in extended mode
+
+  @LW-7824 @Testnet @Pending
+  # Bug: LW-8579
+  Scenario: Extended view - Validate if contact name that has up to 12 characters is not truncated
+    Given address book contains address with name that has 12 characters
+    When I click "Send" button on page header
+    And I enter "abcdefghijkl" in the bundle 1 recipient's address
+    Then first result in address dropdown has name "abcdefghijkl"
+    When I click on one of the contacts on the dropdown
+    Then recipients address input contains address entry with name "abcdefghijkl"
+
+  @LW-7825 @Testnet @Pending
+  # Bug: LW-8579
+  Scenario: Extended view - Validate if contact name that has >12 characters is truncated
+    Given address book contains address with name that has more than 12 characters
+    When I click "Send" button on page header
+    And I enter "abcdefghijklm" in the bundle 1 recipient's address
+    Then first result in address dropdown has name "abcdefghi..."
+    When I click on one of the contacts on the dropdown
+    Then recipients address input contains address entry with name "abcdefghi..."

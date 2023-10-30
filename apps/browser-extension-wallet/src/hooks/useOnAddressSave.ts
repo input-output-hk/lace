@@ -3,7 +3,8 @@ import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   AnalyticsEventNames,
   MatomoEventActions,
-  MatomoEventCategories
+  MatomoEventCategories,
+  PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getAddressToSave } from '@src/utils/validators';
 import AddIcon from '@assets/icons/add.component.svg';
@@ -39,11 +40,14 @@ export const useOnAddressSave = (): useOnAddressSaveInterface => {
     const addressToSave = await getAddressToSave({ address, handleResolver });
 
     if ('id' in addressToEdit) {
+      analytics.sendEventToPostHog(PostHogAction.AddressBookAddressRecordEditAddressDoneClick);
       return updateAddress(addressToEdit.id, addressToSave, {
         text: t('browserView.addressBook.toast.editAddress'),
         icon: EditIcon
       });
     }
+
+    analytics.sendEventToPostHog(PostHogAction.AddressBookAddNewAddressSaveAddressClick);
     return saveAddress(addressToSave, {
       text: t('browserView.addressBook.toast.addAddress'),
       icon: AddIcon

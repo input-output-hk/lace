@@ -15,10 +15,7 @@ import StakingPageObject from '../pageobject/stakingPageObject';
 import StakingPage from '../elements/staking/stakingPage';
 import StakePoolDetails from '../elements/staking/stakePoolDetails';
 import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDrawer';
-import { getTestWallet, TestWalletName, WalletConfig } from '../support/walletConfiguration';
-import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
-import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
 import StakingExitModal from '../elements/staking/StakingExitModal';
 
 Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
@@ -29,21 +26,8 @@ Then(/^I see Staking title displayed$/, async () => {
   await stakingPageAssert.assertSeeTitle();
 });
 
-Then(/^I see the Network Info component with the expected content$/, async () => {
-  await stakingPageAssert.assertNetworkContainerExistsWithContent();
-});
-
-Then(
-  /^I see the stake pool search control with appropriate content in (extended|popup) mode$/,
-  async (mode: 'extended' | 'popup') => {
-    await stakingPageAssert.assertSeeSearchComponent(mode);
-  }
-);
-
-// eslint-disable-next-line no-unused-vars
 Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
-  // eslint-disable-next-line no-unused-vars
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
     const stakePool =
       stakePoolName === 'OtherStakePool'
@@ -95,10 +79,6 @@ Then(
     await stakingPageAssert.assertStakingSuccessDrawer(process, mode);
   }
 );
-
-Then(/^I click "Close" button on staking success drawer$/, async () => {
-  await StakingSuccessDrawer.clickCloseButton();
-});
 
 Then(/^the staking error screen is displayed$/, async () => {
   await stakingPageAssert.assertSeeStakingError();
@@ -161,13 +141,6 @@ Then(/^I input "([^"]*)" to the search bar$/, async (term: string) => {
   await StakingPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
 
-Then(
-  /^there are (.*) results and "([^"]*)" and "([^"]*)" are populated if applicable$/,
-  async (results: number, resultTitle: string, resultSubTitle: string) => {
-    await stakingPageAssert.assertCheckResults(resultTitle, resultSubTitle, results);
-  }
-);
-
 When(/^I click stake pool with name "([^"]*)"$/, async (poolName: string) => {
   poolName === 'OtherStakePool'
     ? await StakingPageObject.clickStakePoolWithName(testContext.load(poolName))
@@ -190,7 +163,7 @@ Then(/^Each stake pool list item contains:$/, async (_ignored: string) => {
 });
 
 Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (metadata: 'with' | 'without') => {
-  const expectedTransactionDetails =
+  const expectedActivityDetails =
     metadata === 'with'
       ? {
           transactionDescription: 'Delegation\n1 token',
@@ -205,7 +178,7 @@ Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async
           poolID: testContext.load('poolID') as string
         };
 
-  await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+  await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
 });
 
 Then(
@@ -292,26 +265,6 @@ When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async
       throw new Error(`Unsupported button name: ${button}`);
   }
 });
-
-Then(
-  /^I enter (correct|incorrect|newly created) wallet password and confirm staking$/,
-  async (type: 'correct' | 'incorrect' | 'newly created') => {
-    let password;
-    switch (type) {
-      case 'newly created':
-        password = String((testContext.load('newCreatedWallet') as WalletConfig).password);
-        break;
-      case 'incorrect':
-        password = 'somePassword';
-        break;
-      case 'correct':
-      default:
-        password = String(getTestWallet(TestWalletName.TestAutomationWallet).password);
-    }
-    await SimpleTxSideDrawerPageObject.fillPassword(password);
-    await stakingExtendedPageObject.confirmStaking();
-  }
-);
 
 Then(
   /^"Next" button is (enabled|disabled) on "Staking confirmation" page$/,

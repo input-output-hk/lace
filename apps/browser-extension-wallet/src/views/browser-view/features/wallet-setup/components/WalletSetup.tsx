@@ -17,9 +17,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { HardwareWalletFlow } from './HardwareWalletFlow';
 import { Portal } from './Portal';
-import { SendOnboardingAnalyticsEvent } from '../types';
+import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
 import styles from './WalletSetup.module.scss';
 import { WalletSetupWizard } from './WalletSetupWizard';
+import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
+const userIdService = getUserIdService();
 
 const { WalletSetup: Events } = AnalyticsEventNames;
 
@@ -80,6 +82,14 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
       document.removeEventListener('keydown', handleEnterKeyPress);
     };
   }, []);
+
+  const clearUserIdService = useCallback(async () => {
+    await userIdService.resetToDefaultValues();
+  }, []);
+  // reset values in user ID service if the background storage and local storage are manually removed
+  useEffect(() => {
+    clearUserIdService();
+  }, [clearUserIdService]);
 
   const clearWallet = useCallback(() => {
     deleteFromLocalStorage('wallet');
@@ -210,7 +220,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
         </Route>
         <Route path={`${path}/create`}>
           <WalletSetupWizard
-            setupType="create"
+            setupType={SetupType.CREATE}
             onCancel={cancelWalletFlow}
             sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_CREATE)}
             initialStep={initialStep}
@@ -218,7 +228,7 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
         </Route>
         <Route path={`${path}/restore`}>
           <WalletSetupWizard
-            setupType={isForgotPasswordFlow ? 'forgot_password' : 'restore'}
+            setupType={isForgotPasswordFlow ? SetupType.FORGOT_PASSWORD : SetupType.RESTORE}
             onCancel={cancelWalletFlow}
             sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_RESTORE)}
             initialStep={initialStep}

@@ -1,8 +1,14 @@
 import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
 import React, { useCallback, useEffect } from 'react';
-import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
+import {
+  useAnalyticsContext,
+  useBackgroundServiceAPIContext,
+  useCurrencyStore,
+  useExternalLinkOpener,
+  useTheme
+} from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
-import { stakePoolDetailsSelector, useDelegationStore } from '@src/features/delegation/stores';
+import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
@@ -17,15 +23,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { setWalletPassword, handleOpenBrowser } = useBackgroundServiceAPIContext();
-  const selectedStakePoolDetails = useDelegationStore(stakePoolDetailsSelector);
-  const {
-    delegationTxBuilder,
-    setDelegationTxBuilder,
-    delegationTxFee,
-    setDelegationTxFee,
-    setSelectedStakePool,
-    selectedStakePool
-  } = useDelegationStore();
+  const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
   const password = usePassword();
   const submittingState = useSubmitingState();
@@ -81,6 +79,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     true
   );
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
+  const analytics = useAnalyticsContext();
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -89,18 +88,16 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   return (
     <OutsideHandlesProvider
       {...{
+        analytics,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,
-        delegationStoreSelectedStakePoolDetails: selectedStakePoolDetails,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreDelegationTxBuilder: delegationTxBuilder,
-        delegationStoreSetSelectedStakePool: setSelectedStakePool,
         delegationStoreSetDelegationTxFee: setDelegationTxFee,
         delegationStoreDelegationTxFee: delegationTxFee,
-        delegationStoreSelectedStakePool: selectedStakePool,
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
         password,
@@ -128,7 +125,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         title={<SectionTitle title={t('staking.sectionTitle')} classname={styles.sectionTilte} />}
         isLoading={isLoadingNetworkInfo}
       >
-        <StakingPopup theme={theme.name} />
+        <StakingPopup currentChain={currentChain} theme={theme.name} />
       </ContentLayout>
     </OutsideHandlesProvider>
   );

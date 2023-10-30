@@ -1,36 +1,41 @@
 import {
   EnhancedAnalyticsOptInStatus,
   ExtensionViews,
-  MatomoSendEventProps,
+  UserTrackingType,
   PostHogAction,
   PostHogProperties,
-  UserTrackingType
+  MatomoSendEventProps,
+  IAnalyticsTracker
 } from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient, MATOMO_OPTED_OUT_EVENTS_DISABLED } from '../matomo';
-import { POSTHOG_ENABLED, POSTHOG_OPTED_OUT_EVENTS_DISABLED, PostHogClient, POSTHOG_EXCLUDED_EVENTS } from '../postHog';
+import {
+  POSTHOG_OPTED_OUT_EVENTS_DISABLED,
+  PostHogClient,
+  POSTHOG_EXCLUDED_EVENTS
+} from '../../PostHogClientProvider/client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
 
 interface AnalyticsTrackerArgs {
   chain: Wallet.Cardano.ChainId;
+  postHogClient?: PostHogClient;
   view?: ExtensionViews;
   analyticsDisabled?: boolean;
   isPostHogEnabled?: boolean;
   excludedEvents?: string;
 }
-export class AnalyticsTracker {
+export class AnalyticsTracker implements IAnalyticsTracker {
   protected matomoClient?: MatomoClient;
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;
   protected excludedEvents: string;
-  protected trackingTypeChangedFromSettings: boolean;
+  protected userTrackingType?: UserTrackingType;
 
   constructor({
+    postHogClient,
     chain,
-    view = ExtensionViews.Extended,
     analyticsDisabled = false,
-    isPostHogEnabled = POSTHOG_ENABLED,
     excludedEvents = POSTHOG_EXCLUDED_EVENTS ?? ''
   }: AnalyticsTrackerArgs) {
     if (analyticsDisabled) return;
@@ -38,38 +43,38 @@ export class AnalyticsTracker {
     this.matomoClient = new MatomoClient(chain, this.userIdService);
     this.excludedEvents = excludedEvents;
 
-    if (isPostHogEnabled) {
-      this.postHogClient = new PostHogClient(chain, this.userIdService, view);
+    if (postHogClient) {
+      this.postHogClient = postHogClient;
     }
+
+    this.userIdService.userTrackingType$.subscribe((trackingType) => {
+      this.userTrackingType = trackingType;
+    });
   }
 
   async setOptedInForEnhancedAnalytics(status: EnhancedAnalyticsOptInStatus): Promise<void> {
     // eslint-disable-next-line unicorn/prefer-ternary
     if (status === EnhancedAnalyticsOptInStatus.OptedIn) {
       await this.userIdService?.makePersistent();
-      if (this.trackingTypeChangedFromSettings) {
-        this.sendAliasEvent();
-        this.trackingTypeChangedFromSettings = false;
-      }
     } else {
       await this.userIdService?.makeTemporary();
     }
   }
 
   async sendPageNavigationEvent(): Promise<void> {
-    const shouldOmitEvent = await this.shouldOmitSendEventToPostHog();
+    const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
     if (shouldOmitEvent) return;
     await this.postHogClient?.sendPageNavigationEvent();
   }
 
   async sendAliasEvent(): Promise<void> {
-    const shouldOmitEvent = await this.shouldOmitSendEventToPostHog();
+    const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
     if (shouldOmitEvent) return;
     await this.postHogClient?.sendAliasEvent();
   }
 
   async sendEventToMatomo(props: MatomoSendEventProps): Promise<void> {
-    const isOptedOutUser = (await this.userIdService.getUserTrackingType()) === UserTrackingType.Basic;
+    const isOptedOutUser = this.userTrackingType === UserTrackingType.Basic;
     if (MATOMO_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser) return;
     await this.matomoClient?.sendEvent(props);
     await this.userIdService?.extendLifespan();
@@ -77,7 +82,7 @@ export class AnalyticsTracker {
 
   async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     const isEventExcluded = this.isEventExcluded(action);
-    const shouldOmitEvent = await this.shouldOmitSendEventToPostHog();
+    const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
     if (shouldOmitEvent || isEventExcluded) return;
     await this.postHogClient?.sendEvent(action, properties);
     await this.userIdService?.extendLifespan();
@@ -88,13 +93,8 @@ export class AnalyticsTracker {
     this.postHogClient?.setChain(chain);
   }
 
-  setTrackingTypeChangedFromSettings(): void {
-    this.trackingTypeChangedFromSettings = true;
-  }
-
-  private async shouldOmitSendEventToPostHog() {
-    const userTrackingType = await this.userIdService.getUserTrackingType();
-    const isOptedOutUser = userTrackingType === UserTrackingType.Basic;
+  private shouldOmitSendEventToPostHog() {
+    const isOptedOutUser = this.userTrackingType === UserTrackingType.Basic;
     return POSTHOG_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser;
   }
 

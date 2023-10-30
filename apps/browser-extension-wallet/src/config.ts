@@ -22,6 +22,7 @@ export type Config = {
   WALLET_INTERVAL: number;
   CARDANO_SERVICES_URLS: CardanoServiceUrls;
   ADA_PRICE_CHECK_INTERVAL: number;
+  TOKEN_PRICE_CHECK_INTERVAL: number;
   AVAILABLE_CHAINS: Wallet.ChainName[];
   CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
   CEXPLORER_URL_PATHS: CExplorerUrlPaths;
@@ -38,12 +39,7 @@ const envChecks = (chosenChain: Wallet.ChainName): void => {
     throw new Error('env vars not complete');
   }
 
-  if (
-    !process.env.CEXPLORER_URL_MAINNET ||
-    !process.env.CEXPLORER_URL_PREVIEW ||
-    !process.env.CEXPLORER_URL_PREPROD ||
-    !process.env.CEXPLORER_URL_TESTNET
-  ) {
+  if (!process.env.CEXPLORER_URL_MAINNET || !process.env.CEXPLORER_URL_PREVIEW || !process.env.CEXPLORER_URL_PREPROD) {
     throw new Error('explorer vars not complete');
   }
 
@@ -78,6 +74,9 @@ export const config = (): Config => {
     ADA_PRICE_CHECK_INTERVAL: !Number.isNaN(Number(process.env.ADA_PRICE_POLLING_IN_SEC))
       ? Number(process.env.ADA_PRICE_POLLING_IN_SEC) * 1000
       : 30 * 1000,
+    TOKEN_PRICE_CHECK_INTERVAL: !Number.isNaN(Number(process.env.TOKEN_PRICE_POLLING_IN_SEC))
+      ? Number(process.env.TOKEN_PRICE_POLLING_IN_SEC) * 1000
+      : 300 * 1000,
     CARDANO_SERVICES_URLS: {
       Mainnet: process.env.CARDANO_SERVICES_URL_MAINNET,
       Preprod: process.env.CARDANO_SERVICES_URL_PREPROD,
@@ -85,9 +84,9 @@ export const config = (): Config => {
     },
     CEXPLORER_BASE_URL: {
       Mainnet: `${process.env.CEXPLORER_URL_MAINNET}`,
-      LegacyTestnet: `${process.env.CEXPLORER_URL_TESTNET}`,
       Preprod: `${process.env.CEXPLORER_URL_PREPROD}`,
-      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`
+      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`,
+      Sanchonet: `${process.env.CEXPLORER_URL_SANCHONET}`
     },
     CEXPLORER_URL_PATHS: {
       Tx: 'tx',

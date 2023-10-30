@@ -35,6 +35,11 @@ class NftsFolderPage extends CommonDrawerElements {
       async (nft) => (await nft.$(this.NFT_NAME).getText()) === nftName
     )) as WebdriverIO.Element;
   }
+
+  async clickAddNftButton() {
+    await this.addNftButton.waitForClickable();
+    await this.addNftButton.click();
+  }
 }
 
 export default new NftsFolderPage();

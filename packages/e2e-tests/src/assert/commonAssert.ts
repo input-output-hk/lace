@@ -2,7 +2,7 @@ import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
 import webTester from '../actor/webTester';
 import { expect } from 'chai';
-import { getNumberOfOpenedTabs, switchToLastWindow } from '../utils/window';
+import { getNumberOfOpenedTabs, switchToLastWindow, waitUntilExpectedNumberOfHandles } from '../utils/window';
 import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
 import TopNavigationAssert from './topNavigationAssert';
@@ -24,6 +24,7 @@ class CommonAssert {
   }
 
   async assertSeeTabWithUrl(urlPart: string) {
+    await waitUntilExpectedNumberOfHandles(2);
     await browser.switchWindow(urlPart);
     expect(await browser.getUrl()).to.contain(urlPart);
   }

@@ -35,7 +35,9 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase01NextClick,
     ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase09NextClick,
     ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingCreateEnterPassphrase17NextClick,
-    DONE_GO_TO_WALLET: PostHogAction.OnboardingCreateDoneGoToWallet
+    DONE_GO_TO_WALLET: PostHogAction.OnboardingCreateDoneGoToWallet,
+    WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingCreateWalletNamePasswordNextClick,
+    PASSPHRASE_INTRO_PLAY_VIDEO_CLICK: PostHogAction.OnboardingCreatePassphraseIntroPlayVideoClick
   },
   restore: {
     ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingRestoreAnalyticsAgreeClick,
@@ -50,7 +52,8 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase01NextClick,
     ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase09NextClick,
     ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.OnboardingRestoreEnterPassphrase17NextClick,
-    DONE_GO_TO_WALLET: PostHogAction.OnboardingRestoreDoneGoToWallet
+    DONE_GO_TO_WALLET: PostHogAction.OnboardingRestoreDoneGoToWallet,
+    WALLET_NAME_PASSWORD_NEXT_CLICK: PostHogAction.OnboardingRestoreWalletNamePasswordNextClick
   },
   hw: {
     ANALYTICS_AGREE_CLICK: PostHogAction.OnboardingHWAnalyticsAgreeClick,
@@ -61,6 +64,14 @@ export const postHogOnboardingActions: PostHogOnboardingActionsType = {
     SELECT_HW_ACCOUNT_NEXT_CLICK: PostHogAction.OnboardingHWSelectAccountNextClick,
     SETUP_OPTION_CLICK: PostHogAction.OnboardingHWClick,
     DONE_GO_TO_WALLET: PostHogAction.OnboardingHWDoneGoToWallet
+  },
+  // eslint-disable-next-line camelcase
+  forgot_password: {
+    WALLET_PASSWORD_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordNextClick,
+    RECOVERY_PASSPHRASE_LENGTH_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordRecoveryPhraseLengthNextClick,
+    ENTER_PASSPHRASE_01_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase01NextClick,
+    ENTER_PASSPHRASE_09_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase09NextClick,
+    ENTER_PASSPHRASE_17_NEXT_CLICK: PostHogAction.UnlockWalletForgotPasswordEnterPassphrase17NextClick
   }
 };
 

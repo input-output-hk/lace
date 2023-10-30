@@ -111,8 +111,7 @@ const colors: Colors = {
     darkColorScheme.$primary_light_grey,
   $bundle_input_error_label_color: darkColorScheme.$secondary_data_pink,
 
-  $sub_navigation_container_borderColor:
-    lightColorScheme.$primary_light_grey_plus,
+  $sub_navigation_container_borderColor: darkColorScheme.$primary_mid_grey,
 
   $sub_navigation_item_label_color: lightColorScheme.$primary_grey,
   $sub_navigation_container_outlineColor:
@@ -156,6 +155,9 @@ const colors: Colors = {
     lightColorScheme.$secondary_data_green,
   $assets_table_market_price_trend_down_label_color:
     lightColorScheme.$secondary_data_pink,
+
+  $dialog_container_bgColor: darkColorScheme.$primary_light_black,
+  $dialog_description_color: darkColorScheme.$primary_light_grey,
 
   $side_drawer_container_bgColor: darkColorScheme.$primary_light_black,
   $side_drawer_separator_bgColor: darkColorScheme.$primary_mid_grey,
@@ -226,6 +228,26 @@ const colors: Colors = {
 
   $message_title_color: darkColorScheme.$primary_white,
   $message_description_color: darkColorScheme.$primary_light_grey,
+
+  $input_container_bgColor: darkColorScheme.$primary_dark_grey,
+  $input_container_hover_outline_color: darkColorScheme.$primary_grey,
+  $input_container_focused_outline_color:
+    darkColorScheme.$secondary_hover_purple,
+  $input_value_color: darkColorScheme.$primary_white,
+  $input_button_bgColor: darkColorScheme.$primary_grey,
+  $input_button_icon_color: darkColorScheme.$primary_light_grey,
+  $input_label_color: darkColorScheme.$primary_light_grey,
+  $input_error_message_color: darkColorScheme.$secondary_data_pink,
+
+  $text_primary: darkColorScheme.$primary_white,
+  $text_secondary: darkColorScheme.$primary_light_grey,
+
+  $metadata_label_color: darkColorScheme.$primary_white,
+  $metadata_secondary_label_color: darkColorScheme.$primary_light_grey,
+
+  $text_link_label_color: darkColorScheme.$secondary_data_blue,
+  $text_link_label_color_visited: darkColorScheme.$primary_accent_purple,
+  $text_link_label_color_disabled: lightColorScheme.$primary_grey,
 };
 
 const elevation: Elevation = {

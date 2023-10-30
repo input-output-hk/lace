@@ -21,6 +21,11 @@ jest.mock('@src/stores', () => ({
   useWalletStore: mockUseWalletStore
 }));
 
+jest.mock('@providers', () => ({
+  ...jest.requireActual<any>('@providers'),
+  useAnalyticsContext: jest.fn().mockReturnValue({ sendEventToPostHog: jest.fn() })
+}));
+
 jest.mock('@cardano-sdk/web-extension', () => ({
   ...jest.requireActual<any>('@cardano-sdk/web-extension'),
   consumeRemoteApi: () => ({
@@ -96,8 +101,9 @@ describe('Connect Component: ', () => {
       await waitFor(assert);
 
       mockUseWalletStore.mockReturnValueOnce({
-        environmentName: 'LegacyTestnet'
+        environmentName: 'Sanchonet'
       });
+
       rerender(<WrappedConnectComponent />);
       await waitFor(assert);
     });
@@ -122,8 +128,9 @@ describe('Connect Component: ', () => {
       await waitFor(assert);
 
       mockUseWalletStore.mockReturnValueOnce({
-        environmentName: 'LegacyTestnet'
+        environmentName: 'Sanchonet'
       });
+
       rerender(<WrappedConnectComponent />);
       await waitFor(assert);
     });

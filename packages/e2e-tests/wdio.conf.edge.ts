@@ -2,16 +2,14 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
-const drivers = {
-  // used only for local runs!
-  chromiumedge: { version: '106.0.1370.52' }
-};
-
 const edgeConfig: WebdriverIO.Config = {
   capabilities: [
     {
       maxInstances: 1,
       browserName: 'MicrosoftEdge',
+      browserVersion: 'stable',
+      ...(process.env.CI && { hostname: 'localhost' }),
+      ...(process.env.CI && { port: 4444 }),
       'ms:edgeOptions': {
         args: [
           '--disable-gpu',
@@ -36,19 +34,7 @@ const edgeConfig: WebdriverIO.Config = {
   services: ['devtools', 'intercept']
 };
 
-if (!process.env.CI) {
-  edgeConfig.services = [
-    [
-      'selenium-standalone',
-      {
-        installArgs: { drivers },
-        args: { drivers }
-      }
-    ],
-    'devtools',
-    'intercept'
-  ];
-} else {
+if (process.env.CI) {
   fetch('http://127.0.0.1:4444/wd/hub').catch(() => {
     throw new Error("chromedriver doesn't seem to be running, please start it first or use CI=false");
   });

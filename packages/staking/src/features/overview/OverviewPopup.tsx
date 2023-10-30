@@ -3,15 +3,16 @@ import { useObservable } from '@lace/common';
 import { Box, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { DelegationCard } from '../delegation-card';
 import { StakePoolDetails } from '../drawer';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useDelegationPortfolioStore, useStakePoolDetails } from '../store';
-import { DelegationCard } from './DelegationCard';
+import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
-import { StakingInfoCard } from './staking-info-card';
+import { StakingInfoCard } from './StakingInfoCard';
+import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -20,14 +21,18 @@ export const OverviewPopup = () => {
     balancesBalance,
     compactNumber,
     fetchCoinPricePriceResult,
-    delegationStoreSetSelectedStakePool: setSelectedStakePool,
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
+    walletStoreWalletActivities: walletActivities,
+    expandStakingView,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
-  const currentPortfolio = useDelegationPortfolioStore((store) => store.currentPortfolio);
-  const setIsDrawerVisible = useStakePoolDetails((state) => state.setIsDrawerVisible);
+  const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
+    portfolioMutators: store.mutators,
+  }));
+  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -47,8 +52,7 @@ export const OverviewPopup = () => {
   });
 
   const onStakePoolOpen = (stakePool: Wallet.Cardano.StakePool) => {
-    setSelectedStakePool(stakePool);
-    setIsDrawerVisible(true);
+    portfolioMutators.executeCommand({ data: stakePool, type: 'ShowDelegatedPoolDetails' });
   };
 
   if (noFunds)
@@ -81,12 +85,26 @@ export const OverviewPopup = () => {
 
   return (
     <>
+      {stakingNotification === 'portfolioDrifted' && (
+        <Box mb="$32">
+          <StakingNotificationBanner
+            notification="portfolioDrifted"
+            onPortfolioDriftedNotificationClick={expandStakingView}
+          />
+        </Box>
+      )}
       <Box mb="$32">
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
           arrangement="vertical"
-          distribution={displayData}
+          distribution={displayData.map(({ color, name = '-', onChainPercentage, apy, saturation }) => ({
+            apy: apy ? String(apy) : undefined,
+            color,
+            name,
+            percentage: onChainPercentage,
+            saturation: saturation ? String(saturation) : undefined,
+          }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
@@ -100,21 +118,14 @@ export const OverviewPopup = () => {
               {...item}
               popupView
               markerColor={displayData.length > 1 ? item.color : undefined}
-              cardanoCoinSymbol="tADA"
+              cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
               onStakePoolSelect={() => onStakePoolOpen(item.stakePool)}
             />
           </Box>
         ))}
       </Box>
       <ExpandViewBanner />
-      <StakePoolDetails
-        showBackIcon
-        showExitConfirmation={() => false}
-        onStakeOnThisPool={() => void 0}
-        onSelect={() => void 0}
-        onUnselect={() => void 0}
-        popupView
-      />
+      <StakePoolDetails showBackIcon showExitConfirmation={() => false} popupView />
     </>
   );
 };

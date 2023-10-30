@@ -12,10 +12,20 @@ export const ExpandViewBanner = (): React.ReactElement => {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.container}>
-        <div className={styles.title}>{t('popup.expandBanner.title')}</div>
-        <div className={styles.description}>{t('popup.expandBanner.description')}</div>
-        <Button onClick={expandStakingView} className={styles.button} size="large" color="gradient">
+      <div className={styles.container} data-testid="expanded-view-banner-container">
+        <div className={styles.title} data-testid="expanded-view-banner-title">
+          {t('popup.expandBanner.title')}
+        </div>
+        <div className={styles.description} data-testid="expanded-view-banner-description">
+          {t('popup.expandBanner.description')}
+        </div>
+        <Button
+          onClick={expandStakingView}
+          className={styles.button}
+          size="large"
+          color="gradient"
+          data-testid="expanded-view-banner-button"
+        >
           <Icon component={ExpandIcon} className={styles.icon} />
           {t('popup.expandBanner.button')}
         </Button>

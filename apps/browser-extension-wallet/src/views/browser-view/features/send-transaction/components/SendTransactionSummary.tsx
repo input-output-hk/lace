@@ -19,7 +19,8 @@ import {
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
-import { useObservable } from '@lace/common';
+import { useObservable, Banner } from '@lace/common';
+import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
 
 const { Text } = Typography;
 
@@ -101,7 +102,7 @@ interface SendTransactionSummaryProps {
 export const SendTransactionSummary = withAddressBookContext(
   ({ isPopupView = false }: SendTransactionSummaryProps): React.ReactElement => {
     const { t } = useTranslation();
-    const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuiltTxState();
+    const { builtTxData: { uiTx: { fee, outputs, handleResolutions } = {} } = {} } = useBuiltTxState();
     const [metadata] = useMetadata();
     const { inMemoryWallet } = useWalletStore();
     const { priceResult } = useFetchCoinPrice();
@@ -113,6 +114,8 @@ export const SendTransactionSummary = withAddressBookContext(
       () => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory,
       [getKeyAgentType]
     );
+    const isTrezor = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.Trezor, [getKeyAgentType]);
+
     const { list: addressList } = useAddressBookContext();
     const analytics = useAnalyticsContext();
     const { fiatCurrency } = useCurrencyStore();
@@ -133,10 +136,11 @@ export const SendTransactionSummary = withAddressBookContext(
       [addressList]
     );
 
-    const rows = [...(outputs?.values() ?? [])].map((item) => ({
+    const rows = [...(outputs?.values() ?? [])].map((item, idx) => ({
       list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
-      recipientAddress: item.address.toString(),
-      recipientName: addressToNameMap?.get(item.address.toString()) || item.handle
+      recipientAddress: item.address,
+      recipientName:
+        addressToNameMap?.get(handleResolutions[idx]?.handle || item.address) || handleResolutions[idx]?.handle
     }));
 
     // Where do we get the deposit field? LW-1363
@@ -165,7 +169,19 @@ export const SendTransactionSummary = withAddressBookContext(
             })
           }
         />
-        {!isInMemory && !isPopupView && <Text className={styles.connectLedgerText}>{t('send.connectYourLedger')}</Text>}
+        {!isInMemory && !isPopupView && (
+          <Text className={styles.connectLedgerText}>
+            {isTrezor ? t('send.connectYourTrezor') : t('send.connectYourLedger')}
+          </Text>
+        )}
+        {isTrezor && (
+          <Banner
+            className={styles.banner}
+            message={t('send.trezorDoesNotDupportDecimals')}
+            withIcon
+            customIcon={<ExclamationIcon style={{ height: '72px' }} />}
+          />
+        )}
       </>
     );
   }

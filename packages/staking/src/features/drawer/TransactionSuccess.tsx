@@ -1,11 +1,11 @@
 /* eslint-disable react/no-multi-comp */
 import { Wallet } from '@lace/cardano';
-import { Button } from '@lace/common';
+import { Button, PostHogAction } from '@lace/common';
 import cn from 'classnames';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { useStakePoolDetails } from '../store';
+import { useDelegationPortfolioStore } from '../store';
 import { ResultMessage } from './ResultMessage';
 import styles from './TransactionComplete.module.scss';
 
@@ -17,7 +17,12 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
   const { t } = useTranslation();
   const {
     submittingState: { isRestaking },
+    analytics,
   } = useOutsideHandles();
+
+  useEffect(() => {
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayView);
+  }, [analytics]);
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -30,30 +35,22 @@ export const TransactionSuccess = ({ popupView }: TransactionSuccessProps): Reac
   );
 };
 
-export const TransactionSuccessFooter = ({ popupView }: TransactionSuccessProps): React.ReactElement => {
+export const TransactionSuccessFooter = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder, walletStoreGetKeyAgentType: getKeyAgentType } =
-    useOutsideHandles();
-  const { setIsDrawerVisible, resetStates } = useStakePoolDetails();
-  // TODO implement analytics for the new flow
-  const analytics = {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    sendEvent: () => {},
-  };
+  const {
+    analytics,
+    delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
+    walletStoreGetKeyAgentType: getKeyAgentType,
+  } = useOutsideHandles();
+  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
+    portfolioMutators: store.mutators,
+  }));
   const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
 
   const closeDrawer = () => {
-    // @ts-ignore
-    analytics.sendEvent({
-      action: 'AnalyticsEventActions.CLICK_EVENT',
-      category: 'AnalyticsEventCategories.STAKING',
-      name: popupView
-        ? 'AnalyticsEventNames.Staking.STAKING_SUCCESS_POPUP'
-        : 'AnalyticsEventNames.Staking.STAKING_SUCCESS_BROWSER',
-    });
+    analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayCloseClick);
     setDelegationTxBuilder();
-    setIsDrawerVisible(false);
-    resetStates();
+    portfolioMutators.executeCommand({ type: 'CancelDrawer' });
     // TODO: Remove this once we pay the `keyAgent.signTransaction` Ledger tech debt up (so we are able to stake multiple times without reloading).
     if (!isInMemory) window.location.reload();
   };

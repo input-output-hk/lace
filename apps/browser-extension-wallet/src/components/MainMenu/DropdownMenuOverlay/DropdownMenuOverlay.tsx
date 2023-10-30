@@ -13,20 +13,28 @@ import {
 import styles from './DropdownMenuOverlay.module.scss';
 import { NetworkInfo } from './components/NetworkInfo';
 import { Sections } from './types';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
   lockWalletButton?: ReactNode;
   topSection?: ReactNode;
+  sendAnalyticsEvent?: (event: PostHogAction) => void;
 }
 
 export const DropdownMenuOverlay: VFC<Props> = ({
   isPopup,
   lockWalletButton = <LockWallet />,
   topSection = <UserInfo />,
+  sendAnalyticsEvent,
   ...props
 }): React.ReactElement => {
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
+
+  const handleNetworkChoise = () => {
+    setCurrentSection(Sections.NetworkInfo);
+    sendAnalyticsEvent(PostHogAction.UserWalletProfileNetworkClick);
+  };
 
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
@@ -38,7 +46,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             <SettingsLink />
             <Separator />
             <ThemeSwitcher isPopup={isPopup} />
-            <NetworkChoise onClick={() => setCurrentSection(Sections.NetworkInfo)} />
+            <NetworkChoise onClick={handleNetworkChoise} />
             {lockWalletButton && (
               <>
                 <Separator /> {lockWalletButton}

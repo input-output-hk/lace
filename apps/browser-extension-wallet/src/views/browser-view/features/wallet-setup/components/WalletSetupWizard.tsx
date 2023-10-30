@@ -10,6 +10,7 @@ import {
   WalletSetupFinalStep,
   WalletSetupLegalStep,
   WalletSetupMnemonicIntroStep,
+  WalletSetupNamePasswordStep,
   WalletSetupPasswordStep,
   WalletSetupRecoveryPhraseLengthStep,
   WalletSetupRegisterStep,
@@ -36,7 +37,20 @@ import { ILocalStorage } from '@src/types';
 import { useAnalyticsContext } from '@providers';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import * as process from 'process';
-import { SendOnboardingAnalyticsEvent } from '../types';
+import { SendOnboardingAnalyticsEvent, SetupType } from '../types';
+import { useExperimentsContext } from '@providers/ExperimentsProvider';
+import { CombinedSetupNamePasswordVariants, ExperimentName } from '@providers/ExperimentsProvider/types';
+
+const isCombinedPasswordNameStepEnabled = process.env.USE_COMBINED_PASSWORD_NAME_STEP_COMPONENT === 'true';
+const walletSetupWizardForABTest = {
+  ...walletSetupWizard,
+  [WalletSetupSteps.PreMnemonic]: { ...walletSetupWizard['pre-mnemonic'], prev: WalletSetupSteps.Register },
+  [WalletSetupSteps.RecoveryPhraseLength]: {
+    ...walletSetupWizard['recovery-phrase-length'],
+    prev: WalletSetupSteps.Register
+  },
+  [WalletSetupSteps.Mnemonic]: { ...walletSetupWizard.mnemonic, prev: WalletSetupSteps.Register }
+};
 
 const WalletSetupModeStep = React.lazy(() =>
   import('@lace/core').then((module) => ({ default: module.WalletSetupModeStep }))
@@ -61,7 +75,7 @@ const DEFAULT_CHAIN_ID = ChainIds[CHAIN];
 const { WalletSetup: Events } = AnalyticsEventNames;
 
 export interface WalletSetupWizardProps {
-  setupType: 'create' | 'restore' | 'forgot_password';
+  setupType: SetupType;
   onCancel: () => void;
   sendAnalytics: SendOnboardingAnalyticsEvent;
   initialStep?: WalletSetupSteps;
@@ -76,7 +90,7 @@ export const WalletSetupWizard = ({
   initialStep = WalletSetupSteps.Legal
 }: WalletSetupWizardProps): React.ReactElement => {
   const [currentStep, setCurrentStep] = useState<WalletSetupSteps>(
-    setupType === 'forgot_password' ? WalletSetupSteps.Password : initialStep
+    setupType === SetupType.FORGOT_PASSWORD ? WalletSetupSteps.Password : initialStep
   );
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
@@ -87,6 +101,8 @@ export const WalletSetupWizard = ({
   const [walletIsCreating, setWalletIsCreating] = useState(false);
   const [resetMnemonicStage, setResetMnemonicStage] = useState<MnemonicStage | ''>('');
   const [isResetMnemonicModalOpen, setIsResetMnemonicModalOpen] = useState(false);
+  const { getExperimentVariant } = useExperimentsContext();
+  const [shouldDisplayTestVariantForExperiment, setShouldDisplayTestVariantForExperiment] = useState<boolean>();
 
   const { createWallet, setWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
@@ -102,7 +118,7 @@ export const WalletSetupWizard = ({
 
   useEffect(() => {
     setMnemonic(
-      ['restore', 'forgot_password'].includes(setupType)
+      [SetupType.RESTORE, SetupType.FORGOT_PASSWORD].includes(setupType)
         ? () => Array.from({ length: mnemonicLength }).map(() => '')
         : util.generateMnemonicWords()
     );
@@ -210,7 +226,10 @@ export const WalletSetupWizard = ({
   }, [currentStep, setCurrentStep]);
 
   const moveBack = () => {
-    const prevStep = walletSetupWizard[currentStep].prev;
+    const prevStep = isCombinedPasswordNameStepEnabled
+      ? walletSetupWizardForABTest[currentStep].prev
+      : walletSetupWizard[currentStep].prev;
+
     if (prevStep) {
       setCurrentStep(prevStep);
     } else {
@@ -227,9 +246,9 @@ export const WalletSetupWizard = ({
     EnhancedAnalyticsOptInStatus.OptedOut
   );
 
-  const handleAnalyticsChoice = (isAccepted: boolean) => {
+  const handleAnalyticsChoice = async (isAccepted: boolean) => {
     setIsAnalyticsAccepted(isAccepted);
-    analytics.setOptedInForEnhancedAnalytics(
+    await analytics.setOptedInForEnhancedAnalytics(
       isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
     );
 
@@ -242,7 +261,7 @@ export const WalletSetupWizard = ({
       // eslint-disable-next-line camelcase
       $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
     };
-    sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
+    await sendAnalytics(matomoEvent, postHogAction, undefined, postHogProperties);
     moveForward();
   };
 
@@ -268,7 +287,10 @@ export const WalletSetupWizard = ({
       setDoesUserAllowAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
-      if (setupType === 'forgot_password') {
+      await analytics.setOptedInForEnhancedAnalytics(
+        isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
+      );
+      if (setupType === SetupType.FORGOT_PASSWORD) {
         deleteFromLocalStorage('isForgotPasswordFlow');
         goToMyWallet(wallet);
       } else {
@@ -280,15 +302,43 @@ export const WalletSetupWizard = ({
     }
   }, [
     createWallet,
-    mnemonic,
-    moveForward,
-    password,
     walletName,
-    goToMyWallet,
-    isAnalyticsAccepted,
+    mnemonic,
+    password,
     setDoesUserAllowAnalytics,
-    setupType
+    isAnalyticsAccepted,
+    analytics,
+    setupType,
+    goToMyWallet,
+    moveForward
   ]);
+
+  const createFlowPasswordNextStep = () => {
+    setupType === SetupType.CREATE
+      ? skipTo(WalletSetupSteps.PreMnemonic)
+      : useDifferentMnemonicLengths
+      ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
+      : skipTo(WalletSetupSteps.Mnemonic);
+  };
+
+  const handleNamePasswordStepNextButtonClick = (result: { password: string; walletName: string }) => {
+    setPassword(result.password);
+    setWalletName(result.walletName);
+    sendAnalytics(Events.WALLET_PASSWORD_NEXT, postHogOnboardingActions[setupType]?.WALLET_NAME_PASSWORD_NEXT_CLICK);
+    createFlowPasswordNextStep();
+  };
+
+  const handlePasswordStepNextButtonClick = (result: { password: string }) => {
+    sendAnalytics(Events.WALLET_PASSWORD_NEXT, postHogOnboardingActions[setupType]?.WALLET_PASSWORD_NEXT_CLICK);
+    setPassword(result.password);
+    createFlowPasswordNextStep();
+  };
+
+  const handleRegisterStepNextButtonClick = (result: { walletName: string }) => {
+    sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions[setupType]?.WALLET_NAME_NEXT_CLICK);
+    setWalletName(result.walletName);
+    moveForward();
+  };
 
   useEffect(() => {
     if (password && currentStep === WalletSetupSteps.Create && !walletIsCreating) {
@@ -299,7 +349,7 @@ export const WalletSetupWizard = ({
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   const renderedMnemonicStep = () => {
-    if (['restore', 'forgot_password'].includes(setupType)) {
+    if ([SetupType.RESTORE, SetupType.FORGOT_PASSWORD].includes(setupType)) {
       const isMnemonicSubmitEnabled = util.validateMnemonic(util.joinMnemonicWords(mnemonic));
 
       return (
@@ -394,6 +444,20 @@ export const WalletSetupWizard = ({
     );
   };
 
+  const shouldDisplayExperiment = useCallback(async () => {
+    const experimentValue = isAnalyticsAccepted
+      ? (await getExperimentVariant<CombinedSetupNamePasswordVariants[number]>(
+          ExperimentName.COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN
+        )) === 'test'
+      : false;
+
+    setShouldDisplayTestVariantForExperiment(experimentValue);
+  }, [getExperimentVariant, isAnalyticsAccepted]);
+
+  useEffect(() => {
+    shouldDisplayExperiment();
+  }, [shouldDisplayExperiment]);
+
   return (
     <WalletSetupLayout prompt={currentStep === WalletSetupSteps.Finish ? <PinExtension /> : undefined}>
       {currentStep === WalletSetupSteps.Legal && (
@@ -426,6 +490,10 @@ export const WalletSetupWizard = ({
             moveForward();
           }}
           translations={walletSetupMnemonicIntroStepTranslations}
+          onClickVideo={() =>
+            analytics.sendEventToPostHog(postHogOnboardingActions[setupType]?.PASSPHRASE_INTRO_PLAY_VIDEO_CLICK)
+          }
+          videoSrc={process.env.YOUTUBE_RECOVERY_PHRASE_VIDEO_URL}
         />
       )}
       {currentStep === WalletSetupSteps.Mnemonic && (
@@ -436,34 +504,34 @@ export const WalletSetupWizard = ({
           <WalletSetupModeStep onBack={moveBack} onNext={moveForward} translations={walletSetupModeStepTranslations} />
         </Suspense>
       )}
-      {currentStep === WalletSetupSteps.Register && (
-        <WalletSetupRegisterStep
-          onBack={moveBack}
-          onNext={(result) => {
-            sendAnalytics(Events.WALLET_NAME_NEXT, postHogOnboardingActions[setupType]?.WALLET_NAME_NEXT_CLICK);
-            setWalletName(result.walletName);
-            moveForward();
-          }}
-          initialWalletName={walletName}
-          translations={walletSetupRegisterStepTranslations}
-        />
+
+      {shouldDisplayTestVariantForExperiment ? (
+        <>
+          {currentStep === WalletSetupSteps.Register && (
+            <WalletSetupNamePasswordStep onBack={moveBack} onNext={handleNamePasswordStepNextButtonClick} />
+          )}
+        </>
+      ) : (
+        <>
+          {currentStep === WalletSetupSteps.Register && (
+            <WalletSetupRegisterStep
+              onBack={moveBack}
+              onNext={handleRegisterStepNextButtonClick}
+              initialWalletName={walletName}
+              translations={walletSetupRegisterStepTranslations}
+            />
+          )}
+          {currentStep === WalletSetupSteps.Password && (
+            <WalletSetupPasswordStep
+              onBack={setupType !== SetupType.FORGOT_PASSWORD ? moveBack : undefined}
+              onNext={handlePasswordStepNextButtonClick}
+              translations={walletSetupPasswordStepTranslations}
+              getFeedbackTranslations={passwordFeedbackTranslation}
+            />
+          )}
+        </>
       )}
-      {currentStep === WalletSetupSteps.Password && (
-        <WalletSetupPasswordStep
-          onBack={setupType !== 'forgot_password' ? moveBack : undefined}
-          onNext={(result) => {
-            sendAnalytics(Events.WALLET_PASSWORD_NEXT, postHogOnboardingActions[setupType]?.WALLET_PASSWORD_NEXT_CLICK);
-            setPassword(result.password);
-            setupType === 'create'
-              ? skipTo(WalletSetupSteps.PreMnemonic)
-              : useDifferentMnemonicLengths
-              ? skipTo(WalletSetupSteps.RecoveryPhraseLength)
-              : skipTo(WalletSetupSteps.Mnemonic);
-          }}
-          translations={walletSetupPasswordStepTranslations}
-          getFeedbackTranslations={passwordFeedbackTranslation}
-        />
-      )}
+
       {currentStep === WalletSetupSteps.RecoveryPhraseLength && (
         <WalletSetupRecoveryPhraseLengthStep
           onBack={moveBack}
@@ -487,7 +555,7 @@ export const WalletSetupWizard = ({
           translations={walletSetupFinalStepTranslations}
         />
       )}
-      {setupType === 'create' && isResetMnemonicModalOpen && (
+      {setupType === SetupType.CREATE && isResetMnemonicModalOpen && (
         <WarningModal
           header={t('browserView.walletSetup.mnemonicResetModal.header')}
           content={t('browserView.walletSetup.mnemonicResetModal.content')}

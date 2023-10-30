@@ -14,13 +14,11 @@ export const Provider = ({
   children,
 }: Readonly<Props>): JSX.Element => {
   return (
-    <>
-      <Tooltip.Provider
-        delayDuration={delayDuration}
-        skipDelayDuration={skipDelayDuration}
-      >
-        {children}
-      </Tooltip.Provider>
-    </>
+    <Tooltip.Provider
+      delayDuration={delayDuration}
+      skipDelayDuration={skipDelayDuration}
+    >
+      {children}
+    </Tooltip.Provider>
   );
 };
