@@ -9,7 +9,7 @@ import {
   totalAddressOutputsValueInspector
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
-import { TransactionType } from '@lace/core';
+import { ActivityType, TransactionActivityType } from '@lace/core';
 import { TxDirection, TxDirections } from '@src/types';
 
 const hasWalletStakeAddress = (
@@ -18,7 +18,7 @@ const hasWalletStakeAddress = (
 ) => withdrawals.some((item) => item.stakeAddress === stakeAddress);
 
 interface TxTypeProps {
-  type: TransactionType;
+  type: ActivityType;
 }
 
 export const getTxDirection = ({ type }: TxTypeProps): TxDirections => {
@@ -47,7 +47,7 @@ export const inspectTxType = ({
 }: {
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
-}): Exclude<TransactionType, 'rewards'> => {
+}): TransactionActivityType => {
   const { paymentAddresses, rewardAccounts } = walletAddresses.reduce(
     (acc, curr) => ({
       paymentAddresses: [...acc.paymentAddresses, curr.address],

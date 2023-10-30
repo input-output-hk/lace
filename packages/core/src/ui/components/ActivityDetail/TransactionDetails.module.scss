@@ -283,6 +283,19 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
     gap: size_unit(1)
   }
 
+  .poolRewardAmount {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--bodySmall);
+    .ada {
+      color: var(--text-color-primary, #ffffff);
+    }
+
+    .fiat {
+      color: var(--text-color-secondary, #878e9e);
+    }
+  }
+
   .lightLabel {
     color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
   }

@@ -1,2 +1,2 @@
 export * from './ActivityLayout';
-export * from './TransactionDetail';
+export * from './ActivityDetail';
