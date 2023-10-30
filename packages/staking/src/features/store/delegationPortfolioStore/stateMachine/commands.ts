@@ -96,6 +96,14 @@ export type DrawerFailure = {
   type: 'DrawerFailure';
 };
 
+export type HwSkipToSuccess = {
+  type: 'HwSkipToSuccess';
+};
+
+export type HwSkipToFailure = {
+  type: 'HwSkipToFailure';
+};
+
 export type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools;
 
 export type BrowsePoolsCommand =
@@ -117,7 +125,12 @@ export type PortfolioManagementPreferencesCommand =
   | RemoveStakePool
   | UpdateStakePercentage;
 
-export type PortfolioManagementConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type PortfolioManagementConfirmationCommand =
+  | CancelDrawer
+  | DrawerContinue
+  | DrawerBack
+  | HwSkipToSuccess
+  | HwSkipToFailure;
 
 export type PortfolioManagementSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
@@ -134,7 +147,12 @@ export type NewPortfolioPreferencesCommand =
   | RemoveStakePool
   | UpdateStakePercentage;
 
-export type NewPortfolioConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type NewPortfolioConfirmationCommand =
+  | CancelDrawer
+  | DrawerContinue
+  | DrawerBack
+  | HwSkipToSuccess
+  | HwSkipToFailure;
 
 export type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 

@@ -16,6 +16,8 @@ import {
   DrawerFailure,
   GoToBrowsePools,
   GoToOverview,
+  HwSkipToFailure,
+  HwSkipToSuccess,
   ManagePortfolio,
   NewPortfolioConfirmationCommand,
   NewPortfolioFailureCommand,
@@ -268,6 +270,18 @@ export const processExpandedViewCases: Handler = (params) =>
                   activeDrawerStep: DrawerManagementStep.Sign,
                 })
               ),
+              HwSkipToFailure: handler<HwSkipToFailure, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Failure,
+                })
+              ),
+              HwSkipToSuccess: handler<HwSkipToSuccess, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Success,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Confirmation
@@ -379,12 +393,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Confirmation,
-                })
-              ),
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Confirmation,
+              })),
               RemoveStakePool: handler<RemoveStakePool, StateNewPortfolio, StateNewPortfolio>(
                 ({ state, command: { data } }) => ({
                   ...state,
@@ -417,12 +429,18 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Preferences,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Sign,
-                })
-              ),
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Sign,
+              })),
+              HwSkipToFailure: handler<HwSkipToFailure, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Failure,
+              })),
+              HwSkipToSuccess: handler<HwSkipToSuccess, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Success,
+              })),
             },
             params.command.type,
             DrawerManagementStep.Confirmation
@@ -439,18 +457,14 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Confirmation,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Success,
-                })
-              ),
-              DrawerFailure: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Failure,
-                })
-              ),
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Success,
+              })),
+              DrawerFailure: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Failure,
+              })),
             },
             params.command.type,
             DrawerManagementStep.Sign
@@ -478,13 +492,12 @@ export const processExpandedViewCases: Handler = (params) =>
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Sign,
+                // TODO: fix for hw wallet skip
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Success,
-                })
-              ),
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Success,
+              })),
             },
             params.command.type,
             DrawerManagementStep.Failure
