@@ -369,7 +369,7 @@ describe('testing tx-inspection utils', () => {
                       {
                         actionId: {
                           actionIndex: 1,
-                          id: Wallet.Cardano.TransactionId('1')
+                          id: DEAFULT_TX_INPUT_INFO.txId
                         },
                         votingProcedure: {
                           vote: 1,

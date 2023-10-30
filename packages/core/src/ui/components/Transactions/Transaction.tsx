@@ -131,8 +131,8 @@ export const Transaction = ({
   const isSuccess = status === 'success';
 
   // Translate certificate typenames
-  certificates.forEach((certificate) => {
-    certificate.forEach((detail) => {
+  certificates?.forEach((certificate) => {
+    certificate?.forEach((detail) => {
       if (detail.title === 'certificateType') {
         detail.details = [t(`package.core.assetActivityItem.certificates.typenames.${detail.details[0]}`)];
       }
@@ -140,8 +140,8 @@ export const Transaction = ({
   });
 
   // Translate governance proposal typenames
-  proposalProcedures.forEach((proposal) => {
-    proposal.forEach((p) => {
+  proposalProcedures?.forEach((proposal) => {
+    proposal?.forEach((p) => {
       if (p.title === 'type') {
         p.details = [t(`package.core.transactionDetailBrowser.governanceActions.${p.details[0]}`)];
       }

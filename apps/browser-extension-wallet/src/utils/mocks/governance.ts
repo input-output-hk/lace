@@ -20,7 +20,7 @@ export const mockVotingProcedures: Wallet.Cardano.VotingProcedures = [
       {
         actionId: {
           actionIndex: 1,
-          id: Wallet.Cardano.TransactionId('1')
+          id: Wallet.Cardano.TransactionId('bb217abaca60fc0ca68c1555eca6a96d2478547818ae76ce6836133f3cc546e0')
         },
         votingProcedure: {
           // eslint-disable-next-line unicorn/no-null
@@ -40,7 +40,7 @@ export const mockVotingProcedures: Wallet.Cardano.VotingProcedures = [
       {
         actionId: {
           actionIndex: 1,
-          id: Wallet.Cardano.TransactionId('1')
+          id: Wallet.Cardano.TransactionId('bb217abaca60fc0ca68c1555eca6a96d2478547818ae76ce6836133f3cc546e0')
         },
         votingProcedure: {
           // eslint-disable-next-line unicorn/no-null
@@ -51,7 +51,7 @@ export const mockVotingProcedures: Wallet.Cardano.VotingProcedures = [
       {
         actionId: {
           actionIndex: 1,
-          id: Wallet.Cardano.TransactionId('1')
+          id: Wallet.Cardano.TransactionId('bb217abaca60fc0ca68c1555eca6a96d2478547818ae76ce6836133f3cc546e0')
         },
         votingProcedure: {
           // eslint-disable-next-line unicorn/no-null
