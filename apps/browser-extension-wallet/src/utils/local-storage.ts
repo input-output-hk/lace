@@ -43,11 +43,11 @@ export const deleteFromLocalStorage = (key: keyof ILocalStorage): void => window
 type ClearLocalStorageOptions = { except: (keyof ILocalStorage)[] };
 export const clearLocalStorage = (params?: ClearLocalStorageOptions): void => {
   const except = params?.except || [];
-  for (const key in window.localStorage) {
+  Object.keys(window.localStorage).forEach((key) => {
     if (!except.includes(key as keyof ILocalStorage)) {
       window.localStorage.removeItem(key);
     }
-  }
+  });
 };
 
 export const onStorageChangeEvent = (
