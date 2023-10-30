@@ -12,6 +12,8 @@ import testContext from '../utils/testContext';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
 import NoWalletModal from '../elements/dappConnector/noWalletModal';
 import DAppConnectorAssert, { ExpectedDAppDetails } from '../assert/dAppConnectorAssert';
+import { Logger } from '../support/logger';
+import TestDAppPage from '../elements/dappConnector/testDAppPage';
 
 class DAppConnectorPageObject {
   TEST_DAPP_URL = this.getTestDAppUrl();
@@ -106,6 +108,21 @@ class DAppConnectorPageObject {
     await this.clickButtonInDAppAuthorizationModal(mode);
     await this.switchToTestDAppWindow();
     await DAppConnectorAssert.waitUntilBalanceNotEmpty();
+  }
+  async switchToDappConnectorPopupAndAuthorizeWithRetry(
+    testDAppDetails: ExpectedDAppDetails,
+    mode: 'Always' | 'Only once'
+  ) {
+    try {
+      await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
+    } catch {
+      Logger.log('Failed to authorize Dapp. Retry will be executed');
+      if ((await browser.getWindowHandles()).length === 3) {
+        await this.closeDappConnectorWindowHandle();
+      }
+      await TestDAppPage.refreshButton.click();
+      await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
+    }
   }
 }
 

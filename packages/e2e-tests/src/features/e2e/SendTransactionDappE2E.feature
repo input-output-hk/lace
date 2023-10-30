@@ -32,7 +32,7 @@ Feature: Send Transactions from Dapp - E2E
     And I click on a transaction: 1
     Then The Tx details are displayed as "package.core.transactionDetailBrowser.received" for ADA with value: 3.00 and wallet: "WalletSendSimpleTransactionE2E" address
 
-  @LW-6797 @Testnet
+  @LW-6797 @Testnet @wip
   Scenario: Send Token from DApp E2E
     And I save token: "LaceCoin2" balance
     And I open and authorize test DApp with "Only once" setting
