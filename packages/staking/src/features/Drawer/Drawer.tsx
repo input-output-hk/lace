@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { useObservable } from '@lace/common';
+import { PostHogAction, useObservable } from '@lace/common';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -52,12 +52,13 @@ export const Drawer = ({
   showExitConfirmation,
 }: stakePoolDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { walletStoreInMemoryWallet } = useOutsideHandles();
+  const { analytics, walletStoreInMemoryWallet } = useOutsideHandles();
   const inFlightTx: Wallet.TxInFlight[] = useObservable(walletStoreInMemoryWallet.transactions.outgoing.inFlight$);
 
   const {
     activeDelegationFlow,
     activeDrawerStep,
+    activeFlow,
     currentPortfolioDrifted,
     draftPortfolioValidity,
     openPoolIsSelected,
@@ -166,6 +167,21 @@ export const Drawer = ({
       showBackIcon={showBackIcon}
       popupView={popupView}
       footer={footer}
+      onCloseIconClick={() => {
+        if (activeFlow === DelegationFlow.PortfolioManagement) {
+          if (activeDrawerStep === DrawerManagementStep.Success) {
+            analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationHurrayXClick);
+          }
+          if (activeDrawerStep === DrawerManagementStep.Failure) {
+            analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongXClick);
+          }
+        }
+      }}
+      onBackButtonClick={() => {
+        if (activeFlow === DelegationFlow.PortfolioManagement && activeDrawerStep === DrawerManagementStep.Failure) {
+          analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationSomethingWentWrongBackClick);
+        }
+      }}
     >
       {section}
     </StakePoolDetailsDrawer>

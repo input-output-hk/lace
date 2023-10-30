@@ -1,6 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import Icon from '@ant-design/icons';
 import { Wallet } from '@lace/cardano';
+import { PostHogAction } from '@lace/common';
 import { List, ListProps, Tooltip } from 'antd';
 import cn from 'classnames';
 import isNumber from 'lodash/isNumber';
@@ -8,6 +9,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import InfoIcon from '../../../../assets/icons/info-icon.svg';
+import { useOutsideHandles } from '../../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../../store';
 import { StakePoolItemBrowser, StakePoolItemBrowserProps } from '../StakePoolItemBrowser';
 import Arrow from './arrow.svg';
@@ -63,6 +65,7 @@ export const StakePoolTableBrowser = ({
   showSkeleton,
   ...props
 }: StakePoolTableBrowserProps): React.ReactElement => {
+  const { analytics } = useOutsideHandles();
   const portfolioPools = useDelegationPortfolioStore((state) =>
     state.selectedPortfolio.map(({ id }) => ({
       // Had to cast it with fromKeyHash because search uses plain ID instead of hex.
@@ -88,6 +91,14 @@ export const StakePoolTableBrowser = ({
   const onSortChange = (field: SortKey) => {
     const order =
       field === activeSort?.field ? ((activeSort?.order === 'asc' ? 'desc' : 'asc') as SortDirection) : 'asc';
+    if (field === 'name') {
+      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsPoolNameClick);
+    } else if (field === 'apy') {
+      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsRosClick);
+    } else {
+      analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSaturationClick);
+    }
+
     setActiveSort({ field, order });
   };
 

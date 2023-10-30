@@ -1,14 +1,8 @@
 /* eslint-disable complexity */
 /* eslint-disable unicorn/no-array-reduce */
 import isEmpty from 'lodash/isEmpty';
-import {
-  TransactionDetailSlice,
-  ZustandHandlers,
-  BlockchainProviderSlice,
-  WalletInfoSlice,
-  SliceCreator
-} from '../types';
-import { CardanoTxOut, Transaction, TransactionDetail } from '../../types';
+import { ActivityDetailSlice, ZustandHandlers, BlockchainProviderSlice, WalletInfoSlice, SliceCreator } from '../types';
+import { CardanoTxOut, Transaction, ActivityDetail, TransactionActivityDetail } from '../../types';
 import { blockTransformer, inputOutputTransformer } from '../../api/transformers';
 import { Wallet } from '@lace/cardano';
 import { getTransactionTotalOutput } from '../../utils/get-transaction-total-output';
@@ -16,7 +10,8 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { MAX_POOLS_COUNT } from '@lace/staking';
-import { TransactionType } from '@lace/core';
+import { ActivityStatus, ActivityType } from '@lace/core';
+import { formatDate, formatTime } from '@src/utils/format-date';
 
 /**
  * validates if the transaction is confirmed
@@ -40,11 +35,13 @@ const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
   return assetIds;
 };
 
-const transactionMetadataTransformer = (metadata: Wallet.Cardano.TxMetadata): TransactionDetail['tx']['metadata'] =>
+const transactionMetadataTransformer = (
+  metadata: Wallet.Cardano.TxMetadata
+): TransactionActivityDetail['activity']['metadata'] =>
   [...metadata.entries()].map(([key, value]) => ({ key: key.toString(), value: Wallet.cardanoMetadatumToObj(value) }));
 
 const shouldIncludeFee = (
-  type: TransactionType,
+  type: ActivityType,
   delegationInfo: Wallet.Cardano.StakeDelegationCertificate[] | undefined
 ) =>
   !(
@@ -55,28 +52,83 @@ const shouldIncludeFee = (
     (type === 'delegationDeregistration' && !!delegationInfo?.length)
   );
 
+const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
+  const filters: Wallet.QueryStakePoolsArgs = {
+    filters: {
+      identifier: {
+        _condition: 'or',
+        values: poolIds.map((poolId) => ({ id: poolId }))
+      }
+    },
+    pagination: {
+      startAt: 0,
+      limit: MAX_POOLS_COUNT
+    }
+  };
+  const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
+
+  return pools;
+};
+
 /**
- * fetchs asset information
+ * fetches asset information
  */
-const getTransactionDetail =
+const buildGetActivityDetail =
   ({
     set,
     get
   }: ZustandHandlers<
-    TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice
-  >): TransactionDetailSlice['getTransactionDetails'] =>
+    ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice
+  >): ActivityDetailSlice['getActivityDetail'] =>
   // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   async ({ coinPrices, fiatCurrency }) => {
     const {
       blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
       inMemoryWallet: wallet,
-      transactionDetail: { tx, status, direction, type },
+      activityDetail,
       walletInfo
     } = get();
 
+    if (activityDetail.type === 'rewards') {
+      const { activity, status, type } = activityDetail;
+      const poolInfos = await getPoolInfos(
+        activity.rewards.map(({ poolId }) => poolId),
+        stakePoolProvider
+      );
+
+      return {
+        activity: {
+          includedUtcDate: formatDate({ date: activity.spendableDate, format: 'MM/DD/YYYY', type: 'utc' }),
+          includedUtcTime: `${formatTime({ date: activity.spendableDate, type: 'utc' })} UTC`,
+          rewards: {
+            totalAmount: Wallet.util.lovelacesToAdaString(
+              Wallet.BigIntMath.sum(activity.rewards?.map(({ rewards }) => rewards) || []).toString()
+            ),
+            spendableEpoch: activity.spendableEpoch,
+            rewards: activity.rewards.map((r) => {
+              const poolInfo = poolInfos.find((p) => p.id === r.poolId);
+              return {
+                amount: Wallet.util.lovelacesToAdaString(r.rewards.toString()),
+                pool: r.poolId
+                  ? {
+                      id: r.poolId,
+                      name: poolInfo?.metadata?.name || '-',
+                      ticker: poolInfo?.metadata?.ticker || '-'
+                    }
+                  : undefined
+              };
+            })
+          }
+        },
+        status,
+        type
+      };
+    }
+
+    const { activity: tx, status, type, direction } = activityDetail;
     const walletAssets = await firstValueFrom(wallet.assetInfo$);
     const protocolParameters = await firstValueFrom(wallet.protocolParameters$);
-    set({ fetchingTransactionInfo: true });
+    set({ fetchingActivityInfo: true });
 
     // Assets
     const assetIds = getTransactionAssetsId(tx.body.outputs);
@@ -134,7 +186,7 @@ const getTransactionDetail =
       (certificate) => certificate.__typename === 'StakeDelegationCertificate'
     ) as Wallet.Cardano.StakeDelegationCertificate[];
 
-    let transaction: TransactionDetail['tx'] = {
+    let transaction: ActivityDetail['activity'] = {
       hash: tx.id.toString(),
       totalOutput: totalOutputInAda,
       fee: shouldIncludeFee(type, delegationInfo) ? feeInAda : undefined,
@@ -148,19 +200,10 @@ const getTransactionDetail =
     };
 
     if (type === 'delegation' && delegationInfo) {
-      const filters: Wallet.QueryStakePoolsArgs = {
-        filters: {
-          identifier: {
-            _condition: 'or',
-            values: delegationInfo.map((certificate) => ({ id: certificate.poolId }))
-          }
-        },
-        pagination: {
-          startAt: 0,
-          limit: MAX_POOLS_COUNT
-        }
-      };
-      const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
+      const pools = await getPoolInfos(
+        delegationInfo.map(({ poolId }) => poolId),
+        stakePoolProvider
+      );
 
       if (pools.length === 0) {
         console.error('Stake pool was not found for delegation tx');
@@ -176,20 +219,23 @@ const getTransactionDetail =
       }
     }
 
-    set({ fetchingTransactionInfo: false });
-    return { tx: transaction, blocks, status, assetAmount, type };
+    set({ fetchingActivityInfo: false });
+    return { activity: transaction, blocks, status, assetAmount, type };
   };
 
 /**
  * has all transactions search related actions and states
  */
-export const transactionDetailSlice: SliceCreator<
-  TransactionDetailSlice & BlockchainProviderSlice & WalletInfoSlice,
-  TransactionDetailSlice
+export const activityDetailSlice: SliceCreator<
+  ActivityDetailSlice & BlockchainProviderSlice & WalletInfoSlice,
+  ActivityDetailSlice
 > = ({ set, get }) => ({
-  transactionDetail: undefined,
-  fetchingTransactionInfo: true,
-  getTransactionDetails: getTransactionDetail({ set, get }),
-  setTransactionDetail: (tx, direction, status, type) => set({ transactionDetail: { tx, direction, status, type } }),
-  resetTransactionState: () => set({ transactionDetail: undefined, fetchingTransactionInfo: false })
+  activityDetail: undefined,
+  fetchingActivityInfo: true,
+  getActivityDetail: buildGetActivityDetail({ set, get }),
+  setTransactionActivityDetail: ({ activity, direction, status, type }) =>
+    set({ activityDetail: { activity, direction, status, type } }),
+  setRewardsActivityDetail: ({ activity }) =>
+    set({ activityDetail: { activity, status: ActivityStatus.SPENDABLE, type: 'rewards' } }),
+  resetActivityState: () => set({ activityDetail: undefined, fetchingActivityInfo: false })
 });

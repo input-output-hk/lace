@@ -1,10 +1,11 @@
 import {
   EnhancedAnalyticsOptInStatus,
   ExtensionViews,
-  MatomoSendEventProps,
+  UserTrackingType,
   PostHogAction,
   PostHogProperties,
-  UserTrackingType
+  MatomoSendEventProps,
+  IAnalyticsTracker
 } from './types';
 import { Wallet } from '@lace/cardano';
 import { MatomoClient, MATOMO_OPTED_OUT_EVENTS_DISABLED } from '../matomo';
@@ -24,7 +25,7 @@ interface AnalyticsTrackerArgs {
   isPostHogEnabled?: boolean;
   excludedEvents?: string;
 }
-export class AnalyticsTracker {
+export class AnalyticsTracker implements IAnalyticsTracker {
   protected matomoClient?: MatomoClient;
   protected postHogClient?: PostHogClient;
   protected userIdService?: UserIdService;

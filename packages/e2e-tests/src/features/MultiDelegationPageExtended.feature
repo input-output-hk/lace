@@ -4,6 +4,23 @@ Feature: Staking Page - Extended View
   Background:
     Given Lace is ready for test
 
+  @LW-8931 @Testnet
+  Scenario: Extended View - Start Staking component
+    Given I save token: "Cardano" balance
+    And I disable showing Multidelegation beta banner
+    When I navigate to Staking extended page
+    Then I see Start Staking page in extended mode
+
+  @LW-8932 @Testnet
+  Scenario Outline: Extended View - Start staking - step link <link_number> click
+    Given I am on Start Staking page in extended mode
+    When I click "Get Started" step <link_number> link
+    Then <expected_step>
+    Examples:
+      | link_number | expected_step                                                                                |
+      | 1           | I see the stake pool search control with appropriate content                                 |
+      | 2           | New tab with url containing "lace.io/faq?question=what-are-staking-and-delegation" is opened |
+
   @LW-8449 @Testnet @Mainnet
   Scenario: Extended View - Staking search control is displayed with appropriate content
     Given I disable showing Multidelegation beta banner

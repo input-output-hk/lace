@@ -4,7 +4,7 @@ export * from './network-information';
 export * from './util';
 export * from './wallet-balance';
 export * from './wallet';
-export * from './tx';
+export * from './activity-detail';
 export * from './dappConnector';
 export * from './ui';
 export * from './side-menu';

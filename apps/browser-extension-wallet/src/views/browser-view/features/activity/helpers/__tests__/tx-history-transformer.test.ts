@@ -100,7 +100,7 @@ describe('Testing txHistoryTransformer function', () => {
           )
         }
       ] as Wallet.KeyManagement.GroupedAddress[],
-      time: date,
+      date,
       fiatCurrency: {
         code: 'USD',
         symbol: '$'
@@ -127,7 +127,7 @@ describe('Testing txHistoryTransformer function', () => {
           )
         }
       ] as Wallet.KeyManagement.GroupedAddress[],
-      time: date,
+      date,
       fiatCurrency: {
         code: 'USD',
         symbol: '$'
@@ -164,7 +164,7 @@ describe('Testing txHistoryTransformer function', () => {
           )
         }
       ] as Wallet.KeyManagement.GroupedAddress[],
-      time: date,
+      date,
       fiatCurrency: {
         code: 'USD',
         symbol: '$'
@@ -187,12 +187,11 @@ describe('Testing txHistoryTransformer function', () => {
       walletAddresses: props.walletAddresses,
       fiatCurrency: props.fiatCurrency,
       fiatPrice: props.fiatPrice,
-      time: props.time,
+      date: props.date,
       protocolParameters: props.protocolParameters,
       cardanoCoin: props.cardanoCoin,
       status: Wallet.TransactionStatus.SUCCESS,
-      direction,
-      date: '01 February 2022'
+      direction
     });
     expect(result.length).toBe(1);
     expect(result[0].status).toBe('success');

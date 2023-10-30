@@ -64,9 +64,9 @@ Then(
   /^The Tx details are displayed as (sent|received) for NFT with name: "([^"]*)" and wallet: "([^"]*)" address$/,
   async (type: string, nftName: string, walletName: string) => {
     const typeTranslationKey =
-      type === 'sent' ? 'package.core.transactionDetailBrowser.sent' : 'package.core.transactionDetailBrowser.received';
+      type === 'sent' ? 'package.core.activityDetails.sent' : 'package.core.activityDetails.received';
 
-    const expectedTransactionDetails = {
+    const expectedActivityDetails = {
       transactionDescription: `${await t(typeTranslationKey)}\n(2)`,
       hash: String(testContext.load('txHashValue')),
       sentAssets: [`1 ${nftName}`],
@@ -74,7 +74,7 @@ Then(
       recipientAddress: getTestWallet(walletName).address,
       status: 'Success'
     };
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 

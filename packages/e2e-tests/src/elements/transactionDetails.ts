@@ -2,7 +2,7 @@
 import { ChainablePromiseElement } from 'webdriverio';
 import CommonDrawerElements from './CommonDrawerElements';
 
-class TransactionDetailsPage extends CommonDrawerElements {
+class ActivityDetailsPage extends CommonDrawerElements {
   protected CONTAINER = '[data-testid="custom-drawer"]';
   private TRANSACTION_DETAILS = '[data-testid="transaction-detail"]';
   private TRANSACTION_DETAILS_SKELETON = '.ant-drawer-body .ant-skeleton';
@@ -172,7 +172,7 @@ class TransactionDetailsPage extends CommonDrawerElements {
     return [...new Set(await arr)];
   }
 
-  async closeTransactionDetails(mode: 'extended' | 'popup'): Promise<void> {
+  async closeActivityDetails(mode: 'extended' | 'popup'): Promise<void> {
     mode === 'popup' ? await this.clickHeaderBackButton() : await this.clickHeaderCloseButton();
   }
 
@@ -185,4 +185,4 @@ class TransactionDetailsPage extends CommonDrawerElements {
   }
 }
 
-export default new TransactionDetailsPage();
+export default new ActivityDetailsPage();

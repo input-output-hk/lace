@@ -1,11 +1,11 @@
 import React from 'react';
 import { Drawer, DrawerNavigation } from '@lace/common';
-import { TransactionDetail } from '@views/browser/features/activity';
+import { ActivityDetail } from '@views/browser/features/activity';
 import { APP_MODE_POPUP, AppMode } from '@src/utils/constants';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
 
-export interface AssetTransactionDetailsProps {
+export interface AssetActivityDetailsProps {
   afterVisibleChange: (visible: boolean) => void;
   appMode: AppMode;
   onBack: () => void;
@@ -13,15 +13,15 @@ export interface AssetTransactionDetailsProps {
   isVisible?: boolean;
 }
 
-export const AssetTransactionDetails = ({
+export const AssetActivityDetails = ({
   afterVisibleChange,
   appMode,
   onBack,
   onClose,
   isVisible
-}: AssetTransactionDetailsProps): React.ReactElement => {
+}: AssetActivityDetailsProps): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
-  const { transactionDetail } = useWalletStore();
+  const { activityDetail } = useWalletStore();
 
   return (
     <Drawer
@@ -31,7 +31,7 @@ export const AssetTransactionDetails = ({
       navigation={<DrawerNavigation onCloseIconClick={onClose} onArrowIconClick={onBack} />}
       popupView={appMode === APP_MODE_POPUP}
     >
-      {transactionDetail && priceResult && <TransactionDetail price={priceResult} />}
+      {activityDetail && priceResult && <ActivityDetail price={priceResult} />}
     </Drawer>
   );
 };
