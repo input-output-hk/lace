@@ -22,6 +22,8 @@ export const StakingView = () => {
     walletStoreBlockchainProvider: blockchainProvider,
     multidelegationFirstVisit,
     triggerMultidelegationFirstVisit,
+    multidelegationFirstVisitSincePortfolioPersistence,
+    triggerMultidelegationFirstVisitSincePortfolioPersistence,
     currentChain,
   } = useOutsideHandles();
 
@@ -50,7 +52,10 @@ export const StakingView = () => {
       <Drawer showCloseIcon showBackIcon={(step: DrawerStep): boolean => stepsWithBackBtn.has(step)} />
       <ChangingPreferencesModal />
       {currentPortfolio.length > 1 ? (
-        <PortfolioPersistenceModal visible={multidelegationFirstVisit} onConfirm={triggerMultidelegationFirstVisit} />
+        <PortfolioPersistenceModal
+          visible={multidelegationFirstVisitSincePortfolioPersistence}
+          onConfirm={triggerMultidelegationFirstVisitSincePortfolioPersistence}
+        />
       ) : (
         <MultidelegationBetaModal visible={multidelegationFirstVisit} onConfirm={triggerMultidelegationFirstVisit} />
       )}
