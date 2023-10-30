@@ -66,6 +66,7 @@ export const en: Translations = {
   'drawer.preferences.poolDetails.actualStake': 'Actual stake',
   'drawer.preferences.poolDetails.savedRatio': 'Saved ratio',
   'drawer.preferences.rebalanceButton': 'Rebalance staking',
+  'drawer.preferences.removePoolButton': 'Remove pool from portfolio',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.sign.confirmation.title': 'Staking confirmation',
   'drawer.sign.enterWalletPasswordToConfirmTransaction': 'Enter your wallet password to confirm transaction',

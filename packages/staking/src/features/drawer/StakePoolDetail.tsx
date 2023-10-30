@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Ellipsis } from '@lace/common';
+import { Ellipsis, PostHogAction } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
@@ -244,6 +244,7 @@ const makeActionButtons = (
 
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   const { walletStoreGetKeyAgentType } = useOutsideHandles();
   const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),
@@ -259,8 +260,9 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   );
 
   const onStakeOnThisPool = useCallback(() => {
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick);
     portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
-  }, [portfolioMutators]);
+  }, [analytics, portfolioMutators]);
 
   useEffect(() => {
     if (isInMemory) return;
@@ -273,19 +275,21 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
 
   const onSelectClick = useCallback(() => {
     if (!viewedStakePool) return;
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailAddStakingPoolClick);
     portfolioMutators.executeCommand({
       data: viewedStakePool,
       type: 'SelectPoolFromDetails',
     });
-  }, [viewedStakePool, portfolioMutators]);
+  }, [viewedStakePool, portfolioMutators, analytics]);
 
   const onUnselectClick = useCallback(() => {
     if (!viewedStakePool) return;
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailUnselectPoolClick);
     portfolioMutators.executeCommand({
       data: Wallet.Cardano.PoolIdHex(viewedStakePool.hexId),
       type: 'UnselectPoolFromDetails',
     });
-  }, [viewedStakePool, portfolioMutators]);
+  }, [viewedStakePool, analytics, portfolioMutators]);
 
   const actionButtons = useMemo(
     () =>
