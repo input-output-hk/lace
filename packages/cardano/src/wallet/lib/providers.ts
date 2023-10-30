@@ -4,7 +4,6 @@ import {
   AssetProvider,
   ChainHistoryProvider,
   NetworkInfoProvider,
-  Provider,
   RewardsProvider,
   StakePoolProvider,
   TxSubmitProvider,
@@ -12,7 +11,6 @@ import {
 } from '@cardano-sdk/core';
 
 import {
-  CreateHttpProviderConfig,
   assetInfoHttpProvider,
   chainHistoryHttpProvider,
   networkInfoHttpProvider,

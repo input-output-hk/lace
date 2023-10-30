@@ -1,4 +1,12 @@
-import { TransactionMetadataProps, TxOutputInput, TransactionType, TxDetails } from '@lace/core';
+import {
+  TransactionMetadataProps,
+  TxOutputInput,
+  TransactionType,
+  TxDetails,
+  TxDetailsVotingProceduresTitles,
+  TxDetailsProposalProceduresTitles,
+  TxDetailsCertificateTitles
+} from '@lace/core';
 import { Wallet } from '@lace/cardano';
 
 export enum TxDirections {
@@ -29,9 +37,9 @@ export interface TransactionDetail {
     metadata?: TransactionMetadataProps['metadata'];
     pools?: TransactionPool[];
     rewards?: string;
-    votingProcedures?: TxDetails[];
-    proposalProcedures?: TxDetails[];
-    certificates?: TxDetails[];
+    votingProcedures?: TxDetails<TxDetailsVotingProceduresTitles>[];
+    proposalProcedures?: TxDetails<TxDetailsProposalProceduresTitles>[];
+    certificates?: TxDetails<TxDetailsCertificateTitles>[];
   };
   blocks?: {
     isPopup?: boolean;

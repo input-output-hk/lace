@@ -1,6 +1,12 @@
 /* eslint-disable unicorn/consistent-destructuring */
 import { Wallet } from '@lace/cardano';
-import { AssetActivityItemProps, TxDetails } from '@lace/core';
+import {
+  AssetActivityItemProps,
+  TxDetails,
+  TxDetailsCertificateTitles,
+  TxDetailsVotingProceduresTitles,
+  TxDetailsProposalProceduresTitles
+} from '@lace/core';
 import { inspectTxType } from '../../../../../utils/tx-inspection';
 
 const { CertificateType } = Wallet.Cardano;
@@ -62,6 +68,15 @@ export const splitDelegationWithRegistrationIntoTwoActions = (tx: TransformedTx)
 export const isDelegationWithRegistrationTx = (tx: TransformedTx, type: ReturnType<typeof inspectTxType>): boolean =>
   type === 'delegation' && !!tx.deposit;
 
+const drepMapper = (drep: Wallet.Cardano.DelegateRepresentative) => {
+  if (Wallet.Cardano.isDRepAlwaysAbstain(drep)) {
+    return 'alwaysAbstain';
+  } else if (Wallet.Cardano.isDRepAlwaysNoConfidence(drep)) {
+    return 'alwaysNoConfidence';
+  }
+  return Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(drep.hash)));
+};
+
 type TransactionCertificate = {
   __typename: Wallet.Cardano.CertificateType;
   deposit?: BigInt;
@@ -92,29 +107,22 @@ type TransactionGovernanceProposal = {
   };
 };
 
-const drepMapper = (drep: Wallet.Cardano.DelegateRepresentative) => {
-  if (Wallet.Cardano.isDRepAlwaysAbstain(drep)) {
-    return 'alwaysAbstain';
-  } else if (Wallet.Cardano.isDRepAlwaysNoConfidence(drep)) {
-    return 'alwaysNoConfidence';
-  }
-  return Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(drep.hash)));
-};
-
 export const certificateTransformer = (
   cardanoCoin: Wallet.CoinId,
   certificates?: TransactionCertificate[]
-): TxDetails[] =>
+): TxDetails<TxDetailsCertificateTitles>[] =>
   // Currently only show enhanced certificate info for conway era certificates pending further discussion
   certificates
     ?.filter((certificate) => conwayEraCertificatesTypes.has(certificate.__typename))
     .map((conwayEraCertificate) => {
-      const transformedCertificate: TxDetails = [{ title: 'type', details: [conwayEraCertificate.__typename] }];
+      const transformedCertificate: TxDetails<TxDetailsCertificateTitles> = [
+        { title: 'certificateType', details: [conwayEraCertificate.__typename] }
+      ];
 
       if (conwayEraCertificate.anchor) {
         transformedCertificate.push({
-          title: 'package.core.translation.something',
-          details: [conwayEraCertificate.anchor.url]
+          title: 'anchor',
+          details: [conwayEraCertificate.anchor.url, conwayEraCertificate.anchor.dataHash]
         });
       }
 
@@ -182,8 +190,10 @@ const getVote = (vote: Wallet.Cardano.Vote): string => {
   }
 };
 
-export const votingProceduresTransformer = (votingProcedures: Wallet.Cardano.VotingProcedures): TxDetails[] => {
-  const votingProcedureDetails: TxDetails[] = [];
+export const votingProceduresTransformer = (
+  votingProcedures: Wallet.Cardano.VotingProcedures
+): TxDetails<TxDetailsVotingProceduresTitles>[] => {
+  const votingProcedureDetails: TxDetails<TxDetailsVotingProceduresTitles>[] = [];
 
   votingProcedures?.forEach((procedure) =>
     procedure.votes.forEach((vote) => {
@@ -194,16 +204,16 @@ export const votingProceduresTransformer = (votingProcedures: Wallet.Cardano.Vot
           : procedure.voter.credential.hash;
       votingProcedureDetails.push([
         {
-          title: 'Voter Type',
+          title: 'voterType',
           details: [voterType]
         },
         {
-          title: 'Voter Credential',
+          title: 'voterCredential',
           details: [voterCredential]
         },
-        { title: 'Vote', details: [getVote(vote.votingProcedure.vote)] },
-        ...(!!vote.votingProcedure.anchor && [{ title: 'Anchor', details: [vote.votingProcedure.anchor.url] }]),
-        { title: 'Proposal Tx Hash', details: [vote.actionId.id] }
+        { title: 'vote', details: [getVote(vote.votingProcedure.vote)] },
+        { ...(!!vote.votingProcedure.anchor && { title: 'anchor', details: [vote.votingProcedure.anchor.url] }) },
+        { title: 'proposalTxHash', details: [vote.actionId.id, vote.actionId.actionIndex.toString()] }
       ]);
     })
   );
@@ -214,7 +224,7 @@ export const votingProceduresTransformer = (votingProcedures: Wallet.Cardano.Vot
 export const governanceProposalsTransformer = (
   cardanoCoin: Wallet.CoinId,
   proposalProcedures?: TransactionGovernanceProposal[]
-): TxDetails[] =>
+): TxDetails<TxDetailsProposalProceduresTitles>[] =>
   proposalProcedures?.map(
     ({
       governanceAction: {
@@ -233,7 +243,7 @@ export const governanceProposalsTransformer = (
       rewardAccount
     }) => {
       // Default details across all proposals
-      const transformedProposal: TxDetails = [
+      const transformedProposal: TxDetails<TxDetailsProposalProceduresTitles> = [
         { title: 'type', details: [__typename] },
         {
           title: 'governanceActionId',

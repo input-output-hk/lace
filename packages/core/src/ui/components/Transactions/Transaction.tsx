@@ -12,8 +12,15 @@ import { ReactComponent as Info } from '../../assets/icons/info-icon.component.s
 import { TransactionInputOutput } from './TransactionInputOutput';
 import { useTranslate } from '@src/ui/hooks';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { TxDetails } from './TransactionType';
-import { TxDetailList } from './TxDetailsList';
+import {
+  TxDetails,
+  TxDetailsCertificateTitles,
+  TxDetailsProposalProceduresTitles,
+  TxDetailsVotingProceduresTitles
+} from './TransactionType';
+import { TxDetailListCertificates } from './TxDetailsListCertificates';
+import { TxDetailListProposals } from './TxDetailsListProposals';
+import { TxDetailListVotes } from './TxDetailsListVotes';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -69,9 +76,9 @@ export interface TransactionProps {
   addressToNameMap: Map<string, string>;
   isPopupView?: boolean;
   openExternalLink?: () => void;
-  votingProcedures?: TxDetails[];
-  proposalProcedures?: TxDetails[];
-  certificates?: TxDetails[];
+  votingProcedures?: TxDetails<TxDetailsVotingProceduresTitles>[];
+  proposalProcedures?: TxDetails<TxDetailsProposalProceduresTitles>[];
+  certificates?: TxDetails<TxDetailsCertificateTitles>[];
   sendAnalyticsInputs?: () => void;
   sendAnalyticsOutputs?: () => void;
 }
@@ -122,6 +129,24 @@ export const Transaction = ({
   const { t } = useTranslate();
   const isSending = status === 'sending';
   const isSuccess = status === 'success';
+
+  // Translate certificate typenames
+  certificates.forEach((certificate) => {
+    certificate.forEach((detail) => {
+      if (detail.title === 'certificateType') {
+        detail.details = [t(`package.core.assetActivityItem.certificates.typenames.${detail.details[0]}`)];
+      }
+    });
+  });
+
+  // Translate governance proposal typenames
+  proposalProcedures.forEach((proposal) => {
+    proposal.forEach((p) => {
+      if (p.title === 'type') {
+        p.details = [t(`package.core.transactionDetailBrowser.governanceActions.${p.details[0]}`)];
+      }
+    });
+  });
 
   const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
     <div className={styles.details}>
@@ -193,33 +218,6 @@ export const Transaction = ({
             </div>
           </div>
         )}
-        {/* votingProcedures &&
-          votingProcedures.map((votingProcedure, idx) => (
-            <>
-              {votingProcedures.length > 1 && <>Vote {idx + 1}</>}
-              <div className={styles.details}>
-                <div className={styles.title}>Voter Type</div>
-                <div className={styles.detail}>{votingProcedure.voter.__typename}</div>
-              </div>
-              <div className={styles.details}>
-                <div className={styles.title}>Credential Type</div>
-                <div className={styles.detail}>
-                  {Wallet.Cardano.CredentialType[votingProcedure.voter.credential.type]}
-                </div>
-              </div>
-              <div className={styles.details}>
-                <div className={styles.title}>Votes</div>
-                <div className={styles.detail}>
-                  {votingProcedure.votes.map((vote) => (
-                    <>
-                      <br />
-                      {Wallet.Cardano.Vote[vote.votingProcedure.vote]}
-                    </>
-                  ))}
-                </div>
-              </div>
-            </>
-                  ))*/}
         {txSummary.map((summary, index) => (
           <div key={index.toString()} data-testid="tx-detail-bundle">
             <div className={styles.details}>
@@ -333,27 +331,56 @@ export const Transaction = ({
           })}
       </div>
       {votingProcedures?.length > 0 && (
-        <TxDetailList
+        <TxDetailListVotes
           testId="voting-procedures"
-          title={'Voting Procedures'}
+          title={t('package.core.transactionDetailBrowser.votingProcedures')}
           lists={votingProcedures}
+          translations={{
+            voterType: t('package.core.transactionDetailBrowser.votingProcedureTitles.voterType'),
+            voterCredential: t('package.core.transactionDetailBrowser.votingProcedureTitles.voterCredential'),
+            vote: t('package.core.transactionDetailBrowser.votingProcedureTitles.vote'),
+            anchor: t('package.core.transactionDetailBrowser.votingProcedureTitles.anchor'),
+            proposalTxHash: t('package.core.transactionDetailBrowser.votingProcedureTitles.proposalTxHash')
+          }}
           withSeparatorLine
         />
       )}
       {proposalProcedures?.length > 0 && (
-        <TxDetailList
+        <TxDetailListProposals
           testId="proposal-procedures"
-          title={'Proposal Procedures'}
+          title={t('package.core.transactionDetailBrowser.proposalProcedures')}
           lists={proposalProcedures}
           withSeparatorLine
+          translations={{
+            type: t('package.core.transactionDetailBrowser.proposalProcedureTitles.type'),
+            governanceActionId: t('package.core.transactionDetailBrowser.proposalProcedureTitles.governanceActionId'),
+            rewardAccount: t('package.core.transactionDetailBrowser.proposalProcedureTitles.rewardAccount'),
+            anchor: t('package.core.transactionDetailBrowser.proposalProcedureTitles.anchor'),
+            protocolParamUpdate: t('package.core.transactionDetailBrowser.proposalProcedureTitles.protocolParamUpdate'),
+            protocolVersion: t('package.core.transactionDetailBrowser.proposalProcedureTitles.protocolVersion'),
+            withdrawals: t('package.core.transactionDetailBrowser.proposalProcedureTitles.withdrawals'),
+            membersToBeRemoved: t('package.core.transactionDetailBrowser.proposalProcedureTitles.membersToBeRemoved'),
+            membersToBeAdded: t('package.core.transactionDetailBrowser.proposalProcedureTitles.membersToBeAdded'),
+            newQuorumThreshold: t('package.core.transactionDetailBrowser.proposalProcedureTitles.newQuorumThreshold'),
+            constitutionAnchor: t('package.core.transactionDetailBrowser.proposalProcedureTitles.constitutionAnchor')
+          }}
         />
       )}
       {certificates?.length > 0 && (
-        <TxDetailList
+        <TxDetailListCertificates
           title={t('package.core.transactionDetailBrowser.certificates')}
           testId="certificates"
           lists={certificates}
           withSeparatorLine
+          translations={{
+            certificateType: t('package.core.transactionDetailBrowser.certificateTitles.certificateType'),
+            drep: t('package.core.transactionDetailBrowser.certificateTitles.drep'),
+            anchor: t('package.core.transactionDetailBrowser.certificateTitles.anchor'),
+            coldCredential: t('package.core.transactionDetailBrowser.certificateTitles.coldCredential'),
+            hotCredential: t('package.core.transactionDetailBrowser.certificateTitles.hotCredential'),
+            drepCredential: t('package.core.transactionDetailBrowser.certificateTitles.drepCredential'),
+            depositPaid: t('package.core.transactionDetailBrowser.certificateTitles.depositPaid')
+          }}
         />
       )}
       {addrInputs?.length > 0 && (

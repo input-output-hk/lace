@@ -35,7 +35,33 @@ export const governanceTransactionTypes: Partial<TransactionType[]> = [
   'voteRegistrationDelegation'
 ];
 
-export type TxDetails = {
-  title: string;
+export type TxDetailsCertificateTitles =
+  | 'certificateType'
+  | 'drep'
+  | 'anchor'
+  | 'coldCredential'
+  | 'hotCredential'
+  | 'drepCredential'
+  | 'depositPaid';
+
+export type TxDetailsProposalProceduresTitles =
+  | 'type'
+  | 'governanceActionId'
+  | 'rewardAccount'
+  | 'anchor'
+  | 'protocolParamUpdate'
+  | 'protocolVersion'
+  | 'withdrawals'
+  | 'membersToBeRemoved'
+  | 'membersToBeAdded'
+  | 'newQuorumThreshold'
+  | 'constitutionAnchor';
+
+export type TxDetailsVotingProceduresTitles = 'voterType' | 'voterCredential' | 'vote' | 'anchor' | 'proposalTxHash';
+
+export type TxDetail<T> = {
+  title: T;
   details: string[];
-}[];
+};
+
+export type TxDetails<T> = TxDetail<T>[];

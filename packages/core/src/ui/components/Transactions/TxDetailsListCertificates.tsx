@@ -8,8 +8,9 @@ import { InfoCircleOutlined, DownOutlined } from '@ant-design/icons';
 
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
 import styles from './TransactionInputOutput.module.scss';
-import { TxDetails } from './TransactionType';
-import { DetailRows } from './Components';
+import { TxDetails, TxDetailsCertificateTitles } from './TransactionType';
+import { DetailRowsCertificates } from './Components';
+import { TranslationsFor } from '@src/ui/utils/types';
 
 const rotateOpen: React.CSSProperties = {
   transform: 'rotate(180deg)',
@@ -21,21 +22,23 @@ const rotateClose: React.CSSProperties = {
   transition: 'transform .2s linear'
 };
 
-export interface TxDetailListProps {
+interface TxDetailListCertificatesProps {
   testId: string;
   title: string;
-  lists: TxDetails[];
+  lists: TxDetails<TxDetailsCertificateTitles>[];
+  translations: TranslationsFor<TxDetailsCertificateTitles>;
   tooltipContent?: React.ReactNode;
   withSeparatorLine?: boolean;
 }
 
-export const TxDetailList = ({
+export const TxDetailListCertificates = ({
   testId,
   title,
   lists,
   tooltipContent,
-  withSeparatorLine
-}: TxDetailListProps): React.ReactElement => {
+  withSeparatorLine,
+  translations
+}: TxDetailListCertificatesProps): React.ReactElement => {
   const [isVisible, setIsVisible] = useState<boolean>();
 
   const animation = isVisible ? rotateOpen : rotateClose;
@@ -66,7 +69,7 @@ export const TxDetailList = ({
         <div className={styles.txInOutContent} data-testid={`${testId}-lists`}>
           {lists.map((list, idx) => (
             <div key={`${testId}-list-${idx}`} className={idx > 0 && styles.topBorderContent}>
-              <DetailRows testId={testId} list={list} />
+              <DetailRowsCertificates translations={translations} testId={testId} list={list} />
             </div>
           ))}
         </div>
