@@ -3,6 +3,7 @@ Feature: Analytics - Settings - Popup View
 
   Background:
     Given Lace is ready for test
+    And I de-authorize all DApps in popup mode
 
   @LW-8560
   Scenario: Analytics - Popup view - Settings - Network events - Switch network
