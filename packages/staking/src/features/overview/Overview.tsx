@@ -10,7 +10,7 @@ import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
 
 export const Overview = () => {
   const { t } = useTranslation();
@@ -78,7 +78,7 @@ export const Overview = () => {
       <>
         {/* defensive check - no other notification than pendingFirstDelegation should be possible here at the moment of writing this comment */}
         {stakingNotifications.includes('pendingFirstDelegation') ? (
-          <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={onManageClick} />
+          <StakingNotificationBanners notifications={stakingNotifications} />
         ) : (
           <Flex flexDirection="column" gap="$32">
             <StakeFundsBanner balance={totalCoinBalance} />
@@ -107,7 +107,7 @@ export const Overview = () => {
       </Box>
       {stakingNotifications.length > 0 && (
         <Flex mb="$40" flexDirection="column">
-          <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={onManageClick} />
+          <StakingNotificationBanners notifications={stakingNotifications} />
         </Flex>
       )}
       <Flex justifyContent="space-between" mb="$16">

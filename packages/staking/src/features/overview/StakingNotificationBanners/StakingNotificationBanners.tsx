@@ -1,24 +1,34 @@
 import { Banner } from '@lace/common';
 import { Box } from '@lace/ui';
-import ExclamationIcon from '@lace/ui/dist/assets/icons/warning-icon-triangle.component.svg';
 import { useTranslation } from 'react-i18next';
-import BellIcon from '../../../assets/icons/bell-icon.svg';
 import InfoIcon from '../../../assets/icons/info-icon.svg';
+import WarningTriangleIcon from '../../../assets/icons/warning-triangle.svg';
+import { useOutsideHandles } from '../../outside-handles-provider';
+import { PortfolioDriftBanner } from '../../portfolio-drift';
+import { useDelegationPortfolioStore } from '../../store';
 import * as styles from './StakingNotificationBanners.css';
 import { StakingNotificationType } from './types';
 
 type StakingNotificationBannersProps = {
   popupView?: boolean;
   notifications: StakingNotificationType[];
-  onClickableBannerClick?: () => void;
 };
 
-export const StakingNotificationBanners = ({
-  popupView,
-  notifications,
-  onClickableBannerClick,
-}: StakingNotificationBannersProps) => {
+export const StakingNotificationBanners = ({ popupView, notifications }: StakingNotificationBannersProps) => {
   const { t } = useTranslation();
+  const { expandStakingView = () => void 0 } = useOutsideHandles();
+  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
+
+  const onPoolRetiredOrSaturatedBannerClick = () => {
+    if (popupView) {
+      expandStakingView();
+      return;
+    }
+
+    portfolioMutators.executeCommand({
+      type: 'ManagePortfolio',
+    });
+  };
 
   const notificationComponents = {
     pendingFirstDelegation: (
@@ -43,22 +53,13 @@ export const StakingNotificationBanners = ({
       <Banner
         popupView={popupView}
         withIcon
-        customIcon={<ExclamationIcon />}
+        customIcon={<WarningTriangleIcon />}
         message={t('overview.banners.saturatedOrRetiredPool.title')}
         description={t('overview.banners.saturatedOrRetiredPool.message')}
-        onBannerClick={onClickableBannerClick}
+        onBannerClick={onPoolRetiredOrSaturatedBannerClick}
       />
     ),
-    portfolioDrifted: (
-      <Banner
-        popupView={popupView}
-        withIcon
-        customIcon={<BellIcon className={styles.bannerInfoIcon} />}
-        message={t('overview.banners.portfolioDrifted.title')}
-        description={t('overview.banners.portfolioDrifted.message')}
-        onBannerClick={onClickableBannerClick}
-      />
-    ),
+    portfolioDrifted: <PortfolioDriftBanner popupView={popupView} />,
   };
 
   return (

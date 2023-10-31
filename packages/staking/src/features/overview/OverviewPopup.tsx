@@ -11,7 +11,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -23,7 +23,6 @@ export const OverviewPopup = () => {
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletActivities: walletActivities,
-    expandStakingView,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -88,7 +87,7 @@ export const OverviewPopup = () => {
     <>
       {stakingNotifications.length > 0 && (
         <Flex mb="$32" flexDirection="column">
-          <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={expandStakingView} />
+          <StakingNotificationBanners notifications={stakingNotifications} />
         </Flex>
       )}
       <Box mb="$32">
