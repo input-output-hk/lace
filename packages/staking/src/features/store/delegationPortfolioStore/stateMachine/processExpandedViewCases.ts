@@ -491,8 +491,8 @@ export const processExpandedViewCases: Handler = (params) =>
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
-                activeDrawerStep: DrawerManagementStep.Sign,
                 // TODO: fix for hw wallet skip
+                activeDrawerStep: DrawerManagementStep.Sign,
               })),
               DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
