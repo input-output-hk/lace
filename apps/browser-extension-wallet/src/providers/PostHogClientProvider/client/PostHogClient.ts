@@ -29,7 +29,7 @@ import { Subscription, BehaviorSubject } from 'rxjs';
  * https://posthog.com/docs/libraries/js
  */
 
-export interface PostHogInstance {
+export interface PostHogClientParams {
   chain: Wallet.Cardano.ChainId;
   userIdService: UserIdService;
   backgroundServiceUtils: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>;
@@ -58,7 +58,7 @@ export class PostHogClient {
     laceVersion = '',
     view = ExtensionViews.Extended,
     publicPostHogHost = PUBLIC_POSTHOG_HOST
-  }: PostHogInstance) {
+  }: PostHogClientParams) {
     this.chain = chain;
     this.userIdService = userIdService;
     this.backgroundServiceUtils = backgroundServiceUtils;
@@ -106,7 +106,7 @@ export class PostHogClient {
     this.subscribeToDistinctIdUpdate();
   }
 
-  static getInstance(params: PostHogInstance): PostHogClient {
+  static getInstance(params: PostHogClientParams): PostHogClient {
     if (this.postHogClientInstance || !POSTHOG_ENABLED) return this.postHogClientInstance;
     this.postHogClientInstance = new PostHogClient(params);
     return this.postHogClientInstance;
