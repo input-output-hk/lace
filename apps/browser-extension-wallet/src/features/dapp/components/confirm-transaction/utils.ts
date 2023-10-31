@@ -67,11 +67,15 @@ export const votingProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano
   tx?.body?.votingProcedures;
 
 // eslint-disable-next-line complexity
+export const proposalProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano.ProposalProcedure[] | undefined =>
+  tx?.body?.proposalProcedures;
+
 export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
     burned: assetsBurnedInspector,
     votingProcedures: votingProceduresInspector,
+    proposalProcedures: proposalProceduresInspector,
     dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
     dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative),
     dRepUpdate: certificateInspectorFactory(CertificateType.UpdateDelegateRepresentative),
@@ -93,10 +97,15 @@ export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
     stakeVoteDelegation,
     voteRegistrationDelegation,
     stakeRegistrationDelegation,
-    stakeVoteDelegationRegistration
+    stakeVoteDelegationRegistration,
+    proposalProcedures
   } = inspector(tx as Wallet.Cardano.HydratedTx);
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
+
+  if (proposalProcedures) {
+    return Wallet.Cip30TxType.ProposalProcedures;
+  }
 
   if (votingProcedures) {
     return Wallet.Cip30TxType.VotingProcedures;

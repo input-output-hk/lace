@@ -1164,6 +1164,12 @@
             "scriptHash": "Script Hash"
           }
         },
+        "infoAction": {
+          "title": "Info Action"
+        },
+        "noConfidenceAction": {
+          "title": "No Confidence Action"
+        },
         "protocolParamUpdate": {
           "title": "Protocol Parameter Update Action",
           "networkGroup": {

@@ -52,11 +52,13 @@ export const UpdateCommitteeAction = ({ dappInfo, errorMessage, data, translatio
         <Cell>
           <Divider my={'$16'} />
         </Cell>
-        <Cell>
-          <Text.Body.Large className={textCss} weight="$bold">
-            {translations.membersToBeAdded.title}
-          </Text.Body.Large>
-        </Cell>
+        {data.membersToBeAdded?.length > 0 && (
+          <Cell>
+            <Text.Body.Large className={textCss} weight="$bold">
+              {translations.membersToBeAdded.title}
+            </Text.Body.Large>
+          </Cell>
+        )}
         {data.membersToBeAdded.map(({ coldCredential, epoch }) => (
           <Card
             key={`${coldCredential.hash}${epoch}`}
@@ -72,11 +74,13 @@ export const UpdateCommitteeAction = ({ dappInfo, errorMessage, data, translatio
             ]}
           />
         ))}
-        <Cell>
-          <Text.Body.Large className={textCss} weight="$bold">
-            {translations.membersToBeRemoved.title}
-          </Text.Body.Large>
-        </Cell>
+        {data.membersToBeRemoved?.length > 0 && (
+          <Cell>
+            <Text.Body.Large className={textCss} weight="$bold">
+              {translations.membersToBeRemoved.title}
+            </Text.Body.Large>
+          </Cell>
+        )}
         {data.membersToBeRemoved.map(({ hash }) => (
           <Card
             key={`${hash}`}

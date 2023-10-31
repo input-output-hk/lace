@@ -2,8 +2,6 @@ import React from 'react';
 import { Cell, Metadata, Text, sx } from '@lace/ui';
 import * as Types from './ParameterChangeActionTypes';
 import { Card } from '../components/Card';
-import decamelizeKeys from 'decamelize-keys';
-import titleize from 'titleize';
 
 interface Props {
   governanceGroup: Types.GovernanceGroup;
@@ -14,8 +12,6 @@ export const GovernanceGroup = ({ governanceGroup, translations }: Props): JSX.E
   const textCss = sx({
     color: '$text_primary'
   });
-
-  const dRepVotingThresholds = decamelizeKeys(governanceGroup.dRepVotingThresholds, { separator: ' ' });
 
   return (
     <>
@@ -62,10 +58,48 @@ export const GovernanceGroup = ({ governanceGroup, translations }: Props): JSX.E
         <Card
           title="DRep Voting Thresholds"
           tooltip={translations.tooltip.dRepVotingThresholds.title}
-          data={Object.entries(dRepVotingThresholds).map(([label, value]) => ({
-            label: titleize(label),
-            value
-          }))}
+          data={[
+            {
+              label: 'DVT Motion No Confidence',
+              value: governanceGroup.dRepVotingThresholds.dvtMotionNoConfidence
+            },
+            {
+              label: 'DVT Committee Normal',
+              value: governanceGroup.dRepVotingThresholds.dvtCommitteeNormal
+            },
+            {
+              label: 'DVT Committee No Confidence',
+              value: governanceGroup.dRepVotingThresholds.dvtCommitteeNoConfidence
+            },
+            {
+              label: 'DVT Update To Constitution',
+              value: governanceGroup.dRepVotingThresholds.dvtUpdateToConstitution
+            },
+            {
+              label: 'DVT Hard Fork Initiation',
+              value: governanceGroup.dRepVotingThresholds.dvtHardForkInitiation
+            },
+            {
+              label: 'DVT PP Network Group',
+              value: governanceGroup.dRepVotingThresholds.dvtPPNetworkGroup
+            },
+            {
+              label: 'DVT PP Economic Group',
+              value: governanceGroup.dRepVotingThresholds.dvtPPEconomicGroup
+            },
+            {
+              label: 'DVT PP Technical Group',
+              value: governanceGroup.dRepVotingThresholds.dvtPPTechnicalGroup
+            },
+            {
+              label: 'DVT PP Gov Group',
+              value: governanceGroup.dRepVotingThresholds.dvtPPGovGroup
+            },
+            {
+              label: 'DVT Treasury Withdrawal',
+              value: governanceGroup.dRepVotingThresholds.dvtTreasuryWithdrawal
+            }
+          ]}
         />
       </Cell>
     </>

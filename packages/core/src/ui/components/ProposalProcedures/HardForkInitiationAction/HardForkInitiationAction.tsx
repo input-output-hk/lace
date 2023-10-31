@@ -2,9 +2,9 @@ import React from 'react';
 import { Box, Cell, Grid, Flex, Divider, sx, Metadata, Text } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../../DappInfo';
 import { ErrorPane } from '@lace/common';
-import * as Types from './TreasuryWithdrawalsActionTypes';
+import * as Types from './HardForkInitiationActionTypes';
 import { Procedure } from '../components/Procedure';
-import { Card } from '../components/Card';
+import { ActionId } from '../components/ActionId';
 
 interface Props {
   dappInfo: Omit<DappInfoProps, 'className'>;
@@ -13,7 +13,7 @@ interface Props {
   translations: Types.Translations;
 }
 
-export const TreasuryWithdrawalsAction = ({ dappInfo, errorMessage, data, translations }: Props): JSX.Element => {
+export const HardForkInitiationAction = ({ dappInfo, errorMessage, data, translations }: Props): JSX.Element => {
   const textCss = sx({
     color: '$text_primary'
   });
@@ -33,26 +33,21 @@ export const TreasuryWithdrawalsAction = ({ dappInfo, errorMessage, data, transl
         <Cell>
           <Divider my={'$16'} />
         </Cell>
+        <ActionId data={data.actionId} translations={translations.actionId} />
+        <Cell>
+          <Divider my={'$16'} />
+        </Cell>
         <Cell>
           <Text.Body.Large className={textCss} weight="$bold">
-            {translations.withdrawals.title}
+            {translations.protocolVersion.title}
           </Text.Body.Large>
         </Cell>
-        {data.withdrawals.map((withdrawal) => (
-          <Card
-            key={`${withdrawal.rewardAccount}${withdrawal.lovelace}`}
-            data={[
-              {
-                label: translations.withdrawals.rewardAccount,
-                value: withdrawal.rewardAccount
-              },
-              {
-                label: translations.withdrawals.lovelace,
-                value: withdrawal.lovelace
-              }
-            ]}
+        <Cell>
+          <Metadata
+            label={translations.protocolVersion.label}
+            text={`${data.protocolVersion.major}.${data.protocolVersion.minor}.${data.protocolVersion.patch || 0}`}
           />
-        ))}
+        </Cell>
       </Grid>
     </Flex>
   );

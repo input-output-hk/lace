@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { useMemo, useState } from 'react';
 import cn from 'classnames';
 import { Button, PostHogAction } from '@lace/common';

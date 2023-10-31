@@ -7,7 +7,7 @@ export interface Data {
   protocolVersion: {
     major: number;
     minor: number;
-    patch: number;
+    patch?: number;
   };
 }
 
