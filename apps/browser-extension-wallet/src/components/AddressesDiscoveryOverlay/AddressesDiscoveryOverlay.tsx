@@ -28,8 +28,8 @@ export const AddressesDiscoveryOverlay: FC = ({ children }) => {
       icon: AddressesDiscoveryStatus.Error === hdDiscoveryStatus ? WarningIcon : RefreshIcon,
       text: t(
         AddressesDiscoveryStatus.Error === hdDiscoveryStatus
-          ? 'addressesDiscoveryOverlay.toast.errorText'
-          : 'addressesDiscoveryOverlay.toast.successText'
+          ? 'addressesDiscovery.toast.errorText'
+          : 'addressesDiscovery.toast.successText'
       ),
       withProgressBar: true
     });
@@ -39,11 +39,9 @@ export const AddressesDiscoveryOverlay: FC = ({ children }) => {
     <>
       {children}
       <WarningModal
-        header={t('addressesDiscoveryOverlay.overlay.title')}
+        header={t('addressesDiscovery.overlay.title')}
         content={<Loader className={styles.loader} data-testid="hd-discovery-loader" />}
         visible={initialHdDiscoveryCompleted && hdDiscoveryStatus === AddressesDiscoveryStatus.InProgress}
-        withCancel={false}
-        withConfirm={false}
       />
     </>
   );

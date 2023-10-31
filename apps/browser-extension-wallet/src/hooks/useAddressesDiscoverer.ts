@@ -1,4 +1,4 @@
-import { Shutdown } from '@cardano-sdk/util/dist/esm';
+import { Shutdown } from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
 import { consumeAddressesDiscoverer, exposeKeyAgent } from '@lib/communication';
 import { useCallback } from 'react';
@@ -21,8 +21,3 @@ export const useAddressesDiscoverer = () => ({
     await addressesDiscoverer.setup({ chainName, keyAgentChannelName: channelName });
   }, [])
 });
-
-// TODO: for now just to have a way to trigger it. Soon it will be triggered with a button in settings
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-window.addressesDiscoverer = addressesDiscoverer;

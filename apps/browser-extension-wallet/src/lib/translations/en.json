@@ -1302,7 +1302,7 @@
       "showUsedAddresses": "Show used addresses"
     }
   },
-  "addressesDiscoveryOverlay": {
+  "addressesDiscovery": {
     "overlay.title": "Your wallet is syncing, this might take a few minutes",
     "toast": {
       "errorText": "Wallet failed to sync",
