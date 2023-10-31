@@ -3,7 +3,7 @@ import { SubNavigation } from '@lace/ui';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { Flow, useDelegationPortfolioStore } from '../store';
+import { DelegationFlow, useDelegationPortfolioStore } from '../store';
 
 export enum Page {
   overview = 'overview',
@@ -19,7 +19,11 @@ const isValueAValidSubPage = (value: string): value is Page => Object.values<str
 export const Navigation = ({ children }: NavigationProps) => {
   const { analytics } = useOutsideHandles();
   const { activePage, portfolioMutators } = useDelegationPortfolioStore((store) => ({
-    activePage: [Flow.Overview, Flow.CurrentPoolDetails, Flow.PortfolioManagement].includes(store.activeFlow)
+    activePage: [
+      DelegationFlow.Overview,
+      DelegationFlow.CurrentPoolDetails,
+      DelegationFlow.PortfolioManagement,
+    ].includes(store.activeDelegationFlow)
       ? Page.overview
       : Page.browsePools,
     portfolioMutators: store.mutators,

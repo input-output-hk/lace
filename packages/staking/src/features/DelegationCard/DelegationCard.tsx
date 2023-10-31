@@ -3,12 +3,11 @@ import cn from 'classnames';
 import { Fragment, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TranslationKey } from '../i18n';
+import { PERCENTAGE_SCALE_MAX, sumPercentagesSanitized } from '../store';
 import * as styles from './DelegationCard.css';
 import { DelegationTooltip } from './DelegationTooltip';
 import { DistributionItem } from './types';
 
-// TODO
-const PERCENTAGE_SCALE_MAX = 100;
 export type DelegationStatus =
   | 'multi-delegation'
   | 'over-allocated'
@@ -58,13 +57,10 @@ export const DelegationCard = ({
     { nameTranslationKey: 'overview.delegationCard.label.pools', value: numberOfPools },
   ];
 
-  const totalPercentage = useMemo(() => {
-    const percentageSum = distribution.reduce((acc, cur) => acc + cur.percentage, 0);
-    // TODO: remove after LW-8683 implemented
-    // Round to avoid floating point errors in case of on-chain (float) percentages being passed to this component
-    return Math.round(percentageSum);
-  }, [distribution]);
-
+  const totalPercentage = useMemo(
+    () => sumPercentagesSanitized({ items: distribution || [], key: 'percentage' }),
+    [distribution]
+  );
   const { data, colorSet = PIE_CHART_DEFAULT_COLOR_SET } = useMemo((): {
     colorSet?: PieChartColor[];
     data: DistributionItem[];

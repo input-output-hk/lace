@@ -1,10 +1,15 @@
 import { Wallet } from '@lace/cardano';
 import { mapStakePoolToDisplayData } from './mapStakePoolToDisplayData';
-import { Flow } from './stateMachine';
+import { DelegationFlow } from './stateMachine';
 import { DelegationPortfolioStore, StakePoolDetails } from './types';
 
-export const isDrawerVisible = ({ activeFlow }: DelegationPortfolioStore) =>
-  [Flow.CurrentPoolDetails, Flow.PortfolioManagement, Flow.NewPortfolio, Flow.PoolDetails].includes(activeFlow);
+export const isDrawerVisible = ({ activeDelegationFlow }: DelegationPortfolioStore) =>
+  [
+    DelegationFlow.CurrentPoolDetails,
+    DelegationFlow.PortfolioManagement,
+    DelegationFlow.NewPortfolio,
+    DelegationFlow.PoolDetails,
+  ].includes(activeDelegationFlow);
 
 export const stakePoolDetailsSelector = ({
   cardanoCoinSymbol,
