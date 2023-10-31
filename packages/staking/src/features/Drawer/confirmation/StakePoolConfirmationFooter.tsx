@@ -55,8 +55,9 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
 
     const isPoolsChanged = validateIsPoolsChanged(currentPortfolioIds, draftPortfolioIds);
 
-    if (isPoolsReduced && isPoolsChanged)
+    if (isPoolsReduced && isPoolsChanged) {
       return setOpenPoolsManagementConfirmationModal(PoolsManagementModalType.ADJUSTMENT);
+    }
 
     if (isPoolsReduced) return setOpenPoolsManagementConfirmationModal(PoolsManagementModalType.REDUCTION);
 
