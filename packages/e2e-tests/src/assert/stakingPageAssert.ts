@@ -15,17 +15,6 @@ import StakingErrorDrawer from '../elements/staking/StakingErrorDrawer';
 import { browser } from '@wdio/globals';
 
 class StakingPageAssert {
-  assertSeeTitleWithCounter = async () => {
-    await StakingPage.title.waitForDisplayed();
-    await StakingPage.counter.waitForDisplayed();
-    await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
-    await expect(await StakingPage.counter.getText()).to.match(TestnetPatterns.COUNTER_REGEX);
-  };
-
-  assertSeeTitle = async () => {
-    await expect(await StakingPage.title.getText()).to.equal(await t('staking.sectionTitle'));
-  };
-
   assertStakePoolSwitched = async (stakePoolName: string) => {
     const stakingInfoComponent = new StakingInfoComponent();
     await browser.waitUntil(
@@ -152,26 +141,6 @@ class StakingPageAssert {
     });
   };
 
-  assertSeeStakePoolRow = async (index?: number) => {
-    const stakePoolListItem = new StakePoolListItem(index);
-    await webTester.seeWebElement(stakePoolListItem.logo());
-    await expect((await stakePoolListItem.getName()) as string).to.not.be.empty;
-    await expect((await stakePoolListItem.getTicker()) as string).to.not.be.empty;
-    await expect((await stakePoolListItem.getRos()) as string).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
-    await expect((await stakePoolListItem.getCost()) as string).to.match(TestnetPatterns.STAKE_POOL_LIST_COST_REGEX);
-    await expect((await stakePoolListItem.getSaturation()) as string).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
-  };
-
-  assertSeeStakePoolRows = async () => {
-    const stakePoolListItem = new StakePoolListItem();
-    await webTester.waitUntilSeeElement(stakePoolListItem.container(), 6000);
-    const rowsNumber = (await stakePoolListItem.getRows()).length;
-
-    for (let i = 1; i <= rowsNumber; i++) {
-      await this.assertSeeStakePoolRow(i);
-    }
-  };
-
   assertStakePoolItemsOrder = async (columnName: string, order: string) => {
     const stakePoolListItem = new StakePoolListItem();
     await webTester.waitUntilSeeElement(stakePoolListItem.container(), 60_000);
@@ -236,13 +205,6 @@ class StakingPageAssert {
     if (expectedTicker === 'ADA') tickerList = tickerList.map((ticker) => ticker.trim().slice(-3));
 
     expect(tickerList.every((ticker) => ticker === expectedTicker)).to.be.true;
-  }
-
-  async waitRowsToLoad() {
-    await browser.waitUntil(async () => (await StakingPage.rows).length > 1, {
-      timeout: 10_000,
-      timeoutMsg: 'failed while waiting for all pools to load'
-    });
   }
 }
 
