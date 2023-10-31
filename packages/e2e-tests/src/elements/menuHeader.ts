@@ -21,8 +21,8 @@ export class MenuHeader {
   private EXPAND_BUTTON = '[data-testid="expand-button"]';
   private MENU_THEME_LABEL = '.ant-dropdown-menu [data-testid="header-menu-theme-switcher"]';
   private MENU_THEME_SWITCHER = '.ant-dropdown-menu [data-testid="header-menu-theme-switcher"] button';
-  private MENU_NETWORK_LABEL = '[data-testid="header-menu-network-choice-label"]';
-  private MENU_NETWORK_VALUE = '[data-testid="header-menu-network-choice-value"]';
+  private MENU_NETWORK_LABEL = '[data-testid="header-menu-network-switcher-label"]';
+  private MENU_NETWORK_VALUE = '[data-testid="header-menu-network-switcher-value"]';
   private RIGHT_SIDE_PANEL_BUTTON = '//button[@data-testid="side-panel-handler"]';
   private readonly RECEIVE_BUTTON = 'aside [data-testid="receive-button"]';
   private readonly SEND_BUTTON = 'aside [data-testid="send-button"]';
