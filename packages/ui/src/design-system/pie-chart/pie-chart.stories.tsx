@@ -8,7 +8,7 @@ import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { page, Section, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Cell, Grid } from '../grid';
-import { Content, ContentInner } from '../tooltip';
+import { TooltipContent } from '../tooltip';
 
 import { PieChart } from './pie-chart.component';
 import {
@@ -47,9 +47,7 @@ const meta: Meta<typeof PieChart> = {
 export default meta;
 
 const CustomTooltip = (): ReactElement => (
-  <Content>
-    <ContentInner label="This is an example tooltip" />
-  </Content>
+  <TooltipContent label="This is an example tooltip" />
 );
 
 export const Overview = (): JSX.Element => (

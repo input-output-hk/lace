@@ -19,6 +19,11 @@ import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
 import StakingManageDrawerAssert from '../assert/multidelegation/StakingManageDrawerAssert';
+import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
+import TokensPageObject from '../pageobject/tokensPageObject';
+import localStorageInitializer from '../fixture/localStorageInitializer';
+import mainMenuPageObject from '../pageobject/mainMenuPageObject';
+import StartStakingPage from '../elements/multidelegation/StartStakingPage';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
@@ -165,7 +170,7 @@ Then(/^I click "Close" button on staking success drawer$/, async () => {
 Then(
   /^the transaction details are displayed for staking (with|without) metadata$/,
   async (metadata: 'with' | 'without') => {
-    const expectedTransactionDetails =
+    const expectedActivityDetails =
       metadata === 'with'
         ? {
             transactionDescription: 'Delegation\n1 token',
@@ -180,7 +185,7 @@ Then(
             poolID: testContext.load('poolID') as string
           };
 
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 
@@ -253,4 +258,28 @@ When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
       await StakingManageDrawerAssert.assertSeeStakingManageDrawer();
       break;
   }
+});
+
+Then(/^I see Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
+  await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
+});
+
+Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await TokensPageObject.waitUntilCardanoTokenLoaded();
+  await TokensPageObject.saveTokenBalance('Cardano');
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await mainMenuPageObject.navigateToSection('Staking', mode);
+  const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
+  await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
+});
+
+Then(/^I click "Get Started" step (1|2) link$/, async (linkNumber: '1' | '2') => {
+  await (linkNumber === '1'
+    ? StartStakingPage.clickGetStartedStep1Link()
+    : StartStakingPage.clickGetStartedStep2Link());
+});
+
+Given(/^I click "Expand view" on Start Staking page$/, async () => {
+  await StartStakingPage.clickExpandedViewBannerButton();
 });
