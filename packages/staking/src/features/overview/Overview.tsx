@@ -2,7 +2,7 @@ import { useObservable } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DelegationCard } from '../delegation-card';
+import { DelegationCard } from '../DelegationCard';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { FundWalletBanner } from './FundWalletBanner';
@@ -61,7 +61,7 @@ export const Overview = () => {
     portfolio: currentPortfolio,
   });
 
-  if (noFunds)
+  if (noFunds) {
     return (
       <FundWalletBanner
         title={t('overview.noFunds.title')}
@@ -71,15 +71,13 @@ export const Overview = () => {
         shouldHaveVerticalContent
       />
     );
+  }
 
-  if (currentPortfolio.length === 0)
+  if (currentPortfolio.length === 0) {
     return (
       <>
         {stakingNotification ? (
-          <StakingNotificationBanner
-            notification={stakingNotification}
-            onPortfolioDriftedNotificationClick={onManageClick}
-          />
+          <StakingNotificationBanner notification={stakingNotification} />
         ) : (
           <Flex flexDirection="column" gap="$32">
             <StakeFundsBanner balance={totalCoinBalance} />
@@ -88,6 +86,7 @@ export const Overview = () => {
         )}
       </>
     );
+  }
 
   return (
     <>
@@ -107,10 +106,7 @@ export const Overview = () => {
       </Box>
       {stakingNotification && (
         <Box mb="$40">
-          <StakingNotificationBanner
-            notification={stakingNotification}
-            onPortfolioDriftedNotificationClick={onManageClick}
-          />
+          <StakingNotificationBanner notification={stakingNotification} />
         </Box>
       )}
       <Flex justifyContent="space-between" mb="$16">

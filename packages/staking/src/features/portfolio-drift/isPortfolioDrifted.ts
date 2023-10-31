@@ -2,13 +2,14 @@
 import { Wallet } from '@lace/cardano';
 import BigNumber from 'bignumber.js';
 import sum from 'lodash/sum';
-import type { CurrentPortfolioStakePool } from '../../store';
-import { PERCENTAGE_SCALE_MAX } from '../../store';
-import { TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED } from '../../store/delegationPortfolioStore/constants';
+import type { CurrentPortfolioStakePool } from '../store';
+import { PERCENTAGE_SCALE_MAX, sumPercentagesSanitized } from '../store';
 
 const PORTFOLIO_DRIFT_PERCENTAGE_THRESHOLD = 15;
 
-const getPortfolioTotalPercentageDrift = (portfolio: CurrentPortfolioStakePool[]): number => {
+const getPortfolioTotalPercentageDrift = (
+  portfolio: (CurrentPortfolioStakePool & { savedIntegerPercentage: number })[]
+): number => {
   const totalValue = Wallet.BigIntMath.sum(portfolio.map(({ value }) => value));
   return sum(
     portfolio.map(({ value, savedIntegerPercentage }) => {
@@ -21,10 +22,19 @@ const getPortfolioTotalPercentageDrift = (portfolio: CurrentPortfolioStakePool[]
   );
 };
 
+const isPortfolioHavingSavedPercentages = (
+  currentPortfolio: CurrentPortfolioStakePool[]
+): currentPortfolio is (CurrentPortfolioStakePool & { savedIntegerPercentage: number })[] =>
+  currentPortfolio.every(({ savedIntegerPercentage }) => savedIntegerPercentage);
+
 // TODO: move this file to store. It gets imported also outside the overview feature so the store seems better place.
 export const isPortfolioDrifted = (currentPortfolio: CurrentPortfolioStakePool[]) => {
-  if (TMP_HOTFIX_PORTFOLIO_STORE_NOT_PERSISTED) return false;
-
+  const onChainPercentageSum = sumPercentagesSanitized({
+    items: currentPortfolio,
+    key: 'onChainPercentage',
+  });
+  if (onChainPercentageSum !== PERCENTAGE_SCALE_MAX) return true;
+  if (!isPortfolioHavingSavedPercentages(currentPortfolio)) return false;
   const drift = getPortfolioTotalPercentageDrift(currentPortfolio);
   return drift >= PORTFOLIO_DRIFT_PERCENTAGE_THRESHOLD;
 };
