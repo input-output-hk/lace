@@ -112,6 +112,18 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
 
   const handleSendAnalyticsEvent = (postHogEvent: PostHogAction) => analytics.sendEventToPostHog(postHogEvent);
 
+  const syncButton = (
+    <Button
+      size="medium"
+      className={styles.settingsButton}
+      onClick={() => addressesDiscoverer.discover()}
+      block={popupView}
+      data-testid="settings-wallet-wallet-sync-cta"
+    >
+      {t('browserView.settings.wallet.walletSync.ctaLabel')}
+    </Button>
+  );
+
   return (
     <>
       <GeneralSettingsDrawer
@@ -200,18 +212,11 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         <SettingsLink
           description={t('browserView.settings.wallet.walletSync.description')}
           data-testid="settings-wallet-wallet-sync"
+          addon={!popupView && syncButton}
         >
           {t('browserView.settings.wallet.walletSync.title')}
         </SettingsLink>
-        <Button
-          size="medium"
-          className={styles.settingsButton}
-          onClick={() => addressesDiscoverer.discover()}
-          block={popupView}
-          data-testid="settings-wallet-wallet-sync-cta"
-        >
-          {t('browserView.settings.wallet.walletSync.ctaLabel')}
-        </Button>
+        {popupView && syncButton}
       </SettingsCard>
     </>
   );

@@ -20,10 +20,10 @@ export const AddressesDiscoveryOverlay: FC = ({ children }) => {
     if (
       !prevStatusWasInProgress ||
       ![AddressesDiscoveryStatus.Error, AddressesDiscoveryStatus.Idle].includes(hdDiscoveryStatus)
-    )
+    ) {
       return;
+    }
 
-    setPrevHdDiscoveryStatus(hdDiscoveryStatus);
     toast.notify({
       icon: AddressesDiscoveryStatus.Error === hdDiscoveryStatus ? WarningIcon : RefreshIcon,
       text: t(
