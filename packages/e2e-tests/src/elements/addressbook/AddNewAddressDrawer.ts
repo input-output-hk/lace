@@ -16,16 +16,6 @@ class AddNewAddressDrawer extends CommonDrawerElements {
   get cancelButton() {
     return $(this.CANCEL_BUTTON);
   }
-
-  async clickOnSaveAddressButton() {
-    await this.saveAddressButton.waitForClickable();
-    await this.saveAddressButton.click();
-  }
-
-  async clickOnCancelButton() {
-    await this.cancelButton.waitForClickable();
-    await this.cancelButton.click();
-  }
 }
 
 export default new AddNewAddressDrawer();
