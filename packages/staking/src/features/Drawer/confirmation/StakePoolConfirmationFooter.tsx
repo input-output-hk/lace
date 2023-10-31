@@ -45,6 +45,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   }, [delegationTxBuilder, inMemoryWallet]);
 
   const handleSubmission = useCallback(async () => {
+    setOpenPoolsManagementConfirmationModal(null);
     if (!isInMemory) {
       // HW-WALLET
       setIsConfirmingTx(true);
