@@ -1,6 +1,12 @@
 import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
 import React, { useCallback, useEffect } from 'react';
-import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
+import {
+  useAnalyticsContext,
+  useBackgroundServiceAPIContext,
+  useCurrencyStore,
+  useExternalLinkOpener,
+  useTheme
+} from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
@@ -73,6 +79,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     true
   );
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
+  const analytics = useAnalyticsContext();
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -81,6 +88,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   return (
     <OutsideHandlesProvider
       {...{
+        analytics,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,

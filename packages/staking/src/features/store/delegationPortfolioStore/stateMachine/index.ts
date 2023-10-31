@@ -1,7 +1,7 @@
 export { processExpandedViewCases } from './processExpandedViewCases';
 export { processPopupViewCases } from './processPopupViewCases';
 export type { Command } from './commands';
-export { Flow, DrawerDefaultStep, DrawerManagementStep } from './types';
+export { DelegationFlow, DrawerDefaultStep, DrawerManagementStep } from './types';
 export type {
   CurrentPortfolioStakePool,
   State,
@@ -10,3 +10,6 @@ export type {
   ExecuteCommand,
   Handler,
 } from './types';
+export { sumPercentagesSanitized } from './sumPercentagesSanitized';
+export { normalizePercentages } from './normalizePercentages';
+export { sanitizePercentages } from './sanitizePercentages';

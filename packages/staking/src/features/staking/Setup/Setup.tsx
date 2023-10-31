@@ -20,6 +20,7 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
   const delegationDistribution = useObservable(walletStoreInMemoryWallet.delegation.distribution$);
   const currentEpoch = useObservable(walletStoreInMemoryWallet.currentEpoch$);
   const delegationRewardsHistory = useObservable(walletStoreInMemoryWallet.delegation.rewardsHistory$);
+  const delegationPortfolio = useObservable(walletStoreInMemoryWallet.delegation.portfolio$);
 
   useEffect(() => {
     if (![delegationDistribution, delegationRewardsHistory, currentEpoch].every(Boolean)) return;
@@ -27,10 +28,19 @@ export const Setup = ({ children, currentChain, view, ...rest }: SetupProps) => 
     portfolioMutators.setCurrentPortfolio({
       currentEpoch,
       delegationDistribution: [...delegationDistribution.values()],
+      delegationPortfolio,
       delegationRewardsHistory,
     });
     portfolioMutators.setView(view);
-  }, [delegationDistribution, delegationRewardsHistory, currentEpoch, portfolioMutators, currentChain, view]);
+  }, [
+    currentChain,
+    currentEpoch,
+    delegationDistribution,
+    delegationPortfolio,
+    delegationRewardsHistory,
+    portfolioMutators,
+    view,
+  ]);
 
   return (
     <SetupBase {...rest} loading={!balancesBalance?.total?.coinBalance}>

@@ -57,15 +57,22 @@ export const en: Translations = {
   'drawer.failure.subTitle': 'The transaction was not successful. Please try again.',
   'drawer.failure.title': 'Oops! Something went wrong...',
   'drawer.preferences.addPoolButton': 'Add stake pool',
-  'drawer.preferences.confirmButton': 'Confirm',
+  'drawer.preferences.confirmButton': 'Confirm new portfolio',
   'drawer.preferences.ctaButtonTooltip.invalidAllocation': 'You need to have a 100% allocation in order to proceed',
   'drawer.preferences.ctaButtonTooltip.zeroPercentageSliderError':
     'Every portfolio pool requires more than 0% allocation',
   'drawer.preferences.pickMorePools': 'You need to stake at least to one pool.',
   'drawer.preferences.poolDetails.actualRatio': 'Actual ratio',
+  'drawer.preferences.poolDetails.actualRatioTooltip':
+    'The current ratio of your stake in this pool as verified by the on-chain state.',
   'drawer.preferences.poolDetails.actualStake': 'Actual stake',
+  'drawer.preferences.poolDetails.actualStakeTooltip':
+    'The amount of ADA currently staked in this pool as verified by the on-chain state.',
   'drawer.preferences.poolDetails.savedRatio': 'Saved ratio',
-  'drawer.preferences.rebalanceButton': 'Rebalance staking',
+  'drawer.preferences.poolDetails.savedRatioTooltip':
+    'The ratio previously saved for this pool. Note: This may not reflect the current on-chain state due to potential stake drift.',
+  'drawer.preferences.rebalanceButton': 'Rebalance portfolio',
+  'drawer.preferences.removePoolButton': 'Remove pool from portfolio',
   'drawer.preferences.selectedStakePools': 'Selected stake pools ({{count}})',
   'drawer.sign.confirmation.title': 'Staking confirmation',
   'drawer.sign.enterWalletPasswordToConfirmTransaction': 'Enter your wallet password to confirm transaction',
@@ -90,6 +97,13 @@ export const en: Translations = {
   'modals.changingPreferences.description':
     "That's totally fine! Just please note that you'll continue receiving rewards from your former pool(s) for two epochs. After that, you'll start to receiving rewards from your new pool(s).",
   'modals.changingPreferences.title': 'Changing staking preferences?',
+  'modals.poolsManagement.buttons.cancel': 'Cancel',
+  'modals.poolsManagement.buttons.confirm': 'Fine by me',
+  'modals.poolsManagement.description.adjustment':
+    "Reducing pool numbers needs a stake key de-registration, triggering the return of the initial ADA deposit and possibly losing any undistributed rewards. When changing pools, you'll get rewards from the former pool for two epochs, then start receiving them from the new pool.",
+  'modals.poolsManagement.description.reduction':
+    'Reducing your pool count requires stake key de-registration, which returns the initial ADA deposit and may cause the loss of undistributed rewards in the calculation epoch phase.',
+  'modals.poolsManagement.title': 'Switching Pool?',
   'overview.banners.pendingFirstDelegation.message':
     'You will see your staking portfolio here once the transaction has been validated',
   'overview.banners.pendingFirstDelegation.title': 'Your staking transaction has been submitted',

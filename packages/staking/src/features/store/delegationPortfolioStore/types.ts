@@ -17,6 +17,7 @@ export type DelegationPortfolioStore = DelegationPortfolioState & {
       delegationDistribution: DelegatedStake[];
       currentEpoch: Wallet.EpochInfo;
       delegationRewardsHistory: Wallet.RewardsHistory;
+      delegationPortfolio: Wallet.Cardano.Cip17DelegationPortfolio | null;
     }) => Promise<void>;
     setView: (view: 'popup' | 'expanded') => void;
   };

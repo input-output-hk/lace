@@ -5,7 +5,7 @@ import {
   StateStatus,
   AssetDetailsSlice,
   BlockchainProviderSlice,
-  TransactionDetailSlice,
+  ActivityDetailSlice,
   UISlice,
   WalletInfoSlice
 } from '@stores/types';
@@ -21,7 +21,7 @@ const mockActivitiesSlice = (
   get: GetState<
     WalletInfoSlice &
       WalletActivitiesSlice &
-      TransactionDetailSlice &
+      ActivityDetailSlice &
       AssetDetailsSlice &
       UISlice &
       BlockchainProviderSlice
@@ -35,7 +35,7 @@ const mockActivitiesSlice = (
       walletInfo: mockWalletInfoTestnet
     } as WalletInfoSlice &
       WalletActivitiesSlice &
-      TransactionDetailSlice &
+      ActivityDetailSlice &
       AssetDetailsSlice &
       UISlice &
       BlockchainProviderSlice);

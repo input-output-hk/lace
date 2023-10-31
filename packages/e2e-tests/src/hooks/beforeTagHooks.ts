@@ -108,6 +108,11 @@ Before(
 );
 
 Before(
+  { tags: '@Staking-NonDelegatedFunds-Popup' },
+  async () => await popupViewWalletInitialization(TestWalletName.TAWalletNonDelegatedFunds)
+);
+
+Before(
   { tags: '@Staking-SwitchingPools-Extended-E2E' },
   async () => await extendedViewWalletInitialization(TestWalletName.WalletSwitchPoolsE2E)
 );
@@ -137,4 +142,9 @@ Before(
 Before(
   { tags: '@Multidelegation-DelegatedFunds-Popup' },
   async () => await popupViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle)
+);
+
+Before(
+  { tags: '@Multidelegation-DelegatedFunds-Extended' },
+  async () => await extendedViewWalletInitialization(TestWalletName.MultidelegationDelegatedSingle)
 );

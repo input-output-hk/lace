@@ -126,14 +126,18 @@ type KeysStructure = {
       pickMorePools: '';
       confirmButton: '';
       rebalanceButton: '';
+      removePoolButton: '';
       ctaButtonTooltip: {
         zeroPercentageSliderError: '';
         invalidAllocation: '';
       };
       poolDetails: {
         savedRatio: '';
+        savedRatioTooltip: '';
         actualRatio: '';
+        actualRatioTooltip: '';
         actualStake: '';
+        actualStakeTooltip: '';
       };
     };
   };
@@ -151,6 +155,17 @@ type KeysStructure = {
       title: '';
       description: '';
       button: '';
+    };
+    poolsManagement: {
+      title: '';
+      buttons: {
+        cancel: '';
+        confirm: '';
+      };
+      description: {
+        reduction: '';
+        adjustment: '';
+      };
     };
   };
   overview: {
