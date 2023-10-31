@@ -1,6 +1,5 @@
-import { Banner, useObservable } from '@lace/common';
+import { useObservable } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
-import ExclamationIcon from '@lace/ui/dist/assets/icons/warning-icon-triangle.component.svg';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../DelegationCard';
@@ -8,15 +7,10 @@ import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
-import {
-  hasMinimumFundsToDelegate,
-  hasPendingDelegationTransaction,
-  hasSaturatedOrRetiredPools,
-  mapPortfolioToDisplayData,
-} from './helpers';
+import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanner';
 
 export const Overview = () => {
   const { t } = useTranslation();
@@ -35,8 +29,7 @@ export const Overview = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
-  const isPoolRetiredOrSaturated = hasSaturatedOrRetiredPools(currentPortfolio);
+  const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
@@ -83,8 +76,9 @@ export const Overview = () => {
   if (currentPortfolio.length === 0) {
     return (
       <>
-        {stakingNotification ? (
-          <StakingNotificationBanner notification={stakingNotification} />
+        {/* defensive check - no other notification than pendingFirstDelegation should be possible here at the moment of writing this comment */}
+        {stakingNotifications.includes('pendingFirstDelegation') ? (
+          <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={onManageClick} />
         ) : (
           <Flex flexDirection="column" gap="$32">
             <StakeFundsBanner balance={totalCoinBalance} />
@@ -111,21 +105,10 @@ export const Overview = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      {stakingNotification && (
-        <Box mb="$40">
-          <StakingNotificationBanner notification={stakingNotification} />
-        </Box>
-      )}
-      {isPoolRetiredOrSaturated && (
-        <Box mb="$40">
-          <Banner
-            withIcon
-            customIcon={<ExclamationIcon />}
-            message={t('overview.banners.saturatedOrRetiredPool.title')}
-            description={t('overview.banners.saturatedOrRetiredPool.message')}
-            onBannerClick={onManageClick}
-          />
-        </Box>
+      {stakingNotifications.length > 0 && (
+        <Flex mb="$40" flexDirection="column">
+          <StakingNotificationBanners notifications={stakingNotifications} onClickableBannerClick={onManageClick} />
+        </Flex>
       )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
