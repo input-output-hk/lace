@@ -82,7 +82,7 @@ export const StakePoolDetailsDrawer = ({
 
   const createArrowIconCallback = () => {
     if (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon) {
-      return popupView ? closeDrawer : onGoBack;
+      return popupView ? closeDrawer() : onGoBack();
     }
     // eslint-disable-next-line consistent-return, unicorn/no-useless-undefined
     return undefined;
