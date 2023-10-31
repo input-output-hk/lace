@@ -1,13 +1,7 @@
-import { style, sx } from '@lace/ui';
+import { style } from '@lace/ui';
 import { theme } from '../../../theme';
 
 export const root = style({
-  minWidth: theme.spacing.$584,
-});
-
-export const poolIndicator = sx({ borderRadius: '$tiny', height: '$40', width: '$4' });
-
-export const valuesRow = style({
   border: `1px solid ${theme.colors.$preferencesPoolCardBorderColor}`,
   borderLeftWidth: 0,
   borderRightWidth: 0,
@@ -24,9 +18,11 @@ export const valueBox = style({
 });
 
 export const valueLabel = style({
-  color: '#6F7786', // TODO
+  color: theme.colors.$preferencesPoolCardDataTextColor,
 });
 
 export const valueInfoIcon = style({
+  color: theme.colors.$preferencesPoolCardDataIconColor,
+  fontSize: theme.spacing.$24,
   marginLeft: theme.spacing.$8,
 });

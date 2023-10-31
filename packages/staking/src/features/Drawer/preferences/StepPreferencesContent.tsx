@@ -3,12 +3,14 @@ import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
 import { Box, ControlButton, Flex, PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
-import { DelegationCard, DelegationStatus } from '../../delegation-card';
+import { DelegationCard, DelegationStatus } from '../../DelegationCard';
 import { useOutsideHandles } from '../../outside-handles-provider';
 import {
+  DelegationFlow,
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
+  sumPercentagesSanitized,
   useDelegationPortfolioStore,
 } from '../../store';
 import { PoolDetailsCard } from './PoolDetailsCard';
@@ -17,7 +19,7 @@ import * as styles from './StepPreferencesContent.css';
 const getDraftDelegationStatus = ({ draftPortfolio }: DelegationPortfolioStore): DelegationStatus => {
   if (!draftPortfolio || draftPortfolio.length === 0) return 'no-selection';
 
-  const percentageSum = draftPortfolio?.reduce((acc, pool) => acc + pool.sliderIntegerPercentage, 0);
+  const percentageSum = sumPercentagesSanitized({ items: draftPortfolio || [], key: 'sliderIntegerPercentage' });
   if (percentageSum > PERCENTAGE_SCALE_MAX) return 'over-allocated';
   if (percentageSum < PERCENTAGE_SCALE_MAX) return 'under-allocated';
 
@@ -39,14 +41,14 @@ export const StepPreferencesContent = () => {
     walletStoreWalletUICardanoCoin: { symbol },
     compactNumber,
   } = useOutsideHandles();
-  const { draftPortfolio, portfolioMutators, delegationStatus, cardanoCoinSymbol } = useDelegationPortfolioStore(
-    (state) => ({
+  const { draftPortfolio, activeDelegationFlow, portfolioMutators, delegationStatus, cardanoCoinSymbol } =
+    useDelegationPortfolioStore((state) => ({
+      activeDelegationFlow: state.activeDelegationFlow,
       cardanoCoinSymbol: state.cardanoCoinSymbol,
       delegationStatus: getDraftDelegationStatus(state),
       draftPortfolio: state.draftPortfolio || [],
       portfolioMutators: state.mutators,
-    })
-  );
+    }));
 
   const displayData = draftPortfolio.map((draftPool, i) => {
     const {
@@ -61,11 +63,10 @@ export const StepPreferencesContent = () => {
       color: PIE_CHART_DEFAULT_COLOR_SET[i] as PieChartColor,
       id,
       name: name || '-',
-      onChainPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.onChainPercentage : undefined,
+      onChainPercentage: draftPool?.onChainPercentage,
       percentage: sliderIntegerPercentage,
       saturation: saturation ? String(saturation) : undefined,
-      savedIntegerPercentage: draftPool.basedOnCurrentPortfolio ? draftPool.savedIntegerPercentage : undefined,
-      // TODO
+      savedIntegerPercentage: draftPool?.savedIntegerPercentage || undefined,
       sliderIntegerPercentage,
       stakeValue: balancesBalance
         ? compactNumber(
@@ -112,7 +113,10 @@ export const StepPreferencesContent = () => {
       </Flex>
       <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" data-testid="selected-pools-container">
         {displayData.map(
-          ({ color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage }) => (
+          (
+            { color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage },
+            idx
+          ) => (
             <PoolDetailsCard
               key={id}
               color={color}
@@ -123,8 +127,7 @@ export const StepPreferencesContent = () => {
               targetPercentage={sliderIntegerPercentage}
               stakeValue={stakeValue}
               cardanoCoinSymbol={cardanoCoinSymbol}
-              expanded
-              onExpandButtonClick={() => void 0}
+              defaultExpand={activeDelegationFlow === DelegationFlow.PortfolioManagement ? idx === 0 : true}
               onPercentageChange={(value) => {
                 portfolioMutators.executeCommand({
                   data: { id, newSliderPercentage: value },

@@ -4,8 +4,7 @@ import { Box, Flex, Text } from '@lace/ui';
 import ExclamationIcon from '@lace/ui/dist/assets/icons/warning-icon-triangle.component.svg';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DelegationCard } from '../delegation-card';
-import { StakePoolDetails } from '../drawer';
+import { DelegationCard } from '../DelegationCard';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
@@ -25,7 +24,6 @@ export const OverviewPopup = () => {
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletActivities: walletActivities,
-    expandStakingView,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -57,7 +55,7 @@ export const OverviewPopup = () => {
     portfolioMutators.executeCommand({ data: stakePool, type: 'ShowDelegatedPoolDetails' });
   };
 
-  if (noFunds)
+  if (noFunds) {
     return (
       <Flex flexDirection="column" gap="$32">
         <FundWalletBanner
@@ -70,14 +68,16 @@ export const OverviewPopup = () => {
         <ExpandViewBanner />
       </Flex>
     );
+  }
 
-  if (currentPortfolio.length === 0)
+  if (currentPortfolio.length === 0) {
     return (
       <Flex flexDirection="column" gap="$32">
         <StakeFundsBanner balance={totalCoinBalance} popupView />
         <ExpandViewBanner />
       </Flex>
     );
+  }
 
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
@@ -89,10 +89,7 @@ export const OverviewPopup = () => {
     <>
       {stakingNotification === 'portfolioDrifted' && (
         <Box mb="$32">
-          <StakingNotificationBanner
-            notification="portfolioDrifted"
-            onPortfolioDriftedNotificationClick={expandStakingView}
-          />
+          <StakingNotificationBanner notification="portfolioDrifted" />
         </Box>
       )}
       {isPoolRetiredOrSaturated && (
@@ -138,7 +135,6 @@ export const OverviewPopup = () => {
         ))}
       </Box>
       <ExpandViewBanner />
-      <StakePoolDetails showBackIcon showExitConfirmation={() => false} popupView />
     </>
   );
 };

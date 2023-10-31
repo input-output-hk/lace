@@ -11,16 +11,13 @@ type PortfolioStakePoolBase = {
 };
 
 type CurrentPortfolioSpecificProps = {
-  savedIntegerPercentage: number; // todo: type for integers
+  savedIntegerPercentage: number | null; // todo: type for integers
   onChainPercentage: number;
 };
 
 export type DraftPortfolioStakePool = PortfolioStakePoolBase & {
   sliderIntegerPercentage: number; // todo: type for integers
-} & (
-    | { basedOnCurrentPortfolio: false } // TODO: re-consider moving to top-level
-    | ({ basedOnCurrentPortfolio: true } & CurrentPortfolioSpecificProps)
-  );
+} & Partial<CurrentPortfolioSpecificProps>;
 
 export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
   CurrentPortfolioSpecificProps & {
@@ -31,7 +28,7 @@ export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
     value: bigint;
   };
 
-export enum Flow {
+export enum DelegationFlow {
   Overview = 'Overview',
   BrowsePools = 'BrowsePools',
   CurrentPoolDetails = 'CurrentPoolDetails',
@@ -41,9 +38,9 @@ export enum Flow {
   NewPortfolio = 'NewPortfolio',
 }
 
-export type ExpandedViewFlow = Flow;
+export type ExpandedViewDelegationFlow = DelegationFlow;
 
-export type PopupViewFLow = Flow.Overview | Flow.CurrentPoolDetails;
+export type PopupViewDelegationFlow = DelegationFlow.Overview | DelegationFlow.CurrentPoolDetails;
 
 export enum DrawerDefaultStep {
   PoolDetails = 'PoolDetails',
@@ -60,7 +57,7 @@ export enum DrawerManagementStep {
 export type DrawerStep = DrawerDefaultStep | DrawerManagementStep;
 
 type BaseState = {
-  activeFlow: Flow;
+  activeDelegationFlow: DelegationFlow;
   activeDrawerStep?: DrawerStep;
 };
 
@@ -81,7 +78,7 @@ type StateMachineSpecificState = BaseState & SupportingData;
 type MakeState<S extends StateMachineSpecificState> = CrossStateData & StateMachineSpecificState & S;
 
 export type StateOverview = MakeState<{
-  activeFlow: Flow.Overview;
+  activeDelegationFlow: DelegationFlow.Overview;
   activeDrawerStep: undefined;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
@@ -90,7 +87,7 @@ export type StateOverview = MakeState<{
 
 export type StateCurrentPoolDetails = MakeState<{
   activeDrawerStep: DrawerDefaultStep.PoolDetails;
-  activeFlow: Flow.CurrentPoolDetails;
+  activeDelegationFlow: DelegationFlow.CurrentPoolDetails;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: StakePoolWithLogo;
@@ -98,14 +95,14 @@ export type StateCurrentPoolDetails = MakeState<{
 
 export type StatePortfolioManagement = MakeState<{
   activeDrawerStep: DrawerManagementStep;
-  activeFlow: Flow.PortfolioManagement;
+  activeDelegationFlow: DelegationFlow.PortfolioManagement;
   draftPortfolio: DraftPortfolioStakePool[];
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
 }>;
 
 export type StateBrowsePools = MakeState<{
-  activeFlow: Flow.BrowsePools;
+  activeDelegationFlow: DelegationFlow.BrowsePools;
   activeDrawerStep: undefined;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
@@ -114,7 +111,7 @@ export type StateBrowsePools = MakeState<{
 
 export type StatePoolDetails = MakeState<{
   activeDrawerStep: DrawerDefaultStep.PoolDetails;
-  activeFlow: Flow.PoolDetails;
+  activeDelegationFlow: DelegationFlow.PoolDetails;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: StakePoolWithLogo;
@@ -122,7 +119,7 @@ export type StatePoolDetails = MakeState<{
 
 export type StateNewPortfolio = MakeState<{
   activeDrawerStep: DrawerManagementStep;
-  activeFlow: Flow.NewPortfolio;
+  activeDelegationFlow: DelegationFlow.NewPortfolio;
   draftPortfolio: DraftPortfolioStakePool[];
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
@@ -130,7 +127,7 @@ export type StateNewPortfolio = MakeState<{
 
 export type StateChangingPreferences = MakeState<{
   activeDrawerStep: undefined;
-  activeFlow: Flow.ChangingPreferences;
+  activeDelegationFlow: DelegationFlow.ChangingPreferences;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: DraftPortfolioStakePool[];
   viewedStakePool: undefined;
@@ -147,8 +144,12 @@ export type State =
 
 export type ExecuteCommand = <C extends Command>(command: C) => void;
 
+// TODO improve the types
 export type Handler<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   C extends Command = any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CurrentState extends State = any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TargetState extends State = any
 > = (params: { command: C; executeCommand: ExecuteCommand; state: CurrentState }) => TargetState;
