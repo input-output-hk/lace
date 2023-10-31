@@ -95,7 +95,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     currentChain,
     setCurrentChain,
     getKeyAgentType,
-    addressesDiscoveryCompleted
+    initialHdDiscoveryCompleted
   } = useWalletStore();
   const { loadWallet } = useWalletManager();
   const [{ chainName }] = useAppSettingsContext();
@@ -184,7 +184,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet && addressesDiscoveryCompleted) {
+  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return (
       <>
         <Switch>

@@ -18,6 +18,7 @@ import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { APP_MODE_POPUP } from './utils/constants';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
+import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -32,7 +33,9 @@ const App = (): React.ReactElement => (
                     <ExperimentsProvider>
                       <AnalyticsProvider>
                         <ThemeProvider>
-                          <DappConnectorView />
+                          <AddressesDiscoveryOverlay>
+                            <DappConnectorView />
+                          </AddressesDiscoveryOverlay>
                         </ThemeProvider>
                       </AnalyticsProvider>
                     </ExperimentsProvider>
