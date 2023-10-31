@@ -200,20 +200,18 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         <SettingsLink
           description={t('browserView.settings.wallet.walletSync.description')}
           data-testid="settings-wallet-wallet-sync"
-          addon={
-            <Button
-              size="medium"
-              // eslint-disable-next-line react/jsx-handler-names
-              onClick={() => addressesDiscoverer.discover()}
-              block={popupView}
-              data-testid="settings-wallet-wallet-sync-cta"
-            >
-              {t('browserView.settings.wallet.walletSync.ctaLabel')}
-            </Button>
-          }
         >
           {t('browserView.settings.wallet.walletSync.title')}
         </SettingsLink>
+        <Button
+          size="medium"
+          className={styles.settingsButton}
+          onClick={() => addressesDiscoverer.discover()}
+          block={popupView}
+          data-testid="settings-wallet-wallet-sync-cta"
+        >
+          {t('browserView.settings.wallet.walletSync.ctaLabel')}
+        </Button>
       </SettingsCard>
     </>
   );

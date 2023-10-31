@@ -5,20 +5,25 @@ import { Loader, toast } from '@lace/common';
 import { AddressesDiscoveryStatus } from '@lib/communication';
 import { useWalletStore } from '@stores';
 import { WarningModal } from '@views/browser/components';
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const AddressesDiscoveryOverlay: FC = ({ children }) => {
   const { t } = useTranslation();
   const { hdDiscoveryStatus, initialHdDiscoveryCompleted } = useWalletStore();
+  const [prevHdDiscoveryStatus, setPrevHdDiscoveryStatus] = useState<AddressesDiscoveryStatus | null>();
 
   useEffect(() => {
+    const prevStatusWasInProgress = prevHdDiscoveryStatus === AddressesDiscoveryStatus.InProgress;
+    setPrevHdDiscoveryStatus(hdDiscoveryStatus);
+
     if (
-      !hdDiscoveryStatus ||
+      !prevStatusWasInProgress ||
       ![AddressesDiscoveryStatus.Error, AddressesDiscoveryStatus.Idle].includes(hdDiscoveryStatus)
     )
       return;
 
+    setPrevHdDiscoveryStatus(hdDiscoveryStatus);
     toast.notify({
       icon: AddressesDiscoveryStatus.Error === hdDiscoveryStatus ? WarningIcon : RefreshIcon,
       text: t(
@@ -28,7 +33,7 @@ export const AddressesDiscoveryOverlay: FC = ({ children }) => {
       ),
       withProgressBar: true
     });
-  }, [hdDiscoveryStatus, t]);
+  }, [hdDiscoveryStatus, prevHdDiscoveryStatus, t]);
 
   return (
     <>

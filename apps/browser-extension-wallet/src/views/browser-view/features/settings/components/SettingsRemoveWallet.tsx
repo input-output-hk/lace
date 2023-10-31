@@ -12,6 +12,7 @@ import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI'
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import cn from 'classnames';
 
 const { Title, Text } = Typography;
 
@@ -73,7 +74,7 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
           </Text>
           <Button
             size="medium"
-            className={styles.settingsButton}
+            className={cn(styles.settingsButton, styles.settingsRemoveWalletButton)}
             onClick={toggleRemoveWalletAlert}
             block={popupView}
             data-testid="remove-wallet-button"

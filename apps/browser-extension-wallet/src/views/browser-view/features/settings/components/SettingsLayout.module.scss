@@ -179,8 +179,6 @@
 
 .settingsButton {
   margin-top: size_unit(3);
-  background-color: var(--data-pink) !important;
-  border-color: var(--data-pink) !important;
   font-weight: 600 !important;
   flex: 1;
   max-width: 160px;
@@ -188,6 +186,11 @@
   @media (max-width: $breakpoint-popup) {
     max-width: none;
   }
+}
+
+.settingsRemoveWalletButton {
+  background-color: var(--data-pink) !important;
+  border-color: var(--data-pink) !important;
 
   &:hover {
     background-color: var(--data-dark-pink) !important;
