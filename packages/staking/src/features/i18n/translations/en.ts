@@ -93,6 +93,7 @@ export const en: Translations = {
   'modals.beta.pill': 'Beta',
   'modals.beta.portfolioPersistence.description':
     "Lace now supports on-chain portfolio persistence! This feature helps protect portfolios from significant drift and ensures cross-device syncing. If you've previously submitted a delegation, please resubmit your current (or a new) delegation to enable on-chain portfolio persistence.",
+  'modals.beta.portfolioPersistence.title': 'Multi-delegation: Portfolio Persistence',
   'modals.beta.title': 'Multi-delegation',
   'modals.changingPreferences.buttons.cancel': 'Cancel',
   'modals.changingPreferences.buttons.confirm': 'Fine by me',

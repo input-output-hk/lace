@@ -1,7 +1,6 @@
 import { Flex } from '@lace/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BetaPill } from './BetaPill';
 import { StakingModal } from './StakingModal';
 
 interface PortfolioPersistenceModalProps {
@@ -32,8 +31,7 @@ export const PortfolioPersistenceModal = ({ popupView, visible, onConfirm }: Por
           flexDirection={popupView ? 'column-reverse' : 'row'}
           gap="$8"
         >
-          {t('modals.beta.title')}
-          <BetaPill />
+          {t('modals.beta.portfolioPersistence.title')}
         </Flex>
       }
       visible={visible}

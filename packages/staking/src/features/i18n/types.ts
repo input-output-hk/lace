@@ -156,6 +156,7 @@ type KeysStructure = {
       description: '';
       button: '';
       portfolioPersistence: {
+        title: '';
         description: '';
       };
     };
