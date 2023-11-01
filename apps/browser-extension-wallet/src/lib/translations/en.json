@@ -1145,6 +1145,13 @@
       "isOwnRetirement": "This is your DRep retirement.",
       "isNotOwnRetirement": "The presented DRepID does not match your wallet's DRepID."
     },
+    "drepUpdate": {
+      "title": "Confirm DRep update",
+      "metadata": "Metadata",
+      "drepId": "Drep ID",
+      "url": "URL",
+      "hash": "Hash"
+    },
     "voteDelegation": {
       "title": "Confirm vote delegation",
       "metadata": "Metadata",
