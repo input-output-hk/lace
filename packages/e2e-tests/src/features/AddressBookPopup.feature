@@ -11,7 +11,8 @@ Feature: Address book - popup view
 
   @LW-4474
   Scenario: Popup-view - Address Book - Copy address button
-    Given I have 3 addresses in my address book in popup mode
+    Given I close wallet synced toast
+    And I have 3 addresses in my address book in popup mode
     When I click address on the list with name "Byron"
     And I click "Copy" button on address details page
     Then I see a toast with message: "general.clipboard.copiedToClipboard"

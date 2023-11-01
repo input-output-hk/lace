@@ -24,6 +24,7 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
+import ToastMessage from '../elements/toastMessage';
 import menuMainExtended from '../elements/menuMainExtended';
 import { browser } from '@wdio/globals';
 import faqPageAssert from '../assert/faqPageAssert';
@@ -49,6 +50,15 @@ Then(/^I close the drawer by clicking close button$/, async () => {
 
 Then(/^I close the drawer by clicking back button$/, async () => {
   await simpleTxSideDrawerPageObject.clickBackDrawerButton();
+});
+
+Then(/^I close wallet synced toast/, async () => {
+  const toastMessage = await (await ToastMessage.messageText).getText();
+  if (toastMessage === (await t('addressesDiscovery.toast.successText')).toString()) {
+    await ToastMessage.closeButton.click();
+  } else {
+    Logger.warn('Wallet synced toast is not displayed, you might want to remove this step');
+  }
 });
 
 Then(/^Wallet is synced$/, async () => {
