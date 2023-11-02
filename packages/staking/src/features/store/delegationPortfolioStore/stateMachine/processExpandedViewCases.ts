@@ -334,10 +334,6 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
               })),
-              DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
-                ...state,
-                activeDrawerStep: DrawerManagementStep.Sign,
-              })),
               DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state }) => ({
                   ...state,
@@ -488,11 +484,6 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
-              })),
-              DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
-                ...state,
-                // TODO: fix for hw wallet skip
-                activeDrawerStep: DrawerManagementStep.Sign,
               })),
               DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,

@@ -83,7 +83,7 @@ export const StakePoolDetailsDrawer = ({
     }
   });
 
-  const createArrowIconCallback = () => {
+  const arrowIconCallback = () => {
     if (shouldShowBackIcon) {
       return popupView ? closeDrawer() : onGoBack();
     }
@@ -105,7 +105,7 @@ export const StakePoolDetailsDrawer = ({
               ? undefined
               : () => {
                   onBackButtonClick?.();
-                  createArrowIconCallback();
+                  arrowIconCallback();
                 }
           }
           onCloseIconClick={() => {

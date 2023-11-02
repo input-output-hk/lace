@@ -134,8 +134,7 @@ export type PortfolioManagementConfirmationCommand =
 
 export type PortfolioManagementSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-// TODO: should not have DrawerBack, it's not used
-export type PortfolioManagementFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type PortfolioManagementFailureCommand = CancelDrawer | DrawerContinue;
 
 export type PortfolioManagementSuccessCommand = CancelDrawer;
 
@@ -157,8 +156,7 @@ export type NewPortfolioConfirmationCommand =
 
 export type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-// TODO: should not have DrawerBack, it's not used
-export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue;
 
 export type NewPortfolioSuccessCommand = CancelDrawer;
 

@@ -46,21 +46,21 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
 
   const handleSubmission = useCallback(async () => {
     setOpenPoolsManagementConfirmationModal(null);
-    if (!isInMemory) {
-      // HW-WALLET
-      setIsConfirmingTx(true);
-      try {
-        await signAndSubmitTransaction();
-        setIsRestaking(currentPortfolio.length > 0);
-        portfolioMutators.executeCommand({ type: 'HwSkipToSuccess' });
-      } catch {
-        portfolioMutators.executeCommand({ type: 'HwSkipToFailure' });
-      } finally {
-        setIsConfirmingTx(false);
-      }
-    } else {
-      // Mnemonic wallet continues to password verification
+    if (isInMemory) {
       portfolioMutators.executeCommand({ type: 'DrawerContinue' });
+      return;
+    }
+
+    // HW-WALLET
+    setIsConfirmingTx(true);
+    try {
+      await signAndSubmitTransaction();
+      setIsRestaking(currentPortfolio.length > 0);
+      portfolioMutators.executeCommand({ type: 'HwSkipToSuccess' });
+    } catch {
+      portfolioMutators.executeCommand({ type: 'HwSkipToFailure' });
+    } finally {
+      setIsConfirmingTx(false);
     }
   }, [currentPortfolio, isInMemory, portfolioMutators, setIsRestaking, signAndSubmitTransaction]);
 
