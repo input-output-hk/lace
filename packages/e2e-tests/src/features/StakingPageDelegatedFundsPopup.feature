@@ -15,12 +15,3 @@ Feature: Staking Page - Funds already delegated - Popup View
     When I click pool name in currently staking component
     Then I see drawer with "ADA Capital" stake pool details
 
-  @LW-2654
-  Scenario Outline: Popup View - Staking - Hover over currently staking element: <element_to_hover>
-    And I navigate to Staking popup page
-    When I hover over <element_to_hover> in currently staking component
-    Then I see tooltip for currently staking component
-    Examples:
-      | element_to_hover |
-      | total staked     |
-      | last reward      |

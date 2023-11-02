@@ -23,7 +23,7 @@ import indexedDB from '../fixture/indexedDB';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import transactionDetailsAssert, { ExpectedTransactionDetails } from '../assert/transactionDetailsAssert';
+import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import nftsPageObject from '../pageobject/nftsPageObject';
 import transactionsPageObject from '../pageobject/transactionsPageObject';
@@ -376,7 +376,7 @@ When(/^I save fee value$/, async () => {
 Then(
   /^The Tx details are displayed as "([^"]*)" for ADA with value: ([^"]*) and wallet: "([^"]*)" address$/,
   async (type: string, adaValue: string, walletName: string) => {
-    const expectedTransactionDetails: ExpectedTransactionDetails = {
+    const expectedActivityDetails: ExpectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
@@ -384,14 +384,14 @@ Then(
       ],
       status: 'Success'
     };
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 
 Then(
   /^The Tx details are displayed as "([^"]*)" for ADA with value: "([^"]*)" and LaceCoin2 with value: "([^"]*)" and wallet: "([^"]*)" address$/,
   async (type: string, adaValue: string, laceCoin2Value: string, walletName: string) => {
-    const expectedTransactionDetails: ExpectedTransactionDetails = {
+    const expectedActivityDetails: ExpectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(2)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
@@ -403,7 +403,7 @@ Then(
       ],
       status: 'Success'
     };
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 
@@ -415,13 +415,13 @@ Then(
       entry.address = getTestWallet(entry.address).address;
       entry.assets = entry.assets.split(',');
     }
-    const expectedTransactionDetails = {
+    const expectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(${numberOfTokens})`,
       hash: String(testContext.load('txHashValue')),
       transactionData: txData,
       status: 'Success'
     };
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 

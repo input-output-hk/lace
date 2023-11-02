@@ -5,6 +5,7 @@ import { t } from '../../utils/translationService';
 import { TestnetPatterns } from '../../support/patterns';
 import NetworkComponent from '../../elements/multidelegation/NetworkInfoComponent';
 import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListItem';
+import Tooltip from '../../elements/Tooltip';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -29,6 +30,13 @@ class MultidelegationPageAssert {
 
   assertSeeTitle = async () => {
     expect(await MultidelegationPage.title.getText()).to.equal(await t('staking.sectionTitle'));
+  };
+
+  assertSeeTabs = async () => {
+    await MultidelegationPage.overviewTab.waitForDisplayed();
+    expect(await MultidelegationPage.overviewTab.getText()).to.equal(await t('root.nav.overviewTitle', 'staking'));
+    await MultidelegationPage.browseTab.waitForDisplayed();
+    expect(await MultidelegationPage.browseTab.getText()).to.equal(await t('root.nav.browsePoolsTitle', 'staking'));
   };
 
   assertSeeDelegationCardDetailsInfo = async () => {
@@ -201,6 +209,12 @@ class MultidelegationPageAssert {
       default:
         throw new Error(`Unsupported column name: ${columnName}`);
     }
+  };
+
+  assertSeeCurrentlyStakingTooltip = async () => {
+    await Tooltip.component.waitForDisplayed();
+    expect(await Tooltip.label.getText()).contains(await t('overview.stakingInfoCard.tooltipFiatLabel', 'staking'));
+    expect(await Tooltip.value.getText()).to.match(TestnetPatterns.USD_VALUE_NO_SUFFIX_REGEX); // TODO: update when LW-8935 is resolved
   };
 }
 

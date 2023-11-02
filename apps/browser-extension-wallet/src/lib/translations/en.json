@@ -27,7 +27,7 @@
         }
       }
     },
-    "transactionDetailBrowser": {
+    "activityDetails": {
       "address": "Address",
       "sent": "Sent",
       "sending": "Sending",
@@ -55,7 +55,8 @@
       "from": "From",
       "to": "To",
       "multipleAddresses": "Multiple addresses",
-      "pools": "Pool(s)"
+      "pools": "Pool(s)",
+      "epoch": "Epoch"
     },
     "walletNameAndPasswordSetupStep": {
       "title": "Let's set up your new wallet",
@@ -796,7 +797,12 @@
           "networkSwitched": "Switched network"
         },
         "authorizedDApps.title": "Authorized DApps",
-        "authorizedDApps.description": "See and manage authorized DApps"
+        "authorizedDApps.description": "See and manage authorized DApps",
+        "walletSync": {
+          "description": "Update or sync your wallet",
+          "ctaLabel": "Sync",
+          "title": "Wallet sync"
+        }
       },
       "preferences": {
         "title": "Preferences",
@@ -1295,6 +1301,13 @@
       "usedAddresses.copy": "Copy Address",
       "usedAddresses.addressCopied": "Address copied",
       "showUsedAddresses": "Show used addresses"
+    }
+  },
+  "addressesDiscovery": {
+    "overlay.title": "Your wallet is syncing, this might take a few minutes",
+    "toast": {
+      "errorText": "Wallet failed to sync",
+      "successText": "Wallet synced successfully"
     }
   }
 }

@@ -1,0 +1,1 @@
+export { AddressesDiscoveryOverlay } from './AddressesDiscoveryOverlay';

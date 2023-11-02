@@ -16,8 +16,12 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   inMemoryWallet: undefined,
   cardanoWallet: undefined,
   walletManagerUi: undefined,
-  addressesDiscoveryCompleted: false,
-  setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted) => set({ addressesDiscoveryCompleted }),
+  initialHdDiscoveryCompleted: false,
+  setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted) =>
+    set({ initialHdDiscoveryCompleted: addressesDiscoveryCompleted }),
+  // eslint-disable-next-line unicorn/no-null
+  hdDiscoveryStatus: null,
+  setHdDiscoveryStatus: (hdDiscoveryStatus) => set({ hdDiscoveryStatus }),
   setCardanoWallet: (wallet?: Wallet.CardanoWallet) => set({ inMemoryWallet: wallet?.wallet, cardanoWallet: wallet }),
   setWalletManagerUi: (walletManagerUi: WalletManagerUi) => set({ walletManagerUi }),
   setCurrentChain: (chain: Wallet.ChainName) => {

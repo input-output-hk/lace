@@ -6,7 +6,8 @@
     "baseUrl": "../src",
     "paths": {
       "@src/*": ["*"],
-      "@ui/*": ["ui/*"]
+      "@ui/*": ["ui/*"],
+      "@analytics/*": ["analytics/*"]
     },
     "declarationDir": "./",
     "declaration": true,
