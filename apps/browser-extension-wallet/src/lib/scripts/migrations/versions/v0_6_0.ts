@@ -89,12 +89,6 @@ export const v0_6_0: Migration = {
               : {
                   keyAgentData: { ...newKeyAgentData, chainId: Wallet.Cardano.ChainIds.Preview, knownAddresses: [] }
                 },
-          Sanchonet:
-            keyAgentStoredChainName === 'Sanchonet'
-              ? { keyAgentData: newKeyAgentData }
-              : {
-                  keyAgentData: { ...newKeyAgentData, chainId: Wallet.Cardano.ChainIds.Sanchonet, knownAddresses: [] }
-                },
           Mainnet:
             keyAgentStoredChainName === 'Mainnet'
               ? { keyAgentData: newKeyAgentData }
