@@ -28,12 +28,13 @@ export const GroupedAssetActivityList = ({
 }: GroupedAssetActivityListProps): React.ReactElement => {
   // workaround for bug in react-infinite-scroll-component
   // related to not loading more elements if the height of the container is less than the height of the window
-  // https://github.com/ankeetmaini/react-infinite-scroll-component/issues/380
-  // windowHeight state needed to ensure that page size remains the same if window is resized
+  // see: https://github.com/ankeetmaini/react-infinite-scroll-component/issues/380
+  // ticket for proper fix on our end: https://input-output.atlassian.net/browse/LW-8986
+  // initialWindowHeight state needed to ensure that page size remains the same if window is resized
   const [initialWindowHeight] = useState(window.innerHeight);
-  const ESTIMATED_ITEM_HEIGHT = 100;
+  const ESTIMATED_MIN_GROUP_HEIGHT = 100;
   // eslint-disable-next-line no-magic-numbers
-  const pageSize = Math.max(5, Math.floor(initialWindowHeight / ESTIMATED_ITEM_HEIGHT));
+  const pageSize = Math.max(5, Math.floor(initialWindowHeight / ESTIMATED_MIN_GROUP_HEIGHT));
 
   const FAKE_LOAD_TIMEOUT = 1000;
   const [skip, setSkip] = useState(0);
