@@ -317,7 +317,6 @@ export const validateWalletMnemonic = async (
 export const shutdownWallet = async (walletManagerUi: WalletManagerUi): Promise<void> => {
   // Use wallet manager UI to shutdown the wallet
   await walletManagerUi.destroy();
-  // await walletManagerUi.clearStore(walletId);
 };
 
 export const switchKeyAgents = async (

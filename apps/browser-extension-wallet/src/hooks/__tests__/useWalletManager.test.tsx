@@ -162,7 +162,7 @@ describe('Testing useWalletManager hook', () => {
 
       await lockWallet();
       expect(lockWallet).toBeDefined();
-      expect(clearBackgroundStorage).toBeCalledWith(['keyAgentsByChain']);
+      expect(clearBackgroundStorage).toBeCalledWith({ keys: ['keyAgentsByChain'] });
       expect(deleteFromLocalStorage).toBeCalledWith('keyAgentData');
       expect(setCardanoWallet).toBeCalledWith();
       expect(setKeyAgentData).toBeCalledWith();
@@ -728,8 +728,8 @@ describe('Testing useWalletManager hook', () => {
       const shutdownWalletMocked = jest.fn();
       mockShutdownWallet.mockImplementation(shutdownWalletMocked);
 
-      const deleteFromLocalStorage = jest.fn();
-      jest.spyOn(localStorage, 'deleteFromLocalStorage').mockImplementation(deleteFromLocalStorage);
+      const clearLocalStorage = jest.fn();
+      jest.spyOn(localStorage, 'clearLocalStorage').mockImplementation(clearLocalStorage);
 
       const resetWalletLock = jest.fn();
       const setCardanoWallet = jest.fn();
@@ -757,12 +757,20 @@ describe('Testing useWalletManager hook', () => {
       expect(deleteWallet).toBeDefined();
       await deleteWallet();
       expect(shutdownWalletMocked).toBeCalledWith(walletManagerUi);
-      expect(deleteFromLocalStorage.mock.calls[0]).toEqual(['appSettings']);
-      expect(deleteFromLocalStorage.mock.calls[1]).toEqual(['showDappBetaModal']);
-      expect(deleteFromLocalStorage.mock.calls[2]).toEqual(['lastStaking']);
-      expect(deleteFromLocalStorage.mock.calls[3]).toEqual(['userInfo']);
-      expect(deleteFromLocalStorage.mock.calls[4]).toEqual(['keyAgentData']);
-      expect(clearBackgroundStorage).toBeCalledWith(['message', 'mnemonic', 'keyAgentsByChain']);
+      expect(clearLocalStorage).toBeCalledWith({
+        except: [
+          'currency',
+          'lock',
+          'mode',
+          'hideBalance',
+          'analyticsAccepted',
+          'isForgotPasswordFlow',
+          'multidelegationFirstVisit'
+        ]
+      });
+      expect(clearBackgroundStorage).toBeCalledWith({
+        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration']
+      });
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();
       expect(setKeyAgentData).toBeCalledWith();

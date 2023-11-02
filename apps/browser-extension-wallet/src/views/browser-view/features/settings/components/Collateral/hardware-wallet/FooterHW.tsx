@@ -50,7 +50,7 @@ export const FooterHW = ({ currentSection, setCurrentStep, hideDrawer }: FooterP
       backgroundStorage.message?.type === MessageTypes.OPEN_COLLATERAL_SETTINGS &&
       backgroundStorage.message?.data.section === BrowserViewSections.COLLATERAL_SETTINGS
     ) {
-      await backgroundServices.clearBackgroundStorage(['message']);
+      await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
     }
 
     closeDrawer();
