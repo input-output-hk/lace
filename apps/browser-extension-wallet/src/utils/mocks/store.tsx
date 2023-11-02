@@ -83,6 +83,7 @@ export const walletStoreMock = async (
     setBlockchainProvider: jest.fn(),
     initialHdDiscoveryCompleted: false,
     setAddressesDiscoveryCompleted: jest.fn(),
+    setDeletingWallet: jest.fn(),
     hdDiscoveryStatus: AddressesDiscoveryStatus.Idle,
     setHdDiscoveryStatus: jest.fn(),
     ...customStore
