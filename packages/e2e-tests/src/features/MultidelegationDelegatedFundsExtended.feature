@@ -25,3 +25,15 @@ Feature: Staking Page - Extended View
       | confirmation   | I click outside the drawer                  |
       | password       | I click outside the drawer                  |
       | success        | I click outside the drawer                  |
+
+  @LW-8450
+  Scenario Outline: Extended View - Staking - Hover over currently staking element: <element>
+    Given I disable showing Multidelegation beta banner
+    And I navigate to Staking extended page
+    When I hover over <element> in currently staking component
+    Then I see tooltip for element in currently staking component
+    Examples:
+      | element       |
+      | total staked  |
+      | total rewards |
+      | last reward   |
