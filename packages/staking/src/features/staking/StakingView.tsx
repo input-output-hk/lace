@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../BrowsePools';
 import { Drawer } from '../Drawer';
-import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
+import { ChangingPreferencesModal, MultidelegationBetaModal, PortfolioPersistenceModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
 import { DrawerManagementStep, DrawerStep, useDelegationPortfolioStore } from '../store';
@@ -13,7 +13,8 @@ const stepsWithBackBtn = new Set<DrawerStep>([DrawerManagementStep.Confirmation,
 
 export const StakingView = () => {
   const { t } = useTranslation();
-  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
+  const { portfolioMutators, currentPortfolio } = useDelegationPortfolioStore((store) => ({
+    currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
   const {
@@ -21,6 +22,8 @@ export const StakingView = () => {
     walletStoreBlockchainProvider: blockchainProvider,
     multidelegationFirstVisit,
     triggerMultidelegationFirstVisit,
+    multidelegationFirstVisitSincePortfolioPersistence,
+    triggerMultidelegationFirstVisitSincePortfolioPersistence,
     currentChain,
   } = useOutsideHandles();
 
@@ -48,7 +51,14 @@ export const StakingView = () => {
       </Navigation>
       <Drawer showCloseIcon showBackIcon={(step: DrawerStep): boolean => stepsWithBackBtn.has(step)} />
       <ChangingPreferencesModal />
-      <MultidelegationBetaModal visible={multidelegationFirstVisit} onConfirm={triggerMultidelegationFirstVisit} />
+      {currentPortfolio.length > 1 ? (
+        <PortfolioPersistenceModal
+          visible={multidelegationFirstVisitSincePortfolioPersistence}
+          onConfirm={triggerMultidelegationFirstVisitSincePortfolioPersistence}
+        />
+      ) : (
+        <MultidelegationBetaModal visible={multidelegationFirstVisit} onConfirm={triggerMultidelegationFirstVisit} />
+      )}
     </>
   );
 };

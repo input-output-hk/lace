@@ -33,6 +33,7 @@ Feature: Top Navigation - Extended view
 
   @LW-2322 @Mainnet @Testnet
   Scenario: Avatar dropdown wallet address copy functions as expected
+    Given I close wallet synced toast
     When I click the menu button
     Then the dropdown menu is visible
     When I click on the user details button
@@ -116,6 +117,7 @@ Feature: Top Navigation - Extended view
 
   @LW-1717 @LW-5255 @Mainnet @Testnet
   Scenario: Avatar dropdown displays a valid wallet sync status (syncing) + toast & network pill
+    Given I close wallet synced toast
     When I am in the offline network mode: true
     Then I see network pill indicates that status is offline next to Lace logo
     And I see a toast with message: "general.errors.networkError"

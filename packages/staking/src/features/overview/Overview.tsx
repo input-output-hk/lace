@@ -10,7 +10,7 @@ import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
 
 export const Overview = () => {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ export const Overview = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
+  const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
@@ -76,8 +76,9 @@ export const Overview = () => {
   if (currentPortfolio.length === 0) {
     return (
       <>
-        {stakingNotification ? (
-          <StakingNotificationBanner notification={stakingNotification} />
+        {/* defensive check - no other notification than pendingFirstDelegation should be possible here at the moment of writing this comment */}
+        {stakingNotifications.includes('pendingFirstDelegation') ? (
+          <StakingNotificationBanners notifications={stakingNotifications} />
         ) : (
           <Flex flexDirection="column" gap="$32">
             <StakeFundsBanner balance={totalCoinBalance} />
@@ -104,10 +105,10 @@ export const Overview = () => {
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      {stakingNotification && (
-        <Box mb="$40">
-          <StakingNotificationBanner notification={stakingNotification} />
-        </Box>
+      {stakingNotifications.length > 0 && (
+        <Flex mb="$40" flexDirection="column">
+          <StakingNotificationBanners notifications={stakingNotifications} />
+        </Flex>
       )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>

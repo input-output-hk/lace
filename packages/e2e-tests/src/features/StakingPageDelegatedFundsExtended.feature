@@ -15,17 +15,6 @@ Feature: Staking Page - Funds already delegated - Extended Browser View
     When I click pool name in currently staking component
     Then I see drawer with "ADA CAPITAL" stake pool details
 
-  @LW-2644
-  Scenario Outline: Extended View - Staking - Hover over currently staking element: <element_to_hover>
-    And I navigate to Staking extended page
-    When I hover over <element_to_hover> in currently staking component
-    Then I see tooltip for currently staking component
-    Examples:
-      | element_to_hover |
-      | last reward      |
-      | total staked     |
-      | total rewards    |
-
   @LW-4877
   Scenario: Extended View - Stake pool details - Enter and Escape buttons support
     Given I am on Staking extended page

@@ -23,3 +23,14 @@ Feature: Staking Page - Popup View
       | walletName                     |
       | MultidelegationDelegatedSingle |
       | MultidelegationDelegatedMulti  |
+
+  @LW-8480
+  Scenario Outline: Popup View - Staking - Hover over currently staking element: <element>
+    Given I disable showing Multidelegation beta banner
+    And I navigate to Staking popup page
+    When I hover over <element> in currently staking component
+    Then I see tooltip for element in currently staking component
+    Examples:
+      | element      |
+      | total staked |
+      | last reward  |

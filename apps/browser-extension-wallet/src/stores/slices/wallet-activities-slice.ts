@@ -308,8 +308,8 @@ const getWalletActivitiesObservable = async ({
     map(async (allTransactions) =>
       (await allTransactions).sort((firstTx, secondTx) => {
         // ensure pending txs are always first
-        if (firstTx.status === ActivityStatus.PENDING && secondTx.status !== ActivityStatus.PENDING) return 1;
-        if (secondTx.status === ActivityStatus.PENDING && firstTx.status !== ActivityStatus.PENDING) return -1;
+        if (firstTx.status === ActivityStatus.PENDING && secondTx.status !== ActivityStatus.PENDING) return -1;
+        if (secondTx.status === ActivityStatus.PENDING && firstTx.status !== ActivityStatus.PENDING) return 1;
         // otherwise sort by date
         return secondTx.date.getTime() - firstTx.date.getTime();
       })

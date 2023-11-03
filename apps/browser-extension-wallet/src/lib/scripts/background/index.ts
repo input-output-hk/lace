@@ -1,3 +1,4 @@
+import './addresses-discoverer';
 import './cip30';
 import './onError';
 import './onUpdate';
