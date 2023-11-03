@@ -2,7 +2,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
-import { Button, inputProps, Password } from '@lace/common';
+import { Button, inputProps, Password, PostHogAction } from '@lace/common';
 import { useWalletStore } from '@stores';
 import { useRedirection, useWalletManager } from '@hooks';
 import { dAppRoutePaths } from '@routes';
@@ -14,6 +14,8 @@ import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
+import { useAnalyticsContext } from '@providers';
+import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const SignTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -26,6 +28,7 @@ export const SignTransaction = (): React.ReactElement => {
   const [password, setPassword] = useState<string>();
   const [validPassword, setValidPassword] = useState<boolean>();
   const { keyAgentData } = useWalletStore();
+  const analytics = useAnalyticsContext();
 
   const handleVerifyPass = useCallback(async () => {
     setIsLoading(true);
@@ -52,10 +55,12 @@ export const SignTransaction = (): React.ReactElement => {
     }
   }, [password, redirectToSignFailure, keyAgentData]);
 
-  const onConfirm = useCallback(
-    () => executeWithPassword(password, handleVerifyPass, false),
-    [executeWithPassword, handleVerifyPass, password]
-  );
+  const onConfirm = useCallback(() => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+    executeWithPassword(password, handleVerifyPass, false);
+  }, [executeWithPassword, handleVerifyPass, password, analytics]);
 
   const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
 

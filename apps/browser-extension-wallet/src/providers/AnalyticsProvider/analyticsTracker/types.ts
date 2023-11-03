@@ -54,6 +54,13 @@ export enum TxRecipientType {
   RegularAddress = 'regular address'
 }
 
+export const TX_CREATION_TYPE_KEY = 'tx_creation_type';
+
+export enum TxCreationType {
+  Internal = 'internal',
+  External = 'external'
+}
+
 export type OnboardingFlows = 'create' | 'restore' | 'hw' | 'forgot_password';
 export type PostHogActionsKeys =
   | 'SETUP_OPTION_CLICK'
