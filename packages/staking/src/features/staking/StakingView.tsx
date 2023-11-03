@@ -44,7 +44,7 @@ export const StakingView = () => {
       </Box>
       <Navigation>
         {(activePage) => (
-          <Box mt="$40">
+          <Box mt="$40" h="$fill">
             {activePage === Page.overview && <Overview />}
             {activePage === Page.browsePools && <BrowsePools />}
             {activePage === Page.activity && <Activity />}

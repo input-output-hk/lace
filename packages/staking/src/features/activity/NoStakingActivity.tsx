@@ -7,7 +7,7 @@ import * as styles from './NoStakingActivity.css';
 export const NoStakingActivity = () => {
   const { t } = useTranslation();
   return (
-    <Flex flexDirection="column" alignItems="center" gap="$8">
+    <Flex h="$fill" flexDirection="column" alignItems="center" justifyContent="center" gap="$8">
       <SadFaceIcon className={styles.sadFaceIcon} />
       <Typography.Text className={styles.noActivityText}>
         {t('activity.rewardsHistory.noStakingActivityYet')}
