@@ -24,13 +24,14 @@ import tokensPageObject from '../pageobject/tokensPageObject';
 import menuMainAssert from '../assert/menuMainAssert';
 import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
-import ToastMessage from '../elements/toastMessage';
 import menuMainExtended from '../elements/menuMainExtended';
 import { browser } from '@wdio/globals';
 import faqPageAssert from '../assert/faqPageAssert';
 import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
+import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
+import onboardingPageObject from '../pageobject/onboardingPageObject';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -53,15 +54,13 @@ Then(/^I close the drawer by clicking back button$/, async () => {
 });
 
 Then(/^I close wallet synced toast/, async () => {
-  const toastMessage = await (await ToastMessage.messageText).getText();
-  if (toastMessage === (await t('addressesDiscovery.toast.successText')).toString()) {
-    await ToastMessage.closeButton.click();
-  } else {
-    Logger.warn('Wallet synced toast is not displayed, you might want to remove this step');
-  }
+  await settingsExtendedPageObject.closeWalletSyncedToast();
 });
 
 Then(/^Wallet is synced$/, async () => {
+  await onboardingPageObject.waitUntilLoaderDisappears();
+  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertWalletIsInSyncedStatus();
 });
 

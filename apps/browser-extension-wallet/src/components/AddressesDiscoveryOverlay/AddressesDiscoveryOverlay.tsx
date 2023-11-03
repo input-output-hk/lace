@@ -43,6 +43,7 @@ export const AddressesDiscoveryOverlay: FC = ({ children }) => {
           visible
           header={t('addressesDiscovery.overlay.title')}
           content={<Loader className={styles.loader} data-testid="hd-discovery-loader" />}
+          dataTestId="address-discovery-warning-modal"
         />
       )}
     </>

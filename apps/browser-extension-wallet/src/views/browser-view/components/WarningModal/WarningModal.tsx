@@ -14,6 +14,7 @@ interface WarningModalProps {
   cancelLabel?: React.ReactNode;
   confirmLabel?: React.ReactNode;
   confirmCustomClassName?: string;
+  dataTestId?: string;
 }
 
 const modalWidth = 480;
@@ -28,7 +29,8 @@ export const WarningModal = ({
   cancelLabel,
   confirmLabel,
   confirmCustomClassName,
-  isPopupView
+  isPopupView,
+  dataTestId
 }: WarningModalProps): React.ReactElement => {
   const { t: translate } = useTranslation();
 
@@ -45,6 +47,7 @@ export const WarningModal = ({
       footer={null}
       visible={visible}
       width={isPopupView ? '100%' : modalWidth}
+      data-testid={dataTestId}
     >
       <div data-testid="delete-address-modal-title" className={styles.header}>
         {header}
