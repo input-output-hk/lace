@@ -1,21 +1,17 @@
-import { GroupedAssetActivityList } from '@lace/core';
+import { AssetActivityListProps, GroupedAssetActivityList } from '@lace/core';
 import { Box, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
-import { StateStatus, useOutsideHandles } from 'features/outside-handles-provider';
+import { StateStatus } from 'features/outside-handles-provider';
 import { useTranslation } from 'react-i18next';
 
 const LACE_APP_ID = 'lace-app';
 
-export const RewardsHistory = () => {
+type RewardsHistoryProps = {
+  groupedRewardsActivities: AssetActivityListProps[];
+  walletActivitiesStatus: StateStatus;
+};
+export const RewardsHistory = ({ groupedRewardsActivities, walletActivitiesStatus }: RewardsHistoryProps) => {
   const { t } = useTranslation();
-  const { walletStoreWalletActivitiesStatus: walletActivitiesStatus, walletStoreWalletActivities: walletActivities } =
-    useOutsideHandles();
-  const groupedRewardsActivities = walletActivities
-    .map((group) => ({
-      ...group,
-      items: group.items.filter((item) => item.type === 'rewards'),
-    }))
-    .filter((group) => group.items.length > 0);
 
   return (
     <>

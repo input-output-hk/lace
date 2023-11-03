@@ -1,6 +1,7 @@
 import { Translations } from '../types';
 
 export const en: Translations = {
+  'activity.rewardsHistory.noStakingActivityYet': 'No staking activity yet.',
   'activity.rewardsHistory.title': 'History',
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
   'browsePools.stakePoolTableBrowser.disabledTooltip': 'Maximum number of pools selected',

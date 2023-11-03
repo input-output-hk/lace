@@ -18,6 +18,7 @@ type KeysStructure = {
   activity: {
     rewardsHistory: {
       title: '';
+      noStakingActivityYet: '';
     };
   };
   browsePools: {
