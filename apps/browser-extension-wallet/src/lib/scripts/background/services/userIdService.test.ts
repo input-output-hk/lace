@@ -1,6 +1,6 @@
 import { BackgroundStorage } from '@lib/scripts/types';
 import { mockKeyAgentsByChain } from '@src/utils/mocks/test-helpers';
-import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from '.';
+import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from './userIdService';
 import * as utils from '../util';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 
