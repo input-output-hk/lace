@@ -41,6 +41,7 @@ export const NftFolderConfirmationModal = ({
     footer={null}
     visible={visible}
     width={popupView ? popupModalWidth : extendedModalWidth}
+    data-testid="create-folder-modal-container"
   >
     <div data-testid="create-folder-modal-title" className={styles.header}>
       {title}

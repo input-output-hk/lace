@@ -42,6 +42,7 @@ export const AddressesDiscoveryOverlay: FC = ({ children }) => {
         header={t('addressesDiscovery.overlay.title')}
         content={<Loader className={styles.loader} data-testid="hd-discovery-loader" />}
         visible={initialHdDiscoveryCompleted && hdDiscoveryStatus === AddressesDiscoveryStatus.InProgress}
+        dataTestId="address-discovery-warning-modal"
       />
     </>
   );
