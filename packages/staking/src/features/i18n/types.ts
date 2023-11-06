@@ -15,6 +15,12 @@ type KeysStructure = {
       close: '';
     };
   };
+  activity: {
+    rewardsHistory: {
+      title: '';
+      noStakingActivityYet: '';
+    };
+  };
   browsePools: {
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
