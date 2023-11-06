@@ -46,18 +46,6 @@ Feature: General Settings - Popup View
       | browserView.settings.legal.privacyPolicy.title     |
       | browserView.settings.legal.cookiePolicy.title      |
 
-  @LW-2708 @Mainnet @Testnet
-  Scenario: Popup View - Remove wallet and confirm
-    Given I am on Tokens popup page
-    And my local storage is fully initialized
-    When I open settings from header menu
-    And I click on Remove wallet button
-    And I click "Remove wallet" button on "Remove wallet" modal
-    And I switch to last window
-    Then "Get started" page is displayed
-    And I expect browser local storage to be empty
-    And Mnemonic is not stored in background storage
-
   @LW-2707 @Mainnet @Testnet
   Scenario: Popup view - Try to remove wallet and cancel
     Given I am on Tokens popup page
@@ -321,3 +309,16 @@ Feature: General Settings - Popup View
   Scenario: Popup view - Settings - Analytics option displayed
     Given I open settings from header menu
     Then I see analytics option with proper description and toggle
+
+    # this test should be executed as the last one in this suite
+  @LW-2708 @Mainnet @Testnet
+  Scenario: Popup View - Remove wallet and confirm
+    Given I am on Tokens popup page
+    And my local storage is fully initialized
+    When I open settings from header menu
+    And I click on Remove wallet button
+    And I click "Remove wallet" button on "Remove wallet" modal
+    And I switch to last window
+    Then "Get started" page is displayed
+    And I expect browser local storage to be empty
+    And Mnemonic is not stored in background storage
