@@ -21,13 +21,13 @@ export const OneTimeModals = ({ popupView }: OneTimeModalManagerProps) => {
 
   // the useEffects below prevent the modals from appearing to the user in the future e.g. after undelegating the portfolio
   useEffect(() => {
-    if (!multidelegationFirstVisit && userAlreadyMultidelegated) {
+    if (multidelegationFirstVisit && userAlreadyMultidelegated) {
       triggerMultidelegationFirstVisit();
     }
   }, [userAlreadyMultidelegated, multidelegationFirstVisit, triggerMultidelegationFirstVisit]);
 
   useEffect(() => {
-    if (!multidelegationFirstVisitSincePortfolioPersistence && portfolioSavedOnChain) {
+    if (multidelegationFirstVisitSincePortfolioPersistence && portfolioSavedOnChain) {
       triggerMultidelegationFirstVisitSincePortfolioPersistence();
     }
   }, [
