@@ -369,6 +369,7 @@ Feature: General Settings - Extended Browser View
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
 
+        # this test should be executed as the last one in this suite
   @LW-2521 @Mainnet @Testnet
   Scenario: Extended View - Remove wallet and confirm
     And my local storage is fully initialized
