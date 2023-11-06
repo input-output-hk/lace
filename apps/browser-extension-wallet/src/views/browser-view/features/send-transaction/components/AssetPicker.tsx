@@ -230,7 +230,6 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
       <WarningModal
         header={t('multipleSelection.reachedTheTxLimit')}
         content={t('multipleSelection.noOtherTokensCanBeAdded')}
-        withCancel={false}
         visible={exceededLimit}
         onConfirm={() => setExceededLimit(false)}
         confirmLabel={t('multipleSelection.gotIt')}

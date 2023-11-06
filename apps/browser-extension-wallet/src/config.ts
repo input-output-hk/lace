@@ -3,9 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { EnvironmentTypes } from '@stores';
 
 type CardanoServiceUrls = {
-  Mainnet: string;
-  Preprod: string;
-  Preview: string;
+  [key in Wallet.ChainName]: string;
 };
 
 type CExplorerUrlPaths = {
@@ -85,8 +83,7 @@ export const config = (): Config => {
     CEXPLORER_BASE_URL: {
       Mainnet: `${process.env.CEXPLORER_URL_MAINNET}`,
       Preprod: `${process.env.CEXPLORER_URL_PREPROD}`,
-      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`,
-      Sanchonet: `${process.env.CEXPLORER_URL_SANCHONET}`
+      Preview: `${process.env.CEXPLORER_URL_PREVIEW}`
     },
     CEXPLORER_URL_PATHS: {
       Tx: 'tx',

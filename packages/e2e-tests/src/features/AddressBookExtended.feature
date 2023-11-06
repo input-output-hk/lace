@@ -110,7 +110,8 @@ Feature: Address book - extended view
 
   @LW-4469
   Scenario: Extended-view - Address Book - Copy address button
-    Given I have 3 addresses in my address book in extended mode
+    Given I close wallet synced toast
+    And I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
     And I click "Copy" button on address details page
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
