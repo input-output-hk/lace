@@ -64,6 +64,7 @@ export const clearBackgroundStorage = async (options?: ClearBackgroundStorageOpt
       delete backgroundStorage[key as BackgroundStorageKeys];
     }
   }
+  // TODO make sure to remove other properties from webStorage (e.g. "lace-activate" seems to remain after clearing)
   await webStorage.local.set({ BACKGROUND_STORAGE: backgroundStorage ?? {} });
 };
 
