@@ -40,16 +40,6 @@ Feature: General Settings - Extended Browser View
       | browserView.settings.legal.privacyPolicy.title     |
       | browserView.settings.legal.cookiePolicy.title      |
 
-  @LW-2521 @Mainnet @Testnet
-  Scenario: Extended View - Remove wallet and confirm
-    And my local storage is fully initialized
-    When I open settings from header menu
-    And I click on Remove wallet button
-    And I click "Remove wallet" button on "Remove wallet" modal
-    Then "Get started" page is displayed
-    And I expect browser local storage to be empty
-    And Mnemonic is not stored in background storage
-
   @LW-2522 @Mainnet @Testnet
   Scenario: Extended View - Try to remove wallet and cancel
     And my local storage is fully initialized
@@ -378,3 +368,13 @@ Feature: General Settings - Extended Browser View
     And I click "Got it" button on "DApp connector is now in Beta" modal
     Then I see LW homepage
     And I see a different wallet address than in my initial wallet
+
+  @LW-2521 @Mainnet @Testnet
+  Scenario: Extended View - Remove wallet and confirm
+    And my local storage is fully initialized
+    When I open settings from header menu
+    And I click on Remove wallet button
+    And I click "Remove wallet" button on "Remove wallet" modal
+    Then "Get started" page is displayed
+    And I expect browser local storage to be empty
+    And Mnemonic is not stored in background storage
