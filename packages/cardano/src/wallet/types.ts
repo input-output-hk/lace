@@ -46,7 +46,8 @@ export type Cip30SignTxAssetItem = {
 export enum WalletManagerProviderTypes {
   CARDANO_SERVICES_PROVIDER = 'cardano-services-provider'
 }
-export type ChainName = keyof typeof Cardano.ChainIds;
+// Exclude Sanchonet until in main branch
+export type ChainName = keyof Omit<typeof Cardano.ChainIds, 'Sanchonet'>;
 
 export interface CreateHardwareWalletArgs {
   deviceConnection: DeviceConnection;

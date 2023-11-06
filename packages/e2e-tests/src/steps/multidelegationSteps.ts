@@ -19,6 +19,7 @@ import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
 import StakingManageDrawerAssert from '../assert/multidelegation/StakingManageDrawerAssert';
+import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
 import TokensPageObject from '../pageobject/tokensPageObject';
 import localStorageInitializer from '../fixture/localStorageInitializer';
@@ -258,6 +259,29 @@ When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
       await StakingManageDrawerAssert.assertSeeStakingManageDrawer();
       break;
   }
+});
+
+When(
+  /^I hover over (last reward|total staked|total rewards) in currently staking component$/,
+  async (elementToHover: string) => {
+    switch (elementToHover) {
+      case 'last reward':
+        await new StakingInfoComponent().hoverOverLastRewardValue();
+        break;
+      case 'total staked':
+        await new StakingInfoComponent().hoverOverTotalStakedValue();
+        break;
+      case 'total rewards':
+        await new StakingInfoComponent().hoverOverTotalRewardsValue();
+        break;
+      default:
+        throw new Error(`Unsupported element: ${elementToHover}`);
+    }
+  }
+);
+
+Then(/^I see tooltip for element in currently staking component$/, async () => {
+  await MultidelegationPageAssert.assertSeeCurrentlyStakingTooltip();
 });
 
 Then(/^I see Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {

@@ -28,6 +28,7 @@ import { DataCheckContainer } from '@components/DataCheckContainer';
 import '../../lib/scripts/keep-alive-ui';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
+import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -45,7 +46,9 @@ const App = (): React.ReactElement => (
                           <ExternalLinkOpenerProvider>
                             <MigrationContainer appMode={APP_MODE_BROWSER}>
                               <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                <BrowserViewRoutes />
+                                <AddressesDiscoveryOverlay>
+                                  <BrowserViewRoutes />
+                                </AddressesDiscoveryOverlay>
                               </DataCheckContainer>
                             </MigrationContainer>
                           </ExternalLinkOpenerProvider>

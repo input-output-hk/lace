@@ -51,7 +51,7 @@ class StakingPageAssert {
           expectedStakePool.ticker
         ));
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsApy().title())).to.equal(
+    expect(await stakingInfoComponent.statsApy.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.ros')
     );
     // TODO BUG LW-5635
@@ -59,65 +59,52 @@ class StakingPageAssert {
     //   TestnetPatterns.PERCENT_DOUBLE_REGEX
     // );
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsFee().title())).to.equal(
+    expect(await stakingInfoComponent.statsFee.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.Fee')
     );
-    await expect((await webTester.getTextValueFromElement(stakingInfoComponent.statsFee().value())) as string).to.match(
-      TestnetPatterns.ADA_LITERAL_VALUE_REGEX
-    );
+    expect(await stakingInfoComponent.statsFee.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsMargin().title())).to.equal(
+    expect(await stakingInfoComponent.statsMargin.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.Margin')
     );
-    await expect(
-      (await webTester.getTextValueFromElement(stakingInfoComponent.statsMargin().value())) as string
-    ).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    expect(await stakingInfoComponent.statsMargin.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
 
     if (mode === 'extended') {
-      await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsTotalRewards().title())).to.equal(
+      expect(await stakingInfoComponent.statsTotalRewards.title.getText()).to.equal(
         await t('browserView.staking.stakingInfo.totalRewards.title')
       );
 
-      await expect(
-        (await webTester.getTextValueFromElement(stakingInfoComponent.statsTotalRewards().value())) as string
-      ).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX_OR_0);
+      expect(await stakingInfoComponent.statsTotalRewards.value.getText()).to.match(
+        TestnetPatterns.ADA_LITERAL_VALUE_REGEX_OR_0
+      );
     }
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsTotalStaked().title())).to.equal(
+    expect(await stakingInfoComponent.statsTotalStaked.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.totalStaked.title')
     );
-    await expect(
-      (await webTester.getTextValueFromElement(stakingInfoComponent.statsTotalStaked().value())) as string
-    ).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+    expect(await stakingInfoComponent.statsTotalStaked.value.getText()).to.match(
+      TestnetPatterns.ADA_LITERAL_VALUE_REGEX
+    );
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.statsLastReward().title())).to.equal(
+    expect(await stakingInfoComponent.statsLastReward.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.lastReward.title')
     );
-    await expect(
-      (await webTester.getTextValueFromElement(stakingInfoComponent.statsLastReward().value())) as string
-    ).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
-  };
-
-  assertSeeCurrentlyStakingTooltip = async () => {
-    const stakingInfoComponent = new StakingInfoComponent();
-    await webTester.seeWebElement(stakingInfoComponent.tooltip());
-    const tooltipText = (await webTester.getTextValueFromElement(stakingInfoComponent.tooltip())) as string;
-    const expectedTitle = await t('browserView.staking.stakingInfo.tooltip.title');
-    await expect(tooltipText).contains(expectedTitle);
-    await expect(tooltipText.replace(expectedTitle, '') as string).to.match(TestnetPatterns.USD_VALUE_NO_SUFFIX_REGEX);
+    expect(await stakingInfoComponent.statsLastReward.value.getText()).to.match(
+      TestnetPatterns.ADA_LITERAL_VALUE_REGEX
+    );
   };
 
   assertStakingSuccessDrawer = async (process: 'Initial' | 'Switching', mode: 'extended' | 'popup') => {
     await StakingSuccessDrawer.drawerHeaderCloseButton.waitForDisplayed();
     if (mode === 'extended') {
       await StakingSuccessDrawer.drawerNavigationTitle.waitForDisplayed();
-      await expect(await StakingSuccessDrawer.drawerNavigationTitle.getText()).to.equal(
+      expect(await StakingSuccessDrawer.drawerNavigationTitle.getText()).to.equal(
         await t('browserView.staking.details.titleSecond')
       );
     }
     await StakingSuccessDrawer.resultIcon.waitForDisplayed();
     await StakingSuccessDrawer.resultTitle.waitForDisplayed();
-    await expect(await StakingSuccessDrawer.resultTitle.getText()).to.equal(
+    expect(await StakingSuccessDrawer.resultTitle.getText()).to.equal(
       process === 'Initial'
         ? await t('browserView.staking.details.success.title')
         : await t('browserView.staking.details.switchedPools.title')
@@ -131,7 +118,7 @@ class StakingPageAssert {
     // );
 
     await StakingSuccessDrawer.closeButton.waitForDisplayed();
-    await expect(await StakingSuccessDrawer.closeButton.getText()).to.equal(await t('general.button.close'));
+    expect(await StakingSuccessDrawer.closeButton.getText()).to.equal(await t('general.button.close'));
   };
 
   assertSeeSingleSearchResult = async () => {

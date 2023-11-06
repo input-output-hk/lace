@@ -135,7 +135,7 @@ Feature: General Settings - Extended Browser View
   @LW-5259 @Mainnet @Testnet
   Scenario: Extended View - Settings - Toast displayed after switching network
     Given I am on Settings extended page
-    When I switch network to: "Preview" in extended mode
+    When I switch network to: "Preview" without closing drawer
     Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
 
   @LW-2718 @Testnet

@@ -30,6 +30,8 @@ import faqPageAssert from '../assert/faqPageAssert';
 import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
+import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
+import onboardingPageObject from '../pageobject/onboardingPageObject';
 
 Given(/^Lace is ready for test$/, async () => {
   await tokensPageObject.waitUntilCardanoTokenLoaded();
@@ -51,7 +53,14 @@ Then(/^I close the drawer by clicking back button$/, async () => {
   await simpleTxSideDrawerPageObject.clickBackDrawerButton();
 });
 
+Then(/^I close wallet synced toast/, async () => {
+  await settingsExtendedPageObject.closeWalletSyncedToast();
+});
+
 Then(/^Wallet is synced$/, async () => {
+  await onboardingPageObject.waitUntilLoaderDisappears();
+  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertWalletIsInSyncedStatus();
 });
 

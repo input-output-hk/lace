@@ -162,7 +162,7 @@ Feature: General Settings - Popup View
   @LW-5262 @Mainnet @Testnet
   Scenario: Popup View - Settings - Toast displayed after switching network
     When I open settings from header menu
-    When I switch network to: "Preview" in popup mode
+    When I switch network to: "Preview" without closing drawer
     Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
 
   @LW-2719 @Testnet

@@ -11,7 +11,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -30,7 +30,7 @@ export const OverviewPopup = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
+  const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -85,10 +85,10 @@ export const OverviewPopup = () => {
 
   return (
     <>
-      {stakingNotification === 'portfolioDrifted' && (
-        <Box mb="$32">
-          <StakingNotificationBanner notification="portfolioDrifted" />
-        </Box>
+      {stakingNotifications.length > 0 && (
+        <Flex mb="$32" flexDirection="column">
+          <StakingNotificationBanners notifications={stakingNotifications} />
+        </Flex>
       )}
       <Box mb="$32">
         <DelegationCard

@@ -23,18 +23,6 @@ class StakingPageObject {
     await webTester.clickElement(new StakingInfoComponent().poolName());
   }
 
-  async hoverLastRewardInStakingInfoComponent() {
-    await webTester.hoverOnWebElement(new StakingInfoComponent().statsLastReward().value());
-  }
-
-  async hoverTotalStakedInStakingInfoComponent() {
-    await webTester.hoverOnWebElement(new StakingInfoComponent().statsTotalStaked().value());
-  }
-
-  async hoverTotalRewardsInStakingInfoComponent() {
-    await webTester.hoverOnWebElement(new StakingInfoComponent().statsTotalRewards().value());
-  }
-
   async getPoolIdFromStakePoolDetails(mode: 'extended' | 'popup') {
     await this.clickPoolNameInStakingInfoComponent();
     await StakePoolDetails.poolId.waitForDisplayed();

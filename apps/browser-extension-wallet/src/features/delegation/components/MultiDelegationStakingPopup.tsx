@@ -18,6 +18,10 @@ import { ContentLayout } from '@components/Layout';
 import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useWalletActivities } from '@hooks/useWalletActivities';
+import {
+  MULTIDELEGATION_FIRST_VISIT_LS_KEY,
+  MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY
+} from '@utils/constants';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -73,11 +77,14 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
   const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
-  const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const [
+    multidelegationFirstVisitSincePortfolioPersistence,
+    { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
+  ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const analytics = useAnalyticsContext();
 
@@ -91,6 +98,9 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         analytics,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        multidelegationFirstVisitSincePortfolioPersistence,
+        triggerMultidelegationFirstVisitSincePortfolioPersistence: () =>
+          setMultidelegationFirstVisitSincePortfolioPersistence(false),
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,

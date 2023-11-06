@@ -49,6 +49,7 @@ export const AddressActionsModal = ({
       visible={visible}
       width={isPopup ? 'calc(100% - 50px)' : modalWidth}
       zIndex={1000}
+      data-testid="delete-address-modal-container"
     >
       <div data-testid="delete-address-modal-title" className={styles.header}>
         {isDeleteAction
