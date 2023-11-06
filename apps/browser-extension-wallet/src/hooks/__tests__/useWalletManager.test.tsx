@@ -758,15 +758,7 @@ describe('Testing useWalletManager hook', () => {
       await deleteWallet();
       expect(shutdownWalletMocked).toBeCalledWith(walletManagerUi);
       expect(clearLocalStorage).toBeCalledWith({
-        except: [
-          'currency',
-          'lock',
-          'mode',
-          'hideBalance',
-          'analyticsAccepted',
-          'isForgotPasswordFlow',
-          'multidelegationFirstVisit'
-        ]
+        except: ['currency', 'lock', 'mode', 'hideBalance', 'isForgotPasswordFlow', 'multidelegationFirstVisit']
       });
       expect(clearBackgroundStorage).toBeCalledWith({
         except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration']
