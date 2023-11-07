@@ -317,7 +317,8 @@ export const useWalletManager = (): UseWalletManager => {
         'hideBalance',
         'analyticsAccepted',
         'isForgotPasswordFlow',
-        'multidelegationFirstVisit'
+        'multidelegationFirstVisit',
+        'multidelegationFirstVisitSincePortfolioPersistence'
       ];
 
       setCurrentChain(CHAIN);

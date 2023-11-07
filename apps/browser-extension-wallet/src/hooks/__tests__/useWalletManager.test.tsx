@@ -765,7 +765,8 @@ describe('Testing useWalletManager hook', () => {
           'hideBalance',
           'analyticsAccepted',
           'isForgotPasswordFlow',
-          'multidelegationFirstVisit'
+          'multidelegationFirstVisit',
+          'multidelegationFirstVisitSincePortfolioPersistence'
         ]
       });
       expect(clearBackgroundStorage).toBeCalledWith({
