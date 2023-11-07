@@ -93,12 +93,27 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   };
 
   const combinedUnique = useMemo(() => {
-    const combinedStakePools = [...selectedPortfolioStakePools, ...stakePools];
+    const combinedStakePools = [
+      /**
+       * If there's a search value, filter selected pools if they are in the search results.
+       * A disadvantage of this approach is that if a current pool is not yet in the search results (it's further down in results),
+       *   it will not be shown in the list. The confusing part about this is that if the user scrolls down long enough,
+       *   the pool will appear in the upper selected list.
+       * Alternative solutions include increasing the search limit / not show selected pools when searching at all,
+       *   but this seems like the best solution for now.
+       */
+      ...(searchValue
+        ? selectedPortfolioStakePools.filter((pool) =>
+            stakePools.find((foundStakePool) => foundStakePool.id === pool.id)
+          )
+        : selectedPortfolioStakePools),
+      ...stakePools,
+    ];
     const combinedUniqueIds = [...new Set(combinedStakePools.map((pool) => pool.id))];
     return combinedUniqueIds.map((id) =>
       combinedStakePools.find((pool) => pool.id === id)
     ) as Wallet.Cardano.StakePool[];
-  }, [stakePools, selectedPortfolioStakePools]);
+  }, [stakePools, selectedPortfolioStakePools, searchValue]);
 
   const list = useMemo(
     () =>
