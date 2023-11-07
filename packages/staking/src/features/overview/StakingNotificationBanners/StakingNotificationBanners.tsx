@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import InfoIcon from '../../../assets/icons/info-icon.svg';
 import WarningTriangleIcon from '../../../assets/icons/warning-triangle.svg';
 import { useOutsideHandles } from '../../outside-handles-provider';
-import { PortfolioDriftBanner } from '../../portfolio-drift';
 import { useDelegationPortfolioStore } from '../../store';
+import { PortfolioDriftBanner } from './PortfolioDriftBanner';
 import * as styles from './StakingNotificationBanners.css';
 import { StakingNotificationType } from './types';
 
