@@ -31,7 +31,6 @@ import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
-import onboardingPageObject from '../pageobject/onboardingPageObject';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -60,9 +59,6 @@ Then(/^I close wallet synced toast/, async () => {
 });
 
 Then(/^Wallet is synced$/, async () => {
-  await onboardingPageObject.waitUntilLoaderDisappears();
-  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
-  await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertWalletIsInSyncedStatus();
 });
 
