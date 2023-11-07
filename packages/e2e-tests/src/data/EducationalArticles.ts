@@ -1,7 +1,7 @@
 export const faqArticles: Record<string, Record<string, string>> = {
-  'Which stake pool should I choose?': {
-    question: 'which-stake-pool-should-i-choose',
-    title: 'Which stake pool should I choose?'
+  'How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature?': {
+    question: 'how-many-stake-pools-can-i-delegate-stake-to-using-the-multi-staking-or-multi-delegation-feature',
+    title: 'How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature?'
   },
   'How do I send and receive funds?': {
     question: 'how-do-i-send-and-receive-digital-assets',
@@ -22,6 +22,14 @@ export const faqArticles: Record<string, Record<string, string>> = {
   'What is my recovery phrase?': {
     question: 'what-is-my-recovery-phrase',
     title: 'What is my recovery phrase?'
+  },
+  'Do Ledger hardware wallets support multi-staking?': {
+    question: 'do-ledger-hardware-wallets-support-multi-staking',
+    title: 'Do Ledger hardware wallets support multi-staking?'
+  },
+  'Does stake distribution remain the same?': {
+    question: 'does-stake-distribution-remain-the-same',
+    title: 'Does stake distribution remain the same?'
   }
 };
 
@@ -49,10 +57,6 @@ export const glossaryArticles: Record<string, Record<string, string>> = {
   'What is an unconfirmed transaction?': {
     term: 'unconfirmed-transaction',
     title: 'Unconfirmed (transaction)'
-  },
-  'What is an active stake?': {
-    term: 'active-stake',
-    title: 'Active stake'
   }
 };
 
@@ -72,9 +76,5 @@ export const videoArticles: Record<string, Record<string, string>> = {
   'Transaction bundles': {
     video: 'lace-introduces-transaction-bundles',
     title: 'Lace introduces transaction bundles'
-  },
-  'Staking made easy with Lace': {
-    video: 'staking-with-lace-let-your-digital-assets-work-for-you',
-    title: 'Staking with Lace - Let your digital assets work for you'
   }
 };
