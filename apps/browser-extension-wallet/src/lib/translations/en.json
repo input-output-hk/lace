@@ -973,9 +973,9 @@
       "enterNFTGallery": "Enter the NFT gallery with Lace",
       "buyAnNft": "How to buy an NFT?",
       "stakingAndDelegation": "What are staking & delegation?",
-      "choosingAStakePool": "Which stake pool should I choose?",
-      "activeStake": "What is an active stake?",
-      "stakingMadeEasy": "Staking made easy with Lace"
+      "howManyPools": "How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature?",
+      "ledgerSupport": "Do Ledger hardware wallets support multi-staking?",
+      "stakeDistribution": "Does stake distribution remain the same?"
     }
   },
   "migrations": {

@@ -79,15 +79,14 @@ class EducationalListAssert {
 
   async assertSeeStakingWidget() {
     const faqTranslation = await t(this.faqTranslationPath);
-    const glossaryTranslation = await t(this.glossaryTranslationPath);
     const videoTranslation = await t(this.videoTranslationPath);
     const expectedTitle = await t('browserView.sidePanel.aboutStaking');
-    const expectedTitles = [faqTranslation, faqTranslation, glossaryTranslation, videoTranslation];
+    const expectedTitles = [faqTranslation, faqTranslation, faqTranslation, faqTranslation, videoTranslation];
     const expectedSubtitles = [
       await t('educationalBanners.subtitle.stakingAndDelegation'),
-      await t('educationalBanners.subtitle.choosingAStakePool'),
-      await t('educationalBanners.subtitle.activeStake'),
-      await t('educationalBanners.subtitle.stakingMadeEasy')
+      await t('educationalBanners.subtitle.howManyPools'),
+      await t('educationalBanners.subtitle.ledgerSupport'),
+      await t('educationalBanners.subtitle.stakeDistribution')
     ];
     await this.assertSeeWidget(expectedTitle, expectedTitles, expectedSubtitles);
   }
