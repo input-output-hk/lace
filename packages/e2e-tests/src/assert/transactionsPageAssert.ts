@@ -148,7 +148,7 @@ class TransactionsPageAssert {
 
   assertSeeMoreTransactions = async () => {
     const currentRowsNumber = (await TransactionsPage.rows).length;
-    await expect(currentRowsNumber).to.be.greaterThan(testContext.load('numberOfRows'));
+    expect(currentRowsNumber).to.be.greaterThan(testContext.load('numberOfRows'));
   };
 
   async assertSeeTicker(expectedTicker: 'ADA' | 'tADA') {
