@@ -3,7 +3,6 @@ import { PostHogAction, useObservable } from '@lace/common';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
-import { isPortfolioDrifted } from '../portfolio-drift';
 import {
   DelegationFlow,
   DelegationPortfolioStore,
@@ -12,6 +11,7 @@ import {
   DrawerStep,
   MAX_POOLS_COUNT,
   PERCENTAGE_SCALE_MAX,
+  isPortfolioDrifted,
   sumPercentagesSanitized,
   useDelegationPortfolioStore,
 } from '../store';

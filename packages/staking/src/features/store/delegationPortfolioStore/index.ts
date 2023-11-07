@@ -5,3 +5,4 @@ export { DelegationFlow, DrawerDefaultStep, DrawerManagementStep, sumPercentages
 export type { CurrentPortfolioStakePool, DraftPortfolioStakePool, DrawerStep } from './stateMachine';
 export { useDelegationPortfolioStore } from './useDelegationPortfolioStore';
 export type { DelegationPortfolioStore, StakePoolDetails } from './types';
+export { isPortfolioDrifted } from './isPortfolioDrifted';

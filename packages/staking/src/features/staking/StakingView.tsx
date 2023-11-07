@@ -3,27 +3,23 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../BrowsePools';
 import { Drawer } from '../Drawer';
-import { ChangingPreferencesModal, MultidelegationBetaModal, PortfolioPersistenceModal } from '../modals';
+import { ChangingPreferencesModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
 import { DrawerManagementStep, DrawerStep, useDelegationPortfolioStore } from '../store';
 import { Navigation, Page } from './Navigation';
+import { OneTimeModals } from './OneTimeModals';
 
 const stepsWithBackBtn = new Set<DrawerStep>([DrawerManagementStep.Confirmation, DrawerManagementStep.Sign]);
 
 export const StakingView = () => {
   const { t } = useTranslation();
-  const { portfolioMutators, currentPortfolio } = useDelegationPortfolioStore((store) => ({
-    currentPortfolio: store.currentPortfolio,
+  const { portfolioMutators } = useDelegationPortfolioStore((store) => ({
     portfolioMutators: store.mutators,
   }));
   const {
     walletStoreFetchNetworkInfo: fetchNetworkInfo,
     walletStoreBlockchainProvider: blockchainProvider,
-    multidelegationFirstVisit,
-    triggerMultidelegationFirstVisit,
-    multidelegationFirstVisitSincePortfolioPersistence,
-    triggerMultidelegationFirstVisitSincePortfolioPersistence,
     currentChain,
   } = useOutsideHandles();
 
@@ -51,14 +47,7 @@ export const StakingView = () => {
       </Navigation>
       <Drawer showCloseIcon showBackIcon={(step: DrawerStep): boolean => stepsWithBackBtn.has(step)} />
       <ChangingPreferencesModal />
-      {currentPortfolio.length > 1 ? (
-        <PortfolioPersistenceModal
-          visible={multidelegationFirstVisitSincePortfolioPersistence}
-          onConfirm={triggerMultidelegationFirstVisitSincePortfolioPersistence}
-        />
-      ) : (
-        <MultidelegationBetaModal visible={multidelegationFirstVisit} onConfirm={triggerMultidelegationFirstVisit} />
-      )}
+      <OneTimeModals />
     </>
   );
 };
