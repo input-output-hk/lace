@@ -308,3 +308,11 @@ Then(/^I click "Get Started" step (1|2) link$/, async (linkNumber: '1' | '2') =>
 Given(/^I click "Expand view" on Start Staking page$/, async () => {
   await StartStakingPage.clickExpandedViewBannerButton();
 });
+
+When(/^I wait for stake pool list to be populated$/, async () => {
+  await MultidelegationPage.waitForStakePoolListToLoad();
+});
+
+Then(/^Each stake pool list item contains: logo, name, ticker, ROS and saturation$/, async () => {
+  await MultidelegationPageAssert.assertSeeStakePoolRows();
+});

@@ -211,6 +211,29 @@ class MultidelegationPageAssert {
     }
   };
 
+  assertSeeStakePoolRow = async (index?: number) => {
+    const stakePoolListItem = new StakePoolListItem(index);
+    await stakePoolListItem.container.scrollIntoView();
+    await stakePoolListItem.logo.waitForDisplayed();
+    await stakePoolListItem.name.waitForDisplayed();
+    await stakePoolListItem.ticker.waitForDisplayed();
+    await stakePoolListItem.ros.waitForDisplayed();
+    await stakePoolListItem.saturation.waitForDisplayed();
+    expect(await stakePoolListItem.name.getText()).to.not.be.empty;
+    expect(await stakePoolListItem.ticker.getText()).to.not.be.empty;
+    expect(await stakePoolListItem.ros.getText()).to.equal('-');
+    // expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX); // TODO: update when issue with ROS not returned is resolved
+    expect(await stakePoolListItem.saturation.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  };
+
+  assertSeeStakePoolRows = async () => {
+    const rowsNumber = (await MultidelegationPage.poolsItems).length;
+
+    for (let i = 0; i < rowsNumber; i++) {
+      await this.assertSeeStakePoolRow(i);
+    }
+  };
+
   assertSeeCurrentlyStakingTooltip = async () => {
     await Tooltip.component.waitForDisplayed();
     expect(await Tooltip.label.getText()).contains(await t('overview.stakingInfoCard.tooltipFiatLabel', 'staking'));
