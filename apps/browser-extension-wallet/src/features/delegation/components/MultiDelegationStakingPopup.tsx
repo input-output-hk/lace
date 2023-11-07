@@ -99,8 +99,10 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         multidelegationFirstVisitSincePortfolioPersistence,
-        triggerMultidelegationFirstVisitSincePortfolioPersistence: () =>
-          setMultidelegationFirstVisitSincePortfolioPersistence(false),
+        triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
+          setMultidelegationFirstVisit(false);
+          setMultidelegationFirstVisitSincePortfolioPersistence(false);
+        },
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,

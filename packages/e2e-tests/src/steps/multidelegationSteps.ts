@@ -293,6 +293,7 @@ Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'ext
   await TokensPageObject.waitUntilCardanoTokenLoaded();
   await TokensPageObject.saveTokenBalance('Cardano');
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   await mainMenuPageObject.navigateToSection('Staking', mode);
   const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
