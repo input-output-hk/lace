@@ -158,7 +158,9 @@
     "detail.blockInfo": "Block information"
   },
   "announcement.title.badge": "New",
-  "announcement.title.text": "release notes",
+  "announcement.title.text": "Introducing {{version}}",
+  "announcement.description.text": "See our latest updates for you",
+  "announcement.description.linktext": "here",
   "announcement.cta": "Got it",
   "walletSetup": {
     "backModal": {
