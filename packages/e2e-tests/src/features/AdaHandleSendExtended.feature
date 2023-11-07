@@ -2,8 +2,8 @@
 Feature: ADA handle - extended view
 
   Background:
-    Given I am on NFTs extended page
-    And Wallet is synced
+    Given Wallet is synced
+    And I am on NFTs extended page
     And Address book is empty
     And I use a single wallet with "$handletosend" NFT in extended mode
 

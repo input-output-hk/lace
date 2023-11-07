@@ -34,6 +34,8 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import onboardingPageObject from '../pageobject/onboardingPageObject';
 
 Given(/^Lace is ready for test$/, async () => {
+  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.closeWalletSyncedToast();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
 });
 
@@ -116,6 +118,7 @@ Then(
 );
 
 Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
+  await settingsExtendedPageObject.closeWalletSyncedToast();
   await ToastMessageAssert.assertSeeToastMessage(await t(toastText), shouldSee === 'see');
   if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
 });

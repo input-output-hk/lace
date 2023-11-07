@@ -1,6 +1,9 @@
 @Multidelegation-DelegatedFunds-Popup @Testnet @Mainnet
 Feature: Staking Page - Popup View
 
+  Background:
+    Given Lace is ready for test
+
   @LW-8330
   Scenario Outline: Popup View - Delegation card displays correct data
     Given I open wallet: "<walletName>" in: popup mode

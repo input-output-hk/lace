@@ -135,6 +135,7 @@ class SettingsExtendedPageObject {
     }
   };
   closeWalletSyncedToast = async () => {
+    await browser.pause(500);
     if (await ToastMessage.container.isDisplayed()) {
       const toastMessage = await (await ToastMessage.messageText).getText();
       if (toastMessage === (await t('addressesDiscovery.toast.successText')).toString()) {
@@ -146,6 +147,7 @@ class SettingsExtendedPageObject {
   };
 
   waitUntilSyncingModalDisappears = async () => {
+    await browser.pause(500);
     if (
       (await Modal.container.isDisplayed()) &&
       (await Modal.title.getText()) === (await t('addressesDiscovery.overlay.title'))
