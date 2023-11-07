@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Wallet } from '@lace/cardano';
-import { Button } from '@lace/common';
+import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
 import { sectionTitle, DAPP_VIEWS } from '../config';
@@ -19,6 +19,8 @@ import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { useWalletStore } from '@stores';
 import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
+import { useAnalyticsContext } from '@providers';
+import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const INDENT_SPACING = 2;
 const DAPP_TOAST_DURATION = 50;
@@ -46,6 +48,7 @@ export const DappConfirmData = (): React.ReactElement => {
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
+  const analytics = useAnalyticsContext();
   const isUsingHardwareWallet = useMemo(
     () => getKeyAgentType() !== Wallet.KeyManagement.KeyAgentType.InMemory,
     [getKeyAgentType]
@@ -130,10 +133,12 @@ export const DappConfirmData = (): React.ReactElement => {
     }
   }, [setIsConfirmingTx, redirectToSignFailure, redirectToSignSuccess]);
 
-  const confirmationCallback = useCallback(
-    () => (isUsingHardwareWallet ? signWithHardwareWallet() : setNextView()),
-    [isUsingHardwareWallet, signWithHardwareWallet, setNextView]
-  );
+  const confirmationCallback = useCallback(() => {
+    analytics?.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+    isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
+  }, [isUsingHardwareWallet, signWithHardwareWallet, setNextView, analytics]);
 
   return (
     <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_DATA])}>
