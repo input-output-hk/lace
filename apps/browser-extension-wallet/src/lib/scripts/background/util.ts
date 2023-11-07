@@ -37,33 +37,18 @@ export const getADAPriceFromBackgroundStorage = async (): Promise<BackgroundStor
 /**
  * Deletes the specified `keys` from the background storage.
  *
- * If no `options` are passed then **ALL** of it is cleared.
+ * If no `keys` are passed then **ALL** of it is cleared.
  *
- * @param options Optional. List of keys to either delete or remove from storage
+ * @param keys Optional. List of keys to delete from storage
  */
-type ClearBackgroundStorageOptions =
-  | {
-      keys: BackgroundStorageKeys[];
-      except?: never;
-    }
-  | {
-      keys?: never;
-      except: BackgroundStorageKeys[];
-    };
-export const clearBackgroundStorage = async (options?: ClearBackgroundStorageOptions): Promise<void> => {
-  if (!options) {
+export const clearBackgroundStorage = async (keys?: BackgroundStorageKeys[]): Promise<void> => {
+  if (!keys?.length) {
     await webStorage.local.remove('BACKGROUND_STORAGE');
     return;
   }
   const backgroundStorage = await getBackgroundStorage();
-  for (const key in backgroundStorage) {
-    if (options.keys && options.keys.includes(key as BackgroundStorageKeys)) {
-      delete backgroundStorage[key as BackgroundStorageKeys];
-    }
-    if (options.except && options.except.includes(key as BackgroundStorageKeys)) {
-      delete backgroundStorage[key as BackgroundStorageKeys];
-    }
-  }
+
+  for (const key of keys) delete backgroundStorage?.[key];
   await webStorage.local.set({ BACKGROUND_STORAGE: backgroundStorage ?? {} });
 };
 

@@ -77,7 +77,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         backgroundStorage.message?.type === MessageTypes.OPEN_COLLATERAL_SETTINGS &&
         backgroundStorage.message?.data.section === BrowserViewSections.COLLATERAL_SETTINGS
       ) {
-        await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
+        await backgroundServices.clearBackgroundStorage(['message']);
         openDrawer(SettingsDrawer.collateral);
       }
     };

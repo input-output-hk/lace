@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { SettingsCard } from './';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import { Button } from '@lace/common';
+import { Wallet } from '@lace/cardano';
 import { WarningModal } from '@views/browser/components/WarningModal';
 import styles from './SettingsLayout.module.scss';
 import { useWalletManager } from '@hooks';
@@ -20,7 +21,9 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
 
   const [isRemoveWalletAlertVisible, setIsRemoveWalletAlertVisible] = useState(false);
   const { deleteWallet } = useWalletManager();
-  const { walletInfo, setDeletingWallet } = useWalletStore();
+  const { walletInfo, getKeyAgentType } = useWalletStore();
+  const isInMemory = useMemo(() => getKeyAgentType() === Wallet.KeyManagement.KeyAgentType.InMemory, [getKeyAgentType]);
+  const isHardwareWalletKeyAgent = !isInMemory;
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
 
@@ -34,11 +37,10 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
 
   const removeWallet = async () => {
     analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick);
-    setDeletingWallet(true);
     await deleteWallet();
     if (popupView) await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME });
-    // force reload to ensure all stores are cleaned up
-    location.reload();
+    // TODO: Remove this workaround when on SDK side we're able to restore wallet 2 times without reloading.
+    if (isHardwareWalletKeyAgent) location.reload();
   };
 
   return (

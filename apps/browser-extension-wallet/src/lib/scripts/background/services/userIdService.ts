@@ -104,7 +104,7 @@ export class UserIdService implements UserIdServiceInterface {
     this.walletBasedUserId = undefined;
     this.userTrackingType$.next(UserTrackingType.Basic);
     this.clearSessionTimeout();
-    await this.clearStorage({ keys: ['userId', 'usePersistentUserId'] });
+    await this.clearStorage(['userId', 'usePersistentUserId']);
   }
 
   async makePersistent(): Promise<void> {

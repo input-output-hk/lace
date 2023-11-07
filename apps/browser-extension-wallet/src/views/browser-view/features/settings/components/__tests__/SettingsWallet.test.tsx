@@ -321,7 +321,7 @@ describe('Testing SettingsWalletBase component', () => {
       });
 
       await waitFor(() => {
-        expect(clearBackgroundStorageMock).toBeCalledWith({ keys: ['message'] });
+        expect(clearBackgroundStorageMock).toBeCalledWith(['message']);
         expect(useSearchParamsSpy).toBeCalledWith(['activeDrawer']);
         expect(useRedirectionSpy).toBeCalledWith(walletRoutePaths.settings);
         expect(redirectToSettingsMock).toBeCalledWith({ search: { activeDrawer: SettingsDrawer.collateral } });

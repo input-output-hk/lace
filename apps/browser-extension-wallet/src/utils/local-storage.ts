@@ -40,16 +40,6 @@ export const saveValueInLocalStorage = <T = ILocalStorage, K extends keyof T = k
 
 export const deleteFromLocalStorage = (key: keyof ILocalStorage): void => window.localStorage.removeItem(key);
 
-type ClearLocalStorageOptions = { except: (keyof ILocalStorage)[] };
-export const clearLocalStorage = (params?: ClearLocalStorageOptions): void => {
-  const except = params?.except || [];
-  Object.keys(window.localStorage).forEach((key) => {
-    if (!except.includes(key as keyof ILocalStorage)) {
-      window.localStorage.removeItem(key);
-    }
-  });
-};
-
 export const onStorageChangeEvent = (
   keys: (keyof ILocalStorage)[] | 'all',
   callback: StorageEventPresetAction | ((ev?: StorageEvent) => unknown),

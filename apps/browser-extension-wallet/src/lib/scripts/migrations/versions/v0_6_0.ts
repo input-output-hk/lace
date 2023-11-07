@@ -123,7 +123,7 @@ export const v0_6_0: Migration = {
           removeItemFromLocalStorage('wallet_tmp');
           removeItemFromLocalStorage('keyAgentData_tmp');
           removeItemFromLocalStorage('lock_tmp');
-          await clearBackgroundStorage({ keys: ['keyAgentsByChain_tmp' as BackgroundStorageKeys] });
+          await clearBackgroundStorage(['keyAgentsByChain_tmp' as BackgroundStorageKeys]);
           throw error;
         }
       },
@@ -208,13 +208,13 @@ export const v0_6_0: Migration = {
         if (tmpBackgroundStorage?.keyAgentsByChain_tmp) {
           await setBackgroundStorage({ keyAgentsByChain: tmpBackgroundStorage.keyAgentsByChain_tmp });
         }
-        await clearBackgroundStorage({ keys: ['walletName' as BackgroundStorageKeys] });
+        await clearBackgroundStorage(['walletName' as BackgroundStorageKeys]);
         // Delete temporary storage
         removeItemFromLocalStorage('appSettings_tmp');
         removeItemFromLocalStorage('wallet_tmp');
         removeItemFromLocalStorage('keyAgentData_tmp');
         removeItemFromLocalStorage('lock_tmp');
-        await clearBackgroundStorage({ keys: ['keyAgentsByChain_tmp' as BackgroundStorageKeys] });
+        await clearBackgroundStorage(['keyAgentsByChain_tmp' as BackgroundStorageKeys]);
       },
       rollback: async () => {
         console.info(`Rollback migrated data for ${MIGRATION_VERSION} upgrade`);
@@ -223,7 +223,7 @@ export const v0_6_0: Migration = {
         if (oldWalletInfo) setItemInLocalStorage('wallet', oldWalletInfo);
         if (oldLock) setItemInLocalStorage('lock', oldLock);
         removeItemFromLocalStorage('keyAgentData');
-        await clearBackgroundStorage({ keys: ['keyAgentsByChain'] });
+        await clearBackgroundStorage(['keyAgentsByChain']);
         if (backgroundStorage?.walletName)
           await setBackgroundStorage({ walletName: backgroundStorage.walletName } as BackgroundStorage);
         // Delete any temporary storage that may have been created
@@ -231,7 +231,7 @@ export const v0_6_0: Migration = {
         removeItemFromLocalStorage('wallet_tmp');
         removeItemFromLocalStorage('keyAgentData_tmp');
         removeItemFromLocalStorage('lock_tmp');
-        await clearBackgroundStorage({ keys: ['keyAgentsByChain_tmp' as BackgroundStorageKeys] });
+        await clearBackgroundStorage(['keyAgentsByChain_tmp' as BackgroundStorageKeys]);
       }
     };
   }
