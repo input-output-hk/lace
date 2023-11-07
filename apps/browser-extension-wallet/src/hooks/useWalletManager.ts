@@ -315,7 +315,6 @@ export const useWalletManager = (): UseWalletManager => {
         'lock',
         'mode',
         'hideBalance',
-        'analyticsAccepted',
         'isForgotPasswordFlow',
         'multidelegationFirstVisit',
         'multidelegationFirstVisitSincePortfolioPersistence'
