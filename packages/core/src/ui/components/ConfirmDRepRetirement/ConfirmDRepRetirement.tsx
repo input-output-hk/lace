@@ -21,15 +21,15 @@ interface Props {
 
 export const ConfirmDRepRetirement = ({ dappInfo, errorMessage, translations, metadata }: Props): JSX.Element => (
   <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$32'}>
+    <Box mb={'$24'} mt={'$16'}>
       <DappInfo {...dappInfo} />
     </Box>
     {errorMessage && (
-      <Box my={'$16'}>
+      <Box mb={'$16'}>
         <ErrorPane error={errorMessage} />
       </Box>
     )}
-    <Grid columns="$1" gutters="$0">
+    <Grid columns="$1" gutters="$20">
       <Cell>
         <TransactionSummary.Metadata label={translations.metadata} text="" />
       </Cell>

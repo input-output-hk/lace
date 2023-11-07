@@ -23,11 +23,11 @@ interface Props {
 
 export const ConfirmDRepUpdate = ({ dappInfo, errorMessage, translations, metadata }: Props): JSX.Element => (
   <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$32'}>
+    <Box mb={'$24'} mt={'$24'}>
       <DappInfo {...dappInfo} />
     </Box>
     {errorMessage && (
-      <Box my={'$16'}>
+      <Box>
         <ErrorPane error={errorMessage} />
       </Box>
     )}

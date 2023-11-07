@@ -16,7 +16,7 @@ type VotingProcedure = {
     };
     votingProcedure: {
       vote: string;
-      anchor?: {
+      anchor: {
         url: string;
         hash: string;
       };
@@ -34,7 +34,7 @@ interface Props {
       index: string;
       txHash: string;
     };
-    anchor: {
+    anchor?: {
       url: string;
       hash: string;
     };
