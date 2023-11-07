@@ -3,7 +3,12 @@ import uniq from 'lodash/uniq';
 import { ResultMessage } from '@components/ResultMessage';
 import { TransactionHashBox } from '@components/TransactionHashBox';
 import { useAnalyticsContext } from '@providers';
-import { PostHogAction, TxRecipientType } from '@providers/AnalyticsProvider/analyticsTracker';
+import {
+  PostHogAction,
+  TX_CREATION_TYPE_KEY,
+  TxCreationType,
+  TxRecipientType
+} from '@providers/AnalyticsProvider/analyticsTracker';
 import {
   useBuiltTxState,
   useAnalyticsSendFlowTriggerPoint,
@@ -75,7 +80,8 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
         // eslint-disable-next-line camelcase
         recipient_type: recipientTypesUnique,
         // eslint-disable-next-line camelcase
-        recipient_source: recipientSourceUnique
+        recipient_source: recipientSourceUnique,
+        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
