@@ -79,11 +79,11 @@ Feature: Staking Page - Extended View
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
     Examples:
-      | type     | subtitle                          |
+      | type | subtitle                    |
       | FAQ      | What are staking & delegation?    |
-      | FAQ      | Which stake pool should I choose? |
-      | Glossary | What is an active stake?          |
-      | Video    | Staking made easy with Lace       |
+      | FAQ      | How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature? |
+      | FAQ  | Do Ledger hardware wallets support multi-staking? |
+      | FAQ  | Does stake distribution remain the same? |
 
   @LW-8469 @Testnet @Mainnet
   Scenario: Extended View - Network info component is present with expected content

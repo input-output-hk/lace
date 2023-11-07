@@ -11,9 +11,7 @@ import { stakingInfoSelector } from '@stores/selectors/staking-selectors';
 import { EducationalList, SectionLayout } from '@src/views/browser-view/components';
 import { useWalletStore } from '@stores';
 import { useFetchCoinPrice, useBalances } from '@src/hooks';
-import Book from '@assets/icons/book.svg';
 import LightBulb from '@src/assets/icons/light.svg';
-import Video from '@assets/icons/video.svg';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.ReactElement => {
@@ -53,21 +51,21 @@ export const StakingSkeleton = ({ children }: PropsWithChildren<object>): React.
     },
     {
       title: titles.faq,
-      subtitle: t('educationalBanners.subtitle.choosingAStakePool'),
+      subtitle: t('educationalBanners.subtitle.howManyPools'),
       src: LightBulb,
-      link: `${process.env.WEBSITE_URL}/faq?question=which-stake-pool-should-i-choose`
+      link: `${process.env.WEBSITE_URL}/faq?question=how-many-stake-pools-can-i-delegate-stake-to-using-the-multi-staking-or-multi-delegation-feature`
     },
     {
-      title: titles.glossary,
-      subtitle: t('educationalBanners.subtitle.activeStake'),
-      src: Book,
-      link: `${process.env.WEBSITE_URL}/glossary?term=active-stake`
+      title: titles.faq,
+      subtitle: t('educationalBanners.subtitle.ledgerSupport'),
+      src: LightBulb,
+      link: `${process.env.WEBSITE_URL}/faq?question=do-ledger-hardware-wallets-support-multi-staking`
     },
     {
-      title: titles.video,
-      subtitle: t('educationalBanners.subtitle.stakingMadeEasy'),
-      src: Video,
-      link: `${process.env.WEBSITE_URL}/learn?video=staking-with-lace-let-your-digital-assets-work-for-you`
+      title: titles.faq,
+      subtitle: t('educationalBanners.subtitle.stakeDistribution'),
+      src: LightBulb,
+      link: `${process.env.WEBSITE_URL}/faq?question=does-stake-distribution-remain-the-same`
     }
   ];
 
