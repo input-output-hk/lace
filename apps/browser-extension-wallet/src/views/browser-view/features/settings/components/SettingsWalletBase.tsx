@@ -15,6 +15,7 @@ import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers'
 import { useSearchParams, useObservable, Button } from '@lace/common';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import uniq from 'lodash/uniq';
 
 const { Title } = Typography;
 
@@ -58,7 +59,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
 
   const { t } = useTranslation();
   const { addressesDiscoverer } = useAddressesDiscoverer();
-  const { environmentName, inMemoryWallet } = useWalletStore();
+  const { environmentName, inMemoryWallet, walletInfo } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
   const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
 
@@ -116,7 +117,18 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
     <Button
       size="medium"
       className={styles.settingsButton}
-      onClick={() => addressesDiscoverer.discover()}
+      onClick={async () => {
+        analytics.sendEventToPostHog(PostHogAction.SettingsWalletHdWalletSyncSyncClick);
+
+        const oldHdAddressesCount = uniq((walletInfo?.addresses ?? []).map(({ index }) => index)).length;
+        const newAddresses = await addressesDiscoverer.discover();
+        const newHdAddressesCount = uniq(newAddresses.map(({ index }) => index)).length;
+        const newHdWalletAddressesDiscovered = newHdAddressesCount > oldHdAddressesCount;
+
+        if (newHdWalletAddressesDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.SettingsWalletHdWalletSyncSyncNewAddresses);
+        }
+      }}
       block={popupView}
       data-testid="settings-wallet-wallet-sync-cta"
     >
