@@ -302,13 +302,18 @@ export const useWalletManager = (): UseWalletManager => {
   const deleteWallet = useCallback(
     async (isForgotPasswordFlow = false): Promise<void> => {
       await Wallet.shutdownWallet(walletManagerUi);
-      setKeyAgentData();
-      resetWalletLock();
-      setCardanoWallet();
-
+      deleteFromLocalStorage('appSettings');
+      deleteFromLocalStorage('showDappBetaModal');
+      deleteFromLocalStorage('lastStaking');
+      deleteFromLocalStorage('userInfo');
+      deleteFromLocalStorage('keyAgentData');
       await backgroundService.clearBackgroundStorage({
         except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration']
       });
+      setKeyAgentData();
+      resetWalletLock();
+      setCardanoWallet();
+      setCurrentChain(CHAIN);
 
       const commonLocalStorageKeysToKeep: (keyof ILocalStorage)[] = [
         'currency',
@@ -318,8 +323,6 @@ export const useWalletManager = (): UseWalletManager => {
         'isForgotPasswordFlow',
         'multidelegationFirstVisit'
       ];
-
-      setCurrentChain(CHAIN);
 
       if (isForgotPasswordFlow) {
         const additionalKeysToKeep: (keyof ILocalStorage)[] = ['wallet', ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY];
