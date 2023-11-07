@@ -134,3 +134,11 @@ Feature: Staking Page - Extended View
     And I click on the stake pool with name "ADA Capital"
     When I close the drawer by clicking close button
     Then Stake pool details drawer is not opened
+
+  @LW-8463 @Testnet @Mainnet
+  Scenario: Extended View - Stake pool list item
+    Given I disable showing Multidelegation beta banner
+    And I am on Staking extended page
+    And I click Browse pools tab
+    And I wait for stake pool list to be populated
+    Then Each stake pool list item contains: logo, name, ticker, ROS and saturation
