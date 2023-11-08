@@ -118,7 +118,7 @@ export const DestinationAddressInput = ({
       options={options}
       loading={handle === HandleVerificationState.VERIFYING}
       customIcon={customIcon}
-      disabled={exists}
+      disabled={exists || handle === HandleVerificationState.VERIFYING}
       invalid={valid === false}
       onInputBlur={() => setFocused(false)}
       onInputFocus={() => setFocused(true)}
