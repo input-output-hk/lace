@@ -70,7 +70,12 @@ const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActiv
     ];
   }
 
-  return [];
+  return [
+    {
+      ...tx,
+      type: 'delegation'
+    }
+  ];
 };
 
 const transformTransactionStatus = (status: Wallet.TransactionStatus): ActivityStatus => {
