@@ -190,7 +190,7 @@ describe('Testing SettingsWalletBase component', () => {
         exact: false
       });
 
-      expect(settingsLinks.length).toBe(7);
+      expect(settingsLinks.length).toBe(12);
       expect(settingsLinks[0]).toHaveAttribute('data-testid', 'settings-wallet-general-link');
       expect(settingsLinks[3]).toHaveAttribute('data-testid', 'settings-wallet-collateral-link');
     });
@@ -212,7 +212,7 @@ describe('Testing SettingsWalletBase component', () => {
         exact: false
       });
 
-      expect(settingsLinks.length).toBe(13);
+      expect(settingsLinks.length).toBe(18);
       expect(settingsLinks[0]).toHaveAttribute('data-testid', 'settings-wallet-network-link');
       expect(settingsLinks[3]).toHaveAttribute('data-testid', 'settings-wallet-authorized-dapps-link');
       expect(settingsLinks[6]).toHaveAttribute('data-testid', 'settings-wallet-general-link');
@@ -236,7 +236,7 @@ describe('Testing SettingsWalletBase component', () => {
         exact: false
       });
 
-      expect(settingsLinks.length).toBe(16);
+      expect(settingsLinks.length).toBe(20);
       expect(settingsLinks[0]).toHaveAttribute('data-testid', 'settings-wallet-about-link');
       expect(settingsLinks[3]).toHaveAttribute('data-testid', 'settings-wallet-network-link');
       expect(settingsLinks[6]).toHaveAttribute('data-testid', 'settings-wallet-authorized-dapps-link');
@@ -321,7 +321,7 @@ describe('Testing SettingsWalletBase component', () => {
       });
 
       await waitFor(() => {
-        expect(clearBackgroundStorageMock).toBeCalledWith(['message']);
+        expect(clearBackgroundStorageMock).toBeCalledWith({ keys: ['message'] });
         expect(useSearchParamsSpy).toBeCalledWith(['activeDrawer']);
         expect(useRedirectionSpy).toBeCalledWith(walletRoutePaths.settings);
         expect(redirectToSettingsMock).toBeCalledWith({ search: { activeDrawer: SettingsDrawer.collateral } });

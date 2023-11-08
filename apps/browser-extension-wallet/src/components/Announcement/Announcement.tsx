@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Typography } from 'antd';
 import { Button } from '@lace/common';
 import styles from './Announcement.module.scss';
-import { fetchNotes } from './ReleaseNotes';
 import { ExtensionUpdateData } from '@lib/scripts/types';
+import DefaultReleaseNote from '@src/release-notes/default';
 
 const { Title, Text } = Typography;
 
@@ -16,25 +16,7 @@ interface AnnouncementProps {
 }
 
 export const Announcement = ({ visible, onConfirm, version, reason }: AnnouncementProps): React.ReactElement => {
-  // eslint-disable-next-line unicorn/no-null
-  const [releaseNotes, setReleaseNotes] = useState<string>('');
   const { t } = useTranslation();
-
-  const loadReleaseNotes = useCallback(async () => {
-    let notes = '';
-    if (version) {
-      try {
-        notes = await fetchNotes(version);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    setReleaseNotes(notes);
-  }, [version]);
-
-  useEffect(() => {
-    loadReleaseNotes();
-  }, [version, loadReleaseNotes]);
 
   return (
     <Modal
@@ -42,7 +24,7 @@ export const Announcement = ({ visible, onConfirm, version, reason }: Announceme
       closable={false}
       // eslint-disable-next-line unicorn/no-null
       footer={null}
-      visible={visible && !!releaseNotes}
+      open={visible}
       width="100%"
       className={styles.modal}
     >
@@ -50,9 +32,11 @@ export const Announcement = ({ visible, onConfirm, version, reason }: Announceme
         <div className={styles.content}>
           {reason !== 'downgrade' && <div className={styles.badge}>{t('announcement.title.badge')}</div>}
           <Title level={3} className={styles.title}>
-            {`${version} ${t('announcement.title.text')}`}
+            {t('announcement.title.text', { version })}
           </Title>
-          <Text className={styles.description}>{releaseNotes}</Text>
+          <Text className={styles.description}>
+            <DefaultReleaseNote version={version} />
+          </Text>
         </div>
       </div>
       <Button className={styles.button} onClick={onConfirm} block>

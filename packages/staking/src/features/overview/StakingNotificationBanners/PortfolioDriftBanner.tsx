@@ -1,9 +1,9 @@
 import { Banner } from '@lace/common';
 import { VFC } from 'react';
 import { useTranslation } from 'react-i18next';
-import BellIcon from '../../assets/icons/bell-icon.svg';
-import { useOutsideHandles } from '../outside-handles-provider';
-import { useDelegationPortfolioStore } from '../store';
+import BellIcon from '../../../assets/icons/bell-icon.svg';
+import { useOutsideHandles } from '../../outside-handles-provider';
+import { useDelegationPortfolioStore } from '../../store';
 import * as styles from './PortfolioDriftBanner.css';
 
 type PortfolioDriftBannerProps = {

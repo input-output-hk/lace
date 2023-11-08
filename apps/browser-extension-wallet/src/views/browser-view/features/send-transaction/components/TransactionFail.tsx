@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResultMessage } from '@components/ResultMessage';
 import { useAnalyticsContext } from '@providers';
-import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction, TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './TransactionSuccessView.module.scss';
 import { useAnalyticsSendFlowTriggerPoint } from '../store';
 
@@ -12,8 +12,11 @@ export const TransactionFail = (): React.ReactElement => {
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
 
   useEffect(() => {
-    // eslint-disable-next-line camelcase
-    analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongView, { trigger_point: triggerPoint });
+    analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongView, {
+      // eslint-disable-next-line camelcase
+      trigger_point: triggerPoint,
+      [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

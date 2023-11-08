@@ -30,8 +30,8 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
-  const currentPortfolioStakePools = useDelegationPortfolioStore((store) =>
-    store.currentPortfolio.map(({ stakePool }) => stakePool)
+  const selectedPortfolioStakePools = useDelegationPortfolioStore((store) =>
+    store.selectedPortfolio.map(({ stakePool }) => stakePool)
   );
   const {
     walletStoreWalletUICardanoCoin: cardanoCoin,
@@ -93,12 +93,12 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   };
 
   const combinedUnique = useMemo(() => {
-    const combinedStakePools = [...stakePools, ...currentPortfolioStakePools];
+    const combinedStakePools = [...selectedPortfolioStakePools, ...stakePools];
     const combinedUniqueIds = [...new Set(combinedStakePools.map((pool) => pool.id))];
     return combinedUniqueIds.map((id) =>
       combinedStakePools.find((pool) => pool.id === id)
     ) as Wallet.Cardano.StakePool[];
-  }, [stakePools, currentPortfolioStakePools]);
+  }, [stakePools, selectedPortfolioStakePools]);
 
   const list = useMemo(
     () =>

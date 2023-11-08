@@ -33,7 +33,9 @@ import {
   MatomoEventActions,
   MatomoEventCategories,
   AnalyticsEventNames,
-  PostHogAction
+  PostHogAction,
+  TX_CREATION_TYPE_KEY,
+  TxCreationType
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
 import { useWalletStore } from '@src/stores';
@@ -182,9 +184,15 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
 
   const onCrossIconClick = () => {
     if (section.currentSection === Sections.SUCCESS_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick, { trigger_point: triggerPoint });
+      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick, {
+        trigger_point: triggerPoint,
+        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+      });
     } else if (section.currentSection === Sections.FAIL_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick, { trigger_point: triggerPoint });
+      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick, {
+        trigger_point: triggerPoint,
+        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+      });
     }
     onClose();
   };

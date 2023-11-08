@@ -9,10 +9,10 @@ import { NetworkChoiceDrawer } from './NetworkChoiceDrawer';
 import { useWalletStore } from '@src/stores';
 import { AboutDrawer } from './AboutDrawer';
 import { config } from '@src/config';
-import { COLLATERAL_AMOUNT_LOVELACES, useRedirection } from '@hooks';
+import { COLLATERAL_AMOUNT_LOVELACES, useAddressesDiscoverer, useRedirection } from '@hooks';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
-import { useSearchParams, useObservable } from '@lace/common';
+import { useSearchParams, useObservable, Button } from '@lace/common';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -57,6 +57,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const closeDrawer = useRedirection(walletRoutePaths.settings);
 
   const { t } = useTranslation();
+  const { addressesDiscoverer } = useAddressesDiscoverer();
   const { environmentName, inMemoryWallet } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
   const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
@@ -76,7 +77,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         backgroundStorage.message?.type === MessageTypes.OPEN_COLLATERAL_SETTINGS &&
         backgroundStorage.message?.data.section === BrowserViewSections.COLLATERAL_SETTINGS
       ) {
-        await backgroundServices.clearBackgroundStorage(['message']);
+        await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
         openDrawer(SettingsDrawer.collateral);
       }
     };
@@ -110,6 +111,18 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const handleCloseGeneralSettingsDrawer = () => handleCloseDrawer(PostHogAction.SettingsYourKeysShowPublicKeyXClick);
 
   const handleSendAnalyticsEvent = (postHogEvent: PostHogAction) => analytics.sendEventToPostHog(postHogEvent);
+
+  const syncButton = (
+    <Button
+      size="medium"
+      className={styles.settingsButton}
+      onClick={() => addressesDiscoverer.discover()}
+      block={popupView}
+      data-testid="settings-wallet-wallet-sync-cta"
+    >
+      {t('browserView.settings.wallet.walletSync.ctaLabel')}
+    </Button>
+  );
 
   return (
     <>
@@ -196,6 +209,14 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           unspendableLoaded={unspendable?.coins !== undefined}
           sendAnalyticsEvent={handleSendAnalyticsEvent}
         />
+        <SettingsLink
+          description={t('browserView.settings.wallet.walletSync.description')}
+          data-testid="settings-wallet-wallet-sync"
+          addon={!popupView && syncButton}
+        >
+          {t('browserView.settings.wallet.walletSync.title')}
+        </SettingsLink>
+        {popupView && syncButton}
       </SettingsCard>
     </>
   );

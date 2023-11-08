@@ -74,6 +74,7 @@ Feature: ADA handle - extended view
 
   @LW-7138 @LW-8509
   Scenario: Extended View - Copy address/ADA handle
+    Given I close wallet synced toast
     And I click "Receive" button on page header
     And I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
     When I click "Copy" button on "Receive" page for default wallet address
