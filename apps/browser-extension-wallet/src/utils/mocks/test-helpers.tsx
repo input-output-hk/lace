@@ -603,7 +603,8 @@ export const userIdServiceMock: Record<keyof UserIdService, jest.Mock> = {
   getUserId: jest.fn(),
   getAliasProperties: jest.fn(),
   userTrackingType$: new Subject() as any,
-  getIsNewSessionStarted: jest.fn(() => true)
+  isNewSession: jest.fn(() => true),
+  resetToDefaultValues: jest.fn()
 };
 
 export const matomoClientMocks: Record<keyof typeof MatomoClient.prototype, jest.Mock> = {

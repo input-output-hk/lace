@@ -213,11 +213,6 @@ export enum EnhancedAnalyticsOptInStatus {
   OptedOut = 'REJECTED'
 }
 
-export enum UserSessionEventType {
-  SessionStarted = 'SESSION_STARTED',
-  LifeExtended = 'LIFE_EXTENDED'
-}
-
 export enum UserTrackingType {
   Enhanced = 'enhanced',
   Basic = 'basic'
