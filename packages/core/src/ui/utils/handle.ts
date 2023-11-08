@@ -1,7 +1,7 @@
 const ADA_HANDLE_PREFIX = '$';
 const ADA_HANDLE_THRESHOLD = 2;
 
-export const HANDLE_DEBOUNCE_TIME = 400;
+export const HANDLE_DEBOUNCE_TIME = 700;
 export const isHandle = (value: string): boolean =>
   value !== undefined &&
   value.length > 0 &&
