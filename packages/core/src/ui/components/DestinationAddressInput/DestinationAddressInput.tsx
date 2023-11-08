@@ -65,8 +65,8 @@ export const DestinationAddressInput = ({
   const [focused, setFocused] = useState<boolean>(false);
 
   useEffect(() => {
-    if (value.name) setFocused(false);
-  }, [value]);
+    if (value.name !== '' || handle !== HandleVerificationState.VERIFYING) setFocused(false);
+  }, [value, handle]);
 
   const customIcon = useMemo(() => {
     let Icon;
