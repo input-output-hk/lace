@@ -27,6 +27,7 @@ import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
+import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -44,7 +45,9 @@ const App = (): React.ReactElement => (
                           <ExternalLinkOpenerProvider>
                             <MigrationContainer appMode={APP_MODE_POPUP}>
                               <DataCheckContainer appMode={APP_MODE_POPUP}>
-                                <PopupView />
+                                <AddressesDiscoveryOverlay>
+                                  <PopupView />
+                                </AddressesDiscoveryOverlay>
                               </DataCheckContainer>
                             </MigrationContainer>
                           </ExternalLinkOpenerProvider>

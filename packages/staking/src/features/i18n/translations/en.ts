@@ -91,6 +91,9 @@ export const en: Translations = {
   'modals.beta.description':
     'This feature allows you to stake to up to {{maxPools}} pools. This is still in beta version, so some functionality might not be available. Read more about multi-delegation in our <Link>dedicated blog.</Link>',
   'modals.beta.pill': 'Beta',
+  'modals.beta.portfolioPersistence.description':
+    "Lace now supports on-chain portfolio persistence! This feature helps protect portfolios from significant drift and ensures cross-device syncing. If you've previously submitted a delegation, please resubmit your current (or a new) delegation to enable on-chain portfolio persistence.",
+  'modals.beta.portfolioPersistence.title': 'Multi-delegation: Portfolio Persistence',
   'modals.beta.title': 'Multi-delegation',
   'modals.changingPreferences.buttons.cancel': 'Cancel',
   'modals.changingPreferences.buttons.confirm': 'Fine by me',
@@ -113,6 +116,8 @@ export const en: Translations = {
   'overview.banners.portfolioDrifted.message':
     'Make sure to rebalance your staking ratios if you want to match your preferences',
   'overview.banners.portfolioDrifted.title': 'Your current delegation portfolio has shifted',
+  'overview.banners.saturatedOrRetiredPool.message': 'Please make sure to choose other pool(s) to avoid losing rewards',
+  'overview.banners.saturatedOrRetiredPool.title': 'One or several of your pools are too saturated / retired',
   'overview.delegationCard.label.balance': 'ADA Balance',
   'overview.delegationCard.label.pools': 'Pool(s)',
   'overview.delegationCard.label.status': 'Status',
@@ -139,6 +144,7 @@ export const en: Translations = {
   'overview.stakingInfoCard.lastReward': 'Last reward',
   'overview.stakingInfoCard.margin': 'Margin',
   'overview.stakingInfoCard.poolRetired': 'Pool retired',
+  'overview.stakingInfoCard.poolRetiring': 'Pool retiring',
   'overview.stakingInfoCard.poolSaturated': 'Pool over-saturated',
   'overview.stakingInfoCard.ros': 'ROS',
   'overview.stakingInfoCard.tooltipFiatLabel': 'USD Value',
