@@ -1,7 +1,8 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { themes } from '@providers/ThemeProvider';
-import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from './storage';
+import { BackgroundStorage, MigrationState } from './storage';
 import { CoinPrices } from './prices';
+import type { clearBackgroundStorage } from '../background/util';
 
 export enum BaseChannels {
   BACKGROUND_ACTIONS = 'background-actions'
@@ -60,14 +61,7 @@ export type BackgroundService = {
   handleChangeTheme: (data: ChangeThemeData) => void;
   setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
   getBackgroundStorage: () => Promise<BackgroundStorage>;
-  /**
-   * Deletes the specified `keys` from the background storage.
-   *
-   * If no `keys` are passed then **ALL** of it is cleared.
-   *
-   * @param keys Optional. List of keys to delete from storage
-   */
-  clearBackgroundStorage: (keys?: BackgroundStorageKeys[]) => Promise<void>;
+  clearBackgroundStorage: typeof clearBackgroundStorage;
   getWalletPassword: () => Uint8Array;
   setWalletPassword: (password?: Uint8Array) => void;
   resetStorage: () => Promise<void>;

@@ -61,10 +61,11 @@ export const AddressChangeDetail = withAddressBookContext(
             <Timeline.Item active={false}>
               <div className={cn(styles.addressDetailsContainer)}>
                 <div className={cn(styles.addressDataDetails)}>
-                  <div className={cn(styles.activeText)}>
+                  <div className={cn(styles.activeText)} data-testid="previous-address-title">
                     {t('addressBook.reviewModal.previousAddress.description')}
                   </div>
                   <Ellipsis
+                    dataTestId="previous-address-value"
                     text={expectedAddress}
                     className={cn(styles.addressDetails)}
                     withTooltip={false}
@@ -81,14 +82,14 @@ export const AddressChangeDetail = withAddressBookContext(
                     <div
                       onClick={handleExpectedAddressOnClickCopy}
                       className={styles.copyContainer}
-                      data-testid="transaction-hash-copy-container"
+                      data-testid="previous-address-copy-button"
                     >
                       {expectedAddressHasBeenCopied ? (
                         <Check className={styles.checkIcon} />
                       ) : (
                         <Copy className={styles.copyIcon} />
                       )}
-                      <Text className={styles.copy} data-testid="transaction-hash-copy-text">
+                      <Text className={styles.copy} data-testid="previous-address-copy-button-text">
                         {t(expectedAddressCopyText)}
                       </Text>
                     </div>
@@ -100,8 +101,11 @@ export const AddressChangeDetail = withAddressBookContext(
             <Timeline.Item active>
               <div className={cn(styles.addressDetailsContainer)}>
                 <div className={cn(styles.addressDataDetails)}>
-                  <div className={cn(styles.activeText)}> {t('addressBook.reviewModal.actualAddress.description')}</div>
+                  <div className={cn(styles.activeText)} data-testid="new-address-title">
+                    {t('addressBook.reviewModal.actualAddress.description')}
+                  </div>
                   <Ellipsis
+                    dataTestId="new-address-value"
                     text={actualAddress}
                     className={cn(styles.addressDetails)}
                     withTooltip={false}
@@ -118,14 +122,14 @@ export const AddressChangeDetail = withAddressBookContext(
                     <div
                       className={styles.copyContainer}
                       onClick={handleActualAddressOnClickCopy}
-                      data-testid="transaction-hash-copy-container"
+                      data-testid="new-address-copy-button"
                     >
                       {actualAddressHasBeenCopied ? (
                         <Check className={styles.checkIcon} />
                       ) : (
                         <Copy className={styles.copyIcon} />
                       )}
-                      <Text className={styles.copy} data-testid="transaction-hash-copy-text">
+                      <Text className={styles.copy} data-testid="new-address-copy-button-text">
                         {t(actualAddressCopyText)}
                       </Text>
                     </div>

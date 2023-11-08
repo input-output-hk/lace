@@ -126,14 +126,18 @@ type KeysStructure = {
       pickMorePools: '';
       confirmButton: '';
       rebalanceButton: '';
+      removePoolButton: '';
       ctaButtonTooltip: {
         zeroPercentageSliderError: '';
         invalidAllocation: '';
       };
       poolDetails: {
         savedRatio: '';
+        savedRatioTooltip: '';
         actualRatio: '';
+        actualRatioTooltip: '';
         actualStake: '';
+        actualStakeTooltip: '';
       };
     };
   };
@@ -151,6 +155,21 @@ type KeysStructure = {
       title: '';
       description: '';
       button: '';
+      portfolioPersistence: {
+        title: '';
+        description: '';
+      };
+    };
+    poolsManagement: {
+      title: '';
+      buttons: {
+        cancel: '';
+        confirm: '';
+      };
+      description: {
+        reduction: '';
+        adjustment: '';
+      };
     };
   };
   overview: {
@@ -181,6 +200,10 @@ type KeysStructure = {
         title: '';
         message: '';
       };
+      saturatedOrRetiredPool: {
+        title: '';
+        message: '';
+      };
     };
     stakingInfoCard: {
       fee: '';
@@ -190,6 +213,7 @@ type KeysStructure = {
       totalRewards: '';
       totalStaked: '';
       poolRetired: '';
+      poolRetiring: '';
       poolSaturated: '';
       tooltipFiatLabel: '';
     };

@@ -3,8 +3,7 @@ import { useObservable } from '@lace/common';
 import { Box, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DelegationCard } from '../delegation-card';
-import { StakePoolDetails } from '../drawer';
+import { DelegationCard } from '../DelegationCard';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
@@ -12,7 +11,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
 
 export const OverviewPopup = () => {
   const { t } = useTranslation();
@@ -24,7 +23,6 @@ export const OverviewPopup = () => {
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletActivities: walletActivities,
-    expandStakingView,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -32,7 +30,7 @@ export const OverviewPopup = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
+  const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
@@ -55,7 +53,7 @@ export const OverviewPopup = () => {
     portfolioMutators.executeCommand({ data: stakePool, type: 'ShowDelegatedPoolDetails' });
   };
 
-  if (noFunds)
+  if (noFunds) {
     return (
       <Flex flexDirection="column" gap="$32">
         <FundWalletBanner
@@ -68,14 +66,16 @@ export const OverviewPopup = () => {
         <ExpandViewBanner />
       </Flex>
     );
+  }
 
-  if (currentPortfolio.length === 0)
+  if (currentPortfolio.length === 0) {
     return (
       <Flex flexDirection="column" gap="$32">
         <StakeFundsBanner balance={totalCoinBalance} popupView />
         <ExpandViewBanner />
       </Flex>
     );
+  }
 
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
@@ -85,23 +85,22 @@ export const OverviewPopup = () => {
 
   return (
     <>
-      {stakingNotification === 'portfolioDrifted' && (
-        <Box mb="$32">
-          <StakingNotificationBanner
-            notification="portfolioDrifted"
-            onPortfolioDriftedNotificationClick={expandStakingView}
-          />
-        </Box>
+      {stakingNotifications.length > 0 && (
+        <Flex mb="$32" flexDirection="column">
+          <StakingNotificationBanners notifications={stakingNotifications} />
+        </Flex>
       )}
       <Box mb="$32">
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
           arrangement="vertical"
-          distribution={displayData.map(({ color, name = '-', onChainPercentage }) => ({
+          distribution={displayData.map(({ color, name = '-', onChainPercentage, apy, saturation }) => ({
+            apy: apy ? String(apy) : undefined,
             color,
             name,
             percentage: onChainPercentage,
+            saturation: saturation ? String(saturation) : undefined,
           }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
@@ -123,7 +122,6 @@ export const OverviewPopup = () => {
         ))}
       </Box>
       <ExpandViewBanner />
-      <StakePoolDetails showBackIcon showExitConfirmation={() => false} popupView />
     </>
   );
 };

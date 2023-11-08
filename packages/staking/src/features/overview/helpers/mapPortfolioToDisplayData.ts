@@ -1,8 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { PIE_CHART_DEFAULT_COLOR_SET, PieChartColor, PieChartGradientColor } from '@lace/ui';
 import type { CurrentPortfolioStakePool } from '../../store';
-
-const SATURATION_UPPER_BOUND = 100;
+import { isOverSaturated } from './hasSaturatedOrRetiredPools';
 
 type MapPortfolioToDisplayDataParams = {
   cardanoCoin: Wallet.CoinId;
@@ -23,9 +22,10 @@ export const mapPortfolioToDisplayData = ({
     fiat: cardanoPrice,
     lastReward: Wallet.util.lovelacesToAdaString(item.displayData.lastReward.toString()),
     name: item.displayData.name || '-',
-    status: ((): 'retired' | 'saturated' | undefined => {
-      if (item.displayData.retired) return 'retired';
-      if (Number(item.displayData.saturation || 0) > SATURATION_UPPER_BOUND) return 'saturated';
+    status: ((): 'retired' | 'saturated' | 'retiring' | undefined => {
+      if (item.stakePool.status === 'retired') return 'retired';
+      if (item.stakePool.status === 'retiring') return 'retiring';
+      if (isOverSaturated(item.displayData.saturation || 0)) return 'saturated';
       // eslint-disable-next-line consistent-return, unicorn/no-useless-undefined
       return undefined;
     })(),

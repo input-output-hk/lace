@@ -1,6 +1,6 @@
 import { BackgroundStorage } from '@lib/scripts/types';
 import { mockKeyAgentsByChain } from '@src/utils/mocks/test-helpers';
-import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from '.';
+import { SESSION_LENGTH, USER_ID_BYTE_SIZE, UserIdService } from './userIdService';
 import * as utils from '../util';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -126,7 +126,7 @@ describe('userIdService', () => {
       await userIdService.clearId();
       const newUserId = await userIdService.getUserId(1);
 
-      expect(clearStorageMock).toHaveBeenCalledWith(expect.arrayContaining(['userId', 'usePersistentUserId']));
+      expect(clearStorageMock).toHaveBeenCalledWith({ keys: ['userId', 'usePersistentUserId'] });
       expect(previousUserId).not.toEqual(newUserId);
       const subscription = userIdService.userTrackingType$.subscribe((trackingType) => {
         expect(trackingType).toEqual(UserTrackingType.Basic);

@@ -8,7 +8,7 @@ import {
   stakePoolSearchSlice,
   walletInfoSlice,
   lockSlice,
-  transactionDetailSlice,
+  activityDetailSlice,
   uiSlice,
   blockchainProviderSlice
 } from './slices';
@@ -34,7 +34,7 @@ export const createWalletStore = (
     ...networkSlice({ set, get }),
     ...stakePoolSearchSlice({ set, get }),
     ...lockSlice({ set, get }),
-    ...transactionDetailSlice({ set, get }),
+    ...activityDetailSlice({ set, get }),
     ...assetDetailsSlice({ set, get })
   }));
 };

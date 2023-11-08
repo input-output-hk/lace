@@ -4,6 +4,23 @@ Feature: Staking Page - Extended View
   Background:
     Given Lace is ready for test
 
+  @LW-8931 @Testnet
+  Scenario: Extended View - Start Staking component
+    Given I save token: "Cardano" balance
+    And I disable showing Multidelegation beta banner
+    When I navigate to Staking extended page
+    Then I see Start Staking page in extended mode
+
+  @LW-8932 @Testnet
+  Scenario Outline: Extended View - Start staking - step link <link_number> click
+    Given I am on Start Staking page in extended mode
+    When I click "Get Started" step <link_number> link
+    Then <expected_step>
+    Examples:
+      | link_number | expected_step                                                                                |
+      | 1           | I see the stake pool search control with appropriate content                                 |
+      | 2           | New tab with url containing "lace.io/faq?question=what-are-staking-and-delegation" is opened |
+
   @LW-8449 @Testnet @Mainnet
   Scenario: Extended View - Staking search control is displayed with appropriate content
     Given I disable showing Multidelegation beta banner
@@ -62,11 +79,11 @@ Feature: Staking Page - Extended View
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
     Examples:
-      | type     | subtitle                          |
+      | type | subtitle                    |
       | FAQ      | What are staking & delegation?    |
-      | FAQ      | Which stake pool should I choose? |
-      | Glossary | What is an active stake?          |
-      | Video    | Staking made easy with Lace       |
+      | FAQ      | How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature? |
+      | FAQ  | Do Ledger hardware wallets support multi-staking? |
+      | FAQ  | Does stake distribution remain the same? |
 
   @LW-8469 @Testnet @Mainnet
   Scenario: Extended View - Network info component is present with expected content
@@ -117,3 +134,11 @@ Feature: Staking Page - Extended View
     And I click on the stake pool with name "ADA Capital"
     When I close the drawer by clicking close button
     Then Stake pool details drawer is not opened
+
+  @LW-8463 @Testnet @Mainnet
+  Scenario: Extended View - Stake pool list item
+    Given I disable showing Multidelegation beta banner
+    And I am on Staking extended page
+    And I click Browse pools tab
+    And I wait for stake pool list to be populated
+    Then Each stake pool list item contains: logo, name, ticker, ROS and saturation

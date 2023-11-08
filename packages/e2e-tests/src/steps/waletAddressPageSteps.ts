@@ -5,6 +5,8 @@ import walletAddressPage from '../elements/walletAddressPage';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
 import ToastMessage from '../elements/toastMessage';
+import MenuHeader from '../elements/menuHeader';
+import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
 When(/^I see handles listed on the "Receive" screen$/, async () => {
   await walletAddressPageAssert.assertSeeAdaHandleAddressCard();
@@ -29,8 +31,18 @@ When(/^I click "Copy" button on "Receive" page for handle: "([^"]*)"$/, async (h
 });
 
 When(/^I see address card for handle: "([^"]*)"$/, async (handleName: string) => {
-  await walletAddressPageAssert.assertSeeAdaHandleAddressCardWithName(handleName);
+  await walletAddressPageAssert.assertSeeAdaHandleAddressCardWithName(handleName, true);
 });
+
+When(
+  /^I validate that handle: "([^"]*)" (is|is not) listed on the Receive screen$/,
+  async (handleName: string, shouldBeListed: 'is' | 'is not') => {
+    await MenuHeader.receiveButton.waitForDisplayed();
+    await MenuHeader.receiveButton.click();
+    await walletAddressPageAssert.assertSeeAdaHandleAddressCardWithName(handleName, shouldBeListed === 'is');
+    await simpleTxSideDrawerPageObject.clickCloseDrawerButton();
+  }
+);
 
 Then(/^The first ADA handle displayed on the list is the shortest$/, async () => {
   await walletAddressPageAssert.assertSeeTheShortestHandleFirst();
@@ -50,7 +62,7 @@ Then(/^I see a toast with text: "(Handle|Address) copied"$/, async (action: stri
   }
 
   await ToastMessageAssert.assertSeeToastMessage(await t(translationKey), true);
-  await ToastMessage.closeButton.click();
+  await ToastMessage.clickCloseButton();
 });
 
 Then(/^I see ADA handle with custom image on the "Wallet Address" page$/, async () => {

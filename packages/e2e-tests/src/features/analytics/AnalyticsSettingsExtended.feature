@@ -126,16 +126,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | hold up | back | click"
     And I validate that 2 analytics event(s) have been sent
 
-  @LW-8559
-  Scenario: Analytics - Extended View - Settings - Wallet removal events - Remove wallet
-    When I open settings from header menu
-    And I set up request interception for posthog analytics request(s)
-    And I click on Remove wallet button
-    Then I validate latest analytics single event "settings | remove wallet | click"
-    And I click "Remove wallet" button on "Remove wallet" modal
-    Then I validate latest analytics single event "settings | hold up | remove wallet | click"
-    And I validate that 2 analytics event(s) have been sent
-
   @LW-8787
   Scenario: Analytics - Extended View - Settings - Recovery phrase
     When I open settings from header menu
@@ -177,4 +167,14 @@ Feature: Analytics - Settings - Extended View
     And I set theme switch in settings to light mode
     Then I validate latest analytics single event "settings | theme | light mode | click"
     Then I validate that 2 analytics event(s) have been sent
-    
+
+        # this test should be executed as the last one in this suite
+  @LW-8559
+  Scenario: Analytics - Extended View - Settings - Wallet removal events - Remove wallet
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on Remove wallet button
+    Then I validate latest analytics single event "settings | remove wallet | click"
+    And I click "Remove wallet" button on "Remove wallet" modal
+    Then I validate latest analytics single event "settings | hold up | remove wallet | click"
+    And I validate that 2 analytics event(s) have been sent

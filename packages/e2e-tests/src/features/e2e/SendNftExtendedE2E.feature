@@ -2,8 +2,8 @@
 Feature: Send NFT - Extended Browser View - E2E
 
   Background:
-    Given I am on NFTs extended page
-    And Wallet is synced
+    Given Wallet is synced
+    And I am on NFTs extended page
     And I use a single wallet with "Ibilecoin" NFT in extended mode
 
   @LW-2502 @Smoke

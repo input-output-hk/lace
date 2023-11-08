@@ -19,7 +19,7 @@ export interface UnlockWalletContainerProps {
 export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContainerProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { unlockWallet, lockWallet, deleteWallet } = useWalletManager();
-  const { environmentName, setKeyAgentData } = useWalletStore();
+  const { environmentName, setKeyAgentData, setDeletingWallet } = useWalletStore();
   const backgroundService = useBackgroundServiceAPIContext();
 
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
@@ -75,8 +75,10 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const onForgotPasswordClick = async (): Promise<void> => {
     await analytics.sendEventToPostHog(PostHogAction.UnlockWalletForgotPasswordProceedClick);
     saveValueInLocalStorage({ key: 'isForgotPasswordFlow', value: true });
+    setDeletingWallet(true);
     await deleteWallet(true);
     await backgroundService.handleOpenBrowser({ section: BrowserViewSections.FORGOT_PASSWORD });
+    setDeletingWallet(false);
   };
 
   useKeyboardShortcut(['Enter'], onUnlock);

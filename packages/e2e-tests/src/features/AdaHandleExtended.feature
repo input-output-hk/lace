@@ -14,7 +14,7 @@ Feature: ADA handle - extended view
     Then Green tick icon is displayed next to ADA handle
     And "Save address" button is enabled on "Add new address" drawer
     When I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    Then I see a toast with text: "Address added"
     And I see address row with name "test_handle_1" and address "$test_handle_1" on the list in extended mode
 
   @LW-7333
@@ -74,6 +74,7 @@ Feature: ADA handle - extended view
 
   @LW-7138 @LW-8509
   Scenario: Extended View - Copy address/ADA handle
+    Given I close wallet synced toast
     And I click "Receive" button on page header
     And I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
     When I click "Copy" button on "Receive" page for default wallet address

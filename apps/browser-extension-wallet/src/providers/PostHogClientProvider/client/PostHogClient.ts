@@ -4,10 +4,8 @@ import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
 import {
   ExtensionViews,
-  PostHogAction,
   PostHogMetadata,
   PostHogPersonProperties,
-  PostHogProperties,
   UserTrackingType
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import {
@@ -23,6 +21,7 @@ import { BackgroundService, UserIdService } from '@lib/scripts/types';
 import { experiments, fallbackConfiguration } from '@providers/ExperimentsProvider/config';
 import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { Subscription, BehaviorSubject } from 'rxjs';
+import { PostHogAction, PostHogProperties } from '@lace/common';
 
 /**
  * PostHog API reference:

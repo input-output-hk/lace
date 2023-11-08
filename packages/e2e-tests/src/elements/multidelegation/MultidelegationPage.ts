@@ -268,7 +268,7 @@ class MultidelegationPage {
     await poolItem.moveTo();
   }
 
-  async clickButtonOnSection(section: string) {
+  async clickNextButtonOnDrawerSection(section: string) {
     switch (section) {
       case 'portfolio bar':
         await this.portfolioBarBtnNext.waitForClickable();
@@ -319,6 +319,13 @@ class MultidelegationPage {
       default:
         throw new Error(`Unsupported column name: ${columnName}`);
     }
+  }
+
+  async waitForStakePoolListToLoad() {
+    await browser.waitUntil(async () => (await this.poolsItems).length > 1, {
+      timeout: 30_000,
+      timeoutMsg: 'failed while waiting for stake pool list to load'
+    });
   }
 }
 

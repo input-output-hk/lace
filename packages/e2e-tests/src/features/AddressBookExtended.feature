@@ -24,7 +24,7 @@ Feature: Address book - extended view
     And "Save address" button is disabled on "Add new address" drawer
     When I fill address form with "Shelley_manual" name and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    Then I see a toast with message: "Address added"
     And I see address row with name "Shelley_manual" and address "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" on the list in extended mode
 
   @LW-4464 @Pending
@@ -36,7 +36,7 @@ Feature: Address book - extended view
     And "Save address" button is disabled on "Add new address" drawer
     When I fill address form with "<wallet_name>" name and "<address>" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    Then I see a toast with message: "Address added"
     And I see address row with name "<wallet_name>" and address "<address>" on the list in extended mode
     Examples:
       | wallet_name          | address                                                                                                            |
@@ -110,7 +110,8 @@ Feature: Address book - extended view
 
   @LW-4469
   Scenario: Extended-view - Address Book - Copy address button
-    Given I have 3 addresses in my address book in extended mode
+    Given I close wallet synced toast
+    And I have 3 addresses in my address book in extended mode
     When I click address on the list with name "Byron"
     And I click "Copy" button on address details page
     Then I see a toast with message: "general.clipboard.copiedToClipboard"

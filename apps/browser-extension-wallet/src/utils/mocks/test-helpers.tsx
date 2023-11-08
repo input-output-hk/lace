@@ -5,7 +5,7 @@ import React, { FunctionComponent } from 'react';
 import { Wallet } from '@lace/cardano';
 import { SendStoreProvider } from '../../features/send/stores';
 import { createSignal } from '@react-rxjs/utils';
-import { Balance, CardanoTxBuild, WalletInfo, TxDirection, TransactionDetail } from '@types';
+import { Balance, CardanoTxBuild, WalletInfo, TxDirection, TransactionActivityDetail } from '@types';
 import { DisplayedCoinDetail, IAssetInfo } from '../../features/send/types';
 import { APP_MODE_POPUP, cardanoCoin } from '../constants';
 import { fakeApiRequest } from './fake-api-request';
@@ -43,8 +43,7 @@ export const mockKeyAgentDataTestnet: Wallet.KeyManagement.SerializableKeyAgentD
 export const mockKeyAgentsByChain: Wallet.KeyAgentsByChain = {
   Mainnet: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Mainnet } },
   Preprod: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preprod } },
-  Preview: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preview } },
-  Sanchonet: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Sanchonet } }
+  Preview: { keyAgentData: { ...mockKeyAgentDataTestnet, chainId: Wallet.Cardano.ChainIds.Preview } }
 };
 
 export const mockInMemoryWallet = {
@@ -109,7 +108,10 @@ export const mockInMemoryWallet = {
       slot: 1
     }
   }),
-  assetInfo$: of([])
+  assetInfo$: of([]),
+  delegation: {
+    rewardsHistory$: of([])
+  }
 } as unknown as Wallet.ObservableWallet;
 
 export const mockWalletUI = {
@@ -409,7 +411,7 @@ export const blockMock: Wallet.BlockInfo = {
   date: new Date(1_638_829_263_730)
 };
 
-export const formatBlockMock: TransactionDetail['blocks'] = {
+export const formatBlockMock: TransactionActivityDetail['blocks'] = {
   block: '3114964',
   blockId: '717ca157f1e696a612af87109ba1f30cd4bb311ded5b504c78a6face463def95',
   confirmations: '17013',

@@ -111,7 +111,7 @@ export class UserIdService implements UserIdServiceInterface {
     this.userTrackingType$.next(UserTrackingType.Basic);
     this.clearSessionTimeout();
     this.hasNewSessionStarted = false;
-    await this.clearStorage(['userId', 'usePersistentUserId']);
+    await this.clearStorage({ keys: ['userId', 'usePersistentUserId'] });
   }
 
   async makePersistent(): Promise<void> {

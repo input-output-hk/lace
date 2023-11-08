@@ -17,6 +17,14 @@ import StakingSuccessDrawerAssert from '../assert/multidelegation/StakingSuccess
 import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDrawer';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
+import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
+import StakingManageDrawerAssert from '../assert/multidelegation/StakingManageDrawerAssert';
+import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
+import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
+import TokensPageObject from '../pageobject/tokensPageObject';
+import localStorageInitializer from '../fixture/localStorageInitializer';
+import mainMenuPageObject from '../pageobject/mainMenuPageObject';
+import StartStakingPage from '../elements/multidelegation/StartStakingPage';
 
 Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
   await MultidelegationPage.clickOnTab(tabToClick);
@@ -43,7 +51,7 @@ Then(
 );
 
 Then(/^I click "Next" button on staking (portfolio bar|manage staking|confirmation)$/, async (section: string) => {
-  await MultidelegationPage.clickButtonOnSection(section);
+  await MultidelegationPage.clickNextButtonOnDrawerSection(section);
 });
 
 Then(/^I see Delegation card displaying correct data$/, async () => {
@@ -153,7 +161,7 @@ When(
 );
 
 Then(/^(Initial|Switching) staking success drawer is displayed$/, async (process: 'Initial' | 'Switching') => {
-  await StakingSuccessDrawerAssert.assertStakingSuccessDrawer(process);
+  await StakingSuccessDrawerAssert.assertSeeStakingSuccessDrawer(process);
 });
 
 Then(/^I click "Close" button on staking success drawer$/, async () => {
@@ -163,7 +171,7 @@ Then(/^I click "Close" button on staking success drawer$/, async () => {
 Then(
   /^the transaction details are displayed for staking (with|without) metadata$/,
   async (metadata: 'with' | 'without') => {
-    const expectedTransactionDetails =
+    const expectedActivityDetails =
       metadata === 'with'
         ? {
             transactionDescription: 'Delegation\n1 token',
@@ -178,7 +186,7 @@ Then(
             poolID: testContext.load('poolID') as string
           };
 
-    await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+    await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
   }
 );
 
@@ -224,4 +232,87 @@ Then(/^staking password drawer is displayed$/, async () => {
 
 Then(/^Stake pool details drawer is not opened$/, async () => {
   await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsNotOpened();
+});
+
+When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
+  const password = String(getTestWallet(TestWalletName.TestAutomationWallet).password);
+  const manageStaking = 'manage staking';
+
+  switch (delegationStep) {
+    case 'success':
+      await MultidelegationPage.clickNextButtonOnDrawerSection(manageStaking);
+      await MultidelegationPage.clickNextButtonOnDrawerSection('confirmation');
+      await StakingPasswordDrawer.fillPassword(password);
+      await StakingPasswordDrawer.confirmStaking();
+      await StakingSuccessDrawerAssert.assertSeeStakingSuccessDrawer('Switching');
+      break;
+    case 'password':
+      await MultidelegationPage.clickNextButtonOnDrawerSection(manageStaking);
+      await MultidelegationPage.clickNextButtonOnDrawerSection('confirmation');
+      await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
+      break;
+    case 'confirmation':
+      await MultidelegationPage.clickNextButtonOnDrawerSection(manageStaking);
+      await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
+      break;
+    case 'manage':
+      await StakingManageDrawerAssert.assertSeeStakingManageDrawer();
+      break;
+  }
+});
+
+When(
+  /^I hover over (last reward|total staked|total rewards) in currently staking component$/,
+  async (elementToHover: string) => {
+    switch (elementToHover) {
+      case 'last reward':
+        await new StakingInfoComponent().hoverOverLastRewardValue();
+        break;
+      case 'total staked':
+        await new StakingInfoComponent().hoverOverTotalStakedValue();
+        break;
+      case 'total rewards':
+        await new StakingInfoComponent().hoverOverTotalRewardsValue();
+        break;
+      default:
+        throw new Error(`Unsupported element: ${elementToHover}`);
+    }
+  }
+);
+
+Then(/^I see tooltip for element in currently staking component$/, async () => {
+  await MultidelegationPageAssert.assertSeeCurrentlyStakingTooltip();
+});
+
+Then(/^I see Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
+  await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
+});
+
+Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
+  await TokensPageObject.waitUntilCardanoTokenLoaded();
+  await TokensPageObject.saveTokenBalance('Cardano');
+  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+  await mainMenuPageObject.navigateToSection('Staking', mode);
+  const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
+  await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
+});
+
+Then(/^I click "Get Started" step (1|2) link$/, async (linkNumber: '1' | '2') => {
+  await (linkNumber === '1'
+    ? StartStakingPage.clickGetStartedStep1Link()
+    : StartStakingPage.clickGetStartedStep2Link());
+});
+
+Given(/^I click "Expand view" on Start Staking page$/, async () => {
+  await StartStakingPage.clickExpandedViewBannerButton();
+});
+
+When(/^I wait for stake pool list to be populated$/, async () => {
+  await MultidelegationPage.waitForStakePoolListToLoad();
+});
+
+Then(/^Each stake pool list item contains: logo, name, ticker, ROS and saturation$/, async () => {
+  await MultidelegationPageAssert.assertSeeStakePoolRows();
 });

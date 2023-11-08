@@ -30,8 +30,11 @@ import faqPageAssert from '../assert/faqPageAssert';
 import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
+import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 
 Given(/^Lace is ready for test$/, async () => {
+  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.closeWalletSyncedToast();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
 });
 
@@ -49,6 +52,10 @@ Then(/^I close the drawer by clicking close button$/, async () => {
 
 Then(/^I close the drawer by clicking back button$/, async () => {
   await simpleTxSideDrawerPageObject.clickBackDrawerButton();
+});
+
+Then(/^I close wallet synced toast/, async () => {
+  await settingsExtendedPageObject.closeWalletSyncedToast();
 });
 
 Then(/^Wallet is synced$/, async () => {
@@ -107,6 +114,7 @@ Then(
 );
 
 Then(/^I (see|don't see) a toast with message: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
+  await settingsExtendedPageObject.closeWalletSyncedToast();
   await ToastMessageAssert.assertSeeToastMessage(await t(toastText), shouldSee === 'see');
   if (toastText === 'general.clipboard.copiedToClipboard') Logger.log(`Clipboard contain: ${await clipboard.read()}`);
 });
@@ -251,6 +259,10 @@ When(/^I set (light|dark) theme mode in Local Storage$/, async (mode: 'light' | 
 
 Given(/^I disable showing Multidelegation beta banner$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+});
+
+Given(/^I disable showing Multidelegation persistence banner$/, async () => {
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
 });
 
 Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: string) => {

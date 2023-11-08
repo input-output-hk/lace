@@ -45,6 +45,7 @@ export const WalletSetupMnemonicIntroStep = ({
           src={videoSrc}
           title="YouTube video player"
           allow="accelerometer; fullscreen; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          data-testid="mnemonic-intro-yt-video-frame"
         />
       </div>
     </WalletSetupStepLayout>
