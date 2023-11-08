@@ -139,17 +139,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | hold up | back | click"
     And I validate that 2 analytics event(s) have been sent
 
-  @LW-8571
-  Scenario: Analytics - Popup View - Settings - Wallet removal events - Remove wallet
-    Given I am on Tokens popup page
-    When I open settings from header menu
-    And I set up request interception for posthog analytics request(s)
-    And I click on Remove wallet button
-    Then I validate latest analytics single event "settings | remove wallet | click"
-    And I click "Remove wallet" button on "Remove wallet" modal
-    Then I validate latest analytics single event "settings | hold up | remove wallet | click"
-    And I validate that 2 analytics event(s) have been sent
-
   @LW-8783
   Scenario: Analytics - Popup View - Settings - Recovery phrase
     Given I am on Tokens popup page
@@ -195,3 +184,15 @@ Feature: Analytics - Settings - Popup View
     And I set theme switch in settings to light mode
     Then I validate latest analytics single event "settings | theme | light mode | click"
     Then I validate that 2 analytics event(s) have been sent
+
+        # this test should be executed as the last one in this suite
+  @LW-8571
+  Scenario: Analytics - Popup View - Settings - Wallet removal events - Remove wallet
+    Given I am on Tokens popup page
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on Remove wallet button
+    Then I validate latest analytics single event "settings | remove wallet | click"
+    And I click "Remove wallet" button on "Remove wallet" modal
+    Then I validate latest analytics single event "settings | hold up | remove wallet | click"
+    And I validate that 2 analytics event(s) have been sent

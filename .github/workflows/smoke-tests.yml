@@ -58,7 +58,7 @@ jobs:
           ${pending}
           " > environment.properties
       - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.2.3
+        uses: andrcuns/allure-publish-action@v2.4.0
         if: always()
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -71,7 +71,7 @@ jobs:
           prefix: 'linux/${BROWSER}/${RUN}'
           copyLatest: true
           ignoreMissingResults: true
-          updatePr: description
+          updatePr: comment
           baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v3

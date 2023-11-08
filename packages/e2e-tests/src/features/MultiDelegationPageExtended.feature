@@ -79,11 +79,11 @@ Feature: Staking Page - Extended View
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
     Examples:
-      | type     | subtitle                          |
+      | type | subtitle                    |
       | FAQ      | What are staking & delegation?    |
-      | FAQ      | Which stake pool should I choose? |
-      | Glossary | What is an active stake?          |
-      | Video    | Staking made easy with Lace       |
+      | FAQ      | How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature? |
+      | FAQ  | Do Ledger hardware wallets support multi-staking? |
+      | FAQ  | Does stake distribution remain the same? |
 
   @LW-8469 @Testnet @Mainnet
   Scenario: Extended View - Network info component is present with expected content
@@ -134,3 +134,11 @@ Feature: Staking Page - Extended View
     And I click on the stake pool with name "ADA Capital"
     When I close the drawer by clicking close button
     Then Stake pool details drawer is not opened
+
+  @LW-8463 @Testnet @Mainnet
+  Scenario: Extended View - Stake pool list item
+    Given I disable showing Multidelegation beta banner
+    And I am on Staking extended page
+    And I click Browse pools tab
+    And I wait for stake pool list to be populated
+    Then Each stake pool list item contains: logo, name, ticker, ROS and saturation

@@ -36,7 +36,7 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
         backgroundStorage.message?.type === MessageTypes.OPEN_BROWSER_VIEW &&
         backgroundStorage.message?.data.section === BrowserViewSections.SEND_ADVANCED
       ) {
-        await backgroundServices.clearBackgroundStorage(['message']);
+        await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
         setDrawerConfig({ content: DrawerContent.SEND_TRANSACTION, options: { isAdvancedFlow: true } });
       }
     };

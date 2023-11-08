@@ -320,6 +320,13 @@ class MultidelegationPage {
         throw new Error(`Unsupported column name: ${columnName}`);
     }
   }
+
+  async waitForStakePoolListToLoad() {
+    await browser.waitUntil(async () => (await this.poolsItems).length > 1, {
+      timeout: 30_000,
+      timeoutMsg: 'failed while waiting for stake pool list to load'
+    });
+  }
 }
 
 export default new MultidelegationPage();

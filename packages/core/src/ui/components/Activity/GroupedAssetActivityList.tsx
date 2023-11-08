@@ -26,21 +26,30 @@ export const GroupedAssetActivityList = ({
   withTitle,
   isDrawerView
 }: GroupedAssetActivityListProps): React.ReactElement => {
-  const TAKE = 5;
+  // workaround for bug in react-infinite-scroll-component
+  // related to not loading more elements if the height of the container is less than the height of the window
+  // see: https://github.com/ankeetmaini/react-infinite-scroll-component/issues/380
+  // ticket for proper fix on our end: https://input-output.atlassian.net/browse/LW-8986
+  // initialWindowHeight state needed to ensure that page size remains the same if window is resized
+  const [initialWindowHeight] = useState(window.innerHeight);
+  const ESTIMATED_MIN_GROUP_HEIGHT = 100;
+  // eslint-disable-next-line no-magic-numbers
+  const pageSize = Math.max(5, Math.floor(initialWindowHeight / ESTIMATED_MIN_GROUP_HEIGHT));
+
   const FAKE_LOAD_TIMEOUT = 1000;
   const [skip, setSkip] = useState(0);
-  const [paginatedLists, setPaginatedLists] = useState(take(lists, skip + TAKE));
+  const [paginatedLists, setPaginatedLists] = useState(take(lists, skip + pageSize));
 
   const loadMoreData = () => {
     setTimeout(() => {
-      setSkip(skip + TAKE);
+      setSkip(skip + pageSize);
     }, FAKE_LOAD_TIMEOUT);
   };
 
   useEffect(() => {
     if (lists.length === 0) return;
-    setPaginatedLists(take(lists, skip + TAKE));
-  }, [skip, lists]);
+    setPaginatedLists(take(lists, skip + pageSize));
+  }, [skip, lists, pageSize]);
 
   return (
     <InfiniteScroll

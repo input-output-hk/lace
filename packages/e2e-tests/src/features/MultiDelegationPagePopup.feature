@@ -11,7 +11,7 @@ Feature: Staking Page - Popup View
     When I navigate to Staking popup page
     Then I see Start Staking page in popup mode
 
-  @LLW-8934 @Testnet
+  @LW-8934 @LW-8472 @Testnet
   Scenario: Popup View - Start Staking - "Expanded view" button click
     Given I am on Start Staking page in popup mode
     When I click "Expand view" on Start Staking page
