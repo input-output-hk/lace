@@ -192,7 +192,7 @@ type KeysStructure = {
         title: '';
         message: '';
       };
-      pendingPoolMigration: {
+      pendingPortfolioModification: {
         title: '';
         message: '';
       };
