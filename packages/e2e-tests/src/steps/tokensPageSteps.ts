@@ -33,8 +33,8 @@ Then(
   /^I see Cardano & LaceCoin tokens on the list with all the details in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
     await tokensPageAssert.assertSeeTableItems(mode);
-    await tokensPageAssert.assertSeeCardanoItem(mode);
-    await tokensPageAssert.assertSeeLaceCoinItem(mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.CARDANO, mode);
+    await tokensPageAssert.assertSeeNotNativeToken(Asset.LACE_COIN, mode);
   }
 );
 
@@ -42,8 +42,8 @@ Then(
   /^I see Cardano & Hosky tokens on the list with all the details in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
     await tokensPageAssert.assertSeeTableItems(mode);
-    await tokensPageAssert.assertSeeCardanoItem(mode);
-    await tokensPageAssert.assertSeeHoskyItem(mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.CARDANO, mode);
+    await tokensPageAssert.assertSeeNativeToken(Asset.HOSKY_TOKEN, mode);
   }
 );
 
@@ -218,4 +218,16 @@ Then(/^I see total wallet balance in ADA is "([^"]*)"$/, async (balanceInAda: nu
 
 Then(/^I see tMin token with the ADA balance of "([^"]*)"$/, async (balanceInAda: number) => {
   await tokensPageAssert.assertTMinBalance(balanceInAda);
+});
+
+Then(/^fiat prices expired fetch error is displayed$/, async () => {
+  await tokensPageAssert.seePriceFetchExpiredErrorMessage();
+});
+
+Then(/^fiat prices unable to fetch error is displayed$/, async () => {
+  await tokensPageAssert.seePriceFetchFailedErrorMessage();
+});
+
+Then(/^fiat prices expired fetch error info is displayed in token details modal$/, async () => {
+  await tokensPageAssert.seePriceFetchExpiredErrorMessageInTokenDetailsScreen();
 });

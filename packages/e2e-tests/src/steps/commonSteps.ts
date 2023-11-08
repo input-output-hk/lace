@@ -13,7 +13,11 @@ import localStorageManager from '../utils/localStorageManager';
 import networkManager from '../utils/networkManager';
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
-import { cleanBrowserStorage } from '../utils/browserStorage';
+import {
+  changeFiatPriceFetchedTimeInBrowserStorage,
+  cleanBrowserStorage,
+  deleteFiatPriceFromBrowserStorage
+} from '../utils/browserStorage';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
@@ -26,6 +30,7 @@ import LocalStorageAssert from '../assert/localStorageAssert';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import menuMainExtended from '../elements/menuMainExtended';
 import { browser } from '@wdio/globals';
+import tokensPageAssert from '../assert/tokensPageAssert';
 import faqPageAssert from '../assert/faqPageAssert';
 import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
@@ -149,11 +154,19 @@ When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' 
 });
 
 When(
-  /^I enable network interception to fail request: "([^"]*)" with error (\d*)$/,
+  /^I enable network interception to finish and fail request: "([^"]*)" with error (\d*)$/,
   async (urlPattern: string, errorCode: number) => {
-    await networkManager.failResponse(urlPattern, errorCode);
+    await networkManager.finishWithFailResponse(urlPattern, errorCode);
   }
 );
+
+When(/^I enable network interception to fail request: "([^"]*)"$/, async (urlPattern: string) => {
+  await networkManager.failRequest(urlPattern);
+});
+
+Then(/^I disable network interception$/, async () => {
+  await networkManager.closeOpenedCdpSessions();
+});
 
 When(/^I click outside the drawer$/, async () => {
   await new CommonDrawerElements().areaOutsideDrawer.click();
@@ -218,6 +231,18 @@ Then(/^I switch to window with (Lace|DApp)$/, async (window: 'Lace' | 'DApp') =>
   await (window === 'Lace' ? switchToWindowWithLace() : DAppConnectorPageObject.switchToTestDAppWindow());
 });
 
+Given(/^I delete fiat price from local storage$/, async () => {
+  await deleteFiatPriceFromBrowserStorage();
+});
+
+Given(/^ADA fiat price has been fetched$/, async () => {
+  await tokensPageAssert.assertFiatPricesAreInLocalStorage();
+});
+
+Then(/^I (see|do not see) a horizontal scroll$/, async (shouldSee: 'see' | 'do not see') => {
+  await commonAssert.assertSeeHorizontalScroll(shouldSee === 'see');
+});
+
 When(/^I resize the window to a width of: ([^"]*) and a height of: ([^"]*)$/, async (width: number, height: number) => {
   await browser.setWindowSize(Number(width), Number(height));
 });
@@ -272,3 +297,10 @@ Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: str
 Then(/^Clipboard contains text: "([^"]*)"$/, async (expectedString: string) => {
   await commonAssert.assertClipboardContains(expectedString);
 });
+
+Given(
+  /^I (delay|advance) last fiat price fetch time in local storage by (\d+) seconds$/,
+  async (action: 'delay' | 'advance', seconds: number) => {
+    await changeFiatPriceFetchedTimeInBrowserStorage(action, seconds);
+  }
+);
