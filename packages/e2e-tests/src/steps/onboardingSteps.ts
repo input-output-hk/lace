@@ -70,12 +70,10 @@ When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back'
   const commonOnboardingElements = new CommonOnboardingElements();
   switch (button) {
     case 'Back':
-      await commonOnboardingElements.nextButton.waitForClickable();
-      await commonOnboardingElements.backButton.click();
+      await commonOnboardingElements.clickOnBackButton();
       break;
     case 'Next':
-      await commonOnboardingElements.nextButton.waitForClickable({ timeout: 12_000 });
-      await commonOnboardingElements.nextButton.click();
+      await commonOnboardingElements.clickOnNextButton();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
@@ -209,7 +207,7 @@ Then(/^"Connect Hardware Wallet" page is displayed$/, async () => {
   await OnboardingConnectHWPageAssert.assertSeeConnectHardwareWalletPage();
 });
 
-Then(/^I click trezor wallet icon$/, async () => {
+Then(/^I click Trezor wallet icon$/, async () => {
   await OnboardingConnectHardwareWalletPage.trezorButton.click();
 });
 

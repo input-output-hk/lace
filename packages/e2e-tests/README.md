@@ -73,5 +73,5 @@ UI-mapped gherkin tests for the Lace browser extension
 
 - run docker image locally <https://github.com/input-output-hk/lace-hw-testing-toolkit.git>
 - After starting docker image (info should be displayed - `⚡️ Trezor Device Manipulation API is running at http://localhost:8000`)
-  test need to be triggered in 60 sec because emulator shutting down device if there is no action  
-  (will be improved in followup tickets by starting emulator trough API)
+  Tests need to be triggered in 60 sec because emulator shuts down device if there is no action  
+  (will be improved in follow-up tickets by starting emulator trough API)
