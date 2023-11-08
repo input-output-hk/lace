@@ -4,6 +4,8 @@ import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import { ParsedCSSValue } from 'webdriverio';
 import extensionUtils from '../utils/utils';
+import onboardingPageObject from '../pageobject/onboardingPageObject';
+import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 
 class TopNavigationAssert {
   private readonly CSS_COLOR = 'color';
@@ -85,6 +87,9 @@ class TopNavigationAssert {
   }
 
   async assertWalletIsInSyncedStatus() {
+    await onboardingPageObject.waitUntilLoaderDisappears();
+    await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+    await settingsExtendedPageObject.closeWalletSyncedToast();
     await this.assertLogoPresent();
     await MenuHeader.menuButton.waitForDisplayed();
     await MenuHeader.menuButton.click();

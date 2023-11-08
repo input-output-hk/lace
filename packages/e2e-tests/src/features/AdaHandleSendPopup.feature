@@ -2,8 +2,8 @@
 Feature: ADA handle - popup view
 
   Background:
-    Given I am on NFTs popup page
-    And Wallet is synced
+    Given Wallet is synced
+    And I am on NFTs popup page
     And I use a single wallet with "$handletosend" NFT in popup mode
 
   @LW-8808 @Pending
