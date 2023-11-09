@@ -1,6 +1,11 @@
 import { Translations } from '../types';
 
 export const en: Translations = {
+  'activity.rewardsChart.all': 'All',
+  'activity.rewardsChart.epochs': 'Epochs',
+  'activity.rewardsChart.last': 'Last',
+  'activity.rewardsChart.rewards': 'Rewards',
+  'activity.rewardsChart.title': 'Rewards',
   'activity.rewardsHistory.noStakingActivityYet': 'No staking activity yet.',
   'activity.rewardsHistory.title': 'History',
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',

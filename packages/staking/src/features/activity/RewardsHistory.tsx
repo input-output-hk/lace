@@ -15,7 +15,7 @@ export const RewardsHistory = ({ groupedRewardsActivities, walletActivitiesStatu
 
   return (
     <>
-      <Box mb="$16">
+      <Box mt="$48" mb="$16">
         <Text.SubHeading>{t('activity.rewardsHistory.title')}</Text.SubHeading>
       </Box>
       <Skeleton loading={walletActivitiesStatus !== StateStatus.LOADED}>
