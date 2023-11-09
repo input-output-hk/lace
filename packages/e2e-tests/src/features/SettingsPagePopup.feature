@@ -134,6 +134,7 @@ Feature: General Settings - Popup View
     And I see current network: "Preprod" name in "About Lace" widget
     And I close the drawer by clicking back button
     When I switch network to: "Preview" in popup mode
+    And Wallet is synced
     And I click on About component
     Then I see current network: "Preview" name in "About Lace" widget
 
@@ -144,6 +145,7 @@ Feature: General Settings - Popup View
     And I see current network: "Mainnet" name in "About Lace" widget
     And I close the drawer by clicking back button
     When I switch network to: "Preview" in popup mode
+    And Wallet is synced
     And I click on About component
     Then I see current network: "Preview" name in "About Lace" widget
 
@@ -199,9 +201,11 @@ Feature: General Settings - Popup View
     Given I have 3 addresses in my address book in popup mode
     And I see address count: 3
     When I switch network to: "Preview" in popup mode
+    And Wallet is synced
     And  I open address book in popup mode
     And I see address count: 0
     When I switch network to: "Preprod" in popup mode
+    And Wallet is synced
     And  I open address book in popup mode
     Then I see address count: 3
 
