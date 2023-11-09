@@ -23,7 +23,7 @@ export default {
   subcomponents: {
     Profile,
     Details,
-  },
+  } as unknown as Meta['subcomponents'],
   decorators: [page({ title: 'Flow card', subtitle })],
 } as Meta;
 

@@ -1,16 +1,30 @@
-const { VanillaExtractPlugin } = require('@vanilla-extract/webpack-plugin');
+import { join, dirname } from 'node:path';
 
-module.exports = {
+import type { StorybookConfig } from '@storybook/react-webpack5';
+import { VanillaExtractPlugin } from '@vanilla-extract/webpack-plugin';
+
+/**
+ * This function is used to resolve the absolute path of a package.
+ * It is needed in projects that use Yarn PnP or are set up within a monorepo.
+ */
+const getAbsolutePath = (value: string): any =>
+  dirname(require.resolve(join(value, 'package.json')));
+
+const config: StorybookConfig = {
   stories: ['../src/**/*.stories.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: [
-    '@storybook/addon-links',
-    '@storybook/addon-essentials',
-    '@storybook/addon-interactions',
-    'storybook-addon-pseudo-states',
+    getAbsolutePath('@storybook/addon-links'),
+    getAbsolutePath('@storybook/addon-essentials'),
+    getAbsolutePath('@storybook/addon-interactions'),
+    getAbsolutePath('storybook-addon-pseudo-states'),
   ],
-  framework: '@storybook/react',
+  framework: {
+    name: getAbsolutePath('@storybook/react-webpack5'),
+    options: {},
+  },
   webpackFinal: config => {
-    config.plugins = [new VanillaExtractPlugin(), ...config.plugins];
+    // @ts-expect-error VanillaExtractPlugin
+    config.plugins = [new VanillaExtractPlugin(), ...(config.plugins || [])];
 
     // HMR doesn't work with vanilla-extract
     // https://github.com/vanilla-extract-css/vanilla-extract/issues/905#issuecomment-1307664487
@@ -41,12 +55,14 @@ module.exports = {
       };
     }
 
-    const fileLoaderRule = config.module.rules.find(rule =>
-      rule.test?.test('.svg'),
+    const fileLoaderRule = config.module?.rules?.find(rule =>
+      //@ts-expect-error storybook webpack config
+      rule!.test?.test('.svg'),
     );
+    //@ts-expect-error storybook webpack config
     fileLoaderRule.exclude = /\.svg$/;
 
-    config.module.rules.push({
+    config.module?.rules?.push({
       test: /\.svg$/i,
       issuer: /\.[jt]sx?$/,
       use: [
@@ -60,18 +76,13 @@ module.exports = {
       ],
     });
 
-    config.resolve.extensions.push('.svg');
+    config.resolve?.extensions?.push('.svg');
 
     return config;
   },
-  core: {
-    builder: 'webpack5',
-    options: {
-      lazyCompilation: true,
-      fsCache: true,
-    },
-  },
-  features: {
-    interactionsDebugger: true,
+  docs: {
+    autodocs: true,
   },
 };
+
+export default config;

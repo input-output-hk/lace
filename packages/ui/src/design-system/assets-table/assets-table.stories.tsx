@@ -25,7 +25,7 @@ export default {
     TokenProfile,
     TokenAmount,
     MarketPrice,
-  },
+  } as unknown as Meta['subcomponents'],
   decorators: [page({ title: 'Assets table', subtitle })],
   argTypes: {
     priceTrend: {

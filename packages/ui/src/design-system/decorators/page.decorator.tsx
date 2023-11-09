@@ -1,7 +1,6 @@
 import React from 'react';
 
-import type { DecoratorFunction } from '@storybook/csf/dist/story';
-import type { ReactFramework } from '@storybook/react';
+import type { DecoratorFunction } from '@storybook/types';
 
 import { PageProvider } from './page-provider.component';
 import { Page } from './page.component';
@@ -10,12 +9,10 @@ import type { PageProps } from './page.component';
 
 export const page = (
   props: Readonly<Omit<PageProps, 'children'>>,
-): DecoratorFunction<ReactFramework> => {
-  const pageDecorator: DecoratorFunction<ReactFramework> = Story => (
+): DecoratorFunction => {
+  const pageDecorator: DecoratorFunction = Story => (
     <PageProvider>
-      <Page {...props}>
-        <Story />
-      </Page>
+      <Page {...props}>{Story()}</Page>
     </PageProvider>
   );
 
