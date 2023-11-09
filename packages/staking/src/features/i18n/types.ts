@@ -23,6 +23,7 @@ type KeysStructure = {
     rewardsChart: {
       title: '';
       epochs: '';
+      epoch: '';
       last: '';
       all: '';
       rewards: '';

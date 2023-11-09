@@ -1,23 +1,33 @@
 import { ControlButton, Flex, Text } from '@lace/ui';
+import { useTranslation } from 'react-i18next';
 import styles from './EpochsSwitch.module.scss';
 
 // eslint-disable-next-line no-magic-numbers
 const EPOCHS_OPTIONS = [5, 15];
 
-export type EpochsSwitchProps = {
+type EpochsSwitchProps = {
   epochsCount: number;
   setEpochsCount: (epochsCount: number) => void;
 };
 
-export const EpochsSwitch = ({ epochsCount, setEpochsCount }: EpochsSwitchProps) => (
-  <Flex gap="$8" alignItems="center">
-    <Text.Body.Normal>Epochs:</Text.Body.Normal>
-    <Flex p="$8" gap="$8" alignItems="center" className={styles.buttonsBackground}>
-      {EPOCHS_OPTIONS.map((option, i) => {
-        const activeOption = epochsCount === option;
-        const Component = activeOption ? ControlButton.Filled : ControlButton.Outlined;
-        return <Component key={i} label={`Last ${option}`} onClick={() => setEpochsCount(option)} />;
-      })}
+export const EpochsSwitch = ({ epochsCount, setEpochsCount }: EpochsSwitchProps) => {
+  const { t } = useTranslation();
+  return (
+    <Flex gap="$8" alignItems="center">
+      <Text.Body.Normal>{t('activity.rewardsChart.epochs')}:</Text.Body.Normal>
+      <Flex p="$8" gap="$8" alignItems="center" className={styles.buttonsBackground}>
+        {EPOCHS_OPTIONS.map((option, i) => {
+          const activeOption = epochsCount === option;
+          const Component = activeOption ? ControlButton.Filled : ControlButton.Outlined;
+          return (
+            <Component
+              key={i}
+              label={`${t('activity.rewardsChart.last')} ${option}`}
+              onClick={() => setEpochsCount(option)}
+            />
+          );
+        })}
+      </Flex>
     </Flex>
-  </Flex>
-);
+  );
+};

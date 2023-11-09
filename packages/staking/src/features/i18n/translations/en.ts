@@ -2,6 +2,7 @@ import { Translations } from '../types';
 
 export const en: Translations = {
   'activity.rewardsChart.all': 'All',
+  'activity.rewardsChart.epoch': 'Epoch',
   'activity.rewardsChart.epochs': 'Epochs',
   'activity.rewardsChart.last': 'Last',
   'activity.rewardsChart.rewards': 'Rewards',
