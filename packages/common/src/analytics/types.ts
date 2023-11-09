@@ -90,6 +90,7 @@ export enum PostHogAction {
   SendTransactionDataReviewTransactionClick = 'send | transaction data | review transaction | click',
   SendTransactionSummaryConfirmClick = 'send | transaction summary | confirm | click',
   SendTransactionConfirmationConfirmClick = 'send | transaction confirmation | confirm | click',
+  SendTransactionConfirmed = 'send | transaction confirmed',
   SendAllDoneView = 'send | all done | view',
   SendAllDoneViewTransactionClick = 'send | all done | view transaction | click',
   SendAllDoneCloseClick = 'send | all done | close | click',

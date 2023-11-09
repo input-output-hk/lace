@@ -43,6 +43,7 @@ import { useAddressBookContext, withAddressBookContext } from '@src/features/add
 import { AddressBookSchema } from '@lib/storage';
 import { getAddressToSave } from '@src/utils/validators';
 import { useAnalyticsContext } from '@providers';
+import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 
 const { SendTransaction: Events, AddressBook } = AnalyticsEventNames;
 
@@ -195,6 +196,11 @@ export const Footer = withAddressBookContext(
     const signAndSubmitTransaction = useCallback(async () => {
       const { tx } = await builtTxData.tx.sign();
       await inMemoryWallet.submitTx(tx);
+      txSubmitted$.next({
+        id: tx.id.toString(),
+        date: new Date().toString(),
+        creationType: TxCreationType.Internal
+      });
     }, [builtTxData, inMemoryWallet]);
 
     const handleVerifyPass = useCallback(async () => {
