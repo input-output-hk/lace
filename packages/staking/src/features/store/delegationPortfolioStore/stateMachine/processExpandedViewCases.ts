@@ -16,6 +16,7 @@ import {
   DrawerFailure,
   GoToBrowsePools,
   GoToOverview,
+  ManageDelegationFromDetails,
   ManagePortfolio,
   NewPortfolioConfirmationCommand,
   NewPortfolioFailureCommand,
@@ -192,6 +193,15 @@ export const processExpandedViewCases: Handler = (params) =>
             ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
             viewedStakePool: undefined,
           })),
+          ManageDelegationFromDetails: handler<ManageDelegationFromDetails, StatePoolDetails, StatePortfolioManagement>(
+            ({ state }) => ({
+              ...state,
+              activeDelegationFlow: DelegationFlow.PortfolioManagement,
+              activeDrawerStep: DrawerManagementStep.Preferences,
+              draftPortfolio: currentPortfolioToDraft(state.currentPortfolio),
+              viewedStakePool: undefined,
+            })
+          ),
           SelectPoolFromDetails: handler<SelectPoolFromDetails, StatePoolDetails, StateBrowsePools>(
             ({ state, command: { data } }) => ({
               ...state,

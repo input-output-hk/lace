@@ -96,6 +96,10 @@ export type DrawerFailure = {
   type: 'DrawerFailure';
 };
 
+export type ManageDelegationFromDetails = {
+  type: 'ManageDelegationFromDetails';
+};
+
 export type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools;
 
 export type BrowsePoolsCommand =
@@ -108,7 +112,12 @@ export type BrowsePoolsCommand =
 
 export type CurrentPoolDetailsCommand = CancelDrawer;
 
-export type PoolDetailsCommand = CancelDrawer | SelectPoolFromDetails | UnselectPoolFromDetails | BeginSingleStaking;
+export type PoolDetailsCommand =
+  | CancelDrawer
+  | SelectPoolFromDetails
+  | UnselectPoolFromDetails
+  | BeginSingleStaking
+  | ManageDelegationFromDetails;
 
 export type PortfolioManagementPreferencesCommand =
   | CancelDrawer
