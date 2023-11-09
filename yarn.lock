@@ -5404,7 +5404,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/core@npm:0.21.0, @cardano-sdk/core@npm:^0.21.0, @cardano-sdk/core@npm:~0.21.0":
+"@cardano-sdk/core@npm:0.21.0, @cardano-sdk/core@npm:~0.21.0":
   version: 0.21.0
   resolution: "@cardano-sdk/core@npm:0.21.0"
   dependencies:
@@ -8026,7 +8026,7 @@ __metadata:
   resolution: "@lace/staking@workspace:packages/staking"
   dependencies:
     "@ant-design/icons": ^4.7.0
-    "@cardano-sdk/core": ^0.21.0
+    "@cardano-sdk/core": 0.21.0
     "@cardano-sdk/input-selection": 0.12.4
     "@cardano-sdk/tx-construction": 0.14.2
     "@cardano-sdk/util": 0.14.2
