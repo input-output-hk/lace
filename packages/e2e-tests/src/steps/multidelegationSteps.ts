@@ -293,6 +293,7 @@ Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'ext
   await TokensPageObject.waitUntilCardanoTokenLoaded();
   await TokensPageObject.saveTokenBalance('Cardano');
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   await mainMenuPageObject.navigateToSection('Staking', mode);
   const cardanoBalance = String(await TokensPageObject.loadTokenBalance('Cardano'));
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
@@ -306,4 +307,12 @@ Then(/^I click "Get Started" step (1|2) link$/, async (linkNumber: '1' | '2') =>
 
 Given(/^I click "Expand view" on Start Staking page$/, async () => {
   await StartStakingPage.clickExpandedViewBannerButton();
+});
+
+When(/^I wait for stake pool list to be populated$/, async () => {
+  await MultidelegationPage.waitForStakePoolListToLoad();
+});
+
+Then(/^Each stake pool list item contains: logo, name, ticker, ROS and saturation$/, async () => {
+  await MultidelegationPageAssert.assertSeeStakePoolRows();
 });

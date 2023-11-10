@@ -2,8 +2,8 @@
 Feature: Send NFT - Popup View - E2E
 
   Background:
-    Given I am on NFTs popup page
-    And Wallet is synced
+    Given Wallet is synced
+    And I am on NFTs popup page
     And I use a single wallet with "Ibilecoin" NFT in popup mode
 
   @LW-2514

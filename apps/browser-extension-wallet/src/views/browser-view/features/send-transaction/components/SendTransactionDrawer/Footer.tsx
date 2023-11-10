@@ -30,7 +30,9 @@ import {
   MatomoEventActions,
   MatomoEventCategories,
   AnalyticsEventNames,
-  PostHogAction
+  PostHogAction,
+  TxCreationType,
+  TX_CREATION_TYPE_KEY
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -105,7 +107,10 @@ export const Footer = withAddressBookContext(
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
     const sendEventToPostHog = (evtAction: PostHogAction) =>
-      analytics.sendEventToPostHog(evtAction, { trigger_point: triggerPoint });
+      analytics.sendEventToPostHog(evtAction, {
+        trigger_point: triggerPoint,
+        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+      });
 
     const sendAnalytics = useCallback(() => {
       switch (currentSection.currentSection) {

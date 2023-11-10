@@ -158,7 +158,9 @@
     "detail.blockInfo": "Block information"
   },
   "announcement.title.badge": "New",
-  "announcement.title.text": "release notes",
+  "announcement.title.text": "Introducing {{version}}",
+  "announcement.description.text": "See our latest updates for you",
+  "announcement.description.linktext": "here",
   "announcement.cta": "Got it",
   "walletSetup": {
     "backModal": {
@@ -799,9 +801,9 @@
         "authorizedDApps.title": "Authorized DApps",
         "authorizedDApps.description": "See and manage authorized DApps",
         "walletSync": {
-          "description": "Update or sync your wallet",
+          "description": "Sync new addresses of your HD wallet. This may be needed if you're using other HD wallets at the same time as Lace",
           "ctaLabel": "Sync",
-          "title": "Wallet sync"
+          "title": "HD wallet sync"
         }
       },
       "preferences": {
@@ -971,9 +973,9 @@
       "enterNFTGallery": "Enter the NFT gallery with Lace",
       "buyAnNft": "How to buy an NFT?",
       "stakingAndDelegation": "What are staking & delegation?",
-      "choosingAStakePool": "Which stake pool should I choose?",
-      "activeStake": "What is an active stake?",
-      "stakingMadeEasy": "Staking made easy with Lace"
+      "howManyPools": "How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature?",
+      "ledgerSupport": "Do Ledger hardware wallets support multi-staking?",
+      "stakeDistribution": "Does stake distribution remain the same?"
     }
   },
   "migrations": {

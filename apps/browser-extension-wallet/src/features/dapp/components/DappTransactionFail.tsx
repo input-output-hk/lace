@@ -1,12 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@lace/common';
+import { Button, PostHogAction } from '@lace/common';
 import Fail from '../../../assets/icons/exclamation-circle.svg';
 import styles from './Layout.module.scss';
 import { Image } from 'antd';
+import { useAnalyticsContext } from '@providers';
+import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const DappTransactionFail = (): React.ReactElement => {
   const { t } = useTranslation();
+  const analytics = useAnalyticsContext();
+  const onClose = async () => {
+    await analytics?.sendEventToPostHog(PostHogAction.SendSomethingWentWrongCancelClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+    window.close();
+  };
+
+  useEffect(() => {
+    analytics?.sendEventToPostHog(PostHogAction.SendSomethingWentWrongView, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+  }, [analytics]);
 
   return (
     <div data-testid="dapp-sign-tx-fail" className={styles.noWalletContainer}>
@@ -16,7 +31,7 @@ export const DappTransactionFail = (): React.ReactElement => {
         <div className={styles.description}>{t('dapp.sign.failure.description')}</div>
       </div>
       <div className={styles.footer}>
-        <Button onClick={() => window.close()} color="secondary" className={styles.footerBtn}>
+        <Button onClick={onClose} color="secondary" className={styles.footerBtn}>
           {t('general.button.cancel')}
         </Button>
       </div>

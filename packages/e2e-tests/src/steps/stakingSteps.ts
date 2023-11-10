@@ -18,14 +18,6 @@ import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDr
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import StakingExitModal from '../elements/staking/StakingExitModal';
 
-Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
-  await stakingPageAssert.assertSeeTitleWithCounter();
-});
-
-Then(/^I see Staking title displayed$/, async () => {
-  await stakingPageAssert.assertSeeTitle();
-});
-
 Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
@@ -134,11 +126,6 @@ When(/^I click on the "(.*)" column header$/, async (listHeader: string) => {
   const stakePoolListItem = new StakePoolListItem();
   await webTester.waitUntilSeeElement(stakePoolListItem.container(), 60_000);
   await stakingExtendedPageObject.clickStakePoolListHeader(listHeader);
-});
-
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-Then(/^Each stake pool list item contains:$/, async (_ignored: string) => {
-  await stakingPageAssert.assertSeeStakePoolRows();
 });
 
 Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (metadata: 'with' | 'without') => {
@@ -258,8 +245,4 @@ Then(/^I see (ADA|tADA) in the cost column$/, async (expectedTicker: 'ADA' | 'tA
 
 Then(/^I see (ADA|tADA) in current staked pool$/, async (expectedTicker: 'ADA' | 'tADA') => {
   await stakingPageAssert.assertSeeTickerInCurrentStakedPool(expectedTicker);
-});
-
-Then(/^I wait for stake pool table item to be loaded$/, async () => {
-  await stakingPageAssert.waitRowsToLoad();
 });

@@ -125,8 +125,10 @@ export const MultiDelegationStaking = (): JSX.Element => {
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         multidelegationFirstVisitSincePortfolioPersistence,
-        triggerMultidelegationFirstVisitSincePortfolioPersistence: () =>
-          setMultidelegationFirstVisitSincePortfolioPersistence(false),
+        triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
+          setMultidelegationFirstVisit(false);
+          setMultidelegationFirstVisitSincePortfolioPersistence(false);
+        },
         walletAddress,
         currentChain
       }}
