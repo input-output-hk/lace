@@ -801,9 +801,9 @@
         "authorizedDApps.title": "Authorized DApps",
         "authorizedDApps.description": "See and manage authorized DApps",
         "walletSync": {
-          "description": "Update or sync your wallet",
+          "description": "Sync new addresses of your HD wallet. This may be needed if you're using other HD wallets at the same time as Lace",
           "ctaLabel": "Sync",
-          "title": "Wallet sync"
+          "title": "HD wallet sync"
         }
       },
       "preferences": {
