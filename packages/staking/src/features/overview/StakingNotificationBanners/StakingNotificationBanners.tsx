@@ -40,13 +40,13 @@ export const StakingNotificationBanners = ({ popupView, notifications }: Staking
         description={t('overview.banners.pendingFirstDelegation.message')}
       />
     ),
-    pendingPoolMigration: (
+    pendingPortfolioModification: (
       <Banner
         popupView={popupView}
         withIcon
         customIcon={<InfoIcon className={styles.bannerInfoIcon} />}
-        message={t('overview.banners.pendingPoolMigration.title')}
-        description={t('overview.banners.pendingPoolMigration.message')}
+        message={t('overview.banners.pendingPortfolioModification.title')}
+        description={t('overview.banners.pendingPortfolioModification.message')}
       />
     ),
     poolRetiredOrSaturated: (

@@ -15,7 +15,7 @@ export const getCurrentStakingNotifications = ({
   const pendingDelegationTransaction = hasPendingDelegationTransaction(walletActivities);
 
   if (pendingDelegationTransaction) {
-    return currentPortfolio.length === 0 ? ['pendingFirstDelegation'] : ['pendingPoolMigration'];
+    return currentPortfolio.length === 0 ? ['pendingFirstDelegation'] : ['pendingPortfolioModification'];
   }
 
   return [
