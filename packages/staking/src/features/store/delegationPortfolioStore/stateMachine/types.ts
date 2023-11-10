@@ -89,6 +89,9 @@ export type StateOverview = MakeState<{
 export type StateActivity = MakeState<{
   activeDelegationFlow: DelegationFlow.Activity;
   activeDrawerStep: undefined;
+  draftPortfolio: undefined;
+  pendingSelectedPortfolio: undefined;
+  viewedStakePool: undefined;
 }>;
 
 export type StateCurrentPoolDetails = MakeState<{
