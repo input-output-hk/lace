@@ -1,12 +1,14 @@
-import { Card, PIE_CHART_DEFAULT_COLOR_SET } from '@lace/ui';
+import { Card } from '@lace/ui';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { GRAYSCALE_PALETTE, maxPoolsIterator } from './const';
+import type { RewardsByEpoch } from './useRewardsByEpoch';
 import { RewardsChartTooltip } from './RewardsChartTooltip';
-import { usePoolInPortfolioPresence } from './usePoolInPortfolioPresence';
-import { RewardsByEpoch } from './useRewardsByEpoch';
+import { useRewardsChartPoolsColorMapper } from './useRewardsChartPoolsColorMapper';
 
 export const RewardsChart = ({ chartData }: { chartData: RewardsByEpoch }) => {
-  const { checkIfPoolIsInPortfolio } = usePoolInPortfolioPresence();
+  const poolColorMapper = useRewardsChartPoolsColorMapper(chartData);
+  // eslint-disable-next-line unicorn/no-array-reduce
+  const maxPoolsPerEpochCount = chartData.reduce((acc, epochRewards) => Math.max(acc, epochRewards.rewards.length), 0);
+
   return (
     <Card.Outlined>
       <ResponsiveContainer width="100%" aspect={2.4} height="auto">
@@ -23,14 +25,11 @@ export const RewardsChart = ({ chartData }: { chartData: RewardsByEpoch }) => {
         >
           <XAxis dataKey="spendableEpoch" tickLine={false} axisLine={false} tickMargin={16} />
           <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value} ADA`} />
-          <Tooltip cursor={false} content={<RewardsChartTooltip />} />
-          {maxPoolsIterator.map((_, i) => (
+          <Tooltip cursor={false} content={<RewardsChartTooltip poolColorMapper={poolColorMapper} />} />
+          {Array.from({ length: maxPoolsPerEpochCount }).map((_, i) => (
             <Bar key={i} dataKey={`rewards[${i}].rewards`} stackId="a" maxBarSize={24}>
               {chartData.map((entry, j) => {
-                const fill =
-                  entry.rewards[i]?.poolId && checkIfPoolIsInPortfolio(entry.rewards[i]?.poolId)
-                    ? PIE_CHART_DEFAULT_COLOR_SET[i]
-                    : GRAYSCALE_PALETTE[i];
+                const fill = poolColorMapper(entry.rewards[i]?.poolId);
                 return <Cell key={`cell-${j}`} fill={fill} />;
               })}
             </Bar>
