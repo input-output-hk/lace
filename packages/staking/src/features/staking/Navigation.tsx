@@ -73,17 +73,13 @@ export const Navigation = ({ children }: NavigationProps) => {
           tabIndex={0}
           highlightWidth="half"
         />
-        {process.env.USE_MULTI_DELEGATION_STAKING_ACTIVITY === 'true' ? (
-          <SubNavigation.Item
-            name={t('root.nav.activityTitle')}
-            value={Page.activity}
-            data-testid="activity-tab"
-            tabIndex={0}
-            highlightWidth="half"
-          />
-        ) : (
-          <></>
-        )}
+        <SubNavigation.Item
+          name={t('root.nav.activityTitle')}
+          value={Page.activity}
+          data-testid="activity-tab"
+          tabIndex={0}
+          highlightWidth="half"
+        />
       </SubNavigation.Root>
       {children(activePage)}
     </>
