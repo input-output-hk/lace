@@ -1,8 +1,8 @@
 import { Card } from '@lace/ui';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import type { RewardsByEpoch } from './useRewardsByEpoch';
+import type { RewardsByEpoch } from './hooks/useRewardsByEpoch';
+import { useRewardsChartPoolsColorMapper } from './hooks/useRewardsChartPoolsColorMapper';
 import { RewardsChartTooltip } from './RewardsChartTooltip';
-import { useRewardsChartPoolsColorMapper } from './useRewardsChartPoolsColorMapper';
 
 export const RewardsChart = ({ chartData }: { chartData: RewardsByEpoch }) => {
   const poolColorMapper = useRewardsChartPoolsColorMapper(chartData);

@@ -1,9 +1,9 @@
 import { Flex, Text } from '@lace/ui';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EpochsSwitch } from './EpochsSwitch';
+import { EpochsSwitch } from '../EpochsSwitch';
+import { useRewardsByEpoch } from './hooks/useRewardsByEpoch';
 import { RewardsChart } from './RewardsChart';
-import { useRewardsByEpoch } from './useRewardsByEpoch';
 
 const DEFAULT_LAST_EPOCHS = 5;
 

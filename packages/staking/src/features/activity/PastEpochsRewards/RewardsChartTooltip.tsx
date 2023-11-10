@@ -2,8 +2,8 @@ import { Card, Flex, Text } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import { TooltipProps } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
+import { useRewardsChartPoolsColorMapper } from './hooks/useRewardsChartPoolsColorMapper';
 import { PoolIndicator } from './PoolIndicator';
-import { useRewardsChartPoolsColorMapper } from './useRewardsChartPoolsColorMapper';
 
 export const RewardsChartTooltip = ({
   active,

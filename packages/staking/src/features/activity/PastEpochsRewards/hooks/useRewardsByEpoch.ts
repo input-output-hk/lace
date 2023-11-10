@@ -6,13 +6,13 @@ import { useOutsideHandles } from 'features/outside-handles-provider';
 import { groupBy, sortBy, takeLast, uniqBy } from 'rambda';
 import { useEffect, useState } from 'react';
 
-export type RewardWithMetadata = Omit<Reward, 'rewards' | 'epoch'> & {
+type RewardWithPoolMetadata = Omit<Reward, 'rewards' | 'epoch'> & {
   metadata: Cardano.StakePoolMetadata | undefined;
   spendableEpoch: Cardano.EpochNo;
-  rewards: string; // TODO move the transformation to the chart
+  rewards: string;
 };
 
-export type RewardsByEpoch = { spendableEpoch: Cardano.EpochNo; rewards: RewardWithMetadata[] }[];
+export type RewardsByEpoch = { spendableEpoch: Cardano.EpochNo; rewards: RewardWithPoolMetadata[] }[];
 
 export type UseRewardsByEpochProps = {
   epochsCount: number;
