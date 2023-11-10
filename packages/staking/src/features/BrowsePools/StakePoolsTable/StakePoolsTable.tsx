@@ -23,17 +23,6 @@ const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
 const searchDebounce = 300;
 const defaultFetchLimit = 10;
 
-// imitates apps/browser-extension-wallet/src/stores/slices/stake-pool-search-slice.ts
-const naiveSelectedPoolsSearch = (searchString: string, pools: Wallet.Cardano.StakePool[]) => {
-  const lowerCaseSearchString = searchString.toLowerCase();
-  return pools.filter(
-    (pool) =>
-      pool.metadata?.name.toLowerCase().includes(lowerCaseSearchString) ||
-      pool.metadata?.ticker.toLowerCase().includes(lowerCaseSearchString) ||
-      pool.id.toLowerCase() === lowerCaseSearchString
-  );
-};
-
 export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
@@ -42,7 +31,9 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
   const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
   const [skip, setSkip] = useState<number>(0);
-  const selectedPortfolio = useDelegationPortfolioStore((store) => store.selectedPortfolio);
+  const selectedPortfolioStakePools = useDelegationPortfolioStore((store) =>
+    store.selectedPortfolio.map(({ stakePool }) => stakePool)
+  );
   const {
     walletStoreWalletUICardanoCoin: cardanoCoin,
     currentChain,
@@ -86,19 +77,12 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
 
   useEffect(() => {
     // Update stake pool list and new offset position
-    setStakePools((prevPools: Wallet.StakePoolSearchResults['pageResults']) => {
-      const selectedPortfolioStakePools = selectedPortfolio.map((sp) => sp.stakePool);
-      const combinedStakePools = [
-        ...(searchValue
-          ? naiveSelectedPoolsSearch(searchValue, selectedPortfolioStakePools)
-          : selectedPortfolioStakePools),
-        ...(searchSkip === 0 ? pageResults : [...prevPools, ...pageResults]),
-      ];
-      return uniqBy(combinedStakePools, (p) => p.id);
-    });
+    setStakePools((prevPools: Wallet.StakePoolSearchResults['pageResults']) =>
+      searchSkip === 0 ? pageResults : [...prevPools, ...pageResults]
+    );
     setSkip(searchSkip);
     setIsLoadingList(false);
-  }, [pageResults, searchSkip, searchValue, selectedPortfolio]);
+  }, [pageResults, searchSkip]);
 
   const onSearch = (searchString: string) => {
     setIsSearching(true);
@@ -109,9 +93,30 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     setSearchValue(searchString);
   };
 
+  // imitates apps/browser-extension-wallet/src/stores/slices/stake-pool-search-slice.ts
+  const naiveSelectedPoolsSearch = (searchString: string, pools: Wallet.Cardano.StakePool[]) => {
+    const lowerCaseSearchString = searchString.toLowerCase();
+    return pools.filter(
+      (pool) =>
+        pool.metadata?.name.toLowerCase().includes(lowerCaseSearchString) ||
+        pool.metadata?.ticker.toLowerCase().includes(lowerCaseSearchString) ||
+        pool.id.toLowerCase() === lowerCaseSearchString
+    );
+  };
+
+  const combinedUnique = useMemo(() => {
+    const combinedStakePools = [
+      ...(searchValue
+        ? naiveSelectedPoolsSearch(searchValue, selectedPortfolioStakePools)
+        : selectedPortfolioStakePools),
+      ...stakePools,
+    ];
+    return uniqBy(combinedStakePools, (p) => p.id);
+  }, [stakePools, selectedPortfolioStakePools, searchValue]);
+
   const list = useMemo(
     () =>
-      stakePools.map((pool) => {
+      combinedUnique.map((pool) => {
         const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
 
@@ -122,7 +127,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
           stakePool: pool,
         };
       }) || [],
-    [stakePools, cardanoCoin]
+    [combinedUnique, cardanoCoin]
   );
 
   return (
