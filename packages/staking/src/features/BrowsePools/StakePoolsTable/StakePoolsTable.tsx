@@ -2,6 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
+import intersectionBy from 'lodash/intersectionBy';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
@@ -103,9 +104,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
        *   but this seems like the best solution for now.
        */
       ...(searchValue
-        ? selectedPortfolioStakePools.filter((pool) =>
-            stakePools.find((foundStakePool) => foundStakePool.id === pool.id)
-          )
+        ? intersectionBy(selectedPortfolioStakePools, stakePools, (p) => p.id)
         : selectedPortfolioStakePools),
       ...stakePools,
     ];
