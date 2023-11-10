@@ -2,7 +2,6 @@ import { Wallet } from '@lace/cardano';
 import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
-import intersectionBy from 'lodash/intersectionBy';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
@@ -93,18 +92,21 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     setSearchValue(searchString);
   };
 
+  // imitates apps/browser-extension-wallet/src/stores/slices/stake-pool-search-slice.ts
+  const naiveSelectedPoolsSearch = (searchString: string, pools: Wallet.Cardano.StakePool[]) => {
+    const lowerCaseSearchString = searchString.toLowerCase();
+    return pools.filter(
+      (pool) =>
+        pool.metadata?.name.toLowerCase().includes(lowerCaseSearchString) ||
+        pool.metadata?.ticker.toLowerCase().includes(lowerCaseSearchString) ||
+        pool.id.toLowerCase() === lowerCaseSearchString
+    );
+  };
+
   const combinedUnique = useMemo(() => {
     const combinedStakePools = [
-      /**
-       * If there's a search value, filter selected pools if they are in the search results.
-       * A disadvantage of this approach is that if a current pool is not yet in the search results (it's further down in results),
-       *   it will not be shown in the list. The confusing part about this is that if the user scrolls down long enough,
-       *   the pool will appear in the upper selected list.
-       * Alternative solutions include increasing the search limit / not show selected pools when searching at all,
-       *   but this seems like the best solution for now.
-       */
       ...(searchValue
-        ? intersectionBy(selectedPortfolioStakePools, stakePools, (p) => p.id)
+        ? naiveSelectedPoolsSearch(searchValue, selectedPortfolioStakePools)
         : selectedPortfolioStakePools),
       ...stakePools,
     ];
