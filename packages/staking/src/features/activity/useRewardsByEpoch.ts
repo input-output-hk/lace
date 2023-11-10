@@ -6,8 +6,9 @@ import { useOutsideHandles } from 'features/outside-handles-provider';
 import { groupBy, sortBy, takeLast, uniqBy } from 'rambda';
 import { useEffect, useState } from 'react';
 
-export type RewardWithMetadata = Reward & {
-  poolMetadata: Cardano.StakePoolMetadata | undefined;
+export type RewardWithMetadata = Omit<Reward, 'rewards'> & {
+  metadata: Cardano.StakePoolMetadata | undefined;
+  rewards: string; // TODO move the transformation to the chart
 };
 
 export type RewardsByEpoch = { epoch: number; rewards: RewardWithMetadata[] }[];
@@ -40,15 +41,17 @@ type GetRewardsByEpochProps = {
   epochsCount: number;
 };
 
-const getRewardsByEpoch = async ({ rewardsHistory, stakePoolProvider, epochsCount }: GetRewardsByEpochProps) => {
-  const uniqPoolIds = uniqBy((rewards) => rewards.poolId, rewardsHistory.all).map((reward) => reward.poolId);
-  const stakePoolsData = await getPoolInfos(uniqPoolIds as never, stakePoolProvider);
+const buildRewardsByEpoch = async ({ rewardsHistory, stakePoolProvider, epochsCount }: GetRewardsByEpochProps) => {
+  const uniqPoolIds = uniqBy((rewards) => rewards.poolId, rewardsHistory.all)
+    .map((reward) => reward.poolId)
+    .filter(Boolean) as Wallet.Cardano.PoolId[];
+  const stakePoolsData = await getPoolInfos(uniqPoolIds, stakePoolProvider);
   const rewardsHistoryWithMetadata = rewardsHistory.all.map((reward) => ({
     ...reward,
     metadata: stakePoolsData.find((poolInfo) => poolInfo.id === reward.poolId)?.metadata,
     rewards: Wallet.util.lovelacesToAdaString(reward.rewards.toString()),
   }));
-  const groupedRewards = groupBy((reward) => reward.epoch as never, rewardsHistoryWithMetadata);
+  const groupedRewards = groupBy(({ epoch }) => epoch.toString(), rewardsHistoryWithMetadata);
   const groupedRewardsArray = Object.entries(groupedRewards).map(([epoch, rewards]) => ({
     epoch: Number.parseInt(epoch),
     rewards,
@@ -63,15 +66,14 @@ export const useRewardsByEpoch = ({ epochsCount }: UseRewardsByEpochProps) => {
   const rewardsHistory = useObservable(inMemoryWallet.delegation.rewardsHistory$);
   useEffect(() => {
     if (!rewardsHistory) return;
-    const fetchRewardsByEpoch = async () => {
-      const result = await getRewardsByEpoch({
+    (async () => {
+      const result = await buildRewardsByEpoch({
         epochsCount,
         rewardsHistory,
         stakePoolProvider: walletStoreBlockchainProvider.stakePoolProvider,
       });
-      setRewardsByEpoch(result as never);
-    };
-    void fetchRewardsByEpoch();
-  }, [epochsCount, rewardsHistory]);
+      setRewardsByEpoch(result);
+    })();
+  }, [epochsCount, rewardsHistory, walletStoreBlockchainProvider]);
   return { rewardsByEpoch };
 };
