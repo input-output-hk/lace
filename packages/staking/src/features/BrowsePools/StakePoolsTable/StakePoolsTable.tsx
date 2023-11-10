@@ -2,6 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
+import uniqBy from 'lodash/uniqBy';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
@@ -110,10 +111,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
         : selectedPortfolioStakePools),
       ...stakePools,
     ];
-    const combinedUniqueIds = [...new Set(combinedStakePools.map((pool) => pool.id))];
-    return combinedUniqueIds.map((id) =>
-      combinedStakePools.find((pool) => pool.id === id)
-    ) as Wallet.Cardano.StakePool[];
+    return uniqBy(combinedStakePools, (p) => p.id);
   }, [stakePools, selectedPortfolioStakePools, searchValue]);
 
   const list = useMemo(
