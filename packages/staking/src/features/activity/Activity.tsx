@@ -11,14 +11,16 @@ export const Activity = () => {
 
   return (
     <>
-      <PastEpochsRewards />
       {walletActivitiesStatus === StateStatus.LOADED && groupedRewardsActivities.length === 0 ? (
         <NoStakingActivity />
       ) : (
-        <RewardsHistory
-          walletActivitiesStatus={walletActivitiesStatus}
-          groupedRewardsActivities={groupedRewardsActivities}
-        />
+        <>
+          <PastEpochsRewards />
+          <RewardsHistory
+            walletActivitiesStatus={walletActivitiesStatus}
+            groupedRewardsActivities={groupedRewardsActivities}
+          />
+        </>
       )}
     </>
   );
