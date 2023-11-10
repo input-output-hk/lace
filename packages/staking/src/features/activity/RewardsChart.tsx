@@ -21,7 +21,7 @@ export const RewardsChart = ({ chartData }: { chartData: RewardsByEpoch }) => {
             top: 32,
           }}
         >
-          <XAxis dataKey="epoch" tickLine={false} axisLine={false} tickMargin={16} />
+          <XAxis dataKey="spendableEpoch" tickLine={false} axisLine={false} tickMargin={16} />
           <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value} ADA`} />
           <Tooltip cursor={false} content={<RewardsChartTooltip />} />
           {maxPoolsIterator.map((_, i) => (

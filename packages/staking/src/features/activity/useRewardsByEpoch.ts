@@ -6,12 +6,13 @@ import { useOutsideHandles } from 'features/outside-handles-provider';
 import { groupBy, sortBy, takeLast, uniqBy } from 'rambda';
 import { useEffect, useState } from 'react';
 
-export type RewardWithMetadata = Omit<Reward, 'rewards'> & {
+export type RewardWithMetadata = Omit<Reward, 'rewards' | 'epoch'> & {
   metadata: Cardano.StakePoolMetadata | undefined;
+  spendableEpoch: Cardano.EpochNo;
   rewards: string; // TODO move the transformation to the chart
 };
 
-export type RewardsByEpoch = { epoch: number; rewards: RewardWithMetadata[] }[];
+export type RewardsByEpoch = { spendableEpoch: Cardano.EpochNo; rewards: RewardWithMetadata[] }[];
 
 export type UseRewardsByEpochProps = {
   epochsCount: number;
@@ -42,6 +43,7 @@ type GetRewardsByEpochProps = {
 };
 
 const buildRewardsByEpoch = async ({ rewardsHistory, stakePoolProvider, epochsCount }: GetRewardsByEpochProps) => {
+  const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
   const uniqPoolIds = uniqBy((rewards) => rewards.poolId, rewardsHistory.all)
     .map((reward) => reward.poolId)
     .filter(Boolean) as Wallet.Cardano.PoolId[];
@@ -50,13 +52,14 @@ const buildRewardsByEpoch = async ({ rewardsHistory, stakePoolProvider, epochsCo
     ...reward,
     metadata: stakePoolsData.find((poolInfo) => poolInfo.id === reward.poolId)?.metadata,
     rewards: Wallet.util.lovelacesToAdaString(reward.rewards.toString()),
+    spendableEpoch: (reward.epoch + REWARD_SPENDABLE_DELAY_EPOCHS) as Cardano.EpochNo,
   }));
   const groupedRewards = groupBy(({ epoch }) => epoch.toString(), rewardsHistoryWithMetadata);
   const groupedRewardsArray = Object.entries(groupedRewards).map(([epoch, rewards]) => ({
-    epoch: Number.parseInt(epoch),
     rewards,
+    spendableEpoch: (Number.parseInt(epoch) + REWARD_SPENDABLE_DELAY_EPOCHS) as Cardano.EpochNo,
   }));
-  const sortedByEpoch = sortBy((entry) => entry.epoch, groupedRewardsArray);
+  const sortedByEpoch = sortBy((entry) => entry.spendableEpoch, groupedRewardsArray);
   return takeLast(epochsCount, sortedByEpoch);
 };
 
