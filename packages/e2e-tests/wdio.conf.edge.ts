@@ -18,7 +18,6 @@ const edgeConfig: WebdriverIO.Config = {
           '--no-first-run',
           '--no-default-browser-check',
           `--load-extension=${__dirname}/../../apps/browser-extension-wallet/dist`,
-          '--disable-web-security',
           '--allow-insecure-localhost',
           '--window-size=1920,1080',
           '--allow-file-access-from-files',
