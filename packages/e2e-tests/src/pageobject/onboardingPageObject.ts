@@ -15,6 +15,7 @@ import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
 import testContext from '../utils/testContext';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
+import WalletCreationPage from '../elements/onboarding/WalletCreationPage';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -278,6 +279,12 @@ class OnboardingPageObject {
     await OnboardingAllDonePage.nextButton.click();
     await Modal.cancelButton.waitForClickable();
     await Modal.cancelButton.click();
+  }
+
+  async waitUntilLoaderDisappears() {
+    if (await WalletCreationPage.walletLoader.isDisplayed()) {
+      await WalletCreationPage.walletLoader.waitForDisplayed({ timeout: 15_000, reverse: true });
+    }
   }
 }
 

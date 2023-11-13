@@ -1,31 +1,26 @@
 import { Wallet } from '@lace/cardano';
 import { MAX_POOLS_COUNT, PERCENTAGE_SCALE_MAX } from '../constants';
-import { mapStakePoolToPortfolioPool } from './mapStakePoolToPortfolioPool';
+import { initializeDraftPortfolioPool } from './initializeDraftPortfolioPool';
 import { normalizePercentages } from './normalizePercentages';
 import {
+  DelegationFlow,
   DraftPortfolioStakePool,
   DrawerDefaultStep,
   DrawerManagementStep,
-  Flow,
   StakePoolWithLogo,
   State,
 } from './types';
 
 const missingDraftPortfolioErrorMessage = 'DelegationPortfolioState: Inconsistent state: missing draftPortfolio';
 
-const ejectDraftFromCurrentPortfolio = (
-  pools: DraftPortfolioStakePool[]
-): (DraftPortfolioStakePool & { basedOnCurrentPortfolio: false })[] =>
-  pools.map((pool) => ({ ...pool, basedOnCurrentPortfolio: false }));
-
 export const atomicStateMutators = {
   addPoolsFromPreferences: ({ state }: { state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
     return {
+      activeDelegationFlow: DelegationFlow.BrowsePools,
       activeDrawerStep: undefined,
-      activeFlow: Flow.BrowsePools,
       draftPortfolio: undefined,
-      selectedPortfolio: ejectDraftFromCurrentPortfolio(state.draftPortfolio),
+      selectedPortfolio: state.draftPortfolio,
     } as const;
   },
   beginNewPortfolioCreation: ({ selections }: { selections: DraftPortfolioStakePool[] }) => {
@@ -41,45 +36,43 @@ export const atomicStateMutators = {
         ...pool,
         sliderIntegerPercentage: percentageValue,
       }));
-      targetDraftPortfolio = normalizePercentages(targetDraftPortfolio, 'sliderIntegerPercentage');
+      targetDraftPortfolio = normalizePercentages({ items: targetDraftPortfolio, key: 'sliderIntegerPercentage' });
     } else {
       targetDraftPortfolio = selections;
     }
 
     return {
+      activeDelegationFlow: DelegationFlow.NewPortfolio,
       activeDrawerStep: DrawerManagementStep.Preferences,
-      activeFlow: Flow.NewPortfolio,
       draftPortfolio: targetDraftPortfolio,
     } as const;
   },
-  cancelDrawer: <F extends Flow.Overview | Flow.BrowsePools>({ targetFlow }: { state: State; targetFlow: F }) => ({
+  cancelDrawer: <F extends DelegationFlow.Overview | DelegationFlow.BrowsePools>({
+    targetFlow,
+  }: {
+    state: State;
+    targetFlow: F;
+  }) => ({
+    activeDelegationFlow: targetFlow,
     activeDrawerStep: undefined,
-    activeFlow: targetFlow,
   }),
   removePoolFromPreferences: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
     if (state.draftPortfolio.length === 1) return {};
     return {
-      draftPortfolio: ejectDraftFromCurrentPortfolio(state.draftPortfolio.filter((pool) => pool.id !== id)),
+      draftPortfolio: state.draftPortfolio.filter((pool) => pool.id !== id),
     } as const;
   },
   selectPool: ({ stakePool, state }: { stakePool: Wallet.Cardano.StakePool; state: State }) => {
     const selectionsFull = state.selectedPortfolio.length === MAX_POOLS_COUNT;
     const alreadySelected = state.selectedPortfolio.some(({ id }) => stakePool.hexId === id);
     if (selectionsFull || alreadySelected) return {};
+    const newPool = initializeDraftPortfolioPool({ initialPercentage: 0, stakePool, state });
 
     return {
-      selectedPortfolio: ejectDraftFromCurrentPortfolio([
-        {
-          ...mapStakePoolToPortfolioPool({
-            cardanoCoinSymbol: state.cardanoCoinSymbol,
-            sliderIntegerPercentage: 0,
-            stakePool,
-          }),
-        },
-        ...state.selectedPortfolio,
-      ]),
-    } as const;
+      // placing new pool at the top of the list for better UX
+      selectedPortfolio: [newPool, ...state.selectedPortfolio],
+    };
   },
   showChangingPreferencesConfirmation: ({
     pendingSelectedPortfolio,
@@ -87,12 +80,12 @@ export const atomicStateMutators = {
     pendingSelectedPortfolio: DraftPortfolioStakePool[];
   }) =>
     ({
+      activeDelegationFlow: DelegationFlow.ChangingPreferences,
       activeDrawerStep: undefined,
-      activeFlow: Flow.ChangingPreferences,
       pendingSelectedPortfolio,
       viewedStakePool: undefined,
     } as const),
-  showPoolDetails: <F extends Flow.CurrentPoolDetails | Flow.PoolDetails>({
+  showPoolDetails: <F extends DelegationFlow.CurrentPoolDetails | DelegationFlow.PoolDetails>({
     pool,
     targetFlow,
   }: {
@@ -100,13 +93,13 @@ export const atomicStateMutators = {
     targetFlow: F;
   }) =>
     ({
+      activeDelegationFlow: targetFlow,
       activeDrawerStep: DrawerDefaultStep.PoolDetails,
-      activeFlow: targetFlow,
       viewedStakePool: pool,
     } as const),
   unselectPool: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) =>
     ({
-      selectedPortfolio: ejectDraftFromCurrentPortfolio(state.selectedPortfolio.filter((pool) => pool.id !== id)),
+      selectedPortfolio: state.selectedPortfolio.filter((pool) => pool.id !== id),
     } as const),
   updateStakePercentage: ({
     id,
@@ -119,10 +112,8 @@ export const atomicStateMutators = {
   }) => {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
     return {
-      draftPortfolio: ejectDraftFromCurrentPortfolio(
-        state.draftPortfolio.map((pool) =>
-          pool.id === id ? { ...pool, sliderIntegerPercentage: newSliderPercentage } : pool
-        )
+      draftPortfolio: state.draftPortfolio.map((pool) =>
+        pool.id === id ? { ...pool, sliderIntegerPercentage: newSliderPercentage } : pool
       ),
     } as const;
   },

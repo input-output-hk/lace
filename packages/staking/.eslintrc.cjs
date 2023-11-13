@@ -22,6 +22,7 @@ module.exports = {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/switch-exhaustiveness-check': 'error',
+    curly: ['error', 'multi-line'],
     'import/no-default-export': 'error',
     'import/no-extraneous-dependencies': 2,
     'import/no-unresolved': 'off',

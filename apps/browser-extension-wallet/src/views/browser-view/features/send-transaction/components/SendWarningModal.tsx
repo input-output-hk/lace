@@ -86,6 +86,7 @@ export const SendWarningModal = ({ isPopupView }: SendWarningModalProps): React.
       onCancel={handleCancel}
       visible={isWarningModalVisible}
       isPopupView={isPopupView}
+      dataTestId="send-warning-modal"
     />
   );
 };

@@ -529,7 +529,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
   await TopNavigationAssert.assertLogoPresent();
   await Modal.cancelButton.waitForDisplayed();
   await Modal.cancelButton.click();
-  await settingsExtendedPageObject.switchNetwork('Preprod', 'extended');
+  await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
   const newCreatedWallet: WalletConfig = {
     password: 'N_8J@bne87A',
     name: 'newCreatedWallet',

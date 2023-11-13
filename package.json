@@ -15,16 +15,11 @@
     "Michael Chappell <michael.chappell@iohk.io> (https://iohk.io)"
   ],
   "workspaces": [
-    "packages/common",
-    "packages/cardano",
-    "packages/core",
-    "apps/*",
-    "packages/e2e-tests",
-    "packages/staking",
-    "packages/ui"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
-    "base-command-for-build-scripts": "wsrun --prefix -tram ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
+    "base-command-for-build-scripts": "wsrun --prefix -trame ${APP_NAME:+-p \"@lace/$APP_NAME\"} ${EXCLUDE_APP:+-x \"@lace/$APP_NAME\"} ${EXCLUDE_BROWSER:+-x \"@lace/browser-extension-wallet\"}",
     "browser": "APP_NAME=browser-extension-wallet yarn $0",
     "build": "yarn base-command-for-build-scripts -c build",
     "build-deps": "EXCLUDE_APP=true yarn build",

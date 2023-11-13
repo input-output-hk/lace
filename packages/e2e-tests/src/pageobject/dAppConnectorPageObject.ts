@@ -11,6 +11,9 @@ import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 import testContext from '../utils/testContext';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
 import NoWalletModal from '../elements/dappConnector/noWalletModal';
+import DAppConnectorAssert, { ExpectedDAppDetails } from '../assert/dAppConnectorAssert';
+import { Logger } from '../support/logger';
+import TestDAppPage from '../elements/dappConnector/testDAppPage';
 
 class DAppConnectorPageObject {
   TEST_DAPP_URL = this.getTestDAppUrl();
@@ -30,6 +33,12 @@ class DAppConnectorPageObject {
     await waitUntilExpectedNumberOfHandles(expectedNumberOfHandles);
     await browser.pause(1000);
     await browser.switchWindow(this.DAPP_CONNECTOR_WINDOW_HANDLE);
+  }
+
+  async closeDappConnectorWindowHandle() {
+    await browser.switchWindow(this.DAPP_CONNECTOR_WINDOW_HANDLE);
+    await browser.closeWindow();
+    await this.switchToTestDAppWindow();
   }
 
   async switchToTestDAppWindow() {
@@ -90,6 +99,30 @@ class DAppConnectorPageObject {
     let feeValue = await ConfirmTransactionPage.transactionAmountFee.getText();
     feeValue = feeValue.replace(' ADA', '').replace('Fee: ', '');
     await testContext.save('feeValueDAppTx', feeValue);
+  }
+
+  async switchToDappConnectorPopupAndAuthorize(testDAppDetails: ExpectedDAppDetails, mode: 'Always' | 'Only once') {
+    await this.waitAndSwitchToDAppConnectorWindow(3);
+    await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
+    await this.clickButtonInDAppAuthorizationWindow('Authorize');
+    await this.clickButtonInDAppAuthorizationModal(mode);
+    await this.switchToTestDAppWindow();
+    await DAppConnectorAssert.waitUntilBalanceNotEmpty();
+  }
+  async switchToDappConnectorPopupAndAuthorizeWithRetry(
+    testDAppDetails: ExpectedDAppDetails,
+    mode: 'Always' | 'Only once'
+  ) {
+    try {
+      await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
+    } catch {
+      Logger.log('Failed to authorize Dapp. Retry will be executed');
+      if ((await browser.getWindowHandles()).length === 3) {
+        await this.closeDappConnectorWindowHandle();
+      }
+      await TestDAppPage.refreshButton.click();
+      await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
+    }
   }
 }
 

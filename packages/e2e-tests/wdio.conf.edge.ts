@@ -7,7 +7,6 @@ const edgeConfig: WebdriverIO.Config = {
     {
       maxInstances: 1,
       browserName: 'MicrosoftEdge',
-      browserVersion: 'stable',
       ...(process.env.CI && { hostname: 'localhost' }),
       ...(process.env.CI && { port: 4444 }),
       'ms:edgeOptions': {

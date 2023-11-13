@@ -17,6 +17,7 @@ import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
 import { ADA_HANDLE_POLICY_ID, HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
 import { Cardano } from '@cardano-sdk/core';
+import { getDiscovererInstance } from '@lib/scripts/background/addresses-discoverer';
 
 const logger = console;
 
@@ -39,10 +40,18 @@ const walletFactory: WalletFactory = {
         ...providers,
         stores: dependencies.stores,
         handleProvider: new KoraLabsHandleProvider({
-          serverUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+          serverUrl:
+            HANDLE_SERVER_URLS[
+              // TODO: remove exclude to support sanchonet
+              Cardano.ChainIds[chainName].networkMagic as Exclude<
+                Cardano.NetworkMagics,
+                Cardano.NetworkMagics.Sanchonet
+              >
+            ],
           adapter: axiosFetchAdapter,
           policyId: ADA_HANDLE_POLICY_ID
-        })
+        }),
+        addressDiscovery: getDiscovererInstance({ chainName })
       }
     );
   }

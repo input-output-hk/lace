@@ -11,7 +11,7 @@ export const config: WebdriverIO.Config = {
   maxInstances: 1,
   maxInstancesPerCapability: 1,
   path: '/',
-  logLevel: 'trace',
+  logLevel: 'error',
   outputDir: 'logs',
   bail: 0,
   baseUrl: '',

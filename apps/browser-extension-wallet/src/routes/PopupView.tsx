@@ -26,7 +26,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const PopupView = (): React.ReactElement => {
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
-  const { inMemoryWallet, keyAgentData, currentChain, walletInfo, setKeyAgentData, addressesDiscoveryCompleted } =
+  const { inMemoryWallet, keyAgentData, currentChain, walletInfo, setKeyAgentData, initialHdDiscoveryCompleted } =
     useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
   const { loadWallet } = useWalletManager();
@@ -70,7 +70,7 @@ export const PopupView = (): React.ReactElement => {
   }
 
   // Wallet loaded
-  if (keyAgentData && walletInfo && inMemoryWallet && addressesDiscoveryCompleted) {
+  if (keyAgentData && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return <ExtensionRoutes />;
   }
 

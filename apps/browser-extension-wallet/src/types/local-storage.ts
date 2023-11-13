@@ -42,4 +42,5 @@ export interface ILocalStorage {
   analyticsAccepted?: EnhancedAnalyticsOptInStatus;
   isForgotPasswordFlow?: boolean;
   multidelegationFirstVisit?: boolean;
+  multidelegationFirstVisitSincePortfolioPersistence?: boolean;
 }

@@ -34,6 +34,7 @@ Feature: Send Transactions from Dapp - E2E
 
   @LW-6797 @Testnet
   Scenario: Send Token from DApp E2E
+    And I de-authorize all DApps in extended mode
     And I save token: "LaceCoin2" balance
     And I open and authorize test DApp with "Only once" setting
     And I click "Send Token" button in test DApp

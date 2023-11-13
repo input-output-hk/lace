@@ -119,7 +119,14 @@ When(/I click on "(Mainnet|Preprod|Preview)" radio button/, async (network: 'Mai
 When(
   /^I switch network to: "(Mainnet|Preprod|Preview)" in (extended|popup) mode/,
   async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
-    await settingsExtendedPageObject.switchNetwork(network, mode);
+    await settingsExtendedPageObject.switchNetworkAndCloseDrawer(network, mode);
+  }
+);
+
+When(
+  /^I switch network to: "(Mainnet|Preprod|Preview)" without closing drawer/,
+  async (network: 'Mainnet' | 'Preprod') => {
+    await settingsExtendedPageObject.switchNetworkWithoutClosingDrawer(network);
   }
 );
 

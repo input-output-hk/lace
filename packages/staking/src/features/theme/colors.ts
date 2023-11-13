@@ -14,6 +14,8 @@ export const colorsContract = {
   $multidelegationBetaModalPillBackground: '',
   $multidelegationBetaModalPillText: '',
   $preferencesPoolCardBorderColor: '',
+  $preferencesPoolCardDataIconColor: '',
+  $preferencesPoolCardDataTextColor: '',
   $qrCodeBackground: '',
   $qrCodeForeground: '',
   $ratioInputContainerBgColor: '',
@@ -40,6 +42,8 @@ export const lightThemeColors: typeof colorsContract = {
   $multidelegationBetaModalPillBackground: laceGradient,
   $multidelegationBetaModalPillText: lightColorScheme.$primary_white,
   $preferencesPoolCardBorderColor: lightColorScheme.$primary_light_grey_plus,
+  $preferencesPoolCardDataIconColor: lightColorScheme.$primary_grey,
+  $preferencesPoolCardDataTextColor: lightColorScheme.$primary_dark_grey,
   $qrCodeBackground: lightColorScheme.$primary_white,
   $qrCodeForeground: lightColorScheme.$primary_black,
   $ratioInputContainerBgColor: lightColorScheme.$primary_light_grey,
@@ -53,22 +57,23 @@ export const lightThemeColors: typeof colorsContract = {
 };
 
 export const darkThemeColors: typeof colorsContract = {
-  // TODO: use darkColorScheme instead
-  $bannerBellIconColor: lightColorScheme.$primary_accent_purple,
-  // TODO: use darkColorScheme instead
-  $bannerInfoIconColor: lightColorScheme.$primary_accent_purple,
+  $bannerBellIconColor: darkColorScheme.$primary_accent_purple,
+  $bannerInfoIconColor: darkColorScheme.$primary_accent_purple,
   $delegationCardInfoLabelColor: darkColorScheme.$primary_light_grey,
   $delegationCardInfoValueColor: darkColorScheme.$primary_white,
-  $delegationCardWarningValueColor: lightColorScheme.$secondary_data_pink,
+  $delegationCardWarningValueColor: darkColorScheme.$secondary_data_pink,
   $drawerBackgroundColor: darkColorScheme.$primary_light_black,
   $getStartedStepBorderColor: darkColorScheme.$primary_mid_black,
   $getStartedStepDescriptionColor: darkColorScheme.$primary_light_grey,
   $getStartedStepFillColor: darkColorScheme.$primary_mid_black,
   $getStartedStepNumberColor: laceGradient,
   $multidelegationBetaModalPillBackground: laceGradient,
-  // TODO: use darkColorScheme instead
-  $multidelegationBetaModalPillText: lightColorScheme.$primary_white,
+  $multidelegationBetaModalPillText: darkColorScheme.$primary_white,
   $preferencesPoolCardBorderColor: darkColorScheme.$primary_mid_black,
+  // TODO: use darkColorScheme instead
+  $preferencesPoolCardDataIconColor: lightColorScheme.$primary_grey,
+  // TODO: use darkColorScheme instead
+  $preferencesPoolCardDataTextColor: lightColorScheme.$primary_dark_grey,
   // TODO: use darkColorScheme instead
   $qrCodeBackground: lightColorScheme.$primary_black,
   // TODO: use darkColorScheme instead
