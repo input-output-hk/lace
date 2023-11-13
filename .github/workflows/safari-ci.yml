@@ -1,42 +1,34 @@
-name: CI2 testing coveralls
+name: Safari Extension Build
 
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
 
 jobs:
-  buildAndTest:
-    name: Build & Test
-    runs-on: ubuntu-20.04
+  build:
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'run-safari-build') }}
+    name: Build for Safari
+    runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Decrypt test data
-        working-directory: ./packages/e2e-tests
-        run: ./decrypt_secret.sh
-        env:
-          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-      - name: Build dist version of Lace
-        uses: ./.github/shared/build
+      - name: Download Lace dist artifacts
+        uses: actions/download-artifact@v3
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY  }}
-          POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_MAINNET || '' }}
-          POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREPROD || '' }}
-          POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN_PREVIEW || '' }}
-          PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
-      - name: Check for linter issues
-        run: yarn lint
-      - name: Run unit tests, generate test coverage report
-        env:
-          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
-          DEFAULT_CHAIN: 'Preprod'
-        run: yarn test:coverage --maxWorkers=2
-      - name: Coveralls
-        uses: coverallsapp/github-action@v2
+          name: lace
+          path: apps/browser-extension-wallet/dist
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
         with:
-          github-token: ZvjdYqqhXOwYoiGYC8MLuiml2KFum8kV7
-          allow-empty: true
-      - name: Upload build
+          xcode-version: latest-stable
+      - name: Add executable rights to extension conversion script
+        run: chmod +x ./packages/e2e-tests/tools/convertChromeExtToSafari.sh
+      - name: Convert Chrome extension to Safari
+        run: packages/e2e-tests/tools/convertChromeExtToSafari.sh
+        shell: bash
+      - name: Upload unsigned Safari build
         uses: actions/upload-artifact@v3
         with:
-          name: lace-common
-          path: packages/common
+          name: lace-safari
+          path: packages/e2e-tests/wallet-extension-safari-build/Lace/wallet-extension-safari-build/extension-build/Build/Products/Release
