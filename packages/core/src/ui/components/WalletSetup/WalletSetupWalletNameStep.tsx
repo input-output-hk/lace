@@ -55,6 +55,7 @@ export const WalletSetupWalletNameStep = ({
     >
       <p className={styles.subtitle}>{translations.chooseName}</p>
       <Input
+        dataTestId="wallet-setup-register-name-input"
         className={styles.inputName}
         label={translations.walletName}
         value={walletName}
