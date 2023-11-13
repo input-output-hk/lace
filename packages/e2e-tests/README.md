@@ -68,3 +68,10 @@ UI-mapped gherkin tests for the Lace browser extension
 - make necessary updates in `packages/e2e-tests/src/support/walletConfiguration.ts`
 - encrypt `walletConfiguration.ts` by running `./encrypt_secret.sh` (from the `packages/e2e-tests` directory)
 - delete `packages/e2e-tests/src/support/walletConfiguration.ts`
+
+## Trezor test automation precondition (local run)
+
+- run docker image locally <https://github.com/input-output-hk/lace-hw-testing-toolkit.git>
+- After starting docker image (info should be displayed - `⚡️ Trezor Device Manipulation API is running at http://localhost:8000`)
+  Tests need to be triggered in 60 sec because emulator shuts down device if there is no action  
+  (will be improved in follow-up tickets by starting emulator trough API)
