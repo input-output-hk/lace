@@ -2,6 +2,9 @@ name: CI2 testing coveralls
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - "add-coveralls-report"
 
 jobs:
   buildAndTest:
@@ -33,7 +36,7 @@ jobs:
       - name: Coveralls
         uses: coverallsapp/github-action@v2
         with:
-          github-token: ZvjdYqqhXOwYoiGYC8MLuiml2KFum8kV7
+          github-token: "ZvjdYqqhXOwYoiGYC8MLuiml2KFum8kV7"
           allow-empty: true
       - name: Upload build
         uses: actions/upload-artifact@v3
