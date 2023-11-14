@@ -44,10 +44,13 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
   const { environmentName } = useWalletStore();
   const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
 
-  const explorerBaseUrl = useMemo(
-    () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
-    [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
-  );
+  const explorerBaseUrl = useMemo(() => {
+    if (environmentName === 'Sanchonet') {
+      return;
+    }
+    // eslint-disable-next-line consistent-return
+    return `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
+  }, [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]);
 
   return (
     <VotingProcedures
@@ -68,7 +71,7 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
             actionId: {
               index: vote.actionId.actionIndex,
               txHash: vote.actionId.id.toString(),
-              txHashUrl: `${explorerBaseUrl}/${vote.actionId.id}`
+              txHashUrl: explorerBaseUrl && `${explorerBaseUrl}/${vote.actionId.id}`
             },
             votingProcedure: {
               vote: getVote(vote.votingProcedure.vote),
