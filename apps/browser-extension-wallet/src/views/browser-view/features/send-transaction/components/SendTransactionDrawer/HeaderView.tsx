@@ -164,7 +164,8 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const onArrowIconClick = () => {
     sendAnalytics();
     const shouldRedirect =
-      isPopupView && [Sections.SUCCESS_TX, Sections.FORM, Sections.FAIL_TX].includes(section.currentSection);
+      isPopupView &&
+      [Sections.SUCCESS_TX, Sections.FORM, Sections.FAIL_TX, Sections.UNAUTHORIZED_TX].includes(section.currentSection);
     if (password) {
       removePassword();
       setSubmitingTxState({ isPasswordValid: true });
@@ -188,7 +189,7 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
         trigger_point: triggerPoint,
         [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
       });
-    } else if (section.currentSection === Sections.FAIL_TX) {
+    } else if (section.currentSection === Sections.FAIL_TX || section.currentSection === Sections.UNAUTHORIZED_TX) {
       analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick, {
         trigger_point: triggerPoint,
         [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
@@ -266,6 +267,7 @@ export const useGetHeaderText = (): Record<Sections, { title: string; subtitle?:
     },
     [Sections.SUCCESS_TX]: { title: '' },
     [Sections.FAIL_TX]: { title: '' },
+    [Sections.UNAUTHORIZED_TX]: { title: '' },
     [Sections.ADDRESS_LIST]: { title: 'browserView.transaction.send.drawer.addressBook' },
     [Sections.ADDRESS_FORM]: { title: 'browserView.transaction.send.drawer.addressForm' },
     [Sections.ASSET_PICKER]: { title: 'core.coinInputSelection.assetSelection' },
@@ -285,7 +287,9 @@ export const HeaderTitle = ({
   const [isMultipleSelectionAvailable, setMultipleSelection] = useMultipleSelection();
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
   const headerText = useGetHeaderText();
-  const shouldDisplayTitle = ![Sections.FORM, Sections.FAIL_TX].includes(section.currentSection);
+  const shouldDisplayTitle = ![Sections.FORM, Sections.FAIL_TX, Sections.UNAUTHORIZED_TX].includes(
+    section.currentSection
+  );
   const title = shouldDisplayTitle
     ? t(headerText[section.currentSection].title, { name: headerText[section.currentSection].name })
     : undefined;
