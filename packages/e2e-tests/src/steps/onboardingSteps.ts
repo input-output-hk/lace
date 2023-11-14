@@ -38,6 +38,7 @@ import CommonAssert from '../assert/commonAssert';
 import { shuffle } from '../utils/arrayUtils';
 import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
 import SelectAccountPage from '../elements/onboarding/selectAccountPage';
+import { browser } from '@wdio/globals';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -109,6 +110,7 @@ When(
   /^I click "(Cancel|OK)" button on "(Limited support for DApp|Restoring a multi-address wallet\?|Are you sure you want to start again\?)" modal$/,
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   async (button: 'Cancel' | 'OK', _modalType: string) => {
+    await browser.pause(500);
     switch (button) {
       case 'Cancel':
         await Modal.cancelButton.click();
