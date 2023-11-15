@@ -101,7 +101,7 @@ class TransactionsPage {
     let rowIndex = 0;
     while (rowIndex < tokensCounterValue && (await this.rows).length < tokensCounterValue) {
       await this.scrollToTheRow(rowIndex);
-      rowIndex += 8;
+      rowIndex += 7;
       await browser.pause(1000);
     }
   }
