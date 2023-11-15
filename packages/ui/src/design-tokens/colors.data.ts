@@ -173,6 +173,7 @@ export const colors = {
 
   $text_primary: '',
   $text_secondary: '',
+  $text_on_gradient: '',
 
   $metadata_label_color: '',
   $metadata_secondary_label_color: '',
@@ -180,6 +181,14 @@ export const colors = {
   $text_link_label_color: '',
   $text_link_label_color_visited: '',
   $text_link_label_color_disabled: '',
+
+  $personal_dropdown_trigger_container_bgColor: '',
+  $personal_dropdown_trigger_container_borderColor: '',
+  $personal_dropdown_trigger_container_bgColor_hover: '',
+  $personal_dropdown_trigger_container_bgColor_pressed: '',
+  $personal_dropdown_trigger_container_outlineColor: '',
+  $personal_dropdown_trigger_label_color: '',
+  $personal_dropdown_trigger_label_color_pressed: '',
 };
 
 export type Colors = typeof colors;

@@ -262,6 +262,7 @@ const colors: Colors = {
 
   $text_primary: lightColorScheme.$primary_black,
   $text_secondary: lightColorScheme.$primary_dark_grey,
+  $text_on_gradient: lightColorScheme.$primary_white,
 
   $metadata_label_color: lightColorScheme.$primary_black,
   $metadata_secondary_label_color: lightColorScheme.$primary_dark_grey,
@@ -269,6 +270,19 @@ const colors: Colors = {
   $text_link_label_color: lightColorScheme.$secondary_data_blue,
   $text_link_label_color_visited: lightColorScheme.$primary_hover_purple,
   $text_link_label_color_disabled: lightColorScheme.$primary_grey,
+
+  $personal_dropdown_trigger_label_color: lightColorScheme.$primary_dark_grey,
+  $personal_dropdown_trigger_label_color_pressed:
+    lightColorScheme.$primary_black,
+  $personal_dropdown_trigger_container_borderColor:
+    lightColorScheme.$primary_light_grey,
+  $personal_dropdown_trigger_container_bgColor: lightColorScheme.$primary_white,
+  $personal_dropdown_trigger_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $personal_dropdown_trigger_container_bgColor_pressed:
+    lightColorScheme.$primary_white,
+  $personal_dropdown_trigger_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
 };
 
 export const elevation: Elevation = {
