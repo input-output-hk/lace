@@ -22,7 +22,7 @@ const data: ComponentProps<typeof ConfirmDRepUpdate> = {
   },
   translations: {
     labels: {
-      drepId: 'Drep ID',
+      drepId: 'DRep ID',
       hash: 'Hash',
       url: 'URL'
     },

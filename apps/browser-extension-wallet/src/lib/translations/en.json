@@ -1134,13 +1134,13 @@
       "metadata": "Metadata",
       "url": "URL",
       "hash": "Hash",
-      "drepId": "Drep ID",
+      "drepId": "DRep ID",
       "depositPaid": "Deposit paid"
     },
     "drepRetirement": {
       "title": "Confirm DRep Retirement",
       "metadata": "Metadata",
-      "drepId": "Drep ID",
+      "drepId": "DRep ID",
       "depositReturned": "Deposit returned",
       "isOwnRetirement": "This is your DRep retirement.",
       "isNotOwnRetirement": "The presented DRepID does not match your wallet's DRepID."
@@ -1148,14 +1148,14 @@
     "drepUpdate": {
       "title": "Confirm DRep update",
       "metadata": "Metadata",
-      "drepId": "Drep ID",
+      "drepId": "DRep ID",
       "url": "URL",
       "hash": "Hash"
     },
     "voteDelegation": {
       "title": "Confirm vote delegation",
       "metadata": "Metadata",
-      "drepId": "Drep ID",
+      "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
       "alwaysNoConfidence": "No Confidence",
       "option": "Yes"
@@ -1163,7 +1163,7 @@
     "stakeVoteDelegation": {
       "title": "Confirm Vote Delegation and Stake Delegation",
       "metadata": "Metadata",
-      "drepId": "Drep ID",
+      "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
       "alwaysNoConfidence": "No Confidence",
       "option": "Yes",
@@ -1173,7 +1173,7 @@
     "stakeVoteDelegationRegistration": {
       "title": "Confirm Vote Delegation, Stake Delegation and Stake Credentials Registration",
       "metadata": "Metadata",
-      "drepId": "Drep ID",
+      "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
       "alwaysNoConfidence": "No Confidence",
       "option": "Yes",
@@ -1191,7 +1191,7 @@
     "voteRegistrationDelegation": {
       "title": "Confirm Vote Delegation and Stake Credentials Registration",
       "metadata": "Metadata",
-      "drepId": "Drep ID",
+      "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
       "alwaysNoConfidence": "No Confidence",
       "option": "Yes",

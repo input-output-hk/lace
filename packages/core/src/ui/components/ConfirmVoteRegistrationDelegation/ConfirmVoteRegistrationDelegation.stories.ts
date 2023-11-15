@@ -22,7 +22,7 @@ const data: ComponentProps<typeof ConfirmVoteRegistrationDelegation> = {
   },
   translations: {
     labels: {
-      drepId: 'Drep ID',
+      drepId: 'DRep ID',
       alwaysAbstain: 'Abstain',
       alwaysNoConfidence: 'No Confidence',
       depositPaid: 'Deposit paid',
