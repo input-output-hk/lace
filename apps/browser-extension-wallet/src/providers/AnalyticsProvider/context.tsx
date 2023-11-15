@@ -61,9 +61,10 @@ export const AnalyticsProvider = ({
   // Track page changes with PostHog in order to keep the user session alive
   useEffect(() => {
     const trackActivePageChange = debounce(() => analyticsTracker.sendPageNavigationEvent(), PAGE_VIEW_DEBOUNCE_DELAY);
-
+    window.addEventListener('load', trackActivePageChange);
     window.addEventListener('popstate', trackActivePageChange);
     return () => {
+      window.removeEventListener('load', trackActivePageChange);
       window.removeEventListener('popstate', trackActivePageChange);
     };
   }, [analyticsTracker]);
