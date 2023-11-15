@@ -19,7 +19,7 @@ import { SubNavigation } from './sub-navigation.component';
 const subtitle = `Subnavigations provide ergonomic movement between destinations and helps users access lower-level categories in the platform's content architecture.`;
 
 export default {
-  title: 'Navigation & toolbars',
+  title: 'Navigation and toolbars/Subnavigation',
   component: SubNavigation,
   decorators: [page({ title: 'Subnavigation', subtitle })],
   argTypes: {
