@@ -5,7 +5,7 @@ import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
 import { t } from '../utils/translationService';
 
-export type ExpectedTransactionDetails = {
+export type ExpectedActivityDetails = {
   transactionDescription: string;
   hash?: string;
   transactionData?: transactionData[];
@@ -29,39 +29,39 @@ class TransactionsDetailsAssert {
     });
   };
 
-  async assertSeeTransactionDetailsDrawer(shouldBeDisplayed: boolean) {
+  async assertSeeActivityDetailsDrawer(shouldBeDisplayed: boolean) {
     await TransactionDetailsPage.transactionDetails.waitForDisplayed({ reverse: !shouldBeDisplayed });
     await TransactionDetailsPage.transactionHeader.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
       expect(await TransactionDetailsPage.transactionHeader.getText()).to.equal(
-        await t('package.core.transactionDetailBrowser.header')
+        await t('package.core.activityDetails.header')
       );
     }
   }
 
-  async assertSeeTransactionDetails(expectedTransactionDetails: ExpectedTransactionDetails) {
+  async assertSeeActivityDetails(expectedActivityDetails: ExpectedActivityDetails) {
     await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
 
     expect(await TransactionDetailsPage.transactionDetailsDescription.getText()).contains(
-      `${expectedTransactionDetails.transactionDescription}`
+      `${expectedActivityDetails.transactionDescription}`
     );
-    if (expectedTransactionDetails.hash) {
+    if (expectedActivityDetails.hash) {
       expect(await TransactionDetailsPage.transactionDetailsHash.getText()).to.equal(
-        String(expectedTransactionDetails.hash)
+        String(expectedActivityDetails.hash)
       );
     }
-    expect(await TransactionDetailsPage.transactionDetailsStatus.getText()).to.equal(expectedTransactionDetails.status);
-    if (expectedTransactionDetails.transactionData) {
-      for (let i = 0; i < expectedTransactionDetails.transactionData.length; i++) {
-        if (expectedTransactionDetails.transactionData[i].assets) {
+    expect(await TransactionDetailsPage.transactionDetailsStatus.getText()).to.equal(expectedActivityDetails.status);
+    if (expectedActivityDetails.transactionData) {
+      for (let i = 0; i < expectedActivityDetails.transactionData.length; i++) {
+        if (expectedActivityDetails.transactionData[i].assets) {
           const actualAssets = await TransactionDetailsPage.getTransactionSentTokensForBundle(i);
-          expect(actualAssets.toString()).to.equal(String(expectedTransactionDetails.transactionData[i].assets));
+          expect(actualAssets.toString()).to.equal(String(expectedActivityDetails.transactionData[i].assets));
         }
         expect(await TransactionDetailsPage.transactionDetailsSentAda(i).getText()).to.equal(
-          expectedTransactionDetails.transactionData[i].ada
+          expectedActivityDetails.transactionData[i].ada
         );
 
-        const expectedAddress = expectedTransactionDetails.transactionData[i].address;
+        const expectedAddress = expectedActivityDetails.transactionData[i].address;
         const actualAddressSplit = (await TransactionDetailsPage.transactionDetailsToAddress(i).getText()).split('...');
         if (actualAddressSplit.length === 1) {
           expect(expectedAddress).to.equal(actualAddressSplit[0]);
@@ -71,24 +71,24 @@ class TransactionsDetailsAssert {
         }
       }
     }
-    if (expectedTransactionDetails.poolName) {
+    if (expectedActivityDetails.poolName) {
       expect(await TransactionDetailsPage.transactionDetailsStakepoolName.getText()).to.equal(
-        expectedTransactionDetails.poolName
+        expectedActivityDetails.poolName
       );
     }
-    if (expectedTransactionDetails.poolTicker) {
+    if (expectedActivityDetails.poolTicker) {
       expect(await TransactionDetailsPage.transactionDetailsStakepoolTicker.getText()).to.equal(
-        `(${expectedTransactionDetails.poolTicker})`
+        `(${expectedActivityDetails.poolTicker})`
       );
     }
-    if (expectedTransactionDetails.poolID) {
+    if (expectedActivityDetails.poolID) {
       expect(await TransactionDetailsPage.transactionDetailsStakePoolId.getText()).to.equal(
-        expectedTransactionDetails.poolID
+        expectedActivityDetails.poolID
       );
     }
   }
 
-  async assertSeeTransactionDetailsUnfolded(mode: 'extended' | 'popup') {
+  async assertSeeActivityDetailsUnfolded(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
 
@@ -109,11 +109,11 @@ class TransactionsDetailsAssert {
         await TransactionDetailsPage.transactionDetailsStakePoolId.waitForDisplayed();
       }
 
-      await TransactionDetailsPage.closeTransactionDetails(mode);
+      await TransactionDetailsPage.closeActivityDetails(mode);
     }
   }
 
-  async assertSeeTransactionDetailsInputAndOutputs(mode: 'extended' | 'popup') {
+  async assertSeeActivityDetailsInputAndOutputs(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
 
@@ -132,7 +132,7 @@ class TransactionsDetailsAssert {
       await TransactionDetailsPage.transactionDetailsOutputFiatAmount.waitForDisplayed();
       // await TransactionDetailsPage.transactionDetailsOutputTokens.waitForDisplayed();
 
-      await TransactionDetailsPage.closeTransactionDetails(mode);
+      await TransactionDetailsPage.closeActivityDetails(mode);
     }
   }
 
@@ -170,11 +170,11 @@ class TransactionsDetailsAssert {
       expect(txDetailsFeeADAValue).to.be.greaterThan(0);
       expect(txDetailsFeeFiatValue).to.be.greaterThan(0);
 
-      await TransactionDetailsPage.closeTransactionDetails(mode);
+      await TransactionDetailsPage.closeActivityDetails(mode);
     }
   }
 
-  async assertSeeTransactionDetailsSummary(mode: 'extended' | 'popup') {
+  async assertSeeActivityDetailsSummary(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
 
@@ -191,11 +191,11 @@ class TransactionsDetailsAssert {
         await TransactionDetailsPage.transactionDetailsToAddress(0).waitForDisplayed();
       }
 
-      await TransactionDetailsPage.closeTransactionDetails(mode);
+      await TransactionDetailsPage.closeActivityDetails(mode);
     }
   }
 
-  async assertSeeTransactionDetailsSummaryAmounts(mode: 'extended' | 'popup') {
+  async assertSeeActivityDetailsSummaryAmounts(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
 
@@ -213,7 +213,7 @@ class TransactionsDetailsAssert {
           expect(tokensAmountSummary).to.equal(Number(tokensDescriptionAmount));
         }
 
-        await TransactionDetailsPage.closeTransactionDetails(mode);
+        await TransactionDetailsPage.closeActivityDetails(mode);
       }
     }
   }

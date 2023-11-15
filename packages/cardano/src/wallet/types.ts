@@ -46,6 +46,7 @@ export type Cip30SignTxAssetItem = {
 export enum WalletManagerProviderTypes {
   CARDANO_SERVICES_PROVIDER = 'cardano-services-provider'
 }
+
 export type ChainName = keyof typeof Cardano.ChainIds;
 
 export interface CreateHardwareWalletArgs {

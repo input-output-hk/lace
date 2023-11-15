@@ -47,4 +47,14 @@ export default class CommonOnboardingElements {
   get termsOfServiceLink(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TERMS_OF_SERVICE_LINK);
   }
+
+  async clickOnNextButton(): Promise<void> {
+    await this.nextButton.waitForClickable({ timeout: 12_000 });
+    await this.nextButton.click();
+  }
+
+  async clickOnBackButton(): Promise<void> {
+    await this.backButton.waitForClickable();
+    await this.backButton.click();
+  }
 }

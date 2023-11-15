@@ -1,13 +1,19 @@
 import { SetState, State, GetState, StoreApi } from 'zustand';
 import { Wallet, StakePoolSortOptions } from '@lace/cardano';
-import { AssetActivityListProps, TransactionType } from '@lace/core';
+import {
+  AssetActivityListProps,
+  ActivityStatus,
+  RewardsActivityType,
+  TransactionActivityType,
+  ActivityType
+} from '@lace/core';
 import { PriceResult } from '../hooks';
 import {
   NetworkInformation,
   WalletInfo,
   WalletLocked,
   TxDirection,
-  TransactionDetail,
+  ActivityDetail,
   WalletUI,
   NetworkConnectionStates,
   CurrencyInfo
@@ -16,6 +22,9 @@ import { FetchWalletActivitiesProps, FetchWalletActivitiesReturn, IBlockchainPro
 import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
+import { AddressesDiscoveryStatus } from '@lib/communication';
+import { Reward } from '@cardano-sdk/core';
+import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
 
 export enum StateStatus {
   IDLE = 'idle',
@@ -96,14 +105,18 @@ export interface WalletInfoSlice {
   inMemoryWallet: Wallet.ObservableWallet | undefined;
   cardanoWallet: Wallet.CardanoWallet | undefined;
   walletManagerUi: WalletManagerUi | undefined;
-  addressesDiscoveryCompleted: boolean;
+  initialHdDiscoveryCompleted: boolean;
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted: boolean) => void;
+  hdDiscoveryStatus: AddressesDiscoveryStatus | null;
+  setHdDiscoveryStatus: (AddressesDiscoveryStatus: AddressesDiscoveryStatus) => void;
   setCardanoWallet: (wallet?: Wallet.CardanoWallet) => void;
   setWalletManagerUi: (walletManager: WalletManagerUi) => void;
   currentChain?: Wallet.Cardano.ChainId;
   setCurrentChain: (chain: Wallet.ChainName) => void;
   environmentName?: EnvironmentTypes;
   getKeyAgentType: () => string;
+  deletingWallet?: boolean;
+  setDeletingWallet: (deletingWallet: boolean) => void;
 }
 
 export interface LockSlice {
@@ -120,25 +133,36 @@ export interface UISlice {
   setBalancesVisibility: (visible: boolean) => void;
 }
 
-export interface TransactionDetailSlice {
-  transactionDetail?: {
+export interface ActivityDetailSlice {
+  activityDetail?: {
+    type: ActivityType;
+    status: ActivityStatus;
+    direction?: TxDirection;
+  } & (
+    | {
+        type: RewardsActivityType;
+        status: ActivityStatus.SPENDABLE;
+        direction?: never;
+        activity: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+      }
+    | {
+        type: TransactionActivityType;
+        activity: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
+        direction: TxDirection;
+      }
+  );
+  fetchingActivityInfo: boolean;
+  setTransactionActivityDetail: (params: {
+    activity: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
     direction: TxDirection;
-    tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx;
-    status?: Wallet.TransactionStatus;
-    type?: TransactionType;
-  };
-  fetchingTransactionInfo: boolean;
-  setTransactionDetail: (
-    tx: Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx,
-    direction: TxDirection,
-    status?: Wallet.TransactionStatus,
-    type?: TransactionType
-  ) => void;
-  getTransactionDetails: (params: {
-    coinPrices: PriceResult;
-    fiatCurrency: CurrencyInfo;
-  }) => Promise<TransactionDetail>;
-  resetTransactionState: () => void;
+    status: ActivityStatus;
+    type: TransactionActivityType;
+  }) => void;
+  setRewardsActivityDetail: (params: {
+    activity: { spendableEpoch: EpochNo; spendableDate: Date; rewards: Reward[] };
+  }) => void;
+  getActivityDetail: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;
+  resetActivityState: () => void;
 }
 
 export interface AssetDetailsSlice {
@@ -159,7 +183,7 @@ export type WalletStore = WalletActivitiesSlice &
   StakePoolSearchSlice &
   LockSlice &
   WalletInfoSlice &
-  TransactionDetailSlice &
+  ActivityDetailSlice &
   AssetDetailsSlice &
   UISlice &
   BlockchainProviderSlice;

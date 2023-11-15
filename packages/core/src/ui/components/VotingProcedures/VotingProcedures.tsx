@@ -12,14 +12,14 @@ type VotingProcedure = {
     actionId: {
       index: number;
       txHash: string;
-      txHashUrl: string;
+      txHashUrl?: string; // Dependent on having an explorer to link
     };
     votingProcedure: {
       vote: string;
-      anchor?: {
+      anchor: {
         url: string;
         hash: string;
-      };
+      } | null;
     };
   }[];
 };
@@ -37,7 +37,7 @@ interface Props {
     anchor: {
       url: string;
       hash: string;
-    };
+    } | null;
     dRepId: string;
     procedureTitle: string;
     vote: string;
@@ -111,9 +111,15 @@ export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }:
                     {indexCounter(translations.actionIdTitle, idx, votes.length)}
                   </Text.Body.Normal>
                 </Cell>
-                <Cell>
-                  <MetadataLink label={translations.actionId.txHash} text={actionId.txHash} url={actionId.txHashUrl} />
-                </Cell>
+                {actionId.txHashUrl && (
+                  <Cell>
+                    <MetadataLink
+                      label={translations.actionId.txHash}
+                      text={actionId.txHash}
+                      url={actionId.txHashUrl}
+                    />
+                  </Cell>
+                )}
                 <Cell>
                   <Metadata label={translations.actionId.index} text={actionId.index.toString()} />
                 </Cell>

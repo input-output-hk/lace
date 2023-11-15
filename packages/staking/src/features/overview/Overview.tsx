@@ -2,7 +2,7 @@ import { useObservable } from '@lace/common';
 import { Box, ControlButton, Flex, Text } from '@lace/ui';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { DelegationCard } from '../delegation-card';
+import { DelegationCard } from '../DelegationCard';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import { FundWalletBanner } from './FundWalletBanner';
@@ -10,7 +10,7 @@ import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
-import { StakingNotificationBanner, getCurrentStakingNotification } from './StakingNotificationBanner';
+import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
 
 export const Overview = () => {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ export const Overview = () => {
     currentPortfolio: store.currentPortfolio,
     portfolioMutators: store.mutators,
   }));
-  const stakingNotification = getCurrentStakingNotification({ currentPortfolio, walletActivities });
+  const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance;
 
@@ -61,7 +61,7 @@ export const Overview = () => {
     portfolio: currentPortfolio,
   });
 
-  if (noFunds)
+  if (noFunds) {
     return (
       <FundWalletBanner
         title={t('overview.noFunds.title')}
@@ -71,15 +71,14 @@ export const Overview = () => {
         shouldHaveVerticalContent
       />
     );
+  }
 
-  if (currentPortfolio.length === 0)
+  if (currentPortfolio.length === 0) {
     return (
       <>
-        {stakingNotification ? (
-          <StakingNotificationBanner
-            notification={stakingNotification}
-            onPortfolioDriftedNotificationClick={onManageClick}
-          />
+        {/* defensive check - no other notification than pendingFirstDelegation should be possible here at the moment of writing this comment */}
+        {stakingNotifications.includes('pendingFirstDelegation') ? (
+          <StakingNotificationBanners notifications={stakingNotifications} />
         ) : (
           <Flex flexDirection="column" gap="$32">
             <StakeFundsBanner balance={totalCoinBalance} />
@@ -88,6 +87,7 @@ export const Overview = () => {
         )}
       </>
     );
+  }
 
   return (
     <>
@@ -95,21 +95,20 @@ export const Overview = () => {
         <DelegationCard
           balance={compactNumber(balancesBalance.available.coinBalance)}
           cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
-          distribution={displayData.map(({ color, name = '-', onChainPercentage }) => ({
+          distribution={displayData.map(({ color, name = '-', onChainPercentage, apy, saturation }) => ({
+            apy: apy ? String(apy) : undefined,
             color,
             name,
             percentage: onChainPercentage,
+            saturation: saturation ? String(saturation) : undefined,
           }))}
           status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
         />
       </Box>
-      {stakingNotification && (
-        <Box mb="$40">
-          <StakingNotificationBanner
-            notification={stakingNotification}
-            onPortfolioDriftedNotificationClick={onManageClick}
-          />
-        </Box>
+      {stakingNotifications.length > 0 && (
+        <Flex mb="$40" flexDirection="column">
+          <StakingNotificationBanners notifications={stakingNotifications} />
+        </Flex>
       )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>

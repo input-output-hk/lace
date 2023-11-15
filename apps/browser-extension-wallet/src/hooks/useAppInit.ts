@@ -1,11 +1,11 @@
 /* eslint-disable unicorn/no-null */
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
-import { useWalletManager } from '@hooks';
+import { useAddressesDiscoverer, useWalletManager } from '@hooks';
+import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
 import { getValueFromLocalStorage } from '@utils/local-storage';
 import { useCallback, useEffect } from 'react';
 import { runtime } from 'webextension-polyfill';
-import { Wallet } from '@lace/cardano';
 
 const useAddressesListener = (
   callback: (addresses: Wallet.KeyManagement.GroupedAddress[]) => void | Promise<void>,
@@ -21,17 +21,34 @@ const useAddressesListener = (
 };
 
 export const useAppInit = (): void => {
-  const { environmentName, setWalletInfo, setWalletManagerUi, walletManagerUi } = useWalletStore();
+  const { cardanoWallet, environmentName, setHdDiscoveryStatus, setWalletInfo, setWalletManagerUi, walletManagerUi } =
+    useWalletStore();
   const { updateAddresses } = useWalletManager();
+  const { addressesDiscoverer, prepare: prepareAddressesDiscoverer } = useAddressesDiscoverer();
 
   useEffect(() => {
     const walletManager = new WalletManagerUi({ walletName: process.env.WALLET_NAME }, { logger: console, runtime });
     setWalletManagerUi(walletManager);
   }, [setWalletManagerUi]);
 
+  useEffect(() => {
+    (async () => {
+      if (!cardanoWallet?.asyncKeyAgent) return;
+      await prepareAddressesDiscoverer({ chainName: environmentName, asyncKeyAgent: cardanoWallet?.asyncKeyAgent });
+    })();
+  }, [cardanoWallet?.asyncKeyAgent, environmentName, prepareAddressesDiscoverer]);
+
+  useEffect(() => {
+    const subscription = addressesDiscoverer.status$.subscribe(setHdDiscoveryStatus);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [addressesDiscoverer, setHdDiscoveryStatus]);
+
   useAddressesListener(
     useCallback(
       async (addresses) => {
+        if (!addresses) return;
         const { name } = getValueFromLocalStorage('wallet');
         setWalletInfo({
           name: name ?? 'Lace',

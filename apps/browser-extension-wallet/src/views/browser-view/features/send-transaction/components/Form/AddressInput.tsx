@@ -97,6 +97,8 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
   const resolveHandle = useMemo(
     () =>
       debounce(async () => {
+        setHandleVerificationState(HandleVerificationState.VERIFYING);
+
         if (isAddressInputInvalidHandle) {
           setHandleVerificationState(HandleVerificationState.INVALID);
         }
@@ -166,7 +168,6 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
     }
 
     if (isAddressInputValueHandle) {
-      setHandleVerificationState(HandleVerificationState.VERIFYING);
       resolveHandle();
     } else {
       setHandleVerificationState(undefined);

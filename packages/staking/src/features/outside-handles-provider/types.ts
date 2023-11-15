@@ -1,6 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { StakePoolSortOptions, Wallet } from '@lace/cardano';
 import { AssetActivityListProps } from '@lace/core';
+import type { IAnalyticsTracker } from '@lace/common';
 
 type WalletBalance = {
   coinBalance: string;
@@ -48,12 +49,8 @@ export interface IBlockchainProvider {
   rewardsProvider: Wallet.RewardsProvider;
 }
 
-export type StakingRewards = {
-  totalRewards: BigInt | number;
-  lastReward: BigInt | number;
-};
-
 export type OutsideHandlesContextValue = {
+  analytics: IAnalyticsTracker;
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   expandStakingView?: () => void;
   balancesBalance?: Balance;
@@ -106,6 +103,8 @@ export type OutsideHandlesContextValue = {
   compactNumber: (value: number | string, decimal?: number) => string;
   multidelegationFirstVisit: boolean;
   triggerMultidelegationFirstVisit: () => void;
+  multidelegationFirstVisitSincePortfolioPersistence: boolean;
+  triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;
   currentChain: Wallet.Cardano.ChainId;
 };

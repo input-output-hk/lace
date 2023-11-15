@@ -1,14 +1,22 @@
 import { OutsideHandlesProvider, Staking } from '@lace/staking';
 import React, { useCallback } from 'react';
-import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
+import {
+  useAnalyticsContext,
+  useBackgroundServiceAPIContext,
+  useCurrencyStore,
+  useExternalLinkOpener,
+  useTheme
+} from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useWalletManager } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
 import { useWalletActivities } from '@hooks/useWalletActivities';
-
-const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
+import {
+  MULTIDELEGATION_FIRST_VISIT_LS_KEY,
+  MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY
+} from '@utils/constants';
 
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
@@ -65,11 +73,17 @@ export const MultiDelegationStaking = (): JSX.Element => {
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const [
+    multidelegationFirstVisitSincePortfolioPersistence,
+    { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
+  ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
+  const analytics = useAnalyticsContext();
 
   return (
     <OutsideHandlesProvider
       {...{
+        analytics,
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         balancesBalance: balance,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
@@ -96,6 +110,11 @@ export const MultiDelegationStaking = (): JSX.Element => {
         compactNumber: compactNumberWithUnit,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        multidelegationFirstVisitSincePortfolioPersistence,
+        triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
+          setMultidelegationFirstVisit(false);
+          setMultidelegationFirstVisitSincePortfolioPersistence(false);
+        },
         walletAddress,
         currentChain
       }}

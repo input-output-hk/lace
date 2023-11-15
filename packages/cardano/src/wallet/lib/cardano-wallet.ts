@@ -23,7 +23,7 @@ import { WalletManagerActivateProps, WalletManagerUi } from '@cardano-sdk/web-ex
 import { ChainName, WalletManagerProviderTypes } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
 import { createWalletUtil } from '@cardano-sdk/wallet';
-// Using nodejs to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
+// Using nodejs CML version to satisfy the tests requirements, but this gets replaced by webpack to the browser version in the build
 import * as CML from '@dcspark/cardano-multiplatform-lib-nodejs';
 
 export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.SerializableKeyAgentData }>;
@@ -317,7 +317,6 @@ export const validateWalletMnemonic = async (
 export const shutdownWallet = async (walletManagerUi: WalletManagerUi): Promise<void> => {
   // Use wallet manager UI to shutdown the wallet
   await walletManagerUi.destroy();
-  // await walletManagerUi.clearStore(walletId);
 };
 
 export const switchKeyAgents = async (

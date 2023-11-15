@@ -2,12 +2,13 @@ import React from 'react';
 import create, { GetState, SetState } from 'zustand';
 import { Wallet } from '@lace/cardano';
 import { mockKeyAgentDataTestnet, mockWalletInfoTestnet } from './test-helpers';
-import { cardanoCoin, APP_MODE_BROWSER } from '@utils/constants';
+import { APP_MODE_BROWSER, cardanoCoin } from '@utils/constants';
 import { StateStatus, WalletStore } from '@stores/types';
 import { StoreProvider } from '@stores';
 import { WalletManagerUi } from '@cardano-sdk/web-extension';
 import { NetworkConnectionStates } from '@src/types';
 import { mockBlockchainProviders } from './blockchain-providers';
+import { AddressesDiscoveryStatus } from '@lib/communication';
 
 interface StoreProviderProps {
   children: React.ReactNode;
@@ -34,20 +35,21 @@ export const walletStoreMock = async (
     resetStakePools: jest.fn(),
     fetchStakePools: jest.fn(),
     getWalletActivitiesObservable: jest.fn(),
-    fetchingTransactionInfo: false,
-    getTransactionDetails: jest.fn(),
+    fetchingActivityInfo: false,
+    getActivityDetail: jest.fn(),
     inMemoryWallet: wallet as Wallet.ObservableWallet,
     getKeyAgentType: jest.fn(() => Wallet.KeyManagement.KeyAgentType.InMemory),
     // TODO: mock [LW-5454]
     cardanoWallet: undefined,
     isWalletLocked: jest.fn(() => false),
     networkStateStatus: StateStatus.LOADED,
-    resetTransactionState: jest.fn(),
+    resetActivityState: jest.fn(),
     resetWalletLock: jest.fn(),
     selectedStakePool: undefined,
     setCardanoWallet: jest.fn(),
     setSelectedStakePool: jest.fn(),
-    setTransactionDetail: jest.fn(),
+    setRewardsActivityDetail: jest.fn(),
+    setTransactionActivityDetail: jest.fn(),
     setWalletLock: jest.fn(),
     stakePoolSearchResults: { pageResults: [], totalResultCount: 0 },
     stakePoolSearchResultsStatus: StateStatus.LOADED,
@@ -79,8 +81,11 @@ export const walletStoreMock = async (
     walletManagerUi: { wallet, activate: jest.fn() } as unknown as WalletManagerUi,
     blockchainProvider: mockBlockchainProviders(),
     setBlockchainProvider: jest.fn(),
-    addressesDiscoveryCompleted: false,
+    initialHdDiscoveryCompleted: false,
     setAddressesDiscoveryCompleted: jest.fn(),
+    setDeletingWallet: jest.fn(),
+    hdDiscoveryStatus: AddressesDiscoveryStatus.Idle,
+    setHdDiscoveryStatus: jest.fn(),
     ...customStore
   };
 };

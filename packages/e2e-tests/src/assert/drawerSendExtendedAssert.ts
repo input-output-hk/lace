@@ -38,7 +38,7 @@ class DrawerSendExtendedAssert {
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.transactionCosts'));
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.transactionFee'));
     await webTester.seeWebElement(transactionNewPage.attributeValueAda());
-    await webTester.seeWebElement(transactionNewPage.attributeValueFiat());
+    await transactionNewPage.attributeValueFiat.waitForDisplayed();
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.footer.review'));
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.footer.cancel'));
     switch (mode) {
@@ -69,18 +69,16 @@ class DrawerSendExtendedAssert {
     await webTester.seeWebElement(transactionNewPage.coinConfigure().container());
 
     await webTester.seeWebElement(transactionNewPage.attributeLabel());
-    await expect(await webTester.getTextValueFromElement(transactionNewPage.attributeLabel())).to.equal(
+    expect(await webTester.getTextValueFromElement(transactionNewPage.attributeLabel())).to.equal(
       await t('browserView.transaction.send.transactionFee')
     );
 
     await webTester.seeWebElement(transactionNewPage.attributeValueAda());
-    await expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueAda())) as string).to.match(
+    expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueAda())) as string).to.match(
       TestnetPatterns.ADA_LITERAL_VALUE_REGEX
     );
-    await webTester.seeWebElement(transactionNewPage.attributeValueFiat());
-    await expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueFiat())) as string).to.match(
-      TestnetPatterns.USD_VALUE_REGEX
-    );
+    await transactionNewPage.attributeValueFiat.waitForDisplayed();
+    expect(await transactionNewPage.attributeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
 
   async assertSeeCoinSelectorWithTitle(expectedTokenName: string) {
@@ -94,20 +92,24 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeTransactionCosts(expectedValueAda: string) {
-    // may need to be updated in the future
-    await browser.pause(1000);
     const transactionNewPage = new TransactionNewPage();
+    if (expectedValueAda !== '0.00') {
+      await browser.waitUntil(async () => (await transactionNewPage.getValueAda()) !== 0, {
+        interval: 500,
+        timeout: 5000,
+        timeoutMsg: 'failed while waiting for transaction fee to change'
+      });
+    }
+
     const valueAda = (await transactionNewPage.getValueAda()) as number;
 
-    await expect(expectedValueAda).to.be.oneOf([
+    expect(expectedValueAda).to.be.oneOf([
       valueAda.toFixed(2).toString(),
       (valueAda + 0.01).toFixed(2).toString(),
       (valueAda - 0.01).toFixed(2).toString()
     ]);
 
-    await expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueFiat())) as string).to.match(
-      TestnetPatterns.USD_VALUE_REGEX
-    );
+    expect(await transactionNewPage.attributeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
 
   async assertSeeAdaAllocationCosts(expectedValueAdaAllocation: string) {
@@ -293,7 +295,10 @@ class DrawerSendExtendedAssert {
   }
 
   async assertReviewTransactionButtonIsEnabled(shouldBeEnabled: boolean) {
-    await new TransactionNewPage().reviewTransactionButton.waitForClickable({ reverse: !shouldBeEnabled });
+    await new TransactionNewPage().reviewTransactionButton.waitForClickable({
+      reverse: !shouldBeEnabled,
+      timeout: 10_000
+    });
   }
 
   async assertReviewTransactionButtonIsDisplayed(shouldBeDisplayed: boolean) {
@@ -357,7 +362,7 @@ class DrawerSendExtendedAssert {
 
   async assertSeeSearchLoader(shouldBeDisplayed: boolean) {
     const addressInput = new AddressInput();
-    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed, interval: 150 });
   }
 
   async assertAddressBookButtonEnabled(bundleIndex: number, shouldBeEnabled: boolean) {

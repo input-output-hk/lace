@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VotingProcedures } from '@lace/core';
 import { SignTxData } from './types';
-import { votingProceduresInspector } from './utils';
+import { drepIDasBech32FromHash, votingProceduresInspector } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
@@ -12,7 +12,7 @@ interface Props {
   errorMessage?: string;
 }
 
-const getVoterType = (voterType: Wallet.Cardano.VoterType): string => {
+const getVoterType = (voterType: Wallet.Cardano.VoterType): 'Constitutional Committee' | 'SPO' | 'DRep' => {
   switch (voterType) {
     case Wallet.Cardano.VoterType.ccHotKeyHash:
     case Wallet.Cardano.VoterType.ccHotScriptHash:
@@ -44,34 +44,45 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
   const { environmentName } = useWalletStore();
   const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
 
-  const explorerBaseUrl = useMemo(
-    () => `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`,
-    [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
-  );
+  const explorerBaseUrl = useMemo(() => {
+    if (environmentName === 'Sanchonet') {
+      return;
+    }
+    // eslint-disable-next-line consistent-return
+    return `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
+  }, [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]);
 
   return (
     <VotingProcedures
       dappInfo={signTxData.dappInfo}
-      data={votingProcedures.map((votingProcedure) => ({
-        voter: {
-          type: getVoterType(votingProcedure.voter.__typename),
-          dRepId: votingProcedure.voter.credential.hash.toString()
-        },
-        votes: votingProcedure.votes.map((vote) => ({
-          actionId: {
-            index: vote.actionId.actionIndex,
-            txHash: vote.actionId.id.toString(),
-            txHashUrl: `${explorerBaseUrl}/${vote.actionId.id}`
+      data={votingProcedures.map((votingProcedure) => {
+        const voterType = getVoterType(votingProcedure.voter.__typename);
+
+        const drepId =
+          voterType === 'DRep'
+            ? drepIDasBech32FromHash(votingProcedure.voter.credential.hash)
+            : votingProcedure.voter.credential.hash.toString();
+        return {
+          voter: {
+            type: voterType,
+            dRepId: drepId
           },
-          votingProcedure: {
-            vote: getVote(vote.votingProcedure.vote),
-            anchor: {
-              url: vote.votingProcedure.anchor?.url,
-              hash: vote.votingProcedure.anchor?.dataHash.toString()
+          votes: votingProcedure.votes.map((vote) => ({
+            actionId: {
+              index: vote.actionId.actionIndex,
+              txHash: vote.actionId.id.toString(),
+              txHashUrl: explorerBaseUrl && `${explorerBaseUrl}/${vote.actionId.id}`
+            },
+            votingProcedure: {
+              vote: getVote(vote.votingProcedure.vote),
+              anchor: !!vote.votingProcedure.anchor?.url && {
+                url: vote.votingProcedure.anchor?.url,
+                hash: vote.votingProcedure.anchor?.dataHash.toString()
+              }
             }
-          }
-        }))
-      }))}
+          }))
+        };
+      })}
       translations={{
         voterType: t('core.votingProcedures.voterType'),
         procedureTitle: t('core.votingProcedures.procedureTitle'),

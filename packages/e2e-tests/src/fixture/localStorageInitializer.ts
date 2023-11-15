@@ -64,6 +64,10 @@ class LocalStorageInitializer {
   disableShowingMultidelegationBetaBanner = async () => {
     await localStorageManager.setItem('multidelegationFirstVisit', 'false');
   };
+
+  disableShowingMultidelegationPersistenceBanner = async () => {
+    await localStorageManager.setItem('multidelegationFirstVisitSincePortfolioPersistence', 'false');
+  };
 }
 
 export default new LocalStorageInitializer();

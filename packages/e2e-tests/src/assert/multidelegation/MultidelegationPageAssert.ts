@@ -5,6 +5,7 @@ import { t } from '../../utils/translationService';
 import { TestnetPatterns } from '../../support/patterns';
 import NetworkComponent from '../../elements/multidelegation/NetworkInfoComponent';
 import { StakePoolListItem } from '../../elements/multidelegation/StakePoolListItem';
+import Tooltip from '../../elements/Tooltip';
 
 class MultidelegationPageAssert {
   assertSeeStakingOnPoolsCounter = async (poolsCount: number) => {
@@ -31,11 +32,20 @@ class MultidelegationPageAssert {
     expect(await MultidelegationPage.title.getText()).to.equal(await t('staking.sectionTitle'));
   };
 
+  assertSeeTabs = async () => {
+    await MultidelegationPage.overviewTab.waitForDisplayed();
+    expect(await MultidelegationPage.overviewTab.getText()).to.equal(await t('root.nav.overviewTitle', 'staking'));
+    await MultidelegationPage.browseTab.waitForDisplayed();
+    expect(await MultidelegationPage.browseTab.getText()).to.equal(await t('root.nav.browsePoolsTitle', 'staking'));
+  };
+
   assertSeeDelegationCardDetailsInfo = async () => {
     expect(await MultidelegationPage.delegationCardBalanceLabel.getText()).to.equal(
       await t('overview.delegationCard.label.balance', 'staking')
     );
-    const adaValue = Number((await MultidelegationPage.delegationCardBalanceValue.getText()).split(' ')[0]);
+    const adaValue = Number(
+      (await MultidelegationPage.delegationCardBalanceValue.getText()).split(' ')[0].replace(',', '')
+    );
     expect(adaValue).to.be.greaterThan(0);
     expect(await MultidelegationPage.delegationCardPoolsLabel.getText()).to.equal(
       await t('overview.delegationCard.label.pools', 'staking')
@@ -201,6 +211,35 @@ class MultidelegationPageAssert {
       default:
         throw new Error(`Unsupported column name: ${columnName}`);
     }
+  };
+
+  assertSeeStakePoolRow = async (index?: number) => {
+    const stakePoolListItem = new StakePoolListItem(index);
+    await stakePoolListItem.container.scrollIntoView();
+    await stakePoolListItem.logo.waitForDisplayed();
+    await stakePoolListItem.name.waitForDisplayed();
+    await stakePoolListItem.ticker.waitForDisplayed();
+    await stakePoolListItem.ros.waitForDisplayed();
+    await stakePoolListItem.saturation.waitForDisplayed();
+    expect(await stakePoolListItem.name.getText()).to.not.be.empty;
+    expect(await stakePoolListItem.ticker.getText()).to.not.be.empty;
+    expect(await stakePoolListItem.ros.getText()).to.equal('-');
+    // expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX); // TODO: update when issue with ROS not returned is resolved
+    expect(await stakePoolListItem.saturation.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  };
+
+  assertSeeStakePoolRows = async () => {
+    const rowsNumber = (await MultidelegationPage.poolsItems).length;
+
+    for (let i = 0; i < rowsNumber; i++) {
+      await this.assertSeeStakePoolRow(i);
+    }
+  };
+
+  assertSeeCurrentlyStakingTooltip = async () => {
+    await Tooltip.component.waitForDisplayed();
+    expect(await Tooltip.label.getText()).contains(await t('overview.stakingInfoCard.tooltipFiatLabel', 'staking'));
+    expect(await Tooltip.value.getText()).to.match(TestnetPatterns.USD_VALUE_NO_SUFFIX_REGEX); // TODO: update when LW-8935 is resolved
   };
 }
 

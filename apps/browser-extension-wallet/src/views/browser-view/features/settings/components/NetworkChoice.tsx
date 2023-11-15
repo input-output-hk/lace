@@ -26,14 +26,14 @@ type networkEventUserWalletProfile =
   | PostHogAction.UserWalletProfileNetworkMainnetClick
   | PostHogAction.UserWalletProfileNetworkSanchonetClick;
 
-const settingsEventByNetworkName: Partial<Record<Wallet.ChainName, networkEventSettings>> = {
+const settingsEventByNetworkName: Record<Wallet.ChainName, networkEventSettings> = {
   Mainnet: PostHogAction.SettingsNetworkMainnetClick,
   Preprod: PostHogAction.SettingsNetworkPreprodClick,
   Preview: PostHogAction.SettingsNetworkPreviewClick,
   Sanchonet: PostHogAction.SettingsNetworkSanchonetClick
 };
 
-const walletProfileEventByNetworkName: Partial<Record<Wallet.ChainName, networkEventUserWalletProfile>> = {
+const walletProfileEventByNetworkName: Record<Wallet.ChainName, networkEventUserWalletProfile> = {
   Mainnet: PostHogAction.UserWalletProfileNetworkMainnetClick,
   Preprod: PostHogAction.UserWalletProfileNetworkPreprodClick,
   Preview: PostHogAction.UserWalletProfileNetworkPreviewClick,

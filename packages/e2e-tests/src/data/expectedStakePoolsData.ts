@@ -68,7 +68,6 @@ export const getStakePoolById = (id: string, network?: 'testnet' | 'mainnet'): S
   const expectedPools = network === 'mainnet' ? StakePoolsMainnetArray : StakePoolsArray;
   for (const pool of expectedPools) {
     if (pool.poolId === id) {
-      console.info(`returning pool${pool.poolId} ${pool.name}`);
       return pool;
     }
   }

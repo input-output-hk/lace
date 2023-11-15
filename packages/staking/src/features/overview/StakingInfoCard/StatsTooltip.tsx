@@ -17,8 +17,8 @@ export const Tooltip = ({
     content ||
     (title && (
       <>
-        <div>{t('overview.stakingInfoCard.tooltipFiatLabel')}</div>
-        <div>{title}</div>
+        <div data-testid="tooltip-label">{t('overview.stakingInfoCard.tooltipFiatLabel')}</div>
+        <div data-testid="tooltip-value">{title}</div>
       </>
     ));
 

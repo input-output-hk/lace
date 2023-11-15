@@ -2,8 +2,11 @@ import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
 import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
-import { formatTime } from '@src/utils/format-date';
-import type { TransformedTx } from './types';
+import { formatDate, formatTime } from '@src/utils/format-date';
+import type { TransformedActivity, TransformedTransactionActivity } from './types';
+import { ActivityStatus } from '@lace/core';
+import capitalize from 'lodash/capitalize';
+import dayjs from 'dayjs';
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -12,10 +15,9 @@ export interface TxTransformerInput {
   fiatPrice?: number;
   protocolParameters: Wallet.ProtocolParameters;
   cardanoCoin: Wallet.CoinId;
-  time: Date;
+  date: Date;
   direction?: TxDirections;
   status?: Wallet.TransactionStatus;
-  date?: string;
 }
 
 export const getFormattedFiatAmount = ({
@@ -33,7 +35,7 @@ export const getFormattedFiatAmount = ({
   return fiatAmount ? `${fiatAmount} ${fiatCurrency.code}` : '-';
 };
 
-const splitDelegationTx = (tx: TransformedTx): TransformedTx[] => {
+const splitDelegationTx = (tx: TransformedActivity): TransformedTransactionActivity[] => {
   if (tx.deposit) {
     return [
       {
@@ -68,9 +70,23 @@ const splitDelegationTx = (tx: TransformedTx): TransformedTx[] => {
     ];
   }
 
-  return [];
+  return [
+    {
+      ...tx,
+      type: 'delegation'
+    }
+  ];
 };
 
+const transformTransactionStatus = (status: Wallet.TransactionStatus): ActivityStatus => {
+  const statuses = {
+    [Wallet.TransactionStatus.PENDING]: ActivityStatus.PENDING,
+    [Wallet.TransactionStatus.ERROR]: ActivityStatus.ERROR,
+    [Wallet.TransactionStatus.SUCCESS]: ActivityStatus.SUCCESS,
+    [Wallet.TransactionStatus.SPENDABLE]: ActivityStatus.SPENDABLE
+  };
+  return statuses[status];
+};
 /**
   Simplifies the transaction object to be used in the activity list
 
@@ -93,11 +109,10 @@ export const txTransformer = ({
   fiatPrice,
   protocolParameters,
   cardanoCoin,
-  time,
   date,
   direction,
   status
-}: TxTransformerInput): TransformedTx[] => {
+}: TxTransformerInput): TransformedTransactionActivity[] => {
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
   const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
   const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
@@ -110,8 +125,11 @@ export const txTransformer = ({
     direction
   });
   const outputAmount = new BigNumber(coins.toString());
-  const timestamp = formatTime({
-    date: time,
+  const formattedDate = dayjs().isSame(date, 'day')
+    ? 'Today'
+    : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });
+  const formattedTimestamp = formatTime({
+    date,
     type: 'local'
   });
 
@@ -121,18 +139,20 @@ export const txTransformer = ({
         .sort((a, b) => Number(b.val) - Number(a.val))
     : [];
 
-  const baseTransformedTx = {
+  const baseTransformedActivity = {
     id: tx.id.toString(),
     deposit,
     depositReclaim,
     fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-    status,
+    status: transformTransactionStatus(status),
     amount: Wallet.util.getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
     fiatAmount: getFormattedFiatAmount({ amount: outputAmount, fiatCurrency, fiatPrice }),
     assets: assetsEntries,
     assetsNumber: (assets?.size ?? 0) + 1,
     date,
-    timestamp
+    formattedDate:
+      status === Wallet.TransactionStatus.PENDING ? capitalize(Wallet.TransactionStatus.PENDING) : formattedDate,
+    formattedTimestamp
   };
 
   // Note that TxInFlight at type level does not expose its inputs with address,
@@ -142,12 +162,12 @@ export const txTransformer = ({
   const type = inspectTxType({ walletAddresses, tx: tx as unknown as Wallet.Cardano.HydratedTx });
 
   if (type === 'delegation') {
-    return splitDelegationTx(baseTransformedTx);
+    return splitDelegationTx(baseTransformedActivity);
   }
 
   return [
     {
-      ...baseTransformedTx,
+      ...baseTransformedActivity,
       type,
       direction
     }

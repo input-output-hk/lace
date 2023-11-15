@@ -112,7 +112,7 @@ describe('userIdService', () => {
       await userIdService.clearId();
       const newUserId = await userIdService.getUserId(1);
 
-      expect(clearStorageMock).toHaveBeenCalledWith(expect.arrayContaining(['userId', 'usePersistentUserId']));
+      expect(clearStorageMock).toHaveBeenCalledWith({ keys: ['userId', 'usePersistentUserId'] });
       expect(previousUserId).not.toEqual(newUserId);
       const subscription = userIdService.userTrackingType$.subscribe((trackingType) => {
         expect(trackingType).toEqual(UserTrackingType.Basic);
