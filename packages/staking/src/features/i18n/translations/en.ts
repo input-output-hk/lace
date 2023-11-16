@@ -1,6 +1,8 @@
 import { Translations } from '../types';
 
 export const en: Translations = {
+  'activity.rewardsHistory.noStakingActivityYet': 'No staking activity yet.',
+  'activity.rewardsHistory.title': 'History',
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
   'browsePools.stakePoolTableBrowser.disabledTooltip': 'Maximum number of pools selected',
   'browsePools.stakePoolTableBrowser.emptyMessage': 'No results matching your search',
@@ -110,9 +112,9 @@ export const en: Translations = {
   'overview.banners.pendingFirstDelegation.message':
     'You will see your staking portfolio here once the transaction has been validated',
   'overview.banners.pendingFirstDelegation.title': 'Your staking transaction has been submitted',
-  'overview.banners.pendingPoolMigration.message':
-    'You will continue to receive rewards from your former stake pool(s) for two epochs',
-  'overview.banners.pendingPoolMigration.title': 'You are migrating stake pool(s)',
+  'overview.banners.pendingPortfolioModification.message':
+    'In case of changing pools you will continue to receive rewards from your former stake pool(s) for two epochs',
+  'overview.banners.pendingPortfolioModification.title': 'You are modifying your staking portfolio',
   'overview.banners.portfolioDrifted.message':
     'Make sure to rebalance your staking ratios if you want to match your preferences',
   'overview.banners.portfolioDrifted.title': 'Your current delegation portfolio has shifted',
@@ -159,6 +161,7 @@ export const en: Translations = {
   'portfolioBar.maxPools': '(max {{maxPoolsCount}})',
   'portfolioBar.next': 'Next',
   'portfolioBar.selectedPools': '{{selectedPoolsCount}} pools selected',
+  'root.nav.activityTitle': 'Activity',
   'root.nav.browsePoolsTitle': 'Browse pools',
   'root.nav.overviewTitle': 'Overview',
   'root.nav.title': 'Staking Navigation',

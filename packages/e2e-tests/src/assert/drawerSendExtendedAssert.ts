@@ -362,7 +362,7 @@ class DrawerSendExtendedAssert {
 
   async assertSeeSearchLoader(shouldBeDisplayed: boolean) {
     const addressInput = new AddressInput();
-    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed, interval: 150 });
   }
 
   async assertAddressBookButtonEnabled(bundleIndex: number, shouldBeEnabled: boolean) {

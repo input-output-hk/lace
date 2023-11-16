@@ -68,7 +68,7 @@ jobs:
           storageType: s3
           resultsGlob: './packages/e2e-tests/reports/allure/results'
           bucket: lace-e2e-test-results
-          prefix: 'linux/${BROWSER}/${RUN}'
+          prefix: 'smoke/linux/${BROWSER}/${RUN}'
           copyLatest: true
           ignoreMissingResults: true
           updatePr: comment

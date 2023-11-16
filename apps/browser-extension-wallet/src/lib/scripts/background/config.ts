@@ -48,5 +48,6 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   getRandomizedUserId: RemoteApiPropertyType.MethodReturningPromise,
   getUserId: RemoteApiPropertyType.MethodReturningPromise,
   userTrackingType$: RemoteApiPropertyType.HotObservable,
+  isNewSession: RemoteApiPropertyType.MethodReturningPromise,
   resetToDefaultValues: RemoteApiPropertyType.MethodReturningPromise
 };

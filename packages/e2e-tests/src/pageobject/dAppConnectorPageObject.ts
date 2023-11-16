@@ -115,8 +115,8 @@ class DAppConnectorPageObject {
   ) {
     try {
       await this.switchToDappConnectorPopupAndAuthorize(testDAppDetails, mode);
-    } catch {
-      Logger.log('Failed to authorize Dapp. Retry will be executed');
+    } catch (error) {
+      Logger.log(`Failed to authorize Dapp. Retry will be executed. Error:\n${error}`);
       if ((await browser.getWindowHandles()).length === 3) {
         await this.closeDappConnectorWindowHandle();
       }

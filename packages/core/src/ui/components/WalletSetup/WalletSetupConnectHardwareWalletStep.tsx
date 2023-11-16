@@ -71,7 +71,7 @@ export const WalletSetupConnectHardwareWalletStep = ({
                 [styles.hdWallet]: true,
                 [styles.hdWalletActive]: isButtonActive(wallet)
               })}
-              data-testid="connect-hardware-wallet-button-ledger"
+              data-testid={`connect-hardware-wallet-button-${wallet.toLowerCase()}`}
             >
               {wallet in logoMap ? (
                 <Icon className={styles.logo} component={logoMap[wallet as keyof typeof logoMap]} />
