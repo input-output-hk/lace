@@ -7,10 +7,10 @@ import { Flex } from '../flex';
 import { UserProfile } from '../profile-picture';
 import * as Text from '../typography';
 
-import * as cx from './personal-dropdown-wallet-card.css';
-import { WalletIcon } from './personal-dropdown-wallet-icon.component';
+import * as cx from './profile-dropdown-wallet-card.css';
+import { WalletIcon } from './profile-dropdown-wallet-icon.component';
 
-import type { WalletType } from './personal-dropdown.data';
+import type { WalletType } from './profile-dropdown.data';
 
 export interface Props {
   title: {

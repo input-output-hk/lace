@@ -8,11 +8,11 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 
-import { WalletOption } from './personal-dropdown-wallet-option.component';
+import { WalletOption } from './profile-dropdown-wallet-option.component';
 const subtitle = `Component for the profile dropdown to represent the wallet type.`;
 
 export default {
-  title: 'Navigation and toolbars/Personal Dropdown/Wallet Option',
+  title: 'Navigation and toolbars/Profile Dropdown/Wallet Option',
   component: WalletOption,
   decorators: [page({ title: 'WalletOption', subtitle })],
   argTypes: {

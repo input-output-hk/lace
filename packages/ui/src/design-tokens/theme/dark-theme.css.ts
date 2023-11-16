@@ -250,26 +250,26 @@ const colors: Colors = {
   $text_link_label_color_visited: darkColorScheme.$primary_accent_purple,
   $text_link_label_color_disabled: lightColorScheme.$primary_grey,
 
-  $personal_dropdown_trigger_label_color: darkColorScheme.$primary_light_grey,
-  $personal_dropdown_trigger_label_color_pressed:
+  $profile_dropdown_trigger_label_color: darkColorScheme.$primary_light_grey,
+  $profile_dropdown_trigger_label_color_pressed:
     darkColorScheme.$primary_light_grey,
-  $personal_dropdown_trigger_container_borderColor:
+  $profile_dropdown_trigger_container_borderColor:
     darkColorScheme.$primary_mid_grey,
-  $personal_dropdown_trigger_container_bgColor: colorTransparent,
-  $personal_dropdown_trigger_container_bgColor_hover:
+  $profile_dropdown_trigger_container_bgColor: colorTransparent,
+  $profile_dropdown_trigger_container_bgColor_hover:
     darkColorScheme.$primary_light_black,
-  $personal_dropdown_trigger_container_bgColor_pressed:
+  $profile_dropdown_trigger_container_bgColor_pressed:
     darkColorScheme.$primary_mid_grey,
-  $personal_dropdown_trigger_container_outlineColor:
+  $profile_dropdown_trigger_container_outlineColor:
     darkColorScheme.$primary_accent_purple_0_3,
 
-  $personal_dropdown_wallet_option_container_bgColor_hover:
+  $profile_dropdown_wallet_option_container_bgColor_hover:
     darkColorScheme.$primary_mid_grey,
-  $personal_dropdown_wallet_option_container_bgColor_pressed:
+  $profile_dropdown_wallet_option_container_bgColor_pressed:
     darkColorScheme.$primary_dark_grey,
-  $personal_dropdown_wallet_option_container_outlineColor:
+  $profile_dropdown_wallet_option_container_outlineColor:
     darkColorScheme.$primary_accent_purple_0_3,
-  $personal_dropdown_wallet_option_label_color:
+  $profile_dropdown_wallet_option_label_color:
     darkColorScheme.$primary_light_grey,
 
   $data_blue: darkColorScheme.$secondary_data_blue,

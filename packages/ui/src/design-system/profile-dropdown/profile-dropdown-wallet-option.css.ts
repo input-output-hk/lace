@@ -10,7 +10,7 @@ export const container = style([
     justifyContent: 'center',
     background: '$transparent',
     borderRadius: '$small',
-    color: '$personal_dropdown_wallet_option_label_color',
+    color: '$profile_dropdown_wallet_option_label_color',
     px: '$8',
     py: '$16',
     width: '$fill',
@@ -26,17 +26,16 @@ export const container = style([
 
     ':hover': {
       background:
-        vars.colors.$personal_dropdown_wallet_option_container_bgColor_hover,
+        vars.colors.$profile_dropdown_wallet_option_container_bgColor_hover,
     },
 
     selectors: {
       '&:active': {
         background:
-          vars.colors
-            .$personal_dropdown_wallet_option_container_bgColor_pressed,
+          vars.colors.$profile_dropdown_wallet_option_container_bgColor_pressed,
       },
       '&:focus-visible:not(:active)': {
-        outlineColor: `${vars.colors.$personal_dropdown_trigger_container_outlineColor}`,
+        outlineColor: `${vars.colors.$profile_dropdown_trigger_container_outlineColor}`,
         outlineWidth: vars.spacing.$4,
         outlineStyle: 'solid',
       },

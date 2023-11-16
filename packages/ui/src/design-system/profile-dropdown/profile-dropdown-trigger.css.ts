@@ -8,13 +8,13 @@ export const container = style([
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '$personal_dropdown_trigger_container_bgColor',
+    background: '$profile_dropdown_trigger_container_bgColor',
     borderRadius: '$medium',
     padding: '$8',
-    color: '$personal_dropdown_trigger_label_color',
+    color: '$profile_dropdown_trigger_label_color',
   }),
   {
-    border: `2px solid ${vars.colors.$personal_dropdown_trigger_container_borderColor}`,
+    border: `2px solid ${vars.colors.$profile_dropdown_trigger_container_borderColor}`,
     outline: 'none',
     cursor: 'pointer',
 
@@ -23,19 +23,18 @@ export const container = style([
     },
 
     ':hover': {
-      background:
-        vars.colors.$personal_dropdown_trigger_container_bgColor_hover,
-      color: vars.colors.$personal_dropdown_trigger_label_color_pressed,
+      background: vars.colors.$profile_dropdown_trigger_container_bgColor_hover,
+      color: vars.colors.$profile_dropdown_trigger_label_color_pressed,
     },
 
     selectors: {
       '&:active': {
         background:
-          vars.colors.$personal_dropdown_trigger_container_bgColor_pressed,
-        color: vars.colors.$personal_dropdown_trigger_label_color_pressed,
+          vars.colors.$profile_dropdown_trigger_container_bgColor_pressed,
+        color: vars.colors.$profile_dropdown_trigger_label_color_pressed,
       },
       '&:focus-visible:not(:active)': {
-        outlineColor: `${vars.colors.$personal_dropdown_trigger_container_outlineColor}`,
+        outlineColor: `${vars.colors.$profile_dropdown_trigger_container_outlineColor}`,
         outlineWidth: vars.spacing.$4,
         outlineStyle: 'solid',
       },

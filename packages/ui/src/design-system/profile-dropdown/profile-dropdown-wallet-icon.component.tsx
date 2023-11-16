@@ -6,9 +6,9 @@ import { ReactComponent as SharedWallet } from '../../assets/icons/user-group.co
 import { ReactComponent as HotWallet } from '../../assets/icons/wallet.component.svg';
 import { Flex } from '../flex';
 
-import * as cx from './personal-dropdown-wallet-icon.css';
+import * as cx from './profile-dropdown-wallet-icon.css';
 
-import type { WalletType } from './personal-dropdown.data';
+import type { WalletType } from './profile-dropdown.data';
 
 export interface Props {
   type: WalletType;

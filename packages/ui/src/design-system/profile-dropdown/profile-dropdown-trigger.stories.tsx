@@ -8,11 +8,11 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 
-import { Trigger } from './personal-dropdown-trigger.component';
+import { Trigger } from './profile-dropdown-trigger.component';
 const subtitle = `Reusable button component for use in a variety of controls containing only an icon for its content.`;
 
 export default {
-  title: 'Navigation and toolbars/Personal Dropdown/Trigger',
+  title: 'Navigation and toolbars/Profile Dropdown/Trigger',
   component: Trigger,
   decorators: [page({ title: 'Trigger', subtitle })],
   argTypes: {

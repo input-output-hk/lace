@@ -8,10 +8,10 @@ import { ReactComponent as ChevronUp } from '../../assets/icons/chevron-up.compo
 import { Box } from '../box';
 import { Flex } from '../flex';
 
-import * as cx from './personal-dropdown-trigger.css';
-import { WalletCard } from './personal-dropdown-wallet-card.component';
+import * as cx from './profile-dropdown-trigger.css';
+import { WalletCard } from './profile-dropdown-wallet-card.component';
 
-import type { WalletType } from './personal-dropdown.data';
+import type { WalletType } from './profile-dropdown.data';
 
 export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   disabled?: boolean;
@@ -30,7 +30,7 @@ export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
 const makeTestId = (namespace = '', path = ''): string => {
   return namespace === ''
     ? namespace
-    : `personal-dropdown-trigger-${namespace}${path}`;
+    : `profile-dropdown-trigger-${namespace}${path}`;
 };
 
 export const Trigger = ({

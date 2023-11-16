@@ -8,10 +8,10 @@ import { Box } from '../box';
 import { Icon as IconButton } from '../control-buttons';
 import { Flex } from '../flex';
 
-import { WalletCard } from './personal-dropdown-wallet-card.component';
-import * as cx from './personal-dropdown-wallet-option.css';
+import { WalletCard } from './profile-dropdown-wallet-card.component';
+import * as cx from './profile-dropdown-wallet-option.css';
 
-import type { WalletType } from './personal-dropdown.data';
+import type { WalletType } from './profile-dropdown.data';
 
 export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   disabled?: boolean;
