@@ -273,14 +273,14 @@ const colors: Colors = {
 
   $personal_dropdown_trigger_label_color: lightColorScheme.$primary_dark_grey,
   $personal_dropdown_trigger_label_color_pressed:
-    lightColorScheme.$primary_black,
+    lightColorScheme.$primary_dark_grey,
   $personal_dropdown_trigger_container_borderColor:
-    lightColorScheme.$primary_light_grey,
+    lightColorScheme.$primary_light_grey_plus,
   $personal_dropdown_trigger_container_bgColor: lightColorScheme.$primary_white,
   $personal_dropdown_trigger_container_bgColor_hover:
     lightColorScheme.$primary_light_grey,
   $personal_dropdown_trigger_container_bgColor_pressed:
-    lightColorScheme.$primary_white,
+    lightColorScheme.$primary_light_grey_0_56,
   $personal_dropdown_trigger_container_outlineColor:
     lightColorScheme.$primary_accent_purple_0_3,
 };

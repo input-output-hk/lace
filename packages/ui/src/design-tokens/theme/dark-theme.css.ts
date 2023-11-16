@@ -252,7 +252,7 @@ const colors: Colors = {
 
   $personal_dropdown_trigger_label_color: darkColorScheme.$primary_light_grey,
   $personal_dropdown_trigger_label_color_pressed:
-    darkColorScheme.$primary_white,
+    darkColorScheme.$primary_light_grey,
   $personal_dropdown_trigger_container_borderColor:
     darkColorScheme.$primary_mid_grey,
   $personal_dropdown_trigger_container_bgColor: colorTransparent,
