@@ -18,7 +18,12 @@ import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
-import { closeAllTabsExceptActiveOne, switchToLastWindow, switchToWindowWithLace } from '../utils/window';
+import {
+  closeAllTabsExceptActiveOne,
+  switchToLastWindow,
+  switchToWindowWithLace,
+  switchToWindowWithRetry
+} from '../utils/window';
 import { Given } from '@wdio/cucumber-framework';
 import tokensPageObject from '../pageobject/tokensPageObject';
 import menuMainAssert from '../assert/menuMainAssert';
@@ -140,6 +145,8 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await localStorageManager.cleanLocalStorage();
   await localStorageInitializer.initializeWallet(walletName);
   await browser.refresh();
+  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertLogoPresent();
   await mainMenuPageObject.navigateToSection('Tokens', mode);
 });
@@ -194,6 +201,10 @@ Then(/^I press keyboard (Enter|Escape) button$/, async (key: 'Enter' | 'Escape')
 Then(/^I switch to last window$/, async () => {
   await browser.pause(1000);
   await switchToLastWindow();
+});
+
+Then(/^I switch to window with title: ([^"]*)$/, async (url: string) => {
+  await switchToWindowWithRetry(url);
 });
 
 Then(/^I see a different wallet address than in my initial wallet$/, async () => {

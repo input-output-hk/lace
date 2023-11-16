@@ -185,6 +185,7 @@ export enum PostHogAction {
   UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
   // Lace Logo
   WalletLaceClick = 'wallet | lace | click',
+  WalletSessionStartPageview = 'wallet | session start | pageview',
   // Tokens
   TokenTokensClick = 'token | tokens | click',
   TokenTokensTokenRowClick = 'token | tokens | token row | click',
