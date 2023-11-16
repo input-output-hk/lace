@@ -14,7 +14,7 @@ import * as cx from './personal-dropdown-trigger.css';
 
 export type Props = ComponentPropsWithoutRef<'button'> & {
   disabled?: boolean;
-  open?: boolean;
+  active?: boolean;
   title: string;
   subtitle: string;
   profile: {
@@ -25,10 +25,16 @@ export type Props = ComponentPropsWithoutRef<'button'> & {
   };
 };
 
+const makeTestId = (namespace?: string, path?: string): string | undefined => {
+  return namespace === undefined
+    ? undefined
+    : `personal-dropdown-trigger-${namespace}${path === undefined ? '' : path}`;
+};
+
 export const Trigger = ({
   id,
   disabled,
-  open = false,
+  active = false,
   className,
   title,
   subtitle,
@@ -41,14 +47,24 @@ export const Trigger = ({
       id={id}
       disabled={disabled}
       className={classNames(cx.button, cx.container, className)}
+      data-testid={makeTestId(id)}
     >
       <Flex alignItems="center">
         <Flex>
           <UserProfile {...profile} radius="rounded" />
           <Flex flexDirection="column" ml="$10" h="$32" alignItems="flex-start">
-            <Text.Label className={cx.title}>{title}</Text.Label>
+            <Text.Label
+              className={cx.title}
+              data-testid={makeTestId(id, '-title')}
+            >
+              {title}
+            </Text.Label>
             <Box className={cx.subtitleOffset}>
-              <Text.Body.Small weight="$semibold" className={cx.subtitle}>
+              <Text.Body.Small
+                weight="$semibold"
+                className={cx.subtitle}
+                data-testid={makeTestId(id, '-subtitle')}
+              >
                 {subtitle}
               </Text.Body.Small>
             </Box>
@@ -56,7 +72,11 @@ export const Trigger = ({
         </Flex>
         <Box ml="$10">
           <Flex w="$16" h="$16" alignItems="center" justifyContent="center">
-            {open ? <ChevronUp /> : <ChevronDown />}
+            {active ? (
+              <ChevronUp data-testid={makeTestId(id, '-chevron-up')} />
+            ) : (
+              <ChevronDown data-testid={makeTestId(id, '-chevron-down')} />
+            )}
           </Flex>
         </Box>
       </Flex>

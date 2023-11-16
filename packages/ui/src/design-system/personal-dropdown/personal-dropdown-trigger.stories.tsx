@@ -23,7 +23,12 @@ export default {
 const Sample = ({
   disabled,
   id,
-}: Readonly<{ disabled?: boolean; id?: string }>): JSX.Element => (
+  active,
+}: Readonly<{
+  disabled?: boolean;
+  id?: string;
+  active?: boolean;
+}>): JSX.Element => (
   <Trigger
     profile={{
       fallback: '0',
@@ -33,6 +38,7 @@ const Sample = ({
     subtitle="Account #0"
     disabled={disabled}
     id={id}
+    active={active}
   />
 );
 
@@ -46,7 +52,7 @@ const Buttons = (): JSX.Element => (
         <Sample id="hover" />
       </Variants.Cell>
       <Variants.Cell>
-        <Sample id="pressed" />
+        <Sample id="pressed" active />
       </Variants.Cell>
       <Variants.Cell>
         <Sample disabled />
