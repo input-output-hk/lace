@@ -42,16 +42,3 @@ export const container = style([
     },
   },
 ]);
-
-export const subtitleOffset = style({
-  top: '-2px',
-  position: 'relative',
-});
-
-export const title = sx({
-  color: '$text_secondary',
-});
-
-export const subtitle = sx({
-  color: '$text_primary',
-});

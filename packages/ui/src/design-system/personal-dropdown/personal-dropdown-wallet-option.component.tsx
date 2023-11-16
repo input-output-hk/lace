@@ -7,32 +7,33 @@ import { ReactComponent as ChevronRight } from '../../assets/icons/chevron-right
 import { Box } from '../box';
 import { Icon as IconButton } from '../control-buttons';
 import { Flex } from '../flex';
-import { UserProfile } from '../profile-picture';
-import * as Text from '../typography';
 
+import { WalletCard } from './personal-dropdown-wallet-card.component';
 import * as cx from './personal-dropdown-wallet-option.css';
 
-export type Props = ComponentPropsWithoutRef<'button'> & {
+import type { WalletType } from './personal-dropdown.data';
+
+export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   disabled?: boolean;
-  open?: boolean;
   title: string;
   subtitle: string;
-  profile: {
+  profile?: {
     imageSrc: string;
     fallback: string;
     alt?: string;
     delayMs?: number;
   };
+  type: WalletType;
 };
 
 export const WalletOption = ({
   id,
   disabled,
-  open = false,
   className,
   title,
   subtitle,
   profile,
+  type,
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
@@ -43,17 +44,15 @@ export const WalletOption = ({
       className={classNames(cx.button, cx.container, className)}
     >
       <Flex alignItems="center" justifyContent="space-between" w="$fill">
-        <Flex>
-          <UserProfile {...profile} radius="rounded" />
-          <Flex flexDirection="column" ml="$10" h="$32" alignItems="flex-start">
-            <Text.Address className={cx.title}>{title}</Text.Address>
-            <Box className={cx.subtitleOffset}>
-              <Text.Body.Small weight="$semibold" className={cx.subtitle}>
-                {subtitle}
-              </Text.Body.Small>
-            </Box>
-          </Flex>
-        </Flex>
+        <WalletCard
+          profile={profile}
+          title={{
+            text: title,
+            type: 'content',
+          }}
+          subtitle={subtitle}
+          type={type}
+        />
         <Box ml="$10">
           <Flex
             className={cx.iconButton}

@@ -9,7 +9,7 @@ import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 
 import { WalletOption } from './personal-dropdown-wallet-option.component';
-const subtitle = `Reusable button component for use in a variety of controls containing only an icon for its content.`;
+const subtitle = `Component for the profile dropdown to represent the wallet type.`;
 
 export default {
   title: 'Navigation and toolbars/Personal Dropdown/Wallet Option',
@@ -20,44 +20,39 @@ export default {
   },
 } as Meta;
 
-const Sample = ({
+const WalletOptionSample = ({
   disabled,
   id,
 }: Readonly<{ disabled?: boolean; id?: string }>): JSX.Element => (
   <div style={{ width: '228px' }}>
     <WalletOption
-      profile={{
-        fallback: '0',
-        imageSrc: '',
-      }}
       title="Alice's wallet"
       subtitle="Account #0"
       disabled={disabled}
       id={id}
+      type="hot"
     />
   </div>
 );
 
 const Buttons = (): JSX.Element => (
-  <>
-    <Variants.Row>
-      <Variants.Cell>
-        <Sample />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Sample id="hover" />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Sample id="pressed" />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Sample disabled />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Sample id="focused" />
-      </Variants.Cell>
-    </Variants.Row>
-  </>
+  <Variants.Row>
+    <Variants.Cell>
+      <WalletOptionSample />
+    </Variants.Cell>
+    <Variants.Cell>
+      <WalletOptionSample id="hover" />
+    </Variants.Cell>
+    <Variants.Cell>
+      <WalletOptionSample id="pressed" />
+    </Variants.Cell>
+    <Variants.Cell>
+      <WalletOptionSample disabled />
+    </Variants.Cell>
+    <Variants.Cell>
+      <WalletOptionSample id="focused" />
+    </Variants.Cell>
+  </Variants.Row>
 );
 
 export const Overview = (): JSX.Element => (
@@ -65,7 +60,33 @@ export const Overview = (): JSX.Element => (
     <Cell>
       <Section title="Examples">
         <Flex flexDirection="column" alignItems="center" w="$fill">
-          <Sample />
+          <Variants.Table
+            headers={['Hot wallet', 'Cold wallet', 'Shared wallet']}
+          >
+            <Variants.Row>
+              <Variants.Cell>
+                <WalletOption
+                  title="Alice's wallet"
+                  subtitle="Account #0"
+                  type="hot"
+                />
+              </Variants.Cell>
+              <Variants.Cell>
+                <WalletOption
+                  title="Alice's wallet"
+                  subtitle="Account #0"
+                  type="cold"
+                />
+              </Variants.Cell>
+              <Variants.Cell>
+                <WalletOption
+                  title="Alice's wallet"
+                  subtitle="Account #0"
+                  type="shared"
+                />
+              </Variants.Cell>
+            </Variants.Row>
+          </Variants.Table>
         </Flex>
       </Section>
 

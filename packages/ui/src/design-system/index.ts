@@ -26,4 +26,4 @@ export { Message } from './message';
 export { PasswordBox } from './password-box';
 export { Metadata } from './metadata';
 export { TextLink } from './text-link';
-export * as PersonalDropdown from './personal-dropdown';
+export * as ProfileDropdown from './personal-dropdown';

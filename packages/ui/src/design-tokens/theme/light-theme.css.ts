@@ -283,6 +283,18 @@ const colors: Colors = {
     lightColorScheme.$primary_light_grey_0_56,
   $personal_dropdown_trigger_container_outlineColor:
     lightColorScheme.$primary_accent_purple_0_3,
+
+  $personal_dropdown_wallet_option_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $personal_dropdown_wallet_option_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $personal_dropdown_wallet_option_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $personal_dropdown_wallet_option_label_color: lightColorScheme.$primary_black,
+
+  $data_blue: lightColorScheme.$secondary_data_blue,
+  $data_green: lightColorScheme.$secondary_data_green,
+  $data_pink: lightColorScheme.$secondary_data_pink,
 };
 
 export const elevation: Elevation = {

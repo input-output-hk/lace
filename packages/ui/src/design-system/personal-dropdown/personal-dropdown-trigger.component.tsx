@@ -7,28 +7,30 @@ import { ReactComponent as ChevronDown } from '../../assets/icons/chevron-down.c
 import { ReactComponent as ChevronUp } from '../../assets/icons/chevron-up.component.svg';
 import { Box } from '../box';
 import { Flex } from '../flex';
-import { UserProfile } from '../profile-picture';
-import * as Text from '../typography';
 
 import * as cx from './personal-dropdown-trigger.css';
+import { WalletCard } from './personal-dropdown-wallet-card.component';
 
-export type Props = ComponentPropsWithoutRef<'button'> & {
+import type { WalletType } from './personal-dropdown.data';
+
+export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   disabled?: boolean;
   active?: boolean;
   title: string;
   subtitle: string;
-  profile: {
+  profile?: {
     imageSrc: string;
     fallback: string;
     alt?: string;
     delayMs?: number;
   };
+  type: WalletType;
 };
 
-const makeTestId = (namespace?: string, path?: string): string | undefined => {
-  return namespace === undefined
-    ? undefined
-    : `personal-dropdown-trigger-${namespace}${path === undefined ? '' : path}`;
+const makeTestId = (namespace = '', path = ''): string => {
+  return namespace === ''
+    ? namespace
+    : `personal-dropdown-trigger-${namespace}${path}`;
 };
 
 export const Trigger = ({
@@ -39,6 +41,7 @@ export const Trigger = ({
   title,
   subtitle,
   profile,
+  type,
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
@@ -50,26 +53,13 @@ export const Trigger = ({
       data-testid={makeTestId(id)}
     >
       <Flex alignItems="center">
-        <Flex>
-          <UserProfile {...profile} radius="rounded" />
-          <Flex flexDirection="column" ml="$10" h="$32" alignItems="flex-start">
-            <Text.Label
-              className={cx.title}
-              data-testid={makeTestId(id, '-title')}
-            >
-              {title}
-            </Text.Label>
-            <Box className={cx.subtitleOffset}>
-              <Text.Body.Small
-                weight="$semibold"
-                className={cx.subtitle}
-                data-testid={makeTestId(id, '-subtitle')}
-              >
-                {subtitle}
-              </Text.Body.Small>
-            </Box>
-          </Flex>
-        </Flex>
+        <WalletCard
+          profile={profile}
+          title={{ text: title, type: 'button' }}
+          subtitle={subtitle}
+          type={type}
+        />
+
         <Box ml="$10">
           <Flex w="$16" h="$16" alignItems="center" justifyContent="center">
             {active ? (

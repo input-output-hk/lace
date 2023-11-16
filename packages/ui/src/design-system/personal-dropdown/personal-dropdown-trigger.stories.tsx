@@ -20,7 +20,7 @@ export default {
   },
 } as Meta;
 
-const Sample = ({
+const TriggerSample = ({
   disabled,
   id,
   active,
@@ -30,38 +30,33 @@ const Sample = ({
   active?: boolean;
 }>): JSX.Element => (
   <Trigger
-    profile={{
-      fallback: '0',
-      imageSrc: '',
-    }}
     title="Alice's wallet"
     subtitle="Account #0"
     disabled={disabled}
     id={id}
     active={active}
+    type="hot"
   />
 );
 
 const Buttons = (): JSX.Element => (
-  <>
-    <Variants.Row>
-      <Variants.Cell>
-        <Sample />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Sample id="hover" />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Sample id="pressed" active />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Sample disabled />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Sample id="focused" />
-      </Variants.Cell>
-    </Variants.Row>
-  </>
+  <Variants.Row>
+    <Variants.Cell>
+      <TriggerSample />
+    </Variants.Cell>
+    <Variants.Cell>
+      <TriggerSample id="hover" />
+    </Variants.Cell>
+    <Variants.Cell>
+      <TriggerSample id="pressed" active />
+    </Variants.Cell>
+    <Variants.Cell>
+      <TriggerSample disabled />
+    </Variants.Cell>
+    <Variants.Cell>
+      <TriggerSample id="focused" />
+    </Variants.Cell>
+  </Variants.Row>
 );
 
 export const Overview = (): JSX.Element => (
@@ -69,7 +64,7 @@ export const Overview = (): JSX.Element => (
     <Cell>
       <Section title="Examples">
         <Flex flexDirection="column" alignItems="center" w="$fill">
-          <Sample />
+          <TriggerSample />
         </Flex>
       </Section>
 

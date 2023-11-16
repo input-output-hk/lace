@@ -189,6 +189,15 @@ export const colors = {
   $personal_dropdown_trigger_container_outlineColor: '',
   $personal_dropdown_trigger_label_color: '',
   $personal_dropdown_trigger_label_color_pressed: '',
+
+  $personal_dropdown_wallet_option_container_bgColor_hover: '',
+  $personal_dropdown_wallet_option_container_bgColor_pressed: '',
+  $personal_dropdown_wallet_option_container_outlineColor: '',
+  $personal_dropdown_wallet_option_label_color: '',
+
+  $data_pink: '',
+  $data_blue: '',
+  $data_green: '',
 };
 
 export type Colors = typeof colors;
