@@ -272,9 +272,13 @@ const colors: Colors = {
   $profile_dropdown_wallet_option_label_color:
     darkColorScheme.$primary_light_grey,
 
+  $profile_dropdown_wallet_status_container_borderColor:
+    darkColorScheme.$primary_mid_grey,
+
   $data_blue: darkColorScheme.$secondary_data_blue,
   $data_green: darkColorScheme.$secondary_data_green,
   $data_pink: darkColorScheme.$secondary_data_pink,
+  $data_yellow: darkColorScheme.$secondary_lace_yellow,
 };
 
 const elevation: Elevation = {

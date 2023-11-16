@@ -43,6 +43,6 @@ export const container = style([
   },
 ]);
 
-export const iconButton = style({
+export const icon = style({
   transform: 'scale(.5)',
 });

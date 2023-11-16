@@ -55,7 +55,7 @@ export const WalletOption = ({
         />
         <Box ml="$10">
           <Flex
-            className={cx.iconButton}
+            className={cx.icon}
             w="$24"
             h="$24"
             alignItems="center"

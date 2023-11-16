@@ -195,9 +195,12 @@ export const colors = {
   $profile_dropdown_wallet_option_container_outlineColor: '',
   $profile_dropdown_wallet_option_label_color: '',
 
+  $profile_dropdown_wallet_status_container_borderColor: '',
+
   $data_pink: '',
   $data_blue: '',
   $data_green: '',
+  $data_yellow: '',
 };
 
 export type Colors = typeof colors;
