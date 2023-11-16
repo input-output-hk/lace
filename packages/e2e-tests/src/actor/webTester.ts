@@ -3,7 +3,6 @@
 import { browser } from '@wdio/globals';
 import { WebElement } from '../elements/webElement';
 import { Logger } from '../support/logger';
-import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import crypto from 'crypto';
 
 export type LocatorStrategy = 'css selector' | 'xpath';
@@ -34,57 +33,6 @@ export default new (class WebTester {
 
   async dontSeeWebElement(element: WebElement, timeout = 3000) {
     await this.dontSeeElement(element.toJSLocator(), timeout);
-  }
-
-  // ugly but resolves some webdriver vs react issues
-  // simple setValue() just does not work!
-  async fillField(selector: string, value: string) {
-    try {
-      await this.clearInputText(selector);
-      await value
-        .split('')
-        // eslint-disable-next-line unicorn/no-array-reduce
-        .reduce(async (prev: Promise<string>, current: string) => {
-          const nextString = `${await prev}${current}`;
-          await $(selector).addValue(current);
-          await $(selector).waitUntil(
-            async () => {
-              const text = await $(selector).getValue();
-              return text === nextString;
-            },
-            {
-              timeout: 5000,
-              interval: 100
-            }
-          );
-
-          return nextString;
-        }, Promise.resolve(''));
-    } catch (error) {
-      Logger.log(`SetInputValue Error: ${error}`);
-    }
-  }
-
-  // workaround because $(selector).clearValue() does not work
-  async clearInputText(selector: string): Promise<void> {
-    const selectorValue = await $(selector).getValue();
-    if (selectorValue !== null) {
-      await clearInputFieldValue(selector);
-    }
-  }
-
-  // eslint-disable-next-line no-undef
-  async clearInputWebElement(selector: WebdriverIO.Element): Promise<void> {
-    const elementValue = await selector.getValue();
-    if (elementValue !== null) {
-      await selector.click();
-      process.platform === 'darwin' ? await browser.keys(['Command', 'a']) : await browser.keys(['Control', 'a']);
-      await browser.keys('Backspace');
-    }
-  }
-
-  async fillComponent(component: WebElement, value: string) {
-    await this.fillField(component.toJSLocator(), value);
   }
 
   async clickOnElement(selector: string, locatorStrategy?: LocatorStrategy): Promise<void> {
