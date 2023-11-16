@@ -15,6 +15,12 @@ type KeysStructure = {
       close: '';
     };
   };
+  activity: {
+    rewardsHistory: {
+      title: '';
+      noStakingActivityYet: '';
+    };
+  };
   browsePools: {
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
@@ -241,6 +247,7 @@ type KeysStructure = {
   root: {
     title: '';
     nav: {
+      activityTitle: '';
       browsePoolsTitle: '';
       title: '';
       overviewTitle: '';
