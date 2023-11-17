@@ -40,7 +40,9 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
         saturation: Percent(0.0512),
         stake: undefined,
         size: undefined,
-        apy: Percent(0.013)
+        apy: Percent(0.013),
+        lastRos: Percent(1),
+        ros: Percent(2)
       },
       owners: [
         Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),

@@ -126,7 +126,9 @@ const getDetailsForAll = (): PoolDetails => ({
     livePledge: BigInt('2000000000'),
     saturation: Percent(0.95),
     size: undefined,
-    stake: undefined
+    stake: undefined,
+    lastRos: Percent(1),
+    ros: Percent(2)
   },
   relays: undefined,
   rewardAccount: Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
