@@ -15,28 +15,25 @@ import { shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import AddressForm from '../elements/addressbook/AddressForm';
-import { clearInputFieldValue, setInputFieldValue } from '../utils/inputFieldUtils';
 
 export default new (class NewTransactionExtendedPageObject {
   fillAddress = async (address: string, index?: number) => {
     // Workaround - native method setValue() is failing during filling multiple bundles
     await browser.pause(500); // TODO: refactor AddressInput class and use waitForClickable() method
-    await setInputFieldValue(new AddressInput(index).input().toJSLocator(), address);
+    await $(new AddressInput(index).input().toJSLocator()).click();
+    await browser.execute(`document.execCommand('insertText', false, '${address}');`);
+    Logger.log(`Filled address: ${address}`);
   };
 
   fillAddressWithFirstChars = async (address: string, characters: number) => {
     await browser.pause(500);
-    await setInputFieldValue(
-      new TransactionNewPage().addressInput().input().toJSLocator(),
-      address.slice(0, characters)
-    );
+    await webTester.fillComponent(new TransactionNewPage().addressInput().input(), address.slice(0, characters));
     await browser.pause(500);
   };
 
   fillTokenValue = async (valueToEnter: number, assetName?: string, bundleIndex = 1) => {
     await browser.pause(400);
-    await setInputFieldValue(new CoinConfigure(bundleIndex, assetName).input().toJSLocator(), String(valueToEnter));
-    await browser.keys('Enter');
+    await webTester.fillComponent(new CoinConfigure(bundleIndex, assetName).input(), String(valueToEnter));
   };
 
   fillTokenValueWithoutClearingField = async (valueToEnter: number, assetName?: string, bundleIndex = 1) => {
@@ -138,6 +135,10 @@ export default new (class NewTransactionExtendedPageObject {
     await webTester.clickElement(new AssetInput().assetAddButtonMultiple(bundleIndex));
   };
 
+  async clickAddAssetButton() {
+    await webTester.clickElement(new AssetInput().assetAddButton());
+  }
+
   clickAddressBookSearchResult = async (index: number) => {
     await webTester.clickElement(new TransactionNewPage().addressBookSearchResultRow(index));
   };
@@ -166,7 +167,7 @@ export default new (class NewTransactionExtendedPageObject {
   clickMaxButton = async (bundleIndex: number, assetName: string) => {
     await browser.pause(1000);
     const bundle = new CoinConfigure(bundleIndex, assetName);
-    await clearInputFieldValue(bundle.input().toJSLocator());
+    await webTester.clearInputWebElement(await $(bundle.input().toJSLocator()));
     await webTester.hoverOnWebElement(bundle.input());
     await webTester.clickElement(bundle.assetMaxButton());
   };
@@ -209,7 +210,7 @@ export default new (class NewTransactionExtendedPageObject {
     if (assetName === 'random characters') {
       assetName = await webTester.generateRandomString(10);
     }
-    await setInputFieldValue(new TokenSearchResult().searchInput().toJSLocator(), assetName);
+    await webTester.fillComponent(new TokenSearchResult().searchInput(), assetName);
   };
 
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {

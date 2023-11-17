@@ -314,7 +314,7 @@ Feature: General Settings - Popup View
     Given I open settings from header menu
     Then I see analytics option with proper description and toggle
 
-  # this test should be executed as the last one in this suite
+    # this test should be executed as the last one in this suite
   @LW-2708 @Mainnet @Testnet
   Scenario: Popup View - Remove wallet and confirm
     Given I am on Tokens popup page

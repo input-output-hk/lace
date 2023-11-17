@@ -48,7 +48,7 @@ export class CoinConfigure extends WebElement {
   }
 
   get insufficientBalanceError(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.INSUFFICIENT_BALANCE_ERROR}`);
+    return $(this.CONTAINER).$(this.INSUFFICIENT_BALANCE_ERROR);
   }
 
   assetMaxButton(): WebElement {
