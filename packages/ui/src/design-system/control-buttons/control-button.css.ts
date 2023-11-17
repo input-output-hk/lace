@@ -1,6 +1,6 @@
 import { recipe } from '@vanilla-extract/recipes';
 
-import { style, vars, globalStyle } from '../../design-tokens';
+import { style, vars, globalStyle, sx } from '../../design-tokens';
 
 import { Scheme } from './control-button.data';
 
@@ -13,9 +13,9 @@ export const container = recipe({
     alignItems: 'center',
     appearance: 'none',
     border: vars.borders.$button_default,
-    borderRadius: vars.radius.$medium,
     outline: 'none',
     cursor: 'pointer',
+    boxSizing: 'border-box',
     vars: {
       borderGap: vars.spacing.$2,
     },
@@ -87,14 +87,25 @@ export const container = recipe({
         paddingLeft: vars.spacing.$24,
         paddingRight: vars.spacing.$24,
       },
-      [Scheme.Icon]: {
-        paddingLeft: vars.spacing.$16,
-        paddingRight: vars.spacing.$16,
-      },
+      [Scheme.Icon]: {},
       [Scheme.Small]: {
         minWidth: vars.spacing.$116,
         paddingLeft: vars.spacing.$24,
         paddingRight: vars.spacing.$24,
+      },
+    },
+    widthSchema: {
+      fill: {
+        width: vars.spacing.$fill,
+      },
+      auto: {
+        width: 'auto',
+      },
+      small: {
+        width: vars.spacing.$40,
+      },
+      extraSmall: {
+        width: vars.spacing.$24,
       },
     },
   },
@@ -140,11 +151,10 @@ export const label = recipe({
 });
 
 export const icon = recipe({
-  base: {
-    fontSize: '$18',
+  base: sx({
     maxWidth: '$24',
     maxHeight: '$24',
-  },
+  }),
   variants: {
     colorScheme: {
       [Scheme.Outlined]: {
@@ -167,8 +177,17 @@ export const icon = recipe({
         },
       },
     },
+    fontSize: {
+      small: sx({
+        fontSize: '$18',
+      }),
+      extraSmall: {
+        fontSize: '15px',
+      },
+    },
   },
   defaultVariants: {
     colorScheme: Scheme.Outlined,
+    fontSize: 'small',
   },
 });

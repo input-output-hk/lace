@@ -3,7 +3,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import { ReactComponent as ChevronRight } from '../../assets/icons/chevron-right.component.svg';
+import { ReactComponent as ChevronRight } from '../../assets/icons/chevron-right-thin.component.svg';
 import { Box } from '../box';
 import { Icon as IconButton } from '../control-buttons';
 import { Flex } from '../flex';
@@ -61,7 +61,7 @@ export const WalletOption = ({
             alignItems="center"
             justifyContent="center"
           >
-            <IconButton icon={<ChevronRight />} />
+            <IconButton icon={<ChevronRight />} size="extraSmall" as="div" />
           </Flex>
         </Box>
       </Flex>

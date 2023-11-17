@@ -3,7 +3,6 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { ReactComponent as PlusCircle } from '../../assets/icons/plus-circle.component.svg';
-import { sx } from '../../design-tokens';
 import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
@@ -16,13 +15,7 @@ import { Small } from './small-button.component';
 
 const subtitle = ``;
 
-const SampleIcon = (): JSX.Element => (
-  <PlusCircle
-    className={sx({
-      fontSize: '$18',
-    })}
-  />
-);
+const SampleIcon = (): JSX.Element => <PlusCircle />;
 
 export default {
   title: 'Buttons/Control Buttons',
@@ -115,6 +108,23 @@ const Buttons = (): JSX.Element => (
       </Variants.Cell>
       <Variants.Cell>
         <Danger label="Label" id="focused" />
+      </Variants.Cell>
+    </Variants.Row>
+    <Variants.Row>
+      <Variants.Cell>
+        <Icon icon={<SampleIcon />} size="extraSmall" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Icon id="hover" icon={<SampleIcon />} size="extraSmall" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Icon id="pressed" icon={<SampleIcon />} size="extraSmall" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Icon disabled icon={<SampleIcon />} size="extraSmall" />
+      </Variants.Cell>
+      <Variants.Cell>
+        <Icon id="focused" icon={<SampleIcon />} size="extraSmall" />
       </Variants.Cell>
     </Variants.Row>
   </>

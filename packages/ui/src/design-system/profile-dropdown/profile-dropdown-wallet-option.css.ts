@@ -43,6 +43,4 @@ export const container = style([
   },
 ]);
 
-export const icon = style({
-  transform: 'scale(.5)',
-});
+export const icon = style({});
