@@ -2,8 +2,7 @@ import React from 'react';
 
 import type { Meta } from '@storybook/react';
 
-import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
-import { page, Variants, Section } from '../decorators';
+import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
@@ -71,17 +70,9 @@ export const Overview = (): JSX.Element => (
       <Divider my="$64" />
 
       <Section title="Main components">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
+        <UIStateTable>
           <Buttons />
-        </Variants.Table>
-
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <Buttons />
-          </Variants.Table>
-        </LocalThemeProvider>
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

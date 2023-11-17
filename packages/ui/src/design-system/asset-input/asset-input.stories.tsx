@@ -4,14 +4,20 @@ import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 
-import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
-import { page, Section, Variants } from '../decorators';
+import {
+  page,
+  Section,
+  Variants,
+  UIStateTable,
+  ColorSchemaTable,
+} from '../decorators';
 import { Divider } from '../divider';
 import { Grid } from '../grid';
 import { Cell } from '../grid/cell.component';
 
 import { AssetInput } from './asset-input.component';
+import { invalidState, validState } from './asset-input.fixtures';
 import { MaxButton } from './max-button.component';
 
 import type { Asset, AssetState } from './asset-input.data';
@@ -24,35 +30,7 @@ export default {
   decorators: [page({ title: 'Asset Input', subtitle })],
 } as Meta;
 
-const asset: Asset = {
-  balance: String(10_000_000),
-  amount: '',
-  id: '',
-  ticker: 'Token',
-  fiat: {
-    value: '0',
-    ticker: 'USD',
-  },
-};
-
-const validState = (id = '1'): AssetState => ({
-  type: 'valid',
-  asset: {
-    ...asset,
-    id,
-  },
-});
-
-const invalidState = (id = '1'): AssetState => ({
-  type: 'invalid',
-  asset: {
-    ...asset,
-    id,
-  },
-  error: 'Insufficient balance',
-});
-
-const MainComponents = (): JSX.Element => (
+const AssetInputMainComponents = (): JSX.Element => (
   <Variants.Row>
     <Variants.Cell>
       <AssetInput state={validState('1')} />
@@ -60,7 +38,7 @@ const MainComponents = (): JSX.Element => (
   </Variants.Row>
 );
 
-const SecondaryItems = (): JSX.Element => (
+const AssetInputUIStates = (): JSX.Element => (
   <>
     <Variants.Row>
       <Variants.Cell>
@@ -99,29 +77,17 @@ export const Overview = (): JSX.Element => (
       <Divider my="$64" />
 
       <Section title="Main components">
-        <Variants.Table headers={['Rest']}>
-          <MainComponents />
-        </Variants.Table>
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <MainComponents />
-          </Variants.Table>
-        </LocalThemeProvider>
+        <ColorSchemaTable headers={['Rest']}>
+          <AssetInputMainComponents />
+        </ColorSchemaTable>
       </Section>
 
       <Divider my="$64" />
 
       <Section title="Secondary items">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
-          <SecondaryItems />
-        </Variants.Table>
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <SecondaryItems />
-          </Variants.Table>
-        </LocalThemeProvider>
+        <UIStateTable>
+          <AssetInputUIStates />
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

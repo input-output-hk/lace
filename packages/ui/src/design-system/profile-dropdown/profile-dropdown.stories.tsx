@@ -4,13 +4,13 @@ import type { Meta } from '@storybook/react';
 
 import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { Box } from '../box';
-import { page, Variants, Section } from '../decorators';
-import { Divider } from '../divider';
+import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Flex } from '../flex';
 import { Grid, Cell } from '../grid';
 
 import { Separator } from './profile-dropdown-separator.component';
 import { WalletOption } from './profile-dropdown-wallet-option.component';
+import { WalletOptionSample } from './profile-dropdown-wallet-option.fixtures';
 import { WalletStatus } from './profile-dropdown-wallet-status.component';
 
 import type { WalletType } from './profile-dropdown.data';
@@ -31,42 +31,6 @@ interface Props {
   id?: string;
   type?: WalletType;
 }
-
-const WalletOptionSample = ({
-  disabled,
-  id,
-  type = 'hot',
-}: Readonly<Props>): JSX.Element => (
-  <div style={{ width: '228px' }}>
-    <WalletOption
-      title="Alice's wallet"
-      subtitle="Account #0"
-      disabled={disabled}
-      id={id}
-      type={type}
-    />
-  </div>
-);
-
-const Buttons = (): JSX.Element => (
-  <Variants.Row>
-    <Variants.Cell>
-      <WalletOptionSample />
-    </Variants.Cell>
-    <Variants.Cell>
-      <WalletOptionSample id="hover" />
-    </Variants.Cell>
-    <Variants.Cell>
-      <WalletOptionSample id="pressed" />
-    </Variants.Cell>
-    <Variants.Cell>
-      <WalletOptionSample disabled />
-    </Variants.Cell>
-    <Variants.Cell>
-      <WalletOptionSample id="focused" />
-    </Variants.Cell>
-  </Variants.Row>
-);
 
 const ProfileDropdownItems = (): JSX.Element => {
   const render = (props: Readonly<Props>): JSX.Element => {
@@ -108,68 +72,10 @@ const WalletStatuses = (): JSX.Element => (
 export const Overview = (): JSX.Element => (
   <Grid columns="$1">
     <Cell>
-      <Section title="Examples">
-        <Flex flexDirection="column" alignItems="center" w="$fill">
-          <Variants.Table
-            headers={['Hot wallet', 'Cold wallet', 'Shared wallet']}
-          >
-            <Variants.Row>
-              <Variants.Cell>
-                <WalletOption
-                  title="Alice's wallet"
-                  subtitle="Account #0"
-                  type="hot"
-                />
-              </Variants.Cell>
-              <Variants.Cell>
-                <WalletOption
-                  title="Alice's wallet"
-                  subtitle="Account #0"
-                  type="cold"
-                />
-              </Variants.Cell>
-              <Variants.Cell>
-                <WalletOption
-                  title="Alice's wallet"
-                  subtitle="Account #0"
-                  type="shared"
-                />
-              </Variants.Cell>
-            </Variants.Row>
-          </Variants.Table>
-        </Flex>
-      </Section>
-
-      <Divider my="$64" />
-
-      <Section title="Main components">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
-          <Buttons />
-        </Variants.Table>
-
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <Buttons />
-          </Variants.Table>
-        </LocalThemeProvider>
-      </Section>
-
-      <Divider my="$64" />
-
       <Section title="Profile dropdown items">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
+        <UIStateTable>
           <ProfileDropdownItems />
-        </Variants.Table>
-
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <ProfileDropdownItems />
-          </Variants.Table>
-        </LocalThemeProvider>
+        </UIStateTable>
 
         <Box my="$20" />
 
