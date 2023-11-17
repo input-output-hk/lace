@@ -14,7 +14,7 @@ import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk
 import { DappDataService } from '@lib/scripts/types';
 import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
-import { useRedirection } from '@hooks';
+import { useFetchCoinPrice, useRedirection } from '@hooks';
 import {
   assetsBurnedInspector,
   assetsMintedInspector,
@@ -28,6 +28,7 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
 import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
+import { useCurrencyStore } from '@providers';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -90,9 +91,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     walletInfo,
     inMemoryWallet,
     getKeyAgentType,
-    blockchainProvider: { assetProvider }
+    blockchainProvider: { assetProvider },
+    walletUI: { cardanoCoin }
   } = useWalletStore();
+  const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
+  const { priceResult } = useFetchCoinPrice();
 
   const [tx, setTx] = useState<Wallet.Cardano.Tx>();
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
@@ -289,7 +293,14 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   return (
     <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
       {tx && txSummary ? (
-        <DappTransaction transaction={txSummary} dappInfo={dappInfo} errorMessage={errorMessage} />
+        <DappTransaction
+          transaction={txSummary}
+          dappInfo={dappInfo}
+          errorMessage={errorMessage}
+          fiatCurrencyCode={fiatCurrency?.code}
+          fiatCurrencyPrice={priceResult?.cardano?.price}
+          coinSymbol={cardanoCoin.symbol}
+        />
       ) : (
         <Skeleton loading />
       )}

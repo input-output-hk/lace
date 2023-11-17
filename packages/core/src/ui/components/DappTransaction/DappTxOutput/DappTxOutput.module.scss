@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   gap: size_unit(3);
-  background-color: $theme-light-grey;
+  background-color: var(--light-mode-light-grey, var(--dark-mode-grey, #f9f9f9));
   border-radius: size_unit(2);
   padding: size_unit(2);
 }

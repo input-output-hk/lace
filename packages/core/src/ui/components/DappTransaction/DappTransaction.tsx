@@ -1,12 +1,14 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import React from 'react';
 import { ErrorPane } from '@lace/common';
+import { Wallet } from '@lace/cardano';
 import { DappInfo, DappInfoProps } from '../DappInfo';
 import { DappTxHeader } from './DappTxHeader/DappTxHeader';
 import { DappTxAsset, DappTxAssetProps } from './DappTxAsset/DappTxAsset';
 import { DappTxOutput, DappTxOutputProps } from './DappTxOutput/DappTxOutput';
 import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
+import { TransactionFee } from '@ui/components/Transactions';
 
 type TransactionDetails = {
   fee: string;
@@ -23,12 +25,18 @@ export interface DappTransactionProps {
   dappInfo: Omit<DappInfoProps, 'className'>;
   /** Optional error message */
   errorMessage?: string;
+  fiatCurrencyCode?: string;
+  fiatCurrencyPrice?: number;
+  coinSymbol?: string;
 }
 
 export const DappTransaction = ({
   transaction: { type, outputs, fee, mintedAssets, burnedAssets },
   dappInfo,
-  errorMessage
+  errorMessage,
+  fiatCurrencyCode,
+  fiatCurrencyPrice,
+  coinSymbol
 }: DappTransactionProps): React.ReactElement => {
   const { t } = useTranslate();
   return (
@@ -69,11 +77,14 @@ export const DappTransaction = ({
             ))}
           </>
         )}
-        {Number(fee) > 0 && (
-          <div className={styles.feeContainer}>
-            <div>{t('package.core.dappTransaction.fee')}:</div>
-            <div>{fee.toString()} ADA</div>
-          </div>
+        {fee && fee !== '-' && (
+          <TransactionFee
+            fee={fee}
+            amountTransformer={(ada: string) =>
+              `${Wallet.util.convertAdaToFiat({ ada, fiat: fiatCurrencyPrice })} ${fiatCurrencyCode}`
+            }
+            coinSymbol={coinSymbol}
+          />
         )}
       </div>
     </div>

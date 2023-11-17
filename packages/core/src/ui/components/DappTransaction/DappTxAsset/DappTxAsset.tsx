@@ -14,13 +14,13 @@ export const DappTxAsset = ({ amount, name, ticker }: DappTxAssetProps): React.R
   return (
     <div className={styles.body}>
       <div className={styles.detail}>
-        <div>{t('package.core.dappTransaction.asset')}</div>
+        <div className={styles.title}>{t('package.core.dappTransaction.asset')}</div>
         <div className={styles.value}>
-          <Ellipsis className={styles.rightAligned} text={ticker ?? name} ellipsisInTheMiddle />
+          <Ellipsis className={styles.ellipsis} text={ticker ?? name} ellipsisInTheMiddle />
         </div>
       </div>
       <div className={styles.detail}>
-        <div>{t('package.core.dappTransaction.quantity')}</div>
+        <div className={styles.title}>{t('package.core.dappTransaction.quantity')}</div>
         <div className={styles.value}>{amount}</div>
       </div>
     </div>
