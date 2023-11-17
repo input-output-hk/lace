@@ -6,6 +6,7 @@ import { ParsedCSSValue } from 'webdriverio';
 import extensionUtils from '../utils/utils';
 import onboardingPageObject from '../pageobject/onboardingPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
+import { browser } from '@wdio/globals';
 
 class TopNavigationAssert {
   private readonly CSS_COLOR = 'color';
@@ -162,29 +163,25 @@ class TopNavigationAssert {
     const expandButton = MenuHeader.expandButton;
     await expandButton.waitForDisplayed();
     const expectedText = withText ? await t('expandPopup') : '';
-    await expect(await expandButton.getText()).to.equal(expectedText);
+    expect(await expandButton.getText()).to.equal(expectedText);
   }
 
   async assertSeeCurrentNetworkInUserMenu(networkName = 'Preprod') {
     await MenuHeader.menuNetworkLabel.waitForDisplayed();
-    await expect(await MenuHeader.menuNetworkLabel.getText()).to.equal(
-      await t('browserView.topNavigationBar.links.network')
-    );
+    expect(await MenuHeader.menuNetworkLabel.getText()).to.equal(await t('browserView.topNavigationBar.links.network'));
 
     await MenuHeader.menuNetworkValue.waitForDisplayed();
     const expectedNetwork = extensionUtils.isMainnet() ? 'Mainnet' : networkName;
-    await expect(await MenuHeader.menuNetworkValue.getText()).to.equal(expectedNetwork);
+    expect(await MenuHeader.menuNetworkValue.getText()).to.equal(expectedNetwork);
   }
 
   async assertSeeNetworkSubMenu() {
     await MenuHeaderNetwork.container.waitForDisplayed();
     await MenuHeaderNetwork.backButton.waitForDisplayed();
     await MenuHeaderNetwork.title.waitForDisplayed();
-    await expect(await MenuHeaderNetwork.title.getText()).to.equal(
-      await t('browserView.settings.wallet.network.title')
-    );
+    expect(await MenuHeaderNetwork.title.getText()).to.equal(await t('browserView.settings.wallet.network.title'));
     await MenuHeaderNetwork.description.waitForDisplayed();
-    await expect(await MenuHeaderNetwork.description.getText()).to.equal(
+    expect(await MenuHeaderNetwork.description.getText()).to.equal(
       await t('browserView.settings.wallet.network.drawerDescription')
     );
     await MenuHeaderNetwork.mainnetRadioButton.waitForDisplayed();
@@ -194,7 +191,7 @@ class TopNavigationAssert {
 
   async assertSeeWalletName(expectedWalletName: string) {
     await MenuHeader.menuWalletName.waitForDisplayed();
-    await expect(await MenuHeader.menuWalletName.getText()).to.equal(expectedWalletName);
+    expect(await MenuHeader.menuWalletName.getText()).to.equal(expectedWalletName);
   }
 
   async assertSeeRightSidePanelButton(shouldBeVisible: boolean) {

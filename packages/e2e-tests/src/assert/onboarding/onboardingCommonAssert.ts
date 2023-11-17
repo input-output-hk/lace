@@ -10,12 +10,12 @@ class OnboardingCommonAssert {
   }
   async assertSeeStepTitle(expectedTitle: string): Promise<void> {
     await this.commonOnboardingElements.stepTitle.waitForDisplayed();
-    await expect(await this.commonOnboardingElements.stepTitle.getText()).to.equal(expectedTitle);
+    expect(await this.commonOnboardingElements.stepTitle.getText()).to.equal(expectedTitle);
   }
 
   async assertSeeStepSubtitle(expectedSubtitle: string): Promise<void> {
     await this.commonOnboardingElements.stepSubtitle.waitForDisplayed();
-    await expect(await this.commonOnboardingElements.stepSubtitle.getText()).to.equal(expectedSubtitle);
+    expect(await this.commonOnboardingElements.stepSubtitle.getText()).to.equal(expectedSubtitle);
   }
 
   async assertSeeBackButton(): Promise<void> {
@@ -55,22 +55,22 @@ class OnboardingCommonAssert {
 
   async assertSeeLegalLinks(): Promise<void> {
     await this.commonOnboardingElements.cookiePolicyLink.waitForDisplayed();
-    await expect(await this.commonOnboardingElements.cookiePolicyLink.getText()).to.equal(
+    expect(await this.commonOnboardingElements.cookiePolicyLink.getText()).to.equal(
       await t('settings.legals.cookiePolicy')
     );
     await this.commonOnboardingElements.privacyPolicyLink.waitForDisplayed();
-    await expect(await this.commonOnboardingElements.privacyPolicyLink.getText()).to.equal(
+    expect(await this.commonOnboardingElements.privacyPolicyLink.getText()).to.equal(
       await t('settings.legals.privacyPolicy')
     );
     await this.commonOnboardingElements.termsOfServiceLink.waitForDisplayed();
-    await expect(await this.commonOnboardingElements.termsOfServiceLink.getText()).to.equal(
+    expect(await this.commonOnboardingElements.termsOfServiceLink.getText()).to.equal(
       await t('settings.legals.termsOfService')
     );
   }
 
   async assertSeeHelpAndSupportButton(): Promise<void> {
     await this.commonOnboardingElements.helpAndSupportButton.waitForDisplayed();
-    await expect(await this.commonOnboardingElements.helpAndSupportButton.getText()).to.equal(
+    expect(await this.commonOnboardingElements.helpAndSupportButton.getText()).to.equal(
       await t('general.lock.helpAndSupport')
     );
   }
