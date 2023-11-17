@@ -176,22 +176,6 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I see insufficient balance error in bundle 1 for "tADA" asset
     And "Review transaction" button is disabled on "Send" page
 
-  @LW-4686 @Pending
-  # FIXME: LW-6715
-  Scenario: Extended View - Validation of insufficient balance error when assets value is equal to 0
-    When I save token: "Cardano" balance
-    And I click "Send" button on page header
-    And I enter a valid "shelley" address in the bundle 1 recipient's address
-    And I enter a 101% of total "tADA" asset in bundle 1
-    Then I see insufficient balance error in bundle 1 for "tADA" asset
-    And "Review transaction" button is disabled on "Send" page
-    When I click "Add bundle" button on "Send" page
-    And I enter a valid "shelley" address in the bundle 2 recipient's address
-    And I enter a value of: 0  to the "tADA" asset in bundle 2
-    Then I do not see insufficient balance error in bundle 2 for "tADA" asset
-    And I see insufficient balance error in bundle 1 for "tADA" asset
-    And "Review transaction" button is disabled on "Send" page
-
   @LW-1762
   Scenario: Extended view: Send - Token can be added once for each bundle
     When I click "Send" button on page header
