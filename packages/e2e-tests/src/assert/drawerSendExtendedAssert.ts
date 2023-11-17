@@ -194,10 +194,10 @@ class DrawerSendExtendedAssert {
   }
 
   async assertInsufficientBalanceErrorInBundle(bundleIndex: number, assetName: string, shouldSee: boolean) {
-    const bundle = new CoinConfigure(bundleIndex, assetName);
-    await bundle.insufficientBalanceError.waitForDisplayed({ reverse: !shouldSee });
+    const coinConfigure = new CoinConfigure(bundleIndex, assetName);
+    await coinConfigure.insufficientBalanceError.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      expect(await bundle.insufficientBalanceError.getText()).to.equal(
+      expect(await coinConfigure.insufficientBalanceError.getText()).to.equal(
         await t('browserView.transaction.send.error.insufficientBalance')
       );
     }

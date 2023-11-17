@@ -241,21 +241,20 @@ Feature: Send - Extended Browser View (Advanced Tx)
     When I click "Add token or NFT" button for bundle 2
     Then the asset "ADA" is not displayed in the token list
 
-  @LW-1605 @LW-1606 @Pending
-  #bug LW-5065
+  @LW-1605 @LW-1606
   Scenario: "Insufficient funds" error for extended view & advanced tx type - summing values for multiple assets
     And I save token: "Cardano" balance
-    And I save token: "HOSKY Token" balance
+    And I save token: "SUNDAE" balance
     When I click "Send" button on page header
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And I enter a 51% of total "ADA" asset in bundle 1
     And I click "Add bundle" button on "Send" page
     And I enter a valid "shelley" address in the bundle 2 recipient's address
     And I click "Add token or NFT" button for bundle 2
-    And click on an token with name: "HOSKY Token"
+    And click on an token with name: "SUNDAE"
     And I enter a 55% of total "ADA" asset in bundle 2
     And I enter a 51% of total "SUNDAE" asset in bundle 2
-    Then I see insufficient balance error in bundle 1 for "ADA" asset
-    And I see insufficient balance error in bundle 1 for "ADA" asset
+    Then I do not see insufficient balance error in bundle 1 for "tADA" asset
+    And I see insufficient balance error in bundle 2 for "ADA" asset
     And I do not see insufficient balance error in bundle 2 for "SUNDAE" asset
     And "Review transaction" button is disabled on "Send" page
