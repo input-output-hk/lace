@@ -294,7 +294,7 @@ Then(
     const tokenBalance: string = testContext.load(`${assetName}tokenBalance`);
     const value = Number.parseFloat(tokenBalance) * (Number.parseFloat(percentage) * (1 / 100));
     const valueToEnter = Number.parseFloat(value.toPrecision(2));
-    await transactionExtendedPageObject.fillTokenValue(valueToEnter, assetName, bundleIndex);
+    await transactionExtendedPageObject.fillTokenValueWithKeys(valueToEnter, assetName, bundleIndex);
   }
 );
 
