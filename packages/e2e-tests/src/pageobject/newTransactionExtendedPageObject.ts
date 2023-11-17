@@ -36,7 +36,7 @@ export default new (class NewTransactionExtendedPageObject {
     await webTester.fillComponent(new CoinConfigure(bundleIndex, assetName).input(), String(valueToEnter));
   };
 
-  fillTokenValueWithKeys = async (valueToEnter: number, assetName?: string, bundleIndex = 1) => {
+  fillTokenValueUsingKeys = async (valueToEnter: number, assetName?: string, bundleIndex = 1) => {
     await browser.pause(400);
     await $(new CoinConfigure(bundleIndex, assetName).input().toJSLocator()).click();
     await browser.keys(String(valueToEnter));
