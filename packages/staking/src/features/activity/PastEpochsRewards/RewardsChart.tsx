@@ -27,7 +27,7 @@ export const RewardsChart = ({ chartData }: { chartData: RewardsByEpoch }) => {
           <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `${value} ADA`} />
           <Tooltip cursor={false} content={<RewardsChartTooltip poolColorMapper={poolColorMapper} />} />
           {Array.from({ length: maxPoolsPerEpochCount }).map((_, i) => (
-            <Bar key={i} dataKey={`rewards[${i}].rewards`} stackId="a" maxBarSize={24}>
+            <Bar key={i} dataKey={`rewards[${i}].rewards`} stackId="a" maxBarSize={24} isAnimationActive={false}>
               {chartData.map((entry, j) => {
                 const fill = poolColorMapper(entry.rewards[i]?.poolId);
                 return <Cell key={`cell-${j}`} fill={fill} />;
