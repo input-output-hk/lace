@@ -11,7 +11,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     When I click "Add bundle" button on "Send" page
     And I click "Add bundle" button on "Send" page
     Then I see 3 bundle rows
-    When I remove output 2 for advanced tx
+    When I remove bundle 2
     Then I see 2 bundle rows
 
   @LW-4937
