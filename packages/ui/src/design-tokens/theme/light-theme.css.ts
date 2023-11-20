@@ -295,6 +295,11 @@ const colors: Colors = {
   $profile_dropdown_wallet_status_container_borderColor:
     lightColorScheme.$primary_light_grey,
 
+  $profile_dropdown_account_item_edit_icon_color:
+    lightColorScheme.$primary_accent_purple,
+  $profile_dropdown_account_item_delete_icon_color:
+    lightColorScheme.$secondary_data_pink,
+
   $data_blue: lightColorScheme.$secondary_data_blue,
   $data_green: lightColorScheme.$secondary_data_green,
   $data_pink: lightColorScheme.$secondary_data_pink,

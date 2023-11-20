@@ -197,6 +197,9 @@ export const colors = {
 
   $profile_dropdown_wallet_status_container_borderColor: '',
 
+  $profile_dropdown_account_item_edit_icon_color: '',
+  $profile_dropdown_account_item_delete_icon_color: '',
+
   $data_pink: '',
   $data_blue: '',
   $data_green: '',
