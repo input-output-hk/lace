@@ -48,7 +48,7 @@ Feature: Analytics - Posthog - Sending - Popup View
     Then I validate latest analytics single event "send | all done | close | click"
     And I validate that 6 analytics event(s) have been sent
 
-  @LW-7830
+  @LW-7830 @LW-9109
   Scenario: Analytics - Popup-view - Send - Success Screen - View transaction
     Given I set up request interception for posthog analytics request(s)
     And I click "Send" button on Tokens page in popup mode
@@ -65,6 +65,10 @@ Feature: Analytics - Posthog - Sending - Popup View
     And I validate latest analytics multiple events:
       | send \| transaction confirmation \| confirm \| click |
       | send \| all done \| view                             |
-    And I click "View transaction" button on submitted transaction page
-    And I validate latest analytics single event "send | all done | view transaction | click"
-    And I validate that 6 analytics event(s) have been sent
+    When I click "View transaction" button on submitted transaction page
+    And Local storage unconfirmedTransaction contains tx with type: "internal"
+    Then I validate latest analytics single event "send | all done | view transaction | click"
+    When the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
+    Then I validate latest analytics single event "send | transaction confirmed"
+    And I validate that 7 analytics event(s) have been sent
+    And Local storage unconfirmedTransaction is empty

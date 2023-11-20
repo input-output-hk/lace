@@ -51,8 +51,8 @@ Feature: Analytics - Posthog - Sending - Extended View
     Then I validate latest analytics single event "send | all done | close | click"
     And I validate that 6 analytics event(s) have been sent
 
-  @LW-7823
-  Scenario: Analytics - Extended-view - Send - Success Screen - View transaction
+  @LW-7823 @LW-9109
+  Scenario: Analytics - Extended-view - Send - Success Screen - View transaction + internal transaction confirmed
     Given I set up request interception for posthog analytics request(s)
     And I click "Send" button on page header
     Then I validate latest analytics single event "send | send | click"
@@ -68,6 +68,48 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I validate latest analytics multiple events:
       | send \| transaction confirmation \| confirm \| click |
       | send \| all done \| view                             |
-    And I click "View transaction" button on submitted transaction page
-    And I validate latest analytics single event "send | all done | view transaction | click"
-    And I validate that 6 analytics event(s) have been sent
+    When I click "View transaction" button on submitted transaction page
+    And Local storage unconfirmedTransaction contains tx with type: "internal"
+    Then I validate latest analytics single event "send | all done | view transaction | click"
+    When the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
+    Then I validate latest analytics single event "send | transaction confirmed"
+    And I validate that 7 analytics event(s) have been sent
+    And Local storage unconfirmedTransaction is empty
+
+  @LW-9109
+  Scenario: Analytics - Extended-view - Send - Dapp Success Screen - View transaction - Transaction confirmed
+    Given I de-authorize all DApps in extended mode
+    And I open and authorize test DApp with "Only once" setting
+    And I click "Send ADA" "Run" button in test DApp
+    And I see DApp connector "Confirm transaction" page with: "3.00 ADA" and: "0" assets
+    And I click "Confirm" button on "Confirm transaction" page
+    And I fill correct password
+    And I click "Confirm" button on "Sign transaction" page
+    And I click "Close" button on DApp "All done" page
+    And I don't see DApp window
+    And I switch to window with Lace
+    When I navigate to Transactions extended page
+    Then Local storage unconfirmedTransaction contains tx with type: "external"
+    And I set up request interception for posthog analytics request(s)
+    When the Sent transaction is displayed with value: "3.00 tADA" and tokens count 1
+    Then I validate latest analytics single event "send | transaction confirmed"
+    And I validate that 1 analytics event(s) have been sent
+    And Local storage unconfirmedTransaction is empty
+
+  @LW-9111
+  Scenario: Analytics - Extended-view - Outdated unconfirmedTransaction is deleted
+    Given I set up request interception for posthog analytics request(s)
+    And I set outdated unconfirmedTransaction entry in Local storage with type: "internal"
+    And Local storage unconfirmedTransaction contains tx with type: "internal"
+    When I refresh the page
+    Then Local storage unconfirmedTransaction is empty
+    And I validate that 0 analytics event(s) have been sent
+
+  @LW-9111
+  Scenario: Analytics - Extended-view - Valid unknown unconfirmedTransaction is not not send and not deleted
+    Given I set up request interception for posthog analytics request(s)
+    And I set valid unconfirmedTransaction entry in Local storage with type: "external"
+    And Local storage unconfirmedTransaction contains tx with type: "external"
+    When I refresh the page
+    Then Local storage unconfirmedTransaction contains tx with type: "external"
+    And I validate that 0 analytics event(s) have been sent
