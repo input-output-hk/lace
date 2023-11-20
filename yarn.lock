@@ -5458,7 +5458,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/dapp-connector@npm:0.11.1, @cardano-sdk/dapp-connector@npm:~0.11.1":
+"@cardano-sdk/dapp-connector@npm:0.11.2-patch.0":
+  version: 0.11.2-patch.0
+  resolution: "@cardano-sdk/dapp-connector@npm:0.11.2-patch.0"
+  dependencies:
+    "@cardano-sdk/core": ~0.21.0
+    "@cardano-sdk/crypto": ~0.1.15
+    "@cardano-sdk/util": ~0.14.2
+    ts-custom-error: ^3.2.0
+    ts-log: ^2.2.4
+    webextension-polyfill: ^0.8.0
+  checksum: 3d0b0e50336391f52eed7e6ed1954bc9e1acb83de1c493d0e6821f64569082861a042b07f928aa0c6fa2fefb76accb447f5af137ae6d48b61ec8a2ba1b724a7b
+  languageName: node
+  linkType: hard
+
+"@cardano-sdk/dapp-connector@npm:~0.11.1":
   version: 0.11.1
   resolution: "@cardano-sdk/dapp-connector@npm:0.11.1"
   dependencies:
@@ -7827,7 +7841,7 @@ __metadata:
     "@ant-design/icons": ^4.7.0
     "@cardano-sdk/cardano-services-client": 0.14.4
     "@cardano-sdk/core": 0.21.0
-    "@cardano-sdk/dapp-connector": 0.11.1
+    "@cardano-sdk/dapp-connector": 0.11.2-patch.0
     "@cardano-sdk/input-selection": 0.12.4
     "@cardano-sdk/tx-construction": 0.14.2
     "@cardano-sdk/util": 0.14.2
