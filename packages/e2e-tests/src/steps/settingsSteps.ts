@@ -137,6 +137,33 @@ Then(
   }
 );
 
+Then(
+  /Local storage unconfirmedTransaction contains tx with type: "(internal|external)"/,
+  async (txType: 'internal' | 'external') => {
+    await localStorageAssert.assertLocalStorageContainsUnconfirmedTransaction(txType);
+  }
+);
+
+Then(/Local storage unconfirmedTransaction is empty/, async () => {
+  await localStorageAssert.assertLocalStorageUnconfirmedTransactionsIsEmpty();
+});
+
+Then(
+  /I set (valid|outdated) unconfirmedTransaction entry in Local storage with type: "(internal|external)"/,
+  async (typeOfEntry: 'valid' | 'outdated', creationType: 'internal' | 'external') => {
+    const date = new Date();
+    if (typeOfEntry === 'outdated') {
+      date.setDate(date.getDate() - 7);
+    }
+    const entry = {
+      id: 'someId',
+      date: date.toString(),
+      creationType
+    };
+    await localStorageInitializer.initializeUnconfirmedTransactions(JSON.stringify(entry));
+  }
+);
+
 Then(/the Terms and Conditions copy is displayed/, async () => {
   await drawerTermsAndConditionsSettingsAssert.assertTermsAndConditionsContent();
 });
