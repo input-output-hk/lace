@@ -69,6 +69,7 @@ const colors: Colors = {
     darkColorScheme.$primary_white,
     0.8,
   ),
+  $control_buttons_label_color_extra_small: darkColorScheme.$primary_white,
   $control_buttons_container_bgColor_filled: darkColorScheme.$primary_grey,
   $control_buttons_container_bgColor_filled_hover:
     darkColorScheme.$primary_mid_grey,
@@ -80,6 +81,10 @@ const colors: Colors = {
     darkColorScheme.$secondary_data_pink,
   $control_buttons_container_bgColor_danger_hover:
     darkColorScheme.$secondary_hover_data_pink,
+  $control_buttons_container_bgColor_extra_small:
+    darkColorScheme.$primary_accent_purple,
+  $control_buttons_container_bgColor_extra_small_active:
+    darkColorScheme.$primary_accent_purple,
   $control_buttons_container_outlineColor:
     darkColorScheme.$primary_accent_purple_0_3,
   $control_buttons_borderColor: darkColorScheme.$primary_dark_grey_plus,

@@ -8,6 +8,7 @@ export enum Scheme {
   Danger = 'Danger',
   Icon = 'Icon',
   Small = 'Small',
+  ExtraSmall = 'ExtraSmall',
 }
 
 export type ControlButtonProps = Omit<ButtonProps, 'className'> & {
