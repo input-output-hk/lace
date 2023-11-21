@@ -4,8 +4,8 @@ Feature: Analytics - Posthog - Sending - Popup View
   Background:
     Given Wallet is synced
 
-  @LW-7828
-  Scenario: Analytics - Popup-view - Send - Success Screen - Close drawer - X button
+  @LW-7828 @LW-9109
+  Scenario: Analytics - Popup-view - Send - Success Screen - View transaction
     Given I set up request interception for posthog analytics request(s)
     And I save token: "Cardano" balance
     And I click "Send" button on Tokens page in popup mode
@@ -23,5 +23,10 @@ Feature: Analytics - Posthog - Sending - Popup View
       | send \| transaction confirmation \| confirm \| click |
       | send \| all done \| view                             |
     And I click "View transaction" button on submitted transaction page
+    And Local storage unconfirmedTransaction contains tx with type: "internal"
     And I validate latest analytics single event "send | all done | view transaction | click"
-    And I validate that 6 analytics event(s) have been sent
+    When the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
+    Then I validate latest analytics single event "send | transaction confirmed"
+    And I validate that the "send | transaction confirmed" event includes property "tx_creation_type" with value "internal" in posthog
+    And I validate that 7 analytics event(s) have been sent
+    And Local storage unconfirmedTransaction is empty
