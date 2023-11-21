@@ -241,7 +241,7 @@ class DrawerSendExtendedAssert {
     if (isVisible) {
       if (assetType === 'Tokens') {
         const textInTooltip = (await webTester.getTextValueFromElement(new CoinConfigure().tooltip())) as string;
-        if (savedTicker.slice(0, 6) === 'asset1') {
+        if (savedTicker.startsWith('asset1')) {
           const assetFirstSection = savedTicker.slice(0, 10);
           const assetLastSection = savedTicker.slice(savedTicker.length, -4);
           expect(textInTooltip.startsWith(assetFirstSection)).to.be.true;
@@ -340,7 +340,7 @@ class DrawerSendExtendedAssert {
   async assertSeeTicker(expectedTicker: 'ADA' | 'tADA', elementToCheck: WebdriverIO.Element) {
     const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    let tickerDisplayed = (await elementToCheck.getText()) as string;
+    let tickerDisplayed = await elementToCheck.getText();
     tickerDisplayed = String(tickerDisplayed.match(regex));
 
     if (expectedTicker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);

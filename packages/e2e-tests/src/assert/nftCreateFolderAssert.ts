@@ -194,7 +194,11 @@ class NftCreateFolderAssert {
 
   async assertSeeFolderOnNftsList(folderName: string, shouldSee: boolean) {
     const nftFolder = await NftsPage.getFolder(folderName);
-    shouldSee ? await nftFolder.waitForDisplayed() : expect(nftFolder).to.be.undefined;
+    if (shouldSee) {
+      await nftFolder.waitForDisplayed();
+    } else {
+      expect(nftFolder).to.be.undefined;
+    }
   }
 
   async verifyNftCounterOnFolderPageMatchesNumberOfNfts() {
