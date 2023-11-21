@@ -7,7 +7,7 @@ class TokenDetailsAssert {
   async assertSeeTokenDrawerNavigation(mode: 'extended' | 'popup') {
     await TokenDetailsPage.drawerNavigationTitle.waitForDisplayed({ reverse: mode === 'popup' });
     if (mode === 'extended') {
-      await expect(await TokenDetailsPage.drawerNavigationTitle.getText()).to.equal(
+      expect(await TokenDetailsPage.drawerNavigationTitle.getText()).to.equal(
         await t('browserView.assetDetails.title')
       );
     }
@@ -57,7 +57,7 @@ class TokenDetailsAssert {
     expect(transactions.length).to.be.greaterThan(0);
     expect(transactions.length).to.be.lessThanOrEqual(3);
     await TokenDetailsPage.viewAllButton.waitForDisplayed();
-    await expect(await TokenDetailsPage.viewAllButton.getText()).to.equal(await t('browserView.assetDetails.viewAll'));
+    expect(await TokenDetailsPage.viewAllButton.getText()).to.equal(await t('browserView.assetDetails.viewAll'));
   }
 
   async assertSeeTokenDetailsPageForToken(tokenName: string, tokenTicker: string, mode: 'extended' | 'popup') {

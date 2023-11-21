@@ -12,7 +12,7 @@ class TransactionBundleAssert {
     for (let i = 1; i <= expectedNumberOfBundles; i++) {
       const bundle = new TransactionBundle(i);
       if (expectedNumberOfBundles > 1) {
-        await expect(await webTester.getTextValueFromElement(bundle.bundleTitle())).to.equal(
+        expect(await webTester.getTextValueFromElement(bundle.bundleTitle())).to.equal(
           `${await t('core.outputSummaryList.output')} ${i}`
         );
         await webTester.seeWebElement(bundle.bundleRemoveButton());
@@ -29,17 +29,17 @@ class TransactionBundleAssert {
       .bundleAssetInput()
       .coinConfigure(bundleIndex, expectedName.replace('...', ''))
       .getName();
-    await expect(tokenName).to.contain(expectedName);
+    expect(tokenName).to.contain(expectedName);
   }
 
   async assertSeeAssetNameAndValueInBundle(expectedName: string, expectedValue: number, bundleIndex: number) {
-    const asset = await new TransactionBundle(bundleIndex).bundleAssetInput().coinConfigure(bundleIndex, expectedName);
+    const asset = new TransactionBundle(bundleIndex).bundleAssetInput().coinConfigure(bundleIndex, expectedName);
 
     const tokenName = await asset.getName();
     const tokenValue = await asset.getAmount();
 
-    await expect(tokenName).to.contain(expectedName);
-    await expect(tokenValue).to.equal(Number(expectedValue));
+    expect(tokenName).to.contain(expectedName);
+    expect(tokenValue).to.equal(Number(expectedValue));
   }
 
   async assertTokenNameNotPresentInBundleAndCoinConfigure(assetName: string, bundleIndex: number) {
@@ -64,10 +64,10 @@ class TransactionBundleAssert {
     const tokenInputAmount = Number(String(await bundle.getInputValue()).replace(',', ''));
     if (assetName === 'tADA' || assetName === 'ADA') {
       const fee = Number(await new TransactionNewPage().getValueAda());
-      await expect(tokenBalance).to.be.greaterThan(tokenInputAmount + fee);
-      await expect(tokenInputAmount - fee).to.be.greaterThan(tokenBalance - tokenBalance * 0.003);
+      expect(tokenBalance).to.be.greaterThan(tokenInputAmount + fee);
+      expect(tokenInputAmount - fee).to.be.greaterThan(tokenBalance - tokenBalance * 0.003);
     } else {
-      await expect(tokenBalance).to.equal(tokenInputAmount);
+      expect(tokenBalance).to.equal(tokenInputAmount);
     }
   }
 
