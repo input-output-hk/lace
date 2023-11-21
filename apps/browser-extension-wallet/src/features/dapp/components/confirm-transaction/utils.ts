@@ -1,6 +1,6 @@
+/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
-import { CardanoTxOut } from '@src/types';
 import { RemoteApiPropertyType, exposeApi } from '@cardano-sdk/web-extension';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
@@ -23,29 +23,16 @@ export enum TxType {
   VotingProcedures = 'VotingProcedures'
 }
 
-export const getTitleKey = (txType: TxType): string => {
-  if (txType === TxType.DRepRegistration) {
-    return 'core.drepRegistration.title';
-  }
-
-  if (txType === TxType.DRepRetirement) {
-    return 'core.drepRetirement.title';
-  }
-
-  if (txType === TxType.DRepUpdate) {
-    return 'core.drepUpdate.title';
-  }
-
-  if (txType === TxType.VoteDelegation) {
-    return 'core.voteDelegation.title';
-  }
-
-  if (txType === TxType.VotingProcedures) {
-    return 'core.votingProcedures.title';
-  }
-
-  return sectionTitle[DAPP_VIEWS.CONFIRM_TX];
-};
+export const getTitleKey = (txType: TxType): string =>
+  [
+    TxType.DRepRegistration,
+    TxType.DRepRetirement,
+    TxType.DRepUpdate,
+    TxType.VoteDelegation,
+    TxType.VotingProcedures
+  ].includes(txType)
+    ? `core.${txType}.title`
+    : sectionTitle[DAPP_VIEWS.CONFIRM_TX];
 
 export const disallowSignTx = (close = false): void => {
   exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
@@ -76,19 +63,6 @@ export const allowSignTx = (): void => {
     },
     { logger: console, runtime }
   );
-};
-
-export const getTransactionAssetsId = (outputs: CardanoTxOut[]): Wallet.Cardano.AssetId[] => {
-  const assetIds: Wallet.Cardano.AssetId[] = [];
-  const assetMaps = outputs.map((output) => output.value.assets);
-  for (const asset of assetMaps) {
-    if (asset) {
-      for (const id of asset.keys()) {
-        !assetIds.includes(id) && assetIds.push(id);
-      }
-    }
-  }
-  return assetIds;
 };
 
 export const certificateInspectorFactory =

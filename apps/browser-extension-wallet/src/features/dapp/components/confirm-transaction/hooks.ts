@@ -1,13 +1,14 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AssetProvider } from '@cardano-sdk/core';
-import { useRedirection } from '@hooks';
-import { Wallet } from '@lace/cardano';
+import * as HardwareLedger from '@cardano-sdk/hardware-ledger';
 import { dAppRoutePaths } from '@routes';
+import { Wallet } from '@lace/cardano';
+import { useRedirection } from '@hooks';
 import { CardanoTxOut, WalletInfo } from '@src/types';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import * as HardwareLedger from '@cardano-sdk/hardware-ledger';
-import { TxType, allowSignTx, pubDRepKeyToHash, disallowSignTx, getTransactionAssetsId, getTxType } from './utils';
+import { getTransactionAssetsId } from '@src/stores/slices';
 import { AddressListType } from '@src/views/browser-view/features/activity';
+import { TxType, allowSignTx, pubDRepKeyToHash, disallowSignTx, getTxType } from './utils';
 import { GetSignTxData, SignTxData } from './types';
 
 export const useCreateAssetList = ({
@@ -83,7 +84,7 @@ export const useSignWithHardwareWallet = (): {
   const disallow = useDisallowSignTx();
   const redirectToSignFailure = useRedirection<Record<string, never>>(dAppRoutePaths.dappTxSignFailure);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
-  const signWithHardwareWallet = async () => {
+  const signWithHardwareWallet = useCallback(async () => {
     setIsConfirmingTx(true);
     try {
       await HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web);
@@ -93,7 +94,7 @@ export const useSignWithHardwareWallet = (): {
       disallow(false);
       redirectToSignFailure({});
     }
-  };
+  }, [allow, disallow, redirectToSignFailure]);
 
   return { isConfirmingTx, signWithHardwareWallet };
 };
