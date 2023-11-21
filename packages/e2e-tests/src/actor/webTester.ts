@@ -49,7 +49,7 @@ export default new (class WebTester {
           await $(selector).addValue(current);
           await $(selector).waitUntil(
             async () => {
-              const text = await $(selector).getValue();
+              const text = (await $(selector).getValue()).replace(',', '');
               return text === nextString;
             },
             {
