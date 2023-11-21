@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, ControlButton, Flex, ProfilePicture, Text } from '../..';
+import { ControlButton, Flex, ProfilePicture, Text } from '../..';
 import { ReactComponent as PencilIcon } from '../../../assets/icons/pencil-outline.component.svg';
 import { ReactComponent as TrashIcon } from '../../../assets/icons/trash-outline.component.svg';
 
@@ -63,12 +63,11 @@ export const AccountItem = ({
         />
       </Flex>
     ) : (
-      <Button.CallToAction
+      <ControlButton.ExtraSmall
         label={unlockLabel}
         onClick={(): void => {
           onUnlockClick?.(accountNumber);
         }}
-        size="extraSmall"
       />
     )}
   </Flex>
