@@ -31,6 +31,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I validate latest analytics single event "send | all done | view transaction | click"
     When the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     Then I validate latest analytics single event "send | transaction confirmed"
+    And I validate that the "send | transaction confirmed" event includes property "tx_creation_type" with value "internal" in posthog
     And I validate that 7 analytics event(s) have been sent
     And Local storage unconfirmedTransaction is empty
 
@@ -40,17 +41,23 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I open and authorize test DApp with "Only once" setting
     And I click "Send ADA" "Run" button in test DApp
     And I see DApp connector "Confirm transaction" page with: "3.00 ADA" and: "0" assets
+    And I set up request interception for posthog analytics request(s)
     And I click "Confirm" button on "Confirm transaction" page
+    Then I validate latest analytics single event "send | transaction summary | confirm | click"
+    And I validate that the "send | transaction summary | confirm | click" event includes property "tx_creation_type" with value "external" in posthog
     And I fill correct password
     And I click "Confirm" button on "Sign transaction" page
+    Then I validate latest analytics single event "send | transaction confirmation | confirm | click"
+    And I validate that the "send | transaction confirmation | confirm | click" event includes property "tx_creation_type" with value "external" in posthog
     And I click "Close" button on DApp "All done" page
     And I don't see DApp window
     And I switch to window with Lace
     When I navigate to Transactions extended page
-    Then Local storage unconfirmedTransaction contains tx with type: "external"
     And I set up request interception for posthog analytics request(s)
+    Then Local storage unconfirmedTransaction contains tx with type: "external"
     When the Sent transaction is displayed with value: "3.00 tADA" and tokens count 1
     Then I validate latest analytics single event "send | transaction confirmed"
+    And I validate that the "send | transaction confirmed" event includes property "tx_creation_type" with value "external" in posthog
     And I validate that 1 analytics event(s) have been sent
     And Local storage unconfirmedTransaction is empty
 

@@ -27,9 +27,15 @@ class LocalStorageAssert {
   };
 
   assertLocalStorageContainsUnconfirmedTransaction = async (txType: 'internal' | 'external') => {
-    await browser.pause(1000);
+    await browser.waitUntil(
+      async () => JSON.parse(await localStorageManager.getItem('unconfirmedTransactions')).length === 1,
+      {
+        interval: 100,
+        timeout: 3000,
+        timeoutMsg: 'Failed while waiting for unconfirmedTransactions === 1'
+      }
+    );
     const unconfirmedTransactions = JSON.parse(await localStorageManager.getItem('unconfirmedTransactions'));
-    expect(unconfirmedTransactions.length).toEqual(1);
     expect(unconfirmedTransactions[0].id).not.toBeNull();
     expect(unconfirmedTransactions[0].date).not.toBeNull();
     expect(unconfirmedTransactions[0].creationType).toEqual(txType);

@@ -27,5 +27,6 @@ Feature: Analytics - Posthog - Sending - Popup View
     And I validate latest analytics single event "send | all done | view transaction | click"
     When the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     Then I validate latest analytics single event "send | transaction confirmed"
+    And I validate that the "send | transaction confirmed" event includes property "tx_creation_type" with value "internal" in posthog
     And I validate that 7 analytics event(s) have been sent
     And Local storage unconfirmedTransaction is empty
