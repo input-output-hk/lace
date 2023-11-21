@@ -12,6 +12,7 @@ const chromeConfig: WebdriverIO.Config = {
       ...(process.env.CI && { port: 4444 }),
       'goog:chromeOptions': {
         args: [
+          '--headless=new',
           '--no-sandbox',
           '--disable-gpu',
           '--disable-notifications',

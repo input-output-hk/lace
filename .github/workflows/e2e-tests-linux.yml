@@ -50,9 +50,6 @@ jobs:
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-      - name: Start XVFB
-        run: |
-          Xvfb :99 &
       - name: Start Chrome driver
         run: |
           if [ ${BROWSER} == "chrome" ]; then
