@@ -1,0 +1,59 @@
+import React from 'react';
+
+import type { Meta } from '@storybook/react';
+
+import { page, Variants, Section } from '../../decorators';
+import { Flex } from '../../flex';
+import { Grid, Cell } from '../../grid';
+
+import { AccountsList } from './profile-dropdown-accounts-list.component';
+
+export default {
+  title: 'Navigation and toolbars/Profile Dropdown/Accounts List',
+  component: AccountsList,
+  decorators: [
+    page({
+      title: 'AccountsList',
+      subtitle: 'Component for the profile dropdown accounts list.',
+    }),
+  ],
+} as Meta;
+
+export const Overview = (): JSX.Element => (
+  <Grid columns="$1">
+    <Cell>
+      <Section title="Examples">
+        <Flex flexDirection="column" alignItems="center" w="$fill">
+          <Variants.Table>
+            <Variants.Row>
+              <Variants.Cell>
+                <div style={{ width: '250px' }}>
+                  <AccountsList
+                    unlockLabel="unlock"
+                    accounts={[
+                      {
+                        accountNumber: 1,
+                        label: 'Account #1',
+                        isUnlocked: true,
+                      },
+                      {
+                        accountNumber: 2,
+                        label: 'Account #2',
+                        isUnlocked: true,
+                      },
+                      {
+                        accountNumber: 3,
+                        label: 'Account #3',
+                        isUnlocked: false,
+                      },
+                    ]}
+                  />
+                </div>
+              </Variants.Cell>
+            </Variants.Row>
+          </Variants.Table>
+        </Flex>
+      </Section>
+    </Cell>
+  </Grid>
+);
