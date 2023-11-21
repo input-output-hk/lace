@@ -4,7 +4,6 @@ import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
 import { page, Section, Variants, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
