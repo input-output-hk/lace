@@ -9,6 +9,7 @@ export enum Sections {
   CONFIRMATION = 'confirmation',
   SUCCESS_TX = 'success_tx',
   FAIL_TX = 'fail_tx',
+  UNAUTHORIZED_TX = 'unauthorized_tx',
   ADDRESS_LIST = 'address_list',
   ADDRESS_FORM = 'address_form',
   ASSET_PICKER = 'asset_picker',

@@ -53,6 +53,7 @@ export const nextStepBtnLabels: Partial<Record<Sections, string>> = {
   [Sections.CONFIRMATION]: 'browserView.transaction.send.footer.confirm',
   [Sections.SUCCESS_TX]: 'browserView.transaction.send.footer.viewTransaction',
   [Sections.FAIL_TX]: 'browserView.transaction.send.footer.fail',
+  [Sections.UNAUTHORIZED_TX]: 'browserView.transaction.send.footer.unauthorized',
   [Sections.ADDRESS_FORM]: 'browserView.transaction.send.footer.save',
   [Sections.ADDRESS_CHANGE]: 'addressBook.reviewModal.confirmUpdate.button'
 };
@@ -135,9 +136,11 @@ export const Footer = withAddressBookContext(
           sendEventToPostHog(PostHogAction.SendAllDoneViewTransactionClick);
           break;
         }
+        case Sections.UNAUTHORIZED_TX:
         case Sections.FAIL_TX: {
           sendEventToMatomo(isPopupView ? Events.FAIL_BACK_POPUP : Events.FAIL_BACK_BROWSER);
           sendEventToPostHog(PostHogAction.SendSomethingWentWrongBackClick);
+          break;
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -218,7 +221,13 @@ export const Footer = withAddressBookContext(
         removePassword();
         // Error name is 'AuthenticationError' in dev build but 'W' in prod build
         if (error.message?.includes('Authentication failure')) {
-          setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
+          if (isHwSummary) {
+            sendEvent(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
+            setSection({ currentSection: Sections.UNAUTHORIZED_TX });
+            setSubmitingTxState({ isSubmitingTx: false });
+          } else {
+            setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
+          }
         } else {
           // TODO: identify the errors and give them a value to send it with the event and track it [LW-6497]
           sendEvent(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
@@ -241,7 +250,9 @@ export const Footer = withAddressBookContext(
       sendAnalytics();
       const isConfirmPass = currentSection.currentSection === Sections.CONFIRMATION;
       const txHasSucceeded = currentSection.currentSection === Sections.SUCCESS_TX;
-      const txHasFailed = currentSection.currentSection === Sections.FAIL_TX;
+      const txHasFailed =
+        currentSection.currentSection === Sections.FAIL_TX ||
+        currentSection.currentSection === Sections.UNAUTHORIZED_TX;
       const isReviewingAddress = currentSection.currentSection === Sections.ADDRESS_CHANGE;
 
       if (hasTempTxData()) {

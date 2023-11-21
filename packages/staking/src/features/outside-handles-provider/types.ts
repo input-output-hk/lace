@@ -70,6 +70,7 @@ export type OutsideHandlesContextValue = {
   walletStoreGetKeyAgentType: () => string;
   walletStoreInMemoryWallet: Wallet.ObservableWallet;
   walletStoreWalletActivities: AssetActivityListProps[];
+  walletStoreWalletActivitiesStatus: StateStatus;
   walletStoreWalletUICardanoCoin: Wallet.CoinId;
   walletManagerExecuteWithPassword: <T>(
     password: string,

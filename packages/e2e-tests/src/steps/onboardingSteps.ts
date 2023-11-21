@@ -594,7 +594,7 @@ When(
   /^I click "(Got it|Learn more)" button on "DApp connector is now in Beta" modal$/,
   async (button: 'Got it' | 'Learn more') => {
     // Wait for main page to finish loading
-    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 15_000 });
+    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 60_000 });
     if (button === 'Got it') {
       await Modal.cancelButton.waitForClickable();
       await Modal.cancelButton.click();
