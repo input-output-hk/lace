@@ -29,6 +29,7 @@ import menuHeaderPageObject from '../pageobject/menuHeaderPageObject';
 import SettingsPage from '../elements/settings/SettingsPage';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
+import type { NetworkType } from '../types/network';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral)" setting$/,
@@ -112,7 +113,7 @@ Then(/^I see network radio buttons$/, async () => {
   await drawerNetworkSettingsAssert.assertSeeNetworkRadioButtons();
 });
 
-When(/I click on "(Mainnet|Preprod|Preview)" radio button/, async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
+When(/I click on "(Mainnet|Preprod|Preview)" radio button/, async (network: NetworkType) => {
   await settingsExtendedPageObject.clickOnNetworkRadioButton(network);
 });
 
@@ -123,16 +124,13 @@ When(
   }
 );
 
-When(
-  /^I switch network to: "(Mainnet|Preprod|Preview)" without closing drawer/,
-  async (network: 'Mainnet' | 'Preprod') => {
-    await settingsExtendedPageObject.switchNetworkWithoutClosingDrawer(network);
-  }
-);
+When(/^I switch network to: "(Mainnet|Preprod|Preview)" without closing drawer/, async (network: NetworkType) => {
+  await settingsExtendedPageObject.switchNetworkWithoutClosingDrawer(network);
+});
 
 Then(
   /Local storage appSettings contains info about network: "(Mainnet|Preprod|Preview)"/,
-  async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
+  async (network: NetworkType) => {
     await localStorageAssert.assertLocalStorageContainNetwork(network);
   }
 );

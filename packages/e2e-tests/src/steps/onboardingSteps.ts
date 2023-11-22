@@ -39,6 +39,7 @@ import { shuffle } from '../utils/arrayUtils';
 import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
 import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 import { browser } from '@wdio/globals';
+import type { RecoveryPhrase } from '../types/onboarding';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -181,7 +182,7 @@ Then(/^"Recovery phrase length page" is displayed and 24 words checkbox is check
   await OnboardingRecoveryPhraseLengthPageAssert.assertSeeRecoveryPhraseLengthPage();
 });
 
-Then(/^I select (12|15|24) word passphrase length$/, async (length: '12' | '15' | '24') => {
+Then(/^I select (12|15|24) word passphrase length$/, async (length: RecoveryPhrase) => {
   await OnboardingPageObject.selectRecoveryPassphraseLength(length);
 });
 
@@ -229,7 +230,7 @@ Then(/^"Name your wallet" page is displayed$/, async () => {
   await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
 });
 
-Then(/^"Wallet password" page is displayed(| in "Forgot password" flow)$/, async (flow: string) => {
+Then(/^"Wallet password" page is displayed in (onboarding|"Forgot password") flow$/, async (flow: string) => {
   const expectedFlow = flow === ' in "Forgot password" flow' ? 'forgot_password' : 'onboarding';
   await OnboardingWalletPasswordPageAssert.assertSeePasswordPage(expectedFlow);
 });
@@ -344,28 +345,25 @@ Given(/^I am on "All done!" page from "Restore wallet" using "([^"]*)" wallet$/,
 
 Given(
   /^I am on "Enter your secret passphrase" with (12|15|24) words page from "Restore wallet" process$/,
-  async (length: '12' | '15' | '24') => {
+  async (length: RecoveryPhrase) => {
     await OnboardingPageObject.goToMnemonicWriteDownPage(length);
   }
 );
 
-Given(
-  /^I fill passphrase with incorrect mnemonic (12|15|24) words on each page$/,
-  async (length: '12' | '15' | '24') => {
-    const invalidMnemonic = [...invalidMnemonicWords];
-    switch (length) {
-      case '12':
-        invalidMnemonic.splice(12);
-        break;
-      case '15':
-        invalidMnemonic.splice(15);
-        break;
-      case '24':
-        break;
-    }
-    await OnboardingPageObject.openMnemonicVerificationLastPage(invalidMnemonic, length);
+Given(/^I fill passphrase with incorrect mnemonic (12|15|24) words on each page$/, async (length: RecoveryPhrase) => {
+  const invalidMnemonic = [...invalidMnemonicWords];
+  switch (length) {
+    case '12':
+      invalidMnemonic.splice(12);
+      break;
+    case '15':
+      invalidMnemonic.splice(15);
+      break;
+    case '24':
+      break;
   }
-);
+  await OnboardingPageObject.openMnemonicVerificationLastPage(invalidMnemonic, length);
+});
 
 Given(
   /^I fill passphrase fields using 24 words mnemonic on (8\/24|16\/24|24\/24) page$/,
