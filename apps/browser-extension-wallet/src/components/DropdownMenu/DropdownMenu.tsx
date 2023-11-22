@@ -47,20 +47,22 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       trigger={['click']}
     >
       {process.env.USE_MULTI_WALLET === 'true' ? (
-        <ProfileDropdown.Trigger
-          title={walletInfo.name}
-          subtitle="Account #0"
-          profile={
-            handleImage
-              ? {
-                  fallback: walletInfo.name,
-                  imageSrc: getAssetImageUrl(handleImage)
-                }
-              : undefined
-          }
-          type="cold"
-          id="menu"
-        />
+        <div className={styles.profileDropdownTrigger}>
+          <ProfileDropdown.Trigger
+            title={walletInfo.name}
+            subtitle="Account #0"
+            profile={
+              handleImage
+                ? {
+                    fallback: walletInfo.name,
+                    imageSrc: getAssetImageUrl(handleImage)
+                  }
+                : undefined
+            }
+            type="cold"
+            id="menu"
+          />
+        </div>
       ) : (
         <Button
           variant="outlined"
