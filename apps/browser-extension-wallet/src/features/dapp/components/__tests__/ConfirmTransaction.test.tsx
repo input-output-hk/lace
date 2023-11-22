@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
+import * as CurrencyProvider from '@providers/currency';
+
 const mockGetKeyAgentType = jest.fn();
 const mockUseWalletStore = jest.fn();
 const error = 'error in getSignTxData';
@@ -7,6 +9,7 @@ const mockConsumeRemoteApi = jest.fn().mockReturnValue({
   getSignTxData: async () => await Promise.reject(error)
 });
 const mockCreateTxInspector = jest.fn().mockReturnValue(() => ({ minted: [] as any, burned: [] as any }));
+const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: 'usd', symbol: '$' } });
 import * as React from 'react';
 import { cleanup, render, waitFor } from '@testing-library/react';
 import { ConfirmTransaction } from '../ConfirmTransaction';
@@ -31,6 +34,8 @@ import { postHogClientMocks } from '@src/utils/mocks/test-helpers';
 
 const assetInfo$ = new BehaviorSubject(new Map());
 const available$ = new BehaviorSubject([]);
+const tokenPrices$ = new BehaviorSubject({});
+const adaPrices$ = new BehaviorSubject({});
 
 const assetProvider = {
   getAsset: () => ({}),
@@ -48,6 +53,11 @@ const inMemoryWallet = {
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
   useWalletStore: mockUseWalletStore
+}));
+
+jest.mock('@providers/currency', (): typeof CurrencyProvider => ({
+  ...jest.requireActual<typeof CurrencyProvider>('@providers/currency'),
+  useCurrencyStore: mockUseCurrencyStore
 }));
 
 jest.mock('@cardano-sdk/web-extension', () => {
@@ -74,7 +84,8 @@ const testIds = {
 
 const backgroundService = {
   getBackgroundStorage: jest.fn(),
-  setBackgroundStorage: jest.fn()
+  setBackgroundStorage: jest.fn(),
+  coinPrices: { tokenPrices$, adaPrices$ }
 } as unknown as BackgroundServiceAPIProviderProps['value'];
 
 const getWrapper =
@@ -98,7 +109,7 @@ const getWrapper =
       </BackgroundServiceAPIProvider>
     );
 
-describe('Testing ConfirmTransaction component', () => {
+describe.only('Testing ConfirmTransaction component', () => {
   window.ResizeObserver = ResizeObserver;
   describe('Testing errors', () => {
     beforeEach(() => {
