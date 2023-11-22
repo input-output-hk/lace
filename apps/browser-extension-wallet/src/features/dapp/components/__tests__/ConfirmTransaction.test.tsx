@@ -109,7 +109,7 @@ const getWrapper =
       </BackgroundServiceAPIProvider>
     );
 
-describe.only('Testing ConfirmTransaction component', () => {
+describe('Testing ConfirmTransaction component', () => {
   window.ResizeObserver = ResizeObserver;
   describe('Testing errors', () => {
     beforeEach(() => {
