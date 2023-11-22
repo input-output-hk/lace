@@ -54,31 +54,31 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
         })}
       >
         <CopyToClipboard text={handleName || walletAddress}>
-          <AntdTooltip
-            overlayInnerStyle={overlayInnerStyle}
-            placement="top"
-            title={
-              <span className={styles.tooltip}>
-                {handleName ? t('settings.copyHandle') : t('settings.copyAddress')}
-              </span>
-            }
-          >
-            {process.env.USE_MULTI_WALLET === 'true' ? (
-              <ProfileDropdown.WalletOption
-                title={walletInfo.name}
-                subtitle="Account #0"
-                id={walletName}
-                profile={
-                  handleImage
-                    ? {
-                        fallback: walletInfo.name,
-                        imageSrc: getAssetImageUrl(handleImage)
-                      }
-                    : undefined
-                }
-                type="cold"
-              />
-            ) : (
+          {process.env.USE_MULTI_WALLET === 'true' ? (
+            <ProfileDropdown.WalletOption
+              title={walletInfo.name}
+              subtitle="Account #0"
+              id={walletName}
+              profile={
+                handleImage
+                  ? {
+                      fallback: walletInfo.name,
+                      imageSrc: getAssetImageUrl(handleImage)
+                    }
+                  : undefined
+              }
+              type="cold"
+            />
+          ) : (
+            <AntdTooltip
+              overlayInnerStyle={overlayInnerStyle}
+              placement="top"
+              title={
+                <span className={styles.tooltip}>
+                  {handleName ? t('settings.copyHandle') : t('settings.copyAddress')}
+                </span>
+              }
+            >
               <div className={styles.userInfo} onClick={handleOnAddressCopy}>
                 {avatarVisible && <UserAvatar walletName={walletName} />}
                 <div className={styles.userMeta} data-testid="header-menu-user-details">
@@ -90,8 +90,8 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
                   </p>
                 </div>
               </div>
-            )}
-          </AntdTooltip>
+            </AntdTooltip>
+          )}
         </CopyToClipboard>
         <div className={styles.walletStatusInfo}>
           <WalletStatusContainer />
