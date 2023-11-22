@@ -126,7 +126,8 @@ Then(/^I (see|don't see) "Folder name" input max length (\d+) error$/, async (sh
 
 Then(
   /^I (see|do not see) "Given name already exists" error on "(Name your folder|Rename your folder)" page$/,
-  async (shouldSee: 'see' | 'do not see') => {
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  async (shouldSee: 'see' | 'do not see', _ignored: string) => {
     await nftCreateFolderAssert.assertSeeGivenNameAlreadyExistsError(shouldSee === 'see');
   }
 );
