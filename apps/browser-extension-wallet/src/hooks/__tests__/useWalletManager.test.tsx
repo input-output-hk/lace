@@ -162,7 +162,7 @@ describe('Testing useWalletManager hook', () => {
 
       await lockWallet();
       expect(lockWallet).toBeDefined();
-      expect(clearBackgroundStorage).toBeCalledWith(['keyAgentsByChain']);
+      expect(clearBackgroundStorage).toBeCalledWith({ keys: ['keyAgentsByChain'] });
       expect(deleteFromLocalStorage).toBeCalledWith('keyAgentData');
       expect(setCardanoWallet).toBeCalledWith();
       expect(setKeyAgentData).toBeCalledWith();
@@ -431,7 +431,7 @@ describe('Testing useWalletManager hook', () => {
         wallet,
         name: 'name'
       } as any;
-      const chainName = 'LegacyTestnet';
+      const chainName = 'Preview';
       const mnemonicVerificationFrequency = 'mnemonicVerificationFrequency';
 
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
@@ -621,7 +621,7 @@ describe('Testing useWalletManager hook', () => {
         keyAgentsByChain,
         ...cardanoWallet
       } as any;
-      const chainName = 'LegacyTestnet';
+      const chainName = 'Preview';
 
       const saveValueInLocalStorage = jest.fn();
       jest.spyOn(localStorage, 'saveValueInLocalStorage').mockImplementation(saveValueInLocalStorage);
@@ -728,8 +728,8 @@ describe('Testing useWalletManager hook', () => {
       const shutdownWalletMocked = jest.fn();
       mockShutdownWallet.mockImplementation(shutdownWalletMocked);
 
-      const deleteFromLocalStorage = jest.fn();
-      jest.spyOn(localStorage, 'deleteFromLocalStorage').mockImplementation(deleteFromLocalStorage);
+      const clearLocalStorage = jest.fn();
+      jest.spyOn(localStorage, 'clearLocalStorage').mockImplementation(clearLocalStorage);
 
       const resetWalletLock = jest.fn();
       const setCardanoWallet = jest.fn();
@@ -757,12 +757,20 @@ describe('Testing useWalletManager hook', () => {
       expect(deleteWallet).toBeDefined();
       await deleteWallet();
       expect(shutdownWalletMocked).toBeCalledWith(walletManagerUi);
-      expect(deleteFromLocalStorage.mock.calls[0]).toEqual(['appSettings']);
-      expect(deleteFromLocalStorage.mock.calls[1]).toEqual(['showDappBetaModal']);
-      expect(deleteFromLocalStorage.mock.calls[2]).toEqual(['lastStaking']);
-      expect(deleteFromLocalStorage.mock.calls[3]).toEqual(['userInfo']);
-      expect(deleteFromLocalStorage.mock.calls[4]).toEqual(['keyAgentData']);
-      expect(clearBackgroundStorage).toBeCalledWith(['message', 'mnemonic', 'keyAgentsByChain']);
+      expect(clearLocalStorage).toBeCalledWith({
+        except: [
+          'currency',
+          'lock',
+          'mode',
+          'hideBalance',
+          'isForgotPasswordFlow',
+          'multidelegationFirstVisit',
+          'multidelegationFirstVisitSincePortfolioPersistence'
+        ]
+      });
+      expect(clearBackgroundStorage).toBeCalledWith({
+        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration']
+      });
       expect(resetWalletLock).toBeCalledWith();
       expect(setCardanoWallet).toBeCalledWith();
       expect(setKeyAgentData).toBeCalledWith();
@@ -854,7 +862,7 @@ describe('Testing useWalletManager hook', () => {
       await expect(switchNetwork(chainId)).rejects.toThrow(new Error('Chain not supported'));
     });
     test('shoud throw in case the chain is not available', async () => {
-      const chainId = 'LegacyTestnet' as any;
+      const chainId = 'Dummy' as any;
       const {
         result: {
           current: { switchNetwork }

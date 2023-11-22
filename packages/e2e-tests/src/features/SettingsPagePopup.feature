@@ -46,18 +46,6 @@ Feature: General Settings - Popup View
       | browserView.settings.legal.privacyPolicy.title     |
       | browserView.settings.legal.cookiePolicy.title      |
 
-  @LW-2708 @Mainnet @Testnet
-  Scenario: Popup View - Remove wallet and confirm
-    Given I am on Tokens popup page
-    And my local storage is fully initialized
-    When I open settings from header menu
-    And I click on Remove wallet button
-    And I click "Remove wallet" button on "Remove wallet" modal
-    And I switch to last window
-    Then "Get started" page is displayed
-    And I expect browser local storage to be empty
-    And Mnemonic is not stored in background storage
-
   @LW-2707 @Mainnet @Testnet
   Scenario: Popup view - Try to remove wallet and cancel
     Given I am on Tokens popup page
@@ -146,6 +134,7 @@ Feature: General Settings - Popup View
     And I see current network: "Preprod" name in "About Lace" widget
     And I close the drawer by clicking back button
     When I switch network to: "Preview" in popup mode
+    And Wallet is synced
     And I click on About component
     Then I see current network: "Preview" name in "About Lace" widget
 
@@ -156,13 +145,14 @@ Feature: General Settings - Popup View
     And I see current network: "Mainnet" name in "About Lace" widget
     And I close the drawer by clicking back button
     When I switch network to: "Preview" in popup mode
+    And Wallet is synced
     And I click on About component
     Then I see current network: "Preview" name in "About Lace" widget
 
   @LW-5262 @Mainnet @Testnet
   Scenario: Popup View - Settings - Toast displayed after switching network
     When I open settings from header menu
-    When I switch network to: "Preview" in popup mode
+    When I switch network to: "Preview" without closing drawer
     Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
 
   @LW-2719 @Testnet
@@ -211,9 +201,11 @@ Feature: General Settings - Popup View
     Given I have 3 addresses in my address book in popup mode
     And I see address count: 3
     When I switch network to: "Preview" in popup mode
+    And Wallet is synced
     And  I open address book in popup mode
     And I see address count: 0
     When I switch network to: "Preprod" in popup mode
+    And Wallet is synced
     And  I open address book in popup mode
     Then I see address count: 3
 
@@ -321,3 +313,16 @@ Feature: General Settings - Popup View
   Scenario: Popup view - Settings - Analytics option displayed
     Given I open settings from header menu
     Then I see analytics option with proper description and toggle
+
+    # this test should be executed as the last one in this suite
+  @LW-2708 @Mainnet @Testnet
+  Scenario: Popup View - Remove wallet and confirm
+    Given I am on Tokens popup page
+    And my local storage is fully initialized
+    When I open settings from header menu
+    And I click on Remove wallet button
+    And I click "Remove wallet" button on "Remove wallet" modal
+    And I switch to last window
+    Then "Get started" page is displayed
+    And I expect browser local storage to be empty
+    And Mnemonic is not stored in background storage

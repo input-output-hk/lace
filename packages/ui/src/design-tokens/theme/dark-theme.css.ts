@@ -111,8 +111,7 @@ const colors: Colors = {
     darkColorScheme.$primary_light_grey,
   $bundle_input_error_label_color: darkColorScheme.$secondary_data_pink,
 
-  $sub_navigation_container_borderColor:
-    lightColorScheme.$primary_light_grey_plus,
+  $sub_navigation_container_borderColor: darkColorScheme.$primary_mid_grey,
 
   $sub_navigation_item_label_color: lightColorScheme.$primary_grey,
   $sub_navigation_container_outlineColor:
@@ -245,6 +244,10 @@ const colors: Colors = {
 
   $metadata_label_color: darkColorScheme.$primary_white,
   $metadata_secondary_label_color: darkColorScheme.$primary_light_grey,
+
+  $text_link_label_color: darkColorScheme.$secondary_data_blue,
+  $text_link_label_color_visited: darkColorScheme.$primary_accent_purple,
+  $text_link_label_color_disabled: lightColorScheme.$primary_grey,
 };
 
 const elevation: Elevation = {

@@ -15,6 +15,10 @@ export class StakePoolListItem {
     this.listItem = $$(this.LIST_ITEM)[index];
   }
 
+  get container(): ChainablePromiseElement<WebdriverIO.Element | undefined> {
+    return this.listItem;
+  }
+
   get logo(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.listItem.$(this.LOGO);
   }

@@ -8,7 +8,7 @@ import { DappTxAsset, DappTxAssetProps } from './DappTxAsset/DappTxAsset';
 import { DappTxOutput, DappTxOutputProps } from './DappTxOutput/DappTxOutput';
 import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
-import { TransactionFee } from '@ui/components/Transactions';
+import { TransactionFee } from '@ui/components/ActivityDetail';
 
 type TransactionDetails = {
   fee: string;

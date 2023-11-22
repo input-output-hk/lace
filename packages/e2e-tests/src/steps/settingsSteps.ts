@@ -119,7 +119,14 @@ When(/I click on "(Mainnet|Preprod|Preview)" radio button/, async (network: 'Mai
 When(
   /^I switch network to: "(Mainnet|Preprod|Preview)" in (extended|popup) mode/,
   async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
-    await settingsExtendedPageObject.switchNetwork(network, mode);
+    await settingsExtendedPageObject.switchNetworkAndCloseDrawer(network, mode);
+  }
+);
+
+When(
+  /^I switch network to: "(Mainnet|Preprod|Preview)" without closing drawer/,
+  async (network: 'Mainnet' | 'Preprod') => {
+    await settingsExtendedPageObject.switchNetworkWithoutClosingDrawer(network);
   }
 );
 
@@ -127,6 +134,33 @@ Then(
   /Local storage appSettings contains info about network: "(Mainnet|Preprod|Preview)"/,
   async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
     await localStorageAssert.assertLocalStorageContainNetwork(network);
+  }
+);
+
+Then(
+  /Local storage unconfirmedTransaction contains tx with type: "(internal|external)"/,
+  async (txType: 'internal' | 'external') => {
+    await localStorageAssert.assertLocalStorageContainsUnconfirmedTransaction(txType);
+  }
+);
+
+Then(/Local storage unconfirmedTransaction is empty/, async () => {
+  await localStorageAssert.assertLocalStorageUnconfirmedTransactionsIsEmpty();
+});
+
+Then(
+  /I set (valid|outdated) unconfirmedTransaction entry in Local storage with type: "(internal|external)"/,
+  async (typeOfEntry: 'valid' | 'outdated', creationType: 'internal' | 'external') => {
+    const date = new Date();
+    if (typeOfEntry === 'outdated') {
+      date.setDate(date.getDate() - 7);
+    }
+    const entry = {
+      id: 'someId',
+      date: date.toString(),
+      creationType
+    };
+    await localStorageInitializer.initializeUnconfirmedTransactions(JSON.stringify(entry));
   }
 );
 

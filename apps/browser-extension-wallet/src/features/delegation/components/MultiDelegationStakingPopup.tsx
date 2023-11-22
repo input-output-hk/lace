@@ -1,6 +1,12 @@
 import { OutsideHandlesProvider, StakingPopup } from '@lace/staking';
 import React, { useCallback, useEffect } from 'react';
-import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
+import {
+  useAnalyticsContext,
+  useBackgroundServiceAPIContext,
+  useCurrencyStore,
+  useExternalLinkOpener,
+  useTheme
+} from '@providers';
 import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
@@ -12,6 +18,10 @@ import { ContentLayout } from '@components/Layout';
 import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useWalletActivities } from '@hooks/useWalletActivities';
+import {
+  MULTIDELEGATION_FIRST_VISIT_LS_KEY,
+  MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY
+} from '@utils/constants';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -63,16 +73,20 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
       name: 'AnalyticsEventNames.Staking.STAKING_MULTI_DELEGATION_POPUP'
     });
   }, []);
-  const { walletActivities } = useWalletActivities({ sendAnalytics });
+  const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
   const { executeWithPassword } = useWalletManager();
   const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
-  const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
   );
+  const [
+    multidelegationFirstVisitSincePortfolioPersistence,
+    { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
+  ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
+  const analytics = useAnalyticsContext();
 
   useEffect(() => {
     fetchNetworkInfo();
@@ -81,8 +95,14 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   return (
     <OutsideHandlesProvider
       {...{
+        analytics,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        multidelegationFirstVisitSincePortfolioPersistence,
+        triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
+          setMultidelegationFirstVisit(false);
+          setMultidelegationFirstVisitSincePortfolioPersistence(false);
+        },
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         expandStakingView: () => handleOpenBrowser({ section: BrowserViewSections.STAKING }),
         balancesBalance: balance,
@@ -107,6 +127,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         walletStoreNetworkInfo: networkInfo,
         walletStoreBlockchainProvider: blockchainProvider,
         walletStoreWalletActivities: walletActivities,
+        walletStoreWalletActivitiesStatus: walletActivitiesStatus,
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         walletAddress,

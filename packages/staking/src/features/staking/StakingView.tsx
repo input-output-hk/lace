@@ -1,13 +1,15 @@
 import { Box, Text } from '@lace/ui';
+import { Activity } from 'features/activity';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BrowsePools } from '../browse-pools';
-import { StakePoolDetails } from '../drawer';
-import { ChangingPreferencesModal, MultidelegationBetaModal } from '../modals';
+import { BrowsePools } from '../BrowsePools';
+import { Drawer } from '../Drawer';
+import { ChangingPreferencesModal } from '../modals';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { Overview } from '../overview';
 import { DrawerManagementStep, DrawerStep, useDelegationPortfolioStore } from '../store';
 import { Navigation, Page } from './Navigation';
+import { OneTimeModals } from './OneTimeModals';
 
 const stepsWithBackBtn = new Set<DrawerStep>([DrawerManagementStep.Confirmation, DrawerManagementStep.Sign]);
 
@@ -19,8 +21,6 @@ export const StakingView = () => {
   const {
     walletStoreFetchNetworkInfo: fetchNetworkInfo,
     walletStoreBlockchainProvider: blockchainProvider,
-    multidelegationFirstVisit,
-    triggerMultidelegationFirstVisit,
     currentChain,
   } = useOutsideHandles();
 
@@ -40,15 +40,16 @@ export const StakingView = () => {
       </Box>
       <Navigation>
         {(activePage) => (
-          <Box mt="$40">
+          <Box mt="$40" h="$fill">
             {activePage === Page.overview && <Overview />}
             {activePage === Page.browsePools && <BrowsePools />}
+            {activePage === Page.activity && <Activity />}
           </Box>
         )}
       </Navigation>
-      <StakePoolDetails showCloseIcon showBackIcon={(step: DrawerStep): boolean => stepsWithBackBtn.has(step)} />
+      <Drawer showCloseIcon showBackIcon={(step: DrawerStep): boolean => stepsWithBackBtn.has(step)} />
       <ChangingPreferencesModal />
-      <MultidelegationBetaModal visible={multidelegationFirstVisit} onConfirm={triggerMultidelegationFirstVisit} />
+      <OneTimeModals />
     </>
   );
 };

@@ -1,113 +1,33 @@
-/* eslint-disable complexity */
-/* eslint-disable no-magic-numbers */
-import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
-import { AssetActivityItemProps } from '@lace/core';
-import dayjs from 'dayjs';
-import { formatDate } from '@src/utils/format-date';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
-import { getFormattedFiatAmount, txTransformer, TxTransformerInput } from './pending-tx-transformer';
-import { TxDirections } from '@types';
-import {
-  isDelegationWithDeregistrationTx,
-  isDelegationWithRegistrationTx,
-  splitDelegationWithDeregistrationIntoTwoActions,
-  splitDelegationWithRegistrationIntoTwoActions
-} from './common-transformers';
+import { txTransformer, TxTransformerInput } from './common-tx-transformer';
+import type { TransformedTransactionActivity } from './types';
 
 interface TxHistoryTransformerInput extends Omit<TxTransformerInput, 'tx'> {
   tx: Wallet.Cardano.HydratedTx;
 }
-
-/**
-  calculates the amount of rewards withdrawn by the wallet
-
-  @param withdrawals the withdrawal list in the transaction
-  @param rewardAccount needed to verify if the withdrawal was made to the wallet stake address
-*/
-export const getRewardsAmount = (
-  withdrawals: Wallet.Cardano.Withdrawal[],
-  rewardAccounts: Wallet.Cardano.RewardAccount[]
-): string =>
-  withdrawals
-    ?.reduce(
-      (total, { quantity, stakeAddress }) =>
-        rewardAccounts.includes(stakeAddress) ? total.plus(quantity.toString()) : total,
-      new BigNumber(0)
-    )
-    ?.toString() || '0';
 
 export const txHistoryTransformer = ({
   tx,
   walletAddresses,
   fiatCurrency,
   fiatPrice,
-  time,
+  date,
   protocolParameters,
   cardanoCoin
-}: TxHistoryTransformerInput):
-  | Array<Omit<AssetActivityItemProps, 'onClick'>>
-  | Omit<AssetActivityItemProps, 'onClick'> => {
+}: TxHistoryTransformerInput): TransformedTransactionActivity[] => {
   const type = inspectTxType({ walletAddresses, tx });
   const direction = getTxDirection({ type });
 
-  const transformedTx = txTransformer({
-    tx: tx as unknown as Wallet.TxInFlight,
+  return txTransformer({
+    tx,
     walletAddresses,
     fiatCurrency,
     fiatPrice,
-    time,
+    date,
     protocolParameters,
     cardanoCoin,
     status: Wallet.TransactionStatus.SUCCESS,
-    direction: direction as TxDirections,
-    date: dayjs().isSame(time, 'day') ? 'Today' : formatDate({ date: time, format: 'DD MMMM YYYY', type: 'local' })
-  });
-
-  if (isDelegationWithRegistrationTx(transformedTx, type)) {
-    return splitDelegationWithRegistrationIntoTwoActions(transformedTx);
-  }
-
-  if (isDelegationWithDeregistrationTx(transformedTx, type)) {
-    return splitDelegationWithDeregistrationIntoTwoActions(transformedTx);
-  }
-
-  /*
-    whenever the wallet have withdrawn rewards, we will need need to create a new record Rewards and add it to the transaction history list
-    given this, we will keep the original send transaction type and we will add this new Rewards record
-    */
-  //  TODO: extract to common-transformers, apply in pending-tx-transformer
-  if (type === 'rewards' || type === 'self-rewards') {
-    const rewardsAmount = getRewardsAmount(
-      tx?.body?.withdrawals,
-      walletAddresses.map((addr) => addr.rewardAccount)
-    );
-    // TODO: create a type for this and replace AssetActivityItemProps type in other place (JIRA: LW-5490)
-    return [
-      {
-        ...transformedTx,
-        type: type === 'self-rewards' ? 'self' : 'outgoing'
-      },
-      {
-        type: 'rewards',
-        direction: 'Incoming',
-        amount: Wallet.util.getFormattedAmount({ amount: rewardsAmount, cardanoCoin }),
-        fiatAmount: getFormattedFiatAmount({
-          amount: new BigNumber(tx?.body?.withdrawals[0]?.quantity?.toString() || '0'),
-          fiatCurrency,
-          fiatPrice
-        }),
-        status: Wallet.TransactionStatus.SPENDABLE,
-        date: transformedTx.date,
-        assets: [],
-        timestamp: transformedTx.timestamp
-      }
-    ] as Array<Omit<AssetActivityItemProps, 'onClick'>>;
-  }
-
-  return {
-    ...transformedTx,
-    type,
     direction
-  };
+  });
 };

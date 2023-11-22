@@ -1,10 +1,9 @@
-import React from 'react';
 import type { PropsWithChildren, ReactNode } from 'react';
+import React from 'react';
 
 import * as Tooltip from '@radix-ui/react-tooltip';
 
-import { RichContentInner } from './rich-tooltip-content-inner.component';
-import { Content } from './tooltip-content.component';
+import { RichTooltipContent } from './rich-tooltip-content.component';
 
 export type Props = PropsWithChildren<
   typeof Tooltip.Root & {
@@ -13,7 +12,7 @@ export type Props = PropsWithChildren<
   }
 >;
 
-export const Root = ({
+export const RichTooltipRoot = ({
   title,
   description,
   children,
@@ -22,9 +21,9 @@ export const Root = ({
     <Tooltip.Root>
       {children}
       <Tooltip.Portal>
-        <Content>
-          <RichContentInner title={title} description={description} />
-        </Content>
+        <Tooltip.Content>
+          <RichTooltipContent title={title} description={description} />
+        </Tooltip.Content>
       </Tooltip.Portal>
     </Tooltip.Root>
   );

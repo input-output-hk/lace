@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, useObservable } from '@lace/common';
+import { Button, PostHogAction, useObservable } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { DappTransaction } from '@lace/core';
 import { Layout } from './Layout';
@@ -29,6 +29,9 @@ import { of } from 'rxjs';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
 import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 import { useCurrencyStore } from '@providers';
+import { useAnalyticsContext } from '@providers';
+import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -97,6 +100,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   const { fiatCurrency } = useCurrencyStore();
   const { list: addressList } = useAddressBookContext();
   const { priceResult } = useFetchCoinPrice();
+  const analytics = useAnalyticsContext();
 
   const [tx, setTx] = useState<Wallet.Cardano.Tx>();
   const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
@@ -290,6 +294,20 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     };
   }, [tx, walletInfo.addresses, createAssetList, createMintedList, addressToNameMap]);
 
+  const onConfirm = () => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+
+    txSubmitted$.next({
+      id: tx?.id.toString(),
+      date: new Date().toString(),
+      creationType: TxCreationType.External
+    });
+
+    isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
+  };
+
   return (
     <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
       {tx && txSummary ? (
@@ -306,9 +324,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       )}
       <div className={styles.actions}>
         <Button
-          onClick={async () => {
-            isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
-          }}
+          onClick={onConfirm}
           disabled={!!errorMessage}
           loading={isUsingHardwareWallet && isConfirmingTx}
           data-testid="dapp-transaction-confirm"

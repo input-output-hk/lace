@@ -35,6 +35,10 @@ import testContext from '../utils/testContext';
 import webTester from '../actor/webTester';
 import MainLoader from '../elements/MainLoader';
 import CommonAssert from '../assert/commonAssert';
+import { shuffle } from '../utils/arrayUtils';
+import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
+import SelectAccountPage from '../elements/onboarding/selectAccountPage';
+import { browser } from '@wdio/globals';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -67,14 +71,18 @@ When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back'
   const commonOnboardingElements = new CommonOnboardingElements();
   switch (button) {
     case 'Back':
-      await commonOnboardingElements.backButton.click();
+      await commonOnboardingElements.clickOnBackButton();
       break;
     case 'Next':
-      await commonOnboardingElements.nextButton.click();
+      await commonOnboardingElements.clickOnNextButton();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+When(/^I select ([^"]*) account on Select Account page$/, async (accountNumber: number) => {
+  await SelectAccountPage.accountRadioButtons[accountNumber - 1].click();
 });
 
 When(/^I click "(Back|Skip|Agree)" button on Analytics page$/, async (button: 'Back' | 'Skip' | 'Agree') => {
@@ -102,6 +110,7 @@ When(
   /^I click "(Cancel|OK)" button on "(Limited support for DApp|Restoring a multi-address wallet\?|Are you sure you want to start again\?)" modal$/,
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   async (button: 'Cancel' | 'OK', _modalType: string) => {
+    await browser.pause(500);
     switch (button) {
       case 'Cancel':
         await Modal.cancelButton.click();
@@ -198,6 +207,10 @@ Then(/^"Mnemonic verification" page is displayed with words (8|15) of 15$/, asyn
 
 Then(/^"Connect Hardware Wallet" page is displayed$/, async () => {
   await OnboardingConnectHWPageAssert.assertSeeConnectHardwareWalletPage();
+});
+
+Then(/^I click Trezor wallet icon$/, async () => {
+  await OnboardingConnectHardwareWalletPage.trezorButton.click();
 });
 
 Then(/^"All done" page is displayed$/, async () => {
@@ -371,6 +384,24 @@ Given(
   }
 );
 
+Given(
+  /^I fill passphrase fields using 24 words mnemonic in incorrect order on (8\/24|16\/24|24\/24) page$/,
+  async (pageNumber: string) => {
+    const shuffledWords = shuffle([...mnemonicWords]);
+    switch (pageNumber) {
+      case '8/24':
+        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 0);
+        break;
+      case '16/24':
+        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 8);
+        break;
+      case '24/24':
+        await OnboardingPageObject.fillMnemonicFields(shuffledWords, 16);
+        break;
+    }
+  }
+);
+
 Given(/^I fill passphrase fields using 12 words mnemonic on (8\/12|12\/12) page$/, async (pageNumber: string) => {
   switch (pageNumber) {
     case '8/12':
@@ -416,7 +447,7 @@ Then(/^I fill saved words (8|16|24) of 24$/, async (pageNumber: string) => {
 });
 
 When(/^I fill mnemonic input with "([^"]*)"$/, async (value: string) => {
-  await OnboardingPageObject.fillMnemonicInput(value);
+  await OnboardingPageObject.fillMnemonicInput(value, 0, false);
 });
 
 When(/^I click on mnemonic input$/, async () => {
@@ -463,6 +494,10 @@ Then(/^I change one random field$/, async () => {
   await OnboardingPageObject.changeRandomMnemonicField();
 });
 
+Then(/^I clear one random field$/, async () => {
+  await OnboardingPageObject.clearRandomMnemonicField();
+});
+
 Then(/^"Mnemonic info" page is displayed$/, async () => {
   await OnboardingMnemonicInfoPageAssert.assertSeeMnemonicInfoPage();
 });
@@ -496,7 +531,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
   await TopNavigationAssert.assertLogoPresent();
   await Modal.cancelButton.waitForDisplayed();
   await Modal.cancelButton.click();
-  await settingsExtendedPageObject.switchNetwork('Preprod', 'extended');
+  await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
   const newCreatedWallet: WalletConfig = {
     password: 'N_8J@bne87A',
     name: 'newCreatedWallet',
@@ -539,8 +574,8 @@ When(
   }
 );
 
-Then(/^I see incorrect passphrase error displayed$/, async () => {
-  await OnboardingMnemonicPageAssert.assertSeeMnemonicError();
+Then(/^I (do not see|see) incorrect passphrase error displayed$/, async (shouldBeDisplayed: 'do not see' | 'see') => {
+  await OnboardingMnemonicPageAssert.assertSeeMnemonicError(shouldBeDisplayed === 'see');
 });
 
 Then(
@@ -559,7 +594,7 @@ When(
   /^I click "(Got it|Learn more)" button on "DApp connector is now in Beta" modal$/,
   async (button: 'Got it' | 'Learn more') => {
     // Wait for main page to finish loading
-    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 15_000 });
+    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 60_000 });
     if (button === 'Got it') {
       await Modal.cancelButton.waitForClickable();
       await Modal.cancelButton.click();
@@ -589,4 +624,8 @@ Given(/^I restore a wallet$/, async () => {
 
 Given(/^I see current onboarding page in (light|dark) mode$/, async (mode: 'light' | 'dark') => {
   await CommonAssert.assertSeeThemeMode(mode);
+});
+
+When(/^I restore previously changed mnemonic word$/, async () => {
+  await OnboardingPageObject.restorePreviousMnemonicWord();
 });

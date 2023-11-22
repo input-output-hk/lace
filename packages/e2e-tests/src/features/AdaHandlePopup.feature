@@ -14,7 +14,7 @@ Feature: ADA handle - popup view
     Then Green tick icon is displayed next to ADA handle
     And "Save address" button is enabled on "Add new address" drawer
     When I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.addAddress"
+    Then I see a toast with text: "Address added"
     And I see address row with name "test_handle_1" and address "$test_handle_1" on the list in popup mode
 
   @LW-7334
@@ -144,7 +144,7 @@ Feature: ADA handle - popup view
   @LW-5023 @LW-5029 @LW-5033
   Scenario: Popup View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on Tokens page in popup mode
-    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    And I enter "$test_handle_3" in the bundle 1 recipient's address
     Then search loader is displayed inside address input field
     And Green tick icon is displayed next to ADA handle
     And "Add address" button is enabled in the bundle 1 recipient's address input
@@ -161,7 +161,7 @@ Feature: ADA handle - popup view
   @LW-8747
   Scenario: Popup View - Send flow - Add address - Valid ADA handle
     When I click "Send" button on Tokens page in popup mode
-    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    And I enter "$test_handle_3" in the bundle 1 recipient's address
     And click "Add address" button 1 in address bar
     And I fill address form with "test handle" name
     Then Green tick icon is displayed next to ADA handle
@@ -170,7 +170,7 @@ Feature: ADA handle - popup view
   @LW-8749
   Scenario: Popup View - Send flow - Add address - Invalid ADA handle
     When I click "Send" button on Tokens page in popup mode
-    And I enter "$test_handle_1" in the bundle 1 recipient's address
+    And I enter "$test_handle_3" in the bundle 1 recipient's address
     And click "Add address" button 1 in address bar
     And I fill address form with "test handle" name
     And I fill address form with "$fake_handle" ADA handle

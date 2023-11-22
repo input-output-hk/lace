@@ -9,7 +9,7 @@ import {
   totalAddressOutputsValueInspector
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
-import { TransactionType } from '@lace/core';
+import { ActivityType, TransactionActivityType } from '@lace/core';
 import { TxDirection, TxDirections } from '@src/types';
 
 const hasWalletStakeAddress = (
@@ -18,10 +18,10 @@ const hasWalletStakeAddress = (
 ) => withdrawals.some((item) => item.stakeAddress === stakeAddress);
 
 interface TxTypeProps {
-  type: TransactionType | 'self-rewards';
+  type: ActivityType;
 }
 
-export const getTxDirection = ({ type }: TxTypeProps): TxDirection => {
+export const getTxDirection = ({ type }: TxTypeProps): TxDirections => {
   switch (type) {
     case 'incoming':
       return TxDirections.Incoming;
@@ -29,8 +29,6 @@ export const getTxDirection = ({ type }: TxTypeProps): TxDirection => {
       return TxDirections.Outgoing;
     case 'outgoing':
       return TxDirections.Outgoing;
-    case 'self-rewards':
-      return TxDirections.Self;
     case 'self':
       return TxDirections.Self;
   }
@@ -49,7 +47,7 @@ export const inspectTxType = ({
 }: {
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   tx: Wallet.Cardano.HydratedTx;
-}): TransactionType | 'self-rewards' => {
+}): TransactionActivityType => {
   const { paymentAddresses, rewardAccounts } = walletAddresses.reduce(
     (acc, curr) => ({
       paymentAddresses: [...acc.paymentAddresses, curr.address],
@@ -74,7 +72,7 @@ export const inspectTxType = ({
     inspectionProperties.totalWithdrawals > BigInt(0) &&
     walletAddresses.some((addr) => hasWalletStakeAddress(tx.body.withdrawals, addr.rewardAccount));
 
-  if (inspectionProperties.sent.inputs.length > 0) {
+  if (inspectionProperties.sent.inputs.length > 0 || withRewardsWithdrawal) {
     switch (true) {
       case !!inspectionProperties.delegation[0]?.poolId:
         return 'delegation';
@@ -82,10 +80,6 @@ export const inspectTxType = ({
         return 'delegationRegistration';
       case inspectionProperties.stakeKeyDeregistration.length > 0:
         return 'delegationDeregistration';
-      case withRewardsWithdrawal && inspectionProperties.selfTransaction:
-        return 'self-rewards';
-      case withRewardsWithdrawal:
-        return 'rewards';
       case inspectionProperties.selfTransaction:
         return 'self';
       default:
@@ -93,7 +87,6 @@ export const inspectTxType = ({
     }
   }
 
-  if (withRewardsWithdrawal) return 'rewards';
   return 'incoming';
 };
 

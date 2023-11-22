@@ -13,6 +13,7 @@ import randomBytes from 'randombytes';
 import { userIdServiceProperties } from '../config';
 import { getChainNameByNetworkMagic } from '@src/utils/get-chain-name-by-network-magic';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
+import isUndefined from 'lodash/isUndefined';
 
 // eslint-disable-next-line no-magic-numbers
 export const SESSION_LENGTH = Number(process.env.SESSION_LENGTH_IN_SECONDS || 1800) * 1000;
@@ -24,6 +25,7 @@ export class UserIdService implements UserIdServiceInterface {
   private sessionTimeout?: NodeJS.Timeout;
   private userIdRestored = false;
   public userTrackingType$ = new BehaviorSubject<UserTrackingType>(UserTrackingType.Basic);
+  private hasNewSessionStarted = false;
 
   constructor(
     private getStorage: typeof getBackgroundStorage = getBackgroundStorage,
@@ -31,6 +33,18 @@ export class UserIdService implements UserIdServiceInterface {
     private clearStorage: typeof clearBackgroundStorage = clearBackgroundStorage,
     private sessionLength: number = SESSION_LENGTH
   ) {}
+
+  async init(): Promise<void> {
+    if (!this.userIdRestored) {
+      console.debug('[ANALYTICS] Restoring user ID...');
+      await this.restoreUserId();
+    }
+
+    if (!this.randomizedUserId) {
+      console.debug('[ANALYTICS] User ID not found - generating new one');
+      this.randomizedUserId = randomBytes(USER_ID_BYTE_SIZE).toString('hex');
+    }
+  }
 
   private async getWalletBasedUserId(networkMagic: Wallet.Cardano.NetworkMagic): Promise<string | undefined> {
     const { keyAgentsByChain, usePersistentUserId } = await this.getStorage();
@@ -58,16 +72,9 @@ export class UserIdService implements UserIdServiceInterface {
     return this.walletBasedUserId;
   }
 
+  // TODO: make this method private when Motamo is not longer in use
   async getRandomizedUserId(): Promise<string> {
-    if (!this.userIdRestored) {
-      console.debug('[ANALYTICS] Restoring user ID...');
-      await this.restoreUserId();
-    }
-
-    if (!this.randomizedUserId) {
-      console.debug('[ANALYTICS] User ID not found - generating new one');
-      this.randomizedUserId = randomBytes(USER_ID_BYTE_SIZE).toString('hex');
-    }
+    await this.init();
 
     console.debug(`[ANALYTICS] getId() called (current ID: ${this.randomizedUserId})`);
     return this.randomizedUserId;
@@ -89,18 +96,28 @@ export class UserIdService implements UserIdServiceInterface {
     return { alias, id };
   }
 
+  async resetToDefaultValues(): Promise<void> {
+    const { usePersistentUserId, userId } = await this.getStorage();
+    if (isUndefined(usePersistentUserId) && isUndefined(userId)) {
+      await this.clearId();
+      this.userIdRestored = false;
+    }
+  }
+
   async clearId(): Promise<void> {
     console.debug('[ANALYTICS] clearId() called');
     this.randomizedUserId = undefined;
     this.walletBasedUserId = undefined;
     this.userTrackingType$.next(UserTrackingType.Basic);
     this.clearSessionTimeout();
-    await this.clearStorage(['userId', 'usePersistentUserId']);
+    this.hasNewSessionStarted = false;
+    await this.clearStorage({ keys: ['userId', 'usePersistentUserId'] });
   }
 
   async makePersistent(): Promise<void> {
     console.debug('[ANALYTICS] Converting user ID into persistent');
     this.clearSessionTimeout();
+    this.setSessionTimeout();
     const userId = await this.getRandomizedUserId();
     await this.setStorage({ usePersistentUserId: true, userId });
     this.userTrackingType$.next(UserTrackingType.Enhanced);
@@ -114,9 +131,6 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   async extendLifespan(): Promise<void> {
-    if (!this.sessionTimeout) {
-      return;
-    }
     console.debug('[ANALYTICS] Extending temporary ID lifespan');
     this.clearSessionTimeout();
     this.setSessionTimeout();
@@ -142,8 +156,10 @@ export class UserIdService implements UserIdServiceInterface {
       return;
     }
     this.sessionTimeout = setTimeout(() => {
-      this.randomizedUserId = undefined;
-      console.debug('[ANALYTICS] Session timed out');
+      if (this.userTrackingType$.value === UserTrackingType.Basic) {
+        this.randomizedUserId = undefined;
+      }
+      this.hasNewSessionStarted = false;
     }, this.sessionLength);
   }
 
@@ -157,6 +173,12 @@ export class UserIdService implements UserIdServiceInterface {
     // by requirement, we want to hash the extended account public key twice
     const hash = hashExtendedAccountPublicKey(extendedAccountPublicKey);
     return hashExtendedAccountPublicKey(hash);
+  }
+
+  async isNewSession(): Promise<boolean> {
+    const isNewSession = !this.hasNewSessionStarted;
+    this.hasNewSessionStarted = true;
+    return isNewSession;
   }
 }
 

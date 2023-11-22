@@ -1,6 +1,7 @@
 import SettingsPage from '../../elements/settings/SettingsPage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
+import { browser } from '@wdio/globals';
 
 class SettingsPageAssert {
   async assertSeeSubHeadings(popupView = false) {
@@ -90,7 +91,7 @@ class SettingsPageAssert {
 
   async assertSeeTitle() {
     await SettingsPage.mainTitle.waitForDisplayed();
-    await expect(await SettingsPage.mainTitle.getText()).to.equal(await t('browserView.settings.heading'));
+    expect(await SettingsPage.mainTitle.getText()).to.equal(await t('browserView.settings.heading'));
   }
 
   async assertSeeHeadings() {

@@ -48,6 +48,10 @@
   display: flex;
   gap: size_unit(2);
   justify-content: space-between;
+
+  @media screen and (max-width: $breakpoint-popup) {
+    flex-direction: column;
+  }
 }
 
 .modal.popupView {
