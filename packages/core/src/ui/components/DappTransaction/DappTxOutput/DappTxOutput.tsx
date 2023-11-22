@@ -22,12 +22,11 @@ export const DappTxOutput = ({ recipient, coins, assets }: DappTxOutputProps): R
           <div data-testid="dapp-transaction-amount-value" className={styles.bold}>
             {coins.toString()} ADA
           </div>
-          {assets &&
-            assets.map((asset) => (
-              <div data-testid="dapp-transaction-asset" className={styles.bold} key={asset.name.toString()}>
-                {asset.amount} {asset.ticker || asset.name}
-              </div>
-            ))}
+          {assets?.map((asset) => (
+            <div data-testid="dapp-transaction-asset" className={styles.bold} key={asset.name.toString()}>
+              {asset.amount} {asset.ticker || asset.name}
+            </div>
+          ))}
         </div>
       </div>
       <div className={styles.detail}>

@@ -28,8 +28,7 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
 import { getAssetsInformation, TokenInfo } from '@src/utils/get-assets-information';
 import * as HardwareLedger from '../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
-import { useCurrencyStore } from '@providers';
-import { useAnalyticsContext } from '@providers';
+import { useCurrencyStore, useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 
