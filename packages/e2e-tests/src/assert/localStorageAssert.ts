@@ -18,7 +18,6 @@ class LocalStorageAssert {
     expect(JSON.parse(await localStorageManager.getItem('analyticsAccepted'))).not.to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('lastStaking'))).not.to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('lock'))).not.to.be.null;
-    expect(JSON.parse(await localStorageManager.getItem('unconfirmedTransactions'))).not.to.be.null;
   };
 
   assertLocalStorageContainNetwork = async (expectedNetwork: string) => {

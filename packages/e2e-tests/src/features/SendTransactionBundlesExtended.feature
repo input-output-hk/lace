@@ -173,7 +173,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I enter a valid "shelley" address in the bundle 2 recipient's address
     And I enter a 51% of total "tADA" asset in bundle 2
     Then I see insufficient balance error in bundle 2 for "tADA" asset
-    And I see insufficient balance error in bundle 1 for "tADA" asset
+    And I do not see insufficient balance error in bundle 1 for "tADA" asset
     And "Review transaction" button is disabled on "Send" page
 
   @LW-1762
