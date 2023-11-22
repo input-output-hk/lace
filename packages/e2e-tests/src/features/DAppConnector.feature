@@ -97,7 +97,7 @@ Feature: DAppConnector - Common
     And I click on "Proceed" button on "Forgot password?" modal
     Then I see DApp no wallet page
     When I switch to tab with restore wallet process
-    Then "Wallet password" page is displayed in "Forgot password" flow
+    Then "Wallet password" page is displayed in forgot password flow
 
   @LW-7083 @Testnet @Mainnet
   Scenario: "Forgot password" click and proceed on DApp wallet unlock page
@@ -109,7 +109,7 @@ Feature: DAppConnector - Common
     And I click on "Proceed" button on "Forgot password?" modal
     Then I see DApp no wallet page
     When I switch to tab with restore wallet process
-    Then "Wallet password" page is displayed in "Forgot password" flow
+    Then "Wallet password" page is displayed in forgot password flow
 
   @LW-4060
   Scenario Outline: DApp connector window displayed in <theme> mode

@@ -230,8 +230,8 @@ Then(/^"Name your wallet" page is displayed$/, async () => {
   await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
 });
 
-Then(/^"Wallet password" page is displayed in (onboarding|"Forgot password") flow$/, async (flow: string) => {
-  const expectedFlow = flow === ' in "Forgot password" flow' ? 'forgot_password' : 'onboarding';
+Then(/^"Wallet password" page is displayed in (onboarding|forgot password) flow$/, async (flow: string) => {
+  const expectedFlow = flow === 'forgot password' ? 'forgot_password' : 'onboarding';
   await OnboardingWalletPasswordPageAssert.assertSeePasswordPage(expectedFlow);
 });
 
