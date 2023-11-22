@@ -95,7 +95,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     currentChain,
     setCurrentChain,
     getKeyAgentType,
-    addressesDiscoveryCompleted
+    deletingWallet,
+    initialHdDiscoveryCompleted
   } = useWalletStore();
   const { loadWallet } = useWalletManager();
   const [{ chainName }] = useAppSettingsContext();
@@ -175,7 +176,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!keyAgentData && !isLoadingWalletInfo) {
+  if (!keyAgentData && !isLoadingWalletInfo && !deletingWallet) {
     return (
       <Switch>
         <Route path={'/setup'} component={WalletSetup} />
@@ -184,10 +185,9 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet) {
+  if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return (
       <>
-        {!addressesDiscoveryCompleted && <MainLoader overlay />}
         <Switch>
           {routesMap.map((route) => (
             <Route key={route.path} path={route.path} component={route.component} />

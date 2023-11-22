@@ -30,10 +30,11 @@ export const PopupView = (): React.ReactElement => {
     currentChain,
     walletInfo,
     setKeyAgentData,
-    addressesDiscoveryCompleted,
     isWalletLocked,
-    walletLock
+    walletLock,
+    initialHdDiscoveryCompleted
   } = useWalletStore();
+
   const { loadWallet } = useWalletManager();
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency, chainName }] = useAppSettingsContext();
   const backgroundServices = useBackgroundServiceAPIContext();
@@ -76,13 +77,8 @@ export const PopupView = (): React.ReactElement => {
   }
 
   // Wallet loaded
-  if (keyAgentData && walletInfo && inMemoryWallet) {
-    return (
-      <>
-        {!addressesDiscoveryCompleted && <MainLoader overlay />}
-        <ExtensionRoutes />
-      </>
-    );
+  if (keyAgentData && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
+    return <ExtensionRoutes />;
   }
 
   return <MainLoader />;

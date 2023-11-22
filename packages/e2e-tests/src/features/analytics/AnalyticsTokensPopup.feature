@@ -1,5 +1,5 @@
 @Tokens-popup @Testnet @Mainnet
-Feature: Analytics -  Tokens tab - Popup view
+Feature: Analytics - Tokens tab - Popup view
 
   Background:
     Given Wallet is synced
@@ -14,3 +14,12 @@ Feature: Analytics -  Tokens tab - Popup view
     Then I validate latest analytics single event "token | tokens | token row | click"
     When I click on "View all" button on token details drawer
     Then I validate latest analytics single event "token | token detail | view all | click"
+    And I validate that 3 analytics event(s) have been sent
+
+  @LW-8709
+  Scenario: Analytics - Popup view - Click Lace logo
+    Given I navigate to Tokens popup page
+    And I set up request interception for posthog analytics request(s)
+    When I click on the logo icon
+    Then I validate latest analytics single event "wallet | lace | click"
+    And I validate that 1 analytics event(s) have been sent

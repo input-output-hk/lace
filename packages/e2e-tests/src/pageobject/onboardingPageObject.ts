@@ -7,13 +7,16 @@ import RecoveryPhraseLengthPage from '../elements/onboarding/recoveryPhraseLengt
 import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
 import AnalyticsPage from '../elements/onboarding/analyticsPage';
-import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import Modal from '../elements/modal';
 import OnboardingDataCollectionPageAssert from '../assert/onboarding/onboardingDataCollectionPageAssert';
 import OnboardingWalletNamePageAssert from '../assert/onboarding/onboardingWalletNamePageAssert';
 import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import OnboardingAllDonePage from '../elements/onboarding/allDonePage';
+import testContext from '../utils/testContext';
+import { clearInputFieldValue } from '../utils/inputFieldUtils';
+import WalletCreationPage from '../elements/onboarding/WalletCreationPage';
+
 const validPassword = 'N_8J@bne87A';
 
 class OnboardingPageObject {
@@ -145,14 +148,19 @@ class OnboardingPageObject {
   async fillMnemonicFields(mnemonicWords: string[], offset: 0 | 8 | 16) {
     const inputs = await OnboardingMnemonicPage.mnemonicInputs;
     for (const [i, input] of inputs.entries()) {
-      await input.setValue(mnemonicWords[i + offset]);
+      await clearInputFieldValue(input);
+      await browser.keys(mnemonicWords[i + offset]);
     }
+    await OnboardingMnemonicPage.stepTitle.click(); // Click outside input fields to trigger validation
   }
 
-  async fillMnemonicInput(value: string) {
+  async fillMnemonicInput(value: string, inputNumber = 0, shouldTriggerValidation = true) {
     const inputs = await OnboardingMnemonicPage.mnemonicInputs;
-    await clearInputFieldValue(inputs[0]);
-    await inputs[0].setValue(value);
+    await clearInputFieldValue(inputs[inputNumber]);
+    await browser.keys(value);
+    if (shouldTriggerValidation) {
+      await OnboardingMnemonicPage.stepTitle.click(); // Click outside input fields to trigger validation
+    }
   }
 
   async clickOnInput() {
@@ -206,7 +214,21 @@ class OnboardingPageObject {
   async changeRandomMnemonicField() {
     const randomFieldNo = Math.floor(Math.random() * 8);
     const inputs = await OnboardingMnemonicPage.mnemonicInputs;
-    await inputs[randomFieldNo].setValue('.');
+    testContext.save('mnemonic', { index: randomFieldNo, value: await inputs[randomFieldNo].getValue() });
+    await inputs[randomFieldNo].click();
+    await browser.keys('.');
+    await OnboardingMnemonicPage.stepTitle.click(); // Click outside input fields to trigger validation
+  }
+
+  async restorePreviousMnemonicWord() {
+    const mnemonic = testContext.load('mnemonic') as { value: string; index: number };
+    await this.fillMnemonicInput(mnemonic.value, mnemonic.index);
+  }
+
+  async clearRandomMnemonicField() {
+    const randomFieldNo = Math.floor(Math.random() * 8);
+    const inputs = await OnboardingMnemonicPage.mnemonicInputs;
+    await clearInputFieldValue(inputs[randomFieldNo]);
   }
 
   async clickOnLegalLink(link: string) {
@@ -257,6 +279,13 @@ class OnboardingPageObject {
     await OnboardingAllDonePage.nextButton.click();
     await Modal.cancelButton.waitForClickable();
     await Modal.cancelButton.click();
+  }
+
+  async waitUntilLoaderDisappears() {
+    await browser.pause(500);
+    if (await WalletCreationPage.walletLoader.isDisplayed()) {
+      await WalletCreationPage.walletLoader.waitForDisplayed({ timeout: 15_000, reverse: true });
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { EnhancedAnalyticsOptInStatus } from '../providers/AnalyticsProvider/analyticsTracker/types';
+import { EnhancedAnalyticsOptInStatus, TxCreationType } from '../providers/AnalyticsProvider/analyticsTracker/types';
 
 export interface WalletStorage {
   name: string;
@@ -28,6 +28,14 @@ export interface LastStakingInfo {
   poolId?: string;
 }
 
+export interface UnconfirmedTransaction {
+  id: string;
+  creationType: TxCreationType;
+  date: string;
+}
+
+export type UnconfirmedTransactions = UnconfirmedTransaction[];
+
 export interface ILocalStorage {
   currency?: CurrencyInfo;
   appSettings?: AppSettings;
@@ -42,4 +50,6 @@ export interface ILocalStorage {
   analyticsAccepted?: EnhancedAnalyticsOptInStatus;
   isForgotPasswordFlow?: boolean;
   multidelegationFirstVisit?: boolean;
+  multidelegationFirstVisitSincePortfolioPersistence?: boolean;
+  unconfirmedTransactions: UnconfirmedTransaction[];
 }

@@ -4,8 +4,8 @@ import {
   CoinOverview,
   CardanoStakePool,
   CardanoTxOut,
-  TransactionDetail,
-  CurrencyInfo
+  CurrencyInfo,
+  TransactionActivityDetail
 } from '../types';
 import { Wallet } from '@lace/cardano';
 import { addEllipsis, getNumberWithUnit } from '@lace/common';
@@ -111,7 +111,7 @@ const isStakePool = (props: CardanoStakePool | Wallet.Cardano.SlotLeader): props
 /**
  * format block information
  */
-export const blockTransformer = (block: Wallet.BlockInfo): TransactionDetail['blocks'] => ({
+export const blockTransformer = (block: Wallet.BlockInfo): TransactionActivityDetail['blocks'] => ({
   blockId: block.header.hash.toString(),
   epoch: block.epoch.toString(),
   block: block.header.blockNo.toString(),

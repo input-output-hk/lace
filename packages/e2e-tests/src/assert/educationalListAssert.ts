@@ -14,12 +14,10 @@ class EducationalListAssert {
 
   async assertSeeWidget(title: string, itemTitles: string[], itemSubtitles: string[]) {
     const rowCount = (await EducationalList.listRows).length;
-    await expect(await EducationalList.getListTitle()).to.equal(title);
-    await expect((await EducationalList.listRowImages).length).to.equal(rowCount);
-    await expect(JSON.stringify(await EducationalList.getListRowTitles())).to.deep.equal(JSON.stringify(itemTitles));
-    await expect(JSON.stringify(await EducationalList.getListRowSubtitles())).to.deep.equal(
-      JSON.stringify(itemSubtitles)
-    );
+    expect(await EducationalList.getListTitle()).to.equal(title);
+    expect((await EducationalList.listRowImages).length).to.equal(rowCount);
+    expect(JSON.stringify(await EducationalList.getListRowTitles())).to.deep.equal(JSON.stringify(itemTitles));
+    expect(JSON.stringify(await EducationalList.getListRowSubtitles())).to.deep.equal(JSON.stringify(itemSubtitles));
   }
 
   async assertSeeAddressBookWidget() {
@@ -79,15 +77,13 @@ class EducationalListAssert {
 
   async assertSeeStakingWidget() {
     const faqTranslation = await t(this.faqTranslationPath);
-    const glossaryTranslation = await t(this.glossaryTranslationPath);
-    const videoTranslation = await t(this.videoTranslationPath);
     const expectedTitle = await t('browserView.sidePanel.aboutStaking');
-    const expectedTitles = [faqTranslation, faqTranslation, glossaryTranslation, videoTranslation];
+    const expectedTitles = [faqTranslation, faqTranslation, faqTranslation, faqTranslation];
     const expectedSubtitles = [
       await t('educationalBanners.subtitle.stakingAndDelegation'),
-      await t('educationalBanners.subtitle.choosingAStakePool'),
-      await t('educationalBanners.subtitle.activeStake'),
-      await t('educationalBanners.subtitle.stakingMadeEasy')
+      await t('educationalBanners.subtitle.howManyPools'),
+      await t('educationalBanners.subtitle.ledgerSupport'),
+      await t('educationalBanners.subtitle.stakeDistribution')
     ];
     await this.assertSeeWidget(expectedTitle, expectedTitles, expectedSubtitles);
   }

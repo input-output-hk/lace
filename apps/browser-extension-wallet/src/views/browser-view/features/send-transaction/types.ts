@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import { CardanoTxOut, TxMinimumCoinQuantity } from '../../../../types';
 import { Wallet } from '@lace/cardano';
-import { Handle, HandleResolution } from '@cardano-sdk/core';
+import { HandleResolution } from '@cardano-sdk/core';
 
 export enum Sections {
   FORM = 'form',
@@ -9,6 +9,7 @@ export enum Sections {
   CONFIRMATION = 'confirmation',
   SUCCESS_TX = 'success_tx',
   FAIL_TX = 'fail_tx',
+  UNAUTHORIZED_TX = 'unauthorized_tx',
   ADDRESS_LIST = 'address_list',
   ADDRESS_FORM = 'address_form',
   ASSET_PICKER = 'asset_picker',
@@ -33,8 +34,9 @@ export interface BuiltTxData {
   tx?: Wallet.UnsignedTx;
   uiTx?: {
     hash: Wallet.Cardano.TransactionId;
-    outputs: Set<Wallet.Cardano.TxOut & { handle?: Handle }>;
+    outputs: Set<Wallet.Cardano.TxOut & { handleResolution?: HandleResolution }>;
     fee: Wallet.Cardano.Lovelace;
+    handleResolutions?: HandleResolution[];
   };
   error?: string;
   reachedMaxAmountList?: (string | Wallet.Cardano.AssetId)[];

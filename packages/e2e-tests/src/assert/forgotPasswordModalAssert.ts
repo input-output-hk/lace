@@ -5,13 +5,13 @@ import { t } from '../utils/translationService';
 class ForgotPasswordModalAssert {
   async assertSeeForgotPasswordModal() {
     await ForgotPasswordModal.title.waitForDisplayed();
-    await expect(await ForgotPasswordModal.title.getText()).to.equal(await t('forgotPassword.title'));
+    expect(await ForgotPasswordModal.title.getText()).to.equal(await t('forgotPassword.title'));
     await ForgotPasswordModal.description.waitForDisplayed();
-    await expect(await ForgotPasswordModal.description.getText()).to.equal(await t('forgotPassword.description'));
+    expect(await ForgotPasswordModal.description.getText()).to.equal(await t('forgotPassword.description'));
     await ForgotPasswordModal.confirmButton.waitForDisplayed();
-    await expect(await ForgotPasswordModal.confirmButton.getText()).to.equal(await t('forgotPassword.confirm'));
+    expect(await ForgotPasswordModal.confirmButton.getText()).to.equal(await t('forgotPassword.confirm'));
     await ForgotPasswordModal.cancelButton.waitForDisplayed();
-    await expect(await ForgotPasswordModal.cancelButton.getText()).to.equal(await t('forgotPassword.cancel'));
+    expect(await ForgotPasswordModal.cancelButton.getText()).to.equal(await t('forgotPassword.cancel'));
   }
 }
 

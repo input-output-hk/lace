@@ -171,10 +171,7 @@ Then(/^I see test DApp on the Authorized DApps list$/, async () => {
 
 When(/^I open and authorize test DApp with "(Always|Only once)" setting$/, async (mode: 'Always' | 'Only once') => {
   await DAppConnectorPageObject.openTestDApp();
-  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
-  await DAppConnectorPageObject.clickButtonInDAppAuthorizationWindow('Authorize');
-  await DAppConnectorPageObject.clickButtonInDAppAuthorizationModal(mode);
+  await DAppConnectorPageObject.switchToDappConnectorPopupAndAuthorizeWithRetry(testDAppDetails, mode);
 });
 
 Then(/^I de-authorize all DApps in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
@@ -212,7 +209,7 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
       }
       await browser.waitUntil(async () => (await browser.getWindowHandles()).length === handlesBeforeClick + 1, {
         interval: 1000,
-        timeout: 4000,
+        timeout: 6000,
         timeoutMsg: `failed while waiting for ${handlesBeforeClick + 1} window handles`
       });
       break;

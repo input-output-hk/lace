@@ -9,7 +9,7 @@ class ToastMessageAssert {
     await ToastMessage.closeButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
     await ToastMessage.messageText.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      await expect(await ToastMessage.messageText.getText()).to.equal(expectedMessage);
+      expect(await ToastMessage.messageText.getText()).to.equal(expectedMessage);
     }
   }
 }

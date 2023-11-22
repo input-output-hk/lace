@@ -1,4 +1,3 @@
-import { LocatorStrategy } from '../../actor/webTester';
 import { WebElement, WebElementFactory as Factory } from './../webElement';
 import { StatsComponent } from './statsComponent';
 
@@ -14,7 +13,6 @@ export class StakingInfoComponent extends WebElement {
   private STATS_LAST_REWARD_CONTAINER = '//div[@data-testid="stats-last-reward-container"]';
   private STATS_TOTAL_STAKED_CONTAINER = '//div[@data-testid="stats-total-staked-container"]';
   private STATS_TOTAL_REWARDS_CONTAINER = '//div[@data-testid="stats-total-rewards-container"]';
-  private TOOLTIP = '//div[@data-testid="tooltip"]';
 
   constructor() {
     super();
@@ -40,35 +38,42 @@ export class StakingInfoComponent extends WebElement {
     return Factory.fromSelector(`${this.CONTAINER}${this.POOL_TICKER}`, 'xpath');
   }
 
-  statsApy(): StatsComponent {
+  get statsApy(): StatsComponent {
     return new StatsComponent(this.STATS_APY_CONTAINER);
   }
 
-  statsFee(): StatsComponent {
+  get statsFee(): StatsComponent {
     return new StatsComponent(this.STATS_FEE_CONTAINER);
   }
 
-  statsMargin(): StatsComponent {
+  get statsMargin(): StatsComponent {
     return new StatsComponent(this.STATS_MARGIN_CONTAINER);
   }
 
-  statsTotalStaked(): StatsComponent {
+  get statsTotalStaked(): StatsComponent {
     return new StatsComponent(this.STATS_TOTAL_STAKED_CONTAINER);
   }
 
-  statsLastReward(): StatsComponent {
+  get statsLastReward(): StatsComponent {
     return new StatsComponent(this.STATS_LAST_REWARD_CONTAINER);
   }
 
-  statsTotalRewards(): StatsComponent {
+  get statsTotalRewards(): StatsComponent {
     return new StatsComponent(this.STATS_TOTAL_REWARDS_CONTAINER);
   }
 
-  tooltip(): WebElement {
-    return Factory.fromSelector(`${this.TOOLTIP}`, 'xpath');
+  async hoverOverTotalStakedValue(): Promise<void> {
+    await this.statsTotalStaked.value.scrollIntoView();
+    await this.statsTotalStaked.value.moveTo();
   }
 
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
+  async hoverOverTotalRewardsValue(): Promise<void> {
+    await this.statsTotalRewards.value.scrollIntoView();
+    await this.statsTotalRewards.value.moveTo();
+  }
+
+  async hoverOverLastRewardValue(): Promise<void> {
+    await this.statsLastReward.value.scrollIntoView();
+    await this.statsLastReward.value.moveTo();
   }
 }

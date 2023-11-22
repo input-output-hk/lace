@@ -61,11 +61,11 @@ class CommonAssert {
     const pageWidth = Number(await browser.execute(() => document?.querySelector('#main')?.scrollWidth));
     const viewportWidth = (await browser.execute(() => window.innerWidth)) - scrollBarWidth;
     const hasHorizontalScroll = pageWidth >= viewportWidth;
-    await expect(hasHorizontalScroll).to.equal(shouldBeVisible);
+    expect(hasHorizontalScroll).to.equal(shouldBeVisible);
   };
 
   async assertSeeThemeMode(mode: 'dark' | 'light') {
-    await expect(await $('html').getAttribute('data-theme')).to.equal(mode);
+    expect(await $('html').getAttribute('data-theme')).to.equal(mode);
     await TopNavigationAssert.assertBackgroundColor(mode);
   }
 

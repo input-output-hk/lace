@@ -18,14 +18,6 @@ import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDr
 import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
 import StakingExitModal from '../elements/staking/StakingExitModal';
 
-Then(/^I see Staking title and counter with total number of pools displayed$/, async () => {
-  await stakingPageAssert.assertSeeTitleWithCounter();
-});
-
-Then(/^I see Staking title displayed$/, async () => {
-  await stakingPageAssert.assertSeeTitle();
-});
-
 Then(
   /^I see currently staking component for stake pool: "([^"]*)" in (extended|popup) mode$/,
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
@@ -65,10 +57,6 @@ Then(
   }
 );
 
-Then(/^I see tooltip for currently staking component$/, async () => {
-  await stakingPageAssert.assertSeeCurrentlyStakingTooltip();
-});
-
 Then(/^I click pool name in currently staking component$/, async () => {
   await StakingPageObject.clickPoolNameInStakingInfoComponent();
 });
@@ -83,23 +71,6 @@ Then(
 Then(/^the staking error screen is displayed$/, async () => {
   await stakingPageAssert.assertSeeStakingError();
 });
-
-When(
-  /^I hover over (last reward|total staked|total rewards) in currently staking component$/,
-  async (elementToHover: string) => {
-    switch (elementToHover) {
-      case 'last reward':
-        await StakingPageObject.hoverLastRewardInStakingInfoComponent();
-        break;
-      case 'total staked':
-        await StakingPageObject.hoverTotalStakedInStakingInfoComponent();
-        break;
-      case 'total rewards':
-        await StakingPageObject.hoverTotalRewardsInStakingInfoComponent();
-        break;
-    }
-  }
-);
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
 Then(/^I see drawer with "([^"]*)" stake pool details$/, async (_stakePool: string) => {
@@ -157,13 +128,8 @@ When(/^I click on the "(.*)" column header$/, async (listHeader: string) => {
   await stakingExtendedPageObject.clickStakePoolListHeader(listHeader);
 });
 
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-Then(/^Each stake pool list item contains:$/, async (_ignored: string) => {
-  await stakingPageAssert.assertSeeStakePoolRows();
-});
-
 Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async (metadata: 'with' | 'without') => {
-  const expectedTransactionDetails =
+  const expectedActivityDetails =
     metadata === 'with'
       ? {
           transactionDescription: 'Delegation\n1 token',
@@ -178,7 +144,7 @@ Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async
           poolID: testContext.load('poolID') as string
         };
 
-  await transactionDetailsAssert.assertSeeTransactionDetails(expectedTransactionDetails);
+  await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
 });
 
 Then(
@@ -279,8 +245,4 @@ Then(/^I see (ADA|tADA) in the cost column$/, async (expectedTicker: 'ADA' | 'tA
 
 Then(/^I see (ADA|tADA) in current staked pool$/, async (expectedTicker: 'ADA' | 'tADA') => {
   await stakingPageAssert.assertSeeTickerInCurrentStakedPool(expectedTicker);
-});
-
-Then(/^I wait for stake pool table item to be loaded$/, async () => {
-  await stakingPageAssert.waitRowsToLoad();
 });

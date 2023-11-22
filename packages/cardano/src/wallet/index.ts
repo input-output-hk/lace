@@ -76,6 +76,7 @@ export * from '@wallet/lib/get-total-minimum-coins';
 export * from '@wallet/lib/get-auxiliary-data';
 export * as util from '@wallet/util';
 export * from '@wallet/lib/providers';
+export * from '@wallet/lib/config';
 
 export * as mockUtils from '@wallet/test/mocks';
 export * from '@wallet/types';

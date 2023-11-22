@@ -26,7 +26,7 @@ class DrawerSendExtendedAssert {
     const transactionNewPage = new TransactionNewPage();
     const addressInput = new AddressInput();
     await webTester.seeWebElement(addressInput.input());
-    await expect(await webTester.getTextValueFromElement(addressInput.label())).to.equal(
+    expect(await webTester.getTextValueFromElement(addressInput.label())).to.equal(
       await t('core.destinationAddressInput.recipientAddress')
     );
     await addressInput.ctaButton.waitForDisplayed();
@@ -38,14 +38,14 @@ class DrawerSendExtendedAssert {
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.transactionCosts'));
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.transactionFee'));
     await webTester.seeWebElement(transactionNewPage.attributeValueAda());
-    await webTester.seeWebElement(transactionNewPage.attributeValueFiat());
+    await transactionNewPage.attributeValueFiat.waitForDisplayed();
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.footer.review'));
     await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.footer.cancel'));
     switch (mode) {
       case 'extended':
         await transactionNewPage.addBundleButton.waitForDisplayed();
         await webTester.seeWebElement(transactionNewPage.bundleDescription());
-        await expect(await transactionNewPage.getBundleDescription()).to.equal(
+        expect(await transactionNewPage.getBundleDescription()).to.equal(
           await t('browserView.transaction.send.advancedFlowText')
         );
         await new CommonDrawerElements().drawerHeaderCloseButton.waitForClickable();
@@ -69,56 +69,58 @@ class DrawerSendExtendedAssert {
     await webTester.seeWebElement(transactionNewPage.coinConfigure().container());
 
     await webTester.seeWebElement(transactionNewPage.attributeLabel());
-    await expect(await webTester.getTextValueFromElement(transactionNewPage.attributeLabel())).to.equal(
+    expect(await webTester.getTextValueFromElement(transactionNewPage.attributeLabel())).to.equal(
       await t('browserView.transaction.send.transactionFee')
     );
 
     await webTester.seeWebElement(transactionNewPage.attributeValueAda());
-    await expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueAda())) as string).to.match(
+    expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueAda())) as string).to.match(
       TestnetPatterns.ADA_LITERAL_VALUE_REGEX
     );
-    await webTester.seeWebElement(transactionNewPage.attributeValueFiat());
-    await expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueFiat())) as string).to.match(
-      TestnetPatterns.USD_VALUE_REGEX
-    );
+    await transactionNewPage.attributeValueFiat.waitForDisplayed();
+    expect(await transactionNewPage.attributeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
 
   async assertSeeCoinSelectorWithTitle(expectedTokenName: string) {
     const tokenName = await new CoinConfigure().getName();
-    await expect(tokenName).to.contain(expectedTokenName);
+    expect(tokenName).to.contain(expectedTokenName);
   }
 
   async assertSeeCoinSelectorWithTokenInputValue(expectedValue: number) {
     const tokenValue = await new CoinConfigure().getBalanceValue();
-    await expect(tokenValue).to.equal(expectedValue);
+    expect(tokenValue).to.equal(expectedValue);
   }
 
   async assertSeeTransactionCosts(expectedValueAda: string) {
-    // may need to be updated in the future
-    await browser.pause(1000);
     const transactionNewPage = new TransactionNewPage();
-    const valueAda = (await transactionNewPage.getValueAda()) as number;
+    if (expectedValueAda !== '0.00') {
+      await browser.waitUntil(async () => (await transactionNewPage.getValueAda()) !== 0, {
+        interval: 500,
+        timeout: 5000,
+        timeoutMsg: 'failed while waiting for transaction fee to change'
+      });
+    }
 
-    await expect(expectedValueAda).to.be.oneOf([
+    const valueAda = Number(await transactionNewPage.getValueAda());
+
+    expect(expectedValueAda).to.be.oneOf([
       valueAda.toFixed(2).toString(),
       (valueAda + 0.01).toFixed(2).toString(),
       (valueAda - 0.01).toFixed(2).toString()
     ]);
 
-    await expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueFiat())) as string).to.match(
-      TestnetPatterns.USD_VALUE_REGEX
-    );
+    expect(await transactionNewPage.attributeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
 
   async assertSeeAdaAllocationCosts(expectedValueAdaAllocation: string) {
     // may need to be updated in the future
     await browser.pause(1000);
     const transactionNewPage = new TransactionNewPage();
-    const valueAdaAllocation = (await transactionNewPage.getValueAdaAllocation()) as number;
+    const valueAdaAllocation = Number(await transactionNewPage.getValueAdaAllocation());
 
     expect(Number(expectedValueAdaAllocation)).to.be.within(valueAdaAllocation - 0.1, valueAdaAllocation + 0.1);
 
-    await expect(
+    expect(
       (await webTester.getTextValueFromElement(transactionNewPage.attributeAdaAllocationValueFiat())) as string
     ).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
@@ -126,7 +128,7 @@ class DrawerSendExtendedAssert {
   async assertAmountOfResultsDisplayed(noOfResults: number) {
     const transactionNewPage = new TransactionNewPage();
     const rowsNumber = (await transactionNewPage.getAddressBookSearchResultsRows()).length;
-    await expect(rowsNumber).to.equal(noOfResults);
+    expect(rowsNumber).to.equal(noOfResults);
   }
 
   async assertResultsMatchContacts() {
@@ -160,15 +162,15 @@ class DrawerSendExtendedAssert {
   async assertSeeMetadataCounterWarning(shouldSee: boolean) {
     const colorProperty = await new TransactionNewPage().txMetadataCounter.getCSSProperty('color');
     // Verify if metadata counter has changed its color to light red (#ff5470) or not
-    await (shouldSee
+    shouldSee
       ? expect(colorProperty.parsed.hex).to.equal('#ff5470')
-      : expect(colorProperty.parsed.hex).to.not.equal('#ff5470'));
+      : expect(colorProperty.parsed.hex).to.not.equal('#ff5470');
   }
 
   async assertTokensValueAmount(expectedValue: string) {
     const coinConfigure = new CoinConfigure();
     const tokenAmount = (await coinConfigure.getInputValue()) as string;
-    await expect(tokenAmount).to.equal(expectedValue);
+    expect(tokenAmount).to.equal(expectedValue);
   }
 
   async assertSeeCancelTransactionModal(shouldSee: boolean) {
@@ -187,15 +189,15 @@ class DrawerSendExtendedAssert {
   async assertDefaultInputsDoNotContainValues() {
     const coinConfigure = new CoinConfigure();
     const addressInput = new AddressInput();
-    await expect(await webTester.getAttributeValue(addressInput.input().toJSLocator(), 'value')).to.be.empty;
-    await expect(await webTester.getAttributeValue(coinConfigure.input().toJSLocator(), 'value')).to.equal('0.00');
+    expect(await webTester.getAttributeValue(addressInput.input().toJSLocator(), 'value')).to.be.empty;
+    expect(await webTester.getAttributeValue(coinConfigure.input().toJSLocator(), 'value')).to.equal('0.00');
   }
 
   async assertInsufficientBalanceErrorInBundle(bundleIndex: number, assetName: string, shouldSee: boolean) {
-    const bundle = new CoinConfigure(bundleIndex, assetName);
-    await bundle.insufficientBalanceError.waitForDisplayed({ reverse: !shouldSee });
+    const coinConfigure = new CoinConfigure(bundleIndex, assetName);
+    await coinConfigure.insufficientBalanceError.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      await expect(await bundle.insufficientBalanceError.getText()).to.equal(
+      expect(await coinConfigure.insufficientBalanceError.getText()).to.equal(
         await t('browserView.transaction.send.error.insufficientBalance')
       );
     }
@@ -205,7 +207,7 @@ class DrawerSendExtendedAssert {
     const coinConfigure = new CoinConfigure();
     await coinConfigure.insufficientBalanceError.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      await expect(await coinConfigure.insufficientBalanceError.getText()).to.equal(
+      expect(await coinConfigure.insufficientBalanceError.getText()).to.equal(
         await t('browserView.transaction.send.error.insufficientBalance')
       );
     }
@@ -225,12 +227,12 @@ class DrawerSendExtendedAssert {
     const amountOfCharacters = String(await new CoinConfigure().getName()).replace('...', '').length;
     if (assetType === 'Tokens') {
       savedTicker.length <= 5
-        ? await expect(savedTicker.length).to.equal(amountOfCharacters)
-        : await expect(amountOfCharacters).to.equal(5);
+        ? expect(savedTicker.length).to.equal(amountOfCharacters)
+        : expect(amountOfCharacters).to.equal(5);
     } else {
       savedTicker.length <= 10
-        ? await expect(savedTicker.length).to.equal(amountOfCharacters)
-        : await expect(amountOfCharacters).to.equal(10);
+        ? expect(savedTicker.length).to.equal(amountOfCharacters)
+        : expect(amountOfCharacters).to.equal(10);
     }
   }
 
@@ -239,16 +241,16 @@ class DrawerSendExtendedAssert {
     if (isVisible) {
       if (assetType === 'Tokens') {
         const textInTooltip = (await webTester.getTextValueFromElement(new CoinConfigure().tooltip())) as string;
-        if (savedTicker.slice(0, 6) === 'asset1') {
+        if (savedTicker.startsWith('asset1')) {
           const assetFirstSection = savedTicker.slice(0, 10);
           const assetLastSection = savedTicker.slice(savedTicker.length, -4);
-          await expect(textInTooltip.startsWith(assetFirstSection)).to.be.true;
-          await expect(textInTooltip.endsWith(assetLastSection)).to.be.true;
+          expect(textInTooltip.startsWith(assetFirstSection)).to.be.true;
+          expect(textInTooltip.endsWith(assetLastSection)).to.be.true;
         } else {
-          await expect(textInTooltip).to.equal(savedTicker);
+          expect(textInTooltip).to.equal(savedTicker);
         }
       } else if (assetType === 'NFTs' && savedTicker.length > 10) {
-        await expect((await webTester.getTextValueFromElement(new CoinConfigure().tooltip())) as string).to.equal(
+        expect((await webTester.getTextValueFromElement(new CoinConfigure().tooltip())) as string).to.equal(
           savedTicker
         );
       }
@@ -265,12 +267,12 @@ class DrawerSendExtendedAssert {
   }
 
   async assertEnteredValue(expectedValue: string) {
-    await expect(await $(new CoinConfigure().input().toJSLocator()).getValue()).to.equal(expectedValue);
+    expect(await $(new CoinConfigure().input().toJSLocator()).getValue()).to.equal(expectedValue);
   }
 
   async assertSeeAddressErrorBanner() {
-    const text = (await Banner.getContainerText()) as string;
-    await expect(text).to.equal(await t('general.errors.wrongNetworkAddress'));
+    const text = await Banner.description.getText();
+    expect(text).to.equal(await t('general.errors.wrongNetworkAddress'));
   }
 
   async assertMetadataBinButtonEnabled(isEnabled: boolean) {
@@ -280,26 +282,29 @@ class DrawerSendExtendedAssert {
 
   async assertMetadataInputIsEmpty() {
     const transactionNewPage = new TransactionNewPage();
-    await expect(await transactionNewPage.txMetadataInputField.getValue()).to.be.empty;
+    expect(await transactionNewPage.txMetadataInputField.getValue()).to.be.empty;
   }
 
   async assertSeeIncorrectAddressError(shouldSee: boolean) {
     await new TransactionBundle().bundleAddressInputError.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      await expect(await new TransactionBundle().bundleAddressInputError.getText()).to.equal(
+      expect(await new TransactionBundle().bundleAddressInputError.getText()).to.equal(
         await t('general.errors.incorrectAddress')
       );
     }
   }
 
   async assertReviewTransactionButtonIsEnabled(shouldBeEnabled: boolean) {
-    await new TransactionNewPage().reviewTransactionButton.waitForClickable({ reverse: !shouldBeEnabled });
+    await new TransactionNewPage().reviewTransactionButton.waitForClickable({
+      reverse: !shouldBeEnabled,
+      timeout: 10_000
+    });
   }
 
   async assertReviewTransactionButtonIsDisplayed(shouldBeDisplayed: boolean) {
     await new TransactionNewPage().reviewTransactionButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      await expect(await new TransactionNewPage().reviewTransactionButton.getText()).to.equal(
+      expect(await new TransactionNewPage().reviewTransactionButton.getText()).to.equal(
         await t('browserView.transaction.send.footer.review')
       );
     }
@@ -317,7 +322,7 @@ class DrawerSendExtendedAssert {
 
   assertSeeEmptyRecipientsAddressInput = async (index?: number) => {
     const text = await webTester.getTextValueFromElement(new AddressInput(index).container());
-    await expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
+    expect(text).to.equal(await t('core.destinationAddressInput.recipientAddress'));
   };
 
   async assertSeeTickerTransactionCostADA(expectedTicker: 'ADA' | 'tADA') {
@@ -335,7 +340,7 @@ class DrawerSendExtendedAssert {
   async assertSeeTicker(expectedTicker: 'ADA' | 'tADA', elementToCheck: WebdriverIO.Element) {
     const regex = expectedTicker === 'ADA' ? /[^t]ADA/g : /tADA/g;
 
-    let tickerDisplayed = (await elementToCheck.getText()) as string;
+    let tickerDisplayed = await elementToCheck.getText();
     tickerDisplayed = String(tickerDisplayed.match(regex));
 
     if (expectedTicker === 'ADA') tickerDisplayed = tickerDisplayed.trim().slice(-3);
@@ -357,12 +362,26 @@ class DrawerSendExtendedAssert {
 
   async assertSeeSearchLoader(shouldBeDisplayed: boolean) {
     const addressInput = new AddressInput();
-    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await addressInput.searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed, interval: 50 });
   }
 
   async assertAddressBookButtonEnabled(bundleIndex: number, shouldBeEnabled: boolean) {
     const addressInput = new AddressInput(bundleIndex);
     await addressInput.ctaButton.waitForEnabled({ reverse: !shouldBeEnabled });
+  }
+
+  async assertSeeReviewAddressBanner(handle: string) {
+    const transactionNewPage = new TransactionNewPage();
+    await transactionNewPage.banner.container.waitForDisplayed();
+    await transactionNewPage.banner.icon.waitForDisplayed();
+    await transactionNewPage.banner.description.waitForDisplayed();
+    expect(await transactionNewPage.banner.description.getText()).to.contain(
+      (await t('addressBook.reviewModal.banner.browserDescription')).replace('{{name}}', handle)
+    );
+    await transactionNewPage.banner.button.waitForDisplayed();
+    expect(await transactionNewPage.banner.button.getText()).to.equal(
+      (await t('addressBook.reviewModal.banner.confirmReview.button')).replace('{{name}}', handle)
+    );
   }
 }
 

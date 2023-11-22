@@ -17,7 +17,7 @@ class NetworkAssert {
       elementToClick,
       payload
     );
-    await expect(isNetworkPresent).to.equal(actualNetworkPresence);
+    expect(isNetworkPresent).to.equal(actualNetworkPresence);
   };
 }
 

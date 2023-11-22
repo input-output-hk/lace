@@ -6,6 +6,10 @@ import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
 import { browser } from '@wdio/globals';
+import ToastMessage from '../elements/toastMessage';
+import { t } from '../utils/translationService';
+import { Logger } from '../support/logger';
+import onboardingPageObject from './onboardingPageObject';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -103,13 +107,18 @@ class SettingsExtendedPageObject {
     }
   };
 
-  switchNetwork = async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
+  switchNetworkWithoutClosingDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
     await menuHeaderPageObject.openSettings();
     await this.clickOnNetwork();
     await this.clickOnNetworkRadioButton(network);
     await browser.waitUntil(
       async () => JSON.parse(await localStorageManager.getItem('appSettings')).chainName === network
     );
+  };
+
+  switchNetworkAndCloseDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
+    await this.switchNetworkWithoutClosingDrawer(network);
+    await this.waitUntilHdWalletSynced();
     await (mode === 'extended'
       ? simpleTxSideDrawerPageObject.clickCloseDrawerButton()
       : simpleTxSideDrawerPageObject.clickBackDrawerButton());
@@ -120,6 +129,40 @@ class SettingsExtendedPageObject {
     await this.clickOnRemoveWallet();
     await Modal.confirmButton.click();
   };
+
+  setExtensionTheme = async (mode: 'light' | 'dark') => {
+    if (mode !== ((await SettingsPage.themeSwitch.getAttribute('aria-checked')) === 'true' ? 'light' : 'dark')) {
+      await SettingsPage.themeSwitch.waitForClickable();
+      await SettingsPage.themeSwitch.click();
+    }
+  };
+  closeWalletSyncedToast = async () => {
+    await browser.pause(500);
+    if (await ToastMessage.container.isDisplayed()) {
+      const toastMessage = await (await ToastMessage.messageText).getText();
+      if (toastMessage === (await t('addressesDiscovery.toast.successText')).toString()) {
+        await ToastMessage.clickCloseButton();
+      } else {
+        Logger.warn('Wallet synced toast is not displayed, you might want to remove this step');
+      }
+    }
+  };
+
+  waitUntilSyncingModalDisappears = async () => {
+    await browser.pause(500);
+    if (
+      (await Modal.container.isDisplayed()) &&
+      (await Modal.title.getText()) === (await t('addressesDiscovery.overlay.title'))
+    ) {
+      await Modal.title.waitForDisplayed({ reverse: true, timeout: 60_000 });
+    }
+  };
+
+  async waitUntilHdWalletSynced() {
+    await onboardingPageObject.waitUntilLoaderDisappears();
+    await this.waitUntilSyncingModalDisappears();
+    await this.closeWalletSyncedToast();
+  }
 }
 
 export default new SettingsExtendedPageObject();

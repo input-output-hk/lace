@@ -1,17 +1,11 @@
-import { MultidelegationBetaModal } from '../modals';
-import { useOutsideHandles } from '../outside-handles-provider';
+import { Drawer } from '../Drawer';
 import { OverviewPopup } from '../overview';
+import { OneTimeModals } from './OneTimeModals';
 
-export const StakingPopupView = () => {
-  const { multidelegationFirstVisit, triggerMultidelegationFirstVisit } = useOutsideHandles();
-  return (
-    <>
-      <OverviewPopup />
-      <MultidelegationBetaModal
-        popupView
-        visible={multidelegationFirstVisit}
-        onConfirm={triggerMultidelegationFirstVisit}
-      />
-    </>
-  );
-};
+export const StakingPopupView = () => (
+  <>
+    <OverviewPopup />
+    <Drawer showBackIcon showExitConfirmation={() => false} popupView />
+    <OneTimeModals popupView />
+  </>
+);

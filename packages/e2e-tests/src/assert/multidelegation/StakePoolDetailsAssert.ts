@@ -65,7 +65,7 @@ class StakePoolDetailsAssert {
     );
     expect(await StakePoolDetails.apyTitle.getText()).to.equal(await t('drawer.details.metrics.apy', 'staking'));
     // TODO BUG LW-5635
-    // await expect(await StakePoolDetails.apyValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    // expect(await StakePoolDetails.apyValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
 
     expect((await StakePoolDetails.activeStakeValue.getText()).slice(0, -1)).to.match(
       TestnetPatterns.NUMBER_DOUBLE_REGEX
@@ -78,6 +78,10 @@ class StakePoolDetailsAssert {
       await t('drawer.details.metrics.delegators', 'staking')
     );
     expect(await StakePoolDetails.delegatorsValue.getText()).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+  }
+
+  async assertStakePoolDetailsDrawerIsNotOpened() {
+    await StakePoolDetails.container.waitForDisplayed({ reverse: true });
   }
 }
 

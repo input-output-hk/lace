@@ -1,6 +1,7 @@
 import PasswordInput from '../passwordInput';
+import CommonDrawerElements from '../CommonDrawerElements';
 
-class StakingPasswordDrawer {
+class StakingPasswordDrawer extends CommonDrawerElements {
   private TITLE = '[data-testid="staking-confirmation-title"]';
   private SUBTITLE = '[data-testid="staking-confirmation-subtitle"]';
   private CONFIRM_BUTTON = '[data-testid="stake-sign-confirmation-btn"]';

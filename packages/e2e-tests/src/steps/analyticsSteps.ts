@@ -47,7 +47,7 @@ When(/^I validate latest analytics multiple events:$/, async (eventActionNames: 
 
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
   await browser.waitUntil(async () => (await getLatestEventsNames()).includes(eventActionName), {
-    interval: 1000,
+    interval: 500,
     timeout: 6000,
     timeoutMsg: `Failed while waiting for event '${eventActionName}'. \nActual events:\n ${(
       await getAllEventsNames()
@@ -61,9 +61,10 @@ When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numbe
     timeout: 6000,
     timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual events amount sent: ${
       (
-        await getLatestEventsNames()
+        await getAllEventsNames()
       ).length
-    }`
+    }\n
+    Actual events:\n ${(await getAllEventsNames()).toString()}`
   });
   await browser.disableInterceptor();
 });

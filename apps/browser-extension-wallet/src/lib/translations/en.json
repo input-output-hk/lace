@@ -27,7 +27,7 @@
         }
       }
     },
-    "transactionDetailBrowser": {
+    "activityDetails": {
       "address": "Address",
       "sent": "Sent",
       "sending": "Sending",
@@ -55,7 +55,8 @@
       "from": "From",
       "to": "To",
       "multipleAddresses": "Multiple addresses",
-      "pools": "Pool(s)"
+      "pools": "Pool(s)",
+      "epoch": "Epoch"
     },
     "walletNameAndPasswordSetupStep": {
       "title": "Let's set up your new wallet",
@@ -157,7 +158,9 @@
     "detail.blockInfo": "Block information"
   },
   "announcement.title.badge": "New",
-  "announcement.title.text": "release notes",
+  "announcement.title.text": "Introducing {{version}}",
+  "announcement.description.text": "See our latest updates for you",
+  "announcement.description.linktext": "here",
   "announcement.cta": "Got it",
   "walletSetup": {
     "backModal": {
@@ -705,6 +708,7 @@
       "send.footer.viewTransaction": "View transaction",
       "send.footer.view": "View",
       "send.footer.fail": "Back",
+      "send.footer.unauthorized": "Back",
       "send.footer.save": "Save",
       "send.footer.signing": "Signing in progress",
       "send.footer.confirmWithDevice": "Confirm with {{hardwareWallet}}",
@@ -723,6 +727,7 @@
         "buttonText": "Learn more"
       },
       "fail.oopsSomethingWentWrong": "Oops! Something went wrong",
+      "fail.unauthorizedTransaction": "The transaction was not authorized.",
       "fail.problemSubmittingYourTransaction": "There was a problem submitting your transaction.",
       "fail.clickBackAndTryAgain": "Click \"Back\" and try again.",
       "success.thisMayTakeAFewMinutesToProcessYouCanViewTheStatusByClickingViewTransaction": "This may take a few minutes to process. You can view the status by clicking view transaction.",
@@ -796,7 +801,12 @@
           "networkSwitched": "Switched network"
         },
         "authorizedDApps.title": "Authorized DApps",
-        "authorizedDApps.description": "See and manage authorized DApps"
+        "authorizedDApps.description": "See and manage authorized DApps",
+        "walletSync": {
+          "description": "Sync new addresses of your HD wallet. This may be needed if you're using other HD wallets at the same time as Lace",
+          "ctaLabel": "Sync",
+          "title": "HD wallet sync"
+        }
       },
       "preferences": {
         "title": "Preferences",
@@ -965,9 +975,9 @@
       "enterNFTGallery": "Enter the NFT gallery with Lace",
       "buyAnNft": "How to buy an NFT?",
       "stakingAndDelegation": "What are staking & delegation?",
-      "choosingAStakePool": "Which stake pool should I choose?",
-      "activeStake": "What is an active stake?",
-      "stakingMadeEasy": "Staking made easy with Lace"
+      "howManyPools": "How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature?",
+      "ledgerSupport": "Do Ledger hardware wallets support multi-staking?",
+      "stakeDistribution": "Does stake distribution remain the same?"
     }
   },
   "migrations": {
@@ -1202,8 +1212,8 @@
     },
     "walletSetupMnemonicIntroStep": {
       "title": "Keeping your wallet secure",
-      "description": "Your 24-word secret passphrase is like a master key to your Lace wallet. We'll show it to you over the next 3 screens. Keep it safe – if you lose your password, it's the only way to access your wallet and funds. Read more about it",
-      "link": "here."
+      "description": "Consider your recovery phrase as the master key to your wallet, and the only way to access your funds.",
+      "link": "Read More."
     },
     "walletSetupMnemonicVerificationStep": {
       "enterPassphrase": "Enter your secret passphrase"
@@ -1295,6 +1305,13 @@
       "usedAddresses.copy": "Copy Address",
       "usedAddresses.addressCopied": "Address copied",
       "showUsedAddresses": "Show used addresses"
+    }
+  },
+  "addressesDiscovery": {
+    "overlay.title": "Your wallet is syncing, this might take a few minutes",
+    "toast": {
+      "errorText": "Wallet failed to sync",
+      "successText": "Wallet synced successfully"
     }
   }
 }
