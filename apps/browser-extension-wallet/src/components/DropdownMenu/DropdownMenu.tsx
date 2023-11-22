@@ -59,6 +59,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
               : undefined
           }
           type="cold"
+          id="menu"
         />
       ) : (
         <Button

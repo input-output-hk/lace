@@ -67,6 +67,7 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
               <ProfileDropdown.WalletOption
                 title={walletInfo.name}
                 subtitle="Account #0"
+                id={walletName}
                 profile={
                   handleImage
                     ? {
