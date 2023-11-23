@@ -12,7 +12,7 @@ interface Props {
   errorMessage?: string;
 }
 
-const getVoterType = (voterType: Wallet.Cardano.VoterType): 'Constitutional Committee' | 'SPO' | 'DRep' => {
+export const getVoterType = (voterType: Wallet.Cardano.VoterType): 'Constitutional Committee' | 'SPO' | 'DRep' => {
   switch (voterType) {
     case Wallet.Cardano.VoterType.ccHotKeyHash:
     case Wallet.Cardano.VoterType.ccHotScriptHash:
@@ -26,7 +26,7 @@ const getVoterType = (voterType: Wallet.Cardano.VoterType): 'Constitutional Comm
   }
 };
 
-const getVote = (vote: Wallet.Cardano.Vote): string => {
+export const getVote = (vote: Wallet.Cardano.Vote): string => {
   switch (vote) {
     case Wallet.Cardano.Vote.yes:
       return 'Yes';
@@ -44,13 +44,10 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
   const { environmentName } = useWalletStore();
   const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
 
-  const explorerBaseUrl = useMemo(() => {
-    if (environmentName === 'Sanchonet') {
-      return;
-    }
-    // eslint-disable-next-line consistent-return
-    return `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
-  }, [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]);
+  const explorerBaseUrl = useMemo(
+    () => (environmentName === 'Sanchonet' ? '' : `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`),
+    [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
+  );
 
   return (
     <VotingProcedures
@@ -71,7 +68,7 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
             actionId: {
               index: vote.actionId.actionIndex,
               txHash: vote.actionId.id.toString(),
-              txHashUrl: explorerBaseUrl && `${explorerBaseUrl}/${vote.actionId.id}`
+              ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${vote.actionId.id}` })
             },
             votingProcedure: {
               vote: getVote(vote.votingProcedure.vote),
