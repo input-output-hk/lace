@@ -9,14 +9,26 @@ import { Scheme } from './control-button.data';
 
 import type { ControlButtonProps } from './control-button.data';
 
-export const Icon = (props: Readonly<ControlButtonProps>): JSX.Element => {
+interface Props extends ControlButtonProps {
+  size?: 'extraSmall' | 'small';
+}
+
+export const Icon = ({
+  size = 'small',
+  ...props
+}: Readonly<Props>): JSX.Element => {
   return (
     <SkeletonButton
       {...props}
+      size={size}
       className={{
-        container: cn(cx.container({ paddingScheme: Scheme.Icon })),
+        container: cn(
+          cx.container({ paddingScheme: Scheme.Icon, widthSchema: size }),
+        ),
         label: cx.label(),
-        icon: cx.icon(),
+        icon: cx.icon({
+          fontSize: size,
+        }),
       }}
     />
   );

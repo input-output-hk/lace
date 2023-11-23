@@ -173,6 +173,7 @@ export const colors = {
 
   $text_primary: '',
   $text_secondary: '',
+  $text_on_gradient: '',
 
   $metadata_label_color: '',
   $metadata_secondary_label_color: '',
@@ -180,6 +181,26 @@ export const colors = {
   $text_link_label_color: '',
   $text_link_label_color_visited: '',
   $text_link_label_color_disabled: '',
+
+  $profile_dropdown_trigger_container_bgColor: '',
+  $profile_dropdown_trigger_container_borderColor: '',
+  $profile_dropdown_trigger_container_bgColor_hover: '',
+  $profile_dropdown_trigger_container_bgColor_pressed: '',
+  $profile_dropdown_trigger_container_outlineColor: '',
+  $profile_dropdown_trigger_label_color: '',
+  $profile_dropdown_trigger_label_color_pressed: '',
+
+  $profile_dropdown_wallet_option_container_bgColor_hover: '',
+  $profile_dropdown_wallet_option_container_bgColor_pressed: '',
+  $profile_dropdown_wallet_option_container_outlineColor: '',
+  $profile_dropdown_wallet_option_label_color: '',
+
+  $profile_dropdown_wallet_status_container_borderColor: '',
+
+  $data_pink: '',
+  $data_blue: '',
+  $data_green: '',
+  $data_yellow: '',
 };
 
 export type Colors = typeof colors;
