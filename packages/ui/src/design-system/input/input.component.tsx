@@ -19,6 +19,7 @@ export interface InputProps extends Form.FormControlProps {
   onChange?: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
   containerClassName?: string;
   containerStyle?: React.CSSProperties;
+  'data-testid'?: string;
 }
 
 export const Input = ({
@@ -32,6 +33,7 @@ export const Input = ({
   containerClassName = '',
   onChange,
   containerStyle,
+  ...rest
 }: Readonly<InputProps>): JSX.Element => {
   return (
     <Form.Root>
@@ -55,6 +57,7 @@ export const Input = ({
               value={value}
               onChange={onChange}
               id={id}
+              data-testid={rest['data-testid']}
             />
           </Form.Control>
           <Form.Label

@@ -22,28 +22,26 @@ export default {
 } as Meta;
 
 const MainComponents = (): JSX.Element => (
-  <>
-    <Variants.Row>
-      <Variants.Cell>
-        <Input label="Label" value="" />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Input label="Label" value="" containerClassName={cx.hoverEffect} />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Input label="Label" value="Input Text" />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Input label="Label" value="Input Text" errorMessage="Error" />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Input label="Label" value="Input Text" disabled />
-      </Variants.Cell>
-      <Variants.Cell>
-        <Input label="Label" value="" containerClassName={cx.focusEffect} />
-      </Variants.Cell>
-    </Variants.Row>
-  </>
+  <Variants.Row>
+    <Variants.Cell>
+      <Input label="Label" value="" />
+    </Variants.Cell>
+    <Variants.Cell>
+      <Input label="Label" value="" containerClassName={cx.hoverEffect} />
+    </Variants.Cell>
+    <Variants.Cell>
+      <Input label="Label" value="Input Text" />
+    </Variants.Cell>
+    <Variants.Cell>
+      <Input label="Label" value="Input Text" errorMessage="Error" />
+    </Variants.Cell>
+    <Variants.Cell>
+      <Input label="Label" value="Input Text" disabled />
+    </Variants.Cell>
+    <Variants.Cell>
+      <Input label="Label" value="" containerClassName={cx.focusEffect} />
+    </Variants.Cell>
+  </Variants.Row>
 );
 
 export const Overview = (): JSX.Element => {

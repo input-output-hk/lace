@@ -13,12 +13,12 @@ export type Props = {
 
 export const EditAccountDrawer = ({ name, index, visible, onSave, hide }: Props): React.ReactElement => {
   const { t } = useTranslation();
-  const [currentName, setName] = useState(name);
+  const [currentName, setCurrentName] = useState(name);
 
   return (
     <Drawer
       zIndex={999}
-      visible={visible}
+      open={visible}
       navigation={<DrawerNavigation title={name || `Account #${index}`} onCloseIconClick={hide} />}
       footer={
         <Flex flexDirection="column">
@@ -48,10 +48,11 @@ export const EditAccountDrawer = ({ name, index, visible, onSave, hide }: Props)
           <Text.Body.Normal>{t('account.edit.subtitle')}</Text.Body.Normal>
         </Box>
         <Input
+          data-testid="edit-account-name-input"
           containerStyle={{ width: '100%' }}
           label={t('account.edit.input.label')}
           value={currentName}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setCurrentName(e.target.value)}
         />
       </div>
     </Drawer>
