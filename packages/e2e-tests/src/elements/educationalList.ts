@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 
-export class EducationalList {
+class EducationalList {
   private CONTAINER = '//div[@data-testid="educational-list"]';
   private LIST_TITLE = '//h1[@data-testid="educational-list-title"]';
   private LIST_ROW = '//div[@data-testid="educational-list-row"]';
@@ -57,6 +57,10 @@ export class EducationalList {
   async getListRowWithSubtitle(subtitle: string): Promise<ChainablePromiseElement<WebdriverIO.Element>> {
     const subtitleSelector = this.LIST_ROW_SUBTITLE_TEMPLATE.replace('###SUBTITLE###', subtitle);
     return $(`${this.LIST_ROW}${subtitleSelector}`);
+  }
+
+  async clickItemWithSubtitle(subtitle: string): Promise<void> {
+    await (await this.getListRowWithSubtitle(subtitle)).click();
   }
 }
 
