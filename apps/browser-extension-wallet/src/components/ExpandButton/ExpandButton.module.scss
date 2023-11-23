@@ -36,6 +36,19 @@
   }
 }
 
+.multiWallet {
+  max-width: size_unit(6);
+  width: size_unit(6);
+  height: size_unit(6);
+  border-radius: size_unit(2);
+  flex-shrink: 0;
+
+  &:hover {
+    max-width: 300px;
+    width: auto;
+  }
+}
+
 .text {
   color: var(--text-color-secondary);
   white-space: nowrap;
