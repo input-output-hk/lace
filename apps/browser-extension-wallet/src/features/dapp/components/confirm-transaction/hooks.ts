@@ -121,23 +121,22 @@ export const useTxSummary = ({
       if (txType === TxType.Send) {
         return walletInfo.addresses.every((addr) => output.address !== addr.address);
       }
-      return true;
+      // Don't show withdrawl tx's etc
+      return output.address.toString() !== walletInfo.addresses[0].address.toString();
     });
 
     // eslint-disable-next-line unicorn/no-array-reduce
-    const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce((acc, txOut) => {
-      // Don't show withdrawl tx's etc
-      if (txOut.address.toString() === walletInfo.addresses[0].address.toString()) return acc;
-
-      return [
+    const txSummaryOutputs: Wallet.Cip30SignTxSummary['outputs'] = externalOutputs.reduce(
+      (acc, txOut) => [
         ...acc,
         {
           coins: Wallet.util.lovelacesToAdaString(txOut.value.coins.toString()),
           recipient: addressToNameMap?.get(txOut.address.toString()) || txOut.address.toString(),
           ...(txOut.value.assets?.size > 0 && { assets: createAssetList(txOut.value.assets) })
         }
-      ];
-    }, []);
+      ],
+      []
+    );
 
     return {
       fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),

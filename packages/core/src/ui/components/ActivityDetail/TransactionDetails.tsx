@@ -141,7 +141,8 @@ export const TransactionDetails = ({
             </div>
             <div
               data-testid="tx-hash-detail"
-              className={cn(styles.detail, !!openExternalLink && styles.hash, {
+              className={cn(styles.detail, {
+                [styles.hash]: openExternalLink,
                 [styles.txLink]: isSuccess && !!openExternalLink
               })}
               onClick={openExternalLink}

@@ -1127,7 +1127,17 @@
         "hash": "Anchor Hash",
         "url": "Anchor URL"
       },
-      "dRepId": "DRep ID"
+      "dRepId": "DRep ID",
+      "voterTypes": {
+        "constitutionalCommittee": "Constitutional Committee",
+        "spo": "SPO",
+        "drep": "DRep"
+      },
+      "votes": {
+        "yes": "Yes",
+        "no": "No",
+        "abstain": "Abstain"
+      }
     },
     "drepRegistration": {
       "title": "Confirm DRep Registration",

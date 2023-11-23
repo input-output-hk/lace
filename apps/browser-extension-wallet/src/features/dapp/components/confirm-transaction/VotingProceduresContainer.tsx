@@ -12,29 +12,41 @@ interface Props {
   errorMessage?: string;
 }
 
-export const getVoterType = (voterType: Wallet.Cardano.VoterType): 'Constitutional Committee' | 'SPO' | 'DRep' => {
+export enum VoterType {
+  CONSTITUTIONAL_COMMITTEE = 'constitutionalCommittee',
+  SPO = 'spo',
+  DREP = 'drep'
+}
+
+export const getVoterType = (voterType: Wallet.Cardano.VoterType): VoterType => {
   switch (voterType) {
     case Wallet.Cardano.VoterType.ccHotKeyHash:
     case Wallet.Cardano.VoterType.ccHotScriptHash:
-      return 'Constitutional Committee';
+      return VoterType.CONSTITUTIONAL_COMMITTEE;
     case Wallet.Cardano.VoterType.stakePoolKeyHash:
-      return 'SPO';
+      return VoterType.SPO;
     case Wallet.Cardano.VoterType.dRepKeyHash:
     case Wallet.Cardano.VoterType.dRepScriptHash:
     default:
-      return 'DRep';
+      return VoterType.DREP;
   }
 };
 
-export const getVote = (vote: Wallet.Cardano.Vote): string => {
+export enum Votes {
+  YES = 'yes',
+  NO = 'no',
+  ABSTAIN = 'abstain'
+}
+
+export const getVote = (vote: Wallet.Cardano.Vote): Votes => {
   switch (vote) {
     case Wallet.Cardano.Vote.yes:
-      return 'Yes';
+      return Votes.YES;
     case Wallet.Cardano.Vote.no:
-      return 'No';
+      return Votes.NO;
     case Wallet.Cardano.Vote.abstain:
     default:
-      return 'Abstain';
+      return Votes.ABSTAIN;
   }
 };
 
@@ -56,12 +68,12 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
         const voterType = getVoterType(votingProcedure.voter.__typename);
 
         const drepId =
-          voterType === 'DRep'
+          voterType === VoterType.DREP
             ? drepIDasBech32FromHash(votingProcedure.voter.credential.hash)
             : votingProcedure.voter.credential.hash.toString();
         return {
           voter: {
-            type: voterType,
+            type: t(`core.votingProcedures.voterType.${voterType}`),
             dRepId: drepId
           },
           votes: votingProcedure.votes.map((vote) => ({
@@ -71,7 +83,7 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
               ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${vote.actionId.id}` })
             },
             votingProcedure: {
-              vote: getVote(vote.votingProcedure.vote),
+              vote: t(`core.votingProcedures.votes.${getVote(vote.votingProcedure.vote)}`),
               anchor: !!vote.votingProcedure.anchor?.url && {
                 url: vote.votingProcedure.anchor?.url,
                 hash: vote.votingProcedure.anchor?.dataHash.toString()

@@ -14,10 +14,9 @@ interface Props {
 
 export const ConfirmVoteDelegationContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
-  const certificate = certificateInspectorFactory<Wallet.Cardano.VoteDelegationCertificate>(
+  const { dRep } = certificateInspectorFactory<Wallet.Cardano.VoteDelegationCertificate>(
     CertificateType.VoteDelegation
   )(signTxData.tx);
-  const dRep = certificate.dRep;
 
   return (
     <ConfirmVoteDelegation
@@ -25,7 +24,7 @@ export const ConfirmVoteDelegationContainer = ({ signTxData, errorMessage }: Pro
       metadata={{
         alwaysAbstain: Wallet.Cardano.isDRepAlwaysAbstain(dRep),
         alwaysNoConfidence: Wallet.Cardano.isDRepAlwaysNoConfidence(dRep),
-        ...(Wallet.Cardano.isDRepCredential(dRep) ? { drepId: drepIDasBech32FromHash(dRep.hash) } : {})
+        ...(Wallet.Cardano.isDRepCredential(dRep) && { drepId: drepIDasBech32FromHash(dRep.hash) })
       }}
       translations={{
         metadata: t('core.voteDelegation.metadata'),
