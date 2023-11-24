@@ -41,7 +41,6 @@ export const TextBox = ({
         <Form.Field
           name="field"
           className={cn(cx.container, {
-            [cx.disabledContainer]: disabled,
             [containerClassName]: containerClassName,
           })}
           style={containerStyle}

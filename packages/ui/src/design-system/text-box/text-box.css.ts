@@ -8,12 +8,6 @@ export const container = style({
   width: 'auto',
 });
 
-export const disabledContainer = style({
-  ':hover': {
-    outline: 'none',
-  },
-});
-
 export const input = style({
   width: 'calc(100% - 90px)',
   fontSize: vars.fontSizes.$18,
@@ -61,10 +55,10 @@ globalStyle(
   },
 );
 
-globalStyle(`${container}:has(${input}:focus)`, {
-  outline: `3px solid ${vars.colors.$input_container_focused_outline_color}`,
+globalStyle(`${container}:has(${input}:hover:not(:disabled))`, {
+  outline: `2px solid ${vars.colors.$input_container_hover_outline_color}`,
 });
 
-globalStyle(`${container}:has(${input}:hover)`, {
-  outline: `2px solid ${vars.colors.$input_container_hover_outline_color}`,
+globalStyle(`${container}:has(${input}:focus)`, {
+  outline: `3px solid ${vars.colors.$input_container_focused_outline_color}`,
 });
