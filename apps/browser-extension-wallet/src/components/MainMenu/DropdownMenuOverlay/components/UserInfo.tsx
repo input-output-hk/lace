@@ -68,7 +68,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                     }
                   : undefined
               }
-              onOpenAccountsMenu={() => onOpenWalletAccounts(walletAddress)}
+              onOpenWalletDetails={() => onOpenWalletAccounts(walletAddress)}
               type="cold"
             />
           ) : (

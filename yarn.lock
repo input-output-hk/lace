@@ -7963,6 +7963,7 @@ __metadata:
   dependencies:
     "@ant-design/icons": ^4.7.0
     "@lace/common": 0.1.0
+    "@lace/ui": ^0.1.0
     "@types/debounce-promise": ^3.1.6
     antd: ^4.24.10
     axios: 0.21.4
@@ -7990,14 +7991,14 @@ __metadata:
   resolution: "@lace/e2e-tests@workspace:packages/e2e-tests"
   dependencies:
     "@rpii/wdio-report-events": 8.0.2
-    "@types/chai": 4.3.9
-    "@types/chai-sorted": 0.2.2
-    "@types/chai-string": 1.4.4
+    "@types/chai": 4.3.11
+    "@types/chai-sorted": 0.2.3
+    "@types/chai-string": 1.4.5
     "@types/flat": 5.0.2
     "@typescript-eslint/eslint-plugin": 6.0.0
     "@typescript-eslint/parser": 6.0.0
     "@wdio/allure-reporter": 8.20.0
-    "@wdio/cli": 8.20.2
+    "@wdio/cli": 8.20.0
     "@wdio/config": 8.20.0
     "@wdio/cucumber-framework": 8.20.0
     "@wdio/devtools-service": 8.20.0
@@ -8027,6 +8028,7 @@ __metadata:
   resolution: "@lace/staking@workspace:packages/staking"
   dependencies:
     "@ant-design/icons": ^4.7.0
+    "@cardano-sdk/core": 0.21.0
     "@cardano-sdk/input-selection": 0.12.4
     "@cardano-sdk/tx-construction": 0.14.2
     "@cardano-sdk/util": 0.14.2
@@ -8054,11 +8056,13 @@ __metadata:
     immer: ^10.0.2
     lodash: 4.17.21
     normalize.css: ^8.0.1
+    rambda: ^8.5.0
     react: 17.0.2
     react-copy-to-clipboard: ^5.1.0
     react-dom: 17.0.2
     react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
+    recharts: ^2.9.2
     tsup: ^6.7.0
     typescript: ^4.9.5
     vite-plugin-checker: ^0.6.0
@@ -14208,21 +14212,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chai-sorted@npm:0.2.2":
-  version: 0.2.2
-  resolution: "@types/chai-sorted@npm:0.2.2"
+"@types/chai-sorted@npm:0.2.3":
+  version: 0.2.3
+  resolution: "@types/chai-sorted@npm:0.2.3"
   dependencies:
     "@types/chai": "*"
-  checksum: 3c6abe410e2f380d55196666da6c0c86a8ebe10833e3862b23ff4e019d5dd426d1ab5303aa184e6129ae26fa86a7a908c6ad567de7671b839e274e7845289eee
+  checksum: 8fc1b350a4921c5d9be47483ec80646c09ffc86500fd7c81461afbb3882ff7309ee232675b4f0b69c5fda4bf188b23d092885c4e94fb66c00c0a45f7e8fde964
   languageName: node
   linkType: hard
 
-"@types/chai-string@npm:1.4.4":
-  version: 1.4.4
-  resolution: "@types/chai-string@npm:1.4.4"
+"@types/chai-string@npm:1.4.5":
+  version: 1.4.5
+  resolution: "@types/chai-string@npm:1.4.5"
   dependencies:
     "@types/chai": "*"
-  checksum: 615b932017a3c465f76cebbdf987596c75a7321263d0d8958820da0f3d4dc4b8dd0b75f22a2698c6be86b4c0c701d0211c2270efa025c970901f50d7f52345e9
+  checksum: 9bfceeab6afa67e904908032f459bd0cac94bd2fdf49160fd765c1b7e585b831bed08b7110904f5fdb6ec18c046f57912ede571c4bd654098ba488588db2476b
   languageName: node
   linkType: hard
 
@@ -14242,10 +14246,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chai@npm:4.3.9":
-  version: 4.3.9
-  resolution: "@types/chai@npm:4.3.9"
-  checksum: 2300a2c7abd4cb590349927a759b3d0172211a69f363db06e585faf7874a47f125ef3b364cce4f6190e3668147587fc11164c791c9560cf9bce8478fb7019610
+"@types/chai@npm:4.3.11":
+  version: 4.3.11
+  resolution: "@types/chai@npm:4.3.11"
+  checksum: d0c05fe5d02b2e6bbca2bd4866a2ab20a59cf729bc04af0060e7a3277eaf2fb65651b90d4c74b0ebf1d152b4b1d49fa8e44143acef276a2bbaa7785fbe5642d3
   languageName: node
   linkType: hard
 
@@ -16140,9 +16144,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/cli@npm:8.20.2":
-  version: 8.20.2
-  resolution: "@wdio/cli@npm:8.20.2"
+"@wdio/cli@npm:8.20.0":
+  version: 8.20.0
+  resolution: "@wdio/cli@npm:8.20.0"
   dependencies:
     "@types/node": ^20.1.1
     "@wdio/config": 8.20.0
@@ -16155,7 +16159,6 @@ __metadata:
     chalk: ^5.2.0
     chokidar: ^3.5.3
     cli-spinners: ^2.9.0
-    detect-package-manager: ^3.0.1
     dotenv: ^16.3.1
     ejs: ^3.1.9
     execa: ^8.0.1
@@ -16170,7 +16173,7 @@ __metadata:
     yargs: ^17.7.2
   bin:
     wdio: bin/wdio.js
-  checksum: 2f25682a3b288461fe727f720f3f456d2f723c6e4526c28beeed2ce541812a543239f35db70c80ade479210681552a46eb1d7a0a5fc6f7b03c7aedd0df5327a8
+  checksum: 2e39de390ffd1a40efbbc17342743b577b590dbca325c376b286a67819e28aeebce90be34d8d26a667f6b0309ec939858057adb9d637325c1d2e0c0ca03b27ec
   languageName: node
   linkType: hard
 
@@ -20755,6 +20758,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"clsx@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "clsx@npm:2.0.0"
+  checksum: a2cfb2351b254611acf92faa0daf15220f4cd648bdf96ce369d729813b85336993871a4bf6978ddea2b81b5a130478339c20d9d0b5c6fc287e5147f0c059276e
+  languageName: node
+  linkType: hard
+
 "cmd-shim@npm:^6.0.0":
   version: 6.0.1
   resolution: "cmd-shim@npm:6.0.1"
@@ -22971,15 +22981,6 @@ __metadata:
   dependencies:
     execa: ^5.1.1
   checksum: e72b910182d5ad479198d4235be206ac64a479257b32201bb06f3c842cc34c65ea851d46f72cc1d4bf535bcc6c4b44b5b86bb29fe1192b8c9c07b46883672f28
-  languageName: node
-  linkType: hard
-
-"detect-package-manager@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "detect-package-manager@npm:3.0.1"
-  dependencies:
-    execa: ^5.1.1
-  checksum: 3a203ba269183baea9969b89f18dd93a9bb451a51280b39ea2ee392f44bada0f79b676425fcd1e7fca6b8c8f03a048a5cc1d3b39bb9c0ebd0300337ae00a0b14
   languageName: node
   linkType: hard
 
@@ -38576,6 +38577,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rambda@npm:^8.5.0":
+  version: 8.6.0
+  resolution: "rambda@npm:8.6.0"
+  checksum: ece4eccd213c1c33289763ec84ad7eab0abc76fd8da5789951d0009a0cf12c72d555cf26fe79fb83f26b3008e5894ad956474d54b338af32b095f11f2642e5d0
+  languageName: node
+  linkType: hard
+
 "ramda@npm:^0.21.0":
   version: 0.21.0
   resolution: "ramda@npm:0.21.0"
@@ -40066,6 +40074,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-smooth@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "react-smooth@npm:2.0.5"
+  dependencies:
+    fast-equals: ^5.0.0
+    react-transition-group: 2.9.0
+  peerDependencies:
+    prop-types: ^15.6.0
+    react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 914c17f741e8b533ff6e3d5e3285aea0625cdd0f98e04202d01351f9516dbdc0a0e297dc22cc2377d6916fb819da8d4ed999c0314a4c186592ca51870012e6f7
+  languageName: node
+  linkType: hard
+
 "react-style-singleton@npm:^2.2.1":
   version: 2.2.1
   resolution: "react-style-singleton@npm:2.2.1"
@@ -40445,6 +40467,26 @@ __metadata:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 4d63232317bbb39e457d13575a8410b353f8b45bb62aaf515d9f5a33bb7a04202908aa760b87a7e243503a5a033a176922ae4aef51238aab8511a5554cf7746e
+  languageName: node
+  linkType: hard
+
+"recharts@npm:^2.9.2":
+  version: 2.10.3
+  resolution: "recharts@npm:2.10.3"
+  dependencies:
+    clsx: ^2.0.0
+    eventemitter3: ^4.0.1
+    lodash: ^4.17.19
+    react-is: ^16.10.2
+    react-smooth: ^2.0.5
+    recharts-scale: ^0.4.4
+    tiny-invariant: ^1.3.1
+    victory-vendor: ^36.6.8
+  peerDependencies:
+    prop-types: ^15.6.0
+    react: ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 503c9fefa8648e0e8834a11ccc09fdcc310d391807438f4c0567b1888d7cd5f7a1f65f020afb981ec54ad6f96d31ebe757ab9025e93782edabc5c741f1aa946a
   languageName: node
   linkType: hard
 
@@ -44538,7 +44580,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-invariant@npm:^1.1.0":
+"tiny-invariant@npm:^1.1.0, tiny-invariant@npm:^1.3.1":
   version: 1.3.1
   resolution: "tiny-invariant@npm:1.3.1"
   checksum: 872dbd1ff20a21303a2fd20ce3a15602cfa7fcf9b228bd694a52e2938224313b5385a1078cb667ed7375d1612194feaca81c4ecbe93121ca1baebe344de4f84c

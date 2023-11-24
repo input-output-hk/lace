@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Flex } from '../..';
+import { Flex } from '../../flex';
 
 import { AccountItem } from './profile-dropdown-account-item.component';
 

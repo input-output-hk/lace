@@ -1,8 +1,11 @@
 import React from 'react';
 
-import { ControlButton, Flex, ProfilePicture, Text } from '../..';
 import { ReactComponent as PencilIcon } from '../../../assets/icons/pencil-outline.component.svg';
 import { ReactComponent as TrashIcon } from '../../../assets/icons/trash-outline.component.svg';
+import * as ControlButtons from '../../control-buttons';
+import { Flex } from '../../flex';
+import * as ProfilePicture from '../../profile-picture';
+import * as Text from '../../typography';
 
 import * as cx from './profile-dropdown-account-item.css';
 
@@ -47,14 +50,14 @@ export const AccountItem = ({
     </Flex>
     {isUnlocked ? (
       <Flex gap="$8">
-        <ControlButton.Icon
+        <ControlButtons.Icon
           icon={<PencilIcon className={cx.editIcon} />}
           size="extraSmall"
           onClick={(): void => {
             onEditClick?.(accountNumber);
           }}
         />
-        <ControlButton.Icon
+        <ControlButtons.Icon
           icon={<TrashIcon className={cx.deleteIcon} />}
           size="extraSmall"
           onClick={(): void => {
@@ -63,7 +66,7 @@ export const AccountItem = ({
         />
       </Flex>
     ) : (
-      <ControlButton.ExtraSmall
+      <ControlButtons.ExtraSmall
         label={unlockLabel}
         onClick={(): void => {
           onUnlockClick?.(accountNumber);
