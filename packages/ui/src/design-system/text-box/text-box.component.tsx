@@ -6,9 +6,9 @@ import cn from 'classnames';
 import { Flex } from '../flex';
 import * as Typography from '../typography';
 
-import * as cx from './input.css';
+import * as cx from './text-box.css';
 
-export interface InputProps extends Form.FormControlProps {
+export interface TextBoxProps extends Form.FormControlProps {
   required?: boolean;
   disabled?: boolean;
   id?: string;
@@ -22,7 +22,7 @@ export interface InputProps extends Form.FormControlProps {
   'data-testid'?: string;
 }
 
-export const Input = ({
+export const TextBox = ({
   required = false,
   disabled = false,
   id,
@@ -34,7 +34,7 @@ export const Input = ({
   onChange,
   containerStyle,
   ...rest
-}: Readonly<InputProps>): JSX.Element => {
+}: Readonly<TextBoxProps>): JSX.Element => {
   return (
     <Form.Root>
       <Flex justifyContent="space-between" alignItems="center">

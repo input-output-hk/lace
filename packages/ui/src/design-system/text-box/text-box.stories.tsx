@@ -8,15 +8,15 @@ import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 
-import { Input } from './input.component';
-import * as cx from './input.stories.css';
+import { TextBox } from './text-box.component';
+import * as cx from './text-box.stories.css';
 
 export default {
-  title: 'Input Fields/Input',
-  component: Input,
+  title: 'Input Fields/TextBox',
+  component: TextBox,
   decorators: [
     page({
-      title: 'Input',
+      title: 'TextBox',
     }),
   ],
 } as Meta;
@@ -24,22 +24,22 @@ export default {
 const MainComponents = (): JSX.Element => (
   <Variants.Row>
     <Variants.Cell>
-      <Input label="Label" value="" />
+      <TextBox label="Label" value="" />
     </Variants.Cell>
     <Variants.Cell>
-      <Input label="Label" value="" containerClassName={cx.hoverEffect} />
+      <TextBox label="Label" value="" containerClassName={cx.hoverEffect} />
     </Variants.Cell>
     <Variants.Cell>
-      <Input label="Label" value="Input Text" />
+      <TextBox label="Label" value="Input Text" />
     </Variants.Cell>
     <Variants.Cell>
-      <Input label="Label" value="Input Text" errorMessage="Error" />
+      <TextBox label="Label" value="Input Text" errorMessage="Error" />
     </Variants.Cell>
     <Variants.Cell>
-      <Input label="Label" value="Input Text" disabled />
+      <TextBox label="Label" value="Input Text" disabled />
     </Variants.Cell>
     <Variants.Cell>
-      <Input label="Label" value="" containerClassName={cx.focusEffect} />
+      <TextBox label="Label" value="" containerClassName={cx.focusEffect} />
     </Variants.Cell>
   </Variants.Row>
 );
@@ -52,7 +52,7 @@ export const Overview = (): JSX.Element => {
       <Cell>
         <Section title="Copy for use">
           <Flex flexDirection="column" alignItems="center" w="$fill" my="$32">
-            <Input
+            <TextBox
               value={value}
               label="Text"
               onChange={(event): void => {
