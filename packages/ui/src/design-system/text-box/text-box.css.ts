@@ -6,10 +6,6 @@ export const container = style({
   maxHeight: vars.spacing.$52,
   borderRadius: vars.radius.$medium,
   width: vars.spacing.$380,
-
-  ':hover': {
-    outline: `2px solid ${vars.colors.$input_container_hover_outline_color}`,
-  },
 });
 
 export const disabledContainer = style({
@@ -67,4 +63,8 @@ globalStyle(
 
 globalStyle(`${container}:has(${input}:focus)`, {
   outline: `3px solid ${vars.colors.$input_container_focused_outline_color}`,
+});
+
+globalStyle(`${container}:has(${input}:hover)`, {
+  outline: `2px solid ${vars.colors.$input_container_hover_outline_color}`,
 });

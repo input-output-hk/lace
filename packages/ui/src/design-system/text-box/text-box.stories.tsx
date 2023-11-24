@@ -9,14 +9,14 @@ import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 
 import { TextBox } from './text-box.component';
-import * as cx from './text-box.stories.css';
 
 export default {
   title: 'Input Fields/TextBox',
   component: TextBox,
   decorators: [
     page({
-      title: 'TextBox',
+      title: 'Text Box',
+      subtitle: 'A text input',
     }),
   ],
 } as Meta;
@@ -27,7 +27,7 @@ const MainComponents = (): JSX.Element => (
       <TextBox label="Label" value="" />
     </Variants.Cell>
     <Variants.Cell>
-      <TextBox label="Label" value="" containerClassName={cx.hoverEffect} />
+      <TextBox label="Label" value="" id="hover" />
     </Variants.Cell>
     <Variants.Cell>
       <TextBox label="Label" value="Input Text" />
@@ -39,7 +39,7 @@ const MainComponents = (): JSX.Element => (
       <TextBox label="Label" value="Input Text" disabled />
     </Variants.Cell>
     <Variants.Cell>
-      <TextBox label="Label" value="" containerClassName={cx.focusEffect} />
+      <TextBox label="Label" value="" id="focus" />
     </Variants.Cell>
   </Variants.Row>
 );
@@ -86,4 +86,11 @@ export const Overview = (): JSX.Element => {
       </Cell>
     </Grid>
   );
+};
+
+Overview.parameters = {
+  pseudo: {
+    hover: '#hover',
+    focus: '#focus',
+  },
 };
