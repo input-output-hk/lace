@@ -42,13 +42,16 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I click "Send ADA" "Run" button in test DApp
     And I see DApp connector "Confirm transaction" page with: "3.00 ADA" and: "0" assets
     And I set up request interception for posthog analytics request(s)
-    And I click "Confirm" button on "Confirm transaction" page
+    When I click "Confirm" button on "Confirm transaction" page
     Then I validate latest analytics single event "send | transaction summary | confirm | click"
     And I validate that the "send | transaction summary | confirm | click" event includes property "tx_creation_type" with value "external" in posthog
     And I fill correct password
-    And I click "Confirm" button on "Sign transaction" page
-    Then I validate latest analytics single event "send | transaction confirmation | confirm | click"
+    When I click "Confirm" button on "Sign transaction" page
+    Then I validate latest analytics multiple events:
+      | send \| transaction confirmation \| confirm \| click |
+      | send \| all done \| view                     |
     And I validate that the "send | transaction confirmation | confirm | click" event includes property "tx_creation_type" with value "external" in posthog
+    And I validate that the "send | all done | view" event includes property "tx_creation_type" with value "external" in posthog
     And I click "Close" button on DApp "All done" page
     And I don't see DApp window
     And I switch to window with Lace
