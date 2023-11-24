@@ -6,6 +6,7 @@ import { SendTransactionSummary } from './SendTransactionSummary';
 import { ConfirmPassword } from './ConfirmPassword';
 import { TransactionSuccess } from './TransactionSuccess';
 import { TransactionFail } from './TransactionFail';
+import { UnauthorizedTransaction } from './UnauthorizedTransaction';
 import { AddressList } from './AddressList';
 import { AddressForm } from './AddressForm';
 import { SendTransactionLayout } from './SendTransactionLayout';
@@ -60,6 +61,7 @@ export const SendTransaction = withAddressBookContext(
       [Sections.CONFIRMATION]: <ConfirmPassword />,
       [Sections.SUCCESS_TX]: <TransactionSuccess />,
       [Sections.FAIL_TX]: <TransactionFail />,
+      [Sections.UNAUTHORIZED_TX]: <UnauthorizedTransaction />,
       [Sections.ADDRESS_LIST]: <AddressList isPopupView={isPopupView} scrollableTargetId={scrollableTargetId} />,
       [Sections.ADDRESS_FORM]: <AddressForm isPopupView={isPopupView} />,
       [Sections.ASSET_PICKER]: <AssetPicker isPopupView={isPopupView} />,

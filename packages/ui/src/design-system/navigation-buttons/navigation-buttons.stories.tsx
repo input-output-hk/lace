@@ -5,9 +5,8 @@ import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { userEvent, waitFor, within } from '@storybook/testing-library';
 
-import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
-import { page, Variants, Section } from '../decorators';
+import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
@@ -82,17 +81,9 @@ export const Overview = (): JSX.Element => (
         <Divider my="$64" />
       </Section>
       <Section title="Main components">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
+        <UIStateTable>
           <Buttons />
-        </Variants.Table>
-
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <Buttons />
-          </Variants.Table>
-        </LocalThemeProvider>
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

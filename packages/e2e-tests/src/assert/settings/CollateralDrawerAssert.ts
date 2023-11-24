@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { browser } from '@wdio/globals';
 import { t } from '../../utils/translationService';
 import CollateralDrawer from '../../elements/settings/CollateralDrawer';
 import SettingsPage from '../../elements/settings/SettingsPage';
@@ -22,15 +23,11 @@ class CollateralDrawerAssert {
         await t('browserView.settings.wallet.collateral.confirm')
       );
 
-      await expect(await CollateralDrawer.transactionFeeLabel.getText()).to.equal(
-        await t('core.outputSummaryList.txFee')
-      );
-      await expect((await CollateralDrawer.transactionFeeAmount.getText()) as string).to.match(
+      expect(await CollateralDrawer.transactionFeeLabel.getText()).to.equal(await t('core.outputSummaryList.txFee'));
+      expect((await CollateralDrawer.transactionFeeAmount.getText()) as string).to.match(
         TestnetPatterns.ADA_LITERAL_VALUE_REGEX
       );
-      await expect((await CollateralDrawer.transactionFeeFiat.getText()) as string).to.match(
-        TestnetPatterns.USD_VALUE_REGEX
-      );
+      expect((await CollateralDrawer.transactionFeeFiat.getText()) as string).to.match(TestnetPatterns.USD_VALUE_REGEX);
     } else {
       await CollateralDrawer.passwordInputContainer.waitForDisplayed({
         reverse: true

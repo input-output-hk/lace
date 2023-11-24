@@ -8,6 +8,7 @@ import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import { switchToLastWindow } from '../utils/window';
 import extensionUtils from '../utils/utils';
 import TokensPage from '../elements/tokensPage';
+import type { NetworkType } from '../types/network';
 
 When(/^I see Tokens counter with total number of tokens displayed$/, async () => {
   await tokensPageAssert.assertSeeTitleWithCounter();
@@ -47,12 +48,9 @@ Then(
   }
 );
 
-Then(
-  /^I see current network: "(Mainnet|Preprod|Preview)" name in network setting$/,
-  async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
-    await settingsPageExtendedAssert.assertSeeCurrentNetworkName(network);
-  }
-);
+Then(/^I see current network: "(Mainnet|Preprod|Preview)" name in network setting$/, async (network: NetworkType) => {
+  await settingsPageExtendedAssert.assertSeeCurrentNetworkName(network);
+});
 
 Then(
   /^I see current network: "(Mainnet|Preprod|Preview)" name in "About Lace" widget$/,
@@ -63,7 +61,7 @@ Then(
 
 Then(
   /^I see "(Mainnet|Preprod|Preview)" specific tokens in (extended|popup) mode$/,
-  async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
+  async (network: NetworkType, mode: 'extended' | 'popup') => {
     const tHosky = {
       name: Asset.THOSKY.name,
       ticker: Asset.THOSKY.ticker,
@@ -199,7 +197,7 @@ When(/^I click (closed|opened) eye icon on Tokens page$/, async (iconType: 'clos
 });
 
 When(/^I click on "View all" button on token details drawer$/, async () => {
-  tokensPageObject.clickOnViewAllButton();
+  await tokensPageObject.clickOnViewAllButton();
 });
 
 Then(/^total wallet balance is masked with asterisks$/, async () => {

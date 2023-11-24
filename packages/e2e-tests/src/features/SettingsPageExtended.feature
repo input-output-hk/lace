@@ -370,7 +370,7 @@ Feature: General Settings - Extended Browser View
     And I see a different wallet address than in my initial wallet
 
         # this test should be executed as the last one in this suite
-  @LW-2521 @Mainnet @Testnet
+  @LW-2521 @LW-9113 @Mainnet @Testnet
   Scenario: Extended View - Remove wallet and confirm
     And my local storage is fully initialized
     When I open settings from header menu

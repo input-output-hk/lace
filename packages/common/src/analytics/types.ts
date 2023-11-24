@@ -56,6 +56,7 @@ export enum PostHogAction {
   StakingAboutStakingFaqClick = 'staking | about staking | faq | click',
   StakingMultiDelegationDedicatedBlogClick = 'staking | multi-delegation | dedicated blog | click',
   StakingMultiDelegationGotItClick = 'staking | multi-delegation | got it | click',
+  StakingActivityClick = 'staking | activity | click',
   StakingOverviewClick = 'staking | overview | click',
   StakingOverviewCopyAddressClick = 'staking | overview | copy address | click',
   StakingOverviewManageClick = 'staking | overview | manage | click',
@@ -90,6 +91,7 @@ export enum PostHogAction {
   SendTransactionDataReviewTransactionClick = 'send | transaction data | review transaction | click',
   SendTransactionSummaryConfirmClick = 'send | transaction summary | confirm | click',
   SendTransactionConfirmationConfirmClick = 'send | transaction confirmation | confirm | click',
+  SendTransactionConfirmed = 'send | transaction confirmed',
   SendAllDoneView = 'send | all done | view',
   SendAllDoneViewTransactionClick = 'send | all done | view transaction | click',
   SendAllDoneCloseClick = 'send | all done | close | click',
@@ -186,6 +188,7 @@ export enum PostHogAction {
   UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
   // Lace Logo
   WalletLaceClick = 'wallet | lace | click',
+  WalletSessionStartPageview = 'wallet | session start | pageview',
   // Tokens
   TokenTokensClick = 'token | tokens | click',
   TokenTokensTokenRowClick = 'token | tokens | token row | click',

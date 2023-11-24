@@ -9,10 +9,10 @@ import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult'
 class CoinConfigureAssert {
   async assertSeeNonEmptyBalanceInCoinConfigure() {
     const balance = ((await new CoinConfigure().getBalanceValue()) as string).replace('Balance: ', '').replace(',', '');
-    await expect(Number(balance)).to.be.greaterThan(0);
+    expect(Number(balance)).to.be.greaterThan(0);
     const balanceFiat = await new CoinConfigure().getFiatBalanceValue();
     if (balanceFiat !== '-') {
-      await expect(Number(balanceFiat)).to.be.greaterThan(0);
+      expect(Number(balanceFiat)).to.be.greaterThan(0);
     } else {
       Logger.log('Fiat balance = "-", skipping validation');
     }
@@ -24,11 +24,9 @@ class CoinConfigureAssert {
     await tokenSelectionPage.nftsButton.waitForDisplayed();
     await tokenSelectionPage.selectMultipleButton.waitForDisplayed();
 
-    await expect(await tokenSelectionPage.tokensButton.getText()).to.equal(
-      await t('browserView.sideMenu.links.tokens')
-    );
-    await expect(await tokenSelectionPage.nftsButton.getText()).to.equal(await t('browserView.sideMenu.links.nfts'));
-    await expect(await tokenSelectionPage.selectMultipleButton.getText()).to.equal(
+    expect(await tokenSelectionPage.tokensButton.getText()).to.equal(await t('browserView.sideMenu.links.tokens'));
+    expect(await tokenSelectionPage.nftsButton.getText()).to.equal(await t('browserView.sideMenu.links.nfts'));
+    expect(await tokenSelectionPage.selectMultipleButton.getText()).to.equal(
       await t('multipleSelection.selectMultiple')
     );
   }

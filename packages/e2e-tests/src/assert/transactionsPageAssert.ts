@@ -50,7 +50,7 @@ class TransactionsPageAssert {
   assertCounterNumberMatchesWalletTransactions = async () => {
     const rowsNumber = (await TransactionsPage.rows).length;
     const tokensCounterValue = Number((await TransactionsPage.counter.getText()).slice(1, -1));
-    await expect(rowsNumber).to.equal(tokensCounterValue);
+    expect(rowsNumber).to.equal(tokensCounterValue);
   };
 
   assertTxsLoaded = async () => {
@@ -74,7 +74,7 @@ class TransactionsPageAssert {
       await TransactionsPage.transactionsDate(i).waitForDisplayed();
       const date = await TransactionsPage.transactionsDate(i).getText();
       if (date !== 'Today') {
-        await expect(date).to.match(TestnetPatterns.TRANSACTIONS_DATE_LIST_REGEX);
+        expect(date).to.match(TestnetPatterns.TRANSACTIONS_DATE_LIST_REGEX);
       }
     }
   }
@@ -109,8 +109,8 @@ class TransactionsPageAssert {
       const txFiatValueNumber = txFiatValueString.slice(0, -4);
       const txFiatValue = Number(txFiatValueNumber);
 
-      await expect(txADAValue).to.be.greaterThan(0);
-      await expect(txFiatValue).to.be.greaterThan(0);
+      expect(txADAValue).to.be.greaterThan(0);
+      expect(txFiatValue).to.be.greaterThan(0);
     }
   }
 

@@ -2,8 +2,7 @@ import React from 'react';
 
 import type { Meta } from '@storybook/react';
 
-import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
-import { Variants, Section, page } from '../decorators';
+import { Variants, Section, page, UIStateTable } from '../decorators';
 import { Grid, Cell } from '../grid';
 
 import { TextLink } from './text-link.component';
@@ -69,17 +68,9 @@ export const Overview = (): JSX.Element => (
   <Grid columns="$1">
     <Cell>
       <Section title="Main components">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
+        <UIStateTable>
           <Buttons />
-        </Variants.Table>
-
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <Buttons />
-          </Variants.Table>
-        </LocalThemeProvider>
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

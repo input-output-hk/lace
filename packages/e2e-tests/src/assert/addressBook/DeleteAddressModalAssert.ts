@@ -8,9 +8,7 @@ class DeleteAddressModalAssert {
     await DeleteAddressModal.container.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
       await DeleteAddressModal.title.waitForDisplayed();
-      await expect(await DeleteAddressModal.title.getText()).to.equal(
-        await t('browserView.addressBook.deleteModal.title')
-      );
+      expect(await DeleteAddressModal.title.getText()).to.equal(await t('browserView.addressBook.deleteModal.title'));
       await DeleteAddressModal.description.waitForDisplayed();
       const expectedDescription = (await isPopupMode())
         ? await t('browserView.addressBook.deleteModal.description')
@@ -18,13 +16,13 @@ class DeleteAddressModalAssert {
             'browserView.addressBook.deleteModal.description2'
           )}`;
 
-      await expect(await DeleteAddressModal.description.getText()).to.equal(expectedDescription);
+      expect(await DeleteAddressModal.description.getText()).to.equal(expectedDescription);
       await DeleteAddressModal.cancelButton.waitForDisplayed();
-      await expect(await DeleteAddressModal.cancelButton.getText()).to.equal(
+      expect(await DeleteAddressModal.cancelButton.getText()).to.equal(
         await t('browserView.addressBook.deleteModal.buttons.cancel')
       );
       await DeleteAddressModal.deleteAddressButton.waitForDisplayed();
-      await expect(await DeleteAddressModal.deleteAddressButton.getText()).to.equal(
+      expect(await DeleteAddressModal.deleteAddressButton.getText()).to.equal(
         await t('browserView.addressBook.deleteModal.buttons.confirm')
       );
     }

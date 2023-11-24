@@ -4,7 +4,7 @@ import type { Meta } from '@storybook/react';
 
 import { ReactComponent as InfoIcon } from '../../assets/icons/info.component.svg';
 import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
-import { page, Variants, Section } from '../decorators';
+import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
@@ -196,19 +196,13 @@ export const Overview = (): JSX.Element => (
           </Variants.Table>
         </LocalThemeProvider>
       </Section>
-      <Divider my="$64" />
-      <Section title="Toggle switch items 🔒">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
-          <SwitchPreview />
-        </Variants.Table>
 
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <SwitchPreview />
-          </Variants.Table>
-        </LocalThemeProvider>
+      <Divider my="$64" />
+
+      <Section title="Toggle switch items 🔒">
+        <UIStateTable>
+          <SwitchPreview />
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

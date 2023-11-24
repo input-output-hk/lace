@@ -15,7 +15,7 @@ import NftsPage from '../elements/NFTs/nftsPage';
 import { browser } from '@wdio/globals';
 
 When(
-  /^I (|left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
+  /^I (left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
   async (clickType: 'left' | 'right' | '', nftName: string) => {
     await nftsPageObject.clickNftItemOnNftsPage(nftName, clickType === '' ? 'left' : clickType);
   }
