@@ -15,8 +15,8 @@ class OnboardingWalletPasswordPageAssert extends OnboardingCommonAssert {
   async assertSeePasswordRecommendation(expectedMessage: string, shouldSee: boolean) {
     const passwordRecommendations = await OnboardingWalletPasswordPage.passwordFeedback.getText();
     shouldSee
-      ? await expect(passwordRecommendations).to.contain(expectedMessage)
-      : await expect(passwordRecommendations).to.not.contain(expectedMessage);
+      ? expect(passwordRecommendations).to.contain(expectedMessage)
+      : expect(passwordRecommendations).to.not.contain(expectedMessage);
   }
 
   async assertSeePasswordConfirmationError(expectedMessage: string, shouldSee: boolean) {
@@ -28,7 +28,7 @@ class OnboardingWalletPasswordPageAssert extends OnboardingCommonAssert {
 
   async assertSeeComplexityBar(complexityBarLength: 0 | 1 | 2 | 3 | 4) {
     const numberOfBars = await OnboardingWalletPasswordPage.getNumberOfActiveComplexityBars();
-    await expect(numberOfBars.toString()).to.equal(complexityBarLength);
+    expect(numberOfBars.toString()).to.equal(complexityBarLength);
   }
 
   async assertSeePasswordPage(flow: 'onboarding' | 'forgot_password') {

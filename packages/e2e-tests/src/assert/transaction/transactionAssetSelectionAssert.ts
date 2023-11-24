@@ -45,7 +45,7 @@ class TransactionAssetSelectionAssert {
     if (isVisible) {
       await webTester.seeWebElement(tokenSelectionPage.assetsCounter());
       const counterValue = Number(await webTester.getTextValueFromElement(tokenSelectionPage.assetsCounter()));
-      await expect(Number(amount)).to.equal(Number(counterValue));
+      expect(Number(amount)).to.equal(Number(counterValue));
     } else {
       await webTester.dontSeeWebElement(tokenSelectionPage.assetsCounter());
     }
@@ -56,7 +56,7 @@ class TransactionAssetSelectionAssert {
     await tokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
     await tokenSelectionPage.neutralFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      await expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(
+      expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(
         await t('package.core.assetSelectorOverlay.usedAllAssets')
       );
     }
@@ -67,7 +67,7 @@ class TransactionAssetSelectionAssert {
     await tokenSelectionPage.emptyStateMessage.waitForDisplayed({ reverse: !shouldSee });
     await tokenSelectionPage.sadFaceIcon.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      await expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(
+      expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(
         await t('package.core.assetSelectorOverlay.noMatchingResult')
       );
     }
@@ -85,7 +85,7 @@ class TransactionAssetSelectionAssert {
         'package.core.assetSelectorOverlay.addFundsToStartYourWeb3Journey.'
       )}`;
       const expectedMessage = assetType === 'tokens' ? messageForTokens : messageForNFTs;
-      await expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(expectedMessage);
+      expect(await tokenSelectionPage.emptyStateMessage.getText()).to.equal(expectedMessage);
     }
   }
 }

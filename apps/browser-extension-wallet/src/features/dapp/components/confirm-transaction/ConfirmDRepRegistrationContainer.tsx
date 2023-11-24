@@ -35,12 +35,12 @@ export const ConfirmDRepRegistrationContainer = ({ signTxData, errorMessage }: P
         url: certificate.anchor?.url
       }}
       translations={{
-        metadata: t('core.drepRegistration.metadata'),
+        metadata: t('core.DRepRegistration.metadata'),
         labels: {
-          depositPaid: t('core.drepRegistration.depositPaid'),
-          drepId: t('core.drepRegistration.drepId'),
-          hash: t('core.drepRegistration.hash'),
-          url: t('core.drepRegistration.url')
+          depositPaid: t('core.DRepRegistration.depositPaid'),
+          drepId: t('core.DRepRegistration.drepId'),
+          hash: t('core.DRepRegistration.hash'),
+          url: t('core.DRepRegistration.url')
         }
       }}
       errorMessage={errorMessage}

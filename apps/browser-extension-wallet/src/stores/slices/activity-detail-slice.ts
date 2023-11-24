@@ -22,7 +22,7 @@ const isConfirmedTransaction = (props: Transaction): props is Wallet.Cardano.Hyd
 /**
  * returns a list of assets ids that belong to the transaction
  */
-const getTransactionAssetsId = (outputs: CardanoTxOut[]) => {
+export const getTransactionAssetsId = (outputs: CardanoTxOut[]): Wallet.Cardano.AssetId[] => {
   const assetIds: Wallet.Cardano.AssetId[] = [];
   const assetMaps = outputs.map((output) => output.value.assets);
   for (const asset of assetMaps) {
@@ -89,12 +89,15 @@ const buildGetActivityDetail =
       walletInfo
     } = get();
 
+    set({ fetchingActivityInfo: true });
+
     if (activityDetail.type === 'rewards') {
       const { activity, status, type } = activityDetail;
       const poolInfos = await getPoolInfos(
         activity.rewards.map(({ poolId }) => poolId),
         stakePoolProvider
       );
+      set({ fetchingActivityInfo: false });
 
       return {
         activity: {
@@ -128,7 +131,6 @@ const buildGetActivityDetail =
     const { activity: tx, status, type, direction } = activityDetail;
     const walletAssets = await firstValueFrom(wallet.assetInfo$);
     const protocolParameters = await firstValueFrom(wallet.protocolParameters$);
-    set({ fetchingActivityInfo: true });
 
     // Assets
     const assetIds = getTransactionAssetsId(tx.body.outputs);

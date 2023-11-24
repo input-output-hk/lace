@@ -40,35 +40,33 @@ class MenuMainPopupPageAssert {
 
   async assertSeeIconAndTextForEachMenuItemExtended() {
     await MenuMainExtended.getIcon(MenuMainExtended.tokensButton).waitForDisplayed();
-    await expect(await MenuMainExtended.tokensButton.getText()).to.equal(await t('browserView.sideMenu.links.tokens'));
+    expect(await MenuMainExtended.tokensButton.getText()).to.equal(await t('browserView.sideMenu.links.tokens'));
 
     await MenuMainExtended.getIcon(MenuMainExtended.nftsButton).waitForDisplayed();
-    await expect(await MenuMainExtended.nftsButton.getText()).to.equal(await t('browserView.sideMenu.links.nfts'));
+    expect(await MenuMainExtended.nftsButton.getText()).to.equal(await t('browserView.sideMenu.links.nfts'));
 
     await MenuMainExtended.getIcon(MenuMainExtended.transactionsButton).waitForDisplayed();
-    await expect(await MenuMainExtended.transactionsButton.getText()).to.equal(
+    expect(await MenuMainExtended.transactionsButton.getText()).to.equal(
       await t('browserView.sideMenu.links.activity')
     );
 
     await MenuMainExtended.getIcon(MenuMainExtended.stakingButton).waitForDisplayed();
-    await expect(await MenuMainExtended.stakingButton.getText()).to.equal(
-      await t('browserView.sideMenu.links.staking')
-    );
+    expect(await MenuMainExtended.stakingButton.getText()).to.equal(await t('browserView.sideMenu.links.staking'));
   }
 
   async assertAddressIsNotEqual(wallet = TestWalletName.TestAutomationWallet) {
     const walletData = getTestWallet(wallet);
     const expectedAddress = extensionUtils.isMainnet() ? walletData.mainnetAddress : walletData.address;
     const actualAddress = await FundWalletBanner.getWalletAddress();
-    await expect(actualAddress).to.not.equal(expectedAddress);
+    expect(actualAddress).to.not.equal(expectedAddress);
   }
 
   async assertMenuFormat(menuFormat: string, width: number) {
     const menuWidth = await MenuMainExtended.container.getSize('width');
     if (width > 1024) {
-      await expect(menuWidth).to.equal(198);
+      expect(menuWidth).to.equal(198);
     } else {
-      await (menuFormat === 'collapsed' ? expect(menuWidth).to.equal(47) : expect(menuWidth).to.equal(163));
+      menuFormat === 'collapsed' ? expect(menuWidth).to.equal(47) : expect(menuWidth).to.equal(163);
     }
   }
 }

@@ -6,12 +6,12 @@ class WalletLockScreenAssert {
   async assertSeeWalletLockScreen() {
     await WalletLockPage.laceLogo.waitForDisplayed();
     await WalletLockPage.helpAndSupportButton.waitForDisplayed();
-    await expect(await WalletLockPage.helpAndSupportButton.getText()).to.equal(await t('general.lock.helpAndSupport'));
+    expect(await WalletLockPage.helpAndSupportButton.getText()).to.equal(await t('general.lock.helpAndSupport'));
     await WalletLockPage.mainImg.waitForDisplayed();
     await WalletLockPage.text1.waitForDisplayed();
-    await expect(await WalletLockPage.text1.getText()).to.equal(await t('general.lock.yourWalletIsLocked'));
+    expect(await WalletLockPage.text1.getText()).to.equal(await t('general.lock.yourWalletIsLocked'));
     await WalletLockPage.text2.waitForDisplayed();
-    await expect(await WalletLockPage.text2.getText()).to.equal(await t('general.lock.toUnlockOpenPopUp'));
+    expect(await WalletLockPage.text2.getText()).to.equal(await t('general.lock.toUnlockOpenPopUp'));
   }
 }
 

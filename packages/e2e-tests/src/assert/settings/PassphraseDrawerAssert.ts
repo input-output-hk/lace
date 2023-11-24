@@ -1,5 +1,6 @@
 import PassphraseDrawer from '../../elements/settings/PassphraseDrawer';
 import { expect } from 'chai';
+import { browser } from '@wdio/globals';
 import { t } from '../../utils/translationService';
 
 class PassphraseDrawerAssert {

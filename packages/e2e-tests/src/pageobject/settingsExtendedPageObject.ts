@@ -9,6 +9,7 @@ import { browser } from '@wdio/globals';
 import ToastMessage from '../elements/toastMessage';
 import { t } from '../utils/translationService';
 import { Logger } from '../support/logger';
+import onboardingPageObject from './onboardingPageObject';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -117,6 +118,7 @@ class SettingsExtendedPageObject {
 
   switchNetworkAndCloseDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
     await this.switchNetworkWithoutClosingDrawer(network);
+    await this.waitUntilHdWalletSynced();
     await (mode === 'extended'
       ? simpleTxSideDrawerPageObject.clickCloseDrawerButton()
       : simpleTxSideDrawerPageObject.clickBackDrawerButton());
@@ -152,9 +154,15 @@ class SettingsExtendedPageObject {
       (await Modal.container.isDisplayed()) &&
       (await Modal.title.getText()) === (await t('addressesDiscovery.overlay.title'))
     ) {
-      await Modal.title.waitForDisplayed({ reverse: true, timeout: 30_000 });
+      await Modal.title.waitForDisplayed({ reverse: true, timeout: 120_000 });
     }
   };
+
+  async waitUntilHdWalletSynced() {
+    await onboardingPageObject.waitUntilLoaderDisappears();
+    await this.waitUntilSyncingModalDisappears();
+    await this.closeWalletSyncedToast();
+  }
 }
 
 export default new SettingsExtendedPageObject();

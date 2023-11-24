@@ -6,7 +6,6 @@ export const root = style([
   sx({
     height: '$32',
     width: '$32',
-    borderRadius: '$circle',
     background: '$lace_gradient',
     display: 'flex',
     alignItems: 'center',
@@ -17,6 +16,14 @@ export const root = style([
     userSelect: 'none',
   },
 ]);
+
+export const rounded = sx({
+  borderRadius: '$extraSmall',
+});
+
+export const circle = sx({
+  borderRadius: '$circle',
+});
 
 export const image = style({
   width: '100%',

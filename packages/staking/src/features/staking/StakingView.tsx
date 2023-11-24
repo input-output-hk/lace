@@ -1,4 +1,5 @@
 import { Box, Text } from '@lace/ui';
+import { Activity } from 'features/activity';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../BrowsePools';
@@ -39,9 +40,10 @@ export const StakingView = () => {
       </Box>
       <Navigation>
         {(activePage) => (
-          <Box mt="$40">
+          <Box mt="$40" h="$fill">
             {activePage === Page.overview && <Overview />}
             {activePage === Page.browsePools && <BrowsePools />}
+            {activePage === Page.activity && <Activity />}
           </Box>
         )}
       </Navigation>

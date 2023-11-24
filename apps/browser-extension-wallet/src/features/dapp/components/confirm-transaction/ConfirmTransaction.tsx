@@ -1,4 +1,5 @@
-import React from 'react';
+/* eslint-disable no-console */
+import React, { useMemo } from 'react';
 import { Button } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
@@ -14,21 +15,24 @@ import { runtime } from 'webextension-polyfill';
 import { getTitleKey, getTxType } from './utils';
 import { ConfirmTransactionContent } from './ConfirmTransactionContent';
 
-const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
-  {
-    baseChannel: DAPP_CHANNELS.dappData,
-    properties: {
-      getSignTxData: RemoteApiPropertyType.MethodReturningPromise
-    }
-  },
-  { logger: console, runtime }
-);
-
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     utils: { setNextView }
   } = useViewsFlowContext();
+  const dappDataApi = useMemo(
+    () =>
+      consumeRemoteApi<Pick<DappDataService, 'getSignTxData'>>(
+        {
+          baseChannel: DAPP_CHANNELS.dappData,
+          properties: {
+            getSignTxData: RemoteApiPropertyType.MethodReturningPromise
+          }
+        },
+        { logger: console, runtime }
+      ),
+    []
+  );
   const { getKeyAgentType } = useWalletStore();
   const { signTxData, errorMessage } = useSignTxData(dappDataApi.getSignTxData);
   const keyAgentType = getKeyAgentType();
@@ -46,7 +50,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
       <div className={styles.actions}>
         <Button
           onClick={async () => {
-            isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
+            isUsingHardwareWallet ? await signWithHardwareWallet() : setNextView();
           }}
           disabled={!!errorMessage}
           loading={isUsingHardwareWallet && isConfirmingTx}

@@ -13,22 +13,16 @@ class OnboardingAllDonePageAssert extends OnboardingCommonAssert {
 
     await AllDonePage.twitterLinkIcon.waitForDisplayed();
     await AllDonePage.twitterLinkText.waitForDisplayed();
-    await expect(await AllDonePage.twitterLinkText.getText()).to.equal(
-      await t('core.walletSetupFinalStep.followTwitter')
-    );
+    expect(await AllDonePage.twitterLinkText.getText()).to.equal(await t('core.walletSetupFinalStep.followTwitter'));
     await AllDonePage.youtubeLinkIcon.waitForDisplayed();
     await AllDonePage.youtubeLinkText.waitForDisplayed();
-    await expect(await AllDonePage.youtubeLinkText.getText()).to.equal(
-      await t('core.walletSetupFinalStep.followYoutube')
-    );
+    expect(await AllDonePage.youtubeLinkText.getText()).to.equal(await t('core.walletSetupFinalStep.followYoutube'));
     await AllDonePage.discordLinkIcon.waitForDisplayed();
     await AllDonePage.discordLinkText.waitForDisplayed();
-    await expect(await AllDonePage.discordLinkText.getText()).to.equal(
-      await t('core.walletSetupFinalStep.followDiscord')
-    );
+    expect(await AllDonePage.discordLinkText.getText()).to.equal(await t('core.walletSetupFinalStep.followDiscord'));
 
     await AllDonePage.nextButton.waitForDisplayed();
-    await expect(await AllDonePage.nextButton.getText()).to.equal(await t('core.walletSetupFinalStep.close'));
+    expect(await AllDonePage.nextButton.getText()).to.equal(await t('core.walletSetupFinalStep.close'));
 
     await this.assertSeeLegalLinks();
   }

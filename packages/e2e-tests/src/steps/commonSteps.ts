@@ -172,7 +172,7 @@ Then(/^Mnemonic is not stored in background storage$/, async () => {
 
 When(/^I click on "Expand" button$/, async () => {
   const tabsCount = (await browser.getWindowHandles()).length;
-  await testContext.save('tabsCount', tabsCount);
+  testContext.save('tabsCount', tabsCount);
   await MenuHeader.clickOnExpandButton();
 });
 

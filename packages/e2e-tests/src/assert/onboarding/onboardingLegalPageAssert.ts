@@ -14,7 +14,7 @@ class OnboardingLegalPageAssert extends OnboardingCommonAssert {
     const actualTerms = await removeWhitespacesFromText(
       (await OnboardingLegalPage.legalText.getText()).replace('I accept the Terms of Use', '')
     );
-    await expect(actualTerms).to.equal(expectedTerms);
+    expect(actualTerms).to.equal(expectedTerms);
   }
 
   async assertSeeTermsAndConditionsConfirmation() {

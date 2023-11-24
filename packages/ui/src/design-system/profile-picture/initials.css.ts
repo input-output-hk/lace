@@ -6,7 +6,6 @@ export const root = style([
   sx({
     height: '$40',
     width: '$40',
-    borderRadius: '$circle',
   }),
   {
     overflow: 'hidden',
@@ -14,6 +13,14 @@ export const root = style([
     position: 'relative',
   },
 ]);
+
+export const rounded = sx({
+  borderRadius: '$extraSmall',
+});
+
+export const circle = sx({
+  borderRadius: '$circle',
+});
 
 export const text = style([
   sx({

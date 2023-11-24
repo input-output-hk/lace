@@ -20,10 +20,10 @@ class OnboardingMnemonicInfoPageAssert extends OnboardingCommonAssert {
 
   async assertSeeMnemonicInfoPageContentLink() {
     await MnemonicInfoPage.hereLink.waitForDisplayed();
-    await expect(await MnemonicInfoPage.hereLink.getText()).to.equal(await t('core.walletSetupMnemonicIntroStep.link'));
+    expect(await MnemonicInfoPage.hereLink.getText()).to.equal(await t('core.walletSetupMnemonicIntroStep.link'));
     const expectedHref = 'https://www.lace.io/faq?question=what-is-my-secret-recovery-phrase';
     const currentHref = await MnemonicInfoPage.hereLink.getAttribute('href');
-    await expect(currentHref).to.equal(expectedHref);
+    expect(currentHref).to.equal(expectedHref);
   }
 }
 

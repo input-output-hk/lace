@@ -34,28 +34,26 @@ class StakingPageAssert {
   ) => {
     const stakingInfoComponent = new StakingInfoComponent();
 
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.title())).to.equal(
+    expect(await webTester.getTextValueFromElement(stakingInfoComponent.title())).to.equal(
       await t('browserView.staking.stakingInfo.title')
     );
 
     await webTester.seeWebElement(stakingInfoComponent.poolLogo());
-    await expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolName())).to.equal(
-      expectedStakePool.name
-    );
+    expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolName())).to.equal(expectedStakePool.name);
 
-    await (noMetaDataPool
+    noMetaDataPool
       ? expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolTicker())).to.contain(
           expectedStakePool.poolId.slice(0, 6)
         )
       : expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolTicker())).to.equal(
           expectedStakePool.ticker
-        ));
+        );
 
     expect(await stakingInfoComponent.statsApy.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.ros')
     );
     // TODO BUG LW-5635
-    // await expect((await webTester.getTextValueFromElement(stakingInfoComponent.statsApy().value())) as string).to.match(
+    // expect((await webTester.getTextValueFromElement(stakingInfoComponent.statsApy().value())) as string).to.match(
     //   TestnetPatterns.PERCENT_DOUBLE_REGEX
     // );
 
@@ -111,7 +109,7 @@ class StakingPageAssert {
     );
     await StakingSuccessDrawer.resultSubtitle.waitForDisplayed();
     // TODO: uncomment when LW-4864 is resolved
-    // await expect(await StakingSuccessDrawer.resultSubtitle.getText()).to.equal(
+    // expect(await StakingSuccessDrawer.resultSubtitle.getText()).to.equal(
     //   process === 'Initial'
     //     ? await t('browserView.staking.details.success.subTitle')
     //     : await t('browserView.staking.details.switchedPools.subTitle')

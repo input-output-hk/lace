@@ -12,14 +12,14 @@ class WalletAddressPageAssert {
     await WalletAddressPage.drawerHeaderTitle.waitForClickable();
     if (mode === 'extended') {
       await WalletAddressPage.drawerNavigationTitle.waitForDisplayed();
-      await expect(await WalletAddressPage.drawerNavigationTitle.getText()).to.equal(await t('qrInfo.receive'));
-      await expect(await WalletAddressPage.drawerHeaderTitle.getText()).to.equal(await t('qrInfo.title'));
+      expect(await WalletAddressPage.drawerNavigationTitle.getText()).to.equal(await t('qrInfo.receive'));
+      expect(await WalletAddressPage.drawerHeaderTitle.getText()).to.equal(await t('qrInfo.title'));
     } else {
-      await expect(await WalletAddressPage.drawerHeaderTitle.getText()).to.equal(await t('qrInfo.receive'));
+      expect(await WalletAddressPage.drawerHeaderTitle.getText()).to.equal(await t('qrInfo.receive'));
     }
     await WalletAddressPage.drawerHeaderCloseButton.waitForDisplayed();
     await WalletAddressPage.drawerHeaderSubtitle.waitForDisplayed();
-    await expect(await WalletAddressPage.drawerHeaderSubtitle.getText()).to.equal(
+    expect(await WalletAddressPage.drawerHeaderSubtitle.getText()).to.equal(
       await t('qrInfo.scanQRCodeToConnectWallet')
     );
     await WalletAddressPage.qrCode.waitForDisplayed();
@@ -33,10 +33,10 @@ class WalletAddressPageAssert {
   }
 
   async assertSeeWalletNameAndAddress(wallet: WalletConfig, mode: 'extended' | 'popup') {
-    await expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
+    expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
     const address = String(extensionUtils.isMainnet() ? wallet.mainnetAddress : wallet.address);
     const expectedAddress = mode === 'extended' ? address : `${address.slice(0, 7)}...${address.slice(-8)}`;
-    await expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
+    expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
   }
 
   async assertSeeAdaHandleAddressCard() {
