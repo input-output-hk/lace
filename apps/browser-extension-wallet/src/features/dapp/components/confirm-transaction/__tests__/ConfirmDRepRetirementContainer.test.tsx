@@ -173,10 +173,10 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
           drepId: Cardano.DRepID(HexBlob.toTypedBech32('drep', Wallet.HexBlob(certificate.dRepCredential.hash)))
         },
         translations: {
-          metadata: t('core.drepRetirement.metadata'),
+          metadata: t('core.DRepRetirement.metadata'),
           labels: {
-            depositReturned: t('core.drepRetirement.depositReturned'),
-            drepId: t('core.drepRetirement.drepId')
+            depositReturned: t('core.DRepRetirement.depositReturned'),
+            drepId: t('core.DRepRetirement.drepId')
           }
         },
         errorMessage
@@ -198,7 +198,7 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     expect(queryByTestId('ConfirmDRepRetirementContainer')).toBeInTheDocument();
     expect(
       mockConfirmDRepRetirement.mock.calls[mockConfirmDRepRetirement.mock.calls.length - 1][0].errorMessage
-    ).toEqual(t('core.drepRetirement.isOwnRetirement'));
+    ).toEqual(t('core.DRepRetirement.isOwnRetirement'));
   });
 
   test('should render ConfirmDRepRetirementContainer component with proper error for not own retirement', async () => {
@@ -215,6 +215,6 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
 
     expect(
       mockConfirmDRepRetirement.mock.calls[mockConfirmDRepRetirement.mock.calls.length - 1][0].errorMessage
-    ).toEqual(t('core.drepRetirement.isNotOwnRetirement'));
+    ).toEqual(t('core.DRepRetirement.isNotOwnRetirement'));
   });
 });

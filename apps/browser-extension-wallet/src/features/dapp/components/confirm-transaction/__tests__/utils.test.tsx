@@ -152,7 +152,7 @@ describe('Testing utils', () => {
 
   test('testing getOwnRetirementMessageKey', () => {
     expect(getOwnRetirementMessageKey(undefined)).toEqual('');
-    expect(getOwnRetirementMessageKey(true)).toEqual('core.drepRetirement.isOwnRetirement');
-    expect(getOwnRetirementMessageKey(false)).toEqual('core.drepRetirement.isNotOwnRetirement');
+    expect(getOwnRetirementMessageKey(true)).toEqual('core.DRepRetirement.isOwnRetirement');
+    expect(getOwnRetirementMessageKey(false)).toEqual('core.DRepRetirement.isNotOwnRetirement');
   });
 });

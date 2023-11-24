@@ -153,11 +153,11 @@ describe('Testing ConfirmDRepUpdateContainer component', () => {
           url: certificate.anchor?.url
         },
         translations: {
-          metadata: t('core.drepUpdate.metadata'),
+          metadata: t('core.DRepUpdate.metadata'),
           labels: {
-            drepId: t('core.drepUpdate.drepId'),
-            hash: t('core.drepUpdate.hash'),
-            url: t('core.drepUpdate.url')
+            drepId: t('core.DRepUpdate.drepId'),
+            hash: t('core.DRepUpdate.hash'),
+            url: t('core.DRepUpdate.url')
           }
         },
         errorMessage

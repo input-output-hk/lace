@@ -230,19 +230,19 @@ describe('Testing VotingProceduresContainer component', () => {
           }))
         })),
         translations: {
-          voterType: t('core.votingProcedures.voterType'),
-          procedureTitle: t('core.votingProcedures.procedureTitle'),
-          actionIdTitle: t('core.votingProcedures.actionIdTitle'),
-          vote: t('core.votingProcedures.vote'),
+          voterType: t('core.VotingProcedures.voterType'),
+          procedureTitle: t('core.VotingProcedures.procedureTitle'),
+          actionIdTitle: t('core.VotingProcedures.actionIdTitle'),
+          vote: t('core.VotingProcedures.vote'),
           actionId: {
-            index: t('core.votingProcedures.actionId.index'),
-            txHash: t('core.votingProcedures.actionId.txHash')
+            index: t('core.VotingProcedures.actionId.index'),
+            txHash: t('core.VotingProcedures.actionId.txHash')
           },
           anchor: {
-            hash: t('core.votingProcedures.anchor.hash'),
-            url: t('core.votingProcedures.anchor.url')
+            hash: t('core.VotingProcedures.anchor.hash'),
+            url: t('core.VotingProcedures.anchor.url')
           },
-          dRepId: t('core.votingProcedures.dRepId')
+          dRepId: t('core.VotingProcedures.dRepId')
         },
         errorMessage
       },
