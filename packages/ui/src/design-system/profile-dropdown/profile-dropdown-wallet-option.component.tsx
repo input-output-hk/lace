@@ -24,6 +24,7 @@ export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
     delayMs?: number;
   };
   type: WalletType;
+  onOpenAccountsMenu?: () => void;
 };
 
 const makeTestId = (namespace = '', path = ''): string => {
@@ -40,6 +41,7 @@ export const WalletOption = ({
   subtitle,
   profile,
   type,
+  onOpenAccountsMenu,
   ...props
 }: Readonly<Props>): JSX.Element => {
   return (
@@ -69,7 +71,12 @@ export const WalletOption = ({
             alignItems="center"
             justifyContent="center"
           >
-            <IconButton icon={<ChevronRight />} size="extraSmall" as="div" />
+            <IconButton
+              onClick={onOpenAccountsMenu}
+              icon={<ChevronRight />}
+              size="extraSmall"
+              as="div"
+            />
           </Flex>
         </Box>
       </Flex>

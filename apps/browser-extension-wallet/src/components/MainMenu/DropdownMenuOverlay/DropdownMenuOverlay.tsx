@@ -1,20 +1,21 @@
-import React, { ReactNode, VFC, useState } from 'react';
+import React, { ReactNode, useState, VFC } from 'react';
 import { Menu, MenuProps } from 'antd';
 import {
-  Separator,
-  Links,
+  AddNewWalletLink,
   AddressBookLink,
+  Links,
+  LockWallet,
+  NetworkChoise,
+  Separator,
   SettingsLink,
   ThemeSwitcher,
-  LockWallet,
-  UserInfo,
-  NetworkChoise,
-  AddNewWalletLink
+  UserInfo
 } from './components';
 import styles from './DropdownMenuOverlay.module.scss';
 import { NetworkInfo } from './components/NetworkInfo';
 import { Sections } from './types';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { WalletAccounts } from './components/WalletAccounts';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -26,16 +27,22 @@ interface Props extends MenuProps {
 export const DropdownMenuOverlay: VFC<Props> = ({
   isPopup,
   lockWalletButton = <LockWallet />,
-  topSection = <UserInfo />,
+  topSection,
   sendAnalyticsEvent,
   ...props
 }): React.ReactElement => {
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
 
+  const openWalletAccounts = () => {
+    setCurrentSection(Sections.WalletAccounts);
+  };
+
   const handleNetworkChoise = () => {
     setCurrentSection(Sections.NetworkInfo);
     sendAnalyticsEvent(PostHogAction.UserWalletProfileNetworkClick);
   };
+
+  topSection = topSection ?? <UserInfo onOpenWalletAccounts={openWalletAccounts} />;
 
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
@@ -58,6 +65,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
         </>
       )}
       {currentSection === Sections.NetworkInfo && <NetworkInfo onBack={() => setCurrentSection(Sections.Main)} />}
+      {currentSection === Sections.WalletAccounts && <WalletAccounts onBack={() => setCurrentSection(Sections.Main)} />}
     </Menu>
   );
 };

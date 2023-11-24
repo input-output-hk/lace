@@ -46,6 +46,11 @@ export const Overview = (): JSX.Element => (
                         label: 'Account #3',
                         isUnlocked: false,
                       },
+                      {
+                        accountNumber: 10,
+                        label: 'Account #10',
+                        isUnlocked: false,
+                      },
                     ]}
                   />
                 </div>

@@ -770,6 +770,10 @@
             "commit": "Commit"
           }
         },
+        "accounts": {
+          "title": "Accounts",
+          "description": "Select your preferred account."
+        },
         "general": {
           "title": "Your keys",
           "description": "View and copy your public and staking keys",

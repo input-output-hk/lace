@@ -27,9 +27,10 @@ const overlayInnerStyle = {
 
 interface UserInfoProps {
   avatarVisible?: boolean;
+  onOpenWalletAccounts?: (walletAddress: string) => void;
 }
 
-export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactElement => {
+export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo } = useWalletStore();
   const analytics = useAnalyticsContext();
@@ -67,6 +68,7 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
                     }
                   : undefined
               }
+              onOpenAccountsMenu={() => onOpenWalletAccounts(walletAddress)}
               type="cold"
             />
           ) : (
