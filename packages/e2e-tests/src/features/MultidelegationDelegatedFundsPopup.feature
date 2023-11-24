@@ -19,6 +19,7 @@ Feature: Staking Page - Popup View
   @LW-8338
   Scenario Outline: Popup View - Delegated pools cards are present
     Given I open wallet: "<walletName>" in: popup mode
+    And I disable showing Multidelegation beta banner
     And I disable showing Multidelegation persistence banner
     When I navigate to Staking popup page
     And I see Delegation pool cards are displayed for popup view
