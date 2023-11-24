@@ -23,7 +23,7 @@ const data: ComponentProps<typeof ConfirmDRepRegistration> = {
   translations: {
     labels: {
       depositPaid: 'Deposit paid',
-      drepId: 'Drep ID',
+      drepId: 'DRep ID',
       hash: 'Hash',
       url: 'URL'
     },
