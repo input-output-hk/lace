@@ -3,7 +3,6 @@ Feature: Main Navigation - Extended view
 
   Background:
     Given Lace is ready for test
-    And I disable showing Multidelegation beta banner
 
   @LW-2692 @Smoke
   Scenario: Extended view - Main navigation is displayed with all items
@@ -38,13 +37,13 @@ Feature: Main Navigation - Extended view
     When I click on the logo icon
     Then I see Tokens counter with total number of tokens displayed
     Examples:
-      | section      | validateIfSectionIsDisplayed                                         |
-      | Tokens       | I see Tokens counter with total number of tokens displayed           |
-      | NFTs         | I see NFTs counter with total number of NFTs displayed               |
-      | Transactions | Transactions section is displayed                                    |
-      | Staking      | I see Delegation title displayed for multidelegation                 |
-      | Settings     | I see settings page                                                  |
-      | Address Book | I see address book title                                             |
+      | section      | validateIfSectionIsDisplayed                               |
+      | Tokens       | I see Tokens counter with total number of tokens displayed |
+      | NFTs         | I see NFTs counter with total number of NFTs displayed     |
+      | Transactions | Transactions section is displayed                          |
+      | Staking      | I see Delegation title displayed for multidelegation       |
+      | Settings     | I see settings page                                        |
+      | Address Book | I see address book title                                   |
 
   @LW-6662
   Scenario Outline: Extended view - Main Navigation - Right side panel not displayed in <section> section
