@@ -33,17 +33,27 @@ export const AccountItem = ({
     justifyContent="space-between"
     gap="$12"
     className={cx.root}
+    data-testid="wallet-account-item"
   >
     <Flex alignItems="center" gap="$12">
       <ProfilePicture.UserProfile
         imageSrc=""
         fallback={accountNumber.toString()}
+        data-testid="wallet-account-item-icon"
       />
       <Flex flexDirection="column">
-        <Text.Label weight="$medium" className={cx.accountLabel}>
+        <Text.Label
+          weight="$medium"
+          className={cx.accountLabel}
+          data-testid="wallet-account-item-label"
+        >
           {label}
         </Text.Label>
-        <Text.Body.Small weight="$semibold" className={cx.derivationPath}>
+        <Text.Body.Small
+          weight="$semibold"
+          className={cx.derivationPath}
+          data-testid="wallet-account-item-path"
+        >
           m/1842`/1841/{accountNumber}
         </Text.Body.Small>
       </Flex>
@@ -56,10 +66,12 @@ export const AccountItem = ({
           onClick={(): void => {
             onEditClick?.(accountNumber);
           }}
+          data-testid="wallet-account-item-edit-btn"
         />
         <ControlButtons.Icon
           icon={<TrashIcon className={cx.deleteIcon} />}
           size="extraSmall"
+          data-testid="wallet-account-item-delete-btn"
           onClick={(): void => {
             onDeleteClick?.(accountNumber);
           }}
@@ -68,6 +80,7 @@ export const AccountItem = ({
     ) : (
       <ControlButtons.ExtraSmall
         label={unlockLabel}
+        data-testid="wallet-account-item-unlock-btn"
         onClick={(): void => {
           onUnlockClick?.(accountNumber);
         }}

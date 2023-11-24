@@ -25,7 +25,7 @@ export const AccountsList = ({
   onAccountEditClick,
   onAccountDeleteClick,
 }: Readonly<Props>): JSX.Element => (
-  <Flex gap="$32" flexDirection="column">
+  <Flex gap="$32" flexDirection="column" data-testid="wallet-accounts-list">
     {accounts.map(a => (
       <AccountItem
         key={a.accountNumber}
