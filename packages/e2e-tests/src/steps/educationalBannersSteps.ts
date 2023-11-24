@@ -1,6 +1,6 @@
 import { When, Then } from '@cucumber/cucumber';
+import EducationalList from '../elements/educationalList';
 import educationalListAssert from '../assert/educationalListAssert';
-import educationalBannerPageObject from '../pageobject/educationalBannerPageObject';
 import faqPageAssert from '../assert/faqPageAssert';
 import { switchToLastWindow } from '../utils/window';
 
@@ -17,7 +17,7 @@ Then(/^I see "More on NFTs" widget with all relevant items$/, async () => {
 });
 
 When(/^I click on a widget item with subtitle: "([^"]*)"$/, async (subTitle: string) => {
-  await educationalBannerPageObject.clickItemWithSubtitle(subTitle);
+  await EducationalList.clickItemWithSubtitle(subTitle);
 });
 
 When(/^I see a "(FAQ|Glossary|Video)" article with title "([^"]*)"$/, async (type: string, subTitle: string) => {
