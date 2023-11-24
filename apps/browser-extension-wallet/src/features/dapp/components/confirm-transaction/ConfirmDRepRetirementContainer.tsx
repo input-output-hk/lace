@@ -38,10 +38,10 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, errorMessage }: Pro
         drepId: drepIDasBech32FromHash(certificate.dRepCredential.hash)
       }}
       translations={{
-        metadata: t('core.drepRetirement.metadata'),
+        metadata: t('core.DRepRetirement.metadata'),
         labels: {
-          depositReturned: t('core.drepRetirement.depositReturned'),
-          drepId: t('core.drepRetirement.drepId')
+          depositReturned: t('core.DRepRetirement.depositReturned'),
+          drepId: t('core.DRepRetirement.drepId')
         }
       }}
       errorMessage={errorMessage || t(ownRetirementMessageKey)}
