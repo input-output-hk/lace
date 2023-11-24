@@ -5,7 +5,7 @@ export const container = style({
   paddingTop: vars.spacing.$12,
   maxHeight: vars.spacing.$52,
   borderRadius: vars.radius.$medium,
-  width: vars.spacing.$380,
+  width: 'auto',
 });
 
 export const disabledContainer = style({
