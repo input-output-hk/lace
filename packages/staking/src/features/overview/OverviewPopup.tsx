@@ -36,7 +36,7 @@ export const OverviewPopup = () => {
 
   if (
     !totalCoinBalance ||
-    !protocolParameters?.stakeKeyDeposit ||
+    !protocolParameters?.hasOwnProperty('stakeKeyDeposit') ||
     !balancesBalance?.available?.coinBalance ||
     !rewardAccounts
   ) {
