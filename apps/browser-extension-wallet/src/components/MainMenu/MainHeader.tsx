@@ -4,6 +4,7 @@ import styles from './MainHeader.module.scss';
 import LaceLogoMark from '../../assets/branding/lace-logo-mark.component.svg';
 import { useTranslation } from 'react-i18next';
 import { walletRoutePaths } from '@routes';
+import classNames from 'classnames';
 
 import { DropdownMenu } from '@components/DropdownMenu';
 import { ExpandButton } from '@components/ExpandButton';
@@ -30,7 +31,16 @@ export const MainHeader = (): React.ReactElement => {
 
   return (
     <div className={styles.header} data-testid="header-container">
-      <div className={styles.content}>
+      <div
+        className={classNames(styles.content, {
+          [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true'
+        })}
+      >
+        {process.env.USE_MULTI_WALLET === 'true' && (
+          <div className={styles.multiWalletNetworkPillBox}>
+            <NetworkPill />
+          </div>
+        )}
         <Link
           className={styles.linkLogo}
           to={walletRoutePaths.assets}
@@ -38,7 +48,7 @@ export const MainHeader = (): React.ReactElement => {
           onClick={() => analytics.sendEventToPostHog(PostHogAction.WalletLaceClick)}
         >
           <LaceLogoMark className={styles.logo} />
-          <NetworkPill />
+          {process.env.USE_MULTI_WALLET !== 'true' && <NetworkPill />}
         </Link>
         <div className={styles.controls}>
           <ExpandButton

@@ -44,8 +44,10 @@
   flex-shrink: 0;
 
   &:hover {
-    max-width: 300px;
-    width: auto;
+    max-width: size_unit(6);
+    width: size_unit(6);
+    gap: 0px;
+    padding: 0;
   }
 }
 
