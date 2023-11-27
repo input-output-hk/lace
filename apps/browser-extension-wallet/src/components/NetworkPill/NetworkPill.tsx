@@ -27,8 +27,7 @@ export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => 
         >
           <span
             className={classnames({
-              [styles.networkPillText]: isExpandable,
-              [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true'
+              [styles.networkPillText]: isExpandable
             })}
           >
             {environmentName}
