@@ -11,7 +11,7 @@ import { Cell, Grid } from '../grid';
 import { TextBox } from './text-box.component';
 
 export default {
-  title: 'Input Fields/TextBox',
+  title: 'Input Fields/Text Box',
   component: TextBox,
   decorators: [
     page({

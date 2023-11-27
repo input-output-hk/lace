@@ -59,11 +59,7 @@ export const TextBox = ({
               data-testid={rest['data-testid']}
             />
           </Form.Control>
-          <Form.Label
-            className={cn(cx.label, { [cx.disabledLabel]: disabled })}
-          >
-            {label}
-          </Form.Label>
+          <Form.Label className={cn(cx.label)}>{label}</Form.Label>
         </Form.Field>
       </Flex>
       {errorMessage && (
