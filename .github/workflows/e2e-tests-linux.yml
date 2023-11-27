@@ -34,6 +34,7 @@ env:
   NETWORK: ${{ github.event.inputs.network || 'preprod' }}
   RUN: ${{ github.run_number }}
   DISPLAY: ':99.0'
+  NODE_OPTIONS: '--max-old-space-size=8192'
 
 jobs:
   tests:

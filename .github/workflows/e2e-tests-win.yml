@@ -33,6 +33,7 @@ env:
   BROWSER: ${{ github.event.inputs.browser || 'edge' }}
   NETWORK: ${{ github.event.inputs.network || 'preprod' }}
   RUN: ${{ github.run_number }}
+  NODE_OPTIONS: '--max-old-space-size=8192'
 
 jobs:
   build-extension-linux:
