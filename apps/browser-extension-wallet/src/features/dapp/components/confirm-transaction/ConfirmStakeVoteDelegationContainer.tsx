@@ -30,14 +30,14 @@ export const ConfirmStakeVoteDelegationContainer = ({ signTxData, errorMessage }
         ...(Wallet.Cardano.isDRepCredential(dRep) ? { drepId: dRep.hash } : {})
       }}
       translations={{
-        metadata: t('core.stakeVoteDelegation.metadata'),
-        option: t('core.stakeVoteDelegation.option'),
+        metadata: t('core.StakeVoteDelegation.metadata'),
+        option: t('core.StakeVoteDelegation.option'),
         labels: {
-          poolId: t('core.stakeVoteDelegation.poolId'),
-          stakeKeyHash: t('core.stakeVoteDelegation.stakeKeyHash'),
-          drepId: t('core.stakeVoteDelegation.drepId'),
-          alwaysAbstain: t('core.stakeVoteDelegation.alwaysAbstain'),
-          alwaysNoConfidence: t('core.stakeVoteDelegation.alwaysNoConfidence')
+          poolId: t('core.StakeVoteDelegation.poolId'),
+          stakeKeyHash: t('core.StakeVoteDelegation.stakeKeyHash'),
+          drepId: t('core.StakeVoteDelegation.drepId'),
+          alwaysAbstain: t('core.StakeVoteDelegation.alwaysAbstain'),
+          alwaysNoConfidence: t('core.StakeVoteDelegation.alwaysNoConfidence')
         }
       }}
       errorMessage={errorMessage}

@@ -1155,15 +1155,15 @@
       "hash": "Hash"
     },
     "VoteDelegation": {
-      "title": "Confirm vote delegation",
+      "title": "Confirm Vote Delegation",
       "metadata": "Metadata",
       "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
       "alwaysNoConfidence": "No Confidence",
       "option": "Yes"
     },
-    "stakeVoteDelegation": {
-      "title": "Confirm Vote Delegation and Stake Delegation",
+    "StakeVoteDelegation": {
+      "title": "Confirm Vote Delegation & Staking",
       "metadata": "Metadata",
       "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
@@ -1172,8 +1172,8 @@
       "stakeKeyHash": "Stake Key Hash",
       "poolId": "Pool ID"
     },
-    "stakeVoteDelegationRegistration": {
-      "title": "Confirm Vote Delegation, Stake Delegation and Stake Credentials Registration",
+    "StakeVoteDelegationRegistration": {
+      "title": "Confirm Vote Delegation & Staking",
       "metadata": "Metadata",
       "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
@@ -1183,15 +1183,15 @@
       "poolId": "Pool ID",
       "depositPaid": "Deposit paid"
     },
-    "stakeRegistrationDelegation": {
-      "title": "Confirm Stake Credentials Registration and Stake Delegation",
+    "StakeRegistrationDelegation": {
+      "title": "Confirm Staking",
       "metadata": "Metadata",
       "stakeKeyHash": "Stake Key Hash",
       "poolId": "Pool ID",
       "depositPaid": "Deposit paid"
     },
-    "voteRegistrationDelegation": {
-      "title": "Confirm Vote Delegation and Stake Credentials Registration",
+    "VoteRegistrationDelegation": {
+      "title": "Confirm Vote Delegation",
       "metadata": "Metadata",
       "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",

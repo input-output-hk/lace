@@ -36,11 +36,11 @@ export const ConfirmStakeRegistrationDelegationContainer = ({
         depositPaid: depositPaidWithCardanoSymbol
       }}
       translations={{
-        metadata: t('core.stakeRegistrationDelegation.metadata'),
+        metadata: t('core.StakeRegistrationDelegation.metadata'),
         labels: {
-          poolId: t('core.stakeRegistrationDelegation.poolId'),
-          stakeKeyHash: t('core.stakeRegistrationDelegation.stakeKeyHash'),
-          depositPaid: t('core.stakeRegistrationDelegation.depositPaid')
+          poolId: t('core.StakeRegistrationDelegation.poolId'),
+          stakeKeyHash: t('core.StakeRegistrationDelegation.stakeKeyHash'),
+          depositPaid: t('core.StakeRegistrationDelegation.depositPaid')
         }
       }}
       errorMessage={errorMessage}

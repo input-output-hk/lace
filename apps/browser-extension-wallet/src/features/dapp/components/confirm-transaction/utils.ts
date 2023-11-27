@@ -33,6 +33,10 @@ export const getTitleKey = (txType: TxType): string =>
     TxType.DRepRetirement,
     TxType.DRepUpdate,
     TxType.VoteDelegation,
+    TxType.StakeVoteDelegation,
+    TxType.VoteRegistrationDelegation,
+    TxType.StakeRegistrationDelegation,
+    TxType.StakeVoteDelegationRegistration,
     TxType.VotingProcedures
   ].includes(txType)
     ? `core.${txType}.title`
