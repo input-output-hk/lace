@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { AccountData } from '@lace/ui/dist/design-system/profile-dropdown/accounts/profile-dropdown-accounts-list.component';
 
-export const useEditAccountDrawer = (): { isOpen: boolean; open: () => void; hide: () => void } => {
-  const [visible, setVisible] = useState(false);
+export const useEditAccountDrawer = () => {
+  const [dataToEdit, setDataToEdit] = useState<AccountData | undefined>();
 
   return {
-    isOpen: visible,
-    open: () => setVisible(true),
-    hide: () => setVisible(false)
+    accountData: dataToEdit,
+    isOpen: dataToEdit !== undefined,
+    open: (data: AccountData) => setDataToEdit(data),
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    hide: () => setDataToEdit(undefined)
   };
 };

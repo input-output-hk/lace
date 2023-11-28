@@ -8,7 +8,7 @@ export type Props = {
   visible: boolean;
   hide: () => void;
   name: string;
-  index: string;
+  index: number;
 };
 
 export const EditAccountDrawer = ({ name, index, visible, onSave, hide }: Props): React.ReactElement => {
@@ -17,7 +17,7 @@ export const EditAccountDrawer = ({ name, index, visible, onSave, hide }: Props)
 
   return (
     <Drawer
-      zIndex={999}
+      zIndex={1100}
       open={visible}
       navigation={<DrawerNavigation title={name || `Account #${index}`} onCloseIconClick={hide} />}
       footer={
@@ -51,7 +51,7 @@ export const EditAccountDrawer = ({ name, index, visible, onSave, hide }: Props)
           data-testid="edit-account-name-input"
           containerStyle={{ width: '100%' }}
           label={t('account.edit.input.label')}
-          value={currentName}
+          defaultValue={name}
           onChange={(e) => setCurrentName(e.target.value)}
         />
       </div>

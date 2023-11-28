@@ -14,7 +14,8 @@ export interface TextBoxProps extends Form.FormControlProps {
   id?: string;
   label: string;
   name?: string;
-  value: string;
+  defaultValue?: string;
+  value?: string;
   errorMessage?: string;
   onChange?: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
   containerClassName?: string;
@@ -28,6 +29,7 @@ export const TextBox = ({
   id,
   label,
   name,
+  defaultValue,
   value,
   errorMessage = '',
   containerClassName = '',
@@ -53,6 +55,7 @@ export const TextBox = ({
               className={cx.input}
               disabled={disabled}
               name={name}
+              defaultValue={defaultValue}
               value={value}
               onChange={onChange}
               id={id}
