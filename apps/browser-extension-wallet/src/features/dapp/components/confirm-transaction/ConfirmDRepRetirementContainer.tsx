@@ -1,11 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRetirement } from '@lace/core';
-import { SignTxData } from './types';
-import { certificateInspectorFactory, drepIDasBech32FromHash, getOwnRetirementMessageKey } from './utils';
+import { certificateInspectorFactory, drepIDasBech32FromHash } from './utils';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
-import { useIsOwnPubDRepKey } from './hooks';
+import { SignTxData } from './types';
 
 const { CertificateType } = Wallet.Cardano;
 
@@ -17,8 +16,7 @@ interface Props {
 export const ConfirmDRepRetirementContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    walletUI: { cardanoCoin },
-    inMemoryWallet
+    walletUI: { cardanoCoin }
   } = useWalletStore();
   const certificate = certificateInspectorFactory<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>(
     CertificateType.UnregisterDelegateRepresentative
@@ -26,9 +24,6 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, errorMessage }: Pro
   const depositPaidWithCardanoSymbol = `${Wallet.util.lovelacesToAdaString(certificate.deposit.toString())} ${
     cardanoCoin.symbol
   }`;
-
-  const isOwnRetirement = useIsOwnPubDRepKey(inMemoryWallet.getPubDRepKey, certificate.dRepCredential.hash);
-  const ownRetirementMessageKey = getOwnRetirementMessageKey(isOwnRetirement);
 
   return (
     <ConfirmDRepRetirement
@@ -44,7 +39,7 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, errorMessage }: Pro
           drepId: t('core.DRepRetirement.drepId')
         }
       }}
-      errorMessage={errorMessage || t(ownRetirementMessageKey)}
+      errorMessage={errorMessage}
     />
   );
 };

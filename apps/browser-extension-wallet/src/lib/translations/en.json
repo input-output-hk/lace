@@ -1154,8 +1154,14 @@
       "metadata": "Metadata",
       "drepId": "DRep ID",
       "depositReturned": "Deposit returned",
-      "isOwnRetirement": "This is your DRep retirement.",
-      "isNotOwnRetirement": "The presented DRepID does not match your wallet's DRepID."
+      "drepIdMismatchModal": {
+        "title": "DRep ID Mismatch",
+        "description": "The DRep ID you are attempting to retire does not match the DRep ID associated with your wallet. Please review the details and ensure that you are retiring the correct DRep ID.",
+        "givenDRepId": "Presented DRep ID:",
+        "expectedDRepId": "Your Wallet's DRep ID:",
+        "confirm": "Proceed",
+        "cancel": "Cancel"
+      }
     },
     "DRepUpdate": {
       "title": "Confirm DRep Update",

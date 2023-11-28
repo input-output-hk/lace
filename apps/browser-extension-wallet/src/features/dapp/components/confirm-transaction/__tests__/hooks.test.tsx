@@ -13,7 +13,7 @@ const mockLovelacesToAdaString = jest.fn();
 import { act, cleanup } from '@testing-library/react';
 import {
   useCreateAssetList,
-  useIsOwnPubDRepKey,
+  useGetOwnPubDRepKeyHash,
   useOnBeforeUnload,
   useSignTxData,
   useSignWithHardwareWallet,

@@ -10,6 +10,7 @@ import { getTransactionAssetsId } from '@src/stores/slices';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { TxType, allowSignTx, pubDRepKeyToHash, disallowSignTx, getTxType } from './utils';
 import { GetSignTxData, SignTxData } from './types';
+import { useWalletStore } from '@stores';
 
 export const useCreateAssetList = ({
   assets,
@@ -154,22 +155,27 @@ export const useOnBeforeUnload = (callBack: () => void): void => {
   }, [callBack]);
 };
 
-export const useIsOwnPubDRepKey = (
-  getOwnPubDRepKey: () => Promise<Wallet.Crypto.Ed25519PublicKeyHex>,
-  drepHash: Wallet.Crypto.Hash28ByteBase16
-): boolean => {
-  const [isOwnDRepKey, setIsOwnDRepKey] = useState<boolean>();
+type UseIsOwnPubDRepKey = {
+  loading: boolean;
+  ownPubDRepKeyHash: Wallet.Crypto.Hash28ByteBase16;
+};
+
+export const useGetOwnPubDRepKeyHash = (): UseIsOwnPubDRepKey => {
+  const [ownPubDRepKeyHash, setOwnPubDRepKeyHash] = useState<Wallet.Crypto.Hash28ByteBase16>();
+  const { inMemoryWallet } = useWalletStore();
 
   useEffect(() => {
+    if (!inMemoryWallet) return;
     const get = async () => {
-      const ownPubDRepKey = await getOwnPubDRepKey();
+      const ownPubDRepKey = await inMemoryWallet.getPubDRepKey();
       const ownDRepKeyHash = await pubDRepKeyToHash(ownPubDRepKey);
 
-      setIsOwnDRepKey(drepHash === ownDRepKeyHash);
+      setOwnPubDRepKeyHash(ownDRepKeyHash);
     };
 
     get();
-  }, [getOwnPubDRepKey, drepHash]);
+  }, [inMemoryWallet]);
 
-  return isOwnDRepKey;
+  // TODO consider using Zustand or at least some common abstraction e.g. https://github.com/streamich/react-use/blob/master/src/useAsync.ts
+  return { loading: ownPubDRepKeyHash === undefined, ownPubDRepKeyHash };
 };
