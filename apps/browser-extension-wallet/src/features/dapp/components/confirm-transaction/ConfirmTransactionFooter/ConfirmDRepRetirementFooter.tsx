@@ -23,7 +23,7 @@ export const ConfirmDRepRetirementFooter = ({
     Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative
   )(signTxData.tx);
   const { loading, ownPubDRepKeyHash } = useGetOwnPubDRepKeyHash();
-  const isOwnDRepKey = transactionDrepKeyHash === 'ownPubDRepKeyHash';
+  const isOwnDRepKey = transactionDrepKeyHash === ownPubDRepKeyHash;
 
   return (
     <>
