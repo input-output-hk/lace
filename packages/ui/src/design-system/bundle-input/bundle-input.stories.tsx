@@ -4,9 +4,15 @@ import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 
-import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
-import { page, Section, Variants } from '../decorators';
+import { invalidState, validState } from '../asset-input/asset-input.fixtures';
+import {
+  page,
+  Section,
+  Variants,
+  UIStateTable,
+  ColorSchemaTable,
+} from '../decorators';
 import { Divider } from '../divider';
 import { Grid } from '../grid';
 import { Cell } from '../grid/cell.component';
@@ -24,35 +30,7 @@ export default {
   decorators: [page({ title: 'Bundle input', subtitle })],
 } as Meta;
 
-const asset: Asset = {
-  balance: String(10_000_000),
-  amount: '',
-  id: '',
-  ticker: 'Token',
-  fiat: {
-    value: '0',
-    ticker: 'USD',
-  },
-};
-
-const validState = (id = '1'): AssetState => ({
-  type: 'valid',
-  asset: {
-    ...asset,
-    id,
-  },
-});
-
-const invalidState = (id = '1'): AssetState => ({
-  type: 'invalid',
-  asset: {
-    ...asset,
-    id,
-  },
-  error: 'Insufficient balance',
-});
-
-const MainComponents = (): JSX.Element => (
+const BundleInputMainComponents = (): JSX.Element => (
   <Variants.Row>
     <Variants.Cell>
       <BundleInput state={[validState('1'), validState('2')]} />
@@ -60,7 +38,7 @@ const MainComponents = (): JSX.Element => (
   </Variants.Row>
 );
 
-const SecondaryItems = (): JSX.Element => (
+const RemoveButtonUIStates = (): JSX.Element => (
   <>
     <Variants.Row>
       <Variants.Cell>
@@ -122,29 +100,17 @@ export const Overview = (): JSX.Element => (
       <Divider my="$64" />
 
       <Section title="Main components">
-        <Variants.Table headers={['Rest']}>
-          <MainComponents />
-        </Variants.Table>
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <MainComponents />
-          </Variants.Table>
-        </LocalThemeProvider>
+        <ColorSchemaTable headers={['Rest']}>
+          <BundleInputMainComponents />
+        </ColorSchemaTable>
       </Section>
 
       <Divider my="$64" />
 
       <Section title="Secondary items">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
-          <SecondaryItems />
-        </Variants.Table>
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <SecondaryItems />
-          </Variants.Table>
-        </LocalThemeProvider>
+        <UIStateTable>
+          <RemoveButtonUIStates />
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

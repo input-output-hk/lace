@@ -44,3 +44,20 @@ export const switchToWindowWithLace = async (): Promise<void> => {
   await browser.pause(1000);
   await browser.switchWindow(/^Lace$/);
 };
+
+export const switchToWindowWithTitle = async (url: string): Promise<boolean> => {
+  try {
+    await browser.switchWindow(url);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const switchToWindowWithRetry = async (url: string): Promise<void> => {
+  await browser.waitUntil(async () => await switchToWindowWithTitle(url), {
+    timeout: 6000,
+    interval: 1000,
+    timeoutMsg: `failed while switching to tab with title: ${url}`
+  });
+};

@@ -39,6 +39,10 @@ export type ManagePortfolio = {
   type: 'ManagePortfolio';
 };
 
+export type GoToActivity = {
+  type: 'GoToActivity';
+};
+
 export type GoToBrowsePools = {
   type: 'GoToBrowsePools';
 };
@@ -100,12 +104,15 @@ export type ManageDelegationFromDetails = {
   type: 'ManageDelegationFromDetails';
 };
 
-export type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools;
+export type ActivityCommand = GoToOverview | GoToBrowsePools;
+
+export type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools | GoToActivity;
 
 export type BrowsePoolsCommand =
   | SelectPoolFromList
   | UnselectPoolFromList
   | ShowPoolDetailsFromList
+  | GoToActivity
   | GoToOverview
   | ClearSelections
   | CreateNewPortfolio;

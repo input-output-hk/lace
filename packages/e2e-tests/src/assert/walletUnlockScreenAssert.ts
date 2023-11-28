@@ -6,12 +6,12 @@ class WalletUnlockScreenAssert {
   assertSeeWalletUnlockScreen = async () => {
     await WalletUnlockPage.mainImage.waitForDisplayed();
     await WalletUnlockPage.title.waitForDisplayed();
-    await expect(await WalletUnlockPage.title.getText()).to.equal(await t('unlock.sectionTitle'));
+    expect(await WalletUnlockPage.title.getText()).to.equal(await t('unlock.sectionTitle'));
     await WalletUnlockPage.passwordInput.waitForDisplayed();
     await WalletUnlockPage.unlockButton.waitForDisplayed();
-    await expect(await WalletUnlockPage.unlockButton.getText()).to.equal(await t('unlock.button'));
+    expect(await WalletUnlockPage.unlockButton.getText()).to.equal(await t('unlock.button'));
     await WalletUnlockPage.forgotPassword.waitForDisplayed();
-    await expect(await WalletUnlockPage.forgotPassword.getText()).to.equal(await t('unlock.forgotPassword'));
+    expect(await WalletUnlockPage.forgotPassword.getText()).to.equal(await t('unlock.forgotPassword'));
   };
 
   assertSeeUnlockButtonEnabled = async (shouldBeEnabled: boolean) => {

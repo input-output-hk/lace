@@ -22,3 +22,4 @@ export {
 } from './theme';
 export { style, createVar, globalStyle, keyframes } from '@vanilla-extract/css';
 export * from '@vanilla-extract/css-utils';
+export { recipe } from '@vanilla-extract/recipes';

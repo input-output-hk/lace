@@ -22,9 +22,9 @@
     "prettier": "prettier --write ."
   },
   "dependencies": {
-    "@types/chai": "4.3.9",
-    "@types/chai-sorted": "0.2.2",
-    "@types/chai-string": "1.4.4",
+    "@types/chai": "4.3.11",
+    "@types/chai-sorted": "0.2.3",
+    "@types/chai-string": "1.4.5",
     "chai": "4.3.10",
     "chai-sorted": "0.2.0",
     "chai-string": "1.5.0"
@@ -35,7 +35,7 @@
     "@typescript-eslint/eslint-plugin": "6.0.0",
     "@typescript-eslint/parser": "6.0.0",
     "@wdio/allure-reporter": "8.20.0",
-    "@wdio/cli": "8.20.2",
+    "@wdio/cli": "8.20.0",
     "@wdio/config": "8.20.0",
     "@wdio/cucumber-framework": "8.20.0",
     "@wdio/devtools-service": "8.20.0",

@@ -61,31 +61,46 @@ export class AnalyticsTracker implements IAnalyticsTracker {
     }
   }
 
+  private async checkNewSessionStarted(): Promise<void> {
+    if (!this.postHogClient) {
+      console.debug('[ANALYTICS] no posthog client');
+      return;
+    }
+    if (await this.userIdService.isNewSession()) {
+      await this.postHogClient.sendSessionStartEvent();
+    }
+  }
+
   async sendPageNavigationEvent(): Promise<void> {
     const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
     if (shouldOmitEvent) return;
+    await this.userIdService?.extendLifespan();
+    await this.checkNewSessionStarted();
     await this.postHogClient?.sendPageNavigationEvent();
   }
 
   async sendAliasEvent(): Promise<void> {
     const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
     if (shouldOmitEvent) return;
+    await this.userIdService?.extendLifespan();
+    await this.checkNewSessionStarted();
     await this.postHogClient?.sendAliasEvent();
   }
 
   async sendEventToMatomo(props: MatomoSendEventProps): Promise<void> {
     const isOptedOutUser = this.userTrackingType === UserTrackingType.Basic;
     if (MATOMO_OPTED_OUT_EVENTS_DISABLED && isOptedOutUser) return;
-    await this.matomoClient?.sendEvent(props);
     await this.userIdService?.extendLifespan();
+    await this.matomoClient?.sendEvent(props);
   }
 
   async sendEventToPostHog(action: PostHogAction, properties: PostHogProperties = {}): Promise<void> {
     const isEventExcluded = this.isEventExcluded(action);
     const shouldOmitEvent = this.shouldOmitSendEventToPostHog();
     if (shouldOmitEvent || isEventExcluded) return;
-    await this.postHogClient?.sendEvent(action, properties);
     await this.userIdService?.extendLifespan();
+    await this.checkNewSessionStarted();
+    await this.postHogClient?.sendEvent(action, properties);
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {

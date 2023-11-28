@@ -6,27 +6,27 @@ import StakingConfirmationDrawer from '../elements/staking/stakingConfirmationDr
 
 class StakePoolConfirmationScreenAssert {
   async assertSeeStakePoolConfirmationScreen(mode: string, expectedStakedPool: StakePool, adaBalance: string) {
-    await expect(await StakingConfirmationDrawer.title.getText()).to.equal(
+    expect(await StakingConfirmationDrawer.title.getText()).to.equal(
       await t('browserView.staking.details.confirmation.title')
     );
-    await expect(await StakingConfirmationDrawer.subTitle.getText()).to.equal(
+    expect(await StakingConfirmationDrawer.subTitle.getText()).to.equal(
       await t('browserView.staking.details.confirmation.subTitle')
     );
 
     await StakingConfirmationDrawer.cardanoLogo.waitForDisplayed();
-    await expect(await StakingConfirmationDrawer.cardanoName.getText()).to.equal(
+    expect(await StakingConfirmationDrawer.cardanoName.getText()).to.equal(
       await t('browserView.staking.details.confirmation.cardanoName')
     );
 
     const currentTicker = extensionUtils.isMainnet() ? 'ADA' : 'tADA';
-    await expect(await StakingConfirmationDrawer.cardanoTicker.getText()).to.equal(currentTicker);
+    expect(await StakingConfirmationDrawer.cardanoTicker.getText()).to.equal(currentTicker);
 
-    await expect(Number(await StakingConfirmationDrawer.cardanoBalanceAda.getText())).to.equal(Number(adaBalance));
+    expect(Number(await StakingConfirmationDrawer.cardanoBalanceAda.getText())).to.equal(Number(adaBalance));
     await StakingConfirmationDrawer.cardanoBalanceFiat.waitForDisplayed();
 
     await StakingConfirmationDrawer.poolLogo.waitForDisplayed();
-    await expect(await StakingConfirmationDrawer.poolName.getText()).to.equal(expectedStakedPool.name);
-    await expect(String(await (await StakingConfirmationDrawer.poolTicker(mode)).getText())).to.equal(
+    expect(await StakingConfirmationDrawer.poolName.getText()).to.equal(expectedStakedPool.name);
+    expect(String(await (await StakingConfirmationDrawer.poolTicker(mode)).getText())).to.equal(
       expectedStakedPool.ticker
     );
 

@@ -18,7 +18,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
 
     Examples:
       | enable_analytics | number_of_events |
-      | Agree            | 3                |
+      | Agree            | 4                |
       | Skip             | 0                |
 
   @LW-7363
@@ -30,7 +30,9 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I click "Next" button during wallet setup
     When "Help us improve your experience" page is displayed
     And I click "Agree" button on Analytics page
-    Then I validate latest analytics single event "onboarding | restore wallet | analytics | agree | click"
+    And I validate latest analytics multiple events:
+      | wallet \| session start \| pageview                         |
+      | onboarding \| restore wallet \| analytics \| agree \| click |
     When "Name your wallet" page is displayed
     And I enter wallet name: "wallet"
     And I click "Next" button during wallet setup
@@ -52,7 +54,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
       | onboarding \| restore wallet \| all done \| go to my wallet \| click |
       | $create_alias                                                        |
     And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
-    And I validate that 9 analytics event(s) have been sent
+    And I validate that 10 analytics event(s) have been sent
 
   @LW-7365
   Scenario: Analytics - Onboarding new wallet events
@@ -62,7 +64,9 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I click "Next" button during wallet setup
     When "Help us improve your experience" page is displayed
     And I click "Agree" button on Analytics page
-    Then I validate latest analytics single event "onboarding | new wallet | analytics | agree | click"
+    And I validate latest analytics multiple events:
+      | wallet \| session start \| pageview                     |
+      | onboarding \| new wallet \| analytics \| agree \| click |
     When "Name your wallet" page is displayed
     And I enter wallet name: "wallet"
     And I click "Next" button during wallet setup
@@ -90,7 +94,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I validate latest analytics multiple events:
       | onboarding \| new wallet \| all done \| go to my wallet \| click |
       | $create_alias                                                    |
-    And I validate that 12 analytics event(s) have been sent
+    And I validate that 13 analytics event(s) have been sent
 
   @LW-7364 @Pending
     # Disabled as user is opted out until he decision about tracking.

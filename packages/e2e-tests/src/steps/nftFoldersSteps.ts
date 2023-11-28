@@ -27,7 +27,7 @@ Given(/^all NFT folders are removed$/, async () => {
 });
 
 Then(
-  /^the NFT folder with name "([^"]*)" and (1|2) NFT was created$/,
+  /^the NFT folder with name "([^"]*)" and ([12]) NFT was created$/,
   async (folderName: string, numberOfAssets: string) => {
     const assets: string[] = [
       '63f01fe6cd68ec6438c95a46cea4a6cd27efb791b5e8cc1fa92af3294c6163654e46542336' // LaceNFT assetId
@@ -125,8 +125,9 @@ Then(/^I (see|don't see) "Folder name" input max length (\d+) error$/, async (sh
 });
 
 Then(
-  /^I (see|do not see) "Given name already exists" error on "Name your folder|Rename your folder" page$/,
-  async (shouldSee: 'see' | 'do not see') => {
+  /^I (see|do not see) "Given name already exists" error on "(Name your folder|Rename your folder)" page$/,
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  async (shouldSee: 'see' | 'do not see', _ignored: string) => {
     await nftCreateFolderAssert.assertSeeGivenNameAlreadyExistsError(shouldSee === 'see');
   }
 );
@@ -413,7 +414,7 @@ When(/^I select (\d+) available NFTs$/, async (numberOfNftsWanted: number) => {
 When(
   /^I (add|remove) (\d+) NFT to or from the folder$/,
   async (action: 'add' | 'remove', numberOfNftsWanted: number) => {
-    const numberOfNftsInFolder = testContext.load('numberOfNftsInFolder') as number;
+    const numberOfNftsInFolder = Number(testContext.load('numberOfNftsInFolder'));
     switch (action) {
       case 'add':
         testContext.saveWithOverride('numberOfNftsInFolder', numberOfNftsInFolder + numberOfNftsWanted);

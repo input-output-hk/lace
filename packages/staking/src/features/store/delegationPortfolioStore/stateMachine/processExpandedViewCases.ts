@@ -1,6 +1,7 @@
 import { PERCENTAGE_SCALE_MAX } from '../constants';
 import { atomicStateMutators } from './atomicStateMutators';
 import {
+  ActivityCommand,
   AddStakePools,
   BeginSingleStaking,
   BrowsePoolsCommand,
@@ -14,6 +15,7 @@ import {
   DrawerBack,
   DrawerContinue,
   DrawerFailure,
+  GoToActivity,
   GoToBrowsePools,
   GoToOverview,
   ManageDelegationFromDetails,
@@ -49,6 +51,7 @@ import {
   DrawerManagementStep,
   ExpandedViewDelegationFlow,
   Handler,
+  StateActivity,
   StateBrowsePools,
   StateChangingPreferences,
   StateCurrentPoolDetails,
@@ -73,6 +76,10 @@ export const processExpandedViewCases: Handler = (params) =>
     {
       [DelegationFlow.Overview]: cases<OverviewCommand['type']>(
         {
+          GoToActivity: handler<GoToActivity, StateOverview, StateActivity>(({ state }) => ({
+            ...state,
+            activeDelegationFlow: DelegationFlow.Activity,
+          })),
           GoToBrowsePools: handler<GoToBrowsePools, StateOverview, StateBrowsePools>(({ state }) => ({
             ...state,
             activeDelegationFlow: DelegationFlow.BrowsePools,
@@ -92,6 +99,27 @@ export const processExpandedViewCases: Handler = (params) =>
         },
         params.command.type,
         DelegationFlow.Overview
+      ),
+      [DelegationFlow.Activity]: cases<ActivityCommand['type']>(
+        {
+          GoToBrowsePools: handler<GoToBrowsePools, StateActivity, StateBrowsePools>(({ state }) => ({
+            ...state,
+            activeDelegationFlow: DelegationFlow.BrowsePools,
+            draftPortfolio: undefined,
+            pendingSelectedPortfolio: undefined,
+            viewedStakePool: undefined,
+          })),
+          GoToOverview: handler<GoToOverview, StateActivity, StateOverview>(({ state }) => ({
+            ...state,
+            activeDelegationFlow: DelegationFlow.Overview,
+            activeDrawerStep: undefined,
+            draftPortfolio: undefined,
+            pendingSelectedPortfolio: undefined,
+            viewedStakePool: undefined,
+          })),
+        },
+        params.command.type,
+        DelegationFlow.Activity
       ),
       [DelegationFlow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
         {
@@ -117,6 +145,10 @@ export const processExpandedViewCases: Handler = (params) =>
               ...atomicStateMutators.beginNewPortfolioCreation({ selections: state.selectedPortfolio }),
             };
           }),
+          GoToActivity: handler<GoToActivity, StateBrowsePools, StateActivity>(({ state }) => ({
+            ...state,
+            activeDelegationFlow: DelegationFlow.Activity,
+          })),
           GoToOverview: handler<GoToOverview, StateBrowsePools, StateOverview>(({ state }) => ({
             ...state,
             activeDelegationFlow: DelegationFlow.Overview,

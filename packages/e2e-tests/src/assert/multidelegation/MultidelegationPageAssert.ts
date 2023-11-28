@@ -43,7 +43,9 @@ class MultidelegationPageAssert {
     expect(await MultidelegationPage.delegationCardBalanceLabel.getText()).to.equal(
       await t('overview.delegationCard.label.balance', 'staking')
     );
-    const adaValue = Number((await MultidelegationPage.delegationCardBalanceValue.getText()).split(' ')[0]);
+    const adaValue = Number(
+      (await MultidelegationPage.delegationCardBalanceValue.getText()).split(' ')[0].replace(',', '')
+    );
     expect(adaValue).to.be.greaterThan(0);
     expect(await MultidelegationPage.delegationCardPoolsLabel.getText()).to.equal(
       await t('overview.delegationCard.label.pools', 'staking')

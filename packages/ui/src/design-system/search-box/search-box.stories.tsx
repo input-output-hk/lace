@@ -4,9 +4,8 @@ import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { within, userEvent } from '@storybook/testing-library';
 
-import { ThemeColorScheme, ThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
-import { page, Section, Variants } from '../decorators';
+import { page, Section, Variants, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid } from '../grid';
@@ -103,31 +102,17 @@ export const Overview = (): JSX.Element => (
       <Divider my="$64" />
 
       <Section title="Main components">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
+        <UIStateTable>
           <MainComponents />
-        </Variants.Table>
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <MainComponents />
-          </Variants.Table>
-        </ThemeProvider>
+        </UIStateTable>
       </Section>
 
       <Divider my="$64" />
 
       <Section title="Search box items">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
+        <UIStateTable>
           <ClearButtons />
-        </Variants.Table>
-        <ThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <ClearButtons />
-          </Variants.Table>
-        </ThemeProvider>
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

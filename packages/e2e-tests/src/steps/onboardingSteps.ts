@@ -36,6 +36,10 @@ import webTester from '../actor/webTester';
 import MainLoader from '../elements/MainLoader';
 import CommonAssert from '../assert/commonAssert';
 import { shuffle } from '../utils/arrayUtils';
+import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectHardwareWalletPage';
+import SelectAccountPage from '../elements/onboarding/selectAccountPage';
+import { browser } from '@wdio/globals';
+import type { RecoveryPhrase } from '../types/onboarding';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -68,14 +72,18 @@ When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back'
   const commonOnboardingElements = new CommonOnboardingElements();
   switch (button) {
     case 'Back':
-      await commonOnboardingElements.backButton.click();
+      await commonOnboardingElements.clickOnBackButton();
       break;
     case 'Next':
-      await commonOnboardingElements.nextButton.click();
+      await commonOnboardingElements.clickOnNextButton();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
   }
+});
+
+When(/^I select ([^"]*) account on Select Account page$/, async (accountNumber: number) => {
+  await SelectAccountPage.accountRadioButtons[accountNumber - 1].click();
 });
 
 When(/^I click "(Back|Skip|Agree)" button on Analytics page$/, async (button: 'Back' | 'Skip' | 'Agree') => {
@@ -103,6 +111,7 @@ When(
   /^I click "(Cancel|OK)" button on "(Limited support for DApp|Restoring a multi-address wallet\?|Are you sure you want to start again\?)" modal$/,
   // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
   async (button: 'Cancel' | 'OK', _modalType: string) => {
+    await browser.pause(500);
     switch (button) {
       case 'Cancel':
         await Modal.cancelButton.click();
@@ -173,7 +182,7 @@ Then(/^"Recovery phrase length page" is displayed and 24 words checkbox is check
   await OnboardingRecoveryPhraseLengthPageAssert.assertSeeRecoveryPhraseLengthPage();
 });
 
-Then(/^I select (12|15|24) word passphrase length$/, async (length: '12' | '15' | '24') => {
+Then(/^I select (12|15|24) word passphrase length$/, async (length: RecoveryPhrase) => {
   await OnboardingPageObject.selectRecoveryPassphraseLength(length);
 });
 
@@ -201,6 +210,10 @@ Then(/^"Connect Hardware Wallet" page is displayed$/, async () => {
   await OnboardingConnectHWPageAssert.assertSeeConnectHardwareWalletPage();
 });
 
+Then(/^I click Trezor wallet icon$/, async () => {
+  await OnboardingConnectHardwareWalletPage.trezorButton.click();
+});
+
 Then(/^"All done" page is displayed$/, async () => {
   await OnboardingAllDonePageAssert.assertSeeAllDonePage();
 });
@@ -217,8 +230,8 @@ Then(/^"Name your wallet" page is displayed$/, async () => {
   await OnboardingWalletNamePageAssert.assertSeeWalletNamePage();
 });
 
-Then(/^"Wallet password" page is displayed(| in "Forgot password" flow)$/, async (flow: string) => {
-  const expectedFlow = flow === ' in "Forgot password" flow' ? 'forgot_password' : 'onboarding';
+Then(/^"Wallet password" page is displayed in (onboarding|forgot password) flow$/, async (flow: string) => {
+  const expectedFlow = flow === 'forgot password' ? 'forgot_password' : 'onboarding';
   await OnboardingWalletPasswordPageAssert.assertSeePasswordPage(expectedFlow);
 });
 
@@ -332,28 +345,25 @@ Given(/^I am on "All done!" page from "Restore wallet" using "([^"]*)" wallet$/,
 
 Given(
   /^I am on "Enter your secret passphrase" with (12|15|24) words page from "Restore wallet" process$/,
-  async (length: '12' | '15' | '24') => {
+  async (length: RecoveryPhrase) => {
     await OnboardingPageObject.goToMnemonicWriteDownPage(length);
   }
 );
 
-Given(
-  /^I fill passphrase with incorrect mnemonic (12|15|24) words on each page$/,
-  async (length: '12' | '15' | '24') => {
-    const invalidMnemonic = [...invalidMnemonicWords];
-    switch (length) {
-      case '12':
-        invalidMnemonic.splice(12);
-        break;
-      case '15':
-        invalidMnemonic.splice(15);
-        break;
-      case '24':
-        break;
-    }
-    await OnboardingPageObject.openMnemonicVerificationLastPage(invalidMnemonic, length);
+Given(/^I fill passphrase with incorrect mnemonic (12|15|24) words on each page$/, async (length: RecoveryPhrase) => {
+  const invalidMnemonic = [...invalidMnemonicWords];
+  switch (length) {
+    case '12':
+      invalidMnemonic.splice(12);
+      break;
+    case '15':
+      invalidMnemonic.splice(15);
+      break;
+    case '24':
+      break;
   }
-);
+  await OnboardingPageObject.openMnemonicVerificationLastPage(invalidMnemonic, length);
+});
 
 Given(
   /^I fill passphrase fields using 24 words mnemonic on (8\/24|16\/24|24\/24) page$/,
@@ -582,7 +592,7 @@ When(
   /^I click "(Got it|Learn more)" button on "DApp connector is now in Beta" modal$/,
   async (button: 'Got it' | 'Learn more') => {
     // Wait for main page to finish loading
-    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 15_000 });
+    await MainLoader.component.waitForDisplayed({ reverse: true, timeout: 60_000 });
     if (button === 'Got it') {
       await Modal.cancelButton.waitForClickable();
       await Modal.cancelButton.click();

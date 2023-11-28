@@ -23,6 +23,7 @@ export enum PostHogAction {
   OnboardingRestoreEnterPassphrase09NextClick = 'onboarding | restore wallet | enter passphrase #09 | next | click',
   OnboardingRestoreEnterPassphrase17NextClick = 'onboarding | restore wallet | enter passphrase #17 | next | click',
   OnboardingRestoreWalletNamePasswordNextClick = 'onboarding | restore wallet | wallet name & password | next | click',
+  OnboardingRestoreHdWallet = 'onboarding | restore wallet | hd wallet',
   // Create new wallet
   OnboardingCreateDoneGoToWallet = 'onboarding | new wallet | all done | go to my wallet | click',
   OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
@@ -56,6 +57,7 @@ export enum PostHogAction {
   StakingAboutStakingFaqClick = 'staking | about staking | faq | click',
   StakingMultiDelegationDedicatedBlogClick = 'staking | multi-delegation | dedicated blog | click',
   StakingMultiDelegationGotItClick = 'staking | multi-delegation | got it | click',
+  StakingActivityClick = 'staking | activity | click',
   StakingOverviewClick = 'staking | overview | click',
   StakingOverviewCopyAddressClick = 'staking | overview | copy address | click',
   StakingOverviewManageClick = 'staking | overview | manage | click',
@@ -91,6 +93,7 @@ export enum PostHogAction {
   SendTransactionDataReviewTransactionClick = 'send | transaction data | review transaction | click',
   SendTransactionSummaryConfirmClick = 'send | transaction summary | confirm | click',
   SendTransactionConfirmationConfirmClick = 'send | transaction confirmation | confirm | click',
+  SendTransactionConfirmed = 'send | transaction confirmed',
   SendAllDoneView = 'send | all done | view',
   SendAllDoneViewTransactionClick = 'send | all done | view transaction | click',
   SendAllDoneCloseClick = 'send | all done | close | click',
@@ -160,6 +163,8 @@ export enum PostHogAction {
   SettingsAnalyticsAgreeClick = 'settings | analytics | agree | click',
   SettingsAnalyticsSkipClick = 'settings | analytics | skip | click',
   SettingsFaqsClick = 'settings | faqs | click',
+  SettingsWalletHdWalletSyncSyncClick = 'settings | wallet | hd wallet sync | sync | click',
+  SettingsWalletHdWalletSyncSyncNewAddresses = 'settings | wallet | hd wallet sync | sync | new addresses',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',
@@ -185,6 +190,7 @@ export enum PostHogAction {
   UserWalletProfileLockWalletClick = 'user/wallet profile | lock wallet | click',
   // Lace Logo
   WalletLaceClick = 'wallet | lace | click',
+  WalletSessionStartPageview = 'wallet | session start | pageview',
   // Tokens
   TokenTokensClick = 'token | tokens | click',
   TokenTokensTokenRowClick = 'token | tokens | token row | click',

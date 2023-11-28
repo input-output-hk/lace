@@ -8,7 +8,7 @@ class FaqPageAssert {
   async assertSeeFaqPage() {
     await commonAssert.assertSeeTabWithUrl('www.lace.io/faq');
     await FaqPage.pageTitle.waitForDisplayed();
-    await expect(await FaqPage.pageTitle.getText()).to.equal('FAQ');
+    expect(await FaqPage.pageTitle.getText()).to.equal('FAQ');
   }
 
   async assertSeeFaqArticle(title: string) {
