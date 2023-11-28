@@ -155,12 +155,12 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
           )
         },
         translations: {
-          metadata: t('core.voteDelegation.metadata'),
-          option: t('core.voteDelegation.option'),
+          metadata: t('core.VoteDelegation.metadata'),
+          option: t('core.VoteDelegation.option'),
           labels: {
-            drepId: t('core.voteDelegation.drepId'),
-            alwaysAbstain: t('core.voteDelegation.alwaysAbstain'),
-            alwaysNoConfidence: t('core.voteDelegation.alwaysNoConfidence')
+            drepId: t('core.VoteDelegation.drepId'),
+            alwaysAbstain: t('core.VoteDelegation.alwaysAbstain'),
+            alwaysNoConfidence: t('core.VoteDelegation.alwaysNoConfidence')
           }
         },
         errorMessage
