@@ -10,6 +10,7 @@ const mockGetTransactionAssetsId = jest.fn();
 const mockGetAssetsInformation = jest.fn();
 const mockCalculateAssetBalance = jest.fn();
 const mockLovelacesToAdaString = jest.fn();
+const mockUseWalletStore = jest.fn();
 import { act, cleanup } from '@testing-library/react';
 import {
   useCreateAssetList,
@@ -28,6 +29,11 @@ import { TxType } from '../utils';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { WalletInfo } from '@src/types';
 import * as Core from '@cardano-sdk/core';
+
+jest.mock('@stores', () => ({
+  ...jest.requireActual<any>('@stores'),
+  useWalletStore: mockUseWalletStore
+}));
 
 jest.mock('@cardano-sdk/core', () => ({
   ...jest.requireActual<any>('@cardano-sdk/core'),
@@ -391,27 +397,25 @@ describe('Testing hooks', () => {
     removeEventListeners();
   });
 
-  test('useIsOwnPubDRepKey', async () => {
+  test('useGetOwnPubDRepKeyHash', async () => {
     const ed25519PublicKeyHexMock = 'ed25519PublicKeyHexMock';
     mockPubDRepKeyToHash.mockReset();
     mockPubDRepKeyToHash.mockImplementation(async (val: Wallet.Crypto.Ed25519PublicKeyHex) => await val);
-
-    const hook = renderHook(() =>
-      useIsOwnPubDRepKey(
-        async () => (await ed25519PublicKeyHexMock) as Wallet.Crypto.Ed25519PublicKeyHex,
-        ed25519PublicKeyHexMock as Wallet.Crypto.Hash28ByteBase16
-      )
-    );
-    await hook.waitFor(() => {
-      expect(hook.result.current).toBe(true);
+    mockUseWalletStore.mockReset();
+    mockUseWalletStore.mockReturnValue({
+      inMemoryWallet: {
+        getPubDRepKey: jest.fn(async () => await ed25519PublicKeyHexMock)
+      }
     });
 
-    mockPubDRepKeyToHash.mockReset();
-    mockPubDRepKeyToHash.mockImplementation(async () => await 1);
-    hook.rerender();
+    let hook: any;
+    await act(async () => {
+      hook = renderHook(() => useGetOwnPubDRepKeyHash());
+      expect(hook.result.current.loading).toEqual(true);
+    });
 
     await hook.waitFor(() => {
-      expect(hook.result.current).toBe(false);
+      expect(hook.result.current.ownPubDRepKeyHash).toEqual(ed25519PublicKeyHexMock);
     });
   });
 });
