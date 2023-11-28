@@ -42,7 +42,6 @@ jobs:
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-          NODE_OPTIONS: '--max-old-space-size=12288'
         run: yarn wdio run wdio.conf.${BROWSER}.ts --cucumberOpts.tagExpression="@Smoke and not @Pending"
       - name: Create allure properties
         if: always()
