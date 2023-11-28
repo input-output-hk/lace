@@ -9,22 +9,22 @@ class ModalAssert {
 
   async assertSeeTitle(expectedTitle: string) {
     await Modal.title.waitForDisplayed();
-    await expect(await Modal.title.getText()).to.equal(expectedTitle);
+    expect(await Modal.title.getText()).to.equal(expectedTitle);
   }
 
   async assertSeeDescription(expectedDescription: string) {
     await Modal.description.waitForDisplayed();
-    await expect(await Modal.description.getText()).to.equal(expectedDescription);
+    expect(await Modal.description.getText()).to.equal(expectedDescription);
   }
 
   async assertSeeCancelButton(label: string) {
     await Modal.cancelButton.waitForDisplayed();
-    await expect(await Modal.cancelButton.getText()).to.equal(label);
+    expect(await Modal.cancelButton.getText()).to.equal(label);
   }
 
   async assertSeeConfirmButton(label: string) {
     await Modal.confirmButton.waitForDisplayed();
-    await expect(await Modal.confirmButton.getText()).to.equal(label);
+    expect(await Modal.confirmButton.getText()).to.equal(label);
   }
 
   async assertSeeModal(title: string, description: string, cancelButtonLabel: string, confirmButtonLabel: string) {

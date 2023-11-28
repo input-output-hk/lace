@@ -34,6 +34,10 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('keyAgentData', JSON.stringify(keyAgentData[network].keyAgentData));
   }
 
+  async initializeUnconfirmedTransactions(value: string): Promise<void> {
+    await localStorageManager.setItem('unconfirmedTransactions', `[${value}]`);
+  }
+
   async initializeWallet(walletName = 'TestAutomationWallet') {
     // Pause fix for flaky tests where local storage keys are disappearing when executed right after opening the extension
     await browser.pause(500);

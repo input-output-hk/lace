@@ -69,6 +69,7 @@ export const Overview = (): JSX.Element => (
           headers={[
             'User profile — initials (default if no uploaded picture)',
             'User profile — Avatar',
+            'User profile — Rounded',
           ]}
         >
           <Variants.Row>
@@ -80,6 +81,23 @@ export const Overview = (): JSX.Element => (
                 imageSrc="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
                 fallback="L"
               />
+            </Variants.Cell>
+            <Variants.Cell>
+              <UserProfile
+                imageSrc="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
+                fallback="L"
+                radius="rounded"
+              />
+            </Variants.Cell>
+          </Variants.Row>
+        </Variants.Table>
+        <Variants.Table headers={['Initials — circle', 'Initials — Rounded']}>
+          <Variants.Row>
+            <Variants.Cell>
+              <Initials letter="M" />
+            </Variants.Cell>
+            <Variants.Cell>
+              <Initials letter="M" radius="rounded" />
             </Variants.Cell>
           </Variants.Row>
         </Variants.Table>

@@ -262,6 +262,7 @@ const colors: Colors = {
 
   $text_primary: lightColorScheme.$primary_black,
   $text_secondary: lightColorScheme.$primary_dark_grey,
+  $text_on_gradient: lightColorScheme.$primary_white,
 
   $metadata_label_color: lightColorScheme.$primary_black,
   $metadata_secondary_label_color: lightColorScheme.$primary_dark_grey,
@@ -269,6 +270,35 @@ const colors: Colors = {
   $text_link_label_color: lightColorScheme.$secondary_data_blue,
   $text_link_label_color_visited: lightColorScheme.$primary_hover_purple,
   $text_link_label_color_disabled: lightColorScheme.$primary_grey,
+
+  $profile_dropdown_trigger_label_color: lightColorScheme.$primary_dark_grey,
+  $profile_dropdown_trigger_label_color_pressed:
+    lightColorScheme.$primary_dark_grey,
+  $profile_dropdown_trigger_container_borderColor:
+    lightColorScheme.$primary_light_grey_plus,
+  $profile_dropdown_trigger_container_bgColor: lightColorScheme.$primary_white,
+  $profile_dropdown_trigger_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $profile_dropdown_trigger_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $profile_dropdown_trigger_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+
+  $profile_dropdown_wallet_option_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $profile_dropdown_wallet_option_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $profile_dropdown_wallet_option_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $profile_dropdown_wallet_option_label_color: lightColorScheme.$primary_black,
+
+  $profile_dropdown_wallet_status_container_borderColor:
+    lightColorScheme.$primary_light_grey,
+
+  $data_blue: lightColorScheme.$secondary_data_blue,
+  $data_green: lightColorScheme.$secondary_data_green,
+  $data_pink: lightColorScheme.$secondary_data_pink,
+  $data_yellow: lightColorScheme.$secondary_lace_yellow,
 };
 
 export const elevation: Elevation = {

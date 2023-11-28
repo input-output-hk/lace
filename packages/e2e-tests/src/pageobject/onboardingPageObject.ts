@@ -282,6 +282,7 @@ class OnboardingPageObject {
   }
 
   async waitUntilLoaderDisappears() {
+    await browser.pause(500);
     if (await WalletCreationPage.walletLoader.isDisplayed()) {
       await WalletCreationPage.walletLoader.waitForDisplayed({ timeout: 15_000, reverse: true });
     }

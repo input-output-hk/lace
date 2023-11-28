@@ -5,9 +5,8 @@ import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { within, userEvent, waitFor } from '@storybook/testing-library';
 
-import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
-import { page, Section, Variants } from '../decorators';
+import { page, Section, Variants, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';
 import { Grid } from '../grid';
@@ -19,7 +18,7 @@ import { SubNavigation } from './sub-navigation.component';
 const subtitle = `Subnavigations provide ergonomic movement between destinations and helps users access lower-level categories in the platform's content architecture.`;
 
 export default {
-  title: 'Navigation & toolbars',
+  title: 'Navigation and toolbars/Subnavigation',
   component: SubNavigation,
   decorators: [page({ title: 'Subnavigation', subtitle })],
   argTypes: {
@@ -85,16 +84,9 @@ export const Overview = (): JSX.Element => (
       <Divider my="$64" />
 
       <Section title="Main components">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
+        <UIStateTable>
           <MainComponents />
-        </Variants.Table>
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <MainComponents />
-          </Variants.Table>
-        </LocalThemeProvider>
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

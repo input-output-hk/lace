@@ -8,9 +8,7 @@ import { removeWhitespacesFromText } from '../../utils/textUtils';
 class CookiePolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
     await CookiePolicyDrawer.drawerNavigationTitle.waitForDisplayed();
-    await expect(await CookiePolicyDrawer.drawerNavigationTitle.getText()).to.equal(
-      await t('browserView.settings.heading')
-    );
+    expect(await CookiePolicyDrawer.drawerNavigationTitle.getText()).to.equal(await t('browserView.settings.heading'));
   };
 
   assertSeeDrawerCloseButton = async () => {
@@ -23,7 +21,7 @@ class CookiePolicyDrawerAssert {
 
   assertSeeCookiePolicyTitle = async () => {
     await CookiePolicyDrawer.drawerHeaderTitle.waitForDisplayed();
-    await expect(await CookiePolicyDrawer.drawerHeaderTitle.getText()).to.equal(
+    expect(await CookiePolicyDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.legal.cookiePolicy.title')
     );
   };

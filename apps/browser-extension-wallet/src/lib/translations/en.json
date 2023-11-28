@@ -708,6 +708,7 @@
       "send.footer.viewTransaction": "View transaction",
       "send.footer.view": "View",
       "send.footer.fail": "Back",
+      "send.footer.unauthorized": "Back",
       "send.footer.save": "Save",
       "send.footer.signing": "Signing in progress",
       "send.footer.confirmWithDevice": "Confirm with {{hardwareWallet}}",
@@ -726,6 +727,7 @@
         "buttonText": "Learn more"
       },
       "fail.oopsSomethingWentWrong": "Oops! Something went wrong",
+      "fail.unauthorizedTransaction": "The transaction was not authorized.",
       "fail.problemSubmittingYourTransaction": "There was a problem submitting your transaction.",
       "fail.clickBackAndTryAgain": "Click \"Back\" and try again.",
       "success.thisMayTakeAFewMinutesToProcessYouCanViewTheStatusByClickingViewTransaction": "This may take a few minutes to process. You can view the status by clicking view transaction.",
@@ -1127,7 +1129,17 @@
         "hash": "Anchor Hash",
         "url": "Anchor URL"
       },
-      "dRepId": "DRep ID"
+      "dRepId": "DRep ID",
+      "voterTypes": {
+        "constitutionalCommittee": "Constitutional Committee",
+        "spo": "SPO",
+        "drep": "DRep"
+      },
+      "votes": {
+        "yes": "Yes",
+        "no": "No",
+        "abstain": "Abstain"
+      }
     },
     "DRepRegistration": {
       "title": "Confirm DRep Registration",

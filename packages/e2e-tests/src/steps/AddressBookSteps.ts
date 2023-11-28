@@ -25,7 +25,6 @@ import indexedDB from '../fixture/indexedDB';
 import popupView from '../page/popupView';
 import extendedView from '../page/extendedView';
 import { browser } from '@wdio/globals';
-import { Address } from '../data/Address';
 import AddressForm from '../elements/addressbook/AddressForm';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
@@ -161,7 +160,10 @@ Then(/^I see empty address book$/, async () => {
 Then(
   /^I (see|do not see) address detail page in (extended|popup) mode with details of "([^"]*)" address$/,
   async (shouldSee: 'see' | 'do not see', mode: 'extended' | 'popup', addressName: string) => {
-    const addressDetails = getAddressDetailsByName(addressName) as Address;
+    const addressDetails = getAddressDetailsByName(addressName);
+    if (!addressDetails) {
+      throw new Error(`Unable to find address details for: ${addressName}`);
+    }
     await AddressDetailsAssert.assertSeeAddressDetailsPage(shouldSee === 'see', mode, addressDetails);
   }
 );
@@ -169,7 +171,7 @@ Then(
 When(/^I click "(Copy|Delete|Edit)" button on address details page$/, async (button: 'Copy' | 'Delete' | 'Edit') => {
   switch (button) {
     case 'Copy':
-      await testContext.save('address', await AddressDetails.address.getText());
+      testContext.save('address', await AddressDetails.address.getText());
       await AddressDetails.copyButton.waitForClickable();
       await AddressDetails.copyButton.click();
       break;
@@ -242,7 +244,10 @@ When(
 Then(
   /^I see "Edit address" drawer in (extended|popup) mode with details of "([^"]*)" address$/,
   async (mode: 'extended' | 'popup', addressName: string) => {
-    const addressDetails = getAddressDetailsByName(addressName) as Address;
+    const addressDetails = getAddressDetailsByName(addressName);
+    if (!addressDetails) {
+      throw new Error(`Unable to find address details for: ${addressName}`);
+    }
     await EditAddressDrawerAssert.assertSeeEditAddressDrawer(mode, addressDetails);
   }
 );
@@ -265,7 +270,7 @@ Then(/^"Done" button is (enabled|disabled) on "Edit address" drawer$/, async (st
 });
 
 Then(/^address is saved to clipboard$/, async () => {
-  const expectedWalletAddress = testContext.load('address') as string;
+  const expectedWalletAddress = String(testContext.load('address'));
   await commonAssert.assertClipboardContains(expectedWalletAddress);
 });
 

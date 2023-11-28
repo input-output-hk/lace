@@ -6,6 +6,13 @@ import { ExtensionViews } from './analyticsTracker/types';
 import shallow from 'zustand/shallow';
 import { POSTHOG_EXCLUDED_EVENTS } from '@providers/PostHogClientProvider/client';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import {
+  createConfirmedTransactionsObservable,
+  getUnconfirmedTransactions,
+  saveUnconfirmedTransactions,
+  sendConfirmedTransactionAnalytics,
+  useOnChainEventAnalytics
+} from './onChain';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -34,8 +41,12 @@ export const AnalyticsProvider = ({
   tracker,
   analyticsDisabled
 }: AnalyticsProviderProps): React.ReactElement => {
-  const { currentChain, view } = useWalletStore(
-    (state) => ({ currentChain: state?.currentChain, view: state.walletUI.appMode }),
+  const { currentChain, view, inMemoryWallet } = useWalletStore(
+    (state) => ({
+      currentChain: state?.currentChain,
+      view: state.walletUI.appMode,
+      inMemoryWallet: state.inMemoryWallet
+    }),
     shallow
   );
   const postHogClient = usePostHogClientContext();
@@ -61,12 +72,24 @@ export const AnalyticsProvider = ({
   // Track page changes with PostHog in order to keep the user session alive
   useEffect(() => {
     const trackActivePageChange = debounce(() => analyticsTracker.sendPageNavigationEvent(), PAGE_VIEW_DEBOUNCE_DELAY);
-
+    window.addEventListener('load', trackActivePageChange);
     window.addEventListener('popstate', trackActivePageChange);
     return () => {
+      window.removeEventListener('load', trackActivePageChange);
       window.removeEventListener('popstate', trackActivePageChange);
     };
   }, [analyticsTracker]);
+
+  useOnChainEventAnalytics({
+    observable$: createConfirmedTransactionsObservable(inMemoryWallet),
+    onChainEvent: (onChainTransactionIds) =>
+      sendConfirmedTransactionAnalytics({
+        onChainTransactionIds,
+        sendEventToPostHog: analyticsTracker?.sendEventToPostHog.bind(analyticsTracker),
+        getUnconfirmedTransactionsFn: getUnconfirmedTransactions,
+        saveUnconfirmedTransactionsFn: saveUnconfirmedTransactions
+      })
+  });
 
   return <AnalyticsContext.Provider value={analyticsTracker}>{children}</AnalyticsContext.Provider>;
 };

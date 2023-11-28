@@ -14,7 +14,7 @@ Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
 });
 
-When(/^I remove output (\d) for advanced tx$/, async (index: number) => {
+When(/^I remove bundle (\d)$/, async (index: number) => {
   await transactionExtendedPageObject.clickRemoveBundleButton(index);
 });
 

@@ -9,9 +9,7 @@ class NftRenameFolderAsserts {
     } else {
       await NftRenameFolderPage.drawerBody.waitForClickable();
       await NftRenameFolderPage.drawerNavigationTitle.waitForDisplayed();
-      await expect(await NftRenameFolderPage.drawerNavigationTitle.getText()).to.equal(
-        await t(drawerTitleTranslationKey)
-      );
+      expect(await NftRenameFolderPage.drawerNavigationTitle.getText()).to.equal(await t(drawerTitleTranslationKey));
       await NftRenameFolderPage.drawerHeaderCloseButton.waitForDisplayed();
     }
   }

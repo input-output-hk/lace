@@ -136,5 +136,5 @@ export const getOwnRetirementMessageKey = (isOwnRetirement: boolean | undefined)
   if (isOwnRetirement === undefined) {
     return '';
   }
-  return isOwnRetirement ? 'core.drepRetirement.isOwnRetirement' : 'core.drepRetirement.isNotOwnRetirement';
+  return isOwnRetirement ? 'core.DRepRetirement.isOwnRetirement' : 'core.DRepRetirement.isNotOwnRetirement';
 };

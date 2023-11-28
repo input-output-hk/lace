@@ -1,6 +1,8 @@
 import { Translations } from '../types';
 
 export const en: Translations = {
+  'activity.rewardsHistory.noStakingActivityYet': 'No staking activity yet.',
+  'activity.rewardsHistory.title': 'History',
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
   'browsePools.stakePoolTableBrowser.disabledTooltip': 'Maximum number of pools selected',
   'browsePools.stakePoolTableBrowser.emptyMessage': 'No results matching your search',
@@ -159,6 +161,7 @@ export const en: Translations = {
   'portfolioBar.maxPools': '(max {{maxPoolsCount}})',
   'portfolioBar.next': 'Next',
   'portfolioBar.selectedPools': '{{selectedPoolsCount}} pools selected',
+  'root.nav.activityTitle': 'Activity',
   'root.nav.browsePoolsTitle': 'Browse pools',
   'root.nav.overviewTitle': 'Overview',
   'root.nav.title': 'Staking Navigation',

@@ -56,6 +56,19 @@ describe('PostHogClient', () => {
     );
   });
 
+  it('should send session started event', async () => {
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
+    await client.sendSessionStartEvent();
+    expect(posthog.capture).toHaveBeenCalledWith(
+      PostHogAction.WalletSessionStartPageview,
+      expect.objectContaining({
+        // eslint-disable-next-line camelcase
+        distinct_id: userId,
+        view: 'extended'
+      })
+    );
+  });
+
   it('should send events with distinct id', async () => {
     const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
     const event = PostHogAction.OnboardingCreateClick;

@@ -36,3 +36,23 @@ Feature: ADA handle - extended view
     And I navigate to Address Book extended page
     And I see address row with name "$handletosend" and address "$handletosend" on the list in extended mode
     And I validate that handle: "$handletosend" is not listed on the Receive screen
+
+  @LW-9106
+  Scenario: Extended view - test for bug LW-9082 - scenario 1
+    When I click "Send" button on page header
+    And I click "Add bundle" button on "Send" page
+    And I remove bundle 1
+    Then I see 1 bundle rows
+    And the "tADA" asset is displayed in bundle 1
+
+  @LW-9107
+  Scenario: Extended view - test for bug LW-9082 - scenario 2
+    When I click "Send" button on page header
+    And I enter a value of: 1 to the "tADA" asset in bundle 1
+    And I click "Add bundle" button on "Send" page
+    And click on the coin selector for "tADA" asset in bundle 2
+    And click on an token with name: "Ibilecoin"
+    And I enter a value of: 1 to the "Ibilecoin" asset in bundle 2
+    And I remove bundle 2
+    Then I see 1 bundle rows
+    And the "tADA" asset is displayed in bundle 1
