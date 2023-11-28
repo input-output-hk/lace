@@ -57,6 +57,11 @@ jest.mock('@src/stores', () => ({
   useWalletStore: mockUseWalletStore
 }));
 
+jest.mock('@stores', () => ({
+  ...jest.requireActual<any>('@stores'),
+  useWalletStore: mockUseWalletStore
+}));
+
 jest.mock('@cardano-sdk/web-extension', () => {
   const original = jest.requireActual('@cardano-sdk/web-extension');
   return {
@@ -182,13 +187,15 @@ describe('Testing ConfirmTransaction component', () => {
     mockGetKeyAgentType.mockReset();
     mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
     mockUseWalletStore.mockReset();
-    mockUseWalletStore.mockImplementation(() => ({
-      getKeyAgentType: mockGetKeyAgentType,
-      inMemoryWallet,
-      walletUI: {},
-      walletInfo: {},
-      blockchainProvider: { assetProvider }
-    }));
+    mockUseWalletStore.mockImplementation((selector) =>
+      selector({
+        getKeyAgentType: mockGetKeyAgentType,
+        inMemoryWallet,
+        walletUI: {},
+        walletInfo: {},
+        blockchainProvider: { assetProvider }
+      })
+    );
     mockGetTxType.mockReset();
     mockGetTxType.mockReturnValue(txType);
     mockGetTitleKey.mockReset();
@@ -245,13 +252,15 @@ describe('Testing ConfirmTransaction component', () => {
     mockGetKeyAgentType.mockReset();
     mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
     mockUseWalletStore.mockReset();
-    mockUseWalletStore.mockImplementation(() => ({
-      getKeyAgentType: mockGetKeyAgentType,
-      inMemoryWallet,
-      walletUI: {},
-      walletInfo: {},
-      blockchainProvider: { assetProvider }
-    }));
+    mockUseWalletStore.mockImplementation((selector) =>
+      selector({
+        getKeyAgentType: mockGetKeyAgentType,
+        inMemoryWallet,
+        walletUI: {},
+        walletInfo: {},
+        blockchainProvider: { assetProvider }
+      })
+    );
 
     const signTxData = { tx: 'signTxDataTx' };
     mockConsumeRemoteApi.mockReset();
@@ -280,13 +289,15 @@ describe('Testing ConfirmTransaction component', () => {
   test('should disable confirm button and show proper error if getSignTxData throws', async () => {
     let queryByTestId: any;
     const txType = 'txType';
-    mockUseWalletStore.mockImplementation(() => ({
-      getKeyAgentType: mockGetKeyAgentType,
-      inMemoryWallet,
-      walletUI: {},
-      walletInfo: {},
-      blockchainProvider: { assetProvider }
-    }));
+    mockUseWalletStore.mockImplementation((selector) =>
+      selector({
+        getKeyAgentType: mockGetKeyAgentType,
+        inMemoryWallet,
+        walletUI: {},
+        walletInfo: {},
+        blockchainProvider: { assetProvider }
+      })
+    );
     mockConsumeRemoteApi.mockReset();
     mockConsumeRemoteApi.mockReturnValue({
       getSignTxData: async () => await Promise.reject(error)

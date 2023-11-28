@@ -66,6 +66,7 @@ export const useSignTxData = (getSignTxData: GetSignTxData): { signTxData?: Sign
       })
       .catch((error) => {
         setErrorMessage(error);
+        // TODO: consider mocking or removing this log
         console.error(error);
       });
   }, [getSignTxData, setSignTxData, setErrorMessage]);
@@ -155,12 +156,12 @@ export const useOnBeforeUnload = (callBack: () => void): void => {
   }, [callBack]);
 };
 
-type UseIsOwnPubDRepKey = {
+type UseGetOwnPubDRepKeyHash = {
   loading: boolean;
   ownPubDRepKeyHash: Wallet.Crypto.Hash28ByteBase16;
 };
 
-export const useGetOwnPubDRepKeyHash = (): UseIsOwnPubDRepKey => {
+export const useGetOwnPubDRepKeyHash = (): UseGetOwnPubDRepKeyHash => {
   const [ownPubDRepKeyHash, setOwnPubDRepKeyHash] = useState<Wallet.Crypto.Hash28ByteBase16>();
   const { inMemoryWallet } = useWalletStore();
 
