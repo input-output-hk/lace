@@ -104,6 +104,14 @@ export type ManageDelegationFromDetails = {
   type: 'ManageDelegationFromDetails';
 };
 
+export type HwSkipToSuccess = {
+  type: 'HwSkipToSuccess';
+};
+
+export type HwSkipToFailure = {
+  type: 'HwSkipToFailure';
+};
+
 export type ActivityCommand = GoToOverview | GoToBrowsePools;
 
 export type OverviewCommand = ShowDelegatedPoolDetails | ManagePortfolio | GoToBrowsePools | GoToActivity;
@@ -133,11 +141,16 @@ export type PortfolioManagementPreferencesCommand =
   | RemoveStakePool
   | UpdateStakePercentage;
 
-export type PortfolioManagementConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type PortfolioManagementConfirmationCommand =
+  | CancelDrawer
+  | DrawerContinue
+  | DrawerBack
+  | HwSkipToSuccess
+  | HwSkipToFailure;
 
 export type PortfolioManagementSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-export type PortfolioManagementFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type PortfolioManagementFailureCommand = CancelDrawer | DrawerContinue;
 
 export type PortfolioManagementSuccessCommand = CancelDrawer;
 
@@ -150,11 +163,16 @@ export type NewPortfolioPreferencesCommand =
   | RemoveStakePool
   | UpdateStakePercentage;
 
-export type NewPortfolioConfirmationCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type NewPortfolioConfirmationCommand =
+  | CancelDrawer
+  | DrawerContinue
+  | DrawerBack
+  | HwSkipToSuccess
+  | HwSkipToFailure;
 
 export type NewPortfolioSignCommand = CancelDrawer | DrawerContinue | DrawerFailure | DrawerBack;
 
-export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue | DrawerBack;
+export type NewPortfolioFailureCommand = CancelDrawer | DrawerContinue;
 
 export type NewPortfolioSuccessCommand = CancelDrawer;
 
