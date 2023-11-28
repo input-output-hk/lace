@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 type ConfirmTransactionFooterProps = {
   errorMessage?: string;
-  onBeforeSubmit?: (submit: () => void) => void;
+  onBeforeSubmit?: (submit: () => Promise<void>) => void;
   loading?: boolean;
 };
 
