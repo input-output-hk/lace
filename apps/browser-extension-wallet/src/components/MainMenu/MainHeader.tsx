@@ -38,7 +38,7 @@ export const MainHeader = (): React.ReactElement => {
       >
         {process.env.USE_MULTI_WALLET === 'true' && (
           <div className={styles.multiWalletNetworkPillBox}>
-            <NetworkPill />
+            <NetworkPill isPopup />
           </div>
         )}
         <Link

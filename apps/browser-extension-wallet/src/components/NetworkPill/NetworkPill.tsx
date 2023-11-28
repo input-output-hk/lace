@@ -8,9 +8,10 @@ import { useTranslation } from 'react-i18next';
 
 interface NetworkPillProp {
   isExpandable?: boolean;
+  isPopup?: boolean;
 }
 
-export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => {
+export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp): ReactElement => {
   const { environmentName } = useWalletStore();
   const { t } = useTranslation();
   const { isOnline, isBackendFailing } = useNetwork();
@@ -21,7 +22,7 @@ export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => 
         <div
           className={classnames(styles.networkPill, {
             [styles.expandablePill]: isExpandable,
-            [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true'
+            [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true' && isPopup
           })}
           data-testid="network-pill"
         >
@@ -41,7 +42,7 @@ export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => 
           <div
             className={classnames(styles.offlinePill, {
               [styles.expandablePill]: isExpandable,
-              [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true'
+              [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true' && isPopup
             })}
             data-testid="network-pill"
           >
@@ -59,7 +60,7 @@ export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => 
           <div
             className={classnames(styles.offlinePill, {
               [styles.expandablePill]: isExpandable,
-              [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true'
+              [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true' && isPopup
             })}
             data-testid="backend-pill"
           >
