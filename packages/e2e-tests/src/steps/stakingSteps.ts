@@ -89,10 +89,13 @@ Then(/^I wait until current stake pool switch to "([^"]*)"$/, async (stakePoolNa
 Then(
   /^I see drawer with "([^"]*)" stake pool details and a button available for staking$/,
   async (stakePoolName: string) => {
-    const stakePool =
-      stakePoolName === 'OtherStakePool'
-        ? getStakePoolByName(testContext.load(stakePoolName))
-        : getStakePoolByName(stakePoolName, extensionUtils.isMainnet() ? 'mainnet' : 'testnet');
+    let stakePool;
+    if (stakePoolName === 'OtherStakePool') {
+      stakePool = getStakePoolByName(testContext.load(stakePoolName));
+    } else {
+      const network = extensionUtils.isMainnet() ? 'mainnet' : 'testnet';
+      stakePool = getStakePoolByName(stakePoolName, network);
+    }
     await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
   }
 );
@@ -134,14 +137,14 @@ Then(/^The Tx details are displayed for Staking (with|without) metadata$/, async
       ? {
           transactionDescription: 'Delegation\n1 token',
           status: 'Success',
-          poolName: testContext.load('poolName') as string,
-          poolTicker: testContext.load('poolTicker') as string,
-          poolID: testContext.load('poolID') as string
+          poolName: String(testContext.load('poolName')),
+          poolTicker: String(testContext.load('poolTicker')),
+          poolID: String(testContext.load('poolID'))
         }
       : {
           transactionDescription: 'Delegation\n1 token',
           status: 'Success',
-          poolID: testContext.load('poolID') as string
+          poolID: String(testContext.load('poolID'))
         };
 
   await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
@@ -176,11 +179,14 @@ Then(/^Staking exit modal (is|is not) displayed$/, async (shouldBeDisplayed: 'is
 Then(
   /^I see drawer with stakepool: "([^"]*)" confirmation screen in (extended|popup) mode$/,
   async (stakePoolName: string, mode: 'extended' | 'popup') => {
-    const adaBalance = testContext.load('tADAtokenBalance') as string;
-    const stakePool =
-      stakePoolName === 'OtherStakePool'
-        ? getStakePoolByName(testContext.load(stakePoolName))
-        : getStakePoolByName(stakePoolName, extensionUtils.isMainnet() ? 'mainnet' : 'testnet');
+    const adaBalance = String(testContext.load('tADAtokenBalance'));
+    let stakePool;
+    if (stakePoolName === 'OtherStakePool') {
+      stakePool = getStakePoolByName(testContext.load(stakePoolName));
+    } else {
+      const network = extensionUtils.isMainnet() ? 'mainnet' : 'testnet';
+      stakePool = getStakePoolByName(stakePoolName, network);
+    }
     await stakingConfirmationScreenAssert.assertSeeStakePoolConfirmationScreen(mode, stakePool, adaBalance);
   }
 );

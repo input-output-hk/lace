@@ -8,9 +8,7 @@ import { browser } from '@wdio/globals';
 class PrivacyPolicyDrawerAssert {
   assertSeeDrawerNavigationTitle = async () => {
     await PrivacyPolicyDrawer.drawerNavigationTitle.waitForDisplayed();
-    await expect(await PrivacyPolicyDrawer.drawerNavigationTitle.getText()).to.equal(
-      await t('browserView.settings.heading')
-    );
+    expect(await PrivacyPolicyDrawer.drawerNavigationTitle.getText()).to.equal(await t('browserView.settings.heading'));
   };
 
   assertSeeDrawerCloseButton = async () => {
@@ -23,7 +21,7 @@ class PrivacyPolicyDrawerAssert {
 
   async assertSeePrivacyPolicyTitle() {
     await PrivacyPolicyDrawer.drawerHeaderTitle.waitForDisplayed();
-    await expect(await PrivacyPolicyDrawer.drawerHeaderTitle.getText()).to.equal(
+    expect(await PrivacyPolicyDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.legal.privacyPolicy.title')
     );
   }

@@ -20,16 +20,41 @@ export type ButtonProps = OmitClassName<'button'> & {
   label?: string;
   icon?: ReactNode;
   w?: Pick<Sx, 'w'>['w'];
-  size?: 'medium' | 'small';
+  size?: 'extraSmall' | 'medium' | 'small';
+  as?: React.ElementType;
 };
 
 export const SkeletonButton = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { id, disabled, className, label, icon, w, size = 'medium', ...props },
+    {
+      id,
+      disabled,
+      className,
+      label,
+      icon,
+      w,
+      size = 'medium',
+      as = 'button',
+      ...props
+    },
     forwardReference,
   ) => {
+    const heights = {
+      medium: '$48',
+      small: '$40',
+      extraSmall: '$24',
+    };
+
+    const radius = {
+      medium: '$medium',
+      small: '$small',
+      extraSmall: '$extraSmall',
+    };
+
+    const Component = as;
+
     return (
-      <button
+      <Component
         {...props}
         id={id}
         disabled={disabled}
@@ -38,8 +63,8 @@ export const SkeletonButton = forwardRef<HTMLButtonElement, ButtonProps>(
             w,
             // TODO: rework into styleVariants, don't forget primaryButton's :before borderRadius
             // https://vanilla-extract.style/documentation/api/style-variants/#stylevariants
-            height: size === 'small' ? '$40' : '$48',
-            borderRadius: size === 'small' ? '$small' : '$medium',
+            height: heights[size] as Sx['height'],
+            borderRadius: radius[size] as Sx['borderRadius'],
           }),
           className.container,
         )}
@@ -58,7 +83,7 @@ export const SkeletonButton = forwardRef<HTMLButtonElement, ButtonProps>(
             <Text.Button className={className.label}>{label}</Text.Button>
           )}
         </Flex>
-      </button>
+      </Component>
     );
   },
 );

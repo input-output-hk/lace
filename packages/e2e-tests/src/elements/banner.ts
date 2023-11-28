@@ -19,10 +19,6 @@ class Banner {
   get button() {
     return $(this.BUTTON);
   }
-
-  async getContainerText(): Promise<string> {
-    return this.description.getText();
-  }
 }
 
 export default new Banner();

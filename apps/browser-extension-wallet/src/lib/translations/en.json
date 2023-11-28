@@ -69,6 +69,18 @@
       "noMatchPassword": "Oops! The passwords don't match.",
       "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
       "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
+    },
+    "dappTransaction": {
+      "asset": "Asset",
+      "burn": "Burn",
+      "fee": "Transaction Fee",
+      "insufficientFunds": "You do not have enough funds to complete the transaction",
+      "mint": "Mint",
+      "quantity": "Quantity",
+      "recipient": "Recipient",
+      "send": "Send",
+      "sending": "Sending",
+      "transaction": "Transaction"
     }
   },
   "tab.main.title": "Tab extension",
@@ -708,6 +720,7 @@
       "send.footer.viewTransaction": "View transaction",
       "send.footer.view": "View",
       "send.footer.fail": "Back",
+      "send.footer.unauthorized": "Back",
       "send.footer.save": "Save",
       "send.footer.signing": "Signing in progress",
       "send.footer.confirmWithDevice": "Confirm with {{hardwareWallet}}",
@@ -726,6 +739,7 @@
         "buttonText": "Learn more"
       },
       "fail.oopsSomethingWentWrong": "Oops! Something went wrong",
+      "fail.unauthorizedTransaction": "The transaction was not authorized.",
       "fail.problemSubmittingYourTransaction": "There was a problem submitting your transaction.",
       "fail.clickBackAndTryAgain": "Click \"Back\" and try again.",
       "success.thisMayTakeAFewMinutesToProcessYouCanViewTheStatusByClickingViewTransaction": "This may take a few minutes to process. You can view the status by clicking view transaction.",
@@ -1310,6 +1324,15 @@
     "toast": {
       "errorText": "Wallet failed to sync",
       "successText": "Wallet synced successfully"
+    }
+  },
+  "account": {
+    "edit": {
+      "title": "Edit account name",
+      "subtitle": "Choose a name to identify your account",
+      "input.label": "Account name",
+      "footer.save": "Save",
+      "footer.cancel": "Cancel"
     }
   }
 }

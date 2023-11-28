@@ -3,8 +3,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 
 import { ReactComponent as QuestionMark } from '../../assets/icons/question-mark.component.svg';
-import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
-import { Variants, Section, page } from '../decorators';
+import { Variants, Section, page, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';
 
@@ -161,17 +160,9 @@ export const Overview = (): JSX.Element => (
         <Divider my="$64" />
       </Section>
       <Section title="Main components">
-        <Variants.Table
-          headers={['Rest', 'Hover', 'Active / pressed', 'Disabled', 'Focused']}
-        >
+        <UIStateTable>
           <Buttons />
-        </Variants.Table>
-
-        <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
-          <Variants.Table>
-            <Buttons />
-          </Variants.Table>
-        </LocalThemeProvider>
+        </UIStateTable>
       </Section>
     </Cell>
   </Grid>

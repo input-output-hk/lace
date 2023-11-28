@@ -47,7 +47,7 @@ When(/^I validate latest analytics multiple events:$/, async (eventActionNames: 
 
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
   await browser.waitUntil(async () => (await getLatestEventsNames()).includes(eventActionName), {
-    interval: 1000,
+    interval: 500,
     timeout: 6000,
     timeoutMsg: `Failed while waiting for event '${eventActionName}'. \nActual events:\n ${(
       await getAllEventsNames()

@@ -26,3 +26,5 @@ export { Message } from './message';
 export { PasswordBox } from './password-box';
 export { Metadata } from './metadata';
 export { TextLink } from './text-link';
+export * as ProfileDropdown from './profile-dropdown';
+export { TextBox } from './text-box';

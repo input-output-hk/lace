@@ -157,6 +157,20 @@ describe('AnalyticsTracker', () => {
     });
   });
 
+  describe('posthog sendSessionStartEvent', () => {
+    it('should send start session event', async () => {
+      const tracker = new AnalyticsTracker({
+        chain: preprodChain,
+        postHogClient: getPostHogClient()
+      });
+      const mockedPostHogClient = (PostHogClient as any).mock.instances[0];
+      const event = PostHogAction.OnboardingCreateClick;
+      await tracker.sendEventToPostHog(event);
+      expect(mockedPostHogClient.sendSessionStartEvent).toHaveBeenCalled();
+      expect(mockedPostHogClient.sendEvent).toHaveBeenCalledWith(event, {});
+    });
+  });
+
   describe('excluded events', () => {
     it('should ommit sending onboarding | new wallet events', async () => {
       const tracker = new AnalyticsTracker({

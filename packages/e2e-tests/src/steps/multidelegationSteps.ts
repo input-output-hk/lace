@@ -82,10 +82,13 @@ When(/^I click on the stake pool with name "([^"]*)"$/, async (poolName: string)
 });
 
 Then(/^I see stake pool details drawer for "([^"]*)" stake pool$/, async (stakePoolName: string) => {
-  const stakePool =
-    stakePoolName === 'OtherStakePool'
-      ? getStakePoolByName(testContext.load('currentStakePoolName'))
-      : getStakePoolByName(stakePoolName, extensionUtils.isMainnet() ? 'mainnet' : 'testnet');
+  let stakePool;
+  if (stakePoolName === 'OtherStakePool') {
+    stakePool = getStakePoolByName(testContext.load('currentStakePoolName'));
+  } else {
+    const network = extensionUtils.isMainnet() ? 'mainnet' : 'testnet';
+    stakePool = getStakePoolByName(stakePoolName, network);
+  }
   await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false);
 });
 
@@ -176,14 +179,14 @@ Then(
         ? {
             transactionDescription: 'Delegation\n1 token',
             status: 'Success',
-            poolName: testContext.load('poolName') as string,
-            poolTicker: testContext.load('poolTicker') as string,
-            poolID: testContext.load('poolID') as string
+            poolName: String(testContext.load('poolName')),
+            poolTicker: String(testContext.load('poolTicker')),
+            poolID: String(testContext.load('poolID'))
           }
         : {
             transactionDescription: 'Delegation\n1 token',
             status: 'Success',
-            poolID: testContext.load('poolID') as string
+            poolID: String(testContext.load('poolID'))
           };
 
     await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
@@ -299,7 +302,7 @@ Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'ext
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
 });
 
-Then(/^I click "Get Started" step (1|2) link$/, async (linkNumber: '1' | '2') => {
+Then(/^I click "Get Started" step ([12]) link$/, async (linkNumber: '1' | '2') => {
   await (linkNumber === '1'
     ? StartStakingPage.clickGetStartedStep1Link()
     : StartStakingPage.clickGetStartedStep2Link());

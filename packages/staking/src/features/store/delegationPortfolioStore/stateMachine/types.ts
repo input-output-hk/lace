@@ -31,6 +31,7 @@ export type CurrentPortfolioStakePool = PortfolioStakePoolBase &
 export enum DelegationFlow {
   Overview = 'Overview',
   BrowsePools = 'BrowsePools',
+  Activity = 'Activity',
   CurrentPoolDetails = 'CurrentPoolDetails',
   PoolDetails = 'PoolDetails',
   PortfolioManagement = 'PortfolioManagement',
@@ -79,6 +80,14 @@ type MakeState<S extends StateMachineSpecificState> = CrossStateData & StateMach
 
 export type StateOverview = MakeState<{
   activeDelegationFlow: DelegationFlow.Overview;
+  activeDrawerStep: undefined;
+  draftPortfolio: undefined;
+  pendingSelectedPortfolio: undefined;
+  viewedStakePool: undefined;
+}>;
+
+export type StateActivity = MakeState<{
+  activeDelegationFlow: DelegationFlow.Activity;
   activeDrawerStep: undefined;
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
@@ -134,6 +143,7 @@ export type StateChangingPreferences = MakeState<{
 }>;
 
 export type State =
+  | StateActivity
   | StateOverview
   | StateCurrentPoolDetails
   | StatePortfolioManagement

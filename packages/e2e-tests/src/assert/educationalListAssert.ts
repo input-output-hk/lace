@@ -14,12 +14,10 @@ class EducationalListAssert {
 
   async assertSeeWidget(title: string, itemTitles: string[], itemSubtitles: string[]) {
     const rowCount = (await EducationalList.listRows).length;
-    await expect(await EducationalList.getListTitle()).to.equal(title);
-    await expect((await EducationalList.listRowImages).length).to.equal(rowCount);
-    await expect(JSON.stringify(await EducationalList.getListRowTitles())).to.deep.equal(JSON.stringify(itemTitles));
-    await expect(JSON.stringify(await EducationalList.getListRowSubtitles())).to.deep.equal(
-      JSON.stringify(itemSubtitles)
-    );
+    expect(await EducationalList.getListTitle()).to.equal(title);
+    expect((await EducationalList.listRowImages).length).to.equal(rowCount);
+    expect(JSON.stringify(await EducationalList.getListRowTitles())).to.deep.equal(JSON.stringify(itemTitles));
+    expect(JSON.stringify(await EducationalList.getListRowSubtitles())).to.deep.equal(JSON.stringify(itemSubtitles));
   }
 
   async assertSeeAddressBookWidget() {

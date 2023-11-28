@@ -102,7 +102,7 @@ interface SendTransactionSummaryProps {
 export const SendTransactionSummary = withAddressBookContext(
   ({ isPopupView = false }: SendTransactionSummaryProps): React.ReactElement => {
     const { t } = useTranslation();
-    const { builtTxData: { uiTx: { fee, outputs, handleResolutions } = {} } = {} } = useBuiltTxState();
+    const { builtTxData: { uiTx: { fee, outputs } = {} } = {} } = useBuiltTxState();
     const [metadata] = useMetadata();
     const { inMemoryWallet } = useWalletStore();
     const { priceResult } = useFetchCoinPrice();
@@ -136,11 +136,11 @@ export const SendTransactionSummary = withAddressBookContext(
       [addressList]
     );
 
-    const rows = [...(outputs?.values() ?? [])].map((item, idx) => ({
+    const rows = [...(outputs?.values() ?? [])].map((item) => ({
       list: formatRow({ output: item, assetInfo: assetsInfo, cardanoCoin, fiatCurrency, prices: priceResult }),
       recipientAddress: item.address,
       recipientName:
-        addressToNameMap?.get(handleResolutions[idx]?.handle || item.address) || handleResolutions[idx]?.handle
+        addressToNameMap?.get(item.handleResolution?.handle || item.address) || item.handleResolution?.handle
     }));
 
     // Where do we get the deposit field? LW-1363

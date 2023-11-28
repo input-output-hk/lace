@@ -396,7 +396,7 @@ export const useAddressState = (
       ({ uiOutputs, setAddressValue }) => ({
         address: !uiOutputs[row] ? '' : uiOutputs[row].address,
         handle: !uiOutputs[row] ? '' : uiOutputs[row].handle,
-        handleStatus: {
+        handleStatus: uiOutputs[row] && {
           hasHandleOwnershipChanged: !uiOutputs[row].handleStatus
             ? true
             : uiOutputs[row].handleStatus.hasHandleOwnershipChanged,
