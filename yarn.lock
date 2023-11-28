@@ -8028,6 +8028,7 @@ __metadata:
   resolution: "@lace/staking@workspace:packages/staking"
   dependencies:
     "@ant-design/icons": ^4.7.0
+    "@cardano-sdk/core": 0.21.0
     "@cardano-sdk/input-selection": 0.12.4
     "@cardano-sdk/tx-construction": 0.14.2
     "@cardano-sdk/util": 0.14.2
@@ -8055,11 +8056,13 @@ __metadata:
     immer: ^10.0.2
     lodash: 4.17.21
     normalize.css: ^8.0.1
+    rambda: ^8.5.0
     react: 17.0.2
     react-copy-to-clipboard: ^5.1.0
     react-dom: 17.0.2
     react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
+    recharts: ^2.9.2
     tsup: ^6.7.0
     typescript: ^4.9.5
     vite-plugin-checker: ^0.6.0
@@ -38459,6 +38462,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rambda@npm:^8.5.0":
+  version: 8.5.0
+  resolution: "rambda@npm:8.5.0"
+  checksum: 4f188195f9859e5b0955f5eddfa454855d3d390c8dfdf22f19b6e493ad978ba1123b09201ef0ebddc2ab608ef22b68c541582a1810cbf3f789870dd10bba5598
+  languageName: node
+  linkType: hard
+
 "ramda@npm:^0.21.0":
   version: 0.21.0
   resolution: "ramda@npm:0.21.0"
@@ -39949,6 +39959,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-smooth@npm:^2.0.4":
+  version: 2.0.5
+  resolution: "react-smooth@npm:2.0.5"
+  dependencies:
+    fast-equals: ^5.0.0
+    react-transition-group: 2.9.0
+  peerDependencies:
+    prop-types: ^15.6.0
+    react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 914c17f741e8b533ff6e3d5e3285aea0625cdd0f98e04202d01351f9516dbdc0a0e297dc22cc2377d6916fb819da8d4ed999c0314a4c186592ca51870012e6f7
+  languageName: node
+  linkType: hard
+
 "react-style-singleton@npm:^2.2.1":
   version: 2.2.1
   resolution: "react-style-singleton@npm:2.2.1"
@@ -40296,6 +40320,27 @@ __metadata:
     react: ^16.0.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
   checksum: 4d63232317bbb39e457d13575a8410b353f8b45bb62aaf515d9f5a33bb7a04202908aa760b87a7e243503a5a033a176922ae4aef51238aab8511a5554cf7746e
+  languageName: node
+  linkType: hard
+
+"recharts@npm:^2.9.2":
+  version: 2.9.2
+  resolution: "recharts@npm:2.9.2"
+  dependencies:
+    classnames: ^2.2.5
+    eventemitter3: ^4.0.1
+    lodash: ^4.17.19
+    react-is: ^16.10.2
+    react-resize-detector: ^8.0.4
+    react-smooth: ^2.0.4
+    recharts-scale: ^0.4.4
+    tiny-invariant: ^1.3.1
+    victory-vendor: ^36.6.8
+  peerDependencies:
+    prop-types: ^15.6.0
+    react: ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 77a87e3d91229ac5400240409568e3345ded50fc117e70e43e61a135b44bbc3164048704393aa988201ea2989278e1c4e96ce350f6a2f87044d1f0a48f290e84
   languageName: node
   linkType: hard
 
@@ -44389,7 +44434,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-invariant@npm:^1.1.0":
+"tiny-invariant@npm:^1.1.0, tiny-invariant@npm:^1.3.1":
   version: 1.3.1
   resolution: "tiny-invariant@npm:1.3.1"
   checksum: 872dbd1ff20a21303a2fd20ce3a15602cfa7fcf9b228bd694a52e2938224313b5385a1078cb667ed7375d1612194feaca81c4ecbe93121ca1baebe344de4f84c
