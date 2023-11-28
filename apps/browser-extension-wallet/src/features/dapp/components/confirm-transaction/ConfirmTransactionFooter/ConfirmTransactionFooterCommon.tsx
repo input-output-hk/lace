@@ -9,9 +9,15 @@ import { useTranslation } from 'react-i18next';
 
 type ConfirmTransactionFooterProps = {
   errorMessage?: string;
+  onBeforeSubmit?: (submit: () => void) => void;
+  loading?: boolean;
 };
 
-export const ConfirmTransactionFooterCommon = ({ errorMessage }: ConfirmTransactionFooterProps): React.ReactElement => {
+export const ConfirmTransactionFooterCommon = ({
+  loading,
+  errorMessage,
+  onBeforeSubmit = (fn) => fn()
+}: ConfirmTransactionFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const disallowSignTx = useDisallowSignTx();
   const {
@@ -20,9 +26,13 @@ export const ConfirmTransactionFooterCommon = ({ errorMessage }: ConfirmTransact
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
   const keyAgentType = useWalletStore((store) => store.getKeyAgentType());
   const isUsingHardwareWallet = keyAgentType !== Wallet.KeyManagement.KeyAgentType.InMemory;
-  const handleSubmit = useCallback(async () => {
-    isUsingHardwareWallet ? await signWithHardwareWallet() : setNextView();
-  }, [isUsingHardwareWallet, setNextView, signWithHardwareWallet]);
+  const handleSubmit = useCallback(
+    () =>
+      onBeforeSubmit(async () => {
+        isUsingHardwareWallet ? await signWithHardwareWallet() : setNextView();
+      }),
+    [isUsingHardwareWallet, setNextView, signWithHardwareWallet, onBeforeSubmit]
+  );
 
   useOnBeforeUnload(disallowSignTx);
 
@@ -31,7 +41,7 @@ export const ConfirmTransactionFooterCommon = ({ errorMessage }: ConfirmTransact
       <Button
         onClick={handleSubmit}
         disabled={!!errorMessage}
-        loading={isUsingHardwareWallet && isConfirmingTx}
+        loading={loading || (isUsingHardwareWallet && isConfirmingTx)}
         data-testid="dapp-transaction-confirm"
         block
       >

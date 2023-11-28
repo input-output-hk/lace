@@ -1,14 +1,11 @@
-import React, { useCallback, useState } from 'react';
-import { Button } from '@lace/common';
+/* eslint-disable unicorn/no-null */
+import React, { useState } from 'react';
 import { Wallet } from '@lace/cardano';
-import { useViewsFlowContext } from '@providers/ViewFlowProvider';
-import { useWalletStore } from '@stores';
-import { useDisallowSignTx, useGetOwnPubDRepKeyHash, useOnBeforeUnload, useSignWithHardwareWallet } from '../hooks';
+import { useGetOwnPubDRepKeyHash } from '../hooks';
 import { certificateInspectorFactory } from '../utils';
 import { SignTxData } from '../types';
-import styles from './ConfirmTransactionFooterCommon.module.scss';
-import { useTranslation } from 'react-i18next';
 import { ConfirmDRepRetirementIdMismatchModal } from '@src/features/dapp/components/confirm-transaction/ConfirmDRepRetirementIdMismatchModal';
+import { ConfirmTransactionFooterCommon } from '@src/features/dapp/components/confirm-transaction/ConfirmTransactionFooter/ConfirmTransactionFooterCommon';
 
 type ConfirmTransactionFooterProps = {
   signTxData?: SignTxData;
@@ -19,51 +16,31 @@ export const ConfirmDRepRetirementFooter = ({
   signTxData,
   errorMessage
 }: ConfirmTransactionFooterProps): React.ReactElement => {
-  const { t } = useTranslation();
-  const disallowSignTx = useDisallowSignTx();
-  const {
-    utils: { setNextView }
-  } = useViewsFlowContext();
-  const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
-  const keyAgentType = useWalletStore((store) => store.getKeyAgentType());
-  const isUsingHardwareWallet = keyAgentType !== Wallet.KeyManagement.KeyAgentType.InMemory;
-  const [dRepIdMismatchModalOpen, setDRepIdMismatchModalOpen] = useState(false);
-  const handleSubmit = useCallback(async () => {
-    isUsingHardwareWallet ? await signWithHardwareWallet() : setNextView();
-  }, [isUsingHardwareWallet, setNextView, signWithHardwareWallet]);
+  const [dRepIdMismatchModalAcceptCallback, setDRepIdMismatchModalAcceptCallback] = useState<() => void>(null);
   const {
     dRepCredential: { hash: transactionDrepKeyHash }
   } = certificateInspectorFactory<Wallet.Cardano.UnRegisterDelegateRepresentativeCertificate>(
     Wallet.Cardano.CertificateType.UnregisterDelegateRepresentative
   )(signTxData.tx);
   const { loading, ownPubDRepKeyHash } = useGetOwnPubDRepKeyHash();
-  const isOwnDRepKey = transactionDrepKeyHash === ownPubDRepKeyHash;
-
-  useOnBeforeUnload(disallowSignTx);
+  const isOwnDRepKey = transactionDrepKeyHash === 'ownPubDRepKeyHash';
 
   return (
-    <div className={styles.actions}>
+    <>
       <ConfirmDRepRetirementIdMismatchModal
-        open={dRepIdMismatchModalOpen}
+        open={!!dRepIdMismatchModalAcceptCallback}
         expectedDRepId={ownPubDRepKeyHash}
         givenDRepId={transactionDrepKeyHash}
-        onConfirm={handleSubmit}
-        onCancel={() => setDRepIdMismatchModalOpen(false)}
+        onConfirm={dRepIdMismatchModalAcceptCallback}
+        onCancel={() => setDRepIdMismatchModalAcceptCallback(null)}
       />
-      <Button
-        onClick={isOwnDRepKey ? handleSubmit : () => setDRepIdMismatchModalOpen(true)}
-        disabled={!!errorMessage}
-        loading={loading || (isUsingHardwareWallet && isConfirmingTx)}
-        data-testid="dapp-transaction-confirm"
-        block
-      >
-        {isUsingHardwareWallet
-          ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: keyAgentType })
-          : t('dapp.confirm.btn.confirm')}
-      </Button>
-      <Button color="secondary" data-testid="dapp-transaction-cancel" onClick={() => disallowSignTx(true)} block>
-        {t('dapp.confirm.btn.cancel')}
-      </Button>
-    </div>
+      <ConfirmTransactionFooterCommon
+        loading={loading}
+        errorMessage={errorMessage}
+        onBeforeSubmit={
+          isOwnDRepKey ? undefined : (handleAccept) => setDRepIdMismatchModalAcceptCallback(() => handleAccept)
+        }
+      />
+    </>
   );
 };
