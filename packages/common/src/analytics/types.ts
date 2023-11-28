@@ -74,6 +74,7 @@ export enum PostHogAction {
   StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick = 'staking | browse pools | stake pool detail | stake all on this pool | click',
   StakingBrowsePoolsStakePoolDetailAddStakingPoolClick = 'staking | browse pools | stake pool detail | add staking pool | click',
   StakingBrowsePoolsStakePoolDetailUnselectPoolClick = 'staking | browse pools | stake pool detail | unselect pool | click',
+  StakingBrowsePoolsStakePoolDetailManageDelegation = 'staking | browse pools | stake pool detail | manage delegation | click',
   StakingBrowsePoolsStakeClick = 'staking | browse pools | stake | click',
   StakingBrowsePoolsUnselectClick = 'staking | browse pools | unselect | click',
   StakingBrowsePoolsClearClick = 'staking | browse pools | clear | click',
