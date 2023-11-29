@@ -12,24 +12,13 @@ const { CertificateType } = Wallet.Cardano;
 
 const DAPP_TOAST_DURATION = 50;
 
-export enum TxType {
-  Send = 'Send',
-  Mint = 'Mint',
-  Burn = 'Burn',
-  DRepRegistration = 'DRepRegistration',
-  DRepRetirement = 'DRepRetirement',
-  DRepUpdate = 'DRepUpdate',
-  VoteDelegation = 'VoteDelegation',
-  VotingProcedures = 'VotingProcedures'
-}
-
-export const getTitleKey = (txType: TxType): string =>
+export const getTitleKey = (txType: Wallet.Cip30TxType): string =>
   [
-    TxType.DRepRegistration,
-    TxType.DRepRetirement,
-    TxType.DRepUpdate,
-    TxType.VoteDelegation,
-    TxType.VotingProcedures
+    Wallet.Cip30TxType.DRepRegistration,
+    Wallet.Cip30TxType.DRepRetirement,
+    Wallet.Cip30TxType.DRepUpdate,
+    Wallet.Cip30TxType.VoteDelegation,
+    Wallet.Cip30TxType.VotingProcedures
   ].includes(txType)
     ? `core.${txType}.title`
     : sectionTitle[DAPP_VIEWS.CONFIRM_TX];
@@ -73,7 +62,7 @@ export const certificateInspectorFactory =
 export const votingProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano.VotingProcedures | undefined =>
   tx?.body?.votingProcedures;
 
-export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
+export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
     burned: assetsBurnedInspector,
@@ -87,38 +76,39 @@ export const getTxType = (tx: Wallet.Cardano.Tx): TxType => {
   const { minted, burned, dRepRegistration, dRepRetirement, dRepUpdate, voteDelegation, votingProcedures } = inspector(
     tx as Wallet.Cardano.HydratedTx
   );
+  // TODO handle Mint&Burn
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
 
   if (votingProcedures) {
-    return TxType.VotingProcedures;
+    return Wallet.Cip30TxType.VotingProcedures;
   }
 
   if (isMintTransaction) {
-    return TxType.Mint;
+    return Wallet.Cip30TxType.Mint;
   }
 
   if (isBurnTransaction) {
-    return TxType.Burn;
+    return Wallet.Cip30TxType.Burn;
   }
 
   if (dRepRegistration) {
-    return TxType.DRepRegistration;
+    return Wallet.Cip30TxType.DRepRegistration;
   }
 
   if (dRepRetirement) {
-    return TxType.DRepRetirement;
+    return Wallet.Cip30TxType.DRepRetirement;
   }
 
   if (voteDelegation) {
-    return TxType.VoteDelegation;
+    return Wallet.Cip30TxType.VoteDelegation;
   }
 
   if (dRepUpdate) {
-    return TxType.DRepUpdate;
+    return Wallet.Cip30TxType.DRepUpdate;
   }
 
-  return TxType.Send;
+  return Wallet.Cip30TxType.Send;
 };
 
 export const drepIDasBech32FromHash = (value: Wallet.Crypto.Hash28ByteBase16): Wallet.Cardano.DRepID =>

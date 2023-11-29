@@ -4,23 +4,15 @@ import { ErrorPane } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { DappInfo, DappInfoProps } from '../DappInfo';
 import { DappTxHeader } from './DappTxHeader/DappTxHeader';
-import { DappTxAsset, DappTxAssetProps } from './DappTxAsset/DappTxAsset';
-import { DappTxOutput, DappTxOutputProps } from './DappTxOutput/DappTxOutput';
+import { DappTxAsset } from './DappTxAsset/DappTxAsset';
+import { DappTxOutput } from './DappTxOutput/DappTxOutput';
 import styles from './DappTransaction.module.scss';
 import { useTranslate } from '@src/ui/hooks';
 import { TransactionFee } from '@ui/components/ActivityDetail';
 
-type TransactionDetails = {
-  fee: string;
-  outputs: DappTxOutputProps[];
-  type: 'Send' | 'Mint';
-  mintedAssets?: DappTxAssetProps[];
-  burnedAssets?: DappTxAssetProps[];
-};
-
 export interface DappTransactionProps {
   /** Transaction details such as type, amount, fee and address */
-  transaction: TransactionDetails;
+  transaction: Wallet.Cip30SignTxSummary;
   /** dApp information such as logo, name and url */
   dappInfo: Omit<DappInfoProps, 'className'>;
   /** Optional error message */
@@ -55,7 +47,7 @@ export const DappTransaction = ({
             ))}
           </>
         )}
-        {type === 'Mint' && burnedAssets?.length > 0 && (
+        {type === 'Burn' && burnedAssets?.length > 0 && (
           <>
             <DappTxHeader
               title={mintedAssets?.length > 0 ? undefined : t('package.core.dappTransaction.transaction')}
