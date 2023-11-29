@@ -7,7 +7,10 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_TYPE = '[data-testid="dapp-transaction-type"]';
   private TRANSACTION_AMOUNT_TITLE = '[data-testid="dapp-transaction-amount-title"]';
   private TRANSACTION_AMOUNT_VALUE = '[data-testid="dapp-transaction-amount-value"]';
-  private TRANSACTION_AMOUNT_FEE = '[data-testid="dapp-transaction-amount-fee"]';
+  private TRANSACTION_AMOUNT_FEE_TITLE = '[data-testid="tx-fee-title"]';
+  private TRANSACTION_AMOUNT_FEE_TITLE_TOOLTIP_ICON = '[data-testid="tx-fee-tooltip-icon"]';
+  private TRANSACTION_AMOUNT_FEE_VALUE_ADA = '[data-testid="tx-fee-ada"]';
+  private TRANSACTION_AMOUNT_FEE_VALUE_FIAT = '[data-testid="tx-fee-fiat"]';
   private TRANSACTION_AMOUNT_ASSET = '[data-testid="dapp-transaction-asset"]';
   private TRANSACTION_RECIPIENT_TITLE = '[data-testid="dapp-transaction-recipient-title"]';
   private TRANSACTION_RECIPIENT_ADDRESS = '[data-testid="dapp-transaction-recipient-address"]';
@@ -29,9 +32,20 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   get transactionAmountValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_AMOUNT_VALUE);
   }
+  get transactionFeeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_AMOUNT_FEE_TITLE);
+  }
 
-  get transactionAmountFee(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_AMOUNT_FEE);
+  get transactionFeeTooltipIcon(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_AMOUNT_FEE_TITLE_TOOLTIP_ICON);
+  }
+
+  get transactionFeeValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_AMOUNT_FEE_VALUE_ADA);
+  }
+
+  get transactionFeeValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_AMOUNT_FEE_VALUE_FIAT);
   }
 
   get transactionAmountAsset(): ChainablePromiseElement<WebdriverIO.Element> {
