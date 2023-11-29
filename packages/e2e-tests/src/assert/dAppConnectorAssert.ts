@@ -289,13 +289,19 @@ class DAppConnectorAssert {
 
     await ConfirmTransactionPage.transactionAmountTitle.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionAmountTitle.getText()).to.equal(
-      await t('dapp.confirm.details.amount')
+      await t('package.core.dappTransaction.sending', 'core')
     );
 
     await ConfirmTransactionPage.transactionAmountValue.waitForDisplayed();
     expect(await ConfirmTransactionPage.transactionAmountValue.getText()).to.equal(expectedTransactionData.amountADA);
 
-    await ConfirmTransactionPage.transactionAmountFee.waitForDisplayed();
+    await ConfirmTransactionPage.transactionFeeTitle.waitForDisplayed();
+    expect(await ConfirmTransactionPage.transactionFeeTitle.getText()).to.equal(
+      await t('package.core.activityDetails.transactionFee', 'core')
+    );
+    await ConfirmTransactionPage.transactionFeeTooltipIcon.waitForDisplayed();
+    await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();
+    await ConfirmTransactionPage.transactionFeeValueFiat.waitForDisplayed();
 
     if (expectedTransactionData.amountAsset && expectedTransactionData.amountAsset !== '0') {
       await ConfirmTransactionPage.transactionAmountAsset.waitForDisplayed();
