@@ -36,7 +36,6 @@ export const mockKeyAgentDataTestnet: Wallet.KeyManagement.SerializableKeyAgentD
   encryptedRootPrivateKeyBytes: [],
   // eslint-disable-next-line no-magic-numbers
   extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex('0'.repeat(128)),
-  knownAddresses: [],
   chainId: Wallet.Cardano.ChainIds.Preprod
 };
 
@@ -263,7 +262,9 @@ export const cardanoStakePoolMock: Wallet.StakePoolSearchResults = {
         saturation: Percent(0.0512),
         stake: undefined,
         size: undefined,
-        apy: Percent(0.013)
+        apy: Percent(0.013),
+        ros: Percent(0.69),
+        lastRos: Percent(0.88)
       },
       owners: [
         Wallet.Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),

@@ -1,8 +1,14 @@
 import { Cardano } from '@cardano-sdk/core';
 import { ObservableWallet } from '@cardano-sdk/wallet';
 import { InitializeTxProps } from '@cardano-sdk/tx-construction';
+import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 import { firstValueFrom } from 'rxjs';
-const { CertificateType, StakeKeyStatus, RewardAccount } = Cardano;
+const {
+  CertificateType,
+  StakeKeyStatus,
+  RewardAccount,
+  CredentialType: { KeyHash }
+} = Cardano;
 
 const buildDelegationCertificates = (
   walletRewardAccount: Cardano.RewardAccountInfo,
@@ -12,16 +18,20 @@ const buildDelegationCertificates = (
   const isStakeKeyRegistered = keyStatus === StakeKeyStatus.Registered;
 
   const stakeKeyHash = RewardAccount.toHash(rewardAccount);
+  const stakeCredential = {
+    hash: Hash28ByteBase16.fromEd25519KeyHashHex(stakeKeyHash),
+    type: KeyHash
+  };
 
   const delegationCertificate: Cardano.StakeDelegationCertificate = {
     __typename: CertificateType.StakeDelegation,
-    stakeKeyHash,
+    stakeCredential,
     poolId: poolToDelegateId
   };
 
   const stakeKeyCertificate: Cardano.StakeAddressCertificate = {
-    __typename: CertificateType.StakeKeyRegistration,
-    stakeKeyHash
+    __typename: CertificateType.StakeRegistration,
+    stakeCredential
   };
 
   return [...(isStakeKeyRegistered ? [] : [stakeKeyCertificate]), delegationCertificate];
