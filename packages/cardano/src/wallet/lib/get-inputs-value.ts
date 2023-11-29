@@ -42,19 +42,22 @@ export const getTxInputsValueAndAddress = async (
     transactions = await fetchTransactionByHashes(chainProviderInstance, transactionIdsWithoutValues);
   }
 
-  for (const transaction of transactions) {
-    const index = inputs.find((input) => input.txId === transaction.id)?.index;
-    if (index !== undefined) inputsOutputsMapping.set(transaction.id, transaction.body.outputs[index]);
-  }
+  return inputs.map((input) => {
+    let txOut: Cardano.TxOut;
 
-  return Promise.all(
-    inputs.map(async (input) => {
-      const { address, value } = inputsOutputsMapping.get(input.txId);
-      return {
-        ...input,
-        value,
-        address
-      };
-    })
-  );
+    for (const transaction of transactions) {
+      if (transaction.id === input.txId) {
+        txOut = transaction.body.outputs[input.index];
+      }
+    }
+
+    const resolvedInput = inputsOutputsMapping.get(input.txId);
+
+    const { address, value } = resolvedInput ?? txOut;
+    return {
+      ...input,
+      value,
+      address
+    };
+  });
 };
