@@ -11,7 +11,7 @@ import { StakePoolItemBrowser, StakePoolItemBrowserProps } from '../StakePoolIte
 import { TranslationsFor } from '@wallet/util/types';
 import { ReactComponent as Arrow } from '../../assets/icons/arrow.component.svg';
 
-type SortKey = 'name' | 'apy' | 'cost' | 'saturation';
+type SortKey = 'name' | 'ros' | 'cost' | 'saturation';
 type SortDirection = 'asc' | 'desc';
 
 export type StakePoolSortOptions = {
@@ -61,7 +61,7 @@ export const StakePoolTableBrowser = ({
 }: StakePoolTableBrowserProps): React.ReactElement => {
   const headers: TableHeaders[] = [
     { label: translations.poolName, value: 'name' },
-    { label: translations.apy, value: 'apy' },
+    { label: translations.apy, value: 'ros' },
     { label: translations.cost, value: 'cost' },
     { label: translations.saturation, value: 'saturation' }
   ];

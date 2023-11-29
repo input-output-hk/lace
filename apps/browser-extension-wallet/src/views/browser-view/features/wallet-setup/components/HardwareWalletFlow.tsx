@@ -175,7 +175,7 @@ export const HardwareWalletFlow = ({
       setDoesUserAllowAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
-      const addressDiscoverySubscriber = wallet.asyncKeyAgent.knownAddresses$.subscribe((addresses) => {
+      const addressDiscoverySubscriber = wallet.wallet.addresses$.subscribe((addresses) => {
         if (addresses.length === 0) return;
         const hdWalletDiscovered = addresses.some((addr) => addr.index > 0);
         if (hdWalletDiscovered) {

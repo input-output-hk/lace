@@ -16,7 +16,7 @@ import Arrow from './arrow.svg';
 import styles from './StakePoolTableBrowser.module.scss';
 
 type TranslationsFor<T extends string> = Record<T, string>;
-type SortKey = 'name' | 'apy' | 'saturation';
+type SortKey = 'name' | 'ros' | 'saturation';
 type SortDirection = 'asc' | 'desc';
 
 export type StakePoolSortOptions = {
@@ -79,7 +79,7 @@ export const StakePoolTableBrowser = ({
     {
       label: translations.apy,
       tooltipText: t('browsePools.stakePoolTableBrowser.tableHeader.ros.tooltip'),
-      value: 'apy',
+      value: 'ros',
     },
     {
       label: translations.saturation,
@@ -93,7 +93,7 @@ export const StakePoolTableBrowser = ({
       field === activeSort?.field ? ((activeSort?.order === 'asc' ? 'desc' : 'asc') as SortDirection) : 'asc';
     if (field === 'name') {
       analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsPoolNameClick);
-    } else if (field === 'apy') {
+    } else if (field === 'ros') {
       analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsRosClick);
     } else {
       analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsSaturationClick);
