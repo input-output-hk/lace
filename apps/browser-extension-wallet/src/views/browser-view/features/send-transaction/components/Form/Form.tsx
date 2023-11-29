@@ -1,111 +1,31 @@
-/* eslint-disable react/no-multi-comp */
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
 import { Button, useObservable } from '@lace/common';
-import { AddressInput } from './AddressInput';
-import { CoinInput } from './CoinInput';
-import { FormRowHeader } from './FormRowHeader';
-import {
-  useOutputs,
-  useBuiltTxState,
-  useSections,
-  useCurrentRow,
-  useSpentBalances,
-  useLastFocusedInput
-} from '../../store';
+
+import { useOutputs, useBuiltTxState, useSpentBalances, useLastFocusedInput } from '../../store';
 import { MetadataInput } from './MetadataInput';
 import { getFee } from '../SendTransactionSummary';
-import { AssetInfo, Sections, SpentBalances } from '../../types';
+
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from '@hooks/useMaxAda';
-import BigNumber from 'bignumber.js';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { CurrencyInfo, Tokens } from '@src/types';
+import { Tokens } from '@src/types';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
-
 import styles from './Form.module.scss';
 import { getReachedMaxAmountList } from '../../helpers';
 import { PriceResult } from '@hooks';
+import { formatAdaAllocation, getNextBundleCoinId } from './util';
+import { BundlesList } from './BundlesList';
 
-const RowContainer = ({
-  children,
-  id,
-  focusRow,
-  isBundle
-}: {
-  children: React.ReactNode;
-  id: string;
-  focusRow?: string;
-  isBundle?: boolean;
-}) => {
-  const ref = useRef<HTMLDivElement>();
-
-  useEffect(() => {
-    if (focusRow === id || isBundle) {
-      ref.current?.scrollIntoView(false);
-    }
-  }, [focusRow, id, isBundle]);
-
-  return (
-    <div ref={ref} className={styles.outputRowContainer} data-testid="asset-bundle-container">
-      {children}
-    </div>
-  );
-};
-
-const cardanoAssetId = '1';
-
-const formatAdaAllocation = ({
-  missingCoins,
-  fiat = 0,
-  cardanoCoin,
-  fiatCurrency
-}: {
-  missingCoins: string;
-  fiat: number;
-  cardanoCoin: Wallet.CoinId;
-  fiatCurrency: CurrencyInfo;
-}) => ({
-  adaAmount: `${Wallet.util.lovelacesToAdaString(missingCoins)} ${cardanoCoin.symbol}`,
-  fiatAmount: `$${Wallet.util.convertLovelaceToFiat({
-    lovelaces: missingCoins ?? '0',
-    fiat
-  })} ${fiatCurrency?.code}`
-});
-
-const getNextBundleCoinId = (
-  balance: string,
-  assetBalances: Tokens,
-  usedCoins: SpentBalances,
-  info: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>,
-  cardanoCoin: Wallet.CoinId
-) => {
-  const adaAmountInLovelace = usedCoins[cardanoCoin.id] ? usedCoins[cardanoCoin.id] : '0';
-  const balanceInAda = Wallet.util.lovelacesToAdaString(balance);
-  if (new BigNumber(adaAmountInLovelace).lt(balanceInAda)) return cardanoCoin.id;
-  const filterdAssets = [];
-
-  if (assetBalances?.size) {
-    for (const [id, value] of assetBalances) {
-      const coinAmount = usedCoins[id.toString()] || '0';
-      const bigintAmount = Wallet.util.assetBalanceToBigInt(coinAmount, info.get(id));
-
-      if (bigintAmount < value) filterdAssets.push(id.toString());
-    }
-  }
-
-  return filterdAssets.length > 0 ? filterdAssets[0] : undefined;
-};
-
-interface IFormProps {
+interface Props {
   assets: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>;
   coinBalance: string;
   assetBalances: Tokens;
@@ -121,27 +41,25 @@ export const Form = ({
   assets,
   isLoading,
   prices
-}: IFormProps): React.ReactElement => {
+}: Props): React.ReactElement => {
   const { t } = useTranslation();
   const {
     inMemoryWallet,
-    walletUI: { cardanoCoin },
-    currentChain
+    walletUI: { cardanoCoin }
   } = useWalletStore();
   const balance = useObservable(inMemoryWallet.balance.utxo.total$);
   const { builtTxData: { totalMinimumCoins, uiTx } = {} } = useBuiltTxState();
-  const { setSection } = useSections();
-  const [row, setCurrentRow] = useCurrentRow();
+
   const [isBundle, setIsBundle] = useState(false);
   const tokensUsed = useSpentBalances();
   const spendableCoin = useMaxAda();
   const analytics = useAnalyticsContext();
-  const [insufficientBalanceInputs, setInsufficientBalanceInputs] = useState([]); // we save all the element input ids with insufficient balance error
+  const [insufficientBalanceInputs, setInsufficientBalanceInputs] = useState<string[]>([]); // we save all the element input ids with insufficient balance error
   const { lastFocusedInput } = useLastFocusedInput();
   const { fiatCurrency } = useCurrencyStore();
 
-  const { ids, uiOutputs, setNewOutput, removeExistingOutput } = useOutputs();
-  const handleRemoveRow = (id: string) => removeExistingOutput(id);
+  const { setNewOutput } = useOutputs();
+
   const isEmptyAssets = assetBalances?.size === 0;
 
   const handleAddRow = () => {
@@ -184,26 +102,6 @@ export const Form = ({
       });
     }
   }, [reachedMaxAmountList, lastFocusedInput]);
-
-  const canAddMoreAssets = (outputId: string): boolean => {
-    const assetsIdsUsedInOutput = new Set(uiOutputs[outputId].assets.map(({ id }: AssetInfo) => id));
-
-    return (
-      (!reachedMaxAmountList.has(cardanoAssetId) && !assetsIdsUsedInOutput.has(cardanoAssetId)) ||
-      (!!balance?.assets?.size &&
-        balance?.assets &&
-        [...balance.assets].some(
-          ([id]) => !reachedMaxAmountList.has(id.toString()) && !assetsIdsUsedInOutput.has(id.toString())
-        ))
-    );
-  };
-
-  const handleAssetPicker = (outputId: string, coinId?: string) => {
-    setSection({ currentSection: Sections.ASSET_PICKER, prevSection: Sections.FORM });
-    setCurrentRow(outputId, coinId);
-    setIsBundle(false);
-  };
-
   const fee = uiTx?.fee?.toString() ?? '0';
   const totalCost = getFee(fee.toString(), prices?.cardano?.price, cardanoCoin, fiatCurrency);
 
@@ -214,33 +112,16 @@ export const Form = ({
 
   return (
     <Skeleton loading={isLoading}>
-      {ids.map((bundleId, idx) => (
-        <RowContainer
-          key={bundleId}
-          id={bundleId}
-          focusRow={row}
-          data-testid="asset-bundle-container"
-          isBundle={isBundle}
-        >
-          {ids.length > 1 && (
-            <FormRowHeader
-              title={t('browserView.transaction.send.advanced.bundleTitle', { index: idx + 1 })}
-              onDeleteRow={() => handleRemoveRow(bundleId)}
-            />
-          )}
-          <AddressInput row={bundleId} currentNetwork={currentChain.networkId} isPopupView={isPopupView} />
-          <CoinInput
-            bundleId={bundleId}
-            assets={assets}
-            assetBalances={assetBalances}
-            coinBalance={coinBalance}
-            insufficientBalanceInputs={insufficientBalanceInputs}
-            onAddAsset={() => handleAssetPicker(bundleId)}
-            openAssetPicker={(coinId) => handleAssetPicker(bundleId, coinId)}
-            canAddMoreAssets={canAddMoreAssets(bundleId)}
-          />
-        </RowContainer>
-      ))}
+      <BundlesList
+        isPopupView={isPopupView}
+        coinBalance={coinBalance}
+        isBundle={isBundle}
+        setIsBundle={setIsBundle}
+        insufficientBalanceInputs={insufficientBalanceInputs}
+        reachedMaxAmountList={reachedMaxAmountList}
+        assets={assets}
+        assetBalances={assetBalances}
+      />
 
       {!isPopupView && (
         <div className={styles.actionsBtnContainer}>
