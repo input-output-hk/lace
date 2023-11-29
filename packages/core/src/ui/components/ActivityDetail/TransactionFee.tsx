@@ -17,9 +17,15 @@ export const TransactionFee = ({ fee, amountTransformer, coinSymbol }: Transacti
   return (
     <div className={styles.details}>
       <div className={styles.txFeeContainer}>
-        <div className={styles.txfee}>{t('package.core.activityDetails.transactionFee')}</div>
+        <div className={styles.txfee} data-testid="tx-fee-title">
+          {t('package.core.activityDetails.transactionFee')}
+        </div>
         <Tooltip title={t('package.core.activityDetails.transactionFeeInfo')}>
-          {Info ? <Info style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} /> : <InfoCircleOutlined />}
+          {Info ? (
+            <Info data-testid="tx-fee-tooltip-icon" style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} />
+          ) : (
+            <InfoCircleOutlined />
+          )}
         </Tooltip>
       </div>
 
