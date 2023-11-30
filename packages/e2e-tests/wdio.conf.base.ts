@@ -22,7 +22,12 @@ export const config: WebdriverIO.Config = {
   connectionRetryCount: 3,
   framework: 'cucumber',
   reporters: [
-    'spec',
+    [
+      'spec',
+      {
+        realtimeReporting: true
+      }
+    ],
     [
       'allure',
       {

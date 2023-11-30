@@ -209,6 +209,12 @@ const makeActionButtons = (
 ): ActionButtonSpec[] =>
   (
     [
+      manageDelegation && {
+        callback: tmpNoop,
+        dataTestId: 'stake-pool-details-manage-delegation-btn',
+        label: t('drawer.details.manageDelegation'),
+        ...getSpecOverride(manageDelegation),
+      },
       stakeOnThisPool && {
         callback: tmpNoop,
         dataTestId: 'stake-pool-details-stake-btn',
@@ -232,12 +238,6 @@ const makeActionButtons = (
         dataTestId: 'stake-pool-details-unselect-pool-btn',
         label: t('drawer.details.unselectPool'),
         ...getSpecOverride(unselectPool),
-      },
-      manageDelegation && {
-        callback: tmpNoop,
-        dataTestId: 'stake-pool-details-manage-delegation-btn',
-        label: t('drawer.details.manageDelegation'),
-        ...getSpecOverride(manageDelegation),
       },
     ] as (ActionButtonSpec | false)[]
   ).filter(Boolean) as ActionButtonSpec[];
@@ -291,13 +291,19 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
     });
   }, [viewedStakePool, analytics, portfolioMutators]);
 
+  const onManageDelegationClick = useCallback(() => {
+    if (!viewedStakePool) return;
+    analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailManageDelegation);
+    portfolioMutators.executeCommand({
+      type: 'ManageDelegationFromDetails',
+    });
+  }, [viewedStakePool, analytics, portfolioMutators]);
+
   const actionButtons = useMemo(
     () =>
       makeActionButtons(t, {
         addStakingPool: ableToSelect && !selectionsEmpty && { callback: onSelectClick },
-        // TODO: disabling this button for now
-        // eslint-disable-next-line sonarjs/no-redundant-boolean
-        manageDelegation: false && poolInCurrentPortfolio,
+        manageDelegation: poolInCurrentPortfolio && { callback: onManageDelegationClick },
         selectForMultiStaking: ableToSelect && selectionsEmpty && { callback: onSelectClick },
         stakeOnThisPool: selectionsEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
         unselectPool: poolSelected && { callback: onUnselectClick },
@@ -306,6 +312,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
       t,
       ableToSelect,
       selectionsEmpty,
+      onManageDelegationClick,
       onSelectClick,
       poolInCurrentPortfolio,
       ableToStakeOnlyOnThisPool,

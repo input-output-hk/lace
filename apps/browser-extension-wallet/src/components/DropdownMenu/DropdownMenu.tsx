@@ -11,6 +11,9 @@ import { useWalletStore } from '@src/stores';
 import { UserAvatar } from '../MainMenu/DropdownMenuOverlay/components';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { ProfileDropdown } from '@lace/ui';
+import { useGetHandles } from '@hooks';
+import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -20,6 +23,8 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
   const analytics = useAnalyticsContext();
   const { walletInfo } = useWalletStore();
   const [open, setOpen] = useState(false);
+  const [handle] = useGetHandles();
+  const handleImage = handle?.profilePic;
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
 
   const sendAnalyticsEvent = (event: PostHogAction) => {
@@ -41,20 +46,39 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       placement="bottomRight"
       trigger={['click']}
     >
-      <Button
-        variant="outlined"
-        color="secondary"
-        className={cn(styles.avatarBtn, { [styles.open]: open })}
-        data-testid="header-menu-button"
-      >
-        <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
-          <UserAvatar walletName={walletInfo.name} isPopup={isPopup} />
-          <Chevron
-            className={cn(styles.chevron, { [styles.open]: open })}
-            data-testid={`chevron-${open ? 'up' : 'down'}`}
+      {process.env.USE_MULTI_WALLET === 'true' ? (
+        <div className={styles.profileDropdownTrigger}>
+          <ProfileDropdown.Trigger
+            title={walletInfo.name}
+            subtitle="Account #0"
+            profile={
+              handleImage
+                ? {
+                    fallback: walletInfo.name,
+                    imageSrc: getAssetImageUrl(handleImage)
+                  }
+                : undefined
+            }
+            type="cold"
+            id="menu"
           />
-        </span>
-      </Button>
+        </div>
+      ) : (
+        <Button
+          variant="outlined"
+          color="secondary"
+          className={cn(styles.avatarBtn, { [styles.open]: open })}
+          data-testid="header-menu-button"
+        >
+          <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
+            <UserAvatar walletName={walletInfo.name} isPopup={isPopup} />
+            <Chevron
+              className={cn(styles.chevron, { [styles.open]: open })}
+              data-testid={`chevron-${open ? 'up' : 'down'}`}
+            />
+          </span>
+        </Button>
+      )}
     </Dropdown>
   );
 };

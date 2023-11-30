@@ -99,8 +99,8 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
         </Button>
       ) : (
         <Button
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          onClick={() => executeWithPassword(password!, onSubmit)}
+          // password defined only for inMemory wallet
+          onClick={() => (password ? executeWithPassword(password, onSubmit) : onSubmit())}
           className={styles.btn}
           size="large"
           loading={isLoading}

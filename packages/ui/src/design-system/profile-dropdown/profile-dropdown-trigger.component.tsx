@@ -58,6 +58,7 @@ export const Trigger = ({
           title={{ text: title, type: 'button' }}
           subtitle={subtitle}
           type={type}
+          testId={makeTestId(id)}
         />
 
         <Box ml="$10">

@@ -60,7 +60,8 @@ export const SidePanel = ({ sidePanelContent, isSidePanelFixed = true }: Section
   const topNavigation = (
     <div
       className={classnames(styles.navigationBox, {
-        [styles.navigationBoxOverlay]: isPanelVisible && isScreenTooSmallForSidePanel
+        [styles.navigationBoxOverlay]: isPanelVisible && isScreenTooSmallForSidePanel,
+        [styles.navigationBoxFlexible]: process.env.USE_MULTI_WALLET === 'true'
       })}
     >
       <SendReceiveBox />
@@ -88,8 +89,17 @@ export const SidePanel = ({ sidePanelContent, isSidePanelFixed = true }: Section
             [styles.topBarAlignment]: isScreenTooSmallForSidePanel
           })}
         >
-          {topNavigation}
-          {!isScreenTooSmallForSidePanel && sidePanelContent}
+          {process.env.USE_MULTI_WALLET === 'true' ? (
+            <>
+              <div className={styles.topNavigationBox}>{topNavigation}</div>
+              {!isScreenTooSmallForSidePanel && <div className={styles.sidePanelContentBox}>{sidePanelContent}</div>}
+            </>
+          ) : (
+            <>
+              {topNavigation}
+              {!isScreenTooSmallForSidePanel && sidePanelContent}
+            </>
+          )}
         </div>
       )}
     </aside>

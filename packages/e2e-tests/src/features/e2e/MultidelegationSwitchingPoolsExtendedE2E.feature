@@ -3,7 +3,6 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
 
   Background:
     Given Wallet is synced
-    And I disable showing Multidelegation beta banner
     And I navigate to Staking extended page
 
   @LW-7819 @Testnet @Pending
