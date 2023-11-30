@@ -26,7 +26,7 @@ type stakePoolsTableProps = {
 };
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'ros',
+  field: 'apy',
   order: 'desc'
 };
 
