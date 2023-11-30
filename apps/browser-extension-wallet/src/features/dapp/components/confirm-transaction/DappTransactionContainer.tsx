@@ -1,7 +1,7 @@
 import React from 'react';
 import { useObservable } from '@lace/common';
 import { useWalletStore } from '@stores';
-import { useCreateAssetList, useCreateMintedList, useTxSummary } from './hooks';
+import { useCreateAssetList, useCreateMintedAssetsList, useTxSummary } from './hooks';
 import { Skeleton } from 'antd';
 import { DappTransaction } from '@lace/core';
 import { TokenInfo } from '@src/utils/get-assets-information';
@@ -33,7 +33,7 @@ export const DappTransactionContainer = withAddressBookContext(
       assets,
       assetProvider
     });
-    const createMintedList = useCreateMintedList({
+    const createMintedAssetsList = useCreateMintedAssetsList({
       metadata: signTxData.tx.auxiliaryData?.blob,
       outputs: signTxData.tx.body.outputs,
       mint: signTxData.tx.body.mint,
@@ -43,7 +43,7 @@ export const DappTransactionContainer = withAddressBookContext(
     const txSummary = useTxSummary({
       addressList,
       createAssetList,
-      createMintedList,
+      createMintedAssetsList,
       tx: signTxData.tx,
       walletInfo
     });

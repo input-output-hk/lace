@@ -305,7 +305,7 @@ describe('Testing hooks', () => {
 
     const createTxInspectorSpy = jest
       .spyOn(Core, 'createTxInspector')
-      .mockReturnValueOnce(() => ({ minted: [], burned: [], votingProcedures: true }));
+      .mockReturnValue(() => ({ minted: [], burned: [], votingProcedures: true }));
 
     const tx = {
       body: {
@@ -332,15 +332,18 @@ describe('Testing hooks', () => {
       addresses: [{ address: 'address2' }, { address: 'address1' }]
     } as WalletInfo;
     const createAssetList = (txAssets: Wallet.Cardano.TokenMap) => txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
-    const createMintedList = (txAssets: AssetsMintedInspection) => txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
+    const createMintedAssetsList = (txAssets: AssetsMintedInspection) =>
+      txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
 
     let hook: any;
     await act(async () => {
-      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedList }));
+      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetsList }));
     });
 
     expect(hook.result.current).toEqual({
       fee: tx.body.fee.toString(),
+      burnedAssets: [],
+      mintedAssets: [],
       outputs: [
         {
           coins: tx.body.outputs[0].value.coins,
@@ -358,13 +361,15 @@ describe('Testing hooks', () => {
     hook.unmount();
 
     await act(async () => {
-      createTxInspectorSpy.mockReturnValueOnce(() => ({ minted: [], burned: [] }));
+      createTxInspectorSpy.mockReturnValue(() => ({ minted: [], burned: [] }));
 
-      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedList }));
+      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetsList }));
     });
 
     expect(hook.result.current).toEqual({
       fee: tx.body.fee.toString(),
+      burnedAssets: [],
+      mintedAssets: [],
       outputs: [
         {
           coins: tx.body.outputs[2].value.coins,
