@@ -43,7 +43,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
         <>
           {topSection}
           <Links>
-            {process.env.USE_MULTI_WALLET === 'true' && <AddNewWalletLink />}
+            {process.env.USE_MULTI_WALLET === 'true' && <AddNewWalletLink isPopup={isPopup} />}
             <AddressBookLink isPopup={isPopup} />
             <SettingsLink />
             <Separator />

@@ -23,6 +23,7 @@ import 'normalize.css';
 import '@lace/staking/index.css';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvider';
+import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
@@ -40,25 +41,27 @@ const App = (): React.ReactElement => (
             <AxiosClientProvider>
               <CurrencyStoreProvider>
                 <HashRouter>
-                  <PostHogClientProvider>
-                    <ExperimentsProvider>
-                      <AnalyticsProvider>
-                        <ThemeProvider>
-                          <UIThemeProvider>
-                            <ExternalLinkOpenerProvider>
-                              <MigrationContainer appMode={APP_MODE_BROWSER}>
-                                <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                  <AddressesDiscoveryOverlay>
-                                    <BrowserViewRoutes />
-                                  </AddressesDiscoveryOverlay>
-                                </DataCheckContainer>
-                              </MigrationContainer>
-                            </ExternalLinkOpenerProvider>
-                          </UIThemeProvider>
-                        </ThemeProvider>
-                      </AnalyticsProvider>
-                    </ExperimentsProvider>
-                  </PostHogClientProvider>
+                  <BackgroundPageProvider>
+                    <PostHogClientProvider>
+                      <ExperimentsProvider>
+                        <AnalyticsProvider>
+                          <ThemeProvider>
+                            <UIThemeProvider>
+                              <ExternalLinkOpenerProvider>
+                                <MigrationContainer appMode={APP_MODE_BROWSER}>
+                                  <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                    <AddressesDiscoveryOverlay>
+                                      <BrowserViewRoutes />
+                                    </AddressesDiscoveryOverlay>
+                                  </DataCheckContainer>
+                                </MigrationContainer>
+                              </ExternalLinkOpenerProvider>
+                            </UIThemeProvider>
+                          </ThemeProvider>
+                        </AnalyticsProvider>
+                      </ExperimentsProvider>
+                    </PostHogClientProvider>
+                  </BackgroundPageProvider>
                 </HashRouter>
               </CurrencyStoreProvider>
             </AxiosClientProvider>
