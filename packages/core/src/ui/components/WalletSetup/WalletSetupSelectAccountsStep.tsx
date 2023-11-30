@@ -43,7 +43,12 @@ export const WalletSetupSelectAccountsStep = ({
     >
       <div className={styles.walletSetupSelectAccountsStep}>
         {Array.from({ length: accounts }).map((_, index) => (
-          <div key={index} className={styles.account} onClick={() => setSelectedAccount(index)}>
+          <div
+            key={index}
+            className={styles.account}
+            onClick={() => setSelectedAccount(index)}
+            data-testid={`select-account-${index}`}
+          >
             <Radio checked={selectedAccount === index} />
             <p>
               {t('core.walletSetupSelectAccountsStep.account')} {index + 1} {index === 0 && '- Default'}
