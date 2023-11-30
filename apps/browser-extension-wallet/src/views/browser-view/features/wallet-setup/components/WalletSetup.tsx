@@ -1,4 +1,10 @@
-import { useTranslate, WalletSetupOptionsStep, WalletSetupSteps } from '@lace/core';
+import {
+  useTranslate,
+  WalletSetupOptionsStep,
+  WalletSetupSteps,
+  WalletSetupFlowProvider,
+  WalletSetupFlow
+} from '@lace/core';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import {
   MatomoEventActions,
@@ -166,82 +172,84 @@ export const WalletSetup = ({ initialStep = WalletSetupSteps.Legal }: WalletSetu
   };
 
   return (
-    <Portal>
-      <Switch>
-        <Route exact path={`${path}/`}>
-          <WalletSetupLayout>
-            <WalletSetupOptionsStep
-              onNewWalletRequest={handleCreateNewWallet}
-              onHardwareWalletRequest={handleStartHardwareOnboarding}
-              onRestoreWalletRequest={handleRestoreWallet}
-              translations={walletSetupOptionsStepTranslations}
+    <WalletSetupFlowProvider flow={WalletSetupFlow.ONBOARDING}>
+      <Portal>
+        <Switch>
+          <Route exact path={`${path}/`}>
+            <WalletSetupLayout>
+              <WalletSetupOptionsStep
+                onNewWalletRequest={handleCreateNewWallet}
+                onHardwareWalletRequest={handleStartHardwareOnboarding}
+                onRestoreWalletRequest={handleRestoreWallet}
+                translations={walletSetupOptionsStepTranslations}
+              />
+              <WarningModal
+                header={translate('browserView.walletSetup.confirmRestoreModal.header')}
+                content={
+                  <div className={styles.confirmResetContent}>
+                    <p>
+                      <Trans
+                        components={{
+                          b: <b />
+                        }}
+                        i18nKey="browserView.walletSetup.confirmRestoreModal.content"
+                      />
+                    </p>
+                  </div>
+                }
+                visible={isConfirmRestoreOpen}
+                confirmLabel={translate('browserView.walletSetup.confirmRestoreModal.confirm')}
+                onCancel={handleCancelRestoreWarning}
+                onConfirm={handleConfirmRestoreWarning}
+              />
+              <WarningModal
+                header={translate('browserView.walletSetup.confirmExperimentalHwDapp.header')}
+                content={
+                  <div className={styles.confirmResetContent}>
+                    <p>
+                      <Trans i18nKey="browserView.walletSetup.confirmExperimentalHwDapp.content" />
+                    </p>
+                  </div>
+                }
+                visible={isDappConnectorWarningOpen}
+                confirmLabel={translate('browserView.walletSetup.confirmExperimentalHwDapp.confirm')}
+                onCancel={() => setIsDappConnectorWarningOpen(false)}
+                onConfirm={() => {
+                  setIsDappConnectorWarningOpen(false);
+                  sendAnalytics({
+                    category: MatomoEventCategories.HW_CONNECT,
+                    eventName: Events.CONNECT_HW_START
+                  });
+                  history.push(walletRoutePaths.setup.hardware);
+                }}
+              />
+            </WalletSetupLayout>
+          </Route>
+          <Route path={`${path}/create`}>
+            <WalletSetupWizard
+              setupType={SetupType.CREATE}
+              onCancel={cancelWalletFlow}
+              sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_CREATE)}
+              initialStep={initialStep}
             />
-            <WarningModal
-              header={translate('browserView.walletSetup.confirmRestoreModal.header')}
-              content={
-                <div className={styles.confirmResetContent}>
-                  <p>
-                    <Trans
-                      components={{
-                        b: <b />
-                      }}
-                      i18nKey="browserView.walletSetup.confirmRestoreModal.content"
-                    />
-                  </p>
-                </div>
-              }
-              visible={isConfirmRestoreOpen}
-              confirmLabel={translate('browserView.walletSetup.confirmRestoreModal.confirm')}
-              onCancel={handleCancelRestoreWarning}
-              onConfirm={handleConfirmRestoreWarning}
+          </Route>
+          <Route path={`${path}/restore`}>
+            <WalletSetupWizard
+              setupType={isForgotPasswordFlow ? SetupType.FORGOT_PASSWORD : SetupType.RESTORE}
+              onCancel={cancelWalletFlow}
+              sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_RESTORE)}
+              initialStep={initialStep}
             />
-            <WarningModal
-              header={translate('browserView.walletSetup.confirmExperimentalHwDapp.header')}
-              content={
-                <div className={styles.confirmResetContent}>
-                  <p>
-                    <Trans i18nKey="browserView.walletSetup.confirmExperimentalHwDapp.content" />
-                  </p>
-                </div>
-              }
-              visible={isDappConnectorWarningOpen}
-              confirmLabel={translate('browserView.walletSetup.confirmExperimentalHwDapp.confirm')}
-              onCancel={() => setIsDappConnectorWarningOpen(false)}
-              onConfirm={() => {
-                setIsDappConnectorWarningOpen(false);
-                sendAnalytics({
-                  category: MatomoEventCategories.HW_CONNECT,
-                  eventName: Events.CONNECT_HW_START
-                });
-                history.push(walletRoutePaths.setup.hardware);
-              }}
+          </Route>
+          <Route path={`${path}/hardware`}>
+            <HardwareWalletFlow
+              onCancel={cancelWalletFlow}
+              onAppReload={() => location.reload()}
+              sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.HW_CONNECT)}
             />
-          </WalletSetupLayout>
-        </Route>
-        <Route path={`${path}/create`}>
-          <WalletSetupWizard
-            setupType={SetupType.CREATE}
-            onCancel={cancelWalletFlow}
-            sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_CREATE)}
-            initialStep={initialStep}
-          />
-        </Route>
-        <Route path={`${path}/restore`}>
-          <WalletSetupWizard
-            setupType={isForgotPasswordFlow ? SetupType.FORGOT_PASSWORD : SetupType.RESTORE}
-            onCancel={cancelWalletFlow}
-            sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.WALLET_RESTORE)}
-            initialStep={initialStep}
-          />
-        </Route>
-        <Route path={`${path}/hardware`}>
-          <HardwareWalletFlow
-            onCancel={cancelWalletFlow}
-            onAppReload={() => location.reload()}
-            sendAnalytics={getSendAnalyticsHandler(MatomoEventCategories.HW_CONNECT)}
-          />
-        </Route>
-      </Switch>
-    </Portal>
+          </Route>
+        </Switch>
+      </Portal>
+    </WalletSetupFlowProvider>
   );
 };
