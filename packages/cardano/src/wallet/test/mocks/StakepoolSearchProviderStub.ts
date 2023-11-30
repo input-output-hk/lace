@@ -20,7 +20,9 @@ export const pools: Partial<Cardano.StakePool>[] = [
       livePledge: BigInt('2000000000'),
       saturation: Percent(0.211),
       size: undefined,
-      stake: undefined
+      stake: undefined,
+      lastRos: Percent(1),
+      ros: Percent(2)
     },
     margin: {
       numerator: 2.01,
@@ -58,7 +60,9 @@ export const pools: Partial<Cardano.StakePool>[] = [
       stake: {
         live: BigInt('201000000'),
         active: BigInt('201000000')
-      }
+      },
+      lastRos: Percent(1),
+      ros: Percent(2)
     },
     metadata: {
       name: 'THE AMSTERDAM NODE',
@@ -92,7 +96,9 @@ export const pools: Partial<Cardano.StakePool>[] = [
       stake: {
         live: BigInt('77000000'),
         active: BigInt('77000000')
-      }
+      },
+      lastRos: Percent(1),
+      ros: Percent(2)
     }
   },
   {
@@ -114,7 +120,9 @@ export const pools: Partial<Cardano.StakePool>[] = [
       stake: {
         live: BigInt('34000000'),
         active: BigInt('34000000')
-      }
+      },
+      lastRos: Percent(1),
+      ros: Percent(2)
     },
     metadata: {
       name: 'stakit.io Pool by TOBG',
@@ -144,7 +152,9 @@ export const pools: Partial<Cardano.StakePool>[] = [
       stake: {
         live: BigInt('53000000'),
         active: BigInt('53000000')
-      }
+      },
+      lastRos: Percent(1),
+      ros: Percent(2)
     },
     margin: {
       numerator: 0.79,
@@ -172,7 +182,9 @@ export const pools: Partial<Cardano.StakePool>[] = [
       stake: {
         live: BigInt('53000000'),
         active: BigInt('53000000')
-      }
+      },
+      lastRos: Percent(1),
+      ros: Percent(2)
     },
     metadata: {
       name: 'VEGASPool',
@@ -202,7 +214,9 @@ const detailsForAll: PoolDetails = {
     stake: {
       live: BigInt('34000000'),
       active: BigInt('34000000')
-    }
+    },
+    lastRos: Percent(1),
+    ros: Percent(2)
   },
   relays: undefined,
   rewardAccount: Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
