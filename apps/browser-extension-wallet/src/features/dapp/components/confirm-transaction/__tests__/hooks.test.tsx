@@ -332,12 +332,12 @@ describe('Testing hooks', () => {
       addresses: [{ address: 'address2' }, { address: 'address1' }]
     } as WalletInfo;
     const createAssetList = (txAssets: Wallet.Cardano.TokenMap) => txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
-    const createMintedAssetsList = (txAssets: AssetsMintedInspection) =>
+    const createMintedAssetList = (txAssets: AssetsMintedInspection) =>
       txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
 
     let hook: any;
     await act(async () => {
-      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetsList }));
+      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetList }));
     });
 
     expect(hook.result.current).toEqual({
@@ -363,7 +363,7 @@ describe('Testing hooks', () => {
     await act(async () => {
       createTxInspectorSpy.mockReturnValue(() => ({ minted: [], burned: [] }));
 
-      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetsList }));
+      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetList }));
     });
 
     expect(hook.result.current).toEqual({

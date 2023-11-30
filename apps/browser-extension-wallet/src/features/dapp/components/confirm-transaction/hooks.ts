@@ -99,7 +99,7 @@ const getAssetNameFromMintMetadata = (asset: MintedAsset, metadata: Wallet.Carda
     return typeof assetMetadataName === 'string' ? assetMetadataName : undefined;
   }
 };
-export const useCreateMintedAssetsList = ({
+export const useCreateMintedAssetList = ({
   assets,
   outputs,
   assetProvider,
@@ -203,13 +203,13 @@ export const useTxSummary = ({
   addressList,
   walletInfo,
   createAssetList,
-  createMintedAssetsList
+  createMintedAssetList
 }: {
   addressList: AddressListType[];
   walletInfo: WalletInfo;
   tx: Wallet.Cardano.Tx;
   createAssetList: (txAssets: Wallet.Cardano.TokenMap) => Wallet.Cip30SignTxAssetItem[];
-  createMintedAssetsList: (txAssets: AssetsMintedInspection) => Wallet.Cip30SignTxAssetItem[];
+  createMintedAssetList: (txAssets: AssetsMintedInspection) => Wallet.Cip30SignTxAssetItem[];
 }): Wallet.Cip30SignTxSummary | undefined =>
   useMemo((): Wallet.Cip30SignTxSummary | undefined => {
     const txType = getTxType(tx);
@@ -249,10 +249,10 @@ export const useTxSummary = ({
       fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
       outputs: txSummaryOutputs,
       type: txType,
-      mintedAssets: createMintedAssetsList(minted),
-      burnedAssets: createMintedAssetsList(burned)
+      mintedAssets: createMintedAssetList(minted),
+      burnedAssets: createMintedAssetList(burned)
     };
-  }, [tx, addressList, createMintedAssetsList, walletInfo.addresses, createAssetList]);
+  }, [tx, addressList, createMintedAssetList, walletInfo.addresses, createAssetList]);
 
 export const useOnBeforeUnload = (callBack: () => void): void => {
   useEffect(() => {
