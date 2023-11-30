@@ -4,6 +4,7 @@ import { Box, Flex, Button, Text, TextBox } from '@lace/ui';
 import { Drawer, DrawerNavigation } from '@lace/common';
 
 export type Props = {
+  isPopup?: boolean;
   onSave: (name: string) => void;
   visible: boolean;
   hide: () => void;
@@ -11,7 +12,14 @@ export type Props = {
   index: number;
 };
 
-export const EditAccountDrawer = ({ name, index, visible, onSave, hide }: Props): React.ReactElement => {
+export const EditAccountDrawer = ({
+  name,
+  index,
+  visible,
+  onSave,
+  hide,
+  isPopup = false
+}: Props): React.ReactElement => {
   const { t } = useTranslation();
   const [currentName, setCurrentName] = useState(name);
 
@@ -20,6 +28,7 @@ export const EditAccountDrawer = ({ name, index, visible, onSave, hide }: Props)
       zIndex={1100}
       open={visible}
       navigation={<DrawerNavigation title={name || `Account #${index}`} onCloseIconClick={hide} />}
+      popupView={isPopup}
       footer={
         <Flex flexDirection="column">
           <Box mb="$16" w="$fill">

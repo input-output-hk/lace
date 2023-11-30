@@ -60,7 +60,7 @@ const exampleAccountData = [
   }
 ];
 
-export const WalletAccounts = ({ onBack, isPopup }: { onBack: () => void; isPopup: boolean }): React.ReactElement => {
+export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: () => void }): React.ReactElement => {
   const { t } = useTranslation();
   const editAccountDrawer = useEditAccountDrawer();
   const [mockAccountData, updateMockAccountData] = useState<AccountData[]>(exampleAccountData);
@@ -81,7 +81,8 @@ export const WalletAccounts = ({ onBack, isPopup }: { onBack: () => void; isPopu
         </div>
         <div
           className={isPopup ? styles.popUpContent : styles.extendedContent}
-          data-testid="user-dropdown-wallet-account-list">
+          data-testid="user-dropdown-wallet-account-list"
+        >
           <ProfileDropdown.AccountsList
             unlockLabel={t('browserView.settings.wallet.accounts.unlockLabel')}
             onAccountEditClick={(accountNumber) =>
@@ -104,6 +105,7 @@ export const WalletAccounts = ({ onBack, isPopup }: { onBack: () => void; isPopu
         hide={editAccountDrawer.hide}
         name={editAccountDrawer.accountData?.label}
         index={editAccountDrawer.accountData?.accountNumber}
+        isPopup={isPopup}
       />
     </>
   );
