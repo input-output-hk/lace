@@ -39,6 +39,7 @@ export const AccountItem = ({
       <ProfilePicture.UserProfile
         imageSrc=""
         fallback={accountNumber.toString()}
+        delayMs={0}
         data-testid="wallet-account-item-icon"
       />
       <Flex flexDirection="column">
