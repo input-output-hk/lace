@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useEffect, useMemo } from 'react';
-import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { Modal } from 'antd';
 
 import styles from './MultiWallet.module.scss';
@@ -15,6 +15,8 @@ import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
+import { NavigationButton } from '@lace/common';
+import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 
 const { newWallet } = walletRoutePaths;
 
@@ -67,6 +69,8 @@ export const SetupRestoreWallet = (): JSX.Element => (
 
 export const MultiWallet = (): JSX.Element => {
   const { path } = useRouteMatch();
+  const history = useHistory();
+  const { page, setBackgroundPage } = useBackgroundPage();
 
   return (
     <WalletSetupFlowProvider flow={WalletSetupFlow.ADD_WALLET}>
@@ -79,6 +83,15 @@ export const MultiWallet = (): JSX.Element => {
         width="100%"
         className={styles.modal}
       >
+        <div className={styles.closeButton}>
+          <NavigationButton
+            icon="cross"
+            onClick={() => {
+              setBackgroundPage();
+              history.push(page);
+            }}
+          />
+        </div>
         <Switch>
           <Route path={newWallet.create.root} component={SetupCreateWallet} />
           <Route path={newWallet.hardware.root} component={SetupHardwareWallet} />

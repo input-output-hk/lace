@@ -41,3 +41,15 @@ $container-width: 840px;
     height: 100%;
   }
 }
+
+.closeButton {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+
+  :global(.ant-btn-icon-only) {
+    height: size_unit(5);
+    width: size_unit(5);
+    z-index: 1;
+  }
+}

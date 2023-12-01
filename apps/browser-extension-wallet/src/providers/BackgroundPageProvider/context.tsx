@@ -7,7 +7,7 @@ interface Props {
 
 interface State {
   page?: Location<unknown>;
-  setBackgroundPage: (page: Location) => void;
+  setBackgroundPage: (page?: Location) => void;
 }
 
 // eslint-disable-next-line unicorn/no-null
