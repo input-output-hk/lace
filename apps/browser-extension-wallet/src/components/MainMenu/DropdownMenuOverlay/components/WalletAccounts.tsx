@@ -22,7 +22,7 @@ export const WalletAccounts = ({ onBack }: { onBack: () => void }): React.ReactE
       </div>
       <div className={styles.content} data-testid="user-dropdown-wallet-account-list">
         <ProfileDropdown.AccountsList
-          unlockLabel="unlock"
+          unlockLabel={t('browserView.settings.wallet.accounts.unlockLabel')}
           accounts={[
             {
               accountNumber: 1,

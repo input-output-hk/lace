@@ -772,7 +772,8 @@
         },
         "accounts": {
           "title": "Accounts",
-          "description": "Select your preferred account."
+          "description": "Select your preferred account.",
+          "unlockLabel": "Unlock"
         },
         "general": {
           "title": "Your keys",
