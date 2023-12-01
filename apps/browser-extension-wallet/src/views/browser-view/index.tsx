@@ -8,7 +8,8 @@ import {
   AxiosClientProvider,
   AppSettingsProvider,
   ThemeProvider,
-  AnalyticsProvider
+  AnalyticsProvider,
+  UIThemeProvider
 } from '@providers';
 import { CardanoWalletManagerProvider } from '@providers/CardanoWalletManager';
 import { StoreProvider } from '@stores';
@@ -43,15 +44,17 @@ const App = (): React.ReactElement => (
                     <ExperimentsProvider>
                       <AnalyticsProvider>
                         <ThemeProvider>
-                          <ExternalLinkOpenerProvider>
-                            <MigrationContainer appMode={APP_MODE_BROWSER}>
-                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                <AddressesDiscoveryOverlay>
-                                  <BrowserViewRoutes />
-                                </AddressesDiscoveryOverlay>
-                              </DataCheckContainer>
-                            </MigrationContainer>
-                          </ExternalLinkOpenerProvider>
+                          <UIThemeProvider>
+                            <ExternalLinkOpenerProvider>
+                              <MigrationContainer appMode={APP_MODE_BROWSER}>
+                                <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                  <AddressesDiscoveryOverlay>
+                                    <BrowserViewRoutes />
+                                  </AddressesDiscoveryOverlay>
+                                </DataCheckContainer>
+                              </MigrationContainer>
+                            </ExternalLinkOpenerProvider>
+                          </UIThemeProvider>
                         </ThemeProvider>
                       </AnalyticsProvider>
                     </ExperimentsProvider>

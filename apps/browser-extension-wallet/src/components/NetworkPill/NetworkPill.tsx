@@ -8,9 +8,10 @@ import { useTranslation } from 'react-i18next';
 
 interface NetworkPillProp {
   isExpandable?: boolean;
+  isPopup?: boolean;
 }
 
-export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => {
+export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp): ReactElement => {
   const { environmentName } = useWalletStore();
   const { t } = useTranslation();
   const { isOnline, isBackendFailing } = useNetwork();
@@ -19,10 +20,19 @@ export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => 
     if (isOnline && !isBackendFailing && environmentName !== 'Mainnet') {
       return (
         <div
-          className={classnames(styles.networkPill, { [styles.expandablePill]: isExpandable })}
+          className={classnames(styles.networkPill, {
+            [styles.expandablePill]: isExpandable,
+            [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true' && isPopup
+          })}
           data-testid="network-pill"
         >
-          <span className={classnames({ [styles.networkPillText]: isExpandable })}>{environmentName}</span>
+          <span
+            className={classnames({
+              [styles.networkPillText]: isExpandable
+            })}
+          >
+            {environmentName}
+          </span>
         </div>
       );
     }
@@ -30,7 +40,10 @@ export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => 
       return (
         <Tooltip title={t('general.networks.error')} placement="rightBottom">
           <div
-            className={classnames(styles.offlinePill, { [styles.expandablePill]: isExpandable })}
+            className={classnames(styles.offlinePill, {
+              [styles.expandablePill]: isExpandable,
+              [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true' && isPopup
+            })}
             data-testid="network-pill"
           >
             <div className={styles.offlinePillText}>
@@ -45,7 +58,10 @@ export const NetworkPill = ({ isExpandable }: NetworkPillProp): ReactElement => 
       return (
         <Tooltip title={t('general.networks.connectionUnavailable.error')} placement="rightBottom">
           <div
-            className={classnames(styles.offlinePill, { [styles.expandablePill]: isExpandable })}
+            className={classnames(styles.offlinePill, {
+              [styles.expandablePill]: isExpandable,
+              [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true' && isPopup
+            })}
             data-testid="backend-pill"
           >
             <div className={styles.offlinePillText}>

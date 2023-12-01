@@ -59,7 +59,11 @@ export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.Reac
         <div className={styles.stickyMenuInner}>
           <div className={styles.logoContainer}>
             {logo}
-            {!isNarrowWindow && <NetworkPill />}
+            {!isNarrowWindow && (
+              <div className={styles.networkPillBox}>
+                <NetworkPill />
+              </div>
+            )}
           </div>
           <SideMenu />
         </div>

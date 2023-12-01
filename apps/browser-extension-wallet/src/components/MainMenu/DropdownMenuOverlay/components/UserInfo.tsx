@@ -11,6 +11,8 @@ import { UserAvatar } from './UserAvatar';
 import { useGetHandles } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { ProfileDropdown } from '@lace/ui';
+import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -36,6 +38,7 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
   const walletName = addEllipsis(walletInfo.name.toString(), WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
   const handleName = handle?.nftMetadata?.name;
+  const handleImage = handle?.profilePic;
 
   const handleOnAddressCopy = () => {
     toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') });
@@ -44,29 +47,51 @@ export const UserInfo = ({ avatarVisible = true }: UserInfoProps): React.ReactEl
 
   return (
     <Menu.ItemGroup className={classnames(styles.menuItem, styles.borderBottom)} data-testid="header-menu-user-info">
-      <div className={styles.userInfoWrapper}>
+      <div
+        className={classnames(styles.userInfoWrapper, {
+          [styles.singleWalletWrapper]: process.env.USE_MULTI_WALLET !== 'true',
+          [styles.multiWalletWrapper]: process.env.USE_MULTI_WALLET === 'true'
+        })}
+      >
         <CopyToClipboard text={handleName || walletAddress}>
-          <AntdTooltip
-            overlayInnerStyle={overlayInnerStyle}
-            placement="top"
-            title={
-              <span className={styles.tooltip}>
-                {handleName ? t('settings.copyHandle') : t('settings.copyAddress')}
-              </span>
-            }
-          >
-            <div className={styles.userInfo} onClick={handleOnAddressCopy}>
-              {avatarVisible && <UserAvatar walletName={walletName} />}
-              <div className={styles.userMeta} data-testid="header-menu-user-details">
-                <p className={styles.walletName} data-testid="header-menu-wallet-name">
-                  {walletName}
-                </p>
-                <p className={styles.walletAddress} data-testid="header-menu-wallet-address">
-                  {handleName || shortenedWalletAddress}
-                </p>
+          {process.env.USE_MULTI_WALLET === 'true' ? (
+            <ProfileDropdown.WalletOption
+              title={walletInfo.name}
+              subtitle="Account #0"
+              id={walletName}
+              profile={
+                handleImage
+                  ? {
+                      fallback: walletInfo.name,
+                      imageSrc: getAssetImageUrl(handleImage)
+                    }
+                  : undefined
+              }
+              type="cold"
+            />
+          ) : (
+            <AntdTooltip
+              overlayInnerStyle={overlayInnerStyle}
+              placement="top"
+              title={
+                <span className={styles.tooltip}>
+                  {handleName ? t('settings.copyHandle') : t('settings.copyAddress')}
+                </span>
+              }
+            >
+              <div className={styles.userInfo} onClick={handleOnAddressCopy}>
+                {avatarVisible && <UserAvatar walletName={walletName} />}
+                <div className={styles.userMeta} data-testid="header-menu-user-details">
+                  <p className={styles.walletName} data-testid="header-menu-wallet-name">
+                    {walletName}
+                  </p>
+                  <p className={styles.walletAddress} data-testid="header-menu-wallet-address">
+                    {handleName || shortenedWalletAddress}
+                  </p>
+                </div>
               </div>
-            </div>
-          </AntdTooltip>
+            </AntdTooltip>
+          )}
         </CopyToClipboard>
         <div className={styles.walletStatusInfo}>
           <WalletStatusContainer />
