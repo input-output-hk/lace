@@ -7,7 +7,6 @@ Feature: Staking Page - Extended View
   @LW-8931 @Testnet
   Scenario: Extended View - Start Staking component
     Given I save token: "Cardano" balance
-    And I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     Then I see Start Staking page in extended mode
 
@@ -23,14 +22,12 @@ Feature: Staking Page - Extended View
 
   @LW-8449 @Testnet @Mainnet
   Scenario: Extended View - Staking search control is displayed with appropriate content
-    Given I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     And I click Browse pools tab
     Then I see the stake pool search control with appropriate content
 
   @LW-8448 @Testnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
-    Given I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     And I click Browse pools tab
     And I input "<stake_pool_search_term>" into stake pool search bar
@@ -49,7 +46,6 @@ Feature: Staking Page - Extended View
 
   @LW-8448 @Mainnet
   Scenario Outline: Extended View - Stake pool search for "<stake_pool_search_term>" returns the expected number of results <number_of_results> with appropriate content
-    Given I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     And I click Browse pools tab
     And I input "<stake_pool_search_term>" into stake pool search bar
@@ -69,12 +65,10 @@ Feature: Staking Page - Extended View
   @LW-8466 @Testnet @Mainnet
   Scenario: Extended View - "About staking" widget
     Given I am on Staking extended page
-    And I close Multi-delegation beta modal
     Then I see "About staking" widget with all relevant items
 
   @LW-8465 @Testnet @Mainnet
   Scenario Outline: Extended View - "About staking" widget item click - <subtitle>
-    Given I disable showing Multidelegation beta banner
     And I am on Staking extended page
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
@@ -87,13 +81,11 @@ Feature: Staking Page - Extended View
 
   @LW-8469 @Testnet @Mainnet
   Scenario: Extended View - Network info component is present with expected content
-    Given I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     Then I see the Network Info component with the expected content
 
   @LW-8499 @Testnet @Mainnet
   Scenario Outline: Extended View - Staking - Show tooltip for column names in browse pools section
-    Given I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     And I click Browse pools tab
     When I hover over "<column_name>" column name in stake pool list
@@ -105,7 +97,6 @@ Feature: Staking Page - Extended View
 
   @LW-8637 @Testnet @Mainnet
   Scenario: Extended View - Staking password screen details
-    Given I disable showing Multidelegation beta banner
     When I navigate to Staking extended page
     And I click Overview tab
     And I click Browse pools tab
@@ -118,7 +109,6 @@ Feature: Staking Page - Extended View
 
   @LW-8445 @Testnet
   Scenario: Extended View - Selecting stakepool from list opens drawer with appropriate details
-    Given I disable showing Multidelegation beta banner
     And I am on Staking extended page
     And I click Browse pools tab
     And I input "ADA Capital" into stake pool search bar
@@ -127,7 +117,6 @@ Feature: Staking Page - Extended View
 
   @LW-8438 @Testnet
   Scenario: Extended View - Staking - Stakepool details drawer - Close drawer
-    Given I disable showing Multidelegation beta banner
     And I am on Staking extended page
     And I click Browse pools tab
     And I input "ADA Capital" into stake pool search bar
@@ -137,7 +126,6 @@ Feature: Staking Page - Extended View
 
   @LW-8463 @Testnet @Mainnet
   Scenario: Extended View - Stake pool list item
-    Given I disable showing Multidelegation beta banner
     And I am on Staking extended page
     And I click Browse pools tab
     And I wait for stake pool list to be populated

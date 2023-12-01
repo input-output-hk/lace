@@ -18,6 +18,9 @@ import {
   GoToActivity,
   GoToBrowsePools,
   GoToOverview,
+  HwSkipToFailure,
+  HwSkipToSuccess,
+  ManageDelegationFromDetails,
   ManagePortfolio,
   NewPortfolioConfirmationCommand,
   NewPortfolioFailureCommand,
@@ -224,6 +227,15 @@ export const processExpandedViewCases: Handler = (params) =>
             ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
             viewedStakePool: undefined,
           })),
+          ManageDelegationFromDetails: handler<ManageDelegationFromDetails, StatePoolDetails, StatePortfolioManagement>(
+            ({ state }) => ({
+              ...state,
+              activeDelegationFlow: DelegationFlow.PortfolioManagement,
+              activeDrawerStep: DrawerManagementStep.Preferences,
+              draftPortfolio: currentPortfolioToDraft(state.currentPortfolio),
+              viewedStakePool: undefined,
+            })
+          ),
           SelectPoolFromDetails: handler<SelectPoolFromDetails, StatePoolDetails, StateBrowsePools>(
             ({ state, command: { data } }) => ({
               ...state,
@@ -300,6 +312,18 @@ export const processExpandedViewCases: Handler = (params) =>
                   activeDrawerStep: DrawerManagementStep.Sign,
                 })
               ),
+              HwSkipToFailure: handler<HwSkipToFailure, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Failure,
+                })
+              ),
+              HwSkipToSuccess: handler<HwSkipToSuccess, StatePortfolioManagement, StatePortfolioManagement>(
+                ({ state }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Success,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Confirmation
@@ -351,10 +375,6 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
-              })),
-              DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
-                ...state,
-                activeDrawerStep: DrawerManagementStep.Sign,
               })),
               DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state }) => ({
@@ -411,12 +431,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Confirmation,
-                })
-              ),
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Confirmation,
+              })),
               RemoveStakePool: handler<RemoveStakePool, StateNewPortfolio, StateNewPortfolio>(
                 ({ state, command: { data } }) => ({
                   ...state,
@@ -449,12 +467,18 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Preferences,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Sign,
-                })
-              ),
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Sign,
+              })),
+              HwSkipToFailure: handler<HwSkipToFailure, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Failure,
+              })),
+              HwSkipToSuccess: handler<HwSkipToSuccess, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Success,
+              })),
             },
             params.command.type,
             DrawerManagementStep.Confirmation
@@ -471,18 +495,14 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Confirmation,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Success,
-                })
-              ),
-              DrawerFailure: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Failure,
-                })
-              ),
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Success,
+              })),
+              DrawerFailure: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+                ...state,
+                activeDrawerStep: DrawerManagementStep.Failure,
+              })),
             },
             params.command.type,
             DrawerManagementStep.Sign
@@ -507,16 +527,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
               })),
-              DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
+              DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
-                activeDrawerStep: DrawerManagementStep.Sign,
+                activeDrawerStep: DrawerManagementStep.Success,
               })),
-              DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
-                  ...state,
-                  activeDrawerStep: DrawerManagementStep.Success,
-                })
-              ),
             },
             params.command.type,
             DrawerManagementStep.Failure

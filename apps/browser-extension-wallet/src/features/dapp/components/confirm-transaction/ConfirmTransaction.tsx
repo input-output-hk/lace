@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import React, { useMemo } from 'react';
-import { Button } from '@lace/common';
+import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
@@ -14,6 +14,9 @@ import { DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { getTitleKey, getTxType } from './utils';
 import { ConfirmTransactionContent } from './ConfirmTransactionContent';
+import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
+import { useAnalyticsContext } from '@providers';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -34,6 +37,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
     []
   );
   const { getKeyAgentType } = useWalletStore();
+  const analytics = useAnalyticsContext();
   const { signTxData, errorMessage } = useSignTxData(dappDataApi.getSignTxData);
   const keyAgentType = getKeyAgentType();
   const isUsingHardwareWallet = keyAgentType !== Wallet.KeyManagement.KeyAgentType.InMemory;
@@ -41,6 +45,19 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet();
   const txType = signTxData ? getTxType(signTxData.tx) : undefined;
   const title = txType ? t(getTitleKey(txType)) : '';
+  const onConfirm = () => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+
+    txSubmitted$.next({
+      id: signTxData.tx?.id.toString(),
+      date: new Date().toString(),
+      creationType: TxCreationType.External
+    });
+
+    isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
+  };
 
   useOnBeforeUnload(disallowSignTx);
 
@@ -49,9 +66,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
       <ConfirmTransactionContent txType={txType} signTxData={signTxData} errorMessage={errorMessage} />
       <div className={styles.actions}>
         <Button
-          onClick={async () => {
-            isUsingHardwareWallet ? await signWithHardwareWallet() : setNextView();
-          }}
+          onClick={onConfirm}
           disabled={!!errorMessage}
           loading={isUsingHardwareWallet && isConfirmingTx}
           data-testid="dapp-transaction-confirm"

@@ -1,6 +1,9 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
+import * as CurrencyProvider from '@providers/currency';
+import * as UseFetchCoinPrice from '@hooks/useFetchCoinPrice';
+
 const mockSkeleton = jest.fn(() => <span data-testid="skeleton" />);
 const mockUseWalletStore = jest.fn();
 const t = jest.fn().mockImplementation((res) => res);
@@ -8,7 +11,10 @@ const mockUseTranslation = jest.fn(() => ({ t }));
 const mockDappTransaction = jest.fn();
 const mockUseTxSummary = jest.fn();
 const mockUseCreateAssetList = jest.fn();
+const mockUseCreateMintedAssetList = jest.fn();
 const mockWithAddressBookContext = jest.fn((children) => children);
+const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: 'usd', symbol: '$' } });
+const mockUseFetchCoinPrice = jest.fn().mockReturnValue({ priceResult: { cardano: { price: 2 }, tokens: new Map() } });
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { DappTransactionContainer } from '../DappTransactionContainer';
@@ -53,6 +59,14 @@ jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
   useWalletStore: mockUseWalletStore
 }));
+jest.mock('@hooks/useFetchCoinPrice', (): typeof UseFetchCoinPrice => ({
+  ...jest.requireActual<typeof UseFetchCoinPrice>('@hooks/useFetchCoinPrice'),
+  useFetchCoinPrice: mockUseFetchCoinPrice
+}));
+jest.mock('@providers/currency', (): typeof CurrencyProvider => ({
+  ...jest.requireActual<typeof CurrencyProvider>('@providers/currency'),
+  useCurrencyStore: mockUseCurrencyStore
+}));
 
 jest.mock('@lace/core', () => {
   const original = jest.requireActual('@lace/core');
@@ -78,7 +92,8 @@ jest.mock('../hooks.ts', () => {
     __esModule: true,
     ...original,
     useTxSummary: mockUseTxSummary,
-    useCreateAssetList: mockUseCreateAssetList
+    useCreateAssetList: mockUseCreateAssetList,
+    useCreateMintedAssetList: mockUseCreateMintedAssetList
   };
 });
 
@@ -129,7 +144,8 @@ describe('Testing DappTransactionContainer component', () => {
     mockUseWalletStore.mockImplementation(() => ({
       inMemoryWallet,
       blockchainProvider: { assetProvider },
-      walletInfo
+      walletInfo,
+      walletUI: { cardanoCoin: {} }
     }));
     mockDappTransaction.mockReset();
     mockDappTransaction.mockReturnValue(<span data-testid="DappTransaction" />);
@@ -179,6 +195,9 @@ describe('Testing DappTransactionContainer component', () => {
     const createAssetList = 'createAssetList';
     mockUseCreateAssetList.mockReset();
     mockUseCreateAssetList.mockReturnValue(createAssetList);
+    const createMintedAssetList = 'createMintedAssetList';
+    mockUseCreateMintedAssetList.mockReset();
+    mockUseCreateMintedAssetList.mockReturnValue(createMintedAssetList);
 
     await act(async () => {
       ({ queryByTestId } = render(<DappTransactionContainer {...props} />, {
@@ -192,9 +211,17 @@ describe('Testing DappTransactionContainer component', () => {
       assets: mockedAssetsInfo,
       assetProvider
     });
+    expect(mockUseCreateMintedAssetList).toHaveBeenLastCalledWith({
+      outputs: props.signTxData.tx.body.outputs,
+      assets: mockedAssetsInfo,
+      assetProvider,
+      metadata: props.signTxData.tx.auxiliaryData.blob,
+      mint: props.signTxData.tx.body.mint
+    });
     expect(mockUseTxSummary).toHaveBeenLastCalledWith({
       addressList,
       createAssetList,
+      createMintedAssetList,
       tx: props.signTxData.tx,
       walletInfo
     });
@@ -202,13 +229,8 @@ describe('Testing DappTransactionContainer component', () => {
       {
         dappInfo,
         transaction: txSummary,
-        translations: {
-          transaction: t('core.dappTransaction.transaction'),
-          amount: t('core.dappTransaction.amount'),
-          recipient: t('core.dappTransaction.recipient'),
-          fee: t('core.dappTransaction.fee'),
-          adaFollowingNumericValue: t('general.adaFollowingNumericValue')
-        },
+        fiatCurrencyCode: 'usd',
+        fiatCurrencyPrice: 2,
         errorMessage
       },
       {}
@@ -220,6 +242,7 @@ describe('Testing DappTransactionContainer component', () => {
 
     mockUseTxSummary.mockReset();
     mockUseTxSummary.mockReturnValue(null);
+    mockUseCurrencyStore.mockRestore();
 
     const signTxData = { tx: { body: {} } } as unknown as SignTxData;
 

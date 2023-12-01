@@ -107,7 +107,10 @@ export class NetworkManager {
             const approximateTimestamp = new Date().toString();
             const combinedFailedRequestInfo = `URL:\n${request.response.url}\n\nRESPONSE CODE:\n${request.response.status}\n\nAPPROXIMATE TIME:\n${approximateTimestamp}\n\nRESPONSE BODY:\n${responseBody}\n\nREQUEST PAYLOAD:\n${requestPayload}`;
             allure.addAttachment('Failed request', combinedFailedRequestInfo, 'text/plain');
-            console.error('Failed request', combinedFailedRequestInfo);
+            console.error(
+              'Failed request',
+              `URL: ${request.response.url}  |  RESPONSE CODE: ${request.response.status}`
+            );
           }
         });
       });
@@ -125,8 +128,8 @@ export class NetworkManager {
     let postData = '';
     try {
       postData = JSON.stringify(await client.send('Network.getRequestPostData', { requestId }));
-    } catch (error) {
-      Logger.warn(`${error}`);
+    } catch {
+      /* empty */
     }
     return postData;
   };

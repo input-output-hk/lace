@@ -23,6 +23,7 @@ export enum PostHogAction {
   OnboardingRestoreEnterPassphrase09NextClick = 'onboarding | restore wallet | enter passphrase #09 | next | click',
   OnboardingRestoreEnterPassphrase17NextClick = 'onboarding | restore wallet | enter passphrase #17 | next | click',
   OnboardingRestoreWalletNamePasswordNextClick = 'onboarding | restore wallet | wallet name & password | next | click',
+  OnboardingRestoreHdWallet = 'onboarding | restore wallet | hd wallet',
   // Create new wallet
   OnboardingCreateDoneGoToWallet = 'onboarding | new wallet | all done | go to my wallet | click',
   OnboardingCreateAnalyticsAgreeClick = 'onboarding | new wallet | analytics | agree | click',
@@ -73,6 +74,7 @@ export enum PostHogAction {
   StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick = 'staking | browse pools | stake pool detail | stake all on this pool | click',
   StakingBrowsePoolsStakePoolDetailAddStakingPoolClick = 'staking | browse pools | stake pool detail | add staking pool | click',
   StakingBrowsePoolsStakePoolDetailUnselectPoolClick = 'staking | browse pools | stake pool detail | unselect pool | click',
+  StakingBrowsePoolsStakePoolDetailManageDelegation = 'staking | browse pools | stake pool detail | manage delegation | click',
   StakingBrowsePoolsStakeClick = 'staking | browse pools | stake | click',
   StakingBrowsePoolsUnselectClick = 'staking | browse pools | unselect | click',
   StakingBrowsePoolsClearClick = 'staking | browse pools | clear | click',
@@ -162,6 +164,8 @@ export enum PostHogAction {
   SettingsAnalyticsAgreeClick = 'settings | analytics | agree | click',
   SettingsAnalyticsSkipClick = 'settings | analytics | skip | click',
   SettingsFaqsClick = 'settings | faqs | click',
+  SettingsWalletHdWalletSyncSyncClick = 'settings | wallet | hd wallet sync | sync | click',
+  SettingsWalletHdWalletSyncSyncNewAddresses = 'settings | wallet | hd wallet sync | sync | new addresses',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',

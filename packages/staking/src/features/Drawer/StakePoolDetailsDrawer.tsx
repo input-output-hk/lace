@@ -72,17 +72,20 @@ export const StakePoolDetailsDrawer = ({
     });
   }, [password, portfolioMutators, backgroundServiceAPIContextSetWalletPassword, removePassword]);
 
+  const shouldShowBackIcon =
+    activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon;
+
   useKeyboardShortcut(['Escape'], () => {
-    if (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon) {
+    if (shouldShowBackIcon) {
       onGoBack();
     } else {
       closeDrawer();
     }
   });
 
-  const createArrowIconCallback = () => {
-    if (activeDrawerStep && typeof showBackIcon === 'function' ? showBackIcon(activeDrawerStep) : showBackIcon) {
-      return popupView ? closeDrawer : onGoBack;
+  const arrowIconCallback = () => {
+    if (shouldShowBackIcon) {
+      return popupView ? closeDrawer() : onGoBack();
     }
     // eslint-disable-next-line consistent-return, unicorn/no-useless-undefined
     return undefined;
@@ -97,10 +100,14 @@ export const StakePoolDetailsDrawer = ({
         <DrawerNavigation
           title={DrawerDefaultStep.PoolDetails === activeDrawerStep ? t('drawer.title') : t('drawer.titleSecond')}
           // If undefined is passed to onArrowIconClick, arrow component will not be rendered
-          onArrowIconClick={() => {
-            onBackButtonClick?.();
-            createArrowIconCallback();
-          }}
+          onArrowIconClick={
+            !shouldShowBackIcon
+              ? undefined
+              : () => {
+                  onBackButtonClick?.();
+                  arrowIconCallback();
+                }
+          }
           onCloseIconClick={() => {
             if (
               activeDrawerStep && typeof showCloseIcon === 'function' ? showCloseIcon(activeDrawerStep) : showCloseIcon

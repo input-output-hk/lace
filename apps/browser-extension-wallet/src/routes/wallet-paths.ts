@@ -20,6 +20,12 @@ export const walletRoutePaths = {
     create: '/setup/create',
     hardware: '/setup/hardware',
     restore: '/setup/restore'
+  },
+  newWallet: {
+    home: '/new-wallet',
+    create: '/new-wallet/create',
+    hardware: '/new-wallet/hardware',
+    restore: '/new-wallet/restore'
   }
 };
 
