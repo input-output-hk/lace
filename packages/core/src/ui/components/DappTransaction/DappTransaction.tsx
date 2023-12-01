@@ -36,7 +36,7 @@ export const DappTransaction = ({
       <DappInfo {...dappInfo} className={styles.dappInfo} />
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
       <div data-testid="dapp-transaction-container" className={styles.details}>
-        {type === 'Mint' && mintedAssets?.length > 0 && (
+        {type === Wallet.Cip30TxType.Mint && mintedAssets?.length > 0 && (
           <>
             <DappTxHeader
               title={t('package.core.dappTransaction.transaction')}
@@ -47,7 +47,7 @@ export const DappTransaction = ({
             ))}
           </>
         )}
-        {type === 'Burn' && burnedAssets?.length > 0 && (
+        {type === Wallet.Cip30TxType.Burn && burnedAssets?.length > 0 && (
           <>
             <DappTxHeader
               title={mintedAssets?.length > 0 ? undefined : t('package.core.dappTransaction.transaction')}
@@ -58,7 +58,7 @@ export const DappTransaction = ({
             ))}
           </>
         )}
-        {type === 'Send' && (
+        {type === Wallet.Cip30TxType.Send && (
           <>
             <DappTxHeader
               title={t('package.core.dappTransaction.transaction')}
