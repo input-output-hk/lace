@@ -76,7 +76,6 @@ export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
   const { minted, burned, dRepRegistration, dRepRetirement, dRepUpdate, voteDelegation, votingProcedures } = inspector(
     tx as Wallet.Cardano.HydratedTx
   );
-  // TODO handle Mint&Burn
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
 

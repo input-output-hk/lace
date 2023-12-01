@@ -115,7 +115,6 @@ export const useCreateMintedAssetList = ({
   const [assetsInfo, setAssetsInfo] = useState<TokenInfo | undefined>();
   const assetIds = useMemo(() => outputs && getTransactionAssetsId(outputs, mint), [outputs, mint]);
 
-  // TODO this will be refactored
   // eslint-disable-next-line sonarjs/no-identical-functions
   useEffect(() => {
     if (assetIds?.length > 0) {
