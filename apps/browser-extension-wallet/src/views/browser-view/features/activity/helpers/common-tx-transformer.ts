@@ -133,6 +133,7 @@ export const txTransformer = async ({
     outputs: tx.body.outputs,
     fee: tx.body.fee,
     direction,
+    withdrawals: tx.body.withdrawals,
     resolveInput
   });
   const formattedDate = dayjs().isSame(date, 'day')
