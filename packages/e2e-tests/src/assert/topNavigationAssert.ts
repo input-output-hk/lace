@@ -114,7 +114,7 @@ class TopNavigationAssert {
 
   async assertNetworkIdNextToLogo() {
     const logo = MenuHeader.logo;
-    const logoSibling = await logo.$('//following-sibling::div');
+    const logoSibling = await logo.$('//following-sibling::div/div');
     expect(await logoSibling.getAttribute('data-testid')).to.equal('network-pill');
   }
 
