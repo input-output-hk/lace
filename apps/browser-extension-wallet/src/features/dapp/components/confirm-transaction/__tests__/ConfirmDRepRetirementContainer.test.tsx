@@ -2,11 +2,21 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
+
+import { UserPromptService } from '@lib/scripts/background/services';
+import { ExposeApiProps } from '@cardano-sdk/web-extension';
+
 const mockUseWalletStore = jest.fn();
 const t = jest.fn().mockImplementation((res) => res);
 const mockUseTranslation = jest.fn(() => ({ t }));
 const mockConfirmDRepRetirement = jest.fn();
-const mockPubDRepKeyToHash = jest.fn();
+const mockDRepIdMismatch = jest.fn();
+const mockUseGetOwnPubDRepKeyHash = jest.fn();
+const mockExposeApi = jest.fn((props: ExposeApiProps<Pick<UserPromptService, 'allowSignTx'>>) => {
+  let returnValue;
+  props.api$.forEach((v) => (returnValue = v.allowSignTx()));
+  return returnValue;
+});
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { ConfirmDRepRetirementContainer } from '../ConfirmDRepRetirementContainer';
@@ -29,7 +39,6 @@ import { postHogClientMocks } from '@src/utils/mocks/test-helpers';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import BigNumber from 'bignumber.js';
-
 const LOVELACE_VALUE = 1_000_000;
 const DEFAULT_DECIMALS = 2;
 
@@ -55,6 +64,24 @@ const cardanoCoinMock = {
   symbol: 'cardanoCoinMockSymbol'
 };
 
+jest.mock('@cardano-sdk/web-extension', () => {
+  const original = jest.requireActual('@cardano-sdk/web-extension');
+  return {
+    __esModule: true,
+    ...original,
+    exposeApi: mockExposeApi
+  };
+});
+
+jest.mock('../hooks.ts', () => {
+  const original = jest.requireActual('../hooks.ts');
+  return {
+    __esModule: true,
+    ...original,
+    useGetOwnPubDRepKeyHash: mockUseGetOwnPubDRepKeyHash
+  };
+});
+
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
   useWalletStore: mockUseWalletStore
@@ -69,21 +96,21 @@ jest.mock('@lace/core', () => {
   };
 });
 
+jest.mock('../DRepIdMismatch', () => {
+  const original = jest.requireActual('@lace/core');
+  return {
+    __esModule: true,
+    ...original,
+    DRepIdMismatch: mockDRepIdMismatch
+  };
+});
+
 jest.mock('react-i18next', () => {
   const original = jest.requireActual('react-i18next');
   return {
     __esModule: true,
     ...original,
     useTranslation: mockUseTranslation
-  };
-});
-
-jest.mock('../utils.ts', () => {
-  const original = jest.requireActual('../utils.ts');
-  return {
-    __esModule: true,
-    ...original,
-    pubDRepKeyToHash: mockPubDRepKeyToHash
   };
 });
 
@@ -114,6 +141,11 @@ const getWrapper =
 describe('Testing ConfirmDRepRetirementContainer component', () => {
   beforeEach(() => {
     mockUseWalletStore.mockReset();
+    mockExposeApi.mockRestore();
+    mockUseGetOwnPubDRepKeyHash.mockImplementationOnce(() => ({
+      loading: false,
+      ownPubDRepKeyHash: hash
+    }));
     mockUseWalletStore.mockImplementation(() => ({
       inMemoryWallet,
       walletUI: { cardanoCoin: cardanoCoinMock },
@@ -121,8 +153,8 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     }));
     mockConfirmDRepRetirement.mockReset();
     mockConfirmDRepRetirement.mockReturnValue(<span data-testid="ConfirmDRepRetirementContainer" />);
-    mockPubDRepKeyToHash.mockReset();
-    mockPubDRepKeyToHash.mockImplementation(async () => await '123');
+    mockDRepIdMismatch.mockReset();
+    mockDRepIdMismatch.mockReturnValue(<span data-testid="DRepIdMismatch" />);
     mockUseTranslation.mockReset();
     mockUseTranslation.mockImplementation(() => ({ t }));
   });
@@ -150,12 +182,14 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     certificates: [certificate]
   });
   const errorMessage = 'errorMessage';
+  // eslint-disable-next-line unicorn/consistent-function-scoping
+  const onErrorMock = jest.fn();
 
   test('should render ConfirmDRepRetirementContainer component with proper props', async () => {
     let queryByTestId: any;
     await act(async () => {
       ({ queryByTestId } = render(
-        <ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx }, errorMessage }} />,
+        <ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx }, errorMessage, onError: onErrorMock }} />,
         {
           wrapper: getWrapper()
         }
@@ -186,13 +220,14 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
   });
 
   test('should render ConfirmDRepRetirementContainer component with proper error for own retirement', async () => {
-    mockPubDRepKeyToHash.mockReset();
-    mockPubDRepKeyToHash.mockImplementation(async (_hash) => await _hash);
     let queryByTestId: any;
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx } }} />, {
-        wrapper: getWrapper()
-      }));
+      ({ queryByTestId } = render(
+        <ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx }, onError: onErrorMock }} />,
+        {
+          wrapper: getWrapper()
+        }
+      ));
     });
 
     expect(queryByTestId('ConfirmDRepRetirementContainer')).toBeInTheDocument();
@@ -202,19 +237,21 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
   });
 
   test('should render ConfirmDRepRetirementContainer component with proper error for not own retirement', async () => {
-    mockPubDRepKeyToHash.mockReset();
-    mockPubDRepKeyToHash.mockImplementation(async () => await '');
+    mockUseGetOwnPubDRepKeyHash.mockReset();
+    mockUseGetOwnPubDRepKeyHash.mockImplementation(() => ({
+      loading: false,
+      ownPubDRepKeyHash: Crypto.Hash28ByteBase16(Buffer.from('WRONG_dRepCredentialHashdRep').toString('hex'))
+    }));
     let queryByTestId: any;
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx } }} />, {
-        wrapper: getWrapper()
-      }));
+      ({ queryByTestId } = render(
+        <ConfirmDRepRetirementContainer {...{ signTxData: { dappInfo, tx }, onError: onErrorMock }} />,
+        {
+          wrapper: getWrapper()
+        }
+      ));
     });
 
-    expect(queryByTestId('ConfirmDRepRetirementContainer')).toBeInTheDocument();
-
-    expect(
-      mockConfirmDRepRetirement.mock.calls[mockConfirmDRepRetirement.mock.calls.length - 1][0].errorMessage
-    ).toEqual(t('core.DRepRetirement.isNotOwnRetirement'));
+    expect(queryByTestId('DRepIdMismatch')).toBeInTheDocument();
   });
 });

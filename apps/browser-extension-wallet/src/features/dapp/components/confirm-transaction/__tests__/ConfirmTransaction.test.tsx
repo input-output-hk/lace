@@ -170,8 +170,6 @@ describe('Testing ConfirmTransaction component', () => {
     mockUseViewsFlowContext.mockReturnValue({ utils: {} });
     mockConfirmTransactionContent.mockReset();
     mockConfirmTransactionContent.mockImplementation(() => <span data-testid="ConfirmTransactionContent" />);
-    mockConfirmTransactionContent.mockReset();
-    mockConfirmTransactionContent.mockImplementation(() => <span data-testid="ConfirmTransactionContent" />);
   });
 
   afterEach(() => {
@@ -187,15 +185,13 @@ describe('Testing ConfirmTransaction component', () => {
     mockGetKeyAgentType.mockReset();
     mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
     mockUseWalletStore.mockReset();
-    mockUseWalletStore.mockImplementation((selector) =>
-      selector({
-        getKeyAgentType: mockGetKeyAgentType,
-        inMemoryWallet,
-        walletUI: {},
-        walletInfo: {},
-        blockchainProvider: { assetProvider }
-      })
-    );
+    mockUseWalletStore.mockImplementation(() => ({
+      getKeyAgentType: mockGetKeyAgentType,
+      inMemoryWallet,
+      walletUI: {},
+      walletInfo: {},
+      blockchainProvider: { assetProvider }
+    }));
     mockGetTxType.mockReset();
     mockGetTxType.mockReturnValue(txType);
     mockGetTitleKey.mockReset();
@@ -224,7 +220,9 @@ describe('Testing ConfirmTransaction component', () => {
     expect(mockConfirmTransactionContent).toHaveBeenLastCalledWith(
       {
         txType,
-        signTxData
+        signTxData,
+        errorMessage: undefined,
+        onError: expect.any(Function)
       },
       {}
     );
@@ -252,15 +250,13 @@ describe('Testing ConfirmTransaction component', () => {
     mockGetKeyAgentType.mockReset();
     mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.Ledger);
     mockUseWalletStore.mockReset();
-    mockUseWalletStore.mockImplementation((selector) =>
-      selector({
-        getKeyAgentType: mockGetKeyAgentType,
-        inMemoryWallet,
-        walletUI: {},
-        walletInfo: {},
-        blockchainProvider: { assetProvider }
-      })
-    );
+    mockUseWalletStore.mockImplementation(() => ({
+      getKeyAgentType: mockGetKeyAgentType,
+      inMemoryWallet,
+      walletUI: {},
+      walletInfo: {},
+      blockchainProvider: { assetProvider }
+    }));
 
     const signTxData = { tx: { id: 'test-tx-id' } };
     mockConsumeRemoteApi.mockReset();
@@ -289,15 +285,13 @@ describe('Testing ConfirmTransaction component', () => {
   test('should disable confirm button and show proper error if getSignTxData throws', async () => {
     let queryByTestId: any;
     const txType = 'txType';
-    mockUseWalletStore.mockImplementation((selector) =>
-      selector({
-        getKeyAgentType: mockGetKeyAgentType,
-        inMemoryWallet,
-        walletUI: {},
-        walletInfo: {},
-        blockchainProvider: { assetProvider }
-      })
-    );
+    mockUseWalletStore.mockImplementation(() => ({
+      getKeyAgentType: mockGetKeyAgentType,
+      inMemoryWallet,
+      walletUI: {},
+      walletInfo: {},
+      blockchainProvider: { assetProvider }
+    }));
     mockConsumeRemoteApi.mockReset();
     mockConsumeRemoteApi.mockReturnValue({
       getSignTxData: async () => await Promise.reject(error)
@@ -311,7 +305,10 @@ describe('Testing ConfirmTransaction component', () => {
     });
 
     expect(queryByTestId('ConfirmTransactionContent')).toBeInTheDocument();
-    expect(mockConfirmTransactionContent).toHaveBeenLastCalledWith({ errorMessage: error }, {});
+    expect(mockConfirmTransactionContent).toHaveBeenLastCalledWith(
+      { errorMessage: error, onError: expect.any(Function), signTxData: undefined, txType: undefined },
+      {}
+    );
     expect(queryByTestId(testIds.dappTransactionConfirm).closest('button')).toHaveAttribute('disabled');
   });
 });

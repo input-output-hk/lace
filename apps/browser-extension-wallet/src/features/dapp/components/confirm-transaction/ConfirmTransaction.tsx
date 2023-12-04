@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
@@ -38,7 +38,8 @@ export const ConfirmTransaction = (): React.ReactElement => {
   );
   const { getKeyAgentType } = useWalletStore();
   const analytics = useAnalyticsContext();
-  const { signTxData, errorMessage } = useSignTxData(dappDataApi.getSignTxData);
+  const { signTxData, errorMessage: getSignTxDataError } = useSignTxData(dappDataApi.getSignTxData);
+  const [confirmTransactionError, setConfirmTransactionError] = useState(false);
   const keyAgentType = getKeyAgentType();
   const isUsingHardwareWallet = keyAgentType !== Wallet.KeyManagement.KeyAgentType.InMemory;
   const disallowSignTx = useDisallowSignTx();
@@ -62,29 +63,36 @@ export const ConfirmTransaction = (): React.ReactElement => {
   useOnBeforeUnload(disallowSignTx);
 
   return (
-    <Layout pageClassname={styles.spaceBetween} title={title}>
-      <ConfirmTransactionContent txType={txType} signTxData={signTxData} errorMessage={errorMessage} />
-      <div className={styles.actions}>
-        <Button
-          onClick={onConfirm}
-          disabled={!!errorMessage}
-          loading={isUsingHardwareWallet && isConfirmingTx}
-          data-testid="dapp-transaction-confirm"
-          className={styles.actionBtn}
-        >
-          {isUsingHardwareWallet
-            ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: keyAgentType })
-            : t('dapp.confirm.btn.confirm')}
-        </Button>
-        <Button
-          color="secondary"
-          data-testid="dapp-transaction-cancel"
-          onClick={() => disallowSignTx(true)}
-          className={styles.actionBtn}
-        >
-          {t('dapp.confirm.btn.cancel')}
-        </Button>
-      </div>
+    <Layout pageClassname={styles.spaceBetween} title={!confirmTransactionError && title}>
+      <ConfirmTransactionContent
+        txType={txType}
+        signTxData={signTxData}
+        onError={() => setConfirmTransactionError(true)}
+        errorMessage={getSignTxDataError}
+      />
+      {!confirmTransactionError && (
+        <div className={styles.actions}>
+          <Button
+            onClick={onConfirm}
+            disabled={!!getSignTxDataError}
+            loading={isUsingHardwareWallet && isConfirmingTx}
+            data-testid="dapp-transaction-confirm"
+            className={styles.actionBtn}
+          >
+            {isUsingHardwareWallet
+              ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: keyAgentType })
+              : t('dapp.confirm.btn.confirm')}
+          </Button>
+          <Button
+            color="secondary"
+            data-testid="dapp-transaction-cancel"
+            onClick={() => disallowSignTx(true)}
+            className={styles.actionBtn}
+          >
+            {t('dapp.confirm.btn.cancel')}
+          </Button>
+        </div>
+      )}
     </Layout>
   );
 };

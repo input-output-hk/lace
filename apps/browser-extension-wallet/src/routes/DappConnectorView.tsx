@@ -97,7 +97,6 @@ export const DappConnectorView = (): React.ReactElement => {
     return (
       <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
         <Switch>
-          <Route exact path={dAppRoutePaths.dappNoWallet} component={NoWallet} />
           <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
           <Route exact path={dAppRoutePaths.dappSignTx} component={SignTxFlowContainer} />
           <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
