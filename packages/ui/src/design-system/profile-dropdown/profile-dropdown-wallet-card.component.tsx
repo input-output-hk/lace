@@ -25,32 +25,44 @@ export interface Props {
     delayMs?: number;
   };
   type: WalletType;
+  testId?: string;
 }
+
+const makeTestId = (namespace = '', path = ''): string => {
+  return namespace === '' ? namespace : `${namespace}${path}`;
+};
 
 export const WalletCard = ({
   title,
   subtitle,
   profile,
   type,
+  testId = '',
 }: Readonly<Props>): JSX.Element => {
   const Title = title.type === 'button' ? Text.Label : Text.Address;
 
   return (
     <Flex>
       {profile === undefined ? (
-        <WalletIcon type={type} />
+        <WalletIcon type={type} testId={makeTestId(testId, '-icon')} />
       ) : (
         <UserProfile {...profile} radius="rounded" />
       )}
       <Flex flexDirection="column" ml="$10" h="$32" alignItems="flex-start">
-        <Title className={cx.title}>{title.text}</Title>
+        <Title className={cx.title} data-testid={makeTestId(testId, '-title')}>
+          {title.text}
+        </Title>
         <Box
           className={cn(cx.subtitleBox, {
             [cx.subtitleButtonOffset]: title.type === 'button',
             [cx.subtitleContentOffset]: title.type === 'content',
           })}
         >
-          <Text.Body.Small weight="$semibold" className={cx.subtitle}>
+          <Text.Body.Small
+            weight="$semibold"
+            className={cx.subtitle}
+            data-testid={makeTestId(testId, '-subtitle')}
+          >
             {subtitle}
           </Text.Body.Small>
         </Box>

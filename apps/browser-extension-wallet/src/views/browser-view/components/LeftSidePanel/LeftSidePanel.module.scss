@@ -50,6 +50,7 @@ $navigation-col-width: 215px;
   padding-top: size_unit(3);
   display: flex;
   align-items: center;
+  position: relative;
 
   .logo {
     cursor: pointer;
@@ -61,4 +62,9 @@ $navigation-col-width: 215px;
   width: 40px;
   cursor: pointer;
   pointer-events: auto;
+}
+
+.networkPillBox {
+  position: absolute;
+  left: 120px;
 }
