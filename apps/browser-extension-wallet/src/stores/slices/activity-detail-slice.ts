@@ -22,17 +22,24 @@ const isConfirmedTransaction = (props: Transaction): props is Wallet.Cardano.Hyd
 /**
  * returns a list of assets ids that belong to the transaction
  */
-export const getTransactionAssetsId = (outputs: CardanoTxOut[]): Wallet.Cardano.AssetId[] => {
-  const assetIds: Wallet.Cardano.AssetId[] = [];
-  const assetMaps = outputs.map((output) => output.value.assets);
+export const getTransactionAssetsId = (
+  outputs: CardanoTxOut[],
+  mint?: Wallet.Cardano.TokenMap
+): Wallet.Cardano.AssetId[] => {
+  const uniqueAssetIds = new Set<Wallet.Cardano.AssetId>();
+  // Merge all assets (TokenMaps) from the tx outputs and mint
+  const assetMaps = outputs.map((output) => output.value.assets) ?? [];
+  if (mint?.size > 0) assetMaps.push(mint);
+
+  // Extract all unique asset ids from the array of TokenMaps
   for (const asset of assetMaps) {
     if (asset) {
       for (const id of asset.keys()) {
-        !assetIds.includes(id) && assetIds.push(id);
+        !uniqueAssetIds.has(id) && uniqueAssetIds.add(id);
       }
     }
   }
-  return assetIds;
+  return [...uniqueAssetIds.values()];
 };
 
 const transactionMetadataTransformer = (

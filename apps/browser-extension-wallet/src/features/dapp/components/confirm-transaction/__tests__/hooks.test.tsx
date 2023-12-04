@@ -2,6 +2,8 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
+import { AssetsMintedInspection } from '@cardano-sdk/core';
+
 const mockPubDRepKeyToHash = jest.fn();
 const mockDisallowSignTx = jest.fn();
 const mockAllowSignTx = jest.fn();
@@ -25,7 +27,6 @@ import { Wallet } from '@lace/cardano';
 import * as hooks from '@hooks';
 import { dAppRoutePaths } from '@routes/wallet-paths';
 import { TokenInfo } from '@src/utils/get-assets-information';
-import { TxType } from '../utils';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { WalletInfo } from '@src/types';
 import * as Core from '@cardano-sdk/core';
@@ -310,7 +311,7 @@ describe('Testing hooks', () => {
 
     const createTxInspectorSpy = jest
       .spyOn(Core, 'createTxInspector')
-      .mockReturnValueOnce(() => ({ minted: [], burned: [], votingProcedures: true }));
+      .mockReturnValue(() => ({ minted: [], burned: [], votingProcedures: true }));
 
     const tx = {
       body: {
@@ -337,14 +338,18 @@ describe('Testing hooks', () => {
       addresses: [{ address: 'address2' }, { address: 'address1' }]
     } as WalletInfo;
     const createAssetList = (txAssets: Wallet.Cardano.TokenMap) => txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
+    const createMintedAssetList = (txAssets: AssetsMintedInspection) =>
+      txAssets as unknown as Wallet.Cip30SignTxAssetItem[];
 
     let hook: any;
     await act(async () => {
-      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList }));
+      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetList }));
     });
 
     expect(hook.result.current).toEqual({
       fee: tx.body.fee.toString(),
+      burnedAssets: [],
+      mintedAssets: [],
       outputs: [
         {
           coins: tx.body.outputs[0].value.coins,
@@ -356,26 +361,28 @@ describe('Testing hooks', () => {
           recipient: tx.body.outputs[2].address
         }
       ],
-      type: TxType.VotingProcedures
+      type: Wallet.Cip30TxType.VotingProcedures
     });
 
     hook.unmount();
 
     await act(async () => {
-      createTxInspectorSpy.mockReturnValueOnce(() => ({ minted: [], burned: [] }));
+      createTxInspectorSpy.mockReturnValue(() => ({ minted: [], burned: [] }));
 
-      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList }));
+      hook = renderHook(() => useTxSummary({ tx, addressList, walletInfo, createAssetList, createMintedAssetList }));
     });
 
     expect(hook.result.current).toEqual({
       fee: tx.body.fee.toString(),
+      burnedAssets: [],
+      mintedAssets: [],
       outputs: [
         {
           coins: tx.body.outputs[2].value.coins,
           recipient: tx.body.outputs[2].address
         }
       ],
-      type: TxType.Send
+      type: Wallet.Cip30TxType.Send
     });
   });
 

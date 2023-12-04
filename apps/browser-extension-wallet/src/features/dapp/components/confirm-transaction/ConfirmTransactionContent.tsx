@@ -2,15 +2,15 @@ import React from 'react';
 import { Skeleton } from 'antd';
 import { ConfirmDRepRegistrationContainer } from './ConfirmDRepRegistrationContainer';
 import { DappTransactionContainer } from './DappTransactionContainer';
-import { TxType } from './utils';
 import { SignTxData } from './types';
 import { ConfirmDRepRetirementContainer } from './ConfirmDRepRetirementContainer';
 import { ConfirmVoteDelegationContainer } from './ConfirmVoteDelegationContainer';
 import { VotingProceduresContainer } from './VotingProceduresContainer';
 import { ConfirmDRepUpdateContainer } from './ConfirmDRepUpdateContainer';
+import { Wallet } from '@lace/cardano';
 
 interface Props {
-  txType?: TxType;
+  txType?: Wallet.Cip30TxType;
   signTxData?: SignTxData;
   errorMessage?: string;
 }
@@ -19,19 +19,19 @@ export const ConfirmTransactionContent = ({ txType, signTxData, errorMessage }: 
   if (!signTxData) {
     return <Skeleton loading />;
   }
-  if (txType === TxType.DRepRegistration) {
+  if (txType === Wallet.Cip30TxType.DRepRegistration) {
     return <ConfirmDRepRegistrationContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
-  if (txType === TxType.DRepRetirement) {
+  if (txType === Wallet.Cip30TxType.DRepRetirement) {
     return <ConfirmDRepRetirementContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
-  if (txType === TxType.DRepUpdate) {
+  if (txType === Wallet.Cip30TxType.DRepUpdate) {
     return <ConfirmDRepUpdateContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
-  if (txType === TxType.VoteDelegation) {
+  if (txType === Wallet.Cip30TxType.VoteDelegation) {
     return <ConfirmVoteDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
-  if (txType === TxType.VotingProcedures) {
+  if (txType === Wallet.Cip30TxType.VotingProcedures) {
     return <VotingProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
 

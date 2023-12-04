@@ -26,6 +26,12 @@ export type Props = Omit<ComponentPropsWithoutRef<'button'>, 'type'> & {
   type: WalletType;
 };
 
+const makeTestId = (namespace = '', path = ''): string => {
+  return namespace === ''
+    ? namespace
+    : `profile-dropdown-wallet-option-${namespace}${path}`;
+};
+
 export const WalletOption = ({
   id,
   disabled,
@@ -42,6 +48,7 @@ export const WalletOption = ({
       id={id}
       disabled={disabled}
       className={classNames(cx.button, cx.container, className)}
+      data-testid={makeTestId(id)}
     >
       <Flex alignItems="center" justifyContent="space-between" w="$fill">
         <WalletCard
@@ -52,6 +59,7 @@ export const WalletOption = ({
           }}
           subtitle={subtitle}
           type={type}
+          testId={makeTestId(id)}
         />
         <Box ml="$10">
           <Flex

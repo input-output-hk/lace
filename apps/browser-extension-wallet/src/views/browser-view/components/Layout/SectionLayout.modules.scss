@@ -95,6 +95,22 @@ $aside-width-large: 420px;
   }
 }
 
+.navigationBoxFlexible {
+  // TODO: update width from navigationBox to auto once feature is rollout
+  width: auto;
+}
+
+.topNavigationBox {
+  position: absolute;
+  right: 0;
+  // Large value to fit both send and receive buttons, plus dropdown trigger
+  width: 500px;
+}
+
+.sidePanelContentBox {
+  margin-top: 120px;
+}
+
 .topBarAlignment {
   display: flex;
   width: 100%;

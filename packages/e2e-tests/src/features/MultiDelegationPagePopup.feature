@@ -7,7 +7,6 @@ Feature: Staking Page - Popup View
   @LW-8933 @Testnet
   Scenario: Popup View - Start Staking component
     Given I save token: "Cardano" balance
-    And I disable showing Multidelegation beta banner
     When I navigate to Staking popup page
     Then I see Start Staking page in popup mode
 

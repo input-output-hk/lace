@@ -34,21 +34,33 @@ export const ConfirmVoteDelegation = ({ dappInfo, errorMessage, translations, me
     )}
     <Grid columns="$1" gutters="$20">
       <Cell>
-        <TransactionSummary.Metadata label={translations.metadata} text="" />
+        <TransactionSummary.Metadata label={translations.metadata} text="" testID="metadata" />
       </Cell>
       {metadata.drepId && (
         <Cell>
-          <TransactionSummary.Address label={translations.labels.drepId} address={metadata.drepId} />
+          <TransactionSummary.Address
+            label={translations.labels.drepId}
+            address={metadata.drepId}
+            testID="metadata-DRepID"
+          />
         </Cell>
       )}
       {metadata.alwaysAbstain && (
         <Cell>
-          <TransactionSummary.Address label={translations.labels.alwaysAbstain} address={translations.option} />
+          <TransactionSummary.Address
+            label={translations.labels.alwaysAbstain}
+            address={translations.option}
+            testID="metadata-alwaysAbstain"
+          />
         </Cell>
       )}
       {metadata.alwaysNoConfidence && (
         <Cell>
-          <TransactionSummary.Address label={translations.labels.alwaysNoConfidence} address={translations.option} />
+          <TransactionSummary.Address
+            label={translations.labels.alwaysNoConfidence}
+            address={translations.option}
+            testID="metadata-alwaysNoCOnfidence"
+          />
         </Cell>
       )}
     </Grid>

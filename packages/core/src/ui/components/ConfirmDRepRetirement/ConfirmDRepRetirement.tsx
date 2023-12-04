@@ -31,13 +31,21 @@ export const ConfirmDRepRetirement = ({ dappInfo, errorMessage, translations, me
     )}
     <Grid columns="$1" gutters="$20">
       <Cell>
-        <TransactionSummary.Metadata label={translations.metadata} text="" />
+        <TransactionSummary.Metadata label={translations.metadata} text="" testID="metadata" />
       </Cell>
       <Cell>
-        <TransactionSummary.Address label={translations.labels.drepId} address={metadata.drepId} />
+        <TransactionSummary.Address
+          label={translations.labels.drepId}
+          address={metadata.drepId}
+          testID="metadata-DRepID"
+        />
       </Cell>
       <Cell>
-        <TransactionSummary.Address label={translations.labels.depositReturned} address={metadata.depositReturned} />
+        <TransactionSummary.Address
+          label={translations.labels.depositReturned}
+          address={metadata.depositReturned}
+          testID="metadata-depositReturned"
+        />
       </Cell>
     </Grid>
   </Flex>
