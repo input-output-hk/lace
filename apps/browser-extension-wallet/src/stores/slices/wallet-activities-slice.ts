@@ -118,6 +118,7 @@ const getWalletActivitiesObservable = async ({
     blockchainProvider: { assetProvider }
   } = get();
   const {
+    addresses$,
     transactions,
     eraSummaries$,
     protocolParameters$,
@@ -128,7 +129,10 @@ const getWalletActivitiesObservable = async ({
   const walletAssets = await firstValueFrom(assetInfo$);
   const historicalTransactions$ = transactions.history$;
   const pendingTransactions$ = transactions.outgoing.inFlight$;
-  const { resolveInput } = createHistoricalOwnInputResolver(inMemoryWallet);
+  const { resolveInput } = createHistoricalOwnInputResolver({
+    addresses$,
+    transactionsHistory$: transactions.history$
+  });
 
   const { addresses } = walletInfo;
 
