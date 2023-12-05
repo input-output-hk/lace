@@ -38,6 +38,14 @@ jobs:
         with:
           name: lace
           path: apps/browser-extension-wallet/dist
+      - name: Remove key property from manifest
+        shell: bash
+        run: sed -i '' -E 's/"key":"[^"]+",//' ./apps/browser-extension-wallet/dist/manifest.json
+      - name: Upload edge build
+        uses: actions/upload-artifact@v3
+        with:
+          name: lace-edge
+          path: apps/browser-extension-wallet/dist
       - name: Upload Coveralls report
         uses: coverallsapp/github-action@v2
         with:
