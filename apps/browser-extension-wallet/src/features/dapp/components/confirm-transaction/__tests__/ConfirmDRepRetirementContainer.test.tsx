@@ -96,8 +96,8 @@ jest.mock('@lace/core', () => {
   };
 });
 
-jest.mock('../DappError', () => {
-  const original = jest.requireActual('../DappError');
+jest.mock('../../DappError', () => {
+  const original = jest.requireActual('../../DappError');
   return {
     __esModule: true,
     ...original,
