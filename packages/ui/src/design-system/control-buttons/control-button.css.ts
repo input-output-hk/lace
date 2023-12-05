@@ -118,8 +118,8 @@ export const container = recipe({
         height: vars.spacing.$24,
         paddingTop: vars.spacing.$2,
         paddingBottom: vars.spacing.$2,
-        paddingLeft: vars.spacing.$10,
-        paddingRight: vars.spacing.$10,
+        paddingLeft: vars.spacing.$8,
+        paddingRight: vars.spacing.$8,
       },
     },
     widthSchema: {

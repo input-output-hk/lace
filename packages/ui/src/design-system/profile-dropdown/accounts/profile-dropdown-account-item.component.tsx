@@ -31,11 +31,11 @@ export const AccountItem = ({
   <Flex
     alignItems="center"
     justifyContent="space-between"
-    gap="$12"
+    gap="$8"
     className={cx.root}
     data-testid="wallet-account-item"
   >
-    <Flex alignItems="center" gap="$12">
+    <Flex alignItems="center" gap="$8">
       <ProfilePicture.UserProfile
         imageSrc=""
         fallback={accountNumber.toString()}

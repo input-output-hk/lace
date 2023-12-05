@@ -2,7 +2,7 @@ import { sx, style } from '../../../design-tokens';
 
 export const root = style({
   width: '100%',
-  minWidth: '227px',
+  minWidth: '218px',
 });
 
 export const accountLabel = sx({
@@ -11,7 +11,7 @@ export const accountLabel = sx({
 
 export const derivationPath = style([
   {
-    lineHeight: '1',
+    lineHeight: '1.3',
   },
   sx({
     color: '$text_primary',

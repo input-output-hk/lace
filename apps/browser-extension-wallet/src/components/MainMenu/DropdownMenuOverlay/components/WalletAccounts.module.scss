@@ -1,10 +1,11 @@
 @import '../../../../../../../packages/common/src/ui/styles/theme.scss';
 @import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
 
 .container {
   display: flex;
   flex-direction: column;
-  padding: size_unit(3) size_unit(4);
+  padding: size_unit(3) size_unit(1) size_unit(3) size_unit(2);
 }
 
 .titleSection {
@@ -27,6 +28,10 @@
   display: flex;
   flex-direction: column;
   margin-top: size_unit(4);
+  padding-right: size_unit(1);
+  max-height: 270px;
+  overflow-y: scroll;
+  @include scroll-bar-style;
 }
 
 .iconClassName {
