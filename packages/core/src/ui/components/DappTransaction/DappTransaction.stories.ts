@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { DappTransaction } from './DappTransaction';
 import { ComponentProps } from 'react';
+import { Wallet } from '@lace/cardano';
 
 const meta: Meta<typeof DappTransaction> = {
   title: 'DappTransaction',
@@ -20,13 +21,6 @@ const data: ComponentProps<typeof DappTransaction> = {
     name: 'Mint',
     url: 'https://preprod.mint.handle.me'
   },
-  translations: {
-    recipient: 'Recipient',
-    amount: 'Amount',
-    adaFollowingNumericValue: 'ADA',
-    fee: 'Fee',
-    transaction: 'Transaction'
-  },
   transaction: {
     fee: '0.17',
     outputs: [
@@ -36,7 +30,7 @@ const data: ComponentProps<typeof DappTransaction> = {
           'addr_test1qrl0s3nqfljv8dfckn7c4wkzu5rl6wn4hakkddcz2mczt3szlqss933x0aag07qcgspcaglmay6ufl4y4lalmlpe02mqhl0fx2'
       }
     ],
-    type: 'Mint'
+    type: Wallet.Cip30TxType.Mint
   }
 };
 

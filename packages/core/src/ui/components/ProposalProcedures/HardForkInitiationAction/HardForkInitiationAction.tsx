@@ -1,54 +1,65 @@
 import React from 'react';
-import { Box, Cell, Grid, Flex, Divider, sx, Metadata, Text } from '@lace/ui';
+import { Box, Grid, Flex, Divider, Metadata, Cell } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../../DappInfo';
 import { ErrorPane } from '@lace/common';
 import * as Types from './HardForkInitiationActionTypes';
+import { TransactionDetails } from '../components/TransactionDetails';
 import { Procedure } from '../components/Procedure';
 import { ActionId } from '../components/ActionId';
 
-interface Props {
+export interface HardForkInitiationActionProps {
   dappInfo: Omit<DappInfoProps, 'className'>;
   errorMessage?: string;
   data: Types.Data;
   translations: Types.Translations;
 }
 
-export const HardForkInitiationAction = ({ dappInfo, errorMessage, data, translations }: Props): JSX.Element => {
-  const textCss = sx({
-    color: '$text_primary'
-  });
-
-  return (
-    <Flex h="$fill" flexDirection="column">
-      <Box mb={'$28'} mt={'$32'}>
-        <DappInfo {...dappInfo} />
+export const HardForkInitiationAction = ({
+  dappInfo,
+  errorMessage,
+  data: { procedure, txDetails, governanceAction, protocolVersion, actionId },
+  translations
+}: HardForkInitiationActionProps): JSX.Element => (
+  <Flex h="$fill" flexDirection="column">
+    <Box mb={'$28'} mt={'$16'}>
+      <DappInfo {...dappInfo} />
+    </Box>
+    {errorMessage && (
+      <Box my={'$16'}>
+        <ErrorPane error={errorMessage} />
       </Box>
-      {errorMessage && (
-        <Box my={'$16'}>
-          <ErrorPane error={errorMessage} />
-        </Box>
+    )}
+    <Grid columns="$1" gutters="$20">
+      {/* tx details section */}
+      <TransactionDetails translations={translations.txDetails} data={txDetails} />
+      <Cell>
+        <Divider my={'$16'} />
+      </Cell>
+      {/* procedure section */}
+      <Procedure
+        translations={{ ...translations.procedure, governanceAction: translations.governanceAction }}
+        data={{ ...procedure, governanceAction }}
+      />
+      <Cell>
+        <Metadata label={translations.protocolVersion.major} text={protocolVersion.major} />
+      </Cell>
+      <Cell>
+        <Metadata label={translations.protocolVersion.minor} text={protocolVersion.minor} />
+      </Cell>
+      {protocolVersion.patch && (
+        <Cell>
+          <Metadata label={translations.protocolVersion.patch} text={protocolVersion.patch} />
+        </Cell>
       )}
-      <Grid columns="$1" gutters="$20">
-        <Procedure data={data.procedure} translations={translations.procedure} />
-        <Cell>
-          <Divider my={'$16'} />
-        </Cell>
-        <ActionId data={data.actionId} translations={translations.actionId} />
-        <Cell>
-          <Divider my={'$16'} />
-        </Cell>
-        <Cell>
-          <Text.Body.Large className={textCss} weight="$bold">
-            {translations.protocolVersion.title}
-          </Text.Body.Large>
-        </Cell>
-        <Cell>
-          <Metadata
-            label={translations.protocolVersion.label}
-            text={`${data.protocolVersion.major}.${data.protocolVersion.minor}.${data.protocolVersion.patch || 0}`}
-          />
-        </Cell>
-      </Grid>
-    </Flex>
-  );
-};
+      {/* action id section*/}
+      {actionId && (
+        <>
+          <Cell>
+            <Divider my={'$16'} />
+          </Cell>
+          <ActionId translations={translations.actionId} data={actionId} />
+        </>
+      )}
+    </Grid>
+  </Flex>
+);

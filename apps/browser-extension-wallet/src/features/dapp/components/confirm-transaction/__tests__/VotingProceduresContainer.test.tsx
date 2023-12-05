@@ -13,22 +13,10 @@ import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { VoterType, Votes, VotingProceduresContainer, getVote, getVoterType } from '../VotingProceduresContainer';
 import '@testing-library/jest-dom';
-import { I18nextProvider } from 'react-i18next';
-import { StoreProvider } from '@src/stores';
-import {
-  AnalyticsProvider,
-  AppSettingsProvider,
-  BackgroundServiceAPIProvider,
-  BackgroundServiceAPIProviderProps,
-  DatabaseProvider
-} from '@src/providers';
-import { APP_MODE_BROWSER } from '@src/utils/constants';
-import i18n from '@lib/i18n';
 import { act } from 'react-dom/test-utils';
-import { PostHogClientProvider } from '@providers/PostHogClientProvider';
-import { postHogClientMocks } from '@src/utils/mocks/test-helpers';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
+import { getWrapper } from '../testing.utils';
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -64,30 +52,6 @@ jest.mock('react-i18next', () => {
     useTranslation: mockUseTranslation
   };
 });
-
-const backgroundService = {
-  getBackgroundStorage: jest.fn(),
-  setBackgroundStorage: jest.fn()
-} as unknown as BackgroundServiceAPIProviderProps['value'];
-
-const getWrapper =
-  () =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <BackgroundServiceAPIProvider value={backgroundService}>
-        <AppSettingsProvider>
-          <DatabaseProvider>
-            <StoreProvider appMode={APP_MODE_BROWSER}>
-              <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-                <AnalyticsProvider analyticsDisabled>
-                  <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
-                </AnalyticsProvider>
-              </PostHogClientProvider>
-            </StoreProvider>
-          </DatabaseProvider>
-        </AppSettingsProvider>
-      </BackgroundServiceAPIProvider>
-    );
 
 describe('Testing VotingProceduresContainer component', () => {
   beforeEach(() => {

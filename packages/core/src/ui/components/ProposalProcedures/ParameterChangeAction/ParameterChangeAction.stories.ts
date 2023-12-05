@@ -3,11 +3,25 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ParameterChangeAction } from './ParameterChangeAction';
 import { ComponentProps } from 'react';
 
+const customViewports = {
+  popup: {
+    name: 'Popup',
+    styles: {
+      width: '360px',
+      height: '600'
+    }
+  }
+};
+
 const meta: Meta<typeof ParameterChangeAction> = {
   title: 'ProposalProcedure/ParameterChangeAction',
   component: ParameterChangeAction,
   parameters: {
-    layout: 'centered'
+    layout: 'centered',
+    viewport: {
+      viewports: customViewports,
+      defaultViewport: 'popup'
+    }
   }
 };
 
@@ -21,29 +35,30 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
     url: 'https://preprod.mint.handle.me'
   },
   data: {
-    procedure: {
+    txDetails: {
+      txType: 'Protocol Parameter Update',
       deposit: '2000',
-      rewardAccount: 'stake1u89sasnfyjtmgk8ydqfv3fdl52f36x3djedfnzfc9rkgzrcss5vgr',
-      anchor: {
-        hash: '0000000000000000000000000000000000000000000000000000000000000000',
-        url: 'https://www.someurl.io',
-        txHashUrl: 'https://www.someurl.io'
-      }
+      rewardAccount: 'stake1u89sasnfyjtmgk8ydqfv3fdl52f36x3djedfnzfc9rkgzrcss5vgr'
+    },
+    anchor: {
+      hash: '0000000000000000000000000000000000000000000000000000000000000000',
+      url: 'https://www.someurl.io',
+      txHashUrl: 'https://www.someurl.io/'
     },
     protocolParamUpdate: {
+      maxBlockExUnits: {
+        memory: '50000000',
+        step: '4000000000'
+      },
+      maxTxExUnits: {
+        memory: '10000000',
+        step: '10000000000'
+      },
       networkGroup: {
         maxBBSize: '65536',
         maxBHSize: '1100',
         maxTxSize: '16384',
-        maxBlockExUnits: {
-          memory: '50000000',
-          step: '4000000000'
-        },
         maxCollateralInputs: '3',
-        maxTxExUnits: {
-          memory: '10000000',
-          step: '10000000000'
-        },
         maxValSize: '5000'
       },
       economicGroup: {
@@ -84,32 +99,42 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
         drepActivity: '0',
         drepDeposit: '0',
         dRepVotingThresholds: {
-          dvtMotionNoConfidence: '0.51',
-          dvtCommitteeNormal: '0.51',
-          dvtCommitteeNoConfidence: '0.51',
-          dvtUpdateToConstitution: '0.51',
-          dvtHardForkInitiation: '0.51',
-          dvtPPNetworkGroup: '0.51',
-          dvtPPEconomicGroup: '0.51',
-          dvtPPTechnicalGroup: '0.51',
-          dvtPPGovGroup: '0.51',
-          dvtTreasuryWithdrawal: '0.51'
+          motionNoConfidence: '0.51',
+          committeeNormal: '0.51',
+          committeeNoConfidence: '0.51',
+          updateToConstitution: '0.51',
+          hardForkInitiation: '0.51',
+          ppNetworkGroup: '0.51',
+          ppEconomicGroup: '0.51',
+          ppTechnicalGroup: '0.51',
+          ppGovGroup: '0.51',
+          treasuryWithdrawal: '0.51'
         }
       }
     }
   },
   translations: {
-    procedure: {
-      anchor: {
-        hash: 'Anchor Hash',
-        url: 'Anchor URL'
-      },
+    txDetails: {
+      title: 'Transaction Details',
+      txType: 'Transaction Type',
       deposit: 'Deposit',
-      rewardAccount: 'Reward account',
-      title: 'Procedure'
+      rewardAccount: 'Reward account'
+    },
+    memory: 'Memory',
+    step: 'Step',
+    anchor: {
+      hash: 'Anchor Hash',
+      url: 'Anchor URL'
     },
     networkGroup: {
       title: 'Network group',
+      maxBBSize: 'Max BB Size',
+      maxTxSize: 'Max Tx Size',
+      maxBHSize: 'Max BH Size',
+      maxValSize: 'Max Val Size',
+      maxTxExUnits: 'Max TX Ex Units',
+      maxBlockExUnits: 'Max Blk Ex Units',
+      maxCollateralInputs: 'Max Coll Inputs',
       tooltip: {
         maxBBSize: 'Max block body size',
         maxTxSize: 'Max transaction size',
@@ -122,6 +147,15 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
     },
     economicGroup: {
       title: 'Economic group',
+      minFeeA: 'Min Fee A',
+      minFeeB: 'Min Fee B',
+      keyDeposit: 'Key Deposit',
+      poolDeposit: 'Pool Deposit',
+      rho: 'Rho',
+      tau: 'Tau',
+      minPoolCost: 'Min Pool Cost',
+      coinsPerUTxOByte: 'Coins/UTxO Byte',
+      prices: 'Price',
       tooltip: {
         minFeeA: 'Min fee coefficient',
         minFeeB: 'Min fee constant',
@@ -136,6 +170,11 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
     },
     technicalGroup: {
       title: 'Technical group',
+      a0: 'A0',
+      eMax: 'EMax',
+      nOpt: 'NOpt',
+      costModels: 'Cost Models',
+      collateralPercentage: 'Coll Percentage',
       tooltip: {
         a0: 'Pool pledge influence',
         eMax: 'Pool retirement maximum epoch',
@@ -146,6 +185,25 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
     },
     governanceGroup: {
       title: 'Governance group',
+      govActionLifetime: 'Gov Act Lifetime',
+      govActionDeposit: 'Gov Act Deposit',
+      drepDeposit: 'DRep Deposit',
+      drepActivity: 'DRep Activity',
+      ccMinSize: 'CC Min Size',
+      ccMaxTermLength: 'CC Max Term Length',
+      dRepVotingThresholds: {
+        title: 'Governance voting thresholds',
+        motionNoConfidence: 'Motion No Conf',
+        committeeNormal: 'Comm Normal',
+        committeeNoConfidence: 'Comm No Conf',
+        updateConstitution: 'Update Const',
+        hardForkInitiation: 'Hard Fork Init',
+        ppNetworkGroup: 'PP Network Grp',
+        ppEconomicGroup: 'PP Economic Grp',
+        ppTechnicalGroup: 'PP Technical Grp',
+        ppGovernanceGroup: 'PP Governance Grp',
+        treasuryWithdrawal: 'Treasury Withdraw'
+      },
       tooltip: {
         govActionLifetime: 'governance action maximum lifetime in epochs',
         govActionDeposit: 'governance action deposit',
@@ -157,7 +215,7 @@ const data: ComponentProps<typeof ParameterChangeAction> = {
           title: 'DRep voting thresholds',
           motionNoConfidence: '1. Motion of no-confidence',
           committeeNormal: '2a. New committee/threshold (normal state)',
-          commiteeNoConfidence: '2b. New committee/threshold (state of no-confidence)',
+          committeeNoConfidence: '2b. New committee/threshold (state of no-confidence)',
           updateConstitution: '3. Update to the Constitution or proposal policy',
           hardForkInitiation: '4. Hard-fork initiation',
           ppNetworkGroup: '5a. Protocol parameter changes, network group',

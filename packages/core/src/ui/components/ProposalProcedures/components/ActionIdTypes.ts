@@ -1,11 +1,11 @@
 export interface Data {
-  index: number;
+  index: string;
   txHash: string;
-  txHashUrl: string;
+  txHashUrl?: string;
 }
 
 export interface Translations {
-  title: string;
+  title?: string;
   index: string;
   txHash: string;
 }

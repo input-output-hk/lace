@@ -1,20 +1,27 @@
 import React from 'react';
-import { Box, Grid, Flex } from '@lace/ui';
+import { Box, Grid, Flex, Divider, Cell } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../../DappInfo';
 import { ErrorPane } from '@lace/common';
 import * as Types from './InfoActionTypes';
+import { TransactionDetails } from '../components/TransactionDetails';
 import { Procedure } from '../components/Procedure';
+import { ActionId } from '../components/ActionId';
 
-interface Props {
+export interface InfoActionProps {
   dappInfo: Omit<DappInfoProps, 'className'>;
   errorMessage?: string;
   data: Types.Data;
   translations: Types.Translations;
 }
 
-export const InfoAction = ({ dappInfo, errorMessage, data, translations }: Props): JSX.Element => (
+export const InfoAction = ({
+  dappInfo,
+  errorMessage,
+  data: { procedure, txDetails, actionId },
+  translations
+}: InfoActionProps): JSX.Element => (
   <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$32'}>
+    <Box mb={'$28'} mt={'$16'}>
       <DappInfo {...dappInfo} />
     </Box>
     {errorMessage && (
@@ -23,7 +30,21 @@ export const InfoAction = ({ dappInfo, errorMessage, data, translations }: Props
       </Box>
     )}
     <Grid columns="$1" gutters="$20">
-      <Procedure data={data.procedure} translations={translations.procedure} />
+      <TransactionDetails translations={translations.txDetails} data={txDetails} />
+      <Cell>
+        <Divider my={'$16'} />
+      </Cell>
+      {/* procedure section */}
+      <Procedure translations={translations.procedure} data={procedure} />
+      {/* action id section*/}
+      {actionId && (
+        <>
+          <Cell>
+            <Divider my={'$16'} />
+          </Cell>
+          <ActionId translations={translations.actionId} data={actionId} />
+        </>
+      )}
     </Grid>
   </Flex>
 );

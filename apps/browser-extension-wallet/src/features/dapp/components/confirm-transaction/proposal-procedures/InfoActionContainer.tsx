@@ -2,52 +2,47 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { InfoAction } from '@lace/core';
-import { useWalletStore } from '@src/stores';
 import { SignTxData } from '../types';
 import { useCExpolorerBaseUrl } from '../hooks';
 
 interface Props {
   dappInfo: SignTxData['dappInfo'];
-  deposit: Wallet.Cardano.ProposalProcedure['deposit'];
-  rewardAccount: Wallet.Cardano.ProposalProcedure['rewardAccount'];
   anchor: Wallet.Cardano.ProposalProcedure['anchor'];
   errorMessage?: string;
 }
 
-export const InfoActionContainer = ({
-  dappInfo,
-  deposit,
-  rewardAccount,
-  anchor,
-  errorMessage
-}: Props): React.ReactElement => {
+export const InfoActionContainer = ({ dappInfo, anchor, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
-  const {
-    walletUI: { cardanoCoin }
-  } = useWalletStore();
 
   const explorerBaseUrl = useCExpolorerBaseUrl();
 
-  const translations = useMemo(
+  const translations = useMemo<Parameters<typeof InfoAction>[0]['translations']>(
     () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType')
+      },
       procedure: {
-        title: t('core.proposalProcedure.governanceAction.infoAction.title'),
-        deposit: t('core.proposalProcedure.procedure.deposit'),
-        rewardAccount: t('core.proposalProcedure.procedure.rewardAccount'),
+        title: t('core.ProposalProcedure.procedure.title'),
         anchor: {
-          url: t('core.proposalProcedure.procedure.anchor.url'),
-          hash: t('core.proposalProcedure.procedure.anchor.hash')
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
+      },
+      actionId: {
+        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
+        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
       }
     }),
     [t]
   );
 
-  const data = {
+  const data: Parameters<typeof InfoAction>[0]['data'] = {
+    txDetails: {
+      txType: t('core.ProposalProcedure.governanceAction.infoAction.title')
+    },
     procedure: {
-      deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
-      rewardAccount,
-      ...(anchor.url && {
+      ...(anchor && {
         anchor: {
           url: anchor.url,
           hash: anchor.dataHash,

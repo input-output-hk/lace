@@ -12,7 +12,6 @@ import { dAppRoutePaths } from '@routes';
 import { Wallet } from '@lace/cardano';
 import { useRedirection } from '@hooks';
 import { CardanoTxOut, WalletInfo } from '@src/types';
-import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
 import { getTransactionAssetsId } from '@src/stores/slices';

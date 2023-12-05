@@ -1,5 +1,6 @@
 import * as ProcedureTypes from '../components/ProcedureTypes';
 import * as ActionIdTypes from '../components/ActionIdTypes';
+import * as TxDetailsTypes from '../components/TransactionDetailsTypes';
 
 interface MembersToBeAdded {
   coldCredential: {
@@ -18,16 +19,20 @@ interface NewQuorumThreshold {
 }
 
 export interface Data {
+  actionId?: ActionIdTypes.Data;
+  txDetails: TxDetailsTypes.TxDetails;
   procedure: ProcedureTypes.Procedure;
-  actionId: ActionIdTypes.Data;
+  governanceAction: ProcedureTypes.Procedure['governanceAction'];
   membersToBeAdded: MembersToBeAdded[];
   membersToBeRemoved: MembersToBeRemoved[];
-  newQuorumThreshold: NewQuorumThreshold;
+  newQuorumThreshold?: NewQuorumThreshold;
 }
 
 export interface Translations {
   procedure: ProcedureTypes.Translations;
-  actionId: ActionIdTypes.Translations;
+  actionId?: ActionIdTypes.Translations;
+  txDetails: TxDetailsTypes.Translations;
+  governanceAction: ProcedureTypes.Translations['governanceAction'];
   membersToBeAdded: {
     title: string;
     coldCredential: {
@@ -39,7 +44,7 @@ export interface Translations {
     title: string;
     hash: string;
   };
-  newQuorumThreshold: {
+  newQuorumThreshold?: {
     title: string;
     denominator: string;
     numerator: string;

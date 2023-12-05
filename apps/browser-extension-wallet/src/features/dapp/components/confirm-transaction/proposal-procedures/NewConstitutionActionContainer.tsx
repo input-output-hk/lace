@@ -30,29 +30,37 @@ export const NewConstitutionActionContainer = ({
 
   const explorerBaseUrl = useCExpolorerBaseUrl();
 
-  const translations = useMemo(
+  const translations = useMemo<Parameters<typeof NewConstitutionAction>[0]['translations']>(
     () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType'),
+        deposit: t('core.ProposalProcedure.txDetails.deposit'),
+        rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
+      },
       procedure: {
-        title: t('core.proposalProcedure.governanceAction.newConstitutionAction.title'),
-        deposit: t('core.proposalProcedure.procedure.deposit'),
-        rewardAccount: t('core.proposalProcedure.procedure.rewardAccount'),
+        title: t('core.ProposalProcedure.procedure.title'),
         anchor: {
-          url: t('core.proposalProcedure.procedure.anchor.url'),
-          hash: t('core.proposalProcedure.procedure.anchor.hash')
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
-      actionId: {
-        title: t('core.proposalProcedure.governanceAction.actionId.title'),
-        index: t('core.proposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.proposalProcedure.governanceAction.actionId.txHash')
+      governanceAction: {
+        id: t('core.ProposalProcedure.governanceAction.newConstitutionAction.actionId.id'),
+        index: t('core.ProposalProcedure.governanceAction.newConstitutionAction.actionId.index')
       },
       constitution: {
-        title: t('core.proposalProcedure.governanceAction.newConstitutionAction.constitution.title'),
+        title: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.title'),
         anchor: {
-          dataHash: t('core.proposalProcedure.governanceAction.newConstitutionAction.constitution.anchor.dataHash'),
-          url: t('core.proposalProcedure.governanceAction.newConstitutionAction.constitution.url')
+          dataHash: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.anchor.dataHash'),
+          url: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.anchor.url')
         },
-        scriptHash: t('core.proposalProcedure.governanceAction.newConstitutionAction.constitution.scriptHash')
+        scriptHash: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.scriptHash')
+      },
+      actionId: {
+        title: t('core.ProposalProcedure.governanceAction.actionId.title'),
+        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
+        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
       }
     }),
     [t]
@@ -60,11 +68,14 @@ export const NewConstitutionActionContainer = ({
 
   const { governanceActionId, constitution } = governanceAction;
 
-  const data = {
-    procedure: {
+  const data: Parameters<typeof NewConstitutionAction>[0]['data'] = {
+    txDetails: {
+      txType: t('core.ProposalProcedure.governanceAction.newConstitutionAction.title'),
       deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
-      rewardAccount,
-      ...(anchor.url && {
+      rewardAccount
+    },
+    procedure: {
+      ...(anchor && {
         anchor: {
           url: anchor.url,
           hash: anchor.dataHash,
@@ -72,12 +83,19 @@ export const NewConstitutionActionContainer = ({
         }
       })
     },
-    actionId: {
-      index: governanceActionId?.actionIndex || 0,
-      txHash: governanceActionId?.id || '',
-      ...(explorerBaseUrl && governanceActionId?.id && { txHashUrl: `${explorerBaseUrl}/${governanceActionId?.id}` })
-    },
-    constitution
+    ...(governanceActionId && {
+      governanceAction: {
+        index: governanceActionId.actionIndex.toString(),
+        id: governanceActionId.id || ''
+      }
+    }),
+    constitution: {
+      anchor: {
+        dataHash: constitution.anchor.dataHash.toString(),
+        url: constitution.anchor.url.toString()
+      },
+      ...(constitution.scriptHash && { scriptHash: constitution.scriptHash.toString() })
+    }
   };
 
   return (

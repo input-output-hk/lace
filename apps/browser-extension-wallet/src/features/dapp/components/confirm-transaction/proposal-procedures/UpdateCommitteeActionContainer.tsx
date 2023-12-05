@@ -30,51 +30,57 @@ export const UpdateCommitteeActionContainer = ({
 
   const explorerBaseUrl = useCExpolorerBaseUrl();
 
-  const translations = useMemo(
+  const translations = useMemo<Parameters<typeof UpdateCommitteeAction>[0]['translations']>(
     () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType'),
+        deposit: t('core.ProposalProcedure.txDetails.deposit'),
+        rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
+      },
       procedure: {
-        title: t('core.proposalProcedure.governanceAction.updateCommitteeAction.title'),
-        deposit: t('core.proposalProcedure.procedure.deposit'),
-        rewardAccount: t('core.proposalProcedure.procedure.rewardAccount'),
+        title: t('core.ProposalProcedure.procedure.title'),
         anchor: {
-          url: t('core.proposalProcedure.procedure.anchor.url'),
-          hash: t('core.proposalProcedure.procedure.anchor.hash')
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
+      governanceAction: {
+        id: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.actionId.id'),
+        index: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.actionId.index')
+      },
       actionId: {
-        title: t('core.proposalProcedure.governanceAction.actionId.title'),
-        index: t('core.proposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.proposalProcedure.governanceAction.actionId.txHash')
+        title: t('core.ProposalProcedure.governanceAction.actionId.title'),
+        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
+        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
       },
       membersToBeAdded: {
-        title: t('core.proposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.title'),
+        title: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.title'),
         coldCredential: {
-          hash: t('core.proposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.coldCredential.hash'),
+          hash: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.coldCredential.hash'),
           epoch: t(
-            'core.proposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.coldCredential.epoch'
+            'core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.coldCredential.epoch'
           )
         }
       },
       membersToBeRemoved: {
-        title: t('core.proposalProcedure.governanceAction.updateCommitteeAction.membersToBeRemoved.title'),
-        hash: t('core.proposalProcedure.governanceAction.updateCommitteeAction.membersToBeRemoved.hash')
-      },
-      newQuorumThreshold: {
-        title: t('core.proposalProcedure.governanceAction.updateCommitteeAction.newQuorumThreshold.title'),
-        denominator: t('core.proposalProcedure.governanceAction.updateCommitteeAction.newQuorumThreshold.denominator'),
-        numerator: t('core.proposalProcedure.governanceAction.updateCommitteeAction.newQuorumThreshold.numerator')
+        title: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeRemoved.title'),
+        hash: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeRemoved.hash')
       }
     }),
     [t]
   );
 
-  const { membersToBeAdded, membersToBeRemoved, newQuorumThreshold, governanceActionId } = governanceAction;
+  const { membersToBeAdded, membersToBeRemoved, governanceActionId } = governanceAction;
 
-  const data = {
-    procedure: {
+  const data: Parameters<typeof UpdateCommitteeAction>[0]['data'] = {
+    txDetails: {
+      txType: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.title'),
       deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
-      rewardAccount,
-      ...(anchor.url && {
+      rewardAccount
+    },
+    procedure: {
+      ...(anchor && {
         anchor: {
           url: anchor.url,
           hash: anchor.dataHash,
@@ -82,22 +88,19 @@ export const UpdateCommitteeActionContainer = ({
         }
       })
     },
-    actionId: {
-      index: governanceActionId?.actionIndex || 0,
-      txHash: governanceActionId?.id || '',
-      ...(explorerBaseUrl && governanceActionId?.id && { txHashUrl: `${explorerBaseUrl}/${governanceActionId?.id}` })
-    },
+    ...(governanceActionId && {
+      governanceAction: {
+        index: governanceActionId.actionIndex.toString(),
+        id: governanceActionId.id || ''
+      }
+    }),
     membersToBeAdded: [...membersToBeAdded].map(({ coldCredential: { hash }, epoch }) => ({
       coldCredential: {
         hash: hash.toString()
       },
       epoch: epoch.toString()
     })),
-    membersToBeRemoved: [...membersToBeRemoved].map(({ hash }) => ({ hash: hash.toString() })),
-    newQuorumThreshold: {
-      denominator: newQuorumThreshold.denominator.toString(),
-      numerator: newQuorumThreshold.numerator.toString()
-    }
+    membersToBeRemoved: [...membersToBeRemoved].map(({ hash }) => ({ hash: hash.toString() }))
   };
 
   return (

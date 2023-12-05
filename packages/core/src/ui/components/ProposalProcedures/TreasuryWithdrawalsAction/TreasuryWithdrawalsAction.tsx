@@ -1,19 +1,25 @@
 import React from 'react';
-import { Box, Cell, Grid, Flex, Divider, sx, Text } from '@lace/ui';
+import { Box, Grid, Flex, Divider, sx, Text, Metadata, Cell } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../../DappInfo';
 import { ErrorPane } from '@lace/common';
 import * as Types from './TreasuryWithdrawalsActionTypes';
+import { TransactionDetails } from '../components/TransactionDetails';
+import { ActionId } from '../components/ActionId';
 import { Procedure } from '../components/Procedure';
-import { Card } from '../components/Card';
 
-interface Props {
+interface TreasuryWithdrawalsActionProps {
   dappInfo: Omit<DappInfoProps, 'className'>;
   errorMessage?: string;
   data: Types.Data;
   translations: Types.Translations;
 }
 
-export const TreasuryWithdrawalsAction = ({ dappInfo, errorMessage, data, translations }: Props): JSX.Element => {
+export const TreasuryWithdrawalsAction = ({
+  dappInfo,
+  errorMessage,
+  data: { txDetails, procedure, withdrawals, actionId },
+  translations
+}: TreasuryWithdrawalsActionProps): JSX.Element => {
   const textCss = sx({
     color: '$text_primary'
   });
@@ -29,30 +35,36 @@ export const TreasuryWithdrawalsAction = ({ dappInfo, errorMessage, data, transl
         </Box>
       )}
       <Grid columns="$1" gutters="$20">
-        <Procedure data={data.procedure} translations={translations.procedure} />
+        {/* tx details section */}
+        <TransactionDetails translations={translations.txDetails} data={txDetails} />
         <Cell>
           <Divider my={'$16'} />
         </Cell>
+        {/* procedure section */}
+        <Procedure translations={translations.procedure} data={procedure} />
         <Cell>
           <Text.Body.Large className={textCss} weight="$bold">
             {translations.withdrawals.title}
           </Text.Body.Large>
         </Cell>
-        {data.withdrawals.map((withdrawal) => (
-          <Card
-            key={`${withdrawal.rewardAccount}${withdrawal.lovelace}`}
-            data={[
-              {
-                label: translations.withdrawals.rewardAccount,
-                value: withdrawal.rewardAccount
-              },
-              {
-                label: translations.withdrawals.lovelace,
-                value: withdrawal.lovelace
-              }
-            ]}
-          />
+        {withdrawals.map((withdrawal) => (
+          <React.Fragment key={`${withdrawal.rewardAccount}${withdrawal.lovelace}`}>
+            <Cell>
+              <Metadata label={translations.withdrawals.rewardAccount} text={withdrawal.rewardAccount} />
+            </Cell>
+            <Cell>
+              <Metadata label={translations.withdrawals.lovelace} text={withdrawal.lovelace} />
+            </Cell>
+          </React.Fragment>
         ))}
+        {actionId && (
+          <>
+            <Cell>
+              <Divider my={'$16'} />
+            </Cell>
+            <ActionId translations={translations.actionId} data={actionId} />
+          </>
+        )}
       </Grid>
     </Flex>
   );

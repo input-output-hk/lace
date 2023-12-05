@@ -1130,15 +1130,21 @@
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
-    "proposalProcedure": {
+    "ProposalProcedure": {
+      "dRepId": "DRep ID",
+      "txDetails": {
+        "deposit": "Deposit",
+        "rewardAccount": "Reward account",
+        "title": "Transaction Details",
+        "txType": "Transaction Type"
+      },
       "procedure": {
         "anchor": {
           "hash": "Anchor Hash",
           "url": "Anchor URL"
         },
-        "deposit": "Deposit",
-        "rewardAccount": "Reward account",
-        "title": "Procedure"
+        "title": "Procedure",
+        "dRepId": "DRep ID"
       },
       "governanceAction": {
         "actionId": {
@@ -1147,14 +1153,23 @@
           "txHash": "TX Hash"
         },
         "hardForkInitiation": {
-          "title": "Hard Fork Initiation Action",
+          "title": "Hard Fork Initiation",
           "protocolVersion": {
-            "title": "Hard Fork Details",
-            "label": "Protocol Version"
+            "major": "Protocol Version Major",
+            "minor": "Protocol Version Minor",
+            "patch": "Protocol Version Patch"
+          },
+          "actionId": {
+            "id": "Governance Action ID",
+            "index": "Action Index"
           }
         },
         "newConstitutionAction": {
           "title": "New Constitution Action",
+          "actionId": {
+            "id": "Governance Action ID",
+            "index": "Governance Action Index"
+          },
           "constitution": {
             "title": "Constitution Details",
             "anchor": {
@@ -1168,12 +1183,25 @@
           "title": "Info Action"
         },
         "noConfidenceAction": {
-          "title": "No Confidence Action"
+          "title": "No Confidence",
+          "actionId": {
+            "id": "Governance Action ID",
+            "index": "Action Index"
+          }
         },
         "protocolParamUpdate": {
-          "title": "Protocol Parameter Update Action",
+          "title": "Protocol Parameter Update",
+          "memory": "Memory",
+          "step": "Step",
           "networkGroup": {
             "title": "Network group",
+            "maxBBSize": "Max BB Size",
+            "maxTxSize": "Max Tx Size",
+            "maxBHSize": "Max BH Size",
+            "maxValSize": "Max Val Size",
+            "maxTxExUnits": "Max TX Ex Units",
+            "maxBlockExUnits": "Max Blk Ex Units",
+            "maxCollateralInputs": "Max Coll Inputs",
             "tooltip": {
               "maxBBSize": "Max block body size",
               "maxTxSize": "Max transaction size",
@@ -1186,6 +1214,15 @@
           },
           "economicGroup": {
             "title": "Economic group",
+            "minFeeA": "Min Fee A",
+            "minFeeB": "Min Fee B",
+            "keyDeposit": "Key Deposit",
+            "poolDeposit": "Pool Deposit",
+            "rho": "Rho",
+            "tau": "Tau",
+            "minPoolCost": "Min Pool Cost",
+            "coinsPerUTxOByte": "Coins/UTxO Byte",
+            "prices": "Price",
             "tooltip": {
               "minFeeA": "Min fee coefficient",
               "minFeeB": "Min fee constant",
@@ -1200,6 +1237,11 @@
           },
           "technicalGroup": {
             "title": "Technical group",
+            "a0": "A0",
+            "eMax": "EMax",
+            "nOpt": "NOpt",
+            "costModels": "Cost Models",
+            "collateralPercentage": "Coll Percentage",
             "tooltip": {
               "a0": "Pool pledge influence",
               "eMax": "Pool retirement maximum epoch",
@@ -1210,6 +1252,25 @@
           },
           "governanceGroup": {
             "title": "Governance group",
+            "govActionLifetime": "Gov Act Lifetime",
+            "govActionDeposit": "Gov Act Deposit",
+            "drepDeposit": "DRep Deposit",
+            "drepActivity": "DRep Activity",
+            "ccMinSize": "CC Min Size",
+            "ccMaxTermLength": "CC Max Term Length",
+            "dRepVotingThresholds": {
+              "title": "Governance voting thresholds",
+              "motionNoConfidence": "Motion No Conf",
+              "committeeNormal": "Comm Normal",
+              "committeeNoConfidence": "Comm No Conf",
+              "updateConstitution": "Update Const",
+              "hardForkInitiation": "Hard Fork Init",
+              "ppNetworkGroup": "PP Network Grp",
+              "ppEconomicGroup": "PP Economic Grp",
+              "ppTechnicalGroup": "PP Technical Grp",
+              "ppGovernanceGroup": "PP Governance Grp",
+              "treasuryWithdrawal": "Treasury Withdraw"
+            },
             "tooltip": {
               "govActionLifetime": "governance action maximum lifetime in epochs",
               "govActionDeposit": "governance action deposit",
@@ -1218,10 +1279,10 @@
               "ccMinSize": "Min constitutional committee size",
               "ccMaxTermLength": "Max term length (in epochs) for the constitutional committee members",
               "dRepVotingThresholds": {
-                "title": "DRep voting thresholds",
+                "title": "Governance voting thresholds",
                 "motionNoConfidence": "1. Motion of no-confidence",
                 "committeeNormal": "2a. New committee/threshold (normal state)",
-                "commiteeNoConfidence": "2b. New committee/threshold (state of no-confidence)",
+                "committeeNoConfidence": "2b. New committee/threshold (state of no-confidence)",
                 "updateConstitution": "3. Update to the Constitution or proposal policy",
                 "hardForkInitiation": "4. Hard-fork initiation",
                 "ppNetworkGroup": "5a. Protocol parameter changes, network group",
@@ -1234,14 +1295,17 @@
           }
         },
         "treasuryWithdrawals": {
-          "title": "Treasury Withdrawals Action",
+          "title": "Treasury Withdrawals",
           "withdrawals": {
-            "title": "Withdrawal Details",
-            "lovelace": "Lovelace Withdrawn",
-            "rewardAccount": "Reward account"
+            "lovelace": "Withdrawal Amount",
+            "rewardAccount": "Withdrawal Reward Account"
           }
         },
         "updateCommitteeAction": {
+          "actionId": {
+            "id": "Governance Action ID",
+            "index": "Governance Action Index"
+          },
           "title": "Update Committee Action",
           "membersToBeAdded": {
             "title": "Members To Be Added",

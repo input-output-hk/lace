@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Cell, Metadata, Text, sx } from '@lace/ui';
+import { Box, Metadata, Text, sx, Cell } from '@lace/ui';
 import * as Types from './ParameterChangeActionTypes';
 import { Card } from '../components/Card';
 
@@ -29,21 +29,26 @@ export const TechnicalGroup = ({ technicalGroup, translations }: Props): JSX.Ele
         </Text.Body.Large>
       </Cell>
       <Cell>
-        <Metadata label="Cost Models" tooltip={translations.tooltip.costModels} text="" />
+        <Metadata label={translations.costModels} tooltip={translations.tooltip.costModels} text="" />
       </Cell>
       <Cell>
-        <Metadata label="A0" tooltip={translations.tooltip.a0} text={technicalGroup.a0} />
+        <Metadata label={translations.a0} tooltip={translations.tooltip.a0} text={technicalGroup.a0} />
       </Cell>
       <Cell>
-        <Metadata label="EMax" tooltip={translations.tooltip.eMax} text={technicalGroup.eMax} />
+        <Metadata label={translations.eMax} tooltip={translations.tooltip.eMax} text={technicalGroup.eMax} />
       </Cell>
       <Cell>
-        <Metadata label="NOpt" tooltip={translations.tooltip.nOpt} text={technicalGroup.nOpt} />
+        <Metadata label={translations.nOpt} tooltip={translations.tooltip.nOpt} text={technicalGroup.nOpt} />
+      </Cell>
+      <Cell>
+        <Text.Body.Large className={textCss} weight="$bold">
+          {translations.costModels}
+        </Text.Body.Large>
       </Cell>
       <Cell>
         {costModels.map(({ title, fields }, idx) => (
-          <Box mt={idx > 0 ? '$24' : '$0'} key={title}>
-            <Card title={`Cost Models - ${title}`} tooltip={translations.tooltip.costModels} data={fields} />
+          <Box mt={idx > 0 ? '$24' : '$0'} mb={costModels.length === idx - 1 ? '$18' : '$0'} key={title}>
+            <Card title={title} tooltip={translations.tooltip.costModels} data={fields} />
           </Box>
         ))}
       </Cell>

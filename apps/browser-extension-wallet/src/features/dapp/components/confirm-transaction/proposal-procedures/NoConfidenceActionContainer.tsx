@@ -30,21 +30,29 @@ export const NoConfidenceActionContainer = ({
 
   const explorerBaseUrl = useCExpolorerBaseUrl();
 
-  const translations = useMemo(
+  const translations = useMemo<Parameters<typeof NoConfidenceAction>[0]['translations']>(
     () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType'),
+        deposit: t('core.ProposalProcedure.txDetails.deposit'),
+        rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
+      },
       procedure: {
-        title: t('core.proposalProcedure.governanceAction.noConfidenceAction.title'),
-        deposit: t('core.proposalProcedure.procedure.deposit'),
-        rewardAccount: t('core.proposalProcedure.procedure.rewardAccount'),
+        title: t('core.ProposalProcedure.procedure.title'),
         anchor: {
-          url: t('core.proposalProcedure.procedure.anchor.url'),
-          hash: t('core.proposalProcedure.procedure.anchor.hash')
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
+      governanceAction: {
+        id: t('core.ProposalProcedure.governanceAction.noConfidenceAction.actionId.id'),
+        index: t('core.ProposalProcedure.governanceAction.noConfidenceAction.actionId.index')
+      },
       actionId: {
-        title: t('core.proposalProcedure.governanceAction.actionId.title'),
-        index: t('core.proposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.proposalProcedure.governanceAction.actionId.txHash')
+        title: t('core.ProposalProcedure.governanceAction.actionId.title'),
+        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
+        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
       }
     }),
     [t]
@@ -52,11 +60,14 @@ export const NoConfidenceActionContainer = ({
 
   const { governanceActionId } = governanceAction;
 
-  const data = {
-    procedure: {
+  const data: Parameters<typeof NoConfidenceAction>[0]['data'] = {
+    txDetails: {
+      txType: t('core.ProposalProcedure.governanceAction.noConfidenceAction.title'),
       deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
-      rewardAccount,
-      ...(anchor.url && {
+      rewardAccount
+    },
+    procedure: {
+      ...(anchor && {
         anchor: {
           url: anchor.url,
           hash: anchor.dataHash,
@@ -64,11 +75,12 @@ export const NoConfidenceActionContainer = ({
         }
       })
     },
-    actionId: {
-      index: governanceActionId?.actionIndex || 0,
-      txHash: governanceActionId?.id || '',
-      ...(explorerBaseUrl && governanceActionId?.id && { txHashUrl: `${explorerBaseUrl}/${governanceActionId?.id}` })
-    }
+    ...(governanceActionId && {
+      governanceAction: {
+        index: governanceActionId.actionIndex.toString(),
+        id: governanceActionId.id || ''
+      }
+    })
   };
 
   return <NoConfidenceAction dappInfo={dappInfo} errorMessage={errorMessage} data={data} translations={translations} />;

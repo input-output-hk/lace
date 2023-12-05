@@ -1,21 +1,27 @@
 import React from 'react';
-import { Box, Cell, Grid, Flex, Divider } from '@lace/ui';
+import { Box, Grid, Flex, Divider, Cell } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../../DappInfo';
 import { ErrorPane } from '@lace/common';
 import * as Types from './NoConfidenceActionTypes';
+import { TransactionDetails } from '../components/TransactionDetails';
 import { Procedure } from '../components/Procedure';
 import { ActionId } from '../components/ActionId';
 
-interface Props {
+export interface NoConfidenceActionProps {
   dappInfo: Omit<DappInfoProps, 'className'>;
   errorMessage?: string;
   data: Types.Data;
   translations: Types.Translations;
 }
 
-export const NoConfidenceAction = ({ dappInfo, errorMessage, data, translations }: Props): JSX.Element => (
+export const NoConfidenceAction = ({
+  dappInfo,
+  errorMessage,
+  data: { procedure, txDetails, governanceAction, actionId },
+  translations
+}: NoConfidenceActionProps): JSX.Element => (
   <Flex h="$fill" flexDirection="column">
-    <Box mb={'$28'} mt={'$32'}>
+    <Box mb={'$28'} mt={'$16'}>
       <DappInfo {...dappInfo} />
     </Box>
     {errorMessage && (
@@ -24,11 +30,25 @@ export const NoConfidenceAction = ({ dappInfo, errorMessage, data, translations 
       </Box>
     )}
     <Grid columns="$1" gutters="$20">
-      <Procedure data={data.procedure} translations={translations.procedure} />
+      {/* tx details section */}
+      <TransactionDetails translations={translations.txDetails} data={txDetails} />
       <Cell>
         <Divider my={'$16'} />
       </Cell>
-      <ActionId data={data.actionId} translations={translations.actionId} />
+      {/* procedure section */}
+      <Procedure
+        translations={{ ...translations.procedure, governanceAction: translations.governanceAction }}
+        data={{ ...procedure, governanceAction }}
+      />
+      {/* action id section*/}
+      {actionId && (
+        <>
+          <Cell>
+            <Divider my={'$16'} />
+          </Cell>
+          <ActionId translations={translations.actionId} data={actionId} />
+        </>
+      )}
     </Grid>
   </Flex>
 );

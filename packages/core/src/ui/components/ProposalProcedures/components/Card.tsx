@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cell, Grid, Flex, Card as UICard, Box, sx, Text, TextLink, Tooltip } from '@lace/ui';
+import { Grid, Flex, Card as UICard, Box, sx, Text, TextLink, Tooltip, Cell } from '@lace/ui';
 import styles from './Card.module.scss';
 
 interface Item {

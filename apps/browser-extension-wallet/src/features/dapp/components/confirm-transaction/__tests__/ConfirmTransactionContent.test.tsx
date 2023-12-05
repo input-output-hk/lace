@@ -9,6 +9,7 @@ const mockConfirmDRepRetirementContainer = jest.fn(() => <span data-testid="Conf
 const mockConfirmDRepUpdateContainer = jest.fn(() => <span data-testid="ConfirmDRepUpdateContainer" />);
 const mockConfirmVoteDelegationContainer = jest.fn(() => <span data-testid="ConfirmVoteDelegationContainer" />);
 const mockVotingProceduresContainer = jest.fn(() => <span data-testid="VotingProceduresContainer" />);
+const mockProposalProceduresContainer = jest.fn(() => <span data-testid="ProposalProceduresContainer" />);
 const mockDappTransactionContainer = jest.fn(() => <span data-testid="DappTransactionContainer" />);
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
@@ -71,6 +72,15 @@ jest.mock('../VotingProceduresContainer', () => {
   };
 });
 
+jest.mock('../ProposalProceduresContainer', () => {
+  const original = jest.requireActual('../ProposalProceduresContainer');
+  return {
+    __esModule: true,
+    ...original,
+    ProposalProceduresContainer: mockProposalProceduresContainer
+  };
+});
+
 jest.mock('../DappTransactionContainer', () => {
   const original = jest.requireActual('../DappTransactionContainer');
   return {
@@ -106,6 +116,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmDRepUpdateContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('VotingProceduresContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ProposalProceduresContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
     expect(mockSkeleton).toHaveBeenLastCalledWith({ loading: true }, {});
   });
@@ -125,6 +136,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmDRepUpdateContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('VotingProceduresContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ProposalProceduresContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
     expect(mockConfirmDRepRegistrationContainer).toHaveBeenLastCalledWith(props, {});
   });
@@ -144,6 +156,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmDRepUpdateContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('VotingProceduresContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ProposalProceduresContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
     expect(mockConfirmDRepRetirementContainer).toHaveBeenLastCalledWith(props, {});
   });
@@ -163,6 +176,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmDRepUpdateContainer')).toBeInTheDocument();
     expect(queryByTestId('ConfirmVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('VotingProceduresContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ProposalProceduresContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
     expect(mockConfirmDRepUpdateContainer).toHaveBeenLastCalledWith(props, {});
   });
@@ -182,6 +196,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmDRepUpdateContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmVoteDelegationContainer')).toBeInTheDocument();
     expect(queryByTestId('VotingProceduresContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ProposalProceduresContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
     expect(mockConfirmVoteDelegationContainer).toHaveBeenLastCalledWith(props, {});
   });
@@ -201,8 +216,29 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmDRepUpdateContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('VotingProceduresContainer')).toBeInTheDocument();
+    expect(queryByTestId('ProposalProceduresContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
     expect(mockVotingProceduresContainer).toHaveBeenLastCalledWith(props, {});
+  });
+
+  test('should render ProposalProceduresContainer with proper props', async () => {
+    let queryByTestId: any;
+
+    await act(async () => {
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.ProposalProcedures, ...props }} />
+      ));
+    });
+
+    expect(queryByTestId('skeleton')).not.toBeInTheDocument();
+    expect(queryByTestId('ConfirmDRepRegistrationContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ConfirmDRepRetirementContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ConfirmDRepUpdateContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ConfirmVoteDelegationContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('VotingProceduresContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ProposalProceduresContainer')).toBeInTheDocument();
+    expect(queryByTestId('DappTransactionContainer')).not.toBeInTheDocument();
+    expect(mockProposalProceduresContainer).toHaveBeenLastCalledWith(props, {});
   });
 
   test('should render DappTransactionContainer with proper props', async () => {
@@ -220,6 +256,7 @@ describe('Testing ConfirmTransactionContent component', () => {
     expect(queryByTestId('ConfirmDRepUpdateContainer')).not.toBeInTheDocument();
     expect(queryByTestId('ConfirmVoteDelegationContainer')).not.toBeInTheDocument();
     expect(queryByTestId('VotingProceduresContainer')).not.toBeInTheDocument();
+    expect(queryByTestId('ProposalProceduresContainer')).not.toBeInTheDocument();
     expect(queryByTestId('DappTransactionContainer')).toBeInTheDocument();
     expect(mockDappTransactionContainer).toHaveBeenLastCalledWith(props, {});
   });

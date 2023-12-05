@@ -30,21 +30,30 @@ export const TreasuryWithdrawalsActionContainer = ({
 
   const explorerBaseUrl = useCExpolorerBaseUrl();
 
-  const translations = useMemo(
+  const translations = useMemo<Parameters<typeof TreasuryWithdrawalsAction>[0]['translations']>(
     () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType'),
+        deposit: t('core.ProposalProcedure.txDetails.deposit'),
+        rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
+      },
       procedure: {
-        title: t('core.proposalProcedure.governanceAction.treasuryWithdrawals.title'),
-        deposit: t('core.proposalProcedure.procedure.deposit'),
-        rewardAccount: t('core.proposalProcedure.procedure.rewardAccount'),
+        title: t('core.ProposalProcedure.procedure.title'),
         anchor: {
-          url: t('core.proposalProcedure.procedure.anchor.url'),
-          hash: t('core.proposalProcedure.procedure.anchor.hash')
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
+      actionId: {
+        title: t('core.ProposalProcedure.governanceAction.actionId.title'),
+        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
+        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+      },
       withdrawals: {
-        title: t('core.proposalProcedure.governanceAction.treasuryWithdrawals.withdrawals.title'),
-        rewardAccount: t('core.proposalProcedure.governanceAction.treasuryWithdrawals.withdrawals.rewardAccount'),
-        lovelace: t('core.proposalProcedure.governanceAction.treasuryWithdrawals.withdrawals.lovelace')
+        title: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.title'),
+        rewardAccount: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.withdrawals.rewardAccount'),
+        lovelace: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.withdrawals.lovelace')
       }
     }),
     [t]
@@ -52,11 +61,14 @@ export const TreasuryWithdrawalsActionContainer = ({
 
   const { withdrawals } = governanceAction;
 
-  const data = {
-    procedure: {
+  const data: Parameters<typeof TreasuryWithdrawalsAction>[0]['data'] = {
+    txDetails: {
+      txType: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.title'),
       deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
-      rewardAccount,
-      ...(anchor.url && {
+      rewardAccount
+    },
+    procedure: {
+      ...(anchor && {
         anchor: {
           url: anchor.url,
           hash: anchor.dataHash,

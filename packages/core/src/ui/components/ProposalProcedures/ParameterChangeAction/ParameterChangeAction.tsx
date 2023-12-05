@@ -1,23 +1,30 @@
 import React from 'react';
-import { Box, Cell, Grid, Flex, Divider } from '@lace/ui';
+import { Box, Grid, Flex, Divider, Metadata, MetadataLink, Cell } from '@lace/ui';
 import { DappInfo, DappInfoProps } from '../../DappInfo';
 import { ErrorPane } from '@lace/common';
-import { Procedure } from '../components/Procedure';
+import { TransactionDetails } from '../components/TransactionDetails';
 import * as Types from './ParameterChangeActionTypes';
 import { EconomicGroup } from './EconomicGroup';
 import { NetworkGroup } from './NetworkGroup';
 import { TechnicalGroup } from './TechnicalGroup';
 import { GovernanceGroup } from './GovernanceGroup';
+import { Card } from '../components/Card';
 
-interface Props {
+interface ParameterChangeActionProps {
   dappInfo: Omit<DappInfoProps, 'className'>;
   errorMessage?: string;
   data: Types.Data;
   translations: Types.Translations;
 }
 
-export const ParameterChangeAction = ({ dappInfo, errorMessage, data, translations }: Props): JSX.Element => {
-  const { economicGroup, governanceGroup, networkGroup, technicalGroup } = data.protocolParamUpdate;
+export const ParameterChangeAction = ({
+  dappInfo,
+  errorMessage,
+  data: { txDetails, protocolParamUpdate, anchor },
+  translations
+}: ParameterChangeActionProps): JSX.Element => {
+  const { economicGroup, governanceGroup, networkGroup, technicalGroup, maxTxExUnits, maxBlockExUnits } =
+    protocolParamUpdate;
 
   return (
     <Flex h="$fill" flexDirection="column">
@@ -30,22 +37,44 @@ export const ParameterChangeAction = ({ dappInfo, errorMessage, data, translatio
         </Box>
       )}
       <Grid columns="$1" gutters="$20">
-        <Procedure data={data.procedure} translations={translations.procedure} />
+        {/* tx details section */}
+        <TransactionDetails translations={translations.txDetails} data={txDetails} />
+        {anchor && (
+          <>
+            <Cell>
+              <Metadata label={translations.anchor.hash} text={anchor.hash} />
+            </Cell>
+            <Cell>
+              <MetadataLink label={translations.anchor.url} text={anchor.url} url={anchor.txHashUrl} />
+            </Cell>
+          </>
+        )}
         <Cell>
-          <Divider my={'$16'} />
+          <Box>
+            <Card
+              title={translations.networkGroup.maxTxExUnits}
+              data={[
+                { label: translations.memory, value: maxTxExUnits.memory },
+                { label: translations.step, value: maxTxExUnits.step }
+              ]}
+            />
+          </Box>
+          <Box mb={'$18'}>
+            <Card
+              title={translations.networkGroup.maxBlockExUnits}
+              data={[
+                { label: translations.memory, value: maxBlockExUnits.memory },
+                { label: translations.step, value: maxBlockExUnits.step }
+              ]}
+            />
+          </Box>
         </Cell>
         <NetworkGroup networkGroup={networkGroup} translations={translations.networkGroup} />
         <Cell>
-          <Box my={'$16'} />
+          <Divider my={'$16'} />
         </Cell>
         <EconomicGroup economicGroup={economicGroup} translations={translations.economicGroup} />
-        <Cell>
-          <Box my={'$16'} />
-        </Cell>
         <TechnicalGroup technicalGroup={technicalGroup} translations={translations.technicalGroup} />
-        <Cell>
-          <Box my={'$16'} />
-        </Cell>
         <GovernanceGroup governanceGroup={governanceGroup} translations={translations.governanceGroup} />
       </Grid>
     </Flex>

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Cell, Metadata, Text, sx } from '@lace/ui';
-import { Card } from '../components/Card';
+import { Metadata, Text, sx, Cell } from '@lace/ui';
 import * as Types from './ParameterChangeActionTypes';
 
 interface Props {
@@ -21,54 +20,38 @@ export const NetworkGroup = ({ networkGroup, translations }: Props): JSX.Element
         </Text.Body.Large>
       </Cell>
       <Cell>
-        <Metadata label="Max BB Size" tooltip={translations.tooltip.maxBBSize} text={networkGroup.maxBBSize} />
-      </Cell>
-      <Cell>
-        <Metadata label="Max Tx Size" tooltip={translations.tooltip.maxTxSize} text={networkGroup.maxTxSize} />
-      </Cell>
-      <Cell>
-        <Metadata label="Max BH Size" tooltip={translations.tooltip.maxBHSize} text={networkGroup.maxBHSize} />
-      </Cell>
-      <Cell>
-        <Metadata label="Max Val Size" tooltip={translations.tooltip.maxValSize} text={networkGroup.maxValSize} />
+        <Metadata
+          label={translations.maxBBSize}
+          tooltip={translations.tooltip.maxBBSize}
+          text={networkGroup.maxBBSize}
+        />
       </Cell>
       <Cell>
         <Metadata
-          label="Max Collateral Inputs"
+          label={translations.maxTxSize}
+          tooltip={translations.tooltip.maxTxSize}
+          text={networkGroup.maxTxSize}
+        />
+      </Cell>
+      <Cell>
+        <Metadata
+          label={translations.maxBHSize}
+          tooltip={translations.tooltip.maxBHSize}
+          text={networkGroup.maxBHSize}
+        />
+      </Cell>
+      <Cell>
+        <Metadata
+          label={translations.maxValSize}
+          tooltip={translations.tooltip.maxValSize}
+          text={networkGroup.maxValSize}
+        />
+      </Cell>
+      <Cell>
+        <Metadata
+          label={translations.maxCollateralInputs}
           tooltip={translations.tooltip.maxCollateralInputs}
           text={networkGroup.maxCollateralInputs}
-        />
-      </Cell>
-      <Cell>
-        <Card
-          title="Max Tx Ex Units"
-          tooltip={translations.tooltip.maxTxExUnits}
-          data={[
-            {
-              label: 'Memory',
-              value: networkGroup.maxTxExUnits.memory
-            },
-            {
-              label: 'Step',
-              value: networkGroup.maxTxExUnits.step
-            }
-          ]}
-        />
-      </Cell>
-      <Cell>
-        <Card
-          title="Max Block Ex Units"
-          tooltip={translations.tooltip.maxBlockExUnits}
-          data={[
-            {
-              label: 'Memory',
-              value: networkGroup.maxBlockExUnits.memory
-            },
-            {
-              label: 'Step',
-              value: networkGroup.maxBlockExUnits.step
-            }
-          ]}
         />
       </Cell>
     </>

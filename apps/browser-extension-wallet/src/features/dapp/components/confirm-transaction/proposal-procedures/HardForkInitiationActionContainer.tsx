@@ -30,25 +30,34 @@ export const HardForkInitiationActionContainer = ({
 
   const explorerBaseUrl = useCExpolorerBaseUrl();
 
-  const translations = useMemo(
+  const translations = useMemo<Parameters<typeof HardForkInitiationAction>[0]['translations']>(
     () => ({
+      txDetails: {
+        title: t('core.ProposalProcedure.txDetails.title'),
+        txType: t('core.ProposalProcedure.txDetails.txType'),
+        deposit: t('core.ProposalProcedure.txDetails.deposit'),
+        rewardAccount: t('core.ProposalProcedure.txDetails.rewardAccount')
+      },
       procedure: {
-        title: t('core.proposalProcedure.governanceAction.hardForkInitiation.title'),
-        deposit: t('core.proposalProcedure.procedure.deposit'),
-        rewardAccount: t('core.proposalProcedure.procedure.rewardAccount'),
+        title: t('core.ProposalProcedure.procedure.title'),
         anchor: {
-          url: t('core.proposalProcedure.procedure.anchor.url'),
-          hash: t('core.proposalProcedure.procedure.anchor.hash')
+          url: t('core.ProposalProcedure.procedure.anchor.url'),
+          hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
-      actionId: {
-        title: t('core.proposalProcedure.governanceAction.actionId.title'),
-        index: t('core.proposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.proposalProcedure.governanceAction.actionId.txHash')
+      governanceAction: {
+        id: t('core.ProposalProcedure.governanceAction.hardForkInitiation.actionId.id'),
+        index: t('core.ProposalProcedure.governanceAction.hardForkInitiation.actionId.index')
       },
       protocolVersion: {
-        title: t('core.proposalProcedure.governanceAction.hardForkInitiation.protocolVersion.title'),
-        label: t('core.proposalProcedure.governanceAction.hardForkInitiation.protocolVersion.label')
+        major: t('core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.major'),
+        minor: t('core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.minor'),
+        patch: t('core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.patch')
+      },
+      actionId: {
+        title: t('core.ProposalProcedure.governanceAction.actionId.title'),
+        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
+        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
       }
     }),
     [t]
@@ -56,11 +65,14 @@ export const HardForkInitiationActionContainer = ({
 
   const { governanceActionId, protocolVersion } = governanceAction;
 
-  const data = {
-    procedure: {
+  const data: Parameters<typeof HardForkInitiationAction>[0]['data'] = {
+    txDetails: {
+      txType: t('core.ProposalProcedure.governanceAction.hardForkInitiation.title'),
       deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
-      rewardAccount,
-      ...(anchor.url && {
+      rewardAccount
+    },
+    procedure: {
+      ...(anchor && {
         anchor: {
           url: anchor.url,
           hash: anchor.dataHash,
@@ -68,12 +80,17 @@ export const HardForkInitiationActionContainer = ({
         }
       })
     },
-    protocolVersion,
-    actionId: {
-      index: governanceActionId?.actionIndex || 0,
-      txHash: governanceActionId?.id || '',
-      ...(explorerBaseUrl && governanceActionId?.id && { txHashUrl: `${explorerBaseUrl}/${governanceActionId?.id}` })
-    }
+    protocolVersion: {
+      major: protocolVersion.major.toString(),
+      minor: protocolVersion.minor.toString(),
+      patch: protocolVersion.patch?.toString()
+    },
+    ...(governanceActionId && {
+      governanceAction: {
+        index: governanceActionId.actionIndex.toString(),
+        id: governanceActionId.id || ''
+      }
+    })
   };
 
   return (

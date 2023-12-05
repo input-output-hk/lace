@@ -1,8 +1,10 @@
 import * as ProcedureTypes from '../components/ProcedureTypes';
+import * as TxDetailsTypes from '../components/TransactionDetailsTypes';
 
 export interface Data {
-  procedure: ProcedureTypes.Procedure;
   protocolParamUpdate: ProtocolParamUpdate;
+  txDetails: TxDetailsTypes.TxDetails;
+  anchor: ProcedureTypes.Procedure['anchor'];
 }
 
 export interface NetworkGroup {
@@ -10,14 +12,6 @@ export interface NetworkGroup {
   maxTxSize: string;
   maxBHSize: string;
   maxValSize: string;
-  maxTxExUnits: {
-    memory: string;
-    step: string;
-  };
-  maxBlockExUnits: {
-    memory: string;
-    step: string;
-  };
   maxCollateralInputs: string;
 }
 
@@ -55,20 +49,28 @@ export interface GovernanceGroup {
   ccMinSize: string;
   ccMaxTermLength: string;
   dRepVotingThresholds: {
-    dvtMotionNoConfidence: string;
-    dvtCommitteeNormal: string;
-    dvtCommitteeNoConfidence: string;
-    dvtUpdateToConstitution: string;
-    dvtHardForkInitiation: string;
-    dvtPPNetworkGroup: string;
-    dvtPPEconomicGroup: string;
-    dvtPPTechnicalGroup: string;
-    dvtPPGovGroup: string;
-    dvtTreasuryWithdrawal: string;
+    motionNoConfidence: string;
+    committeeNormal: string;
+    committeeNoConfidence: string;
+    updateToConstitution: string;
+    hardForkInitiation: string;
+    ppNetworkGroup: string;
+    ppEconomicGroup: string;
+    ppTechnicalGroup: string;
+    ppGovGroup: string;
+    treasuryWithdrawal: string;
   };
 }
 
 interface ProtocolParamUpdate {
+  maxTxExUnits: {
+    memory: string;
+    step: string;
+  };
+  maxBlockExUnits: {
+    memory: string;
+    step: string;
+  };
   networkGroup: NetworkGroup;
   economicGroup: EconomicGroup;
   technicalGroup: TechnicalGroup;
@@ -76,9 +78,19 @@ interface ProtocolParamUpdate {
 }
 
 export interface Translations {
-  procedure: ProcedureTypes.Translations;
+  txDetails: TxDetailsTypes.Translations;
+  anchor: ProcedureTypes.Translations['anchor'];
+  memory: string;
+  step: string;
   networkGroup: {
     title: string;
+    maxBBSize: string;
+    maxTxSize: string;
+    maxBHSize: string;
+    maxValSize: string;
+    maxTxExUnits: string;
+    maxBlockExUnits: string;
+    maxCollateralInputs: string;
     tooltip: {
       maxBBSize: string;
       maxTxSize: string;
@@ -91,6 +103,15 @@ export interface Translations {
   };
   economicGroup: {
     title: string;
+    minFeeA: string;
+    minFeeB: string;
+    keyDeposit: string;
+    poolDeposit: string;
+    rho: string;
+    tau: string;
+    minPoolCost: string;
+    coinsPerUTxOByte: string;
+    prices: string;
     tooltip: {
       minFeeA: string;
       minFeeB: string;
@@ -105,6 +126,11 @@ export interface Translations {
   };
   technicalGroup: {
     title: string;
+    a0: string;
+    eMax: string;
+    nOpt: string;
+    costModels: string;
+    collateralPercentage: string;
     tooltip: {
       a0: string;
       eMax: string;
@@ -115,6 +141,25 @@ export interface Translations {
   };
   governanceGroup: {
     title: string;
+    govActionLifetime: string;
+    govActionDeposit: string;
+    drepDeposit: string;
+    drepActivity: string;
+    ccMinSize: string;
+    ccMaxTermLength: string;
+    dRepVotingThresholds: {
+      title: string;
+      motionNoConfidence: string;
+      committeeNormal: string;
+      committeeNoConfidence: string;
+      updateConstitution: string;
+      hardForkInitiation: string;
+      ppNetworkGroup: string;
+      ppEconomicGroup: string;
+      ppTechnicalGroup: string;
+      ppGovernanceGroup: string;
+      treasuryWithdrawal: string;
+    };
     tooltip: {
       govActionLifetime: string;
       govActionDeposit: string;
@@ -126,7 +171,7 @@ export interface Translations {
         title: string;
         motionNoConfidence: string;
         committeeNormal: string;
-        commiteeNoConfidence: string;
+        committeeNoConfidence: string;
         updateConstitution: string;
         hardForkInitiation: string;
         ppNetworkGroup: string;

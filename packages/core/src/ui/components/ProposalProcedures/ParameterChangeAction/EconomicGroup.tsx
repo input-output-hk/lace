@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cell, Metadata, Text, sx } from '@lace/ui';
+import { Metadata, Text, sx, Cell } from '@lace/ui';
 import { Card } from '../components/Card';
 import * as Types from './ParameterChangeActionTypes';
 
@@ -21,36 +21,48 @@ export const EconomicGroup = ({ economicGroup, translations }: Props): JSX.Eleme
         </Text.Body.Large>
       </Cell>
       <Cell>
-        <Metadata label="Min Fee A" tooltip={translations.tooltip.minFeeA} text={economicGroup.minFeeA} />
+        <Metadata label={translations.minFeeA} tooltip={translations.tooltip.minFeeA} text={economicGroup.minFeeA} />
       </Cell>
       <Cell>
-        <Metadata label="Min Fee B" tooltip={translations.tooltip.minFeeB} text={economicGroup.minFeeB} />
-      </Cell>
-      <Cell>
-        <Metadata label="Key Deposit" tooltip={translations.tooltip.keyDeposit} text={economicGroup.keyDeposit} />
-      </Cell>
-      <Cell>
-        <Metadata label="Pool Deposit" tooltip={translations.tooltip.poolDeposit} text={economicGroup.poolDeposit} />
-      </Cell>
-      <Cell>
-        <Metadata label="Rho" tooltip={translations.tooltip.rho} text={economicGroup.rho} />
-      </Cell>
-      <Cell>
-        <Metadata label="Tau" tooltip={translations.tooltip.tau} text={economicGroup.tau} />
-      </Cell>
-      <Cell>
-        <Metadata label="Min Pool Cost" tooltip={translations.tooltip.minPoolCost} text={economicGroup.minPoolCost} />
+        <Metadata label={translations.minFeeB} tooltip={translations.tooltip.minFeeB} text={economicGroup.minFeeB} />
       </Cell>
       <Cell>
         <Metadata
-          label="Coins Per UTxO Byte"
+          label={translations.keyDeposit}
+          tooltip={translations.tooltip.keyDeposit}
+          text={economicGroup.keyDeposit}
+        />
+      </Cell>
+      <Cell>
+        <Metadata
+          label={translations.poolDeposit}
+          tooltip={translations.tooltip.poolDeposit}
+          text={economicGroup.poolDeposit}
+        />
+      </Cell>
+      <Cell>
+        <Metadata label={translations.rho} tooltip={translations.tooltip.rho} text={economicGroup.rho} />
+      </Cell>
+      <Cell>
+        <Metadata label={translations.tau} tooltip={translations.tooltip.tau} text={economicGroup.tau} />
+      </Cell>
+      <Cell>
+        <Metadata
+          label={translations.minPoolCost}
+          tooltip={translations.tooltip.minPoolCost}
+          text={economicGroup.minPoolCost}
+        />
+      </Cell>
+      <Cell>
+        <Metadata
+          label={translations.coinsPerUTxOByte}
           tooltip={translations.tooltip.coinsPerUTxOByte}
           text={economicGroup.coinsPerUTxOByte}
         />
       </Cell>
-      <Cell>
+      <Cell mb={'$18'}>
         <Card
-          title="Prices"
+          title={translations.prices}
           tooltip={translations.tooltip.prices}
           data={[
             {
