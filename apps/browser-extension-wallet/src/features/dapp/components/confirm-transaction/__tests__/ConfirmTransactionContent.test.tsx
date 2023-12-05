@@ -1,6 +1,8 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
+import { Wallet } from '@lace/cardano';
+
 const mockSkeleton = jest.fn(() => <span data-testid="skeleton" />);
 const mockConfirmDRepRegistrationContainer = jest.fn(() => <span data-testid="ConfirmDRepRegistrationContainer" />);
 const mockConfirmDRepRetirementContainer = jest.fn(() => <span data-testid="ConfirmDRepRetirementContainer" />);
@@ -14,7 +16,6 @@ import { ConfirmTransactionContent } from '../ConfirmTransactionContent';
 import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
-import { TxType } from '../utils';
 
 jest.mock('antd', () => {
   const original = jest.requireActual('antd');
@@ -113,7 +114,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ ...props, txType: TxType.DRepRegistration }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent {...{ ...props, txType: Wallet.Cip30TxType.DRepRegistration }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -130,7 +133,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: TxType.DRepRetirement, ...props }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.DRepRetirement, ...props }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -147,7 +152,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: TxType.DRepUpdate, ...props }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.DRepUpdate, ...props }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -164,7 +171,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: TxType.VoteDelegation, ...props }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VoteDelegation, ...props }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -181,7 +190,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: TxType.VotingProcedures, ...props }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent {...{ txType: Wallet.Cip30TxType.VotingProcedures, ...props }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();
@@ -198,7 +209,9 @@ describe('Testing ConfirmTransactionContent component', () => {
     let queryByTestId: any;
 
     await act(async () => {
-      ({ queryByTestId } = render(<ConfirmTransactionContent {...{ txType: 'other' as TxType, ...props }} />));
+      ({ queryByTestId } = render(
+        <ConfirmTransactionContent {...{ txType: 'other' as Wallet.Cip30TxType, ...props }} />
+      ));
     });
 
     expect(queryByTestId('skeleton')).not.toBeInTheDocument();

@@ -12,6 +12,7 @@ import type { WalletType } from './profile-dropdown.data';
 
 export interface Props {
   type: WalletType;
+  testId?: string;
 }
 
 const icons: Record<WalletType, FC<React.SVGProps<SVGSVGElement>>> = {
@@ -20,13 +21,15 @@ const icons: Record<WalletType, FC<React.SVGProps<SVGSVGElement>>> = {
   shared: SharedWallet,
 };
 
-export const WalletIcon = ({ type }: Readonly<Props>): JSX.Element => {
+export const WalletIcon = ({ type, testId }: Readonly<Props>): JSX.Element => {
   const Icon = icons[type];
   return (
     <Flex
       className={cx.container({
         bg: type,
       })}
+      data-testid={testId}
+      data-value={type}
     >
       <Icon />
     </Flex>

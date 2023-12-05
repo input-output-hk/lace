@@ -194,7 +194,7 @@ describe('Testing ConfirmTransaction component', () => {
     mockGetTitleKey.mockReset();
     mockGetTitleKey.mockImplementation((val) => val);
 
-    const signTxData = { tx: 'signTxDataTx' };
+    const signTxData = { tx: { id: 'test-tx-id' } };
     mockConsumeRemoteApi.mockReset();
     mockConsumeRemoteApi.mockReturnValue({
       getSignTxData: async () => await Promise.resolve(signTxData)
@@ -253,7 +253,7 @@ describe('Testing ConfirmTransaction component', () => {
       blockchainProvider: { assetProvider }
     }));
 
-    const signTxData = { tx: 'signTxDataTx' };
+    const signTxData = { tx: { id: 'test-tx-id' } };
     mockConsumeRemoteApi.mockReset();
     mockConsumeRemoteApi.mockReturnValue({
       getSignTxData: async () => await Promise.resolve(signTxData)
