@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import React, { useMemo, useState } from 'react';
+import cn from 'classnames';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
@@ -63,7 +64,11 @@ export const ConfirmTransaction = (): React.ReactElement => {
   useOnBeforeUnload(disallowSignTx);
 
   return (
-    <Layout pageClassname={styles.spaceBetween} title={!confirmTransactionError && title}>
+    <Layout
+      layoutClassname={cn(confirmTransactionError && styles.layoutError)}
+      pageClassname={styles.spaceBetween}
+      title={!confirmTransactionError && title}
+    >
       <ConfirmTransactionContent
         txType={txType}
         signTxData={signTxData}

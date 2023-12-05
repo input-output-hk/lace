@@ -7,13 +7,13 @@ import { useWalletStore } from '@src/stores';
 import { SignTxData } from './types';
 import { useGetOwnPubDRepKeyHash } from './hooks';
 import { Skeleton } from 'antd';
-import { DRepIdMismatch } from './DRepIdMismatch';
 import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { of } from 'rxjs';
 import { ApiError, APIErrorCode } from '@cardano-sdk/dapp-connector';
 import { DAPP_CHANNELS } from '@utils/constants';
 import { runtime } from 'webextension-polyfill';
+import { DappError } from '../DappError';
 
 interface Props {
   signTxData: SignTxData;
@@ -56,11 +56,18 @@ export const ConfirmDRepRetirementContainer = ({ signTxData, onError, errorMessa
 
   if (isNotOwnDRepKey) {
     return (
-      <DRepIdMismatch
+      <DappError
+        title={t('core.DRepRetirement.drepIdMismatchScreen.title')}
+        description={t('core.DRepRetirement.drepIdMismatchScreen.description')}
         onMount={() => {
           disallowSignTx();
           onError();
         }}
+        containerTestId="drep-id-mismatch-container"
+        imageTestId="drep-id-mismatch-image"
+        titleTestId="drep-id-mismatch-heading"
+        descriptionTestId="drep-id-mismatch-description"
+        closeButtonTestId="drep-id-mismatch-close-button"
       />
     );
   }

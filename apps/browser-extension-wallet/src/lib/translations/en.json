@@ -328,7 +328,7 @@
     "copyHandle": "Copy handle"
   },
   "dapp": {
-    "nowallet.btn": "Create or restore a wallet",
+    "dappErrorPage.closeButton": "Cancel",
     "connect.header": "Authorize DApp",
     "connect.btn.accept": "Authorize",
     "connect.btn.cancel": "Cancel",
@@ -367,6 +367,7 @@
     "delete.confirm": "Disconnect DApp",
     "noWallet.heading": "You don't have a wallet right now",
     "noWallet.description": "You'll need to create or restore a wallet to connect to a dApp or make a transaction.",
+    "noWallet.closeButton": "Create or restore a wallet",
     "educationBanner.title": "DApp Guide",
     "betaModal": {
       "header": "DApp connector is now in Beta",

@@ -6,6 +6,10 @@
   padding-top: size_unit(2);
 }
 
+.layoutError {
+  padding: 0;
+}
+
 .actions {
   @extend %flex-column;
   background-color: var(--bg-color-body);

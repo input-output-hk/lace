@@ -10,7 +10,7 @@ const mockUseWalletStore = jest.fn();
 const t = jest.fn().mockImplementation((res) => res);
 const mockUseTranslation = jest.fn(() => ({ t }));
 const mockConfirmDRepRetirement = jest.fn();
-const mockDRepIdMismatch = jest.fn();
+const mockDappError = jest.fn();
 const mockUseGetOwnPubDRepKeyHash = jest.fn();
 const mockExposeApi = jest.fn((props: ExposeApiProps<Pick<UserPromptService, 'allowSignTx'>>) => {
   let returnValue;
@@ -96,12 +96,12 @@ jest.mock('@lace/core', () => {
   };
 });
 
-jest.mock('../DRepIdMismatch', () => {
-  const original = jest.requireActual('@lace/core');
+jest.mock('../DappError', () => {
+  const original = jest.requireActual('../DappError');
   return {
     __esModule: true,
     ...original,
-    DRepIdMismatch: mockDRepIdMismatch
+    DappError: mockDappError
   };
 });
 
@@ -153,8 +153,8 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
     }));
     mockConfirmDRepRetirement.mockReset();
     mockConfirmDRepRetirement.mockReturnValue(<span data-testid="ConfirmDRepRetirementContainer" />);
-    mockDRepIdMismatch.mockReset();
-    mockDRepIdMismatch.mockReturnValue(<span data-testid="DRepIdMismatch" />);
+    mockDappError.mockReset();
+    mockDappError.mockReturnValue(<span data-testid="DappError" />);
     mockUseTranslation.mockReset();
     mockUseTranslation.mockImplementation(() => ({ t }));
   });
@@ -252,6 +252,6 @@ describe('Testing ConfirmDRepRetirementContainer component', () => {
       ));
     });
 
-    expect(queryByTestId('DRepIdMismatch')).toBeInTheDocument();
+    expect(queryByTestId('DappError')).toBeInTheDocument();
   });
 });
