@@ -21,7 +21,7 @@ jobs:
       - name: Setup Build Essential
         run: apt-get update && apt-get install build-essential -y
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Node.js

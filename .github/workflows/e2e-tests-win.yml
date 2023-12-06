@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
@@ -70,7 +70,7 @@ jobs:
         shell: pwsh
         run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Decrypt test data
         working-directory: ./packages/e2e-tests
         run: ./decrypt_secret.sh
@@ -163,7 +163,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Download reports
         uses: actions/download-artifact@v3
         with:
