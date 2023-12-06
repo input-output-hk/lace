@@ -1,31 +1,31 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
+
+import { Tokens } from '@src/types';
+import { PriceResult } from '@hooks';
+import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
 import { SendTransactionCost } from '@lace/core';
 import { Button, useObservable } from '@lace/common';
-
-import { useOutputs, useBuiltTxState, useSpentBalances, useLastFocusedInput } from '../../store';
-import { MetadataInput } from './MetadataInput';
-import { getFee } from '../SendTransactionSummary';
-
 import { useWalletStore } from '@src/stores';
 import { useMaxAda } from '@hooks/useMaxAda';
-import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import {
   MatomoEventActions,
   MatomoEventCategories,
   AnalyticsEventNames
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { Tokens } from '@src/types';
-import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
-import styles from './Form.module.scss';
-import { getReachedMaxAmountList } from '../../helpers';
-import { PriceResult } from '@hooks';
-import { formatAdaAllocation, getNextBundleCoinId } from './util';
-import { BundlesList } from './BundlesList';
 
-interface Props {
+import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
+import { getFee } from '../SendTransactionSummary';
+import { useBuiltTxState, useSpentBalances, useLastFocusedInput, useOutputs } from '../../store';
+import { getReachedMaxAmountList } from '../../helpers';
+import { MetadataInput } from './MetadataInput';
+import { BundlesList } from './BundlesList';
+import { formatAdaAllocation, getNextBundleCoinId } from './util';
+import styles from './Form.module.scss';
+
+export interface Props {
   assets: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>;
   coinBalance: string;
   assetBalances: Tokens;
