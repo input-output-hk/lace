@@ -19,17 +19,17 @@ class ConfirmDRepUpdatePageAssert extends CommonGovernancePageAssert {
     );
     await this.assertSeeMetadataHeader('core.DRepUpdate.metadata');
 
-    if (expectedMetadataUrl) {
-      await ConfirmDRepUpdatePage.urlLabel.waitForDisplayed();
+    await ConfirmDRepUpdatePage.urlLabel.waitForDisplayed({ reverse: expectedMetadataUrl === '-' });
+    await ConfirmDRepUpdatePage.urlValue.waitForDisplayed({ reverse: expectedMetadataUrl === '-' });
+    if (expectedMetadataUrl !== '-') {
       expect(await ConfirmDRepUpdatePage.urlLabel.getText()).to.equal(await t('core.DRepUpdate.url'));
-      await ConfirmDRepUpdatePage.urlValue.waitForDisplayed();
       expect(await ConfirmDRepUpdatePage.urlValue.getText()).to.equal(expectedMetadataUrl);
     }
 
-    if (expectedMetadataHash) {
-      await ConfirmDRepUpdatePage.hashLabel.waitForDisplayed();
+    await ConfirmDRepUpdatePage.hashLabel.waitForDisplayed({ reverse: expectedMetadataHash === '-' });
+    await ConfirmDRepUpdatePage.hashValue.waitForDisplayed({ reverse: expectedMetadataHash === '-' });
+    if (expectedMetadataHash !== '-') {
       expect(await ConfirmDRepUpdatePage.hashLabel.getText()).to.equal(await t('core.DRepUpdate.hash'));
-      await ConfirmDRepUpdatePage.hashValue.waitForDisplayed();
       expect(await ConfirmDRepUpdatePage.hashValue.getText()).to.equal(expectedMetadataHash);
     }
 

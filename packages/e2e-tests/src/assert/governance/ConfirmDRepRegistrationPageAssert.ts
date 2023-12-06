@@ -19,17 +19,17 @@ class ConfirmDRepRegistrationPageAssert extends CommonGovernancePageAssert {
     );
     await this.assertSeeMetadataHeader('core.DRepRegistration.metadata');
 
-    if (expectedMetadataUrl) {
-      await ConfirmDRepRegistrationPage.urlLabel.waitForDisplayed();
+    await ConfirmDRepRegistrationPage.urlLabel.waitForDisplayed({ reverse: expectedMetadataUrl === '-' });
+    await ConfirmDRepRegistrationPage.urlValue.waitForDisplayed({ reverse: expectedMetadataUrl === '-' });
+    if (expectedMetadataUrl !== '-') {
       expect(await ConfirmDRepRegistrationPage.urlLabel.getText()).to.equal(await t('core.DRepRegistration.url'));
-      await ConfirmDRepRegistrationPage.urlValue.waitForDisplayed();
       expect(await ConfirmDRepRegistrationPage.urlValue.getText()).to.equal(expectedMetadataUrl);
     }
 
-    if (expectedMetadataHash) {
-      await ConfirmDRepRegistrationPage.hashLabel.waitForDisplayed();
+    await ConfirmDRepRegistrationPage.hashLabel.waitForDisplayed({ reverse: expectedMetadataHash === '-' });
+    await ConfirmDRepRegistrationPage.hashValue.waitForDisplayed({ reverse: expectedMetadataHash === '-' });
+    if (expectedMetadataHash !== '-') {
       expect(await ConfirmDRepRegistrationPage.hashLabel.getText()).to.equal(await t('core.DRepRegistration.hash'));
-      await ConfirmDRepRegistrationPage.hashValue.waitForDisplayed();
       expect(await ConfirmDRepRegistrationPage.hashValue.getText()).to.equal(expectedMetadataHash);
     }
 

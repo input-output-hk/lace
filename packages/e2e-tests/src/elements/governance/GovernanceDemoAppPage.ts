@@ -1,5 +1,6 @@
 import DAppConnectorPageObject from '../../pageobject/dAppConnectorPageObject';
 import { GovernanceDemoAppDetails } from '../../assert/governance/GovernanceDemoAppDetails';
+import { browser } from '@wdio/globals';
 
 // App is not adjusted for testing e.g. lack of custom testIDs
 // https://ryun1.github.io/cip95-cardano-wallet-connector/
@@ -55,7 +56,7 @@ class GovernanceDemoAppPage {
     return $(this.VOTE_DELEGATION_STAKE_CREDENTIAL_INPUT);
   }
 
-  get buildVoteDelegationCertAndAddToTxButton() {
+  get voteDelegationBuildCertAndAddToTxButton() {
     return $(this.BUILD_VOTE_DELEGATION_CERT_AND_ADD_TO_TX_BUTTON);
   }
 
@@ -75,7 +76,7 @@ class GovernanceDemoAppPage {
     return $(this.DREP_REGISTRATION_METADATA_HASH_INPUT);
   }
 
-  get dRepRegistrationCertAndAddToTxButton() {
+  get dRepRegistrationBuildCertAndAddToTxButton() {
     return $(this.BUILD_DREP_REGISTRATION_CERT_AND_ADD_TO_TX_BUTTON);
   }
 
@@ -87,7 +88,7 @@ class GovernanceDemoAppPage {
     return $(this.DREP_UPDATE_METADATA_HASH_INPUT);
   }
 
-  get dRepUpdateCertAndAddToTxButton() {
+  get dRepUpdateBuildCertAndAddToTxButton() {
     return $(this.BUILD_DREP_UPDATE_CERT_AND_ADD_TO_TX_BUTTON);
   }
 
@@ -95,7 +96,7 @@ class GovernanceDemoAppPage {
     return $(this.DREP_RETIREMENT_DEPOSIT_REFUND_AMOUNT_INPUT);
   }
 
-  get dRepRetirementCertAndAddToTxButton() {
+  get dRepRetirementBuildCertAndAddToTxButton() {
     return $(this.BUILD_DREP_RETIREMENT_CERT_AND_ADD_TO_TX_BUTTON);
   }
 

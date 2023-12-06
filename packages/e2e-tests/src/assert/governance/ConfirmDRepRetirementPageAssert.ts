@@ -5,7 +5,11 @@ import ConfirmDRepRetirementPage from '../../elements/governance/ConfirmDRepReti
 import { t } from '../../utils/translationService';
 
 class ConfirmDRepRetirementPageAssert extends CommonGovernancePageAssert {
-  async assertSeeConfirmDRepRetirementPage(expectedDRepID: string, expectedDepositReturned: string) {
+  async assertSeeConfirmDRepRetirementPage(
+    expectedDRepID: string,
+    expectedDepositReturned: string,
+    shouldDRepMatch = true
+  ) {
     await this.assertSeeHeader();
     await this.assertSeeTitle('core.DRepRetirement.title');
     await this.assertSeeGovernanceDemoAppDetails(
@@ -13,6 +17,14 @@ class ConfirmDRepRetirementPageAssert extends CommonGovernancePageAssert {
       GovernanceDemoAppDetails.dAppUrlShort,
       GovernanceDemoAppDetails.dAppLogoSrc
     );
+
+    await ConfirmDRepRetirementPage.errorPane.waitForDisplayed({ reverse: !shouldDRepMatch });
+    if (shouldDRepMatch) {
+      expect(await ConfirmDRepRetirementPage.errorPane.getText()).to.equal(
+        await t('core.DRepRetirement.isNotOwnRetirement')
+      );
+    }
+
     await this.assertSeeMetadataHeader('core.DRepRetirement.metadata');
 
     await ConfirmDRepRetirementPage.dRepIdLabel.waitForDisplayed();

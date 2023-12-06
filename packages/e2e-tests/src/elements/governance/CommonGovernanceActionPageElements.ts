@@ -17,6 +17,16 @@ class CommonGovernanceActionPageElements extends CommonDappPageElements {
   get confirmButton(): ChainablePromiseElement {
     return $(this.CONFIRM_BUTTON);
   }
+
+  async clickButton(button: 'Cancel' | 'Confirm'): Promise<void> {
+    if (button === 'Cancel') {
+      await this.cancelButton.waitForClickable();
+      await this.cancelButton.click();
+    } else {
+      await this.confirmButton.waitForClickable();
+      await this.confirmButton.click();
+    }
+  }
 }
 
 export default CommonGovernanceActionPageElements;
