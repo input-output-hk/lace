@@ -3,8 +3,9 @@ import { Wallet } from '@lace/cardano';
 import * as HardwareLedger from '../../../../../../../node_modules/@cardano-sdk/hardware-ledger/dist/cjs';
 import * as HardwareTrezor from '../../../../../../../node_modules/@cardano-sdk/hardware-trezor/dist/cjs';
 import { PostHogProperties } from '@providers/AnalyticsProvider/analyticsTracker';
+import { isFeatureEnabled } from '@src/utils/feature-flags';
 
-export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
+export const isTrezorHWSupported = (): boolean => isFeatureEnabled('TREZOR_HW');
 export const isHardwareWalletAvailable = (wallet: Wallet.HardwareWallets): boolean =>
   wallet !== Wallet.KeyManagement.KeyAgentType.Trezor || isTrezorHWSupported();
 type HardwareWalletPersonProperties = {

@@ -1,6 +1,7 @@
 import { Wallet } from '@lace/cardano';
+import { isFeatureEnabled } from '@src/utils/feature-flags';
 
-export const POSTHOG_ENABLED = process.env.USE_POSTHOG_ANALYTICS === 'true';
+export const POSTHOG_ENABLED = isFeatureEnabled('POSTHOG_ANALYTICS');
 export const POSTHOG_OPTED_OUT_EVENTS_DISABLED = process.env.USE_POSTHOG_ANALYTICS_FOR_OPTED_OUT === 'false';
 export const PUBLIC_POSTHOG_HOST = process.env.PUBLIC_POSTHOG_HOST;
 export const PRODUCTION_TRACKING_MODE_ENABLED = process.env.PRODUCTION_MODE_TRACKING === 'true';

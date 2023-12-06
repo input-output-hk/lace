@@ -4,6 +4,7 @@ import { currencyCode, currencyMap, defaultCurrency, currencies } from './consta
 import { CurrencyInfo } from '@src/types';
 import { saveValueInLocalStorage } from '../../utils/local-storage';
 import { CARDANO_COIN_SYMBOL } from '@src/utils/constants';
+import { isFeatureEnabled } from '@src/utils/feature-flags';
 
 export interface ICurrencyStore {
   fiatCurrency: CurrencyInfo;
@@ -12,9 +13,7 @@ export interface ICurrencyStore {
 }
 
 export const getSupportedCurrencies = (): CurrencyInfo[] =>
-  Object.entries(
-    process.env.USE_MULTI_CURRENCY === 'true' ? currencies : { [currencyCode.usd]: currencies[currencyCode.usd] }
-  )
+  Object.entries(isFeatureEnabled('MULTI_CURRENCY') ? currencies : { [currencyCode.usd]: currencies[currencyCode.usd] })
     .map(([code, symbol]) => ({
       code,
       symbol

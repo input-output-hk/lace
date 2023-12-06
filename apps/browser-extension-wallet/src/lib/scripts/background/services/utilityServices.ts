@@ -24,6 +24,7 @@ import {
   getADAPriceFromBackgroundStorage
 } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
+import { isFeatureEnabled } from '@src/utils/feature-flags';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -167,7 +168,7 @@ const fetchAdaPrice = () => {
 
 fetchAdaPrice();
 setInterval(fetchAdaPrice, ADA_PRICE_CHECK_INTERVAL);
-if (process.env.USE_TOKEN_PRICING === 'true') {
+if (isFeatureEnabled('TOKEN_PRICING')) {
   fetchTokenPrices();
   setInterval(fetchTokenPrices, TOKEN_PRICE_CHECK_INTERVAL);
 }

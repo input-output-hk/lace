@@ -5,8 +5,9 @@ import { AppMode, cardanoCoin, CARDANO_COIN_SYMBOL } from '@src/utils/constants'
 import { GetState, SetState } from 'zustand';
 import { SliceCreator, UISlice } from '../types';
 import { getValueFromLocalStorage, onStorageChangeEvent, saveValueInLocalStorage } from '@src/utils/local-storage';
+import { isFeatureEnabled } from '@src/utils/feature-flags';
 
-const HIDE_BALANCE_FEATURE_ENABLED = process.env.USE_HIDE_MY_BALANCE === 'true';
+const HIDE_BALANCE_FEATURE_ENABLED = isFeatureEnabled('HIDE_MY_BALANCE');
 const HIDE_BALANCE_PLACEHOLDER_LENGTH = 8;
 
 const setWalletUI = (
