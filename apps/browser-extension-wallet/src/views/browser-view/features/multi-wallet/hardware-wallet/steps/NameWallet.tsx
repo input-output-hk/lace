@@ -31,7 +31,7 @@ export const NameWallet = (): JSX.Element => {
     createWallet()
       .then(() => {
         setState({ error: undefined });
-        history.push(walletRoutePaths.newWallet.hardware.allDone);
+        history.push(walletRoutePaths.assets);
       })
       .catch(() => {
         setState({

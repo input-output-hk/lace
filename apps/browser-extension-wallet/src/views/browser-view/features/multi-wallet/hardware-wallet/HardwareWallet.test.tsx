@@ -7,7 +7,7 @@ import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
 import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
-import { getNextButton } from '../tests/utils';
+import { createAssetsRoute, getNextButton } from '../tests/utils';
 
 const connectHardwareWalletStep = async () => {
   const nextButton = getNextButton();
@@ -45,7 +45,7 @@ const nameWalletStep = async () => {
   await waitFor(() => expect(nextButton).toBeEnabled());
   fireEvent.click(nextButton);
 
-  await screen.findByText('Hurray! All done :)');
+  await screen.findByText('Total wallet balance');
 };
 
 describe('Multi Wallet Setup/Hardware Wallet', () => {
@@ -70,6 +70,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
     render(
       <MemoryRouter initialEntries={[walletRoutePaths.newWallet.hardware.connect]}>
         <HardwareWallet providers={providers as Providers} />
+        {createAssetsRoute()}
       </MemoryRouter>
     );
     await connectHardwareWalletStep();
@@ -95,7 +96,5 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
     });
 
     await waitFor(() => expect(screen.queryByText('Oops! Something went wrong')).toBeInTheDocument());
-
-    await nameWalletStep();
   });
 });

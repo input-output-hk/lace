@@ -1,4 +1,7 @@
+import { walletRoutePaths } from '@routes';
 import { fireEvent, waitFor, screen } from '@testing-library/react';
+import React from 'react';
+import { Route, Switch } from 'react-router-dom';
 
 export const getNextButton = (): HTMLElement => screen.queryByTestId('wallet-setup-step-btn-next');
 
@@ -40,3 +43,11 @@ export const fillMnemonic = async (from: number, to: number): Promise<void> => {
   await waitFor(() => expect(nextButton).toBeEnabled());
   fireEvent.click(nextButton);
 };
+
+export const createAssetsRoute = (): JSX.Element => (
+  <Switch>
+    <Route path={walletRoutePaths.assets}>
+      <span>Total wallet balance</span>
+    </Route>
+  </Switch>
+);

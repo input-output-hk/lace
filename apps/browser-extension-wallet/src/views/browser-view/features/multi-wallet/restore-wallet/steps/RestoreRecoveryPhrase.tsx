@@ -7,10 +7,6 @@ import { useHistory } from 'react-router-dom';
 import { useRestoreWallet } from '../context';
 import { walletRoutePaths } from '@routes';
 
-const {
-  newWallet: { restore }
-} = walletRoutePaths;
-
 const noop = (): void => void 0;
 
 const wordList = wordlists.english;
@@ -37,7 +33,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
         mnemonic={data.mnemonic}
         onChange={(mnemonic) => setMnemonic(mnemonic)}
         onCancel={() => history.goBack()}
-        onSubmit={() => history.push(restore.allDone)}
+        onSubmit={() => history.push(walletRoutePaths.assets)}
         onStepNext={noop}
         isSubmitEnabled={Wallet.KeyManagement.util.validateMnemonic(
           Wallet.KeyManagement.util.joinMnemonicWords(data.mnemonic)

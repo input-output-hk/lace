@@ -5,7 +5,7 @@ import { CreateWallet } from './CreateWallet';
 import { MemoryRouter } from 'react-router-dom';
 import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
-import { fillMnemonic, getNextButton, mnemonicWords, setupStep } from '../tests/utils';
+import { createAssetsRoute, fillMnemonic, getNextButton, mnemonicWords, setupStep } from '../tests/utils';
 
 const keepWalletSecureStep = async () => {
   const nextButton = getNextButton();
@@ -33,7 +33,7 @@ const recoveryPhraseStep = async () => {
   await fillMnemonic(step1, step2);
   await fillMnemonic(step2, step3);
 
-  await screen.findByText('Hurray! All done :)');
+  await screen.findByText('Total wallet balance');
 };
 
 describe('Multi Wallet Setup/Create Wallet', () => {
@@ -56,6 +56,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     render(
       <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
         <CreateWallet providers={providers as Providers} />
+        {createAssetsRoute()}
       </MemoryRouter>
     );
 

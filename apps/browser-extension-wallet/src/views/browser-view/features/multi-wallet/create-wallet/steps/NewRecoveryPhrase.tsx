@@ -7,10 +7,6 @@ import { WarningModal } from '@src/views/browser-view/components';
 import { useCreateWallet } from '../context';
 import { walletRoutePaths } from '@routes';
 
-const {
-  newWallet: { create }
-} = walletRoutePaths;
-
 const noop = (): void => void 0;
 
 const wordList = wordlists.english;
@@ -47,7 +43,7 @@ export const NewRecoveryPhrase = (): JSX.Element => {
         onReset={(resetStage) =>
           setState((s) => ({ ...s, isResetMnemonicModalOpen: true, resetMnemonicStage: resetStage }))
         }
-        onNext={() => history.push(create.allDone)}
+        onNext={() => history.push(walletRoutePaths.assets)}
         onStepNext={noop}
         translations={walletSetupMnemonicStepTranslations}
         suggestionList={wordList}

@@ -6,7 +6,6 @@ import { RestoreRecoveryPhrase } from './steps/RestoreRecoveryPhrase';
 import { RestoreWalletProvider } from './context';
 import { KeepWalletSecure } from './steps/KeepWalletSecure';
 import { walletRoutePaths } from '@routes';
-import { AllDone } from './steps/AllDone';
 import { Providers } from './types';
 
 const {
@@ -24,7 +23,6 @@ export const RestoreWallet = ({ providers }: Props): JSX.Element => (
       <Route path={restore.keepSecure} component={KeepWalletSecure} />
       <Route path={restore.selectRecoveryPhraseLength} component={SelectRecoveryPhraseLength} />
       <Route path={restore.enterRecoveryPhrase} component={RestoreRecoveryPhrase} />
-      <Route path={restore.allDone} component={AllDone} />
     </Switch>
   </RestoreWalletProvider>
 );
