@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const mockLovelacesToAdaString = jest.fn();
 let actualLovelacesToAdaString: any;
@@ -81,7 +82,7 @@ describe('Testing tx transformers utils', () => {
     test('should return parsed pending tx', async () => {
       mockLovelacesToAdaString.mockImplementation(actualLovelacesToAdaString);
       const date = new Date();
-      const result = pendingTxTransformer({
+      const result = await pendingTxTransformer({
         tx: { ...pendingTx, cbor: TxCBOR.serialize(pendingTx) },
         walletAddresses: [
           {
@@ -98,7 +99,14 @@ describe('Testing tx transformers utils', () => {
         fiatPrice: 1,
         protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
         cardanoCoin,
-        date
+        date,
+        resolveInput: () =>
+          Promise.resolve({
+            address: sendingAddress,
+            value: {
+              coins: BigInt('2000000')
+            }
+          })
       });
       expect(result).toStrictEqual([
         {
