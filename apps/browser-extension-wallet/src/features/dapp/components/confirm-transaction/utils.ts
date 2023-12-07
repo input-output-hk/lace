@@ -120,10 +120,3 @@ export const pubDRepKeyToHash = async (
   const drepKeyHex = (await pubDRepKey.hash()).hex();
   return Wallet.Crypto.Hash28ByteBase16.fromEd25519KeyHashHex(drepKeyHex);
 };
-
-export const getOwnRetirementMessageKey = (isOwnRetirement: boolean | undefined): string => {
-  if (isOwnRetirement === undefined) {
-    return '';
-  }
-  return isOwnRetirement ? 'core.DRepRetirement.isOwnRetirement' : 'core.DRepRetirement.isNotOwnRetirement';
-};

@@ -16,7 +16,6 @@ import {
   certificateInspectorFactory,
   votingProceduresInspector,
   getTxType,
-  getOwnRetirementMessageKey,
   drepIDasBech32FromHash,
   pubDRepKeyToHash
 } from '../utils';
@@ -147,11 +146,5 @@ describe('Testing utils', () => {
   test('testing pubDRepKeyToHash', async () => {
     const pubDRepKeyHex = '_pubDRepKeyHex';
     expect(await pubDRepKeyToHash(pubDRepKeyHex as Wallet.Crypto.Ed25519PublicKeyHex)).toEqual(pubDRepKeyHex);
-  });
-
-  test('testing getOwnRetirementMessageKey', () => {
-    expect(getOwnRetirementMessageKey(undefined)).toEqual('');
-    expect(getOwnRetirementMessageKey(true)).toEqual('core.DRepRetirement.isOwnRetirement');
-    expect(getOwnRetirementMessageKey(false)).toEqual('core.DRepRetirement.isNotOwnRetirement');
   });
 });

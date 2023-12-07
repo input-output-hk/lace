@@ -13,9 +13,10 @@ interface Props {
   txType?: Wallet.Cip30TxType;
   signTxData?: SignTxData;
   errorMessage?: string;
+  onError?: () => void;
 }
 
-export const ConfirmTransactionContent = ({ txType, signTxData, errorMessage }: Props): React.ReactElement => {
+export const ConfirmTransactionContent = ({ txType, signTxData, onError, errorMessage }: Props): React.ReactElement => {
   if (!signTxData) {
     return <Skeleton loading />;
   }
@@ -23,7 +24,7 @@ export const ConfirmTransactionContent = ({ txType, signTxData, errorMessage }: 
     return <ConfirmDRepRegistrationContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.DRepRetirement) {
-    return <ConfirmDRepRetirementContainer signTxData={signTxData} errorMessage={errorMessage} />;
+    return <ConfirmDRepRetirementContainer signTxData={signTxData} onError={onError} errorMessage={errorMessage} />;
   }
   if (txType === Wallet.Cip30TxType.DRepUpdate) {
     return <ConfirmDRepUpdateContainer signTxData={signTxData} errorMessage={errorMessage} />;

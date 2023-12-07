@@ -11,7 +11,6 @@ import {
   Connect as DappConnect,
   SignTxFlowContainer,
   SignDataFlowContainer,
-  NoWallet,
   DappTransactionSuccess,
   DappTransactionFail,
   DappCollateralContainer
@@ -23,6 +22,9 @@ import { lockWalletSelector } from '@src/features/unlock-wallet/selectors';
 import { useAppSettingsContext } from '@providers';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import { DappError } from '@src/features/dapp/components/DappError';
+import { tabs } from 'webextension-polyfill';
+import { useTranslation } from 'react-i18next';
 
 dayjs.extend(duration);
 
@@ -34,6 +36,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const DappConnectorView = (): React.ReactElement => {
+  const { t } = useTranslation();
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
   const { inMemoryWallet, keyAgentData, currentChain, walletInfo, setKeyAgentData, initialHdDiscoveryCompleted } =
     useWalletStore();
@@ -76,7 +79,19 @@ export const DappConnectorView = (): React.ReactElement => {
   if (hasNoAvailableWallet) {
     return (
       <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
-        <NoWallet />
+        <DappError
+          title={t('dapp.noWallet.heading')}
+          description={t('dapp.noWallet.description')}
+          closeButtonLabel={t('dapp.noWallet.closeButton')}
+          onCloseClick={() => {
+            tabs.create({ url: 'app.html#/setup' });
+          }}
+          containerTestId="no-wallet-container"
+          imageTestId="no-wallet-image"
+          titleTestId="no-wallet-heading"
+          descriptionTestId="no-wallet-description"
+          closeButtonTestId="create-or-restore-wallet-btn"
+        />
       </MainLayout>
     );
   }
@@ -97,7 +112,6 @@ export const DappConnectorView = (): React.ReactElement => {
     return (
       <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
         <Switch>
-          <Route exact path={dAppRoutePaths.dappNoWallet} component={NoWallet} />
           <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
           <Route exact path={dAppRoutePaths.dappSignTx} component={SignTxFlowContainer} />
           <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
