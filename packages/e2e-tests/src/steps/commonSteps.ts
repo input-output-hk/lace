@@ -283,3 +283,8 @@ Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: str
 Then(/^Clipboard contains text: "([^"]*)"$/, async (expectedString: string) => {
   await commonAssert.assertClipboardContains(expectedString);
 });
+
+Then(/^I save tx hash value "([^"]*)"$/, async (hash: string) => {
+  Logger.log(`saving tx hash: ${hash}`);
+  testContext.save('txHashValue', hash);
+});

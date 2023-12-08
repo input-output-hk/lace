@@ -115,3 +115,12 @@ Feature: Transactions - Extended view
     When I switch to last window
     Then I see cexplorer url with correct transaction hash
 
+  @LW-9280 @Testnet
+  Scenario: Defect LW-9229 - transaction details with high amount of inputs
+    When I open wallet: "ManyInputTransactionDefectWallet" in: extended mode
+    And I save tx hash value "a21a3069e214f34ef32e4797865233f87195b753a4cfbca7bed2ccf4807d98d0"
+    And I am on Transactions extended page
+    And I wait for the transaction history to be loaded and all transactions to be confirmed
+    When the Sent transaction is displayed with value: "24.79 tADA" and tokens count 1
+    When I click on a transaction: 1
+    Then The Tx details are displayed as "package.core.activityDetails.sent" for ADA with value: 24.79 and wallet: "WalletReceiveSimpleTransactionE2E" address
