@@ -8,6 +8,7 @@ import testContext from '../utils/testContext';
 import TransactionDetailsPage from '../elements/transactionDetails';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import TransactionsPage from '../elements/transactionsPage';
+import { Logger } from '../support/logger';
 
 Given(/^I am on the Transactions section - Extended view$/, async () => {
   await mainMenuPageObject.navigateToSection('Transactions', 'extended');
@@ -212,4 +213,9 @@ Then(
 
 Then(/^Transaction details drawer (is|is not) displayed$/, async (state: 'is' | 'is not') => {
   await transactionDetailsAssert.assertSeeActivityDetailsDrawer(state === 'is');
+});
+
+Then(/^I save tx hash value "([^"]*)"$/, async (hash: string) => {
+  Logger.log(`saving tx hash: ${hash}`);
+  testContext.save('txHashValue', hash);
 });
