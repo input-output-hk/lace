@@ -8,3 +8,4 @@ export * from './UserInfo';
 export * from './UserAvatar';
 export * from './NetworkChoise';
 export * from './NetworkInfo';
+export * from './AddNewWalletLink';

@@ -8,3 +8,4 @@ export * from './ThemeProvider';
 export * from './ViewFlowProvider';
 export * from './AnalyticsProvider';
 export * from './BackgroundServiceAPI';
+export * from './UIThemeProvider';

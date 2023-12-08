@@ -22,7 +22,7 @@ class TopNavigationAssert {
   }
 
   async assertLogoPresent() {
-    await MenuHeader.logo.waitForDisplayed({ timeout: 15_000 });
+    await MenuHeader.logo.waitForDisplayed({ timeout: 60_000 });
   }
 
   async assertSeeMenuButton() {

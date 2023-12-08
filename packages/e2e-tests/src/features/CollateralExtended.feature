@@ -21,8 +21,7 @@ Feature: Collateral - extended view
     When I click "Reclaim collateral" button on collateral drawer
     Then I see collateral as: "Inactive" in settings
 
-  @LW-5526 @Pending
-  # Bug LW-8530
+  @LW-5526
   Scenario: Extended View - Settings -  Collateral - state of collateral is separated and saved during network switching
     And I am on Settings extended page
     When I click on "Collateral" setting

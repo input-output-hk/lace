@@ -20,6 +20,14 @@ type KeysStructure = {
       title: '';
       noStakingActivityYet: '';
     };
+    rewardsChart: {
+      title: '';
+      epochs: '';
+      epoch: '';
+      last: '';
+      all: '';
+      rewards: '';
+    };
   };
   browsePools: {
     stakePoolTableBrowser: {

@@ -8,7 +8,8 @@ import {
   ThemeSwitcher,
   LockWallet,
   UserInfo,
-  NetworkChoise
+  NetworkChoise,
+  AddNewWalletLink
 } from './components';
 import styles from './DropdownMenuOverlay.module.scss';
 import { NetworkInfo } from './components/NetworkInfo';
@@ -42,6 +43,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
         <>
           {topSection}
           <Links>
+            {process.env.USE_MULTI_WALLET === 'true' && <AddNewWalletLink />}
             <AddressBookLink isPopup={isPopup} />
             <SettingsLink />
             <Separator />
