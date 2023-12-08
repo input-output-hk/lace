@@ -60,6 +60,7 @@ export interface UseWalletManager {
   saveHardwareWallet: (wallet: Wallet.CardanoWalletByChain, chainName?: Wallet.ChainName) => Promise<void>;
   deleteWallet: (isForgotPasswordFlow?: boolean) => Promise<void>;
   executeWithPassword: <T>(password: string, promiseFn: () => Promise<T>, cleanPassword?: boolean) => Promise<T>;
+  clearPassword: () => void;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
   updateAddresses: (args: {
     addresses: Wallet.KeyManagement.GroupedAddress[];
@@ -143,6 +144,13 @@ export const useWalletManager = (): UseWalletManager => {
     },
     [backgroundService]
   );
+
+  /**
+   * Clears the wallet password
+   */
+  const clearPassword = useCallback(() => {
+    backgroundService.setWalletPassword();
+  }, [backgroundService]);
 
   /**
    * Deletes wallet info in storage, which should be stored encrypted with the wallet password as lock
@@ -481,6 +489,7 @@ export const useWalletManager = (): UseWalletManager => {
     saveHardwareWallet,
     deleteWallet,
     executeWithPassword,
+    clearPassword,
     switchNetwork,
     updateAddresses
   };

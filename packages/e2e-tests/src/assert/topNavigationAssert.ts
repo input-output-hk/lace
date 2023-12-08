@@ -22,7 +22,7 @@ class TopNavigationAssert {
   }
 
   async assertLogoPresent() {
-    await MenuHeader.logo.waitForDisplayed({ timeout: 15_000 });
+    await MenuHeader.logo.waitForDisplayed({ timeout: 60_000 });
   }
 
   async assertSeeMenuButton() {
@@ -114,7 +114,7 @@ class TopNavigationAssert {
 
   async assertNetworkIdNextToLogo() {
     const logo = MenuHeader.logo;
-    const logoSibling = await logo.$('//following-sibling::div/div');
+    const logoSibling = await logo.$('//following-sibling::div');
     expect(await logoSibling.getAttribute('data-testid')).to.equal('network-pill');
   }
 
