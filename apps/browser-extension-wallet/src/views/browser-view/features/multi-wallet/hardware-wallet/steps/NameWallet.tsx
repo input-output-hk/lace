@@ -14,7 +14,7 @@ interface State {
 export const NameWallet = (): JSX.Element => {
   const history = useHistory();
   const { t } = useTranslation();
-  const { createWallet, setName } = useHardwareWallet();
+  const { createWallet, setName, resetConnection } = useHardwareWallet();
   const [isStartOverDialogVisible, setIsStartOverDialogVisible] = useState(false);
   const [state, setState] = useState<State>({});
 
@@ -55,7 +55,10 @@ export const NameWallet = (): JSX.Element => {
       />
       <StartOverDialog
         visible={isStartOverDialogVisible}
-        onStartOver={() => history.goBack()}
+        onStartOver={() => {
+          resetConnection();
+          history.push(walletRoutePaths.newWallet.hardware.connect);
+        }}
         onClose={() => setIsStartOverDialogVisible(false)}
       />
     </>
