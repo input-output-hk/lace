@@ -3,6 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
 import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
+import { getTransactionTotalAmount } from '@src/utils/get-transaction-total-amount';
 import type { TransformedActivity, TransformedTransactionActivity } from './types';
 import { ActivityStatus } from '@lace/core';
 import capitalize from 'lodash/capitalize';
@@ -18,6 +19,7 @@ export interface TxTransformerInput {
   date: Date;
   direction?: TxDirections;
   status?: Wallet.TransactionStatus;
+  resolveInput: Wallet.Cardano.ResolveInput;
 }
 
 export const getFormattedFiatAmount = ({
@@ -102,7 +104,7 @@ const transformTransactionStatus = (status: Wallet.TransactionStatus): ActivityS
   @param date the date of the transaction
  */
 
-export const txTransformer = ({
+export const txTransformer = async ({
   tx,
   walletAddresses,
   fiatCurrency,
@@ -111,20 +113,29 @@ export const txTransformer = ({
   cardanoCoin,
   date,
   direction,
-  status
-}: TxTransformerInput): TransformedTransactionActivity[] => {
+  status,
+  resolveInput
+}: TxTransformerInput): Promise<TransformedTransactionActivity[]> => {
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(protocolParameters, tx.body);
   const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
   const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
   const depositReclaim = depositReclaimValue
     ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
     : undefined;
-  const { coins, assets } = inspectTxValues({
+  const { assets } = inspectTxValues({
     addresses: walletAddresses,
     tx: tx as unknown as Wallet.Cardano.HydratedTx,
     direction
   });
-  const outputAmount = new BigNumber(coins.toString());
+  const outputAmount = await getTransactionTotalAmount({
+    addresses: walletAddresses,
+    inputs: tx.body.inputs,
+    outputs: tx.body.outputs,
+    fee: tx.body.fee,
+    direction,
+    withdrawals: tx.body.withdrawals,
+    resolveInput
+  });
   const formattedDate = dayjs().isSame(date, 'day')
     ? 'Today'
     : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });

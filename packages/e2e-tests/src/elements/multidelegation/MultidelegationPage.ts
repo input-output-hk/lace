@@ -292,6 +292,7 @@ class MultidelegationPage {
     const stakingPoolInfoItems = await this.stakingPoolInfoItems;
     for (const stakingPoolInfoItem of stakingPoolInfoItems) {
       await stakingPoolInfoItem.click();
+      await StakePoolDetails.container.waitForDisplayed();
       await StakePoolDetails.poolId.waitForDisplayed();
       const poolId = await StakePoolDetails.poolId.getText();
       poolIDsToBeSaved.push(poolId);

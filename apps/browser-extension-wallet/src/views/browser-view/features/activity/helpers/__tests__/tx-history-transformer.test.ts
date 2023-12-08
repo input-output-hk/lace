@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 const mockGetFormattedAmount = jest.fn();
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -88,7 +89,7 @@ describe('Testing txHistoryTransformer function', () => {
 
   test('should return parsed incoming tx', async () => {
     mockGetFormattedAmount.mockReturnValueOnce('20.00 ADA');
-    const result: any = txHistoryTransformers.txHistoryTransformer({
+    const result: any = await txHistoryTransformers.txHistoryTransformer({
       tx: txHistory,
       walletAddresses: [
         {
@@ -107,15 +108,17 @@ describe('Testing txHistoryTransformer function', () => {
       },
       fiatPrice: 1,
       protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
-      cardanoCoin
+      cardanoCoin,
+      resolveInput: () => Promise.resolve(null)
     });
+
     expect(result[0].status).toBe('success');
     expect(result[0].amount).toBe('20.00 ADA');
   });
 
   test('should return parsed outgoing tx', async () => {
     mockGetFormattedAmount.mockReturnValueOnce('30.00 ADA');
-    const result: any = txHistoryTransformers.txHistoryTransformer({
+    const result: any = await txHistoryTransformers.txHistoryTransformer({
       tx: txHistory,
       walletAddresses: [
         {
@@ -134,8 +137,10 @@ describe('Testing txHistoryTransformer function', () => {
       },
       fiatPrice: 1,
       protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
-      cardanoCoin
+      cardanoCoin,
+      resolveInput: () => Promise.resolve(null)
     });
+
     expect(result[0].status).toBe('success');
     expect(result[0].amount).toBe('30.00 ADA');
   });
@@ -171,9 +176,10 @@ describe('Testing txHistoryTransformer function', () => {
       },
       fiatPrice: 1,
       protocolParameters: { poolDeposit: 3, stakeKeyDeposit: 2 } as Wallet.ProtocolParameters,
-      cardanoCoin
+      cardanoCoin,
+      resolveInput: () => Promise.resolve(null)
     };
-    const result: any = txHistoryTransformers.txHistoryTransformer(props);
+    const result: any = await txHistoryTransformers.txHistoryTransformer(props);
 
     expect(inspectTxTypeSpy).toBeCalledWith({
       walletAddresses: props.walletAddresses,
@@ -191,7 +197,8 @@ describe('Testing txHistoryTransformer function', () => {
       protocolParameters: props.protocolParameters,
       cardanoCoin: props.cardanoCoin,
       status: Wallet.TransactionStatus.SUCCESS,
-      direction
+      direction,
+      resolveInput: props.resolveInput
     });
     expect(result.length).toBe(1);
     expect(result[0].status).toBe('success');
