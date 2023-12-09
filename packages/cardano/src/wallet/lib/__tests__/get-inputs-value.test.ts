@@ -7,7 +7,7 @@
 import '@testing-library/jest-dom';
 import { getTxInputsValueAndAddress } from '../get-inputs-value';
 import { act } from 'react-dom/test-utils';
-import { Cardano } from '@cardano-sdk/core';
+import { Cardano, ChainHistoryProvider } from '@cardano-sdk/core';
 import { of } from 'rxjs';
 import { ObservableWallet } from '@cardano-sdk/wallet';
 
@@ -157,6 +157,72 @@ describe('Testing getTxInputsValueAndAddress function', () => {
           .get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
           .toString()
       ).toBe('30');
+    });
+  });
+
+  test('should resolve inputs from the same transaction only once', async () => {
+    const transactionsByHashes = jest.fn().mockResolvedValue([
+      {
+        id: 'txId1',
+        body: {
+          outputs: Array.from({ length: 30 }).map(() => ({
+            address: 'address',
+            value: {
+              coins: BigInt('3000000')
+            }
+          }))
+        }
+      }
+    ]);
+
+    const result = getTxInputsValueAndAddress(
+      Array.from({ length: 30 }).map((_, index) => ({ index, txId: 'txId1' } as unknown as Cardano.TxIn)),
+      {
+        transactionsByHashes
+      } as unknown as ChainHistoryProvider,
+      wallet
+    );
+
+    await act(async () => {
+      const inputs = await result;
+      expect(transactionsByHashes).toBeCalledTimes(1);
+      expect(inputs[0].address).toBe('address');
+      expect(inputs[0].value.coins.toString()).toBe('3000000');
+    });
+  });
+
+  test('should return inputs with value and address for more inputs than pagination limit', async () => {
+    const transactionsByHashes = jest.fn().mockImplementation(({ ids }) =>
+      Promise.resolve(
+        ids.map((id: Cardano.TransactionId) => ({
+          id,
+          body: {
+            outputs: [
+              {
+                address: 'address',
+                value: {
+                  coins: BigInt('3000000')
+                }
+              }
+            ]
+          }
+        }))
+      )
+    );
+
+    const result = getTxInputsValueAndAddress(
+      Array.from({ length: 30 }).map((_, index) => ({ index: 0, txId: `txId${index}` } as Cardano.TxIn)),
+      {
+        transactionsByHashes
+      } as unknown as ChainHistoryProvider,
+      wallet
+    );
+
+    await act(async () => {
+      const inputs = await result;
+      expect(transactionsByHashes).toBeCalledTimes(2);
+      expect(inputs.every(({ value, address }) => value && address)).toBe(true);
+      expect(inputs).toHaveLength(30);
     });
   });
 });

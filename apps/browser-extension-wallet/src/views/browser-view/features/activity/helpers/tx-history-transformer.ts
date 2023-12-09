@@ -14,8 +14,9 @@ export const txHistoryTransformer = ({
   fiatPrice,
   date,
   protocolParameters,
-  cardanoCoin
-}: TxHistoryTransformerInput): TransformedTransactionActivity[] => {
+  cardanoCoin,
+  resolveInput
+}: TxHistoryTransformerInput): Promise<TransformedTransactionActivity[]> => {
   const type = inspectTxType({ walletAddresses, tx });
   const direction = getTxDirection({ type });
 
@@ -28,6 +29,7 @@ export const txHistoryTransformer = ({
     protocolParameters,
     cardanoCoin,
     status: Wallet.TransactionStatus.SUCCESS,
-    direction
+    direction,
+    resolveInput
   });
 };

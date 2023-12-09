@@ -6,10 +6,12 @@ import Success from '../../../assets/icons/success-staking.svg';
 import styles from './Layout.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useWalletManager } from '@hooks';
 
 export const DappTransactionSuccess = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
+  const { clearPassword } = useWalletManager();
 
   const onClose = async () => {
     await analytics?.sendEventToPostHog(PostHogAction.SendAllDoneCloseClick, {
@@ -17,6 +19,10 @@ export const DappTransactionSuccess = (): React.ReactElement => {
     });
     window.close();
   };
+
+  useEffect(() => {
+    clearPassword();
+  }, [clearPassword]);
 
   useEffect(() => {
     analytics?.sendEventToPostHog(PostHogAction.SendAllDoneView, {
