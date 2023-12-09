@@ -73,7 +73,7 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
             : votingProcedure.voter.credential.hash.toString();
         return {
           voter: {
-            type: t(`core.votingProcedures.voterType.${voterType}`),
+            type: t(`core.VotingProcedures.voterTypes.${voterType}`),
             dRepId: drepId
           },
           votes: votingProcedure.votes.map((vote) => ({
@@ -83,7 +83,7 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
               ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${vote.actionId.id}` })
             },
             votingProcedure: {
-              vote: t(`core.votingProcedures.votes.${getVote(vote.votingProcedure.vote)}`),
+              vote: t(`core.VotingProcedures.votes.${getVote(vote.votingProcedure.vote)}`),
               anchor: !!vote.votingProcedure.anchor?.url && {
                 url: vote.votingProcedure.anchor?.url,
                 hash: vote.votingProcedure.anchor?.dataHash.toString()

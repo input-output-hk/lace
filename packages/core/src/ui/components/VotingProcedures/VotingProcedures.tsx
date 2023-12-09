@@ -6,7 +6,7 @@ import { ErrorPane } from '@lace/common';
 type VotingProcedure = {
   voter: {
     type: string;
-    dRepId: string;
+    dRepId?: string;
   };
   votes: {
     actionId: {
@@ -73,9 +73,11 @@ export const VotingProcedures = ({ dappInfo, errorMessage, data, translations }:
             <Cell>
               <Metadata label={translations.voterType} text={voter.type} />
             </Cell>
-            <Cell>
-              <Metadata label={translations.dRepId} text={voter.dRepId} />
-            </Cell>
+            {voter.dRepId && (
+              <Cell>
+                <Metadata label={translations.dRepId} text={voter.dRepId} />
+              </Cell>
+            )}
             <Cell>
               <Divider my={'$16'} />
             </Cell>
