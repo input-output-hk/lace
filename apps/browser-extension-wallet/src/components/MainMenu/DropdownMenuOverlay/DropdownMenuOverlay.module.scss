@@ -1,5 +1,6 @@
 @import '../../../../../../packages/common/src/ui/styles/theme.scss';
 @import '../../../../../../packages/common/src/ui/styles/abstracts/typography';
+@import '../../../../../../packages/common/src/ui/styles/abstracts/mixins';
 
 .menuOverlay {
   border-radius: size_unit(2) !important;
@@ -175,4 +176,17 @@
 
 .switchIcon {
   font-size: 16px;
+}
+
+.container {
+  @include scroll-bar-style;
+  max-height: 480px;
+  overflow-y: scroll;
+  margin: size_unit(1) size_unit(1) size_unit(1) 0;
+
+  :global {
+    .ant-dropdown-menu-item-group-title {
+      padding: 0;
+    }
+  }
 }
