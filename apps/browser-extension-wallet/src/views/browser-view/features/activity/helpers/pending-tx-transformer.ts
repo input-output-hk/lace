@@ -14,8 +14,9 @@ export const pendingTxTransformer = ({
   fiatPrice,
   protocolParameters,
   cardanoCoin,
-  date
-}: TxHistoryTransformerInput): TransformedTransactionActivity[] =>
+  date,
+  resolveInput
+}: TxHistoryTransformerInput): Promise<TransformedTransactionActivity[]> =>
   txTransformer({
     tx,
     walletAddresses,
@@ -25,5 +26,6 @@ export const pendingTxTransformer = ({
     cardanoCoin,
     date,
     status: Wallet.TransactionStatus.PENDING,
-    direction: TxDirections.Outgoing
+    direction: TxDirections.Outgoing,
+    resolveInput
   });

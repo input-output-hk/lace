@@ -23,6 +23,7 @@ import { WarningModal } from '@src/views/browser-view/components/WarningModal';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
+  // PostHogAction,
   postHogOnboardingActions,
   UserTrackingType
 } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -290,6 +291,7 @@ export const WalletSetupWizard = ({
       await analytics.setOptedInForEnhancedAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
+
       if (setupType === SetupType.FORGOT_PASSWORD) {
         deleteFromLocalStorage('isForgotPasswordFlow');
         goToMyWallet(wallet);

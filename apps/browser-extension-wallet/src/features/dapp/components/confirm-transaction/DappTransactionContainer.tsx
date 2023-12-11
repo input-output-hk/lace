@@ -1,14 +1,15 @@
 import React from 'react';
 import { useObservable } from '@lace/common';
-import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
-import { useCreateAssetList, useTxSummary } from './hooks';
+import { useCreateAssetList, useCreateMintedAssetList, useTxSummary } from './hooks';
 import { Skeleton } from 'antd';
 import { DappTransaction } from '@lace/core';
 import { TokenInfo } from '@src/utils/get-assets-information';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { AddressListType } from '@src/views/browser-view/features/activity';
 import { SignTxData } from './types';
+import { useCurrencyStore } from '@providers/currency';
+import { useFetchCoinPrice } from '@hooks';
 
 interface Props {
   signTxData: SignTxData;
@@ -17,12 +18,14 @@ interface Props {
 
 export const DappTransactionContainer = withAddressBookContext(
   ({ signTxData, errorMessage }: Props): React.ReactElement => {
-    const { t } = useTranslation();
     const {
       walletInfo,
       inMemoryWallet,
-      blockchainProvider: { assetProvider }
+      blockchainProvider: { assetProvider },
+      walletUI: { cardanoCoin }
     } = useWalletStore();
+    const currencyStore = useCurrencyStore();
+    const coinPrice = useFetchCoinPrice();
     const { list: addressList } = useAddressBookContext() as { list: AddressListType[] };
     const assets = useObservable<TokenInfo | null>(inMemoryWallet.assetInfo$);
     const createAssetList = useCreateAssetList({
@@ -30,9 +33,17 @@ export const DappTransactionContainer = withAddressBookContext(
       assets,
       assetProvider
     });
+    const createMintedAssetList = useCreateMintedAssetList({
+      metadata: signTxData.tx.auxiliaryData?.blob,
+      outputs: signTxData.tx.body.outputs,
+      mint: signTxData.tx.body.mint,
+      assets,
+      assetProvider
+    });
     const txSummary = useTxSummary({
       addressList,
       createAssetList,
+      createMintedAssetList,
       tx: signTxData.tx,
       walletInfo
     });
@@ -46,13 +57,9 @@ export const DappTransactionContainer = withAddressBookContext(
         transaction={txSummary}
         dappInfo={signTxData?.dappInfo}
         errorMessage={errorMessage}
-        translations={{
-          transaction: t('core.dappTransaction.transaction'),
-          amount: t('core.dappTransaction.amount'),
-          recipient: t('core.dappTransaction.recipient'),
-          fee: t('core.dappTransaction.fee'),
-          adaFollowingNumericValue: t('general.adaFollowingNumericValue')
-        }}
+        fiatCurrencyCode={currencyStore.fiatCurrency?.code}
+        fiatCurrencyPrice={coinPrice.priceResult?.cardano?.price}
+        coinSymbol={cardanoCoin.symbol}
       />
     );
   }

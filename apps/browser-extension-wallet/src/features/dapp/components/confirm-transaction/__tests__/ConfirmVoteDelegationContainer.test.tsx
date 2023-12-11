@@ -128,7 +128,10 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
         type: Wallet.Cardano.CredentialType.KeyHash,
         hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from('dRepCredentialHashdRepCreden').toString('hex'))
       },
-      stakeKeyHash: STAKE_KEY_HASH
+      stakeCredential: {
+        type: Wallet.Cardano.CredentialType.KeyHash,
+        hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from(STAKE_KEY_HASH).toString('hex'))
+      }
     };
     const tx = buildMockTx({
       certificates: [certificate]
@@ -155,12 +158,12 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
           )
         },
         translations: {
-          metadata: t('core.voteDelegation.metadata'),
-          option: t('core.voteDelegation.option'),
+          metadata: t('core.VoteDelegation.metadata'),
+          option: t('core.VoteDelegation.option'),
           labels: {
-            drepId: t('core.voteDelegation.drepId'),
-            alwaysAbstain: t('core.voteDelegation.alwaysAbstain'),
-            alwaysNoConfidence: t('core.voteDelegation.alwaysNoConfidence')
+            drepId: t('core.VoteDelegation.drepId'),
+            alwaysAbstain: t('core.VoteDelegation.alwaysAbstain'),
+            alwaysNoConfidence: t('core.VoteDelegation.alwaysNoConfidence')
           }
         },
         errorMessage

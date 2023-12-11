@@ -19,10 +19,10 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const { t } = useTranslation();
   const { analytics } = useOutsideHandles();
   const {
-    // walletStoreInMemoryWallet: inMemoryWallet,
+    walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreGetKeyAgentType: getKeyAgentType,
-    // submittingState: { setIsRestaking },
-    // delegationStoreDelegationTxBuilder: delegationTxBuilder,
+    submittingState: { setIsRestaking },
+    delegationStoreDelegationTxBuilder: delegationTxBuilder,
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
@@ -38,13 +38,33 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const isInMemory = useMemo(() => keyAgentType === Wallet.KeyManagement.KeyAgentType.InMemory, [keyAgentType]);
 
   // TODO unify
-  // const signAndSubmitTransaction = useCallback(async () => {
-  //   if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
-  //   const signedTx = await delegationTxBuilder.build().sign();
-  //   await inMemoryWallet.submitTx(signedTx.tx);
-  // }, [delegationTxBuilder, inMemoryWallet]);
+  const signAndSubmitTransaction = useCallback(async () => {
+    if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
+    const signedTx = await delegationTxBuilder.build().sign();
+    await inMemoryWallet.submitTx(signedTx.tx);
+  }, [delegationTxBuilder, inMemoryWallet]);
 
-  const handleConfirmation = useCallback(async () => {
+  const handleSubmission = useCallback(async () => {
+    setOpenPoolsManagementConfirmationModal(null);
+    if (isInMemory) {
+      portfolioMutators.executeCommand({ type: 'DrawerContinue' });
+      return;
+    }
+
+    // HW-WALLET
+    setIsConfirmingTx(true);
+    try {
+      await signAndSubmitTransaction();
+      setIsRestaking(currentPortfolio.length > 0);
+      portfolioMutators.executeCommand({ type: 'HwSkipToSuccess' });
+    } catch {
+      portfolioMutators.executeCommand({ type: 'HwSkipToFailure' });
+    } finally {
+      setIsConfirmingTx(false);
+    }
+  }, [currentPortfolio, isInMemory, portfolioMutators, setIsRestaking, signAndSubmitTransaction]);
+
+  const onClick = useCallback(async () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationStakePoolConfirmationNextClick);
     setIsConfirmingTx(false);
 
@@ -61,21 +81,8 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
 
     if (isPoolsReduced) return setOpenPoolsManagementConfirmationModal(PoolsManagementModalType.REDUCTION);
 
-    // HW-WALLET (FIX LATER):
-    // if (!isInMemory) {
-    //   setIsConfirmingTx(true);
-    //   try {
-    //     await signAndSubmitTransaction();
-    //     setIsRestaking(currentPortfolio.length > 0);
-    //     return setSection(sectionsConfig[Sections.SUCCESS_TX]);
-    //   } catch {
-    //     return setSection(sectionsConfig[Sections.FAIL_TX]);
-    //   } finally {
-    //     setIsConfirmingTx(false);
-    //   }
-    // }
-    return portfolioMutators.executeCommand({ type: 'DrawerContinue' });
-  }, [analytics, currentPortfolio, draftPortfolio, portfolioMutators]);
+    return handleSubmission();
+  }, [analytics, currentPortfolio, draftPortfolio, handleSubmission]);
 
   const confirmLabel = useMemo(() => {
     if (!isInMemory) {
@@ -94,7 +101,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
           data-testid="stake-pool-confirmation-btn"
           disabled={isBuildingTx || !!stakingError}
           loading={isConfirmingTx || isBuildingTx}
-          onClick={handleConfirmation}
+          onClick={onClick}
           style={{ width: '100%' }}
           size="large"
         >
@@ -104,7 +111,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       <PoolsManagementModal
         type={openPoolsManagementConfirmationModal}
         visible={!!openPoolsManagementConfirmationModal}
-        onConfirm={() => portfolioMutators.executeCommand({ type: 'DrawerContinue' })}
+        onConfirm={handleSubmission}
         onCancel={() => setOpenPoolsManagementConfirmationModal(null)}
       />
     </>

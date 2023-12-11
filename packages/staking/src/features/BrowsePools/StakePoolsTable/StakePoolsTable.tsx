@@ -2,6 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { PostHogAction, Search, getRandomIcon } from '@lace/common';
 import { Box } from '@lace/ui';
 import debounce from 'lodash/debounce';
+import uniqBy from 'lodash/uniqBy';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
@@ -15,7 +16,7 @@ type StakePoolsTableProps = {
 };
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'apy',
+  field: 'ros',
   order: 'desc',
 };
 
@@ -92,13 +93,26 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     setSearchValue(searchString);
   };
 
+  // imitates apps/browser-extension-wallet/src/stores/slices/stake-pool-search-slice.ts
+  const naiveSelectedPoolsSearch = (searchString: string, pools: Wallet.Cardano.StakePool[]) => {
+    const lowerCaseSearchString = searchString.toLowerCase();
+    return pools.filter(
+      (pool) =>
+        pool.metadata?.name.toLowerCase().includes(lowerCaseSearchString) ||
+        pool.metadata?.ticker.toLowerCase().includes(lowerCaseSearchString) ||
+        pool.id.toLowerCase() === lowerCaseSearchString
+    );
+  };
+
   const combinedUnique = useMemo(() => {
-    const combinedStakePools = [...selectedPortfolioStakePools, ...stakePools];
-    const combinedUniqueIds = [...new Set(combinedStakePools.map((pool) => pool.id))];
-    return combinedUniqueIds.map((id) =>
-      combinedStakePools.find((pool) => pool.id === id)
-    ) as Wallet.Cardano.StakePool[];
-  }, [stakePools, selectedPortfolioStakePools]);
+    const combinedStakePools = [
+      ...(searchValue
+        ? naiveSelectedPoolsSearch(searchValue, selectedPortfolioStakePools)
+        : selectedPortfolioStakePools),
+      ...stakePools,
+    ];
+    return uniqBy(combinedStakePools, (p) => p.id);
+  }, [stakePools, selectedPortfolioStakePools, searchValue]);
 
   const list = useMemo(
     () =>

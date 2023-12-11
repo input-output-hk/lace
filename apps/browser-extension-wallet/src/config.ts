@@ -47,7 +47,7 @@ const envChecks = (chosenChain: Wallet.ChainName): void => {
     throw new Error('no available chains to connect to');
   }
 
-  if (!process.env.AVAILABLE_CHAINS.includes('Mainnet')) {
+  if (!process.env.AVAILABLE_CHAINS.includes('Mainnet') && process.env.DEFAULT_CHAIN !== 'Sanchonet') {
     throw new Error('mainnet chain not available in env');
   }
 

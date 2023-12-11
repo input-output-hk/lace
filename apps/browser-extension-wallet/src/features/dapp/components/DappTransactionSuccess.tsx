@@ -6,10 +6,12 @@ import Success from '../../../assets/icons/success-staking.svg';
 import styles from './Layout.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useWalletManager } from '@hooks';
 
 export const DappTransactionSuccess = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
+  const { clearPassword } = useWalletManager();
 
   const onClose = async () => {
     await analytics?.sendEventToPostHog(PostHogAction.SendAllDoneCloseClick, {
@@ -19,14 +21,18 @@ export const DappTransactionSuccess = (): React.ReactElement => {
   };
 
   useEffect(() => {
+    clearPassword();
+  }, [clearPassword]);
+
+  useEffect(() => {
     analytics?.sendEventToPostHog(PostHogAction.SendAllDoneView, {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
   }, [analytics]);
 
   return (
-    <div data-testid="dapp-sign-tx-success" className={styles.noWalletContainer}>
-      <div className={styles.noWalletContent}>
+    <div data-testid="dapp-sign-tx-success" className={styles.dappErrorContainer}>
+      <div className={styles.dappErrorContent}>
         <Image data-testid="dapp-sign-tx-success-image" preview={false} width={112} src={Success} />
         <div data-testid="dapp-sign-tx-success-heading" className={styles.heading}>
           {t('browserView.transaction.success.youCanSafelyCloseThisPanel')}

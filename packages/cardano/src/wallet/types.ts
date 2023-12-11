@@ -28,14 +28,29 @@ export enum TransactionStatus {
   SPENDABLE = 'spendable'
 }
 
+export enum Cip30TxType {
+  Send = 'Send',
+  Mint = 'Mint',
+  Burn = 'Burn',
+  DRepRegistration = 'DRepRegistration',
+  DRepRetirement = 'DRepRetirement',
+  DRepUpdate = 'DRepUpdate',
+  VoteDelegation = 'VoteDelegation',
+  VotingProcedures = 'VotingProcedures'
+}
+
+export type Cip30SignTxOutput = {
+  coins: string;
+  recipient: string;
+  assets?: Cip30SignTxAssetItem[];
+};
+
 export type Cip30SignTxSummary = {
   fee: string;
-  outputs: {
-    coins: string;
-    recipient: string;
-    assets?: Cip30SignTxAssetItem[];
-  }[];
-  type: 'Send' | 'Mint' | 'Burn';
+  outputs: Cip30SignTxOutput[];
+  type: Cip30TxType;
+  mintedAssets?: Cip30SignTxAssetItem[];
+  burnedAssets?: Cip30SignTxAssetItem[];
 };
 
 export type Cip30SignTxAssetItem = {

@@ -42,7 +42,6 @@ class ExtensionUtils {
         break;
       }
     }
-    Logger.log(`Using network: ${network} with id: ${id}`);
     return { name: network, id };
   }
 

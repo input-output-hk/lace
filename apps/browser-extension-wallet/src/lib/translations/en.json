@@ -69,6 +69,18 @@
       "noMatchPassword": "Oops! The passwords don't match.",
       "secondLevelPasswordStrengthFeedback": "Getting there! Add some symbols and numbers to make it stronger.",
       "firstLevelPasswordStrengthFeedback": "Weak password. Add some numbers and characters to make it stronger."
+    },
+    "dappTransaction": {
+      "asset": "Asset",
+      "burn": "Burn",
+      "fee": "Transaction Fee",
+      "insufficientFunds": "You do not have enough funds to complete the transaction",
+      "mint": "Mint",
+      "quantity": "Quantity",
+      "recipient": "Recipient",
+      "send": "Send",
+      "sending": "Sending",
+      "transaction": "Transaction"
     }
   },
   "tab.main.title": "Tab extension",
@@ -316,7 +328,7 @@
     "copyHandle": "Copy handle"
   },
   "dapp": {
-    "nowallet.btn": "Create or restore a wallet",
+    "dappErrorPage.closeButton": "Cancel",
     "connect.header": "Authorize DApp",
     "connect.btn.accept": "Authorize",
     "connect.btn.cancel": "Cancel",
@@ -355,6 +367,7 @@
     "delete.confirm": "Disconnect DApp",
     "noWallet.heading": "You don't have a wallet right now",
     "noWallet.description": "You'll need to create or restore a wallet to connect to a dApp or make a transaction.",
+    "noWallet.closeButton": "Create or restore a wallet",
     "educationBanner.title": "DApp Guide",
     "betaModal": {
       "header": "DApp connector is now in Beta",
@@ -405,12 +418,14 @@
     "assetDetails.tokenInformation": "Token Information",
     "assetDetails.fingerprint": "Fingerprint",
     "assetDetails.policyId": "Policy ID",
+    "sideMenu.links.general": "General",
     "sideMenu.links.tokens": "Tokens",
     "sideMenu.links.nfts": "NFTs",
     "sideMenu.links.activity": "Activity",
     "sideMenu.links.staking": "Staking",
     "sideMenu.links.dappStore": "Dapp Store",
     "sideMenu.links.voting": "Voting",
+    "sideMenu.links.addNewWallet": "Add new wallet",
     "sideMenu.links.addressBook": "Address Book",
     "sideMenu.dapps.header": "Open Dapps",
     "sideMenu.mode.light": "Light mode",
@@ -1129,7 +1144,17 @@
         "hash": "Anchor Hash",
         "url": "Anchor URL"
       },
-      "dRepId": "DRep ID"
+      "dRepId": "DRep ID",
+      "voterTypes": {
+        "constitutionalCommittee": "Constitutional Committee",
+        "spo": "SPO",
+        "drep": "DRep"
+      },
+      "votes": {
+        "yes": "Yes",
+        "no": "No",
+        "abstain": "Abstain"
+      }
     },
     "DRepRegistration": {
       "title": "Confirm DRep Registration",
@@ -1144,8 +1169,11 @@
       "metadata": "Metadata",
       "drepId": "DRep ID",
       "depositReturned": "Deposit returned",
-      "isOwnRetirement": "This is your DRep retirement.",
-      "isNotOwnRetirement": "The presented DRepID does not match your wallet's DRepID."
+      "drepIdMismatchScreen": {
+        "title": "DRep ID mismatch",
+        "description": "The presented DRepID does not match your wallet's DRepID",
+        "cancel": "Cancel"
+      }
     },
     "DRepUpdate": {
       "title": "Confirm DRep Update",
@@ -1397,6 +1425,15 @@
     "toast": {
       "errorText": "Wallet failed to sync",
       "successText": "Wallet synced successfully"
+    }
+  },
+  "account": {
+    "edit": {
+      "title": "Edit account name",
+      "subtitle": "Choose a name to identify your account",
+      "input.label": "Account name",
+      "footer.save": "Save",
+      "footer.cancel": "Cancel"
     }
   }
 }

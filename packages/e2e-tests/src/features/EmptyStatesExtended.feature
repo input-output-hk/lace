@@ -29,7 +29,6 @@ Feature: Empty states
 
   @LW-8447
   Scenario: Extended View - Staking empty state
-    When I disable showing Multidelegation beta banner
     And I navigate to Staking extended page
     Then I see empty state banner for Staking page in extended mode
     When I click "Copy" button on empty state banner

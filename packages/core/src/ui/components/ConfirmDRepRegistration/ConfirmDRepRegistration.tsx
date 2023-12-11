@@ -34,23 +34,31 @@ export const ConfirmDRepRegistration = ({ dappInfo, errorMessage, translations, 
     )}
     <Grid columns="$1" gutters="$20">
       <Cell>
-        <TransactionSummary.Metadata label={translations.metadata} text="" />
+        <TransactionSummary.Metadata label={translations.metadata} text="" testID="metadata" />
       </Cell>
       {metadata.url && (
         <Cell>
-          <TransactionSummary.Address label={translations.labels.url} address={metadata.url} />
+          <TransactionSummary.Address label={translations.labels.url} address={metadata.url} testID="metadata-url" />
         </Cell>
       )}
       {metadata.hash && (
         <Cell>
-          <TransactionSummary.Address label={translations.labels.hash} address={metadata.hash} />
+          <TransactionSummary.Address label={translations.labels.hash} address={metadata.hash} testID="metadata-hash" />
         </Cell>
       )}
       <Cell>
-        <TransactionSummary.Address label={translations.labels.drepId} address={metadata.drepId} />
+        <TransactionSummary.Address
+          label={translations.labels.drepId}
+          address={metadata.drepId}
+          testID="metadata-DRepID"
+        />
       </Cell>
       <Cell>
-        <TransactionSummary.Address label={translations.labels.depositPaid} address={metadata.depositPaid} />
+        <TransactionSummary.Address
+          label={translations.labels.depositPaid}
+          address={metadata.depositPaid}
+          testID="metadata-depositPaid"
+        />
       </Cell>
     </Grid>
   </Flex>

@@ -27,3 +27,4 @@ export { Metadata, MetadataLink } from './metadata';
 export { PasswordBox } from './password-box';
 export { TextLink } from './text-link';
 export * as ProfileDropdown from './profile-dropdown';
+export { TextBox } from './text-box';

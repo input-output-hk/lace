@@ -1,16 +1,15 @@
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import cn from 'classnames';
-import { InfoCircleOutlined } from '@ant-design/icons';
-import { Tooltip } from 'antd';
-import styles from './TransactionDetails.module.scss';
-import { TransactionDetailAsset, TxOutputInput, TransactionMetadataProps, TxSummary } from './TransactionDetailAsset';
-import type { ActivityStatus } from '../Activity';
+import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
 import { Ellipsis, toast } from '@lace/common';
-import { ReactComponent as Info } from '../../assets/icons/info-icon.component.svg';
-import { TransactionInputOutput } from './TransactionInputOutput';
+import { Box } from '@lace/ui';
 import { useTranslate } from '@src/ui/hooks';
 import CopyToClipboard from 'react-copy-to-clipboard';
+import type { ActivityStatus } from '../Activity';
+import styles from './TransactionDetails.module.scss';
+import { TransactionInputOutput } from './TransactionInputOutput';
+import { TransactionFee } from './TransactionFee';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,7 +140,8 @@ export const TransactionDetails = ({
             </div>
             <div
               data-testid="tx-hash-detail"
-              className={cn(styles.detail, !!openExternalLink && styles.hash, {
+              className={cn(styles.detail, {
+                [styles.hash]: openExternalLink,
                 [styles.txLink]: isSuccess && !!openExternalLink
               })}
               onClick={openExternalLink}
@@ -265,31 +265,11 @@ export const TransactionDetails = ({
               <span>&nbsp;{includedTime}</span>
             </div>
           </div>
-
           {fee && fee !== '-' && (
-            <div className={styles.details}>
-              <div className={styles.txFeeContainer}>
-                <div className={styles.txfee}>{t('package.core.activityDetails.transactionFee')}</div>
-                <Tooltip title={t('package.core.activityDetails.transactionFeeInfo')}>
-                  {Info ? (
-                    <Info style={{ fontSize: '18px', color: '#8f97a8', cursor: 'pointer' }} />
-                  ) : (
-                    <InfoCircleOutlined />
-                  )}
-                </Tooltip>
-              </div>
-
-              <div data-testid="tx-fee" className={styles.detail}>
-                <div className={styles.amount}>
-                  <span data-testid="tx-fee-ada" className={styles.ada}>{`${fee} ${coinSymbol}`}</span>
-                  <span data-testid="tx-fee-fiat" className={styles.fiat}>
-                    {amountTransformer(fee)}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <Box mb="$32">
+              <TransactionFee fee={fee} amountTransformer={amountTransformer} coinSymbol={coinSymbol} />
+            </Box>
           )}
-
           {deposit && renderDepositValueSection({ value: deposit, label: t('package.core.activityDetails.deposit') })}
           {depositReclaim &&
             renderDepositValueSection({

@@ -149,27 +149,6 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
       }
     }
 
-    .txFeeContainer {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: size_unit(1);
-
-      .txfee {
-        color: var(--text-color-primary);
-        font-size: var(--body, 16px);
-        font-weight: 600;
-        line-height: size_unit(3);
-      }
-
-      .infoIcon {
-        width: size_unit(2);
-        height: size_unit(2);
-        margin-bottom: -#{size_unit(0.5)};
-        color: var(--text-color-secondary);
-      }
-    }
-
     .metadataLabel {
       display: flex;
       flex: 0 0 50%;
@@ -266,7 +245,7 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
   margin-bottom: size_unit(2);
 
   .poolsTitle {
-    @include text-body-semi-bold
+    @include text-body-semi-bold;
   }
 
   .poolsList {
@@ -280,7 +259,7 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
   .poolHeading {
     display: flex;
     justify-content: flex-end;
-    gap: size_unit(1)
+    gap: size_unit(1);
   }
 
   .poolRewardAmount {

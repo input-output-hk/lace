@@ -12,7 +12,6 @@ Feature: Full experience - popup view
 
   @LW-3446
   Scenario Outline: Popup View - <page> opened - "Expand" button click
-    Given I disable showing Multidelegation beta banner
     And I am on <page> popup page
     When I click on "Expand" button
     Then the <page> page is displayed on a new tab in extended view

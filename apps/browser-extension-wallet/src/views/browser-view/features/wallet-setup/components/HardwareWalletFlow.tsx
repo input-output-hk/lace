@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import {
   AnalyticsEventNames,
   EnhancedAnalyticsOptInStatus,
+  PostHogAction,
   postHogOnboardingActions
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import { config } from '@src/config';
@@ -174,6 +175,14 @@ export const HardwareWalletFlow = ({
       setDoesUserAllowAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
+      const addressDiscoverySubscriber = wallet.wallet.addresses$.subscribe((addresses) => {
+        if (addresses.length === 0) return;
+        const hdWalletDiscovered = addresses.some((addr) => addr.index > 0);
+        if (hdWalletDiscovered) {
+          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
+        }
+        addressDiscoverySubscriber.unsubscribe();
+      });
       await analytics.setOptedInForEnhancedAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
