@@ -1,14 +1,26 @@
-/* eslint-disable no-magic-numbers */
+/* eslint-disable no-console */
 import { Cardano, ChainHistoryProvider } from '@cardano-sdk/core';
 import { createWalletUtil, ObservableWallet } from '@cardano-sdk/wallet';
+import flattenDeep from 'lodash/flattenDeep';
+
+const TX_PAGINATION_LIMIT = 25;
 
 export type TxInput = { value?: Cardano.Value; address?: Cardano.HydratedTxIn['address'] } & Pick<
   Cardano.HydratedTxIn,
   'index' | 'txId'
 >;
 
-const fetchTransactionByHashes = (chainProviderInstance: ChainHistoryProvider, ids: Cardano.TransactionId[]) =>
-  chainProviderInstance.transactionsByHashes({ ids });
+const fetchTransactionByHashes = async (chainProviderInstance: ChainHistoryProvider, ids: Cardano.TransactionId[]) => {
+  if (ids.length <= TX_PAGINATION_LIMIT) {
+    return chainProviderInstance.transactionsByHashes({ ids });
+  }
+
+  const paginatedPromises = [];
+  for (let i = 0; i < ids.length; i += TX_PAGINATION_LIMIT) {
+    paginatedPromises.push(chainProviderInstance.transactionsByHashes({ ids: ids.slice(i, i + TX_PAGINATION_LIMIT) }));
+  }
+  return flattenDeep(await Promise.all(paginatedPromises));
+};
 
 export const getTxInputsValueAndAddress = async (
   inputs: Cardano.HydratedTxIn[] | Cardano.TxIn[],
@@ -16,44 +28,33 @@ export const getTxInputsValueAndAddress = async (
   wallet: ObservableWallet
 ): Promise<TxInput[]> => {
   const inputsOutputsMapping = new Map<Cardano.TransactionId, Cardano.TxOut>();
+  const txIdsToResolveInputs = new Set<Cardano.TransactionId>();
   const util = createWalletUtil(wallet);
 
   for (const input of inputs) {
-    inputsOutputsMapping.set(input.txId, await util.resolveInput(input));
+    const resolvedInput = await util.resolveInput(input);
+    if (resolvedInput) {
+      inputsOutputsMapping.set(input.txId, resolvedInput);
+    } else {
+      txIdsToResolveInputs.add(input.txId);
+    }
   }
 
-  const transactionIdsWithoutValues: Cardano.TransactionId[] = [];
-  for (const [key, value] of inputsOutputsMapping) {
-    if (!value) {
-      transactionIdsWithoutValues.push(key);
-    }
-  }
-  let transactions: Cardano.HydratedTx[] = [];
-  if (transactionIdsWithoutValues.length > 25) {
-    const chunkSize = 25; // Current pagination limit for txByHashes
-    const paginatedPromises = [];
-    for (let i = 0; i < transactionIdsWithoutValues.length; i += chunkSize) {
-      const chunk = transactionIdsWithoutValues.slice(i, i + chunkSize);
-      paginatedPromises.push(fetchTransactionByHashes(chainProviderInstance, chunk));
-    }
-    // eslint-disable-next-line unicorn/prefer-spread
-    transactions = [].concat([], await Promise.all(paginatedPromises));
-  } else {
-    transactions = await fetchTransactionByHashes(chainProviderInstance, transactionIdsWithoutValues);
-  }
+  const txsWithResolvedInputs: Cardano.HydratedTx[] = await fetchTransactionByHashes(chainProviderInstance, [
+    ...txIdsToResolveInputs
+  ]);
 
   return inputs.map((input) => {
-    let txOut: Cardano.TxOut;
+    let txOut = inputsOutputsMapping.get(input.txId);
 
-    for (const transaction of transactions) {
+    for (const transaction of txsWithResolvedInputs) {
       if (transaction.id === input.txId) {
         txOut = transaction.body.outputs[input.index];
       }
     }
 
-    const resolvedInput = inputsOutputsMapping.get(input.txId);
+    const { address, value } = txOut;
 
-    const { address, value } = resolvedInput ?? txOut;
     return {
       ...input,
       value,

@@ -3,7 +3,7 @@ import uniq from 'lodash/uniq';
 import { GetState, SetState } from 'zustand';
 import BigNumber from 'bignumber.js';
 import groupBy from 'lodash/groupBy';
-import { mergeMap, combineLatest, tap, Observable, firstValueFrom } from 'rxjs';
+import { mergeMap, combineLatest, tap, Observable, firstValueFrom, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Wallet } from '@lace/cardano';
 import { EraSummary, Reward, TxCBOR, epochSlotsCalc } from '@cardano-sdk/core';
@@ -37,6 +37,7 @@ import {
 } from '../types';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { rewardHistoryTransformer } from '@src/views/browser-view/features/activity/helpers/reward-history-transformer';
+import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 
 export interface FetchWalletActivitiesProps {
   fiatCurrency: CurrencyInfo;
@@ -117,6 +118,7 @@ const getWalletActivitiesObservable = async ({
     blockchainProvider: { assetProvider }
   } = get();
   const {
+    addresses$,
     transactions,
     eraSummaries$,
     protocolParameters$,
@@ -127,23 +129,28 @@ const getWalletActivitiesObservable = async ({
   const walletAssets = await firstValueFrom(assetInfo$);
   const historicalTransactions$ = transactions.history$;
   const pendingTransactions$ = transactions.outgoing.inFlight$;
+  const { resolveInput } = createHistoricalOwnInputResolver({
+    addresses$,
+    transactionsHistory$: transactions.history$
+  });
 
   const { addresses } = walletInfo;
 
-  const historicTransactionMapper = (
+  const historicTransactionMapper = async (
     tx: Wallet.Cardano.HydratedTx,
     eraSummaries: EraSummary[]
-  ): Array<ExtendedActivityProps> => {
+  ): Promise<ExtendedActivityProps[]> => {
     const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
     const date = slotTimeCalc(tx.blockHeader.slot);
-    const transformedTransaction = txHistoryTransformer({
+    const transformedTransaction = await txHistoryTransformer({
       tx,
       walletAddresses: addresses,
       fiatCurrency,
       fiatPrice: cardanoFiatPrice,
       date,
       protocolParameters,
-      cardanoCoin
+      cardanoCoin,
+      resolveInput
     });
 
     const extendWithClickHandler = (transformedTx: TransformedTransactionActivity) => ({
@@ -162,10 +169,10 @@ const getWalletActivitiesObservable = async ({
     return transformedTransaction.map((tt) => extendWithClickHandler(tt));
   };
 
-  const pendingTransactionMapper = (
+  const pendingTransactionMapper = async (
     tx: Wallet.TxInFlight,
     eraSummaries: EraSummary[]
-  ): Array<ExtendedActivityProps> => {
+  ): Promise<ExtendedActivityProps[]> => {
     let date;
     try {
       const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
@@ -173,14 +180,15 @@ const getWalletActivitiesObservable = async ({
     } catch {
       date = new Date();
     }
-    const transformedTransaction = pendingTxTransformer({
+    const transformedTransaction = await pendingTxTransformer({
       tx,
       walletAddresses: addresses,
       fiatPrice: cardanoFiatPrice,
       fiatCurrency,
       protocolParameters,
       cardanoCoin,
-      date
+      date,
+      resolveInput
     });
 
     const extendWithClickHandler = (transformedTx: TransformedTransactionActivity) => ({
@@ -254,19 +262,21 @@ const getWalletActivitiesObservable = async ({
           ? allTransactions
           : filterTransactionByAssetId(allTransactions)
       ),
-      map((allTransactions: Wallet.Cardano.HydratedTx[]) =>
-        flattenDeep(allTransactions.map((tx) => historicTransactionMapper(tx, eraSummaries)))
-      )
+      mergeMap((allTransactions: Wallet.Cardano.HydratedTx[]) =>
+        from(Promise.all(allTransactions.map((tx) => historicTransactionMapper(tx, eraSummaries))))
+      ),
+      map(flattenDeep)
     );
 
   /**
    * Sanitizes pending transactions data
    */
-  const getPendingTransactions = (eraSummaries: EraSummary[]) =>
+  const getPendingTransactions = (eraSummaries: EraSummary[]): Observable<ExtendedActivityProps[]> =>
     pendingTransactions$.pipe(
-      map((pendingTransactions: Wallet.TxInFlight[]) =>
-        flattenDeep(pendingTransactions.map((tx) => pendingTransactionMapper(tx, eraSummaries)))
-      )
+      mergeMap((pendingTransactions: Wallet.TxInFlight[]) =>
+        from(Promise.all(pendingTransactions.map((tx) => pendingTransactionMapper(tx, eraSummaries))))
+      ),
+      map(flattenDeep)
     );
 
   /**
