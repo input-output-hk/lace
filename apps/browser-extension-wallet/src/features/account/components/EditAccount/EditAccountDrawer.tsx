@@ -35,7 +35,7 @@ export const EditAccountDrawer = ({
           <Box mb="$16" w="$fill">
             <Button.CallToAction
               w="$fill"
-              disabled={name === currentName}
+              disabled={name === currentName || currentName === '' || currentName === undefined}
               onClick={() => onSave(currentName)}
               data-testid="edit-account-save-btn"
               label={t('account.edit.footer.save')}
