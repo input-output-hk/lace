@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable react/no-multi-comp */
 import React, { useEffect, useMemo } from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
@@ -7,7 +8,7 @@ import styles from './MultiWallet.module.scss';
 
 import { Home } from './components/Home';
 
-import { WalletSetupFlow, WalletSetupFlowProvider } from '@lace/core';
+import { WalletSetupFlow, WalletSetupFlowProvider, useTranslate } from '@lace/core';
 import { CreateWallet } from './create-wallet';
 import { HardwareWallet } from './hardware-wallet';
 import { RestoreWallet } from './restore-wallet';
@@ -17,6 +18,8 @@ import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
 import { NavigationButton } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
+import { Dialog } from '@lace/ui';
+import { useCancelDialog } from './useCancelDialog';
 
 const { newWallet } = walletRoutePaths;
 
@@ -71,33 +74,36 @@ export const MultiWallet = (): JSX.Element => {
   const { path } = useRouteMatch();
   const history = useHistory();
   const { page, setBackgroundPage } = useBackgroundPage();
+  const closeWalletCreation = () => {
+    setBackgroundPage();
+    history.push(page);
+  };
+  const { t } = useTranslate();
+
+  const { closeWithDialog, isDialogOpen, setIsDialogOpen, setRef, withReset } = useCancelDialog(closeWalletCreation);
 
   return (
     <WalletSetupFlowProvider flow={WalletSetupFlow.ADD_WALLET}>
-      <Modal
-        centered
-        closable={false}
-        // eslint-disable-next-line unicorn/no-null
-        footer={null}
-        open
-        width="100%"
-        className={styles.modal}
-      >
+      <Dialog.Root open={isDialogOpen} setOpen={setIsDialogOpen} zIndex={1000}>
+        <Dialog.Title>{t('multiWallet.cancelDialog.title')}</Dialog.Title>
+        <Dialog.Description>{t('multiWallet.cancelDialog.description')}</Dialog.Description>
+        <Dialog.Actions>
+          <Dialog.Action cancel label={t('multiWallet.cancelDialog.cancel')} onClick={() => setIsDialogOpen(false)} />
+          <Dialog.Action label={t('multiWallet.cancelDialog.confirm')} onClick={closeWalletCreation} />
+        </Dialog.Actions>
+      </Dialog.Root>
+      <Modal centered closable={false} footer={null} open={!isDialogOpen} width="100%" className={styles.modal}>
         <div className={styles.closeButton}>
-          <NavigationButton
-            icon="cross"
-            onClick={() => {
-              setBackgroundPage();
-              history.push(page);
-            }}
-          />
+          <NavigationButton icon="cross" onClick={closeWithDialog} />
         </div>
-        <Switch>
-          <Route path={newWallet.create.root} component={SetupCreateWallet} />
-          <Route path={newWallet.hardware.root} component={SetupHardwareWallet} />
-          <Route path={newWallet.restore.root} component={SetupRestoreWallet} />
-          <Route exact path={`${path}/`} component={Home} />
-        </Switch>
+        <div ref={setRef}>
+          <Switch>
+            <Route path={newWallet.create.root} component={SetupCreateWallet} />
+            <Route path={newWallet.hardware.root} component={SetupHardwareWallet} />
+            <Route path={newWallet.restore.root} component={SetupRestoreWallet} />
+            <Route exact path={`${path}/`} component={withReset(Home)} />
+          </Switch>
+        </div>
       </Modal>
     </WalletSetupFlowProvider>
   );
