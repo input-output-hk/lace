@@ -280,6 +280,12 @@ const colors: Colors = {
   $profile_dropdown_wallet_status_container_borderColor:
     darkColorScheme.$primary_mid_grey,
 
+  $profile_dropdown_account_item_container_bgColor_hover:
+    darkColorScheme.$primary_mid_grey,
+  $profile_dropdown_account_item_container_bgColor_pressed:
+    darkColorScheme.$primary_dark_grey,
+  $profile_dropdown_account_item_container_focus_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
   $profile_dropdown_account_item_edit_icon_color:
     darkColorScheme.$primary_accent_purple,
   $profile_dropdown_account_item_delete_icon_color:
