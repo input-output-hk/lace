@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Flex, Button, Text, TextBox } from '@lace/ui';
 import { Drawer, DrawerNavigation } from '@lace/common';
+import { ACCOUNT_NAME_MAX_LENGTH } from '../../config';
 
 export type Props = {
   isPopup?: boolean;
@@ -61,6 +62,7 @@ export const EditAccountDrawer = ({
           containerStyle={{ width: '100%' }}
           label={t('account.edit.input.label')}
           defaultValue={name}
+          maxLength={ACCOUNT_NAME_MAX_LENGTH}
           onChange={(e) => setCurrentName(e.target.value)}
         />
       </div>

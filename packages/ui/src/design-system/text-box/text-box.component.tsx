@@ -20,6 +20,7 @@ export interface TextBoxProps extends Form.FormControlProps {
   onChange?: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
   containerClassName?: string;
   containerStyle?: React.CSSProperties;
+  maxLength?: number;
   'data-testid'?: string;
 }
 
@@ -35,6 +36,7 @@ export const TextBox = ({
   containerClassName = '',
   onChange,
   containerStyle,
+  maxLength,
   ...rest
 }: Readonly<TextBoxProps>): JSX.Element => {
   return (
@@ -59,6 +61,7 @@ export const TextBox = ({
               value={value}
               onChange={onChange}
               id={id}
+              maxLength={maxLength}
               data-testid={rest['data-testid']}
             />
           </Form.Control>
