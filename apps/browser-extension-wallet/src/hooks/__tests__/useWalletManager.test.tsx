@@ -431,7 +431,7 @@ describe('Testing useWalletManager hook', () => {
         wallet,
         name: 'name'
       } as any;
-      const chainName = 'Preview';
+      const chainName = 'Preprod';
       const mnemonicVerificationFrequency = 'mnemonicVerificationFrequency';
 
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
@@ -621,7 +621,7 @@ describe('Testing useWalletManager hook', () => {
         keyAgentsByChain,
         ...cardanoWallet
       } as any;
-      const chainName = 'Preview';
+      const chainName = 'Preprod';
 
       const saveValueInLocalStorage = jest.fn();
       jest.spyOn(localStorage, 'saveValueInLocalStorage').mockImplementation(saveValueInLocalStorage);

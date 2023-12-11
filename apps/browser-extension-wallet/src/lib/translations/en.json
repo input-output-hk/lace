@@ -1183,12 +1183,50 @@
       "hash": "Hash"
     },
     "VoteDelegation": {
-      "title": "Confirm vote delegation",
+      "title": "Confirm Vote Delegation",
       "metadata": "Metadata",
       "drepId": "DRep ID",
       "alwaysAbstain": "Abstain",
       "alwaysNoConfidence": "No Confidence",
       "option": "Yes"
+    },
+    "StakeVoteDelegation": {
+      "title": "Confirm Vote Delegation & Staking",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "alwaysAbstain": "Abstain",
+      "alwaysNoConfidence": "No Confidence",
+      "option": "Yes",
+      "stakeKeyHash": "Stake Key Hash",
+      "poolId": "Pool ID"
+    },
+    "StakeVoteDelegationRegistration": {
+      "title": "Confirm Vote Delegation & Staking",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "alwaysAbstain": "Abstain",
+      "alwaysNoConfidence": "No Confidence",
+      "option": "Yes",
+      "stakeKeyHash": "Stake Key Hash",
+      "poolId": "Pool ID",
+      "depositPaid": "Deposit paid"
+    },
+    "StakeRegistrationDelegation": {
+      "title": "Confirm Staking",
+      "metadata": "Metadata",
+      "stakeKeyHash": "Stake Key Hash",
+      "poolId": "Pool ID",
+      "depositPaid": "Deposit paid"
+    },
+    "VoteRegistrationDelegation": {
+      "title": "Confirm Vote Delegation",
+      "metadata": "Metadata",
+      "drepId": "DRep ID",
+      "alwaysAbstain": "Abstain",
+      "alwaysNoConfidence": "No Confidence",
+      "option": "Yes",
+      "stakeKeyHash": "Stake Key Hash",
+      "depositPaid": "Deposit paid"
     },
     "destinationAddressInput": {
       "recipientAddress": "Recipient's address or $handle"

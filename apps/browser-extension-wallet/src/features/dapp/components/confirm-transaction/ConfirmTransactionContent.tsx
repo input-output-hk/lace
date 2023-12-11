@@ -7,6 +7,10 @@ import { ConfirmDRepRetirementContainer } from './ConfirmDRepRetirementContainer
 import { ConfirmVoteDelegationContainer } from './ConfirmVoteDelegationContainer';
 import { VotingProceduresContainer } from './VotingProceduresContainer';
 import { ConfirmDRepUpdateContainer } from './ConfirmDRepUpdateContainer';
+import { ConfirmVoteRegistrationDelegationContainer } from './ConfirmVoteRegistrationDelegationContainer';
+import { ConfirmStakeRegistrationDelegationContainer } from './ConfirmStakeRegistrationDelegationContainer';
+import { ConfirmStakeVoteRegistrationDelegationContainer } from './ConfirmStakeVoteRegistrationDelegationContainer';
+import { ConfirmStakeVoteDelegationContainer } from './ConfirmStakeVoteDelegationContainer';
 import { Wallet } from '@lace/cardano';
 
 interface Props {
@@ -34,6 +38,18 @@ export const ConfirmTransactionContent = ({ txType, signTxData, onError, errorMe
   }
   if (txType === Wallet.Cip30TxType.VotingProcedures) {
     return <VotingProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === Wallet.Cip30TxType.VoteRegistrationDelegation) {
+    return <ConfirmVoteRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === Wallet.Cip30TxType.StakeRegistrationDelegation) {
+    return <ConfirmStakeRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === Wallet.Cip30TxType.StakeVoteDelegationRegistration) {
+    return <ConfirmStakeVoteRegistrationDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === Wallet.Cip30TxType.StakeVoteDelegation) {
+    return <ConfirmStakeVoteDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
 
   return <DappTransactionContainer signTxData={signTxData} errorMessage={errorMessage} />;

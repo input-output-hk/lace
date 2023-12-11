@@ -36,7 +36,11 @@ export enum Cip30TxType {
   DRepRetirement = 'DRepRetirement',
   DRepUpdate = 'DRepUpdate',
   VoteDelegation = 'VoteDelegation',
-  VotingProcedures = 'VotingProcedures'
+  VotingProcedures = 'VotingProcedures',
+  VoteRegistrationDelegation = 'VoteRegistrationDelegation',
+  StakeRegistrationDelegation = 'StakeRegistrationDelegation',
+  StakeVoteDelegationRegistration = 'StakeVoteDelegationRegistration',
+  StakeVoteDelegation = 'StakeVoteDelegation'
 }
 
 export type Cip30SignTxOutput = {

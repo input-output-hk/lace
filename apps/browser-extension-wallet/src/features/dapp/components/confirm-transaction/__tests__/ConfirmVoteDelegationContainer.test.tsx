@@ -130,7 +130,7 @@ describe('Testing ConfirmVoteDelegationContainer component', () => {
       },
       stakeCredential: {
         type: Wallet.Cardano.CredentialType.KeyHash,
-        hash: Wallet.Crypto.Hash28ByteBase16(Buffer.from(STAKE_KEY_HASH).toString('hex'))
+        hash: Wallet.Crypto.Hash28ByteBase16(STAKE_KEY_HASH)
       }
     };
     const tx = buildMockTx({

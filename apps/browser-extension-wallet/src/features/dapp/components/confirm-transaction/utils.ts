@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, complexity */
 import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { RemoteApiPropertyType, exposeApi } from '@cardano-sdk/web-extension';
@@ -18,7 +18,11 @@ export const getTitleKey = (txType: Wallet.Cip30TxType): string =>
     Wallet.Cip30TxType.DRepRetirement,
     Wallet.Cip30TxType.DRepUpdate,
     Wallet.Cip30TxType.VoteDelegation,
-    Wallet.Cip30TxType.VotingProcedures
+    Wallet.Cip30TxType.VotingProcedures,
+    Wallet.Cip30TxType.StakeVoteDelegation,
+    Wallet.Cip30TxType.VoteRegistrationDelegation,
+    Wallet.Cip30TxType.StakeRegistrationDelegation,
+    Wallet.Cip30TxType.StakeVoteDelegationRegistration
   ].includes(txType)
     ? `core.${txType}.title`
     : sectionTitle[DAPP_VIEWS.CONFIRM_TX];
@@ -62,6 +66,7 @@ export const certificateInspectorFactory =
 export const votingProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano.VotingProcedures | undefined =>
   tx?.body?.votingProcedures;
 
+// eslint-disable-next-line complexity
 export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,
@@ -70,12 +75,26 @@ export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
     dRepRegistration: certificateInspectorFactory(CertificateType.RegisterDelegateRepresentative),
     dRepRetirement: certificateInspectorFactory(CertificateType.UnregisterDelegateRepresentative),
     dRepUpdate: certificateInspectorFactory(CertificateType.UpdateDelegateRepresentative),
-    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation)
+    voteDelegation: certificateInspectorFactory(CertificateType.VoteDelegation),
+    voteRegistrationDelegation: certificateInspectorFactory(CertificateType.VoteRegistrationDelegation),
+    stakeVoteDelegation: certificateInspectorFactory(CertificateType.StakeVoteDelegation),
+    stakeRegistrationDelegation: certificateInspectorFactory(CertificateType.StakeRegistrationDelegation),
+    stakeVoteDelegationRegistration: certificateInspectorFactory(CertificateType.StakeVoteRegistrationDelegation)
   });
 
-  const { minted, burned, dRepRegistration, dRepRetirement, dRepUpdate, voteDelegation, votingProcedures } = inspector(
-    tx as Wallet.Cardano.HydratedTx
-  );
+  const {
+    minted,
+    burned,
+    votingProcedures,
+    dRepRegistration,
+    dRepRetirement,
+    dRepUpdate,
+    voteDelegation,
+    stakeVoteDelegation,
+    voteRegistrationDelegation,
+    stakeRegistrationDelegation,
+    stakeVoteDelegationRegistration
+  } = inspector(tx as Wallet.Cardano.HydratedTx);
   const isMintTransaction = minted.length > 0;
   const isBurnTransaction = burned.length > 0;
 
@@ -101,6 +120,22 @@ export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
 
   if (voteDelegation) {
     return Wallet.Cip30TxType.VoteDelegation;
+  }
+
+  if (stakeVoteDelegation) {
+    return Wallet.Cip30TxType.StakeVoteDelegation;
+  }
+
+  if (voteRegistrationDelegation) {
+    return Wallet.Cip30TxType.VoteRegistrationDelegation;
+  }
+
+  if (stakeRegistrationDelegation) {
+    return Wallet.Cip30TxType.StakeRegistrationDelegation;
+  }
+
+  if (stakeVoteDelegationRegistration) {
+    return Wallet.Cip30TxType.StakeVoteDelegationRegistration;
   }
 
   if (dRepUpdate) {

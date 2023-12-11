@@ -34,10 +34,10 @@ interface Props {
       index: string;
       txHash: string;
     };
-    anchor?: {
+    anchor: {
       url: string;
       hash: string;
-    };
+    } | null;
     dRepId: string;
     procedureTitle: string;
     vote: string;
