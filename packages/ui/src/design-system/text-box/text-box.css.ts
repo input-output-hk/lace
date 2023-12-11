@@ -13,7 +13,7 @@ export const container = style({
 });
 
 export const input = style({
-  width: 'calc(100% - 90px)',
+  width: '100%',
   fontSize: vars.fontSizes.$18,
   padding: `0 ${vars.spacing.$28}`,
   border: 'none',
