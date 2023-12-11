@@ -30,9 +30,17 @@ export const root = style([
   },
 ]);
 
-export const accountLabel = sx({
-  color: '$text_secondary',
-});
+export const accountLabel = style([
+  sx({
+    color: '$text_secondary',
+  }),
+  {
+    width: '118px',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  },
+]);
 
 export const derivationPath = style([
   {
