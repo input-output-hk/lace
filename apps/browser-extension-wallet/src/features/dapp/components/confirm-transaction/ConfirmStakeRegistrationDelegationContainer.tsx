@@ -32,7 +32,7 @@ export const ConfirmStakeRegistrationDelegationContainer = ({
       dappInfo={signTxData.dappInfo}
       metadata={{
         poolId: certificate.poolId,
-        stakeKeyHash: certificate.stakeKeyHash,
+        stakeKeyHash: certificate.stakeCredential.hash,
         depositPaid: depositPaidWithCardanoSymbol
       }}
       translations={{

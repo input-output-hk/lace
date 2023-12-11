@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, complexity */
 import { Wallet } from '@lace/cardano';
 import { assetsBurnedInspector, assetsMintedInspector, createTxInspector } from '@cardano-sdk/core';
 import { RemoteApiPropertyType, exposeApi } from '@cardano-sdk/web-extension';
@@ -66,6 +66,7 @@ export const certificateInspectorFactory =
 export const votingProceduresInspector = (tx: Wallet.Cardano.Tx): Wallet.Cardano.VotingProcedures | undefined =>
   tx?.body?.votingProcedures;
 
+// eslint-disable-next-line complexity
 export const getTxType = (tx: Wallet.Cardano.Tx): Wallet.Cip30TxType => {
   const inspector = createTxInspector({
     minted: assetsMintedInspector,

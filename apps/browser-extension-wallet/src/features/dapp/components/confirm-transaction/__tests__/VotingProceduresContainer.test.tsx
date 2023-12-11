@@ -211,7 +211,7 @@ describe('Testing VotingProceduresContainer component', () => {
         dappInfo,
         data: voters.map(({ __typename }, index) => ({
           voter: {
-            type: t(`core.votingProcedures.voterType.${getVoterType(__typename)}`),
+            type: t(`core.VotingProcedures.voterTypes.${getVoterType(__typename)}`),
             dRepId: getExpectedDrepId(getVoterType(__typename))(voters[index].credential.hash)
           },
           votes: votingProcedures[index].votes.map((vote) => ({
@@ -221,7 +221,7 @@ describe('Testing VotingProceduresContainer component', () => {
               txHashUrl: `${mockPreprodCexplorerBaseUrl}/${mockCexplorerUrlPathsTx}/${vote.actionId.id}`
             },
             votingProcedure: {
-              vote: t(`core.votingProcedures.votes.${getVote(vote.votingProcedure.vote)}`),
+              vote: t(`core.VotingProcedures.votes.${getVote(vote.votingProcedure.vote)}`),
               anchor: !!vote.votingProcedure.anchor?.url && {
                 url: vote.votingProcedure.anchor?.url,
                 hash: vote.votingProcedure.anchor?.dataHash.toString()

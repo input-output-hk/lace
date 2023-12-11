@@ -24,7 +24,7 @@ export const ConfirmStakeVoteDelegationContainer = ({ signTxData, errorMessage }
       dappInfo={signTxData.dappInfo}
       metadata={{
         poolId: certificate.poolId,
-        stakeKeyHash: certificate.stakeKeyHash,
+        stakeKeyHash: certificate.stakeCredential.hash,
         alwaysAbstain: Wallet.Cardano.isDRepAlwaysAbstain(dRep),
         alwaysNoConfidence: Wallet.Cardano.isDRepAlwaysNoConfidence(dRep),
         ...(Wallet.Cardano.isDRepCredential(dRep) ? { drepId: dRep.hash } : {})
