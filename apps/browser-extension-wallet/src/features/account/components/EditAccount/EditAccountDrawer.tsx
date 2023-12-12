@@ -29,6 +29,7 @@ export const EditAccountDrawer = ({
       zIndex={1100}
       open={visible}
       navigation={<DrawerNavigation title={name || `Account #${index}`} onCloseIconClick={hide} />}
+      onClose={hide}
       popupView={isPopup}
       footer={
         <Flex flexDirection="column">
