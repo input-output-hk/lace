@@ -4,7 +4,7 @@ import { NavigationButton } from '@lace/common';
 import styles from './WalletAccounts.module.scss';
 import { ProfileDropdown } from '@lace/ui';
 
-export const WalletAccounts = ({ onBack }: { onBack: () => void }): React.ReactElement => {
+export const WalletAccounts = ({ onBack, isPopup }: { onBack: () => void; isPopup: boolean }): React.ReactElement => {
   const { t } = useTranslation();
 
   return (
@@ -20,7 +20,10 @@ export const WalletAccounts = ({ onBack }: { onBack: () => void }): React.ReactE
           {t('browserView.settings.wallet.accounts.description')}
         </div>
       </div>
-      <div className={styles.content} data-testid="user-dropdown-wallet-account-list">
+      <div
+        className={isPopup ? styles.popUpContent : styles.extendedContent}
+        data-testid="user-dropdown-wallet-account-list"
+      >
         <ProfileDropdown.AccountsList
           unlockLabel={t('browserView.settings.wallet.accounts.unlockLabel')}
           accounts={[

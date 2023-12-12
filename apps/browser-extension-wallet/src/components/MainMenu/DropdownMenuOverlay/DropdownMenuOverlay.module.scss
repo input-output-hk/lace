@@ -178,9 +178,8 @@
   font-size: 16px;
 }
 
-.container {
+.popUpContainer, .extendedContainer {
   @include scroll-bar-style;
-  max-height: 480px;
   overflow-y: scroll;
   margin: size_unit(1) size_unit(1) size_unit(1) 0;
 
@@ -189,4 +188,12 @@
       padding: 0;
     }
   }
+}
+
+.popUpContainer {
+  max-height: 480px;
+}
+
+.extendedContainer {
+  max-height: 600px;
 }

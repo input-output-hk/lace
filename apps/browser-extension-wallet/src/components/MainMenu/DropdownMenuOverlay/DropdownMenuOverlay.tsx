@@ -47,7 +47,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
       {currentSection === Sections.Main && (
-        <div className={styles.container}>
+        <div className={isPopup ? styles.popUpContainer : styles.extendedContainer}>
           {topSection}
           <Links>
             {process.env.USE_MULTI_WALLET === 'true' && <AddNewWalletLink isPopup={isPopup} />}
@@ -65,7 +65,9 @@ export const DropdownMenuOverlay: VFC<Props> = ({
         </div>
       )}
       {currentSection === Sections.NetworkInfo && <NetworkInfo onBack={() => setCurrentSection(Sections.Main)} />}
-      {currentSection === Sections.WalletAccounts && <WalletAccounts onBack={() => setCurrentSection(Sections.Main)} />}
+      {currentSection === Sections.WalletAccounts && (
+        <WalletAccounts onBack={() => setCurrentSection(Sections.Main)} isPopup={isPopup} />
+      )}
     </Menu>
   );
 };
