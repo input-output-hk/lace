@@ -8,10 +8,6 @@ import { useHardwareWallet } from '../context';
 import { walletRoutePaths } from '@routes';
 import { ErrorHandling } from './ErrorHandling';
 
-const {
-  newWallet: { hardware }
-} = walletRoutePaths;
-
 interface State {
   error?: 'notDetectedLedger' | 'notDetectedTrezor';
 }
@@ -52,9 +48,9 @@ export const Connect = (): JSX.Element => {
       <ErrorHandling error={state.error} onRetry={clearError} />
       <WalletSetupConnectHardwareWalletStep
         wallets={Wallet.AVAILABLE_WALLETS}
-        onBack={() => history.goBack()}
+        onBack={() => history.push(walletRoutePaths.newWallet.root)}
         onConnect={handleConnect}
-        onNext={() => history.push(hardware.select)}
+        onNext={() => history.push(walletRoutePaths.newWallet.hardware.select)}
         isNextEnable={Boolean(data.connection)}
         translations={walletSetupConnectHardwareWalletStepTranslations}
         isHardwareWallet
