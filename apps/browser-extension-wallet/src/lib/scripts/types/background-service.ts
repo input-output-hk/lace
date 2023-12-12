@@ -32,7 +32,8 @@ export enum BrowserViewSections {
   SETTINGS = 'settings',
   HOME = 'home',
   COLLATERAL_SETTINGS = 'collateral-settings',
-  FORGOT_PASSWORD = 'forgot_password'
+  FORGOT_PASSWORD = 'forgot_password',
+  NEW_WALLET = 'new_wallet'
 }
 
 export interface OpenBrowserData {

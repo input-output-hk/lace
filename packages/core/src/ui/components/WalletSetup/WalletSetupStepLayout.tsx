@@ -6,6 +6,7 @@ import { Tooltip } from 'antd';
 import { urls } from '../../utils/constants';
 import { useTranslate } from '@ui/hooks/useTranslate';
 import i18n from '@ui/lib/i18n';
+import { WalletSetupFlow, useWalletSetupFlow } from './WalletSetupFlowProvider';
 
 export enum WalletTimelineSteps {
   LEGAL_AND_ANALYTICS,
@@ -15,7 +16,6 @@ export enum WalletTimelineSteps {
   CONNECT_WALLET,
   NAME_WALLET
 }
-
 export interface WalletSetupStepLayoutProps {
   title: React.ReactNode;
   children?: React.ReactNode;
@@ -36,7 +36,16 @@ export interface WalletSetupStepLayoutProps {
   isHardwareWallet?: boolean;
 }
 
-const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean) => {
+const removeLegalAndAnalyticsStep = (
+  steps: {
+    key: WalletTimelineSteps;
+    name: string;
+  }[]
+) => {
+  steps.shift();
+};
+
+const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean, flow: WalletSetupFlow) => {
   const inMemoryWalletSteps = [
     { key: WalletTimelineSteps.LEGAL_AND_ANALYTICS, name: i18n.t('package.core.walletSetupStep.legalAndAnalytics') },
     { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('package.core.walletSetupStep.walletSetup') },
@@ -52,6 +61,11 @@ const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: bo
   ];
 
   const walletSteps = isHardwareWallet ? hardwareWalletSteps : inMemoryWalletSteps;
+
+  if (flow === WalletSetupFlow.ADD_WALLET) {
+    // remove legal and analytics step
+    removeLegalAndAnalyticsStep(walletSteps);
+  }
 
   if (typeof currentStep !== 'undefined') {
     const currentStepIndex = walletSteps.findIndex((step) => step.key === currentStep);
@@ -82,6 +96,7 @@ export const WalletSetupStepLayout = ({
 }: WalletSetupStepLayoutProps): React.ReactElement => {
   const { t } = useTranslate();
   const nextButtonContainerRef = useRef(null);
+  const flow = useWalletSetupFlow();
 
   const defaultLabel = {
     next: t('package.core.walletSetupStep.next'),
@@ -89,7 +104,7 @@ export const WalletSetupStepLayout = ({
     skip: t('package.core.walletSetupStep.skip')
   };
 
-  const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet);
+  const timelineSteps = getTimelineSteps(currentTimelineStep, isHardwareWallet, flow);
 
   return (
     <div className={styles.walletSetupStepLayout} data-testid="wallet-setup-step-layout">
