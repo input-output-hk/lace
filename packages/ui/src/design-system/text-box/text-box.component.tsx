@@ -38,41 +38,39 @@ export const TextBox = ({
   containerStyle,
   maxLength,
   ...rest
-}: Readonly<TextBoxProps>): JSX.Element => {
-  return (
-    <Form.Root>
-      <Flex justifyContent="space-between" alignItems="center">
-        <Form.Field
-          name="field"
-          className={cn(cx.container, {
-            [containerClassName]: containerClassName,
-          })}
-          style={containerStyle}
-        >
-          <Form.Control asChild>
-            <input
-              type="text"
-              required={required}
-              placeholder=""
-              className={cx.input}
-              disabled={disabled}
-              name={name}
-              defaultValue={defaultValue}
-              value={value}
-              onChange={onChange}
-              id={id}
-              maxLength={maxLength}
-              data-testid={rest['data-testid']}
-            />
-          </Form.Control>
-          <Form.Label className={cn(cx.label)}>{label}</Form.Label>
-        </Form.Field>
-      </Flex>
-      {errorMessage && (
-        <Typography.Label className={cx.errorMessage}>
-          {errorMessage}
-        </Typography.Label>
-      )}
-    </Form.Root>
-  );
-};
+}: Readonly<TextBoxProps>): JSX.Element => (
+  <Form.Root>
+    <Flex justifyContent="space-between" alignItems="center">
+      <Form.Field
+        name="field"
+        className={cn(cx.container, {
+          [containerClassName]: containerClassName,
+        })}
+        style={containerStyle}
+      >
+        <Form.Control asChild>
+          <input
+            type="text"
+            required={required}
+            placeholder=""
+            className={cx.input}
+            disabled={disabled}
+            name={name}
+            defaultValue={defaultValue}
+            value={value}
+            onChange={onChange}
+            id={id}
+            maxLength={maxLength}
+            data-testid={rest['data-testid']}
+          />
+        </Form.Control>
+        <Form.Label className={cn(cx.label)}>{label}</Form.Label>
+      </Form.Field>
+    </Flex>
+    {errorMessage && (
+      <Typography.Label className={cx.errorMessage}>
+        {errorMessage}
+      </Typography.Label>
+    )}
+  </Form.Root>
+);

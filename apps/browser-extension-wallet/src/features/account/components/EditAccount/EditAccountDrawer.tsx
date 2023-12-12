@@ -63,7 +63,7 @@ export const EditAccountDrawer = ({
           label={t('account.edit.input.label')}
           defaultValue={name}
           maxLength={ACCOUNT_NAME_MAX_LENGTH}
-          onChange={(e) => setCurrentName(e.target.value)}
+          onChange={(e) => setCurrentName(e.target.value.trim())}
         />
       </div>
     </Drawer>
