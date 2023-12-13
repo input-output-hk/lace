@@ -98,6 +98,7 @@ export const WalletSetupNamePasswordStep = ({
           errorMessage={walletNameErrorMessage}
         />
         <PasswordVerification
+          id="wallet-password-input"
           className={styles.input}
           value={password}
           label={t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel')}

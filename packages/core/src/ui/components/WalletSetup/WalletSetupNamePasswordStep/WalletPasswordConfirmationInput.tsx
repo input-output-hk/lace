@@ -26,6 +26,7 @@ export const WalletPasswordConfirmationInput = ({
     })}
   >
     <Password
+      id="wallet-password-confirmation-input"
       className={styles.input}
       value={value}
       label={label}

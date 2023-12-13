@@ -79,8 +79,19 @@ export const MultiWallet = (): JSX.Element => {
     history.push(page);
   };
   const { t } = useTranslate();
+  const { closeWithDialog, isDialogOpen, setIsDialogOpen, setRef, reset$ } = useCancelDialog(closeWalletCreation);
 
-  const { closeWithDialog, isDialogOpen, setIsDialogOpen, setRef, withReset } = useCancelDialog(closeWalletCreation);
+  useEffect(() => {
+    const unsubscribe = history.listen((event) => {
+      if (event.pathname === newWallet.root) {
+        reset$.next(true);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  });
 
   return (
     <WalletSetupFlowProvider flow={WalletSetupFlow.ADD_WALLET}>
@@ -101,7 +112,7 @@ export const MultiWallet = (): JSX.Element => {
             <Route path={newWallet.create.root} component={SetupCreateWallet} />
             <Route path={newWallet.hardware.root} component={SetupHardwareWallet} />
             <Route path={newWallet.restore.root} component={SetupRestoreWallet} />
-            <Route exact path={`${path}/`} component={withReset(Home)} />
+            <Route exact path={`${path}/`} component={Home} />
           </Switch>
         </div>
       </Modal>

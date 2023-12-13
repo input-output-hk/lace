@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Subject } from 'rxjs';
 
 export const useCancelDialog = (
   closeWalletCreation: () => void
@@ -7,28 +8,46 @@ export const useCancelDialog = (
   setIsDialogOpen: (isOpen: boolean) => void;
   setRef: (instance: HTMLElement) => void;
   closeWithDialog: () => void;
-  withReset: (WrappedComponent: React.FC) => () => JSX.Element;
+  reset$: Subject<boolean>;
 } => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const shouldOpenDialogRef = useRef(false);
   const containerRef = useRef<HTMLElement>(null);
+  const inputMap = useMemo(() => new Map<string, boolean>(), []);
+  const reset$ = useMemo(() => new Subject<boolean>(), []);
 
-  const handleInputChange = useCallback(() => {
-    shouldOpenDialogRef.current = true;
-  }, []);
+  useEffect(() => {
+    const subscription = reset$.subscribe(() => {
+      inputMap.clear();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [reset$, inputMap]);
+
+  const handleInputChange = useCallback(
+    (event: Event) => {
+      inputMap.set((event.target as HTMLInputElement).id, Boolean((event.target as HTMLInputElement).value));
+    },
+    [inputMap]
+  );
 
   const closeWithDialog = useCallback(() => {
-    if (shouldOpenDialogRef.current) {
+    const shouldOpenDialog = [...inputMap.values()].some(Boolean);
+    if (shouldOpenDialog) {
       setIsDialogOpen(true);
     } else {
       closeWalletCreation();
     }
-  }, [closeWalletCreation, setIsDialogOpen]);
+  }, [inputMap, closeWalletCreation, setIsDialogOpen]);
 
   const setRef: React.RefCallback<HTMLElement> = (node) => {
     if (node) {
       containerRef.current = node;
-      node.querySelectorAll('input').forEach((input) => input.addEventListener('input', handleInputChange));
+      node.querySelectorAll('input').forEach((input) => {
+        inputMap.set(input.id, Boolean(input.value));
+        input.addEventListener('input', handleInputChange);
+      });
     } else {
       containerRef.current
         ?.querySelectorAll('input')
@@ -36,24 +55,11 @@ export const useCancelDialog = (
     }
   };
 
-  const withReset = useCallback((WrappedComponent: React.FC) => {
-    const WithReset = () => {
-      useEffect(() => {
-        shouldOpenDialogRef.current = false;
-      }, []);
-
-      return <WrappedComponent />;
-    };
-
-    WithReset.displayName = `withReset(${WrappedComponent.displayName || WrappedComponent.name})`;
-    return WithReset;
-  }, []);
-
   return {
     isDialogOpen,
     setIsDialogOpen,
     setRef,
     closeWithDialog,
-    withReset
+    reset$
   };
 };
