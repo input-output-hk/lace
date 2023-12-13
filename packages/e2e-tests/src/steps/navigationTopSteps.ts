@@ -37,28 +37,16 @@ Then(/sync status displays "([^"]*)" state/, async (walletState: string) => {
 });
 
 Then(
-  /^I see network id: "(Mainnet|Preprod|Preview)" next to Lace logo$/,
-  async (expectedNetwork: 'Mainnet' | 'Preprod' | 'Preview') => {
-    await topNavigationAssert.assertNetworkIdVisible(expectedNetwork);
-    await topNavigationAssert.assertNetworkIdNextToLogo();
+  /^I (see|do not see) network id: "(Mainnet|Preprod|Preview)"$/,
+  async (shouldSee: 'see' | 'do not see', expectedNetwork: 'Mainnet' | 'Preprod' | 'Preview') => {
+    await (shouldSee === 'see'
+      ? topNavigationAssert.assertNetworkPillVisible(expectedNetwork)
+      : topNavigationAssert.assertNetworkPillNotVisible());
   }
 );
 
-Then(/^I don't see network id next to Lace logo for: "Mainnet"$/, async () => {
-  await topNavigationAssert.assertNetworkIdNotVisible();
-});
-
-Then(
-  /^I see network id next to Lace logo for: "(Preprod|Preview)"$/,
-  async (expectedNetwork: 'Preprod' | 'Preview') => {
-    await topNavigationAssert.assertNetworkIdVisible(expectedNetwork);
-    await topNavigationAssert.assertNetworkIdNextToLogo();
-  }
-);
-
-Then(/^I see network pill indicates that status is offline next to Lace logo$/, async () => {
+Then(/^I see network id with status: offline$/, async () => {
   await topNavigationAssert.assertNetworkPillOffline();
-  await topNavigationAssert.assertNetworkIdNextToLogo();
 });
 
 Then(/^I can see application in (light|dark) mode$/, async (mode: 'light' | 'dark') => {

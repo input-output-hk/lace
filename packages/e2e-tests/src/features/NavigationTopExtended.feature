@@ -40,12 +40,12 @@ Feature: Top Navigation - Extended view
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
 
   @LW-4598 @Testnet
-  Scenario: Extended View - network id is visible next to Lace logo for Testnet
-    Then I see network id next to Lace logo for: "Preprod"
+  Scenario: Extended View - network id is visible for Testnet
+    Then I see network id: "Preprod"
 
   @LW-4598 @Mainnet
-  Scenario: Extended View - network id is not visible next to Lace logo for Mainnet
-    Then I don't see network id next to Lace logo for: "Mainnet"
+  Scenario: Extended View - network id is not visible for Mainnet
+    Then I do not see network id: "Mainnet"
 
   @LW-4843 @Mainnet @Testnet
   Scenario Outline: Extended view - theme switcher - <theme> mode
@@ -112,14 +112,14 @@ Feature: Top Navigation - Extended view
     And I click on the settings option
     Then I see current network: "Preview" name in network setting
     And I see current network: "Preview" name in "About Lace" widget
-    And I see network id: "Preview" next to Lace logo
+    And I see network id: "Preview"
     And Local storage appSettings contains info about network: "Preview"
 
   @LW-1717 @LW-5255 @Mainnet @Testnet
   Scenario: Avatar dropdown displays a valid wallet sync status (syncing) + toast & network pill
     Given I close wallet synced toast
     When I am in the offline network mode: true
-    Then I see network pill indicates that status is offline next to Lace logo
+    Then I see network id with status: offline
     And I see a toast with message: "general.errors.networkError"
     When I click the menu button
     Then wallet sync status component is visible

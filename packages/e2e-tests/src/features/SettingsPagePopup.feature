@@ -91,7 +91,7 @@ Feature: General Settings - Popup View
     Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
     And I close the drawer by clicking back button
     When I navigate to Tokens popup page
-    Then I see network id: "Preprod" next to Lace logo
+    Then I see network id: "Preprod"
     And I see "Preprod" specific tokens in popup mode
 
   @LW-2717 @Mainnet
@@ -102,29 +102,29 @@ Feature: General Settings - Popup View
     Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
     And I close the drawer by clicking back button
     When I navigate to Tokens popup page
-    Then I don't see network id next to Lace logo for: "Mainnet"
+    Then I do not see network id: "Mainnet"
     And I see "Mainnet" specific tokens in popup mode
 
   @LW-5260 @Testnet
   Scenario: Popup View - Settings - Network name updated in settings, logo, localStorage after network switching
     Given I am on Settings popup page
     And I see current network: "Preprod" name in network setting
-    And I see network id: "Preprod" next to Lace logo
+    And I see network id: "Preprod"
     And Local storage appSettings contains info about network: "Preprod"
     When I switch network to: "Preview" in popup mode
     Then I see current network: "Preview" name in network setting
-    And I see network id: "Preview" next to Lace logo
+    And I see network id: "Preview"
     And Local storage appSettings contains info about network: "Preview"
 
   @LW-5260 @Mainnet
   Scenario: Popup View - Settings - Network name updated in settings, logo, localStorage after network switching
     Given I am on Settings popup page
     And I see current network: "Mainnet" name in network setting
-    And I don't see network id next to Lace logo for: "Mainnet"
+    And I do not see network id: "Mainnet"
     And Local storage appSettings contains info about network: "Mainnet""
     When I switch network to: "Preview" in popup mode
     Then I see current network: "Preview" name in network setting
-    And I see network id: "Preview" next to Lace logo
+    And I see network id: "Preview"
     And Local storage appSettings contains info about network: "Preview"
 
   @LW-5261 @Testnet
