@@ -33,6 +33,7 @@ env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
   NETWORK: ${{ github.event.inputs.network || 'preprod' }}
   RUN: ${{ github.run_number }}
+  DISPLAY: ':99.0'
 
 jobs:
   tests:
@@ -49,6 +50,9 @@ jobs:
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+      - name: Start XVFB
+        run: |
+          Xvfb :99 &
       - name: Start Chrome driver
         run: |
           if [ ${BROWSER} == "chrome" ]; then

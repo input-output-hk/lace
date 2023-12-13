@@ -18,6 +18,7 @@ import TokensPageObject from '../pageobject/tokensPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { browser } from '@wdio/globals';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
+import ErrorDAppModal from '../elements/dappConnector/errorDAppModal';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -332,6 +333,16 @@ class DAppConnectorAssert {
     expect(await SignTransactionPage.confirmButton.getText()).to.equal(await t('dapp.confirm.btn.confirm'));
     await SignTransactionPage.cancelButton.waitForDisplayed();
     expect(await SignTransactionPage.cancelButton.getText()).to.equal(await t('dapp.confirm.btn.cancel'));
+  }
+
+  async assertSeeSomethingWentWrongPage() {
+    await this.assertSeeHeader();
+    await ErrorDAppModal.image.waitForDisplayed();
+    await ErrorDAppModal.heading.waitForDisplayed();
+    await ErrorDAppModal.description.waitForDisplayed();
+    await ErrorDAppModal.closeButton.waitForDisplayed();
+    expect(await ErrorDAppModal.heading.getText()).to.equal(await t('dapp.sign.failure.title'));
+    expect(await ErrorDAppModal.description.getText()).to.equal(await t('dapp.sign.failure.description'));
   }
 
   async assertSeeAllDonePage() {

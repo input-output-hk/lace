@@ -61,3 +61,18 @@ Feature: Send Transactions from Dapp - E2E
     Then the Received transaction is displayed with value: "1.38 tADA" and tokens count 2
     And I click on a transaction: 1
     Then The Tx details are displayed as "package.core.activityDetails.received" for ADA with value: "1.38" and LaceCoin2 with value: "2" and wallet: "WalletSendSimpleTransactionE2E" address
+
+  @LW-9279 @Testnet
+  Scenario: Defect LW-9273 - User is not able to accept second dapp transaction until close first dapp window
+    And I de-authorize all DApps in extended mode
+    And I open and authorize test DApp with "Only once" setting
+    When I click "Send ADA" "Run" button in test DApp
+    Then I see DApp connector "Confirm transaction" page with: "3.00 ADA" and: "0" assets
+    And I click "Confirm" button on "Confirm transaction" page
+    And I see DApp connector "Sign transaction" page
+    And I fill correct password
+    And I click "Confirm" button on "Sign transaction" page
+    And I see DApp connector "All done" page
+    Then I click "Send ADA" "Run" button in test DApp
+    Then I see DApp connector "Something went wrong" page on 3 window handle
+    And I see DApp connector "Something went wrong" page on 4 window handle

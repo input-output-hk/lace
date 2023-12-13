@@ -8,6 +8,7 @@ env:
   TAGS: '@Smoke and @Testnet and not @Pending'
   BROWSER: 'chrome'
   RUN: ${{ github.run_number }}
+  DISPLAY: ':99.0'
 
 jobs:
   smokeTests:
@@ -25,6 +26,9 @@ jobs:
         uses: ./.github/shared/build
         with:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+      - name: Start XVFB
+        run: |
+          Xvfb :99 &
       - name: Start Chrome driver
         run: |
           if [ ${BROWSER} == "chrome" ]; then
