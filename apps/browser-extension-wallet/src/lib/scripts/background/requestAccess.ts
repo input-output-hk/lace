@@ -1,6 +1,6 @@
 import pDebounce from 'p-debounce';
-import { Origin, RequestAccess } from '@cardano-sdk/dapp-connector';
-import { storage as webStorage, tabs } from 'webextension-polyfill';
+import { RequestAccess } from '@cardano-sdk/dapp-connector';
+import { storage as webStorage, tabs, Runtime } from 'webextension-polyfill';
 import { AuthorizedDappStorage } from '@src/types';
 
 import { authorizedDappsList, userPromptService } from './services/dappService';
@@ -14,7 +14,7 @@ const DEBOUNCE_THROTTLE = 500;
 
 export const dappInfo$ = new BehaviorSubject<Wallet.DappInfo>(undefined);
 
-export const requestAccess: RequestAccess = async (origin: Origin) => {
+export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender) => {
   const launchingTab = await getLastActiveTab();
   const { logo, name } = await getDappInfoFromLastActiveTab();
   dappInfo$.next({ logo, name, url: origin });
@@ -33,7 +33,7 @@ export const requestAccess: RequestAccess = async (origin: Origin) => {
   } else {
     tabs.onRemoved.addListener((t) => {
       if (t === launchingTab.id) {
-        authenticator.revokeAccess(origin);
+        authenticator.revokeAccess(sender);
         tabs.onRemoved.removeListener(this);
       }
     });
