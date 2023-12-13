@@ -27,11 +27,20 @@ export const DappTransactionFail = (): React.ReactElement => {
     <div data-testid="dapp-sign-tx-fail" className={styles.noWalletContainer}>
       <div className={styles.noWalletContent}>
         <Image data-testid="dapp-sign-tx-fail-image" preview={false} width={112} src={Fail} />
-        <div className={styles.heading}>{t('dapp.sign.failure.title')}</div>
-        <div className={styles.description}>{t('dapp.sign.failure.description')}</div>
+        <div data-testid="dapp-sign-tx-fail-heading" className={styles.heading}>
+          {t('dapp.sign.failure.title')}
+        </div>
+        <div data-testid="dapp-sign-tx-fail-description" className={styles.description}>
+          {t('dapp.sign.failure.description')}
+        </div>
       </div>
       <div className={styles.footer}>
-        <Button onClick={onClose} color="secondary" className={styles.footerBtn}>
+        <Button
+          data-testid="dapp-sign-tx-fail-close-button"
+          onClick={onClose}
+          color="secondary"
+          className={styles.footerBtn}
+        >
           {t('general.button.cancel')}
         </Button>
       </div>

@@ -79,6 +79,11 @@ Then(
   }
 );
 
+Then(/^I see DApp connector "Something went wrong" page on (\d) window handle$/, async (handleNumber: number) => {
+  await DAppConnectorPageObject.waitAndSwitchToHandle(4, handleNumber);
+  await DAppConnectorAssert.assertSeeSomethingWentWrongPage();
+});
+
 Then(/^I see DApp connector "Sign transaction" page$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeSignTransactionPage();
