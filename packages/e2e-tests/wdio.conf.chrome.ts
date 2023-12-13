@@ -23,7 +23,8 @@ const chromeConfig: WebdriverIO.Config = {
           '--window-size=1920,1080',
           '--allow-file-access-from-files',
           '--disable-dev-shm-usage',
-          '--remote-allow-origins=*'
+          '--remote-allow-origins=*',
+          '--headless=new'
         ]
       },
       'wdio:devtoolsOptions': {

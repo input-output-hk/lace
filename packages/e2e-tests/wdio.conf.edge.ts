@@ -21,7 +21,8 @@ const edgeConfig: WebdriverIO.Config = {
           '--allow-insecure-localhost',
           '--window-size=1920,1080',
           '--allow-file-access-from-files',
-          '--remote-allow-origins=*'
+          '--remote-allow-origins=*',
+          '--headless=new'
         ]
       },
       'wdio:devtoolsOptions': {
@@ -35,7 +36,7 @@ const edgeConfig: WebdriverIO.Config = {
 
 if (process.env.CI) {
   fetch('http://127.0.0.1:4444/wd/hub').catch(() => {
-    throw new Error("chromedriver doesn't seem to be running, please start it first or use CI=false");
+    throw new Error("msedgedriver doesn't seem to be running, please start it first or use CI=false");
   });
 }
 
