@@ -8,7 +8,7 @@ import styles from './MultiWallet.module.scss';
 
 import { Home } from './components/Home';
 
-import { WalletSetupFlow, WalletSetupFlowProvider, useTranslate } from '@lace/core';
+import { WalletSetupFlow, WalletSetupFlowProvider } from '@lace/core';
 import { CreateWallet } from './create-wallet';
 import { HardwareWallet } from './hardware-wallet';
 import { RestoreWallet } from './restore-wallet';
@@ -18,8 +18,8 @@ import { Subject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
 import { NavigationButton } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
-import { Dialog } from '@lace/ui';
 import { useCancelDialog } from './useCancelDialog';
+import { CancelDialog } from './components/CancelDialog';
 
 const { newWallet } = walletRoutePaths;
 
@@ -78,7 +78,6 @@ export const MultiWallet = (): JSX.Element => {
     setBackgroundPage();
     history.push(page);
   };
-  const { t } = useTranslate();
   const { closeWithDialog, isDialogOpen, setIsDialogOpen, setRef, reset$ } = useCancelDialog(closeWalletCreation);
 
   useEffect(() => {
@@ -95,14 +94,7 @@ export const MultiWallet = (): JSX.Element => {
 
   return (
     <WalletSetupFlowProvider flow={WalletSetupFlow.ADD_WALLET}>
-      <Dialog.Root open={isDialogOpen} setOpen={setIsDialogOpen} zIndex={1000}>
-        <Dialog.Title>{t('multiWallet.cancelDialog.title')}</Dialog.Title>
-        <Dialog.Description>{t('multiWallet.cancelDialog.description')}</Dialog.Description>
-        <Dialog.Actions>
-          <Dialog.Action cancel label={t('multiWallet.cancelDialog.cancel')} onClick={() => setIsDialogOpen(false)} />
-          <Dialog.Action label={t('multiWallet.cancelDialog.confirm')} onClick={closeWalletCreation} />
-        </Dialog.Actions>
-      </Dialog.Root>
+      <CancelDialog open={isDialogOpen} setOpen={setIsDialogOpen} onClose={closeWalletCreation} />
       <Modal centered closable={false} footer={null} open={!isDialogOpen} width="100%" className={styles.modal}>
         <div className={styles.closeButton}>
           <NavigationButton icon="cross" onClick={closeWithDialog} />
