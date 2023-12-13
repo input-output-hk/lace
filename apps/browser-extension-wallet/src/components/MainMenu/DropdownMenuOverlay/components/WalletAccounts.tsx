@@ -63,7 +63,7 @@ const exampleAccountData = [
 export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: () => void }): React.ReactElement => {
   const { t } = useTranslation();
   const editAccountDrawer = useEditAccountDrawer();
-  const [mockAccountData, updateMockAccountData] = useState<AccountData[]>(exampleAccountData);
+  const [mockAccountData, setMockAccountData] = useState<AccountData[]>(exampleAccountData);
 
   return (
     <>
@@ -94,11 +94,12 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       </div>
       <EditAccountDrawer
         onSave={(newAccountName) => {
-          const modifiedAccount = mockAccountData.find(
+          const newAccountData = [...mockAccountData];
+          const modifiedAccount = newAccountData.find(
             (a) => a.accountNumber === editAccountDrawer.accountData?.accountNumber
           );
           modifiedAccount.label = newAccountName;
-          updateMockAccountData(mockAccountData);
+          setMockAccountData(newAccountData);
           editAccountDrawer.hide();
         }}
         visible={editAccountDrawer.isOpen}
