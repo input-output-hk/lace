@@ -34,6 +34,7 @@ export const colors = {
   $control_buttons_label_color_hover: '',
   $control_buttons_label_color_filled: '',
   $control_buttons_label_color_filled_hover: '',
+  $control_buttons_label_color_extra_small: '',
   $control_buttons_container_bgColor: '',
   $control_buttons_container_bgColor_hover: '',
   $control_buttons_container_bgColor_filled: '',
@@ -41,6 +42,8 @@ export const colors = {
   $control_buttons_container_bgColor_pressed: '',
   $control_buttons_container_bgColor_danger: '',
   $control_buttons_container_bgColor_danger_hover: '',
+  $control_buttons_container_bgColor_extra_small: '',
+  $control_buttons_container_bgColor_extra_small_active: '',
   $control_buttons_container_outlineColor: '',
   $control_buttons_borderColor: '',
   $control_buttons_borderColor_danger: '',
@@ -196,6 +199,12 @@ export const colors = {
   $profile_dropdown_wallet_option_label_color: '',
 
   $profile_dropdown_wallet_status_container_borderColor: '',
+
+  $profile_dropdown_account_item_container_bgColor_hover: '',
+  $profile_dropdown_account_item_container_bgColor_pressed: '',
+  $profile_dropdown_account_item_container_focus_outlineColor: '',
+  $profile_dropdown_account_item_edit_icon_color: '',
+  $profile_dropdown_account_item_delete_icon_color: '',
 
   $data_pink: '',
   $data_blue: '',

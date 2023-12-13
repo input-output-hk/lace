@@ -69,6 +69,23 @@ export const container = recipe({
           },
         },
       },
+      [Scheme.ExtraSmall]: {
+        background: vars.colors.$control_buttons_container_bgColor_extra_small,
+        selectors: {
+          '&:hover': {
+            boxShadow: vars.elevation.$primaryButton,
+          },
+          '&:active': {
+            background:
+              vars.colors.$control_buttons_container_bgColor_extra_small_active,
+          },
+          '&:focus:not(:active)': {
+            outlineColor: `${vars.colors.$control_buttons_container_outlineColor}`,
+            outlineWidth: vars.spacing.$2,
+            outlineStyle: 'solid',
+          },
+        },
+      },
     },
     borderScheme: {
       [Scheme.Outlined]: {
@@ -79,6 +96,10 @@ export const container = recipe({
       },
       [Scheme.Danger]: {
         borderColor: 'transparent',
+      },
+      [Scheme.ExtraSmall]: {
+        borderColor: 'transparent',
+        borderRadius: vars.radius.$extraSmall,
       },
     },
     paddingScheme: {
@@ -93,6 +114,13 @@ export const container = recipe({
         paddingLeft: vars.spacing.$24,
         paddingRight: vars.spacing.$24,
       },
+      [Scheme.ExtraSmall]: {
+        height: vars.spacing.$24,
+        paddingTop: vars.spacing.$2,
+        paddingBottom: vars.spacing.$2,
+        paddingLeft: vars.spacing.$8,
+        paddingRight: vars.spacing.$8,
+      },
     },
     widthSchema: {
       fill: {
@@ -106,6 +134,9 @@ export const container = recipe({
       },
       extraSmall: {
         width: vars.spacing.$24,
+      },
+      [Scheme.ExtraSmall]: {
+        minWidth: vars.spacing.$56,
       },
     },
   },
@@ -142,6 +173,11 @@ export const label = recipe({
             color: vars.colors.$control_buttons_label_color_danger_pressed,
           },
         },
+      },
+      [Scheme.ExtraSmall]: {
+        color: vars.colors.$control_buttons_label_color_extra_small,
+        fontWeight: vars.fontWeights.$regular,
+        fontSize: vars.fontSizes.$12,
       },
     },
   },
