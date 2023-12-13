@@ -5,7 +5,6 @@ import { ErrorPane } from '@lace/common';
 import * as Types from './InfoActionTypes';
 import { TransactionDetails } from '../components/TransactionDetails';
 import { Procedure } from '../components/Procedure';
-import { ActionId } from '../components/ActionId';
 
 export interface InfoActionProps {
   dappInfo: Omit<DappInfoProps, 'className'>;
@@ -17,7 +16,7 @@ export interface InfoActionProps {
 export const InfoAction = ({
   dappInfo,
   errorMessage,
-  data: { procedure, txDetails, actionId },
+  data: { procedure, txDetails },
   translations
 }: InfoActionProps): JSX.Element => (
   <Flex h="$fill" flexDirection="column">
@@ -36,15 +35,6 @@ export const InfoAction = ({
       </Cell>
       {/* procedure section */}
       <Procedure translations={translations.procedure} data={procedure} />
-      {/* action id section*/}
-      {actionId && (
-        <>
-          <Cell>
-            <Divider my={'$16'} />
-          </Cell>
-          <ActionId translations={translations.actionId} data={actionId} />
-        </>
-      )}
     </Grid>
   </Flex>
 );

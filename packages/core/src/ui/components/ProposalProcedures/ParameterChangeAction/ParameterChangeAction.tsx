@@ -39,16 +39,18 @@ export const ParameterChangeAction = ({
       <Grid columns="$1" gutters="$20">
         {/* tx details section */}
         <TransactionDetails translations={translations.txDetails} data={txDetails} />
-        {anchor && (
-          <>
-            <Cell>
-              <Metadata label={translations.anchor.hash} text={anchor.hash} />
-            </Cell>
-            <Cell>
+        <>
+          <Cell>
+            <Metadata label={translations.anchor.hash} text={anchor.hash} />
+          </Cell>
+          <Cell>
+            {anchor.txHashUrl ? (
               <MetadataLink label={translations.anchor.url} text={anchor.url} url={anchor.txHashUrl} />
-            </Cell>
-          </>
-        )}
+            ) : (
+              <Metadata label={translations.anchor.url} text={anchor.url} />
+            )}
+          </Cell>
+        </>
         <Cell>
           <Box>
             <Card

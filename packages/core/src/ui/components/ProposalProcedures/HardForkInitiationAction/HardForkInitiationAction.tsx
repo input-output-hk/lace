@@ -17,7 +17,7 @@ export interface HardForkInitiationActionProps {
 export const HardForkInitiationAction = ({
   dappInfo,
   errorMessage,
-  data: { procedure, txDetails, governanceAction, protocolVersion, actionId },
+  data: { procedure, txDetails, actionId, protocolVersion },
   translations
 }: HardForkInitiationActionProps): JSX.Element => (
   <Flex h="$fill" flexDirection="column">
@@ -36,10 +36,7 @@ export const HardForkInitiationAction = ({
         <Divider my={'$16'} />
       </Cell>
       {/* procedure section */}
-      <Procedure
-        translations={{ ...translations.procedure, governanceAction: translations.governanceAction }}
-        data={{ ...procedure, governanceAction }}
-      />
+      <Procedure translations={translations.procedure} data={procedure} />
       <Cell>
         <Metadata label={translations.protocolVersion.major} text={protocolVersion.major} />
       </Cell>

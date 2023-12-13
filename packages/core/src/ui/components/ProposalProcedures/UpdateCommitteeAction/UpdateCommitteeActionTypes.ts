@@ -22,7 +22,6 @@ export interface Data {
   actionId?: ActionIdTypes.Data;
   txDetails: TxDetailsTypes.TxDetails;
   procedure: ProcedureTypes.Procedure;
-  governanceAction: ProcedureTypes.Procedure['governanceAction'];
   membersToBeAdded: MembersToBeAdded[];
   membersToBeRemoved: MembersToBeRemoved[];
   newQuorumThreshold?: NewQuorumThreshold;
@@ -32,7 +31,6 @@ export interface Translations {
   procedure: ProcedureTypes.Translations;
   actionId?: ActionIdTypes.Translations;
   txDetails: TxDetailsTypes.Translations;
-  governanceAction: ProcedureTypes.Translations['governanceAction'];
   membersToBeAdded: {
     title: string;
     coldCredential: {

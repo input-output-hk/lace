@@ -49,9 +49,7 @@ const data: ComponentProps<typeof NewConstitutionAction> = {
     },
     actionId: {
       index: '0',
-      txHash: '26bfdcc75a7f4d0cd8c71f0189bc5ca5ad2f4a3db6240c82b5a0edac7f9203e0',
-      txHashUrl:
-        'https://cexplorer.io/address/addr1q9wlvfl74g9h8txw5v0lfew2gjsw9z56d5kj8mmv5d8tudcx9eh8zefr3cxuje02lu6tgy083xkl39rr5xkj483vvd6q8nlapq'
+      id: '26bfdcc75a7f4d0cd8c71f0189bc5ca5ad2f4a3db6240c82b5a0edac7f9203e0'
     },
     constitution: {
       anchor: {
@@ -59,10 +57,6 @@ const data: ComponentProps<typeof NewConstitutionAction> = {
         url: 'https://www.someurl.io'
       },
       scriptHash: 'cb0ec2692497b458e46812c8a5bfa2931d1a2d965a99893828ec810f'
-    },
-    governanceAction: {
-      id: 'd0b1f7be72731a97e9728e0f1c358d576fd28aa9f290d53ce1ef803a1a753ba8',
-      index: '0'
     }
   },
   translations: {
@@ -82,7 +76,7 @@ const data: ComponentProps<typeof NewConstitutionAction> = {
     actionId: {
       title: 'Action ID',
       index: 'Index',
-      txHash: 'TX Hash'
+      txId: 'TX ID'
     },
     constitution: {
       title: 'Constitution Details',
@@ -91,10 +85,6 @@ const data: ComponentProps<typeof NewConstitutionAction> = {
         url: 'Anchor URL'
       },
       scriptHash: 'Script Hash'
-    },
-    governanceAction: {
-      id: 'Governance Action ID',
-      index: 'Action Index'
     }
   }
 };

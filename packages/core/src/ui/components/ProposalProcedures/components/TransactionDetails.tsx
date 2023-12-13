@@ -27,7 +27,7 @@ export const TransactionDetails = ({ data, translations }: Props): JSX.Element =
           <Metadata label={translations.rewardAccount} text={data.rewardAccount} />
         </Cell>
       )}
-      {data.rewardAccount && (
+      {data.deposit && (
         <Cell>
           <Metadata label={translations.deposit} text={data.deposit} />
         </Cell>

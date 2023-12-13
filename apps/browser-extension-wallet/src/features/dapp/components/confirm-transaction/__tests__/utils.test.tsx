@@ -102,37 +102,66 @@ describe('Testing utils', () => {
     const txInspectorCurriedFnPayload = { minted: [], burned: [] } as unknown as any;
     const createTxInspectorSpy = jest
       .spyOn(Core, 'createTxInspector')
-      .mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, votingProcedures: true }));
-    expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.VotingProcedures);
+      .mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, proposalProcedures: true }));
+    expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.ProposalProcedures);
     expect(createTxInspectorSpy).toHaveBeenCalledTimes(1);
+
+    createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, votingProcedures: true }));
+    expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.VotingProcedures);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(2);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, minted: { length: 1 } }));
     expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.Mint);
-    expect(createTxInspectorSpy).toHaveBeenCalledTimes(2);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(3);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, burned: { length: 1 } }));
     expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.Burn);
-    expect(createTxInspectorSpy).toHaveBeenCalledTimes(3);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(4);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, dRepRegistration: true }));
     expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.DRepRegistration);
-    expect(createTxInspectorSpy).toHaveBeenCalledTimes(4);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(5);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, dRepRetirement: true }));
     expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.DRepRetirement);
-    expect(createTxInspectorSpy).toHaveBeenCalledTimes(5);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(6);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, voteDelegation: true }));
     expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.VoteDelegation);
-    expect(createTxInspectorSpy).toHaveBeenCalledTimes(6);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(7);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, dRepUpdate: true }));
     expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.DRepUpdate);
-    expect(createTxInspectorSpy).toHaveBeenCalledTimes(7);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(8);
+
+    createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload, stakeVoteDelegation: true }));
+    expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.StakeVoteDelegation);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(9);
+
+    createTxInspectorSpy.mockReturnValueOnce(() => ({
+      ...txInspectorCurriedFnPayload,
+      voteRegistrationDelegation: true
+    }));
+    expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.VoteRegistrationDelegation);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(10);
+
+    createTxInspectorSpy.mockReturnValueOnce(() => ({
+      ...txInspectorCurriedFnPayload,
+      stakeRegistrationDelegation: true
+    }));
+    expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.StakeRegistrationDelegation);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(11);
+
+    createTxInspectorSpy.mockReturnValueOnce(() => ({
+      ...txInspectorCurriedFnPayload,
+      stakeVoteDelegationRegistration: true
+    }));
+    expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.StakeVoteDelegationRegistration);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(12);
 
     createTxInspectorSpy.mockReturnValueOnce(() => ({ ...txInspectorCurriedFnPayload }));
     expect(getTxType(tx)).toEqual(Wallet.Cip30TxType.Send);
-    expect(createTxInspectorSpy).toHaveBeenCalledTimes(8);
+    expect(createTxInspectorSpy).toHaveBeenCalledTimes(13);
   });
 
   test('testing drepIDasBech32FromHash', () => {

@@ -55,9 +55,7 @@ const data: ComponentProps<typeof TreasuryWithdrawalsAction> = {
     ],
     actionId: {
       index: '0',
-      txHash: '26bfdcc75a7f4d0cd8c71f0189bc5ca5ad2f4a3db6240c82b5a0edac7f9203e0',
-      txHashUrl:
-        'https://cexplorer.io/address/addr1q9wlvfl74g9h8txw5v0lfew2gjsw9z56d5kj8mmv5d8tudcx9eh8zefr3cxuje02lu6tgy083xkl39rr5xkj483vvd6q8nlapq'
+      id: '26bfdcc75a7f4d0cd8c71f0189bc5ca5ad2f4a3db6240c82b5a0edac7f9203e0'
     }
   },
   translations: {
@@ -77,7 +75,7 @@ const data: ComponentProps<typeof TreasuryWithdrawalsAction> = {
     actionId: {
       title: 'Action ID',
       index: 'Index',
-      txHash: 'TX Hash'
+      txId: 'TX ID'
     },
     withdrawals: {
       title: 'Withdrawal Details',

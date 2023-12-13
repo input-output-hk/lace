@@ -131,7 +131,7 @@ describe('Testing ProposalProceduresContainer component', () => {
               txHashUrl: `${mockedCExpolorerBaseUrl}/${anchor.dataHash}`
             }
           },
-          governanceAction: {
+          actionId: {
             index: newConstitution.governanceActionId.actionIndex.toString(),
             id: newConstitution.governanceActionId.id || ''
           },
@@ -157,10 +157,6 @@ describe('Testing ProposalProceduresContainer component', () => {
               hash: t('core.ProposalProcedure.procedure.anchor.hash')
             }
           },
-          governanceAction: {
-            id: t('core.ProposalProcedure.governanceAction.newConstitutionAction.actionId.id'),
-            index: t('core.ProposalProcedure.governanceAction.newConstitutionAction.actionId.index')
-          },
           constitution: {
             title: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.title'),
             anchor: {
@@ -172,7 +168,7 @@ describe('Testing ProposalProceduresContainer component', () => {
           actionId: {
             title: t('core.ProposalProcedure.governanceAction.actionId.title'),
             index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-            txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+            txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
           }
         },
         errorMessage

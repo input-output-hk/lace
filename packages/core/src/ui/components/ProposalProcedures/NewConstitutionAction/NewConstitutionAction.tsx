@@ -17,7 +17,7 @@ export interface NewConstitutionActionProps {
 export const NewConstitutionAction = ({
   dappInfo,
   errorMessage,
-  data: { txDetails, procedure, governanceAction, constitution, actionId },
+  data: { txDetails, procedure, constitution, actionId },
   translations
 }: NewConstitutionActionProps): JSX.Element => (
   <Flex h="$fill" flexDirection="column">
@@ -36,10 +36,7 @@ export const NewConstitutionAction = ({
         <Divider my={'$16'} />
       </Cell>
       {/* procedure section */}
-      <Procedure
-        translations={{ ...translations.procedure, governanceAction: translations.governanceAction }}
-        data={{ ...procedure, governanceAction }}
-      />
+      <Procedure translations={translations.procedure} data={procedure} />
       <Cell>
         <MetadataLink
           label={translations.constitution.anchor.url}

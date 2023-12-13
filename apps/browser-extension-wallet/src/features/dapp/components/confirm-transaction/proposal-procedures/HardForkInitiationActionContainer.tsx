@@ -45,10 +45,6 @@ export const HardForkInitiationActionContainer = ({
           hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
-      governanceAction: {
-        id: t('core.ProposalProcedure.governanceAction.hardForkInitiation.actionId.id'),
-        index: t('core.ProposalProcedure.governanceAction.hardForkInitiation.actionId.index')
-      },
       protocolVersion: {
         major: t('core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.major'),
         minor: t('core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.minor'),
@@ -57,7 +53,7 @@ export const HardForkInitiationActionContainer = ({
       actionId: {
         title: t('core.ProposalProcedure.governanceAction.actionId.title'),
         index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+        txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
       }
     }),
     [t]
@@ -72,13 +68,11 @@ export const HardForkInitiationActionContainer = ({
       rewardAccount
     },
     procedure: {
-      ...(anchor && {
-        anchor: {
-          url: anchor.url,
-          hash: anchor.dataHash,
-          ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
-        }
-      })
+      anchor: {
+        url: anchor.url,
+        hash: anchor.dataHash,
+        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+      }
     },
     protocolVersion: {
       major: protocolVersion.major.toString(),
@@ -86,7 +80,7 @@ export const HardForkInitiationActionContainer = ({
       patch: protocolVersion.patch?.toString()
     },
     ...(governanceActionId && {
-      governanceAction: {
+      actionId: {
         index: governanceActionId.actionIndex.toString(),
         id: governanceActionId.id || ''
       }

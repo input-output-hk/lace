@@ -129,7 +129,7 @@ describe('Testing ProposalProceduresContainer component', () => {
           },
           withdrawals: [...treasuryWithdrawalsAction.withdrawals].map((withdrawal) => ({
             rewardAccount: withdrawal.rewardAccount.toString(),
-            lovelace: withdrawal.coin.toString()
+            lovelace: `${withdrawal.coin.toString()} ${cardanoCoinMock.symbol}`
           }))
         },
         translations: {
@@ -149,7 +149,7 @@ describe('Testing ProposalProceduresContainer component', () => {
           actionId: {
             title: t('core.ProposalProcedure.governanceAction.actionId.title'),
             index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-            txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+            txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
           },
           withdrawals: {
             title: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.title'),

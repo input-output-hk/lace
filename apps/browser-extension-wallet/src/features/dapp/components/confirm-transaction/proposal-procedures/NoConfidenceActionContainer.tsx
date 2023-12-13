@@ -45,14 +45,10 @@ export const NoConfidenceActionContainer = ({
           hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
-      governanceAction: {
-        id: t('core.ProposalProcedure.governanceAction.noConfidenceAction.actionId.id'),
-        index: t('core.ProposalProcedure.governanceAction.noConfidenceAction.actionId.index')
-      },
       actionId: {
         title: t('core.ProposalProcedure.governanceAction.actionId.title'),
         index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+        txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
       }
     }),
     [t]
@@ -67,16 +63,14 @@ export const NoConfidenceActionContainer = ({
       rewardAccount
     },
     procedure: {
-      ...(anchor && {
-        anchor: {
-          url: anchor.url,
-          hash: anchor.dataHash,
-          ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
-        }
-      })
+      anchor: {
+        url: anchor.url,
+        hash: anchor.dataHash,
+        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+      }
     },
     ...(governanceActionId && {
-      governanceAction: {
+      actionId: {
         index: governanceActionId.actionIndex.toString(),
         id: governanceActionId.id || ''
       }

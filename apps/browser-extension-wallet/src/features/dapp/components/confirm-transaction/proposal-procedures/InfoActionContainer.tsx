@@ -28,10 +28,6 @@ export const InfoActionContainer = ({ dappInfo, anchor, errorMessage }: Props): 
           url: t('core.ProposalProcedure.procedure.anchor.url'),
           hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
-      },
-      actionId: {
-        index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
       }
     }),
     [t]
@@ -42,13 +38,11 @@ export const InfoActionContainer = ({ dappInfo, anchor, errorMessage }: Props): 
       txType: t('core.ProposalProcedure.governanceAction.infoAction.title')
     },
     procedure: {
-      ...(anchor && {
-        anchor: {
-          url: anchor.url,
-          hash: anchor.dataHash,
-          ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
-        }
-      })
+      anchor: {
+        url: anchor.url,
+        hash: anchor.dataHash,
+        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+      }
     }
   };
 

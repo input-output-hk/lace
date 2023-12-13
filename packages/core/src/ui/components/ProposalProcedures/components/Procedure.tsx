@@ -19,26 +19,14 @@ export const Procedure = ({ data, translations }: Props): JSX.Element => {
           {translations.title}
         </Text.Body.Large>
       </Cell>
-      {data.anchor && (
-        <>
-          <Cell>
-            <Metadata label={translations.anchor.hash} text={data.anchor.hash} />
-          </Cell>
-          <Cell>
-            <MetadataLink label={translations.anchor.url} text={data.anchor.url} url={data.anchor.txHashUrl} />
-          </Cell>
-        </>
-      )}
-      {data.governanceAction && (
-        <>
-          <Cell>
-            <Metadata label={translations.governanceAction.id} text={data.governanceAction.id} />
-          </Cell>
-          <Cell>
-            <Metadata label={translations.governanceAction.index} text={data.governanceAction.index} />
-          </Cell>
-        </>
-      )}
+      <>
+        <Cell>
+          <Metadata label={translations.anchor.hash} text={data.anchor.hash} />
+        </Cell>
+        <Cell>
+          <MetadataLink label={translations.anchor.url} text={data.anchor.url} url={data.anchor.txHashUrl} />
+        </Cell>
+      </>
     </>
   );
 };

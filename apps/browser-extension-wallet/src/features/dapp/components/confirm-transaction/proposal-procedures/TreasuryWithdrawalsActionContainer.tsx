@@ -48,7 +48,7 @@ export const TreasuryWithdrawalsActionContainer = ({
       actionId: {
         title: t('core.ProposalProcedure.governanceAction.actionId.title'),
         index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+        txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
       },
       withdrawals: {
         title: t('core.ProposalProcedure.governanceAction.treasuryWithdrawals.title'),
@@ -68,17 +68,15 @@ export const TreasuryWithdrawalsActionContainer = ({
       rewardAccount
     },
     procedure: {
-      ...(anchor && {
-        anchor: {
-          url: anchor.url,
-          hash: anchor.dataHash,
-          ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
-        }
-      })
+      anchor: {
+        url: anchor.url,
+        hash: anchor.dataHash,
+        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+      }
     },
     withdrawals: [...withdrawals].map((withdrawal) => ({
       rewardAccount: withdrawal.rewardAccount.toString(),
-      lovelace: Wallet.util.lovelacesToAdaString(withdrawal.coin.toString())
+      lovelace: `${Wallet.util.lovelacesToAdaString(withdrawal.coin.toString())} ${cardanoCoin.symbol}`
     }))
   };
 

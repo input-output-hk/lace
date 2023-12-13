@@ -153,7 +153,7 @@ describe('Testing ProposalProceduresContainer component', () => {
               txHashUrl: `${mockedCExpolorerBaseUrl}/${anchor.dataHash}`
             }
           },
-          governanceAction: {
+          actionId: {
             index: updateCommittee.governanceActionId.actionIndex.toString(),
             id: updateCommittee.governanceActionId.id || ''
           },
@@ -179,14 +179,10 @@ describe('Testing ProposalProceduresContainer component', () => {
               hash: t('core.ProposalProcedure.procedure.anchor.hash')
             }
           },
-          governanceAction: {
-            id: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.actionId.id'),
-            index: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.actionId.index')
-          },
           actionId: {
             title: t('core.ProposalProcedure.governanceAction.actionId.title'),
             index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-            txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+            txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
           },
           membersToBeAdded: {
             title: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.title'),

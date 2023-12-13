@@ -5,7 +5,6 @@ import * as TxDetailsTypes from '../components/TransactionDetailsTypes';
 export interface Data {
   procedure: ProcedureTypes.Procedure;
   actionId?: ActionIdTypes.Data;
-  governanceAction: ProcedureTypes.Procedure['governanceAction'];
   txDetails: TxDetailsTypes.TxDetails;
   constitution: {
     anchor: {
@@ -19,7 +18,6 @@ export interface Data {
 export interface Translations {
   procedure: ProcedureTypes.Translations;
   actionId?: ActionIdTypes.Translations;
-  governanceAction: ProcedureTypes.Translations['governanceAction'];
   txDetails: TxDetailsTypes.Translations;
   constitution: {
     title: string;

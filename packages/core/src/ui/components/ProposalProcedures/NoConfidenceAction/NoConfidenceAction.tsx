@@ -17,7 +17,7 @@ export interface NoConfidenceActionProps {
 export const NoConfidenceAction = ({
   dappInfo,
   errorMessage,
-  data: { procedure, txDetails, governanceAction, actionId },
+  data: { procedure, txDetails, actionId },
   translations
 }: NoConfidenceActionProps): JSX.Element => (
   <Flex h="$fill" flexDirection="column">
@@ -36,10 +36,7 @@ export const NoConfidenceAction = ({
         <Divider my={'$16'} />
       </Cell>
       {/* procedure section */}
-      <Procedure
-        translations={{ ...translations.procedure, governanceAction: translations.governanceAction }}
-        data={{ ...procedure, governanceAction }}
-      />
+      <Procedure translations={translations.procedure} data={procedure} />
       {/* action id section*/}
       {actionId && (
         <>

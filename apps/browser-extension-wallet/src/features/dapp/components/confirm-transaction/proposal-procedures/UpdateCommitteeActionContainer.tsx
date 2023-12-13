@@ -45,14 +45,10 @@ export const UpdateCommitteeActionContainer = ({
           hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
-      governanceAction: {
-        id: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.actionId.id'),
-        index: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.actionId.index')
-      },
       actionId: {
         title: t('core.ProposalProcedure.governanceAction.actionId.title'),
         index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+        txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
       },
       membersToBeAdded: {
         title: t('core.ProposalProcedure.governanceAction.updateCommitteeAction.membersToBeAdded.title'),
@@ -80,27 +76,29 @@ export const UpdateCommitteeActionContainer = ({
       rewardAccount
     },
     procedure: {
-      ...(anchor && {
-        anchor: {
-          url: anchor.url,
-          hash: anchor.dataHash,
-          ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
-        }
-      })
+      anchor: {
+        url: anchor.url,
+        hash: anchor.dataHash,
+        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+      }
     },
     ...(governanceActionId && {
-      governanceAction: {
+      actionId: {
         index: governanceActionId.actionIndex.toString(),
         id: governanceActionId.id || ''
       }
     }),
     membersToBeAdded: [...membersToBeAdded].map(({ coldCredential: { hash }, epoch }) => ({
       coldCredential: {
+        // TODO: use bech32 in future revision
         hash: hash.toString()
       },
       epoch: epoch.toString()
     })),
-    membersToBeRemoved: [...membersToBeRemoved].map(({ hash }) => ({ hash: hash.toString() }))
+    membersToBeRemoved: [...membersToBeRemoved].map(({ hash }) => ({
+      // TODO: use bech32 in future revision
+      hash: hash.toString()
+    }))
   };
 
   return (

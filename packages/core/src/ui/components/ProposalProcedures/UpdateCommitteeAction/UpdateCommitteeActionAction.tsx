@@ -17,7 +17,7 @@ interface UpdateCommitteeActionProps {
 export const UpdateCommitteeAction = ({
   dappInfo,
   errorMessage,
-  data: { procedure, governanceAction, txDetails, membersToBeAdded, membersToBeRemoved, actionId },
+  data: { procedure, txDetails, membersToBeAdded, membersToBeRemoved, actionId },
   translations
 }: UpdateCommitteeActionProps): JSX.Element => {
   const textCss = sx({
@@ -41,47 +41,48 @@ export const UpdateCommitteeAction = ({
           <Divider my={'$16'} />
         </Cell>
         {/* procedure section */}
-        <Procedure
-          translations={{ ...translations.procedure, governanceAction: translations.governanceAction }}
-          data={{ ...procedure, governanceAction }}
-        />
+        <Procedure translations={translations.procedure} data={procedure} />
         <Cell>
           <Divider my={'$16'} />
         </Cell>
-        {membersToBeAdded?.length > 0 && (
-          <Cell>
-            <Text.Body.Large className={textCss} weight="$bold">
-              {translations.membersToBeAdded.title}
-            </Text.Body.Large>
-          </Cell>
+        {membersToBeAdded.length > 0 && (
+          <>
+            <Cell>
+              <Text.Body.Large className={textCss} weight="$bold">
+                {translations.membersToBeAdded.title}
+              </Text.Body.Large>
+            </Cell>
+            {membersToBeAdded.map(({ coldCredential, epoch }) => (
+              <React.Fragment key={`${coldCredential.hash}${epoch}`}>
+                <Cell>
+                  <Metadata label={translations.membersToBeAdded.coldCredential.hash} text={coldCredential.hash} />
+                </Cell>
+                <Cell>
+                  <Metadata label={translations.membersToBeAdded.coldCredential.epoch} text={epoch} />
+                </Cell>
+              </React.Fragment>
+            ))}
+          </>
         )}
-        {membersToBeAdded.map(({ coldCredential, epoch }) => (
-          <React.Fragment key={`${coldCredential.hash}${epoch}`}>
+        {membersToBeRemoved.length > 0 && (
+          <>
             <Cell>
-              <Metadata label={translations.membersToBeAdded.coldCredential.hash} text={coldCredential.hash} />
+              <Text.Body.Large className={textCss} weight="$bold">
+                {translations.membersToBeRemoved.title}
+              </Text.Body.Large>
             </Cell>
-            <Cell>
-              <Metadata label={translations.membersToBeAdded.coldCredential.epoch} text={epoch} />
-            </Cell>
-          </React.Fragment>
-        ))}
-        {membersToBeRemoved?.length > 0 && (
-          <Cell>
-            <Text.Body.Large className={textCss} weight="$bold">
-              {translations.membersToBeRemoved.title}
-            </Text.Body.Large>
-          </Cell>
+            {membersToBeRemoved.map(({ hash }) => (
+              <React.Fragment key={hash}>
+                <Cell>
+                  <Metadata label={translations.membersToBeRemoved.hash} text={hash} />
+                </Cell>
+                <Cell>
+                  <Metadata label={translations.membersToBeAdded.coldCredential.epoch} text={hash} />
+                </Cell>
+              </React.Fragment>
+            ))}
+          </>
         )}
-        {membersToBeRemoved.map(({ hash }) => (
-          <React.Fragment key={hash}>
-            <Cell>
-              <Metadata label={translations.membersToBeRemoved.hash} text={hash} />
-            </Cell>
-            <Cell>
-              <Metadata label={translations.membersToBeAdded.coldCredential.epoch} text={hash} />
-            </Cell>
-          </React.Fragment>
-        ))}
         {actionId && (
           <>
             <Cell>

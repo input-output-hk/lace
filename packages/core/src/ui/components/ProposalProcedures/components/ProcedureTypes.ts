@@ -1,12 +1,8 @@
 export interface Procedure {
-  anchor?: {
+  anchor: {
     url: string;
     hash: string;
     txHashUrl: string;
-  };
-  governanceAction?: {
-    id: string;
-    index: string;
   };
 }
 
@@ -15,9 +11,5 @@ export interface Translations {
   anchor: {
     url: string;
     hash: string;
-  };
-  governanceAction?: {
-    id: string;
-    index: string;
   };
 }

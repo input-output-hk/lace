@@ -105,10 +105,6 @@ describe('Testing ProposalProceduresContainer component', () => {
               url: t('core.ProposalProcedure.procedure.anchor.url'),
               hash: t('core.ProposalProcedure.procedure.anchor.hash')
             }
-          },
-          actionId: {
-            index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-            txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
           }
         },
         errorMessage

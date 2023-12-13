@@ -137,7 +137,7 @@ describe('Testing ProposalProceduresContainer component', () => {
             minor: hardForkInitiationAction.protocolVersion.minor.toString(),
             patch: hardForkInitiationAction.protocolVersion.patch?.toString()
           },
-          governanceAction: {
+          actionId: {
             index: hardForkInitiationAction.governanceActionId.actionIndex.toString(),
             id: hardForkInitiationAction.governanceActionId.id || ''
           }
@@ -156,10 +156,6 @@ describe('Testing ProposalProceduresContainer component', () => {
               hash: t('core.ProposalProcedure.procedure.anchor.hash')
             }
           },
-          governanceAction: {
-            id: t('core.ProposalProcedure.governanceAction.hardForkInitiation.actionId.id'),
-            index: t('core.ProposalProcedure.governanceAction.hardForkInitiation.actionId.index')
-          },
           protocolVersion: {
             major: t('core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.major'),
             minor: t('core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.minor'),
@@ -168,7 +164,7 @@ describe('Testing ProposalProceduresContainer component', () => {
           actionId: {
             title: t('core.ProposalProcedure.governanceAction.actionId.title'),
             index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-            txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+            txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
           }
         },
         errorMessage

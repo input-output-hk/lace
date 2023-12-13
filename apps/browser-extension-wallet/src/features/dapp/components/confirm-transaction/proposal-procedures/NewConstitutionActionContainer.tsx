@@ -45,10 +45,6 @@ export const NewConstitutionActionContainer = ({
           hash: t('core.ProposalProcedure.procedure.anchor.hash')
         }
       },
-      governanceAction: {
-        id: t('core.ProposalProcedure.governanceAction.newConstitutionAction.actionId.id'),
-        index: t('core.ProposalProcedure.governanceAction.newConstitutionAction.actionId.index')
-      },
       constitution: {
         title: t('core.ProposalProcedure.governanceAction.newConstitutionAction.constitution.title'),
         anchor: {
@@ -60,7 +56,7 @@ export const NewConstitutionActionContainer = ({
       actionId: {
         title: t('core.ProposalProcedure.governanceAction.actionId.title'),
         index: t('core.ProposalProcedure.governanceAction.actionId.index'),
-        txHash: t('core.ProposalProcedure.governanceAction.actionId.txHash')
+        txId: t('core.ProposalProcedure.governanceAction.actionId.txId')
       }
     }),
     [t]
@@ -75,16 +71,14 @@ export const NewConstitutionActionContainer = ({
       rewardAccount
     },
     procedure: {
-      ...(anchor && {
-        anchor: {
-          url: anchor.url,
-          hash: anchor.dataHash,
-          ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
-        }
-      })
+      anchor: {
+        url: anchor.url,
+        hash: anchor.dataHash,
+        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+      }
     },
     ...(governanceActionId && {
-      governanceAction: {
+      actionId: {
         index: governanceActionId.actionIndex.toString(),
         id: governanceActionId.id || ''
       }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cell, sx, Metadata, Text, MetadataLink } from '@lace/ui';
+import { Cell, sx, Metadata, Text } from '@lace/ui';
 import * as Types from './ActionIdTypes';
 
 interface Props {
@@ -20,7 +20,7 @@ export const ActionId = ({ data, translations }: Props): JSX.Element => {
         </Text.Body.Large>
       </Cell>
       <Cell>
-        <MetadataLink label={translations.txHash} text={data.txHash} url={data.txHashUrl} />
+        <Metadata label={translations.txId} text={data.id} />
       </Cell>
       <Cell>
         <Metadata label={translations.index} text={data.index.toString()} />

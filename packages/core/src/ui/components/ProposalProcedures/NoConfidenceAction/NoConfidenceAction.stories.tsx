@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { HardForkInitiationAction } from './HardForkInitiationAction';
+import { NoConfidenceAction } from './NoConfidenceAction';
 import { ComponentProps } from 'react';
 
 const customViewports = {
@@ -13,9 +13,9 @@ const customViewports = {
   }
 };
 
-const meta: Meta<typeof HardForkInitiationAction> = {
-  title: 'ProposalProcedure/HardForkInitiationAction',
-  component: HardForkInitiationAction,
+const meta: Meta<typeof NoConfidenceAction> = {
+  title: 'ProposalProcedure/NoConfidenceAction',
+  component: NoConfidenceAction,
   parameters: {
     layout: 'centered',
     viewport: {
@@ -26,9 +26,9 @@ const meta: Meta<typeof HardForkInitiationAction> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof HardForkInitiationAction>;
+type Story = StoryObj<typeof NoConfidenceAction>;
 
-const data: ComponentProps<typeof HardForkInitiationAction> = {
+const data: ComponentProps<typeof NoConfidenceAction> = {
   dappInfo: {
     logo: 'https://cdn.mint.handle.me/favicon.png',
     name: 'Mint',
@@ -36,31 +36,20 @@ const data: ComponentProps<typeof HardForkInitiationAction> = {
   },
   data: {
     txDetails: {
-      txType: 'Hard Fork Initiation',
+      txType: 'No Confidence',
       deposit: '2000',
       rewardAccount: 'stake1u89sasnfyjtmgk8ydqfv3fdl52f36x3djedfnzfc9rkgzrcss5vgr'
     },
     procedure: {
       anchor: {
-        hash: '26bfdcc75a7f4d0cd8c71f0189bc5ca5ad2f4a3db6240c82b5a0edac7f9203e0',
+        hash: '0000000000000000000000000000000000000000000000000000000000000000',
         url: 'https://www.someurl.io',
-        txHashUrl: 'https://www.someurl.io'
+        txHashUrl: 'https://www.someurl.io/'
       }
-    },
-    governanceAction: {
-      id: 'd0b1f7be72731a97e9728e0f1c358d576fd28aa9f290d53ce1ef803a1a753ba8',
-      index: '0'
     },
     actionId: {
       index: '0',
-      txHash: '26bfdcc75a7f4d0cd8c71f0189bc5ca5ad2f4a3db6240c82b5a0edac7f9203e0',
-      txHashUrl:
-        'https://cexplorer.io/address/addr1q9wlvfl74g9h8txw5v0lfew2gjsw9z56d5kj8mmv5d8tudcx9eh8zefr3cxuje02lu6tgy083xkl39rr5xkj483vvd6q8nlapq'
-    },
-    protocolVersion: {
-      major: '5',
-      minor: '1',
-      patch: '1'
+      id: '26bfdcc75a7f4d0cd8c71f0189bc5ca5ad2f4a3db6240c82b5a0edac7f9203e0'
     }
   },
   translations: {
@@ -80,16 +69,7 @@ const data: ComponentProps<typeof HardForkInitiationAction> = {
     actionId: {
       title: 'Action ID',
       index: 'Index',
-      txHash: 'TX Hash'
-    },
-    governanceAction: {
-      id: 'Governance Action ID',
-      index: 'Action Index'
-    },
-    protocolVersion: {
-      major: 'Protocol Version Major',
-      minor: 'Protocol Version Minor',
-      patch: 'Protocol Version Patch'
+      txId: 'TX ID'
     }
   }
 };

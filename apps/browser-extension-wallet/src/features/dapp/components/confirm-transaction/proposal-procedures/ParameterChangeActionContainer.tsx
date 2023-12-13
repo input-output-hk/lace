@@ -260,13 +260,11 @@ export const ParameterChangeActionContainer = ({
       deposit: `${Wallet.util.lovelacesToAdaString(deposit.toString())} ${cardanoCoin.symbol}`,
       rewardAccount
     },
-    ...(anchor && {
-      anchor: {
-        url: anchor.url,
-        hash: anchor.dataHash,
-        ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
-      }
-    }),
+    anchor: {
+      url: anchor.url,
+      hash: anchor.dataHash,
+      ...(explorerBaseUrl && { txHashUrl: `${explorerBaseUrl}/${anchor.dataHash}` })
+    },
     protocolParamUpdate: {
       maxTxExUnits: {
         memory: maxExecutionUnitsPerTransaction.memory.toString(),
@@ -301,6 +299,7 @@ export const ParameterChangeActionContainer = ({
         a0: poolInfluence,
         eMax: poolRetirementEpochBound.toString(),
         nOpt: desiredNumberOfPools.toString(),
+        // TODO: review cost model syntax/display
         costModels: {
           PlutusV1: Object.entries(costModels.get(Wallet.Cardano.PlutusLanguageVersion.V1)).reduce(
             (acc, cur) => ({ ...acc, [cur[0]]: cur[1] }),
