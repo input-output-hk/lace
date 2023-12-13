@@ -82,7 +82,7 @@ Feature: General Settings - Extended Browser View
     Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
     And I close the drawer by clicking close button
     When I navigate to Tokens extended page
-    Then I see network id: "Preprod" next to Lace logo
+    Then I see network id: "Preprod"
     And I see "Preprod" specific tokens in extended mode
 
   @LW-2675 @Mainnet
@@ -93,7 +93,7 @@ Feature: General Settings - Extended Browser View
     Then I don't see a toast with message: "browserView.settings.wallet.network.networkSwitched"
     And I close the drawer by clicking close button
     When I navigate to Tokens extended page
-    Then I don't see network id next to Lace logo for: "Mainnet"
+    Then I do not see network id: "Mainnet"
     And I see "Mainnet" specific tokens in extended mode
 
   @LW-5258 @Testnet
@@ -101,12 +101,12 @@ Feature: General Settings - Extended Browser View
     Given I am on Settings extended page
     And I see current network: "Preprod" name in network setting
     And I see current network: "Preprod" name in "About Lace" widget
-    And I see network id: "Preprod" next to Lace logo
+    And I see network id: "Preprod"
     And Local storage appSettings contains info about network: "Preprod"
     When I switch network to: "Preview" in extended mode
     Then I see current network: "Preview" name in network setting
     And I see current network: "Preview" name in "About Lace" widget
-    And I see network id: "Preview" next to Lace logo
+    And I see network id: "Preview"
     And Local storage appSettings contains info about network: "Preview"
 
   @LW-5258 @Mainnet
@@ -114,12 +114,12 @@ Feature: General Settings - Extended Browser View
     Given I am on Settings extended page
     And I see current network: "Mainnet" name in network setting
     And I see current network: "Mainnet" name in "About Lace" widget
-    And I don't see network id next to Lace logo for: "Mainnet"
+    And I do not see network id: "Mainnet"
     And Local storage appSettings contains info about network: "Mainnet"
     When I switch network to: "Preview" in extended mode
     Then I see current network: "Preview" name in network setting
     And I see current network: "Preview" name in "About Lace" widget
-    And I see network id: "Preview" next to Lace logo
+    And I see network id: "Preview"
     And Local storage appSettings contains info about network: "Preview"
 
   @LW-5259 @Mainnet @Testnet
