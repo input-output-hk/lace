@@ -12,6 +12,7 @@ import { dAppRoutePaths } from '@routes';
 import { Wallet } from '@lace/cardano';
 import { useRedirection } from '@hooks';
 import { CardanoTxOut, WalletInfo } from '@src/types';
+import { config } from '@src/config';
 import { TokenInfo, getAssetsInformation } from '@src/utils/get-assets-information';
 import { getTransactionAssetsId } from '@src/stores/slices';
 import { AddressListType } from '@src/views/browser-view/features/activity';
@@ -287,4 +288,21 @@ export const useGetOwnPubDRepKeyHash = (): UseGetOwnPubDRepKeyHash => {
 
   // TODO consider using Zustand or at least some common abstraction e.g. https://github.com/streamich/react-use/blob/master/src/useAsync.ts
   return { loading: ownPubDRepKeyHash === undefined, ownPubDRepKeyHash };
+};
+
+export const useCExpolorerBaseUrl = (): string => {
+  const [explorerBaseUrl, setExplorerBaseUrl] = useState('');
+  const { environmentName } = useWalletStore();
+
+  const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
+
+  useEffect(() => {
+    const newUrl =
+      environmentName === 'Sanchonet' ? '' : `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`;
+    if (newUrl !== explorerBaseUrl) {
+      setExplorerBaseUrl(newUrl);
+    }
+  }, [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName, explorerBaseUrl]);
+
+  return explorerBaseUrl;
 };

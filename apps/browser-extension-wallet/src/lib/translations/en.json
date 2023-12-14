@@ -1130,6 +1130,186 @@
       "tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
       "noCollateral": "Wallet should not be able to sign dapp txs without collateral."
     },
+    "ProposalProcedure": {
+      "dRepId": "DRep ID",
+      "txDetails": {
+        "deposit": "Deposit",
+        "rewardAccount": "Reward account",
+        "title": "Transaction Details",
+        "txType": "Transaction Type"
+      },
+      "procedure": {
+        "anchor": {
+          "hash": "Anchor Hash",
+          "url": "Anchor URL"
+        },
+        "title": "Procedure",
+        "dRepId": "DRep ID"
+      },
+      "governanceAction": {
+        "actionId": {
+          "title": "Action ID",
+          "index": "Index",
+          "txId": "TX ID"
+        },
+        "hardForkInitiation": {
+          "title": "Hard Fork Initiation",
+          "protocolVersion": {
+            "major": "Protocol Version Major",
+            "minor": "Protocol Version Minor",
+            "patch": "Protocol Version Patch"
+          }
+        },
+        "newConstitutionAction": {
+          "title": "New Constitution Action",
+          "constitution": {
+            "title": "Constitution Details",
+            "anchor": {
+              "dataHash": "Anchor Data Hash",
+              "url": "Constitution Anchor URL"
+            },
+            "scriptHash": "Constitution Script Hash"
+          }
+        },
+        "infoAction": {
+          "title": "Info Action"
+        },
+        "noConfidenceAction": {
+          "title": "No Confidence"
+        },
+        "protocolParamUpdate": {
+          "title": "Protocol Parameter Update",
+          "memory": "Memory",
+          "step": "Step",
+          "networkGroup": {
+            "title": "Network group",
+            "maxBBSize": "Max BB Size",
+            "maxTxSize": "Max Tx Size",
+            "maxBHSize": "Max BH Size",
+            "maxValSize": "Max Val Size",
+            "maxTxExUnits": "Max TX Ex Units",
+            "maxBlockExUnits": "Max Blk Ex Units",
+            "maxCollateralInputs": "Max Coll Inputs",
+            "tooltip": {
+              "maxBBSize": "Max block body size",
+              "maxTxSize": "Max transaction size",
+              "maxBHSize": "Max block header size",
+              "maxValSize": "Max size of a serialized asset value",
+              "maxTxExUnits": "Max script execution units in a single transaction",
+              "maxBlockExUnits": "Max script execution units in a single block",
+              "maxCollateralInputs": "Max number of collateral inputs"
+            }
+          },
+          "economicGroup": {
+            "title": "Economic group",
+            "minFeeA": "Min Fee A",
+            "minFeeB": "Min Fee B",
+            "keyDeposit": "Key Deposit",
+            "poolDeposit": "Pool Deposit",
+            "rho": "Rho",
+            "tau": "Tau",
+            "minPoolCost": "Min Pool Cost",
+            "coinsPerUTxOByte": "Coins/UTxO Byte",
+            "prices": "Price",
+            "tooltip": {
+              "minFeeA": "Min fee coefficient",
+              "minFeeB": "Min fee constant",
+              "keyDeposit": "Delegation key Lovelace deposit",
+              "poolDeposit": "Pool registration Lovelace deposit",
+              "rho": "Monetary expansion",
+              "tau": "Treasury expansion",
+              "minPoolCost": "Min fixed rewards cut for pools",
+              "coinsPerUTxOByte": "Min Lovelace deposit per byte of serialized UTxO",
+              "prices": "Prices of Plutus execution units"
+            }
+          },
+          "technicalGroup": {
+            "title": "Technical group",
+            "a0": "A0",
+            "eMax": "EMax",
+            "nOpt": "NOpt",
+            "costModels": "Cost Models",
+            "collateralPercentage": "Coll Percentage",
+            "tooltip": {
+              "a0": "Pool pledge influence",
+              "eMax": "Pool retirement maximum epoch",
+              "nOpt": "Desired number of pools",
+              "costModels": "Plutus execution cost models",
+              "collateralPercentage": "Proportion of collateral needed for scripts"
+            }
+          },
+          "governanceGroup": {
+            "title": "Governance group",
+            "govActionLifetime": "Gov Act Lifetime",
+            "govActionDeposit": "Gov Act Deposit",
+            "drepDeposit": "DRep Deposit",
+            "drepActivity": "DRep Activity",
+            "ccMinSize": "CC Min Size",
+            "ccMaxTermLength": "CC Max Term Length",
+            "dRepVotingThresholds": {
+              "title": "Governance voting thresholds",
+              "motionNoConfidence": "Motion No Conf",
+              "committeeNormal": "Comm Normal",
+              "committeeNoConfidence": "Comm No Conf",
+              "updateConstitution": "Update Const",
+              "hardForkInitiation": "Hard Fork Init",
+              "ppNetworkGroup": "PP Network Grp",
+              "ppEconomicGroup": "PP Economic Grp",
+              "ppTechnicalGroup": "PP Technical Grp",
+              "ppGovernanceGroup": "PP Governance Grp",
+              "treasuryWithdrawal": "Treasury Withdraw"
+            },
+            "tooltip": {
+              "govActionLifetime": "governance action maximum lifetime in epochs",
+              "govActionDeposit": "governance action deposit",
+              "drepDeposit": "DRep deposit amount",
+              "drepActivity": "DRep activity period in epochs",
+              "ccMinSize": "Min constitutional committee size",
+              "ccMaxTermLength": "Max term length (in epochs) for the constitutional committee members",
+              "dRepVotingThresholds": {
+                "title": "Governance voting thresholds",
+                "motionNoConfidence": "1. Motion of no-confidence",
+                "committeeNormal": "2a. New committee/threshold (normal state)",
+                "committeeNoConfidence": "2b. New committee/threshold (state of no-confidence)",
+                "updateConstitution": "3. Update to the Constitution or proposal policy",
+                "hardForkInitiation": "4. Hard-fork initiation",
+                "ppNetworkGroup": "5a. Protocol parameter changes, network group",
+                "ppEconomicGroup": "5b. Protocol parameter changes, economic group",
+                "ppTechnicalGroup": "5c. Protocol parameter changes, technical group",
+                "ppGovernanceGroup": "5d. Protocol parameter changes, governance group",
+                "treasuryWithdrawal": "6. Treasury withdrawal"
+              }
+            }
+          }
+        },
+        "treasuryWithdrawals": {
+          "title": "Treasury Withdrawals",
+          "withdrawals": {
+            "lovelace": "Withdrawal Amount",
+            "rewardAccount": "Withdrawal Reward Account"
+          }
+        },
+        "updateCommitteeAction": {
+          "title": "Update Committee Action",
+          "membersToBeAdded": {
+            "title": "Members To Be Added",
+            "coldCredential": {
+              "hash": "Cold Credential Hash",
+              "epoch": "Epoch"
+            }
+          },
+          "membersToBeRemoved": {
+            "title": "Members To Be Removed",
+            "hash": "Hash"
+          },
+          "newQuorumThreshold": {
+            "title": "New Quorum Threshold",
+            "denominator": "Denominator",
+            "numerator": "Numerator"
+          }
+        }
+      }
+    },
     "VotingProcedures": {
       "title": "Confirm Vote",
       "voterType": "Voter type",

@@ -4,6 +4,16 @@ import 'normalize.css';
 import './theme.scss';
 import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
 
+export const customViewports = {
+  popup: {
+    name: 'Popup',
+    styles: {
+      width: '360px',
+      height: '600'
+    }
+  }
+};
+
 export const preview = {
   parameters: {
     actions: { argTypesRegex: '^on[A-Z].*' },
@@ -12,6 +22,10 @@ export const preview = {
         color: /(background|color)$/i,
         date: /Date$/
       }
+    },
+    viewport: {
+      viewports: customViewports,
+      defaultViewport: 'Popup'
     }
   }
 };

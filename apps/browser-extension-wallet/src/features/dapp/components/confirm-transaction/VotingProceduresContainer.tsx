@@ -1,11 +1,10 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { VotingProcedures } from '@lace/core';
 import { SignTxData } from './types';
 import { drepIDasBech32FromHash, votingProceduresInspector } from './utils';
 import { Wallet } from '@lace/cardano';
-import { useWalletStore } from '@src/stores';
-import { config } from '@src/config';
+import { useCExpolorerBaseUrl } from './hooks';
 
 interface Props {
   signTxData: SignTxData;
@@ -53,13 +52,8 @@ export const getVote = (vote: Wallet.Cardano.Vote): Votes => {
 export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const votingProcedures = votingProceduresInspector(signTxData.tx);
-  const { environmentName } = useWalletStore();
-  const { CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS } = config();
 
-  const explorerBaseUrl = useMemo(
-    () => (environmentName === 'Sanchonet' ? '' : `${CEXPLORER_BASE_URL[environmentName]}/${CEXPLORER_URL_PATHS.Tx}`),
-    [CEXPLORER_BASE_URL, CEXPLORER_URL_PATHS.Tx, environmentName]
-  );
+  const explorerBaseUrl = useCExpolorerBaseUrl();
 
   return (
     <VotingProcedures

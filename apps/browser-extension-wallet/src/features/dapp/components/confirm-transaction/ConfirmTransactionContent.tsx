@@ -1,8 +1,10 @@
+/* eslint-disable complexity */
 import React from 'react';
 import { Skeleton } from 'antd';
+import { Wallet } from '@lace/cardano';
+import { SignTxData } from './types';
 import { ConfirmDRepRegistrationContainer } from './ConfirmDRepRegistrationContainer';
 import { DappTransactionContainer } from './DappTransactionContainer';
-import { SignTxData } from './types';
 import { ConfirmDRepRetirementContainer } from './ConfirmDRepRetirementContainer';
 import { ConfirmVoteDelegationContainer } from './ConfirmVoteDelegationContainer';
 import { VotingProceduresContainer } from './VotingProceduresContainer';
@@ -11,7 +13,7 @@ import { ConfirmVoteRegistrationDelegationContainer } from './ConfirmVoteRegistr
 import { ConfirmStakeRegistrationDelegationContainer } from './ConfirmStakeRegistrationDelegationContainer';
 import { ConfirmStakeVoteRegistrationDelegationContainer } from './ConfirmStakeVoteRegistrationDelegationContainer';
 import { ConfirmStakeVoteDelegationContainer } from './ConfirmStakeVoteDelegationContainer';
-import { Wallet } from '@lace/cardano';
+import { ProposalProceduresContainer } from './ProposalProceduresContainer';
 
 interface Props {
   txType?: Wallet.Cip30TxType;
@@ -50,6 +52,9 @@ export const ConfirmTransactionContent = ({ txType, signTxData, onError, errorMe
   }
   if (txType === Wallet.Cip30TxType.StakeVoteDelegation) {
     return <ConfirmStakeVoteDelegationContainer signTxData={signTxData} errorMessage={errorMessage} />;
+  }
+  if (txType === Wallet.Cip30TxType.ProposalProcedures) {
+    return <ProposalProceduresContainer signTxData={signTxData} errorMessage={errorMessage} />;
   }
 
   return <DappTransactionContainer signTxData={signTxData} errorMessage={errorMessage} />;
