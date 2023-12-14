@@ -12,12 +12,11 @@ export const root = style([
     outline: 'none',
     cursor: 'pointer',
 
-    ':hover': {
-      background:
-        vars.colors.$profile_dropdown_account_item_container_bgColor_hover,
-    },
-
     selectors: {
+      '&:hover': {
+        background:
+          vars.colors.$profile_dropdown_account_item_container_bgColor_hover,
+      },
       '&:active': {
         background:
           vars.colors.$profile_dropdown_account_item_container_bgColor_pressed,
@@ -31,9 +30,17 @@ export const root = style([
   },
 ]);
 
-export const accountLabel = sx({
-  color: '$text_secondary',
-});
+export const accountLabel = style([
+  sx({
+    color: '$text_secondary',
+  }),
+  {
+    width: '118px',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  },
+]);
 
 export const derivationPath = style([
   {

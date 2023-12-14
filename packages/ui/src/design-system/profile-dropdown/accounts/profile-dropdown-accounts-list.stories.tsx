@@ -27,7 +27,7 @@ export const Overview = (): JSX.Element => (
           <Variants.Table>
             <Variants.Row>
               <Variants.Cell>
-                <div style={{ width: '250px' }}>
+                <div style={{ width: '218px' }}>
                   <AccountsList
                     unlockLabel="Unlock"
                     accounts={[
@@ -44,6 +44,11 @@ export const Overview = (): JSX.Element => (
                       {
                         accountNumber: 3,
                         label: 'Account #3',
+                        isUnlocked: false,
+                      },
+                      {
+                        accountNumber: 4,
+                        label: 'Account with a long name',
                         isUnlocked: false,
                       },
                       {

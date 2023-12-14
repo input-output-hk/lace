@@ -14,11 +14,13 @@ export interface TextBoxProps extends Form.FormControlProps {
   id?: string;
   label: string;
   name?: string;
-  value: string;
+  defaultValue?: string;
+  value?: string;
   errorMessage?: string;
   onChange?: (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => void;
   containerClassName?: string;
   containerStyle?: React.CSSProperties;
+  maxLength?: number;
   'data-testid'?: string;
 }
 
@@ -28,45 +30,47 @@ export const TextBox = ({
   id,
   label,
   name,
+  defaultValue,
   value,
   errorMessage = '',
   containerClassName = '',
   onChange,
   containerStyle,
+  maxLength,
   ...rest
-}: Readonly<TextBoxProps>): JSX.Element => {
-  return (
-    <Form.Root>
-      <Flex justifyContent="space-between" alignItems="center">
-        <Form.Field
-          name="field"
-          className={cn(cx.container, {
-            [containerClassName]: containerClassName,
-          })}
-          style={containerStyle}
-        >
-          <Form.Control asChild>
-            <input
-              type="text"
-              required={required}
-              placeholder=""
-              className={cx.input}
-              disabled={disabled}
-              name={name}
-              value={value}
-              onChange={onChange}
-              id={id}
-              data-testid={rest['data-testid']}
-            />
-          </Form.Control>
-          <Form.Label className={cn(cx.label)}>{label}</Form.Label>
-        </Form.Field>
-      </Flex>
-      {errorMessage && (
-        <Typography.Label className={cx.errorMessage}>
-          {errorMessage}
-        </Typography.Label>
-      )}
-    </Form.Root>
-  );
-};
+}: Readonly<TextBoxProps>): JSX.Element => (
+  <Form.Root>
+    <Flex justifyContent="space-between" alignItems="center">
+      <Form.Field
+        name="field"
+        className={cn(cx.container, {
+          [containerClassName]: containerClassName,
+        })}
+        style={containerStyle}
+      >
+        <Form.Control asChild>
+          <input
+            type="text"
+            required={required}
+            placeholder=""
+            className={cx.input}
+            disabled={disabled}
+            name={name}
+            defaultValue={defaultValue}
+            value={value}
+            onChange={onChange}
+            id={id}
+            maxLength={maxLength}
+            data-testid={rest['data-testid']}
+          />
+        </Form.Control>
+        <Form.Label className={cn(cx.label)}>{label}</Form.Label>
+      </Form.Field>
+    </Flex>
+    {errorMessage && (
+      <Typography.Label className={cx.errorMessage}>
+        {errorMessage}
+      </Typography.Label>
+    )}
+  </Form.Root>
+);
