@@ -1,7 +1,7 @@
 /* eslint-disable no-magic-numbers */
 import { POPUP_WINDOW } from '@src/utils/constants';
 import { getRandomIcon } from '@lace/common';
-import { runtime, Tabs, tabs, Windows, windows, storage as webStorage } from 'webextension-polyfill';
+import { runtime, Tabs, tabs, Windows, windows, storage as webStorage, Runtime } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
 import uniqueId from 'lodash/uniqueId';
@@ -83,18 +83,14 @@ export const setBackgroundStorage = async (data: BackgroundStorage): Promise<voi
 export const initMigrationState = async (): Promise<void> => {
   await webStorage.local.set(INITIAL_STORAGE);
 };
-
-export const getLastActiveTab: () => Promise<Tabs.Tab> = async () =>
-  await (
-    await tabs.query({ currentWindow: true, active: true })
-  )[0];
-
 /**
  * getDappInfoFromLastActiveTab
  * @returns {Promise<Wallet.DappInfo>}
  */
-export const getDappInfoFromLastActiveTab: () => Promise<Wallet.DappInfo> = async () => {
-  const lastActiveTab = await getLastActiveTab();
+export const getDappInfoFromLastActiveTab: (sender: Runtime.MessageSender) => Promise<Wallet.DappInfo> = async (
+  sender
+) => {
+  const lastActiveTab = sender.tab;
   if (!lastActiveTab) throw new Error('could not find DApp');
   return {
     logo: lastActiveTab.favIconUrl || getRandomIcon({ id: uniqueId(), size: 40 }),

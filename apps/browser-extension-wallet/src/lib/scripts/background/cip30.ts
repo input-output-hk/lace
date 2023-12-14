@@ -39,7 +39,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
     Promise.resolve(true),
   signTx: pDebounce(async (args) => {
     try {
-      const { logo, name, url } = await getDappInfoFromLastActiveTab();
+      const { logo, name, url } = await getDappInfoFromLastActiveTab(args.sender);
       dappSignTxData$.next({ dappInfo: { logo, name, url: getOrigin(url) }, tx: args.data });
       await ensureUiIsOpenAndLoaded('#/dapp/sign-tx');
 
@@ -53,7 +53,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   }, DEBOUNCE_THROTTLE),
   signData: pDebounce(async (args) => {
     try {
-      const { logo, name, url } = await getDappInfoFromLastActiveTab();
+      const { logo, name, url } = await getDappInfoFromLastActiveTab(args.sender);
       dappSignData$.next({ dappInfo: { logo, name, url: getOrigin(url) }, sign: args.data });
       await ensureUiIsOpenAndLoaded('#/dapp/sign-data');
 
@@ -67,7 +67,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   }, DEBOUNCE_THROTTLE),
   getCollateral: pDebounce(async (args) => {
     try {
-      const { logo, name, url } = await getDappInfoFromLastActiveTab();
+      const { logo, name, url } = await getDappInfoFromLastActiveTab(args.sender);
       dappSetCollateral$.next({ dappInfo: { logo, name, url: getOrigin(url) }, collateralRequest: args.data });
       await ensureUiIsOpenAndLoaded('#/dapp/set-collateral');
 

@@ -4,7 +4,7 @@ import { storage as webStorage, tabs, Runtime } from 'webextension-polyfill';
 import { AuthorizedDappStorage } from '@src/types';
 
 import { authorizedDappsList, userPromptService } from './services/dappService';
-import { ensureUiIsOpenAndLoaded, getDappInfoFromLastActiveTab, getLastActiveTab } from './util';
+import { ensureUiIsOpenAndLoaded, getDappInfoFromLastActiveTab } from './util';
 import { authenticator } from './authenticator';
 import { AUTHORIZED_DAPPS_KEY } from '../types';
 import { Wallet } from '@lace/cardano';
@@ -15,8 +15,7 @@ const DEBOUNCE_THROTTLE = 500;
 export const dappInfo$ = new BehaviorSubject<Wallet.DappInfo>(undefined);
 
 export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender) => {
-  const launchingTab = await getLastActiveTab();
-  const { logo, name } = await getDappInfoFromLastActiveTab();
+  const { logo, name } = await getDappInfoFromLastActiveTab(sender);
   dappInfo$.next({ logo, name, url: origin });
   await ensureUiIsOpenAndLoaded('#/dapp/connect', false);
   const isAllowed = await userPromptService.allowOrigin(origin);
@@ -32,7 +31,7 @@ export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender
     }
   } else {
     tabs.onRemoved.addListener((t) => {
-      if (t === launchingTab.id) {
+      if (t === sender.tab.id) {
         authenticator.revokeAccess(sender);
         tabs.onRemoved.removeListener(this);
       }
