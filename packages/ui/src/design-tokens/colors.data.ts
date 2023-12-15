@@ -23,6 +23,16 @@ export const colors = {
   $buttons_secondary_container_bgColor_disabled: '',
   $buttons_secondary_container_outlineColor: '',
 
+  $toggle_button_group_bgColor: '',
+  $toggle_button_group_item_bgColor_hover: '',
+  $toggle_button_group_item_bgColor: '',
+  $toggle_button_group_item_bgColor_active: '',
+  $toggle_button_group_item_outline_focused: '',
+  $toggle_button_group_item_label_color: '',
+  $toggle_button_group_item_label_color_hover: '',
+  $toggle_button_group_item_label_color_active: '',
+  $toggle_button_group_item_label_color_disabled: '',
+
   $card_elevated_backgroundColor: '',
   $card_greyed_backgroundColor: '',
   $card_outlined_backgroundColor: '',
@@ -232,7 +242,7 @@ export const lightColorScheme = {
   $secondary_cream: '#FCF5E3',
   $secondary_data_green: '#2CB67D',
   $secondary_data_blue: '#3489F7',
-};
+} as const;
 
 export const darkColorScheme = {
   $primary_accent_purple: '#7F5AF0',
@@ -257,4 +267,4 @@ export const darkColorScheme = {
   $secondary_lace_yellow: '#FDC300',
   $secondary_data_green: '#2CB67D',
   $secondary_data_blue: '#3489F7',
-};
+} as const;
