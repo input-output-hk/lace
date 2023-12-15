@@ -23,7 +23,6 @@ export const WalletNameInput = ({
 }: WalletNameInputProps): React.ReactElement => (
   <div className={styles.walletNameInputContainer}>
     <Input
-      id="wallet-name-input"
       dataTestId="wallet-name-input"
       value={value}
       label={label}

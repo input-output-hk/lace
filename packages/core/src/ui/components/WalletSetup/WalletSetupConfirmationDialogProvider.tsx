@@ -12,7 +12,7 @@ interface ContextType {
   isDialogOpen: boolean;
   withConfirmationDialog: (confirmedCallback: () => void) => () => void;
   reset$: Subject<boolean>;
-  setRef: (instance: HTMLElement) => void;
+  shouldShowDialog$: Subject<boolean>;
 }
 
 const WalletSetupConfirmationDialogContext = createContext<ContextType>(null);
@@ -25,34 +25,36 @@ export const useWalletSetupConfirmationDialog = (): ContextType => {
 
 export const WalletSetupConfirmationDialogProvider = ({ children }: Props): React.ReactElement => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const containerRef = useRef<HTMLElement>(null);
   const confirmedCallbackRef = useRef(() => void 0);
-  const inputMap = useMemo(() => new Map<string, boolean>(), []);
   const reset$ = useMemo(() => new Subject<boolean>(), []);
+  const shouldShowDialog = useRef<boolean>(false);
+  const shouldShowDialog$ = useMemo(() => new Subject<boolean>(), []);
   const { t } = useTranslate();
 
   useEffect(() => {
+    const subscription = shouldShowDialog$.subscribe((value) => {
+      shouldShowDialog.current = value;
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [shouldShowDialog$]);
+
+  useEffect(() => {
     const subscription = reset$.subscribe(() => {
-      inputMap.clear();
+      shouldShowDialog.current = false;
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [reset$, inputMap]);
-
-  const handleInputChange = useCallback(
-    (event: Event) => {
-      inputMap.set((event.target as HTMLInputElement).id, Boolean((event.target as HTMLInputElement).value));
-    },
-    [inputMap]
-  );
+  }, [reset$]);
 
   const withConfirmationDialog = useCallback(
     (confirmedCallback: () => void) => () => {
-      const shouldOpenDialog = [...inputMap.values()].some(Boolean);
-      if (shouldOpenDialog) {
+      if (shouldShowDialog.current) {
         confirmedCallbackRef.current = () => {
+          shouldShowDialog.current = false;
           setIsDialogOpen(false);
           confirmedCallback();
         };
@@ -61,31 +63,23 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
         confirmedCallback();
       }
     },
-    [inputMap, setIsDialogOpen]
+    [setIsDialogOpen]
   );
 
-  const setRef: React.RefCallback<HTMLElement> = (node) => {
-    if (node) {
-      containerRef.current = node;
-      node.querySelectorAll('input').forEach((input) => {
-        inputMap.set(input.id, Boolean(input.value));
-        input.addEventListener('input', handleInputChange);
-      });
-    } else {
-      containerRef.current
-        ?.querySelectorAll('input')
-        .forEach((input) => input.removeEventListener('input', handleInputChange));
-    }
-  };
-
   return (
-    <WalletSetupConfirmationDialogContext.Provider value={{ setRef, isDialogOpen, reset$, withConfirmationDialog }}>
+    <WalletSetupConfirmationDialogContext.Provider
+      value={{ isDialogOpen, reset$, shouldShowDialog$, withConfirmationDialog }}
+    >
       <Dialog.Root open={isDialogOpen} setOpen={setIsDialogOpen} zIndex={1000}>
-        <Dialog.Title>{t('multiWallet.cancelDialog.title')}</Dialog.Title>
-        <Dialog.Description>{t('multiWallet.cancelDialog.description')}</Dialog.Description>
+        <Dialog.Title>{t('multiWallet.confirmationDialog.title')}</Dialog.Title>
+        <Dialog.Description>{t('multiWallet.confirmationDialog.description')}</Dialog.Description>
         <Dialog.Actions>
-          <Dialog.Action cancel label={t('multiWallet.cancelDialog.cancel')} onClick={() => setIsDialogOpen(false)} />
-          <Dialog.Action label={t('multiWallet.cancelDialog.confirm')} onClick={confirmedCallbackRef?.current} />
+          <Dialog.Action
+            cancel
+            label={t('multiWallet.confirmationDialog.cancel')}
+            onClick={() => setIsDialogOpen(false)}
+          />
+          <Dialog.Action label={t('multiWallet.confirmationDialog.confirm')} onClick={confirmedCallbackRef?.current} />
         </Dialog.Actions>
       </Dialog.Root>
       {children}

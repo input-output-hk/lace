@@ -12,6 +12,8 @@ interface State {
   setName: (name: string) => void;
   setPassword: (password: string) => void;
   generatedMnemonic: () => void;
+  onChange: (state: { name: string; password: string }) => void;
+  withConfirmationDialog: (callback: () => void) => () => void;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -46,6 +48,10 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
     setState((prevState) => ({ ...prevState, mnemonic: providers.generateMnemonicWords() }));
   };
 
+  const onChange = ({ name, password }: { name: string; password: string }) => {
+    providers.shouldShowDialog$.next(Boolean(name || password));
+  };
+
   return (
     <CreateWalletContext.Provider
       value={{
@@ -53,7 +59,9 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
         setMnemonic,
         setName,
         setPassword,
-        generatedMnemonic
+        generatedMnemonic,
+        onChange,
+        withConfirmationDialog: providers.withConfirmationDialog
       }}
     >
       {children}

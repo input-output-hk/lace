@@ -9,9 +9,9 @@ import styles from './MultiWallet.module.scss';
 import { Home } from './components/Home';
 
 import {
+  WalletSetupConfirmationDialogProvider,
   WalletSetupFlow,
   WalletSetupFlowProvider,
-  WalletSetupConfirmationDialogProvider,
   useWalletSetupConfirmationDialog
 } from '@lace/core';
 import { CreateWallet } from './create-wallet';
@@ -56,11 +56,19 @@ export const SetupHardwareWallet = (): JSX.Element => {
   );
 };
 
-export const SetupCreateWallet = (): JSX.Element => (
+export const SetupCreateWallet = ({
+  shouldShowDialog$,
+  withConfirmationDialog
+}: {
+  shouldShowDialog$: Subject<boolean>;
+  withConfirmationDialog: (callback: () => void) => () => void;
+}): JSX.Element => (
   <CreateWallet
     providers={{
       createWallet,
-      generateMnemonicWords: Wallet.KeyManagement.util.generateMnemonicWords
+      generateMnemonicWords: Wallet.KeyManagement.util.generateMnemonicWords,
+      shouldShowDialog$,
+      withConfirmationDialog
     }}
   />
 );
@@ -73,12 +81,12 @@ export const SetupRestoreWallet = (): JSX.Element => (
   />
 );
 
-const Component = (): JSX.Element => {
+export const Component = (): JSX.Element => {
   const { path } = useRouteMatch();
   const history = useHistory();
   const { page, setBackgroundPage } = useBackgroundPage();
+  const { isDialogOpen, withConfirmationDialog, reset$, shouldShowDialog$ } = useWalletSetupConfirmationDialog();
 
-  const { setRef, isDialogOpen, withConfirmationDialog, reset$ } = useWalletSetupConfirmationDialog();
   const closeWalletCreation = withConfirmationDialog(() => {
     setBackgroundPage();
     history.push(page);
@@ -102,14 +110,20 @@ const Component = (): JSX.Element => {
         <div className={styles.closeButton}>
           <NavigationButton icon="cross" onClick={closeWalletCreation} />
         </div>
-        <div ref={setRef}>
-          <Switch>
-            <Route path={newWallet.create.root} component={SetupCreateWallet} />
-            <Route path={newWallet.hardware.root} component={SetupHardwareWallet} />
-            <Route path={newWallet.restore.root} component={SetupRestoreWallet} />
-            <Route exact path={`${path}/`} component={Home} />
-          </Switch>
-        </div>
+        <Switch>
+          <Route
+            path={newWallet.create.root}
+            render={() => (
+              <SetupCreateWallet
+                shouldShowDialog$={shouldShowDialog$}
+                withConfirmationDialog={withConfirmationDialog}
+              />
+            )}
+          />
+          <Route path={newWallet.hardware.root} component={SetupHardwareWallet} />
+          <Route path={newWallet.restore.root} component={SetupRestoreWallet} />
+          <Route exact path={`${path}/`} component={Home} />
+        </Switch>
       </Modal>
     </WalletSetupFlowProvider>
   );

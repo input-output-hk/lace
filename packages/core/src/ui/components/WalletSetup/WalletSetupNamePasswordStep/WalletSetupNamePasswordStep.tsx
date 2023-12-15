@@ -20,12 +20,14 @@ export interface WalletSetupNamePasswordStepProps {
   onBack: () => void;
   onNext: (params: WalletSetupNamePasswordSubmitParams) => void;
   initialWalletName?: string;
+  onChange?: (state: { name: string; password: string }) => void;
 }
 
 export const WalletSetupNamePasswordStep = ({
   onBack,
   onNext,
-  initialWalletName = ''
+  initialWalletName = '',
+  onChange
 }: WalletSetupNamePasswordStepProps): React.ReactElement => {
   const { t } = useTranslate();
   const [password, setPassword] = useState('');
@@ -64,10 +66,12 @@ export const WalletSetupNamePasswordStep = ({
   const handleNameChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
     setWalletName(value);
     setShouldShowNameErrorMessage(true);
+    onChange?.({ name: value, password });
   };
 
   const handlePasswordChange = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(value);
+    onChange?.({ password: value, name: walletName });
   };
 
   const handlePasswordConfirmationChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +102,6 @@ export const WalletSetupNamePasswordStep = ({
           errorMessage={walletNameErrorMessage}
         />
         <PasswordVerification
-          id="wallet-password-input"
           className={styles.input}
           value={password}
           label={t('package.core.walletNameAndPasswordSetupStep.passwordInputLabel')}

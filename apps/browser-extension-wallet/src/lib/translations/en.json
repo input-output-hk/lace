@@ -1343,7 +1343,7 @@
     }
   },
   "multiWallet": {
-    "cancelDialog": {
+    "confirmationDialog": {
       "title": "Are you sure you want to cancel adding a new wallet?",
       "description": "You'll have to start over.",
       "cancel": "Go back",
