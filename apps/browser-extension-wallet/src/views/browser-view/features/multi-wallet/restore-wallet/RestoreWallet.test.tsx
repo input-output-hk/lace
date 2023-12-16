@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
 import { createAssetsRoute, fillMnemonic, getNextButton, setupStep } from '../tests/utils';
+import { Subject } from 'rxjs';
 
 const keepWalletSecureStep = async () => {
   const nextButton = getNextButton();
@@ -41,6 +42,10 @@ const recoveryPhraseStep = async () => {
 describe('Multi Wallet Setup/Restore Wallet', () => {
   let providers = {} as {
     createWallet: jest.Mock;
+    confirmationDialog: {
+      shouldShowDialog$: Subject<boolean>;
+      withConfirmationDialog: jest.Mock;
+    };
   };
 
   const originalWarn = console.error.bind(console.error);
@@ -53,7 +58,11 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
 
   beforeEach(() => {
     providers = {
-      createWallet: jest.fn()
+      createWallet: jest.fn(),
+      confirmationDialog: {
+        shouldShowDialog$: new Subject(),
+        withConfirmationDialog: jest.fn()
+      }
     };
   });
 

@@ -12,6 +12,8 @@ interface State {
   setLength: (length: number) => void;
   setName: (name: string) => void;
   setPassword: (password: string) => void;
+  onChange: (state: { name: string; password: string }) => void;
+  withConfirmationDialog: (callback: () => void) => () => void;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -23,10 +25,11 @@ export const useRestoreWallet = (): State => {
   return state;
 };
 
-export const RestoreWalletProvider = ({ children }: Props): React.ReactElement => {
+export const RestoreWalletProvider = ({ children, providers }: Props): React.ReactElement => {
   const [state, setState] = useState<Data>();
 
   const setMnemonic = (mnemonic: string[]) => {
+    providers.confirmationDialog.shouldShowDialog$.next(Boolean(mnemonic));
     setState((prevState) => ({ ...prevState, mnemonic }));
   };
 
@@ -42,6 +45,10 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
     setState((prevState) => ({ ...prevState, password }));
   };
 
+  const onChange = (s: { name: string; password: string }) => {
+    providers.confirmationDialog.shouldShowDialog$.next(Boolean(s.name || s.password));
+  };
+
   return (
     <RestoreWalletContext.Provider
       value={{
@@ -49,7 +56,9 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
         setMnemonic,
         setLength,
         setName,
-        setPassword
+        setPassword,
+        onChange,
+        withConfirmationDialog: providers.confirmationDialog.withConfirmationDialog
       }}
     >
       {children}

@@ -28,7 +28,14 @@ const { newWallet } = walletRoutePaths;
 
 const createWallet = (): Promise<void> => Promise.resolve(void 0);
 
-export const SetupHardwareWallet = (): JSX.Element => {
+interface ConfirmationDialog {
+  shouldShowDialog$: Subject<boolean>;
+  withConfirmationDialog: (callback: () => void) => () => void;
+}
+
+export const SetupHardwareWallet = ({
+  shouldShowDialog$
+}: Pick<ConfirmationDialog, 'shouldShowDialog$'>): JSX.Element => {
   const { connectHardwareWallet } = useWalletManager();
   const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
 
@@ -50,33 +57,28 @@ export const SetupHardwareWallet = (): JSX.Element => {
       providers={{
         connectHardwareWallet,
         createWallet,
-        disconnectHardwareWallet$
+        disconnectHardwareWallet$,
+        shouldShowDialog$
       }}
     />
   );
 };
 
-export const SetupCreateWallet = ({
-  shouldShowDialog$,
-  withConfirmationDialog
-}: {
-  shouldShowDialog$: Subject<boolean>;
-  withConfirmationDialog: (callback: () => void) => () => void;
-}): JSX.Element => (
+export const SetupCreateWallet = (confirmationDialog: ConfirmationDialog): JSX.Element => (
   <CreateWallet
     providers={{
       createWallet,
       generateMnemonicWords: Wallet.KeyManagement.util.generateMnemonicWords,
-      shouldShowDialog$,
-      withConfirmationDialog
+      confirmationDialog
     }}
   />
 );
 
-export const SetupRestoreWallet = (): JSX.Element => (
+export const SetupRestoreWallet = (confirmationDialog: ConfirmationDialog): JSX.Element => (
   <RestoreWallet
     providers={{
-      createWallet
+      createWallet,
+      confirmationDialog
     }}
   />
 );
@@ -85,7 +87,7 @@ export const Component = (): JSX.Element => {
   const { path } = useRouteMatch();
   const history = useHistory();
   const { page, setBackgroundPage } = useBackgroundPage();
-  const { isDialogOpen, withConfirmationDialog, reset$, shouldShowDialog$ } = useWalletSetupConfirmationDialog();
+  const { isDialogOpen, withConfirmationDialog, shouldShowDialog$ } = useWalletSetupConfirmationDialog();
 
   const closeWalletCreation = withConfirmationDialog(() => {
     setBackgroundPage();
@@ -95,7 +97,7 @@ export const Component = (): JSX.Element => {
   useEffect(() => {
     const unsubscribe = history.listen((event) => {
       if (event.pathname === newWallet.root) {
-        reset$.next(true);
+        shouldShowDialog$.next(false);
       }
     });
 
@@ -120,8 +122,19 @@ export const Component = (): JSX.Element => {
               />
             )}
           />
-          <Route path={newWallet.hardware.root} component={SetupHardwareWallet} />
-          <Route path={newWallet.restore.root} component={SetupRestoreWallet} />
+          <Route
+            path={newWallet.hardware.root}
+            render={() => <SetupHardwareWallet shouldShowDialog$={shouldShowDialog$} />}
+          />
+          <Route
+            path={newWallet.restore.root}
+            render={() => (
+              <SetupRestoreWallet
+                shouldShowDialog$={shouldShowDialog$}
+                withConfirmationDialog={withConfirmationDialog}
+              />
+            )}
+          />
           <Route exact path={`${path}/`} component={Home} />
         </Switch>
       </Modal>

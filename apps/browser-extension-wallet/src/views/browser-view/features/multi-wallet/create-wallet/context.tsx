@@ -49,7 +49,7 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
   };
 
   const onChange = ({ name, password }: { name: string; password: string }) => {
-    providers.shouldShowDialog$.next(Boolean(name || password));
+    providers.confirmationDialog.shouldShowDialog$.next(Boolean(name || password));
   };
 
   return (
@@ -61,7 +61,7 @@ export const CreateWalletProvider = ({ children, providers }: Props): React.Reac
         setPassword,
         generatedMnemonic,
         onChange,
-        withConfirmationDialog: providers.withConfirmationDialog
+        withConfirmationDialog: providers.confirmationDialog.withConfirmationDialog
       }}
     >
       {children}

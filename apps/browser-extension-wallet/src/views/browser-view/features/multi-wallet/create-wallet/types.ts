@@ -9,6 +9,8 @@ export interface Data {
 export interface Providers {
   createWallet: (params: Data) => Promise<void>;
   generateMnemonicWords: () => string[];
-  shouldShowDialog$: Subject<boolean>;
-  withConfirmationDialog: (callback: () => void) => () => void;
+  confirmationDialog: {
+    shouldShowDialog$: Subject<boolean>;
+    withConfirmationDialog: (callback: () => void) => () => void;
+  };
 }

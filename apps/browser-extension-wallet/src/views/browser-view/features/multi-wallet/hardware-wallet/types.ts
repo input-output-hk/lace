@@ -1,5 +1,5 @@
 import { Wallet } from '@lace/cardano';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 export interface Data {
   model: Wallet.HardwareWallets;
@@ -12,4 +12,5 @@ export interface Providers {
   createWallet: (params: Data) => Promise<void>;
   connectHardwareWallet: (model: Wallet.HardwareWallets) => Promise<Wallet.DeviceConnection>;
   disconnectHardwareWallet$: Observable<HIDConnectionEvent>;
+  shouldShowDialog$: Subject<boolean>;
 }
