@@ -53,13 +53,15 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
     connectHardwareWallet: jest.Mock;
     createWallet: jest.Mock;
     disconnectHardwareWallet$: Subject<HIDConnectionEvent>;
+    shouldShowDialog$: Subject<boolean>;
   };
 
   beforeEach(() => {
     providers = {
       connectHardwareWallet: jest.fn(),
       createWallet: jest.fn(),
-      disconnectHardwareWallet$: new Subject<HIDConnectionEvent>()
+      disconnectHardwareWallet$: new Subject<HIDConnectionEvent>(),
+      shouldShowDialog$: new Subject()
     };
   });
 
