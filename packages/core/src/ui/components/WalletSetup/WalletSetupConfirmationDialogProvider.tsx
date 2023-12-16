@@ -54,8 +54,17 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
     [setIsDialogOpen]
   );
 
+  const value = useMemo(
+    () => ({
+      isDialogOpen,
+      shouldShowDialog$,
+      withConfirmationDialog
+    }),
+    [isDialogOpen, shouldShowDialog$, withConfirmationDialog]
+  );
+
   return (
-    <WalletSetupConfirmationDialogContext.Provider value={{ isDialogOpen, shouldShowDialog$, withConfirmationDialog }}>
+    <WalletSetupConfirmationDialogContext.Provider value={value}>
       <Dialog.Root open={isDialogOpen} setOpen={setIsDialogOpen} zIndex={1000}>
         <Dialog.Title>{t('multiWallet.confirmationDialog.title')}</Dialog.Title>
         <Dialog.Description>{t('multiWallet.confirmationDialog.description')}</Dialog.Description>
