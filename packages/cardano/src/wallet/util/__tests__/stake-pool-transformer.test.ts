@@ -58,7 +58,7 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
 
 const transformedStakePool = {
   apy: '1.30',
-  cost: '2.00% + 6ADA',
+  cost: '6ADA',
   description: 'This is the STTST description',
   fee: '6.04',
   hexId: 'a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab',

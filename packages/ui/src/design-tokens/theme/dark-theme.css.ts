@@ -334,6 +334,7 @@ const colors: Colors = {
   $checkbox_hover_unchecked_backgroundColor: darkColorScheme.$primary_dark_grey,
   $checkbox_hover_checked_backgroundColor:
     darkColorScheme.$primary_hover_purple,
+  $data_orange: darkColorScheme.$secondary_data_orange,
 };
 
 const elevation: Elevation = {

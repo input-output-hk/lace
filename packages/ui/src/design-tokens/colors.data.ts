@@ -241,6 +241,7 @@ export const colors = {
   $checkbox_hover_checked_backgroundColor: '',
   $checkbox_hover_unchecked_borderColor: '',
   $checkbox_hover_unchecked_backgroundColor: '',
+  $data_orange: '',
 };
 
 export type Colors = typeof colors;

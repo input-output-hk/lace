@@ -1057,10 +1057,15 @@
       "saturated": "This pool is too saturated. Stake on another pool to avoid losing rewards"
     },
     "stakePoolTableBrowser": {
-      "tableHeader.poolName": "Pool name",
-      "tableHeader.ros": "ROS",
-      "tableHeader.cost": "Cost",
-      "tableHeader.saturation": "Saturation"
+      "tableHeader": {
+        "ticker": "Ticker",
+        "ros": "ROS",
+        "cost": "Cost",
+        "saturation": "Saturation",
+        "margin": "Margin",
+        "blocks": "Blocks",
+        "pledge": "Pledge"
+      }
     },
     "stakingConfirmationInfo": {
       "delegateTo": "Delegate to",

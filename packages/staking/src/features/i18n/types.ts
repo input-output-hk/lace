@@ -33,13 +33,25 @@ type KeysStructure = {
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
       tableHeader: {
-        poolName: '';
+        ticker: '';
         ros: {
           title: '';
           tooltip: '';
         };
         cost: '';
         saturation: {
+          title: '';
+          tooltip: '';
+        };
+        margin: {
+          title: '';
+          tooltip: '';
+        };
+        blocks: {
+          title: '';
+          tooltip: '';
+        };
+        pledge: {
           title: '';
           tooltip: '';
         };

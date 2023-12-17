@@ -1,6 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import debounce from 'lodash/debounce';
-import { Wallet, StakePoolTableBrowser, StakePoolItemBrowserProps, StakePoolSortOptions } from '@lace/cardano';
+import { Wallet } from '@lace/cardano';
+import {
+  Columns,
+  SortDirection,
+  SortField,
+  StakePoolItemBrowser,
+  StakePoolSortOptions,
+  StakePoolTableBodyBrowser,
+  StakePoolTableHeaderBrowser,
+  TranslationsFor
+} from '@lace/staking';
 import { Typography } from 'antd';
 import { Search, getRandomIcon } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -17,17 +27,18 @@ import {
   AnalyticsEventNames,
   PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
+import { compactNumberWithUnit } from '@src/utils/format-number';
 
 const { Text } = Typography;
 
 type stakePoolsTableProps = {
-  onStake?: (id: StakePoolItemBrowserProps['id']) => void;
+  onStake?: (id: Parameters<typeof StakePoolItemBrowser>[0]['id']) => void;
   scrollableTargetId: string;
 };
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'apy',
-  order: 'desc'
+  field: Columns.apy,
+  order: SortDirection.desc
 };
 
 const searchDebounce = 300;
@@ -55,11 +66,14 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
     blockchainProvider
   } = useWalletStore();
 
-  const tableHeaderTranslations = {
-    poolName: t('cardano.stakePoolTableBrowser.tableHeader.poolName'),
+  const tableHeaderTranslations: TranslationsFor<Columns> = {
+    ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker'),
     apy: t('cardano.stakePoolTableBrowser.tableHeader.ros'),
     cost: t('cardano.stakePoolTableBrowser.tableHeader.cost'),
-    saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation')
+    saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation'),
+    margin: t('cardano.stakePoolTableBrowser.tableHeader.margin'),
+    blocks: t('cardano.stakePoolTableBrowser.tableHeader.blocks'),
+    pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge')
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
@@ -102,7 +116,10 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
 
         return {
           logo,
+          stakePool: pool,
           ...stakePool,
+          hexId: pool.hexId,
+          ...(pool.metrics && { blocks: compactNumberWithUnit(pool.metrics.blocksCreated) }),
           onClick: (): void => {
             analytics.sendEventToMatomo({
               category: MatomoEventCategories.STAKING,
@@ -123,6 +140,18 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
     [stakePools, cardanoCoin, analytics, setSelectedStakePool, setIsDrawerVisible, onStake]
   );
 
+  const onSortChange = (field: Columns) => {
+    if (!Object.keys(SortField).includes(field)) return;
+    const order =
+      field === sort?.field
+        ? (sort?.order === SortDirection.asc && SortDirection.desc) || SortDirection.asc
+        : SortDirection.asc;
+
+    setSort({ field: field as unknown as SortField, order });
+  };
+
+  const isActiveSortItem = (value: string) => value === sort?.field;
+
   return (
     <div data-testid="stake-pool-table" className={styles.table}>
       <div className={styles.header}>
@@ -142,20 +171,24 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
         />
       </div>
       <div style={{ marginTop: '16px' }}>
-        <StakePoolTableBrowser
+        <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
+          <StakePoolTableHeaderBrowser
+            activeSort={sort}
+            translations={tableHeaderTranslations}
+            isActiveSortItem={isActiveSortItem}
+            onSortChange={onSortChange}
+          />
+        </div>
+        <StakePoolTableBodyBrowser
           items={list}
           loadMoreData={loadMoreData}
-          locale={{ emptyText: true }}
-          // TODO: there are too many loading states and it's confusing, we should refactor this and reduce them
-          // do not show loader if we are already searching/filtering
+          emptyText
           total={isSearching ? 0 : totalResultCount}
           emptyPlaceholder={!fetchingPools && !isSearching && <StakePoolsTableEmpty />}
           // Show skeleton if it's loading the list while a search is not being performed
           showSkeleton={isLoadingList && !isSearching}
           scrollableTargetId={scrollableTargetId}
-          translations={tableHeaderTranslations}
-          activeSort={sort}
-          setActiveSort={setSort}
+          ItemRenderer={StakePoolItemBrowser}
         />
       </div>
     </div>

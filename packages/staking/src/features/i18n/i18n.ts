@@ -25,6 +25,7 @@ export const initI18n = () => {
         translation: en,
       },
     },
+    returnNull: false,
     supportedLngs: Object.values(Language),
   });
 };

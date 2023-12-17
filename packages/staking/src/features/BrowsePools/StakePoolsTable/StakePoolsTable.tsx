@@ -7,17 +7,18 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../store';
-import styles from './StakePoolsTable.module.scss';
-import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
-import { StakePoolSortOptions, StakePoolTableBrowser } from './StakePoolTableBrowser';
+import * as styles from './StakePoolsTable.css';
+import { StakePoolsTableEmpty } from './StakePoolsTableEmpty/StakePoolsTableEmpty';
+import { StakePoolTableBrowser } from './StakePoolTableBrowser/StakePoolTableBrowser';
+import { SortDirection, SortField, StakePoolSortOptions } from './types';
 
 type StakePoolsTableProps = {
   scrollableTargetId: string;
 };
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: 'apy',
-  order: 'desc',
+  field: SortField.apy,
+  order: SortDirection.desc,
 };
 
 const searchDebounce = 300;
@@ -53,9 +54,12 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
 
   const tableHeaderTranslations = {
     apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
+    blocks: t('browsePools.stakePoolTableBrowser.tableHeader.blocks.title'),
     cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost'),
-    poolName: t('browsePools.stakePoolTableBrowser.tableHeader.poolName'),
+    margin: t('browsePools.stakePoolTableBrowser.tableHeader.margin.title'),
+    pledge: t('browsePools.stakePoolTableBrowser.tableHeader.pledge.title'),
     saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),
+    ticker: t('browsePools.stakePoolTableBrowser.tableHeader.ticker'),
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
@@ -139,7 +143,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
         data-testid="search-input"
         loading={fetchingPools}
       />
-      <Box mt="$32">
+      <Box mt="$10">
         <StakePoolTableBrowser
           items={list}
           loadMoreData={loadMoreData}
