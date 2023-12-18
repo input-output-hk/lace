@@ -8,9 +8,9 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
   @LW-7819 @Testnet @Pending
 #    bug LW-8777
   Scenario Outline: Extended View - Multidelegation - Delegate to multiple pools E2E
-    When I click Overview tab
+    When I open Overview tab
     And I wait until delegation info card shows staking to "<pools_before>" pool(s)
-    And I click Browse pools tab
+    And I open Browse pools tab
     And I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
@@ -22,7 +22,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I navigate to Transactions extended page
     Then I can see transaction 1 with type "<tx_type>"
     When I navigate to Staking extended page
-    And I click Overview tab
+    And I open Overview tab
     Then I wait until delegation info card shows staking to "<pools_after>" pool(s)
     Examples:
       | pools_before | pools_after | pools_names                                        | tx_type                   |
@@ -35,7 +35,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
   @LW-8434 @Testnet
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool with metadata
     And I save identifiers of stake pools currently in use
-    And I click Browse pools tab
+    And I open Browse pools tab
     And I input "OtherStakePool" into stake pool search bar
     And I click on the stake pool with name "OtherStakePool"
     Then I see stake pool details drawer for "OtherStakePool" stake pool
@@ -47,7 +47,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I enter correct wallet password and confirm staking
     Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
-    And I click Overview tab
+    And I open Overview tab
     And I wait until "OtherStakePool" pool is on "Your pools" list
     And I navigate to Transactions extended page
     Then I can see transaction 1 with type "Delegation"
@@ -57,7 +57,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
   @LW-8435 @Testnet
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool without metadata
     And I save identifiers of stake pools currently in use
-    And I click Browse pools tab
+    And I open Browse pools tab
     And I input "OtherNoMetadataStakePool" into stake pool search bar
     And I click on the stake pool with name "-"
     Then I see stake pool details drawer for stake pool without metadata
@@ -69,7 +69,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I enter correct wallet password and confirm staking
     Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
-    And I click Overview tab
+    And I open Overview tab
     And I wait until "-" pool is on "Your pools" list
     And I navigate to Transactions extended page
     Then I can see transaction 1 with type "Delegation"

@@ -6,12 +6,12 @@ export interface StakePool {
   owners: string[];
 }
 
-const adacapital: StakePool = {
-  name: 'ADA Capital',
-  ticker: 'ADACT',
-  information: 'ADA Capital - PreProd Pool',
-  poolId: 'pool132jxjzyw4awr3s75ltcdx5tv5ecv6m042306l630wqjckhfm32r',
-  owners: ['stake_test1up3hm9j74c560trk9enccpc269wc9xfn4ah8ax8jp3rwtdgtr58qe']
+const adaocean: StakePool = {
+  name: 'ADA Ocean',
+  ticker: 'OCEAN',
+  information: 'Cloud based reliable stake pool cluster',
+  poolId: 'pool129n0d9zrla7ntfjlwhqrtmn7halem0shcjd5mz5zhfym2auyu05',
+  owners: ['stake_test1uq3j8w969529ny6m3pazdtherkq5ekgx3v8z62s9aszcuhg7mfj0q']
 };
 
 const adacapitalMainnet: StakePool = {
@@ -48,8 +48,8 @@ const noMetadataPool2: StakePool = {
   owners: ['stake_test1ur97646x6f523xx9k89d6tt0c2td3pfvczw903zu2qa8syqal0s9h']
 };
 
-export const StakePoolsData = { adacapital, canadaStakes, noMetadataPool1, noMetadataPool2, adacapitalMainnet };
-const StakePoolsArray: StakePool[] = [adacapital, canadaStakes, noMetadataPool1, noMetadataPool2, adacapitalMainnet];
+export const StakePoolsData = { adaocean, canadaStakes, noMetadataPool1, noMetadataPool2, adacapitalMainnet };
+const StakePoolsArray: StakePool[] = [adaocean, canadaStakes, noMetadataPool1, noMetadataPool2, adacapitalMainnet];
 
 export const StakePoolsDataMainnet = { adacapitalMainnet };
 const StakePoolsMainnetArray: StakePool[] = [adacapitalMainnet];
