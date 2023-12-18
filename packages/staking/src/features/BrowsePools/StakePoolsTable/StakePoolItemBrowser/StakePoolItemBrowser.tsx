@@ -31,7 +31,9 @@ export const StakePoolItemBrowser = ({
 }: StakePoolItemBrowserProps): React.ReactElement => (
   <div
     data-testid="stake-pool-table-item"
-    className={cn(styles.row, { [styles.withMultiDelegation!]: multiDelegationEnabled })}
+    className={cn(styles.row, {
+      [styles.withMultiDelegation!]: multiDelegationEnabled,
+    })}
     onClick={() => onClick?.()}
   >
     {config.columns.map((cell, index) => (

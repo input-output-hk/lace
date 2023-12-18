@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { stakePoolCellRenderer } from './StakePoolCellRenderer/StakePoolCellRenderer';
 import { Columns } from './types';
 
@@ -25,7 +26,13 @@ export const getSaturationLevel = (saturation: number): SaturationColors => {
   return color;
 };
 
+export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && Columns.apy].filter(
+  (c) => !!c
+) as Columns[];
+
 export const config = {
-  columns: Object.keys(Columns).filter((v) => Number.isNaN(Number(v))) as Columns[],
+  columns: (Object.keys(Columns).filter((v) => Number.isNaN(Number(v))) as Columns[]).filter(
+    (column) => !hiddenColumns.includes(column)
+  ),
   renderer: stakePoolCellRenderer,
 };

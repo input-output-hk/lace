@@ -51,6 +51,7 @@ export const StakePoolTableBrowser = ({
   const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
   const onSortChange = (field: Columns) => {
+    // TODO: remove once updated on sdk side
     if (!Object.keys(SortField).includes(field)) return;
     const order =
       field === activeSort?.field && activeSort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;

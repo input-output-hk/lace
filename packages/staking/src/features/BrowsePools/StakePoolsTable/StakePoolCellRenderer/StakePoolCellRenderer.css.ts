@@ -14,7 +14,6 @@ export const dot = style([
     display: 'flex',
     height: '7px',
     marginRight: theme.spacing.$6,
-
     width: '7px',
   },
 ]);

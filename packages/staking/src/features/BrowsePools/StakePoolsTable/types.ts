@@ -21,6 +21,7 @@ export type StakePoolSortOptions = {
   order: SortDirection;
 };
 
+// TODO: update once updated on sdk side
 export enum SortField {
   name = 'name',
   apy = 'apy',

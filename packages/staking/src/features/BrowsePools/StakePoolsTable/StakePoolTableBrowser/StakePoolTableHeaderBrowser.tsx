@@ -41,7 +41,7 @@ export const StakePoolTableHeaderBrowser = ({
   });
 
   return (
-    <div data-testid="stake-pool-list-header" className={styles.header}>
+    <div data-testid="stake-pool-list-header" className={cn(styles.header, {})}>
       {headers.map(({ label, value, tooltipText }) => (
         <div
           className={cn(styles.headerItem, {

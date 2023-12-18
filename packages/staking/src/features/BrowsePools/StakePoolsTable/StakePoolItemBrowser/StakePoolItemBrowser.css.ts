@@ -8,10 +8,11 @@ export const row = style([
     display: 'grid',
     flex: '1',
     gap: vars.spacing.$20,
-    gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+    gridAutoColumns: 'minmax(0, 1fr)',
+    gridAutoFlow: 'column',
     height: '68px',
     minHeight: '68px',
-    padding: `22px ${vars.spacing.$10}`,
+    padding: `0 ${vars.spacing.$20}`,
     selectors: {
       '&:hover': {
         background: vars.colors.$buttons_secondary_container_bgColor_pressed,
@@ -32,9 +33,6 @@ export const withMultiDelegation = style([
       },
       [` &${row}:hover`]: {
         background: vars.colors.$buttons_secondary_container_bgColor_pressed,
-        gap: '0',
-        gridTemplateColumns: 'calc(100% / 7) calc(100% / 7 * 6)',
-        padding: '0',
       },
     },
   },
@@ -52,11 +50,8 @@ export const cell = style([
     fontWeight: vars.fontWeights.$bold,
     lineHeight: vars.spacing.$24,
     selectors: {
-      [`${withMultiDelegation}:hover &`]: {
+      [`${withMultiDelegation}:hover &:nth-last-child(2)`]: {
         display: 'none',
-      },
-      [`${withMultiDelegation}:hover &:first-child`]: {
-        display: 'flex',
       },
     },
   },
@@ -67,7 +62,6 @@ export const actions = style([
     alignItems: 'center',
     display: 'none',
     justifyContent: 'flex-end',
-    paddingRight: vars.spacing.$10,
     selectors: {
       [`${withMultiDelegation}:hover &`]: {
         display: 'flex',
@@ -78,6 +72,15 @@ export const actions = style([
 export const cellInner = style([
   {
     overflow: 'hidden',
+    selectors: {
+      [`${withMultiDelegation}:hover &`]: {
+        display: 'none',
+      },
+      [`${withMultiDelegation}:hover :first-child &`]: {
+        display: 'block',
+        textAlign: 'center',
+      },
+    },
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     width: '100%',

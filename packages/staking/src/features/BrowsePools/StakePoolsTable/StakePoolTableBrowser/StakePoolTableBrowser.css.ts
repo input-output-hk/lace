@@ -38,7 +38,6 @@ export const selectedPools = style([
         borderBottom: `1px solid ${theme.colors.$selectedPoolsSectionBorderColor}`,
         display: 'flex',
         flexDirection: 'column',
-        gap: vars.spacing.$8,
         marginBottom: vars.spacing.$24,
         paddingBottom: vars.spacing.$24,
       },
@@ -53,8 +52,9 @@ export const header = style([
     display: 'grid',
     flex: '1',
     gap: vars.spacing.$20,
-    gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-    padding: `22px ${vars.spacing.$10}`,
+    gridAutoColumns: 'minmax(0, 1fr)',
+    gridAutoFlow: 'column',
+    padding: `22px ${vars.spacing.$20}`,
   },
 ]);
 
