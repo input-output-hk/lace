@@ -26,8 +26,8 @@ import localStorageInitializer from '../fixture/localStorageInitializer';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import StartStakingPage from '../elements/multidelegation/StartStakingPage';
 
-Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
-  await MultidelegationPage.clickOnTab(tabToClick);
+Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
+  await MultidelegationPage.openTab(tabToClick);
 });
 
 When(/^I close Multi-delegation beta modal$/, async () => {

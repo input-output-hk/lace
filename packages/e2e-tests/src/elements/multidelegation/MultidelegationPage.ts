@@ -219,19 +219,25 @@ class MultidelegationPage {
     )) as WebdriverIO.Element;
   }
 
-  async clickOnTab(tab: string) {
+  async clickAndGetTabStateAttribute(tab: 'Overview' | 'Browse pools') {
+    let tabElement;
     switch (tab) {
       case 'Overview':
-        await this.overviewTab.waitForClickable();
-        await this.overviewTab.click();
+        tabElement = this.overviewTab;
         break;
       case 'Browse pools':
-        await this.browseTab.waitForClickable();
-        await this.browseTab.click();
-        break;
-      default:
-        throw new Error(`Unsupported tab name: ${tab}`);
+        tabElement = this.browseTab;
     }
+    await tabElement.waitForClickable();
+    await tabElement.click();
+    return tabElement.getAttribute('data-state');
+  }
+
+  async openTab(tab: 'Overview' | 'Browse pools') {
+    await browser.waitUntil(async () => (await this.clickAndGetTabStateAttribute(tab)) === 'active', {
+      timeout: 5000,
+      interval: 1000
+    });
   }
 
   async markPoolsForDelegation(poolsToStake: string) {
