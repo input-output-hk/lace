@@ -7,11 +7,11 @@ Feature: Staking Page - Funds already delegated - Popup View
   @LW-2652
   Scenario: Popup View - Staking  - Currently staking component
     When I navigate to Staking popup page
-    Then I see currently staking component for stake pool: "ADA Capital" in popup mode
+    Then I see currently staking component for stake pool: "ADA Ocean" in popup mode
 
   @LW-2653
   Scenario: Popup View - Staking - Details of currently staked pool
     And I navigate to Staking popup page
     When I click pool name in currently staking component
-    Then I see drawer with "ADA Capital" stake pool details
+    Then I see drawer with "ADA Ocean" stake pool details
 
