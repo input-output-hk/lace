@@ -27,7 +27,6 @@ import {
   AnalyticsEventNames,
   PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
-import { compactNumberWithUnit } from '@src/utils/format-number';
 
 const { Text } = Typography;
 
@@ -119,7 +118,6 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           stakePool: pool,
           ...stakePool,
           hexId: pool.hexId,
-          ...(pool.metrics && { blocks: compactNumberWithUnit(pool.metrics.blocksCreated) }),
           onClick: (): void => {
             analytics.sendEventToMatomo({
               category: MatomoEventCategories.STAKING,

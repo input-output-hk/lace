@@ -28,9 +28,6 @@ export const row = style([
 export const withMultiDelegation = style([
   {
     selectors: {
-      [`&${row}`]: {
-        cursor: 'default',
-      },
       [` &${row}:hover`]: {
         background: vars.colors.$buttons_secondary_container_bgColor_pressed,
       },

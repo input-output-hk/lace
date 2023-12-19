@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp */
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import { Columns } from '../types';
@@ -15,4 +16,5 @@ export const stakePoolCellRenderer = {
       </div>
     );
   },
+  [Columns.margin]: ({ value }: { value: string }) => <span>{value}%</span>,
 } as Record<Columns, React.FunctionComponent<{ value?: string }>>;
