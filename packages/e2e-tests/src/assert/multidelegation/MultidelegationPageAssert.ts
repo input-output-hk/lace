@@ -62,7 +62,7 @@ class MultidelegationPageAssert {
     expect(await MultidelegationPage.delegationCardChartSlices.length).to.equal(poolsCount);
   };
 
-  assertSeeDelegatedPoolCardsPopup = async () => {
+  assertSeeDelegatedPoolCards = async () => {
     const poolsCount = Number(await MultidelegationPage.delegationCardPoolsValue.getText());
     for (let i = 0; i < poolsCount; i++) {
       await this.assertSeeDelegatedPoolDetailsInfo(i);

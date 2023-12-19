@@ -22,7 +22,7 @@ Feature: Staking Page - Popup View
     And I disable showing Multidelegation beta banner
     And I disable showing Multidelegation persistence banner
     When I navigate to Staking popup page
-    And I see Delegation pool cards are displayed for popup view
+    And I see Delegation pool cards are displayed
     Examples:
       | walletName                     |
       | MultidelegationDelegatedSingle |
