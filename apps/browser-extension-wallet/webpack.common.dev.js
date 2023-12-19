@@ -2,11 +2,7 @@ const path = require('path');
 const { merge } = require('webpack-merge');
 const CopyPlugin = require('copy-webpack-plugin');
 const { transformManifest } = require('./webpack-utils');
-require('dotenv-defaults').config({
-  path: './.env',
-  encoding: 'utf8',
-  defaults: './.env.defaults'
-});
+const Dotenv = require('dotenv-webpack');
 
 const serverConfig = (RUN_DEV_SERVER, port) =>
   RUN_DEV_SERVER
@@ -43,6 +39,14 @@ module.exports =
         devtool: 'inline-source-map',
         cache: { type: 'filesystem' },
         plugins: [
+          new Dotenv({
+            path: '.env',
+            safe: false,
+            silent: false,
+            defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.devpreview' : true,
+            systemvars: true,
+            allowEmptyValues: true
+          }),
           new CopyPlugin({
             patterns: [
               {

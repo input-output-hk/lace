@@ -1,11 +1,18 @@
-require('dotenv-defaults').config({
-  path: './.env',
-  encoding: 'utf8',
-  defaults: './.env.defaults'
-});
-
 const transformManifest = (content, mode) => {
+  require('dotenv-defaults').config({
+    path: './.env',
+    encoding: 'utf8',
+    defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.devpreview' : './.env.defaults'
+  });
+
+  const yy = new Date();
+  yy.getTime();
   const manifest = JSON.parse(content.toString());
+  manifest.name = manifest.name.replace('$WALLET_MANIFEST_NAME', process.env.WALLET_MANIFEST_NAME);
+  if (process.env.BUILD_DEV_PREVIEW === 'true') {
+    const date = new Date();
+    manifest.version = `${manifest.version}.${date.getTime()}`;
+  }
   manifest.content_security_policy.extension_pages = manifest.content_security_policy.extension_pages
     .replace(
       '$CARDANO_SERVICES_URLS',
@@ -29,7 +36,6 @@ const transformManifest = (content, mode) => {
   } else {
     delete manifest.key;
   }
-
   return JSON.stringify(manifest);
 };
 

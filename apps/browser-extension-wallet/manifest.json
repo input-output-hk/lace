@@ -1,5 +1,5 @@
 {
-  "name": "Lace",
+  "name": "$WALLET_MANIFEST_NAME",
   "description": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
   "version": "1.8.0",
   "manifest_version": 3,

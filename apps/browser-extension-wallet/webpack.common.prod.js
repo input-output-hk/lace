@@ -1,16 +1,20 @@
 const TerserPlugin = require('terser-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const { transformManifest } = require('./webpack-utils');
-require('dotenv-defaults').config({
-  path: './.env',
-  encoding: 'utf8',
-  defaults: './.env.defaults'
-});
+const Dotenv = require('dotenv-webpack');
 
 module.exports = () => ({
   mode: 'production',
   devtool: false,
   plugins: [
+    new Dotenv({
+      path: '.env',
+      safe: false,
+      silent: false,
+      defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.devpreview' : true,
+      systemvars: true,
+      allowEmptyValues: true
+    }),
     new CopyPlugin({
       patterns: [
         {

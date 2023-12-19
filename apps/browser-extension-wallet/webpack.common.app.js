@@ -4,11 +4,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const { merge } = require('webpack-merge');
 const commonConfig = require('./webpack.common');
-require('dotenv-defaults').config({
-  path: './.env',
-  encoding: 'utf8',
-  defaults: './.env.defaults'
-});
 
 module.exports = () =>
   merge(commonConfig(), {
