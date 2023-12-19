@@ -6,7 +6,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
 import { createAssetsRoute, fillMnemonic, getNextButton, mnemonicWords, setupStep } from '../tests/utils';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 const keepWalletSecureStep = async () => {
   const nextButton = getNextButton();
@@ -42,7 +42,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     createWallet: jest.Mock;
     generateMnemonicWords: jest.Mock;
     confirmationDialog: {
-      shouldShowDialog$: Subject<boolean>;
+      shouldShowDialog$: BehaviorSubject<boolean>;
       withConfirmationDialog: jest.Mock;
     };
   };
@@ -52,7 +52,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       createWallet: jest.fn(),
       generateMnemonicWords: jest.fn(),
       confirmationDialog: {
-        shouldShowDialog$: new Subject(),
+        shouldShowDialog$: new BehaviorSubject(false),
         withConfirmationDialog: jest.fn().mockReturnValue((): void => void 0)
       }
     };
@@ -74,7 +74,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     await recoveryPhraseStep();
   });
 
-  test.only('should emit correct value for shouldShowDialog', (done) => {
+  test('should emit correct value for shouldShowDialog', async () => {
     render(
       <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
         <CreateWallet providers={providers as Providers} />
@@ -84,19 +84,12 @@ describe('Multi Wallet Setup/Create Wallet', () => {
 
     const nameInput = screen.getByTestId('wallet-name-input');
 
-    const firstSub = providers.confirmationDialog.shouldShowDialog$.subscribe((value) => {
-      expect(value).toBe(true);
-      firstSub.unsubscribe();
-    });
-
     fireEvent.change(nameInput, { target: { value: 'My X Wallet' } });
 
-    const secondSub = providers.confirmationDialog.shouldShowDialog$.subscribe((value) => {
-      expect(value).toBe(false);
-      secondSub.unsubscribe();
-      done();
-    });
+    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(true);
 
     fireEvent.change(nameInput, { target: { value: '' } });
+
+    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
   });
 });

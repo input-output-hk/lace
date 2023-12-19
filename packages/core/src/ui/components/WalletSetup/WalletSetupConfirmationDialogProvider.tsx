@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Dialog } from '@lace/ui';
 import { useTranslate } from '@src/ui/hooks';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 interface Props {
   children: React.ReactNode;
@@ -10,7 +10,7 @@ interface Props {
 
 interface ContextType {
   isDialogOpen: boolean;
-  shouldShowDialog$: Subject<boolean>;
+  shouldShowDialog$: BehaviorSubject<boolean>;
   withConfirmationDialog: (confirmedCallback: () => void) => () => void;
 }
 
@@ -26,7 +26,7 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const handleOnConfirmRef = useRef(() => void 0);
   const shouldShowDialog = useRef<boolean>(false);
-  const shouldShowDialog$ = useMemo(() => new Subject<boolean>(), []);
+  const shouldShowDialog$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
   const { t } = useTranslate();
 
   useEffect(() => {
