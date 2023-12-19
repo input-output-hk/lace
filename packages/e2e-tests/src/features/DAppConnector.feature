@@ -30,7 +30,7 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I see DApp authorization window
 
-  @LW-4062 @LW-3753 @Testnet @Mainnet
+  @LW-4062 @LW-3753 @LW-9080 @Testnet @Mainnet
   Scenario: Authorize app functions as expected when the user chooses 'Only once'
     Given I am on Tokens extended page
     And I save token: "Cardano" balance
@@ -39,6 +39,7 @@ Feature: DAppConnector - Common
     And I click "Authorize" button in DApp authorization window
     And I click "Only once" button in DApp authorization window
     Then I see Lace wallet info in DApp when connected
+    And I am able to access all window.cardano.lace properties
     And I switch to window with Lace
     And I close all remaining tabs except current one
     When I open test DApp

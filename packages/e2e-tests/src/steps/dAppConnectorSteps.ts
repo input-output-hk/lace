@@ -161,6 +161,10 @@ Then(
   }
 );
 
+Then(/^I am able to access all window.cardano.lace properties$/, async () => {
+  await DAppConnectorAssert.assertSeeWindowCardanoLaceProperties();
+});
+
 Then(/^I see "Authorized DApps" section empty state in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await DAppConnectorAssert.assertSeeAuthorizedDAppsEmptyState(mode);
 });

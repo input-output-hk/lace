@@ -365,6 +365,26 @@ class DAppConnectorAssert {
     Logger.log('saving tx hash: null'); // TODO save proper hash once it's added to the all done page
     testContext.save('txHashValue', false);
   }
+
+  async assertSeeWindowCardanoLaceProperties() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const result = await browser.execute(() => window.cardano.lace);
+    expect(result.apiVersion).to.equal('0.1.0');
+    expect(result.icon).not.to.be.empty;
+    expect(result.name).to.equal('lace');
+    expect(result.supportedExtensions[0].cip).to.equal(95);
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const isEnabled = await browser.execute(() => window.cardano.lace.isEnabled());
+    expect(isEnabled).to.be.true;
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const enable = await browser.execute(() => window.cardano.lace.enable());
+    expect(enable).not.to.be.empty;
+  }
 }
 
 export default new DAppConnectorAssert();
