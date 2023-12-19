@@ -18,7 +18,7 @@ import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDraw
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
-import StakingManageDrawerAssert from '../assert/multidelegation/StakingManageDrawerAssert';
+import ManageStakingDrawerAssert from '../assert/multidelegation/ManageStakingDrawerAssert';
 import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
 import TokensPageObject from '../pageobject/tokensPageObject';
@@ -259,7 +259,7 @@ When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
       await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
       break;
     case 'manage':
-      await StakingManageDrawerAssert.assertSeeStakingManageDrawer();
+      await ManageStakingDrawerAssert.assertSeeManageStakingDrawer();
       break;
   }
 });
