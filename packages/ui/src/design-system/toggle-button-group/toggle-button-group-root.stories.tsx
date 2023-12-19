@@ -305,9 +305,8 @@ const idsByScenario = {
   ],
 };
 
-export const Interactions: ComponentStory<
-  typeof ToggleButtonGroup.Root
-> = (): JSX.Element => {
+type Interactions = ComponentStory<typeof ToggleButtonGroup.Root>;
+export const Interactions: Interactions = (): JSX.Element => {
   const [labelScenarioActive, setLabelScenarioActive] = useState('tab1');
   const [iconScenarioActive, setIconScenarioActive] = useState('tab1');
   const [labelAndIconScenarioActive, setLabelAndIconScenarioActive] =
