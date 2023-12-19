@@ -27,18 +27,18 @@ Feature: Delegating funds to new pool E2E
     And I navigate to Transactions extended page
     Then the Received transaction is displayed with value: "5.00 tADA" and tokens count 1
     And I navigate to Staking extended page
-    And I input "ADA Capital" to the search bar
+    And I input "ADA Ocean" to the search bar
     And I wait for single search result
-    And I click stake pool with name "ADA Capital"
-    Then I see drawer with "ADA Capital" stake pool details and a button available for staking
+    And I click stake pool with name "ADA Ocean"
+    Then I see drawer with "ADA Ocean" stake pool details and a button available for staking
     And I save stake pool info
     When I click "Stake on this pool" button on stake pool details drawer
     And I click "Next" button on staking confirmation drawer
     And I enter newly created wallet password and confirm staking
     Then Initial Delegation success screen is displayed in extended mode
     When I click "Close" button on staking success drawer
-    And I wait until current stake pool switch to "ADA Capital"
-    Then I see currently staking component for stake pool: "ADA Capital" in extended mode
+    And I wait until current stake pool switch to "ADA Ocean"
+    Then I see currently staking component for stake pool: "ADA Ocean" in extended mode
     When I navigate to Transactions extended page
     Then I can see transaction 1 with type "Delegation"
     And I click and open recent transactions details until find transaction with correct poolID
@@ -71,18 +71,18 @@ Feature: Delegating funds to new pool E2E
     And I navigate to Transactions popup page
     Then the Received transaction is displayed with value: "5.00 tADA" and tokens count 1
     And I navigate to Staking popup page
-    And I input "ADA Capital" to the search bar
+    And I input "ADA Ocean" to the search bar
     And I wait for single search result
-    And I click stake pool with name "ADA Capital"
-    Then I see drawer with "ADA Capital" stake pool details and a button available for staking
+    And I click stake pool with name "ADA Ocean"
+    Then I see drawer with "ADA Ocean" stake pool details and a button available for staking
     When I save stake pool info
     When I click "Stake on this pool" button on stake pool details drawer
     And I click "Next" button on staking confirmation drawer
     And I enter newly created wallet password and confirm staking
     Then Initial Delegation success screen is displayed in popup mode
     When I click "Close" button on staking success drawer
-    And I wait until current stake pool switch to "ADA Capital"
-    Then I see currently staking component for stake pool: "ADA Capital" in popup mode
+    And I wait until current stake pool switch to "ADA Ocean"
+    Then I see currently staking component for stake pool: "ADA Ocean" in popup mode
     When I navigate to Transactions popup page
     Then I can see transaction 1 with type "Delegation"
     And I click and open recent transactions details until find transaction with correct poolID

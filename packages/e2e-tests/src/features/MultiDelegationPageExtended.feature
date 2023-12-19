@@ -35,8 +35,8 @@ Feature: Staking Page - Extended View
     And (if applicable) first stake pool search result has "<stake_pool_name>" name and "<stake_pool_ticker>" ticker
     Examples:
       | stake_pool_search_term | number_of_results | stake_pool_name                  | stake_pool_ticker |
-      | a Ocean                | 1                 | ADA Ocean                        | ADACT             |
-      | a ocean                | 1                 | ADA Ocean                        | ADACT             |
+      | a Ocean                | 1                 | ADA Ocean                        | OCEAN             |
+      | a ocean                | 1                 | ADA Ocean                        | OCEAN             |
       | NED#                   | 0                 |                                  |                   |
       | PAN                    | 1                 | PANL Stake Pool (Pre-Production) | PANL              |
       | 123456                 | 0                 |                                  |                   |
