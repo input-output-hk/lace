@@ -1,11 +1,14 @@
+/* eslint-disable functional/no-loop-statements */
 import React, { useCallback, useState } from 'react';
 
 import { Root as RadixReactToggleGroupRoot } from '@radix-ui/react-toggle-group';
-import type { Meta } from '@storybook/react';
+import type { ComponentStory, Meta } from '@storybook/react';
+import { userEvent, within } from '@storybook/testing-library';
 
 import { ReactComponent as Globe } from '../../assets/icons/globe-alt.component.svg';
 import { ReactComponent as Home } from '../../assets/icons/home.component.svg';
 import { ReactComponent as Key } from '../../assets/icons/key.component.svg';
+import { sleep } from '../../test';
 import { page, Section, UIStateTable, Variants } from '../decorators';
 import { Divider } from '../divider';
 import { Cell, Grid } from '../grid';
@@ -290,4 +293,138 @@ Overview.parameters = {
     focusVisible: '#focused',
     active: '#pressed',
   },
+};
+
+const idsByScenario = {
+  'label-only': ['tab1-label-only', 'tab2-label-only', 'tab3-label-only'],
+  'icon-only': ['tab1-icon-only', 'tab2-icon-only', 'tab3-icon-only'],
+  'label-and-icon': [
+    'tab1-label-and-icon',
+    'tab2-label-and-icon',
+    'tab3-label-and-icon',
+  ],
+};
+
+export const Interactions: ComponentStory<
+  typeof ToggleButtonGroup.Root
+> = (): JSX.Element => {
+  const [labelScenarioActive, setLabelScenarioActive] = useState('tab1');
+  const [iconScenarioActive, setIconScenarioActive] = useState('tab1');
+  const [labelAndIconScenarioActive, setLabelAndIconScenarioActive] =
+    useState('tab1');
+
+  return (
+    <Grid columns="$2">
+      <Cell>
+        <Section title="Scenario: label-only">
+          <ToggleButtonGroup.Root
+            value={labelScenarioActive}
+            onValueChange={(tab): void => {
+              setLabelScenarioActive(tab);
+            }}
+          >
+            <ToggleButtonGroup.Item data-testid="tab1-label-only" value="tab1">
+              Tab 1
+            </ToggleButtonGroup.Item>
+            <ToggleButtonGroup.Item data-testid="tab2-label-only" value="tab2">
+              Tab 2
+            </ToggleButtonGroup.Item>
+            <ToggleButtonGroup.Item data-testid="tab3-label-only" value="tab3">
+              Tab 3
+            </ToggleButtonGroup.Item>
+          </ToggleButtonGroup.Root>
+        </Section>
+      </Cell>
+      <Cell />
+      <Cell>
+        <Section title="Scenario: icon-only">
+          <ToggleButtonGroup.Root
+            value={iconScenarioActive}
+            onValueChange={(tab): void => {
+              setIconScenarioActive(tab);
+            }}
+          >
+            <ToggleButtonGroup.Item
+              data-testid="tab1-icon-only"
+              icon={Globe}
+              value="tab1"
+            />
+            <ToggleButtonGroup.Item
+              data-testid="tab2-icon-only"
+              icon={Home}
+              value="tab2"
+            />
+            <ToggleButtonGroup.Item
+              data-testid="tab3-icon-only"
+              icon={Key}
+              value="tab3"
+            />
+          </ToggleButtonGroup.Root>
+        </Section>
+      </Cell>
+      <Cell />
+      <Cell>
+        <Section title="Scenario: label and icon">
+          <ToggleButtonGroup.Root
+            value={labelAndIconScenarioActive}
+            onValueChange={(tab): void => {
+              setLabelAndIconScenarioActive(tab);
+            }}
+          >
+            <ToggleButtonGroup.Item
+              data-testid="tab1-label-and-icon"
+              icon={Globe}
+              value="tab1"
+            >
+              Tab 1
+            </ToggleButtonGroup.Item>
+            <ToggleButtonGroup.Item
+              data-testid="tab2-label-and-icon"
+              icon={Home}
+              value="tab2"
+            >
+              Tab 2
+            </ToggleButtonGroup.Item>
+            <ToggleButtonGroup.Item
+              data-testid="tab3-label-and-icon"
+              icon={Key}
+              value="tab3"
+            >
+              Tab 3
+            </ToggleButtonGroup.Item>
+          </ToggleButtonGroup.Root>
+        </Section>
+      </Cell>
+      <Cell />
+    </Grid>
+  );
+};
+
+Interactions.play = async ({ canvasElement }): Promise<void> => {
+  const canvas = within(canvasElement);
+
+  // navigate between scenarios by tab
+  for (let index = 0; index < 5; index++) {
+    userEvent.tab({ shift: index > 2 });
+    await sleep(300);
+  }
+
+  // click through the items
+  for (const ids of Object.values(idsByScenario)) {
+    for (const testId of ids) {
+      userEvent.click(canvas.getByTestId(testId));
+      await sleep(300);
+    }
+  }
+
+  // click through the items using only keyboard
+  userEvent.keyboard('[ArrowLeft]');
+  await sleep(300);
+  userEvent.keyboard('[ArrowLeft]');
+  await sleep(300);
+  userEvent.keyboard('[Space]');
+  await sleep(300);
+  userEvent.keyboard('[ArrowRight]');
+  await sleep(300);
+  userEvent.keyboard('[Space]');
 };
