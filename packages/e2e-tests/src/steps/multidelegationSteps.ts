@@ -62,8 +62,8 @@ Then(/^I see Delegation title displayed for multidelegation$/, async () => {
   await MultidelegationPageAssert.assertSeeTitle();
 });
 
-Then(/^I see Delegation pool cards are displayed for popup view$/, async () => {
-  await MultidelegationPageAssert.assertSeeDelegatedPoolCardsPopup();
+Then(/^I see Delegation pool cards are displayed$/, async () => {
+  await MultidelegationPageAssert.assertSeeDelegatedPoolCards();
 });
 
 When(/^I save identifiers of stake pools currently in use$/, async () => {

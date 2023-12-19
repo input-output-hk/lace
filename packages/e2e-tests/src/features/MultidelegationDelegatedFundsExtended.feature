@@ -35,3 +35,29 @@ Feature: Staking Page - Extended View
       | total staked  |
       | total rewards |
       | last reward   |
+
+  @LW-8432
+  Scenario Outline: Extended View - Delegation card displays correct data
+    Given I open wallet: "<walletName>" in: extended mode
+    And I disable showing Multidelegation beta banner
+    And I disable showing Multidelegation persistence banner
+    When I navigate to Staking extended page
+    And I open Overview tab
+    Then I see Delegation card displaying correct data
+    Examples:
+      | walletName                     |
+      | MultidelegationDelegatedSingle |
+      | MultidelegationDelegatedMulti  |
+
+  @LW-8433
+  Scenario Outline: Extended View - Delegated pools cards are present
+    Given I open wallet: "<walletName>" in: extended mode
+    And I disable showing Multidelegation beta banner
+    And I disable showing Multidelegation persistence banner
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I see Delegation pool cards are displayed
+    Examples:
+      | walletName                     |
+      | MultidelegationDelegatedSingle |
+      | MultidelegationDelegatedMulti  |
