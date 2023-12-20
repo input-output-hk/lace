@@ -69,7 +69,10 @@ export const PoolDetailsCardData = ({
           </Tooltip>
         </Flex>
         <Text.Body.Large weight="$semibold" data-testid="pool-details-card-actual-stake-value">
-          {stakeValue} <Text.Body.Small weight="$medium">{cardanoCoinSymbol}</Text.Body.Small>
+          {stakeValue}{' '}
+          <Text.Body.Small weight="$medium" data-testid="pool-details-card-actual-stake-coin-symbol">
+            {cardanoCoinSymbol}
+          </Text.Body.Small>
         </Text.Body.Large>
       </Flex>
     </Flex>
