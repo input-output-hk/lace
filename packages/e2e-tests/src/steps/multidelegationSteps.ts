@@ -319,3 +319,11 @@ When(/^I wait for stake pool list to be populated$/, async () => {
 Then(/^Each stake pool list item contains: logo, name, ticker, ROS and saturation$/, async () => {
   await MultidelegationPageAssert.assertSeeStakePoolRows();
 });
+
+When(/^I click Manage button$/, async () => {
+  await MultidelegationPage.clickManageButton();
+});
+
+Then(/^I see Manage delegation page$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeManageStakingDrawer(true);
+});
