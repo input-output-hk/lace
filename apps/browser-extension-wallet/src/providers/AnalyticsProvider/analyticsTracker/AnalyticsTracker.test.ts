@@ -29,13 +29,13 @@ const mockBackgroundServiceUtils = {
 };
 
 const getPostHogClient = (view = ExtensionViews.Extended) =>
-  new PostHogClient(
-    Wallet.Cardano.ChainIds.Preprod,
+  new PostHogClient({
+    chain: Wallet.Cardano.ChainIds.Preprod,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    userIdServiceMock as any,
-    mockBackgroundServiceUtils,
+    userIdService: userIdServiceMock as any,
+    backgroundServiceUtils: mockBackgroundServiceUtils,
     view
-  );
+  });
 
 describe('AnalyticsTracker', () => {
   const preprodChain = Wallet.Cardano.ChainIds.Preprod;
@@ -50,12 +50,12 @@ describe('AnalyticsTracker', () => {
       new AnalyticsTracker({ chain: preprodChain, postHogClient: getPostHogClient() });
       expect(getUserIdService).toHaveBeenCalledTimes(1);
       expect(MatomoClient).toHaveBeenCalledWith(preprodChain, userIdServiceMock);
-      expect(PostHogClient).toHaveBeenCalledWith(
-        preprodChain,
-        userIdServiceMock,
-        mockBackgroundServiceUtils,
-        ExtensionViews.Extended
-      );
+      expect(PostHogClient).toHaveBeenCalledWith({
+        chain: preprodChain,
+        userIdService: userIdServiceMock,
+        backgroundServiceUtils: mockBackgroundServiceUtils,
+        view: ExtensionViews.Extended
+      });
     });
     it('should only setup matomo client if posthog is disabled', () => {
       // eslint-disable-next-line no-new
@@ -78,12 +78,12 @@ describe('AnalyticsTracker', () => {
         view: ExtensionViews.Popup,
         postHogClient: getPostHogClient(ExtensionViews.Popup)
       });
-      expect(PostHogClient).toHaveBeenCalledWith(
-        preprodChain,
-        userIdServiceMock,
-        mockBackgroundServiceUtils,
-        ExtensionViews.Popup
-      );
+      expect(PostHogClient).toHaveBeenCalledWith({
+        chain: preprodChain,
+        userIdService: userIdServiceMock,
+        backgroundServiceUtils: mockBackgroundServiceUtils,
+        view: ExtensionViews.Popup
+      });
     });
     it('should setup Post Hog client with view = extended', () => {
       // eslint-disable-next-line no-new
@@ -92,12 +92,12 @@ describe('AnalyticsTracker', () => {
         view: ExtensionViews.Extended,
         postHogClient: getPostHogClient()
       });
-      expect(PostHogClient).toHaveBeenCalledWith(
-        preprodChain,
-        userIdServiceMock,
-        mockBackgroundServiceUtils,
-        ExtensionViews.Extended
-      );
+      expect(PostHogClient).toHaveBeenCalledWith({
+        chain: preprodChain,
+        userIdService: userIdServiceMock,
+        backgroundServiceUtils: mockBackgroundServiceUtils,
+        view: ExtensionViews.Extended
+      });
     });
   });
 
