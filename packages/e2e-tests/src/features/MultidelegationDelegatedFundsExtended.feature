@@ -37,10 +37,8 @@ Feature: Staking Page - Extended View
       | last reward   |
 
   @LW-8432
-  Scenario Outline: Extended View - Delegation card displays correct data
+  Scenario Outline: Extended View - Staking - Delegation card displays correct data
     Given I open wallet: "<walletName>" in: extended mode
-    And I disable showing Multidelegation beta banner
-    And I disable showing Multidelegation persistence banner
     When I navigate to Staking extended page
     And I open Overview tab
     Then I see Delegation card displaying correct data
@@ -50,10 +48,8 @@ Feature: Staking Page - Extended View
       | MultidelegationDelegatedMulti  |
 
   @LW-8433
-  Scenario Outline: Extended View - Delegated pools cards are present
+  Scenario Outline: Extended View - Staking - Delegated pools cards are present
     Given I open wallet: "<walletName>" in: extended mode
-    And I disable showing Multidelegation beta banner
-    And I disable showing Multidelegation persistence banner
     When I navigate to Staking extended page
     And I open Overview tab
     And I see Delegation pool cards are displayed
@@ -61,3 +57,10 @@ Feature: Staking Page - Extended View
       | walletName                     |
       | MultidelegationDelegatedSingle |
       | MultidelegationDelegatedMulti  |
+
+  @LW-8636
+  Scenario: Extended View - Staking - Manage button works
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page

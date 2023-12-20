@@ -18,7 +18,7 @@ import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDraw
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
-import StakingManageDrawerAssert from '../assert/multidelegation/StakingManageDrawerAssert';
+import ManageStakingDrawerAssert from '../assert/multidelegation/ManageStakingDrawerAssert';
 import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
 import TokensPageObject from '../pageobject/tokensPageObject';
@@ -259,7 +259,7 @@ When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
       await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
       break;
     case 'manage':
-      await StakingManageDrawerAssert.assertSeeStakingManageDrawer();
+      await ManageStakingDrawerAssert.assertSeeManageStakingDrawer();
       break;
   }
 });
@@ -318,4 +318,12 @@ When(/^I wait for stake pool list to be populated$/, async () => {
 
 Then(/^Each stake pool list item contains: logo, name, ticker, ROS and saturation$/, async () => {
   await MultidelegationPageAssert.assertSeeStakePoolRows();
+});
+
+When(/^I click Manage button$/, async () => {
+  await MultidelegationPage.clickManageButton();
+});
+
+Then(/^I see Manage delegation page$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeManageStakingDrawer(true);
 });
