@@ -25,8 +25,10 @@
     "README.md"
   ],
   "scripts": {
+    "prebuild": "yarn checkenv",
     "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.prod.js --progress & run -T webpack --config webpack.app.prod.js --progress",
     "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress & run -T webpack --config webpack.app.dev.js --progress",
+    "checkenv": "node checkenv.js",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
     "lint": "cd ../.. && yarn extension:lint",

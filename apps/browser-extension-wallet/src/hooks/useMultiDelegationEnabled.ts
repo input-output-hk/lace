@@ -1,6 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useMemo } from 'react';
+import { isFeatureEnabled } from '@src/utils/feature-flags';
 
 export const useMultiDelegationEnabled = (): boolean => {
   const { getKeyAgentType } = useWalletStore();
@@ -9,9 +10,9 @@ export const useMultiDelegationEnabled = (): boolean => {
     const keyAgentType = getKeyAgentType();
     switch (keyAgentType) {
       case Wallet.KeyManagement.KeyAgentType.Ledger:
-        return process.env.USE_MULTI_DELEGATION_STAKING_LEDGER === 'true';
+        return isFeatureEnabled('MULTI_DELEGATION_STAKING_LEDGER');
       case Wallet.KeyManagement.KeyAgentType.Trezor:
-        return process.env.USE_MULTI_DELEGATION_STAKING_TREZOR === 'true';
+        return isFeatureEnabled('MULTI_DELEGATION_STAKING_TREZOR');
       default:
         return true;
     }
