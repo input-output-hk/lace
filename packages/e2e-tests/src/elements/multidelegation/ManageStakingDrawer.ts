@@ -140,7 +140,7 @@ class ManageStakingDrawer extends CommonDrawerElements {
     return $$(this.TOOLTIP);
   }
 
-  tooltip(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+  tooltip(index: number): ChainablePromiseElement<WebdriverIO.Element | undefined> {
     return this.tooltips[index];
   }
 }
