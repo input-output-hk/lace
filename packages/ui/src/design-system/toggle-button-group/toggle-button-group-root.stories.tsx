@@ -5,9 +5,9 @@ import { Root as RadixReactToggleGroupRoot } from '@radix-ui/react-toggle-group'
 import type { ComponentStory, Meta } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
 
-import { ReactComponent as Globe } from '../../assets/icons/globe-alt.component.svg';
-import { ReactComponent as Home } from '../../assets/icons/home.component.svg';
-import { ReactComponent as Key } from '../../assets/icons/key.component.svg';
+import { ReactComponent as Globe } from '../../assets/storybook/globe-alt.component.svg';
+import { ReactComponent as Home } from '../../assets/storybook/home.component.svg';
+import { ReactComponent as Key } from '../../assets/storybook/key.component.svg';
 import { sleep } from '../../test';
 import { page, Section, UIStateTable, Variants } from '../decorators';
 import { Divider } from '../divider';
