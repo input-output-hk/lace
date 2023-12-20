@@ -52,6 +52,7 @@ class MultidelegationPage {
   private ROS_COLUMN_INFO = '[data-testid="browse-pools-apy-column-info"]';
   private SATURATION_COLUMN_INFO = '[data-testid="browse-pools-saturation-column-info"]';
   private TOOLTIP = 'div.ant-tooltip-inner';
+  private MANAGE_BTN = '[data-testid="manage-btn"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -151,6 +152,10 @@ class MultidelegationPage {
 
   get tooltip() {
     return $(this.TOOLTIP);
+  }
+
+  get manageBtn() {
+    return $(this.MANAGE_BTN);
   }
 
   delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
@@ -333,6 +338,11 @@ class MultidelegationPage {
       timeout: 30_000,
       timeoutMsg: 'failed while waiting for stake pool list to load'
     });
+  }
+
+  async clickManageButton() {
+    await this.manageBtn.waitForClickable();
+    await this.manageBtn.click();
   }
 }
 
