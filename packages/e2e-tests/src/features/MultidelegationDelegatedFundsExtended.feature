@@ -64,3 +64,15 @@ Feature: Staking Page - Extended View
     And I open Overview tab
     And I click Manage button
     Then I see Manage delegation page
+
+  @LW-9447
+  Scenario Outline: Extended-view - Staking - Manage staking only one pool is expanded by default
+    Given I open wallet: "<walletName>" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see only first pools details are expanded
+    Examples:
+      | walletName                     |
+      | MultidelegationDelegatedSingle |
+      | MultidelegationDelegatedMulti  |
