@@ -43,7 +43,7 @@ export const RatioInput = ({ onUpdate, onClick, value }: RatioInputProps) => {
   }, [value]);
 
   return (
-    <Box className={styles.inputContainer} data-testid="pool-details-card-ratio-input">
+    <Box className={styles.inputContainer}>
       <input
         type="text"
         className={styles.input}
@@ -53,6 +53,7 @@ export const RatioInput = ({ onUpdate, onClick, value }: RatioInputProps) => {
         onChange={handleChange}
         onKeyDown={handleKeyPress}
         onBlur={validateAndUpdate}
+        data-testid="pool-details-card-ratio-input"
       />
     </Box>
   );
