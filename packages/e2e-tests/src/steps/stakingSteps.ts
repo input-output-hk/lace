@@ -46,7 +46,7 @@ Then(
     let stakePoolDataToSave;
     if (variable === 'OtherStakePool') {
       stakePoolDataToSave =
-        stakePool === StakePoolsData.adacapital ? StakePoolsData.canadaStakes.name : StakePoolsData.adacapital.name;
+        stakePool === StakePoolsData.adaocean ? StakePoolsData.canadaStakes.name : StakePoolsData.adaocean.name;
     } else {
       stakePoolDataToSave =
         stakePool === StakePoolsData.noMetadataPool1
@@ -74,7 +74,7 @@ Then(/^the staking error screen is displayed$/, async () => {
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
 Then(/^I see drawer with "([^"]*)" stake pool details$/, async (_stakePool: string) => {
-  const adacapital = extensionUtils.isMainnet() ? StakePoolsData.adacapitalMainnet : StakePoolsData.adacapital;
+  const adacapital = extensionUtils.isMainnet() ? StakePoolsData.adacapitalMainnet : StakePoolsData.adaocean;
   await stakePoolDetailsAssert.assertSeeStakePoolDetailsPage(adacapital, true);
 });
 

@@ -1,7 +1,7 @@
 import StakingPage from '../elements/staking/stakingPage';
 import { TestnetPatterns } from '../support/patterns';
 import webTester from '../actor/webTester';
-import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
+import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
 import { t } from '../utils/translationService';
 import { StakePoolListItem } from '../elements/staking/StakePoolListItem';
 import StakingSuccessDrawer from '../elements/staking/StakingSuccessDrawer';
@@ -16,15 +16,11 @@ import { browser } from '@wdio/globals';
 
 class StakingPageAssert {
   assertStakePoolSwitched = async (stakePoolName: string) => {
-    const stakingInfoComponent = new StakingInfoComponent();
-    await browser.waitUntil(
-      async () => (await webTester.getTextValueFromElement(stakingInfoComponent.poolName())) === stakePoolName,
-      {
-        timeout: 180_000,
-        interval: 2000,
-        timeoutMsg: 'failed while waiting for stake Pool Switch'
-      }
-    );
+    await browser.waitUntil(async () => (await StakingInfoComponent.poolName.getText()) === stakePoolName, {
+      timeout: 180_000,
+      interval: 2000,
+      timeoutMsg: 'failed while waiting for stake Pool Switch'
+    });
   };
 
   assertSeeCurrentlyStakingComponent = async (
@@ -32,24 +28,16 @@ class StakingPageAssert {
     mode: 'extended' | 'popup',
     noMetaDataPool = false
   ) => {
-    const stakingInfoComponent = new StakingInfoComponent();
+    expect(await StakingInfoComponent.title.getText()).to.equal(await t('browserView.staking.stakingInfo.title'));
 
-    expect(await webTester.getTextValueFromElement(stakingInfoComponent.title())).to.equal(
-      await t('browserView.staking.stakingInfo.title')
-    );
-
-    await webTester.seeWebElement(stakingInfoComponent.poolLogo());
-    expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolName())).to.equal(expectedStakePool.name);
+    await StakingInfoComponent.poolLogo.waitForDisplayed();
+    expect(await StakingInfoComponent.poolName.getText()).to.equal(expectedStakePool.name);
 
     noMetaDataPool
-      ? expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolTicker())).to.contain(
-          expectedStakePool.poolId.slice(0, 6)
-        )
-      : expect(await webTester.getTextValueFromElement(stakingInfoComponent.poolTicker())).to.equal(
-          expectedStakePool.ticker
-        );
+      ? expect(await StakingInfoComponent.poolTicker.getText()).to.contain(expectedStakePool.poolId.slice(0, 6))
+      : expect(await StakingInfoComponent.poolTicker.getText()).to.equal(expectedStakePool.ticker);
 
-    expect(await stakingInfoComponent.statsApy.title.getText()).to.equal(
+    expect(await StakingInfoComponent.statsApy.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.ros')
     );
     // TODO BUG LW-5635
@@ -57,37 +45,37 @@ class StakingPageAssert {
     //   TestnetPatterns.PERCENT_DOUBLE_REGEX
     // );
 
-    expect(await stakingInfoComponent.statsFee.title.getText()).to.equal(
+    expect(await StakingInfoComponent.statsFee.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.Fee')
     );
-    expect(await stakingInfoComponent.statsFee.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+    expect(await StakingInfoComponent.statsFee.value.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
 
-    expect(await stakingInfoComponent.statsMargin.title.getText()).to.equal(
+    expect(await StakingInfoComponent.statsMargin.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.stats.Margin')
     );
-    expect(await stakingInfoComponent.statsMargin.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    expect(await StakingInfoComponent.statsMargin.value.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
 
     if (mode === 'extended') {
-      expect(await stakingInfoComponent.statsTotalRewards.title.getText()).to.equal(
+      expect(await StakingInfoComponent.statsTotalRewards.title.getText()).to.equal(
         await t('browserView.staking.stakingInfo.totalRewards.title')
       );
 
-      expect(await stakingInfoComponent.statsTotalRewards.value.getText()).to.match(
+      expect(await StakingInfoComponent.statsTotalRewards.value.getText()).to.match(
         TestnetPatterns.ADA_LITERAL_VALUE_REGEX_OR_0
       );
     }
 
-    expect(await stakingInfoComponent.statsTotalStaked.title.getText()).to.equal(
+    expect(await StakingInfoComponent.statsTotalStaked.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.totalStaked.title')
     );
-    expect(await stakingInfoComponent.statsTotalStaked.value.getText()).to.match(
+    expect(await StakingInfoComponent.statsTotalStaked.value.getText()).to.match(
       TestnetPatterns.ADA_LITERAL_VALUE_REGEX
     );
 
-    expect(await stakingInfoComponent.statsLastReward.title.getText()).to.equal(
+    expect(await StakingInfoComponent.statsLastReward.title.getText()).to.equal(
       await t('browserView.staking.stakingInfo.lastReward.title')
     );
-    expect(await stakingInfoComponent.statsLastReward.value.getText()).to.match(
+    expect(await StakingInfoComponent.statsLastReward.value.getText()).to.match(
       TestnetPatterns.ADA_LITERAL_VALUE_REGEX
     );
   };

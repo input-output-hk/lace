@@ -1,5 +1,4 @@
-import webTester from '../actor/webTester';
-import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
+import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
 import StakePoolDetails from '../elements/staking/stakePoolDetails';
 import simpleTxSideDrawerPageObject from './simpleTxSideDrawerPageObject';
 import { browser } from '@wdio/globals';
@@ -20,7 +19,7 @@ class StakingPageObject {
   }
 
   async clickPoolNameInStakingInfoComponent() {
-    await webTester.clickElement(new StakingInfoComponent().poolName());
+    await StakingInfoComponent.poolName.click();
   }
 
   async getPoolIdFromStakePoolDetails(mode: 'extended' | 'popup') {
