@@ -116,6 +116,7 @@ export const Overview = () => {
           disabled={pendingDelegationTransaction}
           onClick={onManageClick}
           label={t('overview.yourPoolsSection.manageButtonLabel')}
+          data-testid="manage-btn"
         />
       </Flex>
       {displayData.map((item) => (
