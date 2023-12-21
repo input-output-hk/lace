@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src", ".eslintrc.cjs", "vitest.config.ts", "tsup.config.ts", ".ladle/*.mjs", ".ladle/*"]
+  "include": ["src", ".eslintrc.cjs", "vitest.config.ts", "tsup.config.ts"]
 }
