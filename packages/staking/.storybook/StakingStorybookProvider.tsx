@@ -1,14 +1,15 @@
 // @ts-ignore
 import { SetupBase } from '../src/features/staking/Setup/SetupBase';
 // @ts-ignore
-import { OutsideHandlesProvider, OutsideHandlesContextValue } from '../src/features/outside-handles-provider';
+import { OutsideHandlesContextValue, OutsideHandlesProvider } from '../src/features/outside-handles-provider';
 import React, { ReactNode } from 'react';
+import { ThemeColorScheme } from '@lace/ui';
 
 type StakingStorybookProviderProps = {
   children: ReactNode;
 };
 
-// TODO globalState.theme === ThemeState.Light ? 'light' : 'dark'
+// Extend mocks if needed
 const outsideHandlesMocks: OutsideHandlesContextValue = {
   analytics: {
     sendPageNavigationEvent: async () => {
@@ -49,8 +50,11 @@ const outsideHandlesMocks: OutsideHandlesContextValue = {
   currentChain: undefined,
 };
 
-export const StakingStorybookProvider = ({ children }: StakingStorybookProviderProps) => (
-  <OutsideHandlesProvider {...outsideHandlesMocks}>
-    <SetupBase theme={'light'}>{children}</SetupBase>
-  </OutsideHandlesProvider>
-);
+// Please use <LocalThemeProvider> to present dark theme
+export const StakingStorybookProvider = ({ children }: StakingStorybookProviderProps) => {
+  return (
+    <OutsideHandlesProvider {...outsideHandlesMocks}>
+      <SetupBase theme={ThemeColorScheme.Light}>{children}</SetupBase>
+    </OutsideHandlesProvider>
+  );
+};
