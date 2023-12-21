@@ -39,7 +39,7 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/cardano-services-client": "0.16.2",
+    "@cardano-sdk/cardano-services-client": "0.16.4",
     "@cardano-sdk/core": "0.23.0",
     "@cardano-sdk/crypto": "0.1.19",
     "@cardano-sdk/hardware-ledger": "0.8.2",

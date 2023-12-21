@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@cardano-sdk/cardano-services-client": "0.16.2",
+    "@cardano-sdk/cardano-services-client": "0.16.4",
     "@cardano-sdk/core": "0.23.0",
     "@cardano-sdk/dapp-connector": "0.12.1",
     "@cardano-sdk/input-selection": "0.12.9",
