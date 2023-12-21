@@ -16,4 +16,3 @@ Feature: Staking Page - Popup View
     When I click "Expand view" on Start Staking page
     And I switch to last window
     Then I see Lace extension main page in extended mode
-

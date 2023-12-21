@@ -1,41 +1,33 @@
-import { WebElement, WebElementFactory as Factory } from './../webElement';
+/* eslint-disable no-undef */
 import { StatsComponent } from './statsComponent';
 
-export class StakingInfoComponent extends WebElement {
-  private CONTAINER = '//div[@data-testid="staking-info-container"]';
-  private TITLE = '//div[@data-testid="staking-info-title"]';
-  private POOL_LOGO = '//img[@data-testid="stake-pool-logo"]';
-  private POOL_NAME = '//div[@data-testid="stake-pool-name"]';
-  private POOL_TICKER = '//div[@data-testid="stake-pool-ticker"]';
-  private STATS_APY_CONTAINER = '//div[@data-testid="stats-apy-container"]';
-  private STATS_FEE_CONTAINER = '//div[@data-testid="stats-fee-container"]';
-  private STATS_MARGIN_CONTAINER = '//div[@data-testid="stats-margin-container"]';
-  private STATS_LAST_REWARD_CONTAINER = '//div[@data-testid="stats-last-reward-container"]';
-  private STATS_TOTAL_STAKED_CONTAINER = '//div[@data-testid="stats-total-staked-container"]';
-  private STATS_TOTAL_REWARDS_CONTAINER = '//div[@data-testid="stats-total-rewards-container"]';
+class StakingInfoComponent {
+  private CONTAINER = '[data-testid="delegated-pool-item"]';
+  private TITLE = '[data-testid="staking-info-title"]';
+  private POOL_LOGO = '[data-testid="stake-pool-logo"]';
+  private POOL_NAME = '[data-testid="stake-pool-name"]';
+  private POOL_TICKER = '[data-testid="stake-pool-ticker"]';
+  private STATS_APY_CONTAINER = '[data-testid="stats-apy-container"]';
+  private STATS_FEE_CONTAINER = '[data-testid="stats-fee-container"]';
+  private STATS_MARGIN_CONTAINER = '[data-testid="stats-margin-container"]';
+  private STATS_LAST_REWARD_CONTAINER = '[data-testid="stats-last-reward-container"]';
+  private STATS_TOTAL_STAKED_CONTAINER = '[data-testid="stats-total-staked-container"]';
+  private STATS_TOTAL_REWARDS_CONTAINER = '[data-testid="stats-total-rewards-container"]';
 
-  constructor() {
-    super();
+  get container() {
+    return $(this.CONTAINER);
   }
-
-  container(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}`, 'xpath');
+  get title() {
+    return $(this.TITLE);
   }
-
-  title(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.TITLE}`, 'xpath');
+  get poolLogo() {
+    return $(this.POOL_LOGO);
   }
-
-  poolLogo(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.POOL_LOGO}`, 'xpath');
+  get poolName() {
+    return $(this.POOL_NAME);
   }
-
-  poolName(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.POOL_NAME}`, 'xpath');
-  }
-
-  poolTicker(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.POOL_TICKER}`, 'xpath');
+  get poolTicker() {
+    return $(this.POOL_TICKER);
   }
 
   get statsApy(): StatsComponent {
@@ -62,6 +54,13 @@ export class StakingInfoComponent extends WebElement {
     return new StatsComponent(this.STATS_TOTAL_REWARDS_CONTAINER);
   }
 
+  async clickPoolName(title: string): Promise<void> {
+    const el: WebdriverIO.Element = await $$(this.POOL_NAME).find(
+      async (item: WebdriverIO.Element) => (await item.getText()) === title
+    );
+    await el.click();
+  }
+
   async hoverOverTotalStakedValue(): Promise<void> {
     await this.statsTotalStaked.value.scrollIntoView();
     await this.statsTotalStaked.value.moveTo();
@@ -77,3 +76,4 @@ export class StakingInfoComponent extends WebElement {
     await this.statsLastReward.value.moveTo();
   }
 }
+export default new StakingInfoComponent();
