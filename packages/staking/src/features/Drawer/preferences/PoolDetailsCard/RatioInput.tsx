@@ -53,6 +53,7 @@ export const RatioInput = ({ onUpdate, onClick, value }: RatioInputProps) => {
         onChange={handleChange}
         onKeyDown={handleKeyPress}
         onBlur={validateAndUpdate}
+        data-testid="pool-details-card-ratio-input"
       />
     </Box>
   );
