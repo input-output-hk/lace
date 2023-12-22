@@ -37,3 +37,17 @@ Feature: Staking Page - Popup View
       | element      |
       | total staked |
       | last reward  |
+
+
+  @Pending @LW-9446 @Testnet
+    # BUG LW-9152
+  Scenario Outline: Popup View - Staking - Stakepool details drawer - Close drawer by clicking <close_button> button
+    Given I navigate to Staking popup page
+    And I click on the stake pool title: "ADA Ocean" in currently staking component
+    And Stake pool details drawer is opened
+    When I close the drawer by clicking <close_button> button
+    Then Stake pool details drawer is not opened
+    Examples:
+      | close_button |
+      | back         |
+      | close        |

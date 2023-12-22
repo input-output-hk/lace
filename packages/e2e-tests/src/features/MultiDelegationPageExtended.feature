@@ -121,6 +121,7 @@ Feature: Staking Page - Extended View
     And I open Browse pools tab
     And I input "ADA Ocean" into stake pool search bar
     And I click on the stake pool with name "ADA Ocean"
+    And Stake pool details drawer is opened
     When I close the drawer by clicking close button
     Then Stake pool details drawer is not opened
 

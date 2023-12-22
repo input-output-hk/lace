@@ -18,8 +18,8 @@ import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDraw
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
+import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
 import ManageStakingDrawerAssert from '../assert/multidelegation/ManageStakingDrawerAssert';
-import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
 import TokensPageObject from '../pageobject/tokensPageObject';
 import localStorageInitializer from '../fixture/localStorageInitializer';
@@ -233,8 +233,8 @@ Then(/^staking password drawer is displayed$/, async () => {
   await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
 });
 
-Then(/^Stake pool details drawer is not opened$/, async () => {
-  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsNotOpened();
+Then(/^Stake pool details drawer (is|is not) opened$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsDisplayed(shouldBeDisplayed === 'is');
 });
 
 When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
@@ -269,19 +269,24 @@ When(
   async (elementToHover: string) => {
     switch (elementToHover) {
       case 'last reward':
-        await new StakingInfoComponent().hoverOverLastRewardValue();
+        await StakingInfoComponent.hoverOverLastRewardValue();
         break;
       case 'total staked':
-        await new StakingInfoComponent().hoverOverTotalStakedValue();
+        await StakingInfoComponent.hoverOverTotalStakedValue();
         break;
       case 'total rewards':
-        await new StakingInfoComponent().hoverOverTotalRewardsValue();
+        await StakingInfoComponent.hoverOverTotalRewardsValue();
         break;
       default:
         throw new Error(`Unsupported element: ${elementToHover}`);
     }
   }
 );
+
+When(/^I click on the stake pool title: "([^"]*)" in currently staking component$/, async (poolName: string) => {
+  await StakingInfoComponent.container.waitForDisplayed();
+  await StakingInfoComponent.clickPoolName(poolName);
+});
 
 Then(/^I see tooltip for element in currently staking component$/, async () => {
   await MultidelegationPageAssert.assertSeeCurrentlyStakingTooltip();
