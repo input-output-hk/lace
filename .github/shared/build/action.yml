@@ -21,7 +21,7 @@ inputs:
     required: false
     default: 'false'
   BUILD_DEV_PREVIEW:
-    description: 'Should build developer preview version?'
+    description: 'Build developer preview of Lace'
     required: false
     default: 'false'
 runs:
