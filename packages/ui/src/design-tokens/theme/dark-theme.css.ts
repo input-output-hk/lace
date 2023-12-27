@@ -55,6 +55,19 @@ const colors: Colors = {
   $buttons_secondary_container_outlineColor:
     darkColorScheme.$primary_accent_purple_0_3,
 
+  $toggle_button_group_bgColor: darkColorScheme.$primary_mid_black,
+  $toggle_button_group_item_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $toggle_button_group_item_outline_focused:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $toggle_button_group_item_label_color: darkColorScheme.$primary_light_grey,
+  $toggle_button_group_item_label_color_hover:
+    darkColorScheme.$primary_light_grey,
+  $toggle_button_group_item_label_color_active: darkColorScheme.$primary_white,
+  $toggle_button_group_item_label_color_disabled:
+    darkColorScheme.$primary_light_grey,
+  $toggle_button_group_item_bgColor: darkColorScheme.$primary_mid_black,
+  $toggle_button_group_item_bgColor_active: darkColorScheme.$primary_grey,
+
   $card_elevated_backgroundColor: darkColorScheme.$primary_mid_black,
   $card_greyed_backgroundColor: darkColorScheme.$primary_dark_grey_plus,
   $card_outlined_backgroundColor: darkColorScheme.$primary_mid_black,
