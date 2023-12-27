@@ -83,7 +83,7 @@ export const SetupRestoreWallet = (confirmationDialog: ConfirmationDialog): JSX.
   />
 );
 
-export const Component = (): JSX.Element => {
+const Component = (): JSX.Element => {
   const { path } = useRouteMatch();
   const history = useHistory();
   const { page, setBackgroundPage } = useBackgroundPage();
@@ -92,18 +92,6 @@ export const Component = (): JSX.Element => {
   const closeWalletCreation = withConfirmationDialog(() => {
     setBackgroundPage();
     history.push(page);
-  });
-
-  useEffect(() => {
-    const unsubscribe = history.listen((event) => {
-      if (event.pathname === newWallet.root) {
-        shouldShowDialog$.next(false);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
   });
 
   return (
