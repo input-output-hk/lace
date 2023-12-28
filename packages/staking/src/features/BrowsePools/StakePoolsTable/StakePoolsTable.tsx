@@ -14,6 +14,9 @@ import { SortDirection, SortField, StakePoolSortOptions } from './types';
 
 type StakePoolsTableProps = {
   scrollableTargetId: string;
+  searchValue: string;
+  sort: StakePoolSortOptions;
+  setSort: (option: StakePoolSortOptions) => void;
 };
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
@@ -24,7 +27,7 @@ const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
 const searchDebounce = 300;
 const defaultFetchLimit = 100;
 
-export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
+export const StakePoolsTable = ({ scrollableTargetId, searchValue, sort, setSort }: StakePoolsTableProps) => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
   const [isSearching, setIsSearching] = useState<boolean>(true);

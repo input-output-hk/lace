@@ -9,6 +9,7 @@ export const en: Translations = {
   'activity.rewardsChart.title': 'Rewards',
   'activity.rewardsHistory.noStakingActivityYet': 'No staking activity yet.',
   'activity.rewardsHistory.title': 'History',
+  'browsePools.header.poolsCount': 'Pools ({{poolsCount}})',
   'browsePools.stakePoolTableBrowser.addPool': 'Add pool',
   'browsePools.stakePoolTableBrowser.disabledTooltip': 'Maximum number of pools selected',
   'browsePools.stakePoolTableBrowser.emptyMessage': 'No results matching your search',

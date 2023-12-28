@@ -16,7 +16,7 @@ import { Tooltip } from './StatsTooltip';
 
 const DEFAULT_DECIMALS = 2;
 
-export const formatLocaleNumber = (value: string, decimalPlaces: number = DEFAULT_DECIMALS): string =>
+export const formatLocaleNumber = (value: number | string, decimalPlaces: number = DEFAULT_DECIMALS): string =>
   new BigNumber(value).toFormat(decimalPlaces, {
     decimalSeparator: '.',
     groupSeparator: ',',

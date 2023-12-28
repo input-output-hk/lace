@@ -30,6 +30,9 @@ type KeysStructure = {
     };
   };
   browsePools: {
+    header: {
+      poolsCount: '';
+    };
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
       tableHeader: {
