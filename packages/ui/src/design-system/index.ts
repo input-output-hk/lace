@@ -1,3 +1,5 @@
+export { Variants, Section } from './decorators';
+
 export { Box } from './box';
 export * as Button from './buttons';
 export * as ControlButton from './control-buttons';
@@ -28,7 +30,12 @@ export { Metadata } from './metadata';
 export { TextLink } from './text-link';
 export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
-export { Variants, Section } from './decorators';
 export * as EducationalCard from './educational-card';
 export { Checkbox } from './checkbox';
 export * as Dialog from './dialog';
+
+export * as ToggleButtonGroup from './toggle-button-group';
+export type {
+  ToggleButtonGroupRootProps,
+  ToggleButtonGroupItemProps,
+} from './toggle-button-group';
