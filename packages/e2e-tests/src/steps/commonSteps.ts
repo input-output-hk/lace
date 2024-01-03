@@ -36,6 +36,8 @@ import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
+import consoleManager from '../utils/consoleManager';
+import consoleAssert from '../assert/consoleAssert';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -282,4 +284,21 @@ Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: str
 
 Then(/^Clipboard contains text: "([^"]*)"$/, async (expectedString: string) => {
   await commonAssert.assertClipboardContains(expectedString);
+});
+
+When(/^I (enable|disable) console logs collection$/, async (action: 'enable' | 'disable') => {
+  switch (action) {
+    case 'enable':
+      await consoleManager.startLogsCollection();
+      break;
+    case 'disable':
+      await consoleManager.closeOpenedCdpSessions();
+      break;
+    default:
+      throw new Error('Unsupported option');
+  }
+});
+
+Then(/^I verify there are no errors in console logs$/, async () => {
+  await consoleAssert.assertNoErrorsInConsole();
 });

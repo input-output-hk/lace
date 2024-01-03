@@ -6,6 +6,7 @@ import { clearBackgroundStorageKey } from '../utils/browserStorage';
 import { closeAllTabsExceptOriginalOne } from '../utils/window';
 import networkManager from '../utils/networkManager';
 import { browser } from '@wdio/globals';
+import consoleManager from '../utils/consoleManager';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
@@ -14,6 +15,7 @@ Before(async () => {
 
 After(async () => {
   await networkManager.closeOpenedCdpSessions();
+  await consoleManager.closeOpenedCdpSessions();
   await browser.disableInterceptor();
   testContext.clearContext();
   await clearBackgroundStorageKey(); // FIXME: does not work for onboarding scenarios - error is thrown

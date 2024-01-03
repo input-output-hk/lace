@@ -83,10 +83,20 @@ export const SignData = (): React.ReactElement => {
         </Spin>
       </div>
       <div className={styles.actions}>
-        <Button onClick={onConfirm} disabled={confirmIsDisabled || isLoading} className={styles.actionBtn}>
+        <Button
+          onClick={onConfirm}
+          disabled={confirmIsDisabled || isLoading}
+          className={styles.actionBtn}
+          data-testid="sign-transaction-confirm"
+        >
           {t('dapp.confirm.btn.confirm')}
         </Button>
-        <Button onClick={setPreviousView} color="secondary" className={styles.actionBtn}>
+        <Button
+          onClick={setPreviousView}
+          color="secondary"
+          className={styles.actionBtn}
+          data-testid="sign-transaction-cancel"
+        >
           {t('dapp.confirm.btn.cancel')}
         </Button>
       </div>

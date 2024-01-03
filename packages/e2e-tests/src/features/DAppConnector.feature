@@ -7,7 +7,7 @@ Feature: DAppConnector - Common
     And I reclaim collateral (if active) in extended mode
 
   @LW-3760 @Testnet @Mainnet
-  Scenario: Extended View - Limited wallet information when wallet is not connected
+  Scenario: Limited wallet information when wallet is not connected
     When I open test DApp
     Then I see Lace wallet info in DApp when not connected
 
@@ -183,6 +183,22 @@ Feature: DAppConnector - Common
     And I close all remaining tabs except current one
     When I open test DApp
     Then I see DApp authorization window
+
+  @LW-9481 @Testnet @Mainnet
+  Scenario: Signing data / no errors in console
+    Given I am on Tokens extended page
+    And I save token: "Cardano" balance
+    And I open and authorize test DApp with "Only once" setting
+    And I enable console logs collection
+    When I click "Sign data" button in test DApp
+    Then I see DApp connector "Confirm transaction" page in dark mode
+    And I click "Confirm" button on "Confirm transaction" page
+    And I see DApp connector "Sign transaction" page
+    And I fill correct password
+    And I click "Confirm" button on "Sign transaction" page
+    And I see DApp connector "All done" page
+    And I verify there are no errors in console logs
+    And I see Lace wallet info in DApp when connected
 
     @LW-8403 @LW-8406
     Scenario: Automatically trigger collateral setup - happy path
