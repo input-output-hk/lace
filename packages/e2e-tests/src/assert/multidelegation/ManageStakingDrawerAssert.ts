@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 import ManageStakingDrawer from '../../elements/multidelegation/ManageStakingDrawer';
+import MultidelegationPage from '../../elements/multidelegation/MultidelegationPage';
 
 class ManageStakingDrawerAssert {
   assertSeeManageStakingDrawer = async (manageButtonInitiated = false) => {
@@ -63,6 +64,20 @@ class ManageStakingDrawerAssert {
     await ManageStakingDrawer.poolDetailsSlider(0).waitForClickable();
     await ManageStakingDrawer.poolDetailsSliderPlus(0).waitForClickable();
     await ManageStakingDrawer.poolDetailsRemovePoolButton(0).waitForDisplayed();
+  };
+
+  assertSeeAllPoolsDetailsExpanded = async () => {
+    expect(await ManageStakingDrawer.poolDetailsIconTruncated.length).to.equal(0);
+    expect(await ManageStakingDrawer.poolDetailsIconExpanded.length).to.equal(
+      Number(await MultidelegationPage.delegationCardPoolsValue.getText())
+    );
+  };
+
+  assertSeeAllPoolsDetailsHidden = async () => {
+    expect(await ManageStakingDrawer.poolDetailsIconExpanded.length).to.equal(0);
+    expect(await ManageStakingDrawer.poolDetailsIconTruncated.length).to.equal(
+      Number(await MultidelegationPage.delegationCardPoolsValue.getText())
+    );
   };
 }
 
