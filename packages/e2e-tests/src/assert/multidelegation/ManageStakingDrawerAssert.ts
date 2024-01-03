@@ -5,7 +5,7 @@ import MultidelegationPage from '../../elements/multidelegation/MultidelegationP
 
 class ManageStakingDrawerAssert {
   assertSeeManageStakingDrawer = async (manageButtonInitiated = false) => {
-    await ManageStakingDrawer.drawerHeaderCloseButton.waitForDisplayed();
+    await ManageStakingDrawer.drawerHeaderCloseButton.waitForClickable();
     await ManageStakingDrawer.drawerNavigationTitle.waitForDisplayed();
     expect(await ManageStakingDrawer.drawerNavigationTitle.getText()).to.equal(
       await t('drawer.titleSecond', 'staking')
@@ -78,6 +78,13 @@ class ManageStakingDrawerAssert {
     expect(await ManageStakingDrawer.poolDetailsIconTruncated.length).to.equal(
       Number(await MultidelegationPage.delegationCardPoolsValue.getText())
     );
+  };
+
+  assertSeeSelectedPoolsCounter = async (poolsCount: number) => {
+    let selectedPoolsCounter = await ManageStakingDrawer.selectedPoolsLabel.getText();
+    selectedPoolsCounter = selectedPoolsCounter.split('(')[1].replace(')', '');
+    expect(Number(selectedPoolsCounter)).to.equal(Number(poolsCount));
+    expect(Number(await MultidelegationPage.delegationCardPoolsValue.getText())).to.equal(Number(selectedPoolsCounter));
   };
 }
 
