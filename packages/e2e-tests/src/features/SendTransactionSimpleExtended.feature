@@ -92,8 +92,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I enter a value of: 1 to the "ADA" asset in bundle 1
     Then "Review transaction" button is enabled on "Send" page
 
-  @LW-2742 @Testnet @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2742 @Testnet @Mainnet
   Scenario: Extended-view - Send flow - Search contact
     Given I have several contacts whose start with the same characters
     And I navigate to Tokens extended page
@@ -101,8 +100,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I enter the first characters of the contacts
     Then a dropdown showing the first 5 matches is displayed
 
-  @LW-2743 @Testnet @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2743 @Testnet @Mainnet
   Scenario: Extended-view - Send flow - Select contact from dropdown
     Given I have several contacts whose start with the same characters
     And I navigate to Tokens extended page

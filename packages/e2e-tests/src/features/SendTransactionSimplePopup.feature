@@ -65,16 +65,14 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I open address book from header menu
     Then I see address row with name "WalletName" and address "Shelley" on the list in popup mode
 
-  @LW-2740 @Testnet @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2740 @Testnet @Mainnet
   Scenario: Popup-view - Send flow - Search contact
     Given I have several contacts whose start with the same characters
     When I click "Send" button on Tokens page in popup mode
     And I enter the first characters of the contacts
     Then a dropdown showing the first 3 matches is displayed
 
-  @LW-2741 @Testnet @Mainnet @Pending
-  # BUG LW-7925
+  @LW-2741 @Testnet @Mainnet
   Scenario: Popup-view - Send flow - Select contact from dropdown
     Given I have several contacts whose start with the same characters
     When I click "Send" button on Tokens page in popup mode
