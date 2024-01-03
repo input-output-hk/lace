@@ -2,29 +2,37 @@ import { globalStyle, vars, style } from '../../design-tokens';
 
 export const container = style({
   background: vars.colors.$input_container_bgColor,
-  paddingTop: vars.spacing.$12,
-  maxHeight: vars.spacing.$52,
+  height: vars.spacing.$64,
   borderRadius: vars.radius.$medium,
   width: 'auto',
   fontWeight: vars.fontWeights.$semibold,
   fontFamily: vars.fontFamily.$nova,
+  display: 'flex',
+  alignItems: 'center',
+  position: 'relative',
 });
 
 export const input = style({
-  width: 'calc(100% - 90px)',
+  width: '100%',
   fontSize: vars.fontSizes.$18,
-  padding: `${vars.spacing.$10} ${vars.spacing.$20}`,
+  padding: `0 ${vars.spacing.$28}`,
   border: 'none',
   outline: 'none',
   background: 'transparent',
   color: vars.colors.$input_value_color,
+  position: 'relative',
+  selectors: {
+    '&:focus, &:not(:placeholder-shown)': {
+      top: vars.spacing.$8,
+    },
+  },
 });
 
 export const label = style({
-  position: 'relative',
+  position: 'absolute',
   display: 'block',
-  left: vars.spacing.$20,
-  top: '-40px',
+  left: vars.spacing.$28,
+  top: '18px',
   transitionDuration: '0.2s',
   pointerEvents: 'none',
   color: vars.colors.$input_label_color,
@@ -39,7 +47,7 @@ export const errorMessage = style({
 globalStyle(
   `${input}:focus + ${label}, ${input}:not(:placeholder-shown) + ${label}`,
   {
-    top: '-52px',
+    top: '8px',
     fontSize: vars.fontSizes.$12,
   },
 );

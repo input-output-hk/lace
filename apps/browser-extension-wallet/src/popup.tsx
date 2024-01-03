@@ -27,6 +27,7 @@ import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
+import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 
 const App = (): React.ReactElement => (
@@ -46,7 +47,9 @@ const App = (): React.ReactElement => (
                             <MigrationContainer appMode={APP_MODE_POPUP}>
                               <DataCheckContainer appMode={APP_MODE_POPUP}>
                                 <AddressesDiscoveryOverlay>
-                                  <PopupView />
+                                  <BackgroundPageProvider>
+                                    <PopupView />
+                                  </BackgroundPageProvider>
                                 </AddressesDiscoveryOverlay>
                               </DataCheckContainer>
                             </MigrationContainer>

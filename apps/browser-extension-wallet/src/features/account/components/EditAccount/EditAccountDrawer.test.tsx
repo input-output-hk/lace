@@ -16,7 +16,7 @@ describe('EditAccountDrawer', () => {
   });
 
   it('displays default account name', () => {
-    render(<EditAccountDrawer name="" index="1" visible onSave={onSaveMock} hide={hideMock} />);
+    render(<EditAccountDrawer name="" index={1} visible onSave={onSaveMock} hide={hideMock} />);
 
     expect(screen.getByTestId('edit-account')).toBeInTheDocument();
     expect(screen.getByTestId('drawer-navigation-title')).toHaveTextContent('Account #1');
@@ -25,7 +25,7 @@ describe('EditAccountDrawer', () => {
   });
 
   it('displays correct account name', () => {
-    render(<EditAccountDrawer name="Test Account" index="1" visible onSave={onSaveMock} hide={hideMock} />);
+    render(<EditAccountDrawer name="Test Account" index={1} visible onSave={onSaveMock} hide={hideMock} />);
 
     expect(screen.getByTestId('edit-account')).toBeInTheDocument();
     expect(screen.getByTestId('drawer-navigation-title')).toHaveTextContent('Test Account');
@@ -34,7 +34,7 @@ describe('EditAccountDrawer', () => {
   });
 
   it('updates input value on change and enables save button', () => {
-    render(<EditAccountDrawer name="Test Account" index="1" visible onSave={onSaveMock} hide={hideMock} />);
+    render(<EditAccountDrawer name="Test Account" index={1} visible onSave={onSaveMock} hide={hideMock} />);
 
     const input = screen.getByTestId('edit-account-name-input');
 
@@ -48,7 +48,7 @@ describe('EditAccountDrawer', () => {
   });
 
   it('calls hide function when Cancel button is clicked', () => {
-    render(<EditAccountDrawer name="Test Account" index="1" visible onSave={onSaveMock} hide={hideMock} />);
+    render(<EditAccountDrawer name="Test Account" index={1} visible onSave={onSaveMock} hide={hideMock} />);
 
     fireEvent.click(screen.getByTestId('edit-account-cancel-btn'));
 

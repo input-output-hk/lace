@@ -59,6 +59,18 @@ const colors: Colors = {
   $buttons_secondary_container_outlineColor:
     lightColorScheme.$primary_accent_purple_0_3,
 
+  $toggle_button_group_bgColor: lightColorScheme.$primary_light_grey,
+  $toggle_button_group_item_bgColor_hover: lightColorScheme.$primary_light_grey,
+  $toggle_button_group_item_outline_focused:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $toggle_button_group_item_label_color: lightColorScheme.$primary_dark_grey,
+  $toggle_button_group_item_label_color_hover: lightColorScheme.$primary_black,
+  $toggle_button_group_item_label_color_active: lightColorScheme.$primary_black,
+  $toggle_button_group_item_label_color_disabled:
+    lightColorScheme.$primary_dark_grey,
+  $toggle_button_group_item_bgColor: lightColorScheme.$primary_light_grey,
+  $toggle_button_group_item_bgColor_active: lightColorScheme.$primary_white,
+
   $card_elevated_backgroundColor: lightColorScheme.$primary_white,
   $card_greyed_backgroundColor: lightColorScheme.$primary_light_grey,
   $card_outlined_backgroundColor: lightColorScheme.$primary_white,
@@ -73,6 +85,7 @@ const colors: Colors = {
     lightColorScheme.$primary_white,
     0.8,
   ),
+  $control_buttons_label_color_extra_small: lightColorScheme.$primary_white,
   $control_buttons_container_bgColor: lightColorScheme.$primary_white,
   $control_buttons_container_bgColor_hover:
     lightColorScheme.$primary_light_grey,
@@ -92,6 +105,11 @@ const colors: Colors = {
   $control_buttons_borderColor: lightColorScheme.$primary_light_grey_plus,
   $control_buttons_borderColor_danger:
     lightColorScheme.$primary_accent_purple_0_3,
+
+  $control_buttons_container_bgColor_extra_small:
+    lightColorScheme.$primary_accent_purple,
+  $control_buttons_container_bgColor_extra_small_active:
+    lightColorScheme.$primary_accent_purple,
 
   $variants_table_bgColor: lightColorScheme.$primary_light_grey_0_56,
   $variants_table_borderColor: lightColorScheme.$primary_light_grey_plus,
@@ -294,6 +312,17 @@ const colors: Colors = {
 
   $profile_dropdown_wallet_status_container_borderColor:
     lightColorScheme.$primary_light_grey,
+
+  $profile_dropdown_account_item_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $profile_dropdown_account_item_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $profile_dropdown_account_item_container_focus_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $profile_dropdown_account_item_edit_icon_color:
+    lightColorScheme.$primary_accent_purple,
+  $profile_dropdown_account_item_delete_icon_color:
+    lightColorScheme.$secondary_data_pink,
 
   $data_blue: lightColorScheme.$secondary_data_blue,
   $data_green: lightColorScheme.$secondary_data_green,

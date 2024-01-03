@@ -31,7 +31,11 @@ export const DelegationRatioSlider = React.forwardRef(
     };
     return (
       <div className={styles.SliderContainer}>
-        <IconButton.Primary icon={<SliderMinusIcon />} onClick={handleMinusClick} />
+        <IconButton.Primary
+          icon={<SliderMinusIcon />}
+          onClick={handleMinusClick}
+          data-testid="pool-details-card-slider-minus"
+        />
         <Slider.Root
           className={styles.SliderRoot}
           {...props}
@@ -42,13 +46,18 @@ export const DelegationRatioSlider = React.forwardRef(
           onValueCommit={() => {
             analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationDelegationRatioSliderVolumePinDrag);
           }}
+          data-testid="pool-details-card-slider-item"
         >
           <Slider.Track className={styles.SliderTrack}>
             <Slider.Range className={styles.SliderRange} />
           </Slider.Track>
           <Slider.Thumb className={styles.SliderThumb} aria-label="Volume" />
         </Slider.Root>
-        <IconButton.Primary icon={<SliderPlusIcon />} onClick={handlePlusClick} />
+        <IconButton.Primary
+          icon={<SliderPlusIcon />}
+          onClick={handlePlusClick}
+          data-testid="pool-details-card-slider-plus"
+        />
       </div>
     );
   }

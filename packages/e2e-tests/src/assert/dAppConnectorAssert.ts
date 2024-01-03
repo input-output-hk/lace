@@ -18,6 +18,7 @@ import TokensPageObject from '../pageobject/tokensPageObject';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import { browser } from '@wdio/globals';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
+import ErrorDAppModal from '../elements/dappConnector/errorDAppModal';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -334,6 +335,16 @@ class DAppConnectorAssert {
     expect(await SignTransactionPage.cancelButton.getText()).to.equal(await t('dapp.confirm.btn.cancel'));
   }
 
+  async assertSeeSomethingWentWrongPage() {
+    await this.assertSeeHeader();
+    await ErrorDAppModal.image.waitForDisplayed();
+    await ErrorDAppModal.heading.waitForDisplayed();
+    await ErrorDAppModal.description.waitForDisplayed();
+    await ErrorDAppModal.closeButton.waitForDisplayed();
+    expect(await ErrorDAppModal.heading.getText()).to.equal(await t('dapp.sign.failure.title'));
+    expect(await ErrorDAppModal.description.getText()).to.equal(await t('dapp.sign.failure.description'));
+  }
+
   async assertSeeAllDonePage() {
     await this.assertSeeHeader();
     await DAppTransactionAllDonePage.image.waitForDisplayed();
@@ -353,6 +364,26 @@ class DAppConnectorAssert {
 
     Logger.log('saving tx hash: null'); // TODO save proper hash once it's added to the all done page
     testContext.save('txHashValue', false);
+  }
+
+  async assertSeeWindowCardanoLaceProperties() {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const result = await browser.execute(() => window.cardano.lace);
+    expect(result.apiVersion).to.equal('0.1.0');
+    expect(result.icon).not.to.be.empty;
+    expect(result.name).to.equal('lace');
+    expect(result.supportedExtensions[0].cip).to.equal(95);
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const isEnabled = await browser.execute(() => window.cardano.lace.isEnabled());
+    expect(isEnabled).to.be.true;
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const enable = await browser.execute(() => window.cardano.lace.enable());
+    expect(enable).not.to.be.empty;
   }
 }
 

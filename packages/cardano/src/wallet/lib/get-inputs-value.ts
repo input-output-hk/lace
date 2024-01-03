@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Cardano, ChainHistoryProvider } from '@cardano-sdk/core';
 import { createWalletUtil, ObservableWallet } from '@cardano-sdk/wallet';
 import flattenDeep from 'lodash/flattenDeep';
@@ -43,19 +44,21 @@ export const getTxInputsValueAndAddress = async (
     ...txIdsToResolveInputs
   ]);
 
-  for (const transaction of txsWithResolvedInputs) {
-    const index = inputs.find((input) => input.txId === transaction.id)?.index;
-    if (index !== undefined) inputsOutputsMapping.set(transaction.id, transaction.body.outputs[index]);
-  }
+  return inputs.map((input) => {
+    let txOut = inputsOutputsMapping.get(input.txId);
 
-  return Promise.all(
-    inputs.map(async (input) => {
-      const { address, value } = inputsOutputsMapping.get(input.txId);
-      return {
-        ...input,
-        value,
-        address
-      };
-    })
-  );
+    for (const transaction of txsWithResolvedInputs) {
+      if (transaction.id === input.txId) {
+        txOut = transaction.body.outputs[input.index];
+      }
+    }
+
+    const { address, value } = txOut;
+
+    return {
+      ...input,
+      value,
+      address
+    };
+  });
 };

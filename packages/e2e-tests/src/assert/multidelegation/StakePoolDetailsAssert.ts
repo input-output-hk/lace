@@ -30,15 +30,20 @@ class StakePoolDetailsAssert {
       await StakePoolDetails.delegatedBadge.moveTo();
       await StakePoolDetails.tooltip.waitForDisplayed();
       expect(await StakePoolDetails.tooltip.getText()).to.equal(await t('drawer.details.status.delegating', 'staking'));
+      await StakePoolDetails.manageDelegationButton.waitForDisplayed();
+      expect(await StakePoolDetails.manageDelegationButton.getText()).to.equal(
+        await t('drawer.details.manageDelegation', 'staking')
+      );
     } else {
-      await StakePoolDetails.selectPoolForMultiStakingButton.waitForDisplayed();
-      expect(await StakePoolDetails.selectPoolForMultiStakingButton.getText()).to.equal(
-        await t('drawer.details.selectForMultiStaking', 'staking')
+      await StakePoolDetails.stakeAllOnThisPoolButton.waitForDisplayed();
+      expect(await StakePoolDetails.stakeAllOnThisPoolButton.getText()).to.equal(
+        await t('drawer.details.stakeOnPoolButton', 'staking')
       );
     }
-    await StakePoolDetails.stakeAllOnThisPoolButton.waitForDisplayed();
-    expect(await StakePoolDetails.stakeAllOnThisPoolButton.getText()).to.equal(
-      await t('drawer.details.stakeOnPoolButton', 'staking')
+
+    await StakePoolDetails.selectPoolForMultiStakingButton.waitForDisplayed();
+    expect(await StakePoolDetails.selectPoolForMultiStakingButton.getText()).to.equal(
+      await t('drawer.details.selectForMultiStaking', 'staking')
     );
 
     expect(await StakePoolDetails.informationTitle.getText()).to.equal(
@@ -80,8 +85,8 @@ class StakePoolDetailsAssert {
     expect(await StakePoolDetails.delegatorsValue.getText()).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
   }
 
-  async assertStakePoolDetailsDrawerIsNotOpened() {
-    await StakePoolDetails.container.waitForDisplayed({ reverse: true });
+  async assertStakePoolDetailsDrawerIsDisplayed(shouldBeDisplayed = true) {
+    await StakePoolDetails.container.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 }
 

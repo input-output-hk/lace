@@ -1,0 +1,13 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.outputRowContainer {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(2);
+  padding-bottom: size_unit(2.5);
+
+  @media (max-width: $breakpoint-popup) {
+    padding-bottom: size_unit(2);
+  }
+}

@@ -7,8 +7,8 @@ Feature: Staking Page - Extended View
   @LW-8436 @LW-8439 @LW-8440 @LW-8598
   Scenario Outline: Extended View - Staking - Close drawer
     When I navigate to Staking extended page
-    And I click Browse pools tab
-    And I pick "1" pools for delegation from browse pools view: "ADA Capital"
+    And I open Browse pools tab
+    And I pick "1" pools for delegation from browse pools view: "ADA Ocean"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
     And I'm on a delegation flow "<delegationStep>"
@@ -35,3 +35,44 @@ Feature: Staking Page - Extended View
       | total staked  |
       | total rewards |
       | last reward   |
+
+  @LW-8432
+  Scenario Outline: Extended View - Staking - Delegation card displays correct data
+    Given I open wallet: "<walletName>" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    Then I see Delegation card displaying correct data
+    Examples:
+      | walletName                     |
+      | MultidelegationDelegatedSingle |
+      | MultidelegationDelegatedMulti  |
+
+  @LW-8433
+  Scenario Outline: Extended View - Staking - Delegated pools cards are present
+    Given I open wallet: "<walletName>" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I see Delegation pool cards are displayed
+    Examples:
+      | walletName                     |
+      | MultidelegationDelegatedSingle |
+      | MultidelegationDelegatedMulti  |
+
+  @LW-8636
+  Scenario: Extended View - Staking - Manage button works
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+
+  @LW-9447
+  Scenario Outline: Extended-view - Staking - Manage staking only one pool is expanded by default
+    Given I open wallet: "<walletName>" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see only first pools details are expanded
+    Examples:
+      | walletName                     |
+      | MultidelegationDelegatedSingle |
+      | MultidelegationDelegatedMulti  |

@@ -96,13 +96,13 @@ class TopNavigationAssert {
     await MenuHeader.menuButton.click();
   }
 
-  async assertNetworkIdVisible(expectedNetwork: 'Mainnet' | 'Preprod' | 'Preview') {
+  async assertNetworkPillVisible(expectedNetwork: 'Mainnet' | 'Preprod' | 'Preview') {
     const networkPill = await MenuHeader.networkPill;
     await networkPill.waitForDisplayed();
     expect(await networkPill.getText()).to.equal(expectedNetwork);
   }
 
-  async assertNetworkIdNotVisible() {
+  async assertNetworkPillNotVisible() {
     await MenuHeader.networkPill.waitForDisplayed({ reverse: true });
   }
 
@@ -110,12 +110,6 @@ class TopNavigationAssert {
     const networkPill = await MenuHeader.offlineNetworkPill;
     await networkPill.waitForDisplayed();
     expect(await networkPill.getText()).to.equal(await t('general.networks.offline'));
-  }
-
-  async assertNetworkIdNextToLogo() {
-    const logo = MenuHeader.logo;
-    const logoSibling = await logo.$('//following-sibling::div');
-    expect(await logoSibling.getAttribute('data-testid')).to.equal('network-pill');
   }
 
   async assertThemeTitle(mode: string) {

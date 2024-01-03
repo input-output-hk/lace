@@ -52,6 +52,7 @@ class MultidelegationPage {
   private ROS_COLUMN_INFO = '[data-testid="browse-pools-apy-column-info"]';
   private SATURATION_COLUMN_INFO = '[data-testid="browse-pools-saturation-column-info"]';
   private TOOLTIP = 'div.ant-tooltip-inner';
+  private MANAGE_BTN = '[data-testid="manage-btn"]';
 
   get title() {
     return SectionTitle.sectionTitle;
@@ -153,6 +154,10 @@ class MultidelegationPage {
     return $(this.TOOLTIP);
   }
 
+  get manageBtn() {
+    return $(this.MANAGE_BTN);
+  }
+
   delegatedPoolLogo(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_LOGO);
   }
@@ -219,19 +224,25 @@ class MultidelegationPage {
     )) as WebdriverIO.Element;
   }
 
-  async clickOnTab(tab: string) {
+  async clickAndGetTabStateAttribute(tab: 'Overview' | 'Browse pools') {
+    let tabElement;
     switch (tab) {
       case 'Overview':
-        await this.overviewTab.waitForClickable();
-        await this.overviewTab.click();
+        tabElement = this.overviewTab;
         break;
       case 'Browse pools':
-        await this.browseTab.waitForClickable();
-        await this.browseTab.click();
-        break;
-      default:
-        throw new Error(`Unsupported tab name: ${tab}`);
+        tabElement = this.browseTab;
     }
+    await tabElement.waitForClickable();
+    await tabElement.click();
+    return tabElement.getAttribute('data-state');
+  }
+
+  async openTab(tab: 'Overview' | 'Browse pools') {
+    await browser.waitUntil(async () => (await this.clickAndGetTabStateAttribute(tab)) === 'active', {
+      timeout: 5000,
+      interval: 1000
+    });
   }
 
   async markPoolsForDelegation(poolsToStake: string) {
@@ -327,6 +338,11 @@ class MultidelegationPage {
       timeout: 30_000,
       timeoutMsg: 'failed while waiting for stake pool list to load'
     });
+  }
+
+  async clickManageButton() {
+    await this.manageBtn.waitForClickable();
+    await this.manageBtn.click();
   }
 }
 

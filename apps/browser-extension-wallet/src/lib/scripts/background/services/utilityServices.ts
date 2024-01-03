@@ -80,6 +80,9 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.FORGOT_PASSWORD:
       path = walletRoutePaths.setup.restore;
       break;
+    case BrowserViewSections.NEW_WALLET:
+      path = walletRoutePaths.newWallet.root;
+      break;
   }
   await tabs.create({ url: `app.html#${path}` }).catch((error) => console.error(error));
 };

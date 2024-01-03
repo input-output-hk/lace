@@ -1,7 +1,9 @@
+/* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
 import React, { useEffect, useState, ComponentType } from 'react';
+import { Location } from 'history';
 import { Wallet } from '@lace/cardano';
-import { Switch, Redirect, Route } from 'react-router-dom';
+import { Switch, Redirect, Route, useLocation } from 'react-router-dom';
 import { useWalletStore } from '../../../stores';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
 import { AddressBook } from '../features/adress-book';
@@ -21,8 +23,10 @@ import { runtime, tabs } from 'webextension-polyfill';
 import debounce from 'lodash/debounce';
 import { useEnterKeyPress } from '@hooks/useEnterKeyPress';
 import { useAppSettingsContext } from '@providers/AppSettings';
+import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { config } from '@src/config';
 import { Portal } from '../features/wallet-setup/components/Portal';
+import { MultiWallet } from '../features/multi-wallet';
 import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
 import { DappBetaModal } from '../features/dapp';
@@ -101,6 +105,15 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const { loadWallet } = useWalletManager();
   const [{ chainName }] = useAppSettingsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
+  const { page, setBackgroundPage } = useBackgroundPage();
+
+  const location = useLocation<{ background?: Location<unknown> }>();
+
+  useEffect(() => {
+    if (location.pathname === routes.newWallet.root && page === undefined) {
+      setBackgroundPage({ pathname: '/assets', search: '', hash: '', state: undefined });
+    }
+  }, [location, page, setBackgroundPage]);
 
   useAppInit();
   useEnterKeyPress();
@@ -188,12 +201,17 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   if (!isLoadingWalletInfo && keyAgentData && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return (
       <>
-        <Switch>
+        <Switch location={page || location}>
           {routesMap.map((route) => (
             <Route key={route.path} path={route.path} component={route.component} />
           ))}
           <Route path="*" render={() => <Redirect to={routes.assets} />} />
         </Switch>
+        {page && (
+          <Switch>
+            <Route path={routes.newWallet.root} component={MultiWallet} />
+          </Switch>
+        )}
         <StakingWarningModals />
         <DappBetaModal />
       </>

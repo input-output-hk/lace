@@ -1,5 +1,6 @@
 @import '../../../../../../packages/common/src/ui/styles/theme.scss';
 @import '../../../../../../packages/common/src/ui/styles/abstracts/typography';
+@import '../../../../../../packages/common/src/ui/styles/abstracts/mixins';
 
 .menuOverlay {
   border-radius: size_unit(2) !important;
@@ -7,8 +8,7 @@
   box-shadow: var(--shadows-toast-tooltip);
   margin-top: size_unit(0.5) !important;
   background-color: var(--bg-color-container, #ffffff) !important;
-  max-width: 258px;
-  width: 258px;
+  min-width: 275px;
 
   .borderBottom {
     border-bottom: 1px var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef)) solid;
@@ -123,7 +123,7 @@
 
 .menuOverlay li:first-child {
   background: transparent;
-  padding: 0px size_unit(1);
+  padding: 0 size_unit(1);
 }
 
 .tooltip {
@@ -176,4 +176,24 @@
 
 .switchIcon {
   font-size: 16px;
+}
+
+.popUpContainer, .extendedContainer {
+  @include scroll-bar-style;
+  overflow-y: scroll;
+  margin: size_unit(1) size_unit(1) size_unit(1) 0;
+
+  :global {
+    .ant-dropdown-menu-item-group-title {
+      padding: 0;
+    }
+  }
+}
+
+.popUpContainer {
+  max-height: 480px;
+}
+
+.extendedContainer {
+  max-height: 600px;
 }

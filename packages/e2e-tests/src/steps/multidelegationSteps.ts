@@ -18,16 +18,16 @@ import StakingSuccessDrawer from '../elements/multidelegation/StakingSuccessDraw
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
 import StakingPasswordDrawerAssert from '../assert/multidelegation/StakingPasswordDrawerAssert';
 import StakingConfirmationDrawerAssert from '../assert/multidelegation/StakingConfirmationDrawerAssert';
-import StakingManageDrawerAssert from '../assert/multidelegation/StakingManageDrawerAssert';
-import { StakingInfoComponent } from '../elements/staking/stakingInfoComponent';
+import StakingInfoComponent from '../elements/staking/stakingInfoComponent';
+import ManageStakingDrawerAssert from '../assert/multidelegation/ManageStakingDrawerAssert';
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
 import TokensPageObject from '../pageobject/tokensPageObject';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import StartStakingPage from '../elements/multidelegation/StartStakingPage';
 
-Given(/^I click (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
-  await MultidelegationPage.clickOnTab(tabToClick);
+Given(/^I open (Overview|Browse pools) tab$/, async (tabToClick: 'Overview' | 'Browse pools') => {
+  await MultidelegationPage.openTab(tabToClick);
 });
 
 When(/^I close Multi-delegation beta modal$/, async () => {
@@ -62,8 +62,8 @@ Then(/^I see Delegation title displayed for multidelegation$/, async () => {
   await MultidelegationPageAssert.assertSeeTitle();
 });
 
-Then(/^I see Delegation pool cards are displayed for popup view$/, async () => {
-  await MultidelegationPageAssert.assertSeeDelegatedPoolCardsPopup();
+Then(/^I see Delegation pool cards are displayed$/, async () => {
+  await MultidelegationPageAssert.assertSeeDelegatedPoolCards();
 });
 
 When(/^I save identifiers of stake pools currently in use$/, async () => {
@@ -233,8 +233,8 @@ Then(/^staking password drawer is displayed$/, async () => {
   await StakingPasswordDrawerAssert.assertSeeStakingPasswordDrawer();
 });
 
-Then(/^Stake pool details drawer is not opened$/, async () => {
-  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsNotOpened();
+Then(/^Stake pool details drawer (is|is not) opened$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  await stakePoolDetailsAssert.assertStakePoolDetailsDrawerIsDisplayed(shouldBeDisplayed === 'is');
 });
 
 When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
@@ -259,7 +259,7 @@ When(/^I'm on a delegation flow "([^"]*)"$/, async (delegationStep: string) => {
       await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
       break;
     case 'manage':
-      await StakingManageDrawerAssert.assertSeeStakingManageDrawer();
+      await ManageStakingDrawerAssert.assertSeeManageStakingDrawer();
       break;
   }
 });
@@ -269,19 +269,24 @@ When(
   async (elementToHover: string) => {
     switch (elementToHover) {
       case 'last reward':
-        await new StakingInfoComponent().hoverOverLastRewardValue();
+        await StakingInfoComponent.hoverOverLastRewardValue();
         break;
       case 'total staked':
-        await new StakingInfoComponent().hoverOverTotalStakedValue();
+        await StakingInfoComponent.hoverOverTotalStakedValue();
         break;
       case 'total rewards':
-        await new StakingInfoComponent().hoverOverTotalRewardsValue();
+        await StakingInfoComponent.hoverOverTotalRewardsValue();
         break;
       default:
         throw new Error(`Unsupported element: ${elementToHover}`);
     }
   }
 );
+
+When(/^I click on the stake pool title: "([^"]*)" in currently staking component$/, async (poolName: string) => {
+  await StakingInfoComponent.container.waitForDisplayed();
+  await StakingInfoComponent.clickPoolName(poolName);
+});
 
 Then(/^I see tooltip for element in currently staking component$/, async () => {
   await MultidelegationPageAssert.assertSeeCurrentlyStakingTooltip();
@@ -318,4 +323,16 @@ When(/^I wait for stake pool list to be populated$/, async () => {
 
 Then(/^Each stake pool list item contains: logo, name, ticker, ROS and saturation$/, async () => {
   await MultidelegationPageAssert.assertSeeStakePoolRows();
+});
+
+When(/^I click Manage button$/, async () => {
+  await MultidelegationPage.clickManageButton();
+});
+
+Then(/^I see Manage delegation page$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeManageStakingDrawer(true);
+});
+
+Then(/^I see only first pools details are expanded$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeOnlyFirstPoolDetailsExpanded();
 });

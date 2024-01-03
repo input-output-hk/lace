@@ -79,6 +79,11 @@ Then(
   }
 );
 
+Then(/^I see DApp connector "Something went wrong" page on (\d) window handle$/, async (handleNumber: number) => {
+  await DAppConnectorPageObject.waitAndSwitchToHandle(4, handleNumber);
+  await DAppConnectorAssert.assertSeeSomethingWentWrongPage();
+});
+
 Then(/^I see DApp connector "Sign transaction" page$/, async () => {
   await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeSignTransactionPage();
@@ -155,6 +160,10 @@ Then(
       : await DAppConnectorAssert.assertWalletFoundButNotConnectedInTestDApp();
   }
 );
+
+Then(/^I am able to access all window.cardano.lace properties$/, async () => {
+  await DAppConnectorAssert.assertSeeWindowCardanoLaceProperties();
+});
 
 Then(/^I see "Authorized DApps" section empty state in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   await DAppConnectorAssert.assertSeeAuthorizedDAppsEmptyState(mode);

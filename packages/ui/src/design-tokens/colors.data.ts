@@ -23,6 +23,16 @@ export const colors = {
   $buttons_secondary_container_bgColor_disabled: '',
   $buttons_secondary_container_outlineColor: '',
 
+  $toggle_button_group_bgColor: '',
+  $toggle_button_group_item_bgColor_hover: '',
+  $toggle_button_group_item_bgColor: '',
+  $toggle_button_group_item_bgColor_active: '',
+  $toggle_button_group_item_outline_focused: '',
+  $toggle_button_group_item_label_color: '',
+  $toggle_button_group_item_label_color_hover: '',
+  $toggle_button_group_item_label_color_active: '',
+  $toggle_button_group_item_label_color_disabled: '',
+
   $card_elevated_backgroundColor: '',
   $card_greyed_backgroundColor: '',
   $card_outlined_backgroundColor: '',
@@ -34,6 +44,7 @@ export const colors = {
   $control_buttons_label_color_hover: '',
   $control_buttons_label_color_filled: '',
   $control_buttons_label_color_filled_hover: '',
+  $control_buttons_label_color_extra_small: '',
   $control_buttons_container_bgColor: '',
   $control_buttons_container_bgColor_hover: '',
   $control_buttons_container_bgColor_filled: '',
@@ -41,6 +52,8 @@ export const colors = {
   $control_buttons_container_bgColor_pressed: '',
   $control_buttons_container_bgColor_danger: '',
   $control_buttons_container_bgColor_danger_hover: '',
+  $control_buttons_container_bgColor_extra_small: '',
+  $control_buttons_container_bgColor_extra_small_active: '',
   $control_buttons_container_outlineColor: '',
   $control_buttons_borderColor: '',
   $control_buttons_borderColor_danger: '',
@@ -197,6 +210,12 @@ export const colors = {
 
   $profile_dropdown_wallet_status_container_borderColor: '',
 
+  $profile_dropdown_account_item_container_bgColor_hover: '',
+  $profile_dropdown_account_item_container_bgColor_pressed: '',
+  $profile_dropdown_account_item_container_focus_outlineColor: '',
+  $profile_dropdown_account_item_edit_icon_color: '',
+  $profile_dropdown_account_item_delete_icon_color: '',
+
   $data_pink: '',
   $data_blue: '',
   $data_green: '',
@@ -232,7 +251,7 @@ export const lightColorScheme = {
   $secondary_cream: '#FCF5E3',
   $secondary_data_green: '#2CB67D',
   $secondary_data_blue: '#3489F7',
-};
+} as const;
 
 export const darkColorScheme = {
   $primary_accent_purple: '#7F5AF0',
@@ -257,4 +276,4 @@ export const darkColorScheme = {
   $secondary_lace_yellow: '#FDC300',
   $secondary_data_green: '#2CB67D',
   $secondary_data_blue: '#3489F7',
-};
+} as const;
