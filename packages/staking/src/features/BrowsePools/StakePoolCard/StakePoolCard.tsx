@@ -1,31 +1,36 @@
-import { Card } from '@lace/ui';
+import { Card, Text } from '@lace/ui';
+import cn from 'classnames';
 import { PoolMetric } from './PoolMetric';
 import { StakePoolCardProgressBar } from './SkatePoolCardProgressBar';
 import * as styles from './StakePoolCard.css';
 import { MetricType } from './types';
 
-interface Props {
+export interface StakePoolCardProps {
   ticker: string;
   metricType: MetricType;
   metricValue: number;
   saturation: number;
+  selected?: boolean;
   onClick: () => void;
 }
 
-export const StakePoolCard = ({ ticker, metricType, metricValue, saturation, onClick }: Props) => {
+export const StakePoolCard = ({
+  ticker,
+  metricType,
+  metricValue,
+  saturation,
+  selected,
+  onClick,
+}: StakePoolCardProps) => {
   console.debug('[STAKE]:', { metricType, metricValue, onClick, saturation, ticker });
 
   return (
-    <Card.Outlined className={styles.card}>
+    <Card.Outlined className={cn(styles.card, selected && styles.cardSelected)}>
       <div className={styles.firstRow}>
-        <div className={styles.tickerName}>{ticker}</div>
-        <div>
-          <PoolMetric metricType={metricType} metricValue={metricValue} />
-        </div>
+        <Text.Body.Large className={styles.tickerName}>{ticker}</Text.Body.Large>
+        <PoolMetric metricType={metricType} metricValue={metricValue} />
       </div>
-      <div style={{ display: 'flex' }}>
-        <StakePoolCardProgressBar percentage={saturation} />
-      </div>
+      <StakePoolCardProgressBar percentage={saturation} />
     </Card.Outlined>
   );
 };

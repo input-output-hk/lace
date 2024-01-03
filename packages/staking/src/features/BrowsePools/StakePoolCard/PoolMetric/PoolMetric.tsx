@@ -1,8 +1,10 @@
 import { getNumberWithUnit } from '@lace/common';
-import AdaIcon from '../../../assets/icons/ada.svg';
-import ChartPieIcon from '../../../assets/icons/chart-pie.svg';
-import CubeIcon from '../../../assets/icons/cube.svg';
-import { MetricType } from './types';
+import AdaIcon from '/src/assets/icons/ada.svg';
+import ChartPieIcon from '/src/assets/icons/chart-pie.svg';
+import CubeIcon from '/src/assets/icons/cube.svg';
+import { Text } from '@lace/ui';
+import { MetricType } from '../types';
+import * as styles from './PoolMetric.css';
 
 interface Props {
   metricType: MetricType;
@@ -29,13 +31,8 @@ const getIcon = (metricType: MetricType) => {
 
 const getValue = (metricType: MetricType, metricValue: number) => {
   if (metricType === 'stake-delegeted' || metricType === 'pledge' || metricType === 'blocks') {
-    const { number, unit } = getNumberWithUnit('10234');
-    return (
-      <span style={{ textAlign: 'right' }}>
-        {number}
-        {unit}
-      </span>
-    );
+    const { number, unit } = getNumberWithUnit(metricValue.toString());
+    return `${number}${unit}`;
   }
 
   return metricValue.toString();
@@ -45,9 +42,9 @@ export const PoolMetric = ({ metricType, metricValue }: Props) => {
   const icon = getIcon(metricType);
   const value = getValue(metricType, metricValue);
   return (
-    <div>
+    <div className={styles.metric}>
       {icon}
-      {value}
+      <Text.Body.Normal className={styles.metricValue}>{value}</Text.Body.Normal>
     </div>
   );
 };

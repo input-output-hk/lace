@@ -1,27 +1,26 @@
-import { style } from '@lace/ui';
+import { style, sx } from '@lace/ui';
 import { theme } from '../../../theme';
 
-export const wrapper = style({
+export const wrapper = sx({
   alignItems: 'center',
   display: 'flex',
-  gap: theme.spacing.$2,
+  gap: '$10',
   justifyContent: 'space-between',
-  width: '100%',
 });
 
 export const bar = style({
   backgroundColor: '#EFEFEF',
   borderRadius: theme.radius.$medium,
-  height: '6px',
+  height: theme.spacing.$6,
   width: '100%',
 });
 
-export const progress = style({
-  borderRadius: theme.radius.$medium,
-  height: '6px',
-  width: theme.spacing.$28,
+export const progress = sx({
+  borderRadius: '$medium',
+  height: '$6',
 });
 
 export const progressValue = style({
   color: theme.colors.$poolCardProgressBarValue,
+  fontWeight: 500,
 });
