@@ -352,3 +352,7 @@ When(/^I hide all pools details$/, async () => {
 Then(/^all pools details are hidden$/, async () => {
   await ManageStakingDrawerAssert.assertSeeAllPoolsDetailsHidden();
 });
+
+Then(/^I see selected pools counter is showing "([^"]*)"$/, async (poolsCount: number) => {
+  await ManageStakingDrawerAssert.assertSeeSelectedPoolsCounter(poolsCount);
+});
