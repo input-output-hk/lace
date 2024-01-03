@@ -8,8 +8,12 @@ class AddNewAddressDrawerAssert {
     await AddNewAddressDrawer.drawerHeaderBackButton.waitForClickable({
       reverse: isSendFlow ? false : mode === 'extended'
     });
+    // Uncomment L12-14 and remove L15-17 when LW-7399 is resolved
+    // await AddNewAddressDrawer.drawerHeaderCloseButton.waitForDisplayed({
+    //   reverse: mode === 'popup'
+    // });
     await AddNewAddressDrawer.drawerHeaderCloseButton.waitForDisplayed({
-      reverse: mode === 'popup'
+      reverse: isSendFlow ? false : mode === 'popup'
     });
     await AddNewAddressDrawer.drawerNavigationTitle.waitForDisplayed({ reverse: mode === 'popup' });
     if (mode === 'extended') {
