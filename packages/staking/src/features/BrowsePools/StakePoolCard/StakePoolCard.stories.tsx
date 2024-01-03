@@ -27,6 +27,7 @@ export const Card = {
     metricType: 'blocks',
     metricValue: 123_456,
     saturation: 51.75,
+    selected: false,
     ticker: 'TIKRNM',
   } as StakePoolCardProps,
   render: (props: StakePoolCardProps) => (
