@@ -3,10 +3,13 @@ import React from 'react';
 import * as Form from '@radix-ui/react-form';
 import cn from 'classnames';
 
+import { sx } from '../../design-tokens';
 import { Flex } from '../flex';
 import * as Typography from '../typography';
 
 import * as cx from './text-box.css';
+
+import type { Sx } from '../../design-tokens';
 
 export interface TextBoxProps extends Form.FormControlProps {
   required?: boolean;
@@ -22,6 +25,7 @@ export interface TextBoxProps extends Form.FormControlProps {
   containerStyle?: React.CSSProperties;
   maxLength?: number;
   'data-testid'?: string;
+  w?: Sx['w'];
 }
 
 export const TextBox = ({
@@ -37,13 +41,14 @@ export const TextBox = ({
   onChange,
   containerStyle,
   maxLength,
+  w = '$auto',
   ...rest
 }: Readonly<TextBoxProps>): JSX.Element => (
   <Form.Root>
     <Flex justifyContent="space-between" alignItems="center">
       <Form.Field
         name="field"
-        className={cn(cx.container, {
+        className={cn(sx({ w }), cx.container, {
           [containerClassName]: containerClassName,
         })}
         style={containerStyle}
