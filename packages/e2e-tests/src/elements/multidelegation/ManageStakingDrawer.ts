@@ -143,6 +143,22 @@ class ManageStakingDrawer extends CommonDrawerElements {
   tooltip(index: number): ChainablePromiseElement<WebdriverIO.Element | undefined> {
     return this.tooltips[index];
   }
+
+  async expandAllPoolsDetails() {
+    await this.poolDetailsIconTruncated[0].waitForClickable();
+    const truncatedPoolsCount = await this.poolDetailsIconTruncated.length;
+    for (let i = 0; i < truncatedPoolsCount; i++) {
+      await (await this.poolDetailsIconTruncated)[0].click();
+    }
+  }
+
+  async hideAllPoolsDetails() {
+    const expandedPoolsCount = await this.poolDetailsIconExpanded.length;
+    for (let i = 0; i < expandedPoolsCount; i++) {
+      await (await this.poolDetailsIconExpanded)[0].waitForClickable();
+      await (await this.poolDetailsIconExpanded)[0].click();
+    }
+  }
 }
 
 export default new ManageStakingDrawer();

@@ -76,3 +76,14 @@ Feature: Staking Page - Extended View
       | walletName                     |
       | MultidelegationDelegatedSingle |
       | MultidelegationDelegatedMulti  |
+
+  @LW-9476
+  Scenario: Extended View - Staking - Manage staking expanding and hiding all pools details
+    Given I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    And I expand all pools details
+    Then all pools details are expanded
+    When I hide all pools details
+    Then all pools details are hidden
