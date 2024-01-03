@@ -127,7 +127,7 @@ export const createCardanoWalletsByChain = async (
   return { wallet, keyAgent: activeKeyAgent, keyAgentsByChain };
 };
 
-const keyagentSigningCallback = (signCallback?: (result: boolean) => void, response?: boolean) => {
+const executeSigningCallbackIfExists = (signCallback?: (result: boolean) => void, response?: boolean) => {
   if (signCallback)
     setTimeout(() => {
       signCallback(response);
@@ -145,11 +145,11 @@ const createAsyncKeyAgentWithCallback = (
     keyAgent
       .signTransaction(...args)
       .then(async (sigs) => {
-        keyagentSigningCallback(signCallback, true);
+        executeSigningCallbackIfExists(signCallback, true);
         return sigs;
       })
       .catch((error) => {
-        keyagentSigningCallback(signCallback, false);
+        executeSigningCallbackIfExists(signCallback, false);
         throw new Error(error);
       });
 
@@ -157,11 +157,11 @@ const createAsyncKeyAgentWithCallback = (
     keyAgent
       .signBlob(...args)
       .then(async (sigs) => {
-        keyagentSigningCallback(signCallback, true);
+        executeSigningCallbackIfExists(signCallback, true);
         return sigs;
       })
       .catch((error) => {
-        keyagentSigningCallback(signCallback, false);
+        executeSigningCallbackIfExists(signCallback, false);
         throw new Error(error);
       });
 
