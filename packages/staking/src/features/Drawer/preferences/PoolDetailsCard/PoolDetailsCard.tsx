@@ -51,13 +51,14 @@ export const PoolDetailsCard = ({
   };
 
   return (
-    <Card.Outlined className={styles.root}>
+    <Card.Outlined className={styles.root} data-testid="pool-details-card">
       <Flex justifyContent="space-between" alignItems="center" my="$24" mx="$32">
         <Flex alignItems="center" gap="$24">
           <Box className={styles.poolIndicator} style={{ backgroundColor: color }} />
-          <Text.SubHeading>{name}</Text.SubHeading>
+          <Text.SubHeading data-testid="pool-details-name">{name}</Text.SubHeading>
         </Flex>
         <ControlButton.Icon
+          data-testid={`pool-details-icon-${expand ? 'up' : 'down'}`}
           icon={expand ? <ChevronUpIcon /> : <ChevronDownIcon />}
           onClick={() => setExpand((prevExpand) => !prevExpand)}
         />
@@ -72,9 +73,9 @@ export const PoolDetailsCard = ({
           />
           <Flex gap="$28" p="$32" pt="$20" flexDirection="column" alignItems="center">
             <Flex justifyContent="space-between" alignItems="center" w="$fill">
-              <Text.Body.Large>Edit saved ratio</Text.Body.Large>
+              <Text.Body.Large data-testid="pool-details-card-edit-ratio-title">Edit saved ratio</Text.Body.Large>
               <Flex alignItems="center" gap="$12">
-                <Text.Body.Large>Ratio</Text.Body.Large>
+                <Text.Body.Large data-testid="pool-details-card-ratio-title">Ratio</Text.Body.Large>
                 <RatioInput
                   onUpdate={updatePercentage}
                   value={localValue}
@@ -84,7 +85,7 @@ export const PoolDetailsCard = ({
                     );
                   }}
                 />
-                <Text.Body.Large>%</Text.Body.Large>
+                <Text.Body.Large data-testid="pool-details-card-ratio-input-percent-sign">%</Text.Body.Large>
               </Flex>
             </Flex>
             <DelegationRatioSlider
@@ -108,6 +109,7 @@ export const PoolDetailsCard = ({
                     onRemove();
                   }}
                   disabled={!onRemove}
+                  data-testid="pool-details-card-remove-pool-button"
                 />
               </div>
             </Tooltip>

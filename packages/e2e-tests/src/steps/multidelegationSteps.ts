@@ -332,3 +332,23 @@ When(/^I click Manage button$/, async () => {
 Then(/^I see Manage delegation page$/, async () => {
   await ManageStakingDrawerAssert.assertSeeManageStakingDrawer(true);
 });
+
+Then(/^I see only first pools details are expanded$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeOnlyFirstPoolDetailsExpanded();
+});
+
+Then(/^I expand all pools details$/, async () => {
+  await ManageStakingDrawer.expandAllPoolsDetails();
+});
+
+Then(/^all pools details are expanded$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeAllPoolsDetailsExpanded();
+});
+
+When(/^I hide all pools details$/, async () => {
+  await ManageStakingDrawer.hideAllPoolsDetails();
+});
+
+Then(/^all pools details are hidden$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeAllPoolsDetailsHidden();
+});
