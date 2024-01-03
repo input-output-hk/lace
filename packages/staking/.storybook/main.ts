@@ -4,6 +4,7 @@ import { join, dirname } from 'path';
 import { mergeConfig } from 'vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import svgrPlugin from 'vite-plugin-svgr';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -38,6 +39,7 @@ const config: StorybookConfig = {
         vanillaExtractPlugin({
           esbuildOptions: { loader: { '.css': 'empty' } },
         }),
+        tsconfigPaths(),
       ],
     });
   },

@@ -1,8 +1,8 @@
 import { PostHogAction } from '@lace/common';
 import { IconButton } from '@lace/ui';
 import * as Slider from '@radix-ui/react-slider';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import React from 'react';
-import { useOutsideHandles } from '../../../outside-handles-provider';
 import * as styles from './DelegationRatioSlider.css';
 import SliderMinusIcon from './slider-minus.svg';
 import SliderPlusIcon from './slider-plus.svg';
