@@ -13,7 +13,6 @@ interface State {
   setName: (name: string) => void;
   setPassword: (password: string) => void;
   onChange: (state: { name: string; password: string }) => void;
-  withConfirmationDialog: (callback: () => void) => () => void;
 }
 
 // eslint-disable-next-line unicorn/no-null
@@ -26,7 +25,12 @@ export const useRestoreWallet = (): State => {
 };
 
 export const RestoreWalletProvider = ({ children, providers }: Props): React.ReactElement => {
-  const [state, setState] = useState<Data>();
+  const [state, setState] = useState<Data>({
+    mnemonic: [],
+    length: 0,
+    name: '',
+    password: ''
+  });
 
   const setMnemonic = (mnemonic: string[]) => {
     providers.confirmationDialog.shouldShowDialog$.next(Boolean(mnemonic));
@@ -57,8 +61,7 @@ export const RestoreWalletProvider = ({ children, providers }: Props): React.Rea
         setLength,
         setName,
         setPassword,
-        onChange,
-        withConfirmationDialog: providers.confirmationDialog.withConfirmationDialog
+        onChange
       }}
     >
       {children}

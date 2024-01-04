@@ -44,7 +44,6 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
     createWallet: jest.Mock;
     confirmationDialog: {
       shouldShowDialog$: Subject<boolean>;
-      withConfirmationDialog: jest.Mock;
     };
   };
 
@@ -60,8 +59,7 @@ describe('Multi Wallet Setup/Restore Wallet', () => {
     providers = {
       createWallet: jest.fn(),
       confirmationDialog: {
-        shouldShowDialog$: new Subject(),
-        withConfirmationDialog: jest.fn()
+        shouldShowDialog$: new Subject()
       }
     };
   });

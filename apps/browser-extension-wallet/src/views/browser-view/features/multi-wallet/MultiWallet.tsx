@@ -30,7 +30,6 @@ const createWallet = (): Promise<void> => Promise.resolve(void 0);
 
 interface ConfirmationDialog {
   shouldShowDialog$: Subject<boolean>;
-  withConfirmationDialog: (callback: () => void) => () => void;
 }
 
 export const SetupHardwareWallet = ({
@@ -88,7 +87,6 @@ const Component = (): JSX.Element => {
   const history = useHistory();
   const { page, setBackgroundPage } = useBackgroundPage();
   const { isDialogOpen, withConfirmationDialog, shouldShowDialog$ } = useWalletSetupConfirmationDialog();
-
   const closeWalletCreation = withConfirmationDialog(() => {
     setBackgroundPage();
     history.push(page);
@@ -103,12 +101,7 @@ const Component = (): JSX.Element => {
         <Switch>
           <Route
             path={newWallet.create.root}
-            render={() => (
-              <SetupCreateWallet
-                shouldShowDialog$={shouldShowDialog$}
-                withConfirmationDialog={withConfirmationDialog}
-              />
-            )}
+            render={() => <SetupCreateWallet shouldShowDialog$={shouldShowDialog$} />}
           />
           <Route
             path={newWallet.hardware.root}
@@ -116,12 +109,7 @@ const Component = (): JSX.Element => {
           />
           <Route
             path={newWallet.restore.root}
-            render={() => (
-              <SetupRestoreWallet
-                shouldShowDialog$={shouldShowDialog$}
-                withConfirmationDialog={withConfirmationDialog}
-              />
-            )}
+            render={() => <SetupRestoreWallet shouldShowDialog$={shouldShowDialog$} />}
           />
           <Route exact path={`${path}/`} component={Home} />
         </Switch>

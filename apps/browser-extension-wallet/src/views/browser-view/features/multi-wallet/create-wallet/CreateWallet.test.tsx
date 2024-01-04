@@ -43,7 +43,6 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     generateMnemonicWords: jest.Mock;
     confirmationDialog: {
       shouldShowDialog$: BehaviorSubject<boolean>;
-      withConfirmationDialog: jest.Mock;
     };
   };
 
@@ -52,8 +51,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       createWallet: jest.fn(),
       generateMnemonicWords: jest.fn(),
       confirmationDialog: {
-        shouldShowDialog$: new BehaviorSubject(false),
-        withConfirmationDialog: jest.fn().mockReturnValue((): void => void 0)
+        shouldShowDialog$: new BehaviorSubject(false)
       }
     };
   });

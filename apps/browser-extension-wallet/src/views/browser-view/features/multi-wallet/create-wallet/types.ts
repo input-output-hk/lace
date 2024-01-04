@@ -11,6 +11,5 @@ export interface Providers {
   generateMnemonicWords: () => string[];
   confirmationDialog: {
     shouldShowDialog$: Subject<boolean>;
-    withConfirmationDialog: (callback: () => void) => () => void;
   };
 }

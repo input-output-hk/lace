@@ -14,7 +14,7 @@ const wordList = wordlists.english;
 export const RestoreRecoveryPhrase = (): JSX.Element => {
   const { t } = useTranslation();
   const history = useHistory();
-  const { data, setMnemonic, withConfirmationDialog } = useRestoreWallet();
+  const { data, setMnemonic } = useRestoreWallet();
 
   const walletSetupMnemonicStepTranslations = {
     writePassphrase: t('core.walletSetupMnemonicStep.writePassphrase'),
@@ -32,7 +32,7 @@ export const RestoreRecoveryPhrase = (): JSX.Element => {
       <WalletSetupMnemonicVerificationStep
         mnemonic={data.mnemonic}
         onChange={(mnemonic) => setMnemonic(mnemonic)}
-        onCancel={withConfirmationDialog(() => history.goBack())}
+        onCancel={() => history.goBack()}
         onSubmit={() => history.push(walletRoutePaths.assets)}
         onStepNext={noop}
         isSubmitEnabled={Wallet.KeyManagement.util.validateMnemonic(

@@ -11,6 +11,5 @@ export interface Providers {
   createWallet: (params: Data) => Promise<void>;
   confirmationDialog: {
     shouldShowDialog$: Subject<boolean>;
-    withConfirmationDialog: (callback: () => void) => () => void;
   };
 }
