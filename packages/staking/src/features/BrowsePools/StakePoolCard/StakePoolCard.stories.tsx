@@ -1,4 +1,3 @@
-import { LocalThemeProvider, ThemeColorScheme } from '@lace/ui';
 import type { Meta } from '@storybook/react';
 import { StakePoolCard, StakePoolCardProps } from './StakePoolCard';
 import { MetricType } from './types';
@@ -31,10 +30,8 @@ export const Card = {
     ticker: 'TIKRNM',
   } as StakePoolCardProps,
   render: (props: StakePoolCardProps) => (
-    <LocalThemeProvider colorScheme={ThemeColorScheme.Light}>
-      <div style={{ width: 220 }}>
-        <StakePoolCard {...props} />
-      </div>
-    </LocalThemeProvider>
+    <div style={{ width: 220 }}>
+      <StakePoolCard {...props} />
+    </div>
   ),
 };
