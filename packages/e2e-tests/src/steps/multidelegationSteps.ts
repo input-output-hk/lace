@@ -357,6 +357,6 @@ Then(/^I see selected pools counter is showing "([^"]*)"$/, async (poolsCount: n
   await ManageStakingDrawerAssert.assertSeeSelectedPoolsCounter(poolsCount);
 });
 
-Then(/^I see add stake pool button is (disabled|enabled)$/, async (state: 'enabled' | 'disabled') => {
+Then(/^I see "Add stake pool" button is (disabled|enabled)$/, async (state: 'enabled' | 'disabled') => {
   await ManageStakingDrawerAssert.assertSeeAddStakePoolButtonDisabled(state === 'enabled');
 });

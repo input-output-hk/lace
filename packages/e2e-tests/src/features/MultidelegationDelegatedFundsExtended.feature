@@ -108,7 +108,7 @@ Feature: Staking Page - Extended View
     And I open Overview tab
     And I click Manage button
     Then I see Manage delegation page
-    And I see add stake pool button is disabled
+    And I see "Add stake pool" button is disabled
 
   @LW-9485
   Scenario: Extended View - Staking - Manage staking add button disabled when staking to less than max pools
@@ -116,4 +116,4 @@ Feature: Staking Page - Extended View
     And I open Overview tab
     And I click Manage button
     Then I see Manage delegation page
-    And I see add stake pool button is enabled
+    And I see "Add stake pool" button is enabled
