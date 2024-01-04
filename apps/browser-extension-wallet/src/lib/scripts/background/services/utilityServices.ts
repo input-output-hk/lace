@@ -83,7 +83,7 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.NEW_WALLET:
       path = walletRoutePaths.newWallet.root;
       break;
-    case BrowserViewSections.SHARED_WALLET:
+    case BrowserViewSections.ADD_SHARED_WALLET:
       path = walletRoutePaths.sharedWallet.root;
       break;
   }

@@ -1,16 +1,5 @@
 import React from 'react';
-import { useTranslate, SetupSharedWallet, SharedWalletSetupOptionTranslations } from '@lace/core';
-
-export interface SetupSharedWalletProps {
-  onNewSharedWalletClick: () => void;
-  onImportSharedWalletClick: () => void;
-  translations: {
-    title: string;
-    subTitle: string;
-    newSharedWallet: SharedWalletSetupOptionTranslations;
-    importSharedWallet: SharedWalletSetupOptionTranslations;
-  };
-}
+import { useTranslate, SetupSharedWallet } from '@lace/core';
 
 export const SetupSharedWalletStep = (): React.ReactElement => {
   const { t } = useTranslate();
@@ -20,7 +9,7 @@ export const SetupSharedWalletStep = (): React.ReactElement => {
       translations={{
         title: t('browserView.sharedWallet.setup.title'),
         subTitle: t('browserView.sharedWallet.setup.subTitle'),
-        newSharedWalletOption: {
+        createSharedWalletOption: {
           title: t('browserView.sharedWallet.setup.newSharedWalletOption.title'),
           description: t('browserView.sharedWallet.setup.newSharedWalletOption.description'),
           button: t('browserView.sharedWallet.setup.newSharedWalletOption.button')

@@ -1,25 +1,25 @@
 import React from 'react';
+import styles from './SetupSharedWallet.module.scss';
+import { SharedWalletSetupOption } from './SharedWalletSetupOption.component';
 import { ReactComponent as UserGroupIcon } from '../../../assets/icons/user-group-gradient.component.svg';
 import { ReactComponent as UploadIcon } from '../../../assets/icons/upload.component.svg';
 import { ReactComponent as LaceLogo } from '../../../assets/icons/lace-logo.component.svg';
-import styles from './SetupSharedWallet.module.scss';
-import { SharedWalletSetupOption } from './SharedWalletSetupOption.component';
 
 export type SharedWalletSetupOptionTranslations = Record<'title' | 'description' | 'button', string>;
 
 export interface SetupSharedWalletProps {
-  onNewSharedWalletClick?: () => void;
+  onCreateSharedWalletClick?: () => void;
   onImportSharedWalletClick?: () => void;
   translations: {
     title: string;
     subTitle: string;
-    newSharedWalletOption: SharedWalletSetupOptionTranslations;
+    createSharedWalletOption: SharedWalletSetupOptionTranslations;
     importSharedWalletOption: SharedWalletSetupOptionTranslations;
   };
 }
 
 export const SetupSharedWallet = ({
-  onNewSharedWalletClick,
+  onCreateSharedWalletClick,
   onImportSharedWalletClick,
   translations
 }: SetupSharedWalletProps): React.ReactElement => (
@@ -36,9 +36,9 @@ export const SetupSharedWallet = ({
       </div>
       <div className={styles.options}>
         <SharedWalletSetupOption
-          copies={translations.newSharedWalletOption}
+          copies={translations.createSharedWalletOption}
           Icon={UserGroupIcon}
-          onClick={onNewSharedWalletClick}
+          onClick={onCreateSharedWalletClick}
           testId="shared-wallet-new"
         />
         <div className={styles.separator} />

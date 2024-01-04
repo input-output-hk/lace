@@ -17,7 +17,7 @@ export const Dialog: Story = {
     translations: {
       title: 'Hello Web 3',
       subTitle: 'Choose an option to get started',
-      newSharedWalletOption: {
+      createSharedWalletOption: {
         title: 'New shared wallet',
         description: 'Create a new shared wallet',
         button: 'Create'
