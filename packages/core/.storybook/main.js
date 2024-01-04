@@ -27,7 +27,6 @@ module.exports = {
         {
           loader: '@svgr/webpack',
           options: {
-            icon: true,
             exportType: 'named'
           }
         }

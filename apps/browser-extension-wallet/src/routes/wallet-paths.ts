@@ -45,6 +45,9 @@ export const walletRoutePaths = {
       enterRecoveryPhrase: '/new-wallet/restore/enter-recovery-phrase',
       allDone: '/new-wallet/restore/all-done'
     }
+  },
+  sharedWallet: {
+    root: '/shared-wallet'
   }
 };
 

@@ -16,6 +16,7 @@ import { NetworkInfo } from './components/NetworkInfo';
 import { Sections } from './types';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { WalletAccounts } from './components/WalletAccounts';
+import { AddSharedWalletLink } from '@components/MainMenu/DropdownMenuOverlay/components/AddSharedWalletLink';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -51,6 +52,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
           {topSection}
           <Links>
             {process.env.USE_MULTI_WALLET === 'true' && <AddNewWalletLink isPopup={isPopup} />}
+            {process.env.USE_SHARED_WALLET === 'true' && <AddSharedWalletLink isPopup={isPopup} />}
             <AddressBookLink isPopup={isPopup} />
             <SettingsLink />
             <Separator />
