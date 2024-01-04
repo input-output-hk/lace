@@ -6,7 +6,7 @@ export default {
   title: 'Drawer/PoolDetailsCard',
 } as Meta;
 
-// TODO fix import side-effects
+// TODO https://input-output.atlassian.net/browse/LW-9492
 export const Overview = () => (
   <Flex gap="$24" flexDirection="column" alignItems="stretch">
     {/* <PoolDetailsCard*/}
