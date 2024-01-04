@@ -360,3 +360,11 @@ Then(/^I see selected pools counter is showing "([^"]*)"$/, async (poolsCount: n
 Then(/^I see "Add stake pool" button is (disabled|enabled)$/, async (state: 'enabled' | 'disabled') => {
   await ManageStakingDrawerAssert.assertSeeAddStakePoolButtonDisabled(state === 'enabled');
 });
+
+Then(/^I click "Add stake pool" button$/, async () => {
+  await ManageStakingDrawer.clickAddStakePoolButton();
+});
+
+Then(/^I pick "([^"]*)" pool for delegation$/, async (poolToStake: string) => {
+  await MultidelegationPage.markPoolsForDelegation(poolToStake);
+});
