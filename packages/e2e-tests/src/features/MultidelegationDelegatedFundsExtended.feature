@@ -100,3 +100,20 @@ Feature: Staking Page - Extended View
     Then all pools details are expanded
     When I hide all pools details
     Then all pools details are hidden
+
+  @LW-9484
+  Scenario: Extended View - Staking - Manage staking add button disabled when staking to max pools
+    Given I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+    And I see "Add stake pool" button is disabled
+
+  @LW-9485
+  Scenario: Extended View - Staking - Manage staking add button disabled when staking to less than max pools
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+    And I see "Add stake pool" button is enabled

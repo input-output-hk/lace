@@ -86,6 +86,12 @@ class ManageStakingDrawerAssert {
     expect(Number(selectedPoolsCounter)).to.equal(Number(poolsCount));
     expect(Number(await MultidelegationPage.delegationCardPoolsValue.getText())).to.equal(Number(selectedPoolsCounter));
   };
+
+  assertSeeAddStakePoolButtonDisabled = async (shouldBeEnabled: boolean) => {
+    await ManageStakingDrawer.addPoolsButton.waitForClickable({
+      reverse: !shouldBeEnabled
+    });
+  };
 }
 
 export default new ManageStakingDrawerAssert();
