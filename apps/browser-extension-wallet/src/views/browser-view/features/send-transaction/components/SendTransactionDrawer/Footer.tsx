@@ -246,6 +246,22 @@ export const Footer = withAddressBookContext(
       signAndSubmitTransaction
     ]);
 
+    useEffect(() => {
+      const onHardwareWalletDisconnect = (event: HIDConnectionEvent) => {
+        if (event.device.opened) {
+          sendEvent(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
+          setSection({ currentSection: Sections.FAIL_TX });
+          setSubmitingTxState({ isSubmitingTx: false });
+        }
+      };
+
+      navigator.hid.addEventListener('disconnect', onHardwareWalletDisconnect);
+
+      return () => {
+        navigator.hid.removeEventListener('disconnect', onHardwareWalletDisconnect);
+      };
+    }, [sendEvent, setSection, setSubmitingTxState, isPopupView]);
+
     const onConfirm = useCallback(() => {
       sendAnalytics();
       const isConfirmPass = currentSection.currentSection === Sections.CONFIRMATION;

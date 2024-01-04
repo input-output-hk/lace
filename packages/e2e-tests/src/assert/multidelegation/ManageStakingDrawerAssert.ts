@@ -1,10 +1,11 @@
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 import ManageStakingDrawer from '../../elements/multidelegation/ManageStakingDrawer';
+import MultidelegationPage from '../../elements/multidelegation/MultidelegationPage';
 
 class ManageStakingDrawerAssert {
   assertSeeManageStakingDrawer = async (manageButtonInitiated = false) => {
-    await ManageStakingDrawer.drawerHeaderCloseButton.waitForDisplayed();
+    await ManageStakingDrawer.drawerHeaderCloseButton.waitForClickable();
     await ManageStakingDrawer.drawerNavigationTitle.waitForDisplayed();
     expect(await ManageStakingDrawer.drawerNavigationTitle.getText()).to.equal(
       await t('drawer.titleSecond', 'staking')
@@ -63,6 +64,27 @@ class ManageStakingDrawerAssert {
     await ManageStakingDrawer.poolDetailsSlider(0).waitForClickable();
     await ManageStakingDrawer.poolDetailsSliderPlus(0).waitForClickable();
     await ManageStakingDrawer.poolDetailsRemovePoolButton(0).waitForDisplayed();
+  };
+
+  assertSeeAllPoolsDetailsExpanded = async () => {
+    expect(await ManageStakingDrawer.poolDetailsIconTruncated.length).to.equal(0);
+    expect(await ManageStakingDrawer.poolDetailsIconExpanded.length).to.equal(
+      Number(await MultidelegationPage.delegationCardPoolsValue.getText())
+    );
+  };
+
+  assertSeeAllPoolsDetailsHidden = async () => {
+    expect(await ManageStakingDrawer.poolDetailsIconExpanded.length).to.equal(0);
+    expect(await ManageStakingDrawer.poolDetailsIconTruncated.length).to.equal(
+      Number(await MultidelegationPage.delegationCardPoolsValue.getText())
+    );
+  };
+
+  assertSeeSelectedPoolsCounter = async (poolsCount: number) => {
+    let selectedPoolsCounter = await ManageStakingDrawer.selectedPoolsLabel.getText();
+    selectedPoolsCounter = selectedPoolsCounter.split('(')[1].replace(')', '');
+    expect(Number(selectedPoolsCounter)).to.equal(Number(poolsCount));
+    expect(Number(await MultidelegationPage.delegationCardPoolsValue.getText())).to.equal(Number(selectedPoolsCounter));
   };
 }
 

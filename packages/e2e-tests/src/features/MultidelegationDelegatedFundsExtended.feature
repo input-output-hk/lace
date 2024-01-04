@@ -76,3 +76,27 @@ Feature: Staking Page - Extended View
       | walletName                     |
       | MultidelegationDelegatedSingle |
       | MultidelegationDelegatedMulti  |
+
+  @LW-9478
+  Scenario Outline: Extended-view - Staking - Manage staking selected pools counter working correctly
+    Given I open wallet: "<walletName>" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+    And I see selected pools counter is showing "<poolsCount>"
+    Examples:
+      | walletName                     | poolsCount |
+      | MultidelegationDelegatedSingle | 1          |
+      | MultidelegationDelegatedMulti  | 10         |
+
+  @LW-9476
+  Scenario: Extended View - Staking - Manage staking expanding and hiding all pools details
+    Given I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    And I expand all pools details
+    Then all pools details are expanded
+    When I hide all pools details
+    Then all pools details are hidden
