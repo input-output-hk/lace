@@ -8,7 +8,7 @@ const transformManifest = (content, mode) => {
     const manifest = JSON.parse(content.toString());
     manifest.name = manifest.name.replace('$WALLET_MANIFEST_NAME', process.env.WALLET_MANIFEST_NAME);
     if (process.env.BUILD_DEV_PREVIEW === 'true') {
-      manifest.version = `${manifest.version}.${Date.now()}`;
+      manifest.version = `${manifest.version}.${Date.getUTCMonth()}${Date.getUTCDate()}`;
     }
     manifest.content_security_policy.extension_pages = manifest.content_security_policy.extension_pages
       .replace(
