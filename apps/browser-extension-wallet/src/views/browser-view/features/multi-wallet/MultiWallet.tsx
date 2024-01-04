@@ -32,9 +32,7 @@ interface ConfirmationDialog {
   shouldShowDialog$: Subject<boolean>;
 }
 
-export const SetupHardwareWallet = ({
-  shouldShowDialog$
-}: Pick<ConfirmationDialog, 'shouldShowDialog$'>): JSX.Element => {
+export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
   const { connectHardwareWallet } = useWalletManager();
   const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
 
