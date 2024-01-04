@@ -1,10 +1,11 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 
-import { join, dirname } from 'path';
-import { mergeConfig } from 'vite';
+import { dirname, join } from 'path';
+import { mergeConfig, UserConfig } from 'vite';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import svgrPlugin from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -29,9 +30,10 @@ const config: StorybookConfig = {
   docs: {
     autodocs: 'tag',
   },
-  async viteFinal(cfg) {
-    return mergeConfig(cfg, {
+  async viteFinal(baseConfig) {
+    const userConfig: UserConfig = {
       plugins: [
+        nodePolyfills(),
         svgrPlugin({
           include: '**/*.svg',
           svgrOptions: { icon: true, exportType: 'default' },
@@ -41,7 +43,9 @@ const config: StorybookConfig = {
         }),
         tsconfigPaths(),
       ],
-    });
+    };
+
+    return mergeConfig(baseConfig, userConfig);
   },
 };
 
