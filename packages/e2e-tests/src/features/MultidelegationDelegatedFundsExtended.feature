@@ -120,34 +120,34 @@ Feature: Staking Page - Extended View
 
   @LW-9489
   Scenario: Extended View - Staking - Manage staking add button works as expected
-    When I navigate to Staking extended page
+    And I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    Then I see Manage delegation page
+    And I see Manage delegation page
     And I see selected pools counter is showing "1"
     And I see "Add stake pool" button is enabled
-    Then I click "Add stake pool" button
-    And I pick "CanadaStakes" pool for delegation
+    When I click "Add stake pool" button
+    Then I pick "CanadaStakes" pool for delegation
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
-    Then I see Manage delegation page
+    And I see Manage delegation page
     And I see selected pools counter is showing "2"
 
   @LW-9490
   Scenario Outline: Extended View - Staking - Manage staking add button disabled when selected max pools for staking
-    When I navigate to Staking extended page
+    And I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    Then I see Manage delegation page
+    And I see Manage delegation page
     And I see selected pools counter is showing "1"
     And I see "Add stake pool" button is enabled
-    Then I click "Add stake pool" button
-    And I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
+    And I click "Add stake pool" button
+    When I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
-    Then I see Manage delegation page
+    And I see Manage delegation page
     And I see selected pools counter is showing "<pools_after>"
-    And I see "Add stake pool" button is disabled
+    Then I see "Add stake pool" button is disabled
     Examples:
       | pools_after | pools_names                                                                                   |
       | 10          | 8BETA, ADA Capital, AdaNet.io, Boople Turtle Pool, ADV, BAZAR, ADASquirrel, Akasha, Alfa Pool |
