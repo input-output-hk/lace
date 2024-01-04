@@ -18,14 +18,9 @@ const backgroundServices = consumeRemoteApi<BackgroundService>(
   { runtime, logger: console }
 );
 
-// eslint-disable-next-line unicorn/no-null
-const BackgroundServiceAPIContext = createContext<typeof backgroundServices | null>(null);
+const BackgroundServiceAPIContext = createContext<typeof backgroundServices>(backgroundServices);
 
-export const useBackgroundServiceAPIContext = (): typeof backgroundServices => {
-  const backgroundService = useContext(BackgroundServiceAPIContext);
-  if (backgroundService === null) throw new Error('BackgroundServiceAPIContext not defined');
-  return backgroundService;
-};
+export const useBackgroundServiceAPIContext = (): typeof backgroundServices => useContext(BackgroundServiceAPIContext);
 
 export const BackgroundServiceAPIProvider = ({
   children,

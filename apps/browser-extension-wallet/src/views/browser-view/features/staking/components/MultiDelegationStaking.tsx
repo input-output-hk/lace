@@ -7,7 +7,7 @@ import {
   useExternalLinkOpener,
   useTheme
 } from '@providers';
-import { useBalances, useFetchCoinPrice, useLocalStorage, useWalletManager } from '@hooks';
+import { useBalances, useFetchCoinPrice, useLocalStorage } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { useWalletStore } from '@stores';
@@ -20,6 +20,7 @@ import {
 import { ActivityDetail } from '../../activity';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { useTranslation } from 'react-i18next';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 
 export const MultiDelegationStaking = (): JSX.Element => {
   const { theme } = useTheme();
@@ -76,7 +77,6 @@ export const MultiDelegationStaking = (): JSX.Element => {
   }, []);
   const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
-  const { executeWithPassword } = useWalletManager();
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
     true
@@ -105,13 +105,13 @@ export const MultiDelegationStaking = (): JSX.Element => {
         delegationStoreDelegationTxFee: delegationTxFee,
         fetchCoinPricePriceResult: priceResult,
         openExternalLink,
+        walletManagerExecuteWithPassword: withSignTxConfirmation,
         password,
         submittingState,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,
         currencyStoreFiatCurrency: fiatCurrency,
-        walletManagerExecuteWithPassword: executeWithPassword,
         walletStoreStakePoolSearchResults: stakePoolSearchResults,
         walletStoreStakePoolSearchResultsStatus: stakePoolSearchResultsStatus,
         walletStoreFetchStakePools: fetchStakePools,

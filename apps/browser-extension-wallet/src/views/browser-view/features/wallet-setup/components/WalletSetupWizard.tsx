@@ -2,7 +2,7 @@
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { wordlists } from 'bip39';
-import { CreateWalletData, useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
+import { useLocalStorage, useTimeSpentOnPage, useWalletManager } from '@hooks';
 import {
   MnemonicStage,
   WalletSetupAnalyticsStep,
@@ -95,7 +95,7 @@ export const WalletSetupWizard = ({
   );
   const [walletName, setWalletName] = useState(getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet')?.name);
   const [password, setPassword] = useState('');
-  const [walletInstance, setWalletInstance] = useState<CreateWalletData | undefined>();
+  const [walletInstance, setWalletInstance] = useState<Wallet.CardanoWallet | undefined>();
   const [isAnalyticsAccepted, setIsAnalyticsAccepted] = useState(false);
   const [mnemonicLength, setMnemonicLength] = useState<number>(DEFAULT_MNEMONIC_LENGTH);
   const [mnemonic, setMnemonic] = useState<string[]>([]);
@@ -105,7 +105,7 @@ export const WalletSetupWizard = ({
   const { getExperimentVariant } = useExperimentsContext();
   const [shouldDisplayTestVariantForExperiment, setShouldDisplayTestVariantForExperiment] = useState<boolean>();
 
-  const { createWallet, setWallet } = useWalletManager();
+  const { createWallet, activateWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
 
@@ -267,13 +267,13 @@ export const WalletSetupWizard = ({
   };
 
   const goToMyWallet = useCallback(
-    (wallet?: CreateWalletData) => {
-      setWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
+    async (wallet?: Wallet.CardanoWallet) => {
+      await activateWallet({ walletInstance: wallet || walletInstance, chainName: CHAIN });
       if (isAnalyticsAccepted) {
         analytics.sendAliasEvent();
       }
     },
-    [analytics, isAnalyticsAccepted, setWallet, walletInstance]
+    [analytics, isAnalyticsAccepted, activateWallet, walletInstance]
   );
 
   const handleCompleteCreation = useCallback(async () => {

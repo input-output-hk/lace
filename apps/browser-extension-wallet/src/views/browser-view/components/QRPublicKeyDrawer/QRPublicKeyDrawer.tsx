@@ -6,11 +6,17 @@ import { useTranslation } from 'react-i18next';
 import styles from './QRPublicKeyDrawer.module.scss';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
     name: state?.walletInfo?.name,
-    publicKey: state?.keyAgentData?.extendedAccountPublicKey
+    publicKey:
+      state?.cardanoWallet.source.wallet.type === WalletType.Script
+        ? (() => {
+            throw new Error('Script wallet support is not implemented');
+          })()
+        : state?.cardanoWallet.source.wallet.extendedAccountPublicKey
   }));
 
 export const QRPublicKeyDrawer = ({

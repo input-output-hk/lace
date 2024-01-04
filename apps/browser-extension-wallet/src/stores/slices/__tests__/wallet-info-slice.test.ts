@@ -6,12 +6,8 @@ import create, { GetState, SetState, UseStore } from 'zustand';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { BlockchainProviderSlice, WalletInfoSlice } from '@stores/types';
 import { walletInfoSlice } from '../wallet-info-slice';
-import {
-  mockPersonalWallet,
-  mockKeyAgentDataTestnet,
-  mockInMemoryWallet,
-  mockWalletInfoTestnet
-} from '@src/utils/mocks/test-helpers';
+import { mockPersonalWallet, mockInMemoryWallet, mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
+import { AnyWallet, SignerManager } from '@cardano-sdk/web-extension';
 
 const mockWalletInfoStore = (
   set: SetState<WalletInfoSlice>,
@@ -22,7 +18,6 @@ const mockWalletInfoStore = (
     walletInfo: mockWalletInfoTestnet,
     inMemoryWallet: mockInMemoryWallet,
     currentChain: Wallet.Cardano.ChainIds.Preprod,
-    keyAgentData: mockKeyAgentDataTestnet,
     ...walletInfoSlice({ set, get })
   };
 };
@@ -33,8 +28,6 @@ describe('Testing wallet info slice', () => {
     const { result } = renderHook(() => useWalletInfoHook());
 
     expect(typeof result.current.walletInfo).toEqual('object');
-    expect(typeof result.current.keyAgentData).toEqual('object');
-    expect(typeof result.current.setKeyAgentData).toEqual('function');
     expect(result.current.inMemoryWallet).toBeUndefined();
     expect(result.current.cardanoWallet).toBeUndefined();
     expect(typeof result.current.setCardanoWallet).toEqual('function');
@@ -52,11 +45,11 @@ describe('Testing wallet info slice', () => {
         asyncKeyAgent: {} as any,
         wallet: mockPersonalWallet as any,
         stores: { mock: 'store ' } as any,
-        keyAgent: {
-          serializableData: mockKeyAgentDataTestnet,
-          unsubscribe: jest.fn()
-        } as unknown as Wallet.KeyManagement.KeyAgent,
-        name: 'any'
+        name: 'any',
+        source: {
+          wallet: {} as AnyWallet<Wallet.Metadata>
+        },
+        signerManager: {} as SignerManager<Wallet.Metadata>
       };
       result.current.setCardanoWallet(cardanoWallet);
       await waitForNextUpdate();

@@ -1,10 +1,14 @@
 /* eslint-disable no-magic-numbers */
 import { POPUP_WINDOW } from '@src/utils/constants';
 import { getRandomIcon } from '@lace/common';
-import { runtime, Tabs, tabs, Windows, windows, storage as webStorage, Runtime } from 'webextension-polyfill';
+import { runtime, Tabs, tabs, Windows, windows, Runtime } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
-import { BackgroundStorage, BackgroundStorageKeys, MigrationState } from '../types';
+import { BackgroundStorage } from '../types';
 import uniqueId from 'lodash/uniqueId';
+import { walletManager, walletRepository } from './wallet';
+import { firstValueFrom } from 'rxjs';
+import { AnyWallet, WalletManager, WalletRepository, WalletType } from '@cardano-sdk/web-extension';
+import { getBackgroundStorage } from './storage';
 
 const { blake2b } = Wallet.Crypto;
 
@@ -20,69 +24,11 @@ type WindowSize = {
 
 type WindowSizeAndPositionProps = WindowPosition & WindowSize;
 
-export const INITIAL_STORAGE = { MIGRATION_STATE: { state: 'not-loaded' } as MigrationState };
-
-/**
- * Gets the background storage content
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getBackgroundStorage = async (): Promise<BackgroundStorage> =>
-  (await webStorage.local.get('BACKGROUND_STORAGE'))?.BACKGROUND_STORAGE ?? {};
-
 export const getADAPriceFromBackgroundStorage = async (): Promise<BackgroundStorage['fiatPrices']> => {
   const backgroundStorage = await getBackgroundStorage();
   return backgroundStorage?.fiatPrices;
 };
 
-/**
- * Deletes the specified `keys` from the background storage.
- *
- * If no `options` are passed then **ALL** of it is cleared.
- *
- * @param options Optional. List of keys to either delete or remove from storage
- */
-type ClearBackgroundStorageOptions =
-  | {
-      keys: BackgroundStorageKeys[];
-      except?: never;
-    }
-  | {
-      keys?: never;
-      except: BackgroundStorageKeys[];
-    };
-export const clearBackgroundStorage = async (options?: ClearBackgroundStorageOptions): Promise<void> => {
-  if (!options) {
-    await webStorage.local.remove('BACKGROUND_STORAGE');
-    return;
-  }
-  const backgroundStorage = await getBackgroundStorage();
-  for (const key in backgroundStorage) {
-    if (options.keys && options.keys.includes(key as BackgroundStorageKeys)) {
-      delete backgroundStorage[key as BackgroundStorageKeys];
-    }
-    if (options.except && !options.except.includes(key as BackgroundStorageKeys)) {
-      delete backgroundStorage[key as BackgroundStorageKeys];
-    }
-  }
-  // TODO make sure to remove other properties from webStorage (e.g. "lace-activate" seems to remain after clearing)
-  await webStorage.local.set({ BACKGROUND_STORAGE: backgroundStorage ?? {} });
-};
-
-/**
- * Adds content to the background storage. Does not replace it.
- */
-export const setBackgroundStorage = async (data: BackgroundStorage): Promise<void> => {
-  const backgroundStorage = await getBackgroundStorage();
-
-  await webStorage.local.set({ BACKGROUND_STORAGE: { ...backgroundStorage, ...data } });
-};
-
-/**
- * Initialize MIGRATION_STATE
- */
-export const initMigrationState = async (): Promise<void> => {
-  await webStorage.local.set(INITIAL_STORAGE);
-};
 /**
  * getDappInfoFromLastActiveTab
  * @returns {Promise<Wallet.DappInfo>}
@@ -160,18 +106,23 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
     tabs.onUpdated.addListener(listener);
   });
 
-const keyAgentIsHardwareWallet = (keyAgentsByChain?: Wallet.KeyAgentsByChain): boolean => {
-  if (!keyAgentsByChain) return false;
-  return Object.values(keyAgentsByChain).some(
-    ({ keyAgentData }) => keyAgentData.__typename !== Wallet.KeyManagement.KeyAgentType.InMemory
-  );
+export const getActiveWallet = async (props: {
+  walletRepository: WalletRepository<Wallet.Metadata>;
+  walletManager: WalletManager<Wallet.Metadata>;
+}): Promise<AnyWallet<Wallet.Metadata> | undefined> => {
+  const activeWallet = await firstValueFrom(props.walletManager.activeWalletId$);
+  if (!activeWallet) return;
+  const wallets = await firstValueFrom(props.walletRepository.wallets$);
+  // eslint-disable-next-line consistent-return
+  return wallets.find(({ walletId }) => walletId === activeWallet.walletId);
 };
 
 export const ensureUiIsOpenAndLoaded = async (url?: string, checkKeyAgent = true): Promise<Tabs.Tab> => {
-  const bgStorage = await getBackgroundStorage();
-
   const keyAgentTypeIsHardwareWallet = checkKeyAgent
-    ? keyAgentIsHardwareWallet(bgStorage?.keyAgentsByChain)
+    ? await (async () => {
+        const activeWallet = await getActiveWallet({ walletManager, walletRepository });
+        return activeWallet?.type === WalletType.Ledger || activeWallet?.type === WalletType.Trezor;
+      })()
     : undefined;
 
   const windowType: Windows.CreateType = keyAgentTypeIsHardwareWallet ? 'normal' : 'popup';

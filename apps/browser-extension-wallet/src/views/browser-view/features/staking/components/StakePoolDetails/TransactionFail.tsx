@@ -11,7 +11,6 @@ import styles from './TransactionComplete.module.scss';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
 import { usePassword } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
-import { useWalletManager } from '@hooks';
 import {
   MatomoEventActions,
   MatomoEventCategories,
@@ -46,8 +45,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setIsDrawerVisible, resetStates, setSection } = useStakePoolDetails();
   const { setDelegationTxBuilder } = useDelegationStore();
-  const { password, removePassword } = usePassword();
-  const { executeWithPassword } = useWalletManager();
+  const { removePassword } = usePassword();
   const analytics = useAnalyticsContext();
 
   const closeDrawer = () => {
@@ -107,7 +105,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
         </Button>
       ) : (
         <Button
-          onClick={() => executeWithPassword(password, onSubmit)}
+          onClick={onSubmit}
           className={styles.btn}
           size="large"
           loading={isLoading}

@@ -17,13 +17,9 @@ import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
-import {
-  setBackgroundStorage,
-  clearBackgroundStorage,
-  getBackgroundStorage,
-  getADAPriceFromBackgroundStorage
-} from '../util';
+import { getADAPriceFromBackgroundStorage } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
+import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);

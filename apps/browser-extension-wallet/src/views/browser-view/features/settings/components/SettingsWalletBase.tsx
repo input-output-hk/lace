@@ -9,13 +9,15 @@ import { NetworkChoiceDrawer } from './NetworkChoiceDrawer';
 import { useWalletStore } from '@src/stores';
 import { AboutDrawer } from './AboutDrawer';
 import { config } from '@src/config';
-import { COLLATERAL_AMOUNT_LOVELACES, useAddressesDiscoverer, useRedirection } from '@hooks';
+import { COLLATERAL_AMOUNT_LOVELACES, useRedirection } from '@hooks';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { useSearchParams, useObservable, Button } from '@lace/common';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import uniq from 'lodash/uniq';
+import { isKeyHashAddress } from '@cardano-sdk/wallet';
+import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 
 const { Title } = Typography;
 
@@ -58,8 +60,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const closeDrawer = useRedirection(walletRoutePaths.settings);
 
   const { t } = useTranslation();
-  const { addressesDiscoverer } = useAddressesDiscoverer();
-  const { environmentName, inMemoryWallet, walletInfo } = useWalletStore();
+  const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
   const unspendable = useObservable(inMemoryWallet.balance.utxo.unspendable$);
 
@@ -121,12 +122,20 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         analytics.sendEventToPostHog(PostHogAction.SettingsWalletHdWalletSyncSyncClick);
 
         const oldHdAddressesCount = uniq((walletInfo?.addresses ?? []).map(({ index }) => index)).length;
-        const newAddresses = await addressesDiscoverer.discover();
-        const newHdAddressesCount = uniq(newAddresses.map(({ index }) => index)).length;
-        const newHdWalletAddressesDiscovered = newHdAddressesCount > oldHdAddressesCount;
+        setHdDiscoveryStatus(AddressesDiscoveryStatus.InProgress);
+        try {
+          const newAddresses = await inMemoryWallet.discoverAddresses();
+          // TODO: script address support
+          // eslint-disable-next-line unicorn/no-array-callback-reference
+          const newHdAddressesCount = uniq(newAddresses.filter(isKeyHashAddress).map(({ index }) => index)).length;
+          const newHdWalletAddressesDiscovered = newHdAddressesCount > oldHdAddressesCount;
+          setHdDiscoveryStatus(AddressesDiscoveryStatus.Idle);
 
-        if (newHdWalletAddressesDiscovered) {
-          analytics.sendEventToPostHog(PostHogAction.SettingsWalletHdWalletSyncSyncNewAddresses);
+          if (newHdWalletAddressesDiscovered) {
+            analytics.sendEventToPostHog(PostHogAction.SettingsWalletHdWalletSyncSyncNewAddresses);
+          }
+        } catch {
+          setHdDiscoveryStatus(AddressesDiscoveryStatus.Error);
         }
       }}
       block={popupView}

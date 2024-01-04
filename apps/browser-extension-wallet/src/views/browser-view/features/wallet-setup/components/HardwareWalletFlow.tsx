@@ -67,7 +67,7 @@ export const HardwareWalletFlow = ({
   const [hardwareWalletErrorCode, setHardwareWalletErrorCode] = useState<HWErrorCode>('common');
   const [isStartOverDialogVisible, setIsStartOverDialogVisible] = useState(false);
   const showStartOverDialog = () => setIsStartOverDialogVisible(true);
-  const [walletCreated, setWalletCreated] = useState<Wallet.CardanoWalletByChain>();
+  const [walletCreated, setWalletCreated] = useState<Wallet.CardanoWallet>();
   const [deviceConnection, setDeviceConnection] = useState<Wallet.DeviceConnection>();
   const [connectedDevice, setConnectedDevice] = useState<Wallet.HardwareWallets | undefined>();
   const [accountIndex, setAccountIndex] = useState<number>(0);
@@ -175,14 +175,7 @@ export const HardwareWalletFlow = ({
       setDoesUserAllowAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );
-      const addressDiscoverySubscriber = wallet.wallet.addresses$.subscribe((addresses) => {
-        if (addresses.length === 0) return;
-        const hdWalletDiscovered = addresses.some((addr) => addr.index > 0);
-        if (hdWalletDiscovered) {
-          analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
-        }
-        addressDiscoverySubscriber.unsubscribe();
-      });
+      analytics.sendEventToPostHog(PostHogAction.OnboardingRestoreHdWallet);
       await analytics.setOptedInForEnhancedAnalytics(
         isAnalyticsAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
       );

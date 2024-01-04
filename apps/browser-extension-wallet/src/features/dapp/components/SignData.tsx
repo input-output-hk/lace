@@ -3,71 +3,49 @@ import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { Button, inputProps, Password } from '@lace/common';
-import { useWalletStore } from '@stores';
-import { useRedirection, useWalletManager } from '@hooks';
+import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { Layout } from './Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './SignTransaction.module.scss';
-import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { DAPP_CHANNELS } from '@src/utils/constants';
-import { runtime } from 'webextension-polyfill';
-import { UserPromptService } from '@lib/scripts/background/services';
-import { of } from 'rxjs';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export const SignData = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    utils: { setPreviousView }
+    utils: { setPreviousView },
+    signDataRequest: { request }
   } = useViewsFlowContext();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
-  const { executeWithPassword } = useWalletManager();
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState<string>();
   const [validPassword, setValidPassword] = useState<boolean>();
-  const { keyAgentData } = useWalletStore();
 
-  const handleVerifyPass = useCallback(async () => {
+  const onConfirm = useCallback(async () => {
     setIsLoading(true);
     try {
-      const valid = await Wallet.validateWalletPassword(keyAgentData, password);
-      setValidPassword(valid);
-      if (!valid) {
-        setIsLoading(false);
-        return;
-      }
-      exposeApi<Pick<UserPromptService, 'allowSignData'>>(
-        {
-          api$: of({
-            allowSignData(): Promise<boolean> {
-              return Promise.resolve(valid);
-            }
-          }),
-          baseChannel: DAPP_CHANNELS.userPrompt,
-          properties: { allowSignData: RemoteApiPropertyType.MethodReturningPromise }
-        },
-        { logger: console, runtime }
-      );
+      const passphrase = Buffer.from(password, 'utf8');
+      await request.sign(passphrase, { willRetryOnFailure: true });
+      setValidPassword(true);
       redirectToSignSuccess();
-    } catch {
-      redirectToSignFailure();
+    } catch (error) {
+      if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
+        setValidPassword(false);
+      } else {
+        redirectToSignFailure();
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [password, redirectToSignFailure, keyAgentData, redirectToSignSuccess]);
-
-  const onConfirm = useCallback(
-    () => executeWithPassword(password, handleVerifyPass, false),
-    [executeWithPassword, handleVerifyPass, password]
-  );
+  }, [password, redirectToSignFailure, redirectToSignSuccess, request]);
 
   const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
 
   const confirmIsDisabled = useMemo(() => {
-    if (keyAgentData.__typename !== 'InMemory') return false;
+    if (request.walletType !== WalletType.InMemory) return false;
     return !password;
-  }, [keyAgentData.__typename, password]);
+  }, [request, password]);
 
   return (
     <Layout title={undefined}>

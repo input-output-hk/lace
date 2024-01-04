@@ -25,11 +25,10 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const PopupView = (): React.ReactElement => {
   const {
+    cardanoWallet,
     inMemoryWallet,
-    keyAgentData,
     currentChain,
     walletInfo,
-    setKeyAgentData,
     isWalletLocked,
     walletLock,
     initialHdDiscoveryCompleted
@@ -43,22 +42,19 @@ export const PopupView = (): React.ReactElement => {
   useEnterKeyPress();
 
   useEffect(() => {
-    // try to get key agent data from local storage if exist and initialize state
-    // if no key agent and the wallet is not locked open setup flow
-    const keyAgentFromStorage = getValueFromLocalStorage('keyAgentData');
+    // try to get wallet data from storage if exist and initialize state
+    // if no wallet is found and the wallet is not locked open setup flow
     // all the related data is cleared for the forgot password flow as well, so do not react in this case
     const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>(
       'isForgotPasswordFlow'
     );
-    if (!keyAgentFromStorage && !isWalletLocked() && !isForgotPasswordFlow) {
+    if (cardanoWallet === null && !isWalletLocked() && !isForgotPasswordFlow) {
       backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
-    } else {
-      setKeyAgentData(keyAgentFromStorage);
     }
     // TODO: Revise network switching with address discovery and refactor to make the process easier to maintain
     // chainName is not being used but it's needed here for this to work like the browser view when switching networks
     // (see useEffect in browser-view routes index)
-  }, [isWalletLocked, backgroundServices, currentChain, chainName, setKeyAgentData]);
+  }, [isWalletLocked, backgroundServices, currentChain, chainName, cardanoWallet]);
 
   useEffect(() => {
     loadWallet();
@@ -76,8 +72,7 @@ export const PopupView = (): React.ReactElement => {
     return <UnlockWalletContainer />;
   }
 
-  // Wallet loaded
-  if (keyAgentData && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
+  if (!!cardanoWallet && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return <ExtensionRoutes />;
   }
 

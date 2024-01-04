@@ -8,7 +8,7 @@ import { Sections } from '../../types';
 import styles from './SignConfirmation.module.scss';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
-import { useDelegationDetails, useWalletManager } from '@hooks';
+import { useDelegationDetails } from '@hooks';
 import {
   MatomoEventActions,
   MatomoEventCategories,
@@ -62,7 +62,6 @@ export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): R
   const { signAndSubmitTransaction } = useDelegationTransaction();
   const { setSubmitingTxState, isSubmitingTx, setIsRestaking } = useSubmitingState();
   const { setSection } = useStakePoolDetails();
-  const { executeWithPassword } = useWalletManager();
   const analytics = useAnalyticsContext();
   const { inMemoryWallet } = useWalletStore();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
@@ -119,7 +118,7 @@ export const SignConfirmationFooter = ({ popupView }: { popupView: boolean }): R
     <div className={styles.footer}>
       <Button
         data-testid="stake-sign-confirmation-btn"
-        onClick={() => executeWithPassword(password, handleVerifyPass)}
+        onClick={handleVerifyPass}
         disabled={isSubmitDisabled}
         loading={isSubmitingTx}
         className={styles.confirmBtn}

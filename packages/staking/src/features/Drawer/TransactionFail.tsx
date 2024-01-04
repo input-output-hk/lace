@@ -29,11 +29,11 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const {
-    walletManagerExecuteWithPassword: executeWithPassword,
     delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     password: { password, removePassword },
     walletStoreInMemoryWallet: inMemoryWallet,
+    walletManagerExecuteWithPassword: executeWithPassword,
   } = useOutsideHandles();
   // TODO implement analytics for the new flow
   const analytics = {
@@ -61,7 +61,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
     const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx.tx);
+    await inMemoryWallet.submitTx(signedTx);
   }, [delegationTxBuilder, inMemoryWallet]);
 
   const onSubmit = async () => {
@@ -100,7 +100,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       ) : (
         <Button
           // password defined only for inMemory wallet
-          onClick={() => (password ? executeWithPassword(password, onSubmit) : onSubmit())}
+          onClick={() => executeWithPassword(onSubmit, password)}
           className={styles.btn}
           size="large"
           loading={isLoading}

@@ -25,7 +25,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork, useSendEvent, useWalletManager } from '@hooks';
+import { useHandleResolver, useNetwork, useSendEvent } from '@hooks';
 import {
   MatomoEventActions,
   MatomoEventCategories,
@@ -44,6 +44,7 @@ import { AddressBookSchema } from '@lib/storage';
 import { getAddressToSave } from '@src/utils/validators';
 import { useAnalyticsContext } from '@providers';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 
 const { SendTransaction: Events, AddressBook } = AnalyticsEventNames;
 
@@ -84,7 +85,6 @@ export const Footer = withAddressBookContext(
     const { password, removePassword } = usePassword();
     const [metadata] = useMetadata();
     const { onClose, onCloseSubmitedTransaction } = useHandleClose();
-    const { executeWithPassword } = useWalletManager();
     const analytics = useAnalyticsContext();
     const isOnline = useNetwork();
     const [selectedId, setSelectedId] = useState<number | null>();
@@ -197,10 +197,10 @@ export const Footer = withAddressBookContext(
     const isHwSummary = useMemo(() => isSummaryStep && !isInMemory, [isSummaryStep, isInMemory]);
 
     const signAndSubmitTransaction = useCallback(async () => {
-      const { tx } = await builtTxData.tx.sign();
-      await inMemoryWallet.submitTx(tx);
+      const signedTx = await builtTxData.tx.sign();
+      await inMemoryWallet.submitTx(signedTx);
       txSubmitted$.next({
-        id: tx.id.toString(),
+        id: signedTx.tx.id.toString(),
         date: new Date().toString(),
         creationType: TxCreationType.Internal
       });
@@ -210,17 +210,15 @@ export const Footer = withAddressBookContext(
       if (isSubmitingTx) return;
 
       setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
+
       try {
-        await signAndSubmitTransaction();
-        removePassword();
+        await withSignTxConfirmation(signAndSubmitTransaction, password);
         // Send amount of bundles as value
         sendEvent(isPopupView ? Events.TX_SUCCESS_POPUP : Events.TX_SUCCESS_BROWSER, outputMap.size);
         setSection({ currentSection: Sections.SUCCESS_TX });
         setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
       } catch (error) {
-        removePassword();
-        // Error name is 'AuthenticationError' in dev build but 'W' in prod build
-        if (error.message?.includes('Authentication failure')) {
+        if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
           if (isHwSummary) {
             sendEvent(isPopupView ? Events.TX_FAIL_POPUP : Events.TX_FAIL_BROWSER);
             setSection({ currentSection: Sections.UNAUTHORIZED_TX });
@@ -234,6 +232,8 @@ export const Footer = withAddressBookContext(
           setSection({ currentSection: Sections.FAIL_TX });
           setSubmitingTxState({ isSubmitingTx: false });
         }
+      } finally {
+        removePassword();
       }
     }, [
       isPopupView,
@@ -243,7 +243,9 @@ export const Footer = withAddressBookContext(
       sendEvent,
       setSection,
       setSubmitingTxState,
-      signAndSubmitTransaction
+      signAndSubmitTransaction,
+      password,
+      isHwSummary
     ]);
 
     const onConfirm = useCallback(() => {
@@ -268,7 +270,7 @@ export const Footer = withAddressBookContext(
           }
           return handleVerifyPass();
         case isConfirmPass:
-          return executeWithPassword(password, handleVerifyPass);
+          return handleVerifyPass();
         case txHasSucceeded:
           return onCloseSubmitedTransaction();
         case txHasFailed:
@@ -283,8 +285,6 @@ export const Footer = withAddressBookContext(
       isInMemory,
       isPopupView,
       handleVerifyPass,
-      executeWithPassword,
-      password,
       onCloseSubmitedTransaction,
       setSubmitingTxState,
       setSection,

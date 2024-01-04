@@ -1,6 +1,5 @@
-import { Wallet } from '@lace/cardano';
 import { AuthorizedDappStorage } from '@src/types/dappConnector';
-import { Message } from './background-service';
+import type { Message } from './background-service';
 import { ADAPrices } from './prices';
 
 export interface PendingMigrationState {
@@ -25,7 +24,6 @@ export const ABOUT_EXTENSION_KEY = 'aboutExtension';
 export interface BackgroundStorage {
   message?: Message;
   mnemonic?: string;
-  keyAgentsByChain?: Wallet.KeyAgentsByChain;
   fiatPrices?: { prices: ADAPrices; timestamp: number };
   userId?: string;
   usePersistentUserId?: boolean;

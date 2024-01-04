@@ -7,7 +7,7 @@ import {
   useExternalLinkOpener,
   useTheme
 } from '@providers';
-import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards, useWalletManager } from '@hooks';
+import { useBalances, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -22,6 +22,7 @@ import {
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY
 } from '@utils/constants';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -75,7 +76,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   }, []);
   const { walletActivities, walletActivitiesStatus } = useWalletActivities({ sendAnalytics });
   const { fiatCurrency } = useCurrencyStore();
-  const { executeWithPassword } = useWalletManager();
   const isLoadingNetworkInfo = useWalletStore(networkInfoStatusSelector);
   const [multidelegationFirstVisit, { updateLocalStorage: setMultidelegationFirstVisit }] = useLocalStorage(
     MULTIDELEGATION_FIRST_VISIT_LS_KEY,
@@ -115,11 +115,11 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         password,
         stakingRewards,
         submittingState,
+        walletManagerExecuteWithPassword: withSignTxConfirmation,
         walletStoreGetKeyAgentType: getKeyAgentType,
         walletStoreInMemoryWallet: inMemoryWallet,
         walletStoreWalletUICardanoCoin: cardanoCoin,
         currencyStoreFiatCurrency: fiatCurrency,
-        walletManagerExecuteWithPassword: executeWithPassword,
         walletStoreStakePoolSearchResults: stakePoolSearchResults,
         walletStoreStakePoolSearchResultsStatus: stakePoolSearchResultsStatus,
         walletStoreFetchStakePools: fetchStakePools,
