@@ -18,15 +18,14 @@ Feature: Address book - popup view
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
     And address is saved to clipboard
 
-  @LW-4475 @Pending
-  # BUG LW-7925
+  @LW-4475
   Scenario Outline: Popup-view - Address Book - Edit address: <edited_address>
     Given I have 3 addresses in my address book in popup mode
     When I click address on the list with name "<edited_address>"
     And I click "Edit" button on address details page
     And I fill address form with "<wallet_name>" name and "<address>" address
     And I click "Done" button on "Edit address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.editAddress"
+    Then I see a toast with text: "Edited successfully"
     And I see address row with name "<wallet_name>" and address "<address_label>" on the list in popup mode
     Examples:
       | edited_address | wallet_name  | address                                                                                                            | address_label  |
@@ -102,8 +101,7 @@ Feature: Address book - popup view
     And I click "Cancel" button on delete address modal
     Then I see address detail page in popup mode with details of "Byron" address
 
-  @LW-4479 @Pending
-  # BUG LW-7925
+  @LW-4479
   Scenario Outline: Popup-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page
@@ -111,7 +109,7 @@ Feature: Address book - popup view
     And "Save address" button is disabled on "Add new address" drawer
     When I fill address form with "<wallet_name>" name and address from "<wallet_address>" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "Address added"
+    Then I see a toast with text: "Address added"
     And I see address row with name "<wallet_name>" and address "<wallet_address>" on the list in popup mode
     Examples:
       | wallet_name          | wallet_address |
