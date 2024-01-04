@@ -1,6 +1,10 @@
 name: Shared Build
 description: Shared build config for both Chromium and Safari workflows
 inputs:
+  BUILD_DEV_PREVIEW:
+    description: 'Build developer preview of Lace'
+    required: false
+    default: 'false'
   LACE_EXTENSION_KEY:
     description: 'Public extended manifest key'
     required: true
@@ -18,10 +22,6 @@ inputs:
     default: ''
   PRODUCTION_MODE_TRACKING:
     description: 'Enable analytics tracking in production'
-    required: false
-    default: 'false'
-  BUILD_DEV_PREVIEW:
-    description: 'Build developer preview of Lace'
     required: false
     default: 'false'
 runs:
@@ -45,10 +45,10 @@ runs:
     - name: Build dist version
       shell: bash
       env:
+        BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
         POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_MAINNET }}
         POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREPROD }}
         POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
-        BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
       run: yarn browser build
