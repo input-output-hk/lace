@@ -356,3 +356,15 @@ Then(/^all pools details are hidden$/, async () => {
 Then(/^I see selected pools counter is showing "([^"]*)"$/, async (poolsCount: number) => {
   await ManageStakingDrawerAssert.assertSeeSelectedPoolsCounter(poolsCount);
 });
+
+Then(/^I see "Add stake pool" button is (disabled|enabled)$/, async (state: 'enabled' | 'disabled') => {
+  await ManageStakingDrawerAssert.assertSeeAddStakePoolButtonDisabled(state === 'enabled');
+});
+
+Then(/^I click "Add stake pool" button$/, async () => {
+  await ManageStakingDrawer.clickAddStakePoolButton();
+});
+
+Then(/^I pick "([^"]*)" pool for delegation$/, async (poolToStake: string) => {
+  await MultidelegationPage.markPoolsForDelegation(poolToStake);
+});

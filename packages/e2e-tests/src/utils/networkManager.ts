@@ -18,7 +18,7 @@ export class NetworkManager {
       const puppeteer = await browser.getPuppeteer();
       const targets = puppeteer.targets().filter((target) => target.type() === 'page');
       targets.map(async (target) => {
-        const client = await target.createCDPSession();
+        const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
         NetworkManager.cdpSessions.push(client);
         await client.send(this.NETWORK_ENABLE);
         client.on('Network.requestWillBeSent', (params: any) => {
@@ -47,7 +47,7 @@ export class NetworkManager {
           (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
         );
       targets.map(async (target) => {
-        const client = await target.createCDPSession();
+        const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
         NetworkManager.cdpSessions.push(client);
         await client.send(this.NETWORK_ENABLE);
         await client.send('Network.emulateNetworkConditions', {
@@ -70,7 +70,7 @@ export class NetworkManager {
           (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
         );
       targets.map(async (target) => {
-        const client = await target.createCDPSession();
+        const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
         NetworkManager.cdpSessions.push(client);
         await client.send('Fetch.enable', {
           patterns: [{ urlPattern }]
@@ -96,7 +96,7 @@ export class NetworkManager {
           (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
         );
       targets.map(async (target) => {
-        const client = await target.createCDPSession();
+        const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
         NetworkManager.cdpSessions.push(client);
         await client.send(this.NETWORK_ENABLE);
         client.on('Network.responseReceived', async (request) => {

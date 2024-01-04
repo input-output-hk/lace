@@ -62,3 +62,5 @@ export const DelegationRatioSlider = React.forwardRef(
     );
   }
 );
+
+DelegationRatioSlider.displayName = 'DelegationRatioSlider';

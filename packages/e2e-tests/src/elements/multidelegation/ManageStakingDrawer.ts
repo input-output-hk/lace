@@ -159,6 +159,11 @@ class ManageStakingDrawer extends CommonDrawerElements {
       await (await this.poolDetailsIconExpanded)[0].click();
     }
   }
+
+  async clickAddStakePoolButton() {
+    await this.addPoolsButton.waitForClickable();
+    await this.addPoolsButton.click();
+  }
 }
 
 export default new ManageStakingDrawer();

@@ -112,15 +112,15 @@ export const DappConfirmData = (): React.ReactElement => {
     try {
       HardwareLedger.LedgerKeyAgent.establishDeviceConnection(Wallet.KeyManagement.CommunicationType.Web)
         .then(() => {
-          exposeApi<Pick<UserPromptService, 'allowSignTx'>>(
+          exposeApi<Pick<UserPromptService, 'allowSignData'>>(
             {
               api$: of({
-                async allowSignTx(): Promise<boolean> {
+                async allowSignData(): Promise<boolean> {
                   return Promise.resolve(true);
                 }
               }),
               baseChannel: DAPP_CHANNELS.userPrompt,
-              properties: { allowSignTx: RemoteApiPropertyType.MethodReturningPromise }
+              properties: { allowSignData: RemoteApiPropertyType.MethodReturningPromise }
             },
             { logger: console, runtime }
           );

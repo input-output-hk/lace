@@ -100,3 +100,54 @@ Feature: Staking Page - Extended View
     Then all pools details are expanded
     When I hide all pools details
     Then all pools details are hidden
+
+  @LW-9484
+  Scenario: Extended View - Staking - Manage staking add button disabled when staking to max pools
+    Given I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+    And I see "Add stake pool" button is disabled
+
+  @LW-9485
+  Scenario: Extended View - Staking - Manage staking add button disabled when staking to less than max pools
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+    And I see "Add stake pool" button is enabled
+
+  @LW-9489
+  Scenario: Extended View - Staking - Manage staking add button works as expected
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    And I see Manage delegation page
+    And I see selected pools counter is showing "1"
+    And I see "Add stake pool" button is enabled
+    When I click "Add stake pool" button
+    Then I pick "CanadaStakes" pool for delegation
+    And I click "Next" button on staking portfolio bar
+    And I click "Fine by me" button on "Changing staking preferences?" modal
+    And I see Manage delegation page
+    And I see selected pools counter is showing "2"
+
+  @LW-9490
+  Scenario Outline: Extended View - Staking - Manage staking add button disabled when selected max pools for staking
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    And I see Manage delegation page
+    And I see selected pools counter is showing "1"
+    And I see "Add stake pool" button is enabled
+    And I click "Add stake pool" button
+    When I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
+    And I click "Next" button on staking portfolio bar
+    And I click "Fine by me" button on "Changing staking preferences?" modal
+    And I see Manage delegation page
+    And I see selected pools counter is showing "<pools_after>"
+    Then I see "Add stake pool" button is disabled
+    Examples:
+      | pools_after | pools_names                                                                                   |
+      | 10          | 8BETA, ADA Capital, AdaNet.io, Boople Turtle Pool, ADV, BAZAR, ADASquirrel, Akasha, Alfa Pool |

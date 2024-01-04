@@ -21,7 +21,6 @@ export const SignData = (): React.ReactElement => {
     utils: { setPreviousView }
   } = useViewsFlowContext();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
-  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const { executeWithPassword } = useWalletManager();
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState<string>();
@@ -49,13 +48,12 @@ export const SignData = (): React.ReactElement => {
         },
         { logger: console, runtime }
       );
-      redirectToSignSuccess();
     } catch {
       redirectToSignFailure();
     } finally {
       setIsLoading(false);
     }
-  }, [password, redirectToSignFailure, keyAgentData, redirectToSignSuccess]);
+  }, [password, redirectToSignFailure, keyAgentData]);
 
   const onConfirm = useCallback(
     () => executeWithPassword(password, handleVerifyPass, false),
@@ -85,10 +83,20 @@ export const SignData = (): React.ReactElement => {
         </Spin>
       </div>
       <div className={styles.actions}>
-        <Button onClick={onConfirm} disabled={confirmIsDisabled || isLoading} className={styles.actionBtn}>
+        <Button
+          onClick={onConfirm}
+          disabled={confirmIsDisabled || isLoading}
+          className={styles.actionBtn}
+          data-testid="sign-transaction-confirm"
+        >
           {t('dapp.confirm.btn.confirm')}
         </Button>
-        <Button onClick={setPreviousView} color="secondary" className={styles.actionBtn}>
+        <Button
+          onClick={setPreviousView}
+          color="secondary"
+          className={styles.actionBtn}
+          data-testid="sign-transaction-cancel"
+        >
           {t('dapp.confirm.btn.cancel')}
         </Button>
       </div>

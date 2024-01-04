@@ -2,6 +2,7 @@ import { PostHogAction } from '@lace/common';
 import { SubNavigation } from '@lace/ui';
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { USE_MULTI_DELEGATION_STAKING_ACTIVITY } from '../../featureFlags';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { DelegationFlow, useDelegationPortfolioStore } from '../store';
 
@@ -73,7 +74,7 @@ export const Navigation = ({ children }: NavigationProps) => {
           tabIndex={0}
           highlightWidth="half"
         />
-        {process.env.USE_MULTI_DELEGATION_STAKING_ACTIVITY === 'true' ? (
+        {USE_MULTI_DELEGATION_STAKING_ACTIVITY ? (
           <SubNavigation.Item
             name={t('root.nav.activityTitle')}
             value={Page.activity}
