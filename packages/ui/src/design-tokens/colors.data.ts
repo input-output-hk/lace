@@ -220,6 +220,18 @@ export const colors = {
   $data_blue: '',
   $data_green: '',
   $data_yellow: '',
+
+  $educational_card_root_container_bgColor: '',
+  $educational_card_root_container_borderColor: '',
+
+  $educational_card_item_container_bgColor: '',
+  $educational_card_item_container_bgColor_hover: '',
+  $educational_card_item_container_bgColor_pressed: '',
+  $educational_card_item_container_outlineColor: '',
+  $educational_card_item_label_color: '',
+  $educational_card_item_title_color: '',
+  $educational_card_item_icon_container_bgColor: '',
+  $educational_card_item_icon_container_borderColor: '',
 };
 
 export type Colors = typeof colors;
