@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@lace/common';
+import { Box, Button, Flex, Text } from '@lace/ui';
 import styles from './SharedWalletSetupOption.module.scss';
 
 export interface WalletSetupOptionProps {
@@ -15,18 +15,16 @@ export const SharedWalletSetupOption = ({
   onClick,
   testId
 }: WalletSetupOptionProps): React.ReactElement => (
-  <div className={styles.sharedWalletSetupOption}>
-    <div>
-      <Icon className={styles.icon} data-testid={`${testId}-icon`} />
-      <div className={styles.title} data-testid={`${testId}-title`}>
-        {title}
-      </div>
-      <div className={styles.description} data-testid={`${testId}-description`}>
-        {description}
-      </div>
-    </div>
-    <Button data-testid={`${testId}-button`} className={styles.button} color="gradient-secondary" onClick={onClick}>
-      {button}
-    </Button>
-  </div>
+  <Flex flexDirection="column" p="$16" alignItems="center" justifyContent="space-between">
+    <Icon className={styles.icon} data-testid={`${testId}-icon`} />
+    <Text.Body.Normal weight="$bold" data-testid={`${testId}-title`}>
+      {title}
+    </Text.Body.Normal>
+    <Text.Body.Small weight="$semibold" className={styles.description} data-testid={`${testId}-description`}>
+      {description}
+    </Text.Body.Small>
+    <Box mt="$24">
+      <Button.Primary data-testid={`${testId}-button`} onClick={onClick} label={button} w="$fill" />
+    </Box>
+  </Flex>
 );

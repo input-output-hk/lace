@@ -47,7 +47,7 @@ export const walletRoutePaths = {
     }
   },
   sharedWallet: {
-    root: '/shared-wallet'
+    root: '/add-shared-wallet'
   }
 };
 

@@ -4,6 +4,7 @@ import { SharedWalletSetupOption } from './SharedWalletSetupOption.component';
 import { ReactComponent as UserGroupIcon } from '../../../assets/icons/user-group-gradient.component.svg';
 import { ReactComponent as UploadIcon } from '../../../assets/icons/upload.component.svg';
 import { ReactComponent as LaceLogo } from '../../../assets/icons/lace-logo.component.svg';
+import { Flex, Text } from '@lace/ui';
 
 export type SharedWalletSetupOptionTranslations = Record<'title' | 'description' | 'button', string>;
 
@@ -23,17 +24,26 @@ export const SetupSharedWallet = ({
   onImportSharedWalletClick,
   translations
 }: SetupSharedWalletProps): React.ReactElement => (
-  <div className={styles.walletSetupOptionsStep} data-testid="shared-wallet-setup-options-container">
-    <div className={styles.content} data-testid="shared-wallet-setup-options-content">
-      <div className={styles.header} data-testid="shared-wallet-setup-options-header">
+  <div className={styles.root} data-testid="shared-wallet-setup-options-container">
+    <Flex
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="space-between"
+      data-testid="shared-wallet-setup-options-content"
+    >
+      <Flex
+        mb="$48"
+        flexDirection="column"
+        alignItems="center"
+        className={styles.header}
+        data-testid="shared-wallet-setup-options-header"
+      >
         <LaceLogo className={styles.image} data-testid="shared-wallet-setup-logo" />
-        <h5 className={styles.title} data-testid="wallet-setup-title">
-          {translations.title}
-        </h5>
-        <p className={styles.subtitle} data-testid="shared-wallet-setup-subtitle">
+        <Text.Heading data-testid="wallet-setup-title">{translations.title}</Text.Heading>
+        <Text.Body.Normal className={styles.subtitle} weight="$semibold" data-testid="shared-wallet-setup-subtitle">
           {translations.subTitle}
-        </p>
-      </div>
+        </Text.Body.Normal>
+      </Flex>
       <div className={styles.options}>
         <SharedWalletSetupOption
           copies={translations.createSharedWalletOption}
@@ -49,6 +59,6 @@ export const SetupSharedWallet = ({
           testId="shared-wallet-import"
         />
       </div>
-    </div>
+    </Flex>
   </div>
 );
