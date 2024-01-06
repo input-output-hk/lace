@@ -1,0 +1,14 @@
+@import '../../styles/theme.scss';
+.governance {
+  svg {
+    path,
+    circle,
+    line,
+    polyline,
+    rect,
+    ellipse {
+      fill: var(--text-color-blue, #3489f7);
+      color: var(--text-color-blue, #3489f7);
+    }
+  }
+}

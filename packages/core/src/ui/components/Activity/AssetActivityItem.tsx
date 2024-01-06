@@ -6,11 +6,18 @@ import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
-import styles from './AssetActivityItem.module.scss';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
 import { useTranslate } from '@src/ui/hooks';
-import { ActivityTypeIcon, ActivityType } from '../ActivityDetail';
+import {
+  ActivityTypeIcon,
+  DelegationTransactionType,
+  TransactionActivityType,
+  ConwayEraGovernanceActions,
+  ConwayEraCertificatesTypes
+} from '../ActivityDetail';
+import type { ActivityType } from '../ActivityDetail';
+import styles from './AssetActivityItem.module.scss';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
@@ -61,7 +68,6 @@ export interface AssetActivityItemProps {
   assets?: ActivityAssetProp[];
 }
 
-const DelegationTransactionTypes = new Set(['delegation', 'delegationRegistration', 'delegationDeregistration']);
 const DELEGATION_ASSET_NUMBER = 1;
 
 interface ActivityStatusIconProps {
@@ -77,23 +83,13 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
     case ActivityStatus.SUCCESS:
       return <ActivityTypeIcon type={type} />;
     case ActivityStatus.SPENDABLE:
-      return <ActivityTypeIcon type="rewards" />;
+      return <ActivityTypeIcon type={TransactionActivityType.rewards} />;
     case ActivityStatus.PENDING:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
     case ActivityStatus.ERROR:
     default:
       return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
   }
-};
-
-const translationTypes = {
-  delegation: 'package.core.assetActivityItem.entry.name.delegation',
-  delegationDeregistration: 'package.core.assetActivityItem.entry.name.delegationDeregistration',
-  delegationRegistration: 'package.core.assetActivityItem.entry.name.delegationRegistration',
-  rewards: 'package.core.assetActivityItem.entry.name.rewards',
-  incoming: 'package.core.assetActivityItem.entry.name.incoming',
-  outgoing: 'package.core.assetActivityItem.entry.name.outgoing',
-  self: 'package.core.assetActivityItem.entry.name.self'
 };
 
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.
@@ -109,12 +105,43 @@ export const AssetActivityItem = ({
   formattedTimestamp
 }: AssetActivityItemProps): React.ReactElement => {
   const { t } = useTranslate();
+
+  const translationTypes: Record<ActivityType, string> = {
+    [TransactionActivityType.rewards]: 'package.core.assetActivityItem.entry.name.rewards',
+    [TransactionActivityType.incoming]: 'package.core.assetActivityItem.entry.name.incoming',
+    [TransactionActivityType.outgoing]: 'package.core.assetActivityItem.entry.name.outgoing',
+    [TransactionActivityType.self]: 'package.core.assetActivityItem.entry.name.self',
+    [DelegationTransactionType.delegation]: 'package.core.assetActivityItem.entry.name.delegation',
+    [DelegationTransactionType.delegationDeregistration]:
+      'package.core.assetActivityItem.entry.name.delegationDeregistration',
+    [DelegationTransactionType.delegationRegistration]:
+      'package.core.assetActivityItem.entry.name.delegationRegistration',
+    [ConwayEraGovernanceActions.vote]: 'package.core.assetActivityItem.entry.name.vote',
+    [ConwayEraGovernanceActions.submitProposal]: 'package.core.assetActivityItem.entry.name.submitProposal',
+    [ConwayEraCertificatesTypes.RegisterDelegateRepresentative]:
+      'package.core.assetActivityItem.entry.name.drepRegistration',
+    [ConwayEraCertificatesTypes.UnregisterDelegateRepresentative]:
+      'package.core.assetActivityItem.entry.name.drepRetirement',
+    [ConwayEraCertificatesTypes.UpdateDelegateRepresentative]: 'package.core.assetActivityItem.entry.name.drepUpdate',
+    [ConwayEraCertificatesTypes.StakeVoteDelegation]: 'package.core.assetActivityItem.entry.name.stakeVoteDelegation',
+    [ConwayEraCertificatesTypes.StakeRegistrationDelegation]:
+      'package.core.assetActivityItem.entry.name.stakeRegistrationDelegation',
+    [ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation]:
+      'package.core.assetActivityItem.entry.name.stakeVoteRegistrationDelegation',
+    [ConwayEraCertificatesTypes.VoteDelegation]: 'package.core.assetActivityItem.entry.name.voteDelegation',
+    [ConwayEraCertificatesTypes.VoteRegistrationDelegation]:
+      'package.core.assetActivityItem.entry.name.voteRegistrationDelegation',
+    [ConwayEraCertificatesTypes.ResignCommitteeCold]: 'package.core.assetActivityItem.entry.name.resignComitteeCold',
+    [ConwayEraCertificatesTypes.AuthorizeCommitteeHot]: 'package.core.assetActivityItem.entry.name.authCommitteeHot'
+  };
+
   const ref = useRef<HTMLHeadingElement>(null);
   const [assetsToShow, setAssetsToShow] = React.useState<number>(0);
 
   const getText = useCallback(
     (items: number): { text: string; suffix: string } => {
-      if (DelegationTransactionTypes.has(type) || type === 'self') return { text: amount, suffix: '' };
+      if (type in DelegationTransactionType || type === TransactionActivityType.self)
+        return { text: amount, suffix: '' };
 
       const assetsIdsText = assets
         ?.slice(0, items)
@@ -159,15 +186,16 @@ export const AssetActivityItem = ({
   const isPendingTx = status === ActivityStatus.PENDING;
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
-  const assetAmountContent = DelegationTransactionTypes.has(type) ? (
-    <p data-testid="tokens-amount" className={styles.description}>
-      {DELEGATION_ASSET_NUMBER} {t('package.core.assetActivityItem.entry.token')}
-    </p>
-  ) : (
-    <p data-testid="tokens-amount" className={styles.description}>
-      {pluralize('package.core.assetActivityItem.entry.token', assetsNumber, true)}
-    </p>
-  );
+  const assetAmountContent =
+    type in DelegationTransactionType ? (
+      <p data-testid="tokens-amount" className={styles.description}>
+        {DELEGATION_ASSET_NUMBER} {t('package.core.assetActivityItem.entry.token')}
+      </p>
+    ) : (
+      <p data-testid="tokens-amount" className={styles.description}>
+        {pluralize('package.core.assetActivityItem.entry.token', assetsNumber, true)}
+      </p>
+    );
   const descriptionContent = formattedTimestamp ? (
     <p data-testid="timestamp" className={styles.description}>
       {formattedTimestamp}
@@ -188,7 +216,7 @@ export const AssetActivityItem = ({
         </div>
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
-            {isPendingTx && type !== 'self' && !DelegationTransactionTypes.has(type)
+            {isPendingTx && type !== TransactionActivityType.self && !(type in DelegationTransactionType)
               ? t('package.core.assetActivityItem.entry.name.sending')
               : t(translationTypes[type])}
           </h6>

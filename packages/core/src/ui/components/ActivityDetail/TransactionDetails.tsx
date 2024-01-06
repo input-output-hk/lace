@@ -6,11 +6,20 @@ import { Ellipsis, toast } from '@lace/common';
 import { Box } from '@lace/ui';
 import { useTranslate } from '@src/ui/hooks';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import type { ActivityStatus } from '../Activity';
+import { ActivityStatus } from '../Activity';
 import styles from './TransactionDetails.module.scss';
 import { TransactionInputOutput } from './TransactionInputOutput';
 import { TransactionFee } from './TransactionFee';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
+import { TxDetailListCertificates } from './TxDetailsListCertificates';
+import { TxDetailListProposals } from './TxDetailsListProposals';
+import { TxDetailListVotes } from './TxDetailsListVotes';
+import {
+  TxDetailsVotingProceduresTitles,
+  TxDetailsProposalProceduresTitles,
+  TxDetailsCertificateTitles,
+  TxDetails
+} from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
@@ -67,6 +76,9 @@ export interface TransactionDetailsProps {
   openExternalLink?: () => void;
   sendAnalyticsInputs?: () => void;
   sendAnalyticsOutputs?: () => void;
+  votingProcedures?: TxDetails<TxDetailsVotingProceduresTitles>[];
+  proposalProcedures?: TxDetails<TxDetailsProposalProceduresTitles>[];
+  certificates?: TxDetails<TxDetailsCertificateTitles>[];
 }
 
 const TOAST_DEFAULT_DURATION = 3;
@@ -108,11 +120,32 @@ export const TransactionDetails = ({
   isPopupView,
   openExternalLink,
   sendAnalyticsInputs,
-  sendAnalyticsOutputs
+  sendAnalyticsOutputs,
+  proposalProcedures,
+  votingProcedures,
+  certificates
 }: TransactionDetailsProps): React.ReactElement => {
   const { t } = useTranslate();
-  const isSending = status === 'sending';
-  const isSuccess = status === 'success';
+  const isSending = status === ActivityStatus.PENDING;
+  const isSuccess = status === ActivityStatus.SUCCESS;
+
+  // Translate certificate typenames
+  certificates?.forEach((certificate) => {
+    certificate?.forEach((detail) => {
+      if (detail.title === 'certificateType') {
+        detail.details = [t(`package.core.assetActivityItem.certificates.typenames.${detail.details[0]}`)];
+      }
+    });
+  });
+
+  // Translate governance proposal typenames
+  proposalProcedures?.forEach((proposal) => {
+    proposal?.forEach((p) => {
+      if (p.title === 'type') {
+        p.details = [t(`package.core.transactionDetailBrowser.governanceActions.${p.details[0]}`)];
+      }
+    });
+  });
 
   const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
     <div className={styles.details}>
@@ -278,6 +311,61 @@ export const TransactionDetails = ({
             })}
         </div>
 
+        {votingProcedures?.length > 0 && (
+          <TxDetailListVotes
+            testId="voting-procedures"
+            title={t('package.core.transactionDetailBrowser.votingProcedures')}
+            lists={votingProcedures}
+            translations={{
+              voterType: t('package.core.transactionDetailBrowser.votingProcedureTitles.voterType'),
+              voterCredential: t('package.core.transactionDetailBrowser.votingProcedureTitles.voterCredential'),
+              vote: t('package.core.transactionDetailBrowser.votingProcedureTitles.vote'),
+              anchor: t('package.core.transactionDetailBrowser.votingProcedureTitles.anchor'),
+              proposalTxHash: t('package.core.transactionDetailBrowser.votingProcedureTitles.proposalTxHash')
+            }}
+            withSeparatorLine
+          />
+        )}
+        {proposalProcedures?.length > 0 && (
+          <TxDetailListProposals
+            testId="proposal-procedures"
+            title={t('package.core.transactionDetailBrowser.proposalProcedures')}
+            lists={proposalProcedures}
+            withSeparatorLine
+            translations={{
+              type: t('package.core.transactionDetailBrowser.proposalProcedureTitles.type'),
+              governanceActionId: t('package.core.transactionDetailBrowser.proposalProcedureTitles.governanceActionId'),
+              rewardAccount: t('package.core.transactionDetailBrowser.proposalProcedureTitles.rewardAccount'),
+              anchor: t('package.core.transactionDetailBrowser.proposalProcedureTitles.anchor'),
+              protocolParamUpdate: t(
+                'package.core.transactionDetailBrowser.proposalProcedureTitles.protocolParamUpdate'
+              ),
+              protocolVersion: t('package.core.transactionDetailBrowser.proposalProcedureTitles.protocolVersion'),
+              withdrawals: t('package.core.transactionDetailBrowser.proposalProcedureTitles.withdrawals'),
+              membersToBeRemoved: t('package.core.transactionDetailBrowser.proposalProcedureTitles.membersToBeRemoved'),
+              membersToBeAdded: t('package.core.transactionDetailBrowser.proposalProcedureTitles.membersToBeAdded'),
+              newQuorumThreshold: t('package.core.transactionDetailBrowser.proposalProcedureTitles.newQuorumThreshold'),
+              constitutionAnchor: t('package.core.transactionDetailBrowser.proposalProcedureTitles.constitutionAnchor')
+            }}
+          />
+        )}
+        {certificates?.length > 0 && (
+          <TxDetailListCertificates
+            title={t('package.core.transactionDetailBrowser.certificates')}
+            testId="certificates"
+            lists={certificates}
+            withSeparatorLine
+            translations={{
+              certificateType: t('package.core.transactionDetailBrowser.certificateTitles.certificateType'),
+              drep: t('package.core.transactionDetailBrowser.certificateTitles.drep'),
+              anchor: t('package.core.transactionDetailBrowser.certificateTitles.anchor'),
+              coldCredential: t('package.core.transactionDetailBrowser.certificateTitles.coldCredential'),
+              hotCredential: t('package.core.transactionDetailBrowser.certificateTitles.hotCredential'),
+              drepCredential: t('package.core.transactionDetailBrowser.certificateTitles.drepCredential'),
+              depositPaid: t('package.core.transactionDetailBrowser.certificateTitles.depositPaid')
+            }}
+          />
+        )}
         {addrInputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}

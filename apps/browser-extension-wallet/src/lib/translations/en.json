@@ -23,7 +23,41 @@
           "incoming": "Received",
           "outgoing": "Sent",
           "sending": "Sending",
-          "self": "Self Transaction"
+          "self": "Self Transaction",
+          "drepRegistration": "DRep Registration",
+          "drepRetirement": "DRep De-Registration",
+          "drepUpdate": "DRep Update",
+          "resignComitteeCold": "Resign Committee",
+          "stakeRegistrationDelegation": "Stake Key Registration & Delgation",
+          "stakeVoteDelegation": "Stake Key Registration & DRep Delegation",
+          "stakeVoteRegistrationDelegation": "Stake Key Registration, Delegation, & DRep Delegation",
+          "voteRegistrationDelegation": "Stake Key Registration & DRep Delegation",
+          "authCommitteeHot": "Authorize Committee",
+          "voteDelegation": "Vote Delegation",
+          "vote": "Vote Signing",
+          "submitProposal": "Governance Proposal"
+        },
+        "certificates": {
+          "headings": {
+            "typename": "Certificate Type",
+            "anchor": "Anchor",
+            "drep": "DRep",
+            "deposit": "Deposit paid",
+            "coldCredential": "Cold credential",
+            "hotCredential": "Hot credential"
+          },
+          "typenames:": {
+            "VoteDelegation": "Vote Delegation",
+            "StakeVoteDelegation": "Stake Vote Delegation",
+            "StakeRegistrationDelegation": "Stake Registration Delegate",
+            "VoteRegistrationDelegation": "Vote Registration Delegate",
+            "StakeVoteRegistrationDelegation": "Stake Vote Registration Delegation",
+            "AuthorizeCommitteeHot": "Authorize Committee",
+            "ResignCommitteeCold": "Resign Committee",
+            "RegisterDelegateRepresentative": "Register Delegate Representative",
+            "UnregisterDelegateRepresentative": "Unregister Delegate Representative",
+            "UpdateDelegateRepresentative": "Update Delegate Representative"
+          }
         }
       }
     },

@@ -20,6 +20,7 @@ import {
   ActivityStatus,
   AssetActivityItemProps,
   AssetActivityListProps,
+  DelegationTransactionType,
   TransactionActivityType
 } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
@@ -63,32 +64,22 @@ type MappedActivityListProps = Omit<AssetActivityListProps, 'items'> & {
   items: ExtendedActivityProps[];
 };
 export type FetchWalletActivitiesReturn = Observable<Promise<MappedActivityListProps[]>>;
-export type DelegationTransactionType = Extract<
-  TransactionActivityType,
-  'delegation' | 'delegationRegistration' | 'delegationDeregistration'
->;
-
-const delegationTransactionTypes: ReadonlySet<DelegationTransactionType> = new Set([
-  'delegation',
-  'delegationRegistration',
-  'delegationDeregistration'
-]);
 
 type DelegationActivityItemProps = Omit<ExtendedActivityProps, 'type'> & {
   type: DelegationTransactionType;
 };
 
 const isDelegationActivity = (activity: ExtendedActivityProps): activity is DelegationActivityItemProps =>
-  delegationTransactionTypes.has(activity.type as DelegationTransactionType);
+  activity.type in DelegationTransactionType;
 
 const getDelegationAmount = (activity: DelegationActivityItemProps) => {
   const fee = new BigNumber(Number.parseFloat(activity.fee));
 
-  if (activity.type === 'delegationRegistration') {
+  if (activity.type === DelegationTransactionType.delegationRegistration) {
     return fee.plus(activity.deposit);
   }
 
-  if (activity.type === 'delegationDeregistration') {
+  if (activity.type === DelegationTransactionType.delegationDeregistration) {
     return new BigNumber(activity.depositReclaim).minus(fee);
   }
 
@@ -358,7 +349,7 @@ const getWalletActivitiesObservable = async ({
             amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,
             fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
           }),
-          ...(activity.type === 'self' && {
+          ...(activity.type === TransactionActivityType.self && {
             amount: `${activity.fee} ${cardanoCoin.symbol}`,
             fiatAmount: cardanoFiatPrice
               ? `${getFiatAmount(new BigNumber(activity.fee), cardanoFiatPrice)} ${fiatCurrency.code}`
