@@ -213,6 +213,7 @@ class ManageStakingDrawer extends CommonDrawerElements {
   }
 
   async hoverOverRemovePoolButtonForPool(tooltipForPool: number) {
+    await this.poolDetailsRemovePoolButton(tooltipForPool - 1).scrollIntoView();
     await this.poolDetailsRemovePoolButton(tooltipForPool - 1).moveTo();
   }
 }
