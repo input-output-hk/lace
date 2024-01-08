@@ -120,58 +120,58 @@ Feature: Staking Page - Extended View
 
   @LW-9489
   Scenario: Extended View - Staking - Manage staking add button works as expected
-    And I navigate to Staking extended page
+    When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    And I see Manage delegation page
+    Then I see Manage delegation page
     And I see selected pools counter is showing "1"
     And I see "Add stake pool" button is enabled
     When I click "Add stake pool" button
-    Then I pick "CanadaStakes" pool for delegation
+    And I pick "CanadaStakes" pool for delegation
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
-    And I see Manage delegation page
+    Then I see Manage delegation page
     And I see selected pools counter is showing "2"
 
   @LW-9490
   Scenario Outline: Extended View - Staking - Manage staking add button disabled when selected max pools for staking
-    And I navigate to Staking extended page
+    When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    And I see Manage delegation page
+    Then I see Manage delegation page
     And I see selected pools counter is showing "1"
     And I see "Add stake pool" button is enabled
-    And I click "Add stake pool" button
-    When I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
+    When I click "Add stake pool" button
+    And I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
-    And I see Manage delegation page
+    Then I see Manage delegation page
     And I see selected pools counter is showing "<pools_after>"
-    Then I see "Add stake pool" button is disabled
+    And I see "Add stake pool" button is disabled
     Examples:
       | pools_after | pools_names                                                                                   |
       | 10          | 8BETA, ADA Capital, AdaNet.io, Boople Turtle Pool, ADV, BAZAR, ADASquirrel, Akasha, Alfa Pool |
 
   @LW-9493
   Scenario: Extended View - Staking - Manage staking remove button disabled when staking to 1 pool
-    And I navigate to Staking extended page
+    When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    And I see Manage delegation page
-    When I see selected pools counter is showing "1"
-    Then I see "Remove pool from portfolio" button is disabled for pool "1"
+    Then I see Manage delegation page
+    And I see selected pools counter is showing "1"
+    And I see "Remove pool from portfolio" button is disabled for pool "1"
     And I see "Remove pool from portfolio" button tooltip on hover for pool "1"
 
   @LW-9494
   Scenario: Extended View - Staking - Manage staking remove button works as expected
-    And I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
     And I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    And I see Manage delegation page
+    Then I see Manage delegation page
     And I see selected pools counter is showing "10"
-    And I expand all pools details
-    And all pools details are expanded
+    When I expand all pools details
+    Then all pools details are expanded
     When I remove "9" pools from delegation portfolio
     Then I see selected pools counter is showing "1"
     And I see "Remove pool from portfolio" button is disabled for pool "1"
