@@ -76,7 +76,7 @@ class ManageStakingDrawer extends CommonDrawerElements {
     return this.infoCard.$(this.DELEGATIONCARD_POOLS_VALUE);
   }
 
-  get delegationCardChartPieSlice(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+  get delegationCardChartSlices(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return this.infoCard.$$(this.DELEGATIONCARD_CHART_PIE_SLICE);
   }
 

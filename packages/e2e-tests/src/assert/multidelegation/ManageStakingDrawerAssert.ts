@@ -28,7 +28,7 @@ class ManageStakingDrawerAssert {
     await ManageStakingDrawer.delegationCardBalanceValue.waitForDisplayed();
     await ManageStakingDrawer.delegationCardPoolsLabel.waitForDisplayed();
     await ManageStakingDrawer.delegationCardPoolsValue.waitForDisplayed();
-    await ManageStakingDrawer.delegationCardChartPieSlice[0].waitForDisplayed();
+    expect(await ManageStakingDrawer.delegationCardChartSlices.length).to.be.greaterThan(0);
   };
 
   assertSeeOnlyFirstPoolDetailsExpanded = async () => {
