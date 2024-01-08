@@ -328,6 +328,16 @@ const colors: Colors = {
   $data_green: lightColorScheme.$secondary_data_green,
   $data_pink: lightColorScheme.$secondary_data_pink,
   $data_yellow: lightColorScheme.$secondary_lace_yellow,
+
+  $checkbox_check_color: lightColorScheme.$primary_white,
+  $checkbox_checked_backgroundColor: lightColorScheme.$primary_accent_purple,
+  $checkbox_unchecked_backgroundColor: colorTransparent,
+  $checkbox_unchecked_borderColor: lightColorScheme.$primary_grey,
+  $checkbox_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $checkbox_hover_unchecked_borderColor: lightColorScheme.$primary_dark_grey,
+  $checkbox_hover_unchecked_backgroundColor: colorTransparent,
+  $checkbox_hover_checked_backgroundColor:
+    lightColorScheme.$primary_hover_purple,
 };
 
 export const elevation: Elevation = {
