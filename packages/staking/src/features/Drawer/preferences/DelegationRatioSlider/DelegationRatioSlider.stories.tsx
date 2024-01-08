@@ -1,18 +1,15 @@
-import { Story, StoryDefault } from '@ladle/react';
 import { useState } from 'react';
+import type { Meta } from '@storybook/react';
 import { DelegationRatioSlider } from './DelegationRatioSlider';
 
-export const Controlled: Story = () => {
+export default {
+  title: 'Drawer/DelegationRatioSlider',
+} as Meta;
+
+export const Controlled = () => {
   const DEFAULT_VALUE = 50;
   const [value, setValue] = useState(DEFAULT_VALUE);
   return <DelegationRatioSlider onValueChange={setValue} value={value} />;
 };
 
-// eslint-disable-next-line react/no-multi-comp
-export const Uncontrolled: Story = () => <DelegationRatioSlider defaultValue={33} />;
-
-const storyDefault: StoryDefault = {
-  title: 'DelegationRatioSlider',
-};
-
-export default storyDefault;
+export const Uncontrolled = () => <DelegationRatioSlider defaultValue={33} />;
