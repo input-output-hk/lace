@@ -49,7 +49,7 @@ export const ImportantInfo = ({ translations, onBack, onNext }: Props): JSX.Elem
       </Grid>
       <Flex w="$fill" justifyContent="space-between" alignItems="center">
         <Button.Secondary label={translations.backButton} onClick={onBack} />
-        <Button.CallToAction label={translations.nextButton} onClick={onNext} />
+        <Button.CallToAction disabled={!checked} label={translations.nextButton} onClick={onNext} />
       </Flex>
     </Flex>
   );
