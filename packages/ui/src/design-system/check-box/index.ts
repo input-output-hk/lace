@@ -1,1 +1,1 @@
-export { Root as Checkbox } from './check-box.component';
+export { Checkbox } from './check-box.component';

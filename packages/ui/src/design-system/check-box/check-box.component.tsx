@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 
-import * as Checkbox from '@radix-ui/react-checkbox';
+import * as RadixCheckbox from '@radix-ui/react-checkbox';
 import cn from 'classnames';
 
 import { ReactComponent as CheckIcon } from '../../assets/icons/check.component.svg';
@@ -21,7 +21,7 @@ export type Props = Readonly<
   }
 >;
 
-export const Root = ({
+export const Checkbox = ({
   checked,
   disabled = false,
   onClick,
@@ -34,7 +34,7 @@ export const Root = ({
       [cx.withLabel]: label !== undefined,
     })}
   >
-    <Checkbox.Root
+    <RadixCheckbox.Root
       {...props}
       checked={checked}
       disabled={disabled}
@@ -43,10 +43,10 @@ export const Root = ({
         [cx.disabled]: disabled,
       })}
     >
-      <Checkbox.Indicator>
+      <RadixCheckbox.Indicator>
         <CheckIcon className={cx.icon} />
-      </Checkbox.Indicator>
-    </Checkbox.Root>
+      </RadixCheckbox.Indicator>
+    </RadixCheckbox.Root>
     {label !== undefined && (
       <Box
         className={cn(cx.label, {
