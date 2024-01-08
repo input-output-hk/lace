@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Flex, Text } from '@lace/ui';
+import { Box, Button, Flex, sx, Text } from '@lace/ui';
 import styles from './SharedWalletSetupOption.module.scss';
 
 export interface WalletSetupOptionProps {
@@ -17,7 +17,13 @@ export const SharedWalletSetupOption = ({
 }: WalletSetupOptionProps): React.ReactElement => (
   <Flex flexDirection="column" p="$16" alignItems="center" justifyContent="space-between">
     <Icon className={styles.icon} data-testid={`${testId}-icon`} />
-    <Text.Body.Normal weight="$bold" data-testid={`${testId}-title`}>
+    <Text.Body.Normal
+      className={sx({
+        color: '$text_primary'
+      })}
+      weight="$bold"
+      data-testid={`${testId}-title`}
+    >
       {title}
     </Text.Body.Normal>
     <Text.Body.Small weight="$semibold" className={styles.description} data-testid={`${testId}-description`}>

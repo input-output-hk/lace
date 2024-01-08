@@ -4,7 +4,7 @@ import { SharedWalletSetupOption } from './SharedWalletSetupOption.component';
 import { ReactComponent as UserGroupIcon } from '../../../assets/icons/user-group-gradient.component.svg';
 import { ReactComponent as UploadIcon } from '../../../assets/icons/upload.component.svg';
 import { ReactComponent as LaceLogo } from '../../../assets/icons/lace-logo.component.svg';
-import { Flex, Text } from '@lace/ui';
+import { Box, Flex, sx, Text } from '@lace/ui';
 
 export type SharedWalletSetupOptionTranslations = Record<'title' | 'description' | 'button', string>;
 
@@ -39,10 +39,25 @@ export const SetupSharedWallet = ({
         data-testid="shared-wallet-setup-options-header"
       >
         <LaceLogo className={styles.image} data-testid="shared-wallet-setup-logo" />
-        <Text.Heading data-testid="wallet-setup-title">{translations.title}</Text.Heading>
-        <Text.Body.Normal className={styles.subtitle} weight="$semibold" data-testid="shared-wallet-setup-subtitle">
-          {translations.subTitle}
-        </Text.Body.Normal>
+        <Text.Heading
+          className={sx({
+            color: '$text_primary'
+          })}
+          data-testid="wallet-setup-title"
+        >
+          {translations.title}
+        </Text.Heading>
+        <Box mt="$8">
+          <Text.Body.Normal
+            className={sx({
+              color: '$text_secondary'
+            })}
+            weight="$semibold"
+            data-testid="shared-wallet-setup-subtitle"
+          >
+            {translations.subTitle}
+          </Text.Body.Normal>
+        </Box>
       </Flex>
       <div className={styles.options}>
         <SharedWalletSetupOption

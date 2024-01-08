@@ -13,7 +13,7 @@ export const SharedWallet = (): JSX.Element => {
   const { page, setBackgroundPage } = useBackgroundPage();
 
   return (
-    <WalletSetupFlowProvider flow={WalletSetupFlow.SHARED_WALLET}>
+    <WalletSetupFlowProvider flow={WalletSetupFlow.ADD_SHARED_WALLET}>
       <Modal
         centered
         closable={false}
