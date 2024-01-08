@@ -10,7 +10,7 @@ class ManageStakingDrawerAssert {
     expect(await ManageStakingDrawer.drawerNavigationTitle.getText()).to.equal(
       await t('drawer.titleSecond', 'staking')
     );
-    await ManageStakingDrawer.infoCard.waitForDisplayed();
+    await this.assertSeeInfoCard();
     await ManageStakingDrawer.selectedPoolsLabel.waitForDisplayed();
     await ManageStakingDrawer.addPoolsButton.waitForDisplayed();
     if (!manageButtonInitiated) {
@@ -19,6 +19,16 @@ class ManageStakingDrawerAssert {
         await t('drawer.preferences.confirmButton', 'staking')
       );
     }
+  };
+
+  assertSeeInfoCard = async () => {
+    await ManageStakingDrawer.delegationCardStatusLabel.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardStatusValue.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardBalanceLabel.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardBalanceValue.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardPoolsLabel.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardPoolsValue.waitForDisplayed();
+    expect(await ManageStakingDrawer.delegationCardChartSlices.length).to.be.greaterThan(0);
   };
 
   assertSeeOnlyFirstPoolDetailsExpanded = async () => {
@@ -84,13 +94,26 @@ class ManageStakingDrawerAssert {
     let selectedPoolsCounter = await ManageStakingDrawer.selectedPoolsLabel.getText();
     selectedPoolsCounter = selectedPoolsCounter.split('(')[1].replace(')', '');
     expect(Number(selectedPoolsCounter)).to.equal(Number(poolsCount));
-    expect(Number(await MultidelegationPage.delegationCardPoolsValue.getText())).to.equal(Number(selectedPoolsCounter));
+    expect(Number(await ManageStakingDrawer.delegationCardPoolsValue.getText())).to.equal(Number(selectedPoolsCounter));
   };
 
   assertSeeAddStakePoolButtonDisabled = async (shouldBeEnabled: boolean) => {
     await ManageStakingDrawer.addPoolsButton.waitForClickable({
       reverse: !shouldBeEnabled
     });
+  };
+
+  assertSeeRemovePoolButtonDisabled = async (shouldBeEnabled: boolean, poolNo: number) => {
+    await ManageStakingDrawer.poolDetailsRemovePoolButton(poolNo - 1).waitForEnabled({
+      reverse: !shouldBeEnabled
+    });
+  };
+
+  assertSeeRemovePoolButtonTooltip = async (tooltipForPool: number) => {
+    await ManageStakingDrawer.tooltip(tooltipForPool - 1).waitForDisplayed();
+    expect(await ManageStakingDrawer.tooltip(tooltipForPool - 1).getText()).to.equal(
+      await t('drawer.preferences.pickMorePools', 'staking')
+    );
   };
 }
 
