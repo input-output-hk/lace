@@ -3,7 +3,7 @@ import { Logger } from '../support/logger';
 
 const verifyBrowserStorageSupport: any = async () => {
   const currentBrowser = await extensionUtils.getBrowser();
-  if (currentBrowser.includes('chrome') || currentBrowser.includes('msedge')) {
+  if (currentBrowser.includes('chrome') || currentBrowser.includes('MicrosoftEdge')) {
     return Promise.resolve();
   }
   return Promise.reject('Unsupported browser');
