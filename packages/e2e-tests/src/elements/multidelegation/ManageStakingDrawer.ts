@@ -7,13 +7,13 @@ class ManageStakingDrawer extends CommonDrawerElements {
   private CONTAINER = '[data-testid="custom-drawer"]';
   private NEXT_BUTTON = '[data-testid="preferences-next-button"]';
   private DELEGATION_INFO_CARD = '[data-testid="delegation-info-card"]';
-  private DELEGATIONCARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
-  private DELEGATIONCARD_STATUS_VALUE = '[data-testid="overview.delegationCard.label.status-value"]';
-  private DELEGATIONCARD_BALANCE_LABEL = '[data-testid="overview.delegationCard.label.balance-label"]';
-  private DELEGATIONCARD_BALANCE_VALUE = '[data-testid="overview.delegationCard.label.balance-value"]';
-  private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
-  private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
-  private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
+  private DELEGATION_CARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
+  private DELEGATION_CARD_STATUS_VALUE = '[data-testid="overview.delegationCard.label.status-value"]';
+  private DELEGATION_CARD_BALANCE_LABEL = '[data-testid="overview.delegationCard.label.balance-label"]';
+  private DELEGATION_CARD_BALANCE_VALUE = '[data-testid="overview.delegationCard.label.balance-value"]';
+  private DELEGATION_CARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
+  private DELEGATION_CARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
+  private DELEGATION_CARD_CHART_PIE_SLICE = '.recharts-pie-sector';
   private DELEGATION_SELECTED_POOLS_LABEL = '[data-testid="manage-delegation-selected-pools-label"]';
   private DELEGATION_ADD_POOLS_BUTTON = '[data-testid="manage-delegation-add-pools-btn"]';
   private POOL_DETAILS_NAME = '[data-testid="pool-details-name"]';
@@ -53,31 +53,31 @@ class ManageStakingDrawer extends CommonDrawerElements {
   }
 
   get delegationCardStatusLabel(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.infoCard.$(this.DELEGATIONCARD_STATUS_LABEL);
+    return this.infoCard.$(this.DELEGATION_CARD_STATUS_LABEL);
   }
 
   get delegationCardStatusValue(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.infoCard.$(this.DELEGATIONCARD_STATUS_VALUE);
+    return this.infoCard.$(this.DELEGATION_CARD_STATUS_VALUE);
   }
 
   get delegationCardBalanceLabel(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.infoCard.$(this.DELEGATIONCARD_BALANCE_LABEL);
+    return this.infoCard.$(this.DELEGATION_CARD_BALANCE_LABEL);
   }
 
   get delegationCardBalanceValue(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.infoCard.$(this.DELEGATIONCARD_BALANCE_VALUE);
+    return this.infoCard.$(this.DELEGATION_CARD_BALANCE_VALUE);
   }
 
   get delegationCardPoolsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.infoCard.$(this.DELEGATIONCARD_POOLS_LABEL);
+    return this.infoCard.$(this.DELEGATION_CARD_POOLS_LABEL);
   }
 
   get delegationCardPoolsValue(): ChainablePromiseElement<WebdriverIO.Element> {
-    return this.infoCard.$(this.DELEGATIONCARD_POOLS_VALUE);
+    return this.infoCard.$(this.DELEGATION_CARD_POOLS_VALUE);
   }
 
   get delegationCardChartSlices(): ChainablePromiseArray<WebdriverIO.ElementArray> {
-    return this.infoCard.$$(this.DELEGATIONCARD_CHART_PIE_SLICE);
+    return this.infoCard.$$(this.DELEGATION_CARD_CHART_PIE_SLICE);
   }
 
   get selectedPoolsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -213,7 +213,6 @@ class ManageStakingDrawer extends CommonDrawerElements {
   }
 
   async hoverOverRemovePoolButtonForPool(tooltipForPool: number) {
-    await this.poolDetailsRemovePoolButton(tooltipForPool - 1).scrollIntoView();
     await this.poolDetailsRemovePoolButton(tooltipForPool - 1).moveTo();
   }
 }

@@ -103,7 +103,7 @@ class ManageStakingDrawerAssert {
     });
   };
 
-  assertSeeRemovePoolForFirstPoolButtonDisabled = async (shouldBeEnabled: boolean, poolNo: number) => {
+  assertSeeRemovePoolButtonDisabled = async (shouldBeEnabled: boolean, poolNo: number) => {
     await ManageStakingDrawer.poolDetailsRemovePoolButton(poolNo - 1).waitForEnabled({
       reverse: !shouldBeEnabled
     });

@@ -372,7 +372,7 @@ Then(/^I pick "([^"]*)" pool for delegation$/, async (poolToStake: string) => {
 Given(
   /^I see "Remove pool from portfolio" button is (disabled|enabled) for pool "([^"]*)"$/,
   async (state: 'enabled' | 'disabled', poolNo: number) => {
-    await ManageStakingDrawerAssert.assertSeeRemovePoolForFirstPoolButtonDisabled(state === 'enabled', poolNo);
+    await ManageStakingDrawerAssert.assertSeeRemovePoolButtonDisabled(state === 'enabled', poolNo);
   }
 );
 
