@@ -10,9 +10,9 @@ export const SetupSharedWalletStep = (): React.ReactElement => {
         title: t('browserView.sharedWallet.setup.title'),
         subTitle: t('browserView.sharedWallet.setup.subTitle'),
         createSharedWalletOption: {
-          title: t('browserView.sharedWallet.setup.newSharedWalletOption.title'),
-          description: t('browserView.sharedWallet.setup.newSharedWalletOption.description'),
-          button: t('browserView.sharedWallet.setup.newSharedWalletOption.button')
+          title: t('browserView.sharedWallet.setup.createSharedWalletOption.title'),
+          description: t('browserView.sharedWallet.setup.createSharedWalletOption.description'),
+          button: t('browserView.sharedWallet.setup.createSharedWalletOption.button')
         },
         importSharedWalletOption: {
           title: t('browserView.sharedWallet.setup.importSharedWalletOption.title'),

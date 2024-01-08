@@ -3,7 +3,7 @@ import React, { createContext, useContext } from 'react';
 export enum WalletSetupFlow {
   ONBOARDING,
   ADD_WALLET,
-  SHARED_WALLET
+  ADD_SHARED_WALLET
 }
 
 interface Props {
