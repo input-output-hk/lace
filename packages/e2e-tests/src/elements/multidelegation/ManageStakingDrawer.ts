@@ -4,8 +4,16 @@ import { ChainablePromiseElement } from 'webdriverio';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class ManageStakingDrawer extends CommonDrawerElements {
+  private CONTAINER = '[data-testid="custom-drawer"]';
   private NEXT_BUTTON = '[data-testid="preferences-next-button"]';
   private DELEGATION_INFO_CARD = '[data-testid="delegation-info-card"]';
+  private DELEGATIONCARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
+  private DELEGATIONCARD_STATUS_VALUE = '[data-testid="overview.delegationCard.label.status-value"]';
+  private DELEGATIONCARD_BALANCE_LABEL = '[data-testid="overview.delegationCard.label.balance-label"]';
+  private DELEGATIONCARD_BALANCE_VALUE = '[data-testid="overview.delegationCard.label.balance-value"]';
+  private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
+  private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
+  private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
   private DELEGATION_SELECTED_POOLS_LABEL = '[data-testid="manage-delegation-selected-pools-label"]';
   private DELEGATION_ADD_POOLS_BUTTON = '[data-testid="manage-delegation-add-pools-btn"]';
   private POOL_DETAILS_NAME = '[data-testid="pool-details-name"]';
@@ -32,36 +40,68 @@ class ManageStakingDrawer extends CommonDrawerElements {
   private POOL_DETAILS_REMOVE_POOL_BUTTON = '[data-testid="pool-details-card-remove-pool-button"]';
   private TOOLTIP = 'div.ant-tooltip-inner';
 
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CONTAINER);
+  }
+
   get nextButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.NEXT_BUTTON);
+    return this.container.$(this.NEXT_BUTTON);
   }
 
   get infoCard(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DELEGATION_INFO_CARD);
+    return this.container.$(this.DELEGATION_INFO_CARD);
+  }
+
+  get delegationCardStatusLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.infoCard.$(this.DELEGATIONCARD_STATUS_LABEL);
+  }
+
+  get delegationCardStatusValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.infoCard.$(this.DELEGATIONCARD_STATUS_VALUE);
+  }
+
+  get delegationCardBalanceLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.infoCard.$(this.DELEGATIONCARD_BALANCE_LABEL);
+  }
+
+  get delegationCardBalanceValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.infoCard.$(this.DELEGATIONCARD_BALANCE_VALUE);
+  }
+
+  get delegationCardPoolsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.infoCard.$(this.DELEGATIONCARD_POOLS_LABEL);
+  }
+
+  get delegationCardPoolsValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.infoCard.$(this.DELEGATIONCARD_POOLS_VALUE);
+  }
+
+  get delegationCardChartPieSlice(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return this.infoCard.$$(this.DELEGATIONCARD_CHART_PIE_SLICE);
   }
 
   get selectedPoolsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DELEGATION_SELECTED_POOLS_LABEL);
+    return this.container.$(this.DELEGATION_SELECTED_POOLS_LABEL);
   }
 
   get addPoolsButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DELEGATION_ADD_POOLS_BUTTON);
+    return this.container.$(this.DELEGATION_ADD_POOLS_BUTTON);
   }
 
   get poolDetailsName(): ChainablePromiseArray<WebdriverIO.ElementArray> {
-    return $$(this.POOL_DETAILS_NAME);
+    return this.container.$$(this.POOL_DETAILS_NAME);
   }
 
   get poolDetailsIconExpanded(): ChainablePromiseArray<WebdriverIO.ElementArray> {
-    return $$(this.POOL_DETAILS_ICON_EXPANDED);
+    return this.container.$$(this.POOL_DETAILS_ICON_EXPANDED);
   }
 
   get poolDetailsIconTruncated(): ChainablePromiseArray<WebdriverIO.ElementArray> {
-    return $$(this.POOL_DETAILS_ICON_TRUNCATED);
+    return this.container.$$(this.POOL_DETAILS_ICON_TRUNCATED);
   }
 
   get poolDetailsCard(): ChainablePromiseArray<WebdriverIO.ElementArray> {
-    return $$(this.POOL_DETAILS_CARD);
+    return this.container.$$(this.POOL_DETAILS_CARD);
   }
 
   poolDetailsSavedRatioTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
@@ -163,6 +203,18 @@ class ManageStakingDrawer extends CommonDrawerElements {
   async clickAddStakePoolButton() {
     await this.addPoolsButton.waitForClickable();
     await this.addPoolsButton.click();
+  }
+
+  async removePoolsFromDelegationPortfolio(poolsToRemove: number) {
+    await this.poolDetailsRemovePoolButton(0).waitForClickable();
+    for (let i = 0; i < poolsToRemove; i++) {
+      await this.poolDetailsRemovePoolButton(0).click();
+    }
+  }
+
+  async hoverOverRemovePoolButtonForPool(tooltipForPool: number) {
+    await this.poolDetailsRemovePoolButton(tooltipForPool - 1).scrollIntoView();
+    await this.poolDetailsRemovePoolButton(tooltipForPool - 1).moveTo();
   }
 }
 

@@ -151,3 +151,28 @@ Feature: Staking Page - Extended View
     Examples:
       | pools_after | pools_names                                                                                   |
       | 10          | 8BETA, ADA Capital, AdaNet.io, Boople Turtle Pool, ADV, BAZAR, ADASquirrel, Akasha, Alfa Pool |
+
+  @LW-9493
+  Scenario: Extended View - Staking - Manage staking remove button disabled when staking to 1 pool
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    And I see Manage delegation page
+    When I see selected pools counter is showing "1"
+    Then I see "Remove pool from portfolio" button is disabled for pool "1"
+    And I see "Remove pool from portfolio" button tooltip on hover for pool "1"
+
+  @LW-9494
+  Scenario: Extended View - Staking - Manage staking remove button works as expected
+    And I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    And I see Manage delegation page
+    And I see selected pools counter is showing "10"
+    And I expand all pools details
+    And all pools details are expanded
+    When I remove "9" pools from delegation portfolio
+    Then I see selected pools counter is showing "1"
+    And I see "Remove pool from portfolio" button is disabled for pool "1"
+    And I see "Remove pool from portfolio" button tooltip on hover for pool "1"
