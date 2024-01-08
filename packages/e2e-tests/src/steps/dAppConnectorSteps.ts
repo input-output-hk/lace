@@ -64,6 +64,14 @@ Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, a
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
+Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeSignDataConfirmTransactionPage(
+    testDAppDetails,
+    String(getTestWallet('TestAutomationWallet').address)
+  );
+});
+
 Then(
   /^I see DApp connector "Confirm transaction" page with: "([^"]*)" and: "([^"]*)" assets$/,
   async (adaValue: string, assetValue: string) => {
