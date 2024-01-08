@@ -147,12 +147,20 @@ export const DappConfirmData = (): React.ReactElement => {
         {formattedData ? (
           <>
             <div className={styles.contentSection}>
-              <p className={styles.heading}>Address:</p>
-              <pre className={styles.pre}>{formattedData.address}</pre>
+              <p className={styles.heading} data-testid="dapp-transaction-recipient-address-title">
+                Address:
+              </p>
+              <pre className={styles.pre} data-testid="dapp-transaction-recipient-address">
+                {formattedData.address}
+              </pre>
             </div>
             <div className={styles.contentSection}>
-              <p className={styles.heading}>Data:</p>
-              <pre className={styles.pre}>{formattedData.dataToSign}</pre>
+              <p className={styles.heading} data-testid="dapp-transaction-data-title">
+                Data:
+              </p>
+              <pre className={styles.pre} data-testid="dapp-transaction-data">
+                {formattedData.dataToSign}
+              </pre>
             </div>
           </>
         ) : (

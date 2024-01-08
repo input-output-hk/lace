@@ -191,7 +191,7 @@ Feature: DAppConnector - Common
     And I open and authorize test DApp with "Only once" setting
     And I enable console logs collection
     When I click "Sign data" button in test DApp
-    Then I see DApp connector "Confirm transaction" page in dark mode
+    Then I see DApp connector Sign data "Confirm transaction" page
     And I click "Confirm" button on "Confirm transaction" page
     And I see DApp connector "Sign transaction" page
     And I fill correct password
