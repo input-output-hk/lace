@@ -84,8 +84,8 @@ const getTypeLabel = (type: ActivityType, t: ReturnType<typeof useTranslate>['t'
   if (type === DelegationTransactionType.delegationDeregistration)
     return t('package.core.activityDetails.deregistration');
   if (type === TransactionActivityType.incoming) return t('package.core.activityDetails.received');
-  if (type === TransactionActivityType.outgoing) return t('package.core.transactionDetailBrowser.sent');
-  return t(`package.core.transactionDetailBrowser.${type}`);
+  if (type === TransactionActivityType.outgoing) return t('package.core.activityDetails.sent');
+  return t(`package.core.activityDetails.${type}`);
 };
 
 export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => {
