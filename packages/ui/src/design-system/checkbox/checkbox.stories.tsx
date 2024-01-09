@@ -9,9 +9,9 @@ import { Flex } from '../flex';
 import { Cell, Grid } from '../grid';
 import * as Text from '../typography';
 
-import * as cx from './check-box.stories.css';
+import * as cx from './checkbox.stories.css';
 
-import { Checkbox } from './';
+import { Checkbox } from '.';
 
 export default {
   title: 'Input Fields/Checkbox',

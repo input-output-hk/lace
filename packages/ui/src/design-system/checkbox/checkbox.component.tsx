@@ -7,7 +7,7 @@ import cn from 'classnames';
 import { ReactComponent as CheckIcon } from '../../assets/icons/check.component.svg';
 import { Box } from '../box';
 
-import * as cx from './check-box.css';
+import * as cx from './checkbox.css';
 
 import type { OmitClassName } from '../../types';
 
