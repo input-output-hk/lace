@@ -82,7 +82,7 @@ Feature: Top Navigation - Popup view
     And I click on the network option
     When I click on "Preview" radio button
     Then Lace is loaded properly
-    Then I click the menu button
+    When I click the menu button
     And I click on the settings option
     Then I see current network: "Preview" name in network setting
     And I see network id: "Preview"
