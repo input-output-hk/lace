@@ -1,5 +1,7 @@
-import { style, vars } from '../../design-tokens';
+import { style } from '../../design-tokens';
+
+import { focusBoxShadow } from './checkbox.css';
 
 export const focus = style({
-  boxShadow: `0px 0px 0px 3px ${vars.colors.$checkbox_focus_color}`,
+  boxShadow: focusBoxShadow,
 });

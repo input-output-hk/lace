@@ -1,4 +1,6 @@
-import { sx, style, vars } from '../../design-tokens';
+import { sx, style, vars, createVar } from '../../design-tokens';
+
+export const focusBoxShadow = createVar();
 
 export const icon = style({
   height: '14px',
@@ -14,6 +16,11 @@ export const withLabel = style({
 });
 
 export const root = style([
+  {
+    vars: {
+      [focusBoxShadow]: `0px 0px 0px 3px ${vars.colors.$checkbox_focus_color}`,
+    },
+  },
   sx({
     alignItems: 'center',
     justifyContent: 'center',
@@ -23,7 +30,7 @@ export const root = style([
     display: 'inline-flex',
     selectors: {
       '&:focus-within': {
-        boxShadow: `0px 0px 0px 3px ${vars.colors.$checkbox_focus_color}`,
+        boxShadow: focusBoxShadow,
       },
     },
   },
