@@ -3,7 +3,7 @@ import webTester from '../../actor/webTester';
 import { TransactionBundle } from '../../elements/newTransaction/transactionBundle';
 import coinConfigureAssert from '../coinConfigureAssert';
 import assetInputAssert from '../assetInputAssert';
-import { TransactionNewPage } from '../../elements/newTransaction/transactionNewPage';
+import TransactionNewPage from '../../elements/newTransaction/transactionNewPage';
 import { t } from '../../utils/translationService';
 import { CoinConfigure } from '../../elements/newTransaction/coinConfigure';
 
@@ -51,7 +51,7 @@ class TransactionBundleAssert {
   }
 
   async assertInvalidAddressErrorIsDisplayed(index: number) {
-    await webTester.seeWebElement(new TransactionNewPage().invalidAddressError(index));
+    await TransactionNewPage.invalidAddressError(index).waitForDisplayed();
   }
 
   async assertSetMaxAmountInBundleAndCoinConfigure(bundleIndex: number, assetName: string) {
@@ -63,7 +63,7 @@ class TransactionBundleAssert {
     );
     const tokenInputAmount = Number(String(await bundle.getInputValue()).replace(',', ''));
     if (assetName === 'tADA' || assetName === 'ADA') {
-      const fee = Number(await new TransactionNewPage().getValueAda());
+      const fee = Number(await TransactionNewPage.getTransactionFeeValueInAda());
       expect(tokenBalance).to.be.greaterThan(tokenInputAmount + fee);
       expect(tokenInputAmount - fee).to.be.greaterThan(tokenBalance - tokenBalance * 0.003);
     } else {

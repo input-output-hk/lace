@@ -41,7 +41,12 @@ import consoleAssert from '../assert/consoleAssert';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await tokensPageObject.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();
+});
+
+Then(/^Lace is loaded properly$/, async () => {
+  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await tokensPageObject.waitUntilCardanoTokenLoaded();
 });
 
