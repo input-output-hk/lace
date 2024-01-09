@@ -1,1 +1,1 @@
-export * from './StakePoolCardProgressBar';
+export { StakePoolCardProgressBar } from './StakePoolCardProgressBar';

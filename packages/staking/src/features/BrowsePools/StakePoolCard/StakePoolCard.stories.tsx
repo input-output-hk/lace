@@ -19,7 +19,7 @@ export const Card = {
     metricValue: 123_456,
     saturation: 51.75,
     selected: false,
-    ticker: 'TIKRNM',
+    title: 'TIKRNM',
   } as StakePoolCardProps,
   render: (props: StakePoolCardProps) => (
     <div style={{ width: 220 }}>

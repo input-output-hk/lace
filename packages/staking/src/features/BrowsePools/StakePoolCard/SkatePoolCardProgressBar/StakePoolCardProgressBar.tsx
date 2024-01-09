@@ -18,9 +18,10 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
           className={cn([
             styles.progress,
             {
-              [styles.progress20]: inRange(percentage, 0, 21),
-              [styles.progress69]: inRange(percentage, 21, 70),
-              [styles.progress100]: inRange(percentage, 70, 100) || percentage === 100,
+              [styles.progressLow]: inRange(percentage, 0, 21),
+              [styles.progressMedium]: inRange(percentage, 21, 70),
+              [styles.progressHigh]: inRange(percentage, 70, 90),
+              [styles.progressVeryHigh]: inRange(percentage, 90, 100) || percentage === 100,
               [styles.progressOversaturated]: percentage > 100,
             },
           ])}
