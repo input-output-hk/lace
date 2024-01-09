@@ -176,3 +176,37 @@ Feature: Staking Page - Extended View
     Then I see selected pools counter is showing "1"
     And I see "Remove pool from portfolio" button is disabled for pool "1"
     And I see "Remove pool from portfolio" button tooltip on hover for pool "1"
+
+  @LW-9509
+  Scenario: Extended View - Staking - Manage staking 'Confirm new portfolio' button not visible
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+    And I don't see "Confirm new portfolio" button
+
+  @LW-9510
+  Scenario: Extended View - Staking - Manage staking 'Confirm new portfolio' disabled
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+    When I remove "1" pools from delegation portfolio
+    Then I see "Confirm new portfolio" button
+    And "Confirm new portfolio" button is disabled
+
+  @LW-9511
+  Scenario: Extended View - Staking - Manage staking 'Confirm new portfolio' works correctly
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation page
+    When I expand all pools details
+    And I click minus button for pool "1"
+    And I click plus button for pool "2"
+    Then I see "Confirm new portfolio" button
+    And "Confirm new portfolio" button is enabled
+    When I click "Confirm new portfolio" button
+    Then I see Confirmation page

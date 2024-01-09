@@ -115,6 +115,18 @@ class ManageStakingDrawerAssert {
       await t('drawer.preferences.pickMorePools', 'staking')
     );
   };
+
+  assertSeeConfirmNewPortfolioButton = async (shouldBeVisible: boolean) => {
+    await ManageStakingDrawer.nextButton.waitForDisplayed({
+      reverse: !shouldBeVisible
+    });
+  };
+
+  assertConfirmNewPortfolioButtonState = async (isEnabled: boolean) => {
+    await ManageStakingDrawer.nextButton.waitForEnabled({
+      reverse: !isEnabled
+    });
+  };
 }
 
 export default new ManageStakingDrawerAssert();

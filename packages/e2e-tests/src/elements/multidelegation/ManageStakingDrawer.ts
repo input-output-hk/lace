@@ -216,6 +216,18 @@ class ManageStakingDrawer extends CommonDrawerElements {
     await this.poolDetailsRemovePoolButton(tooltipForPool - 1).scrollIntoView();
     await this.poolDetailsRemovePoolButton(tooltipForPool - 1).moveTo();
   }
+
+  async clickRatioButtonForPool(ratioButton: 'plus' | 'minus', poolNo: number) {
+    await this.poolDetailsSlider(poolNo - 1).waitForClickable();
+    await (ratioButton === 'plus'
+      ? this.poolDetailsSliderPlus(poolNo - 1).click()
+      : this.poolDetailsSliderMinus(poolNo - 1).click());
+  }
+
+  async clickConfirmNewPortfolioButton() {
+    await this.nextButton.waitForClickable();
+    await this.nextButton.click();
+  }
 }
 
 export default new ManageStakingDrawer();

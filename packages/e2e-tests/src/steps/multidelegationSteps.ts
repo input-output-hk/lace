@@ -387,3 +387,23 @@ Given(
     await ManageStakingDrawerAssert.assertSeeRemovePoolButtonTooltip(tooltipForPool);
   }
 );
+
+Then(/^I (see|don't see) "Confirm new portfolio" button$/, async (visible: 'see' | 'dont see') => {
+  await ManageStakingDrawerAssert.assertSeeConfirmNewPortfolioButton(visible === 'see');
+});
+
+Then(/^"Confirm new portfolio" button is (enabled|disabled)$/, async (isEnabled: 'enabled' | 'disabled') => {
+  await ManageStakingDrawerAssert.assertConfirmNewPortfolioButtonState(isEnabled === 'enabled');
+});
+
+When(/^I click (plus|minus) button for pool "(\d+)"$/, async (ratioButton: 'plus' | 'minus', poolNo: number) => {
+  await ManageStakingDrawer.clickRatioButtonForPool(ratioButton, poolNo);
+});
+
+When(/^I click "Confirm new portfolio" button$/, async () => {
+  await ManageStakingDrawer.clickConfirmNewPortfolioButton();
+});
+
+Then(/^I see Confirmation page$/, async () => {
+  await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
+});
