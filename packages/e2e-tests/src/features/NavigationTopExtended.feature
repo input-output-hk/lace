@@ -92,23 +92,22 @@ Feature: Top Navigation - Extended view
     When I click on then network sub-menu back button
     Then the dropdown menu is visible
 
-  @LW-6073 @Testnet @Mainnet @Pending
-  # Bug LW-8530
-  Scenario: Extended View - Toast displayed after switching network to Preview and menu not closed after switching
+  @LW-6073 @Testnet @Mainnet
+  Scenario: Extended View - Toast displayed after switching network to Preview
     When I click the menu button
     And I click on the network option
     When I click on "Preview" radio button
     Then I see a toast with message: "browserView.settings.wallet.network.networkSwitched"
-    And I see network sub-menu
+    Then Lace is loaded properly
 
-  @LW-6074 @Testnet @Mainnet @Pending
-  # Bug LW-8530
+  @LW-6074 @Testnet @Mainnet
   Scenario: Extended View - Network switched after choosing Preview network
     Given I click the menu button
     And I see current network in user menu
     And I click on the network option
     When I click on "Preview" radio button
-    And I click on then network sub-menu back button
+    Then Lace is loaded properly
+    When I click the menu button
     And I click on the settings option
     Then I see current network: "Preview" name in network setting
     And I see current network: "Preview" name in "About Lace" widget

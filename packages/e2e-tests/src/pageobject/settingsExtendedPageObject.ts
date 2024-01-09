@@ -137,7 +137,6 @@ class SettingsExtendedPageObject {
     }
   };
   closeWalletSyncedToast = async () => {
-    await browser.pause(500);
     if (await ToastMessage.container.isDisplayed()) {
       const toastMessage = await (await ToastMessage.messageText).getText();
       if (toastMessage === (await t('addressesDiscovery.toast.successText')).toString()) {
