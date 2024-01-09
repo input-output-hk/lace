@@ -1,5 +1,5 @@
 import webTester from '../actor/webTester';
-import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
+import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult';
 import { AddressInput } from '../elements/addressInput';
@@ -15,6 +15,7 @@ import { shelley } from '../data/AddressData';
 import { browser } from '@wdio/globals';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import AddressForm from '../elements/addressbook/AddressForm';
+import { generateRandomString } from '../utils/textUtils';
 
 export default new (class NewTransactionExtendedPageObject {
   fillAddress = async (address: string, index?: number) => {
@@ -27,7 +28,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   fillAddressWithFirstChars = async (address: string, characters: number) => {
     await browser.pause(500);
-    await webTester.fillComponent(new TransactionNewPage().addressInput().input(), address.slice(0, characters));
+    await webTester.fillComponent(TransactionNewPage.addressInput().input(), address.slice(0, characters));
     await browser.pause(500);
   };
 
@@ -66,10 +67,6 @@ export default new (class NewTransactionExtendedPageObject {
     const element = new CoinConfigure(bundleIndex, assetName).nameElement();
     await webTester.waitUntilSeeElement(element);
     await webTester.hoverOnWebElement(element);
-  };
-
-  clickBackground = async () => {
-    await new TransactionNewPage().backgroundSection.click();
   };
 
   addToAddress = async (value: string) => {
@@ -134,7 +131,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   clickAddAddressButton = async (index?: number) => {
     await AddressForm.searchLoader.waitForDisplayed({ reverse: true, timeout: 5000 });
-    await new TransactionNewPage().addressInput(index).ctaButton.click();
+    await TransactionNewPage.addressInput(index).ctaButton.click();
   };
 
   clickAddAssetButtonMulti = async (bundleIndex: number) => {
@@ -145,21 +142,12 @@ export default new (class NewTransactionExtendedPageObject {
     await webTester.clickElement(new AssetInput().assetAddButton());
   }
 
-  clickAddressBookSearchResult = async (index: number) => {
-    await webTester.clickElement(new TransactionNewPage().addressBookSearchResultRow(index));
-  };
-
   clickRemoveBundleButton = async (outputIndex: number) => {
     await webTester.clickElement(new TransactionBundle(outputIndex).bundleRemoveButton());
   };
 
   clickRemoveAssetButton = async (assetName: string, bundleIndex?: number) => {
     await webTester.clickElement(new CoinConfigure(bundleIndex, assetName).assetRemoveButton());
-  };
-
-  fillMetadata = async (characters: number) => {
-    const text = await webTester.generateRandomString(characters);
-    await new TransactionNewPage().txMetadataInputField.setValue(text);
   };
 
   clickTokensButton = async () => {
@@ -202,11 +190,6 @@ export default new (class NewTransactionExtendedPageObject {
     return nftInfo;
   };
 
-  saveMetadata = async () => {
-    const metadata = await new TransactionNewPage().txMetadataInputField.getValue();
-    testContext.save('metadata', metadata);
-  };
-
   clickToLoseFocus = async () => {
     const coinConfigure = new CoinConfigure();
     await webTester.clickElement(coinConfigure.container());
@@ -214,7 +197,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   searchAsset = async (assetName: string) => {
     if (assetName === 'random characters') {
-      assetName = await webTester.generateRandomString(10);
+      assetName = await generateRandomString(10);
     }
     await webTester.fillComponent(new TokenSearchResult().searchInput(), assetName);
   };
@@ -235,7 +218,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   async setTwoBundlesWithMultipleAssets() {
     await this.setTwoAssetsForBundle(1, 2, 1);
-    await new TransactionNewPage().addBundleButton.click();
+    await TransactionNewPage.addBundleButton.click();
     await this.fillAddress(shelley.getAddress(), 2);
     await this.clickCoinSelectorName(Asset.CARDANO.ticker, 2);
     await this.clickNFTsButton();
@@ -249,7 +232,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   async setTwoBundlesWithTheSameAssets() {
     await this.setTwoAssetsForBundle(1, 1, 2);
-    await new TransactionNewPage().addBundleButton.click();
+    await TransactionNewPage.addBundleButton.click();
     await this.setTwoAssetsForBundle(2, 3, 4);
   }
 

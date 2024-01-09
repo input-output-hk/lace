@@ -31,7 +31,7 @@ import { Asset } from '../data/Asset';
 import clipboard from 'clipboardy';
 import extensionUtils from '../utils/utils';
 import Modal from '../elements/modal';
-import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
+import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
@@ -105,7 +105,7 @@ When(/I enter the first characters of the contacts/, async () => {
 
 When(/click on one of the contacts on the dropdown/, async () => {
   await browser.pause(500);
-  await transactionExtendedPageObject.clickAddressBookSearchResult(1);
+  await TransactionNewPage.clickAddressBookSearchResult(1);
 });
 
 When(
@@ -264,7 +264,7 @@ Then(
 );
 
 Then(/^I click on transaction drawer background to lose focus$/, async () => {
-  await transactionExtendedPageObject.clickBackground();
+  await TransactionNewPage.clickDrawerBackground();
 });
 
 Then(/^I enter a value of: ([^"]*) to the "([^"]*)" asset$/, async (valueToEnter: string, assetName: string) => {
@@ -512,7 +512,7 @@ Then(/^"Bin" button inside metadata input is (enabled|disabled)$/, async (state:
 });
 
 When(/^I click "Bin" button inside metadata input$/, async () => {
-  await new TransactionNewPage().metadataBinButton.click();
+  await TransactionNewPage.metadataBinButton.click();
 });
 
 Then(/^Metadata input is empty$/, async () => {
@@ -538,19 +538,18 @@ Then(/^"Insufficient balance" error (is|is not) displayed on "Send" page$/, asyn
 When(
   /^I click "(Review transaction|Cancel|Add bundle)" button on "Send" page$/,
   async (button: 'Review transaction' | 'Cancel' | 'Add bundle') => {
-    const newTransactionPage = new TransactionNewPage();
     switch (button) {
       case 'Review transaction':
-        await newTransactionPage.reviewTransactionButton.waitForEnabled({ timeout: 15_000 });
-        await newTransactionPage.reviewTransactionButton.click();
+        await TransactionNewPage.reviewTransactionButton.waitForEnabled({ timeout: 15_000 });
+        await TransactionNewPage.reviewTransactionButton.click();
         break;
       case 'Cancel':
-        await newTransactionPage.cancelTransactionButton.waitForClickable();
-        await newTransactionPage.cancelTransactionButton.click();
+        await TransactionNewPage.cancelTransactionButton.waitForClickable();
+        await TransactionNewPage.cancelTransactionButton.click();
         break;
       case 'Add bundle':
-        await newTransactionPage.addBundleButton.waitForClickable();
-        await newTransactionPage.addBundleButton.click();
+        await TransactionNewPage.addBundleButton.waitForClickable();
+        await TransactionNewPage.addBundleButton.click();
         break;
       default:
         throw new Error(`Unsupported button name: ${button}`);
@@ -668,5 +667,5 @@ Then(/^I see review handle banner for handle: "([^"]*)"$/, async (handleName: st
 });
 
 When(/^I click "Review" button in review handle banner$/, async () => {
-  await new TransactionNewPage().banner.button.click();
+  await TransactionNewPage.banner.button.click();
 });
