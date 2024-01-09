@@ -328,6 +328,7 @@ const colors: Colors = {
   $data_green: lightColorScheme.$secondary_data_green,
   $data_pink: lightColorScheme.$secondary_data_pink,
   $data_yellow: lightColorScheme.$secondary_lace_yellow,
+  $data_orange: lightColorScheme.$secondary_data_orange,
 };
 
 export const elevation: Elevation = {

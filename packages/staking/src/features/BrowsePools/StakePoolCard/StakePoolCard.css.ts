@@ -11,14 +11,10 @@ export const card = sx({
 
 export const tickerName = style({
   fontWeight: theme.fontWeights.$semibold,
+  height: theme.spacing.$20,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   width: theme.spacing.$120,
-});
-
-export const firstRow = style({
-  display: 'flex',
-  justifyContent: 'space-between',
 });
 
 export const cardSelected = style({

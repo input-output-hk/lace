@@ -1,13 +1,6 @@
 import { style, sx } from '@lace/ui';
 import { theme } from '../../../theme';
 
-export const wrapper = sx({
-  alignItems: 'center',
-  display: 'flex',
-  gap: '$10',
-  justifyContent: 'space-between',
-});
-
 export const bar = style({
   backgroundColor: '#EFEFEF',
   borderRadius: theme.radius.$medium,
@@ -22,5 +15,20 @@ export const progress = sx({
 
 export const progressValue = style({
   color: theme.colors.$poolCardProgressBarValue,
-  fontWeight: 500,
+});
+
+export const progress20 = sx({
+  backgroundColor: '$data_blue',
+});
+export const progress69 = sx({
+  backgroundColor: '$data_green',
+});
+export const progress90 = sx({
+  backgroundColor: '$data_yellow',
+});
+export const progress100 = sx({
+  backgroundColor: '$data_orange',
+});
+export const progressOversaturated = sx({
+  backgroundColor: '$data_pink',
 });

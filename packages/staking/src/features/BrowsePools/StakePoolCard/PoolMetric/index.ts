@@ -1,1 +1,1 @@
-export * from './PoolMetric';
+export { PoolMetric } from './PoolMetric';

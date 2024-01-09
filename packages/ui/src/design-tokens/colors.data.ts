@@ -220,6 +220,7 @@ export const colors = {
   $data_blue: '',
   $data_green: '',
   $data_yellow: '',
+  $data_orange: '',
 };
 
 export type Colors = typeof colors;

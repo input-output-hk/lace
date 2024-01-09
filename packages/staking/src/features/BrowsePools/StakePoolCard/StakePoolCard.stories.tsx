@@ -6,15 +6,7 @@ export default {
   title: 'StakePoolsGrid/StakePoolCard',
 } as Meta;
 
-const metricTypeOptions: Array<MetricType> = [
-  'blocks',
-  'cost',
-  'margin',
-  'pledge',
-  'saturation',
-  'stake-delegeted',
-  'ticker',
-];
+const metricTypeOptions: MetricType[] = ['blocks', 'cost', 'margin', 'pledge', 'saturation', 'live-stake', 'ticker'];
 
 export const Card = {
   argTypes: {
