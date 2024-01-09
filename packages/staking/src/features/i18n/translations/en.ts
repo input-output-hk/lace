@@ -17,6 +17,7 @@ export const en: Translations = {
   'browsePools.stakePoolTableBrowser.tableHeader.blocks.title': 'Blocks',
   'browsePools.stakePoolTableBrowser.tableHeader.blocks.tooltip': 'Total blocks created by the pool.',
   'browsePools.stakePoolTableBrowser.tableHeader.cost': 'Cost',
+  'browsePools.stakePoolTableBrowser.tableHeader.liveStake.title': 'Live Stake',
   'browsePools.stakePoolTableBrowser.tableHeader.margin.title': 'Margin',
   'browsePools.stakePoolTableBrowser.tableHeader.margin.tooltip':
     'The percentage of rewards taken by the stake pool operator after the fixed cost but before rewards are distributed',

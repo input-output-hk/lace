@@ -3,20 +3,20 @@ import isNumber from 'lodash/isNumber';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PoolSkeleton } from '../PoolSkeleton/PoolSkeleton';
-import { StakePoolItemBrowserProps } from '../StakePoolItemBrowser';
 import * as styles from './StakePoolTableBrowser.css';
+import { StakePoolTableItemBrowserProps } from './StakePoolTableItemBrowser';
 
-export type StakePoolTableBodyBrowser = {
+export type StakePoolTableBodyBrowserProps = {
   scrollableTargetId: string;
   className?: string;
   emptyText?: React.ReactNode | (() => React.ReactNode);
-  items: StakePoolItemBrowserProps[];
+  items: StakePoolTableItemBrowserProps[];
   loadMoreData: () => void;
   total: number;
   emptyPlaceholder?: React.ReactNode | string;
   showSkeleton?: boolean;
-  listProps?: ListProps<StakePoolItemBrowserProps>;
-  ItemRenderer: (data: StakePoolItemBrowserProps) => React.ReactElement;
+  listProps?: ListProps<StakePoolTableItemBrowserProps>;
+  ItemRenderer: (item: StakePoolTableItemBrowserProps, index: number) => React.ReactElement;
 };
 
 export const StakePoolTableBodyBrowser = ({
@@ -30,7 +30,7 @@ export const StakePoolTableBodyBrowser = ({
   showSkeleton,
   listProps,
   ItemRenderer,
-}: StakePoolTableBodyBrowser) => (
+}: StakePoolTableBodyBrowserProps) => (
   <div data-testid="stake-pool-list-scroll-wrapper" className={styles.wrapper}>
     {isNumber(total) && !total && emptyPlaceholder}
     <InfiniteScroll
@@ -49,7 +49,8 @@ export const StakePoolTableBodyBrowser = ({
           dataSource={items}
           itemLayout="horizontal"
           locale={{ emptyText }}
-          renderItem={(item: StakePoolItemBrowserProps) => (
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          renderItem={(item: StakePoolTableItemBrowserProps) => (
             <List.Item className={styles.listItemWrapper}>
               <ItemRenderer {...item} />
             </List.Item>

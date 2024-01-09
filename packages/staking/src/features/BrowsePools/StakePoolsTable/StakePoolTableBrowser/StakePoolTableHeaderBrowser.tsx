@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Tooltip } from 'antd';
-import cn from 'classnames';
 import { TranslationKey } from 'features/i18n';
 import { en } from 'features/i18n/translations';
 import { useTranslation } from 'react-i18next';
-import { Columns, SortField, StakePoolSortOptions, TranslationsFor } from '../types';
+import { useOutsideHandles } from '../../../outside-handles-provider';
+import { analyticsActionsMap } from '../analytics';
+import { TableHeader } from '../Table/TableHeader';
+import { Columns, SortDirection, SortField, StakePoolSortOptions, TranslationsFor } from '../types';
 import { config } from '../utils';
-import * as styles from './StakePoolTableBrowser.css';
 
 const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
 
@@ -17,19 +16,18 @@ export interface TableHeaders {
 }
 
 export type StakePoolTableHeaderBrowserProps = {
-  isActiveSortItem: (value: string) => boolean;
-  onSortChange: (field: Columns) => void;
+  setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
   translations: TranslationsFor<Columns>;
 };
 
 export const StakePoolTableHeaderBrowser = ({
   translations,
-  isActiveSortItem,
-  onSortChange,
+  setActiveSort,
   activeSort,
 }: StakePoolTableHeaderBrowserProps) => {
   const { t } = useTranslation();
+  const { analytics } = useOutsideHandles();
   const headers: TableHeaders[] = config.columns.map((column) => {
     const translationKey = `browsePools.stakePoolTableBrowser.tableHeader.${column}.tooltip` as TranslationKey;
     const tooltipText = t(translationKey);
@@ -40,29 +38,27 @@ export const StakePoolTableHeaderBrowser = ({
     };
   });
 
+  const onSortChange = (field: Columns) => {
+    // TODO: remove once updated on sdk side
+    if (!Object.keys(SortField).includes(field)) return;
+    const order =
+      field === activeSort?.field && activeSort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
+
+    analytics.sendEventToPostHog(analyticsActionsMap[field]);
+    setActiveSort({ field: field as unknown as SortField, order });
+  };
+
+  const isActiveSortItem = (value: string) => value === activeSort?.field;
+
   return (
-    <div data-testid="stake-pool-list-header" className={cn(styles.header, {})}>
-      {headers.map(({ label, value, tooltipText }) => (
-        <div
-          className={cn(styles.headerItem, {
-            [styles.withAction!]: isSortingAvailable(value),
-            [styles.active!]: isActiveSortItem(value),
-          })}
-          key={value}
-          onClick={() => onSortChange(value)}
-          data-testid={`stake-pool-list-header-${value}`}
-        >
-          <Tooltip destroyTooltipOnHide title={tooltipText}>
-            {label}
-          </Tooltip>
-          {isSortingAvailable(value) && isActiveSortItem(value) && (
-            <div
-              className={cn(styles.triangle, styles[activeSort?.order])}
-              data-testid={`stake-pool-sort-order-${activeSort?.order}`}
-            />
-          )}
-        </div>
-      ))}
-    </div>
+    <TableHeader
+      dataTestId="table"
+      headers={headers}
+      isActiveSortItem={isActiveSortItem}
+      isSortingAvailable={isSortingAvailable}
+      onSortChange={onSortChange}
+      order={activeSort?.order}
+      withSelection
+    />
   );
 };

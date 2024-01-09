@@ -1,6 +1,4 @@
-/* eslint-disable complexity */
-/* eslint-disable no-magic-numbers */
-import { formatPercentages, getRandomIcon, getNumberWithUnit } from '@lace/common';
+import { formatPercentages, getRandomIcon } from '@lace/common';
 import { Cardano } from '@cardano-sdk/core';
 import { CoinId } from '@src/wallet';
 import { lovelacesToAdaString } from './unit-converters';
@@ -18,7 +16,7 @@ export interface StakePool {
   logo?: string;
   retired?: boolean;
   apy?: string;
-  size: string;
+  liveStake?: string;
   saturation?: string;
   fee?: number | string;
   isStakingPool?: boolean;
@@ -36,9 +34,6 @@ export const stakePoolTransformer = ({
   cardanoCoin
 }: StakePoolTransformerProp): StakePool => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
-  const formattedPledge = pledge && getNumberWithUnit(lovelacesToAdaString(pledge.toString()));
-  const formattedCost = cost && getNumberWithUnit(lovelacesToAdaString(cost.toString()));
-  const formattedBlock = getNumberWithUnit(metrics?.blocksCreated?.toString());
 
   return {
     id: id.toString(),
@@ -52,16 +47,16 @@ export const stakePoolTransformer = ({
     description: metadata?.description,
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
     ...(cost && {
-      cost: `${formattedCost.number}${formattedCost.unit}${cardanoCoin.symbol}`
+      cost: `${cardanoCoin.symbol} ${lovelacesToAdaString(cost.toString())}`
     }),
     ...(metrics && {
       ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
       saturation: formatPercentages(metrics.saturation.valueOf()),
-      blocks: `${formattedBlock?.number}${formattedBlock?.unit}`,
-      size: formatPercentages(metrics.size.live)
+      blocks: metrics?.blocksCreated?.toString(),
+      liveStake: formatPercentages(metrics.size.live)
     }),
     ...(pledge && {
-      pledge: `${formattedPledge.number}${formattedPledge.unit} ${cardanoCoin.symbol}`
+      pledge: `${cardanoCoin.symbol} ${lovelacesToAdaString(pledge.toString())}`
     }),
     ...(delegatingPoolId && { isStakingPool: delegatingPoolId === id.toString() })
   };

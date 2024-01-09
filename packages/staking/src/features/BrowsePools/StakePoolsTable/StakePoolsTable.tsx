@@ -22,7 +22,7 @@ const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
 };
 
 const searchDebounce = 300;
-const defaultFetchLimit = 10;
+const defaultFetchLimit = 100;
 
 export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
   const { t } = useTranslation();
@@ -56,6 +56,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     apy: t('browsePools.stakePoolTableBrowser.tableHeader.ros.title'),
     blocks: t('browsePools.stakePoolTableBrowser.tableHeader.blocks.title'),
     cost: t('browsePools.stakePoolTableBrowser.tableHeader.cost'),
+    liveStake: t('browsePools.stakePoolTableBrowser.tableHeader.liveStake.title'),
     margin: t('browsePools.stakePoolTableBrowser.tableHeader.margin.title'),
     pledge: t('browsePools.stakePoolTableBrowser.tableHeader.pledge.title'),
     saturation: t('browsePools.stakePoolTableBrowser.tableHeader.saturation.title'),

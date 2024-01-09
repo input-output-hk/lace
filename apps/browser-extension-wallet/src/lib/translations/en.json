@@ -1064,7 +1064,8 @@
         "saturation": "Saturation",
         "margin": "Margin",
         "blocks": "Blocks",
-        "pledge": "Pledge"
+        "pledge": "Pledge",
+        "liveStake": "Live Stake"
       }
     },
     "stakingConfirmationInfo": {

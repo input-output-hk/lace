@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { StateStatus, StakePoolSearchSlice, BlockchainProviderSlice, ZustandHandlers, SliceCreator } from '../types';
 
-const defaultFetchLimit = 10;
+const defaultFetchLimit = 100;
 
 const fetchStakePools =
   ({

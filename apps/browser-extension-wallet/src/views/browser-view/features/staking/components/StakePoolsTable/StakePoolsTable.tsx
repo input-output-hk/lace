@@ -5,11 +5,12 @@ import {
   Columns,
   SortDirection,
   SortField,
-  StakePoolItemBrowser,
+  TableRow,
   StakePoolSortOptions,
   StakePoolTableBodyBrowser,
   StakePoolTableHeaderBrowser,
-  TranslationsFor
+  TranslationsFor,
+  stakePooltableConfig
 } from '@lace/staking';
 import { Typography } from 'antd';
 import { Search, getRandomIcon } from '@lace/common';
@@ -31,7 +32,7 @@ import {
 const { Text } = Typography;
 
 type stakePoolsTableProps = {
-  onStake?: (id: Parameters<typeof StakePoolItemBrowser>[0]['id']) => void;
+  onStake?: (id: string) => void;
   scrollableTargetId: string;
 };
 
@@ -72,7 +73,8 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
     saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation'),
     margin: t('cardano.stakePoolTableBrowser.tableHeader.margin'),
     blocks: t('cardano.stakePoolTableBrowser.tableHeader.blocks'),
-    pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge')
+    pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge'),
+    liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake')
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
@@ -138,17 +140,14 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
     [stakePools, cardanoCoin, analytics, setSelectedStakePool, setIsDrawerVisible, onStake]
   );
 
-  const onSortChange = (field: Columns) => {
+  const onSortChange = ({ field, order }: StakePoolSortOptions) => {
     if (!Object.keys(SortField).includes(field)) return;
-    const order =
-      field === sort?.field
-        ? (sort?.order === SortDirection.asc && SortDirection.desc) || SortDirection.asc
-        : SortDirection.asc;
-
-    setSort({ field: field as unknown as SortField, order });
+    setSort({ field, order });
   };
 
-  const isActiveSortItem = (value: string) => value === sort?.field;
+  useEffect(() => {
+    onSortChange(sort);
+  }, [sort]);
 
   return (
     <div data-testid="stake-pool-table" className={styles.table}>
@@ -173,8 +172,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           <StakePoolTableHeaderBrowser
             activeSort={sort}
             translations={tableHeaderTranslations}
-            isActiveSortItem={isActiveSortItem}
-            onSortChange={onSortChange}
+            setActiveSort={setSort}
           />
         </div>
         <StakePoolTableBodyBrowser
@@ -186,7 +184,16 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           // Show skeleton if it's loading the list while a search is not being performed
           showSkeleton={isLoadingList && !isSearching}
           scrollableTargetId={scrollableTargetId}
-          ItemRenderer={StakePoolItemBrowser}
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          ItemRenderer={({ stakePool, hexId, id, selectionDisabledMessage, ...data }) => (
+            <TableRow<Columns>
+              columns={stakePooltableConfig.columns}
+              cellRenderers={stakePooltableConfig.renderer}
+              dataTestId="stake-pool"
+              data={data as Parameters<typeof TableRow>[0]['data']}
+              selectionDisabledMessage={selectionDisabledMessage}
+            />
+          )}
         />
       </div>
     </div>

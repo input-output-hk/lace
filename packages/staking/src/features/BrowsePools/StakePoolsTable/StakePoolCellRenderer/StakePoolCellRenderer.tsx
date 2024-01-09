@@ -17,4 +17,4 @@ export const stakePoolCellRenderer = {
     );
   },
   [Columns.margin]: ({ value }: { value: string }) => <span>{value}%</span>,
-} as Record<Columns, React.FunctionComponent<{ value?: string }>>;
+} as Record<Partial<Columns>, React.FunctionComponent<{ value?: string }>>;

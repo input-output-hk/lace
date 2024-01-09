@@ -55,6 +55,9 @@ type KeysStructure = {
           title: '';
           tooltip: '';
         };
+        liveStake: {
+          title: '';
+        };
       };
       emptyMessage: '';
       stake: '';

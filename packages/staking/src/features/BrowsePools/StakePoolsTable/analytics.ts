@@ -9,4 +9,5 @@ export const analyticsActionsMap: Record<Columns, PostHogAction> = {
   [Columns.margin]: PostHogAction.StakingBrowsePoolsMarginClick,
   [Columns.blocks]: PostHogAction.StakingBrowsePoolsBlocksClick,
   [Columns.pledge]: PostHogAction.StakingBrowsePoolsPledgeClick,
+  [Columns.liveStake]: PostHogAction.StakingBrowsePoolsLiveStakeClick,
 };

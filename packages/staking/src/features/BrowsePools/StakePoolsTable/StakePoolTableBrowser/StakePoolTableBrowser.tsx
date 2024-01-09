@@ -1,23 +1,20 @@
 import { Wallet } from '@lace/cardano';
+import { PostHogAction } from '@lace/common';
 import { ListProps } from 'antd';
-
 import React from 'react';
 import { useOutsideHandles } from '../../../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../../../store';
-import { analyticsActionsMap } from '../analytics';
-import { StakePoolItemBrowser, StakePoolItemBrowserProps } from '../StakePoolItemBrowser';
-import { Columns, SortDirection, SortField, StakePoolSortOptions, TranslationsFor } from '../types';
+import { Columns, StakePoolSortOptions, TranslationsFor } from '../types';
 import { StakePoolTableBodyBrowser } from './StakePoolTableBodyBrowser';
 import * as styles from './StakePoolTableBrowser.css';
 import { StakePoolTableHeaderBrowser } from './StakePoolTableHeaderBrowser';
-
-export const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
+import { StakePoolTableItemBrowser, StakePoolTableItemBrowserProps } from './StakePoolTableItemBrowser';
 
 export type StakePoolTableBrowserProps = {
   scrollableTargetId: string;
   className?: string;
   emptyText?: React.ReactNode | (() => React.ReactNode);
-  items: StakePoolItemBrowserProps[];
+  items: StakePoolTableItemBrowserProps[];
   loadMoreData: () => void;
   total: number;
   emptyPlaceholder?: React.ReactNode | string;
@@ -25,7 +22,7 @@ export type StakePoolTableBrowserProps = {
   setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
   showSkeleton?: boolean;
-} & ListProps<StakePoolItemBrowserProps>;
+} & ListProps<StakePoolTableItemBrowserProps>;
 
 export const StakePoolTableBrowser = ({
   scrollableTargetId,
@@ -50,38 +47,30 @@ export const StakePoolTableBrowser = ({
   );
   const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
 
-  const onSortChange = (field: Columns) => {
-    // TODO: remove once updated on sdk side
-    if (!Object.keys(SortField).includes(field)) return;
-    const order =
-      field === activeSort?.field && activeSort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
-
-    analytics.sendEventToPostHog(analyticsActionsMap[field]);
-    setActiveSort({ field: field as unknown as SortField, order });
-  };
-
   const selectedStakePools = items
     .filter((item) => portfolioPools.find((pool) => pool.id.toString() === item.id))
     .map((pool) => ({
       ...pool,
-      onUnselect: () => portfolioMutators.executeCommand({ data: pool.hexId, type: 'UnselectPoolFromList' }),
+      onSelect: () => {
+        portfolioMutators.executeCommand({ data: pool.hexId, type: 'UnselectPoolFromList' });
+        analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsUnselectClick);
+      },
     }));
   const availableStakePools = items.filter((item) => !selectedStakePools.some((pool) => pool.id === item.id));
-  const isActiveSortItem = (value: string) => value === activeSort?.field;
 
   return (
     <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
-      <StakePoolTableHeaderBrowser {...{ activeSort, isActiveSortItem, onSortChange, translations }} />
+      <StakePoolTableHeaderBrowser {...{ activeSort, setActiveSort, translations }} />
       {selectedStakePools?.length > 0 && (
         <div className={styles.selectedPools}>
           {selectedStakePools.map((pool) => (
-            <StakePoolItemBrowser key={pool.id} {...pool} />
+            <StakePoolTableItemBrowser key={pool.id} {...{ ...pool, selected: true }} />
           ))}
         </div>
       )}
       <StakePoolTableBodyBrowser
         {...{
-          ItemRenderer: StakePoolItemBrowser,
+          ItemRenderer: StakePoolTableItemBrowser,
           className,
           emptyPlaceholder,
           emptyText,

@@ -8,6 +8,7 @@ export enum Columns {
   margin = 'margin',
   blocks = 'blocks',
   pledge = 'pledge',
+  liveStake = 'liveStake',
 }
 
 export type TranslationsFor<T extends string> = Record<T, string>;
