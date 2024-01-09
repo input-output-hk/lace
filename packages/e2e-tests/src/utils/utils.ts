@@ -1,11 +1,11 @@
-import { Capabilities } from '@wdio/types';
 import localStorageManager from './localStorageManager';
 import { Logger } from '../support/logger';
 import { browser } from '@wdio/globals';
 
 class ExtensionUtils {
   async getBrowser(): Promise<string> {
-    return String((browser.capabilities as Capabilities.Capabilities).browserName);
+    // eslint-disable-next-line no-undef
+    return String((browser.capabilities as WebdriverIO.Capabilities).browserName);
   }
 
   async getUserAgent(): Promise<string> {

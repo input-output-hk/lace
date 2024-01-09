@@ -9,6 +9,7 @@ import TransactionDetailsPage from '../elements/transactionDetails';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import TransactionsPage from '../elements/transactionsPage';
 import { Logger } from '../support/logger';
+import { browser } from '@wdio/globals';
 
 Given(/^I am on the Transactions section - Extended view$/, async () => {
   await mainMenuPageObject.navigateToSection('Transactions', 'extended');
@@ -109,11 +110,11 @@ When(/^I click on a transaction and click on both dropdowns$/, async () => {
 });
 
 When(/^I click on inputs dropdowns$/, async () => {
-  TransactionDetailsPage.clickInputsDropdown();
+  await TransactionDetailsPage.clickInputsDropdown();
 });
 
 When(/^I click on outputs dropdowns$/, async () => {
-  TransactionDetailsPage.clickOutputsDropdown();
+  await TransactionDetailsPage.clickOutputsDropdown();
 });
 
 Then(
