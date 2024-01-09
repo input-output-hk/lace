@@ -5,7 +5,7 @@ import { WalletSetupFlow, WalletSetupFlowProvider } from '@lace/core';
 import { NavigationButton } from '@lace/common';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import styles from '@views/browser/features/multi-wallet/MultiWallet.module.scss';
-import { SetupSharedWalletStep } from '@views/browser/features/shared-wallet/ui-flow/setup/SetupSharedWalletStep';
+import { SharedWalletGetStarted } from '@views/browser/features/shared-wallet/ui-flow/get-started/SharedWalletGetStarted';
 
 export const SharedWallet = (): JSX.Element => {
   const { path } = useRouteMatch();
@@ -33,7 +33,7 @@ export const SharedWallet = (): JSX.Element => {
           />
         </div>
         <Switch>
-          <Route exact path={`${path}/`} component={SetupSharedWalletStep} />
+          <Route exact path={`${path}/`} component={SharedWalletGetStarted} />
         </Switch>
       </Modal>
     </WalletSetupFlowProvider>

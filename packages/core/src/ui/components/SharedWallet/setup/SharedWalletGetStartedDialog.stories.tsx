@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { SetupSharedWallet } from './SetupSharedWallet.component';
+import { SharedWalletGetStartedOptions } from './SharedWalletGetStartedDialog.component';
 
-const meta: Meta<typeof SetupSharedWallet> = {
-  title: 'Shared Wallets | Setup',
-  component: SetupSharedWallet,
+const meta: Meta<typeof SharedWalletGetStartedOptions> = {
+  title: 'Shared Wallets / Get Started',
+  component: SharedWalletGetStartedOptions,
   parameters: {
     layout: 'centered'
   }
 };
 
 export default meta;
-type Story = StoryObj<typeof SetupSharedWallet>;
+type Story = StoryObj<typeof SharedWalletGetStartedOptions>;
 
 export const Dialog: Story = {
   args: {

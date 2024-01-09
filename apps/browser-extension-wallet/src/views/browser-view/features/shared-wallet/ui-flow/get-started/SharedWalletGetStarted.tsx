@@ -1,11 +1,11 @@
 import React from 'react';
-import { useTranslate, SetupSharedWallet } from '@lace/core';
+import { useTranslate, SharedWalletGetStartedOptions } from '@lace/core';
 
-export const SetupSharedWalletStep = (): React.ReactElement => {
+export const SharedWalletGetStarted = (): React.ReactElement => {
   const { t } = useTranslate();
 
   return (
-    <SetupSharedWallet
+    <SharedWalletGetStartedOptions
       translations={{
         title: t('browserView.sharedWallet.setup.title'),
         subTitle: t('browserView.sharedWallet.setup.subTitle'),

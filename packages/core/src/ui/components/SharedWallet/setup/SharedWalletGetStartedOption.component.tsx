@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Flex, sx, Text } from '@lace/ui';
-import styles from './SharedWalletSetupOption.module.scss';
+import styles from './SharedWalletGetStartedOption.module.scss';
 
 export interface WalletSetupOptionProps {
   copies: Record<'title' | 'description' | 'button', string>;

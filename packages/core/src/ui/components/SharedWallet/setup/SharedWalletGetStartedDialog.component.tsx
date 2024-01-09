@@ -1,6 +1,6 @@
 import React from 'react';
-import styles from './SetupSharedWallet.module.scss';
-import { SharedWalletSetupOption } from './SharedWalletSetupOption.component';
+import styles from './SharedWalletGetStartedDialog.module.scss';
+import { SharedWalletSetupOption } from './SharedWalletGetStartedOption.component';
 import { ReactComponent as UserGroupIcon } from '../../../assets/icons/user-group-gradient.component.svg';
 import { ReactComponent as UploadIcon } from '../../../assets/icons/upload.component.svg';
 import { ReactComponent as LaceLogo } from '../../../assets/icons/lace-logo.component.svg';
@@ -19,7 +19,7 @@ export interface SetupSharedWalletProps {
   };
 }
 
-export const SetupSharedWallet = ({
+export const SharedWalletGetStartedOptions = ({
   onCreateSharedWalletClick,
   onImportSharedWalletClick,
   translations
