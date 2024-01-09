@@ -232,6 +232,15 @@ export const colors = {
   $educational_card_item_title_color: '',
   $educational_card_item_icon_container_bgColor: '',
   $educational_card_item_icon_container_borderColor: '',
+
+  $file_upload_container_bgColor: '',
+  $file_upload_container_bgColor_hover: '',
+  $file_upload_container_bgColor_pressed: '',
+  $file_upload_container_bgColor_focused: '',
+  $file_upload_container_outlineColor: '',
+  $file_upload_container_borderColor: '',
+  $file_upload_icon_container_bgColor: '',
+  $file_upload_icon_container_borderColor: '',
 };
 
 export type Colors = typeof colors;

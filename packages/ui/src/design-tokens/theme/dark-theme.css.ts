@@ -324,6 +324,17 @@ const colors: Colors = {
   $educational_card_item_icon_container_bgColor:
     darkColorScheme.$primary_dark_grey_plus,
   $educational_card_item_icon_container_borderColor: colorTransparent,
+
+  $file_upload_container_bgColor: darkColorScheme.$primary_mid_black,
+  $file_upload_container_bgColor_hover: darkColorScheme.$primary_mid_grey,
+  $file_upload_container_bgColor_pressed: darkColorScheme.$primary_dark_grey,
+  $file_upload_container_bgColor_focused: darkColorScheme.$primary_mid_black,
+  $file_upload_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $file_upload_container_borderColor: colorTransparent,
+
+  $file_upload_icon_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
+  $file_upload_icon_container_borderColor: colorTransparent,
 };
 
 const elevation: Elevation = {

@@ -346,6 +346,18 @@ const colors: Colors = {
     lightColorScheme.$primary_white,
   $educational_card_item_icon_container_borderColor:
     lightColorScheme.$primary_light_grey_plus,
+
+  $file_upload_container_bgColor: lightColorScheme.$primary_white,
+  $file_upload_container_bgColor_hover: lightColorScheme.$primary_light_grey,
+  $file_upload_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $file_upload_container_bgColor_focused: lightColorScheme.$primary_white,
+  $file_upload_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $file_upload_container_borderColor: lightColorScheme.$primary_light_grey_plus,
+
+  $file_upload_icon_container_bgColor: lightColorScheme.$primary_white,
+  $file_upload_icon_container_borderColor: lightColorScheme.$primary_light_grey,
 };
 
 export const elevation: Elevation = {
