@@ -356,6 +356,19 @@ const colors: Colors = {
   $checkbox_hover_unchecked_backgroundColor: colorTransparent,
   $checkbox_hover_checked_backgroundColor:
     lightColorScheme.$primary_hover_purple,
+  $radiobutton_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $radiobutton_indicator_backgroundColor:
+    lightColorScheme.$primary_accent_purple,
+  $radiobutton_indicator_check_color: lightColorScheme.$primary_white,
+  $radiobutton_unchecked_borderColor: lightColorScheme.$primary_grey,
+
+  $select_border: lightColorScheme.$primary_grey,
+  $select_icon_color: lightColorScheme.$primary_black,
+  $select_background_color: lightColorScheme.$primary_white,
+  $select_hover_background_color: lightColorScheme.$primary_light_grey_plus,
+  $select_input_value_color: lightColorScheme.$primary_black,
+  $select_input_background_data_highlighted:
+    lightColorScheme.$primary_light_grey_plus_0_56,
 };
 
 export const elevation: Elevation = {

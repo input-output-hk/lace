@@ -241,6 +241,17 @@ export const colors = {
   $checkbox_hover_checked_backgroundColor: '',
   $checkbox_hover_unchecked_borderColor: '',
   $checkbox_hover_unchecked_backgroundColor: '',
+  $radiobutton_focus_color: '',
+  $radiobutton_indicator_backgroundColor: '',
+  $radiobutton_indicator_check_color: '',
+  $radiobutton_unchecked_borderColor: '',
+
+  $select_border: '',
+  $select_icon_color: '',
+  $select_background_color: '',
+  $select_hover_background_color: '',
+  $select_input_value_color: '',
+  $select_input_background_data_highlighted: '',
 };
 
 export type Colors = typeof colors;
@@ -279,6 +290,7 @@ export const darkColorScheme = {
   $primary_hover_purple: 'rgba(116, 82, 219, 1)',
   $primary_accent_purple_0_3: 'rgba(127, 90, 240, 0.3)',
   $primary_light_grey: '#a9a9a9',
+  $primary_light_grey_plus_0_56: 'rgba(239, 239, 239, 0.56)',
   $primary_light_grey_plus: '#f9f9f9',
   $primary_white: '#FFFFFF',
   $primary_grey: '#383838',
