@@ -120,6 +120,10 @@ class ManageStakingDrawerAssert {
     await ManageStakingDrawer.nextButton.waitForDisplayed({
       reverse: !shouldBeVisible
     });
+    if (shouldBeVisible)
+      expect(await ManageStakingDrawer.nextButton.getText()).to.equal(
+        await t('drawer.preferences.confirmButton', 'staking')
+      );
   };
 
   assertConfirmNewPortfolioButtonState = async (isEnabled: boolean) => {

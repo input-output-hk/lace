@@ -209,4 +209,4 @@ Feature: Staking Page - Extended View
     Then I see "Confirm new portfolio" button
     And "Confirm new portfolio" button is enabled
     When I click "Confirm new portfolio" button
-    Then I see Confirmation page
+    Then I see Manage delegation drawer Confirmation page

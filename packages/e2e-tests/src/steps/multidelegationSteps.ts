@@ -404,6 +404,6 @@ When(/^I click "Confirm new portfolio" button$/, async () => {
   await ManageStakingDrawer.clickConfirmNewPortfolioButton();
 });
 
-Then(/^I see Confirmation page$/, async () => {
+Then(/^I see Manage delegation drawer Confirmation page$/, async () => {
   await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
 });
