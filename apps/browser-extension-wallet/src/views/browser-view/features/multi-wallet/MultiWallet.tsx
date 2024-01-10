@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable react/no-multi-comp */
 import React, { useEffect, useMemo } from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
@@ -7,7 +8,12 @@ import styles from './MultiWallet.module.scss';
 
 import { Home } from './components/Home';
 
-import { WalletSetupFlow, WalletSetupFlowProvider } from '@lace/core';
+import {
+  WalletSetupConfirmationDialogProvider,
+  WalletSetupFlow,
+  WalletSetupFlowProvider,
+  useWalletSetupConfirmationDialog
+} from '@lace/core';
 import { CreateWallet } from './create-wallet';
 import { HardwareWallet } from './hardware-wallet';
 import { RestoreWallet } from './restore-wallet';
@@ -22,7 +28,11 @@ const { newWallet } = walletRoutePaths;
 
 const createWallet = (): Promise<void> => Promise.resolve(void 0);
 
-export const SetupHardwareWallet = (): JSX.Element => {
+interface ConfirmationDialog {
+  shouldShowDialog$: Subject<boolean>;
+}
+
+export const SetupHardwareWallet = ({ shouldShowDialog$ }: ConfirmationDialog): JSX.Element => {
   const { connectHardwareWallet } = useWalletManager();
   const disconnectHardwareWallet$ = useMemo(() => new Subject<HIDConnectionEvent>(), []);
 
@@ -44,61 +54,70 @@ export const SetupHardwareWallet = (): JSX.Element => {
       providers={{
         connectHardwareWallet,
         createWallet,
-        disconnectHardwareWallet$
+        disconnectHardwareWallet$,
+        shouldShowDialog$
       }}
     />
   );
 };
 
-export const SetupCreateWallet = (): JSX.Element => (
+export const SetupCreateWallet = (confirmationDialog: ConfirmationDialog): JSX.Element => (
   <CreateWallet
     providers={{
       createWallet,
-      generateMnemonicWords: Wallet.KeyManagement.util.generateMnemonicWords
+      generateMnemonicWords: Wallet.KeyManagement.util.generateMnemonicWords,
+      confirmationDialog
     }}
   />
 );
 
-export const SetupRestoreWallet = (): JSX.Element => (
+export const SetupRestoreWallet = (confirmationDialog: ConfirmationDialog): JSX.Element => (
   <RestoreWallet
     providers={{
-      createWallet
+      createWallet,
+      confirmationDialog
     }}
   />
 );
 
-export const MultiWallet = (): JSX.Element => {
+const Component = (): JSX.Element => {
   const { path } = useRouteMatch();
   const history = useHistory();
   const { page, setBackgroundPage } = useBackgroundPage();
+  const { isDialogOpen, withConfirmationDialog, shouldShowDialog$ } = useWalletSetupConfirmationDialog();
+  const closeWalletCreation = withConfirmationDialog(() => {
+    setBackgroundPage();
+    history.push(page);
+  });
 
   return (
     <WalletSetupFlowProvider flow={WalletSetupFlow.ADD_WALLET}>
-      <Modal
-        centered
-        closable={false}
-        // eslint-disable-next-line unicorn/no-null
-        footer={null}
-        open
-        width="100%"
-        className={styles.modal}
-      >
+      <Modal centered closable={false} footer={null} open={!isDialogOpen} width="100%" className={styles.modal}>
         <div className={styles.closeButton}>
-          <NavigationButton
-            icon="cross"
-            onClick={() => {
-              setBackgroundPage();
-              history.push(page);
-            }}
-          />
+          <NavigationButton icon="cross" onClick={closeWalletCreation} />
         </div>
         <Switch>
-          <Route path={newWallet.create.root} component={SetupCreateWallet} />
-          <Route path={newWallet.hardware.root} component={SetupHardwareWallet} />
-          <Route path={newWallet.restore.root} component={SetupRestoreWallet} />
+          <Route
+            path={newWallet.create.root}
+            render={() => <SetupCreateWallet shouldShowDialog$={shouldShowDialog$} />}
+          />
+          <Route
+            path={newWallet.hardware.root}
+            render={() => <SetupHardwareWallet shouldShowDialog$={shouldShowDialog$} />}
+          />
+          <Route
+            path={newWallet.restore.root}
+            render={() => <SetupRestoreWallet shouldShowDialog$={shouldShowDialog$} />}
+          />
           <Route exact path={`${path}/`} component={Home} />
         </Switch>
       </Modal>
     </WalletSetupFlowProvider>
   );
 };
+
+export const MultiWallet = (): JSX.Element => (
+  <WalletSetupConfirmationDialogProvider>
+    <Component />
+  </WalletSetupConfirmationDialogProvider>
+);

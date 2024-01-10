@@ -1,13 +1,12 @@
 import webTester from '../actor/webTester';
-import PasswordInput from '../elements/passwordInput';
-import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
+import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 
 class SimpleTxSideDrawerPageObject {
   fillTokenValue = async (value: string) => {
-    await webTester.fillComponent(new TransactionNewPage().coinConfigure().input(), value);
+    await webTester.fillComponent(TransactionNewPage.coinConfigure().input(), value);
   };
 
   clickCloseDrawerButton = async () => {
@@ -25,10 +24,6 @@ class SimpleTxSideDrawerPageObject {
     await commonDrawerElements.drawerHeaderBackButton.waitForClickable({ timeout: 15_000 });
     await commonDrawerElements.drawerHeaderBackButton.click();
   };
-
-  async fillPassword(password: string) {
-    await PasswordInput.input.setValue(password);
-  }
 
   async fillPasswordAndConfirm(password: string) {
     await TransactionPasswordPage.passwordInput.setValue(password);
