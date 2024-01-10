@@ -9,6 +9,7 @@ import extensionUtils from '../utils/utils';
 import { shelley, byron } from '../data/AddressData';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
+import { AssetInput } from '../elements/newTransaction/assetInput';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
   await transactionBundlesAssert.assertSeeBundles(expectedNumberOfBundles);
@@ -103,7 +104,7 @@ Then(/^An Incorrect address (\d*) error is displayed$/, async (inputIndex: numbe
 });
 
 Then(/^I click "Add token or NFT" button for bundle (\d*)$/, async (inputIndex: number) => {
-  await transactionExtendedPageObject.clickAddAssetButtonMulti(inputIndex);
+  await new AssetInput(inputIndex).clickAddAssetButton();
 });
 
 Then(

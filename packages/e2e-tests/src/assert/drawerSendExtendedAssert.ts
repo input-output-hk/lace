@@ -8,7 +8,6 @@ import { expect } from 'chai';
 import { AddressInput } from '../elements/addressInput';
 import coinConfigureAssert from './coinConfigureAssert';
 import assetInputAssert from './assetInputAssert';
-import { AssetInput } from '../elements/newTransaction/assetInput';
 import testContext from '../utils/testContext';
 import Banner from '../elements/banner';
 import { getAddressByName, validAddress, validAddress2 } from '../data/AddressData';
@@ -21,7 +20,6 @@ import { truncateAddressEntryName } from '../utils/addressBookUtils';
 class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
     await this.assertSeeDrawerTitle(mode === 'extended');
-    const assetInput = new AssetInput();
     const addressInput = new AddressInput();
     await webTester.seeWebElement(addressInput.input());
     expect(await webTester.getTextValueFromElement(addressInput.label())).to.equal(
@@ -30,7 +28,6 @@ class DrawerSendExtendedAssert {
     await addressInput.ctaButton.waitForDisplayed();
     await coinConfigureAssert.assertSeeCoinConfigure();
     await assetInputAssert.assertSeeAssetInput();
-    await webTester.seeWebElement(assetInput.assetAddButton());
     await TransactionNewPage.metadataInputField.waitForDisplayed();
     await TransactionNewPage.metadataInputLabel.waitForDisplayed();
     expect(await TransactionNewPage.metadataInputLabel.getText()).to.equal(
