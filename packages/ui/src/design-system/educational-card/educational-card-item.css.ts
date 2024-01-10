@@ -42,6 +42,11 @@ export const label = sx({
   color: '$educational_card_item_label_color',
 });
 
-export const title = sx({
-  color: '$educational_card_item_title_color',
-});
+export const title = style([
+  sx({
+    color: '$educational_card_item_title_color',
+  }),
+  {
+    whiteSpace: 'pre-wrap',
+  },
+]);
