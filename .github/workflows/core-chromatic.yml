@@ -38,7 +38,7 @@ jobs:
         run: yarn --immutable --inline-builds
 
       - name: 🧑‍🔬 Build
-        run: yarn browser build-dep
+        run: yarn browser build-deps
 
       - name: 🧑‍🔬 Linter
         working-directory: ./packages/core
