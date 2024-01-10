@@ -335,6 +335,22 @@ class DAppConnectorAssert {
     expect(await SignTransactionPage.cancelButton.getText()).to.equal(await t('dapp.confirm.btn.cancel'));
   }
 
+  async assertSeeSignDataConfirmTransactionPage(
+    expectedDApp: ExpectedDAppDetails,
+    expectedTransactionRecipientAddress: string
+  ) {
+    await this.assertSeeHeader();
+    await this.assertSeeTitleAndDappDetails('dapp.confirm.header', expectedDApp);
+
+    expect(await ConfirmTransactionPage.transactionRecipientAddressTitle.getText()).to.equal('Address:');
+    expect(await ConfirmTransactionPage.transactionRecipientAddress.getText()).to.equal(
+      expectedTransactionRecipientAddress
+    );
+
+    expect(await ConfirmTransactionPage.transactionDataTitle.getText()).to.equal('Data:');
+    expect(await ConfirmTransactionPage.transactionData.getText()).to.equal('fixed the bug');
+  }
+
   async assertSeeSomethingWentWrongPage() {
     await this.assertSeeHeader();
     await ErrorDAppModal.image.waitForDisplayed();

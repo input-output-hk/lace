@@ -356,3 +356,34 @@ Then(/^all pools details are hidden$/, async () => {
 Then(/^I see selected pools counter is showing "([^"]*)"$/, async (poolsCount: number) => {
   await ManageStakingDrawerAssert.assertSeeSelectedPoolsCounter(poolsCount);
 });
+
+Then(/^I see "Add stake pool" button is (disabled|enabled)$/, async (state: 'enabled' | 'disabled') => {
+  await ManageStakingDrawerAssert.assertSeeAddStakePoolButtonDisabled(state === 'enabled');
+});
+
+Then(/^I click "Add stake pool" button$/, async () => {
+  await ManageStakingDrawer.clickAddStakePoolButton();
+});
+
+Then(/^I pick "([^"]*)" pool for delegation$/, async (poolToStake: string) => {
+  await MultidelegationPage.markPoolsForDelegation(poolToStake);
+});
+
+Given(
+  /^I see "Remove pool from portfolio" button is (disabled|enabled) for pool "([^"]*)"$/,
+  async (state: 'enabled' | 'disabled', poolNo: number) => {
+    await ManageStakingDrawerAssert.assertSeeRemovePoolButtonDisabled(state === 'enabled', poolNo);
+  }
+);
+
+Given(/^I remove "(\d+)" pools from delegation portfolio$/, async (poolsToRemove: number) => {
+  await ManageStakingDrawer.removePoolsFromDelegationPortfolio(poolsToRemove);
+});
+
+Given(
+  /^I see "Remove pool from portfolio" button tooltip on hover for pool "(\d*)"$/,
+  async (tooltipForPool: number) => {
+    await ManageStakingDrawer.hoverOverRemovePoolButtonForPool(tooltipForPool);
+    await ManageStakingDrawerAssert.assertSeeRemovePoolButtonTooltip(tooltipForPool);
+  }
+);

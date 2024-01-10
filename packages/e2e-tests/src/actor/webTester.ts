@@ -4,7 +4,6 @@ import { browser } from '@wdio/globals';
 import { WebElement } from '../elements/webElement';
 import { Logger } from '../support/logger';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
-import crypto from 'crypto';
 
 export type LocatorStrategy = 'css selector' | 'xpath';
 
@@ -156,7 +155,7 @@ export default new (class WebTester {
 
   async waitUntilSeeElement(element: WebElement, timeoutMs = 3000) {
     Logger.log(`waiting for: ${element.toJSLocator()}`);
-    await browser.waitUntil(async () => (await $(element.toJSLocator()).isDisplayed()) === true, {
+    await browser.waitUntil(async () => await $(element.toJSLocator()).isDisplayed(), {
       timeout: timeoutMs,
       timeoutMsg: `failed while waiting for: ${element.toJSLocator()}`
     });
@@ -165,16 +164,9 @@ export default new (class WebTester {
   async waitUntilSeeElementContainingText(text: string, timeoutMs = 3000) {
     const selectorToWait = `//*[contains(text(), "${text}")]`;
     Logger.log(`waiting for: ${selectorToWait}`);
-    await browser.waitUntil(async () => (await $(selectorToWait).isExisting()) === true, {
+    await browser.waitUntil(async () => await $(selectorToWait).isExisting(), {
       timeout: timeoutMs,
       timeoutMsg: `failed while waiting for element containing text: ${text}`
     });
-  }
-
-  async generateRandomString(length: number) {
-    return crypto
-      .randomBytes(Math.ceil(length / 2))
-      .toString('hex')
-      .slice(0, length);
   }
 })();
