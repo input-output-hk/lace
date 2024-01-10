@@ -1,4 +1,3 @@
-import { Ellipsis } from '@lace/common';
 import { Card, Flex, Text } from '@lace/ui';
 import cn from 'classnames';
 import { PoolMetric } from './PoolMetric';
@@ -26,8 +25,8 @@ export const StakePoolCard = ({
   <Card.Outlined className={cn(styles.card, selected && styles.cardSelected)} onClick={onClick}>
     <Flex flexDirection="column">
       <Flex justifyContent="space-between">
-        <Text.Body.Large className={styles.title} weight="$semibold">
-          <Ellipsis text={title} />
+        <Text.Body.Large weight="$semibold" className={styles.title}>
+          {title}
         </Text.Body.Large>
         <PoolMetric metricType={metricType} metricValue={metricValue} />
       </Flex>

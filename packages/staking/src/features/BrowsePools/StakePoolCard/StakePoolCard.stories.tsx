@@ -1,3 +1,4 @@
+import { Flex } from '@lace/ui';
 import type { Meta } from '@storybook/react';
 import { StakePoolCard, StakePoolCardProps } from './StakePoolCard';
 import { MetricType } from './types';
@@ -22,8 +23,25 @@ export const Card = {
     title: 'TIKRNM',
   } as StakePoolCardProps,
   render: (props: StakePoolCardProps) => (
-    <div style={{ width: 220 }}>
+    <Flex
+      style={{
+        flexWrap: 'wrap',
+        rowGap: 10,
+      }}
+      gap="$20"
+    >
       <StakePoolCard {...props} />
-    </div>
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+      <StakePoolCard {...props} />
+    </Flex>
   ),
 };

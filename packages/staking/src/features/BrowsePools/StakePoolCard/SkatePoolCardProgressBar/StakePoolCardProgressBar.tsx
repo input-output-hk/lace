@@ -12,7 +12,7 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
   const progressWidth = percentage > 100 ? 100 : percentage;
 
   return (
-    <Flex alignItems="center" gap="$10" justifyContent="space-between">
+    <Flex alignItems="center" gap="$10" justifyContent="space-between" className={styles.wrapper}>
       <div className={styles.bar}>
         <div
           className={cn([

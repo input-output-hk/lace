@@ -1,6 +1,10 @@
 import { style, sx } from '@lace/ui';
 import { theme } from '../../../theme';
 
+export const wrapper = sx({
+  width: '$fill',
+});
+
 export const bar = style([
   sx({
     borderRadius: '$medium',
