@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 
+import { browser } from '@wdio/globals';
+
 export class LocalStorageManager {
   getItem = async (key: string): Promise<any> => browser.execute((key: string) => localStorage.getItem(key), key);
   setItem = async (key: string, value: string): Promise<any> =>

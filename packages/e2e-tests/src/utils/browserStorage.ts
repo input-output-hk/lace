@@ -1,5 +1,6 @@
 import extensionUtils from './utils';
 import { Logger } from '../support/logger';
+import { browser } from '@wdio/globals';
 
 const verifyBrowserStorageSupport: any = async () => {
   const currentBrowser = await extensionUtils.getBrowser();
