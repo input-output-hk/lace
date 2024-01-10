@@ -28,41 +28,39 @@ const options = [{ value: 'option', label: 'Option' }];
 
 const MainComponents = (): JSX.Element => {
   return (
-    <>
-      <Variants.Row>
-        <Variants.Cell>
-          <RadioButton
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
+    <Variants.Row>
+      <Variants.Cell>
+        <RadioButton
+          selectedValue={''}
+          onValueChange={(): undefined => undefined}
+          options={options}
+        />
+      </Variants.Cell>
 
-        <Variants.Cell>
-          <RadioButton
-            selectedValue={'option'}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButton
-            disabled
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButton
-            className={cx.focus}
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-      </Variants.Row>
-    </>
+      <Variants.Cell>
+        <RadioButton
+          selectedValue={'option'}
+          onValueChange={(): undefined => undefined}
+          options={options}
+        />
+      </Variants.Cell>
+      <Variants.Cell>
+        <RadioButton
+          disabled
+          selectedValue={''}
+          onValueChange={(): undefined => undefined}
+          options={options}
+        />
+      </Variants.Cell>
+      <Variants.Cell>
+        <RadioButton
+          className={cx.focus}
+          selectedValue={''}
+          onValueChange={(): undefined => undefined}
+          options={options}
+        />
+      </Variants.Cell>
+    </Variants.Row>
   );
 };
 

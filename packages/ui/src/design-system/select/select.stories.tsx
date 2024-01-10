@@ -27,42 +27,30 @@ export default {
 const MainComponents = (): JSX.Element => {
   const placeholder = 'Make a choice...';
   const options = [
-    {
-      label: 'Apple',
-      value: 'apple',
-    },
+    { label: 'Apple', value: 'apple' },
     { label: 'Banana', value: 'banana' },
     { label: 'Blueberry', value: 'blueberry' },
   ];
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedValue, setSelectedValue] = React.useState<
-    string | undefined
-  >();
-
   return (
-    <>
-      <Variants.Row>
-        <Variants.Cell>
-          <SelectGroup
-            selectedValue={selectedValue}
-            onValueChange={(): undefined => undefined}
-            options={options}
-            placeholder={placeholder}
-          />
-        </Variants.Cell>
+    <Variants.Row>
+      <Variants.Cell>
+        <SelectGroup
+          onValueChange={(): undefined => undefined}
+          options={options}
+          placeholder={placeholder}
+        />
+      </Variants.Cell>
 
-        <Variants.Cell>
-          <SelectGroup
-            disabled={true}
-            selectedValue={selectedValue}
-            onValueChange={(): undefined => undefined}
-            options={options}
-            placeholder={placeholder}
-          />
-        </Variants.Cell>
-      </Variants.Row>
-    </>
+      <Variants.Cell>
+        <SelectGroup
+          disabled={true}
+          onValueChange={(): undefined => undefined}
+          options={options}
+          placeholder={placeholder}
+        />
+      </Variants.Cell>
+    </Variants.Row>
   );
 };
 

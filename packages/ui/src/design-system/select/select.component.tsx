@@ -12,7 +12,7 @@ import * as cx from './select.css';
 
 export type Props = Readonly<{
   className?: string;
-  selectedValue: string | undefined;
+  selectedValue: string;
   placeholder: string;
   options: {
     value: string;

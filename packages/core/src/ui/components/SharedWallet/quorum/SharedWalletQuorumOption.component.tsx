@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-
 import React, { useState } from 'react';
 import styles from './SharedWalletQuorumOption.module.scss';
 import { Card, RadioButton, Flex, Button, SelectGroup, Text, Box } from '@lace/ui';
@@ -10,11 +9,9 @@ export interface WalletSetupQuorumOptionProps {
   cosignersSentence: Record<'start' | 'end', string>;
   title: string;
   description: string;
-  optionCoSigners: string;
   backButton: string;
   nextButton: string;
 
-  onClick?: () => void;
   onNext: () => void;
   onBack: () => void;
 }
@@ -49,7 +46,7 @@ export const SharedWalletQuorumOption = ({
   onNext
 }: WalletSetupQuorumOptionProps) => {
   const [value, setValue] = useState('');
-  const [selectedValue, setOnSelectValueChange] = useState<string | undefined>();
+  const [selectedValue, setSelectedValue] = useState<string | undefined>();
 
   const onChange = (eventValue: string) => {
     setValue(eventValue);
@@ -71,7 +68,7 @@ export const SharedWalletQuorumOption = ({
   ];
 
   const onSelectValueChange = (selectEventValue: string) => {
-    setOnSelectValueChange(selectEventValue);
+    setSelectedValue(selectEventValue);
   };
 
   return (
