@@ -130,22 +130,24 @@ export const TransactionDetails = ({
   const isSuccess = status === ActivityStatus.SUCCESS;
 
   // Translate certificate typenames
-  certificates?.forEach((certificate) => {
-    certificate?.forEach((detail) => {
-      if (detail.title === 'certificateType') {
-        detail.details = [t(`package.core.assetActivityItem.certificates.typenames.${detail.details[0]}`)];
-      }
-    });
-  });
+  const translatedCertificates = certificates?.map((certificate) =>
+    certificate?.map((detail) => ({
+      ...detail,
+      ...(detail.title === 'certificateType' && {
+        details: [t(`package.core.assetActivityItem.entry.certificates.typenames.${detail.details[0]}`)]
+      })
+    }))
+  );
 
   // Translate governance proposal typenames
-  proposalProcedures?.forEach((proposal) => {
-    proposal?.forEach((p) => {
-      if (p.title === 'type') {
-        p.details = [t(`package.core.activityDetails.governanceActions.${p.details[0]}`)];
-      }
-    });
-  });
+  const translatedProposalProcedures = proposalProcedures?.map((proposal) =>
+    proposal?.map((p) => ({
+      ...p,
+      ...(p.title === 'type' && {
+        details: [t(`package.core.activityDetails.governanceActions.${p.details[0]}`)]
+      })
+    }))
+  );
 
   const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
     <div className={styles.details}>
@@ -330,7 +332,7 @@ export const TransactionDetails = ({
           <TxDetailListProposals
             testId="proposal-procedures"
             title={t('package.core.activityDetails.proposalProcedures')}
-            lists={proposalProcedures}
+            lists={translatedProposalProcedures}
             withSeparatorLine
             translations={{
               type: t('package.core.activityDetails.proposalProcedureTitles.type'),
@@ -351,7 +353,7 @@ export const TransactionDetails = ({
           <TxDetailListCertificates
             title={t('package.core.activityDetails.certificates')}
             testId="certificates"
-            lists={certificates}
+            lists={translatedCertificates}
             withSeparatorLine
             translations={{
               certificateType: t('package.core.activityDetails.certificateTitles.certificateType'),

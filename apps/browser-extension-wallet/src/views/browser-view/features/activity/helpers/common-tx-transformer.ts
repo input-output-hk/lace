@@ -12,10 +12,12 @@ import {
   TxDetailsCertificateTitles,
   TxDetailsVotingProceduresTitles,
   TxDetailsProposalProceduresTitles,
-  ConwayEraCertificatesTypes
+  ConwayEraCertificatesTypes,
+  TxDetail
 } from '@lace/core';
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
+import isEmpty from 'lodash/isEmpty';
 
 const { util, VoterType, Vote, GovernanceActionType } = Wallet.Cardano;
 
@@ -231,7 +233,7 @@ const drepMapper = (drep: Wallet.Cardano.DelegateRepresentative) => {
   } else if (Wallet.Cardano.isDRepAlwaysNoConfidence(drep)) {
     return 'alwaysNoConfidence';
   }
-  return Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(drep.hash)));
+  return Wallet.Cardano.DRepID(drep.hash);
 };
 
 export const certificateTransformer = (
@@ -334,7 +336,7 @@ export const votingProceduresTransformer = (
         voterType === 'DRep'
           ? Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(procedure.voter.credential.hash)))
           : procedure.voter.credential.hash;
-      votingProcedureDetails.push([
+      const detail: TxDetails<TxDetailsVotingProceduresTitles> = [
         {
           title: 'voterType',
           details: [voterType]
@@ -346,7 +348,9 @@ export const votingProceduresTransformer = (
         { title: 'vote', details: [getVote(vote.votingProcedure.vote)] },
         { ...(!!vote.votingProcedure.anchor && { title: 'anchor', details: [vote.votingProcedure.anchor.url] }) },
         { title: 'proposalTxHash', details: [vote.actionId.id, vote.actionId.actionIndex.toString()] }
-      ]);
+      ];
+
+      votingProcedureDetails.push(detail.filter((el: TxDetail<TxDetailsVotingProceduresTitles>) => !isEmpty(el)));
     })
   );
 

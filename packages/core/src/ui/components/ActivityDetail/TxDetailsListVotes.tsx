@@ -1,4 +1,3 @@
-/* eslint-disable no-magic-numbers */
 import { Tooltip } from 'antd';
 import cn from 'classnames';
 import React, { useState } from 'react';

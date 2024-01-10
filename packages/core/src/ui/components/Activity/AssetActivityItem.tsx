@@ -10,14 +10,14 @@ import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
 import { useTranslate } from '@src/ui/hooks';
 import {
-  ActivityTypeIcon,
   DelegationTransactionType,
   TransactionActivityType,
   ConwayEraGovernanceActions,
   ConwayEraCertificatesTypes
-} from '../ActivityDetail';
-import type { ActivityType } from '../ActivityDetail';
+} from '../ActivityDetail/types';
+import type { ActivityType } from '../ActivityDetail/types';
 import styles from './AssetActivityItem.module.scss';
+import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
@@ -119,20 +119,24 @@ export const AssetActivityItem = ({
     [ConwayEraGovernanceActions.vote]: 'package.core.assetActivityItem.entry.name.vote',
     [ConwayEraGovernanceActions.submitProposal]: 'package.core.assetActivityItem.entry.name.submitProposal',
     [ConwayEraCertificatesTypes.RegisterDelegateRepresentative]:
-      'package.core.assetActivityItem.entry.name.drepRegistration',
+      'package.core.assetActivityItem.entry.name.RegisterDelegateRepresentativeCertificate',
     [ConwayEraCertificatesTypes.UnregisterDelegateRepresentative]:
-      'package.core.assetActivityItem.entry.name.drepRetirement',
-    [ConwayEraCertificatesTypes.UpdateDelegateRepresentative]: 'package.core.assetActivityItem.entry.name.drepUpdate',
-    [ConwayEraCertificatesTypes.StakeVoteDelegation]: 'package.core.assetActivityItem.entry.name.stakeVoteDelegation',
+      'package.core.assetActivityItem.entry.name.UnregisterDelegateRepresentativeCertificate',
+    [ConwayEraCertificatesTypes.UpdateDelegateRepresentative]:
+      'package.core.assetActivityItem.entry.name.UpdateDelegateRepresentativeCertificate',
+    [ConwayEraCertificatesTypes.StakeVoteDelegation]:
+      'package.core.assetActivityItem.entry.name.StakeVoteDelegationCertificate',
     [ConwayEraCertificatesTypes.StakeRegistrationDelegation]:
-      'package.core.assetActivityItem.entry.name.stakeRegistrationDelegation',
+      'package.core.assetActivityItem.entry.name.StakeRegistrationDelegateCertificate',
     [ConwayEraCertificatesTypes.StakeVoteRegistrationDelegation]:
-      'package.core.assetActivityItem.entry.name.stakeVoteRegistrationDelegation',
-    [ConwayEraCertificatesTypes.VoteDelegation]: 'package.core.assetActivityItem.entry.name.voteDelegation',
+      'package.core.assetActivityItem.entry.name.StakeVoteRegistrationDelegateCertificate',
+    [ConwayEraCertificatesTypes.VoteDelegation]: 'package.core.assetActivityItem.entry.name.VoteDelegationCertificate',
     [ConwayEraCertificatesTypes.VoteRegistrationDelegation]:
-      'package.core.assetActivityItem.entry.name.voteRegistrationDelegation',
-    [ConwayEraCertificatesTypes.ResignCommitteeCold]: 'package.core.assetActivityItem.entry.name.resignComitteeCold',
-    [ConwayEraCertificatesTypes.AuthorizeCommitteeHot]: 'package.core.assetActivityItem.entry.name.authCommitteeHot'
+      'package.core.assetActivityItem.entry.name.VoteRegistrationDelegateCertificate',
+    [ConwayEraCertificatesTypes.ResignCommitteeCold]:
+      'package.core.assetActivityItem.entry.name.ResignCommitteeColdCertificate',
+    [ConwayEraCertificatesTypes.AuthorizeCommitteeHot]:
+      'package.core.assetActivityItem.entry.name.AuthorizeCommitteeHotCertificate'
   };
 
   const ref = useRef<HTMLHeadingElement>(null);
