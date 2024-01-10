@@ -10538,6 +10538,7 @@ __metadata:
     "@babel/preset-env": ^7.22.20
     "@babel/preset-react": ^7.22.15
     "@babel/preset-typescript": ^7.22.15
+    "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/ui": ^0.1.0
     "@storybook/addon-actions": ^6.5.16
