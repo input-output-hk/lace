@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Button, Flex, sx, Text } from '@lace/ui';
+import { Button as ExistingButton } from '@lace/common';
 import styles from './SharedWalletGetStartedOption.module.scss';
 
 export interface WalletSetupOptionProps {
@@ -29,7 +30,15 @@ export const SharedWalletSetupOption = ({
     <Text.Body.Small weight="$semibold" className={styles.description} data-testid={`${testId}-description`}>
       {description}
     </Text.Body.Small>
-    <Box mt="$24">
+    <ExistingButton
+      data-testid={`${testId}-button`}
+      className={styles.button}
+      color="gradient-secondary"
+      onClick={onClick}
+    >
+      {button}
+    </ExistingButton>
+    <Box mt="$24" w="$fill">
       <Button.Primary data-testid={`${testId}-button`} onClick={onClick} label={button} w="$fill" />
     </Box>
   </Flex>
