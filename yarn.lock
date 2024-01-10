@@ -10687,6 +10687,7 @@ __metadata:
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
     "@lace/ui": ^0.1.0
+    "@types/react": 17.0.18
     antd: ^4.17.3
     bignumber.js: 9.0.1
     react: 17.0.2
