@@ -1,14 +1,20 @@
-import { style, vars } from '@lace/ui';
+import { globalStyle, style, vars } from '@lace/ui';
 import { theme } from 'features/theme';
 
 export const wrapper = style([
   {
     display: 'flex',
     flexDirection: 'column',
-    flexGrow: '1',
+    flexGrow: 1,
+    marginTop: '-3px',
+    paddingTop: '3px',
     width: '100%',
   },
 ]);
+
+globalStyle(`${wrapper} .ant-list-items`, {
+  paddingTop: '3px',
+});
 
 export const listItemWrapper = style([
   {

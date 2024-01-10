@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
 import { ListProps } from 'antd';
@@ -39,14 +40,14 @@ export const StakePoolTableBrowser = ({
   ...props
 }: StakePoolTableBrowserProps): React.ReactElement => {
   const { analytics } = useOutsideHandles();
-  const portfolioPools = useDelegationPortfolioStore((state) =>
-    state.selectedPortfolio.map(({ id }) => ({
+
+  const { portfolioMutators, portfolioPools } = useDelegationPortfolioStore((store) => ({
+    portfolioMutators: store.mutators,
+    portfolioPools: store.selectedPortfolio.map(({ id }) => ({
       // Had to cast it with fromKeyHash because search uses plain ID instead of hex.
       id: Wallet.Cardano.PoolId.fromKeyHash(id as unknown as Wallet.Crypto.Ed25519KeyHashHex),
-    }))
-  );
-  const portfolioMutators = useDelegationPortfolioStore((store) => store.mutators);
-
+    })),
+  }));
   const selectedStakePools = items
     .filter((item) => portfolioPools.find((pool) => pool.id.toString() === item.id))
     .map((pool) => ({
