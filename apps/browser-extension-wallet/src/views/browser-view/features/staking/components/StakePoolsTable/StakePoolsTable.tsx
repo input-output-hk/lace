@@ -150,7 +150,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
   );
 
   const onSortChange = (field: Columns) => {
-    // TODO: remove once updated on sdk side
+    // TODO: remove once updated on sdk side (LW-9530)
     if (!Object.keys(SortField).includes(field)) return;
     const order = field === sort?.field && sort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
 

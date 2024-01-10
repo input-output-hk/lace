@@ -24,6 +24,7 @@ const ConditionalTooltipWrapper = ({ message = '', children }: { message?: strin
   <>{!message ? children : <Tooltip label={message}>{children}</Tooltip>}</>
 );
 
+// TODO: migrate into the ui package (LW-9531)
 export const TableRow = function TableRow<E extends string>({
   columns,
   cellRenderers,
@@ -47,7 +48,7 @@ export const TableRow = function TableRow<E extends string>({
       {withSelection && (
         <div className={styles.cell} data-testid={`${dataTestId}-list-checkbox`}>
           <ConditionalTooltipWrapper message={(!selectable && selectionDisabledMessage) || ''}>
-            {/* TODO: replace with the one imported from ui toolkit */}
+            {/* TODO: replace with the one imported from ui toolkit (LW-9529) */}
             <span
               onClick={(event) => {
                 event.stopPropagation();
