@@ -329,7 +329,7 @@ When(/^I click Manage button$/, async () => {
   await MultidelegationPage.clickManageButton();
 });
 
-Then(/^I see Manage delegation page$/, async () => {
+Then(/^I see Manage delegation drawer$/, async () => {
   await ManageStakingDrawerAssert.assertSeeManageStakingDrawer(true);
 });
 
