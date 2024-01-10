@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { sx, Box, Cell, Grid, Flex, Text, Button, Checkbox } from '@lace/ui';
-
+import { Box, Cell, Grid, Flex, Text, Button, Checkbox } from '@lace/ui';
+import * as cx from './ImportantInfo.css';
 interface Props {
   onNext: () => void;
   onBack: () => void;
@@ -19,21 +19,10 @@ export const ImportantInfo = ({ translations, onBack, onNext }: Props): JSX.Elem
   return (
     <Flex h="$fill" flexDirection="column">
       <Box mb="$24">
-        <Text.Heading
-          className={sx({
-            color: '$text_primary'
-          })}
-        >
-          {translations.title}
-        </Text.Heading>
+        <Text.Heading className={cx.text}>{translations.title}</Text.Heading>
       </Box>
       <Box mb="$24">
-        <Text.Body.Normal
-          weight="$medium"
-          className={sx({
-            color: '$text_secondary'
-          })}
-        >
+        <Text.Body.Normal weight="$medium" className={cx.text}>
           {translations.subtitle}
         </Text.Body.Normal>
       </Box>
@@ -42,7 +31,9 @@ export const ImportantInfo = ({ translations, onBack, onNext }: Props): JSX.Elem
           <Flex>
             <Checkbox checked={checked} onClick={() => setChecked(!checked)} />
             <Box ml="$10" style={{ marginTop: -5 }}>
-              <Text.Body.Small weight="$medium">{translations.checkBoxLabel}</Text.Body.Small>
+              <Text.Body.Small className={cx.text} weight="$semibold">
+                {translations.checkBoxLabel}
+              </Text.Body.Small>
             </Box>
           </Flex>
         </Cell>
