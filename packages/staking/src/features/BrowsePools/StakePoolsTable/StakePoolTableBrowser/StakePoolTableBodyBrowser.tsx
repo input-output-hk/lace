@@ -4,7 +4,7 @@ import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PoolSkeleton } from '../PoolSkeleton/PoolSkeleton';
 import * as styles from './StakePoolTableBrowser.css';
-import { StakePoolTableItemBrowserProps } from './StakePoolTableItemBrowser';
+import { StakePoolTableItemBrowserProps } from './types';
 
 export type StakePoolTableBodyBrowserProps = {
   scrollableTargetId: string;

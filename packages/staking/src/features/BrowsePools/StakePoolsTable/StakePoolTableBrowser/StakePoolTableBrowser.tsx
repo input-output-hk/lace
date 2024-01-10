@@ -9,7 +9,8 @@ import { Columns, StakePoolSortOptions, TranslationsFor } from '../types';
 import { StakePoolTableBodyBrowser } from './StakePoolTableBodyBrowser';
 import * as styles from './StakePoolTableBrowser.css';
 import { StakePoolTableHeaderBrowser } from './StakePoolTableHeaderBrowser';
-import { StakePoolTableItemBrowser, StakePoolTableItemBrowserProps } from './StakePoolTableItemBrowser';
+import { StakePoolTableItemBrowser } from './StakePoolTableItemBrowser';
+import { StakePoolTableItemBrowserProps } from './types';
 
 export type StakePoolTableBrowserProps = {
   scrollableTargetId: string;

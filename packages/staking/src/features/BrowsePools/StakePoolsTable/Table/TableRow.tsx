@@ -3,7 +3,6 @@
 import { Tooltip } from '@lace/ui';
 import cn from 'classnames';
 import React from 'react';
-// import { config } from '../utils';
 import CheckboxChecked from './assets/checkbox-checked.component.svg';
 import Checkbox from './assets/checkbox.component.svg';
 import * as styles from './Table.css';

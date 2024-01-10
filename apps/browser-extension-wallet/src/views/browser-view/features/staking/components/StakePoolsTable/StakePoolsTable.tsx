@@ -6,9 +6,9 @@ import {
   SortDirection,
   SortField,
   TableRow,
+  TableHeader,
   StakePoolSortOptions,
   StakePoolTableBodyBrowser,
-  StakePoolTableHeaderBrowser,
   TranslationsFor,
   stakePooltableConfig
 } from '@lace/staking';
@@ -44,6 +44,8 @@ const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
 const searchDebounce = 300;
 const defaultFetchLimit = 10;
 
+const isSortingAvailable = (value: string) => Object.keys(SortField).includes(value);
+
 export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTableProps): React.ReactElement => {
   const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState<string>('');
@@ -68,13 +70,20 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
 
   const tableHeaderTranslations: TranslationsFor<Columns> = {
     ticker: t('cardano.stakePoolTableBrowser.tableHeader.ticker'),
-    apy: t('cardano.stakePoolTableBrowser.tableHeader.ros'),
+    apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.title'),
     cost: t('cardano.stakePoolTableBrowser.tableHeader.cost'),
-    saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation'),
-    margin: t('cardano.stakePoolTableBrowser.tableHeader.margin'),
-    blocks: t('cardano.stakePoolTableBrowser.tableHeader.blocks'),
-    pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge'),
+    saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.title'),
+    margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.title'),
+    blocks: t('cardano.stakePoolTableBrowser.tableHeader.blocks.title'),
+    pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge.title'),
     liveStake: t('cardano.stakePoolTableBrowser.tableHeader.liveStake')
+  };
+  const tableHeaderTooltipsTranslations: Partial<TranslationsFor<Columns>> = {
+    apy: t('cardano.stakePoolTableBrowser.tableHeader.ros.tooltip'),
+    saturation: t('cardano.stakePoolTableBrowser.tableHeader.saturation.tooltip'),
+    margin: t('cardano.stakePoolTableBrowser.tableHeader.margin.tooltip'),
+    blocks: t('cardano.stakePoolTableBrowser.tableHeader.blocks.tooltip'),
+    pledge: t('cardano.stakePoolTableBrowser.tableHeader.pledge.tooltip')
   };
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
@@ -140,14 +149,25 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
     [stakePools, cardanoCoin, analytics, setSelectedStakePool, setIsDrawerVisible, onStake]
   );
 
-  const onSortChange = ({ field, order }: StakePoolSortOptions) => {
+  const onSortChange = (field: Columns) => {
+    // TODO: remove once updated on sdk side
     if (!Object.keys(SortField).includes(field)) return;
-    setSort({ field, order });
+    const order = field === sort?.field && sort?.order === SortDirection.asc ? SortDirection.desc : SortDirection.asc;
+
+    setSort({ field: field as unknown as SortField, order });
   };
 
-  useEffect(() => {
-    onSortChange(sort);
-  }, [sort]);
+  const headers = stakePooltableConfig.columns.map((column) => {
+    const translationKey = `cardano.stakePoolTableBrowser.tableHeader.${column}.tooltip`;
+    const tooltipText = t(translationKey);
+    return {
+      label: tableHeaderTranslations[column],
+      ...(tableHeaderTooltipsTranslations[column] && { tooltipText }),
+      value: column
+    };
+  });
+
+  const isActiveSortItem = (value: string) => value === sort?.field;
 
   return (
     <div data-testid="stake-pool-table" className={styles.table}>
@@ -169,10 +189,13 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
       </div>
       <div style={{ marginTop: '16px' }}>
         <div className={styles.stakepoolTable} data-testid="stake-pool-list-container">
-          <StakePoolTableHeaderBrowser
-            activeSort={sort}
-            translations={tableHeaderTranslations}
-            setActiveSort={setSort}
+          <TableHeader
+            dataTestId="stake-pool"
+            headers={headers}
+            isActiveSortItem={isActiveSortItem}
+            isSortingAvailable={isSortingAvailable}
+            onSortChange={onSortChange}
+            order={sort?.order}
           />
         </div>
         <StakePoolTableBodyBrowser
@@ -185,8 +208,9 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           showSkeleton={isLoadingList && !isSearching}
           scrollableTargetId={scrollableTargetId}
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          ItemRenderer={({ stakePool, hexId, id, selectionDisabledMessage, ...data }) => (
+          ItemRenderer={({ stakePool, hexId, id, selectionDisabledMessage, onClick, ...data }) => (
             <TableRow<Columns>
+              onClick={onClick}
               columns={stakePooltableConfig.columns}
               cellRenderers={stakePooltableConfig.renderer}
               dataTestId="stake-pool"

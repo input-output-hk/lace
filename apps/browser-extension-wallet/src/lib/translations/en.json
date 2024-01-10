@@ -1059,12 +1059,27 @@
     "stakePoolTableBrowser": {
       "tableHeader": {
         "ticker": "Ticker",
-        "ros": "ROS",
         "cost": "Cost",
-        "saturation": "Saturation",
-        "margin": "Margin",
-        "blocks": "Blocks",
-        "pledge": "Pledge",
+        "ros": {
+          "title": "ROS",
+          "tooltip": "Estimated 'Return On Stake' based on previous pool performance"
+        },
+        "saturation": {
+          "title": "Saturation",
+          "tooltip": "Once a pool reaches the point of saturation, it will offer diminishing rewards"
+        },
+        "margin": {
+          "title": "Margin",
+          "tooltip": "The percentage of rewards taken by the stake pool operator after the fixed cost but before rewards are distributed"
+        },
+        "blocks": {
+          "title": "Blocks",
+          "tooltip": "Total blocks created by the pool."
+        },
+        "pledge": {
+          "title": "Pledge",
+          "tooltip": "An amount of self‐bonded assets intended to remain staked to the pool for as long as it operates"
+        },
         "liveStake": "Live Stake"
       }
     },

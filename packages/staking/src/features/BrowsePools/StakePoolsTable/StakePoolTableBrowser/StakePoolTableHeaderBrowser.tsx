@@ -52,7 +52,7 @@ export const StakePoolTableHeaderBrowser = ({
 
   return (
     <TableHeader
-      dataTestId="table"
+      dataTestId="stake-pool"
       headers={headers}
       isActiveSortItem={isActiveSortItem}
       isSortingAvailable={isSortingAvailable}

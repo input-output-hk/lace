@@ -1,4 +1,3 @@
-import { Wallet } from '@lace/cardano';
 import { PostHogAction } from '@lace/common';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,21 +6,7 @@ import { MAX_POOLS_COUNT, isPoolSelectedSelector, useDelegationPortfolioStore } 
 import { TableRow } from '../Table';
 import { Columns } from '../types';
 import { config } from '../utils';
-
-export type StakePoolTableItemBrowserProps = {
-  id: string;
-  hexId: Wallet.Cardano.PoolIdHex;
-  name?: string;
-  ticker?: string;
-  apy?: string;
-  saturation?: string;
-  cost?: string;
-  margin?: string;
-  blocks?: string;
-  pledge?: string;
-  selectionDisabledMessage?: string;
-  stakePool: Wallet.Cardano.StakePool;
-};
+import { StakePoolTableItemBrowserProps } from './types';
 
 export const StakePoolTableItemBrowser = ({
   stakePool,
