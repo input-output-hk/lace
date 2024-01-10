@@ -64,6 +64,14 @@ Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, a
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
+Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => {
+  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorAssert.assertSeeSignDataConfirmTransactionPage(
+    testDAppDetails,
+    String(getTestWallet('TestAutomationWallet').address)
+  );
+});
+
 Then(
   /^I see DApp connector "Confirm transaction" page with: "([^"]*)" and: "([^"]*)" assets$/,
   async (adaValue: string, assetValue: string) => {
@@ -192,10 +200,19 @@ Then(/^I de-authorize test DApp in (extended|popup) mode$/, async (mode: 'extend
   await DAppConnectorPageObject.deauthorizeDApp(DAppConnectorPageObject.TEST_DAPP_NAME, mode);
 });
 
-When(/^I click "Set Collateral" button in test DApp$/, async () => {
+When(/^I click "(Set Collateral|Sign data)" button in test DApp$/, async (button: 'Set Collateral' | 'Sign data') => {
   await DAppConnectorPageObject.switchToTestDAppWindow();
   await browser.pause(1000);
-  await TestDAppPage.setCollateralButton.click();
+  switch (button) {
+    case 'Set Collateral':
+      await TestDAppPage.setCollateralButton.click();
+      break;
+    case 'Sign data':
+      await TestDAppPage.signDataButton.click();
+      break;
+    default:
+      throw new Error(`Unsupported button: ${button}`);
+  }
 });
 
 Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runButton: 'Send ADA' | 'Send Token') => {

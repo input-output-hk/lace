@@ -11,6 +11,7 @@ export interface SendTransactionCostProps {
   fiatAmount: string;
   tooltipContent: React.ReactNode;
   onTooltipHover?: () => unknown;
+  testId?: string;
 }
 
 export const SendTransactionCost = ({
@@ -18,11 +19,14 @@ export const SendTransactionCost = ({
   adaAmount,
   fiatAmount,
   tooltipContent,
-  onTooltipHover
+  onTooltipHover,
+  testId
 }: SendTransactionCostProps): React.ReactElement => (
   <div className={styles.transactionCost}>
     <div className={styles.labelContainer}>
-      <Text className={styles.label}>{label} </Text>
+      <Text className={styles.label} data-testid={`${testId}-label`}>
+        {label}{' '}
+      </Text>
       <div>
         <Tooltip
           title={tooltipContent}
@@ -36,10 +40,10 @@ export const SendTransactionCost = ({
     </div>
 
     <div className={styles.descriptionContainer}>
-      <Text data-testid="send-transaction-costs-ada" className={styles.ada}>
+      <Text data-testid={`${testId}-value-ada`} className={styles.ada}>
         {adaAmount}
       </Text>
-      <Text data-testid="send-transaction-costs-fiat" className={styles.fiat}>
+      <Text data-testid={`${testId}-value-fiat`} className={styles.fiat}>
         {fiatAmount}
       </Text>
     </div>

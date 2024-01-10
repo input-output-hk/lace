@@ -1,14 +1,13 @@
 import { WalletSetupMnemonicIntroStep } from '@lace/core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router';
 interface Props {
   onVideoClick: () => void;
   onNext: () => void;
+  onBack: () => void;
 }
 
-export const KeepWalletSecure = ({ onNext, onVideoClick }: Props): JSX.Element => {
-  const history = useHistory();
+export const KeepWalletSecure = ({ onBack, onNext, onVideoClick }: Props): JSX.Element => {
   const { t } = useTranslation();
 
   const walletSetupMnemonicIntroStepTranslations = {
@@ -19,7 +18,7 @@ export const KeepWalletSecure = ({ onNext, onVideoClick }: Props): JSX.Element =
 
   return (
     <WalletSetupMnemonicIntroStep
-      onBack={() => history.goBack()}
+      onBack={onBack}
       onNext={onNext}
       translations={walletSetupMnemonicIntroStepTranslations}
       onClickVideo={onVideoClick}

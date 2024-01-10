@@ -12,13 +12,13 @@ import CommonDrawerElements from '../CommonDrawerElements';
 class MultidelegationPage {
   private OVERVIEW_TAB = '[data-testid="overview-tab"]';
   private BROWSE_POOLS_TAB = '[data-testid="browse-tab"]';
-  private DELEGATIONCARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
-  private DELEGATIONCARD_STATUS_VALUE = '[data-testid="overview.delegationCard.label.status-value"]';
-  private DELEGATIONCARD_BALANCE_LABEL = '[data-testid="overview.delegationCard.label.balance-label"]';
-  private DELEGATIONCARD_BALANCE_VALUE = '[data-testid="overview.delegationCard.label.balance-value"]';
-  private DELEGATIONCARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
-  private DELEGATIONCARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
-  private DELEGATIONCARD_CHART_PIE_SLICE = '.recharts-pie-sector';
+  private DELEGATION_CARD_STATUS_LABEL = '[data-testid="overview.delegationCard.label.status-label"]';
+  private DELEGATION_CARD_STATUS_VALUE = '[data-testid="overview.delegationCard.label.status-value"]';
+  private DELEGATION_CARD_BALANCE_LABEL = '[data-testid="overview.delegationCard.label.balance-label"]';
+  private DELEGATION_CARD_BALANCE_VALUE = '[data-testid="overview.delegationCard.label.balance-value"]';
+  private DELEGATION_CARD_POOLS_LABEL = '[data-testid="overview.delegationCard.label.pools-label"]';
+  private DELEGATION_CARD_POOLS_VALUE = '[data-testid="overview.delegationCard.label.pools-value"]';
+  private DELEGATION_CARD_CHART_PIE_SLICE = '.recharts-pie-sector';
   private SEARCH_INPUT = 'input[data-testid="search-input"]';
   private SEARCH_ICON = '[data-testid="search-icon"]';
   private SEARCH_LOADER = '[data-testid="search-loader"]';
@@ -67,31 +67,31 @@ class MultidelegationPage {
   }
 
   get delegationCardStatusLabel() {
-    return $(this.DELEGATIONCARD_STATUS_LABEL);
+    return $(this.DELEGATION_CARD_STATUS_LABEL);
   }
 
   get delegationCardStatusValue() {
-    return $(this.DELEGATIONCARD_STATUS_VALUE);
+    return $(this.DELEGATION_CARD_STATUS_VALUE);
   }
 
   get delegationCardBalanceLabel() {
-    return $(this.DELEGATIONCARD_BALANCE_LABEL);
+    return $(this.DELEGATION_CARD_BALANCE_LABEL);
   }
 
   get delegationCardBalanceValue() {
-    return $(this.DELEGATIONCARD_BALANCE_VALUE);
+    return $(this.DELEGATION_CARD_BALANCE_VALUE);
   }
 
   get delegationCardPoolsLabel() {
-    return $(this.DELEGATIONCARD_POOLS_LABEL);
+    return $(this.DELEGATION_CARD_POOLS_LABEL);
   }
 
   get delegationCardPoolsValue() {
-    return $(this.DELEGATIONCARD_POOLS_VALUE);
+    return $(this.DELEGATION_CARD_POOLS_VALUE);
   }
 
   get delegationCardChartSlices() {
-    return $$(this.DELEGATIONCARD_CHART_PIE_SLICE);
+    return $$(this.DELEGATION_CARD_CHART_PIE_SLICE);
   }
 
   get delegatedPoolItems() {

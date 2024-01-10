@@ -1,27 +1,26 @@
-/* eslint-disable no-unused-vars */
 import { When, Then } from '@cucumber/cucumber';
-import transactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import drawerSendExtendedAssert from '../assert/drawerSendExtendedAssert';
 import TransactionsDetailsAssert from '../assert/transactionDetailsAssert';
+import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 
 When(/I do not enter metadata/, async () => {
   // DO NOTHING
 });
 
 When(/I enter minimum metadata/, async () => {
-  await transactionExtendedPageObject.fillMetadata(1);
+  await TransactionNewPage.fillMetadata(1);
 });
 
 When(/I enter more than maximum metadata allowed/, async () => {
-  await transactionExtendedPageObject.fillMetadata(161);
+  await TransactionNewPage.fillMetadata(161);
 });
 
 When(/I enter maximum metadata allowed/, async () => {
-  await transactionExtendedPageObject.fillMetadata(160);
+  await TransactionNewPage.fillMetadata(160);
 });
 
 When(/^I save the metadata value$/, async () => {
-  await transactionExtendedPageObject.saveMetadata();
+  await TransactionNewPage.saveMetadata();
 });
 
 Then(/^Metadata counter (is|is not) displayed$/, async (shouldSee: string) => {

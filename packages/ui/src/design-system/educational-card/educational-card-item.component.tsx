@@ -21,7 +21,7 @@ export const Item = ({
   icon,
   ...props
 }: Readonly<Props>): JSX.Element => (
-  <Flex {...props} className={cx.root} p="$16">
+  <Flex {...props} className={cx.root} p="$16" alignItems="center">
     <Flex
       className={cx.iconBox}
       mr="$24"

@@ -30,3 +30,4 @@ export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
 export * as EducationalCard from './educational-card';
 export { FileUpload } from './file-upload';
+export * as Dialog from './dialog';

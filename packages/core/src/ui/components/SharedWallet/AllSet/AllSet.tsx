@@ -1,6 +1,7 @@
 import React from 'react';
 import { sx, Box, Flex, Text, Button, EducationalCard } from '@lace/ui';
 import { ReactComponent as BookGradient } from '@lace/ui/dist/assets/icons/book-gradient.component.svg';
+import { ReactComponent as LightBulbGradient } from '@lace/ui/dist/assets/icons/light-bulb-gradient.component.svg';
 
 type Educational = {
   title: string;
@@ -40,7 +41,7 @@ export const AllSet = ({ translations }: Props): JSX.Element => (
         {translations.subtitle}
       </Text.Body.Normal>
     </Box>
-    <Box h="$fill">
+    <Box h="$fill" w="$fill">
       <EducationalCard.Item
         label={translations.educational.multiSig.subtitle}
         title={translations.educational.multiSig.title}
@@ -54,7 +55,7 @@ export const AllSet = ({ translations }: Props): JSX.Element => (
       <EducationalCard.Item
         label={translations.educational.tips.subtitle}
         title={translations.educational.tips.title}
-        icon={<BookGradient />}
+        icon={<LightBulbGradient />}
       />
     </Box>
     <Flex w="$fill" justifyContent="flex-end" alignItems="center">

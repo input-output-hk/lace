@@ -21,8 +21,7 @@ Feature: Collateral - popup view
     When I click "Reclaim collateral" button on collateral drawer
     Then I see collateral as: "Inactive" in settings
 
-  @LW-5528 @Pending
-  # Bug LW-8530
+  @LW-5528
   Scenario: Popup View - Settings -  Collateral - state of collateral is separated and saved during network switching
     And I am on Settings popup page
     When I click on "Collateral" setting

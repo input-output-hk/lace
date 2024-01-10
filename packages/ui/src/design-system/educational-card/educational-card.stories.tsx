@@ -27,7 +27,7 @@ export const Overview = (): JSX.Element => (
         <ColorSchemaTable headers={['Default']}>
           <Variants.Row>
             <Variants.Cell>
-              <Box w="$342">
+              <Box w="$380">
                 <Root title="Main title">
                   <Item
                     label="Label"

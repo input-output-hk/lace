@@ -37,6 +37,9 @@ class AddressBookPageAssert {
   };
 
   assertSeeAddressOnTheList = async (name: string, address: string, shouldSee: boolean, mode: 'extended' | 'popup') => {
+    if (name.length > 16) {
+      name = `${name.slice(0, 12)}...`;
+    }
     const addressRow = await AddressBookPage.getAddressRowByName(name);
     if (shouldSee) {
       await addressRow.waitForDisplayed();

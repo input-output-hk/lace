@@ -7,7 +7,7 @@ import { Asset } from '../data/Asset';
 import transactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import extensionUtils from '../utils/utils';
 import { shelley, byron } from '../data/AddressData';
-import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
+import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import simpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 
 Then(/^I see (\d) bundle rows$/, async (expectedNumberOfBundles: number) => {
@@ -21,7 +21,7 @@ When(/^I remove bundle (\d)$/, async (index: number) => {
 When(/^I set multiple outputs for advanced transaction$/, async () => {
   await transactionExtendedPageObject.fillAddress(shelley.getAddress(), 1);
   await transactionExtendedPageObject.fillTokenValue(1, Asset.CARDANO.name);
-  await new TransactionNewPage().addBundleButton.click();
+  await TransactionNewPage.addBundleButton.click();
   await transactionExtendedPageObject.fillAddress(shelley.getAddress(), 2);
   await transactionExtendedPageObject.fillTokenValue(2, Asset.CARDANO.name, 2);
 });
@@ -29,7 +29,7 @@ When(/^I set multiple outputs for advanced transaction$/, async () => {
 When(/^I set multiple outputs for advanced transaction with less than minimum value for Byron address$/, async () => {
   await transactionExtendedPageObject.fillAddress(byron.getAddress(), 1);
   await transactionExtendedPageObject.fillTokenValue(1, Asset.CARDANO.ticker);
-  await new TransactionNewPage().addBundleButton.click();
+  await TransactionNewPage.addBundleButton.click();
   await transactionExtendedPageObject.fillAddress(byron.getAddress(), 2);
   await transactionExtendedPageObject.fillTokenValue(2, Asset.CARDANO.ticker, 2);
 });

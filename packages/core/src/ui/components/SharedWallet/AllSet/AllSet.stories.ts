@@ -20,16 +20,16 @@ const data: ComponentProps<typeof AllSet> = {
     title: "Hooray! You're All Set",
     educational: {
       advancedFeatures: {
-        title: 'Advanced Features of Your Shared Wallet',
+        title: 'Advanced Features of Your\nShared Wallet',
         subtitle: 'Learn'
       },
       multiSig: {
-        title: 'The Basics of Multi-Sig Wallets',
+        title: 'The Basics of Multi-Sig\nWallets',
         subtitle: 'Learn'
       },
       tips: {
         subtitle: 'Tips',
-        title: 'Tips for Smart Wallet Management'
+        title: 'Tips for Smart Wallet\nManagement'
       }
     },
     goToSharedWallet: 'Go to my shared wallet'
