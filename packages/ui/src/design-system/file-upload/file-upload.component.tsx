@@ -2,7 +2,7 @@ import React from 'react';
 
 import cn from 'classnames';
 
-import { ReactComponent as CheckIcon } from '../../assets/icons/check.component.svg';
+import { ReactComponent as CheckFileUploadIcon } from '../../assets/icons/check-file-upload.component.svg';
 import { ReactComponent as UploadIcon } from '../../assets/icons/upload-gradient.component.svg';
 import { Box } from '../box';
 import { Divider } from '../divider';
@@ -71,7 +71,7 @@ export const FileUpload = ({
                   {file}
                 </Text.Body.Small>
                 <Box className={cx.checkIconBox} ml="$8">
-                  <CheckIcon />
+                  <CheckFileUploadIcon />
                 </Box>
               </Flex>
               <button
