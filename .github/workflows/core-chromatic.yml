@@ -37,6 +37,9 @@ jobs:
       - name: 💽 Install dependencies
         run: yarn --immutable --inline-builds
 
+      - name: 🧑‍🔬 Build
+        run: yarn browser build-dep
+
       - name: 🧑‍🔬 Linter
         working-directory: ./packages/core
         run: yarn lint
