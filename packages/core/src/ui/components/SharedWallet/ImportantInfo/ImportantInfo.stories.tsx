@@ -5,7 +5,7 @@ import { ImportantInfo } from './ImportantInfo';
 import { Flex } from '@lace/ui';
 
 const meta: Meta<typeof ImportantInfo> = {
-  title: 'ImportantInfo',
+  title: 'Shared Wallets/ImportantInfo',
   component: ImportantInfo,
   parameters: {
     layout: 'centered'
