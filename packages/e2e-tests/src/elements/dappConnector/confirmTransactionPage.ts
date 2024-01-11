@@ -13,7 +13,10 @@ class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_AMOUNT_FEE_VALUE_FIAT = '[data-testid="tx-fee-fiat"]';
   private TRANSACTION_AMOUNT_ASSET = '[data-testid="dapp-transaction-asset"]';
   private TRANSACTION_RECIPIENT_TITLE = '[data-testid="dapp-transaction-recipient-title"]';
+  private TRANSACTION_RECIPIENT_ADDRESS_TITLE = '[data-testid="dapp-transaction-recipient-address-title"]';
   private TRANSACTION_RECIPIENT_ADDRESS = '[data-testid="dapp-transaction-recipient-address"]';
+  private TRANSACTION_DATA_TITLE = '[data-testid="dapp-transaction-data-title"]';
+  private TRANSACTION_DATA = '[data-testid="dapp-transaction-data"]';
   private CONFIRM_BUTTON = '[data-testid="dapp-transaction-confirm"]';
   private CANCEL_BUTTON = '[data-testid="dapp-transaction-cancel"]';
 
@@ -56,14 +59,25 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     return $(this.TRANSACTION_RECIPIENT_TITLE);
   }
 
+  get transactionRecipientAddressTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_RECIPIENT_ADDRESS_TITLE);
+  }
+
   get transactionRecipientAddress(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_RECIPIENT_ADDRESS);
+  }
+
+  get transactionDataTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DATA_TITLE);
+  }
+
+  get transactionData(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_DATA);
   }
 
   get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONFIRM_BUTTON);
   }
-
   get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CANCEL_BUTTON);
   }

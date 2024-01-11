@@ -32,7 +32,6 @@ import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject
 import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
-import webTester from '../actor/webTester';
 import MainLoader from '../elements/MainLoader';
 import CommonAssert from '../assert/commonAssert';
 import { shuffle } from '../utils/arrayUtils';
@@ -40,6 +39,7 @@ import OnboardingConnectHardwareWalletPage from '../elements/onboarding/connectH
 import SelectAccountPage from '../elements/onboarding/selectAccountPage';
 import { browser } from '@wdio/globals';
 import type { RecoveryPhrase } from '../types/onboarding';
+import { generateRandomString } from '../utils/textUtils';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -136,7 +136,7 @@ When(/^I enter wallet name: "([^"]*)"$/, async (walletName: string) => {
 });
 
 When(/^I enter wallet name with size of: ([^"]*) characters$/, async (numberOfCharacters: number) => {
-  const walletName = await webTester.generateRandomString(numberOfCharacters);
+  const walletName = await generateRandomString(numberOfCharacters);
   await OnboardingPageObject.fillWalletNameInput(walletName);
 });
 

@@ -29,3 +29,4 @@ export { TextLink } from './text-link';
 export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
 export { Checkbox } from './checkbox';
+export * as Dialog from './dialog';

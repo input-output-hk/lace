@@ -5,9 +5,10 @@ module.exports = {
   extends: ['prettier'],
   overrides: [
     {
-      files: ['src/**/*.d.ts', 'tsup.config.ts', 'vitest.config.ts', '.ladle/*.*', '*.stories.{ts,tsx}'],
+      files: ['src/**/*.d.ts', 'tsup.config.ts', 'vitest.config.ts', '*.stories.{ts,tsx}'],
       rules: {
         'import/no-default-export': 'off',
+        'react/no-multi-comp': 0,
       },
     },
   ],

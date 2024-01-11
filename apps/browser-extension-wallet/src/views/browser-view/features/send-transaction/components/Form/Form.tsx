@@ -148,11 +148,14 @@ export const Form = ({
 
       <div className={styles.costsContainer}>
         <div className={styles.titleContainer}>
-          <h1 className={styles.title}>{t('browserView.transaction.send.transactionCosts')}</h1>
+          <h1 className={styles.title} data-testid="transaction-costs-section-label">
+            {t('browserView.transaction.send.transactionCosts')}
+          </h1>
         </div>
 
         <SendTransactionCost
           label={t('browserView.transaction.send.transactionFee')}
+          testId="transaction-fee"
           adaAmount={totalCost.ada}
           fiatAmount={totalCost.fiat}
           tooltipContent={t('send.theAmountYoullBeChargedToProcessYourTransaction')}
@@ -168,6 +171,7 @@ export const Form = ({
         {hasMissingCoins && (
           <SendTransactionCost
             label={t('browserView.transaction.send.adaAllocation')}
+            testId="ada-allocation"
             tooltipContent={t('send.toSendAnNFTOrNativeToken')}
             {...formatAdaAllocation({
               missingCoins: totalMinimumCoins?.coinMissing,
