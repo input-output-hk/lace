@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import * as RadixCheckbox from '@radix-ui/react-checkbox';
 import cn from 'classnames';
 
-import { ReactComponent as CheckIcon } from '../../assets/icons/check.component.svg';
+import { ReactComponent as CheckIcon } from '../../assets/icons/check-box.component.svg';
 import { Box } from '../box';
 
 import * as cx from './checkbox.css';
