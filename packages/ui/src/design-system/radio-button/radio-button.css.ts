@@ -1,53 +1,65 @@
 import { style, sx, vars } from '../../design-tokens';
 
-export const radioGroupRoot = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '10px',
-  fontFamily: vars.fontFamily.$nova,
-  fontWeight: vars.fontWeights.$semibold,
-  margin: 0,
-});
-
-export const radioGroupItem = style({
-  width: '25px',
-  height: '25px',
-  borderRadius: '100%',
-  padding: 0,
-  background: vars.colors.$radiobutton_indicator_check_color,
-
-  ':focus': {
-    backgroundColor: vars.colors.$radiobutton_focus_color,
+export const radioGroupRoot = style([
+  sx({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '$10',
+    margin: '$0',
+  }),
+  {
+    fontFamily: vars.fontFamily.$nova,
+    fontWeight: vars.fontWeights.$semibold,
   },
+]);
 
-  ':hover': {
-    border: `1px solid ${vars.colors.$radiobutton_hover_color}`,
+export const radioGroupItem = style([
+  sx({
+    width: '$24',
+    height: '$24',
+    padding: '$0',
+    borderRadius: '$circle',
+  }),
+  {
+    background: vars.colors.$radiobutton_indicator_check_color,
+
+    ':focus': {
+      backgroundColor: vars.colors.$radiobutton_focus_color,
+    },
+
+    ':hover': {
+      border: `1px solid ${vars.colors.$radiobutton_hover_color}`,
+    },
+
+    ':disabled': {
+      cursor: 'not-allowed',
+    },
   },
+]);
 
-  ':disabled': {
-    cursor: 'not-allowed',
+export const radioGroupIndicator = style([
+  sx({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '$circle',
+  }),
+  {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+    backgroundColor: vars.colors.$radiobutton_indicator_backgroundColor,
+
+    '::after': {
+      content: '',
+      display: 'block',
+      width: '11px',
+      height: '11px',
+      borderRadius: '50%',
+      backgroundColor: vars.colors.$radiobutton_indicator_check_color,
+    },
   },
-});
-
-export const radioGroupIndicator = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
-  height: '100%',
-  position: 'relative',
-  borderRadius: '100%',
-  backgroundColor: vars.colors.$radiobutton_indicator_backgroundColor,
-
-  '::after': {
-    content: '',
-    display: 'block',
-    width: '11px',
-    height: '11px',
-    borderRadius: '50%',
-    backgroundColor: vars.colors.$radiobutton_indicator_check_color,
-  },
-});
+]);
 
 export const unchecked = style({
   border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
