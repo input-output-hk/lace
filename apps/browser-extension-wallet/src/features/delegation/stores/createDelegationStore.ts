@@ -48,7 +48,6 @@ DelegationStore): stakePoolDetailsSelectorProps => {
         ...ext?.pool.contact
       },
       blocks: blocksCreated || '-',
-      costsPerEpoch: 'costsPerEpoch',
       pledge: Wallet.util.lovelacesToAdaString(pledge.toString())
     };
   }

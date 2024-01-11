@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Ellipsis, PostHogAction } from '@lace/common';
+import { Ellipsis, PostHogAction, getNumberWithUnit } from '@lace/common';
 import { Button, Flex } from '@lace/ui';
 import cn from 'classnames';
 import { TFunction } from 'i18next';
@@ -42,7 +42,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       status,
       contact,
       blocks,
-      costsPerEpoch,
+      fee,
       pledge,
       margin,
     },
@@ -81,15 +81,15 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     retiring: t('drawer.details.status.retiring'),
     saturated: t('drawer.details.status.saturated'),
   };
-
+  const formattedPledge = getNumberWithUnit(pledge);
   const metricsData = [
     { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
     { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
     { t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' },
     { t: metricsTranslations.activeStake, testId: 'active-stake', unit: stake.unit, value: stake.number },
     { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
-    { t: metricsTranslations.cost, testId: 'cost', unit: '%', value: costsPerEpoch },
-    { t: metricsTranslations.pledge, testId: 'pledge', unit: cardanoCoinSymbol, value: pledge },
+    { t: metricsTranslations.cost, testId: 'cost', unit: cardanoCoinSymbol, value: fee },
+    { t: metricsTranslations.pledge, testId: 'pledge', unit: formattedPledge.unit, value: formattedPledge.number },
     { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin },
   ];
 

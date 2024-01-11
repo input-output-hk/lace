@@ -22,7 +22,6 @@ export const mapStakePoolToDisplayData = ({
       ...stakePool.metadata?.ext?.pool.contact,
     },
     cost: `${margin || '-'}% + ${fee}${cardanoCoinSymbol}`,
-    costsPerEpoch: 'costsPerEpoch',
     delegators: stakePool.metrics?.delegators || '-',
     description: stakePool.metadata?.description || '-',
     fee,

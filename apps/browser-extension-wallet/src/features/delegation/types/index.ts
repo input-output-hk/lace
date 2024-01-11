@@ -47,6 +47,5 @@ export type stakePoolDetailsSelectorProps = {
   fee: number | string;
   contact: Wallet.Cardano.PoolContactData;
   blocks: number | string;
-  costsPerEpoch: string;
   pledge: string;
 };
