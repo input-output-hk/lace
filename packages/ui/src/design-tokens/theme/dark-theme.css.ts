@@ -309,6 +309,22 @@ const colors: Colors = {
   $data_pink: darkColorScheme.$secondary_data_pink,
   $data_yellow: darkColorScheme.$secondary_lace_yellow,
 
+  $educational_card_root_container_bgColor: darkColorScheme.$primary_mid_black,
+  $educational_card_root_container_borderColor: colorTransparent,
+
+  $educational_card_item_container_bgColor: colorTransparent,
+  $educational_card_item_container_bgColor_hover:
+    darkColorScheme.$primary_mid_grey,
+  $educational_card_item_container_bgColor_pressed:
+    darkColorScheme.$primary_dark_grey,
+  $educational_card_item_container_outlineColor:
+    darkColorScheme.$primary_accent_purple_0_3,
+  $educational_card_item_label_color: darkColorScheme.$primary_light_grey,
+  $educational_card_item_title_color: darkColorScheme.$primary_white,
+  $educational_card_item_icon_container_bgColor:
+    darkColorScheme.$primary_dark_grey_plus,
+  $educational_card_item_icon_container_borderColor: colorTransparent,
+
   $checkbox_check_color: darkColorScheme.$primary_black,
   $checkbox_checked_backgroundColor: darkColorScheme.$primary_accent_purple,
   $checkbox_unchecked_backgroundColor: colorTransparent,
