@@ -1,4 +1,4 @@
-import { formatPercentages, getRandomIcon } from '@lace/common';
+import { formatPercentages, getRandomIcon, getNumberWithUnit } from '@lace/common';
 import { Cardano } from '@cardano-sdk/core';
 import { CoinId } from '@src/wallet';
 import { lovelacesToAdaString } from './unit-converters';
@@ -25,15 +25,13 @@ export interface StakePool {
 type StakePoolTransformerProp = {
   stakePool: Cardano.StakePool;
   delegatingPoolId?: string;
-  cardanoCoin: CoinId;
+  cardanoCoin?: CoinId;
 };
 
-export const stakePoolTransformer = ({
-  stakePool,
-  delegatingPoolId,
-  cardanoCoin
-}: StakePoolTransformerProp): StakePool => {
+export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolTransformerProp): StakePool => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
+  const formattedPledge = pledge && getNumberWithUnit(lovelacesToAdaString(pledge.toString()));
+  const formattedCost = cost && getNumberWithUnit(lovelacesToAdaString(cost.toString()));
 
   return {
     id: id.toString(),
@@ -47,7 +45,7 @@ export const stakePoolTransformer = ({
     description: metadata?.description,
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
     ...(cost && {
-      cost: `${cardanoCoin.symbol} ${lovelacesToAdaString(cost.toString())}`
+      cost: `${formattedCost.number}${formattedCost.unit}`
     }),
     ...(metrics && {
       ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
@@ -56,7 +54,7 @@ export const stakePoolTransformer = ({
       liveStake: formatPercentages(metrics.size.live)
     }),
     ...(pledge && {
-      pledge: `${cardanoCoin.symbol} ${lovelacesToAdaString(pledge.toString())}`
+      pledge: `${formattedPledge.number}${formattedPledge.unit}`
     }),
     ...(delegatingPoolId && { isStakingPool: delegatingPoolId === id.toString() })
   };
