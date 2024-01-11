@@ -6,16 +6,14 @@ import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
 import { logger, observableWallet, signerManager, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
-import { deleteFromLocalStorage, clearLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
+import { deleteFromLocalStorage, clearLocalStorage } from '@src/utils/local-storage';
 import { config } from '@src/config';
-import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/matomo/config';
 import { ILocalStorage } from '@src/types';
 import { firstValueFrom } from 'rxjs';
 import { AddWalletProps, WalletType } from '@cardano-sdk/web-extension';
 import { HexBlob } from '@cardano-sdk/util';
-import { BackgroundService } from '@lib/scripts/types';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const LOCK_VALUE = JSON.stringify({ lock: 'lock' });
@@ -61,38 +59,6 @@ const chainIdFromName = (chainName: Wallet.ChainName) => {
   const chainId = Wallet.Cardano.ChainIds[chainName];
   if (!chainId || !AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
   return chainId;
-};
-
-const keyAgentDataToAddWalletProps = async (
-  data: Wallet.KeyManagement.SerializableKeyAgentData,
-  backgroundService: BackgroundService
-): Promise<AddWalletProps<Wallet.Metadata>> => {
-  switch (data.__typename) {
-    case Wallet.KeyManagement.KeyAgentType.InMemory: {
-      const { mnemonic } = await backgroundService.getBackgroundStorage();
-      if (!mnemonic) throw new Error('Inconsistent state: mnemonic not found for in-memory wallet');
-      return {
-        type: WalletType.InMemory,
-        extendedAccountPublicKey: data.extendedAccountPublicKey,
-        encryptedSecrets: {
-          rootPrivateKeyBytes: HexBlob.fromBytes(Buffer.from(data.encryptedRootPrivateKeyBytes)),
-          keyMaterial: HexBlob.fromBytes(Buffer.from(JSON.parse(mnemonic).data))
-        }
-      };
-    }
-    case Wallet.KeyManagement.KeyAgentType.Ledger:
-      return {
-        type: WalletType.Ledger,
-        extendedAccountPublicKey: data.extendedAccountPublicKey
-      };
-    case Wallet.KeyManagement.KeyAgentType.Trezor:
-      return {
-        type: WalletType.Trezor,
-        extendedAccountPublicKey: data.extendedAccountPublicKey
-      };
-    default:
-      throw new Error('Unknown key agent type');
-  }
 };
 
 const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
@@ -308,46 +274,7 @@ export const useWalletManager = (): UseWalletManager => {
    */
   // eslint-disable-next-line max-statements
   const loadWallet = useCallback(async (): Promise<Wallet.CardanoWallet | undefined> => {
-    let wallets = await firstValueFrom(walletRepository.wallets$);
-
-    // Migration from stored serializable key agent data
-    // REVIEW: should this be in /migrations or maybe useAppInit?
-    // TODO: this is untested. Test plan:
-    // - clone lace master, build extension, create wallet using same extension key
-    // - build this branch, copy over dist/ to installed extension directory
-    // - reload the extension and check if Lace still works and preserves the original wallet data
-    //   - it should load fairly fast, because it is supposed to be using the same pouchdb stores
-    // This should be tested with a ledger wallet and in-memory wallet
-    if (wallets.length === 0) {
-      const walletName = getWalletFromStorage()?.name;
-      const keyAgentData = getValueFromLocalStorage('keyAgentData');
-      const lock = getValueFromLocalStorage('lock');
-      // Wallet info for current network
-      if (!keyAgentData || !walletName) {
-        // eslint-disable-next-line unicorn/no-null
-        setCardanoWallet(null);
-        return;
-      }
-      const walletId = await walletRepository.addWallet(
-        await keyAgentDataToAddWalletProps(keyAgentData, backgroundService)
-      );
-
-      const lockValue =
-        keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory ? HexBlob.fromBytes(lock) : undefined;
-
-      await walletRepository.addAccount({
-        accountIndex: keyAgentData.accountIndex,
-        metadata: { name: walletName, lockValue },
-        walletId
-      });
-      await walletManager.activate({
-        chainId: keyAgentData.chainId,
-        walletId,
-        accountIndex: keyAgentData.accountIndex,
-        provider
-      });
-      wallets = await firstValueFrom(walletRepository.wallets$);
-    }
+    const wallets = await firstValueFrom(walletRepository.wallets$);
 
     let activeWalletId = await firstValueFrom(walletManager.activeWalletId$);
 

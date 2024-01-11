@@ -43,7 +43,7 @@ export type Migration = {
   downgrade?: (password?: string) => MigrationPersistance | Promise<MigrationPersistance>;
 };
 
-const migrations: Migration[] = [versions.v_1_0_0];
+const migrations: Migration[] = [versions.v_1_0_0, versions.v_1_8_2];
 
 /**
  * Applies all migrations in order between the two version provided
