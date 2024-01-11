@@ -53,7 +53,6 @@ const MainComponents = (): JSX.Element => {
             options={emptyOption}
           />
         </Variants.Cell>
-        {/* Disabled */}
         <Variants.Cell>
           <RadioButton
             disabled
@@ -62,7 +61,6 @@ const MainComponents = (): JSX.Element => {
             options={emptyOption}
           />
         </Variants.Cell>
-        {/* Focused */}
         <Variants.Cell>
           <RadioButton
             className={cx.focus}
