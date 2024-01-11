@@ -79,8 +79,8 @@ export const Overview = (): JSX.Element => (
               </Variants.Cell>
               <Variants.Cell>
                 <WalletOption
-                  title="Alice's wallet"
-                  subtitle="Account #0"
+                  title="Shared Wallet"
+                  subtitle="Lace Team"
                   type="shared"
                 />
               </Variants.Cell>
