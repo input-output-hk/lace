@@ -22,9 +22,7 @@ const SATURATION_UPPER_BOUND = 100;
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
   const { openExternalLink } = useOutsideHandles();
-  const { cardanoCoinSymbol } = useDelegationPortfolioStore((store) => ({
-    cardanoCoinSymbol: store.cardanoCoinSymbol,
-  }));
+
   const {
     delegatingToThisPool,
     details: {
@@ -82,13 +80,14 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     saturated: t('drawer.details.status.saturated'),
   };
   const formattedPledge = getNumberWithUnit(pledge);
+  const formattedCost = getNumberWithUnit(fee);
   const metricsData = [
     { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
     { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
     { t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' },
     { t: metricsTranslations.activeStake, testId: 'active-stake', unit: stake.unit, value: stake.number },
     { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
-    { t: metricsTranslations.cost, testId: 'cost', unit: cardanoCoinSymbol, value: fee },
+    { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost.unit, value: formattedCost.number },
     { t: metricsTranslations.pledge, testId: 'pledge', unit: formattedPledge.unit, value: formattedPledge.number },
     { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin },
   ];

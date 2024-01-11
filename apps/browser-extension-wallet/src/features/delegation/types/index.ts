@@ -44,7 +44,7 @@ export type stakePoolDetailsSelectorProps = {
   ticker: string;
   apy: number | string;
   status: Wallet.Cardano.StakePool['status'];
-  fee: number | string;
+  fee: string;
   contact: Wallet.Cardano.PoolContactData;
   blocks: number | string;
   pledge: string;
