@@ -1,0 +1,1 @@
+export { SetupSharedWallet } from './SetupSharedWallet';
