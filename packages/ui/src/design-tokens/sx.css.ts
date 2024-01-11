@@ -5,6 +5,8 @@ import { vars } from './theme';
 const responsiveProperties = defineProperties({
   conditions: {
     popupScreen: { '@media': 'screen and (min-width: 360px)' },
+    minimumScreen: { '@media': 'screen and (min-width: 668px)' },
+    xSmallScreen: { '@media': 'screen and (min-width: 1024px)' },
     smallScreen: { '@media': 'screen and (min-width: 1280px)' },
     mediumScreen: { '@media': 'screen and (min-width: 1440px)' },
     largeScreen: { '@media': 'screen and (min-width: 1660px)' },

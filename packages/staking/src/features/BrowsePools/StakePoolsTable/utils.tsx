@@ -1,27 +1,20 @@
-/* eslint-disable no-console */
 import { stakePoolCellRenderer } from './StakePoolCellRenderer/StakePoolCellRenderer';
-import { Columns } from './types';
+import { Columns, SaturationLevelColors } from './types';
 
-export enum SaturationColors {
-  red = 'red',
-  orange = 'orange',
-  yellow = 'yellow',
-  green = 'green',
-}
 const SATURATION_LEVEL_100 = 100;
 const SATURATION_LEVEL_105 = 105;
 const SATURATION_LEVEL_110 = 110;
 
-export const getSaturationLevel = (saturation: number): SaturationColors => {
+export const getSaturationLevelColor = (saturation: number): SaturationLevelColors => {
   let color;
   if (saturation > SATURATION_LEVEL_110) {
-    color = SaturationColors.red;
+    color = SaturationLevelColors.red;
   } else if (saturation > SATURATION_LEVEL_105) {
-    color = SaturationColors.orange;
+    color = SaturationLevelColors.orange;
   } else if (saturation > SATURATION_LEVEL_100) {
-    color = SaturationColors.yellow;
+    color = SaturationLevelColors.yellow;
   } else {
-    color = SaturationColors.green;
+    color = SaturationLevelColors.green;
   }
   return color;
 };

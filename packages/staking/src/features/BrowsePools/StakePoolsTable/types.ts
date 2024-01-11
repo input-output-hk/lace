@@ -29,3 +29,10 @@ export enum SortField {
   saturation = 'saturation',
   cost = 'cost',
 }
+
+export enum SaturationLevelColors {
+  red = 'red',
+  orange = 'orange',
+  yellow = 'yellow',
+  green = 'green',
+}

@@ -4,7 +4,7 @@ import { theme } from 'features/theme';
 export const row = style([
   {
     alignItems: 'center',
-    borderRadius: '14px',
+    borderRadius: vars.radius.$medium,
     cursor: 'pointer',
     display: 'grid',
     flex: '1',

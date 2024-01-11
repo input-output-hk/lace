@@ -16,7 +16,7 @@ export type TableRowProps<E extends string> = {
   selected?: boolean;
   onSelect?: () => void;
   onClick?: () => void;
-  cellRenderers?: Record<E, React.FunctionComponent<{ value?: string | undefined }>>;
+  cellRenderers?: Partial<Record<E, React.FunctionComponent<{ value?: string }>>>;
   dataTestId?: string;
 };
 
