@@ -549,7 +549,9 @@ export const cardanoStakePoolSelectedDetails = {
     number: '-'
   },
   status: 'active',
-  ticker: 'STTST'
+  ticker: 'STTST',
+  blocks: 20,
+  pledge: '2000.00'
 };
 
 export const transformedStakePool = {
