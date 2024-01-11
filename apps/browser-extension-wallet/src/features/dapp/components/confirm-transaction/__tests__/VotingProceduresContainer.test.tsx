@@ -11,12 +11,13 @@ const mockPreprodCexplorerBaseUrl = 'PREPROD_CEXPLORER_BASE_URL';
 const mockCexplorerUrlPathsTx = 'CEXPLORER_URL_PATHS.TX';
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
-import { VoterType, Votes, VotingProceduresContainer, getVote, getVoterType } from '../VotingProceduresContainer';
+import { VotingProceduresContainer } from '../VotingProceduresContainer';
 import '@testing-library/jest-dom';
 import { act } from 'react-dom/test-utils';
 import { buildMockTx } from '@src/utils/mocks/tx';
 import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
+import { getVoterType, getVote, VoterTypeEnum, VotesEnum } from '@src/utils/tx-inspection';
 
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
@@ -167,7 +168,7 @@ describe('Testing VotingProceduresContainer component', () => {
     expect(queryByTestId('VotingProcedures')).toBeInTheDocument();
     // eslint-disable-next-line unicorn/consistent-function-scoping
     const getExpectedDrepId = (type: string) => (hash: Wallet.Crypto.Hash28ByteBase16) =>
-      type === VoterType.DREP
+      type === VoterTypeEnum.DREP
         ? Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(hash)))
         : hash.toString();
     expect(mockVotingProcedures).toHaveBeenLastCalledWith(
@@ -243,16 +244,20 @@ describe('Testing VotingProceduresContainer component', () => {
   });
 
   test('testing getVoterType', () => {
-    expect(getVoterType(constitutionalCommitteeKeyHashVoter.__typename)).toEqual(VoterType.CONSTITUTIONAL_COMMITTEE);
-    expect(getVoterType(constitutionalCommitteeScriptHashVoter.__typename)).toEqual(VoterType.CONSTITUTIONAL_COMMITTEE);
-    expect(getVoterType(drepKeyHashVoter.__typename)).toEqual(VoterType.DREP);
-    expect(getVoterType(drepScriptHashVoter.__typename)).toEqual(VoterType.DREP);
-    expect(getVoterType(stakePoolKeyHashVoter.__typename)).toEqual(VoterType.SPO);
+    expect(getVoterType(constitutionalCommitteeKeyHashVoter.__typename)).toEqual(
+      VoterTypeEnum.CONSTITUTIONAL_COMMITTEE
+    );
+    expect(getVoterType(constitutionalCommitteeScriptHashVoter.__typename)).toEqual(
+      VoterTypeEnum.CONSTITUTIONAL_COMMITTEE
+    );
+    expect(getVoterType(drepKeyHashVoter.__typename)).toEqual(VoterTypeEnum.DREP);
+    expect(getVoterType(drepScriptHashVoter.__typename)).toEqual(VoterTypeEnum.DREP);
+    expect(getVoterType(stakePoolKeyHashVoter.__typename)).toEqual(VoterTypeEnum.SPO);
   });
 
   test('testing getVote', () => {
-    expect(getVote(Wallet.Cardano.Vote.yes)).toEqual(Votes.YES);
-    expect(getVote(Wallet.Cardano.Vote.no)).toEqual(Votes.NO);
-    expect(getVote(Wallet.Cardano.Vote.abstain)).toEqual(Votes.ABSTAIN);
+    expect(getVote(Wallet.Cardano.Vote.yes)).toEqual(VotesEnum.YES);
+    expect(getVote(Wallet.Cardano.Vote.no)).toEqual(VotesEnum.NO);
+    expect(getVote(Wallet.Cardano.Vote.abstain)).toEqual(VotesEnum.ABSTAIN);
   });
 });

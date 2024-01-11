@@ -3,51 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { VotingProcedures } from '@lace/core';
 import { SignTxData } from './types';
 import { drepIDasBech32FromHash, votingProceduresInspector } from './utils';
-import { Wallet } from '@lace/cardano';
 import { useCExpolorerBaseUrl } from './hooks';
+import { VoterTypeEnum, getVote, getVoterType } from '@src/utils/tx-inspection';
 
 interface Props {
   signTxData: SignTxData;
   errorMessage?: string;
 }
-
-export enum VoterType {
-  CONSTITUTIONAL_COMMITTEE = 'constitutionalCommittee',
-  SPO = 'spo',
-  DREP = 'drep'
-}
-
-export const getVoterType = (voterType: Wallet.Cardano.VoterType): VoterType => {
-  switch (voterType) {
-    case Wallet.Cardano.VoterType.ccHotKeyHash:
-    case Wallet.Cardano.VoterType.ccHotScriptHash:
-      return VoterType.CONSTITUTIONAL_COMMITTEE;
-    case Wallet.Cardano.VoterType.stakePoolKeyHash:
-      return VoterType.SPO;
-    case Wallet.Cardano.VoterType.dRepKeyHash:
-    case Wallet.Cardano.VoterType.dRepScriptHash:
-    default:
-      return VoterType.DREP;
-  }
-};
-
-export enum Votes {
-  YES = 'yes',
-  NO = 'no',
-  ABSTAIN = 'abstain'
-}
-
-export const getVote = (vote: Wallet.Cardano.Vote): Votes => {
-  switch (vote) {
-    case Wallet.Cardano.Vote.yes:
-      return Votes.YES;
-    case Wallet.Cardano.Vote.no:
-      return Votes.NO;
-    case Wallet.Cardano.Vote.abstain:
-    default:
-      return Votes.ABSTAIN;
-  }
-};
 
 export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): React.ReactElement => {
   const { t } = useTranslation();
@@ -62,7 +24,7 @@ export const VotingProceduresContainer = ({ signTxData, errorMessage }: Props): 
         const voterType = getVoterType(votingProcedure.voter.__typename);
 
         const drepId =
-          voterType === VoterType.DREP
+          voterType === VoterTypeEnum.DREP
             ? drepIDasBech32FromHash(votingProcedure.voter.credential.hash)
             : votingProcedure.voter.credential.hash.toString();
         return {

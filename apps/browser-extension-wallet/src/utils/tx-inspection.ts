@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable unicorn/consistent-destructuring */
 /* eslint-disable consistent-return, unicorn/no-array-reduce */
 import {
   createTxInspector,
@@ -187,4 +187,42 @@ export const inspectTxValues = ({
   })(tx);
 
   return inspectionProperties.totalOutputsValue;
+};
+
+export enum VoterTypeEnum {
+  CONSTITUTIONAL_COMMITTEE = 'constitutionalCommittee',
+  SPO = 'spo',
+  DREP = 'drep'
+}
+
+export const getVoterType = (voterType: Wallet.Cardano.VoterType): VoterTypeEnum => {
+  switch (voterType) {
+    case Wallet.Cardano.VoterType.ccHotKeyHash:
+    case Wallet.Cardano.VoterType.ccHotScriptHash:
+      return VoterTypeEnum.CONSTITUTIONAL_COMMITTEE;
+    case Wallet.Cardano.VoterType.stakePoolKeyHash:
+      return VoterTypeEnum.SPO;
+    case Wallet.Cardano.VoterType.dRepKeyHash:
+    case Wallet.Cardano.VoterType.dRepScriptHash:
+    default:
+      return VoterTypeEnum.DREP;
+  }
+};
+
+export enum VotesEnum {
+  YES = 'yes',
+  NO = 'no',
+  ABSTAIN = 'abstain'
+}
+
+export const getVote = (vote: Wallet.Cardano.Vote): VotesEnum => {
+  switch (vote) {
+    case Wallet.Cardano.Vote.yes:
+      return VotesEnum.YES;
+    case Wallet.Cardano.Vote.no:
+      return VotesEnum.NO;
+    case Wallet.Cardano.Vote.abstain:
+    default:
+      return VotesEnum.ABSTAIN;
+  }
 };

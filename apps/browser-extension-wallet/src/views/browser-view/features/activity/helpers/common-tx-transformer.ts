@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
-import { inspectTxValues, inspectTxType } from '@src/utils/tx-inspection';
+import { inspectTxValues, inspectTxType, getVoterType, VoterTypeEnum, getVote } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import { getTransactionTotalAmount } from '@src/utils/get-transaction-total-amount';
 import type { TransformedActivity, TransformedTransactionActivity } from './types';
@@ -19,7 +19,7 @@ import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 
-const { util, VoterType, Vote, GovernanceActionType } = Wallet.Cardano;
+const { util, GovernanceActionType } = Wallet.Cardano;
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
@@ -297,33 +297,6 @@ export const certificateTransformer = (
       return transformedCertificate;
     });
 
-// TODO: check votes procedure container in dapp feature for common logic
-const getVoterType = (voterType: Wallet.Cardano.VoterType): string => {
-  switch (voterType) {
-    case VoterType.ccHotKeyHash:
-    case VoterType.ccHotScriptHash:
-      return 'Constitutional Committee';
-    case VoterType.stakePoolKeyHash:
-      return 'SPO';
-    case VoterType.dRepKeyHash:
-    case VoterType.dRepScriptHash:
-    default:
-      return 'DRep';
-  }
-};
-
-const getVote = (vote: Wallet.Cardano.Vote): string => {
-  switch (vote) {
-    case Vote.yes:
-      return 'Yes';
-    case Vote.no:
-      return 'No';
-    case Vote.abstain:
-    default:
-      return 'Abstain';
-  }
-};
-
 export const votingProceduresTransformer = (
   votingProcedures: Wallet.Cardano.VotingProcedures
 ): TxDetails<TxDetailsVotingProceduresTitles>[] => {
@@ -333,7 +306,7 @@ export const votingProceduresTransformer = (
     procedure.votes.forEach((vote) => {
       const voterType = getVoterType(procedure.voter.__typename);
       const voterCredential =
-        voterType === 'DRep'
+        voterType === VoterTypeEnum.DREP
           ? Wallet.Cardano.DRepID(Wallet.HexBlob.toTypedBech32('drep', Wallet.HexBlob(procedure.voter.credential.hash)))
           : procedure.voter.credential.hash;
       const detail: TxDetails<TxDetailsVotingProceduresTitles> = [
