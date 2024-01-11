@@ -6,6 +6,7 @@ export const radioGroupRoot = style({
   gap: '10px',
   fontFamily: vars.fontFamily.$nova,
   fontWeight: vars.fontWeights.$semibold,
+  margin: 0,
 });
 
 export const radioGroupItem = style({
@@ -13,10 +14,18 @@ export const radioGroupItem = style({
   height: '25px',
   borderRadius: '100%',
   padding: 0,
-  background: 'white',
+  background: vars.colors.$radiobutton_indicator_check_color,
 
   ':focus': {
     backgroundColor: vars.colors.$radiobutton_focus_color,
+  },
+
+  ':hover': {
+    border: `1px solid ${vars.colors.$radiobutton_hover_color}`,
+  },
+
+  ':disabled': {
+    cursor: 'not-allowed',
   },
 });
 
@@ -74,6 +83,6 @@ export const disabled = style([
     opacity: '$0_24',
   }),
   {
-    cursor: 'default',
+    cursor: 'not-allowed',
   },
 ]);

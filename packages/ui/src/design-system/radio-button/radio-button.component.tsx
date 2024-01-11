@@ -13,12 +13,12 @@ export type Props = Readonly<{
   disabled?: boolean;
   label?: ReactNode;
   className?: string;
-  onValueChange: (value: string) => void;
   selectedValue: string;
   options: {
     value: string;
     label: string;
   }[];
+  onValueChange: (value: string) => void;
 }>;
 
 export const RadioButton = ({
@@ -38,7 +38,7 @@ export const RadioButton = ({
       className={cx.radioGroupRoot}
     >
       {options.map(({ value, label }) => (
-        <Flex mb="$24" alignItems="center" h="$fill" key={value}>
+        <Flex alignItems="center" h="$fill" m="$4" key={value}>
           <RadioGroup.Item
             id={label}
             value={value}
@@ -49,15 +49,17 @@ export const RadioButton = ({
           >
             <RadioGroup.Indicator className={cx.radioGroupIndicator} />
           </RadioGroup.Item>
-          <label className="Label" htmlFor={value}>
-            <Box
-              className={cn(cx.label, {
-                [cx.disabled]: disabled,
-              })}
-            >
-              {label}
-            </Box>
-          </label>
+          {label && (
+            <label className="Label" htmlFor={value}>
+              <Box
+                className={cn(cx.label, {
+                  [cx.disabled]: disabled,
+                })}
+              >
+                {label}
+              </Box>
+            </label>
+          )}
         </Flex>
       ))}
     </RadioGroup.Root>

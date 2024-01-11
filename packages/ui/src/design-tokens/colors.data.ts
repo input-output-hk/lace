@@ -242,6 +242,7 @@ export const colors = {
   $checkbox_hover_unchecked_borderColor: '',
   $checkbox_hover_unchecked_backgroundColor: '',
   $radiobutton_focus_color: '',
+  $radiobutton_hover_color: '',
   $radiobutton_indicator_backgroundColor: '',
   $radiobutton_indicator_check_color: '',
   $radiobutton_unchecked_borderColor: '',

@@ -357,6 +357,7 @@ const colors: Colors = {
   $checkbox_hover_checked_backgroundColor:
     lightColorScheme.$primary_hover_purple,
   $radiobutton_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $radiobutton_hover_color: lightColorScheme.$primary_dark_grey_plus,
   $radiobutton_indicator_backgroundColor:
     lightColorScheme.$primary_accent_purple,
   $radiobutton_indicator_check_color: lightColorScheme.$primary_white,
