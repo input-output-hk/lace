@@ -39,6 +39,7 @@ import { browser } from '@wdio/globals';
 import SimpleTxSideDrawerPageObject from '../pageobject/simpleTxSideDrawerPageObject';
 import AddNewAddressDrawer from '../elements/addressbook/AddNewAddressDrawer';
 import { AddressInput } from '../elements/addressInput';
+import { AssetInput } from '../elements/newTransaction/assetInput';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -222,12 +223,12 @@ When(
         case 'ADA':
           break;
         case 'NFT':
-          await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
+          await new AssetInput(bundleIndex).clickAddAssetButton();
           await transactionExtendedPageObject.clickNFTsButton();
           await nftsPageObject.clickNftItemInAssetSelector(entry.assetName);
           break;
         case 'Token':
-          await transactionExtendedPageObject.clickAddAssetButtonMulti(bundleIndex);
+          await new AssetInput(bundleIndex).clickAddAssetButton();
           await transactionExtendedPageObject.clickCoinConfigureTokenSearchResult(entry.assetName);
           break;
       }

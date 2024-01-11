@@ -232,6 +232,15 @@ export const colors = {
   $educational_card_item_title_color: '',
   $educational_card_item_icon_container_bgColor: '',
   $educational_card_item_icon_container_borderColor: '',
+
+  $checkbox_check_color: '',
+  $checkbox_checked_backgroundColor: '',
+  $checkbox_unchecked_backgroundColor: '',
+  $checkbox_unchecked_borderColor: '',
+  $checkbox_focus_color: '',
+  $checkbox_hover_checked_backgroundColor: '',
+  $checkbox_hover_unchecked_borderColor: '',
+  $checkbox_hover_unchecked_backgroundColor: '',
 };
 
 export type Colors = typeof colors;

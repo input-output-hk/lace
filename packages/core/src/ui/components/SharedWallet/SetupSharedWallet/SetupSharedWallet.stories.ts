@@ -4,7 +4,7 @@ import { SetupSharedWallet } from './SetupSharedWallet';
 import { ComponentProps } from 'react';
 
 const meta: Meta<typeof SetupSharedWallet> = {
-  title: 'SetupSharedWallet',
+  title: 'Shared Wallets/SetupSharedWallet',
   component: SetupSharedWallet,
   parameters: {
     layout: 'centered'

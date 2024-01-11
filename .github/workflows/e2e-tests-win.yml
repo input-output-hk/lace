@@ -124,7 +124,7 @@ jobs:
           if [ "$TAGS" == "empty" ]; then
             TAGS_TO_RUN="";
           else
-            TAGS_TO_RUN="--cucumberOpts.tagExpression='${{ env.TAGS }}'";
+            TAGS_TO_RUN="--cucumberOpts.tags='${{ env.TAGS }}'";
           fi
           yarn wdio run wdio.conf.${BROWSER}.ts $TAGS_TO_RUN
           runCommand="yarn wdio run wdio.conf.${BROWSER}.ts ${TAGS_TO_RUN}"

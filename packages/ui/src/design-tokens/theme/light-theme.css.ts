@@ -346,6 +346,16 @@ const colors: Colors = {
     lightColorScheme.$primary_white,
   $educational_card_item_icon_container_borderColor:
     lightColorScheme.$primary_light_grey_plus,
+
+  $checkbox_check_color: lightColorScheme.$primary_white,
+  $checkbox_checked_backgroundColor: lightColorScheme.$primary_accent_purple,
+  $checkbox_unchecked_backgroundColor: colorTransparent,
+  $checkbox_unchecked_borderColor: lightColorScheme.$primary_grey,
+  $checkbox_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $checkbox_hover_unchecked_borderColor: lightColorScheme.$primary_dark_grey,
+  $checkbox_hover_unchecked_backgroundColor: colorTransparent,
+  $checkbox_hover_checked_backgroundColor:
+    lightColorScheme.$primary_hover_purple,
 };
 
 export const elevation: Elevation = {

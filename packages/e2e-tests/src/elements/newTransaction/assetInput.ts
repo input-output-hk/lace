@@ -1,36 +1,29 @@
-import { LocatorStrategy } from '../../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from '../webElement';
+/* eslint-disable no-undef */
 import { CoinConfigure } from './coinConfigure';
+import { ChainablePromiseElement } from 'webdriverio';
 
-export class AssetInput extends WebElement {
-  protected CONTAINER = '//div[@data-testid="asset-input-container"]';
+export class AssetInput {
+  private CONTAINER = '//div[@data-testid="asset-input-container"]';
   private ASSET_ADD_BUTTON = '//button[@data-testid="asset-add-button"]';
+  index;
 
-  constructor() {
-    super();
+  constructor(index = 1) {
+    this.index = index;
   }
 
-  container(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}`, 'xpath');
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`(${this.CONTAINER})[${this.index}]`);
   }
 
-  assetAddButton(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.ASSET_ADD_BUTTON}`, 'xpath');
-  }
-
-  assetAddButtonMultiple(index: number): WebElement {
-    return Factory.fromSelector(`(${this.CONTAINER}${this.ASSET_ADD_BUTTON})[${index}]`, 'xpath');
+  get assetAddButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`(${this.ASSET_ADD_BUTTON})[${this.index}]`);
   }
 
   coinConfigure(bundleIndex?: number, tokenName?: string): CoinConfigure {
     return new CoinConfigure(bundleIndex, tokenName);
   }
 
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
-
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
+  async clickAddAssetButton(): Promise<void> {
+    await this.assetAddButton.click();
   }
 }
