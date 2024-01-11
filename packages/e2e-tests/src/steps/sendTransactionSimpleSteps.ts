@@ -32,7 +32,7 @@ import clipboard from 'clipboardy';
 import extensionUtils from '../utils/utils';
 import Modal from '../elements/modal';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
-import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
+import TransactionSummaryPage from '../elements/newTransaction/transactionSummaryPage';
 import TransactionAssetSelectionAssert from '../assert/transaction/transactionAssetSelectionAssert';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import { browser } from '@wdio/globals';
@@ -559,9 +559,8 @@ When(
 );
 
 When(/^I click "Confirm" button on "Transaction summary" page$/, async () => {
-  const transactionSummaryPage = new TransactionSummaryPage();
-  await transactionSummaryPage.confirmButton.waitForEnabled();
-  await transactionSummaryPage.confirmButton.click();
+  await TransactionSummaryPage.confirmButton.waitForEnabled();
+  await TransactionSummaryPage.confirmButton.click();
 });
 
 When(/^I click "(Save|Cancel)" button on "Add address" drawer in send flow$/, async (button: 'Save' | 'Cancel') => {
