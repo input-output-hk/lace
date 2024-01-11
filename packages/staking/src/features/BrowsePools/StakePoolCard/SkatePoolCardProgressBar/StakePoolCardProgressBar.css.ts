@@ -8,7 +8,7 @@ export const wrapper = sx({
 export const bar = style([
   sx({
     borderRadius: '$medium',
-    height: '$6',
+    height: '$4',
     width: '$fill',
   }),
   {
@@ -18,7 +18,7 @@ export const bar = style([
 
 export const progress = sx({
   borderRadius: '$medium',
-  height: '$6',
+  height: '$4',
 });
 
 export const progressValue = style({

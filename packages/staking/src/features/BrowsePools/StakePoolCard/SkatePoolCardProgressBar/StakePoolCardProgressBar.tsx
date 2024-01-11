@@ -28,9 +28,9 @@ export const StakePoolCardProgressBar = ({ percentage }: Props) => {
           style={{ width: `${progressWidth}%` }}
         />
       </div>
-      <Text.Body.Normal weight="$semibold" className={styles.progressValue}>
-        {percentage.toFixed(0)}%
-      </Text.Body.Normal>
+      <Text.Body.Small weight="$medium" className={styles.progressValue}>
+        {percentage.toFixed(2)}%
+      </Text.Body.Small>
     </Flex>
   );
 };

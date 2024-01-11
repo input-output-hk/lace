@@ -6,28 +6,28 @@ import * as styles from './StakePoolCard.css';
 import { MetricType } from './types';
 
 export interface StakePoolCardProps {
-  title: string;
+  title?: string;
   metricType: MetricType;
-  metricValue: number;
+  metricValue?: number;
   saturation: number;
   selected?: boolean;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export const StakePoolCard = ({
-  title,
+  title = '-',
   metricType,
   metricValue,
   saturation,
   selected,
   onClick,
 }: StakePoolCardProps) => (
-  <Card.Outlined className={cn(styles.card, selected && styles.cardSelected)} onClick={onClick}>
+  <Card.Outlined className={cn(styles.card, selected && styles.cardSelected)} {...(onClick ? { onClick } : {})}>
     <Flex flexDirection="column">
-      <Flex justifyContent="space-between">
-        <Text.Body.Large weight="$semibold" className={styles.title}>
+      <Flex justifyContent="space-between" w="$fill">
+        <Text.Body.Normal weight="$medium" className={styles.title}>
           {title}
-        </Text.Body.Large>
+        </Text.Body.Normal>
         <PoolMetric metricType={metricType} metricValue={metricValue} />
       </Flex>
       <StakePoolCardProgressBar percentage={saturation} />

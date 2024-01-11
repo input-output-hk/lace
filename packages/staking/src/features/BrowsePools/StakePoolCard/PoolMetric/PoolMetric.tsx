@@ -8,7 +8,7 @@ import * as styles from './PoolMetric.css';
 
 interface Props {
   metricType: MetricType;
-  metricValue: number;
+  metricValue?: number;
 }
 
 const iconsByType: Record<MetricType, React.ReactNode> = {
@@ -43,11 +43,11 @@ const getValue = (metricType: MetricType, metricValue: number) => {
 
 export const PoolMetric = ({ metricType, metricValue }: Props) => {
   const icon = iconsByType[metricType];
-  const value = getValue(metricType, metricValue);
+  const value = metricValue ? getValue(metricType, metricValue) : '-';
   return (
     <Flex alignItems="center" gap="$4" className={styles.metric}>
       {icon}
-      <Text.Body.Normal weight="$semibold">{value}</Text.Body.Normal>
+      <Text.Body.Small weight="$medium">{value}</Text.Body.Small>
     </Flex>
   );
 };
