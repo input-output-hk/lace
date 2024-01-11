@@ -1,7 +1,3 @@
-export {
-  SharedWalletGetStartedOptions,
-  SharedWalletSetupOptionTranslations
-} from './setup/SharedWalletGetStartedDialog.component';
-export { SetupSharedWallet } from './SetupSharedWallet';
+export * from './GetStarted';
 export { AllSet } from './AllSet';
 export { ImportantInfo } from './ImportantInfo';
