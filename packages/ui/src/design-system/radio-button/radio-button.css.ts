@@ -33,6 +33,7 @@ export const radioGroupItem = style([
 
     ':disabled': {
       cursor: 'not-allowed',
+      opacity: '20%',
     },
   },
 ]);

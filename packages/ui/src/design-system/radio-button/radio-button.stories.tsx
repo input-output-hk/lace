@@ -57,7 +57,7 @@ const MainComponents = (): JSX.Element => {
         <Variants.Cell>
           <RadioButton
             disabled
-            selectedValue={''}
+            selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={emptyOption}
           />
