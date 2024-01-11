@@ -308,6 +308,16 @@ const colors: Colors = {
   $data_green: darkColorScheme.$secondary_data_green,
   $data_pink: darkColorScheme.$secondary_data_pink,
   $data_yellow: darkColorScheme.$secondary_lace_yellow,
+
+  $checkbox_check_color: darkColorScheme.$primary_black,
+  $checkbox_checked_backgroundColor: darkColorScheme.$primary_accent_purple,
+  $checkbox_unchecked_backgroundColor: colorTransparent,
+  $checkbox_unchecked_borderColor: darkColorScheme.$primary_light_grey,
+  $checkbox_focus_color: darkColorScheme.$primary_accent_purple_0_3,
+  $checkbox_hover_unchecked_borderColor: darkColorScheme.$primary_light_grey,
+  $checkbox_hover_unchecked_backgroundColor: darkColorScheme.$primary_dark_grey,
+  $checkbox_hover_checked_backgroundColor:
+    darkColorScheme.$primary_hover_purple,
 };
 
 const elevation: Elevation = {

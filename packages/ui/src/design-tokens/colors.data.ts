@@ -220,6 +220,15 @@ export const colors = {
   $data_blue: '',
   $data_green: '',
   $data_yellow: '',
+
+  $checkbox_check_color: '',
+  $checkbox_checked_backgroundColor: '',
+  $checkbox_unchecked_backgroundColor: '',
+  $checkbox_unchecked_borderColor: '',
+  $checkbox_focus_color: '',
+  $checkbox_hover_checked_backgroundColor: '',
+  $checkbox_hover_unchecked_borderColor: '',
+  $checkbox_hover_unchecked_backgroundColor: '',
 };
 
 export type Colors = typeof colors;
