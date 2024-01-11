@@ -45,7 +45,11 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     name,
     ticker,
     status,
-    contact
+    contact,
+    blocks,
+    costsPerEpoch,
+    pledge,
+    margin
   } = useDelegationStore(stakePoolDetailsSelector) || {};
   const delegationDetails = useDelegationDetails();
   const {
@@ -73,7 +77,11 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     activeStake: t('cardano.stakePoolMetricsBrowser.activeStake'),
     saturation: t('cardano.stakePoolMetricsBrowser.saturation'),
     delegators: t('cardano.stakePoolMetricsBrowser.delegators'),
-    apy: t('cardano.stakePoolMetricsBrowser.ros')
+    apy: t('cardano.stakePoolMetricsBrowser.ros'),
+    blocks: t('cardano.stakePoolMetricsBrowser.blocks'),
+    cost: t('cardano.stakePoolMetricsBrowser.cost'),
+    margin: t('cardano.stakePoolMetricsBrowser.margin'),
+    pledge: t('cardano.stakePoolMetricsBrowser.pledge')
   };
 
   const statusLogoTranslations = {
@@ -82,6 +90,17 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     retiring: t('cardano.stakePoolStatusLogo.retiring'),
     retired: t('cardano.stakePoolStatusLogo.retired')
   };
+
+  const metricsData = [
+    { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
+    { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
+    { t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' },
+    { t: metricsTranslations.activeStake, testId: 'active-stake', unit: stake.unit, value: stake.number },
+    { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
+    { t: metricsTranslations.cost, testId: 'cost', unit: '%', value: costsPerEpoch },
+    { t: metricsTranslations.pledge, testId: 'pledge', unit: cardanoCoin.symbol, value: pledge },
+    { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin }
+  ];
 
   return (
     <>
@@ -105,11 +124,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
             <div className={styles.title} data-testid="stake-pool-details-title">
               {t('browserView.staking.details.statistics.title')}
             </div>
-            <StakePoolMetricsBrowser
-              popupView={popupView}
-              {...{ apy, saturation, stake, delegators }}
-              translations={metricsTranslations}
-            />
+            <StakePoolMetricsBrowser popupView={popupView} data={metricsData} />
           </div>
           {isDelegatingToThisPool && (
             <Banner

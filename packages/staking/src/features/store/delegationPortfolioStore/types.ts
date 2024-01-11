@@ -39,4 +39,7 @@ export type StakePoolDetails = {
   status: Wallet.Cardano.StakePool['status'];
   fee: number | string;
   contact: Wallet.Cardano.PoolContactData;
+  blocks: number | string;
+  costsPerEpoch: string;
+  pledge: string;
 };

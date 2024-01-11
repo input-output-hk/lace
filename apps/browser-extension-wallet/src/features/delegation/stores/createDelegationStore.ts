@@ -16,11 +16,12 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       cost,
       hexId,
       metadata: { description = '', name = '', ticker = '', homepage, ext } = {},
-      metrics: { apy, delegators, stake, saturation },
+      metrics: { apy, delegators, stake, saturation, blocksCreated } = {},
       margin,
       owners,
       logo,
-      status
+      status,
+      pledge
     } = selectedStakePool;
     const calcMargin = margin ? `${formatPercentages(margin.numerator / margin.denominator)}` : '-';
 
@@ -45,7 +46,10 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       contact: {
         primary: homepage,
         ...ext?.pool.contact
-      }
+      },
+      blocks: blocksCreated || '-',
+      costsPerEpoch: 'costsPerEpoch',
+      pledge: Wallet.util.lovelacesToAdaString(pledge.toString())
     };
   }
 };

@@ -5,22 +5,23 @@ import { StakePoolMetricsBrowser, StakePoolMetricsBrowserProps } from '../StakeP
 import '@testing-library/jest-dom';
 
 describe('Testing StakePoolMetricsBrowser component', () => {
+  const apy = { t: 'APY (M)', testId: 'apy', unit: '%', value: 45.5 };
+  const delegators = { t: 'Delegators', testId: 'delegators', value: 20 };
+  const saturation = { t: 'Saturation', testId: 'saturation', unit: '%', value: 201 };
+  const activeStake = { t: 'Active stake', testId: 'active-stake', unit: 'K', value: '12' };
+  const data = [apy, delegators, saturation, activeStake];
   const props: StakePoolMetricsBrowserProps = {
-    apy: 45.5,
-    saturation: 201,
-    stake: { number: '12' },
-    delegators: 20,
-    translations: { activeStake: 'Active stake', saturation: 'Saturation', delegators: 'Delegators', apy: 'APY (M)' }
+    data
   };
   test('should display all stake pool metrics with icons', async () => {
     const { findByText } = render(<StakePoolMetricsBrowser {...props} />);
-    const apyLabel = await findByText('APY (M)');
-    const saturationLabel = await findByText('Saturation');
-    const saturationValue = await findByText(props.saturation);
-    const stakeLabel = await findByText('Active stake');
-    const stakeValue = await findByText(props.stake.number);
-    const delegatorsLabel = await findByText('Delegators');
-    const delegatorsValue = await findByText(props.delegators);
+    const apyLabel = await findByText(apy.t);
+    const saturationLabel = await findByText(saturation.t);
+    const saturationValue = await findByText(saturation.value);
+    const stakeLabel = await findByText(activeStake.t);
+    const stakeValue = await findByText(activeStake.value);
+    const delegatorsLabel = await findByText(delegators.t);
+    const delegatorsValue = await findByText(delegators.value);
 
     expect(apyLabel).toBeVisible();
     expect(saturationLabel).toBeVisible();

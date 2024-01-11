@@ -22,6 +22,9 @@ const SATURATION_UPPER_BOUND = 100;
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
   const { openExternalLink } = useOutsideHandles();
+  const { cardanoCoinSymbol } = useDelegationPortfolioStore((store) => ({
+    cardanoCoinSymbol: store.cardanoCoinSymbol,
+  }));
   const {
     delegatingToThisPool,
     details: {
@@ -38,6 +41,10 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
       ticker,
       status,
       contact,
+      blocks,
+      costsPerEpoch,
+      pledge,
+      margin,
     },
   } = useDelegationPortfolioStore((store) => ({
     delegatingToThisPool:
@@ -60,7 +67,11 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
   const metricsTranslations = {
     activeStake: t('drawer.details.metrics.activeStake'),
     apy: t('drawer.details.metrics.apy'),
+    blocks: t('drawer.details.metrics.blocks'),
+    cost: t('drawer.details.metrics.cost'),
     delegators: t('drawer.details.metrics.delegators'),
+    margin: t('drawer.details.metrics.margin'),
+    pledge: t('drawer.details.metrics.pledge'),
     saturation: t('drawer.details.metrics.saturation'),
   };
 
@@ -70,6 +81,17 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
     retiring: t('drawer.details.status.retiring'),
     saturated: t('drawer.details.status.saturated'),
   };
+
+  const metricsData = [
+    { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
+    { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
+    { t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' },
+    { t: metricsTranslations.activeStake, testId: 'active-stake', unit: stake.unit, value: stake.number },
+    { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
+    { t: metricsTranslations.cost, testId: 'cost', unit: '%', value: costsPerEpoch },
+    { t: metricsTranslations.pledge, testId: 'pledge', unit: cardanoCoinSymbol, value: pledge },
+    { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin },
+  ];
 
   return (
     <>
@@ -96,11 +118,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
             <div className={styles.title} data-testid="stake-pool-details-title">
               {t('drawer.details.statistics')}
             </div>
-            <StakePoolMetricsBrowser
-              {...{ apy: apy || '-', delegators: delegators || '-', saturation: saturation || '-', stake }}
-              translations={metricsTranslations}
-              popupView={popupView}
-            />
+            <StakePoolMetricsBrowser data={metricsData} popupView={popupView} />
           </div>
           <div className={styles.row} data-testid="stake-pool-details-information">
             <div

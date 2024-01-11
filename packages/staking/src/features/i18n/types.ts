@@ -87,6 +87,10 @@ type KeysStructure = {
         apy: '';
         delegators: '';
         saturation: '';
+        blocks: '';
+        cost: '';
+        pledge: '';
+        margin: '';
       };
       status: {
         delegating: '';

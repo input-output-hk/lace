@@ -16,11 +16,13 @@ export const mapStakePoolToDisplayData = ({
 
   return {
     apy: stakePool.metrics?.apy && formatPercentages(stakePool.metrics.apy),
+    blocks: stakePool.metrics?.blocksCreated || '-',
     contact: {
       primary: stakePool.metadata?.homepage,
       ...stakePool.metadata?.ext?.pool.contact,
     },
     cost: `${margin || '-'}% + ${fee}${cardanoCoinSymbol}`,
+    costsPerEpoch: 'costsPerEpoch',
     delegators: stakePool.metrics?.delegators || '-',
     description: stakePool.metadata?.description || '-',
     fee,
@@ -32,9 +34,7 @@ export const mapStakePoolToDisplayData = ({
     margin,
     name: stakePool.metadata?.name || '-',
     owners: stakePool.owners ? stakePool.owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
-    pledge: stakePool.pledge
-      ? `${Wallet.util.lovelacesToAdaString(stakePool.pledge.toString())}${cardanoCoinSymbol}`
-      : '-',
+    pledge: Wallet.util.lovelacesToAdaString(stakePool.pledge.toString()),
     retired: stakePool.status === Wallet.Cardano.StakePoolStatus.Retired,
     saturation: stakePool.metrics?.saturation && formatPercentages(stakePool.metrics.saturation),
     size: `${stakePool.metrics?.size.live ?? '-'} %`,
