@@ -18,9 +18,9 @@ export const selectTrigger = style([
     height: '$32',
     gap: '$6',
     lineHeight: '$16',
+    borderRadius: '$extraSmall',
   }),
   {
-    borderRadius: '10px',
     padding: '0 15px',
     backgroundColor: vars.colors.$select_background_color,
     border: `1px solid ${vars.colors.$select_border}`,
@@ -57,11 +57,15 @@ export const selectIcon = style({
   color: vars.colors.$select_icon_color,
 });
 
-export const selectContent = style({
-  overflow: 'hidden',
-  backgroundColor: vars.colors.$select_background_color,
-  borderRadius: '6px',
-});
+export const selectContent = style([
+  sx({
+    borderRadius: '$extraSmall',
+  }),
+  {
+    overflow: 'hidden',
+    backgroundColor: vars.colors.$select_background_color,
+  },
+]);
 
 export const selectViewport = style({
   padding: '5px',
@@ -73,11 +77,11 @@ export const selectItem = style([
     alignItems: 'center',
     fontSize: '$14',
     height: '$24',
-    lineHeight: '$16',
+    lineHeight: '$24',
+    borderRadius: '$extraSmall',
   }),
   {
     lineHeight: 1,
-    borderRadius: '10px',
     padding: '0 35px 0 25px',
     position: 'relative',
     userSelect: 'none',
