@@ -1,0 +1,18 @@
+{
+  "name": "@lace/icons",
+  "version": "0.1.0",
+  "description": "Lace Icons",
+  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/icons/README.md",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/input-output-hk/lace.git"
+  },
+  "license": "Apache-2.0",
+  "author": "IOHK",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "typings": "dist/index.d.ts"
+}
