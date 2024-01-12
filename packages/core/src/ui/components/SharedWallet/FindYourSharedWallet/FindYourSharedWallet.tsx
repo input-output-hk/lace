@@ -38,7 +38,7 @@ export const FindYourSharedWallet = ({ translations, onChange, onBack, onNext, f
       <Box mb={'$40'}>
         <Text.Body.Normal
           className={sx({
-            color: '$text_secondary'
+            color: '$text_primary'
           })}
         >
           {translations.subtitle}
