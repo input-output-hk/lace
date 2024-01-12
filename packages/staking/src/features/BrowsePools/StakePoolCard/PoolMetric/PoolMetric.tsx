@@ -1,8 +1,8 @@
 import { getNumberWithUnit } from '@lace/common';
-import AdaIcon from '/src/assets/icons/ada.svg';
-import CubeIcon from '/src/assets/icons/cube.svg';
-import ChartPieIcon from '/src/assets/icons/chart-pie.svg';
 import { Flex, Text } from '@lace/ui';
+import AdaIcon from 'assets/icons/ada.svg';
+import ChartPieIcon from 'assets/icons/chart-pie.svg';
+import CubeIcon from 'assets/icons/cube.svg';
 import { MetricType } from '../types';
 import * as styles from './PoolMetric.css';
 

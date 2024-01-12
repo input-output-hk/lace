@@ -28,4 +28,4 @@ export { Metadata } from './metadata';
 export { TextLink } from './text-link';
 export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
-export { Variants } from './decorators';
+export { Variants, Section } from './decorators';

@@ -1,6 +1,5 @@
-import { Box, Cell, Flex, Grid, LocalThemeProvider, Text, ThemeColorScheme, Variants } from '@lace/ui';
+import { Box, Cell, Flex, Grid, LocalThemeProvider, Section, Text, ThemeColorScheme, Variants } from '@lace/ui';
 
-import { Section } from '@lace/ui/src/design-system/decorators';
 import type { Meta } from '@storybook/react';
 import { StakePoolCard, StakePoolCardProps } from './StakePoolCard';
 import { MetricType } from './types';
@@ -20,18 +19,18 @@ const CardsGroup = (props: StakePoolCardProps) => (
     gap="$20"
     w="$584"
   >
-    <div style={{ width: 220 }}>
+    <Box w="$214">
       <StakePoolCard {...props} />
-    </div>
-    <div style={{ width: 220 }}>
+    </Box>
+    <Box w="$214">
       <StakePoolCard {...props} />
-    </div>
-    <div style={{ width: 220 }}>
+    </Box>
+    <Box w="$214">
       <StakePoolCard {...props} />
-    </div>
-    <div style={{ width: 220 }}>
+    </Box>
+    <Box w="$214">
       <StakePoolCard {...props} />
-    </div>
+    </Box>
   </Flex>
 );
 
@@ -56,16 +55,16 @@ export const Overview = {
             <Cell>
               <Variants.Table headers={['Default']}>
                 <Flex alignItems="center" justifyContent="center" h="$214">
-                  <div style={{ width: 220 }}>
+                  <Box w="$214">
                     <StakePoolCard {...props} />
-                  </div>
+                  </Box>
                 </Flex>
               </Variants.Table>
               <Variants.Table headers={['Selected']}>
                 <Flex alignItems="center" justifyContent="center" h="$214">
-                  <div style={{ width: 220 }}>
+                  <Box w="$214">
                     <StakePoolCard {...props} selected />
-                  </div>
+                  </Box>
                 </Flex>
               </Variants.Table>
             </Cell>
@@ -73,9 +72,9 @@ export const Overview = {
         </Cell>
         <Cell>
           <Variants.Table headers={['Hover']}>
-            <div style={{ alignItems: 'center', display: 'flex', height: 550, justifyContent: 'center' }}>
-              <div style={{ width: 220 }}>Placeholder</div>
-            </div>
+            <Flex alignItems="center" style={{ height: 550 }} justifyContent="center">
+              <Box w="$214">Placeholder</Box>
+            </Flex>
           </Variants.Table>
         </Cell>
       </Grid>
@@ -107,7 +106,7 @@ export const Overview = {
 
       <Section title="Parameter(s) types">
         <Variants.Table
-          headers={['Ticker', 'Satiration', 'ROS', 'Cost', 'Margin', 'Produced-blocks', 'Pledge', 'Live stake']}
+          headers={['Ticker', 'Saturation', 'ROS', 'Cost', 'Margin', 'Produced-blocks', 'Pledge', 'Live stake']}
         >
           <Variants.Row>
             <Variants.Cell style={{ padding: 10 }}>
@@ -200,9 +199,9 @@ export const Overview = {
                   </Flex>
                 </Cell>
                 <Cell>
-                  <div style={{ width: 220 }}>
+                  <Box w="$214">
                     <StakePoolCard title="MDS" metricType="cost" metricValue={30_000_000} saturation={51.75} />
-                  </div>
+                  </Box>
                 </Cell>
                 <Cell>
                   <Flex flexDirection="column">
@@ -213,14 +212,14 @@ export const Overview = {
                   </Flex>
                 </Cell>
                 <Cell>
-                  <div style={{ width: 220 }}>
+                  <Box w="$214">
                     <StakePoolCard
                       title="Medusa Development Support"
                       metricType="cost"
                       metricValue={30_000_000}
                       saturation={51.75}
                     />
-                  </div>
+                  </Box>
                 </Cell>
                 <Cell>
                   <Flex flexDirection="column">
@@ -229,9 +228,9 @@ export const Overview = {
                   </Flex>
                 </Cell>
                 <Cell>
-                  <div style={{ width: 220 }}>
+                  <Box w="$214">
                     <StakePoolCard metricType="cost" metricValue={30_000_000} saturation={51.75} />
-                  </div>
+                  </Box>
                 </Cell>
                 <Cell>
                   <Flex flexDirection="column">
@@ -240,9 +239,9 @@ export const Overview = {
                   </Flex>
                 </Cell>
                 <Cell>
-                  <div style={{ width: 220 }}>
+                  <Box w="$214">
                     <StakePoolCard metricType="cost" saturation={51.75} />
-                  </div>
+                  </Box>
                 </Cell>
               </Grid>
             </Variants.Cell>
@@ -267,8 +266,8 @@ export const Controls = {
     title: 'TIKRNM',
   } as StakePoolCardProps,
   render: (props: StakePoolCardProps) => (
-    <div style={{ width: 220 }}>
+    <Box w="$214">
       <StakePoolCard {...props} />
-    </div>
+    </Box>
   ),
 };

@@ -22,7 +22,7 @@ export const StakePoolCard = ({
   selected,
   onClick,
 }: StakePoolCardProps) => (
-  <Card.Outlined className={cn(styles.card, selected && styles.cardSelected)} {...(onClick ? { onClick } : {})}>
+  <Card.Outlined className={cn(styles.card, selected && styles.cardSelected)} onClick={onClick}>
     <Flex flexDirection="column">
       <Flex justifyContent="space-between" w="$fill">
         <Text.Body.Normal weight="$medium" className={styles.title}>
