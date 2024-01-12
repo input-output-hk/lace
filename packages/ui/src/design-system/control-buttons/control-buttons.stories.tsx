@@ -1,8 +1,8 @@
 import React from 'react';
 
+import { ReactComponent as PlusCircle } from '@lace/icons/dist/PlusCircleComponent';
 import type { Meta } from '@storybook/react';
 
-import { ReactComponent as PlusCircle } from '../../assets/icons/plus-circle.component.svg';
 import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';

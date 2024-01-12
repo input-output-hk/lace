@@ -1,9 +1,8 @@
 import React, { forwardRef } from 'react';
 import type { MouseEvent, Ref } from 'react';
 
+import { ReactComponent as CloseIcon } from '@lace/icons/dist/CloseComponent';
 import classNames from 'classnames';
-
-import { ReactComponent as CloseIcon } from '../../assets/icons/close.component.svg';
 
 import * as cx from './search-box-clear-button.css';
 

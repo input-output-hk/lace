@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react';
 import type { PropsWithChildren } from 'react';
 
-import { ReactComponent as PlusSmall } from '../../assets/icons/plus-small.component.svg';
+import { ReactComponent as PlusSmall } from '@lace/icons/dist/PlusSmallComponent';
+
 import { AssetInput } from '../asset-input';
 import { Box } from '../box';
 import * as ControlButtons from '../control-buttons';

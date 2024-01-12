@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { ReactComponent as PencilIcon } from '../../../assets/icons/pencil-outline.component.svg';
-import { ReactComponent as TrashIcon } from '../../../assets/icons/trash-outline.component.svg';
+import { ReactComponent as PencilIcon } from '@lace/icons/dist/PencilOutlineComponent';
+import { ReactComponent as TrashIcon } from '@lace/icons/dist/TrashOutlineComponent';
+
 import * as ControlButtons from '../../control-buttons';
 import { Flex } from '../../flex';
 import * as ProfilePicture from '../../profile-picture';

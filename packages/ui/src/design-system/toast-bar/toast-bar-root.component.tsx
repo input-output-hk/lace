@@ -1,10 +1,10 @@
 import React from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 
+import { ReactComponent as CloseIcon } from '@lace/icons/dist/CloseComponent';
 import * as Toast from '@radix-ui/react-toast';
 import classNames from 'classnames';
 
-import { ReactComponent as CloseIcon } from '../../assets/icons/close.component.svg';
 import { Box } from '../box';
 import { Flex } from '../flex';
 import * as IconButton from '../icon-buttons';

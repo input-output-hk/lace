@@ -1,8 +1,8 @@
 import React from 'react';
 
+import { ReactComponent as ShieldIcon } from '@lace/icons/dist/ShieldGradientComponent';
 import type { Meta } from '@storybook/react';
 
-import { ReactComponent as ShieldIcon } from '../../assets/icons/shield-gradient.component.svg';
 import { Box } from '../box';
 import { page, Section, Variants, ColorSchemaTable } from '../decorators';
 import { Divider } from '../divider';

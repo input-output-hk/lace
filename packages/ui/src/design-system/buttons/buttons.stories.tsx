@@ -1,8 +1,8 @@
 import React from 'react';
 
+import { ReactComponent as QuestionMark } from '@lace/icons/dist/QuestionMarkComponent';
 import type { Meta } from '@storybook/react';
 
-import { ReactComponent as QuestionMark } from '../../assets/icons/question-mark.component.svg';
 import { Variants, Section, page, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Grid, Cell } from '../grid';

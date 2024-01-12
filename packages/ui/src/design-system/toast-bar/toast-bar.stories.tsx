@@ -1,12 +1,12 @@
 import React from 'react';
 
+import { ReactComponent as PlainCircle } from '@lace/icons/dist/PlainCircleComponent';
 import * as Toast from '@radix-ui/react-toast';
 import { expect } from '@storybook/jest';
 import type { ComponentStory, Meta } from '@storybook/react';
 import { within, screen, userEvent, waitFor } from '@storybook/testing-library';
 import isChromatic from 'chromatic/isChromatic';
 
-import { ReactComponent as PlainCircle } from '../../assets/icons/plain-circle.component.svg';
 import { ThemeColorScheme, LocalThemeProvider } from '../../design-tokens';
 import { sleep } from '../../test';
 import { page, Variants, Section } from '../decorators';
