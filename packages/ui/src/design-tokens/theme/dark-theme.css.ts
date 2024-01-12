@@ -335,6 +335,16 @@ const colors: Colors = {
 
   $file_upload_icon_container_bgColor: darkColorScheme.$primary_dark_grey_plus,
   $file_upload_icon_container_borderColor: colorTransparent,
+
+  $checkbox_check_color: darkColorScheme.$primary_black,
+  $checkbox_checked_backgroundColor: darkColorScheme.$primary_accent_purple,
+  $checkbox_unchecked_backgroundColor: colorTransparent,
+  $checkbox_unchecked_borderColor: darkColorScheme.$primary_light_grey,
+  $checkbox_focus_color: darkColorScheme.$primary_accent_purple_0_3,
+  $checkbox_hover_unchecked_borderColor: darkColorScheme.$primary_light_grey,
+  $checkbox_hover_unchecked_backgroundColor: darkColorScheme.$primary_dark_grey,
+  $checkbox_hover_checked_backgroundColor:
+    darkColorScheme.$primary_hover_purple,
 };
 
 const elevation: Elevation = {

@@ -6,6 +6,7 @@ import assetInputAssert from '../assetInputAssert';
 import TransactionNewPage from '../../elements/newTransaction/transactionNewPage';
 import { t } from '../../utils/translationService';
 import { CoinConfigure } from '../../elements/newTransaction/coinConfigure';
+import { AssetInput } from '../../elements/newTransaction/assetInput';
 
 class TransactionBundleAssert {
   assertSeeBundles = async (expectedNumberOfBundles: number) => {
@@ -18,9 +19,8 @@ class TransactionBundleAssert {
         await webTester.seeWebElement(bundle.bundleRemoveButton());
       }
       await webTester.seeWebElement(bundle.bundleAddressInput().input());
-      await webTester.seeWebElement(bundle.bundleAssetInput());
       await coinConfigureAssert.assertSeeCoinConfigure();
-      await assetInputAssert.assertSeeAssetInput();
+      await assetInputAssert.assertSeeAssetInput(i);
     }
   };
 
@@ -72,10 +72,7 @@ class TransactionBundleAssert {
   }
 
   async assertAddAssetButtonIsEnabled(bundleIndex: number, shouldBeEnabled: boolean) {
-    const addAssetButton = await $(
-      new TransactionBundle(bundleIndex).bundleAssetInput().assetAddButton().toJSLocator()
-    );
-    await addAssetButton.waitForEnabled({ reverse: !shouldBeEnabled });
+    await new AssetInput(bundleIndex).assetAddButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }
 }
 

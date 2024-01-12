@@ -3,7 +3,6 @@ import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 import { TokenSearchResult } from '../elements/newTransaction/tokenSearchResult';
 import { AddressInput } from '../elements/addressInput';
-import { AssetInput } from '../elements/newTransaction/assetInput';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 import nftsPageObject from './nftsPageObject';
@@ -16,6 +15,7 @@ import { browser } from '@wdio/globals';
 import TransactionSubmittedPage from '../elements/newTransaction/transactionSubmittedPage';
 import AddressForm from '../elements/addressbook/AddressForm';
 import { generateRandomString } from '../utils/textUtils';
+import { AssetInput } from '../elements/newTransaction/assetInput';
 
 export default new (class NewTransactionExtendedPageObject {
   fillAddress = async (address: string, index?: number) => {
@@ -134,14 +134,6 @@ export default new (class NewTransactionExtendedPageObject {
     await TransactionNewPage.addressInput(index).ctaButton.click();
   };
 
-  clickAddAssetButtonMulti = async (bundleIndex: number) => {
-    await webTester.clickElement(new AssetInput().assetAddButtonMultiple(bundleIndex));
-  };
-
-  async clickAddAssetButton() {
-    await webTester.clickElement(new AssetInput().assetAddButton());
-  }
-
   clickRemoveBundleButton = async (outputIndex: number) => {
     await webTester.clickElement(new TransactionBundle(outputIndex).bundleRemoveButton());
   };
@@ -204,7 +196,7 @@ export default new (class NewTransactionExtendedPageObject {
 
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
     await this.fillAddress(shelley.getAddress(), bundleIndex);
-    await this.clickAddAssetButtonMulti(bundleIndex);
+    await new AssetInput(bundleIndex).clickAddAssetButton();
     await this.clickCoinConfigureTokenSearchResult(
       extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name
     );
@@ -223,7 +215,7 @@ export default new (class NewTransactionExtendedPageObject {
     await this.clickCoinSelectorName(Asset.CARDANO.ticker, 2);
     await this.clickNFTsButton();
     await nftsPageObject.clickNftItemInAssetSelector(Asset.IBILECOIN.name);
-    await this.clickAddAssetButtonMulti(2);
+    await new AssetInput(2).clickAddAssetButton();
     await this.clickNFTsButton();
     await nftsPageObject.clickNftItemInAssetSelector(Asset.BISON_COIN.name);
     await this.fillTokenValue(1, Asset.IBILECOIN.name, 2);
@@ -238,14 +230,14 @@ export default new (class NewTransactionExtendedPageObject {
 
   async setOneBundleWithMultipleAssets() {
     await this.fillAddress(shelley.getAddress(), 1);
-    await this.clickAddAssetButtonMulti(1);
+    await new AssetInput(1).clickAddAssetButton();
     await this.clickCoinConfigureTokenSearchResult(
       extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name
     );
-    await this.clickAddAssetButtonMulti(1);
+    await new AssetInput(1).clickAddAssetButton();
     await this.clickNFTsButton();
     await nftsPageObject.clickNftItemInAssetSelector(Asset.IBILECOIN.name);
-    await this.clickAddAssetButtonMulti(1);
+    await new AssetInput(1).clickAddAssetButton();
     await this.clickNFTsButton();
     await nftsPageObject.clickNftItemInAssetSelector(Asset.BISON_COIN.name);
     await this.fillTokenValue(1, Asset.CARDANO.ticker);
@@ -255,7 +247,7 @@ export default new (class NewTransactionExtendedPageObject {
   }
 
   async addAllAvailableTokenTypes(bundleIndex: number) {
-    await this.clickAddAssetButtonMulti(bundleIndex);
+    await new AssetInput(bundleIndex).clickAddAssetButton();
     await this.clickTokensButton();
     const tokens = await this.getTokensInfo();
     let tokensCount = tokens.length;
@@ -263,14 +255,14 @@ export default new (class NewTransactionExtendedPageObject {
       tokensCount--;
       await this.clickCoinConfigureTokenSearchResult(token.name);
       if (tokensCount) {
-        await this.clickAddAssetButtonMulti(bundleIndex);
+        await new AssetInput(bundleIndex).clickAddAssetButton();
         await this.clickTokensButton();
       }
     }
   }
 
   async addAllAvailableNftTypes(bundleIndex: number) {
-    await this.clickAddAssetButtonMulti(bundleIndex);
+    await new AssetInput(bundleIndex).clickAddAssetButton();
     await this.clickNFTsButton();
     const nftNames = await this.getNftNames();
     let nftsCount = nftNames.length;
@@ -278,7 +270,7 @@ export default new (class NewTransactionExtendedPageObject {
       nftsCount--;
       await nftsPageObject.clickNftItemInAssetSelector(nftName);
       if (nftsCount) {
-        await this.clickAddAssetButtonMulti(bundleIndex);
+        await new AssetInput(bundleIndex).clickAddAssetButton();
         await this.clickNFTsButton();
       }
     }
