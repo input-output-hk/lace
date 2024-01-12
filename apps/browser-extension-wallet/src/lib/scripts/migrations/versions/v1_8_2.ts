@@ -6,9 +6,10 @@ import { getItemFromLocalStorage, removeItemFromLocalStorage, setItemInLocalStor
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { walletRepository } from '@src/lib/wallet-api-ui';
 import { Wallet } from '@lace/cardano';
-import { AddWalletProps, WalletType } from '@cardano-sdk/web-extension';
+import { AddWalletProps, WalletType, getWalletId } from '@cardano-sdk/web-extension';
 import { HexBlob } from '@cardano-sdk/util';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
+import { firstValueFrom } from 'rxjs';
 
 const MIGRATION_VERSION = '1.8.2';
 const LOCK_STORAGE = 'lock';
@@ -77,16 +78,23 @@ export const v_1_8_2: Migration = {
         console.info(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
 
         const walletName = getWalletFromStorage()?.name;
-        const walletId = await walletRepository.addWallet(await keyAgentDataToAddWalletProps(keyAgentData));
-
+        const wallets = await firstValueFrom(walletRepository.wallets$);
+        const walletProps = await keyAgentDataToAddWalletProps(keyAgentData);
+        const walletId = await getWalletId(
+          walletProps.type === WalletType.Script ? walletProps.script : walletProps.extendedAccountPublicKey
+        );
         const lockValue =
           keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory ? HexBlob.fromBytes(lock) : undefined;
 
-        await walletRepository.addAccount({
-          accountIndex: keyAgentData.accountIndex,
-          metadata: { name: walletName, lockValue },
-          walletId
-        });
+        if (!wallets.some((wallet) => wallet.walletId === walletId)) {
+          await walletRepository.addWallet(await keyAgentDataToAddWalletProps(keyAgentData));
+
+          await walletRepository.addAccount({
+            accountIndex: keyAgentData.accountIndex,
+            metadata: { name: walletName, lockValue },
+            walletId
+          });
+        }
 
         if (lock && !keyAgentData) {
           setItemInLocalStorage(LOCK_STORAGE, lockValue);
