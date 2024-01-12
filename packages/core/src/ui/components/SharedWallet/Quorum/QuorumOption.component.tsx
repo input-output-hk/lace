@@ -1,30 +1,27 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import React, { useState } from 'react';
-import styles from './SharedWalletQuorumOption.module.scss';
+import styles from './QuorumOption.module.scss';
 import { Card, RadioButton, Flex, Button, SelectGroup, Text, Box } from '@lace/ui';
 
-export interface WalletSetupQuorumOptionProps {
+export interface QuorumOptionProps {
+  translations: {
+    title: string;
+    description: string;
+    cosignersSentence: Record<'start' | 'end', string>;
+    navigationButtons: Record<'back' | 'next', string>;
+  };
   radioButtonOptions: Record<'allAddresses' | 'anyAddress' | 'someAddress', string>;
-  cosignersSentence: Record<'start' | 'end', string>;
   cosignerValue: { label: string; value: string }[];
-  title: string;
-  description: string;
-  navigationButtons: Record<'back' | 'next', string>;
-
   onNext: (data: { userSelection: string; numberOfCosigner: string }) => void;
   onBack: () => void;
 }
 
-export const SharedWalletQuorumOption = ({
+export const QuorumOption = ({
+  translations: { title, description, cosignersSentence, navigationButtons },
   radioButtonOptions: { allAddresses, anyAddress, someAddress },
   cosignerValue,
-  title,
-  description,
-  cosignersSentence,
-  navigationButtons,
   onBack,
   onNext
-}: WalletSetupQuorumOptionProps) => {
+}: QuorumOptionProps): JSX.Element => {
   const [radioButtonValue, setRadioButtonValue] = useState('');
   const [cosignerSelection, setCosignerSelection] = useState<string | undefined>();
 
@@ -52,7 +49,7 @@ export const SharedWalletQuorumOption = ({
   };
 
   return (
-    <div className={styles.sharedWalletQuorumOption} data-testid="shared-wallet-setup-quorum-container">
+    <div className={styles.QuorumOption} data-testid="shared-wallet-setup-quorum-container">
       <Text.Heading data-testid="shared-wallet-setup-quorum-user-header">{title}</Text.Heading>
       <Box mb="$28" mt="$20">
         <Text.Body.Normal data-testid="shared-wallet-setup-quorum-user-description">{description}</Text.Body.Normal>

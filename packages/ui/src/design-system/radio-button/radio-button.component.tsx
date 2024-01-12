@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 
+import { ReactComponent as DocumentDownload } from '@lace/icons/dist/DocumentDownload';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 import cn from 'classnames';
 
@@ -14,10 +15,15 @@ export type Props = Readonly<{
   label?: ReactNode;
   className?: string;
   selectedValue: string;
+
   options: {
     value: string;
     label: string;
+    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+
+    onIconClick?: () => void;
   }[];
+
   onValueChange: (value: string) => void;
 }>;
 
@@ -37,7 +43,7 @@ export const RadioButton = ({
       onValueChange={onValueChange}
       className={cx.radioGroupRoot}
     >
-      {options.map(({ value, label }) => (
+      {options.map(({ value, label, icon, onIconClick }) => (
         <Flex alignItems="center" h="$fill" m="$4" key={value}>
           <RadioGroup.Item
             id={label}
@@ -59,6 +65,13 @@ export const RadioButton = ({
                 {label}
               </Box>
             </label>
+          )}
+          {icon !== undefined && (
+            <Flex justifyContent="flex-end">
+              <div className={cx.icon} onClick={onIconClick}>
+                <DocumentDownload />
+              </div>
+            </Flex>
           )}
         </Flex>
       ))}

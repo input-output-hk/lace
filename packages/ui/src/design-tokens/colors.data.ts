@@ -241,11 +241,15 @@ export const colors = {
   $checkbox_hover_checked_backgroundColor: '',
   $checkbox_hover_unchecked_borderColor: '',
   $checkbox_hover_unchecked_backgroundColor: '',
+
   $radiobutton_focus_color: '',
   $radiobutton_hover_color: '',
   $radiobutton_indicator_backgroundColor: '',
   $radiobutton_indicator_check_color: '',
   $radiobutton_unchecked_borderColor: '',
+  $radiobutton_icon_color: '',
+  $radiobutton_icon_hover_color: '',
+  $radiobutton_icon_hover_border_color: '',
 
   $select_border: '',
   $select_icon_color: '',
@@ -253,6 +257,7 @@ export const colors = {
   $select_hover_background_color: '',
   $select_input_value_color: '',
   $select_input_background_data_highlighted: '',
+  $select_input_focus_color: '',
 };
 
 export type Colors = typeof colors;

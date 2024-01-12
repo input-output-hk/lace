@@ -41,9 +41,17 @@ const MainComponents = (): JSX.Element => {
           placeholder={placeholder}
         />
       </Variants.Cell>
-
       <Variants.Cell>
         <SelectGroup
+          disabled={true}
+          onValueChange={(): undefined => undefined}
+          options={options}
+          placeholder={placeholder}
+        />
+      </Variants.Cell>
+      <Variants.Cell>
+        <SelectGroup
+          className={cx.focus}
           disabled={true}
           onValueChange={(): undefined => undefined}
           options={options}
@@ -98,7 +106,7 @@ export const Overview = (): JSX.Element => {
         <Divider my="$64" />
 
         <Section title="Main components">
-          <Variants.Table headers={['Rest', 'Disabled']}>
+          <Variants.Table headers={['Rest', 'Disabled', 'Focused']}>
             <MainComponents />
           </Variants.Table>
           <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>

@@ -62,6 +62,32 @@ export const radioGroupIndicator = style([
   },
 ]);
 
+export const icon = style([
+  sx({
+    borderRadius: '$tiny',
+    ml: '$24',
+    color: '$radiobutton_icon_color',
+  }),
+  {
+    padding: '6px 6px 0 6px',
+    border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
+
+    ':focus': {
+      backgroundColor: vars.colors.$radiobutton_focus_color,
+    },
+
+    ':hover': {
+      border: `1px solid ${vars.colors.$radiobutton_icon_hover_border_color}`,
+      backgroundColor: vars.colors.$radiobutton_icon_hover_color,
+    },
+
+    ':disabled': {
+      cursor: 'not-allowed',
+      opacity: '20%',
+    },
+  },
+]);
+
 export const unchecked = style({
   border: `1px solid ${vars.colors.$radiobutton_unchecked_borderColor}`,
 });

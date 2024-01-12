@@ -1,10 +1,10 @@
 import React from 'react';
 
+import { ReactComponent as ChevronDownIcon } from '@lace/icons/dist/ChevronDownComponent';
+import { ReactComponent as ChevronUpIcon } from '@lace/icons/dist/ChevronUpComponent';
 import * as Select from '@radix-ui/react-select';
 import cn from 'classnames';
 
-import { ReactComponent as ChevronDownIcon } from '../../assets/icons/chevron-down.component.svg';
-import { ReactComponent as ChevronUpIcon } from '../../assets/icons/chevron-up.component.svg';
 import { Box } from '../box';
 
 import { SelectItem } from './select-item.component';

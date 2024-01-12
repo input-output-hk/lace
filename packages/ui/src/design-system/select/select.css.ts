@@ -1,12 +1,25 @@
-import { style, vars, sx } from '../../design-tokens';
+import { style, vars, sx, createVar } from '../../design-tokens';
+export const focusBoxShadow = createVar();
 
 export const root = style([
+  {
+    vars: {
+      [focusBoxShadow]: `0px 0px 0px 3px ${vars.colors.$select_input_focus_color}`,
+    },
+  },
   sx({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '$tiny',
   }),
+  {
+    selectors: {
+      '&:focus-within': {
+        boxShadow: focusBoxShadow,
+      },
+    },
+  },
 ]);
 
 export const selectTrigger = style([
@@ -31,7 +44,7 @@ export const selectTrigger = style([
     },
 
     ':focus': {
-      boxShadow: 'none',
+      boxShadow: 'focusBoxShadow',
     },
 
     ':focus-visible': {

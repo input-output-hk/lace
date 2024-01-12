@@ -1,8 +1,7 @@
 import React from 'react';
 
+import { ReactComponent as CheckIcon } from '@lace/icons/dist/CheckBoxComponent';
 import * as Select from '@radix-ui/react-select';
-
-import { ReactComponent as CheckIcon } from '../../assets/icons/check.component.svg';
 
 import * as cx from './select.css';
 
