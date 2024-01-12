@@ -10712,6 +10712,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@lace/icons@workspace:packages/icons":
+  version: 0.0.0-use.local
+  resolution: "@lace/icons@workspace:packages/icons"
+  languageName: unknown
+  linkType: soft
+
 "@lace/staking@0.1.0, @lace/staking@workspace:packages/staking":
   version: 0.0.0-use.local
   resolution: "@lace/staking@workspace:packages/staking"
