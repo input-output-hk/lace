@@ -4,7 +4,6 @@ export const container = style({
   background: vars.colors.$input_container_bgColor,
   height: vars.spacing.$64,
   borderRadius: vars.radius.$medium,
-  width: 'auto',
   fontWeight: vars.fontWeights.$semibold,
   fontFamily: vars.fontFamily.$nova,
   display: 'flex',

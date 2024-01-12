@@ -63,7 +63,7 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    Then I see Manage delegation page
+    Then I see Manage delegation drawer
 
   @LW-9447
   Scenario Outline: Extended-view - Staking - Manage staking only one pool is expanded by default
@@ -83,7 +83,7 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    Then I see Manage delegation page
+    Then I see Manage delegation drawer
     And I see selected pools counter is showing "<poolsCount>"
     Examples:
       | walletName                     | poolsCount |
@@ -107,7 +107,7 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    Then I see Manage delegation page
+    Then I see Manage delegation drawer
     And I see "Add stake pool" button is disabled
 
   @LW-9485
@@ -115,39 +115,98 @@ Feature: Staking Page - Extended View
     When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    Then I see Manage delegation page
+    Then I see Manage delegation drawer
     And I see "Add stake pool" button is enabled
 
   @LW-9489
   Scenario: Extended View - Staking - Manage staking add button works as expected
-    And I navigate to Staking extended page
+    When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    And I see Manage delegation page
+    Then I see Manage delegation drawer
     And I see selected pools counter is showing "1"
     And I see "Add stake pool" button is enabled
     When I click "Add stake pool" button
-    Then I pick "CanadaStakes" pool for delegation
+    And I pick "CanadaStakes" pool for delegation
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
-    And I see Manage delegation page
+    Then I see Manage delegation drawer
     And I see selected pools counter is showing "2"
 
   @LW-9490
   Scenario Outline: Extended View - Staking - Manage staking add button disabled when selected max pools for staking
-    And I navigate to Staking extended page
+    When I navigate to Staking extended page
     And I open Overview tab
     And I click Manage button
-    And I see Manage delegation page
+    Then I see Manage delegation drawer
     And I see selected pools counter is showing "1"
     And I see "Add stake pool" button is enabled
-    And I click "Add stake pool" button
-    When I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
+    When I click "Add stake pool" button
+    And I pick "<pools_after>" pools for delegation from browse pools view: "<pools_names>"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
-    And I see Manage delegation page
+    Then I see Manage delegation drawer
     And I see selected pools counter is showing "<pools_after>"
-    Then I see "Add stake pool" button is disabled
+    And I see "Add stake pool" button is disabled
     Examples:
       | pools_after | pools_names                                                                                   |
       | 10          | 8BETA, ADA Capital, AdaNet.io, Boople Turtle Pool, ADV, BAZAR, ADASquirrel, Akasha, Alfa Pool |
+
+  @LW-9493
+  Scenario: Extended View - Staking - Manage staking remove button disabled when staking to 1 pool
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    And I see selected pools counter is showing "1"
+    And I see "Remove pool from portfolio" button is disabled for pool "1"
+    And I see "Remove pool from portfolio" button tooltip on hover for pool "1"
+
+  @LW-9494
+  Scenario: Extended View - Staking - Manage staking remove button works as expected
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    And I see selected pools counter is showing "10"
+    When I expand all pools details
+    Then all pools details are expanded
+    When I remove "9" pools from delegation portfolio
+    Then I see selected pools counter is showing "1"
+    And I see "Remove pool from portfolio" button is disabled for pool "1"
+    And I see "Remove pool from portfolio" button tooltip on hover for pool "1"
+
+  @LW-9509
+  Scenario: Extended View - Staking - Manage staking 'Confirm new portfolio' button not visible
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    And I don't see "Confirm new portfolio" button
+
+  @LW-9510
+  Scenario: Extended View - Staking - Manage staking 'Confirm new portfolio' disabled
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I remove "1" pools from delegation portfolio
+    Then I see "Confirm new portfolio" button
+    And "Confirm new portfolio" button is disabled
+
+  @LW-9511
+  Scenario: Extended View - Staking - Manage staking 'Confirm new portfolio' works correctly
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I expand all pools details
+    And I click minus button for pool "1"
+    And I click plus button for pool "2"
+    Then I see "Confirm new portfolio" button
+    And "Confirm new portfolio" button is enabled
+    When I click "Confirm new portfolio" button
+    Then I see Manage delegation drawer Confirmation page

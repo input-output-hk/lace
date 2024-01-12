@@ -13,13 +13,15 @@ export interface WalletSetupWalletNameStepProps {
   onNext: (walletName: string) => void;
   translations: TranslationsFor<'maxCharacters' | 'nameYourWallet' | 'create' | 'walletName' | 'chooseName'>;
   isHardwareWallet?: boolean;
+  onChange?: (name: string) => void;
 }
 
 export const WalletSetupWalletNameStep = ({
   onBack,
   onNext,
   translations,
-  isHardwareWallet = false
+  isHardwareWallet = false,
+  onChange
 }: WalletSetupWalletNameStepProps): React.ReactElement => {
   const [isCreating, setIsCreating] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -40,6 +42,7 @@ export const WalletSetupWalletNameStep = ({
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setIsDirty(true);
     setWalletName(e.target.value);
+    onChange?.(e.target.value);
   };
 
   return (

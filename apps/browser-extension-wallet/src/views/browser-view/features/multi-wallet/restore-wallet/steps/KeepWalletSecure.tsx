@@ -12,5 +12,11 @@ const noop = (): void => void 0;
 export const KeepWalletSecure = (): JSX.Element => {
   const history = useHistory();
 
-  return <View onNext={() => history.push(restore.selectRecoveryPhraseLength)} onVideoClick={noop} />;
+  return (
+    <View
+      onBack={() => history.goBack()}
+      onNext={() => history.push(restore.selectRecoveryPhraseLength)}
+      onVideoClick={noop}
+    />
+  );
 };

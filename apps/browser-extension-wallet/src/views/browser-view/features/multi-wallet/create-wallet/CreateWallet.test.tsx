@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { Providers } from './types';
 import { walletRoutePaths } from '@routes';
 import { createAssetsRoute, fillMnemonic, getNextButton, mnemonicWords, setupStep } from '../tests/utils';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 const keepWalletSecureStep = async () => {
   const nextButton = getNextButton();
@@ -40,12 +41,18 @@ describe('Multi Wallet Setup/Create Wallet', () => {
   let providers = {} as {
     createWallet: jest.Mock;
     generateMnemonicWords: jest.Mock;
+    confirmationDialog: {
+      shouldShowDialog$: BehaviorSubject<boolean>;
+    };
   };
 
   beforeEach(() => {
     providers = {
       createWallet: jest.fn(),
-      generateMnemonicWords: jest.fn()
+      generateMnemonicWords: jest.fn(),
+      confirmationDialog: {
+        shouldShowDialog$: new BehaviorSubject(false)
+      }
     };
   });
 
@@ -63,5 +70,24 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     await setupStep();
     await keepWalletSecureStep();
     await recoveryPhraseStep();
+  });
+
+  test('should emit correct value for shouldShowDialog', async () => {
+    render(
+      <MemoryRouter initialEntries={[walletRoutePaths.newWallet.create.setup]}>
+        <CreateWallet providers={providers as Providers} />
+        {createAssetsRoute()}
+      </MemoryRouter>
+    );
+
+    const nameInput = screen.getByTestId('wallet-name-input');
+
+    fireEvent.change(nameInput, { target: { value: 'My X Wallet' } });
+
+    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(true);
+
+    fireEvent.change(nameInput, { target: { value: '' } });
+
+    expect(await firstValueFrom(providers.confirmationDialog.shouldShowDialog$)).toBe(false);
   });
 });

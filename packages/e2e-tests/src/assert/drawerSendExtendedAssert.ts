@@ -1,29 +1,25 @@
 /* eslint-disable no-undef */
 import webTester from '../actor/webTester';
 import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
-import { TransactionNewPage } from '../elements/newTransaction/transactionNewPage';
+import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
 import { TestnetPatterns } from '../support/patterns';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import { AddressInput } from '../elements/addressInput';
 import coinConfigureAssert from './coinConfigureAssert';
 import assetInputAssert from './assetInputAssert';
-import { AssetInput } from '../elements/newTransaction/assetInput';
 import testContext from '../utils/testContext';
 import Banner from '../elements/banner';
 import { getAddressByName, validAddress, validAddress2 } from '../data/AddressData';
 import { TransactionBundle } from '../elements/newTransaction/transactionBundle';
 import ModalAssert from './modalAssert';
-import CommonDrawerElements from '../elements/CommonDrawerElements';
 import TransactionsPage from '../elements/transactionsPage';
 import { browser } from '@wdio/globals';
 import { truncateAddressEntryName } from '../utils/addressBookUtils';
 
 class DrawerSendExtendedAssert {
   assertSeeSendDrawer = async (mode: 'extended' | 'popup') => {
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.title'));
-    const assetInput = new AssetInput();
-    const transactionNewPage = new TransactionNewPage();
+    await this.assertSeeDrawerTitle(mode === 'extended');
     const addressInput = new AddressInput();
     await webTester.seeWebElement(addressInput.input());
     expect(await webTester.getTextValueFromElement(addressInput.label())).to.equal(
@@ -32,53 +28,80 @@ class DrawerSendExtendedAssert {
     await addressInput.ctaButton.waitForDisplayed();
     await coinConfigureAssert.assertSeeCoinConfigure();
     await assetInputAssert.assertSeeAssetInput();
-    await webTester.seeWebElement(assetInput.assetAddButton());
-    await transactionNewPage.txMetadataInputField.waitForDisplayed();
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.metadata.addANote'));
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.transactionCosts'));
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.transactionFee'));
-    await webTester.seeWebElement(transactionNewPage.attributeValueAda());
-    await transactionNewPage.attributeValueFiat.waitForDisplayed();
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.footer.review'));
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.footer.cancel'));
+    await TransactionNewPage.metadataInputField.waitForDisplayed();
+    await TransactionNewPage.metadataInputLabel.waitForDisplayed();
+    expect(await TransactionNewPage.metadataInputLabel.getText()).to.equal(
+      await t('browserView.transaction.send.metadata.addANote')
+    );
+    await this.assertSeeTransactionCostsLabel();
+    await this.assertSeeTransactionFeeLabel();
+    await TransactionNewPage.transactionFeeValueAda.waitForDisplayed();
+    await TransactionNewPage.transactionFeeValueFiat.waitForDisplayed();
+    await TransactionNewPage.addBundleButton.waitForDisplayed();
+    expect(await TransactionNewPage.addBundleButton.getText()).to.equal(
+      await t('browserView.transaction.send.drawer.addBundle')
+    );
+    await this.assertSeeFooterButtons();
     switch (mode) {
       case 'extended':
-        await transactionNewPage.addBundleButton.waitForDisplayed();
-        await webTester.seeWebElement(transactionNewPage.bundleDescription());
-        expect(await transactionNewPage.getBundleDescription()).to.equal(
+        await TransactionNewPage.bundleDescription.waitForDisplayed();
+        expect(await TransactionNewPage.bundleDescription.getText()).to.equal(
           await t('browserView.transaction.send.advancedFlowText')
         );
-        await new CommonDrawerElements().drawerHeaderCloseButton.waitForClickable();
+        await TransactionNewPage.drawerHeaderCloseButton.waitForClickable();
         break;
       case 'popup':
-        await new CommonDrawerElements().drawerHeaderBackButton.waitForClickable();
-        await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.drawer.addBundle'));
+        await TransactionNewPage.drawerHeaderBackButton.waitForClickable();
         break;
     }
   };
 
-  async assertSeeSendSimpleScreen(mode: 'extended' | 'popup') {
-    await webTester.waitUntilSeeElementContainingText(await t('browserView.transaction.send.title'));
-
-    const transactionNewPage = new TransactionNewPage();
-
-    if (mode === 'extended') {
-      await transactionNewPage.addBundleButton.waitForDisplayed();
-    }
-    await webTester.seeWebElement(transactionNewPage.addressInput().container());
-    await webTester.seeWebElement(transactionNewPage.coinConfigure().container());
-
-    await webTester.seeWebElement(transactionNewPage.attributeLabel());
-    expect(await webTester.getTextValueFromElement(transactionNewPage.attributeLabel())).to.equal(
+  private async assertSeeTransactionFeeLabel() {
+    await TransactionNewPage.transactionFeeLabel.waitForDisplayed();
+    expect(await TransactionNewPage.transactionFeeLabel.getText()).to.equal(
       await t('browserView.transaction.send.transactionFee')
     );
+  }
 
-    await webTester.seeWebElement(transactionNewPage.attributeValueAda());
-    expect((await webTester.getTextValueFromElement(transactionNewPage.attributeValueAda())) as string).to.match(
-      TestnetPatterns.ADA_LITERAL_VALUE_REGEX
+  private async assertSeeTransactionCostsLabel() {
+    await TransactionNewPage.transactionCostsSectionLabel.waitForDisplayed();
+    expect(await TransactionNewPage.transactionCostsSectionLabel.getText()).to.equal(
+      await t('browserView.transaction.send.transactionCosts')
     );
-    await transactionNewPage.attributeValueFiat.waitForDisplayed();
-    expect(await transactionNewPage.attributeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
+  }
+
+  private async assertSeeDrawerTitle(shouldBeDisplayed: boolean) {
+    await TransactionNewPage.title.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    if (shouldBeDisplayed) {
+      expect(await TransactionNewPage.title.getText()).to.equal(await t('browserView.transaction.send.title'));
+    }
+  }
+
+  private async assertSeeFooterButtons() {
+    await TransactionNewPage.reviewTransactionButton.waitForDisplayed();
+    expect(await TransactionNewPage.reviewTransactionButton.getText()).to.equal(
+      await t('browserView.transaction.send.footer.review')
+    );
+    await TransactionNewPage.cancelTransactionButton.waitForDisplayed();
+    expect(await TransactionNewPage.cancelTransactionButton.getText()).to.equal(
+      await t('browserView.transaction.send.footer.cancel')
+    );
+  }
+
+  async assertSeeSendSimpleScreen(mode: 'extended' | 'popup') {
+    await this.assertSeeDrawerTitle(mode === 'extended');
+    if (mode === 'extended') {
+      await TransactionNewPage.addBundleButton.waitForDisplayed();
+    }
+    await webTester.seeWebElement(TransactionNewPage.addressInput().container());
+    await webTester.seeWebElement(TransactionNewPage.coinConfigure().container());
+
+    await this.assertSeeTransactionCostsLabel();
+    await this.assertSeeTransactionFeeLabel();
+    await TransactionNewPage.transactionFeeValueAda.waitForDisplayed();
+    await TransactionNewPage.transactionFeeValueFiat.waitForDisplayed();
+    expect(await TransactionNewPage.transactionFeeValueAda.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+    expect(await TransactionNewPage.transactionFeeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
 
   async assertSeeCoinSelectorWithTitle(expectedTokenName: string) {
@@ -92,16 +115,15 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeTransactionCosts(expectedValueAda: string) {
-    const transactionNewPage = new TransactionNewPage();
     if (expectedValueAda !== '0.00') {
-      await browser.waitUntil(async () => (await transactionNewPage.getValueAda()) !== 0, {
+      await browser.waitUntil(async () => (await TransactionNewPage.getTransactionFeeValueInAda()) !== 0, {
         interval: 500,
         timeout: 5000,
         timeoutMsg: 'failed while waiting for transaction fee to change'
       });
     }
 
-    const valueAda = Number(await transactionNewPage.getValueAda());
+    const valueAda = Number(await TransactionNewPage.getTransactionFeeValueInAda());
 
     expect(expectedValueAda).to.be.oneOf([
       valueAda.toFixed(2).toString(),
@@ -109,58 +131,51 @@ class DrawerSendExtendedAssert {
       (valueAda - 0.01).toFixed(2).toString()
     ]);
 
-    expect(await transactionNewPage.attributeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
+    expect(await TransactionNewPage.transactionFeeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
 
   async assertSeeAdaAllocationCosts(expectedValueAdaAllocation: string) {
     // may need to be updated in the future
     await browser.pause(1000);
-    const transactionNewPage = new TransactionNewPage();
-    const valueAdaAllocation = Number(await transactionNewPage.getValueAdaAllocation());
+    const valueAdaAllocation = Number(await TransactionNewPage.getAdaAllocationValueInAda());
 
     expect(Number(expectedValueAdaAllocation)).to.be.within(valueAdaAllocation - 0.1, valueAdaAllocation + 0.1);
 
-    expect(
-      (await webTester.getTextValueFromElement(transactionNewPage.attributeAdaAllocationValueFiat())) as string
-    ).to.match(TestnetPatterns.USD_VALUE_REGEX);
+    expect(await TransactionNewPage.adaAllocationValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
 
   async assertAmountOfResultsDisplayed(noOfResults: number) {
-    const transactionNewPage = new TransactionNewPage();
-    const rowsNumber = (await transactionNewPage.getAddressBookSearchResultsRows()).length;
+    const rowsNumber = (await TransactionNewPage.getAddressBookSearchResultsRows()).length;
     expect(rowsNumber).to.equal(noOfResults);
   }
 
   async assertResultsMatchContacts() {
-    const transactionNewPage = new TransactionNewPage();
     // Verify 1st address
-    expect(await transactionNewPage.getContactName(1)).to.equal(truncateAddressEntryName(validAddress.getName()));
-    const partOfActualAddress1 = String(await transactionNewPage.getPartialContactAddress(1));
+    expect(await TransactionNewPage.getContactName(1)).to.equal(truncateAddressEntryName(validAddress.getName()));
+    const partOfActualAddress1 = String(await TransactionNewPage.getPartialContactAddress(1));
     expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress1);
     // Verify 2nd address
-    expect(await transactionNewPage.getContactName(2)).to.equal(truncateAddressEntryName(validAddress2.getName()));
-    const partOfActualAddress2 = String(await transactionNewPage.getPartialContactAddress(2));
+    expect(await TransactionNewPage.getContactName(2)).to.equal(truncateAddressEntryName(validAddress2.getName()));
+    const partOfActualAddress2 = String(await TransactionNewPage.getPartialContactAddress(2));
     expect(getAddressByName(validAddress2.getName())).contains(partOfActualAddress2);
   }
 
   async assertFirstResultNameEquals(expectedName: string) {
-    const transactionNewPage = new TransactionNewPage();
-    expect(await transactionNewPage.getContactName(1)).to.equal(expectedName);
+    expect(await TransactionNewPage.getContactName(1)).to.equal(expectedName);
   }
 
   async assertAddedContactMatches() {
-    const transactionNewPage = new TransactionNewPage();
-    expect(await transactionNewPage.getContactName(1)).to.equal(truncateAddressEntryName(validAddress.getName()));
-    const partOfActualAddress = String(await transactionNewPage.getPartialContactAddress(1));
+    expect(await TransactionNewPage.getContactName(1)).to.equal(truncateAddressEntryName(validAddress.getName()));
+    const partOfActualAddress = String(await TransactionNewPage.getPartialContactAddress(1));
     expect(getAddressByName(validAddress.getName())).contains(partOfActualAddress);
   }
 
   async assertSeeMetadataCounter(shouldSee: boolean) {
-    await new TransactionNewPage().txMetadataCounter.waitForDisplayed({ reverse: !shouldSee });
+    await TransactionNewPage.txMetadataCounter.waitForDisplayed({ reverse: !shouldSee });
   }
 
   async assertSeeMetadataCounterWarning(shouldSee: boolean) {
-    const colorProperty = await new TransactionNewPage().txMetadataCounter.getCSSProperty('color');
+    const colorProperty = await TransactionNewPage.txMetadataCounter.getCSSProperty('color');
     // Verify if metadata counter has changed its color to light red (#ff5470) or not
     shouldSee
       ? expect(colorProperty.parsed.hex).to.equal('#ff5470')
@@ -276,13 +291,11 @@ class DrawerSendExtendedAssert {
   }
 
   async assertMetadataBinButtonEnabled(isEnabled: boolean) {
-    const transactionNewPage = new TransactionNewPage();
-    await transactionNewPage.metadataBinButton.waitForEnabled({ reverse: !isEnabled });
+    await TransactionNewPage.metadataBinButton.waitForEnabled({ reverse: !isEnabled });
   }
 
   async assertMetadataInputIsEmpty() {
-    const transactionNewPage = new TransactionNewPage();
-    expect(await transactionNewPage.txMetadataInputField.getValue()).to.be.empty;
+    expect(await TransactionNewPage.metadataInputField.getValue()).to.be.empty;
   }
 
   async assertSeeIncorrectAddressError(shouldSee: boolean) {
@@ -295,16 +308,16 @@ class DrawerSendExtendedAssert {
   }
 
   async assertReviewTransactionButtonIsEnabled(shouldBeEnabled: boolean) {
-    await new TransactionNewPage().reviewTransactionButton.waitForClickable({
+    await TransactionNewPage.reviewTransactionButton.waitForClickable({
       reverse: !shouldBeEnabled,
       timeout: 10_000
     });
   }
 
   async assertReviewTransactionButtonIsDisplayed(shouldBeDisplayed: boolean) {
-    await new TransactionNewPage().reviewTransactionButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await TransactionNewPage.reviewTransactionButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      expect(await new TransactionNewPage().reviewTransactionButton.getText()).to.equal(
+      expect(await TransactionNewPage.reviewTransactionButton.getText()).to.equal(
         await t('browserView.transaction.send.footer.review')
       );
     }
@@ -371,15 +384,14 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeReviewAddressBanner(handle: string) {
-    const transactionNewPage = new TransactionNewPage();
-    await transactionNewPage.banner.container.waitForDisplayed();
-    await transactionNewPage.banner.icon.waitForDisplayed();
-    await transactionNewPage.banner.description.waitForDisplayed();
-    expect(await transactionNewPage.banner.description.getText()).to.contain(
+    await TransactionNewPage.banner.container.waitForDisplayed();
+    await TransactionNewPage.banner.icon.waitForDisplayed();
+    await TransactionNewPage.banner.description.waitForDisplayed();
+    expect(await TransactionNewPage.banner.description.getText()).to.contain(
       (await t('addressBook.reviewModal.banner.browserDescription')).replace('{{name}}', handle)
     );
-    await transactionNewPage.banner.button.waitForDisplayed();
-    expect(await transactionNewPage.banner.button.getText()).to.equal(
+    await TransactionNewPage.banner.button.waitForDisplayed();
+    expect(await TransactionNewPage.banner.button.getText()).to.equal(
       (await t('addressBook.reviewModal.banner.confirmReview.button')).replace('{{name}}', handle)
     );
   }
