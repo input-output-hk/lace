@@ -10778,7 +10778,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/icons@workspace:packages/icons":
+"@lace/icons@^0.1.0, @lace/icons@workspace:packages/icons":
   version: 0.0.0-use.local
   resolution: "@lace/icons@workspace:packages/icons"
   dependencies:
@@ -10879,6 +10879,7 @@ __metadata:
   resolution: "@lace/ui@workspace:packages/ui"
   dependencies:
     "@babel/core": ^7.21.0
+    "@lace/icons": ^0.1.0
     "@radix-ui/react-alert-dialog": ^1.0.4
     "@radix-ui/react-avatar": ^1.0.2
     "@radix-ui/react-checkbox": ^1.0.4
