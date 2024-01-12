@@ -1,7 +1,7 @@
 import React from 'react';
 import { sx, Box, Flex, Text, Button, EducationalCard } from '@lace/ui';
-import { ReactComponent as BookGradient } from '@lace/ui/dist/assets/icons/book-gradient.component.svg';
-import { ReactComponent as LightBulbGradient } from '@lace/ui/dist/assets/icons/light-bulb-gradient.component.svg';
+import { ReactComponent as BookGradient } from '@lace/icons/dist/BookGradientComponent';
+import { ReactComponent as LightBulbGradient } from '@lace/icons/dist/LightBulbGradientComponent';
 
 type Educational = {
   title: string;
