@@ -1,14 +1,7 @@
-import { style } from '@lace/ui';
-const minimumScreenSize = '668px';
+import { sx } from '@lace/ui';
 
-export const stakePoolsTable = style([
-  {
-    '@media': {
-      [`screen and (min-width: ${minimumScreenSize})`]: {
-        alignItems: 'stretch',
-        display: 'flex',
-        flexDirection: 'column',
-      },
-    },
-  },
-]);
+export const stakePoolsTable = sx({
+  alignItems: { minimumScreen: 'stretch' },
+  display: { minimumScreen: 'flex' },
+  flexDirection: { minimumScreen: 'column' },
+});

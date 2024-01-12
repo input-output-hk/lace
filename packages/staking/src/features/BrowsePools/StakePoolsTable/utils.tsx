@@ -1,22 +1,31 @@
+/* eslint-disable no-magic-numbers */
+import inRange from 'lodash/inRange';
 import { stakePoolCellRenderer } from './StakePoolCellRenderer/StakePoolCellRenderer';
-import { Columns, SaturationLevelColors } from './types';
+import { Columns, SaturationLevels } from './types';
 
-const SATURATION_LEVEL_100 = 100;
-const SATURATION_LEVEL_105 = 105;
-const SATURATION_LEVEL_110 = 110;
+const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
+  [SaturationLevels.Oversaturated]: [100, Number.MAX_SAFE_INTEGER],
+  [SaturationLevels.Veryhigh]: [90, 100],
+  [SaturationLevels.High]: [70, 90],
+  [SaturationLevels.Medium]: [21, 70],
+  [SaturationLevels.Low]: [0, 21],
+};
 
-export const getSaturationLevelColor = (saturation: number): SaturationLevelColors => {
-  let color;
-  if (saturation > SATURATION_LEVEL_110) {
-    color = SaturationLevelColors.red;
-  } else if (saturation > SATURATION_LEVEL_105) {
-    color = SaturationLevelColors.orange;
-  } else if (saturation > SATURATION_LEVEL_100) {
-    color = SaturationLevelColors.yellow;
-  } else {
-    color = SaturationLevelColors.green;
+type Entries<T> = {
+  [K in keyof T]: [K, T[K]];
+}[keyof T][];
+
+export const getSaturationLevel = (saturation: number): SaturationLevels => {
+  let result = SaturationLevels.Low;
+  for (const [level, [min, max]] of Object.entries(saturationLevelsRangeMap) as Entries<
+    typeof saturationLevelsRangeMap
+  >) {
+    if (inRange(saturation, min, max)) {
+      result = level;
+      return result;
+    }
   }
-  return color;
+  return result;
 };
 
 export const hiddenColumns = [process.env.USE_ROS_STAKING_COLUMN !== 'true' && Columns.apy].filter(

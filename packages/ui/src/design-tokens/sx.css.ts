@@ -15,6 +15,8 @@ const responsiveProperties = defineProperties({
   defaultCondition: 'popupScreen',
   responsiveArray: [
     'popupScreen',
+    'minimumScreen',
+    'xSmallScreen',
     'smallScreen',
     'mediumScreen',
     'largeScreen',

@@ -1,5 +1,7 @@
-import { style, vars } from '@lace/ui';
+import { style, sx } from '@lace/ui';
+import { recipe } from '@vanilla-extract/recipes';
 import { theme } from 'features/theme';
+import type { RecipeVariants } from '@vanilla-extract/recipes';
 
 export const dotWrapper = style([
   {
@@ -8,49 +10,25 @@ export const dotWrapper = style([
   },
 ]);
 
-export const dot = style([
-  {
-    borderRadius: theme.radius.$circle,
-    display: 'flex',
-    height: '7px',
-    marginRight: theme.spacing.$6,
-    width: '7px',
+export const dot = recipe({
+  base: [
+    {
+      borderRadius: theme.radius.$circle,
+      display: 'flex',
+      height: '7px',
+      marginRight: theme.spacing.$6,
+      width: '7px',
+    },
+  ],
+  variants: {
+    level: {
+      high: sx({ backgroundColor: '$data_yellow' }),
+      low: sx({ backgroundColor: '$data_blue' }),
+      medium: sx({ backgroundColor: '$data_green' }),
+      oversaturated: sx({ backgroundColor: '$data_pink' }),
+      veryHigh: sx({ backgroundColor: '$data_orange' }),
+    },
   },
-]);
+});
 
-export const red = style([
-  {
-    selectors: {
-      [`&${dot}`]: {
-        backgroundColor: vars.colors.$data_pink,
-      },
-    },
-  },
-]);
-export const orange = style([
-  {
-    selectors: {
-      [`&${dot}`]: {
-        backgroundColor: vars.colors.$data_orange,
-      },
-    },
-  },
-]);
-export const yellow = style([
-  {
-    selectors: {
-      [`&${dot}`]: {
-        backgroundColor: vars.colors.$data_yellow,
-      },
-    },
-  },
-]);
-export const green = style([
-  {
-    selectors: {
-      [`&${dot}`]: {
-        backgroundColor: vars.colors.$data_green,
-      },
-    },
-  },
-]);
+export type DotVariants = Required<NonNullable<RecipeVariants<typeof dot>>>;

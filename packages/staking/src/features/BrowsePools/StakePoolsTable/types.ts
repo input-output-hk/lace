@@ -30,6 +30,14 @@ export enum SortField {
   cost = 'cost',
 }
 
+export enum SaturationLevels {
+  Low = 'low',
+  Medium = 'medium',
+  High = 'high',
+  Veryhigh = 'veryHigh',
+  Oversaturated = 'oversaturated',
+}
+
 export enum SaturationLevelColors {
   red = 'red',
   orange = 'orange',
