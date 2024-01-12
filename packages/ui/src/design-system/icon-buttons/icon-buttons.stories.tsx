@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { ReactComponent as PlainCircle } from '@lace/icons/dist/PlainCircleComponent';
+import { ReactComponent as PlusCircleIcon } from '@lace/icons/dist/PlusCircleComponent';
 import type { Meta } from '@storybook/react';
 
-import { ReactComponent as PlainCircle } from '../../assets/icons/plain-circle.component.svg';
-import { ReactComponent as PlusCircleIcon } from '../../assets/icons/plus-circle.component.svg';
 import { page, Variants, Section, UIStateTable } from '../decorators';
 import { Divider } from '../divider';
 import { Flex } from '../flex';

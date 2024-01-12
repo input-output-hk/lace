@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ReactComponent as CloseIcon } from '../../assets/icons/close.component.svg';
+import { ReactComponent as CloseIcon } from '@lace/icons/dist/CloseComponent';
 
 import * as cx from './close-button.css';
 import { NavigationSkeletonButton } from './navigation-skeleton-button.component';
