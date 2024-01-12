@@ -7,7 +7,7 @@ import extensionUtils from '../utils/utils';
 import testContext from '../utils/testContext';
 import NftDetails from '../elements/NFTs/nftDetails';
 import TransactionNewPage from '../elements/newTransaction/transactionNewPage';
-import { TransactionSummaryPage } from '../elements/newTransaction/transactionSummaryPage';
+import TransactionSummaryPage from '../elements/newTransaction/transactionSummaryPage';
 import NftsPage from '../elements/NFTs/nftsPage';
 import { TokenSelectionPage } from '../elements/newTransaction/tokenSelectionPage';
 
@@ -37,8 +37,8 @@ class NftsPageObject {
     await simpleTxSideDrawerPageObject.fillTokenValue('1');
     await TransactionNewPage.reviewTransactionButton.waitForClickable({ timeout: 15_000 });
     await TransactionNewPage.reviewTransactionButton.click();
-    await new TransactionSummaryPage().confirmButton.waitForClickable();
-    await new TransactionSummaryPage().confirmButton.click();
+    await TransactionSummaryPage.confirmButton.waitForClickable();
+    await TransactionSummaryPage.confirmButton.click();
   }
 
   async isNftDisplayed(nftName: string): Promise<boolean> {
