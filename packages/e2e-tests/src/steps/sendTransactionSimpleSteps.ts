@@ -26,7 +26,6 @@ import testContext from '../utils/testContext';
 import transactionDetailsAssert, { ExpectedActivityDetails } from '../assert/transactionDetailsAssert';
 import { t } from '../utils/translationService';
 import nftsPageObject from '../pageobject/nftsPageObject';
-import transactionsPageObject from '../pageobject/transactionsPageObject';
 import { Asset } from '../data/Asset';
 import clipboard from 'clipboardy';
 import extensionUtils from '../utils/utils';
@@ -371,7 +370,7 @@ Then(/^the selected contact is added in the bundle recipient's address$/, async 
 });
 
 When(/^I save fee value$/, async () => {
-  await transactionsPageObject.saveFeeValue();
+  await TransactionSummaryPage.saveFeeValue();
 });
 
 Then(

@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-import { ChainablePromiseElement } from 'webdriverio';
 import CommonDrawerElements from '../CommonDrawerElements';
+import testContext from '../../utils/testContext';
 
 class TransactionSummaryPage extends CommonDrawerElements {
   private BUNDLE_ROW = '//div[@data-testid="bundle-summary-row"]';
@@ -65,12 +65,18 @@ class TransactionSummaryPage extends CommonDrawerElements {
     return $(`${this.METADATA_CONTAINER}${this.METADATA_VALUE}`);
   }
 
-  get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get confirmButton() {
     return $(this.CONFIRM_BUTTON);
   }
 
-  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
+  get cancelButton() {
     return $(this.CANCEL_BUTTON);
+  }
+
+  async saveFeeValue() {
+    let feeValue = await this.transactionFeeValueAda.getText();
+    feeValue = feeValue.replace('ADA', '');
+    testContext.save('feeValue', feeValue);
   }
 }
 
