@@ -131,6 +131,29 @@ class ManageStakingDrawerAssert {
       reverse: !isEnabled
     });
   };
+
+  assertSeeDelegationCardStatus = async (
+    status: 'Simple delegation' | 'Multi delegation' | 'Under allocated' | 'Over allocated'
+  ) => {
+    if (status.includes('delegation')) {
+      const expectedCopy =
+        status === 'Simple delegation'
+          ? await t('overview.delegationCard.statuses.simpleDelegation', 'staking')
+          : await t('overview.delegationCard.statuses.multiDelegation', 'staking');
+      expect(await ManageStakingDrawer.delegationCardStatusValue.getText()).to.equal(expectedCopy);
+    }
+    if (status.includes('allocated')) {
+      const expectedCopy =
+        status === 'Under allocated'
+          ? await t('overview.delegationCard.statuses.underAllocated', 'staking')
+          : await t('overview.delegationCard.statuses.overAllocated', 'staking');
+      expect(await ManageStakingDrawer.delegationCardStatusValue.getText()).to.equal(expectedCopy);
+    }
+  };
+
+  async assertSeeRatioForPool(ratio: number, poolNo: number) {
+    expect(Number(await ManageStakingDrawer.poolDetailsRatioInput(poolNo - 1).getValue())).to.equal(ratio);
+  }
 }
 
 export default new ManageStakingDrawerAssert();

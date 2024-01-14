@@ -210,3 +210,62 @@ Feature: Staking Page - Extended View
     And "Confirm new portfolio" button is enabled
     When I click "Confirm new portfolio" button
     Then I see Manage delegation drawer Confirmation page
+
+  @LW-9544
+  Scenario: Extended View - Staking - Manage staking 'Under allocated' status when removing pool from portfolio
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I remove "1" pools from delegation portfolio
+    Then I see "Under allocated" status in delegation card
+
+  @LW-9545
+  Scenario: Extended View - Staking - Manage staking 'Under allocated' status when decreasing pool allocation
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I click minus button for pool "1"
+    Then I see "Under allocated" status in delegation card
+
+  @LW-9546
+  Scenario: Extended View - Staking - Manage staking 'Over allocated' status when increasing pool allocation
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I click plus button for pool "1"
+    Then I see "Over allocated" status in delegation card
+
+  @LW-9548
+  Scenario: Extended View - Staking - Manage staking input field works as expected
+    When I open wallet: "MultidelegationDelegatedMulti" in: extended mode
+    And I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I expand all pools details
+    And I input random ratio for 10 pools adding to 100%
+    Then I see "Multi delegation" status in delegation card
+
+  @LW-9549
+  Scenario: Extended View - Staking - Manage staking input field can't set zero
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I input 0% ratio for pool 1
+    Then I see input ratio field showing 1% for pool 1
+
+  @LW-9550
+  Scenario: Extended View - Staking - Manage staking input field can't set over 100%
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I input 250% ratio for pool 1
+    Then I see input ratio field showing 100% for pool 1

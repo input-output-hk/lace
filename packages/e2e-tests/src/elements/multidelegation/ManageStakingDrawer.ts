@@ -2,6 +2,7 @@ import CommonDrawerElements from '../CommonDrawerElements';
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
+import { browser } from '@wdio/globals';
 
 class ManageStakingDrawer extends CommonDrawerElements {
   private CONTAINER = '[data-testid="custom-drawer"]';
@@ -227,6 +228,37 @@ class ManageStakingDrawer extends CommonDrawerElements {
   async clickConfirmNewPortfolioButton() {
     await this.nextButton.waitForClickable();
     await this.nextButton.click();
+  }
+
+  async inputRatioForPool(ratio: number, poolNo: number) {
+    await this.poolDetailsRatioInput(poolNo - 1).waitForClickable();
+    await this.poolDetailsRatioInput(poolNo - 1).setValue(ratio.toString());
+    await browser.keys('Return');
+  }
+
+  async inputRandomRatiosForPools(poolsCount: number) {
+    const ratios = this.generateRandomRatios(poolsCount);
+
+    for (let i = 0; i < poolsCount; i++) {
+      await this.inputRatioForPool(ratios[i], i + 1);
+    }
+  }
+
+  generateRandomRatios(poolsCount: number): number[] {
+    const randomNumbers = [];
+    let totalSum = 0;
+    while (totalSum !== 100) {
+      for (let i = 0; i < poolsCount - 1; i++) {
+        const currentSum = randomNumbers.reduce((sum, num) => sum + num, 0);
+        let randomNum = Math.floor(Math.random() * (100 - currentSum));
+        if (randomNum > 20) randomNum %= 20;
+        if (randomNum === 0) randomNum += 1;
+        randomNumbers.push(randomNum);
+      }
+      randomNumbers.push(100 - randomNumbers.reduce((sum, num) => sum + num, 0));
+      totalSum = randomNumbers.reduce((sum, num) => sum + num, 0);
+    }
+    return randomNumbers;
   }
 }
 
