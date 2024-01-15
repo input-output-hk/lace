@@ -1,8 +1,10 @@
+/* eslint-disable no-magic-numbers */
 /* eslint-disable react/no-multi-comp */
+import inRange from 'lodash/inRange';
 import React, { useEffect, useMemo, useCallback } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
-import { Banner, Button, Ellipsis, getNumberWithUnit } from '@lace/common';
+import { Banner, Button, Ellipsis, ProgressBar, getNumberWithUnit } from '@lace/common';
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
 import { useDelegationStore, stakePoolDetailsSelector } from '@src/features/delegation/stores';
 import { useDelegationDetails } from '@src/hooks';
@@ -19,7 +21,40 @@ import {
   PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
-const SATURATION_UPPER_BOUND = 100;
+// TODO: remove duplication once lw-9270 is merged (lw-9552)
+export enum SaturationLevels {
+  Low = 'low',
+  Medium = 'medium',
+  High = 'high',
+  Veryhigh = 'veryHigh',
+  Oversaturated = 'oversaturated'
+}
+
+const saturationLevelsRangeMap: Record<SaturationLevels, [number, number]> = {
+  [SaturationLevels.Oversaturated]: [100, Number.MAX_SAFE_INTEGER],
+  [SaturationLevels.Veryhigh]: [90, 100],
+  [SaturationLevels.High]: [70, 90],
+  [SaturationLevels.Medium]: [21, 70],
+  [SaturationLevels.Low]: [0, 21]
+};
+
+type Entries<T> = {
+  [K in keyof T]: [K, T[K]];
+}[keyof T][];
+
+export const getSaturationLevel = (saturation: number): SaturationLevels => {
+  let result = SaturationLevels.Low;
+  for (const [level, [min, max]] of Object.entries(saturationLevelsRangeMap) as Entries<
+    typeof saturationLevelsRangeMap
+  >) {
+    if (inRange(saturation, min, max)) {
+      result = level;
+      return result;
+    }
+  }
+  return result;
+};
+
 const listItem = [
   'browserView.staking.details.clickOnAPoolFromTheListInTheMainPage',
   'browserView.staking.details.clickOnTheStakeToThisPoolButtonInTheDetailPage',
@@ -40,7 +75,8 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     owners = [],
     apy,
     saturation,
-    stake,
+    activeStake,
+    liveStake,
     logo,
     name,
     ticker,
@@ -75,6 +111,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
 
   const metricsTranslations = {
     activeStake: t('cardano.stakePoolMetricsBrowser.activeStake'),
+    liveStake: t('cardano.stakePoolMetricsBrowser.liveStake'),
     saturation: t('cardano.stakePoolMetricsBrowser.saturation'),
     delegators: t('cardano.stakePoolMetricsBrowser.delegators'),
     apy: t('cardano.stakePoolMetricsBrowser.ros'),
@@ -93,16 +130,48 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
 
   const formattedPledge = getNumberWithUnit(pledge);
   const formattedCost = getNumberWithUnit(fee);
-  const metricsData = [
-    { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
-    { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
-    { t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' },
-    { t: metricsTranslations.activeStake, testId: 'active-stake', unit: stake.unit, value: stake.number },
-    { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
-    { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost.unit, value: formattedCost.number },
-    { t: metricsTranslations.pledge, testId: 'pledge', unit: formattedPledge.unit, value: formattedPledge.number },
-    { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin }
-  ];
+  const metricsData = useMemo(() => {
+    const metrics = [
+      { t: metricsTranslations.activeStake, testId: 'active-stake', unit: activeStake.unit, value: activeStake.number },
+      { t: metricsTranslations.liveStake, testId: 'live-stake', unit: liveStake.unit, value: liveStake.number },
+      { t: metricsTranslations.delegators, testId: 'delegators', value: delegators || '-' },
+      { t: metricsTranslations.apy, testId: 'apy', unit: '%', value: apy || '-' },
+      { t: metricsTranslations.blocks, testId: 'blocks', value: blocks },
+      { t: metricsTranslations.cost, testId: 'cost', unit: formattedCost.unit, value: formattedCost.number },
+      { t: metricsTranslations.pledge, testId: 'pledge', unit: formattedPledge.unit, value: formattedPledge.number },
+      { t: metricsTranslations.margin, testId: 'margin', unit: '%', value: margin }
+    ];
+
+    if (popupView) {
+      metrics.push({ t: metricsTranslations.saturation, testId: 'saturation', unit: '%', value: saturation || '-' });
+    }
+
+    return metrics;
+  }, [
+    activeStake.number,
+    activeStake.unit,
+    apy,
+    blocks,
+    delegators,
+    formattedCost.number,
+    formattedCost.unit,
+    formattedPledge.number,
+    formattedPledge.unit,
+    liveStake.number,
+    liveStake.unit,
+    margin,
+    metricsTranslations.activeStake,
+    metricsTranslations.apy,
+    metricsTranslations.blocks,
+    metricsTranslations.cost,
+    metricsTranslations.delegators,
+    metricsTranslations.liveStake,
+    metricsTranslations.margin,
+    metricsTranslations.pledge,
+    metricsTranslations.saturation,
+    popupView,
+    saturation
+  ]);
 
   return (
     <>
@@ -115,10 +184,27 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
             id,
             status,
             isDelegated: isDelegatingToThisPool,
-            isOversaturated: saturation !== undefined && Number(saturation) > SATURATION_UPPER_BOUND
+            isOversaturated:
+              saturation !== undefined && getSaturationLevel(Number(saturation)) === SaturationLevels.Oversaturated
           }}
           translations={statusLogoTranslations}
         />
+        {!popupView && (
+          <div className={styles.saturationContainer}>
+            <div className={styles.saturationTitle}>{metricsTranslations.saturation}</div>
+            <div className={styles.saturationProgressContainer}>
+              <div className={styles.saturationProgress}>
+                {/* TODO: fix colors once lw-9270 is merged (lw-9552) */}
+                <ProgressBar
+                  className={styles[getSaturationLevel(Number(saturation))]}
+                  duration={0}
+                  width={`${Number(saturation)}%`}
+                />
+              </div>
+              <span className={styles.saturation}>{saturation}%</span>
+            </div>
+          </div>
+        )}
       </div>
       <div className={cn(styles.container, { [styles.popupView]: popupView })} data-testid="stake-pool-details">
         <div className={cn(styles.contentWrapper, { [styles.popupView]: popupView })}>

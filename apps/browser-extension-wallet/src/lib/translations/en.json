@@ -1039,6 +1039,7 @@
     },
     "stakePoolMetricsBrowser": {
       "activeStake": "Active stake",
+      "liveStake": "Live stake",
       "saturation": "Saturation",
       "delegators": "Delegators",
       "ros": "ROS",

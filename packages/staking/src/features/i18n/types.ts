@@ -84,6 +84,7 @@ type KeysStructure = {
     details: {
       metrics: {
         activeStake: '';
+        liveStake: '';
         apy: '';
         delegators: '';
         saturation: '';

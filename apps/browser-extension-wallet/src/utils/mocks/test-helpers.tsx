@@ -531,7 +531,7 @@ export const cardanoStakePoolSelectedDetails = {
   contact: {
     primary: 'http://www.sttst.com'
   },
-  delegators: 20,
+  delegators: '20',
   description: 'This is the STTST description',
   fee: '6.04',
   hexId: 'a76e3a1104a9d816a67d5826a155c9e2979a839d0d944346d47e33ab',
@@ -545,12 +545,15 @@ export const cardanoStakePoolSelectedDetails = {
   ],
   saturation: '5.12',
   apy: '1.30',
-  stake: {
+  activeStake: {
+    number: '-'
+  },
+  liveStake: {
     number: '-'
   },
   status: 'active',
   ticker: 'STTST',
-  blocks: 20,
+  blocks: '20',
   pledge: '2000.00'
 };
 

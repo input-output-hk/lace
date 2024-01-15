@@ -49,6 +49,7 @@ export const en: Translations = {
   'drawer.details.metrics.blocks': 'Blocks',
   'drawer.details.metrics.cost': 'Cost p/ epoch',
   'drawer.details.metrics.delegators': 'Delegators',
+  'drawer.details.metrics.liveStake': 'Live stake',
   'drawer.details.metrics.margin': 'Pool margin',
   'drawer.details.metrics.pledge': 'Pledge',
   'drawer.details.metrics.saturation': 'Saturation',

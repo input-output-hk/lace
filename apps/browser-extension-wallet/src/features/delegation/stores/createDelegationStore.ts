@@ -1,4 +1,5 @@
 /* eslint-disable no-magic-numbers */
+import BigNumber from 'bignumber.js';
 import create, { StateSelector } from 'zustand';
 import { Wallet } from '@lace/cardano';
 import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
@@ -27,7 +28,7 @@ DelegationStore): stakePoolDetailsSelectorProps => {
 
     return {
       // TODO: a lot of this is repeated in `stakePoolTransformer`. Have only one place to parse this info
-      delegators: delegators || '-',
+      delegators: new BigNumber(delegators).toFormat() || '-',
       description,
       hexId: hexId.toString(),
       id: id.toString(),
@@ -36,8 +37,11 @@ DelegationStore): stakePoolDetailsSelectorProps => {
       name,
       owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
       saturation: saturation && formatPercentages(saturation),
-      stake: stake?.active
+      activeStake: stake?.active
         ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake?.active?.toString()))
+        : { number: '-' },
+      liveStake: stake?.live
+        ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(stake?.live?.toString()))
         : { number: '-' },
       ticker,
       status,
@@ -47,7 +51,7 @@ DelegationStore): stakePoolDetailsSelectorProps => {
         primary: homepage,
         ...ext?.pool.contact
       },
-      blocks: blocksCreated || '-',
+      blocks: new BigNumber(blocksCreated).toFormat() || '-',
       pledge: Wallet.util.lovelacesToAdaString(pledge.toString())
     };
   }

@@ -40,7 +40,8 @@ export type stakePoolDetailsSelectorProps = {
   name: string;
   owners: string[];
   saturation: number | string;
-  stake: { number: string; unit?: string };
+  activeStake: { number: string; unit?: string };
+  liveStake: { number: string; unit?: string };
   ticker: string;
   apy: number | string;
   status: Wallet.Cardano.StakePool['status'];
