@@ -175,7 +175,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
 
   return (
     <>
-      <div className={cn(styles.contentWrapper, { [styles.popupView]: popupView })}>
+      <div className={cn(styles.contentWrapper, styles.nameWrapper, { [styles.popupView]: popupView })}>
         <StakePoolNameBrowser
           {...{
             logo,

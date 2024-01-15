@@ -164,7 +164,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
   return (
     <>
       {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
-      <div className={cn(styles.contentWrapper, { [styles.popupView!]: popupView })}>
+      <div className={cn(styles.contentWrapper, styles.nameWrapper, { [styles.popupView!]: popupView })}>
         <StakePoolNameBrowser
           {...{
             id,
