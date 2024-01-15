@@ -32,3 +32,4 @@ export * as EducationalCard from './educational-card';
 export { FileUpload } from './file-upload';
 export { Checkbox } from './checkbox';
 export * as Dialog from './dialog';
+export { ActionCard } from './action-card';

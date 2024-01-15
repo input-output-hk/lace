@@ -250,6 +250,15 @@ export const colors = {
   $checkbox_hover_checked_backgroundColor: '',
   $checkbox_hover_unchecked_borderColor: '',
   $checkbox_hover_unchecked_backgroundColor: '',
+
+  $action_card_container_bgColor: '',
+  $action_card_container_bgColor_hover: '',
+  $action_card_container_bgColor_pressed: '',
+  $action_card_container_bgColor_focused: '',
+  $action_card_container_outlineColor: '',
+  $action_card_container_borderColor: '',
+  $action_card_icon_container_bgColor: '',
+  $action_card_icon_container_borderColor: '',
 };
 
 export type Colors = typeof colors;

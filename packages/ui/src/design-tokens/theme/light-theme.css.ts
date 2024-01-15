@@ -368,6 +368,18 @@ const colors: Colors = {
   $checkbox_hover_unchecked_backgroundColor: colorTransparent,
   $checkbox_hover_checked_backgroundColor:
     lightColorScheme.$primary_hover_purple,
+
+  $action_card_container_bgColor: lightColorScheme.$primary_white,
+  $action_card_container_bgColor_hover: lightColorScheme.$primary_light_grey,
+  $action_card_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_0_56,
+  $action_card_container_bgColor_focused: lightColorScheme.$primary_white,
+  $action_card_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $action_card_container_borderColor: lightColorScheme.$primary_light_grey_plus,
+
+  $action_card_icon_container_bgColor: lightColorScheme.$primary_white,
+  $action_card_icon_container_borderColor: lightColorScheme.$primary_light_grey,
 };
 
 export const elevation: Elevation = {
