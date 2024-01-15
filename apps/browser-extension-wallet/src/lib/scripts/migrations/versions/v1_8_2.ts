@@ -4,7 +4,7 @@
 import { Migration } from '../migrations';
 import { getItemFromLocalStorage, removeItemFromLocalStorage, setItemInLocalStorage } from '../util';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { walletRepository } from '@src/lib/wallet-api-ui';
+import { walletManager, walletRepository } from '@src/lib/wallet-api-ui';
 import { Wallet } from '@lace/cardano';
 import { AddWalletProps, WalletType, getWalletId } from '@cardano-sdk/web-extension';
 import { HexBlob } from '@cardano-sdk/util';
@@ -16,6 +16,8 @@ const LOCK_STORAGE = 'lock';
 const KEY_AGENT_DATA_STORAGE = 'keyAgentData';
 const LOCK_TEMP_STORAGE = 'lock_tmp';
 const KEY_AGENT_DATA_TEMP_STORAGE = 'keyAgentData_tmp';
+
+const provider = { type: Wallet.WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER, options: {} };
 
 const keyAgentDataToAddWalletProps = async (
   data: Wallet.KeyManagement.SerializableKeyAgentData
@@ -93,6 +95,13 @@ export const v_1_8_2: Migration = {
             accountIndex: keyAgentData.accountIndex,
             metadata: { name: walletName, lockValue },
             walletId
+          });
+
+          await walletManager.activate({
+            chainId: keyAgentData.chainId,
+            walletId,
+            accountIndex: keyAgentData.accountIndex,
+            provider
           });
         }
 
