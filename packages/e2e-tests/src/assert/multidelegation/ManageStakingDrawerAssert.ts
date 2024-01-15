@@ -135,25 +135,29 @@ class ManageStakingDrawerAssert {
   assertSeeDelegationCardStatus = async (
     status: 'Simple delegation' | 'Multi delegation' | 'Under allocated' | 'Over allocated'
   ) => {
-    if (status.includes('delegation')) {
-      const expectedCopy =
-        status === 'Simple delegation'
-          ? await t('overview.delegationCard.statuses.simpleDelegation', 'staking')
-          : await t('overview.delegationCard.statuses.multiDelegation', 'staking');
-      expect(await ManageStakingDrawer.delegationCardStatusValue.getText()).to.equal(expectedCopy);
+    let expectedCopy;
+    switch (status) {
+      case 'Simple delegation':
+        expectedCopy = await t('overview.delegationCard.statuses.simpleDelegation', 'staking');
+        break;
+      case 'Multi delegation':
+        expectedCopy = await t('overview.delegationCard.statuses.multiDelegation', 'staking');
+        break;
+      case 'Under allocated':
+        expectedCopy = await t('overview.delegationCard.statuses.underAllocated', 'staking');
+        break;
+      case 'Over allocated':
+        expectedCopy = await t('overview.delegationCard.statuses.overAllocated', 'staking');
+        break;
+      default:
+        throw new Error('Invalid status');
     }
-    if (status.includes('allocated')) {
-      const expectedCopy =
-        status === 'Under allocated'
-          ? await t('overview.delegationCard.statuses.underAllocated', 'staking')
-          : await t('overview.delegationCard.statuses.overAllocated', 'staking');
-      expect(await ManageStakingDrawer.delegationCardStatusValue.getText()).to.equal(expectedCopy);
-    }
+    expect(await ManageStakingDrawer.delegationCardStatusValue.getText()).to.equal(expectedCopy);
   };
 
-  async assertSeeRatioForPool(ratio: number, poolNo: number) {
+  assertSeeRatioForPool = async (ratio: number, poolNo: number) => {
     expect(Number(await ManageStakingDrawer.poolDetailsRatioInput(poolNo - 1).getValue())).to.equal(ratio);
-  }
+  };
 }
 
 export default new ManageStakingDrawerAssert();

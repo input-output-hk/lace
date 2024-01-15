@@ -238,7 +238,6 @@ class ManageStakingDrawer extends CommonDrawerElements {
 
   async inputRandomRatiosForPools(poolsCount: number) {
     const ratios = this.generateRandomRatios(poolsCount);
-
     for (let i = 0; i < poolsCount; i++) {
       await this.inputRatioForPool(ratios[i], i + 1);
     }
@@ -248,17 +247,27 @@ class ManageStakingDrawer extends CommonDrawerElements {
     const randomNumbers = [];
     let totalSum = 0;
     while (totalSum !== 100) {
+      totalSum = 0;
+      randomNumbers.length = 0;
       for (let i = 0; i < poolsCount - 1; i++) {
-        const currentSum = randomNumbers.reduce((sum, num) => sum + num, 0);
+        const currentSum = this.getCurrentSum(randomNumbers);
         let randomNum = Math.floor(Math.random() * (100 - currentSum));
-        if (randomNum > 20) randomNum %= 20;
-        if (randomNum === 0) randomNum += 1;
+        if (randomNum > 40) randomNum %= 40;
+        if (randomNum === 0) randomNum = 1;
         randomNumbers.push(randomNum);
       }
-      randomNumbers.push(100 - randomNumbers.reduce((sum, num) => sum + num, 0));
-      totalSum = randomNumbers.reduce((sum, num) => sum + num, 0);
+      if (this.getCurrentSum(randomNumbers) >= 100) {
+        totalSum = 0;
+        continue;
+      }
+      randomNumbers.push(100 - this.getCurrentSum(randomNumbers));
+      totalSum = this.getCurrentSum(randomNumbers);
     }
     return randomNumbers;
+  }
+
+  private getCurrentSum(randomNumbers: number[]) {
+    return randomNumbers.reduce((sum, num) => sum + num, 0);
   }
 }
 
