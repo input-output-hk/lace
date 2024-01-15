@@ -57,6 +57,7 @@ export { InputSelectionError } from '@cardano-sdk/input-selection';
 
 export {
   CardanoWallet,
+  KeyAgentsByChain,
   CreateStores,
   WalletProvidersDependencies,
   createCardanoWallet,

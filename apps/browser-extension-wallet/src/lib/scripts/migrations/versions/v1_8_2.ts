@@ -19,6 +19,15 @@ const KEY_AGENT_DATA_TEMP_STORAGE = 'keyAgentData_tmp';
 
 const provider = { type: Wallet.WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER, options: {} };
 
+const isWalletLoacked = (lock: string, keyAgentData: string) => lock && !keyAgentData;
+
+const decryptLock = async (lock: number[], password: string) => {
+  const walletDecrypted = await Wallet.KeyManagement.emip3decrypt(Buffer.from(lock), Buffer.from(password));
+  const walletParsed: Wallet.KeyAgentsByChain = JSON.parse(walletDecrypted.toString());
+
+  return walletParsed.Mainnet;
+};
+
 const keyAgentDataToAddWalletProps = async (
   data: Wallet.KeyManagement.SerializableKeyAgentData
 ): Promise<AddWalletProps<Wallet.Metadata>> => {
@@ -52,9 +61,20 @@ const keyAgentDataToAddWalletProps = async (
 
 export const v_1_8_2: Migration = {
   version: MIGRATION_VERSION,
-  upgrade: async () => {
+  requiresPassword: () => {
     const lock = getItemFromLocalStorage<any>(LOCK_STORAGE);
     const keyAgentData = getItemFromLocalStorage<any>(KEY_AGENT_DATA_STORAGE);
+
+    if (isWalletLoacked(lock, keyAgentData)) {
+      return true;
+    }
+
+    return false;
+  },
+  upgrade: async (password) => {
+    const lock = getItemFromLocalStorage<any>(LOCK_STORAGE);
+    const keyAgentData =
+      getItemFromLocalStorage<any>(KEY_AGENT_DATA_STORAGE) || (await decryptLock(lock.data, password)).keyAgentData;
 
     return {
       prepare: () => {
@@ -105,11 +125,9 @@ export const v_1_8_2: Migration = {
           });
         }
 
-        if (lock && !keyAgentData) {
+        if (isWalletLoacked(lock, keyAgentData)) {
           setItemInLocalStorage(LOCK_STORAGE, lockValue);
-        }
-
-        if (lock && keyAgentData) {
+        } else {
           setItemInLocalStorage(LOCK_STORAGE, '');
         }
 
