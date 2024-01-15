@@ -1,9 +1,9 @@
 import React from 'react';
 import styles from './SharedWalletGetStartedDialog.module.scss';
 import { SharedWalletSetupOption } from './SharedWalletGetStartedOption.component';
-import { ReactComponent as UserGroupIcon } from '../../../assets/icons/user-group-gradient.component.svg';
-import { ReactComponent as UploadIcon } from '../../../assets/icons/upload.component.svg';
-import { ReactComponent as LaceLogo } from '../../../assets/icons/lace-logo.component.svg';
+import { ReactComponent as UserGroupIcon } from '@lace/icons/dist/UserGroupGradientComponent';
+import { ReactComponent as UploadIcon } from '@lace/icons/dist/UploadComponent';
+import { ReactComponent as LaceLogo } from '@lace/icons/dist/LaceLogoComponent';
 import { Box, Flex, sx, Text } from '@lace/ui';
 
 export type SharedWalletSetupOptionTranslations = Record<'title' | 'description' | 'button', string>;

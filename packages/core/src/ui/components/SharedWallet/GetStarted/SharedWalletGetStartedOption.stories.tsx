@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { SharedWalletSetupOption } from './SharedWalletGetStartedOption.component';
-import { ReactComponent as UserGroupIcon } from '../../../assets/icons/user-group-gradient.component.svg';
+import { ReactComponent as UserGroupIcon } from '../../../../../../icons/raw/user-group-gradient.component.svg';
 
 const meta: Meta<typeof SharedWalletSetupOption> = {
   title: 'Shared Wallets / Get Started',
