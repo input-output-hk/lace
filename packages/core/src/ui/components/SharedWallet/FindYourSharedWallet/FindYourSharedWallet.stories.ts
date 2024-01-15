@@ -30,6 +30,16 @@ const data: ComponentProps<typeof FindYourSharedWallet> = {
       ],
       supportedFormats: 'Supported formats: JSON',
       removeButtonLabel: 'Remove'
+    },
+    syncNetwork: {
+      title: [
+        {
+          text: 'Sync network to find a shared wallet',
+          highlight: false
+        },
+        { text: 'click here', highlight: true }
+      ],
+      description: 'This will take a few minutes'
     }
   },
   onBack: noop,

@@ -1,5 +1,8 @@
 import React from 'react';
-import { sx, Box, Flex, Text, Button, FileUpload } from '@lace/ui';
+import { sx, Box, Flex, Text, Button, FileUpload, ActionCard } from '@lace/ui';
+import { ReactComponent as RefreshIcon } from '@lace/ui/dist/assets/icons/refresh.component.svg';
+
+type Title = { text: string; highlight: boolean };
 
 interface Props {
   translations: {
@@ -8,9 +11,13 @@ interface Props {
     backButton: string;
     nextButton: string;
     fileUpload: {
-      label: { text: string; highlight: boolean }[];
+      label: Title[];
       supportedFormats: string;
       removeButtonLabel: string;
+    };
+    syncNetwork: {
+      title: Title[];
+      description: string;
     };
   };
   onChange: (file: File) => void;
@@ -45,14 +52,23 @@ export const FindYourSharedWallet = ({ translations, onChange, onBack, onNext, f
         </Text.Body.Normal>
       </Box>
       <Box h="$fill" w="$fill">
-        <FileUpload
-          label={translations.fileUpload.label}
-          removeButtonLabel={translations.fileUpload.removeButtonLabel}
-          supportedFormats={translations.fileUpload.supportedFormats}
-          accept="application/json"
-          onChange={handleFileChange}
-          files={file ? [file.name] : undefined}
-        />
+        <Box mb="$16">
+          <FileUpload
+            label={translations.fileUpload.label}
+            removeButtonLabel={translations.fileUpload.removeButtonLabel}
+            supportedFormats={translations.fileUpload.supportedFormats}
+            accept="application/json"
+            onChange={handleFileChange}
+            files={file ? [file.name] : undefined}
+          />
+        </Box>
+        <Box>
+          <ActionCard
+            title={translations.syncNetwork.title}
+            description={translations.syncNetwork.description}
+            icon={<RefreshIcon />}
+          />
+        </Box>
       </Box>
       <Flex w="$fill" justifyContent="space-between" alignItems="center">
         <Button.Secondary label={translations.backButton} onClick={() => onBack()} />
