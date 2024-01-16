@@ -17,7 +17,7 @@ export interface StakePool {
   logo?: string;
   retired?: boolean;
   apy?: string;
-  liveStake?: string;
+  liveStake?: { number: string; unit?: string };
   saturation?: string;
   fee?: number | string;
   isStakingPool?: boolean;
@@ -32,7 +32,7 @@ type StakePoolTransformerProp = {
 export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolTransformerProp): StakePool => {
   const { margin, cost, hexId, pledge, owners, status, metadata, id, metrics } = stakePool;
   const formattedPledge = getNumberWithUnit(lovelacesToAdaString(pledge.toString()));
-  const formattedCost = getNumberWithUnit(lovelacesToAdaString(cost.toString()));
+  const formattedCost = cost && getNumberWithUnit(lovelacesToAdaString(cost.toString()));
 
   return {
     id: id.toString(),
@@ -46,11 +46,13 @@ export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolT
     description: metadata?.description,
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
     cost: `${formattedCost.number}${formattedCost.unit}`,
+    liveStake: metrics?.stake.live
+      ? getNumberWithUnit(lovelacesToAdaString(metrics?.stake.live.toString()))
+      : { number: '-' },
     ...(metrics && {
       ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
       saturation: formatPercentages(metrics.saturation.valueOf()),
-      blocks: metrics?.blocksCreated?.toString(),
-      liveStake: formatPercentages(metrics.size.live)
+      blocks: metrics?.blocksCreated?.toString()
     }),
     pledge: `${formattedPledge.number}${formattedPledge.unit}`,
     ...(delegatingPoolId && { isStakingPool: delegatingPoolId === id.toString() })

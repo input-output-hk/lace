@@ -127,6 +127,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
         return {
           ...stakePool,
           hexId: pool.hexId,
+          liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
           logo: stakePool.logo || logo,
           stakePool: pool,
         };

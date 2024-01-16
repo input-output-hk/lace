@@ -24,20 +24,22 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
     id: id.toString(),
     logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
+    activeStake: metrics?.stake.active
+      ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.active.toString()))
+      : { number: '-' },
+    liveStake: metrics?.stake.live
+      ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.live.toString()))
+      : { number: '-' },
     name: metadata?.name || '-',
     owners: owners ? owners.map((owner: Wallet.Cardano.RewardAccount) => owner.toString()) : [],
     pledge: `${formattedPledge.number}${formattedPledge.unit}`,
     retired: status === Wallet.Cardano.StakePoolStatus.Retired,
-    stake: metrics?.stake.active
-      ? getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics?.stake.active.toString()))
-      : { number: '-' },
     status,
     ticker: metadata?.ticker || '-',
     ...(metrics && {
       ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
       blocks: new BigNumber(metrics.blocksCreated).toFormat(),
       delegators: new BigNumber(metrics.delegators).toFormat(),
-      liveStake: formatPercentages(metrics.size.live),
       saturation: formatPercentages(metrics.saturation),
     }),
   };
