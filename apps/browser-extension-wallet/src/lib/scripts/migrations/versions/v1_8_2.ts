@@ -14,8 +14,6 @@ import { firstValueFrom } from 'rxjs';
 const MIGRATION_VERSION = '1.8.2';
 const LOCK_STORAGE = 'lock';
 const KEY_AGENT_DATA_STORAGE = 'keyAgentData';
-const LOCK_TEMP_STORAGE = 'lock_tmp';
-const KEY_AGENT_DATA_TEMP_STORAGE = 'keyAgentData_tmp';
 
 const provider = { type: Wallet.WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER, options: {} };
 
@@ -77,24 +75,7 @@ export const v_1_8_2: Migration = {
       getItemFromLocalStorage<any>(KEY_AGENT_DATA_STORAGE) || (await decryptLock(lock.data, password)).keyAgentData;
 
     return {
-      prepare: () => {
-        // Save temporary storage. Revert if something fails
-        try {
-          console.info('Saving temporary migration for', MIGRATION_VERSION);
-
-          if (keyAgentData) {
-            setItemInLocalStorage(KEY_AGENT_DATA_TEMP_STORAGE, keyAgentData);
-          }
-          if (lock) {
-            setItemInLocalStorage(LOCK_TEMP_STORAGE, lock);
-          }
-        } catch (error) {
-          console.info(`Error saving temporary migrations for ${MIGRATION_VERSION}, deleting...`, error);
-          removeItemFromLocalStorage(KEY_AGENT_DATA_TEMP_STORAGE);
-          removeItemFromLocalStorage(LOCK_TEMP_STORAGE);
-          throw error;
-        }
-      },
+      prepare: () => void 0,
       assert: () => void 0,
       persist: async () => {
         console.info(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
@@ -132,8 +113,6 @@ export const v_1_8_2: Migration = {
         }
 
         removeItemFromLocalStorage(KEY_AGENT_DATA_STORAGE);
-        removeItemFromLocalStorage(KEY_AGENT_DATA_TEMP_STORAGE);
-        removeItemFromLocalStorage(LOCK_TEMP_STORAGE);
       },
       rollback: () => {
         console.info(`Rollback migrated data for ${MIGRATION_VERSION} upgrade`);
@@ -143,8 +122,6 @@ export const v_1_8_2: Migration = {
         if (lock) {
           setItemInLocalStorage(LOCK_STORAGE, lock);
         }
-        removeItemFromLocalStorage(KEY_AGENT_DATA_TEMP_STORAGE);
-        removeItemFromLocalStorage(LOCK_TEMP_STORAGE);
       }
     };
   }
