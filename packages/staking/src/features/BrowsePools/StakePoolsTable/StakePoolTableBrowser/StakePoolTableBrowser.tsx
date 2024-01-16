@@ -80,7 +80,7 @@ export const StakePoolTableBrowser = ({
           loadMoreData,
           scrollableTargetId,
           showSkeleton,
-          total,
+          total: total - selectedStakePools?.length,
         }}
       />
     </div>
