@@ -37,7 +37,8 @@ const CardsGroup = (props: StakePoolCardProps) => (
 export const Overview = {
   argTypes: {
     metricType: {
-      control: { options: metricTypeOptions, type: 'select' },
+      control: { type: 'select' },
+      options: metricTypeOptions,
     },
   },
   args: {
