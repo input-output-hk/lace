@@ -1,5 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { formatPercentages, getNumberWithUnit, getRandomIcon } from '@lace/common';
+import BigNumber from 'bignumber.js';
 
 // TODO: try to remove data existense checks. in most cases that data is present according to StakePool type
 // eslint-disable-next-line complexity
@@ -34,9 +35,10 @@ export const mapStakePoolToDisplayData = ({ stakePool }: { stakePool: Wallet.Car
     ticker: metadata?.ticker || '-',
     ...(metrics && {
       ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
-      blocks: metrics?.blocksCreated?.toString(),
+      blocks: new BigNumber(metrics.blocksCreated).toFormat(),
+      delegators: new BigNumber(metrics.delegators).toFormat(),
       liveStake: formatPercentages(metrics.size.live),
-      saturation: formatPercentages(metrics.saturation.valueOf()),
+      saturation: formatPercentages(metrics.saturation),
     }),
   };
 };

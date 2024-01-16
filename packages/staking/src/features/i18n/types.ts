@@ -99,9 +99,14 @@ type KeysStructure = {
     details: {
       metrics: {
         activeStake: '';
+        liveStake: '';
         apy: '';
         delegators: '';
         saturation: '';
+        blocks: '';
+        cost: '';
+        pledge: '';
+        margin: '';
       };
       status: {
         delegating: '';

@@ -407,3 +407,22 @@ When(/^I click "Confirm new portfolio" button$/, async () => {
 Then(/^I see Manage delegation drawer Confirmation page$/, async () => {
   await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
 });
+
+Then(
+  /^I see "(Simple delegation|Multi delegation|Under allocated|Over allocated)" status in delegation card$/,
+  async (status: 'Simple delegation' | 'Multi delegation' | 'Under allocated' | 'Over allocated') => {
+    await ManageStakingDrawerAssert.assertSeeDelegationCardStatus(status);
+  }
+);
+
+When(/^I input random ratio for (\d+) pools adding to 100%$/, async (poolsCount: number) => {
+  await ManageStakingDrawer.inputRandomRatiosForPools(poolsCount);
+});
+
+When(/^I input (\d+)% ratio for pool (\d+)$/, async (ratio: number, poolNo: number) => {
+  await ManageStakingDrawer.inputRatioForPool(ratio, poolNo);
+});
+
+Then(/^I see input ratio field showing (\d+)% for pool (\d+)$/, async (ratio: number, poolNo: number) => {
+  await ManageStakingDrawerAssert.assertSeeRatioForPool(ratio, poolNo);
+});

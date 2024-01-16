@@ -1039,9 +1039,14 @@
     },
     "stakePoolMetricsBrowser": {
       "activeStake": "Active stake",
+      "liveStake": "Live stake",
       "saturation": "Saturation",
       "delegators": "Delegators",
-      "ros": "ROS"
+      "ros": "ROS",
+      "blocks": "Blocks",
+      "cost": "Cost p/ epoch",
+      "margin": "Pool margin",
+      "pledge": "Pledge"
     },
     "stakePoolSearch": {
       "gettingSaturated": "This pool starts to be saturated",

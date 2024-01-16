@@ -33,13 +33,13 @@ export type StakePoolDetails = {
   name: string;
   owners: string[];
   saturation?: string;
-  stake: { number: string; unit?: string };
+  liveStake: { number: string; unit?: string };
+  activeStake: { number: string; unit?: string };
   ticker: string;
   apy?: string;
   status: Wallet.Cardano.StakePool['status'];
-  fee: number | string;
+  fee: string;
   contact: Wallet.Cardano.PoolContactData;
-  liveStake?: string;
   blocks?: string;
   pledge: string;
 };
