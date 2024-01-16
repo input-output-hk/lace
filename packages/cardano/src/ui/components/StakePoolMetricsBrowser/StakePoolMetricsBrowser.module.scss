@@ -2,7 +2,9 @@
 @import '../../../../../common/src/ui/styles/abstracts/typography';
 
 .stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  row-gap: size_unit(3);
 
   .statItem {
     display: flex;
@@ -12,19 +14,18 @@
 
     .statHeader {
       color: var(--text-color-secondary);
-      @include text-bodyLarge-regular;
+      @include text-bodyLarge-medium;
     }
 
     .statBody {
       align-items: baseline;
       color: var(--text-color-primary);
       display: flex;
-      @include text-bodyLarge-medium;
+      @include text-bodyLarge-semi-bold;
 
       .suffix {
+        @include text-bodySmall-semi-bold;
         color: var(--text-color-secondary);
-        font-size: var(--bodySmall);
-        font-weight: 500;
         margin-left: size_unit(0.5);
       }
     }
@@ -33,10 +34,11 @@
 
 .popupView {
   &.stats {
+    display: flex;
     border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
     flex-direction: column;
     gap: size_unit(2);
-    padding-bottom: size_unit(4 );
+    padding-bottom: size_unit(4);
     .statItem {
       align-items: center;
       flex-direction: row;
