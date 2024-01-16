@@ -41,6 +41,7 @@ export const DappTransaction = ({
   const { t } = useTranslate();
   return (
     <div>
+      <div>Dapp information</div>
       <DappInfo {...dappInfo} className={styles.dappInfo} />
       {errorMessage && <ErrorPane error={errorMessage} className={styles.error} />}
       <div data-testid="dapp-transaction-container" className={styles.details}>
@@ -68,6 +69,7 @@ export const DappTransaction = ({
         )}
         {type === 'Send' && (
           <>
+            ${'dapp transaction'}
             <DappTxHeader
               title={t('package.core.dappTransaction.transaction')}
               subtitle={t('package.core.dappTransaction.send')}

@@ -307,8 +307,12 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
     isUsingHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
 
+  console.log('Transactions here:', tx);
+
   return (
-    <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
+    // <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_TX])}>
+    <Layout pageClassname={styles.spaceBetween}>
+      <div>Hello tx Summary below</div>
       {tx && txSummary ? (
         <DappTransaction
           transaction={txSummary}
@@ -321,6 +325,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
       ) : (
         <Skeleton loading />
       )}
+      <div>loading the</div>
       <div className={styles.actions}>
         <Button
           onClick={onConfirm}
