@@ -151,7 +151,7 @@ export const inspectTxType = ({
       case inspectionProperties.stakeKeyDeregistration.length > 0:
         return DelegationTransactionType.delegationDeregistration;
       // Voting procedures take priority over proposals
-      // TODO: should we create proper inspector instead?
+      // TODO: use proper inspector when available on sdk side (LW-9569)
       case tx.body.votingProcedures?.length > 0:
         return ConwayEraGovernanceActions.vote;
       case tx.body.proposalProcedures?.length > 0:
@@ -204,6 +204,7 @@ export const getVoterType = (voterType: Wallet.Cardano.VoterType): VoterTypeEnum
       return VoterTypeEnum.SPO;
     case Wallet.Cardano.VoterType.dRepKeyHash:
     case Wallet.Cardano.VoterType.dRepScriptHash:
+      return VoterTypeEnum.DREP;
     default:
       return VoterTypeEnum.DREP;
   }

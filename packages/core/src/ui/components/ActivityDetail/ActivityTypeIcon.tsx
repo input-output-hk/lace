@@ -51,15 +51,17 @@ export const ActivityTypeIcon = ({ type }: ActivityTypeIconProps): React.ReactEl
   const icon = type && activityTypeIcon[type];
   const iconStyle = { fontSize: txIconSize() };
 
-  // TODO: set fill color for every icon using currentColor, replace icon not to contain surrounding circle
+  const isGovernanceTx =
+    Object.values(ConwayEraCertificatesTypes).includes(type as unknown as ConwayEraCertificatesTypes) ||
+    type in ConwayEraGovernanceActions;
+
+  // TODO: set fill color for every icon using currentColor, replace icon not to contain surrounding circle (LW-9566)
   return icon ? (
     <Icon
       style={iconStyle}
       // Override fill color for governance related transactions
       className={cn({
-        [styles.governance]:
-          Object.values(ConwayEraCertificatesTypes).includes(type as unknown as ConwayEraCertificatesTypes) ||
-          type in ConwayEraGovernanceActions
+        [styles.governance]: isGovernanceTx
       })}
       component={icon}
     />

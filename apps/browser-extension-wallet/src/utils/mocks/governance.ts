@@ -1,7 +1,5 @@
 import { Wallet } from '@lace/cardano';
 
-// const STAKE_KEY_HASH = Wallet.Cardano.RewardAccount.toHash(REWARD_ACCOUNT);
-// const POOL_ID = Wallet.Cardano.PoolId('pool185g59xpqzt7gf0ljr8v8f3akl95qnmardf2f8auwr3ffx7atjj5');
 const VOTER_CREDENTIAL = {
   type: Wallet.Cardano.CredentialType.KeyHash,
   hash: Wallet.Crypto.Hash28ByteBase16('0d94e174732ef9aae73f395ab44507bfa983d65023c11a951f0c32e4')
