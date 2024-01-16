@@ -17,6 +17,8 @@ import { Sections } from './types';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { WalletAccounts } from './components/WalletAccounts';
 import { AddSharedWalletLink } from '@components/MainMenu/DropdownMenuOverlay/components/AddSharedWalletLink';
+import { useWalletStore } from '@stores';
+import classNames from 'classnames';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -33,6 +35,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   ...props
 }): React.ReactElement => {
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
+  const { environmentName } = useWalletStore();
 
   const openWalletAccounts = () => {
     setCurrentSection(Sections.WalletAccounts);
@@ -48,7 +51,12 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
       {currentSection === Sections.Main && (
-        <div className={isPopup ? styles.popUpContainer : styles.extendedContainer}>
+        <div
+          className={classNames(
+            isPopup ? styles.popUpContainer : styles.extendedContainer,
+            environmentName === 'Mainnet' ? styles.popUpContainerHigher : styles.popUpContainerLower
+          )}
+        >
           {topSection}
           <Links>
             {process.env.USE_MULTI_WALLET === 'true' && <AddNewWalletLink isPopup={isPopup} />}
