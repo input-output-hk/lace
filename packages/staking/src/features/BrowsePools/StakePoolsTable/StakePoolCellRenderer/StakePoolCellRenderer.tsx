@@ -17,4 +17,5 @@ export const stakePoolCellRenderer: Partial<Record<Columns, React.FunctionCompon
     );
   },
   [Columns.margin]: ({ value }: { value?: string }) => <span>{value}%</span>,
+  [Columns.liveStake]: ({ value }: { value?: string }) => <span>{value}%</span>,
 };

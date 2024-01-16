@@ -21,7 +21,15 @@ export type TableRowProps<E extends string> = {
 };
 
 const ConditionalTooltipWrapper = ({ message = '', children }: { message?: string; children: React.ReactNode }) => (
-  <>{!message ? children : <Tooltip label={message}>{children}</Tooltip>}</>
+  <>
+    {!message ? (
+      children
+    ) : (
+      <Tooltip side="right" label={message}>
+        {children}
+      </Tooltip>
+    )}
+  </>
 );
 
 // TODO: migrate into the ui package (LW-9531)
