@@ -37,7 +37,7 @@ type stakePoolsTableProps = {
 };
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: Columns.apy,
+  field: SortField.name,
   order: SortDirection.desc
 };
 
@@ -214,7 +214,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
               columns={stakePooltableConfig.columns}
               cellRenderers={stakePooltableConfig.renderer}
               dataTestId="stake-pool"
-              data={data as Parameters<typeof TableRow>[0]['data']}
+              data={data as unknown as Parameters<typeof TableRow>[0]['data']}
               selectionDisabledMessage={selectionDisabledMessage}
             />
           )}

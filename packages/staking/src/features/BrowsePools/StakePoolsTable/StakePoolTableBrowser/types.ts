@@ -7,10 +7,10 @@ export type StakePoolTableItemBrowserProps = {
   ticker?: string;
   apy?: string;
   saturation?: string;
-  cost?: string;
+  cost: string;
   margin?: string;
   blocks?: string;
-  pledge?: string;
+  pledge: string;
   selectionDisabledMessage?: string;
   stakePool: Wallet.Cardano.StakePool;
   onClick?: () => void;

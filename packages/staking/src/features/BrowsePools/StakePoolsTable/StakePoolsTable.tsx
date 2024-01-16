@@ -6,7 +6,7 @@ import uniqBy from 'lodash/uniqBy';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../../outside-handles-provider';
-import { useDelegationPortfolioStore } from '../../store';
+import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../../store';
 import * as styles from './StakePoolsTable.css';
 import { StakePoolsTableEmpty } from './StakePoolsTableEmpty/StakePoolsTableEmpty';
 import { StakePoolTableBrowser } from './StakePoolTableBrowser/StakePoolTableBrowser';
@@ -17,7 +17,7 @@ type StakePoolsTableProps = {
 };
 
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: SortField.apy,
+  field: SortField.name,
   order: SortDirection.desc,
 };
 
@@ -36,7 +36,6 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     store.selectedPortfolio.map(({ stakePool }) => stakePool)
   );
   const {
-    walletStoreWalletUICardanoCoin: cardanoCoin,
     currentChain,
     walletStoreStakePoolSearchResults: {
       pageResults,
@@ -122,17 +121,17 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
   const list = useMemo(
     () =>
       combinedUnique.map((pool) => {
-        const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
+        const stakePool = mapStakePoolToDisplayData({ stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
 
         return {
-          logo,
           ...stakePool,
           hexId: pool.hexId,
+          logo: stakePool.logo || logo,
           stakePool: pool,
         };
       }) || [],
-    [combinedUnique, cardanoCoin]
+    [combinedUnique]
   );
 
   return (
