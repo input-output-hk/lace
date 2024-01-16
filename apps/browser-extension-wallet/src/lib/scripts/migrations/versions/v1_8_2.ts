@@ -128,7 +128,7 @@ export const v_1_8_2: Migration = {
         if (isWalletLoacked(lock, keyAgentData)) {
           setItemInLocalStorage(LOCK_STORAGE, lockValue);
         } else {
-          setItemInLocalStorage(LOCK_STORAGE, '');
+          removeItemFromLocalStorage(LOCK_STORAGE);
         }
 
         removeItemFromLocalStorage(KEY_AGENT_DATA_STORAGE);
