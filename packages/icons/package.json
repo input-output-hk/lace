@@ -16,9 +16,10 @@
   "module": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "yarn build:svgr && yarn build:babel && yarn build:tsc",
-    "build:babel": "babel --extensions .tsx src --out-dir dist/ --config-file ./babel.config.js",
-    "build:svgr": "svgr ./raw --out-dir ./src --typescript",
+    "build": "yarn build:svgr && yarn build:babel && yarn build:tsc && yarn build:cleanup",
+    "build:babel": "babel --extensions .tsx ./tmp --out-dir dist/ --config-file ./babel.config.js",
+    "build:cleanup": "rm -rf ./tmp",
+    "build:svgr": "svgr ./raw --out-dir ./tmp --typescript",
     "build:tsc": "tsc --project tsconfig.json"
   },
   "devDependencies": {
