@@ -107,7 +107,7 @@ export const Overview = {
 
       <Section title="Parameter(s) types">
         <Variants.Table
-          headers={['Ticker', 'Saturation', 'ROS', 'Cost', 'Margin', 'Produced-blocks', 'Pledge', 'Live stake']}
+          headers={['Ticker', 'Saturation', 'ROS', 'Cost', 'Margin', 'Produced blocks', 'Pledge', 'Live stake']}
         >
           <Variants.Row>
             <Variants.Cell style={{ padding: 10 }}>
