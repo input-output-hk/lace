@@ -62,13 +62,15 @@ export const FindYourSharedWallet = ({ translations, onChange, onBack, onNext, f
             files={file ? [file.name] : undefined}
           />
         </Box>
-        <Box>
-          <ActionCard
-            title={translations.syncNetwork.title}
-            description={translations.syncNetwork.description}
-            icon={<RefreshIcon />}
-          />
-        </Box>
+        {file === undefined && (
+          <Box>
+            <ActionCard
+              title={translations.syncNetwork.title}
+              description={translations.syncNetwork.description}
+              icon={<RefreshIcon />}
+            />
+          </Box>
+        )}
       </Box>
       <Flex w="$fill" justifyContent="space-between" alignItems="center">
         <Button.Secondary label={translations.backButton} onClick={() => onBack()} />
