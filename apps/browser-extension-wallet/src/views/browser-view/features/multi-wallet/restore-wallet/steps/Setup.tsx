@@ -6,10 +6,12 @@ import { walletRoutePaths } from '@routes/wallet-paths';
 
 export const Setup = (): JSX.Element => {
   const history = useHistory();
-  const { setName, setPassword } = useRestoreWallet();
+  const { setName, setPassword, onChange, data } = useRestoreWallet();
 
   return (
     <WalletSetupNamePasswordStep
+      initialWalletName={data.name}
+      onChange={onChange}
       onBack={() => history.push(walletRoutePaths.newWallet.root)}
       onNext={({ password, walletName }) => {
         setName(walletName);

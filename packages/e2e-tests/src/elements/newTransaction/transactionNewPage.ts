@@ -1,37 +1,35 @@
 /* eslint-disable no-undef */
-import webTester, { LocatorStrategy } from '../../actor/webTester';
-import { WebElement, WebElementFactory as Factory } from '../webElement';
 import { CoinConfigure } from './coinConfigure';
 import { AddressInput } from '../addressInput';
 import { TransactionBundle } from './transactionBundle';
 import { Asset } from '../../data/Asset';
 import { ChainablePromiseElement } from 'webdriverio';
 import Banner from '../banner';
+import CommonDrawerElements from '../CommonDrawerElements';
+import testContext from '../../utils/testContext';
+import { generateRandomString } from '../../utils/textUtils';
 
-export class TransactionNewPage extends WebElement {
+class TransactionNewPage extends CommonDrawerElements {
   private CONTAINER = '//div[@class="ant-drawer-body"]';
-  private SEND_TITLE = '//span[contains(., "Send")]';
   private ADD_BUNDLE_BUTTON = '[data-testid="add-bundle-button"]';
-  private ATTRIBUTES_LABEL = '//span[contains(@class, "SendTransactionCost-module_label")]';
-  private ATTRIBUTES_VALUE_ADA = '//span[contains(@class, "SendTransactionCost-module_ada")]';
-  private ATTRIBUTES_VALUE_FIAT = '//span[contains(@class, "SendTransactionCost-module_fiat")]';
-  private CONFIRMATION_ADDRESS_ERROR_SELECTOR = '//p[@data-testid="transaction-confirmation-address-error"]';
-  private FUNDS_ERROR_SELECTOR = '//span[contains(@class, "CoinConfigure-module_coinInputError")]';
   private ADDR_SEARCH_RESULTS_ROW = '//div[@data-testid="search-result-row"]';
   private ADDR_SEARCH_RESULTS_ROW_NAME = '//span[@data-testid="search-result-name"]';
   private ADDR_SEARCH_RESULTS_ROW_ADDRESS = '//span[@data-testid="search-result-address"]';
+  private METADATA_INPUT_LABEL = '[data-testid="metadata-input-container"] [data-testid="input-label"]';
   private METADATA_INPUT_FIELD = '[data-testid="metadata-input"]';
   private METADATA_COUNTER = '[data-testid="metadata-counter"]';
   private METADATA_BIN_BUTTON = '[data-testid="text-box-item"]';
   private INVALID_ADDRESS_ERROR_SELECTOR = '//span[@data-testid="address-input-error"]';
-  private BUNDLE_DESCRIPTION = '//p[@data-testid="bundle-description"]';
+  private BUNDLE_DESCRIPTION = '[data-testid="bundle-description"]';
   private BACKGROUND_SECTION = '//div[@data-testid="drawer-navigation"]';
   private REVIEW_TRANSACTION_BUTTON = '#send-next-btn';
   private CANCEL_TRANSACTION_BUTTON = '[data-testid="send-cancel-btn"]';
-
-  constructor() {
-    super();
-  }
+  private TRANSACTION_COSTS_SECTION_LABEL = '[data-testid="transaction-costs-section-label"]';
+  private TRANSACTION_FEE_LABEL = '[data-testid="transaction-fee-label"]';
+  private TRANSACTION_FEE_VALUE_ADA = '[data-testid="transaction-fee-value-ada"]';
+  private TRANSACTION_FEE_VALUE_FIAT = '[data-testid="transaction-fee-value-fiat"]';
+  private ADA_ALLOCATION_VALUE_ADA = '[data-testid="ada-allocation-value-ada"]';
+  private ADA_ALLOCATION_VALUE_FIAT = '[data-testid="ada-allocation-value-fiat"]';
 
   get banner(): typeof Banner {
     return Banner;
@@ -45,8 +43,8 @@ export class TransactionNewPage extends WebElement {
     return new TransactionBundle(index);
   }
 
-  sendTitleElement(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.SEND_TITLE}`, 'xpath');
+  get title() {
+    return this.drawerNavigationTitle;
   }
 
   get addBundleButton(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -61,53 +59,47 @@ export class TransactionNewPage extends WebElement {
     return new AddressInput(index);
   }
 
-  attributeLabel(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.ATTRIBUTES_LABEL}`, 'xpath');
+  get transactionCostsSectionLabel() {
+    return $(this.TRANSACTION_COSTS_SECTION_LABEL);
   }
 
-  attributeValueAda(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.ATTRIBUTES_VALUE_ADA}`, 'xpath');
+  get transactionFeeLabel() {
+    return $(this.TRANSACTION_FEE_LABEL);
   }
 
-  attributeValueAdaAllocation(): WebElement {
-    return Factory.fromSelector(`(${this.CONTAINER}${this.ATTRIBUTES_VALUE_ADA})[2]`, 'xpath');
+  get transactionFeeValueAda() {
+    return $(this.TRANSACTION_FEE_VALUE_ADA);
   }
 
-  get attributeValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.ATTRIBUTES_VALUE_FIAT}`);
+  get transactionFeeValueFiat() {
+    return $(this.TRANSACTION_FEE_VALUE_FIAT);
   }
 
-  attributeAdaAllocationValueFiat(): WebElement {
-    return Factory.fromSelector(`(${this.CONTAINER}${this.ATTRIBUTES_VALUE_FIAT})[2]`, 'xpath');
+  get adaAllocationValueAda() {
+    return $(this.ADA_ALLOCATION_VALUE_ADA);
   }
 
-  fundsErrorElement(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.FUNDS_ERROR_SELECTOR}`, 'xpath');
+  get adaAllocationValueFiat() {
+    return $(this.ADA_ALLOCATION_VALUE_FIAT);
   }
 
-  addressErrorElement(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.CONFIRMATION_ADDRESS_ERROR_SELECTOR}`, 'xpath');
+  addressBookSearchResultRow(index: number) {
+    return $(`(${this.ADDR_SEARCH_RESULTS_ROW})[${index}]`);
   }
 
-  addressBookSearchResultRow(index: number): WebElement {
-    return Factory.fromSelector(`(${this.ADDR_SEARCH_RESULTS_ROW})[${index}]`, 'xpath');
+  addressBookSearchResultRowName(index: number) {
+    return $(`(${this.ADDR_SEARCH_RESULTS_ROW}${this.ADDR_SEARCH_RESULTS_ROW_NAME})[${index}]`);
   }
 
-  addressBookSearchResultRowName(index: number): WebElement {
-    return Factory.fromSelector(
-      `(${this.ADDR_SEARCH_RESULTS_ROW}${this.ADDR_SEARCH_RESULTS_ROW_NAME})[${index}]`,
-      'xpath'
-    );
+  addressBookSearchResultRowAddress(index: number) {
+    return $(`(${this.ADDR_SEARCH_RESULTS_ROW}${this.ADDR_SEARCH_RESULTS_ROW_ADDRESS})[${index}]`);
   }
 
-  addressBookSearchResultRowAddress(index: number): WebElement {
-    return Factory.fromSelector(
-      `(${this.ADDR_SEARCH_RESULTS_ROW}${this.ADDR_SEARCH_RESULTS_ROW_ADDRESS})[${index}]`,
-      'xpath'
-    );
+  get metadataInputLabel() {
+    return $(this.METADATA_INPUT_LABEL);
   }
 
-  get txMetadataInputField(): ChainablePromiseElement<WebdriverIO.Element> {
+  get metadataInputField() {
     return $(this.METADATA_INPUT_FIELD);
   }
 
@@ -119,8 +111,8 @@ export class TransactionNewPage extends WebElement {
     return $(this.METADATA_BIN_BUTTON);
   }
 
-  bundleDescription(): WebElement {
-    return Factory.fromSelector(`${this.CONTAINER}${this.BUNDLE_DESCRIPTION}`, 'xpath');
+  get bundleDescription() {
+    return $(this.BUNDLE_DESCRIPTION);
   }
 
   get reviewTransactionButton(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -131,28 +123,18 @@ export class TransactionNewPage extends WebElement {
     return $(this.CANCEL_TRANSACTION_BUTTON);
   }
 
-  async getAddressError(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.addressErrorElement());
+  invalidAddressError(index: number) {
+    return $(`(${this.INVALID_ADDRESS_ERROR_SELECTOR})[${index}]`);
   }
 
-  async getFundsError(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.fundsErrorElement());
-  }
-
-  async getValueAda(): Promise<number> {
-    const stringValue = (await webTester.getTextValueFromElement(this.attributeValueAda())) as string;
+  async getTransactionFeeValueInAda(): Promise<number> {
+    const stringValue = await this.transactionFeeValueAda.getText();
     const stringValueTrimmed = stringValue.replace(` ${Asset.CARDANO.ticker}`, '');
     return Number(stringValueTrimmed);
   }
 
-  async getValueFiat(): Promise<number> {
-    const stringValue = await this.attributeValueFiat.getText();
-    const stringValueTrimmed = stringValue.replace('$', '').replace(' USD', '');
-    return Number(stringValueTrimmed);
-  }
-
-  async getValueAdaAllocation(): Promise<number> {
-    const stringValue = (await webTester.getTextValueFromElement(this.attributeValueAdaAllocation())) as string;
+  async getAdaAllocationValueInAda(): Promise<number> {
+    const stringValue = await this.adaAllocationValueAda.getText();
     const stringValueTrimmed = stringValue.replace(` ${Asset.CARDANO.ticker}`, '');
     return Number(stringValueTrimmed);
   }
@@ -161,28 +143,32 @@ export class TransactionNewPage extends WebElement {
     return $$(`${this.ADDR_SEARCH_RESULTS_ROW}`);
   }
 
-  async getContactName(index: number): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.addressBookSearchResultRowName(index));
+  async getContactName(index: number): Promise<string> {
+    return await this.addressBookSearchResultRowName(index).getText();
   }
 
-  async getPartialContactAddress(index: number): Promise<string | number> {
-    const fullAddress = await webTester.getTextValueFromElement(this.addressBookSearchResultRowAddress(index));
+  async getPartialContactAddress(index: number): Promise<string> {
+    const fullAddress = await this.addressBookSearchResultRowAddress(index).getText();
     return String(fullAddress).slice(-6);
   }
 
-  async getBundleDescription(): Promise<string | number> {
-    return await webTester.getTextValueFromElement(this.bundleDescription());
+  async clickDrawerBackground(): Promise<void> {
+    await this.backgroundSection.click();
   }
 
-  invalidAddressError(index: number): WebElement {
-    return Factory.fromSelector(`(${this.INVALID_ADDRESS_ERROR_SELECTOR})[${index}]`, 'xpath');
-  }
+  clickAddressBookSearchResult = async (index: number) => {
+    await this.addressBookSearchResultRow(index).click();
+  };
 
-  toJSLocator(): string {
-    return this.CONTAINER;
-  }
+  fillMetadata = async (characters: number) => {
+    const text = await generateRandomString(characters);
+    await this.metadataInputField.setValue(text);
+  };
 
-  locatorStrategy(): LocatorStrategy {
-    return 'xpath';
-  }
+  saveMetadata = async () => {
+    const metadata = await this.metadataInputField.getValue();
+    testContext.save('metadata', metadata);
+  };
 }
+
+export default new TransactionNewPage();

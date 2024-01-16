@@ -25,6 +25,7 @@ class TestDAppPage {
   private SEND_ADA_RUN_BUTTON = '[data-testid="send-ada-run-button"]';
   private SEND_TOKEN_RUN_BUTTON = '[data-testid="send-token-run-button"]';
   private SET_COLLATERAL_BUTTON = '[data-testid="collateral-run-button"]';
+  private SIGN_DATA_BUTTON = '[data-testid="sign-data-run-button"]';
 
   get walletItem(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.WALLET_ITEM);
@@ -120,6 +121,10 @@ class TestDAppPage {
 
   get setCollateralButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SET_COLLATERAL_BUTTON);
+  }
+
+  get signDataButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SIGN_DATA_BUTTON);
   }
 }
 

@@ -35,9 +35,9 @@ UI-mapped gherkin tests for the Lace browser extension
 
 ## Selective gherkin scenario runs by tag matching
 
-- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag and @Testnet'`
-- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag or @otherTag and @Testnet'`
-- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tagExpression='@yourtag and not @Pending and @Testnet'`
+- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tags='@yourtag and @Testnet'`
+- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tags='@yourtag or @otherTag and @Testnet'`
+- `yarn wdio run wdio.conf.<browser>.ts --cucumberOpts.tags='@yourtag and not @Pending and @Testnet'`
 
 ## Supported browsers
 

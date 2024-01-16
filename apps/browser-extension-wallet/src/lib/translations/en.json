@@ -748,7 +748,7 @@
       "success.thisMayTakeAFewMinutesToProcessYouCanViewTheStatusByClickingViewTransaction": "This may take a few minutes to process. You can view the status by clicking view transaction.",
       "fail.theTransactionHasNotBeenProceedPleasetryagain": "There was a problem submitting your transaction. Click 'Back to transaction summary' and try again",
       "send.advanced.output": "Add bundle",
-      "send.advanced.asset": "Add token or NFT ",
+      "send.advanced.asset": "Add token or NFT",
       "send.advanced.bundleTitle": "Bundle {{ index }}",
       "send.transactionFee": "Transaction fee",
       "send.transactionCosts": "Transaction costs",
@@ -1040,9 +1040,14 @@
     },
     "stakePoolMetricsBrowser": {
       "activeStake": "Active stake",
+      "liveStake": "Live stake",
       "saturation": "Saturation",
       "delegators": "Delegators",
-      "ros": "ROS"
+      "ros": "ROS",
+      "blocks": "Blocks",
+      "cost": "Cost p/ epoch",
+      "margin": "Pool margin",
+      "pledge": "Pledge"
     },
     "stakePoolSearch": {
       "gettingSaturated": "This pool starts to be saturated",
@@ -1619,6 +1624,14 @@
       "input.label": "Account name",
       "footer.save": "Save",
       "footer.cancel": "Cancel"
+    }
+  },
+  "multiWallet": {
+    "confirmationDialog": {
+      "title": "Are you sure you want to cancel adding a new wallet?",
+      "description": "You'll have to start over.",
+      "cancel": "Go back",
+      "confirm": "Proceed"
     }
   }
 }

@@ -117,31 +117,45 @@ export const createCardanoWalletsByChain = async (
   return { keyAgent: activeKeyAgent, keyAgentsByChain };
 };
 
+const executeSigningCallbackIfExists = (signCallback?: (result: boolean) => void, response?: boolean) => {
+  if (signCallback)
+    setTimeout(() => {
+      signCallback(response);
+    }, 0);
+};
+
 const createAsyncKeyAgentWithCallback = (
   keyAgent: KeyManagement.KeyAgent,
   signCallback?: (result: boolean) => void
 ): KeyManagement.AsyncKeyAgent => {
   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
   // TODO: LW-7807 revise the sdk cip30 implementation
+
   const wrappedSign = (...args: Parameters<KeyManagement.KeyAgent['signTransaction']>) =>
     keyAgent
       .signTransaction(...args)
       .then(async (sigs) => {
-        if (signCallback)
-          setTimeout(() => {
-            signCallback(true);
-          }, 0);
+        executeSigningCallbackIfExists(signCallback, true);
         return sigs;
       })
       .catch((error) => {
-        if (signCallback)
-          setTimeout(() => {
-            signCallback(false);
-          }, 0);
+        executeSigningCallbackIfExists(signCallback, false);
         throw new Error(error);
       });
 
-  return { ...asyncKeyAgent, signTransaction: wrappedSign.bind(keyAgent) };
+  const wrappedSignData = (...args: Parameters<KeyManagement.KeyAgent['signBlob']>) =>
+    keyAgent
+      .signBlob(...args)
+      .then(async (sigs) => {
+        executeSigningCallbackIfExists(signCallback, true);
+        return sigs;
+      })
+      .catch((error) => {
+        executeSigningCallbackIfExists(signCallback, false);
+        throw new Error(error);
+      });
+
+  return { ...asyncKeyAgent, signTransaction: wrappedSign.bind(keyAgent), signBlob: wrappedSignData.bind(keyAgent) };
 };
 
 /**

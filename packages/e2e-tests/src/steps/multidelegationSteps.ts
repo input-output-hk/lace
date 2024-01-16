@@ -329,10 +329,81 @@ When(/^I click Manage button$/, async () => {
   await MultidelegationPage.clickManageButton();
 });
 
-Then(/^I see Manage delegation page$/, async () => {
+Then(/^I see Manage delegation drawer$/, async () => {
   await ManageStakingDrawerAssert.assertSeeManageStakingDrawer(true);
 });
 
 Then(/^I see only first pools details are expanded$/, async () => {
   await ManageStakingDrawerAssert.assertSeeOnlyFirstPoolDetailsExpanded();
+});
+
+Then(/^I expand all pools details$/, async () => {
+  await ManageStakingDrawer.expandAllPoolsDetails();
+});
+
+Then(/^all pools details are expanded$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeAllPoolsDetailsExpanded();
+});
+
+When(/^I hide all pools details$/, async () => {
+  await ManageStakingDrawer.hideAllPoolsDetails();
+});
+
+Then(/^all pools details are hidden$/, async () => {
+  await ManageStakingDrawerAssert.assertSeeAllPoolsDetailsHidden();
+});
+
+Then(/^I see selected pools counter is showing "([^"]*)"$/, async (poolsCount: number) => {
+  await ManageStakingDrawerAssert.assertSeeSelectedPoolsCounter(poolsCount);
+});
+
+Then(/^I see "Add stake pool" button is (disabled|enabled)$/, async (state: 'enabled' | 'disabled') => {
+  await ManageStakingDrawerAssert.assertSeeAddStakePoolButtonDisabled(state === 'enabled');
+});
+
+Then(/^I click "Add stake pool" button$/, async () => {
+  await ManageStakingDrawer.clickAddStakePoolButton();
+});
+
+Then(/^I pick "([^"]*)" pool for delegation$/, async (poolToStake: string) => {
+  await MultidelegationPage.markPoolsForDelegation(poolToStake);
+});
+
+Given(
+  /^I see "Remove pool from portfolio" button is (disabled|enabled) for pool "([^"]*)"$/,
+  async (state: 'enabled' | 'disabled', poolNo: number) => {
+    await ManageStakingDrawerAssert.assertSeeRemovePoolButtonDisabled(state === 'enabled', poolNo);
+  }
+);
+
+Given(/^I remove "(\d+)" pools from delegation portfolio$/, async (poolsToRemove: number) => {
+  await ManageStakingDrawer.removePoolsFromDelegationPortfolio(poolsToRemove);
+});
+
+Given(
+  /^I see "Remove pool from portfolio" button tooltip on hover for pool "(\d*)"$/,
+  async (tooltipForPool: number) => {
+    await ManageStakingDrawer.hoverOverRemovePoolButtonForPool(tooltipForPool);
+    await ManageStakingDrawerAssert.assertSeeRemovePoolButtonTooltip(tooltipForPool);
+  }
+);
+
+Then(/^I (see|don't see) "Confirm new portfolio" button$/, async (visible: 'see' | 'dont see') => {
+  await ManageStakingDrawerAssert.assertSeeConfirmNewPortfolioButton(visible === 'see');
+});
+
+Then(/^"Confirm new portfolio" button is (enabled|disabled)$/, async (isEnabled: 'enabled' | 'disabled') => {
+  await ManageStakingDrawerAssert.assertConfirmNewPortfolioButtonState(isEnabled === 'enabled');
+});
+
+When(/^I click (plus|minus) button for pool "(\d+)"$/, async (ratioButton: 'plus' | 'minus', poolNo: number) => {
+  await ManageStakingDrawer.clickRatioButtonForPool(ratioButton, poolNo);
+});
+
+When(/^I click "Confirm new portfolio" button$/, async () => {
+  await ManageStakingDrawer.clickConfirmNewPortfolioButton();
+});
+
+Then(/^I see Manage delegation drawer Confirmation page$/, async () => {
+  await StakingConfirmationDrawerAssert.assertSeeStakingConfirmationDrawer();
 });

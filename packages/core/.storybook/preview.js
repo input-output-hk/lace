@@ -4,38 +4,20 @@ import 'normalize.css';
 import './theme.scss';
 import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
 
-export const customViewports = {
-  popup: {
-    name: 'Popup',
-    styles: {
-      width: '360px',
-      height: '600'
-    }
-  }
-};
-
 export const preview = {
-  parameters: {
-    actions: { argTypesRegex: '^on[A-Z].*' },
-    controls: {
-      matchers: {
-        color: /(background|color)$/i,
-        date: /Date$/
-      }
-    },
-    viewport: {
-      viewports: customViewports,
-      defaultViewport: 'Popup'
+  actions: { argTypesRegex: '^on[A-Z].*' },
+  controls: {
+    matchers: {
+      color: /(background|color)$/i,
+      date: /Date$/
     }
   }
 };
 
 export const decorators = [
-  (Story) => {
-    return (
-      <ThemeProvider colorScheme={ThemeColorScheme.Light}>
-        <Story />
-      </ThemeProvider>
-    );
-  }
+  (Story) => (
+    <ThemeProvider colorScheme={ThemeColorScheme.Light}>
+      <Story />
+    </ThemeProvider>
+  )
 ];

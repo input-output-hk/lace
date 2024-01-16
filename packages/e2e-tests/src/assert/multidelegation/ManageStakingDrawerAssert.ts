@@ -1,15 +1,16 @@
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 import ManageStakingDrawer from '../../elements/multidelegation/ManageStakingDrawer';
+import MultidelegationPage from '../../elements/multidelegation/MultidelegationPage';
 
 class ManageStakingDrawerAssert {
   assertSeeManageStakingDrawer = async (manageButtonInitiated = false) => {
-    await ManageStakingDrawer.drawerHeaderCloseButton.waitForDisplayed();
+    await ManageStakingDrawer.drawerHeaderCloseButton.waitForClickable();
     await ManageStakingDrawer.drawerNavigationTitle.waitForDisplayed();
     expect(await ManageStakingDrawer.drawerNavigationTitle.getText()).to.equal(
       await t('drawer.titleSecond', 'staking')
     );
-    await ManageStakingDrawer.infoCard.waitForDisplayed();
+    await this.assertSeeInfoCard();
     await ManageStakingDrawer.selectedPoolsLabel.waitForDisplayed();
     await ManageStakingDrawer.addPoolsButton.waitForDisplayed();
     if (!manageButtonInitiated) {
@@ -18,6 +19,16 @@ class ManageStakingDrawerAssert {
         await t('drawer.preferences.confirmButton', 'staking')
       );
     }
+  };
+
+  assertSeeInfoCard = async () => {
+    await ManageStakingDrawer.delegationCardStatusLabel.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardStatusValue.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardBalanceLabel.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardBalanceValue.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardPoolsLabel.waitForDisplayed();
+    await ManageStakingDrawer.delegationCardPoolsValue.waitForDisplayed();
+    expect(await ManageStakingDrawer.delegationCardChartSlices.length).to.be.greaterThan(0);
   };
 
   assertSeeOnlyFirstPoolDetailsExpanded = async () => {
@@ -63,6 +74,62 @@ class ManageStakingDrawerAssert {
     await ManageStakingDrawer.poolDetailsSlider(0).waitForClickable();
     await ManageStakingDrawer.poolDetailsSliderPlus(0).waitForClickable();
     await ManageStakingDrawer.poolDetailsRemovePoolButton(0).waitForDisplayed();
+  };
+
+  assertSeeAllPoolsDetailsExpanded = async () => {
+    expect(await ManageStakingDrawer.poolDetailsIconTruncated.length).to.equal(0);
+    expect(await ManageStakingDrawer.poolDetailsIconExpanded.length).to.equal(
+      Number(await MultidelegationPage.delegationCardPoolsValue.getText())
+    );
+  };
+
+  assertSeeAllPoolsDetailsHidden = async () => {
+    expect(await ManageStakingDrawer.poolDetailsIconExpanded.length).to.equal(0);
+    expect(await ManageStakingDrawer.poolDetailsIconTruncated.length).to.equal(
+      Number(await MultidelegationPage.delegationCardPoolsValue.getText())
+    );
+  };
+
+  assertSeeSelectedPoolsCounter = async (poolsCount: number) => {
+    let selectedPoolsCounter = await ManageStakingDrawer.selectedPoolsLabel.getText();
+    selectedPoolsCounter = selectedPoolsCounter.split('(')[1].replace(')', '');
+    expect(Number(selectedPoolsCounter)).to.equal(Number(poolsCount));
+    expect(Number(await ManageStakingDrawer.delegationCardPoolsValue.getText())).to.equal(Number(selectedPoolsCounter));
+  };
+
+  assertSeeAddStakePoolButtonDisabled = async (shouldBeEnabled: boolean) => {
+    await ManageStakingDrawer.addPoolsButton.waitForClickable({
+      reverse: !shouldBeEnabled
+    });
+  };
+
+  assertSeeRemovePoolButtonDisabled = async (shouldBeEnabled: boolean, poolNo: number) => {
+    await ManageStakingDrawer.poolDetailsRemovePoolButton(poolNo - 1).waitForEnabled({
+      reverse: !shouldBeEnabled
+    });
+  };
+
+  assertSeeRemovePoolButtonTooltip = async (tooltipForPool: number) => {
+    await ManageStakingDrawer.tooltip(tooltipForPool - 1).waitForDisplayed();
+    expect(await ManageStakingDrawer.tooltip(tooltipForPool - 1).getText()).to.equal(
+      await t('drawer.preferences.pickMorePools', 'staking')
+    );
+  };
+
+  assertSeeConfirmNewPortfolioButton = async (shouldBeVisible: boolean) => {
+    await ManageStakingDrawer.nextButton.waitForDisplayed({
+      reverse: !shouldBeVisible
+    });
+    if (shouldBeVisible)
+      expect(await ManageStakingDrawer.nextButton.getText()).to.equal(
+        await t('drawer.preferences.confirmButton', 'staking')
+      );
+  };
+
+  assertConfirmNewPortfolioButtonState = async (isEnabled: boolean) => {
+    await ManageStakingDrawer.nextButton.waitForEnabled({
+      reverse: !isEnabled
+    });
   };
 }
 

@@ -1,6 +1,10 @@
 name: Shared Build
 description: Shared build config for both Chromium and Safari workflows
 inputs:
+  BUILD_DEV_PREVIEW:
+    description: 'Build developer preview of Lace'
+    required: false
+    default: 'false'
   LACE_EXTENSION_KEY:
     description: 'Public extended manifest key'
     required: true
@@ -41,6 +45,7 @@ runs:
     - name: Build dist version
       shell: bash
       env:
+        BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
         POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_MAINNET }}
         POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREPROD }}

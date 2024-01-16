@@ -15,8 +15,7 @@ Feature: Address book - extended view
     When I see address count: 3
     Then address list is displayed and each row consists of avatar, name and address
 
-  @LW-4464 @Smoke @Pending
-  # BUG LW-7925
+  @LW-4464 @Smoke
   Scenario: Extended-view - Address Book - Add new address "Shelley_manual"
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -24,11 +23,10 @@ Feature: Address book - extended view
     And "Save address" button is disabled on "Add new address" drawer
     When I fill address form with "Shelley_manual" name and "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "Address added"
+    Then I see a toast with text: "Address added"
     And I see address row with name "Shelley_manual" and address "addr_test1qq959a7g4spmkg4gz2yw02622c739p8crt6tzh04qzag992wcj4m99m95nmkgxhk8j0upqp2jzaxxdsj3jf9v4yhv3uqfwr6ja" on the list in extended mode
 
-  @LW-4464 @Pending
-  # BUG LW-7925
+  @LW-4464
   Scenario Outline: Extended-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in extended mode
     And I click "Add address" button on address book page
@@ -36,7 +34,7 @@ Feature: Address book - extended view
     And "Save address" button is disabled on "Add new address" drawer
     When I fill address form with "<wallet_name>" name and "<address>" address
     And I click "Save address" button on "Add new address" drawer
-    Then I see a toast with message: "Address added"
+    Then I see a toast with text: "Address added"
     And I see address row with name "<wallet_name>" and address "<address>" on the list in extended mode
     Examples:
       | wallet_name          | address                                                                                                            |
@@ -117,15 +115,14 @@ Feature: Address book - extended view
     Then I see a toast with message: "general.clipboard.copiedToClipboard"
     And address is saved to clipboard
 
-  @LW-4470 @Pending
-  # BUG LW-7925
+  @LW-4470
   Scenario Outline: Extended-view - Address Book - Edit address: <edited_address>
     Given I have 3 addresses in my address book in extended mode
     When I click address on the list with name "<edited_address>"
     And I click "Edit" button on address details page
     And I fill address form with "<wallet_name>" name and "<address>" address
     And I click "Done" button on "Edit address" drawer
-    Then I see a toast with message: "browserView.addressBook.toast.editAddress"
+    Then I see a toast with text: "Edited successfully"
     And I see address row with name "<wallet_name>" and address "<address>" on the list in extended mode
     Examples:
       | edited_address | wallet_name    | address                                                                                                            |
@@ -262,24 +259,24 @@ Feature: Address book - extended view
     Then Contact "empty" name error and "empty" address error are displayed
     And "Save address" button is disabled on "Add new address" drawer
 
-  @LW-7043 @Pending
-  # BUG LW-7925
+  @LW-7043
   Scenario Outline: Extended-view - Address Book - Add the same contact to the address book for two different networks
     Given I don't have any addresses added to my address book in extended mode
     When I add new address: "<address>" with name: "<wallet_name>" in extended mode
     Then I verify that address: "<address>" with name: "<wallet_name>" has been added in extended mode
     And I switch network to: "Preview" in extended mode
+    And I close wallet synced toast
     When I add new address: "<address>" with name: "<wallet_name>" in extended mode
     Then I verify that address: "<address>" with name: "<wallet_name>" has been added in extended mode
     And I switch network to: "Mainnet" in extended mode
+    And I close wallet synced toast
     When I add new address: "<address>" with name: "<wallet_name>" in extended mode
     Then I verify that address: "<address>" with name: "<wallet_name>" has been added in extended mode
     Examples:
       | wallet_name   | address                                                                                                      |
       | example_name1 | addr_test1qzngq82mhkzqttqvdk8yl4twk4ea70ja2e7j92x9vqwatds4dm4z5j48w9mjpag2htut4g6pzfxm7x958m3wxjwc8t6q8k6txr |
 
-  @LW-7042 @Pending
-  # BUG LW-7925
+  @LW-7042
   Scenario Outline: Extended-view - Address Book - Delete an address that is on more than one network
     Given I don't have any addresses added to my address book in extended mode
     And I add new address: "<address>" with name: "<wallet_name>" in extended mode

@@ -58,7 +58,7 @@ const envChecks = (chosenChain: Wallet.ChainName): void => {
 
 export const config = (): Config => {
   const chosenChain = (process.env.DEFAULT_CHAIN || 'Mainnet') as Wallet.ChainName;
-  envChecks(chosenChain);
+  if (process.env.BUILD_DEV_PREVIEW !== 'true') envChecks(chosenChain);
   return {
     TOAST_DURATION: 1.5,
     // TODO: review default chain for dev vs production building

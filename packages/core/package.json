@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "build": "run -T rollup -c rollup.config.js",
-    "build-storybook": "storybook build",
+    "build-storybook": "NODE_OPTIONS=--openssl-legacy-provider; build-storybook",
     "cleanup": "yarn exec rm -rf dist node_modules coverage .rollup.cache src/dist",
     "lint": "cd ../.. && yarn core:lint",
     "prepack": "yarn build",
@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
+    "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/ui": "^0.1.0",
     "antd": "^4.24.10",

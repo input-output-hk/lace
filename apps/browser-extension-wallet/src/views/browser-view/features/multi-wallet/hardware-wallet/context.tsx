@@ -40,6 +40,7 @@ export const HardwareWalletProvider = ({ children, providers }: Props): React.Re
       try {
         const connection = await providers.connectHardwareWallet(model);
         setState((prevState) => ({ ...prevState, model, connection }));
+        providers.shouldShowDialog$.next(true);
       } catch (error) {
         if (error.innerError?.innerError?.message !== 'The device is already open.') {
           throw error;

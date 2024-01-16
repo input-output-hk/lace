@@ -28,3 +28,6 @@ export { PasswordBox } from './password-box';
 export { TextLink } from './text-link';
 export * as ProfileDropdown from './profile-dropdown';
 export { TextBox } from './text-box';
+export * as EducationalCard from './educational-card';
+export { Checkbox } from './checkbox';
+export * as Dialog from './dialog';
