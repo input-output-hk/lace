@@ -150,7 +150,7 @@ export const StakingInfoCard = ({
             <Stats
               text={t('overview.stakingInfoCard.totalRewards')}
               value={
-                <Tooltip title={fiat && `$ ${Wallet.util.convertAdaToFiat({ ada: totalRewards.toString(), fiat })}`}>
+                <Tooltip title={fiat && Wallet.util.convertAdaToFiat({ ada: totalRewards.toString(), fiat })}>
                   <span>{totalRewards}</span>
                   <span className={styles.suffix}>{cardanoCoinSymbol}</span>
                 </Tooltip>
