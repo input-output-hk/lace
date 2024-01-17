@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { ReactComponent as HappyEmoji } from '../../assets/icons/happy-emoji.component.svg';
+import { ReactComponent as HappyEmoji } from '@lace/icons/dist/HappyEmojiComponent';
+
 import { Box } from '../box';
 import { Flex } from '../flex';
 import * as Typography from '../typography';
