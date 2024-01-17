@@ -1,8 +1,8 @@
 import React from 'react';
 
+import { ReactComponent as RefreshIcon } from '@lace/icons/dist/RefreshComponent';
 import type { Meta } from '@storybook/react';
 
-import { ReactComponent as RefreshIcon } from '../../assets/icons/refresh.component.svg';
 import { Box } from '../box';
 import { page, Section, Variants, ColorSchemaTable } from '../decorators';
 import { Divider } from '../divider';
