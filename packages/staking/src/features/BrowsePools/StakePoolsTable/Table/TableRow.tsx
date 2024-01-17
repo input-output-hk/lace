@@ -1,10 +1,8 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Tooltip } from '@lace/ui';
+import { Checkbox, Tooltip } from '@lace/ui';
 import cn from 'classnames';
 import React from 'react';
-import CheckboxChecked from './assets/checkbox-checked.component.svg';
-import Checkbox from './assets/checkbox.component.svg';
 import * as styles from './Table.css';
 
 export type TableRowProps<E extends string> = {
@@ -55,20 +53,16 @@ export const TableRow = function TableRow<E extends string>({
     >
       {withSelection && (
         <div className={styles.cell} data-testid={`${dataTestId}-list-checkbox`}>
-          <ConditionalTooltipWrapper message={(!selectable && selectionDisabledMessage) || ''}>
-            {/* TODO: replace with the one imported from ui toolkit (LW-9529) */}
-            <span
-              onClick={(event) => {
-                event.stopPropagation();
-                onSelect?.();
-              }}
-              className={cn(styles.checkboxContainer, { [styles.disabled]: !selectable, [styles.selected]: selected })}
-            >
-              {selected ? (
-                <CheckboxChecked className={cn(styles.checkbox, styles.selected)} />
-              ) : (
-                <Checkbox className={cn(styles.checkbox, { [styles.disabled]: !selectable })} />
-              )}
+          <ConditionalTooltipWrapper message={(!selectable && !selected && selectionDisabledMessage) || ''}>
+            <span>
+              <Checkbox
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onSelect?.();
+                }}
+                disabled={!selected && !selectable}
+                checked={!!selected}
+              />
             </span>
           </ConditionalTooltipWrapper>
         </div>

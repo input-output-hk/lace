@@ -59,58 +59,6 @@ export const cellInner = style([
   },
 ]);
 
-export const checkboxContainer = style([
-  {
-    ':hover': {
-      backgroundColor: theme.colors.$stakePoolItemCheckboxHoverBgColor,
-    },
-    borderRadius: '6px',
-    display: 'flex',
-    height: vars.spacing.$16,
-    width: vars.spacing.$16,
-  },
-]);
-
-export const checkbox = style([
-  {
-    ':hover': {
-      color: theme.colors.$stakePoolItemCheckboxHoverColor,
-    },
-    color: theme.colors.$stakePoolItemCheckboxColor,
-    fontSize: vars.fontSizes.$16,
-  },
-]);
-
-export const selected = style([
-  {
-    selectors: {
-      [`&${checkbox}`]: {
-        color: theme.colors.$stakePoolItemCheckboxSelectedColor,
-      },
-      [`&${checkboxContainer}:hover`]: {
-        backgroundColor: theme.colors.$stakePoolItemCheckboxBgColor,
-      },
-    },
-  },
-]);
-
-export const disabled = style([
-  {
-    selectors: {
-      [`&${checkbox}`]: {
-        opacity: '24%',
-      },
-      [`&${checkbox}:hover`]: {
-        color: theme.colors.$stakePoolItemCheckboxColor,
-        opacity: '24%',
-      },
-      [`&${checkboxContainer}:hover`]: {
-        backgroundColor: theme.colors.$stakePoolItemCheckboxBgColor,
-      },
-    },
-  },
-]);
-
 // header styles
 export const header = style([
   {
