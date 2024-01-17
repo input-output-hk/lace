@@ -7,10 +7,10 @@ import { ExtensionStorage } from '@lib/scripts/types';
 import { ILocalStorage } from '@src/types';
 import { getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/local-storage';
 import { useWalletStore, WalletStore } from '@src/stores';
-import { isWalletStorageValid } from '@src/utils/data-validators';
 import { config } from '@src/config';
 import { firstValueFrom } from 'rxjs';
-import { walletRepository } from '@lib/wallet-api-ui';
+import { WalletRepositoryApi } from '@cardano-sdk/web-extension';
+import { Wallet } from '@lace/cardano';
 
 const { CHAIN } = config();
 
@@ -19,8 +19,12 @@ export type DataCheckState =
   | { checkState: 'checked'; result: { valid: true } | { valid: false; error: string } };
 export type DataCheckAction = { type: 'not-checked' | 'checking' | 'valid' } | { type: 'error'; error: string };
 
-export type DataCheckDispatcher = (dispatcher: React.Dispatch<DataCheckAction>, store: WalletStore) => Promise<void>;
-export type UseDataCheck = [DataCheckState, () => Promise<void>];
+export type DataCheckDispatcher = (
+  walletRepositoryApi: WalletRepositoryApi<Wallet.Metadata>,
+  dispatcher: React.Dispatch<DataCheckAction>,
+  store: WalletStore
+) => Promise<void>;
+export type UseDataCheck = [DataCheckState, (walletRepository: WalletRepositoryApi<Wallet.Metadata>) => Promise<void>];
 
 const dataCheckReducer = (state: DataCheckState, action: DataCheckAction): DataCheckState => {
   switch (action.type) {
@@ -37,12 +41,9 @@ const dataCheckReducer = (state: DataCheckState, action: DataCheckAction): DataC
   }
 };
 
-// eslint-disable-next-line complexity, sonarjs/cognitive-complexity
-export const dataCheckDispatcher: DataCheckDispatcher = async (dispatcher, walletStore) => {
+export const dataCheckDispatcher: DataCheckDispatcher = async (walletRepository, dispatcher, walletStore) => {
   dispatcher({ type: 'checking' });
   try {
-    // const lock = getValueFromLocalStorage<ILocalStorage, 'lock'>('lock'); // Not in HW
-    const walletStorage = getValueFromLocalStorage<ILocalStorage, 'wallet'>('wallet');
     const appSettings = getValueFromLocalStorage<ILocalStorage, 'appSettings'>('appSettings');
     const wallets = await firstValueFrom(walletRepository.wallets$);
     const extensionStorage = (await storage.local.get('BACKGROUND_STORAGE')) as Pick<
@@ -55,16 +56,9 @@ export const dataCheckDispatcher: DataCheckDispatcher = async (dispatcher, walle
     if (!isWalletCreated && !isNil(extensionStorage.BACKGROUND_STORAGE)) {
       await storage.local.remove('BACKGROUND_STORAGE');
     }
-    if (isWalletCreated) {
-      // If there is no wallet name stored or is invalid, fallback to "Lace" without failing the data check
-      if (isNil(walletStorage) || !isWalletStorageValid(walletStorage)) {
-        saveValueInLocalStorage({ key: 'wallet', value: { name: 'Lace' } });
-      }
-
-      if (isNil(appSettings?.chainName)) {
-        // If there is no appSettings or no chainName when there is a wallet save current network or the default one
-        saveValueInLocalStorage({ key: 'appSettings', value: { chainName: walletStore?.environmentName || CHAIN } });
-      }
+    if (isWalletCreated && isNil(appSettings?.chainName)) {
+      // If there is no appSettings or no chainName when there is a wallet save current network or the default one
+      saveValueInLocalStorage({ key: 'appSettings', value: { chainName: walletStore?.environmentName || CHAIN } });
     }
 
     return dispatcher({ type: 'valid' });
@@ -79,9 +73,12 @@ export const useDataCheck = (checkData = dataCheckDispatcher): UseDataCheck => {
   const store = useWalletStore();
   const [dataCheckState, dispatch] = useReducer(dataCheckReducer, INITIAL_STATE);
 
-  const performDataCheck = useCallback(async () => {
-    await checkData(dispatch, store);
-  }, [checkData, store]);
+  const performDataCheck = useCallback(
+    async (walletRepository: WalletRepositoryApi<Wallet.Metadata>) => {
+      await checkData(walletRepository, dispatch, store);
+    },
+    [checkData, store]
+  );
 
   return [dataCheckState, performDataCheck];
 };
