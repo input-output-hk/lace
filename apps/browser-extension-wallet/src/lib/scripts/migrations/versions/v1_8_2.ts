@@ -39,6 +39,9 @@ const keyAgentDataToAddWalletProps = async (
         encryptedSecrets: {
           rootPrivateKeyBytes: HexBlob.fromBytes(Buffer.from(data.encryptedRootPrivateKeyBytes)),
           keyMaterial: HexBlob.fromBytes(Buffer.from(JSON.parse(mnemonic).data))
+        },
+        metadata: {
+          name: getWalletFromStorage()?.name
         }
       };
     }
@@ -80,7 +83,6 @@ export const v_1_8_2: Migration = {
       persist: async () => {
         console.info(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
 
-        const walletName = getWalletFromStorage()?.name;
         const wallets = await firstValueFrom(walletRepository.wallets$);
         const walletProps = await keyAgentDataToAddWalletProps(keyAgentData);
         const walletId = await getWalletId(
@@ -94,7 +96,7 @@ export const v_1_8_2: Migration = {
 
           await walletRepository.addAccount({
             accountIndex: keyAgentData.accountIndex,
-            metadata: { name: walletName, lockValue },
+            metadata: { name: 'Account #0', lockValue },
             walletId
           });
 
