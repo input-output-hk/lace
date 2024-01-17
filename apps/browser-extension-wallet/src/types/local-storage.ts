@@ -1,5 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import { EnhancedAnalyticsOptInStatus, TxCreationType } from '../providers/AnalyticsProvider/analyticsTracker/types';
+import { DelegationPreferences } from '@lace/staking';
 
 export interface WalletStorage {
   name: string;
@@ -52,4 +53,5 @@ export interface ILocalStorage {
   multidelegationFirstVisit?: boolean;
   multidelegationFirstVisitSincePortfolioPersistence?: boolean;
   unconfirmedTransactions: UnconfirmedTransaction[];
+  delegationPreferences: DelegationPreferences;
 }

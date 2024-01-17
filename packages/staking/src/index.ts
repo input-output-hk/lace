@@ -9,4 +9,5 @@ export { config as stakePooltableConfig } from './features/BrowsePools/StakePool
 export type { TableRowProps } from './features/BrowsePools/StakePoolsTable/Table';
 export * from './features/BrowsePools/StakePoolsTable/types';
 export { OutsideHandlesProvider } from './features/outside-handles-provider';
+export type { DelegationPreferences } from './features/outside-handles-provider';
 export { MAX_POOLS_COUNT } from './features/store';

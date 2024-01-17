@@ -14,6 +14,7 @@ import { useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import {
+  DELEGATION_PREFERENCES_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY
 } from '@utils/constants';
@@ -85,6 +86,10 @@ export const MultiDelegationStaking = (): JSX.Element => {
     multidelegationFirstVisitSincePortfolioPersistence,
     { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
   ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
+
+  const [delegationPreferencePersistence, { updateLocalStorage: setDelegationPreferencePersistence }] =
+    useLocalStorage(DELEGATION_PREFERENCES_LS_KEY);
+
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const analytics = useAnalyticsContext();
 
@@ -97,6 +102,8 @@ export const MultiDelegationStaking = (): JSX.Element => {
     <OutsideHandlesProvider
       {...{
         analytics,
+        delegationPreferencePersistence,
+        setDelegationPreferencePersistence,
         backgroundServiceAPIContextSetWalletPassword: setWalletPassword,
         balancesBalance: balance,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,

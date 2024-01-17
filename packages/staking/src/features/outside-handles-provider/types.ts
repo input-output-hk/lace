@@ -40,6 +40,11 @@ export enum StateStatus {
   ERROR = 'error',
 }
 
+export interface DelegationPreferences {
+  sortOptions: StakePoolSortOptions;
+  searchQuery?: string;
+}
+
 export interface IBlockchainProvider {
   stakePoolProvider: Wallet.StakePoolProvider;
   assetProvider: Wallet.AssetProvider;
@@ -52,6 +57,8 @@ export interface IBlockchainProvider {
 
 export type OutsideHandlesContextValue = {
   analytics: IAnalyticsTracker;
+  delegationPreferencePersistence: DelegationPreferences;
+  setDelegationPreferencePersistence: (preferences: DelegationPreferences) => void;
   backgroundServiceAPIContextSetWalletPassword: (password?: Uint8Array) => void;
   expandStakingView?: () => void;
   balancesBalance?: Balance;

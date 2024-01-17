@@ -25,16 +25,6 @@ const searchDebounce = 300;
 const defaultFetchLimit = 100;
 
 export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) => {
-  const { t } = useTranslation();
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [isSearching, setIsSearching] = useState<boolean>(true);
-  const [isLoadingList, setIsLoadingList] = useState<boolean>(true);
-  const [sort, setSort] = useState<StakePoolSortOptions>(DEFAULT_SORT_OPTIONS);
-  const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
-  const [skip, setSkip] = useState<number>(0);
-  const selectedPortfolioStakePools = useDelegationPortfolioStore((store) =>
-    store.selectedPortfolio.map(({ stakePool }) => stakePool)
-  );
   const {
     currentChain,
     walletStoreStakePoolSearchResults: {
@@ -47,7 +37,21 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     walletStoreStakePoolSearchResultsStatus,
     walletStoreFetchStakePools: fetchStakePools,
     analytics,
+    delegationPreferencePersistence,
+    setDelegationPreferencePersistence,
   } = useOutsideHandles();
+  const { t } = useTranslation();
+  const [searchValue, setSearchValue] = useState<string>(delegationPreferencePersistence?.searchQuery || '');
+  const [isSearching, setIsSearching] = useState<boolean>(true);
+  const [isLoadingList, setIsLoadingList] = useState<boolean>(true);
+  const [sort, setSort] = useState<StakePoolSortOptions>(
+    delegationPreferencePersistence?.sortOptions || DEFAULT_SORT_OPTIONS
+  );
+  const [stakePools, setStakePools] = useState<Wallet.StakePoolSearchResults['pageResults']>([]);
+  const [skip, setSkip] = useState<number>(0);
+  const selectedPortfolioStakePools = useDelegationPortfolioStore((store) =>
+    store.selectedPortfolio.map(({ stakePool }) => stakePool)
+  );
 
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
 
@@ -68,7 +72,19 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
     // Fetch pools on mount, network switching, searchValue change and sort change
     setIsLoadingList(true);
     debouncedSearch({ searchString: searchValue, sort });
-  }, [currentChain, searchValue, sort, debouncedSearch]);
+    setDelegationPreferencePersistence({
+      ...delegationPreferencePersistence,
+      searchQuery: searchValue,
+      sortOptions: sort,
+    });
+  }, [
+    currentChain,
+    searchValue,
+    sort,
+    debouncedSearch,
+    setDelegationPreferencePersistence,
+    delegationPreferencePersistence,
+  ]);
 
   const loadMoreData = () => fetchStakePools({ searchString: searchValue, skip: skip + defaultFetchLimit, sort });
 
@@ -141,6 +157,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: StakePoolsTableProps) =>
         withSearchIcon
         inputPlaceholder={t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')}
         onChange={onSearch}
+        value={searchValue}
         data-testid="search-input"
         loading={fetchingPools}
       />

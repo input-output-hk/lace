@@ -20,7 +20,8 @@ import { BrowserViewSections } from '@lib/scripts/types';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import {
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
-  MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY
+  MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
+  DELEGATION_PREFERENCES_LS_KEY
 } from '@utils/constants';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
@@ -85,6 +86,10 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     multidelegationFirstVisitSincePortfolioPersistence,
     { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
   ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
+
+  const [delegationPreferencePersistence, { updateLocalStorage: setDelegationPreferencePersistence }] =
+    useLocalStorage(DELEGATION_PREFERENCES_LS_KEY);
+
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const analytics = useAnalyticsContext();
 
@@ -96,6 +101,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     <OutsideHandlesProvider
       {...{
         analytics,
+        delegationPreferencePersistence,
+        setDelegationPreferencePersistence,
         multidelegationFirstVisit,
         triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
         multidelegationFirstVisitSincePortfolioPersistence,
