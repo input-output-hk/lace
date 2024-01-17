@@ -27,6 +27,9 @@ import { Cardano, NotImplementedError } from '@cardano-sdk/core';
 
 const logger = console;
 
+// It is important that this file is not exported from index,
+// because creating wallet repository with store creates an actual pouchdb database
+// which results in some trash files when running the tests (leveldb directory)
 export const walletRepository = new WalletRepository({
   logger,
   store: new Wallet.storage.PouchDbCollectionStore<AnyWallet<Wallet.Metadata>>({ dbName: 'walletRepository' }, logger)
