@@ -33,6 +33,9 @@ type KeysStructure = {
     header: {
       poolsCount: '';
     };
+    stakePoolGrid: {
+      poolsCount: '';
+    };
     stakePoolTableBrowser: {
       searchInputPlaceholder: '';
       tableHeader: {

@@ -16,7 +16,7 @@ export const BrowsePoolsHeader = ({ poolsCount, poolsView, setPoolsView }: Brows
 
   return (
     <Flex justifyContent="space-between" alignItems="center">
-      <Text.Body.Normal weight="$semibold">
+      <Text.Body.Normal weight="$bold">
         {t('browsePools.header.poolsCount', { poolsCount: formatLocaleNumber(poolsCount, 0) })}
       </Text.Body.Normal>
       <ToggleButtonGroup.Root variant="compact" value={poolsView} onValueChange={setPoolsView}>

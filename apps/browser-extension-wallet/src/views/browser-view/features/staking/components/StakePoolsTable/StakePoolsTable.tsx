@@ -5,27 +5,26 @@ import {
   Columns,
   SortDirection,
   SortField,
-  TableRow,
-  TableHeader,
   StakePoolSortOptions,
   StakePoolTableBodyBrowser,
-  TranslationsFor,
-  stakePooltableConfig
+  stakePooltableConfig,
+  TableHeader,
+  TableRow,
+  TranslationsFor
 } from '@lace/staking';
 import { Typography } from 'antd';
-import { Search, getRandomIcon } from '@lace/common';
+import { getRandomIcon, Search } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { stakePoolResultsSelector } from '@stores/selectors/staking-selectors';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletStore } from '@stores';
 import { useStakePoolDetails } from '../../store';
-import { StakePoolsTableEmpty } from './StakePoolsTableEmpty';
 import styles from './StakePoolsTable.modules.scss';
 import { useAnalyticsContext } from '@providers';
 import {
+  AnalyticsEventNames,
   MatomoEventActions,
   MatomoEventCategories,
-  AnalyticsEventNames,
   PostHogAction
 } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -203,7 +202,6 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           loadMoreData={loadMoreData}
           emptyText
           total={isSearching ? 0 : totalResultCount}
-          emptyPlaceholder={!fetchingPools && !isSearching && <StakePoolsTableEmpty />}
           // Show skeleton if it's loading the list while a search is not being performed
           showSkeleton={isLoadingList && !isSearching}
           scrollableTargetId={scrollableTargetId}

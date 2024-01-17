@@ -3,6 +3,7 @@ import isNumber from 'lodash/isNumber';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PoolSkeleton } from '../PoolSkeleton/PoolSkeleton';
+import { StakePoolsTableEmpty } from '../StakePoolsTableEmpty/StakePoolsTableEmpty';
 import * as styles from './StakePoolTableBrowser.css';
 import { StakePoolTableItemBrowserProps } from './types';
 
@@ -13,7 +14,6 @@ export type StakePoolTableBodyBrowserProps = {
   items: StakePoolTableItemBrowserProps[];
   loadMoreData: () => void;
   total: number;
-  emptyPlaceholder?: React.ReactNode | string;
   showSkeleton?: boolean;
   listProps?: ListProps<StakePoolTableItemBrowserProps>;
   ItemRenderer: (item: StakePoolTableItemBrowserProps, index: number) => React.ReactElement;
@@ -26,13 +26,12 @@ export const StakePoolTableBodyBrowser = ({
   total,
   loadMoreData,
   items,
-  emptyPlaceholder = '',
   showSkeleton,
   listProps,
   ItemRenderer,
 }: StakePoolTableBodyBrowserProps) => (
   <div data-testid="stake-pool-list-scroll-wrapper" className={styles.wrapper}>
-    {isNumber(total) && !total && emptyPlaceholder}
+    {total === 0 && <StakePoolsTableEmpty />}
     <InfiniteScroll
       dataLength={items?.length || 0}
       next={loadMoreData}

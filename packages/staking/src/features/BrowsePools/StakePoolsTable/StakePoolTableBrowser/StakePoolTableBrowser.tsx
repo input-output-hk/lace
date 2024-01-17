@@ -18,7 +18,6 @@ export type StakePoolTableBrowserProps = {
   items: StakePoolTableItemBrowserProps[];
   loadMoreData: () => void;
   total: number;
-  emptyPlaceholder?: React.ReactNode | string;
   translations: TranslationsFor<Columns>;
   setActiveSort: (props: StakePoolSortOptions) => void;
   activeSort: StakePoolSortOptions;
@@ -32,7 +31,6 @@ export const StakePoolTableBrowser = ({
   total,
   loadMoreData,
   items,
-  emptyPlaceholder = '',
   translations,
   activeSort,
   setActiveSort,
@@ -73,7 +71,6 @@ export const StakePoolTableBrowser = ({
         {...{
           ItemRenderer: StakePoolTableItemBrowser,
           className,
-          emptyPlaceholder,
           emptyText,
           items: availableStakePools,
           listProps: props,
