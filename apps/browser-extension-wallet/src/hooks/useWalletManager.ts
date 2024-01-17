@@ -413,7 +413,6 @@ export const useWalletManager = (): UseWalletManager => {
 
   /**
    * Saves hardware wallet in storage and updates wallet store
-   * TODO: can probably consolidate this with 'saveWallet' or 'activateWallet' for both types (hw and in-memory)?
    */
   const saveHardwareWallet = useCallback(
     async (wallet: Wallet.CardanoWallet, chainName = CHAIN): Promise<void> => {

@@ -47,7 +47,7 @@ export const disallowSignTx = (close = false): void => {
     {
       api$: of({
         async allowSignTx(): Promise<boolean> {
-          return Promise.reject();
+          return Promise.reject(new Error('Transaction rejected'));
         }
       }),
       baseChannel: DAPP_CHANNELS.userPrompt,
