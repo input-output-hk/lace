@@ -9,8 +9,7 @@ import {
   AxiosClientProvider,
   DatabaseProvider,
   ThemeProvider,
-  AnalyticsProvider,
-  CardanoWalletManagerProvider
+  AnalyticsProvider
 } from '@providers';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
@@ -32,35 +31,33 @@ import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay'
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
     <AppSettingsProvider>
-      <CardanoWalletManagerProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_POPUP}>
-            <AxiosClientProvider>
-              <CurrencyStoreProvider>
-                <HashRouter>
-                  <PostHogClientProvider>
-                    <ExperimentsProvider>
-                      <AnalyticsProvider>
-                        <ThemeProvider>
-                          <ExternalLinkOpenerProvider>
-                            <MigrationContainer appMode={APP_MODE_POPUP}>
-                              <DataCheckContainer appMode={APP_MODE_POPUP}>
-                                <AddressesDiscoveryOverlay>
-                                  <PopupView />
-                                </AddressesDiscoveryOverlay>
-                              </DataCheckContainer>
-                            </MigrationContainer>
-                          </ExternalLinkOpenerProvider>
-                        </ThemeProvider>
-                      </AnalyticsProvider>
-                    </ExperimentsProvider>
-                  </PostHogClientProvider>
-                </HashRouter>
-              </CurrencyStoreProvider>
-            </AxiosClientProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </CardanoWalletManagerProvider>
+      <DatabaseProvider>
+        <StoreProvider appMode={APP_MODE_POPUP}>
+          <AxiosClientProvider>
+            <CurrencyStoreProvider>
+              <HashRouter>
+                <PostHogClientProvider>
+                  <ExperimentsProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <ExternalLinkOpenerProvider>
+                          <MigrationContainer appMode={APP_MODE_POPUP}>
+                            <DataCheckContainer appMode={APP_MODE_POPUP}>
+                              <AddressesDiscoveryOverlay>
+                                <PopupView />
+                              </AddressesDiscoveryOverlay>
+                            </DataCheckContainer>
+                          </MigrationContainer>
+                        </ExternalLinkOpenerProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </ExperimentsProvider>
+                </PostHogClientProvider>
+              </HashRouter>
+            </CurrencyStoreProvider>
+          </AxiosClientProvider>
+        </StoreProvider>
+      </DatabaseProvider>
     </AppSettingsProvider>
   </BackgroundServiceAPIProvider>
 );

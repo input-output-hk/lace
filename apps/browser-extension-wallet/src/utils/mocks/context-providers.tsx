@@ -11,7 +11,6 @@ import {
   AnalyticsProvider,
   AppSettingsProvider,
   AxiosClientProvider,
-  CardanoWalletManagerProvider,
   CurrencyStoreProvider,
   DatabaseProvider
 } from '@providers';
@@ -71,26 +70,24 @@ export const buildMockProviders = async (
         <I18nextProvider i18n={i18n}>
           <AppSettingsProvider initialState={{ ...mockAppSettings, ...overrideConfig?.appSettings }}>
             {/* Check `SendAddressInput.test.tsx` for an example to handle the db in tests */}
-            <CardanoWalletManagerProvider>
-              <DatabaseProvider dbCustomInstance={overrideConfig?.walletDatabase ?? config?.walletDatabase}>
-                <MockWalletStore
-                  mockStore={{ ...mockStore, ...overrideConfig?.walletStore }}
-                  customSlice={storeCustomSlice}
-                >
-                  <CurrencyStoreProvider>
-                    <AxiosClientProvider>
-                      <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-                        <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                          <ExternalLinkOpenerProvider>
-                            <HashRouter>{children}</HashRouter>
-                          </ExternalLinkOpenerProvider>
-                        </AnalyticsProvider>
-                      </PostHogClientProvider>
-                    </AxiosClientProvider>
-                  </CurrencyStoreProvider>
-                </MockWalletStore>
-              </DatabaseProvider>
-            </CardanoWalletManagerProvider>
+            <DatabaseProvider dbCustomInstance={overrideConfig?.walletDatabase ?? config?.walletDatabase}>
+              <MockWalletStore
+                mockStore={{ ...mockStore, ...overrideConfig?.walletStore }}
+                customSlice={storeCustomSlice}
+              >
+                <CurrencyStoreProvider>
+                  <AxiosClientProvider>
+                    <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+                      <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                        <ExternalLinkOpenerProvider>
+                          <HashRouter>{children}</HashRouter>
+                        </ExternalLinkOpenerProvider>
+                      </AnalyticsProvider>
+                    </PostHogClientProvider>
+                  </AxiosClientProvider>
+                </CurrencyStoreProvider>
+              </MockWalletStore>
+            </DatabaseProvider>
           </AppSettingsProvider>
         </I18nextProvider>
       </BackgroundServiceAPIProvider>

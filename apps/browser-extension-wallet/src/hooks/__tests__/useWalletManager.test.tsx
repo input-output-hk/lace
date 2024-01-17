@@ -25,9 +25,7 @@ import {
   AppSettingsProvider,
   BackgroundServiceAPIProvider,
   BackgroundServiceAPIProviderProps,
-  CardanoWalletManagerProvider,
-  DatabaseProvider,
-  ICardanoWalletManager
+  DatabaseProvider
 } from '@providers';
 
 import * as stores from '@stores';
@@ -90,22 +88,14 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
 });
 
 const getWrapper =
-  ({
-    backgroundService,
-    cardanoWalletManager
-  }: {
-    backgroundService?: BackgroundServiceAPIProviderProps['value'];
-    cardanoWalletManager?: ICardanoWalletManager;
-  }) =>
+  ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
   ({ children }: { children: React.ReactNode }) =>
     (
-      <CardanoWalletManagerProvider value={cardanoWalletManager}>
-        <AppSettingsProvider>
-          <DatabaseProvider>
-            <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-          </DatabaseProvider>
-        </AppSettingsProvider>
-      </CardanoWalletManagerProvider>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
     );
 
 describe('Testing useWalletManager hook', () => {
