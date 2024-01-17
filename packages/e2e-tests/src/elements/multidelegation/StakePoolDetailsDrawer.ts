@@ -12,12 +12,23 @@ class StakePoolDetailsDrawer extends CommonDrawerElements {
   private STATISTICS_TITLE = '[data-testid="stake-pool-details-title"]';
   private ACTIVE_STAKE_TITLE = '[data-testid="active-stake-title"]';
   private ACTIVE_STAKE_VALUE = '[data-testid="active-stake-value"]';
+  private LIVE_STAKE_TITLE = '[data-testid="live-stake-title"]';
+  private LIVE_STAKE_VALUE = '[data-testid="live-stake-value"]';
   private SATURATION_TITLE = '[data-testid="saturation-title"]';
   private SATURATION_VALUE = '[data-testid="saturation-value"]';
+  private SATURATION_PROGRESS_BAR = '[data-testid="saturation-progress-bar"]';
   private DELEGATORS_TITLE = '[data-testid="delegators-title"]';
   private DELEGATORS_VALUE = '[data-testid="delegators-value"]';
-  private APY_TITLE = '[data-testid="apy-title"]';
-  private APY_VALUE = '[data-testid="apy-value"]';
+  private ROS_TITLE = '[data-testid="apy-title"]';
+  private ROS_VALUE = '[data-testid="apy-value"]';
+  private BLOCKS_TITLE = '[data-testid="blocks-title"]';
+  private BLOCKS_VALUE = '[data-testid="blocks-value"]';
+  private COST_PER_EPOCH_TITLE = '[data-testid="cost-title"]';
+  private COST_PER_EPOCH_VALUE = '[data-testid="cost-value"]';
+  private PLEDGE_TITLE = '[data-testid="pledge-title"]';
+  private PLEDGE_VALUE = '[data-testid="pledge-value"]';
+  private POOL_MARGIN_TITLE = '[data-testid="margin-title"]';
+  private POOL_MARGIN_VALUE = '[data-testid="margin-value"]';
   private INFORMATION_TITLE = '[data-testid="stake-pool-details-information-title"]';
   private INFORMATION_DESCRIPTION = '[data-testid="stake-pool-details-information-description"]';
   private SOCIAL_LINKS_TITLE = '[data-testid="stake-pool-details-social-title"]';
@@ -59,12 +70,24 @@ class StakePoolDetailsDrawer extends CommonDrawerElements {
     return $(this.ACTIVE_STAKE_VALUE);
   }
 
+  get liveStakeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.LIVE_STAKE_TITLE);
+  }
+
+  get liveStakeValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.LIVE_STAKE_VALUE);
+  }
+
   get saturationTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SATURATION_TITLE);
   }
 
   get saturationValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SATURATION_VALUE);
+  }
+
+  get saturationProgressBar(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SATURATION_PROGRESS_BAR);
   }
 
   get delegatorsTitle(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -75,12 +98,44 @@ class StakePoolDetailsDrawer extends CommonDrawerElements {
     return $(this.DELEGATORS_VALUE);
   }
 
-  get apyTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.APY_TITLE);
+  get rosTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ROS_TITLE);
   }
 
-  get apyValue(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.APY_VALUE);
+  get rosValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ROS_VALUE);
+  }
+
+  get blocksTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.BLOCKS_TITLE);
+  }
+
+  get blocksValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.BLOCKS_VALUE);
+  }
+
+  get costPerEpochTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.COST_PER_EPOCH_TITLE);
+  }
+
+  get costPerEpochValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.COST_PER_EPOCH_VALUE);
+  }
+
+  get pledgeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PLEDGE_TITLE);
+  }
+
+  get pledgeValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PLEDGE_VALUE);
+  }
+
+  get poolMarginTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.POOL_MARGIN_TITLE);
+  }
+
+  get poolMarginValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.POOL_MARGIN_VALUE);
   }
 
   get informationTitle(): ChainablePromiseElement<WebdriverIO.Element> {

@@ -65,24 +65,97 @@ class StakePoolDetailsAssert {
     await StakePoolDetails.poolLogo.waitForDisplayed();
 
     expect(await StakePoolDetails.statisticsTitle.getText()).to.equal(await t('drawer.details.statistics', 'staking'));
-    expect(await StakePoolDetails.activeStakeTitle.getText()).to.equal(
-      await t('drawer.details.metrics.activeStake', 'staking')
-    );
-    expect(await StakePoolDetails.apyTitle.getText()).to.equal(await t('drawer.details.metrics.apy', 'staking'));
-    // TODO BUG LW-5635
-    // expect(await StakePoolDetails.apyValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+    await StakePoolDetails.activeStakeTitle.waitForDisplayed();
 
-    expect((await StakePoolDetails.activeStakeValue.getText()).slice(0, -1)).to.match(
-      TestnetPatterns.NUMBER_DOUBLE_REGEX
-    );
+    await this.assertSeeActiveStake();
+    await this.assertSeeLiveStake();
+    await this.assertSeeDelegators();
+    await this.assertSeeROS();
+    await this.assertSeeBlocks();
+    await this.assertSeeCostPerEpoch();
+    await this.assertSeePledge();
+    await this.assertSeePoolMargin();
+    await this.assertSeeSaturation();
+  }
+
+  private async assertSeeSaturation() {
+    await StakePoolDetails.saturationTitle.waitForDisplayed();
     expect(await StakePoolDetails.saturationTitle.getText()).to.equal(
       await t('drawer.details.metrics.saturation', 'staking')
     );
+    await StakePoolDetails.saturationProgressBar.waitForDisplayed({ reverse: await isPopupMode() });
+    await StakePoolDetails.saturationValue.waitForDisplayed();
     expect(await StakePoolDetails.saturationValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  }
+
+  private async assertSeePoolMargin() {
+    await StakePoolDetails.poolMarginTitle.waitForDisplayed();
+    expect(await StakePoolDetails.poolMarginTitle.getText()).to.equal(
+      await t('drawer.details.metrics.margin', 'staking')
+    );
+    await StakePoolDetails.poolMarginValue.waitForDisplayed();
+    expect(await StakePoolDetails.poolMarginValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  }
+
+  private async assertSeePledge() {
+    await StakePoolDetails.pledgeTitle.waitForDisplayed();
+    expect(await StakePoolDetails.pledgeTitle.getText()).to.equal(await t('drawer.details.metrics.pledge', 'staking'));
+    await StakePoolDetails.pledgeValue.waitForDisplayed();
+    expect(await StakePoolDetails.pledgeValue.getText()).to.match(TestnetPatterns.PLEDGE_PATTERN);
+  }
+
+  private async assertSeeCostPerEpoch() {
+    await StakePoolDetails.costPerEpochTitle.waitForDisplayed();
+    expect(await StakePoolDetails.costPerEpochTitle.getText()).to.equal(
+      await t('drawer.details.metrics.cost', 'staking')
+    );
+    await StakePoolDetails.costPerEpochValue.waitForDisplayed();
+    expect(await StakePoolDetails.costPerEpochValue.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+  }
+
+  private async assertSeeBlocks() {
+    await StakePoolDetails.blocksTitle.waitForDisplayed();
+    expect(await StakePoolDetails.blocksTitle.getText()).to.equal(await t('drawer.details.metrics.blocks', 'staking'));
+    await StakePoolDetails.blocksValue.waitForDisplayed();
+    expect((await StakePoolDetails.blocksValue.getText()).replaceAll(',', '')).to.match(TestnetPatterns.NUMBER_REGEX);
+  }
+
+  private async assertSeeROS() {
+    await StakePoolDetails.rosTitle.waitForDisplayed();
+    expect(await StakePoolDetails.rosTitle.getText()).to.equal(await t('drawer.details.metrics.apy', 'staking'));
+    await StakePoolDetails.rosValue.waitForDisplayed();
+    // TODO BUG LW-5635
+    // expect(await StakePoolDetails.apyValue.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
+  }
+
+  private async assertSeeDelegators() {
+    await StakePoolDetails.delegatorsTitle.waitForDisplayed();
     expect(await StakePoolDetails.delegatorsTitle.getText()).to.equal(
       await t('drawer.details.metrics.delegators', 'staking')
     );
+    await StakePoolDetails.delegatorsValue.waitForDisplayed();
     expect(await StakePoolDetails.delegatorsValue.getText()).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+  }
+
+  private async assertSeeLiveStake() {
+    await StakePoolDetails.liveStakeTitle.waitForDisplayed();
+    expect(await StakePoolDetails.liveStakeTitle.getText()).to.equal(
+      await t('drawer.details.metrics.liveStake', 'staking')
+    );
+    await StakePoolDetails.liveStakeValue.waitForDisplayed();
+    expect((await StakePoolDetails.liveStakeValue.getText()).slice(0, -1)).to.match(
+      TestnetPatterns.NUMBER_DOUBLE_REGEX
+    );
+  }
+
+  private async assertSeeActiveStake() {
+    expect(await StakePoolDetails.activeStakeTitle.getText()).to.equal(
+      await t('drawer.details.metrics.activeStake', 'staking')
+    );
+    await StakePoolDetails.activeStakeValue.waitForDisplayed();
+    expect((await StakePoolDetails.activeStakeValue.getText()).slice(0, -1)).to.match(
+      TestnetPatterns.NUMBER_DOUBLE_REGEX
+    );
   }
 
   async assertStakePoolDetailsDrawerIsDisplayed(shouldBeDisplayed = true) {
