@@ -16,7 +16,7 @@ export const Description = ({
 }: Readonly<DialogDescriptionProps>): JSX.Element => (
   <AlertDialog.Description asChild>
     {typeof children === 'string' ? (
-      <Text.Body.Normal weight="$semibold" className={cx.dialogDescription}>
+      <Text.Body.Normal className={cx.dialogDescription}>
         {children}
       </Text.Body.Normal>
     ) : (
