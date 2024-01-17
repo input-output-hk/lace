@@ -1,5 +1,5 @@
 .progressBarContainer {
-  background: var(--light-mode-light-grey);
+  background: var(--light-mode-light-grey, var(--dark-mode-mid-grey));
   height: 3px;
   width: 100%;
 
