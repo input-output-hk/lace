@@ -3,6 +3,10 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
+const extensionPath = process.env.PROD_BUILD
+  ? `${__dirname}/temp`
+  : `${__dirname}/../../apps/browser-extension-wallet/dist`;
+
 const chromeConfig: WebdriverIO.Config = {
   capabilities: [
     {
@@ -18,7 +22,7 @@ const chromeConfig: WebdriverIO.Config = {
           '--enable-automation',
           '--no-first-run',
           '--no-default-browser-check',
-          `--load-extension=${__dirname}/../../apps/browser-extension-wallet/dist`,
+          `--load-extension=${extensionPath}`,
           '--allow-insecure-localhost',
           '--window-size=1920,1080',
           '--allow-file-access-from-files',

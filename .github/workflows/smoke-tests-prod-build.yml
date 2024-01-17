@@ -27,8 +27,9 @@ jobs:
         run: |
           mkdir temp
           cd temp
-          wget -O lace.crx https://clients2.googleusercontent.com/crx/blobs/AeKPYwzDVQLWkOHd3_TGujF_2CyQVy0B0QPsw2jsLcWbkKs3vaDCwcu6Ajc81Y9tvzMW0_V_ehL_mMc3E_3iqKhsrSbOj4SF_tXjgyed0lj4hzMxy45erwDGUprlDJleUYT1MSxZyKS7eBIcieVqNEU/GAFHHKGHBFJJKEIENDHLOFAJOKPAFLMK_1_8_1_0.crx
+          wget -O lace.crx https://clients2.google.com/service/update2/crx?response=redirect&prodversion=95.0.4638.54&acceptformat=crx2,crx3&x=id%3Dgafhhkghbfjjkeiendhlofajokpaflmk%26uc
           unzip lace.crx
+          ls -la
       - name: Start XVFB
         run: |
           Xvfb :99 &
