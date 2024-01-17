@@ -32,6 +32,7 @@ jobs:
         env:
           AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
           DEFAULT_CHAIN: 'Preprod'
+          NODE_OPTIONS: '--max_old_space_size=8192'
         run: yarn test:coverage --maxWorkers=2
       - name: Upload build
         uses: actions/upload-artifact@v3
