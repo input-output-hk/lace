@@ -328,6 +328,34 @@ const colors: Colors = {
   $data_green: lightColorScheme.$secondary_data_green,
   $data_pink: lightColorScheme.$secondary_data_pink,
   $data_yellow: lightColorScheme.$secondary_lace_yellow,
+
+  $educational_card_root_container_bgColor: lightColorScheme.$primary_white,
+  $educational_card_root_container_borderColor:
+    lightColorScheme.$primary_light_grey,
+
+  $educational_card_item_container_bgColor: colorTransparent,
+  $educational_card_item_container_bgColor_hover:
+    lightColorScheme.$primary_light_grey,
+  $educational_card_item_container_bgColor_pressed:
+    lightColorScheme.$primary_light_grey_plus_0_56,
+  $educational_card_item_container_outlineColor:
+    lightColorScheme.$primary_accent_purple_0_3,
+  $educational_card_item_label_color: lightColorScheme.$primary_dark_grey,
+  $educational_card_item_title_color: lightColorScheme.$primary_black,
+  $educational_card_item_icon_container_bgColor:
+    lightColorScheme.$primary_white,
+  $educational_card_item_icon_container_borderColor:
+    lightColorScheme.$primary_light_grey_plus,
+
+  $checkbox_check_color: lightColorScheme.$primary_white,
+  $checkbox_checked_backgroundColor: lightColorScheme.$primary_accent_purple,
+  $checkbox_unchecked_backgroundColor: colorTransparent,
+  $checkbox_unchecked_borderColor: lightColorScheme.$primary_grey,
+  $checkbox_focus_color: lightColorScheme.$primary_accent_purple_0_3,
+  $checkbox_hover_unchecked_borderColor: lightColorScheme.$primary_dark_grey,
+  $checkbox_hover_unchecked_backgroundColor: colorTransparent,
+  $checkbox_hover_checked_backgroundColor:
+    lightColorScheme.$primary_hover_purple,
 };
 
 export const elevation: Elevation = {

@@ -1,6 +1,54 @@
 @import '../../../../../packages/common/src/ui/styles/theme.scss';
 @import '../../../../../packages/common/src/ui/styles/abstracts/typography';
 
+.nameWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.saturationContainer {
+  display: flex;
+  flex-direction: column;
+
+  .saturationTitle {
+    @include text-body-semi-bold;
+    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #a9a9a9));
+    text-align: right;
+  }
+
+  .saturationProgressContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .saturationProgress {
+    width: 136px;
+  }
+
+  .saturation {
+    @include text-bodySmall-medium;
+    color: var(--light-mode-mid-grey, var(--dark-mode-light-grey));
+  }
+
+  .high {
+    background: var(--lace-yellow) !important;
+  }
+  .low {
+    background: var(--data-blue) !important;
+  }
+  .medium {
+    background: var(--data-green) !important;
+  }
+  .oversaturated {
+    background: var(--data-pink) !important;
+  }
+  .veryHigh {
+    background: var(--data-orange) !important;
+  }
+}
+
 .container {
   display: flex;
   flex-direction: column;
