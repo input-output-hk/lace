@@ -7,7 +7,7 @@ import { BackgroundStorage } from '../types';
 import uniqueId from 'lodash/uniqueId';
 import { walletManager, walletRepository } from './wallet';
 import { firstValueFrom } from 'rxjs';
-import { AnyWallet, WalletManager, WalletRepository, WalletType } from '@cardano-sdk/web-extension';
+import { AnyWallet, WalletManagerApi, WalletRepositoryApi, WalletType } from '@cardano-sdk/web-extension';
 import { getBackgroundStorage } from './storage';
 
 const { blake2b } = Wallet.Crypto;
@@ -107,8 +107,8 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
   });
 
 export const getActiveWallet = async (props: {
-  walletRepository: WalletRepository<Wallet.Metadata>;
-  walletManager: WalletManager<Wallet.Metadata>;
+  walletRepository: WalletRepositoryApi<Wallet.Metadata>;
+  walletManager: WalletManagerApi;
 }): Promise<AnyWallet<Wallet.Metadata> | undefined> => {
   const activeWallet = await firstValueFrom(props.walletManager.activeWalletId$);
   if (!activeWallet) return;

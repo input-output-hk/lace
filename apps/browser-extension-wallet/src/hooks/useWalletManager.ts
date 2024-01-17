@@ -18,7 +18,7 @@ import { HexBlob } from '@cardano-sdk/util';
 import { BackgroundService } from '@lib/scripts/types';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
-const LOCK_VALUE = JSON.stringify({ lock: 'lock' });
+export const LOCK_VALUE = Buffer.from(JSON.stringify({ lock: 'lock' }), 'utf8');
 
 export interface CreateWallet {
   name: string;
@@ -136,9 +136,7 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
     type: WalletType.InMemory
   };
 
-  const lockValue = HexBlob.fromBytes(
-    await Wallet.KeyManagement.emip3encrypt(Buffer.from(LOCK_VALUE, 'utf8'), passphrase)
-  );
+  const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
   const walletId = await walletRepository.addWallet(addWalletProps);
   const addAccountProps = {
     accountIndex,

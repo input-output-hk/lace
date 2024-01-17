@@ -1,14 +1,11 @@
-import { WalletManager, WalletRepository, WalletType, exposeApi } from '@cardano-sdk/web-extension';
+import { WalletManagerApi, WalletRepositoryApi, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { of, BehaviorSubject } from 'rxjs';
-import { runtime } from 'webextension-polyfill';
+import { BehaviorSubject } from 'rxjs';
 import { getActiveWallet, hashExtendedAccountPublicKey } from '@lib/scripts/background/util';
-import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
+import { UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import randomBytes from 'randombytes';
-import { userIdServiceProperties } from '../config';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 import isUndefined from 'lodash/isUndefined';
-import * as wallet from '../wallet';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
 
 export type UserIdServiceStorage = {
@@ -30,8 +27,8 @@ export class UserIdService implements UserIdServiceInterface {
   private hasNewSessionStarted = false;
 
   constructor(
-    private walletRepository: WalletRepository<Wallet.Metadata>,
-    private walletManager: WalletManager<Wallet.Metadata>,
+    private walletRepository: WalletRepositoryApi<Wallet.Metadata>,
+    private walletManager: WalletManagerApi,
     private storage: UserIdServiceStorage = {
       clear: clearBackgroundStorage,
       get: getBackgroundStorage,
@@ -188,14 +185,3 @@ export class UserIdService implements UserIdServiceInterface {
     return isNewSession;
   }
 }
-
-const userIdService = new UserIdService(wallet.walletRepository, wallet.walletManager);
-
-exposeApi<UserIdServiceInterface>(
-  {
-    api$: of(userIdService),
-    baseChannel: USER_ID_SERVICE_BASE_CHANNEL,
-    properties: userIdServiceProperties
-  },
-  { logger: console, runtime }
-);

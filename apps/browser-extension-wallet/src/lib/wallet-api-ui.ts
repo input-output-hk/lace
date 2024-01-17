@@ -1,6 +1,6 @@
 import {
   SignerManager,
-  WalletRepository,
+  WalletRepositoryApi,
   WalletType,
   consumeRemoteApi,
   createKeyAgentFactory,
@@ -51,7 +51,7 @@ export const observableWallet = consumeRemoteApi(
   { logger, runtime }
 );
 
-export const walletRepository = consumeRemoteApi<WalletRepository<Wallet.Metadata>>(
+export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.Metadata>>(
   { baseChannel: repositoryChannel(process.env.WALLET_NAME), properties: walletRepositoryProperties },
   { logger, runtime }
 );
