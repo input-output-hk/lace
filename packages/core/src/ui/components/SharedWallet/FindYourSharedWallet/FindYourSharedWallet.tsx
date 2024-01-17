@@ -1,6 +1,6 @@
 import React from 'react';
 import { sx, Box, Flex, Text, Button, FileUpload, ActionCard } from '@lace/ui';
-import { ReactComponent as RefreshIcon } from '@lace/ui/dist/assets/icons/refresh.component.svg';
+import { ReactComponent as RefreshIcon } from '@lace/icons/dist/RefreshComponent';
 
 type Title = { text: string; highlight: boolean };
 

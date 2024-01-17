@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { ReactComponent as CheckFileUploadIcon } from '@lace/icons/dist/CheckFileUploadComponent';
+import { ReactComponent as UploadIcon } from '@lace/icons/dist/UploadGradientComponent';
 import cn from 'classnames';
 
-import { ReactComponent as CheckFileUploadIcon } from '../../assets/icons/check-file-upload.component.svg';
-import { ReactComponent as UploadIcon } from '../../assets/icons/upload-gradient.component.svg';
 import { Box } from '../box';
 import { Divider } from '../divider';
 import { Flex } from '../flex';

@@ -1,9 +1,9 @@
 import React from 'react';
 
+import { ReactComponent as LoaderDarkIcon } from '@lace/icons/dist/LoaderDarkGradientComponent';
+import { ReactComponent as LoaderLightIcon } from '@lace/icons/dist/LoaderLightGradientComponent';
 import cn from 'classnames';
 
-import { ReactComponent as LoaderDarkIcon } from '../../assets/icons/loader-dark-gradient.component.svg';
-import { ReactComponent as LoaderLightIcon } from '../../assets/icons/loader-light-gradient.component.svg';
 import { ThemeColorScheme, sx, useTheme } from '../../design-tokens';
 import { Flex } from '../flex';
 
