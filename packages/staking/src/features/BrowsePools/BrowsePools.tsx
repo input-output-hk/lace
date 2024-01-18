@@ -5,6 +5,7 @@ import debounce from 'lodash/debounce';
 import uniqBy from 'lodash/uniqBy';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from '../../featureFlags';
 import { StateStatus, useOutsideHandles } from '../outside-handles-provider';
 import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
 import { BrowsePoolsHeader } from './BrowsePoolsHeader';
@@ -49,8 +50,9 @@ export const BrowsePools = () => {
     analytics,
   } = useOutsideHandles();
   const fetchingPools = walletStoreStakePoolSearchResultsStatus === StateStatus.LOADING;
-  const [poolsView, setPoolsView] = useState<BrowsePoolsView>(BrowsePoolsView.grid);
-  // TODO
+  const [poolsView, setPoolsView] = useState<BrowsePoolsView>(
+    USE_MULTI_DELEGATION_STAKING_GRID_VIEW ? BrowsePoolsView.grid : BrowsePoolsView.table
+  );
 
   const debouncedSearch = useMemo(() => debounce(fetchStakePools, searchDebounce), [fetchStakePools]);
 
@@ -139,7 +141,7 @@ export const BrowsePools = () => {
         loading={fetchingPools}
       />
       <Box mt="$16">
-        {poolsView === BrowsePoolsView.grid && (
+        {USE_MULTI_DELEGATION_STAKING_GRID_VIEW && poolsView === BrowsePoolsView.grid && (
           <StakePoolsGrid
             scrollableTargetId={LACE_APP_ID}
             sortField={sort.field}

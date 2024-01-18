@@ -2,6 +2,7 @@ import { Flex, Text, ToggleButtonGroup } from '@lace/ui';
 import { useTranslation } from 'react-i18next';
 import Table from '../../assets/icons/table-icon.svg';
 import ViewGrid from '../../assets/icons/view-grid-icon.svg';
+import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from '../../featureFlags';
 import { formatLocaleNumber } from '../overview/StakingInfoCard/StakingInfoCard';
 import { BrowsePoolsView } from './types';
 
@@ -19,10 +20,12 @@ export const BrowsePoolsHeader = ({ poolsCount, poolsView, setPoolsView }: Brows
       <Text.Body.Normal weight="$bold">
         {t('browsePools.header.poolsCount', { poolsCount: formatLocaleNumber(poolsCount, 0) })}
       </Text.Body.Normal>
-      <ToggleButtonGroup.Root variant="compact" value={poolsView} onValueChange={setPoolsView}>
-        <ToggleButtonGroup.Item value={BrowsePoolsView.grid} icon={ViewGrid} />
-        <ToggleButtonGroup.Item value={BrowsePoolsView.table} icon={Table} />
-      </ToggleButtonGroup.Root>
+      {USE_MULTI_DELEGATION_STAKING_GRID_VIEW && (
+        <ToggleButtonGroup.Root variant="compact" value={poolsView} onValueChange={setPoolsView}>
+          <ToggleButtonGroup.Item value={BrowsePoolsView.grid} icon={ViewGrid} />
+          <ToggleButtonGroup.Item value={BrowsePoolsView.table} icon={Table} />
+        </ToggleButtonGroup.Root>
+      )}
     </Flex>
   );
 };

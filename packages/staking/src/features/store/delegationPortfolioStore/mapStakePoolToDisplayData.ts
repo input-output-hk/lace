@@ -28,7 +28,7 @@ export const mapStakePoolToDisplayData = ({
     logo: metadata?.ext?.pool.media_assets?.icon_png_64x64 || getRandomIcon({ id: id.toString(), size: 30 }),
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
     activeStake: getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics.stake.active.toString())),
-    apy: metrics.apy ? formatPercentages(metrics.apy.valueOf()) : '-',
+    apy: metrics.apy ? formatPercentages(metrics.apy.valueOf()) : undefined,
     blocks: new BigNumber(metrics.blocksCreated).toFormat(),
     delegators: new BigNumber(metrics.delegators).toFormat(),
     liveStake: getNumberWithUnit(Wallet.util.lovelacesToAdaString(metrics.stake.live.toString())),
