@@ -63,22 +63,24 @@ export const WalletOption = ({
           type={type}
           testId={makeTestId(id)}
         />
-        <Box ml="$10">
-          <Flex
-            className={cx.icon}
-            w="$24"
-            h="$24"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <IconButton
-              onClick={onOpenAccountsMenu}
-              icon={<ChevronRight />}
-              size="extraSmall"
-              as="div"
-            />
-          </Flex>
-        </Box>
+        {type !== 'shared' && (
+          <Box ml="$10">
+            <Flex
+              className={cx.icon}
+              w="$24"
+              h="$24"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <IconButton
+                onClick={onOpenAccountsMenu}
+                icon={<ChevronRight />}
+                size="extraSmall"
+                as="div"
+              />
+            </Flex>
+          </Box>
+        )}
       </Flex>
     </button>
   );
