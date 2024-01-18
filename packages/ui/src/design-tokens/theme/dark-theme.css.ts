@@ -308,6 +308,7 @@ const colors: Colors = {
   $data_green: darkColorScheme.$secondary_data_green,
   $data_pink: darkColorScheme.$secondary_data_pink,
   $data_yellow: darkColorScheme.$secondary_lace_yellow,
+  $data_orange: darkColorScheme.$secondary_data_orange,
 
   $educational_card_root_container_bgColor: darkColorScheme.$primary_mid_black,
   $educational_card_root_container_borderColor: colorTransparent,

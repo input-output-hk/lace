@@ -83,6 +83,9 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.NEW_WALLET:
       path = walletRoutePaths.newWallet.root;
       break;
+    case BrowserViewSections.ADD_SHARED_WALLET:
+      path = walletRoutePaths.sharedWallet.root;
+      break;
   }
   await tabs.create({ url: `app.html#${path}` }).catch((error) => console.error(error));
 };

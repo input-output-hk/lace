@@ -27,9 +27,14 @@ export const container = recipe({
       cold: sx({
         background: '$data_blue',
       }),
-      shared: sx({
-        background: '$data_green',
-      }),
+      shared: style([
+        sx({
+          background: '$data_green',
+        }),
+        {
+          fontSize: '24px',
+        },
+      ]),
     },
   },
 

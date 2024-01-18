@@ -1,8 +1,8 @@
 import React from 'react';
+import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
 import 'antd/dist/antd.css';
 import 'normalize.css';
 import './theme.scss';
-import { ThemeColorScheme, ThemeProvider } from '@lace/ui';
 
 export const preview = {
   actions: { argTypesRegex: '^on[A-Z].*' },
