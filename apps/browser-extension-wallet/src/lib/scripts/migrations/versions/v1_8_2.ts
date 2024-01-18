@@ -30,13 +30,14 @@ const keyAgentDataToAddWalletProps = async (
   data: Wallet.KeyManagement.SerializableKeyAgentData,
   lockValue: Wallet.HexBlob
 ): Promise<AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata>> => {
+  const name = getWalletFromStorage()?.name;
   switch (data.__typename) {
     case Wallet.KeyManagement.KeyAgentType.InMemory: {
       const { mnemonic } = await getBackgroundStorage();
       if (!mnemonic) throw new Error('Inconsistent state: mnemonic not found for in-memory wallet');
       return {
         type: WalletType.InMemory,
-        metadata: { name: getWalletFromStorage()?.name, lockValue },
+        metadata: { name, lockValue },
         extendedAccountPublicKey: data.extendedAccountPublicKey,
         encryptedSecrets: {
           rootPrivateKeyBytes: HexBlob.fromBytes(Buffer.from(data.encryptedRootPrivateKeyBytes)),
