@@ -12,11 +12,11 @@ import { Cell, Grid } from '../grid';
 
 import * as cx from './radio-button.stories.css';
 
-import { RadioButton } from './';
+import { RadioButtonGroup } from './';
 
 export default {
   title: 'Input Fields/Radio button',
-  component: RadioButton,
+  component: RadioButtonGroup,
   decorators: [
     page({
       title: 'Radio button',
@@ -41,14 +41,14 @@ const MainComponents = (): JSX.Element => {
     <>
       <Variants.Row>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             selectedValue={''}
             onValueChange={(): undefined => undefined}
             options={emptyOption}
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
@@ -56,14 +56,14 @@ const MainComponents = (): JSX.Element => {
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={emptyOption}
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             disabled
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
@@ -71,7 +71,7 @@ const MainComponents = (): JSX.Element => {
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             className={cx.focus}
             selectedValue={''}
             onValueChange={(): undefined => undefined}
@@ -81,39 +81,39 @@ const MainComponents = (): JSX.Element => {
       </Variants.Row>
       <Variants.Row>
         <Variants.Cell>
-          <RadioButton
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButton
-            id="hover"
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={options}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={options}
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
-            disabled
-            selectedValue={''}
+          <RadioButtonGroup
+            id="hover"
+            selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={options}
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
+            selectedValue={'option'}
+            onValueChange={(): undefined => undefined}
+            options={options}
+          />
+        </Variants.Cell>
+        <Variants.Cell>
+          <RadioButtonGroup
+            disabled
+            selectedValue={'option'}
+            onValueChange={(): undefined => undefined}
+            options={options}
+          />
+        </Variants.Cell>
+        <Variants.Cell>
+          <RadioButtonGroup
             className={cx.focus}
-            selectedValue={''}
+            selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={options}
           />
@@ -128,14 +128,14 @@ const AdditionalVariants = (): JSX.Element => {
     <>
       <Variants.Row>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             selectedValue={''}
             onValueChange={(): undefined => undefined}
             options={options}
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             id="hover"
             selectedValue={''}
             onValueChange={(): undefined => undefined}
@@ -143,14 +143,14 @@ const AdditionalVariants = (): JSX.Element => {
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={options}
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             disabled
             selectedValue={''}
             onValueChange={(): undefined => undefined}
@@ -158,7 +158,7 @@ const AdditionalVariants = (): JSX.Element => {
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             className={cx.focus}
             selectedValue={''}
             onValueChange={(): undefined => undefined}
@@ -168,39 +168,39 @@ const AdditionalVariants = (): JSX.Element => {
       </Variants.Row>
       <Variants.Row>
         <Variants.Cell>
-          <RadioButton
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={optionsWithIcon}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButton
-            id="hover"
-            selectedValue={''}
-            onValueChange={(): undefined => undefined}
-            options={optionsWithIcon}
-          />
-        </Variants.Cell>
-        <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
             selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={optionsWithIcon}
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
-            disabled
-            selectedValue={''}
+          <RadioButtonGroup
+            id="hover"
+            selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={optionsWithIcon}
           />
         </Variants.Cell>
         <Variants.Cell>
-          <RadioButton
+          <RadioButtonGroup
+            selectedValue={'option'}
+            onValueChange={(): undefined => undefined}
+            options={optionsWithIcon}
+          />
+        </Variants.Cell>
+        <Variants.Cell>
+          <RadioButtonGroup
+            disabled
+            selectedValue={'option'}
+            onValueChange={(): undefined => undefined}
+            options={optionsWithIcon}
+          />
+        </Variants.Cell>
+        <Variants.Cell>
+          <RadioButtonGroup
             className={cx.focus}
-            selectedValue={''}
+            selectedValue={'option'}
             onValueChange={(): undefined => undefined}
             options={optionsWithIcon}
           />
@@ -211,15 +211,7 @@ const AdditionalVariants = (): JSX.Element => {
 };
 
 export const Overview = (): JSX.Element => {
-  const optionIcon = [
-    {
-      value: 'singleOptionIcon',
-      label: 'Single label with icon',
-      icon: DocumentDownload,
-      onIconClick: () => void 0,
-    },
-  ];
-
+  const headers = ['Rest', 'Hover', 'Active/Selected', 'Disabled', 'Focused'];
   const option = [{ value: 'singleOption', label: 'Single label' }];
   const options = [
     { value: 'label01', label: 'Label 1' },
@@ -241,10 +233,10 @@ export const Overview = (): JSX.Element => {
             my="$32"
           >
             <Flex mr="$8">
-              <RadioButton
+              <RadioButtonGroup
                 selectedValue={radioValue}
                 options={option}
-                onValueChange={(value): void => {
+                onValueChange={(value: React.SetStateAction<string>): void => {
                   setRadioValue(value);
                 }}
               />
@@ -261,30 +253,10 @@ export const Overview = (): JSX.Element => {
             my="$32"
           >
             <Flex mr="$8">
-              <RadioButton
-                selectedValue={radioValue}
-                options={optionIcon}
-                onValueChange={(value): void => {
-                  setRadioValue(value);
-                }}
-              />
-            </Flex>
-          </Flex>
-
-          <Divider my="$64" />
-
-          <Flex
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="center"
-            w="$fill"
-            my="$32"
-          >
-            <Flex mr="$8">
-              <RadioButton
+              <RadioButtonGroup
                 selectedValue={radioValue}
                 options={options}
-                onValueChange={(value): void => {
+                onValueChange={(value: React.SetStateAction<string>): void => {
                   setRadioValue(value);
                 }}
               />
@@ -295,15 +267,7 @@ export const Overview = (): JSX.Element => {
         <Divider my="$64" />
 
         <Section title="Main components">
-          <Variants.Table
-            headers={[
-              'Rest',
-              'Hover',
-              'Active/Selected',
-              'Disabled',
-              'Focused',
-            ]}
-          >
+          <Variants.Table headers={headers}>
             <MainComponents />
           </Variants.Table>
           <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
@@ -316,15 +280,7 @@ export const Overview = (): JSX.Element => {
         <Divider my="$64" />
 
         <Section title="Additional Variants">
-          <Variants.Table
-            headers={[
-              'Rest',
-              'Hover',
-              'Active/Selected',
-              'Disabled',
-              'Focused',
-            ]}
-          >
+          <Variants.Table headers={headers}>
             <AdditionalVariants />
           </Variants.Table>
           <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>

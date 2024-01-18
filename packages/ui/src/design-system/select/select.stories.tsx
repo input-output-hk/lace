@@ -24,74 +24,78 @@ export default {
   ],
 } as Meta;
 
-const MainComponents = (): JSX.Element => {
-  const placeholder = 'Make a choice...';
-  const options = [
-    { label: 'Apple', value: 'apple' },
-    { label: 'Banana', value: 'banana' },
-    { label: 'Blueberry', value: 'blueberry' },
-  ];
+const placeholder = 'Select a value...';
+const options = [
+  { label: 'Apple', value: 'apple' },
+  { label: 'Banana', value: 'banana' },
+  { label: 'Blueberry', value: 'blueberry' },
+];
 
-  return (
-    <Variants.Row>
-      <Variants.Cell>
-        <SelectGroup
-          onValueChange={(): undefined => undefined}
-          options={options}
-          placeholder={placeholder}
-        />
-      </Variants.Cell>
-      <Variants.Cell>
-        <SelectGroup
-          id="hover"
-          onValueChange={(): undefined => undefined}
-          options={options}
-          placeholder={placeholder}
-        />
-      </Variants.Cell>
-      <Variants.Cell>
-        <SelectGroup
-          onValueChange={(): undefined => undefined}
-          options={options}
-          placeholder={placeholder}
-        />
-      </Variants.Cell>
-      <Variants.Cell>
-        <SelectGroup
-          disabled={true}
-          onValueChange={(): undefined => undefined}
-          options={options}
-          placeholder={placeholder}
-        />
-      </Variants.Cell>
-      <Variants.Cell>
-        <SelectGroup
-          className={cx.focus}
-          disabled={true}
-          onValueChange={(): undefined => undefined}
-          options={options}
-          placeholder={placeholder}
-        />
-      </Variants.Cell>
-    </Variants.Row>
-  );
-};
+const MainComponentsIcon = (): JSX.Element => (
+  <Variants.Row>
+    <Variants.Cell>
+      <SelectGroup
+        onValueChange={(): undefined => undefined}
+        options={options}
+        placeholder={placeholder}
+        showArrow={true}
+      />
+    </Variants.Cell>
+    <Variants.Cell>
+      <SelectGroup
+        disabled={true}
+        onValueChange={(): undefined => undefined}
+        options={options}
+        placeholder={placeholder}
+        showArrow={true}
+      />
+    </Variants.Cell>
+    <Variants.Cell>
+      <SelectGroup
+        className={cx.focus}
+        disabled={true}
+        onValueChange={(): undefined => undefined}
+        options={options}
+        placeholder={placeholder}
+        showArrow={true}
+      />
+    </Variants.Cell>
+  </Variants.Row>
+);
+
+const MainComponents = (): JSX.Element => (
+  <Variants.Row>
+    <Variants.Cell>
+      <SelectGroup
+        onValueChange={(): undefined => undefined}
+        options={options}
+        placeholder={placeholder}
+      />
+    </Variants.Cell>
+    <Variants.Cell>
+      <SelectGroup
+        disabled={true}
+        onValueChange={(): undefined => undefined}
+        options={options}
+        placeholder={placeholder}
+      />
+    </Variants.Cell>
+    <Variants.Cell>
+      <SelectGroup
+        className={cx.focus}
+        disabled={true}
+        onValueChange={(): undefined => undefined}
+        options={options}
+        placeholder={placeholder}
+      />
+    </Variants.Cell>
+  </Variants.Row>
+);
 
 export const Overview = (): JSX.Element => {
-  const options = [
-    {
-      label: 'Apple',
-      value: 'apple',
-    },
-    { label: 'Banana', value: 'banana' },
-    { label: 'Blueberry', value: 'blueberry' },
-  ];
-
   const [selectedValue, setSelectedValue] = React.useState<string>(
     options[0].value,
   );
-
-  const placeholder = 'Make a selection...';
 
   return (
     <Grid>
@@ -116,19 +120,53 @@ export const Overview = (): JSX.Element => {
               />
             </Flex>
           </Flex>
+
+          <Divider my="$64" />
+
+          <Flex
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="center"
+            w="$fill"
+            my="$32"
+          >
+            <Flex mr="$8">
+              <SelectGroup
+                selectedValue={selectedValue}
+                options={options}
+                onValueChange={(value): void => {
+                  setSelectedValue(value);
+                }}
+                placeholder={placeholder}
+                className={cx.testClassName}
+                showArrow={true}
+              />
+            </Flex>
+          </Flex>
         </Section>
 
         <Divider my="$64" />
 
         <Section title="Main components">
-          <Variants.Table
-            headers={['Rest', 'Hover', 'Active', 'Disabled', 'Focused']}
-          >
+          <Variants.Table headers={['Rest', 'Disabled', 'Focused']}>
             <MainComponents />
           </Variants.Table>
           <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
             <Variants.Table>
               <MainComponents />
+            </Variants.Table>
+          </LocalThemeProvider>
+        </Section>
+
+        <Divider my="$64" />
+
+        <Section title="Main components with Icon">
+          <Variants.Table headers={['Rest', 'Disabled', 'Focused']}>
+            <MainComponentsIcon />
+          </Variants.Table>
+          <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
+            <Variants.Table>
+              <MainComponentsIcon />
             </Variants.Table>
           </LocalThemeProvider>
         </Section>

@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { ReactComponent as ChevronDownIcon } from '@lace/icons/dist/ChevronDownComponent';
-import { ReactComponent as ChevronUpIcon } from '@lace/icons/dist/ChevronUpComponent';
 import * as Select from '@radix-ui/react-select';
 import cn from 'classnames';
 
@@ -20,6 +19,7 @@ export type Props = Readonly<{
   }[];
   open?: boolean;
   disabled?: boolean;
+  showArrow?: boolean;
 
   onValueChange: (value: string) => void;
 }>;
@@ -30,12 +30,18 @@ export const SelectGroup = ({
   placeholder,
   onValueChange,
   selectedValue,
+  showArrow = false,
   ...props
 }: Props): JSX.Element => (
   <Box className={cn(className, cx.root)}>
     <Select.Root onValueChange={onValueChange} value={selectedValue} {...props}>
       <Select.Trigger className={cx.selectTrigger} aria-label="Food">
         <Select.Value placeholder={placeholder} />
+        {showArrow && (
+          <Select.Icon className={cx.selectIcon}>
+            <ChevronDownIcon />
+          </Select.Icon>
+        )}
       </Select.Trigger>
       <Select.Portal>
         <Select.Content className={cx.selectContent}>

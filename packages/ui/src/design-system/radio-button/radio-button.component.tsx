@@ -1,8 +1,6 @@
 import React from 'react';
-import type { ReactNode } from 'react';
 
-import { ReactComponent as DocumentDownload } from '@lace/icons/dist/DocumentDownload';
-import * as RadioGroup from '@radix-ui/react-radio-group';
+import * as RadixRadioGroup from '@radix-ui/react-radio-group';
 import cn from 'classnames';
 
 import { Box } from '../box';
@@ -12,7 +10,6 @@ import * as cx from './radio-button.css';
 
 export type Props = Readonly<{
   disabled?: boolean;
-  label?: ReactNode;
   className?: string;
   selectedValue: string;
 
@@ -27,7 +24,7 @@ export type Props = Readonly<{
   onValueChange: (value: string) => void;
 }>;
 
-export const RadioButton = ({
+export const RadioButtonGroup = ({
   disabled = false,
   onValueChange,
   className,
@@ -36,7 +33,7 @@ export const RadioButton = ({
   ...props
 }: Props): JSX.Element => (
   <Box className={cn(className, cx.root)}>
-    <RadioGroup.Root
+    <RadixRadioGroup.Root
       {...props}
       value={selectedValue}
       disabled={disabled}
@@ -45,7 +42,7 @@ export const RadioButton = ({
     >
       {options.map(({ value, label, icon, onIconClick }) => (
         <Flex alignItems="center" h="$fill" m="$4" key={value}>
-          <RadioGroup.Item
+          <RadixRadioGroup.Item
             id={label}
             value={value}
             className={cn(
@@ -53,8 +50,8 @@ export const RadioButton = ({
               value === selectedValue ? cx.checked : cx.unchecked,
             )}
           >
-            <RadioGroup.Indicator className={cx.radioGroupIndicator} />
-          </RadioGroup.Item>
+            <RadixRadioGroup.Indicator className={cx.radioGroupIndicator} />
+          </RadixRadioGroup.Item>
           {label && (
             <label className="Label" htmlFor={value}>
               <Box
@@ -69,12 +66,12 @@ export const RadioButton = ({
           {icon !== undefined && value === selectedValue && (
             <Flex justifyContent="flex-end">
               <div className={cx.icon} onClick={onIconClick}>
-                <DocumentDownload />
+                {React.createElement(icon)}
               </div>
             </Flex>
           )}
         </Flex>
       ))}
-    </RadioGroup.Root>
+    </RadixRadioGroup.Root>
   </Box>
 );

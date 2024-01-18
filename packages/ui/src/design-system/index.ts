@@ -31,5 +31,5 @@ export { TextBox } from './text-box';
 export * as EducationalCard from './educational-card';
 export { Checkbox } from './checkbox';
 export * as Dialog from './dialog';
-export { RadioButton } from './radio-button';
+export { RadioButtonGroup } from './radio-button';
 export { SelectGroup } from './select';

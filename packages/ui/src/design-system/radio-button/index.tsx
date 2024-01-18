@@ -1,1 +1,1 @@
-export { RadioButton } from './radio-button.component';
+export { RadioButtonGroup } from './radio-button.component';

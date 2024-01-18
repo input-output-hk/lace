@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './QuorumOption.module.scss';
-import { Card, RadioButton, Flex, Button, SelectGroup, Text, Box } from '@lace/ui';
+import { Card, RadioButtonGroup, Flex, Button, SelectGroup, Text, Box } from '@lace/ui';
 
 export interface QuorumOptionProps {
   translations: {
@@ -55,7 +55,7 @@ export const QuorumOption = ({
         <Text.Body.Normal data-testid="shared-wallet-setup-quorum-user-description">{description}</Text.Body.Normal>
       </Box>
       <Card.Outlined className={styles.cardContainer} data-testid="shared-wallet-setup-quorum-user-options">
-        <RadioButton options={radioButtonValues} onValueChange={onChange} selectedValue={radioButtonValue} />
+        <RadioButtonGroup options={radioButtonValues} onValueChange={onChange} selectedValue={radioButtonValue} />
       </Card.Outlined>
 
       <Flex

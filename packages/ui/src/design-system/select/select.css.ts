@@ -11,9 +11,13 @@ export const root = style([
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '$tiny',
+    borderRadius: '$extraSmall',
   }),
   {
+    ':hover': {
+      backgroundColor: vars.colors.$select_hover_background_color,
+    },
+
     selectors: {
       '&:focus-within': {
         boxShadow: focusBoxShadow,
@@ -36,7 +40,7 @@ export const selectTrigger = style([
     padding: '16px',
     backgroundColor: vars.colors.$select_background_color,
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     border: 0,
     cursor: 'pointer',
 
@@ -134,19 +138,5 @@ export const selectItemIndicator = style([
     position: 'absolute',
     left: 0,
     width: '25px',
-  },
-]);
-
-export const selectScrollButton = style([
-  sx({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '$24',
-  }),
-  {
-    backgroundColor: vars.colors.$select_background_color,
-    color: vars.colors.$select_input_background_data_highlighted,
-    cursor: 'default',
   },
 ]);
