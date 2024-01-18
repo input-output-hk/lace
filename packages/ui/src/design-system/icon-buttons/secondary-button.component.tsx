@@ -1,8 +1,7 @@
 import React from 'react';
 
+import { ReactComponent as LaceGradient } from '@lace/icons/dist/LaceGradientComponent';
 import classNames from 'classnames';
-
-import { ReactComponent as LaceGradient } from '../../assets/icons/lace-gradient.component.svg';
 
 import { NavigationSkeletonButton } from './icon-skeleton-button.component';
 import * as cx from './secondary-button.css';

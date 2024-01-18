@@ -30,6 +30,7 @@ import { MultiWallet } from '../features/multi-wallet';
 import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
 import { DappBetaModal } from '../features/dapp';
+import { SharedWallet } from '@views/browser/features/shared-wallet';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -110,7 +111,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const location = useLocation<{ background?: Location<unknown> }>();
 
   useEffect(() => {
-    if (location.pathname === routes.newWallet.root && page === undefined) {
+    if (
+      page === undefined &&
+      (location.pathname === routes.newWallet.root || location.pathname === routes.sharedWallet.root)
+    ) {
       setBackgroundPage({ pathname: '/assets', search: '', hash: '', state: undefined });
     }
   }, [location, page, setBackgroundPage]);
@@ -210,6 +214,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
         {page && (
           <Switch>
             <Route path={routes.newWallet.root} component={MultiWallet} />
+            <Route path={routes.sharedWallet.root} component={SharedWallet} />
           </Switch>
         )}
         <StakingWarningModals />

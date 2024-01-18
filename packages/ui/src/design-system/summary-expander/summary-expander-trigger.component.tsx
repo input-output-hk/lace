@@ -1,8 +1,9 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
-import { ReactComponent as ChevronDown } from '../../assets/icons/chevron-down.component.svg';
-import { ReactComponent as ChevronUp } from '../../assets/icons/chevron-up.component.svg';
+import { ReactComponent as ChevronDown } from '@lace/icons/dist/ChevronDownComponent';
+import { ReactComponent as ChevronUp } from '@lace/icons/dist/ChevronUpComponent';
+
 import { Flex } from '../flex';
 
 import * as cx from './summary-expander-trigger.css';

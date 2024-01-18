@@ -190,8 +190,12 @@
   }
 }
 
-.popUpContainer {
-  max-height: 480px;
+.popUpContainerHigher {
+  max-height: 475px;
+}
+
+.popUpContainerLower {
+  max-height: 440px;
 }
 
 .extendedContainer {

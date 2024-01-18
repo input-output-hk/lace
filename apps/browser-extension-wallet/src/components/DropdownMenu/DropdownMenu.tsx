@@ -59,7 +59,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
                   }
                 : undefined
             }
-            type="cold"
+            type={process.env.USE_SHARED_WALLET === 'true' ? 'shared' : 'cold'}
             id="menu"
           />
         </div>
