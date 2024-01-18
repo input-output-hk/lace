@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { Required } from 'utility-types';
 import { formatPercentages, getRandomIcon, getNumberWithUnit } from '@lace/common';
 import { Cardano } from '@cardano-sdk/core';
 import { CoinId } from '@src/wallet';
@@ -18,13 +19,14 @@ export interface StakePool {
   retired?: boolean;
   apy?: string;
   liveStake?: { number: string; unit?: string };
+  blocks: string;
   saturation?: string;
   fee?: number | string;
   isStakingPool?: boolean;
 }
 
 type StakePoolTransformerProp = {
-  stakePool: Cardano.StakePool;
+  stakePool: Required<Cardano.StakePool, 'metrics'>;
   delegatingPoolId?: string;
   cardanoCoin?: CoinId;
 };
@@ -46,14 +48,10 @@ export const stakePoolTransformer = ({ stakePool, delegatingPoolId }: StakePoolT
     description: metadata?.description,
     ...(margin && { margin: `${formatPercentages(margin.numerator / margin.denominator)}` }),
     cost: `${formattedCost.number}${formattedCost.unit}`,
-    liveStake: metrics?.stake.live
-      ? getNumberWithUnit(lovelacesToAdaString(metrics?.stake.live.toString()))
-      : { number: '-' },
-    ...(metrics && {
-      ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
-      saturation: formatPercentages(metrics.saturation.valueOf()),
-      blocks: metrics?.blocksCreated?.toString()
-    }),
+    liveStake: getNumberWithUnit(lovelacesToAdaString(metrics.stake.live.toString())),
+    ...(metrics.apy && { apy: formatPercentages(metrics.apy.valueOf()) }),
+    saturation: formatPercentages(metrics.saturation.valueOf()),
+    blocks: metrics.blocksCreated.toString(),
     pledge: `${formattedPledge.number}${formattedPledge.unit}`,
     ...(delegatingPoolId && { isStakingPool: delegatingPoolId === id.toString() })
   };

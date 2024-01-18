@@ -88,6 +88,7 @@ export const DelegationContent = (): React.ReactElement => {
   const parseStakePools = () =>
     stakePoolSearchResults?.pageResults.map((pool) =>
       Wallet.util.stakePoolTransformer({
+        // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
         stakePool: pool,
         delegatingPoolId: delegationDetails?.id?.toString(),
         cardanoCoin
@@ -143,6 +144,7 @@ export const DelegationContent = (): React.ReactElement => {
         handleSearchChange={handleSearch}
         handleAddFunds={redirectToReceive}
         currentStakePool={
+          // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
           delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin })
         }
         isLoading={isLoadingNetworkInfo}

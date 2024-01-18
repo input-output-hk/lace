@@ -126,6 +126,7 @@ export const Staking = (): React.ReactElement => {
         <div className={styles.flexRow}>
           <StakingInfo
             {...{
+              // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
               ...Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
               coinBalance,
               fiat: priceResult?.cardano?.price,

@@ -6,7 +6,7 @@ import uniqBy from 'lodash/uniqBy';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StateStatus, useOutsideHandles } from '../outside-handles-provider';
-import { useDelegationPortfolioStore } from '../store';
+import { mapStakePoolToDisplayData, useDelegationPortfolioStore } from '../store';
 import { BrowsePoolsHeader } from './BrowsePoolsHeader';
 import { PortfolioBar } from './PortfolioBar';
 import { StakePoolsGrid } from './StakePoolsGrid';
@@ -17,7 +17,7 @@ import { BrowsePoolsView } from './types';
 
 const LACE_APP_ID = 'lace-app';
 const DEFAULT_SORT_OPTIONS: StakePoolSortOptions = {
-  field: SortField.apy,
+  field: SortField.name,
   order: SortDirection.desc,
 };
 
@@ -36,7 +36,6 @@ export const BrowsePools = () => {
     store.selectedPortfolio.map(({ stakePool }) => stakePool)
   );
   const {
-    walletStoreWalletUICardanoCoin: cardanoCoin,
     currentChain,
     walletStoreStakePoolSearchResults: {
       pageResults,
@@ -112,19 +111,22 @@ export const BrowsePools = () => {
   const list = useMemo(
     () =>
       combinedUnique.map((pool) => {
-        const stakePool = Wallet.util.stakePoolTransformer({ cardanoCoin, stakePool: pool });
+        // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
+        const stakePool = mapStakePoolToDisplayData({ stakePool: pool });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
 
         return {
-          logo,
           ...stakePool,
           hexId: pool.hexId,
+          liveStake: `${stakePool.liveStake.number}${stakePool.liveStake.unit}`,
+          logo: stakePool.logo || logo,
           stakePool: pool,
         };
       }) || [],
-    [combinedUnique, cardanoCoin]
+    [combinedUnique]
   );
   const total = isSearching ? 0 : totalResultCount;
+  const hasMoreData = list.length < total;
 
   return (
     <Flex flexDirection="column" alignItems="stretch">
@@ -145,6 +147,7 @@ export const BrowsePools = () => {
             loadMoreData={loadMoreData}
             totalResultCount={total}
             loading={isLoadingList || isSearching}
+            hasMoreData={hasMoreData}
           />
         )}
         {poolsView === BrowsePoolsView.table && (

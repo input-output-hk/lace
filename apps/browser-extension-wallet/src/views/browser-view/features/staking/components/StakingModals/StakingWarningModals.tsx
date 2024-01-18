@@ -36,6 +36,7 @@ export const StakingWarningModals = ({ popupView }: StakingWarningModalsProps): 
     saturation,
     retired,
     id: poolId
+    // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
   } = (delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin })) || {};
 
   useEffect(() => {

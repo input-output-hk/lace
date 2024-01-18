@@ -89,6 +89,7 @@ const transformedStakePool = {
 
 describe('Testing transformers', () => {
   test('should return proper data form stakePoolTransformer', () => {
+    // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
     expect(stakePoolTransformer({ stakePool: cardanoStakePoolMock.pageResults[0], cardanoCoin })).toEqual(
       transformedStakePool
     );

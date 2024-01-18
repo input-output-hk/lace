@@ -23,6 +23,7 @@ export type DelegationPortfolioStore = DelegationPortfolioState & {
   };
 };
 
+// TODO Please double-check: saturation/blocks/delegators technically aren't optional in SDK (metrics)
 export type StakePoolDetails = {
   delegators?: number | string;
   description: string;

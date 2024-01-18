@@ -120,6 +120,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
   const list = useMemo(
     () =>
       stakePools?.map((pool: Wallet.Cardano.StakePool) => {
+        // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
         const stakePool = Wallet.util.stakePoolTransformer({ stakePool: pool, cardanoCoin });
         const logo = getRandomIcon({ id: pool.id.toString(), size: 30 });
 
@@ -198,6 +199,7 @@ export const StakePoolsTable = ({ scrollableTargetId, onStake }: stakePoolsTable
           />
         </div>
         <StakePoolTableBodyBrowser
+          // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
           items={list}
           loadMoreData={loadMoreData}
           emptyText

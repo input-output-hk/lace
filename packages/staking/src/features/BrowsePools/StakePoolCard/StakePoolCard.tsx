@@ -8,7 +8,7 @@ import { MetricType } from './types';
 export interface StakePoolCardProps {
   title?: string;
   metricType: MetricType;
-  metricValue?: number;
+  metricValue?: string;
   saturation: string;
   selected?: boolean;
   onClick?: () => void;
@@ -28,7 +28,7 @@ export const StakePoolCard = ({
         <Text.Body.Normal weight="$medium" className={styles.title}>
           {title}
         </Text.Body.Normal>
-        <PoolMetric metricType={metricType} metricValue={metricValue} />
+        {metricValue && <PoolMetric metricType={metricType} metricValue={metricValue} />}
       </Flex>
       <StakePoolCardProgressBar percentage={saturation} />
     </Flex>

@@ -15,6 +15,7 @@ export const stakePoolDetailsSelector = ({
   viewedStakePool,
 }: DelegationPortfolioStore): StakePoolDetails | undefined => {
   if (!viewedStakePool) return undefined;
+  // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
   // eslint-disable-next-line consistent-return
   return mapStakePoolToDisplayData({ stakePool: viewedStakePool });
 };

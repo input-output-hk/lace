@@ -92,6 +92,7 @@ export const StakePoolDetail = ({ popupView, setIsStaking }: stakePoolDetailProp
     walletUI: { cardanoCoin }
   } = useWalletStore();
   const currentDelegatedStakePool =
+    // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
     delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin });
   const { t } = useTranslation();
 
@@ -332,6 +333,7 @@ export const StakePoolDetailFooter = ({
 
   const delegationDetails = useDelegationDetails();
   const currentDelegatedStakePool =
+    // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
     delegationDetails && Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin });
   const isDelegatingToThisPool = currentDelegatedStakePool?.id === id;
 

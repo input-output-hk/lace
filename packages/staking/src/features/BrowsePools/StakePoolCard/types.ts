@@ -1,1 +1,1 @@
-export type MetricType = 'ticker' | 'saturation' | 'ros' | 'cost' | 'margin' | 'blocks' | 'pledge' | 'live-stake';
+export type MetricType = 'ticker' | 'saturation' | 'ros' | 'cost' | 'margin' | 'blocks' | 'pledge' | 'liveStake';

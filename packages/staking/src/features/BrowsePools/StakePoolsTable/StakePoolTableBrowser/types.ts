@@ -11,6 +11,7 @@ export type StakePoolTableItemBrowserProps = {
   margin: string;
   blocks: string;
   pledge: string;
+  liveStake: string;
   selectionDisabledMessage?: string;
   stakePool: Wallet.Cardano.StakePool;
   onClick?: () => void;

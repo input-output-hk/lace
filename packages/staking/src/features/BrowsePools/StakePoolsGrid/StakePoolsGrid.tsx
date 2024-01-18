@@ -17,6 +17,7 @@ type StakePoolsGridProps = {
   sortField: Wallet.SortField;
   loadMoreData: () => Promise<void>;
   list: StakePoolTableItemBrowserProps[];
+  hasMoreData: boolean;
   loading: boolean;
   totalResultCount: number;
 };
@@ -28,12 +29,9 @@ const metricTypesBySortField: Record<Wallet.SortField, MetricType> = {
   saturation: 'saturation',
 };
 
-// TODO this whole thing should be removed because we have already mapped and formatted data. Check lovelaces computation e.g. pledge in mapStakePoolToDisplayData
-// eslint-disable-next-line consistent-return
 const getMetricValueByType = (pool: StakePoolTableItemBrowserProps, metricType: MetricType) => {
   switch (metricType) {
-    case 'live-stake':
-      // @ts-ignore
+    case 'liveStake':
       return pool.liveStake;
     case 'pledge':
       return pool.pledge;
@@ -44,6 +42,8 @@ const getMetricValueByType = (pool: StakePoolTableItemBrowserProps, metricType: 
     case 'margin':
       return pool.margin;
     default:
+      // eslint-disable-next-line unicorn/no-useless-undefined, consistent-return
+      return undefined;
   }
 };
 
@@ -53,6 +53,7 @@ export const StakePoolsGrid = ({
   list: items,
   scrollableTargetId,
   loadMoreData,
+  hasMoreData,
   loading,
 }: StakePoolsGridProps) => {
   // TODO duplication - should be lifted to Browse Pools
@@ -113,7 +114,7 @@ export const StakePoolsGrid = ({
       <InfiniteScroll
         scrollableTarget={scrollableTargetId}
         next={loadMoreData}
-        hasMore
+        hasMore={hasMoreData}
         // TODO: replace with StakePoolCard Skeletons
         loader={<Skeleton active avatar />}
         dataLength={availableStakePools.length}

@@ -9,6 +9,7 @@ const mapStakePoolToPortfolioPool = ({
   stakePool: Wallet.Cardano.StakePool;
   sliderIntegerPercentage: number;
 }): DraftPortfolioStakePool => ({
+  // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
   displayData: mapStakePoolToDisplayData({ stakePool }),
   id: stakePool.hexId,
   sliderIntegerPercentage,

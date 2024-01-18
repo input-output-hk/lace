@@ -109,6 +109,7 @@ export const useDelegationPortfolioStore = create(
 
             return {
               displayData: {
+                // @ts-expect-error TODO: filter pools without metrics (this technically shouldn't happen)
                 ...mapStakePoolToDisplayData({ stakePool }),
                 lastReward: confirmedPoolRewards[confirmedPoolRewards.length - 1] || BigInt(0),
                 totalRewards: Wallet.BigIntMath.sum(confirmedPoolRewards),
