@@ -101,7 +101,7 @@ class StakePoolDetailsAssert {
     await StakePoolDetails.pledgeTitle.waitForDisplayed();
     expect(await StakePoolDetails.pledgeTitle.getText()).to.equal(await t('drawer.details.metrics.pledge', 'staking'));
     await StakePoolDetails.pledgeValue.waitForDisplayed();
-    expect(await StakePoolDetails.pledgeValue.getText()).to.match(TestnetPatterns.PLEDGE_PATTERN);
+    expect(await StakePoolDetails.pledgeValue.getText()).to.match(TestnetPatterns.PLEDGE_REGEX);
   }
 
   private async assertSeeCostPerEpoch() {
@@ -117,7 +117,7 @@ class StakePoolDetailsAssert {
     await StakePoolDetails.blocksTitle.waitForDisplayed();
     expect(await StakePoolDetails.blocksTitle.getText()).to.equal(await t('drawer.details.metrics.blocks', 'staking'));
     await StakePoolDetails.blocksValue.waitForDisplayed();
-    expect((await StakePoolDetails.blocksValue.getText()).replaceAll(',', '')).to.match(TestnetPatterns.NUMBER_REGEX);
+    expect((await StakePoolDetails.blocksValue.getText()).replaceAll(',', '')).to.match(TestnetPatterns.BLOCKS_REGEX);
   }
 
   private async assertSeeROS() {
