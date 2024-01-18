@@ -6,10 +6,11 @@ import { getItemFromLocalStorage, removeItemFromLocalStorage, setItemInLocalStor
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { walletManager, walletRepository } from '@src/lib/wallet-api-ui';
 import { Wallet } from '@lace/cardano';
-import { AddWalletProps, WalletType, getWalletId } from '@cardano-sdk/web-extension';
+import { AddWalletProps, AnyWallet, WalletType, getWalletId } from '@cardano-sdk/web-extension';
 import { HexBlob } from '@cardano-sdk/util';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
 import { firstValueFrom } from 'rxjs';
+import { bufferReviver, getValueFromLocalStorage } from '@src/utils/local-storage';
 
 const MIGRATION_VERSION = '1.8.2';
 const LOCK_STORAGE = 'lock';
@@ -18,20 +19,29 @@ const WALLET_METADATA_STORAGE = 'wallet';
 
 const provider = { type: Wallet.WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER, options: {} };
 
-const isWalletLoacked = (lock: string, keyAgentData: string) => lock && !keyAgentData;
+const isWalletLoacked = (lock: Uint8Array, keyAgentData: Wallet.KeyManagement.SerializableKeyAgentData) =>
+  lock && !keyAgentData;
 
-const decryptLock = async (lock: number[], password: string) => {
+const decryptLock = async (lock: Uint8Array, password: string) => {
   const walletDecrypted = await Wallet.KeyManagement.emip3decrypt(Buffer.from(lock), Buffer.from(password));
   const walletParsed: Wallet.KeyAgentsByChain = JSON.parse(walletDecrypted.toString());
 
   return walletParsed.Mainnet;
 };
 
+const removeWallet = async (wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[], walletId: string) => {
+  const wallet = wallets.find((currentWallet) => currentWallet.walletId === walletId);
+
+  if (wallet) {
+    await walletRepository.removeWallet(wallet.walletId);
+  }
+};
+
 const keyAgentDataToAddWalletProps = async (
   data: Wallet.KeyManagement.SerializableKeyAgentData,
-  lockValue: Wallet.HexBlob
+  lockValue: Wallet.HexBlob,
+  name: string
 ): Promise<AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata>> => {
-  const name = getWalletFromStorage()?.name;
   switch (data.__typename) {
     case Wallet.KeyManagement.KeyAgentType.InMemory: {
       const { mnemonic } = await getBackgroundStorage();
@@ -66,8 +76,8 @@ const keyAgentDataToAddWalletProps = async (
 export const v_1_8_2: Migration = {
   version: MIGRATION_VERSION,
   requiresPassword: () => {
-    const lock = getItemFromLocalStorage<any>(LOCK_STORAGE);
-    const keyAgentData = getItemFromLocalStorage<any>(KEY_AGENT_DATA_STORAGE);
+    const lock = getValueFromLocalStorage(LOCK_STORAGE, undefined, bufferReviver);
+    const keyAgentData = getItemFromLocalStorage<Wallet.KeyManagement.SerializableKeyAgentData>(KEY_AGENT_DATA_STORAGE);
 
     if (isWalletLoacked(lock, keyAgentData)) {
       return true;
@@ -79,20 +89,21 @@ export const v_1_8_2: Migration = {
     const walletMetadata = getWalletFromStorage();
     const lock = getItemFromLocalStorage<any>(LOCK_STORAGE);
     const keyAgentData =
-      getItemFromLocalStorage<any>(KEY_AGENT_DATA_STORAGE) || (await decryptLock(lock.data, password)).keyAgentData;
+      getItemFromLocalStorage<Wallet.KeyManagement.SerializableKeyAgentData>(KEY_AGENT_DATA_STORAGE) ||
+      (await decryptLock(lock, password)).keyAgentData;
+    const lockValue =
+      keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory ? HexBlob.fromBytes(lock) : undefined;
+    const walletProps = await keyAgentDataToAddWalletProps(keyAgentData, lockValue, walletMetadata?.name);
+    const walletId = await getWalletId(
+      walletProps.type === WalletType.Script ? walletProps.script : walletProps.extendedAccountPublicKey
+    );
+    const wallets = await firstValueFrom(walletRepository.wallets$);
 
     return {
       prepare: () => void 0,
       assert: () => void 0,
       persist: async () => {
         console.info(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
-        const lockValue =
-          keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory ? HexBlob.fromBytes(lock) : undefined;
-        const wallets = await firstValueFrom(walletRepository.wallets$);
-        const walletProps = await keyAgentDataToAddWalletProps(keyAgentData, lockValue);
-        const walletId = await getWalletId(
-          walletProps.type === WalletType.Script ? walletProps.script : walletProps.extendedAccountPublicKey
-        );
 
         if (!wallets.some((wallet) => wallet.walletId === walletId)) {
           await walletRepository.addWallet(walletProps);
@@ -120,7 +131,7 @@ export const v_1_8_2: Migration = {
         removeItemFromLocalStorage(KEY_AGENT_DATA_STORAGE);
         removeItemFromLocalStorage(WALLET_METADATA_STORAGE);
       },
-      rollback: () => {
+      rollback: async () => {
         console.info(`Rollback migrated data for ${MIGRATION_VERSION} upgrade`);
         if (keyAgentData) {
           setItemInLocalStorage(KEY_AGENT_DATA_STORAGE, keyAgentData);
@@ -131,6 +142,8 @@ export const v_1_8_2: Migration = {
         if (walletMetadata) {
           setItemInLocalStorage(WALLET_METADATA_STORAGE, walletMetadata);
         }
+
+        await removeWallet(wallets, walletId);
       }
     };
   }
