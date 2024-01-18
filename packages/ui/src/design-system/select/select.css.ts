@@ -27,16 +27,17 @@ export const selectTrigger = style([
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '$14',
-    height: '$32',
+    fontSize: '$18',
     gap: '$6',
-    lineHeight: '$16',
+    lineHeight: '$24',
     borderRadius: '$extraSmall',
   }),
   {
-    padding: '0 15px',
+    padding: '16px',
     backgroundColor: vars.colors.$select_background_color,
-    border: `1px solid ${vars.colors.$select_border}`,
+    flex: 1,
+    justifyContent: 'flex-start',
+    border: 0,
     cursor: 'pointer',
 
     ':hover': {
@@ -54,6 +55,7 @@ export const selectTrigger = style([
     ':disabled': {
       backgroundColor: vars.colors.$select_hover_background_color,
       cursor: 'not-allowed',
+      opacity: '20%',
     },
 
     selectors: {
@@ -88,14 +90,14 @@ export const selectItem = style([
   sx({
     display: 'flex',
     alignItems: 'center',
-    fontSize: '$14',
+    fontSize: '$18',
     height: '$24',
     lineHeight: '$24',
     borderRadius: '$extraSmall',
   }),
   {
     lineHeight: 1,
-    padding: '0 35px 0 25px',
+    padding: '16px',
     position: 'relative',
     userSelect: 'none',
     fontFamily: vars.fontFamily.$nova,

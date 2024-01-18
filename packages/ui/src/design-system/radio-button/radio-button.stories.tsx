@@ -213,7 +213,7 @@ const AdditionalVariants = (): JSX.Element => {
 export const Overview = (): JSX.Element => {
   const optionIcon = [
     {
-      value: 'singleOption',
+      value: 'singleOptionIcon',
       label: 'Single label with icon',
       icon: DocumentDownload,
       onIconClick: () => void 0,

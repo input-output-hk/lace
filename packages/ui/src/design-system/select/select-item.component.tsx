@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { ReactComponent as CheckIcon } from '@lace/icons/dist/CheckBoxComponent';
 import * as Select from '@radix-ui/react-select';
 
 import * as cx from './select.css';
@@ -23,9 +22,6 @@ const SelectItemComponent = (
       ref={forwardedReference}
     >
       <Select.ItemText>{children}</Select.ItemText>
-      <Select.ItemIndicator className={cx.selectItemIndicator}>
-        <CheckIcon />
-      </Select.ItemIndicator>
     </Select.Item>
   );
 };

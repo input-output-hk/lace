@@ -36,15 +36,9 @@ export const SelectGroup = ({
     <Select.Root onValueChange={onValueChange} value={selectedValue} {...props}>
       <Select.Trigger className={cx.selectTrigger} aria-label="Food">
         <Select.Value placeholder={placeholder} />
-        <Select.Icon className={cx.selectIcon}>
-          <ChevronDownIcon />
-        </Select.Icon>
       </Select.Trigger>
       <Select.Portal>
         <Select.Content className={cx.selectContent}>
-          <Select.ScrollUpButton className={cx.selectScrollButton}>
-            <ChevronUpIcon />
-          </Select.ScrollUpButton>
           <Select.Viewport className="SelectViewport">
             <Select.Group>
               {options.map(({ label, value }) => {
@@ -56,9 +50,6 @@ export const SelectGroup = ({
               })}
             </Select.Group>
           </Select.Viewport>
-          <Select.ScrollDownButton className={cx.selectScrollButton}>
-            <ChevronDownIcon />
-          </Select.ScrollDownButton>
         </Select.Content>
       </Select.Portal>
     </Select.Root>

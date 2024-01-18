@@ -66,7 +66,7 @@ export const RadioButton = ({
               </Box>
             </label>
           )}
-          {icon !== undefined && (
+          {icon !== undefined && value === selectedValue && (
             <Flex justifyContent="flex-end">
               <div className={cx.icon} onClick={onIconClick}>
                 <DocumentDownload />

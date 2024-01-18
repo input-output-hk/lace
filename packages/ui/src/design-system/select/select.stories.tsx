@@ -43,6 +43,21 @@ const MainComponents = (): JSX.Element => {
       </Variants.Cell>
       <Variants.Cell>
         <SelectGroup
+          id="hover"
+          onValueChange={(): undefined => undefined}
+          options={options}
+          placeholder={placeholder}
+        />
+      </Variants.Cell>
+      <Variants.Cell>
+        <SelectGroup
+          onValueChange={(): undefined => undefined}
+          options={options}
+          placeholder={placeholder}
+        />
+      </Variants.Cell>
+      <Variants.Cell>
+        <SelectGroup
           disabled={true}
           onValueChange={(): undefined => undefined}
           options={options}
@@ -106,7 +121,9 @@ export const Overview = (): JSX.Element => {
         <Divider my="$64" />
 
         <Section title="Main components">
-          <Variants.Table headers={['Rest', 'Disabled', 'Focused']}>
+          <Variants.Table
+            headers={['Rest', 'Hover', 'Active', 'Disabled', 'Focused']}
+          >
             <MainComponents />
           </Variants.Table>
           <LocalThemeProvider colorScheme={ThemeColorScheme.Dark}>
