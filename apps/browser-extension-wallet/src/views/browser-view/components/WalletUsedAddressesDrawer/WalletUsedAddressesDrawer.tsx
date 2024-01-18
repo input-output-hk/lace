@@ -17,7 +17,7 @@ export const WalletUsedAddressesDrawer = (): React.ReactElement => {
             // .filter((address) => address.isUsed)
             .map((address, addressNo) => ({
               address: address.address.toString(),
-              // TODO: might be better to id script addresses by address
+              // TODO: might be better to id script addresses by address LW-9574
               id: isScriptAddress(address) ? addressNo : address.index
             }))
         )

@@ -1,6 +1,5 @@
 export * from './AppSettings';
 export * from './AxiosProvider';
-export * from './CardanoWalletManager';
 export * from './currency';
 export * from './DatabaseProvider';
 export * from './ExternalLinkOpenerProvider';

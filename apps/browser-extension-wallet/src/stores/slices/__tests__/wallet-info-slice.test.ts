@@ -7,7 +7,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { BlockchainProviderSlice, WalletInfoSlice } from '@stores/types';
 import { walletInfoSlice } from '../wallet-info-slice';
 import { mockPersonalWallet, mockInMemoryWallet, mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
-import { AnyWallet, SignerManager } from '@cardano-sdk/web-extension';
+import { AnyWallet, SigningCoordinatorConfirmationApi } from '@cardano-sdk/web-extension';
 
 const mockWalletInfoStore = (
   set: SetState<WalletInfoSlice>,
@@ -47,9 +47,9 @@ describe('Testing wallet info slice', () => {
         stores: { mock: 'store ' } as any,
         name: 'any',
         source: {
-          wallet: {} as AnyWallet<Wallet.Metadata>
+          wallet: {} as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
         },
-        signerManager: {} as SignerManager<Wallet.Metadata>
+        signingCoordinator: {} as SigningCoordinatorConfirmationApi<Wallet.WalletMetadata, Wallet.AccountMetadata>
       };
       result.current.setCardanoWallet(cardanoWallet);
       await waitForNextUpdate();

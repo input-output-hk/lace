@@ -9,6 +9,7 @@ import { authenticator } from './authenticator';
 import { AUTHORIZED_DAPPS_KEY } from '../types';
 import { Wallet } from '@lace/cardano';
 import { BehaviorSubject } from 'rxjs';
+import { walletManager, walletRepository } from './wallet';
 
 const DEBOUNCE_THROTTLE = 500;
 
@@ -17,7 +18,7 @@ export const dappInfo$ = new BehaviorSubject<Wallet.DappInfo>(undefined);
 export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender) => {
   const { logo, name } = await getDappInfoFromLastActiveTab(sender);
   dappInfo$.next({ logo, name, url: origin });
-  await ensureUiIsOpenAndLoaded('#/dapp/connect', false);
+  await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/connect', false);
   const isAllowed = await userPromptService.allowOrigin(origin);
   if (isAllowed === 'deny') return Promise.reject();
   if (isAllowed === 'allow') {

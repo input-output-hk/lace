@@ -20,14 +20,12 @@ const mockLedgerCreateWithDevice = jest.fn();
 const mockUseAppSettingsContext = jest.fn().mockReturnValue([{}, jest.fn()]);
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { useWalletManager } from '../useWalletManager';
+import { LOCK_VALUE, useWalletManager } from '../useWalletManager';
 import {
   AppSettingsProvider,
   BackgroundServiceAPIProvider,
   BackgroundServiceAPIProviderProps,
-  CardanoWalletManagerProvider,
-  DatabaseProvider,
-  ICardanoWalletManager
+  DatabaseProvider
 } from '@providers';
 
 import * as stores from '@stores';
@@ -90,22 +88,14 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
 });
 
 const getWrapper =
-  ({
-    backgroundService,
-    cardanoWalletManager
-  }: {
-    backgroundService?: BackgroundServiceAPIProviderProps['value'];
-    cardanoWalletManager?: ICardanoWalletManager;
-  }) =>
+  ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
   ({ children }: { children: React.ReactNode }) =>
     (
-      <CardanoWalletManagerProvider value={cardanoWalletManager}>
-        <AppSettingsProvider>
-          <DatabaseProvider>
-            <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-          </DatabaseProvider>
-        </AppSettingsProvider>
-      </CardanoWalletManagerProvider>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
     );
 
 describe('Testing useWalletManager hook', () => {
@@ -122,7 +112,7 @@ describe('Testing useWalletManager hook', () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         cardanoWallet: {
           source: {
-            account: {
+            wallet: {
               metadata: { lockValue: undefined }
             }
           }
@@ -152,7 +142,7 @@ describe('Testing useWalletManager hook', () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         cardanoWallet: {
           source: {
-            account: {
+            wallet: {
               metadata: { lockValue }
             }
           }
@@ -180,7 +170,7 @@ describe('Testing useWalletManager hook', () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         cardanoWallet: {
           source: {
-            account: {
+            wallet: {
               metadata: { lockValue: 'abc' }
             }
           }
@@ -254,7 +244,7 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('loadWallet', () => {
-    let wallets$: ReplaySubject<AnyWallet<unknown>[]>;
+    let wallets$: ReplaySubject<AnyWallet<unknown, unknown>[]>;
     let activeWallet$: ReplaySubject<WalletManagerActivateProps>;
     beforeEach(() => {
       (walletApiUi.walletRepository as any).wallets$ = wallets$ = new ReplaySubject(1);
@@ -288,11 +278,12 @@ describe('Testing useWalletManager hook', () => {
         {
           walletId,
           type: WalletType.Ledger,
+          metadata: { name },
           extendedAccountPublicKey: 'pubkey' as any,
           accounts: [
             {
               accountIndex,
-              metadata: { name }
+              metadata: { name: 'Account #0' }
             }
           ]
         }
@@ -337,8 +328,6 @@ describe('Testing useWalletManager hook', () => {
         networkMagic: 0
       };
 
-      const keyAgentsByChain = { keyAgentData: {} };
-
       const emip3encryptResultMocked = '{}';
       const emip3encryptResultMocked2 = '{}';
       mockEmip3encrypt.mockImplementationOnce(async () => emip3encryptResultMocked);
@@ -361,11 +350,12 @@ describe('Testing useWalletManager hook', () => {
           })
         })
       );
-      expect(mockEmip3encrypt.mock.calls[0]).toEqual([
-        Buffer.from(JSON.stringify(keyAgentsByChain)),
-        Buffer.from(password)
-      ]);
-      expect(mockEmip3encrypt.mock.calls[1]).toEqual([Buffer.from(mnemonic.join(' ')), Buffer.from(password)]);
+      // It is actually called with Buffer.from(password) rather than with [0, 0, ..., 0],
+      // but buffer that this is called with is nullified in order to remove the actual passphrase
+      // bytes from memory as soon as possible. jest keeps a reference to the buffer, so it thinks it's called with 0-es
+      const nullifiedPassphrase = Buffer.from(new Uint8Array(password.length));
+      expect(mockEmip3encrypt.mock.calls[1]).toEqual([LOCK_VALUE, nullifiedPassphrase]);
+      expect(mockEmip3encrypt.mock.calls[0]).toEqual([Buffer.from(mnemonic.join(' ')), nullifiedPassphrase]);
     });
   });
 

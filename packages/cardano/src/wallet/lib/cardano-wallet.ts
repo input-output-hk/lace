@@ -16,8 +16,8 @@ import * as KeyManagement from '@cardano-sdk/key-management';
 import {
   AnyWallet,
   Bip32WalletAccount,
-  SignerManagerConfirmationApi,
-  WalletManagerApi
+  WalletManagerApi,
+  SigningCoordinatorConfirmationApi
 } from '@cardano-sdk/web-extension';
 import { ChainName } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
@@ -30,19 +30,23 @@ export const bip32Ed25519 = new Crypto.CmlBip32Ed25519(CML);
 
 export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.SerializableKeyAgentData }>;
 
-export interface Metadata {
+export interface WalletMetadata {
   name: string;
   lockValue?: HexBlob;
+}
+
+export interface AccountMetadata {
+  name: string;
 }
 
 export interface CardanoWallet {
   wallet: ObservableWallet;
   source: {
-    wallet: AnyWallet<Metadata>;
-    account?: Bip32WalletAccount<Metadata>;
+    wallet: AnyWallet<WalletMetadata, AccountMetadata>;
+    account?: Bip32WalletAccount<AccountMetadata>;
   };
   name: string;
-  signerManager: SignerManagerConfirmationApi<Metadata>;
+  signingCoordinator: SigningCoordinatorConfirmationApi<WalletMetadata, AccountMetadata>;
 }
 
 export type CreateStores = (name: string) => storage.WalletStores;
@@ -66,103 +70,6 @@ export interface CreatePersonalWallet {
 }
 
 /**
- * Creates an array of Cardano wallets based on the chain id and returns an object that contains the wallet and keyAgent for the active chain
- * and the key agents for all chains.
- */
-export const createCardanoWalletsByChain = async (
-  _mnemonicWords: string[],
-  _getPassword: () => Promise<Uint8Array>,
-  _activeChainId: Cardano.ChainId
-): Promise<Pick<CardanoWallet, 'signerManager'>> => {
-  throw new Error('Not implemented2');
-  // const keyAgentsByChain: KeyAgentsByChain = {} as KeyAgentsByChain;
-  // let activeChainName: ChainName;
-
-  // const setup = async ({ chainId }: { chainId: Cardano.ChainId }) => {
-  //   const keyAgent = await KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
-  //     {
-  //       mnemonicWords,
-  //       getPassphrase: getPassword,
-  //       chainId
-  //     },
-  //     { logger: console, bip32Ed25519 }
-  //   );
-
-  //   return { keyAgent };
-};
-
-// Key agent for wallet to activate
-// getPassphrase referrs to user's spending password. Change introduced in https://github.com/input-output-hk/cardano-js-sdk/releases/tag/%40cardano-sdk%2Fwallet%400.8.0
-// const { keyAgent: activeKeyAgent } = await setup({ chainId: activeChainId });
-// for (const [chainName, chainId] of Object.entries(Cardano.ChainIds)) {
-//   if (chainId.networkId === activeChainId.networkId && chainId.networkMagic === activeChainId.networkMagic)
-//     activeChainName = chainName as ChainName;
-// }
-// if (!activeChainName) throw new Error('Incorrect chain supplied');
-// keyAgentsByChain[activeChainName] = { keyAgentData: activeKeyAgent.serializableData };
-
-// // Rest of key agents to be able to switch
-// await Promise.all(
-//   Object.entries(Cardano.ChainIds)
-//     .filter(([chainName]) => chainName !== activeChainName)
-//     .map(async ([chainName, chainId]) => {
-//       // Create a key agent for each chain id to save in storage
-//       const { keyAgent } = await setup({ chainId });
-
-//       // Build object with key agents for all chains to be able to switch to eventually
-//       keyAgentsByChain[chainName as ChainName] = { keyAgentData: keyAgent.serializableData };
-//     })
-// );
-
-// return { keyAgent: activeKeyAgent, keyAgentsByChain };
-// };
-
-// const createAsyncKeyAgentWithCallback = (
-//   keyAgent: KeyManagement.KeyAgent,
-//   signCallback?: (result: boolean) => void
-// ): KeyManagement.AsyncKeyAgent => {
-//   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
-//   // TODO: LW-7807 revise the sdk cip30 implementation
-//   const wrappedSign = (...args: Parameters<KeyManagement.KeyAgent['signTransaction']>) =>
-//     keyAgent
-//       .signTransaction(...args)
-//       .then(async (sigs) => {
-//         if (signCallback)
-//           setTimeout(() => {
-//             signCallback(true);
-//           }, 0);
-//         return sigs;
-//       })
-//       .catch((error) => {
-//         if (signCallback)
-//           setTimeout(() => {
-//             signCallback(false);
-//           }, 0);
-//         throw new Error(error);
-//       });
-
-//   return { ...asyncKeyAgent, signTransaction: wrappedSign.bind(keyAgent) };
-// };
-
-/**
- * Creates a Cardano wallet and activates it.
- */
-export const createCardanoWallet = async (
-  _walletManager: WalletManagerApi,
-  _name: string,
-  _mnemonicWords: string[],
-  _getPassword: () => Promise<Uint8Array>,
-  _activeChainId: Cardano.ChainId
-): Promise<CardanoWallet> => {
-  // const { wallet } = walletManager;
-  // const { keyAgent, keyAgentsByChain } = await createCardanoWalletsByChain(mnemonicWords, getPassword, activeChainId);
-  // const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
-  // await walletManager.activate({ keyAgent: asyncKeyAgent, observableWalletName: name });
-  // return { asyncKeyAgent, name, wallet, keyAgent, keyAgentsByChain };
-  throw new Error('Not implemented');
-};
-
-/**
  * Restores a wallet from a serializable key agent data.
  */
 export const restoreWallet = async (
@@ -171,40 +78,6 @@ export const restoreWallet = async (
 ): Promise<{ keyAgent: KeyManagement.KeyAgent }> => {
   const keyAgent = await restoreKeyAgent(keyAgentData, { logger: console, bip32Ed25519 }, getPassword);
   return { keyAgent };
-};
-
-/**
- * Restores a wallet from a serializable key agent data and activates it.
- */
-export const restoreWalletFromKeyAgent = async (
-  _walletManager: WalletManagerApi,
-  _name: string,
-  _keyAgentData: KeyManagement.SerializableKeyAgentData,
-  _getPassword: () => Promise<Uint8Array>,
-  _chainName: ChainName,
-  _activateOnRestore = true,
-  _callback?: (result: boolean) => void
-  // eslint-disable-next-line max-params
-): Promise<CardanoWallet> => {
-  throw new Error('Not implemented');
-  // const { wallet } = walletManager;
-
-  // const { keyAgent } = await restoreWallet(keyAgentData, getPassword);
-  // // TODO: LW-7807 revise the sdk cip30 implementation
-  // const asyncKeyAgent = createAsyncKeyAgentWithCallback(keyAgent, callback);
-
-  // if (activateOnRestore) {
-  //   await walletManager.activate({
-  //     keyAgent: asyncKeyAgent,
-  //     observableWalletName: name,
-  //     provider: {
-  //       type: WalletManagerProviderTypes.CARDANO_SERVICES_PROVIDER,
-  //       options: { chainName }
-  //     }
-  //   });
-  // }
-
-  // return { name, wallet, keyAgent, asyncKeyAgent };
 };
 
 type Challenge = KeyManagement.SignBlobResult;

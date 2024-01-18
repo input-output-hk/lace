@@ -125,7 +125,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         setHdDiscoveryStatus(AddressesDiscoveryStatus.InProgress);
         try {
           const newAddresses = await inMemoryWallet.discoverAddresses();
-          // TODO: script address support
+          // TODO: script address support LW-9574
           // eslint-disable-next-line unicorn/no-array-callback-reference
           const newHdAddressesCount = uniq(newAddresses.filter(isKeyHashAddress).map(({ index }) => index)).length;
           const newHdWalletAddressesDiscovered = newHdAddressesCount > oldHdAddressesCount;

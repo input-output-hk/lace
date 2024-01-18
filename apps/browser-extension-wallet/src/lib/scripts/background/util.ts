@@ -5,9 +5,8 @@ import { runtime, Tabs, tabs, Windows, windows, Runtime } from 'webextension-pol
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage } from '../types';
 import uniqueId from 'lodash/uniqueId';
-import { walletManager, walletRepository } from './wallet';
 import { firstValueFrom } from 'rxjs';
-import { AnyWallet, WalletManager, WalletRepository, WalletType } from '@cardano-sdk/web-extension';
+import { AnyWallet, WalletManagerApi, WalletRepositoryApi, WalletType } from '@cardano-sdk/web-extension';
 import { getBackgroundStorage } from './storage';
 
 const { blake2b } = Wallet.Crypto;
@@ -23,6 +22,11 @@ type WindowSize = {
 };
 
 type WindowSizeAndPositionProps = WindowPosition & WindowSize;
+
+type WalletManagementServices = {
+  walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  walletManager: WalletManagerApi;
+};
 
 export const getADAPriceFromBackgroundStorage = async (): Promise<BackgroundStorage['fiatPrices']> => {
   const backgroundStorage = await getBackgroundStorage();
@@ -106,21 +110,25 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
     tabs.onUpdated.addListener(listener);
   });
 
-export const getActiveWallet = async (props: {
-  walletRepository: WalletRepository<Wallet.Metadata>;
-  walletManager: WalletManager<Wallet.Metadata>;
-}): Promise<AnyWallet<Wallet.Metadata> | undefined> => {
-  const activeWallet = await firstValueFrom(props.walletManager.activeWalletId$);
+export const getActiveWallet = async ({
+  walletManager,
+  walletRepository
+}: WalletManagementServices): Promise<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined> => {
+  const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
   if (!activeWallet) return;
-  const wallets = await firstValueFrom(props.walletRepository.wallets$);
+  const wallets = await firstValueFrom(walletRepository.wallets$);
   // eslint-disable-next-line consistent-return
   return wallets.find(({ walletId }) => walletId === activeWallet.walletId);
 };
 
-export const ensureUiIsOpenAndLoaded = async (url?: string, checkKeyAgent = true): Promise<Tabs.Tab> => {
+export const ensureUiIsOpenAndLoaded = async (
+  services: WalletManagementServices,
+  url?: string,
+  checkKeyAgent = true
+): Promise<Tabs.Tab> => {
   const keyAgentTypeIsHardwareWallet = checkKeyAgent
     ? await (async () => {
-        const activeWallet = await getActiveWallet({ walletManager, walletRepository });
+        const activeWallet = await getActiveWallet(services);
         return activeWallet?.type === WalletType.Ledger || activeWallet?.type === WalletType.Trezor;
       })()
     : undefined;

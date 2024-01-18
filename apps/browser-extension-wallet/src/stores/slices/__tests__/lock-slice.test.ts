@@ -7,8 +7,7 @@ import { saveValueInLocalStorage } from '@src/utils/local-storage';
 
 const mockWalletLock = Buffer.from('test') as Uint8Array;
 const mockLockSlice = (set: SetState<LockSlice>, get: GetState<LockSlice>): LockSlice => {
-  const getState: GetState<LockSlice & WalletInfoSlice> = () =>
-    ({ ...get(), walletLock: mockWalletLock } as LockSlice & WalletInfoSlice);
+  const getState: GetState<LockSlice & WalletInfoSlice> = () => ({ ...get() } as LockSlice & WalletInfoSlice);
   return lockSlice({ set, get: getState });
 };
 

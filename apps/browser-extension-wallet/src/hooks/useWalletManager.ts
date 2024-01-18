@@ -5,7 +5,7 @@ import { useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { logger, observableWallet, signerManager, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
+import { logger, observableWallet, signingCoordinator, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
 import { deleteFromLocalStorage, clearLocalStorage } from '@src/utils/local-storage';
 import { config } from '@src/config';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
@@ -16,7 +16,7 @@ import { AddWalletProps, WalletType } from '@cardano-sdk/web-extension';
 import { HexBlob } from '@cardano-sdk/util';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
-const LOCK_VALUE = JSON.stringify({ lock: 'lock' });
+export const LOCK_VALUE = Buffer.from(JSON.stringify({ lock: 'lock' }), 'utf8');
 
 export interface CreateWallet {
   name: string;
@@ -61,6 +61,8 @@ const chainIdFromName = (chainName: Wallet.ChainName) => {
   return chainId;
 };
 
+const defaultAccountName = (accountIndex: number) => `Account #${accountIndex}`;
+
 const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
   const walletEncrypted = await Wallet.KeyManagement.emip3encrypt(
     Buffer.from(Wallet.KeyManagement.util.joinMnemonicWords(mnemonic)),
@@ -88,7 +90,8 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
     }
   );
 
-  const addWalletProps: AddWalletProps<Wallet.Metadata> = {
+  const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+    metadata: { name },
     encryptedSecrets: {
       keyMaterial: await encryptMnemonic(mnemonic, passphrase),
       rootPrivateKeyBytes: HexBlob.fromBytes(
@@ -102,13 +105,11 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
     type: WalletType.InMemory
   };
 
-  const lockValue = HexBlob.fromBytes(
-    await Wallet.KeyManagement.emip3encrypt(Buffer.from(LOCK_VALUE, 'utf8'), passphrase)
-  );
+  const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
   const walletId = await walletRepository.addWallet(addWalletProps);
   const addAccountProps = {
     accountIndex,
-    metadata: { name, lockValue },
+    metadata: { name: defaultAccountName(accountIndex), lockValue },
     walletId
   };
   await walletRepository.addAccount(addAccountProps);
@@ -122,7 +123,7 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
 
   return {
     name,
-    signerManager,
+    signingCoordinator,
     wallet: observableWallet,
     source: {
       wallet: {
@@ -169,7 +170,8 @@ const createHardwareWallet = async ({
           { bip32Ed25519: Wallet.bip32Ed25519, logger }
         );
 
-  const addWalletProps: AddWalletProps<Wallet.Metadata> = {
+  const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+    metadata: { name },
     type: WalletType.Ledger,
     extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
   };
@@ -177,13 +179,13 @@ const createHardwareWallet = async ({
   const addAccountProps = {
     walletId,
     accountIndex,
-    metadata: { name }
+    metadata: { name: defaultAccountName(accountIndex) }
   };
   await walletRepository.addAccount(addAccountProps);
 
   return {
     name,
-    signerManager,
+    signingCoordinator,
     wallet: observableWallet,
     source: {
       wallet: {
@@ -243,7 +245,7 @@ export const useWalletManager = (): UseWalletManager => {
    * Deletes wallet lock in storage, which should be stored encrypted with the wallet password
    */
   const lockWallet = useCallback(async (): Promise<void> => {
-    const lockValue = cardanoWallet.source.account?.metadata.lockValue;
+    const lockValue = cardanoWallet.source.wallet.metadata.lockValue;
     if (!lockValue) return;
     setWalletLock(Buffer.from(lockValue, 'hex'));
     setCardanoWallet();
@@ -305,8 +307,8 @@ export const useWalletManager = (): UseWalletManager => {
     }
 
     const result = {
-      name: activeAccount.metadata.name,
-      signerManager,
+      name: activeWallet.metadata.name,
+      signingCoordinator,
       source: {
         wallet: activeWallet,
         account: activeAccount
@@ -317,7 +319,7 @@ export const useWalletManager = (): UseWalletManager => {
     // REVIEW: why "Async arrow function expected no return value."?
     // eslint-disable-next-line consistent-return
     return result;
-  }, [backgroundService, setCardanoWallet]);
+  }, [setCardanoWallet]);
 
   const activateWallet = useCallback(
     async ({ walletInstance, mnemonicVerificationFrequency = '', chainName = CHAIN }: SetWallet): Promise<void> => {
@@ -342,7 +344,6 @@ export const useWalletManager = (): UseWalletManager => {
 
   /**
    * Saves hardware wallet in storage and updates wallet store
-   * TODO: can probably consolidate this with 'saveWallet' or 'activateWallet' for both types (hw and in-memory)?
    */
   const saveHardwareWallet = useCallback(
     async (wallet: Wallet.CardanoWallet, chainName = CHAIN): Promise<void> => {

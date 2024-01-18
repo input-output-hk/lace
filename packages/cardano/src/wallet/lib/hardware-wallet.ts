@@ -40,28 +40,3 @@ const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> =
 };
 
 export const connectDevice = async (model: HardwareWallets): Promise<DeviceConnection> => await connectDevices[model]();
-
-// export const createHardwareWallet = async (
-//   walletManager: WalletManagerApi,
-//   {
-//     deviceConnection,
-//     name,
-//     accountIndex,
-//     activeChainId,
-//     connectedDevice
-//   }: CreateHardwareWalletArgs & { connectedDevice: HardwareWallets }
-// ): Promise<CardanoWallet> => {
-//   const { wallet } = walletManager;
-
-//   const { keyAgent, keyAgentsByChain } = await createHardwareWalletsByChain(
-//     accountIndex,
-//     deviceConnection,
-//     activeChainId,
-//     connectedDevice
-//   );
-
-//   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
-//   await walletManager.activate({ keyAgent: asyncKeyAgent, observableWalletName: name });
-
-//   return { asyncKeyAgent, name, wallet, keyAgent, keyAgentsByChain };
-// };

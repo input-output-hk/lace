@@ -21,7 +21,7 @@ import {
 import { FetchWalletActivitiesProps, FetchWalletActivitiesReturn, IBlockchainProvider } from './slices';
 import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
-import { WalletManager } from '@cardano-sdk/web-extension';
+import { WalletManagerApi } from '@cardano-sdk/web-extension';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { Reward } from '@cardano-sdk/core';
 import { EpochNo } from '@cardano-sdk/core/dist/cjs/Cardano';
@@ -102,7 +102,7 @@ export interface WalletInfoSlice {
   setWalletInfo: (info?: WalletInfo) => void;
   inMemoryWallet: Wallet.ObservableWallet | undefined;
   cardanoWallet: Wallet.CardanoWallet | undefined;
-  walletManager: WalletManager<Wallet.Metadata> | undefined;
+  walletManager: WalletManagerApi | undefined;
   initialHdDiscoveryCompleted: boolean;
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted: boolean) => void;
   hdDiscoveryStatus: AddressesDiscoveryStatus | null;

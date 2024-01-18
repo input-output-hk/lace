@@ -27,32 +27,33 @@ const decryptLock = async (lock: number[], password: string) => {
 };
 
 const keyAgentDataToAddWalletProps = async (
-  data: Wallet.KeyManagement.SerializableKeyAgentData
-): Promise<AddWalletProps<Wallet.Metadata>> => {
+  data: Wallet.KeyManagement.SerializableKeyAgentData,
+  lockValue: Wallet.HexBlob
+): Promise<AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata>> => {
   switch (data.__typename) {
     case Wallet.KeyManagement.KeyAgentType.InMemory: {
       const { mnemonic } = await getBackgroundStorage();
       if (!mnemonic) throw new Error('Inconsistent state: mnemonic not found for in-memory wallet');
       return {
         type: WalletType.InMemory,
+        metadata: { name: getWalletFromStorage()?.name, lockValue },
         extendedAccountPublicKey: data.extendedAccountPublicKey,
         encryptedSecrets: {
           rootPrivateKeyBytes: HexBlob.fromBytes(Buffer.from(data.encryptedRootPrivateKeyBytes)),
           keyMaterial: HexBlob.fromBytes(Buffer.from(JSON.parse(mnemonic).data))
-        },
-        metadata: {
-          name: getWalletFromStorage()?.name
         }
       };
     }
     case Wallet.KeyManagement.KeyAgentType.Ledger:
       return {
         type: WalletType.Ledger,
+        metadata: { name },
         extendedAccountPublicKey: data.extendedAccountPublicKey
       };
     case Wallet.KeyManagement.KeyAgentType.Trezor:
       return {
         type: WalletType.Trezor,
+        metadata: { name },
         extendedAccountPublicKey: data.extendedAccountPublicKey
       };
     default:
@@ -82,21 +83,20 @@ export const v_1_8_2: Migration = {
       assert: () => void 0,
       persist: async () => {
         console.info(`Persisting migrated data for ${MIGRATION_VERSION} upgrade`);
-
+        const lockValue =
+          keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory ? HexBlob.fromBytes(lock) : undefined;
         const wallets = await firstValueFrom(walletRepository.wallets$);
-        const walletProps = await keyAgentDataToAddWalletProps(keyAgentData);
+        const walletProps = await keyAgentDataToAddWalletProps(keyAgentData, lockValue);
         const walletId = await getWalletId(
           walletProps.type === WalletType.Script ? walletProps.script : walletProps.extendedAccountPublicKey
         );
-        const lockValue =
-          keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory ? HexBlob.fromBytes(lock) : undefined;
 
         if (!wallets.some((wallet) => wallet.walletId === walletId)) {
-          await walletRepository.addWallet(await keyAgentDataToAddWalletProps(keyAgentData));
+          await walletRepository.addWallet(walletProps);
 
           await walletRepository.addAccount({
             accountIndex: keyAgentData.accountIndex,
-            metadata: { name: 'Account #0', lockValue },
+            metadata: { name: `Account #${keyAgentData.accountIndex}` },
             walletId
           });
 

@@ -22,7 +22,7 @@ export const useAppInit = (): void => {
     }
     setWalletInfo({
       name: cardanoWallet.source.account.metadata.name,
-      // TODO: script address support
+      // TODO: script address support LW-9574
       // eslint-disable-next-line unicorn/no-array-callback-reference
       addresses: addresses.filter(isKeyHashAddress)
     });

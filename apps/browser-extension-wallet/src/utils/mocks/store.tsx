@@ -75,7 +75,10 @@ export const walletStoreMock = async (
       getHiddenBalancePlaceholder: jest.fn()
     },
     setBalancesVisibility: jest.fn(),
-    walletManager: { wallet, activate: jest.fn() } as unknown as WalletManager<Wallet.Metadata>,
+    walletManager: { wallet, activate: jest.fn() } as unknown as WalletManager<
+      Wallet.WalletMetadata,
+      Wallet.AccountMetadata
+    >,
     blockchainProvider: mockBlockchainProviders(),
     setBlockchainProvider: jest.fn(),
     initialHdDiscoveryCompleted: false,

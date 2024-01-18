@@ -11,7 +11,6 @@ import {
   AnalyticsProvider,
   UIThemeProvider
 } from '@providers';
-import { CardanoWalletManagerProvider } from '@providers/CardanoWalletManager';
 import { StoreProvider } from '@stores';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
@@ -34,37 +33,35 @@ import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay'
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
     <AppSettingsProvider>
-      <CardanoWalletManagerProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_BROWSER}>
-            <AxiosClientProvider>
-              <CurrencyStoreProvider>
-                <HashRouter>
-                  <PostHogClientProvider>
-                    <ExperimentsProvider>
-                      <AnalyticsProvider>
-                        <ThemeProvider>
-                          <UIThemeProvider>
-                            <ExternalLinkOpenerProvider>
-                              <MigrationContainer appMode={APP_MODE_BROWSER}>
-                                <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                  <AddressesDiscoveryOverlay>
-                                    <BrowserViewRoutes />
-                                  </AddressesDiscoveryOverlay>
-                                </DataCheckContainer>
-                              </MigrationContainer>
-                            </ExternalLinkOpenerProvider>
-                          </UIThemeProvider>
-                        </ThemeProvider>
-                      </AnalyticsProvider>
-                    </ExperimentsProvider>
-                  </PostHogClientProvider>
-                </HashRouter>
-              </CurrencyStoreProvider>
-            </AxiosClientProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </CardanoWalletManagerProvider>
+      <DatabaseProvider>
+        <StoreProvider appMode={APP_MODE_BROWSER}>
+          <AxiosClientProvider>
+            <CurrencyStoreProvider>
+              <HashRouter>
+                <PostHogClientProvider>
+                  <ExperimentsProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <UIThemeProvider>
+                          <ExternalLinkOpenerProvider>
+                            <MigrationContainer appMode={APP_MODE_BROWSER}>
+                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                <AddressesDiscoveryOverlay>
+                                  <BrowserViewRoutes />
+                                </AddressesDiscoveryOverlay>
+                              </DataCheckContainer>
+                            </MigrationContainer>
+                          </ExternalLinkOpenerProvider>
+                        </UIThemeProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </ExperimentsProvider>
+                </PostHogClientProvider>
+              </HashRouter>
+            </CurrencyStoreProvider>
+          </AxiosClientProvider>
+        </StoreProvider>
+      </DatabaseProvider>
     </AppSettingsProvider>
   </BackgroundServiceAPIProvider>
 );

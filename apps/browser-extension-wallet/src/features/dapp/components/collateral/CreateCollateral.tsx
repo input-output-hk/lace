@@ -33,7 +33,6 @@ export const CreateCollateral = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(true);
-  // const { unlockWallet: validatePassword } = useWalletManager();
 
   const handleChange: inputProps['onChange'] = ({ target: { value } }) => {
     setIsPasswordValid(true);
