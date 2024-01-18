@@ -25,3 +25,18 @@ export const initializeBrowserStorage = async (wallet: WalletConfig): Promise<vo
 
   await setMigrationState();
 };
+
+export const clearWalletRepository = async (): Promise<void> => {
+  Logger.log('Removing wallets');
+  const removedWallets = await browser.execute(`
+    return (async () => {
+      await window.walletManager.deactivate();
+      const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
+      for (const wallet of wallets) {
+        await window.walletRepository.removeWallet(wallet.walletId);
+      }
+      return JSON.stringify(wallets);
+    })()
+  `);
+  Logger.log(`Removed wallets: ${removedWallets}`);
+};

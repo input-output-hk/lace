@@ -73,7 +73,12 @@ class DrawerSendExtendedAssert {
   private async assertSeeDrawerTitle(shouldBeDisplayed: boolean) {
     await TransactionNewPage.title.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      expect(await TransactionNewPage.title.getText()).to.equal(await t('browserView.transaction.send.title'));
+      const expectedTitle = await t('browserView.transaction.send.title');
+      // It renders empty first: wait for it to be set to an actual title
+      await browser.waitUntil(async () => {
+        const title = await TransactionNewPage.title.getText();
+        return title === expectedTitle;
+      });
     }
   }
 

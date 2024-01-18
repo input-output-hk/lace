@@ -13,6 +13,7 @@ import {
   walletRepositoryProperties
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
+import { firstValueFrom } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
 export const logger = console;
@@ -76,3 +77,10 @@ export const withSignTxConfirmation = async <T>(action: () => Promise<T>, passwo
     subscription.unsubscribe();
   }
 };
+
+// These globals are used for e2e test setup/teardown
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const untypedWindow = window as any;
+untypedWindow.walletRepository = walletRepository;
+untypedWindow.walletManager = walletManager;
+untypedWindow.firstValueFrom = firstValueFrom;

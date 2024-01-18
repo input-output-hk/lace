@@ -7,6 +7,7 @@ import { closeAllTabsExceptOriginalOne } from '../utils/window';
 import networkManager from '../utils/networkManager';
 import { browser } from '@wdio/globals';
 import consoleManager from '../utils/consoleManager';
+import { clearWalletRepository } from '../fixture/browserStorageInitializer';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
@@ -14,13 +15,14 @@ Before(async () => {
 });
 
 After(async () => {
+  await closeAllTabsExceptOriginalOne();
+  await clearWalletRepository();
   await networkManager.closeOpenedCdpSessions();
   await consoleManager.closeOpenedCdpSessions();
   await browser.disableInterceptor();
   testContext.clearContext();
   await clearBackgroundStorageKey(); // FIXME: does not work for onboarding scenarios - error is thrown
   await localStorageManager.cleanLocalStorage();
-  await closeAllTabsExceptOriginalOne();
 });
 
 AfterStep(async (scenario) => {

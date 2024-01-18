@@ -38,6 +38,7 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
+import { clearWalletRepository } from '../fixture/browserStorageInitializer';
 
 Given(/^Lace is ready for test$/, async () => {
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -149,6 +150,7 @@ Then(/^FAQ page is displayed$/, async () => {
 
 Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: string, mode: 'extended' | 'popup') => {
   await cleanBrowserStorage();
+  await clearWalletRepository();
   await localStorageManager.cleanLocalStorage();
   await localStorageInitializer.initializeWallet(walletName);
   await browser.refresh();

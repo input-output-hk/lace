@@ -1,6 +1,6 @@
 import { getTestWallet, WalletConfig } from '../support/walletConfiguration';
 import testContext from '../utils/testContext';
-import { initializeBrowserStorage } from './browserStorageInitializer';
+import { clearWalletRepository, initializeBrowserStorage } from './browserStorageInitializer';
 import extensionUtils from '../utils/utils';
 import { cleanBrowserStorage } from '../utils/browserStorage';
 import localStorageManager from '../utils/localStorageManager';
@@ -59,6 +59,7 @@ class LocalStorageInitializer {
   }
 
   reInitializeWallet = async (walletName: string) => {
+    await clearWalletRepository();
     await cleanBrowserStorage();
     await localStorageManager.cleanLocalStorage();
     await this.initializeWallet(walletName);

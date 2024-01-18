@@ -90,7 +90,7 @@ Given(
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
       await mainMenuPageObject.navigateToSection('NFTs', mode);
-      expect(await nftsPageObject.isNftDisplayed(nftName));
+      expect(await nftsPageObject.isNftDisplayed(nftName)).toBe(true);
     }
   }
 );
