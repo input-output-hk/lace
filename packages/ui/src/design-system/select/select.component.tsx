@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ReactComponent as ChevronDownIcon } from '@lace/icons/dist/ChevronDownComponent';
-import * as Select from '@radix-ui/react-select';
+import * as RadixSelectGroup from '@radix-ui/react-select';
 import cn from 'classnames';
 
 import { Box } from '../box';
@@ -34,19 +34,23 @@ export const SelectGroup = ({
   ...props
 }: Props): JSX.Element => (
   <Box className={cn(className, cx.root)}>
-    <Select.Root onValueChange={onValueChange} value={selectedValue} {...props}>
-      <Select.Trigger className={cx.selectTrigger} aria-label="Food">
-        <Select.Value placeholder={placeholder} />
+    <RadixSelectGroup.Root
+      onValueChange={onValueChange}
+      value={selectedValue}
+      {...props}
+    >
+      <RadixSelectGroup.Trigger className={cx.selectTrigger} aria-label="Food">
+        <RadixSelectGroup.Value placeholder={placeholder} />
         {showArrow && (
-          <Select.Icon className={cx.selectIcon}>
+          <RadixSelectGroup.Icon className={cx.selectIcon}>
             <ChevronDownIcon />
-          </Select.Icon>
+          </RadixSelectGroup.Icon>
         )}
-      </Select.Trigger>
-      <Select.Portal>
-        <Select.Content className={cx.selectContent}>
-          <Select.Viewport className="SelectViewport">
-            <Select.Group>
+      </RadixSelectGroup.Trigger>
+      <RadixSelectGroup.Portal>
+        <RadixSelectGroup.Content className={cx.selectContent}>
+          <RadixSelectGroup.Viewport className="SelectViewport">
+            <RadixSelectGroup.Group>
               {options.map(({ label, value }) => {
                 return (
                   <SelectItem key={label} value={value}>
@@ -54,10 +58,10 @@ export const SelectGroup = ({
                   </SelectItem>
                 );
               })}
-            </Select.Group>
-          </Select.Viewport>
-        </Select.Content>
-      </Select.Portal>
-    </Select.Root>
+            </RadixSelectGroup.Group>
+          </RadixSelectGroup.Viewport>
+        </RadixSelectGroup.Content>
+      </RadixSelectGroup.Portal>
+    </RadixSelectGroup.Root>
   </Box>
 );

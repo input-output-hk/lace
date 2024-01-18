@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as Select from '@radix-ui/react-select';
+import * as RadixSelectGroup from '@radix-ui/react-select';
 
 import * as cx from './select.css';
 
@@ -15,14 +15,14 @@ const SelectItemComponent = (
   forwardedReference: React.Ref<HTMLDivElement>,
 ): JSX.Element => {
   return (
-    <Select.Item
+    <RadixSelectGroup.Item
       className={cx.selectItem}
       {...props}
       value={value}
       ref={forwardedReference}
     >
-      <Select.ItemText>{children}</Select.ItemText>
-    </Select.Item>
+      <RadixSelectGroup.ItemText>{children}</RadixSelectGroup.ItemText>
+    </RadixSelectGroup.Item>
   );
 };
 

@@ -49,47 +49,45 @@ export const QuorumOption = ({
   };
 
   return (
-    <div className={styles.QuorumOption} data-testid="shared-wallet-setup-quorum-container">
-      <Text.Heading data-testid="shared-wallet-setup-quorum-user-header">{title}</Text.Heading>
-      <Box mb="$28" mt="$20">
-        <Text.Body.Normal data-testid="shared-wallet-setup-quorum-user-description">{description}</Text.Body.Normal>
-      </Box>
-      <Card.Outlined className={styles.cardContainer} data-testid="shared-wallet-setup-quorum-user-options">
-        <RadioButtonGroup options={radioButtonValues} onValueChange={onChange} selectedValue={radioButtonValue} />
-      </Card.Outlined>
+    <Flex h="$fill" flexDirection="column">
+      <div className={styles.QuorumOption} data-testid="setup-quorum-container">
+        <Text.Heading data-testid="setup-quorum-user-header">{title}</Text.Heading>
+        <Box mb="$28" mt="$20">
+          <Text.Body.Normal data-testid="setup-quorum-user-description">{description}</Text.Body.Normal>
+        </Box>
+        <Card.Outlined className={styles.cardContainer} data-testid="setup-quorum-user-options">
+          <RadioButtonGroup options={radioButtonValues} onValueChange={onChange} selectedValue={radioButtonValue} />
+        </Card.Outlined>
 
-      <Flex
-        w="$fill"
-        pt="$24"
-        pb="$64"
-        justifyContent="flex-start"
-        alignItems="center"
-        data-testid="shared-wallet-setup-quorum-cosigner-container"
-      >
-        <SelectGroup
-          options={cosignerValue}
-          placeholder="0"
-          selectedValue={cosignerSelection}
-          onValueChange={onSelectValueChange}
-        />
-        <Text.Body.Small className={styles.dropdownCopy}>
-          {cosignersSentence.start} {cosignerValue.length} {cosignersSentence.end}
-        </Text.Body.Small>
-      </Flex>
+        <Flex
+          w="$fill"
+          pt="$24"
+          pb="$64"
+          justifyContent="flex-start"
+          alignItems="center"
+          data-testid="setup-quorum-cosigner-container"
+        >
+          <SelectGroup
+            options={cosignerValue}
+            placeholder="0"
+            selectedValue={cosignerSelection}
+            onValueChange={onSelectValueChange}
+            showArrow
+          />
+          <Text.Body.Small className={styles.dropdownCopy}>
+            {cosignersSentence.start} {cosignerValue.length} {cosignersSentence.end}
+          </Text.Body.Small>
+        </Flex>
 
-      <Flex
-        w="$fill"
-        justifyContent="space-between"
-        alignItems="center"
-        data-testid="shared-wallet-setup-quorum-navigation"
-      >
-        <Button.Secondary label={navigationButtons.back} onClick={onBack} />
-        <Button.CallToAction
-          disabled={!radioButtonValue || !cosignerSelection}
-          label={navigationButtons.next}
-          onClick={() => onNext({ userSelection: radioButtonValue, numberOfCosigner: cosignerSelection })}
-        />
-      </Flex>
-    </div>
+        <Flex w="$fill" justifyContent="space-between" alignItems="center" data-testid="setup-quorum-navigation">
+          <Button.Secondary label={navigationButtons.back} onClick={onBack} />
+          <Button.CallToAction
+            disabled={!radioButtonValue || !cosignerSelection}
+            label={navigationButtons.next}
+            onClick={() => onNext({ userSelection: radioButtonValue, numberOfCosigner: cosignerSelection })}
+          />
+        </Flex>
+      </div>
+    </Flex>
   );
 };
