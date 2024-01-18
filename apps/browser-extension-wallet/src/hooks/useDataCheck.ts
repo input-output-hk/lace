@@ -20,11 +20,14 @@ export type DataCheckState =
 export type DataCheckAction = { type: 'not-checked' | 'checking' | 'valid' } | { type: 'error'; error: string };
 
 export type DataCheckDispatcher = (
-  walletRepositoryApi: WalletRepositoryApi<Wallet.Metadata>,
+  walletRepositoryApi: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>,
   dispatcher: React.Dispatch<DataCheckAction>,
   store: WalletStore
 ) => Promise<void>;
-export type UseDataCheck = [DataCheckState, (walletRepository: WalletRepositoryApi<Wallet.Metadata>) => Promise<void>];
+export type UseDataCheck = [
+  DataCheckState,
+  (walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>) => Promise<void>
+];
 
 const dataCheckReducer = (state: DataCheckState, action: DataCheckAction): DataCheckState => {
   switch (action.type) {
@@ -74,7 +77,7 @@ export const useDataCheck = (checkData = dataCheckDispatcher): UseDataCheck => {
   const [dataCheckState, dispatch] = useReducer(dataCheckReducer, INITIAL_STATE);
 
   const performDataCheck = useCallback(
-    async (walletRepository: WalletRepositoryApi<Wallet.Metadata>) => {
+    async (walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
       await checkData(walletRepository, dispatch, store);
     },
     [checkData, store]

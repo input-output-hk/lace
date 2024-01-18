@@ -65,7 +65,8 @@ export {
   restoreWallet,
   createKeyAgent,
   bip32Ed25519,
-  Metadata
+  WalletMetadata,
+  AccountMetadata
 } from '@wallet/lib/cardano-wallet';
 
 export * from '@wallet/lib/hardware-wallet';

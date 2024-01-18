@@ -37,7 +37,7 @@ const generateStorageMocks = (state: Pick<BackgroundStorage, 'usePersistentUserI
 };
 
 describe('userIdService', () => {
-  let walletRepository: jest.Mocked<WalletRepositoryApi<Wallet.Metadata>>;
+  let walletRepository: jest.Mocked<WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>>;
   let walletManager: jest.Mocked<WalletManagerApi>;
   const repositoryWalletId = 'walletId';
   const wmActiveWalletId = {
@@ -53,12 +53,12 @@ describe('userIdService', () => {
       extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex(
         'fc5ab25e830b67c47d0a17411bf7fdabf711a597fb6cf04102734b0a2934ceaaa65ff5e7c52498d52c07b8ddfcd436fc2b4d2775e2984a49d0c79f65ceee4779'
       )
-    } as InMemoryWallet<Wallet.Metadata>
+    } as InMemoryWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
   ];
   let mockHashExtendedAccountPublicKey: jest.SpyInstance;
 
   beforeEach(() => {
-    walletRepository = {} as jest.Mocked<WalletRepositoryApi<Wallet.Metadata>>;
+    walletRepository = {} as jest.Mocked<WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>>;
     walletManager = {} as jest.Mocked<WalletManagerApi>;
     mockHashExtendedAccountPublicKey = jest.spyOn(utils, 'hashExtendedAccountPublicKey');
     mockHashExtendedAccountPublicKey.mockReturnValue(mockWalletBasedId);

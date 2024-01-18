@@ -12,7 +12,7 @@ export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Pr
     const tx = delegationTxBuilder.build();
     const { hash } = await tx.inspect();
     void firstValueFrom(
-      cardanoWallet.signerManager.transactionWitnessRequest$.pipe(
+      cardanoWallet.signingCoordinator.transactionWitnessRequest$.pipe(
         filter((req) => req.transaction.getId() === hash),
         tap((req) => req.sign(password ? Buffer.from(password, 'utf8') : void 0))
       )

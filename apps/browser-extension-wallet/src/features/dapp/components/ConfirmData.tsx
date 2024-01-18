@@ -20,7 +20,7 @@ import { useWalletStore } from '@stores';
 import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { senderOrigin } from '@cardano-sdk/dapp-connector';
-import { signerManager } from '@lib/wallet-api-ui';
+import { signingCoordinator } from '@lib/wallet-api-ui';
 
 const INDENT_SPACING = 2;
 const DAPP_TOAST_DURATION = 50;
@@ -68,7 +68,7 @@ export const DappConfirmData = (): React.ReactElement => {
   window.addEventListener('beforeunload', cancelTransaction);
 
   useEffect(() => {
-    const subscription = signerManager.signDataRequest$.subscribe((r) => {
+    const subscription = signingCoordinator.signDataRequest$.subscribe((r) => {
       setDappInfo({
         logo: r.signContext.sender.tab.favIconUrl,
         url: senderOrigin(r.signContext.sender),

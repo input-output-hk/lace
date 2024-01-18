@@ -5,7 +5,7 @@ import { useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { logger, observableWallet, signerManager, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
+import { logger, observableWallet, signingCoordinator, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
 import { deleteFromLocalStorage, clearLocalStorage, getValueFromLocalStorage } from '@src/utils/local-storage';
 import { config } from '@src/config';
 import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
@@ -63,16 +63,21 @@ const chainIdFromName = (chainName: Wallet.ChainName) => {
   return chainId;
 };
 
+const defaultAccountName = (accountIndex: number) => `Account #${accountIndex}`;
+
 const keyAgentDataToAddWalletProps = async (
   data: Wallet.KeyManagement.SerializableKeyAgentData,
-  backgroundService: BackgroundService
-): Promise<AddWalletProps<Wallet.Metadata>> => {
+  backgroundService: BackgroundService,
+  name: string,
+  lockValue: Wallet.HexBlob
+): Promise<AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata>> => {
   switch (data.__typename) {
     case Wallet.KeyManagement.KeyAgentType.InMemory: {
       const { mnemonic } = await backgroundService.getBackgroundStorage();
       if (!mnemonic) throw new Error('Inconsistent state: mnemonic not found for in-memory wallet');
       return {
         type: WalletType.InMemory,
+        metadata: { name, lockValue },
         extendedAccountPublicKey: data.extendedAccountPublicKey,
         encryptedSecrets: {
           rootPrivateKeyBytes: HexBlob.fromBytes(Buffer.from(data.encryptedRootPrivateKeyBytes)),
@@ -83,11 +88,13 @@ const keyAgentDataToAddWalletProps = async (
     case Wallet.KeyManagement.KeyAgentType.Ledger:
       return {
         type: WalletType.Ledger,
+        metadata: { name },
         extendedAccountPublicKey: data.extendedAccountPublicKey
       };
     case Wallet.KeyManagement.KeyAgentType.Trezor:
       return {
         type: WalletType.Trezor,
+        metadata: { name },
         extendedAccountPublicKey: data.extendedAccountPublicKey
       };
     default:
@@ -122,7 +129,8 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
     }
   );
 
-  const addWalletProps: AddWalletProps<Wallet.Metadata> = {
+  const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+    metadata: { name },
     encryptedSecrets: {
       keyMaterial: await encryptMnemonic(mnemonic, passphrase),
       rootPrivateKeyBytes: HexBlob.fromBytes(
@@ -140,7 +148,7 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
   const walletId = await walletRepository.addWallet(addWalletProps);
   const addAccountProps = {
     accountIndex,
-    metadata: { name, lockValue },
+    metadata: { name: defaultAccountName(accountIndex), lockValue },
     walletId
   };
   await walletRepository.addAccount(addAccountProps);
@@ -154,7 +162,7 @@ const createWallet = async ({ mnemonic, name, password, chainId }: CreateWallet)
 
   return {
     name,
-    signerManager,
+    signingCoordinator,
     wallet: observableWallet,
     source: {
       wallet: {
@@ -201,7 +209,8 @@ const createHardwareWallet = async ({
           { bip32Ed25519: Wallet.bip32Ed25519, logger }
         );
 
-  const addWalletProps: AddWalletProps<Wallet.Metadata> = {
+  const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+    metadata: { name },
     type: WalletType.Ledger,
     extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
   };
@@ -209,13 +218,13 @@ const createHardwareWallet = async ({
   const addAccountProps = {
     walletId,
     accountIndex,
-    metadata: { name }
+    metadata: { name: defaultAccountName(accountIndex) }
   };
   await walletRepository.addAccount(addAccountProps);
 
   return {
     name,
-    signerManager,
+    signingCoordinator,
     wallet: observableWallet,
     source: {
       wallet: {
@@ -275,7 +284,7 @@ export const useWalletManager = (): UseWalletManager => {
    * Deletes wallet lock in storage, which should be stored encrypted with the wallet password
    */
   const lockWallet = useCallback(async (): Promise<void> => {
-    const lockValue = cardanoWallet.source.account?.metadata.lockValue;
+    const lockValue = cardanoWallet.source.wallet.metadata.lockValue;
     if (!lockValue) return;
     setWalletLock(Buffer.from(lockValue, 'hex'));
     setCardanoWallet();
@@ -326,16 +335,17 @@ export const useWalletManager = (): UseWalletManager => {
         setCardanoWallet(null);
         return;
       }
-      const walletId = await walletRepository.addWallet(
-        await keyAgentDataToAddWalletProps(keyAgentData, backgroundService)
-      );
 
       const lockValue =
         keyAgentData.__typename === Wallet.KeyManagement.KeyAgentType.InMemory ? HexBlob.fromBytes(lock) : undefined;
 
+      const walletId = await walletRepository.addWallet(
+        await keyAgentDataToAddWalletProps(keyAgentData, backgroundService, walletName, lockValue)
+      );
+
       await walletRepository.addAccount({
         accountIndex: keyAgentData.accountIndex,
-        metadata: { name: walletName, lockValue },
+        metadata: { name: defaultAccountName(keyAgentData.accountIndex) },
         walletId
       });
       await walletManager.activate({
@@ -376,8 +386,8 @@ export const useWalletManager = (): UseWalletManager => {
     }
 
     const result = {
-      name: activeAccount.metadata.name,
-      signerManager,
+      name: activeWallet.metadata.name,
+      signingCoordinator,
       source: {
         wallet: activeWallet,
         account: activeAccount

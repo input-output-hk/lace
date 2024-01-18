@@ -11,7 +11,7 @@ import {
   WalletManager,
   WalletRepository,
   WalletType,
-  consumeSignerManagerApi,
+  consumeSigningCoordinatorApi,
   exposeApi,
   observableWalletProperties,
   repositoryChannel,
@@ -32,7 +32,10 @@ const logger = console;
 // which results in some trash files when running the tests (leveldb directory)
 export const walletRepository = new WalletRepository({
   logger,
-  store: new Wallet.storage.PouchDbCollectionStore<AnyWallet<Wallet.Metadata>>({ dbName: 'walletRepository' }, logger)
+  store: new Wallet.storage.PouchDbCollectionStore<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
+    { dbName: 'walletRepository' },
+    logger
+  )
 });
 
 const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
@@ -50,7 +53,7 @@ const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
   }
 };
 
-const walletFactory: WalletFactory<Wallet.Metadata> = {
+const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
   create: async ({ chainId, accountIndex, provider }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName =
       // provider.options are useless now, because they are bound to wallet (not to wallet per network).
@@ -103,11 +106,11 @@ const storesFactory: StoresFactory = {
   create: ({ name }) => storage.createPouchDbWalletStores(name, { logger })
 };
 
-const signerManagerApi = consumeSignerManagerApi({ logger, runtime });
+const signingCoordinatorApi = consumeSigningCoordinatorApi({ logger, runtime });
 export const walletManager = new WalletManager(
   { name: process.env.WALLET_NAME },
   {
-    signerManagerApi,
+    signingCoordinatorApi,
     walletRepository,
     logger,
     runtime,

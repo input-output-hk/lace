@@ -22,8 +22,12 @@ export interface IViewState<T extends string> {
 
 const useViewsFlowState = (view: IViewState<DAPP_VIEWS>) => {
   const [currentView, setCurrentView] = useState(view.initial);
-  const [signTxRequest, setSignTxRequest] = useState<TransactionWitnessRequest<Wallet.Metadata> | undefined>();
-  const [signDataRequest, setSignDataRequest] = useState<SignDataRequest<Wallet.Metadata> | undefined>();
+  const [signTxRequest, setSignTxRequest] = useState<
+    TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined
+  >();
+  const [signDataRequest, setSignDataRequest] = useState<
+    SignDataRequest<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined
+  >();
 
   const renderCurrentView = (): (() => React.ReactElement) => view.states[currentView].action(currentView);
 

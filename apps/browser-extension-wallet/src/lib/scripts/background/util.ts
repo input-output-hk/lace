@@ -24,7 +24,7 @@ type WindowSize = {
 type WindowSizeAndPositionProps = WindowPosition & WindowSize;
 
 type WalletManagementServices = {
-  walletRepository: WalletRepositoryApi<Wallet.Metadata>;
+  walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   walletManager: WalletManagerApi;
 };
 
@@ -113,7 +113,7 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
 export const getActiveWallet = async ({
   walletManager,
   walletRepository
-}: WalletManagementServices): Promise<AnyWallet<Wallet.Metadata> | undefined> => {
+}: WalletManagementServices): Promise<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined> => {
   const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
   if (!activeWallet) return;
   const wallets = await firstValueFrom(walletRepository.wallets$);

@@ -27,7 +27,7 @@ export class UserIdService implements UserIdServiceInterface {
   private hasNewSessionStarted = false;
 
   constructor(
-    private walletRepository: WalletRepositoryApi<Wallet.Metadata>,
+    private walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>,
     private walletManager: WalletManagerApi,
     private storage: UserIdServiceStorage = {
       clear: clearBackgroundStorage,

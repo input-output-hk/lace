@@ -20,7 +20,7 @@ const setStorageHelper = async ({ withAppSettings }: { withAppSettings?: boolean
 
 describe('useDataCheck', () => {
   let MockProviders: IMockProviders;
-  let walletRepository: jest.Mocked<WalletRepositoryApi<Wallet.Metadata>>;
+  let walletRepository: jest.Mocked<WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>>;
 
   beforeAll(async () => {
     ({ MockProviders } = await buildMockProviders({ walletStore: { environmentName: 'Preview' } }));
@@ -102,11 +102,11 @@ describe('useDataCheck', () => {
         extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex(
           'fc5ab25e830b67c47d0a17411bf7fdabf711a597fb6cf04102734b0a2934ceaaa65ff5e7c52498d52c07b8ddfcd436fc2b4d2775e2984a49d0c79f65ceee4779'
         )
-      } as InMemoryWallet<Wallet.Metadata>
+      } as InMemoryWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
     ];
 
     beforeEach(() => {
-      walletRepository = {} as jest.Mocked<WalletRepositoryApi<Wallet.Metadata>>;
+      walletRepository = {} as jest.Mocked<WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>>;
     });
 
     afterEach(async () => {

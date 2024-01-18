@@ -30,7 +30,7 @@ import { useCurrencyStore, useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { senderOrigin } from '@cardano-sdk/dapp-connector';
-import { signerManager } from '@lib/wallet-api-ui';
+import { signingCoordinator } from '@lib/wallet-api-ui';
 
 const DAPP_TOAST_DURATION = 50;
 
@@ -164,7 +164,7 @@ export const ConfirmTransaction = withAddressBookContext((): React.ReactElement 
   };
 
   useEffect(() => {
-    const subscription = signerManager.transactionWitnessRequest$.subscribe((r) => {
+    const subscription = signingCoordinator.transactionWitnessRequest$.subscribe((r) => {
       setDappInfo({
         logo: r.signContext.sender.tab.favIconUrl,
         url: senderOrigin(r.signContext.sender),

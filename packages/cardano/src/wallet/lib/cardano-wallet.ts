@@ -16,8 +16,8 @@ import * as KeyManagement from '@cardano-sdk/key-management';
 import {
   AnyWallet,
   Bip32WalletAccount,
-  SignerManagerConfirmationApi,
-  WalletManagerApi
+  WalletManagerApi,
+  SigningCoordinatorConfirmationApi
 } from '@cardano-sdk/web-extension';
 import { ChainName } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
@@ -30,19 +30,23 @@ export const bip32Ed25519 = new Crypto.CmlBip32Ed25519(CML);
 
 export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.SerializableKeyAgentData }>;
 
-export interface Metadata {
+export interface WalletMetadata {
   name: string;
   lockValue?: HexBlob;
+}
+
+export interface AccountMetadata {
+  name: string;
 }
 
 export interface CardanoWallet {
   wallet: ObservableWallet;
   source: {
-    wallet: AnyWallet<Metadata>;
-    account?: Bip32WalletAccount<Metadata>;
+    wallet: AnyWallet<WalletMetadata, AccountMetadata>;
+    account?: Bip32WalletAccount<AccountMetadata>;
   };
   name: string;
-  signerManager: SignerManagerConfirmationApi<Metadata>;
+  signingCoordinator: SigningCoordinatorConfirmationApi<WalletMetadata, AccountMetadata>;
 }
 
 export type CreateStores = (name: string) => storage.WalletStores;

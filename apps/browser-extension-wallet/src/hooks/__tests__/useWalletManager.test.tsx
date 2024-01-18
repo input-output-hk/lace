@@ -112,7 +112,7 @@ describe('Testing useWalletManager hook', () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         cardanoWallet: {
           source: {
-            account: {
+            wallet: {
               metadata: { lockValue: undefined }
             }
           }
@@ -142,7 +142,7 @@ describe('Testing useWalletManager hook', () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         cardanoWallet: {
           source: {
-            account: {
+            wallet: {
               metadata: { lockValue }
             }
           }
@@ -170,7 +170,7 @@ describe('Testing useWalletManager hook', () => {
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         cardanoWallet: {
           source: {
-            account: {
+            wallet: {
               metadata: { lockValue: 'abc' }
             }
           }
@@ -244,7 +244,7 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('loadWallet', () => {
-    let wallets$: ReplaySubject<AnyWallet<unknown>[]>;
+    let wallets$: ReplaySubject<AnyWallet<unknown, unknown>[]>;
     let activeWallet$: ReplaySubject<WalletManagerActivateProps>;
     beforeEach(() => {
       (walletApiUi.walletRepository as any).wallets$ = wallets$ = new ReplaySubject(1);
@@ -278,11 +278,12 @@ describe('Testing useWalletManager hook', () => {
         {
           walletId,
           type: WalletType.Ledger,
+          metadata: { name },
           extendedAccountPublicKey: 'pubkey' as any,
           accounts: [
             {
               accountIndex,
-              metadata: { name }
+              metadata: { name: 'Account #0' }
             }
           ]
         }

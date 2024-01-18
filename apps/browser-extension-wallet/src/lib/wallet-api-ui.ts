@@ -1,10 +1,10 @@
 import {
-  SignerManager,
+  SigningCoordinator,
   WalletRepositoryApi,
   WalletType,
   consumeRemoteApi,
   createKeyAgentFactory,
-  exposeSignerManagerApi,
+  exposeSigningCoordinatorApi,
   observableWalletProperties,
   repositoryChannel,
   walletChannel,
@@ -51,19 +51,19 @@ export const observableWallet = consumeRemoteApi(
   { logger, runtime }
 );
 
-export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.Metadata>>(
+export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
   { baseChannel: repositoryChannel(process.env.WALLET_NAME), properties: walletRepositoryProperties },
   { logger, runtime }
 );
 
-export const signerManager = new SignerManager<Wallet.Metadata>(
+export const signingCoordinator = new SigningCoordinator<Wallet.WalletMetadata, Wallet.AccountMetadata>(
   { hwOptions: { manifest: Wallet.manifest, communicationType: Wallet.KeyManagement.CommunicationType.Web } },
   { keyAgentFactory: createKeyAgentFactory({ bip32Ed25519: Wallet.bip32Ed25519, logger }) }
 );
-exposeSignerManagerApi({ signerManager }, { logger, runtime });
+exposeSigningCoordinatorApi({ signingCoordinator }, { logger, runtime });
 
 export const withSignTxConfirmation = async <T>(action: () => Promise<T>, password?: string): Promise<T> => {
-  const subscription = signerManager.transactionWitnessRequest$.subscribe(async (req) => {
+  const subscription = signingCoordinator.transactionWitnessRequest$.subscribe(async (req) => {
     try {
       if (req.walletType === WalletType.InMemory) {
         if (typeof password !== 'string') {
