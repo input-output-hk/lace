@@ -220,6 +220,7 @@ export const colors = {
   $data_blue: '',
   $data_green: '',
   $data_yellow: '',
+  $data_orange: '',
 
   $educational_card_root_container_bgColor: '',
   $educational_card_root_container_borderColor: '',

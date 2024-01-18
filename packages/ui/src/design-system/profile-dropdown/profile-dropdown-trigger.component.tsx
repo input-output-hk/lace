@@ -1,10 +1,10 @@
 import type { ComponentPropsWithoutRef } from 'react';
 import React from 'react';
 
+import { ReactComponent as ChevronDown } from '@lace/icons/dist/ChevronDownComponent';
+import { ReactComponent as ChevronUp } from '@lace/icons/dist/ChevronUpComponent';
 import classNames from 'classnames';
 
-import { ReactComponent as ChevronDown } from '../../assets/icons/chevron-down.component.svg';
-import { ReactComponent as ChevronUp } from '../../assets/icons/chevron-up.component.svg';
 import { Box } from '../box';
 import { Flex } from '../flex';
 
