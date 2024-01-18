@@ -180,7 +180,9 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
         />
         {!popupView && (
           <div className={styles.saturationContainer}>
-            <div className={styles.saturationTitle}>{metricsTranslations.saturation}</div>
+            <div className={styles.saturationTitle} data-testid="saturation-title">
+              {metricsTranslations.saturation}
+            </div>
             <div className={styles.saturationProgressContainer}>
               <div className={styles.saturationProgress}>
                 {/* TODO: fix colors once lw-9270 is merged (lw-9552) */}
@@ -188,9 +190,12 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
                   className={styles[getSaturationLevel(Number(saturation))]}
                   duration={0}
                   width={`${Number(saturation)}%`}
+                  dataTestId="saturation-progress-bar"
                 />
               </div>
-              <span className={styles.saturation}>{saturation}%</span>
+              <span className={styles.saturation} data-testid="saturation-value">
+                {saturation}%
+              </span>
             </div>
           </div>
         )}

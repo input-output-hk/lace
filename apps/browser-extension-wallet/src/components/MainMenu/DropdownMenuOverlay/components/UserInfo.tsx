@@ -69,7 +69,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                   : undefined
               }
               onOpenAccountsMenu={() => onOpenWalletAccounts(walletAddress)}
-              type="cold"
+              type={process.env.USE_SHARED_WALLET === 'true' ? 'shared' : 'cold'}
             />
           ) : (
             <AntdTooltip
