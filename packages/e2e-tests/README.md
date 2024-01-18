@@ -75,3 +75,14 @@ UI-mapped gherkin tests for the Lace browser extension
 - After starting docker image (info should be displayed - `⚡️ Trezor Device Manipulation API is running at http://localhost:8000`)
   Tests need to be triggered in 60 sec because emulator shuts down device if there is no action  
   (will be improved in follow-up tickets by starting emulator trough API)
+
+## Running tests locally in debug mode using IntelliJ IDEA/WebStorm
+
+- create new run configuration
+- create config and fill it in as per attached screenshots, create a new script in package.json or use one of the existing ones
+  ![img.png](src/images/readme/img.png) ![img_2.png](src/images/readme/img_2.png)
+- add required environment variables as per screenshot
+  ![img_1.png](src/images/readme/img_1.png)!
+- make sure you have a chromedriver running on port 4444
+- start debug run configuration just created\
+  ![img_3.png](src/images/readme/img_3.png)
