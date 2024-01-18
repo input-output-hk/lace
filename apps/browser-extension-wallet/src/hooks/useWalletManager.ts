@@ -278,6 +278,12 @@ export const useWalletManager = (): UseWalletManager => {
   const loadWallet = useCallback(async (): Promise<Wallet.CardanoWallet | undefined> => {
     const wallets = await firstValueFrom(walletRepository.wallets$);
 
+    if (wallets.length === 0) {
+      // eslint-disable-next-line unicorn/no-null
+      setCardanoWallet(null);
+      return;
+    }
+
     let activeWalletId = await firstValueFrom(walletManager.activeWalletId$);
 
     if (!activeWalletId) {
