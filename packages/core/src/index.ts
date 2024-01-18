@@ -28,3 +28,4 @@ export * from '@ui/components/DappTransaction';
 export * from '@ui/components/Send/SendTransactionCost';
 export * from '@ui/components/MnemonicWordsAutoComplete';
 export * from '@ui/components/AddressCard';
+export * from '@ui/components/SharedWallet';
